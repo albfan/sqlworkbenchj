@@ -194,7 +194,6 @@ public abstract class BaseAnalyzer
 			this.title = tableForColumnList.getTableName() + ".*";
 			
 			this.elements = new ArrayList(cols.size() + 1);
-			this.elements.add(allColumnsMarker);
 			this.elements.addAll(cols);
 		}
 		return cols;

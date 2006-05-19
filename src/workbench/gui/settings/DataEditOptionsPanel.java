@@ -12,6 +12,7 @@
 package workbench.gui.settings;
 
 import javax.swing.JPanel;
+import workbench.gui.components.DividerBorder;
 import workbench.gui.components.WbCheckBoxLabel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -30,6 +31,7 @@ public class DataEditOptionsPanel
 	public DataEditOptionsPanel()
 	{
 		initComponents();
+		setBorder(DividerBorder.BOTTOM_DIVIDER);
 		restoreSettings();
 	}
 
@@ -97,6 +99,7 @@ public class DataEditOptionsPanel
     jPanel3.add(pkMapFile, java.awt.BorderLayout.CENTER);
 
     selectMapFile.setText("...");
+    selectMapFile.setBorder(javax.swing.BorderFactory.createEtchedBorder());
     selectMapFile.setMaximumSize(new java.awt.Dimension(22, 22));
     selectMapFile.setMinimumSize(new java.awt.Dimension(22, 22));
     selectMapFile.setPreferredSize(new java.awt.Dimension(22, 22));

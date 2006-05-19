@@ -35,6 +35,8 @@ public class DividerBorder extends AbstractBorder
 	protected int type;
 	protected int thickness;
 	
+	public static final DividerBorder BOTTOM_DIVIDER = new DividerBorder(BOTTOM);
+	
 	public DividerBorder(int type)
 	{
 		this(type, 1);

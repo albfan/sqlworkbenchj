@@ -46,6 +46,8 @@ public class WbColorPicker extends javax.swing.JPanel
     add(samplePanel);
 
     selectColor.setText("...");
+    selectColor.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+    selectColor.setMargin(new java.awt.Insets(0, 0, 0, 0));
     selectColor.setMaximumSize(new java.awt.Dimension(22, 22));
     selectColor.setMinimumSize(new java.awt.Dimension(22, 22));
     selectColor.setPreferredSize(new java.awt.Dimension(22, 22));

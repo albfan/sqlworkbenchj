@@ -72,7 +72,7 @@ public class FirebirdProcedureReader
 				source.append("\nRETURNS ");
 				source.append(retType);
 			}
-			source.append("\nAS");
+			source.append("\nAS\n");
 		}
 		catch (Exception e)
 		{

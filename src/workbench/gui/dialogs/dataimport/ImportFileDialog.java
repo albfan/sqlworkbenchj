@@ -16,23 +16,15 @@ import java.awt.Window;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
-import workbench.db.exporter.DataExporter;
-import workbench.db.importer.DataImporter;
 import workbench.db.importer.ProducerFactory;
 
 import workbench.gui.components.ExtensionFileFilter;
-import workbench.gui.dialogs.export.ExportOptions;
-import workbench.gui.dialogs.export.TextOptions;
-import workbench.gui.dialogs.export.XmlOptions;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.storage.ResultInfo;
-
 
 /**
  * @author support@sql-workbench.net

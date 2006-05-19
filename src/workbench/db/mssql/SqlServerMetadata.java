@@ -82,6 +82,12 @@ public class SqlServerMetadata
 				String dbname = rs.getString("PROCEDURE_QUALIFIER");
 				String procOwner = rs.getString("PROCEDURE_OWNER");
 				String name = rs.getString("PROCEDURE_NAME");
+				char procType = 0;
+				if (name.indexOf(';') == name.length() - 2)
+				{
+					procType = name.charAt(name.length() - 1);
+					name = name.substring(0, name.length() - 2);
+				}
 				String remark = rs.getString("REMARKS");
 				short type = rs.getShort("PROCEDURE_TYPE");
 				Integer iType = null;
@@ -91,7 +97,21 @@ public class SqlServerMetadata
 				}
 				else
 				{
-					iType = new Integer(type);
+					if (procType != 0)
+					{
+						if (procType == '0')
+						{
+							iType = new Integer(DatabaseMetaData.procedureReturnsResult);
+						}
+						else
+						{
+							iType = new Integer(DatabaseMetaData.procedureNoResult);
+						}
+					}
+					else
+					{
+						iType = new Integer(type);
+					}
 				}
 				int row = ds.addRow();
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, dbname);

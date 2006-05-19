@@ -80,7 +80,6 @@ public class ReplacePanel
 		
 		this.criteriaTextField.addMouseListener(new TextComponentMouseListener());
 		this.replaceValueTextField.addMouseListener(new TextComponentMouseListener());
-		
 		this.restoreSettings();
 	}
 	
@@ -260,17 +259,16 @@ public class ReplacePanel
 			}
 			this.dialog.addWindowListener(this);
 			
-			boolean hasCurrentText = false;
-			
-			if (currentText != null)
-			{
-				if (currentText.indexOf('\n') == -1 && currentText.indexOf('\r') == -1)
-				{
-					this.criteriaTextField.setText(currentText);
-					this.criteriaTextField.selectAll();
-					hasCurrentText = true;
-				}
-			}
+//			boolean hasCurrentText = false;
+//			
+//			if (currentText != null)
+//			{
+//				if (currentText.indexOf('\n') == -1 && currentText.indexOf('\r') == -1)
+//				{
+//					this.criteriaTextField.setText(currentText);
+//					hasCurrentText = true;
+//				}
+//			}
 			
 			//this.selectedTextCheckBox.setEnabled(this.client.isTextSelected());
 			
@@ -281,20 +279,22 @@ public class ReplacePanel
 			im.put(escAction.getAccelerator(), escAction.getActionName());
 			am.put(escAction.getActionName(), escAction);
 
-			final boolean selectSearchValue = !hasCurrentText;
+//			final boolean selectSearchValue = !hasCurrentText;
 			
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
-					if (selectSearchValue)
-					{
+//					if (selectSearchValue)
+//					{
+						criteriaTextField.selectAll();
 						criteriaTextField.requestFocus();
-					}
-					else
-					{
-						replaceValueTextField.requestFocus();
-					}
+//					}
+//					else
+//					{
+//						replaceValueTextField.selectAll();
+//						replaceValueTextField.requestFocus();
+//					}
 				}
 			});
 			this.dialog.show();

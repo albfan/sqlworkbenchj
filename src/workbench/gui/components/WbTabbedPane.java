@@ -18,6 +18,7 @@ import java.awt.Graphics;
 import java.awt.Insets;
 
 import javax.swing.JTabbedPane;
+import javax.swing.JToolTip;
 import javax.swing.UIManager;
 import javax.swing.plaf.TabbedPaneUI;
 import workbench.gui.WbSwingUtilities;
@@ -58,6 +59,13 @@ public class WbTabbedPane
 		init();
 	}
 	
+	public JToolTip createToolTip()
+	{
+		JToolTip tip = new MultiLineToolTip();
+		tip.setComponent(this);
+		return tip;
+	}
+	
 	private void init()
 	{
 		this.putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
@@ -73,17 +81,30 @@ public class WbTabbedPane
 		}
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 	}
-	
+
+	boolean stateChangedPending = false;
+	protected void fireStateChanged()
+	{
+		if (!isRepaintSuspended())
+		{
+			super.fireStateChanged();
+		}
+		else
+		{
+			stateChangedPending = true;
+		}
+	}
+
 	public synchronized void setSuspendRepaint(boolean suspendNow)
 	{
-		boolean suspended = this.suspendRepaint;
+		boolean wasSuspended = this.suspendRepaint;
 		this.suspendRepaint = suspendNow;
 
 		// if repainting was re-enabled, then queue
 		// a repaint event right away
 		// I'm using invokeLater() to make sure, that
 		// this is executed on the AWT thread.
-		if (suspended && !suspendNow)
+		if (wasSuspended && !suspendNow)
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -91,6 +112,11 @@ public class WbTabbedPane
 				{
 					validate();
 					repaint();
+					if (stateChangedPending)
+					{
+						stateChangedPending = false;
+						fireStateChanged();
+					}
 				}
 			});
 		}

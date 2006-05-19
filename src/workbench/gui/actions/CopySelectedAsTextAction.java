@@ -29,7 +29,6 @@ public class CopySelectedAsTextAction extends WbAction
   public CopySelectedAsTextAction(WbTable aClient)
   {
       this(aClient, "MnuTxtCopySelectedAsText");
-      this.setIcon(null);
   }
   
   public CopySelectedAsTextAction(WbTable aClient, String labelKey)
@@ -40,7 +39,6 @@ public class CopySelectedAsTextAction extends WbAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_COPY_SELECTED);
 		String desc = ResourceMgr.getDescription(labelKey, true);
 		this.initMenuDefinition(ResourceMgr.getString(labelKey), desc, null);
-		this.setIcon(ResourceMgr.getBlankImage());
 		this.setEnabled(false);
 	}
 

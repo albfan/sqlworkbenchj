@@ -60,11 +60,6 @@ public class SingleVerbCommand extends SqlCommand
 			}
 
 			result.addMessage(this.verb + " " + ResourceMgr.getString("MsgKnownStatementOK"));
-			StringBuffer warnings = new StringBuffer();
-			if (this.appendWarnings(aConnection, this.currentStatement , warnings))
-			{
-				result.addMessage(warnings.toString());
-			}
 			result.setSuccess();
 		}
 		catch (Exception e)

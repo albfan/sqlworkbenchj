@@ -17,11 +17,17 @@ public class WbFontPicker
 	extends JPanel
 {
 	private Font selectedFont;
+	private boolean monospacedOnly = false;
 	
 	/** Creates new form WbFontPicker */
 	public WbFontPicker()
 	{
 		initComponents();
+	}
+	
+	public void setListMonospacedOnly(boolean flag)
+	{
+		this.monospacedOnly = flag;
 	}
 	
 	/** This method is called from within the constructor to
@@ -52,7 +58,8 @@ public class WbFontPicker
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
     add(fontName, gridBagConstraints);
 
-    selectFontButton.setText("jButton1");
+    selectFontButton.setText("...");
+    selectFontButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
     selectFontButton.setMaximumSize(new java.awt.Dimension(22, 22));
     selectFontButton.setMinimumSize(new java.awt.Dimension(22, 22));
     selectFontButton.setPreferredSize(new java.awt.Dimension(22, 22));
@@ -72,7 +79,7 @@ public class WbFontPicker
 
 	private void selectFontButtonMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_selectFontButtonMouseClicked
 	{//GEN-HEADEREND:event_selectFontButtonMouseClicked
-		Font f = WbFontChooser.chooseFont(this, this.selectedFont);
+		Font f = WbFontChooser.chooseFont(this, this.selectedFont, monospacedOnly);
 		if (f != null)
 		{
 			this.setSelectedFont(f);

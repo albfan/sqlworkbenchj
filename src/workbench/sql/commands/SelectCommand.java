@@ -106,53 +106,53 @@ public class SelectCommand extends SqlCommand
 				if (this.isConsumerWaiting())
 				{
 					result.addResultSet(rs);
-				}
-				else
-				{
-					try
-					{
-						// An exception in the constructor should lead to a real error
-						this.data = new DataStore(rs, false, this.rowMonitor, maxRows, this.currentConnection);
-						try
-						{
-							// Not reading the data in the constructor enables us
-							// to cancel the retrieval of the data from the ResultSet
-							// without using statement.cancel()
-							// The DataStore checks for the cancel flag during processing
-							// of the ResulSet
-							this.data.initData(rs, maxRows);
-						}
-						catch (SQLException e)
-						{
-							// Errors during loading should not throw away the
-							// rows retrieved until then
-							if (this.data != null && this.data.getRowCount() > 0)
-							{
-								result.addMessage(ResourceMgr.getString("MsgErrorDuringRetrieve"));
-								result.addMessage(ExceptionUtil.getDisplay(e));
-								result.setWarning(true);
-							}
-						}
-					}
-					finally
-					{
-						try { rs.close(); } catch (Throwable th) {}
-					}
-
-					if (data != null)
-					{
-						result.addDataStore(data);
-					}
-				}
-
-				if (!isCancelled)
-				{
 					StringBuffer warnings = new StringBuffer();
-					this.appendSuccessMessage(result);
 					if (this.appendWarnings(aConnection, this.currentStatement, warnings))
 					{
 						result.addMessage(warnings.toString());
 					}
+				}
+				else
+				{
+					processResults(result, true);
+//					try
+//					{
+//						// An exception in the constructor should lead to a real error
+//						this.data = new DataStore(rs, false, this.rowMonitor, maxRows, this.currentConnection);
+//						try
+//						{
+//							// Not reading the data in the constructor enables us
+//							// to cancel the retrieval of the data from the ResultSet
+//							// without using statement.cancel()
+//							// The DataStore checks for the cancel flag during processing
+//							// of the ResulSet
+//							this.data.initData(rs, maxRows);
+//						}
+//						catch (SQLException e)
+//						{
+//							// Errors during loading should not throw away the
+//							// rows retrieved until then
+//							if (this.data != null && this.data.getRowCount() > 0)
+//							{
+//								result.addMessage(ResourceMgr.getString("MsgErrorDuringRetrieve"));
+//								result.addMessage(ExceptionUtil.getDisplay(e));
+//								result.setWarning(true);
+//							}
+//						}
+//					}
+//					finally
+//					{
+//						try { rs.close(); } catch (Throwable th) {}
+//					}
+//					if (data != null)
+//					{
+//						result.addDataStore(data);
+//					}
+				}
+
+				if (!isCancelled)
+				{
+					this.appendSuccessMessage(result);
 				}
 				else
 				{

@@ -98,10 +98,8 @@ public class UpdatingCommand extends SqlCommand
 				updateCount = this.currentStatement.executeUpdate(sql);
 			}
 			StringBuffer warnings = new StringBuffer();
-			boolean hasWarnings = this.appendWarnings(aConnection, this.currentStatement, warnings);
 			this.appendSuccessMessage(result);
-			result.addUpdateCount(updateCount);
-			if (hasWarnings) result.addMessage(warnings.toString());
+			processResults(result, false);
 
 			result.setSuccess();
 		}

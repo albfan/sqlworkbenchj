@@ -19,7 +19,6 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.AbstractListModel;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -27,11 +26,15 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
+import workbench.gui.components.DividerBorder;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
@@ -77,6 +80,7 @@ public class LnFOptionsPanel
 		this.toolbar.addDefaultBorder();
 		this.toolbar.add(new NewListEntryAction(this));
 		this.toolbar.add(new DeleteListEntryAction(this));
+		setBorder(DividerBorder.BOTTOM_DIVIDER);
 		
 		listPanel.setLayout(new BorderLayout());
 		listPanel.add(scroll, BorderLayout.CENTER);
@@ -87,6 +91,7 @@ public class LnFOptionsPanel
 		switchLnFButton = new WbButton();
 		switchLnFButton.setResourceKey("LblSwitchLnF");
 		switchLnFButton.addActionListener(this);
+		switchLnFButton.setBorder(new CompoundBorder(new EtchedBorder(), new EmptyBorder(1, 5, 1, 5)));
 		
 		switchPanel.add(switchLnFButton);
 		
@@ -104,6 +109,9 @@ public class LnFOptionsPanel
 		
 		currentLabel.setMinimumSize(new Dimension(50, (int)d.getHeight()));
 		currentLabel.setPreferredSize(d);
+//		currentLabel.setBackground(Color.WHITE);
+//		currentLabel.setOpaque(true);
+		currentLabel.setBorder(DividerBorder.BOTTOM_DIVIDER);
 		infoPanel.add(currentLabel, BorderLayout.NORTH);
 		
 		splitPane.setRightComponent(infoPanel);
@@ -132,7 +140,7 @@ public class LnFOptionsPanel
 	
 	private void setCurrentInfo(String name)
 	{
-		currentLabel.setText("  " + ResourceMgr.getString("LblCurrLnf") + " " + name);
+		currentLabel.setText("<html>" + ResourceMgr.getString("LblCurrLnf") + " <b>" + name + "</b></html>");
 	}
 	
 	public void saveSettings()

@@ -113,7 +113,7 @@ public class DbExplorerPanel
 		try
 		{
 			tables = new TableListPanel(aParent);
-			procs = new ProcedureListPanel();
+			procs = new ProcedureListPanel(aParent);
 			this.searchPanel = new TableSearchPanel(tables);
 			tabPane = new WbTabbedPane(JTabbedPane.TOP);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);

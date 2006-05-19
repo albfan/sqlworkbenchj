@@ -13,16 +13,16 @@ package workbench.gui.completion;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Set;
 import workbench.db.WbConnection;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 /**
  * A factory to generate a BaseAnalyzer based on a given SQL statement
@@ -62,20 +62,20 @@ public class StatementContext
 			{
 				analyzer = new InsertAnalyzer(conn, sql, pos);
 			}
-			else if ("CREATE".equalsIgnoreCase(verb))
-			{
-				int viewPos = StringUtil.findPattern(DdlAnalyzer.VIEW_PATTERN, sql, 0);
-				if (viewPos > 0)
-				{
-					Pattern selectPattern = Pattern.compile("\\sSELECT\\s|\\sSELECT$", Pattern.CASE_INSENSITIVE);
-					int selectPos = StringUtil.findPattern(selectPattern, sql, viewPos + 1);
-					if (selectPos > 0)
-					{
-						String select = sql.substring(selectPos);
-						analyzer = new SelectAnalyzer(conn, select, pos - selectPos);
-					}
-				}
-			}
+//			else if ("CREATE".equalsIgnoreCase(verb))
+//			{
+//				int viewPos = StringUtil.findPattern(DdlAnalyzer.VIEW_PATTERN, sql, 0);
+//				if (viewPos > 0)
+//				{
+//					Pattern selectPattern = Pattern.compile("\\sSELECT\\s|\\sSELECT$", Pattern.CASE_INSENSITIVE);
+//					int selectPos = StringUtil.findPattern(selectPattern, sql, viewPos + 1);
+//					if (selectPos > 0)
+//					{
+//						String select = sql.substring(selectPos);
+//						analyzer = new SelectAnalyzer(conn, select, pos - selectPos);
+//					}
+//				}
+//			}
 		}
 		
 		if (analyzer != null)
@@ -119,9 +119,17 @@ public class StatementContext
 			int lastEnd = 0;
 			String verb = t.getContents();
 			
+			// Will contain the position of each SELECT verb
+			// if a UNION is encountered.
+			List unionStarts = new ArrayList();
 			int bracketCount = 0;
 			boolean inSubselect = false;
-			boolean checkForInsertSelect = verb.equals("INSERT");
+			boolean checkForInsertSelect = verb.equals("INSERT") || verb.equals("CREATE");
+			
+			Set unionKeywords = new HashSet();
+			unionKeywords.add("UNION");
+			unionKeywords.add("MINUS");
+			unionKeywords.add("INTERSECT");
 			
 			while (t != null)
 			{
@@ -161,7 +169,32 @@ public class StatementContext
 						return true;
 					}
 				}
-					
+				else if (bracketCount == 0 && unionKeywords.contains(t.getContents()))
+				{
+					if (t.getContents().equals("UNION"))
+					{
+						SQLToken t2 = (SQLToken)lexer.getNextToken(false, false);
+						if (t2.getContents().equals("ALL"))
+						{
+							// swallow potential UNION ALL
+							unionStarts.add(new Integer(t.getCharBegin()));
+						}
+						else
+						{
+							unionStarts.add(new Integer(t.getCharEnd()));
+							
+							// continue with the token just read
+							lastToken = t;
+							t = t2;
+							continue;
+						}
+					}
+					else
+					{
+						unionStarts.add(new Integer(t.getCharEnd()));
+					}
+				}
+				
 				if (bracketCount == 1 && lastToken.getContents().equals("(") && t.getContents().equals("SELECT"))
 				{
 					inSubselect = true;
@@ -169,28 +202,40 @@ public class StatementContext
 
 				lastToken = t;
 				t = (SQLToken)lexer.getNextToken(false, false);
-			}		
+			}
+			
+			if (unionStarts.size() > 0)
+			{
+				boolean found = false;
+				int index = 0;
+				int lastPos = 0;
+				while (index < unionStarts.size())
+				{
+					int startPos = ((Integer)unionStarts.get(index)).intValue();
+					if (lastPos <= pos && pos <= startPos)
+					{
+						int newPos = pos - lastPos;
+						analyzer = new SelectAnalyzer(conn, sql.substring(lastPos, startPos), newPos);
+						return true;
+					}
+					lastPos = startPos;
+					index ++;
+				}
+				// check last union
+				int startPos = ((Integer)unionStarts.get(unionStarts.size()-1)).intValue();
+				if (pos >= startPos)
+				{
+					int newPos = pos - startPos;
+					analyzer = new SelectAnalyzer(conn, sql.substring(startPos), newPos);
+					return true;
+				}
+			}
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 		}
 		
-//		Matcher m = INSERT_SELECT_PATTERN.matcher(sql);
-//		if (m.find())
-//		{
-//			Matcher s = SELECT_PATTERN.matcher(sql);
-//			if (s.find())
-//			{
-//				int selectStart = s.start();
-//				if (selectStart < pos)
-//				{
-//					String subselect = sql.substring(selectStart).trim();
-//					int newpos = pos - selectStart;
-//					analyzer = new SelectAnalyzer(conn, subselect, newpos);
-//					return true;
-//				}
-//			}
-//		}
 		return false;
 	}
 	

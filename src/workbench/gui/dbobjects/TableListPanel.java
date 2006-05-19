@@ -81,9 +81,7 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.dialogs.export.ExportFileDialog;
 import workbench.gui.menu.GenerateScriptMenuItem;
-import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
-import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.ShareableDisplay;
 import workbench.interfaces.Exporter;
@@ -100,6 +98,7 @@ import java.util.Iterator;
 import workbench.WbManager;
 import workbench.gui.components.WbTabbedPane;
 import workbench.interfaces.CriteriaPanel;
+import workbench.interfaces.Reloadable;
 import workbench.util.WbWorkspace;
 import workbench.util.WbProperties;
 
@@ -110,7 +109,7 @@ import workbench.util.WbProperties;
 public class TableListPanel
 	extends JPanel
 	implements ActionListener, ChangeListener, ListSelectionListener, MouseListener,
-						 ShareableDisplay, Exporter, FilenameChangeListener, PropertyChangeListener,
+						 ShareableDisplay, Exporter, PropertyChangeListener,
 						 TableModelListener
 {
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
@@ -133,7 +132,7 @@ public class TableListPanel
 
 	private WbScrollPane indexPanel;
 	private TriggerDisplayPanel triggers;
-	private EditorPanel tableSource;
+	private DbObjectSourcePanel tableSource;
 	private JTabbedPane displayTab;
 	private WbSplitPane splitPane;
 
@@ -174,7 +173,7 @@ public class TableListPanel
 	private static final String DELETE_TABLE_CMD = "delete-table-data";
 	private static final String COMPILE_CMD = "compile-procedure";
 
-	private WbMenu showDataMenu;
+	private EditorTabSelectMenu showDataMenu;
 	private WbAction dropIndexAction;
 	private WbAction createDummyInsertAction;
 	private WbAction createDefaultSelect;
@@ -210,9 +209,14 @@ public class TableListPanel
 		this.indexPanel = new WbScrollPane(this.indexes);
 		this.indexes.getSelectionModel().addListSelectionListener(this);
 
-		this.tableSource = EditorPanel.createSqlEditor();
-		this.tableSource.setEditable(false);
-		this.tableSource.showFindOnPopupMenu();
+		Reloadable sourceReload = new Reloadable()
+															{
+																public void reload()
+																{
+																	retrieveTableSource();
+																}
+															};
+		this.tableSource = new DbObjectSourcePanel(aParent, sourceReload);
 
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.tableSource);
 		this.tableData = new TableDataPanel();
@@ -321,11 +325,6 @@ public class TableListPanel
 		pol.addComponent(tableDefinition);
 		this.setFocusTraversalPolicy(pol);
 		this.reset();
-		if (this.parentWindow != null)
-		{
-			this.parentWindow.addFilenameChangeListener(this);
-			this.parentWindow.addIndexChangeListener(this);
-		}
 		this.displayTab.addMouseListener(this);
 		this.tableList.addMouseListener(this);
 
@@ -344,10 +343,8 @@ public class TableListPanel
 	{
 		if (this.parentWindow != null)
 		{
-			this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
+			this.showDataMenu = new EditorTabSelectMenu(this, ResourceMgr.getString("MnuTxtShowTableData"), "LblShowDataInNewTab", parentWindow);
 			this.showDataMenu.setEnabled(false);
-			this.updateShowDataMenu();
-			this.showDataMenu.setIcon(ResourceMgr.getImage("blank"));
 			this.tableList.addPopupMenu(this.showDataMenu, false);
 		}
 
@@ -360,7 +357,6 @@ public class TableListPanel
 
 		WbMenuItem item = new WbMenuItem(ResourceMgr.getString("MnuTxtSchemaReport"));
 		item.setToolTipText(ResourceMgr.getDescription("MnuTxtSchemaReport"));
-		item.setBlankIcon();
 		item.setActionCommand(SCHEMA_REPORT_CMD);
 		item.addActionListener(this);
 		item.setEnabled(true);
@@ -369,7 +365,6 @@ public class TableListPanel
 		this.dropTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDropDbObject"));
 		this.dropTableItem.setToolTipText(ResourceMgr.getDescription("MnuTxtDropDbObject"));
 		this.dropTableItem.setActionCommand(DROP_CMD);
-		this.dropTableItem.setBlankIcon();
 		this.dropTableItem.addActionListener(this);
 		this.dropTableItem.setEnabled(false);
 		tableList.addPopupMenu(this.dropTableItem, true);
@@ -377,7 +372,6 @@ public class TableListPanel
 		this.deleteTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDeleteTableData"));
 		this.deleteTableItem.setToolTipText(ResourceMgr.getDescription("MnuTxtDeleteTableData"));
 		this.deleteTableItem.setActionCommand(DELETE_TABLE_CMD);
-		this.deleteTableItem.setBlankIcon();
 		this.deleteTableItem.addActionListener(this);
 		this.deleteTableItem.setEnabled(true);
 		tableList.addPopupMenu(this.deleteTableItem, false);
@@ -391,61 +385,6 @@ public class TableListPanel
 		this.setActionMap(am);
 
 		this.toggleTableSource.addToInputMap(im, am);
-	}
-
-	private void updateShowDataMenu()
-	{
-		if (this.parentWindow == null) return;
-
-		if (this.showDataMenu == null)
-		{
-			this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
-		}
-
-		String[] panels = this.parentWindow.getPanelLabels();
-		if (panels == null) return;
-
-		int current = this.parentWindow.getCurrentPanelIndex();
-		int newCount = panels.length  + 1;
-		int currentCount = this.showDataMenu.getItemCount();
-
-		// re-create the menu
-		if (newCount != currentCount && currentCount > 0)
-		{
-			int count = this.showDataMenu.getItemCount();
-			for (int i=0; i < count; i++)
-			{
-				JMenuItem item = this.showDataMenu.getItem(0);
-				item.removeActionListener(this);
-			}
-			this.showDataMenu.removeAll();
-		}
-
-		Font boldFont = Settings.getInstance().getStandardMenuFont().deriveFont(Font.BOLD);
-		
-		JMenuItem item = null;
-
-		for (int i=0; i < newCount; i++)
-		{
-			if (i == newCount - 1)
-			{
-				item = new WbMenuItem(ResourceMgr.getString("LblShowDataInNewTab"));
-				item.setActionCommand("panel--1");
-				showDataMenu.addSeparator();
-			}
-			else
-			{
-				item = new WbMenuItem(panels[i]);
-				item.setActionCommand("panel-" + i);
-				if (i == current)
-				{
-					item.setFont(boldFont);
-				}
-			}
-			item.setToolTipText(ResourceMgr.getDescription("LblShowDataInNewTab"));
-			item.addActionListener(this);
-			this.showDataMenu.add(item);
-		}
 	}
 
 	private void addTablePanels()
@@ -680,7 +619,6 @@ public class TableListPanel
 			this.recompileItem.setActionCommand(COMPILE_CMD);
 			this.recompileItem.addActionListener(this);
 			this.recompileItem.setEnabled(false);
-			this.recompileItem.setBlankIcon();
 			JPopupMenu popup = this.tableList.getPopupMenu();
 			popup.add(this.recompileItem);
 		}
@@ -2138,21 +2076,6 @@ public class TableListPanel
 
 			});
     }
-    else
-    {
-			// Updating the showDataMenu needs to be posted because
-			// the ChangeEvent is also triggered when a tab has been
-			// removed (thus implicitely changing the index)
-			// but the changeEvent occurs before the actual
-			// panel is removed from the control.
-      EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					updateShowDataMenu();
-				}
-			});
-    }
 	}
 
 	/**
@@ -2165,27 +2088,6 @@ public class TableListPanel
 		if (TableDefinitionPanel.INDEX_PROP.equals(evt.getPropertyName()))
 		{
 			this.shouldRetrieveIndexes = true;
-		}
-	}
-
-	/**
-	 * This is a callback from the MainWindow if a tab has been
-	 * renamed. As we are showing the tab names in the "Show table data"
-	 * popup menu, we need to update the popup menu
-	 */
-	public void fileNameChanged(Object sender, String newFilename)
-	{
-		try
-		{
-			this.updateShowDataMenu();
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("TableListPanel.fileNameChanged()", "Error when updating the popup menu", e);
-
-			// re-initialize the menu from scratch
-
-			try { this.updateShowDataMenu(); } catch (Throwable th) {}
 		}
 	}
 

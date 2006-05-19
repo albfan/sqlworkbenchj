@@ -28,12 +28,12 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
-import javax.swing.JTabbedPane;
 import javax.swing.WindowConstants;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
+import workbench.gui.components.WbTabbedPane;
 import workbench.gui.help.HtmlViewer;
 import workbench.interfaces.Restoreable;
 import workbench.resource.ResourceMgr;
@@ -50,7 +50,7 @@ public class SettingsPanel
   private JPanel buttonPanel;
   private JButton cancelButton;
   private JButton helpButton;
-  private JTabbedPane mainTab;
+  private WbTabbedPane mainTab;
   private JButton okButton;
 
 	private JDialog dialog;
@@ -88,7 +88,7 @@ public class SettingsPanel
 
   private void initComponents()
   {
-    mainTab = new JTabbedPane();
+    mainTab = new WbTabbedPane();
 		mainTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		
     okButton = new WbButton(ResourceMgr.getString("LblOK"));

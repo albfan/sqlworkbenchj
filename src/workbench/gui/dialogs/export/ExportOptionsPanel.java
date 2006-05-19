@@ -82,7 +82,7 @@ public class ExportOptionsPanel
 		p.add(this.generalOptions, BorderLayout.CENTER);
 		
 		JPanel s = new JPanel(new BorderLayout(2, 2));
-		Border b = new CompoundBorder(new DividerBorder(DividerBorder.BOTTOM), new EmptyBorder(0, 0, 5, 0));
+		Border b = new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(0, 0, 5, 0));
 		s.setBorder(b);
 		typeSelector = new JComboBox();
 		typeSelector.addItem("Text");

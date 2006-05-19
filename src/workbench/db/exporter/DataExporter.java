@@ -123,7 +123,7 @@ public class DataExporter
 	private JDialog progressWindow;
 	private ExportJobEntry currentJob;
 	private boolean cancelJobs = false;
-	private int pendingJobs = 0;
+	//private int pendingJobs = 0;
 	private boolean jobsRunning = false;
 	private RowActionMonitor rowMonitor;
 
@@ -595,7 +595,7 @@ public class DataExporter
 	{
 		if (this.jobQueue == null) return;
 		int count = this.jobQueue.size();
-		this.pendingJobs = count;
+		//this.pendingJobs = count;
 		this.jobsRunning = true;
 		this.cancelJobs = false;
 		this.tablesExported = 0;
@@ -640,10 +640,10 @@ public class DataExporter
 				LogMgr.logError("DataExporter.runJobs()", "Error exporting data for [" + this.sql + "] to file: " + this.outputfile, th);
 				this.addError(th.getMessage());
 			}
-			this.pendingJobs --;
+			//this.pendingJobs --;
 			if (this.cancelJobs) break;
 		}
-		this.pendingJobs = 0;
+		//this.pendingJobs = 0;
 		this.jobsRunning = false;
 		this.closeProgress();
 	}

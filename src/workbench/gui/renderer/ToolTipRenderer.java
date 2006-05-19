@@ -107,12 +107,7 @@ public class ToolTipRenderer
 		this.highlightBackground = c;
 	}
 	
-	public Component getTableCellRendererComponent(	JTable table,
-																									Object value,
-																									boolean isSelected,
-																									boolean hasFocus,
-																									int row,
-																									int col)
+	public Component getTableCellRendererComponent(	JTable table, Object value,	boolean isSelected,	boolean hasFocus, int row, int col)
 	{
 		this.focus = hasFocus;
 		this.isEditing = (row == this.editingRow) && (this.highlightBackground != null);
@@ -203,11 +198,18 @@ public class ToolTipRenderer
 		}
 		else
 		{
-			if (this.highlightCols[this.currentColumn])
+			try
 			{
-				g.setColor(this.highlightBackground);
+				if (this.highlightCols[this.currentColumn])
+				{
+					g.setColor(this.highlightBackground);
+				}
+				else
+				{
+					g.setColor(unselectedBackground);
+				}
 			}
-			else
+			catch (Throwable th)
 			{
 				g.setColor(unselectedBackground);
 			}

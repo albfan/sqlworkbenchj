@@ -103,7 +103,7 @@ public class SelectAnalyzer
 			{
 				context = CONTEXT_TABLE_LIST;
 			}
-			
+		
 			// The schemaForTableList will be set anyway
 			// in order to allow BaseAnalyzer to retrieve 
 			// the table list
@@ -134,6 +134,8 @@ public class SelectAnalyzer
 				this.title = ResourceMgr.getString("TxtTitleColumns");
 				return;
 			}
+			
+			this.addAllMarker = !afterWhere;
 			
 			// check if the current qualifier is either one of the
 			// tables in the table list or one of the aliases used

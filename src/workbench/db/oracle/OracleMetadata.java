@@ -373,44 +373,47 @@ public class OracleMetadata
 		try
 		{
 			int lineCount = 0;
-			stmt = this.connection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, packageName);
-			stmt.setString(2, owner);
-			stmt.setString(3, "PACKAGE");
-			rs = stmt.executeQuery();
-			while (rs.next())
+			synchronized (connection)
 			{
-				String line = rs.getString(1);
-				if (line != null)
+				stmt = this.connection.getSqlConnection().prepareStatement(sql);
+				stmt.setString(1, packageName);
+				stmt.setString(2, owner);
+				stmt.setString(3, "PACKAGE");
+				rs = stmt.executeQuery();
+				while (rs.next())
 				{
-					lineCount ++;
-					if (lineCount == 1)
+					String line = rs.getString(1);
+					if (line != null)
 					{
-						result.append("CREATE OR REPLACE ");
+						lineCount ++;
+						if (lineCount == 1)
+						{
+							result.append("CREATE OR REPLACE ");
+						}
+						result.append(line);
 					}
-					result.append(line);
 				}
-			}
-			if (!(result.endsWith('\n') || result.endsWith('\r'))) result.append('\n');
-			result.append("/\n\n");
-			lineCount = 0;
-			
-			stmt.clearParameters();
-			stmt.setString(1, packageName);
-			stmt.setString(2, owner);
-			stmt.setString(3, "PACKAGE BODY");
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String line = rs.getString(1);
-				if (line != null)
+				if (!(result.endsWith('\n') || result.endsWith('\r'))) result.append('\n');
+				result.append("/\n\n");
+				lineCount = 0;
+
+				stmt.clearParameters();
+				stmt.setString(1, packageName);
+				stmt.setString(2, owner);
+				stmt.setString(3, "PACKAGE BODY");
+				rs = stmt.executeQuery();
+				while (rs.next())
 				{
-					lineCount ++;
-					if (lineCount == 1)
+					String line = rs.getString(1);
+					if (line != null)
 					{
-						result.append("CREATE OR REPLACE ");
+						lineCount ++;
+						if (lineCount == 1)
+						{
+							result.append("CREATE OR REPLACE ");
+						}
+						result.append(line);
 					}
-					result.append(line);
 				}
 			}
 			if (!(result.endsWith('\n') || result.endsWith('\r'))) result.append('\n');

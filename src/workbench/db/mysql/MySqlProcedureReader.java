@@ -38,49 +38,6 @@ public class MySqlProcedureReader
 		this.conn = con;
 	}
 
-//	public DataStore getProcedures(String catalog, String schema)
-//		throws SQLException
-//	{
-//		PreparedStatement stmt = null;
-//		String sql = "SELECT NULL AS procedure_cat, \n" + 
-//             "       routine_schema AS procedure_schem, \n" + 
-//             "       routine_name AS procedure_name, \n" + 
-//             "       case when routine_type = 'PROCEDURE' then 1 \n" + 
-//             "            else 2 end as procedure_type, \n" + 
-//             "       NULL AS remarks \n" + 
-//             "FROM information_schema.routines " +
-//		         " WHERE routine_schema like ?";	
-//		DataStore ds = null;
-//		try 
-//		{
-//			stmt = this.conn.getSqlConnection().prepareStatement(sql);
-//			if (schema == null || schema.equals("*") || schema.equals("%"))
-//			{
-//				stmt.setString(1, null);
-//			}
-//			else
-//			{
-//				stmt.setString(1, schema);
-//			}
-//			ResultSet rs = stmt.executeQuery();
-//			JdbcProcedureReader reader = new JdbcProcedureReader(this.metaData);
-//			// fillProcedureListDataStore will close the result set
-//			ds = reader.fillProcedureListDataStore(rs);
-//		}
-//		finally
-//		{
-//			SqlUtil.closeStatement(stmt);
-//		}
-//		return ds;		
-//	}
-	
-//	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
-//		throws SQLException
-//	{
-//		JdbcProcedureReader reader = new JdbcProcedureReader(this.metaData);
-//		return reader.getProcedureColumns(aCatalog, aSchema, aProcname);
-//	}
-	
 	public StrBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
 		StrBuffer source = new StrBuffer();
@@ -116,8 +73,9 @@ public class MySqlProcedureReader
 			int added = 0;
 			for (int i=0; i < count; i++)
 			{
-				String vartype = ds.getValueAsString(i,ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
 				String ret = ds.getValueAsString(i,ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+				if (ret.equals("RETURN") || ret.equals("RESULTSET")) continue;
+				String vartype = ds.getValueAsString(i,ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
 				String name = ds.getValueAsString(i,ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
 				if (added > 0) source.append(",");
 				source.append(ret);

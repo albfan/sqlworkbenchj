@@ -41,6 +41,7 @@ import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ingres.IngresMetadata;
 import workbench.db.mckoi.McKoiMetadata;
 import workbench.db.mssql.SqlServerConstraintReader;
+import workbench.db.mssql.SqlServerMetadata;
 import workbench.db.mysql.EnumReader;
 import workbench.db.mysql.MySqlProcedureReader;
 import workbench.db.oracle.DbmsOutput;
@@ -48,6 +49,7 @@ import workbench.db.oracle.OracleConstraintReader;
 import workbench.db.oracle.OracleIndexReader;
 import workbench.db.oracle.OracleMetadata;
 import workbench.db.oracle.OracleSynonymReader;
+import workbench.db.postgres.PostgresDDLFilter;
 import workbench.db.postgres.PostgresIndexReader;
 import workbench.db.postgres.PostgresSequenceReader;
 import workbench.db.postgres.PostgresConstraintReader;
@@ -62,6 +64,10 @@ import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 import workbench.db.hsqldb.HsqlConstraintReader;
 import workbench.db.firebird.FirebirdConstraintReader;
+import workbench.storage.DmlStatement;
+import workbench.storage.ResultInfo;
+import workbench.storage.RowData;
+import workbench.storage.StatementFactory;
 
 
 /**
@@ -121,6 +127,7 @@ public class DbMetadata
 	private ErrorInformationReader errorInfoReader;
 	private SchemaInformationReader schemaInfoReader;
 	private IndexReader indexReader;
+	private DDLFilter ddlFilter;
 
 	private DbmsOutput oraOutput;
 
@@ -248,6 +255,7 @@ public class DbMetadata
 			this.sequenceReader = new PostgresSequenceReader(this.dbConnection.getSqlConnection());
 			this.procedureReader = new PostgresProcedureReader(this);
 			this.indexReader = new PostgresIndexReader(this);
+			this.ddlFilter = new PostgresDDLFilter();
 		}
 		else if (productLower.indexOf("hsql") > -1)
 		{
@@ -283,6 +291,11 @@ public class DbMetadata
 		{
 			this.isSqlServer = true;
 			this.constraintReader = new SqlServerConstraintReader();
+			boolean useJdbc = Settings.getInstance().getBoolProperty("workbench.db.mssql.usejdbcprocreader", true);
+			if (!useJdbc)
+			{
+				this.procedureReader = new SqlServerMetadata(this);
+			}
 		}
 		else if (productLower.indexOf("adaptive server") > -1)
 		{
@@ -601,6 +614,12 @@ public class DbMetadata
 
 	private List schemasToIgnore;
 
+	public String filterDDL(String sql)
+	{
+		if (this.ddlFilter == null) return sql;
+		return this.ddlFilter.adjustDDL(sql);
+	}
+	
 	public boolean ignoreSchema(String schema)
 	{
 		if (schema == null) return true;
@@ -648,17 +667,15 @@ public class DbMetadata
 		return true;
 	}
 
-	/**
-	 * Return true if connected to an Oracle8 database. Returns fals
-	 * for every other DBMS (including Oracle9 and later)
-	 */
-  public boolean isOracle8()
+	public boolean needCatalogInDML(TableIdentifier table)
 	{
-		if (!this.isOracle) return false;
-		if (this.oracleMetaData == null) return false;
-		return this.oracleMetaData.isOracle8();
+		if (!this.supportsCatalogs()) return false;
+		String cat = table.getCatalog();
+		if (StringUtil.isEmptyString(cat)) return false;
+		String currentCat = getCurrentCatalog();
+		if (StringUtil.isEmptyString(currentCat)) return false;
+		return !cat.equalsIgnoreCase(currentCat);
 	}
-
 
 	private static HashMap readStatementTemplates(String aFilename)
 	{
@@ -682,8 +699,19 @@ public class DbMetadata
 			result = (HashMap)value;
 		}
 
+		// When running tests, the WbManager is not necessarily available
+		WbManager mgr = WbManager.getInstance();
+		File baseDir = null;;
+		if (mgr == null)
+		{
+			baseDir = new File(".");
+		}
+		else
+		{
+			baseDir = new File(mgr.getJarPath());
+		}
+			
 		// Try to read the file in the directory where the jar file is locateds
-		File baseDir = new File(WbManager.getInstance().getJarPath());
 		File f = new File(baseDir, aFilename);
 		if (f.exists())
 		{
@@ -1052,7 +1080,7 @@ public class DbMetadata
 		// this is for MS SQL Server, which appends a ;1 to
 		// the end of the procedure name
 		int i = aProcname.indexOf(';');
-		if (i > -1)
+		if (i > -1 && isSqlServer)
 		{
 			aProcname = aProcname.substring(0, i);
 		}
@@ -3128,90 +3156,6 @@ public class DbMetadata
 		}
 
 		return result;
-	}
-
-	/**
-	 *	Return an "empty" INSERT statement for the given table.
-	 */
-	public String getEmptyInsert(TableIdentifier tbl)
-		throws SQLException
-	{
-		DataStore tableDef = this.getTableDefinition(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), true);
-
-		if (tableDef.getRowCount() == 0) return StringUtil.EMPTY_STRING;
-		int colCount = tableDef.getRowCount();
-		if (colCount == 0) return StringUtil.EMPTY_STRING;
-
-		StrBuffer sql = new StrBuffer(colCount * 80);
-
-		sql.append("INSERT INTO ");
-		sql.append(tbl.getTableName());
-		sql.append("\n(\n");
-		for (int i=0; i < colCount; i++)
-		{
-			String column = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			column = SqlUtil.quoteObjectname(column);
-			if (i > 0 && i < colCount) sql.append(",\n");
-			sql.append("   ");
-			sql.append(column);
-		}
-		sql.append("\n)\nVALUES\n(\n");
-
-		for (int i=0; i < colCount; i++)
-		{
-			String dummyvalue = StringUtil.EMPTY_STRING;
-			String type = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
-			String name = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			if (type != null || type.length() > 0)
-			{
-				type = type.toLowerCase();
-				dummyvalue = name + "_" + type;
-				if (type.indexOf("char") > -1)
-				{
-					dummyvalue = "'" + dummyvalue + "'";
-				}
-			}
-
-			if (i > 0 && i < colCount) sql.append(",\n");
-			sql.append("   ");
-			sql.append(dummyvalue);
-		}
-		sql.append("\n);\n");
-		return sql.toString();
-	}
-
-	/**
-	 *	Return a default SELECT statement for the given table.
-	 */
-	public String getDefaultSelect(TableIdentifier tbl)
-		throws SQLException
-	{
-		DataStore tableDef = this.getTableDefinition(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), true);
-
-		if (tableDef.getRowCount() == 0) return StringUtil.EMPTY_STRING;
-		int colCount = tableDef.getRowCount();
-		if (colCount == 0) return StringUtil.EMPTY_STRING;
-
-		StrBuffer sql = new StrBuffer(colCount * 80);
-
-		sql.append("SELECT ");
-		for (int i=0; i < colCount; i++)
-		{
-			String column = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			//column = SqlUtil.quoteObjectname(column);
-			if (i > 0)
-			{
-				sql.append(",\n");
-				sql.append("       ");
-			}
-
-			sql.append(column);
-		}
-		sql.append("\nFROM ");
-		sql.append(tbl.getTableName());
-		sql.append(";\n");
-
-		return sql.toString();
 	}
 
 	/** 	

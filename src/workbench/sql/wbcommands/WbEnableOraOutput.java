@@ -18,6 +18,8 @@ import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.Token;
 
 /**
  *
@@ -36,17 +38,18 @@ public class WbEnableOraOutput extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException, Exception
 	{
-		this.checkVerb(aSql);
-
-		StringTokenizer tok = new StringTokenizer(aSql.trim(), " ");
+		SQLLexer lexer = new SQLLexer(aSql);
+		Token t = lexer.getNextToken(false, false);
+		
+		// First token is the verb
+		if (t != null) t = lexer.getNextToken(false, false);
+		
 		long limit = -1;
 		
-		if (tok.hasMoreTokens()) tok.nextToken(); // skip the verb
-
 		// second token is the buffer size
-		if (tok.hasMoreTokens())
+		if (t != null)
 		{
-			String value = tok.nextToken();
+			String value = t.getContents();
 			try
 			{
 				limit = Long.parseLong(value);

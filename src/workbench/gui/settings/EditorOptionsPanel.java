@@ -12,6 +12,7 @@
 package workbench.gui.settings;
 
 import javax.swing.JPanel;
+import workbench.gui.components.DividerBorder;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.WbCheckBoxLabel;
 import workbench.resource.ResourceMgr;
@@ -31,6 +32,8 @@ public class EditorOptionsPanel
 	public EditorOptionsPanel()
 	{
 		initComponents();
+		setBorder(DividerBorder.BOTTOM_DIVIDER);
+		editorFont.setListMonospacedOnly(true);
 		restoreSettings();
 	}
 

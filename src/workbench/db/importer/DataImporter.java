@@ -819,25 +819,6 @@ public class DataImporter
 		}
 		return rows;
 	}
-	/**
-	 * 	Oracle8 does not seem to support batch updates with the LONG
-	 *  datatype.
-	 */
-	private void checkColumnsForBatch()
-	{
-		if (!this.useBatch) return;
-		if (!this.dbConn.getMetadata().isOracle8()) return;
-
-		for (int i=0; i < this.targetColumns.length; i++)
-		{
-			if ("LONG".equals(this.targetColumns[i].getDbmsType()))
-			{
-				this.supportsBatch = false;
-				this.useBatch = false;
-				this.messages.append(ResourceMgr.getString("ErrNoOracle8BatchWithLong") + "\n");
-			}
-		}
-	}
 
 	/**
 	 *	Callback function from the RowDataProducer
@@ -921,7 +902,7 @@ public class DataImporter
 			{
 				this.prepareUpdateStatement();
 			}
-			this.checkColumnsForBatch();
+			
 			if (this.deleteTarget)
 			{
 				try

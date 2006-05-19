@@ -15,7 +15,6 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -23,11 +22,9 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import workbench.db.importer.ProducerFactory;
-import workbench.gui.components.ColumnSelectorPanel;
 import workbench.gui.components.DividerBorder;
 import workbench.interfaces.EncodingSelector;
 import workbench.resource.Settings;
-import workbench.storage.ResultInfo;
 
 /**
  *
@@ -56,7 +53,7 @@ public class ImportOptionsPanel
 		p.add(this.generalOptions, BorderLayout.CENTER);
 		
 		JPanel s = new JPanel(new BorderLayout(2, 2));
-		Border b = new CompoundBorder(new DividerBorder(DividerBorder.BOTTOM), new EmptyBorder(0, 0, 5, 0));
+		Border b = new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(0, 0, 5, 0));
 		s.setBorder(b);
 		typeSelector = new JComboBox();
 		typeSelector.addItem("Text");

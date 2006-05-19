@@ -18,29 +18,28 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.RunnableStatement;
 import workbench.resource.ResourceMgr;
 
 /**
  *	@author  support@sql-workbench.net
  */
-public class ExecuteSelAction 
+public class RunStatement 
 	extends WbAction
 {
-	private SqlPanel target;
+	private RunnableStatement target;
 	
-	public ExecuteSelAction(SqlPanel aPanel)
+	public RunStatement(RunnableStatement runner)
 	{
 		super();
-		this.target = aPanel;
-		this.initMenuDefinition(ResourceMgr.TXT_EXECUTE_SEL, KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
+		this.target = runner;
+		this.initMenuDefinition("MnuTxtRunStmt");
 		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_EXEC_SEL));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setAlternateAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0));
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		if (this.isEnabled()) this.target.runSelectedStatement();
+		if (this.isEnabled()) this.target.runStatement();
 	}
 	
 }

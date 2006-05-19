@@ -96,7 +96,11 @@ public class ConnectionProfile
 		
 	public void setStoreExplorerSchema(boolean value)
 	{
-		rememberExplorerSchema = value;
+		if (value != rememberExplorerSchema )
+		{
+			rememberExplorerSchema = value;
+			changed = true;
+		}
 	}
 	
   public String getIdentifier()
@@ -436,6 +440,7 @@ public class ConnectionProfile
 		result.setDisableUpdateTableCheck(this.disableUpdateTableCheck);
 		result.setConfirmUpdates(this.confirmUpdates);
 		result.setStorePassword(this.storePassword);
+		result.setStoreExplorerSchema(this.rememberExplorerSchema);
 		if (this.connectionProperties != null)
 		{
 			Enumeration keys = this.connectionProperties.propertyNames();

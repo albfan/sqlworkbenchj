@@ -13,10 +13,7 @@ package workbench.sql.commands;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,6 +23,8 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.Token;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -76,10 +75,7 @@ public class DdlCommand extends SqlCommand
 		{
 			this.currentStatement = aConnection.createStatement();
 
-			if (aConnection.getMetadata().isPostgres() && "CREATE".equals(verb))
-			{
-				aSql = fixPgDollarQuote(aSql);
-			}
+			aSql = aConnection.getMetadata().filterDDL(aSql);
 			
 			String msg = null;
 
@@ -177,7 +173,7 @@ public class DdlCommand extends SqlCommand
 		return result;
 	}
 
-	private boolean isDropCommand(String sql)
+	public boolean isDropCommand(String sql)
 	{
 		if ("DROP".equals(this.verb)) return true;
 		Pattern p = Pattern.compile("\\sDROP\\s*(PRIMARY\\s*KEY|CONSTRAINT)\\s*", Pattern.CASE_INSENSITIVE);
@@ -251,40 +247,6 @@ public class DdlCommand extends SqlCommand
 			return false;
 		}
   }
-
-	/**
-	 * PG's documentation shows CREATE FUNCTION samples that use
-	 * a "dollar quoting" to avoid the nested single quotes
-	 * e.g. http://www.postgresql.org/docs/8.0/static/plpgsql-structure.html
-	 * but the JDBC driver does not (yet) understand this as well (this 
-	 * seems to be only implemented in the psql command line tool
-	 * So we'll replace the "dollar quotes" with regular single quotes
-	 * Every single quote inside the function body will be replaced with 
-	 * two single quotes in properly "escape" them
-	 */
-	private String fixPgDollarQuote(String sql)
-	{
-		Pattern createFunc = Pattern.compile("CREATE.*FUNCTION.*AS\\s*\\$", Pattern.CASE_INSENSITIVE);
-		Matcher m = createFunc.matcher(sql);
-		if (!m.find()) return sql;
-		
-		int start = sql.indexOf('$');
-		int end = sql.indexOf('$', start + 1);
-		String quote = sql.substring(start, end + 1);
-		
-		int startQuote = sql.indexOf(quote);
-		int endQuote = sql.lastIndexOf(quote);
-		String body = sql.substring(startQuote + quote.length(), endQuote);
-		body = body.replaceAll("'", "''");
-		
-		StringBuffer newSql = new StringBuffer(sql.length() + 10);
-		newSql.append(sql.substring(0, startQuote));
-		newSql.append('\'');
-		newSql.append(body);
-		newSql.append('\'');
-		newSql.append(sql.substring(endQuote + quote.length()));
-		return newSql.toString();
-	}
 	
 	public String getVerb()
 	{

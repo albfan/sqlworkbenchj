@@ -18,7 +18,15 @@ import workbench.util.ExceptionUtil;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
+import workbench.resource.Settings;
+import workbench.storage.DataStore;
+import workbench.storage.DmlStatement;
+import workbench.storage.ResultInfo;
+import workbench.storage.RowData;
+import workbench.storage.StatementFactory;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -139,11 +147,11 @@ public class ObjectScripter
 					}
 					else if (TYPE_INSERT.equalsIgnoreCase(type))
 					{
-						source = this.meta.getEmptyInsert(tbl);
+						source = this.getEmptyInsert(tbl);
 					}
 					else if (TYPE_SELECT.equalsIgnoreCase(type))
 					{
-						source = this.meta.getDefaultSelect(tbl);
+						source = this.getDefaultSelect(tbl);
 					}
 				}
 			}
@@ -162,5 +170,80 @@ public class ObjectScripter
 			}
 		}
 	}
+	
+	/**
+	 *	Return an "empty" INSERT statement for the given table.
+	 */
+	public String getEmptyInsert(TableIdentifier tbl)
+		throws SQLException
+	{
+    boolean makePrepared = Settings.getInstance().getBoolProperty("workbench.sql.generate.defaultinsert.prepared", false);
+		ResultInfo info = new ResultInfo(tbl, this.dbConnection);
+		info.setUpdateTable(tbl);
+		StatementFactory factory = new StatementFactory(info, this.dbConnection);
+		RowData dummyData = new RowData(info.getColumnCount());
+
+		// This is a "trick" to fool the StatementFactory which will
+		// check the type of the Data, in case it does not "know" the 
+		// class, it calls toString() which works fine for 
+		StringBuffer marker = new StringBuffer("?");
+		
+		for (int i=0; i < info.getColumnCount(); i++)
+		{
+			if (makePrepared)
+			{
+				dummyData.setValue(i, marker);
+			}
+			else
+			{
+				int type = info.getColumnType(i);
+				String name = info.getColumnName(i);
+				StringBuffer dummy = new StringBuffer();
+				if (SqlUtil.isCharacterType(type)) dummy.append("'");
+				dummy.append(info.getColumnName(i));
+				dummy.append("_value");
+				if (SqlUtil.isCharacterType(type)) dummy.append("'");
+				dummyData.setValue(i, dummy);
+			}
+		}
+		DmlStatement stmt = factory.createInsertStatement(dummyData, true);
+		String sql = stmt.getExecutableStatement(this.meta.getProductName()) + ";\n";
+		return sql;
+	}
+	
+	/**
+	 *	Return a default SELECT statement for the given table.
+	 */
+	public String getDefaultSelect(TableIdentifier tbl)
+		throws SQLException
+	{
+		DataStore tableDef = this.meta.getTableDefinition(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), true);
+
+		if (tableDef.getRowCount() == 0) return StringUtil.EMPTY_STRING;
+		int colCount = tableDef.getRowCount();
+		if (colCount == 0) return StringUtil.EMPTY_STRING;
+
+		StrBuffer sql = new StrBuffer(colCount * 80);
+
+		sql.append("SELECT ");
+		for (int i=0; i < colCount; i++)
+		{
+			String column = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+			//column = SqlUtil.quoteObjectname(column);
+			if (i > 0)
+			{
+				sql.append(",\n");
+				sql.append("       ");
+			}
+
+			sql.append(column);
+		}
+		sql.append("\nFROM ");
+		sql.append(tbl.getTableName());
+		sql.append(";\n");
+
+		return sql.toString();
+	}
+
 
 }

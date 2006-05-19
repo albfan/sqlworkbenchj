@@ -46,21 +46,6 @@ public class SqlCommand
 	protected int queryTimeout = 0;
 	protected int maxRows = 0;
 
-	/**
-	 *	Checks if the verb of the given SQL script
-	 *	is the same as registered for this SQL command.
-	 */
-	protected boolean checkVerb(String aSql)
-		throws Exception
-	{
-		StringTokenizer tok = new StringTokenizer(aSql, " ");
-		String verb = null;
-		if (tok.hasMoreTokens()) verb = tok.nextToken();
-		String thisVerb = this.getVerb();
-		if (!thisVerb.equalsIgnoreCase(verb)) throw new Exception("Syntax error! " + thisVerb + " expected");
-		return true;
-	}
-
 	public void setRowMonitor(RowActionMonitor monitor)
 	{
 		this.rowMonitor = monitor;
@@ -199,6 +184,8 @@ public class SqlCommand
 	protected void processResults(StatementRunnerResult result, boolean hasResult)
 		throws SQLException
 	{
+		if (result == null) return;
+		
 		// Postgres obviously clears the warnings if the getMoreResults()
 		// and stuff is called, so we add the warnings right at the beginning
 		// this shouldn't affect other DBMSs (hopefully :-)
@@ -234,7 +221,29 @@ public class SqlCommand
 				rs = this.currentStatement.getResultSet();
 				if (rs != null) 
 				{
-					ds = new DataStore(rs, true, this.rowMonitor, this.maxRows, this.currentConnection);
+					//ds = new DataStore(rs, true, this.rowMonitor, this.maxRows, this.currentConnection);
+					// An exception in the constructor should lead to a real error
+					ds = new DataStore(rs, false, this.rowMonitor, maxRows, this.currentConnection);
+					try
+					{
+						// Not reading the data in the constructor enables us
+						// to cancel the retrieval of the data from the ResultSet
+						// without using statement.cancel()
+						// The DataStore checks for the cancel flag during processing
+						// of the ResulSet
+						ds.initData(rs, maxRows);
+					}
+					catch (SQLException e)
+					{
+						// Errors during loading should not throw away the
+						// rows retrieved until then
+						if (ds != null && ds.getRowCount() > 0)
+						{
+							result.addMessage(ResourceMgr.getString("MsgErrorDuringRetrieve"));
+							result.addMessage(ExceptionUtil.getDisplay(e));
+							result.setWarning(true);
+						}
+					}
 					result.addDataStore(ds);
 				}
 			}
@@ -249,6 +258,7 @@ public class SqlCommand
 			// some JDBC drivers do not implement getMoreResults() and getUpdateCount()
 			// correctly, so this is a safety to prevent an endless loop
 			if (counter > 50) break;
+			try { rs.close(); } catch (Throwable th) {}
 		}
 		
 	}

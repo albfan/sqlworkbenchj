@@ -12,6 +12,7 @@
 package workbench.gui.settings;
 
 import javax.swing.JPanel;
+import workbench.gui.components.DividerBorder;
 import workbench.gui.components.WbCheckBoxLabel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -29,6 +30,7 @@ public class DbExplorerOptionsPanel
 	public DbExplorerOptionsPanel()
 	{
 		initComponents();
+		setBorder(DividerBorder.BOTTOM_DIVIDER);
 		restoreSettings();
 	}
 

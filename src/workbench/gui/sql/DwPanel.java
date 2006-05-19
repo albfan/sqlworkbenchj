@@ -24,9 +24,9 @@ import javax.swing.BorderFactory;
 import javax.swing.CellEditor;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.JToolTip;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -56,6 +56,7 @@ import workbench.gui.actions.SelectKeyColumnsAction;
 import workbench.gui.actions.StartEditAction;
 import workbench.gui.actions.UpdateDatabaseAction;
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.MultiLineToolTip;
 import workbench.gui.components.OneLineTableModel;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbScrollPane;
@@ -208,6 +209,13 @@ public class DwPanel
 		};
 		t.start();
 	}
+	
+//	public JToolTip createToolTip()
+//	{
+//		JToolTip tip = new MultiLineToolTip();
+//		tip.setComponent(this);
+//		return tip;
+//	}
 	
 	public void setManageUpdateAction(boolean aFlag)
 	{
@@ -1036,7 +1044,6 @@ public class DwPanel
 	
 	public WbTable getTable() { return this.dataTable; }
 	
-	
 	/**
 	 *	Stops the editing mode of the displayed WbTable:
 	 *	<ul>
@@ -1047,8 +1054,14 @@ public class DwPanel
 	 */
 	public void endEdit()
 	{
+		endEdit(true);
+	}
+	
+	public void endEdit(boolean restoreData)
+	{
 		if (!this.editingStarted) return;
 		this.editingStarted = false;
+		this.dataTable.stopEditing();
 		this.dataTable.setShowStatusColumn(false);
 		this.updateAction.setEnabled(false);
 		int rows = this.dataTable.getSelectedRowCount();
@@ -1056,7 +1069,7 @@ public class DwPanel
 		this.deleteRow.setEnabled(this.isUpdateable() && rows > 0);
 		this.duplicateRow.setEnabled(this.isUpdateable() && rows == 1);
 		this.startEdit.setSwitchedOn(false);
-		this.dataTable.restoreOriginalValues();
+		if (restoreData) this.dataTable.restoreOriginalValues();
 	}
 	
 	/**

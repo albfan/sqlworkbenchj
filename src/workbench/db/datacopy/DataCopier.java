@@ -96,8 +96,8 @@ public class DataCopier
 
 		if (!this.sourceConnection.getMetadata().tableExists(aSourceTable))
 		{
-			this.addError(ResourceMgr.getString("ErrCopySourceTableNotFound").replaceAll("%name%", aTargetTable.getTableName()));
-			throw new SQLException("Table " + aTargetTable.getTableName() + " not found in target connection");
+			this.addError(ResourceMgr.getString("ErrCopySourceTableNotFound").replaceAll("%name%", aSourceTable.getTableExpression()));
+			throw new SQLException("Table " + aTargetTable.getTableName() + " not found in source connection");
 		}
 
 		//this.setSourceTableWhere(additionalWhere);
@@ -158,7 +158,7 @@ public class DataCopier
 		}
 		else
 		{
-			this.addError(ResourceMgr.getString("ErrCopyTargetTableNotFound").replaceAll("%name%", aTargetTable.getTableName()));
+			this.addError(ResourceMgr.getString("ErrCopyTargetTableNotFound").replaceAll("%name%", aTargetTable.getTableExpression()));
 			throw new SQLException("Table " + aTargetTable.getTableName() + " not found in target connection");
 		}
 		this.initImporterForTable(additionalWhere);

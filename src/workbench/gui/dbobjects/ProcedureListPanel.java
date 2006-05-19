@@ -39,6 +39,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableCellRenderer;
 
 import workbench.db.DbMetadata;
+import workbench.db.ProcedureCreator;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -50,9 +51,9 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.menu.GenerateScriptMenuItem;
 import workbench.gui.renderer.ProcStatusRenderer;
-import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
+import workbench.interfaces.RunnableStatement;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -61,10 +62,12 @@ import javax.swing.JLabel;
 import workbench.WbManager;
 import workbench.db.ObjectScripter;
 import workbench.db.ProcedureDefinition;
+import workbench.gui.MainWindow;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.WbTabbedPane;
 import workbench.interfaces.CriteriaPanel;
+import workbench.util.ExceptionUtil;
 import workbench.util.WbWorkspace;
 
 
@@ -75,7 +78,7 @@ import workbench.util.WbWorkspace;
  */
 public class ProcedureListPanel
 	extends JPanel
-	implements ListSelectionListener, Reloadable, ActionListener
+	implements ListSelectionListener, Reloadable, ActionListener, RunnableStatement
 {
 	//<editor-fold defaultstate="collapsed" desc="Variables">
 	private WbConnection dbConnection;
@@ -83,7 +86,7 @@ public class ProcedureListPanel
 	private CriteriaPanel findPanel;
 	private WbTable procList;
 	private WbTable procColumns;
-	private EditorPanel source;
+	private DbObjectSourcePanel source;
 	private JTabbedPane displayTab;
 	private WbSplitPane splitPane;
 	private String currentSchema;
@@ -101,7 +104,8 @@ public class ProcedureListPanel
 	private static final String DROP_CMD = "drop-object";
 	private static final String COMPILE_CMD = "compile-procedure";
 
-	public ProcedureListPanel() throws Exception
+	public ProcedureListPanel(MainWindow parent) 
+		throws Exception
 	{
 		this.displayTab = new WbTabbedPane();
 		this.displayTab.setTabPlacement(JTabbedPane.BOTTOM);
@@ -116,11 +120,15 @@ public class ProcedureListPanel
 		this.procColumns.setAdjustToColumnLabel(false);
 		JScrollPane scroll = new WbScrollPane(this.procColumns);
 
-		this.source = EditorPanel.createSqlEditor();
-		this.source.setEditable(false);
-		this.source.showFindOnPopupMenu();
-
-		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.source);
+		Reloadable sourceReload = new Reloadable()
+															{
+																public void reload()
+																{
+																	retrieveCurrentProcedure();
+																}
+															};
+		source = new DbObjectSourcePanel(parent, sourceReload);
+		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), source);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), scroll);
 
 		this.listPanel = new JPanel();
@@ -147,6 +155,7 @@ public class ProcedureListPanel
 		this.findPanel = new QuickFilterPanel(this.procList, cols, false, "procedurelist");
 		
 		ReloadAction a = new ReloadAction(this);
+		
 		this.findPanel.addToToolbar(a, true, false);
 		a.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshProcedureList"));
 		this.listPanel.setLayout(new BorderLayout());
@@ -243,7 +252,6 @@ public class ProcedureListPanel
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
 		throws Exception
 	{
-		this.reset();
 		this.currentSchema = aSchema;
 		this.currentCatalog = aCatalog;
 		if (this.isVisible() && retrieve)
@@ -252,6 +260,7 @@ public class ProcedureListPanel
 		}
 		else
 		{
+			this.reset();
 			this.shouldRetrieve = true;
 		}
 
@@ -269,6 +278,7 @@ public class ProcedureListPanel
 		
 		try
 		{
+			this.reset();
 			this.dbConnection.setBusy(true);
 			this.isRetrieving = true;
 			DbMetadata meta = dbConnection.getMetadata();
@@ -381,6 +391,11 @@ public class ProcedureListPanel
 	{
 		if (e.getSource() != this.procList.getSelectionModel()) return;
 		if (e.getValueIsAdjusting()) return;
+		retrieveCurrentProcedure();
+	}
+	
+	private void retrieveCurrentProcedure()
+	{
 		int row = this.procList.getSelectedRow();
 
 		if (row < 0) return;
@@ -588,6 +603,43 @@ public class ProcedureListPanel
 		this.retrieve();
 	}
 
+	/**
+	 * Execute the SQL Source currently in the editor
+	 */
+	public void runStatement()
+	{
+		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
+		if (this.isRetrieving) return;
+		
+		int row = this.procList.getSelectedRow();
+		if (row < 0) return;
+		
+		try
+		{
+			source.setEditable(false);
+			WbSwingUtilities.showWaitCursor(this);
+			
+			String sql = source.getText();
+			String proc = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+			String schema = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
+			String catalog = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
+			
+			ProcedureCreator creator = new ProcedureCreator(this.dbConnection, catalog, schema, proc, sql);
+			creator.recreate();
+			String msg = creator.getType() + " " + ResourceMgr.getString("MsgReCreated");
+			WbSwingUtilities.showMessage(this, msg);
+		}
+		catch (Exception e)
+		{
+			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(e));
+		}
+		finally
+		{
+			this.source.setEditable(true);
+			WbSwingUtilities.showDefaultCursor(this);
+		}
+
+	}
 	public void actionPerformed(ActionEvent e)
 	{
 		String command = e.getActionCommand();

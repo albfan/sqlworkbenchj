@@ -57,6 +57,12 @@ public class LnFDefinitionPanel
 				nameFieldFocusLost(evt);
 			}
 		});
+		
+		String button = ResourceMgr.getString("LblSwitchLnF");
+		String info = ResourceMgr.getString("TxtChangeLnFInfo").replaceAll("%button%", button);
+		infoText.setText(info);
+		infoText.setOpaque(true);
+		infoText.setBackground(this.getBackground());
 	}
 
 	public void setPropertyListener(PropertyChangeListener l)
@@ -96,8 +102,9 @@ public class LnFDefinitionPanel
     tfClassName = new StringPropertyEditor();
     lblLibrary = new javax.swing.JLabel();
     tfLibrary = new StringPropertyEditor();
-    jPanel1 = new javax.swing.JPanel();
     selectLibButton = new javax.swing.JButton();
+    infoText = new javax.swing.JTextArea();
+    jSeparator1 = new javax.swing.JSeparator();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -108,7 +115,7 @@ public class LnFDefinitionPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(11, 10, 1, 7);
+    gridBagConstraints.insets = new java.awt.Insets(15, 10, 1, 7);
     add(lblName, gridBagConstraints);
 
     tfName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
@@ -132,7 +139,7 @@ public class LnFDefinitionPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(1, 10, 0, 7);
     add(lblClassName, gridBagConstraints);
 
     tfClassName.setColumns(10);
@@ -145,7 +152,7 @@ public class LnFDefinitionPanel
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
+    gridBagConstraints.insets = new java.awt.Insets(1, 3, 0, 3);
     add(tfClassName, gridBagConstraints);
 
     lblLibrary.setFont(null);
@@ -154,7 +161,7 @@ public class LnFDefinitionPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 7);
     add(lblLibrary, gridBagConstraints);
 
     tfLibrary.setColumns(10);
@@ -167,19 +174,12 @@ public class LnFDefinitionPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
+    gridBagConstraints.insets = new java.awt.Insets(2, 3, 0, 3);
     add(tfLibrary, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridheight = java.awt.GridBagConstraints.REMAINDER;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
-    gridBagConstraints.weighty = 1.0;
-    add(jPanel1, gridBagConstraints);
 
     selectLibButton.setFont(null);
     selectLibButton.setText("...");
+    selectLibButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
     selectLibButton.setMaximumSize(new java.awt.Dimension(20, 20));
     selectLibButton.setMinimumSize(new java.awt.Dimension(20, 20));
     selectLibButton.setPreferredSize(new java.awt.Dimension(20, 20));
@@ -188,8 +188,32 @@ public class LnFDefinitionPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 3);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 3);
     add(selectLibButton, gridBagConstraints);
+
+    infoText.setEditable(false);
+    infoText.setFont(infoText.getFont());
+    infoText.setLineWrap(true);
+    infoText.setText("Please click on the \"Make current\" button to switch the current Look and Feel");
+    infoText.setWrapStyleWord(true);
+    infoText.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 10);
+    add(infoText, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+    add(jSeparator1, gridBagConstraints);
 
   }
 
@@ -254,7 +278,8 @@ public class LnFDefinitionPanel
 	}
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  public javax.swing.JPanel jPanel1;
+  public javax.swing.JTextArea infoText;
+  public javax.swing.JSeparator jSeparator1;
   public javax.swing.JLabel lblClassName;
   public javax.swing.JLabel lblLibrary;
   public javax.swing.JLabel lblName;

@@ -88,15 +88,20 @@ public class SqlKeywordHandler
 			Collection values = reader.getValues();
 			if (values != null) this.keywords.addAll(values);
 			
-			File baseDir = new File(WbManager.getInstance().getJarPath());
-			File f = new File(baseDir, "SqlKeywords.txt");
-			if (f.exists()) 
+			// When running tests, the WbManager is not necessarily available
+			WbManager mgr = WbManager.getInstance();
+			if (mgr != null)
 			{
-				LogMgr.logDebug("SqlKeywordHandler.readKeywords()", "Reading addtional keywords from " + f.getCanonicalPath());
-				in = new FileInputStream(f);;
-				reader = new TextlistReader(in);
-				values = reader.getValues();
-				if (values != null) this.keywords.addAll(values);
+				File baseDir = new File(mgr.getJarPath());
+				File f = new File(baseDir, "SqlKeywords.txt");
+				if (f.exists()) 
+				{
+					LogMgr.logDebug("SqlKeywordHandler.readKeywords()", "Reading addtional keywords from " + f.getCanonicalPath());
+					in = new FileInputStream(f);;
+					reader = new TextlistReader(in);
+					values = reader.getValues();
+					if (values != null) this.keywords.addAll(values);
+				}
 			}
 		}
 		catch (Exception e)

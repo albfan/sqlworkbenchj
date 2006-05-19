@@ -385,7 +385,6 @@ public class WbTable
 	public static WbMenu createCopySelectedMenu()
 	{
 		WbMenu copyMenu = new WbMenu(ResourceMgr.getString("MnuTxtCopySelected"));
-		copyMenu.setIcon(ResourceMgr.getImage("blank"));
 		copyMenu.setParentMenuId(ResourceMgr.MNU_TXT_DATA);
 		return copyMenu;
 	}
@@ -430,6 +429,7 @@ public class WbTable
 
 	public void reset()
 	{
+		this.stopEditing();
 		if (this.getModel() == EmptyTableModel.EMPTY_MODEL) return;
 		this.setModel(EmptyTableModel.EMPTY_MODEL, false);
 	}

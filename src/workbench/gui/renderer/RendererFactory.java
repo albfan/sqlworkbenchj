@@ -34,9 +34,9 @@ public class RendererFactory
 	
 	private static TableCellRenderer createRenderer(String className)
 	{
-		TableCellRenderer rend = (TableCellRenderer)sharedInstances.get(className);
-		if (rend == null)
-		{
+		TableCellRenderer rend = null;//(TableCellRenderer)sharedInstances.get(className);
+//		if (rend == null)
+//		{
 			try
 			{
 				Class cls = Class.forName(className);
@@ -48,7 +48,7 @@ public class RendererFactory
 				rend = new DefaultTableCellRenderer();
 			}
 			
-		}
+//		}
 		return rend;
 	}	
 	
@@ -59,9 +59,9 @@ public class RendererFactory
 	
 	public static TableCellRenderer getDateRenderer(String format)
 	{
-		TableCellRenderer rend = (TableCellRenderer)dateRenderer.get(format);
-		if (rend == null)
-		{
+		TableCellRenderer rend = null;//(TableCellRenderer)dateRenderer.get(format);
+//		if (rend == null)
+//		{
 			try
 			{
 				Class cls = Class.forName("workbench.gui.renderer.DateColumnRenderer");
@@ -76,7 +76,7 @@ public class RendererFactory
 				return new DefaultTableCellRenderer();
 			} 
 			dateRenderer.put(format, rend);
-		}
+//		}
 		return rend;
 	}
 

@@ -639,6 +639,7 @@ public class WbConnection
 			this.busy = flag;
 		}
 	}
+	
 	public void executionStart(WbConnection conn, Object source)
 	{
 		if (conn == this)

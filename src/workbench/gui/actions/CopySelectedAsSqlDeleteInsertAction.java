@@ -31,7 +31,6 @@ public class CopySelectedAsSqlDeleteInsertAction extends WbAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtCopySelectedAsSqlDeleteInsert");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_COPY_SELECTED);
-		this.setIcon(null);
 		this.setEnabled(false);
 	}
 

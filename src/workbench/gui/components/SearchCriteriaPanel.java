@@ -70,7 +70,6 @@ public class SearchCriteriaPanel
 		{
 			this.criteria.setText(initialValue);
 			this.criteria.selectAll();
-			//initialValue = Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_CRIT, null);
 		}
 		
 		this.criteria.addMouseListener(new TextComponentMouseListener());
@@ -88,6 +87,14 @@ public class SearchCriteriaPanel
 		p.add(this.useRegEx);
 		
 		this.add(p, BorderLayout.SOUTH);
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				criteria.requestFocusInWindow();
+			}
+		});
+		
 	}
 
 	public String getCriteria()

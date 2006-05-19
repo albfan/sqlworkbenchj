@@ -31,7 +31,6 @@ public class CopySelectedAsSqlInsertAction extends WbAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtCopySelectedAsSqlInsert", null);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_COPY_SELECTED);
-		this.setIcon(null);
 		this.setEnabled(false);
 	}
 

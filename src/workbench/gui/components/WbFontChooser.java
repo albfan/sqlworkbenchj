@@ -13,6 +13,7 @@ package workbench.gui.components;
 
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
@@ -27,15 +28,15 @@ import workbench.util.StringUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class WbFontChooser extends javax.swing.JPanel
+public class WbFontChooser 
+	extends javax.swing.JPanel
 {
 	private boolean updateing;
 	
-	/** Creates new form BeanForm */
-	public WbFontChooser()
+	public WbFontChooser(boolean monospacedOnly)
 	{
 		initComponents();
-		fillFontList();
+		fillFontList(monospacedOnly);
 	}
 	
 	public void setSelectedFont(Font aFont)
@@ -73,8 +74,13 @@ public class WbFontChooser extends javax.swing.JPanel
 	}
 	
   public static Font chooseFont(JComponent owner, Font defaultFont)
+	{
+		return chooseFont(owner, defaultFont, false);
+	}
+	
+  public static Font chooseFont(JComponent owner, Font defaultFont, boolean monospacedOnly)
   {
-		WbFontChooser chooser = new WbFontChooser();
+		WbFontChooser chooser = new WbFontChooser(monospacedOnly);
 		chooser.setSelectedFont(defaultFont);
 		Dimension d = new Dimension(320, 240);
 		chooser.setSize(d);
@@ -101,12 +107,21 @@ public class WbFontChooser extends javax.swing.JPanel
   }
 	
 	
-	private void fillFontList()
+	private void fillFontList(boolean monospacedOnly)
 	{
 		String[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 		DefaultListModel model = new DefaultListModel();
+		
 		for (int i = 0; i < fonts.length; i++)
 		{
+			if (monospacedOnly)
+			{
+				Font f = new Font(fonts[i], Font.PLAIN, 10);
+				FontMetrics fm = getFontMetrics(f);
+				int iWidth = fm.charWidth('i');
+				int mWidth = fm.charWidth('M');
+				if (iWidth != mWidth) continue;
+			}
 			model.addElement(fonts[i]);
 		}
 		this.fontNameList.setModel(model);

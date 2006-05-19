@@ -83,8 +83,8 @@ public class WbMenuItem
 		}
 	}	
 
-	public void setBlankIcon()
-	{
-		this.setIcon(ResourceMgr.getImage("blank"));
-	}
+//	public void setBlankIcon()
+//	{
+//		this.setIcon(ResourceMgr.getImage("blank"));
+//	}
 }

@@ -125,6 +125,11 @@ public class TableIdentifier
 		StringBuffer result = new StringBuffer(30);
 		if (conn == null)
 		{
+			if (this.catalog != null)
+			{
+				result.append(SqlUtil.quoteObjectname(this.catalog));
+				result.append('.');
+			}
 			if (this.schema != null)
 			{
 				result.append(SqlUtil.quoteObjectname(this.schema));
@@ -136,6 +141,11 @@ public class TableIdentifier
 		{
 			DbMetadata meta = conn.getMetadata();
 			this.adjustCase(conn);
+			if (this.catalog != null && meta.needCatalogInDML(this))
+			{
+				result.append(SqlUtil.quoteObjectname(this.catalog));
+				result.append('.');
+			}
 			if (this.schema != null && meta.needSchemaInDML(this))
 			{
 				result.append(meta.quoteObjectname(this.schema));

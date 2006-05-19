@@ -1885,6 +1885,8 @@ public class SqlPanel
 		if (currentData != null)
 		{
 			this.currentData.removePropertyChangeListener(this);
+			this.currentData.getTable().stopEditing();
+			this.currentData.endEdit(false);
 		}
 		
 		int newIndex = this.resultTab.getSelectedIndex();
@@ -1986,8 +1988,8 @@ public class SqlPanel
 		data.setUpdateHandler(this);
 		data.setAutomaticUpdateTableCheck(!this.dbConnection.getProfile().getDisableUpdateTableCheck());
 		int newIndex = this.resultTab.getTabCount() - 1;
-		String tip = StringUtil.getMaxSubstring(sql,80);
-		this.resultTab.insertTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_RESULT), null, data, tip, newIndex);
+		//String tip = StringUtil.getMaxSubstring(sql,80);
+		this.resultTab.insertTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_RESULT), null, data, sql, newIndex);
 		if (this.resultTab.getTabCount() == 2)
 		{
 			this.resultTab.setSelectedIndex(0);
