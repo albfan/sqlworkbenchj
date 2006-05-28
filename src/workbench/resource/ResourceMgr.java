@@ -201,6 +201,7 @@ public class ResourceMgr
 	{
 		return getDescription(aKey, false);
 	}
+	
 	/**
 	 *    Returns the description associcate with the given key.
 	 *    This is used for Tooltips which are associated with a

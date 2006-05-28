@@ -49,6 +49,11 @@
           <SubComponents>
             <Container class="javax.swing.JScrollPane" name="resultScrollPane">
               <Properties>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                    <EmptyBorder/>
+                  </Border>
+                </Property>
                 <Property name="horizontalScrollBarPolicy" type="int" value="31"/>
               </Properties>
               <AuxValues>
@@ -58,7 +63,7 @@
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
                   <JTabbedPaneConstraints tabName="&lt;User Code&gt;">
                     <Property name="tabTitle" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                      <Connection code="ResourceMgr.getString(&quot;LabelTableSearchResultTab&quot;)" type="code"/>
+                      <Connection code="ResourceMgr.getString(&quot;LblTableSearchResultTab&quot;)" type="code"/>
                     </Property>
                   </JTabbedPaneConstraints>
                 </Constraint>
@@ -129,7 +134,7 @@
                 <Component class="javax.swing.JButton" name="selectAllButton">
                   <Properties>
                     <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                      <Connection code="ResourceMgr.getString(&quot;LabelSelectAll&quot;)" type="code"/>
+                      <Connection code="ResourceMgr.getString(&quot;LblSelectAll&quot;)" type="code"/>
                     </Property>
                   </Properties>
                   <Events>
@@ -154,7 +159,7 @@
                 <Component class="javax.swing.JButton" name="selectNoneButton">
                   <Properties>
                     <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                      <Connection code="ResourceMgr.getString(&quot;LabelSelectNone&quot;)" type="code"/>
+                      <Connection code="ResourceMgr.getString(&quot;LblSelectNone&quot;)" type="code"/>
                     </Property>
                   </Properties>
                   <Events>
@@ -199,7 +204,7 @@
         <Component class="javax.swing.JButton" name="startButton">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LabelStartSearch&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;LblStartSearch&quot;)" type="code"/>
             </Property>
           </Properties>
           <Events>
@@ -216,7 +221,7 @@
             <Property name="columns" type="int" value="20"/>
             <Property name="text" type="java.lang.String" value="% ... %"/>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getDescription(&quot;LabelSearchTableCriteria&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getDescription(&quot;LblSearchTableCriteria&quot;)" type="code"/>
             </Property>
             <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[100, 20]"/>
@@ -232,7 +237,7 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="LIKE"/>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getDescription(&quot;LabelSearchTableCriteria&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getDescription(&quot;LblSearchTableCriteria&quot;)" type="code"/>
             </Property>
           </Properties>
           <Constraints>
@@ -243,12 +248,6 @@
         </Component>
         <Component class="javax.swing.JButton" name="reloadButton">
           <Properties>
-            <Property name="text" type="java.lang.String" value="jButton1"/>
-            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-              <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
-                <EtchetBorder/>
-              </Border>
-            </Property>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[24, 24]"/>
             </Property>
@@ -285,7 +284,7 @@
               <ComponentRef name="rowCount"/>
             </Property>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LabelMaxRows&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;LblMaxRows&quot;)" type="code"/>
             </Property>
           </Properties>
           <Constraints>

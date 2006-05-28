@@ -32,6 +32,7 @@ public class StatementRunnerResult
 	
 	private boolean success = true;
 	private boolean hasWarning = false;
+	private boolean wasCancelled = false;
 
 	private long executionTime = -1;
 	
@@ -44,6 +45,9 @@ public class StatementRunnerResult
 		this.sourceCommand = aCmd;
 	}
 
+	public boolean promptingWasCancelled() { return wasCancelled; }
+	public void setPromptingWasCancelled() { this.wasCancelled = true; }
+	
 	public void setExecutionTime(long t) { this.executionTime = t; }
 	public long getExecutionTime() { return this.executionTime; }
 	public String getTimingMessage()

@@ -38,6 +38,7 @@ import javax.swing.ComponentInputMap;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -61,6 +62,7 @@ import workbench.gui.actions.ViewMessageLogAction;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.dialogs.dataimport.ImportFileDialog;
+import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ExceptionUtil;
@@ -170,7 +172,7 @@ public class SqlPanel
 	implements FontChangedListener, ActionListener, TextChangeListener,
 		PropertyChangeListener, ChangeListener, 
 		MainPanel, Exporter, TextFileContainer, DbUpdater, Interruptable, FormattableSql, Commitable,
-		JobErrorHandler, FilenameChangeListener, ExecutionController, ResultLogger
+		JobErrorHandler, FilenameChangeListener, ExecutionController, ResultLogger, ParameterPrompter
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	private EditorPanel editor;
@@ -486,8 +488,13 @@ public class SqlPanel
 
 	public boolean closeFile(boolean emptyEditor)
 	{
+		return closeFile(emptyEditor, true);
+	}
+	
+	public boolean closeFile(boolean emptyEditor, boolean checkUnsaved)
+	{
 		if (this.editor == null) return true;
-		this.checkAndSaveFile();
+		if (checkUnsaved) this.checkAndSaveFile();
 		if (this.editor.closeFile(emptyEditor))
     {
 			this.fileDiscardAction.setEnabled(false);
@@ -1023,6 +1030,7 @@ public class SqlPanel
 
 		if (!fileLoaded)
 		{
+			this.removeIconFromTab();
 			try
 			{
 				this.sqlHistory.showCurrent();
@@ -1051,6 +1059,7 @@ public class SqlPanel
 		{
 			LogMgr.logWarning("SqlPanel.restoreSettings()", "Error when restore settings", e);
 		}
+		this.updateTabTitle();
 		this.editor.clearUndoBuffer();
 	}
 
@@ -1120,6 +1129,18 @@ public class SqlPanel
 		}
 		if (fname == null) fname = defaultLabel;
 		return fname;
+	}
+
+	
+	private void updateTabTitle()
+	{
+		Container parent = this.getParent();
+		if (parent instanceof JTabbedPane)
+		{
+			JTabbedPane tab = (JTabbedPane)parent;
+			int index = tab.indexOfComponent(this);
+			setTabTitle(tab, index);
+		}
 	}
 	
 	public void setTabTitle(JTabbedPane tab, int index)
@@ -1572,7 +1593,7 @@ public class SqlPanel
 		}
 	}
 
-	private String currentMacroSql = null;
+	private boolean macroExecution = false;
 	
 	public void executeMacro(final String macroName, final boolean replaceText)
 	{
@@ -1602,11 +1623,11 @@ public class SqlPanel
 		{
 			this.storeStatementInHistory();
 			this.editor.setText(sql);
-			this.currentMacroSql = null;
+			this.macroExecution = false;
 		}
 		else
 		{
-			this.currentMacroSql = sql;
+			this.macroExecution = true;
 		}
 		this.startExecution(sql, 0, -1, false);
 	}
@@ -2006,6 +2027,53 @@ public class SqlPanel
 		scriptParser.setCheckForSingleLineCommands(this.dbConnection.getMetadata().supportSingleLineCommands());
 		return scriptParser;
 	}
+
+	private VariablePrompter prompter;
+	private boolean checkPrepared;
+	
+	public boolean processParameterPrompts(String sql)
+	{
+		boolean goOn = true;
+		
+		if (prompter == null) prompter = new VariablePrompter();
+		prompter.setSql(sql);
+		if (prompter.needsInput())
+		{
+			// the animated gif needs to be turned off when a
+			// dialog is displayed, otherwise Swing uses too much CPU
+			this.showBusyIcon(false);
+			goOn = prompter.getPromptValues();
+			this.showBusyIcon(true);
+		}
+
+		if (goOn && this.checkPrepared)
+		{
+			PreparedStatementPool pool = this.dbConnection.getPreparedStatementPool();
+			try
+			{
+				if (pool.isRegistered(sql) || pool.addPreparedStatement(sql))
+				{
+					StatementParameters parms = pool.getParameters(sql);
+					this.showBusyIcon(false);
+					goOn = ParameterEditor.showParameterDialog(parms);
+					this.showBusyIcon(true);
+				}
+			}
+			catch (SQLException e)
+			{
+					this.showBusyIcon(false);
+					String msg = ResourceMgr.getString("ErrCheckPreparedStatement");
+					msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));
+					WbSwingUtilities.showErrorMessage(this, msg);
+					this.showBusyIcon(true);
+					
+					// Ignore errors in prepared statements...
+					goOn = true;
+			}
+		}
+		return goOn;
+		
+	}
 	
 	private void displayResult(String script, int selectionOffset, int commandAtIndex, boolean highlightOnError)
 	{
@@ -2015,24 +2083,47 @@ public class SqlPanel
 		boolean jumpToNext = (commandAtIndex > -1 && Settings.getInstance().getAutoJumpNextStatement());
 		boolean highlightCurrent = false;
 		boolean restoreSelection = false;
-		boolean checkPreparedStatement = Settings.getInstance().getCheckPreparedStatements();
 		boolean shouldRestoreSelection = Settings.getInstance().getBoolProperty("workbench.gui.sql.restoreselection", true);
-		
+		boolean macroRun = false;
+		this.checkPrepared = Settings.getInstance().getCheckPreparedStatements();
 		this.executeAllStatements = false;
 		this.cancelAll = false;
 		
-		ExecutionController control = null;
-		if (this.dbConnection.getProfile().isConfirmUpdates())
-		{
-			control = this;
-		}
-
 		ScriptParser scriptParser = createScriptParser();
 		
 		int oldSelectionStart = -1;
 		int oldSelectionEnd = -1;
 
-		this.stmtRunner.setExecutionController(control);
+		if (this.dbConnection.getProfile().isConfirmUpdates())
+		{
+			this.stmtRunner.setExecutionController(this);
+		}
+		else
+		{
+			this.stmtRunner.setExecutionController(null);
+		}
+		this.stmtRunner.setParameterPrompter(this);
+		
+		// If a file is loaded in the editor, make sure the StatementRunner
+		// is using the file's directory as the base directory
+		// Thanks to Christian d'Heureuse for this fix!
+		if (this.editor.hasFileLoaded())
+		{
+			try
+			{
+				File f = new File(editor.getCurrentFileName());
+				String dir = f.getCanonicalFile().getParent();
+				this.stmtRunner.setBaseDir(dir);
+			}
+			catch (IOException e)
+			{
+				this.stmtRunner.setBaseDir(System.getProperty("user.dir"));
+			}
+		}
+		else
+		{
+			this.stmtRunner.setBaseDir(System.getProperty("user.dir"));
+		}
 		
 		int maxRows = this.statusBar.getMaxRows();
 		int timeout = this.statusBar.getQueryTimeout();
@@ -2051,12 +2142,16 @@ public class SqlPanel
 			{
 				appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + cleanSql + "\n");
 				script = macro;
+				macroRun = true;
 			}
 			
-			if (currentMacroSql != null)
+			if (this.macroExecution)
 			{
-				// executeMacro will set this variable for logging purposes
-				appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + currentMacroSql  + "\n");
+				// executeMacro will set this variable for logging purposes only
+				// the same SQL is actually passed into this method
+				macroRun = true;
+				appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + script + "\n");
+				macroExecution = false;
 			}
 			
 			scriptParser.setScript(script);
@@ -2105,7 +2200,7 @@ public class SqlPanel
 
 			this.showResultPanel();
 
-			highlightCurrent = ((count > 1 || commandAtIndex > -1) && (currentMacroSql == null) && Settings.getInstance().getHighlightCurrentStatement());
+			highlightCurrent = ((count > 1 || commandAtIndex > -1) && (!macroRun) && Settings.getInstance().getHighlightCurrentStatement());
 
 			if (highlightCurrent)
 			{
@@ -2118,12 +2213,11 @@ public class SqlPanel
 			long stmtTotal = 0;
 			int executedCount = 0;
 			String currentSql = null;
-			VariablePrompter prompter = new VariablePrompter();
 			
 			StringBuffer logmsg = new StringBuffer(100);
 			int resultSets = 0;
 			this.ignoreStateChange = false;
-			this.currentMacroSql = null;
+			this.macroExecution = false;
 			
 			for (int i=startIndex; i < endIndex; i++)
 			{
@@ -2135,48 +2229,6 @@ public class SqlPanel
 				Thread.yield();
 				if (cancelExecution) break;
 
-				boolean goOn = true;
-				
-				prompter.setSql(currentSql);
-				if (prompter.needsInput())
-				{
-					// the animated gif needs to be turned off when a
-					// dialog is displayed, otherwise Swing uses too much CPU
-					this.showBusyIcon(false);
-					goOn = prompter.getPromptValues();
-					this.showBusyIcon(true);
-				}
-
-				if (goOn && checkPreparedStatement)
-				{
-					PreparedStatementPool pool = this.dbConnection.getPreparedStatementPool();
-					try
-					{
-						if (pool.isRegistered(currentSql) || pool.addPreparedStatement(currentSql))
-						{
-							StatementParameters parms = pool.getParameters(currentSql);
-							this.showBusyIcon(false);
-							goOn = ParameterEditor.showParameterDialog(parms);
-							this.showBusyIcon(true);
-						}
-					}
-					catch (SQLException e)
-					{
-							this.showBusyIcon(false);
-							msg = ResourceMgr.getString("ErrCheckPreparedStatement").replaceAll("%error%", ExceptionUtil.getDisplay(e));
-							WbSwingUtilities.showErrorMessage(this, msg);
-							this.showBusyIcon(true);
-					}
-				}
-				if (!goOn)
-				{
-					String cancelMsg = ResourceMgr.getString("MsgSqlCancelledDuringPrompt");
-					cancelMsg = cancelMsg.replaceAll("%nr%", Integer.toString(i+1));
-					this.appendToLog(cancelMsg);
-					this.showLogPanel();
-					continue;
-				}
-
 				if (highlightCurrent)
 				{
 					highlightStatement(scriptParser, i, selectionOffset);
@@ -2186,6 +2238,15 @@ public class SqlPanel
 				
 				this.stmtRunner.runStatement(currentSql, maxRows, timeout);
 				statementResult = this.stmtRunner.getResult();	
+				if (statementResult.promptingWasCancelled())
+				{
+					String cancelMsg = ResourceMgr.getString("MsgSqlCancelledDuringPrompt");
+					cancelMsg = cancelMsg.replaceAll("%nr%", Integer.toString(i+1));
+					this.appendToLog(cancelMsg);
+					this.showLogPanel();
+					continue;
+				}
+
 				resultSets += this.showResult(statementResult);
 				stmtTotal += statementResult.getExecutionTime();
 
@@ -2244,7 +2305,7 @@ public class SqlPanel
 						// dialog is displayed, otherwise Swing uses too much CPU
 						this.showBusyIcon(false);
 
-						this.highlightError(scriptParser, commandWithError, selectionOffset);
+						if (!macroRun) this.highlightError(scriptParser, commandWithError, selectionOffset);
 
 						// force a refresh in order to display the selection
 						EventQueue.invokeLater(new Runnable()
@@ -2285,7 +2346,7 @@ public class SqlPanel
 			statusBar.setExecutionTime(stmtTotal);
 			statusBar.clearStatusMessage();
 
-			if (commandWithError > -1 && highlightOnError)
+			if (commandWithError > -1 && highlightOnError && !macroRun)
 			{
 				restoreSelection = false;
 				final ScriptParser p = scriptParser;

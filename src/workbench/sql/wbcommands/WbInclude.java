@@ -88,11 +88,6 @@ public class WbInclude
 
 		file = evaluateFileArgument(file);
 		File f = new File(file);
-		if (!f.exists())
-		{
-			String dir = this.runner.getBaseDir();
-			f = new File(dir, file);
-		}
 
 		if (!f.exists())
 		{
@@ -123,6 +118,7 @@ public class WbInclude
 			batchRunner.setCheckEscapedQuotes(checkEscape);
 			batchRunner.setShowTiming(false);
 			batchRunner.setEncoding(encoding);
+			batchRunner.setParameterPrompter(this.prompter);
 			batchRunner.execute();
 			result.setSuccess();
 		}

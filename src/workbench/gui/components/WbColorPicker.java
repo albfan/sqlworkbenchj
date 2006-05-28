@@ -7,6 +7,7 @@
 package workbench.gui.components;
 
 import java.awt.Color;
+import java.io.Serializable;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -16,7 +17,9 @@ import workbench.resource.ResourceMgr;
  *
  * @author  thomas
  */
-public class WbColorPicker extends javax.swing.JPanel
+public class WbColorPicker 
+	extends javax.swing.JPanel
+	implements Serializable
 {
 	
 	/** Creates new form WbColorPicker */
@@ -34,7 +37,7 @@ public class WbColorPicker extends javax.swing.JPanel
   private void initComponents()
   {
     samplePanel = new javax.swing.JPanel();
-    selectColor = new javax.swing.JButton();
+    selectColor = new FlatButton();
 
     setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
 
@@ -46,7 +49,6 @@ public class WbColorPicker extends javax.swing.JPanel
     add(samplePanel);
 
     selectColor.setText("...");
-    selectColor.setBorder(javax.swing.BorderFactory.createEtchedBorder());
     selectColor.setMargin(new java.awt.Insets(0, 0, 0, 0));
     selectColor.setMaximumSize(new java.awt.Dimension(22, 22));
     selectColor.setMinimumSize(new java.awt.Dimension(22, 22));
@@ -68,11 +70,11 @@ public class WbColorPicker extends javax.swing.JPanel
 		Color newColor = JColorChooser.showDialog(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("TxtSelectColor"), this.getSelectedColor());
 		if (newColor != null)
 		{
-			this.setColor(newColor);
+			this.setSelectedColor(newColor);
 		}
 	}//GEN-LAST:event_selectColorMouseClicked
 	
-	public void setColor(Color c)
+	public void setSelectedColor(Color c)
 	{
 		samplePanel.setBackground(c);
 	}

@@ -45,6 +45,7 @@ import javax.swing.border.EtchedBorder;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.actions.SelectKeyColumnsAction;
+import workbench.gui.components.FlatButton;
 import workbench.interfaces.PropertyStorage;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
@@ -84,7 +85,7 @@ public class TableDataPanel
 	private JButton config;
 	private JLabel tableNameLabel;
 	private JLabel rowCountLabel;
-	private WbButton rowCountButton;
+	private FlatButton rowCountButton;
 	private JCheckBox autoRetrieve;
 	private JPanel topPanel;
 
@@ -158,12 +159,13 @@ public class TableDataPanel
 		topPanel.add(tableNameLabel);
 
 		topPanel.add(Box.createHorizontalStrut(10));
-		rowCountButton = new WbButton(ResourceMgr.getString("LblTableDataRowCount"));
+		rowCountButton = new FlatButton(ResourceMgr.getString("LblTableDataRowCount"));
 		rowCountButton.setRollover(true);
+		rowCountButton.setFlatLook();
 		rowCountButton.addActionListener(this);
 		rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountButton"));
-		//rowCountButton.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		rowCountButton.setFocusable(false);
+		
 		topPanel.add(rowCountButton);
 		topPanel.add(Box.createHorizontalStrut(5));
 		rowCountLabel = new JLabel();
@@ -180,9 +182,8 @@ public class TableDataPanel
 		topPanel.add(autoRetrieve);
 
 		topPanel.add(Box.createHorizontalGlue());
-		this.config = new WbButton(ResourceMgr.getString("LblConfigureWarningThreshold"));
+		this.config = new FlatButton(ResourceMgr.getString("LblConfigureWarningThreshold"));
 		this.config.addActionListener(this);
-		this.config.setBorder(WbSwingUtilities.FLAT_BUTTON_BORDER);
 		topPanel.add(this.config);
 
 		this.add(topPanel, BorderLayout.NORTH);

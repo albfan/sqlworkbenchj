@@ -220,7 +220,7 @@ public abstract class BaseAnalyzer
 		// if no dot is present, then the current word is not a qualifier (e.g. a table name or alias)
 		if (c != '.') return null;
 		
-		String word = StringUtil.getWordLeftOfCursor(this.sql, start, ".");
+		String word = StringUtil.getWordLeftOfCursor(this.sql, start, ";[]'\"().");
 		if (word == null) return null;
 		int dotPos= word.indexOf('.');
 		

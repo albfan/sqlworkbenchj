@@ -26,8 +26,8 @@ public class SourceStatementsHelp
 	{
 		String explain = "Currently no SQL query is configured\n" +
 			" to retrieve the source of a view for your DBMS.\n" + 
-			"To enabled this, create a file called ViewSourceStatements.xml\n" +
-			"in the same directory where Workbench.jar is located,\nwith the following content:\n\n" +
+			"To enable this, create a file called ViewSourceStatements.xml\n" +
+			"in the same directory where Workbench.jar is located,\nand supply the necessary SELECT statement (where indicated) to retrieve the source from the DBMS:\n\n" +
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>  \n" + 
 			"<java version=\"1.4.0_01\" class=\"java.beans.XMLDecoder\">  \n" + 
 			" \n" + 
@@ -45,13 +45,13 @@ public class SourceStatementsHelp
 			"     <string>THE COLUMN FROM THE SELECT THAT IDENTIFIES THE VIEW SCHEMA (if necessary)</string>  \n" + 
 			"    </void>  \n" + 
 			"    <void property=\"orderBy\">  \n" + 
-			"     <string>DEFINE AN ORDER BY CLAUSE FOR THE SELECT STATEMENT (if necessary)</string>  \n" + 
+			"     <string>DEFINE AN ORDER BY CLAUSE FOR THE SELECT STATEMENT</string>  \n" + 
 			"    </void>  \n" + 
 			"   </object>  \n" + 
 			"  </void>  \n" + 
 			"   \n" + 
 			" </object>  \n" + 
-			"</java> ";		
+			"</java>";		
 		return explain;
 	}
 
@@ -59,8 +59,8 @@ public class SourceStatementsHelp
 	{
 		String explain = "Currently no SQL query is configured to retrieve the source\n" +
 			"of a stored procedure for your DBMS.\n" + 
-			"To enabled this, create a file called ProcSourceStatements.xml\n" +
-			"in the same directory where Workbench.jar is located,\nwith the following content:\n\n" +
+			"To enable this, create a file called ProcSourceStatements.xml\n" +
+			"in the same directory where Workbench.jar is located,\nand supply the necessary SELECT statement (where indicated) to retrieve the source from your DBMS:\n\n" +
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>  \n" + 
 			"<java version=\"1.4.0_01\" class=\"java.beans.XMLDecoder\">  \n" + 
 			" \n" + 

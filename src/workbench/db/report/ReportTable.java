@@ -82,12 +82,6 @@ public class ReportTable
 		this(tbl, conn, nspace, true, true, true, true);
 	}
 	
-	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace, boolean includeIndex, boolean includeFk, boolean includePk)
-		throws SQLException
-	{
-		this(tbl, conn, nspace, includeIndex, includeFk, includePk, true);
-	}
-
 	/**
 	 * Initialize this ReportTable.
 	 * This will read the following information for the table: 
@@ -350,4 +344,5 @@ public class ReportTable
 	{
 		return this.table.getTableName().equalsIgnoreCase(other.table.getTableName());
 	}
+
 }

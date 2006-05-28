@@ -15,9 +15,9 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.StringTokenizer;
 
 import workbench.db.WbConnection;
+import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.StatementRunner;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.ResultLogger;
@@ -45,6 +45,8 @@ public class SqlCommand
 	protected StatementRunner runner;
 	protected int queryTimeout = 0;
 	protected int maxRows = 0;
+	protected DataStore currentRetrievalData;
+	protected ParameterPrompter prompter;
 
 	public void setRowMonitor(RowActionMonitor monitor)
 	{
@@ -64,6 +66,10 @@ public class SqlCommand
 		result.addMessage(this.getVerb() + " " + ResourceMgr.getString("MsgKnownStatementOK"));
 	}
 
+	public void setParameterPrompter(ParameterPrompter p) 
+	{
+		this.prompter = p;
+	}
 	/**
 	 *	Append any warnings from the given Statement and Connection to the given
 	 *	StringBuffer. If the connection is a connection to Oracle
@@ -87,7 +93,11 @@ public class SqlCommand
 		throws SQLException
 	{
 		this.isCancelled = true;
-		if (this.currentStatement != null)
+		if (this.currentRetrievalData != null)
+		{
+			this.currentRetrievalData.cancelRetrieve();
+		}
+		else if (this.currentStatement != null)
 		{
 			try
 			{
@@ -211,7 +221,6 @@ public class SqlCommand
 		}
 
 		ResultSet rs = null;
-		DataStore ds = null;
 
 		int counter = 0;
 		while (moreResults || updateCount > -1)
@@ -223,7 +232,10 @@ public class SqlCommand
 				{
 					//ds = new DataStore(rs, true, this.rowMonitor, this.maxRows, this.currentConnection);
 					// An exception in the constructor should lead to a real error
-					ds = new DataStore(rs, false, this.rowMonitor, maxRows, this.currentConnection);
+					
+					// we have to use an instance variable for the retrieval, otherwise the retrieval
+					// cannot be cancelled!
+					this.currentRetrievalData = new DataStore(rs, false, this.rowMonitor, maxRows, this.currentConnection);
 					try
 					{
 						// Not reading the data in the constructor enables us
@@ -231,20 +243,20 @@ public class SqlCommand
 						// without using statement.cancel()
 						// The DataStore checks for the cancel flag during processing
 						// of the ResulSet
-						ds.initData(rs, maxRows);
+						this.currentRetrievalData.initData(rs, maxRows);
 					}
 					catch (SQLException e)
 					{
 						// Errors during loading should not throw away the
 						// rows retrieved until then
-						if (ds != null && ds.getRowCount() > 0)
+						if (this.currentRetrievalData != null && this.currentRetrievalData.getRowCount() > 0)
 						{
 							result.addMessage(ResourceMgr.getString("MsgErrorDuringRetrieve"));
 							result.addMessage(ExceptionUtil.getDisplay(e));
 							result.setWarning(true);
 						}
 					}
-					result.addDataStore(ds);
+					result.addDataStore(this.currentRetrievalData);
 				}
 			}
 			else if (updateCount > -1)
@@ -260,8 +272,9 @@ public class SqlCommand
 			if (counter > 50) break;
 			try { rs.close(); } catch (Throwable th) {}
 		}
-		
+		this.currentRetrievalData = null;
 	}
+	
 	public void setConnection(WbConnection conn)
 	{
 		this.currentConnection = conn;
@@ -315,8 +328,7 @@ public class SqlCommand
 		if (f.isAbsolute()) return fname;
 		
 		// Use the "current" directory of the StatementRunner
-		// for the ouptut path of the file, if no path
-		// is specified.
+		// for the path of the file, if no path is specified.
 		if (this.runner != null)
 		{
 			String dir = this.runner.getBaseDir();

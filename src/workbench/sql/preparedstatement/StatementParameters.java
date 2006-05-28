@@ -16,6 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 
 /**
@@ -48,10 +49,11 @@ public class StatementParameters
 				}
 			}
 		}
-		catch (SQLException e)
+		catch (Throwable e)
 		{
 			LogMgr.logError("StatementParameter.<init>", "Error when checking parameters", e);
-			throw e;
+			if (e instanceof SQLException) throw (SQLException)e;
+			else throw new SQLException("Error retrieving statement parameters: " + e.getClass().getName());
 		}
 		finally
 		{

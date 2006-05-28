@@ -45,20 +45,17 @@ public class TableDiff
 	private ReportTable targetTable;
 	private StrBuffer indent;
 	private TagWriter writer;
-	//private boolean compareComments = true;
-	private boolean compareFK = true;
+	private SchemaDiff diff;
 	
-	public TableDiff(ReportTable reference, ReportTable target)
+	public TableDiff(ReportTable reference, ReportTable target, SchemaDiff factory)
 	{
 		if (reference == null) throw new NullPointerException("Reference table may not be null");
 		if (target == null) throw new NullPointerException("Target table may not be null");
 		this.referenceTable = reference;
 		this.targetTable = target;
+		this.diff = factory;
 	}
 
-	//public void setCompareComments(boolean flag) { this.compareComments = flag; }
-	public void setCompareForeignKeys(boolean flag) { this.compareFK = flag; }
-	
 	/**
 	 * Return the XML that describes how the target table needs to 
 	 * modified in order to get the same structure as the reference table.
@@ -86,7 +83,8 @@ public class TableDiff
 			{
 				ColumnDiff d = new ColumnDiff(refCols[i], tcol);
 				//d.setCompareComments(this.compareComments);
-				d.setCompareForeignKeys(this.compareFK);
+				d.setCompareForeignKeys(this.diff.getIncludeForeignKeys());
+				d.setCompareJdbcTypes(diff.getCompareJdbcTypes());
 				d.setTagWriter(this.writer);
 				d.setIndent(myindent);
 				StrBuffer diff = d.getMigrateTargetXml();

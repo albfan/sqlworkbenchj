@@ -537,6 +537,7 @@ public class EditorPanel
 		JFileChooser fc = new JFileChooser(lastDir);
 		JComponent p = EncodingUtil.createEncodingPanel();
 		EncodingSelector selector = (EncodingSelector)p;
+		selector.setEncoding(Settings.getInstance().getDefaultFileEncoding());
 		fc.setAccessory(p);
 		fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
 		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));

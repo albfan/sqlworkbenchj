@@ -33,7 +33,6 @@ public class SelectCommand extends SqlCommand
 
 	public static final String VERB = "SELECT";
 	private int maxRows = 0;
-	private DataStore data;
 
 	public SelectCommand()
 	{
@@ -42,7 +41,6 @@ public class SelectCommand extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
-		this.data = null;
 		this.isCancelled = false;
 
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
@@ -57,7 +55,14 @@ public class SelectCommand extends SqlCommand
 				  && aConnection.getPreparedStatementPool().isRegistered(aSql))
 			{
 				this.currentStatement = aConnection.getPreparedStatementPool().prepareStatement(aSql);
-				isPrepared = true;
+				if (this.currentStatement != null)
+				{
+					isPrepared = true;
+				}
+				else
+				{
+					this.currentStatement = aConnection.createStatementForQuery();
+				}
 			}
 			else
 			{
@@ -115,39 +120,6 @@ public class SelectCommand extends SqlCommand
 				else
 				{
 					processResults(result, true);
-//					try
-//					{
-//						// An exception in the constructor should lead to a real error
-//						this.data = new DataStore(rs, false, this.rowMonitor, maxRows, this.currentConnection);
-//						try
-//						{
-//							// Not reading the data in the constructor enables us
-//							// to cancel the retrieval of the data from the ResultSet
-//							// without using statement.cancel()
-//							// The DataStore checks for the cancel flag during processing
-//							// of the ResulSet
-//							this.data.initData(rs, maxRows);
-//						}
-//						catch (SQLException e)
-//						{
-//							// Errors during loading should not throw away the
-//							// rows retrieved until then
-//							if (this.data != null && this.data.getRowCount() > 0)
-//							{
-//								result.addMessage(ResourceMgr.getString("MsgErrorDuringRetrieve"));
-//								result.addMessage(ExceptionUtil.getDisplay(e));
-//								result.setWarning(true);
-//							}
-//						}
-//					}
-//					finally
-//					{
-//						try { rs.close(); } catch (Throwable th) {}
-//					}
-//					if (data != null)
-//					{
-//						result.addDataStore(data);
-//					}
 				}
 
 				if (!isCancelled)
@@ -193,19 +165,6 @@ public class SelectCommand extends SqlCommand
 		}
 
 		return result;
-	}
-
-	public void cancel()
-		throws SQLException
-	{
-		if (this.data != null)
-		{
-			this.data.cancelRetrieve();
-		}
-		else
-		{
-			super.cancel();
-		}
 	}
 
 	public String getVerb()

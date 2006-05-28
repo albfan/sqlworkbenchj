@@ -49,7 +49,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.EmptyTableModel;
-import workbench.gui.components.TabbedPaneUIFactory;
+import workbench.gui.components.FlatButton;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
@@ -104,11 +104,8 @@ public class TableSearchPanel
 		WbTable tables = (WbTable)this.tableNames;
 		tables.setAdjustToColumnLabel(false);
 
-		WbToolbarButton reload = (WbToolbarButton)this.reloadButton;
-		Border b = reload.getBorder();
-		reload.setBorder(new CompoundBorder(b, new EmptyBorder(1,1,1,1)));
-		reload.setAction(new ReloadAction(this.tableListSource));
-		reload.setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
+		this.reloadButton.setAction(new ReloadAction(this.tableListSource));
+		this.reloadButton.setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
 
 		this.searcher = new TableSearcher();
 		this.searcher.setDisplay(this);
@@ -159,6 +156,7 @@ public class TableSearchPanel
 
     jSplitPane1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
     jSplitPane1.setDividerLocation(150);
+    resultScrollPane.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
     resultScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     resultPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -253,8 +251,6 @@ public class TableSearchPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
     entryPanel.add(jLabel1, gridBagConstraints);
 
-    reloadButton.setText("jButton1");
-    reloadButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
     reloadButton.setMaximumSize(new java.awt.Dimension(24, 24));
     reloadButton.setMinimumSize(new java.awt.Dimension(24, 24));
     reloadButton.setPreferredSize(new java.awt.Dimension(24, 24));

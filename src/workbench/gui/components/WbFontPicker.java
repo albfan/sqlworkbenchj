@@ -7,6 +7,7 @@
 package workbench.gui.components;
 
 import java.awt.Font;
+import java.io.Serializable;
 import javax.swing.JPanel;
 
 /**
@@ -15,6 +16,7 @@ import javax.swing.JPanel;
  */
 public class WbFontPicker 
 	extends JPanel
+	implements Serializable
 {
 	private Font selectedFont;
 	private boolean monospacedOnly = false;
@@ -41,7 +43,7 @@ public class WbFontPicker
     java.awt.GridBagConstraints gridBagConstraints;
 
     fontName = new javax.swing.JLabel();
-    selectFontButton = new javax.swing.JButton();
+    selectFontButton = new FlatButton();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -59,7 +61,6 @@ public class WbFontPicker
     add(fontName, gridBagConstraints);
 
     selectFontButton.setText("...");
-    selectFontButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
     selectFontButton.setMaximumSize(new java.awt.Dimension(22, 22));
     selectFontButton.setMinimumSize(new java.awt.Dimension(22, 22));
     selectFontButton.setPreferredSize(new java.awt.Dimension(22, 22));

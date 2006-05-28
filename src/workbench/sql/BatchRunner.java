@@ -26,6 +26,7 @@ import workbench.db.DbDriver;
 import workbench.db.WbConnection;
 import workbench.gui.components.ConsoleStatusBar;
 import workbench.gui.components.GenericRowMonitor;
+import workbench.interfaces.ParameterPrompter;
 
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.StatementRunner;
@@ -70,6 +71,7 @@ public class BatchRunner
 	private String encoding = null;
 	private String baseDir;
 	private boolean showProgress = false;
+	private ParameterPrompter prompter = null;
 	
 	public BatchRunner(String aFilelist)
 	{
@@ -83,6 +85,12 @@ public class BatchRunner
 		{
 			this.stmtRunner.setBaseDir(dir);
 		}
+	}
+	
+	public void setParameterPrompter(ParameterPrompter p)
+	{
+		this.prompter = p;
+		if (this.stmtRunner != null) this.stmtRunner.setParameterPrompter(p);
 	}
 	
 	public void showResultSets(boolean flag)
@@ -129,6 +137,7 @@ public class BatchRunner
 		this.stmtRunner.setBaseDir(this.baseDir);
 		this.stmtRunner.setFullErrorReporting(true);
 		this.stmtRunner.setRowMonitor(this.rowMonitor);
+		this.stmtRunner.setParameterPrompter(this.prompter);
 	}
 
 	public void connect()
@@ -218,6 +227,9 @@ public class BatchRunner
 					this.resultDisplay.appendToLog(msg);
 					this.resultDisplay.appendToLog("\n");
 				}
+				String dir = fo.getCanonicalFile().getParent();
+				this.setBaseDir(dir);
+				
 				error = this.executeScript(fo);
 			}
 			catch (Exception e)

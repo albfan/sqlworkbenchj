@@ -57,6 +57,7 @@ public class SchemaDiff
 	private List viewsToDelete;
 	private String namespace;
 	private String encoding = "UTF-8";
+	private boolean compareJdbcTypes = false;
 	private boolean diffIndex = true;
 	private boolean diffForeignKeys = true;
 	private boolean diffPrimaryKeys = true;
@@ -97,24 +98,31 @@ public class SchemaDiff
 	 * The default is to compare foreign keys.
 	 */
 	public void setIncludeForeignKeys(boolean flag) { this.diffForeignKeys = flag; }
+	public boolean getIncludeForeignKeys() { return this.diffForeignKeys; }
 
 	/**
 	 *	Control whether index definitions should be compared as well.
 	 *  The default is to compare index definitions
 	 */
 	public void setIncludeIndex(boolean flag) { this.diffIndex = flag; }
+	public boolean getIncludeIndex() { return this.diffIndex; }
 	
 	/**
 	 * Control whether primary keys should be compared as well.
 	 * The default is to compare primary keys.
 	 */
 	public void setIncludePrimaryKeys(boolean flag) { this.diffPrimaryKeys = flag; }
+	public boolean getIncludePrimaryKeys() { return this.diffPrimaryKeys; }
 
 	/**
 	 * Control whether table constraints should be compared as well.
 	 * The default is to not compare primary keys.
 	 */
 	public void setIncludeTableConstraints(boolean flag) { this.diffConstraints = flag; }
+	public boolean getIncludeTableConstraints() { return this.diffConstraints; }
+
+	public void setCompareJdbcTypes(boolean flag) { this.compareJdbcTypes = flag; }
+	public boolean getCompareJdbcTypes() { return this.compareJdbcTypes; }
 	
 	public void setIncludeViews(boolean flag) { this.diffViews = flag; }
 	
@@ -191,6 +199,7 @@ public class SchemaDiff
 			else if (o != null)
 			{
 				reference = new TableIdentifier(o.toString());
+				reference.setType(this.sourceDb.getMetadata().getTableTypeName());
 			}
 			if (reference == null) continue;
 			
@@ -203,6 +212,7 @@ public class SchemaDiff
 			else if (o != null)
 			{
 				target = new TableIdentifier(o.toString());
+				target.setType(this.targetDb.getMetadata().getTableTypeName());
 			}
 			DiffEntry entry = new DiffEntry(reference, target);
 			this.objectsToCompare.add(entry);
@@ -480,7 +490,7 @@ public class SchemaDiff
 					else
 					{
 						ReportTable target = createReportTableInstance(entry.target, this.targetDb);
-						TableDiff d = new TableDiff(source, target);
+						TableDiff d = new TableDiff(source, target, this);
 						//d.setCompareComments(this.diffComments);
 						d.setIndent(indent);
 						d.setTagWriter(tw);

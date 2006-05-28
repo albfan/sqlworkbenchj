@@ -38,7 +38,7 @@ public class DataEditOptionsPanel
 	public void restoreSettings()
 	{
 		pkMapFile.setCaretPosition(0);
-		requiredFieldColor.setColor(Settings.getInstance().getRequiredFieldColor());
+		requiredFieldColor.setSelectedColor(Settings.getInstance().getRequiredFieldColor());
 		dataFont.setSelectedFont(Settings.getInstance().getDataFont());
 	}
 

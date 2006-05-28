@@ -22,6 +22,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.BlobHandler;
 import workbench.gui.components.EncodingPanel;
+import workbench.gui.components.FlatButton;
 import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -122,12 +123,12 @@ public class BlobInfoDialog
     closeButton = new javax.swing.JButton();
     jPanel1 = new javax.swing.JPanel();
     infoLabel = new javax.swing.JLabel();
-    showAsTextButton = new WbButton();
-    saveAsButton = new WbButton();
+    showAsTextButton = new FlatButton();
+    saveAsButton = new FlatButton();
     encodingPanel = new EncodingPanel(null, false);
-    showImageButton = new javax.swing.JButton();
-    uploadButton = new WbButton();
-    showHexButton = new javax.swing.JButton();
+    showImageButton = new FlatButton();
+    uploadButton = new FlatButton();
+    showHexButton = new FlatButton();
 
     getContentPane().setLayout(new java.awt.GridBagLayout());
 
@@ -158,7 +159,6 @@ public class BlobInfoDialog
     jPanel1.add(infoLabel, gridBagConstraints);
 
     showAsTextButton.setText(ResourceMgr.getString("LblShowAsTxt"));
-    showAsTextButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3)));
     showAsTextButton.addMouseListener(this);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -171,7 +171,6 @@ public class BlobInfoDialog
     jPanel1.add(showAsTextButton, gridBagConstraints);
 
     saveAsButton.setText(ResourceMgr.getString("MnuTxtFileSaveAs"));
-    saveAsButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3)));
     saveAsButton.addMouseListener(this);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -191,7 +190,6 @@ public class BlobInfoDialog
     jPanel1.add(encodingPanel, gridBagConstraints);
 
     showImageButton.setText(ResourceMgr.getString("LblShowAsImg"));
-    showImageButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3)));
     showImageButton.addMouseListener(this);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -202,7 +200,6 @@ public class BlobInfoDialog
     jPanel1.add(showImageButton, gridBagConstraints);
 
     uploadButton.setText(ResourceMgr.getString("LblUploadFile"));
-    uploadButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3)));
     uploadButton.addMouseListener(this);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -214,7 +211,6 @@ public class BlobInfoDialog
     jPanel1.add(uploadButton, gridBagConstraints);
 
     showHexButton.setText(ResourceMgr.getString("LblShowAsHex"));
-    showHexButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3)));
     showHexButton.addMouseListener(this);
 
     gridBagConstraints = new java.awt.GridBagConstraints();

@@ -21,6 +21,7 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicBorders;
+import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -66,6 +67,11 @@ public class WbButton
 	
 	public void setText(String newText)
 	{
+		if (newText == null) 
+		{
+			super.setText(null);
+			return;
+		}
 		int pos = newText.indexOf('&');
 		if (pos > -1)
 		{

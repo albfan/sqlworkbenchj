@@ -20,7 +20,9 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.BlobHandler;
+import workbench.gui.components.FlatButton;
 import workbench.resource.ResourceMgr;
 import workbench.storage.NullValue;
 
@@ -32,7 +34,7 @@ public class BlobColumnPanel
 	extends JPanel
 {
 	private static final int BUTTON_WIDTH = 16;
-	private JButton openButton = new JButton("...");
+	private FlatButton openButton = new FlatButton("...");
 	private JLabel label = new JLabel();
 	private BlobHandler blobHandler = new BlobHandler();
 	
@@ -41,12 +43,13 @@ public class BlobColumnPanel
 		super();
 		setLayout(new BorderLayout(0,0));
 		Dimension d = new Dimension(BUTTON_WIDTH,BUTTON_WIDTH);
+		openButton.setFlatLook();
+		openButton.setBorder(WbSwingUtilities.FLAT_BUTTON_BORDER);
 		openButton.setMaximumSize(d);
 		openButton.setPreferredSize(d);
 		openButton.setMinimumSize(d);
 		openButton.setEnabled(true);
 		openButton.setFocusable(false);
-		openButton.setBorder(BorderFactory.createEtchedBorder());
 		add(label,BorderLayout.WEST);
 		add(openButton,BorderLayout.EAST);
 		openButton.setVisible(true);

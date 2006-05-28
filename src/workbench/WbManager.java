@@ -11,6 +11,7 @@
  */
 package workbench;
 
+import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -37,6 +38,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.LookAndFeel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
@@ -283,6 +285,11 @@ public class WbManager
 		}
 	}
 
+	public boolean isWindowsClassic() { return isWindowsClassic; }
+	
+	private boolean isWindowsClassic = false;
+	private boolean isNativeLnF = false;
+	
 	private void initializeLookAndFeel()
 	{
 		trace("WbManager.setLookAndFeel() - start");
@@ -303,7 +310,41 @@ public class WbManager
 			
 			LnFLoader loader = new LnFLoader(def);
 			UIManager.put("jgoodies.useNarrowButtons", Boolean.FALSE);
-			UIManager.setLookAndFeel(loader.getLookAndFeel());
+			LookAndFeel lnf = loader.getLookAndFeel();
+			UIManager.setLookAndFeel(lnf);
+			try
+			{
+				if (lnf instanceof WindowsLookAndFeel)
+				{
+					String osVersion = System.getProperty("os.version");
+					if (osVersion != null)
+					{
+						Float version = Float.valueOf(osVersion);
+						if (version.floatValue() <= 5.0)
+						{
+							isWindowsClassic = true;
+						}
+						else
+						{
+				      Toolkit toolkit = Toolkit.getDefaultToolkit();
+							Boolean flag = (Boolean)toolkit.getDesktopProperty("win.xpstyle.themeActive");
+							if (flag != null)
+							{
+								isWindowsClassic = !flag.booleanValue();
+							}
+							else
+							{
+								isWindowsClassic = true;
+							}
+						}
+					}
+					System.out.println("classic = " + isWindowsClassic);
+				}
+			}
+			catch (Throwable e)
+			{
+				isWindowsClassic = false;
+			}
 		}
 		catch (Exception e)
 		{
@@ -585,7 +626,7 @@ public class WbManager
 			if (w != null)
 			{
 				w.setVisible(false);
-				w.dispose();
+				try { w.dispose(); } catch (Throwable th) {}
 			}
 		}
 		this.mainWindows.clear();

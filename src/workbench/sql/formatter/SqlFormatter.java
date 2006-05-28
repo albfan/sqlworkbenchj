@@ -96,7 +96,8 @@ public class SqlFormatter
 		BY_TERMINAL.add(";");
 	}
 
-	private final Set SELECT_TERMINAL = new HashSet(1);
+	public static final Set SELECT_TERMINAL = new HashSet(1);
+	static
 	{
 		SELECT_TERMINAL.add("FROM");
 	}

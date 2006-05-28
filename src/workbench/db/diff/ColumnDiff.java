@@ -15,12 +15,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.report.ColumnReference;
 import workbench.db.report.ReportColumn;
 import workbench.db.report.TagWriter;
-import workbench.util.StrBuffer;
-import workbench.util.StringUtil;
-import workbench.db.ColumnIdentifier;
-import workbench.db.report.ColumnReference;
-import workbench.db.report.ReportColumn;
-import workbench.db.report.TagWriter;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -48,6 +43,7 @@ public class ColumnDiff
 	private TagWriter writer;
 	private boolean compareFK = true;
 	private boolean compareComments = true;
+	private boolean compareJdbcTypes = false;
 	
 	/**
 	 *	Create a ColumnDiff object for the reference and target columns
@@ -89,6 +85,36 @@ public class ColumnDiff
 		this.indent = ind;
 	}
 	
+	private boolean typesAreEqual()
+	{
+		ColumnIdentifier sId = this.referenceColumn.getColumn();
+		ColumnIdentifier tId = this.targetColumn.getColumn();
+		if (this.getCompareJdbcTypes())
+		{
+			int sourceType = sId.getDataType();
+			int targetType = tId.getDataType();
+			if (sourceType != targetType) return false;
+			
+			if (SqlUtil.isCharacterType(sourceType))
+			{
+				int sourceSize = sId.getColumnSize();
+				int targetSize = tId.getColumnSize();
+				return targetSize == sourceSize;
+			}
+			else if (SqlUtil.isNumberType(sourceType))
+			{
+				int sourceDigits = sId.getDecimalDigits();
+				int targetDigits = sId.getDecimalDigits();
+				return sourceDigits == targetDigits;
+			}
+			return true;
+		}
+		else
+		{
+			return sId.getDbmsType().equalsIgnoreCase(tId.getDbmsType());
+		}
+	}
+	
 	/**
 	 * Return the XML describing how to modify the reference column
 	 * to get the same definition as the source column.
@@ -105,7 +131,7 @@ public class ColumnDiff
 
 		// the PK attribute is not checked, because this is already handled
 		// by the TableDiff class
-		boolean typeDifferent = !sId.getDbmsType().equalsIgnoreCase(tId.getDbmsType());
+		boolean typeDifferent = !typesAreEqual();
 		boolean nullableDifferent = (sId.isNullable() != tId.isNullable());
 		String sdef = sId.getDefaultValue();
 		String tdef = tId.getDefaultValue();
@@ -185,5 +211,15 @@ public class ColumnDiff
 			writer.appendCloseTag(result, this.indent, TAG_MODIFY_COLUMN);
 		}
 		return result;
+	}
+
+	public boolean getCompareJdbcTypes()
+	{
+		return compareJdbcTypes;
+	}
+
+	public void setCompareJdbcTypes(boolean compareJdbcTypes)
+	{
+		this.compareJdbcTypes = compareJdbcTypes;
 	}
 }

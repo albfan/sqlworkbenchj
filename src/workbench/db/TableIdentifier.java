@@ -201,16 +201,7 @@ public class TableIdentifier
 			this.schema = elements[1];
 			this.tablename = elements[2];
 		}
-//		int pos = aTable.indexOf('.');
-//		if (pos > -1 && pos < atPos)
-//		{
-//			this.schema = aTable.substring(0, pos).trim();
-//			this.tablename = aTable.substring(pos + 1).trim();
-//		}
-//		else
-//		{
-//			this.tablename = aTable.trim();
-//		}
+
 		this.expression = null;
 	}
 

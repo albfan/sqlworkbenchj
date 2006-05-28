@@ -170,12 +170,10 @@ public class ExecuteSqlDialog
 				{
 					dbConn.setBusy(false);
 					try { stmt.close(); } catch (Throwable th) {}
-					createFinished();
 				}
 			}
 		};
-		WbSwingUtilities.showWaitCursorOnWindow(ExecuteSqlDialog.this);
-		WbSwingUtilities.showWaitCursorOnWindow(sqlEditor);
+		WbSwingUtilities.showWaitCursor(this);
 		this.startButton.setEnabled(false);
 		this.closeButton.setEnabled(false);
 		this.sqlEditor.setEnabled(false);
@@ -184,14 +182,14 @@ public class ExecuteSqlDialog
 
 	private void createSuccess()
 	{
-		WbSwingUtilities.showDefaultCursor(sqlEditor);
-		WbSwingUtilities.showDefaultCursor(ExecuteSqlDialog.this);
+		createFinished();
 		WbSwingUtilities.showMessage(this, ResourceMgr.getString("MsgIndexCreated"));
 		this.closeWindow();
 	}
 	
 	private void createFinished()
 	{
+		WbSwingUtilities.showDefaultCursor(this);
 		this.startButton.setEnabled(true);
 		this.closeButton.setEnabled(true);
 		this.sqlEditor.setEnabled(true);
@@ -200,8 +198,7 @@ public class ExecuteSqlDialog
 
 	private void createFailure(Exception e)
 	{
-		WbSwingUtilities.showDefaultCursor(sqlEditor);
-		WbSwingUtilities.showDefaultCursor(ExecuteSqlDialog.this);
+		createFinished();
 		String error = ExceptionUtil.getDisplay(e);
 		statusMessage.setText(error);
 		String msg = ResourceMgr.getString("MsgCreateIndexError") + "\n" + error;

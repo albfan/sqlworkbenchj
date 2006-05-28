@@ -46,11 +46,6 @@
         <Component class="javax.swing.JButton" name="selectSourceButton">
           <Properties>
             <Property name="text" type="java.lang.String" value="..."/>
-            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-              <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
-                <EtchetBorder/>
-              </Border>
-            </Property>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[24, 24]"/>
             </Property>
@@ -61,6 +56,9 @@
               <Dimension value="[24, 24]"/>
             </Property>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new FlatButton();"/>
+          </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
               <GridBagConstraints gridX="1" gridY="1" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="13" weightX="0.0" weightY="0.0"/>
@@ -75,11 +73,6 @@
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="ResourceMgr.getString(&quot;Desc_DataPumperOpenFile&quot;)" type="code"/>
             </Property>
-            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-              <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
-                <EtchetBorder/>
-              </Border>
-            </Property>
             <Property name="iconTextGap" type="int" value="0"/>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[24, 24]"/>
@@ -91,6 +84,9 @@
               <Dimension value="[24, 24]"/>
             </Property>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new FlatButton();"/>
+          </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
               <GridBagConstraints gridX="2" gridY="1" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="17" weightX="0.0" weightY="0.0"/>
@@ -135,11 +131,6 @@
         <Component class="javax.swing.JButton" name="selectTargetButton">
           <Properties>
             <Property name="text" type="java.lang.String" value="..."/>
-            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-              <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
-                <EtchetBorder/>
-              </Border>
-            </Property>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[24, 24]"/>
             </Property>
@@ -150,6 +141,9 @@
               <Dimension value="[24, 24]"/>
             </Property>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new FlatButton();"/>
+          </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
               <GridBagConstraints gridX="1" gridY="1" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="13" weightX="0.0" weightY="0.0"/>
@@ -201,7 +195,7 @@
         </Property>
         <Property name="horizontalAlignment" type="int" value="0"/>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="&quot;&lt;html&gt;&lt;b&gt;&quot; + ResourceMgr.getString(&quot;LabelTargetConnection&quot;) + &quot;&lt;/b&gt;&lt;/html&gt;&quot;" type="code"/>
+          <Connection code="&quot;&lt;html&gt;&lt;b&gt;&quot; + ResourceMgr.getString(&quot;LblTargetConnection&quot;) + &quot;&lt;/b&gt;&lt;/html&gt;&quot;" type="code"/>
         </Property>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[23768, 22]"/>
@@ -227,7 +221,7 @@
         </Property>
         <Property name="horizontalAlignment" type="int" value="0"/>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="&quot;&lt;html&gt;&lt;b&gt;&quot; + ResourceMgr.getString(&quot;LabelSourceConnection&quot;) + &quot;&lt;/b&gt;&lt;/html&gt;&quot;" type="code"/>
+          <Connection code="&quot;&lt;html&gt;&lt;b&gt;&quot; + ResourceMgr.getString(&quot;LblSourceConnection&quot;) + &quot;&lt;/b&gt;&lt;/html&gt;&quot;" type="code"/>
         </Property>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[32768, 22]"/>
@@ -310,7 +304,7 @@
                         <Component class="javax.swing.JLabel" name="sqlEditorLabel">
                           <Properties>
                             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                              <Connection code="ResourceMgr.getString(&quot;LabelDPAdditionalWhere&quot;)" type="code"/>
+                              <Connection code="ResourceMgr.getString(&quot;LblDPAdditionalWhere&quot;)" type="code"/>
                             </Property>
                           </Properties>
                           <Constraints>
@@ -324,10 +318,10 @@
                     <Component class="javax.swing.JCheckBox" name="useQueryCbx">
                       <Properties>
                         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="ResourceMgr.getString(&quot;LabelDPUseSQLSource&quot;)" type="code"/>
+                          <Connection code="ResourceMgr.getString(&quot;LblDPUseSQLSource&quot;)" type="code"/>
                         </Property>
                         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="ResourceMgr.getString(&quot;LabelDPUseSQLSource&quot;)" type="code"/>
+                          <Connection code="ResourceMgr.getString(&quot;LblDPUseSQLSource&quot;)" type="code"/>
                         </Property>
                         <Property name="horizontalAlignment" type="int" value="2"/>
                         <Property name="horizontalTextPosition" type="int" value="2"/>
@@ -341,15 +335,10 @@
                     <Component class="javax.swing.JButton" name="checkQueryButton">
                       <Properties>
                         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="ResourceMgr.getString(&quot;LabelDPCheckQuery&quot;)" type="code"/>
+                          <Connection code="ResourceMgr.getString(&quot;LblDPCheckQuery&quot;)" type="code"/>
                         </Property>
                         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="ResourceMgr.getDescription(&quot;LabelDPCheckQuery&quot;)" type="code"/>
-                        </Property>
-                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-                          <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
-                            <EtchetBorder/>
-                          </Border>
+                          <Connection code="ResourceMgr.getDescription(&quot;LblDPCheckQuery&quot;)" type="code"/>
                         </Property>
                         <Property name="enabled" type="boolean" value="false"/>
                         <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
@@ -365,6 +354,9 @@
                           <Dimension value="[130, 24]"/>
                         </Property>
                       </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new FlatButton();"/>
+                      </AuxValues>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
                           <GridBagConstraints gridX="0" gridY="7" gridWidth="1" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="2" insetsRight="0" anchor="18" weightX="0.2" weightY="0.0"/>
@@ -386,10 +378,10 @@
                       <Properties>
                         <Property name="horizontalAlignment" type="int" value="2"/>
                         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="ResourceMgr.getString(&quot;LabelDPCommitEvery&quot;)" type="code"/>
+                          <Connection code="ResourceMgr.getString(&quot;LblDPCommitEvery&quot;)" type="code"/>
                         </Property>
                         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="ResourceMgr.getDescription(&quot;LabelDPCommitEvery&quot;)" type="code"/>
+                          <Connection code="ResourceMgr.getDescription(&quot;LblDPCommitEvery&quot;)" type="code"/>
                         </Property>
                       </Properties>
                       <Constraints>
@@ -428,10 +420,10 @@
                     <Component class="javax.swing.JCheckBox" name="deleteTargetCbx">
                       <Properties>
                         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="ResourceMgr.getString(&quot;LabelDeleteTargetTable&quot;)" type="code"/>
+                          <Connection code="ResourceMgr.getString(&quot;LblDeleteTargetTable&quot;)" type="code"/>
                         </Property>
                         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="ResourceMgr.getDescription(&quot;LabelDeleteTargetTable&quot;)" type="code"/>
+                          <Connection code="ResourceMgr.getDescription(&quot;LblDeleteTargetTable&quot;)" type="code"/>
                         </Property>
                         <Property name="horizontalTextPosition" type="int" value="4"/>
                       </Properties>
@@ -444,10 +436,10 @@
                     <Component class="javax.swing.JCheckBox" name="dropTargetCbx">
                       <Properties>
                         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="ResourceMgr.getString(&quot;LabelDPDropTable&quot;)" type="code"/>
+                          <Connection code="ResourceMgr.getString(&quot;LblDPDropTable&quot;)" type="code"/>
                         </Property>
                         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="ResourceMgr.getDescription(&quot;LabelDPDropTable&quot;)" type="code"/>
+                          <Connection code="ResourceMgr.getDescription(&quot;LblDPDropTable&quot;)" type="code"/>
                         </Property>
                         <Property name="horizontalTextPosition" type="int" value="4"/>
                         <Property name="enabled" type="boolean" value="false"/>
@@ -478,7 +470,7 @@
                     <Component class="javax.swing.JLabel" name="modeLabel">
                       <Properties>
                         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="ResourceMgr.getString(&quot;LabelDPMode&quot;)" type="code"/>
+                          <Connection code="ResourceMgr.getString(&quot;LblDPMode&quot;)" type="code"/>
                         </Property>
                       </Properties>
                       <Constraints>
@@ -499,7 +491,7 @@
                     <Component class="javax.swing.JLabel" name="jLabel1">
                       <Properties>
                         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="ResourceMgr.getString(&quot;LabelDPUpdateOptions&quot;)" type="code"/>
+                          <Connection code="ResourceMgr.getString(&quot;LblDPUpdateOptions&quot;)" type="code"/>
                         </Property>
                       </Properties>
                       <Constraints>
@@ -511,7 +503,7 @@
                     <Component class="javax.swing.JCheckBox" name="useBatchCheckBox">
                       <Properties>
                         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="ResourceMgr.getString(&quot;LabelUseBatchUpdate&quot;)" type="code"/>
+                          <Connection code="ResourceMgr.getString(&quot;LblUseBatchUpdate&quot;)" type="code"/>
                         </Property>
                       </Properties>
                       <Constraints>
@@ -572,7 +564,7 @@
             <Component class="javax.swing.JButton" name="startButton">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="ResourceMgr.getString(&quot;LabelStartDataPumper&quot;)" type="code"/>
+                  <Connection code="ResourceMgr.getString(&quot;LblStartDataPumper&quot;)" type="code"/>
                 </Property>
                 <Property name="enabled" type="boolean" value="false"/>
               </Properties>
@@ -588,7 +580,7 @@
             <Component class="javax.swing.JButton" name="cancelButton">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="ResourceMgr.getString(&quot;LabelCancelCopy&quot;)" type="code"/>
+                  <Connection code="ResourceMgr.getString(&quot;LblCancelCopy&quot;)" type="code"/>
                 </Property>
                 <Property name="enabled" type="boolean" value="false"/>
               </Properties>
@@ -612,7 +604,7 @@
             <Component class="javax.swing.JButton" name="showLogButton">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="ResourceMgr.getString(&quot;LabelShowDataPumperLog&quot;)" type="code"/>
+                  <Connection code="ResourceMgr.getString(&quot;LblShowDataPumperLog&quot;)" type="code"/>
                 </Property>
                 <Property name="enabled" type="boolean" value="false"/>
               </Properties>
@@ -625,10 +617,10 @@
             <Component class="javax.swing.JButton" name="showWbCommand">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="ResourceMgr.getString(&quot;LabelShowWbCopyCommand&quot;)" type="code"/>
+                  <Connection code="ResourceMgr.getString(&quot;LblShowWbCopyCommand&quot;)" type="code"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="ResourceMgr.getDescription(&quot;LabelShowWbCopyCommand&quot;)" type="code"/>
+                  <Connection code="ResourceMgr.getDescription(&quot;LblShowWbCopyCommand&quot;)" type="code"/>
                 </Property>
               </Properties>
               <Constraints>
@@ -651,7 +643,7 @@
             <Component class="javax.swing.JButton" name="helpButton">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="ResourceMgr.getString(&quot;LabelHelp&quot;)" type="code"/>
+                  <Connection code="ResourceMgr.getString(&quot;LblHelp&quot;)" type="code"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" value=""/>
               </Properties>
@@ -664,7 +656,7 @@
             <Component class="javax.swing.JButton" name="closeButton">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="ResourceMgr.getString(&quot;LabelClose&quot;)" type="code"/>
+                  <Connection code="ResourceMgr.getString(&quot;LblClose&quot;)" type="code"/>
                 </Property>
               </Properties>
               <Constraints>

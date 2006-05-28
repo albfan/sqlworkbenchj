@@ -91,7 +91,7 @@ public class LnFOptionsPanel
 		switchLnFButton = new WbButton();
 		switchLnFButton.setResourceKey("LblSwitchLnF");
 		switchLnFButton.addActionListener(this);
-		switchLnFButton.setBorder(new CompoundBorder(new EtchedBorder(), new EmptyBorder(1, 5, 1, 5)));
+		//switchLnFButton.setBorder(new CompoundBorder(switchLnFButton.getBorder(), new EmptyBorder(3, 10, 3, 10)));
 		
 		switchPanel.add(switchLnFButton);
 		

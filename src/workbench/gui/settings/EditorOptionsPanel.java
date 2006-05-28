@@ -39,8 +39,8 @@ public class EditorOptionsPanel
 
 	public void restoreSettings()
 	{
-		errorColor.setColor(Settings.getInstance().getEditorErrorColor());
-		selectionColor.setColor(Settings.getInstance().getEditorSelectionColor());
+		errorColor.setSelectedColor(Settings.getInstance().getEditorErrorColor());
+		selectionColor.setSelectedColor(Settings.getInstance().getEditorSelectionColor());
 		editorFont.setSelectedFont(Settings.getInstance().getEditorFont());
 
 		// It is important to add these in the correct order

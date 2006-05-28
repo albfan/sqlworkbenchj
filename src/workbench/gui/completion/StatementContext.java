@@ -62,20 +62,6 @@ public class StatementContext
 			{
 				analyzer = new InsertAnalyzer(conn, sql, pos);
 			}
-//			else if ("CREATE".equalsIgnoreCase(verb))
-//			{
-//				int viewPos = StringUtil.findPattern(DdlAnalyzer.VIEW_PATTERN, sql, 0);
-//				if (viewPos > 0)
-//				{
-//					Pattern selectPattern = Pattern.compile("\\sSELECT\\s|\\sSELECT$", Pattern.CASE_INSENSITIVE);
-//					int selectPos = StringUtil.findPattern(selectPattern, sql, viewPos + 1);
-//					if (selectPos > 0)
-//					{
-//						String select = sql.substring(selectPos);
-//						analyzer = new SelectAnalyzer(conn, select, pos - selectPos);
-//					}
-//				}
-//			}
 		}
 		
 		if (analyzer != null)

@@ -43,6 +43,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.BooleanPropertyEditor;
+import workbench.gui.components.FlatButton;
 import workbench.gui.components.IntegerPropertyEditor;
 import workbench.gui.components.PasswordPropertyEditor;
 import workbench.gui.components.StringPropertyEditor;
@@ -148,11 +149,11 @@ public class ConnectionEditorPanel
     jSeparator2 = new javax.swing.JSeparator();
     jSeparator1 = new javax.swing.JSeparator();
     manageDriversButton = new WbButton();
-    extendedProps = new javax.swing.JButton();
+    extendedProps = new FlatButton();
     helpButton = new WbButton();
     tfFetchSize = new IntegerPropertyEditor();
     fetchSizeLabel = new javax.swing.JLabel();
-    showPassword = new javax.swing.JButton();
+    showPassword = new FlatButton();
     wbOptionsPanel = new javax.swing.JPanel();
     cbStorePassword = new BooleanPropertyEditor();
     disableTableCheck = new BooleanPropertyEditor();
@@ -338,7 +339,6 @@ public class ConnectionEditorPanel
 
     extendedProps.setText(ResourceMgr.getString("LblConnExtendedProps"));
     extendedProps.setToolTipText(ResourceMgr.getDescription("LblConnExtendedProps"));
-    extendedProps.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(1, 6, 1, 6)));
     extendedProps.addMouseListener(new java.awt.event.MouseAdapter()
     {
       public void mouseClicked(java.awt.event.MouseEvent evt)
@@ -391,7 +391,6 @@ public class ConnectionEditorPanel
     add(fetchSizeLabel, gridBagConstraints);
 
     showPassword.setText(ResourceMgr.getString("LblShowPassword"));
-    showPassword.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(1, 6, 1, 6)));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 4;

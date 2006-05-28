@@ -72,10 +72,10 @@ public class WbDefineVar extends SqlCommand
 			{
 				try
 				{
-					File f = new File(value);
-					VariablePool.getInstance().readFromFile(value);
+					String filename = this.evaluateFileArgument(value);
+					VariablePool.getInstance().readFromFile(filename);
 					msg = ResourceMgr.getString("MsgVarDefFileLoaded");
-					msg = StringUtil.replace(msg, "%file%", f.getAbsolutePath());
+					msg = StringUtil.replace(msg, "%file%", filename);
 					result.addMessage(msg);
 					result.setSuccess();
 				}

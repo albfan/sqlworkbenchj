@@ -34,7 +34,10 @@ import workbench.util.TableAlias;
 public class SelectAnalyzer
 	extends BaseAnalyzer
 {
-
+	private final int NO_JOIN_ON = 0;
+	private final int JOIN_ON_TABLE_LIST = 1;
+	private final int JOIN_ON_COLUMN_LIST = 2;
+	
 	public SelectAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{	
 		super(conn, statement, cursorPos);
@@ -75,7 +78,9 @@ public class SelectAnalyzer
 		
 		if (inTableList && afterGroup) inTableList = false;
 		
-		if (inTableList && inJoinONPart(fromPos))
+		int joinState = inJoinONPart();
+			
+		if (inTableList && joinState != JOIN_ON_TABLE_LIST)
 		{
 			inTableList = false;
 		}
@@ -186,35 +191,48 @@ public class SelectAnalyzer
 		}
 	}
 
-	private boolean inJoinONPart(int fromPos)
+	private int inJoinONPart()
 	{
+		int result = NO_JOIN_ON;
 		try
 		{
 			boolean afterFrom = false;
-			int lastON = -1;
+			boolean inONPart = false;
 			int lastJoin = -1;
 			SQLLexer lexer = new SQLLexer(this.sql);
 			Token token = lexer.getNextToken(false, false);
+			int bracketCount = 0;
 			while (token != null)
 			{
 				String t = token.getContents();
 				if (afterFrom)
 				{
-					if ("ON".equals(t))
+					if ("(".equals(t))
 					{
-						lastON = token.getCharEnd();
+						bracketCount ++;
+						if (inONPart && cursorPos >= token.getCharBegin()) result = JOIN_ON_COLUMN_LIST;
 					}
-					else if (t.equals("JOIN"))
+					else if (")".equals(t))
 					{
-						lastON = -1;
+						if (bracketCount > 0)
+						{
+							if (inONPart && cursorPos < token.getCharBegin()) return JOIN_ON_COLUMN_LIST;
+						}
+						bracketCount --;
+					}
+					else if ("ON".equals(t))
+					{
+						inONPart = (cursorPos >= token.getCharBegin());
+					}
+					else if (t.equals("JOIN") || SqlUtil.JOIN_KEYWORDS.contains(t))
+					{
+						inONPart = false;
+						if (t.equals("JOIN") && cursorPos > token.getCharEnd()) result = JOIN_ON_TABLE_LIST;
+						else result = NO_JOIN_ON;
 					}
 					else if (SqlFormatter.FROM_TERMINAL.contains(t))
 					{
-						if (lastON > -1)
-						{
-							return (cursorPos < token.getCharBegin() && cursorPos > lastON);
-						}
-						return false;
+						return result;
 					}
 				}
 				else
@@ -222,7 +240,9 @@ public class SelectAnalyzer
 					if (SqlFormatter.FROM_TERMINAL.contains(t)) break;
 					if (t.equals("FROM"))
 					{
+						if (cursorPos < token.getCharBegin()) return NO_JOIN_ON;
 						afterFrom = true;
+						result = JOIN_ON_TABLE_LIST;
 					}
 				}
 				token = lexer.getNextToken(false, false);
@@ -232,16 +252,13 @@ public class SelectAnalyzer
 		{
 			LogMgr.logError("SelectAnalyzer.inJoinONPart()", "Error parsing SQL Statement!", e);
 		}
-		return false;
+		return result;
 	}	
 	
 	private List getColumnsForGroupBy(int fromStart)
 	{
-		int colStart = StringUtil.findFirstWhiteSpace(this.sql.trim());
-		String columns = this.sql.substring(colStart, fromStart);
-		List cols = StringUtil.stringToList(columns, ",", true, true, true);
+		List cols = SqlUtil.getSelectColumns(this.sql, false);
 		List validCols = new LinkedList();
-		Pattern p = Pattern.compile("\\s*AS\\s*", Pattern.CASE_INSENSITIVE);
 		String[] funcs = new String[]{"sum", "count", "avg", "min", "max" };
 		StringBuffer regex = new StringBuffer(50);
 		for (int i = 0; i < funcs.length; i++)
@@ -255,11 +272,6 @@ public class SelectAnalyzer
 		for (int i = 0; i < cols.size(); i++)
 		{
 			String col = (String)cols.get(i);
-			int alias = StringUtil.findPattern(p, col, 0);
-			if (alias > -1)
-			{
-				col = col.substring(0, alias).trim();
-			}
 			if (StringUtil.findPattern(aggregate, col, 0) == -1)
 			{
 				validCols.add(col);

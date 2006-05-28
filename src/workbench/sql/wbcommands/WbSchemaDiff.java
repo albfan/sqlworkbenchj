@@ -58,7 +58,8 @@ public class WbSchemaDiff
 	public static final String PARAM_INCLUDE_PK = "includeprimarykeys";
 	public static final String PARAM_INCLUDE_CONSTRAINTS = "includeconstraints";
 	public static final String PARAM_INCLUDE_VIEWS = "includeviews";
-
+	public static final String PARAM_DIFF_JDBC_TYPES = "usejdbctypes";
+	
 	private ArgumentParser cmdLine;
 	private SchemaDiff diff;
 
@@ -81,6 +82,7 @@ public class WbSchemaDiff
 		cmdLine.addArgument(PARAM_EXCLUDE_TABLES);
 		cmdLine.addArgument(PARAM_INCLUDE_CONSTRAINTS);
 		cmdLine.addArgument(PARAM_INCLUDE_VIEWS);
+		cmdLine.addArgument(PARAM_DIFF_JDBC_TYPES);
 		//cmdLine.addArgument(PARAM_INCLUDE_COMMENTS);
 	}
 
@@ -98,8 +100,9 @@ public class WbSchemaDiff
 			result.addMessage("Support for 'WbDiff' will be removed in a future release.\n");
 		}
 		
+		
 		int pos = sql.toUpperCase().indexOf(VERB);
-		if (pos > -1) sql = sql.substring(pos + VERB.length() + 1);
+		if (pos > -1) sql = sql.substring(pos + VERB.length());
 
 		try
 		{
@@ -218,6 +221,7 @@ public class WbSchemaDiff
 		diff.setIncludePrimaryKeys(cmdLine.getBoolean(PARAM_INCLUDE_PK, true));
 		diff.setIncludeTableConstraints(cmdLine.getBoolean(PARAM_INCLUDE_CONSTRAINTS, true));
 		diff.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
+		diff.setCompareJdbcTypes(cmdLine.getBoolean(PARAM_DIFF_JDBC_TYPES, false));
 		//diff.setIncludeComments(cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, false));
 
 		String refTables = cmdLine.getValue(PARAM_SOURCETABLES);

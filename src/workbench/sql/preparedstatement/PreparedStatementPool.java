@@ -11,14 +11,12 @@
  */
 package workbench.sql.preparedstatement;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import workbench.db.WbConnection;
 
 /**
@@ -32,6 +30,7 @@ public class PreparedStatementPool
 	// of type StatementParameter
 	private Map statements;
 	private WbConnection dbConnection;
+	private Pattern placeholder = Pattern.compile("\\s\\?\\s*");
 	
 	public PreparedStatementPool(WbConnection conn)
 	{
@@ -65,7 +64,8 @@ public class PreparedStatementPool
 		throws SQLException
 	{
 		if (sql == null) return false;
-		if (sql.indexOf('?') == -1) return false;
+		Matcher m = placeholder.matcher(sql);
+		if (!m.find()) return false;
 		
 		if (this.statements.containsKey(sql))
 		{

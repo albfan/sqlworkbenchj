@@ -13,6 +13,7 @@ package workbench.sql;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import java.util.List;
 
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
+import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.StatementRunner;
 import workbench.log.LogMgr;
@@ -90,6 +92,7 @@ public class DefaultStatementRunner
 	private boolean supportsSelectInto = false;
 	private boolean removeComments;
 	private boolean fullErrorReporting = false;
+	private ParameterPrompter prompter;
 	
 	public DefaultStatementRunner()
 	{
@@ -213,6 +216,7 @@ public class DefaultStatementRunner
 		this.controller = control;
 	}
 
+	public void setParameterPrompter(ParameterPrompter filter) { this.prompter = filter; }
 	public void setBaseDir(String dir) { this.baseDir = dir; }
 	public String getBaseDir() { return this.baseDir; }
 	
@@ -311,6 +315,17 @@ public class DefaultStatementRunner
 			return;
 		}
 
+		if (this.prompter != null)
+		{
+			boolean goOn = this.prompter.processParameterPrompts(aSql);
+			if (!goOn)
+			{
+				this.result = new StatementRunnerResult();
+				this.result.setPromptingWasCancelled();
+				return;
+			}				
+		}
+		
 		if (removeComments)
 		{
 			aSql = SqlUtil.makeCleanSql(aSql, true, false, '\'');
@@ -331,6 +346,7 @@ public class DefaultStatementRunner
 		this.currentCommand.setMaxRows(maxRows);
 		this.currentCommand.setQueryTimeout(queryTimeout);
 		this.currentCommand.setConnection(this.dbConnection);
+		this.currentCommand.setParameterPrompter(this.prompter);
 
 		String realSql = aSql;
 		if (parameterPool.getParameterCount() > 0)

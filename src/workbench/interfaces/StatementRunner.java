@@ -25,6 +25,7 @@ public interface StatementRunner
 	void setExecutionController(ExecutionController control);
 	StatementRunnerResult getResult();
 	void setResultLogger(ResultLogger logger);
+	void setParameterPrompter(ParameterPrompter filter);
 	void runStatement(String aSql, int maxRows, int queryTimeout)
 		throws SQLException, Exception;
 	void setVerboseLogging(boolean flag);

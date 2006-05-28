@@ -1146,22 +1146,10 @@ public class MainWindow
 				if (p instanceof SqlPanel)
 				{
 					SqlPanel sql = (SqlPanel)p;
-					sql.closeFile(true);
-					sql.setTabTitle(this.sqlTab, i);
 					updateViewMenu(i, getPlainTabTitle(i));
 				}
 			}
 			this.currentWorkspaceFile = realFilename;
-
-//			int count = this.sqlTab.getTabCount();
-//			for (int i=0; i < count; i++)
-//			{
-//				MainPanel p = this.getSqlPanel(i);
-//				if (p instanceof DbExplorerPanel)
-//				{
-//					p.readFromWorkspace(w,i);
-//				}
-//			}
 
 			result = true;
 			
@@ -1966,7 +1954,7 @@ public class MainWindow
 			if (p instanceof SqlPanel)
 			{
 				SqlPanel sql = (SqlPanel)p;
-				sql.closeFile(true);
+				sql.closeFile(true, false);
 				this.setTabTitle(i, defaultTitle);
 			}
 		}
@@ -2399,6 +2387,11 @@ public class MainWindow
 		MainPanel panel = this.getSqlPanel(index);
 		if (panel == null) return;
 
+		if (panel instanceof SqlPanel)
+		{
+			boolean ok = ((SqlPanel)panel).checkAndSaveFile();
+			if (!ok) return;
+		}
 		int newTab = -1;
 
 		boolean inProgress = this.isConnectInProgress();

@@ -22,6 +22,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.components.FlatButton;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.lnf.LnFDefinition;
@@ -33,8 +34,8 @@ import workbench.util.StringUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class LnFDefinitionPanel 
-	extends JPanel 
+public class LnFDefinitionPanel
+	extends JPanel
 	implements ActionListener
 {
 	private LnFDefinition currentLnF;
@@ -57,7 +58,7 @@ public class LnFDefinitionPanel
 				nameFieldFocusLost(evt);
 			}
 		});
-		
+
 		String button = ResourceMgr.getString("LblSwitchLnF");
 		String info = ResourceMgr.getString("TxtChangeLnFInfo").replaceAll("%button%", button);
 		infoText.setText(info);
@@ -69,7 +70,7 @@ public class LnFDefinitionPanel
 	{
 		this.changeListener = l;
 	}
-	
+
 	public void nameFieldFocusLost(FocusEvent evt)
 	{
 		if (this.changeListener != null)
@@ -78,7 +79,7 @@ public class LnFDefinitionPanel
 			this.changeListener.propertyChange(pEvt);
 		}
 	}
-	
+
 	public void setEnabled(boolean flag)
 	{
 		this.tfClassName.setEnabled(flag);
@@ -102,14 +103,12 @@ public class LnFDefinitionPanel
     tfClassName = new StringPropertyEditor();
     lblLibrary = new javax.swing.JLabel();
     tfLibrary = new StringPropertyEditor();
-    selectLibButton = new javax.swing.JButton();
+    selectLibButton = new FlatButton();
     infoText = new javax.swing.JTextArea();
     jSeparator1 = new javax.swing.JSeparator();
 
     setLayout(new java.awt.GridBagLayout());
 
-    setFont(null);
-    lblName.setFont(null);
     lblName.setText(ResourceMgr.getString("LblLnFName"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -133,7 +132,6 @@ public class LnFDefinitionPanel
     gridBagConstraints.insets = new java.awt.Insets(11, 3, 1, 3);
     add(tfName, gridBagConstraints);
 
-    lblClassName.setFont(null);
     lblClassName.setText(ResourceMgr.getString("LblLnFClass"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -155,7 +153,6 @@ public class LnFDefinitionPanel
     gridBagConstraints.insets = new java.awt.Insets(1, 3, 0, 3);
     add(tfClassName, gridBagConstraints);
 
-    lblLibrary.setFont(null);
     lblLibrary.setText(ResourceMgr.getString("LblLnFLib"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -177,9 +174,7 @@ public class LnFDefinitionPanel
     gridBagConstraints.insets = new java.awt.Insets(2, 3, 0, 3);
     add(tfLibrary, gridBagConstraints);
 
-    selectLibButton.setFont(null);
     selectLibButton.setText("...");
-    selectLibButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
     selectLibButton.setMaximumSize(new java.awt.Dimension(20, 20));
     selectLibButton.setMinimumSize(new java.awt.Dimension(20, 20));
     selectLibButton.setPreferredSize(new java.awt.Dimension(20, 20));
@@ -192,7 +187,6 @@ public class LnFDefinitionPanel
     add(selectLibButton, gridBagConstraints);
 
     infoText.setEditable(false);
-    infoText.setFont(infoText.getFont());
     infoText.setLineWrap(true);
     infoText.setText("Please click on the \"Make current\" button to switch the current Look and Feel");
     infoText.setWrapStyleWord(true);
@@ -263,8 +257,8 @@ public class LnFDefinitionPanel
 			}
 		}
 	}
-	
-	
+
+
 	public void setDefinition(LnFDefinition lnf)
 	{
 		this.currentLnF = lnf;

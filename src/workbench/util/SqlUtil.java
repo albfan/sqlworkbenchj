@@ -118,11 +118,97 @@ public class SqlUtil
 		return table;
 	}
 	
+	public static List getSelectColumns(String select, boolean includeAlias)
+	{
+		List result = new LinkedList();
+		try
+		{
+			SQLLexer lex = new SQLLexer(select);
+			Token t = lex.getNextToken(false, false);
+			if (!"SELECT".equalsIgnoreCase(t.getContents())) return Collections.EMPTY_LIST;
+			t = lex.getNextToken(false, false);
+			int lastColStart = t.getCharBegin();
+			boolean nextIsCol = true;
+			while (t != null)
+			{
+				if (",".equals(t.getContents()) || SqlFormatter.SELECT_TERMINAL.contains(t.getContents()))
+				{
+					String col = select.substring(lastColStart, t.getCharBegin());
+					if (includeAlias)
+					{
+						result.add(col.trim());
+					}
+					else
+					{
+						result.add(striptColumnAlias(col));
+					}
+					if (SqlFormatter.SELECT_TERMINAL.contains(t.getContents()))
+					{
+						nextIsCol = false;
+						lastColStart = -1;
+						break;
+					}
+					nextIsCol = true;
+				}
+				else if (nextIsCol)
+				{
+					lastColStart = t.getCharBegin();
+					nextIsCol = false;
+				}
+				t = lex.getNextToken(false, false);
+			}
+			if (lastColStart > -1)
+			{
+				// no FROM was found, so assume it's a partial SELECT x,y,z
+				String col = select.substring(lastColStart);
+				if (includeAlias)
+				{
+					result.add(col.trim());
+				}
+				else
+				{
+					result.add(striptColumnAlias(col));
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("SqlUtil.getColumnsFromSelect()", "Error parsing SELECT statement", e);
+			return Collections.EMPTY_LIST;
+		}
+		
+		return result;
+	}
+	
+	public static String striptColumnAlias(String expression)
+	{
+		if (expression == null) return null;
+		
+		String result = expression.trim();
+		int pos = StringUtil.findFirstWhiteSpace(result);
+		if (pos > -1)
+		{
+			result = result.substring(0, pos).trim();
+		}
+		return result;
+	}
+	
 	public static List getTables(String aSql)
 	{
 		return getTables(aSql, false);
 	}
-	
+
+	public static final Set JOIN_KEYWORDS = new HashSet(6);
+	static
+	{
+			JOIN_KEYWORDS.add("INNER");
+			JOIN_KEYWORDS.add("CROSS");
+			JOIN_KEYWORDS.add("NATURAL");
+			JOIN_KEYWORDS.add("FULL");
+			JOIN_KEYWORDS.add("RIGHT");
+			JOIN_KEYWORDS.add("LEFT");
+			JOIN_KEYWORDS.add("OUTER");
+	}
 	public static List getTables(String sql, boolean includeAlias)
 	{
 		String from = SqlUtil.getFromPart(sql);
@@ -132,14 +218,7 @@ public class SqlUtil
 		{
 				SQLLexer lex = new SQLLexer(from);
 				Token t = lex.getNextToken(false, false);
-				Set js = new HashSet();
-				js.add("INNER");
-				js.add("CROSS");
-				js.add("NATURAL");
-				js.add("FULL");
-				js.add("RIGHT");
-				js.add("LEFT");
-				js.add("OUTER");
+
 				int lastStart = t.getCharBegin();
 				int lastJoinStart = 0;
 				boolean hadJoin = false;
@@ -149,7 +228,7 @@ public class SqlUtil
 				while (t != null)
 				{
 					String s = t.getContents();
-					if (js.contains(s) && !inJoinKeyWords)
+					if (JOIN_KEYWORDS.contains(s) && !inJoinKeyWords)
 					{
 						lastJoinStart = t.getCharBegin();
 						inJoinKeyWords = true;
@@ -200,7 +279,10 @@ public class SqlUtil
 				if (lastStart < from.length() && lastStart > -1)
 				{
 					String table = from.substring(lastStart).trim();
-					result.add(getTableDefinition(table, includeAlias));
+					if (!StringUtil.isEmptyString(table))
+					{
+						result.add(getTableDefinition(table, includeAlias));
+					}
 				}
 		}
 		catch (Exception e)
