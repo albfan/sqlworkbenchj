@@ -219,11 +219,6 @@ public class WbManager
 		WbSwingUtilities.showErrorMessage(getCurrentWindow(), ResourceMgr.getString("MsgOutOfMemoryError"));		
 	}
 	
-	public List getMainWindows()
-	{
-		return Collections.unmodifiableList(this.mainWindows);
-	}
-	
 	public MainWindow getCurrentWindow()
 	{
 		if (this.mainWindows == null) return null;
@@ -338,7 +333,6 @@ public class WbManager
 							}
 						}
 					}
-					System.out.println("classic = " + isWindowsClassic);
 				}
 			}
 			catch (Throwable e)
@@ -590,31 +584,14 @@ public class WbManager
 			this.closeMessage.dispose();
 		}
 
-		try
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			if (SwingUtilities.isEventDispatchThread())
+			public void run()
 			{
 				closeAllWindows();
 			}
-			else
-			{
-				SwingUtilities.invokeAndWait(new Runnable()
-				{
-					public void run()
-					{
-						closeAllWindows();
-					}
-				});
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			doShutdown();
-		}
+		});
+		doShutdown();
 	}
 
 	private void closeAllWindows()
@@ -625,7 +602,7 @@ public class WbManager
 			MainWindow w = (MainWindow)this.mainWindows.get(i);
 			if (w != null)
 			{
-				w.setVisible(false);
+				try { w.setVisible(false); } catch (Throwable th) {}
 				try { w.dispose(); } catch (Throwable th) {}
 			}
 		}

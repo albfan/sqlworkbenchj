@@ -439,7 +439,6 @@ public class StringUtil
 
 	public static final String trimQuotes(String input)
 	{
-		//System.out.println("toTrim=" + input);
 		if (input == null) return null;
 		if (input.length() == 0) return EMPTY_STRING;
 		if (input.length() == 1) return input;
@@ -455,9 +454,9 @@ public class StringUtil
 		if ( (firstChar == '"' && lastChar == '"') ||
 		     (firstChar == '\'' && lastChar == '\''))
 		{
-			result = result.substring(1, len - 1);
+			return result.substring(1, len - 1);
 		}
-		return result;
+		return input;
 	}
 
 	public static final String escapeXML(String s)

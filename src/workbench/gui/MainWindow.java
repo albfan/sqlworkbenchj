@@ -119,7 +119,7 @@ import workbench.gui.lnf.LnFManager;
 public class MainWindow
 	extends JFrame
 	implements MouseListener, WindowListener, ChangeListener, DropTargetListener,
-						FilenameChangeListener, MacroChangeListener, DbExecutionListener, Connectable
+						MacroChangeListener, DbExecutionListener, Connectable
 {
 	private static final String DEFAULT_WORKSPACE = "%ConfigDir%/Default.wksp";
 	private static int instanceCount;
@@ -820,24 +820,24 @@ public class MainWindow
 		}
 	}
 
-	public void fileNameChanged(Object sender, String newFilename)
-	{
-		if (!(sender instanceof SqlPanel)) return;
-
-		int index = -1;
-		for (int i=0; i < this.sqlTab.getTabCount(); i++)
-		{
-			if (this.sqlTab.getComponentAt(i) == sender)
-			{
-				index = i;
-				break;
-			}
-		}
-		if (index == -1) return;
-
-		SqlPanel sql = (SqlPanel)sender;
-		sql.setTabTitle(this.sqlTab, index);
-	}
+//	public void fileNameChanged(Object sender, String newFilename)
+//	{
+//		if (!(sender instanceof SqlPanel)) return;
+//
+//		int index = -1;
+//		for (int i=0; i < this.sqlTab.getTabCount(); i++)
+//		{
+//			if (this.sqlTab.getComponentAt(i) == sender)
+//			{
+//				index = i;
+//				break;
+//			}
+//		}
+//		if (index == -1) return;
+//
+//		SqlPanel sql = (SqlPanel)sender;
+//		sql.setTabTitle(this.sqlTab, index);
+//	}
 
 	public void windowOpened(WindowEvent windowEvent)
 	{
@@ -2178,7 +2178,7 @@ public class MainWindow
 		if (index == -1) index = sqlTab.getTabCount();
 		final SqlPanel sql = new SqlPanel(index+1);
 		sql.addDbExecutionListener(this);
-		sql.addFilenameChangeListener(this);
+		//sql.addFilenameChangeListener(this);
 		if (checkConnection) this.checkConnectionForPanel(sql, false);
 
 		boolean isSuspended = this.sqlTab.isRepaintSuspended();

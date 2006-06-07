@@ -47,6 +47,7 @@ import workbench.db.WbConnection;
 import workbench.gui.actions.SelectKeyColumnsAction;
 import workbench.gui.components.FlatButton;
 import workbench.interfaces.PropertyStorage;
+import workbench.interfaces.Resettable;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
@@ -75,7 +76,7 @@ import workbench.util.WbWorkspace;
  */
 public class TableDataPanel
   extends JPanel
-	implements Reloadable, ActionListener, Interruptable, TableDeleteListener, MouseListener
+	implements Reloadable, ActionListener, Interruptable, TableDeleteListener, MouseListener, Resettable
 {
 	private WbConnection dbConnection;
 	private DwPanel dataDisplay;

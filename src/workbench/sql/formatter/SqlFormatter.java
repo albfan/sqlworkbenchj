@@ -43,6 +43,12 @@ public class SqlFormatter
 		LINE_BREAK_BEFORE.add("REFRESH");
 		LINE_BREAK_BEFORE.add("AS");
 		LINE_BREAK_BEFORE.add("FOR");
+		LINE_BREAK_BEFORE.add("INNER JOIN");
+		LINE_BREAK_BEFORE.add("RIGHT OUTER JOIN");
+		LINE_BREAK_BEFORE.add("LEFT OUTER JOIN");
+		LINE_BREAK_BEFORE.add("CROSS JOIN");
+		LINE_BREAK_BEFORE.add("LEFT JOIN");
+		LINE_BREAK_BEFORE.add("RIGHT JOIN");
 	}
 
 	private final Set LINE_BREAK_AFTER = new HashSet();
@@ -264,7 +270,8 @@ public class SqlFormatter
 		if (Character.isWhitespace(lastChar) || Character.isWhitespace(currChar)) return false;
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
 		if (lastChar == '\'') return false;
-		if ( (lastChar == '<' || lastChar == '>') && (currChar == '=' || currChar == '<' || currChar == '>')) return false;
+		if (currChar == '?') return true;
+		//if ( (lastChar == '<' || lastChar == '>') && (currChar == '=' || currChar == '<' || currChar == '>')) return false;
 		if (currChar == '=') return true;
 		if (lastChar == '=') return true;
 		if (lastChar == '\"') return false;
@@ -323,6 +330,11 @@ public class SqlFormatter
 			else
 			{
 				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
+				if (LINE_BREAK_BEFORE.contains(text))
+				{
+					this.appendNewline();
+					this.indent(b);
+				}
 				this.appendText(text);
 				if (LINE_BREAK_AFTER.contains(text))
 				{
@@ -933,15 +945,22 @@ public class SqlFormatter
 					this.appendText(" (");
 					t = this.processSubSelect(false);
 					if (t == null) return null;
-					continue;
+					if (t.getContents().equals(")")) this.appendText(")");
 				}
-				bracketCount ++;
-				if (lastWord != null) lastWord = lastWord.toUpperCase();
-				if (!lastToken.isSeparator() && !this.dbFunctions.contains(lastWord)) this.appendText(' ');
-				this.appendText(t.getContents());
+				else
+				{
+					bracketCount ++;
+					if (lastWord != null) lastWord = lastWord.toUpperCase();
+					if (!lastToken.isSeparator() && !this.dbFunctions.contains(lastWord)) this.appendText(' ');
+					this.appendText(t.getContents());
+				}
 			}
 			else if (bracketCount == 0 && t.isReservedWord() && (verb.equals("AND") || verb.equals("OR")) )
 			{
+				// TODO: this attempt to keep conditions in bracktes together results
+				// in effectively not formatting when the whole WHERE clause is put 
+				// between brackets (because bracketCount will never be zero until 
+				// the end of the WHERE clause)
 				if (!this.isStartOfLine()) this.appendNewline();
 				this.appendText(verb);
 				this.appendText("  ");

@@ -64,11 +64,6 @@ import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 import workbench.db.hsqldb.HsqlConstraintReader;
 import workbench.db.firebird.FirebirdConstraintReader;
-import workbench.storage.DmlStatement;
-import workbench.storage.ResultInfo;
-import workbench.storage.RowData;
-import workbench.storage.StatementFactory;
-
 
 /**
  * Retrieve meta data information from the database.
@@ -2495,18 +2490,44 @@ public class DbMetadata
 	}
 	
 	/**
-	 * Changes the current catalog using Connection.setCatalot()
+	 * Changes the current catalog using Connection.setCatalog()
 	 * and notifies the connection object about the change.
+	 *
+	 * @param newCatalog the name of the new catalog/database that should be selected
+	 * @see WbConnection#catalogChanged(String, String)
 	 */
 	public boolean setCurrentCatalog(String newCatalog)
 		throws SQLException
 	{
-		if (newCatalog == null) return false;
+		if (StringUtil.isEmptyString(newCatalog)) return false;
 	
 		String old = getCurrentCatalog();
-		this.dbConnection.getSqlConnection().setCatalog(newCatalog);
+		boolean useSetCatalog = Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".usesetcatalog", true);
+		
+		// MySQL does not seem to like changing the current database by executing a USE command
+		// through Statement.execute(), so we'll use setCatalog() instead
+		// which seems to work with SQL Server as well. 
+		// If for some reason this does not work, it could be turned off
+		if (useSetCatalog)
+		{
+			this.dbConnection.getSqlConnection().setCatalog(trimQuotes(newCatalog));
+		}
+		else
+		{
+			Statement stmt = null;
+			try 
+			{
+				stmt = this.dbConnection.createStatement();
+				stmt.execute("USE " + newCatalog);
+			}
+			finally
+			{
+				SqlUtil.closeStatement(stmt);
+			}
+		}
+		
 		String newCat = getCurrentCatalog();
-		if (old != null && newCat != null && !newCat.equals(old))
+		if (!StringUtil.equalString(old, newCat))
 		{
 			this.dbConnection.catalogChanged(old, newCatalog);
 		}
@@ -2515,7 +2536,24 @@ public class DbMetadata
 		return true;
 	}
 	
-	
+	/**
+	 * Remove quotes from an object's name. 
+	 * For MS SQL Server this also removes [] brackets
+	 * around the identifier.
+	 */
+	private String trimQuotes(String s)
+	{
+		if (s.length() < 2) return s;
+		if (this.isSqlServer)
+		{
+			String clean = s.trim();
+			int len = clean.length();
+			if (clean.charAt(0)=='[' && clean.charAt(len-1)==']')
+				return clean.substring(1,len-1);
+		}
+		
+		return StringUtil.trimQuotes(s);
+}
 	/**
 	 *	Returns a list of all catalogs in the database.
 	 *	Some DBMS's do not support catalogs, in this case the method

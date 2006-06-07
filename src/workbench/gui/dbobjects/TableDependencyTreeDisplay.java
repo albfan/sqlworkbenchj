@@ -33,6 +33,7 @@ import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.renderer.DependencyTreeCellRenderer;
+import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
 
 /**
@@ -41,6 +42,7 @@ import workbench.log.LogMgr;
  */
 public class TableDependencyTreeDisplay 
   extends JPanel
+	implements Resettable
 {
 	private WbConnection connection;
 	private DependencyTreeCellRenderer renderer;

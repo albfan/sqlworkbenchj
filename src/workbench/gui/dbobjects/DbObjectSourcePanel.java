@@ -23,18 +23,19 @@ import workbench.gui.actions.RunStatement;
 import workbench.gui.components.DropDownButton;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.sql.EditorPanel;
-import workbench.gui.sql.SqlPanel;
+import workbench.gui.sql.PanelContentSender;
 import workbench.interfaces.Reloadable;
-import workbench.interfaces.RunnableStatement;
+import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 
 /**
- * @author thomas
+ * @author support@sql-workbench.net
  */
 public class DbObjectSourcePanel
 	extends JPanel
-	implements ActionListener
+	implements ActionListener, Resettable
 {
 	private EditorPanel sourceEditor;
 	private ReloadAction reloadSource;
@@ -73,7 +74,7 @@ public class DbObjectSourcePanel
 			this.add(toolbar, BorderLayout.NORTH);
 		}
 		editButton = new DropDownButton("Edit in");
-		selectTabMenu = new EditorTabSelectMenu(this, "Edit in", "LblEditInTab", parent);
+		selectTabMenu = new EditorTabSelectMenu(this, ResourceMgr.getString("LblEditScriptSource"), "LblEditInNewTab", "LblEditInTab", parent);
 		editButton.setDropDownMenu(selectTabMenu.getPopupMenu());
 		toolbar.add(editButton);
 	}
@@ -106,32 +107,8 @@ public class DbObjectSourcePanel
 		
 	private void editText(final int panelIndex)
 	{
-		final SqlPanel panel;
-
-		if (panelIndex == -1)
-		{
-			panel = (SqlPanel)this.parentWindow.addTab(true, true);
-		}
-		else
-		{
-		 panel = (SqlPanel)this.parentWindow.getSqlPanel(panelIndex);
-		}
-
-		String sql = this.getText();
-		if (sql != null)
-		{
-			panel.setStatementText(sql);
-
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					parentWindow.requestFocus();
-					if (panelIndex > -1) parentWindow.selectTab(panelIndex);
-					panel.selectEditor();
-				}
-			});
-		}
+		PanelContentSender sender = new PanelContentSender(this.parentWindow);
+		sender.sendContent(getText(), panelIndex);
 	}
 	
 	public void setText(final String sql)
@@ -144,6 +121,7 @@ public class DbObjectSourcePanel
 				boolean hasText = !StringUtil.isEmptyString(sql);
 				if (reloadSource != null) reloadSource.setEnabled(hasText);
 				if (recreateObject != null) recreateObject.setEnabled(hasText);
+				if (editButton != null) editButton.setEnabled(hasText);
 			}
 		});
 	}
@@ -171,5 +149,10 @@ public class DbObjectSourcePanel
 	public void setEditable(boolean flag)
 	{
 		sourceEditor.setEditable(flag);
+	}
+
+	public void reset()
+	{
+		this.setText("");
 	}
 }

@@ -28,6 +28,7 @@ import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.sql.EditorPanel;
+import workbench.interfaces.Resettable;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 
@@ -37,7 +38,7 @@ import workbench.storage.DataStore;
  */
 public class TriggerDisplayPanel
 	extends JPanel
-	implements ListSelectionListener
+	implements ListSelectionListener, Resettable
 {
 	private WbConnection dbConnection;
 	private WbTable triggers;

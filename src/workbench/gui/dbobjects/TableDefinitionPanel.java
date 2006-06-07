@@ -46,6 +46,7 @@ import workbench.gui.components.WbTable;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.sql.ExecuteSqlDialog;
 import workbench.interfaces.Reloadable;
+import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -58,7 +59,7 @@ import workbench.util.WbThread;
  */
 public class TableDefinitionPanel
 	extends JPanel
-	implements Reloadable, ActionListener, ListSelectionListener
+	implements Reloadable, ActionListener, ListSelectionListener, Resettable
 {
 	public static final String INDEX_PROP = "index";
 	private WbTable tableDefinition;
@@ -333,8 +334,7 @@ public class TableDefinitionPanel
 	}
 
 	/**
-	 * Invoked when the selection in the table list
-	 * has changed
+	 * Invoked when the selection in the table list has changed
 	 */
 	public void valueChanged(ListSelectionEvent e)
 	{

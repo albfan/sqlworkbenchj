@@ -52,6 +52,50 @@ public class SqlUtilTest
 	{
 	}
 
+	public void testGetSelectColumns()
+	{
+		String sql = "select x,y,z from bla";
+		List l = SqlUtil.getSelectColumns(sql,true);
+		assertEquals("Not enough columns", 3, l.size());
+		assertEquals("x", l.get(0));
+		assertEquals("z", l.get(2));
+		
+		sql = "select x,y,z";
+		l = SqlUtil.getSelectColumns(sql,true);		
+		assertEquals("Not enough columns", 3, l.size());
+		assertEquals("x", l.get(0));
+		assertEquals("z", l.get(2));
+		
+		sql = "select x\n     ,y\n     ,z FROM bla";
+		l = SqlUtil.getSelectColumns(sql,true);		
+		assertEquals("Not enough columns", 3, l.size());
+		assertEquals("x", l.get(0));
+		assertEquals("z", l.get(2));
+		
+		sql = "SELECT a.att1\n      ,a.att2\nFROM   adam   a";
+		l = SqlUtil.getSelectColumns(sql,true);		
+		assertEquals("Not enough columns", 2, l.size());
+	}
+	
+	public void testStripColumnAlias()
+	{
+		String expression = "p.name as lastname";
+		String col = SqlUtil.striptColumnAlias(expression);
+		assertEquals("p.name", col);
+		
+		expression = "p.name";
+		col = SqlUtil.striptColumnAlias(expression);
+		assertEquals("p.name", col);
+		
+		expression = "p.name as";
+		col = SqlUtil.striptColumnAlias(expression);
+		assertEquals("p.name", col);
+		
+		expression = "p.name as";
+		col = SqlUtil.striptColumnAlias(expression);
+		assertEquals("p.name", col);
+	}
+	
 	public void testGetSqlVerb()
 	{
 		String sql = "-- comment line1\nSELECT";
@@ -64,7 +108,7 @@ public class SqlUtilTest
 		
 			sql = "/* \n" + 
              "* $URL: svn+ssh://nichdexp.nichd.nih.gov/subversion/mtrac/trunk/db/00-release-1.0/01-trac-8-ddl.sql $ \n" + 
-             "* $Revision: 1.1 $ \n" + 
+             "* $Revision: 1.2 $ \n" + 
              "* Created by Janek K. Claus. \n" + 
              "* $LastChangedBy: clausjan $ \n" + 
              "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
@@ -127,6 +171,81 @@ public class SqlUtilTest
 		assertEquals("tblcredit", (String)l.get(3));
 		assertEquals("tblcreditstate", (String)l.get(4));
 		
+		sql = "SELECT c.cntry_name as country,  \n" + 
+             "case  \n" + 
+             "   when r.ref_name is null then p.plr_name  \n" + 
+             "   else r.ref_name \n" + 
+             "end as name, \n" + 
+             "case  \n" + 
+             "   when r.ref_name is null then 'PLAYER' \n" + 
+             "   else 'REF' \n" + 
+             "end as type \n" + 
+             "from country c right outer join referee r on (c.)  \n" + 
+             "               right outer join  \n" + 
+             "where c.cntry_id = p.cntry_id (+) \n" + 
+             "and c.cntry_id = r.cntry_id (+)";		
+		l = SqlUtil.getTables(sql, false);
+		assertEquals(2, l.size());
+		
+		sql = "SELECT DISTINCT CONVERT(VARCHAR(50),an.oid) AS an_oid, \n" + 
+					 "       an.cid AS an_cid, \n" + 
+					 "       CONVERT(VARCHAR(50),an.anrede) AS an_anrede, \n" + 
+					 "       an.titel AS an_titel, \n" + 
+					 "       an.akadgrad AS an_grad, \n" + 
+					 "       an.vorname AS an_vorname, \n" + 
+					 "       an.nachname AS an_nachname, \n" + 
+					 "       an.nummer AS an_nummer, \n" + 
+					 "       an.gebdatum AS an_gdat, \n" + 
+					 "       an_adr.ort AS an_adr_ort, \n" + 
+					 "       an_adr.plz AS an_adr_plz, \n" + 
+					 "       an_adr.strasse AS an_adr_str, \n" + 
+					 "       CONVERT(VARCHAR(50),an_adr.staatoid) AS an_adr_staat, \n" + 
+					 "       CONVERT(VARCHAR(50),an_adr.bland) AS an_adr_land, \n" + 
+					 "       ang.bezeichnung AS ang_bezeichnung, \n" + 
+					 "       CONVERT(VARCHAR(50),ag.oid) AS ag_oid, \n" + 
+					 "       CONVERT(VARCHAR(50),ag.art) AS ag_art, \n" + 
+					 "       ag.name AS ag_name, \n" + 
+					 "       ag.nummer AS ag_nummer, \n" + 
+					 "       ag.gdatum AS ag_gdat, \n" + 
+					 "       CONVERT(VARCHAR(50),ag.rform) AS ag_rechtsform, \n" + 
+					 "       ag_adr.ort AS ag_adr_ort, \n" + 
+					 "       ag_adr.plz AS ag_adr_plz, \n" + 
+					 "       ag_adr.strasse AS ag_adr_str, \n" + 
+					 "       CONVERT(VARCHAR(50),ag_adr.staatoid) AS ag_adr_staat, \n" + 
+					 "       CONVERT(VARCHAR(50),ag_adr.bland) AS ag_adr_land, \n" + 
+					 "       CONVERT(VARCHAR(50),ber.anrede) AS ber_anrede, \n" + 
+					 "       ber.titel AS ber_titel, \n" + 
+					 "       ber.akadgrad AS ber_grad, \n" + 
+					 "       ber.vorname AS ber_vorname, \n" + 
+					 "       ber.nachname AS ber_nachname, \n" + 
+					 "       ber.nummer AS ber_nummer \n" + 
+					 "FROM (((((((((((accright acc LEFT JOIN \n" + 
+					 "      stuser u_ber ON u_ber.userid = acc.userid AND u_ber.dc = acc.dc) LEFT JOIN \n" + 
+					 "      nperson ber ON u_ber.person_oid = ber.oid AND u_ber.dc = ber.dc) LEFT JOIN \n" + 
+					 "      nperson an ON acc.subject_oid = an.oid AND acc.dc = an.dc) LEFT JOIN \n" + 
+					 "      bavdaten bav ON bav.modeloid = an.oid AND bav.dc = an.dc) LEFT JOIN \n" + 
+					 "      bavangroup ang ON bav.angruppe_oid = ang.oid AND bav.dc = ang.dc) LEFT JOIN \n" + 
+					 "      adresse an_adr ON an_adr.quelleoid = an.oid AND an_adr.dc = an.dc) LEFT OUTER JOIN \n" + 
+					 "      beziehung bez ON bez.zieloid = an.oid AND bez.zielcid = an.cid AND bez.dc = an.dc) LEFT OUTER JOIN \n" + 
+					 "      jperson ag ON ag.oid = bez.quelleoid AND ag.cid = bez.quellecid AND ag.dc = bez.dc) LEFT OUTER JOIN \n" + 
+					 "      bavagdaten bavag ON bavag.modeloid = ag.oid AND bavag.dc = ag.dc) LEFT OUTER JOIN \n" + 
+					 "      adresse ag_adr ON ag_adr.quelleoid = ag.oid AND ag_adr.dc = ag.dc) LEFT JOIN \n" + 
+					 "      accright acc_ag ON acc_ag.subject_oid = ag.oid AND acc_ag.dc = ag.dc) LEFT JOIN \n" + 
+					 "      stuser u_ag ON u_ag.userid = acc_ag.userid AND u_ag.dc = acc_ag.dc \n" + 
+					 "WHERE ((u_ag.userid = '17564'OR u_ag.bossid IN (SELECT userid \n" + 
+					 "                                                FROM stuser \n" + 
+					 "                                                WHERE (userid = '17564'OR bossid = '17564') \n" + 
+					 "                                                AND   deaktiv = '0' \n" + 
+					 "                                                AND   dc = ' ')) \n" + 
+					 "AND   (acc_ag.rolename = 'berater')) AND ('berater'= '' \n" + 
+					 "OR    acc.rolename LIKE 'berater') AND ('CVM02000'= '' \n" + 
+					 "OR    acc.subject_cid = 'CVM02000') AND (bez.bezeichnung = 'B2E5AE00-9050-4401-B8E1-8A3B55B22CA9' \n" + 
+					 "OR    bez.bezeichnung IS NULL) AND ((bavag.anoptok = '1'AND '1'= '1') \n" + 
+					 "OR    ((bavag.anoptok = '0'OR bavag.anoptok IS NULL) AND '1'= '1')) AND an.dc = ' 'AND ber.nummer = '65346' \n" + 
+					 "ORDER BY an.nachname,an.vorname,an.nummer";
+		
+		l = SqlUtil.getTables(sql, true);
+		assertEquals(13, l.size());
 	}
 
 }

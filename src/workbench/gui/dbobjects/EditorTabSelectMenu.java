@@ -34,14 +34,16 @@ public class EditorTabSelectMenu
 {
 	private MainWindow parentWindow;
 	private ActionListener target;
-	private String tooltip; 
+	private String regularTooltip;
+	private String newTabTooltip;
 	
-	public EditorTabSelectMenu(ActionListener l, String label, String tooltipKey, MainWindow parent)
+	public EditorTabSelectMenu(ActionListener l, String label, String tooltipKeyNewTab, String tooltipKeyTab, MainWindow parent)
 	{
 		super(label);
 		parentWindow = parent;
 		target = l;
-		tooltip = ResourceMgr.getDescription(tooltipKey);
+		newTabTooltip = ResourceMgr.getDescription(tooltipKeyNewTab);
+		regularTooltip = ResourceMgr.getDescription(tooltipKeyTab);
 		updateMenu();
 		parentWindow.addFilenameChangeListener(this);
 		parentWindow.addIndexChangeListener(this);
@@ -56,7 +58,7 @@ public class EditorTabSelectMenu
 		// Make sure none of the items has an ActionListener attached
 		for (int i=0; i < count; i++)
 		{
-			JMenuItem item = this.getItem(1);
+			JMenuItem item = this.getItem(i);
 			if (item != null && target != null)
 			{
 				item.removeActionListener(target);
@@ -65,31 +67,30 @@ public class EditorTabSelectMenu
 		this.removeAll();
 
 		int current = this.parentWindow.getCurrentPanelIndex();
-		int newCount = panels.length  + 1;
 
 		Font boldFont = Settings.getInstance().getStandardMenuFont().deriveFont(Font.BOLD);
 		
 		JMenuItem item = null;
+		
+		item = new WbMenuItem(ResourceMgr.getString("LblShowDataInNewTab"));
+		item.setActionCommand("panel--1");
+		item.setToolTipText(newTabTooltip);
+		item.addActionListener(target);
+		this.add(item);
+		
+		addSeparator();
 
-		for (int i=0; i < newCount; i++)
+		for (int i=0; i < panels.length; i++)
 		{
-			if (i == newCount - 1)
+			item = new WbMenuItem(panels[i]);
+			item.setActionCommand("panel-" + i);
+			if (i == current)
 			{
-				item = new WbMenuItem(ResourceMgr.getString("LblShowDataInNewTab"));
-				item.setActionCommand("panel--1");
-				addSeparator();
+				item.setFont(boldFont);
 			}
-			else
-			{
-				item = new WbMenuItem(panels[i]);
-				item.setActionCommand("panel-" + i);
-				if (i == current)
-				{
-					item.setFont(boldFont);
-				}
-			}
+			
 			// The tooltip is the same for all items
-			item.setToolTipText(tooltip);
+			item.setToolTipText(regularTooltip);
 			item.addActionListener(target);
 			this.add(item);
 		}

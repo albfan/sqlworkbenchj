@@ -105,6 +105,7 @@ import workbench.gui.renderer.RowStatusRenderer;
 import workbench.gui.renderer.ToolTipRenderer;
 import workbench.gui.renderer.WbRenderer;
 import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.Resettable;
 import workbench.interfaces.Searchable;
 import workbench.log.LogMgr;
 import workbench.print.PrintPreview;
@@ -122,7 +123,7 @@ import workbench.util.WbThread;
 public class WbTable
 	extends JTable
 	implements ActionListener, FocusListener, MouseListener,
-	           FontChangedListener, Searchable, ListSelectionListener, PropertyChangeListener
+	           FontChangedListener, Searchable, ListSelectionListener, PropertyChangeListener, Resettable
 {
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	private JPopupMenu popup;

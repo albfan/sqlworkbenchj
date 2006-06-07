@@ -16,6 +16,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import workbench.db.WbConnection;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.Token;
 import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -47,16 +49,21 @@ public class UseCommand extends SqlCommand
 		{
 			String oldCatalog = aConnection.getMetadata().getCurrentCatalog();
 			
-			Pattern p = Pattern.compile("\\s*USE\\s*", Pattern.CASE_INSENSITIVE);
-			Matcher m = p.matcher(aSql);
-			String catName = m.replaceAll("").trim();
-			aConnection.getSqlConnection().setCatalog(catName);
+			SQLLexer lexer = new SQLLexer(aSql);
+			
+			// The first token should be the USE verb;
+			Token t = lexer.getNextToken(false, false);
+			
+			// everything after the USE command is the catalog name
+			String catName = aSql.substring(t.getCharEnd()).trim();
+
+			// DbMetadata.setCurrentCatalog() will fire the 
+			// catalogChanged() event on the connection!
+			// no need to do this here
+			aConnection.getMetadata().setCurrentCatalog(catName);
 			
 			String newCatalog = aConnection.getMetadata().getCurrentCatalog();
-			if (oldCatalog != null && !oldCatalog.equals(newCatalog))
-			{
-				aConnection.catalogChanged(oldCatalog, newCatalog);
-			}
+			
 			String msg = ResourceMgr.getString("MsgCatalogChanged");
 			String term = aConnection.getMetadata().getCatalogTerm();
 			

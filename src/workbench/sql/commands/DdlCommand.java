@@ -45,7 +45,7 @@ public class DdlCommand extends SqlCommand
 
 	// Firebird RECREATE VIEW command
 	public static final SqlCommand RECREATE = new DdlCommand("RECREATE");
-	
+
 	public static final List DDL_COMMANDS = new ArrayList();
 
 	static
@@ -76,7 +76,7 @@ public class DdlCommand extends SqlCommand
 			this.currentStatement = aConnection.createStatement();
 
 			aSql = aConnection.getMetadata().filterDDL(aSql);
-			
+
 			String msg = null;
 
 			if (isDropCommand(aSql) && aConnection.getIgnoreDropErrors())
@@ -96,14 +96,14 @@ public class DdlCommand extends SqlCommand
 			{
 				this.currentStatement.execute(aSql);
 				boolean schemaChanged = false;
-				
+
 				if ("ALTER".equals(verb) && aConnection.getMetadata().isOracle())
 				{
 					// check for schema change in oracle
 					String regex = "alter\\s*session\\s*set\\s*current_schema\\s*=\\s*(\\p{Graph}*)";
 					Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
 					Matcher m = p.matcher(aSql);
-					
+
 					if (m.find() && m.groupCount() > 0)
 					{
 						String schema = m.group(1);
@@ -111,7 +111,7 @@ public class DdlCommand extends SqlCommand
 						schemaChanged = true;
 					}
 				}
-					
+
 				if (schemaChanged)
 				{
 					msg = ResourceMgr.getString("MsgSchemaChanged");
@@ -180,7 +180,7 @@ public class DdlCommand extends SqlCommand
 		Matcher m = p.matcher(sql);
 		return m.find();
 	}
-	
+
 	/**
 	 * Extract the type (function, package, procedure) of the created object.
 	 * @see #addExtendErrorInfo(workbench.db.WbConnection, String, workbench.sql.StatementRunnerResult)
@@ -190,7 +190,7 @@ public class DdlCommand extends SqlCommand
 		String regex = "CREATE\\s*(OR\\s*REPLACE|)\\s*(PROCEDURE|FUNCTION|PACKAGE\\s*BODY|PACKAGE)\\s*(\\p{Graph}*)";
 		String type = null;
 		Matcher m = Pattern.compile(regex,Pattern.CASE_INSENSITIVE).matcher(sql);
-		if (m.find() && m.groupCount() > 1) 
+		if (m.find() && m.groupCount() > 1)
 		{
 			type = m.group(2).toUpperCase();
 		}
@@ -220,7 +220,7 @@ public class DdlCommand extends SqlCommand
 
 	/**
 	 * Retrieve extended error information if the DBMS supports this.
-	 * Currently this is only implemented for Oracle to read errors 
+	 * Currently this is only implemented for Oracle to read errors
 	 * after creating a stored procedure from the ALL_ERRORS view.
 	 *
 	 * @see #getObjectName(String)
@@ -247,7 +247,7 @@ public class DdlCommand extends SqlCommand
 			return false;
 		}
   }
-	
+
 	public String getVerb()
 	{
 		return verb;

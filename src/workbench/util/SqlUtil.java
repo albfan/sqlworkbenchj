@@ -201,13 +201,14 @@ public class SqlUtil
 	public static final Set JOIN_KEYWORDS = new HashSet(6);
 	static
 	{
-			JOIN_KEYWORDS.add("INNER");
-			JOIN_KEYWORDS.add("CROSS");
-			JOIN_KEYWORDS.add("NATURAL");
-			JOIN_KEYWORDS.add("FULL");
-			JOIN_KEYWORDS.add("RIGHT");
-			JOIN_KEYWORDS.add("LEFT");
-			JOIN_KEYWORDS.add("OUTER");
+			JOIN_KEYWORDS.add("INNER JOIN");
+			JOIN_KEYWORDS.add("LEFT JOIN");
+			JOIN_KEYWORDS.add("RIGHT JOIN");
+			JOIN_KEYWORDS.add("LEFT OUTER JOIN");
+			JOIN_KEYWORDS.add("RIGHT OUTER JOIN");
+			JOIN_KEYWORDS.add("CROSS JOIN");
+			JOIN_KEYWORDS.add("FULL JOIN");
+			JOIN_KEYWORDS.add("FULL OUTER JOIN");
 	}
 	public static List getTables(String sql, boolean includeAlias)
 	{
@@ -217,72 +218,48 @@ public class SqlUtil
 		try
 		{
 				SQLLexer lex = new SQLLexer(from);
-				Token t = lex.getNextToken(false, false);
+				SQLToken t = (SQLToken)lex.getNextToken(false, false);
 
-				int lastStart = t.getCharBegin();
-				int lastJoinStart = 0;
-				boolean hadJoin = false;
-				boolean isJoinSyntax = false;
-				boolean inJoinKeyWords = false;
+				boolean collectTable = true;
+				StringBuffer currentTable = new StringBuffer();
 				
 				while (t != null)
 				{
 					String s = t.getContents();
-					if (JOIN_KEYWORDS.contains(s) && !inJoinKeyWords)
+					if (JOIN_KEYWORDS.contains(s))
 					{
-						lastJoinStart = t.getCharBegin();
-						inJoinKeyWords = true;
-						// if we find a JOIN keyword
-						// we assume the FROM clause is in the new ANSI syntax
-						// this assumes that even with the new syntax, a comma does
-						// not occur before any of the JOIN keywords!
-						isJoinSyntax = true;
+						collectTable = true;
+						if (currentTable.length() > 0)
+						{
+							result.add(getTableDefinition(currentTable.toString(), includeAlias));
+							currentTable = new StringBuffer();
+						}
 					}
 					else if (",".equals(s))
 					{
-						if (isJoinSyntax)
-						{
-							lastStart = t.getCharEnd();
-							lastJoinStart = -1;
-						}
-						else if (lastStart > -1)
-						{
-							String table = from.substring(lastStart, t.getCharBegin()).trim();
-							result.add(getTableDefinition(table, includeAlias));
-							lastStart = t.getCharEnd();
-						}
+							collectTable = true;
+							result.add(getTableDefinition(currentTable.toString(), includeAlias));
+							currentTable = new StringBuffer();
 					}
-					else if ("JOIN".equals(s) )
+					else if ("ON".equals(s))
 					{
-						inJoinKeyWords = true;
-						if (lastStart > -1 && (lastJoinStart == -1 || lastJoinStart > lastStart))
-						{
-							if (lastJoinStart == -1) lastJoinStart = t.getCharBegin();
-							String table = from.substring(lastStart, lastJoinStart).trim();
-							result.add(getTableDefinition(table, includeAlias));
-						}
-						lastStart = t.getCharEnd();
-						lastJoinStart = -1;
-						hadJoin = true;
+						collectTable = false;
+						result.add(getTableDefinition(currentTable.toString(), includeAlias));
+						currentTable = new StringBuffer();
 					}
-					else if ("ON".equals(s) && lastStart > -1)
+					else if (collectTable && !s.equals("("))
 					{
-						String table = from.substring(lastStart, t.getCharBegin()).trim();
-						result.add(getTableDefinition(table, includeAlias));
-						// reset the start markers until a new JOIN keyword is detected
-						lastStart = -1;
-						lastJoinStart = -1;
+						int size = currentTable.length();
+						if (size > 0 && !s.equals(".") && currentTable.charAt(size-1) != '.') currentTable.append(' ');
+						currentTable.append(s);
 					}
 					
-					t = lex.getNextToken(false, false);
+					t = (SQLToken)lex.getNextToken(false, false);
 				}
-				if (lastStart < from.length() && lastStart > -1)
+				
+				if (currentTable.length() > 0)
 				{
-					String table = from.substring(lastStart).trim();
-					if (!StringUtil.isEmptyString(table))
-					{
-						result.add(getTableDefinition(table, includeAlias));
-					}
+					result.add(getTableDefinition(currentTable.toString(), includeAlias));
 				}
 		}
 		catch (Exception e)
