@@ -1541,13 +1541,19 @@ public class WbTable
 		return this.getLastVisibleRow(this.getFirstVisibleRow());
 	}
 
+//	public int _getLastVisibleRow(int first)
+//	{
+//		long start = System.currentTimeMillis();
+//		int result = getLastVisibleRow(first);
+//		long end = System.currentTimeMillis();
+//		System.out.println("time: " + (end - start));
+//		return result;
+//	}
+	
 	public int getLastVisibleRow(int first)
 	{
 		int count = this.getRowCount();
 		if (count == 0) return -1;
-
-		JScrollBar bar = this.scrollPane.getVerticalScrollBar();
-		if (bar != null && bar.getValue() == bar.getMaximum()) return count;
 
 		JViewport view = this.scrollPane.getViewport();
 		Point p = view.getViewPosition();
@@ -1556,25 +1562,14 @@ public class WbTable
 		int currentRowHeight = 0;
 		int spacing = this.getRowMargin();
 		int lastRow = 0;
-		if (this.rowResizer == null)
+		for (int r = first; r < count; r ++)
 		{
-			// if the row height cannot be resized, we can
-			// calculate the number of visible rows 
-			currentRowHeight = this.getRowHeight();
-			int numRows = (int) ((height / currentRowHeight) - 0.5);
-			lastRow = numRows;
+			int h = this.getRowHeight(r) + spacing;
+			if (currentRowHeight + h > height) break;
+			currentRowHeight += h;
 		}
-		else
-		{
-			for (int r = first; r < count; r ++)
-			{
-				int h = this.getRowHeight(r) + spacing;
-				if (currentRowHeight + h > height) break;
-				currentRowHeight += h;
-			}
-			p.move(0, currentRowHeight);
-			lastRow = this.rowAtPoint(p);
-		}
+		p.move(0, currentRowHeight);
+		lastRow = this.rowAtPoint(p);
 
 		// if rowAtPoint() returns a negative number, then all
 		// rows fit into the current viewport

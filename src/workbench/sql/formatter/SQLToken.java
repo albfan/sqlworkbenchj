@@ -24,7 +24,8 @@ package workbench.sql.formatter;
  * occurred, the number of characters into the input at which it started, and
  * similarly, the number of characters into the input at which it ended. <br>
  */
-public class SQLToken extends Token
+public class SQLToken
+	extends Token
 {
 	/**
 	 * A reserved word (keyword)

@@ -159,7 +159,7 @@ public class DbDriver
 		
 		try
 		{
-			if (this.classLoader == null)
+			if (this.classLoader == null && this.library != null)
 			{
 				StringTokenizer tok = new StringTokenizer(this.library, StringUtil.PATH_SEPARATOR);
 				URL[] url = new URL[tok.countTokens()];
@@ -173,11 +173,22 @@ public class DbDriver
 				this.classLoader = new URLClassLoader(url, this.getClass().getClassLoader());
 			}
 
-			// New Firebird 2.0 driver needs this, and it does not seem to do any harm
-			// for other drivers
-			Thread.currentThread().setContextClassLoader(classLoader);
+			Class drvClass = null;
+			if (this.classLoader != null && this.library != null)
+			{
+				// New Firebird 2.0 driver needs this, and it does not seem to do any harm
+				// for other drivers
+				Thread.currentThread().setContextClassLoader(classLoader);
+
+				drvClass = this.classLoader.loadClass(this.driverClass);
+			}
+			else
+			{
+				// Assume the driver class is available on the classpath
+				LogMgr.logDebug("DbDriver.loadDriverClass()", "Assuming drvierclass " + this.driverClass + " is in current classpath");
+				drvClass = Class.forName(this.driverClass);
+			}
 			
-			Class drvClass = this.classLoader.loadClass(this.driverClass);
 			this.driverClassInstance = (Driver)drvClass.newInstance();
 			if (Settings.getInstance().getBoolProperty("workbench.db.registerdriver", false))
 			{

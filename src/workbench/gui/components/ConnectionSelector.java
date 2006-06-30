@@ -134,9 +134,9 @@ public class ConnectionSelector
 	public void closeConnectingInfo()
 	{
 		WbSwingUtilities.showDefaultCursor(this.parent);
-		WbSwingUtilities.showDefaultCursor(this.connectingInfo);
 		if (this.connectingInfo != null)
 		{
+			WbSwingUtilities.showDefaultCursor(this.connectingInfo);
 			try
 			{
 				this.connectingInfo.setVisible(false);
@@ -251,6 +251,7 @@ public class ConnectionSelector
 
 		try
 		{
+			this.closeConnectingInfo();
 			if (connected)
 			{
 				final WbConnection theConnection = conn;
@@ -284,7 +285,6 @@ public class ConnectionSelector
 		}
 		finally
 		{
-			this.closeConnectingInfo();
 			client.connectEnded();
 			this.clearConnectIsInProgress();
 		}

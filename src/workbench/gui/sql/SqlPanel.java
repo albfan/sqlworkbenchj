@@ -172,7 +172,7 @@ public class SqlPanel
 	implements FontChangedListener, ActionListener, TextChangeListener,
 		PropertyChangeListener, ChangeListener, 
 		MainPanel, Exporter, TextFileContainer, DbUpdater, Interruptable, FormattableSql, Commitable,
-		JobErrorHandler, FilenameChangeListener, ExecutionController, ResultLogger, ParameterPrompter
+		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	private EditorPanel editor;
@@ -284,7 +284,7 @@ public class SqlPanel
 		JScrollPane scroll = new WbScrollPane(log);
 		this.resultTab.addTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_MSG), scroll);
 
-		this.editor.addFilenameChangeListener(this);
+		//this.editor.addFilenameChangeListener(this);
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
 		this.contentPanel.setOneTouchExpandable(true);
 		this.contentPanel.setContinuousLayout(true);
@@ -474,8 +474,9 @@ public class SqlPanel
 			String newFile = this.editor.getCurrentFileName();
 			if (newFile != null && !newFile.equals(oldFile))
 			{
-				return true;
+				this.fireFilenameChanged(this.editor.getCurrentFileName());
 			}
+			return true;
 		}
 		return false;
 	}
@@ -500,20 +501,15 @@ public class SqlPanel
 			this.fileDiscardAction.setEnabled(false);
 			this.fileReloadAction.setEnabled(false);
       this.fireFilenameChanged(this.tabName);
-			this.removeIconFromTab();
 			this.selectEditorLater();
 			return true;
     }
 		return false;
 	}
 
-	public void fileNameChanged(Object sender, String aNewName)
+	private void fireFilenameChanged(String aNewName)
 	{
-		this.fireFilenameChanged(aNewName);
-	}
-
-	public void fireFilenameChanged(String aNewName)
-	{
+		updateTabTitle();
 		if (this.filenameChangeListeners == null) return;
 		for (int i=0; i < this.filenameChangeListeners.size(); i++)
 		{
@@ -646,7 +642,7 @@ public class SqlPanel
 		this.copyAsSqlUpdate = new CopyAsSqlUpdateAction(null); 
 		this.actions.add(this.copyAsSqlUpdate);
 
-		this.copyAsSqlDeleteInsert = new CopyAsSqlDeleteInsertAction(null); //this.currentData.getTable().getCopyAsDeleteInsertAction();
+		this.copyAsSqlDeleteInsert = new CopyAsSqlDeleteInsertAction(null); 
 		this.actions.add(this.copyAsSqlDeleteInsert);
 
 		copySelectedMenu = WbTable.createCopySelectedMenu();
@@ -657,8 +653,8 @@ public class SqlPanel
 		this.importFileAction.setCreateMenuSeparator(true);
 		this.actions.add(this.importFileAction);
 
-		this.printDataAction = new PrintAction(null); //this.currentData.getTable().getPrintAction();
-		this.printPreviewAction = new PrintPreviewAction(null); //this.currentData.getTable().getPrintPreviewAction();
+		this.printDataAction = new PrintAction(null); 
+		this.printPreviewAction = new PrintPreviewAction(null); 
 
 		this.actions.add(this.executeAll);
 		this.actions.add(this.executeSelected);
@@ -1177,11 +1173,6 @@ public class SqlPanel
 		tab.setToolTipTextAt(index, tooltip);
 	}
 
-//	public String getName()
-//	{
-//		return this.getTabTitle();
-//	}
-	
 	public String getTabName()
 	{
 		return this.tabName;
@@ -2198,6 +2189,8 @@ public class SqlPanel
 
 			boolean onErrorAsk = !Settings.getInstance().getIgnoreErrors();
 
+            // Displays the first "result" tab. As no result is available
+            // at this point, it merely shows the message log
 			this.showResultPanel();
 
 			highlightCurrent = ((count > 1 || commandAtIndex > -1) && (!macroRun) && Settings.getInstance().getHighlightCurrentStatement());
@@ -2439,10 +2432,19 @@ public class SqlPanel
 		{
 			if (e instanceof OutOfMemoryError)
 			{
+				if (statementResult != null)
+				{
+					try { stmtRunner.statementDone(); } catch (Throwable th) {}
+					statementResult.clearResultData();
+				}
 				WbManager.getInstance().showOutOfMemoryError();
 			}
 			LogMgr.logError("SqlPanel.displayResult()", "Error executing statement", e);
-			if (statementResult != null) this.showLogMessage(statementResult.getMessageBuffer().toString());
+			if (statementResult != null)
+			{
+				this.showLogMessage(statementResult.getMessageBuffer().toString());
+				statementResult.clear();
+			}
 		}
 		finally
 		{
@@ -2812,14 +2814,14 @@ public class SqlPanel
 		if (this.currentData != null) this.currentData.clearContent();
 		this.currentData = null;
 		if (this.execListener != null) execListener.clear();
-		this.sqlHistory.clear();
-		this.editor.dispose();
+		if (this.sqlHistory != null) this.sqlHistory.clear();
+		if (this.editor != null) this.editor.dispose();
 		this.editor = null;
-		this.actions.clear();
-		this.toolbarActions.clear();
-		this.filenameChangeListeners.clear();
-		this.execListener.clear();
-		this.toolbar.removeAll();
+		if (this.actions != null) this.actions.clear();
+		if (this.toolbarActions != null) this.toolbarActions.clear();
+		if (this.filenameChangeListeners != null) this.filenameChangeListeners.clear();
+		if (this.execListener != null) this.execListener.clear();
+		if (this.toolbar != null) this.toolbar.removeAll();
 		this.toolbar = null;
 		this.abortExecution();
 		this.executionThread = null;

@@ -14,10 +14,10 @@ package workbench.storage;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionProfile;
 
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
@@ -196,7 +196,7 @@ public class StatementFactory
 		boolean newLineAfterColumn = doFormatting && (cols > columnThresholdForNewline);
 		boolean skipIdentityCols = Settings.getInstance().getFormatInsertIgnoreIdentity();
 		int colsPerLine = Settings.getInstance().getFormatInsertColsPerLine();
-		boolean includeNulls = this.dbConnection.getProfile().getIncludeNullInInsert();
+		boolean includeNulls = (this.dbConnection.getProfile() == null ? false : this.dbConnection.getProfile().getIncludeNullInInsert());
 		
 		ArrayList values = new ArrayList(cols);
 		StringBuffer sql = new StringBuffer(250);
@@ -405,8 +405,10 @@ public class StatementFactory
 		this.dbConnection = conn;
 		if (this.dbConnection != null)
 		{
-			emptyStringIsNull = this.dbConnection.getProfile().getEmptyStringIsNull();
+			ConnectionProfile prof = dbConnection.getProfile();
+			emptyStringIsNull = (prof == null ? true : prof.getEmptyStringIsNull());
+			literalFormatter = new SqlLiteralFormatter(dbConnection.getDatabaseProductName());
 		}
-		this.literalFormatter = new SqlLiteralFormatter(conn.getDatabaseProductName());
+		
 	}
 }

@@ -66,10 +66,10 @@ public class TableSearcher
 			if (this.query != null)
 			{
 				this.query.cancel();
-				if (this.connection.cancelNeedsReconnect())
-				{
-					this.connection.reconnect();
-				}
+//				if (this.connection.cancelNeedsReconnect())
+//				{
+//					this.connection.reconnect();
+//				}
 			}
 		}
 		catch (Throwable e)

@@ -14,7 +14,6 @@ package workbench.db.oracle;
 import java.io.IOException;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
-import workbench.sql.formatter.Token;
 
 /**
  * @author support@sql-workbench.net
@@ -63,7 +62,7 @@ public class OraclePackageParser
 		throws IOException
 	{
 		SQLLexer lexer = new SQLLexer(sql);
-		SQLToken t = (SQLToken)lexer.getNextToken(false, false);
+		SQLToken t = lexer.getNextToken(false, false);
 		
 		// we expect the package definition to come before the body!
 		int defBegin = t.getCharBegin();
@@ -134,7 +133,7 @@ public class OraclePackageParser
 					break;
 				}
 			}
-			t = (SQLToken)lexer.getNextToken(false, false);
+			t = lexer.getNextToken(false, false);
 		}
 		if (defBegin > -1 && defEnd > defBegin)
 		{
@@ -149,7 +148,7 @@ public class OraclePackageParser
 	private SQLToken findEnd(SQLLexer lexer, String name)
 		throws IOException
 	{
-		SQLToken t = (SQLToken)lexer.getNextToken(false, false);
+		SQLToken t = lexer.getNextToken(false, false);
 		boolean lastWasEnd = false;
 		
 		while (t != null)
@@ -160,7 +159,7 @@ public class OraclePackageParser
 			}
 			else if (lastWasEnd && name.equalsIgnoreCase(t.getContents()))
 			{
-				SQLToken t2 = (SQLToken)lexer.getNextToken(false, false);
+				SQLToken t2 = lexer.getNextToken(false, false);
 				if (t2 != null) return t2;
 				else return t;
 			}
@@ -168,7 +167,7 @@ public class OraclePackageParser
 			{
 				lastWasEnd = false;
 			}
-			t = (SQLToken)lexer.getNextToken(false, false);
+			t = lexer.getNextToken(false, false);
 		}
 		return null;
 	}

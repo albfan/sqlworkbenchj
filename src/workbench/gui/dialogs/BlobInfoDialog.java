@@ -13,8 +13,10 @@ package workbench.gui.dialogs;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import javax.swing.ActionMap;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -23,10 +25,13 @@ import workbench.gui.actions.EscAction;
 import workbench.gui.components.BlobHandler;
 import workbench.gui.components.EncodingPanel;
 import workbench.gui.components.FlatButton;
-import workbench.gui.components.WbButton;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
+import workbench.util.StringUtil;
+import workbench.util.ToolDefinition;
 
 /**
  *
@@ -34,7 +39,7 @@ import workbench.util.FileDialogUtil;
  */
 public class BlobInfoDialog
 	extends JDialog
-	implements java.awt.event.MouseListener, java.awt.event.ActionListener, java.awt.event.WindowListener
+	implements ActionListener
 {
 	private Object blobValue;
 	private BlobHandler handler;
@@ -56,6 +61,26 @@ public class BlobInfoDialog
 
 		String encoding = Settings.getInstance().getDefaultBlobTextEncoding();
 		encodingPanel.setEncoding(encoding);
+		ToolDefinition[] tools = Settings.getInstance().getExternalTools();
+		boolean hasTools = (tools != null && tools.length > 0);
+		this.externalViewer.setEnabled(hasTools);
+		this.externalTools.setEnabled(hasTools);
+		if (hasTools)
+		{
+			this.externalTools.setModel(new DefaultComboBoxModel(tools));
+			String name = Settings.getInstance().getLastUsedBlobTool();
+			if (name != null)
+			{
+				for (int i = 0; i < tools.length; i++)
+				{
+					if (name.equals(tools[i].getName()))
+					{
+						this.externalTools.setSelectedIndex(i);
+						break;
+					}
+				}
+			}
+		}
 		WbSwingUtilities.center(this, parent);
 	}
 
@@ -110,6 +135,24 @@ public class BlobInfoDialog
 		showHexButton.setEnabled(len > 0);
 	}
 
+	private void openWithExternalViewer()
+	{
+		try
+		{
+			File f = File.createTempFile("wb$", ".data");
+			f.deleteOnExit();
+			handler.saveBlobToFile(this.blobValue, f.getAbsolutePath());
+			ToolDefinition tool = (ToolDefinition)this.externalTools.getSelectedItem();
+			tool.runApplication(f.getAbsolutePath());
+			Settings.getInstance().setLastUsedBlobTool(tool.getName());
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("BlobInfoDialog.openWithExternalViewer()", "Error running external program", e);
+			String msg = ExceptionUtil.getDisplay(e);
+			WbSwingUtilities.showErrorMessage(this, msg);
+		}		
+	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -129,16 +172,30 @@ public class BlobInfoDialog
     showImageButton = new FlatButton();
     uploadButton = new FlatButton();
     showHexButton = new FlatButton();
+    externalViewer = new javax.swing.JButton();
+    externalTools = new javax.swing.JComboBox();
 
     getContentPane().setLayout(new java.awt.GridBagLayout());
 
     setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
     setTitle(ResourceMgr.getString("TxtBlobInfo"));
     setResizable(false);
-    addWindowListener(this);
+    addWindowListener(new java.awt.event.WindowAdapter()
+    {
+      public void windowClosed(java.awt.event.WindowEvent evt)
+      {
+        formWindowClosed(evt);
+      }
+    });
 
     closeButton.setText(ResourceMgr.getString("LblClose"));
-    closeButton.addMouseListener(this);
+    closeButton.addMouseListener(new java.awt.event.MouseAdapter()
+    {
+      public void mouseClicked(java.awt.event.MouseEvent evt)
+      {
+        closeButtonMouseClicked(evt);
+      }
+    });
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -155,70 +212,134 @@ public class BlobInfoDialog
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(13, 10, 0, 8);
+    gridBagConstraints.insets = new java.awt.Insets(15, 10, 0, 8);
     jPanel1.add(infoLabel, gridBagConstraints);
 
     showAsTextButton.setText(ResourceMgr.getString("LblShowAsTxt"));
-    showAsTextButton.addMouseListener(this);
+    showAsTextButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        showAsTextButtonActionPerformed(evt);
+      }
+    });
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.5;
-    gridBagConstraints.insets = new java.awt.Insets(0, 8, 14, 5);
+    gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 5);
     jPanel1.add(showAsTextButton, gridBagConstraints);
 
     saveAsButton.setText(ResourceMgr.getString("MnuTxtFileSaveAs"));
-    saveAsButton.addMouseListener(this);
+    saveAsButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        saveAsButtonActionPerformed(evt);
+      }
+    });
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.5;
-    gridBagConstraints.insets = new java.awt.Insets(9, 8, 2, 5);
+    gridBagConstraints.insets = new java.awt.Insets(9, 10, 2, 5);
     jPanel1.add(saveAsButton, gridBagConstraints);
 
+    encodingPanel.setLabelVisible(false);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 14, 8);
+    gridBagConstraints.weightx = 0.5;
+    gridBagConstraints.insets = new java.awt.Insets(5, 6, 0, 10);
     jPanel1.add(encodingPanel, gridBagConstraints);
 
     showImageButton.setText(ResourceMgr.getString("LblShowAsImg"));
-    showImageButton.addMouseListener(this);
+    showImageButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        showImageButtonActionPerformed(evt);
+      }
+    });
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(16, 8, 2, 5);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 0.5;
+    gridBagConstraints.insets = new java.awt.Insets(16, 10, 2, 5);
     jPanel1.add(showImageButton, gridBagConstraints);
 
     uploadButton.setText(ResourceMgr.getString("LblUploadFile"));
-    uploadButton.addMouseListener(this);
+    uploadButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        uploadButtonActionPerformed(evt);
+      }
+    });
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 0.5;
-    gridBagConstraints.insets = new java.awt.Insets(9, 8, 2, 5);
+    gridBagConstraints.insets = new java.awt.Insets(9, 8, 2, 10);
     jPanel1.add(uploadButton, gridBagConstraints);
 
     showHexButton.setText(ResourceMgr.getString("LblShowAsHex"));
-    showHexButton.addMouseListener(this);
+    showHexButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        showHexButtonActionPerformed(evt);
+      }
+    });
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(16, 6, 2, 5);
+    gridBagConstraints.insets = new java.awt.Insets(16, 8, 2, 10);
     jPanel1.add(showHexButton, gridBagConstraints);
+
+    externalViewer.setText(ResourceMgr.getString("LblExternalView"));
+    externalViewer.setToolTipText(ResourceMgr.getDescription("LblExternalView"));
+    externalViewer.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        externalViewerActionPerformed(evt);
+      }
+    });
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 0.5;
+    gridBagConstraints.insets = new java.awt.Insets(7, 10, 11, 5);
+    jPanel1.add(externalViewer, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 0.5;
+    gridBagConstraints.insets = new java.awt.Insets(7, 6, 11, 10);
+    jPanel1.add(externalTools, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -231,129 +352,76 @@ public class BlobInfoDialog
     getContentPane().add(jPanel1, gridBagConstraints);
 
     pack();
-  }
-
-  // Code for dispatching events from components to event handlers.
-
-  public void mouseClicked(java.awt.event.MouseEvent evt)
-  {
-    if (evt.getSource() == closeButton)
-    {
-      BlobInfoDialog.this.closeButtonMouseClicked(evt);
-    }
-    else if (evt.getSource() == showAsTextButton)
-    {
-      BlobInfoDialog.this.showAsTextButtonMouseClicked(evt);
-    }
-    else if (evt.getSource() == saveAsButton)
-    {
-      BlobInfoDialog.this.saveAsButtonMouseClicked(evt);
-    }
-    else if (evt.getSource() == showImageButton)
-    {
-      BlobInfoDialog.this.showImageButtonMouseClicked(evt);
-    }
-    else if (evt.getSource() == uploadButton)
-    {
-      BlobInfoDialog.this.uploadButtonMouseClicked(evt);
-    }
-    else if (evt.getSource() == showHexButton)
-    {
-      BlobInfoDialog.this.showHexButtonMouseClicked(evt);
-    }
-  }
-
-  public void mouseEntered(java.awt.event.MouseEvent evt)
-  {
-  }
-
-  public void mouseExited(java.awt.event.MouseEvent evt)
-  {
-  }
-
-  public void mousePressed(java.awt.event.MouseEvent evt)
-  {
-  }
-
-  public void mouseReleased(java.awt.event.MouseEvent evt)
-  {
-  }
-
-  public void windowActivated(java.awt.event.WindowEvent evt)
-  {
-  }
-
-  public void windowClosed(java.awt.event.WindowEvent evt)
-  {
-    if (evt.getSource() == BlobInfoDialog.this)
-    {
-      BlobInfoDialog.this.formWindowClosed(evt);
-    }
-  }
-
-  public void windowClosing(java.awt.event.WindowEvent evt)
-  {
-  }
-
-  public void windowDeactivated(java.awt.event.WindowEvent evt)
-  {
-  }
-
-  public void windowDeiconified(java.awt.event.WindowEvent evt)
-  {
-  }
-
-  public void windowIconified(java.awt.event.WindowEvent evt)
-  {
-  }
-
-  public void windowOpened(java.awt.event.WindowEvent evt)
-  {
   }// </editor-fold>//GEN-END:initComponents
 
-	private void showHexButtonMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_showHexButtonMouseClicked
-	{//GEN-HEADEREND:event_showHexButtonMouseClicked
+	private void showHexButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showHexButtonActionPerformed
+	{//GEN-HEADEREND:event_showHexButtonActionPerformed
 		HexViewer v = new HexViewer(this, ResourceMgr.getString("TxtBlobData"));
 		v.setData(handler.getBlobAsArray(this.blobValue));
 		v.setVisible(true);
 		closeWindow();		
-		
-	}//GEN-LAST:event_showHexButtonMouseClicked
+	}//GEN-LAST:event_showHexButtonActionPerformed
 
-	private void uploadButtonMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_uploadButtonMouseClicked
-	{//GEN-HEADEREND:event_uploadButtonMouseClicked
+	private void showAsTextButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showAsTextButtonActionPerformed
+	{//GEN-HEADEREND:event_showAsTextButtonActionPerformed
+		handler.showBlobAsText(this, this.blobValue, encodingPanel.getEncoding());
+		closeWindow();
+	}//GEN-LAST:event_showAsTextButtonActionPerformed
+
+	private void saveAsButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_saveAsButtonActionPerformed
+	{//GEN-HEADEREND:event_saveAsButtonActionPerformed
+		long fileSize = -1;
+		try
+		{
+			String file = FileDialogUtil.getBlobFile(this);
+			if (file == null) return;
+			
+			fileSize = handler.saveBlobToFile(blobValue, file);
+			String msg = ResourceMgr.getString("MsgBlobSaved");
+			File f = new File(file);
+			msg = StringUtil.replace(msg, "%filename%", f.getAbsolutePath());
+			fileSize = f.length();
+			msg = StringUtil.replace(msg, "%size%", Long.toString(fileSize));
+			WbSwingUtilities.showMessage(this, msg);
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("WbTable.saveBlobContent", "Error when writing data file", ex);
+			String msg = ResourceMgr.getString("ErrBlobSaveError");
+			msg += "\n" + ExceptionUtil.getDisplay(ex);
+			WbSwingUtilities.showErrorMessage(this, msg);
+		}
+		
+	}//GEN-LAST:event_saveAsButtonActionPerformed
+
+	private void uploadButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_uploadButtonActionPerformed
+	{//GEN-HEADEREND:event_uploadButtonActionPerformed
 		String file = FileDialogUtil.getBlobFile(this, false);
 		if (file != null)
 		{
 			this.uploadFile = new File(file);
 		}
 		closeWindow();
-	}//GEN-LAST:event_uploadButtonMouseClicked
+	}//GEN-LAST:event_uploadButtonActionPerformed
 
-	private void showImageButtonMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_showImageButtonMouseClicked
-	{//GEN-HEADEREND:event_showImageButtonMouseClicked
+	private void showImageButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showImageButtonActionPerformed
+	{//GEN-HEADEREND:event_showImageButtonActionPerformed
 		ImageViewer v = new ImageViewer(this, ResourceMgr.getString("TxtBlobData"));
 		v.setData(this.blobValue);
 		v.setVisible(true);
 		closeWindow();
-	}//GEN-LAST:event_showImageButtonMouseClicked
+	}//GEN-LAST:event_showImageButtonActionPerformed
+
+	private void externalViewerActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_externalViewerActionPerformed
+	{//GEN-HEADEREND:event_externalViewerActionPerformed
+		openWithExternalViewer();
+	}//GEN-LAST:event_externalViewerActionPerformed
 
 	private void formWindowClosed(java.awt.event.WindowEvent evt)//GEN-FIRST:event_formWindowClosed
 	{//GEN-HEADEREND:event_formWindowClosed
 		String encoding = encodingPanel.getEncoding();
 		Settings.getInstance().setDefaultBlobTextEncoding(encoding);
 	}//GEN-LAST:event_formWindowClosed
-
-	private void saveAsButtonMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_saveAsButtonMouseClicked
-	{//GEN-HEADEREND:event_saveAsButtonMouseClicked
-		handler.saveBlobToFile(this, blobValue);
-	}//GEN-LAST:event_saveAsButtonMouseClicked
-
-	private void showAsTextButtonMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_showAsTextButtonMouseClicked
-	{//GEN-HEADEREND:event_showAsTextButtonMouseClicked
-		handler.showBlobAsText(this, this.blobValue, encodingPanel.getEncoding());
-		closeWindow();
-	}//GEN-LAST:event_showAsTextButtonMouseClicked
 
 	private void closeButtonMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_closeButtonMouseClicked
 	{//GEN-HEADEREND:event_closeButtonMouseClicked
@@ -363,6 +431,8 @@ public class BlobInfoDialog
   // Variables declaration - do not modify//GEN-BEGIN:variables
   public javax.swing.JButton closeButton;
   public workbench.gui.components.EncodingPanel encodingPanel;
+  public javax.swing.JComboBox externalTools;
+  public javax.swing.JButton externalViewer;
   public javax.swing.JLabel infoLabel;
   public javax.swing.JPanel jPanel1;
   public javax.swing.JButton saveAsButton;

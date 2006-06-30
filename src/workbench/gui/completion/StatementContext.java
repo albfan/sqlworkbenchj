@@ -62,6 +62,10 @@ public class StatementContext
 			{
 				analyzer = new InsertAnalyzer(conn, sql, pos);
 			}
+			else if ("CREATE".equalsIgnoreCase(verb))
+			{
+				analyzer = new CreateAnalyzer(conn, sql, pos);
+			}
 		}
 		
 		if (analyzer != null)
@@ -70,6 +74,12 @@ public class StatementContext
 		}
 	}
 
+	public boolean isKeywordList()
+	{
+		if (analyzer == null) return false;
+		return analyzer.isKeywordList();
+	}
+	
 	public boolean appendDotToSelection()
 	{
 		if (analyzer == null) return false;
@@ -95,10 +105,9 @@ public class StatementContext
 	{
 		try
 		{
-			Reader in = new StringReader(sql);
-			SQLLexer lexer = new SQLLexer(in);
+			SQLLexer lexer = new SQLLexer(sql);
 
-			SQLToken t = (SQLToken)lexer.getNextToken(false, false);
+			SQLToken t = lexer.getNextToken(false, false);
 			SQLToken lastToken = null;
 			
 			int lastStart = 0;
@@ -159,7 +168,7 @@ public class StatementContext
 				{
 					if (t.getContents().equals("UNION"))
 					{
-						SQLToken t2 = (SQLToken)lexer.getNextToken(false, false);
+						SQLToken t2 = lexer.getNextToken(false, false);
 						if (t2.getContents().equals("ALL"))
 						{
 							// swallow potential UNION ALL
@@ -187,7 +196,7 @@ public class StatementContext
 				}
 
 				lastToken = t;
-				t = (SQLToken)lexer.getNextToken(false, false);
+				t = lexer.getNextToken(false, false);
 			}
 			
 			if (unionStarts.size() > 0)

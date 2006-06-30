@@ -12,7 +12,6 @@
 package workbench.gui.completion;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -21,8 +20,8 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
-import workbench.sql.formatter.Token;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -200,7 +199,7 @@ public class SelectAnalyzer
 			boolean inONPart = false;
 			int lastJoin = -1;
 			SQLLexer lexer = new SQLLexer(this.sql);
-			Token token = lexer.getNextToken(false, false);
+			SQLToken token = lexer.getNextToken(false, false);
 			int bracketCount = 0;
 			while (token != null)
 			{

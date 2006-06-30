@@ -12,15 +12,17 @@
 package workbench.gui.completion;
 
 import java.awt.Toolkit;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
+import workbench.util.TextlistReader;
 
 /**
  * Base class to analyze a SQL statement to find out what kind and which 
@@ -29,7 +31,8 @@ import workbench.util.StringUtil;
  */
 public abstract class BaseAnalyzer
 {
-	public static final String WORD_DELIM = ",;()@.";
+	public static final String QUALIFIER_DELIM = "<>!/{}\\#%[]'\"().,:;";
+	public static final String WORD_DELIM = QUALIFIER_DELIM + "@";
 	
 	protected static final int NO_CONTEXT = -1;
 	
@@ -41,10 +44,18 @@ public abstract class BaseAnalyzer
 
 	// List the tables that are available in the FROM list
 	protected static final int CONTEXT_FROM_LIST = 3;
-	
+
 	protected static final int CONTEXT_TABLE_OR_COLUMN_LIST = 4;
+	
+	// List keywords available at this point
+	protected static final int CONTEXT_KW_LIST = 5;
+	
+	// List keywords available at this point
+	protected static final int CONTEXT_INDEX_LIST = 6;
+	
 	private final SelectAllMarker allColumnsMarker = new SelectAllMarker();
 	private String typeFilter;
+	protected String keywordFile;
 	protected WbConnection dbConnection;
 	protected final String sql;
 	protected final int cursorPos;
@@ -94,6 +105,11 @@ public abstract class BaseAnalyzer
 	{
 		return this.appendDot;
 	}
+
+	public boolean isKeywordList()
+	{
+		return this.context == CONTEXT_KW_LIST;
+	}
 	
 	public boolean getOverwriteCurrentWord() 
 	{ 
@@ -106,6 +122,7 @@ public abstract class BaseAnalyzer
 		this.elements = null;
 		this.context = NO_CONTEXT;
 		this.typeFilter = null;
+		this.keywordFile = null;
 
 		checkOverwrite();
 		this.addAllMarker = false;
@@ -151,6 +168,22 @@ public abstract class BaseAnalyzer
 			// element list has already been filled
 			this.title = ResourceMgr.getString("LblCompletionListTables");
 		}
+		else if (context == CONTEXT_KW_LIST)
+		{
+			// element list has already been filled
+			this.title = ResourceMgr.getString("LblCompletionListKws");
+			this.elements = readKeywords();
+		}
+//		else if (context == CONTEXT_INDEX_LIST)
+//		{
+//			this.title = ResourceMgr.getString("LblCompletionListIndex");
+//			IndexDefinition[] idx = this.dbConnection.getMetadata().getIndexList(this.schemaForTableList);
+//			this.elements = new ArrayList();
+//			for (int i = 0; i < idx.length; i++)
+//			{
+//				this.elements.add(idx[i].getName());
+//			}
+//		}
 		else
 		{
 			// no proper sql found
@@ -164,6 +197,15 @@ public abstract class BaseAnalyzer
 		}
 	}
 
+	private List readKeywords()
+	{
+		if (this.keywordFile == null) return null;
+		InputStream in = getClass().getResourceAsStream(keywordFile);
+		TextlistReader reader = new TextlistReader(in);
+		List result = new ArrayList(reader.getValues());
+		return result;
+	}
+	
 	private void retrieveTables()
 	{
 		Set tables = this.dbConnection.getObjectCache().getTables(schemaForTableList, typeFilter);
@@ -220,7 +262,7 @@ public abstract class BaseAnalyzer
 		// if no dot is present, then the current word is not a qualifier (e.g. a table name or alias)
 		if (c != '.') return null;
 		
-		String word = StringUtil.getWordLeftOfCursor(this.sql, start, ";[]'\"().");
+		String word = StringUtil.getWordLeftOfCursor(this.sql, start, QUALIFIER_DELIM);
 		if (word == null) return null;
 		int dotPos= word.indexOf('.');
 		

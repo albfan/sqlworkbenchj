@@ -216,7 +216,8 @@ public class WbManager
 
 	public void showOutOfMemoryError()
 	{
-		WbSwingUtilities.showErrorMessage(getCurrentWindow(), ResourceMgr.getString("MsgOutOfMemoryError"));		
+		System.gc();
+		WbSwingUtilities.showErrorMessage(getCurrentWindow(), ResourceMgr.getString("MsgOutOfMemoryError"));
 	}
 	
 	public MainWindow getCurrentWindow()
@@ -767,34 +768,40 @@ public class WbManager
 	private static final String ARG_SHOW_PUMPER = "datapumper";
 	private static final String ARG_SHOW_DBEXP = "dbexplorer";
 
+	public static ArgumentParser createArgumentParser()
+	{
+		ArgumentParser parser = new ArgumentParser();
+		parser.addArgument(ARG_PROFILE);
+		parser.addArgument(ARG_PROFILE_STORAGE);
+		parser.addArgument(ARG_CONFIGDIR);
+		parser.addArgument(ARG_LIBDIR);
+		parser.addArgument(ARG_SCRIPT);
+		parser.addArgument(ARG_LOGFILE);
+		parser.addArgument(ARG_ABORT);
+		parser.addArgument(ARG_SUCCESS_SCRIPT);
+		parser.addArgument(ARG_ERROR_SCRIPT);
+		parser.addArgument(ARG_VARDEF);
+
+		parser.addArgument(ARG_CONN_URL);
+		parser.addArgument(ARG_CONN_DRIVER);
+		parser.addArgument(ARG_CONN_JAR);
+		parser.addArgument(ARG_CONN_USER);
+		parser.addArgument(ARG_CONN_PWD);
+		parser.addArgument(ARG_SHOW_PUMPER);
+		parser.addArgument(ARG_IGNORE_DROP);
+		parser.addArgument(ARG_DISPLAY_RESULT);
+		parser.addArgument(ARG_SHOW_DBEXP);
+		parser.addArgument(ARG_SHOW_TIMING);
+		parser.addArgument(ARG_SHOWPROGRESS);
+		return parser;
+	}
+	
 	private void initCmdLine(String[] args)
 	{
 		trace("WbManager.initCmdLine() - start");
 
-		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(ARG_PROFILE);
-		cmdLine.addArgument(ARG_PROFILE_STORAGE);
-		cmdLine.addArgument(ARG_CONFIGDIR);
-		cmdLine.addArgument(ARG_LIBDIR);
-		cmdLine.addArgument(ARG_SCRIPT);
-		cmdLine.addArgument(ARG_LOGFILE);
-		cmdLine.addArgument(ARG_ABORT);
-		cmdLine.addArgument(ARG_SUCCESS_SCRIPT);
-		cmdLine.addArgument(ARG_ERROR_SCRIPT);
-		cmdLine.addArgument(ARG_VARDEF);
-
-		cmdLine.addArgument(ARG_CONN_URL);
-		cmdLine.addArgument(ARG_CONN_DRIVER);
-		cmdLine.addArgument(ARG_CONN_JAR);
-		cmdLine.addArgument(ARG_CONN_USER);
-		cmdLine.addArgument(ARG_CONN_PWD);
-		cmdLine.addArgument(ARG_SHOW_PUMPER);
-		cmdLine.addArgument(ARG_IGNORE_DROP);
-		cmdLine.addArgument(ARG_DISPLAY_RESULT);
-		cmdLine.addArgument(ARG_SHOW_DBEXP);
-		cmdLine.addArgument(ARG_SHOW_TIMING);
-		cmdLine.addArgument(ARG_SHOWPROGRESS);
-
+		cmdLine = createArgumentParser();
+		
 		try
 		{
 			cmdLine.parse(args);
@@ -972,6 +979,16 @@ public class WbManager
 		this.doShutdown(exitCode);
 	}
 
+	/**
+	 * For testing purposes only!
+	 */
+	public static void prepareForTest(String configDir)
+	{
+		wb = new WbManager();
+		String args[] = { "-configdir=" + configDir };
+		wb.initCmdLine(args);
+	}
+	
 	public static void main(String[] args)
 	{
 		wb = new WbManager();

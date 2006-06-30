@@ -267,7 +267,7 @@ public class DefaultStatementRunner
 		}
 
 		String verbs = Settings.getInstance().getProperty("workbench.db.ignore." + meta.getDbId(), "");
-		List l = StringUtil.stringToList(verbs, ",");
+		List l = StringUtil.stringToList(verbs, ",", true, true);
 		for (int i=0; i < l.size(); i++)
 		{
 			String verb = (String)l.get(i);
@@ -306,6 +306,11 @@ public class DefaultStatementRunner
 	public void runStatement(String aSql, int maxRows, int queryTimeout)
 		throws SQLException, Exception
 	{
+        if (this.result != null)
+        {
+            this.result.clear();
+        }
+        
 		// Silently ignore empty statements
 		if (aSql == null || aSql.trim().length() == 0)
 		{

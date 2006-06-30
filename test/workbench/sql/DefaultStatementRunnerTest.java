@@ -72,14 +72,6 @@ public class DefaultStatementRunnerTest
 		super(testName);
 	}
 
-	protected void setUp() throws Exception
-	{
-	}
-
-	protected void tearDown() throws Exception
-	{
-	}
-
 	/**
 	 * Test of getCommandToUse method, of class workbench.sql.DefaultStatementRunner.
 	 */

@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.DDLFilter;
 import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.Token;
+import workbench.sql.formatter.SQLToken;
 
 /**
  * @author support@sql-workbench.net
@@ -52,7 +52,7 @@ public class PostgresDDLFilter
 		
 		try
 		{
-			Token t = lexer.getNextToken(false, false);
+			SQLToken t = lexer.getNextToken(false, false);
 			
 			while (t != null)
 			{

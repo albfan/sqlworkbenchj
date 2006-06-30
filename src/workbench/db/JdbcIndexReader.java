@@ -36,7 +36,7 @@ public class JdbcIndexReader
 	public void indexInfoProcessed()
 	{
 	}
-	
+
 	public ResultSet getIndexInfo(TableIdentifier table, boolean unique)
 		throws SQLException
 	{

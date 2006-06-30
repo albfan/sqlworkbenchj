@@ -1293,7 +1293,7 @@ public class MainWindow
 					}
 				});
 				sql.disconnect();
-				if (conn != null) mgr.disconnect(conn.getId());
+				if (conn != null) mgr.disconnect(conn);
 			}
 			this.closeExplorerWindows(true);
 		}
@@ -1484,11 +1484,13 @@ public class MainWindow
 	public JMenu getMenu(String aName, int panelIndex)
 	{
 		if (panelIndex < 0 || panelIndex >= this.panelMenus.size()) return null;
+		if (aName == null) return null;
 		JMenuBar menubar = (JMenuBar)this.panelMenus.get(panelIndex);
 		int count = menubar.getMenuCount();
 		for (int k=0; k < count; k++)
 		{
 			JMenu item = menubar.getMenu(k);
+			if (item == null) continue;
 			if (aName.equals(item.getName())) return item;
 		}
 		return null;
@@ -1711,7 +1713,7 @@ public class MainWindow
 				WbConnection conn = p.getConnection();
 				if (conn != this.currentConnection)
 				{
-					ConnectionMgr.getInstance().disconnect(conn.getId());
+					ConnectionMgr.getInstance().disconnect(conn);
 				}
 			}
 			p.disconnect();
@@ -2073,20 +2075,22 @@ public class MainWindow
 
 		String realFilename = FileDialogUtil.replaceConfigDir(filename);
 
+		// Make a backup of the existing workspace 
+		// if saving of the workspace fails, the backup
+		// will be renamed back to the original name
+		// otherwise it will be deleted if no backups should be made
 		File f = new File(realFilename);
-		if (Settings.getInstance().getCreateWorkspaceBackup())
+		File bck = new File(realFilename + ".bck");
+		try
 		{
-			File bck = new File(realFilename + ".bck");
-			try
-			{
-				bck.delete();
-				f.renameTo(bck);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logWarning("MainWindow.saveWorkspace()", "Error when creating backup file!", e);
-			}
+			bck.delete();
+			f.renameTo(bck);
 		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("MainWindow.saveWorkspace()", "Error when creating backup file!", e);
+		}
+
 
 		try
 		{
@@ -2107,6 +2111,10 @@ public class MainWindow
 			{
 				MainPanel p = getSqlPanel(i);
 				p.saveToWorkspace(w,i);
+			}
+			if (!Settings.getInstance().getCreateWorkspaceBackup())
+			{
+				bck.delete();
 			}
 		}
 		catch (Throwable e)
@@ -2345,37 +2353,31 @@ public class MainWindow
 	{
 		int index = this.getCurrentPanelIndex();
 		if (index <= 0) return;
-		SqlPanel p = (SqlPanel) this.getSqlPanel(index);
-		this.sqlTab.remove(index);
-		index --;
-		this.sqlTab.add(p, index);
-		this.sqlTab.setSelectedIndex(index);
-		renumberTabs();
-		this.validate();
+		moveTab(index, index - 1);
 	}
 
 	/**
 	 * Moves the current sql tab to the right (i.e. index := index + 1)
-	 * If index denotes the last SQL Tab, nothing happens
+	 * If oldIndex denotes the last SQL Tab, nothing happens
 	 */
 	public void moveTabRight()
 	{
 		int index = this.getCurrentPanelIndex();
 		int lastIndex = this.getLastSqlPanelIndex();
 		if (index >= lastIndex) return;
-		SqlPanel p = (SqlPanel) this.getSqlPanel(index);
-		this.sqlTab.remove(index);
-		//removeFromViewMenu(index);
-		index ++;
-		this.sqlTab.add(p, index);
-		this.sqlTab.setSelectedIndex(index);
-		SelectTabAction a = new SelectTabAction(this.sqlTab, index);
-		a.setMenuText(getPlainTabTitle(index));
-		//addToViewMenu(a);
-		renumberTabs();
-		this.validate();
+		moveTab(index, index + 1);
 	}
 
+	private void moveTab(int oldIndex, int newIndex)
+	{
+		SqlPanel p = (SqlPanel) this.getSqlPanel(oldIndex);
+		this.sqlTab.remove(oldIndex);
+		this.sqlTab.add(p, newIndex);
+		this.sqlTab.setSelectedIndex(newIndex);
+		renumberTabs();
+		this.tabSelected(newIndex);
+		this.validate();
+	}
 	/**
 	 * Removes the tab at the give location. If the current profile
 	 * uses a separate connection per tab, then a disconnect will be

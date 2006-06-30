@@ -23,8 +23,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.Token;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 

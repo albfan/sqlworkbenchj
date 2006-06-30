@@ -41,20 +41,26 @@ public class ScriptParser
 	private ArrayList commands = null;
 	private String delimiter = ";";
 	private String alternateDelimiter;
-	private int currentIteratorIndex = 0;
+	private int currentIteratorIndex = -42;
 	private boolean checkEscapedQuotes = true;
 	private IteratingScriptParser iteratingParser = null;
 	private boolean emptyLineIsSeparator = false;
 	private boolean supportOracleInclude = true;
 	private boolean checkSingleLineCommands = true;
+	private int maxFileSize;
 	
+	public ScriptParser()
+	{
+		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
+	}
 	/** Create a ScriptParser
 	 *
 	 *	The actual script needs to be specified with setScript()
 	 *  The delimiter will be evaluated dynamically
 	 */
-	public ScriptParser()
+	public ScriptParser(int fileSize)
 	{
+		maxFileSize = fileSize;
 	}
 
 	/**
@@ -82,6 +88,7 @@ public class ScriptParser
 	{
 		setFile(f, null);
 	}
+	
 	/**
 	 * Define the source file for this ScriptParser.
 	 * Depending on the size the file might be read into memory or not
@@ -91,7 +98,7 @@ public class ScriptParser
 	{
 		if (!f.exists()) throw new FileNotFoundException(f.getName() + " not found");
 		
-		if (f.length() < Settings.getInstance().getInMemoryScriptSizeThreshold())
+		if (f.length() < this.maxFileSize)
 		{
 			this.readScriptFromFile(f, encoding);
 			this.findDelimiterToUse();
@@ -355,6 +362,7 @@ public class ScriptParser
 		{
 			this.iteratingParser.done();
 		}
+		this.currentIteratorIndex = -42;
 	}
 
 	/**
@@ -420,6 +428,7 @@ public class ScriptParser
 	 */
 	public boolean hasNext()
 	{
+		if (this.currentIteratorIndex == -42) throw new IllegalStateException("Iterator not initialized");
 		if (this.iteratingParser != null)
 		{
 			return this.iteratingParser.hasMoreCommands();
@@ -432,18 +441,35 @@ public class ScriptParser
 
 	/**
 	 * Return the next {@link ScriptCommandDefinition} from the script. 
+	 * This is delegated to {@link #getNextCommand()}
+	 * @throws IllegalStateException if the Iterator has not been initialized using {@link #getIterator()}
 	 * @see IteratingScriptParser#getNextCommand()
+	 * @see #getNextCommand()
 	 */
 	public Object next()
 	{
-		Object result = null;
+		if (this.currentIteratorIndex == -42) throw new IllegalStateException("Iterator not initialized");
+		return getNextCommand();
+	}
+
+	/**
+	 * Return the next {@link ScriptCommandDefinition} from the script. 
+	 * This is delegated to {@link #getNextCommand()}
+	 * @throws IllegalStateException if the Iterator has not been initialized using {@link #getIterator()}
+	 * @see IteratingScriptParser#getNextCommand()
+	 * @see #next()
+	 */
+	public ScriptCommandDefinition getNextCommand()
+	{
+		if (this.currentIteratorIndex == -42) throw new IllegalStateException("Iterator not initialized");
+		ScriptCommandDefinition result = null;
 		if (this.iteratingParser != null)
 		{
 			result = this.iteratingParser.getNextCommand();
 		}
 		else
 		{
-			result = this.commands.get(this.currentIteratorIndex);
+			result = (ScriptCommandDefinition)this.commands.get(this.currentIteratorIndex);
 			this.currentIteratorIndex ++;
 		}
 		return result;

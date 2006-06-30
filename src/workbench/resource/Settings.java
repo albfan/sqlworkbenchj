@@ -24,26 +24,27 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
 import workbench.WbManager;
-import workbench.gui.lnf.LnFDefinition;
 import workbench.interfaces.PropertyStorage;
-import workbench.util.ExceptionUtil;
 import workbench.gui.actions.ActionRegistration;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
 import workbench.storage.PkMapping;
 import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
+import workbench.util.ToolDefinition;
 import workbench.util.WbProperties;
 
 
@@ -235,6 +236,79 @@ public class Settings
 		return System.getProperty("workbench.libdir", getProperty("workbench.libdir", null));
 	}
 
+	public void setLastUsedBlobTool(String name)
+	{
+		setProperty("workbench.tools.last.blob", name);
+	}
+	
+	public String getLastUsedBlobTool()
+	{
+		return getProperty("workbench.tools.last.blob", null);
+	}
+	
+	public ToolDefinition[] getExternalTools()
+	{
+		return getExternalTools(true);
+	}
+	
+	public ToolDefinition[] getAllExternalTools()
+	{
+		return getExternalTools(false);
+	}
+	
+	private ToolDefinition[] getExternalTools(boolean check)
+	{
+		int numTools = getIntProperty("workbench.tools.count", 0);
+		LinkedList l = new LinkedList();
+		int count = 0;
+		for (int i = 0; i < numTools; i++)
+		{
+			String path = getProperty("workbench.tools." + i + ".executable", "");
+			String name = getProperty("workbench.tools." + i + ".name", path);
+
+			if (check)
+			{
+				if (!StringUtil.isEmptyString(path))
+				{
+					File f = new File(path);
+					if (f.exists())
+					{
+						l.add(new ToolDefinition(path, name));
+						count ++;
+					}
+				}
+			}
+			else
+			{
+				l.add(new ToolDefinition(path, name));
+				count ++;
+			}
+		}
+		ToolDefinition[] result = new ToolDefinition[count];
+		Iterator itr = l.iterator();
+		int i=0;
+		while (itr.hasNext())
+		{
+			result[i] = (ToolDefinition)itr.next();
+			i++;
+		}
+		return result;
+	}
+	
+	public void setExternalTool(Collection tools)
+	{
+		int count = 0;
+		Iterator itr = tools.iterator();
+		while (itr.hasNext())
+		{
+			ToolDefinition tool = (ToolDefinition)itr.next();
+			setProperty("workbench.tools." + count + ".executable", tool.getApplicationPath());
+			setProperty("workbench.tools." + count + ".name", tool.getName());
+			count ++;
+		}
+		setProperty("workbench.tools.count", count);
+	}
+	
 	public static final String PK_MAPPING_FILENAME_PROPERTY = "workbench.pkmapping.file";
 	public String getPKMappingFilename()
 	{
@@ -431,7 +505,10 @@ public class Settings
 		}
 		if (this.getPKMappingFilename() != null)
 		{
-			PkMapping.getInstance().saveMapping(this.getPKMappingFilename());
+			if (PkMapping.isInitialized())
+			{
+				PkMapping.getInstance().saveMapping(this.getPKMappingFilename());
+			}
 		}
 	}
 
@@ -488,7 +565,7 @@ public class Settings
 			// not needed any longer
 			this.props.remove("workbench.db.oracle.quotedigits");
 			this.props.remove("workbench.gui.macros.replaceonrun");
-			
+			this.props.remove("workbench.db.cancelneedsreconnect");
 		}
 		catch (Throwable e)
 		{
@@ -925,7 +1002,7 @@ public class Settings
 
 	public void setAutoJumpNextStatement(boolean show)
 	{
-		this.props.setProperty("workbench.editor.autojumpnext", Boolean.toString(show));
+		this.setProperty("workbench.editor.autojumpnext", show);
 	}
 
 	public boolean getIgnoreErrors()
@@ -935,7 +1012,7 @@ public class Settings
 
 	public void setIgnoreErrors(boolean ignore)
 	{
-		this.props.setProperty("workbench.sql.ignoreerror", Boolean.toString(ignore));
+		this.setProperty("workbench.sql.ignoreerror", ignore);
 	}
 
 	public boolean useOracleCharSemanticsFix()
@@ -945,21 +1022,21 @@ public class Settings
 	
 	public boolean getCheckPreparedStatements()
 	{
-		return StringUtil.stringToBool(this.props.getProperty("workbench.sql.checkprepared", "false"));
+		return getBoolProperty("workbench.sql.checkprepared", false);
 	}
 	public void setCheckPreparedStatements(boolean show)
 	{
-		this.props.setProperty("workbench.sql.checkprepared", Boolean.toString(show));
+		this.setProperty("workbench.sql.checkprepared", show);
 	}
 
 	public boolean getHighlightCurrentStatement()
 	{
-		return StringUtil.stringToBool(this.props.getProperty("workbench.editor.highlightcurrent", "false"));
+		return getBoolProperty("workbench.editor.highlightcurrent", false);
 	}
 	
 	public void setHighlightCurrentStatement(boolean show)
 	{
-		this.props.setProperty("workbench.editor.highlightcurrent", Boolean.toString(show));
+		this.setProperty("workbench.editor.highlightcurrent", show);
 	}
 
 	public boolean getIncludeOwnerInSqlExport()
@@ -974,27 +1051,27 @@ public class Settings
 
 	public boolean getEnableDbmsOutput()
 	{
-		return StringUtil.stringToBool(this.props.getProperty("workbench.sql.enable_dbms_output", "false"));
+		return getBoolProperty("workbench.sql.enable_dbms_output", false);
 	}
 
 	public void setEnableDbmsOutput(boolean aFlag)
 	{
-		this.props.setProperty("workbench.sql.enable_dbms_output", Boolean.toString(aFlag));
+		this.setProperty("workbench.sql.enable_dbms_output", aFlag);
 	}
 
 	public int getDbmsOutputDefaultBuffer()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.dbms_output.defaultbuffer", "-1"));
+		return getIntProperty("workbench.sql.dbms_output.defaultbuffer", -1);
 	}
 
 	public void setDbmsOutputDefaultBuffer(int aSize)
 	{
-		this.props.setProperty("workbench.sql.dbms_output.defaultbuffer", Integer.toString(aSize));
+		this.setProperty("workbench.sql.dbms_output.defaultbuffer", aSize);
 	}
 
 	public String getLastImportDateFormat()
 	{
-		return this.props.getProperty("workbench.import.dateformat", this.getDefaultDateFormat());
+		return getProperty("workbench.import.dateformat", this.getDefaultDateFormat());
 	}
 
 	public void setLastImportDateFormat(String aFormat)
@@ -1085,7 +1162,7 @@ public class Settings
 
 	public void setIncludeNewLineInCodeSnippet(boolean useEncryption)
 	{
-		this.props.setProperty("workbench.javacode.includenewline", Boolean.toString(useEncryption));
+		this.setProperty("workbench.javacode.includenewline", useEncryption);
 	}
 
 	public String getLastSqlDir()
@@ -1140,7 +1217,7 @@ public class Settings
 
 	public void setCheckEscapedQuotes(boolean flag)
 	{
-		this.props.setProperty("workbench.sql.checkescapedquotes", Boolean.toString(flag));
+		this.setProperty("workbench.sql.checkescapedquotes", flag);
 	}
 
 	public boolean getAutoConnectDataPumper()
@@ -1150,7 +1227,7 @@ public class Settings
 
 	public void setAutoConnectDataPumper(boolean flag)
 	{
-		this.props.setProperty("workbench.datapumper.autoconnect", Boolean.toString(flag));
+		this.setProperty("workbench.datapumper.autoconnect", flag);
 	}
 
 	public void storeWindowPosition(Component target)
@@ -1294,7 +1371,7 @@ public class Settings
 
 	public void setEditorTabWidth(int aWidth)
 	{
-		this.props.setProperty(PROPERTY_EDITOR_TAB_WIDTH, Integer.toString(aWidth));
+		this.setProperty(PROPERTY_EDITOR_TAB_WIDTH, aWidth);
 	}
 
 	public String getLastConnection(String key)
@@ -1332,12 +1409,12 @@ public class Settings
 
 	public int getMaxHistorySize()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.historysize", "15"));
+		return getIntProperty("workbench.sql.historysize", 15);
 	}
 
 	public void setMaxHistorySize(int aValue)
 	{
-		this.props.setProperty("workbench.sql.historysize", Integer.toString(aValue));
+		this.setProperty("workbench.sql.historysize", aValue);
 	}
 
 	public void setLookAndFeelClass(String aClassname)
@@ -1400,12 +1477,12 @@ public class Settings
 
 	public int getMaxColumnWidth()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.maxcolwidth", "500"));
+		return getIntProperty("workbench.sql.maxcolwidth", 500);
 	}
 
 	public void setMaxColumnWidth(int aWidth)
 	{
-		this.props.setProperty("workbench.sql.maxcolwidth", Integer.toString(aWidth));
+		this.setProperty("workbench.sql.maxcolwidth", aWidth);
 	}
 
 	private SimpleDateFormat defaultDateFormatter = null;
@@ -1619,7 +1696,7 @@ public class Settings
 
 	public void setConsolidateLogMsg(boolean aFlag)
 	{
-		this.props.setProperty("workbench.gui.log.consolidate", Boolean.toString(aFlag));
+		this.setProperty("workbench.gui.log.consolidate", aFlag);
 	}
 
 	public boolean getPlainEditorWordWrap()
@@ -1781,7 +1858,7 @@ public class Settings
 
 	public void setUseEncryption(boolean useEncryption)
 	{
-		this.props.setProperty(PROPERTY_ENCRYPT_PWD, Boolean.toString(useEncryption));
+		this.setProperty(PROPERTY_ENCRYPT_PWD, useEncryption);
 	}
 
 	public boolean getRetrieveDbExplorer()
@@ -1791,7 +1868,7 @@ public class Settings
 
 	public void setRetrieveDbExplorer(boolean aFlag)
 	{
-		this.props.setProperty("workbench.dbexplorer.retrieveonopen", Boolean.toString(aFlag));
+		this.setProperty("workbench.dbexplorer.retrieveonopen", aFlag);
 	}
 
 	public boolean getAutoSaveWorkspace()
@@ -1799,9 +1876,9 @@ public class Settings
 		return getBoolProperty("workbench.workspace.autosave", false);
 	}
 
-	public void setAutoSaveWorkspace(boolean aFlag)
+	public void setAutoSaveWorkspace(boolean flag)
 	{
-		this.props.setProperty("workbench.workspace.autosave", Boolean.toString(aFlag));
+		this.setProperty("workbench.workspace.autosave", flag);
 	}
 
 	public boolean getCreateWorkspaceBackup()
@@ -1816,7 +1893,7 @@ public class Settings
 
 	public void setUseAnimatedIcon(boolean flag)
 	{
-		this.props.setProperty(PROPERTY_ANIMATED_ICONS, Boolean.toString(flag));
+		this.setProperty(PROPERTY_ANIMATED_ICONS, flag);
 	}
 
 	public boolean getUseDynamicLayout()
@@ -1826,7 +1903,7 @@ public class Settings
 
 	public void setUseDynamicLayout(boolean flag)
 	{
-		this.props.setProperty("workbench.gui.dynamiclayout", Boolean.toString(flag));
+		this.setProperty("workbench.gui.dynamiclayout", flag);
 	}
 
 	public boolean getVerifyDriverUrl()
@@ -1871,16 +1948,12 @@ public class Settings
 		String list = this.props.getProperty("workbench.db.nonullkeyword", "");
 		return StringUtil.stringToList(list, ",");
 	}
+	
 	public List getCaseSensitivServers()
 	{
 		String list = this.props.getProperty("workbench.db.casesensitive", "");
 		return StringUtil.stringToList(list, ",");
 	}
 
-	public List getCancelWithReconnectDrivers()
-	{
-		String list = this.props.getProperty("workbench.db.cancelwithreconnect", "");
-		return StringUtil.stringToList(list, ",");
-	}
 
 }

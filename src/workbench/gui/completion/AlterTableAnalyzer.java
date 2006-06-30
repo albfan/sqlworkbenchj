@@ -10,17 +10,12 @@
  *
  */
 package workbench.gui.completion;
-import java.io.StringReader;
-import java.util.regex.Pattern;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
-import workbench.sql.formatter.Token;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
-
 
 /**
  * Analyze an ALTER TABLE statement to provide completion for tables and columns
@@ -46,7 +41,7 @@ public class AlterTableAnalyzer
 		
 		try
 		{
-			Token token = lexer.getNextToken(false, false);
+			SQLToken token = lexer.getNextToken(false, false);
 			while (token != null)
 			{
 				if ("TABLE".equalsIgnoreCase(token.getContents()))

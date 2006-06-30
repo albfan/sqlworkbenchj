@@ -18,7 +18,24 @@
     </void>
    </object>
   </void>
-	
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.edb.Driver</string>
+    </void>
+    <void property="library">
+     <string>edb-jdbc14.jar</string>
+    </void>
+    <void property="name">
+     <string>EnterpriseDB</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:edb://servername:port/database"</string>
+    </void>
+   </object>
+  </void>
+
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">

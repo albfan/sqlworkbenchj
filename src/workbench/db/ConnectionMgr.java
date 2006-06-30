@@ -358,31 +358,50 @@ public class ConnectionMgr
 		while (itr.hasNext())
 		{
 			WbConnection con = (WbConnection)itr.next();
-			this.disconnect(con);
+			this.closeConnection(con);
 		}
 		this.activeConnections.clear();
 	}
 
+	public synchronized void disconnect(WbConnection con)
+	{
+		if (this.activeConnections.containsKey(con.getId()))
+		{
+			this.activeConnections.remove(con.getId());
+		}
+		this.closeConnection(con);
+	}
+	
 	/**
 	 *	Disconnect the connection with the given id
 	 */
-	public void disconnect(String anId)
+	public synchronized void disconnect(String anId)
 	{
 		WbConnection con = (WbConnection)this.activeConnections.get(anId);
-		this.disconnect(con);
+		this.closeConnection(con);
 		this.activeConnections.remove(anId);
 	}
 
 	/**
 	 *	Disconnect the given connection
 	 */
-	private void disconnect(WbConnection conn)
+	private synchronized void closeConnection(WbConnection conn)
 	{
 		if (conn == null) return;
-
+		if (conn.getSqlConnection() == null) return;
+		
 		try
 		{
-			if (conn.getMetadata().isCloudscape() || conn.getMetadata().isApacheDerby())
+			if (conn.getProfile() != null)
+			{
+				LogMgr.logInfo("ConnectionMgr.disconnect()", "Disconnecting: [" + conn.getProfile().getName() + "], ID=" + conn.getId());
+			}
+			
+			if (conn.getMetadata() == null)
+			{
+				conn.close();
+			}
+			else if (conn.getMetadata().isCloudscape() || conn.getMetadata().isApacheDerby())
 			{
 				ConnectionProfile prof = conn.getProfile();
 				boolean shutdown = this.canShutdownCloudscape(conn);
@@ -399,7 +418,6 @@ public class ConnectionMgr
 			}
 			else
 			{
-				LogMgr.logInfo("ConnectionMgr.disconnect()", "Disconnecting: [" + conn.getProfile().getName() + "], ID=" + conn.getId());
 				conn.close();
 			}
 		}

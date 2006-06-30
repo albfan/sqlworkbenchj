@@ -210,6 +210,20 @@ public class StatementRunnerResult
 		return counts;
 	}
 
+	public void clearResultData()
+	{
+		if (this.datastores != null)
+		{
+			for (int i = 0; i < datastores.size(); i++)
+			{
+				DataStore ds = (DataStore)datastores.get(i);
+				if (ds != null) ds.reset();
+			}
+			this.datastores.clear();
+		}
+		this.clearResultSets();
+	}
+	
 	public void clearResultSets()
 	{
 		if (this.results != null)

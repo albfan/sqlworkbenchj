@@ -136,6 +136,7 @@ public class DefaultCompletionHandler
 				this.elements = ctx.getData();
 				this.header.setText(ctx.getTitle());
 				this.window.setAppendDot(ctx.appendDotToSelection());
+				this.window.setAppendSpace(ctx.isKeywordList());
 				this.window.setColumnPrefix(ctx.getColumnPrefix());
 				
 				result = (this.elements != null && this.elements.size() > 0);

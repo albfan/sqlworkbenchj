@@ -110,11 +110,11 @@ public class SqlCommand
 				LogMgr.logWarning("SqlCommand.cancel()", "Error when cancelling statement", th);
 			}
 
-			if (this.currentConnection != null && this.currentConnection.cancelNeedsReconnect())
-			{
-				LogMgr.logInfo(this, "Cancelling needs a reconnect to the database for this DBMS...");
-				this.currentConnection.reconnect();
-			}
+//			if (this.currentConnection != null && this.currentConnection.cancelNeedsReconnect())
+//			{
+//				LogMgr.logInfo(this, "Cancelling needs a reconnect to the database for this DBMS...");
+//				this.currentConnection.reconnect();
+//			}
 		}
 	}
 

@@ -75,6 +75,13 @@ public class SqlUtilTest
 		sql = "SELECT a.att1\n      ,a.att2\nFROM   adam   a";
 		l = SqlUtil.getSelectColumns(sql,true);		
 		assertEquals("Not enough columns", 2, l.size());
+		
+		sql = "SELECT to_char(date_col, 'YYYY-MM-DD'), col2 as \"Comma, column\", func('bla,blub')\nFROM   adam   a";
+		l = SqlUtil.getSelectColumns(sql,true);		
+		assertEquals("Not enough columns", 3, l.size());
+		assertEquals("Wrong first column", "to_char(date_col, 'YYYY-MM-DD')", l.get(0));
+		assertEquals("Wrong third column", "func('bla,blub')", l.get(2));
+		
 	}
 	
 	public void testStripColumnAlias()
@@ -84,10 +91,6 @@ public class SqlUtilTest
 		assertEquals("p.name", col);
 		
 		expression = "p.name";
-		col = SqlUtil.striptColumnAlias(expression);
-		assertEquals("p.name", col);
-		
-		expression = "p.name as";
 		col = SqlUtil.striptColumnAlias(expression);
 		assertEquals("p.name", col);
 		
@@ -107,10 +110,8 @@ public class SqlUtilTest
 		assertEquals("SELECT", verb);
 		
 			sql = "/* \n" + 
-             "* $URL: svn+ssh://nichdexp.nichd.nih.gov/subversion/mtrac/trunk/db/00-release-1.0/01-trac-8-ddl.sql $ \n" + 
-             "* $Revision: 1.2 $ \n" + 
-             "* Created by Janek K. Claus. \n" + 
-             "* $LastChangedBy: clausjan $ \n" + 
+             "* $URL: ddl.sql $ \n" + 
+             "* $Revision: 1.3 $ \n" + 
              "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
              "*/ \n" + 
              "-- This is the initial creation script for the MTrac database. \n" + 

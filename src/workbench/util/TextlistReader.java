@@ -40,7 +40,7 @@ public class TextlistReader
 			String line = r.readLine();
 			while (line != null)
 			{
-				values.add(line);
+				values.add(line.trim());
 				line = r.readLine();
 			}
 			//LogMgr.logDebug("TextlistReader.<init>", values.size() + " element read from InputStream");

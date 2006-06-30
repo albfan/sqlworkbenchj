@@ -227,11 +227,11 @@ public abstract class RowDataConverter
 		throws IndexOutOfBoundsException
 	{
 		Object value = row.getValue(col);
-    if (value == null || value instanceof NullValue)
+		if (value == null || value instanceof NullValue)
 		{
-      return null;
+			return null;
 		}
-    else
+		else
 		{
 			String result = null;
 			if (value instanceof java.sql.Timestamp && this.defaultTimestampFormatter != null)
@@ -277,7 +277,7 @@ public abstract class RowDataConverter
 			{
 				result = value.toString();
 			}
-      return result;
+			return result;
 		}
 	}
 	

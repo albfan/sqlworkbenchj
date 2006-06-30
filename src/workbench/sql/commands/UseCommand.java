@@ -12,16 +12,14 @@
 package workbench.sql.commands;
 
 import java.sql.SQLException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import workbench.db.WbConnection;
 import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.Token;
 import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.formatter.SQLToken;
 import workbench.util.StringUtil;
 
 /**
@@ -52,7 +50,7 @@ public class UseCommand extends SqlCommand
 			SQLLexer lexer = new SQLLexer(aSql);
 			
 			// The first token should be the USE verb;
-			Token t = lexer.getNextToken(false, false);
+			SQLToken t = lexer.getNextToken(false, false);
 			
 			// everything after the USE command is the catalog name
 			String catName = aSql.substring(t.getCharEnd()).trim();

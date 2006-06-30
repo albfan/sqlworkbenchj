@@ -57,6 +57,7 @@ public class CompletionPopup
 	private JComponent headerComponent;
 	private String pasteCase;
 	private boolean appendDot;
+	private boolean appendSpace;
 	private boolean selectCurrentWordInEditor;
 	private String columnPrefix;
 	private CompletionSearchField searchField;
@@ -203,6 +204,7 @@ public class CompletionPopup
 			result = value;
 		}
 		if (this.appendDot) result += ".";
+		if (this.appendSpace) result += " ";
 		return result;
 	}
 	
@@ -297,6 +299,10 @@ public class CompletionPopup
 		this.selectCurrentWordInEditor = flag;
 	}
 	
+	public void setAppendSpace(boolean flag)
+	{
+		this.appendSpace = flag;
+	}
 	public void setAppendDot(boolean flag)
 	{
 		this.appendDot = flag;

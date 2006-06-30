@@ -54,10 +54,10 @@ public class WbConnection
 	private Connection sqlConnection;
 	private DbMetadata metaData;
 	private ConnectionProfile profile;
-	private PreparedStatementPool pool;
+	private PreparedStatementPool preparedStatementPool;
 
 //	private boolean ddlNeedsCommit;
-	private boolean cancelNeedsReconnect = false;
+//	private boolean cancelNeedsReconnect = false;
 
 	private List listeners;
 	private DbObjectCache objectCache;
@@ -81,21 +81,21 @@ public class WbConnection
 	public void setProfile(ConnectionProfile aProfile)
 	{
 		this.profile = aProfile;
-		String driverClass = aProfile.getDriverclass();
-		List drivers = Settings.getInstance().getCancelWithReconnectDrivers();
-		if (drivers.contains(driverClass))
-		{
-			this.cancelNeedsReconnect = true;
-		}
+//		String driverClass = aProfile.getDriverclass();
+//		List drivers = Settings.getInstance().getCancelWithReconnectDrivers();
+//		if (drivers.contains(driverClass))
+//		{
+//			this.cancelNeedsReconnect = true;
+//		}
 	}
 
 	public PreparedStatementPool getPreparedStatementPool()
 	{
-		if (this.pool == null)
+		if (this.preparedStatementPool == null)
 		{
-			this.pool = new PreparedStatementPool(this);
+			this.preparedStatementPool = new PreparedStatementPool(this);
 		}
-		return this.pool;
+		return this.preparedStatementPool;
 	}
 
 	public DbObjectCache getObjectCache()
@@ -118,17 +118,17 @@ public class WbConnection
 		return this.profile;
 	}
 
-	public void reconnect()
-	{
-		try
-		{
-			ConnectionMgr.getInstance().reconnect(this);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("WbConnection.reconnect()", "Error when reconnecting", e);
-		}
-	}
+//	public void reconnect()
+//	{
+//		try
+//		{
+//			ConnectionMgr.getInstance().reconnect(this);
+//		}
+//		catch (Exception e)
+//		{
+//			LogMgr.logError("WbConnection.reconnect()", "Error when reconnecting", e);
+//		}
+//	}
 
 	void setSqlConnection(Connection aConn)
 	{
@@ -317,10 +317,10 @@ public class WbConnection
 	 */
 	public void disconnect()
 	{
-		ConnectionMgr.getInstance().disconnect(this.id);
-		if (this.pool != null)
+		ConnectionMgr.getInstance().disconnect(this);
+		if (this.preparedStatementPool != null)
 		{
-			this.pool.done();
+			this.preparedStatementPool.done();
 		}
 		fireConnectionStateChanged(PROP_CONNECTION_STATE, CONNECTION_OPEN, CONNECTION_CLOSED);
 	}
@@ -366,9 +366,16 @@ public class WbConnection
 	}
 
 	public boolean isClosed()
-		throws SQLException
 	{
-		return this.sqlConnection.isClosed();
+		if (this.sqlConnection == null) return true;
+		try
+		{
+			return this.sqlConnection.isClosed();
+		}
+		catch (Exception e)
+		{
+			return true;
+		}
 	}
 
 	/**
@@ -407,10 +414,10 @@ public class WbConnection
 		return this.metaData.getUseJdbcCommit();
 	}
 
-	public boolean cancelNeedsReconnect()
-	{
-		return this.cancelNeedsReconnect;
-	}
+//	public boolean cancelNeedsReconnect()
+//	{
+//		return this.cancelNeedsReconnect;
+//	}
 
 	public DbMetadata getMetadata()
 	{

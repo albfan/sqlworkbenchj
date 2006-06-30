@@ -68,7 +68,7 @@ public class EncodingPanel
 			label =  new JLabel(ResourceMgr.getString("LblFileEncoding"));
 			c.gridx = 0;
 			c.gridy = 0;
-			c.insets = new java.awt.Insets(0, 5, 0, 5);
+			c.insets = new java.awt.Insets(0, 5, 0, 0);
 			c.fill = java.awt.GridBagConstraints.HORIZONTAL;
 			c.anchor = java.awt.GridBagConstraints.NORTHWEST;
 
@@ -77,7 +77,7 @@ public class EncodingPanel
 		c = new GridBagConstraints();
     c.gridx = 0;
     c.gridy = 1;
-		c.insets = new java.awt.Insets(5, 5, 0, 5);
+		c.insets = new java.awt.Insets(5, 5, 0, 0);
     c.fill = java.awt.GridBagConstraints.HORIZONTAL;
     c.anchor = java.awt.GridBagConstraints.NORTHWEST;
     c.weightx = 1.0;
@@ -86,6 +86,18 @@ public class EncodingPanel
 		this.add(encodings, c);
 	}
 
+	public void setLabelVisible(boolean flag)
+	{
+		if (this.label == null) return;
+		this.label.setVisible(flag);
+	}
+	
+	public boolean isLabelVisible()
+	{
+		if (this.label == null) return false;
+		return this.label.isVisible();
+	}
+	
 	public void setEncoding(String enc)
 	{
 		encodings.setSelectedItem(enc);

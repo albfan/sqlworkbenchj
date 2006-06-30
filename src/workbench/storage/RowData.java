@@ -51,7 +51,17 @@ public class RowData
 	private Object[] colData;
 	private Object[] originalData;
 
-	/** Creates new RowData */
+	public RowData(ResultInfo info)
+	{
+		int colCount = info.getColumnCount();
+		this.colData = new Object[colCount];
+		for (int i = 0; i < colCount; i++)
+		{
+			this.setNull(i, info.getColumnType(i));
+		}
+		this.setNew();
+	}
+	
 	public RowData(int aColCount)
 	{
 		this.colData = new Object[aColCount];
@@ -167,6 +177,7 @@ public class RowData
 			{
 				this.originalData = new Object[this.colData.length];
 			}
+			
 			if (this.originalData[aColIndex] == null)
 			{
 				this.originalData[aColIndex] = this.colData[aColIndex];
@@ -219,6 +230,7 @@ public class RowData
 		else
 		{
 			if (this.originalData == null) return false;
+			//if (this.originalData[aColumn] == null && this.colData[aColumn] != null && !(this.colData[aColumn] instanceof NullValue)) return true; 
 			return (this.originalData[aColumn] != null);
 		}
 	}

@@ -184,7 +184,10 @@ public class ValueConverter
 		{
 			try
 			{
-				result = this.timestampFormatter.parse(aDate);
+				synchronized (this.timestampFormatter)
+				{
+					result = this.timestampFormatter.parse(aDate);
+				}
 			}
 			catch (Exception e)
 			{
@@ -195,17 +198,20 @@ public class ValueConverter
 		
 		if (result == null)
 		{
-			for (int i=0; i < dateFormats.length; i++)
+			synchronized (this.formatter)
 			{
-				try
+				for (int i=0; i < dateFormats.length; i++)
 				{
-					this.formatter.applyPattern(timestampFormats[i]);
-					result = this.formatter.parse(aDate);
-					break;
-				}
-				catch (Exception e)
-				{
-					result = null;
+					try
+					{
+						this.formatter.applyPattern(timestampFormats[i]);
+						result = this.formatter.parse(aDate);
+						break;
+					}
+					catch (Exception e)
+					{
+						result = null;
+					}
 				}
 			}
 		}
@@ -226,7 +232,10 @@ public class ValueConverter
 		{
 			try
 			{
-				result = this.dateFormatter.parse(aDate);
+				synchronized (this.dateFormatter)
+				{
+					result = this.dateFormatter.parse(aDate);
+				}
 			}
 			catch (Exception e)
 			{
@@ -248,17 +257,20 @@ public class ValueConverter
 
 		if (result == null)
 		{
-			for (int i=0; i < dateFormats.length; i++)
+			synchronized (this.formatter)
 			{
-				try
+				for (int i=0; i < dateFormats.length; i++)
 				{
-					this.formatter.applyPattern(dateFormats[i]);
-					result = this.formatter.parse(aDate);
-					break;
-				}
-				catch (Exception e)
-				{
-					result = null;
+					try
+					{
+						this.formatter.applyPattern(dateFormats[i]);
+						result = this.formatter.parse(aDate);
+						break;
+					}
+					catch (Exception e)
+					{
+						result = null;
+					}
 				}
 			}
 		}

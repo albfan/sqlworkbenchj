@@ -10,12 +10,12 @@
  *
  */
 package workbench.gui.completion;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
 import workbench.db.DbMetadata;
+import workbench.db.IndexDefinition;
 import workbench.db.WbConnection;
-import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
-
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 
 /**
  * Analyze a DDL statement regarding the context for the auto-completion
@@ -24,9 +24,6 @@ import workbench.util.StringUtil;
 public class DdlAnalyzer
 	extends BaseAnalyzer
 {
-	final Pattern TABLE_PATTERN = Pattern.compile("\\sTABLE\\s|\\sTABLE$", Pattern.CASE_INSENSITIVE);
-	final static Pattern VIEW_PATTERN = Pattern.compile("\\sVIEW\\s|\\sVIEW$", Pattern.CASE_INSENSITIVE);
-
 	public DdlAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{	
 		super(conn, statement, cursorPos);
@@ -34,7 +31,25 @@ public class DdlAnalyzer
 	
 	protected void checkContext()
 	{
-		String verb = SqlUtil.getSqlVerb(this.sql);
+		SQLLexer lexer = new SQLLexer(this.sql);
+		SQLToken verbToken = lexer.getNextToken(false, false);
+		if (verbToken == null) 
+		{
+			this.context = NO_CONTEXT;
+			return;
+		}
+		
+		String verb = verbToken.getContents();
+		
+		if ("TRUNCATE".equalsIgnoreCase(verb))
+		{
+			context = CONTEXT_TABLE_LIST;
+			return;
+		}
+		
+		SQLToken typeToken = lexer.getNextToken(false, false);
+		String type = (typeToken != null ? typeToken.getContents() : null);
+
 		String q = this.getQualifierLeftOfCursor();
 		if (q != null)
 		{
@@ -44,30 +59,35 @@ public class DdlAnalyzer
 		{
 			this.schemaForTableList = this.dbConnection.getMetadata().getCurrentSchema();
 		}
-		
-		if ("TRUNCATE".equalsIgnoreCase(verb))
+
+		if (!"DROP".equals(verb))
 		{
-			context = CONTEXT_TABLE_LIST;
+			context = NO_CONTEXT;
 			return;
 		}
 		
-		int tablePos = StringUtil.findPattern(TABLE_PATTERN, sql, 0);
+		if (type == null || between(cursorPos,verbToken.getCharEnd(), typeToken.getCharBegin()))
+		{
+			context = CONTEXT_KW_LIST;
+			this.keywordFile = "drop_types.txt";
+		}
+		
 		// for DROP etc, we'll need to be after the table keyword
 		// otherwise it could be a DROP PROCEDURE as well.
-		if (tablePos > -1 && cursorPos > tablePos + 5)
+		if ("TABLE".equals(type) && cursorPos >= typeToken.getCharEnd())
 		{
 			context = CONTEXT_TABLE_LIST;
 			setTableTypeFilter(this.dbConnection.getMetadata().getTableTypeName());
 		}
-		else 
+		else if ("VIEW".equals(type) && cursorPos >= typeToken.getCharEnd())
 		{
-			int viewPos = StringUtil.findPattern(VIEW_PATTERN, sql, 0);
-			if (viewPos > -1 && cursorPos > tablePos + 4)
-			{
-				context = CONTEXT_TABLE_LIST;
-				setTableTypeFilter(DbMetadata.TABLE_TYPE_VIEW);
-			}
+			context = CONTEXT_TABLE_LIST;
+			setTableTypeFilter(DbMetadata.TABLE_TYPE_VIEW);
 		}
+//		else if ("INDEX".equals(type) && cursorPos >= typeToken.getCharEnd())
+//		{
+//			context = CONTEXT_INDEX_LIST;
+//		}
 	}
 
 

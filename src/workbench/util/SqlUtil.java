@@ -11,7 +11,6 @@
  */
 package workbench.util;
 
-import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -33,7 +32,6 @@ import workbench.log.LogMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
-import workbench.sql.formatter.Token;
 
 public class SqlUtil
 {
@@ -52,6 +50,24 @@ public class SqlUtil
 		return col.toString();
 	}
 
+	public static String getInsertTable(String sql)
+	{
+		try
+		{
+			SQLLexer lexer = new SQLLexer(sql);
+			SQLToken t = lexer.getNextToken(false, false);
+			if (!t.getContents().equals("INSERT")) return null;
+			t = lexer.getNextToken(false, false);
+			if (!t.getContents().equals("INTO")) return null;
+			t = lexer.getNextToken(false, false);
+			return t.getContents();
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
+	
 	public static String getSqlVerb(String sql)
 	{
 		if (sql == null) return "";
@@ -66,7 +82,7 @@ public class SqlUtil
 		SQLLexer l = new SQLLexer(sql);
 		try
 		{
-			Token t = l.getNextToken(false, false);
+			SQLToken t = l.getNextToken(false, false);
 			return t.getContents().toUpperCase();
 		}
 		catch (Exception e)
@@ -124,14 +140,24 @@ public class SqlUtil
 		try
 		{
 			SQLLexer lex = new SQLLexer(select);
-			Token t = lex.getNextToken(false, false);
+			SQLToken t = lex.getNextToken(false, false);
 			if (!"SELECT".equalsIgnoreCase(t.getContents())) return Collections.EMPTY_LIST;
 			t = lex.getNextToken(false, false);
 			int lastColStart = t.getCharBegin();
+			int bracketCount = 0;
 			boolean nextIsCol = true;
 			while (t != null)
 			{
-				if (",".equals(t.getContents()) || SqlFormatter.SELECT_TERMINAL.contains(t.getContents()))
+				String v = t.getContents();
+				if ("(".equals(v))
+				{
+					bracketCount ++;
+				}
+				else if (")".equals(v))
+				{
+					bracketCount --;
+				}
+				else if (bracketCount == 0 && (",".equals(v) || SqlFormatter.SELECT_TERMINAL.contains(t.getContents())))
 				{
 					String col = select.substring(lastColStart, t.getCharBegin());
 					if (includeAlias)
@@ -316,7 +342,7 @@ public class SqlUtil
 		{
 			SQLLexer lexer = new SQLLexer(sql);
 
-			SQLToken t = (SQLToken)lexer.getNextToken(false, false);
+			SQLToken t = lexer.getNextToken(false, false);
 			int bracketCount = 0;
 			while (t != null)
 			{
@@ -338,7 +364,7 @@ public class SqlUtil
 					}
 				}
 
-				t = (SQLToken)lexer.getNextToken(false, false);
+				t = lexer.getNextToken(false, false);
 			}		
 		}
 		catch (Exception e)

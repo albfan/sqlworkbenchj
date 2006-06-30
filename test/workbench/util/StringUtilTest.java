@@ -32,6 +32,37 @@ public class StringUtilTest extends TestCase
 		super(testName);
 	}
 
+    public void testStringToList()
+    {
+        String list = "1,2,3";
+        List l = StringUtil.stringToList(list, ",", true, true, true);
+        assertEquals("Wrong number of elements returned", 3, l.size());
+        
+        list = "1,2,,3";
+        l = StringUtil.stringToList(list, ",", true, true, true);
+        assertEquals("Empty element not removed", 3, l.size());        
+        
+        list = "1,2, ,3";
+        l = StringUtil.stringToList(list, ",", false);
+        assertEquals("Empty element removed", 4, l.size());        
+        
+        list = "1,2,,3";
+        l = StringUtil.stringToList(list, ",", false);
+        assertEquals("Null element not removed", 3, l.size());        
+        
+        list = " 1 ,2,3";
+        l = StringUtil.stringToList(list, ",", true);
+        assertEquals("Null element not removed", 3, l.size());        
+        assertEquals(" 1 ", l.get(0));
+        
+        l = StringUtil.stringToList(list, ",", true, true);
+        assertEquals("Element not trimmed", "1", l.get(0));
+        
+        list = "1,\"2,5\",3";
+        l = StringUtil.stringToList(list, ",", true, true, true);
+        assertEquals("Quoted string not recognized","2,5", l.get(1));
+    }
+    
 	public void testIsNumber()
 	{
 		boolean isNumber = StringUtil.isNumber("1");

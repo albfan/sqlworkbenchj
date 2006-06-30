@@ -16,12 +16,10 @@ import java.sql.Statement;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import workbench.db.oracle.OraclePackageParser;
 import workbench.log.LogMgr;
 import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.Token;
+import workbench.sql.formatter.SQLToken;
 import workbench.util.SqlUtil;
 
 /**
@@ -95,7 +93,7 @@ public class ProcedureCreator
 		try
 		{
 			SQLLexer lexer = new SQLLexer(this.sourceSql);
-			Token t = lexer.getNextToken(false, false);
+			SQLToken t = lexer.getNextToken(false, false);
 			boolean nextTokenIsType = false;
 			while (t != null)
 			{

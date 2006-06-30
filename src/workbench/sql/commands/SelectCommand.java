@@ -142,7 +142,7 @@ public class SelectCommand extends SqlCommand
 				throw new Exception(ResourceMgr.getString("MsgReceivedNullResultSet"));
 			}
 		}
-		catch (Throwable e)
+		catch (Exception e)
 		{
 			result.clear();
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));

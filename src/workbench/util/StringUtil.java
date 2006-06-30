@@ -260,7 +260,7 @@ public class StringUtil
 	
 	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries)
 	{
-		return stringToList(aString, aDelimiter, removeEmpty, false, false);
+		return stringToList(aString, aDelimiter, removeEmpty, trimEntries, false);
 	}
 	/**
 	 * 	Parses the given String and creates a List containing the elements
@@ -269,6 +269,7 @@ public class StringUtil
 	 * @param aDelimiter the delimiter to user
 	 * @param removeEmpty flag to remove empty entries
 	 * @param trimEntries flag to trim entries
+     * @param checkBrackets flag to check for quoted delimiters
 	 * @return A List of Strings
 	 */
 	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets)

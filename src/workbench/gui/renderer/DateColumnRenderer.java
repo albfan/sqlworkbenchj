@@ -32,7 +32,7 @@ public class DateColumnRenderer
 	public DateColumnRenderer()
 	{
 		this.dateFormatter = new SimpleDateFormat(DEFAULT_FORMAT);
-    this.setHorizontalAlignment(SwingConstants.RIGHT);
+		this.setHorizontalAlignment(SwingConstants.RIGHT);
 	}
 	
 	public DateColumnRenderer(String aDateFormat)
@@ -45,7 +45,10 @@ public class DateColumnRenderer
 	{
 		try
 		{
-			this.dateFormatter.applyPattern(aDateFormat);
+			synchronized (this.dateFormatter)
+			{
+				this.dateFormatter.applyPattern(aDateFormat);
+			}
 		}
 		catch (Exception e)
 		{
@@ -59,7 +62,10 @@ public class DateColumnRenderer
 		try
 		{
 			java.util.Date d = (java.util.Date)value;
-			this.displayValue = this.dateFormatter.format(d);
+			synchronized (this.dateFormatter)
+			{
+				this.displayValue = this.dateFormatter.format(d);
+			}
 			this.tooltip = d.toString();
 		}
 		catch (Throwable cc)

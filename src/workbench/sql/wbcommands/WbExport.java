@@ -180,7 +180,7 @@ public class WbExport
 			return result;
 		}
 
-		String table = cmdLine.getValue("table");
+		String updateTable = cmdLine.getValue("table");
 		type = type.trim().toLowerCase();
 
 		String encoding = cmdLine.getValue("encoding");
@@ -189,7 +189,8 @@ public class WbExport
 
 		if ("text".equals(type) || "txt".equals(type))
 		{
-			exporter.setWriteOracleControlFile(cmdLine.getBoolean("oraldr"));
+			exporter.setWriteOracleControlFile(cmdLine.getBoolean("writeoracleloader", false));
+			
 			String delimiter = cmdLine.getValue("delimiter");
 			if (delimiter != null) exporter.setTextDelimiter(delimiter);
 
@@ -250,7 +251,7 @@ public class WbExport
 			int commit = StringUtil.getIntValue(cmdLine.getValue("commitevery"),-1);
 			exporter.setCommitEvery(commit);
 			exporter.setAppendToFile(cmdLine.getBoolean("append"));
-			if (table != null) exporter.setTableName(table);
+			if (updateTable != null) exporter.setTableName(updateTable);
 			String c = cmdLine.getValue("keycolumns");
 			if (c != null)
 			{
@@ -293,7 +294,7 @@ public class WbExport
 				}
 			}
 			this.exporter.setUseCDATA(cmdLine.getBoolean("usecdata"));
-			if (table != null) exporter.setTableName(table);
+			if (updateTable != null) exporter.setTableName(updateTable);
 			this.defaultExtension = ".xml";
 		}
 		else if ("html".equals(type))
@@ -320,7 +321,7 @@ public class WbExport
 			{
 				exporter.setCreateFullHtmlPage("true".equalsIgnoreCase(value));
 			}
-			if (table != null) exporter.setTableName(table);
+			if (updateTable != null) exporter.setTableName(updateTable);
 			this.defaultExtension = ".html";
 		}
 		else
@@ -474,13 +475,13 @@ public class WbExport
 		result.setSuccess();
 
 		int count = tableList.size();
-		if (count == 1)
+		
+		String t = (String)tableList.get(0);
+		
+		// If only one table argument is present, we'll have to
+		// to check for wildcards e.g. -sourcetable=theschema.*
+		if (count == 1 && (t.indexOf('*') > -1 || t.indexOf('%') > -1))
 		{
-			// If only one table is present, we'll have to
-			// to check for wildcards e.g. -sourcetable=theschema.*
-			// This will be handled by DbMetadata when passing
-			// null or wildcards to the getTableList() method
-			String t = (String)tableList.get(0);
 			TableIdentifier tbl = new TableIdentifier(t);
 			if (tbl.getSchema() == null)
 			{
@@ -523,13 +524,14 @@ public class WbExport
 			}
 		}
 
-		File outdir = null;
+		File outdir = (outputdir == null ? null : new File(outputdir));
 		String outfile = exporter.getOutputFilename();
 		String msg = null;
 
-		if (count > 1)
+		if (count > 1 || outfile == null)
 		{
-			// when more then table is selected, then we require an output directory
+			// when more then table is selected or no outputfile is specified
+			// then we require an output directory
 			if (outputdir == null || outputdir.trim().length() == 0)
 			{
 				result.setFailure();
@@ -537,8 +539,7 @@ public class WbExport
 				return;
 			}
 
-			outdir = new File(outputdir);
-			if (!outdir.exists())
+			if (outdir == null || !outdir.exists())
 			{
 				msg = ResourceMgr.getString("ErrExportOutputDirNotFound");
 				msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
@@ -568,13 +569,18 @@ public class WbExport
 				File f = new File(outdir, fname + defaultExtension);
 				exporter.addTableExportJob(f.getAbsolutePath(), tables[i]);
 			}
-
 		}
 		else
 		{
 			// if only one table should be exported
 			// we have to use the supplied filename, and cannot use
 			// the above loop
+			if (StringUtil.isEmptyString(outfile))
+			{
+				outfile = StringUtil.makeFilename(tables[0].getTableName());
+				File f = new File(outdir, outfile + defaultExtension);
+				outfile = f.getAbsolutePath();
+			}
 			exporter.addTableExportJob(outfile, tables[0]);
 		}
 		

@@ -51,7 +51,7 @@ public class InsertAnalyzer
 		{
 			int bracketCount = 0;
 			boolean nextTokenIsTable = false;
-			SQLToken t = (SQLToken)lexer.getNextToken(false, false);
+			SQLToken t = lexer.getNextToken(false, false);
 			
 			while (t != null)
 			{
@@ -83,12 +83,12 @@ public class InsertAnalyzer
 					if (nextTokenIsTable)
 					{
 						tableStart = t.getCharBegin();
-						t = (SQLToken)lexer.getNextToken(false, false);
+						t = lexer.getNextToken(false, false);
 						if (".".equals(t.getContents()))
 						{
 							schema = value;
 							// we have a schema.table qualifier
-							t = (SQLToken)lexer.getNextToken(false, false);
+							t = lexer.getNextToken(false, false);
 							if (!"(".equals(t.getContents()))
 							{
 								table = t.getContents();
@@ -114,7 +114,7 @@ public class InsertAnalyzer
 						break;
 					}
 				}
-				t = (SQLToken)lexer.getNextToken(false, false);
+				t = lexer.getNextToken(false, false);
 			}		
 		}
 		catch (Exception e)

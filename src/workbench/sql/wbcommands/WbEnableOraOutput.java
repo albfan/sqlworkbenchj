@@ -12,14 +12,13 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import java.util.StringTokenizer;
 
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.Token;
+import workbench.sql.formatter.SQLToken;
 
 /**
  *
@@ -39,7 +38,7 @@ public class WbEnableOraOutput extends SqlCommand
 		throws SQLException, Exception
 	{
 		SQLLexer lexer = new SQLLexer(aSql);
-		Token t = lexer.getNextToken(false, false);
+		SQLToken t = lexer.getNextToken(false, false);
 		
 		// First token is the verb
 		if (t != null) t = lexer.getNextToken(false, false);

@@ -172,6 +172,8 @@ public class DbMetadata
 	private String[] TABLE_TYPES_TABLE; 
 	private String[] TABLE_TYPES_SELECTABLE;
 	private List objectsWithData = null;
+	private List schemasToIgnore;
+	private List catalogsToIgnore;
 
 	public DbMetadata(WbConnection aConnection)
 		throws SQLException
@@ -607,8 +609,6 @@ public class DbMetadata
 	public boolean isCloudscape() { return this.isCloudscape; }
 	public boolean isApacheDerby() { return this.isApacheDerby; }
 
-	private List schemasToIgnore;
-
 	public String filterDDL(String sql)
 	{
 		if (this.ddlFilter == null) return sql;
@@ -670,6 +670,24 @@ public class DbMetadata
 		String currentCat = getCurrentCatalog();
 		if (StringUtil.isEmptyString(currentCat)) return false;
 		return !cat.equalsIgnoreCase(currentCat);
+	}
+	
+	public boolean ignoreCatalog(String catalog)
+	{
+		if (catalog == null) return true;
+		if (catalogsToIgnore == null)
+		{
+			String cats = Settings.getInstance().getProperty("workbench.sql.ignorecatalog." + this.getDbId(), null);
+			if (cats != null)
+			{
+				catalogsToIgnore = StringUtil.stringToList(cats, ",");
+			}
+			else
+			{
+				 catalogsToIgnore = Collections.EMPTY_LIST;
+			}
+		}
+		return catalogsToIgnore.contains("*") || catalogsToIgnore.contains(catalog);
 	}
 
 	private static HashMap readStatementTemplates(String aFilename)
@@ -2389,6 +2407,10 @@ public class DbMetadata
 			{
 				s = null;
 			}
+			if (this.ignoreCatalog(c))
+			{
+				c = null;
+			}
 			TableIdentifier tbl = new TableIdentifier(c, s, t);
 			tbl.setType(ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_TYPE));
 			tables.add(tbl);
@@ -3606,7 +3628,7 @@ public class DbMetadata
 			stmt = StringUtil.replace(stmt, TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? aTable : tableNameToUse));
 			stmt = StringUtil.replace(stmt, FK_NAME_PLACEHOLDER, name);
 			colList = (List)fkCols.get(name);
-			entry = StringUtil.listToString(colList, ',');//this.convertSetToList(colList);
+			entry = StringUtil.listToString(colList, ',');
 			stmt = StringUtil.replace(stmt, COLUMNLIST_PLACEHOLDER, entry);
 			String rule = (String)updateRules.get(name);
 			stmt = StringUtil.replace(stmt, FK_UPDATE_RULE, " ON UPDATE " + rule);
@@ -3630,15 +3652,15 @@ public class DbMetadata
 			}
 
 			colList = (List)fkTarget.get(name);
-			entry = StringUtil.listToString(colList, ',');//this.convertSetToList(colList);
-
-			StringTokenizer tok = new StringTokenizer(entry, ",");
+			
+			Iterator itr = colList.iterator();
 			StrBuffer colListBuffer = new StrBuffer(30);
 			String targetTable = null;
 			boolean first = true;
-			while (tok.hasMoreTokens())
+			//while (tok.hasMoreTokens())
+			while (itr.hasNext())
 			{
-				col = tok.nextToken();
+				col = (String)itr.next();//tok.nextToken();
 				int pos = col.lastIndexOf('.');
 				if (targetTable == null)
 				{
@@ -3656,7 +3678,7 @@ public class DbMetadata
 			}
 			stmt = StringUtil.replace(stmt, FK_TARGET_TABLE_PLACEHOLDER, targetTable);
 			stmt = StringUtil.replace(stmt, FK_TARGET_COLUMNS_PLACEHOLDER, colListBuffer.toString());
-			fks.put(name, stmt);
+			fks.put(name, stmt.trim());
 		}
 		StrBuffer fk = new StrBuffer();
 

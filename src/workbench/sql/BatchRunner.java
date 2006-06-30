@@ -480,6 +480,7 @@ public class BatchRunner
 			{
 				String url = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_URL));
 				String driverclass = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_DRIVER));
+				if (driverclass == null) throw new NullPointerException("Driver class may not be null");
 				String user = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_USER));
 				String pwd = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_PWD));
 				String jar = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_JAR));

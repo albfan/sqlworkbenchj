@@ -29,6 +29,7 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
@@ -212,22 +213,22 @@ public class WbSwingUtilities
 
 	public static void showErrorMessage(Component aCaller, String aMessage)
 	{
-		JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(aCaller), aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);
 	}
 
 	public static void showMessage(Component aCaller, Object aMessage)
 	{
-		JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(aCaller), aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
 	}
 	
 	public static void showMessage(Component aCaller, String title, Object aMessage)
 	{
-		JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(aCaller), aMessage, title, JOptionPane.PLAIN_MESSAGE);
+		JOptionPane.showMessageDialog(aCaller, aMessage, title, JOptionPane.PLAIN_MESSAGE);
 	}
 
 	public static void showMessageKey(Component aCaller, String aKey)
 	{
-		JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(aCaller), ResourceMgr.getString(aKey), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(aCaller, ResourceMgr.getString(aKey), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	public static boolean getYesNo(Component aCaller, String aMessage)

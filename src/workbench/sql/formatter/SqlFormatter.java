@@ -49,6 +49,8 @@ public class SqlFormatter
 		LINE_BREAK_BEFORE.add("CROSS JOIN");
 		LINE_BREAK_BEFORE.add("LEFT JOIN");
 		LINE_BREAK_BEFORE.add("RIGHT JOIN");
+		LINE_BREAK_BEFORE.add("START WITH");
+		LINE_BREAK_BEFORE.add("CONNECT BY");
 	}
 
 	private final Set LINE_BREAK_AFTER = new HashSet();
@@ -58,14 +60,15 @@ public class SqlFormatter
 		//LINE_BREAK_AFTER.add("INTERSECT");
 		LINE_BREAK_AFTER.add("AS");
 		LINE_BREAK_AFTER.add("FOR");
-		LINE_BREAK_AFTER.add("JOIN");
+		//LINE_BREAK_AFTER.add("JOIN");
 	}
 
-	private final Set SUBSELECT_START = new HashSet();
-	{
-		SUBSELECT_START.add("IN");
-		SUBSELECT_START.add("EXISTS");
-	}
+//	private final Set SUBSELECT_START = new HashSet();
+//	{
+//		SUBSELECT_START.add("IN");
+//		SUBSELECT_START.add("EXISTS");
+//		SUBSELECT_START.add("=");
+//	}
 
 	// keywords terminating a WHERE clause
 	public static final Set WHERE_TERMINAL = new HashSet();
@@ -86,6 +89,8 @@ public class SqlFormatter
 	{
 		FROM_TERMINAL.addAll(WHERE_TERMINAL);
 		FROM_TERMINAL.add("WHERE");
+		FROM_TERMINAL.add("START WITH");
+		FROM_TERMINAL.add("CONNECT BY");
 	}
 
 
@@ -184,12 +189,6 @@ public class SqlFormatter
 		return pos;
 	}
 
-//	private void indentNewline(int pos)
-//	{
-//		this.appendNewline();
-//		for (int i = 0; i < pos; i ++) this.result.append(' ');
-//	}
-
 	private void appendNewline()
 	{
 		if (this.result.length() == 0) return;
@@ -267,14 +266,15 @@ public class SqlFormatter
 	{
 		char lastChar = last.getContents().charAt(0);
 		char currChar = current.getContents().charAt(0);
-		if (Character.isWhitespace(lastChar) || Character.isWhitespace(currChar)) return false;
+		if (last.isWhiteSpace() && current.isWhiteSpace()) return false;
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
-		if (lastChar == '\'') return false;
+		if (last.isLiteral() && (current.isIdentifier() || current.isReservedWord() || current.isOperator())) return true;
+		//if (lastChar == '\'') return false;
+		if (last.isLiteral() && current.isLiteral()) return false;
 		if (currChar == '?') return true;
-		//if ( (lastChar == '<' || lastChar == '>') && (currChar == '=' || currChar == '<' || currChar == '>')) return false;
 		if (currChar == '=') return true;
 		if (lastChar == '=') return true;
-		if (lastChar == '\"') return false;
+		//if (lastChar == '\"') return false;
 		if (lastChar == '.' && current.isIdentifier()) return false;
 		if (lastChar == '(' && current.isReservedWord()) return false;
 		if (lastChar == ')' && !current.isSeparator() ) return true;
@@ -291,7 +291,7 @@ public class SqlFormatter
 		StringBuffer b = new StringBuffer("     ");
 		StringBuffer oldIndent = this.indent;
 		//this.indent = null;
-		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
+		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = t;
 		while (t != null)
 		{
@@ -343,7 +343,7 @@ public class SqlFormatter
 				}
 			}
 			lastToken = t;
-			t = (SQLToken)this.lexer.getNextToken(true, false);
+			t = this.lexer.getNextToken(true, false);
 		}
 		this.indent = oldIndent;
 		return null;
@@ -357,7 +357,7 @@ public class SqlFormatter
 
 		int currentColumnCount = 0;
 		boolean isSelect = last.getContents().equals("SELECT");
-		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
+		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = last;
 		
 		while (t != null)
@@ -427,7 +427,7 @@ public class SqlFormatter
 				this.appendText(text);
 			}
 			lastToken = t;
-			t = (SQLToken)this.lexer.getNextToken(true, false);
+			t = this.lexer.getNextToken(true, false);
 		}
 		return null;
 	}
@@ -435,7 +435,7 @@ public class SqlFormatter
 	private SQLToken processSubSelect(boolean addSelectKeyword)
 		throws Exception
 	{
-		SQLToken t = (SQLToken)this.lexer.getNextToken(false, false);
+		SQLToken t = this.lexer.getNextToken(false, false);
 		int bracketCount = 1;
 		StringBuffer subSql = new StringBuffer(250);
 
@@ -486,7 +486,7 @@ public class SqlFormatter
 			}
 			subSql.append(' ');
 			subSql.append(text);
-			t = (SQLToken)this.lexer.getNextToken();
+			t = this.lexer.getNextToken();
 		}
 		return null;
 	}
@@ -502,7 +502,7 @@ public class SqlFormatter
 		for (int i=0; i < indent; i++) b.append(' ');
 		b.append("      ");
 		
-		SQLToken t = (SQLToken)this.lexer.getNextToken(true,true);
+		SQLToken t = this.lexer.getNextToken(true,true);
 		String text = null;
 		int commaCount = 0;
 		boolean inQuotes = false;
@@ -529,14 +529,14 @@ public class SqlFormatter
 				this.appendNewline();
 				this.indent(current);
 				this.appendText(") ");
-				t = (SQLToken)this.lexer.getNextToken(true, false);
+				t = this.lexer.getNextToken(true, false);
 				return t;
 			}
 			else if (text.indexOf("\n") == -1 &&  text.indexOf("\r") == -1)
 			{
 				this.appendText(text);
 			}
-			t = (SQLToken)this.lexer.getNextToken(true,true);
+			t = this.lexer.getNextToken(true,true);
 		}
 		return null;
 	}
@@ -552,7 +552,7 @@ public class SqlFormatter
 		for (int i=0; i < indent; i++) b.append(' ');
 		b.append("  ");
 		
-		SQLToken t = (SQLToken)this.lexer.getNextToken(true,true);
+		SQLToken t = this.lexer.getNextToken(true,true);
 		String text = null;
 		while (t != null)
 		{
@@ -573,14 +573,14 @@ public class SqlFormatter
 				this.indent(current);
 				this.appendText(text);
 				//this.appendNewline();
-				t = (SQLToken)this.lexer.getNextToken(true, false);
+				t = this.lexer.getNextToken(true, false);
 				return t;
 			}
 			else if (text.indexOf("\n") == -1 &&  text.indexOf("\r") == -1)
 			{
 				this.appendText(text);
 			}
-			t = (SQLToken)this.lexer.getNextToken(true,true);
+			t = this.lexer.getNextToken(true,true);
 		}
 		return null;
 	}
@@ -592,7 +592,7 @@ public class SqlFormatter
 
 		for (int i=0; i < indent; i++) b.append(' ');
 
-		SQLToken t = (SQLToken)this.lexer.getNextToken(true,false);
+		SQLToken t = this.lexer.getNextToken(true,false);
 		boolean first = true;
 		boolean isParm = false;
 		while (t != null)
@@ -617,7 +617,7 @@ public class SqlFormatter
 				isParm = false;
 			}
 			this.appendText(text);
-			t = (SQLToken)this.lexer.getNextToken(true,false);
+			t = this.lexer.getNextToken(true,false);
 			first = false;
 		}
 		return null;
@@ -631,7 +631,7 @@ public class SqlFormatter
 		for (int i=0; i < indentCount; i++) b.append(' ');
 
 		this.appendText(b);
-		SQLToken t = (SQLToken)this.lexer.getNextToken(true,false);
+		SQLToken t = this.lexer.getNextToken(true,false);
 
 		while (t != null)
 		{
@@ -641,7 +641,7 @@ public class SqlFormatter
 				this.appendNewline();
 				//this.indent(b);
 				this.appendText(")");
-				return (SQLToken)this.lexer.getNextToken();
+				return this.lexer.getNextToken();
 			}
 			else if (t.isSeparator() && text.equals("("))
 			{
@@ -659,7 +659,7 @@ public class SqlFormatter
 				this.appendText(text);
 				if (t.isComment()) this.appendText(' ');
 			}
-			t = (SQLToken)this.lexer.getNextToken(true, false);
+			t = this.lexer.getNextToken(true, false);
 		}
 		return null;
 	}
@@ -682,7 +682,7 @@ public class SqlFormatter
 				if (bracketcount == 0)
 				{
 					this.appendCommaList(list);
-					return (SQLToken)this.lexer.getNextToken();
+					return this.lexer.getNextToken();
 				}
 				else
 				{
@@ -725,7 +725,7 @@ public class SqlFormatter
 					if (t.isComment()) b.append(' ');
 				}
 			}
-			t = (SQLToken)this.lexer.getNextToken(true, false);
+			t = this.lexer.getNextToken(true, false);
 		}
 		return null;
 	}
@@ -760,7 +760,7 @@ public class SqlFormatter
 	private void formatSql()
 		throws Exception
 	{
-		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
+		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = t;
 		CommandTester wbTester = new CommandTester();
 		//if (this.indent != null) this.appendText(this.indent);
@@ -855,7 +855,7 @@ public class SqlFormatter
 				if (word.equalsIgnoreCase("VALUES"))
 				{
 					// the next (non-whitespace token has to be a (
-					t = (SQLToken)this.lexer.getNextToken(false, false);
+					t = this.lexer.getNextToken(false, false);
 					if (t.isSeparator() && t.getContents().equals("("))
 					{
 						this.appendNewline();
@@ -902,7 +902,7 @@ public class SqlFormatter
 				}
 			}
 			lastToken = t;
-			t = (SQLToken)this.lexer.getNextToken(false, false);
+			t = this.lexer.getNextToken(false, false);
 		}
 		this.appendNewline();
 		this.appendNewline();
@@ -911,7 +911,7 @@ public class SqlFormatter
 	private SQLToken processWhere(SQLToken previousToken)
 		throws Exception
 	{
-		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
+		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = previousToken;
 		int bracketCount = 0;
 		while (t != null)
@@ -923,12 +923,12 @@ public class SqlFormatter
 				return t;
 			}
 
-			if (t.isSeparator() && verb.equals(";"))
+			if (verb.equals(";"))
 			{
 				return t;
 			}
 
-			if (t.isSeparator() && verb.equals(")"))
+			if (verb.equals(")"))
 			{
 				bracketCount --;
 				this.appendText(")");
@@ -937,28 +937,36 @@ public class SqlFormatter
 			{
 				this.appendComment(verb);
 			}
-			else if (t.isSeparator() && t.getContents().equals("("))
+			else if (t.getContents().equals("("))
 			{
 				String lastWord = lastToken.getContents();
-				if (lastToken.isReservedWord() && SUBSELECT_START.contains(lastWord))
+				
+				if (lastWord != null) lastWord = lastWord.toUpperCase();
+				if (!lastToken.isSeparator() && !this.dbFunctions.contains(lastWord)) this.appendText(' ');
+				this.appendText(t.getContents());
+				
+				SQLToken next = skipComments();
+				if (next == null) return null;
+				
+				if ("SELECT".equals(next.getContents()))
 				{
-					this.appendText(" (");
-					t = this.processSubSelect(false);
+					t = this.processSubSelect(true);
 					if (t == null) return null;
 					if (t.getContents().equals(")")) this.appendText(")");
 				}
 				else
 				{
 					bracketCount ++;
-					if (lastWord != null) lastWord = lastWord.toUpperCase();
-					if (!lastToken.isSeparator() && !this.dbFunctions.contains(lastWord)) this.appendText(' ');
-					this.appendText(t.getContents());
+
+					lastToken = t;
+					t = next;
+					continue;
 				}
 			}
 			else if (bracketCount == 0 && t.isReservedWord() && (verb.equals("AND") || verb.equals("OR")) )
 			{
 				// TODO: this attempt to keep conditions in bracktes together results
-				// in effectively not formatting when the whole WHERE clause is put 
+				// in effectively no formatting when the whole WHERE clause is put 
 				// between brackets (because bracketCount will never be zero until 
 				// the end of the WHERE clause)
 				if (!this.isStartOfLine()) this.appendNewline();
@@ -973,15 +981,29 @@ public class SqlFormatter
 			}
 
 			lastToken = t;
-			t = (SQLToken)this.lexer.getNextToken(true, false);
+			t = this.lexer.getNextToken(true, false);
 		}
 		return null;
 	}
 
+	private SQLToken skipComments()
+		throws Exception
+	{
+		SQLToken next = lexer.getNextToken(true, false);
+		if (!next.isComment()) return next;
+		while (next != null) 
+		{
+			if (!next.isComment()) return next;
+			this.appendComment(next.getContents());
+			next = lexer.getNextToken(true, false);
+		}
+		return null;
+	}
+	
 	private SQLToken processIntoKeyword()
 		throws Exception
 	{
-		SQLToken t = (SQLToken)this.lexer.getNextToken(false, false);
+		SQLToken t = this.lexer.getNextToken(false, false);
 		// we expect an identifier now (the table name)
 		// but to be able to handle "wrong statements" we'll
 		// make sure everything's fine
@@ -990,7 +1012,7 @@ public class SqlFormatter
 		{
 			this.appendText(' ');
 			this.appendText(t.getContents());
-			t = (SQLToken)this.lexer.getNextToken(false, false);
+			t = this.lexer.getNextToken(false, false);
 			if (t.getContents().equalsIgnoreCase("VALUES"))
 			{
 				// no column list to format here...
@@ -1015,7 +1037,7 @@ public class SqlFormatter
 		throws Exception
 	{
 		int bracketCount = 1;
-		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
+		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = last;
 		while (t != null)
 		{
@@ -1037,14 +1059,14 @@ public class SqlFormatter
 				break;
 			}
 			lastToken = t;
-			t = (SQLToken)this.lexer.getNextToken(true, false);
+			t = this.lexer.getNextToken(true, false);
 		}
 	}
 
 	private SQLToken processCreate(SQLToken previous)
 		throws Exception
 	{
-		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
+		SQLToken t = this.lexer.getNextToken(true, false);
 		String verb = t.getContents().toUpperCase();
 		if (verb.equals("TABLE"))
 		{
@@ -1075,7 +1097,7 @@ public class SqlFormatter
 	private SQLToken processCreateTable(SQLToken previous)
 		throws Exception
 	{
-		SQLToken t = (SQLToken)this.lexer.getNextToken(false, false);
+		SQLToken t = this.lexer.getNextToken(false, false);
 		SQLToken last = previous;
 		int bracketCount = 0;
 		StringBuffer definition = new StringBuffer(200);
@@ -1132,7 +1154,7 @@ public class SqlFormatter
 				}
 			}
 			last = t;
-			t = (SQLToken)this.lexer.getNextToken(false, false);
+			t = this.lexer.getNextToken(false, false);
 		}
 		return t;
 	}
@@ -1237,7 +1259,7 @@ public class SqlFormatter
 				{
 					List elements = StringUtil.stringToList(definition.toString(), ",");
 					this.outputElements(elements, maxElements, indentCount);
-					return (SQLToken)this.lexer.getNextToken(true, false);
+					return this.lexer.getNextToken(true, false);
 				}
 				else
 				{
@@ -1254,7 +1276,7 @@ public class SqlFormatter
 				definition.append(t.getContents());
 			}
 			last = t;
-			t = (SQLToken)this.lexer.getNextToken(true, false);
+			t = this.lexer.getNextToken(true, false);
 		}
 		return t;
 	}
@@ -1324,7 +1346,7 @@ public class SqlFormatter
 	private SQLToken processCreateView(SQLToken previous)
 		throws Exception
 	{
-		SQLToken t = (SQLToken)this.lexer.getNextToken(false, false);
+		SQLToken t = this.lexer.getNextToken(false, false);
 		SQLToken last = previous;
 		int bracketCount = 0;
 		StringBuffer definition = new StringBuffer(200);
@@ -1391,7 +1413,7 @@ public class SqlFormatter
 				}
 			}
 			last = t;
-			t = (SQLToken)this.lexer.getNextToken(false, false);
+			t = this.lexer.getNextToken(false, false);
 		}
 		return t;
 	}
@@ -1399,7 +1421,7 @@ public class SqlFormatter
 	private SQLToken processCreateIndex(SQLToken previous)
 		throws Exception
 	{
-		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
+		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken last = previous;
 
 		while (t != null)
@@ -1420,7 +1442,7 @@ public class SqlFormatter
 				if (this.needsWhitespace(last, t)) this.appendText(' ');
 				this.appendText(text);
 			}
-			t = (SQLToken)this.lexer.getNextToken(true, false);
+			t = this.lexer.getNextToken(true, false);
 		}
 		return t;
 	}

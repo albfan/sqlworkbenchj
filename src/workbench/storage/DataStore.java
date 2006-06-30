@@ -53,6 +53,7 @@ import workbench.util.CsvLineParser;
 import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
 
 
@@ -108,12 +109,11 @@ public class DataStore
 	/**
 	 *	Create a DataStore which is not based on a result set
 	 *	and contains the columns defined in the given array
-	 *	The column types need to be SQL types from java.sql.Types
+	 *	The column types need to match the values from from java.sql.Types
 	 */
 	public DataStore(String[] colNames, int[] colTypes, int[] colSizes)
 	{
 		this.data = createData();
-		this.setColumnSizes(colSizes);
 		this.resultInfo = new ResultInfo(colNames, colTypes, colSizes);
 	}
 
@@ -396,20 +396,8 @@ public class DataStore
 	{
 		int cols = this.resultInfo.getColumnCount();
 		RowData row = new RowData(cols);
+		row.read(rs, this.resultInfo);
 		this.data.add(row);
-		for (int i=0; i < cols; i++)
-		{
-			Object value = rs.getObject(i + 1);
-			if (rs.wasNull() || value == null)
-			{
-				row.setNull(i, this.resultInfo.getColumnType(i));
-			}
-			else
-			{
-				row.setValue(i, value);
-			}
-		}
-		row.resetStatus();
 		return this.getRowCount() - 1;
 	}
 
@@ -420,7 +408,7 @@ public class DataStore
 	 */
 	public int addRow()
 	{
-		RowData row = new RowData(this.resultInfo.getColumnCount());
+		RowData row = new RowData(this.resultInfo);
 		this.data.add(row);
 		this.modified = true;
 		return this.getRowCount() - 1;
@@ -442,7 +430,7 @@ public class DataStore
 	 */
 	public int insertRowAfter(int anIndex)
 	{
-		RowData row = new RowData(this.resultInfo.getColumnCount());
+		RowData row = new RowData(this.resultInfo);
 		anIndex ++;
 		int newIndex = -1;
 
@@ -534,7 +522,7 @@ public class DataStore
 	 */
 	public void setUpdateTable(String aTablename, WbConnection aConn)
 	{
-		if (aTablename == null || aTablename.trim().length() == 0)
+		if (StringUtil.isEmptyString(aTablename))
 		{
 			setUpdateTable((TableIdentifier)null, aConn);
 		}
@@ -770,8 +758,6 @@ public class DataStore
 		// are computed columns like count(*) etc)
 		if (this.resultInfo.getColumnName(aColumn) == null) return;
 
-		// If an updatetable is defined, we only accept
-		// values for columns in that table
 		RowData row = this.getRow(aRow);
 		if (aValue == null)
 			row.setNull(aColumn, this.resultInfo.getColumnType(aColumn));
@@ -1550,7 +1536,7 @@ public class DataStore
 
 		this.ignoreAllUpdateErrors = false;
 
-		StatementFactory factory = new StatementFactory(this.resultInfo, this.originalConnection);
+		StatementFactory factory = new StatementFactory(this.resultInfo, aConnection);
 		factory.setIncludeTableOwner(aConnection.getMetadata().needSchemaInDML(resultInfo.getUpdateTable()));
 
 		try

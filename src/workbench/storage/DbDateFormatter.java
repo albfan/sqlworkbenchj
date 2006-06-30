@@ -47,6 +47,7 @@ public class DbDateFormatter
 	{
 		return this.format;
 	}
+	
 	public void setFormat(String aFormat)
 	{
 		this.format = aFormat;
@@ -68,7 +69,10 @@ public class DbDateFormatter
 		String dateStr;
 		try
 		{
-			dateStr = "'" + this.formatter.format(aDate) + "'";
+			synchronized (this.formatter)
+			{
+				dateStr = "'" + this.formatter.format(aDate) + "'";
+			}
 			if (this.functionCall != null)
 			{
 				dateStr = StringUtil.replace(this.functionCall, DATE_PLACEHOLDER, dateStr);

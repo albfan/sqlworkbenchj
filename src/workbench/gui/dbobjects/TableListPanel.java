@@ -211,6 +211,7 @@ public class TableListPanel
 															{
 																public void reload()
 																{
+																	shouldRetrieveTable = true;
 																	retrieveTableSource();
 																}
 															};
@@ -692,17 +693,9 @@ public class TableListPanel
 			return;
 		}
 
-		try
+		if (dbConnection == null || dbConnection.isClosed())
 		{
-			if (dbConnection == null || dbConnection.isClosed())
-			{
-				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrConnectionGone"));
-				return;
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("TableListPanel.retrieve()", "Error checking connection", e);
+			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrConnectionGone"));
 			return;
 		}
 
