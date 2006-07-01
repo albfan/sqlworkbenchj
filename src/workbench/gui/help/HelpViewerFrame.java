@@ -1,5 +1,5 @@
 /*
- * HtmlViewer.java
+ * HelpViewerFrame.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -22,6 +22,7 @@ import java.net.URL;
 
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
+import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -35,19 +36,14 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 
-public class HtmlViewer 
-	extends JDialog 
+public class HelpViewerFrame 
+	extends JFrame
 {
 	private HtmlPanel display;
 	
-	public HtmlViewer(Frame owner)
+	public HelpViewerFrame()
 	{
-		this(owner, "workbench-manual.html");
-	}
-	
-	public HtmlViewer(Frame owner, String aStartFile)
-	{
-		super(owner, ResourceMgr.getString("TxtHelpWindowTitle"), false);
+		super(ResourceMgr.getString("TxtHelpWindowTitle"));
 		addWindowListener(new WindowAdapter()
 		{
 			public void windowClosing(WindowEvent evt)
@@ -57,18 +53,13 @@ public class HtmlViewer
 				dispose();
 			}
 		});
-		this.initHtml(aStartFile);
-		this.restoreSettings(owner);
+		this.display = new HtmlPanel("workbench-manual.html");
+		this.getContentPane().add(this.display);
+		this.setIconImage(ResourceMgr.getImage("help").getImage());
+		this.restoreSettings();
 	}
 
-	public HtmlViewer(JDialog owner)
-	{
-		super(owner, ResourceMgr.getString("TxtHelpWindowTitle"), false);
-		this.initHtml(null);
-		this.restoreSettings(owner);
-	}
-	
-	private void restoreSettings(Window owner)
+	private void restoreSettings()
 	{
 		if (!Settings.getInstance().restoreWindowSize(this))
 		{
@@ -77,33 +68,8 @@ public class HtmlViewer
 		
 		if (!Settings.getInstance().restoreWindowPosition(this))
 		{
-			WbSwingUtilities.center(this, owner);
+			WbSwingUtilities.center(this, null);
 		}
-	}
-	
-	private void initHtml(String aStartFile)
-	{
-		display = new HtmlPanel(aStartFile);
-	}
-	
-	public void showDataPumperHelp()
-	{
-		this.display.showDataPumperHelp();
-	}
-	
-	public void showOptionsHelp()
-	{
-		this.display.showOptionsHelp();
-	}
-	
-	public void showProfileHelp()
-	{
-		this.display.showProfileHelp();
-	}
-	
-	public void showIndex()
-	{
-		this.display.showIndex();
 	}
 	
 	private void saveSettings()

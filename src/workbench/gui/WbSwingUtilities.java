@@ -101,7 +101,6 @@ public class WbSwingUtilities
 	 */
 	public static void center(Window aWinToCenter, Window aReference)
 	{
-		if (aWinToCenter == null) return;
 		Point location = getLocationToCenter(aWinToCenter, aReference);
 		aWinToCenter.setLocation(location);
 	}
