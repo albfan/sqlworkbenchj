@@ -1898,7 +1898,6 @@ public class SqlPanel
 		{
 			this.currentData.removePropertyChangeListener(this);
 			this.currentData.getTable().stopEditing();
-			this.currentData.endEdit(false);
 		}
 		
 		int newIndex = this.resultTab.getSelectedIndex();

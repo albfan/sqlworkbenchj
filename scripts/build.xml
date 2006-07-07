@@ -4,6 +4,7 @@
   <property name="root" value=".."/>
   <property name="doc" value="../doc"/>
   <property name="src" value="../src"/>
+  <property name="testsrc" value="../test"/>
   <property name="csrc" value="../launcher"/>
   <property name="scriptsrc" value="."/>
   <property name="libdir" value="../libs"/>
@@ -93,19 +94,27 @@
     <delete file="${scriptsrc}/history.new" failonerror="false" />
     <mkdir dir="${build}"/>
     <mkdir dir="${distdir}"/>
+    <delete failonerror="false">
+      <fileset dir="${distdir}">
+        <include name="WorkbenchSrc*.zip"/>
+        <include name="Workbench-Build*.zip"/>
+      </fileset>
+    </delete>
+
   </target>
 
   <target name="prepare" depends="init">
+		
     <copy todir="${build}">
-      <fileset dir="${src}">
-        <include name="**/*.gif"/>
-        <include name="**/*.ico"/>
-        <include name="**/*.png"/>
-        <include name="**/*.xml"/>
-        <include name="**/*.html"/>
-        <include name="**/*.txt"/>
+			<fileset defaultexcludes="true" dir="${src}">
+        <include name="**/*.*"/>
+        <exclude name="**/*.java"/>
+        <exclude name="**/*.form"/>
+        <exclude name="**/*.class"/>
+        <exclude name="**/*.flex"/>
       </fileset>
     </copy>
+		
     <copy todir="${build}">
       <fileset dir="${src}">
         <include name="**/*.properties"/>
@@ -116,12 +125,6 @@
       </filterset>
     </copy>
 
-    <copy todir="${build}">
-      <fileset dir="${src}">
-        <include name="**/BaseValueObject.java"/>
-        <include name="**/BaseTablePersistence.java"/>
-      </fileset>
-    </copy>
   </target>
 
   <target name="compile" depends="prepare">
@@ -358,6 +361,10 @@
 
     <delete file="${html-outdir}/Manual.xml"/>
     <copy overwrite="true" todir="${html-outdir}" file="${doc}/css/${html-stylesheet}"/>
+		<replace dir="${distdir}/manual" summary="true">
+				<replacetoken><![CDATA[<a href="mailto:support@sql-workbench.net">support@sql-workbench.net</a>]]></replacetoken> 
+				<replacevalue><![CDATA[<a href=mailto:&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;>&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;</a>]]></replacevalue>
+		</replace>
   </target>
 
   <!-- End Manual related tasks -->
@@ -370,7 +377,7 @@
       <manifest>
         <attribute name="Main-Class" value="workbench.WbStarter"/>
         <attribute name="Class-Path" value="."/>
-        <attribute name="Created-By" value="Thomas Kellerer (info@sql-workbench.net)"/>
+        <attribute name="Created-By" value="Thomas Kellerer (support@sql-workbench.net)"/>
         <attribute name="WbBuild-Number" value="${build.number}"/>
         <attribute name="WbBuild-Date" value="${build_date}"/>
       </manifest>
@@ -405,6 +412,10 @@
       <zipfileset dir="${scriptsrc}" prefix="scripts">
         <exclude name="**/.nb*"/>
         <exclude name="**/.new"/>
+      </zipfileset>
+      
+      <zipfileset dir="${testsrc}" prefix="test">
+        <exclude name="**/.nb*"/>
       </zipfileset>
 
       <zipfileset dir="${doc}" prefix="doc">
@@ -523,9 +534,9 @@
         <include name="DbExplorer.exe"/>
       </zipfileset>
       <zipfileset dir="${scriptsrc}">
-        <include name="jworkbench"/>
-        <include name="datapumper"/>
-        <include name="dbexplorer"/>
+        <include name="jworkbench.sh"/>
+        <include name="datapumper.sh"/>
+        <include name="dbexplorer.sh"/>
       </zipfileset>
       <zipfileset dir="${html-outdir}" prefix="manual">
         <include name="**/*.*"/>
@@ -535,6 +546,7 @@
       </zipfileset>
     </zip>
 
+		<!--
     <tar destfile="${root}/release/Workbench-Build${build.number}.tar.gz" compression="gzip">
       <tarfileset dir="${root}/dist">
         <include name="Workbench.jar"/>
@@ -552,16 +564,12 @@
         <include name="**/*.xslt"/>
       </tarfileset>
     </tar>
-
+		-->
+		
   </target>
 
-    <target name="release-src-zip" depends="init">
-    <delete failonerror="false">
-      <fileset dir="${root}/${release-src-dir}">
-        <include name="WorkbenchSrc*.zip"/>
-      </fileset>
-    </delete>
-
+	<target name="release-src-zip" depends="init">
+		
     <zip zipfile="${root}/${release-src-dir}/WorkbenchSrc-Build${build.number}.zip">
       <zipfileset dir="${src}" prefix="src">
         <include name="**/*.*"/>
@@ -603,4 +611,12 @@
 
   <target name="src" depends="make-src-zip"/>
 
+	<target name="generate-lexer">
+		<java classname="JFlex.Main" classpath="../etc/JFlex.jar" fork="true">
+			<jvmarg value="-Xmx128m"/>
+			<arg value="-q"/>
+			<arg value="../src/workbench/sql/formatter/SQLLexer.flex"/>
+		</java>
+	</target>
+	
 </project>
