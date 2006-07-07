@@ -1,5 +1,8 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+
+Build 88, 07.07.2006
+--------------------
 Enh:  (87.14) The help window invoked from the main window is now 
       non-modal and can be put into the background.
 Enh:  (87.11) CREATE INDEX is now supported for code-completion
@@ -63,7 +66,9 @@ Fix:  (87.11) Sub-selects in the WHERE clause where not formatted correctly
 Fix:  (87.13) Moving SQL tabs around was not always working properly (wrong
       statements were executed)
 Fix:  (87.13) The display for start and end row was not always correct.
-
+Fix:  (87.15) Switching between result sets in the same SQL panel would 
+      discard any changes in done in the result set
+      
 Build 87, 08.05.2006
 --------------------
 Fix:  Some Workbench specific statements were broken when entered in lowercase
