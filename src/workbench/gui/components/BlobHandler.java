@@ -19,9 +19,11 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Blob;
+import java.sql.SQLException;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dialogs.BlobInfoDialog;
@@ -205,76 +207,39 @@ public class BlobHandler
 		return value.toString();
 	}
 	
-	public void saveBlobToFile(Component caller, Object data)
+	public static long saveBlobToFile(Object data, String file)
+		throws IOException, SQLException
 	{
-		String file = FileDialogUtil.getBlobFile(caller);
-		if (file == null) return;
-		
 		InputStream in = null;
 		OutputStream out = null;
 		if (data instanceof java.sql.Blob)
 		{
 			java.sql.Blob blob = (java.sql.Blob)data;
-			try
-			{
-				in = blob.getBinaryStream();
-			}
-			catch (Exception ex)
-			{
-				WbSwingUtilities.showErrorMessage(caller, ex.getMessage());
-				return;
-			}
+			in = blob.getBinaryStream();
 		}
 		else if (data instanceof byte[])
 		{
-			try
-			{
-				in = new ByteArrayInputStream((byte[])data);
-			}
-			catch (Exception ex)
-			{
-				WbSwingUtilities.showErrorMessage(caller, ex.getMessage());
-				return;
-			}
+			in = new ByteArrayInputStream((byte[])data);
 		}
 		else if (data instanceof File)
 		{
-			try
-			{
-				in = new FileInputStream((File)data);
-			}
-			catch (Exception ex)
-			{
-				WbSwingUtilities.showErrorMessage(caller, ex.getMessage());
-				return;
-			}
+			in = new FileInputStream((File)data);
 		}
 		
 		if (in == null) 
 		{
 			LogMgr.logError("WbTable.saveBlobContent", "No valid BLOB data found, got " + data.getClass().getName() + " instead", null);
-			WbSwingUtilities.showMessageKey(caller, "ErrBlobNoAvail");
-			return;
+			//WbSwingUtilities.showMessageKey(caller, "ErrBlobNoAvail");
+			throw new IOException("No BLOB data object found");
 		}
 		
-		try
-		{
-			out = new FileOutputStream(file);
-			FileUtil.copy(in, out);
-			String msg = ResourceMgr.getString("MsgBlobSaved");
-			File f = new File(file);
-			msg = StringUtil.replace(msg, "%filename%", f.getAbsolutePath());
-			int size = (int)f.length();
-			msg = StringUtil.replace(msg, "%size%", Integer.toString(size));
-			WbSwingUtilities.showMessage(caller, msg);
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError("WbTable.saveBlobContent", "Error when writing data file", ex);
-			String msg = ResourceMgr.getString("ErrBlobSaveError");
-			msg += "\n" + ExceptionUtil.getDisplay(ex);
-			WbSwingUtilities.showErrorMessage(caller, msg);
-		}
+		long fileSize = -1;
+		out = new FileOutputStream(file);
+		FileUtil.copy(in, out);
+		File f = new File(file);
+		fileSize = f.length();
+		
+		return fileSize;
 	}
 
 	public void showBlobAsText(Object value)

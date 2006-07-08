@@ -119,7 +119,7 @@ public class SelectCommand extends SqlCommand
 				}
 				else
 				{
-					processResults(result, true);
+					processResults(result, true, rs);
 				}
 
 				if (!isCancelled)

@@ -11,14 +11,15 @@
  */
 package workbench.db.exporter;
 
-import java.text.SimpleDateFormat;
-
-import workbench.storage.ResultInfo;
+import java.io.File;
+import workbench.gui.components.BlobHandler;
+import workbench.log.LogMgr;
 import workbench.storage.RowData;
 import workbench.util.CharacterRange;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -35,7 +36,15 @@ public class TextRowDataConverter
 	private CharacterRange escapeRange = null;
 	private String additionalEncodeCharacters = null;
 	private String lineEnding = StringUtil.LINE_TERMINATOR;
-
+	
+	private static final int BLOB_MODE_NONE = -1;
+	private static final int BLOB_MODE_WB = 1;
+	private static final int BLOB_MODE_ORA = 2;
+	
+	private int blobMode = -1;
+	private BlobHandler blobHandler; 
+	private String baseFilename;
+	
 	public TextRowDataConverter()
 	{
 		super();
@@ -56,6 +65,23 @@ public class TextRowDataConverter
 		return null;
 	}
 
+	public void setBlobModeWorkbench(String baseFile) 
+	{ 
+		setBasefilename(baseFile);
+		this.blobMode = BLOB_MODE_WB; 
+	}
+	
+	public void setBlobModeOracle(String baseFile) 
+	{ 
+		setBasefilename(baseFile);
+		this.blobMode = BLOB_MODE_ORA; 
+	}
+	private void setBasefilename(String baseFile)
+	{
+		WbFile f = new WbFile(baseFile);
+		this.baseFilename = f.getFileName();
+	}
+	
 	public String getFormatName()
 	{
 		return "Text";
@@ -69,11 +95,23 @@ public class TextRowDataConverter
 		for (int c=0; c < count; c ++)
 		{
 			if (!this.includeColumnInExport(c)) continue;
-			String value = this.getValueAsFormattedString(row, c);
+			
+			int colType = this.metaData.getColumnType(c);
+			String value = null;
+			
+			if (blobMode != BLOB_MODE_NONE && SqlUtil.isBlobType(colType))
+			{
+				value = writeBlobFile(row.getValue(c), c, rowIndex);
+			}
+			else 
+			{
+				value = this.getValueAsFormattedString(row, c);
+			}
+			
 			if (value == null) value = "";
 			boolean needQuote = false;
 
-			if (SqlUtil.isCharacterType(this.metaData.getColumnType(c)))
+			if (SqlUtil.isCharacterType(colType))
 			{
 				if (this.cleanCR)
 				{
@@ -98,6 +136,36 @@ public class TextRowDataConverter
 		return result;
 	}
 
+	private String writeBlobFile(Object value, int colIndex, long rowNum)
+	{
+		StringBuffer fname = new StringBuffer(baseFilename.length() + 10);
+		
+		fname.append(baseFilename);
+		fname.append("_c");
+		fname.append(colIndex);
+		fname.append("_r");
+		fname.append(rowNum+1);
+		fname.append(".data");
+		
+		String realName = fname.toString();
+		File f = new File(baseDir, realName);
+		try
+		{
+			BlobHandler.saveBlobToFile(value, f.getAbsolutePath());
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("TextRowDataConverter.writeBlobFile()", "Error writing blob data", e);
+			return "";
+		}
+		if (blobMode == BLOB_MODE_ORA)
+		{
+			return realName;
+		}
+		return "{$blobfile='" + realName + "'}";
+	}
+	
+	
 	public void setLineEnding(String ending)
 	{
 		if (ending != null) this.lineEnding = ending;

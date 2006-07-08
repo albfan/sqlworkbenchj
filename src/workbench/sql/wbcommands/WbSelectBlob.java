@@ -10,9 +10,7 @@
  *
  */
 package workbench.sql.wbcommands;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +26,9 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ExceptionUtil;
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 import workbench.util.WbStringTokenizer;
 
 /**
@@ -95,15 +95,20 @@ public class WbSelectBlob
 		OutputStream out = null;
 		InputStream in = null;
 		int filesize = 0;
+		
+		WbFile outputFile = new WbFile(filename);
+		File outputDir = outputFile.getParentFile();
+		String baseFilename = outputFile.getFileName();
+		String extension = outputFile.getExtension();
 		try
 		{
 			stmt = aConnection.createStatementForQuery();
 			this.currentStatement = stmt;
 			rs = stmt.executeQuery(sql);
-			if (rs.next())
+			int row = 0;
+			while (rs.next())
 			{
 				int bufsize = 32*1024;
-				byte[] buffer = new byte[bufsize];
 				in = rs.getBinaryStream(1);
 				if (in == null)
 				{
@@ -111,21 +116,25 @@ public class WbSelectBlob
 					result.addMessage(ResourceMgr.getString("ErrSelectBlobNoStream"));
 					return result;
 				}
-				out = new BufferedOutputStream(new FileOutputStream(filename), bufsize * 2);
-				int bytesRead = in.read(buffer);
-				while (bytesRead != -1)
+				
+				if (row == 0)
 				{
-					filesize += bytesRead;
-					out.write(buffer, 0, bytesRead);
-					bytesRead = in.read(buffer);
+					f = new File(filename);
 				}
+				else
+				{
+					f = new File(outputDir, baseFilename + "_" + Integer.toString(row) + "." + extension);
+				}
+				out = new FileOutputStream(f);
+				filesize = FileUtil.copy(in, out);
+				this.appendSuccessMessage(result);
+				String msg = ResourceMgr.getString("MsgBlobSaved");
+				msg = StringUtil.replace(msg, "%filename%", f.getAbsolutePath());
+				msg = msg.replaceAll("%filesize%", Integer.toString(filesize));
+				result.addMessage(msg);
+				result.setSuccess();
+				row ++;
 			}
-			this.appendSuccessMessage(result);
-			String msg = ResourceMgr.getString("MsgBlobSaved");
-			msg = StringUtil.replace(msg, "%filename%", filename);
-			msg = msg.replaceAll("%filesize%", Integer.toString(filesize));
-			result.addMessage(msg);
-			result.setSuccess();
 		}
 		catch (IOException e)
 		{
@@ -144,8 +153,6 @@ public class WbSelectBlob
 		}
 		finally
 		{
-			try { out.close(); } catch (Throwable th) {}
-			try { in.close(); } catch (Throwable th) {}
 			try { rs.close(); } catch (Throwable th) {}
 			try { stmt.close(); } catch (Throwable th) {}
 		}

@@ -26,11 +26,11 @@ import workbench.db.report.ReportTable;
 import workbench.db.report.TagWriter;
 import workbench.log.LogMgr;
 import workbench.storage.NullValue;
-import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -133,11 +133,8 @@ public class XmlRowDataConverter
 	public void setBaseFilename(String name) 
 	{ 
 		if (name == null) return;
-		File f = new File(name);
-		String fname = f.getName();
-		int pos = fname.lastIndexOf('.');
-		if (pos == -1) pos = fname.length() - 1;
-		this.baseFilename = fname.substring(0, pos) + "_";
+		WbFile f = new WbFile(name);
+		this.baseFilename = f.getFileName() + "_";
 	}
 	
 	public StrBuffer getEnd(long totalRows)

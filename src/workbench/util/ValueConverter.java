@@ -11,9 +11,8 @@
  */
 package workbench.util;
 
+import java.io.File;
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
 import workbench.log.LogMgr;
@@ -102,6 +101,9 @@ public class ValueConverter
 	/**
 	 * Convert the given input value to a class instance
 	 * according to the given type (from java.sql.Types)
+	 * If the value is a blob file parameter as defined by {@link workbench.util.LobFileParameter}
+	 * then a File object is returned that points to the data file (as passed in the
+	 * blob file parameter)
 	 * @see workbench.storage.DataStore#convertCellValue(Object, int)
 	 */
 	public Object convertValue(Object aValue, int type)
@@ -129,16 +131,23 @@ public class ValueConverter
 			case Types.CHAR:
 			case Types.VARCHAR:
 			case Types.LONGVARCHAR:
-				if (aValue instanceof String)
-					return aValue;
-				else
 					return aValue.toString();
 			case Types.DATE:
-				if (aValue.toString().length() == 0) return null;
+				if (aValue.toString().trim().length() == 0) return null;
 				return this.parseDate((String)aValue);
 			case Types.TIMESTAMP:
-				if (aValue.toString().length() == 0) return null;
+				if (aValue.toString().trim().length() == 0) return null;
 				return this.parseTimestamp((String)aValue);
+			case Types.BLOB:
+			case Types.BINARY:
+			case Types.LONGVARBINARY:
+			case Types.VARBINARY:
+				LobFileParameterParser p = new LobFileParameterParser(aValue.toString());
+				LobFileParameter[] parms = p.getParameters();
+				if (parms == null) return null;
+				String fname = parms[0].getFilename();
+				if (fname == null) return null;
+				return new File(fname);
 			case Types.BIT:
 			case Types.BOOLEAN:
 				try

@@ -15,7 +15,6 @@ import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -44,6 +43,7 @@ import workbench.util.WbStringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import workbench.util.EncodingUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -451,16 +451,14 @@ public class TextFileParser
 			{
 				break;
 			}
-			File theFile = (File)itr.next();
+			WbFile theFile = new WbFile((File)itr.next());
 			try
 			{
 				currentFile++;
 				this.messages = new StrBuffer();
 				this.receiver.setCurrentTable(currentFile);
 				this.filename = theFile.getAbsolutePath();
-				String name = theFile.getName();
-				int p = name.lastIndexOf('.');
-				this.tableName = name.substring(0, p);
+				this.tableName = theFile.getFileName();
 				this.columns = null;
 				this.colCount = 0;
 				this.columnMap = null;

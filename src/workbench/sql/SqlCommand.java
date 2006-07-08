@@ -194,6 +194,12 @@ public class SqlCommand
 	protected void processResults(StatementRunnerResult result, boolean hasResult)
 		throws SQLException
 	{
+		processResults(result, hasResult, null);
+	}
+	
+	protected void processResults(StatementRunnerResult result, boolean hasResult, ResultSet queryResult)
+		throws SQLException
+	{
 		if (result == null) return;
 		
 		// Postgres obviously clears the warnings if the getMoreResults()
@@ -208,11 +214,10 @@ public class SqlCommand
 		int updateCount = -1;
 		boolean moreResults = false;
 
-		// if hasResult == false, then the first "result" is an updateCount
-		if (!hasResult) 
+		if (hasResult == false) 
 		{
+			// the first "result" is an updateCount
 			updateCount = this.currentStatement.getUpdateCount();
-			//result.addMessage(updateCount + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
 			moreResults = this.currentStatement.getMoreResults();
 		}
 		else
@@ -227,12 +232,17 @@ public class SqlCommand
 		{
 			if (moreResults)
 			{
-				rs = this.currentStatement.getResultSet();
+				if (queryResult != null)
+				{
+					rs = queryResult;
+					queryResult = null;
+				}
+				else
+				{
+					rs = this.currentStatement.getResultSet();
+				}
 				if (rs != null) 
 				{
-					//ds = new DataStore(rs, true, this.rowMonitor, this.maxRows, this.currentConnection);
-					// An exception in the constructor should lead to a real error
-					
 					// we have to use an instance variable for the retrieval, otherwise the retrieval
 					// cannot be cancelled!
 					this.currentRetrievalData = new DataStore(rs, false, this.rowMonitor, maxRows, this.currentConnection);

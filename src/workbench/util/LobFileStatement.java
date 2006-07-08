@@ -23,7 +23,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -35,10 +34,9 @@ import workbench.resource.ResourceMgr;
  */
 public class LobFileStatement
 {
-	private final String MARKER = "\\{\\$[cb]lobfile=";
-	private final Pattern MARKER_PATTERN = Pattern.compile(MARKER, Pattern.CASE_INSENSITIVE);
+	private final String MARKER = "\\{\\$[cb]lobfile=[^\\}]*\\}";
 	private String sqlToUse;
-	private ParameterEntry[] parameters;
+	private LobFileParameter[] parameters;
 	private int parameterCount = 0;
 	private String baseDir;
 	
@@ -47,87 +45,51 @@ public class LobFileStatement
 	{
 		this(sql, null);
 	}
+	
 	public LobFileStatement(String sql, String dir)
 		throws FileNotFoundException
 	{
-		Matcher m = MARKER_PATTERN.matcher(sql);
-		if (!m.find()) return;
-		
 		this.baseDir = dir;
+
+		LobFileParameterParser p = new LobFileParameterParser(sql);
 		
-		// Calculate number of parameters
-		parameterCount ++;
-		while (m.find())
+		this.parameters = p.getParameters();
+		if (this.parameters == null) return;
+		
+		parameterCount = this.parameters.length;
+		for (int index=0; index < parameterCount; index++)
 		{
-			parameterCount ++;
-		}
-		m.reset();
-		parameters = new ParameterEntry[parameterCount];
-		int index = 0;
-		StringBuffer newSql = new StringBuffer(sql.length());
-		WbStringTokenizer tok = new WbStringTokenizer(" \t", false, "\"'", false);
-		int lastStart = 0;
-		while (m.find())
-		{
-			int start = m.start();
-			int end = sql.indexOf("}", start + 1);
-			if (end > -1)
+			if (parameters[index].getFilename() == null)
 			{
-				newSql.append(sql.substring(lastStart, start));
-				newSql.append(" ? ");
-				lastStart = end + 1; 
-				String parm = sql.substring(start + 2, end);
-				tok.setSourceString(parm);
-				parameters[index] = new ParameterEntry();
-				while (tok.hasMoreTokens())
-				{
-					String s = tok.nextToken();
-					String arg = null;
-					String value = null;
-					int pos = s.indexOf("=");
-					if (pos > -1)
-					{
-						arg = s.substring(0, pos);
-						value = s.substring(pos + 1);
-					}
-					if ("encoding".equals(arg))
-					{
-						parameters[index].encoding = value;
-					}
-					else
-					{
-						// only other parameter allowed is [cb]lobfile
-						File f = new File(value);
-						if (!f.isAbsolute() && this.baseDir != null)
-						{
-							f = new File(this.baseDir, value);
-							value = f.getAbsolutePath();
-						}
-						parameters[index].filename = value;
-						parameters[index].binary = "blobfile".equals(arg);
-					}
-				}
-				if (parameters[index].filename == null)
-				{
-					String msg = ResourceMgr.getString("ErrUpdateBlobNoFileParameter");
-					msg = StringUtil.replace(msg, "%parm%",sql.substring(start + 2, end));
-					throw new FileNotFoundException(msg);
-				}
-				File f = new File(parameters[index].filename);
-				if (f.isDirectory() || !f.exists())
-				{
-					String msg = ResourceMgr.getString("ErrUpdateBlobFileNotFound");
-					msg = StringUtil.replace(msg, "%filename%", parameters[index].filename);
-					throw new FileNotFoundException(msg);
-				}
+				String msg = ResourceMgr.getString("ErrUpdateBlobNoFileParameter");
+				throw new FileNotFoundException(msg);
 			}
-			index ++;
+			File f = new File(parameters[index].getFilename());
+
+			if (!f.isAbsolute() && this.baseDir != null)
+			{
+				f = new File(this.baseDir, parameters[index].getFilename());
+				parameters[index].setFilename(f.getAbsolutePath());
+			}
+						
+			if (f.isDirectory() || !f.exists())
+			{
+				String msg = ResourceMgr.getString("ErrUpdateBlobFileNotFound");
+				msg = StringUtil.replace(msg, "%filename%", parameters[index].getFilename());
+				throw new FileNotFoundException(msg);
+			}
 		}
-		newSql.append(sql.substring(lastStart));
-		this.sqlToUse = newSql.toString();
+		this.sqlToUse = sql.replaceAll(MARKER, " ? ");
 		//LogMgr.logDebug("LobFileStatement.<init>", "Using SQL: " + sqlToUse);
 	}
 
+	public String getPreparedSql() { return sqlToUse; }
+	
+	public LobFileParameter[] getParameters()
+	{
+		return parameters;
+	}
+	
 	public int getParameterCount()
 	{
 		return parameterCount;
@@ -147,24 +109,24 @@ public class LobFileStatement
 		final int buffSize = 64*1024;
 		for (int i = 0; i < parameters.length; i++)
 		{
-			File f = new File(parameters[i].filename);
+			File f = new File(parameters[i].getFilename());
 			int length = (int)f.length(); 
-			if (parameters[i].binary)
+			if (parameters[i].isBinary())
 			{
 				InputStream in = new BufferedInputStream(new FileInputStream(f), buffSize);
-				parameters[i].dataStream = new CloseableDataStream(in);
+				parameters[i].setDataStream(new CloseableDataStream(in));
 				pstmt.setBinaryStream(i+1, in, length);
 			}
-			else if (parameters[i].encoding == null)
+			else if (parameters[i].getEncoding() == null)
 			{
 				InputStream in = new BufferedInputStream(new FileInputStream(f), buffSize);
-				parameters[i].dataStream = new CloseableDataStream(in);
+				parameters[i].setDataStream(new CloseableDataStream(in));
 				pstmt.setAsciiStream(i+1, in, length);
 			}
 			else
 			{
-				Reader in = EncodingUtil.createBufferedReader(f, parameters[i].encoding);
-				parameters[i].dataStream = new CloseableDataStream(in);
+				Reader in = EncodingUtil.createBufferedReader(f, parameters[i].getEncoding());
+				parameters[i].setDataStream(new CloseableDataStream(in));
 				pstmt.setCharacterStream(i+1, in, length);
 			}
 		}
@@ -176,22 +138,10 @@ public class LobFileStatement
 		if (this.parameters == null) return;
 		for (int i = 0; i < parameters.length; i++)
 		{
-			if (parameters[i].dataStream != null)
+			if (parameters[i].getDataStream() != null)
 			{
-				parameters[i].dataStream.close();
+				parameters[i].getDataStream().close();
 			}
-		}
-	}
-	
-	class ParameterEntry
-	{
-		CloseableDataStream dataStream;
-		String filename;
-		String encoding;
-		boolean binary;
-		public String toString()
-		{
-			return "filename=[" + filename + "], binary=" + binary + ", encoding=" + encoding;
 		}
 	}
 	

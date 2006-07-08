@@ -760,6 +760,11 @@ public class DataImporter
 					// blobs will be "passed" as File objects pointing to 
 					// the external file 
 					File f = (File)row[i];
+					if (!f.isAbsolute())
+					{
+						File source = new File(this.parser.getSourceFilename());
+						f = new File(source.getParentFile(), f.getName());
+					}
 					try
 					{
 						in = new BufferedInputStream(new FileInputStream(f), 64*1024);

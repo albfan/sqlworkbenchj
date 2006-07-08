@@ -16,12 +16,16 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
 import workbench.util.CharacterRange;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -54,6 +58,15 @@ public class TextExportWriter
 		conv.setQuoteAlways(exporter.getQuoteAlways());
 		conv.setEscapeRange(exporter.getEscapeRange());
 		conv.setLineEnding(exporter.getLineEnding());
+		WbFile f = new WbFile(exporter.getOutputFilename());
+		if (exporter.getWriteOracleControlFile())
+		{
+			conv.setBlobModeOracle(exporter.getOutputFilename());
+		}
+		else
+		{
+			conv.setBlobModeWorkbench(exporter.getOutputFilename());
+		}
 	}
 	
 	protected void writeStart()
@@ -68,10 +81,9 @@ public class TextExportWriter
 		if (!exporter.getWriteOracleControlFile()) return;
 		
 		ResultInfo resultInfo = this.converter.getResultInfo();
-		File baseFile = new File(exporter.getFullOutputFilename());
+		WbFile baseFile = new WbFile(exporter.getFullOutputFilename());
 		String dir = baseFile.getParent();
-		String baseName = baseFile.getName();
-		baseName = baseName.substring(0,baseName.lastIndexOf('.'));
+		String baseName = baseFile.getFileName();
 		File ctl = new File(dir, baseName + ".ctl");
 		PrintWriter out = null;
 		try
@@ -105,13 +117,24 @@ public class TextExportWriter
 			//if (format == null) format = exporter.getDateFormat();
 			
 			String oraFormat = convertJavaDateFormatToOracle(format);
+			List blobColumns = new LinkedList();
 			
 			for (int i=0; i < count; i++)
 			{
 				String col = resultInfo.getColumnName(i);
+				int type = resultInfo.getColumnType(i);
 				out.print("  ");
-				out.print(col);
-				if (SqlUtil.isDateType(resultInfo.getColumnType(i)))
+				if (SqlUtil.isBlobType(type))
+				{
+					blobColumns.add(col);
+					out.print("blob_file_" + blobColumns.size() + " FILLER");
+				}
+				else
+				{
+					out.print(col);
+				}
+				
+				if (SqlUtil.isDateType(type))
 				{
 					for (int k=col.length(); k < max; k++) out.print(" ");
 					out.print("DATE");
@@ -122,8 +145,22 @@ public class TextExportWriter
 						out.print("\"");
 					}
 				}
-				if (i < count - 1) out.print(",");
+				if (i < count - 1 || blobColumns.size() > 0) out.print(",");
 				out.println();
+			}
+			if (blobColumns.size() > 0)
+			{
+				Iterator itr = blobColumns.iterator();
+				int i = 1;
+				while (itr.hasNext())
+				{
+					String col = (String)itr.next();
+					out.print("  ");
+					out.print(col);
+					out.print(" LOBFILE(blob_file_" + i + ") TERMINATED BY EOF");
+					if (itr.hasNext()) out.print(",");
+					out.println();
+				}
 			}
 			out.print(")");
 		}

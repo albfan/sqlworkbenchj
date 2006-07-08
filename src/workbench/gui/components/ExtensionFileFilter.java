@@ -18,6 +18,7 @@ import java.util.List;
 import javax.swing.filechooser.FileFilter;
 
 import workbench.resource.ResourceMgr;
+import workbench.util.WbFile;
 
 /**
  *
@@ -65,16 +66,11 @@ public class ExtensionFileFilter
 	{
 		return getExtension(f.getName());
 	}
+	
 	public static String getExtension(String s)
 	{
-		String ext = "";
-		int i = s.lastIndexOf('.');
-
-		if (i > 0 &&  i < s.length() - 1)
-		{
-			ext = s.substring(i+1);
-		}
-		return ext;
+		WbFile f = new WbFile(s);
+		return f.getExtension();
 	}
 
 	public static boolean hasSqlExtension(String aFilename)
