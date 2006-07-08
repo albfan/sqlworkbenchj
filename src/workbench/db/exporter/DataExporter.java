@@ -485,7 +485,10 @@ public class DataExporter
 			return -1;
 	}
 
-	public void setOutputFilename(String aFilename) { this.outputfile = aFilename; }
+	public void setOutputFilename(String aFilename) 
+	{ 
+		this.outputfile = aFilename; 
+	}
 
 	public String getOutputFilename() { return this.outputfile; }
 	public String getFullOutputFilename() { return this.fullOutputFileName; }
@@ -877,7 +880,7 @@ public class DataExporter
 				pw = new BufferedWriter(new FileWriter(f,this.append), buffSize);
 			}
 			this.exportWriter.setOutput(pw);
-			this.exportWriter.setBaseDir(dir);
+			this.exportWriter.configureConverter();
 		}
 		catch (IOException e)
 		{
@@ -1025,7 +1028,7 @@ public class DataExporter
 		this.setDateFormat(options.getDateFormat());
 		this.setTimestampFormat(options.getTimestampFormat());
 		this.setEncoding(options.getEncoding());
-		if (this.exportWriter != null) this.exportWriter.configureFromExporter();
+		if (this.exportWriter != null) this.exportWriter.configureConverter();
 	}
 
 	public void setSqlOptions(SqlOptions sqlOptions)
@@ -1046,7 +1049,7 @@ public class DataExporter
 		this.setCommitEvery(sqlOptions.getCommitEvery());
 		this.setTableName(sqlOptions.getAlternateUpdateTable());
 		this.setKeyColumnsToUse(sqlOptions.getKeyColumns());
-		this.exportWriter.configureFromExporter();
+		this.exportWriter.configureConverter();
 	}
 
 	public void setXmlOptions(XmlOptions xmlOptions)
@@ -1054,7 +1057,7 @@ public class DataExporter
 		this.setOutputTypeXml();
 		this.setUseCDATA(xmlOptions.getUseCDATA());
 		this.setUseVerboseFormat(xmlOptions.getUseVerboseXml());
-		this.exportWriter.configureFromExporter();
+		this.exportWriter.configureConverter();
 	}
 
 	public void setHtmlOptions(HtmlOptions html)
@@ -1063,7 +1066,7 @@ public class DataExporter
 		this.setCreateFullHtmlPage(html.getCreateFullPage());
 		this.setHtmlTitle(html.getPageTitle());
 		this.setEscapeHtml(html.getEscapeHtml());
-		this.exportWriter.configureFromExporter();
+		this.exportWriter.configureConverter();
 	}
 
 	public void setTextOptions(TextOptions text)
@@ -1075,7 +1078,7 @@ public class DataExporter
 		this.setQuoteAlways(text.getQuoteAlways());
 		this.setEscapeRange(text.getEscapeRange());
 		this.setLineEnding(text.getLineEnding());
-		this.exportWriter.configureFromExporter();
+		this.exportWriter.configureConverter();
 	}
 
 	public boolean isIncludeCreateTable()

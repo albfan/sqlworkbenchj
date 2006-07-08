@@ -141,14 +141,14 @@ public class TextRowDataConverter
 		StringBuffer fname = new StringBuffer(baseFilename.length() + 10);
 		
 		fname.append(baseFilename);
-		fname.append("_c");
-		fname.append(colIndex);
 		fname.append("_r");
 		fname.append(rowNum+1);
+		fname.append("_c");
+		fname.append(colIndex+1);
 		fname.append(".data");
 		
 		String realName = fname.toString();
-		File f = new File(baseDir, realName);
+		File f = new File(getBaseDir(), realName);
 		try
 		{
 			BlobHandler.saveBlobToFile(value, f.getAbsolutePath());

@@ -34,9 +34,6 @@ import workbench.util.WbFile;
 public class TextExportWriter
 	extends ExportWriter
 {
-	//private ResultInfo resultInfo;
-	
-	/** Creates a new instance of TextExportWriter */
 	public TextExportWriter(DataExporter exp)
 	{
 		super(exp);
@@ -58,14 +55,18 @@ public class TextExportWriter
 		conv.setQuoteAlways(exporter.getQuoteAlways());
 		conv.setEscapeRange(exporter.getEscapeRange());
 		conv.setLineEnding(exporter.getLineEnding());
-		WbFile f = new WbFile(exporter.getOutputFilename());
-		if (exporter.getWriteOracleControlFile())
+		String fname = exporter.getOutputFilename();
+		if (fname != null)
 		{
-			conv.setBlobModeOracle(exporter.getOutputFilename());
-		}
-		else
-		{
-			conv.setBlobModeWorkbench(exporter.getOutputFilename());
+			WbFile f = new WbFile(fname);
+			if (exporter.getWriteOracleControlFile())
+			{
+				conv.setBlobModeOracle(exporter.getOutputFilename());
+			}
+			else
+			{
+				conv.setBlobModeWorkbench(exporter.getOutputFilename());
+			}
 		}
 	}
 	

@@ -230,8 +230,8 @@ public class XmlRowDataConverter
 				dataFile.append('r');
 				dataFile.append(rowIndex + 1);
 				dataFile.append("_c");
-				dataFile.append(c);
-				dataFile.append(".dat");
+				dataFile.append(c + 1);
+				dataFile.append(".data");
 				xml.append(' ');
 				xml.append(ATTR_DATA_FILE);
 				xml.append("=\"");
@@ -280,7 +280,7 @@ public class XmlRowDataConverter
 		OutputStream out = null;
 		try
 		{
-			File f = new File(this.baseDir, file.toString());
+			File f = new File(getBaseDir(), file.toString());
 			out = new BufferedOutputStream(new FileOutputStream(f), 64*1024);
 			if (data instanceof byte[])
 			{

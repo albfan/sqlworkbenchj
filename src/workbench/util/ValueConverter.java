@@ -142,12 +142,20 @@ public class ValueConverter
 			case Types.BINARY:
 			case Types.LONGVARBINARY:
 			case Types.VARBINARY:
-				LobFileParameterParser p = new LobFileParameterParser(aValue.toString());
-				LobFileParameter[] parms = p.getParameters();
-				if (parms == null) return null;
-				String fname = parms[0].getFilename();
-				if (fname == null) return null;
-				return new File(fname);
+				if (aValue instanceof String)
+				{
+					LobFileParameterParser p = new LobFileParameterParser(aValue.toString());
+					LobFileParameter[] parms = p.getParameters();
+					if (parms == null) return null;
+					String fname = parms[0].getFilename();
+					if (fname == null) return null;
+					return new File(fname);
+				}
+				else if (aValue instanceof File)
+				{
+					return aValue;
+				}
+				return null;
 			case Types.BIT:
 			case Types.BOOLEAN:
 				try

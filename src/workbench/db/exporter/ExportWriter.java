@@ -11,6 +11,7 @@
  */
 package workbench.db.exporter;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
@@ -21,6 +22,7 @@ import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
+import workbench.util.WbFile;
 
 /**
  *
@@ -35,7 +37,7 @@ public abstract class ExportWriter
 	protected RowActionMonitor rowMonitor;
 	protected RowDataConverter converter;
 	private Writer output;
-	private String baseDir;
+	private File outputFile;
 	private int progressInterval = 10;
 	
 	public ExportWriter(DataExporter exp)
@@ -45,11 +47,6 @@ public abstract class ExportWriter
 		configureConverter();
 	}
 
-	public void configureFromExporter()
-	{
-		configureConverter();
-	}
-	
 	public void configureConverter()
 	{
 		converter.setErrorReporter(exporter);
@@ -59,8 +56,10 @@ public abstract class ExportWriter
 		converter.setDefaultNumberFormatter(exporter.getDecimalFormatter());
 		converter.setOriginalConnection(this.exporter.getConnection());
 		converter.setColumnsToExport(this.exporter.getColumnsToExport());
-		converter.setBaseDir(this.baseDir);
+		String file = this.exporter.getOutputFilename();
+		if (file != null) converter.setOutputFile(new File(file));
 	}
+	
 	public abstract RowDataConverter createConverter();
 
 	public void setProgressInterval(int interval)
@@ -76,14 +75,14 @@ public abstract class ExportWriter
 		this.rowMonitor = monitor;
 	}
 
-	public void setBaseDir(String dir) 
-	{ 
-		this.baseDir = dir; 
-		if (this.converter != null) 
-		{
-			this.converter.setBaseDir(dir);
-		}
-	}
+//	public void setOutputFilename(File outfile) 
+//	{ 
+//		this.outputFile = outfile;
+//		if (this.converter != null) 
+//		{
+//			this.converter.setOutputFile(this.outputFile);
+//		}
+//	}
 	
 	public long getNumberOfRecords()
 	{

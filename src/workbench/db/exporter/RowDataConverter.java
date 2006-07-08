@@ -11,6 +11,7 @@
  */
 package workbench.db.exporter;
 
+import java.io.File;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -39,7 +40,7 @@ public abstract class RowDataConverter
 	protected WbConnection originalConnection;
 	protected String generatingSql;
 	protected ResultInfo metaData;
-	protected String baseDir;
+	private File outputFile;
 	private boolean[] columnsToExport = null;
 	protected List exportColumns = null;
 	protected ErrorReporter errorReporter;
@@ -62,7 +63,16 @@ public abstract class RowDataConverter
 	public void setResultInfo(ResultInfo meta) { this.metaData = meta; }
 	public ResultInfo getResultInfo() { return this.metaData; }
 	
-	public void setBaseDir(String dir) { this.baseDir = dir; }
+	public void setOutputFile(File f) { this.outputFile = f; }
+	
+	protected File getBaseDir()
+	{
+		if (this.outputFile == null) return new File(".");
+		if (this.outputFile.isAbsolute()) return this.outputFile.getParentFile();
+		return new File(".");
+	}
+	
+	protected File getOutputFile() { return this.outputFile; }
 	
 	public void setErrorReporter(ErrorReporter reporter)
 	{
