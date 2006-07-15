@@ -45,6 +45,7 @@ public class BlobInfoDialog
 	private BlobHandler handler;
 	private EscAction escAction;
 	private File uploadFile;
+	private boolean setToNull = false;
 	
 	public BlobInfoDialog(java.awt.Frame parent, boolean modal)
 	{
@@ -85,6 +86,7 @@ public class BlobInfoDialog
 	}
 
 	public File getUploadedFile() { return uploadFile; }
+	public boolean setToNull() { return this.setToNull; }
 	
 	public void actionPerformed(ActionEvent e)
 	{
@@ -174,6 +176,7 @@ public class BlobInfoDialog
     showHexButton = new FlatButton();
     externalViewer = new javax.swing.JButton();
     externalTools = new javax.swing.JComboBox();
+    setNullButton = new javax.swing.JButton();
 
     getContentPane().setLayout(new java.awt.GridBagLayout());
 
@@ -226,7 +229,7 @@ public class BlobInfoDialog
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.5;
@@ -254,11 +257,11 @@ public class BlobInfoDialog
     encodingPanel.setLabelVisible(false);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.5;
-    gridBagConstraints.insets = new java.awt.Insets(5, 6, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(5, 8, 0, 10);
     jPanel1.add(encodingPanel, gridBagConstraints);
 
     showImageButton.setText(ResourceMgr.getString("LblShowAsImg"));
@@ -272,7 +275,7 @@ public class BlobInfoDialog
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.5;
@@ -307,7 +310,7 @@ public class BlobInfoDialog
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(16, 8, 2, 10);
@@ -325,7 +328,7 @@ public class BlobInfoDialog
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.5;
@@ -334,12 +337,29 @@ public class BlobInfoDialog
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.5;
-    gridBagConstraints.insets = new java.awt.Insets(7, 6, 11, 10);
+    gridBagConstraints.insets = new java.awt.Insets(7, 8, 11, 10);
     jPanel1.add(externalTools, gridBagConstraints);
+
+    setNullButton.setText(ResourceMgr.getString("LblSetNull"));
+    setNullButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        setNullButtonActionPerformed(evt);
+      }
+    });
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 8, 0, 10);
+    jPanel1.add(setNullButton, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -353,6 +373,12 @@ public class BlobInfoDialog
 
     pack();
   }// </editor-fold>//GEN-END:initComponents
+
+	private void setNullButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_setNullButtonActionPerformed
+	{//GEN-HEADEREND:event_setNullButtonActionPerformed
+		this.setToNull = true;
+		closeWindow();
+	}//GEN-LAST:event_setNullButtonActionPerformed
 
 	private void showHexButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showHexButtonActionPerformed
 	{//GEN-HEADEREND:event_showHexButtonActionPerformed
@@ -436,6 +462,7 @@ public class BlobInfoDialog
   public javax.swing.JLabel infoLabel;
   public javax.swing.JPanel jPanel1;
   public javax.swing.JButton saveAsButton;
+  public javax.swing.JButton setNullButton;
   public javax.swing.JButton showAsTextButton;
   public javax.swing.JButton showHexButton;
   public javax.swing.JButton showImageButton;

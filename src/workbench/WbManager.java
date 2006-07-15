@@ -633,7 +633,7 @@ public class WbManager
 
   private boolean checkProfiles(MainWindow win)
   {
-    if (ConnectionMgr.getInstance().profilesChanged())
+    if (ConnectionMgr.getInstance().profilesAreModified())
     {
       int answer = JOptionPane.showConfirmDialog(win, ResourceMgr.getString("MsgConfirmUnsavedProfiles"), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_CANCEL_OPTION);
       if (answer == JOptionPane.OK_OPTION)

@@ -94,7 +94,7 @@ public class WbSelectBlob
 		this.currentConnection = aConnection;
 		OutputStream out = null;
 		InputStream in = null;
-		int filesize = 0;
+		long filesize = 0;
 		
 		WbFile outputFile = new WbFile(filename);
 		File outputDir = outputFile.getParentFile();
@@ -130,7 +130,7 @@ public class WbSelectBlob
 				this.appendSuccessMessage(result);
 				String msg = ResourceMgr.getString("MsgBlobSaved");
 				msg = StringUtil.replace(msg, "%filename%", f.getAbsolutePath());
-				msg = msg.replaceAll("%filesize%", Integer.toString(filesize));
+				msg = msg.replaceAll("%filesize%", Long.toString(filesize));
 				result.addMessage(msg);
 				result.setSuccess();
 				row ++;

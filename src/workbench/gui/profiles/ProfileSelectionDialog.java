@@ -251,8 +251,10 @@ public class ProfileSelectionDialog
 			this.setInitialFocus();
 		}
 	}
+	
 	public void windowClosed(WindowEvent e)
 	{
+		this.profiles.done();
 	}
 
 	public void windowClosing(WindowEvent e)

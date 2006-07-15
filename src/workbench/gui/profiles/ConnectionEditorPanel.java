@@ -22,9 +22,11 @@ import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import javax.swing.ComboBoxModel;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
@@ -43,6 +45,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.BooleanPropertyEditor;
+import workbench.gui.components.ComboStringPropertyEditor;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.IntegerPropertyEditor;
 import workbench.gui.components.PasswordPropertyEditor;
@@ -169,7 +172,9 @@ public class ConnectionEditorPanel
     tfWorkspaceFile = new StringPropertyEditor();
     selectWkspButton = new javax.swing.JButton();
     workspaceFileLabel = new javax.swing.JLabel();
-    jLabel1 = new WbCheckBoxLabel();
+    autoCommitLabel = new WbCheckBoxLabel();
+    jLabel1 = new javax.swing.JLabel();
+    groupCombobox = new ComboStringPropertyEditor();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -528,17 +533,17 @@ public class ConnectionEditorPanel
     jPanel1.setLayout(new java.awt.GridBagLayout());
 
     tfWorkspaceFile.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+    tfWorkspaceFile.setToolTipText("");
     tfWorkspaceFile.setMaximumSize(new java.awt.Dimension(2147483647, 20));
     tfWorkspaceFile.setMinimumSize(new java.awt.Dimension(40, 20));
     tfWorkspaceFile.setName("workspaceFile");
     tfWorkspaceFile.setPreferredSize(new java.awt.Dimension(100, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
     jPanel1.add(tfWorkspaceFile, gridBagConstraints);
 
     selectWkspButton.setText("...");
@@ -546,7 +551,7 @@ public class ConnectionEditorPanel
     selectWkspButton.setMinimumSize(new java.awt.Dimension(26, 22));
     selectWkspButton.setPreferredSize(new java.awt.Dimension(26, 22));
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
@@ -558,7 +563,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 6);
     add(jPanel1, gridBagConstraints);
 
     workspaceFileLabel.setLabelFor(tfWorkspaceFile);
@@ -572,14 +577,32 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
     add(workspaceFileLabel, gridBagConstraints);
 
-    jLabel1.setLabelFor(cbAutocommit);
-    jLabel1.setText("Autocommit");
+    autoCommitLabel.setLabelFor(cbAutocommit);
+    autoCommitLabel.setText("Autocommit");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 3, 0);
+    add(autoCommitLabel, gridBagConstraints);
+
+    jLabel1.setText(ResourceMgr.getString("LblProfGroup"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 14;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(3, 5, 0, 0);
     add(jLabel1, gridBagConstraints);
+
+    groupCombobox.setEditable(true);
+    groupCombobox.setName("group");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 14;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(3, 4, 0, 6);
+    add(groupCombobox, gridBagConstraints);
 
   }// </editor-fold>//GEN-END:initComponents
 
@@ -671,6 +694,7 @@ public class ConnectionEditorPanel
 	}//GEN-LAST:event_showDriverEditorDialog
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JLabel autoCommitLabel;
   private javax.swing.JCheckBox cbAutocommit;
   private javax.swing.JComboBox cbDrivers;
   private javax.swing.JCheckBox cbIgnoreDropErrors;
@@ -681,6 +705,7 @@ public class ConnectionEditorPanel
   private javax.swing.JCheckBox emptyStringIsNull;
   private javax.swing.JButton extendedProps;
   private javax.swing.JLabel fetchSizeLabel;
+  private javax.swing.JComboBox groupCombobox;
   private javax.swing.JButton helpButton;
   private javax.swing.JCheckBox includeNull;
   private javax.swing.JLabel jLabel1;
@@ -821,6 +846,8 @@ public class ConnectionEditorPanel
 			drv = ConnectionMgr.getInstance().findDriverByName(drvClass, name);
 		}
 
+		readGroups();
+		
 		try
 		{
 			this.init = true;
@@ -838,14 +865,30 @@ public class ConnectionEditorPanel
 
 	/** This method gets called when a bound property is changed.
 	 * @param evt A PropertyChangeEvent object describing the event source
-	 *   	and the property that has changed.
+	 * and the property that has changed.
 	 *
 	 */
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		//this.updateProfile();
-    if (!this.init)	this.sourceModel.profileChanged(this.currentProfile);
+		if (evt.getSource() instanceof SimplePropertyEditor)
+		{
+			if (!this.init)	this.sourceModel.profileChanged(this.currentProfile);
+		}
+		if (evt.getSource() == this.groupCombobox)
+		{
+			System.out.println("group changed!");
+			ConnectionMgr.getInstance().profileGroupChanged(this.currentProfile);
+			readGroups();
+		}
 	}
+	
+	private void readGroups()
+	{
+		Collection c = ConnectionMgr.getInstance().getProfileGroups();
+		ComboBoxModel m = new DefaultComboBoxModel(c.toArray());
+		this.groupCombobox.setModel(m);
+	}
+
 
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{

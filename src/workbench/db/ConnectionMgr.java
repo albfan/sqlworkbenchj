@@ -11,12 +11,12 @@
  */
 package workbench.db;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
@@ -49,6 +51,7 @@ public class ConnectionMgr
 	private boolean profilesChanged;
 	private boolean readTemplates = true;
 	private boolean templatesImported;
+	private List groupsChangeListener;
 	private static final ConnectionMgr mgrInstance = new ConnectionMgr();
 
 	/** Creates new ConnectionMgr */
@@ -339,6 +342,43 @@ public class ConnectionMgr
 		return null;
 	}
 
+	public synchronized Collection getProfileGroups()
+	{
+		Set result = new TreeSet();
+		if (this.profiles == null) this.readProfiles();
+		Iterator itr = this.profiles.values().iterator();
+		while (itr.hasNext())
+		{
+			String group = ((ConnectionProfile)itr.next()).getGroup();
+			if (StringUtil.isEmptyString(group)) continue;
+			result.add(group);
+		}
+		return result;
+	}
+
+	public void addProfileGroupChangeListener(PropertyChangeListener l)
+	{
+		if (this.groupsChangeListener == null) this.groupsChangeListener = new ArrayList();
+		this.groupsChangeListener.add(l);
+	}
+	
+	public void removeProfileGroupChangeListener(PropertyChangeListener l)
+	{
+		if (groupsChangeListener == null) return;
+		groupsChangeListener.remove(l);
+	}
+	
+	public void profileGroupChanged(ConnectionProfile profile)
+	{
+		if (this.groupsChangeListener == null) return;
+		Iterator itr = this.groupsChangeListener.iterator();
+		PropertyChangeEvent evt = new PropertyChangeEvent(profile, ConnectionProfile.PROPERTY_PROFILE_GROUP, null, profile.getGroup());
+		while (itr.hasNext())
+		{
+			PropertyChangeListener l = (PropertyChangeListener)itr.next();
+			if (l != null) l.propertyChange(evt);
+		}
+	}
 	/**
 	 *	Returns a Map with the current profiles.
 	 *	The key to the map is the profile name, the value is the actual profile
@@ -736,7 +776,7 @@ public class ConnectionMgr
 	 *	Returns true if any of the profile definitions has changed.
 	 *	(Or if a profile has been deleted or added)
 	 */
-  public boolean profilesChanged()
+  public boolean profilesAreModified()
   {
 		if (this.profilesChanged) return true;
     if (this.profiles == null) return false;

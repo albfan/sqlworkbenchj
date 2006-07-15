@@ -78,7 +78,8 @@ public class WbImport
 	public static final String ARG_IGNORE_SCHEMA = "ignoreschema";
 	public static final String ARG_TRUNCATE_TABLE = "truncatetable";
 	public static final String ARG_CREATE_TABLE = "createtarget";
-
+	public static final String ARG_BLOB_ISFILENAME = "blobisfilename";
+	
 	private ArgumentParser cmdLine;
 
 	public WbImport()
@@ -362,6 +363,8 @@ public class WbImport
 				textParser.setContainsHeader(true);
 			}
 
+			textParser.setTreatBlobsAsFilenames(cmdLine.getBoolean(ARG_BLOB_ISFILENAME, true));
+			
 			String filter = cmdLine.getValue(ARG_LINE_FILTER);
 			if (filter != null)
 			{

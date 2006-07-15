@@ -12,6 +12,7 @@
 package workbench.gui.tools;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -148,6 +149,13 @@ public class DataPumper
 		}
 	}
 
+//	private void adjustColumnWidth()
+//	{
+//		int mw = (int)(this.columnMapper.getSize().width + 10 / 2);
+//		System.out.println("size="+ this.columnMapper.getSize().width  + ",width=" + mw);
+//		this.columnMapper.setSourceColumnsWidth(mw);
+//	}
+	
 	public void saveSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -504,25 +512,27 @@ public class DataPumper
     sourceProfilePanel.add(sourceProfileLabel, gridBagConstraints);
 
     selectSourceButton.setText("...");
-    selectSourceButton.setMaximumSize(new java.awt.Dimension(24, 24));
-    selectSourceButton.setMinimumSize(new java.awt.Dimension(24, 24));
-    selectSourceButton.setPreferredSize(new java.awt.Dimension(24, 24));
+    selectSourceButton.setMaximumSize(new java.awt.Dimension(22, 22));
+    selectSourceButton.setMinimumSize(new java.awt.Dimension(22, 22));
+    selectSourceButton.setPreferredSize(new java.awt.Dimension(22, 22));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
     sourceProfilePanel.add(selectSourceButton, gridBagConstraints);
 
     openFileButton.setIcon(ResourceMgr.getImage("Open"));
     openFileButton.setToolTipText(ResourceMgr.getString("Desc_DataPumperOpenFile"));
     openFileButton.setIconTextGap(0);
-    openFileButton.setMaximumSize(new java.awt.Dimension(24, 24));
-    openFileButton.setMinimumSize(new java.awt.Dimension(24, 24));
-    openFileButton.setPreferredSize(new java.awt.Dimension(24, 24));
+    openFileButton.setMaximumSize(new java.awt.Dimension(22, 22));
+    openFileButton.setMinimumSize(new java.awt.Dimension(22, 22));
+    openFileButton.setPreferredSize(new java.awt.Dimension(22, 22));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
     sourceProfilePanel.add(openFileButton, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -549,13 +559,14 @@ public class DataPumper
     targetProfilePanel.add(targetProfileLabel, gridBagConstraints);
 
     selectTargetButton.setText("...");
-    selectTargetButton.setMaximumSize(new java.awt.Dimension(24, 24));
-    selectTargetButton.setMinimumSize(new java.awt.Dimension(24, 24));
-    selectTargetButton.setPreferredSize(new java.awt.Dimension(24, 24));
+    selectTargetButton.setMaximumSize(new java.awt.Dimension(22, 22));
+    selectTargetButton.setMinimumSize(new java.awt.Dimension(22, 22));
+    selectTargetButton.setPreferredSize(new java.awt.Dimension(22, 22));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
     targetProfilePanel.add(selectTargetButton, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -969,7 +980,9 @@ public class DataPumper
 		{
 			WbSwingUtilities.center(this.window, aParent);
 		}
+
 		this.window .setVisible(true);
+		//adjustColumnWidth();
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run()

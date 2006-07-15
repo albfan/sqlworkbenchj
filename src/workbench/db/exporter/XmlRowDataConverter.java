@@ -174,7 +174,6 @@ public class XmlRowDataConverter
 		StrBuffer indent = new StrBuffer("    ");
 		int colCount = this.metaData.getColumnCount();
 		StrBuffer xml = new StrBuffer(colCount * 100);
-		StringBuffer dataFile = null;
 
 		if (this.verboseFormat)
 		{
@@ -195,8 +194,7 @@ public class XmlRowDataConverter
 			boolean isNull = (data == null || data instanceof NullValue);
 			boolean writeCloseTag = true;
 			
-			boolean isBlob = SqlUtil.isBlobType(type) || "BLOB".equalsIgnoreCase(dbmsType);
-			boolean isClob = SqlUtil.isClobType(type) || "CLOB".equalsIgnoreCase(dbmsType);
+			boolean isBlob = SqlUtil.isBlobType(type);
 				
 			if (this.verboseFormat) xml.append(indent);
 			xml.append(startColTag);
@@ -205,48 +203,42 @@ public class XmlRowDataConverter
 				xml.append(c);
 				xml.append('"');
 			}
+			
 			if (isNull)
 			{
-				xml.append(" null=\"true\"");
+				xml.append(" null=\"true\"/");
+				writeCloseTag = false;
 			}
-
-			if (SqlUtil.isDateType(type))
+			else 
 			{
-				try
+				if (SqlUtil.isDateType(type))
 				{
 					java.util.Date d = (java.util.Date)data;
 					xml.append(" longValue=\"");
 					xml.append(Long.toString(d.getTime()));
 					xml.append('"');
 				}
-				catch (Exception e)
+				else if (isBlob)
 				{
+					String dataFile = writeBlobFile(data, c, rowIndex);
+					xml.append(' ');
+					xml.append(ATTR_DATA_FILE);
+					xml.append("=\"");
+					xml.append(dataFile);
+					xml.append("\"/");
+					writeCloseTag = false;
 				}
-			}
-			else if (isBlob)
-			{
-				dataFile = new StringBuffer(100);
-				dataFile.append(baseFilename);
-				dataFile.append('r');
-				dataFile.append(rowIndex + 1);
-				dataFile.append("_c");
-				dataFile.append(c + 1);
-				dataFile.append(".data");
-				xml.append(' ');
-				xml.append(ATTR_DATA_FILE);
-				xml.append("=\"");
-				xml.append(dataFile);
-				xml.append("\"/");
-				writeCloseTag = false;
 			}
 			xml.append('>');
 
-			if (!isNull)
+			// Only write the tag content if the value is not null (we have already closed the tag)
+			// or if the value is not a blob value (which has already been written!)
+			if (!isNull && !isBlob)
 			{
 				// String data needs to be escaped!
-				if (SqlUtil.isCharacterType(type) || isClob)
+				if (SqlUtil.isCharacterType(type))
 				{
-					if (this.useCData || isClob)
+					if (this.useCData)
 					{
 						xml.append(TagWriter.CDATA_START);
 						xml.append(this.getValueAsFormattedString(row, c));
@@ -256,10 +248,6 @@ public class XmlRowDataConverter
 					{
 						xml.append(StringUtil.escapeXML(this.getValueAsFormattedString(row, c)));
 					}
-				}
-				else if (isBlob)
-				{
-					writeBlobFile(dataFile, data);
 				}
 				else
 				{
@@ -275,41 +263,6 @@ public class XmlRowDataConverter
 		return xml;
 	}
 
-	private void writeBlobFile(StringBuffer file, Object data)
-	{
-		OutputStream out = null;
-		try
-		{
-			File f = new File(getBaseDir(), file.toString());
-			out = new BufferedOutputStream(new FileOutputStream(f), 64*1024);
-			if (data instanceof byte[])
-			{
-				out.write((byte[])data);
-			}
-			else if (data instanceof Blob)
-			{
-				Blob bl = (Blob)data;
-				InputStream in = bl.getBinaryStream();
-				int buffsize = 32*1024;
-				byte[] buffer = new byte[buffsize];
-				int read = in.read(buffer);
-				while (read > -1)
-				{
-					out.write(buffer, 0, read);
-					read = in.read(buffer);
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("XmlRowDataConverter.writeBlobFile()", "Error writing blob to external file", e);
-		}
-		finally
-		{
-			try { out.close(); } catch (Throwable e) {}
-		}
-	}
-	
 	private StrBuffer getMetaDataAsXml(String anIndent)
 	{
 		TagWriter tagWriter = new TagWriter();

@@ -79,7 +79,6 @@ public class ProfileEditorPanel
 		
 		this.listPanel.add(p, BorderLayout.NORTH);
 		
-		
 		this.addKeyListener(this);
 		this.connectionEditor.setSourceList(this.model);
 		WbTraversalPolicy policy = new WbTraversalPolicy();

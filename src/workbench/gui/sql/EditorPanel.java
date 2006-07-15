@@ -11,7 +11,6 @@
  */
 package workbench.gui.sql;
 
-import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Window;
@@ -46,6 +45,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.text.BadLocationException;
@@ -75,8 +75,6 @@ import workbench.gui.components.SearchCriteriaPanel;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
 import workbench.gui.editor.SyntaxDocument;
-import workbench.gui.editor.SyntaxStyle;
-import workbench.gui.editor.Token;
 import workbench.gui.editor.TokenMarker;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.FilenameChangeListener;
@@ -536,9 +534,11 @@ public class EditorPanel
 		String lastDir = Settings.getInstance().getLastSqlDir();
 		JFileChooser fc = new JFileChooser(lastDir);
 		JComponent p = EncodingUtil.createEncodingPanel();
+		p.setBorder(new EmptyBorder(0, 5, 0, 0));
 		EncodingSelector selector = (EncodingSelector)p;
 		selector.setEncoding(Settings.getInstance().getDefaultFileEncoding());
 		fc.setAccessory(p);
+		
 		fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
 		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
 		if (answer == JFileChooser.APPROVE_OPTION)
@@ -710,7 +710,7 @@ public class EditorPanel
 			}
 			else
 			{
-				this.saveFile();
+				result = this.saveFile();
 			}
 		}
 		catch (IOException e)
@@ -738,8 +738,10 @@ public class EditorPanel
 		JFileChooser fc = new JFileChooser(lastDir);
 		fc.setSelectedFile(this.currentFile);
 		fc.addChoosableFileFilter(ff);
-		JComponent p = EncodingUtil.createEncodingPanel(this.fileEncoding);
+		JComponent p = EncodingUtil.createEncodingPanel();
+		p.setBorder(new EmptyBorder(0,5,0,0));
 		EncodingSelector selector = (EncodingSelector)p;
+		selector.setEncoding(this.fileEncoding);
 		fc.setAccessory(p);
 
 		int answer = fc.showSaveDialog(SwingUtilities.getWindowAncestor(this));
@@ -759,6 +761,7 @@ public class EditorPanel
 				{
 					Settings.getInstance().setLastEditorDir(lastDir);
 				}
+				result = true;
 			}
 			catch (IOException e)
 			{

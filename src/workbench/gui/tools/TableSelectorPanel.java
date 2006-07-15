@@ -21,14 +21,12 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import javax.swing.JPanel;
-
-import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.FlatButton;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.storage.DataStore;
 import workbench.util.StringUtil;
 
 /**
@@ -136,6 +134,7 @@ public class TableSelectorPanel
 	public void setConnection(WbConnection conn)
 	{
 		this.dbConnection = conn;
+		this.refreshButton.setEnabled(this.dbConnection != null);
 		if (this.dbConnection != null)
 		{
 			this.retrieveSchemas();
@@ -356,7 +355,8 @@ public class TableSelectorPanel
     tableSelector = new javax.swing.JComboBox();
     schemaLabel = new javax.swing.JLabel();
     tableLabel = new javax.swing.JLabel();
-    editNewTableNameButton = new javax.swing.JButton();
+    editNewTableNameButton = new FlatButton();
+    refreshButton = new FlatButton();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -372,7 +372,6 @@ public class TableSelectorPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.3;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
     add(schemaSelector, gridBagConstraints);
 
     tableSelector.setMaximumRowCount(0);
@@ -385,7 +384,6 @@ public class TableSelectorPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.7;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
     add(tableSelector, gridBagConstraints);
 
     schemaLabel.setText("jLabel1");
@@ -415,26 +413,51 @@ public class TableSelectorPanel
     add(tableLabel, gridBagConstraints);
 
     editNewTableNameButton.setIcon(ResourceMgr.getImage("Rename"));
-    editNewTableNameButton.setToolTipText(ResourceMgr.getString("LblEditNewTableName"));
-    editNewTableNameButton.setBorder(new javax.swing.border.EtchedBorder());
-    editNewTableNameButton.setMaximumSize(new java.awt.Dimension(24, 24));
-    editNewTableNameButton.setMinimumSize(new java.awt.Dimension(24, 24));
-    editNewTableNameButton.setPreferredSize(new java.awt.Dimension(24, 24));
+    editNewTableNameButton.setToolTipText(ResourceMgr.getString("LabelEditNewTableName"));
     editNewTableNameButton.setEnabled(false);
+    editNewTableNameButton.setMaximumSize(new java.awt.Dimension(22, 22));
+    editNewTableNameButton.setMinimumSize(new java.awt.Dimension(22, 22));
+    editNewTableNameButton.setPreferredSize(new java.awt.Dimension(22, 22));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+    add(editNewTableNameButton, gridBagConstraints);
+
+    refreshButton.setIcon(ResourceMgr.getImage("Refresh"));
+    refreshButton.setToolTipText("");
+    refreshButton.setEnabled(false);
+    refreshButton.setMaximumSize(new java.awt.Dimension(22, 22));
+    refreshButton.setMinimumSize(new java.awt.Dimension(22, 22));
+    refreshButton.setPreferredSize(new java.awt.Dimension(22, 22));
+    refreshButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        refreshButtonActionPerformed(evt);
+      }
+    });
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 2, 4, 0);
-    add(editNewTableNameButton, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+    add(refreshButton, gridBagConstraints);
 
-  }
-  // </editor-fold>//GEN-END:initComponents
+  }// </editor-fold>//GEN-END:initComponents
+
+	private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_refreshButtonActionPerformed
+	{//GEN-HEADEREND:event_refreshButtonActionPerformed
+		retrieveSchemas();
+	}//GEN-LAST:event_refreshButtonActionPerformed
 
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton editNewTableNameButton;
+  private javax.swing.JButton refreshButton;
   private javax.swing.JLabel schemaLabel;
   private javax.swing.JComboBox schemaSelector;
   private javax.swing.JLabel tableLabel;

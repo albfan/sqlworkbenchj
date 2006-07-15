@@ -73,9 +73,9 @@ public class FileUtil
 
 	}
 
-	public static int copy(InputStream in, OutputStream out)
+	public static long copy(InputStream in, OutputStream out)
 	{
-		int filesize = 0;
+		long filesize = 0;
 		try
 		{
 			int bufsize = 32*1024;

@@ -141,6 +141,10 @@ public class BlobColumnRenderer
 		{
 			currentTable.setValueAt(f, currentRow, currentColumn);
 		}
+		else if (handler.setToNull())
+		{
+			currentTable.setValueAt(null, currentRow, currentColumn);
+		}
 	}
 
 }

@@ -53,6 +53,7 @@ public class TextFileParser
 	implements RowDataProducer, ImportFileParser
 {
 	private String filename;
+	private File baseDir;
 	private String tableName;
 	private String encoding = "ISO-8859-1";
 	private String delimiter = "\t";
@@ -94,7 +95,8 @@ public class TextFileParser
 	private Pattern[] columnFilter;
 	private Pattern lineFilter;
 	private String targetSchema;
-
+	private boolean blobsAreFilenames = true;
+	
 	public TextFileParser()
 	{
 	}
@@ -190,6 +192,11 @@ public class TextFileParser
 		}
 	}
 
+	public void setTreatBlobsAsFilenames(boolean flag)
+	{
+		this.blobsAreFilenames = flag;
+	}
+	
 	/**
 	 * 	Define the columns that should be imported.
 	 * 	If the list is empty or null, then all columns will be imported
@@ -477,7 +484,12 @@ public class TextFileParser
 	{
 		this.cancelImport = false;
 		File f = new File(this.filename);
-
+		if (f.isAbsolute())
+		{
+			this.baseDir = f.getParentFile();
+		}
+		if (baseDir == null) this.baseDir = new File(".");
+		
 		BufferedReader in = EncodingUtil.createBufferedReader(f, this.encoding);
 
 		String line;
@@ -587,6 +599,8 @@ public class TextFileParser
 						if (tok.hasNext())
 						{
 							value = tok.getNext();
+							
+							int colType = this.columns[i].getDataType();
 
 							if (hasColumnFilter && this.columnFilter[i] != null)
 							{
@@ -606,18 +620,33 @@ public class TextFileParser
 							int targetIndex = this.columnMap[i];
 							if (targetIndex == -1) continue;
 
-							if (this.decodeUnicode && SqlUtil.isCharacterType(this.columns[i].getDataType()))
+							if (SqlUtil.isCharacterType(colType))
 							{
-								value = StringUtil.decodeUnicode((String)value);
+								if (this.decodeUnicode)
+								{
+									value = StringUtil.decodeUnicode((String)value);
+								}
+								if (this.emptyStringIsNull && StringUtil.isEmptyString(value))
+								{
+									value = null;
+								}
 							}
-							rowData[targetIndex] = converter.convertValue(value, this.columns[i].getDataType());
-
-							if (this.emptyStringIsNull && SqlUtil.isCharacterType(this.columns[i].getDataType()))
+							
+							if (value != null && SqlUtil.isBlobType(colType) && blobsAreFilenames)
 							{
-								String s = (String)rowData[targetIndex];
-								if (s != null && s.length() == 0) rowData[targetIndex] = null;
+								File bfile = new File(value);
+								if (!bfile.isAbsolute())
+								{
+									bfile = new File(this.baseDir, value);
+								}
+								rowData[targetIndex] = bfile;
+							}
+							else
+							{
+								rowData[targetIndex] = converter.convertValue(value, colType);
 							}
 						}
+						
 					}
 					catch (Exception e)
 					{

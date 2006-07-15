@@ -88,6 +88,7 @@ public class WbExport
 		cmdLine.addArgument("verbosexml");
 		cmdLine.addArgument("oraldr");
 		cmdLine.addArgument("writeoracleloader");
+		cmdLine.addArgument("compress");
 	}
 
 	public String getVerb() { return VERB; }
@@ -349,6 +350,8 @@ public class WbExport
 			}
 		}
 
+		this.exporter.setCompressOutput(cmdLine.getBoolean("compress", false));
+		
 		file = evaluateFileArgument(file);
 		this.exporter.setOutputFilename(file);
 

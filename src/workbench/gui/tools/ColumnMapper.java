@@ -68,6 +68,14 @@ public class ColumnMapper
 		this.adjustKeyColumn();
 	}
 
+//	public void setSourceColumnsWidth(int width)
+//	{
+//		TableColumnModel m = this.columnDisplay.getColumnModel();
+//		TableColumn c = m.getColumn(0);
+//		c.setWidth(width);
+//		c.setPreferredWidth(width);
+//	}
+	
 	private void adjustKeyColumn()
 	{
 		TableColumnModel colMod = this.columnDisplay.getColumnModel();

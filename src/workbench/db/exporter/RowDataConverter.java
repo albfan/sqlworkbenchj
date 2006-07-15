@@ -12,6 +12,8 @@
 package workbench.db.exporter;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -19,14 +21,19 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import workbench.db.WbConnection;
+import workbench.gui.components.BlobHandler;
 import workbench.interfaces.ErrorReporter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.NullValue;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+import workbench.util.DefaultOutputFactory;
+import workbench.util.OutputFactory;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
+import workbench.util.ZipOutputFactory;
 
 /**
  * Interface for classes that can take objects of type {@link RowData}
@@ -41,6 +48,7 @@ public abstract class RowDataConverter
 	protected String generatingSql;
 	protected ResultInfo metaData;
 	private File outputFile;
+	private String baseFilename;
 	private boolean[] columnsToExport = null;
 	protected List exportColumns = null;
 	protected ErrorReporter errorReporter;
@@ -49,6 +57,8 @@ public abstract class RowDataConverter
 	protected DecimalFormat defaultNumberFormatter;
 	protected SimpleDateFormat defaultTimestampFormatter;
 	protected boolean needsUpdateTable = false;
+	private OutputFactory factory;
+	private boolean compressExternalFiles;
 	
 	/**
 	 *	The metadata for the result set that should be exported
@@ -63,7 +73,77 @@ public abstract class RowDataConverter
 	public void setResultInfo(ResultInfo meta) { this.metaData = meta; }
 	public ResultInfo getResultInfo() { return this.metaData; }
 	
-	public void setOutputFile(File f) { this.outputFile = f; }
+	public void setOutputFile(File f) 
+	{ 
+		this.outputFile = f; 
+		if (f != null) 
+		{
+			WbFile wf = new WbFile(f);
+			this.baseFilename = wf.getFileName();
+		}
+	}
+	
+	public void setCompressExternalFiles(boolean flag)
+	{
+		this.compressExternalFiles = flag;
+	}
+	
+	private void initOutputFactory()
+	{
+		if (this.compressExternalFiles)
+		{
+			WbFile f = new WbFile(getOutputFile());
+			String fname = f.getFileName() + "_blobs.zip";
+			File archive = new File(getBaseDir(), fname);
+			this.factory = new ZipOutputFactory(archive);
+		}
+		else
+		{
+			this.factory = new DefaultOutputFactory();
+		}
+	}
+	
+	public void exportFinished()
+		throws IOException
+	{
+		if (this.factory != null)
+		{
+			this.factory.done();
+		}
+	}
+	protected OutputStream createOutputStream(File output)
+		throws IOException
+	{
+		if (this.factory == null) initOutputFactory();
+		return this.factory.createOutputStream(output);
+	}
+	
+	protected String writeBlobFile(Object value, int colIndex, long rowNum)
+	{
+		if (value == null || value instanceof NullValue) return null;
+		StringBuffer fname = new StringBuffer(baseFilename.length() + 10);
+		
+		fname.append(baseFilename);
+		fname.append("_r");
+		fname.append(rowNum+1);
+		fname.append("_c");
+		fname.append(colIndex+1);
+		fname.append(".data");
+		
+		String realName = fname.toString();
+		File f = new File(getBaseDir(), realName);
+		try
+		{
+			OutputStream out = this.createOutputStream(f);
+			BlobHandler.saveBlobToFile(value, out);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("TextRowDataConverter.writeBlobFile()", "Error writing blob data", e);
+			return "";
+		}
+		return realName;
+	}
 	
 	protected File getBaseDir()
 	{

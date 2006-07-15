@@ -29,6 +29,7 @@ import workbench.util.WbPersistence;
 public class ConnectionProfile
 	implements PropertyChangeListener
 {
+	public static String PROPERTY_PROFILE_GROUP = "profileGroup";
 	private static final String CRYPT_PREFIX = "@*@";
 	private String name;
 	private String url;
@@ -36,6 +37,7 @@ public class ConnectionProfile
 	private String username;
 	private String password;
 	private String driverName;
+	private String group;
 	private boolean autocommit;
 	private boolean disableUpdateTableCheck;
 	private boolean rollbackBeforeDisconnect;
@@ -59,9 +61,6 @@ public class ConnectionProfile
 	static
 	{
 		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
-		WbPersistence.makeTransient(ConnectionProfile.class, "globalProfile");
-
-		// trying to correct the misspelled seperate...
 		WbPersistence.makeTransient(ConnectionProfile.class, "useSeperateConnectionPerTab");
 	}
 
@@ -102,6 +101,9 @@ public class ConnectionProfile
 			changed = true;
 		}
 	}
+	
+	public String getGroup() { return this.group; }
+	public void setGroup(String g) { this.group = g; }
 	
   public String getIdentifier()
   {

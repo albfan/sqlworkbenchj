@@ -16,13 +16,13 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
-import workbench.util.WbFile;
 
 /**
  *
@@ -39,7 +39,7 @@ public abstract class ExportWriter
 	private Writer output;
 	private File outputFile;
 	private int progressInterval = 10;
-	
+
 	public ExportWriter(DataExporter exp)
 	{
 		this.exporter = exp;
@@ -56,6 +56,7 @@ public abstract class ExportWriter
 		converter.setDefaultNumberFormatter(exporter.getDecimalFormatter());
 		converter.setOriginalConnection(this.exporter.getConnection());
 		converter.setColumnsToExport(this.exporter.getColumnsToExport());
+		converter.setCompressExternalFiles(exporter.getCompressOutput());
 		String file = this.exporter.getOutputFilename();
 		if (file != null) converter.setOutputFile(new File(file));
 	}
@@ -193,6 +194,15 @@ public abstract class ExportWriter
 		{
 			try { this.output.close(); } catch (Throwable th) {}
 		}
+		try
+		{
+			if (this.converter != null) this.converter.exportFinished();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("ExportWriter.exportFinished()", "Error closing output stream", e);
+		}
+		
 	}
 
 	public void cancel()

@@ -39,6 +39,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import workbench.db.DbMetadata;
@@ -49,7 +50,6 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.EmptyTableModel;
-import workbench.gui.components.FlatButton;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
@@ -63,7 +63,9 @@ import workbench.interfaces.TableSearchDisplay;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.storage.ResultInfo;
 import workbench.util.Like;
+import workbench.util.SqlUtil;
 import workbench.util.WbWorkspace;
 
 
@@ -109,7 +111,7 @@ public class TableSearchPanel
 
 		this.searcher = new TableSearcher();
 		this.searcher.setDisplay(this);
-		//this.searchResult.setFont(Settings.getInstance().getMsgLogFont());
+		
 		this.tableNames.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.fixedStatusText = ResourceMgr.getString("TxtSearchingTable") + " ";
 		tables.getSelectionModel().addListSelectionListener(this);
@@ -354,6 +356,20 @@ public class TableSearchPanel
 		}
 	}
 
+	private void initRenderer(WbTable table, ResultInfo info)
+	{
+		TableColumnModel model = table.getColumnModel();
+		
+		for (int i=0; i < info.getColumnCount(); i++)
+		{
+			int type = info.getColumnType(i);
+			if (SqlUtil.isCharacterType(type))
+			{
+				model.getColumn(i).setCellRenderer(renderer);
+			}
+		}
+	}
+	
 	public synchronized void addResultRow(String aTablename, ResultSet aResult)
 	{
 		try
@@ -365,9 +381,10 @@ public class TableSearchPanel
 				// (or only results from one database table where returned)
 				// therefor it's important to call this in searchEnded() as well
 				this.adjustDataTable();
+				
 				this.currentDisplayTable = new WbTable();
 				this.currentDisplayTable.setUseDefaultStringRenderer(false);
-				this.currentDisplayTable.setDefaultRenderer(String.class, renderer);
+				//this.currentDisplayTable.setDefaultRenderer(String.class, renderer);
 				if (this.firstTable == null)
 				{
 					this.firstTable = this.currentDisplayTable;
@@ -376,6 +393,7 @@ public class TableSearchPanel
 				this.currentResult = new DataStore(aResult);
 				DataStoreTableModel model = new DataStoreTableModel(this.currentResult);
 				this.currentDisplayTable.setModel(model, true);
+				initRenderer(currentDisplayTable, currentResult.getResultInfo());
 				this.currentScrollPane  = new ParentWidthScrollPane(this.currentDisplayTable);
 				TitledBorder b = new TitledBorder(aTablename);
 				this.currentBorder = b;

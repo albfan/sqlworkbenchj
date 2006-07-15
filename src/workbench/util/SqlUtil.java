@@ -587,10 +587,10 @@ public class SqlUtil
 	public static final boolean isDecimalType(int aSqlType, int aScale, int aPrecision)
 	{
 		if (aSqlType == Types.DECIMAL ||
-						aSqlType == Types.DOUBLE ||
-					  aSqlType == Types.FLOAT ||
-					  aSqlType == Types.NUMERIC ||
-					  aSqlType == Types.REAL)
+			aSqlType == Types.DOUBLE ||
+			aSqlType == Types.FLOAT ||
+			aSqlType == Types.NUMERIC ||
+			aSqlType == Types.REAL)
 		{
 			return (aScale > 0);
 		}
@@ -603,17 +603,17 @@ public class SqlUtil
 	public static final boolean isIntegerType(int aSqlType)
 	{
 		return (aSqlType == Types.BIGINT ||
-						aSqlType == Types.INTEGER ||
-						aSqlType == Types.SMALLINT ||
-						aSqlType == Types.TINYINT);
+		        aSqlType == Types.INTEGER ||
+		        aSqlType == Types.SMALLINT ||
+		        aSqlType == Types.TINYINT);
 	}
 	
 	public static final boolean isCharacterType(int aSqlType)
 	{
 		return (aSqlType == Types.VARCHAR || 
 		        aSqlType == Types.CHAR ||
-						aSqlType == Types.CLOB ||
-						aSqlType == Types.LONGVARCHAR);
+		        aSqlType == Types.CLOB ||
+		        aSqlType == Types.LONGVARCHAR);
 	}
 	
 	/**
@@ -623,19 +623,19 @@ public class SqlUtil
 	public static final boolean isNumberType(int aSqlType)
 	{
 		return (aSqlType == Types.BIGINT ||
-				    aSqlType == Types.INTEGER ||
-						aSqlType == Types.DECIMAL ||
-						aSqlType == Types.DOUBLE ||
-					  aSqlType == Types.FLOAT ||
-					  aSqlType == Types.NUMERIC ||
-					  aSqlType == Types.REAL ||
-					  aSqlType == Types.SMALLINT ||
-					  aSqlType == Types.TINYINT);
+				aSqlType == Types.INTEGER ||
+		        aSqlType == Types.DECIMAL ||
+		        aSqlType == Types.DOUBLE ||
+		        aSqlType == Types.FLOAT ||
+	            aSqlType == Types.NUMERIC ||
+	            aSqlType == Types.REAL ||
+	            aSqlType == Types.SMALLINT ||
+	            aSqlType == Types.TINYINT);
 	}
+	
 	public static final boolean isDateType(int aSqlType)
 	{
-		return (aSqlType == Types.DATE ||
-						aSqlType == Types.TIMESTAMP);
+		return (aSqlType == Types.DATE || aSqlType == Types.TIMESTAMP);
 	}
 
 	public static final boolean isClobType(int aSqlType)
