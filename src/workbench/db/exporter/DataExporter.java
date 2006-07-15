@@ -15,13 +15,11 @@ import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -31,6 +29,8 @@ import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import javax.swing.JDialog;
 
 import workbench.WbManager;
@@ -58,6 +58,7 @@ import workbench.util.CharacterRange;
 import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 import workbench.util.WbThread;
 
 
@@ -138,6 +139,10 @@ public class DataExporter
 	private long totalRows;
 	
 	private boolean writeOracleControlFile = false;
+	private boolean compressOutput = false;
+
+	private ZipOutputStream zipArchive;
+	private ZipEntry zipEntry;
 	
 	public DataExporter(WbConnection con)
 	{
@@ -176,6 +181,9 @@ public class DataExporter
 		this.progressWindow.setVisible(true);
 	}
 
+	public boolean getCompressOutput() { return this.compressOutput; }
+	public void setCompressOutput(boolean flag) { this.compressOutput = flag; }
+	
 	public void clearJobs()
 	{
 		if (this.jobsRunning) return;
@@ -791,8 +799,7 @@ public class DataExporter
 		}
 		finally
 		{
-			if (this.exportWriter != null) this.exportWriter.exportFinished();
-			if (!jobsRunning) this.closeProgress();
+			exportFinished();
 			try { rs.close(); } catch (Throwable th) {}
 		}
 		long numRows = this.exportWriter.getNumberOfRecords();
@@ -816,13 +823,31 @@ public class DataExporter
 		}
 		finally
 		{
-			if (this.exportWriter != null) this.exportWriter.exportFinished();
-			if (!jobsRunning) this.closeProgress();
+			exportFinished();
 		}
 		long numRows = this.exportWriter.getNumberOfRecords();
 		return numRows;
 	}
 
+	private void exportFinished()
+	{
+		if (this.exportWriter != null) this.exportWriter.exportFinished();
+		if (this.zipArchive != null) 
+		{
+			try 
+			{ 
+				this.zipArchive.close();
+				this.zipArchive = null;
+				this.zipEntry = null;
+			} 
+			catch (Exception e) 
+			{
+				LogMgr.logError("DataExporter.exportFinished()", "Error closing ZIP archive", e);
+			}
+		}
+		if (!jobsRunning) this.closeProgress();
+	}
+	
 	/**
 	 *	Export a table to an external file.
 	 */
@@ -847,39 +872,31 @@ public class DataExporter
 			this.exportWriter.setTableToUse(this.tableName);
 		}
 
-		BufferedWriter pw = null;
-		final int buffSize = 64*1024;
-
 		try
 		{
 			File f = new File(this.outputfile);
 			this.fullOutputFileName = f.getAbsolutePath();
-			String dir = f.getParent();
-			// first try to open the file using the current encoding
-			if (this.encoding != null)
+			
+			OutputStream out = null;
+			if (this.getCompressOutput())
 			{
-				try
-				{
-					OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(f, this.append), EncodingUtil.cleanupEncoding(this.encoding));
-					pw = new BufferedWriter(out, buffSize);
-				}
-				catch (UnsupportedEncodingException e)
-				{
-					pw = null;
-					String msg = ResourceMgr.getString("ErrExportWrongEncoding");
-					msg = StringUtil.replace(msg, "%encoding%", this.encoding);
-					this.encoding = null;
-					this.addWarning(msg);
-				}
+				WbFile wf = new WbFile(f);
+				String baseName = wf.getFileName();
+				String dir = wf.getParent();
+				OutputStream zout = new FileOutputStream(new File(dir, baseName + ".zip"));
+				this.zipArchive = new ZipOutputStream(zout);
+				this.zipArchive.setLevel(9);
+				this.zipEntry = new ZipEntry(wf.getName());
+				this.zipArchive.putNextEntry(zipEntry);
+				out = this.zipArchive;
 			}
-
-			// if opening the file with an encoding failed, open the file
-			// without encoding (thus using the default system encoding)
-			if (pw == null)
+			else
 			{
-				pw = new BufferedWriter(new FileWriter(f,this.append), buffSize);
+				out = new FileOutputStream(f, append);
 			}
-			this.exportWriter.setOutput(pw);
+			Writer w = EncodingUtil.createWriter(out, this.encoding);
+			
+			this.exportWriter.setOutput(w);
 			this.exportWriter.configureConverter();
 		}
 		catch (IOException e)

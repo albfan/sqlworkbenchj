@@ -21,10 +21,10 @@ import javax.swing.filechooser.FileFilter;
 import workbench.gui.components.EncodingPanel;
 
 import workbench.gui.components.ExtensionFileFilter;
-import workbench.gui.dialogs.export.ExportOptionsPanel;
 import workbench.interfaces.EncodingSelector;
 import workbench.resource.Settings;
 import javax.swing.JComponent;
+import javax.swing.border.EmptyBorder;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
 //import workbench.gui.components.ExportOptionsPanel;
@@ -91,6 +91,7 @@ public class FileDialogUtil
 		else
 		{
 			EncodingPanel p = new EncodingPanel(this.encoding);
+			p.setBorder(new EmptyBorder(0,5,0,0));
 			selector = p;
 			fc.setAccessory(p);
 		}

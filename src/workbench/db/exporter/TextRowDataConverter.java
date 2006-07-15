@@ -12,6 +12,7 @@
 package workbench.db.exporter;
 
 import java.io.File;
+import java.io.OutputStream;
 import workbench.gui.components.BlobHandler;
 import workbench.log.LogMgr;
 import workbench.storage.RowData;
@@ -43,7 +44,6 @@ public class TextRowDataConverter
 	
 	private int blobMode = -1;
 	private BlobHandler blobHandler; 
-	private String baseFilename;
 	
 	public TextRowDataConverter()
 	{
@@ -65,21 +65,9 @@ public class TextRowDataConverter
 		return null;
 	}
 
-	public void setBlobModeWorkbench(String baseFile) 
-	{ 
-		setBasefilename(baseFile);
-		this.blobMode = BLOB_MODE_WB; 
-	}
-	
-	public void setBlobModeOracle(String baseFile) 
-	{ 
-		setBasefilename(baseFile);
-		this.blobMode = BLOB_MODE_ORA; 
-	}
-	private void setBasefilename(String baseFile)
+	public void setOutputFile(File f)
 	{
-		WbFile f = new WbFile(baseFile);
-		this.baseFilename = f.getFileName();
+		super.setOutputFile(f);
 	}
 	
 	public String getFormatName()
@@ -99,9 +87,15 @@ public class TextRowDataConverter
 			int colType = this.metaData.getColumnType(c);
 			String value = null;
 			
-			if (blobMode != BLOB_MODE_NONE && SqlUtil.isBlobType(colType))
+			boolean needQuote = false;
+			if (SqlUtil.isBlobType(colType))
 			{
 				value = writeBlobFile(row.getValue(c), c, rowIndex);
+				if (this.quoteAlways) 
+				{
+					result.append(this.quoteCharacter);
+					needQuote = true;
+				}
 			}
 			else 
 			{
@@ -109,7 +103,6 @@ public class TextRowDataConverter
 			}
 			
 			if (value == null) value = "";
-			boolean needQuote = false;
 
 			if (SqlUtil.isCharacterType(colType))
 			{
@@ -136,36 +129,6 @@ public class TextRowDataConverter
 		return result;
 	}
 
-	private String writeBlobFile(Object value, int colIndex, long rowNum)
-	{
-		StringBuffer fname = new StringBuffer(baseFilename.length() + 10);
-		
-		fname.append(baseFilename);
-		fname.append("_r");
-		fname.append(rowNum+1);
-		fname.append("_c");
-		fname.append(colIndex+1);
-		fname.append(".data");
-		
-		String realName = fname.toString();
-		File f = new File(getBaseDir(), realName);
-		try
-		{
-			BlobHandler.saveBlobToFile(value, f.getAbsolutePath());
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("TextRowDataConverter.writeBlobFile()", "Error writing blob data", e);
-			return "";
-		}
-		if (blobMode == BLOB_MODE_ORA)
-		{
-			return realName;
-		}
-		return "{$blobfile='" + realName + "'}";
-	}
-	
-	
 	public void setLineEnding(String ending)
 	{
 		if (ending != null) this.lineEnding = ending;

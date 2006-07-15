@@ -12,19 +12,25 @@
 package workbench.util;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Constructor;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Map;
 import javax.swing.JComponent;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
@@ -155,23 +161,36 @@ public class EncodingUtil
 		}
 	}
 
-	public static JComponent createEncodingPanel(String encoding)
+	public static Writer createWriter(File outfile, String encoding, boolean append)
+		throws IOException
 	{
-		try
-		{
-			Class cls = Class.forName("workbench.gui.components.EncodingPanel");
-			Class[] types = new Class[] { String.class };
-			Constructor cons = cls.getConstructor(types);
-			Object[] args =  new Object[] { encoding };
-			JComponent p = (JComponent)cons.newInstance(args);
-			return p;
-		} 
-		catch (Exception e)
-		{
-			return null;
-		}
+		return createWriter(new FileOutputStream(outfile, append), encoding);
 	}
 	
+	public static Writer createWriter(OutputStream stream, String encoding)
+		throws IOException
+	{
+		Writer pw = null;
+		final int buffSize = 64*1024;
+		if (encoding != null)
+		{
+			try
+			{
+				OutputStreamWriter out = new OutputStreamWriter(stream, cleanupEncoding(encoding));
+				pw = new BufferedWriter(out, buffSize);
+			}
+			catch (UnsupportedEncodingException e)
+			{
+				// Fall back to default encoding
+				pw = new BufferedWriter(new OutputStreamWriter(stream), buffSize);
+				String msg = ResourceMgr.getString("ErrWrongEncoding");
+				msg = StringUtil.replace(msg, "%encoding%", encoding);
+				LogMgr.logError("EncodingUtil.createWriter()", msg, e);
+			}
+		}
+		return pw;
+	}
+
 	public static JComponent createEncodingPanel()
 	{
 		try

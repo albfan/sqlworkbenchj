@@ -55,19 +55,6 @@ public class TextExportWriter
 		conv.setQuoteAlways(exporter.getQuoteAlways());
 		conv.setEscapeRange(exporter.getEscapeRange());
 		conv.setLineEnding(exporter.getLineEnding());
-		String fname = exporter.getOutputFilename();
-		if (fname != null)
-		{
-			WbFile f = new WbFile(fname);
-			if (exporter.getWriteOracleControlFile())
-			{
-				conv.setBlobModeOracle(exporter.getOutputFilename());
-			}
-			else
-			{
-				conv.setBlobModeWorkbench(exporter.getOutputFilename());
-			}
-		}
 	}
 	
 	protected void writeStart()
@@ -94,8 +81,22 @@ public class TextExportWriter
 			{
 				out.println("OPTIONS (skip=1)");
 			}
-			out.print("LOAD DATA CHARACTERSET ");
-			out.println(exporter.getEncoding());
+			
+			if (!exporter.getEncoding().startsWith("UTF"))
+			{
+				out.println("-- The specified character set is an ISO name and will most probably not work");
+				out.println("-- as Oracle uses its own names for character sets (e.g. WE8ISO8859P1 for ISO-8859-1)");
+			}
+			out.print("LOAD DATA CHARACTERSET '");
+			if (exporter.getEncoding().equals("UTF-8"))
+			{
+				// Oracle only understand UTF8 not UTF-8
+				out.println("UTF8'");
+			}
+			else
+			{
+				out.println(exporter.getEncoding() + "'");
+			}
 			out.println("TRUNCATE");
 			out.print("INTO TABLE ");
 			out.println(resultInfo.getUpdateTable().getTableName());

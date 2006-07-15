@@ -17,9 +17,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.util.List;
+import javax.swing.JPanel;
 
 import javax.swing.JToolBar;
 import javax.swing.ListModel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionListener;
 
 import workbench.db.ConnectionMgr;
@@ -28,6 +30,7 @@ import workbench.gui.actions.CopyProfileAction;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.actions.SaveListFileAction;
+import workbench.gui.components.DividerBorder;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
@@ -41,34 +44,42 @@ import workbench.util.StringUtil;
  * @author  support@sql-workbench.net
  */
 public class ProfileEditorPanel
-	extends javax.swing.JPanel
+	extends JPanel
 	implements FileActions, KeyListener
 {
-	//private ConnectionEditorPanel connectionEditor;
 	private ProfileListModel model;
 	private JToolBar toolbar;
 	private ConnectionEditorPanel connectionEditor;
 	private MouseListener listMouseListener;
-
+	private ProfileFilter filter;
+	
 	/** Creates new form ProfileEditor */
 	public ProfileEditorPanel(String lastProfileKey)
 	{
-		initComponents();
+		initComponents(); // will initialize the model!
+		
 		this.connectionEditor = new ConnectionEditorPanel();
 		this.jSplitPane1.setRightComponent(this.connectionEditor);
 		this.fillDrivers();
 		String last = Settings.getInstance().getLastConnection(lastProfileKey);
 		this.selectProfile(last);
+		JPanel p = new JPanel();
+		p.setLayout(new BorderLayout());
 		this.toolbar = new WbToolbar();
 		this.toolbar.add(new NewListEntryAction(this, "LblNewProfile"));
 		this.toolbar.add(new CopyProfileAction(this));
 		this.toolbar.add(new SaveListFileAction(this));
 		this.toolbar.addSeparator();
 		this.toolbar.add(new DeleteListEntryAction(this, "LblDeleteProfile"));
-		this.listPanel.add(this.toolbar, BorderLayout.NORTH);
-		int pos = Settings.getInstance().getProfileDividerLocation();
-		if (pos == -1) pos = 140;
-		this.jSplitPane1.setDividerLocation(pos);
+		this.toolbar.setBorder(DividerBorder.BOTTOM_DIVIDER);
+		p.add(toolbar, BorderLayout.NORTH);
+		this.filter = new ProfileFilter(this.model);
+		this.filter.setBorder(new EmptyBorder(1,2,1,0));
+		p.add(filter, BorderLayout.SOUTH);
+		
+		this.listPanel.add(p, BorderLayout.NORTH);
+		
+		
 		this.addKeyListener(this);
 		this.connectionEditor.setSourceList(this.model);
 		WbTraversalPolicy policy = new WbTraversalPolicy();
@@ -77,8 +88,14 @@ public class ProfileEditorPanel
 		policy.addComponent(this.connectionEditor);
 		policy.setDefaultComponent(this.jList1);
 		this.setFocusTraversalPolicy(policy);
+		
+		restoreSettings();
 	}
 
+	public void done()
+	{
+		this.filter.done();
+	}
 
 	public void removeSelectionListener(ListSelectionListener listener)
 	{
@@ -107,9 +124,19 @@ public class ProfileEditorPanel
 		this.connectionEditor.setDrivers(drivers);
 	}
 
+	public void restoreSettings()
+	{
+		int pos = Settings.getInstance().getProfileDividerLocation();
+		if (pos == -1) pos = 140;
+		this.jSplitPane1.setDividerLocation(pos);
+		String group = Settings.getInstance().getProperty("workbench.gui.profiles.lastgroup", null);
+		if (group != null) filter.setGroupFilter(group);
+	}
+	
 	public void saveSettings()
 	{
 		Settings.getInstance().setProfileDividerLocation(this.jSplitPane1.getDividerLocation());
+		Settings.getInstance().setProperty("workbench.gui.profiles.lastgroup", this.filter.getCurrentGroup());
 	}
 	
 	private void fillProfiles()
@@ -117,6 +144,7 @@ public class ProfileEditorPanel
 		this.model = new ProfileListModel(ConnectionMgr.getInstance().getProfiles());
 		this.jList1.setModel(this.model);
 	}
+	
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -188,6 +216,7 @@ public class ProfileEditorPanel
 		if (this.jList1.getModel().getSize() <= 0) return;
 		if (evt.getSource() == this.jList1)
 		{
+			if (filter != null) this.filter.readGroups();
 			try
 			{
 				ConnectionProfile newProfile = (ConnectionProfile)this.jList1.getSelectedValue();

@@ -132,6 +132,7 @@ public class ExportOptionsPanel
 
 		gbc.gridx = 0;
 		gbc.gridy ++;
+		gbc.insets = new Insets(0, 5, 0, 0);
 		this.encPanel = new EncodingPanel(Settings.getInstance().getDefaultFileEncoding());
 		this.add(encPanel, gbc);
 
@@ -140,6 +141,7 @@ public class ExportOptionsPanel
 
 		gbc.weightx = 1.0;
 		gbc.weighty = 1.0;
+		gbc.insets = emptyInsets;
 		JPanel dummy = new JPanel();
 		this.add(dummy, gbc);
 

@@ -43,6 +43,7 @@ import workbench.util.StringUtil;
 public class BlobHandler
 {
 	private File uploadFile;
+	private boolean setToNull = false;
 	
 	public BlobHandler()
 	{
@@ -54,6 +55,7 @@ public class BlobHandler
 		return getByteDisplay(l);
 	}
 
+	public boolean setToNull() { return this.setToNull; }
 	public File getUploadFile() 
 	{
 		return uploadFile;
@@ -210,8 +212,15 @@ public class BlobHandler
 	public static long saveBlobToFile(Object data, String file)
 		throws IOException, SQLException
 	{
+		OutputStream out = new FileOutputStream(file);
+		File f = new File(file);
+		return saveBlobToFile(data, out);
+	}
+	
+	public static long saveBlobToFile(Object data, OutputStream out)
+		throws IOException, SQLException
+	{
 		InputStream in = null;
-		OutputStream out = null;
 		if (data instanceof java.sql.Blob)
 		{
 			java.sql.Blob blob = (java.sql.Blob)data;
@@ -232,14 +241,7 @@ public class BlobHandler
 			//WbSwingUtilities.showMessageKey(caller, "ErrBlobNoAvail");
 			throw new IOException("No BLOB data object found");
 		}
-		
-		long fileSize = -1;
-		out = new FileOutputStream(file);
-		FileUtil.copy(in, out);
-		File f = new File(file);
-		fileSize = f.length();
-		
-		return fileSize;
+		return FileUtil.copy(in, out);
 	}
 
 	public void showBlobAsText(Object value)
@@ -271,6 +273,7 @@ public class BlobHandler
 		d.setBlobValue(blobValue);
 		d.setVisible(true);
 		this.uploadFile = d.getUploadedFile();
+		this.setToNull = d.setToNull();
 		d.dispose();
 	}
 }

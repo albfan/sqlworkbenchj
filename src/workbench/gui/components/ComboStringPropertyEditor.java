@@ -19,6 +19,9 @@ import java.lang.reflect.Method;
 
 import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import workbench.interfaces.SimplePropertyEditor;
 
@@ -74,6 +77,7 @@ public class ComboStringPropertyEditor
 			System.out.println("Error on init");
 			e.printStackTrace();
 		}
+
 		this.addItemListener(this);
 	}
 	
@@ -128,6 +132,7 @@ public class ComboStringPropertyEditor
 			this.applyChanges();
 		}
 	}
+	
 	public void setImmediateUpdate(boolean aFlag)
 	{
 		this.immediateUpdate = aFlag;
@@ -153,6 +158,5 @@ public class ComboStringPropertyEditor
 	{
 		if (!this.immediateUpdate) this.applyChanges();
 	}
-	
 }
 
