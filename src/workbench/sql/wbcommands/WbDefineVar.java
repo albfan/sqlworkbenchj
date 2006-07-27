@@ -64,6 +64,8 @@ public class WbDefineVar extends SqlCommand
 			return result;
 		}
 
+		var = var.trim();
+		
 		if (tok.hasMoreTokens()) value = tok.nextToken();
 
 		if ("-file".equalsIgnoreCase(var))
@@ -125,9 +127,10 @@ public class WbDefineVar extends SqlCommand
 			msg = ResourceMgr.getString("MsgVarDefVariableDefined");
 			try
 			{
-				VariablePool.getInstance().setParameterValue(var.trim(), value.trim());
-				msg = StringUtil.replace(msg, "%var%", var.trim());
-				msg = StringUtil.replace(msg, "%value%", value.trim());
+				value = value.trim();
+				VariablePool.getInstance().setParameterValue(var, value);
+				msg = StringUtil.replace(msg, "%var%", var);
+				msg = StringUtil.replace(msg, "%value%", value);
 				msg = StringUtil.replace(msg, "%varname%", VariablePool.getInstance().buildVarName(var, false));
 			}
 			catch (IllegalArgumentException e)

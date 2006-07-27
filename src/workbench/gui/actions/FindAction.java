@@ -21,7 +21,6 @@ import workbench.interfaces.Searchable;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to clear the contents of a entry field
  *	@author  support@sql-workbench.net
  */
 public class FindAction extends WbAction
@@ -33,7 +32,7 @@ public class FindAction extends WbAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtFind", KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
-		this.setIcon(ResourceMgr.getImage("search"));
+		this.setIcon(ResourceMgr.getImage("Find"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 		this.setCreateToolbarSeparator(true);
 	}

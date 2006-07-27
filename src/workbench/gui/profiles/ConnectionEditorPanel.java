@@ -173,8 +173,6 @@ public class ConnectionEditorPanel
     selectWkspButton = new javax.swing.JButton();
     workspaceFileLabel = new javax.swing.JLabel();
     autoCommitLabel = new WbCheckBoxLabel();
-    jLabel1 = new javax.swing.JLabel();
-    groupCombobox = new ComboStringPropertyEditor();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -586,24 +584,6 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 3, 0);
     add(autoCommitLabel, gridBagConstraints);
 
-    jLabel1.setText(ResourceMgr.getString("LblProfGroup"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 14;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(3, 5, 0, 0);
-    add(jLabel1, gridBagConstraints);
-
-    groupCombobox.setEditable(true);
-    groupCombobox.setName("group");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 14;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(3, 4, 0, 6);
-    add(groupCombobox, gridBagConstraints);
-
   }// </editor-fold>//GEN-END:initComponents
 
 	private void helpButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_helpButtonActionPerformed
@@ -705,10 +685,8 @@ public class ConnectionEditorPanel
   private javax.swing.JCheckBox emptyStringIsNull;
   private javax.swing.JButton extendedProps;
   private javax.swing.JLabel fetchSizeLabel;
-  private javax.swing.JComboBox groupCombobox;
   private javax.swing.JButton helpButton;
   private javax.swing.JCheckBox includeNull;
-  private javax.swing.JLabel jLabel1;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JSeparator jSeparator1;
   private javax.swing.JSeparator jSeparator2;
@@ -837,6 +815,7 @@ public class ConnectionEditorPanel
 
 		this.currentProfile = aProfile;
 		this.initPropertyEditors();
+		//this.readGroups();
 
 		String drvClass = aProfile.getDriverclass();
 		DbDriver drv = null;
@@ -846,8 +825,6 @@ public class ConnectionEditorPanel
 			drv = ConnectionMgr.getInstance().findDriverByName(drvClass, name);
 		}
 
-		readGroups();
-		
 		try
 		{
 			this.init = true;
@@ -874,22 +851,8 @@ public class ConnectionEditorPanel
 		{
 			if (!this.init)	this.sourceModel.profileChanged(this.currentProfile);
 		}
-		if (evt.getSource() == this.groupCombobox)
-		{
-			System.out.println("group changed!");
-			ConnectionMgr.getInstance().profileGroupChanged(this.currentProfile);
-			readGroups();
-		}
 	}
 	
-	private void readGroups()
-	{
-		Collection c = ConnectionMgr.getInstance().getProfileGroups();
-		ComboBoxModel m = new DefaultComboBoxModel(c.toArray());
-		this.groupCombobox.setModel(m);
-	}
-
-
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
 		if (e.getSource() == this.selectWkspButton)

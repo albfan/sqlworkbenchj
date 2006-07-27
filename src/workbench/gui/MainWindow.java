@@ -798,7 +798,7 @@ public class MainWindow
 
 		if (!s.restoreWindowSize(this))
 		{
-			this.setSize(800,600);
+			this.setSize(1000,750);
 		}
 
 		if (!s.restoreWindowPosition(this))

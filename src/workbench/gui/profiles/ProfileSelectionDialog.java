@@ -30,8 +30,10 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 
 import workbench.db.ConnectionProfile;
 import workbench.gui.WbSwingUtilities;
@@ -49,7 +51,7 @@ import workbench.util.StringUtil;
  */
 public class ProfileSelectionDialog
 	extends JDialog 
-	implements ActionListener, WindowListener, ListSelectionListener
+	implements ActionListener, WindowListener, TreeSelectionListener
 {
   private JPanel buttonPanel;
   private JButton okButton;
@@ -165,7 +167,7 @@ public class ProfileSelectionDialog
 	{
 		if (!Settings.getInstance().restoreWindowSize(this))
 		{
-			this.setSize(640,480);
+			this.setSize(700,550);
 		}
 	}
 
@@ -198,7 +200,7 @@ public class ProfileSelectionDialog
 	
 	public void profileListClicked(MouseEvent evt)
 	{
-		if (evt.getClickCount() == 2)
+		if (evt.getButton() == MouseEvent.BUTTON1 && evt.getClickCount() == 2)
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -283,10 +285,9 @@ public class ProfileSelectionDialog
 		this.setInitialFocus();
 	}
 
-	public void valueChanged(ListSelectionEvent e)
+	public void valueChanged(TreeSelectionEvent e)
 	{
-		if (e.getValueIsAdjusting()) return;
-		this.okButton.setEnabled(e.getFirstIndex() >= 0);
+		this.okButton.setEnabled(profiles.getSelectedProfile() != null);
 	}
 
 }

@@ -124,36 +124,20 @@ public class IntegerPropertyEditor
 	
 	public boolean isChanged() { return this.changed; }
 	
-	public void changedUpdate(DocumentEvent e)
-	{
-		this.changed = true;
-		if (this.immediateUpdate)
-		{
-			this.applyChanges();
-		}
-		firePropertyChange(this.propName, null, null);
-	}
-	
-	public void insertUpdate(DocumentEvent e)
-	{
-		this.changed = true;
-		if (this.immediateUpdate)
-		{
-			this.applyChanges();
-		}
-		firePropertyChange(this.propName, null, null);
-	}
-	
-	public void removeUpdate(DocumentEvent e)
-	{
-		this.changed = true;
-		if (this.immediateUpdate)
-		{
-			this.applyChanges();
-		}
-		firePropertyChange(this.propName, null, null);
-	}
+	public void changedUpdate(DocumentEvent e) { documentChanged(); 	}
+	public void insertUpdate(DocumentEvent e) { documentChanged(); }
+	public void removeUpdate(DocumentEvent e) { documentChanged(); }
 
+	private void documentChanged()
+	{
+		this.changed = true;
+		if (this.immediateUpdate)
+		{
+			this.applyChanges();
+		}
+		firePropertyChange(this.propName, null, null);
+	}
+	
 	public void setImmediateUpdate(boolean aFlag)
 	{
 		this.immediateUpdate = aFlag;

@@ -54,6 +54,9 @@ public class ValueConverter
 														"MM/dd/yyyy HH:mm:ss",
 													};
 
+	private static final String[] timeFormats = new String[] { "HH:mm:ss.SS", "HH:mm:ss", "HH:mm" };
+	private static final SimpleDateFormat timeFormatter = new SimpleDateFormat();
+	
 	private String defaultDateFormat;
 	private String defaultTimestampFormat;
 	private char decimalCharacter = '.';
@@ -114,19 +117,19 @@ public class ValueConverter
 		switch (type)
 		{
 			case Types.BIGINT:
-				if (aValue.toString().length() == 0) return null;
+				if (aValue.toString().trim().length() == 0) return null;
 				return new Long(aValue.toString().trim());
 			case Types.INTEGER:
 			case Types.SMALLINT:
 			case Types.TINYINT:
-				if (aValue.toString().length() == 0) return null;
+				if (aValue.toString().trim().length() == 0) return null;
 				return new Integer(aValue.toString().trim());
 			case Types.NUMERIC:
 			case Types.DECIMAL:
 			case Types.DOUBLE:
 			case Types.REAL:
 			case Types.FLOAT:
-				if (aValue.toString().length() == 0) return null;
+				if (aValue.toString().trim().length() == 0) return null;
 				return new BigDecimal(this.adjustDecimalString(aValue.toString()));
 			case Types.CHAR:
 			case Types.VARCHAR:
@@ -138,6 +141,9 @@ public class ValueConverter
 			case Types.TIMESTAMP:
 				if (aValue.toString().trim().length() == 0) return null;
 				return this.parseTimestamp((String)aValue);
+			case Types.TIME:
+				if (aValue.toString().trim().length() == 0) return null;
+				return this.parseTime((String)aValue);
 			case Types.BLOB:
 			case Types.BINARY:
 			case Types.LONGVARBINARY:
@@ -193,6 +199,37 @@ public class ValueConverter
 		return this.defaultTimestampFormat;
 	}
 
+  public java.sql.Time parseTime(String time)
+	{
+		java.sql.Time result = null;
+		java.util.Date parsed = null;
+		synchronized (this.formatter)
+		{
+			for (int i=0; i < timeFormats.length; i++)
+			{
+				try
+				{
+					this.formatter.applyPattern(timeFormats[i]);
+					parsed = this.formatter.parse(time);
+					break;
+				}
+				catch (Exception e)
+				{
+					result = null;
+				}
+			}
+		}
+		
+		if (parsed == null) 
+		{
+			LogMgr.logWarning("ValueConverter.parseTime()", "Could not parse time value '" + time + "'");
+			return null;
+		}
+		
+		result = new java.sql.Time(parsed.getTime());
+		return result;
+	}
+	
   public java.sql.Timestamp parseTimestamp(String aDate)
   {
 		java.util.Date result = null;

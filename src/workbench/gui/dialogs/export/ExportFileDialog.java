@@ -27,8 +27,7 @@ import workbench.gui.components.ExtensionFileFilter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
-import workbench.gui.dialogs.export.TextOptions;
-import workbench.gui.dialogs.export.XmlOptions;
+import workbench.util.StringUtil;
 
 
 /**
@@ -218,7 +217,7 @@ public class ExportFileDialog
 					filename = fl.getAbsolutePath();
 
 					String ext = ExtensionFileFilter.getExtension(fl);
-					if (ext.length() == 0)
+					if (StringUtil.isEmptyString(ext))
 					{
 						if (!filename.endsWith(".")) filename = filename + ".";
 						filename = filename + eff.getDefaultExtension();

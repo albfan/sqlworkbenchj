@@ -77,11 +77,11 @@ public class ProfileFilter
 	
 	public void actionPerformed(ActionEvent e)
 	{
-		if (e.getSource() == this.combo)
-		{
-			String group = getCurrentGroup();
-			data.setGroupFilter(group);
-		}
+//		if (e.getSource() == this.combo)
+//		{
+//			String group = getCurrentGroup();
+//			data.setGroupFilter(group);
+//		}
 	}
 
 	public void done()

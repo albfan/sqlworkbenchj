@@ -17,7 +17,9 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 import workbench.WbManager;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 import workbench.util.WbCipher;
 import workbench.util.WbPersistence;
 
@@ -103,7 +105,12 @@ public class ConnectionProfile
 	}
 	
 	public String getGroup() { return this.group; }
-	public void setGroup(String g) { this.group = g; }
+	public void setGroup(String g) 
+	{ 
+		if (StringUtil.equalString(this.group, g)) return;
+		this.group = g; 
+		this.changed = true;
+	}
 	
   public String getIdentifier()
   {
@@ -443,6 +450,7 @@ public class ConnectionProfile
 		result.setConfirmUpdates(this.confirmUpdates);
 		result.setStorePassword(this.storePassword);
 		result.setStoreExplorerSchema(this.rememberExplorerSchema);
+		result.setGroup(this.group);
 		if (this.connectionProperties != null)
 		{
 			Enumeration keys = this.connectionProperties.propertyNames();

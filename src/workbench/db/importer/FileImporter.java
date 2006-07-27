@@ -27,8 +27,6 @@ import workbench.util.StringUtil;
  */
 public class FileImporter
 {
-	public static final int IMPORT_TEXT = 0;
-	public static final int IMPORT_XML = 1;
 	private int importType = -1;
 	private TextImportOptions textOptions;
 	private XmlImportOptions xmlOptions;
@@ -82,9 +80,9 @@ public class FileImporter
 	
 	public void setType(int type)
 	{
-		if (type == IMPORT_TEXT)
+		if (type == ProducerFactory.IMPORT_TEXT)
 			this.setImportTypeText();
-		else if (type == IMPORT_XML)
+		else if (type == ProducerFactory.IMPORT_XML)
 			this.setImportTypeXml();
 		else
 			throw new IllegalArgumentException("Not a valid import type!");
@@ -92,22 +90,22 @@ public class FileImporter
 
 	public boolean isTextImport()
 	{
-		return this.importType == IMPORT_TEXT;
+		return this.importType == ProducerFactory.IMPORT_TEXT;
 	}
 	public boolean isXmlImport()
 	{
-		return this.importType == IMPORT_XML;
+		return this.importType == ProducerFactory.IMPORT_XML;
 	}
 	
 	public void setImportTypeText()
 	{
-		this.importType = IMPORT_TEXT;
+		this.importType = ProducerFactory.IMPORT_TEXT;
 		this.producer = null;
 	}
 	
 	public void setImportTypeXml()
 	{
-		this.importType = IMPORT_XML;
+		this.importType = ProducerFactory.IMPORT_XML;
 		this.producer = null;
 	}
 	
@@ -134,10 +132,23 @@ public class FileImporter
 	{
 		if (this.producer == null)
 		{
-			if (this.importType == IMPORT_TEXT)
-				this.producer = createTextFileParser();
-			else if (this.importType == IMPORT_XML)
-				this.producer = createXmlFileParser();
+			ProducerFactory factory = new ProducerFactory(inputFile);
+			factory.setType(this.importType);
+			factory.setXmlOptions(this.xmlOptions);
+			factory.setGeneralOptions(this.generalOptions);
+			factory.setTextOptions(this.textOptions);
+			factory.setConnection(this.connection);
+			factory.setImportTypeText();
+			if (this.table != null)
+			{
+				factory.setTargetTable(this.table);
+			}
+			
+//			if (this.importType == IMPORT_TEXT)
+//				this.producer = createTextFileParser();
+//			else if (this.importType == IMPORT_XML)
+//				this.producer = createXmlFileParser();
+			this.producer = factory.getProducer();
 		}
 		return this.producer;
 	}
@@ -165,36 +176,36 @@ public class FileImporter
 		}
 	}
 	
-	private RowDataProducer createTextFileParser()
-	{
-		TextFileParser parser = new TextFileParser(inputFile);
-		parser.setContainsHeader(this.textOptions.getContainsHeader());
-		parser.setDateFormat(this.generalOptions.getDateFormat());
-		parser.setTimeStampFormat(this.generalOptions.getTimestampFormat());
-		parser.setQuoteChar(this.textOptions.getTextQuoteChar());
-		parser.setDecimalChar(this.textOptions.getDecimalChar());
-		parser.setDecodeUnicode(this.textOptions.getDecode());
-		parser.setDelimiter(this.textOptions.getTextDelimiter());
-		parser.setConnection(this.connection);
-		if (this.table != null)
-		{
-			parser.setTableName(this.table.getTableExpression());
-		}
-		this.inputColumns = parser.getColumnsFromFile();
-		return parser;
-	}
+//	private RowDataProducer createTextFileParser()
+//	{
+//		TextFileParser parser = new TextFileParser(inputFile);
+//		parser.setContainsHeader(this.textOptions.getContainsHeader());
+//		parser.setDateFormat(this.generalOptions.getDateFormat());
+//		parser.setTimeStampFormat(this.generalOptions.getTimestampFormat());
+//		parser.setQuoteChar(this.textOptions.getTextQuoteChar());
+//		parser.setDecimalChar(this.textOptions.getDecimalChar());
+//		parser.setDecodeUnicode(this.textOptions.getDecode());
+//		parser.setDelimiter(this.textOptions.getTextDelimiter());
+//		parser.setConnection(this.connection);
+//		if (this.table != null)
+//		{
+//			parser.setTableName(this.table.getTableExpression());
+//		}
+//		this.inputColumns = parser.getColumnsFromFile();
+//		return parser;
+//	}
 	
 	public String getSourceFilename()
 	{
 		return this.inputFile;
 	}
 	
-	private RowDataProducer createXmlFileParser()
-	{
-		XmlDataFileParser parser = new XmlDataFileParser(inputFile);
-		parser.setUseVerboseFormat(this.xmlOptions.getUseVerboseXml());
-		return parser;
-	}
+//	private RowDataProducer createXmlFileParser()
+//	{
+//		XmlDataFileParser parser = new XmlDataFileParser(inputFile);
+//		parser.setUseVerboseFormat(this.xmlOptions.getUseVerboseXml());
+//		return parser;
+//	}
 	
 	public String getWbCommand()
 	{

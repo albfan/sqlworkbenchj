@@ -712,11 +712,11 @@ public class DataImporter
 			{
 				colIndex = this.columnMap[i] + 1;
 			}
+			
 			if (row[i] == null || row[i] instanceof NullValue)
 			{
 				pstmt.setNull(colIndex, this.targetColumns[i].getDataType());
 			}
-			
 			// This will only work with Oracle 10g drivers.
 			// Oracle 9i drivers do not implement the setCharacterStream() 
 			// and associated methods properly
@@ -781,6 +781,7 @@ public class DataImporter
 					in = b.getBinaryStream();
 					len = (int)b.length();
 				}
+				
 				if (in != null && len > -1)
 				{
 					pstmt.setBinaryStream(colIndex, in, len);
@@ -794,8 +795,7 @@ public class DataImporter
 			{
 				if (this.dbConn.getMetadata().isOracle() &&
 					  this.targetColumns[i].getDataType() == java.sql.Types.DATE &&
-						row[i] instanceof java.sql.Date
-					)
+						row[i] instanceof java.sql.Date)
 				{
 					java.sql.Timestamp ts = new java.sql.Timestamp(((java.sql.Date)row[i]).getTime());
 					pstmt.setTimestamp(colIndex, ts);

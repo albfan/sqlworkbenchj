@@ -247,6 +247,8 @@ public class GetMetaDataSql
 		}
 	}
 	
+	public String toString() { return getSql(); }
+	
 	/** Getter for property schemaField.
 	 * @return Value of property schemaField.
 	 *

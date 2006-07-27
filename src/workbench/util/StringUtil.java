@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -55,6 +56,26 @@ public class StringUtil
 	private static final java.util.Date now()
 	{
 		return new java.util.Date(System.currentTimeMillis());
+	}
+
+	public static Comparator getCaseInsensitiveComparator()
+	{
+		return new Comparator()
+		{
+			public int compare(Object o1, Object o2)
+			{
+				if (o1 == null && o2 == null) return 0;
+				if (o1 == null) return -1;
+				if (o2 == null) return 1;
+				if (o1 instanceof String && o2 instanceof String)
+				{
+					String value1 = (String)o1;
+					String value2 = (String)o2;
+					return value1.compareToIgnoreCase(value2);
+				}
+				return 0;
+			}
+		};
 	}
 	
 	public static final StringBuffer replaceToBuffer(String aString, String aValue, String aReplacement)
@@ -263,13 +284,14 @@ public class StringUtil
 		return stringToList(aString, aDelimiter, removeEmpty, trimEntries, false);
 	}
 	/**
-	 * 	Parses the given String and creates a List containing the elements
-	 *  of the string that are separated by <tt>aDelimiter</aa>
-	 * @param aString the separated input to parse
+	 * Parses the given String and creates a List containing the elements
+	 * of the string that are separated by <tt>aDelimiter</aa>
+	 *
+	 * @param aString the value to be parsed
 	 * @param aDelimiter the delimiter to user
 	 * @param removeEmpty flag to remove empty entries
-	 * @param trimEntries flag to trim entries
-     * @param checkBrackets flag to check for quoted delimiters
+	 * @param trimEntries flag to trim entries (will be applied beore checking for empty entries)
+   * @param checkBrackets flag to check for quoted delimiters
 	 * @return A List of Strings
 	 */
 	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets)
@@ -283,11 +305,9 @@ public class StringUtil
 		{
 			String element = tok.nextToken();
 			if (element == null) continue;
-			if (removeEmpty && element.trim().length() == 0) continue;
-			if (trimEntries)
-				result.add(element.trim());
-			else
-				result.add(element);
+			if (trimEntries) element = element.trim();
+			if (removeEmpty && isEmptyString(element)) continue;
+			result.add(element);
 		}
 		return result;
 	}
@@ -320,6 +340,10 @@ public class StringUtil
 	 */
 	public static final String listToString(List aList, char aDelimiter)
 	{
+		return listToString(aList, aDelimiter, false);
+	}
+	public static final String listToString(List aList, char aDelimiter, boolean quoteEntries)
+	{
 		if (aList == null || aList.size() == 0) return "";
 		int count = aList.size();
 		int numElements = 0;
@@ -332,7 +356,9 @@ public class StringUtil
 			{
 				result.append(aDelimiter);
 			}
+			result.append('"');
 			result.append(o.toString());
+			result.append('"');
 			numElements ++;
 		}
 		return result.toString();

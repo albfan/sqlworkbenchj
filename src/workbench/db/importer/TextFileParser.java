@@ -224,8 +224,17 @@ public class TextFileParser
 			this.pendingImportColumns = new ArrayList();
 			for (int i=0; i < count; i++)
 			{
-				String colname = (String)columnList.get(i);
-				pendingImportColumns.add(new ColumnIdentifier(colname));
+				Object o = columnList.get(i);
+				if (o instanceof String)
+				{
+					String colname = (String)columnList.get(i);
+					pendingImportColumns.add(new ColumnIdentifier(colname));
+				}
+				else if (o instanceof ColumnIdentifier)
+				{
+					pendingImportColumns.add((ColumnIdentifier)o);
+				}
+					
 			}
 			return;
 		}
@@ -494,6 +503,11 @@ public class TextFileParser
 
 		String line;
 
+		if (!this.withHeader && this.sourceDir != null)
+		{
+			this.setColumns(this.getColumnsFromTargetTable());
+		}
+		
 		try
 		{
 			line = in.readLine();
@@ -590,7 +604,8 @@ public class TextFileParser
 
 				tok.setLine(line);
 				includeLine = true;
-
+				int targetIndex = -1;
+				
 				// Build row data
 				for (int i=0; i < this.colCount; i++)
 				{
@@ -599,6 +614,9 @@ public class TextFileParser
 						if (tok.hasNext())
 						{
 							value = tok.getNext();
+							if (this.columns[i] == null) continue;
+							targetIndex = this.columnMap[i];
+							if (targetIndex == -1) continue;
 							
 							int colType = this.columns[i].getDataType();
 
@@ -616,9 +634,6 @@ public class TextFileParser
 									break;
 								}
 							}
-
-							int targetIndex = this.columnMap[i];
-							if (targetIndex == -1) continue;
 
 							if (SqlUtil.isCharacterType(colType))
 							{
@@ -650,10 +665,10 @@ public class TextFileParser
 					}
 					catch (Exception e)
 					{
-						rowData[i] = null;
+						if (targetIndex != -1) rowData[targetIndex] = null;
 						String msg = ResourceMgr.getString("ErrTextfileImport");
 						msg = msg.replaceAll("%row%", Integer.toString(importRow + 1));
-						msg = msg.replaceAll("%col%", this.columns[i].getColumnName());
+						msg = msg.replaceAll("%col%", (this.columns[i] == null ? "n/a" : this.columns[i].getColumnName()));
 						msg = msg.replaceAll("%value%", (value == null ? "(NULL)" : value.toString()));
 						msg = msg.replaceAll("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
 						LogMgr.logWarning("TextFileParser.start()",msg, e);
@@ -784,12 +799,31 @@ public class TextFileParser
 		return cols;
 	}
 
+	
 	public void setupFileColumns()
 		throws SQLException
 	{
-		List cols = this.getColumnsFromFile();
+	
+		List cols = null;
+		
+		if (this.withHeader)
+		{
+			cols = this.getColumnsFromFile();
+		}
+		else
+		{
+			cols = this.getColumnsFromTargetTable();
+		}
 		this.setColumns(cols);
 	}
+	
+	private List getColumnsFromTargetTable()
+		throws SQLException
+	{
+		TableIdentifier tbl = new TableIdentifier(this.targetSchema, this.tableName);
+		return this.connection.getMetadata().getTableColumns(tbl);
+	}
+	
 	/**
 	 * 	Read the column definitions from the database.
 	 * 	@param cols a List of column names (String)

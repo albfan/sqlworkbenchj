@@ -11,6 +11,8 @@
  */
 package workbench.gui.components;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
@@ -24,6 +26,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import workbench.interfaces.SimplePropertyEditor;
+import workbench.log.LogMgr;
+import workbench.util.StringUtil;
 
 
 
@@ -34,27 +38,27 @@ import workbench.interfaces.SimplePropertyEditor;
  */
 public class ComboStringPropertyEditor 
 	extends JComboBox 
-	implements ItemListener, SimplePropertyEditor, FocusListener
+	implements ItemListener, SimplePropertyEditor, FocusListener, DocumentListener
 {
 	private Object source;
 	private Method setter;
 	private Method getter;
 	private boolean changed;
 	private boolean immediateUpdate = false;
-	
+	private String propName;
+	private ActionListener listener;
 	public ComboStringPropertyEditor()
 	{
 		super();
-		//this.addFocusListener(this);
 	}
 	
 	public void setSourceObject(Object aSource, String aProperty)
 	{
 		this.source = aSource;
+		this.propName = aProperty;
 		this.changed = false;
 		String propertyName = Character.toUpperCase(aProperty.charAt(0)) + aProperty.substring(1);
-		
-		this.removeItemListener(this);
+		stopEvents();
 		
 		try
 		{
@@ -77,25 +81,72 @@ public class ComboStringPropertyEditor
 			System.out.println("Error on init");
 			e.printStackTrace();
 		}
-
-		this.addItemListener(this);
+		startEvents();
 	}
 	
+	private ActionListener getListener()
+	{
+		if (listener == null)
+		{
+			listener = new ActionListener()
+			{
+				public void actionPerformed(ActionEvent evt)
+				{
+					changed = true;
+					applyChanges();
+				}
+			};
+		}
+		return listener;
+	}
+	
+	private void stopEvents()
+	{
+		this.removeItemListener(this);
+		if (this.isEditable())
+		{
+			removeActionListener(getListener());
+			JTextField text = (JTextField)getEditor().getEditorComponent();
+			//text.removeFocusListener(this);
+			text.getDocument().removeDocumentListener(this);
+		}
+	}
+	
+	private void startEvents()
+	{
+		this.addItemListener(this);
+		if (this.isEditable())
+		{
+			addActionListener(getListener());
+			JTextField text = (JTextField)getEditor().getEditorComponent();
+			//text.addFocusListener(this);
+			text.getDocument().addDocumentListener(this);
+		}
+	}
+
 	public void setModel(ComboBoxModel m)
 	{
+		stopEvents();
 		super.setModel(m);
-		this.initData();
+		if (this.isEditable())
+		{
+			this.initData();
+		}
+		startEvents();
 	}
 
 	private void initData()
 	{
+		if (this.getter == null || this.source == null) return;
 		try
 		{
+			
 			Object value = this.getter.invoke(this.source, (Object[])null);
 			this.setSelectedItem(value);
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("ComboProperty.intiData", "Error", e);
 		}
 	}
 	
@@ -105,7 +156,14 @@ public class ComboStringPropertyEditor
 	{
 		if (!this.changed) return;
 		Object args[] = new Object[1];
-		args[0] = this.getSelectedItem().toString();
+		if (this.isEditable())
+		{
+			args[0] = this.getEditor().getItem().toString();
+		}
+		else
+		{
+			args[0] = this.getSelectedItem().toString();
+		}
 		try
 		{
 			this.setter.invoke(this.source, args);
@@ -144,19 +202,23 @@ public class ComboStringPropertyEditor
 		return this.immediateUpdate;
 	}
 	
-	/** Invoked when a component gains the keyboard focus.
-	 *
-	 */
 	public void focusGained(FocusEvent e)
 	{
 	}
 	
-	/** Invoked when a component loses the keyboard focus.
-	 *
-	 */
 	public void focusLost(FocusEvent e)
 	{
-		if (!this.immediateUpdate) this.applyChanges();
+		this.applyChanges();
+	}
+	
+	public void changedUpdate(DocumentEvent e) { documentChanged(); 	}
+	public void insertUpdate(DocumentEvent e) { documentChanged(); }
+	public void removeUpdate(DocumentEvent e) { documentChanged(); }
+	
+	private void documentChanged()
+	{
+		this.changed = true;
+		this.applyChanges();
 	}
 }
 

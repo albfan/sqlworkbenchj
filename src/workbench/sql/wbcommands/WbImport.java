@@ -284,10 +284,16 @@ public class WbImport
 				boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER);
 				textParser.setContainsHeader(header);
 
-				// filecolumns is the new parameter
-				// -columns is deprecated
 				String filecolumns = cmdLine.getValue(ARG_FILECOLUMNS);
-				if (filecolumns == null) filecolumns = cmdLine.getValue("columns");
+				if (filecolumns == null) 
+				{
+					filecolumns = cmdLine.getValue("columns");
+					if (filecolumns != null)
+					{
+						result.addMessage(ResourceMgr.getString("MsgImpColumnsDeprecated"));
+						result.setWarning(true);
+					}
+				}
 
 				String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
 				if (importcolumns != null)
@@ -318,23 +324,26 @@ public class WbImport
 					}
 				}
 
-				if (!header && filecolumns == null)
-				{
-					result.addMessage(ResourceMgr.getString("ErrHeaderOrColumnDefRequired"));
-					result.setFailure();
-					return result;
-				}
+//				if (!header && filecolumns == null)
+//				{
+//					result.addMessage(ResourceMgr.getString("ErrHeaderOrColumnDefRequired"));
+//					result.setFailure();
+//					return result;
+//				}
+//
+//				if (!header && importcolumns != null && filecolumns == null)
+//				{
+//					result.addMessage(ResourceMgr.getString("ErrImportNoFileColumns"));
+//					result.setFailure();
+//					return result;
+//				}
 
-				if (!header && importcolumns != null && filecolumns == null)
+				if (filecolumns == null)
 				{
-					result.addMessage(ResourceMgr.getString("ErrImportNoFileColumns"));
-					result.setFailure();
-					return result;
-				}
-
-				if (header && filecolumns == null)
-				{
-					// read column definition from heaer line
+					// read column definition from header line
+					// if no header was specified, the text parser
+					// will assume the columns in the text file 
+					// map to the column in the target table
 					try
 					{
 						textParser.setupFileColumns();
@@ -360,7 +369,7 @@ public class WbImport
 			else
 			{
 				// source directory specified --> Assume files contain headers
-				textParser.setContainsHeader(true);
+				textParser.setContainsHeader(cmdLine.getBoolean(ARG_CONTAINSHEADER, true));
 			}
 
 			textParser.setTreatBlobsAsFilenames(cmdLine.getBoolean(ARG_BLOB_ISFILENAME, true));

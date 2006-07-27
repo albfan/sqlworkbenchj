@@ -382,6 +382,7 @@ public class ConnectionMgr
 	/**
 	 *	Returns a Map with the current profiles.
 	 *	The key to the map is the profile name, the value is the actual profile
+	 *  (i.e. instances of {@link ConnectionProfile}
 	 */
 	public synchronized Map getProfiles()
 	{

@@ -17,6 +17,7 @@ import workbench.gui.dialogs.dataimport.ImportOptions;
 import workbench.gui.dialogs.dataimport.TextImportOptions;
 import workbench.gui.dialogs.dataimport.XmlImportOptions;
 import workbench.interfaces.ImportFileParser;
+import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbImport;
 import workbench.util.StringUtil;
 
@@ -206,7 +207,7 @@ public class ProducerFactory
 		appendArgument(command, WbImport.ARG_DECODE, textOptions.getDecode(), indent);
 		String delim = textOptions.getTextDelimiter();
 		if ("\t".equals(delim)) delim = "\\t";
-		appendArgument(command, WbImport.ARG_DELIM, delim, indent);
+		appendArgument(command, WbImport.ARG_DELIM, "'" + delim + "'", indent);
 		appendArgument(command, WbImport.ARG_QUOTE, textOptions.getTextQuoteChar(), indent);
 		appendArgument(command, WbImport.ARG_DECCHAR, textOptions.getDecimalChar(), indent);
 		appendArgument(command, WbImport.ARG_FILECOLUMNS, this.fileParser.getColumns(), indent);
@@ -255,7 +256,9 @@ public class ProducerFactory
 		indent.append('\n');
 		for (int i=0; i < WbImport.VERB.length(); i++) indent.append(' ');
 		indent.append(' ');
-		result.append(WbImport.VERB + " -" + WbImport.ARG_FILE + "=");
+		CommandTester ct = new CommandTester();
+		String verb = ct.formatVerb(WbImport.VERB);
+		result.append(verb + " -" + WbImport.ARG_FILE + "=");
 		if (inputFile.indexOf('-') > -1) result.append('"');
 		result.append(StringUtil.replace(inputFile, "\\", "/"));
 		if (inputFile.indexOf('-') > -1) result.append('"');

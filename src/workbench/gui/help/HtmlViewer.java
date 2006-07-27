@@ -84,6 +84,7 @@ public class HtmlViewer
 	private void initHtml(String aStartFile)
 	{
 		display = new HtmlPanel(aStartFile);
+		this.getContentPane().add(display);
 	}
 	
 	public void showDataPumperHelp()

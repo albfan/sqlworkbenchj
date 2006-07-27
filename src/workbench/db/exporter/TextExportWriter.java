@@ -147,6 +147,11 @@ public class TextExportWriter
 						out.print("\"");
 					}
 				}
+//				else if (SqlUtil.isCharacterType(type))
+//				{
+//					for (int k=col.length(); k < max; k++) out.print(" ");
+//					out.print("\"trim(:" + col + ")\"");
+//				}
 				if (i < count - 1 || blobColumns.size() > 0) out.print(",");
 				out.println();
 			}

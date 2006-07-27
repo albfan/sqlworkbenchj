@@ -13,28 +13,30 @@ package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.Point;
 import java.awt.event.MouseListener;
 import java.util.List;
 import javax.swing.JPanel;
 
 import javax.swing.JToolBar;
-import javax.swing.ListModel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.gui.actions.CollapseTreeAction;
 import workbench.gui.actions.CopyProfileAction;
 import workbench.gui.actions.DeleteListEntryAction;
+import workbench.gui.actions.ExpandTreeAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.actions.SaveListFileAction;
-import workbench.gui.components.DividerBorder;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.FileActions;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
@@ -45,13 +47,17 @@ import workbench.util.StringUtil;
  */
 public class ProfileEditorPanel
 	extends JPanel
-	implements FileActions, KeyListener
+	implements FileActions
 {
 	private ProfileListModel model;
 	private JToolBar toolbar;
 	private ConnectionEditorPanel connectionEditor;
 	private MouseListener listMouseListener;
 	private ProfileFilter filter;
+	private NewListEntryAction newItem;
+	private CopyProfileAction copyItem;
+	private DeleteListEntryAction deleteItem;
+	private NewGroupAction newGroup;
 	
 	/** Creates new form ProfileEditor */
 	public ProfileEditorPanel(String lastProfileKey)
@@ -61,49 +67,52 @@ public class ProfileEditorPanel
 		this.connectionEditor = new ConnectionEditorPanel();
 		this.jSplitPane1.setRightComponent(this.connectionEditor);
 		this.fillDrivers();
-		String last = Settings.getInstance().getLastConnection(lastProfileKey);
-		this.selectProfile(last);
+		
 		JPanel p = new JPanel();
 		p.setLayout(new BorderLayout());
 		this.toolbar = new WbToolbar();
-		this.toolbar.add(new NewListEntryAction(this, "LblNewProfile"));
-		this.toolbar.add(new CopyProfileAction(this));
-		this.toolbar.add(new SaveListFileAction(this));
+		newItem = new NewListEntryAction(this, "LblNewProfile");
+		newItem.setIcon(ResourceMgr.getImage("NewProfile"));
+		this.toolbar.add(newItem);
+		
+		copyItem = new CopyProfileAction(this);
+		copyItem.setEnabled(false);
+		this.toolbar.add(copyItem);
+		ProfileTree tree = (ProfileTree)profileTree;
+		this.toolbar.add(new NewGroupAction(tree));
+		
 		this.toolbar.addSeparator();
-		this.toolbar.add(new DeleteListEntryAction(this, "LblDeleteProfile"));
-		this.toolbar.setBorder(DividerBorder.BOTTOM_DIVIDER);
-		p.add(toolbar, BorderLayout.NORTH);
-		this.filter = new ProfileFilter(this.model);
-		this.filter.setBorder(new EmptyBorder(1,2,1,0));
-		p.add(filter, BorderLayout.SOUTH);
+		deleteItem = new DeleteListEntryAction(this, "LblDeleteProfile");
+		deleteItem.setEnabled(false);
+		this.toolbar.add(deleteItem);
 		
-		this.listPanel.add(p, BorderLayout.NORTH);
+		this.toolbar.addSeparator();
+		this.toolbar.add(new SaveListFileAction(this));
 		
-		this.addKeyListener(this);
-		this.connectionEditor.setSourceList(this.model);
+		this.toolbar.addSeparator();
+		this.toolbar.add(new ExpandTreeAction(tree));
+		this.toolbar.add(new CollapseTreeAction(tree));
+		
+		this.listPanel.add(toolbar, BorderLayout.NORTH);
+		
 		WbTraversalPolicy policy = new WbTraversalPolicy();
 		this.setFocusCycleRoot(false);
-		policy.addComponent(this.jList1);
+		policy.addComponent(this.profileTree);
 		policy.addComponent(this.connectionEditor);
-		policy.setDefaultComponent(this.jList1);
+		policy.setDefaultComponent(this.profileTree);
 		this.setFocusTraversalPolicy(policy);
+		
+		buildTree();
+		
+		String last = Settings.getInstance().getLastConnection(lastProfileKey);
+		this.selectProfile(last);
 		
 		restoreSettings();
 	}
 
 	public void done()
 	{
-		this.filter.done();
-	}
-
-	public void removeSelectionListener(ListSelectionListener listener)
-	{
-		this.jList1.removeListSelectionListener(listener);
-	}
-	
-	public void addSelectionListener(ListSelectionListener listener)
-	{
-		this.jList1.addListSelectionListener(listener);
+		if (this.filter != null) this.filter.done();
 	}
 	
 	public void setInitialFocus()
@@ -112,11 +121,16 @@ public class ProfileEditorPanel
 		{
 			public void run()
 			{
-				jList1.requestFocus();
+				profileTree.requestFocus();
 			}
 		});
 	}
-
+	
+	public void addSelectionListener(TreeSelectionListener listener)
+	{
+		this.profileTree.addTreeSelectionListener(listener);
+	}
+	
 	private void fillDrivers()
 	{
 		List drivers = ConnectionMgr.getInstance().getDrivers();
@@ -126,22 +140,25 @@ public class ProfileEditorPanel
 	public void restoreSettings()
 	{
 		int pos = Settings.getInstance().getProfileDividerLocation();
-		if (pos == -1) pos = 140;
+		if (pos == -1) pos = 210;
 		this.jSplitPane1.setDividerLocation(pos);
-		String group = Settings.getInstance().getProperty("workbench.gui.profiles.lastgroup", null);
-		if (group != null) filter.setGroupFilter(group);
+		String groups = Settings.getInstance().getProperty("workbench.profiles.expandedgroups", null);
+		List l = StringUtil.stringToList(groups, ",", true, true);
+		((ProfileTree)profileTree).expandGroups(l);
 	}
 	
 	public void saveSettings()
 	{
 		Settings.getInstance().setProfileDividerLocation(this.jSplitPane1.getDividerLocation());
-		Settings.getInstance().setProperty("workbench.gui.profiles.lastgroup", this.filter.getCurrentGroup());
+		List expandedGroups = ((ProfileTree)profileTree).getExpandedGroupNames();
+		Settings.getInstance().setProperty("workbench.profiles.expandedgroups", StringUtil.listToString(expandedGroups,',', true));
 	}
 	
-	private void fillProfiles()
+	private void buildTree()
 	{
 		this.model = new ProfileListModel(ConnectionMgr.getInstance().getProfiles());
-		this.jList1.setModel(this.model);
+		this.profileTree.setModel(this.model);
+		this.connectionEditor.setSourceList(this.model);
 	}
 	
 	/** This method is called from within the constructor to
@@ -156,35 +173,31 @@ public class ProfileEditorPanel
 
     listPanel = new javax.swing.JPanel();
     jScrollPane1 = new javax.swing.JScrollPane();
-    jList1 = new javax.swing.JList();
+    profileTree = new ProfileTree();
 
     setLayout(new java.awt.BorderLayout());
 
-    jSplitPane1.setBorder(new javax.swing.border.EtchedBorder());
+    jSplitPane1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
     jSplitPane1.setDividerLocation(110);
     listPanel.setLayout(new java.awt.BorderLayout());
 
     jScrollPane1.setPreferredSize(null);
-    jList1.setFont(Settings.getInstance().getStandardLabelFont());
-    jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-    jList1.setVisibleRowCount(10);
-    this.fillProfiles();
-    jList1.addListSelectionListener(new javax.swing.event.ListSelectionListener()
+    profileTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener()
     {
-      public void valueChanged(javax.swing.event.ListSelectionEvent evt)
+      public void valueChanged(javax.swing.event.TreeSelectionEvent evt)
       {
-        jList1ValueChanged(evt);
+        profileTreeValueChanged(evt);
       }
     });
-    jList1.addMouseListener(new java.awt.event.MouseAdapter()
+    profileTree.addMouseListener(new java.awt.event.MouseAdapter()
     {
       public void mouseClicked(java.awt.event.MouseEvent evt)
       {
-        jList1MouseClicked(evt);
+        profileTreeMouseClicked(evt);
       }
     });
 
-    jScrollPane1.setViewportView(jList1);
+    jScrollPane1.setViewportView(profileTree);
 
     listPanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
@@ -192,90 +205,71 @@ public class ProfileEditorPanel
 
     add(jSplitPane1, java.awt.BorderLayout.CENTER);
 
-  }
-  // </editor-fold>//GEN-END:initComponents
+  }// </editor-fold>//GEN-END:initComponents
 
-	private void jList1MouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jList1MouseClicked
-	{//GEN-HEADEREND:event_jList1MouseClicked
-		if (this.listMouseListener != null)
+	private void profileTreeValueChanged(javax.swing.event.TreeSelectionEvent evt)//GEN-FIRST:event_profileTreeValueChanged
+	{//GEN-HEADEREND:event_profileTreeValueChanged
+		if (this.connectionEditor == null) return;
+		if (evt.getSource() == this.profileTree)
 		{
-			this.listMouseListener.mouseClicked(evt);
+			try
+			{
+				ConnectionProfile newProfile = getSelectedProfile();
+				if (newProfile != null)
+				{
+					this.connectionEditor.setProfile(newProfile);
+					this.deleteItem.setEnabled(true);
+					this.copyItem.setEnabled(true);
+				}
+				else
+				{
+					this.deleteItem.setEnabled(false);
+					this.copyItem.setEnabled(false);
+				}
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("ProfileEditorPanel.valueChanged()", "Error selecting new profile", e);
+			}
 		}
-	}//GEN-LAST:event_jList1MouseClicked
+	}//GEN-LAST:event_profileTreeValueChanged
 
+	private void profileTreeMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_profileTreeMouseClicked
+	{//GEN-HEADEREND:event_profileTreeMouseClicked
+		if (this.listMouseListener != null) 
+		{
+			Point p = evt.getPoint();
+			TreePath path = profileTree.getClosestPathForLocation((int)p.getX(), (int)p.getY());
+			TreeNode n = (TreeNode)path.getLastPathComponent();
+			if (n.isLeaf())
+			{
+				this.listMouseListener.mouseClicked(evt);
+			}
+		}
+	}//GEN-LAST:event_profileTreeMouseClicked
+
+	public ConnectionProfile getSelectedProfile()
+	{
+		return ((ProfileTree)profileTree).getSelectedProfile();
+	}
+	
 	public void addListMouseListener(MouseListener aListener)
 	{
 		this.listMouseListener = aListener;
 	}
 
-	private void jList1ValueChanged(javax.swing.event.ListSelectionEvent evt)//GEN-FIRST:event_jList1ValueChanged
-	{//GEN-HEADEREND:event_jList1ValueChanged
-		if (this.connectionEditor == null) return;
-		if (this.jList1.getModel() == null) return;
-		if (this.jList1.getModel().getSize() <= 0) return;
-		if (evt.getSource() == this.jList1)
-		{
-			if (filter != null) this.filter.readGroups();
-			try
-			{
-				ConnectionProfile newProfile = (ConnectionProfile)this.jList1.getSelectedValue();
-				if (newProfile != null)
-				{
-					this.connectionEditor.setProfile(newProfile);
-				}
-				//lastIndex = this.jList1.getSelectedIndex();
-			}
-			catch (Exception e)
-			{
-				//lastIndex = 0;
-			}
-		}
-	}//GEN-LAST:event_jList1ValueChanged
-
-	public ConnectionProfile getSelectedProfile()
-	{
-		return this.connectionEditor.getProfile();
-	}
-
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JList jList1;
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JSplitPane jSplitPane1;
   private javax.swing.JPanel listPanel;
+  private javax.swing.JTree profileTree;
   // End of variables declaration//GEN-END:variables
 
 
 	private void selectProfile(String aProfileName)
 	{
-		ListModel m = jList1.getModel();
-		int count = m.getSize();
-		
-		if (StringUtil.isEmptyString(aProfileName) && count > 0)
-		{
-			jList1.setSelectedIndex(0);
-			return;
-		}
-
-		try
-		{
-
-			for (int i=0; i < count; i++)
-			{
-				ConnectionProfile prof = (ConnectionProfile)m.getElementAt(i);
-				if (prof.getName().equals(aProfileName))
-				{
-					this.jList1.setSelectedIndex(i);
-					this.jList1.ensureIndexIsVisible(i);
-					break;
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			jList1.setSelectedIndex(0);
-		}
+		((ProfileTree)profileTree).selectProfile(aProfileName);
 	}
 
 	/**
@@ -285,13 +279,24 @@ public class ProfileEditorPanel
 	 */
 	public void deleteItem() throws Exception
 	{
-		int index = this.jList1.getSelectedIndex();
-    if (index >= 0)
-    {
-      this.model.deleteProfile(index);
-    }
-    if (index > 0) index --;
-    this.jList1.setSelectedIndex(index);
+		TreePath path = profileTree.getSelectionPath();
+		if (path == null) return;
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
+		if (node == null) return;
+		Object o = node.getUserObject();
+		if (o instanceof ConnectionProfile)
+		{
+			ConnectionProfile prof = (ConnectionProfile)o;
+			DefaultMutableTreeNode group = (DefaultMutableTreeNode)path.getPathComponent(1);
+			int index = model.getIndexOfChild(group, node);
+			int children = model.getChildCount(group);
+			if (index > 0) index --;
+			
+			this.model.deleteProfile(prof);
+			Object newChild = model.getChild(group, index);
+			TreePath newPath = new TreePath(new Object[] { model.getRoot(), group, newChild });
+			((ProfileTree)profileTree).selectPath(newPath);
+		}
 	}
 
 	/**
@@ -304,7 +309,7 @@ public class ProfileEditorPanel
 
 		if (createCopy)
 		{
-  		ConnectionProfile current = (ConnectionProfile)this.jList1.getSelectedValue();
+  		ConnectionProfile current = getSelectedProfile();
   		if (current != null)
   		{
   			cp = current.createCopy();
@@ -317,12 +322,33 @@ public class ProfileEditorPanel
 			cp = new ConnectionProfile();
 			cp.setUseSeparateConnectionPerTab(true);
 			cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
+			cp.setGroup(getCurrentGroup());
 		}
     cp.setNew();
-		this.model.addProfile(cp);
-		this.selectProfile(cp.getName());
+		
+		TreePath newPath = this.model.addProfile(cp);
+		//this.selectProfile(cp.getName());
+		((ProfileTree)profileTree).selectPath(newPath);
 	}
 
+	private String getCurrentGroup()
+	{
+		TreePath path = profileTree.getSelectionPath();
+		if (path == null) return null;
+		 
+		
+		if (path.getPathCount() > 1) 
+		{
+			// Get the group of the currently selected profile;
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getPathComponent(1);
+			Object o = node.getUserObject();
+			if (o instanceof GroupNode)
+			{
+				return ((GroupNode)o).getGroup();
+			}
+		}
+		return null;
+	}
 	public void saveItem() throws Exception
 	{
 		ConnectionMgr conn = ConnectionMgr.getInstance();
@@ -332,36 +358,7 @@ public class ProfileEditorPanel
 
 	public int getProfileCount()
 	{
-		return this.jList1.getModel().getSize();
-	}
-
-	/** Invoked when a key has been pressed.
-	 * See the class description for {@link KeyEvent} for a definition of
-	 * a key pressed event.
-	 *
-	 */
-	public void keyPressed(KeyEvent e)
-	{
-		//this.ctrlPressed = ((e.getModifiers() & KeyEvent.CTRL_DOWN_MASK) == KeyEvent.CTRL_DOWN_MASK);
-	}
-
-	/** Invoked when a key has been released.
-	 * See the class description for {@link KeyEvent} for a definition of
-	 * a key released event.
-	 *
-	 */
-	public void keyReleased(KeyEvent e)
-	{
-		//this.ctrlPressed = ((e.getModifiers() & KeyEvent.CTRL_MASK) == 0);
-	}
-
-	/** Invoked when a key has been typed.
-	 * See the class description for {@link KeyEvent} for a definition of
-	 * a key typed event.
-	 *
-	 */
-	public void keyTyped(KeyEvent e)
-	{
+		return this.profileTree.getRowCount();
 	}
 
 }
