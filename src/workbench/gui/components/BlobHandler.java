@@ -99,6 +99,7 @@ public class BlobHandler
 			}
 			catch (Exception e)
 			{
+				LogMgr.logError("BlobHandler.getBlobAsArray()", "Error retrieving blob value", e);
 				return null;
 			}
 		}
@@ -119,6 +120,7 @@ public class BlobHandler
 			}
 			catch (Exception e)
 			{
+				LogMgr.logError("BlobHandler.getBlobAsArray()", "Error retrieving blob value", e);
 				return null;
 			}
 			finally
@@ -178,6 +180,7 @@ public class BlobHandler
 			}
 			catch (Exception e)
 			{
+				LogMgr.logError("BlobHandler.getBlobAsString()", "Error retrieving blob value", e);
 				return "";
 			}
 		}
@@ -198,6 +201,7 @@ public class BlobHandler
 			}
 			catch (Exception e)
 			{
+				LogMgr.logError("BlobHandler.getBlobAsString()", "Error retrieving blob value", e);
 				return "";
 			}
 			finally

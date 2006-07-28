@@ -174,9 +174,9 @@ public class BlobInfoDialog
     showImageButton = new FlatButton();
     uploadButton = new FlatButton();
     showHexButton = new FlatButton();
-    externalViewer = new javax.swing.JButton();
+    externalViewer = new FlatButton();
     externalTools = new javax.swing.JComboBox();
-    setNullButton = new javax.swing.JButton();
+    setNullButton = new FlatButton();
 
     getContentPane().setLayout(new java.awt.GridBagLayout());
 
@@ -382,10 +382,24 @@ public class BlobInfoDialog
 
 	private void showHexButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showHexButtonActionPerformed
 	{//GEN-HEADEREND:event_showHexButtonActionPerformed
-		HexViewer v = new HexViewer(this, ResourceMgr.getString("TxtBlobData"));
-		v.setData(handler.getBlobAsArray(this.blobValue));
-		v.setVisible(true);
-		closeWindow();		
+		try
+		{
+			byte[] data = handler.getBlobAsArray(this.blobValue);
+			if (data == null) 
+			{
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgBlobNotRetrieved"));
+				return;
+			}
+			HexViewer v = new HexViewer(this, ResourceMgr.getString("TxtBlobData"));
+			v.setData(data);
+			v.setVisible(true);
+			closeWindow();				
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("BlobInfoDialog.showHexButtonActionPerformed()", "Error showing hex data", e);
+		}
+
 	}//GEN-LAST:event_showHexButtonActionPerformed
 
 	private void showAsTextButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showAsTextButtonActionPerformed
@@ -407,7 +421,7 @@ public class BlobInfoDialog
 			File f = new File(file);
 			msg = StringUtil.replace(msg, "%filename%", f.getAbsolutePath());
 			fileSize = f.length();
-			msg = StringUtil.replace(msg, "%size%", Long.toString(fileSize));
+			msg = StringUtil.replace(msg, "%filesize%", Long.toString(fileSize));
 			WbSwingUtilities.showMessage(this, msg);
 		}
 		catch (Exception ex)

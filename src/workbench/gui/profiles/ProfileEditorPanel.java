@@ -79,6 +79,7 @@ public class ProfileEditorPanel
 		copyItem.setEnabled(false);
 		this.toolbar.add(copyItem);
 		ProfileTree tree = (ProfileTree)profileTree;
+		
 		this.toolbar.add(new NewGroupAction(tree));
 		
 		this.toolbar.addSeparator();
@@ -94,6 +95,8 @@ public class ProfileEditorPanel
 		this.toolbar.add(new CollapseTreeAction(tree));
 		
 		this.listPanel.add(toolbar, BorderLayout.NORTH);
+		
+		tree.setDeleteAction(deleteItem);
 		
 		WbTraversalPolicy policy = new WbTraversalPolicy();
 		this.setFocusCycleRoot(false);
@@ -360,5 +363,5 @@ public class ProfileEditorPanel
 	{
 		return this.profileTree.getRowCount();
 	}
-
+	
 }

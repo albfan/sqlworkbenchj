@@ -813,11 +813,6 @@ public class WbTable
 		addListeners();
 	}
 
-	private void setCopyActions(boolean flag)
-	{
-
-	}
-	
 	private FilterExpression lastFilter;
 	private FilterExpression currentFilter;
 

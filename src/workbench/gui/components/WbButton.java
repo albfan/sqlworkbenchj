@@ -14,6 +14,7 @@ package workbench.gui.components;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.Action;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -21,7 +22,6 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicBorders;
-import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -51,6 +51,12 @@ public class WbButton
 	public WbButton(String aText)
 	{
 		super(aText);
+		init();
+	}
+
+	public WbButton(Icon i)
+	{
+		super(i);
 		init();
 	}
 	

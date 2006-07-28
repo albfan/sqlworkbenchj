@@ -257,13 +257,20 @@ public class SqlCommand
 					}
 					catch (SQLException e)
 					{
-						// Errors during loading should not throw away the
-						// rows retrieved until then
-						if (this.currentRetrievalData != null && this.currentRetrievalData.getRowCount() > 0)
+						// Some JDBC driver throw an exception when a statement is 
+						// cancelled. But in this case, we do not want to throw away the 
+						// data retrieved until now. We only add a warning
+						if (this.currentRetrievalData != null && this.currentRetrievalData.isCancelled())
 						{
 							result.addMessage(ResourceMgr.getString("MsgErrorDuringRetrieve"));
 							result.addMessage(ExceptionUtil.getDisplay(e));
 							result.setWarning(true);
+						}
+						else
+						{
+							// if the statement was not cancelled, make sure
+							// the error is displayed to the user.
+							throw e;
 						}
 					}
 					result.addDataStore(this.currentRetrievalData);

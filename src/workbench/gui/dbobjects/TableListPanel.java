@@ -208,13 +208,13 @@ public class TableListPanel
 		this.indexes.getSelectionModel().addListSelectionListener(this);
 
 		Reloadable sourceReload = new Reloadable()
-															{
-																public void reload()
-																{
-																	shouldRetrieveTable = true;
-																	retrieveTableSource();
-																}
-															};
+		{
+			public void reload()
+			{
+				shouldRetrieveTable = true;
+				retrieveTableSource();
+			}
+		};
 		this.tableSource = new DbObjectSourcePanel(aParent, sourceReload);
 
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.tableSource);
@@ -229,8 +229,6 @@ public class TableListPanel
 		this.importedPanel.setTopComponent(scroll);
 		this.importedTableTree = new TableDependencyTreeDisplay();
 		this.importedPanel.setBottomComponent(this.importedTableTree);
-//		this.importedPanel.addClient(importedKeys);
-//		this.importedPanel.addClient(importedTableTree);
 
 		this.exportedKeys = new WbTable();
 		this.exportedKeys.setAdjustToColumnLabel(false);
@@ -241,8 +239,6 @@ public class TableListPanel
 		this.exportedPanel.setTopComponent(scroll);
 		this.exportedTableTree = new TableDependencyTreeDisplay();
 		this.exportedPanel.setBottomComponent(this.exportedTableTree);
-//		this.importedPanel.addClient(exportedKeys );
-//		this.importedPanel.addClient(exportedTableTree);
 
 		this.triggers = new TriggerDisplayPanel();
 
@@ -716,6 +712,7 @@ public class TableListPanel
 			DataStore ds = dbConnection.getMetadata().getTables(currentCatalog, currentSchema, types);
 			DataStoreTableModel model = new DataStoreTableModel(ds);
 			tableList.setModel(model, true);
+			tableList.getExportAction().setEnabled(true);
 			model.sortByColumn(0);
 			tableList.adjustColumns();
 			EventQueue.invokeLater(new Runnable()

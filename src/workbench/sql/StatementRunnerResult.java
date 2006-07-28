@@ -72,6 +72,7 @@ public class StatementRunnerResult
 	public int addDataStore(DataStore ds)
 	{
 		if (this.datastores == null) this.datastores = new ArrayList();
+		ds.resetCancelStatus();
 		this.datastores.add(ds);
 		return this.datastores.size();
 	}

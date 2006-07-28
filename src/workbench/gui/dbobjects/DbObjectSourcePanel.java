@@ -73,10 +73,13 @@ public class DbObjectSourcePanel
 		{
 			this.add(toolbar, BorderLayout.NORTH);
 		}
-		editButton = new DropDownButton("Edit in");
-		selectTabMenu = new EditorTabSelectMenu(this, ResourceMgr.getString("LblEditScriptSource"), "LblEditInNewTab", "LblEditInTab", parent);
-		editButton.setDropDownMenu(selectTabMenu.getPopupMenu());
-		toolbar.add(editButton);
+		if (parent != null)
+		{
+			editButton = new DropDownButton("Edit in");
+			selectTabMenu = new EditorTabSelectMenu(this, ResourceMgr.getString("LblEditScriptSource"), "LblEditInNewTab", "LblEditInTab", parent);
+			editButton.setDropDownMenu(selectTabMenu.getPopupMenu());
+			toolbar.add(editButton);
+		}
 	}
 
 	public void actionPerformed(ActionEvent e)

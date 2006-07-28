@@ -820,25 +820,6 @@ public class MainWindow
 		}
 	}
 
-//	public void fileNameChanged(Object sender, String newFilename)
-//	{
-//		if (!(sender instanceof SqlPanel)) return;
-//
-//		int index = -1;
-//		for (int i=0; i < this.sqlTab.getTabCount(); i++)
-//		{
-//			if (this.sqlTab.getComponentAt(i) == sender)
-//			{
-//				index = i;
-//				break;
-//			}
-//		}
-//		if (index == -1) return;
-//
-//		SqlPanel sql = (SqlPanel)sender;
-//		sql.setTabTitle(this.sqlTab, index);
-//	}
-
 	public void windowOpened(WindowEvent windowEvent)
 	{
 	}
@@ -1260,7 +1241,7 @@ public class MainWindow
 		{
 			if (saveWorkspace) saveWorkspace(false);
 			this.doDisconnect();
-			if (closeWorkspace) closeWorkspace();
+			if (closeWorkspace) closeWorkspace(false);
 		}
 	}
 
@@ -1999,17 +1980,29 @@ public class MainWindow
 		//this.updateWindowTitle();
 	}
 
+	public void closeWorkspace()
+	{
+		closeWorkspace(true);
+	}
+	
+	private boolean shutdownWorkspace = false;
+	
 	/**
 	 *	Closes the current workspace.
 	 *  The tab count is reset to 1, the SQL history for the tab will be emptied
 	 *  and the workspace filename will be "forgotten".
 	 */
-	public void closeWorkspace()
+	public void closeWorkspace(boolean checkUnsaved)
 	{
 		this.currentWorkspaceFile = null;
 		this.isProfileWorkspace = false;
+		
 		try
 		{
+			if (!checkUnsaved) 
+			{
+				shutdownWorkspace = true;
+			}
 			this.closeExplorerPanels();
 			this.adjustTabCount(1);
 			this.resetTabTitles();
@@ -2019,6 +2012,10 @@ public class MainWindow
 		catch (Exception e)
 		{
 			LogMgr.logError("MainWindow.closeWorkspace()", "Error when resetting workspace", e);
+		}
+		finally
+		{
+			shutdownWorkspace = false;
 		}
 		this.updateWindowTitle();
 		this.checkWorkspaceActions();
@@ -2389,7 +2386,7 @@ public class MainWindow
 		MainPanel panel = this.getSqlPanel(index);
 		if (panel == null) return;
 
-		if (panel instanceof SqlPanel)
+		if (panel instanceof SqlPanel && !shutdownWorkspace)
 		{
 			boolean ok = ((SqlPanel)panel).checkAndSaveFile();
 			if (!ok) return;

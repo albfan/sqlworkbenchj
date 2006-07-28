@@ -93,6 +93,19 @@ public class WbExport
 
 	public String getVerb() { return VERB; }
 
+	private String getWrongArgumentsMessage()
+	{
+		boolean headerDefault = getTextHeaderDefault();
+		String msg = ResourceMgr.getString("ErrExportWrongParameters");
+		msg = StringUtil.replace(msg, "%header_flag_default%", Boolean.toString(getTextHeaderDefault()));
+		return msg;
+	}
+	
+	private boolean getTextHeaderDefault()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false);
+	}
+	
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
@@ -111,7 +124,7 @@ public class WbExport
 		}
 		catch (Exception e)
 		{
-			result.addMessage(ResourceMgr.getString("ErrExportWrongParameters"));
+			result.addMessage(getWrongArgumentsMessage());
 			result.setFailure();
 			return result;
 		}
@@ -138,7 +151,7 @@ public class WbExport
 				if (i > 0) msg.append(',');
 			}
 			result.addMessage(msg.toString());
-			result.addMessage(ResourceMgr.getString("ErrExportWrongParameters"));
+			result.addMessage(getWrongArgumentsMessage());
 			result.setFailure();
 			return result;
 		}
@@ -152,7 +165,7 @@ public class WbExport
 		{
 			result.addMessage(ResourceMgr.getString("ErrExportWrongType"));
 			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrExportWrongParameters"));
+			result.addMessage(getWrongArgumentsMessage());
 			result.setFailure();
 			return result;
 		}
@@ -167,7 +180,7 @@ public class WbExport
 		{
 			result.addMessage(ResourceMgr.getString("ErrExportTypeRequired"));
 			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrExportWrongParameters"));
+			result.addMessage(getWrongArgumentsMessage());
 			result.setFailure();
 			return result;
 		}
@@ -176,7 +189,7 @@ public class WbExport
 		{
 			result.addMessage(ResourceMgr.getString("ErrExportFileRequired"));
 			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrExportWrongParameters"));
+			result.addMessage(getWrongArgumentsMessage());
 			result.setFailure();
 			return result;
 		}
@@ -207,8 +220,7 @@ public class WbExport
 			format = cmdLine.getValue("decimal");
 			if (format != null) exporter.setDecimalSymbol(format);
 
-			boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false);
-			exporter.setExportHeaders(cmdLine.getBoolean("header", headerDefault));
+			exporter.setExportHeaders(cmdLine.getBoolean("header", getTextHeaderDefault()));
 			exporter.setCleanupCarriageReturns(cmdLine.getBoolean("cleancr"));
 			String escape = cmdLine.getValue("escapetext");
 			if (escape != null)

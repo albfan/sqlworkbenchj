@@ -11,6 +11,7 @@
  */
 package workbench.gui.components;
 
+import javax.swing.Icon;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 
@@ -27,6 +28,13 @@ public class FlatButton
 		super();
 		init();
 	}
+	
+	public FlatButton(Icon icon)
+	{
+		super(icon);
+		init();
+	}
+	
 	public FlatButton(String label)
 	{
 		super(label);
@@ -35,16 +43,17 @@ public class FlatButton
 
 	private void init()
 	{
-//		if (WbManager.getInstance() == null) return;
-//		if (WbManager.getInstance().isWindowsClassic())
-//		{
-//			setFlatLook();
-//			this.setBorder(WbSwingUtilities.FLAT_BUTTON_BORDER);
-//		}
+		if (WbManager.getInstance() == null) return;
+		if (WbManager.getInstance().isWindowsClassic())
+		{
+			setFlatLook();
+		}
 	}
 	
 	public void setFlatLook()
 	{
-		this.setUI(new javax.swing.plaf.basic.BasicButtonUI());
+//		this.setUI(new javax.swing.plaf.basic.BasicButtonUI());
+//		this.updateUI();
+		this.setBorder(WbSwingUtilities.FLAT_BUTTON_BORDER);
 	}
 }

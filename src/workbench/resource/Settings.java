@@ -41,6 +41,7 @@ import workbench.interfaces.PropertyStorage;
 import workbench.gui.actions.ActionRegistration;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
+import workbench.sql.BatchRunner;
 import workbench.storage.PkMapping;
 import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
@@ -98,7 +99,7 @@ public class Settings
 		// this ensures that new defaults will be applied automatically.
 		fillDefaults();
 
-		this.configDir = this.props.getProperty("workbench.configdir", null);
+		this.configDir = getProperty("workbench.configdir", null);
 		if (configDir == null)
 		{
 			this.configDir = System.getProperty("workbench.configdir", "");
@@ -162,7 +163,7 @@ public class Settings
 
 	  WbManager.trace("Settings.<init> - Done reading settings. Initializing LogMgr");
 
-		boolean logSysErr = StringUtil.stringToBool(this.props.getProperty("workbench.log.console", "false"));
+		boolean logSysErr = getBoolProperty("workbench.log.console", false);
 		String sysLog = System.getProperty("workbench.log.console", null);
 		if (sysLog != null)
 		{
@@ -171,20 +172,16 @@ public class Settings
 
 		LogMgr.logToSystemError(logSysErr);
 
-		String format = this.props.getProperty("workbench.log.format", "{type} {timestamp} {message} {error}");
+		String format = getProperty("workbench.log.format", "{type} {timestamp} {message} {error}");
 		LogMgr.setMessageFormat(format);
 
-		String level = this.props.getProperty("workbench.log.level", "info");
+		String level = getProperty("workbench.log.level", "info");
 		LogMgr.setLevel(level);
 
 		String logfile = null;
     try
     {
-			logfile = System.getProperty("workbench.log.filename", null);
-			if (logfile == null)
-			{
-				logfile = this.props.getProperty("workbench.log.filename", FileDialogUtil.CONFIG_DIR_KEY + "/workbench.log");
-			}
+			logfile = getProperty("workbench.log.filename", FileDialogUtil.CONFIG_DIR_KEY + "/workbench.log");
 			int maxSize = this.getMaxLogfileSize();
 			if (logfile.indexOf("%configdir%") > -1)
 			{
@@ -801,7 +798,7 @@ public class Settings
 
 	private int getPrintOrientation()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.print.orientation"), PageFormat.PORTRAIT);
+		return getIntProperty("workbench.print.orientation", PageFormat.PORTRAIT);
 	}
 
 	private double getPrintPaperWidth()
@@ -962,14 +959,14 @@ public class Settings
 	
 	public String getSqlParameterPrefix()
 	{
-		String value = this.props.getProperty("workbench.sql.parameter.prefix", "$[");
-		if (value == null || value.length() == 0) value = "$[";
+		String value = getProperty("workbench.sql.parameter.prefix", "$[");
+		if (StringUtil.isEmptyString(value)) value = "$[";
 		return value;
 	}
 
 	public String getSqlParameterSuffix()
 	{
-		return this.props.getProperty("workbench.sql.parameter.suffix", "]");
+		return getProperty("workbench.sql.parameter.suffix", "]");
 	}
 
 	public int getMaxLogfileSize()
@@ -979,7 +976,7 @@ public class Settings
 
 	public String getCodeSnippetPrefix()
 	{
-		String value = this.props.getProperty("workbench.editor.codeprefix", "String sql = ");
+		String value = getProperty("workbench.editor.codeprefix", "String sql = ");
 		return value;
 	}
 
@@ -1024,6 +1021,7 @@ public class Settings
 	{
 		return getBoolProperty("workbench.sql.checkprepared", false);
 	}
+	
 	public void setCheckPreparedStatements(boolean show)
 	{
 		this.setProperty("workbench.sql.checkprepared", show);
@@ -1086,7 +1084,7 @@ public class Settings
 
 	public String getLastImportNumberFormat()
 	{
-		String result = this.props.getProperty("workbench.import.numberformat", null);
+		String result = getProperty("workbench.import.numberformat", null);
 		if (result == null)
 		{
 			result = "#" + this.getDecimalSymbol() + "#";
@@ -1096,7 +1094,7 @@ public class Settings
 
 	public String getLastImportDir()
 	{
-		return this.props.getProperty("workbench.import.lastdir", this.getLastExportDir());
+		return getProperty("workbench.import.lastdir", this.getLastExportDir());
 	}
 
 	public void setLastImportDir(String aDir)
@@ -1116,7 +1114,7 @@ public class Settings
 
 	public String getLastImportQuoteChar()
 	{
-		return this.props.getProperty("workbench.import.quotechar", "\"");
+		return getProperty("workbench.import.quotechar", "\"");
 	}
 
 	public void setLastImportQuoteChar(String aChar)
@@ -1137,7 +1135,7 @@ public class Settings
 	
 	public String getLastWorkspaceDir()
 	{
-		return this.props.getProperty("workbench.workspace.lastdir", this.getConfigDir());
+		return getProperty("workbench.workspace.lastdir", this.getConfigDir());
 	}
 
 	public void setLastWorkspaceDir(String aDir)
@@ -1147,7 +1145,7 @@ public class Settings
 
 	public String getLastExportDir()
 	{
-		return this.props.getProperty("workbench.export.lastdir","");
+		return getProperty("workbench.export.lastdir","");
 	}
 
 	public void setLastExportDir(String aDir)
@@ -1167,7 +1165,7 @@ public class Settings
 
 	public String getLastSqlDir()
 	{
-		return this.props.getProperty("workbench.sql.lastscriptdir","");
+		return getProperty("workbench.sql.lastscriptdir","");
 	}
 
 	public void setLastSqlDir(String aDir)
@@ -1177,7 +1175,7 @@ public class Settings
 
 	public String getLastJavaDir()
 	{
-		return this.props.getProperty("workbench.editor.java.lastdir","");
+		return getProperty("workbench.editor.java.lastdir","");
 	}
 
 	public void setLastJavaDir(String aDir)
@@ -1187,7 +1185,7 @@ public class Settings
 
 	public String getLastEditorDir()
 	{
-		return this.props.getProperty("workbench.editor.lastdir","");
+		return getProperty("workbench.editor.lastdir","");
 	}
 
 	public void setLastEditorDir(String aDir)
@@ -1197,7 +1195,7 @@ public class Settings
 
 	public String getLastFilterDir() 
 	{
-		return this.props.getProperty("workbench.filter.lastdir","");
+		return getProperty("workbench.filter.lastdir","");
 	}
 	
 	public void setLastFilterDir(String dir) 
@@ -1245,6 +1243,7 @@ public class Settings
 	{
 		this.storeWindowSize(target, null);
 	}
+	
 	public void storeWindowSize(Component target, String id)
 	{
 		if (target == null) return;
@@ -1346,27 +1345,27 @@ public class Settings
 	
 	public int getWindowPosX(String windowClass)
 	{
-		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".x", "0"));
+		return getIntProperty(windowClass + ".x", 0);
 	}
 
 	public int getWindowPosY(String windowClass)
 	{
-		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".y", "0"));
+		return getIntProperty(windowClass + ".y", 0);
 	}
 
 	public int getWindowWidth(String windowClass)
 	{
-		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".width", "0"));
+		return getIntProperty(windowClass + ".width", 0);
 	}
 
 	public int getWindowHeight(String windowClass)
 	{
-		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".height", "0"));
+		return getIntProperty(windowClass + ".height", 0);
 	}
 
 	public int getEditorTabWidth()
 	{
-		return StringUtil.getIntValue(this.props.getProperty(PROPERTY_EDITOR_TAB_WIDTH, "2"));
+		return getIntProperty(PROPERTY_EDITOR_TAB_WIDTH, 2);
 	}
 
 	public void setEditorTabWidth(int aWidth)
@@ -1376,8 +1375,8 @@ public class Settings
 
 	public String getLastConnection(String key)
 	{
-		if (key == null) return this.props.getProperty("workbench.connection.last");
-		return this.props.getProperty(key);
+		if (key == null) return getProperty("workbench.connection.last", null);
+		return getProperty(key, null);
 	}
 
 	public String getLastConnection()
@@ -1385,21 +1384,19 @@ public class Settings
 		return this.getLastConnection("workbench.connection.last");
 	}
 
-	public void setLastExplorerConnection(String aName)
-	{
-		if (aName == null) aName = "";
-		this.props.setProperty("workbench.dbexplorer.connection.last", aName);
-	}
-
 	public void setLastConnection(String aName)
 	{
 		if (aName == null) aName = "";
+		
+		// comparing with == is intended!!!!
+		if (aName == BatchRunner.CMD_LINE_PROFILE_NAME) return;
+		
 		this.props.setProperty("workbench.connection.last", aName);
 	}
 
 	public String getLastLibraryDir()
 	{
-		return this.props.getProperty("workbench.drivers.lastlibdir", "");
+		return getProperty("workbench.drivers.lastlibdir", "");
 	}
 	
 	public void setLastLibraryDir(String aDir)
@@ -1424,7 +1421,7 @@ public class Settings
 
 	public String getLookAndFeelClass()
 	{
-		return this.props.getProperty("workbench.gui.lookandfeelclass", "");
+		return getProperty("workbench.gui.lookandfeelclass", "");
 	}
 
 
@@ -1511,12 +1508,12 @@ public class Settings
 	
 	public String getDefaultDateFormat()
 	{
-		return this.props.getProperty(PROPERTY_DATE_FORMAT, StringUtil.ISO_DATE_FORMAT);
+		return getProperty(PROPERTY_DATE_FORMAT, StringUtil.ISO_DATE_FORMAT);
 	}
 
 	public String getDefaultTimestampFormat()
 	{
-		return this.props.getProperty(PROPERTY_DATETIME_FORMAT, StringUtil.ISO_TIMESTAMP_FORMAT);
+		return getProperty(PROPERTY_DATETIME_FORMAT, StringUtil.ISO_TIMESTAMP_FORMAT);
 	}
 
 	public void setDefaultTimestampFormat(String aFormat)
@@ -1579,7 +1576,7 @@ public class Settings
 
 	public String getDecimalSymbol()
 	{
-		return this.props.getProperty("workbench.gui.display.decimal.separator", ".");
+		return getProperty("workbench.gui.display.decimal.separator", ".");
 	}
 
 	public void setDecimalSymbol(String aSep)
@@ -1590,7 +1587,7 @@ public class Settings
 
 	public String getAlternateDelimiter()
 	{
-		return this.props.getProperty("workbench.sql.alternatedelimiter", "./");
+		return getProperty("workbench.sql.alternatedelimiter", "./");
 	}
 
 	public void setAlternateDelimiter(String aDelimit)
@@ -1605,7 +1602,7 @@ public class Settings
 
 	public String getQuoteChar()
 	{
-		return this.props.getProperty("workbench.export.text.quotechar", "");
+		return getProperty("workbench.export.text.quotechar", "");
 	}
 
 	public void setQuoteChar(String aQuoteChar)
@@ -1627,18 +1624,13 @@ public class Settings
 	{
 		String def = System.getProperty("file.encoding");
 		if ("Cp1252".equals(def)) def = "ISO-8859-15";
-		return this.props.getProperty("workbench.file.data.encoding", def);
+		return getProperty("workbench.file.data.encoding", def);
 	}
-
-//	public void setDefaultDataEncoding(String enc)
-//	{
-//		this.props.setProperty("workbench.file.data.encoding", enc);
-//	}
 
 	public String getDefaultFileEncoding()
 	{
 		String def = System.getProperty("file.encoding");
-		return this.props.getProperty("workbench.file.encoding", def);
+		return getProperty("workbench.file.encoding", def);
 	}
 
 	public void setDefaultFileEncoding(String enc)
@@ -1648,7 +1640,7 @@ public class Settings
 
 	public String getDefaultTextDelimiter(boolean readable)
 	{
-		String del = this.props.getProperty("workbench.export.text.fielddelimiter", "\\t");
+		String del = getProperty("workbench.export.text.fielddelimiter", "\\t");
 		if (readable)
 		{
 			if (del.equals("\t"))
@@ -1673,7 +1665,7 @@ public class Settings
 
 	public String getLastImportDelimiter(boolean readable)
 	{
-		String del = this.props.getProperty("workbench.import.text.fielddelimiter", "\\t");
+		String del = getProperty("workbench.import.text.fielddelimiter", "\\t");
 		if (readable)
 		{
 			if (del.equals("\t"))
@@ -1716,17 +1708,17 @@ public class Settings
 	
 	public boolean getUseCollator()
 	{
-		return this.getBoolProperty("workbench.sort.usecollator", false);
+		return getBoolProperty("workbench.sort.usecollator", false);
 	}
 
 	public String getSortLanguage()
 	{
-		return this.props.getProperty("workbench.sort.language", System.getProperty("user.language"));
+		return getProperty("workbench.sort.language", System.getProperty("user.language"));
 	}
 
 	public String getSortCountry()
 	{
-		return this.props.getProperty("workbench.sort.country", System.getProperty("user.country"));
+		return getProperty("workbench.sort.country", System.getProperty("user.country"));
 	}
 
 	public void setLastImportDelimiter(String aDelimit)
@@ -1773,11 +1765,16 @@ public class Settings
 
 	public boolean getBoolProperty(String property)
 	{
-		return this.props.getBoolProperty(property, false);
+		return getBoolProperty(property, false);
 	}
 
 	public boolean getBoolProperty(String property, boolean defaultValue)
 	{
+		String sysValue = System.getProperty(property, null);
+		if (sysValue != null)
+		{
+			return StringUtil.stringToBool(sysValue);
+		}
 		return this.props.getBoolProperty(property, defaultValue);
 	}
 
@@ -1798,13 +1795,17 @@ public class Settings
 
 	public String getProperty(String aProperty, String aDefault)
 	{
-		return this.props.getProperty(aProperty, aDefault);
+		return System.getProperty(aProperty, this.props.getProperty(aProperty, aDefault));
 	}
 
 	public int getIntProperty(String aProperty, int defaultValue)
 	{
-		String value = this.getProperty(aProperty, null);
-		return StringUtil.getIntValue(value, defaultValue);
+		String sysValue = System.getProperty(aProperty, null);
+		if (sysValue != null)
+		{
+			return StringUtil.getIntValue(sysValue, defaultValue);
+		}
+		return this.props.getIntProperty(aProperty, defaultValue);
 	}
 
 	public void setAutoCompletionPasteCase(String value)
@@ -1928,30 +1929,30 @@ public class Settings
 
 	public List getServersWhereDDLNeedsCommit()
 	{
-		String list = this.props.getProperty("workbench.db.ddlneedscommit", "");
+		String list = getProperty("workbench.db.ddlneedscommit", "");
     return StringUtil.stringToList(list, ",");
 	}
 
 	public List getServersWithInlineConstraints()
 	{
-		String list = this.props.getProperty("workbench.db.inlineconstraints", "");
+		String list = getProperty("workbench.db.inlineconstraints", "");
 		return StringUtil.stringToList(list, ",");
 	}
 	public List getServersWhichNeedJdbcCommit()
 	{
-		String list = this.props.getProperty("workbench.db.usejdbccommit", "");
+		String list = getProperty("workbench.db.usejdbccommit", "");
     return StringUtil.stringToList(list, ",");
 	}
 
 	public List getServersWithNoNullKeywords()
 	{
-		String list = this.props.getProperty("workbench.db.nonullkeyword", "");
+		String list = getProperty("workbench.db.nonullkeyword", "");
 		return StringUtil.stringToList(list, ",");
 	}
 	
 	public List getCaseSensitivServers()
 	{
-		String list = this.props.getProperty("workbench.db.casesensitive", "");
+		String list = getProperty("workbench.db.casesensitive", "");
 		return StringUtil.stringToList(list, ",");
 	}
 

@@ -119,6 +119,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_FILE_EXT);
 		cmdLine.addArgument(ARG_TRUNCATE_TABLE);
 		cmdLine.addArgument(ARG_CREATE_TABLE);
+		cmdLine.addArgument(ARG_BLOB_ISFILENAME);
 
 		this.isUpdatingCommand = true;
 	}

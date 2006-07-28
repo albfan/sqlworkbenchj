@@ -63,6 +63,7 @@ import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 import workbench.gui.dialogs.WbSplash;
 import workbench.gui.lnf.LnFManager;
+import workbench.util.FileDialogUtil;
 import workbench.util.WbCipher;
 import workbench.util.WbNullCipher;
 import workbench.util.WbThread;
@@ -80,6 +81,7 @@ public class WbManager
 	private List toolWindows = new ArrayList();
 	private WbCipher desCipher = null;
 	private boolean batchMode = false;
+	private boolean writeSettings = true;
 	
 	private static boolean trace = false;
 	private static PrintStream traceOut;
@@ -399,6 +401,18 @@ public class WbManager
 			def.put("ToolTip.font", stdFont);
 			def.put("Tree.font", stdFont);
 			def.put("ViewPort.font", stdFont);
+			
+      def.put("OptionPane.yesButtonText",ResourceMgr.getPlainString("LblYes"));
+      def.put("OptionPane.yesButtonMnemonic",ResourceMgr.getAcceleratorChar("LblYes"));
+      def.put("OptionPane.noButtonText",ResourceMgr.getPlainString("LblNo"));
+      def.put("OptionPane.noButtonMnemonic",ResourceMgr.getAcceleratorChar("LblNo"));
+      def.put("OptionPane.cancelButtonText",ResourceMgr.getPlainString("LblCancel"));
+      def.put("OptionPane.cancelButtonMnemonic",ResourceMgr.getAcceleratorChar("LblCancel"));
+      def.put("OptionPane.okButtonText",ResourceMgr.getPlainString("LblOK"));
+      def.put("OptionPane.okButtonMnemonic",ResourceMgr.getAcceleratorChar("LblOK"));
+			
+			FileDialogUtil.initFileChooserLabels();
+			
 		}
 		Font dataFont = settings.getDataFont();
 
@@ -407,11 +421,7 @@ public class WbManager
 
 		// Polish up the standard look & feel settings
 
-		Color c = settings.getColor("workbench.table.gridcolor");
-		if (c == null)
-		{
-			c = new Color(215,215,215);
-		}
+		Color c = settings.getColor("workbench.table.gridcolor", new Color(215,215,215));
 		def.put("Table.gridColor", c);
 
 		// use our own classes for some GUI elements
@@ -615,12 +625,20 @@ public class WbManager
 		doShutdown(0);
 	}
 
+	private void saveSettings()
+	{
+		if (this.writeSettings && !this.isBatchMode()) 
+		{
+			Settings s = Settings.getInstance();
+			if (s != null) s.saveSettings();
+		}
+	}
+	
 	private void doShutdown(int errorCode)
 	{
 		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
-		//this.shutdownInProgress = true;
 		this.closeAllWindows();
-		if (!this.isBatchMode()) Settings.getInstance().saveSettings();
+		saveSettings();
 		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.shutdown();
 		System.exit(errorCode);
@@ -710,22 +728,29 @@ public class WbManager
 		{
 			// get profile name from commandline
 			String profilename = cmdLine.getValue(ARG_PROFILE);
+			ConnectionProfile prof  = null;
 			if (profilename != null && profilename.trim().length() > 0)
 			{
-				ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(profilename);
-				if (prof != null)
-				{
-					LogMgr.logDebug("WbManager.openNewWindow()", "Connecting to " + prof.getName());
-					// try to connect to the profile passed on the
-					// command line. If this fails the connection
-					// dialog will be show to the user
-					main.connectTo(prof, true);
-
-					// the main window will take of displaying the connection dialog
-					// if the connection to the requested profile fails.
-					connected = true;
-				}
+				prof = ConnectionMgr.getInstance().getProfile(profilename);
 			}
+			else 
+			{
+				prof = BatchRunner.createCmdLineProfile(this.cmdLine);
+			}
+			
+			if (prof != null)
+			{
+				LogMgr.logDebug("WbManager.openNewWindow()", "Connecting to " + prof.getName());
+				// try to connect to the profile passed on the
+				// command line. If this fails the connection
+				// dialog will be show to the user
+				main.connectTo(prof, true);
+
+				// the main window will take of displaying the connection dialog
+				// if the connection to the requested profile fails.
+				connected = true;
+			}
+
 		}
 
 		boolean autoSelect = Settings.getInstance().getBoolProperty("workbench.gui.autoconnect", true);
@@ -752,6 +777,7 @@ public class WbManager
 	public static final String ARG_SUCCESS_SCRIPT = "cleanupsuccess";
 	public static final String ARG_ERROR_SCRIPT = "cleanuperror";
 	public static final String ARG_SHOW_TIMING = "showtiming";
+	public static final String ARG_WORKSPACE = "workspace";
 
 	// Other parameters
 	public static final String ARG_PROFILE = "profile";
@@ -792,6 +818,8 @@ public class WbManager
 		parser.addArgument(ARG_SHOW_DBEXP);
 		parser.addArgument(ARG_SHOW_TIMING);
 		parser.addArgument(ARG_SHOWPROGRESS);
+		parser.addArgument(ARG_WORKSPACE);
+		parser.addArgument("nosettings");
 		return parser;
 	}
 	
@@ -850,6 +878,12 @@ public class WbManager
 			// stuff correctly!
 			value = cmdLine.getValue(ARG_PROFILE_STORAGE);
 			Settings.getInstance().setProfileStorage(value);
+			
+			if (cmdLine.isArgPresent("nosettings"))
+			{
+				trace("WbManager.initCmdLine() - Parameter nosettings specified. Settings will not be written!");
+				this.writeSettings = false;
+			}
 		}
 		catch (Exception e)
 		{
@@ -863,21 +897,10 @@ public class WbManager
 
 		LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
 		LogMgr.logInfo("WbManager.init()", "Using Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
-		LogMgr.logDebug("WbManager.init()", "Use -Dworkbench.startuptrace=true to display trace messages during startup");
+		LogMgr.logDebug("WbManager.init()", "Use -Dworkbench.startuptrace=true to log messages during startup");
 
     if (this.cmdLine == null) this.initCmdLine(null);
 
-		// Kick off loading of the profiles in the background...
-		WbThread rp = new WbThread("ReadProfiles")
-		{
-			public void run()
-			{
-				ConnectionMgr.getInstance().getDrivers();
-				ConnectionMgr.getInstance().getProfiles();
-			}
-		};
-		rp.start();
-		
 		// batchMode flag is set by initCmdLine()
 		if (this.batchMode)
 		{
@@ -1006,8 +1029,7 @@ public class WbManager
 	public void run()
 	{
 		LogMgr.logDebug("WbManager.run()", "Shutdownhook called!");
-		Settings s = Settings.getInstance();
-		if (s != null) s.saveSettings();
+		saveSettings();
 	}
 
 }

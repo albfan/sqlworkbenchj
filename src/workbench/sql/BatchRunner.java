@@ -42,6 +42,7 @@ import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
+import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -52,6 +53,7 @@ import workbench.util.StringUtil;
  */
 public class BatchRunner
 {
+	public static final String CMD_LINE_PROFILE_NAME = "WbCommandLineProfile";
 	private List files;
 	private StatementRunner stmtRunner;
 	private WbConnection connection;
@@ -461,6 +463,56 @@ public class BatchRunner
 		}
 	}
 
+	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine)
+	{
+		ConnectionProfile result = null;
+		if (!cmdLine.isArgPresent(WbManager.ARG_CONN_URL)) return null;
+		try
+		{
+			String url = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_URL));
+			if (url == null) 
+			{
+				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Cannot connect with command line settings without a connection URL!", null);
+				return null;
+			}
+			String driverclass = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_DRIVER));
+			if (driverclass == null) 
+			{
+				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Cannot connect with command line settings without a driver class!", null);
+				return null;
+			}
+			String user = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_USER));
+			String pwd = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_PWD));
+			String jar = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_JAR));
+			String wksp = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_WORKSPACE));
+			DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver(driverclass);
+			if (drv == null)
+			{
+				drv = ConnectionMgr.getInstance().registerDriver(driverclass, jar);
+			}
+			result = new ConnectionProfile(CMD_LINE_PROFILE_NAME, driverclass, url, user, pwd);
+			if (!StringUtil.isEmptyString(wksp))
+			{
+				wksp = FileDialogUtil.replaceConfigDir(wksp);
+				File f = new File(wksp);
+				if (!f.exists() && !f.isAbsolute())
+				{
+					f = new File(Settings.getInstance().getConfigDir(), wksp);
+				}
+				if (f.exists())
+				{
+					result.setWorkspaceFile(f.getAbsolutePath());
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("BatchRunner.initFromCommandLine()", "Error creating temporary profile", e);
+			result = null;
+		}
+		return result;
+	}
+	
 	public static BatchRunner createBatchRunner(ArgumentParser cmdLine)
 	{
 		String scripts = cmdLine.getValue(WbManager.ARG_SCRIPT);
@@ -474,28 +526,7 @@ public class BatchRunner
 		ConnectionProfile profile = null;
 		if (profilename == null)
 		{
-			// No connection profile given, create a temporary profile
-			// to be used for the batch runner.
-			try
-			{
-				String url = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_URL));
-				String driverclass = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_DRIVER));
-				if (driverclass == null) throw new NullPointerException("Driver class may not be null");
-				String user = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_USER));
-				String pwd = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_PWD));
-				String jar = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_JAR));
-				DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver(driverclass);
-				if (drv == null)
-				{
-					drv = ConnectionMgr.getInstance().registerDriver(driverclass, jar);
-				}
-				profile = new ConnectionProfile("BatchRunnerProfile", driverclass, url, user, pwd);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("BatchRunner.initFromCommandLine()", "Error creating temporary profile", e);
-				profile = null;
-			}
+			profile = createCmdLineProfile(cmdLine);
 		}
 		else
 		{

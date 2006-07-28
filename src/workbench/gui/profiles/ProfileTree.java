@@ -33,6 +33,8 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import workbench.db.ConnectionProfile;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.CopyProfileAction;
+import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.ClipboardSupport;
@@ -53,7 +55,7 @@ public class ProfileTree
 	private int clipboardType = 0;
 	private TextPopup popup;
 	private WbAction pasteToFolderAction;
-		
+	
 	public ProfileTree()
 	{
 		super();
@@ -77,23 +79,30 @@ public class ProfileTree
 		
 		WbAction a = popup.getPasteAction();
 		
-		a.setIcon(null);
+//		a.removeIcon();
 		a.addToInputMap(im, am);
 		
 		a = popup.getCopyAction();
 		a.addToInputMap(im, am);
-		a.setIcon(null);
+//		a.removeIcon();
 		
 		a = popup.getCutAction();
 		a.addToInputMap(im, am);
-		a.setIcon(null);
+//		a.removeIcon();
 
 		pasteToFolderAction = new WbAction(this, "pasteToFolder");
+		pasteToFolderAction.removeIcon();
 		pasteToFolderAction.initMenuDefinition("MnuTxtPasteNewFolder");
 		popup.addAction(pasteToFolderAction, false);
 		
 	}
 
+	public void setDeleteAction(DeleteListEntryAction delete)
+	{
+		this.popup.addSeparator();
+		this.popup.add(delete);
+	}
+	
 	public void setModel(TreeModel model)
 	{
 		super.setModel(model);
@@ -132,13 +141,19 @@ public class ProfileTree
 			String newGroup = null;
 			if (data instanceof String)
 			{
+				// When a group was edited, the tree puts a String 
+				// object into the user object. As we rely on having
+				// a GroupNode object as the UserObject, this has
+				// to be re-assigned here!
 				newGroup = (String)data;
+				group.setUserObject(GroupNode.createGroupNode(newGroup));
 			}
 			else if (data instanceof GroupNode)
 			{
 				GroupNode groupNode = (GroupNode)data;
 				newGroup = groupNode.getGroup();
 			}
+			
 			
 			int count = profileModel.getChildCount(group);
 			for (int i = 0; i < count; i++)
@@ -265,8 +280,8 @@ public class ProfileTree
 
 		a = popup.getCutAction();
 		a.setEnabled(canCopy);
-
 	}
+	
 	public void mouseClicked(MouseEvent e)
 	{
 		if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1)

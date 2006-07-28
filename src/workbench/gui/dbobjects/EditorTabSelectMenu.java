@@ -44,13 +44,18 @@ public class EditorTabSelectMenu
 		target = l;
 		newTabTooltip = ResourceMgr.getDescription(tooltipKeyNewTab);
 		regularTooltip = ResourceMgr.getDescription(tooltipKeyTab);
-		updateMenu();
-		parentWindow.addFilenameChangeListener(this);
-		parentWindow.addIndexChangeListener(this);
+		if (parentWindow != null)
+		{
+			updateMenu();
+			parentWindow.addFilenameChangeListener(this);
+			parentWindow.addIndexChangeListener(this);
+		}
 	}
 	
 	private synchronized void updateMenu()
 	{
+		if (parentWindow == null) return;
+		
 		String[] panels = this.parentWindow.getPanelLabels();
 		if (panels == null) return;
 		

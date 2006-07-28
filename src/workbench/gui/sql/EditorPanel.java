@@ -675,7 +675,6 @@ public class EditorPanel
 			this.currentFile = aFile;
 			this.fileEncoding = encoding;
 			result = true;
-			this.resetModified();
 			this.fireFilenameChanged(filename);
 		}
 		catch (BadLocationException bl)
@@ -692,6 +691,7 @@ public class EditorPanel
 		}
 		finally
 		{
+			this.resetModified();
 			try { reader.close(); } catch (Throwable th) {}
 		}
 		this.setCaretPosition(0);
