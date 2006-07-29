@@ -149,6 +149,7 @@ public class TableSelectorPanel
 	{
 		try
 		{
+			WbSwingUtilities.showWaitCursor(this);
 			StringBuffer s = new StringBuffer(this.dbConnection.getMetadata().getSchemaTerm().toLowerCase());
 			s.setCharAt(0, Character.toUpperCase(s.charAt(0)));
 			this.schemaLabel.setText(s.toString());
@@ -186,6 +187,10 @@ public class TableSelectorPanel
 		catch (Exception e)
 		{
 			LogMgr.logError("TableSelectorPanel.retrieveSchemas()", "Could not retrieve schema list", e);
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
 
@@ -413,7 +418,7 @@ public class TableSelectorPanel
     add(tableLabel, gridBagConstraints);
 
     editNewTableNameButton.setIcon(ResourceMgr.getImage("Rename"));
-    editNewTableNameButton.setToolTipText(ResourceMgr.getString("LabelEditNewTableName"));
+    editNewTableNameButton.setToolTipText(ResourceMgr.getString("LblEditNewTableName"));
     editNewTableNameButton.setEnabled(false);
     editNewTableNameButton.setMaximumSize(new java.awt.Dimension(22, 22));
     editNewTableNameButton.setMinimumSize(new java.awt.Dimension(22, 22));

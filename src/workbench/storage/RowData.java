@@ -11,16 +11,16 @@
  */
 package workbench.storage;
 
+import java.io.Reader;
 import java.math.BigDecimal;
-import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.DecimalFormat;
-import java.util.List;
 
 import workbench.log.LogMgr;
+import workbench.util.FileUtil;
 
 /**
  *	A class to hold the data for a single row retrieved from the database.
@@ -75,6 +75,7 @@ public class RowData
 	 *	Read the row data from the supplied ResultSet
 	 */
 	public void read(ResultSet rs, ResultInfo info)
+		throws SQLException
 	{
 		int colCount = this.colData.length;
 		Object value = null;
@@ -83,18 +84,50 @@ public class RowData
 			int type = info.getColumnType(i);
 			try
 			{
-				// This is a workaround for Oracle, because
+				// Not using getObject() for timestamp columns
+				// is a workaround for Oracle, because
 				// it does not return the correct object class
 				// when using getObject() on a TIMESTAMP column
 				// I simply assume that this is working properly
 				// for other JDBC drivers as well.
-
 				// On the other hand we may not use getDate()
 				// for Oracle DATE columns as this will remove
 				// the time part of the column
 				if (type == java.sql.Types.TIMESTAMP)
 				{
 					value = rs.getTimestamp(i+1);
+				}
+//				else if (type == Types.LONGVARBINARY)
+//				{
+//					InputStream in = rs.getBinaryStream(i);
+//					value = FileUtil.readBytes(in);
+//				}
+				else if (type == java.sql.Types.LONGVARCHAR)
+				{
+					// Older Oracle driver are not happy about using getObject() on a LONG column
+					// according to the JDBC specs, using getCharacterStream() should also 
+					// work with other JDBC drivers
+					Reader in = null;
+					try
+					{
+						in = rs.getCharacterStream(i);
+						if (in != null && !rs.wasNull())
+						{
+							value = FileUtil.readCharacters(in);
+						}
+						else 
+						{
+							value = null;
+						}
+					}
+					catch (Exception e)
+					{
+						LogMgr.logError("RowData.read()", "Error retrieving column '" + info.getColumnName(i) + "'", e);
+					}
+					finally
+					{
+						try { in.close(); } catch (Throwable th) {}
+					}
 				}
 				else
 				{
@@ -118,7 +151,7 @@ public class RowData
 			}
 			catch (SQLException e)
 			{
-				value = null;
+				throw e;
 			}
 
 			if (value == null && useNullValueObject)

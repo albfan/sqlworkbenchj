@@ -228,7 +228,7 @@ WHERE p.person_id = a.person_id;</programlisting>
 			<para>
 				You can copy and <link linkend="editor-clean-java-code">clean</link> the SQL statement
 				but you will not be able to execute it, because there is no value available for the parameter
-				denoted by the quotation mark. To run this kind of statements, you need to enable the prepared statement
+				denoted by the question mark. To run this kind of statements, you need to enable the prepared statement
 				detection using <menuchoice><guimenu>SQL</guimenu><guimenuitem>Detect prepared statements</guimenuitem></menuchoice>
 			</para>
 			<para>
@@ -249,15 +249,32 @@ WHERE p.person_id = a.person_id;</programlisting>
 				the statement and paste the Java code into your program.
 			</para>
 			<para>Prepared statements are supported for <literal>SELECT</literal>, <literal>INSERT</literal>,
-				<literal>UPDATE</literal> and <literal>UPDATE</literal> statements.
+				<literal>UPDATE</literal> and <literal>DELETE</literal> statements.
 			</para>
 			<note>This feature requires that the <ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/ParameterMetaData.html#getParameterCount()">getParameterCount()</ulink> and
 				<ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/ParameterMetaData.html#getParameterType(int)">getParameterType()</ulink>
-				methods of the <literal>ParameterMetaData</literal> class are implemented by the JDBC driver.
-				Currently the drivers for <ulink url="http://www.oracle.com">Oracle</ulink>
-				and <ulink url="http://www.postgresql.org">PostgreSQL</ulink> do not implement this. The feature has
-				been tested with <ulink url="http://www.firebirdsql.org/">Firebird SQL</ulink> and <ulink url="http://hsqldb.sourceforge.net">HSQLDB</ulink>
+				methods of the <literal>ParameterMetaData</literal> class are implemented by the JDBC driver and return the correct
+				information about the available parameters.
 			</note>
+			<para>The following
+				drivers have been tested succesfully with this feature:
+				<simplelist>
+					<member><ulink url="http://www.postgresql.org">PostgreSQL</ulink>, driver version 8.1-build 405</member>
+					<member><ulink url="http://www.firebirdsql.org/">Firebird SQL</ulink>, Jaybird 2.0 driver</member>
+					<member><ulink url="http://hsqldb.sourceforge.net">HSQLDB</ulink>, version 1.8.0</member>
+					<member><ulink url="http://jtds.sourceforge.net">jTDS driver for MS SQL Server</ulink>, driver version 1.2</member>
+					<member><ulink url="http://www.mysql.com">MySQL</ulink>, driver version 5.0.13</member>
+				</simplelist>
+			</para>
+			<para>
+				Drivers known to <emphasis role="bold">not</emphasis> support this feature:
+				<simplelist>
+					<member>Oracle 10g driver (ojdbc14.jar)</member>
+					<member>Microsoft SQL Server 2000 driver (mssqlserver.jar;msbase.jar;msutil.jar)</member>
+					<member>Microsoft SQL Server 2005 driver (sqljdbc.jar)</member>
+				</simplelist>
+				
+			</para>
 		</section>
 
 	</section>

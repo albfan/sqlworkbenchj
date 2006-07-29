@@ -153,14 +153,7 @@ public class SelectCommand extends SqlCommand
 			{
 				result.addMessage(warnings.toString());
 			}
-			if (e instanceof SQLException)
-			{
-				LogMgr.logDebug("SelectCommand.execute()", "Error executing statement: " + ExceptionUtil.getDisplay(e));
-			}
-			else
-			{
-				LogMgr.logError("SelectCommand.execute()", "Error executing statement", e);
-			}
+			LogMgr.logDebug("SelectCommand.execute()", "Error executing SELECT: " + ExceptionUtil.getDisplay(e));
 			result.setFailure();
 		}
 

@@ -17,6 +17,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 
 /**
  * @author  support@sql-workbench.net
@@ -98,6 +99,36 @@ public class FileUtil
 			try { in.close(); } catch (Throwable th) {}
 		}
 		return filesize;
+	}
+
+	public static String readCharacters(Reader in)
+		throws IOException
+	{
+		if (in == null) return null;
+		StringBuffer result = new StringBuffer(1024);
+		char[] buff = new char[1024];
+		int bytesRead = in.read(buff);
+		while (bytesRead > -1)
+		{
+			result.append(buff, 0, bytesRead);
+			bytesRead = in.read(buff);
+		}
+		return result.toString();
+	}
+	
+	public static byte[] readBytes(InputStream in)
+		throws IOException
+	{
+		if (in == null) return null;
+		ByteBuffer result = new ByteBuffer(1024);
+		byte[] buff = new byte[1024];
+		int bytesRead = in.read(buff);
+		while (bytesRead > -1)
+		{
+			result.append(buff, 0, bytesRead);
+			bytesRead = in.read(buff);
+		}
+		return result.getBuffer();
 	}
 	
 	public static int countLines(File f)

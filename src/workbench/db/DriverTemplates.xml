@@ -138,6 +138,7 @@
     </void>
    </object>
   </void>
+  
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -147,7 +148,7 @@
      <string>jconn2.jar</string>
     </void>
     <void property="name">
-     <string>Adaptive Server Anywhere</string>
+     <string>Sybase jConnect</string>
     </void>
     <void property="sampleUrl">
      <string>jdbc:sybase:Tds:machine-name:port-number</string>

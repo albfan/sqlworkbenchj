@@ -270,7 +270,7 @@
 			<para>This would lead to problems as the slash is recognized as the
 				statement terminator. Thus the &wb-productname; would send everything up
 				to sum(field) to the database and execute it. The same is true when
-				using the column mapping parameters for the <link linkend="command-copy"><literal>WBCOPY</literal></link>
+				using the column mapping parameters for the <link linkend="command-copy"><literal>WbCopy</literal></link>
 				command.
 			</para>
 		</section>
@@ -513,6 +513,20 @@
 		
 	</section>
 
+	<section id="options-external-tools">
+		<title>External tools</title>
+		<para>
+			On this page, you can define external tools (programs). Currently the only
+			place where this is used, is in the <link linkend="update-blob-editmode">blob info dialog</link>, 
+			to open the BLOB data with one of the defined external tools. This could 
+			be a program to display images (like <ulink url="http://www.xnview.org">XnView</ulink>), 
+			<ulink url="http://www.adobe.com/products/acrobat/index.html">Acrobat Reader</ulink> 
+			to display PDF documents, <ulink url="http://www.openoffice.org">OpenOffice</ulink> to display 
+			office documents or a text editor (like <ulink url="http://www.pspad.com">PSPad</ulink>) to 
+			display text files. 
+		</para>
+	</section>
+	
 	<section id="options-look-and-feel">
 		<title>Look and Feel</title>		
 		<para>
@@ -532,6 +546,12 @@
 			the current Look &amp; Feel it will be changed, regardless whether
 			you close the options dialog using Cancel or OK.
 		</para>
+		<note><para>
+			The current look and feel is only changed when you click on the 
+			<guibutton>Make current</guibutton> button. Simply selecting a different entry
+			in the list on the left side will <emphasis role="bold">not</emphasis> 
+			change the look and feel.
+		</para></note>
 	</section>
 	
 </section>

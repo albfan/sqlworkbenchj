@@ -66,6 +66,9 @@ public class JdbcProcedureReader
 		throws SQLException
 	{
 		DataStore ds = buildProcedureListDataStore(this.dbMeta);
+		
+		String versionDelimiter = dbMeta.getProcVersionDelimiter();
+		boolean stripVersion = dbMeta.getStripProcedureVersion();
 		try
 		{
 			while (rs.next())
@@ -88,6 +91,14 @@ public class JdbcProcedureReader
 				int row = ds.addRow();
 
 
+				if (stripVersion)
+				{
+					int pos = name.lastIndexOf(versionDelimiter);
+					if (pos > 1)
+					{
+						name = name.substring(0,pos);
+					}
+				}
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, cat);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, name);

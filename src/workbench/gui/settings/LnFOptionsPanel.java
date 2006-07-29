@@ -26,9 +26,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import workbench.gui.WbSwingUtilities;
@@ -43,6 +40,7 @@ import workbench.gui.lnf.LnFLoader;
 import workbench.gui.lnf.LnFManager;
 import workbench.interfaces.FileActions;
 import workbench.interfaces.Restoreable;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -204,7 +202,7 @@ public class LnFOptionsPanel
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("LnFOptionsPanel.newItem()", "Error creating new item", e);
 		}
 	}
 
@@ -243,7 +241,7 @@ public class LnFOptionsPanel
 		}
 		else
 		{
-			WbSwingUtilities.showMessage(this, ResourceMgr.getString("MsgLnFNotLoaded"));
+			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgLnFNotLoaded"));
 		}
 	}
 	

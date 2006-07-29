@@ -95,7 +95,7 @@
           <Connection code="ResourceMgr.getImage(&quot;Rename&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelEditNewTableName&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblEditNewTableName&quot;)" type="code"/>
         </Property>
         <Property name="enabled" type="boolean" value="false"/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">

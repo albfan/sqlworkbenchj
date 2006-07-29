@@ -139,7 +139,26 @@ and  sysobjects.type = &apos;P&apos;</string>
     </void> 
    </object> 
   </void> 
-  
+
+  <void method="put"> 
+   <string>Adaptive Server Enterprise</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>select syscomments.text  
+ from sysobjects, syscomments  
+ where sysobjects.id = syscomments.id  
+and  sysobjects.type = &apos;P&apos;</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>sysobjects.name</string> 
+    </void> 
+    <void property="orderBy"> 
+     <string> order by syscomments.colid</string> 
+    </void> 
+   </object> 
+  </void> 
+	
+	
   <void method="put"> 
    <string>INGRES</string> 
    <object class="workbench.db.GetMetaDataSql"> 

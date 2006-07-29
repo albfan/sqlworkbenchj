@@ -24,7 +24,8 @@ import workbench.interfaces.ClipboardSupport;
 /**
  * @author  support@sql-workbench.net
  */
-public class TextPopup extends JPopupMenu
+public class TextPopup 
+	extends JPopupMenu
 {
 	private CopyAction copy;
 	private PasteAction paste;
@@ -32,8 +33,11 @@ public class TextPopup extends JPopupMenu
 	private SelectAllAction selectAll;
 	private CutAction cut;
 	
-	/** Creates new LogPanelPopup */
 	public TextPopup(ClipboardSupport aClient)
+	{
+		this(aClient, false);
+	}
+	public TextPopup(ClipboardSupport aClient, boolean cutCopyPasteOnly)
 	{
 		this.cut = new CutAction(aClient);
 		this.add(cut.getMenuItem());
@@ -41,11 +45,14 @@ public class TextPopup extends JPopupMenu
 		this.add(this.copy.getMenuItem());
 		this.paste = new PasteAction(aClient);
 		this.add(this.paste.getMenuItem());
-		this.addSeparator();
-		this.clear = new ClearAction(aClient);
-		this.add(this.clear.getMenuItem());
-		this.selectAll = new SelectAllAction(aClient);
-		this.add(this.selectAll.getMenuItem());
+		if (!cutCopyPasteOnly)
+		{
+			this.addSeparator();
+			this.clear = new ClearAction(aClient);
+			this.add(this.clear.getMenuItem());
+			this.selectAll = new SelectAllAction(aClient);
+			this.add(this.selectAll.getMenuItem());
+		}
 	}
 	
 	public void addAction(WbAction anAction, boolean withSep)

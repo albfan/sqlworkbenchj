@@ -17,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import workbench.TestUtil;
 import workbench.WbManager;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
@@ -40,22 +41,14 @@ public class WbExportTest extends TestCase
 	public WbExportTest(String testName)
 	{
 		super(testName);
+		
 		try
 		{
-			File tempdir = new File(System.getProperty("java.io.tmpdir"));
-			File dir = new File(tempdir, "wbtest");
-			dir.mkdir();
-			basedir = dir.getAbsolutePath();
-			File db = new File(basedir, "wbexporttest");
-			dbName = db.getAbsolutePath();
+			TestUtil util = new TestUtil();
+			util.prepareEnvironment();
+			this.dbName = util.getDbName();
+			this.basedir = util.getBaseDir();
 			
-			PrintWriter pw = new PrintWriter(new FileWriter(new File(dir, "workbench.settings")));
-			pw.println("workbench.log.console=false");
-			pw.println("workbench.log.format={type} {timestamp} {source} {message} {error}");
-			pw.println("workbench.log.level=DEBUG");
-			pw.println("workbench.log.maxfilesize=150000");
-			pw.close();
-			WbManager.getInstance().prepareForTest(basedir);
 		}
 		catch (Exception e)
 		{

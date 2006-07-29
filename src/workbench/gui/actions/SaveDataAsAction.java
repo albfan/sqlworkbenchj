@@ -21,7 +21,8 @@ import workbench.resource.ResourceMgr;
  *	Action to copy the contents of a entry field into the clipboard
  *	@author  support@sql-workbench.net
  */
-public class SaveDataAsAction extends WbAction
+public class SaveDataAsAction 
+	extends WbAction
 {
 	private WbTable client;
 

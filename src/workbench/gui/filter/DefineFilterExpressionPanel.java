@@ -25,18 +25,16 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
-import javax.swing.InputVerifier;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
 import javax.swing.filechooser.FileFilter;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.components.FlatButton;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.resource.ResourceMgr;
@@ -45,7 +43,6 @@ import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.filter.AndExpression;
 import workbench.storage.filter.ColumnComparator;
-import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ComplexExpression;
 import workbench.storage.filter.ExpressionValue;
 import workbench.storage.filter.FilterExpression;
@@ -79,6 +76,7 @@ public class DefineFilterExpressionPanel
 	{
 		this(source,true);
 	}
+	
 	public DefineFilterExpressionPanel(ResultInfo source, boolean allowSave)
 	{
 		columnInfo = source;
@@ -138,10 +136,7 @@ public class DefineFilterExpressionPanel
 		c.weightx = 1;
 		p.add(radioPanel, c);
 		
-		addLineButton = new JButton(ResourceMgr.getString("LblFilterAddLine"));
-		Border ob = BorderFactory.createEtchedBorder();
-		Border ib = BorderFactory.createEmptyBorder(2,5,2,5);
-		addLineButton.setBorder(BorderFactory.createCompoundBorder(ob, ib));
+		addLineButton = new FlatButton(ResourceMgr.getString("LblFilterAddLine"));
 		Dimension d = radioPanel.getPreferredSize();
 		int ph = (int)d.getHeight();
 		addLineButton.setMinimumSize(new Dimension(25,ph));
@@ -151,7 +146,7 @@ public class DefineFilterExpressionPanel
 		c.gridx++;
 		c.anchor = GridBagConstraints.NORTHEAST;
 		c.weightx = 1;
-		c.insets = new Insets(0,0,0,2);
+		c.insets = new Insets(0,15,0,2);
 		p.add(addLineButton);
 
 		
@@ -340,9 +335,9 @@ public class DefineFilterExpressionPanel
 	private Dimension addExpressionPanel(ExpressionValue filter)
 	{
 		final ColumnExpressionPanel exp = new ColumnExpressionPanel(columnInfo, filter);
-		JButton b = new JButton(ResourceMgr.getImage("Remove"));
+		JButton b = new FlatButton(ResourceMgr.getImage("Remove"));
 		b.setPreferredSize(new Dimension(21,21));
-		b.setBorder(BorderFactory.createEtchedBorder());
+//		b.setBorder(BorderFactory.createEtchedBorder());
 		b.addActionListener(this);
 		JPanel p = new JPanel(new GridBagLayout());
 		GridBagConstraints c1 = new GridBagConstraints();

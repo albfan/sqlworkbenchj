@@ -273,7 +273,8 @@
 							<entry>-help</entry>
 							<entry>Display a message with the list of parameters</entry>
 						</row>
-            
+
+						<!--
 						<row id="launcher-nolang">
 							<entry>-nolang</entry>
 							<entry>As &wb-productname; is (currently) only available in english, the launcher
@@ -285,6 +286,8 @@
 							certain JDBC drivers. It seems that the new Oracle 10g Release 2 driver
 		          does not work properly without passing this parameter.</entry>
 						</row>
+						-->
+						
 					</tbody>
 				</tgroup>
 			</informaltable>
@@ -306,26 +309,32 @@
 	<section id="commandline" xreflabel="command line parameters">
 		<title>Command line parameters</title>
 
-		<para>Command line parameters are <emphasis role="bold">not</emphasis> case sensitive,
-		the parameters <literal>-Profile</literal> or <literal>-profile</literal> are
-		identical. The usage of the command line parameters is identical between
-		the launcher or starting &wb-productname; using the java command itself.</para>
-
+		<para>
+			Command line parameters are <emphasis role="bold">not</emphasis> case sensitive.
+			The parameters <literal>-PROFILE</literal> or <literal>-profile</literal> are
+			identical. The usage of the command line parameters is identical between
+			the launcher or starting &wb-productname; using the <literal>java</literal> command itself.
+		</para>
+		
 		<section id="cmdline-parameter-configdir">
-			<title>-configdir</title>
+			<title>Specify the directory for configuration settings</title>
 
-			<para>Store all settings, the connection profile and the statement
-			history in the given directory. If this parameter is not supplied, the current
-			working directory is used.</para>
-
+			<para>
+				The parameter <literal>-configdir</literal> specifies the directory where
+				&wb-productname; will store all its settings.
+				If this parameter is not supplied, the directory where the <literal>Workbench.jar</literal>
+				is located, is used.
+			</para>
+			
 			<programlisting>java -jar Workbench.jar -configdir=$HOME/wbconfig
 jworkbench -configdir='c:/Configurations/JWorkbench'</programlisting>
+
 		</section>
 
 		<section id="cmdline-parameter-libdir">
-			<title>-libdir</title>
+			<title>Specify a base directory for JDBC driver libraries</title>
 			<para>
-				Define the base directory for your JDBC drivers. The value of
+				The <literal>-libdir</literal> parameter defines the base directory for your JDBC drivers. The value of
 				this parameter can be referenced when <link linkend="jdbc-lib-dir">defining a driver library</link> 
 				using the placholder <literal>%LibDir%</literal>
 				The value for this parameter can also be set in the file <link linkend="settings-libdir"><literal>workbench.settings</literal></link>.
@@ -333,44 +342,148 @@ jworkbench -configdir='c:/Configurations/JWorkbench'</programlisting>
 		</section>
 		
 		<section id="cmdline-parameter-profilestorage">
-			<title>-profilestorage</title>
-			<para>&wb-productname; stores the connection profiles in a file called <literal>WbProfiles.xml</literal>.
-				If you want to use a different filename, or use different sets of profiles for different purposes
-				you can define the file where the profiles are stored with this parameter.
+			<title>Specify the file containing connection profiles</title>
+			<para>
+				&wb-productname; stores the connection profiles in a file called <literal>WbProfiles.xml</literal>.
+				If you want to use a different filename, or use different set of profiles for different purposes
+				you can define the file where the profiles are stored with the <literal>-profilestorage</literal>
+				parameter.
 			</para>
-			<para>If the value of the parameter does not contain a path, the file will be stored in the
+			
+			<para>
+				If the value of the parameter does not contain a path, the file will be expected (and stored) in the
 				configuration directory.
 			</para>
 		</section>
 		
-		
-		<section id="vardef-commandline">
-			<title>-vardef</title>
+		<section id="cmdline-vardef">
+			<title>Defining variables</title>
 
-			<para>With this command line parameter a definition file for internal variables can 
-				be defined. Each variable is listed on a single line in the format <literal>variable=value</literal>.
-				Lines starting with a <literal>#</literal> character are ignored (comments)
+			<para>
+				With the <literal>-vardef</literal> parameter a definition file for 
+				<link linkend="using-variables">internal variables</link> can be specified. 
+				Each variable has to be listed on a single line in the format <literal>variable=value</literal>.
+				Lines starting with a <literal>#</literal> character are ignored (comments).
 			</para>
 			<programlisting>#Define some values
 var_id=42
 person_name=Dent
 another_variable=24</programlisting>
 
-			<para>You can also define a list of variables with this parameter. In this case, the first
+			<para>
+				You can also define a list of variables with this parameter. In this case, the first
 				character after the = sign, has to be # (hash sign) to flag the value as a variable list:
 				<programlisting>java -jar Workbench.jar -vardef=#var_id=42,person_name=Dent</programlisting>
 			</para>
+			
 		</section>
 
-		<section id="commandline-scripting">
-			<title>Parameters for batch execution</title>
-
-			<para>When using &wb-productname; inside batch files, additional command line parameters 
-				are supported to define the database connection and other things. 
-				Details about using batch execution can be found in the chapter <link linkend="using-scripting">
-				Using &wb-productname; in batch files</link>
+		<section id="nosettings-commandline">
+			<title>Prevent updating the .settings file</title>
+			<para>
+				If the <literal>-nosettings</literal> parameter is specified, &wb-productname; will not write 
+				its settings to the file <literal>workbench.settings</literal> when it's beeing closed. Note 
+				that in <link linkend="using-scripting">batch mode</link>, this file is never written.
 			</para>
 		</section>
+
+		<section id="commandline-connect-profile">
+			<title>Connect using a pre-defined connection profile</title>
+			<para>
+				You can specify the name of an already created <link linkend="profiles">connection
+				profile</link> on the commandline with the <literal>-profile=&#60;profile name&#62;</literal>
+				parameter. The name has to be passed exactly like it appears in the profile dialog
+				(case sensitiv!). If the name contains spaces or dashes, it has to be enclosed in
+				quotations marks.
+			</para>
+			
+			<para>Example:</para>
+
+			<programlisting>java -jar Workbench.jar -profile='Oracle - Test' -script='test.sql'</programlisting>
+			<para>
+				In this case the file <literal>WbProfiles.xml</literal> must be in the current
+				(working) directory of the application. If this is not the case, please specify the 
+				location of the profile using either the <link linkend="cmdline-parameter-profilestorage"><literal>-profilestorage</literal></link> or 
+				<link linkend="cmdline-parameter-configdir"><literal>-configdir</literal></link> parameter
+			</para>
+		</section>
+		
+		<section id="commandline-connect-noprofile">
+			<title>Connect without a profile</title>
+			<para>
+				You can also specify the full connection parameters on the commandline, if
+				you don&apos;t want to create a profile only for executing a batch file.
+				The advantage of this method is, that &wb-productname; does not need the files
+				<filename>WbProfiles.xml</filename>, <filename>WbDrivers.xml</filename> to be
+				able to connect to the database.
+			</para>
+
+			<para>The connection can be specified with the following parameters:</para>
+
+			<informaltable frame="all">
+				<tgroup cols="2">
+					<colspec colname="c1" colwidth="2.5cm" />
+					<colspec colname="c2" />
+					<thead>
+						<row>
+							<entry>Parameter</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+
+					<tbody valign="top">
+						<row>
+							<entry>-url</entry>
+							<entry>The JDBC connection URL</entry>
+						</row>
+
+						<row>
+							<entry>-username</entry>
+							<entry>Specify the username for the DBMS</entry>
+						</row>
+
+						<row>
+							<entry>-password</entry>
+							<entry>Specify the password for the user</entry>
+						</row>
+
+						<row>
+							<entry>-driver</entry>
+							<entry>Specify the full class name of the JDBC driver</entry>
+						</row>
+
+						<row>
+							<entry>-driverjar</entry>
+							<entry>Specify the full pathname to the .jar file containing the JDBC driver</entry>
+						</row>
+						<row>
+							<entry>-workspace</entry>
+							<entry>The workspace file to be loaded. If the file specification does not 
+							include a directory, the workspace will be loaded from the 
+							<link linkend="cmdline-parameter-configdir">configuration directory</link>. If this parameter
+							is not specified, the default workspace (<literal>Default.wksp</literal>) will be loaded.
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>
+
+			</informaltable>
+
+			<para>
+				If a value for one of the parameters contains a dash or a space, you will 
+				need to quote the parameter value.
+			</para>
+
+			<para>
+				A disadvantage of this method is, that the password is displayed in plain text
+				on the command line. If this is used in a batch file, the password will be stored
+				in plain text in the batch file. If you don't want to expose the password,
+				you can use a connection profile and <link linkend="options-encrypt-password">enable password encryption</link>
+				for connection profiles.
+			</para>
+
+		</section>
+			
+		</section>
     
-	</section>
 </section>

@@ -147,8 +147,8 @@ COMMIT</programlisting>
 
 
 			<para>A statement is executed by either pressing <keycap>F9</keycap>, <keycap>Ctrl-E</keycap> or
-				clicking the <literal>Execute Selected</literal> button
-				<guiicon><inlinegraphic fileref="@IMAGE_DIR@/ExecuteSel16.gif" format="GIF"/></guiicon>
+				clicking the <literal>Execute Selected</literal> button 
+				(<guiicon><inlinegraphic fileref="@IMAGE_DIR@/ExecuteSel16.gif" format="GIF"/></guiicon>)
 				in the toolbar. This will execute the currently selected
 				text. If no text is selected in the editor, the complete statement
 				will be executed. If you want to execute the whole statement even when
@@ -320,7 +320,8 @@ END;
 			</para>
 			<note>
 				When using the <link linkend="command-export">WbExport</link> command to export
-				data into an XML file, blob data will also be saved into separate files.
+				data, blob data will also be saved into separate files. This works for both 
+				export formats (XML and Text).
 			</note>
 		</section>
 			
@@ -335,6 +336,16 @@ END;
 				display the blob as an image (Windows bitmap files 
 				(with the extension <literal>BMP</literal>) is only supported starting with 
 				JDK 1.5) or display a hex view of the blob.
+			</para>
+			<para>
+				The window will also let you open the contents of the BLOB data with a predefined
+				<link linkend="options-external-tools">external tool</link>. The tools that 
+				are defined in the options dialog can be selected from a dropdown. To open 
+				the BLOB content with one of the tools, select the tool from the dropdown list,
+				then click on the button <guibutton>Open with</guibutton> next to the external
+				tools dropdown. &wb-productname; will then retrieve the BLOB data from the server,
+				store it in a temporary file on your harddisk, and run the selected application, 
+				passing the temporary file as a parameter.
 			</para>
 			<para>
 				From within this information dialog, you can also upload a file to be stored
@@ -747,7 +758,7 @@ Done.</programlisting>
 			command.
 		</para>
 		<para>
-			Cou can either copy all the data, or only selected rows to the clipboard. 
+			You can either copy all the data, or only selected rows to the clipboard. 
 			When you select the menu item while holding down the <keycap>Control</keycap> key
 			you will be able to select the columns that should be part of the data to be copied.
 		</para>
@@ -758,16 +769,17 @@ Done.</programlisting>
 		<para>Once the data has been retrieved from the Server it can be filtered
 		with the need to re-retrieve the data.</para>
 		<para>
-			To define a filter, click on the <literal>Filter</literal> <guiicon><inlinegraphic fileref="@IMAGE_DIR@/filter16.gif" format="GIF"/></guiicon>
+			To define a filter, click on the (<literal>Filter</literal> <guiicon><inlinegraphic fileref="@IMAGE_DIR@/filter16.gif" format="GIF"/></guiicon>)
 			button in the toolbar or select <menuchoice><guimenu>Data</guimenu><guimenuitem>Filter data</guimenuitem></menuchoice>.
 			A dialog will appear where you can define a filter for the current result set. Each line
 			in the filter dialog defines an expression that will be applied to the column selected
-			in the first dropdown. 
+			in the first dropdown. If you select <literal>*</literal> for the column, the filter
+			condition will be applied to all columns of the result set.
 		</para>
 		<para>
 			To add a multi-column expression, press the <literal>More</literal> button, to create
 			a new line. To remove a column expression from the filter, click the <literal>Remove</literal> 
-			<guiicon><inlinegraphic fileref="@IMAGE_DIR@/Remove16.gif" format="GIF"/></guiicon> icon.
+			(<guiicon><inlinegraphic fileref="@IMAGE_DIR@/Remove16.gif" format="GIF"/></guiicon>) button.
 			For character based column data, you can select to ignore the case of the column's data
 			when applying the expression, i.e. when <literal>Ignore case</literal> is selected, the
 			expression <literal>'NAME = arthur'</literal> will match the column value '<literal>Arthur</literal>', 

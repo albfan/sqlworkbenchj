@@ -188,7 +188,6 @@ public class ColumnMapper
 		return null;
 	}
 	
-
 	public void setAllowSourceEditing(boolean aFlag)
 	{
 		this.allowSourceEditing = aFlag;
@@ -218,22 +217,42 @@ public class ColumnMapper
 		return result;
 	}
 
-	public List getMappingForImport()
+	private ColumnIdentifier getTargetColumn(ColumnIdentifier source)
 	{
 		int count = this.mapping.length;
+		for (int i=0; i < count; i++)
+		{
+			ColumnMapRow row = this.mapping[i];
+			if (row.getSource().getColumnName().equals(source.getColumnName()))
+			{
+				return row.getTarget();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Return the columns from the input file as they should 
+	 * be specified for the WbImport command
+	 */
+	public List getMappingForImport()
+	{
+		int count = this.sourceColumns.size();
 		ArrayList result = new ArrayList(count);
 		ColumnIdentifier skipId = new ColumnIdentifier(RowDataProducer.SKIP_INDICATOR);
 		for (int i=0; i < count; i++)
 		{
-			ColumnMapRow row = this.mapping[i];
+			ColumnIdentifier col = (ColumnIdentifier)this.sourceColumns.get(i);
 
-			if (row.getSource() == null)
+			ColumnIdentifier target = getTargetColumn(col);
+			
+			if (target == null)
 			{
 				result.add(skipId);
 			}
 			else
 			{
-				result.add(row.getTarget());
+				result.add(target);
 			}
 		}
 		return result;

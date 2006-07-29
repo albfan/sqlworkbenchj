@@ -4,7 +4,7 @@
 	<section id="data-pumper-overview">
 		<title>Overview</title>
 
-		<para>The export and import features are useful, if you cannot connect to
+		<para>The export and import features are useful if you cannot connect to
 			the source and the target database at once. If your source and target
 			are both reachable at the same time, it is more efficient to use the DataPumper
 			to copy data between two systems. With the DataPumper no intermediate

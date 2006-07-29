@@ -523,7 +523,7 @@ public class DataPumper
     sourceProfilePanel.add(selectSourceButton, gridBagConstraints);
 
     openFileButton.setIcon(ResourceMgr.getImage("Open"));
-    openFileButton.setToolTipText(ResourceMgr.getString("Desc_DataPumperOpenFile"));
+    openFileButton.setToolTipText(ResourceMgr.getString("d_DataPumperOpenFile"));
     openFileButton.setIconTextGap(0);
     openFileButton.setMaximumSize(new java.awt.Dimension(22, 22));
     openFileButton.setMinimumSize(new java.awt.Dimension(22, 22));
@@ -619,8 +619,8 @@ public class DataPumper
     sourceHeader.setText("<html><b>" + ResourceMgr.getString("LblSourceConnection") + "</b></html>");
     sourceHeader.setMaximumSize(new java.awt.Dimension(32768, 22));
     sourceHeader.setMinimumSize(new java.awt.Dimension(25, 22));
-    sourceHeader.setPreferredSize(new java.awt.Dimension(50, 22));
     sourceHeader.setOpaque(true);
+    sourceHeader.setPreferredSize(new java.awt.Dimension(50, 22));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;

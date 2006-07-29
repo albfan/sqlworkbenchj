@@ -38,7 +38,6 @@ public class SqlTabPopup extends JPopupMenu
 	private MoveSqlTab moveLeft;
 	private MoveSqlTab moveRight;
 
-	/** Creates new LogPanelPopup */
 	public SqlTabPopup(MainWindow aClient)
 	{
 		this.add = new AddTabAction(aClient);

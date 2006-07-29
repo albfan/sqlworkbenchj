@@ -1,256 +1,198 @@
-    <section id="using-scripting">
-      <title>Using &wb-productname; in batch files</title>
+<section id="using-scripting">
+	<title>Using &wb-productname; in batch files</title>
+	
+	<para>
+		&wb-productname; can also be used from batch files to execute SQL scripts.
+		This can be used to e.g. automatically extract data from a database or run
+		other SQL queries or statements. If the <link linkend="scripting-scriptfile">-script</link> parameter
+		is passed on the commandline, &wb-productname; will run in batch mode, otherwise
+		in GUI mode.
+	</para>
+	
+	<para>
+		When using &wb-productname; from a batch file (or the commandline that is) it is
+		<emphasis role="bold">not</emphasis> recommended to use the <link linkend="launcher-using">launcher</link> 
+		as it will immediately return to the commandline while starting the JVM (and thus &wb-productname;) 
+		in the background. Please refer to <link linkend="starting">Starting &wb-productname;</link> for details
+		on how to start &wb-productname; with the <literal>java</literal> command.
+	</para>
 
-      <para>&wb-productname; can also be used from batch files to execute SQL scripts.
-      This can be used to e.g. automatically extract data from a database or run
-      other SQL queries or statements.
-      </para>
-      <para>When using &wb-productname; from a batch file (or the commandline that is) it is
-      recommend <emphasis role="bold">not</emphasis> to use the <link linkend="launcher-using">launcher</link> as it will
-      immediately return to the commandline while starting the JVM (and thus &wb-productname;) in the background.
-      Please refer to <link linkend="starting">Starting &wb-productname;</link> for details
-      on how to start &wb-productname; with the <literal>java</literal> command.
-      </para>
+	<section id="scripting-connecting">
+		<title>Specifying the connection</title>
+		
+		<para>
+			When running &wb-productname; in batch mode, the same 
+			<link linkend="commandline-connect-noprofile">connection parameters</link> 
+			can be specified that are available in GUI mode.
+		</para>
+		
+	</section>
+	
+	<section id="scripting-scriptfile">
+		<title>Specifying the script file(s)</title>
+		
+		<para>
+			With the parameter <literal>-script=&#60;filename&#62;</literal> the script
+			file to be executed can be passed to the application. Multiple scripts can be specified by
+			separating them with a comma. The scripts will be executed in the
+			order in which they appear in the commandline. Again, if the filenames contain spaces
+			or dashes (i.e. <literal>test-1.sql</literal>) the names have to be quoted.
+		</para>
+		<para>
+			You can also execute several scripts by using the <link linkend="command-wbinclude"><literal>WbInclude</literal></link>
+			command inside a script.
+		</para>
+	</section>
+	
+	<section id="scripting-logfile">
+		<title>Specifying a logfile</title>
+		
+		<para>
+			If you don't want to write the messages to the default logfile
+			which is defined in <filename>workbench.settings</filename>
+			an alternate logfile can be specified with <literal>-logfile=&#60;filename&#62;</literal>
+		</para>
+	</section>
+	
+	<section id="scripting-handling-errors">
+		<title>Handling errors</title>
+		
+		<para>
+			To control the behavior when errors occur during
+			script execution, you can use the parameter <literal>-AbortOnError=[true|false]</literal>.
+			If any error occurs, and <literal>AbortOnError</literal> is <literal>true</literal>,
+			script processing is completely stopped (i.e. &wb-productname; will be stopped).
+			The only script which will be executed after that point is the script specified
+			with the parameter <literal>-CleanupError</literal>.
+		</para>
+		
+		<para>
+			If <literal>AbortOnError</literal> is false all statements in all
+			scripts are executed regardless of any errors. As no error information is
+			evaluated the script specified in -CleanupSuccess will be executed at
+		the end.</para>
+		
+		<para>
+			If this parameter is not supplied it defaults to true, meaning
+		that the script will be aborted when an error occurs.</para>
+		
+		<para>
+			You can also specify whether errors from <literal>DROP</literal> commands
+			should be ignored. To enable this, pass the parameter <literal>-ignoredroperrors=true</literal>
+			on the commandline. This works when connecting through a profile or through a full
+			connection specification. If this parameter is set to <literal>true</literal>
+			only a warning will be issued, but any (!) error reported from the DBMS will
+			be ignored.
+		</para>
+	</section>
+	
+	<section id="script-success">
+		<title>Specify a script to be executed on successful completion</title>
+		
+		<para>
+			The script specified with the parameter <literal>-CleanupSuccess=&#60;filename&#62;</literal>
+			is executed as the last script if either no error occurred or AbortOnError is set to false.
+		</para>
+		<para>
+			If you update data in the database, this script usually contains a <literal>COMMIT</literal>
+			command to make all changes permanent. The abort script usually contains a <literal>ROLLBACK</literal>
+			command.
+		</para>
+	</section>
+	
+	<section id="script-failure">
+		<title>Specify a script to be executed after an error</title>
+		
+		<para>
+			The script specified with the parameter <literal>-CleanupErorr=&#60;filename&#62;</literal>
+			is executed as the last script if <literal>AbortOnError</literal> is set to true and an error occurred
+			during script execution.
+		</para>
+		
+		<para>
+			The failure script usually contains a <literal>ROLLBACK</literal> command
+			to undo any changes to the database in case an error occured.
+		</para>
+	</section>
 
-      <section id="scripting-connecting">
-        <title>Connecting to the database server</title>
-        <para>There are two ways to connect to the database from the commandline.</para>
+	<section id="script-ignoredrop">
+		<title>Ignoring errors from DROP statements</title>
+		
+		<para>
+			When connecting <link linkend="commandline-connect-noprofile">without a profile</link>, 
+			you can use the switch <literal>-ignoredroperrors=[true|false]</literal> to ignore errors that are reported from <literal>DROP</literal>
+			statements. This has the same effect as connecting with a profile where the 
+			<link linkend="profile-ignore-drop-error">Ignore DROP errors</link> property is enabled.
+		</para>
+	</section>
+	
+	<section id="script-display">
+		<title>Controlling console output during batch execution</title>
+		
+		<para>
+			When running &wb-productname; in batch mode, it is recommended that
+			the <link linkend="options-log-console">logging to the console</link> is disabled.
+			If you are running <literal>SELECT</literal> statements in your script wihtout "using" 
+			the data through an <link linkend="command-export"><literal>WbExport</literal></link>,
+			you can optionally display the results to the console using the parameter 
+			<literal>-displayresult=true</literal>. If this parameter is not passed or set
+			to false, results sets will not be visible (for a <literal>SELECT</literal> statement
+			you will simply see the message '<literal>SELECT executed successfully</literal>'.
+		</para>
+		<para>
+			Usually each statement reports its success or failure individually. You can control
+			this logging by using the <link linkend="command-wbfeedback">WbFeedback</link> command.
+			As displaying the statement's result can be quite some overhead especially when executing
+			thousands of statements in a script file, it is recommended to turn off the result logging
+			using <literal>WbFeedback off</literal>.
+		</para>
+		
+		<para>
+			Any output generated by &wb-productname; during batch execution is sent to the standard
+			output (stdout, System.out) and can be redirected if desired.
+		</para>
+		
+	</section>
+	
+	<section id="scripting-examples">
+		<title>Examples</title>
 
-        <section id="scripting-connect-profile">
-          <title>Specifying a connection profile</title>
+		<para>The examples in this section are displayed on several lines. If
+		you enter them manually on the commandline you will need to put everything
+		in one line, or use the escape character for your operating system to
+		extend a single command over more then one input line.
+		</para>
 
-    			<para>You can specify the name of an already created connection
-          profile on the commandline with the <literal>-profile=&#60;profile name&#62;</literal>
-          parameter. The name has to be passed exactly like it appears in the profile dialog
-          (case sensitiv!). If the name contains spaces or dashes, it has to be enclosed in
-          quotations marks.</para>
-
-			     <para>Example:</para>
-
-			     <programlisting>java -jar Workbench.jar -profile='Oracle - Test' -script='test.sql'</programlisting>
-					 <para>In this case the file <literal>WbProfiles.xml</literal> must be in the current
-					 (working) directory of the application. If this is not the case, please specify the 
-					 location of the profile using either the <link linkend="cmdline-parameter-profilestorage"><literal>-profilestorage</literal></link> or 
-					 <link linkend="cmdline-parameter-configdir"><literal>-configdir</literal></link> parameter</para>
-        </section>
-
-        <section id="scripting-connecting-no-profile">
-          <title>Connecting without a profile</title>
-
-          <para>You can also specify the full connection parameters on the commandline, if
-          you don&apos;t want to create a profile only for executing a batch file.
-          The advantage of this method is, that wb-productname; does not need the files
-          <filename>WbProfiles.xml</filename>, <filename>WbDrivers.xml</filename> to be
-          able to connect to the database.</para>
-
-          <para>The connection can be specified with the following parameters:</para>
-
-          <informaltable frame="all">
-            <tgroup cols="2">
-              <colspec colname="c1" colwidth="2.5cm" />
-              <colspec colname="c2" />
-              <thead>
-                <row>
-                  <entry>Parameter</entry>
-                  <entry>Description</entry>
-                </row>
-              </thead>
-              <tbody valign="top">
-                <row>
-                  <entry>-url</entry>
-
-                  <entry>The -url parameter specifies the JDBC url
-                  to connect to.</entry>
-                </row>
-
-                <row>
-                  <entry>-username</entry>
-
-                  <entry>Specify the username for the DBMS</entry>
-                </row>
-
-                <row>
-                  <entry>-password</entry>
-
-                  <entry>Specify the password for the user</entry>
-                </row>
-
-                <row>
-                  <entry>-driver</entry>
-
-                  <entry>Specify the full class name of the JDBC
-                  driver</entry>
-                </row>
-
-                <row>
-                  <entry>-driverjar</entry>
-
-                  <entry>Specify the full pathname to the .jar file
-                  containing the JDBC driver</entry>
-                </row>
-              </tbody>
-            </tgroup>
-          </informaltable>
-          <para>Please refer to the <link linkend="scripting-examples">examples</link> at the end
-          of this chapter for an using these parameters</para>
-
-          <para>A disadvantage of this method is, that the password is displayed in plain text
-          on the command line. If this is used in a batch file, the password will be stored
-          in plain text in the batch file. If you don't want to expose the password,
-          you can use a connection profile and <link linkend="options-encrypt-password">enable password encryption</link>
-          for connection profiles.</para>
-
-        </section>
-      </section>
-
-      <section id="scripting-scriptfile">
-        <title>Specifying the script file(s)</title>
-
-        <para>With the parameter <literal>-script=&#60;filename&#62;</literal> the script
-        file to be executed can be passed to the application. Multiple scripts can be specified by
-        separating them with a comma. The scripts will be executed in the
-        order in which they appear in the commandline. Again, if the filenames contain spaces
-				or dashes (i.e. <literal>test-1.sql</literal>) the names have to be quoted.
-				</para>
-				<para>
-				You can also execute several scripts by using the <link linkend="command-wbinclude"><literal>WBINCLUDE</literal></link>
-				command inside a script.
-				</para>
-      </section>
-
-      <section id="scripting-logfile">
-        <title>Specifying a logfile</title>
-
-        <para>If you don't want to write the messages to the default logfile
-        which is defined in <filename>workbench.settings</filename>
-        an alternate logfile can be specified with <literal>-logfile=&#60;filename&#62;</literal>
-        </para>
-      </section>
-
-      <section id="scripting-handling-errors">
-        <title>Handling errors</title>
-
-        <para>To control the behavior when errors occur during
-        script execution, you can use the parameter <literal>-AbortOnError=[true|false]</literal>.
-        If any error occurs, and <literal>AbortOnError</literal> is <literal>true</literal>,
-        script processing is completely stopped (i.e. &wb-productname; will be stopped).
-        The only script which will be executed after that point is the script specified
-        with the parameter <literal>-CleanupError</literal>.
-        </para>
-
-        <para>If <literal>AbortOnError</literal> is false all statements in all
-        scripts are executed regardless of any errors. As no error information is
-        evaluated the script specified in -CleanupSuccess will be executed at
-        the end.</para>
-
-        <para>If this parameter is not supplied it defaults to true, meaning
-        that the script will be aborted when an error occurs.</para>
-        
-        <para>You can also specify whether errors from <literal>DROP</literal> commands
-        should be ignored. To enable this, pass the parameter <literal>-ignoredroperrors=true</literal>
-        on the commandline. This works when connecting through a profile or through a full
-        connection specification. If this parameter is set to <literal>true</literal>
-        only a warning will be issued, but any (!) error reported from the DBMS will
-        be ignored.
-        </para>
-      </section>
-
-      <section id="script-success">
-        <title>Specify a script to be executed on successful completion</title>
-
-        <para>The script specified with the parameter <literal>-CleanupSuccess=&#60;filename&#62;</literal>
-        is executed as the last script if either no error occurred or AbortOnError is set to false.</para>
-        <para>If you update data in the database, this script usually contains a <literal>COMMIT</literal>
-        command to make all changes permanent. The abort script usually contains a <literal>ROLLBACK</literal>
-        command.
-        </para>
-      </section>
-
-      <section id="script-failure">
-        <title>Specify a script to be executed after an error</title>
-
-        <para>The script specified with the parameter <literal>-CleanupErorr=&#60;filename&#62;</literal>
-        is executed as the last script if <literal>AbortOnError</literal> is set to true and an error occurred
-        during script execution.
-        </para>
-
-        <para>The failure script usually contains a <literal>ROLLBACK</literal> command
-        to undo any changes to the database in case an error occured.
-        </para>
-      </section>
-      
-      <section id="script-ignoredrop">
-          <title>Ignoring errors from DROP statements</title>
-    
-          <para>When connecting <link linkend="scripting-connecting-no-profile">without a profile</link>, 
-          you can use the switch <literal>-ignoredroperrors=[true|false]</literal> to ignore errors that are reported from <literal>DROP</literal>
-          statements. This has the same effect as connecting with a profile where the 
-          <link linkend="profile-ignore-drop-error">Ignore DROP errors</link> property is enabled.
-          </para>
-      </section>
- 
-      <section id="script-display">
-          <title>Controlling console output during batch execution</title>
-    
-          <para>When running &wb-productname; in batch mode, it is recommended that
-          the <link linkend="options-log-console">logging to the console</link> is disabled.
-          If you are running <literal>SELECT</literal> statements in your script wihtout "using" 
-          the data through an <link linkend="command-export"><literal>WBEXPORT</literal></link>,
-          you can optionally display the results to the console using the parameter 
-          <literal>-displayresult=true</literal>. If this parameter is not passed or set
-          to false, results sets will not be visible (for a <literal>SELECT</literal> statement
-          you will simply see the message '<literal>SELECT executed successfully</literal>'.
-          </para>
-          <para>
-					Usually each statement reports its success or failure individually. You can control
-					this logging by using the <link linkend="command-wbfeedback">WBFEEBACK</link> command.
-					As displaying the statement's result can be quite some overhead especially when executing
-					thousands of statements in a script file, it is recommended to turn off the result logging
-					using <literal>WBFEEDBACK off</literal>.
-          </para>
-          
-          <para>
-          Any output generated by &wb-productname; during batch execution is sent to the standard
-          output (stdout, System.out) and can be redirected if desired.
-          </para>
-      </section>
-
-    <section id="scripting-examples">
-      <title>Examples</title>
-
-        <para>The examples in this section are displayed on several lines. If
-        you enter them manually on the commandline you will need to put everything
-        in one line, or use the escape character for your operating system to
-        extend a single command over more then one input line.
-        </para>
-
-        <para><emphasis role="bold">Connect to the database without specifying a connection profile:</emphasis></para>
-        <programlisting>java -jar Workbench.jar -url=jdbc:postgresql:/dbserver/mydb
+		<para><emphasis role="bold">Connect to the database without specifying a connection profile:</emphasis></para>
+		<programlisting>java -jar Workbench.jar -url=jdbc:postgresql:/dbserver/mydb
      -driver=org.postgresql.Driver
      -username=zaphod
      -password=vogsphere
      -driverjar=C:/Programme/pgsql/pg73jdbc3.jar 
      -script='test-script.sql'</programlisting>
 
-        <para>This will start &wb-productname;, connect to the database server
-        as specified in the connection parameters and execute the script
-        <filename>test-script.sql</filename>. As the script&apos;s filename contains
-        a dash, it has to be quoted. This is also necessary when the filename contains spaces.
-        You should use single quotes (<literal>&apos;test-script.sql&apos;</literal>) to quote
-        these values because most command line shells (including Windows&reg;) do not pass
-        double quotes to the application.
-        </para>
+		<para>
+			This will start &wb-productname;, connect to the database server
+			as specified in the connection parameters and execute the script
+			<filename>test-script.sql</filename>. As the script&apos;s filename contains
+			a dash, it has to be quoted. This is also necessary when the filename contains spaces.
+			You should use single quotes (<literal>&apos;test-script.sql&apos;</literal>) to quote
+			these values because most command line shells (including Windows&reg;) do not pass
+			double quotes to the application.
+		</para>
 
-        <para><emphasis role="bold">Executing several scripts with a cleanup and failure script:</emphasis></para>
-        <programlisting>java -jar Workbench.jar
+		<para><emphasis role="bold">Executing several scripts with a cleanup and failure script:</emphasis></para>
+		<programlisting>java -jar Workbench.jar
      -script='c:/scripts/script1.sql','c:/scripst/script2.sql'
      -profile=Firebird
      -AbortOnError=false
      -CleanupSuccess=commit.sql
      -CleanupErorr=rollback.sql</programlisting>
-      <para>Note that you need to quote each file individually and not the value for the
-      <literal>-script</literal> parameter</para>
+		<para>
+			Note that you need to quote each file individually and not the value for the
+			<literal>-script</literal> parameter
+		</para>
 
-      </section>
+	</section>
 
-    </section>
+</section>

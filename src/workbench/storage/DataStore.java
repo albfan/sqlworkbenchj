@@ -11,46 +11,31 @@
  */
 package workbench.storage;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.exporter.HtmlRowDataConverter;
-import workbench.db.exporter.RowDataConverter;
 import workbench.db.exporter.SqlRowDataConverter;
-import workbench.db.exporter.XmlRowDataConverter;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.dialogs.dataimport.ImportOptions;
-import workbench.gui.dialogs.dataimport.TextImportOptions;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.filter.FilterExpression;
-import workbench.util.CsvLineParser;
-import workbench.util.EncodingUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -193,6 +178,7 @@ public class DataStore
 		if (readData)
 		{
 			this.initData(aResult, maxRows);
+			this.cancelRetrieve = false;
 		}
 		else
 		{
@@ -1138,6 +1124,7 @@ public class DataStore
 				if (this.cancelRetrieve) break;
 				if (maxRows > 0 && rowCount > maxRows) break;
 			}
+			this.cancelRetrieve = false;
 		}
 		catch (SQLException e)
 		{
@@ -1147,20 +1134,24 @@ public class DataStore
 				// as we silently want to use the data that has been retrieved so far
 				// the Exception should not be passed to the caller
 				LogMgr.logInfo("DataStore.initData()", "Retrieve cancelled");
+				// do not reset the cancelRetrieve flag, because this is checked
+				// by the caller!
 			}
 			else
 			{
+				LogMgr.logError("DataStore.initData()", "Error during retrieve", e);
 				throw e;
 			}
 		}
 		catch (Exception e)
 		{
-			throw new SQLException(e.getMessage());
+			this.cancelRetrieve = false;
+			LogMgr.logError("DataStore.initData()", "Error during retrieve", e);
+			throw new SQLException(ExceptionUtil.getDisplay(e));
 		}
 		finally
 		{
 			this.modified = false;
-			this.cancelRetrieve = false;
 		}
 	}
 
@@ -1413,6 +1404,16 @@ public class DataStore
 		this.cancelRetrieve = true;
 	}
 
+	public boolean isCancelled() 
+	{
+		return this.cancelRetrieve;
+	}
+	
+	public void resetCancelStatus()
+	{
+		this.cancelRetrieve = false;
+	}
+	
 	private void updateProgressMonitor(int currentRow, int totalRows)
 	{
 		if (this.rowActionMonitor != null)

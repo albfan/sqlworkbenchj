@@ -196,7 +196,45 @@ public class ResourceMgr
 			return aKey;
 		}
 	}
+	
+	public static String getPlainString(String aKey)
+	{
+		try
+		{
+			String value = resources.getString(aKey).replaceAll("\\&", "");
+			return value;
+		}
+		catch (MissingResourceException e)
+		{
+			LogMgr.logWarning("ResourceMgr", "String with key=" + aKey + " not found in resource file!");
 
+			return aKey;
+		}
+	}
+
+	public static String getAcceleratorChar(String aKey)
+	{
+		try
+		{
+			String label = getString(aKey);
+			int pos = label.indexOf('&');
+			if (pos == -1) return null;
+			
+			char c = label.charAt(pos + 1);
+			StringBuffer b = new StringBuffer(1);
+			b.append(c);
+			return b.toString();
+		}
+		catch (MissingResourceException e)
+		{
+			return null;
+		}
+		catch (Exception e)
+		{
+			return  null;
+		}
+	}
+	
 	public static String getDescription(String aKey)
 	{
 		return getDescription(aKey, false);

@@ -209,10 +209,11 @@
       <para>Property: <literal>workbench.sort.language</literal></para>
       <para>
         If you want to use a language/country specific collation sequence, 
-        this property defines the sort language to be used. By default this language
+        this property defines the sort language to be used. <!-- By default this language
         is english as &wb-productname; is only available in english, and thus the
         Windows launcher sets the language for the Java runtime to english as well 
         (For details please refer to <link linkend="launcher-nolang">Windows launcher parameters</link>).
+				-->
       </para>
       <para>Default value: en</para>
     </section>
@@ -319,6 +320,7 @@
       <para>No default</para>
     </section>
 
+		<!--
     <section id="db-settings-cancel-reconnect">
       <title>Controlling statement cancelling</title>
       <para>Property: <literal>workbench.db.cancelneedsreconnect</literal></para>
@@ -328,7 +330,8 @@
        that require a reconnect after cancelling a statement. </para>
       <para>Default: <literal>com.microsoft.jdbc.sqlserver.SQLServerDriver</literal></para>
     </section>
-
+		-->
+		
     <section id="db-settings-switch-catalog">
       <title>Database switch in DbExplorer</title>
       <para>Property: <literal>workbench.dbexplorer.switchcatalog</literal></para>
@@ -426,7 +429,7 @@
       <para>Default: <literal>1048576</literal></para>
     </section>
 
-    <section>
+    <section id="settings-ignore-commands">
       <title>Ignoring certain SQL commands</title>
       <para>Property: <literal>workbench.db.ignore.[dbid]=</literal></para>
       <para>
@@ -460,7 +463,7 @@
 			</para>
 			<para>Default: <literal>oracle, rdb, hsqldb, postgresql, mysql, adaptive_server_anywhere, cloudscape, apache_derby</literal></para>
 		</section>
-		
+
 		<section id="options-check-single-line-commands">
 			<title>Check for single line commands without delimiter</title>
 			<para>Property: <literal>workbench.db.checksinglelinecmd</literal></para>
@@ -472,14 +475,23 @@
 			</para>
 			<para>Default: <literal>oracle</literal></para>
 		</section>
-		
+
+		<section id="export-text-header-default">
+			<title>Controlling header lines in text exports</title>
+			<para>Property: <literal>workbench.export.text.default.header</literal></para>
+			<para>
+				This property controls whether default value for the <literal>-header</literal>
+				parameter of the <link linkend="command-export">WbExport</link> command.
+			</para>
+      <para>Default: <literal>false</literal></para>
+		</section>
   </section>
 			
   <section id="log-setting">
     <title>Controlling the log file</title>
     <section>
       <title>Log level</title>
-      <para>Property: <literal>workbench.log.level</literal>></para>
+      <para>Property: <literal>workbench.log.level</literal></para>
       <para>Set the log level for the log file. Valid values are
         <itemizedlist spacing="compact">
           <listitem>DEBUG</listitem>

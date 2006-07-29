@@ -444,6 +444,18 @@ public class DbMetadata
 	public String[] getTypeListTable() { return TABLE_TYPES_TABLE; }
 	public String[] getTypeListSelectable() { return TABLE_TYPES_SELECTABLE; }
 
+	public boolean getStripProcedureVersion()
+	{
+		String ids = Settings.getInstance().getProperty("workbench.db.stripprocversion", "");
+		List l = StringUtil.stringToList(ids, ",", true, true, false);
+		return l.contains(this.dbId);
+	}
+	
+	public String getProcVersionDelimiter()
+	{
+		return Settings.getInstance().getProperty("workbench.db.procversiondelimiter." + this.getDbId(), "");
+	}
+	
 	public DatabaseMetaData getJdbcMetadata()
 	{
 		return this.metaData;
@@ -1108,13 +1120,18 @@ public class DbMetadata
 		Statement stmt = null;
 		ResultSet rs = null;
     int linecount = 0;
-
+		
 		try
 		{
 			aProcname = this.adjustObjectnameCase(aProcname);
 			sql.setSchema(aSchema);
 			sql.setObjectName(aProcname);
 			sql.setCatalog(aCatalog);
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logInfo("DbMetadata.getProcedureSource()", "Using query=\n" + sql.getSql());
+			}
+
 			stmt = this.dbConnection.createStatementForQuery();
 			rs = stmt.executeQuery(sql.getSql());
 			while (rs.next())
@@ -1158,13 +1175,21 @@ public class DbMetadata
 			SqlUtil.closeAll(rs, stmt);
 		}
 
-		if (!isPackage && !source.endsWith(';'))
+		if (!isPackage && !source.endsWith(';') && proceduresNeedTerminator())
 		{
-			source.append(";");
+			source.append(';');
 		}
 		return source.toString();
 	}
 
+	public boolean proceduresNeedTerminator()
+	{
+		String value = Settings.getInstance().getProperty("workbench.db.noprocterminator", null);
+		if (value == null) return true;
+		List l = StringUtil.stringToList(value, ",");
+		return !l.contains(this.getDbId());
+	}
+	
 	private void initKeywordHandler()
 	{
 		this.keywordHandler = new SqlKeywordHandler(this.dbConnection.getSqlConnection(), this.getDbId());

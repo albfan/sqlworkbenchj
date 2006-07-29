@@ -71,7 +71,7 @@
               <Connection code="ResourceMgr.getImage(&quot;Open&quot;)" type="code"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;Desc_DataPumperOpenFile&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;d_DataPumperOpenFile&quot;)" type="code"/>
             </Property>
             <Property name="iconTextGap" type="int" value="0"/>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">

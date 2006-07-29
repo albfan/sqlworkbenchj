@@ -5,61 +5,61 @@
       <title>Defining variables</title>
 
       <para>
-        There are two ways to define a variable. You can pass a variable definition 
-        on the commandline when invoking &wb-productname; by specifying 
-        <literal>-Dwbp.varname=value</literal>. This example defines a variable with 
-        the name "<literal>varname</literal>" and the value "<literal>value</literal>".
-        The value will internally be stored as a string (character data). When using the
-        variable later, the value will be put into the SQL statement without further
-        modification. It is your responsibility to use a literal that is approriate 
-        for the usage in the SQL statement. As this is a parameter for the JVM, it has
-        to be specified before the -jar parameter:
-        <programlisting>java -Dwbp.varname=value -jar Workbench.jar ...</programlisting>.
-        If you have special characters (e.g. a backslash) in the value for the variable,
-        you have to quote the value part: <literal>-Dwbp.filename='c:\temp\test-data.txt'</literal>
-      </para>
-      <para>
-        You can also define a variable from within &wb-productname;. This is done through the
-        internal command <literal>WBVARDEF</literal>, e.g.: <literal>wbvardef myvar=42</literal>
-        This example defines a variable with the name "<literal>varname</literal>" and the value 
+        You can define variables within &wb-productname; that can be referenced in your 
+				SQL statements. This is done through the internal command <literal>WbVarDef</literal>, 
+				e.g.: <literal>wbvardef myvar=42</literal>
+        This example defines a variable with the name <literal>myvar</literal> and the value 
         <literal>42</literal>. If the variable does not exist, it will be created. If it exists
         its value will be overwritten with the new value. To remove a variable simply set its value
-        to nothing: <literal>wbvardef varname=</literal>. Alternatevily you can use the command
+        to nothing: <literal>wbvardef myvar=</literal>. Alternatevily you can use the command
         <literal>wbvardelete myvar</literal> to remove a variable definition.
       </para>
       <para>
         Variables can also be read from a properties file, either by specifying 
-        <literal>-file=filename</literal> for the <literal>WBVARDEF</literal> command, 
+        <literal>-file=filename</literal> for the <literal>WbVarDef</literal> command, 
         or by passing the <literal>-vardef</literal> parameter when starting &wb-productname;.
-        Please see the description for the <link linkend="vardef-commandline">command line parameters</link>
+        Please see the description for the <link linkend="cmdline-vardef">command line parameters</link>
         for details. 
       </para>
       <programlisting>wbvardef -file=/temp/myvars.def</programlisting>
       <para>This file has to be a standard Java "properties" file. Each variable 
       is listed on a single line in the format <literal>variable=value</literal>.
-      Lines starting with a <literal>#</literal> character are ignored (comments). Assuming the file
-      /temp/myvars.def had the following content:
-      </para>
-      <para>You can also use (Java) PreparedStatements in the SQL editor.In this case
-      the parameters are denoted by quotation marks. For details on how to use
-      prepared statements refer to <link linkend="editor-prepared-statement">support for prepared statements</link> 
-      </para>
-      
+      Lines starting with a <literal>#</literal> character are ignored (comments). Assuming 
+			the file <literal>myvars.def</literal> had the following content:
+			</para>
+			
 <programlisting>#Define the ID that we need later
 var_id=42
 person_name=Dent
 another_variable=24</programlisting>
       <para>After executing <literal>wbvardef -file=/temp/myvars.def</literal> there would be
-      three variables available in the system: <literal>var_id, person_name, another_variable</literal>
+      three variables available in the system: <literal>var_id, person_name, another_variable</literal>, that 
+			could be used e.g. in a SELECT query:
       </para>
+			<programlisting>SELECT * FROM person where name='$[person_name]' or id=$[var_id];</programlisting>
+			<para>
+				&wb-productname; would expand the variables and send the following statement to the server:
+			</para>
+			<programlisting>SELECT * FROM person where name='Dent' or id=42;</programlisting>
       
-      <para>A variable can also be defined as the result of a <literal>SELECT</literal> statement. This indicated
-      by using @ as the first character after the equal sign. The <literal>SELECT</literal> needs
-      to be enclosed in double quotes, if you are using single quotes e.g. in the where clause:</para>
-      <programlisting>wbvardef myvar=@"SELECT id FROM person WHERE name='Dent'"</programlisting>
-      <para>When executing the statement, &wb-productname; uses the first column of the 
-      result set for retrieving the value for the variable. It will also retrieve onle the first
-      row from the result set.</para>
+			<para>
+				A variable can also be defined as the result of a <literal>SELECT</literal> statement. This indicated
+				by using @ as the first character after the equal sign. The <literal>SELECT</literal> needs
+			to be enclosed in double quotes, if you are using single quotes e.g. in the where clause:</para>
+			<programlisting>wbvardef myvar=@"SELECT id FROM person WHERE name='Dent'"</programlisting>
+			<para>When executing the statement, &wb-productname; uses the first column of the first row of 
+				the result set for retrieving the value for the variable. Everything else (additional 
+				columns, additional rows) will be ignored.
+			</para>
+			
+      <para>
+				You can also use PreparedStatements in the SQL editor. In this case
+				the parameters are denoted by quotation marks and you will be prompted for a value 
+				each time you run the statement (which is different to using &wb-productname; variables. 
+				For details on how to use prepared statements refer to 
+				<link linkend="editor-prepared-statement">support for prepared statements</link> 
+			</para>
+			
     </section>
 
     <section id="edit-variable">
@@ -97,6 +97,11 @@ another_variable=24</programlisting>
         the quotes into the value of the variable (e.g. <literal>wbvardef name="'Arthur'"</literal>)
         or you put the quotes around the variable's placeholder, e.g.: <literal>WHERE name='$[name]';</literal>
       </para>
+			
+			<note><para>
+				As you can see the variable substitution is also done inside quoted literals.
+			</para></note>
+			
       <para>
         If you are using values in your regualar statements that actually need the prefix (<literal>$[</literal> or
         suffix (<literal>]</literal>) characters, please make sure that you have no variables defined.
@@ -106,36 +111,57 @@ another_variable=24</programlisting>
         the suffix (i.e end of the variable name) to <literal>#</literal>, add the following lines to
         your <literal>workbench.settings</literal> file:
       </para>
-        <programlisting>workbench.sql.parameter.prefix=%#
+      <programlisting>workbench.sql.parameter.prefix=%#
 workbench.sql.parameter.suffix=#</programlisting>
-        <para>
-            You may leave the suffix empty, but the prefix definition may not be empty. 
-        </para>
+			<para>
+				You may leave the suffix empty, but the prefix definition may not be empty. 
+			</para>
+			
     </section>
 
     <section id="prompt-variable">
-      <title>Prompting for values during execution</title>
-      <para>You can also use variables in a way that &wb-productname; will prompt you 
-      during execution of a SQL statement that contains a variable.</para>
-      <para>If you want to be prompted for a value, simply reference the value with a quotation mark
-      in front of its name:</para>
-      <programlisting>SELECT id FROM person WHERE name like '$[?search_name]%'</programlisting>
-      <para>If you execute this statement, &wb-productname; will prompt you for the value
-      of the variable <literal>search_name</literal>. If the variable is already defined
-      you will see the current value of the variable. If the variable is not yet defined
-      it will be implicitely defined with an empty value.</para>
-      <para>If you use a variable more then once in your statement it is sufficient to 
-      define it once as a prompt variable. Prompting for a variable value is especially
-      useful inside a macro definition.</para>
-      <para>You can also define a conditional prompt with using an ampersand instead of 
-      a quotation mark. In this case you will only be prompted if no value is assigned
-      for the variable:
-      </para>
-      <programlisting>SELECT id FROM person WHERE name like '$[&amp;search_name]%'</programlisting>
-      <para>The first time you execute this statement (and no value has been assigned to <literal>search_name</literal>
-      before using <literal>WBVARDEF</literal> or on the commandline) you will be prompted for a value for 
-      <literal>search_name</literal>. Any subsequent execution of the statement (or any other
-      statement referencing <literal>$[&amp;search_name]</literal>) will re-use the value 
-      you entered.</para>
-   </section>
+			<title>Prompting for values during execution</title>
+			
+			<para>
+				You can also use variables in a way that &wb-productname; will prompt you 
+				during execution of a SQL statement that contains a variable.
+			</para>
+			
+			<para>
+				If you want to be prompted for a value, simply reference the value with a quotation mark
+				in front of its name:
+			</para>
+			
+			<programlisting>SELECT id FROM person WHERE name like '$[?search_name]%'</programlisting>
+			
+			<para>
+				If you execute this statement, &wb-productname; will prompt you for the value
+				of the variable <literal>search_name</literal>. If the variable is already defined
+				you will see the current value of the variable. If the variable is not yet defined
+				it will be implicitely defined with an empty value.
+			</para>
+			
+			<para>
+				If you use a variable more then once in your statement it is sufficient to 
+				define it once as a prompt variable. Prompting for a variable value is especially
+				useful inside a macro definition.
+			</para>
+			
+			<para>
+				You can also define a conditional prompt with using an ampersand instead of 
+				a quotation mark. In this case you will only be prompted if no value is assigned
+				for the variable:
+			</para>
+			
+			<programlisting>SELECT id FROM person WHERE name like '$[&amp;search_name]%'</programlisting>
+			
+			<para>
+				The first time you execute this statement (and no value has been assigned to <literal>search_name</literal>
+				before using <literal>WBVARDEF</literal> or on the commandline) you will be prompted for a value for 
+				<literal>search_name</literal>. Any subsequent execution of the statement (or any other
+				statement referencing <literal>$[&amp;search_name]</literal>) will re-use the value 
+				you entered.
+			</para>
+			
+		</section>
 </section>

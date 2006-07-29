@@ -25,7 +25,7 @@
 		tab.
 	</para>
 	<para>
-		For Oracle synonyms are displayed as well. You can filter out unwanted synonyms 
+		For Oracle, synonyms are displayed as well. You can filter out unwanted synonyms 
 		by <link linkend="db-oracle-filter-syns">specifying a regular expression</link> 
 		in your <literal>workbench.settings</literal> file. This filter will also 
 		be applied when displaying the list of available tables when opening
@@ -62,24 +62,25 @@
 		<simplesect id="dbexplorer-spool">
 			<title>Export data</title>
 			<blockquote>
-				<para>This will execute a <link linkend="command-export"><literal>WBEXPORT</literal></link> command for the currently selected
+				<para>This will execute a <link linkend="command-export"><literal>WbExport</literal></link> command for the currently selected
 				table(s). Choosing this option is equivalent to do a <literal>SELECT * FROM table;</literal>
 				and then executing <menuchoice><guimenu>SQL</guimenu><guimenuitem>Export query result</guimenuitem></menuchoice>
 				from the SQL editor in the main window.
-				See the description of the <link linkend="command-export">WBEXPORT command</link>
+				See the description of the <link linkend="command-export">WbExport command</link>
 				for details.</para>
 			</blockquote>
 		</simplesect>
 
 		<simplesect>
-			<title>Show table data</title>
+			<title>Put SELECT into</title>
 
 			<blockquote><para>
 				This will put a SELECT statement into the SQL editor to display
 				all data for the selected table. You can choose into which editor tab
 				the statement will be written. The currently selected editor tab is
-				displayed in bold. You can also put the generated SQL statement into
-				a new editor tab, by selecting the item <guimenuitem>New tab</guimenuitem>
+				displayed in bold (when displaying the DbExplorer in a separate window. 
+				You can also put the generated SQL statement into a new editor tab, by 
+				selecting the item <guimenuitem>New tab</guimenuitem>
 			</para></blockquote>
 		</simplesect>
 
@@ -134,7 +135,7 @@
 			<blockquote>
 				<para>This will create an XML report of the selected tables. You will be
 					prompted to specify the location of the generated XML file. This report can
-					also be generated using the <link linkend="command-schema-report">WBREPORT</link>
+					also be generated using the <link linkend="command-schema-report">WbReport</link>
 					command.
 				</para>
 			</blockquote>
@@ -173,12 +174,12 @@
 
 	<section id="table-details">
 		<title>Table details</title>
-    
+
 		<para>When a table is selected, the right part of the window will
-		display it&apos;s column definition, the SQL statement to create the
-		table, any index defined on that table (only if the JDBC driver
-		returns that information), other tables that are referenced by the
-		currently selected table, any table that references the currently
+			display it&apos;s column definition, the SQL statement to create the
+			table, any index defined on that table (only if the JDBC driver
+			returns that information), other tables that are referenced by the
+			currently selected table, any table that references the currently
 		selected table and any trigger that is defined on that table.</para>
 
 		<para>The column list will also display any comments defined for the column
@@ -190,14 +191,21 @@
 		</para>
 
 		<para>When an Oracle synonym is selected, the columns tab will display
-		the column definition of the underlying table or view. The source tab
+			the column definition of the underlying table or view. The source tab
 		will display the statement to re-create the synonym.</para>
 
-		<para>The data tab will display the data from the currently selected
+	</section>
+	
+	<section id="table-data">
+		<title>Table data</title>
+		
+		<para>
+			The data tab will display the data from the currently selected
 		table. There are several options to configure the display of this tab.
 		The <literal>Autoload</literal> check box, controls the retrieval of the data. If this is
 		checked, then the data will be retrieved from the database as soon as
-		the table is selected in the table list (and the tab is visible).</para>
+		the table is selected in the table list (and the tab is visible).
+		</para>
     
 		<para>The data tab will also display a total row count of the table. As this
 		display can take a while, it can be disabled. To disable the automatic calculation
@@ -206,7 +214,7 @@
 		the table's row count when this is disabled, double-click on the <literal>Rows:</literal>
 		label.</para>
     
-		<para>The data type is only available if the currently selected objects
+		<para>The data tab is only available if the currently selected objects
 			is recognized as an object that can can be "SELECTED". Which object types
 			are included can be defined in the settings for &wb-productname;
 			See <link linkend="selectable-objects-setting">selectable object types</link> for details.
@@ -235,9 +243,11 @@
 		while the field has focus (yellow border) or hit F2 while the field
 		has focus.</para>
 
+		<!--
 		<para>The References/Referenced by tabs display the complete
 		reference tree (any table referencing the tables referencing the
 		currently selected one, and so on).</para>
+		-->
 	</section>
   
 	<section id="view-details">
