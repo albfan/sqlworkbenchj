@@ -615,7 +615,7 @@ public class WbExport
 			{
 				long rows = exporter.getTotalRows();
 				msg = ResourceMgr.getString("MsgExportTableExported");
-				msg = StringUtil.replace(msg, "%file%", outfile);
+				msg = StringUtil.replace(msg, "%file%", exporter.getFullOutputFilename());
 				msg = StringUtil.replace(msg, "%tablename%", tables[0].getTableExpression());
 				msg = StringUtil.replace(msg, "%rows%", Long.toString(rows));
 				result.addMessage(msg);

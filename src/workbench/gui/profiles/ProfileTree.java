@@ -33,10 +33,9 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import workbench.db.ConnectionProfile;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.CopyProfileAction;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.WbAction;
-import workbench.gui.menu.TextPopup;
+import workbench.gui.menu.CutCopyPastePopup;
 import workbench.interfaces.ClipboardSupport;
 import workbench.resource.ResourceMgr;
 
@@ -53,7 +52,7 @@ public class ProfileTree
 	private static final int CLIP_COPY = 1;
 	private static final int CLIP_CUT = 2;
 	private int clipboardType = 0;
-	private TextPopup popup;
+	private CutCopyPastePopup popup;
 	private WbAction pasteToFolderAction;
 	
 	public ProfileTree()
@@ -75,20 +74,16 @@ public class ProfileTree
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
 		
-		this.popup = new TextPopup(this, true);
+		this.popup = new CutCopyPastePopup(this);
 		
 		WbAction a = popup.getPasteAction();
-		
-//		a.removeIcon();
 		a.addToInputMap(im, am);
 		
 		a = popup.getCopyAction();
 		a.addToInputMap(im, am);
-//		a.removeIcon();
 		
 		a = popup.getCutAction();
 		a.addToInputMap(im, am);
-//		a.removeIcon();
 
 		pasteToFolderAction = new WbAction(this, "pasteToFolder");
 		pasteToFolderAction.removeIcon();

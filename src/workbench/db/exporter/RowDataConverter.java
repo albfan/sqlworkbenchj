@@ -43,6 +43,7 @@ import workbench.util.ZipOutputFactory;
  */
 public abstract class RowDataConverter
 {
+	public static final String BLOB_ARCHIVE_SUFFIX = "_blobs";
 	protected String encoding;
 	protected WbConnection originalConnection;
 	protected String generatingSql;
@@ -93,7 +94,7 @@ public abstract class RowDataConverter
 		if (this.compressExternalFiles)
 		{
 			WbFile f = new WbFile(getOutputFile());
-			String fname = f.getFileName() + "_blobs.zip";
+			String fname = f.getFileName() + BLOB_ARCHIVE_SUFFIX + ".zip";
 			File archive = new File(getBaseDir(), fname);
 			this.factory = new ZipOutputFactory(archive);
 		}

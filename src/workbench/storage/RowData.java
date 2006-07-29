@@ -11,6 +11,8 @@
  */
 package workbench.storage;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.sql.Clob;
@@ -97,15 +99,28 @@ public class RowData
 				{
 					value = rs.getTimestamp(i+1);
 				}
-//				else if (type == Types.LONGVARBINARY)
-//				{
-//					InputStream in = rs.getBinaryStream(i);
-//					value = FileUtil.readBytes(in);
-//				}
+				else if (type == Types.LONGVARBINARY)
+				{
+					InputStream in = null;
+					try
+					{
+						in = rs.getBinaryStream(i);
+						value = FileUtil.readBytes(in);
+					}
+					catch (IOException e)
+					{
+						LogMgr.logError("RowData.read()", "Error retrieving binary data for column '" + info.getColumnName(i) + "'", e);
+						value = null;
+					}
+					finally
+					{
+						try { in.close(); } catch (Throwable th) {}
+					}
+				}
 				else if (type == java.sql.Types.LONGVARCHAR)
 				{
-					// Older Oracle driver are not happy about using getObject() on a LONG column
-					// according to the JDBC specs, using getCharacterStream() should also 
+					// Older Oracle driver are not happy about using getObject() on a LONG column.
+					// According to the JDBC specs, using getCharacterStream() should also 
 					// work with other JDBC drivers
 					Reader in = null;
 					try
@@ -120,9 +135,9 @@ public class RowData
 							value = null;
 						}
 					}
-					catch (Exception e)
+					catch (IOException e)
 					{
-						LogMgr.logError("RowData.read()", "Error retrieving column '" + info.getColumnName(i) + "'", e);
+						LogMgr.logError("RowData.read()", "Error retrieving data for column '" + info.getColumnName(i) + "'", e);
 					}
 					finally
 					{

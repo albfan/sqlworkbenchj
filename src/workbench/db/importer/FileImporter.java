@@ -143,11 +143,6 @@ public class FileImporter
 			{
 				factory.setTargetTable(this.table);
 			}
-			
-//			if (this.importType == IMPORT_TEXT)
-//				this.producer = createTextFileParser();
-//			else if (this.importType == IMPORT_XML)
-//				this.producer = createXmlFileParser();
 			this.producer = factory.getProducer();
 		}
 		return this.producer;
@@ -176,36 +171,10 @@ public class FileImporter
 		}
 	}
 	
-//	private RowDataProducer createTextFileParser()
-//	{
-//		TextFileParser parser = new TextFileParser(inputFile);
-//		parser.setContainsHeader(this.textOptions.getContainsHeader());
-//		parser.setDateFormat(this.generalOptions.getDateFormat());
-//		parser.setTimeStampFormat(this.generalOptions.getTimestampFormat());
-//		parser.setQuoteChar(this.textOptions.getTextQuoteChar());
-//		parser.setDecimalChar(this.textOptions.getDecimalChar());
-//		parser.setDecodeUnicode(this.textOptions.getDecode());
-//		parser.setDelimiter(this.textOptions.getTextDelimiter());
-//		parser.setConnection(this.connection);
-//		if (this.table != null)
-//		{
-//			parser.setTableName(this.table.getTableExpression());
-//		}
-//		this.inputColumns = parser.getColumnsFromFile();
-//		return parser;
-//	}
-	
 	public String getSourceFilename()
 	{
 		return this.inputFile;
 	}
-	
-//	private RowDataProducer createXmlFileParser()
-//	{
-//		XmlDataFileParser parser = new XmlDataFileParser(inputFile);
-//		parser.setUseVerboseFormat(this.xmlOptions.getUseVerboseXml());
-//		return parser;
-//	}
 	
 	public String getWbCommand()
 	{

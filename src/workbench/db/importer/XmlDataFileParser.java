@@ -13,18 +13,14 @@ package workbench.db.importer;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.Constructor;
-import java.math.BigInteger;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -44,11 +40,11 @@ import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.ImportFileParser;
 import workbench.log.LogMgr;
-import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
+import workbench.util.ZipUtil;
 
 /**
  *
@@ -94,6 +90,7 @@ public class XmlDataFileParser
 	
 	private HashMap constructors = new HashMap();
 	private SAXParser saxParser;
+	private ImportFileHandler fileHandler = new ImportFileHandler();
 	
 	public XmlDataFileParser()
 	{
@@ -115,6 +112,11 @@ public class XmlDataFileParser
 		this.inputFile = inputFile;
 	}
 
+	public ImportFileHandler getFileHandler()
+	{
+		return this.fileHandler;
+	}
+	
 	public String getColumns()
 	{
 		return StringUtil.listToString(this.columnsToImport, ',');
@@ -260,7 +262,7 @@ public class XmlDataFileParser
 	private void readTableDefinition()
 		throws IOException, SAXException
 	{
-		XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(inputFile, this.encoding);
+		XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(this.fileHandler);
 		this.columns = tableDef.getColumns();
 		//if (columns == null) throw new IllegalArgumentException("No valid table definition found");
 		this.colCount = this.columns.length;
@@ -317,7 +319,14 @@ public class XmlDataFileParser
 	private void processOneFile()
 		throws Exception
 	{
+		File f = new File(this.inputFile);
+		
+		this.fileHandler.setMainFile(f, this.encoding);
+		
+		// readTableDefinition relies on the fileHandler, so this 
+		// has to be called after creating initializing the fileHandler
 		if (this.columns == null) this.readTableDefinition();
+		
 		if (this.columnsToImport == null)
 		{
 			this.realColCount = this.colCount;
@@ -328,11 +337,12 @@ public class XmlDataFileParser
 		}
 		this.messages = new StrBuffer();
 		this.sendTableDefinition();
-		InputStream in = null;
+		Reader in = null;
 		try
 		{
-			in = new FileInputStream(this.inputFile);
-			InputSource source = new InputSource(new BufferedReader(new InputStreamReader(in, EncodingUtil.cleanupEncoding(this.encoding)), 512*1024));
+			//in = new FileInputStream(this.inputFile);
+			in = this.fileHandler.getMainFileReader();
+			InputSource source = new InputSource(in);
 			this.keepRunning = true;
 			saxParser.parse(source, this);
 		}

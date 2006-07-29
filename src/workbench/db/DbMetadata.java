@@ -3402,8 +3402,14 @@ public class DbMetadata
 			template = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, realTable);
 			template = StringUtil.replace(template, COLUMNLIST_PLACEHOLDER, pkCols.toString());
 			String name = this.getPkIndexName(aIndexDef);
-			if (name == null) name = "pk_" + realTable.toLowerCase();
+			if (name == null && Settings.getInstance().getAutoGeneratePKName()) name = "pk_" + realTable.toLowerCase();
 			if (isKeyword(name)) name = "\"" + name + "\"";
+			if (StringUtil.isEmptyString(name)) 
+			{
+				name = ""; // remove placeholder if no name is available
+				template = StringUtil.replace(template, "CONSTRAINT ", ""); // remove CONSTRAINT KEYWORD if not name is available
+			}
+			
 			template = StringUtil.replace(template, PK_NAME_PLACEHOLDER, name);
 			result.append(template);
 			result.append(";\n\n");

@@ -14,10 +14,8 @@ package workbench.db.importer;
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.Reader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +40,6 @@ import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import workbench.util.EncodingUtil;
 import workbench.util.WbFile;
 
 /**
@@ -96,6 +93,8 @@ public class TextFileParser
 	private Pattern lineFilter;
 	private String targetSchema;
 	private boolean blobsAreFilenames = true;
+
+	private ImportFileHandler fileHandler = new ImportFileHandler();
 	
 	public TextFileParser()
 	{
@@ -107,6 +106,11 @@ public class TextFileParser
 		this.sourceDir = null;
 	}
 
+	public ImportFileHandler getFileHandler()
+	{
+		return this.fileHandler;
+	}
+	
 	public void setTargetSchema(String schema)
 	{
 		this.targetSchema = schema;
@@ -488,10 +492,18 @@ public class TextFileParser
 		}
 	}
 
+	private void setupFileHandler()
+		throws IOException
+	{
+		File f = new File(this.filename);
+		this.fileHandler.setMainFile(f, this.encoding);
+	}
+	
 	private void processOneFile()
 		throws Exception
 	{
 		this.cancelImport = false;
+		
 		File f = new File(this.filename);
 		if (f.isAbsolute())
 		{
@@ -499,14 +511,16 @@ public class TextFileParser
 		}
 		if (baseDir == null) this.baseDir = new File(".");
 		
-		BufferedReader in = EncodingUtil.createBufferedReader(f, this.encoding);
-
+		setupFileHandler();
+		
 		String line;
 
 		if (!this.withHeader && this.sourceDir != null)
 		{
 			this.setColumns(this.getColumnsFromTargetTable());
 		}
+		
+		BufferedReader in = new BufferedReader(this.fileHandler.getMainFileReader());
 		
 		try
 		{
@@ -764,9 +778,7 @@ public class TextFileParser
 		List cols = new ArrayList();
 		try
 		{
-			File f = new File(this.filename);
-			InputStream inStream = new FileInputStream(f);
-			in = new BufferedReader(new InputStreamReader(inStream, this.encoding));
+			in = this.fileHandler.getMainFileReader();
 			String firstLine = in.readLine();
 			WbStringTokenizer tok = new WbStringTokenizer(delimiter.charAt(0), this.quoteChar, false);
 			tok.setSourceString(firstLine);
@@ -801,13 +813,14 @@ public class TextFileParser
 
 	
 	public void setupFileColumns()
-		throws SQLException
+		throws SQLException, IOException
 	{
 	
 		List cols = null;
 		
 		if (this.withHeader)
 		{
+			setupFileHandler();
 			cols = this.getColumnsFromFile();
 		}
 		else

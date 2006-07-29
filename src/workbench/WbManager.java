@@ -1007,7 +1007,8 @@ public class WbManager
 	public static void prepareForTest(String configDir)
 	{
 		wb = new WbManager();
-		String args[] = { "-configdir=" + configDir };
+		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
+		String args[] = { "-nosettings -configdir=" + configDir };
 		wb.initCmdLine(args);
 	}
 	

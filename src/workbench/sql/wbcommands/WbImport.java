@@ -126,6 +126,14 @@ public class WbImport
 
 	public String getVerb() { return VERB; }
 
+	private String getWrongParamsMessage()
+	{
+		String result = ResourceMgr.getString("ErrImportWrongParameters");
+		boolean continueDefault = Settings.getInstance().getBoolProperty("workbench.import.default.continue", false);
+		result = StringUtil.replace(result, "%continue_default%", Boolean.toString(continueDefault));
+		return result;
+	}
+	
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
@@ -146,7 +154,7 @@ public class WbImport
 		}
 		catch (Exception e)
 		{
-			result.addMessage(ResourceMgr.getString("ErrImportWrongParameters"));
+			result.addMessage(getWrongParamsMessage());
 			result.setFailure();
 			return result;
 		}
@@ -161,13 +169,13 @@ public class WbImport
 				if (i > 0) msg.append(',');
 			}
 			result.addMessage(msg.toString());
-			result.addMessage(ResourceMgr.getString("ErrImportWrongParameters"));
+			result.addMessage(getWrongParamsMessage());
 			result.setFailure();
 			return result;
 		}
 		if (!cmdLine.hasArguments())
 		{
-			result.addMessage(ResourceMgr.getString("ErrImportWrongParameters"));
+			result.addMessage(getWrongParamsMessage());
 			result.setFailure();
 			return result;
 		}
@@ -179,7 +187,7 @@ public class WbImport
 		if (type == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrImportTypeMissing"));
-			result.addMessage(ResourceMgr.getString("ErrImportWrongParameters"));
+			result.addMessage(getWrongParamsMessage());
 			result.setFailure();
 			return result;
 		}
@@ -188,7 +196,7 @@ public class WbImport
 		{
 			result.addMessage(ResourceMgr.getString("ErrImportFileMissing"));
 			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrImportWrongParameters"));
+			result.addMessage(getWrongParamsMessage());
 			result.setFailure();
 			return result;
 		}
@@ -349,7 +357,7 @@ public class WbImport
 					{
 						textParser.setupFileColumns();
 					}
-					catch (SQLException e)
+					catch (Exception e)
 					{
 						result.setFailure();
 						result.addMessage(textParser.getMessages());

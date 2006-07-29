@@ -53,7 +53,7 @@
   </path>
 
   <target name="set-build-number" depends="init">
-        <property name="release-src-dir" value="release"/>
+		<property name="release-src-dir" value="release"/>
     <buildnumber file="build.number"/>
     <echo message="Build number is ${build.number}"/>
 
@@ -65,7 +65,7 @@
   </target>
 
   <target name="set-dev-build" depends="init">
-        <property name="release-src-dir" value="dist"/>
+		<property name="release-src-dir" value="dist"/>
     <propertyfile file="devbuild.number">
         <entry key="dev-build.number" type="int" operation="+" value="1"/>
     </propertyfile>
@@ -105,26 +105,27 @@
 
   <target name="prepare" depends="init">
 		
-    <copy todir="${build}">
+    <copy overwrite="true"  todir="${build}">
 			<fileset defaultexcludes="true" dir="${src}">
         <include name="**/*.*"/>
         <exclude name="**/*.java"/>
         <exclude name="**/*.form"/>
         <exclude name="**/*.class"/>
         <exclude name="**/*.flex"/>
+        <exclude name="**/*.properties"/>
       </fileset>
-    </copy>
-		
-    <copy todir="${build}">
-      <fileset dir="${src}">
+    </copy>	
+
+    <copy overwrite="true" todir="${build}">
+			<fileset defaultexcludes="true" dir="${src}">
         <include name="**/*.properties"/>
       </fileset>
-      <filterset begintoken="@" endtoken="@">
+			<filterset begintoken="@" endtoken="@">
         <filter token="BUILD_DATE" value="${build_date}"/>
         <filter token="BUILD_NUMBER" value="${build.number}"/>
       </filterset>
-    </copy>
-
+    </copy>	
+		
   </target>
 
   <target name="compile" depends="prepare">
@@ -292,7 +293,8 @@
         <include name="ExecuteSel16.gif"/>
         <include name="Remove16.gif"/>
         <include name="filter16.gif"/>
-        <include name="New16.gif"/>
+        <include name="NewProfile16.gif"/>
+        <include name="NewFolder16.gif"/>
         <include name="Delete16.gif"/>
         <include name="CopyProfile16.gif"/>
         <include name="ExecuteSel16.gif"/>

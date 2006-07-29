@@ -14,18 +14,18 @@
         <listitem>Tab separated text file. Columns are separated with a tab, rows are separated with a newline character</listitem>
         </itemizedlist>
 
-        <para>To save the data from the current result set into an external file, 
-            choose <menuchoice><guimenu>Data</guimenu><guimenuitem>Save Data as</guimenuitem></menuchoice>
-            You will be prompted for the filename. On the right side of the file dialog
-            you will have the possibility to define the type of the export. 
-            The export parameters on the right side of the dialog are split into two parts. 
-            The upper part defines parameters that are available for all export types. 
-			These are the encoding for the file, the format for date and date/time data 
-            and the columns that should be exported.
-        </para>
-        <para>
+				<para>To save the data from the current result set into an external file, 
+					choose <menuchoice><guimenu>Data</guimenu><guimenuitem>Save Data as</guimenuitem></menuchoice>
+					You will be prompted for the filename. On the right side of the file dialog
+					you will have the possibility to define the type of the export. 
+					The export parameters on the right side of the dialog are split into two parts. 
+					The upper part defines parameters that are available for all export types. 
+					These are the encoding for the file, the format for date and date/time data 
+					and the columns that should be exported.
+				</para>
+				<para>
             All format specific options that are available in the lower part, are also 
-            available when using the <link linkend="command-export">WBEXPORT</link> command. 
+            available when using the <link linkend="command-export">WbExport</link> command. 
             For a detailed discussion of the individual options please refer to that section. 
         </para>
         <para>The options <literal>SQL UPDATE</literal> and <literal>SQL DELETE/INSERT</literal>
@@ -59,8 +59,9 @@
                     The end-of-line sequence will be a newline (Unix style) and 
                     the column headers will be part of the copied data. Special
                     characters (e.g. newlines) in the actual data will not
-                    be replaced (as it is possible with the <link linkend="text-escape-switch">
-                    WBEXPORT</link> command).</para>
+                    be replaced (as it is possible with the 
+										<link linkend="text-escape-switch">WbExport</link> command).
+										</para>
                     <para>When you hold down the <keycap>Shift</keycap> key when you 
                     select the menu item, the column headers will not be copied
                     to the clipboard.
@@ -72,10 +73,10 @@
                 </listitem>
                 <listitem><para>SQL (INSERT, UPDATE, or DELETE &amp; INSERT)</para>
                     <para>The end-of-line sequence will be a newline (Unix style). 
-                    No cleanup of data will be done as it is possible with the <link linkend="export-sql-cleanup">
-                    WBEXPORT</link> command, apart from correctly quoting 
-                    single quotes inside the values (which is required to generate
-                    valid SQL)</para>
+                    No cleanup of data will be done as it is possible with the 
+										<link linkend="export-sql-cleanup">WbExport</link> command, apart from 
+										correctly quoting single quotes inside the values (which is required to 
+										generate valid SQL)</para>
                 </listitem>
             </itemizedlist>
         </para>
@@ -144,8 +145,8 @@
         </tgroup>
         </informaltable>
         <para>
-            You can also import text and XML files using the <link linkend="command-import">WBIMPORT</link> 
-            command. Using the <literal>WBIMPORT</literal> command is the recommended way to import
+            You can also import text and XML files using the <link linkend="command-import">WbImport</link> 
+            command. Using the <literal>WbImport</literal> command is the recommended way to import
             data, as it is much more flexible, and - more important - it does not read the 
             data into memory.
         </para>
@@ -157,7 +158,7 @@
         <para>You can use &wb-productname;'s XML files to copy data from
             one system to another.
         </para>
-        <para>You need to create the XML file first, using the EXPORT command
+        <para>You need to create the XML file first, using the <literal>WbExpor</literal> command
             from within the workbench, beeing connected to the source system. Suppose your data
             is stored in the table <literal>PERSON</literal> on your source system
             and you want to only select the columns <literal>lastname, firstname, birthday</literal>
@@ -166,7 +167,7 @@
        
        <para>To create the XML file the following command should be used:</para>
        
-       <programlisting>WBEXPORT -type=xml -file=&quot;c:/data/person.xml&quot; -table=contact;
+       <programlisting>WbExport -type=xml -file=&quot;c:/data/person.xml&quot; -table=contact;
 SELECT lastname, firstname, birthday FROM person;</programlisting>
         <para>As the data should be imported into the table <literal>CONTACT</literal>
             the <literal>-table=contact</literal> parameter is passed to the <literal>EXPORT</literal>
@@ -174,26 +175,55 @@ SELECT lastname, firstname, birthday FROM person;</programlisting>
             change the contents of of the <literal>&lt;table-name&gt; </literal> tag.</para>
             <para>Once the XML file is generated, you can connect to your source system and
             import the file with the following command:</para>
-            <programlisting>WBIMPORT -type=xml -file=&quot;c:/data/person.xml&quot;;</programlisting>
+            <programlisting>WbImport -type=xml -file=&quot;c:/data/person.xml&quot;;</programlisting>
             <para>&wb-productname; will read the XML file and insert every row into the table <literal>CONTACT</literal>
             of the database. AS the XML format generated by &wb-productname; includes the internal long value for date
             objects, it is not necessary to set the date or datetime format when importing the data.
             If you have a file with a lot of rows, you might want to set the parameter <literal>-commitevery=n</literal>.
             Some DBMS work faster if you commit more frequently instead of commit a huge number of inserts at the end.
-            Please refer to the <link linkend="command-export">WBEXPORT command</link> for more details.
+            Please refer to the <link linkend="command-export">WbExport command</link> for more details.
         </para>
         <para>If you have XML files in a different format then the one expected by &wb-productname;
             you can transform the file via XSLT into the correct format. More details on how 
             to transform XML files to and from &wb-productname; can be found in the 
             description of the <link linkend="command-xslt">XSLT command</link> and the 
-            <link linkend="command-export">WBEXPORT command</link>
+            <link linkend="command-export">WbExport command</link>
         </para>
         
         <para>
             If you want to copy data from one database to another, you can also use the 
-            <link linkend="command-copy">WBCOPY</link> command, or the <link linkend="data-pumper">
+            <link linkend="command-copy">WbCopy</link> command, or the <link linkend="data-pumper">
             DataPumper tool</link>
         </para>
         
     </section>
+		
+		<section id="export-compress">
+			<title>Compressing export files</title>
+			<para>
+				The <link linkend="command-export"><literal>WbExport</literal></link> command supports compressing
+				of the generated output files. This includes the actually export file and any associated BLOB
+				files.
+			</para>
+			<para>
+				When using <link linkend="command-import"><literal>WbImport</literal></link> you can import
+				the data stored in the archives without unpacking them. Simply specify the archive name
+				with the <literal>-file</literal> parameter. &wb-productname; will detect that the input file
+				is an archive and will extract the information "on the fly". Assume the following export 
+				command:
+			</para>
+			<programlisting>WbExport -type=text -file=/home/data/person.txt -compress=true -sourcetable=person;</programlisting>
+			<para>
+				This command will create the file <literal>/home/data/person.zip</literal> that will contain the
+				specified <literal>person.txt</literal>. To import this export into the table employee, you can
+				use the following command:
+			</para>
+			<programlisting>WbImport -type=text -file=/home/data/person.zip -table=employee;</programlisting>
+			<para>
+				Assuming the <literal>PERSON</literal> table had a BLOB colum (e.g. a picture of the person),
+				the <literal>WbExport</literal> command would have created an additional file called 
+				<literal>person_blobs.zip</literal> that would contain all BLOB data. The <literal>WbImport</literal>
+				command will automatically read the BLOB data from that archive.
+			</para>
+		</section>
 </section>

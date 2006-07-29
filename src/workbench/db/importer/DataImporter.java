@@ -14,14 +14,12 @@ package workbench.db.importer;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -756,23 +754,35 @@ public class DataImporter
 				int len = -1;
 				if (row[i] instanceof File)
 				{
-					// When importing XML files created by SQL Workbench/J
-					// blobs will be "passed" as File objects pointing to 
-					// the external file 
+					// When importing files created by SQL Workbench/J
+					// blobs will be "passed" as File objects pointing to the external file 
+					ImportFileHandler handler = (this.parser != null ? parser.getFileHandler() : null);
+					InputStream dataStream = null;
 					File f = (File)row[i];
-					if (!f.isAbsolute())
-					{
-						File source = new File(this.parser.getSourceFilename());
-						f = new File(source.getParentFile(), f.getName());
-					}
 					try
 					{
-						in = new BufferedInputStream(new FileInputStream(f), 64*1024);
-						len = (int)f.length();
+						if (handler != null)
+						{
+							in = new BufferedInputStream(handler.getAttachedFileStream(f));
+							len = (int)handler.getLength(f);
+						}
+						else
+						{
+							if (!f.isAbsolute())
+							{
+								File source = new File(this.parser.getSourceFilename());
+								f = new File(source.getParentFile(), f.getName());
+							}
+							else
+							{
+								in = new BufferedInputStream(new FileInputStream(f), 64*1024);
+							}
+							len = (int)f.length();
+						}
 					}
-					catch (FileNotFoundException ex)
+					catch (IOException ex)
 					{
-						throw new SQLException("External data file " + f.getAbsolutePath() + " not found");
+						throw new SQLException("Could not read data file " + f.getAbsolutePath() + " not found");
 					}
 				}
 				else if (row[i] instanceof Blob)

@@ -393,7 +393,7 @@ public class BlobInfoDialog
 			HexViewer v = new HexViewer(this, ResourceMgr.getString("TxtBlobData"));
 			v.setData(data);
 			v.setVisible(true);
-			closeWindow();				
+			//closeWindow();				
 		}
 		catch (Exception e)
 		{

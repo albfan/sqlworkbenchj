@@ -77,8 +77,9 @@ public class DataExporter
 	private WbConnection dbConn;
 	private String sql;
 	private String htmlTitle = null;
+	private String realOutputfile;
 	private String outputfile;
-	private String fullOutputFileName;
+	//private String fullOutputFileName;
 	private String xsltFile = null;
 	private String transformOutputFile = null;
 	private int exportType;
@@ -499,7 +500,10 @@ public class DataExporter
 	}
 
 	public String getOutputFilename() { return this.outputfile; }
-	public String getFullOutputFilename() { return this.fullOutputFileName; }
+	public String getFullOutputFilename() 
+	{ 
+		return this.realOutputfile; 
+	}
 
 	public void setCleanupCarriageReturns(boolean aFlag) { this.cleancr = aFlag; }
 	public boolean getCleanupCarriageReturns() { return this.cleancr; }
@@ -875,7 +879,7 @@ public class DataExporter
 		try
 		{
 			File f = new File(this.outputfile);
-			this.fullOutputFileName = f.getAbsolutePath();
+//			this.fullOutputFileName = f.getAbsolutePath();
 			
 			OutputStream out = null;
 			if (this.getCompressOutput())
@@ -883,16 +887,19 @@ public class DataExporter
 				WbFile wf = new WbFile(f);
 				String baseName = wf.getFileName();
 				String dir = wf.getParent();
-				OutputStream zout = new FileOutputStream(new File(dir, baseName + ".zip"));
+				File zipfile = new File(dir, baseName + ".zip");
+				OutputStream zout = new FileOutputStream(zipfile);
 				this.zipArchive = new ZipOutputStream(zout);
 				this.zipArchive.setLevel(9);
 				this.zipEntry = new ZipEntry(wf.getName());
 				this.zipArchive.putNextEntry(zipEntry);
 				out = this.zipArchive;
+				this.realOutputfile = zipfile.getAbsolutePath();
 			}
 			else
 			{
 				out = new FileOutputStream(f, append);
+				this.realOutputfile = f.getAbsolutePath();
 			}
 			Writer w = EncodingUtil.createWriter(out, this.encoding);
 			
@@ -914,7 +921,7 @@ public class DataExporter
 		else if (this.rowMonitor != null)
 		{
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-			String msg = ResourceMgr.getString("MsgExportingData") + " " + this.fullOutputFileName;
+			String msg = ResourceMgr.getString("MsgExportingData") + " " + this.realOutputfile;
 			this.rowMonitor.setCurrentObject(msg, -1, -1);
 			Thread.yield();
 		}

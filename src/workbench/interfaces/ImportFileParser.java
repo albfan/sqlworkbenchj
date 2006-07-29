@@ -13,6 +13,7 @@ package workbench.interfaces;
 
 import java.sql.SQLException;
 import java.util.List;
+import workbench.db.importer.ImportFileHandler;
 
 /**
  * @author support@sql-workbench.net
@@ -42,4 +43,6 @@ public interface ImportFileParser
 	 *  that can be used for the WbImport command
 	 */
 	String getColumns();
+	
+	ImportFileHandler getFileHandler();
 }

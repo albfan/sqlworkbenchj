@@ -14,6 +14,7 @@ package workbench.gui.settings;
 import javax.swing.JPanel;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.WbCheckBoxLabel;
+import workbench.interfaces.Restoreable;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -23,7 +24,7 @@ import workbench.resource.Settings;
  */
 public class DbExplorerOptionsPanel
 	extends JPanel
-	implements workbench.interfaces.Restoreable
+	implements Restoreable
 {
 
 	/** Creates new form DbExplorerOptionsPanel */
@@ -42,11 +43,13 @@ public class DbExplorerOptionsPanel
 		//set.setStoreExplorerSchema(this.rememberSchema.isSelected());
 		set.setStoreExplorerObjectType(this.rememberObject.isSelected());
 		set.setProperty("workbench.dbexplorer.defTableType", this.defTableTypeField.getText());
+		set.setAutoGeneratePKName(autogeneratePK.isSelected());
 	}
 
 	public void restoreSettings()
 	{
-
+		Settings set = Settings.getInstance();
+		autogeneratePK.setSelected(set.getAutoGeneratePKName());
 	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -66,6 +69,8 @@ public class DbExplorerOptionsPanel
     defTableTypeField = new javax.swing.JTextField();
     rememberObjectLabel = new WbCheckBoxLabel();
     rememberObject = new javax.swing.JCheckBox();
+    autogeneratePkLabel = new WbCheckBoxLabel();
+    autogeneratePK = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -126,7 +131,7 @@ public class DbExplorerOptionsPanel
     defTableTypeLabel.setToolTipText(ResourceMgr.getDescription("LblDefTableType"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(11, 12, 0, 0);
@@ -137,7 +142,7 @@ public class DbExplorerOptionsPanel
     defTableTypeField.setMinimumSize(new java.awt.Dimension(72, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
@@ -166,10 +171,34 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 9, 0, 0);
     add(rememberObject, gridBagConstraints);
 
+    autogeneratePkLabel.setLabelFor(autogeneratePK);
+    autogeneratePkLabel.setText(ResourceMgr.getString("LblGeneratePkName"));
+    autogeneratePkLabel.setToolTipText(ResourceMgr.getDescription("LblGeneratePkName"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
+    add(autogeneratePkLabel, gridBagConstraints);
+
+    autogeneratePK.setSelected(Settings.getInstance().getStoreExplorerObjectType());
+    autogeneratePK.setText("");
+    autogeneratePK.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    autogeneratePK.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 9, 0, 0);
+    add(autogeneratePK, gridBagConstraints);
+
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JCheckBox autogeneratePK;
+  private javax.swing.JLabel autogeneratePkLabel;
   private javax.swing.JLabel dbExplorerLabel;
   private javax.swing.JTextField defTableTypeField;
   private javax.swing.JLabel defTableTypeLabel;

@@ -120,7 +120,7 @@ public class FileUtil
 		throws IOException
 	{
 		if (in == null) return null;
-		ByteBuffer result = new ByteBuffer(1024);
+		ByteBuffer result = new ByteBuffer();
 		byte[] buff = new byte[1024];
 		int bytesRead = in.read(buff);
 		while (bytesRead > -1)

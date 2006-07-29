@@ -16,7 +16,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,21 +48,27 @@ public class EncodingUtil
 	public static Reader createReader(File f, String encoding)
 		throws IOException, UnsupportedEncodingException
 	{
+		InputStream inStream = new FileInputStream(f);
+		return createReader(inStream, encoding);
+	}
+	
+	public static Reader createReader(InputStream in, String encoding)
+		throws IOException, UnsupportedEncodingException
+	{
 		Reader r = null;
 		if (encoding != null)
 		{
 			try
 			{
-				InputStream inStream = new FileInputStream(f);
 				String enc = cleanupEncoding(encoding);
 				
 				if (enc.toLowerCase().startsWith("utf"))
 				{
-					r = new UnicodeReader(inStream, enc);
+					r = new UnicodeReader(in, enc);
 				}
 				else
 				{
-					r = new InputStreamReader(inStream, enc);
+					r = new InputStreamReader(in, enc);
 				}
 			}
 			catch (UnsupportedEncodingException e)
@@ -73,7 +78,7 @@ public class EncodingUtil
 		}
 		else
 		{
-			r = new FileReader(f);
+			r = new InputStreamReader(in);
 		}
 		return r;
 	}

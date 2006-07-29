@@ -481,12 +481,27 @@
 			<para>Property: <literal>workbench.export.text.default.header</literal></para>
 			<para>
 				This property controls whether default value for the <literal>-header</literal>
-				parameter of the <link linkend="command-export">WbExport</link> command.
+				parameter of the <link linkend="command-export">WbExport</link> command. 
+				The current default will be displayed in the help message when you run 
+				<literal>WbExport</literal> without any parameters.				
 			</para>
       <para>Default: <literal>false</literal></para>
 		</section>
+		
+		<section id="import-continue-default">
+			<title>Setting default for WbImport's -continueOnError parameter</title>
+			<para>Property: <literal>workbench.import.default.continue</literal></para>
+			<para>
+				This property controls the default value for the parameter <literal>-continueOnError</literal>
+				of the <link linkend="command-import">WbImport</link> command. The current default will 
+				be displayed in the help message when you run <literal>WbImport</literal> without any
+				parameters.
+			</para>
+		</section>
+
+		
   </section>
-			
+	
   <section id="log-setting">
     <title>Controlling the log file</title>
     <section>

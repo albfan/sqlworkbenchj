@@ -10,6 +10,7 @@
  *
  */
 package workbench.db.importer;
+import java.io.File;
 import java.util.List;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -20,6 +21,7 @@ import workbench.interfaces.ImportFileParser;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbImport;
 import workbench.util.StringUtil;
+import workbench.util.ZipUtil;
 
 /**
  *	A factory for RowDataProducer to import text or XML files. 
@@ -121,6 +123,7 @@ public class ProducerFactory
 		this.inputColumns = null;
 		this.producer = null;
 		this.fileParser = null;
+		File f = new File(inputFilename);
 	}
 	
 	public void setTargetTable(TableIdentifier tableId)

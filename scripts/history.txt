@@ -1,6 +1,54 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
-
+Enh:  (89) The launcher will no longer set the default language for 
+      the JVM to englich (-Duser.language=en) as this causes some trouble
+      with newer Oracle drivers. The -nolang parameter is thus obsolete. 
+      To activate the old behaviour, -J-Duser.language=en needs to be added
+      manually to the commandline of the launcher.
+Enh:  (88.10) The WbImport command can now handle the compressed archives
+      created with WbImport -compress=true
+Enh:  (88.10) Specifying a full connection using the -url -driver, ... 
+      parameters is now also possible when not running in batch mode, 
+      so a connection can be established without an existing profile for GUI 
+      mode. A new commandline parameter -workspace is also available to 
+      a workspace file to be used. (The file name can contain the 
+      %ConfigDir% placeholder)
+Enh:  (88.7) Stored procedures for Sybase Adaptive Server Enterprise are 
+      now displayed correctly.
+Enh:  (88.6) If neither the -header nor the -filecolumns parameter are 
+      specified for the WbImport command, SQL Workbench/J assumes the 
+      file matches the table definition.
+Enh:  (88.6) All settings that are available in workbench.settings can now 
+      be overwritten on the commandline using -Dworkbench.settings...=
+Enh:  (88.6) Writing the settings when closing the application can now 
+      be prevented by passing the -nosettings parameter to the application
+Enh:  (88.6) The connection profiles can now be grouped. The list on the
+      left side of the connection dialog is now displayed as a Tree.
+Enh:  (88.1) The table lists in the DataPumper can now be refreshed 
+      without re-connecting
+Enh:  (88.1) BLOB columns can now be set to NULL from within the BLOB Dialog
+Enh:  (88.1) Text export and import can now handle BLOB data as well. The
+      text file will contain the file name of the external file to which 
+      the blob was written. WbImport will automatically assume the value
+      of blob columns are filenames (this can be turned off with 
+      the parameter -blobisfilename=false when running WbImport) 
+      When writing Oracle SQL*Loader control files (-writeoracleloader=true 
+      for WbExport), the control file will include the necessary definitions
+      to import the blob from the external file.
+Enh:  (88.1) WbSelectBlob now processes the full result set (and not 
+      only the first row. Subsequent files will be name as the 
+      base file with _(n) appended, where (n) is the row number 
+      as retrieved from the DBMS server.
+Fix:  (88.1) With Firebird, SELECT statements were broken
+Fix:  (88.2) With Oracle CLOBs where always written with CDATA tags when 
+      using XML Export even if -usecdata was set to false
+Fix:  (88.4) WbImport now treats empty strings or strings that only consist 
+      of whitespace as null values
+Fix:  (88.4) When saving a result set to a file "Save Data as", nothing 
+      was written, if no file extension was specified.
+Fix:  (88.6) The DbExplorer was not working as a standalone application any 
+      longer (using the -dbexplorer switch or DbExplorer.exe)
+      
 Build 88, 07.07.2006
 --------------------
 Enh:  (87.14) The help window invoked from the main window is now 

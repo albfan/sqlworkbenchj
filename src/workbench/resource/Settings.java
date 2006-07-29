@@ -461,6 +461,16 @@ public class Settings
 	{
 		this.props.remove(property);
 	}
+
+	public boolean getAutoGeneratePKName()
+	{
+		return getBoolProperty("workbench.db.createpkname", true);
+	}
+	
+	public void setAutoGeneratePKName(boolean flag)
+	{
+		setProperty("workbench.db.createpkname", flag);
+	}
 	
 	public String getDriverConfigFilename()
 	{

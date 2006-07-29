@@ -38,16 +38,15 @@ public class XmlTableDefinitionParser
 	private int currentColIndex;
 	private ColumnIdentifier[] columnList;
 	private String tableName;
-	private String filename;
-	private String encoding = "UTF-8";
+	//private String filename;
+	private ImportFileHandler fileHandler;
 	private StringBuffer chars;
 	private String tagFormat;
 	
-	public XmlTableDefinitionParser(String fname, String enc)
+	public XmlTableDefinitionParser(ImportFileHandler handler)
 		throws IOException, SAXException
 	{
-		this.filename = fname;
-		if (enc != null) this.encoding = enc;
+		this.fileHandler = handler;
 		this.parseTableStructure();
 	}
 	
@@ -75,8 +74,7 @@ public class XmlTableDefinitionParser
 		try
 		{
 			SAXParser saxParser = factory.newSAXParser();
-			File f = new File(this.filename);
-			in = EncodingUtil.createReader(f, this.encoding);
+			in = this.fileHandler.getMainFileReader();
 			InputSource source = new InputSource(in);
 			saxParser.parse(source, this);
 		}

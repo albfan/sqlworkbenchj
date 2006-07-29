@@ -24,20 +24,21 @@ import workbench.interfaces.ClipboardSupport;
 /**
  * @author  support@sql-workbench.net
  */
-public class TextPopup 
-	extends CutCopyPastePopup
+public class CutCopyPastePopup 
+	extends JPopupMenu
 {
-	private ClearAction clear;
-	private SelectAllAction selectAll;
+	private CopyAction copy;
+	private PasteAction paste;
+	private CutAction cut;
 	
-	public TextPopup(ClipboardSupport aClient)
+	public CutCopyPastePopup(ClipboardSupport aClient)
 	{
-		super(aClient);
-		this.addSeparator();
-		this.clear = new ClearAction(aClient);
-		this.add(this.clear.getMenuItem());
-		this.selectAll = new SelectAllAction(aClient);
-		this.add(this.selectAll.getMenuItem());
+		this.cut = new CutAction(aClient);
+		this.add(cut.getMenuItem());
+		this.copy = new CopyAction(aClient);
+		this.add(this.copy.getMenuItem());
+		this.paste = new PasteAction(aClient);
+		this.add(this.paste.getMenuItem());
 	}
 	
 	public void addAction(WbAction anAction, boolean withSep)
@@ -46,6 +47,7 @@ public class TextPopup
 		this.add(anAction.getMenuItem());
 	}
 	
-	public WbAction getSelectAllAction() { return this.selectAll; }
-	public WbAction getClearAction() { return this.clear; }
+	public WbAction getCopyAction() { return this.copy; }
+	public WbAction getCutAction() { return this.cut; }
+	public WbAction getPasteAction() { return this.paste; }
 }
