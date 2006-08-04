@@ -27,6 +27,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.WbStringTokenizer;
@@ -100,6 +101,9 @@ public class WbSelectBlob
 		File outputDir = outputFile.getParentFile();
 		String baseFilename = outputFile.getFileName();
 		String extension = outputFile.getExtension();
+		if (StringUtil.isEmptyString(extension)) extension = "";
+		else extension = "." + extension;
+		
 		try
 		{
 			stmt = aConnection.createStatementForQuery();
@@ -108,13 +112,14 @@ public class WbSelectBlob
 			int row = 0;
 			while (rs.next())
 			{
-				int bufsize = 32*1024;
 				in = rs.getBinaryStream(1);
 				if (in == null)
 				{
-					result.setFailure();
-					result.addMessage(ResourceMgr.getString("ErrSelectBlobNoStream"));
-					return result;
+					//result.setFailure();
+					String msg = ResourceMgr.getString("ErrSelectBlobNoStream");
+					result.addMessage(StringUtil.replace(msg, "%row%", Integer.toString(row)));
+					result.setWarning(true);
+					continue;
 				}
 				
 				if (row == 0)
@@ -123,7 +128,7 @@ public class WbSelectBlob
 				}
 				else
 				{
-					f = new File(outputDir, baseFilename + "_" + Integer.toString(row) + "." + extension);
+					f = new File(outputDir, baseFilename + "_" + Integer.toString(row) + extension);
 				}
 				out = new FileOutputStream(f);
 				filesize = FileUtil.copy(in, out);
@@ -153,8 +158,7 @@ public class WbSelectBlob
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
-			try { stmt.close(); } catch (Throwable th) {}
+			SqlUtil.closeAll(rs, stmt);
 		}
 
 		return result;

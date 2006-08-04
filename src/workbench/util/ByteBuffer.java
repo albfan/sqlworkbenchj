@@ -24,12 +24,6 @@ public class ByteBuffer
 	
 	public ByteBuffer()
 	{
-		this(1024);
-	}
-	
-	public ByteBuffer(int initialSize)
-	{
-		byteData = new byte[initialSize];
 	}
 	
 	/**
@@ -68,9 +62,11 @@ public class ByteBuffer
 
 	public ByteBuffer append(byte[] buf, int start, int len)
 	{
+		if (len < 0) return this;
+		int pos = getLength();
 		int newlen = getLength() + len;
 		ensureSize(newlen);
-		System.arraycopy(buf, start, byteData, byteData.length, len);
+		System.arraycopy(buf, start, byteData, pos, len);
 		return this;
 	}
 

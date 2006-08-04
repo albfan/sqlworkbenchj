@@ -28,6 +28,7 @@ import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  * @author  support@sql-workbench.net
@@ -40,15 +41,15 @@ public class PostgresIndexReader
 		super(meta);
 	}
 	
-	public StrBuffer getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
+	public StringBuffer getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
 	{
 		Connection con = this.metaData.getSqlConnection();
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		String sql = "SELECT indexdef FROM pg_indexes WHERE indexname = ? ";
 		int count = indexDefinition.getRowCount();
-		if (count == 0) return StrBuffer.EMPTY_BUFFER;
-		StrBuffer source = new StrBuffer(count * 50);
+		if (count == 0) return StringUtil.emptyBuffer();
+		StringBuffer source = new StringBuffer(count * 50);
 		try
 		{
 			stmt = con.prepareStatement(sql);
@@ -68,7 +69,7 @@ public class PostgresIndexReader
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			source = new StrBuffer(ExceptionUtil.getDisplay(e));
+			source = new StringBuffer(ExceptionUtil.getDisplay(e));
 		}
 		finally
 		{

@@ -131,20 +131,20 @@ public class TableDataPanel
 		this.dataDisplay.getTable().setMaxColWidth(Settings.getInstance().getMaxColumnWidth());
 		this.dataDisplay.getTable().setMinColWidth(Settings.getInstance().getMinColumnWidth());
 
-    topPanel = new JPanel();
+		topPanel = new JPanel();
 		topPanel.setMaximumSize(new Dimension(32768, 32768));
 		BoxLayout box = new BoxLayout(topPanel, BoxLayout.X_AXIS);
 		topPanel.setLayout(box);
-
+		
 		this.reloadAction = new ReloadAction(this);
 		this.reloadAction.setTooltip(ResourceMgr.getDescription("TxtLoadTableData", true));
-
+		
 		WbToolbar mytoolbar = new WbToolbar();
 		mytoolbar.addDefaultBorder();
 		topPanel.add(mytoolbar);
 		mytoolbar.add(this.reloadAction);
 		mytoolbar.addSeparator();
-
+		
 		this.cancelRetrieve = new StopAction(this);
 		this.cancelRetrieve.setEnabled(false);
 		mytoolbar.add(this.cancelRetrieve);

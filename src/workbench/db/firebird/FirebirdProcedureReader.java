@@ -11,13 +11,11 @@
  */
 package workbench.db.firebird;
 
-import java.sql.SQLException;
 import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
-import workbench.db.WbConnection;
 import workbench.storage.DataStore;
-import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  * @author  support@sql-workbench.net
@@ -30,9 +28,9 @@ public class FirebirdProcedureReader
 		super(meta);
 	}
 
-	public StrBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
+	public StringBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
-		StrBuffer source = new StrBuffer();
+		StringBuffer source = new StringBuffer();
 		try
 		{
 			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname);
@@ -76,7 +74,7 @@ public class FirebirdProcedureReader
 		}
 		catch (Exception e)
 		{
-			source = new StrBuffer();
+			source = StringUtil.emptyBuffer();
 		}
 		return source;
 	}

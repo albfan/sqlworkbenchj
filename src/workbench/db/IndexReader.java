@@ -40,8 +40,8 @@ public interface IndexReader
 	 * If tableNameToUse is non-null then that name will be used instead
 	 * of the name of the TableIdentifier
 	 */
+	StringBuffer getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse);
 	
-	StrBuffer getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse);
 	/**
 	 * 	Build the SQL statement to create an Index on the given table.
 	 * 	@param aTable - The table name for which the index should be constructed

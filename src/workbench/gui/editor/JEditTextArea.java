@@ -55,7 +55,6 @@ import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.EventListenerList;
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.PlainDocument;
@@ -65,8 +64,6 @@ import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.events.Event;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
@@ -78,7 +75,6 @@ import workbench.interfaces.Undoable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -109,7 +105,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.46 2006-04-06 16:30:05 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.47 2006-08-04 14:52:41 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -334,7 +330,7 @@ public class JEditTextArea
 		int realEndline = this.getSelectionEndLine();
 		int endline = realEndline;
 		int tabSize = this.getTabSize();
-		StrBuffer buff = new StrBuffer(tabSize);
+		StringBuffer buff = new StringBuffer(tabSize);
 		for (int i=0; i < tabSize; i++) buff.append(' ');
 		String spacer = buff.toString();
 
@@ -1706,7 +1702,7 @@ public class JEditTextArea
 				start = tmp;
 			}
 
-			StrBuffer buf = new StrBuffer();
+			StringBuffer buf = new StringBuffer();
 			Segment seg = new Segment();
 
 			for(int i = selectionStartLine; i <= selectionEndLine; i++)

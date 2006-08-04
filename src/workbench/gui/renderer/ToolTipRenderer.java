@@ -13,7 +13,6 @@ package workbench.gui.renderer;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
@@ -26,6 +25,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 import workbench.gui.WbSwingUtilities;
+import workbench.resource.Settings;
 import workbench.storage.NullValue;
 import workbench.util.StringUtil;
 
@@ -45,6 +45,10 @@ public class ToolTipRenderer
 	protected Color unselectedForeground;
 	protected Color unselectedBackground;
 	protected Color highlightBackground;
+	
+	private Color alternateBackground = Settings.getInstance().getAlternateRowColor();
+	private boolean useAlternatingColors = Settings.getInstance().getUseAlternateRowColor();
+	
 	protected int editingRow = -1;
 	private boolean isEditing = false;
 	private boolean[] highlightCols;
@@ -68,7 +72,7 @@ public class ToolTipRenderer
 	
 	public static final String[] EMPTY_DISPLAY = new String[] { StringUtil.EMPTY_STRING, null };
 	
-	public boolean debug = false;
+	private boolean isAlternatingRow = false;
 	
 	public ToolTipRenderer()
 	{
@@ -76,6 +80,11 @@ public class ToolTipRenderer
 		focusedInsets = new Insets(thick, thick, thick, thick);
 	}
 
+	public void setUseAlternatingColors(boolean flag)
+	{
+		this.useAlternatingColors = flag;
+	}
+	
 	public void setEditingRow(int row) 
 	{ 
 		this.editingRow = row; 
@@ -126,6 +135,8 @@ public class ToolTipRenderer
 		}
 
 		this.selected = isSelected;
+		this.isAlternatingRow = this.useAlternatingColors && ((row % 2) == 1);
+		
 		boolean isNull = (value == null) || (value instanceof NullValue);
 		if (isNull)
 		{
@@ -191,7 +202,14 @@ public class ToolTipRenderer
 			}
 			else 
 			{
-				g.setColor(unselectedBackground);
+				if (isAlternatingRow)
+				{
+					g.setColor(alternateBackground);
+				}
+				else
+				{
+					g.setColor(unselectedBackground);
+				}
 				g.fillRect(0,0,w,h);
 				g.setColor(unselectedForeground);
 			}

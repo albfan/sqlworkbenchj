@@ -51,7 +51,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
-import workbench.util.StrBuffer;
 import workbench.util.WbThread;
 
 /**
@@ -352,7 +351,7 @@ public class TableDefinitionPanel
 		int colCount = this.tableDefinition.getRowCount();
 		if (colCount == 0) return null;
 
-		StrBuffer sql = new StrBuffer(colCount * 80);
+		StringBuffer sql = new StringBuffer(colCount * 80);
 
 		sql.append("SELECT ");
 		DbMetadata meta = this.dbConnection.getMetadata();

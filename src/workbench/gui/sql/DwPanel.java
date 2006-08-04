@@ -26,7 +26,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.JToolTip;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -56,7 +55,6 @@ import workbench.gui.actions.SelectKeyColumnsAction;
 import workbench.gui.actions.StartEditAction;
 import workbench.gui.actions.UpdateDatabaseAction;
 import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.MultiLineToolTip;
 import workbench.gui.components.OneLineTableModel;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbScrollPane;
@@ -75,7 +73,6 @@ import workbench.storage.DataStore;
 import workbench.storage.DmlStatement;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -376,7 +373,7 @@ public class DwPanel
 			preview.setMaximumSize(max);
 			JScrollPane scroll = new JScrollPane(preview);
 			scroll.setMaximumSize(max);
-			StrBuffer text = new StrBuffer(stmts.size() * 80);
+			StringBuffer text = new StringBuffer(stmts.size() * 150);
 			for (int i=0; i < stmts.size(); i++)
 			{
 				DmlStatement dml = (DmlStatement)stmts.get(i);

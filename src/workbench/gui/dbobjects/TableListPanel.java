@@ -128,7 +128,8 @@ public class TableListPanel
 	private TableDependencyTreeDisplay exportedTableTree;
 	private WbSplitPane exportedPanel;
 
-	private WbScrollPane indexPanel;
+	private JPanel indexPanel;
+	//private WbScrollPane indexPanel;
 	private TriggerDisplayPanel triggers;
 	private DbObjectSourcePanel tableSource;
 	private JTabbedPane displayTab;
@@ -202,9 +203,22 @@ public class TableListPanel
 		this.tableDefinition.addPropertyChangeListener(this);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), tableDefinition);
 
+		JPanel indexPanel = new JPanel();
+		indexPanel.setLayout(new BorderLayout());
+		
+		Reloadable indexReload = new Reloadable()
+		{
+			public void reload()
+			{
+				shouldRetrieveIndexes = true;
+				try { retrieveIndexes(); } catch (Throwable th) {}
+			}
+		};
+		
 		this.indexes = new WbTable();
 		this.indexes.setAdjustToColumnLabel(false);
-		this.indexPanel = new WbScrollPane(this.indexes);
+		this.indexPanel = new TableIndexPanel(this.indexes, indexReload);
+			
 		this.indexes.getSelectionModel().addListSelectionListener(this);
 
 		Reloadable sourceReload = new Reloadable()

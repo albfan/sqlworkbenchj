@@ -12,6 +12,7 @@
 package workbench.gui.settings;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -29,6 +30,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.WindowConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
@@ -45,7 +48,7 @@ import workbench.resource.Settings;
  */
 public class SettingsPanel
 	extends JPanel
-	implements ActionListener
+	implements ActionListener, ChangeListener
 {
   private JPanel buttonPanel;
   private JButton cancelButton;
@@ -65,26 +68,53 @@ public class SettingsPanel
 		mainTab.add(ResourceMgr.getString("LblSettingsGeneral"), page);
 		pages.add(page);
 
-		page = new EditorOptionsPanel();
-		mainTab.addTab(ResourceMgr.getString("LblSettingsEditor"), page);
-		pages.add(page);
-
-		page = new DataEditOptionsPanel();
-		mainTab.addTab(ResourceMgr.getString("LblDataEdit"), page);
-		pages.add(page);
-
-		page = new DbExplorerOptionsPanel();
-		mainTab.addTab(ResourceMgr.getString("LblSettingsDbExplorer"), page);
-		pages.add(page);
-
-		page = new FormatterOptionsPanel();
-		mainTab.addTab(ResourceMgr.getString("LblSqlFormat"), page);
-		pages.add(page);
-		
-		page = new LnFOptionsPanel();
-		mainTab.addTab(ResourceMgr.getString("LblLnFOptions"), page);
-		pages.add(page);
+		mainTab.addTab(ResourceMgr.getString("LblSettingsEditor"), new JPanel());
+		mainTab.addTab(ResourceMgr.getString("LblDataEdit"), new JPanel());
+		mainTab.addTab(ResourceMgr.getString("LblSettingsDbExplorer"), new JPanel());
+		mainTab.addTab(ResourceMgr.getString("LblSqlFormat"), new JPanel());
+		mainTab.addTab(ResourceMgr.getString("LblExternalTools"), new JPanel());
+		mainTab.addTab(ResourceMgr.getString("LblLnFOptions"), new JPanel());
+		mainTab.addChangeListener(this);
 	}
+	public void stateChanged(ChangeEvent e)
+	{
+		Component c = this.mainTab.getSelectedComponent();
+		if (c instanceof Restoreable) return;
+		try
+		{
+			WbSwingUtilities.showWaitCursor(this);
+			int index = mainTab.getSelectedIndex();
+			JPanel page = null;
+			switch (index)
+			{
+				case 1:
+					page = new EditorOptionsPanel();
+					break;
+				case 2:
+					page = new DataEditOptionsPanel();
+					break;
+				case 3:
+					page = new DbExplorerOptionsPanel();
+					break;
+				case 4:
+					page = new FormatterOptionsPanel();
+					break;
+				case 5:
+					page = new ExternalToolsPanel();
+					break;
+				case 6:
+					page = new LnFOptionsPanel();
+					break;
+			}
+			pages.add(page);
+			mainTab.setComponentAt(index, page);
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(this);
+		}
+	}
+
 
   private void initComponents()
   {
@@ -155,7 +185,7 @@ public class SettingsPanel
 		}
 		else
 		{
-			this.dialog.setSize(500,460);
+			this.dialog.setSize(600,480);
 		}
 
 		this.dialog.getRootPane().setDefaultButton(this.okButton);

@@ -11,22 +11,12 @@
  */
 package workbench.db.postgres;
 
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import workbench.db.DbMetadata;
-import workbench.db.IndexReader;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
 import workbench.storage.DataStore;
-import workbench.util.ExceptionUtil;
-import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  * @author  support@sql-workbench.net
@@ -39,9 +29,9 @@ public class PostgresProcedureReader
 		super(meta);
 	}
 	
-	public StrBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
+	public StringBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
-		StrBuffer source = new StrBuffer();
+		StringBuffer source = new StringBuffer();
 		try
 		{
 			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname);
@@ -77,7 +67,7 @@ public class PostgresProcedureReader
 		}
 		catch (Exception e)
 		{
-			source = StrBuffer.EMPTY_BUFFER;
+			source = StringUtil.emptyBuffer();
 		}
 		return source;
 	}

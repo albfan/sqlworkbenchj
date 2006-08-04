@@ -11,11 +11,8 @@
  */
 package workbench.db.mysql;
 
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
@@ -23,7 +20,7 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 /**
  * @author  support@sql-workbench.net
  */
@@ -38,9 +35,9 @@ public class MySqlProcedureReader
 		this.conn = con;
 	}
 
-	public StrBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
+	public StringBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
-		StrBuffer source = new StrBuffer();
+		StringBuffer source = new StringBuffer();
 		source.append("CREATE ");
 		
 		String sql = "SELECT routine_type, dtd_identifier " +
@@ -96,7 +93,7 @@ public class MySqlProcedureReader
 		catch (Exception e)
 		{
 			LogMgr.logError("MySqlMetadata.getProcedureHeader()", "Error retrieving procedure header", e);
-			source = new StrBuffer();
+			source = StringUtil.emptyBuffer();
 		}
 		finally
 		{

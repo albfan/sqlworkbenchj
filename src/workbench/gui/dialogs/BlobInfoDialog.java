@@ -46,6 +46,7 @@ public class BlobInfoDialog
 	private EscAction escAction;
 	private File uploadFile;
 	private boolean setToNull = false;
+	private boolean hasTools = false;
 	
 	public BlobInfoDialog(java.awt.Frame parent, boolean modal)
 	{
@@ -63,7 +64,7 @@ public class BlobInfoDialog
 		String encoding = Settings.getInstance().getDefaultBlobTextEncoding();
 		encodingPanel.setEncoding(encoding);
 		ToolDefinition[] tools = Settings.getInstance().getExternalTools();
-		boolean hasTools = (tools != null && tools.length > 0);
+		this.hasTools = (tools != null && tools.length > 0);
 		this.externalViewer.setEnabled(hasTools);
 		this.externalTools.setEnabled(hasTools);
 		if (hasTools)
@@ -135,6 +136,7 @@ public class BlobInfoDialog
 		showAsTextButton.setEnabled(len > 0);
 		showImageButton.setEnabled(len > 0);
 		showHexButton.setEnabled(len > 0);
+		externalViewer.setEnabled(len > 0 && hasTools);
 	}
 
 	private void openWithExternalViewer()

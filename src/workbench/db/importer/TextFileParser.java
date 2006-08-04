@@ -15,7 +15,6 @@ import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +33,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.CsvLineParser;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
@@ -85,7 +83,7 @@ public class TextFileParser
 	private int[] columnMap;
 	private List pendingImportColumns;
 	private ValueConverter converter;
-	private StrBuffer messages;
+	private StringBuffer messages;
 
 	// If a filter for the input file is defined
 	// this will hold the regular expressions per column
@@ -475,7 +473,7 @@ public class TextFileParser
 			try
 			{
 				currentFile++;
-				this.messages = new StrBuffer();
+				this.messages = new StringBuffer();
 				this.receiver.setCurrentTable(currentFile);
 				this.filename = theFile.getAbsolutePath();
 				this.tableName = theFile.getFileName();
@@ -686,7 +684,7 @@ public class TextFileParser
 						msg = msg.replaceAll("%value%", (value == null ? "(NULL)" : value.toString()));
 						msg = msg.replaceAll("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
 						LogMgr.logWarning("TextFileParser.start()",msg, e);
-						if (this.messages == null) this.messages = new StrBuffer();
+						if (this.messages == null) this.messages = new StringBuffer();
 						this.messages.append(msg);
 						this.messages.append("\n");
 						if (this.abortOnError) throw e;
@@ -844,7 +842,7 @@ public class TextFileParser
 	private void readColumnDefinition(List cols)
 		throws SQLException
 	{
-		if (this.messages == null) messages = new StrBuffer();
+		if (this.messages == null) messages = new StringBuffer();
 		try
 		{
 			this.colCount = cols.size();

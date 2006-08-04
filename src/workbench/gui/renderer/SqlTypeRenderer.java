@@ -18,7 +18,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.WbTable;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
 /**
@@ -32,8 +32,16 @@ public class SqlTypeRenderer
 	private Color unselectedForeground;
 	private Color unselectedBackground;
 	
+	private Color alternateColor = Settings.getInstance().getAlternateRowColor();
+	private boolean useAlternatingColors = Settings.getInstance().getUseAlternateRowColor();
+	
 	public SqlTypeRenderer()
 	{
+	}
+	
+	public void setUseAlternatingColors(boolean flag)
+	{
+		this.useAlternatingColors = flag;
 	}
 	
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
@@ -72,7 +80,14 @@ public class SqlTypeRenderer
 					this.unselectedBackground = table.getBackground();
 				}
 				super.setForeground(this.unselectedForeground);
-				super.setBackground(this.unselectedBackground);
+				if (useAlternatingColors && ((row % 2) == 1))
+				{
+					super.setBackground(this.alternateColor);
+				}
+				else
+				{
+					super.setBackground(this.unselectedBackground);
+				}
 			}
 			
 		}

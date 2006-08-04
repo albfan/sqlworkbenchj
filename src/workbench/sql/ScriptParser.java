@@ -120,10 +120,10 @@ public class ScriptParser
 		throws IOException
 	{
 		BufferedReader in = null;
-		StrBuffer content = null;
+		StringBuffer content = null;
 		try
 		{
-			content = new StrBuffer((int)f.length());
+			content = new StringBuffer((int)f.length());
 			in = EncodingUtil.createBufferedReader(f, encoding);
 			String line = in.readLine();
 			while (line != null)
@@ -136,7 +136,7 @@ public class ScriptParser
 		catch (Exception e)
 		{
 			LogMgr.logError("ScriptParser.readFile()", "Error reading file " + f.getAbsolutePath(), e);
-			content = new StrBuffer();
+			content = new StringBuffer(0);
 		}
 		finally
 		{

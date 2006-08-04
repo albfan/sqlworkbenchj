@@ -1216,6 +1216,7 @@ public class WbTable
 
 	public boolean isBlobColumn(int column)
 	{
+		if (this.dwModel == null) return false;
 		int type = this.dwModel.getColumnType(column);
 		//Class cl = this.dwModel.getColumnClass(column);
 		//if (cl == null) return false;

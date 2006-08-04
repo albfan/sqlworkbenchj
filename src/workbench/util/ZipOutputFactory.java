@@ -50,7 +50,35 @@ public class ZipOutputFactory
 		String filename = output.getName();
 		this.currentEntry = new ZipEntry(filename);
 		this.zout.putNextEntry(currentEntry);
-		return new ZipEntryOutputStream(this.currentEntry, this.zout);
+		OutputStream out = new OutputStream()
+		{
+			public void close() throws IOException
+			{
+				zout.closeEntry();
+				currentEntry = null;
+			}
+
+			public void flush() throws IOException
+			{
+				zout.flush();
+			}
+
+			public void write(byte[] b, int off, int len) throws IOException
+			{
+				zout.write(b, off, len);
+			}
+
+			public void write(byte[] b) throws IOException
+			{
+				zout.write(b);
+			}
+
+			public void write(int b) throws IOException
+			{
+				zout.write(b);
+			}
+		};
+		return out;
 	}
 
 	public Writer createWriter(File output, String encoding)
@@ -62,48 +90,10 @@ public class ZipOutputFactory
 	
 	public void done() throws IOException
 	{
-//		if (currentEntry != null) 
-//		{
-//			zout.closeEntry();
-//		}
-		if (this.zout != null) zout.close();
-	}
-	
-}
-
-class ZipEntryOutputStream
-	extends OutputStream
-{
-	private ZipOutputStream archive;
-	
-	ZipEntryOutputStream(ZipEntry e, ZipOutputStream zip)
-	{
-		archive = zip;
-	}
-
-	public void close() throws IOException
-	{
-		archive.closeEntry();
-	}
-	
-	public void flush() throws IOException
-	{
-		archive.flush();
-	}
-	
-	public void write(byte[] b, int off, int len) throws IOException
-	{
-		archive.write(b, off, len);
-	}
-
-	public void write(byte[] b) throws IOException
-	{
-		archive.write(b);
-	}
-
-	public void write(int b) throws IOException
-	{
-		archive.write(b);
+		if (this.zout != null) 
+		{
+			zout.close();
+		}
 	}
 	
 }

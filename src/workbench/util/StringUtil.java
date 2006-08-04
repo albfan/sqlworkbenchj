@@ -48,6 +48,8 @@ public class StringUtil
 	public static final SimpleDateFormat ISO_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TIMESTAMP_FORMAT);
 	public static final SimpleDateFormat ISO_TZ_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TZ_TIMESTAMP_FORMAT);
 
+	public static final StringBuffer emptyBuffer() { return new StringBuffer(0); }
+	
 	public static final String getCurrentTimestampWithTZString()
 	{
 		return ISO_TZ_TIMESTAMP_FORMATTER.format(now());

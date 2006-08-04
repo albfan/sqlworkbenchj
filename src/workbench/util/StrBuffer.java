@@ -27,8 +27,8 @@ import java.io.Writer;
 public class StrBuffer
 	implements CharSequence
 {
-	public static final StrBuffer EMPTY_BUFFER = new StrBuffer();
 	private static final int DEFAULT_LEN = 80;
+
 	/**
 	 * The number of characters in the buffer.
 	 */
@@ -39,8 +39,8 @@ public class StrBuffer
 	 */
 	private char charData[];
 
-	//static final ThreadLocal savedObj = new ThreadLocal();
-
+	public static final StrBuffer emptyBuffer() { return new StrBuffer(0); }
+	
 	/**
 	 * Make an empty string buffer with 80 characters of storage.
 	 */

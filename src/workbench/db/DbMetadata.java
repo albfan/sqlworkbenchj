@@ -938,7 +938,7 @@ public class DbMetadata
 		// ThinkSQL returns the full CREATE VIEW statement
 		if (source.toLowerCase().startsWith("create")) return source;
 
-		StrBuffer result = new StrBuffer(source.length() + 100);
+		StringBuffer result = new StringBuffer(source.length() + 100);
 
 		result.append(generateCreateObject(includeDrop, view.getType(), view.getTableName()));
 
@@ -1030,9 +1030,9 @@ public class DbMetadata
 		return source.toString();
 	}
 
-	private StrBuffer generateCreateObject(boolean includeDrop, String type, String name)
+	private StringBuffer generateCreateObject(boolean includeDrop, String type, String name)
 	{
-		StrBuffer result = new StrBuffer();
+		StringBuffer result = new StringBuffer();
 		boolean replaced = false;
 
 		String prefix = "workbench.db.";
@@ -2188,6 +2188,11 @@ public class DbMetadata
 
 				int size = rs.getInt("COLUMN_SIZE");
 				int digits = rs.getInt("DECIMAL_DIGITS");
+				if (this.isPostgres && (sqlType == java.sql.Types.NUMERIC || sqlType == java.sql.Types.DECIMAL))
+				{
+					if (size == 65535) size = 0;
+					if (digits == 65531) digits = 0;
+				}
 				String rem = rs.getString("REMARKS");
 				String def = rs.getString("COLUMN_DEF");
 				if (def != null && this.trimDefaults)
@@ -2349,7 +2354,7 @@ public class DbMetadata
 
 					String unique = (String)colist.get(0);
 					idxData.setValue(row, 1, unique);
-					StrBuffer def = new StrBuffer();
+					StringBuffer def = new StringBuffer();
 					for (int i=1; i < colist.size(); i++)
 					{
 						if (i > 1) def.append(", ");
@@ -3288,7 +3293,7 @@ public class DbMetadata
 		result.append(generateCreateObject(includeDrop, "TABLE", (tableNameToUse == null ? table.getTableName() : tableNameToUse)));
 		result.append("\n(\n");
 		int count = columns.length;
-		StrBuffer pkCols = new StrBuffer(1000);
+		StringBuffer pkCols = new StringBuffer(1000);
 		int maxColLength = 0;
 		int maxTypeLength = 0;
 
@@ -3388,7 +3393,7 @@ public class DbMetadata
 			result.append(pkCols.toString());
 			result.append(")\n");
 
-			StrBuffer fk = this.getFkSource(table.getTableName(), aFkDef, tableNameToUse);
+			StringBuffer fk = this.getFkSource(table.getTableName(), aFkDef, tableNameToUse);
 			if (fk.length() > 0)
 			{
 				result.append(fk);
@@ -3414,7 +3419,7 @@ public class DbMetadata
 			result.append(template);
 			result.append(";\n\n");
 		}
-		StrBuffer indexSource = this.indexReader.getIndexSource(table, aIndexDef, tableNameToUse);
+		StringBuffer indexSource = this.indexReader.getIndexSource(table, aIndexDef, tableNameToUse);
 		result.append(indexSource);
 		if (!this.createInlineConstraints) result.append(this.getFkSource(table.getTableName(), aFkDef, tableNameToUse));
 
@@ -3504,7 +3509,7 @@ public class DbMetadata
 	{
 		String columnStatement = (String)columnCommentStatements.get(this.productName);
 		if (columnStatement == null || columnStatement.trim().length() == 0) return null;
-		StrBuffer result = new StrBuffer(500);
+		StringBuffer result = new StringBuffer(500);
 		int cols = columns.length;
 		for (int i=0; i < cols; i ++)
 		{
@@ -3574,11 +3579,11 @@ public class DbMetadata
 	 *
 	 *	@return a SQL statement to add the foreign key definitions to the given table
 	 */
-	public StrBuffer getFkSource(String aTable, DataStore aFkDef, String tableNameToUse)
+	public StringBuffer getFkSource(String aTable, DataStore aFkDef, String tableNameToUse)
 	{
-		if (aFkDef == null) return StrBuffer.EMPTY_BUFFER;
+		if (aFkDef == null) return StringUtil.emptyBuffer();
 		int count = aFkDef.getRowCount();
-		if (count == 0) return StrBuffer.EMPTY_BUFFER;
+		if (count == 0) return StringUtil.emptyBuffer();
 
 		String template = (String)DbMetadata.fkStatements.get(this.productName);
 
@@ -3685,7 +3690,7 @@ public class DbMetadata
 			colList = (List)fkTarget.get(name);
 			
 			Iterator itr = colList.iterator();
-			StrBuffer colListBuffer = new StrBuffer(30);
+			StringBuffer colListBuffer = new StringBuffer(30);
 			String targetTable = null;
 			boolean first = true;
 			//while (tok.hasMoreTokens())
@@ -3711,7 +3716,7 @@ public class DbMetadata
 			stmt = StringUtil.replace(stmt, FK_TARGET_COLUMNS_PLACEHOLDER, colListBuffer.toString());
 			fks.put(name, stmt.trim());
 		}
-		StrBuffer fk = new StrBuffer();
+		StringBuffer fk = new StringBuffer();
 
 		Iterator values = fks.values().iterator();
 		while (values.hasNext())

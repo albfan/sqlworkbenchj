@@ -310,23 +310,25 @@ public class WbManager
 			UIManager.setLookAndFeel(lnf);
 			try
 			{
-				if (lnf instanceof WindowsLookAndFeel)
+				String cls = lnf.getClass().getName();
+				if (cls.indexOf("com.sun.java.swing.plaf.windows") > -1)
 				{
-					String osVersion = System.getProperty("os.version");
-					if (osVersion != null)
+					String osVersion = System.getProperty("os.version", "1.0");
+					Float version = Float.valueOf(osVersion);
+					if (version.floatValue() <= 5.0)
 					{
-						Float version = Float.valueOf(osVersion);
-						if (version.floatValue() <= 5.0)
+						isWindowsClassic = true;
+					}
+					else
+					{
+						isWindowsClassic = (cls.indexOf("WindowsClassicLookAndFeel") > -1);
+						if (!isWindowsClassic)
 						{
-							isWindowsClassic = true;
-						}
-						else
-						{
-				      Toolkit toolkit = Toolkit.getDefaultToolkit();
-							Boolean flag = (Boolean)toolkit.getDesktopProperty("win.xpstyle.themeActive");
-							if (flag != null)
+							Toolkit toolkit = Toolkit.getDefaultToolkit();
+							Boolean themeActive = (Boolean)toolkit.getDesktopProperty("win.xpstyle.themeActive");
+							if (themeActive != null)
 							{
-								isWindowsClassic = !flag.booleanValue();
+								isWindowsClassic = !themeActive.booleanValue();
 							}
 							else
 							{

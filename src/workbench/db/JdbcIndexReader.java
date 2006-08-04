@@ -43,12 +43,12 @@ public class JdbcIndexReader
 		return this.metaData.getSqlConnection().getMetaData().getIndexInfo(table.getCatalog(), table.getSchema(), table.getTableName(), unique, false);
 	}
 	
-	public StrBuffer getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
+	public StringBuffer getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
 	{
-		if (indexDefinition == null) return StrBuffer.EMPTY_BUFFER;
+		if (indexDefinition == null) return new StringBuffer(0);
 		int count = indexDefinition.getRowCount();
-		if (count == 0) return StrBuffer.EMPTY_BUFFER;
-		StrBuffer idx = new StrBuffer();
+		if (count == 0) return StringUtil.emptyBuffer();
+		StringBuffer idx = new StringBuffer();
 		String template = this.metaData.getIndexSqlTemplate();
 		String sql;
 		int idxCount = 0;
@@ -58,7 +58,7 @@ public class JdbcIndexReader
 			String unique = indexDefinition.getValue(i, 1).toString();
 			String is_pk  = indexDefinition.getValue(i, 2).toString();
 			String definition = indexDefinition.getValue(i, 3).toString();
-			StrBuffer columns = new StrBuffer();
+			StringBuffer columns = new StringBuffer();
 			StringTokenizer tok = new StringTokenizer(definition, ",");
 			String col;
 			int pos;
@@ -114,7 +114,7 @@ public class JdbcIndexReader
 		int count = columnList.length;
 		if (count == 0) return StringUtil.EMPTY_STRING;
 		String template = this.metaData.getIndexSqlTemplate();
-		StrBuffer cols = new StrBuffer(count * 25);
+		StringBuffer cols = new StringBuffer(count * 25);
 
 		for (int i=0; i < count; i++)
 		{

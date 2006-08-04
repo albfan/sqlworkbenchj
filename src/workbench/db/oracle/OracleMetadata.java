@@ -337,9 +337,9 @@ public class OracleMetadata
 		return rs;
 	}
 	
-	private final StrBuffer PROC_HEADER = new StrBuffer("CREATE OR REPLACE ");
+	private final StringBuffer PROC_HEADER = new StringBuffer("CREATE OR REPLACE ");
 	
-	public StrBuffer getProcedureHeader(String catalog, String schema, String procname, int procType)
+	public StringBuffer getProcedureHeader(String catalog, String schema, String procname, int procType)
 	{
 		return PROC_HEADER;
 	}
@@ -500,7 +500,7 @@ public class OracleMetadata
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		StrBuffer result = new StrBuffer(250);
+		StringBuffer result = new StringBuffer(250);
 		try
 		{
 			if (objectName.indexOf('.') > -1)

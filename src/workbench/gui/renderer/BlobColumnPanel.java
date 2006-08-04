@@ -43,6 +43,7 @@ public class BlobColumnPanel
 		super();
 		setLayout(new BorderLayout(0,0));
 		Dimension d = new Dimension(BUTTON_WIDTH,BUTTON_WIDTH);
+		openButton.setBasicUI();
 		openButton.setFlatLook();
 		openButton.setBorder(WbSwingUtilities.FLAT_BUTTON_BORDER);
 		openButton.setMaximumSize(d);

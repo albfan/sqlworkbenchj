@@ -76,15 +76,6 @@ public abstract class ExportWriter
 		this.rowMonitor = monitor;
 	}
 
-//	public void setOutputFilename(File outfile) 
-//	{ 
-//		this.outputFile = outfile;
-//		if (this.converter != null) 
-//		{
-//			this.converter.setOutputFile(this.outputFile);
-//		}
-//	}
-	
 	public long getNumberOfRecords()
 	{
 		return rows;

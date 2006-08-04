@@ -21,7 +21,8 @@ package workbench.gui.renderer;
  *
  * @author  support@sql-workbench.net
  */
-public class StringColumnRenderer extends ToolTipRenderer
+public class StringColumnRenderer 
+	extends ToolTipRenderer
 {
 	public StringColumnRenderer()
 	{

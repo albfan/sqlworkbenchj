@@ -42,7 +42,7 @@ public class ArgumentParser
 	public void parse(String args[])
 	{
 		this.reset();
-		StrBuffer line = new StrBuffer(200);
+		StringBuffer line = new StringBuffer(200);
 		for (int i=0; i<args.length; i++)
 		{
 			line.append(args[i]);

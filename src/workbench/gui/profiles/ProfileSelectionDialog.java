@@ -81,30 +81,6 @@ public class ProfileSelectionDialog
 		im.put(esc.getAccelerator(), esc.getActionName());
 		am.put(esc.getActionName(), esc);
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				checkProfiles();
-			}
-		});
-
-	}
-
-	private void checkProfiles()
-	{
-		int count = this.profiles.getProfileCount();
-		if (count == 0)
-		{
-			try
-			{
-				this.profiles.newItem(false);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("ProfileSelectionDialog.checkProfiles()", "Error creating default profile", e);
-			}
-		}
 	}
 
   private void initComponents(String lastProfileKey)

@@ -104,6 +104,18 @@ public class ConnectionEditorPanel
 		this.showPassword.addActionListener(this);
 	}
 
+	public void setFocusToTitle()
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				tfProfileName.requestFocusInWindow();
+				tfProfileName.selectAll();
+			}
+		});
+	}
+	
 	private void initEditorList()
 	{
 		this.editors = new ArrayList(10);
@@ -176,7 +188,7 @@ public class ConnectionEditorPanel
 
     setLayout(new java.awt.GridBagLayout());
 
-    setMinimumSize(new java.awt.Dimension(200, 200));
+    setMinimumSize(new java.awt.Dimension(220, 200));
     tfProfileName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
     tfProfileName.setName("name");
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -320,9 +332,9 @@ public class ConnectionEditorPanel
 
     manageDriversButton.setText(ResourceMgr.getString("LblEditDrivers"));
     manageDriversButton.setToolTipText(ResourceMgr.getDescription("LblEditDrivers"));
-    manageDriversButton.setMaximumSize(new java.awt.Dimension(200, 25));
-    manageDriversButton.setMinimumSize(new java.awt.Dimension(70, 25));
-    manageDriversButton.setPreferredSize(new java.awt.Dimension(150, 25));
+    manageDriversButton.setMaximumSize(new java.awt.Dimension(220, 25));
+    manageDriversButton.setMinimumSize(new java.awt.Dimension(200, 25));
+    manageDriversButton.setPreferredSize(new java.awt.Dimension(180, 25));
     manageDriversButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)

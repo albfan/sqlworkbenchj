@@ -88,15 +88,17 @@ public class TextExportWriter
 				out.println("-- as Oracle uses its own names for character sets (e.g. WE8ISO8859P1 for ISO-8859-1)");
 			}
 			out.print("LOAD DATA CHARACTERSET '");
-			if (exporter.getEncoding().equals("UTF-8"))
+			if (exporter.getEncoding().equalsIgnoreCase("UTF-8"))
 			{
 				// Oracle only understand UTF8 not UTF-8
 				out.println("UTF8'");
 			}
 			else
 			{
-				out.println(exporter.getEncoding() + "'");
+				out.println(exporter.getEncoding().toUpperCase() + "'");
 			}
+			File f = new File(exporter.getFullOutputFilename());
+			out.println("INFILE '" + f.getName() + "'");
 			out.println("TRUNCATE");
 			out.print("INTO TABLE ");
 			out.println(resultInfo.getUpdateTable().getTableName());

@@ -52,8 +52,6 @@ public class FlatButton
 	
 	public void setFlatLook()
 	{
-//		this.setUI(new javax.swing.plaf.basic.BasicButtonUI());
-//		this.updateUI();
 		this.setBorder(WbSwingUtilities.FLAT_BUTTON_BORDER);
 	}
 }

@@ -25,6 +25,7 @@ import workbench.db.importer.ProducerFactory;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  * @author support@sql-workbench.net
@@ -143,7 +144,7 @@ public class ImportFileDialog
 				filename = fl.getAbsolutePath();
 
 				String ext = ExtensionFileFilter.getExtension(fl);
-				if (ext.length() == 0)
+				if (StringUtil.isEmptyString(ext))
 				{
 					if (!filename.endsWith(".")) filename = filename + ".";
 					filename = filename + eff.getDefaultExtension();

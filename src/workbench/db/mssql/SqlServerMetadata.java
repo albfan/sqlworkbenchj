@@ -22,6 +22,7 @@ import workbench.db.ProcedureReader;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -39,9 +40,9 @@ public class SqlServerMetadata
 		this.meta = db;
 	}
 	
-	public StrBuffer getProcedureHeader(String catalog, String schema, String procName, int procType)
+	public StringBuffer getProcedureHeader(String catalog, String schema, String procName, int procType)
 	{
-		return StrBuffer.EMPTY_BUFFER;
+		return StringUtil.emptyBuffer();
 	}
 
 	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
@@ -130,22 +131,4 @@ public class SqlServerMetadata
 
 	private final String GET_PROC_SQL = "{call sp_stored_procedures '%', ?}";
 	
-//	private final String GET_PROC_SQL =
-//					 "select db_name()  PROCEDURE_CAT, \n" +
-//           "	  convert(sysname,user_name(o.uid))  PROCEDURE_SCHEM, \n" +
-//           "	  convert(nvarchar(134),o.name) PROCEDURE_NAME, \n" +
-//           "	  null, \n" +
-//           "	  null, \n" +
-//           "	  null, \n" +
-//           "	  null REMARKS, \n" +
-//           "	  case type  \n" +
-//           "	    when 'P' then 1 \n" +
-//           "	    when 'FN' then 2 \n" +
-//					 "      else 0 \n " +
-//           "	  end PROCEDURE_TYPE \n" +
-//           "    from  sysobjects o  \n" +
-//           "    where o.type in ('P', 'FN', 'TF', 'IF') \n" +
-//           "      and permissions (o.id)&32 <> 0 \n" +
-//           "      and user_name(o.uid) like ? \n" +
-//           "	order by 2, 3 \n";
 }

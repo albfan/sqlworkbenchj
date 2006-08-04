@@ -121,10 +121,10 @@ public class StatementFactory
 				else
 				{
 					sql.append(" = ?");
-					if (value instanceof String && "LONG".equals(this.resultInfo.getDbmsTypeName(col)))
-					{
-						value = new OracleLongType(value.toString());
-					}
+//					if (value instanceof String && SqlUtil.isClobType(this.resultInfo.getColumnType(col)))
+//					{
+//						value = new ClobWrapper(value.toString());
+//					}
 					values.add(new ColumnData(value,this.resultInfo.getColumn(col)));
 				}
 			}

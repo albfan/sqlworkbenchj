@@ -726,6 +726,26 @@ public class Settings
 		return result;
 	}
 
+	public boolean getUseAlternateRowColor()
+	{
+		return getBoolProperty("workbench.gui.table.alternate.use", false);
+	}
+	
+	public void setUseAlternateRowColor(boolean flag)
+	{
+		setProperty("workbench.gui.table.alternate.use", flag);
+	}
+	
+	public Color getAlternateRowColor()
+	{
+		return getColor("workbench.gui.table.alternate.color", new Color(252,252,252));
+	}
+	
+	public void setAlternateRowColor(Color c)
+	{
+		setColor("workbench.gui.table.alternate.color", c);
+	}
+	
 	public void setRequiredFieldColor(Color c)
 	{
 		setColor("workbench.gui.edit.requiredfield.color", c);

@@ -95,10 +95,15 @@ public class WbExport
 
 	private String getWrongArgumentsMessage()
 	{
-		boolean headerDefault = getTextHeaderDefault();
 		String msg = ResourceMgr.getString("ErrExportWrongParameters");
 		msg = StringUtil.replace(msg, "%header_flag_default%", Boolean.toString(getTextHeaderDefault()));
+		msg = StringUtil.replace(msg, "%verbose_default%", Boolean.toString(getVerboseXmlDefault()));
 		return msg;
+	}
+	
+	private boolean getVerboseXmlDefault()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.export.xml.default.verbose", true);
 	}
 	
 	private boolean getTextHeaderDefault()
@@ -287,7 +292,7 @@ public class WbExport
 			String xsl = cmdLine.getValue(WbXslt.ARG_STYLESHEET);
 			String output = cmdLine.getValue(WbXslt.ARG_OUTPUT);
 
-			boolean verboseDefault = Settings.getInstance().getBoolProperty("workbench.export.xml.default.verbose", true);
+			boolean verboseDefault = getVerboseXmlDefault(); 
 			boolean verbose = cmdLine.getBoolean("verbosexml", verboseDefault);
 			exporter.setUseVerboseFormat(verbose);
 

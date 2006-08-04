@@ -18,13 +18,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import workbench.resource.Settings;
 
 /**
  * @author  support@sql-workbench.net
  */
 public class FileUtil
 {
-
+	
 	public static final long estimateRecords(String filename)
 		throws IOException
 	{
@@ -44,6 +45,11 @@ public class FileUtil
 		return estimateRecords(f, 5);
 	}
 
+	private static int getBuffSize()
+	{
+		return Settings.getInstance().getIntProperty("workbench.lob.buffsize",32*1024);
+	}
+	
 	public static final long estimateRecords(File f, long sampleLines)
 		throws IOException
 	{
@@ -79,8 +85,7 @@ public class FileUtil
 		long filesize = 0;
 		try
 		{
-			int bufsize = 32*1024;
-			byte[] buffer = new byte[bufsize];
+			byte[] buffer = new byte[getBuffSize()];
 			int bytesRead = in.read(buffer);
 			while (bytesRead != -1)
 			{
@@ -106,7 +111,7 @@ public class FileUtil
 	{
 		if (in == null) return null;
 		StringBuffer result = new StringBuffer(1024);
-		char[] buff = new char[1024];
+		char[] buff = new char[getBuffSize()];
 		int bytesRead = in.read(buff);
 		while (bytesRead > -1)
 		{
@@ -121,7 +126,7 @@ public class FileUtil
 	{
 		if (in == null) return null;
 		ByteBuffer result = new ByteBuffer();
-		byte[] buff = new byte[1024];
+		byte[] buff = new byte[getBuffSize()];
 		int bytesRead = in.read(buff);
 		while (bytesRead > -1)
 		{

@@ -279,7 +279,7 @@ public class VariablePool
 		
 	public String buildVarName(String varName, boolean forPrompt)
 	{
-		StrBuffer result = new StrBuffer(varName.length() + this.prefixLen + this.suffixLen + 1);
+		StringBuffer result = new StringBuffer(varName.length() + this.prefixLen + this.suffixLen + 1);
 		result.append(this.prefix);
 		if (forPrompt) result.append("?");
 		result.append(varName);
@@ -289,7 +289,7 @@ public class VariablePool
 	
 	public String buildVarNamePattern(String varName, boolean forPrompt)
 	{
-		StrBuffer result = new StrBuffer(varName.length() + this.prefixLen + this.suffixLen + 1);
+		StringBuffer result = new StringBuffer(varName.length() + this.prefixLen + this.suffixLen + 1);
 		
 		result.append(StringUtil.quoteRegexMeta(prefix));
 		if (forPrompt)

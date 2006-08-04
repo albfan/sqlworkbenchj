@@ -38,6 +38,7 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.menu.CutCopyPastePopup;
 import workbench.interfaces.ClipboardSupport;
 import workbench.resource.ResourceMgr;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -116,13 +117,14 @@ public class ProfileTree
 		
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
 		
-		Object g = node.getUserObject();
-		if (g instanceof GroupNode)
-		{
-			GroupNode gnode = (GroupNode)g;
-			return !gnode.isDefaultGroup();
-		}
-		return false;
+//		Object g = node.getUserObject();
+		return node.getAllowsChildren();
+//		if (g instanceof GroupNode) return true;
+//		{
+//			GroupNode gnode = (GroupNode)g;
+//			return !gnode.isDefaultGroup();
+//		}
+//		return false;
 	}
 
 	public void treeNodesChanged(TreeModelEvent e)
@@ -141,14 +143,13 @@ public class ProfileTree
 				// a GroupNode object as the UserObject, this has
 				// to be re-assigned here!
 				newGroup = (String)data;
-				group.setUserObject(GroupNode.createGroupNode(newGroup));
+				//group.setUserObject(newGroup);
 			}
-			else if (data instanceof GroupNode)
-			{
-				GroupNode groupNode = (GroupNode)data;
-				newGroup = groupNode.getGroup();
-			}
-			
+//			else if (data instanceof GroupNode)
+//			{
+//				GroupNode groupNode = (GroupNode)data;
+//				newGroup = groupNode.getGroup();
+//			}
 			
 			int count = profileModel.getChildCount(group);
 			for (int i = 0; i < count; i++)
@@ -197,11 +198,12 @@ public class ProfileTree
 	{
 		if (groupList == null) return;
 		TreePath[] groupNodes = this.profileModel.getGroupNodes();
+		if (groupNodes == null) return;
 		for (int i = 0; i < groupNodes.length; i++)
 		{
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)groupNodes[i].getLastPathComponent();
-			GroupNode g = (GroupNode)node.getUserObject();
-			if ((g.isDefaultGroup() && groupList.contains(GroupNode.DEFAULT_GROUP_MARKER)) || groupList.contains(g.getGroup()))
+			String g = (String)node.getUserObject();
+			if (groupList.contains(g))
 			{
 				if (!isExpanded(groupNodes[i])) expandPath(groupNodes[i]);
 			}
@@ -222,15 +224,8 @@ public class ProfileTree
 			if (isExpanded(groupNodes[i]))
 			{
 				DefaultMutableTreeNode node = (DefaultMutableTreeNode)groupNodes[i].getLastPathComponent();
-				GroupNode g = (GroupNode)node.getUserObject();
-				if (g.isDefaultGroup())
-				{
-					result.add(GroupNode.DEFAULT_GROUP_MARKER);
-				}
-				else
-				{
-					result.add(g.getGroup());
-				}
+				String g = (String)node.getUserObject();
+				result.add(g);
 			}
 		}
 		return result;
@@ -300,6 +295,7 @@ public class ProfileTree
 	 */
 	public void selectProfile(String profile)
 	{
+		if (profileModel == null) return;
 		TreePath path = this.profileModel.getPath(profile);
 		if (path == null)
 		{
@@ -426,8 +422,7 @@ public class ProfileTree
 			if (group == null) return;
 			if (!group.getAllowsChildren()) return;
 			
-			GroupNode go = (GroupNode)group.getUserObject();
-			groupName = go.getGroup();
+			groupName = (String)group.getUserObject();
 			
 			for (int i = 0; i < clipboardNodes.length; i++)
 			{
@@ -483,7 +478,13 @@ public class ProfileTree
 	public String addProfileGroup()
 	{
 		String group = WbSwingUtilities.getUserInput(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("LblNewProfileGroup"), "");
-		if (group == null) return null;
+		if (StringUtil.isEmptyString(group)) return null;
+		List groups = this.profileModel.getGroups();
+		if (groups.contains(group))
+		{
+			WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("ErrGroupNotUnique"));
+			return null;
+		}
 		TreePath path = this.profileModel.addGroup(group);
 		selectPath(path);
 		return group;

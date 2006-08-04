@@ -30,7 +30,6 @@ import workbench.interfaces.Connectable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.util.StrBuffer;
 import workbench.util.WbThread;
 
 /**
@@ -226,18 +225,17 @@ public class ConnectionSelector
 		}
 		catch (SQLException se)
 		{
-			error = se.getMessage();
-
-			StrBuffer logmsg = new StrBuffer(200);
-			logmsg.append(se.getMessage());
+			StringBuffer logmsg = new StringBuffer(200);
+			logmsg.append(ExceptionUtil.getDisplay(se));
 			SQLException next = se.getNextException();
 			while (next != null)
 			{
 				logmsg.append("\n");
-				logmsg.append(next.getMessage());
+				logmsg.append(ExceptionUtil.getDisplay(next));
 				next = next.getNextException();
 			}
-
+			error = logmsg.toString();
+			
 			LogMgr.logError("ConnectionSelector.doConnect()", "SQL Exception when connecting", se);
 		}
 		catch (Throwable e)

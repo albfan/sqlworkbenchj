@@ -41,7 +41,7 @@ class ProfileListModel
 	private	DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Profiles");
 	private int size;
 	
-	public ProfileListModel(Map aProfileList)
+	public ProfileListModel()
 	{
 		super(null, true);
 		buildTree();
@@ -84,6 +84,7 @@ class ProfileListModel
 
 	private DefaultMutableTreeNode findGroupNode(String group)
 	{
+		if (this.rootNode == null) return null;
 		if (StringUtil.isEmptyString(group))
 		{
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)getChild(this.rootNode, 0);
@@ -96,8 +97,7 @@ class ProfileListModel
 			{
 				DefaultMutableTreeNode n = (DefaultMutableTreeNode)getChild(rootNode, i);
 				if (n == null) continue;
-				GroupNode g = (GroupNode)n.getUserObject();
-				String name = g.getGroup();
+				String name = (String)n.getUserObject();
 				if (name.equals(group)) 
 				{
 					return n;
@@ -109,6 +109,7 @@ class ProfileListModel
 	
 	public TreePath[] getGroupNodes()
 	{
+		if (this.rootNode == null) return null;
 		int children = this.getChildCount(this.rootNode);
 		TreePath[] nodes = new TreePath[children];
 		for (int i = 0; i < children; i++)
@@ -122,14 +123,14 @@ class ProfileListModel
 	
 	public List getGroups()
 	{
+		if (this.rootNode == null) return null;
 		List result = new LinkedList();
 		int children = this.getChildCount(this.rootNode);
 		for (int i = 1; i < children; i++)
 		{
 			DefaultMutableTreeNode n = (DefaultMutableTreeNode)getChild(rootNode, i);
 			if (n == null) continue;
-			GroupNode g = (GroupNode)n.getUserObject();
-			String group = g.getGroup();
+			String group = (String)n.getUserObject();
 			result.add(group);
 		}
 		return result;
@@ -159,6 +160,7 @@ class ProfileListModel
 	
 	public TreePath getPath(String profileName)
 	{
+		if (profileName == null) return null;
 		Collection profiles = ConnectionMgr.getInstance().getProfiles().values();
 		Iterator itr = profiles.iterator();
 		while (itr.hasNext())
@@ -184,12 +186,12 @@ class ProfileListModel
 		{
 			int children = this.getChildCount(this.rootNode);
 			// find the profile group
-			for (int i = 1; i < children; i++)
+			for (int i = 0; i < children; i++)
 			{
 				DefaultMutableTreeNode n = (DefaultMutableTreeNode)getChild(rootNode, i);
 				if (n == null) continue;
-				GroupNode g = (GroupNode)n.getUserObject();
-				if (pGroup.equals(g.getGroup())) 
+				String g = (String)n.getUserObject();
+				if (pGroup.equals(g)) 
 				{
 					groupNode = n;
 					break;
@@ -230,29 +232,33 @@ class ProfileListModel
 	public TreePath addGroup(String name)
 	{
 		if (name == null) return null;
-		DefaultMutableTreeNode node = new DefaultMutableTreeNode(GroupNode.createGroupNode(name), true);
+		DefaultMutableTreeNode node = new DefaultMutableTreeNode(name, true);
 		this.insertNodeInto(node, this.rootNode, this.rootNode.getChildCount());
 		return new TreePath(new Object[] { rootNode, node });
+	}
+
+	public void addEmptyProfile()
+	{
+		ConnectionProfile dummy = new ConnectionProfile();
+		dummy.setName(ResourceMgr.getString("TxtEmptyProfileName"));
+		dummy.setUrl("jdbc:");
+		dummy.setUsername(ResourceMgr.getString("TxtEmptyProfileUser"));
+		ConnectionMgr.getInstance().addProfile(dummy);
+		this.changed = true;
+		buildTree();
 	}
 	
 	private void buildTree()
 	{
 		ArrayList profiles = new ArrayList();
 		profiles.addAll(ConnectionMgr.getInstance().getProfiles().values());
-		
-		if (profiles.size() == 0)
-		{
-			ConnectionProfile dummy = new ConnectionProfile();
-			dummy.setName(ResourceMgr.getString("TxtEmptyProfileName"));
-			dummy.setUrl("jdbc:");
-			dummy.setUsername(ResourceMgr.getString("TxtEmptyProfileUser"));
-			// Add dummy profile
-			profiles.add(dummy);
-		}
+		if (profiles.size() == 0) return;
 		
 		sortList(profiles);
 		
 		Map groupMap = new HashMap(profiles.size());
+		List defaultProfiles = new ArrayList();
+		
 		Iterator itr = profiles.iterator();
 		
 		this.size = 0;
@@ -261,23 +267,44 @@ class ProfileListModel
 		{
 			ConnectionProfile profile = (ConnectionProfile)itr.next();
 			String group = profile.getGroup();
-			if (StringUtil.isEmptyString(group)) group = GroupNode.DEFAULT_GROUP_MARKER;
-			List l = (List)groupMap.get(group);
-			if (l == null)
+			if (StringUtil.isEmptyString(group)) 
 			{
-				l = new ArrayList();
-				groupMap.put(group, l);
+				defaultProfiles.add(profile);
 			}
-			l.add(profile);
+			else
+			{
+				List l = (List)groupMap.get(group);
+				if (l == null)
+				{
+					l = new ArrayList();
+					groupMap.put(group, l);
+				}
+				l.add(profile);
+			}
 			this.size ++;
+		}
+		
+		// Make sure the "default" profiles (i.e. those without a group) 
+		// are put at the front, this is for backward compatibility to older
+		// versions that do not have profile groups
+		if (defaultProfiles.size() > 0)
+		{
+			DefaultMutableTreeNode defaultNode = new DefaultMutableTreeNode(ResourceMgr.getString("LblDefGroup"), true);
+			Collections.sort(defaultProfiles, StringUtil.getCaseInsensitiveComparator());
+			rootNode.add(defaultNode);
+			Iterator dg = defaultProfiles.iterator();
+			while (dg.hasNext())
+			{
+				ConnectionProfile prof = (ConnectionProfile)dg.next();
+				DefaultMutableTreeNode profNode = new DefaultMutableTreeNode(prof, false);
+				defaultNode.add(profNode);
+			}
 		}
 		
 		// Make sure the default group is added as the first item!
 		List groups = new ArrayList();
 		groups.addAll(groupMap.keySet());
-		groups.remove(GroupNode.DEFAULT_GROUP_MARKER);
 		Collections.sort(groups, StringUtil.getCaseInsensitiveComparator());
-		groups.add(0, GroupNode.DEFAULT_GROUP_MARKER);
 		
 		// Now add all the other groups
 		itr = groups.iterator();
@@ -285,15 +312,7 @@ class ProfileListModel
 		{
 			String group = (String)itr.next();
 			
-			DefaultMutableTreeNode groupNode = null;
-			if (group == GroupNode.DEFAULT_GROUP_MARKER)
-			{
-				groupNode = new DefaultMutableTreeNode(GroupNode.DEFAULT_GROUP, true);
-			}
-			else
-			{
-				groupNode = new DefaultMutableTreeNode(GroupNode.createGroupNode(group), true);
-			}
+			DefaultMutableTreeNode groupNode = new DefaultMutableTreeNode(group, true);
 			rootNode.add(groupNode);
 			List groupProfiles = (List)groupMap.get(group);
 			

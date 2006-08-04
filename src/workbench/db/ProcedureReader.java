@@ -39,7 +39,7 @@ public interface ProcedureReader
 	public static final String PROC_RESULT_YES = "RESULT";
 	public static final String PROC_RESULT_NO = "NO RESULT";
 	
-	StrBuffer getProcedureHeader(String catalog, String schema, String procName, int procType);
+	StringBuffer getProcedureHeader(String catalog, String schema, String procName, int procType);
 	DataStore getProcedures(String aCatalog, String aSchema)
 		throws SQLException;
 	DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)

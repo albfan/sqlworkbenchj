@@ -19,6 +19,7 @@ import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  * @author  support@sql-workbench.net
@@ -33,9 +34,9 @@ public class JdbcProcedureReader
 		this.dbMeta = meta;
 	}
 	
-	public StrBuffer getProcedureHeader(String catalog, String schema, String procName, int procType)
+	public StringBuffer getProcedureHeader(String catalog, String schema, String procName, int procType)
 	{
-		return StrBuffer.EMPTY_BUFFER;
+		return StringUtil.emptyBuffer();
 	}
 	
 	public DataStore getProcedures(String aCatalog, String aSchema)

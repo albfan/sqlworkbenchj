@@ -26,7 +26,6 @@ import java.util.List;
 
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 
 /**
  * A class to execute a SQL Statement and to create the statement
@@ -88,17 +87,17 @@ public class DmlStatement
 		for (int i=0; i < this.values.size(); i++)
 		{
 			ColumnData data = (ColumnData)this.values.get(i);
+			int type = data.getIdentifier().getDataType();
 			Object value = data.getValue();
-			if (value instanceof NullValue)
+			if (value == null || value instanceof NullValue)
 			{
-				NullValue nv = (NullValue)value;
-				stmt.setNull(i+1, nv.getType());
+				stmt.setNull(i+1, type);
 			}
-			else if (value instanceof OracleLongType)
+			else if (SqlUtil.isClobType(type) && value instanceof String)
 			{
-				OracleLongType longValue = (OracleLongType)value;
-				Reader in = new StringReader(longValue.getValue());
-				stmt.setCharacterStream(i + 1, in, longValue.getLength());
+				String s = (String)value;
+				Reader in = new StringReader(s);
+				stmt.setCharacterStream(i + 1, in, s.length());
 				readers.add(in);
 			}
 			else if (value instanceof File)
@@ -181,7 +180,7 @@ public class DmlStatement
 		
 		if (this.values.size() > 0)
 		{
-			StrBuffer result = new StrBuffer(this.sql.length() + this.values.size() * 10);
+			StringBuffer result = new StringBuffer(this.sql.length() + this.values.size() * 10);
 			boolean inQuotes = false;
 			int parmIndex = 0;
 			for (int i = 0; i < this.sql.length(); ++i)
@@ -220,7 +219,7 @@ public class DmlStatement
 		boolean useConcatFunc = (this.concatFunction != null);
 		
 		if (!useConcatFunc && this.concatString == null) this.concatString = "||";
-		StrBuffer result = new StrBuffer();
+		StringBuffer result = new StringBuffer();
 		boolean funcAppended = false;
 		boolean quotePending = false;
 		
@@ -236,7 +235,7 @@ public class DmlStatement
 				{
 					if (!funcAppended)
 					{
-						StrBuffer temp = new StrBuffer(concatFunction);
+						StringBuffer temp = new StringBuffer(concatFunction);
 						temp.append('(');
 						temp.append(result);
 						result = temp;

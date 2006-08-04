@@ -145,6 +145,7 @@ public class StringPropertyEditor
 	 */
 	public void focusGained(FocusEvent e)
 	{
+		this.selectAll();
 	}
 	
 	/** Invoked when a component loses the keyboard focus.

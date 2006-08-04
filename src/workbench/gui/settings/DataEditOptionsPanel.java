@@ -13,6 +13,7 @@ package workbench.gui.settings;
 
 import javax.swing.JPanel;
 import workbench.gui.components.DividerBorder;
+import workbench.gui.components.FlatButton;
 import workbench.gui.components.WbCheckBoxLabel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -38,6 +39,7 @@ public class DataEditOptionsPanel
 	public void restoreSettings()
 	{
 		pkMapFile.setCaretPosition(0);
+		alternateColor.setSelectedColor(Settings.getInstance().getAlternateRowColor());
 		requiredFieldColor.setSelectedColor(Settings.getInstance().getRequiredFieldColor());
 		dataFont.setSelectedFont(Settings.getInstance().getDataFont());
 	}
@@ -45,6 +47,8 @@ public class DataEditOptionsPanel
 	public void saveSettings()
 	{
 		Settings set = Settings.getInstance();
+		set.setUseAlternateRowColor(useAlternateRowColors.isSelected());
+		set.setAlternateRowColor(alternateColor.getSelectedColor());
 		set.setAllowRowHeightResizing(rowHeightResize.isSelected());
 		set.setDataFont(dataFont.getSelectedFont());
 		set.setRequiredFieldColor(requiredFieldColor.getSelectedColor());
@@ -65,7 +69,7 @@ public class DataEditOptionsPanel
     pkMapFileLabel = new javax.swing.JLabel();
     jPanel3 = new javax.swing.JPanel();
     pkMapFile = new javax.swing.JTextField();
-    selectMapFile = new javax.swing.JButton();
+    selectMapFile = new FlatButton();
     previewDmlLabel = new WbCheckBoxLabel();
     previewDml = new javax.swing.JCheckBox();
     labelRowHeight = new WbCheckBoxLabel();
@@ -76,6 +80,10 @@ public class DataEditOptionsPanel
     dataFont = new workbench.gui.components.WbFontPicker();
     highlightRequiredLabel = new WbCheckBoxLabel();
     highlightRequired = new javax.swing.JCheckBox();
+    alternatingColorsLabel = new WbCheckBoxLabel();
+    useAlternateRowColors = new javax.swing.JCheckBox();
+    alternateColorLabel = new javax.swing.JLabel();
+    alternateColor = new workbench.gui.components.WbColorPicker();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -99,7 +107,6 @@ public class DataEditOptionsPanel
     jPanel3.add(pkMapFile, java.awt.BorderLayout.CENTER);
 
     selectMapFile.setText("...");
-    selectMapFile.setBorder(javax.swing.BorderFactory.createEtchedBorder());
     selectMapFile.setMaximumSize(new java.awt.Dimension(22, 22));
     selectMapFile.setMinimumSize(new java.awt.Dimension(22, 22));
     selectMapFile.setPreferredSize(new java.awt.Dimension(22, 22));
@@ -110,11 +117,12 @@ public class DataEditOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(7, 10, 0, 15);
+    gridBagConstraints.insets = new java.awt.Insets(7, 8, 0, 15);
     add(jPanel3, gridBagConstraints);
 
     previewDmlLabel.setLabelFor(previewDml);
@@ -124,7 +132,7 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(14, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
     add(previewDmlLabel, gridBagConstraints);
 
     previewDml.setFont(null);
@@ -137,6 +145,7 @@ public class DataEditOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(10, 9, 0, 11);
@@ -149,7 +158,7 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
     add(labelRowHeight, gridBagConstraints);
 
     rowHeightResize.setSelected(Settings.getInstance().getAllowRowHeightResizing());
@@ -161,26 +170,27 @@ public class DataEditOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 9, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(7, 9, 0, 11);
     add(rowHeightResize, gridBagConstraints);
 
     requiredFieldLabel.setText(ResourceMgr.getString("LblReqFldColor"));
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(9, 8, 0, 0);
     add(requiredFieldLabel, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 25);
+    gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 25);
     add(requiredFieldColor, gridBagConstraints);
 
     dataFontLabel.setText(ResourceMgr.getString("LblDataFont"));
@@ -196,9 +206,10 @@ public class DataEditOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
+    gridBagConstraints.insets = new java.awt.Insets(5, 8, 0, 15);
     add(dataFont, gridBagConstraints);
 
     highlightRequiredLabel.setLabelFor(highlightRequired);
@@ -208,7 +219,7 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
     add(highlightRequiredLabel, gridBagConstraints);
 
     highlightRequired.setFont(null);
@@ -223,8 +234,50 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 9, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(9, 9, 0, 0);
     add(highlightRequired, gridBagConstraints);
+
+    alternatingColorsLabel.setLabelFor(useAlternateRowColors);
+    alternatingColorsLabel.setText(ResourceMgr.getString("LblUseAltRowColor"));
+    alternatingColorsLabel.setToolTipText(ResourceMgr.getDescription("LblUseAltRowColor"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
+    add(alternatingColorsLabel, gridBagConstraints);
+
+    useAlternateRowColors.setFont(null);
+    useAlternateRowColors.setSelected(Settings.getInstance().getUseAlternateRowColor());
+    useAlternateRowColors.setText("");
+    useAlternateRowColors.setBorder(null);
+    useAlternateRowColors.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    useAlternateRowColors.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    useAlternateRowColors.setIconTextGap(5);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 9, 0, 0);
+    add(useAlternateRowColors, gridBagConstraints);
+
+    alternateColorLabel.setText(ResourceMgr.getString("LblAlternateRowColor"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 8, 0, 0);
+    add(alternateColorLabel, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(3, 4, 0, 25);
+    add(alternateColor, gridBagConstraints);
 
   }
 
@@ -246,6 +299,9 @@ public class DataEditOptionsPanel
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private workbench.gui.components.WbColorPicker alternateColor;
+  private javax.swing.JLabel alternateColorLabel;
+  private javax.swing.JLabel alternatingColorsLabel;
   private workbench.gui.components.WbFontPicker dataFont;
   private javax.swing.JLabel dataFontLabel;
   private javax.swing.JCheckBox highlightRequired;
@@ -260,6 +316,7 @@ public class DataEditOptionsPanel
   private javax.swing.JLabel requiredFieldLabel;
   private javax.swing.JCheckBox rowHeightResize;
   private javax.swing.JButton selectMapFile;
+  private javax.swing.JCheckBox useAlternateRowColors;
   // End of variables declaration//GEN-END:variables
 
 }

@@ -23,6 +23,7 @@ import java.text.DecimalFormat;
 
 import workbench.log.LogMgr;
 import workbench.util.FileUtil;
+import workbench.util.SqlUtil;
 
 /**
  *	A class to hold the data for a single row retrieved from the database.
@@ -99,13 +100,21 @@ public class RowData
 				{
 					value = rs.getTimestamp(i+1);
 				}
-				else if (type == Types.LONGVARBINARY)
+				//else if (type == java.sql.Types.LONGVARBINARY) 
+				else if (SqlUtil.isBlobType(type))
 				{
 					InputStream in = null;
 					try
 					{
-						in = rs.getBinaryStream(i);
-						value = FileUtil.readBytes(in);
+						in = rs.getBinaryStream(i+1);
+						if (in != null && !rs.wasNull())
+						{
+							value = FileUtil.readBytes(in);
+						}
+						else 
+						{
+							value = null;
+						}
 					}
 					catch (IOException e)
 					{
@@ -117,15 +126,13 @@ public class RowData
 						try { in.close(); } catch (Throwable th) {}
 					}
 				}
-				else if (type == java.sql.Types.LONGVARCHAR)
+				//else if (type == java.sql.Types.LONGVARCHAR)
+				else if (SqlUtil.isClobType(type))
 				{
-					// Older Oracle driver are not happy about using getObject() on a LONG column.
-					// According to the JDBC specs, using getCharacterStream() should also 
-					// work with other JDBC drivers
 					Reader in = null;
 					try
 					{
-						in = rs.getCharacterStream(i);
+						in = rs.getCharacterStream(i+1);
 						if (in != null && !rs.wasNull())
 						{
 							value = FileUtil.readCharacters(in);
@@ -138,6 +145,9 @@ public class RowData
 					catch (IOException e)
 					{
 						LogMgr.logError("RowData.read()", "Error retrieving data for column '" + info.getColumnName(i) + "'", e);
+						// fallback to getObject()
+						
+						value = rs.getObject(i);
 					}
 					finally
 					{
@@ -148,21 +158,21 @@ public class RowData
 				{
 					value = rs.getObject(i + 1);
 				}
-				if (type == Types.CLOB)
-				{
-					// "Convert" a CLOB to a String object 
-					// This makes handling the value much easier
-					try
-					{
-						Clob clob = (Clob)value;
-						int len = (int)clob.length();
-						value = clob.getSubString(1, len);
-					}
-					catch (Exception e)
-					{
-						value = null;
-					}
-				}
+//				if (type == Types.CLOB)
+//				{
+//					// "Convert" a CLOB to a String object 
+//					// This makes handling the value much easier
+//					try
+//					{
+//						Clob clob = (Clob)value;
+//						int len = (int)clob.length();
+//						value = clob.getSubString(1, len);
+//					}
+//					catch (Exception e)
+//					{
+//						LogMgr.logError("RowData.read()", "Error when converting CLOB column to String",e);
+//					}
+//				}
 			}
 			catch (SQLException e)
 			{

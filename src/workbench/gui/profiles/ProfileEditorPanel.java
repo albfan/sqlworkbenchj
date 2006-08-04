@@ -15,6 +15,7 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.event.MouseListener;
+import java.util.Collection;
 import java.util.List;
 import javax.swing.JPanel;
 
@@ -58,6 +59,7 @@ public class ProfileEditorPanel
 	private CopyProfileAction copyItem;
 	private DeleteListEntryAction deleteItem;
 	private NewGroupAction newGroup;
+	private boolean dummyAdded;
 	
 	/** Creates new form ProfileEditor */
 	public ProfileEditorPanel(String lastProfileKey)
@@ -124,7 +126,14 @@ public class ProfileEditorPanel
 		{
 			public void run()
 			{
-				profileTree.requestFocus();
+				if (dummyAdded)
+				{
+					connectionEditor.setFocusToTitle();
+				}
+				else
+				{
+					profileTree.requestFocus();
+				}
 			}
 		});
 	}
@@ -143,7 +152,7 @@ public class ProfileEditorPanel
 	public void restoreSettings()
 	{
 		int pos = Settings.getInstance().getProfileDividerLocation();
-		if (pos == -1) pos = 210;
+		if (pos < 210) pos = 210; // make sure the whole toolbar for the tree is visible!
 		this.jSplitPane1.setDividerLocation(pos);
 		String groups = Settings.getInstance().getProperty("workbench.profiles.expandedgroups", null);
 		List l = StringUtil.stringToList(groups, ",", true, true);
@@ -159,7 +168,14 @@ public class ProfileEditorPanel
 	
 	private void buildTree()
 	{
-		this.model = new ProfileListModel(ConnectionMgr.getInstance().getProfiles());
+		this.dummyAdded = false;
+		Collection c = ConnectionMgr.getInstance().getProfiles().values();
+		this.model = new ProfileListModel();
+		if (c.size() == 0) 
+		{
+			this.model.addEmptyProfile();
+			this.dummyAdded = true;
+		}
 		this.profileTree.setModel(this.model);
 		this.connectionEditor.setSourceList(this.model);
 	}
@@ -344,14 +360,15 @@ public class ProfileEditorPanel
 		{
 			// Get the group of the currently selected profile;
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getPathComponent(1);
-			Object o = node.getUserObject();
-			if (o instanceof GroupNode)
+			if (node.getAllowsChildren())
 			{
-				return ((GroupNode)o).getGroup();
+				String g = (String)node.getUserObject();
+				return g;
 			}
 		}
 		return null;
 	}
+
 	public void saveItem() throws Exception
 	{
 		ConnectionMgr conn = ConnectionMgr.getInstance();

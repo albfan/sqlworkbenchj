@@ -53,7 +53,7 @@ public class WbButton
 		super(aText);
 		init();
 	}
-
+	
 	public WbButton(Icon i)
 	{
 		super(i);
@@ -73,7 +73,7 @@ public class WbButton
 	
 	public void setText(String newText)
 	{
-		if (newText == null) 
+		if (newText == null)
 		{
 			super.setText(null);
 			return;
@@ -91,18 +91,23 @@ public class WbButton
 			super.setText(newText);
 		}
 	}
-	
+
+	public void setBasicUI()
+	{
+		this.setUI(new javax.swing.plaf.basic.BasicButtonUI());
+	}
 	public void setRollover(boolean flag)
 	{
 		this.setRolloverEnabled(flag);
 		if (flag)
 		{
+			setBasicUI();
 			UIDefaults table = UIManager.getLookAndFeelDefaults();
 			Border out = new BasicBorders.RolloverButtonBorder(
-					   table.getColor("controlShadow"),
-             table.getColor("controlDkShadow"),
-             table.getColor("controlHighlight"),
-             table.getColor("controlLtHighlight"));
+				table.getColor("controlShadow"),
+				table.getColor("controlDkShadow"),
+				table.getColor("controlHighlight"),
+				table.getColor("controlLtHighlight"));
 			Border in = new EmptyBorder(3,3,3,3);
 			this.rolloverBorder = new CompoundBorder(out, in);
 			this.emptyBorder = new EmptyBorder(6,6,6,6);;
@@ -114,24 +119,24 @@ public class WbButton
 			this.addMouseListener(this);
 		}
 	}
-
+	
 	public void mouseClicked(MouseEvent e)
 	{
 	}
-
+	
 	public void mousePressed(MouseEvent e)
 	{
 	}
-
+	
 	public void mouseReleased(MouseEvent e)
 	{
 	}
-
+	
 	public void mouseEntered(MouseEvent e)
 	{
 		this.setBorder(this.rolloverBorder);
 	}
-
+	
 	public void mouseExited(MouseEvent e)
 	{
 		this.setBorder(this.emptyBorder);

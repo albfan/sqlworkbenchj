@@ -45,7 +45,7 @@ public class ObjectScripter
 
 	private Map objectList;
 	private DbMetadata meta;
-	private StrBuffer script;
+	private StringBuffer script;
 	private ScriptGenerationMonitor progressMonitor;
 	private WbConnection dbConnection;
 	private boolean cancel;
@@ -79,7 +79,7 @@ public class ObjectScripter
 		{
 			this.dbConnection.setBusy(true);
 			this.cancel = false;
-			this.script = new StrBuffer(this.objectList.size() * 500);
+			this.script = new StringBuffer(this.objectList.size() * 500);
 			if (!cancel) this.appendObjectType(TYPE_SEQUENCE);
 			if (!cancel) this.appendObjectType(TYPE_TABLE);
 			if (!cancel) this.appendObjectType(TYPE_VIEW);
@@ -223,7 +223,7 @@ public class ObjectScripter
 		int colCount = tableDef.getRowCount();
 		if (colCount == 0) return StringUtil.EMPTY_STRING;
 
-		StrBuffer sql = new StrBuffer(colCount * 80);
+		StringBuffer sql = new StringBuffer(colCount * 80);
 
 		sql.append("SELECT ");
 		for (int i=0; i < colCount; i++)

@@ -112,6 +112,7 @@ public abstract class RowDataConverter
 			this.factory.done();
 		}
 	}
+	
 	protected OutputStream createOutputStream(File output)
 		throws IOException
 	{

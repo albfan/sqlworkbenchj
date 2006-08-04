@@ -354,6 +354,7 @@ public class DataPumper
 		try
 		{
 			this.sourceConnection = ConnectionMgr.getInstance().getConnection(this.sourceProfile, "Dp-Source");
+			this.sourceConnection.getMetadata().disableOutput();
 		}
 		catch (Exception e)
 		{
@@ -412,6 +413,7 @@ public class DataPumper
 		try
 		{
 			this.targetConnection = ConnectionMgr.getInstance().getConnection(this.targetProfile, "Dp-Target");
+			this.targetConnection.getMetadata().disableOutput();
 		}
 		catch (Exception e)
 		{

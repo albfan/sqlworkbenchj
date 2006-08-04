@@ -402,7 +402,14 @@ public class DbExplorerPanel
 			}
 			else if (aConnection.getProfile() != null)
 			{
-				setSwitchCatalog(aConnection.getProfile().getUseSeparateConnectionPerTab());
+				boolean separateConnection = aConnection.getProfile().getUseSeparateConnectionPerTab();
+				setSwitchCatalog(separateConnection);
+				// when dealing with tables that have LONG or LONG RAW columns
+				// and DBMS_OUTPUT was enabled, then retrieval of those columns
+				// does not work. If we have separate connections for each tab
+				// we can safely disable the DBMS_OUTPUT on this connection 
+				// as there won't be a way to view the output anyway
+				if (separateConnection) aConnection.getMetadata().disableOutput();
 			}
 			
 			this.connectionInitPending = true;

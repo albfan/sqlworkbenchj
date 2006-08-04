@@ -27,6 +27,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import workbench.WbManager;
 import workbench.gui.components.*;
+import workbench.resource.Settings;
 
 /**
  * @author  support@sql-workbench.net
@@ -40,6 +41,8 @@ public class BlobColumnRenderer
 	private WbTable currentTable;
 	private int currentRow;
 	private int currentColumn;
+	private Color alternateColor = Settings.getInstance().getAlternateRowColor();
+	private boolean useAlternatingColors = Settings.getInstance().getUseAlternateRowColor();
 	
 	public BlobColumnRenderer()
 	{
@@ -53,8 +56,7 @@ public class BlobColumnRenderer
 		this.displayPanel.setFont(aFont);
 	}
 
-	public Component getTableCellEditorComponent(JTable table, Object value,
-							boolean isSelected,int row, int column)
+	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,int row, int column)
 	{
 		return getComponent(table, value, true, isSelected, row, column);
 	}
@@ -77,7 +79,14 @@ public class BlobColumnRenderer
 		else
 		{
 			this.displayPanel.setForeground(table.getForeground());
-			this.displayPanel.setBackground(table.getBackground());
+			if (useAlternatingColors && ((row % 2) == 1))
+			{
+				this.displayPanel.setBackground(this.alternateColor);
+			}
+			else
+			{
+				this.displayPanel.setBackground(table.getBackground());
+			}
 		}
 		
 		currentValue = value;

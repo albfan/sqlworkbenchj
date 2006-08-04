@@ -146,6 +146,7 @@ public class NumberPropertyEditor
 	 */
 	public void focusGained(FocusEvent e)
 	{
+		this.selectAll();
 	}
 	
 	/** Invoked when a component loses the keyboard focus.

@@ -113,7 +113,7 @@ public class SqlLiteralFormatter
 		if (value == null) return "NULL";
 		int type = data.getIdentifier().getDataType();
 		
-		if (value instanceof String || value instanceof OracleLongType)
+		if (value instanceof String)
 		{
 			String t = (String)value;
 			StringBuffer realValue = new StringBuffer(t.length() + 10);

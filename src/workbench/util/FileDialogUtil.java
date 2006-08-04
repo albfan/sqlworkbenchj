@@ -175,7 +175,7 @@ public class FileDialogUtil
 				filename = fl.getAbsolutePath();
 
 				String ext = ExtensionFileFilter.getExtension(fl);
-				if (ext.length() == 0)
+				if (StringUtil.isEmptyString(ext))
 				{
 					if (!filename.endsWith(".")) filename = filename + ".";
 					filename = filename + eff.getDefaultExtension();
@@ -278,7 +278,7 @@ public class FileDialogUtil
 				filename = fl.getAbsolutePath();
 
 				String ext = ExtensionFileFilter.getExtension(fl);
-				if (ext.length() == 0)
+				if (StringUtil.isEmptyString(ext))
 				{
 					if (!filename.endsWith(".")) filename = filename + ".";
 					filename = filename + ExtensionFileFilter.WORKSPACE_EXT;
