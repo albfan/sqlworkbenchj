@@ -16,17 +16,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.*;
 import java.sql.Types;
-import workbench.WbManager;
+import workbench.TestUtil;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.storage.filter.AndExpression;
 import workbench.storage.filter.ComplexExpression;
-import workbench.storage.filter.GreaterThanComparator;
 import workbench.storage.filter.LessThanComparator;
 import workbench.storage.filter.NumberEqualsComparator;
 import workbench.storage.filter.OrExpression;
 import workbench.storage.filter.StartsWithComparator;
 import workbench.storage.filter.StringEqualsComparator;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 
 /**
@@ -45,12 +45,10 @@ public class DataStoreTest
 		super(testName);
 		try
 		{
-			File tempdir = new File(System.getProperty("java.io.tmpdir"));
-			File dir = new File(tempdir, "wbtest");
-			dir.mkdir();
-			basedir = dir.getAbsolutePath();
-			File db = new File(basedir, "datastoretest");
-			dbName = db.getAbsolutePath();
+			TestUtil util = new TestUtil();
+			util.prepareEnvironment();
+			this.basedir = util.getBaseDir();
+			this.dbName = util.getDbName();
 		}
 		catch (Exception e)
 		{
@@ -84,7 +82,7 @@ public class DataStoreTest
 		con.commit();
 		WbConnection wb = new WbConnection(con);
 		
-		// Create a dummy profiles as the profile
+		// Create a dummy profiles because the profile
 		// is used all around the Wb sources
 		ConnectionProfile prof = new ConnectionProfile();
 		prof.setAutocommit(false);
@@ -102,7 +100,6 @@ public class DataStoreTest
 
 	public void testRetrieve()
 	{
-		WbManager.getInstance().prepareForTest(basedir);
 		WbConnection con = null;
 		Statement stmt = null;
 		try
@@ -139,7 +136,6 @@ public class DataStoreTest
 			ds.setValue(row, 0, new Integer(42));
 			ds.setValue(row, 1, "Beeblebrox");
 			assertEquals("Row not inserted", rowcount + 1, ds.getRowCount());
-			ds.updateDb(con, null);
 			ds.setValue(row, 2, "Zaphod");
 			ds.updateDb(con, null);
 			
@@ -174,7 +170,7 @@ public class DataStoreTest
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			fail();
+			fail(ExceptionUtil.getDisplay(e));
 		}
 		finally
 		{

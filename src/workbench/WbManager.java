@@ -688,7 +688,7 @@ public class WbManager
 			{
 				public void run()
 				{
-					// First parameter tells the window to disconnect the window in a
+					// First parameter tells the window to disconnect in a
 					// separate thread as we are already in a background thread
 					// second parameter tells the window not to close the workspace
 					// third parameter tells the window not to save the workspace

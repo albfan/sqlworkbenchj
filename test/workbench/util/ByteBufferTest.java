@@ -48,8 +48,13 @@ public class ByteBufferTest extends TestCase
 			assertEquals("Wrong buffer size", 2048, l);
 			byte[] more = new byte[20];
 			buffer.append(more);
-			l = buffer.getBuffer().length;
+			l = buffer.getLength();
 			assertEquals("Wrong buffer size", 2068, l);			
+			
+			more = new byte[2345];
+			buffer.append(more);
+			System.out.println(buffer.getLength());
+			assertEquals("Wrong buffer size", 2068 + 2345, buffer.getLength());			
 		}
 		catch (Exception e)
 		{

@@ -70,10 +70,10 @@ public class WbExportTest extends TestCase
 	public void testExport()
 	{
 		doTextExport();
-		doSqlExport();
-		doXmlExport();
-		doTextExportCompressed();
-		doXmlExportCompressed();
+//		doSqlExport();
+//		doXmlExport();
+//		doTextExportCompressed();
+//		doXmlExportCompressed();
 	}
 
 	public void doTextExportCompressed() 
