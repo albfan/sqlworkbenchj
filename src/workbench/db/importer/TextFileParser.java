@@ -59,6 +59,12 @@ public class TextFileParser
 	private int importColCount = -1;
 
 	private ColumnIdentifier[] columns;
+	// for each column from columns
+	// the value for the respective index
+	// defines its real index
+	// if the value is -1 then the column
+	// will not be imported
+	private int[] columnMap;
 	private Object[] rowData;
 
 	private boolean withHeader = true;
@@ -75,12 +81,6 @@ public class TextFileParser
 	private String sourceDir;
 	private String extensionToUse;
 	private JobErrorHandler errorHandler;
-	// for each column from columns
-	// the value for the respective index
-	// defines its real index
-	// if the value is -1 then the column
-	// will not be imported
-	private int[] columnMap;
 	private List pendingImportColumns;
 	private ValueConverter converter;
 	private StringBuffer messages;

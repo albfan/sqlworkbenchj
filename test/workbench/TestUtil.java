@@ -11,7 +11,9 @@
  */
 package workbench;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -51,5 +53,28 @@ public class TestUtil
 	
 	public String getBaseDir() { return this.basedir; }
 	public String getDbName() { return this.dbName; }
+
+	public static int countLines(File f)
+		throws IOException
+	{
+		BufferedReader in = null;
+		int lines = 0;
+		try
+		{
+			in = new BufferedReader(new FileReader(f));
+			String s = in.readLine();
+			while (s != null)
+			{
+				lines ++;
+				s = in.readLine();
+			}
+		}
+		finally
+		{
+			try { in.close(); } catch (Throwable th) {}
+		}
+		return lines;
+	}
+	
 	
 }

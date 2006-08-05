@@ -123,7 +123,7 @@ public class WbExportTest extends TestCase
 			assertEquals("Export file not created", true, exportFile.exists());
 			// WbExport creates an empty line at the end plus the header line
 			// we end up with rowcount + 2 lines in the export file
-			assertEquals("Wrong number of lines", rowcount + 1, FileUtil.countLines(exportFile));
+			assertEquals("Wrong number of lines", rowcount + 1, TestUtil.countLines(exportFile));
 			
 			File ctl = new File(this.basedir, "export.ctl");
 			assertEquals("Control file not created", true, ctl.exists());

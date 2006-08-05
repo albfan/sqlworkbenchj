@@ -56,7 +56,7 @@ public class FileUtil
 		if (!f.exists()) return -1;
 		if (!f.isFile()) return -1;
 		long size = f.length();
-		if (size == 0) return 1;
+		if (size == 0) return 0;
 		
 		long lineSize = 0;
 		if (sampleLines <= 0) throw new IllegalArgumentException("Sample size must be greater then zero");
@@ -70,7 +70,7 @@ public class FileUtil
 			for (int i=0; i < sampleLines; i++)
 			{
 				String line = in.readLine();
-				if (line == null) return 1;
+				if (line == null) return i + 1;
 				lineSize += (line.length() + lfSize);
 			}
 		}
@@ -136,28 +136,6 @@ public class FileUtil
 			bytesRead = in.read(buff);
 		}
 		return result.getBuffer();
-	}
-	
-	public static int countLines(File f)
-		throws IOException
-	{
-		BufferedReader in = null;
-		int lines = 0;
-		try
-		{
-			in = new BufferedReader(new FileReader(f));
-			String s = in.readLine();
-			while (s != null)
-			{
-				lines ++;
-				s = in.readLine();
-			}
-		}
-		finally
-		{
-			try { in.close(); } catch (Throwable th) {}
-		}
-		return lines;
 	}
 	
 }
