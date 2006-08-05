@@ -79,6 +79,18 @@ public class StringUtil
 			}
 		};
 	}
+
+	public static final boolean hasOpenQuotes(String data, char quoteChar)
+	{
+		if (isEmptyString(data)) return false;
+		int chars = data.length();
+		boolean inQuotes = false;
+		for (int i = 0; i < chars; i++)
+		{
+			if (data.charAt(i) == quoteChar) inQuotes = !inQuotes;
+		}
+		return inQuotes;
+	}
 	
 	public static final StringBuffer replaceToBuffer(String aString, String aValue, String aReplacement)
 	{

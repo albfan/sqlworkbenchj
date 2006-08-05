@@ -31,38 +31,50 @@ public class StringUtilTest extends TestCase
 	{
 		super(testName);
 	}
-
-    public void testStringToList()
-    {
-        String list = "1,2,3";
-        List l = StringUtil.stringToList(list, ",", true, true, true);
-        assertEquals("Wrong number of elements returned", 3, l.size());
-        
-        list = "1,2,,3";
-        l = StringUtil.stringToList(list, ",", true, true, true);
-        assertEquals("Empty element not removed", 3, l.size());        
-        
-        list = "1,2, ,3";
-        l = StringUtil.stringToList(list, ",", false);
-        assertEquals("Empty element removed", 4, l.size());        
-        
-        list = "1,2,,3";
-        l = StringUtil.stringToList(list, ",", false);
-        assertEquals("Null element not removed", 3, l.size());        
-        
-        list = " 1 ,2,3";
-        l = StringUtil.stringToList(list, ",", true);
-        assertEquals("Null element not removed", 3, l.size());        
-        assertEquals(" 1 ", l.get(0));
-        
-        l = StringUtil.stringToList(list, ",", true, true);
-        assertEquals("Element not trimmed", "1", l.get(0));
-        
-        list = "1,\"2,5\",3";
-        l = StringUtil.stringToList(list, ",", true, true, true);
-        assertEquals("Quoted string not recognized","2,5", l.get(1));
-    }
-    
+	
+	public void testStringToList()
+	{
+		String list = "1,2,3";
+		List l = StringUtil.stringToList(list, ",", true, true, true);
+		assertEquals("Wrong number of elements returned", 3, l.size());
+		
+		list = "1,2,,3";
+		l = StringUtil.stringToList(list, ",", true, true, true);
+		assertEquals("Empty element not removed", 3, l.size());
+		
+		list = "1,2, ,3";
+		l = StringUtil.stringToList(list, ",", false);
+		assertEquals("Empty element removed", 4, l.size());
+		
+		list = "1,2,,3";
+		l = StringUtil.stringToList(list, ",", false);
+		assertEquals("Null element not removed", 3, l.size());
+		
+		list = " 1 ,2,3";
+		l = StringUtil.stringToList(list, ",", true);
+		assertEquals("Null element not removed", 3, l.size());
+		assertEquals(" 1 ", l.get(0));
+		
+		l = StringUtil.stringToList(list, ",", true, true);
+		assertEquals("Element not trimmed", "1", l.get(0));
+		
+		list = "1,\"2,5\",3";
+		l = StringUtil.stringToList(list, ",", true, true, true);
+		assertEquals("Quoted string not recognized","2,5", l.get(1));
+	}
+	
+	public void testHasOpenQuotes()
+	{
+		String value = "this line does not have quotes";
+		assertEquals("Wrong check for non-quotes", false, StringUtil.hasOpenQuotes(value, '\''));
+		
+		value = "this line 'does' have quotes";
+		assertEquals("Wrong check for quotes", false, StringUtil.hasOpenQuotes(value, '\''));
+		
+		value = "this line leaves a 'quote open";
+		assertEquals("Wrong check for open quotes", true, StringUtil.hasOpenQuotes(value, '\''));
+	}
+	
 	public void testIsNumber()
 	{
 		boolean isNumber = StringUtil.isNumber("1");
@@ -77,16 +89,16 @@ public class StringUtilTest extends TestCase
 		isNumber = StringUtil.isNumber("bla");
 		assertEquals(false, isNumber);
 	}
-
+	
 	public void testTrimQuotes()
 	{
 		String s = StringUtil.trimQuotes(" \"bla\" ");
 		assertEquals("bla", s);
 		s = StringUtil.trimQuotes(" \"bla ");
-		assertEquals(" \"bla ", s);		
+		assertEquals(" \"bla ", s);
 		s = StringUtil.trimQuotes(" 'bla' ");
 		assertEquals("bla", s);
 	}
-
-
+	
+	
 }

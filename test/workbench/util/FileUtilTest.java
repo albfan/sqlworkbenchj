@@ -7,6 +7,7 @@
 
 package workbench.util;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -15,6 +16,8 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
 import junit.framework.*;
 import workbench.TestUtil;
 
@@ -41,6 +44,43 @@ public class FileUtilTest
 		}
 	}
 
+	public void testGetLineEnding()
+		throws Exception
+	{
+		try
+		{
+			File f = new File(testUtil.getBaseDir(), "ending.txt");
+			
+			String encoding = "ISO-8859-1";
+			Writer w = EncodingUtil.createWriter(new FileOutputStream(f), encoding);
+			w.write("Line 1");
+			w.write('\n');
+			w.write("Line 2");
+			w.close();
+			
+			Reader r = EncodingUtil.createReader(f, encoding);
+			String ending = FileUtil.getLineEnding(r);
+			assertEquals("Unix line ending not detected", "\n", ending);
+			r.close();
+			
+			w = EncodingUtil.createWriter(new FileOutputStream(f), encoding);
+			w.write("Line 1");
+			w.write("\r\n");
+			w.write("Line 2");
+			w.close();			
+			
+			r = EncodingUtil.createReader(f, encoding);
+			ending = FileUtil.getLineEnding(r);
+			assertEquals("DOS line ending not detected", "\r\n", ending);
+			r.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testEstimateRecords() throws Exception
 	{
 		try

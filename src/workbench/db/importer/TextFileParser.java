@@ -32,6 +32,7 @@ import workbench.interfaces.ImportFileParser;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.CsvLineParser;
+import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
@@ -54,7 +55,8 @@ public class TextFileParser
 	private String delimiter = "\t";
 	private String quoteChar = null;
 	private boolean decodeUnicode = false;
-
+	private boolean enableMultiLineMode = true;
+	
 	private int colCount = -1;
 	private int importColCount = -1;
 
@@ -107,6 +109,11 @@ public class TextFileParser
 	public ImportFileHandler getFileHandler()
 	{
 		return this.fileHandler;
+	}
+
+	public void setEnableMultilineRecords(boolean flag)
+	{
+		this.enableMultiLineMode = flag;
 	}
 	
 	public void setTargetSchema(String schema)
@@ -339,7 +346,6 @@ public class TextFileParser
 			}
 			this.importAllColumns();
 		}
-		
 	}
 
 	public void setConnection(WbConnection aConn)
@@ -503,6 +509,7 @@ public class TextFileParser
 		this.cancelImport = false;
 		
 		File f = new File(this.filename);
+		
 		if (f.isAbsolute())
 		{
 			this.baseDir = f.getParentFile();
@@ -518,7 +525,31 @@ public class TextFileParser
 			this.setColumns(this.getColumnsFromTargetTable());
 		}
 		
-		BufferedReader in = new BufferedReader(this.fileHandler.getMainFileReader());
+		BufferedReader in = this.fileHandler.getMainFileReader();
+
+		String lineEnding = StringUtil.LINE_TERMINATOR;
+		if (enableMultiLineMode)
+		{
+			try
+			{
+				lineEnding = FileUtil.getLineEnding(in);
+			}
+			catch (IOException io)
+			{
+				LogMgr.logError("TextFileParser.processOneFile()", "Could not read line ending from file. Multi-line mode disabled!", io);
+				this.messages.append(ResourceMgr.getString("ErrNoMultiLine") + "\n");
+				enableMultiLineMode = false;
+			}
+			LogMgr.logDebug("TextFileParser.processOneFile()", "Using line ending: " + lineEnding.replaceAll("\\r", "\\\\r").replaceAll("\\n", "\\\\n"));
+			// now that we have already used the Reader supplied by the fileHandler, 
+			// close and re-open that. To make sure we start at the beginning
+			// as we cannot rely on mark() and reset() to be available for the ZIP archives
+			// setupFileHandler will re-initialize the ImportFileHandler 
+			// which in turn will take care of setting up the 
+			in.close();
+			setupFileHandler();
+			in = this.fileHandler.getMainFileReader();
+		}
 		
 		try
 		{
@@ -566,7 +597,8 @@ public class TextFileParser
 		this.rowData = new Object[this.importColCount];
 		int importRow = 0;
 
-		CsvLineParser tok = new CsvLineParser(delimiter.charAt(0), (quoteChar == null ? 0 : quoteChar.charAt(0)));
+		char quoteCharToUse = (quoteChar == null ? '"' : quoteChar.charAt(0));
+		CsvLineParser tok = new CsvLineParser(delimiter.charAt(0), quoteCharToUse);
 		tok.setReturnEmptyStrings(true);
 		tok.setTrimValues(this.trimValues);
 
@@ -581,7 +613,7 @@ public class TextFileParser
 				if (this.cancelImport) break;
 
 				// silently ignore empty lines...
-				if (line.trim().length() == 0)
+				if (StringUtil.isEmptyString(line))
 				{
 					try
 					{
@@ -594,6 +626,24 @@ public class TextFileParser
 					continue;
 				}
 
+				if (enableMultiLineMode && StringUtil.hasOpenQuotes(line, quoteCharToUse))
+				{
+					try
+					{
+						StringBuffer b = new StringBuffer(line.length() * 2);
+						b.append(line);
+						b.append(lineEnding);
+						String nextLine = in.readLine();
+						if (nextLine != null) b.append(nextLine);
+						line = b.toString();
+						continue;
+					}
+					catch (IOException e)
+					{
+						LogMgr.logError("TextFileParser.processOneFile()", "Could not read next line for multi-line record", e);
+					}
+				}
+				
 				if (hasLineFilter)
 				{
 					Matcher m = this.lineFilter.matcher(line);

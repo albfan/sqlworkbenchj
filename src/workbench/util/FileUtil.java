@@ -50,6 +50,30 @@ public class FileUtil
 		return Settings.getInstance().getIntProperty("workbench.lob.buffsize",32*1024);
 	}
 	
+	public static final String getLineEnding(Reader in)
+		throws IOException
+	{
+		String ending = null;
+		char c = (char)in.read();
+		while (c != -1)
+		{
+			if (c == '\r')
+			{ 
+				char n = (char)in.read();
+				ending = "\r\n";
+				break;
+			}
+			else if (c == '\n')
+			{
+				ending = "\n";
+				break;
+			}
+			c = (char)in.read();
+		}
+		return ending;
+	}
+	
+	
 	public static final long estimateRecords(File f, long sampleLines)
 		throws IOException
 	{

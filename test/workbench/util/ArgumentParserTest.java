@@ -12,6 +12,12 @@
 package workbench.util;
 
 import junit.framework.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -28,12 +34,22 @@ public class ArgumentParserTest
 	
 	public void testParser()
 	{
-		String cmdline = "-profile='test-prof' -script=bla.sql";
+		String cmdline = "  -otherbool=1 -nosettings -boolarg=true -profile='test-prof' -script=bla.sql -arg2=\"with space and quote\"";
 		ArgumentParser arg = new ArgumentParser();
 		arg.addArgument("profile");
 		arg.addArgument("script");
+		arg.addArgument("arg2");
+		arg.addArgument("nosettings");
+		arg.addArgument("boolarg");
+		arg.addArgument("otherbool");
 		arg.parse(cmdline);
 		assertEquals("profile not retrieved", "test-prof", arg.getValue("profile"));
 		assertEquals("script not retrieved", "bla.sql", arg.getValue("script"));
+		assertEquals("double quoted value not retrieved", "with space and quote", arg.getValue("arg2"));
+		assertEquals("argument without parameter not found", true, arg.isArgPresent("nosettings"));
+		assertEquals("boolean argument not retrieved", true, arg.getBoolean("boolarg", false));
+		assertEquals("numeric boolean argument not retrieved", true, arg.getBoolean("otherbool", false));
+		
 	}
+
 }

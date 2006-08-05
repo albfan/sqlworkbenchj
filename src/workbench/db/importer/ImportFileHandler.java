@@ -44,7 +44,6 @@ public class ImportFileHandler
 
 	public ImportFileHandler()
 	{
-		
 	}
 
 	public void setMainFile(File mainFile, String encoding)
@@ -84,7 +83,7 @@ public class ImportFileHandler
 		{
 			r = EncodingUtil.createReader(baseFile, encoding);
 		}
-		return new BufferedReader(r);
+		return new BufferedReader(r, 32*1024);
 	}
 
 	private void initAttachements()

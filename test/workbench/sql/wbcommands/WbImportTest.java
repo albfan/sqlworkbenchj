@@ -88,7 +88,7 @@ public class WbImportTest extends TestCase
 			out.println("  \tempty nr\tempty");
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -continueonerror=false -table=junit_test");
+			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -108,6 +108,100 @@ public class WbImportTest extends TestCase
 		}
 	}
 
+	public void testMultiLineImport()
+	{
+		int rowCount = 10;
+		try
+		{
+			File importFile  = new File(this.basedir, "multi.txt");
+			PrintWriter out = new PrintWriter(new FileWriter(importFile));
+			out.println("nr\tfirstname\tlastname");
+			out.print(Integer.toString(1));
+			out.print('\t');
+			out.println("First\t\"Last");
+			out.println("name\"");
+			out.close();
+			
+			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
+			int count = -1;
+			if (rs.next())
+			{
+				int nr = rs.getInt(1);
+				assertEquals("Wrong nr imported", 1, nr);
+				
+				String first = rs.getString(2);
+				assertEquals("Wrong firstname imported", "First", first);
+				
+				String last = rs.getString(3);
+				assertEquals("Wrong firstname imported", "Last\r\nname", last);
+			}
+			else
+			{
+				fail("No data imported");
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testZipMultiLineImport()
+	{
+		int rowCount = 10;
+		try
+		{
+			
+			File importFile  = new File(this.basedir, "zipmulti.txt");
+			
+			File archive = new File(this.basedir, "zipmulti.zip");
+			ZipOutputFactory zout = new ZipOutputFactory(archive);
+			PrintWriter out = new PrintWriter(zout.createWriter(importFile, "UTF-8"));
+			
+			out.println("nr\tfirstname\tlastname");
+			out.print(Integer.toString(1));
+			out.print('\t');
+			out.println("First\t\"Last");
+			out.println("name\"");
+			out.close();
+			zout.done();
+			
+			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + archive.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
+			int count = -1;
+			if (rs.next())
+			{
+				int nr = rs.getInt(1);
+				assertEquals("Wrong nr imported", 1, nr);
+				
+				String first = rs.getString(2);
+				assertEquals("Wrong firstname imported", "First", first);
+				
+				String last = rs.getString(3);
+				assertEquals("Wrong firstname imported", "Last\r\nname", last);
+			}
+			else
+			{
+				fail("No data imported");
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testNoHeader()
 		throws Exception
 	{
@@ -124,7 +218,7 @@ public class WbImportTest extends TestCase
 			}
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -filecolumns=nr,firstname,lastname -header=false -table=junit_test");
+			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true  -type=text -filecolumns=nr,firstname,lastname -header=false -table=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -167,7 +261,7 @@ public class WbImportTest extends TestCase
 			}
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -table=junit_test");
+			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -type=text -header=false -table=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -369,7 +463,7 @@ public class WbImportTest extends TestCase
 
 			zout.done();
 
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + archive.getAbsolutePath() + "' -decimal='.' -encoding='UTF-8' -type=text -header=true -table=blob_test");
+			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + archive.getAbsolutePath() + "' -decimal='.' -multiline=true -encoding='UTF-8' -type=text -header=true -table=blob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();

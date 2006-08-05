@@ -55,7 +55,6 @@ public class ArgumentParser
 	{
 		this.reset();
 
-		//List words = StringUtil.split(aCmdLine, "-", false, "\"'", false);
 		WbStringTokenizer tok = new WbStringTokenizer('-', "\"'", false);
 		tok.setDelimiterNeedsWhitspace(true);
 		tok.setSourceString(aCmdLine.trim());
@@ -141,7 +140,7 @@ public class ArgumentParser
 	{
 		String value = this.getValue(key);
 		if (value == null || value.trim().length() == 0) return def;
-		return "true".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value);
+		return StringUtil.stringToBool(value);
 	}
 
 	public String getValue(String key)

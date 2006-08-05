@@ -79,6 +79,7 @@ public class WbImport
 	public static final String ARG_TRUNCATE_TABLE = "truncatetable";
 	public static final String ARG_CREATE_TABLE = "createtarget";
 	public static final String ARG_BLOB_ISFILENAME = "blobisfilename";
+	public static final String ARG_MULTI_LINE = "multiline";
 	
 	private ArgumentParser cmdLine;
 
@@ -120,7 +121,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_TRUNCATE_TABLE);
 		cmdLine.addArgument(ARG_CREATE_TABLE);
 		cmdLine.addArgument(ARG_BLOB_ISFILENAME);
-
+		cmdLine.addArgument(ARG_MULTI_LINE);
 		this.isUpdatingCommand = true;
 	}
 
@@ -131,6 +132,10 @@ public class WbImport
 		String result = ResourceMgr.getString("ErrImportWrongParameters");
 		boolean continueDefault = Settings.getInstance().getBoolProperty("workbench.import.default.continue", false);
 		result = StringUtil.replace(result, "%continue_default%", Boolean.toString(continueDefault));
+		
+		boolean multiDefault = Settings.getInstance().getBoolProperty("workbench.import.default.multilinerecord", false);
+		result = StringUtil.replace(result, "%multiline_default%", Boolean.toString(continueDefault));
+		
 		return result;
 	}
 	
@@ -262,6 +267,9 @@ public class WbImport
 				String ext = cmdLine.getValue(ARG_FILE_EXT);
 				if (ext != null) textParser.setSourceExtension(ext);
 			}
+			boolean multiDefault = Settings.getInstance().getBoolProperty("workbench.import.default.multilinerecord", false);
+			boolean multi = cmdLine.getBoolean(ARG_MULTI_LINE, multiDefault);
+			textParser.setEnableMultilineRecords(multi);
 			textParser.setTargetSchema(schema);
 			textParser.setConnection(aConnection);
 			textParser.setAbortOnError(!cmdLine.getBoolean(ARG_CONTINUE, true));
