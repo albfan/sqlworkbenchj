@@ -56,6 +56,8 @@ public class FileUtil
 		if (!f.exists()) return -1;
 		if (!f.isFile()) return -1;
 		long size = f.length();
+		if (size == 0) return 1;
+		
 		long lineSize = 0;
 		if (sampleLines <= 0) throw new IllegalArgumentException("Sample size must be greater then zero");
 
@@ -68,7 +70,7 @@ public class FileUtil
 			for (int i=0; i < sampleLines; i++)
 			{
 				String line = in.readLine();
-				if (line == null) break;
+				if (line == null) return 1;
 				lineSize += (line.length() + lfSize);
 			}
 		}

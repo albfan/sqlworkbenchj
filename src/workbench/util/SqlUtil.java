@@ -11,6 +11,7 @@
  */
 package workbench.util;
 
+import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -91,6 +92,12 @@ public class SqlUtil
 		}
 	}
 	
+	/**
+	 * Returns the columns for the result set defined by the passed
+	 * query.
+	 * This method will actually execute the given SQL query, but will 
+	 * not retrieve any rows (using setMaxRows(1).
+	 */
 	public static List getResultSetColumns(String sql, WbConnection conn)
 		throws SQLException
 	{
@@ -102,7 +109,7 @@ public class SqlUtil
 
 		try
 		{
-			stmt = conn.createStatement();
+			stmt = conn.createStatementForQuery();
 			stmt.setMaxRows(1);
 			rs = stmt.executeQuery(sql);
 			ResultSetMetaData meta = rs.getMetaData();
@@ -112,7 +119,7 @@ public class SqlUtil
 			{
 				String name = meta.getColumnName(i + 1);
 				if (name == null) name = meta.getColumnLabel(i + 1);
-				if (name == null) continue;
+				if (name == null) name = "Col" + (i + 1);
 
 				int type = meta.getColumnType(i + 1);
 				ColumnIdentifier col = new ColumnIdentifier(name, type);
@@ -134,6 +141,14 @@ public class SqlUtil
 		return table;
 	}
 	
+	/**
+	 * Parse the given SQL SELECT query and return the columns defined
+	 * in the column list.
+	 * @para select the SQL String to parse
+	 * @para includeAlias if false, the "raw" column names will be returned, otherwise
+	 *       the column name including the alias (e.g. "p.name AS person_name"
+	 * @return a List of String objecs. 
+	 */
 	public static List getSelectColumns(String select, boolean includeAlias)
 	{
 		List result = new LinkedList();
@@ -236,6 +251,11 @@ public class SqlUtil
 			JOIN_KEYWORDS.add("FULL JOIN");
 			JOIN_KEYWORDS.add("FULL OUTER JOIN");
 	}
+	
+	/**
+	 * Returns a List of tables defined in the SQL query. If the 
+	 * query is not a SELECT query the result is undefined
+	 */
 	public static List getTables(String sql, boolean includeAlias)
 	{
 		String from = SqlUtil.getFromPart(sql);
@@ -313,6 +333,9 @@ public class SqlUtil
 		return sql.substring(fromPos, fromEnd);
 	}
 	
+	/**
+	 * Return the position of the FROM keyword in the given SQL
+	 */
 	public static int getFromPosition(String sql)
 	{
 		Set s = new HashSet();
@@ -470,115 +493,6 @@ public class SqlUtil
 		return s;
 	}
 
-	public static final String getJavaPrimitive(String aClass)
-	{
-		if (aClass == null) return null;
-		int pos = aClass.lastIndexOf('.');
-		if (pos >= 0)
-		{
-			aClass = aClass.substring(pos + 1);
-		}
-		if (aClass.equals("Integer"))
-		{
-			return "int";
-		}
-		else if (aClass.equals("Long"))
-		{
-			return "long";
-		}
-		else if (aClass.equals("Boolean"))
-		{
-			return "boolean";
-		}
-		else if (aClass.equals("Character"))
-		{
-			return "char";
-		}
-		else if (aClass.equals("Float"))
-		{
-			return "float";
-		}
-		else if (aClass.equals("Double"))
-		{
-			return "double";
-		}
-		return null;
-	}
-
-	public static final String getJavaClass(int aSqlType, int aScale, int aPrecision)
-	{
-		if (aSqlType == Types.BIGINT)
-			return "java.math.BigInteger";
-		else if (aSqlType == Types.BOOLEAN)
-			return "Boolean";
-		else if (aSqlType == Types.CHAR)
-			return "Character";
-		else if (aSqlType == Types.DATE)
-			return "java.util.Date";
-		else if (aSqlType == Types.DECIMAL)
-			return getDecimalClass(aSqlType, aScale, aPrecision);
-		else if (aSqlType == Types.DOUBLE)
-			return getDecimalClass(aSqlType, aScale, aPrecision);
-		else if (aSqlType == Types.FLOAT)
-			return getDecimalClass(aSqlType, aScale, aPrecision);
-		else if (aSqlType == Types.INTEGER)
-			return "Integer";
-		else if (aSqlType == Types.JAVA_OBJECT)
-			return "Object";
-		else if (aSqlType == Types.NUMERIC)
-			return getDecimalClass(aSqlType, aScale, aPrecision);
-		else if (aSqlType == Types.REAL)
-			return getDecimalClass(aSqlType, aScale, aPrecision);
-		else if (aSqlType == Types.SMALLINT)
-			return "Integer";
-		else if (aSqlType == Types.TIME)
-			return "java.sql.Time";
-		else if (aSqlType == Types.TIMESTAMP)
-			return "java.sql.Timestamp";
-		else if (aSqlType == Types.TINYINT)
-			return "Integer";
-		else if (aSqlType == Types.VARCHAR)
-			return "String";
-		else if (aSqlType == Types.LONGVARCHAR)
-			return "String";
-		else
-			return null;
-	}
-
-	private static final String getDecimalClass(int aSqlType, int aScale, int aPrecision)
-	{
-		if (aPrecision == 0)
-		{
-			if (aScale < 11)
-			{
-				return "java.lang.Integer";
-			}
-			if (aScale >= 11 && aScale < 18)
-			{
-				return "java.lang.Long";
-			}
-			else
-			{
-				return "java.math.BigInteger";
-			}
-		}
-		else
-		{
-			if (aScale < 11)
-			{
-				return "java.lang.Float";
-			}
-			if (aScale >= 11 && aScale < 18)
-			{
-				return "java.lang.Double";
-			}
-			else
-			{
-				return "java.math.BigDecimal";
-			}
-		}
-	}
-
 	/**
 	 * returns true if the passed data type (from java.sql.Types)
 	 * indicates a data type which can hold numeric values with
@@ -623,14 +537,14 @@ public class SqlUtil
 	public static final boolean isNumberType(int aSqlType)
 	{
 		return (aSqlType == Types.BIGINT ||
-				aSqlType == Types.INTEGER ||
+		        aSqlType == Types.INTEGER ||
 		        aSqlType == Types.DECIMAL ||
 		        aSqlType == Types.DOUBLE ||
 		        aSqlType == Types.FLOAT ||
-	            aSqlType == Types.NUMERIC ||
-	            aSqlType == Types.REAL ||
-	            aSqlType == Types.SMALLINT ||
-	            aSqlType == Types.TINYINT);
+		        aSqlType == Types.NUMERIC ||
+		        aSqlType == Types.REAL ||
+		        aSqlType == Types.SMALLINT ||
+		        aSqlType == Types.TINYINT);
 	}
 	
 	public static final boolean isDateType(int aSqlType)
@@ -647,8 +561,8 @@ public class SqlUtil
 	{
 		return (aSqlType == Types.BLOB || 
 		        aSqlType == Types.BINARY ||
-						aSqlType == Types.LONGVARBINARY ||
-			      aSqlType == Types.VARBINARY);
+		        aSqlType == Types.LONGVARBINARY ||
+		        aSqlType == Types.VARBINARY);
 	}
 
 	/**
@@ -820,24 +734,25 @@ public class SqlUtil
 		}
 	}
 	
-//	public static void main(String args[])
-//	{
-//		try
-//		{
-//			Field fields[] = java.sql.Types.class.getDeclaredFields();
-//			for (int i=0; i < fields.length; i++)
-//			{
-//				int type = fields[i].getInt(null);
-//				if (!isValidType(type))
-//				{
-//					System.out.println("Type " + fields[i].getName() + " not included in getTypeName()!");
-//				}
-//			}
-//		}
-//		catch (Throwable th)
-//		{
-//			th.printStackTrace();
-//		}
-//		System.out.println("Done.");
-//	}
+	public static void main(String args[])
+	{
+		try
+		{
+			System.out.println(System.getProperty("java.version"));
+			Field fields[] = java.sql.Types.class.getDeclaredFields();
+			for (int i=0; i < fields.length; i++)
+			{
+				int type = fields[i].getInt(null);
+				if (!isValidType(type))
+				{
+					System.out.println("Type " + fields[i].getName() + " not included in getTypeName()!");
+				}
+			}
+		}
+		catch (Throwable th)
+		{
+			th.printStackTrace();
+		}
+		System.out.println("Done.");
+	}
 }

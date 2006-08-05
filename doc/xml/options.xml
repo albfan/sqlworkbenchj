@@ -46,6 +46,12 @@
 			<para>If this option is not checked, you need to manually enable the <literal>DBMS_OUTPUT</literal>
 				with <xref linkend="command-enableout"/>.
 			</para>
+			<note><para>
+				Due to a bug in the Oracle JDBC driver, you cannot retrieve data from tables that contain 
+				<literal>LONG</literal> or <literal>LONG RAW</literal> columns if the <literal>DBMS_OUTPUT</literal> 
+				package is enabled. In order to be able to display these columns support for <literal>DBMS_OUTPUT</literal> has
+				to be switched off. 
+			</para></note>
 		</section>
 
 		<section id="option-animated-icon" xreflabel="Enable animated icons">

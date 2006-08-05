@@ -488,6 +488,19 @@
       <para>Default: <literal>false</literal></para>
 		</section>
 		
+		<section id="export-xml-verbose">
+			<title>Controlling XML export format</title>
+			<para>Property: <literal>workbench.export.xml.default.verbose</literal></para>
+			<para>
+				This property controls whether XML exports are done using verbose XML or 
+				short tags and only basic formatting. This property sets the default 
+				value of the <literal>-verbosexml</literal> parameter for the <link linkend="command-export">WbExport</link> command. 
+				The current default will be displayed in the help message when you run 
+				<literal>WbExport</literal> without any parameters.				
+			</para>
+      <para>Default: <literal>true</literal></para>
+		</section>
+
 		<section id="import-continue-default">
 			<title>Setting default for WbImport's -continueOnError parameter</title>
 			<para>Property: <literal>workbench.import.default.continue</literal></para>
