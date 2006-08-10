@@ -1,10 +1,14 @@
 /*
  * ScriptParserTest.java
- * JUnit based test
  *
- * Created on May 11, 2006, 9:54 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2006, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
-
 package workbench.sql;
 
 import java.io.BufferedWriter;
@@ -84,7 +88,7 @@ public class ScriptParserTest extends TestCase
 
 		sql = "/* \n" + 
 					 "* $URL: svn+ssh://nichdexp.nichd.nih.gov/subversion/mtrac/trunk/db/00-release-1.0/01-trac-8-ddl.sql $ \n" + 
-					 "* $Revision: 1.2 $ \n" + 
+					 "* $Revision: 1.3 $ \n" + 
 					 "* Created by Janek K. Claus. \n" + 
 					 "* $LastChangedBy: clausjan $ \n" + 
 					 "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 

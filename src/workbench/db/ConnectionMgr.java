@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import workbench.WbManager;
 
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
@@ -236,6 +237,16 @@ public class ConnectionMgr
 				}
 			}
 		}
+		
+		// In datch mode the default drivers (DriverTemplates.xml) are not loaded. 
+		
+		if (firstMatch == null && WbManager.getInstance().isBatchMode())
+		{
+			// We simple pretend there is one available, this will e.g. make
+			// the ODBC Bridge work without a WbDrivers.xml 
+			return new DbDriver(aName, drvClassName, null);
+		}
+		
 		LogMgr.logDebug("ConnectionMgr.findDriverByName()", "Did not find driver with name="+ aName + ", using " + (firstMatch == null ? "(n/a)" : firstMatch.getName()));
 
 		return firstMatch;

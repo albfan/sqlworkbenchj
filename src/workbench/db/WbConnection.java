@@ -118,18 +118,6 @@ public class WbConnection
 		return this.profile;
 	}
 
-//	public void reconnect()
-//	{
-//		try
-//		{
-//			ConnectionMgr.getInstance().reconnect(this);
-//		}
-//		catch (Exception e)
-//		{
-//			LogMgr.logError("WbConnection.reconnect()", "Error when reconnecting", e);
-//		}
-//	}
-
 	void setSqlConnection(Connection aConn)
 	{
 		this.sqlConnection = aConn;
@@ -477,7 +465,14 @@ public class WbConnection
 			}
 
 			buff.append(", URL=");
-			buff.append(getSqlConnection().getMetaData().getURL());
+			if (getProfile() != null)
+			{
+				buff.append(getProfile().getUrl());
+			}
+			else
+			{
+				buff.append(getSqlConnection().getMetaData().getURL());
+			}
 			displayString = buff.toString();
 		}
 		catch (Exception e)

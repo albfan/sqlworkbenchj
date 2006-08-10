@@ -80,6 +80,18 @@ public class StringUtil
 		};
 	}
 
+	public static final boolean arraysEqual(String[] one, String[] other)
+	{
+		if (one == null && other != null) return false;
+		if (one != null && other == null) return false;
+		if (one.length != other.length) return false;
+		for (int i = 0; i < one.length; i++)
+		{
+			if (!equalString(one[i],other[i])) return false;
+		}
+		return true;
+	}
+	
 	public static final boolean hasOpenQuotes(String data, char quoteChar)
 	{
 		if (isEmptyString(data)) return false;
@@ -681,6 +693,7 @@ public class StringUtil
 
 	public static final String getMaxSubstring(String s, int maxLen)
 	{
+		if (maxLen < 1) return s;
 		if (s == null) return null;
 		if (s.length() < maxLen) return s;
 		return s.substring(0, maxLen - 1) + "...";

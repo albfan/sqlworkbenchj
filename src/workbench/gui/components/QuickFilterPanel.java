@@ -10,6 +10,7 @@
  *
  */
 package workbench.gui.components;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -18,9 +19,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.ActionMap;
 import javax.swing.ComponentInputMap;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -52,7 +56,7 @@ import workbench.util.StringUtil;
  */
 public class QuickFilterPanel 
 	extends JPanel 
-	implements QuickFilter, CriteriaPanel, ActionListener, MouseListener
+	implements QuickFilter, CriteriaPanel, ActionListener, MouseListener, PropertyChangeListener
 {
 	private WbTable searchTable;
 	private String searchColumn;
@@ -66,11 +70,13 @@ public class QuickFilterPanel
 	private String[] columnList;
 	private boolean showColumnDropDown;
 	private JCheckBoxMenuItem[] columnItems;
+	private TextComponentMouseListener textListener;
 	
 	public QuickFilterPanel(WbTable table, String[] columns, boolean showDropDown, String historyProperty)
 	{
 		this.searchTable = table;
-		if (columns.length == 1) 
+		this.searchTable.addPropertyChangeListener("model", this);
+		if (columns != null && columns.length == 1) 
 		{
 			showColumnDropDown = false;
 		}
@@ -100,33 +106,16 @@ public class QuickFilterPanel
 
 		this.filterValue = new HistoryTextField(historyProperty);
 		this.filterValue.setToolTipText(ResourceMgr.getString("TxtQuickFilterColumnHint"));
-		TextComponentMouseListener l = new TextComponentMouseListener();
-		if (this.columnList != null)
+		if (this.columnList != null && this.showColumnDropDown)
 		{
-			JMenu menu = new WbMenu(ResourceMgr.getString("MnuTextFilterOnColumn"));
-			menu.setIcon(ResourceMgr.getImage("blank"));
-			columnItems = new JCheckBoxMenuItem[columnList.length];
-			for (int i=0; i < this.columnList.length; i++)
-			{
-				columnItems[i] = new JCheckBoxMenuItem(columnList[i]);
-				columnItems[i].setSelected(i == 0);
-				columnItems[i].putClientProperty("filterColumn", columnList[i]);
-				columnItems[i].addActionListener(this);
-				menu.add(columnItems[i]);
-			}
-			l.addMenuItem(menu);
-			if (this.showColumnDropDown)
-			{
-				columnDropDown = new JComboBox(columnList);
-				columnDropDown.addActionListener(this);
-				columnDropDown.setSelectedIndex(0);
-				columnDropDown.setToolTipText(ResourceMgr.getString("TxtQuickFilterColumnSelector"));
-			}
+			columnDropDown = new JComboBox(columnList);
+			columnDropDown.addActionListener(this);
+			columnDropDown.setSelectedIndex(0);
+			columnDropDown.setToolTipText(ResourceMgr.getString("TxtQuickFilterColumnSelector"));
 		}
 		
-		filterValue.getEditor().getEditorComponent().addMouseListener(l);
-		//this.filterValue.addMouseListener(new TextComponentMouseListener());
-
+		initPopup();
+		
 		this.toolbar = new WbToolbar();
 		this.filterAction = new QuickFilterAction(this);
 		this.resetFilterAction = this.searchTable.getResetFilterAction();
@@ -196,10 +185,43 @@ public class QuickFilterPanel
 	{
 		this.toolbar.add(action, index);
 	}
-	
-	public void setColumnList(String[] columns, boolean showDropDown)
+
+	private void initPopup()
 	{
+		if (this.columnList == null) return;
+		
+		Component ed = filterValue.getEditor().getEditorComponent();
+		if (this.textListener != null) ed.removeMouseListener(this.textListener);
+		
+		this.textListener = new TextComponentMouseListener();
+		JMenu menu = new WbMenu(ResourceMgr.getString("MnuTextFilterOnColumn"));
+		//menu.setIcon(null);
+		columnItems = new JCheckBoxMenuItem[columnList.length];
+		for (int i=0; i < this.columnList.length; i++)
+		{
+			columnItems[i] = new JCheckBoxMenuItem(columnList[i]);
+			columnItems[i].setSelected(i == 0);
+			columnItems[i].putClientProperty("filterColumn", columnList[i]);
+			columnItems[i].addActionListener(this);
+			menu.add(columnItems[i]);
+		}
+		textListener.addMenuItem(menu);
+		ed.addMouseListener(textListener);
+	}
+	
+	private void updateColumnDropDown()
+	{
+		if (this.columnList == null || this.columnDropDown == null) return;
+		columnDropDown = new JComboBox(columnList);
+		columnDropDown.setModel(new DefaultComboBoxModel(this.columnList));
+	}
+	
+	public void setColumnList(String[] columns)
+	{
+		if (StringUtil.arraysEqual(columns, columnList)) return;
 		this.columnList = columns;
+		initPopup();
+		updateColumnDropDown();
 	}
 	
 	private void setupActionMap(InputMap im, ActionMap am)
@@ -332,5 +354,16 @@ public class QuickFilterPanel
 	public void mouseExited(java.awt.event.MouseEvent e) {}
 	public void mousePressed(java.awt.event.MouseEvent e) {}
 	public void mouseReleased(java.awt.event.MouseEvent e) {}
+
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		int count = this.searchTable.getColumnCount();
+		String[] names = new String[count];
+		for (int i = 0; i < count; i++)
+		{
+			names[i] = this.searchTable.getColumnName(i);
+		}
+		this.setColumnList(names);
+	}
 
 }

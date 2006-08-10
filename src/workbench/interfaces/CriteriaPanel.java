@@ -26,5 +26,5 @@ public interface CriteriaPanel
 	void restoreSettings();
 	void saveSettings(PropertyStorage props, String key);
 	void restoreSettings(PropertyStorage props, String key);
-	
+	void setColumnList(String[] names);
 }

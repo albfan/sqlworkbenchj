@@ -61,6 +61,7 @@ import workbench.interfaces.TableDeleteListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.interfaces.JobErrorHandler;
@@ -238,23 +239,43 @@ public class TableDataPanel
 		}
 	}
 
+	private boolean rowCountCancel = false;
+	
 	private void startRetrieveRowCount()
 	{
-		Thread t = new WbThread("RowCount Retrieve")
+		Thread t = null;
+		if (rowCountRetrieveStmt != null)
 		{
-			public void run()
+			t = new WbThread("RowCount cancel")
 			{
-				showRowCount();
-			}
-		};
+				public void run()
+				{
+					cancelRowCountRetrieve();
+				}
+			};
+		}
+		else
+		{
+			t = new WbThread("RowCount Retrieve")
+			{
+				public void run()
+				{
+					showRowCount();
+				}
+			};
+		}
 		t.start();
 	}
+	
+	private Statement rowCountRetrieveStmt = null;
 	
 	public long showRowCount()
 	{
 		if (this.dbConnection == null) return -1;
 		if (this.isRetrieving()) return -1;
 
+		this.retrieveRunning = true;
+		
 		this.rowCountLabel.setText("");
 		this.rowCountLabel.setIcon(this.getLoadingIndicator());
 
@@ -271,35 +292,58 @@ public class TableDataPanel
 
 		try
 		{
-			stmt = this.dbConnection.createStatement();
-			rs = stmt.executeQuery(sql);
+			this.dbConnection.executionStart(null, this);
+			rowCountRetrieveStmt = this.dbConnection.createStatement();
+			rs = rowCountRetrieveStmt.executeQuery(sql);
 			if (rs.next())
 			{
 				rowCount = rs.getLong(1);
 			}
 			this.rowCountLabel.setText(Long.toString(rowCount));
 		}
-		catch (SQLException e)
-		{
-			this.rowCountLabel.setText(ResourceMgr.getString("TxtError"));
-			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression() + ": " + ExceptionUtil.getDisplay(e), null);
-		}
 		catch (Exception e)
 		{
-			this.rowCountLabel.setText(ResourceMgr.getString("TxtError"));
-			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression(), e);
+			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression() + ": " + ExceptionUtil.getDisplay(e), null);
+			if (rowCountCancel)
+			{
+				this.rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
+			}
+			else
+			{
+				this.rowCountLabel.setText(ResourceMgr.getString("TxtError"));
+			}
 		}
 		finally
 		{
+			this.rowCountCancel = false;
+			this.retrieveRunning = false;
 			this.dataDisplay.setStatusMessage("");
 			this.clearLoadingImage();
-			try { if (rs != null) rs.close(); } catch (Throwable th) {}
-			try { if (stmt != null) stmt.close(); } catch (Throwable th) {}
+			SqlUtil.closeAll(rs, rowCountRetrieveStmt);
+			rowCountRetrieveStmt = null;
 			this.reloadAction.setEnabled(true);
+			this.dbConnection.executionEnd(null, this);
 		}
 		return rowCount;
 	}
 
+	private void cancelRowCountRetrieve()
+	{
+		if (this.rowCountRetrieveStmt != null)
+		{
+			try 
+			{ 
+				this.rowCountCancel = true;
+				this.rowCountRetrieveStmt.cancel();
+			} 
+			catch (Throwable th) 
+			{
+				LogMgr.logError("TableDataPanel.cancelRowCountRetrieve()", "Error when cancelling row count retrieve", th);
+			}
+		}
+	}
+	
+	
 	public void setTable(TableIdentifier aTable)
 	{
 		if (!this.isRetrieving()) reset();

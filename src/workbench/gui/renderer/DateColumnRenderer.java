@@ -66,12 +66,12 @@ public class DateColumnRenderer
 			{
 				this.displayValue = this.dateFormatter.format(d);
 			}
-			this.tooltip = d.toString();
+			tooltip = d.toString();
 		}
 		catch (Throwable cc)
 		{
 			this.displayValue = value.toString();
-			this.tooltip = null;
+			tooltip = value.toString();
 		}
   }
 	

@@ -39,16 +39,8 @@ public class StringColumnRenderer
 		{
 			displayValue = aValue.toString();
 		}
-		
-		if (this.displayValue.length() > 0) 
-		{
-			this.tooltip = this.displayValue;
-		}
-		else
-		{
-			this.tooltip = null;
-		}
 
+		setTooltip(displayValue);
 	}
 
 }

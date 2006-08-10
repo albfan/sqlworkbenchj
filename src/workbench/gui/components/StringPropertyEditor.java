@@ -145,7 +145,13 @@ public class StringPropertyEditor
 	 */
 	public void focusGained(FocusEvent e)
 	{
-		this.selectAll();
+		//System.out.println(e.getOppositeComponent().getClass().getName());
+		// When the popup menu for copy & paste is used, the oppositeComponent()
+		// is the RootPane. In this case we don't want to chage the selection
+		if (!(e.getOppositeComponent() instanceof javax.swing.JRootPane))
+		{
+			this.selectAll();
+		}
 	}
 	
 	/** Invoked when a component loses the keyboard focus.

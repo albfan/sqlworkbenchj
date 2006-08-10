@@ -1,10 +1,14 @@
 /*
  * WbExportTest.java
- * JUnit based test
  *
- * Created on June 26, 2006, 7:15 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2006, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
-
 package workbench.sql.wbcommands;
 
 import junit.framework.*;
@@ -67,16 +71,7 @@ public class WbExportTest extends TestCase
 		this.connection.disconnect();
 	}
 
-	public void testExport()
-	{
-		doTextExport();
-//		doSqlExport();
-//		doXmlExport();
-//		doTextExportCompressed();
-//		doXmlExportCompressed();
-	}
-
-	public void doTextExportCompressed() 
+	public void testTextExportCompressed() 
 	{
 		try
 		{
@@ -94,7 +89,7 @@ public class WbExportTest extends TestCase
 		}
 	}
 
-	public void doXmlExportCompressed() 
+	public void testXmlExportCompressed() 
 	{
 		try
 		{
@@ -112,7 +107,7 @@ public class WbExportTest extends TestCase
 		}
 	}
 	
-	public void doTextExport() 
+	public void testTextExport() 
 	{
 		try
 		{
@@ -150,7 +145,7 @@ public class WbExportTest extends TestCase
 		}
 	}
 
-	public void doSqlExport()
+	public void testSqlExport()
 	{
 		try
 		{
@@ -178,7 +173,7 @@ public class WbExportTest extends TestCase
 		}
 	}
 
-	public void doXmlExport()
+	public void testXmlExport()
 	{
 		try
 		{

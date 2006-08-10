@@ -22,7 +22,7 @@ public class ClobColumnRenderer extends ToolTipRenderer
 	public ClobColumnRenderer()
 	{
 		super();
-		this.tooltip = null;
+		setTooltip(null);
 	}
 
 	public void prepareDisplay(Object aValue)
@@ -32,6 +32,7 @@ public class ClobColumnRenderer extends ToolTipRenderer
 			Clob clob = (Clob)aValue;
 			long len = clob.length();
 			this.displayValue = clob.getSubString(1, (int)len);
+			setTooltip(displayValue);
 		}
 		catch (Throwable e)
 		{

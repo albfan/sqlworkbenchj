@@ -56,6 +56,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
+import workbench.db.ColumnIdentifier;
 
 import workbench.db.DbMetadata;
 import workbench.db.ObjectScripter;
@@ -1277,7 +1278,7 @@ public class TableListPanel
 
 		try
 		{
-			this.dbConnection.executionStart(this.dbConnection, this);
+			this.dbConnection.executionStart(null, this);
 			synchronized (this.dbConnection)
 			{
 				switch (index)
@@ -1317,7 +1318,7 @@ public class TableListPanel
 		}
 		finally
 		{
-			this.dbConnection.executionEnd(this.dbConnection, this);
+			this.dbConnection.executionEnd(null, this);
 			this.setBusy(false);
 			this.repaint();
 			closeInfoWindow();

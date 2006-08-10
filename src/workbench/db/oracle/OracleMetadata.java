@@ -284,7 +284,7 @@ public class OracleMetadata
 		if (prof != null)
 		{
 			Properties prop = prof.getConnectionProperties();
-			if (prop != null)	returnComments = "true".equals(prop.getProperty("remarksReporting", "false"));
+			if (prop != null) returnComments = "true".equals(prop.getProperty("remarksReporting", "false"));
 		}
 		
 		if (returnComments)

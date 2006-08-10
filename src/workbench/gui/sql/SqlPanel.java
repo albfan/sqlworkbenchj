@@ -502,6 +502,7 @@ public class SqlPanel
 			this.fileReloadAction.setEnabled(false);
       this.fireFilenameChanged(this.tabName);
 			this.selectEditorLater();
+			this.removeIconFromTab();
 			return true;
     }
 		return false;
@@ -684,6 +685,7 @@ public class SqlPanel
 		this.actions.add(this.sqlHistory.getShowPreviousStatementAction());
 		this.actions.add(this.sqlHistory.getShowNextStatementAction());
 		this.actions.add(this.sqlHistory.getShowLastStatementAction());
+		this.actions.add(this.sqlHistory.getClearHistoryAction());
 
 		this.actions.add(new AutoJumpNextStatement());
 		a = new HighlightCurrentStatement();
@@ -993,7 +995,15 @@ public class SqlPanel
 	public void readFromWorkspace(WbWorkspace w, int index)
 		throws IOException
 	{
-		this.editor.setText("");
+		if (this.hasFileLoaded())
+		{
+			this.closeFile(true, false);
+		}
+		else
+		{
+			this.editor.setText("");
+		}
+		
 
 		try
 		{
@@ -1026,7 +1036,6 @@ public class SqlPanel
 
 		if (!fileLoaded)
 		{
-			this.removeIconFromTab();
 			try
 			{
 				this.sqlHistory.showCurrent();
@@ -1057,6 +1066,7 @@ public class SqlPanel
 		}
 		this.updateTabTitle();
 		this.editor.clearUndoBuffer();
+		this.editor.resetModified();
 	}
 
 	/** Do any work which should be done during the process of saving the
@@ -2541,22 +2551,28 @@ public class SqlPanel
 		this.copySelectedMenu.setEnabled(hasResult);
 	}
 
-	private void setExecuteActionStates(boolean aFlag)
+	private void setExecuteActionStates(final boolean aFlag)
 	{
-		this.executeAll.setEnabled(aFlag);
-		this.executeSelected.setEnabled(aFlag);
-		this.executeCurrent.setEnabled(aFlag);
-		this.importFileAction.setEnabled(aFlag);
-		if (aFlag)
+		EventQueue.invokeLater(new Runnable()
 		{
-			this.checkAutocommit();
-		}
-		else
-		{
-			this.commitAction.setEnabled(aFlag);
-			this.rollbackAction.setEnabled(aFlag);
-		}
-		this.spoolData.setEnabled(aFlag);
+			public void run()
+			{
+				executeAll.setEnabled(aFlag);
+				executeSelected.setEnabled(aFlag);
+				executeCurrent.setEnabled(aFlag);
+				importFileAction.setEnabled(aFlag);
+				if (aFlag)
+				{
+					checkAutocommit();
+				}
+				else
+				{
+					commitAction.setEnabled(aFlag);
+					rollbackAction.setEnabled(aFlag);
+				}
+				spoolData.setEnabled(aFlag);
+			}
+		});
 	}
 
 	private ImageIcon fileIcon = null;
@@ -2724,7 +2740,7 @@ public class SqlPanel
 				{
 					LogMgr.logWarning("SqlPanel.setBusy()", "Error when setting busy icon!", th);
 				}
-				//tab.validate();
+				tab.invalidate();
 				tab.repaint();
 			}
 		}
@@ -2732,10 +2748,10 @@ public class SqlPanel
 
 	private synchronized void setBusy(final boolean busy)
 	{
-		if (busy == this.threadBusy) return;
+		//if (busy == this.threadBusy) return;
 		this.threadBusy = busy;
-		this.setExecuteActionStates(!busy);
 		this.showBusyIcon(busy);
+		this.setExecuteActionStates(!busy);
 	}
 
 	public boolean isBusy() { return this.threadBusy; }

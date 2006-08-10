@@ -634,9 +634,16 @@ public class TextFileParser
 						b.append(line);
 						b.append(lineEnding);
 						String nextLine = in.readLine();
-						if (nextLine != null) b.append(nextLine);
-						line = b.toString();
-						continue;
+
+						// if the next line is null, the file is finished
+						// in that case we must not "continue" in order to 
+						// catch the EOF situation correctly!
+						if (nextLine != null)
+						{
+							b.append(nextLine);
+							line = b.toString();
+							continue;
+						}
 					}
 					catch (IOException e)
 					{
@@ -733,11 +740,11 @@ public class TextFileParser
 						msg = msg.replaceAll("%col%", (this.columns[i] == null ? "n/a" : this.columns[i].getColumnName()));
 						msg = msg.replaceAll("%value%", (value == null ? "(NULL)" : value.toString()));
 						msg = msg.replaceAll("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
-						LogMgr.logWarning("TextFileParser.start()",msg, e);
 						if (this.messages == null) this.messages = new StringBuffer();
 						this.messages.append(msg);
 						this.messages.append("\n");
 						if (this.abortOnError) throw e;
+						LogMgr.logWarning("TextFileParser.start()", msg, e);
 						if (this.errorHandler != null)
 						{
 							int choice = errorHandler.getActionOnError(importRow + 1, this.columns[i].getColumnName(), (value == null ? "(NULL)" : value.toString()), ExceptionUtil.getDisplay(e, false));
@@ -745,7 +752,6 @@ public class TextFileParser
 							if (choice == JobErrorHandler.JOB_IGNORE_ALL) 
 							{
 								this.abortOnError = false;
-//								this.ignoreAllErrors = true;
 							}
 						}
 					}

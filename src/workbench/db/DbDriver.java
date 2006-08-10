@@ -185,7 +185,7 @@ public class DbDriver
 			else
 			{
 				// Assume the driver class is available on the classpath
-				LogMgr.logDebug("DbDriver.loadDriverClass()", "Assuming drvierclass " + this.driverClass + " is in current classpath");
+				//LogMgr.logDebug("DbDriver.loadDriverClass()", "Assuming driver " + this.driverClass + " is in current classpath");
 				drvClass = Class.forName(this.driverClass);
 			}
 			
@@ -323,9 +323,14 @@ public class DbDriver
 			}
 			else if (url.startsWith("jdbc:microsoft:sqlserver"))
 			{
+				// Old MS SQL Server driver
 				propName = "ProgramName";
 			}
-
+			else if (url.startsWith("jdbc:sqlserver:"))
+			{
+				// New SQL Server 2005 JDBC driver
+				propName = "applicationName";
+			}
 			if (propName != null && !props.containsKey(propName))
 			{
 				String appName = ResourceMgr.TXT_PRODUCT_NAME + " (" + ResourceMgr.getBuildId() +")";

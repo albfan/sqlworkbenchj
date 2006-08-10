@@ -37,6 +37,7 @@ public class UpdatingCommand extends SqlCommand
 	public static final SqlCommand UPDATE = new UpdatingCommand("UPDATE");
 	public static final SqlCommand DELETE = new UpdatingCommand("DELETE");
 	public static final SqlCommand INSERT = new UpdatingCommand("INSERT");
+	public static final SqlCommand TRUNCATE = new UpdatingCommand("TRUNCATE");
 
 	private String verb;
 	private boolean checkLobParameter = false;
@@ -52,7 +53,6 @@ public class UpdatingCommand extends SqlCommand
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		InputStream in = null;
 		
 		try
 		{
@@ -117,10 +117,6 @@ public class UpdatingCommand extends SqlCommand
 		}
 		finally
 		{
-			if (in != null)
-			{
-				try { in.close(); } catch (Throwable th) {}
-			}
 			this.done();
 		}
 		return result;

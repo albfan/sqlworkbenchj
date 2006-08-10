@@ -189,6 +189,8 @@ public class DefaultStatementRunner
 		cmdDispatch.put(UpdatingCommand.DELETE.getVerb(), UpdatingCommand.DELETE);
 		cmdDispatch.put(UpdatingCommand.INSERT.getVerb(), UpdatingCommand.INSERT);
 		cmdDispatch.put(UpdatingCommand.UPDATE.getVerb(), UpdatingCommand.UPDATE);
+		cmdDispatch.put(UpdatingCommand.TRUNCATE.getVerb(), UpdatingCommand.TRUNCATE);
+		
 		cmdDispatch.put(WbSelectBlob.VERB, new WbSelectBlob());
 		
 		for (int i=0; i < DdlCommand.DDL_COMMANDS.size(); i ++)

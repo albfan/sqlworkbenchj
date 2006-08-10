@@ -46,13 +46,14 @@ public class ImportFileHandler
 	{
 	}
 
-	public void setMainFile(File mainFile, String encoding)
+	public void setMainFile(File mainFile, String enc)
 		throws IOException
 	{
 		this.done();
 		this.mainArchive = null;
 		this.attachmentEntries = null;
 		this.attachments = null;
+		this.encoding = enc;
 		
 		this.baseFile = mainFile;
 		this.baseDir = baseFile.getParentFile();

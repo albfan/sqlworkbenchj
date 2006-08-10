@@ -165,6 +165,8 @@ public class WbManager
 		return wb;
 	}
 
+	public boolean writeSettings() { return this.writeSettings; }
+	
 	public void showHelpForProfiles(JDialog owner)
 	{
 		JDialog dialog = null;
@@ -457,6 +459,7 @@ public class WbManager
 
 	private boolean saveWindowSettings()
 	{
+		if (!this.writeSettings) return true;
 		MainWindow w = this.getCurrentWindow();
 		boolean settingsSaved = false;
 
@@ -852,10 +855,22 @@ public class WbManager
 			}
 
 			String scriptname = cmdLine.getValue(ARG_SCRIPT);
+			
 			if (StringUtil.isEmptyString(scriptname))
 			{
 				this.batchMode = false;
-				ConnectionMgr.getInstance().setReadTemplates(true);
+				String url = cmdLine.getValue(ARG_CONN_URL);
+				String jar = cmdLine.getValue(ARG_CONN_JAR);
+				String profile = cmdLine.getValue(ARG_PROFILE);
+				if (!StringUtil.isEmptyString(url) && !StringUtil.isEmptyString(jar))
+				{
+					// do not register the default drivers if a full connection is specified!
+					ConnectionMgr.getInstance().setReadTemplates(false);
+				}
+				else if (!StringUtil.isEmptyString(profile))
+				{
+					ConnectionMgr.getInstance().setReadTemplates(true);
+				}
 			}
 			else
 			{

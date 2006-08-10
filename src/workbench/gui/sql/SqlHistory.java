@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import workbench.gui.actions.ClearStatementHistoryAction;
 import workbench.gui.actions.WbAction;
 
 import workbench.log.LogMgr;
@@ -46,6 +47,7 @@ public class SqlHistory
 	private PrevStatementAction prevStmtAction;
 	private FirstStatementAction firstStmtAction;
 	private LastStatementAction lastStmtAction;
+	private ClearStatementHistoryAction clearAction;
 
 	public SqlHistory(EditorPanel ed, int maxSize)
 	{
@@ -63,12 +65,15 @@ public class SqlHistory
 
 		this.lastStmtAction = new LastStatementAction(this);
 		this.lastStmtAction.setEnabled(false);
+		
+		this.clearAction = new ClearStatementHistoryAction(this);
 	}
 
 	public WbAction getShowFirstStatementAction() { return this.firstStmtAction; }
 	public WbAction getShowLastStatementAction() { return this.lastStmtAction; }
 	public WbAction getShowNextStatementAction() { return this.nextStmtAction; }
 	public WbAction getShowPreviousStatementAction() { return this.prevStmtAction; }
+	public WbAction getClearHistoryAction() { return this.clearAction; }
 	
 	public synchronized void addContent(EditorPanel editor)
 	{

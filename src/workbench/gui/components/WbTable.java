@@ -755,6 +755,12 @@ public class WbTable
 			header.removeMouseListener(this);
 		}
 
+		if (this.dwModel != null)
+		{
+			this.dwModel.dispose();
+			this.dwModel = null;
+		}
+
 		try
 		{
 			super.setModel(aModel);
@@ -762,12 +768,6 @@ public class WbTable
 		catch (Throwable th)
 		{
 			LogMgr.logError("WbTable.setModel()", "Error setting table model", th);
-		}
-
-		if (this.dwModel != null)
-		{
-			this.dwModel.dispose();
-			this.dwModel = null;
 		}
 
 		resetFilter();

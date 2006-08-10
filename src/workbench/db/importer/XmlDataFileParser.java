@@ -335,6 +335,10 @@ public class XmlDataFileParser
 		{
 			this.realColCount = this.columnsToImport.size();
 		}
+		
+		// Re-initialize the reader in case we are reading from a ZIP archive
+		this.fileHandler.setMainFile(f, this.encoding);
+		
 		this.messages = new StrBuffer();
 		this.sendTableDefinition();
 		Reader in = null;

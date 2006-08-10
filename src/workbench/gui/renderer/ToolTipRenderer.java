@@ -48,7 +48,8 @@ public class ToolTipRenderer
 	
 	private Color alternateBackground = Settings.getInstance().getAlternateRowColor();
 	private boolean useAlternatingColors = Settings.getInstance().getUseAlternateRowColor();
-	
+
+	protected int maxTooltipSize = Settings.getInstance().getIntProperty("workbench.gui.renderer.maxtooltipsize", 1000);
 	protected int editingRow = -1;
 	private boolean isEditing = false;
 	private boolean[] highlightCols;
@@ -256,9 +257,16 @@ public class ToolTipRenderer
 	public void prepareDisplay(Object aValue)
 	{
 		displayValue = aValue.toString();
-		if (displayValue.length() > 0) tooltip = displayValue;
-		else tooltip = null;
+		setTooltip(displayValue);
 	}
 
+	protected void setTooltip(String tip)
+	{
+		if (tip != null && tip.length() > 0)
+			tooltip = StringUtil.getMaxSubstring(tip, maxTooltipSize);
+		else 
+			tooltip = null;
+	}
+	
 	public String getDisplayValue() { return displayValue; }
 }

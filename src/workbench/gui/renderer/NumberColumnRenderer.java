@@ -71,13 +71,16 @@ public class NumberColumnRenderer
 		try
 		{
 			Number n = (Number) aValue;
-			displayValue = decimalFormatter.format(n.doubleValue());
-			tooltip = aValue.toString();
+			synchronized (this.decimalFormatter)
+			{
+				displayValue = decimalFormatter.format(n.doubleValue());
+			}
+			this.tooltip = aValue.toString();
 		}
 		catch (Throwable th)
 		{
 			displayValue = aValue.toString(); 
-			tooltip = null;
+			this.tooltip = null;
 		}
 	}
 }

@@ -60,6 +60,7 @@ import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import javax.swing.JLabel;
 import workbench.WbManager;
+import workbench.db.ColumnIdentifier;
 import workbench.db.ObjectScripter;
 import workbench.db.ProcedureDefinition;
 import workbench.gui.MainWindow;
@@ -67,6 +68,7 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.WbTabbedPane;
 import workbench.interfaces.CriteriaPanel;
+import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
 import workbench.util.WbWorkspace;
 
@@ -150,7 +152,6 @@ public class ProcedureListPanel
 		this.procList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.procList.setAdjustToColumnLabel(false);
 
-		//this.findPanel = new FindPanel(this.procList);
 		String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", "CATALOG", "SCHEMA", "REMARKS"};
 		this.findPanel = new QuickFilterPanel(this.procList, cols, false, "procedurelist");
 		
@@ -283,7 +284,9 @@ public class ProcedureListPanel
 			this.isRetrieving = true;
 			DbMetadata meta = dbConnection.getMetadata();
 			WbSwingUtilities.showWaitCursorOnWindow(this);
-			DataStoreTableModel model = new DataStoreTableModel(meta.getProcedures(currentCatalog, currentSchema));
+			DataStore ds = meta.getProcedures(currentCatalog, currentSchema);
+			DataStoreTableModel model = new DataStoreTableModel(ds);
+			
 			int rows = model.getRowCount();
 			String info = rows + " " + ResourceMgr.getString("TxtTableListObjects");
 			this.infoLabel.setText(info);

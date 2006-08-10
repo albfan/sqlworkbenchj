@@ -60,6 +60,8 @@ public class HistoryTextField
 	{
 		String s = props.getProperty(prefix + "history", "");
 		List l = StringUtil.stringToList(s, ";", true, true);
+		this.setText("");
+		this.historyValues.clear();
 		this.historyValues.addAll(l);
 		this.updateModel();
 		String lastValue = props.getProperty(prefix + "lastvalue", null);

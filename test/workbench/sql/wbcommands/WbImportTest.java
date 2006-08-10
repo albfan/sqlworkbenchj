@@ -1,10 +1,14 @@
 /*
  * WbImportTest.java
- * JUnit based test
  *
- * Created on 17. Juli 2006, 19:58
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2006, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
-
 package workbench.sql.wbcommands;
 
 import java.io.BufferedWriter;
@@ -16,6 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.sql.Connection;
@@ -76,8 +81,9 @@ public class WbImportTest extends TestCase
 		int rowCount = 10;
 		try
 		{
+			String name = "\u0627\u0644\u0633\u0639\u0631 \u0627\u0644\u0645\u0642\u062A\u0631\u062D \u0644\u0644\u0645\u0633\u0647\u0644\u0643";
 			File importFile  = new File(this.basedir, "import.txt");
-			PrintWriter out = new PrintWriter(new FileWriter(importFile));
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
 			out.println("nr\tfirstname\tlastname");
 			for (int i = 0; i < rowCount; i++)
 			{
@@ -85,10 +91,13 @@ public class WbImportTest extends TestCase
 				out.print('\t');
 				out.println("First" + i + "\tLastname" + i);
 			}
+			out.println("999\tUnifirst\t"+name);
+			rowCount ++;
 			out.println("  \tempty nr\tempty");
+			rowCount ++;
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -type=text -header=true -continueonerror=false -table=junit_test");
+			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -multiline=true -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -98,9 +107,24 @@ public class WbImportTest extends TestCase
 			{
 				count = rs.getInt(1);
 			}
-			assertEquals("Not enough values imported", rowCount+1, count);
+			assertEquals("Not enough values imported", rowCount, count);
+			
+			rs.close();
+			
+			rs = stmt.executeQuery("select lastname from junit_test where nr = 999");
+			if (rs.next())
+			{
+				String sname = rs.getString(1);
+				assertEquals("Unicode incorrectly imported", name, sname);
+			}
+			else
+			{
+				fail("Unicode row not imported");
+			}
 			rs.close();
 			stmt.close();
+			
+			
 		}
 		catch (Exception e)
 		{
@@ -115,11 +139,11 @@ public class WbImportTest extends TestCase
 		{
 			File importFile  = new File(this.basedir, "multi.txt");
 			PrintWriter out = new PrintWriter(new FileWriter(importFile));
-			out.println("nr\tfirstname\tlastname");
-			out.print(Integer.toString(1));
-			out.print('\t');
-			out.println("First\t\"Last");
-			out.println("name\"");
+			out.println("firstname\tlastname\tnr");
+			out.println("First\t\"Last\r\nname\"\t1");
+			out.println("first2\tlast2\t2");
+			out.println("first3\t\"last3\r\nlast3last3\"\t3");
+			out.println("first4\t\"last4\tlast4\"\t4");
 			out.close();
 			
 			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
@@ -127,22 +151,36 @@ public class WbImportTest extends TestCase
 			
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
-			int count = -1;
-			if (rs.next())
+			int count = 0;
+			while (rs.next())
 			{
+				count ++;
 				int nr = rs.getInt(1);
-				assertEquals("Wrong nr imported", 1, nr);
-				
 				String first = rs.getString(2);
-				assertEquals("Wrong firstname imported", "First", first);
-				
 				String last = rs.getString(3);
-				assertEquals("Wrong firstname imported", "Last\r\nname", last);
+				assertEquals("Wrong nr imported", count, nr);
+				if (count == 1)
+				{
+					assertEquals("Wrong firstname imported", "First", first);
+					assertEquals("Wrong firstname imported", "Last\r\nname", last);
+				}
+				else if (count == 2)
+				{
+					assertEquals("Wrong firstname imported", "first2", first);
+					assertEquals("Wrong firstname imported", "last2", last);
+				}
+				else if (count == 3)
+				{
+					assertEquals("Wrong firstname imported", "first3", first);
+					assertEquals("Wrong firstname imported", "last3\r\nlast3last3", last);
+				}
+				else if (count == 4)
+				{
+					assertEquals("Wrong firstname imported", "first4", first);
+					assertEquals("Wrong firstname imported", "last4\tlast4", last);
+				}
 			}
-			else
-			{
-				fail("No data imported");
-			}
+			assertEquals("Wrong number of rows imported", 4, count);
 			rs.close();
 			stmt.close();
 		}

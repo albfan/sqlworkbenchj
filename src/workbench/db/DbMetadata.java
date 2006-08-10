@@ -138,7 +138,8 @@ public class DbMetadata
 	private boolean isMySql;
 	private boolean isCloudscape;
 	private boolean isApacheDerby;
-
+	private boolean isExcel; 
+	
 	private boolean trimDefaults = true;
 	private boolean createInlineConstraints;
 	private boolean useNullKeyword = true;
@@ -337,6 +338,10 @@ public class DbMetadata
 		{
 			this.constraintReader = new FirstSqlMetadata();
 			this.isFirstSql = true;
+		}
+		else if (productLower.indexOf("excel") > -1)
+		{
+			this.isExcel = true;
 		}
 
 		// if the DBMS does not need a specific ProcedureReader
@@ -680,7 +685,18 @@ public class DbMetadata
 		String cat = table.getCatalog();
 		if (StringUtil.isEmptyString(cat)) return false;
 		String currentCat = getCurrentCatalog();
-		if (StringUtil.isEmptyString(currentCat)) return false;
+		if (this.isExcel)
+		{
+			// Excel puts the directory into the catalog
+			// so we need to normalize the directory name
+			File c1 = new File(cat);
+			File c2 = new File(currentCat);
+			if (c1.equals(c2)) return false;
+		}
+		else
+		{
+			if (StringUtil.isEmptyString(currentCat)) return false;
+		}
 		return !cat.equalsIgnoreCase(currentCat);
 	}
 	
