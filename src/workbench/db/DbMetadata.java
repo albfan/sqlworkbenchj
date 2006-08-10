@@ -38,6 +38,7 @@ import workbench.WbManager;
 import workbench.db.firebird.FirebirdProcedureReader;
 import workbench.db.firstsql.FirstSqlMetadata;
 import workbench.db.hsqldb.HsqlSequenceReader;
+import workbench.db.ibm.Db2SynonymReader;
 import workbench.db.ingres.IngresMetadata;
 import workbench.db.mckoi.McKoiMetadata;
 import workbench.db.mssql.SqlServerConstraintReader;
@@ -295,8 +296,13 @@ public class DbMetadata
 				this.procedureReader = new SqlServerMetadata(this);
 			}
 		}
-		else if (productLower.indexOf("adaptive server") > -1)
+		else if (productLower.indexOf("db2") > -1)
 		{
+			this.synonymReader = new Db2SynonymReader();
+		}
+		else if (productLower.indexOf("adaptive server") > -1) 
+		{
+			// this covers adaptive server Enterprise and Anywhere
 			this.constraintReader = new ASAConstraintReader();
 		}
 		else if (productLower.indexOf("mysql") > -1)
@@ -3219,6 +3225,13 @@ public class DbMetadata
 		return StringUtil.EMPTY_STRING;
 	}
 
+	public boolean isSynonymType(String type)
+	{
+		if (type == null) return false;
+		String synType = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".synonymtype", "synonym");
+		return (type.equalsIgnoreCase(synType));
+	}
+	
 	/**
 	 *	Return the underlying table of a synonym.
 	 *

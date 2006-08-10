@@ -567,12 +567,12 @@ public class SqlFormatter
 			{
 				this.appendText(text);
 			}
-			else if ("END".equalsIgnoreCase(text))
+			else if ("END".equalsIgnoreCase(text) || "END CASE".equalsIgnoreCase(text))
 			{
 				this.appendNewline();
 				this.indent(current);
 				this.appendText(text);
-				//this.appendNewline();
+				this.appendNewline();
 				t = this.lexer.getNextToken(true, false);
 				return t;
 			}

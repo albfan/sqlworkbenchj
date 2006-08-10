@@ -2,6 +2,21 @@
 <java version="1.4.0_01" class="java.beans.XMLDecoder"> 
  <object class="java.util.HashMap"> 
  
+  <void method="put">  
+   <string>DB2/NT</string>  
+   <object class="workbench.db.GetMetaDataSql">  
+    <void property="baseSql">  
+     <string>SELECT text FROM syscat.routines</string>  
+    </void>  
+    <void property="objectNameField">  
+     <string>ROUTINENAME</string>  
+    </void>  
+    <void property="schemaField">  
+     <string>ROUTINESCHEMA</string>  
+    </void>  
+   </object>  
+  </void>  
+	 
   <void method="put"> 
    <string>Oracle</string> 
    <object class="workbench.db.GetMetaDataSql"> 

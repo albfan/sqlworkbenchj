@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <java version="1.4.0_01" class="java.beans.XMLDecoder">
  <object class="java.util.HashMap">
+
+  <void method="put">
+   <string>DB2/NT</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT text FROM syscat.triggers</string>
+    </void>
+    <void property="objectNameField">
+     <string>trigname</string>
+    </void>
+    <void property="schemaField">
+     <string>trigschema</string>
+    </void>
+    <void property="useUpperCase">
+     <boolean>true</boolean>
+    </void>
+   </object>
+  </void>
  
   <void method="put">
    <string>Oracle</string>

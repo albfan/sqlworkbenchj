@@ -356,15 +356,23 @@ public class ProfileEditorPanel
 		if (path == null) return null;
 		 
 		
-		if (path.getPathCount() > 1) 
+		DefaultMutableTreeNode node = null;
+		if (path.getPathCount() == 2)
+		{
+			// group node selected
+			node = (DefaultMutableTreeNode)path.getLastPathComponent();
+		}
+		if (path.getPathCount() > 2) 
 		{
 			// Get the group of the currently selected profile;
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getPathComponent(1);
-			if (node.getAllowsChildren())
-			{
-				String g = (String)node.getUserObject();
-				return g;
-			}
+			node = (DefaultMutableTreeNode)path.getPathComponent(1);
+		}
+		if (node == null) return null;
+		
+		if (node.getAllowsChildren())
+		{
+			String g = (String)node.getUserObject();
+			return g;
 		}
 		return null;
 	}

@@ -1053,7 +1053,7 @@ public class TableListPanel
 			{
 				sql = meta.getExtendedViewSource(tbl, tableDefinition.getDataStore(), true);
 			}
-			else if ("synonym".equals(this.selectedObjectType))
+			else if (meta.isSynonymType(this.selectedObjectType))
 			{
 				sql = meta.getSynonymSource(this.selectedSchema, this.selectedTableName);
 				if (sql.length() == 0)

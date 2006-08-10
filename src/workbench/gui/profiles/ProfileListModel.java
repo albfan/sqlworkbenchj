@@ -85,25 +85,18 @@ class ProfileListModel
 	private DefaultMutableTreeNode findGroupNode(String group)
 	{
 		if (this.rootNode == null) return null;
-		if (StringUtil.isEmptyString(group))
+		int children = this.getChildCount(this.rootNode);
+		for (int i = 0; i < children; i++)
 		{
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode)getChild(this.rootNode, 0);
-			return node;
-		}
-		else
-		{
-			int children = this.getChildCount(this.rootNode);
-			for (int i = 1; i < children; i++)
+			DefaultMutableTreeNode n = (DefaultMutableTreeNode)getChild(rootNode, i);
+			if (n == null) continue;
+			String name = (String)n.getUserObject();
+			if (name.equals(group)) 
 			{
-				DefaultMutableTreeNode n = (DefaultMutableTreeNode)getChild(rootNode, i);
-				if (n == null) continue;
-				String name = (String)n.getUserObject();
-				if (name.equals(group)) 
-				{
-					return n;
-				}
+				return n;
 			}
 		}
+
 		return null;
 	}
 	
@@ -263,11 +256,12 @@ class ProfileListModel
 		
 		this.size = 0;
 		
+		String defGroupName = ResourceMgr.getString("LblDefGroup");
 		while (itr.hasNext())
 		{
 			ConnectionProfile profile = (ConnectionProfile)itr.next();
 			String group = profile.getGroup();
-			if (StringUtil.isEmptyString(group)) 
+			if (StringUtil.isEmptyString(group) || defGroupName.equals(group)) 
 			{
 				defaultProfiles.add(profile);
 			}
@@ -289,7 +283,7 @@ class ProfileListModel
 		// versions that do not have profile groups
 		if (defaultProfiles.size() > 0)
 		{
-			DefaultMutableTreeNode defaultNode = new DefaultMutableTreeNode(ResourceMgr.getString("LblDefGroup"), true);
+			DefaultMutableTreeNode defaultNode = new DefaultMutableTreeNode(defGroupName, true);
 			Collections.sort(defaultProfiles, StringUtil.getCaseInsensitiveComparator());
 			rootNode.add(defaultNode);
 			Iterator dg = defaultProfiles.iterator();
