@@ -254,6 +254,7 @@ public class SqlCommand
 						// The DataStore checks for the cancel flag during processing
 						// of the ResulSet
 						this.currentRetrievalData.initData(rs, maxRows);
+						this.currentRetrievalData.setGeneratingSql(result.getSourceCommand());
 					}
 					catch (SQLException e)
 					{

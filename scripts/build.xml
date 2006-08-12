@@ -35,17 +35,6 @@
     </tstamp>
   </target>
 
-  <path id="docbook.extensions.path">
-    <pathelement location="c:/etc/xalan/bin/xalan.jar"/>
-    <pathelement location="c:/etc/xalan/bin/xercesImpl.jar"/>
-    <pathelement location="${docbook.root}/extensions/xalan25.jar"/>
-    <pathelement path="${classpath}"/>
-  </path>
-
-  <path id="saxon.path">
-    <pathelement location="c:/etc/saxon/saxon8.jar"/>
-  </path>
-
   <path id="fop.path">
     <fileset dir="${fop.root}/lib">
       <include name="**/*.jar"/>
@@ -196,12 +185,17 @@
   </target>
 
   <!-- Create the pdf version of the manual -->
-  <target name="pdf" depends="fop">
-    <java classname="org.apache.fop.apps.Fop" classpathref="fop.path">
-      <arg value="${doc}/pdf/manual.fo"/>
-      <arg value="${doc}/pdf/SQLWorkbench-Manual.pdf"/>
+  <target name="pdf" depends="init,fop">
+		
+		<property name="inputFile" location="${doc}/pdf/manual.fo"/>
+		<property name="outputFile" location="${doc}/pdf/SQLWorkbench-Manual.pdf"/>
+		
+    <java failonerror="true" fork="true" dir="${fop.root}" classname="org.apache.fop.cli.Main" classpathref="fop.path">
+			<arg line="-fo ${inputFile} -out application/pdf ${outputFile}"/>
     </java>
+		
     <delete file="${doc}/pdf/manual.fo"/>
+		
   </target>
 
   <!-- Create the html help files for putting them into the
@@ -211,7 +205,7 @@
 		<delete dir="${build}/help" failonerror="false"/>
 		<mkdir dir="${build}/help"/>
 		<echo message="Generating HTML Help"/>
-		<!-- copy overwrite="true" todir="${build}/help" file="${doc}/xml/docbookx.dtd"/ -->
+		
 		<copy overwrite="true" todir="${build}/help">
 			<fileset dir="${doc}/xml">
 				<include name="*.xml"/>
@@ -226,8 +220,7 @@
 		
 		<xslt basedir="${build}/help" includes="Manual.xml" style="${doc}/docbook/html/chunk.xsl" destdir="${build}/help">
 			<xmlcatalog>
-				<dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN"
-				location="${doc}/dtd/docbookx.dtd"/>
+				<dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN" location="${doc}/dtd/docbookx.dtd"/>
 			</xmlcatalog>
 			
 			<param name="root.filename" expression="workbench-manual"/>
@@ -241,6 +234,8 @@
 			<param name="chunk.first.sections" expression="1"/>
 			<param name="chunker.output.indent" expression="yes"/>
 			<param name="chunk.quietly" expression="1"/>
+			<param name="generate.index" expression="0"/>
+			<param name="index.method" expression="'default'"/>
 			<param name="chunk.fast" expression="1"/>
 			<param name="toc.section.depth" expression="3"/>
 			<param name="use.id.as.filename" expression="1"/>
@@ -255,7 +250,7 @@
 			<param name="navig.showtitles" expression="1"/>
 			<param name="css.decoration" expression="1"/>
 		</xslt>
-		<!-- delete file="${build}/help/docbookx.dtd"/ -->
+
 		<delete file="${build}/help/Manual.html"/>
 		<delete>
 			<fileset dir="${build}/help">
@@ -324,7 +319,7 @@
 		<copy overwrite="true" tofile="${html-outdir}/history.txt" file="${scriptsrc}/history.new"/>
 		
 		<xslt basedir="${html-outdir}" includes="Manual.xml" style="${doc}/docbook/html/chunk.xsl"
-			destdir="${html-outdir}" classpathref="saxon.path">
+			destdir="${html-outdir}">
 			<xmlcatalog>
 				<dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN"
 				location="${doc}/dtd/docbookx.dtd"/>
@@ -339,6 +334,8 @@
 			<param name="admon.textlabel" expression="0"/>
 			<param name="chunk.first.sections" expression="1"/>
 			<param name="chunker.output.indent" expression="yes"/>
+			<param name="generate.index" expression="0"/>
+			<param name="index.method" expression="'default'"/>
 			<param name="chunk.quietly" expression="1"/>
 			<param name="chunk.fast" expression="1"/>
 			<param name="use.id.as.filename" expression="1"/>
@@ -415,6 +412,7 @@
       <zipfileset dir="${scriptsrc}" prefix="scripts">
         <exclude name="**/.nb*"/>
         <exclude name="**/.new"/>
+        <exclude name="publish-dev.cmd"/>
       </zipfileset>
       
       <zipfileset dir="${testsrc}" prefix="test">
@@ -646,6 +644,10 @@
 	--> 
 	
 	<target name="test" depends="compile-tests">
+		<delete failonerror="false">
+			<fileset dir="${junitdir}" includes="*.txt"/>
+		</delete>
+		
 		<junit haltonerror="true" haltonfailure="true" includeantruntime="true" fork="true">
 			<classpath>
 				<pathelement location="${build}"/>

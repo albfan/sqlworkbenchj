@@ -5,6 +5,27 @@ Enh:  (89) The launcher will no longer set the default language for
       with newer Oracle drivers. The -nolang parameter is thus obsolete. 
       To activate the old behaviour, -J-Duser.language=en needs to be added
       manually to the commandline of the launcher.
+Enh:  (88.15) Individual cells can now be selected in a result set by
+      holding down the Alt-Key while selecting rows/columns. When using 
+      "Copy selected" on such a selection, only the selected columns
+      will be copied. Note that this will produce incorrect results 
+      when copying SQL statements and no primary key has been selected.
+      The modifier for rectangular selections in the editor has been 
+      switch to the Alt key as well, to be consistent. 
+Enh:  (88.15) When specifying a connection profile through parameters 
+      when using "Copy as update" and the key column is not selected.
+      (Commandline, WbCopy, WbSchemaDiff) the profile group can now 
+      also be specified. Please refer to the manual for details on the new 
+      parameters
+Enh:  (88.14) Added support for DB2 Triggers, Alias and Stored Procedures
+      in the DbExplorer
+Enh:  (88.14) The statement history can now be deleted by using 
+      SQL -> Clear history
+Enh:  (88.12) WbImport with -type=text can now handle records spanning 
+      multiple lines (which need to be enclosed with the quote character)
+      This support can be enabled with the parameter -multiline=true
+Enh:  (88.11) A new option to use alternating colors for table rows 
+      is available in the Options dialog
 Enh:  (88.10) The WbImport command can now handle the compressed archives
       created with WbImport -compress=true
 Enh:  (88.10) Specifying a full connection using the -url -driver, ... 
@@ -42,12 +63,30 @@ Enh:  (88.1) WbSelectBlob now processes the full result set (and not
 Fix:  (88.1) With Firebird, SELECT statements were broken
 Fix:  (88.2) With Oracle CLOBs where always written with CDATA tags when 
       using XML Export even if -usecdata was set to false
-Fix:  (88.4) WbImport now treats empty strings or strings that only consist 
-      of whitespace as null values
+Fix:  (88.4) For non-character columns, WbImport now treats empty values or 
+      values that only consist of whitespace as null values (instead 
+      of throwing an error) 
 Fix:  (88.4) When saving a result set to a file "Save Data as", nothing 
       was written, if no file extension was specified.
 Fix:  (88.6) The DbExplorer was not working as a standalone application any 
       longer (using the -dbexplorer switch or DbExplorer.exe)
+Fix:  (88.11) "Save Workspace as..." was not working when no extension
+      was specified
+Fix:  (88.11) When enabling DBMS_OUTPUT (on Oracle) LONG or LONG RAW columns
+      could not be retrieved as well. DbExplorer and DataPumper now disable
+      DBMS_OUTPUT as soon as they connect. For regular SELECTs in the 
+      editor tabs, this has to be done manually by the user by either
+      globally disabling DBMS_OUTPUT in the options dialog or through
+      DISABLEOUT before running a query on a table with a LONG column.
+Fix:  (88.13) When switching from one Workspace with a file in a tab to 
+      another workspace with not file in the same tab location, the file 
+      was not unloaded.
+Fix:  (88.13) WbImport did not use the -encoding parameter
+Fix:  (88.14) When using SQL Workbench in batch mode without a 
+      WbDrivers.xml, connections through the ODBC bridge did not work
+Fix:  (88.15) When copying a profile from one group to another using
+      the context menu, the new profile was not saved.
+
       
 Build 88, 07.07.2006
 --------------------
@@ -303,460 +342,3 @@ Fix:  (83.25) When "Retrieve DbExplorer" was not enabled in the options dialog,
 Fix:  (83.26) Displaying table structure in DbExplorer was broken with Oracle 8i
 Fix:  (83.28) "Replace all" was not working with "Ignore case" in the editor
 
-Build 83, 20.11.2005
---------------------
-Enh:  (82.1) When running external files using WbInclude the directory of the 
-      currently executed file is used as the "current" directory, so if the 
-      executed file is using WbInclude (@) files can be referenced with a 
-      relative path.
-Enh:  (82.1) SQL Workbench now supports reading and writing blob columns to and 
-      from external files. For updating blob and clob columns the usual 
-      UPDATE and INSERT statements can be used with placeholders for the file 
-      definition. To retrieve a blob the new WbSelectBlob command can be used. 
-      When exporting data into an XML file, blob columns are now written
-      into external files (the files are referenced from the XML output)
-      This has been tested with Postgres 8.0, SQL Server (jTDS driver), MySQL,
-      Firebird 1.5 and SQL Anywhere.
-      For Oracle, the 10g driver is required. Earlier drivers do not support 
-      the standard JDBC calls used for this feature.
-Enh:  (82.1) When "confirming" updates, there was no way to cancel the execution
-      completely. WbInclude is now also considered as an "updating" command.
-Enh:  (82.2) Oracle 10g drivers do not work properly with Oracle 9i and date 
-      columns. (The time part is not retrieved correctly). SQL Workbench now 
-      always treats DATE columns as TIMESTAMP columns (i.e. it will 
-      getTimestamp() and java.sql.Timestamp objects for those columns) to 
-      preserve the time part. This can be switched off by setting 
-      workbench.db.oracle.date.usetimestamp=false
-      in workbench.settings
-Enh:  (82.2) Added support for views, stored procedures and triggers for 
-      MySQL 5.x in DbExplorer
-Enh:  (82.3) WbReport now includes VIEW definitions
-Enh:  (82.3) Added support for views and triggers for Apache Derby in DbExplorer
-Enh:  (82.3) The password in the connection dialog can now be displayed in plain
-      text
-Enh:  (82.6) With WbImport -truncatetable=true can be used as a shortcut
-      for -deletetarget=true -usetruncate=true. If -truncatetable is present
-      -deletetarget will be ignored.
-Enh:  (82.15) Filters can now be applied to all columns with a single expression
-Enh:  (82.16) Oracle public synonyms can now optionally be included in the 
-      auto completion popup. To enable this, a new property is available in 
-      workbench.settings:
-      workbench.editor.autocompletion.oracle.public_synonyms=true
-Enh:  (82.18) The data tab in the DbExplorer now displays the current table name      
-Enh:  (82.25) Tried to make concurrent access to the same connection more robust
-Enh:  (82.27) The WbExport command can now write a skeleton for an SQL*Loader 
-      control file when -oraldr=true is specified
-Enh:  (82.28) Postgres: The source for a table now includes the index definition 
-      as returned by the view pg_indexes, thus indexes with operator classes are 
-      displayed correctly. The Index tab will still display it incorrectly though
-      (the JDBC driver does not return the information)
-Enh:  (82.29) WbDiff now includes Views
-Enh:  (82.29) The "Create DDL Script" is now also available in the Procedures tab
-      of the DBExplorer, not only the Objects tab.
-Enh:  (82.30) Basic support for Oracle materialized views added
-
-Fix:  (82.1) When an error occurs during inserting of new rows from a result set, 
-      and the error is ignored, the status for the incorrect rows is lost, and 
-      subsequent saving of the data will generate an UPDATE statement instead
-      of an INSERT statement
-Fix:  (82.2) When importing XML files with a CLOB column SQL Workbench/J would
-      report an error. 
-Fix:  (82.4) Fixed an error when loading files into the editor (files with CR/LF 
-      ending were not loaded correctly)
-Fix:  (82.5) Since 82.3 the assigned workspace file was not shown any longer in 
-      the connection dialog
-Fix:  (82.6) The defaults stated in the help for the WbDiff command did not  
-      match the actual defaults used. The constraint comparing is now reported 
-      correctly in the XML file as well.
-Fix:  (82.6) The first column of a result set could not be edited any more.      
-Fix:  (82.7) If an invalid regular expression is entered in the search dialog 
-      of the editor, an error message is now displayed.
-Fix:  (82.9) Replace & Next was not using regular expressions correctly for the 
-      replacement string      
-Fix:  (82.11) -decimal did not work for text imports
-Fix:  (82.13) The tree display of foreign key references did not work any more
-Fix:  (82.14) "Replace all" did not work any longer in the editor
-Fix:  (82.15) When using a different table name for the generated script with 
-      WbExport (with -type=sqlinsert) together with the -createtable option 
-      the alternate name was not used for the PK, FK and Index definition.
-Fix:  (82.18) Importing CLOB columns in Oracle did not work      
-Fix:  (82.33) Checking for the MS SQL "GO" delimiter did not work properly 
-Fix:  (82.34) When "Retrieve Explorer" was disabled, nothing was retrieved at 
-      all when the Explorer was opened in a separate window
-Fix:  (82.35) When using "Save Data as" date and timestamp columns were not
-      written into the export file if not format was specified.
-
-Build 82, 12.09.2005
---------------------
-Fix:  @filename.sql was not working any longer
-Fix:  Import of text files with the column definition in the header line was not 
-      working
-
-Build 81, 11.09.2005
---------------------
-Enh:  (80.33) The filter definitions now support IS NULL and IS NOT NULL comparator
-Enh:  (80.32) Auto completion now supports CREATE VIEW statements.
-Enh:  (80.30) The SQL that is used for the UPDATE Statement in the WbImport command
-      can now be "enhanced" with an additional WHERE clause. This can be specified
-      with the parameter -updatewhere for the WbImport command. If this is specified
-      e.g. -updatewhere="column=value" then this expression will be appended to the
-      generated UPDATE statement with an AND condition. e.g. 
-      UPDATE table SET col1=?, col2=? WHERE id=? AND (column=value)
-      If the expression starts with the keyword AND or OR, then it will appended
-      to the UPDATE staement as it is. If it does not start with either of the two
-      keywords, it will be put into brackets and appended using AND.
-      The expression -updatewhere="AND (col5=42 OR col5 = 43)" will be append "as is" 
-      to the generated UPDATE statement.
-Enh:  (80.29) The execution time of the last statement is now also shown
-      in the statusbar.
-Enh:  (80.26) The object types that are considered by the DbExplorer to contain
-      data (i.e. that can be used in a SELECT statement) can now be configured. 
-      The default setting is stored in the property 
-      workbench.db.objecttype.data.default
-      This can be overwritten for a specific dbms by replacing default with the
-      DBID for the server, e.g. rdb or oracle
-      
-      workbench.db.objecttype.selectable.rdb=table,view,system,system view
-      
-      The values that should be listed in that property can be taken from 
-      the TYPE column in the Object list of the DbExplorer
-Enh:  (80.19) If a editor tab is associated with a file, the filename can now
-      be displayed in the window title. This can be configured in workbench.settings
-      with the property workbench.gui.display.showfilename 
-      Possible values are none,name,path. If this property is set to "name", then 
-      only the name of the current file (if any) is displayed in the window title.
-      If it is set to "path", the full path will be displayed in the window title. 
-      Otherwise (i.e. if the property is empty, or not present) the filename is
-      not displayed at all.
-Enh:  (80.19) Columns that are defined as NOT NULL are now displayed with 
-      a different background color during editing. This feature can be disabled
-      using the property:
-      workbench.gui.edit.requiredfield.dohighlight=false
-      The default highlight color is:
-      workbench.gui.edit.requiredfield.color=255,100,100
-      and can be changed with that property
-Enh:  (80.18) The file to be used to store the connection profiles can now 
-      be specified on the commandline using -profilestorage=filename.xml
-      If the filename does not contain a directory, the configuration directory
-      is used to search for the file, otherwise the full filename is used.
-Enh:  (80.18) Editor Tabs that contain a file can now be renamed as well.
-      The full filename is only available as the tooltip of the tab. To 
-      restore the title to the file's name, rename the tab to an "empty" name
-Enh:  (80.18) The editor tabs can now be re-ordered (right click on the
-      tab, choose "Move left" or "Move right"
-Enh:  (80.18) The retrieval of the row count can now be configured in the 
-      data tab of the DbExplorer (using the "Settings" button)
-Enh:  (80.17) Added a column filter and searcher to the column list display
-      in the DbExplorer
-Enh:  (80.13) The table list in the DbExplorer now uses a filter instead
-      of simply searching for an object name.
-Enh:  (80.12) Filtering of the resultset is now possible
-Enh:  (80.6) Support for completion of INSERT statements added
-Enh:  (80.10) The DbExplorer now lets you define the key columns for a table 
-      in the data tab.
-Fix:  (80.1) Fixed incorrect quoting for table names when creating 
-      statements to save the changes to the data.
-Fix:  (80.2) Fixed some errors in the generation of DbDesigner files
-Fix:  (80.2) When using single line comments in the FROM list, the comments
-      would show up in the generated update statemens when editing the data
-Fix:  (80.3) When connecting to a database profile with a workspace assigned
-      while a workspace was loaded the last tab would be removed from
-      the currently active workspace
-Fix:  (80.4) Re-introduced fix for the bug in Oracle 9 
-      regarding the wrong information vor VARCHAR columns if NLS_LENGTH_SEMANTICS
-      is set to char
-Fix:  (80.5) Displaying procedures did not work any longer
-Fix:  (80.7) Automatically detecting the alternate delimiter did not work 
-      properly when using @ as a replacement of the WbInclude command
-Fix:  (80.8) BIT and BOOLEAN fields where not handled correctly when importing
-      XML files generated by SQL Workbench/J
-Fix:  (80.9) Prevent endless loops with faulty JDBC drivers when retrieving warnings
-      and errors after a retrieval.
-Fix:  (80.12) When closing the search dialog in the editor with the ESC
-      key, the search was performed anyway.
-Fix:  (80.14) Fixed a bug with the autocompletion of columns in DELETE 
-      statements
-Fix:  (80.15) Using Ctrl-Space as the shortcut for code completion now works
-      properly
-Fix:  (80.19) The generated SQL for foreign key constraints in Oracle would 
-      contain an "ON DELETE" rule which is not supported by Oracle
-Fix:  (80.19) If the name of an editor tab contained a number equal to the 
-      index of the tab, the shortcut was not displayed correctly
-Fix:  (80.19) The scripts for SYNONYMs and SEQUENCEs were not created in 
-      the DbExplorer (Create DDL Script)
-Fix:  (80.19) When importing a text file that has fewer columns then the 
-      target table, not all columns were imported properly
-Fix:  (80.19) When a DbExplorer tab was currently selected, creating a new 
-      SQL Tab did not work properly with JDK 1.5
-Fix:  (80.20) The order of the foreign key/primary key columns was not correct 
-      in the generated source for a table
-Fix:  (80.21) Defined Filters were not displayed correctly when re-defining
-Fix:  (80.25) WbReport now ensures, that the values stored in the DB Info part
-      are valid XML by replacing potential illegal characters (e.g. (char)0) 
-Fix:  (80.25) The size (width) limitation for the schema selector in the 
-      DbExplorer has been removed 
-Fix:  (80.25) New tabs were not always selected correctly (i.e. a different
-      tab was considered the active tab)
-Fix:  (80.35) When importing several files with the WbImport command that
-      specified a different schema then the current one, SQL Workbench/J 
-      tried to delete the tables in the schema defined by the files not
-      by the -schema switch.
-Fix:  (80.37) If running SQLWorkbench/J in batch mode and the specified connection 
-      profile was not found, no clear error message was shown.
-      
-Build 80, 26.06.2005
---------------------
-Enh:  (79.1) Workbench commands are now formatted correctly when using
-      "Format SQL"
-Enh:  (79.3) Added support for the new CHECK constraints in FirstSQL/J
-Enh:  (79.3) Added a new menu item for controlling auto commit
-Enh:  (79.3) Enhanced the performace of WBINCLUDE when processing scripts
-      that are not read into memory completely.
-Enh:  (79.3) Multiple Database Explorer windows and/or tabs can now be
-      opened. The existing "Show Database Explorer" menu works as before.
-      Additionally there is "New Db Explorer tab" and "New DbExplorer Window"
-      It is strongly recommended to use the option "Separate connection for
-      each tab" in this case to avoid threading problems in the JDBC driver
-Enh:  (79.3) Sorting inside the result has been changed slightly. For
-      performace reasons Strings are now compared using Java's internal
-      compare which might produce incorrect results for certain languages
-      (http://java.sun.com/j2se/1.4.2/docs/api/java/lang/String.html#compareTo(java.lang.String))
-      To enable a language and country specific collation please use the
-      following properties in workbench.setttings:
-      workbench.sort.usecollator=true
-      workbench.sort.language
-      workbench.sort.country
-      to specify the collation that should be used.
-Enh:  (79.4) Code completion for tables and columns is now available. It can
-      be activated by Ctrl-Q while the cursor is inside a SELECT, INSERT
-      or UPDATE statement (other statements are not yet supported). To correctly
-      identify the objects that need to be displayed it is required that the 
-      statement is somewhat correct (it does not need to be complete, but 
-      the statements in the editor have to be separated using ;)
-      When a column or table name is pasted into the editor, it is pasted
-      the way the JDBC driver returned the name. With
-      workbench.editor.autocompletion.paste.case=lower
-      this behaviour can be controlled in workbench.settings.
-      Allowe values for this property are lower (names are pasted in lower case), 
-      upper (names are pasted in upper case) or empty. If the property is empty
-      or not present at all (default) then the names are pasted as they are
-      returned from the driver
-Enh:  (79.5) The usage of the schema name in DML statements generated by SQL Workbench
-      can now be controlled. To do this, add the line 
-      workbench.sql.ignoreschema.<dbid1>=schema1,...
-      You can use * to ignore omit all schemas in DML statements, or list each 
-      schema that should be ignored (e.g. PUBLIC) separately.
-      The <dbid> that is generated for your DBMS is reported in the log file after a 
-      successful connection (the log level needs to be set to INFO). 
-      Look for the text "Using DBID"
-Enh:  (79.6) WbImport now supports the -sourcedir parameter for text files as well.
-Enh:  (79.6) WbDiff now supports more parameters to control the level of comparison
-Enh:  (79.8) Added a workaround for the PostgreSQL JDBC driver not understanding
-      the "dollar" quoting when creating functions.
-Enh:  (79.12) Support for schema changes in HSQLDB and Oracle added
-
-Fix:  (79.1) When no tables were found using WbExport -sourcetable=* no proper
-      error was reported.
-Fix:  (79.1) When using WbXslt the output file was not close properly and thus
-      locked until the application was ended
-Fix:  (79.1) When changing the selected table in the DbExplorer while a
-      table definition was loaded, the application could hang.
-Fix:  (79.2) Display (and export) of the time part of an Oracle DATE column
-      was broken
-Fix:  (79.3) when running "SET AUTOCOMMIT" the commit and rollback toolbar
-      buttons where not enabled/disabled accordingly
-Fix:  (79.3) Fixed a problem in the SQL parser with single line comments
-      in the last statement of the editor
-Fix:  (79.3) WBINCLUDE was not working if no encoding was specified
-Fix:  (79.3) WBCOPY was not working when beeing used from within a batchfile
-Fix:  (79.7) Fixed some problems with WBCOPY and creating tables during copying
-Fix:  (79.7) When creating Oracle packages, errors were not shown correctly
-Fix:  (79.7) Postgres' JDBC driver does not understand the "dollar quoting" 
-      when creating stored procedures. A workaround was implemented to be 
-      able to run the same scripts as with psql
-Fix:  (79.9) Fixed a problem with detecting the "current" statement in the editor
-      when using Ctrl-Enter
-Fix:  (79.13) Cancelling a WbExport is now more reliable.
-Fix:  (79.15) Fixed a bug in the handling of BIGINT columns.
-
-Build 79, 25.04.2005
---------------------
-Fix:  WbImport was not working if no encoding was specified
-
-Build 78, 24.04.2005
---------------------
-Enh:  (77.1) Prepared Statements (i.e. ? in a SELECT) are now supported
-      This support relies on certain JDBC features which are
-      not available e.g. in Oracle's or PostgreSQL's JDBC drivers.
-      Currently this has been tested with Firebird and HSQLDB.
-Enh:  (77.3) The source for stored procedure and views can now be
-      displayed for Informix (thanks Meikel)
-Enh:  (77.10) Errors during script execution can now be ignored by default
-      (SQL -> Ignore errors)
-Enh:  (77.12) When importing text files, columns can now be excluded
-      from the import by specifying $wb_skip$ as the columnname
-      in the -filecolumns parameter or by supplying a list of
-      columns to be imported using the -importcolumns switch
-Enh:  (77.12) When importing text file, filters based on regular expressions
-      can now be applied either on column level or input line level
-      (using the -columnfilter or -linefilter switch)
-Enh:  (77.12) The WbImport command can now switch off the progress display
-      of the current row which speeds up the process when importing from
-      within the GUI (batch import does not suffer from the performance
-      impact of the progress report). To disable the progress use
-      -showprogress=false
-      Alternatively the interval for the reporting can be selected as
-      well -showprogress=100 will only update the display every 100 rows.
-      Additionally the performance of the status display has been improved.
-      Loading large result sets (which report the progress as well) and
-      importing using -showprogress=true (the default) should run quicker now
-Enh:  (77.14) The WBINCLUDE (and batch execution) command will not load script
-      files into memory that exceed a certain size. They will be processed
-      statement by statement which is a bit slower then loading them into
-      memory. The threshold can be defined in workbench.settings with the
-      property: workbench.sql.script.inmemory.maxsize
-      The value is defined in bytes. Any file exceeding this size will be
-      processed by not loading it into memory. The default threshold
-      is 1MB (which means that any file that is smaller then 1MB will be
-      processed in memory)
-Enh:  (77.17) WBIMPORT now supports -importcolumns for XML files to
-      select only certain columns from the input file
-Enh:  (77.17) The DataPumper can now use a text or XML file as the source
-Enh:  (77.18) A new command - WBDIFF - to generate an XML presentation of the
-      difference between to schemas. The XML shows all modifications that
-      need to be done to get the target schema to the same state
-      as the reference (=source) schema. XSLTs to transform this XML
-      into SQL scripts will follow
-Enh:  (77.19) WBIMPORT now accepts -sourcedir for XML files to import
-      all .xml files in that directory. When mixing XML files with long
-      and short tags this works only if the files are created with
-      this build, as the information about the tags used is available
-      in the meta data of the XML file.
-Enh:  (77.19) WBEXPORT now accepts -sourcetable=* to export all tables
-Enh:  (77.22) Two new settings to control the formatting of generated
-      SQL statements:
-      workbench.sql.generate.insert.doformat
-	  workbench.sql.generate.update.doformat
-	  If set to false generated SQL statements (INSERT, UPDATE) will always
-	  be put into a single line.
-Enh:  (77.27) The default behaviour when creating text files with WBEXPORT
-      for writing a header line, can now be defined using the property
-      workbench.export.text.default.header
-      (The existing setting workbench.export.text.includeheader stores
-      the last selection when the export file was created using the GUI
-      rather then WBEXPORT)
-
-Fix:  (77.1) When a table was created using lowercase in Oracle, the
-      DB Explorer would not work correctly for displaying data and
-      dropping the table
-Fix:  (77.2) Schemas with underscores where not treated correctly when
-      creating UPDATE statements for the result set
-Fix:  (77.4) SELECT statements that were immediately followed by a whitespace
-      other then a regular space were not detected correctly when
-      exporting data.
-Fix:  (77.4) "Show table data" in the DbExplorer did not always use the
-      correct table definition.
-Fix:  (77.5) When a file was saved with an encoding other then the default
-      encoding, the encoding was not properly restored when the workspace
-      was loaded again.
-Fix:  (77.6) Tried to make the workspace loading more robust to avoid
-      corrupted workspaces.
-Fix:  (77.10) SELECT .. INTO did no longer work with Informix and Postgres
-Fix:  (77.11) Sometimes connection errors where not displayed correctly
-      (the application would display the "Connecting to the database..."
-      message indefinitely)
-Fix:  (77.11) Fixed a problem when no workspace file was defined for
-      a connection profile that was introduced with 77.6
-Fix:  (77.12) Fixed a uppercase/lowercase problem when using WBIMPORT
-Fix:  (77.12) When the -file switched is not supplied when using WBIMPORT
-      a clear error message is now given.
-Fix:  (77.15) Fixed a problem with the parsing of SQL statements with comments
-Fix:  When importing text files with quote characters, empty fields ("") where
-      not processed correctly (the import would fail with an error)
-Fix:  (77.16) When exporting data from the select SQL statement, this now blocks
-      the current panel (just like executing the statement would do) to avoid
-      conflicts with non-threaded JDBC drivers
-Fix:  (77.17) Ctrl-Enter was still working even if the application was
-      disconnected.
-Fix:  (77.20) Worked around a bug in the Oracle driver which would not
-      return the correct objects for Timestamp (Oracle 9) columns
-Fix:  (77.22) Entering timestamp values did not work.
-Fix:  (77.23) [Oracle] In the DbExplorer the name for table level check
-      constraints was not included in the SQL source
-Fix:  (77.24) When using -charfunc for WBEXPORT the generated SQL Statements
-      were not correct if a non-printable character was immediately followed
-      by another non-printable character.
-Fix:  (77.25) The source for Oracle packages are now displayed correctly
-Fix:  (77.28) Date columns where not exported (Clipboard, WBEXPORT) correctly
-      with Oracle (the export would not use to_date())
-
-Build 77, 12.02.2005
---------------------
-Enh:  When saving a result set using "Save as", the table to be used for INSERT
-      statements can now be defined. (For UPDATE also, but that requires
-      the retrieval of the PK columns prior to opening the dialog)
-Enh:  The usage of the NULL keyword in a CREATE TABLE statement (DbExplorer)
-      can now be configured. If the DBID of the connection is listed in the
-      property workbench.db.nonullkeyword then the NULL keyword will not be
-      used when generating the CREATE TABLE
-Enh:  When copying data to the clipboard (Text, SQL), or saving the result set
-      to a file (Data -> Save Data As) the columns that should be include can
-      now be selected. When copying to the clipboard the selection dialog
-      is displayed when pressing the CTRL key while clicking the menu item.
-Enh:  When connected to a FirebirdSQL database, the command INPUT can also be
-      used to call one SQL script from another.
-Enh:  A query timeout can now be defined (Whether it is really working depends
-      on the capabilities of the JDBC driver)
-Enh:  Selected text (or the current line) can now be commented or un-commented
-      using the Shortcuts Ctrl-Shift-C (Comment) or Ctrl-Shift-U (Uncomment)
-Enh:  Added a "Select all" and "Select none" button to primary key select
-      dialog (when updating a table without primary key definition)
-Enh:  Added support for McKoi database
-Enh:  The formatting of the generated INSERT statements can now be influenced
-      by setting two properties in workbench.settings:
-
-      workbench.sql.generate.insert.newlinethreshold
-      defines the number of columns in the table before any reformatting of the
-      column list or values list takes place
-
-      workbench.sql.generate.insert.colsperline
-      if the INSERT statement affects more then 'newlinethreshold' columns
-      this value defines the number of columns to put into a single line.
-
-      The default is newlinethreshold=5 and colsperline=1 which results in the
-      same formatting used as before.
-
-Enh:  Added more logging during connect
-Enh:  The display format for DATE and DATE/TIME datatypes can now be specified
-      seperately. With Oracle (at least Oracle8) however this does not work
-      because there is no (real) distinction between DATE and TIMESTAMP
-Enh:  The usage of the user name for SQL Statements created for "Export" can
-      now be disabled using the property:
-      workbench.export.sql.includeowner=false
-Enh:  Data can now be saved and copied as DELETE/INSERT as well.
-Fix:  The AVG() function was not displayed correctly
-Fix:  When opening the Save as dialog, the application tried to check the
-      update table even if "Disable automatic update check" was enabled
-Fix:  Tried to fix a problem where the "Manage Driver" dialog was not displayed
-      correctly under Linux
-Fix:  The WBCOPY command did not properly report an error when the source or
-      target table was not found.
-Fix:  The WBCOPY command always issued an error if the JDBC driver does not
-      support batch updates even if batchupdate was set to false.
-Fix:  When using a separate connection per tab, connection errors that occurred
-      during a connection for a tab were not displayed to the user, and the
-      "Connecting..." message would not be closed
-Fix:  If rows where only inserted into a table with no primary key, the
-      DbExplorer would not update the table
-Fix:  Syntax highlighting for statements with embedded # was not displayed
-      correctly for non-MySql connections
-Fix:  When spooling data from within the editor, the progress was not shown
-      correctly
-Fix:  When turning password encryption on (or off) the encrypted (or readable)
-      passwords were only written to WbProfiles.xml if at least on Profile
-      was changed.
-Fix:  When an import was cancelled no messages were shown.
-Fix:  When a driver class was defined with a trailing space, the driver
-      definition was not found and the connection to the server failed.
-Fix:  Date columns were not displayed according to the date format defined
-      in the Options dialog

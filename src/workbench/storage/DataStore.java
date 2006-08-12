@@ -976,9 +976,10 @@ public class DataStore
 			out.write(aLineTerminator);
 		}
 		int count = rows.length;
+		boolean[] cols = columnListToBool(columns);
 		for (int i=0; i < count; i++)
 		{
-			out.write(this.getRowDataAsString(rows[i], aFieldDelimiter, columnListToBool(columns)).toString());
+			out.write(this.getRowDataAsString(rows[i], aFieldDelimiter, cols).toString());
 			out.write(aLineTerminator);
 		}
 	}
