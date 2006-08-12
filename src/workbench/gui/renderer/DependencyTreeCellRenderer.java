@@ -50,7 +50,7 @@ public class DependencyTreeCellRenderer
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setVerticalAlignment(SwingConstants.TOP);
 		this.setHorizontalAlignment(SwingConstants.LEFT);
-		this.fk = ResourceMgr.getPicture("foreignKey");
+		this.fk = ResourceMgr.getPicture("key");
 		this.table = ResourceMgr.getPicture("table");
 		this.selectedForeground = UIManager.getColor("Tree.selectionForeground");
 		this.selectedBackground = UIManager.getColor("Tree.selectionBackground");

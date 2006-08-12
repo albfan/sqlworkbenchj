@@ -228,7 +228,8 @@ public class MainWindow
 	/**
 	 * Remove the file name change listener.
 	 * @see #addFilenameChangeListener(FilenameChangeListener )
-	 */	public void removeFilenameChangeListener(FilenameChangeListener aListener)
+	 */	
+	public void removeFilenameChangeListener(FilenameChangeListener aListener)
 	{
 		for (int i=0; i < this.sqlTab.getTabCount(); i++)
 		{
@@ -931,7 +932,7 @@ public class MainWindow
 		// disconnect respects this flag and does nothing...
 		this.setConnectIsInProgress();
 		this.currentProfile = aProfile;
-		Settings.getInstance().setLastConnection(this.currentProfile.getName());
+		Settings.getInstance().setLastConnection(this.currentProfile);
 
 		loadWorkspaceForProfile(aProfile);
 		showStatusMessage(ResourceMgr.getString("MsgConnecting"));
@@ -942,6 +943,10 @@ public class MainWindow
 		return "Wb" + MainWindow.instanceCount + "-" + p.getId();
 	}
 
+	/**
+	 * Return the internal ID that should be used when connecting 
+	 * to the given connection profile
+	 */
 	public String getConnectionId(ConnectionProfile aProfile)
 	{
 		String id;

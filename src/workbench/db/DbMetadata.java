@@ -140,6 +140,7 @@ public class DbMetadata
 	private boolean isCloudscape;
 	private boolean isApacheDerby;
 	private boolean isExcel; 
+	private boolean isAccess;
 	
 	private boolean trimDefaults = true;
 	private boolean createInlineConstraints;
@@ -687,10 +688,12 @@ public class DbMetadata
 
 	public boolean needCatalogInDML(TableIdentifier table)
 	{
+		if (this.isAccess) return true;
 		if (!this.supportsCatalogs()) return false;
 		String cat = table.getCatalog();
 		if (StringUtil.isEmptyString(cat)) return false;
 		String currentCat = getCurrentCatalog();
+		
 		if (this.isExcel)
 		{
 			// Excel puts the directory into the catalog

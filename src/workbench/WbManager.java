@@ -11,7 +11,6 @@
  */
 package workbench;
 
-import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -63,6 +62,7 @@ import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 import workbench.gui.dialogs.WbSplash;
 import workbench.gui.lnf.LnFManager;
+import workbench.gui.profiles.ProfileKey;
 import workbench.util.FileDialogUtil;
 import workbench.util.WbCipher;
 import workbench.util.WbNullCipher;
@@ -733,10 +733,12 @@ public class WbManager
 		{
 			// get profile name from commandline
 			String profilename = cmdLine.getValue(ARG_PROFILE);
+			String group = cmdLine.getValue(ARG_PROFILE_GROUP);
 			ConnectionProfile prof  = null;
-			if (profilename != null && profilename.trim().length() > 0)
+			if (!StringUtil.isEmptyString(profilename))
 			{
-				prof = ConnectionMgr.getInstance().getProfile(profilename);
+				ProfileKey def = new ProfileKey(StringUtil.trimQuotes(profilename), StringUtil.trimQuotes(group));
+				prof = ConnectionMgr.getInstance().getProfile(def);
 			}
 			else 
 			{
@@ -777,6 +779,7 @@ public class WbManager
 	public static final String ARG_CONN_JAR = "driverjar";
 	public static final String ARG_CONN_USER = "username";
 	public static final String ARG_CONN_PWD = "password";
+	public static final String ARG_CONN_AUTOCOMMIT = "autocommit";
 	public static final String ARG_IGNORE_DROP = "ignoredroperrors";
 	public static final String ARG_DISPLAY_RESULT = "displayresult";
 	public static final String ARG_SUCCESS_SCRIPT = "cleanupsuccess";
@@ -786,6 +789,7 @@ public class WbManager
 
 	// Other parameters
 	public static final String ARG_PROFILE = "profile";
+	public static final String ARG_PROFILE_GROUP = "profilegroup";
 	public static final String ARG_SHOWPROGRESS = "showprogress";
 
 	private static final String ARG_PROFILE_STORAGE = "profilestorage";
@@ -802,6 +806,7 @@ public class WbManager
 	{
 		ArgumentParser parser = new ArgumentParser();
 		parser.addArgument(ARG_PROFILE);
+		parser.addArgument(ARG_PROFILE_GROUP);
 		parser.addArgument(ARG_PROFILE_STORAGE);
 		parser.addArgument(ARG_CONFIGDIR);
 		parser.addArgument(ARG_LIBDIR);
@@ -817,6 +822,7 @@ public class WbManager
 		parser.addArgument(ARG_CONN_JAR);
 		parser.addArgument(ARG_CONN_USER);
 		parser.addArgument(ARG_CONN_PWD);
+		parser.addArgument(ARG_CONN_AUTOCOMMIT);
 		parser.addArgument(ARG_SHOW_PUMPER);
 		parser.addArgument(ARG_IGNORE_DROP);
 		parser.addArgument(ARG_DISPLAY_RESULT);

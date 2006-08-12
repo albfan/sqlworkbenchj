@@ -193,10 +193,10 @@ public class WbTable
 	public WbTable(boolean printEnabled, boolean sqlCopyAllowed)
 	{
 		super(EmptyTableModel.EMPTY_MODEL);
-		this.setMinimumSize(null);
-		this.setMaximumSize(null);
-		this.setPreferredSize(null);
-
+//		this.setMinimumSize(null);
+//		this.setMaximumSize(null);
+//		this.setPreferredSize(null);
+		
 		this.sortAscending = new SortAscendingAction(this);
 		this.sortAscending.setEnabled(false);
 		this.sortDescending = new SortDescendingAction(this);
@@ -1665,6 +1665,11 @@ public class WbTable
 	 */
 	public void mousePressed(MouseEvent e)
 	{
+		if (e.getButton() == e.BUTTON1)
+		{
+			boolean altDown = ((e.getModifiersEx() & e.ALT_DOWN_MASK) == e.ALT_DOWN_MASK);
+			this.setColumnSelectionAllowed(altDown);
+		}
 	}
 
 	/** Invoked when a mouse button has been released on a component.

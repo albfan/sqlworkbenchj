@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import workbench.WbManager;
+import workbench.gui.profiles.ProfileKey;
 
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
@@ -47,7 +49,7 @@ public class ConnectionMgr
 	//private WbConnection currentConnection;
 	private HashMap activeConnections = new HashMap();
 
-	private HashMap profiles;
+	private List profiles;
 	private List drivers;
 	private boolean profilesChanged;
 	private boolean readTemplates = true;
@@ -66,10 +68,10 @@ public class ConnectionMgr
 		return mgrInstance;
 	}
 
-	public WbConnection getConnection(String aProfileName, String anId)
+	public WbConnection getConnection(ProfileKey def, String anId)
 		throws ClassNotFoundException, SQLException, Exception
 	{
-		ConnectionProfile prof = this.getProfile(aProfileName);
+		ConnectionProfile prof = this.getProfile(def);
 		if (prof == null) return null;
 
 		return this.getConnection(prof, anId);
@@ -101,7 +103,7 @@ public class ConnectionMgr
 		
 		this.disconnect(anId);
 		WbConnection conn = new WbConnection(anId);
-		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getName() + "] with ID=" + anId + " for driver=" + aProfile.getDriverclass());
+		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getKey() + "] with ID=" + anId + " for driver=" + aProfile.getDriverclass());
 		Connection sql = this.connect(aProfile, anId);
 		conn.setProfile(aProfile);
 		conn.setSqlConnection(sql);
@@ -339,25 +341,40 @@ public class ConnectionMgr
 		this.drivers = aDriverList;
 	}
 
-	public ConnectionProfile getProfile(String aName)
+	public ConnectionProfile getProfile(ProfileKey def)
 	{
 		this.getProfiles();
+		if (def == null) return null;
+		String name = def.getName();
+		String group = def.getGroup();
 		if (this.profiles == null) return null;
-		Iterator itr = this.profiles.values().iterator();
+		Iterator itr = this.profiles.iterator();
 		ConnectionProfile prof = null;
+		ConnectionProfile firstMatch = null;
 		while (itr.hasNext())
 		{
 			prof = (ConnectionProfile)itr.next();
-			if (aName.equalsIgnoreCase(prof.getName())) return prof;
+			if (name.equalsIgnoreCase(prof.getName()))
+			{
+				if (firstMatch == null) firstMatch = prof;
+				if (group == null) 
+				{
+					return prof;
+				}
+				else if (group.equalsIgnoreCase(prof.getGroup())) 
+				{
+					return prof;
+				}
+			}
 		}
-		return null;
+		return firstMatch;
 	}
 
 	public synchronized Collection getProfileGroups()
 	{
 		Set result = new TreeSet();
 		if (this.profiles == null) this.readProfiles();
-		Iterator itr = this.profiles.values().iterator();
+		Iterator itr = this.profiles.iterator();
 		while (itr.hasNext())
 		{
 			String group = ((ConnectionProfile)itr.next()).getGroup();
@@ -395,10 +412,10 @@ public class ConnectionMgr
 	 *	The key to the map is the profile name, the value is the actual profile
 	 *  (i.e. instances of {@link ConnectionProfile}
 	 */
-	public synchronized Map getProfiles()
+	public synchronized List getProfiles()
 	{
 		if (this.profiles == null) this.readProfiles();
-		return this.profiles;
+		return Collections.unmodifiableList(this.profiles);
 	}
 
 	/**
@@ -714,13 +731,13 @@ public class ConnectionMgr
 		catch (FileNotFoundException fne)
 		{
 			LogMgr.logDebug("ConnectionMgr.readProfiles()", "WbProfiles.xml not found. Creating new one.");
-			this.profiles = new HashMap();
+			this.profiles = new ArrayList();
 			return;
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("ConnectionMgr.readProfiles()", "Error when reading connection profiles", e);
-			this.profiles = new HashMap();
+			this.profiles = new ArrayList();
 			return;
 		}
 		if (result instanceof Collection)
@@ -733,12 +750,12 @@ public class ConnectionMgr
 			// This is to support the very first version of the profile storage
 			// probably obsolete by know, but you never know...
 			Object[] l = (Object[])result;
-			this.profiles = new HashMap(20);
+			this.profiles = new ArrayList(l.length);
 			for (int i=0; i < l.length; i++)
 			{
 				ConnectionProfile prof = (ConnectionProfile)l[i];
 				prof.reset();
-				this.profiles.put(prof.getIdentifier(), prof);
+				this.profiles.add(prof);
 			}
 		}
 	}
@@ -752,7 +769,7 @@ public class ConnectionMgr
 	{
 		if (this.profiles != null)
 		{
-      Iterator values = this.profiles.values().iterator();
+      Iterator values = this.profiles.iterator();
       while (values.hasNext())
       {
         ConnectionProfile profile = (ConnectionProfile)values.next();
@@ -774,7 +791,7 @@ public class ConnectionMgr
 			WbPersistence writer = new WbPersistence(Settings.getInstance().getProfileStorage());
 			try
 			{
-				writer.writeObject(new ArrayList(this.profiles.values()));
+				writer.writeObject(this.profiles);
 			}
 			catch (IOException e)
 			{
@@ -792,7 +809,7 @@ public class ConnectionMgr
   {
 		if (this.profilesChanged) return true;
     if (this.profiles == null) return false;
-    Iterator values = this.profiles.values().iterator();
+    Iterator values = this.profiles.iterator();
     while (values.hasNext())
     {
       ConnectionProfile profile = (ConnectionProfile)values.next();
@@ -814,9 +831,9 @@ public class ConnectionMgr
     if (this.profiles == null)
     {
       this.readProfiles();
-      if (this.profiles == null) this.profiles = new HashMap();
+      if (this.profiles == null) this.profiles = new ArrayList();
     }
-		this.profiles.put(aProfile.getIdentifier(), aProfile);
+		this.profiles.add(aProfile);
     this.profilesChanged = true;
 	}
 
@@ -827,7 +844,7 @@ public class ConnectionMgr
 	{
     if (this.profiles == null) return;
 
-		this.profiles.remove(aProfile.getIdentifier());
+		this.profiles.remove(aProfile);
 		// deleting a new profile should not change the status to changed
 		if (!aProfile.isNew())
 		{
@@ -840,7 +857,7 @@ public class ConnectionMgr
 		Iterator itr = ((Collection)c).iterator();
 		if (this.profiles == null)
 		{
-			this.profiles = new HashMap();
+			this.profiles = new ArrayList();
 		}
 		else
 		{
@@ -849,7 +866,7 @@ public class ConnectionMgr
 		while (itr.hasNext())
 		{
 			ConnectionProfile prof = (ConnectionProfile)itr.next();
-			this.profiles.put(prof.getIdentifier(), prof);
+			this.profiles.add(prof);
 		}
 	}
 

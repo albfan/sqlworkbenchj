@@ -67,6 +67,7 @@ public class SqlHistory
 		this.lastStmtAction.setEnabled(false);
 		
 		this.clearAction = new ClearStatementHistoryAction(this);
+		this.clearAction.setEnabled(false);
 	}
 
 	public WbAction getShowFirstStatementAction() { return this.firstStmtAction; }
@@ -324,5 +325,6 @@ public class SqlHistory
 		this.lastStmtAction.setEnabled(this.hasNext());
 		this.prevStmtAction.setEnabled(this.hasPrevious());
 		this.firstStmtAction.setEnabled(this.hasPrevious());
+		this.clearAction.setEnabled(this.history.size() > 0);
 	}
 }

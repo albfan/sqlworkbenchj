@@ -17,6 +17,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 import workbench.WbManager;
+import workbench.gui.profiles.ProfileKey;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
@@ -73,6 +74,17 @@ public class ConnectionProfile
     this.changed = true;
 		Settings.getInstance().addPropertyChangeListener(this);
 	}
+	
+	public ConnectionProfile(String aName, String driverClass, String url, String userName, String pwd)
+	{
+		this();
+		this.setUrl(url);
+		this.setDriverclass(driverClass);
+		this.setUsername(userName);
+		this.setPassword(pwd);
+		this.setName(aName);
+		this.changed = false;
+	}
 
 	private static synchronized int getNextId()
 	{
@@ -104,7 +116,12 @@ public class ConnectionProfile
 		}
 	}
 	
-	public String getGroup() { return this.group; }
+	public String getGroup() 
+	{ 
+		if (this.group == null) return ResourceMgr.getString("LblDefGroup");
+		return this.group; 
+	}
+	
 	public void setGroup(String g) 
 	{ 
 		if (StringUtil.equalString(this.group, g)) return;
@@ -117,17 +134,23 @@ public class ConnectionProfile
     return Integer.toString(this.id);
   }
 
-	public ConnectionProfile(String aName, String driverClass, String url, String userName, String pwd)
+	public boolean isProfileForKey(ProfileKey key)
 	{
-		this();
-		this.setUrl(url);
-		this.setDriverclass(driverClass);
-		this.setUsername(userName);
-		this.setPassword(pwd);
-		this.setName(aName);
-		this.changed = false;
+		if (key == null) return false;
+		if (key.getName() == null) return false;
+		if (this.name.equals(key.getName()))
+		{
+			if (key.getGroup() != null) return true;
+			return this.getGroup().equals(key.getGroup());
+		}
+		return false;
 	}
-
+	
+	public ProfileKey getKey()
+	{
+		return new ProfileKey(this.name, this.getGroup());
+	}
+	
 	/**
 	 * Return true if the application should use a separate connection
 	 * per tab or if all SQL tabs including DbExplorer tabs and windows 
@@ -361,26 +384,17 @@ public class ConnectionProfile
 	 */
 	public String toString() { return this.name; }
 
-	/** Two connection profiles are equal if:
-	 *  <ul>
-	 * 	<li>the url are equal</li>
-	 *  <li>the driver classes are equal</li>
-	 *	<li>the usernames are equal</li>
-	 *	<li>the (encrypted) passwords are equal</li>
-	 *  </ul>
-	 */
+	public int hashCode()
+	{
+		return id;
+	}
+	
 	public boolean equals(Object other)
 	{
 		try
 		{
 			ConnectionProfile prof = (ConnectionProfile)other;
 			return this.id == prof.id;
-			/*
-			return this.url.equals(prof.url) &&
-						 this.driverclass.equals(prof.driverclass) &&
-						 this.username.equals(prof.username) &&
-						 this.password.equals(prof.password);
-			*/
 		}
 		catch (ClassCastException e)
 		{
@@ -464,7 +478,6 @@ public class ConnectionProfile
 			}
 		}
 		result.setEmptyStringIsNull(this.emptyStringIsNull);
-		result.changed = false;
 		return result;
 	}
 

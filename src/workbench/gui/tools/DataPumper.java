@@ -149,23 +149,16 @@ public class DataPumper
 		}
 	}
 
-//	private void adjustColumnWidth()
-//	{
-//		int mw = (int)(this.columnMapper.getSize().width + 10 / 2);
-//		System.out.println("size="+ this.columnMapper.getSize().width  + ",width=" + mw);
-//		this.columnMapper.setSourceColumnsWidth(mw);
-//	}
-	
 	public void saveSettings()
 	{
 		Settings s = Settings.getInstance();
 		if (this.sourceProfile != null)
 		{
-			s.setProperty("workbench.datapumper.source.lastprofile", this.sourceProfile.getName());
+			s.setLastConnection("workbench.datapumper.source.lastprofile", this.sourceProfile);
 		}
 		if (this.targetProfile != null)
 		{
-			s.setProperty("workbench.datapumper.target.lastprofile", this.targetProfile.getName());
+			s.setLastConnection("workbench.datapumper.target.lastprofile", this.targetProfile);
 		}
 		s.setProperty("workbench.datapumper.divider", jSplitPane1.getDividerLocation());
 		s.setProperty("workbench.datapumper.target.deletetable", Boolean.toString(this.deleteTargetCbx.isSelected()));
@@ -1474,16 +1467,28 @@ public class DataPumper
 		StringBuffer result = new StringBuffer(150);
 		result.append(WbCopy.VERB + " -" + WbCopy.PARAM_SOURCEPROFILE + "=");
 		String s = this.sourceProfile.getName();
-		if (s.indexOf(' ') >-1) result.append('"');
+		if (s.indexOf(' ') >-1) result.append('\'');
 		result.append(s);
-		if (s.indexOf(' ') >-1) result.append('"');
+		if (s.indexOf(' ') >-1) result.append('\'');
+
+		result.append("\n     -" + WbCopy.PARAM_SOURCEPROFILE_GROUP + "=");
+		s = this.sourceProfile.getGroup();
+		if (s.indexOf(' ') >-1) result.append('\'');
+		result.append(s);
+		if (s.indexOf(' ') >-1) result.append('\'');
 
 		s = this.targetProfile.getName();
 		result.append("\n     -" + WbCopy.PARAM_TARGETPROFILE + "=");
-		if (s.indexOf(' ') >-1) result.append('"');
+		if (s.indexOf(' ') >-1) result.append('\'');
 		result.append(s);
-		if (s.indexOf(' ') >-1) result.append('"');
+		if (s.indexOf(' ') >-1) result.append('\'');
 
+		result.append("\n     -" + WbCopy.PARAM_TARGETPROFILE_GROUP + "=");
+		s = this.targetProfile.getGroup();
+		if (s.indexOf(' ') >-1) result.append('\'');
+		result.append(s);
+		if (s.indexOf(' ') >-1) result.append('\'');
+		
 		TableIdentifier id = this.targetTable.getSelectedTable();
 		if (targetProfile == null) return;
 

@@ -15,6 +15,8 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -27,7 +29,7 @@ import workbench.storage.DataStore;
 
 /**
  * A class to copy the data of a {@link workbench.components.WbTable} to 
- * the clipboard. Either as tab-separated text of SQL Statements.
+ * the clipboard. Either as tab-separated text or SQL Statements.
  *
  * @author support@sql-workbench.net
  */
@@ -44,13 +46,18 @@ public class ClipBoardCopier
 	 *	Copy data from the table as tab-delimited into the clipboard
 	 *	@param includeHeaders if true, then a header line with the column names is copied as well
 	 *  @param selectedOnly if true, then only selected rows are copied, else all rows
-	 *
+	 *  @param showSelectColumns if true, a dialog will be presented to the user to select the columns to be included
 	 */
 	public void copyDataToClipboard(boolean includeHeaders, boolean selectedOnly, final boolean showSelectColumns)
 	{
 		if (this.client.getRowCount() <= 0) return;
 		
 		List columnsToCopy = null;
+		if (selectedOnly  && !showSelectColumns && this.client.getColumnSelectionAllowed())
+		{
+			columnsToCopy = getColumnsFromSelection();
+		}
+		
 		if (showSelectColumns)
 		{
 			// Display column selection dialog
@@ -143,6 +150,11 @@ public class ClipBoardCopier
 		if (ds == null) return;
 
 		List columnsToInclude = null;
+		if (selectedOnly  && !showSelectColumns && this.client.getColumnSelectionAllowed())
+		{
+			columnsToInclude = getColumnsFromSelection();
+		}
+		
 		if (showSelectColumns)
 		{
       ColumnSelectionResult result = this.selectColumns(false, selectedOnly, false, client.getSelectedRowCount() > 0);
@@ -217,6 +229,18 @@ public class ClipBoardCopier
 		return result;
 	}
 
+	private List getColumnsFromSelection()
+	{
+		int[] cols = this.client.getSelectedColumns();
+		DataStore ds = this.client.getDataStore();
+		if (ds == null) return Collections.EMPTY_LIST;
+		List result = new ArrayList(cols.length);
+		for (int i=0; i < cols.length; i++)
+		{
+			result.add(ds.getResultInfo().getColumn(cols[i]));
+		}
+		return result;
+	}
 }
 
 class ColumnSelectionResult

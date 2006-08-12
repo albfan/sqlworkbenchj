@@ -17,6 +17,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.event.InputEvent;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.beans.PropertyChangeListener;
@@ -37,6 +38,8 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
 import workbench.WbManager;
+import workbench.db.ConnectionProfile;
+import workbench.gui.profiles.ProfileKey;
 import workbench.interfaces.PropertyStorage;
 import workbench.gui.actions.ActionRegistration;
 import workbench.interfaces.FontChangedListener;
@@ -337,6 +340,32 @@ public class Settings
 		}
 	}
 
+	/**
+	 *  Returns the modifier key for rectangular selections in the editor
+	 */
+	public int getRectSelectionModifier()
+	{
+		String mod = getProperty("workbench.editor.rectselection.modifier", "alt");
+		if (mod.equalsIgnoreCase("ctrl"))
+		{
+			return InputEvent.CTRL_MASK;
+		}
+		return InputEvent.ALT_MASK;
+	}
+	
+	public void setRectSelectionModifier(String mod)
+	{
+		if (mod == null) return;
+		if (mod.equalsIgnoreCase("alt"))
+		{
+			setProperty("workbench.editor.rectselection.modifier", "alt");
+		}
+		else if (mod.equalsIgnoreCase("ctrl"))
+		{
+			setProperty("workbench.editor.rectselection.modifier", "ctrl");
+		}
+	}
+	
 	public int getMaxCharInListElements()
 	{
 		return getIntProperty("workbench.editor.format.list.maxelements.quoted", 2);
@@ -1403,25 +1432,41 @@ public class Settings
 		this.setProperty(PROPERTY_EDITOR_TAB_WIDTH, aWidth);
 	}
 
-	public String getLastConnection(String key)
+	public ProfileKey getLastConnection(String key)
 	{
-		if (key == null) return getProperty("workbench.connection.last", null);
-		return getProperty(key, null);
+		if (key == null) 
+		{
+			key = "workbench.connection.last";
+		}
+		String name = getProperty(key, null);
+		if (name == null) return null;
+		String group = getProperty(key + ".group", null);
+		return new ProfileKey(name, group);
 	}
 
-	public String getLastConnection()
-	{
-		return this.getLastConnection("workbench.connection.last");
-	}
+//	public ProfileKey getLastConnection()
+//	{
+//		return this.getLastConnection("workbench.connection.last");
+//	}
 
-	public void setLastConnection(String aName)
+	public void setLastConnection(ConnectionProfile prof)
 	{
-		if (aName == null) aName = "";
+		setLastConnection("workbench.connection.last", prof);
+	}
+	
+	public void setLastConnection(String key, ConnectionProfile prof)
+	{
+		if (prof == null)
+		{
+			this.props.setProperty(key, "");
+			this.props.setProperty(key + ".group", "");
+		}
 		
 		// comparing with == is intended!!!!
-		if (aName == BatchRunner.CMD_LINE_PROFILE_NAME) return;
+		if (prof.getName() == BatchRunner.CMD_LINE_PROFILE_NAME) return;
 		
-		this.props.setProperty("workbench.connection.last", aName);
+		this.props.setProperty(key, prof.getName());
+		this.props.setProperty(key + ".group", prof.getGroup());
 	}
 
 	public String getLastLibraryDir()

@@ -365,7 +365,8 @@ public class SchemaDiff
 			{
 				TableIdentifier t = (TableIdentifier)targetTables.get(i);
 				if (this.tablesToIgnore != null && this.tablesToIgnore.contains(t.getTableName())) continue;
-				if (!refTableNames.contains(t.getTableName()))
+				String tbl = sourceDb.getMetadata().adjustObjectnameCase(t.getTableName());
+				if (!refTableNames.contains(tbl))
 				{
 					if (tableType.equals(t.getType()))
 					{

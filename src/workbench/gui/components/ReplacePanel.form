@@ -17,7 +17,7 @@
           <ComponentRef name="criteriaTextField"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelSearchCriteria&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblSearchCriteria&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -40,6 +40,9 @@
       <Properties>
         <Property name="columns" type="int" value="30"/>
       </Properties>
+      <Events>
+        <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="replaceValueTextFieldFocusGained"/>
+      </Events>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
           <GridBagConstraints gridX="1" gridY="1" gridWidth="1" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="4" insetsBottom="0" insetsRight="5" anchor="17" weightX="0.0" weightY="0.0"/>
@@ -49,10 +52,10 @@
     <Component class="javax.swing.JCheckBox" name="ignoreCaseCheckBox">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelSearchIgnoreCase&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblSearchIgnoreCase&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LabelSearchIgnoreCase&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblSearchIgnoreCase&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -64,10 +67,10 @@
     <Component class="javax.swing.JCheckBox" name="wordsOnlyCheckBox">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelSearchWordsOnly&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblSearchWordsOnly&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LabelSearchWordsOnly&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblSearchWordsOnly&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -82,7 +85,7 @@
           <ComponentRef name="replaceValueTextField"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelReplaceNewValue&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblReplaceNewValue&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -103,10 +106,10 @@
     <Component class="javax.swing.JButton" name="findButton">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelFindNow&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblFindNow&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LabelFindNow&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblFindNow&quot;)" type="code"/>
         </Property>
       </Properties>
       <AuxValues>
@@ -121,10 +124,10 @@
     <Component class="javax.swing.JButton" name="replaceNextButton">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelReplaceNext&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblReplaceNext&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LabelReplaceNext&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblReplaceNext&quot;)" type="code"/>
         </Property>
       </Properties>
       <AuxValues>
@@ -139,10 +142,10 @@
     <Component class="javax.swing.JButton" name="replaceAllButton">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelReplaceAll&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblReplaceAll&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LabelReplaceAll&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblReplaceAll&quot;)" type="code"/>
         </Property>
       </Properties>
       <AuxValues>
@@ -157,7 +160,7 @@
     <Component class="javax.swing.JButton" name="closeButton">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelClose&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblClose&quot;)" type="code"/>
         </Property>
       </Properties>
       <AuxValues>
@@ -172,10 +175,10 @@
     <Component class="javax.swing.JCheckBox" name="selectedTextCheckBox">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelSelectedTextOnly&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblSelectedTextOnly&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LabelSelectedTextOnly&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblSelectedTextOnly&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -187,10 +190,10 @@
     <Component class="javax.swing.JCheckBox" name="useRegexCheckBox">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelSearchRegEx&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblSearchRegEx&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LabelSearchRegEx&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblSearchRegEx&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>

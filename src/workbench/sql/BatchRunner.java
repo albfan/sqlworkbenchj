@@ -26,6 +26,7 @@ import workbench.db.DbDriver;
 import workbench.db.WbConnection;
 import workbench.gui.components.ConsoleStatusBar;
 import workbench.gui.components.GenericRowMonitor;
+import workbench.gui.profiles.ProfileKey;
 import workbench.interfaces.ParameterPrompter;
 
 import workbench.interfaces.ResultLogger;
@@ -110,15 +111,15 @@ public class BatchRunner
 		this.showTiming = this.verboseLogging;
 	}
 
-	public void setProfile(String aProfilename)
+	public void setProfile(ProfileKey def)
 	{
-		LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnecting") + " [" + aProfilename + "]");
+		LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnecting") + " [" + def.getName() + "]");
 		ConnectionMgr mgr = ConnectionMgr.getInstance();
-		ConnectionProfile prof = mgr.getProfile(aProfilename);
+		ConnectionProfile prof = mgr.getProfile(def);
 		if (prof == null)
 		{
 			LogMgr.logError("BatchRunner", ResourceMgr.getString("ErrConnectionError"),null);
-			throw new IllegalArgumentException("Could not find profile " + aProfilename);
+			throw new IllegalArgumentException("Could not find profile " + def.getName());
 		}
 		this.setProfile(prof);
 	}
@@ -484,6 +485,7 @@ public class BatchRunner
 			String user = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_USER));
 			String pwd = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_PWD));
 			String jar = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_JAR));
+			String commit =  cmdLine.getValue(WbManager.ARG_CONN_AUTOCOMMIT);
 			String wksp = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_WORKSPACE));
 			DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver(driverclass);
 			if (drv == null)
@@ -504,6 +506,10 @@ public class BatchRunner
 					result.setWorkspaceFile(f.getAbsolutePath());
 				}
 			}
+			if (!StringUtil.isEmptyString(commit))
+			{
+				result.setAutocommit(StringUtil.stringToBool(commit));
+			}
 		}
 		catch (Exception e)
 		{
@@ -519,6 +525,7 @@ public class BatchRunner
 		if (scripts == null || scripts.trim().length() == 0) return null;
 
 		String profilename = cmdLine.getValue(WbManager.ARG_PROFILE);
+		
 		boolean abort = cmdLine.getBoolean(WbManager.ARG_ABORT, true);
 		boolean showResult = cmdLine.getBoolean(WbManager.ARG_DISPLAY_RESULT);
 		boolean showProgress = cmdLine.getBoolean(WbManager.ARG_SHOWPROGRESS, false);
@@ -530,10 +537,13 @@ public class BatchRunner
 		}
 		else
 		{
-			profile = ConnectionMgr.getInstance().getProfile(StringUtil.trimQuotes(profilename));
+			String group = cmdLine.getValue(WbManager.ARG_PROFILE_GROUP);
+			ProfileKey def = new ProfileKey(StringUtil.trimQuotes(profilename), StringUtil.trimQuotes(group));
+			
+			profile = ConnectionMgr.getInstance().getProfile(def);
 			if (profile == null)
 			{
-				String msg = "Profile [" + profilename + "] not found!";
+				String msg = "Profile [" + def + "] not found!";
 				System.out.println(msg);
 				LogMgr.logError("BatchRunner.initFromCommandLine", msg, null);
 			}

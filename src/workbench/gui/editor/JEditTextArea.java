@@ -105,7 +105,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.47 2006-08-04 14:52:41 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.48 2006-08-12 21:35:50 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -121,7 +121,7 @@ public class JEditTextArea
 	private boolean currentSelectionIsTemporary;
 	protected String commentChar;
 	private TokenMarker currentTokenMarker;
-	
+	private int rectangularSelectionModifier = 0;
 	private KeyListener keyEventInterceptor;
 	/**
 	 * Adding components with this name to the text area will place
@@ -2615,7 +2615,7 @@ public class JEditTextArea
 		{
 			if(popup != null && popup.isVisible()) return;
 
-			setSelectionRectangular((evt.getModifiers()	& InputEvent.CTRL_MASK) != 0);
+			setSelectionRectangular((evt.getModifiers()	& Settings.getInstance().getRectSelectionModifier()) != 0);
 
 			int x = evt.getX() - painter.getGutterWidth();
 			int y = evt.getY();
@@ -2693,7 +2693,7 @@ public class JEditTextArea
 		{
 			if((evt.getModifiers() & InputEvent.SHIFT_MASK) != 0)
 			{
-				rectSelect = (evt.getModifiers() & InputEvent.CTRL_MASK) != 0;
+				rectSelect = (evt.getModifiers() & Settings.getInstance().getRectSelectionModifier()) != 0;
 				select(getMarkPosition(),dot);
 			}
 			else

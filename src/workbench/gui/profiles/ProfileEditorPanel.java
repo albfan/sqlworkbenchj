@@ -67,7 +67,9 @@ public class ProfileEditorPanel
 		initComponents(); // will initialize the model!
 		
 		this.connectionEditor = new ConnectionEditorPanel();
-		this.jSplitPane1.setRightComponent(this.connectionEditor);
+		JPanel dummy = new JPanel(new BorderLayout());
+		dummy.add(connectionEditor, BorderLayout.CENTER);
+		this.jSplitPane1.setRightComponent(dummy);
 		this.fillDrivers();
 		
 		JPanel p = new JPanel();
@@ -109,8 +111,8 @@ public class ProfileEditorPanel
 		
 		buildTree();
 		
-		String last = Settings.getInstance().getLastConnection(lastProfileKey);
-		this.selectProfile(last);
+		ProfileKey last = Settings.getInstance().getLastConnection(lastProfileKey);
+		((ProfileTree)profileTree).selectProfile(last);
 		
 		restoreSettings();
 	}
@@ -169,9 +171,8 @@ public class ProfileEditorPanel
 	private void buildTree()
 	{
 		this.dummyAdded = false;
-		Collection c = ConnectionMgr.getInstance().getProfiles().values();
 		this.model = new ProfileListModel();
-		if (c.size() == 0) 
+		if (model.getSize() < 1) 
 		{
 			this.model.addEmptyProfile();
 			this.dummyAdded = true;
@@ -236,12 +237,14 @@ public class ProfileEditorPanel
 				ConnectionProfile newProfile = getSelectedProfile();
 				if (newProfile != null)
 				{
+					if (!this.connectionEditor.isVisible()) this.connectionEditor.setVisible(true);
 					this.connectionEditor.setProfile(newProfile);
 					this.deleteItem.setEnabled(true);
 					this.copyItem.setEnabled(true);
 				}
 				else
 				{
+					this.connectionEditor.setVisible(false);
 					this.deleteItem.setEnabled(false);
 					this.copyItem.setEnabled(false);
 				}
@@ -285,11 +288,6 @@ public class ProfileEditorPanel
   private javax.swing.JTree profileTree;
   // End of variables declaration//GEN-END:variables
 
-
-	private void selectProfile(String aProfileName)
-	{
-		((ProfileTree)profileTree).selectProfile(aProfileName);
-	}
 
 	/**
 	 *	Remove an item from the listmodel.
@@ -346,7 +344,6 @@ public class ProfileEditorPanel
     cp.setNew();
 		
 		TreePath newPath = this.model.addProfile(cp);
-		//this.selectProfile(cp.getName());
 		((ProfileTree)profileTree).selectPath(newPath);
 	}
 

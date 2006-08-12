@@ -37,7 +37,6 @@ import workbench.util.StringUtil;
 class ProfileListModel 
 	extends DefaultTreeModel
 {
-	private boolean changed = false;
 	private	DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Profiles");
 	private int size;
 	
@@ -53,14 +52,8 @@ class ProfileListModel
 		Collections.sort(toSort, ConnectionProfile.getNameComparator());
 	}
 	
-	public void profileGroupModified(ConnectionProfile profile)
-	{
-		this.changed = true;
-	}
-	
 	public void profileChanged(ConnectionProfile profile)
 	{
-		this.changed = true;
 		TreePath path = getPath(profile);
 		if (path == null) return;
 		if (path.getPathCount() < 3) return;
@@ -74,11 +67,11 @@ class ProfileListModel
 	{
 		ConnectionMgr conn = ConnectionMgr.getInstance();
 		conn.addProfile(profile);
-		this.changed = true;
 		DefaultMutableTreeNode group = findGroupNode(profile.getGroup());
 		DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(profile, false);
 		this.insertNodeInto(newNode, group, group.getChildCount());
 		TreePath newPath = new TreePath(new Object[] { this.rootNode, group, newNode });
+		this.size ++;
 		return newPath;
 	}
 
@@ -140,8 +133,7 @@ class ProfileListModel
 		conn.removeProfile(prof);
 		this.removeNodeFromParent(node);
 		
-		
-		this.changed = true;
+		this.size --;
 	}
 
 	public TreePath getFirstProfile()
@@ -151,18 +143,13 @@ class ProfileListModel
 		return new TreePath( new Object[] { rootNode, defGroup, profile });
 	}
 	
-	public TreePath getPath(String profileName)
+	public TreePath getPath(ProfileKey def)
 	{
-		if (profileName == null) return null;
-		Collection profiles = ConnectionMgr.getInstance().getProfiles().values();
-		Iterator itr = profiles.iterator();
-		while (itr.hasNext())
+		if (def == null) return null;
+		ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(def);
+		if (prof != null)
 		{
-			ConnectionProfile prof = (ConnectionProfile)itr.next();
-			if (prof.getName().equals(profileName))
-			{
-				return getPath(prof);
-			}
+			return getPath(prof);
 		}
 		return null;
 	}
@@ -210,16 +197,12 @@ class ProfileListModel
 	
 	public boolean isChanged()
 	{
-		if (changed) return true;
-		Collection profiles = ConnectionMgr.getInstance().getProfiles().values();
-		
-		Iterator itr = profiles.iterator();
-		while (itr.hasNext())
-		{
-			ConnectionProfile profile = (ConnectionProfile)itr.next();
-			if (profile.isChanged()) return true;
-		}
-		return false;
+		return ConnectionMgr.getInstance().profilesAreModified();
+	}
+	
+	public int getSize()
+	{
+		return this.size;
 	}
 	
 	public TreePath addGroup(String name)
@@ -235,64 +218,35 @@ class ProfileListModel
 		ConnectionProfile dummy = new ConnectionProfile();
 		dummy.setName(ResourceMgr.getString("TxtEmptyProfileName"));
 		dummy.setUrl("jdbc:");
-		dummy.setUsername(ResourceMgr.getString("TxtEmptyProfileUser"));
 		ConnectionMgr.getInstance().addProfile(dummy);
-		this.changed = true;
+		this.size ++;
 		buildTree();
 	}
 	
 	private void buildTree()
 	{
-		ArrayList profiles = new ArrayList();
-		profiles.addAll(ConnectionMgr.getInstance().getProfiles().values());
+		ArrayList profiles = new ArrayList(ConnectionMgr.getInstance().getProfiles());
 		if (profiles.size() == 0) return;
 		
 		sortList(profiles);
 		
 		Map groupMap = new HashMap(profiles.size());
-		List defaultProfiles = new ArrayList();
 		
 		Iterator itr = profiles.iterator();
 		
-		this.size = 0;
+		this.size = profiles.size();
 		
-		String defGroupName = ResourceMgr.getString("LblDefGroup");
 		while (itr.hasNext())
 		{
 			ConnectionProfile profile = (ConnectionProfile)itr.next();
 			String group = profile.getGroup();
-			if (StringUtil.isEmptyString(group) || defGroupName.equals(group)) 
+			List l = (List)groupMap.get(group);
+			if (l == null)
 			{
-				defaultProfiles.add(profile);
+				l = new ArrayList();
+				groupMap.put(group, l);
 			}
-			else
-			{
-				List l = (List)groupMap.get(group);
-				if (l == null)
-				{
-					l = new ArrayList();
-					groupMap.put(group, l);
-				}
-				l.add(profile);
-			}
-			this.size ++;
-		}
-		
-		// Make sure the "default" profiles (i.e. those without a group) 
-		// are put at the front, this is for backward compatibility to older
-		// versions that do not have profile groups
-		if (defaultProfiles.size() > 0)
-		{
-			DefaultMutableTreeNode defaultNode = new DefaultMutableTreeNode(defGroupName, true);
-			Collections.sort(defaultProfiles, StringUtil.getCaseInsensitiveComparator());
-			rootNode.add(defaultNode);
-			Iterator dg = defaultProfiles.iterator();
-			while (dg.hasNext())
-			{
-				ConnectionProfile prof = (ConnectionProfile)dg.next();
-				DefaultMutableTreeNode profNode = new DefaultMutableTreeNode(prof, false);
-				defaultNode.add(profNode);
-			}
+			l.add(profile);
 		}
 		
 		// Make sure the default group is added as the first item!

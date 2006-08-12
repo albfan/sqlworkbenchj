@@ -31,6 +31,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
@@ -117,14 +118,7 @@ public class ProfileTree
 		
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
 		
-//		Object g = node.getUserObject();
 		return node.getAllowsChildren();
-//		if (g instanceof GroupNode) return true;
-//		{
-//			GroupNode gnode = (GroupNode)g;
-//			return !gnode.isDefaultGroup();
-//		}
-//		return false;
 	}
 
 	public void treeNodesChanged(TreeModelEvent e)
@@ -135,29 +129,13 @@ public class ProfileTree
 		
 		if (group.getAllowsChildren())
 		{
-			String newGroup = null;
-			if (data instanceof String)
-			{
-				// When a group was edited, the tree puts a String 
-				// object into the user object. As we rely on having
-				// a GroupNode object as the UserObject, this has
-				// to be re-assigned here!
-				newGroup = (String)data;
-				//group.setUserObject(newGroup);
-			}
-//			else if (data instanceof GroupNode)
-//			{
-//				GroupNode groupNode = (GroupNode)data;
-//				newGroup = groupNode.getGroup();
-//			}
-			
+			String newGroup = (String)data;
 			int count = profileModel.getChildCount(group);
 			for (int i = 0; i < count; i++)
 			{
 				DefaultMutableTreeNode node = (DefaultMutableTreeNode)profileModel.getChild(group,i);
 				ConnectionProfile prof = (ConnectionProfile)node.getUserObject();
 				prof.setGroup(newGroup);
-				this.profileModel.profileGroupModified(prof);
 			}
 		}
 		else if (data instanceof ConnectionProfile)
@@ -293,10 +271,10 @@ public class ProfileTree
 	 * name. If the profile is not found, the first profile
 	 * will be selected (and expanded)
 	 */
-	public void selectProfile(String profile)
+	public void selectProfile(ProfileKey def)
 	{
 		if (profileModel == null) return;
-		TreePath path = this.profileModel.getPath(profile);
+		TreePath path = this.profileModel.getPath(def);
 		if (path == null)
 		{
 			path = this.profileModel.getFirstProfile();
@@ -445,11 +423,10 @@ public class ProfileTree
 				{
 					ConnectionProfile copy = original.createCopy();
 					copy.setGroup(groupName);
+					ConnectionMgr.getInstance().addProfile(copy);
 					DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(copy, false);
 					profileModel.insertNodeInto(newNode, group, group.getChildCount());
 				}
-				
-				profileModel.profileGroupModified(original);
 			}
 		}
 		finally

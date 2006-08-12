@@ -36,7 +36,7 @@ import workbench.sql.formatter.SqlFormatter;
 
 public class SqlUtil
 {
-	private static Pattern specialCharPattern = Pattern.compile("[$ ]");
+	private static Pattern specialCharPattern = Pattern.compile("[$:\\/ ]");
 	
 	public static String quoteObjectname(String aColname)
 	{
@@ -76,7 +76,7 @@ public class SqlUtil
 		if (s.length() == 0) return "";
 		
 		// The SQLLexer does not recognize @ as a keyword (which is basically
-		// correct, but to support the Oracle style include we'll treat it
+		// correct, but to support the Oracle style includes we'll treat it
 		// as a keyword here.
 		if (s.charAt(0) == '@') return "@";
 		

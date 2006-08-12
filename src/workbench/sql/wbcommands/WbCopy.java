@@ -21,6 +21,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.datacopy.DataCopier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.gui.profiles.ProfileKey;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -44,7 +45,9 @@ public class WbCopy
 	public static final String PARAM_SOURCEQUERY = "sourcequery";
 	public static final String PARAM_TARGETTABLE = "targettable";
 	public static final String PARAM_SOURCEPROFILE = "sourceprofile";
+	public static final String PARAM_SOURCEPROFILE_GROUP = "sourcegroup";
 	public static final String PARAM_TARGETPROFILE = "targetprofile";
+	public static final String PARAM_TARGETPROFILE_GROUP = "targetgroup";
 	public static final String PARAM_COLUMNS = "columns";
 	public static final String PARAM_SOURCEWHERE = "sourcewhere";
 	public static final String PARAM_COMMITEVERY = "commitevery";
@@ -68,6 +71,8 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_TARGETTABLE);
 		cmdLine.addArgument(PARAM_SOURCEPROFILE);
 		cmdLine.addArgument(PARAM_TARGETPROFILE);
+		cmdLine.addArgument(PARAM_SOURCEPROFILE_GROUP);
+		cmdLine.addArgument(PARAM_TARGETPROFILE_GROUP);
 		cmdLine.addArgument(PARAM_COLUMNS);
 		cmdLine.addArgument(PARAM_SOURCEWHERE);
 		cmdLine.addArgument(PARAM_COMMITEVERY);
@@ -131,8 +136,15 @@ public class WbCopy
 
 
 		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
+		String sourceGroup = cmdLine.getValue(PARAM_SOURCEPROFILE_GROUP);
+		ProfileKey sourceKey = null;
+		if (sourceProfile != null) sourceKey = new ProfileKey(sourceProfile, sourceGroup);
+		
 		String targetProfile = cmdLine.getValue(PARAM_TARGETPROFILE);
-
+		String targetGroup = cmdLine.getValue(PARAM_TARGETPROFILE_GROUP);
+		ProfileKey targetKey = null;
+		if (targetProfile != null) targetKey = new ProfileKey(targetProfile, targetGroup);
+		
 		int commit = StringUtil.getIntValue(cmdLine.getValue(PARAM_COMMITEVERY),-1);
 
 		String sourcetable = cmdLine.getValue(PARAM_SOURCETABLE);
@@ -158,7 +170,7 @@ public class WbCopy
 
 		WbConnection targetCon = null;
 		WbConnection sourceCon = null;
-		if (targetProfile == null || aConnection.getProfile().getName().equals(targetProfile))
+		if (targetProfile == null || aConnection.getProfile().isProfileForKey(targetKey))
 		{
 			targetCon = aConnection;
 		}
@@ -166,7 +178,7 @@ public class WbCopy
 		{
 			try
 			{
-				targetCon = ConnectionMgr.getInstance().getConnection(targetProfile, "Wb-Copy-Target");
+				targetCon = ConnectionMgr.getInstance().getConnection(targetKey, "Wb-Copy-Target");
 			}
 			catch (Exception e)
 			{
@@ -176,7 +188,7 @@ public class WbCopy
 			}
 		}
 
-		if (sourceProfile == null || aConnection.getProfile().getName().equals(sourceProfile))
+		if (sourceProfile == null || aConnection.getProfile().isProfileForKey(sourceKey))
 		{
 			sourceCon = aConnection;
 		}
@@ -184,7 +196,7 @@ public class WbCopy
 		{
 			try
 			{
-				sourceCon = ConnectionMgr.getInstance().getConnection(sourceProfile, "Wb-Copy-Source");
+				sourceCon = ConnectionMgr.getInstance().getConnection(sourceKey, "Wb-Copy-Source");
 			}
 			catch (Exception e)
 			{

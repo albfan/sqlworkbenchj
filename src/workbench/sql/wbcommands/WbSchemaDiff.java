@@ -23,6 +23,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.diff.SchemaDiff;
+import workbench.gui.profiles.ProfileKey;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -40,7 +41,10 @@ public class WbSchemaDiff
 {
 	public static final String VERB = "WBSCHEMADIFF";
 	public static final String PARAM_SOURCEPROFILE = "referenceprofile";
+	public static final String PARAM_SOURCEPROFILE_GROUP = "referencegroup";
 	public static final String PARAM_TARGETPROFILE = "targetprofile";
+	public static final String PARAM_TARGETPROFILE_GROUP = "targetgroup";
+	
 	public static final String PARAM_FILENAME = "file";
 	public static final String PARAM_ENCODING = "encoding";
 	public static final String PARAM_NAMESPACE = "namespace";
@@ -67,8 +71,10 @@ public class WbSchemaDiff
 	{
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(PARAM_SOURCEPROFILE);
+		cmdLine.addArgument(PARAM_SOURCEPROFILE_GROUP);
 		cmdLine.addArgument("sourceprofile"); // old name of the parameter
 		cmdLine.addArgument(PARAM_TARGETPROFILE);
+		cmdLine.addArgument(PARAM_TARGETPROFILE_GROUP);
 		cmdLine.addArgument(PARAM_FILENAME);
 		cmdLine.addArgument(PARAM_ENCODING);
 		cmdLine.addArgument(PARAM_SOURCETABLES);
@@ -143,24 +149,32 @@ public class WbSchemaDiff
 
 		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
 		if (sourceProfile == null) sourceProfile = cmdLine.getValue("sourceprofile"); // support old name
+		
+		String sourceGroup = cmdLine.getValue(PARAM_SOURCEPROFILE_GROUP);
+		ProfileKey sourceKey = null;
+		if (sourceProfile != null) sourceKey = new ProfileKey(sourceProfile, sourceGroup);
+		
 		String targetProfile = cmdLine.getValue(PARAM_TARGETPROFILE);
-
+		String targetGroup = cmdLine.getValue(PARAM_TARGETPROFILE_GROUP);
+		ProfileKey targetKey = null;
+		if (targetProfile != null) targetKey = new ProfileKey(targetProfile, targetGroup);
+		
 		WbConnection targetCon = null;
 		WbConnection sourceCon = null;
 
 		this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 
-		if (targetProfile == null || aConnection.getProfile().getName().equals(targetProfile))
+		if (targetProfile == null || aConnection.getProfile().isProfileForKey(targetKey))
 		{
 			targetCon = aConnection;
 		}
 		else
 		{
-			ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(targetProfile);
+			ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(targetKey);
 			if (prof == null)
 			{
 				String msg = ResourceMgr.getString("ErrProfileNotFound");
-				msg = StringUtil.replace(msg, "%profile%", targetProfile);
+				msg = StringUtil.replace(msg, "%profile%", targetKey.toString());
 				result.addMessage(msg);
 				result.setFailure();
 				return result;
@@ -168,7 +182,7 @@ public class WbSchemaDiff
 			try
 			{
 				this.rowMonitor.setCurrentObject(ResourceMgr.getString("MsgDiffConnectingTarget"),-1,-1);
-				targetCon = ConnectionMgr.getInstance().getConnection(targetProfile, "Wb-Diff-Target");
+				targetCon = ConnectionMgr.getInstance().getConnection(targetKey, "Wb-Diff-Target");
 			}
 			catch (Exception e)
 			{
@@ -178,17 +192,17 @@ public class WbSchemaDiff
 			}
 		}
 
-		if (sourceProfile == null || aConnection.getProfile().getName().equals(sourceProfile))
+		if (sourceProfile == null || aConnection.getProfile().isProfileForKey(sourceKey))
 		{
 			sourceCon = aConnection;
 		}
 		else
 		{
-			ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(sourceProfile);
+			ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(sourceKey);
 			if (prof == null)
 			{
 				String msg = ResourceMgr.getString("ErrProfileNotFound");
-				msg = StringUtil.replace(msg, "%profile%", sourceProfile);
+				msg = StringUtil.replace(msg, "%profile%", sourceKey.toString());
 				result.addMessage(msg);
 				result.setFailure();
 				return result;
@@ -197,7 +211,7 @@ public class WbSchemaDiff
 			try
 			{
 				this.rowMonitor.setCurrentObject(ResourceMgr.getString("MsgDiffConnectingSource"),-1,-1);
-				sourceCon = ConnectionMgr.getInstance().getConnection(sourceProfile, "Wb-Diff-Source");
+				sourceCon = ConnectionMgr.getInstance().getConnection(sourceKey, "Wb-Diff-Source");
 			}
 			catch (Exception e)
 			{

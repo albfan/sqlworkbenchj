@@ -826,8 +826,8 @@ public class ConnectionEditorPanel
 		if (aProfile == null) return;
 
 		this.currentProfile = aProfile;
+		//System.out.println("switching to profile: " + aProfile.getName() + "(" + aProfile.getIdentifier() + ")");
 		this.initPropertyEditors();
-		//this.readGroups();
 
 		String drvClass = aProfile.getDriverclass();
 		DbDriver drv = null;

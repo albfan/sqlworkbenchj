@@ -127,7 +127,7 @@ public class ReplaceCriteriaPanel extends JPanel
 		});
 		JDialog d = new JDialog();
 		d.getContentPane().add(this, BorderLayout.CENTER);
-		d.show();
+		d.setVisible(true);
 		return true;
 	}
 	
