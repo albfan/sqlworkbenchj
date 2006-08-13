@@ -173,7 +173,7 @@ public class DataImporter
 	 * Controls creation of target table for imports where the 
 	 * producer can retrieve a full table definition (i.e. XML files
 	 * created with SQL Workbench
-	 * @see #createTable()
+	 * @see #createTarget()
 	 * @see #setTargetTable(String, workbench.db.ColumnIdentifier[])
 	 */
 	public void setCreateTarget(boolean flag) { this.createTarget = flag; }

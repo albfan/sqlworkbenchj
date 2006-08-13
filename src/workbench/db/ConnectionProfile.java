@@ -188,7 +188,7 @@ public class ConnectionProfile
 	 * Define how empty strings (Strings with length == 0) are treated.
 	 * If this is set to true, then they are treated as a NULL value, else an 
 	 * empty string is sent to the database during update and insert.
-	 * @see #setIncludeNullInInsert(flag)
+	 * @see #setIncludeNullInInsert(boolean)
 	 */
 	public void setEmptyStringIsNull(boolean flag) 
 	{

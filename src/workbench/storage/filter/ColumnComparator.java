@@ -37,7 +37,7 @@ public interface ColumnComparator
 	
 	/**
 	 * Should return true if this comparator supports the ignoreCase
-	 * parameter in the {@link evaluate(Object, Object, boolean)} method.
+	 * parameter in the {@link #evaluate(Object, Object, boolean)} method.
 	 * The value returned by this method will be used when building the GUI
 	 * for defining a filter.
 	 */
@@ -46,7 +46,7 @@ public interface ColumnComparator
 	/**
 	 * If this filter does not need a reference value (e.g. for IS NULL)
 	 * this method should return true. In that case, the reference
-	 * value passed into the {@link evaluate(Object, Object, boolean)} method
+	 * value passed into the {@link #evaluate(Object, Object, boolean)} method
 	 * has to be ignored by the filter.
 	 */
 	boolean needsValue();

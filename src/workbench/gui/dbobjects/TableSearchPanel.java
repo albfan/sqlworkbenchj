@@ -1,4 +1,4 @@
-/*
+   /*
  * TableSearchPanel.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
@@ -490,34 +490,19 @@ public class TableSearchPanel
 		this.reset();
 
 		int[] selectedTables = this.tableNames.getSelectedRows();
-		ArrayList searchTables = new ArrayList(this.tableNames.getSelectedRowCount());
+		//ArrayList searchTables = new ArrayList(this.tableNames.getSelectedRowCount());
+		TableIdentifier[] searchTables = new TableIdentifier[this.tableNames.getSelectedRowCount()];
 		DataStore tables = ((WbTable)(this.tableNames)).getDataStore();
 		for (int i=0; i < selectedTables.length; i++)
 		{
-			StringBuffer table = new StringBuffer(100);
 			String type = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
 
+			String catalog = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
 			String schema = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 			String tablename = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 
-			if ("synonym".equalsIgnoreCase(type))
-			{
-				TableIdentifier id = this.connection.getMetadata().getSynonymTable(schema, tablename);
-				if (id != null)
-				{
-					schema = id.getSchema();
-					tablename = id.getTableName();
-				}
-			}
-
-
-			if (schema != null && schema.length() > 0)
-			{
-				table.append(schema);
-				table.append('.');
-			}
-			table.append(tablename);
-			searchTables.add(table.toString());
+			searchTables[i] = new TableIdentifier(catalog, schema, tablename);
+			searchTables[i].setType(type);
 		}
 		int maxRows = 0;
 		try

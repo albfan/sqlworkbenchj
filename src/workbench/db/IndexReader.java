@@ -23,15 +23,20 @@ import workbench.util.StrBuffer;
 public interface IndexReader
 {
 	/**
-	 * Replacement for the JDBC's getIndexInfo method
+	 * Replacement for the JDBC's getIndexInfo method.
+	 * After the returned ResultSet has been processed, indexInfoProcessed() has to be called!
+	 *
+	 * @see #indexInfoProcessed()
 	 */
 	ResultSet getIndexInfo(TableIdentifier table, boolean unique)
 		throws SQLException;
 	
 	/**
-	 * This closes any resources opened by {@link getIndexInfo(TableIdentifier, boolean)}
-	 * and should be called after the ResultSet obtained from getIndexInfo() has
+	 * This closes any resources opened by {@link #getIndexSource(workbench.db.TableIdentifier, workbench.storage.DataStore, String)}
+	 * and should be called after the ResultSet obtained from {@link #getIndexInfo(TableIdentifier, boolean)} has
 	 * been processed and closed
+	 *
+	 * @see #getIndexInfo(workbench.db.TableIdentifier, boolean)
 	 */
 	void indexInfoProcessed();
 
@@ -44,7 +49,7 @@ public interface IndexReader
 	
 	/**
 	 * 	Build the SQL statement to create an Index on the given table.
-	 * 	@param aTable - The table name for which the index should be constructed
+	 * 	@param table - The table for which the index should be constructed
 	 * 	@param indexName - The name of the Index
 	 * 	@param unique - Should the index be unique
 	 *  @param columnList - The columns that should build the index

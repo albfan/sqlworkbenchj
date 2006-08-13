@@ -32,7 +32,7 @@ import workbench.util.StringSequence;
  *
  * @see workbench.interfaces.CharacterSequence
  * @see workbench.util.FileMappedSequence
- * @see workbench.util.StringSequences
+ * @see workbench.util.StringSequence
  *
  * @author  support@sql-workbench.net
  */

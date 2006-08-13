@@ -293,12 +293,13 @@ public class DataStore
 
 	/**
 	 * Applies a filter based on the given {@link workbench.storage.filter.FilterExpression}
-	 * to this datastore. Each row that does not satisfy the {@link workbench.storage.filter.FilterExpression#evaluate(Object, Object)}
-	 * criteria is removed from the active date by {@link #filterRow(int)}
+	 * to this datastore. Each row that does not satisfy the {@link workbench.storage.filter.FilterExpression#evaluate(Map)}
+	 * criteria is removed from the active data
+	 *
 	 * @param filterExpression the expression identifying the rows to be kept
+	 *
 	 * @see workbench.storage.filter.FilterExpression
-	 * @see filterRow(int)
-	 * @see clearFilter()
+	 * @see #clearFilter()
 	 */
 	public void applyFilter(FilterExpression filterExpression)
 	{

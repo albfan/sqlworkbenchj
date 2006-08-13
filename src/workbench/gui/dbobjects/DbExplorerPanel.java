@@ -522,7 +522,16 @@ public class DbExplorerPanel
 
 	public void panelSelected()
 	{
-		// nothing to do
+		Component panel = this.tabPane.getSelectedComponent();
+		if (panel == null) return;
+		if (panel == this.tables)
+		{
+			this.tables.panelSelected();
+		}
+		else if (panel == this.procs)
+		{
+			this.procs.panelSelected();
+		}
 	}
 	
 	public WbConnection getConnection()

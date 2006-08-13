@@ -593,6 +593,12 @@ public class DbMetadata
 		return dbs.contains(this.getDbId());
 	}
 	
+	public boolean supportsGetPrimaryKeys()
+	{
+		boolean result = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".supportgetpk", true);
+		return result;
+	}
+	
 	public boolean supportShortInclude()
 	{
 		String ids = Settings.getInstance().getProperty("workbench.db.supportshortinclude", "");
@@ -999,7 +1005,7 @@ public class DbMetadata
 	 *	Return the source of a view definition as it is stored in the database.
 	 *	Usually (depending on how the meta data is stored in the database) the DBMS
 	 *	only stores the underlying SELECT statement, and that will be returned by this method.
-	 *	To create a complete SQL to re-create a view, use {@linke getExtendedViewSource(String, String, String, DataStore, boolean)}
+	 *	To create a complete SQL to re-create a view, use {@link #getExtendedViewSource(TableIdentifier, DataStore, boolean)}
 	 *
 	 *	@return the view source as stored in the database.
 	 */
@@ -1293,7 +1299,7 @@ public class DbMetadata
 	 * the table definition. Usually the getColumns()
 	 * method is case sensitiv. If no special case
 	 * for schemas is configured then this method
-	 * is simply delegating to {@link adjustObjectNameCase(String)
+	 * is simply delegating to {@link #adjustObjectnameCase(String)}
 	 */
 	public String adjustSchemaNameCase(String schema)
 	{
@@ -1371,9 +1377,9 @@ public class DbMetadata
 
 	/**
 	 * Returns the schema that should be used for the current user
-	 * This essential call {@link getCurrentSchema()}. The method 
+	 * This essential call {@link #getCurrentSchema()}. The method 
 	 * then checks if the schema should be ignored for the current
-	 * dbms by calling {@link ignoreSchema(String)}. If the 
+	 * dbms by calling {@link #ignoreSchema(String)}. If the 
 	 * Schema should not be ignored, the it's returned, otherwise
 	 * the method will return null
 	 */
@@ -1836,7 +1842,7 @@ public class DbMetadata
 
 	/**
 	 * Enable Oracle's DBMS_OUTPUT package with a default buffer size
-	 * @see workbench.db.oracle.DbmsOutput#enable(int)
+	 * @see #enableOutput(long)
 	 */
 	public void enableOutput()
 	{
@@ -1845,7 +1851,7 @@ public class DbMetadata
 
 	/**
 	 * Enable Oracle's DBMS_OUTPUT package.
-	 * @see workbench.db.oracle.DbmsOutput#enable(int)
+	 * @see workbench.db.oracle.DbmsOutput#enable(long)
 	 */
 	public void enableOutput(long aLimit)
 	{
@@ -2077,13 +2083,16 @@ public class DbMetadata
 	{
 		return getTableDefinition(aTable, true);
 	}
+	
 	/**
-  * Returns the definition of the given
-  * table in a {@link workbench.storage.DataStore }
-  * @return definiton of the datastore
-  * @param aTable The identifier of the table
-  * @throws SQLException If the table was not found or an error occurred
-  */
+	 * Returns the definition of the given
+	 * table in a {@link workbench.storage.DataStore }
+	 * @return definiton of the datastore
+	 * @param id The identifier of the table
+	 * @param adjustCase whether to adjust the case of the tablename
+	 * @throws SQLException If the table was not found or an error occurred 
+	 * @see #getTableDefinition(String, String, String, String, boolean)
+	 */
 	public DataStore getTableDefinition(TableIdentifier id, boolean adjustCase)
 		throws SQLException
 	{
@@ -2161,24 +2170,27 @@ public class DbMetadata
 		}
 
 		ArrayList keys = new ArrayList();
-		ResultSet keysRs = null;
-		try
+		if (this.supportsGetPrimaryKeys())
 		{
-			keysRs = this.metaData.getPrimaryKeys(aCatalog, aSchema, aTable);
-			while (keysRs.next())
+			ResultSet keysRs = null;
+			try
 			{
-				keys.add(keysRs.getString("COLUMN_NAME").toLowerCase());
+				keysRs = this.metaData.getPrimaryKeys(aCatalog, aSchema, aTable);
+				while (keysRs.next())
+				{
+					keys.add(keysRs.getString("COLUMN_NAME").toLowerCase());
+				}
+			}
+			catch (Throwable e)
+			{
+				LogMgr.logWarning("DbMetaData.getTableDefinition()", "Error retrieving key columns", e);
+			}
+			finally
+			{
+				SqlUtil.closeResult(keysRs);
 			}
 		}
-		catch (Throwable e)
-		{
-			LogMgr.logWarning("DbMetaData.getTableDefinition()", "Error retrieving key columns", e);
-		}
-		finally
-		{
-			SqlUtil.closeResult(keysRs);
-		}
-
+		
 		boolean hasEnums = false;
 
 		ResultSet rs = null;
@@ -3285,9 +3297,7 @@ public class DbMetadata
 	 * current DBMS)
    *
 	 * @return the SQL statement to create the given table.
-	 * @param catalog The catalog in which the table is defined. This should be null if the DBMS does not support catalogs
-	 * @param schema The schema in which the table is defined. This should be null if the DBMS does not support schemas
-	 * @param table The name of the table
+	 * @param table the table for which the source should be retrievedcatalog The catalog in which the table is defined. This should be null if the DBMS does not support catalogs
 	 * @param includeDrop If true, a DROP TABLE statement will be included in the generated SQL script.
 	 * @throws SQLException
 	 */
@@ -3490,7 +3500,7 @@ public class DbMetadata
 	 * @param table The table to check
 	 * @return A Map with columns and their constraints. The keys to the Map are column names
 	 * The value is the SQL source for the column. The actual retrieval is delegated to a {@link ConstraintReader}
-	 * @see ConstraintReader#getColumnConstraints(TableIdentifier)
+	 * @see ConstraintReader#getColumnConstraints(java.sql.Connection, TableIdentifier)
 	 */
 	public Map getColumnConstraints(TableIdentifier table)
 	{

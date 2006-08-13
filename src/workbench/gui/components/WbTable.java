@@ -85,7 +85,7 @@ import workbench.gui.actions.CopySelectedAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopySelectedAsSqlInsertAction;
 import workbench.gui.actions.CopySelectedAsSqlUpdateAction;
 import workbench.gui.actions.CopySelectedAsTextAction;
-import workbench.gui.actions.DataToClipboardAction;
+import workbench.gui.actions.CopyAsTextAction;
 import workbench.gui.actions.FilterDataAction;
 import workbench.gui.actions.ResetFilterAction;
 import workbench.gui.actions.FindDataAction;
@@ -146,8 +146,9 @@ public class WbTable
 
 	private FindDataAction findAction;
 	private FindDataAgainAction findAgainAction;
-	private DataToClipboardAction dataToClipboard;
 	private SaveDataAsAction exportDataAction;
+	
+	private CopyAsTextAction copyAsTextAction;
 	private CopyAsSqlInsertAction copyInsertAction;
 	private CopyAsSqlDeleteInsertAction copyDeleteInsertAction;
 	private CopyAsSqlUpdateAction copyUpdateAction;
@@ -156,6 +157,7 @@ public class WbTable
 	private CopySelectedAsSqlInsertAction copySelectedAsInsertAction;
 	private CopySelectedAsSqlDeleteInsertAction copySelectedAsDeleteInsertAction;
 	private CopySelectedAsSqlUpdateAction copySelectedAsUpdateAction;
+	
 	private FilterDataAction filterAction;
 	private ResetFilterAction resetFilterAction;
 
@@ -193,9 +195,6 @@ public class WbTable
 	public WbTable(boolean printEnabled, boolean sqlCopyAllowed)
 	{
 		super(EmptyTableModel.EMPTY_MODEL);
-//		this.setMinimumSize(null);
-//		this.setMaximumSize(null);
-//		this.setPreferredSize(null);
 		
 		this.sortAscending = new SortAscendingAction(this);
 		this.sortAscending.setEnabled(false);
@@ -237,7 +236,7 @@ public class WbTable
 		this.findAgainAction = new FindDataAgainAction(this);
 		this.findAgainAction.setEnabled(false);
 
-		this.dataToClipboard = new DataToClipboardAction(this);
+		this.copyAsTextAction = new CopyAsTextAction(this);
 		if (sqlCopyAllowed)
 		{
 			this.copyInsertAction = new CopyAsSqlInsertAction(this);
@@ -251,7 +250,7 @@ public class WbTable
 
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.addPopupAction(this.exportDataAction, false);
-		this.addPopupAction(this.dataToClipboard, true);
+		this.addPopupAction(this.copyAsTextAction, true);
 		if (copyUpdateAction != null) this.addPopupAction(this.copyUpdateAction, false);
 		if (copyInsertAction != null) this.addPopupAction(this.copyInsertAction, false);
 		if (copyDeleteInsertAction != null) this.addPopupAction(this.copyDeleteInsertAction, false);
@@ -285,7 +284,7 @@ public class WbTable
 		ActionMap am = this.getActionMap();
 		this.findAction.addToInputMap(im, am);
 		this.findAgainAction.addToInputMap(im, am);
-		this.dataToClipboard.addToInputMap(im, am);
+		this.copyAsTextAction.addToInputMap(im, am);
 		this.exportDataAction.addToInputMap(im, am);
 		this.optimizeAllCol.addToInputMap(im, am);
 		
@@ -410,9 +409,9 @@ public class WbTable
 		return this.exportDataAction;
 	}
 
-	public DataToClipboardAction getDataToClipboardAction()
+	public CopyAsTextAction getDataToClipboardAction()
 	{
-		return this.dataToClipboard;
+		return this.copyAsTextAction;
 	}
 
 	public FindDataAction getFindAction()

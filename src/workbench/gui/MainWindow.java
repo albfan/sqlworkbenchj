@@ -210,7 +210,7 @@ public class MainWindow
 	 * The listener will be notified when the name of a tab changes.
 	 * This is used in the {@link workbench.gui.dbobjects.TableListPanel}
 	 * to display the available panels in the context menu
-	 * @see workbench.gui.dbobjects.TableListPanel#fileNameChanged(Object, String)
+	 * @see workbench.gui.dbobjects.EditorTabSelectMenu#fileNameChanged(Object, String)
 	 */
 	public void addFilenameChangeListener(FilenameChangeListener aListener)
 	{

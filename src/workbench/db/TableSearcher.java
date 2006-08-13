@@ -29,7 +29,7 @@ import workbench.util.WbThread;
  */
 public class TableSearcher
 {
-	private List tableNames;
+	private TableIdentifier[] tablesToSearch;
 	private String columnFunction;
 	private TableSearchDisplay display;
 	private String criteria;
@@ -66,10 +66,6 @@ public class TableSearcher
 			if (this.query != null)
 			{
 				this.query.cancel();
-//				if (this.connection.cancelNeedsReconnect())
-//				{
-//					this.connection.reconnect();
-//				}
 			}
 		}
 		catch (Throwable e)
@@ -97,14 +93,15 @@ public class TableSearcher
 
 	private void doSearch()
 	{
-		if (this.tableNames == null || this.tableNames.size() == 0) return;
+		if (this.tablesToSearch == null || this.tablesToSearch.length == 0) return;
 		this.setRunning(true);
 		try
 		{
 			this.connection.setBusy(true);
-			for (int i=0; i < this.tableNames.size(); i++)
+			for (int i=0; i < this.tablesToSearch.length; i++)
 			{
-				this.searchTable((String)this.tableNames.get(i));
+				TableIdentifier tbl = tablesToSearch[i];
+				this.searchTable(tbl);
 				if (this.cancelSearch) break;
 			}
 			if (this.display != null) this.display.setStatusText("");
@@ -120,14 +117,14 @@ public class TableSearcher
 		}
 	}
 
-	private void searchTable(String aTable)
+	private void searchTable(TableIdentifier table)
 	{
 		ResultSet rs = null;
 		try
 		{
-			String sql = this.buildSqlForTable(aTable);
+			String sql = this.buildSqlForTable(table);
 			if (sql == null) return;
-			if (this.display != null) this.display.setCurrentTable(aTable, sql);
+			if (this.display != null) this.display.setCurrentTable(table.getTableExpression(), sql);
 
 			this.query = this.connection.createStatementForQuery();
 			this.query.setMaxRows(this.maxRows);
@@ -139,7 +136,7 @@ public class TableSearcher
 				{
 					break;
 				}
-				if (this.display != null)this.display.addResultRow(aTable, rs);
+				if (this.display != null)this.display.addResultRow(table.getTableExpression(), rs);
 			}
 		}
 		catch (OutOfMemoryError mem)
@@ -148,7 +145,7 @@ public class TableSearcher
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("TableSearcher.searchTable()", "Error retrieving data for " + aTable, e);
+			LogMgr.logError("TableSearcher.searchTable()", "Error retrieving data for " + table.getTableExpression(), e);
 		}
 		finally
 		{
@@ -170,11 +167,10 @@ public class TableSearcher
 		}
 	}
 
-	private String buildSqlForTable(String aTable)
+	private String buildSqlForTable(TableIdentifier tbl)
 		throws SQLException
 	{
 		DbMetadata meta = this.connection.getMetadata();
-		TableIdentifier tbl = new TableIdentifier(aTable);
 
 		DataStore def = meta.getTableDefinition(tbl);
 		int cols = def.getRowCount();
@@ -189,8 +185,7 @@ public class TableSearcher
 			String column = (String)def.getValue(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
 			Integer type = (Integer)def.getValue(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
 			int sqlType = type.intValue();
-			boolean isChar = SqlUtil.isCharacterType(sqlType);
-			if (isChar)
+			if (SqlUtil.isCharacterType(sqlType))
 			{
 				colcount ++;
 				if (!first)
@@ -262,14 +257,9 @@ public class TableSearcher
 		return result;
 	}
 
-	public List getTableNames()
+	public void setTableNames(TableIdentifier[] tables)
 	{
-		return tableNames;
-	}
-
-	public void setTableNames(List tables)
-	{
-		this.tableNames = tables;
+		this.tablesToSearch = tables;
 	}
 
 	public TableSearchDisplay getDisplay()

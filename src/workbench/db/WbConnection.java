@@ -124,6 +124,7 @@ public class WbConnection
 		try
 		{
 			this.metaData = new DbMetadata(this);
+			this.doOracleClear = this.metaData.isOracle();
 		}
 		catch (Exception e)
 		{
@@ -319,7 +320,7 @@ public class WbConnection
 	 */
 	void close()
 	{
-		if (this.profile != null && this.profile.getRollbackBeforeDisconnect())
+		if (this.profile != null && this.profile.getRollbackBeforeDisconnect() && this.sqlConnection != null)
 		{
 			try
 			{
@@ -327,7 +328,7 @@ public class WbConnection
 			}
 			catch (Exception e)
 			{
-				LogMgr.logWarning("WbConnection.close()", "Error reported when doing rollback before disconnect", e);
+				LogMgr.logWarning("WbConnection.close()", "Error when calling rollback before disconnect", e);
 			}
 		}
 

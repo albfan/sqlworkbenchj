@@ -746,6 +746,16 @@ public class TableListPanel
 		catch (Throwable e)
 		{
 			LogMgr.logError("TableListPanel.retrieve()", "Error retrieving table list", e);
+			final String msg = ExceptionUtil.getDisplay(e);
+			invalidateData();
+			this.shouldRetrieve = true;
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					WbSwingUtilities.showErrorMessage(TableListPanel.this, msg);
+				}
+			});
 		}
 		finally
 		{
@@ -769,10 +779,15 @@ public class TableListPanel
 		t.start();
 	}
 
+	public void panelSelected()
+	{
+		if (this.shouldRetrieve) startRetrieve();
+	}
+	
 	public void setVisible(boolean aFlag)
 	{
 		super.setVisible(aFlag);
-		if (this.shouldRetrieve)
+		if (aFlag && this.shouldRetrieve)
 			this.retrieve();
 	}
 

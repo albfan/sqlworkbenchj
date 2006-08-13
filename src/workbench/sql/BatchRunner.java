@@ -470,23 +470,23 @@ public class BatchRunner
 		if (!cmdLine.isArgPresent(WbManager.ARG_CONN_URL)) return null;
 		try
 		{
-			String url = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_URL));
+			String url = cmdLine.getValue(WbManager.ARG_CONN_URL);
 			if (url == null) 
 			{
 				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Cannot connect with command line settings without a connection URL!", null);
 				return null;
 			}
-			String driverclass = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_DRIVER));
+			String driverclass = cmdLine.getValue(WbManager.ARG_CONN_DRIVER);
 			if (driverclass == null) 
 			{
 				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Cannot connect with command line settings without a driver class!", null);
 				return null;
 			}
-			String user = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_USER));
-			String pwd = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_PWD));
-			String jar = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_JAR));
+			String user = cmdLine.getValue(WbManager.ARG_CONN_USER);
+			String pwd = cmdLine.getValue(WbManager.ARG_CONN_PWD);
+			String jar = cmdLine.getValue(WbManager.ARG_CONN_JAR);
 			String commit =  cmdLine.getValue(WbManager.ARG_CONN_AUTOCOMMIT);
-			String wksp = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_WORKSPACE));
+			String wksp = cmdLine.getValue(WbManager.ARG_WORKSPACE);
 			DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver(driverclass);
 			if (drv == null)
 			{

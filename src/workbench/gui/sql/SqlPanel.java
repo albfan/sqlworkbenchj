@@ -79,7 +79,7 @@ import workbench.gui.actions.CopyAsSqlUpdateAction;
 import workbench.gui.actions.CopyRowAction;
 import workbench.gui.actions.CreateDeleteScriptAction;
 import workbench.gui.actions.CreateSnippetAction;
-import workbench.gui.actions.DataToClipboardAction;
+import workbench.gui.actions.CopyAsTextAction;
 import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.ExecuteAllAction;
 import workbench.gui.actions.ExecuteCurrentAction;
@@ -197,7 +197,7 @@ public class SqlPanel
 	private ExecuteSelAction executeSelected;
 
 	// Actions from DwPanel
-	private DataToClipboardAction dataToClipboard;
+	private CopyAsTextAction dataToClipboard;
 	private SaveDataAsAction exportDataAction;
 	private CopyAsSqlInsertAction copyAsSqlInsert;
 	private CopyAsSqlUpdateAction copyAsSqlUpdate;
@@ -632,7 +632,7 @@ public class SqlPanel
 		this.optimizeAllCol.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 		this.actions.add(this.optimizeAllCol);
 
-		this.dataToClipboard = new DataToClipboardAction(null); 
+		this.dataToClipboard = new CopyAsTextAction(null); 
 		this.dataToClipboard.setEnabled(false);
 		this.actions.add(this.exportDataAction);
 		this.actions.add(this.dataToClipboard);
@@ -646,7 +646,7 @@ public class SqlPanel
 		this.copyAsSqlDeleteInsert = new CopyAsSqlDeleteInsertAction(null); 
 		this.actions.add(this.copyAsSqlDeleteInsert);
 
-		copySelectedMenu = WbTable.createCopySelectedMenu();
+		copySelectedMenu = WbTable.createAlternateCopyMenu();
 		copySelectedMenu.setEnabled(false);
 		this.actions.add(copySelectedMenu);
 
@@ -1991,7 +1991,7 @@ public class SqlPanel
 			this.findDataAction.setOriginal(this.currentData.getTable().getFindAction());
 			this.findDataAgainAction.setOriginal(this.currentData.getTable().getFindAgainAction());
 			copySelectedMenu.removeAll();
-			this.currentData.getTable().populateCopySelectedMenu(copySelectedMenu);
+			this.currentData.getTable().populateCopyMenu(copySelectedMenu);
 			copySelectedMenu.setEnabled(true);
 			this.printDataAction.setOriginal(this.currentData.getTable().getPrintAction());
 			this.printPreviewAction.setOriginal(this.currentData.getTable().getPrintPreviewAction());

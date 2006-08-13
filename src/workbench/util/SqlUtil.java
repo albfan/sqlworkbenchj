@@ -36,7 +36,7 @@ import workbench.sql.formatter.SqlFormatter;
 
 public class SqlUtil
 {
-	private static Pattern specialCharPattern = Pattern.compile("[$:\\/ ]");
+	private static Pattern specialCharPattern = Pattern.compile("[$:\\/ \\.;,]");
 	
 	public static String quoteObjectname(String aColname)
 	{
@@ -144,8 +144,8 @@ public class SqlUtil
 	/**
 	 * Parse the given SQL SELECT query and return the columns defined
 	 * in the column list.
-	 * @para select the SQL String to parse
-	 * @para includeAlias if false, the "raw" column names will be returned, otherwise
+	 * @param select the SQL String to parse
+	 * @param includeAlias if false, the "raw" column names will be returned, otherwise
 	 *       the column name including the alias (e.g. "p.name AS person_name"
 	 * @return a List of String objecs. 
 	 */

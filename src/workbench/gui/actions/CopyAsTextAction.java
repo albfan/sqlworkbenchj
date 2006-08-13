@@ -31,7 +31,8 @@ public class CopyAsTextAction
 	extends WbAction
 {
 	private WbTable client;
-
+	protected boolean copySelected;
+	
 	public CopyAsTextAction(WbTable aClient)
 	{
 		super();
@@ -40,6 +41,7 @@ public class CopyAsTextAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		String desc = ResourceMgr.getDescription("MnuTxtDataToClipboard", true);
 		this.initMenuDefinition(ResourceMgr.getString("MnuTxtDataToClipboard"), desc, KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
+		copySelected = false;
 	}
 
 	public void executeAction(ActionEvent e)
@@ -48,7 +50,7 @@ public class CopyAsTextAction
 		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
 		ctrlPressed = ctrlPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
 		ClipBoardCopier copier = new ClipBoardCopier(this.client);
-		copier.copyDataToClipboard(!shiftPressed, false, ctrlPressed);
+		copier.copyDataToClipboard(!shiftPressed, copySelected, ctrlPressed);
 	}
 
 	public void addToInputMap(InputMap im, ActionMap am)

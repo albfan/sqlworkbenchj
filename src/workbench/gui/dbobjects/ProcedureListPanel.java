@@ -267,6 +267,11 @@ public class ProcedureListPanel
 
 	}
 
+	public void panelSelected()
+	{
+		retrieveIfNeeded();
+	}
+	
 	public void retrieveIfNeeded()
 	{
 		if (this.shouldRetrieve) this.retrieve();

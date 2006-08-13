@@ -630,7 +630,7 @@ public class OracleMetadata
 	}
 	
 	/**
-	 * Close the statement object that was used in {@link getColumns(String, String, String, String)}.
+	 * Close the statement object that was used in {@link #getColumns(String, String, String, String)}.
 	 * This method should be called after closing the ResultSet obtained from that method.
 	 */
 	public void columnsProcessed()

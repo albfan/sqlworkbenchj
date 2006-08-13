@@ -457,7 +457,7 @@ public class ConnectionMgr
 	private synchronized void closeConnection(WbConnection conn)
 	{
 		if (conn == null) return;
-		if (conn.getSqlConnection() == null) return;
+		if (conn.isClosed()) return;
 		
 		try
 		{

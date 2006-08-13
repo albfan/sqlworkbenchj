@@ -72,9 +72,9 @@ public class ReportView
 	 * Initialize this ReportView.
 	 * This will read the following information for the table: 
 	 * <ul>
-	 *	<li>columns for the table using {@link workbench.db.DbMetadata.getTableColumns(workbench.db.TableIdentifier)}</li>
-	 *  <li>the comments for the view using {@link workbench.db.DbMetadata.getTableComment(workbench.db.TableIdentifier)}</li>
-	 *  <li>the source for the view using{@link workbench.db.DbMetadata.getViewSource(workbench.db.DbMetadata.getViewSource(String, String, String)}</li>
+	 *	<li>columns for the table using {@link workbench.db.DbMetadata#getTableColumns(workbench.db.TableIdentifier)}</li>
+	 *  <li>the comments for the view using {@link workbench.db.DbMetadata#getTableComment(workbench.db.TableIdentifier)}</li>
+	 *  <li>the source for the view using{@link workbench.db.DbMetadata#getViewSource(workbench.db.TableIdentifier)}</li>
 	 *</ul>
 	 */
 	public ReportView(TableIdentifier tbl, WbConnection conn, String nspace)

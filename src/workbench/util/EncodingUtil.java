@@ -150,7 +150,7 @@ public class EncodingUtil
 	 * Test if the given encoding is supported. Before this is 
 	 * tested, cleanupEncoding() is called to allow for some
 	 * common "abbreviations"
-	 * @see cleanupEncoding(String)
+	 * @see #cleanupEncoding(String)
 	 */
 	public static boolean isEncodingSupported(String encoding)
 	{

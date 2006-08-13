@@ -755,6 +755,21 @@ public class Settings
 		return result;
 	}
 
+	public void setCopyDefault(String value)
+	{
+		if (value == null) return;
+		if (value.equalsIgnoreCase("all") || value.equalsIgnoreCase("selected"))
+		{
+			setProperty("workbench.gui.table.copydefault", value.toLowerCase());
+		}
+	}
+	
+	public boolean getCopySelectedIsDefault()
+	{
+		String value = getProperty("workbench.gui.table.copydefault", "all");
+		return "selected".equalsIgnoreCase(value);
+	}
+	
 	public boolean getUseAlternateRowColor()
 	{
 		return getBoolProperty("workbench.gui.table.alternate.use", false);

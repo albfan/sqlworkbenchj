@@ -737,7 +737,7 @@ public class WbManager
 			ConnectionProfile prof  = null;
 			if (!StringUtil.isEmptyString(profilename))
 			{
-				ProfileKey def = new ProfileKey(StringUtil.trimQuotes(profilename), StringUtil.trimQuotes(group));
+				ProfileKey def = new ProfileKey(profilename, group);
 				prof = ConnectionMgr.getInstance().getProfile(def);
 			}
 			else 

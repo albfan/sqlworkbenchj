@@ -28,7 +28,7 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 
 /**
- * A class to copy the data of a {@link workbench.components.WbTable} to 
+ * A class to copy the data of a {@link workbench.gui.components.WbTable} to 
  * the clipboard. Either as tab-separated text or SQL Statements.
  *
  * @author support@sql-workbench.net
@@ -117,7 +117,7 @@ public class ClipBoardCopier
 	 * are checked. If none are present, the user is prompted to select the key columns
 	 *
 	 * @see workbench.storage.DataStore#hasPkColumns()
-	 * @see workbench.components.WbTable#detectDefinedPkColumns()
+	 * @see workbench.gui.components.WbTable#detectDefinedPkColumns()
 	 * @see #copyAsSql(boolean, boolean, boolean, boolean)
 	 */
 	public void copyAsSqlUpdate(boolean selectedOnly, boolean showSelectColumns)

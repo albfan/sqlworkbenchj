@@ -353,7 +353,7 @@ public class DataStoreTableModel
 	 * Clear the locked column. After a call to clearLockedColumn()
 	 * all columns (except the status column) are editable 
 	 * when the table is in edit mode.
-	 * @see setLockedColumn(int)
+	 * @see #setLockedColumn(int)
 	 */
 	public void clearLockedColumn()
 	{
@@ -363,8 +363,8 @@ public class DataStoreTableModel
 	/**
 	 * Define a column that may not be edited even if the 
 	 * table is in "Edit mode"
-	 * @param the column to be set as non-editable
-	 * @see clearLockedColumn()
+	 * @param column the column to be set as non-editable
+	 * @see #clearLockedColumn()
 	 */
 	public void setLockedColumn(int column)
 	{

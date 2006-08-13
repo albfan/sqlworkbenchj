@@ -254,7 +254,7 @@ public class ColumnIdentifier
 	/**
 	 * Setter for property columnClassName.
 	 * 
-	 * @param columnClassName New value of property columnClassName.
+	 * @param columnClass New value of property columnClassName.
 	 */
 	public void setColumnClassName(String columnClass)
 	{

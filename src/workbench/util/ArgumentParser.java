@@ -136,6 +136,13 @@ public class ArgumentParser
 	{
 		return getBoolean(key, false);
 	}
+	
+	/**
+	 * Return a parameter value as a boolean. If no 
+	 * value was specified the given default value will be returned
+	 * @see #getValue(String)
+	 * @see StringUtil#stringToBool(String)
+	 */
 	public boolean getBoolean(String key, boolean def)
 	{
 		String value = this.getValue(key);
@@ -143,6 +150,14 @@ public class ArgumentParser
 		return StringUtil.stringToBool(value);
 	}
 
+	/**
+	 * Return the parameter for the give argument. 
+	 * If no value was specified or the parameter was not 
+	 * passed on the commandline null will be returned.
+	 * Any leading or trailing quotes will be removed from the argument
+	 * before it is returned
+	 * @see StringUtil#trimQuotes(String)
+	 */
 	public String getValue(String key)
 	{
 		String value = (String)this.arguments.get(key.toLowerCase());

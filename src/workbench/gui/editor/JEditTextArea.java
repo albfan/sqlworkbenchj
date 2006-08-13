@@ -105,7 +105,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.48 2006-08-12 21:35:50 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.49 2006-08-13 15:55:12 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -1297,7 +1297,7 @@ public class JEditTextArea
 	 * Returns the word that is left of the cursor.
 	 * If the character left of the cursor is a whitespace
 	 * this method returns null.
-	 * @param additional word boundary characters (whitespace is always a word boundary)
+	 * @param wordBoundaries additional word boundary characters (whitespace is always a word boundary)
 	 */
 	public String getWordAtCursor(String wordBoundaries)
 	{

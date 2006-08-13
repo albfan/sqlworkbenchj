@@ -39,7 +39,7 @@ public class GenericSchemaInfoReader
 	 * If no query is configured or an error is thrown, this method
 	 * returns null
 	 * @see #GenericSchemaInfoReader(String)
-	 * @see workbench.DbMetadata#getDbId()
+	 * @see workbench.db.DbMetadata#getDbId()
 	 */
 	public String getCurrentSchema(WbConnection conn)
 	{

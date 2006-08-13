@@ -65,6 +65,12 @@ public class OracleIndexReader
 	public ResultSet getIndexInfo(TableIdentifier table, boolean unique)
 		throws SQLException
 	{
+		if (this.indexStatement != null)
+		{
+			LogMgr.logWarning("OracleIndexReader.getIndexInfo()", "getIndexInfo() called with pending results!");
+			indexInfoProcessed();
+		}
+		
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(this.metaData.getWbConnection());
 		
