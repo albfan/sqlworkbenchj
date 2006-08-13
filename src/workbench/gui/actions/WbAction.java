@@ -63,7 +63,7 @@ public class WbAction
 	}
 
 	/**
-	 * Creates a WbAction which dispatches its {@link executeAction(ActionEvent)} 
+	 * Creates a WbAction which dispatches its {@link #executeAction(ActionEvent)} 
 	 * event to the passed ActionListener, instead of executing it itself.
 	 * This is intended for situations where an Action is needed, but not 
 	 * implemented with a subclass of WbAction, but with an ActionListener
@@ -107,7 +107,7 @@ public class WbAction
 	 * be used to initialize the menu label and tooltip.
 	 * This method will register the action with the ShortcutManager even though
 	 * no shortcut is defined.
-	 * @param aKey         Translation key for ResourceMgr
+	 * @param aKey Translation key for ResourceMgr
 	 * @see #setMenuTextByKey(String) 
 	 * @see workbench.resource.ShortcutManager#registerAction(WbAction)
 	 */
@@ -185,8 +185,8 @@ public class WbAction
 	 * removing the & sign) will be set using
 	 * putValue(Actin.NAME, Object)
 	 *
-	 * @param the text for the menu item 
-	 * @see setMenuTextByKey(String)
+	 * @param text the text for the menu item 
+	 * @see #setMenuTextByKey(String)
 	 */
 	public void setMenuText(String text)
 	{

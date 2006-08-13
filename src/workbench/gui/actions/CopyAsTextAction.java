@@ -24,14 +24,15 @@ import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
+ *	Action to copy the contents of a WbTable as tab-separated text to the clipboard
  *	@author  support@sql-workbench.net
  */
-public class DataToClipboardAction extends WbAction
+public class CopyAsTextAction 
+	extends WbAction
 {
 	private WbTable client;
 
-	public DataToClipboardAction(WbTable aClient)
+	public CopyAsTextAction(WbTable aClient)
 	{
 		super();
 		this.client = aClient;
