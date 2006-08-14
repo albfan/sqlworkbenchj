@@ -146,7 +146,7 @@ public class WbTable
 
 	private FindDataAction findAction;
 	private FindDataAgainAction findAgainAction;
-	private SaveDataAsAction exportDataAction;
+	private SaveDataAsAction saveDataAsAction;
 	
 	private CopyAsTextAction copyAsTextAction;
 	private CopyAsSqlInsertAction copyInsertAction;
@@ -243,13 +243,14 @@ public class WbTable
 			this.copyDeleteInsertAction = new CopyAsSqlDeleteInsertAction(this);
 			this.copyUpdateAction = new CopyAsSqlUpdateAction(this);
 		}
-		this.exportDataAction = new SaveDataAsAction(this);
+		this.saveDataAsAction = new SaveDataAsAction(this);
+		this.saveDataAsAction.setEnabled(true);
 
 		this.filterAction = new FilterDataAction(this);
 		this.resetFilterAction = new ResetFilterAction(this);
 
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.addPopupAction(this.exportDataAction, false);
+		this.addPopupAction(this.saveDataAsAction, false);
 		this.addPopupAction(this.copyAsTextAction, true);
 		if (copyUpdateAction != null) this.addPopupAction(this.copyUpdateAction, false);
 		if (copyInsertAction != null) this.addPopupAction(this.copyInsertAction, false);
@@ -285,7 +286,7 @@ public class WbTable
 		this.findAction.addToInputMap(im, am);
 		this.findAgainAction.addToInputMap(im, am);
 		this.copyAsTextAction.addToInputMap(im, am);
-		this.exportDataAction.addToInputMap(im, am);
+		this.saveDataAsAction.addToInputMap(im, am);
 		this.optimizeAllCol.addToInputMap(im, am);
 		
 		Settings.getInstance().addFontChangedListener(this);
@@ -406,7 +407,7 @@ public class WbTable
 
 	public SaveDataAsAction getExportAction()
 	{
-		return this.exportDataAction;
+		return this.saveDataAsAction;
 	}
 
 	public CopyAsTextAction getDataToClipboardAction()

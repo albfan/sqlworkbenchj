@@ -135,7 +135,7 @@ public class ProcedureListPanel
 
 		this.listPanel = new JPanel();
 		this.statusRenderer = new ProcStatusRenderer();
-		this.procList = new WbTable()
+		this.procList = new WbTable(true, false)
 		{
 			public TableCellRenderer getCellRenderer(int row, int column) 
 			{

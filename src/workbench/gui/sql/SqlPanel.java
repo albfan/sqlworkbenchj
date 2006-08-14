@@ -646,7 +646,7 @@ public class SqlPanel
 		this.copyAsSqlDeleteInsert = new CopyAsSqlDeleteInsertAction(null); 
 		this.actions.add(this.copyAsSqlDeleteInsert);
 
-		copySelectedMenu = WbTable.createAlternateCopyMenu();
+		copySelectedMenu = WbTable.createCopySelectedMenu();
 		copySelectedMenu.setEnabled(false);
 		this.actions.add(copySelectedMenu);
 
@@ -1991,7 +1991,7 @@ public class SqlPanel
 			this.findDataAction.setOriginal(this.currentData.getTable().getFindAction());
 			this.findDataAgainAction.setOriginal(this.currentData.getTable().getFindAgainAction());
 			copySelectedMenu.removeAll();
-			this.currentData.getTable().populateCopyMenu(copySelectedMenu);
+			this.currentData.getTable().populateCopySelectedMenu(copySelectedMenu);
 			copySelectedMenu.setEnabled(true);
 			this.printDataAction.setOriginal(this.currentData.getTable().getPrintAction());
 			this.printPreviewAction.setOriginal(this.currentData.getTable().getPrintPreviewAction());

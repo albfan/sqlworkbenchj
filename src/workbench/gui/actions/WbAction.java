@@ -174,7 +174,7 @@ public class WbAction
 	public void setMenuTextByKey(String aKey)
 	{
 		this.setMenuText(ResourceMgr.getString(aKey));
-		this.setTooltip(ResourceMgr.getDescription(aKey));
+		this.setTooltip(ResourceMgr.getDescription(aKey, true));
 	}
 	
 	/**
