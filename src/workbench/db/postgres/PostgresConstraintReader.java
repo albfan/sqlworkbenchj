@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import workbench.db.*;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 
 /**
@@ -50,6 +51,8 @@ public class PostgresConstraintReader
 		if (sql == null) return null;
 		StringBuffer result = new StringBuffer(100);
 
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
+		
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
 		try
@@ -66,7 +69,7 @@ public class PostgresConstraintReader
 				{
 					if (count > 0)
 					{
-						result.append("\n");
+						result.append(nl);
 						result.append(indent);
 						result.append(',');
 					}

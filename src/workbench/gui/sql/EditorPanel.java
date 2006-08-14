@@ -293,11 +293,13 @@ public class EditorPanel
 		StringBuffer newSql = new StringBuffer(sql.length() + 100);
 		String formattedDelimit = StringUtil.EMPTY_STRING;
 
+		String end = Settings.getInstance().getInternalEditorLineEnding();
+		
 		if (count > 1)
 		{
 			// make sure add a delimiter after each statement
 			// if we have more then one
-			formattedDelimit = "\n" + delimit + "\n\n";
+			formattedDelimit = end + delimit + end + end;
 		}
 		else
 		{
@@ -326,7 +328,7 @@ public class EditorPanel
 				}
 				else
 				{
-					newSql.append("\n");
+					newSql.append(end);
 				}
 			}
 			catch (Exception e)
@@ -631,6 +633,7 @@ public class EditorPanel
 		boolean result = false;
 		
 		BufferedReader reader = null;
+		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
 		try
 		{
 			// try to free memory by releasing the current document
@@ -666,7 +669,7 @@ public class EditorPanel
 			doc.beginCompoundEdit();
 			while (line != null)
 			{
-				doc.insertString(pos, line + "\n", null);
+				doc.insertString(pos, line + lineEnding, null);
 				pos += line.length() + 1;
 				line = reader.readLine();
 			}
@@ -750,7 +753,7 @@ public class EditorPanel
 			try
 			{
 				String encoding = selector.getEncoding();
-				this.saveFile(fc.getSelectedFile(), encoding);
+				this.saveFile(fc.getSelectedFile(), encoding, Settings.getInstance().getExternalEditorLineEnding());
 	      this.fireFilenameChanged(this.getCurrentFileName());
 				lastDir = fc.getCurrentDirectory().getAbsolutePath();
 				if (this.editorType == SQL_EDITOR)
@@ -775,10 +778,10 @@ public class EditorPanel
 	public void saveFile(File aFile)
 		throws IOException
 	{
-		this.saveFile(aFile, this.fileEncoding);
+		this.saveFile(aFile, this.fileEncoding, Settings.getInstance().getExternalEditorLineEnding());
 	}
 
-	public void saveFile(File aFile, String encoding)
+	public void saveFile(File aFile, String encoding, String lineEnding)
 		throws IOException
 	{
 		if (encoding == null)
@@ -795,24 +798,16 @@ public class EditorPanel
 				filename = filename + ".sql";
 				aFile = new File(filename);
 			}
-			Writer w = null;
-			FileOutputStream out = new FileOutputStream(filename);
-			try
-			{
-				w = new OutputStreamWriter(out, encoding);
-			}
-			catch (UnsupportedEncodingException e)
-			{
-				LogMgr.logError("EditorPanel.readFile()", "Unsupported encoding: " + encoding + " requested. Using UTF-8", e);
-				try { w = new OutputStreamWriter(out, "UTF-8"); } catch (Throwable ignore) {}
-			}
-			PrintWriter writer = new PrintWriter(w);
+			
+			Writer writer = EncodingUtil.createWriter(aFile, encoding, false);
+			
 			int count = this.getLineCount();
 			String line;
 			int trimLen;
 			for (int i=0; i < count; i++)
 			{
 				line = this.getLineText(i);
+				
 				if (line.endsWith("\r\n") || line.endsWith("\n\r"))
 					trimLen = 2;
 				else if (line.endsWith("\n") || line.endsWith("\r"))
@@ -820,10 +815,9 @@ public class EditorPanel
 				else
 					trimLen = 0;
 
-				if (trimLen > 0)
-					writer.println(line.substring(0, line.length() - trimLen));
-				else
-					writer.println(line);
+				int len = line.length() - trimLen;
+				writer.write(line, 0, len);
+				writer.write(lineEnding);
 			}
 			writer.close();
 			this.currentFile = aFile;

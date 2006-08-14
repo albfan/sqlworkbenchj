@@ -22,8 +22,8 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.sql.preparedstatement.PreparedStatementPool;
-import workbench.storage.DataStore;
+import workbench.util.CharacterRange;
+import workbench.util.StringUtil;
 
 /**
  * @author  support@sql-workbench.net

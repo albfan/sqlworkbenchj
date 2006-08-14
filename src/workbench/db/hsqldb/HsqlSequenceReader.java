@@ -15,11 +15,11 @@ import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.db.SequenceReader;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
@@ -113,6 +113,7 @@ public class HsqlSequenceReader
 		query.append("system_sequences WHERE sequence_name = ?");
 		StringBuffer result = new StringBuffer(100);
 		result.append("CREATE SEQUENCE ");
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		try
 		{
 			stmt = this.dbConn.prepareStatement(query.toString());
@@ -130,7 +131,7 @@ public class HsqlSequenceReader
 				long start = rs.getLong(3);
 				if (start > 0)
 				{
-					result.append("\n       START WITH ");
+					result.append(nl + "       START WITH ");
 					result.append(start);
 				}
 				String max = rs.getString(4);
@@ -149,13 +150,13 @@ public class HsqlSequenceReader
 				
 				if (!isMax)
 				{
-					result.append("\n       START WITH ");
+					result.append(nl + "       START WITH ");
 					result.append(start);
 				}
 				long inc = rs.getLong(5);
 				if (inc != 1)
 				{
-					result.append("\n       INCREMENT BY ");
+					result.append(nl + "       INCREMENT BY ");
 					result.append(inc);
 				}
 				result.append(";");

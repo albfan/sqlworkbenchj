@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import workbench.db.AbstractConstraintReader;
 import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 /**
  *
@@ -62,6 +63,7 @@ public class OracleConstraintReader
 		StringBuffer result = new StringBuffer(100);
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		try
 		{
 			stmt = dbConnection.prepareStatement(sql);
@@ -80,7 +82,7 @@ public class OracleConstraintReader
           if (constraint.trim().endsWith("NOT NULL")) continue;
 					if (count > 0)
 					{
-						result.append("\n");
+						result.append(nl);
 						result.append(indent);
 						result.append(',');
 					}

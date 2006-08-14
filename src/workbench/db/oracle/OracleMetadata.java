@@ -168,6 +168,8 @@ public class OracleMetadata
 			"WHERE sequence_owner = ?" +
 			"  AND sequence_name = ?";
 		
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
+		
 		try
 		{
 			stmt = this.connection.getSqlConnection().prepareStatement(sql);
@@ -187,7 +189,7 @@ public class OracleMetadata
 				String order = rs.getString(6);
 				long cache = rs.getLong(7);
 				
-				result.append("\n      INCREMENT BY ");
+				result.append(nl + "      INCREMENT BY ");
 				result.append(increment);
 				
 				BigInteger one = new BigInteger("1");
@@ -195,39 +197,39 @@ public class OracleMetadata
 				
 				if (minvalue.compareTo(one) == 0)
 				{
-					result.append("\n      NOMINVALUE");
+					result.append(nl + "      NOMINVALUE");
 				}
 				else
 				{
-					result.append("\n      MINVALUE ");
+					result.append(nl + "      MINVALUE ");
 					result.append(minvalue);
 				}
 				
 				if (maxvalue.compareTo(max) == -1)
 				{
-					result.append("\n      MAXVALUE ");
+					result.append(nl + "      MAXVALUE ");
 					result.append(maxvalue);
 				}
 				else
 				{
-					result.append("\n      NOMAXVALUE");
+					result.append(nl + "      NOMAXVALUE");
 				}
 				if (cache > 0)
 				{
-					result.append("\n      CACHE ");
+					result.append(nl + "      CACHE ");
 					result.append(cache);
 				}
 				else
 				{
-					result.append("\n      NOCACHE");
+					result.append(nl + "      NOCACHE");
 				}
-				result.append("\n      ");
+				result.append(nl + "      ");
 				result.append(cycle);
 				
-				result.append("\n      ");
+				result.append(nl + "      ");
 				result.append(order);
 				
-				result.append("\n;");
+				result.append(nl + ";");
 			}
 		}
 		catch (Exception e)
@@ -370,6 +372,9 @@ public class OracleMetadata
 		StrBuffer result = new StrBuffer(1000);
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
+		
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
+		
 		try
 		{
 			int lineCount = 0;
@@ -393,8 +398,10 @@ public class OracleMetadata
 						result.append(line);
 					}
 				}
-				if (!(result.endsWith('\n') || result.endsWith('\r'))) result.append('\n');
-				result.append("/\n\n");
+				if (!(result.endsWith('\n') || result.endsWith('\r'))) result.append(nl);
+				result.append("/");
+				result.append(nl);
+				result.append(nl);
 				lineCount = 0;
 
 				stmt.clearParameters();
@@ -416,8 +423,9 @@ public class OracleMetadata
 					}
 				}
 			}
-			if (!(result.endsWith('\n') || result.endsWith('\r'))) result.append('\n');
-			result.append("/\n");
+			if (!(result.endsWith('\n') || result.endsWith('\r'))) result.append(nl);
+			result.append("/");
+			result.append(nl);
 		}
 		catch (Exception e)
 		{

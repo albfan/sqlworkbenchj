@@ -51,6 +51,22 @@ public class SqlUtil
 		return col.toString();
 	}
 
+	public static String getCreateType(String sql)
+	{
+		try
+		{
+			SQLLexer lexer = new SQLLexer(sql);
+			SQLToken t = lexer.getNextToken(false, false);
+			if (!t.getContents().equals("CREATE")) return null;
+			t = lexer.getNextToken(false, false);
+			return t.getContents();
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
+	
 	public static String getInsertTable(String sql)
 	{
 		try

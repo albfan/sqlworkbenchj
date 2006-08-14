@@ -1064,7 +1064,7 @@ public class TableListPanel
 			}
 			TableIdentifier tbl = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
 			tbl.setType(this.selectedObjectType);
-			if (this.selectedObjectType.indexOf("view") > -1)
+			if (meta.isViewType(this.selectedObjectType))
 			{
 				sql = meta.getExtendedViewSource(tbl, tableDefinition.getDataStore(), true);
 			}

@@ -18,6 +18,7 @@ import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -45,6 +46,7 @@ public class MySqlProcedureReader
 		         " WHERE routine_schema like ? " +
 		         "  and  routine_name = ? ";
 						 
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try
@@ -82,12 +84,13 @@ public class MySqlProcedureReader
 				source.append(vartype);
 				added ++;
 			}
-			source.append(")\n");
+			source.append(")");
+			source.append(nl);
 			if ("FUNCTION".equals(proctype))
 			{
 				source.append("RETURNS ");
 				source.append(returntype);
-				source.append('\n');
+				source.append(nl);
 			}
 		}
 		catch (Exception e)

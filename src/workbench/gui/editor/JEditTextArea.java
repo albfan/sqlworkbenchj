@@ -105,7 +105,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.49 2006-08-13 15:55:12 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.50 2006-08-14 22:11:19 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -1739,9 +1739,11 @@ public class JEditTextArea
 		if(!editable) return;
 
 		document.beginCompoundEdit();
-
+		
 		try
 		{
+			String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
+			
 			if (rectSelect)
 			{
 				Element map = document.getDefaultRootElement();
@@ -1759,7 +1761,7 @@ public class JEditTextArea
 
 				int lastNewline = 0;
 				int currNewline = 0;
-
+				
 				for(int i = selectionStartLine; i <= selectionEndLine; i++)
 				{
 					Element lineElement = map.getElement(i);
@@ -1771,7 +1773,7 @@ public class JEditTextArea
 
 					if(selectedText == null) continue;
 
-					currNewline = selectedText.indexOf('\n',lastNewline);
+					currNewline = selectedText.indexOf(lineEnding,lastNewline);
 					if(currNewline == -1)
 					{
 						currNewline = selectedText.length();
@@ -1784,7 +1786,7 @@ public class JEditTextArea
 				if(selectedText != null && currNewline != selectedText.length())
 				{
 					int offset = map.getElement(selectionEndLine).getEndOffset() - 1;
-					document.insertString(offset,"\n",null);
+					document.insertString(offset,lineEnding,null);
 					document.insertString(offset + 1,selectedText.substring(currNewline + 1),null);
 				}
 			}
@@ -1798,7 +1800,7 @@ public class JEditTextArea
 				if (this.autoIndent)
 				{
 					int c = this.getCaretLine();
-					if (c > 0 && selectedText.equals("\n"))
+					if (c > 0 && selectedText.equals(lineEnding))
 					{
 						String s = this.getLineText(c - 1);
 						String p = StringUtil.getStartingWhiteSpace(s);
@@ -2097,7 +2099,7 @@ public class JEditTextArea
 			{
 				// The MacOS MRJ doesn't convert \r to \n,
 				// so do it here
-				String selection = ((String)clipboard.getContents(this).getTransferData(DataFlavor.stringFlavor)).replaceAll("\r\n","\n");
+				String selection = ((String)clipboard.getContents(this).getTransferData(DataFlavor.stringFlavor)).replaceAll("\r\n",Settings.getInstance().getInternalEditorLineEnding());
 				setSelectedText(selection);
 			}
 			catch(Exception e)

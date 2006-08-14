@@ -38,6 +38,7 @@ import workbench.WbManager;
 import workbench.db.firebird.FirebirdProcedureReader;
 import workbench.db.firstsql.FirstSqlMetadata;
 import workbench.db.hsqldb.HsqlSequenceReader;
+import workbench.db.ibm.Db2SequenceReader;
 import workbench.db.ibm.Db2SynonymReader;
 import workbench.db.ingres.IngresMetadata;
 import workbench.db.mckoi.McKoiMetadata;
@@ -300,6 +301,7 @@ public class DbMetadata
 		else if (productLower.indexOf("db2") > -1)
 		{
 			this.synonymReader = new Db2SynonymReader();
+			this.sequenceReader = new Db2SequenceReader(this.dbConnection);
 		}
 		else if (productLower.indexOf("adaptive server") > -1) 
 		{
@@ -966,16 +968,36 @@ public class DbMetadata
 		
 		if (source == null || source.length() == 0) return StringUtil.EMPTY_STRING;
 
-		// ThinkSQL returns the full CREATE VIEW statement
-		if (source.toLowerCase().startsWith("create")) return source;
-
 		StringBuffer result = new StringBuffer(source.length() + 100);
+
+		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
+		
+		// ThinkSQL and DB2 return the full CREATE VIEW statement
+		if (source.toLowerCase().startsWith("create")) 
+		{
+			String type = SqlUtil.getCreateType(source);
+			result.append("DROP ");
+			result.append(type);
+			result.append(' ');
+			result.append(view.getTableName());
+			result.append(";");
+			result.append(lineEnding);
+			result.append(lineEnding);
+			result.append(source);
+			if (this.ddlNeedsCommit)
+			{
+				result.append(lineEnding);
+				result.append(lineEnding);
+				result.append("COMMIT;");
+			}
+			return result.toString();
+		}
 
 		result.append(generateCreateObject(includeDrop, view.getType(), view.getTableName()));
 
 		if (columnsListInViewDefinitionAllowed && !MVIEW_NAME.equalsIgnoreCase(view.getType()))
 		{
-			result.append("\n(\n");
+			result.append(lineEnding + "(" + lineEnding);
 			int rows = viewTableDefinition.getRowCount();
 			for (int i=0; i < rows; i++)
 			{
@@ -985,18 +1007,18 @@ public class DbMetadata
 				if (i < rows - 1)
 				{
 					result.append(",");
-					result.append("\n");
+					result.append(lineEnding);
 				}
 			}
-			result.append("\n)");
+			result.append(lineEnding + ")");
 		}
 		
-		result.append("\nAS \n");
+		result.append(lineEnding + "AS " + lineEnding);
 		result.append(source);
-		result.append("\n");
+		result.append(lineEnding);
 		if (this.ddlNeedsCommit)
 		{
-			result.append("COMMIT;\n");
+			result.append("COMMIT;");
 		}
 		return result.toString();
 	}
@@ -1518,7 +1540,6 @@ public class DbMetadata
 		boolean checkOracleInternalSynonyms = (isOracle && typeIncluded("SYNONYM", types));
 		boolean checkOracleSnapshots = (isOracle && Settings.getInstance().getBoolProperty("workbench.db.oracle.detectsnapshots", true) && typeIncluded("TABLE", types));
 		
-		
 		String excludeSynsRegex = Settings.getInstance().getProperty("workbench.db.oracle.exclude.synonyms", null);
 		Pattern synPattern = null;
 		if (checkOracleInternalSynonyms && excludeSynsRegex != null)
@@ -1649,6 +1670,7 @@ public class DbMetadata
 		int l = types.length;
 		for (int i=0; i < l; i++)
 		{
+			if (types[i].equals("*")) return true;
 			if (type.equalsIgnoreCase(types[i])) return true;
 		}
 		return false;
@@ -3240,11 +3262,21 @@ public class DbMetadata
 		return StringUtil.EMPTY_STRING;
 	}
 
+	public boolean isViewType(String type)
+	{
+		if (type == null) return false;
+		if (type.toUpperCase().indexOf("VIEW") > -1) return true;
+		String viewTypes = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".additional.viewtypes", "view").toLowerCase();
+		List types = StringUtil.stringToList(viewTypes, ",", true, true, false);
+		return (types.contains(type.toLowerCase()));
+	}
+	
 	public boolean isSynonymType(String type)
 	{
 		if (type == null) return false;
-		String synType = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".synonymtype", "synonym");
-		return (type.equalsIgnoreCase(synType));
+		String synTypes = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".synonymtypes", "synonym").toLowerCase();
+		List types = StringUtil.stringToList(synTypes, ",", true, true, false);
+		return (types.contains(type.toLowerCase()));
 	}
 	
 	/**
@@ -3354,7 +3386,9 @@ public class DbMetadata
 		boolean defaultBeforeNull = Settings.getInstance().getBoolProperty("workbench.db.defaultbeforenull." + this.getDbId(), false);//this.isOracle || this.isFirebird || this.isIngres;
 		String nullKeyword = Settings.getInstance().getProperty("workbench.db.nullkeyword." + getDbId(), "NULL");
 		boolean includeCommentInTableSource = Settings.getInstance().getBoolProperty("workbench.db.colcommentinline." + this.getDbId(), false);
-			
+		
+		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
+		
 		for (int i=0; i < count; i++)
 		{
 			String colName = columns[i].getColumnName();
@@ -3417,7 +3451,7 @@ public class DbMetadata
 			}
 			
 			if (i < count - 1) result.append(',');
-			result.append('\n');
+			result.append(lineEnding);
 		}
 
 		String cons = this.getTableConstraints(table, "   ");
@@ -3425,15 +3459,15 @@ public class DbMetadata
 		{
 			result.append("   ,");
 			result.append(cons);
-			result.append('\n');
+			result.append(lineEnding);
 		}
 		String realTable = (tableNameToUse == null ? table.getTableName() : tableNameToUse);
 
 		if (this.createInlineConstraints && pkCols.length() > 0)
 		{
-			result.append("\n   ,PRIMARY KEY (");
+			result.append(lineEnding + "   ,PRIMARY KEY (");
 			result.append(pkCols.toString());
-			result.append(")\n");
+			result.append(")" + lineEnding);
 
 			StringBuffer fk = this.getFkSource(table.getTableName(), aFkDef, tableNameToUse);
 			if (fk.length() > 0)
@@ -3442,7 +3476,7 @@ public class DbMetadata
 			}
 		}
 
-		result.append(");\n");
+		result.append(");" + lineEnding);
 		if (!this.createInlineConstraints && pkCols.length() > 0)
 		{
 			String template = this.getSqlTemplate(DbMetadata.pkStatements);
@@ -3459,7 +3493,9 @@ public class DbMetadata
 			
 			template = StringUtil.replace(template, PK_NAME_PLACEHOLDER, name);
 			result.append(template);
-			result.append(";\n\n");
+			result.append(";");
+			result.append(lineEnding);
+			result.append(lineEnding);
 		}
 		StringBuffer indexSource = this.indexReader.getIndexSource(table, aIndexDef, tableNameToUse);
 		result.append(indexSource);
@@ -3468,17 +3504,17 @@ public class DbMetadata
 		String comments = this.getTableCommentSql(table);
 		if (comments != null && comments.length() > 0)
 		{
-			result.append('\n');
+			result.append(lineEnding);
 			result.append(comments);
-			result.append('\n');
+			result.append(lineEnding);
 		}
 
 		comments = this.getTableColumnCommentsSql(table, columns);
 		if (comments != null && comments.length() > 0)
 		{
-			result.append('\n');
+			result.append(lineEnding);
 			result.append(comments);
-			result.append('\n');
+			result.append(lineEnding);
 		}
 
 		StrBuffer grants = this.getTableGrantSource(table);
@@ -3489,7 +3525,9 @@ public class DbMetadata
 		
 		if (this.ddlNeedsCommit)
 		{
-			result.append("\nCOMMIT;\n");
+			result.append(lineEnding);
+			result.append("COMMIT;");
+			result.append(lineEnding);
 		}
 
 		return result.toString();

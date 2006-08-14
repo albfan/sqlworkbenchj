@@ -19,9 +19,9 @@ import java.util.Collections;
 import java.util.List;
 import workbench.db.SequenceReader;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 
 /**
  * @author  support@sql-workbench.net
@@ -50,6 +50,9 @@ public class PostgresSequenceReader
 		{
 			aSequence = aSequence.substring(pos);
 		}
+		
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
+		
 		Statement stmt = null;
 		ResultSet rs = null;
 		String result = "";
@@ -77,24 +80,24 @@ public class PostgresSequenceReader
 				}
 				if (min != 1)
 				{
-					buf.append("\n       MINVALUE ");
+					buf.append(nl + "       MINVALUE ");
 					buf.append(min);
 				}
 				final BigInteger bigMax = new BigInteger("9223372036854775807");
 				BigInteger maxV = new BigInteger(max);
 				if (!maxV.equals(bigMax))
 				{
-					buf.append("\n       MAXVALUE ");
+					buf.append(nl + "       MAXVALUE ");
 					buf.append(max);
 				}
 				if (cache != 1)
 				{
-					buf.append("\n        CACHE ");
+					buf.append(nl + "        CACHE ");
 					buf.append(cache);
 				}
 				if ("true".equalsIgnoreCase(cycle))
 				{
-					buf.append("\n        CYCLE");
+					buf.append(nl + "        CYCLE");
 				}
 				buf.append(";");
 				result = buf.toString();

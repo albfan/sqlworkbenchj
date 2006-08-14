@@ -18,17 +18,20 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import workbench.gui.actions.ClearStatementHistoryAction;
 import workbench.gui.actions.WbAction;
 
 import workbench.log.LogMgr;
+import workbench.util.EncodingUtil;
 import workbench.util.StringUtil;
 import java.io.UnsupportedEncodingException;
 import workbench.gui.actions.FirstStatementAction;
 import workbench.gui.actions.LastStatementAction;
 import workbench.gui.actions.NextStatementAction;
 import workbench.gui.actions.PrevStatementAction;
+import workbench.resource.Settings;
 
 /**
  *
@@ -204,37 +207,32 @@ public class SqlHistory
 
 	public void writeToStream(OutputStream out)
 	{
-		BufferedWriter writer = null;
+		
+		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
 		try
 		{
-			writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			// cannot happen!
-		}
-		try
-		{
+			Writer writer = EncodingUtil.createWriter(out, "UTF-8");
+			
 			int count = this.history.size();
 			for (int i=0; i < count; i++)
 			{
 				SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(i);
 				writer.write(KEY_POS);
 				writer.write(Integer.toString(entry.getCursorPosition()));
-				writer.write('\n');
+				writer.write(lineEnding);
 
 				writer.write(KEY_START);
 				writer.write(Integer.toString(entry.getSelectionStart()));
-				writer.write('\n');
+				writer.write(lineEnding);
 
 				writer.write(KEY_END);
 				writer.write(Integer.toString(entry.getSelectionEnd()));
-				writer.write('\n');
+				writer.write(lineEnding);
 
 				writer.write(entry.getText());
-				writer.write('\n');
+				writer.write(lineEnding);
 				writer.write(LIST_DELIMITER);
-				writer.write('\n');
+				writer.write(lineEnding);
 			}
 			writer.flush();
 			this.changed = false;
@@ -252,22 +250,16 @@ public class SqlHistory
 
 	public void readFromStream(InputStream in)
 	{
-		BufferedReader reader = null;
-		try
-		{
-			reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			// cannot happen!
-		}
-
 		StringBuffer content = new StringBuffer(500);
 		int pos = 0;
 		int start = -1;
 		int end = -1;
+		
+		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
+		
 		try
 		{
+			BufferedReader reader = new BufferedReader(EncodingUtil.createReader(in , "UTF-8"));
 			String line = reader.readLine();
 			while(line != null)
 			{
@@ -302,7 +294,7 @@ public class SqlHistory
 				else
 				{
 					content.append(line);
-					content.append('\n');
+					content.append(lineEnding);
 				}
 				line = reader.readLine();
 			}

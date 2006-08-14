@@ -340,6 +340,57 @@ public class Settings
 		}
 	}
 
+	public String getExternalEditorLineEnding()
+	{
+		return getLineEndingProperty("workbench.editor.lineending.external", StringUtil.LINE_TERMINATOR);
+	}
+	
+	public void setExternalEditorLineEnding(String value)
+	{
+		setLineEndingProperty("workbench.editor.lineending.external", value);
+	}
+	
+	public String getInternalEditorLineEnding()
+	{
+		return getLineEndingProperty("workbench.editor.lineending.internal", "lf");
+	}
+	
+	public void setInternalEditorLineEnding(String value)
+	{
+		setLineEndingProperty("workbench.editor.lineending.internal", value);
+	}
+
+	private String getLineEndingProperty(String key, String def)
+	{
+		String value = getProperty(key, def);
+		if ("lf".equalsIgnoreCase(value))
+		{ 
+			return "\n";
+		}
+		else if ("crlf".equalsIgnoreCase(value))
+		{
+			return "\r\n";
+		}
+		else if ("cr".equalsIgnoreCase(value))
+		{
+			return "\r";
+		}
+		else 
+		{
+			return "\n";
+		}
+	}
+	
+	private void setLineEndingProperty(String key, String value)
+	{
+		if (value == null) return;
+		
+		if ("lf".equalsIgnoreCase(value) || "crlf".equalsIgnoreCase(value) || "cr".equalsIgnoreCase(value))
+		{
+			setProperty(key, value);
+		}
+	}
+	
 	/**
 	 *  Returns the modifier key for rectangular selections in the editor
 	 */

@@ -15,6 +15,7 @@ import java.sql.DatabaseMetaData;
 import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
 
@@ -32,6 +33,9 @@ public class PostgresProcedureReader
 	public StringBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
 		StringBuffer source = new StringBuffer();
+		
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
+		
 		try
 		{
 			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname);
@@ -61,9 +65,9 @@ public class PostgresProcedureReader
 				}
 			}
 			source.append(")");
-			source.append("\nRETURNS ");
+			source.append(nl + "RETURNS ");
 			source.append(retType);
-			source.append("\nAS\n");
+			source.append(nl + "AS" + nl);
 		}
 		catch (Exception e)
 		{

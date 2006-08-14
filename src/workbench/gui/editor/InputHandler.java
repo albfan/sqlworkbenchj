@@ -21,6 +21,7 @@ import java.util.Iterator;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.text.BadLocationException;
+import workbench.resource.Settings;
 
 /**
  * An input handler converts the user's key strokes into concrete actions.
@@ -31,7 +32,7 @@ import javax.swing.text.BadLocationException;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.20 2006-08-13 15:55:12 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.21 2006-08-14 22:11:20 thomas Exp $
  * @see DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -797,7 +798,7 @@ public abstract class InputHandler extends KeyAdapter
 				return;
 			}
 
-			textArea.setSelectedText("\n");
+			textArea.setSelectedText(Settings.getInstance().getInternalEditorLineEnding());
 		}
 	}
 

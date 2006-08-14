@@ -20,6 +20,7 @@ import java.util.List;
 import workbench.db.SynonymReader;
 
 import workbench.db.TableIdentifier;
+import workbench.resource.Settings;
 
 /**
  *
@@ -80,11 +81,12 @@ public class OracleSynonymReader
 	{
 		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);
 		StringBuffer result = new StringBuffer(200);
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE SYNONYM ");
 		result.append(aSynonym);
-		result.append("\n       FOR ");
+		result.append(nl + "       FOR ");
 		result.append(id.getTableExpression());
-		result.append(";\n");
+		result.append(";");
 		return result.toString();
 	}
 

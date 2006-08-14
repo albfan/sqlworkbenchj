@@ -484,6 +484,11 @@ public class TableDataPanel
 		}
 		catch (Throwable e)
 		{
+			if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab() && !this.dbConnection.getAutoCommit())
+			{
+				try { this.dbConnection.rollback(); } catch (Throwable th) {}
+			}
+			
 			LogMgr.logError("TableDataPanel.doRetrieve()", "Error retrieving table data", e);
 			final String msg; 
 			if (e instanceof OutOfMemoryError)
