@@ -61,6 +61,7 @@ import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbXslt;
 import workbench.storage.RowActionMonitor;
+import workbench.util.CharacterRange;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.interfaces.ExecutionController;
@@ -93,6 +94,7 @@ public class DefaultStatementRunner
 	private boolean removeComments;
 	private boolean fullErrorReporting = false;
 	private ParameterPrompter prompter;
+	private boolean logStatements = Settings.getInstance().getBoolProperty("workbench.sql.execution.log", false);
 	
 	public DefaultStatementRunner()
 	{
@@ -308,10 +310,10 @@ public class DefaultStatementRunner
 	public void runStatement(String aSql, int maxRows, int queryTimeout)
 		throws SQLException, Exception
 	{
-        if (this.result != null)
-        {
-            this.result.clear();
-        }
+		if (this.result != null)
+		{
+			this.result.clear();
+		}
         
 		// Silently ignore empty statements
 		if (aSql == null || aSql.trim().length() == 0)
@@ -338,6 +340,10 @@ public class DefaultStatementRunner
 			aSql = SqlUtil.makeCleanSql(aSql, true, false, '\'');
 		}
 		
+		if (logStatements)
+		{
+			LogMgr.logInfo("DefaultStatementRunner.runStatement()", "Running SQL: " + StringUtil.escapeUnicode(aSql, CharacterRange.RANGE_CONTROL));
+		}
 		this.currentCommand = this.getCommandToUse(aSql);
 
 		// if no mapping is found use the default implementation
@@ -419,7 +425,7 @@ public class DefaultStatementRunner
 		if (this.supportsSelectInto && !verb.equalsIgnoreCase(WbSelectBlob.VERB) && this.dbConnection != null && this.dbConnection.getMetadata().isSelectIntoNewTable(sql))
 		{
 			LogMgr.logDebug("StatementRunner.getCommandToUse()", "Found 'SELECT ... INTO new_table'");
-			// use the generic SqlCommand implementation for this.
+			// use the generic SqlCommand implementation for this and not the SelectCommand
 			return (SqlCommand)this.cmdDispatch.get("*");
 		}
 		else

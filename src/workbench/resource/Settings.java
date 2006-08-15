@@ -340,9 +340,13 @@ public class Settings
 		}
 	}
 
+	public static final String UNIX_LINE_TERMINATOR_PROP_VALUE = "lf";
+	public static final String DOS_LINE_TERMINATOR_PROP_VALUE = "crlf";
+	public static final String DEFAULT_LINE_TERMINATOR_PROP_VALUE = "default";
+	
 	public String getExternalEditorLineEnding()
 	{
-		return getLineEndingProperty("workbench.editor.lineending.external", StringUtil.LINE_TERMINATOR);
+		return getLineEndingProperty("workbench.editor.lineending.external", DEFAULT_LINE_TERMINATOR_PROP_VALUE);
 	}
 	
 	public void setExternalEditorLineEnding(String value)
@@ -350,9 +354,19 @@ public class Settings
 		setLineEndingProperty("workbench.editor.lineending.external", value);
 	}
 	
+	/** 
+	 * The real setting for the external line ending property
+	 * to be used by the options dialog
+	 */
+	public String getExternalLineEndingValue()
+	{
+		return getProperty("workbench.editor.lineending.external", DEFAULT_LINE_TERMINATOR_PROP_VALUE);
+	}
+	
+	
 	public String getInternalEditorLineEnding()
 	{
-		return getLineEndingProperty("workbench.editor.lineending.internal", "lf");
+		return getLineEndingProperty("workbench.editor.lineending.internal", UNIX_LINE_TERMINATOR_PROP_VALUE);
 	}
 	
 	public void setInternalEditorLineEnding(String value)
@@ -360,20 +374,29 @@ public class Settings
 		setLineEndingProperty("workbench.editor.lineending.internal", value);
 	}
 
+	/** 
+	 * The real setting for the internal line ending property
+	 * to be used by the options dialog
+	 */
+	public String getInteralLineEndingValue()
+	{
+		return getProperty("workbench.editor.lineending.internal", UNIX_LINE_TERMINATOR_PROP_VALUE);
+	}
+	
 	private String getLineEndingProperty(String key, String def)
 	{
 		String value = getProperty(key, def);
-		if ("lf".equalsIgnoreCase(value))
+		if (DEFAULT_LINE_TERMINATOR_PROP_VALUE.equalsIgnoreCase(value))
+		{
+			return StringUtil.LINE_TERMINATOR;
+		}
+		if (UNIX_LINE_TERMINATOR_PROP_VALUE.equalsIgnoreCase(value))
 		{ 
 			return "\n";
 		}
-		else if ("crlf".equalsIgnoreCase(value))
+		else if (DOS_LINE_TERMINATOR_PROP_VALUE.equalsIgnoreCase(value))
 		{
 			return "\r\n";
-		}
-		else if ("cr".equalsIgnoreCase(value))
-		{
-			return "\r";
 		}
 		else 
 		{
@@ -384,11 +407,7 @@ public class Settings
 	private void setLineEndingProperty(String key, String value)
 	{
 		if (value == null) return;
-		
-		if ("lf".equalsIgnoreCase(value) || "crlf".equalsIgnoreCase(value) || "cr".equalsIgnoreCase(value))
-		{
-			setProperty(key, value);
-		}
+		setProperty(key, value.toLowerCase());
 	}
 	
 	/**
