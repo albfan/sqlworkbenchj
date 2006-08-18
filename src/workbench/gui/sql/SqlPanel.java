@@ -2571,7 +2571,6 @@ public class SqlPanel
 				executeAll.setEnabled(aFlag);
 				executeSelected.setEnabled(aFlag);
 				executeCurrent.setEnabled(aFlag);
-				importFileAction.setEnabled(aFlag);
 				if (aFlag)
 				{
 					checkAutocommit();
