@@ -56,6 +56,32 @@ public class SqlUtilTest
 	{
 	}
 
+	public void testCleanSql()
+	{
+		String sql = "select \r\n from project";
+		String clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
+		assertEquals("Not correctly cleaned", clean, "select   from project");
+		
+		sql = "select 'some\nvalue' from project";
+		clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
+		// nothing should be changed!
+		assertEquals("Not correctly cleaned", clean, sql);	
+		
+		sql = "select 'some\nvalue' \nfrom project";
+		clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
+		assertEquals("Not correctly cleaned", clean, "select 'some\nvalue'  from project");	
+		
+		sql = "select\t'some\n\tvalue' from project";
+		clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
+		assertEquals("Not correctly cleaned", clean, "select 'some\n\tvalue' from project");	
+
+		sql = "select from \"project\"";
+		clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
+		// nothing should be changed!
+		assertEquals("Not correctly cleaned", clean, sql);	
+		
+	}
+	
 	public void testGetSelectColumns()
 	{
 		String sql = "select x,y,z from bla";
@@ -115,7 +141,7 @@ public class SqlUtilTest
 		
 			sql = "/* \n" + 
              "* $URL: ddl.sql $ \n" + 
-             "* $Revision: 1.4 $ \n" + 
+             "* $Revision: 1.5 $ \n" + 
              "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
              "*/ \n" + 
              "-- This is the initial creation script for the MTrac database. \n" + 

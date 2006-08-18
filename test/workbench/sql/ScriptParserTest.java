@@ -14,7 +14,6 @@ package workbench.sql;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.util.Iterator;
 import junit.framework.*;
 import java.util.List;
 import workbench.util.SqlUtil;
@@ -31,6 +30,50 @@ public class ScriptParserTest extends TestCase
 		super(testName);
 	}
 
+	
+	public void testAccessByCursorPos()
+	{
+		try
+		{
+			String sql = "-- comment line 1\n" +
+				"select * from person;\n" +
+				"\n" +
+				"-- next comment\n" +
+				"insert into bla;\n" +
+				"\n" +
+				"/* bla stuff \n" +
+				"   bla stuff \n" +
+				"   bla stuff */\n" +
+				"-- line comment\n" +
+				"delete from blub;";
+			ScriptParser p = new ScriptParser(sql);
+			List l = p.getCommands();
+			assertEquals("Not enough commands", 3, l.size());
+			
+			String c = (String)l.get(0);
+			assertEquals("Wrong command at index 0", "SELECT", SqlUtil.getSqlVerb(c));
+			
+			c = p.getCommand(2);
+			assertEquals("Wrong command at index 0", "DELETE", SqlUtil.getSqlVerb(c));
+			
+			int index = p.getCommandIndexAtCursorPos(5);
+			assertEquals("Wrong command at cursor pos", index, 0);
+			
+			index = p.getCommandIndexAtCursorPos(45);
+			assertEquals("Wrong command at cursor pos", index, 1);
+			
+			index = p.getCommandIndexAtCursorPos(99999);
+			assertEquals("Wrong command at cursor pos", index, -1);
+			
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testFileParsing()
 	{
 		try
@@ -38,7 +81,7 @@ public class ScriptParserTest extends TestCase
 			File tempdir = new File(System.getProperty("java.io.tmpdir"));
 			File script = new File(tempdir, "largefile.sql");
 			BufferedWriter out = new BufferedWriter(new FileWriter(script));
-			int counter = 1000;
+			int counter = 5000;
 			for (int i = 0; i < counter; i++)
 			{
 				out.write("--- test command\n");
@@ -54,7 +97,8 @@ public class ScriptParserTest extends TestCase
 			{
 				String sql = def.getSQL();
 				assertNotNull("No SQL returned " + count, sql);
-				assertEquals("Wrong statement retrieved", "insert", sql.substring(0, 6));
+				String verb = SqlUtil.getSqlVerb(sql);
+				assertEquals("Wrong statement retrieved", "insert", verb.toLowerCase());
 				count ++;
 				def = p.getNextCommand();
 			}
@@ -87,34 +131,38 @@ public class ScriptParserTest extends TestCase
 		assertEquals("select * from template_field_label", l.get(1));
 
 		sql = "/* \n" + 
-					 "* $URL: svn+ssh://nichdexp.nichd.nih.gov/subversion/mtrac/trunk/db/00-release-1.0/01-trac-8-ddl.sql $ \n" + 
-					 "* $Revision: 1.3 $ \n" + 
-					 "* Created by Janek K. Claus. \n" + 
-					 "* $LastChangedBy: clausjan $ \n" + 
-					 "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
+					 "* comment comment comment \n" + 
+					 "* comment \n" + 
+					 "* comment \n" + 
 					 "*/ \n" + 
-					 "-- This is the initial creation script for the MTrac database. \n" + 
-					 "-- It assumes the database space and schema have been setup. \n" + 
-					 "-- Each table can be indivually recreated, if you add foreign keys, make sure that they will be deleted in all \n" + 
-					 "-- associated tables before dropping. \n" + 
+					 "-- comment comment comment comment comment comment comment. \n" + 
+					 "-- comment comment comment comment comment comment comment. \n" + 
+					 "-- comment comment comment comment comment comment comment. \n" + 
+					 "-- comment comment comment comment comment comment comment. \n" + 
 					 " \n" + 
 					 "-- ############################################# \n" + 
 					 "-- ##                                         ## \n" + 
-					 "-- ##              Organizations              ## \n" + 
+					 "-- ##              Stuff                      ## \n" + 
 					 "-- ##                                         ## \n" + 
 					 "alter table participants drop constraint r_05;   -- make sure you recreate this foreign key after inserting data! \n" + 
 					 "drop table organizations;\n" +
-					 "@include.sql";
+					 "@include.sql\n" +
+			     "\n" +
+			     "select * from bla;";
 		
 		p.setScript(sql);
 		p.setSupportOracleInclude(true);
 		l = p.getCommands();
-		assertEquals(3, l.size());
-		assertEquals("drop table organizations", l.get(1));
+		assertEquals(4, l.size());
+		String verb = SqlUtil.getSqlVerb((String)l.get(1));
+		assertEquals("drop", verb.toLowerCase());
 		String s = (String)l.get(0);
 		String clean = SqlUtil.makeCleanSql(s, false, false, '\'');
 		assertEquals("alter table participants drop constraint r_05", clean);
 
+		s = (String)l.get(2);
+		assertEquals("@include.sql", s);
+		
 		sql = "SELECT distinct t.KEY \n" + 
 					"FROM translation t, content_folder f \n" + 
 					"WHERE t.key = f.folder_name \n" + 
