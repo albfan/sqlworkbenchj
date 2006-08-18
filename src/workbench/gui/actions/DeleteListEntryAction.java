@@ -12,6 +12,8 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.KeyStroke;
 
 import workbench.interfaces.FileActions;
 import workbench.log.LogMgr;
@@ -34,6 +36,7 @@ public class DeleteListEntryAction extends WbAction
 	{
 		this.client = aClient;
 		this.setMenuTextByKey(aKey);
+		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));
 		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_DELETE));
 	}
 

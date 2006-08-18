@@ -40,6 +40,7 @@ import javax.swing.border.LineBorder;
 import workbench.db.WbConnection;
 
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.ValidatingDialog;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
@@ -371,7 +372,7 @@ public class WbSwingUtilities
 	
 	public static String getUserInput(Component caller, String aTitle, String initialValue, boolean hideInput)
 	{
-		Component parent = SwingUtilities.getWindowAncestor(caller);
+		Window parent = (Window)SwingUtilities.getWindowAncestor(caller);
 
 		final JTextField input;
 		if (hideInput)
@@ -392,8 +393,10 @@ public class WbSwingUtilities
 				input.grabFocus();
 			}
 		});
-		int choice = JOptionPane.showConfirmDialog(parent, input, aTitle, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-		if (choice == JOptionPane.CANCEL_OPTION) return null;
+		//int choice = JOptionPane.showConfirmDialog(parent, input, aTitle, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		boolean ok = ValidatingDialog.showConfirmDialog(parent, input, aTitle);
+		if (!ok) return null;
+		//if (choice == JOptionPane.CANCEL_OPTION) return null;
 		String value = input.getText();
 		return value;
 	}

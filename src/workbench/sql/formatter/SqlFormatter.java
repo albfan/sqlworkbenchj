@@ -38,6 +38,7 @@ public class SqlFormatter
 		LINE_BREAK_BEFORE.add("HAVING");
 		LINE_BREAK_BEFORE.add("VALUES");
 		LINE_BREAK_BEFORE.add("UNION");
+		LINE_BREAK_BEFORE.add("UNION ALL");
 		LINE_BREAK_BEFORE.add("MINUS");
 		LINE_BREAK_BEFORE.add("INTERSECT");
 		LINE_BREAK_BEFORE.add("REFRESH");
@@ -55,7 +56,8 @@ public class SqlFormatter
 
 	private final Set LINE_BREAK_AFTER = new HashSet();
 	{
-		//LINE_BREAK_AFTER.add("UNION");
+		LINE_BREAK_AFTER.add("UNION");
+		LINE_BREAK_AFTER.add("UNION ALL");
 		//LINE_BREAK_AFTER.add("MINUS");
 		//LINE_BREAK_AFTER.add("INTERSECT");
 		LINE_BREAK_AFTER.add("AS");
@@ -78,6 +80,7 @@ public class SqlFormatter
 		WHERE_TERMINAL.add("GROUP");
 		WHERE_TERMINAL.add("HAVING");
 		WHERE_TERMINAL.add("UNION");
+		WHERE_TERMINAL.add("UNION ALL");
 		WHERE_TERMINAL.add("INTERSECT");
 		WHERE_TERMINAL.add("MINUS");
 		WHERE_TERMINAL.add(";");
@@ -128,9 +131,9 @@ public class SqlFormatter
 	private Set dbFunctions = Collections.EMPTY_SET;
 	private int selectColumnsPerLine = 1;
 	
-	public SqlFormatter(String aScript, int maxLength)
+	public SqlFormatter(String aScript, int maxSubselectLength)
 	{
-		this(aScript, 0, maxLength);
+		this(aScript, 0, maxSubselectLength);
 	}
 
 	private SqlFormatter(String aScript, int indentCount, int maxSubselectLength)
@@ -773,7 +776,7 @@ public class SqlFormatter
 			}
 			else if (t.isReservedWord())
 			{
-				if (lastToken.isComment()) this.appendNewline();
+				if (lastToken.isComment() && !isStartOfLine()) this.appendNewline();
 
 				String word = t.getContents().toUpperCase();
 				
@@ -797,11 +800,6 @@ public class SqlFormatter
 				}
 
 				if (LINE_BREAK_AFTER.contains(word))
-				{
-					this.appendNewline();
-				}
-
-				if (word.equals("ALL") && lastToken.isReservedWord() && lastToken.getContents().equals("UNION"))
 				{
 					this.appendNewline();
 				}

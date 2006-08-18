@@ -383,13 +383,14 @@ public class StringUtil
 			{
 				result.append(aDelimiter);
 			}
-			result.append('"');
+			if (quoteEntries) result.append('"');
 			result.append(o.toString());
-			result.append('"');
+			if (quoteEntries) result.append('"');
 			numElements ++;
 		}
 		return result.toString();
 	}
+
 
 	public static final String makeJavaString(String sql, String prefix, boolean includeNewLines)
 	{
@@ -893,9 +894,6 @@ public class StringUtil
 	 * This has been "borrowed" from the Properties class, because the code
 	 * there is not usable from the outside.
 	 * Backslash, CR, LF, Tab and FormFeed (\f) will always be replaced.
-	 * @param value the String to escape
-	 * @param range the CharacterRange to be escaped
-	 * @param specialSaveChars additional characters that will be escaped that are not part of the range
 	 */
 	public static String escapeUnicode(String value, String specialSaveChars, CharacterRange range)
 	{

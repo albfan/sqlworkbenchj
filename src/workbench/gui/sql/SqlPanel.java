@@ -1606,12 +1606,23 @@ public class SqlPanel
 
 		if (mgr.hasSelectedKey(sql))
 		{
-			sql = mgr.replaceSelected(sql, this.editor.getSelectedText());
+			String selected = this.editor.getSelectedText();
+			if (selected == null)
+			{
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrNoSelection4Macro"));
+				return;
+			}
+			sql = mgr.replaceSelected(sql, selected);
 		}
 		
 		if (mgr.hasCurrentKey(sql))
 		{
 			String current = getStatementAtCursor();
+			if (current == null)
+			{
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrNoCurrent4Macro"));
+				return;
+			}
 			sql = mgr.replaceCurrent(sql, current);
 		}
 		

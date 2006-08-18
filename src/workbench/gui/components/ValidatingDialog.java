@@ -12,9 +12,11 @@
 package workbench.gui.components;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -37,7 +39,6 @@ import workbench.resource.ResourceMgr;
 
 
 /**
- *
  * @author  support@sql-workbench.net
  */
 public class ValidatingDialog
@@ -45,38 +46,73 @@ public class ValidatingDialog
 	implements WindowListener, ActionListener
 {
 	private ValidatingComponent validator = null;
-	private JButton okButton;
+	private JComponent editorComponent;
+	private JButton[] optionButtons;
+	//private JButton okButton;
 	private JButton cancelButton;
 	private boolean isCancelled = true;
+	private int selectedOption = -1;
 	private EscAction esc;
 	
-	/** Creates a new instance of ValidatingDialog */
-	public ValidatingDialog(Frame owner, String title, JPanel editor)
+	public ValidatingDialog(Dialog owner, String title, JComponent editor)
 	{
 		super(owner, title, true);
-		if (!(editor instanceof ValidatingComponent))
+		init(owner, title, editor, new String[] { ResourceMgr.getString("LblOK") }, true);
+	}
+	
+	public ValidatingDialog(Frame owner, String title, JComponent editor)
+	{
+		super(owner, title, true);
+		init(owner, title, editor, new String[] { ResourceMgr.getString("LblOK") }, true);
+	}
+
+	public ValidatingDialog(Dialog owner, String title, JComponent editor, String[] options)
+	{
+		this(owner, title, editor, options, true);
+	}
+	
+	public ValidatingDialog(Dialog owner, String title, JComponent editor, String[] options, boolean addCancelButton)
+	{
+		super(owner, title, true);
+		init(owner, title, editor, options, addCancelButton);
+	}
+	
+	private void init(Window owner, String title, JComponent editor, String[] options, boolean addCancelButton)
+	{
+		if (editor instanceof ValidatingComponent)
 		{
-			throw new IllegalArgumentException("The supplied panel does not implement the ValidatingComponent interface");
+			this.validator = (ValidatingComponent)editor;
 		}
-		this.validator = (ValidatingComponent)editor;
-		this.okButton = new WbButton(ResourceMgr.getString("LblOK"));
-		this.okButton.addActionListener(this);
-		this.cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
-		this.cancelButton.addActionListener(this);
+		this.editorComponent = editor;
+		this.optionButtons = new JButton[options.length];
+		for (int i = 0; i < options.length; i++)
+		{
+			this.optionButtons[i] = new WbButton(options[i]);
+			this.optionButtons[i].addActionListener(this);
+		}
+		
+		if (addCancelButton)
+		{
+			this.cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
+			this.cancelButton.addActionListener(this);
+		}
 		
 		JRootPane root = this.getRootPane();
-		root.setDefaultButton(okButton);		
+		root.setDefaultButton(optionButtons[0]);		
 
-		InputMap im = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-		ActionMap am = root.getActionMap();
-		this.esc = new EscAction(this);
-		im.put(esc.getAccelerator(), esc.getActionName());
-		am.put(esc.getActionName(), esc);
+		if (addCancelButton)
+		{
+			InputMap im = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+			ActionMap am = root.getActionMap();
+			this.esc = new EscAction(this);
+			im.put(esc.getAccelerator(), esc.getActionName());
+			am.put(esc.getActionName(), esc);
 
-		im = editor.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-		am = editor.getActionMap();
-		im.put(esc.getAccelerator(), esc.getActionName());
-		am.put(esc.getActionName(), esc);
+			im = editor.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+			am = editor.getActionMap();
+			im.put(esc.getAccelerator(), esc.getActionName());
+			am.put(esc.getActionName(), esc);
+		}
 		
 		JPanel content = new JPanel();
 		content.setLayout(new BorderLayout());
@@ -85,8 +121,11 @@ public class ValidatingDialog
 		content.add(editor, BorderLayout.CENTER);
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		buttonPanel.add(okButton);
-		buttonPanel.add(cancelButton);
+		for (int i = 0; i < optionButtons.length; i++)
+		{
+			buttonPanel.add(optionButtons[i]);
+		}
+		if (cancelButton != null) buttonPanel.add(cancelButton);
 		b = BorderFactory.createEmptyBorder(2, 0, 0, 0);
 		buttonPanel.setBorder(b);
 		content.add(buttonPanel, BorderLayout.SOUTH);
@@ -97,14 +136,24 @@ public class ValidatingDialog
 		WbSwingUtilities.center(this, owner);
 	}
 	
+	public int getSelectedOption()
+	{
+		return this.selectedOption;
+	}
 	public boolean isCancelled()
 	{
 		return this.isCancelled;
 	}
 	
-	public static boolean showConfirmDialog(Frame parent, JPanel editor, String title)
+	public static boolean showConfirmDialog(Window parent, JComponent editor, String title)
 	{
-		ValidatingDialog dialog = new ValidatingDialog(parent, title, editor);
+		ValidatingDialog dialog = null;
+		if (parent instanceof Frame) 
+			dialog = new ValidatingDialog((Frame)parent, title, editor);
+		else if (parent instanceof Dialog)
+			dialog = new ValidatingDialog((Dialog)parent, title, editor);
+		else
+			throw new IllegalArgumentException("Parent component must be Dialog or Frame");
 		dialog.setVisible(true);
 		return !dialog.isCancelled();
 	}
@@ -146,7 +195,8 @@ public class ValidatingDialog
 		{
 			public void run()
 			{
-				validator.componentDisplayed();
+				editorComponent.grabFocus();
+				if (validator != null) validator.componentDisplayed();
 			}
 		});
 	}
@@ -155,12 +205,21 @@ public class ValidatingDialog
 	{
 		if (e.getSource() == this.cancelButton || e.getSource() == this.esc)
 		{
+			this.selectedOption = -1;
 			this.isCancelled = true;
 			this.close();
 		}
-		if (e.getSource() == this.okButton)
+		else 
 		{
-			if (this.validator.validateInput())
+			for (int i = 0; i < optionButtons.length; i++)
+			{
+				if (e.getSource() == optionButtons[i])
+				{
+					this.selectedOption = i;
+					break;
+				}
+			}
+			if (validator == null || this.validator.validateInput())
 			{
 				this.isCancelled = false;
 				this.close();

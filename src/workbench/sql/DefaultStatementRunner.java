@@ -95,6 +95,7 @@ public class DefaultStatementRunner
 	private boolean fullErrorReporting = false;
 	private ParameterPrompter prompter;
 	private boolean logStatements = Settings.getInstance().getBoolProperty("workbench.sql.execution.log", false);
+	private boolean removeNewLines = false;
 	
 	public DefaultStatementRunner()
 	{
@@ -290,6 +291,7 @@ public class DefaultStatementRunner
 		// be as quick as possible
 		this.supportsSelectInto = meta.supportsSelectIntoNewTable();
 		this.removeComments = dbConnection.getProfile().getRemoveComments();
+		this.removeNewLines = Settings.getInstance().getBoolProperty("workbench.db." + meta.getDbId() + ".removenewlines", false);
 	}
 
 	public StatementRunnerResult getResult()
@@ -335,9 +337,9 @@ public class DefaultStatementRunner
 			}				
 		}
 		
-		if (removeComments)
+		if (removeComments || removeNewLines)
 		{
-			aSql = SqlUtil.makeCleanSql(aSql, true, false, '\'');
+			aSql = SqlUtil.makeCleanSql(aSql, !removeNewLines, !removeComments, '\'');
 		}
 		
 		if (logStatements)

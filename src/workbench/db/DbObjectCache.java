@@ -124,17 +124,20 @@ public class DbObjectCache
 	
 	private Set filterTablesBySchema(String schema)
 	{
-		if (schema == null)	return Collections.unmodifiableSet(this.objects.keySet());
+		//if (schema == null)	return Collections.unmodifiableSet(this.objects.keySet());
 		Iterator itr = this.objects.keySet().iterator();
 		SortedSet result = new TreeSet();
+		DbMetadata meta = this.dbConnection.getMetadata();
 		while (itr.hasNext())
 		{
 			TableIdentifier tbl = (TableIdentifier)itr.next();
 			String tSchema = tbl.getSchema();
-			if (schema.equalsIgnoreCase(tSchema) || tSchema == null || "public".equalsIgnoreCase(tSchema))
+			if (schema == null || meta.ignoreSchema(tSchema) || schema.equalsIgnoreCase(tSchema))
 			{
 				TableIdentifier copy = tbl.createCopy();
 				copy.setSchema(null);
+				String cat = copy.getCatalog();
+				if (meta.ignoreCatalog(cat)) copy.setCatalog(null);
 				result.add(copy);
 			}
 		}

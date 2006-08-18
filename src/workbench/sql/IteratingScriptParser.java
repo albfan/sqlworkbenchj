@@ -300,9 +300,6 @@ public class IteratingScriptParser
 							commentOn = false;
 							startOfLine = true;
 							lastNewLineStart = pos;
-							
-							// don't include the comment in the next command
-							lastPos = pos;
 							continue;
 						}
 					}
@@ -450,12 +447,12 @@ public class IteratingScriptParser
 		value = this.script.substring(startPos, endPos).trim();
 		if (value.length() == 0) return null;
 		
-		int offset = this.getRealStartOffset(value);
-		if (offset > 0)
-		{
-			startPos += offset;
-			value = value.substring(offset);
-		}
+//		int offset = this.getRealStartOffset(value);
+//		if (offset > 0)
+//		{
+//			startPos += offset;
+//			value = value.substring(offset);
+//		}
 
 		ScriptCommandDefinition c = new ScriptCommandDefinition(value, startPos, endPos);
 		
@@ -467,66 +464,66 @@ public class IteratingScriptParser
 	 *	startPos/endPos. This method will return the actual start of the
 	 *	command with leading comments trimmed
 	 */
-	private int getRealStartOffset(String sql)
-	{
-		int len = sql.length();
-		int pos = 0;
-		
-		boolean inComment = false;
-		boolean inQuotes = false;
-		
-		for (int i=0; i < len - 1; i++)
-		{
-			char c = sql.charAt(i);
-			inQuotes = c == '\'';
-			if (inQuotes) continue;
-			//if (Character.isWhitespace(c)) continue;
-
-			if ( c == '/' && sql.charAt(i+1) == '*')
-			{
-				inComment = true;
-				// skip the start at the next position
-				i++;
-				continue;
-			}
-			
-			if (c == '-' && sql.charAt(i+1) == '-')
-			{
-				i += 2;
-				
-				if (i < len) c = sql.charAt(i);
-				// ignore rest of line for -- style comments
-				while (c != '\n' && c != '\r' && i < len - 1)
-				{
-					i++;
-					c = sql.charAt(i);
-				}
-				while (i < len -1  && Character.isWhitespace(sql.charAt(i+1)))
-				{
-					i++;
-				}
-				continue;
-			}			
-			
-			if (inComment && c == '*' && sql.charAt(i+1) == '/')
-			{
-				inComment = false;
-				i += 2;
-				while (i < len - 1 && Character.isWhitespace(sql.charAt(i)))
-				{
-					i++;
-				}
-			}
-			
-			if (!inComment)
-			{
-				pos = i;
-				break;
-			}
-		}
-		
-		return pos;
-	}
+//	private int getRealStartOffset(String sql)
+//	{
+//		int len = sql.length();
+//		int pos = 0;
+//		
+//		boolean inComment = false;
+//		boolean inQuotes = false;
+//		
+//		for (int i=0; i < len - 1; i++)
+//		{
+//			char c = sql.charAt(i);
+//			inQuotes = c == '\'';
+//			if (inQuotes) continue;
+//			//if (Character.isWhitespace(c)) continue;
+//
+//			if ( c == '/' && sql.charAt(i+1) == '*')
+//			{
+//				inComment = true;
+//				// skip the start at the next position
+//				i++;
+//				continue;
+//			}
+//			
+//			if (c == '-' && sql.charAt(i+1) == '-')
+//			{
+//				i += 2;
+//				
+//				if (i < len) c = sql.charAt(i);
+//				// ignore rest of line for -- style comments
+//				while (c != '\n' && c != '\r' && i < len - 1)
+//				{
+//					i++;
+//					c = sql.charAt(i);
+//				}
+//				while (i < len -1  && Character.isWhitespace(sql.charAt(i+1)))
+//				{
+//					i++;
+//				}
+//				continue;
+//			}			
+//			
+//			if (inComment && c == '*' && sql.charAt(i+1) == '/')
+//			{
+//				inComment = false;
+//				i += 2;
+//				while (i < len - 1 && Character.isWhitespace(sql.charAt(i)))
+//				{
+//					i++;
+//				}
+//			}
+//			
+//			if (!inComment)
+//			{
+//				pos = i;
+//				break;
+//			}
+//		}
+//		
+//		return pos;
+//	}
 
 	public void setCheckEscapedQuotes(boolean flag)
 	{

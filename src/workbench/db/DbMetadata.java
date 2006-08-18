@@ -720,6 +720,8 @@ public class DbMetadata
 	public boolean ignoreCatalog(String catalog)
 	{
 		if (catalog == null) return true;
+		String c = getCurrentCatalog();
+		if (c != null && c.equalsIgnoreCase(catalog)) return true;
 		if (catalogsToIgnore == null)
 		{
 			String cats = Settings.getInstance().getProperty("workbench.sql.ignorecatalog." + this.getDbId(), null);

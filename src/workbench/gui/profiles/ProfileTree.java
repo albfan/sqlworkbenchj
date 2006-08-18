@@ -17,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.LinkedList;
 import java.util.List;
+import javax.management.modelmbean.ModelMBean;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JTree;
@@ -98,6 +99,9 @@ public class ProfileTree
 	{
 		this.popup.addSeparator();
 		this.popup.add(delete);
+		InputMap im = this.getInputMap(WHEN_FOCUSED);
+		ActionMap am = this.getActionMap();
+		delete.addToInputMap(im, am);
 	}
 	
 	public void setModel(TreeModel model)
@@ -285,7 +289,7 @@ public class ProfileTree
 	/**
 	 * Checks if the current selection contains only profiles
 	 */
-	private boolean onlyProfilesSelected()
+	public boolean onlyProfilesSelected()
 	{
 		TreePath[] selection = getSelectionPaths();
 		if (selection == null) return false;
@@ -300,7 +304,7 @@ public class ProfileTree
 	/**
 	 * Checks if the current selection contains only groups
 	 */
-	private boolean onlyGroupSelected()
+	public boolean onlyGroupSelected()
 	{
 		if (getSelectionCount() > 1) return false;
 		TreePath[] selection = getSelectionPaths();
@@ -392,41 +396,19 @@ public class ProfileTree
 		if (clipboardNodes == null) return;
 		if (clipboardNodes.length == 0) return;
 
-		String groupName = null;
+		DefaultMutableTreeNode group = (DefaultMutableTreeNode)getLastSelectedPathComponent();
+		if (group == null) return;
+		if (!group.getAllowsChildren()) return;
 		
 		try
 		{
-			DefaultMutableTreeNode group = (DefaultMutableTreeNode)getLastSelectedPathComponent();
-			if (group == null) return;
-			if (!group.getAllowsChildren()) return;
-			
-			groupName = (String)group.getUserObject();
-			
-			for (int i = 0; i < clipboardNodes.length; i++)
+			if (clipboardType == CLIP_CUT)
 			{
-				Object o = clipboardNodes[i].getUserObject();
-				ConnectionProfile original = null;
-				if (o instanceof ConnectionProfile)
-				{
-					original = (ConnectionProfile)o;
-				}
-				if (original == null) continue;
-
-
-				if (clipboardType == CLIP_CUT)
-				{
-					profileModel.removeNodeFromParent(clipboardNodes[i]);
-					profileModel.insertNodeInto(clipboardNodes[i], group, group.getChildCount());
-					original.setGroup(groupName);
-				}
-				else
-				{
-					ConnectionProfile copy = original.createCopy();
-					copy.setGroup(groupName);
-					ConnectionMgr.getInstance().addProfile(copy);
-					DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(copy, false);
-					profileModel.insertNodeInto(newNode, group, group.getChildCount());
-				}
+				profileModel.moveProfilesToGroup(clipboardNodes, group);
+			}
+			else if (clipboardType == CLIP_COPY)
+			{
+				profileModel.copyProfilesToGroup(clipboardNodes, group);
 			}
 		}
 		finally

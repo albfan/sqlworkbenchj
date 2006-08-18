@@ -119,7 +119,7 @@ public class XmlDataFileParser
 	
 	public String getColumns()
 	{
-		return StringUtil.listToString(this.columnsToImport, ',');
+		return StringUtil.listToString(this.columnsToImport, ',', false);
 	}
 	
 	public void setColumns(String columnList)

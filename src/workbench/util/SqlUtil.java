@@ -33,6 +33,7 @@ import workbench.log.LogMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.formatter.Token;
 
 public class SqlUtil
 {
@@ -453,20 +454,31 @@ public class SqlUtil
 		{
 			char c = aSql.charAt(i);
 
-			inQuotes = c == quote;
-			if (!inQuotes && (last == '\n' || last == '\r' || i == 0 ) && (c == '#'))
+			if (c == quote)
+			{
+				inQuotes = !inQuotes;
+			}
+			
+			if (inQuotes)
+			{
+				newSql.append(c);
+				last = c;
+				continue;
+			}
+
+			if ((last == '\n' || last == '\r' || i == 0 ) && (c == '#'))
 			{
 				lineComment = true;
 			}
 
 			if (!(inComment || lineComment) || keepComments)
 			{
-				if ( c == '/' && i < count - 1 && aSql.charAt(i+1) == '*' & !inQuotes)
+				if ( c == '/' && i < count - 1 && aSql.charAt(i+1) == '*')
 				{
 					inComment = true;
 					i++;
 				}
-				else if (c == '-' && i < count - 1 && aSql.charAt(i+1) == '-' && !inQuotes)
+				else if (c == '-' && i < count - 1 && aSql.charAt(i+1) == '-')
 				{
 					// ignore rest of line for -- style comments
 					while (c != '\n' && i < count - 1)
@@ -477,11 +489,13 @@ public class SqlUtil
 				}
 				else
 				{
-					if (c == '\n' && !keepNewlines)
+					if ((c == '\n' || c == '\r') && !keepNewlines)
 					{
-						newSql.append(' ');
+						// only replace the \n, \r are simply removed
+						// thus replacing \r\n with only one space
+						if (c == '\n') newSql.append(' ');
 					}
-					else if (c < 32 || (c > 126 && c < 145) || c == 255)
+					else if (c != '\n' && (c < 32 || (c > 126 && c < 145) || c == 255))
 					{
 						newSql.append(' ');
 					}
@@ -503,6 +517,7 @@ public class SqlUtil
 					lineComment = false;
 				}
 			}
+			last = c;
 		}
 		String s = newSql.toString().trim();
 		if (s.endsWith(";")) s = s.substring(0, s.length() - 1);

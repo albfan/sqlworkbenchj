@@ -52,7 +52,7 @@ public class HistoryTextField
 
 	public void saveSettings(PropertyStorage props, String prefix)
 	{
-		props.setProperty(prefix + "history", StringUtil.listToString(historyValues, ';'));
+		props.setProperty(prefix + "history", StringUtil.listToString(historyValues, ';', true));
 		props.setProperty(prefix + "lastvalue", this.getText());
 	}
 	

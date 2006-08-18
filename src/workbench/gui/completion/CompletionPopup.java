@@ -34,6 +34,8 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.editor.JEditTextArea;
 import workbench.log.LogMgr;
@@ -90,7 +92,7 @@ public class CompletionPopup
 		content.add(scroll);
 		elementList.addKeyListener(this);
 	}
-	
+
 	public void showPopup(String valueToSelect)
 	{
 		//if (window != null) closePopup(false);
@@ -235,7 +237,9 @@ public class CompletionPopup
 				{
 					if (o instanceof TableAlias)
 					{
-						value = getPasteValue(((TableAlias)o).getNameToUse());
+						TableAlias a = (TableAlias)o;
+						String name = a.getNameToUse();
+						value = getPasteValue(a.getNameToUse());
 					}
 					else if (o instanceof SelectAllMarker)
 					{

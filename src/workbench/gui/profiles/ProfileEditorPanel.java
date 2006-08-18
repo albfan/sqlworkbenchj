@@ -12,14 +12,18 @@
 package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.event.MouseListener;
-import java.util.Collection;
 import java.util.List;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
@@ -33,6 +37,7 @@ import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.ExpandTreeAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.actions.SaveListFileAction;
+import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
@@ -87,7 +92,7 @@ public class ProfileEditorPanel
 		this.toolbar.add(new NewGroupAction(tree));
 		
 		this.toolbar.addSeparator();
-		deleteItem = new DeleteListEntryAction(this, "LblDeleteProfile");
+		deleteItem = new DeleteListEntryAction(this);
 		deleteItem.setEnabled(false);
 		this.toolbar.add(deleteItem);
 		
@@ -244,8 +249,11 @@ public class ProfileEditorPanel
 				}
 				else
 				{
+					TreePath p = profileTree.getSelectionPath();
+					TreeNode n = (TreeNode)(p != null ? p.getLastPathComponent() : null);
+					int count = (n == null ? -1 : n.getChildCount());
 					this.connectionEditor.setVisible(false);
-					this.deleteItem.setEnabled(false);
+					this.deleteItem.setEnabled(true);
 					this.copyItem.setEnabled(false);
 				}
 			}
@@ -289,6 +297,41 @@ public class ProfileEditorPanel
   // End of variables declaration//GEN-END:variables
 
 
+	private boolean checkGroupWithProfiles(DefaultMutableTreeNode groupNode)
+	{
+		List groups = model.getGroups();
+		JPanel p = new JPanel();
+		DefaultComboBoxModel m = new DefaultComboBoxModel(groups.toArray());
+		JComboBox groupBox = new JComboBox(m);
+		groupBox.setSelectedIndex(0);
+		p.setLayout(new BorderLayout(0,5));
+		p.add(new JLabel(ResourceMgr.getString("LblDeleteNonEmptyGroup")), BorderLayout.NORTH);
+		p.add(groupBox, BorderLayout.SOUTH);
+		String[] options = new String[] { ResourceMgr.getString("LblMoveProfiles"), ResourceMgr.getString("LblDeleteProfiles")};
+		
+		Dialog parent = (Dialog)SwingUtilities.getWindowAncestor(this);
+		
+		ValidatingDialog dialog = new ValidatingDialog(parent, ResourceMgr.TXT_PRODUCT_NAME, p, options);
+		dialog.setVisible(true);
+		if (dialog.isCancelled()) return false;
+		
+		int result = dialog.getSelectedOption();
+		if (result == 0) 
+		{
+			// move profiles
+			String newGroup = (String)groupBox.getSelectedItem();
+			if (newGroup == null) return false;
+			
+			model.moveProfilesToGroup(groupNode, newGroup);
+			return true;
+		}
+		else if (result == 1) 
+		{
+			return true;
+		}
+		
+		return false;
+	}
 	/**
 	 *	Remove an item from the listmodel.
 	 *	This will also remove the profile from the ConnectionMgr's
@@ -296,23 +339,40 @@ public class ProfileEditorPanel
 	 */
 	public void deleteItem() throws Exception
 	{
-		TreePath path = profileTree.getSelectionPath();
+		TreePath[] path = profileTree.getSelectionPaths();
 		if (path == null) return;
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
-		if (node == null) return;
-		Object o = node.getUserObject();
-		if (o instanceof ConnectionProfile)
+		if (path.length == 0) return;
+		
+		ProfileTree tree = (ProfileTree)profileTree;
+		if (tree.onlyProfilesSelected())
 		{
-			ConnectionProfile prof = (ConnectionProfile)o;
-			DefaultMutableTreeNode group = (DefaultMutableTreeNode)path.getPathComponent(1);
-			int index = model.getIndexOfChild(group, node);
-			int children = model.getChildCount(group);
-			if (index > 0) index --;
+			DefaultMutableTreeNode group = (DefaultMutableTreeNode)path[0].getPathComponent(1);
+			DefaultMutableTreeNode firstNode = (DefaultMutableTreeNode)path[0].getLastPathComponent();
+			int newIndex = model.getIndexOfChild(group, firstNode);
+			if (newIndex > 0) newIndex--;
 			
-			this.model.deleteProfile(prof);
-			Object newChild = model.getChild(group, index);
-			TreePath newPath = new TreePath(new Object[] { model.getRoot(), group, newChild });
-			((ProfileTree)profileTree).selectPath(newPath);
+			for (int i=0; i < path.length; i++)
+			{
+				DefaultMutableTreeNode node = (DefaultMutableTreeNode)path[i].getLastPathComponent();
+				ConnectionProfile prof = (ConnectionProfile)node.getUserObject();
+
+				this.model.deleteProfile(prof);
+			}
+			if (group.getChildCount() > 0)
+			{
+				Object newChild = model.getChild(group, newIndex);
+				TreePath newPath = new TreePath(new Object[] { model.getRoot(), group, newChild });
+				((ProfileTree)profileTree).selectPath(newPath);
+			}
+		}
+		else // delete a group
+		{
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode)path[0].getLastPathComponent();
+			if (node.getChildCount() > 0)
+			{
+				if (!checkGroupWithProfiles(node)) return;
+			}
+			model.removeGroupNode(node);
 		}
 	}
 
