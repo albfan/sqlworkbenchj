@@ -28,7 +28,6 @@ import javax.swing.JComponent;
 import javax.swing.border.EmptyBorder;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
-//import workbench.gui.components.ExportOptionsPanel;
 
 /**
  *
