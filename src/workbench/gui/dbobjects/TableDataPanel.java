@@ -184,6 +184,7 @@ public class TableDataPanel
 
 		topPanel.add(Box.createHorizontalGlue());
 		this.config = new FlatButton(ResourceMgr.getString("LblConfigureWarningThreshold"));
+		this.config.setToolTipText(ResourceMgr.getDescription("LblConfigureWarningThreshold"));
 		this.config.addActionListener(this);
 		topPanel.add(this.config);
 
@@ -333,6 +334,7 @@ public class TableDataPanel
 		{
 			try 
 			{ 
+				this.dataDisplay.setStatusMessage(ResourceMgr.getString("MsgCancelRowCount"));
 				this.rowCountCancel = true;
 				this.rowCountRetrieveStmt.cancel();
 			} 

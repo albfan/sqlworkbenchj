@@ -32,13 +32,13 @@ public class NewListEntryAction
 	{
 		this.client = aClient;
 		this.initMenuDefinition(aKey);
-		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_NEW));
+		this.setIcon(ResourceMgr.getImage("New"));
 	}
 	
 	public NewListEntryAction(FileActions aClient)
 	{
 		this.client = aClient;
-		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_NEW));
+		this.setIcon(ResourceMgr.getImage("New"));
 		this.checkShift = true;
 		String tip = ResourceMgr.getDescription("LblNewListEntry", true);
 		this.initMenuDefinition(ResourceMgr.getString("LblNewListEntry"), tip, null);

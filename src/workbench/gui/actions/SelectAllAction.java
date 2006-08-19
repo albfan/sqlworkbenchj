@@ -32,7 +32,7 @@ public class SelectAllAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.setMenuTextByKey(ResourceMgr.TXT_SELECTALL);
+		this.setMenuTextByKey("MnuTxtSelectAll");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_MASK));
 	}

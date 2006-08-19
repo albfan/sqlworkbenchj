@@ -32,8 +32,8 @@ public class CopyAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.setMenuTextByKey(ResourceMgr.TXT_COPY);
-		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_COPY));
+		this.setMenuTextByKey("MnuTxtCopy");
+		this.setIcon(ResourceMgr.getImage("Copy"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
 	}

@@ -33,7 +33,7 @@ public class FindDataAction extends WbAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtFindInTableData", KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_FIND));
+		this.setIcon(ResourceMgr.getImage("Find"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(true);
 	}

@@ -29,7 +29,7 @@ public class ClearAction
 	{
 		super();
 		this.client = aClient;
-		this.setMenuTextByKey(ResourceMgr.TXT_CLEAR);
+		this.setMenuTextByKey("MnuTxtClear");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 

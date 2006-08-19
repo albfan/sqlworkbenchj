@@ -25,7 +25,7 @@ public class FileExitAction extends WbAction
 	public FileExitAction()
 	{
 		super();
-		this.initMenuDefinition(ResourceMgr.MNU_TXT_EXIT);
+		this.initMenuDefinition("MnuTxtExit");
 	}
 
 	public void executeAction(ActionEvent e)

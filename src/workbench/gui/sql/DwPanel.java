@@ -430,7 +430,7 @@ public class DwPanel
 			ds.setProgressMonitor(null);
 			long sqlTime = (end - start);
 			this.lastMessage = ResourceMgr.getString("MsgUpdateSuccessfull");
-			this.lastMessage = this.lastMessage + "\n" + rows + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED) + "\n";
+			this.lastMessage = this.lastMessage + "\n" + rows + " " + ResourceMgr.getString("MsgRowsAffected") + "\n";
 			this.lastMessage = this.lastMessage + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
 			if (!ds.lastUpdateHadErrors())
 			{
@@ -956,8 +956,8 @@ public class DwPanel
 	{
 		if (this.resultEmptyMsgModel == null)
 		{
-			String msg = ResourceMgr.getString(ResourceMgr.MSG_WARN_NO_RESULT);
-			String title = ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_TITLE);
+			String msg = ResourceMgr.getString("MsgWarningNoResultSet");
+			String title = ResourceMgr.getString("ErrMessageTitle");
 			this.resultEmptyMsgModel = new OneLineTableModel(title, msg);
 		}
 		return this.resultEmptyMsgModel;
@@ -1013,8 +1013,8 @@ public class DwPanel
 	{
 		if (this.errorModel == null)
 		{
-			String msg = ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_DATA);
-			String title = ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_TITLE);
+			String msg = ResourceMgr.getString("ErrMessageData");
+			String title = ResourceMgr.getString("ErrMessageTitle");
 			this.errorModel = new OneLineTableModel(title, msg);
 		}
 		return this.errorModel;
@@ -1030,7 +1030,7 @@ public class DwPanel
 	{
 		if (this.errorMessageModel == null)
 		{
-			String title = ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_TITLE);
+			String title = ResourceMgr.getString("ErrMessageTitle");
 			this.errorMessageModel = new OneLineTableModel(title, aMsg);
 		}
 		else

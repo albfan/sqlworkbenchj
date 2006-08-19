@@ -32,8 +32,8 @@ public class ExecuteAllAction extends WbAction
 	{
 		super();
 		this.client = aPanel;
-		this.initMenuDefinition(ResourceMgr.TXT_EXECUTE_ALL, KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_EXEC_ALL));
+		this.initMenuDefinition("MnuTxtExecuteAll", KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+		this.setIcon(ResourceMgr.getImage("ExecuteAll"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 	}
 

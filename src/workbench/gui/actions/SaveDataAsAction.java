@@ -31,7 +31,7 @@ public class SaveDataAsAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtSaveDataAs");
-		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_SAVE_AS));
+		this.setIcon(ResourceMgr.getImage("SaveAs"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setEnabled(false);
 	}

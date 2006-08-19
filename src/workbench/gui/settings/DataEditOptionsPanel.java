@@ -263,6 +263,7 @@ public class DataEditOptionsPanel
     add(useAlternateRowColors, gridBagConstraints);
 
     alternateColorLabel.setText(ResourceMgr.getString("LblAlternateRowColor"));
+    alternateColorLabel.setToolTipText(ResourceMgr.getDescription("LblAlternateRowColor"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 3;

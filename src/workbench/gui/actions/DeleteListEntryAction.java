@@ -37,7 +37,7 @@ public class DeleteListEntryAction extends WbAction
 		this.client = aClient;
 		this.setMenuTextByKey(aKey);
 		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));
-		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_DELETE));
+		this.setIcon(ResourceMgr.getImage("Delete"));
 	}
 
 	public void executeAction(ActionEvent e)

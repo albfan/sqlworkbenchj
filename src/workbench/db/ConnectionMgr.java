@@ -492,7 +492,7 @@ public class ConnectionMgr
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError(this, ResourceMgr.getString(ResourceMgr.ERROR_DISCONNECT), e);
+			LogMgr.logError(this, ResourceMgr.getString("ErrOnDisconnect"), e);
 		}
 	}
 

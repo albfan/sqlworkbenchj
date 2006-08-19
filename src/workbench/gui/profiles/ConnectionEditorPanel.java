@@ -273,7 +273,7 @@ public class ConnectionEditorPanel
     add(cbAutocommit, gridBagConstraints);
 
     lblUsername.setLabelFor(tfUserName);
-    lblUsername.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_USERNAME));
+    lblUsername.setText(ResourceMgr.getString("LblUsername"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -283,7 +283,7 @@ public class ConnectionEditorPanel
     add(lblUsername, gridBagConstraints);
 
     lblPwd.setLabelFor(tfPwd);
-    lblPwd.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_PASSWORD));
+    lblPwd.setText(ResourceMgr.getString("LblPassword"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -293,7 +293,7 @@ public class ConnectionEditorPanel
     add(lblPwd, gridBagConstraints);
 
     lblDriver.setLabelFor(cbDrivers);
-    lblDriver.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_DRIVER));
+    lblDriver.setText(ResourceMgr.getString("LblDriver"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -303,7 +303,7 @@ public class ConnectionEditorPanel
     add(lblDriver, gridBagConstraints);
 
     lblUrl.setLabelFor(tfURL);
-    lblUrl.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_URL));
+    lblUrl.setText(ResourceMgr.getString("LblDbURL"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -496,7 +496,7 @@ public class ConnectionEditorPanel
     wbOptionsPanel.add(emptyStringIsNull, gridBagConstraints);
 
     includeNull.setText(ResourceMgr.getString("LblIncludeNullInInsert"));
-    includeNull.setToolTipText(ResourceMgr.getString("LblIncludeNullInInsert"));
+    includeNull.setToolTipText(ResourceMgr.getDescription("LblIncludeNullInInsert"));
     includeNull.setName("includeNullInInsert");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;

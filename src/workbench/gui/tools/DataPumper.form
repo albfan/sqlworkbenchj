@@ -441,8 +441,8 @@
                         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                           <Connection code="ResourceMgr.getDescription(&quot;LblDPDropTable&quot;)" type="code"/>
                         </Property>
-                        <Property name="horizontalTextPosition" type="int" value="4"/>
                         <Property name="enabled" type="boolean" value="false"/>
+                        <Property name="horizontalTextPosition" type="int" value="4"/>
                       </Properties>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -504,6 +504,9 @@
                       <Properties>
                         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                           <Connection code="ResourceMgr.getString(&quot;LblUseBatchUpdate&quot;)" type="code"/>
+                        </Property>
+                        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                          <Connection code="ResourceMgr.getDescription(&quot;LblUseBatchUpdate&quot;)" type="code"/>
                         </Property>
                       </Properties>
                       <Constraints>

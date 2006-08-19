@@ -32,8 +32,8 @@ public class ExecuteSelAction
 	{
 		super();
 		this.target = aPanel;
-		this.initMenuDefinition(ResourceMgr.TXT_EXECUTE_SEL, KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
-		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_EXEC_SEL));
+		this.initMenuDefinition("MnuTxtExecuteSel", KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
+		this.setIcon(ResourceMgr.getImage("ExecuteSel"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setAlternateAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0));
 	}

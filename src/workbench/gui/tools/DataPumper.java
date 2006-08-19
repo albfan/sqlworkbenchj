@@ -737,8 +737,8 @@ public class DataPumper
 
     dropTargetCbx.setText(ResourceMgr.getString("LblDPDropTable"));
     dropTargetCbx.setToolTipText(ResourceMgr.getDescription("LblDPDropTable"));
-    dropTargetCbx.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     dropTargetCbx.setEnabled(false);
+    dropTargetCbx.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -779,6 +779,7 @@ public class DataPumper
     updateOptionPanel.add(jLabel1, gridBagConstraints);
 
     useBatchCheckBox.setText(ResourceMgr.getString("LblUseBatchUpdate"));
+    useBatchCheckBox.setToolTipText(ResourceMgr.getDescription("LblUseBatchUpdate"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;

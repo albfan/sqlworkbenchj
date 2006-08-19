@@ -108,7 +108,6 @@ public class FileDialogUtil
 		UIManager.put("FileChooser.saveDialogTitleText",ResourceMgr.getPlainString("LblSave"));
 		UIManager.put("FileChooser.openDialogTitleText",ResourceMgr.getPlainString("LblOpen"));
 		UIManager.put("FileChooser.cancelButtonText",ResourceMgr.getPlainString("LblCancel"));
-//		UIManager.put("FileChooser.updateButtonText",ResourceMgr.getPlainString("LblUpdate"));
 		UIManager.put("FileChooser.helpButtonText",ResourceMgr.getPlainString("LblHelp"));
 		UIManager.put("FileChooser.directoryOpenButtonText",ResourceMgr.getPlainString("LblOpen"));
 

@@ -136,7 +136,7 @@
           <ComponentRef name="tfUserName"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(ResourceMgr.TXT_DB_USERNAME)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblUsername&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -151,7 +151,7 @@
           <ComponentRef name="tfPwd"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(ResourceMgr.TXT_DB_PASSWORD)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblPassword&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -166,7 +166,7 @@
           <ComponentRef name="cbDrivers"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(ResourceMgr.TXT_DB_DRIVER)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblDriver&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -181,7 +181,7 @@
           <ComponentRef name="tfURL"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(ResourceMgr.TXT_DB_URL)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblDbURL&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -466,7 +466,7 @@
               <Connection code="ResourceMgr.getString(&quot;LblIncludeNullInInsert&quot;)" type="code"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LblIncludeNullInInsert&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getDescription(&quot;LblIncludeNullInInsert&quot;)" type="code"/>
             </Property>
             <Property name="name" type="java.lang.String" value="includeNullInInsert"/>
           </Properties>

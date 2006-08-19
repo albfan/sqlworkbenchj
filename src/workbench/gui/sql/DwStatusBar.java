@@ -152,7 +152,7 @@ public class DwStatusBar
 		p.add(tfRowCount);
 		this.add(p, BorderLayout.EAST);
 
-		this.readyMsg = ResourceMgr.getString(ResourceMgr.STAT_READY);
+		this.readyMsg = ResourceMgr.getString("MsgReady");
 		this.clearStatusMessage();
 		
 		DecimalFormatSymbols symb = new DecimalFormatSymbols();

@@ -34,7 +34,7 @@ public class RunStatement
 		super();
 		this.target = runner;
 		this.initMenuDefinition("MnuTxtRunStmt");
-		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_EXEC_SEL));
+		this.setIcon(ResourceMgr.getImage("ExecuteSel"));
 	}
 
 	public void executeAction(ActionEvent e)

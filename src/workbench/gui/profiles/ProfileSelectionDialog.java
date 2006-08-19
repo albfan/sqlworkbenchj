@@ -121,7 +121,7 @@ public class ProfileSelectionDialog
     getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
 
-		setTitle(ResourceMgr.getString(ResourceMgr.TXT_SELECT_PROFILE));
+		setTitle(ResourceMgr.getString("LblSelectProfile"));
 		//this.setFocusTraversalPolicy(null);
 		this.restoreSize();
   }

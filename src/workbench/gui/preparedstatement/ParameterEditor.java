@@ -14,8 +14,6 @@ package workbench.gui.preparedstatement;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.sql.Types;
-import java.util.Properties;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -28,21 +26,15 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 
 import workbench.WbManager;
+import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.DeleteListEntryAction;
-import workbench.gui.actions.NewListEntryAction;
-import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTextCellEditor;
-import workbench.interfaces.FileActions;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.sql.VariablePool;
 import workbench.sql.preparedstatement.StatementParameters;
-import workbench.storage.DataStore;
-import workbench.gui.sql.*;
 import workbench.util.SqlUtil;
 
 /**
@@ -140,7 +132,8 @@ public class ParameterEditor
 
 		boolean result = false; 
 		//boolean ok = ValidatingDialog.showConfirmDialog(WbManager.getInstance().getCurrentWindow(), editor, ResourceMgr.getString("TxtEditPSParameterWindowTitle"));
-		boolean ok = ValidatingDialog.showConfirmDialog(null, editor, ResourceMgr.getString("TxtEditPSParameterWindowTitle"));
+		MainWindow parent = WbManager.getInstance().getCurrentWindow();
+		boolean ok = ValidatingDialog.showConfirmDialog(parent, editor, ResourceMgr.getString("TxtEditPSParameterWindowTitle"));
 		if (ok)
 		{
 			try

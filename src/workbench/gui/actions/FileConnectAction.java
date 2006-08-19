@@ -28,7 +28,7 @@ public class FileConnectAction extends WbAction
 	{
 		super();
 		this.window = aWindow;
-		this.initMenuDefinition(ResourceMgr.MNU_TXT_CONNECT, KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_MASK));
+		this.initMenuDefinition("MnuTxtConnect", KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_MASK));
 	}
 
 	public void executeAction(ActionEvent e)

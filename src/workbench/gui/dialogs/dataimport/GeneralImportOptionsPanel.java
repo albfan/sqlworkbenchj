@@ -122,7 +122,7 @@ public class GeneralImportOptionsPanel
     gridBagConstraints.weightx = 1.0;
     add(encodingPanel, gridBagConstraints);
 
-    dateFormatLabel.setText(ResourceMgr.getString("LblDateFormat"));
+    dateFormatLabel.setText(ResourceMgr.getString("LabelDateFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -139,7 +139,7 @@ public class GeneralImportOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(dateFormat, gridBagConstraints);
 
-    timestampFormatLabel.setText(ResourceMgr.getString("LblTimestampFormat"));
+    timestampFormatLabel.setText(ResourceMgr.getString("LabelTimestampFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -163,7 +163,8 @@ public class GeneralImportOptionsPanel
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
 
-    modeLabel.setText(ResourceMgr.getString("LblImportMode"));
+    modeLabel.setText(ResourceMgr.getString("LabelImportMode"));
+    modeLabel.setToolTipText(ResourceMgr.getDescription("LabelImportMode"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
@@ -181,8 +182,7 @@ public class GeneralImportOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(modeComboBox, gridBagConstraints);
 
-  }
-  // </editor-fold>//GEN-END:initComponents
+  }// </editor-fold>//GEN-END:initComponents
 	
 	
   // Variables declaration - do not modify//GEN-BEGIN:variables

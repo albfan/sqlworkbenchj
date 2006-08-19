@@ -282,7 +282,7 @@ public class SqlPanel
 
 		this.resultTab.addChangeListener(this);
 		JScrollPane scroll = new WbScrollPane(log);
-		this.resultTab.addTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_MSG), scroll);
+		this.resultTab.addTab(ResourceMgr.getString("LblTabMessages"), scroll);
 
 		//this.editor.addFilenameChangeListener(this);
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
@@ -1564,7 +1564,7 @@ public class SqlPanel
 	 */
 	private void runStatement(String sql, int selectionOffset, int commandAtIndex, boolean highlightOnError)
 	{
-		this.showStatusMessage(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
+		this.showStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
 		
 		this.storeStatementInHistory();
 		cancelExecution = false;
@@ -2021,7 +2021,7 @@ public class SqlPanel
 		data.setAutomaticUpdateTableCheck(!this.dbConnection.getProfile().getDisableUpdateTableCheck());
 		int newIndex = this.resultTab.getTabCount() - 1;
 		//String tip = StringUtil.getMaxSubstring(sql,80);
-		this.resultTab.insertTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_RESULT), null, data, sql, newIndex);
+		this.resultTab.insertTab(ResourceMgr.getString("LblTabResult"), null, data, sql, newIndex);
 		if (this.resultTab.getTabCount() == 2)
 		{
 			this.resultTab.setSelectedIndex(0);
