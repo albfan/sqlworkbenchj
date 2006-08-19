@@ -19,7 +19,7 @@ import workbench.resource.Settings;
  *
  * @author  support@sql-workbench.net
  */
-public class GeneralImportOptionsPanel 
+public class GeneralImportOptionsPanel
 	extends javax.swing.JPanel
 	implements ImportOptions
 {
@@ -35,7 +35,7 @@ public class GeneralImportOptionsPanel
 		this.modeComboBox.setSelectedIndex(0);
 		this.modeComboBox.setVisible(flag);
 	}
-	
+
 	public void saveSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -44,7 +44,7 @@ public class GeneralImportOptionsPanel
 		s.setProperty("workbench.import.general.encoding", this.getEncoding());
 		s.setProperty("workbench.import.general.mode", this.getMode());
 	}
-	
+
 	public void restoreSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -53,17 +53,17 @@ public class GeneralImportOptionsPanel
 		this.setEncoding(s.getProperty("workbench.export.import.encoding", s.getDefaultDataEncoding()));
 		this.setMode(s.getProperty("workbench.import.general.mode", "insert"));
 	}
-	
+
 	public String getMode()
 	{
 		return (String)this.modeComboBox.getSelectedItem();
 	}
-	
+
 	public void setMode(String mode)
 	{
 		this.modeComboBox.setSelectedItem(mode);
 	}
-	
+
 	public String getDateFormat()
 	{
 		return this.dateFormat.getText();
@@ -93,7 +93,7 @@ public class GeneralImportOptionsPanel
 	{
 		timestampFormat.setText(format);
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -122,7 +122,7 @@ public class GeneralImportOptionsPanel
     gridBagConstraints.weightx = 1.0;
     add(encodingPanel, gridBagConstraints);
 
-    dateFormatLabel.setText(ResourceMgr.getString("LabelDateFormat"));
+    dateFormatLabel.setText(ResourceMgr.getString("LblDateFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -139,7 +139,7 @@ public class GeneralImportOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(dateFormat, gridBagConstraints);
 
-    timestampFormatLabel.setText(ResourceMgr.getString("LabelTimestampFormat"));
+    timestampFormatLabel.setText(ResourceMgr.getString("LblTimestampFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -163,8 +163,8 @@ public class GeneralImportOptionsPanel
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
 
-    modeLabel.setText(ResourceMgr.getString("LabelImportMode"));
-    modeLabel.setToolTipText(ResourceMgr.getDescription("LabelImportMode"));
+    modeLabel.setText(ResourceMgr.getString("LblImportMode"));
+    modeLabel.setToolTipText(ResourceMgr.getDescription("LblImportMode"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
@@ -183,8 +183,8 @@ public class GeneralImportOptionsPanel
     add(modeComboBox, gridBagConstraints);
 
   }// </editor-fold>//GEN-END:initComponents
-	
-	
+
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JTextField dateFormat;
   private javax.swing.JLabel dateFormatLabel;
@@ -195,5 +195,5 @@ public class GeneralImportOptionsPanel
   private javax.swing.JTextField timestampFormat;
   private javax.swing.JLabel timestampFormatLabel;
   // End of variables declaration//GEN-END:variables
-	
+
 }

@@ -1579,7 +1579,12 @@ public class DbMetadata
 		try
 		{
 			tableRs = this.metaData.getTables(aCatalog, aSchema, tables, types);
-			while (tableRs.next())
+			if (tableRs == null)
+			{
+				LogMgr.logError("DbMetadata.getTables()", "Driver returned a NULL ResultSet from getTables()",null);
+				return result;
+			}
+			while (tableRs != null && tableRs.next())
 			{
 				String cat = tableRs.getString(1);
 				String schem = tableRs.getString(2);
@@ -3903,10 +3908,11 @@ public class DbMetadata
 		{
 			String grantee = ds.getValueAsString(i, COLUMN_IDX_TABLE_GRANTS_GRANTEE);
 			String priv = ds.getValueAsString(i, COLUMN_IDX_TABLE_GRANTS_PRIV);
+			if (priv == null) continue;
 			StrBuffer privs;
 			if (!grants.containsKey(grantee))
 			{
-				privs = new StrBuffer(priv);
+				privs = new StrBuffer(priv.trim());
 				grants.put(grantee, privs);
 			}
 			else
@@ -3914,7 +3920,7 @@ public class DbMetadata
 				privs = (StrBuffer)grants.get(grantee);
 				if (privs == null) privs = new StrBuffer();
 				privs.append(", ");
-				privs.append(priv);
+				privs.append(priv.trim());
 			}
 		}
 		Set entries = grants.entrySet();

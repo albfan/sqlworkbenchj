@@ -19,6 +19,24 @@
    </object>
   </void>
 
+	
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.informix.jdbc.IfxDriver</string>
+    </void>
+    <void property="library">
+     <string>ifxjdbc.jar</string>
+    </void>
+    <void property="name">
+     <string>Informix</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:informix-sqli://host-name:port-number/dbName:INFORMIXSERVER=serverName</string>
+    </void>
+   </object>
+  </void>
+	
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -31,7 +49,7 @@
      <string>EnterpriseDB</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:edb://servername:port/database"</string>
+     <string>jdbc:edb://servername:port/database</string>
     </void>
    </object>
   </void>
