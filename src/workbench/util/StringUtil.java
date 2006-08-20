@@ -887,6 +887,7 @@ public class StringUtil
 	{
 		return escapeUnicode(value, null, range);
 	}
+	
 	/*
 	 * Converts unicodes to encoded &#92;uxxxx
 	 * and writes out any of the characters in specialSaveChars

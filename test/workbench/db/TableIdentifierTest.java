@@ -26,14 +26,6 @@ public class TableIdentifierTest extends TestCase
 		super(testName);
 	}
 
-	protected void setUp() throws Exception
-	{
-	}
-
-	protected void tearDown() throws Exception
-	{
-	}
-
 	public void testIdentifier()
 	{
 		String sql = "BDB_IE.dbo.tblBDBMMPGroup";
@@ -41,6 +33,11 @@ public class TableIdentifierTest extends TestCase
 		assertEquals("BDB_IE", tbl.getCatalog());
 		assertEquals("dbo", tbl.getSchema());
 		assertEquals("BDB_IE.dbo.tblBDBMMPGroup", tbl.getTableExpression());
+
+		sql = "\"APP\".\"BLOB_TEST\"";
+		tbl = new TableIdentifier(sql);
+		assertEquals("APP", tbl.getSchema());
+		assertEquals("BLOB_TEST", tbl.getTableName());
 		
 	}
 	

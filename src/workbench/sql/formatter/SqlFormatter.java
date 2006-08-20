@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import workbench.resource.Settings;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.util.StringUtil;
 
@@ -130,7 +131,7 @@ public class SqlFormatter
 	private int maxSubselectLength = 60;
 	private Set dbFunctions = Collections.EMPTY_SET;
 	private int selectColumnsPerLine = 1;
-	
+	private String nl = null;
 	public SqlFormatter(String aScript, int maxSubselectLength)
 	{
 		this(aScript, 0, maxSubselectLength);
@@ -148,6 +149,7 @@ public class SqlFormatter
 			for (int i=0; i < indentCount; i++) this.indent.append(' ');
 		}
 		this.maxSubselectLength = maxSubselectLength;
+		this.nl = Settings.getInstance().getInternalEditorLineEnding();
 	}
 
 	public void setMaxColumnsPerSelect(int cols)
@@ -195,7 +197,7 @@ public class SqlFormatter
 	private void appendNewline()
 	{
 		if (this.result.length() == 0) return;
-		this.result.append('\n');
+		this.result.append(this.nl);
 		if (this.indent != null) this.result.append(indent);
 	}
 
