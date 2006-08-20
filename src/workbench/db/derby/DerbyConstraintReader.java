@@ -9,14 +9,16 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db;
+package workbench.db.derby;
+
+import workbench.db.*;
 
 
 /**
  * Constraint reader for Cloudscape database
  * @author  support@sql-workbench.net
  */
-public class CloudscapeConstraintReader 
+public class DerbyConstraintReader 
 	extends AbstractConstraintReader
 {
 	private static final String TABLE_SQL = "select 'check '|| c.checkdefinition \n" + 
@@ -28,7 +30,7 @@ public class CloudscapeConstraintReader
              "and   s.schemaname = ?";
 
 						 
-	public CloudscapeConstraintReader()
+	public DerbyConstraintReader()
 	{
 	}
 	

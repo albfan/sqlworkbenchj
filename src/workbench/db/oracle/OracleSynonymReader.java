@@ -33,7 +33,10 @@ public class OracleSynonymReader
 	{
 	}
 
-	public List getSynonymList(String owner) 
+	/**
+	 * The Oracle driver already returns the SYNONYMS in the getTables() call
+	 */
+	public List getSynonymList(Connection con, String owner) 
 		throws SQLException
 	{
 		return Collections.EMPTY_LIST;
@@ -64,7 +67,6 @@ public class OracleSynonymReader
 				dblink = rs.getString(4);
 				if (dblink != null) table = table + "@" + dblink;
 				result = new TableIdentifier(null, owner, table);
-				//result.setExternalTable(dblink != null);
 			}
 		}
 		finally

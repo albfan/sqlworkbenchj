@@ -24,7 +24,8 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  support@sql-workbench.net
  */
-public class RemoveTabAction extends WbAction
+public class RemoveTabAction 
+	extends WbAction
 {
 	private MainWindow client;
 

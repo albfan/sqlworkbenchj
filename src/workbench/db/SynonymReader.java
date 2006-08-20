@@ -27,6 +27,6 @@ public interface SynonymReader
 	TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)
 			throws SQLException;
 	
-	List getSynonymList(String owner)
+	List getSynonymList(Connection con, String owner)
 		throws SQLException;
 }

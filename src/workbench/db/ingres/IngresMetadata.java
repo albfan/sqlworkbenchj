@@ -36,13 +36,12 @@ public class IngresMetadata
 	
 	public IngresMetadata(Connection conn)
 	{
-		this.dbConn = conn;
 	}
 
 	/**
 	 * 	Get a list of synonyms for the given owner
 	 */
-	public List getSynonymList(String owner)
+	public List getSynonymList(Connection conn, String owner)
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
@@ -57,7 +56,7 @@ public class IngresMetadata
 
 		try
 		{
-			stmt = this.dbConn.prepareStatement(sql.toString());
+			stmt = conn.prepareStatement(sql.toString());
 			if (owner != null) stmt.setString(1, owner);
 			rs = stmt.executeQuery();
 			while (rs.next())

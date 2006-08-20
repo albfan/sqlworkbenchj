@@ -9,13 +9,14 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db.ibm;
+package workbench.db.derby;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
@@ -24,11 +25,11 @@ import workbench.resource.Settings;
 /**
  * @author support@sql-workbench.net
  */
-public class Db2SynonymReader
+public class DerbySynonymReader
 	implements SynonymReader
 {
 	
-	public Db2SynonymReader()
+	public DerbySynonymReader()
 	{
 	}
 
@@ -39,21 +40,50 @@ public class Db2SynonymReader
 	public List getSynonymList(Connection con, String owner) 
 		throws SQLException
 	{
-		return Collections.EMPTY_LIST;
+		LinkedList result = new LinkedList();
+		String sql = "select a.alias " + 
+             "from sys.sysaliases a, sys.sysschemas s \n" + 
+             "where a.schemaid = s.schemaid \n" + 
+			       " and a.aliastype = 'S' " +
+			       " and s.schemaname = ?";		
+
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			stmt = con.prepareStatement(sql);
+			stmt.setString(1, owner);
+			rs = stmt.executeQuery();
+			while (rs.next())
+			{
+				String alias = rs.getString(1);
+				if (!rs.wasNull())
+				{
+					result.add(alias);
+				}
+			}
+		}
+		finally
+		{
+			try { rs.close(); } catch (Exception e) {}
+			try { stmt.close(); } catch (Exception e) {}
+		}
+
+		return result;
 	}
 
 	public TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
-		StringBuffer sql = new StringBuffer(200);
+		String sql = "select a.aliasinfo \n" + 
+             "from sys.sysaliases a, sys.sysschemas s \n" + 
+             "where a.schemaid = s.schemaid \n" + 
+             " and a.alias = ?" +
+			       " and s.schemaname = ?";		
 
-		sql.append("SELECT base_tabschema, base_tabname FROM syscat.tables ");
-		sql.append(" WHERE TYPE = 'A' and tabname = ? and tabschema = ?");
-
-		PreparedStatement stmt = con.prepareStatement(sql.toString());
+		PreparedStatement stmt = con.prepareStatement(sql);
 		stmt.setString(1, aSynonym);
 		stmt.setString(2, anOwner);
-
 		ResultSet rs = stmt.executeQuery();
 		String table = null;
 		String owner = null;
@@ -62,9 +92,8 @@ public class Db2SynonymReader
 		{
 			if (rs.next())
 			{
-				owner = rs.getString(1);
-				table = rs.getString(2);
-				result = new TableIdentifier(null, owner, table);
+				table = rs.getString(1);
+				result = new TableIdentifier(table);
 			}
 		}
 		finally
@@ -82,7 +111,7 @@ public class Db2SynonymReader
 		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);
 		StringBuffer result = new StringBuffer(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		result.append("CREATE ALIAS ");
+		result.append("CREATE SYNONYM ");
 		result.append(aSynonym);
 		result.append(nl + "       FOR ");
 		result.append(id.getTableExpression());

@@ -92,12 +92,4 @@ public class SqlTabPopup extends JPopupMenu
 		}
 	}
 
-	public void addAction(WbAction anAction, boolean withSep)
-	{
-		if (withSep) this.addSeparator();
-		this.add(anAction);
-	}
-
-	public RemoveTabAction getRemoveAction() { return this.remove; }
-	public AddTabAction getAddAction() { return this.add; }
 }

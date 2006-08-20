@@ -188,18 +188,18 @@ public class TableIdentifier
 		String[] elements = aTable.split("\\.");
 		if (elements.length == 1)
 		{
-			this.tablename = aTable.trim();
+			this.tablename = StringUtil.trimQuotes(aTable).trim();
 		}
 		else if (elements.length == 2)
 		{
-			this.schema = elements[0];
-			this.tablename = elements[1];
+			setSchema(elements[0]);
+			this.tablename = StringUtil.trimQuotes(elements[1]).trim();
 		}
 		else if (elements.length == 3)
 		{
-			this.catalog = elements[0];
-			this.schema = elements[1];
-			this.tablename = elements[2];
+			setCatalog(elements[0]);
+			setSchema(elements[1]);
+			this.tablename = StringUtil.trimQuotes(elements[2]).trim();
 		}
 
 		this.expression = null;

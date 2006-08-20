@@ -165,9 +165,9 @@ where trg.tgrelid = tbl.oid
    </object> 
   </void> 
     
-  <void method="put"> 
-   <string>Adaptive Server Anywhere</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
+	<void method="put"> 
+		<string>Adaptive Server Enterprise</string> 
+   <object id="ase_trg_source" class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
      <string>select syscomments.text  
  from sysobjects, syscomments  
@@ -183,6 +183,11 @@ and  sysobjects.type = &apos;TR&apos;</string>
    </object> 
   </void> 
   
+	<void method="put"> 
+		<string>Adaptive Server Anywhere</string> 
+		<object idref="ase_trg_source"/>
+	</void>
+	
   <void method="put"> 
    <string>Firebird</string> 
    <object class="workbench.db.GetMetaDataSql"> 

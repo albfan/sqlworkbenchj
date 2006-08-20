@@ -484,6 +484,24 @@ public class MainWindow
 		return menuBar;
 	}
 
+	private void checkViewMenu(int index)
+	{
+		JMenu view = getViewMenu(index);
+		int count = view.getItemCount();
+		MainPanel p = getCurrentPanel();
+		boolean isExplorer = (p instanceof DbExplorerPanel);
+		for (int i = 0; i < count; i++)
+		{
+			JMenuItem item = view.getItem(i);
+			if (item == null) continue;
+			Action a = item.getAction();
+			if (a instanceof RemoveTabAction)
+			{
+				a.setEnabled(isExplorer || canCloseTab());
+			}
+		}
+	}
+	
 	private void checkMacroMenuForPanel(int index)
 	{
 		MainPanel p = this.getSqlPanel(index);
@@ -494,7 +512,7 @@ public class MainWindow
 		}
 		catch (Exception e)
 		{
-			
+			LogMgr.logError("MainWindow.checkMacroMenuForPanel()", "Error during macro update", e);
 		}
 	}
 	
@@ -756,6 +774,7 @@ public class MainWindow
 		}
 		current.panelSelected();
 		this.checkMacroMenuForPanel(anIndex);
+		this.checkViewMenu(anIndex);
 	}
 
 	private void tabSelected(final int anIndex)
@@ -2273,8 +2292,8 @@ public class MainWindow
 
 	public boolean canCloseTab()
 	{
-		int numTabs = this.sqlTab.getTabCount();
-		return numTabs > 1;
+		int numTabs = this.getLastSqlPanelIndex();
+		return numTabs > 0;
 	}
 
 	public boolean canRenameTab()
@@ -2302,6 +2321,7 @@ public class MainWindow
 
 	public void removeTab()
 	{
+		if (!canCloseTab()) return;
 		int index = this.sqlTab.getSelectedIndex();
 		this.removeTab(index);
 	}

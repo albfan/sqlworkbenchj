@@ -35,6 +35,8 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.WbManager;
+import workbench.db.derby.DerbyConstraintReader;
+import workbench.db.derby.DerbySynonymReader;
 import workbench.db.firebird.FirebirdProcedureReader;
 import workbench.db.firstsql.FirstSqlMetadata;
 import workbench.db.hsqldb.HsqlSequenceReader;
@@ -320,12 +322,13 @@ public class DbMetadata
 		else if (productLower.indexOf("cloudscape") > -1)
 		{
 			this.isCloudscape = true;
-			this.constraintReader = new CloudscapeConstraintReader();
+			this.constraintReader = new DerbyConstraintReader();
 		}
 		else if (productLower.indexOf("derby") > -1)
 		{
 			this.isApacheDerby = true;
-			this.constraintReader = new CloudscapeConstraintReader();
+			this.constraintReader = new DerbyConstraintReader();
+			this.synonymReader = new DerbySynonymReader();
 		}
 		else if (productLower.indexOf("ingres") > -1)
 		{
@@ -1654,7 +1657,7 @@ public class DbMetadata
 		if (retrieveSyns && typeIncluded("SYNONYM", types) )
 		{
 			LogMgr.logDebug("DbMetadata.getTables()", "Retrieving synonyms...");
-			List syns = this.synonymReader.getSynonymList(aSchema);
+			List syns = this.synonymReader.getSynonymList(this.dbConnection.getSqlConnection(), aSchema);
 			int count = syns.size();
 			for (int i=0; i < count; i++)
 			{

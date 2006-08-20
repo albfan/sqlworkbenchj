@@ -559,7 +559,7 @@ public class ConnectionMgr
 	}
 
 	/**
-	 *	Shut down the connection to an internal Cloudscape database
+	 *	Shut down the connection to an internal Cloudscape/Derby database
 	 */
 	private void shutdownCloudscape(ConnectionProfile prof)
 	{
@@ -588,7 +588,7 @@ public class ConnectionMgr
 		catch (SQLException e)
 		{
 			// This exception is expected!
-			// Cloudscape reports the shutdown success through an exception
+			// Cloudscape/Derby reports the shutdown success through an exception
 			LogMgr.logInfo("ConnectionMgr.shutdownCloudscape()", ExceptionUtil.getDisplay(e));
 		}
 		catch (Throwable th)

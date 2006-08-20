@@ -214,6 +214,7 @@ public class Settings
 		LogMgr.logInfo("Settings.<init>", "Using configdir: " + configDir);
 
 		this.renameOldProps();
+		this.migrateProps();
 	}
 
 	public ShortcutManager getShortcutManager()
@@ -618,6 +619,17 @@ public class Settings
 		}
 	}
 
+	private void migrateProps()
+	{
+		List servers = getServersWhereDDLNeedsCommit();
+		if (!servers.contains("Microsoft SQL Server"))
+		{
+			servers.add("Microsoft SQL Server");
+		}
+		String val = 	StringUtil.listToString(servers, ',');
+		setProperty("workbench.db.ddlneedscommit", val);
+	}
+	
 	private void renameOldProps()
 	{
 		this.renameProperty("sort.language", "workbench.sort.language");

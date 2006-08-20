@@ -64,6 +64,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 	private void addKeywords()
 	{
 		keywords.add("AVG",Token.KEYWORD1);
+		keywords.add("ALIAS",Token.KEYWORD1);
 		keywords.add("ADD",Token.KEYWORD1);
 		keywords.add("ALTER",Token.KEYWORD1);
 		keywords.add("AS",Token.KEYWORD1);
@@ -135,6 +136,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("REVOKE",Token.KEYWORD1);
 		keywords.add("ROLLBACK",Token.KEYWORD1);
 		keywords.add("SCHEMA",Token.KEYWORD1);
+		keywords.add("SYNONYM",Token.KEYWORD1);
 		keywords.add("SELECT",Token.KEYWORD1);
 		keywords.add("SET",Token.KEYWORD1);
 		keywords.add("TABLE",Token.KEYWORD1);

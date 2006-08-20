@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <java version="1.4.0_01" class="java.beans.XMLDecoder"> 
  <object class="java.util.HashMap"> 
+
+  <void method="put">  
+   <string>Apache Derby</string>  
+   <object id="derby_proc_source" class="workbench.db.GetMetaDataSql">  
+    <void property="baseSql">  
+     <string>SELECT a.aliasinfo FROM sys.sysaliases a, sys.sysschemas s WHERE a.schemaid = s.schemaid</string>  
+    </void>  
+    <void property="objectNameField">  
+     <string>a.alias</string>  
+    </void>  
+    <void property="schemaField">  
+     <string>s.schemaname</string>  
+    </void>  
+   </object>  
+  </void>  
  
   <void method="put">  
+   <string>Cloudscape</string>  
+   <object idref="derby_proc_source"/>
+	</void>
+
+	<void method="put">  
    <string>DB2/NT</string>  
    <object class="workbench.db.GetMetaDataSql">  
     <void property="baseSql">  
@@ -19,7 +39,7 @@
 	 
   <void method="put"> 
    <string>Oracle</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
+   <object id="ora_proc_source" class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
      <string>SELECT text FROM all_source</string> 
     </void> 
@@ -36,6 +56,11 @@
      <boolean>true</boolean> 
     </void> 
    </object> 
+  </void> 
+
+  <void method="put"> 
+   <string>Oracle8</string> 
+   <object idref="ora_proc_source"/> 
   </void> 
   
   <void method="put">  
@@ -71,27 +96,6 @@
    </object> 
   </void> 
 
-  <void method="put"> 
-   <string>Oracle8</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT text FROM all_source</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>name</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string>ORDER BY TYPE,LINE</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>owner</string> 
-    </void> 
-    <void property="useUpperCase"> 
-     <boolean>true</boolean> 
-    </void> 
-   </object> 
-  </void> 
-  
   <void method="put"> 
    <string>Microsoft SQL Server</string> 
    <object class="workbench.db.GetMetaDataSql"> 
@@ -138,26 +142,8 @@ where p.prolang = l.oid
   </void> 
   
   <void method="put"> 
-   <string>Adaptive Server Anywhere</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>select syscomments.text  
- from sysobjects, syscomments  
- where sysobjects.id = syscomments.id  
-and  sysobjects.type = &apos;P&apos;</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>sysobjects.name</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string> order by syscomments.colid</string> 
-    </void> 
-   </object> 
-  </void> 
-
-  <void method="put"> 
    <string>Adaptive Server Enterprise</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
+   <object id="ase_proc_source" class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
      <string>select syscomments.text  
  from sysobjects, syscomments  
@@ -173,6 +159,10 @@ and  sysobjects.type = &apos;P&apos;</string>
    </object> 
   </void> 
 	
+  <void method="put"> 
+   <string>Adaptive Server Anywhere</string> 
+		<object idref="ase_proc_source"/>
+  </void> 
 	
   <void method="put"> 
    <string>INGRES</string> 
