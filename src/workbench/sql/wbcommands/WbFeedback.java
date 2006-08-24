@@ -16,6 +16,8 @@ import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 
 /**
  *
@@ -37,14 +39,13 @@ public class WbFeedback
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
-		String[] words = sql.split("\\s");
-		if (words.length != 2)
+		String parm = stripVerb(sql);
+		if (parm == null)
 		{
 			result.setFailure();
 			result.addMessage(ResourceMgr.getString("ErrFeedbackWrongParameter"));
 			return result;
 		}
-		String parm = words[1];
 		
 		if ("off".equalsIgnoreCase(parm) || "false".equalsIgnoreCase(parm))
 		{

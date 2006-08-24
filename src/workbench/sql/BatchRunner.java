@@ -89,6 +89,11 @@ public class BatchRunner
 			this.stmtRunner.setBaseDir(dir);
 		}
 	}
+
+	public WbConnection getConnection() 
+	{
+		return this.connection;
+	}
 	
 	public void setParameterPrompter(ParameterPrompter p)
 	{
@@ -487,12 +492,16 @@ public class BatchRunner
 			String jar = cmdLine.getValue(WbManager.ARG_CONN_JAR);
 			String commit =  cmdLine.getValue(WbManager.ARG_CONN_AUTOCOMMIT);
 			String wksp = cmdLine.getValue(WbManager.ARG_WORKSPACE);
+			boolean rollback = cmdLine.getBoolean(WbManager.ARG_CONN_ROLLBACK, false);
+			
 			DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver(driverclass);
 			if (drv == null)
 			{
 				drv = ConnectionMgr.getInstance().registerDriver(driverclass, jar);
 			}
 			result = new ConnectionProfile(CMD_LINE_PROFILE_NAME, driverclass, url, user, pwd);
+			result.setRollbackBeforeDisconnect(rollback);
+			
 			if (!StringUtil.isEmptyString(wksp))
 			{
 				wksp = FileDialogUtil.replaceConfigDir(wksp);

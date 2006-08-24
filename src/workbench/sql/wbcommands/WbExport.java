@@ -116,12 +116,14 @@ public class WbExport
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		this.currentConnection = aConnection;
-		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
-		int pos = aSql.indexOf(' ');
-		if (pos > -1)
-			aSql = aSql.substring(pos);
-		else
-			aSql = "";
+		
+		aSql = stripVerb(aSql);
+//		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
+//		int pos = aSql.indexOf(' ');
+//		if (pos > -1)
+//			aSql = aSql.substring(pos);
+//		else
+//			aSql = "";
 
 		try
 		{
@@ -376,6 +378,7 @@ public class WbExport
 		// of the exporter as this will trigger some initialization 
 		// that depends on the other properties
 		setExportType(exporter, type);
+		
 		List tablesToExport = null;
 		if (tables != null)
 		{
@@ -417,8 +420,16 @@ public class WbExport
 		}
 		else
 		{
-			setExportType(exporter, type);
-			runTableExports(tablesToExport, result, outputdir);
+			try
+			{
+				runTableExports(tablesToExport, result, outputdir);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("WbExport.execute()", "Error when running table export", e);
+				result.addMessage(e.getMessage());
+				result.setFailure();
+			}
 		}
 		return result;
 	}

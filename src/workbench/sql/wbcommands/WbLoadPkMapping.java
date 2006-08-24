@@ -46,7 +46,7 @@ public class WbLoadPkMapping
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String sql = aSql.trim().substring(this.getVerb().length()).trim();
+		String sql = stripVerb(aSql);//aSql.trim().substring(this.getVerb().length()).trim();
 		cmdLine.parse(sql);
 		String file = cmdLine.getValue("file");
 		if (file == null)

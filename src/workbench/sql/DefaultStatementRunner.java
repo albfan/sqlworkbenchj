@@ -225,6 +225,11 @@ public class DefaultStatementRunner
 	public void setBaseDir(String dir) { this.baseDir = dir; }
 	public String getBaseDir() { return this.baseDir; }
 	
+	public WbConnection getConnection()
+	{
+		return this.dbConnection;
+	}
+	
 	public void setConnection(WbConnection aConn)
 	{
 

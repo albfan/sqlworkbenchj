@@ -23,6 +23,8 @@ import workbench.util.ExceptionUtil;
 import workbench.interfaces.ResultLogger;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
@@ -89,6 +91,24 @@ public class SqlCommand
 		return hasWarning;
 	}
 
+	protected String stripVerb(String sql)
+	{
+		String result = "";
+		try
+		{
+			SQLLexer l = new SQLLexer(sql);
+			SQLToken t = l.getNextToken(false, false);
+			int pos = -1;
+			if (t != null) pos = t.getCharEnd();
+			if (pos > -1) result = sql.substring(pos).trim();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("SqlCommand.stripVerb()", "Error cleaning up SQL", e);
+		}
+		return result;
+	}
+	
 	public void cancel()
 		throws SQLException
 	{

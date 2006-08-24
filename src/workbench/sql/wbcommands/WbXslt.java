@@ -58,7 +58,7 @@ public class WbXslt
 			return result;
 		}
 
-		String parm = aSql.trim().substring(this.getVerb().length());
+		String parm = stripVerb(aSql); //aSql.trim().substring(this.getVerb().length());
 
 		cmdLine.parse(parm);
 

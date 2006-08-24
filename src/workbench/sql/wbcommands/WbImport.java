@@ -146,13 +146,8 @@ public class WbImport
 		this.imp.setConnection(aConnection);
 
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
-		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
-		int pos = aSql.indexOf(' ');
-		if (pos > -1)
-			aSql = aSql.substring(pos);
-		else
-			aSql = "";
-
+		aSql = stripVerb(aSql);
+		
 		try
 		{
 			cmdLine.parse(aSql);

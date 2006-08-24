@@ -36,7 +36,7 @@ public class WbRemoveVar extends SqlCommand
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String var = aSql.trim().substring(this.getVerb().length()).trim();
+		String var = stripVerb(aSql);
 
 		String msg = null;
 

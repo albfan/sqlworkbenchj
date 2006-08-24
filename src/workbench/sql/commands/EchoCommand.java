@@ -17,6 +17,7 @@ import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.StringUtil;
 
 /**
  * This class implements a wrapper for the ECHO command
@@ -36,27 +37,24 @@ public class EchoCommand extends SqlCommand
 	{
 		StatementRunnerResult result = null;
 
-		String[] words = aSql.split("\\s");
+		String param = stripVerb(aSql);
 
-		if (words.length > 1)
+		if (StringUtil.isEmptyString(param))
 		{
-			if ("off".equalsIgnoreCase(words[1]) || "false".equalsIgnoreCase(words[2]))
-			{
-				this.runner.setVerboseLogging(false);
-				result.addMessage(ResourceMgr.getString("MsgFeedbackDisabled"));
-				result.setSuccess();
-			}
-			else if ("on".equalsIgnoreCase(words[1]) || "true".equalsIgnoreCase(words[2]))
-			{
-				this.runner.setVerboseLogging(true);
-				result.addMessage(ResourceMgr.getString("MsgFeedbackEnabled"));
-				result.setSuccess();
-			}
-			else
-			{
 				result.addMessage(ResourceMgr.getString("ErrEchoWrongParameter"));
 				result.setFailure();
-			}
+		}
+		else if ("off".equalsIgnoreCase(param) || "false".equalsIgnoreCase(param))
+		{
+			this.runner.setVerboseLogging(false);
+			result.addMessage(ResourceMgr.getString("MsgFeedbackDisabled"));
+			result.setSuccess();
+		}
+		else if ("on".equalsIgnoreCase(param) || "true".equalsIgnoreCase(param))
+		{
+			this.runner.setVerboseLogging(true);
+			result.addMessage(ResourceMgr.getString("MsgFeedbackEnabled"));
+			result.setSuccess();
 		}
 		return result;
 	}

@@ -103,12 +103,6 @@ public class VariablePool
 			}
 		}
 	}
-	
-	public boolean hasPrompts(String sql)
-	{
-		Matcher m = this.promptPattern.matcher(sql);
-		return m.find();
-	}
 
 	public String replacePrompts(String sql)
 	{
@@ -122,9 +116,12 @@ public class VariablePool
 	}
 	
 	/**
-	 *	Returns a set of prompt variables defined in the 
-	 *	SQL string. If a variable is not yet defined it will
-	 *  be created in the internal pool.
+	 * Returns a set of prompt variables defined in the 
+	 * SQL string. If a variable is not yet defined it will
+	 * be created in the internal pool with an empty value.
+	 * and returned in the result set.
+	 *
+	 * @return a Set containing variable names (String objects)
 	 */
 	public Set getVariablesNeedingPrompt(String sql)
 	{
@@ -197,10 +194,6 @@ public class VariablePool
 	}
 	public DataStore getVariablesDataStore(Set varNames)
 	{
-//		final String cols[] = {"VARIABLE", "VALUE"};
-//		final int types[] =   {Types.VARCHAR, Types.VARCHAR};
-//		final int sizes[] =   {20, 50};
-		
 		DataStore vardata = new VariableDataStore();
 		
 		Iterator itr = varNames.iterator();
@@ -220,6 +213,7 @@ public class VariablePool
 	
 	public String getParameterValue(String varName)
 	{
+		if (varName == null) return null;
 		return (String)this.data.get(varName);
 	}
 
@@ -307,13 +301,13 @@ public class VariablePool
 	
 	public boolean isVariableDefined(String varName)
 	{
-		String value = this.getParameterValue(varName);
-		return (value != null);
+		return (getParameterValue(varName) != null);
 	}
 	
 	public synchronized boolean removeValue(String varName)
 	{
-		if (LogMgr.isDebugEnabled()) 	LogMgr.logDebug("SqlParameterPool", "Removing parameter definition [" + varName + "]");
+		if (varName == null) return false;
+		if (LogMgr.isDebugEnabled()) LogMgr.logDebug("SqlParameterPool", "Removing parameter definition [" + varName + "]");
 		Object old = this.data.remove(varName);
 		return (old != null);
 	}

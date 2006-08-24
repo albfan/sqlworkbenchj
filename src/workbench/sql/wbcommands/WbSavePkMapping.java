@@ -47,7 +47,7 @@ public class WbSavePkMapping
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String sql = aSql.trim().substring(this.getVerb().length()).trim();
+		String sql = stripVerb(aSql);// .trim().substring(this.getVerb().length()).trim();
 		cmdLine.parse(sql);
 		String file = cmdLine.getValue("file");
 		if (file == null)

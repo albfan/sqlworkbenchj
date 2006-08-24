@@ -46,7 +46,7 @@ public class WbDefineVar extends SqlCommand
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String sql = aSql.trim().substring(this.getVerb().length()).trim();
+		String sql = stripVerb(aSql);
 
 		String msg = null;
 

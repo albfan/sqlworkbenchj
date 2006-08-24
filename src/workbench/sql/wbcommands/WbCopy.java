@@ -100,12 +100,7 @@ public class WbCopy
 		 * in order to make the commandline parser work properly
 		 */
 
-		aSql = aSql.trim();
-		int pos = StringUtil.findFirstWhiteSpace(aSql);
-		if (pos > -1)
-			aSql = aSql.substring(pos);
-		else
-			aSql = "";
+		aSql = stripVerb(aSql);
 
 		try
 		{

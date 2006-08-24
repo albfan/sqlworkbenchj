@@ -16,12 +16,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import workbench.db.WbConnection;
-import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * This class implements a wrapper for the SET command
@@ -52,31 +53,44 @@ public class SetCommand extends SqlCommand
 
 		try
 		{
-			String[] words = aSql.split("\\s");
-			boolean execSql = true;
 			String command = null;
+			String param = null;
+			try
+			{
+				SQLLexer l = new SQLLexer(aSql);
+				SQLToken t = l.getNextToken(false, false); // ignore the verb
+				t = l.getNextToken(false, false);
+				if (t != null) command = t.getContents();
+				t = l.getNextToken(false, false);
+				if (t != null) param = t.getContents();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			boolean execSql = true;
 			
-			if (words.length > 1)
+			if (command != null)
 			{
 				// those SET commands that have a SQL Workbench equivalent
 				// will be "executed" by calling the approriate functions
 				// we don't need to send the SQL to the server in this case
-				command = words[1];
+				// everything else is sent to the server
 				if (command.equalsIgnoreCase("autocommit"))
 				{
-					result = this.setAutocommit(aConnection, words);
+					result = this.setAutocommit(aConnection, param);
 					execSql = false;
 				}
 				else if (aConnection.getMetadata().isOracle())
 				{
 					if (command.equalsIgnoreCase("serveroutput"))
 					{
-						result = this.setServeroutput(aConnection, words);
+						result = this.setServeroutput(aConnection, param);
 						execSql = false;
 					}
 					else if (command.equalsIgnoreCase("feedback"))
 					{
-						result = this.setFeedback(aConnection, words);
+						result = this.setFeedback(aConnection, param);
 						execSql = false;
 					}
 				}
@@ -96,6 +110,8 @@ public class SetCommand extends SqlCommand
 			}
 			String regex = "set\\s*(current|)\\s*schema";
 			Matcher m = Pattern.compile(regex,Pattern.CASE_INSENSITIVE).matcher(aSql);
+			// I'm not using the Lexer to test this, because Oracle's Syntax 
+			// includes an ALTER SESSION
 			if (m.find())
 			{
 				aConnection.schemaChanged(null, null);
@@ -130,40 +146,34 @@ public class SetCommand extends SqlCommand
 		return result;
 	}
 
-	private StatementRunnerResult setServeroutput(WbConnection aConnection, String[] words)
+	private StatementRunnerResult setServeroutput(WbConnection aConnection, String param)
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
 
-		if (words.length > 2)
+		if ("off".equalsIgnoreCase(param))
 		{
-			if (words[2].equalsIgnoreCase("off"))
-			{
-				aConnection.getMetadata().disableOutput();
-				result.addMessage(ResourceMgr.getString("MsgDbmsOutputDisabled"));
-			}
-			else if (words[2].equalsIgnoreCase("on"))
-			{
-				aConnection.getMetadata().enableOutput();
-				result.addMessage(ResourceMgr.getString("MsgDbmsOutputEnabled"));
-			}
-			else
-			{
-				result.setFailure();
-				result.addMessage(ResourceMgr.getString("ErrServeroutputWrongParameter"));
-			}
+			aConnection.getMetadata().disableOutput();
+			result.addMessage(ResourceMgr.getString("MsgDbmsOutputDisabled"));
+		}
+		else if ("on".equalsIgnoreCase(param))
+		{
+			aConnection.getMetadata().enableOutput();
+			result.addMessage(ResourceMgr.getString("MsgDbmsOutputEnabled"));
 		}
 		else
 		{
 			result.setFailure();
+			result.addMessage(ResourceMgr.getString("ErrServeroutputWrongParameter"));
 		}
 		return result;
 	}
 
-	private StatementRunnerResult setAutocommit(WbConnection aConnection, String[] words)
+	private StatementRunnerResult setAutocommit(WbConnection aConnection, String param)
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		if (words.length <= 2)
+		
+		if (StringUtil.isEmptyString(param))
 		{
 			result.setFailure();
 			result.addMessage(ResourceMgr.getString("ErrAutocommitWrongParameter"));
@@ -172,13 +182,13 @@ public class SetCommand extends SqlCommand
 
 		try
 		{
-			if ("off".equalsIgnoreCase(words[2]) || "false".equalsIgnoreCase(words[2]))
+			if ("off".equalsIgnoreCase(param) || "false".equalsIgnoreCase(param))
 			{
 				aConnection.setAutoCommit(false);
 				result.addMessage(ResourceMgr.getString("MsgAutocommitDisabled"));
 				result.setSuccess();
 			}
-			else if ("on".equalsIgnoreCase(words[2]) || "true".equalsIgnoreCase(words[2]))
+			else if ("on".equalsIgnoreCase(param) || "true".equalsIgnoreCase(param))
 			{
 				aConnection.setAutoCommit(true);
 				result.addMessage(ResourceMgr.getString("MsgAutocommitEnabled"));
@@ -198,23 +208,23 @@ public class SetCommand extends SqlCommand
 		return result;
 	}
 
-	private StatementRunnerResult setFeedback(WbConnection aConnection, String[] words)
+	private StatementRunnerResult setFeedback(WbConnection aConnection, String param)
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		if (words.length <= 2)
+		if (StringUtil.isEmptyString(param))
 		{
 			result.setFailure();
 			result.addMessage(ResourceMgr.getString("ErrFeedbackWrongParameter"));
 			return result;
 		}
 
-		if ("off".equalsIgnoreCase(words[2]) || "false".equalsIgnoreCase(words[2]))
+		if ("off".equalsIgnoreCase(param) || "false".equalsIgnoreCase(param))
 		{
 			this.runner.setVerboseLogging(false);
 			result.addMessage(ResourceMgr.getString("MsgFeedbackDisabled"));
 			result.setSuccess();
 		}
-		else if ("on".equalsIgnoreCase(words[2]) || "true".equalsIgnoreCase(words[2]))
+		else if ("on".equalsIgnoreCase(param) || "true".equalsIgnoreCase(param))
 		{
 			this.runner.setVerboseLogging(true);
 			result.addMessage(ResourceMgr.getString("MsgFeedbackEnabled"));

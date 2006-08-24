@@ -35,7 +35,7 @@ public class SqlFormatter
 		LINE_BREAK_BEFORE.add("FROM");
 		LINE_BREAK_BEFORE.add("WHERE");
 		LINE_BREAK_BEFORE.add("ORDER");
-		LINE_BREAK_BEFORE.add("GROUP");
+		LINE_BREAK_BEFORE.add("GROUP BY");
 		LINE_BREAK_BEFORE.add("HAVING");
 		LINE_BREAK_BEFORE.add("VALUES");
 		LINE_BREAK_BEFORE.add("UNION");
@@ -59,8 +59,8 @@ public class SqlFormatter
 	{
 		LINE_BREAK_AFTER.add("UNION");
 		LINE_BREAK_AFTER.add("UNION ALL");
-		//LINE_BREAK_AFTER.add("MINUS");
-		//LINE_BREAK_AFTER.add("INTERSECT");
+		LINE_BREAK_AFTER.add("MINUS");
+		LINE_BREAK_AFTER.add("INTERSECT");
 		LINE_BREAK_AFTER.add("AS");
 		LINE_BREAK_AFTER.add("FOR");
 		//LINE_BREAK_AFTER.add("JOIN");
@@ -78,7 +78,7 @@ public class SqlFormatter
 	static
 	{
 		WHERE_TERMINAL.add("ORDER");
-		WHERE_TERMINAL.add("GROUP");
+		WHERE_TERMINAL.add("GROUP BY");
 		WHERE_TERMINAL.add("HAVING");
 		WHERE_TERMINAL.add("UNION");
 		WHERE_TERMINAL.add("UNION ALL");
@@ -132,6 +132,7 @@ public class SqlFormatter
 	private Set dbFunctions = Collections.EMPTY_SET;
 	private int selectColumnsPerLine = 1;
 	private String nl = null;
+	
 	public SqlFormatter(String aScript, int maxSubselectLength)
 	{
 		this(aScript, 0, maxSubselectLength);
@@ -152,6 +153,10 @@ public class SqlFormatter
 		this.nl = Settings.getInstance().getInternalEditorLineEnding();
 	}
 
+	public String getLineEnding()
+	{
+		return nl;
+	}
 	public void setMaxColumnsPerSelect(int cols)
 	{
 		this.selectColumnsPerLine = cols;
@@ -264,6 +269,11 @@ public class SqlFormatter
 		return this.needsWhitespace(last, current, false);
 	}
 
+	private boolean isDbFunction(String key)
+	{
+		return this.dbFunctions.contains(key);
+	}
+	
 	/**
 	 * 	Return true if a whitespace should be added before the current token.
 	 */
@@ -273,6 +283,8 @@ public class SqlFormatter
 		char currChar = current.getContents().charAt(0);
 		if (last.isWhiteSpace() && current.isWhiteSpace()) return false;
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
+		if (currChar == '(' && isDbFunction(last.getContents())) return false;
+		
 		if (last.isLiteral() && (current.isIdentifier() || current.isReservedWord() || current.isOperator())) return true;
 		//if (lastChar == '\'') return false;
 		if (last.isLiteral() && current.isLiteral()) return false;
@@ -379,11 +391,17 @@ public class SqlFormatter
 				t = processDecode(indentCount);
 				continue;
 			}
-			else if (isSelect && "CASE".equals(text))
+			else if ("CASE".equals(text))
 			{
 				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
 				this.appendText(text);
-				t = processCase(indentCount);
+				int caseIndent = indentCount;
+				if (!isSelect) 
+				{
+					caseIndent = this.getCurrentLineLength() - 4;
+					this.appendText(' ');
+				}
+				t = processCase(caseIndent);
 				continue;
 			}
 			else if (t.isReservedWord() && terminalKeys.contains(text.toUpperCase()))
@@ -472,14 +490,12 @@ public class SqlFormatter
 					String s = f.getFormattedSql();
 					if (f.getRealLength() < this.maxSubselectLength)
 					{
-						s = s.replaceAll(" *\n *", " ");
+						s = s.replaceAll(" *" + nl + " *", " ");
 						this.appendText(s.trim());
 					}
 					else
 					{
-						this.appendText(s);
-						//this.appendNewline();
-						//for (int i=0; i < lastIndent; i++) this.indent(' ');
+						this.appendText(s.trim());
 					}
 
 					return t;
@@ -557,22 +573,33 @@ public class SqlFormatter
 		for (int i=0; i < indent; i++) b.append(' ');
 		b.append("  ");
 		
-		SQLToken t = this.lexer.getNextToken(true,true);
+		SQLToken last = null;
+		SQLToken t = this.lexer.getNextToken(true,false);
 		String text = null;
 		while (t != null)
 		{
 			text = t.getContents();
-			if ("WHEN".equalsIgnoreCase(text) || "ELSE".equalsIgnoreCase(text))
+			
+			if ("SELECT".equals(text) && last.getContents().equals("("))
+			{
+				t = this.processSubSelect(true);
+				if (t == null) return null;
+				if (t.getContents().equals(")")) this.appendText(")");
+			}
+			else if ("WHEN".equals(text) || "ELSE".equals(text))
 			{
 				this.appendNewline();
 				this.indent(b);
 				this.appendText(text);
+				appendText(' ');
 			}
-			else if ("THEN".equalsIgnoreCase(text))
+			else if ("THEN".equals(text))
 			{
+				if (last != null && this.needsWhitespace(last, t)) appendText(' ');
 				this.appendText(text);
+				appendText(' ');
 			}
-			else if ("END".equalsIgnoreCase(text) || "END CASE".equalsIgnoreCase(text))
+			else if ("END".equals(text) || "END CASE".equals(text))
 			{
 				this.appendNewline();
 				this.indent(current);
@@ -581,10 +608,15 @@ public class SqlFormatter
 				t = this.lexer.getNextToken(true, false);
 				return t;
 			}
-			else if (text.indexOf("\n") == -1 &&  text.indexOf("\r") == -1)
+			else if (t.isComment())
+			{
+				this.appendComment(text);
+			}
+			else if (text.trim().length() > 0)
 			{
 				this.appendText(text);
 			}
+			last = t;
 			t = this.lexer.getNextToken(true,true);
 		}
 		return null;
@@ -832,7 +864,7 @@ public class SqlFormatter
 					if (t == null) return;
 					continue;
 				}
-				if (word.equals("BY") && lastToken.isReservedWord()	&& lastToken.getContents().equals("GROUP"))
+				if (t.getContents().equals("GROUP BY"))
 				{
 					t = this.processList(lastToken, "GROUP BY ".length(), BY_TERMINAL);
 					if (t == null) return;
@@ -883,7 +915,8 @@ public class SqlFormatter
 
 				if (t.isSeparator() && word.equals("("))
 				{
-					this.appendText(" (");
+					if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
+					this.appendText('(');
 					this.processFunctionCall(t);
 				}
 				else

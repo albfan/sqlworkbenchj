@@ -69,12 +69,13 @@ public class WbSchemaReport
 		boolean dbDesigner = false;
 		StatementRunnerResult result = new StatementRunnerResult();
 		this.currentConnection = aConnection;
-		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
-		int pos = aSql.indexOf(' ');
-		if (pos > -1)
-			aSql = aSql.substring(pos);
-		else
-			aSql = "";
+		aSql = stripVerb(aSql);
+//		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
+//		int pos = aSql.indexOf(' ');
+//		if (pos > -1)
+//			aSql = aSql.substring(pos);
+//		else
+//			aSql = "";
 
 		try
 		{
