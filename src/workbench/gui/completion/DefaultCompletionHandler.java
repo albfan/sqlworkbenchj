@@ -86,6 +86,11 @@ public class DefaultCompletionHandler
 		}
 	}
 	
+	public void cancelPopup()
+	{
+		if (this.window != null) this.window.cancelPopup();
+	}
+	
 	public void showCompletionPopup()
 	{
 		if (this.window == null)

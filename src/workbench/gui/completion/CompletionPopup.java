@@ -210,6 +210,13 @@ public class CompletionPopup
 		return result;
 	}
 	
+	public void cancelPopup()
+	{
+		if (this.window == null) return;
+		if (!this.window.isVisible()) return;
+		this.window.setVisible(false);
+	}
+	
 	private void closePopup(boolean pasteEntry)
 	{
 		editor.removeKeyEventInterceptor();

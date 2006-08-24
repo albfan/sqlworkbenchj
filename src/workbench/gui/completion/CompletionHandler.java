@@ -24,4 +24,5 @@ public interface CompletionHandler
 	void setEditor(JEditTextArea ed);
 	void setConnection(WbConnection conn);
 	void showCompletionPopup();
+	void cancelPopup();
 }
