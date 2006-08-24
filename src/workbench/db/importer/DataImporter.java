@@ -711,16 +711,18 @@ public class DataImporter
 				colIndex = this.columnMap[i] + 1;
 			}
 			
+			int targetSqlType = this.targetColumns[i].getDataType();
+			String targetDbmsType = this.targetColumns[i].getDbmsType(); 
+			
 			if (row[i] == null || row[i] instanceof NullValue)
 			{
-				pstmt.setNull(colIndex, this.targetColumns[i].getDataType());
+				pstmt.setNull(colIndex, targetSqlType);
 			}
 			// This will only work with Oracle 10g drivers.
 			// Oracle 9i drivers do not implement the setCharacterStream() 
 			// and associated methods properly
-			else if ( SqlUtil.isClobType(this.targetColumns[i].getDataType()) || 
-				       "LONG".equals(this.targetColumns[i].getDbmsType()) ||
-				       "CLOB".equals(this.targetColumns[i].getDbmsType()) )
+			else if ( SqlUtil.isClobType(targetSqlType) || "LONG".equals(targetDbmsType) ||
+				       "CLOB".equals(targetDbmsType) )
 			{
 				String value = null;
 				if (row[i] instanceof Clob)
@@ -747,8 +749,7 @@ public class DataImporter
 				Reader in = new StringReader(value);
 				pstmt.setCharacterStream(colIndex, in, size);
 			}
-			else if (SqlUtil.isBlobType(this.targetColumns[i].getDataType()) || 
-				       "BLOB".equals(this.targetColumns[i].getDbmsType()))
+			else if (SqlUtil.isBlobType(targetSqlType) || "BLOB".equals(targetDbmsType))
 			{
 				InputStream in = null;
 				int len = -1;
@@ -803,16 +804,14 @@ public class DataImporter
 			}
 			else
 			{
-				if (this.dbConn.getMetadata().isOracle() &&
-					  this.targetColumns[i].getDataType() == java.sql.Types.DATE &&
-						row[i] instanceof java.sql.Date)
+				if (this.dbConn.getMetadata().isOracle() &&	targetSqlType == java.sql.Types.DATE && row[i] instanceof java.sql.Date)
 				{
 					java.sql.Timestamp ts = new java.sql.Timestamp(((java.sql.Date)row[i]).getTime());
 					pstmt.setTimestamp(colIndex, ts);
 				}
 				else
 				{
-					pstmt.setObject(colIndex, row[i]);
+					pstmt.setObject(colIndex, row[i], targetSqlType);
 				}
 			}
 		}

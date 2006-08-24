@@ -597,7 +597,7 @@ public class TextFileParser
 		this.rowData = new Object[this.importColCount];
 		int importRow = 0;
 
-		char quoteCharToUse = (quoteChar == null ? '"' : quoteChar.charAt(0));
+		char quoteCharToUse = (quoteChar == null ? 0 : quoteChar.charAt(0));
 		CsvLineParser tok = new CsvLineParser(delimiter.charAt(0), quoteCharToUse);
 		tok.setReturnEmptyStrings(true);
 		tok.setTrimValues(this.trimValues);
