@@ -95,9 +95,11 @@ public class WbImportTest extends TestCase
 			rowCount ++;
 			out.println("  \tempty nr\tempty");
 			rowCount ++;
+			out.println("42\tarthur\"dent\tempty");
+			rowCount ++;
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -multiline=true -type=text -header=true -continueonerror=false -table=junit_test");
+			StatementRunnerResult result = importCmd.execute(this.connection, "-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -122,8 +124,19 @@ public class WbImportTest extends TestCase
 				fail("Unicode row not imported");
 			}
 			rs.close();
-			stmt.close();
 			
+			rs = stmt.executeQuery("select firstname from junit_test where nr = 42");
+			if (rs.next())
+			{
+				String sname = rs.getString(1);
+				assertEquals("Embedded quote not imported", "arthur\"dent", sname);
+			}
+			else
+			{
+				fail("Row with embedded quote not imported");
+			}
+			rs.close();
+			stmt.close();
 			
 		}
 		catch (Exception e)

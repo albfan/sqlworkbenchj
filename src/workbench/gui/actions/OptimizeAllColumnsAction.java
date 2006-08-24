@@ -20,11 +20,13 @@ import javax.swing.InputMap;
 import javax.swing.KeyStroke;
 
 import workbench.gui.components.WbTable;
+import workbench.resource.Settings;
 
 /**
  *	@author  support@sql-workbench.net
  */
-public class OptimizeAllColumnsAction extends WbAction
+public class OptimizeAllColumnsAction 
+	extends WbAction
 {
 	private WbTable client;
 
@@ -44,7 +46,7 @@ public class OptimizeAllColumnsAction extends WbAction
 	{
 		if (client == null) return;
 		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
-		this.client.optimizeAllColWidth(shiftPressed);
+		this.client.optimizeAllColWidth(shiftPressed || Settings.getInstance().getIncludeHeaderInOptimalWidth());
 	}
 
 	public void addToInputMap(InputMap im, ActionMap am)

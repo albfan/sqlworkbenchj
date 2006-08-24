@@ -387,7 +387,10 @@ public class WbAction
 	{
 		if (this.isEnabled()) 
 		{
-			if (this.original != null) this.original.executeAction(e);
+			if (this.original != null) 
+			{
+				this.original.executeAction(e);
+			}
 			else
 			{
 				EventQueue.invokeLater(new Runnable()

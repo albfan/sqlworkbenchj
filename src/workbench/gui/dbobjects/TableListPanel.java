@@ -266,7 +266,7 @@ public class TableListPanel
 		this.tableList.setRowSelectionAllowed(true);
 		this.tableList.getSelectionModel().addListSelectionListener(this);
 		this.tableList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		this.tableList.setAdjustToColumnLabel(false);
+		this.tableList.setAdjustToColumnLabel(true);
 		this.tableList.addTableModelListener(this);
 
 		this.spoolData = new SpoolDataAction(this);

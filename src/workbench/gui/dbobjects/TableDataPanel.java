@@ -129,8 +129,6 @@ public class TableDataPanel
 		this.dataDisplay.setShowLoadProcess(true);
 		this.dataDisplay.setDefaultStatusMessage("");
 		this.dataDisplay.setShowErrorMessages(true);
-		this.dataDisplay.getTable().setMaxColWidth(Settings.getInstance().getMaxColumnWidth());
-		this.dataDisplay.getTable().setMinColWidth(Settings.getInstance().getMinColumnWidth());
 
 		topPanel = new JPanel();
 		topPanel.setMaximumSize(new Dimension(32768, 32768));
@@ -301,6 +299,7 @@ public class TableDataPanel
 				rowCount = rs.getLong(1);
 			}
 			this.rowCountLabel.setText(Long.toString(rowCount));
+			this.rowCountLabel.setToolTipText(null);
 		}
 		catch (Exception e)
 		{
@@ -308,10 +307,12 @@ public class TableDataPanel
 			if (rowCountCancel)
 			{
 				this.rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
+				this.rowCountLabel.setToolTipText(null);
 			}
 			else
 			{
 				this.rowCountLabel.setText(ResourceMgr.getString("TxtError"));
+				this.rowCountLabel.setToolTipText(ExceptionUtil.getDisplay(e));
 			}
 		}
 		finally

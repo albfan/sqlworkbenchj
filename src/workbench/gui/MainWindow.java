@@ -2031,7 +2031,7 @@ public class MainWindow
 			this.adjustTabCount(1);
 			this.resetTabTitles();
 			SqlPanel sql = (SqlPanel)this.getSqlPanel(0);
-			sql.clearSqlStatements();
+			sql.clearSqlHistory(true);
 		}
 		catch (Exception e)
 		{

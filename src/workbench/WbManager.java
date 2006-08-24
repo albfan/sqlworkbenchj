@@ -780,6 +780,7 @@ public class WbManager
 	public static final String ARG_CONN_USER = "username";
 	public static final String ARG_CONN_PWD = "password";
 	public static final String ARG_CONN_AUTOCOMMIT = "autocommit";
+	public static final String ARG_CONN_ROLLBACK = "rollbackondisconnect";
 	public static final String ARG_IGNORE_DROP = "ignoredroperrors";
 	public static final String ARG_DISPLAY_RESULT = "displayresult";
 	public static final String ARG_SUCCESS_SCRIPT = "cleanupsuccess";
@@ -823,6 +824,7 @@ public class WbManager
 		parser.addArgument(ARG_CONN_USER);
 		parser.addArgument(ARG_CONN_PWD);
 		parser.addArgument(ARG_CONN_AUTOCOMMIT);
+		parser.addArgument(ARG_CONN_ROLLBACK);
 		parser.addArgument(ARG_SHOW_PUMPER);
 		parser.addArgument(ARG_IGNORE_DROP);
 		parser.addArgument(ARG_DISPLAY_RESULT);

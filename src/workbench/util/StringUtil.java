@@ -883,6 +883,11 @@ public class StringUtil
 		return outBuffer.toString();
 	}
 
+	public static String escapeUnicode(String value)
+	{
+		return escapeUnicode(value, null, null);
+	}
+	
 	public static String escapeUnicode(String value, CharacterRange range)
 	{
 		return escapeUnicode(value, null, range);
@@ -928,7 +933,7 @@ public class StringUtil
 					outBuffer.append('f');
 					break;
 				default:
-					if (range.isOutsideRange(aChar))
+					if (range != null && range.isOutsideRange(aChar))
 					{
 						outBuffer.append('\\');
 						outBuffer.append('u');

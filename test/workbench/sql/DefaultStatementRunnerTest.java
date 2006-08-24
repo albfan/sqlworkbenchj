@@ -11,58 +11,21 @@
  */
 package workbench.sql;
 
+import java.util.Map;
 import junit.framework.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import workbench.db.DbMetadata;
+import workbench.TestUtil;
+import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
-import workbench.interfaces.ResultLogger;
-import workbench.interfaces.StatementRunner;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 import workbench.sql.commands.DdlCommand;
-import workbench.sql.commands.EchoCommand;
-import workbench.sql.commands.IgnoredCommand;
-import workbench.sql.commands.SelectCommand;
-import workbench.sql.commands.SetCommand;
-import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.commands.UpdatingCommand;
-import workbench.sql.commands.UseCommand;
 import workbench.sql.wbcommands.WbCopy;
 import workbench.sql.wbcommands.WbDefinePk;
 import workbench.sql.wbcommands.WbDefineVar;
-import workbench.sql.wbcommands.WbDescribeTable;
-import workbench.sql.wbcommands.WbSchemaDiff;
-import workbench.sql.wbcommands.WbDisableOraOutput;
-import workbench.sql.wbcommands.WbEnableOraOutput;
-import workbench.sql.wbcommands.WbEndBatch;
-import workbench.sql.wbcommands.WbExport;
-import workbench.sql.wbcommands.WbHelp;
-import workbench.sql.wbcommands.WbImport;
-import workbench.sql.wbcommands.WbInclude;
-import workbench.sql.wbcommands.WbListCatalogs;
-import workbench.sql.wbcommands.WbListPkDef;
-import workbench.sql.wbcommands.WbListProcedures;
-import workbench.sql.wbcommands.WbListTables;
-import workbench.sql.wbcommands.WbListVars;
-import workbench.sql.wbcommands.WbLoadPkMapping;
-import workbench.sql.wbcommands.WbOraExecute;
-import workbench.sql.wbcommands.WbRemoveVar;
-import workbench.sql.wbcommands.WbSavePkMapping;
-import workbench.sql.wbcommands.WbSchemaReport;
-import workbench.sql.wbcommands.WbSelectBlob;
-import workbench.sql.wbcommands.WbStartBatch;
-import workbench.sql.wbcommands.WbXslt;
-import workbench.storage.RowActionMonitor;
-import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
-import workbench.interfaces.ExecutionController;
 import workbench.sql.wbcommands.WbFeedback;
+import workbench.sql.wbcommands.WbInclude;
+import workbench.sql.wbcommands.WbRemoveVar;
+import workbench.storage.PkMapping;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -71,22 +34,63 @@ import workbench.sql.wbcommands.WbFeedback;
 public class DefaultStatementRunnerTest 
 	extends TestCase
 {
+	private TestUtil util;
 	public DefaultStatementRunnerTest(String testName)
 	{
 		super(testName);
+		util = new TestUtil();
 	}
 
+	public void testWbCommands()
+		throws Exception
+	{
+		try
+		{
+			util.prepareEnvironment();
+			DefaultStatementRunner runner = util.createConnectedStatementRunner();
+			WbConnection con = runner.getConnection();
+
+			runner.setVerboseLogging(true);
+			
+			String sql = "--comment\n\nwbfeedback off";
+			SqlCommand command = runner.getCommandToUse(sql);
+			assertTrue(command instanceof WbFeedback);
+			runner.runStatement(sql, -1, -1);
+
+			boolean verbose = runner.getVerboseLogging();
+			assertEquals("Feedback not executed", false, verbose);
+			
+			sql = "--define a new PK for a view\nwbdefinepk junitpk=id,name";
+			command = runner.getCommandToUse(sql);
+			assertTrue(command instanceof WbDefinePk);
+			runner.runStatement(sql, -1, -1);
+
+			Map mapping = PkMapping.getInstance().getMapping();
+			String cols = (String)mapping.get("junitpk");
+			assertEquals("Wrong pk mapping stored", "id,name", cols);
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+	
 	/**
 	 * Test of getCommandToUse method, of class workbench.sql.DefaultStatementRunner.
 	 */
-	public void testRunner() throws Exception
+	public void testCommands() throws Exception
 	{
-		String sql = "insert into bla (col) values (1)";
+		String sql = "\n\ninsert into bla (col) values (1)";
 		DefaultStatementRunner runner = new DefaultStatementRunner();
 		SqlCommand command = runner.getCommandToUse(sql);
 		assertSame(command, UpdatingCommand.INSERT);
 		
-		sql = "  update bla set col = value";
+		sql = "--do something\nupdate bla set col = value";
 		command = runner.getCommandToUse(sql);
 		assertSame(command, UpdatingCommand.UPDATE);
 		assertEquals(true, command.isUpdatingCommand());
@@ -110,7 +114,7 @@ public class DefaultStatementRunnerTest
 		assertSame(command, DdlCommand.DROP);
 		assertEquals(true, command.isUpdatingCommand());
 		
-		sql = "  alter table bla drop constraint xyz;";
+		sql = "/* this is \n a comment \n*/\n-- comment\nalter table bla drop constraint xyz;";
 		command = runner.getCommandToUse(sql);
 		assertSame(command, DdlCommand.ALTER);
 		assertEquals(true, command.isUpdatingCommand());
@@ -118,7 +122,7 @@ public class DefaultStatementRunnerTest
 		boolean isDrop = ((DdlCommand)command).isDropCommand(sql);
 		assertEquals(true, isDrop);
 		
-		sql = "  wbvardefine x=42;";
+		sql = "  -- comment\n   wbvardefine x=42;";
 		command = runner.getCommandToUse(sql);
 		assertSame(command, WbDefineVar.DEFINE_LONG);
 		assertEquals(false, command.isUpdatingCommand());
@@ -127,7 +131,7 @@ public class DefaultStatementRunnerTest
 		command = runner.getCommandToUse(sql);
 		assertSame(command, WbDefineVar.DEFINE_SHORT);
 		
-		sql = "   wbcopy -sourceprofile=x";
+		sql = "   -- comment\nwbcopy -sourceprofile=x";
 		command = runner.getCommandToUse(sql);
 		assertTrue(command instanceof WbCopy);
 		

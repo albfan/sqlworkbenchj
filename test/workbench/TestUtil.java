@@ -17,6 +17,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
+import workbench.db.WbConnection;
+import workbench.interfaces.StatementRunner;
+import workbench.sql.BatchRunner;
+import workbench.sql.DefaultStatementRunner;
+import workbench.util.ArgumentParser;
 
 /**
  *
@@ -35,11 +42,17 @@ public class TestUtil
 	public void prepareEnvironment()
 		throws IOException
 	{
+		prepareEnvironment("wbtestdb");
+	}
+	
+	public void prepareEnvironment(String dbBaseName)
+		throws IOException
+	{
 		File tempdir = new File(System.getProperty("java.io.tmpdir"));
 		File dir = new File(tempdir, "wbtest");
 		dir.mkdir();
 		basedir = dir.getAbsolutePath();
-		File db = new File(basedir, "wbexporttest");
+		File db = new File(basedir, dbBaseName);
 		dbName = db.getAbsolutePath();
 
 		PrintWriter pw = new PrintWriter(new FileWriter(new File(dir, "workbench.settings")));
@@ -50,7 +63,32 @@ public class TestUtil
 		pw.close();
 		WbManager.getInstance().prepareForTest(basedir);
 	}
-	
+
+	public void emptyBaseDirectory()
+	{
+		// Cleanup old database files
+		File dir = new File(basedir);
+		File[] files = dir.listFiles();
+		for (int i = 0; i < files.length; i++)
+		{ 
+			files[i].delete();
+		}
+	}
+
+	public DefaultStatementRunner createConnectedStatementRunner()
+		throws Exception
+	{
+		emptyBaseDirectory();
+		ArgumentParser parser = WbManager.createArgumentParser();
+		parser.parse("-url=jdbc:hsqldb:" + getDbName() + " -user=sa -driver=org.hsqldb.jdbcDriver");
+		DefaultStatementRunner runner = new DefaultStatementRunner();
+		runner.setBaseDir(getBaseDir());
+		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
+		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, "WbUnitTest");
+		runner.setConnection(con);
+		return runner;
+	}
+
 	public String getBaseDir() { return this.basedir; }
 	public String getDbName() { return this.dbName; }
 

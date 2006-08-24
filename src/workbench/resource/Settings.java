@@ -341,6 +341,26 @@ public class Settings
 		}
 	}
 
+	public boolean getIncludeHeaderInOptimalWidth()
+	{
+		return getBoolProperty("workbench.gui.optimalwidth.includeheader", false);
+	}
+	
+	public void setIncludeHeaderInOptimalWidth(boolean flag)
+	{
+		setProperty("workbench.gui.optimalwidth.includeheader", flag);
+	}
+	
+	public boolean getAutomaticOptimalWidth()
+	{
+		return getBoolProperty("workbench.gui.optimalwidth.automatic", false);
+	}
+	
+	public void setAutomaticOptimalWidth(boolean flag)
+	{
+		setProperty("workbench.gui.optimalwidth.automatic", flag);
+	}
+
 	public static final String UNIX_LINE_TERMINATOR_PROP_VALUE = "lf";
 	public static final String DOS_LINE_TERMINATOR_PROP_VALUE = "crlf";
 	public static final String DEFAULT_LINE_TERMINATOR_PROP_VALUE = "default";
@@ -355,16 +375,6 @@ public class Settings
 		setLineEndingProperty("workbench.editor.lineending.external", value);
 	}
 	
-	/** 
-	 * The real setting for the external line ending property
-	 * to be used by the options dialog
-	 */
-	public String getExternalLineEndingValue()
-	{
-		return getProperty("workbench.editor.lineending.external", DEFAULT_LINE_TERMINATOR_PROP_VALUE);
-	}
-	
-	
 	public String getInternalEditorLineEnding()
 	{
 		return getLineEndingProperty("workbench.editor.lineending.internal", UNIX_LINE_TERMINATOR_PROP_VALUE);
@@ -375,6 +385,15 @@ public class Settings
 		setLineEndingProperty("workbench.editor.lineending.internal", value);
 	}
 
+	/** 
+	 * The real setting for the external line ending property
+	 * to be used by the options dialog
+	 */
+	public String getExternalLineEndingValue()
+	{
+		return getProperty("workbench.editor.lineending.external", DEFAULT_LINE_TERMINATOR_PROP_VALUE);
+	}
+	
 	/** 
 	 * The real setting for the internal line ending property
 	 * to be used by the options dialog
@@ -632,6 +651,8 @@ public class Settings
 	
 	private void renameOldProps()
 	{
+		this.renameProperty("workbench.sql.maxcolwidth","workbench.gui.optimalwidth.maxsize");
+		this.renameProperty("workbench.sql.mincolwidth","workbench.gui.optimalwidth.minsize");
 		this.renameProperty("sort.language", "workbench.sort.language");
 		this.renameProperty("sort.country", "workbench.sort.country");
 		this.renameProperty("connection.last", "workbench.connection.last");
@@ -1540,12 +1561,7 @@ public class Settings
 		String group = getProperty(key + ".group", null);
 		return new ProfileKey(name, group);
 	}
-
-//	public ProfileKey getLastConnection()
-//	{
-//		return this.getLastConnection("workbench.connection.last");
-//	}
-
+	
 	public void setLastConnection(ConnectionProfile prof)
 	{
 		setLastConnection("workbench.connection.last", prof);
@@ -1597,11 +1613,6 @@ public class Settings
 	}
 
 
-	public int getMinColumnWidth()
-	{
-		return this.getIntProperty("workbench.sql.mincolwidth", 50);
-	}
-
 	public int getInMemoryScriptSizeThreshold()
 	{
 		// Process scripts up to 1 MB in memory
@@ -1644,14 +1655,24 @@ public class Settings
 		setProperty("workbench.editor.rightclickmovescursor", flag);
 	}
 
+	public void setMinColumnWidth(int width)
+	{
+		setProperty("workbench.gui.optimalwidth.minsize", width);
+	}
+	
+	public int getMinColumnWidth()
+	{
+		return this.getIntProperty("workbench.gui.optimalwidth.minsize", 50);
+	}
+	
 	public int getMaxColumnWidth()
 	{
-		return getIntProperty("workbench.sql.maxcolwidth", 500);
+		return getIntProperty("workbench.gui.optimalwidth.maxsize", 500);
 	}
 
-	public void setMaxColumnWidth(int aWidth)
+	public void setMaxColumnWidth(int width)
 	{
-		this.setProperty("workbench.sql.maxcolwidth", aWidth);
+		this.setProperty("workbench.gui.optimalwidth.minsize", width);
 	}
 
 	private SimpleDateFormat defaultDateFormatter = null;

@@ -62,6 +62,7 @@ public class WbExportTest extends TestCase
 
 	protected void setUp() throws Exception
 	{
+		super.setUp();
 		this.connection = prepareDatabase();
 		this.exportCmd.setConnection(this.connection);
 	}
@@ -69,6 +70,7 @@ public class WbExportTest extends TestCase
 	protected void tearDown() throws Exception
 	{
 		this.connection.disconnect();
+		super.tearDown();
 	}
 
 	public void testTextExportCompressed() 

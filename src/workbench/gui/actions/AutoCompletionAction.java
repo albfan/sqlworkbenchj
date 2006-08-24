@@ -45,6 +45,11 @@ public class AutoCompletionAction
 		editor.addKeyBinding(this);
 	}
 
+	public void closePopup()
+	{
+		if (handler != null) handler.cancelPopup();
+	}
+	
 	public void setConnection(WbConnection conn)
 	{
 		if (conn != null && this.handler == null)
