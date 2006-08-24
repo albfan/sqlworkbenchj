@@ -44,6 +44,11 @@ public abstract class ExportWriter
 	{
 		this.exporter = exp;
 		converter = createConverter();
+		// configureConverter() might be called more than once
+		// to prevent connection dependent information to be read
+		// more than once, call setOriginalConnection() only 
+		// here and now
+		converter.setOriginalConnection(this.exporter.getConnection());
 		configureConverter();
 	}
 
@@ -54,7 +59,6 @@ public abstract class ExportWriter
 		converter.setDefaultDateFormatter(exporter.getDateFormatter());
 		converter.setDefaultTimestampFormatter(exporter.getTimestampFormatter());
 		converter.setDefaultNumberFormatter(exporter.getDecimalFormatter());
-		converter.setOriginalConnection(this.exporter.getConnection());
 		converter.setColumnsToExport(this.exporter.getColumnsToExport());
 		converter.setCompressExternalFiles(exporter.getCompressOutput());
 		String file = this.exporter.getOutputFilename();

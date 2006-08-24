@@ -85,8 +85,17 @@ public class XmlRowDataConverter
 	public void setOriginalConnection(WbConnection con)
 	{
 		super.setOriginalConnection(con);
-		StrBuffer indent = new StrBuffer("    ");
-		this.dbInfo = con.getDatabaseInfoAsXml(indent);
+		// This should be done before running the actual export
+		// in order to avoid concurrent statement execution during export
+		// getDatabaseInfoAsXml() indirectly runs some statements because
+		// it retrieves user and schema information from the database
+		// DataExporter will call this immediately after creating the 
+		// ExportWriter, which in turn will call this method
+		if (this.dbInfo == null)
+		{
+			StrBuffer indent = new StrBuffer("    ");
+			this.dbInfo = con.getDatabaseInfoAsXml(indent);
+		}
 	}
 	
 	public void setUseVerboseFormat(boolean flag)

@@ -426,8 +426,6 @@ public class DataExporter
 
 	private void createExportWriter()
 	{
-		ExportWriter exporter = null;
-
 		switch (this.exportType)
 		{
 			case EXPORT_HTML:
@@ -879,7 +877,6 @@ public class DataExporter
 		try
 		{
 			File f = new File(this.outputfile);
-//			this.fullOutputFileName = f.getAbsolutePath();
 			
 			OutputStream out = null;
 			if (this.getCompressOutput())
