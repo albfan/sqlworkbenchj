@@ -14,6 +14,7 @@ package workbench.db;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
+import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
 
 import workbench.interfaces.ScriptGenerationMonitor;
@@ -49,6 +50,7 @@ public class ObjectScripter
 	private ScriptGenerationMonitor progressMonitor;
 	private WbConnection dbConnection;
 	private boolean cancel;
+	private String nl = Settings.getInstance().getInternalEditorLineEnding();
 	
 	public ObjectScripter(Map objectList, WbConnection aConnection)
 	{
@@ -82,6 +84,7 @@ public class ObjectScripter
 			this.script = new StringBuffer(this.objectList.size() * 500);
 			if (!cancel) this.appendObjectType(TYPE_SEQUENCE);
 			if (!cancel) this.appendObjectType(TYPE_TABLE);
+			if (!cancel) this.appendForeignKeys();
 			if (!cancel) this.appendObjectType(TYPE_VIEW);
 			if (!cancel) this.appendObjectType(TYPE_SYNONYM);
 			if (!cancel) this.appendObjectType(TYPE_INSERT);
@@ -97,6 +100,43 @@ public class ObjectScripter
 	public void cancel()
 	{
 		this.cancel = true;
+	}
+	
+	private void appendForeignKeys()
+	{
+		Iterator itr = this.objectList.entrySet().iterator();
+		boolean first = true;
+		if (this.progressMonitor != null)
+		{
+			this.progressMonitor.setCurrentObject(ResourceMgr.getString("TxtScriptProcessFk"));
+		}
+		while (itr.hasNext())
+		{
+			if (cancel) break;
+			Map.Entry entry = (Map.Entry)itr.next();
+			Object key = entry.getKey();
+			String type = (String)entry.getValue();
+			if (!type.equalsIgnoreCase(TYPE_TABLE)) continue;
+
+			String object = (String)key;
+			TableIdentifier tbl = new TableIdentifier(object);
+			tbl.adjustCase(this.dbConnection);
+			StringBuffer source = meta.getFkSource(tbl);
+			if (source != null && source.length() > 0)
+			{
+				if (first)
+				{
+					this.script.append("-- BEGIN FOREIGN KEYS --" + nl + nl);
+					first = false;
+				}
+				script.append(source);
+			}
+		}	
+		if (!first)
+		{
+			// no table was found, so no FK was added --> do not add separator
+			this.script.append("-- END FOREIGN KEYS --" + nl);
+		}
 	}
 	
 	private void appendObjectType(String typeFilter)
@@ -131,7 +171,7 @@ public class ObjectScripter
 					tbl.adjustCase(this.dbConnection);
 					if (TYPE_TABLE.equalsIgnoreCase(type))
 					{
-						source = meta.getTableSource(tbl, true);
+						source = meta.getTableSource(tbl, true, false);
 					}
 					else if (TYPE_VIEW.equalsIgnoreCase(type))
 					{
@@ -163,10 +203,10 @@ public class ObjectScripter
 			if (source != null && source.length() > 0)
 			{
 				boolean useSeparator = !type.equalsIgnoreCase("insert") && !type.equalsIgnoreCase("select");
-				if (useSeparator) this.script.append("-- BEGIN " + type + " " + key.toString() + "\n");
+				if (useSeparator) this.script.append("-- BEGIN " + type + " " + key.toString() + nl);
 				this.script.append(source);
-				if (useSeparator) this.script.append("\n-- END " + type + " " + key.toString() + "\n");
-				this.script.append("\n");
+				if (useSeparator) this.script.append(nl + "-- END " + type + " " + key.toString() + nl);
+				this.script.append(nl);
 			}
 		}
 	}
@@ -207,7 +247,7 @@ public class ObjectScripter
 			}
 		}
 		DmlStatement stmt = factory.createInsertStatement(dummyData, true);
-		String sql = stmt.getExecutableStatement(this.meta.getProductName()) + ";\n";
+		String sql = stmt.getExecutableStatement(this.meta.getProductName()) + ";" + nl;
 		return sql;
 	}
 	
@@ -232,15 +272,18 @@ public class ObjectScripter
 			//column = SqlUtil.quoteObjectname(column);
 			if (i > 0)
 			{
-				sql.append(",\n");
+				sql.append(',');
+				sql.append(nl);
 				sql.append("       ");
 			}
 
 			sql.append(column);
 		}
-		sql.append("\nFROM ");
+		sql.append(nl);
+		sql.append("FROM ");
 		sql.append(tbl.getTableName());
-		sql.append(";\n");
+		sql.append(';');
+		sql.append(nl);
 
 		return sql.toString();
 	}

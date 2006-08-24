@@ -849,6 +849,9 @@ public class DbMetadata
 
 			funcs = this.metaData.getTimeDateFunctions();
 			this.addStringList(dbFunctions, funcs);
+			
+			// Add Standard ANSI SQL Functions
+			this.addStringList(dbFunctions, Settings.getInstance().getProperty("workbench.db.standardfunctions", "COUNT,AVG,SUM,MAX,MIN"));
 		}
 		catch (Exception e)
 		{
@@ -3341,17 +3344,20 @@ public class DbMetadata
 	 * @return the SQL statement to create the given table.
 	 * @param table the table for which the source should be retrievedcatalog The catalog in which the table is defined. This should be null if the DBMS does not support catalogs
 	 * @param includeDrop If true, a DROP TABLE statement will be included in the generated SQL script.
+	 * @param includeFk if true, the foreign key constraints will be added after the CREATE TABLE
 	 * @throws SQLException
 	 */
-	public String getTableSource(TableIdentifier table, boolean includeDrop)
+	public String getTableSource(TableIdentifier table, boolean includeDrop, boolean includeFk)
 		throws SQLException
 	{
 		DataStore tableDef = this.getTableDefinition(table, true);
+		ColumnIdentifier[] cols = createColumnIdentifiers(tableDef);
 		DataStore index = this.getTableIndexInformation(table);
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(this.dbConnection);
-		DataStore fkDef = this.getForeignKeys(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), false);
-		String source = this.getTableSource(table, tableDef, index, fkDef, includeDrop);
+		DataStore fkDef = null;
+		if (includeFk) fkDef = this.getForeignKeys(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), false);
+		String source = this.getTableSource(table, cols, index, fkDef, includeDrop, null, includeFk);
 		return source;
 	}
 
@@ -3363,10 +3369,15 @@ public class DbMetadata
 
 	public String getTableSource(TableIdentifier table, ColumnIdentifier[] columns, String tableNameToUse)
 	{
-		return getTableSource(table, columns, null, null, false, tableNameToUse);
+		return getTableSource(table, columns, null, null, false, tableNameToUse, true);
 	}
 
 	public String getTableSource(TableIdentifier table, ColumnIdentifier[] columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse)
+	{
+		return getTableSource(table, columns, aIndexDef, aFkDef, includeDrop, tableNameToUse, true);
+	}
+	
+	public String getTableSource(TableIdentifier table, ColumnIdentifier[] columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
 	{
 		if (columns == null || columns.length == 0) return StringUtil.EMPTY_STRING;
 
@@ -3479,14 +3490,19 @@ public class DbMetadata
 			result.append(pkCols.toString());
 			result.append(")" + lineEnding);
 
-			StringBuffer fk = this.getFkSource(table.getTableName(), aFkDef, tableNameToUse);
-			if (fk.length() > 0)
+			if (includeFk)
 			{
-				result.append(fk);
+				StringBuffer fk = this.getFkSource(table.getTableName(), aFkDef, tableNameToUse);
+				if (fk.length() > 0)
+				{
+					result.append(fk);
+				}
 			}
 		}
 
-		result.append(");" + lineEnding);
+		result.append(");" + lineEnding); // end of CREATE TABLE
+		
+		
 		if (!this.createInlineConstraints && pkCols.length() > 0)
 		{
 			String template = this.getSqlTemplate(DbMetadata.pkStatements);
@@ -3509,7 +3525,7 @@ public class DbMetadata
 		}
 		StringBuffer indexSource = this.indexReader.getIndexSource(table, aIndexDef, tableNameToUse);
 		result.append(indexSource);
-		if (!this.createInlineConstraints) result.append(this.getFkSource(table.getTableName(), aFkDef, tableNameToUse));
+		if (!this.createInlineConstraints && includeFk) result.append(this.getFkSource(table.getTableName(), aFkDef, tableNameToUse));
 
 		String comments = this.getTableCommentSql(table);
 		if (comments != null && comments.length() > 0)
@@ -3661,6 +3677,12 @@ public class DbMetadata
 		return result;
 	}
 
+	public StringBuffer getFkSource(TableIdentifier table)
+	{
+		DataStore fkDef = this.getForeignKeys(table.getCatalog(), table.getSchema(), table.getTableName(), false);
+		return getFkSource(table.getTableName(), fkDef, null);
+	}
+	
 	/**
 	 *	Return a SQL script to re-create the Foreign key definition for the given table.
 	 *
@@ -3808,6 +3830,8 @@ public class DbMetadata
 		}
 		StringBuffer fk = new StringBuffer();
 
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
+		
 		Iterator values = fks.values().iterator();
 		while (values.hasNext())
 		{
@@ -3815,12 +3839,13 @@ public class DbMetadata
 			{
 				fk.append("   ,");
 				fk.append((String)values.next());
-				fk.append("\n");
+				fk.append(nl);
 			}
 			else
 			{
 				fk.append((String)values.next());
-				fk.append(";\n\n");
+				fk.append(';');
+				fk.append(nl);fk.append(nl);
 			}
 		}
 		return fk;
@@ -3928,10 +3953,12 @@ public class DbMetadata
 		}
 		Set entries = grants.entrySet();
 		Iterator itr = entries.iterator();
+		String user = dbConnection.getCurrentUser();
 		while (itr.hasNext())
 		{
 			Entry entry = (Entry)itr.next();
 			String grantee = (String)entry.getKey();
+			if (user.equalsIgnoreCase(grantee)) continue;
 			StrBuffer privs = (StrBuffer)entry.getValue();
 			result.append("GRANT ");
 			result.append(privs);
