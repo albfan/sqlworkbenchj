@@ -37,6 +37,7 @@ public class ExportJobEntry
 		StringBuffer sql = new StringBuffer(100);
 		sql.append("SELECT ");
 		ColumnIdentifier[] cols = resultInfo.getColumns();
+		if (cols.length == 0) throw new SQLException("Table '" + table.getTableExpression() + "' not found!");
 		for (int i = 0; i < cols.length; i++)
 		{
 			if (i > 0) sql.append(',');
