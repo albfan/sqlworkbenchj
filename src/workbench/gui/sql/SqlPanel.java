@@ -434,7 +434,8 @@ public class SqlPanel
 	{
 		if (this.editor == null) return true;
 		int result = this.editor.checkAndSaveFile();
-		return (result != JOptionPane.CANCEL_OPTION);
+		if (result == JOptionPane.CANCEL_OPTION) return false;
+		return true;
 	}
 
 	public EditorPanel getEditor()
@@ -481,7 +482,7 @@ public class SqlPanel
 		return false;
 	}
 
-	public void clearSqlStatements()
+	public void clearSqlHistory(boolean removeEditorText)
 	{
 		if (this.sqlHistory != null) this.sqlHistory.clear();
 		this.editor.setText("");
@@ -495,7 +496,11 @@ public class SqlPanel
 	public boolean closeFile(boolean emptyEditor, boolean checkUnsaved)
 	{
 		if (this.editor == null) return true;
-		if (checkUnsaved) this.checkAndSaveFile();
+		if (checkUnsaved) 
+		{
+			boolean canClose = this.checkAndSaveFile();
+			if (!canClose) return false;
+		}
 		if (this.editor.closeFile(emptyEditor))
     {
 			this.fileDiscardAction.setEnabled(false);
@@ -503,6 +508,7 @@ public class SqlPanel
       this.fireFilenameChanged(this.tabName);
 			this.selectEditorLater();
 			this.removeIconFromTab();
+			this.clearSqlHistory(false);
 			return true;
     }
 		return false;
@@ -769,6 +775,14 @@ public class SqlPanel
 		this.setExecuteActionStates(false);
 	}
 
+	public void setVisible(boolean flag)
+	{
+		super.setVisible(flag);
+		if (!flag)
+		{
+			this.autoCompletion.closePopup();
+		}
+	}
 	private void setupActionMap()
 	{
 		InputMap im = new ComponentInputMap(this);
@@ -1012,7 +1026,7 @@ public class SqlPanel
 		catch (Exception e)
 		{
 			LogMgr.logWarning("SqlPanel.readFromWorkspace()", "Could not read history data for index " + (this.internalId - 1));
-			this.clearSqlStatements();
+			this.clearSqlHistory(false);
 		}
 
 		String filename = w.getExternalFileName(index);

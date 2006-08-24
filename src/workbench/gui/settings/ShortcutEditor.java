@@ -110,7 +110,7 @@ public class ShortcutEditor
 		this.keysTable.setRowSelectionAllowed(true);
 		this.keysTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		this.keysTable.setAdjustToColumnLabel(true);
-		this.keysTable.optimizeAllColWidth(80);
+		this.keysTable.optimizeAllColWidth(80,-1,true);
 		this.keysTable.addMouseListener(this);
 		this.cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
 		this.cancelButton.addActionListener(this);

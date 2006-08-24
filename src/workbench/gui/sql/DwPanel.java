@@ -158,8 +158,6 @@ public class DwPanel
 		this.dataTable.setRowSelectionAllowed(true);
 		this.dataTable.getSelectionModel().addListSelectionListener(this);
 		this.dataTable.setHighlightRequiredFields(Settings.getInstance().getHighlightRequiredFields());
-		this.dataTable.setMaxColWidth(Settings.getInstance().getMaxColumnWidth());
-		this.dataTable.setMinColWidth(Settings.getInstance().getMinColumnWidth());
 		
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.setDefaultComponent(dataTable);
@@ -206,13 +204,6 @@ public class DwPanel
 		};
 		t.start();
 	}
-	
-//	public JToolTip createToolTip()
-//	{
-//		JToolTip tip = new MultiLineToolTip();
-//		tip.setComponent(this);
-//		return tip;
-//	}
 	
 	public void setManageUpdateAction(boolean aFlag)
 	{
@@ -699,8 +690,14 @@ public class DwPanel
 		this.dataTable.reset();
 		this.dataTable.setAutoCreateColumnsFromModel(true);
 		this.dataTable.setModel(new DataStoreTableModel(newData), true);
-		this.dataTable.adjustColumns();
-		
+		if (Settings.getInstance().getAutomaticOptimalWidth())
+		{
+			this.dataTable.optimizeAllColWidth(true);
+		}
+		else
+		{
+			this.dataTable.adjustColumns();
+		}
 		StringBuffer header = new StringBuffer(80);
 		header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
 		header.append(this.sql);

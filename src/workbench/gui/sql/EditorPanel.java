@@ -337,19 +337,14 @@ public class EditorPanel
 		}
 
 		if (newSql.length() == 0) return;
-		int caret = -1;
 
 		if (this.isTextSelected())
 		{
-			caret = this.getSelectionStart();
 			this.setSelectedText(newSql.toString());
-			this.select(caret, caret + newSql.length());
 		}
 		else
 		{
-			caret = this.getCaretPosition();
 			this.setText(newSql.toString());
-			if (caret > 0 && caret < this.getText().length()) this.setCaretPosition(caret);
 		}
 
 	}
@@ -634,6 +629,8 @@ public class EditorPanel
 		
 		BufferedReader reader = null;
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
+		int endLength = lineEnding.length();
+		SyntaxDocument doc = null;
 		try
 		{
 			// try to free memory by releasing the current document
@@ -663,17 +660,18 @@ public class EditorPanel
 			// does not seem to work, inserting the text has to
 			// go through the SyntaxDocument
 			GapContent  content = new GapContent((int)aFile.length() + 500);
-			SyntaxDocument doc = new SyntaxDocument(content);
+			doc = new SyntaxDocument(content);
 			int pos = 0;
 			String line = reader.readLine();
-			doc.beginCompoundEdit();
 			while (line != null)
 			{
-				doc.insertString(pos, line + lineEnding, null);
-				pos += line.length() + 1;
+				doc.insertString(pos, line, null);
+				pos += line.length();
+				doc.insertString(pos, lineEnding, null);
+				pos += endLength;
 				line = reader.readLine();
 			}
-			doc.endCompoundEdit();
+			doc.clearUndoBuffer();
 			this.setDocument(doc);
 			this.currentFile = aFile;
 			this.fileEncoding = encoding;

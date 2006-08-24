@@ -14,6 +14,7 @@ package workbench.gui.settings;
 import javax.swing.JPanel;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.FlatButton;
+import workbench.gui.components.NumberField;
 import workbench.gui.components.WbCheckBoxLabel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -42,6 +43,11 @@ public class DataEditOptionsPanel
 		alternateColor.setSelectedColor(Settings.getInstance().getAlternateRowColor());
 		requiredFieldColor.setSelectedColor(Settings.getInstance().getRequiredFieldColor());
 		dataFont.setSelectedFont(Settings.getInstance().getDataFont());
+		autoColWidth.setSelected(Settings.getInstance().getAutomaticOptimalWidth());
+		includeHeaderWidth.setSelected(Settings.getInstance().getIncludeHeaderInOptimalWidth());
+		minColSizeField.setText(Integer.toString(Settings.getInstance().getMinColumnWidth()));
+		maxColSizeField.setText(Integer.toString(Settings.getInstance().getMaxColumnWidth()));
+		pkMapFile.setText(Settings.getInstance().getPKMappingFilename());
 	}
 
 	public void saveSettings()
@@ -51,11 +57,16 @@ public class DataEditOptionsPanel
 		set.setAlternateRowColor(alternateColor.getSelectedColor());
 		set.setAllowRowHeightResizing(rowHeightResize.isSelected());
 		set.setDataFont(dataFont.getSelectedFont());
+		set.setMaxColumnWidth(((NumberField)this.maxColSizeField).getValue());
+		set.setMinColumnWidth(((NumberField)this.minColSizeField).getValue());
 		set.setRequiredFieldColor(requiredFieldColor.getSelectedColor());
 		set.setHighlightRequiredFields(this.highlightRequired.isSelected());
 		set.setPreviewDml(this.previewDml.isSelected());
 		set.setPKMappingFilename(pkMapFile.getText());
+		set.setAutomaticOptimalWidth(autoColWidth.isSelected());
+		set.setIncludeHeaderInOptimalWidth(includeHeaderWidth.isSelected());
 	}
+	
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -84,6 +95,15 @@ public class DataEditOptionsPanel
     useAlternateRowColors = new javax.swing.JCheckBox();
     alternateColorLabel = new javax.swing.JLabel();
     alternateColor = new workbench.gui.components.WbColorPicker();
+    maxColSizeLabel = new javax.swing.JLabel();
+    maxColSizeField = new NumberField();
+    minColSizeLabel = new javax.swing.JLabel();
+    minColSizeField = new NumberField();
+    includeHeaderWidth = new javax.swing.JCheckBox();
+    includeHeaderWidthLabel = new WbCheckBoxLabel();
+    autoColWidthLabel = new WbCheckBoxLabel();
+    autoColWidth = new javax.swing.JCheckBox();
+    dummyPanel = new javax.swing.JPanel();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -93,14 +113,12 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(11, 12, 0, 0);
     add(pkMapFileLabel, gridBagConstraints);
 
     jPanel3.setLayout(new java.awt.BorderLayout(5, 0));
 
     pkMapFile.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-    pkMapFile.setText(Settings.getInstance().getPKMappingFilename());
     pkMapFile.setMaximumSize(new java.awt.Dimension(2147483647, 22));
     pkMapFile.setMinimumSize(new java.awt.Dimension(6, 22));
     pkMapFile.setPreferredSize(new java.awt.Dimension(72, 22));
@@ -120,8 +138,6 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(7, 8, 0, 15);
     add(jPanel3, gridBagConstraints);
 
@@ -137,7 +153,7 @@ public class DataEditOptionsPanel
 
     previewDml.setFont(null);
     previewDml.setSelected(Settings.getInstance().getPreviewDml());
-    previewDml.setText("");
+    previewDml.setText(" ");
     previewDml.setBorder(null);
     previewDml.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     previewDml.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -146,7 +162,6 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(10, 9, 0, 11);
     add(previewDml, gridBagConstraints);
@@ -158,11 +173,10 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
     add(labelRowHeight, gridBagConstraints);
 
     rowHeightResize.setSelected(Settings.getInstance().getAllowRowHeightResizing());
-    rowHeightResize.setText("");
     rowHeightResize.setBorder(null);
     rowHeightResize.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     rowHeightResize.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -171,7 +185,6 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(7, 9, 0, 11);
     add(rowHeightResize, gridBagConstraints);
@@ -219,12 +232,11 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
     add(highlightRequiredLabel, gridBagConstraints);
 
     highlightRequired.setFont(null);
     highlightRequired.setSelected(Settings.getInstance().getHighlightRequiredFields());
-    highlightRequired.setText("");
     highlightRequired.setBorder(null);
     highlightRequired.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     highlightRequired.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -244,12 +256,11 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(4, 12, 0, 0);
     add(alternatingColorsLabel, gridBagConstraints);
 
     useAlternateRowColors.setFont(null);
     useAlternateRowColors.setSelected(Settings.getInstance().getUseAlternateRowColor());
-    useAlternateRowColors.setText("");
     useAlternateRowColors.setBorder(null);
     useAlternateRowColors.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     useAlternateRowColors.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -280,6 +291,87 @@ public class DataEditOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(3, 4, 0, 25);
     add(alternateColor, gridBagConstraints);
 
+    maxColSizeLabel.setText(ResourceMgr.getString("LblMaxColsize"));
+    maxColSizeLabel.setToolTipText(ResourceMgr.getDescription("LblMaxColsize"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
+    add(maxColSizeLabel, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 8, 0, 15);
+    add(maxColSizeField, gridBagConstraints);
+
+    minColSizeLabel.setText(ResourceMgr.getString("LblMinColsize"));
+    minColSizeLabel.setToolTipText(ResourceMgr.getDescription("LblMinColsize"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 7;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
+    add(minColSizeLabel, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(4, 8, 0, 15);
+    add(minColSizeField, gridBagConstraints);
+
+    includeHeaderWidth.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    includeHeaderWidth.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(9, 8, 0, 0);
+    add(includeHeaderWidth, gridBagConstraints);
+
+    includeHeaderWidthLabel.setLabelFor(includeHeaderWidth);
+    includeHeaderWidthLabel.setText(ResourceMgr.getString("LblIncludeHeaderColWidth"));
+    includeHeaderWidthLabel.setToolTipText(ResourceMgr.getDescription("LblIncludeHeaderColWidth"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
+    add(includeHeaderWidthLabel, gridBagConstraints);
+
+    autoColWidthLabel.setLabelFor(autoColWidth);
+    autoColWidthLabel.setText(ResourceMgr.getString("LblAutoColWidth"));
+    autoColWidthLabel.setToolTipText(ResourceMgr.getDescription("LblAutoColWidth"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
+    add(autoColWidthLabel, gridBagConstraints);
+
+    autoColWidth.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    autoColWidth.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(9, 8, 0, 0);
+    add(autoColWidth, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 10;
+    gridBagConstraints.weighty = 1.0;
+    add(dummyPanel, gridBagConstraints);
+
   }
 
   // Code for dispatching events from components to event handlers.
@@ -303,12 +395,21 @@ public class DataEditOptionsPanel
   private workbench.gui.components.WbColorPicker alternateColor;
   private javax.swing.JLabel alternateColorLabel;
   private javax.swing.JLabel alternatingColorsLabel;
+  private javax.swing.JCheckBox autoColWidth;
+  private javax.swing.JLabel autoColWidthLabel;
   private workbench.gui.components.WbFontPicker dataFont;
   private javax.swing.JLabel dataFontLabel;
+  private javax.swing.JPanel dummyPanel;
   private javax.swing.JCheckBox highlightRequired;
   private javax.swing.JLabel highlightRequiredLabel;
+  private javax.swing.JCheckBox includeHeaderWidth;
+  private javax.swing.JLabel includeHeaderWidthLabel;
   private javax.swing.JPanel jPanel3;
   private javax.swing.JLabel labelRowHeight;
+  private javax.swing.JTextField maxColSizeField;
+  private javax.swing.JLabel maxColSizeLabel;
+  private javax.swing.JTextField minColSizeField;
+  private javax.swing.JLabel minColSizeLabel;
   private javax.swing.JTextField pkMapFile;
   private javax.swing.JLabel pkMapFileLabel;
   private javax.swing.JCheckBox previewDml;

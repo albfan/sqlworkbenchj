@@ -414,7 +414,7 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
     add(internalLineEndingLabel, gridBagConstraints);
 
-    internalLineEnding.setToolTipText(ResourceMgr.getDescription("LblPasteCase"));
+    internalLineEnding.setToolTipText(ResourceMgr.getDescription("LblIntLineEnding"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
@@ -433,7 +433,7 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
     add(externalLineEndingLabel, gridBagConstraints);
 
-    externalLineEnding.setToolTipText(ResourceMgr.getDescription("LblPasteCase"));
+    externalLineEnding.setToolTipText(ResourceMgr.getDescription("LblExtLineEnding"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 5;

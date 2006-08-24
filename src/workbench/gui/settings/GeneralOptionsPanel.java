@@ -56,7 +56,6 @@ public class GeneralOptionsPanel
 		set.setDefaultDateFormat(this.dateFormatTextField.getText());
 		set.setDefaultTimeFormat(this.timeFormat.getText());
 		set.setDefaultTimestampFormat(this.timestampFormatTextField.getText());
-		set.setMaxColumnWidth(((NumberField)this.maxColSizeField).getValue());
 		set.setMaxFractionDigits(((NumberField)this.maxDigitsField).getValue());
 		set.setQuoteChar(this.quoteCharField.getText().trim());
 		set.setEnableDbmsOutput(this.enableDbmsOutput.isSelected());
@@ -64,7 +63,6 @@ public class GeneralOptionsPanel
     set.setDbmsOutputDefaultBuffer(StringUtil.getIntValue(this.defaultBufferSize.getText(), -1));
 		set.setDecimalSymbol(this.decimalField.getText());
 		set.setDefaultTextDelimiter(this.textDelimiterField.getText());
-
 	}
 
 	public void actionPerformed(java.awt.event.ActionEvent e)
@@ -93,8 +91,6 @@ public class GeneralOptionsPanel
     decimalField = new javax.swing.JTextField();
     maxDigitsLabel = new javax.swing.JLabel();
     maxDigitsField = new NumberField();
-    maxColSizeLabel = new javax.swing.JLabel();
-    maxColSizeField = new NumberField();
     textDelimiterLabel = new javax.swing.JLabel();
     textDelimiterField = new javax.swing.JTextField();
     quoteCharLabel = new javax.swing.JLabel();
@@ -204,25 +200,6 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 15);
     add(maxDigitsField, gridBagConstraints);
 
-    maxColSizeLabel.setText(ResourceMgr.getString("LblMaxColsize"));
-    maxColSizeLabel.setToolTipText(ResourceMgr.getDescription("LblMaxColsize"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 12, 0, 0);
-    add(maxColSizeLabel, gridBagConstraints);
-
-    maxColSizeField.setText(Integer.toString(Settings.getInstance().getMaxColumnWidth()));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 11;
-    gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 15);
-    add(maxColSizeField, gridBagConstraints);
-
     textDelimiterLabel.setText(ResourceMgr.getString("LblFieldDelimiter"));
     textDelimiterLabel.setToolTipText(ResourceMgr.getDescription("LblFieldDelimiter"));
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -265,7 +242,7 @@ public class GeneralOptionsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 14;
+    gridBagConstraints.gridy = 15;
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
 
@@ -494,8 +471,6 @@ public class GeneralOptionsPanel
   private javax.swing.JCheckBox enableDbmsOutput;
   private javax.swing.JLabel enableDbmsOutputLabel;
   private javax.swing.JPanel jPanel1;
-  private javax.swing.JTextField maxColSizeField;
-  private javax.swing.JLabel maxColSizeLabel;
   private javax.swing.JTextField maxDigitsField;
   private javax.swing.JLabel maxDigitsLabel;
   private javax.swing.JLabel msgFontLabel;
