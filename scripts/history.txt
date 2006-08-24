@@ -1,24 +1,43 @@
-Build @BUILD_NUMBER@, @BUILD_DATE@
+Build 88.16, 15.08.2006
 --------------------
-Enh:  (89) The launcher will no longer set the default language for 
-      the JVM to englich (-Duser.language=en) as this causes some trouble
-      with newer Oracle drivers. The -nolang parameter is thus obsolete. 
-      To activate the old behaviour, -J-Duser.language=en needs to be added
-      manually to the commandline of the launcher.
+Enh:  (88.19) Column widths can now be optimized automatically after 
+      data is retrieved. A new option is available in 
+      Tools->Options->Data editing. The column header can also be 
+      included in that calculation by default.
+Enh:  (88.19) When starting without a profile, the parameter 
+      -rollbackOnDisconnect (with the value true/false) is now supported.
+      If this is set to true, then SQL Workbench will send a rollback
+      to the DBMS before closing the connection. This is already 
+      available in the (GUI) connection profile.
+Enh:  (88.18) When creating a DDL script from within the DbExplorer, 
+      foreign key constraints are now put at the end of the script. 
+Enh:  (88.17) Profile groups can now be deleted directly using the context
+      menu, even if they still contain profiles.
+Enh:  (88.16) Statements can be cleaned from newlines before sending 
+      them to the server by using the property
+      workbench.db.[dbid].removenewlines=true
+      Where [dbid] should be replaced with the DBID shown in the log file
+Enh:  (88.16) Every SQL Statement sent from within the editor, can now 
+      be logged by setting the property:
+      workbench.sql.execution.log=true
+      The statements will be logged with INFO level.
+Enh:  (88.16) The character sequence for a new line that is used by the 
+      editor internally and for saving files can now be configured in the 
+      Options dialog
+Enh:  (88.16) Added support for DB2 Triggers, Alias, Stored Procedures
+      Sequences and materialized query tables in the DbExplorer
 Enh:  (88.15) Individual cells can now be selected in a result set by
       holding down the Alt-Key while selecting rows/columns. When using 
       "Copy selected" on such a selection, only the selected columns
       will be copied. Note that this will produce incorrect results 
-      when copying SQL statements and no primary key has been selected.
+      when copying SQL statements and no primary key column is part of 
+      the selection.
       The modifier for rectangular selections in the editor has been 
-      switch to the Alt key as well, to be consistent. 
+      switched to the Alt key as well, to be consistent. 
 Enh:  (88.15) When specifying a connection profile through parameters 
-      when using "Copy as update" and the key column is not selected.
       (Commandline, WbCopy, WbSchemaDiff) the profile group can now 
       also be specified. Please refer to the manual for details on the new 
       parameters
-Enh:  (88.14) Added support for DB2 Triggers, Alias and Stored Procedures
-      in the DbExplorer
 Enh:  (88.14) The statement history can now be deleted by using 
       SQL -> Clear history
 Enh:  (88.12) WbImport with -type=text can now handle records spanning 
@@ -86,7 +105,15 @@ Fix:  (88.14) When using SQL Workbench in batch mode without a
       WbDrivers.xml, connections through the ODBC bridge did not work
 Fix:  (88.15) When copying a profile from one group to another using
       the context menu, the new profile was not saved.
-
+Fix:  (88.18) After reformatting the SQL Ctrl-Z (Undo) needed to be pressed
+      twice in order to undo the reformatting.
+Fix:  (88.18) If the internal line ending was set to something else then Unix
+      loading external files would not work properly 
+Fix:  (88.19) WbImport always used a quote character ("), even if no
+      quote character was specified (so it was not possible to run 
+      an import without any tests on quotes)
+Fix:  (83.19) Re-introduced fix to prevent sending another SQL Statement while a 
+      WbExport is running
       
 Build 88, 07.07.2006
 --------------------
