@@ -13,6 +13,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 /**
@@ -20,7 +21,6 @@ import workbench.resource.Settings;
  * system.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxDocument.java,v 1.15 2006-05-07 11:29:10 thomas Exp $
  */
 public class SyntaxDocument
 	extends PlainDocument
@@ -28,6 +28,9 @@ public class SyntaxDocument
 {
 	private UndoManager undoManager = new UndoManager();
 	protected TokenMarker tokenMarker;
+	private int compoundLevelCounter = 0;
+	private WbCompoundEdit compoundEditItem = null;
+	private boolean undoSuspended = false;
 
 	public SyntaxDocument()
 	{
@@ -76,24 +79,31 @@ public class SyntaxDocument
 	public void setTokenMarker(TokenMarker tm)
 	{
 		tokenMarker = tm;
-		if(tm == null) return;
+		if (tm == null) return;
 		tokenMarker.insertLines(0,getDefaultRootElement().getElementCount());
 		tokenizeLines();
-	}
-
-	public void undoableEditHappened(UndoableEditEvent e)
-	{
-		if (e.getEdit().isSignificant())
-		{
-			undoManager.addEdit(e.getEdit());
-		}
 	}
 
 	public void dispose()
 	{
 		this.clearUndoBuffer();
+		if (this.compoundEditItem != null)
+		{
+			this.compoundEditItem.clear();
+			this.compoundEditItem = null;
+		}
 		if (tokenMarker != null) tokenMarker.dispose();
 		try { this.remove(0, this.getLength()); } catch (Throwable th) {}
+	}
+	
+	public void suspendUndo()
+	{
+		this.undoSuspended = true;
+	}
+	
+	public void resumeUndo()
+	{
+		this.undoSuspended = false;
 	}
 	
 	public void clearUndoBuffer()
@@ -103,25 +113,27 @@ public class SyntaxDocument
 
 	public void redo()
 	{
+		if (!undoManager.canRedo()) return;
 		try
 		{
 			undoManager.redo();
 		}
 		catch (CannotRedoException cre)
 		{
-			//cre.printStackTrace();
+			cre.printStackTrace();
 		}
 	}
 
 	public void undo()
 	{
+		if (!undoManager.canUndo()) return;
 		try
 		{
 			undoManager.undo();
 		}
 		catch (CannotUndoException cre)
 		{
-			//cre.printStackTrace();
+			cre.printStackTrace();
 		}
 	}
 	/**
@@ -153,7 +165,7 @@ public class SyntaxDocument
 
 		try
 		{
-			for(int i = start; i < len; i++)
+			for (int i = start; i < len; i++)
 			{
 				Element lineElement = map.getElement(i);
 				int lineStart = lineElement.getStartOffset();
@@ -167,36 +179,88 @@ public class SyntaxDocument
 		}
 	}
 
+	public synchronized void undoableEditHappened(UndoableEditEvent e)
+	{
+		if (undoSuspended) return;
+		
+		if (this.compoundEditItem != null)
+		{
+			this.compoundEditItem.addEdit(e.getEdit());
+		}
+		else
+		{
+			undoManager.addEdit(e.getEdit());
+		}
+	}
+	
 	/**
 	 * Starts a compound edit that can be undone in one operation.
-	 * Subclasses that implement undo should override this method;
-	 * this class has no undo functionality so this method is
-	 * empty.
 	 */
-	public void beginCompoundEdit() {}
+	public synchronized void beginCompoundEdit() 
+	{
+		if (undoSuspended) return;
+		if (compoundLevelCounter == 0) 
+		{
+			this.compoundEditItem = new WbCompoundEdit();
+		}
+		this.compoundLevelCounter ++;
+	}
 
 	/**
 	 * Ends a compound edit that can be undone in one operation.
-	 * Subclasses that implement undo should override this method;
-	 * this class has no undo functionality so this method is
-	 * empty.
 	 */
-	public void endCompoundEdit() {}
+	public synchronized void endCompoundEdit() 
+	{
+		if (undoSuspended) return;
+		if (compoundLevelCounter == 1)
+		{
+			// it's important to finish the current compound undo
+			// because the UndoManager asks the last UndoableEdit whether
+			// it accepts more elements. If the compound wasn't finished
+			// the single item added would be added to the compound rather
+			// than to the UndoManager's item list
+			compoundEditItem.finished();
+			
+			if (compoundEditItem.getSize() == 1)
+			{
+				UndoableEdit single = compoundEditItem.getLast();
+				undoManager.addEdit(single);
+				compoundEditItem.clear();
+			}
+			else if (compoundEditItem.getSize() > 1)
+			{
+				undoManager.addEdit(compoundEditItem);
+			}
+			compoundEditItem = null;		
+			compoundLevelCounter = 0;
+		}
+		else if (compoundLevelCounter == 0)
+		{
+			Exception e = new IllegalStateException();
+			LogMgr.logError("SyntaxDocument.endCompoundEdit", "Unbalanced endCompoundEdit()", e);
+		}
+		else 
+		{
+			this.compoundLevelCounter --;
+		}
+	}
 
-	/**
-	 * Adds an undoable edit to this document's undo list. The edit
-	 * should be ignored if something is currently being undone.
-	 * @param edit The undoable edit
-	 *
-	 * @since jEdit 2.2pre1
-	 */
 	public void addUndoableEdit(UndoableEdit edit)
 	{
+//		if (this.compoundEditItem != null)
+//		{
+//			this.compoundEditItem.addEdit(edit);
+//		}
+//		else
+//		{
+//			undoManager.addEdit(edit);
+//		}		
 	}
 
 	public int getPositionOfLastChange() { return lastChangePosition; }
 	
 	private int lastChangePosition = -1;
+	
 	/**
 	 * We overwrite this method to update the token marker
 	 * state immediately so that any event listeners get a
@@ -204,7 +268,7 @@ public class SyntaxDocument
 	 */
 	protected void fireInsertUpdate(DocumentEvent evt)
 	{
-		if(tokenMarker != null)
+		if (tokenMarker != null)
 		{
 			DocumentEvent.ElementChange ch = evt.getChange(getDefaultRootElement());
 			if(ch != null)
@@ -223,7 +287,7 @@ public class SyntaxDocument
 	 */
 	protected void fireRemoveUpdate(DocumentEvent evt)
 	{
-		if(tokenMarker != null)
+		if (tokenMarker != null)
 		{
 			DocumentEvent.ElementChange ch = evt.getChange(getDefaultRootElement());
 			if(ch != null)

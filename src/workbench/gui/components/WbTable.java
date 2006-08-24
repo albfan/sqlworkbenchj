@@ -167,8 +167,6 @@ public class WbTable
 	private boolean adjustToColumnLabel = false;
 	private int headerPopupX = -1;
 	private int[] savedColumnSizes;
-	private int maxColWidth = 32768;
-	private int minColWidth = 10;
 
 	private RowHeightResizer rowResizer;
 	private ArrayList changeListener = new ArrayList();
@@ -1294,6 +1292,10 @@ public class WbTable
 		}
 	}
 
+	/**
+	 * Adjusts the columns to the width defined from the 
+	 * underlying tables (i.e. getColumnWidth() for each column)
+	 */
 	public void adjustColumns()
 	{
 		if (this.getModel() == null) return;
@@ -1303,6 +1305,9 @@ public class WbTable
 		TableColumnModel colMod = this.getColumnModel();
 		if (colMod == null) return;
 
+		int minWidth = Settings.getInstance().getMinColumnWidth();
+		int maxWidth = Settings.getInstance().getMaxColumnWidth();
+		
 		for (int i=0; i < colMod.getColumnCount(); i++)
 		{
 			TableColumn col = colMod.getColumn(i);
@@ -1319,8 +1324,8 @@ public class WbTable
 				}
 				int width = (this.dwModel.getColumnWidth(i) * charWidth) + addWidth;
 				int w = Math.max(width, lblWidth);
-				w	= Math.min(w, this.maxColWidth);
-				if (w < this.minColWidth) w = this.minColWidth;
+				if (maxWidth > 0) w	= Math.min(w, maxWidth);
+				if (minWidth > 0) w = Math.max(w, minWidth);
 				col.setPreferredWidth(w);
 			}
 		}
@@ -1328,44 +1333,39 @@ public class WbTable
 
 	public void optimizeAllColWidth()
 	{
-		this.optimizeAllColWidth(0, false);
+		this.optimizeAllColWidth(Settings.getInstance().getMinColumnWidth(), Settings.getInstance().getMaxColumnWidth(), Settings.getInstance().getIncludeHeaderInOptimalWidth());
 	}
 
 	public void optimizeAllColWidth(boolean respectColName)
 	{
-		this.optimizeAllColWidth(0, respectColName);
+		this.optimizeAllColWidth(Settings.getInstance().getMinColumnWidth(), Settings.getInstance().getMaxColumnWidth(), respectColName);
 	}
 
-	public void optimizeAllColWidth(int aMinWidth)
-	{
-		this.optimizeAllColWidth(aMinWidth, false);
-	}
-
-	public void optimizeAllColWidth(int aMinWidth, boolean respectColName)
+	public void optimizeAllColWidth(int minWidth, int maxWidth, boolean respectColName)
 	{
 		int count = this.getColumnCount();
 		for (int i=0; i < count; i++)
 		{
-			this.optimizeColWidth(i, aMinWidth, respectColName);
+			this.optimizeColWidth(i, minWidth, maxWidth, respectColName);
 		}
 	}
 
 	public void optimizeColWidth(int aColumn)
 	{
-		this.optimizeColWidth(aColumn, 0, false);
+		this.optimizeColWidth(aColumn, 0, -1, false);
 	}
 
 	public void optimizeColWidth(int aColumn, boolean respectColName)
 	{
-		this.optimizeColWidth(aColumn, 0, respectColName);
+		this.optimizeColWidth(aColumn, Settings.getInstance().getMinColumnWidth(), Settings.getInstance().getMaxColumnWidth(), respectColName);
 	}
 
-	public void optimizeColWidth(int aColumn, int aMinWidth)
+	public void optimizeColWidth(int aColumn, int minWidth, int maxWidth)
 	{
-		this.optimizeColWidth(aColumn, aMinWidth, false);
+		this.optimizeColWidth(aColumn, minWidth, maxWidth, false);
 	}
 
-	public void optimizeColWidth(int aColumn, int aMinWidth, boolean respectColumnName)
+	public void optimizeColWidth(int aColumn, int minWidth, int maxWidth, boolean respectColumnName)
 	{
 		if (this.dwModel == null) return;
 		if (aColumn < 0 || aColumn > this.getColumnCount() - 1) return;
@@ -1377,7 +1377,7 @@ public class WbTable
 		int addWidth = this.getAdditionalColumnSpace(0, aColumn);
 		String s = null;
 		int stringWidth = 0;
-		int optWidth = aMinWidth;
+		int optWidth = minWidth;
 
 		if (respectColumnName)
 		{
@@ -1406,6 +1406,10 @@ public class WbTable
 				stringWidth = fm.stringWidth(s);
 			
 			optWidth = Math.max(optWidth, stringWidth + addWidth);
+		}
+		if (maxWidth > 0)
+		{
+			optWidth = Math.min(optWidth, maxWidth);
 		}
 		if (optWidth > 0)
 		{
@@ -1885,16 +1889,6 @@ public class WbTable
 			ClipBoardCopier copier = new ClipBoardCopier(this);
 			copier.copyAsSql(true, selectedOnly, showSelectColumns, false);
 		}
-	}
-
-	public void setMaxColWidth(int maxColWidth)
-	{
-		this.maxColWidth = maxColWidth;
-	}
-
-	public void setMinColWidth(int minColWidth)
-	{
-		this.minColWidth = minColWidth;
 	}
 
 	public void fontChanged(String aFontId, Font newFont)

@@ -31,6 +31,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.border.Border;
+import workbench.WbManager;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
@@ -148,12 +149,19 @@ public class ValidatingDialog
 	public static boolean showConfirmDialog(Window parent, JComponent editor, String title)
 	{
 		ValidatingDialog dialog = null;
-		if (parent instanceof Frame) 
-			dialog = new ValidatingDialog((Frame)parent, title, editor);
-		else if (parent instanceof Dialog)
-			dialog = new ValidatingDialog((Dialog)parent, title, editor);
+		if (parent == null)
+		{
+			dialog = new ValidatingDialog(WbManager.getInstance().getCurrentWindow(), title, editor);
+		}
 		else
-			throw new IllegalArgumentException("Parent component must be Dialog or Frame");
+		{
+			if (parent instanceof Frame) 
+				dialog = new ValidatingDialog((Frame)parent, title, editor);
+			else if (parent instanceof Dialog)
+				dialog = new ValidatingDialog((Dialog)parent, title, editor);
+			else 
+				throw new IllegalArgumentException("Parent component must be Dialog or Frame");
+		}
 		dialog.setVisible(true);
 		return !dialog.isCancelled();
 	}

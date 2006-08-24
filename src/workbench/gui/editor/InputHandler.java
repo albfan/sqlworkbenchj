@@ -32,7 +32,7 @@ import workbench.resource.Settings;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.21 2006-08-14 22:11:20 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.22 2006-08-24 23:06:54 thomas Exp $
  * @see DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -492,8 +492,7 @@ public abstract class InputHandler extends KeyAdapter
 				return;
 			}
 
-			if(textArea.getSelectionStart()
-			   != textArea.getSelectionEnd())
+			if (textArea.getSelectionStart() != textArea.getSelectionEnd())
 			{
 				textArea.setSelectedText("");
 			}
@@ -505,9 +504,10 @@ public abstract class InputHandler extends KeyAdapter
 					textArea.getToolkit().beep();
 					return;
 				}
+				SyntaxDocument doc = textArea.getDocument();
 				try
 				{
-					textArea.getDocument().remove(caret - 1,1);
+					doc.remove(caret - 1,1);
 				}
 				catch(BadLocationException bl)
 				{

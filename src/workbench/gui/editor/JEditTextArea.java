@@ -105,7 +105,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.50 2006-08-14 22:11:19 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.51 2006-08-24 23:06:54 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -1241,7 +1241,6 @@ public class JEditTextArea
 			{
 				document.insertString(0,text,null);
 			}
-			document.tokenizeLines();
 		}
 		catch(BadLocationException bl)
 		{
@@ -1250,6 +1249,7 @@ public class JEditTextArea
 		finally
 		{
 			document.endCompoundEdit();
+			document.tokenizeLines();
 		}
 		updateScrollBars();
 	}
@@ -1282,6 +1282,7 @@ public class JEditTextArea
 	 */
 	public final void getText(int start, int len, Segment segment)
 	{
+		if (len < 0) return;
 		try
 		{
 			document.getText(start,len,segment);
@@ -1793,6 +1794,7 @@ public class JEditTextArea
 			else
 			{
 				document.remove(selectionStart,selectionEnd - selectionStart);
+				
 				if(selectedText != null)
 				{
 					document.insertString(selectionStart,selectedText,null);
@@ -1831,6 +1833,7 @@ public class JEditTextArea
 	{
 		insertText(getCaretPosition(), text);
 	}
+	
 	public void insertText(int position, String text)
 	{
 		document.beginCompoundEdit();
@@ -1921,8 +1924,7 @@ public class JEditTextArea
 			return;
 		}
 
-		// Don't overstrike if we're on the end of
-		// the line
+		// Don't overstrike if we're on the end of the line
 		int caret = getCaretPosition();
 		int caretLineEnd = getLineEndOffset(getCaretLine());
 		if(caretLineEnd - caret <= str.length())
