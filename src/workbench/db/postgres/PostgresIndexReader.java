@@ -49,7 +49,9 @@ public class PostgresIndexReader
 			stmt = con.prepareStatement(sql);
 			for (int i = 0; i < count; i++)
 			{
-				String idxName = indexDefinition.getValueAsString(i, 0);
+				String idxName = indexDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
+				String pk = indexDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG);
+				if ("YES".equalsIgnoreCase(pk)) continue;
 				stmt.setString(1, idxName);
 				rs = stmt.executeQuery();
 				if (rs.next())
