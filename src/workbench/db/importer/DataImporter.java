@@ -368,6 +368,11 @@ public class DataImporter
 		this.keyColumns = cols;
 	}
 
+	private boolean hasKeyColumns()
+	{
+		return (this.keyColumns != null && keyColumns.size() > 0);
+	}
+	
 	public void startBackgroundImport()
 	{
 		if (this.source == null) return;
@@ -1022,10 +1027,10 @@ public class DataImporter
 	private void prepareUpdateStatement()
 		throws SQLException
 	{
-		if (this.keyColumns == null)
+		if (!this.hasKeyColumns())
 		{
 			this.retrieveKeyColumns();
-			if (this.keyColumns == null)
+			if (!this.hasKeyColumns())
 			{
 				this.messages.append(ResourceMgr.getString("ErrImportNoKeyForUpdate"));
 				throw new SQLException("No key columns defined for update mode");

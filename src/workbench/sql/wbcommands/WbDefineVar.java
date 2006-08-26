@@ -104,12 +104,12 @@ public class WbDefineVar extends SqlCommand
 
 		if (value != null)
 		{
-			if (value.startsWith("@"))
+			if (value.trim().startsWith("@"))
 			{
 				String valueSql = null;
 				try
 				{
-					valueSql = value.substring(1);
+					valueSql = value.trim().substring(1);
 					value = this.evaluateSql(aConnection, valueSql);
 				}
 				catch (SQLException e)

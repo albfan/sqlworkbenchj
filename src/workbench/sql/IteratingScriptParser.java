@@ -56,6 +56,7 @@ public class IteratingScriptParser
 	private boolean emptyLineIsSeparator = false;
 	private boolean supportOracleInclude = true;
 	private boolean checkSingleLineCommands = true;
+	private boolean storeSqlInCommands = false;
 	
 	/** Create an InteratingScriptParser
 	 */
@@ -113,6 +114,7 @@ public class IteratingScriptParser
 		this.script = new FileMappedSequence(f, enc);
 		this.scriptLength = (int)f.length();
 		this.checkEscapedQuotes = false;
+		this.storeSqlInCommands = true;
 		this.reset();
 	}
 
@@ -150,6 +152,7 @@ public class IteratingScriptParser
 	public void setScript(String aScript)
 	{
 		this.cleanup();
+		this.storeSqlInCommands = false;
 		this.script = new StringSequence(aScript);
 		this.scriptLength = aScript.length();
 		this.checkEscapedQuotes = false;
@@ -223,7 +226,24 @@ public class IteratingScriptParser
 	
 	public boolean hasMoreCommands()
 	{
-		return this.lastPos < this.scriptLength;
+		if (lastPos < this.scriptLength)
+		{
+			int nextPos = findNextNonWhiteSpace(lastPos);
+			return nextPos < scriptLength;
+		}
+		return false;
+	}
+	
+	
+	private int findNextNonWhiteSpace(int start)
+	{
+		char ch = this.script.charAt(start);
+		while (start < this.scriptLength && Character.isWhitespace(ch))
+		{
+			start ++;
+			if (start < this.scriptLength) ch = this.script.charAt(start);
+		}
+		return start;
 	}
 	
 	/**
@@ -446,84 +466,11 @@ public class IteratingScriptParser
 
 		value = this.script.substring(startPos, endPos).trim();
 		if (value.length() == 0) return null;
-		
-//		int offset = this.getRealStartOffset(value);
-//		if (offset > 0)
-//		{
-//			startPos += offset;
-//			value = value.substring(offset);
-//		}
 
-		ScriptCommandDefinition c = new ScriptCommandDefinition(value, startPos, endPos);
+		ScriptCommandDefinition c = new ScriptCommandDefinition(storeSqlInCommands ? value : null, startPos, endPos);
 		
 		return c;
 	}
-
-	/**
-	 *	Check for the real beginning of the statement identified by
-	 *	startPos/endPos. This method will return the actual start of the
-	 *	command with leading comments trimmed
-	 */
-//	private int getRealStartOffset(String sql)
-//	{
-//		int len = sql.length();
-//		int pos = 0;
-//		
-//		boolean inComment = false;
-//		boolean inQuotes = false;
-//		
-//		for (int i=0; i < len - 1; i++)
-//		{
-//			char c = sql.charAt(i);
-//			inQuotes = c == '\'';
-//			if (inQuotes) continue;
-//			//if (Character.isWhitespace(c)) continue;
-//
-//			if ( c == '/' && sql.charAt(i+1) == '*')
-//			{
-//				inComment = true;
-//				// skip the start at the next position
-//				i++;
-//				continue;
-//			}
-//			
-//			if (c == '-' && sql.charAt(i+1) == '-')
-//			{
-//				i += 2;
-//				
-//				if (i < len) c = sql.charAt(i);
-//				// ignore rest of line for -- style comments
-//				while (c != '\n' && c != '\r' && i < len - 1)
-//				{
-//					i++;
-//					c = sql.charAt(i);
-//				}
-//				while (i < len -1  && Character.isWhitespace(sql.charAt(i+1)))
-//				{
-//					i++;
-//				}
-//				continue;
-//			}			
-//			
-//			if (inComment && c == '*' && sql.charAt(i+1) == '/')
-//			{
-//				inComment = false;
-//				i += 2;
-//				while (i < len - 1 && Character.isWhitespace(sql.charAt(i)))
-//				{
-//					i++;
-//				}
-//			}
-//			
-//			if (!inComment)
-//			{
-//				pos = i;
-//				break;
-//			}
-//		}
-//		
-//		return pos;
-//	}
 
 	public void setCheckEscapedQuotes(boolean flag)
 	{

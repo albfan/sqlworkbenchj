@@ -1295,6 +1295,7 @@ public class WbTable
 	/**
 	 * Adjusts the columns to the width defined from the 
 	 * underlying tables (i.e. getColumnWidth() for each column)
+	 * If 
 	 */
 	public void adjustColumns()
 	{
@@ -1429,23 +1430,23 @@ public class WbTable
 		int addWidth = this.getIntercellSpacing().width * 2;
 		if (this.getShowVerticalLines()) addWidth += 4;
 
-		if (rend == null)
-		{
-			rend = this.getDefaultRenderer(this.getColumnClass(aColumn));
-		}
-		if (rend != null)
-		{
-			Component c = rend.getTableCellRendererComponent(this, null, false, false, aRow, aColumn);
-			if (c instanceof JComponent)
-			{
-				JComponent jc = (JComponent)c;
-				Insets ins = jc.getInsets();
-				if (ins != null)
-				{
-					addWidth += ins.left + ins.right;
-				}
-			}
-		}
+//		if (rend == null)
+//		{
+//			rend = this.getDefaultRenderer(this.getColumnClass(aColumn));
+//		}
+//		if (rend != null)
+//		{
+//			Component c = rend.getTableCellRendererComponent(this, null, false, false, aRow, aColumn);
+//			if (c instanceof JComponent)
+//			{
+//				JComponent jc = (JComponent)c;
+//				Insets ins = jc.getInsets();
+//				if (ins != null)
+//				{
+//					addWidth += ins.left + ins.right;
+//				}
+//			}
+//		}
 		return addWidth;
 	}
 

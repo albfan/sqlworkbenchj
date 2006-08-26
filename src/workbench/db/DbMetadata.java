@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1975,7 +1976,6 @@ public class DbMetadata
 		if (this.oracleMetaData != null) this.oracleMetaData.columnsProcessed();
 	}
 
-
 	/**
 	 *	Return a list of ColumnIdentifier's for the given table
 	 */
@@ -3388,7 +3388,8 @@ public class DbMetadata
 		result.append(generateCreateObject(includeDrop, "TABLE", (tableNameToUse == null ? table.getTableName() : tableNameToUse)));
 		result.append("\n(\n");
 		int count = columns.length;
-		StringBuffer pkCols = new StringBuffer(1000);
+		//StringBuffer pkCols = new StringBuffer(1000);
+		List pkCols = new LinkedList();
 		int maxColLength = 0;
 		int maxTypeLength = 0;
 
@@ -3420,8 +3421,8 @@ public class DbMetadata
 			result.append(quoteObjectname(colName));
 			if (columns[i].isPkColumn() && (!this.isFirstSql || this.isFirstSql && !type.equals("sequence")))
 			{
-				if (pkCols.length() > 0) pkCols.append(',');
-				pkCols.append(colName.trim());
+				//if (pkCols.length() > 0) pkCols.append(',');
+				pkCols.add(colName.trim());
 			}
 			for (int k=0; k < maxColLength - colName.length(); k++) result.append(' ');
 			result.append(type);
@@ -3484,10 +3485,10 @@ public class DbMetadata
 		}
 		String realTable = (tableNameToUse == null ? table.getTableName() : tableNameToUse);
 
-		if (this.createInlineConstraints && pkCols.length() > 0)
+		if (this.createInlineConstraints && pkCols.size() > 0)
 		{
 			result.append(lineEnding + "   ,PRIMARY KEY (");
-			result.append(pkCols.toString());
+			result.append(StringUtil.listToString(pkCols, ','));
 			result.append(")" + lineEnding);
 
 			if (includeFk)
@@ -3503,23 +3504,11 @@ public class DbMetadata
 		result.append(");" + lineEnding); // end of CREATE TABLE
 		
 		
-		if (!this.createInlineConstraints && pkCols.length() > 0)
+		if (!this.createInlineConstraints && pkCols.size() > 0)
 		{
-			String template = this.getSqlTemplate(DbMetadata.pkStatements);
-			template = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, realTable);
-			template = StringUtil.replace(template, COLUMNLIST_PLACEHOLDER, pkCols.toString());
 			String name = this.getPkIndexName(aIndexDef);
-			if (name == null && Settings.getInstance().getAutoGeneratePKName()) name = "pk_" + realTable.toLowerCase();
-			if (isKeyword(name)) name = "\"" + name + "\"";
-			if (StringUtil.isEmptyString(name)) 
-			{
-				name = ""; // remove placeholder if no name is available
-				template = StringUtil.replace(template, "CONSTRAINT ", ""); // remove CONSTRAINT KEYWORD if not name is available
-			}
-			
-			template = StringUtil.replace(template, PK_NAME_PLACEHOLDER, name);
-			result.append(template);
-			result.append(";");
+			StringBuffer pkSource = getPkSource(realTable, pkCols, name);
+			result.append(pkSource);
 			result.append(lineEnding);
 			result.append(lineEnding);
 		}
@@ -3559,6 +3548,29 @@ public class DbMetadata
 		return result.toString();
 	}
 
+	public StringBuffer getPkSource(String tablename, List pkCols, String pkName)
+	{
+		String template = this.getSqlTemplate(DbMetadata.pkStatements);
+		StringBuffer result = new StringBuffer();
+		if (StringUtil.isEmptyString(template)) return result;
+		
+		template = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, tablename);
+		template = StringUtil.replace(template, COLUMNLIST_PLACEHOLDER, StringUtil.listToString(pkCols, ','));
+		
+		if (pkName == null && Settings.getInstance().getAutoGeneratePKName()) pkName = "pk_" + tablename.toLowerCase();
+		if (isKeyword(pkName)) pkName = "\"" + pkName + "\"";
+		if (StringUtil.isEmptyString(pkName)) 
+		{
+			pkName = ""; // remove placeholder if no name is available
+			template = StringUtil.replace(template, "CONSTRAINT ", ""); // remove CONSTRAINT KEYWORD if not name is available
+		}
+
+		template = StringUtil.replace(template, PK_NAME_PLACEHOLDER, pkName);
+		result.append(template);
+		result.append(";");
+		return result;
+	}
+	
 	/**
 	 * Return constraints defined for each column in the given table.
 	 * @param table The table to check

@@ -711,7 +711,6 @@ public class DwPanel
 			updEnd = System.currentTimeMillis();
 			checkUpdateTime = (updEnd - updStart);
 		}
-		this.rowCountChanged();
 		this.dataTable.checkKeyActions();
 		this.checkResultSetActions();
 	}

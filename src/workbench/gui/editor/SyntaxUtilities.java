@@ -24,7 +24,7 @@ import workbench.resource.Settings;
  * subsystem.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxUtilities.java,v 1.4 2006-05-07 11:29:10 thomas Exp $
+ * @version $Id: SyntaxUtilities.java,v 1.5 2006-08-26 14:04:12 thomas Exp $
  */
 public class SyntaxUtilities
 {
@@ -129,7 +129,7 @@ public class SyntaxUtilities
 	 */
 	public static int paintSyntaxLine(Segment line, Token tokens,
 		SyntaxStyle[] styles, TabExpander expander, Graphics gfx,
-		int x, int y)
+		int x, int y, int addwidth)
 	{
 		Font defaultFont = gfx.getFont();
 		Color defaultColor = gfx.getColor();
@@ -153,7 +153,7 @@ public class SyntaxUtilities
 				styles[id].setGraphicsFlags(gfx,defaultFont);
 
 			line.count = length;
-			x = Utilities.drawTabbedText(line,x,y,gfx,expander,0);
+			x = Utilities.drawTabbedText(line,x,y,gfx,expander,addwidth);
 			line.offset += length;
 			offset += length;
 

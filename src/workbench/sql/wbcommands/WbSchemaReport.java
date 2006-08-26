@@ -63,23 +63,18 @@ public class WbSchemaReport
 
 	public String getVerb() { return VERB; }
 
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(WbConnection aConnection, String sql)
 		throws SQLException
 	{
 		boolean dbDesigner = false;
 		StatementRunnerResult result = new StatementRunnerResult();
 		this.currentConnection = aConnection;
-		aSql = stripVerb(aSql);
-//		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
-//		int pos = aSql.indexOf(' ');
-//		if (pos > -1)
-//			aSql = aSql.substring(pos);
-//		else
-//			aSql = "";
+		
+		sql = stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
 
 		try
 		{
-			cmdLine.parse(aSql);
+			cmdLine.parse(sql);
 		}
 		catch (Exception e)
 		{

@@ -22,7 +22,7 @@ import java.util.*;
  * cached.
  *
  * @author Slava Pestov
- * @version $Id: TokenMarker.java,v 1.8 2006-04-17 14:55:34 thomas Exp $
+ * @version $Id: TokenMarker.java,v 1.9 2006-08-26 14:04:12 thomas Exp $
  *
  * @see Token
  */
@@ -138,6 +138,7 @@ public abstract class TokenMarker
 
 	public void dispose()
 	{
+		if (lineInfo == null) return;
 		for (int i=0; i < lineInfo.length; i++)
 		{
 			if (lineInfo[i] != null) lineInfo[i].obj = null;

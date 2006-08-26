@@ -33,6 +33,7 @@ public class ScriptCommandDefinition
 		this.endPosInScript = end;
 		this.indexInScript = index;
 	}
+	
 	public String getSQL() { return this.command; }
 	public int getStartPositionInScript() { return this.startPosInScript; }
 	public int getEndPositionInScript() { return this.endPosInScript; }

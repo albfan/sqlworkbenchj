@@ -106,11 +106,8 @@ public class WbSchemaDiff
 			result.addMessage("Support for 'WbDiff' will be removed in a future release.\n");
 		}
 		
-		sql = stripVerb(sql);
+		sql = stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
 		
-//		int pos = sql.toUpperCase().indexOf(VERB);
-//		if (pos > -1) sql = sql.substring(pos + VERB.length());
-
 		try
 		{
 			cmdLine.parse(sql);

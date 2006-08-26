@@ -59,12 +59,12 @@ public class WbInclude
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
 
-		String clean = SqlUtil.makeCleanSql(aSql, false, '"');
-		int pos = clean.indexOf(' ');
-		if (pos > -1)
-			clean = clean.substring(pos);
-		else
-			clean = "";
+		String clean = stripVerb(SqlUtil.makeCleanSql(aSql, false, '"'));
+//		int pos = clean.indexOf(' ');
+//		if (pos > -1)
+//			clean = clean.substring(pos);
+//		else
+//			clean = "";
 
 		String file = null;
 

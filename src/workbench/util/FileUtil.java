@@ -50,6 +50,28 @@ public class FileUtil
 		return Settings.getInstance().getIntProperty("workbench.lob.buffsize",32*1024);
 	}
 	
+	public static final int readLines(BufferedReader in, StringBuffer buffer, int numLines, String lineEnd)
+		throws IOException
+	{
+		int lines = 0;
+		String line = in.readLine();
+		while (line != null && lines < numLines) 
+		{
+			buffer.append(line);
+			buffer.append(lineEnd);
+			lines ++;
+			line = in.readLine();
+		}
+		if (line != null) 
+		{
+			// loop was ended due to numLines reached, so append the 
+			// last line retrieved
+			buffer.append(line);
+			buffer.append(lineEnd);
+		}
+		return lines;
+	}
+	
 	public static final String getLineEnding(Reader in)
 		throws IOException
 	{

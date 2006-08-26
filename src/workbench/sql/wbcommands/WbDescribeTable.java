@@ -12,7 +12,6 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import java.util.StringTokenizer;
 import workbench.db.TableIdentifier;
 
 import workbench.db.WbConnection;
@@ -20,6 +19,7 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -36,16 +36,11 @@ public class WbDescribeTable extends SqlCommand
 
 	public String getVerb() { return VERB; }
 
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(WbConnection aConnection, String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		StringTokenizer tok = new StringTokenizer(aSql.trim(), " ");
-		String verb = tok.nextToken();
-		if (!VERB.equalsIgnoreCase(verb) &&
-        !VERB_LONG.equalsIgnoreCase(verb)) throw new SQLException("Wrong syntax. " + VERB + " expected!");
-		String table = null;
-		if (tok.hasMoreTokens()) table = tok.nextToken();
+		String table = stripVerb(SqlUtil.makeCleanSql(sql, false, false, '\''));
 		
 		TableIdentifier tbl = new TableIdentifier(table);
 		

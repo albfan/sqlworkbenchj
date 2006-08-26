@@ -2024,23 +2024,15 @@ public class SqlPanel
 			this.resetFilterAction.setOriginal(this.currentData.getTable().getResetFilterAction());
 		}
 	}
-	
-	private DwPanel addResultTab(String sql)
-		throws SQLException
+
+	private void addResultTab(DwPanel data, String sql)
 	{
-		DwPanel data = new DwPanel(statusBar);
-		data.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		data.setConnection(this.dbConnection);
-		data.setUpdateHandler(this);
-		data.setAutomaticUpdateTableCheck(!this.dbConnection.getProfile().getDisableUpdateTableCheck());
 		int newIndex = this.resultTab.getTabCount() - 1;
-		//String tip = StringUtil.getMaxSubstring(sql,80);
 		this.resultTab.insertTab(ResourceMgr.getString("LblTabResult"), null, data, sql, newIndex);
 		if (this.resultTab.getTabCount() == 2)
 		{
 			this.resultTab.setSelectedIndex(0);
 		}
-		return data;
 	}
 
 	private ScriptParser createScriptParser()
@@ -2180,11 +2172,10 @@ public class SqlPanel
 			}
 			
 			scriptParser.setScript(script);
-			List sqls = scriptParser.getCommands();
 
 			int commandWithError = -1;
 			int startIndex = 0;
-			int count = sqls.size();
+			int count = scriptParser.getSize();
 			int endIndex = count;
 			int failuresIgnored = 0;
 
@@ -2487,6 +2478,16 @@ public class SqlPanel
 		}
 	}
 
+	private DwPanel createDwPanel()
+		throws SQLException
+	{
+		DwPanel data = new DwPanel(statusBar);
+		data.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		data.setConnection(this.dbConnection);
+		data.setUpdateHandler(this);
+		data.setAutomaticUpdateTableCheck(!this.dbConnection.getProfile().getDisableUpdateTableCheck());
+		return data;
+	}
 	/**
 	 * Display the data contained in the StatementRunnerResult.
 	 * For each DataStore or ResultSet in the result, an additional
@@ -2507,9 +2508,9 @@ public class SqlPanel
 			for (int i = 0; i < results.length; i++)
 			{
 				count ++;
-				DwPanel p = this.addResultTab(sql);
-				p.setConnection(this.dbConnection);
+				DwPanel p = createDwPanel();
 				p.showData(results[i], sql);
+				this.addResultTab(p, sql);
 			}
 		}
 
@@ -2519,9 +2520,9 @@ public class SqlPanel
 			for (int i = 0; i < results.length; i++)
 			{
 				count ++;
-				DwPanel p = this.addResultTab(sql);
-				p.setConnection(this.dbConnection);
+				DwPanel p = createDwPanel();
 				p.showData(results[i], sql);
+				this.addResultTab(p, sql);
 			}
 		}
 		

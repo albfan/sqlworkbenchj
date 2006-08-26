@@ -323,13 +323,13 @@ public class DefaultStatementRunner
 		}
         
 		// Silently ignore empty statements
-		if (aSql == null || aSql.trim().length() == 0)
-		{
-			this.result = new StatementRunnerResult();
-			this.result.clear();
-			this.result.setSuccess();
-			return;
-		}
+//		if (StringUtil.isEmptyString(aSql))
+//		{
+//			this.result = new StatementRunnerResult();
+//			this.result.clear();
+//			this.result.setSuccess();
+//			return;
+//		}
 
 		if (this.prompter != null)
 		{
@@ -347,10 +347,11 @@ public class DefaultStatementRunner
 			aSql = SqlUtil.makeCleanSql(aSql, !removeNewLines, !removeComments, '\'');
 		}
 		
-		if (logStatements)
-		{
-			LogMgr.logInfo("DefaultStatementRunner.runStatement()", "Running SQL: " + StringUtil.escapeUnicode(aSql, CharacterRange.RANGE_CONTROL));
-		}
+//		if (logStatements)
+//		{
+//			LogMgr.logInfo("DefaultStatementRunner.runStatement()", "Running SQL: " + StringUtil.escapeUnicode(aSql, CharacterRange.RANGE_CONTROL));
+//		}
+		
 		this.currentCommand = this.getCommandToUse(aSql);
 
 		// if no mapping is found use the default implementation

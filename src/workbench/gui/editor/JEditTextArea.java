@@ -105,7 +105,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.51 2006-08-24 23:06:54 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.52 2006-08-26 14:04:12 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -138,9 +138,9 @@ public class JEditTextArea
 		// Enable the necessary events
 		enableEvents(AWTEvent.KEY_EVENT_MASK);
 
-		// Initialize some misc. stuff
 		painter = new TextAreaPainter(this);
-		//painter.setBorder(BorderFactory.createLoweredBevelBorder());
+		setBackground(Color.WHITE);
+		
 		documentHandler = new DocumentHandler();
 		listeners = new EventListenerList();
 		caretEvent = new MutableCaretEvent();
@@ -186,6 +186,7 @@ public class JEditTextArea
 
 		this.addKeyBinding("C+a", this.popup.getSelectAllAction());
 
+		
 		// We don't seem to get the initial focus event?
 		focusedComponent = this;
 	}
@@ -939,14 +940,7 @@ public class JEditTextArea
 				else
 					charWidth = fm.charWidth(c);
 
-				if(painter.isBlockCaretEnabled())
-				{
-					if(x - charWidth <= width) return i;
-				}
-				else
-				{
-					if(x - charWidth / 2 <= width) return i;
-				}
+				if(x - charWidth / 2 <= width) return i;
 
 				width += charWidth;
 			}
@@ -991,14 +985,7 @@ public class JEditTextArea
 					else
 						charWidth = fm.charWidth(c);
 
-					if(painter.isBlockCaretEnabled())
-					{
-						if (x - charWidth <= width) return offset + i;
-					}
-					else
-					{
-						if (x - charWidth / 2 <= width) return offset + i;
-					}
+					if (x - charWidth / 2 <= width) return offset + i;
 
 					width += charWidth;
 				}
@@ -1040,22 +1027,36 @@ public class JEditTextArea
 		if(this.document != null)
 		{
 			this.document.removeDocumentListener(documentHandler);
-			this.document.clearUndoBuffer();
+			this.document.dispose();
 		}
+		
 		this.document = document;
 
 		if(this.document != null)
 		{
+			painter.calculateTabSize();
+			
 			if (this.currentTokenMarker != null)
 			{
 				this.document.setTokenMarker(this.currentTokenMarker);
 			}
+			
 			this.document.addDocumentListener(documentHandler);
-			painter.invalidateLineRange(0, getLineCount());
-			select(0,0);
+		
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					painter.invalidateLineRange(0,getLineCount());
+					setCaretPosition(0);
+					painter.repaint();
+					painter.validate();
+					repaint();
+					validate();
+					updateScrollBars();
+				}
+			});
 		}
-		updateScrollBars();
-		painter.repaint();
 	}
 
 	public void setFont(Font aNewFont)

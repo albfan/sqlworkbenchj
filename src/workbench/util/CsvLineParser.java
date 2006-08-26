@@ -53,6 +53,11 @@ public class CsvLineParser
 		this.current = 0;
 	}
 	
+	/**
+	 * Controls how empty strings are returned. If this is set to 
+	 * true, than an empty element is returned as an empty string
+	 * otherwise an empty element is returend as null
+	 */
 	public void setReturnEmptyStrings(boolean flag)
 	{
 		this.returnEmptyStrings = flag;
@@ -98,7 +103,7 @@ public class CsvLineParser
 		
 		this.current ++; // skip the delimiter
 		if (this.returnEmptyStrings && next == null) next = StringUtil.EMPTY_STRING;
-		if (trimValues) return next.trim();
+		if (trimValues && next != null) return next.trim();
 		else return next;
 	}
 

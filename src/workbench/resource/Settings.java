@@ -1672,7 +1672,7 @@ public class Settings
 
 	public void setMaxColumnWidth(int width)
 	{
-		this.setProperty("workbench.gui.optimalwidth.minsize", width);
+		this.setProperty("workbench.gui.optimalwidth.maxsize", width);
 	}
 
 	private SimpleDateFormat defaultDateFormatter = null;

@@ -12,7 +12,6 @@
 package workbench.sql.wbcommands;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +20,6 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.ParsingInterruptedException;
-import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.TextFileParser;
 import workbench.db.importer.XmlDataFileParser;
 import workbench.util.ExceptionUtil;
@@ -31,7 +29,6 @@ import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
-import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -146,7 +143,7 @@ public class WbImport
 		this.imp.setConnection(aConnection);
 
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
-		aSql = stripVerb(aSql);
+		aSql = stripVerb(SqlUtil.makeCleanSql(aSql,false, false, '\''));
 		
 		try
 		{

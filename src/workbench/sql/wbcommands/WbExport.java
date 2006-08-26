@@ -111,23 +111,17 @@ public class WbExport
 		return Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false);
 	}
 	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(WbConnection aConnection, String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		this.currentConnection = aConnection;
 		
-		aSql = stripVerb(aSql);
-//		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
-//		int pos = aSql.indexOf(' ');
-//		if (pos > -1)
-//			aSql = aSql.substring(pos);
-//		else
-//			aSql = "";
+		sql = stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
 
 		try
 		{
-			cmdLine.parse(aSql);
+			cmdLine.parse(sql);
 		}
 		catch (Exception e)
 		{

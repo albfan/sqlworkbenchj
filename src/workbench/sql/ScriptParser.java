@@ -322,23 +322,13 @@ public class ScriptParser
 		if (this.commands == null) this.parseCommands();
 		if (index < 0 || index >= this.commands.size()) return null;
 		ScriptCommandDefinition c = (ScriptCommandDefinition)this.commands.get(index);
-		return c.getSQL();
+		return originalScript.substring(c.getStartPositionInScript(), c.getEndPositionInScript());
 	}
 
-	/**
-	 *	Return the list of commands in the current script.
-	 *	The list contains elements of <code>String</code>.
-	 *	The commands will be returned without the delimiter
-	 */
-	public List getCommands()
+	public int getSize() 
 	{
 		if (this.commands == null) this.parseCommands();
-		ArrayList result = new ArrayList(this.commands.size());
-		for (int i=0; i < this.commands.size(); i++)
-		{
-			result.add(this.getCommand(i));
-		}
-		return result;
+		return this.commands.size();
 	}
 
 	/**
@@ -440,8 +430,9 @@ public class ScriptParser
 	}
 
 	/**
-	 * Return the next {@link ScriptCommandDefinition} from the script. 
+	 * Return the next SQL command from the script. 
 	 * This is delegated to {@link #getNextCommand()}
+	 * @return a String object representing the SQL command
 	 * @throws IllegalStateException if the Iterator has not been initialized using {@link #getIterator()}
 	 * @see IteratingScriptParser#getNextCommand()
 	 * @see #getNextCommand()
@@ -459,19 +450,24 @@ public class ScriptParser
 	 * @see IteratingScriptParser#getNextCommand()
 	 * @see #next()
 	 */
-	public ScriptCommandDefinition getNextCommand()
+	public String getNextCommand()
 	{
 		if (this.currentIteratorIndex == -42) throw new IllegalStateException("Iterator not initialized");
-		ScriptCommandDefinition result = null;
+		ScriptCommandDefinition command = null;
+		String result = null;
 		if (this.iteratingParser != null)
 		{
-			result = this.iteratingParser.getNextCommand();
+			command = this.iteratingParser.getNextCommand();
+			if (command == null) return null;
+			result = command.getSQL();
 		}
 		else
 		{
-			result = (ScriptCommandDefinition)this.commands.get(this.currentIteratorIndex);
+			command = (ScriptCommandDefinition)this.commands.get(this.currentIteratorIndex);
+			result = this.originalScript.substring(command.getStartPositionInScript(), command.getEndPositionInScript());
 			this.currentIteratorIndex ++;
 		}
+
 		return result;
 	}
 

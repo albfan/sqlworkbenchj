@@ -25,11 +25,8 @@ import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -89,6 +86,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
 import workbench.sql.formatter.SqlFormatter;
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -284,10 +282,10 @@ public class EditorPanel
 		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
 		//parser.setSupportOracleInclude(this.dbConnection.getMetadata().supportShortInclude());
 		parser.setScript(sql);
-		List commands = parser.getCommands();
+		
 		String delimit = parser.getDelimiter();
 
-		int count = commands.size();
+		int count = parser.getSize();
 		if (count < 1) return;
 
 		StringBuffer newSql = new StringBuffer(sql.length() + 100);
@@ -312,7 +310,7 @@ public class EditorPanel
 
 		for (int i=0; i < count; i++)
 		{
-			String command = (String)commands.get(i);
+			String command = parser.getCommand(i);
 			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getFormatterMaxSubselectLength());
 			f.setDBFunctions(this.dbFunctions);
 			int cols = Settings.getInstance().getFormatterMaxColumnsInSelect();
@@ -541,7 +539,18 @@ public class EditorPanel
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
 			String encoding = selector.getEncoding();
-			result = this.readFile(fc.getSelectedFile(), encoding);
+			
+			result = readFile(fc.getSelectedFile(), encoding);
+			
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					SwingUtilities.getWindowAncestor(EditorPanel.this).validate();
+					SwingUtilities.getWindowAncestor(EditorPanel.this).repaint();
+				}
+			});
+			
 			lastDir = fc.getCurrentDirectory().getAbsolutePath();
 			Settings.getInstance().setLastSqlDir(lastDir);
 			Settings.getInstance().setDefaultFileEncoding(encoding);
@@ -620,22 +629,29 @@ public class EditorPanel
 	{
 		if (aFile == null) return false;
 		if (!aFile.exists()) return false;
-		if (aFile.length() >= Integer.MAX_VALUE)
+		if (aFile.length() >= Integer.MAX_VALUE / 2)
 		{
 			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgFileTooBig"));
 			return false;
 		}
+		
 		boolean result = false;
 		
 		BufferedReader reader = null;
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
 		int endLength = lineEnding.length();
 		SyntaxDocument doc = null;
+		
 		try
 		{
 			// try to free memory by releasing the current document
-			this.setDocument(new SyntaxDocument());
+			if(this.document != null)
+			{
+				this.document.removeDocumentListener(documentHandler);
+				this.document.dispose();
+			}			
 			System.gc();
+			System.runFinalization();
 			
 			String filename = aFile.getAbsolutePath();
 			File f = new File(filename);
@@ -659,20 +675,34 @@ public class EditorPanel
 			// Creating a SyntaxDocument with a filled GapContent
 			// does not seem to work, inserting the text has to
 			// go through the SyntaxDocument
+			// but we initiallize the GapContent before to avoid
+			// too many re-allocations of the internal buffer
 			GapContent  content = new GapContent((int)aFile.length() + 500);
 			doc = new SyntaxDocument(content);
+			doc.suspendUndo();
+			
 			int pos = 0;
-			String line = reader.readLine();
-			while (line != null)
+			
+			final int numLines = 50;
+			StringBuffer lineBuffer = new StringBuffer(numLines * 100);
+			
+			// Inserting the text in chunks is much faster than 
+			// inserting it line by line. Optimal speed would probably
+			// when reading everything into a buffer, and then call insertString()
+			// only once, but that will cost too much memory (the memory footprint
+			// of the editor is already too high...)
+			int lines = FileUtil.readLines(reader, lineBuffer, numLines, lineEnding);
+			while (lines > 0)
 			{
-				doc.insertString(pos, line, null);
-				pos += line.length();
-				doc.insertString(pos, lineEnding, null);
-				pos += endLength;
-				line = reader.readLine();
+				doc.insertString(pos, lineBuffer.toString(), null);
+				pos += lineBuffer.length();
+				lineBuffer.setLength(0);
+				lines = FileUtil.readLines(reader, lineBuffer, numLines, lineEnding);
 			}
-			doc.clearUndoBuffer();
+			
+			doc.resumeUndo();
 			this.setDocument(doc);
+			
 			this.currentFile = aFile;
 			this.fileEncoding = encoding;
 			result = true;
@@ -688,6 +718,8 @@ public class EditorPanel
 		}
 		catch (OutOfMemoryError mem)
 		{
+			doc.dispose();
+			System.gc();
 			WbManager.getInstance().showOutOfMemoryError();
 		}
 		finally
@@ -695,7 +727,6 @@ public class EditorPanel
 			this.resetModified();
 			try { reader.close(); } catch (Throwable th) {}
 		}
-		this.setCaretPosition(0);
 		return result;
 	}
 

@@ -13,6 +13,7 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 import workbench.log.LogMgr;
@@ -63,10 +64,12 @@ public class TableCreator
 		sql.append(" (");
 		int count = this.columnDefinition.length;
 		int numCols = 0;
+		List pkCols = new ArrayList();
+		
 		for (int i=0; i < count; i++)
 		{
 			ColumnIdentifier col = this.columnDefinition[i];
-			
+			if (col.isPkColumn()) pkCols.add(col.getColumnName());
 			String def = this.getColumnDefintionString(col);
 			if (def == null) continue;
 			
@@ -75,11 +78,22 @@ public class TableCreator
 			numCols++;
 		}
 		sql.append(')');
-		LogMgr.logInfo("TableCreator.createTable()", "Using sql=" + sql);
+		LogMgr.logInfo("TableCreator.createTable()", "Creating table using sql: " + sql);
 		Statement stmt = this.connection.createStatement();
 		try
 		{
 			stmt.executeUpdate(sql.toString());
+			
+			if (pkCols.size() > 0)
+			{
+				StringBuffer pkSql = this.connection.getMetadata().getPkSource(this.tablename.getTableName(), pkCols, null);
+				if (pkSql.length() > 0)
+				{
+					LogMgr.logInfo("TableCreator.createTable()", "Adding primary key using: " + pkSql.toString());
+					stmt.executeUpdate(pkSql.toString());
+				}
+			}
+			
 			if (this.connection.getMetadata().getDDLNeedsCommit() && !this.connection.getAutoCommit())
 			{
 				LogMgr.logDebug("TableCreator.createTable()", "Commiting the changes");

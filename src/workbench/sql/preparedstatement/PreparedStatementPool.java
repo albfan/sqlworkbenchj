@@ -30,7 +30,6 @@ public class PreparedStatementPool
 	// of type StatementParameter
 	private Map statements;
 	private WbConnection dbConnection;
-	private Pattern placeholder = Pattern.compile("\\s\\?\\s*");
 	
 	public PreparedStatementPool(WbConnection conn)
 	{
@@ -64,8 +63,7 @@ public class PreparedStatementPool
 		throws SQLException
 	{
 		if (sql == null) return false;
-		Matcher m = placeholder.matcher(sql);
-		if (!m.find()) return false;
+		if (sql.indexOf('?') == -1) return false;
 		
 		if (this.statements.containsKey(sql))
 		{
