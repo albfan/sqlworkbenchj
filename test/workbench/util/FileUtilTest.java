@@ -48,6 +48,69 @@ public class FileUtilTest
 		}
 	}
 
+	public void testReadLines()
+	{
+		try
+		{
+			File f = new File(testUtil.getBaseDir(), "linetest.txt");
+			String encoding = "ISO-8859-1";
+			Writer w = EncodingUtil.createWriter(new FileOutputStream(f), encoding);
+			w.write("Line 1\n");
+			w.write("Line 2\n");
+			w.close();
+			
+			BufferedReader in = EncodingUtil.createBufferedReader(f, encoding);
+			StringBuffer content = new StringBuffer();
+			int lines = FileUtil.readLines(in, content, 5, "\n");
+			in.close();
+			assertEquals("Not enough lines", 2, lines);
+			assertEquals("Content not read properly", "Line 1\nLine 2\n", content.toString());
+			
+			StringBuffer fileContent = new StringBuffer();
+			for (int i = 0; i < 15; i++)
+			{
+				fileContent.append("Line " + i + "\n");
+			}
+			w = EncodingUtil.createWriter(new FileOutputStream(f), encoding);
+			w.write(fileContent.toString());
+			w.close();			
+			
+			content = new StringBuffer();
+			in = EncodingUtil.createBufferedReader(f, encoding);
+			lines = FileUtil.readLines(in, content, 10, "\n");
+			assertEquals("Not enough lines", 10, lines);
+			lines = FileUtil.readLines(in, content, 10, "\n");
+			in.close();
+//			System.out.println("content: " + StringUtil.escapeUnicode(content.toString()));
+//			System.out.println("content: " + StringUtil.escapeUnicode(fileContent.toString()));
+			assertEquals("Not enough lines", 4, lines);
+			assertEquals("Wrong content retrieved", fileContent.toString(), content.toString());
+			
+			fileContent = new StringBuffer();
+			for (int i = 0; i < 237; i++)
+			{
+				fileContent.append("Line " + i + "\n");
+			}
+			w = EncodingUtil.createWriter(new FileOutputStream(f), encoding);
+			w.write(fileContent.toString());
+			w.close();				
+			
+			content = new StringBuffer(1000);
+			in = EncodingUtil.createBufferedReader(f, encoding);
+			lines = FileUtil.readLines(in, content, 10, "\n");
+			while (lines == 10)
+			{
+				lines = FileUtil.readLines(in, content, 10, "\n");
+			}
+			in.close();
+			assertEquals("Wrong content retrieved", fileContent.toString(), content.toString());			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	public void testGetLineEnding()
 		throws Exception
 	{
@@ -57,8 +120,7 @@ public class FileUtilTest
 			
 			String encoding = "ISO-8859-1";
 			Writer w = EncodingUtil.createWriter(new FileOutputStream(f), encoding);
-			w.write("Line 1");
-			w.write('\n');
+			w.write("Line 1\n");
 			w.write("Line 2");
 			w.close();
 			

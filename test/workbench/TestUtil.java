@@ -62,29 +62,50 @@ public class TestUtil
 		pw.println("workbench.log.maxfilesize=150000");
 		pw.close();
 		WbManager.getInstance().prepareForTest(basedir);
+		emptyBaseDirectory();
 	}
 
 	public void emptyBaseDirectory()
 	{
 		// Cleanup old database files
 		File dir = new File(basedir);
+		deleteFiles(dir);
+	}
+	
+	private void deleteFiles(File dir)
+	{
 		File[] files = dir.listFiles();
 		for (int i = 0; i < files.length; i++)
 		{ 
+			if (files[i].isDirectory())
+			{
+				deleteFiles(files[i]);
+			}
 			files[i].delete();
 		}
+	}
+
+	public WbConnection getConnection()
+		throws Exception
+	{
+		ArgumentParser parser = WbManager.createArgumentParser();
+		parser.parse("-url=jdbc:hsqldb:" + getDbName() + " -user=sa -driver=org.hsqldb.jdbcDriver");
+		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
+		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, "WbUnitTest");
+		return con;
 	}
 
 	public DefaultStatementRunner createConnectedStatementRunner()
 		throws Exception
 	{
-		emptyBaseDirectory();
-		ArgumentParser parser = WbManager.createArgumentParser();
-		parser.parse("-url=jdbc:hsqldb:" + getDbName() + " -user=sa -driver=org.hsqldb.jdbcDriver");
+		return createConnectedStatementRunner(getConnection());
+	}
+	
+	public DefaultStatementRunner createConnectedStatementRunner(WbConnection con)
+		throws Exception
+	{
 		DefaultStatementRunner runner = new DefaultStatementRunner();
 		runner.setBaseDir(getBaseDir());
-		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
-		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, "WbUnitTest");
 		runner.setConnection(con);
 		return runner;
 	}

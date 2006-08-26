@@ -159,8 +159,8 @@ public class WbExportTest extends TestCase
 			
 			ScriptParser p = new ScriptParser(1024*1024);
 			p.setFile(exportFile);
-			List l = p.getCommands();
-			assertEquals("Wrong number of statements", rowcount + 1, l.size());
+			
+			assertEquals("Wrong number of statements", rowcount + 1, p.getSize());
 			String sql = p.getCommand(0);
 			String verb = SqlUtil.getSqlVerb(sql);
 			assertEquals("Not an insert file", "INSERT", verb);

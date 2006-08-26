@@ -11,7 +11,6 @@
  */
 package workbench.sql;
 
-import java.util.Map;
 import junit.framework.*;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
@@ -19,13 +18,9 @@ import workbench.db.WbConnection;
 import workbench.sql.commands.DdlCommand;
 import workbench.sql.commands.UpdatingCommand;
 import workbench.sql.wbcommands.WbCopy;
-import workbench.sql.wbcommands.WbDefinePk;
 import workbench.sql.wbcommands.WbDefineVar;
 import workbench.sql.wbcommands.WbFeedback;
 import workbench.sql.wbcommands.WbInclude;
-import workbench.sql.wbcommands.WbRemoveVar;
-import workbench.storage.PkMapping;
-import workbench.util.StringUtil;
 
 /**
  *
@@ -59,15 +54,6 @@ public class DefaultStatementRunnerTest
 
 			boolean verbose = runner.getVerboseLogging();
 			assertEquals("Feedback not executed", false, verbose);
-			
-			sql = "--define a new PK for a view\nwbdefinepk junitpk=id,name";
-			command = runner.getCommandToUse(sql);
-			assertTrue(command instanceof WbDefinePk);
-			runner.runStatement(sql, -1, -1);
-
-			Map mapping = PkMapping.getInstance().getMapping();
-			String cols = (String)mapping.get("junitpk");
-			assertEquals("Wrong pk mapping stored", "id,name", cols);
 			
 		}
 		catch (Exception e)

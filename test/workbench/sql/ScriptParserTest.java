@@ -14,6 +14,7 @@ package workbench.sql;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.Iterator;
 import junit.framework.*;
 import java.util.List;
 import workbench.util.SqlUtil;
@@ -47,10 +48,9 @@ public class ScriptParserTest extends TestCase
 				"-- line comment\n" +
 				"delete from blub;";
 			ScriptParser p = new ScriptParser(sql);
-			List l = p.getCommands();
-			assertEquals("Not enough commands", 3, l.size());
+			assertEquals("Not enough commands", 3, p.getSize());
 			
-			String c = (String)l.get(0);
+			String c = p.getCommand(0);
 			assertEquals("Wrong command at index 0", "SELECT", SqlUtil.getSqlVerb(c));
 			
 			c = p.getCommand(2);
@@ -85,22 +85,20 @@ public class ScriptParserTest extends TestCase
 			for (int i = 0; i < counter; i++)
 			{
 				out.write("--- test command\n");
-				out.write("insert into test_table\n(col1, col2, col3, col4)\nvalues ('1','2''',3,' a very long \n quoted text');\n\n");
+				out.write("insert into test_table\n(col1, col2, col3, col4)\nvalues ('1','2''',3,' a two line \n; quoted text');\n\n");
 			}
 			out.close();
-			ScriptParser p = new ScriptParser(1000);
+			ScriptParser p = new ScriptParser(500);
 			p.setFile(script);
 			int count = 0;
-			p.getIterator();
-			ScriptCommandDefinition def = p.getNextCommand();
-			while (def != null)
+			Iterator itr = p.getIterator();
+			while (itr.hasNext())
 			{
-				String sql = def.getSQL();
-				assertNotNull("No SQL returned " + count, sql);
+				String sql = (String)itr.next();
+				assertNotNull("No SQL returned at " + count, sql);
 				String verb = SqlUtil.getSqlVerb(sql);
 				assertEquals("Wrong statement retrieved", "insert", verb.toLowerCase());
 				count ++;
-				def = p.getNextCommand();
 			}
 			p.done();
 			assertEquals("Wrong number of statements", counter, count);
@@ -126,9 +124,8 @@ public class ScriptParserTest extends TestCase
 								 "WHERE t.key = f.folder_name;";
 		
 		ScriptParser p = new ScriptParser(sql);
-		List l = p.getCommands();
-		assertEquals(3, l.size());
-		assertEquals("select * from template_field_label", l.get(1));
+		assertEquals(3, p.getSize());
+		assertEquals("select * from template_field_label", p.getCommand(1));
 
 		sql = "/* \n" + 
 					 "* comment comment comment \n" + 
@@ -152,15 +149,14 @@ public class ScriptParserTest extends TestCase
 		
 		p.setScript(sql);
 		p.setSupportOracleInclude(true);
-		l = p.getCommands();
-		assertEquals(4, l.size());
-		String verb = SqlUtil.getSqlVerb((String)l.get(1));
+		assertEquals(4, p.getSize());
+		String verb = SqlUtil.getSqlVerb(p.getCommand(1));
 		assertEquals("drop", verb.toLowerCase());
-		String s = (String)l.get(0);
+		String s = p.getCommand(0);
 		String clean = SqlUtil.makeCleanSql(s, false, false, '\'');
 		assertEquals("alter table participants drop constraint r_05", clean);
 
-		s = (String)l.get(2);
+		s = p.getCommand(2);
 		assertEquals("@include.sql", s);
 		
 		sql = "SELECT distinct t.KEY \n" + 
@@ -176,8 +172,7 @@ public class ScriptParserTest extends TestCase
 					"       -includeprimarykeys=false \n" + 
 					";       ";			
 		p = new ScriptParser(sql);
-		l = p.getCommands();
-		assertEquals(2, l.size());
+		assertEquals(2, p.getSize());
 	}
 
 	
