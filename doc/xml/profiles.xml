@@ -279,7 +279,7 @@
 				Some DBMS require that all open transactions are closed before actually
 				closing the connection to the server. If this option is enabled, &wb-productname; 
 				will send a <literal>ROLLBACK</literal> to the backend server before
-				closing the connection. This is e.g. required for Cloudscape because executing
+				closing the connection. This is e.g. required for Cloudscape/Derby because executing
 				a <literal>SELECT</literal> query already starts a transaction. If you see
 				errors in your log file while disconnecting, you might need to enable this
 				for your database as well.

@@ -1,6 +1,6 @@
 <section id="using">
 	<title>Using &wb-productname;</title>
-
+	
 	<section id="executing-sql-statements">
 		<title>Executing SQL statements</title>
 
@@ -21,6 +21,18 @@
 			recalled the next statement can be shown using <keycap>Alt-Right</keycap> or choosing
 			<menuchoice><guimenu>SQL</guimenu><guimenuitem>Next Statement</guimenuitem></menuchoice>
 			from the menu. This is similar to browsing through the history of a web browser.</para>
+			<para>
+				You can clear the statement history for the current tab, but selecting
+				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Clear history</guimenuitem></menuchoice>
+			</para>
+			<note>
+				When you clear the content of the editor (e.g. by selecting the whole text 
+				and then pressing the <keycap>Del</keycap> key) this will not clear the statement
+				history. When you load the associated workspace the next time, the editor will 
+				automatically display the last statement from the history. You need to manually
+				clear the statement history, if you want an empty editor the next time you 
+				load the workspace.
+			</note>
 		</section>
 
 		<section id="execute-sql-commands">
@@ -745,7 +757,7 @@ Done.</programlisting>
 			When editing date, timestamp or time fields, the format specified 
 			in the <link linkend="options-date-format">options dialog</link> is used 
 			for parsing the entered value and converting that into the internal representation 
-			of a date.
+			of a date. The value entered must match the format defined there.
 		</para>
 	</section>
     

@@ -14,6 +14,9 @@
         to nothing: <literal>wbvardef myvar=</literal>. Alternatevily you can use the command
         <literal>wbvardelete myvar</literal> to remove a variable definition.
       </para>
+			<note>
+				Variables are case sensitive.
+			</note>
       <para>
         Variables can also be read from a properties file, either by specifying 
         <literal>-file=filename</literal> for the <literal>WbVarDef</literal> command, 
@@ -21,6 +24,7 @@
         Please see the description for the <link linkend="cmdline-vardef">command line parameters</link>
         for details. 
       </para>
+			
       <programlisting>wbvardef -file=/temp/myvars.def</programlisting>
       <para>This file has to be a standard Java "properties" file. Each variable 
       is listed on a single line in the format <literal>variable=value</literal>.

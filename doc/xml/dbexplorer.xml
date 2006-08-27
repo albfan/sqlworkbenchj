@@ -11,8 +11,11 @@
 			<member>When using Windows with the <literal>DbExplorer.exe</literal> executable or in Linux/Unix using shell script <literal>jworkbench</literal></member>
 		</simplelist>
 	</para>
-	<para>At the top of the window, the current schema (for MS SQL Server this
-	would be the current database, for Oracle this is the user) can be selected.</para>
+
+	<para>
+		At the top of the window, the current schema (for MS SQL Server this
+		would be the current database, for Oracle this is the user) can be selected.
+	</para>
   
 	<para>The displayed list can be filtered using the quick filter above the list. To filter
 		the list by the object name, simply enter the criteria in the filter field, and 
@@ -180,7 +183,8 @@
 			table, any index defined on that table (only if the JDBC driver
 			returns that information), other tables that are referenced by the
 			currently selected table, any table that references the currently
-		selected table and any trigger that is defined on that table.</para>
+			selected table and any trigger that is defined on that table.
+		</para>
 
 		<para>The column list will also display any comments defined for the column
 			(if the JDBC driver returns the information).
@@ -190,9 +194,11 @@
 			and the value should be set to <literal>true</literal>.
 		</para>
 
-		<para>When an Oracle synonym is selected, the columns tab will display
+		<para>
+			When an Oracle synonym is selected, the columns tab will display
 			the column definition of the underlying table or view. The source tab
-		will display the statement to re-create the synonym.</para>
+			will display the statement to re-create the synonym.
+		</para>
 
 	</section>
 	
@@ -201,18 +207,20 @@
 		
 		<para>
 			The data tab will display the data from the currently selected
-		table. There are several options to configure the display of this tab.
-		The <literal>Autoload</literal> check box, controls the retrieval of the data. If this is
-		checked, then the data will be retrieved from the database as soon as
-		the table is selected in the table list (and the tab is visible).
+			table. There are several options to configure the display of this tab.
+			The <literal>Autoload</literal> check box, controls the retrieval of the data. If this is
+			checked, then the data will be retrieved from the database as soon as
+			the table is selected in the table list (and the tab is visible).
 		</para>
     
-		<para>The data tab will also display a total row count of the table. As this
-		display can take a while, it can be disabled. To disable the automatic calculation
-		of the table's rowcount, click on the <guibutton>Settings</guibutton> button and deselect 
-		the checkbox <literal>Autoload table row count</literal>. To calculate
-		the table's row count when this is disabled, double-click on the <literal>Rows:</literal>
-		label.</para>
+		<para>
+			The data tab will also display a total row count of the table. As this
+			display can take a while, the automatic retrieval of the row count can be disabled. 
+			To disable the automatic calculation of the table's rowcount, click on the <guibutton>Settings</guibutton> 
+			button and deselect the checkbox <literal>Autoload table row count</literal>. To calculate
+			the table's row count when this is not done automatically, click on the <literal>Rows</literal>
+			label. You can cancel the row count retrieval while it's running by clicking on the label again.
+		</para>
     
 		<para>The data tab is only available if the currently selected objects
 			is recognized as an object that can can be "SELECTED". Which object types
@@ -268,52 +276,76 @@
 	<section id="procedure-tab">
 		<title>Procedure tab</title>
 
-		<para>The procedure tab will list all stored procedures and functions
-		stored in the current schema. For procedures or functions returning a
-		result set, the definition of the columns will be displayed as well.</para>
+		<para>
+			The procedure tab will list all stored procedures and functions
+			stored in the current schema. For procedures or functions returning a
+			result set, the definition of the columns will be displayed as well.
+		</para>
+		
+		<para>
+			To display the procedure's source code &wb-productname; uses its
+			own SQL queries. For most popular DBMS systems the necessary 
+			queries are built into the application. If the procedure sourc
+			is not displayed for your DBMS, please contact the author.
+		</para>
 
-		<para>Functions in Oracle packages will be listed separately on the left
-		side, but the source code will contain all functions/procedures from
-		that package.</para>
+		<para>
+			Functions inside Oracle packages will be listed separately on the left
+			side, but the source code will contain all functions/procedures from
+			that package. 
+		</para>
+		
 	</section>
 
 	<section id="search-tables">
 		<title>Search tables</title>
 
-		<para>This tab offers the ability to search for a value in all text
-		columns of all tables which are selected. The results will be displayed
-		on the right side of that tab. The result will always display the
-		complete row where the search value was found. Any column that contains
-		the entered value will be highlighted.</para>
+		<para>
+			This tab offers the ability to search for a value in all text
+			columns of all tables which are selected. The results will be displayed
+			on the right side of that tab. The result will always display the
+			complete row where the search value was found. Any column that contains
+			the entered value will be highlighted.
+		</para>
 
-		<para>The value will be used to create a <literal>LIKE &apos;value&apos;</literal>
-		restriction for each text column on the selected tables. Therefore the
-		value should contain a wildcard, otherwise the exact expression will be
-		searched.</para>
+		<para>
+			The value will be used to create a <literal>LIKE &apos;value&apos;</literal>
+			restriction for each text column on the selected tables. Therefore the
+			value should contain a wildcard, otherwise the exact expression will be
+			searched.
+		</para>
 
-		<para>You can apply a function to each column as well. This is useful if
-		you want to to do a case insensitive search on Oracle (Oracles VARCHAR
-		comparison is case sensitive). In the entry field for the column the
-		placeholder $col$ is replaced with the actual column name during the
-		search. To do a case insensitive search in Oracle, you would enter
-		lower($col$) in the column field and &apos;%test%&apos; in the value
-		field.</para>
+		<para>
+			You can apply a function to each column as well. This is useful if
+			you want to to do a case insensitive search on Oracle (Oracles VARCHAR
+			comparison is case sensitive). In the entry field for the column the
+			placeholder $col$ is replaced with the actual column name during the
+			search. To do a case insensitive search in Oracle, you would enter
+			lower($col$) in the column field and &apos;%test%&apos; in the value
+			field.
+		</para>
 
-		<para>The expression in the column field is sent to the DBMS without
-		changes, except the replacement of $col$ with the current column name.
-		The above example would yield a <literal>lower(&lt;column_name&gt;) like
-		&apos;%test%&apos;</literal> for each text column for the selected tables.</para>
+		<para>
+			The expression in the column field is sent to the DBMS without
+			changes, except the replacement of $col$ with the current column name.
+			The above example would yield a <literal>lower(&lt;column_name&gt;) like
+			&apos;%test%&apos;</literal> for each text column for the selected tables.
+		</para>
 
-		<para>The generated SQL statements are logged in the second tab, labelled
-		<literal>SQL Statements</literal>.</para>
+		<para>
+			The generated SQL statements are logged in the second tab, labelled
+			<literal>SQL Statements</literal>.
+		</para>
 
-		<para>In the resulting tables, &wb-productname; tries to highlight those columns
-		which match the criteria. This might not always work, if you apply a function to the
-		column itself such as <literal>to_upper()</literal> &wb-productname; does not know
-		that this will result in a case-insesitive search on the database. &wb-productname; tries to
-		guess if the given function/value combination might result in a case insensitive search (especially
-		on a DBMS which does a case sensitive search by default) but this might not work
-		in all the cases and for all DBMS</para>
+		<para>
+			In the resulting tables, &wb-productname; tries to highlight those columns
+			which match the criteria. This might not always work, if you apply a function to the
+			column itself such as <literal>to_upper()</literal> &wb-productname; does not know
+			that this will result in a case-insesitive search on the database. &wb-productname; tries to
+			guess if the given function/value combination might result in a case insensitive search (especially
+			on a DBMS which does a case sensitive search by default) but this might not work
+			in all the cases and for all DBMS.
+		</para>
 
 	</section>
 </section>

@@ -1,6 +1,31 @@
 <section id="editor" xreflabel="Editing SQL Statements">
 
 	<title>Editing SQL Statements</title>
+	
+	<section id="editing-files">
+		<title>Editing files</title>
+		
+		<para>You can load and save the editor's content into external files (e.g. for re-using)
+			them in other SQL tools.
+		</para>
+		<para>
+			To load a file use <menuchoice><guimenu>File</guimenu><guimenuitem>Open...</guimenuitem></menuchoice>
+			or right click on the tab's label and choose <guimenuitem>Open...</guimenuitem> from the popup
+			menu.
+		</para>
+		<para>
+			The association between an editor tab and the external file will be saved
+			in the workspace that is used for the current connection. When opening the 
+			workspace (e.g. by connecting using a profile that is linked to that workspace) the
+			external file will be loaded as well.
+		</para>
+		<note>
+			The editor is not suited for editing very large amounts of text. If you need to edit
+			and run large SQL scripts it is recommended to use the 
+			<link linkend="command-wbinclude">WbInclude</link> command to run the script 
+			without loading it into memory.
+		</note>
+	</section>
     
 	<section id="command-completion">
 		<title>Command completion</title>
@@ -29,17 +54,6 @@ FROM person p, address a;</programlisting>
 			for the auto completion of object names, this behaviour can be <link linkend="auto-completion-empty-line">configured</link>
 			to also	accept an empty line as a separator.
 		</para>
-	</section>
-    
-	<section id="editing-files">
-		<title>Editing files</title>
-		<para>You can also load and save the editor's content into external files (e.g. for re-using)
-			them in other SQL tools
-		</para>
-		<para>The association between an editor tab and the external file will be saved
-		in the workspace that is used for the current connection. When opening the 
-		workspace (e.g. by connecting using a profile that is linked to that workspace) the
-		external file will be loaded as well.</para>
 	</section>
     
 	<section id="editor-reformat-sql" xreflabel="SQL Formatter">
@@ -78,10 +92,6 @@ AND   NOT EXISTS (SELECT 1
 		</para>
 	</section>
       
-	<note>
-		Please note that formatting of stored procedures is currently not supported.
-	</note>
-
 	<section id="editor-make-in-list">
 		<title>Create SQL value lists</title>
 		<para>

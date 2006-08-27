@@ -75,6 +75,19 @@
 		</section>
 	</section>
 
+
+	<section id="displaying-help">
+		<title>Displaying help</title>
+		<para>
+			You have two options to display help for &wb-productname;. Either the built-in help
+			file, which is accessible through <menuchoice><guimenu>Help</guimenu><guimenuitem>Contents</guimenuitem></menuchoice>
+			or the PDF manual. In order to be able to display the PDF manual, you need to define
+			 the path to the executable for the PDF reader in the <link linkend="options-general">General options</link>
+			 and the file <literal>SQLWorkbench-Manual.pdf</literal> must be available in the 
+			 directory where <literal>Workbench.jar</literal> is located.
+		</para>
+	</section>
+	
 	<section id="install-increase-memory">
 		<title>Increasing the memory available to the application</title>
 		<para>&wb-productname; is a Java application and thus runs inside a
@@ -92,7 +105,7 @@
 		will increase the maximum memory to 256MB. The recommended way
 		is to create Windows&reg; shortcut (e.g. on the desktop) and add the above parameter
 		to the shortcut definition. The launcher increases the available heap size
-		by default to 128 MB.</para>
+		by default to 256MB.</para>
 		<para>If you are running &wb-productname; on a non-Windows&reg; operating system or do not
 		want to use the launcher, then you need to pass this parameter directly to the JVM</para>
 		<para><programlisting>java -Xmx256m -jar Workbench.jar</programlisting></para>
@@ -385,6 +398,9 @@ another_variable=24</programlisting>
 				its settings to the file <literal>workbench.settings</literal> when it's beeing closed. Note 
 				that in <link linkend="using-scripting">batch mode</link>, this file is never written.
 			</para>
+			<note>
+				Note that if this parameter supplied, the workspace will not be saved automatically as well!
+			</note>
 		</section>
 
 		<section id="commandline-connect-profile">
@@ -394,7 +410,9 @@ another_variable=24</programlisting>
 				profile</link> on the commandline with the <literal>-profile=&#60;profile name&#62;</literal>
 				parameter. The name has to be passed exactly like it appears in the profile dialog
 				(case sensitiv!). If the name contains spaces or dashes, it has to be enclosed in
-				quotations marks.
+				quotations marks. If you have more than one profile with the same name but in different
+				profile groups, you have to specify the desired profile group using the <literal>-profilegroup</literal>
+				parameter, otherwise the first profile matching the passed name will be selected.
 			</para>
 			
 			<para>Example:</para>
@@ -404,8 +422,13 @@ another_variable=24</programlisting>
 				In this case the file <literal>WbProfiles.xml</literal> must be in the current
 				(working) directory of the application. If this is not the case, please specify the 
 				location of the profile using either the <link linkend="cmdline-parameter-profilestorage"><literal>-profilestorage</literal></link> or 
-				<link linkend="cmdline-parameter-configdir"><literal>-configdir</literal></link> parameter
+				<link linkend="cmdline-parameter-configdir"><literal>-configdir</literal></link> parameter.
 			</para>
+			<para>
+				If you have two profiles with the names <literal>&quot;Oracle - Test&quot;</literal> you will 
+				need to specify the profile group as well:
+			</para>
+			<programlisting>java -jar Workbench.jar -profile='Oracle - Test' -profilegroup='Local' -script='test.sql'</programlisting>
 		</section>
 		
 		<section id="commandline-connect-noprofile">
@@ -456,6 +479,23 @@ another_variable=24</programlisting>
 							<entry>-driverjar</entry>
 							<entry>Specify the full pathname to the .jar file containing the JDBC driver</entry>
 						</row>
+
+						<row>
+							<entry>-autocommit</entry>
+							<entry>Set the autocommit property for this connection. Note that you can 
+							dynamically enable or disable autocommit using <literal>SET AUTOCOMMIT ON</literal> or
+							<literal>SET AUTOCOMMIT OFF</literal> in your SQL scripts. 
+							</entry>
+						</row>
+						
+						<row>
+							<entry>-rollbackOnDisconnect</entry>
+							<entry>If this parameter is set to true, a <literal>ROLLBACK</literal> will 
+							be sent to the DBMS before the connection is closed. This setting is 
+							also available in the <link linkend="profile-rollback-before-disconnect">connection profile</link>.
+							</entry>
+						</row>
+						
 						<row>
 							<entry>-workspace</entry>
 							<entry>The workspace file to be loaded. If the file specification does not 

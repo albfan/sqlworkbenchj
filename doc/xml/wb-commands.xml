@@ -143,7 +143,7 @@
             <entry><para>-compress</para></entry>
             <entry><para>Selects whether the output file should be compressed 
 						and put into a ZIP archive. An archive will be created with the name of the specified outputfile
-						but with the extenion <literal>zip</literal>. The archive will then contain the specified file 
+						but with the extension <literal>zip</literal>. The archive will then contain the specified file 
 						(e.g. if you specify <literal>data.txt</literal>, an archive <literal>data.zip</literal>
 						will be created containing exactly one entry with the name <literal>data.txt</literal>).
 						If the exported result set contains BLOBs, they will be stored in a separate archive, named 
@@ -279,16 +279,15 @@
             <row>
               <entry><para>-dateformat</para></entry>
 
-              <entry><para>The date format to be used when
-              writing date columns into the output file. The syntax of the
-              format definition, is the same as for the SimpleDateFormat
-              class.</para></entry>
-            </row>
+							<entry><para>The date <link linkend="options-date-format">format</link> to be used when
+									writing date columns into the output file. 
+							</para></entry>
+						</row>
 
             <row>
               <entry><para>-datetimeformat</para></entry>
 
-              <entry><para>The format to be used when writing
+              <entry><para>The <link linkend="options-date-format">format</link> to be used when writing
               datetime (or timestamp) columns into the output file.
               </para></entry>
             </row>
@@ -319,31 +318,9 @@
             <row>
               <entry><para>-decimal</para></entry>
 
-              <entry><para>The decimal symbol to be used for
-                  numbers. The default is a dot (e.g. 3.14152)</para>
+              <entry><para>The decimal symbol to be used for numbers. The default is a dot (e.g. 3.14152)</para>
               </entry>
             </row>
-
-                        <!--
-            <row>
-              <entry><para>-cleancr=[true|false]</para></entry>
-
-              <entry><para>Controls the handling of non
-                  printable characters inside character columns. If
-                  <literal>-cleancr=true</literal>, any character &#60; ASCII 32 will
-                  be replaced with a space character. This results in
-                  exported data that is different to the content of the database,
-                  but will allow importing using tools that do not
-                  support embedded newlines.
-                  If you plan to use <literal>WbImport</literal> to import
-                  the textfile, then using the <literal>-escapetext</literal> flag
-                  is the recommended way to deal with special characters. Using
-                  the text encoding offered by <literal>WbImport/WbExport</literal>
-                  special characters can be written and restored using text files that would
-                  otherwise not support this.
-              </para></entry>
-            </row>
-            -->
 
             <row>
               <entry><para id="text-escape-switch">-escapetext</para></entry>
@@ -415,25 +392,23 @@
               into the &#60;table&#62; tag as an attribute.</para></entry>
             </row>
 
-            <row>
-              <entry><para>-dateformat</para></entry>
-              <entry><para>The date format to be used when
-              writing date columns into the output file. The syntax of the
-              format definition, is the same as for the SimpleDateFormat
-              class.</para></entry>
-            </row>
-
+						<row>
+							<entry><para>-dateformat</para></entry>
+							<entry><para>The date <link linkend="options-date-format">format</link> to be used when
+									writing date columns into the output file. 
+							</para></entry>
+						</row>
+						
             <row>
               <entry><para>-datetimeformat</para></entry>
-              <entry><para>The format to be used when writing
+              <entry><para>The <link linkend="options-date-format">format</link> to be used when writing
               datetime (or timestamp) columns into the output file.
               </para></entry>
             </row>
 
             <row>
               <entry><para>-decimal</para></entry>
-              <entry><para>The decimal symbol to be used for
-              numbers. The default is a dot (e.g. 3.14152)</para></entry>
+              <entry><para>The decimal symbol to be used for numbers. The default is a dot (e.g. 3.14152)</para></entry>
             </row>
             <row>
               <entry><para>-usecdata</para></entry>
@@ -629,9 +604,13 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						<entry><para>This parameter controls the behaviour when errors occur during
 								the import. The default is <literal>true</literal>, meaning that the import
 								will continue even if an error occurs during file parsing or updating the database.
-								Set this parameter to <literal>false</literal>
-								if you want to stop the import as soon as an error occurs.
-						</para></entry>
+								Set this parameter to <literal>false</literal> if you want to stop the import as soon as an error occurs.
+						</para>
+						<para>
+							The default value for this parameter can be controlled in the <link linkend="import-continue-default">settings file</link>
+							and it will be displayed if you run <literal>WbImport</literal> without any parameters.
+						</para>
+						</entry>
 					</row>
 					<row>
 						<entry><para>-keyColumns</para></entry>
@@ -646,7 +625,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 					<row>
 						<entry><para>-table</para></entry>
 						<entry><para>Defines the table into which the data should be imported</para>
-							<para>This parameter is ignored files are imported using the <literal>-sourcedir</literal>
+							<para>This parameter is ignored, if the files are imported using the <literal>-sourcedir</literal>
 								parameter
 						</para></entry>
 					</row>
@@ -724,7 +703,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 					
 					<tbody valign="top">
 						<row>
-							<entry><para>-filecolumns</para></entry>
+							<entry><para>-fileColumns</para></entry>
 							<entry><para>A comma separated list of the table columns in the import file
 									Each column from the file should be listed with the approriate column
 									name from the target table. This parameter also defines
@@ -742,7 +721,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 							</entry>
 						</row>
 						<row>
-							<entry><para>-importcolumns</para></entry>
+							<entry><para>-importColumns</para></entry>
 							<entry><para>Defines the columns that should be imported. If all
 									columns from the input file should be imported (the default), then
 									this parameter can be ommited. If only certain columns should be
@@ -766,21 +745,42 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</row>
 						
 						<row>
-							<entry><para>-dateformat</para></entry>
-							<entry><para>The format for date columns
-									The syntax of the format definition, is the same as for the SimpleDateFormat
-							class.</para></entry>
-						</row>
-						
-						<row>
-							<entry><para>-datetimeformat</para></entry>
-							<entry><para>The format for datetime (or timestamp) columns in the input file.
+							<entry><para>-dateFormat</para></entry>
+							<entry><para>
+								The <link linkend="options-date-format">format</link> for date columns. 
 							</para></entry>
 						</row>
 						
 						<row>
-							<entry><para>-quotechar</para></entry>
+							<entry><para>-dateTimeFormat</para></entry>
+							<entry><para>The <link linkend="options-date-format">format</link> for datetime (or timestamp) columns in the input file.
+							</para></entry>
+						</row>
+						
+						<row>
+							<entry><para>-quoteChar</para></entry>
 							<entry><para>The character which was used to quote values where the delimiter is contained.
+							This parameter has no default value. Thus if this is not specified, no quote checking 
+							will take place. If you use <literal>-multiLine=true</literal> you <emphasis role="bold">have</emphasis>
+							to specify a quote character in order for this to work properly.
+							</para></entry>
+						</row>
+						
+						<row>
+							<entry><para>-multiLine</para></entry>
+							<entry><para>
+									Enable support for records spanning more than one line in the input file. 
+									These records have to be quoted, otherwise they will
+									not be recognized.
+								</para>
+								<para>
+									If you create your exports with the <link linkend="command-export">WbExport</link> command, 
+									it is recommended to encode special characters using the <literal>-escapetext</literal>
+									switch rather then using multi-line records.
+								</para>
+								<para>The default value for this parameter can be controlled
+									in the <link linkend="import-text-multiline">settings file</link> 
+									and it will be displayed if you run <literal>WbImport</literal> without any parameters.
 							</para></entry>
 						</row>
 						
@@ -830,12 +830,12 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						<row>
 							<entry><para>-lineFilter</para></entry>
 							<entry><para>
-									To define a filter on the level of the input row (rather then
+									To define a filter on the level of the input row (rather than
 									for each column individually) you can define a regular expression
 									that is applied to the whole input row. As the regular expressioin
-									will be applied to the input row as it is retrieved from the
-									input file, the column delimiter(s) have to be taken into account
-									when defining the regular expression.
+									will be applied to the row as it is retrieved from the input file, 
+									the column delimiter(s) have to be taken into account when defining 
+									the regular expression.
 							</para></entry>
 						</row>
 						<row>
@@ -846,7 +846,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 									or as an empty string. 
 							</para>
 							<para>
-								Note that, input values for non character columns (such as numeric, date) that are 
+								Note that, input values for non character columns (such as numbers or date columns) that are 
 								empty or consist only of whitespace will always be treated as <literal>NULL</literal>.
 							</para>
 							</entry>
@@ -952,12 +952,6 @@ WHERE table1.column1 = table2.column1;</programlisting>
 				records that are flagged as manual even if they are contained in the input file.
 			</para>
 
-			<note>
-				When importing text files, records spanning multiple lines in the input
-				file are <emphasis role="strong">not</emphasis> supported, even when
-				they are quoted.
-			</note>
-			
 		</section>
 
 		<section id="import-xml-parameters">
@@ -1091,22 +1085,36 @@ WHERE table1.column1 = table2.column1;</programlisting>
 
             <tbody valign="top">
               <row>
-                <entry><para>-sourceprofile</para></entry>
+                <entry><para>-sourceProfile</para></entry>
                 <entry><para>The name of the connection profile to use as the source connection.
                 If -sourceprofile is not specified, the current connection is used as the source.
                 </para></entry>
               </row>
               <row>
-                <entry><para>-targetprofile</para></entry>
-                <entry><para>The name of the connection profile to use as the target connection. If either
+                <entry><para>-sourceGroup</para></entry>
+                <entry><para>If the name of your source profile is not unique across 
+								all profiles, you will need to specify the group in which the profile 
+								is located with this parameter.
+                </para></entry>
+              </row>
+              <row>
+                <entry><para>-targetProfile</para></entry>
+                <entry><para>The name of the connection profile to use as the target connection. If
                 -targetprofile is not specified, the current connection is used as the target.</para></entry>
               </row>
               <row>
-                <entry><para>-commitevery</para></entry>
+                <entry><para>-targetGroup</para></entry>
+                <entry><para>If the name of your target profile is not unique across 
+								all profiles, you will need to specify the group in which the profile 
+								is located with this parameter.
+                </para></entry>
+              </row>
+              <row>
+                <entry><para>-commitEvery</para></entry>
                 <entry><para>The number of rows after which a commit is send to the target database.</para></entry>
               </row>
               <row>
-                <entry><para>-deletetarget=[true|false]</para></entry>
+                <entry><para>-deleteTarget=[true|false]</para></entry>
                 <entry><para>If this parameter is set to true, all rows are deleted from the
                 target table before copying the data.</para></entry>
               </row>
@@ -1143,24 +1151,24 @@ WHERE table1.column1 = table2.column1;</programlisting>
             </thead>
             <tbody valign="top">
               <row>
-                <entry><para>-sourcetable=&lt;tablename&gt;</para></entry>
+                <entry><para>-sourceTable</para></entry>
                 <entry><para>The name of the table to be copied.</para></entry>
               </row>
               <row>
-                <entry><para>-sourcewhere=&lt;condition&gt;</para></entry>
+                <entry><para>-sourceWhere</para></entry>
                 <entry><para>A <literal>WHERE</literal> condition that is applied to the source table.</para></entry>
               </row>
               <row>
-                <entry><para>-targettable=&lt;tablename&gt;</para></entry>
+                <entry><para>-targetTable</para></entry>
                 <entry><para>The name of the table into which the data should be written.</para></entry>
               </row>
               <row>
-                <entry><para>-createtarget=[true|false]</para></entry>
+                <entry><para>-createTarget=[true|false]</para></entry>
                 <entry><para>If this parameter is set to <literal>true</literal> the target table
                 will be created, if it doesn't exist.</para></entry>
               </row>
               <row>
-                <entry><para>-droptarget=[true|false]</para></entry>
+                <entry><para>-dropTarget=[true|false]</para></entry>
                 <entry><para>If this parameter is set to <literal>true</literal> the target table
                 will be dropped before it is create. This parameter is ignored if -createtarget
                 is <literal>false</literal></para></entry>
@@ -1254,17 +1262,19 @@ WHERE table1.column1 = table2.column1;</programlisting>
        -deletetarget=true
        -columns=firstname/surname, lastname/name, birthday/bday;</programlisting>
 
-       <para>If you use this way to map columns, please make sure that you
-                 don't use the forward slash as the <link linkend="options-alternate-delimiter">alternate delimiter</link>.
-                 This can be achieved by either specifying a different character sequence or making sure
-                 that - if you use the forward slash - the current script does not end with it, as
-                 this turns on the usage of the alternate delimiter. The above example would work even if
-                 the forward slash was used as the alternate delimiter, because the whole command is
-                 terminated with a semicolon, which disables the usage of the alternate delimiter.
+       <para>
+				 If you use this way to map columns, please make sure that you
+				 don't use the forward slash as the <link linkend="options-alternate-delimiter">alternate delimiter</link>.
+				 This can be achieved by either specifying a different character sequence or making sure
+				 that - if you use the forward slash - the current script does not end with it, as
+				 this turns on the usage of the alternate delimiter. The above example would work even if
+				 the forward slash was used as the alternate delimiter, because the whole command is
+				 terminated with a semicolon, which disables the usage of the alternate delimiter.
        </para>
 
-        <para>Copy data based on a SQL query, matching the columns
-                    from the query to the corresponding columns from the target table:
+        <para>
+					Copy data based on a SQL query, matching the columns
+					from the query to the corresponding columns from the target table:
         </para>
 
         <programlisting>WbCopy -sourceprofile=ProfileA
@@ -1303,7 +1313,7 @@ WHERE id=42;</programlisting>
                 use the <link linkend="command-export">WbExport</link> together with the XML format.
             </para>
             <note>
-                You can full manipulate (save, view, upload) the contents of BLOB columns in a result set.
+                You can fully manipulate (save, view, upload) the contents of BLOB columns in a result set.
                 Please refer to <xref linkend="blob-support"/> for details.
             </note>
     </section>
@@ -1430,6 +1440,13 @@ WHERE id=42;</programlisting>
 							connection. If this is not specified, then the current connection is
 							used.</para></entry>
 						</row>
+              <row>
+                <entry><para>-referenceGroup</para></entry>
+                <entry><para>If the name of your reference profile is not unique across 
+								all profiles, you will need to specify the group in which the profile 
+								is located with this parameter.
+                </para></entry>
+              </row>
 						<row>
 							<entry><para>-targetProfile</para></entry>
 							<entry><para>The name of the connection profile for the target
@@ -1441,6 +1458,13 @@ WHERE id=42;</programlisting>
 								<literal>-targetschema</literal> parameters.</para>
 							</entry>
 						</row>
+              <row>
+                <entry><para>-targetGroup</para></entry>
+                <entry><para>If the name of your target profile is not unique across 
+								all profiles, you will need to specify the group in which the profile 
+								is located with this parameter.
+                </para></entry>
+              </row>
 						<row>
 							<entry><para>-file</para></entry>
 							<entry><para>The filename of the output file. If this
@@ -1560,11 +1584,10 @@ WHERE id=42;</programlisting>
 									tables from two different DBMS it is recommended to use
 									<literal>-useJdbcType=true</literal> as this will make the 
 									comparison a bit more DBMS-independent. When comparing e.g. 
-									Oracle vs. PostgreSQL character columns defined as 
-									<literal>VARCHAR2(100)</literal> would be reported as beeing different
-									to a <literal>VARCHAR(100)</literal> column which is not really true
-									(as PostgreSQL's <literal>VARCHAR</literal> and Oracle's <literal>VARCHAR2</literal>
-									are identical). Provided both drivers report the columns a java.sql.Types.VARCHAR
+									Oracle vs. PostgreSQL a column defined as 
+									<literal>VARCHAR2(100)</literal> in Oracle would be reported as beeing different
+									to a <literal>VARCHAR(100)</literal> column in PostgreSQL which is not really true
+									As both drivers ropert the column as java.sql.Types.VARCHAR, 
 									they would be considered as identical when using <literal>-useJdbcType=true</literal>.
 								</para>
 							</entry>
@@ -1839,17 +1862,58 @@ v_data=id1,id2</programlisting>
         </para>
     </section>
 
-  <section id="command-desc">
-    <title>Show table structure - DESCRIBE</title>
-
-    <para>Describe shows the definition of the given table. It can be
-    abbreviated with DESC. The command expects the table name as a parameter.</para>
-    <programlisting>DESC person;</programlisting>
-    <para>If you want to show the structure of a table from a different user, you need
-    to prefix the table name with the desired user</para>
-    <programlisting>DESCRIBE otheruser.person;</programlisting>
-  </section>
-
+		<section id="command-desc">
+			<title>Show table structure - DESCRIBE</title>
+			
+			<para>Describe shows the definition of the given table. It can be
+			abbreviated with DESC. The command expects the table name as a parameter.</para>
+			<programlisting>DESC person;</programlisting>
+			<para>If you want to show the structure of a table from a different user, you need
+			to prefix the table name with the desired user</para>
+			<programlisting>DESCRIBE otheruser.person;</programlisting>
+		</section>
+		
+		<section id="command-set">
+			<title>Setting connection properties - SET</title>
+			<para>
+				The <literal>SET</literal> command is available to enable you to run SQL scripts that are 
+				designed to run with Oracle's SQL*Plus utility inside &wb-productname; as well.
+				Most of the parameters of the <literal>SET</literal> are only valid inside 
+				SQL*Plus, and thus for Oracle any error message resulting from executing a <literal>SET</literal>
+				command will only be logged as a warning. For all other DBMS the command is passed
+				directly to the server, except for the parameters described in this chapter (because
+				they have an equivalent JDBC call that will be executed instead).
+			</para>
+			
+			<section id="command-set-feedback">
+				<title>FEEEDBACK</title>
+				<para>
+					<literal>SET feedback ON/OFF</literal> is equivalent to the <link linkend="command-wbfeedback">WbFeedback</link>
+					command, but mimics the syntax of Oracle's SQL*Plus utility.
+				</para>
+			</section>
+			
+			<section id="command-set-serveroutput">
+				<title>SERVEROUTPUT</title>
+				<para>
+					<literal>SET serveroutput on</literal> is equivalent to the <link linkend="command-enableout">ENABLEOUT</link>
+					command and <literal>SET serveroutput off</literal> is equivalent to <link linkend="command-disableout">DISABLEOUT</link> command.
+				</para>
+			</section>
+			
+			<section id="command-set-autocommit">
+				<title>AUTOCOMMIT</title>
+				<para>
+					With the command <literal>SET autocommit ON/OFF</literal> autocommit can be turned on or 
+					off for the current connection. This is equivalent to setting the autocommit property
+					in the <link linkend="profile-jdbc-properties">connection profile</link> or toggling 
+					the state of the 
+					<menuchoice><guimenu>SQL</guimenu><guimenuitem>Autocommit</guimenuitem></menuchoice>
+					menu item.
+				</para>
+			</section>
+			
+		</section>
 
   <section id="command-list">
     <title>List tables - WbList</title>

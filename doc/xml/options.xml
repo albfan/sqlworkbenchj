@@ -125,6 +125,7 @@
 						</tbody>
 					</tgroup>
 				</informaltable>
+				
 			</para>
 		</section>
 
@@ -147,14 +148,6 @@
 			</para>
 		</section>
 		
-		<section id="options-column-width">
-			<title>Max column width</title>
-			<para>When the initial display size of a column is calculated, the
-				column width will not exceed this number. This is useful when displaying
-				large character columns.
-			</para>
-		</section>
-
 		<section id="options-filed-delimiter">
 			<title>Field delimiter</title>
 			<para>The default delimiter used when exporting data to a text file.
@@ -165,16 +158,26 @@
 
 		<section id="options-quote-character">
 			<title>Quote character</title>
-			<para>This character will be used to quote column data when exporting to
-			a text file. When using a tab character (\t) as the field delimiter this
-			is not really necessary. When using a comma as the field delimiter,
-			quoting the data is necessary in case the data contains a a comma (or
-			whatever character is used to delimit the columns). This will be the
-			default for exporting data through the menu. If you use the <link
-			linkend="command-export"><literal>SPOOL</literal> command</link>, you can
-			freely customize the output for each file you create.</para>
+			<para>The default character to be used to quote column data when exporting to
+				a text file. This value will be used when you don't specify a quote
+				character e.g. for the <link linkend="command-export"><literal>WbExport</literal></link> 
+				command and when you use <menuchoice><guimenu>SQL</guimenu><guimenuitem>Save data as</guimenuitem></menuchoice>
+				to export a result set.
+			</para>
 		</section>
 
+		<section id="options-pdf-reader">
+			<title>PDF Reader</title>
+			<para>
+				If you want to display the PDF manual from inside the application, you need to 
+				specify the full path to your PDF reader application. If this is defined
+				and the file <literal>SQLWorkbench-Manual.pdf</literal> is available in the 
+				directory where <literal>Workbench.jar</literal> is located, you will be 
+				able to display the PDF manual by selecting
+				<menuchoice><guimenu>Help</guimenu><guimenuitem>Manual</guimenuitem></menuchoice>.
+			</para>
+		</section>
+		
 	</section>
 
 	<section id="options-editor">
@@ -221,6 +224,31 @@
 				from the code completion popup is pasted into the editor. <literal>As is</literal>
 				means, that the values will be inserted into the editor as it was 
 				retrieved from the database. 
+			</para>
+		</section>
+		
+		<section id="options-internal-lineending">
+			<title>Internal line terminator</title>
+			<para>
+				This property controls the line terminator used by the editor internally. This 
+				line ending will also be sent to the DBMS when execution SQL statements that you 
+				have entered in the editor. Please select the value that is approriate for your
+				DBMS server. The value "Platform default" relates to the platform where you 
+				run &wb-productname; this is not the platform of the DBMS server. 
+			</para>
+			<para>
+				Changing this property will only affect new editor tabs, existing 
+				editors are not affected by a change to this property. If you want 
+				to make sure that all internal editors use the new setting, please
+				restart the application.
+			</para>
+		</section>
+		
+		<section id="options-externally-lineending">
+			<title>Line terminator used when saving files</title>
+			<para>
+				This property controls the line terminator used when a file is saved by the editor. 
+				Changing this property affects the next save operation.
 			</para>
 		</section>
 
@@ -377,9 +405,45 @@
 				is read whenever the primary keys for the base table of a result
 				cannot be obtained from the database. For a detailed
 				description on how to define extra primary key columns, please
-				refer to the <link linkend="command-define-pk"><literal>WbDefinPk</literal></link> command.
+				refer to the <link linkend="command-define-pk"><literal>WbDefinePk</literal></link> command.
 			</para>
 		</section>
+		
+		<section id="options-max-column-width">
+			<title>Max. column width</title>
+			<para>When the initial display size of a column is calculated, or if 
+				you optimize the column widths to fit the actual data, columns will not exceed this 
+				width. This is useful when displaying large character columns.
+			</para>
+		</section>		
+		
+		<section id="options-min-column-width">
+			<title>Min. column width</title>
+			<para>When the initial display size of a column is calculated, or if 
+				you optimize the column widths to fit the actual data, columns will not exceed this 
+				width.
+			</para>
+		</section>		
+
+		<section id="options-auto-optimize-column-width">
+			<title>Auto adjust column widths</title>
+			<para>
+				If this option is enabled, the widths of the result set columns are automatically
+				adjusted to fit the largest value (respecting the min. and max. size settings)
+			</para>
+		</section>		
+
+		<section id="options-optimize-include-header">
+			<title>Consider column headers</title>
+			<para>
+				When calculating the optimal width for a column (either manually
+				or if "Auto adjust column widths" is enabled, then the column's
+				label will be included in the width calculation if this option 
+				is enabled. If this option is disabled, and the column contains
+				very short values, the column width could be smaller than the 
+				column's label.
+			</para>
+		</section>		
 		
 	</section>
 	
@@ -418,7 +482,7 @@
 			</para>
 			<note>
 				Don't forget to enable <xref linkend="options-retrieve-explorer"/> so
-				that the DbExplorer will be retrieved automatically with the desired object
+				that the table list in the DbExplorer will be retrieved automatically with the desired object
 				type, when you open it.
 			</note>
 		</section>

@@ -99,8 +99,40 @@
       <para>Default value: <literal>15</literal></para>
     </section>
 		
+  </section>
+
+	<section id="editor-settings">
+		<title>Editor related settings</title>
+
+		<section id="editor-internal-lineending">
+			<title>Line terminator used internally</title>
+			<para>Property: <literal>workbench.editor.lineending.internal</literal></para>
+			<para>
+				This property controls the line terminator used by the editor internally. 
+				This might be important, if the DBMS server does not work with a LF (chr(10) or \n) 
+				line ending correctly. Note that this does not impact the saving of editor
+				files. 
+			</para>
+			<para>Default value: <literal>lf</literal></para>
+			<para>
+				Valid values: <literal>default</literal> (Platform default), <literal>lf</literal> (Unix), <literal>crlf</literal> (Windows)
+			</para>
+		</section>
+		
+		<section id="editor-externally-lineending">
+			<title>Line terminator used when saving files</title>
+			<para>Property: <literal>workbench.editor.lineending.external</literal></para>
+			<para>
+				This property controls the line terminator used when a file 
+				is saved by the editor. 
+			</para>
+			<para>Default value: Platform specific</para>
+			<para>
+				Valid values: <literal>default</literal> (Platform default), <literal>lf</literal> (Unix), <literal>crlf</literal> (Windows)
+			</para>
+		</section>
+		
     <section id="editor-color-setting">
-			
       <title>Customizing the colors used for syntax highlighting</title>
       <para>Property: <literal>workbench.editor.color.[type]</literal></para>
       <para>
@@ -119,12 +151,22 @@
           <member><literal>operator</literal> - The color used for operators (0,0,0)</member>
         </simplelist>
       </para>
-			
     </section>
-		
-		
-  </section>
 
+    <section id="editor-rect-selection">
+      <title>Set the modifier key for rectangular selections in the edior</title>
+      <para>Property: <literal>workbench.editor.rectselection.modifier</literal></para>
+      <para>
+				These properties control the modifier key that needs to be pressed to enable
+				rectangular selections in the editor. Possible values are <literal>alt</literal> for 
+				setting the <keycap>Alt</keycap> key as the modifier, or <literal>ctrl</literal>
+				for setting the <keycap>Ctrl</keycap> key as the modifier.
+      </para> 
+			<para>Default value: <literal>alt</literal></para>
+    </section>
+	
+	</section>
+	
 	<section id="auto-completion">
 		<title>Controlling auto completion of table and column names</title>
 		<para>
@@ -148,6 +190,7 @@
 				<para>Default value: <literal>false</literal></para>
 		</section>
 		
+	  <!--
 		<section id="auto-completion-paste-case">
 				<title>Case for pasting names</title>
 				<para>Property: <literal>workbench.editor.autocompletion.paste.case</literal></para>
@@ -160,6 +203,7 @@
 				</para>
 				<para>Default value: empty</para>
 		</section>
+		-->
 		
 		<section id="auto-completion-empty-line">
 			<title>Empty line to terminate SQL statements</title>
@@ -347,6 +391,22 @@
       </para>
       <para>Default: <literal>true</literal></para>
     </section>
+
+		<section id="db-filter-tables">
+			<title>Filtering tables</title>
+			<para>Property: <literal>workbench.db.[dbid].exclude.tables</literal></para>
+			<para>
+				Whenever &wb-productname; retrieves a list of tables (e.g. the DbExplorer, 
+				auto completion, <link linkend="command-report">WbSchemaReport</link>)
+				certain tables can be filtered out by supplying a regular expression in 
+				this property. The default setting will filter Oracle tables that reside
+				in the "Recycle bin". This setting can be applied on a per DBMS basis
+			</para>
+			<para>
+				Default value: <literal>workbench.db.oracle.exclude.tables=^BIN\\$.*</literal>
+			</para>
+			<para>Note that you need to use two backslashes in the RegeEx.</para>
+		</section>
 		
 		<section id="db-oracle-filter-syns">
 			<title>Filtering Oracle public synonyms</title>
@@ -476,6 +536,11 @@
 			<para>Default: <literal>oracle</literal></para>
 		</section>
 
+  </section>
+	
+	<section id="import-export-default">
+		<title>Default settings for Export/Import</title>
+		
 		<section id="export-text-header-default">
 			<title>Controlling header lines in text exports</title>
 			<para>Property: <literal>workbench.export.text.default.header</literal></para>
@@ -485,7 +550,7 @@
 				The current default will be displayed in the help message when you run 
 				<literal>WbExport</literal> without any parameters.				
 			</para>
-      <para>Default: <literal>false</literal></para>
+			<para>Default: <literal>false</literal></para>
 		</section>
 		
 		<section id="export-xml-verbose">
@@ -498,9 +563,9 @@
 				The current default will be displayed in the help message when you run 
 				<literal>WbExport</literal> without any parameters.				
 			</para>
-      <para>Default: <literal>true</literal></para>
+			<para>Default: <literal>true</literal></para>
 		</section>
-
+		
 		<section id="import-continue-default">
 			<title>Setting default for WbImport's -continueOnError parameter</title>
 			<para>Property: <literal>workbench.import.default.continue</literal></para>
@@ -511,9 +576,19 @@
 				parameters.
 			</para>
 		</section>
-
 		
-  </section>
+		<section id="import-text-multiline">
+			<title>Setting default for WbImport's -multiLine parameter</title>
+			<para>Property: <literal>workbench.import.default.multilinerecord</literal></para>
+			<para>
+				This property controls the default value for the parameter <literal>-multiLine</literal>
+				of the <link linkend="command-import">WbImport</link> command. The current default will 
+				be displayed in the help message when you run <literal>WbImport</literal> without any
+				parameters.
+			</para>
+		</section>
+		
+	</section>
 	
   <section id="log-setting">
     <title>Controlling the log file</title>

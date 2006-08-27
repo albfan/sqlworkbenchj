@@ -87,6 +87,22 @@
             define the key columns to be used, using <menuchoice><guimenu>Data</guimenu>
             <guimenuitem>Define key columns</guimenuitem></menuchoice>
         </para>
+				<note>
+					If you do not want to copy all columns to the clipboard, hold down the 
+					the <keycap>CTRL</keycap> key while selecting one of the
+					menu items related to the clipboard. A dialog will then let you select the 
+					columns that you want to copy.
+				</note>
+				<para>
+					Alternatively you can hold down the <keycap>Alt</keycap> key while 
+					selecting rows/columns in the result set. This will allow you to 
+					select only the columns and rows that you want to copy. If you then use 
+					one of the formats available in the <guimenu>Copy selected</guimenu>
+					submenu, only the selected cells will be copied. If you choose to 
+					copy the data as <literal>UPDATE</literal> or <literal>DELETE/INSERT</literal>
+					statements, the generated SQL statements will not be correct if you did not
+					select the primary key of the underlying update table.
+				</para>
     </section>
     
     <section id="import">
@@ -124,15 +140,13 @@
                 </row>
                 <row>
                     <entry><para>Date Format</para></entry>
-                    <entry><para>The format in which date fields are specified. The
-                    format of this parameter is the same as the SimpleDateFormat class from
-                    the JDK.</para></entry>
+                    <entry><para>The <link linkend="options-date-format">format</link> in which date fields are specified. 
+										</para></entry>
                 </row>
                 <row>
-                    <entry><para>Number Format</para></entry>
-                    <entry><para>The format in which numeric values are specified.
-                    Most import if a comma or a point are used as the decimal separator. In
-                    the above example a point is used. Enter #,# if a comma is used.</para></entry>
+                    <entry><para>Decimal char</para></entry>
+                    <entry><para>The character that is used to indicate the decimals
+										in numeric values (typically a dot or a comma)</para></entry>
                 </row>
                 <row>
                     <entry><para>Quote char</para></entry>
