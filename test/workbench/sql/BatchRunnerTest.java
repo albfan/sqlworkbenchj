@@ -29,14 +29,14 @@ import workbench.util.SqlUtil;
  *
  * @author support@sql-workbench.net
  */
-public class BatchRunnerTest 
+public class BatchRunnerTest
 	extends TestCase
 {
 	private File[] scriptFiles;
 	private BatchRunner runner;
 	private String basedir;
 	private String dbName;
-	private TestUtil util; 
+	private TestUtil util;
 	
 	public BatchRunnerTest(String testName)
 	{
@@ -45,24 +45,15 @@ public class BatchRunnerTest
 		{
 			util = new TestUtil();
 			util.prepareEnvironment();
-		} 
+		}
 		catch (IOException ex)
 		{
 			fail(ex.getMessage());
 		}
 	}
-
-	private void prepareDatabase()
-	{
-	}
-
-	public void testWbCommands()
-	{
-		
-	}
 	
 	private void createScript()
-		throws Exception
+	throws Exception
 	{
 		scriptFiles = new File[1];
 		scriptFiles[0] = new File(util.getBaseDir(), "preparedata.sql");
@@ -81,8 +72,8 @@ public class BatchRunnerTest
 		writer.close();
 	}
 	
-	private void createRunner() 
-		throws Exception
+	private void createRunner()
+	throws Exception
 	{
 		util.emptyBaseDirectory();
 		createScript();
@@ -99,7 +90,7 @@ public class BatchRunnerTest
 		this.runner = BatchRunner.createBatchRunner(parser);
 		assertNotNull(this.runner);
 	}
-
+	
 	public void testBatchRunner()
 	{
 		try
@@ -136,5 +127,6 @@ public class BatchRunnerTest
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-
+	
+	
 }

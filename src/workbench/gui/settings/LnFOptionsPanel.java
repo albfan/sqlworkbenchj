@@ -12,10 +12,7 @@
 package workbench.gui.settings;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.AbstractListModel;
@@ -26,9 +23,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.components.DividerBorder;
@@ -36,7 +33,6 @@ import workbench.gui.components.WbButton;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.lnf.LnFDefinition;
-import workbench.gui.lnf.LnFLoader;
 import workbench.gui.lnf.LnFManager;
 import workbench.interfaces.FileActions;
 import workbench.interfaces.Restoreable;
@@ -51,7 +47,7 @@ import workbench.resource.Settings;
 public class LnFOptionsPanel 
 	extends JPanel
 	implements Restoreable, ListSelectionListener, FileActions, 
-	           PropertyChangeListener, ActionListener
+	           PropertyChangeListener
 {
 	public WbSplitPane splitPane;
 	private JPanel listPanel;
@@ -83,17 +79,6 @@ public class LnFOptionsPanel
 		listPanel.setLayout(new BorderLayout());
 		listPanel.add(scroll, BorderLayout.CENTER);
 		listPanel.add(this.toolbar, BorderLayout.NORTH);
-		Dimension d = toolbar.getPreferredSize();
-		
-		JPanel switchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER,0,2));
-		switchLnFButton = new WbButton();
-		switchLnFButton.setResourceKey("LblSwitchLnF");
-		switchLnFButton.addActionListener(this);
-		//switchLnFButton.setBorder(new CompoundBorder(switchLnFButton.getBorder(), new EmptyBorder(3, 10, 3, 10)));
-		
-		switchPanel.add(switchLnFButton);
-		
-		listPanel.add(switchPanel, BorderLayout.SOUTH);
 		
 		splitPane.setLeftComponent(listPanel);
 		
@@ -103,13 +88,18 @@ public class LnFOptionsPanel
 		definitionPanel.setPropertyListener(this);
 		infoPanel.add(definitionPanel, BorderLayout.CENTER);
 
-		currentLabel = new JLabel();
+		currentLabel = new JLabel()
+		{
+			public void setText(String name)
+			{
+				super.setText("<html>" + ResourceMgr.getString("LblCurrLnf") + " <b>" + name + "</b></html>");
+			}
+		};
 		
-		currentLabel.setMinimumSize(new Dimension(50, (int)d.getHeight()));
-		currentLabel.setPreferredSize(d);
-//		currentLabel.setBackground(Color.WHITE);
-//		currentLabel.setOpaque(true);
-		currentLabel.setBorder(DividerBorder.BOTTOM_DIVIDER);
+		currentLabel.setBackground(Color.WHITE);
+		currentLabel.setOpaque(true);
+		//currentLabel.setBorder(DividerBorder.BOTTOM_DIVIDER);
+		currentLabel.setBorder(new EmptyBorder(2,2,2,0));
 		infoPanel.add(currentLabel, BorderLayout.NORTH);
 		
 		splitPane.setRightComponent(infoPanel);
@@ -131,14 +121,10 @@ public class LnFOptionsPanel
 		lnfList.setModel(model);
 		lnfList.addListSelectionListener(this);
 		LnFDefinition clnf = manager.getCurrentLnF();
+		definitionPanel.setCurrentInfoDisplay(currentLabel);
 		lnfList.setSelectedValue(clnf, true);
-		if (clnf != null) setCurrentInfo(clnf.getName());
+		if (clnf != null) currentLabel.setText(clnf.getName());
 		restoreSettings();
-	}
-	
-	private void setCurrentInfo(String name)
-	{
-		currentLabel.setText("<html>" + ResourceMgr.getString("LblCurrLnf") + " <b>" + name + "</b></html>");
 	}
 	
 	public void saveSettings()
@@ -211,37 +197,6 @@ public class LnFOptionsPanel
 		if (evt.getPropertyName().equals("name"))
 		{
 			lnfList.repaint();
-		}
-	}
-
-	private boolean testLnF(LnFDefinition lnf)
-	{
-		try
-		{
-			LnFLoader loader = new LnFLoader(lnf);
-			return loader.isAvailable();
-		}
-		catch (Exception e)
-		{
-			return false;
-		}
-	}
-	
-	public void actionPerformed(ActionEvent e)
-	{
-		if (e.getSource() != switchLnFButton) return;
-		int index = lnfList.getSelectedIndex();
-		LnFDefinition lnf = (LnFDefinition)manager.getAvailableLookAndFeels().get(index);
-		if (testLnF(lnf))
-		{
-			String className = lnf.getClassName();
-			this.currentLabel.setText(lnf.getName());
-			Settings.getInstance().setLookAndFeelClass(className);
-			WbSwingUtilities.showMessage(this, ResourceMgr.getString("MsgLnFChanged"));
-		}
-		else
-		{
-			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgLnFNotLoaded"));
 		}
 	}
 	

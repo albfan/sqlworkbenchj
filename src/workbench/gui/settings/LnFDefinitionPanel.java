@@ -19,15 +19,20 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbButton;
 import workbench.gui.lnf.LnFDefinition;
+import workbench.gui.lnf.LnFLoader;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
@@ -40,7 +45,8 @@ public class LnFDefinitionPanel
 {
 	private LnFDefinition currentLnF;
 	private PropertyChangeListener changeListener;
-
+	private JLabel currentLabel;
+	
 	/** Creates new form BeanForm */
 	public LnFDefinitionPanel()
 	{
@@ -59,13 +65,20 @@ public class LnFDefinitionPanel
 			}
 		});
 
-		String button = ResourceMgr.getString("LblSwitchLnF");
+		String button = changeLnfButton.getText();
 		String info = ResourceMgr.getString("TxtChangeLnFInfo").replaceAll("%button%", button);
 		infoText.setText(info);
+		infoText.setWrapStyleWord(true);
+		infoText.setLineWrap(true);
 		infoText.setOpaque(true);
 		infoText.setBackground(this.getBackground());
 	}
 
+	public void setCurrentInfoDisplay(JLabel label)
+	{
+		this.currentLabel = label;
+	}
+	
 	public void setPropertyListener(PropertyChangeListener l)
 	{
 		this.changeListener = l;
@@ -87,6 +100,20 @@ public class LnFDefinitionPanel
 		this.tfName.setEnabled(flag);
 		this.selectLibButton.setEnabled(flag);
 	}
+	
+	private boolean testLnF(LnFDefinition lnf)
+	{
+		try
+		{
+			LnFLoader loader = new LnFLoader(lnf);
+			return loader.isAvailable();
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+	}
+	
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -106,6 +133,7 @@ public class LnFDefinitionPanel
     selectLibButton = new FlatButton();
     infoText = new javax.swing.JTextArea();
     jSeparator1 = new javax.swing.JSeparator();
+    changeLnfButton = new WbButton();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -197,7 +225,6 @@ public class LnFDefinitionPanel
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 10);
     add(infoText, gridBagConstraints);
 
@@ -209,6 +236,18 @@ public class LnFDefinitionPanel
     gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
     add(jSeparator1, gridBagConstraints);
 
+    changeLnfButton.setText("Make Current");
+    ((WbButton)changeLnfButton).setResourceKey("LblSwitchLnF");
+    changeLnfButton.addActionListener(this);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(10, 8, 0, 0);
+    add(changeLnfButton, gridBagConstraints);
+
   }
 
   // Code for dispatching events from components to event handlers.
@@ -219,7 +258,27 @@ public class LnFDefinitionPanel
     {
       LnFDefinitionPanel.this.selectLibrary(evt);
     }
+    else if (evt.getSource() == changeLnfButton)
+    {
+      LnFDefinitionPanel.this.changeLnfButtonActionPerformed(evt);
+    }
   }// </editor-fold>//GEN-END:initComponents
+
+	private void changeLnfButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_changeLnfButtonActionPerformed
+	{//GEN-HEADEREND:event_changeLnfButtonActionPerformed
+		LnFDefinition lnf = getDefinition();
+		if (testLnF(lnf))
+		{
+			String className = lnf.getClassName();
+			this.currentLabel.setText(lnf.getName());
+			Settings.getInstance().setLookAndFeelClass(className);
+			WbSwingUtilities.showMessage(this, ResourceMgr.getString("MsgLnFChanged"));
+		}
+		else
+		{
+			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgLnFNotLoaded"));
+		}
+	}//GEN-LAST:event_changeLnfButtonActionPerformed
 
 	private void selectLibrary(java.awt.event.ActionEvent evt)//GEN-FIRST:event_selectLibrary
 	{//GEN-HEADEREND:event_selectLibrary
@@ -272,6 +331,7 @@ public class LnFDefinitionPanel
 	}
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  public javax.swing.JButton changeLnfButton;
   public javax.swing.JTextArea infoText;
   public javax.swing.JSeparator jSeparator1;
   public javax.swing.JLabel lblClassName;

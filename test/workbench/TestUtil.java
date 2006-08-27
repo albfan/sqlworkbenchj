@@ -45,7 +45,13 @@ public class TestUtil
 		prepareEnvironment("wbtestdb");
 	}
 	
-	public void prepareEnvironment(String dbBaseName)
+	public void prepareBaseDir()
+		throws IOException
+	{
+		prepareBaseDir("wbtestdb");
+	}
+	
+	public void prepareBaseDir(String dbBaseName)
 		throws IOException
 	{
 		File tempdir = new File(System.getProperty("java.io.tmpdir"));
@@ -61,8 +67,14 @@ public class TestUtil
 		pw.println("workbench.log.level=DEBUG");
 		pw.println("workbench.log.maxfilesize=150000");
 		pw.close();
-		WbManager.getInstance().prepareForTest(basedir);
 		emptyBaseDirectory();
+	}
+	
+	public void prepareEnvironment(String dbBaseName)
+		throws IOException
+	{
+		prepareBaseDir(dbBaseName);
+		WbManager.getInstance().prepareForTest(basedir);
 	}
 
 	public void emptyBaseDirectory()
