@@ -985,14 +985,15 @@ public class WbTable
 
 	private boolean suspendRepaint = false;
 
-	public synchronized void setSuspendRepaint(boolean aFlag)
+	public synchronized void setSuspendRepaint(boolean suspend)
 	{
-		boolean suspend = this.suspendRepaint;
-		this.suspendRepaint = aFlag;
-		this.setIgnoreRepaint(!aFlag);
+		if (this.suspendRepaint == suspend) return;
+		boolean wasSuspended = this.suspendRepaint;
+		this.suspendRepaint = suspend;
+		this.setIgnoreRepaint(!suspend);
 		// if repainting was re-enabled, then queue
 		// a repaint event right away
-		if (suspend && !aFlag)
+		if (wasSuspended && !suspend)
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -1542,15 +1543,6 @@ public class WbTable
 		return this.getLastVisibleRow(this.getFirstVisibleRow());
 	}
 
-//	public int _getLastVisibleRow(int first)
-//	{
-//		long start = System.currentTimeMillis();
-//		int result = getLastVisibleRow(first);
-//		long end = System.currentTimeMillis();
-//		System.out.println("time: " + (end - start));
-//		return result;
-//	}
-	
 	public int getLastVisibleRow(int first)
 	{
 		int count = this.getRowCount();
@@ -1694,11 +1686,17 @@ public class WbTable
 		}
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public int getPopupColumnIndex()
 	{
 		TableColumnModel colMod = this.getColumnModel();
 		int viewColumn = colMod.getColumnIndexAtX(this.headerPopupX);
-		final int column = this.convertColumnIndexToModel(viewColumn);
+		int column = this.convertColumnIndexToModel(viewColumn);
+		return column;
+	}
+	
+	public void actionPerformed(ActionEvent e)
+	{
+		int column = getPopupColumnIndex();
 		if (e.getSource() == this.sortAscending && this.dwModel != null)
 		{
 			this.dwModel.sortInBackground(this, column, true);
@@ -1706,23 +1704,6 @@ public class WbTable
 		else if (e.getSource() == this.sortDescending && this.dwModel != null)
 		{
 			this.dwModel.sortInBackground(this, column, false);
-		}
-		else if (e.getSource() == this.optimizeCol)
-		{
-			final boolean respectColName = this.optimizeCol.includeColumnLabels();
-			Thread t = new WbThread("OptimizeCol Thread")
-			{
-				public void run()	{ optimizeColWidth(column, respectColName); }
-			};
-			t.start();
-		}
-		else if (e.getSource() == this.optimizeAllCol)
-		{
-			Thread t = new WbThread("OptimizeAllCols Thread") 
-			{ 	
-				public void run()	{ optimizeAllColWidth(); }  
-			};
-			t.start();
 		}
 		else if (e.getSource() == this.setColWidth)
 		{
@@ -1741,7 +1722,7 @@ public class WbTable
 					}
 				}
 			}
-			catch (Exception ex2)
+			catch (Exception ex)
 			{
 			}
 		}
@@ -1750,6 +1731,7 @@ public class WbTable
 	public void resetPopup()
 	{
 		if (this.popup != null) this.popup.setVisible(false);
+		this.headerPopupX = -1;
 		this.popup = null;
 	}
 

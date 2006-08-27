@@ -21,6 +21,7 @@ import javax.swing.KeyStroke;
 
 import workbench.gui.components.WbTable;
 import workbench.resource.Settings;
+import workbench.util.WbThread;
 
 /**
  *	@author  support@sql-workbench.net
@@ -45,16 +46,19 @@ public class OptimizeAllColumnsAction
 	public void executeAction(ActionEvent e)
 	{
 		if (client == null) return;
-		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
-		this.client.optimizeAllColWidth(shiftPressed || Settings.getInstance().getIncludeHeaderInOptimalWidth());
+		final boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
+		Thread t = new WbThread("OptimizeAllCols Thread") 
+		{ 	
+			public void run()	
+			{ 
+				client.optimizeAllColWidth(shiftPressed || Settings.getInstance().getIncludeHeaderInOptimalWidth()); 
+			}  
+		};
+		t.start();
 	}
 
-	public void addToInputMap(InputMap im, ActionMap am)
-	{
-		super.addToInputMap(im, am);
-		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK), this.getActionName());
-	}
-
+	public boolean hasShiftModifier() { return true; }
+	
 	public void setClient(WbTable c)
 	{
 		this.client = c;

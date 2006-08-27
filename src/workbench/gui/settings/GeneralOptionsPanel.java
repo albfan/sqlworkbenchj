@@ -32,6 +32,7 @@ public class GeneralOptionsPanel
 	public GeneralOptionsPanel()
 	{
 		initComponents();
+		pdfReaderPath.setAllowMultiple(false);
 		setBorder(DividerBorder.BOTTOM_DIVIDER);
 		restoreSettings();
 	}
@@ -42,6 +43,7 @@ public class GeneralOptionsPanel
 		this.defaultBufferSize.setEnabled(this.enableDbmsOutput.isSelected());
 		msgLogFont.setSelectedFont(Settings.getInstance().getMsgLogFont());
 		standardFont.setSelectedFont(Settings.getInstance().getStandardFont());
+		pdfReaderPath.setFilename(Settings.getInstance().getPDFReaderPath());
 	}
 
 	public void saveSettings()
@@ -63,6 +65,7 @@ public class GeneralOptionsPanel
     set.setDbmsOutputDefaultBuffer(StringUtil.getIntValue(this.defaultBufferSize.getText(), -1));
 		set.setDecimalSymbol(this.decimalField.getText());
 		set.setDefaultTextDelimiter(this.textDelimiterField.getText());
+		set.setPDFReaderPath(pdfReaderPath.getFilename());
 	}
 
 	public void actionPerformed(java.awt.event.ActionEvent e)
@@ -112,6 +115,8 @@ public class GeneralOptionsPanel
     standardFont = new workbench.gui.components.WbFontPicker();
     timeFormatLabel = new javax.swing.JLabel();
     timeFormat = new javax.swing.JTextField();
+    pdfReaderPathLabel = new javax.swing.JLabel();
+    pdfReaderPath = new workbench.gui.components.WbFilePicker();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -242,7 +247,7 @@ public class GeneralOptionsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 15;
+    gridBagConstraints.gridy = 17;
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
 
@@ -423,6 +428,23 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 15);
     add(timeFormat, gridBagConstraints);
 
+    pdfReaderPathLabel.setText(ResourceMgr.getString("LblReaderPath"));
+    pdfReaderPathLabel.setToolTipText(ResourceMgr.getDescription("LblReaderPath"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 14;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 12, 0, 0);
+    add(pdfReaderPathLabel, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 14;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 14);
+    add(pdfReaderPath, gridBagConstraints);
+
   }
 
   // Code for dispatching events from components to event handlers.
@@ -475,6 +497,8 @@ public class GeneralOptionsPanel
   private javax.swing.JLabel maxDigitsLabel;
   private javax.swing.JLabel msgFontLabel;
   private workbench.gui.components.WbFontPicker msgLogFont;
+  private workbench.gui.components.WbFilePicker pdfReaderPath;
+  private javax.swing.JLabel pdfReaderPathLabel;
   private javax.swing.JTextField quoteCharField;
   private javax.swing.JLabel quoteCharLabel;
   private workbench.gui.components.WbFontPicker standardFont;

@@ -21,8 +21,6 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
@@ -32,7 +30,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.Action;
@@ -44,7 +41,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
@@ -56,6 +52,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.gui.actions.AboutAction;
 import workbench.gui.actions.ConfigureShortcutsAction;
+import workbench.gui.actions.ShowManualAction;
 import workbench.util.ExceptionUtil;
 import workbench.gui.actions.AddMacroAction;
 import workbench.gui.actions.AddTabAction;
@@ -104,8 +101,6 @@ import workbench.gui.actions.FileSaveProfiles;
 import workbench.gui.actions.OptionsDialogAction;
 import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.actions.WhatsNewAction;
-import workbench.gui.lnf.LnFDefinition;
-import workbench.gui.lnf.LnFManager;
 
 /**
  * The main window for the Workbench.
@@ -1783,7 +1778,7 @@ public class MainWindow
 		JMenu result = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_HELP));
 		result.setName(ResourceMgr.MNU_TXT_HELP);
 		result.add(ShowHelpAction.getInstance());
-
+		result.add(ShowManualAction.getInstance());
 		result.addSeparator();
 
 		result.add(WhatsNewAction.getInstance());

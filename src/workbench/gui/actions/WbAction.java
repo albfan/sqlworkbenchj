@@ -15,6 +15,7 @@ import java.awt.EventQueue;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
@@ -77,6 +78,9 @@ public class WbAction
     this.putValue(ACTION_COMMAND_KEY, this.actionName);
 	}
 
+	public boolean hasShiftModifier() { return false; }
+	public boolean hasCtrlModifier() { return false; }
+	
 	public void setTooltip(String aText)
 	{
 		this.putValue(Action.SHORT_DESCRIPTION, aText);
@@ -337,6 +341,8 @@ public class WbAction
 
 	public void addToInputMap(InputMap im, ActionMap am)
 	{
+		if (this.getAccelerator() == null) return;
+		
 		im.put(this.getAccelerator(), this.getActionName());
 		am.put(this.getActionName(), this);
 		
@@ -344,6 +350,19 @@ public class WbAction
 		if (alternate != null)
 		{
 			im.put(alternate, getActionName());
+		}
+		
+		int key = this.getAccelerator().getKeyCode();
+		int modifiers = this.getAccelerator().getModifiers();
+		
+		if (this.hasShiftModifier())
+		{
+			im.put(KeyStroke.getKeyStroke(key, modifiers | InputEvent.SHIFT_MASK), this.getActionName());
+		}
+		
+		if (this.hasCtrlModifier())
+		{
+			im.put(KeyStroke.getKeyStroke(key, modifiers | InputEvent.CTRL_MASK), this.getActionName());
 		}
 	}
 
@@ -355,6 +374,18 @@ public class WbAction
 		if (alternate != null)
 		{
 			im.remove(alternate);
+		}
+		
+		int key = this.getAccelerator().getKeyCode();
+		int modifiers = this.getAccelerator().getModifiers();
+		
+		if (this.hasShiftModifier())
+		{
+			im.remove(KeyStroke.getKeyStroke(key, modifiers | InputEvent.SHIFT_MASK));
+		}
+		if (this.hasCtrlModifier())
+		{
+			im.remove(KeyStroke.getKeyStroke(key, modifiers | InputEvent.CTRL_MASK));
 		}
 	}
 	

@@ -833,6 +833,7 @@ public class WbManager
 		parser.addArgument(ARG_SHOWPROGRESS);
 		parser.addArgument(ARG_WORKSPACE);
 		parser.addArgument("nosettings");
+		parser.addArgument("embedded");
 		return parser;
 	}
 	
@@ -845,6 +846,8 @@ public class WbManager
 		try
 		{
 			cmdLine.parse(args);
+			boolean embeddedMode = cmdLine.isArgPresent("embedded");
+			
 			String value = cmdLine.getValue(ARG_CONFIGDIR);
 			if (!StringUtil.isEmptyString(value))
 			{
@@ -864,7 +867,7 @@ public class WbManager
 
 			String scriptname = cmdLine.getValue(ARG_SCRIPT);
 			
-			if (StringUtil.isEmptyString(scriptname))
+			if (StringUtil.isEmptyString(scriptname) && !embeddedMode)
 			{
 				this.batchMode = false;
 				String url = cmdLine.getValue(ARG_CONN_URL);
@@ -1033,7 +1036,7 @@ public class WbManager
 	{
 		wb = new WbManager();
 		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
-		String args[] = { "-nosettings -configdir=" + configDir };
+		String args[] = { "-embedded -nosettings -configdir=" + configDir };
 		wb.initCmdLine(args);
 	}
 	

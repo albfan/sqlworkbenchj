@@ -477,7 +477,14 @@ public class TableDataPanel
 			dataDisplay.setStatusMessage(ResourceMgr.getString("LblLoadingProgress"));
 			dataDisplay.setAutomaticUpdateTableCheck(false);
 			dataDisplay.runQuery(sql, respectMaxRows);
-			dataDisplay.getTable().adjustColumns();
+			if (Settings.getInstance().getAutomaticOptimalWidth())
+			{
+				dataDisplay.getTable().optimizeAllColWidth();
+			}
+			else
+			{
+				dataDisplay.getTable().adjustColumns();
+			}
 			dataDisplay.setUpdateTable(this.table);
 			dataDisplay.getSelectKeysAction().setEnabled(true);
 			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
@@ -487,21 +494,25 @@ public class TableDataPanel
 		}
 		catch (Throwable e)
 		{
-			if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab() && !this.dbConnection.getAutoCommit())
-			{
-				try { this.dbConnection.rollback(); } catch (Throwable th) {}
-			}
+			final String msg;
 			
-			LogMgr.logError("TableDataPanel.doRetrieve()", "Error retrieving table data", e);
-			final String msg; 
 			if (e instanceof OutOfMemoryError)
 			{
+				try { dataDisplay.getTable().reset(); } catch (Throwable th) {}
+				System.gc();
 				msg = ResourceMgr.getString("MsgOutOfMemoryError");
 			}				
 			else
 			{
 				msg = ExceptionUtil.getDisplay(e);
 			}
+			
+			if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab() && !this.dbConnection.getAutoCommit())
+			{
+				try { this.dbConnection.rollback(); } catch (Throwable th) {}
+			}
+			
+			LogMgr.logError("TableDataPanel.doRetrieve()", "Error retrieving table data", e);
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()

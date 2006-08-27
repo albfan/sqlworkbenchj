@@ -675,9 +675,9 @@ public class EditorPanel
 			// Creating a SyntaxDocument with a filled GapContent
 			// does not seem to work, inserting the text has to
 			// go through the SyntaxDocument
-			// but we initiallize the GapContent before to avoid
+			// but we initiallize the GapContent in advance to avoid
 			// too many re-allocations of the internal buffer
-			GapContent  content = new GapContent((int)aFile.length() + 500);
+			GapContent  content = new GapContent((int)aFile.length() + 1500);
 			doc = new SyntaxDocument(content);
 			doc.suspendUndo();
 			
@@ -721,6 +721,7 @@ public class EditorPanel
 			doc.dispose();
 			System.gc();
 			WbManager.getInstance().showOutOfMemoryError();
+			result = false;
 		}
 		finally
 		{

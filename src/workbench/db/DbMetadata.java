@@ -1563,6 +1563,22 @@ public class DbMetadata
 				synPattern = null;
 			}
 		}
+		
+		String excludeTablesRegex = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".exclude.tables", null);
+		Pattern excludeTablePattern = null;
+		if (excludeTablesRegex != null && typeIncluded("TABLE", types))
+		{
+			try
+			{
+				excludeTablePattern = Pattern.compile(excludeTablesRegex);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("DbMetadata.getTables()", "Invalid RegEx for excluding tables. RegEx '" + excludeTablesRegex + "' ignored", e);
+				excludeTablePattern = null;
+			}
+			LogMgr.logInfo("DbMetadata.getTables()", "Excluding tables that match the following regex: " + excludeTablesRegex);
+		}
 
 		if (isPostgres && types == null)
 		{
@@ -1596,6 +1612,7 @@ public class DbMetadata
 				String cat = tableRs.getString(1);
 				String schem = tableRs.getString(2);
 				String name = tableRs.getString(3);
+				String ttype = tableRs.getString(4);
 				if (name == null) continue;
 
 				// filter out "internal" synonyms for Oracle
@@ -1608,7 +1625,13 @@ public class DbMetadata
 						if (m.matches()) continue;
 					}
 				}
-				String ttype = tableRs.getString(4);
+				
+				if (excludeTablePattern != null && ttype.equalsIgnoreCase("TABLE"))
+				{
+					Matcher m = excludeTablePattern.matcher(name);
+					if (m.matches()) continue;
+				}
+				
 				if (hideIndexes && isIndexType(ttype)) continue;
 				
 				if (checkOracleSnapshots)

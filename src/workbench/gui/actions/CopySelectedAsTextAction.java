@@ -35,13 +35,14 @@ public class CopySelectedAsTextAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-
 		this.setMenuItemName(ResourceMgr.MNU_TXT_COPY_SELECTED);
-		String desc = ResourceMgr.getDescription(labelKey, true);
-		this.initMenuDefinition(ResourceMgr.getString(labelKey), desc, null);
+		this.initMenuDefinition(labelKey, null);
 		this.setEnabled(false);
 	}
 
+	public boolean hasCtrlModifier() { return true; }
+	public boolean hasShiftModifier() { return true; }
+	
 	public void executeAction(ActionEvent e)
 	{
 		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);

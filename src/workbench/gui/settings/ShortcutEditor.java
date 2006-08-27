@@ -397,18 +397,16 @@ public class ShortcutEditor
 	
 	private int findKey(KeyStroke key)
 	{
-		int theRow = -1;
 		int count = this.definitions.getRowCount();
 		for (int row = 0; row < count; row++)
 		{
 			ShortcutDisplay d = (ShortcutDisplay)this.definitions.getValue(row, 1);
 			if (!d.isCleared() && d.isMappedTo(key))
 			{
-				theRow = row;
-				break;
+				return row;
 			}
 		}
-		return theRow;
+		return -1;
 	}
 
 	public void windowActivated(WindowEvent e)

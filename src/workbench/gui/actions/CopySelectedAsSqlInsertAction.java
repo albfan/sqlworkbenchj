@@ -34,6 +34,9 @@ public class CopySelectedAsSqlInsertAction extends WbAction
 		this.setEnabled(false);
 	}
 
+	public boolean hasCtrlModifier() { return true; }
+	public boolean hasShiftModifier() { return true; }
+	
 	public void executeAction(ActionEvent e)
 	{
 		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);

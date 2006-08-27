@@ -32,7 +32,10 @@ public class CopySelectedAsSqlUpdateAction extends WbAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_COPY_SELECTED);
 		this.setEnabled(false);
 	}
-
+	
+	public boolean hasCtrlModifier() { return true; }
+	public boolean hasShiftModifier() { return true; }
+	
 	public void executeAction(ActionEvent e)
 	{
 		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);

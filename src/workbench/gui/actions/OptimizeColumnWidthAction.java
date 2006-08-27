@@ -12,18 +12,18 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import workbench.gui.components.WbTable;
+import workbench.resource.Settings;
+import workbench.util.WbThread;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
  *	@author  support@sql-workbench.net
  */
-public class OptimizeColumnWidthAction extends WbAction
+public class OptimizeColumnWidthAction 
+	extends WbAction
 {
-	private ActionListener client;
-	private boolean shiftPressed = false;
+	private WbTable client;
 
 	public OptimizeColumnWidthAction(WbTable aClient)
 	{
@@ -32,16 +32,18 @@ public class OptimizeColumnWidthAction extends WbAction
 		this.setMenuTextByKey("MnuTxtOptimizeCol");
 	}
 
-	public boolean includeColumnLabels()
-	{
-		return this.shiftPressed;
-	}
-
 	public void executeAction(ActionEvent e)
 	{
-		this.shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
-		e.setSource(this);
-		this.client.actionPerformed(e);
-		this.shiftPressed = false;
+		if (client == null) return;
+		final boolean respectColName = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK) || Settings.getInstance().getIncludeHeaderInOptimalWidth();
+		final int column = client.getPopupColumnIndex();
+		Thread t = new WbThread("OptimizeCol Thread")
+		{
+			public void run()	
+			{ 
+				client.optimizeColWidth(column, respectColName); 
+			}
+		};
+		t.start();
 	}
 }

@@ -120,7 +120,7 @@ public class WbFilePicker extends javax.swing.JPanel
 
 	public void setFilename(String name)
 	{
-		this.tfFilename.setText(name);
+		this.tfFilename.setText(name != null ? name : "");
 		this.tfFilename.setCaretPosition(0);
 	}
 	

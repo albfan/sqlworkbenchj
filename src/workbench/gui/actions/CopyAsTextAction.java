@@ -37,13 +37,14 @@ public class CopyAsTextAction
 	{
 		super();
 		this.client = aClient;
-
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		String desc = ResourceMgr.getDescription("MnuTxtDataToClipboard", true);
-		this.initMenuDefinition(ResourceMgr.getString("MnuTxtDataToClipboard"), desc, KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtDataToClipboard", KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
 		copySelected = false;
 	}
 
+	public boolean hasCtrlModifier() { return true; }
+	public boolean hasShiftModifier() { return true; }
+	
 	public void executeAction(ActionEvent e)
 	{
 		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
@@ -53,9 +54,4 @@ public class CopyAsTextAction
 		copier.copyDataToClipboard(!shiftPressed, copySelected, ctrlPressed);
 	}
 
-	public void addToInputMap(InputMap im, ActionMap am)
-	{
-		super.addToInputMap(im, am);
-		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK), this.getActionName());
-	}
 }

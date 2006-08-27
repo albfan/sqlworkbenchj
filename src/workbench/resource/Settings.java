@@ -64,6 +64,7 @@ public class Settings
 	public static final String PROPERTY_DATE_FORMAT = "workbench.gui.display.dateformat";
 	public static final String PROPERTY_DATETIME_FORMAT = "workbench.gui.display.datetimeformat";
 	public static final String PROPERTY_TIME_FORMAT = "workbench.gui.display.timeformat";
+	public static final String PROPERTY_PDF_READER_PATH = "workbench.gui.pdfreader.path";
 
 	public static final String PROPERTY_EDITOR_FONT = "editor";
 	public static final String PROPERTY_STANDARD_FONT = "standard";
@@ -361,6 +362,37 @@ public class Settings
 		setProperty("workbench.gui.optimalwidth.automatic", flag);
 	}
 
+	public String getPDFReaderPath()
+	{
+		return getProperty(PROPERTY_PDF_READER_PATH, null);
+	}
+	
+	public void setPDFReaderPath(String path)
+	{
+		setProperty(PROPERTY_PDF_READER_PATH, path);
+	}
+	
+	public String getManualPath()
+	{
+		String pdfManual = getProperty("workbench.pdfmanual.filename", "SQLWorkbench-Manual.pdf");
+		File f = new File(pdfManual);
+		// This allows to overwrite the location of the manual completely...
+		if (f.isAbsolute() && f.exists() && f.canRead())
+		{
+			return f.getAbsolutePath();
+		}
+		String jarDir = WbManager.getInstance().getJarPath();
+		File pdf = new File(jarDir, pdfManual);
+		if (pdf.exists() && pdf.canRead())
+		{
+			return pdf.getAbsolutePath();
+		}
+		else 
+		{
+			return null;
+		}
+	}
+	
 	public static final String UNIX_LINE_TERMINATOR_PROP_VALUE = "lf";
 	public static final String DOS_LINE_TERMINATOR_PROP_VALUE = "crlf";
 	public static final String DEFAULT_LINE_TERMINATOR_PROP_VALUE = "default";
