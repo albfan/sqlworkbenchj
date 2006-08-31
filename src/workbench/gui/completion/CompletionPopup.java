@@ -114,7 +114,7 @@ public class CompletionPopup
 				{
 					public void run()
 					{
-						editor.selectWordAtCursor(BaseAnalyzer.WORD_DELIM);
+						editor.selectWordAtCursor(BaseAnalyzer.SELECT_WORD_DELIM);
 					}
 				};
 				t.start();
@@ -213,8 +213,20 @@ public class CompletionPopup
 	public void cancelPopup()
 	{
 		if (this.window == null) return;
-		if (!this.window.isVisible()) return;
-		this.window.setVisible(false);
+		window.setVisible(false);
+		window.dispose();
+	}
+	
+	private void selectEditor()
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				editor.requestFocus();
+				editor.requestFocusInWindow();
+			}
+		});
 	}
 	
 	private void closePopup(boolean pasteEntry)
@@ -227,15 +239,6 @@ public class CompletionPopup
 		try
 		{
 			this.window.setVisible(false);
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					editor.requestFocus();
-					editor.requestFocusInWindow();
-				}
-			});
-			
 			if (pasteEntry)
 			{
 				Object o = this.elementList.getSelectedValue();
@@ -290,13 +293,13 @@ public class CompletionPopup
 					editor.setSelectedText(value);
 				}
 			}
-			
 		}
 		finally
 		{
 			this.window.dispose();
 			this.window = null;
 			this.searchField = null;
+			selectEditor();
 		}
 	}
 
@@ -473,7 +476,7 @@ public class CompletionPopup
 		{
 			public void run()
 			{
-				searchField.requestFocusInWindow();
+				if (searchField != null) searchField.requestFocusInWindow();
 			}
 		});
 	}

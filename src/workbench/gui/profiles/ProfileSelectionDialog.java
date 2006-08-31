@@ -12,7 +12,6 @@
 package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -30,16 +29,16 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
 
 import workbench.db.ConnectionProfile;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
+import workbench.gui.components.DividerBorder;
 import workbench.gui.components.WbButton;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
@@ -86,7 +85,8 @@ public class ProfileSelectionDialog
   private void initComponents(String lastProfileKey)
   {
 		profiles = new ProfileEditorPanel(lastProfileKey);
-		
+//		DividerBorder b = new DividerBorder(DividerBorder.BOTTOM + DividerBorder.RIGHT + DividerBorder.TOP, 1);
+//		profiles.setBorder(b);
     buttonPanel = new JPanel();
     okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
 		okButton.setEnabled(profiles.getSelectedProfile() != null);
@@ -102,9 +102,6 @@ public class ProfileSelectionDialog
     buttonPanel.add(cancelButton);
 		cancelButton.addActionListener(this);
 
-		// dummy panel to create small top border...
-		JPanel dummy = new JPanel();
-		dummy.setMinimumSize(new Dimension(1, 1));
 		profiles.addListMouseListener(new MouseAdapter()
 		{
 			public void mouseClicked(MouseEvent evt)
@@ -116,7 +113,6 @@ public class ProfileSelectionDialog
 
 		BorderLayout bl = new BorderLayout();
 		this.getContentPane().setLayout(bl);
-		getContentPane().add(dummy, BorderLayout.NORTH);
 		getContentPane().add(profiles, BorderLayout.CENTER);
     getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 

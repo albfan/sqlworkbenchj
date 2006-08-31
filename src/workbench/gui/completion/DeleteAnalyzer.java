@@ -66,21 +66,8 @@ public class DeleteAnalyzer
 		{
 			// current cursor position is after the WHERE
 			// so we'll need a column list
-			int fromPos = StringUtil.findPattern(FROM_PATTERN, sql, 0);
-			if (fromPos > -1)
-			{
-				int start = fromPos + "FROM".length() + 1;
-				int end = -1;
-				if (fromPos > -1) end = StringUtil.findFirstWhiteSpace(sql, start);
-				if (end == -1) end = this.sql.length() - 1;
-
-				if (end > -1 && start > -1)
-				{
-					context = CONTEXT_COLUMN_LIST;
-					String table = sql.substring(start, end).trim();
-					tableForColumnList = new TableIdentifier(table);
-				}
-			}
+			String table = SqlUtil.getDeleteTable(sql);
+			if (table != null) tableForColumnList = new TableIdentifier(table);
 		}
 	}
 

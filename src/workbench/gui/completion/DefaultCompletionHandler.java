@@ -76,6 +76,7 @@ public class DefaultCompletionHandler
 			statusBar.setStatusMessage(ResourceMgr.getString("MsgCompletionRetrievingObjects"));
 			if (this.updateSelectionList())
 			{
+
 				this.window.showPopup(currentWord);
 			}
 		}
@@ -128,7 +129,7 @@ public class DefaultCompletionHandler
 			showNoObjectsFoundMessage();
 			return false;
 		}
-		this.currentWord = editor.getWordAtCursor(BaseAnalyzer.WORD_DELIM);
+		this.currentWord = editor.getWordAtCursor(BaseAnalyzer.SELECT_WORD_DELIM);
 		
 		try
 		{

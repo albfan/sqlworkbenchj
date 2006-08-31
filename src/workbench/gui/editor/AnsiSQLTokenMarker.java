@@ -26,12 +26,12 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 	{
 		this.addKeywordList(keywords, Token.KEYWORD1);
 	}
-	
+
 	public void setSqlFunctions(Collection functions)
 	{
 		this.addKeywordList(functions, Token.KEYWORD3);
 	}
-	
+
 	private void addKeywordList(Collection words, byte anId)
 	{
 		if (words == null) return;
@@ -51,7 +51,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 	{
 		this.isMySql = flag;
 	}
-	
+
 	public void initKeywordMap()
 	{
 		keywords = new KeywordMap(true, 80);
@@ -249,7 +249,6 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("FLOOR",Token.KEYWORD3);
 		keywords.add("LOG",Token.KEYWORD3);
 		keywords.add("MONTH",Token.KEYWORD3);
-		keywords.add("RIGHT",Token.KEYWORD3);
 		keywords.add("ROUND",Token.KEYWORD3);
 		keywords.add("SIN",Token.KEYWORD3);
 		keywords.add("SOUNDEX",Token.KEYWORD3);
@@ -279,5 +278,8 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("OR",Token.KEYWORD1);
 		keywords.add("OUTER",Token.KEYWORD1);
 		keywords.add("SOME",Token.KEYWORD1);
+		keywords.add("RIGHT",Token.KEYWORD1);
+		keywords.add("LEFT",Token.KEYWORD1);
+		keywords.add("FULL",Token.KEYWORD1);
 	}
 }

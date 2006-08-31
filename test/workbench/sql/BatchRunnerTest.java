@@ -53,7 +53,7 @@ public class BatchRunnerTest
 	}
 	
 	private void createScript()
-	throws Exception
+		throws Exception
 	{
 		scriptFiles = new File[1];
 		scriptFiles[0] = new File(util.getBaseDir(), "preparedata.sql");
@@ -73,7 +73,7 @@ public class BatchRunnerTest
 	}
 	
 	private void createRunner()
-	throws Exception
+		throws Exception
 	{
 		util.emptyBaseDirectory();
 		createScript();
@@ -86,7 +86,7 @@ public class BatchRunnerTest
 			files.append(scriptFiles[i].getAbsolutePath());
 			files.append('\'');
 		}
-		parser.parse("-url=jdbc:hsqldb:" + util.getDbName() + " -user=sa -driver=org.hsqldb.jdbcDriver "  + files.toString() + " -rollbackOnDisconnect=true");
+		parser.parse("-url='jdbc:hsqldb:" + util.getDbName() + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver "  + files.toString() + " -rollbackOnDisconnect=true");
 		this.runner = BatchRunner.createBatchRunner(parser);
 		assertNotNull(this.runner);
 	}

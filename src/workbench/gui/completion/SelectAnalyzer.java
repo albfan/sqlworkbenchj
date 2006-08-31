@@ -128,7 +128,6 @@ public class SelectAnalyzer
 			// we'll try to find a proper column list
 			
 			int count = tables.size();
-			String q = getQualifierLeftOfCursor();
 			this.tableForColumnList = null;
 
 			if (afterGroup)
@@ -140,19 +139,33 @@ public class SelectAnalyzer
 			}
 			
 			this.addAllMarker = !afterWhere;
+
 			
 			// check if the current qualifier is either one of the
 			// tables in the table list or one of the aliases used
 			// in the table list.
 			TableAlias currentAlias = null;
-			if (q != null)
+			if (currentWord != null)
 			{
+				String table = null;
+				String column = null;
+				int pos = currentWord.indexOf('.');
+				if (pos == -1)
+				{
+					table = currentWord;
+				}
+				else
+				{
+					table = currentWord.substring(0, pos);
+					column = currentWord.substring(pos + 1);
+				}
+				
 				for (int i=0; i < count; i++)
 				{
 					String element = (String)tables.get(i);
 					TableAlias tbl = new TableAlias(element);
 
-					if (tbl.isTableOrAlias(q))
+					if (tbl.isTableOrAlias(table))
 					{
 						tableForColumnList = tbl.getTable();
 						currentAlias = tbl;
@@ -164,11 +177,6 @@ public class SelectAnalyzer
 			{
 				TableAlias tbl = new TableAlias((String)tables.get(0));
 				tableForColumnList = tbl.getTable();
-			}
-
-			if (tableForColumnList == null && currentWord != null && currentWord.endsWith(".") && afterWhere)
-			{
-				tableForColumnList = new TableIdentifier(currentWord.substring(0, currentWord.length() - 1));
 			}
 
 			if (tableForColumnList == null)

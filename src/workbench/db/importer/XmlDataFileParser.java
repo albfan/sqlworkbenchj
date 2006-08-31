@@ -128,7 +128,7 @@ public class XmlDataFileParser
 		if (columnList != null && columnList.trim().length() > 0)
 		{
 			WbStringTokenizer tok = new WbStringTokenizer(columnList, ",");
-			this.columnsToImport = new ArrayList(15);
+			this.columnsToImport = new ArrayList();
 			while (tok.hasMoreTokens())
 			{
 				String col = tok.nextToken();
@@ -201,6 +201,8 @@ public class XmlDataFileParser
 		}
 		catch (Throwable e)
 		{
+			LogMgr.logError("XmlDataFileParser.checkImportColumns()", "Error reading table definition from XML file", e);
+			throw new SQLException("Could not read table definition from XML file");
 		}
 		for (int i=0; i < this.columnsToImport.size(); i++)
 		{
@@ -262,6 +264,9 @@ public class XmlDataFileParser
 	private void readTableDefinition()
 		throws IOException, SAXException
 	{
+		File f = new File(this.inputFile);
+		fileHandler.setMainFile(f, this.encoding);
+		
 		XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(this.fileHandler);
 		this.columns = tableDef.getColumns();
 		//if (columns == null) throw new IllegalArgumentException("No valid table definition found");

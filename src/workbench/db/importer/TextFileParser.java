@@ -225,54 +225,44 @@ public class TextFileParser
 			return;
 		}
 
+		// Make sure the list only contains ColumnIdentifiers
+		ArrayList cols = new ArrayList(count);
+		for (int i=0; i < count; i++)
+		{
+			Object o = columnList.get(i);
+			if (o instanceof String)
+			{
+				String colname = (String)columnList.get(i);
+				cols.add(new ColumnIdentifier(colname));
+			}
+			else if (o instanceof ColumnIdentifier)
+			{
+				cols.add((ColumnIdentifier)o);
+			}
+		}
+		
 		if (this.columns == null)
 		{
 			// store the list so that when the columns
 			// are retrieved or defined later, the real columns to be imported
 			// can be defined
-			this.pendingImportColumns = new ArrayList();
-			for (int i=0; i < count; i++)
-			{
-				Object o = columnList.get(i);
-				if (o instanceof String)
-				{
-					String colname = (String)columnList.get(i);
-					pendingImportColumns.add(new ColumnIdentifier(colname));
-				}
-				else if (o instanceof ColumnIdentifier)
-				{
-					pendingImportColumns.add((ColumnIdentifier)o);
-				}
-					
-			}
-			return;
-		}
-
-		List colIds = new ArrayList(count);
-
-		// If we have pending import columns,
-		// then use only those that are defined there
-		if (this.pendingImportColumns != null)
-		{
-			for (int i=0; i < count; i++)
-			{
-				Object o = columnList.get(i);
-				if (o instanceof ColumnIdentifier)
-				{
-					colIds.add(o);
-				}
-				else
-				{
-					String columnName = o.toString();
-					colIds.add(new ColumnIdentifier(columnName));
-				}
-			}
-			colIds.retainAll(this.pendingImportColumns);
+			this.pendingImportColumns = cols;
 		}
 		else
 		{
-			colIds = columnList;
+			this.pendingImportColumns = null;
+			checkPendingImportColumns(cols);
 		}
+	}
+	
+	/**
+	 * Retain only those columns in the defined source file columns
+	 * that are in the passed list
+	 */
+	private void checkPendingImportColumns(List colIds)
+	{
+		if (colIds == null || colIds.size() == 0) return;
+		int count = colIds.size();
 
 		this.columnMap = new int[this.colCount];
 		for (int i=0; i < this.colCount; i++) this.columnMap[i] = -1;
@@ -335,6 +325,7 @@ public class TextFileParser
 		if (this.connection != null && this.tableName != null)
 		{
 			this.readColumnDefinition(columnList);
+			checkPendingImportColumns(this.pendingImportColumns);
 		}
 		else
 		{
@@ -814,7 +805,7 @@ public class TextFileParser
 		this.readColumnDefinition(cols);
 		if (this.pendingImportColumns != null)
 		{
-			this.setImportColumns(this.pendingImportColumns);
+			checkPendingImportColumns(this.pendingImportColumns);
 			this.pendingImportColumns = null;
 		}
 	}

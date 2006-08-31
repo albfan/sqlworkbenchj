@@ -2288,6 +2288,8 @@ public class MainWindow
 	public boolean canCloseTab()
 	{
 		int numTabs = this.getLastSqlPanelIndex();
+		int currentIndex = this.sqlTab.getSelectedIndex();
+		if (currentIndex > numTabs) return true;
 		return numTabs > 0;
 	}
 

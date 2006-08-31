@@ -393,6 +393,16 @@ public class WbImport
 		else if ("xml".equalsIgnoreCase(type))
 		{
 			XmlDataFileParser xmlParser = new XmlDataFileParser();
+			
+			// The encoding must be set as early as possible
+			// as the XmlDataFileParser might need it to read
+			// the table structure!
+			String encoding = cmdLine.getValue(ARG_ENCODING);
+			if (encoding != null) xmlParser.setEncoding(encoding);
+
+			boolean verbose = cmdLine.getBoolean(ARG_VERBOSEXML, true);
+			xmlParser.setUseVerboseFormat(verbose);
+			
 			if (dir != null)
 			{
 				String ext = cmdLine.getValue(ARG_FILE_EXT);
@@ -410,7 +420,7 @@ public class WbImport
 					{
 						xmlParser.setColumns(cols);
 					}
-					catch (IllegalArgumentException e)
+					catch (Exception e)
 					{
 						result.setFailure();
 						String col = xmlParser.getMissingColumn();
@@ -421,12 +431,6 @@ public class WbImport
 					}
 				}
 			}
-
-			String encoding = cmdLine.getValue(ARG_ENCODING);
-			if (encoding != null) xmlParser.setEncoding(encoding);
-
-			boolean verbose = cmdLine.getBoolean(ARG_VERBOSEXML, true);
-			xmlParser.setUseVerboseFormat(verbose);
 
 			imp.setCreateTarget(cmdLine.getBoolean(ARG_CREATE_TABLE, false));
 			imp.setProducer(xmlParser);

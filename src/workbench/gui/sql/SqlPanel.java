@@ -2086,6 +2086,9 @@ public class SqlPanel
 					
 					// Ignore errors in prepared statements...
 					goOn = true;
+					
+					// Disable checking as the current driver does not seem to support it
+					Settings.getInstance().setCheckPreparedStatements(false);
 			}
 		}
 		return goOn;

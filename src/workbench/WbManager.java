@@ -646,7 +646,8 @@ public class WbManager
 		saveSettings();
 		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.shutdown();
-		System.exit(errorCode);
+		boolean doExit = "true".equals(System.getProperty("workbench.system.doexit", "true"));
+		if (doExit) System.exit(errorCode);
 	}
 
 	private boolean checkAbort(MainWindow win)
@@ -772,6 +773,7 @@ public class WbManager
 
 	// Parameters for batch execution used by BatchRunner
 	public static final String ARG_SCRIPT = "script";
+	public static final String ARG_SCRIPT_ENCODING = "encoding";
 	public static final String ARG_ABORT = "abortonerror";
 
 	public static final String ARG_CONN_URL = "url";
@@ -812,12 +814,12 @@ public class WbManager
 		parser.addArgument(ARG_CONFIGDIR);
 		parser.addArgument(ARG_LIBDIR);
 		parser.addArgument(ARG_SCRIPT);
+		parser.addArgument(ARG_SCRIPT_ENCODING);
 		parser.addArgument(ARG_LOGFILE);
 		parser.addArgument(ARG_ABORT);
 		parser.addArgument(ARG_SUCCESS_SCRIPT);
 		parser.addArgument(ARG_ERROR_SCRIPT);
 		parser.addArgument(ARG_VARDEF);
-
 		parser.addArgument(ARG_CONN_URL);
 		parser.addArgument(ARG_CONN_DRIVER);
 		parser.addArgument(ARG_CONN_JAR);
@@ -833,7 +835,7 @@ public class WbManager
 		parser.addArgument(ARG_SHOWPROGRESS);
 		parser.addArgument(ARG_WORKSPACE);
 		parser.addArgument("nosettings");
-		parser.addArgument("embedded");
+		parser.addArgument("notemplates");
 		return parser;
 	}
 	
@@ -846,7 +848,6 @@ public class WbManager
 		try
 		{
 			cmdLine.parse(args);
-			boolean embeddedMode = cmdLine.isArgPresent("embedded");
 			
 			String value = cmdLine.getValue(ARG_CONFIGDIR);
 			if (!StringUtil.isEmptyString(value))
@@ -866,8 +867,10 @@ public class WbManager
 			}
 
 			String scriptname = cmdLine.getValue(ARG_SCRIPT);
+
+			boolean readDriverTemplates = true;
 			
-			if (StringUtil.isEmptyString(scriptname) && !embeddedMode)
+			if (StringUtil.isEmptyString(scriptname))
 			{
 				this.batchMode = false;
 				String url = cmdLine.getValue(ARG_CONN_URL);
@@ -875,20 +878,24 @@ public class WbManager
 				String profile = cmdLine.getValue(ARG_PROFILE);
 				if (!StringUtil.isEmptyString(url) && !StringUtil.isEmptyString(jar))
 				{
-					// do not register the default drivers if a full connection is specified!
-					ConnectionMgr.getInstance().setReadTemplates(false);
-				}
-				else if (!StringUtil.isEmptyString(profile))
-				{
-					ConnectionMgr.getInstance().setReadTemplates(true);
+					// Do not read the driver templates if a connection is specified directly
+					readDriverTemplates = false;
 				}
 			}
 			else
 			{
 				this.batchMode = true;
-				ConnectionMgr.getInstance().setReadTemplates(false);
+				readDriverTemplates = false;
+			}
+			
+			if (cmdLine.isArgPresent("notemplates"))
+			{
+				readDriverTemplates = false;
 			}
 
+			ConnectionMgr.getInstance().setReadTemplates(readDriverTemplates);
+			
+			
 			value = cmdLine.getValue(ARG_VARDEF);
 			if (!StringUtil.isEmptyString(value))
 			{
@@ -1036,7 +1043,7 @@ public class WbManager
 	{
 		wb = new WbManager();
 		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
-		String args[] = { "-embedded -nosettings -configdir=" + configDir };
+		String args[] = { "-notemplates -nosettings -configdir=" + configDir };
 		wb.initCmdLine(args);
 	}
 	

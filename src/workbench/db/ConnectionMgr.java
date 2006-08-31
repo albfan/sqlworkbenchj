@@ -78,7 +78,7 @@ public class ConnectionMgr
 	}
 	
 	public WbConnection getConnection(ConnectionProfile aProfile, String anId)
-		throws ClassNotFoundException, SQLException, Exception
+		throws ClassNotFoundException, SQLException
 	{
 		return getConnection(aProfile, anId, false);
 	}
@@ -87,7 +87,7 @@ public class ConnectionMgr
 	 *	Return a new connection specified by the profile
 	 */
 	public WbConnection getConnection(ConnectionProfile aProfile, String anId, boolean reUse)
-		throws ClassNotFoundException, SQLException, Exception
+		throws ClassNotFoundException, SQLException
 	{
 		
 		if (reUse)
@@ -151,7 +151,7 @@ public class ConnectionMgr
 	}
 
 	Connection connect(ConnectionProfile aProfile, String anId)
-		throws ClassNotFoundException, Exception
+		throws ClassNotFoundException, SQLException
 	{
 		// The DriverManager refuses to use a driver which was not loaded
 		// from the system classloader, so the connection has to be
@@ -184,7 +184,7 @@ public class ConnectionMgr
 			}
 			return sql;
 		}
-		catch (Exception e)
+		catch (SQLException e)
 		{
 			LogMgr.logError("ConnectionMgr.connect()", "Error when creating connection", e);
 			throw e;

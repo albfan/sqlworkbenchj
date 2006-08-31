@@ -11,6 +11,7 @@
  */
 package workbench.util;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -67,6 +68,25 @@ public class SqlUtil
 			return null;
 		}
 	}
+
+	public static String getDeleteTable(String sql)
+	{
+		try
+		{
+			SQLLexer lexer = new SQLLexer(sql);
+			SQLToken t = lexer.getNextToken(false, false);
+			if (!t.getContents().equals("DELETE")) return null;
+			t = lexer.getNextToken(false, false);
+			if (!t.getContents().equals("FROM")) return null;
+			t = lexer.getNextToken(false, false);
+			if (t == null) return null;
+			return t.getContents();
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}	
 	
 	public static String getInsertTable(String sql)
 	{
@@ -74,10 +94,11 @@ public class SqlUtil
 		{
 			SQLLexer lexer = new SQLLexer(sql);
 			SQLToken t = lexer.getNextToken(false, false);
-			if (!t.getContents().equals("INSERT")) return null;
+			if (t == null || !t.getContents().equals("INSERT")) return null;
 			t = lexer.getNextToken(false, false);
-			if (!t.getContents().equals("INTO")) return null;
+			if (t == null || !t.getContents().equals("INTO")) return null;
 			t = lexer.getNextToken(false, false);
+			if (t == null) return null;
 			return t.getContents();
 		}
 		catch (Exception e)

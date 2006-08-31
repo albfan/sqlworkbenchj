@@ -347,11 +347,6 @@ public class DefaultStatementRunner
 			aSql = SqlUtil.makeCleanSql(aSql, !removeNewLines, !removeComments, '\'');
 		}
 		
-//		if (logStatements)
-//		{
-//			LogMgr.logInfo("DefaultStatementRunner.runStatement()", "Running SQL: " + StringUtil.escapeUnicode(aSql, CharacterRange.RANGE_CONTROL));
-//		}
-		
 		this.currentCommand = this.getCommandToUse(aSql);
 
 		// if no mapping is found use the default implementation

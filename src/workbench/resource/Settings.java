@@ -74,7 +74,7 @@ public class Settings
 
 	public static final String PROPERTY_PROFILE_STORAGE = "workbench.settings.profilestorage";
 	public static final String PROPERTY_EDITOR_TAB_WIDTH = "workbench.editor.tabwidth";
-	
+
 	private WbProperties props;
 	private String filename;
 	private ArrayList fontChangeListeners = new ArrayList();
@@ -98,7 +98,7 @@ public class Settings
 		WbManager.trace("Settings.<init> - start");
 		this.props = new WbProperties();
 		String configFile = System.getProperty("workbench.settings.file", "workbench.settings");
-		
+
 		// first read the built-in defaults
 		// this ensures that new defaults will be applied automatically.
 		fillDefaults();
@@ -129,7 +129,7 @@ public class Settings
 				}
 				configDir = cfd.getAbsolutePath();
 			}
-			else 
+			else
 			{
 				if ("${user.home}".equals(configDir))
 				{
@@ -143,14 +143,14 @@ public class Settings
 			LogMgr.logError("Settings.<init>", "Error when initializing configdir", e);
 			cfd = new File(System.getProperty("user.dir"));
 		}
-		
+
 		configDir = cfd.getAbsolutePath();
-		
+
 		WbManager.trace("Settings.<init> - using configDir: " + configDir);
 
 		File cf = new File(this.configDir, configFile);
 		this.filename = cf.getAbsolutePath();
-		
+
 		WbManager.trace("Settings.<init> - using configfile: " + this.filename);
 
 	  WbManager.trace("Settings.<init> - Reading settings");
@@ -195,7 +195,7 @@ public class Settings
 			{
 				logfile = StringUtil.replace(logfile, FileDialogUtil.CONFIG_DIR_KEY, configDir);
 			}
-			
+
 			// Replace old System.out or System.err settings
 			if (logfile.equalsIgnoreCase("System.out") || logfile.equalsIgnoreCase("System.err"))
 			{
@@ -203,7 +203,7 @@ public class Settings
 				logfile = f.getAbsolutePath();
 				this.props.setProperty("workbench.log.filename", FileDialogUtil.CONFIG_DIR_KEY + "/workbench.log");
 			}
-			
+
 			LogMgr.setOutputFile(logfile, maxSize);
     }
     catch (Throwable e)
@@ -242,22 +242,22 @@ public class Settings
 	{
 		setProperty("workbench.tools.last.blob", name);
 	}
-	
+
 	public String getLastUsedBlobTool()
 	{
 		return getProperty("workbench.tools.last.blob", null);
 	}
-	
+
 	public ToolDefinition[] getExternalTools()
 	{
 		return getExternalTools(true);
 	}
-	
+
 	public ToolDefinition[] getAllExternalTools()
 	{
 		return getExternalTools(false);
 	}
-	
+
 	private ToolDefinition[] getExternalTools(boolean check)
 	{
 		int numTools = getIntProperty("workbench.tools.count", 0);
@@ -296,7 +296,7 @@ public class Settings
 		}
 		return result;
 	}
-	
+
 	public void setExternalTool(Collection tools)
 	{
 		int count = 0;
@@ -310,7 +310,7 @@ public class Settings
 		}
 		setProperty("workbench.tools.count", count);
 	}
-	
+
 	public static final String PK_MAPPING_FILENAME_PROPERTY = "workbench.pkmapping.file";
 	public String getPKMappingFilename()
 	{
@@ -319,12 +319,12 @@ public class Settings
 		String dir = getConfigDir();
 		return StringUtil.replace(fName, FileDialogUtil.CONFIG_DIR_KEY, dir);
 	}
-	
+
 	public void setPKMappingFilename(String file)
 	{
 		setProperty(PK_MAPPING_FILENAME_PROPERTY,file);
 	}
-	
+
 	private String getShortcutFilename()
 	{
 		return new File(this.configDir, "WbShortcuts.xml").getAbsolutePath();
@@ -346,17 +346,17 @@ public class Settings
 	{
 		return getBoolProperty("workbench.gui.optimalwidth.includeheader", false);
 	}
-	
+
 	public void setIncludeHeaderInOptimalWidth(boolean flag)
 	{
 		setProperty("workbench.gui.optimalwidth.includeheader", flag);
 	}
-	
+
 	public boolean getAutomaticOptimalWidth()
 	{
 		return getBoolProperty("workbench.gui.optimalwidth.automatic", false);
 	}
-	
+
 	public void setAutomaticOptimalWidth(boolean flag)
 	{
 		setProperty("workbench.gui.optimalwidth.automatic", flag);
@@ -366,12 +366,12 @@ public class Settings
 	{
 		return getProperty(PROPERTY_PDF_READER_PATH, null);
 	}
-	
+
 	public void setPDFReaderPath(String path)
 	{
 		setProperty(PROPERTY_PDF_READER_PATH, path);
 	}
-	
+
 	public String getManualPath()
 	{
 		String pdfManual = getProperty("workbench.pdfmanual.filename", "SQLWorkbench-Manual.pdf");
@@ -387,37 +387,37 @@ public class Settings
 		{
 			return pdf.getAbsolutePath();
 		}
-		else 
+		else
 		{
 			return null;
 		}
 	}
-	
+
 	public static final String UNIX_LINE_TERMINATOR_PROP_VALUE = "lf";
 	public static final String DOS_LINE_TERMINATOR_PROP_VALUE = "crlf";
 	public static final String DEFAULT_LINE_TERMINATOR_PROP_VALUE = "default";
-	
+
 	public String getExternalEditorLineEnding()
 	{
 		return getLineEndingProperty("workbench.editor.lineending.external", DEFAULT_LINE_TERMINATOR_PROP_VALUE);
 	}
-	
+
 	public void setExternalEditorLineEnding(String value)
 	{
 		setLineEndingProperty("workbench.editor.lineending.external", value);
 	}
-	
+
 	public String getInternalEditorLineEnding()
 	{
 		return getLineEndingProperty("workbench.editor.lineending.internal", UNIX_LINE_TERMINATOR_PROP_VALUE);
 	}
-	
+
 	public void setInternalEditorLineEnding(String value)
 	{
 		setLineEndingProperty("workbench.editor.lineending.internal", value);
 	}
 
-	/** 
+	/**
 	 * The real setting for the external line ending property
 	 * to be used by the options dialog
 	 */
@@ -425,8 +425,8 @@ public class Settings
 	{
 		return getProperty("workbench.editor.lineending.external", DEFAULT_LINE_TERMINATOR_PROP_VALUE);
 	}
-	
-	/** 
+
+	/**
 	 * The real setting for the internal line ending property
 	 * to be used by the options dialog
 	 */
@@ -434,7 +434,7 @@ public class Settings
 	{
 		return getProperty("workbench.editor.lineending.internal", UNIX_LINE_TERMINATOR_PROP_VALUE);
 	}
-	
+
 	private String getLineEndingProperty(String key, String def)
 	{
 		String value = getProperty(key, def);
@@ -443,25 +443,25 @@ public class Settings
 			return StringUtil.LINE_TERMINATOR;
 		}
 		if (UNIX_LINE_TERMINATOR_PROP_VALUE.equalsIgnoreCase(value))
-		{ 
+		{
 			return "\n";
 		}
 		else if (DOS_LINE_TERMINATOR_PROP_VALUE.equalsIgnoreCase(value))
 		{
 			return "\r\n";
 		}
-		else 
+		else
 		{
 			return "\n";
 		}
 	}
-	
+
 	private void setLineEndingProperty(String key, String value)
 	{
 		if (value == null) return;
 		setProperty(key, value.toLowerCase());
 	}
-	
+
 	/**
 	 *  Returns the modifier key for rectangular selections in the editor
 	 */
@@ -474,7 +474,7 @@ public class Settings
 		}
 		return InputEvent.ALT_MASK;
 	}
-	
+
 	public void setRectSelectionModifier(String mod)
 	{
 		if (mod == null) return;
@@ -487,12 +487,12 @@ public class Settings
 			setProperty("workbench.editor.rectselection.modifier", "ctrl");
 		}
 	}
-	
+
 	public int getMaxCharInListElements()
 	{
 		return getIntProperty("workbench.editor.format.list.maxelements.quoted", 2);
 	}
-	
+
 	public void setMaxCharInListElements(int value)
 	{
 		setProperty("workbench.editor.format.list.maxelements.quoted", (value <= 0 ? 2 : value));
@@ -502,17 +502,17 @@ public class Settings
 	{
 		return getIntProperty("workbench.editor.format.list.maxelements.nonquoted", 10);
 	}
-	
+
 	public void setMaxNumInListElements(int value)
 	{
 		setProperty("workbench.editor.format.list.maxelements.nonquoted", (value <= 0 ? 10 : value));
 	}
-	
+
 	public int getFormatUpdateColumnThreshold()
 	{
 		return getIntProperty("workbench.sql.generate.update.newlinethreshold", 5);
 	}
-	
+
 	public void setFormatUpdateColumnThreshold(int value)
 	{
 		setProperty("workbench.sql.generate.update.newlinethreshold", value);
@@ -522,37 +522,37 @@ public class Settings
 	{
 		return getIntProperty("workbench.sql.generate.insert.colsperline",1);
 	}
-	
+
 	public void setFormatInsertColsPerLine(int value)
 	{
 		setProperty("workbench.sql.generate.insert.colsperline",1);
 	}
-	
+
 	public boolean getFormatInsertIgnoreIdentity()
 	{
 		return getBoolProperty("workbench.sql.generate.insert.ignoreidentity",true);
 	}
-	
+
 	public void setFormatInsertIgnoreIdentity(boolean flag)
 	{
 		setProperty("workbench.sql.generate.insert.ignoreidentity",flag);
 	}
-	
+
 	public int getFormatInsertColumnThreshold()
 	{
 		return getIntProperty("workbench.sql.generate.insert.newlinethreshold", 5);
 	}
-	
+
 	public void setFormatInsertColumnThreshold(int value)
 	{
 		setProperty("workbench.sql.generate.insert.newlinethreshold", value);
 	}
-	
+
 	public boolean getDoFormatUpdates()
 	{
 		return getBoolProperty("workbench.sql.generate.update.doformat",true);
 	}
-	
+
 	public void setDoFormatUpdates(boolean flag)
 	{
 		setProperty("workbench.sql.generate.update.doformat", flag);
@@ -562,12 +562,12 @@ public class Settings
 	{
 		return getBoolProperty("workbench.sql.generate.insert.doformat",true);
 	}
-	
+
 	public void setDoFormatInserts(boolean flag)
 	{
 		setProperty("workbench.sql.generate.insert.doformat", flag);
 	}
-	
+
 	public String getDefaultObjectType()
 	{
 		return getProperty("workbench.dbexplorer.defTableType", null);
@@ -577,17 +577,17 @@ public class Settings
 	{
 		setProperty("workbench.dbexplorer.rememberObjectType", flag);
 	}
-	
+
 	public boolean getStoreExplorerObjectType()
 	{
 		return getBoolProperty("workbench.dbexplorer.rememberObjectType", false);
 	}
-	
+
 	public boolean getSwitchCatalogInExplorer()
 	{
 		return getBoolProperty("workbench.dbexplorer.switchcatalog", true);
 	}
-	
+
 	public String getProfileStorage()
 	{
 		String profiles = this.props.getProperty(PROPERTY_PROFILE_STORAGE);
@@ -596,12 +596,12 @@ public class Settings
 			return new File(this.configDir, "WbProfiles.xml").getAbsolutePath();
 		}
 		String realFilename = FileDialogUtil.replaceConfigDir(profiles);
-		
+
 		// Check if filename contains a directory
 		File f = new File(realFilename);
 		if (f.getParent() == null)
 		{
-			// no directory in filename -> use config directory 
+			// no directory in filename -> use config directory
 			f = new File(this.configDir, realFilename);
 		}
 		LogMgr.logInfo("Settings.getProfileFilename()", "Using profiles from " + f.getAbsolutePath());
@@ -617,12 +617,12 @@ public class Settings
 	{
 		return getBoolProperty("workbench.db.createpkname", true);
 	}
-	
+
 	public void setAutoGeneratePKName(boolean flag)
 	{
 		setProperty("workbench.db.createpkname", flag);
 	}
-	
+
 	public String getDriverConfigFilename()
 	{
 		return new File(this.configDir, "WbDrivers.xml").getAbsolutePath();
@@ -680,7 +680,7 @@ public class Settings
 		String val = 	StringUtil.listToString(servers, ',');
 		setProperty("workbench.db.ddlneedscommit", val);
 	}
-	
+
 	private void renameOldProps()
 	{
 		this.renameProperty("workbench.sql.maxcolwidth","workbench.gui.optimalwidth.maxsize");
@@ -690,7 +690,7 @@ public class Settings
 		this.renameProperty("connection.last", "workbench.connection.last");
 		this.renameProperty("drivers.lastlibdir", "workbench.drivers.lastlibdir");
 		this.renameProperty("workbench.db.debugger", "workbench.db.previewsql");
-		
+
 		// Fix typos from incorrect default.properties
 		this.renameProperty("workbench.db.objecttype.data.postgres", "workbench.db.objecttype.data.postgresql");
 		this.renameProperty("workbench.db.objecttype.selectable.postgres", "workbench.db.objecttype.selectable.postgresql");
@@ -732,7 +732,7 @@ public class Settings
 			this.props.remove("workbench.sql.search.wholeword");
 			this.props.remove("workbench.sql.search.lastvalue");
 			this.props.remove("workbench.dbexplorer.rememberSchema");
-			
+
 			// not needed any longer
 			this.props.remove("workbench.db.oracle.quotedigits");
 			this.props.remove("workbench.gui.macros.replaceonrun");
@@ -758,12 +758,12 @@ public class Settings
 		}
 		WbManager.trace("Setting.fillDefaults() - done");
 	}
-	
+
 	public int getMaxMacrosInMenu()
 	{
 		return getIntProperty("workbench.gui.macro.maxmenuitems", 9);
 	}
-	
+
 	public Font getStandardFont()
 	{
 		Font f = this.getFont(PROPERTY_STANDARD_FONT,false);
@@ -779,7 +779,7 @@ public class Settings
 	{
 		setFont(PROPERTY_STANDARD_FONT,f);
 	}
-	
+
 	public Font getStandardLabelFont()
 	{
 		Font f = this.getStandardFont();
@@ -790,7 +790,7 @@ public class Settings
 		}
 		return f;
 	}
-	
+
 	public Font getStandardMenuFont()
 	{
 		Font f = this.getStandardFont();
@@ -806,7 +806,7 @@ public class Settings
 	{
 		this.setFont(PROPERTY_EDITOR_FONT, f);
 	}
-	
+
 	public Font getEditorFont()
 	{
 		return this.getFont(PROPERTY_EDITOR_FONT);
@@ -816,7 +816,7 @@ public class Settings
 	{
 		this.setFont(PROPERTY_MSGLOG_FONT, f);
 	}
-	
+
 	public Font getMsgLogFont()
 	{
 		return this.getFont(PROPERTY_MSGLOG_FONT);
@@ -826,7 +826,7 @@ public class Settings
 	{
 		this.setFont(PROPERTY_DATA_FONT, f);
 	}
-	
+
 	public Font getDataFont()
 	{
 		Font f = this.getFont(PROPERTY_DATA_FONT, false);
@@ -898,58 +898,58 @@ public class Settings
 			setProperty("workbench.gui.table.copydefault", value.toLowerCase());
 		}
 	}
-	
+
 	public boolean getCopySelectedIsDefault()
 	{
 		String value = getProperty("workbench.gui.table.copydefault", "all");
 		return "selected".equalsIgnoreCase(value);
 	}
-	
+
 	public boolean getUseAlternateRowColor()
 	{
 		return getBoolProperty("workbench.gui.table.alternate.use", false);
 	}
-	
+
 	public void setUseAlternateRowColor(boolean flag)
 	{
 		setProperty("workbench.gui.table.alternate.use", flag);
 	}
-	
+
 	public Color getAlternateRowColor()
 	{
 		return getColor("workbench.gui.table.alternate.color", new Color(252,252,252));
 	}
-	
+
 	public void setAlternateRowColor(Color c)
 	{
 		setColor("workbench.gui.table.alternate.color", c);
 	}
-	
+
 	public void setRequiredFieldColor(Color c)
 	{
 		setColor("workbench.gui.edit.requiredfield.color", c);
 	}
-	
+
 	public Color getRequiredFieldColor()
 	{
 		return getColor("workbench.gui.edit.requiredfield.color", new Color(255,100,100));
 	}
-	
+
 	public void setHighlightRequiredFields(boolean flag)
 	{
 		setProperty("workbench.gui.edit.requiredfield.dohighlight", flag);
 	}
-	
+
 	public boolean getHighlightRequiredFields()
 	{
 		return getBoolProperty("workbench.gui.edit.requiredfield.dohighlight", true);
 	}
-	
+
 	public Color getColor(String aColorKey)
 	{
 		return getColor(aColorKey, null);
 	}
-	
+
 	public Color getColor(String aColorKey, Color defaultColor)
 	{
 		String value = this.getProperty(aColorKey, null);
@@ -1131,17 +1131,17 @@ public class Settings
 	{
 		return getBoolProperty("workbench.gui.display.rowheightresize", true);
 	}
-	
+
 	public void setAllowRowHeightResizing(boolean flag)
 	{
 		setProperty("workbench.gui.display.rowheightresize", flag);
 	}
-	
+
 	public boolean getShowRowNumbers()
 	{
 		return getBoolProperty("workbench.data.rownumbers", false);
 	}
-	
+
 	public void setShowFilenameInWindowTitle(int type)
 	{
 		switch (type)
@@ -1157,7 +1157,7 @@ public class Settings
 				break;
 		}
 	}
-	
+
 	public int getShowFilenameInWindowTitle()
 	{
 		String type = this.getProperty("workbench.gui.display.showfilename", "none");
@@ -1165,7 +1165,7 @@ public class Settings
 		if ("path".equalsIgnoreCase(type)) return SHOW_FULL_PATH;
 		return SHOW_NO_FILENAME;
 	}
-	
+
 	public String getSqlParameterPrefix()
 	{
 		String value = getProperty("workbench.sql.parameter.prefix", "$[");
@@ -1195,7 +1195,7 @@ public class Settings
 	{
 		return getBoolProperty(PROPERTY_SHOW_LINE_NUMBERS, true);
 	}
-	
+
 	public void setShowLineNumbers(boolean show)
 	{
 		setProperty(PROPERTY_SHOW_LINE_NUMBERS, show);
@@ -1225,22 +1225,22 @@ public class Settings
 	{
 		return getBoolProperty("workbench.db.oracle.fixcharsemantics", true);
 	}
-	
+
 	public boolean getCheckPreparedStatements()
 	{
 		return getBoolProperty("workbench.sql.checkprepared", false);
 	}
-	
-	public void setCheckPreparedStatements(boolean show)
+
+	public void setCheckPreparedStatements(boolean flag)
 	{
-		this.setProperty("workbench.sql.checkprepared", show);
+		this.setProperty("workbench.sql.checkprepared", flag);
 	}
 
 	public boolean getHighlightCurrentStatement()
 	{
 		return getBoolProperty("workbench.editor.highlightcurrent", false);
 	}
-	
+
 	public void setHighlightCurrentStatement(boolean show)
 	{
 		this.setProperty("workbench.editor.highlightcurrent", show);
@@ -1250,7 +1250,7 @@ public class Settings
 	{
 		return this.getBoolProperty("workbench.export.sql.includeowner", true);
 	}
-	
+
 	public void setIncludeOwnerInSqlExport(boolean flag)
 	{
 		setProperty("workbench.export.sql.includeowner", flag);
@@ -1340,8 +1340,8 @@ public class Settings
 	{
 		this.setProperty("workbench.data.blob.save.lastdir", aDir);
 	}
-	
-	
+
+
 	public String getLastWorkspaceDir()
 	{
 		return getProperty("workbench.workspace.lastdir", this.getConfigDir());
@@ -1402,16 +1402,16 @@ public class Settings
 		this.props.setProperty("workbench.editor.lastdir", aDir);
 	}
 
-	public String getLastFilterDir() 
+	public String getLastFilterDir()
 	{
 		return getProperty("workbench.filter.lastdir","");
 	}
-	
-	public void setLastFilterDir(String dir) 
+
+	public void setLastFilterDir(String dir)
 	{
 		this.props.setProperty("workbench.filter.lastdir",dir);
 	}
-	
+
 	public String toString()
 	{
 		return "[Settings]";
@@ -1441,7 +1441,7 @@ public class Settings
 	{
 		this.storeWindowPosition(target, target.getClass().getName());
 	}
-	
+
 	public void storeWindowPosition(Component target, String id)
 	{
 		Point p = target.getLocation();
@@ -1452,7 +1452,7 @@ public class Settings
 	{
 		this.storeWindowSize(target, null);
 	}
-	
+
 	public void storeWindowSize(Component target, String id)
 	{
 		if (target == null) return;
@@ -1526,32 +1526,32 @@ public class Settings
 	{
 		setColor("workbench.editor.color.selection", c);
 	}
-	
+
 	public Color getEditorSelectionColor()
 	{
 		return getColor("workbench.editor.color.selection", new Color(0xccccff));
 	}
-	
+
 	public void setEditorErrorColor(Color c)
 	{
 		setColor("workbench.editor.color.error", c);
 	}
-	
+
 	public Color getEditorErrorColor()
 	{
 		return getColor("workbench.editor.color.error", Color.RED.brighter());
 	}
-	
+
 	public int getElectricScroll()
 	{
 		return this.getIntProperty("workbench.editor.electricscroll", 3);
 	}
-	
+
 	public void setElectricScroll(int value)
 	{
 		setProperty("workbench.editor.electricscroll", (value < 0 ? 3 : value));
 	}
-	
+
 	public int getWindowPosX(String windowClass)
 	{
 		return getIntProperty(windowClass + ".x", 0);
@@ -1584,7 +1584,7 @@ public class Settings
 
 	public ProfileKey getLastConnection(String key)
 	{
-		if (key == null) 
+		if (key == null)
 		{
 			key = "workbench.connection.last";
 		}
@@ -1593,12 +1593,12 @@ public class Settings
 		String group = getProperty(key + ".group", null);
 		return new ProfileKey(name, group);
 	}
-	
+
 	public void setLastConnection(ConnectionProfile prof)
 	{
 		setLastConnection("workbench.connection.last", prof);
 	}
-	
+
 	public void setLastConnection(String key, ConnectionProfile prof)
 	{
 		if (prof == null)
@@ -1606,10 +1606,10 @@ public class Settings
 			this.props.setProperty(key, "");
 			this.props.setProperty(key + ".group", "");
 		}
-		
+
 		// comparing with == is intended!!!!
 		if (prof.getName() == BatchRunner.CMD_LINE_PROFILE_NAME) return;
-		
+
 		this.props.setProperty(key, prof.getName());
 		this.props.setProperty(key + ".group", prof.getGroup());
 	}
@@ -1618,7 +1618,7 @@ public class Settings
 	{
 		return getProperty("workbench.drivers.lastlibdir", "");
 	}
-	
+
 	public void setLastLibraryDir(String aDir)
 	{
 		this.props.setProperty("workbench.drivers.lastlibdir", aDir);
@@ -1666,12 +1666,12 @@ public class Settings
 	{
 		setProperty("workbench.sql.formatter.select.columnsperline", value);
 	}
-	
+
 	public int getFormatterMaxSubselectLength()
 	{
 		return getIntProperty("workbench.sql.formatter.subselect.maxlength", 60);
 	}
-	
+
 	public void setFormatterMaxSubselectLength(int value)
 	{
 		setProperty("workbench.sql.formatter.subselect.maxlength", value);
@@ -1681,7 +1681,7 @@ public class Settings
 	{
 		return this.getBoolProperty("workbench.editor.rightclickmovescursor", false);
 	}
-	
+
 	public void setRightClickMovesCursor(boolean flag)
 	{
 		setProperty("workbench.editor.rightclickmovescursor", flag);
@@ -1691,15 +1691,15 @@ public class Settings
 	{
 		setProperty("workbench.gui.optimalwidth.minsize", width);
 	}
-	
+
 	public int getMinColumnWidth()
 	{
 		return this.getIntProperty("workbench.gui.optimalwidth.minsize", 50);
 	}
-	
+
 	public int getMaxColumnWidth()
 	{
-		return getIntProperty("workbench.gui.optimalwidth.maxsize", 500);
+		return getIntProperty("workbench.gui.optimalwidth.maxsize", 850);
 	}
 
 	public void setMaxColumnWidth(int width)
@@ -1709,7 +1709,7 @@ public class Settings
 
 	private SimpleDateFormat defaultDateFormatter = null;
 	private SimpleDateFormat defaultTimestampFormatter = null;
-	
+
 	public SimpleDateFormat getDefaultDateFormatter()
 	{
 		if (this.defaultDateFormatter == null)
@@ -1730,7 +1730,7 @@ public class Settings
 		if (prop == null) return false;
 		return (PROPERTY_DATE_FORMAT.equals(prop) || PROPERTY_DATETIME_FORMAT.equals(prop) || PROPERTY_TIME_FORMAT.equals(prop));
 	}
-	
+
 	public String getDefaultDateFormat()
 	{
 		return getProperty(PROPERTY_DATE_FORMAT, StringUtil.ISO_DATE_FORMAT);
@@ -1746,17 +1746,17 @@ public class Settings
 		this.defaultDateFormatter = null;
 		this.props.setProperty(PROPERTY_DATETIME_FORMAT, aFormat);
 	}
-	
+
 	public void setDefaultTimeFormat(String format)
 	{
 		this.props.setProperty(PROPERTY_TIME_FORMAT, format);
 	}
-	
+
 	public String getDefaultTimeFormat()
 	{
 		return getProperty(PROPERTY_TIME_FORMAT, "HH:mm:ss");
 	}
-	
+
 	public SimpleDateFormat getDefaultTimestampFormatter()
 	{
 		if (this.defaultTimestampFormatter == null)
@@ -1839,12 +1839,12 @@ public class Settings
 	{
 		return getProperty("workbench.blob.text.encoding", getDefaultDataEncoding());
 	}
-	
+
 	public void setDefaultBlobTextEncoding(String enc)
 	{
 		setProperty("workbench.blob.text.encoding", enc);
 	}
-	
+
 	public String getDefaultDataEncoding()
 	{
 		String def = System.getProperty("file.encoding");
@@ -1920,17 +1920,17 @@ public class Settings
 	{
 		return getBoolProperty("workbench.editor.plain.wordwrap", true);
 	}
-	
+
 	public void setPlainEditorWordWrap(boolean flag)
 	{
 		setProperty("workbench.editor.plain.wordwrap", flag);
 	}
-	
+
 	public boolean getUsePlainEditorForData()
 	{
 		return getBoolProperty("workbench.gui.editor.data.plain", true);
 	}
-	
+
 	public boolean getUseCollator()
 	{
 		return getBoolProperty("workbench.sort.usecollator", false);
@@ -2046,22 +2046,22 @@ public class Settings
 			setProperty("workbench.editor.autocompletion.paste.case", null);
 		}
 	}
-	
+
 	public String getAutoCompletionPasteCase()
 	{
 		return getProperty("workbench.editor.autocompletion.paste.case", null);
 	}
-	
+
 	public boolean getCloseAutoCompletionWithSearch()
 	{
 		return getBoolProperty("workbench.editor.autocompletion.closewithsearch", false);
 	}
-	
+
 	public void setCloseAutoCompletionWithSearch(boolean flag)
 	{
 		setProperty("workbench.editor.autocompletion.closewithsearch", flag);
 	}
-	
+
 	public boolean getAutoCompletionEmptyLineIsSeparator()
 	{
 		return getBoolProperty("workbench.editor.autocompletion.sql.emptylineseparator", false);
@@ -2136,7 +2136,7 @@ public class Settings
 	{
 		return getBoolProperty("workbench.db.verifydriverurl", false);
 	}
-	
+
 	public boolean getShowMnemonics()
 	{
 		return getBoolProperty("workbench.gui.showmnemonics", true);
@@ -2174,7 +2174,7 @@ public class Settings
 		String list = getProperty("workbench.db.nonullkeyword", "");
 		return StringUtil.stringToList(list, ",");
 	}
-	
+
 	public List getCaseSensitivServers()
 	{
 		String list = getProperty("workbench.db.casesensitive", "");

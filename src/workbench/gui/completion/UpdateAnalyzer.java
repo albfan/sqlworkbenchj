@@ -21,6 +21,8 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -32,8 +34,6 @@ import workbench.util.TableAlias;
 public class UpdateAnalyzer
 	extends BaseAnalyzer
 {
-	private	final Pattern SET_PATTERN = Pattern.compile("\\sSET\\s|\\sSET$", Pattern.CASE_INSENSITIVE);
-
 	public UpdateAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
 		super(conn, statement, cursorPos);
@@ -41,11 +41,52 @@ public class UpdateAnalyzer
 
 	protected void checkContext()
 	{
-		int setPos = StringUtil.findPattern(SET_PATTERN, sql, 0);
-
 		checkOverwrite();
 		
-		if ( setPos == -1 || setPos > -1 && this.cursorPos < setPos )
+		final int IN_SET = 1;
+		final int IN_UPDATE = 2;
+		final int IN_WHERE = 3;
+		
+		int state = -1;
+		boolean nextIsTable = false;
+		String table = null;
+		
+		SQLLexer lexer = new SQLLexer(sql);
+		SQLToken t = lexer.getNextToken(false, false);
+		
+		while (t != null)
+		{
+			if (nextIsTable)
+			{
+				table = t.getContents();
+				nextIsTable = false;
+			}
+			if (t.getContents().equals("UPDATE"))
+			{
+				nextIsTable = true;
+				if (cursorPos > t.getCharEnd())
+				{
+					state = IN_UPDATE;
+				}
+			}
+			else if (t.getContents().equals("SET"))
+			{
+				if (cursorPos > t.getCharEnd())
+				{
+					state = IN_SET;
+				}
+			}
+			else if (t.getContents().equals("WHERE"))
+			{
+				if (cursorPos > t.getCharEnd())
+				{
+					state = IN_WHERE;
+				}
+			}
+			t = lexer.getNextToken(false, false);
+		}
+		
+		if (state == IN_UPDATE)
 		{
 			context = CONTEXT_TABLE_LIST;
 			String q = this.getQualifierLeftOfCursor();
@@ -60,18 +101,10 @@ public class UpdateAnalyzer
 		}
 		else
 		{
-			// current cursor position is after the WHERE
-			// so we'll need a column list
-			int start = StringUtil.findFirstWhiteSpace(sql);
-
-			int end = -1;
-			if (start > -1) end = StringUtil.findFirstWhiteSpace(sql, start + 1);
-			if (end == -1 && start > -1) end = this.sql.length() - 1;
-
-			if (end > -1 && start > -1)
+			// "inside" the SET and after the WHERE we always need the column list
+			if (table != null)
 			{
 				context = CONTEXT_COLUMN_LIST;
-				String table = sql.substring(start, end).trim();
 				tableForColumnList = new TableIdentifier(table);
 			}
 		}

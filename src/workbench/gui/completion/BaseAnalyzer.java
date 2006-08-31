@@ -31,8 +31,9 @@ import workbench.util.TextlistReader;
  */
 public abstract class BaseAnalyzer
 {
-	public static final String QUALIFIER_DELIM = "<>!/{}\\#%[]'\"().,:;";
+	public static final String QUALIFIER_DELIM = "<>!/{}\\#%[]'\"(),:;";
 	public static final String WORD_DELIM = QUALIFIER_DELIM + "@";
+	public static final String SELECT_WORD_DELIM = WORD_DELIM + ".";
 	
 	protected static final int NO_CONTEXT = -1;
 	
@@ -49,9 +50,6 @@ public abstract class BaseAnalyzer
 	
 	// List keywords available at this point
 	protected static final int CONTEXT_KW_LIST = 5;
-	
-	// List keywords available at this point
-	protected static final int CONTEXT_INDEX_LIST = 6;
 	
 	private final SelectAllMarker allColumnsMarker = new SelectAllMarker();
 	private String typeFilter;
@@ -262,7 +260,7 @@ public abstract class BaseAnalyzer
 		// if no dot is present, then the current word is not a qualifier (e.g. a table name or alias)
 		if (c != '.') return null;
 		
-		String word = StringUtil.getWordLeftOfCursor(this.sql, start, QUALIFIER_DELIM);
+		String word = StringUtil.getWordLeftOfCursor(this.sql, start, QUALIFIER_DELIM + ".");
 		if (word == null) return null;
 		int dotPos= word.indexOf('.');
 		

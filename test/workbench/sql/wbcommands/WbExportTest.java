@@ -41,14 +41,14 @@ public class WbExportTest extends TestCase
 	private final int rowcount = 10;
 	private WbExport exportCmd = new WbExport();
 	private WbConnection connection;
-	
+	private TestUtil util;
 	public WbExportTest(String testName)
 	{
 		super(testName);
 		
 		try
 		{
-			TestUtil util = new TestUtil();
+			util = new TestUtil();
 			util.prepareEnvironment();
 			this.dbName = util.getDbName();
 			this.basedir = util.getBaseDir();
@@ -210,16 +210,11 @@ public class WbExportTest extends TestCase
 	private WbConnection prepareDatabase()
 		throws SQLException, ClassNotFoundException
 	{
-		File dir = new File(basedir);
-		File[] files = dir.listFiles();
-		for (int i = 0; i < files.length; i++)
-		{
-			files[i].delete();
-		}
-		Class.forName("org.hsqldb.jdbcDriver");
-		String url = "jdbc:hsqldb:" + dbName + ";shutdown=true";
-		Connection con = DriverManager.getConnection(url, "sa", "");
-		Statement stmt = con.createStatement();
+		util.emptyBaseDirectory();
+		WbConnection wb = util.getConnection();
+		Connection con = wb.getSqlConnection();
+		
+		Statement stmt = wb.createStatement();
 		stmt.executeUpdate("CREATE TABLE junit_test (nr integer primary key, firstname varchar(100), lastname varchar(100))");
 		PreparedStatement pstmt = con.prepareStatement("insert into junit_test (nr, firstname, lastname) values (?,?,?)");
 		for (int i=0; i < rowcount; i ++)
@@ -249,21 +244,6 @@ public class WbExportTest extends TestCase
 		pstmt.close();
 		stmt.close();
 		
-		WbConnection wb = new WbConnection(con);
-		
-		// Create a dummy profiles as the profile
-		// is used all around the Wb sources
-		ConnectionProfile prof = new ConnectionProfile();
-		prof.setAutocommit(false);
-		prof.setEmptyStringIsNull(true);
-		prof.setIgnoreDropErrors(true);
-		prof.setIncludeNullInInsert(true);
-		prof.setName("JunitTest");
-		prof.setDriverName("HSQLDB");
-		prof.setDriverclass("org.hsqldb.jdbcDriver");
-		prof.setUrl(url);
-		prof.setPassword("");
-		wb.setProfile(prof);
 		return wb;
 	}	
 }

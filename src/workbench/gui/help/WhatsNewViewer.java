@@ -82,7 +82,6 @@ public class WhatsNewViewer
 				saveSettings();
 				hide();
 				dispose();
-				//System.exit(1);
 			}
 		});
 	}

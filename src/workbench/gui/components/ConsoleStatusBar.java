@@ -33,18 +33,13 @@ public class ConsoleStatusBar
 	private String createDeleteString(String original)
 	{
 		if (original == null) return StringUtil.EMPTY_STRING;
-		StringBuffer result = new StringBuffer(original.length() * 2);
-		result.append(original);
-		result.append(original);
-		int count = result.length();
-		for (int i = 0; i < count; i++)
+		StringBuffer result = new StringBuffer(original.length()+2);
+		result.append('\r');
+		for (int i = 0; i < original.length(); i++)
 		{
-			result.setCharAt(i, ' ');
+			result.append(' ');
 		}
-		for (int i = 0; i < count; i++)
-		{
-			result.setCharAt(i, (char)8);
-		}
+		result.append('\r');
 		return result.toString();
 	}
 
@@ -63,8 +58,8 @@ public class ConsoleStatusBar
 		if (lastMessage != null)
 		{
 			output.print(createDeleteString(lastMessage));
+			lastMessage = null;
 		}
-		output.println();
 	}
 
 	public void repaint()

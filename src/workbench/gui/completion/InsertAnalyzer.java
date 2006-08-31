@@ -83,25 +83,8 @@ public class InsertAnalyzer
 					if (nextTokenIsTable)
 					{
 						tableStart = t.getCharBegin();
-						t = lexer.getNextToken(false, false);
-						if (".".equals(t.getContents()))
-						{
-							schema = value;
-							// we have a schema.table qualifier
-							t = lexer.getNextToken(false, false);
-							if (!"(".equals(t.getContents()))
-							{
-								table = t.getContents();
-							}
-						}
-						else
-						{
-							table = value;
-						}
+						table = t.getContents();
 						nextTokenIsTable = false;
-						// skip getting the next token at the end of the loop
-						// otherwise we'd swallow the one that was just retrieved.
-						continue;
 					}
 					if ("INTO".equals(value))
 					{
@@ -123,15 +106,7 @@ public class InsertAnalyzer
 			this.context = NO_CONTEXT;
 		}
 		
-		TableIdentifier id = null;
-		if (table != null && schema != null)
-		{
-			id = new TableIdentifier(schema, table);
-		} 
-		else if (table != null)
-		{
-			id = new TableIdentifier(table);
-		}
+		TableIdentifier id = new TableIdentifier(table);
 		
 		if (cursorPos > intoStart && cursorPos < intoEnd)
 		{

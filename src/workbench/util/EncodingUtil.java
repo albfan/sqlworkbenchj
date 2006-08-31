@@ -160,7 +160,7 @@ public class EncodingUtil
 			Charset.forName(enc);
 			return true;
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			return false;
 		}

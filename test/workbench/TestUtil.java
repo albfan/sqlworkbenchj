@@ -17,10 +17,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
-import workbench.interfaces.StatementRunner;
 import workbench.sql.BatchRunner;
 import workbench.sql.DefaultStatementRunner;
 import workbench.util.ArgumentParser;
@@ -98,10 +98,10 @@ public class TestUtil
 	}
 
 	public WbConnection getConnection()
-		throws Exception
+		throws SQLException, ClassNotFoundException
 	{
 		ArgumentParser parser = WbManager.createArgumentParser();
-		parser.parse("-url=jdbc:hsqldb:" + getDbName() + " -user=sa -driver=org.hsqldb.jdbcDriver");
+		parser.parse("-url='jdbc:hsqldb:" + getDbName() + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, "WbUnitTest");
 		return con;

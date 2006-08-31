@@ -15,9 +15,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import workbench.db.WbConnection;
+import workbench.util.SqlUtil;
 
 /**
  *	@author  support@sql-workbench.net
@@ -64,6 +63,9 @@ public class PreparedStatementPool
 	{
 		if (sql == null) return false;
 		if (sql.indexOf('?') == -1) return false;
+	
+		String clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
+		if (clean.indexOf('?') == -1) return false;
 		
 		if (this.statements.containsKey(sql))
 		{

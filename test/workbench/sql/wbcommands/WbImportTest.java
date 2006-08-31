@@ -75,6 +75,123 @@ public class WbImportTest extends TestCase
 		this.connection.disconnect();
 	}
 	
+	public void testPartialXmlImport()
+		throws Exception
+	{
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
+             "<wb-export> \n" + 
+             "  <meta-data> \n" + 
+             " \n" + 
+             "    <generating-sql> \n" + 
+             "    <![CDATA[ \n" + 
+             "    select id, lastname, firstname from person \n" + 
+             "    ]]> \n" + 
+             "    </generating-sql> \n" + 
+             " \n" + 
+             "    <created>2006-07-29 23:31:40.366 CEST</created> \n" + 
+             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" + 
+             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" + 
+             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" + 
+             "    <database-product-name>HSQL Database Engine</database-product-name> \n" + 
+             "    <database-product-version>1.8.0</database-product-version> \n" + 
+             "    <wb-tag-format>short</wb-tag-format> \n" + 
+             "  </meta-data> \n" + 
+             " \n" + 
+             "  <table-def> \n" + 
+             "    <!-- The following information was retrieved from the JDBC driver's ResultSetMetaData --> \n" + 
+             "    <!-- column-name is retrieved from ResultSetMetaData.getColumnName() --> \n" + 
+             "    <!-- java-class is retrieved from ResultSetMetaData.getColumnClassName() --> \n" + 
+             "    <!-- java-sql-type-name is the constant's name from java.sql.Types --> \n" + 
+             "    <!-- java-sql-type is the constant's numeric value from java.sql.Types as returned from ResultSetMetaData.getColumnType() --> \n" + 
+             "    <!-- dbms-data-type is retrieved from ResultSetMetaData.getColumnTypeName() --> \n" + 
+             " \n" + 
+             "    <!-- For date and timestamp types, the internal long value obtained from java.util.Date.getTime() \n" + 
+             "         is written as an attribute to the <column-data> tag. That value can be used \n" + 
+             "         to create a java.util.Date() object directly, without the need to parse the actual tag content. \n" + 
+             "         If Java is not used to parse this file, the date/time format used to write the data \n" + 
+             "         is provided in the <data-format> tag of the column definition \n" + 
+             "    --> \n" + 
+             " \n" + 
+             "    <table-name>junit_test</table-name> \n" + 
+             "    <column-count>3</column-count> \n" + 
+             " \n" + 
+             "    <column-def index=\"0\"> \n" + 
+             "      <column-name>NR</column-name> \n" + 
+             "      <java-class>java.lang.Integer</java-class> \n" + 
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
+             "      <java-sql-type>4</java-sql-type> \n" + 
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"1\"> \n" + 
+             "      <column-name>LASTNAME</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"2\"> \n" + 
+             "      <column-name>FIRSTNAME</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "  </table-def> \n" + 
+             " \n" + 
+             "<data> \n" + 
+             "<rd><cd>1</cd><cd>Dent</cd><cd>Arthur</cd></rd> \n" + 
+             "<rd><cd>2</cd><cd>Beeblebrox</cd><cd>Zaphod</cd></rd> \n" + 
+             "<rd><cd>3</cd><cd>Prefect</cd><cd>Ford</cd></rd> \n" + 
+             "</data> \n" + 
+             "</wb-export>";
+		try
+		{
+			File xmlFile = new File(this.basedir, "partial_xml_import.xml");
+			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
+			out.write(xml);
+			out.close();
+			
+			String cmd = "wbimport -importcolumns=nr,lastname -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
+			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr, lastname, firstname from junit_test");
+			int rowCount = 0;
+			
+			while (rs.next())
+			{
+				rowCount ++;
+				int nr = rs.getInt(1);
+				assertEquals("Wrong data imported", rowCount, nr);
+				String lastname = rs.getString(2);
+				switch (nr)
+				{
+					case 1: 
+						assertEquals("Wrong data imported", "Dent", lastname);
+						break;
+					case 2: 
+						assertEquals("Wrong data imported", "Beeblebrox", lastname);
+						break;
+					case 3: 
+						assertEquals("Wrong data imported", "Prefect", lastname);
+						break;
+				}
+				String firstname = rs.getString(3);
+				assertNull("Omitted column imported", firstname);
+				
+			}
+			assertEquals("Wrong number of rows", rowCount, 3);
+			rs.close();
+			stmt.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testRegularImport()
 		throws Exception
 	{
@@ -91,10 +208,15 @@ public class WbImportTest extends TestCase
 				out.print('\t');
 				out.println("First" + i + "\tLastname" + i);
 			}
+			// Make sure encoding is working
 			out.println("999\tUnifirst\t"+name);
 			rowCount ++;
+			
+			// test for empty values (should be stored as NULL)
 			out.println("  \tempty nr\tempty");
 			rowCount ++;
+			
+			// Check that quote characters are used if not specified
 			out.println("42\tarthur\"dent\tempty");
 			rowCount ++;
 			out.close();
@@ -145,6 +267,102 @@ public class WbImportTest extends TestCase
 		}
 	}
 
+	public void testSkipImport()
+		throws Exception
+	{
+		int rowCount = 10;
+		try
+		{
+			File importFile  = new File(this.basedir, "partial.txt");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("nr\tfirstname\tlastname");
+			out.println("1\tArthur\tDent");
+			out.println("2\tZaphod\tBeeblebrox");
+			out.close();
+			
+			StatementRunnerResult result = importCmd.execute(this.connection, "-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,$wb_skip$,lastname -type=text -header=true -continueonerror=false -table=junit_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
+			while (rs.next())
+			{
+				int nr = rs.getInt(1);
+				String fname = rs.getString(2);
+				String lname = rs.getString(3);
+				assertNull("Firstname imported for nr=" + nr, fname);
+				if (nr == 1)
+				{
+					assertEquals("Wrong lastname", "Dent", lname);
+				}
+				else if (nr == 2)
+				{
+					assertEquals("Wrong lastname", "Beeblebrox", lname);
+				}
+				else
+				{
+					fail("Wrong lines imported");
+				}
+			}
+
+			rs.close();
+			stmt.close();
+			
+		}
+		catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testPartialTextImport()
+		throws Exception
+	{
+		int rowCount = 10;
+		try
+		{
+			File importFile  = new File(this.basedir, "partial.txt");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("nr\tfirstname\tlastname");
+			out.println("1\tArthur\tDent");
+			out.println("2\tZaphod\tBeeblebrox");
+			out.close();
+			
+			StatementRunnerResult result = importCmd.execute(this.connection, "-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,firstname,lastname -importcolumns=nr,lastname -type=text -header=true -continueonerror=false -table=junit_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
+			while (rs.next())
+			{
+				int nr = rs.getInt(1);
+				String fname = rs.getString(2);
+				String lname = rs.getString(3);
+				assertNull("Firstname imported for nr=" + nr, fname);
+				if (nr == 1)
+				{
+					assertEquals("Wrong lastname", "Dent", lname);
+				}
+				else if (nr == 2)
+				{
+					assertEquals("Wrong lastname", "Beeblebrox", lname);
+				}
+				else
+				{
+					fail("Wrong lines imported");
+				}
+			}
+
+			rs.close();
+			stmt.close();
+			
+		}
+		catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testMultiLineImport()
 	{
 		int rowCount = 10;
@@ -617,7 +835,7 @@ public class WbImportTest extends TestCase
              " \n" + 
              "<data> \n" + 
              "<rd><cd>1</cd><cd>Dent</cd><cd>Arthur</cd></rd> \n" + 
-             "<rd><cd>2</cd><cd>Dent</cd><cd>Zaphod</cd></rd> \n" + 
+             "<rd><cd>2</cd><cd>Beeblebrox</cd><cd>Zaphod</cd></rd> \n" + 
              "</data> \n" + 
              "</wb-export>";
 		try

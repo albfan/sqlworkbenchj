@@ -254,7 +254,7 @@ public class DbDriver
 	}
 
 	public Connection connect(String url, String user, String password, String id, Properties connProps)
-		throws ClassNotFoundException, SQLException, Exception
+		throws ClassNotFoundException, SQLException
 	{
 		Connection c = null;
 		try
@@ -299,8 +299,6 @@ public class DbDriver
 
 			// identify the program name when connecting
 			// this is different for each DBMS.
-			// If nothing is specified, Oracle would only list "JDBC Thin Driver"
-			// as the client program, which isn't very nice.
 			String propName = null;
 			if (url.startsWith("jdbc:oracle"))
 			{
@@ -341,7 +339,7 @@ public class DbDriver
 			if (c == null)
 			{
 				LogMgr.logError("DbDriver.connect()", "No connection returned by driver " + this.driverClass + " for URL=" + url, null);
-				throw new Exception("Driver did not return a connection for url=" + url);
+				throw new SQLException("Driver did not return a connection for url=" + url);
 			}
 		}
 		catch (ClassNotFoundException e)
@@ -357,7 +355,7 @@ public class DbDriver
 		catch (Throwable th)
 		{
 			LogMgr.logError("DbDriver.connect()", "Error connecting to driver " + this.driverClass, th);
-			throw new Exception("Error connecting to database. (" + th.getClass().getName() + " - " + th.getMessage() + ")");
+			throw new SQLException("Error connecting to database. (" + th.getClass().getName() + " - " + th.getMessage() + ")");
 		}
 
 		return c;

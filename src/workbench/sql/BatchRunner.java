@@ -539,6 +539,8 @@ public class BatchRunner
 		boolean showResult = cmdLine.getBoolean(WbManager.ARG_DISPLAY_RESULT);
 		boolean showProgress = cmdLine.getBoolean(WbManager.ARG_SHOWPROGRESS, false);
 
+		String encoding = cmdLine.getValue(WbManager.ARG_SCRIPT_ENCODING);
+		
 		ConnectionProfile profile = null;
 		if (profilename == null)
 		{
@@ -568,6 +570,15 @@ public class BatchRunner
 
 		BatchRunner runner = new BatchRunner(scripts);
 		runner.showResultSets(showResult);
+		try
+		{
+			runner.setEncoding(encoding);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("BatchRunner.createBatchRunner()", "Invalid encoding '" + encoding + "' specified. Using platform default'", null);
+		}
+		
 		runner.setAbortOnError(abort);
 		runner.setErrorScript(error);
 		runner.setSuccessScript(success);

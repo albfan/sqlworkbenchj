@@ -37,6 +37,7 @@ import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.ExpandTreeAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.actions.SaveListFileAction;
+import workbench.gui.components.DividerBorder;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
@@ -75,6 +76,7 @@ public class ProfileEditorPanel
 		JPanel dummy = new JPanel(new BorderLayout());
 		dummy.add(connectionEditor, BorderLayout.CENTER);
 		this.jSplitPane1.setRightComponent(dummy);
+//		this.jSplitPane1.setBorder(null);
 		this.fillDrivers();
 		
 		JPanel p = new JPanel();
@@ -88,6 +90,8 @@ public class ProfileEditorPanel
 		copyItem.setEnabled(false);
 		this.toolbar.add(copyItem);
 		ProfileTree tree = (ProfileTree)profileTree;
+		tree.setBorder(null);
+//		jScrollPane1.setBorder(new DividerBorder(DividerBorder.TOP));
 		
 		this.toolbar.add(new NewGroupAction(tree));
 		

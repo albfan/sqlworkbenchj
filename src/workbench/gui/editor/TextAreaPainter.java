@@ -16,13 +16,11 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.event.MouseEvent;
+import java.awt.Shape;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JComponent;
-import javax.swing.ToolTipManager;
 import javax.swing.text.PlainDocument;
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
@@ -33,7 +31,7 @@ import workbench.resource.Settings;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.22 2006-08-26 14:04:12 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.23 2006-08-31 22:34:56 thomas Exp $
  */
 public class TextAreaPainter 
 	extends JComponent 
@@ -300,21 +298,25 @@ public class TextAreaPainter
 		boolean paintLineNumbers = false;
 		
 		Rectangle clipRect = gfx.getClipBounds();
+		Shape clip = gfx.getClip();
 
-		gfx.setColor(this.getBackground());
-		gfx.fillRect(clipRect.x,clipRect.y,clipRect.width,clipRect.height);
-		
-		if (this.showLineNumbers && clipRect.x < gutterWidth)
+		if (clipRect != null)
 		{
-			paintLineNumbers = true;
-			gfx.setColor(GUTTER_BACKGROUND);
-			gfx.fillRect(clipRect.x, clipRect.y, gutterWidth - clipRect.x, clipRect.height);
+			gfx.setColor(this.getBackground());
+			gfx.fillRect(clipRect.x,clipRect.y,clipRect.width,clipRect.height);
+
+			if (this.showLineNumbers && clipRect.x < gutterWidth)
+			{
+				paintLineNumbers = true;
+				gfx.setColor(GUTTER_BACKGROUND);
+				gfx.fillRect(clipRect.x, clipRect.y, gutterWidth - clipRect.x, clipRect.height);
+			}
+		}
+		else
+		{
+			System.out.println("No clip!");
 		}
 		
-//		System.out.println("repainting: x=" + clipRect.x + ", y=" + clipRect.y + ", w=" +  clipRect.width + ", h=" + clipRect.height);
-		
-		// We don't use yToLine() here because that method doesn't
-		// return lines past the end of the document
 		int height = fm.getHeight();
 		
 		int firstInvalid = firstVisible + clipRect.y / height;
@@ -330,9 +332,10 @@ public class TextAreaPainter
 			int endLine = firstVisible + visibleCount;
 			if (endLine > lastLine) endLine = lastLine;
 			
-			int cw = clipRect.width - gutterWidth;
+			int cw = this.getWidth() - gutterWidth;
+			int ch = getHeight();
 			int gutterX = this.gutterWidth - GUTTER_MARGIN;
-			
+
 			for (int line = firstVisible; line <= endLine; line++)
 			{
 				int y = textArea.lineToY(line);
@@ -342,26 +345,25 @@ public class TextAreaPainter
 					int w = s.length() * this.gutterCharWidth;
 					gf2d.setColor(GUTTER_COLOR);
 					gf2d.drawString(s, gutterX - w, y);
-					
-					if (line >= firstInvalid && line < lastLine) 
+				}
+				
+				if (line >= firstInvalid && line < lastLine) 
+				{
+					if (paintLineNumbers)
 					{
-						gfx.setClip(this.gutterWidth, clipRect.y, cw, clipRect.height);
-						gfx.translate(this.gutterWidth,0);		
-						gf2d.setColor(f);
-
-						paintLine(gfx,tokenMarker,line,y,x);
-
+						gfx.setClip(this.gutterWidth, 0, cw, ch);
+//						gfx.translate(this.gutterWidth,0);		
+//						gf2d.setColor(f);
+					}		
+					
+					paintLine(gfx,tokenMarker,line,y,x+gutterWidth);
+					
+					if (paintLineNumbers)
+					{
+//						gfx.translate(-this.gutterWidth,0);				
 						gfx.setClip(null);
-						gfx.translate(-this.gutterWidth,0);				
 					}
 				}
-				else
-				{
-					if (line >= firstInvalid && line < lastLine) 
-					{
-						paintLine(gfx,tokenMarker,line,y,x);
-					}
-				}				
 			}
 
 			if (tokenMarker != null && tokenMarker.isNextLineRequested())
@@ -453,7 +455,7 @@ public class TextAreaPainter
 		gfx.setColor(defaultColor);
 
 		y += fm.getHeight();
-		x = Utilities.drawTabbedText(currentLine,x,y,gfx,this,0);
+		Utilities.drawTabbedText(currentLine,x,y,gfx,this,0);
 	}
 
 	protected void paintSyntaxLine(Graphics gfx, TokenMarker tokenMarker,
@@ -517,31 +519,32 @@ public class TextAreaPainter
 		if(textArea.isSelectionRectangular())
 		{
 			int lineLen = textArea.getLineLength(line);
-			x1 = textArea._offsetToX(line,Math.min(lineLen,selectionStart - textArea.getLineStartOffset(selectionStartLine)));
-			x2 = textArea._offsetToX(line,Math.min(lineLen,selectionEnd - textArea.getLineStartOffset(selectionEndLine)));
+			x1 = textArea._offsetToX(line,Math.min(lineLen,selectionStart - textArea.getLineStartOffset(selectionStartLine))) + this.gutterWidth;
+			x2 = textArea._offsetToX(line,Math.min(lineLen,selectionEnd - textArea.getLineStartOffset(selectionEndLine))) + this.gutterWidth;
 			if(x1 == x2) x2++;
 		}
 		else if(selectionStartLine == selectionEndLine)
 		{
-			x1 = textArea._offsetToX(line,selectionStart - lineStart);
-			x2 = textArea._offsetToX(line,selectionEnd - lineStart);
+			x1 = textArea._offsetToX(line,selectionStart - lineStart) + this.gutterWidth;
+			x2 = textArea._offsetToX(line,selectionEnd - lineStart) + this.gutterWidth;
 		}
 		else if(line == selectionStartLine)
 		{
-			x1 = textArea._offsetToX(line,selectionStart - lineStart);
+			x1 = textArea._offsetToX(line,selectionStart - lineStart) + this.gutterWidth;
 			x2 = getWidth();
 		}
 		else if(line == selectionEndLine)
 		{
-			x1 = 0;
-			x2 = textArea._offsetToX(line,selectionEnd - lineStart);
+			x1 = gutterWidth;
+			x2 = textArea._offsetToX(line,selectionEnd - lineStart) + this.gutterWidth;
 		}
 		else
 		{
-			x1 = 0;
+			x1 = gutterWidth;
 			x2 = getWidth();
 		}
 
+		
 		// "inlined" min/max()
 		gfx.fillRect(x1 > x2 ? x2 : x1,y,x1 > x2 ? (x1 - x2) : (x2 - x1),height);
 
@@ -553,7 +556,7 @@ public class TextAreaPainter
 		if(position == -1) return;
 
 		y += fm.getLeading() + fm.getMaxDescent();
-		int x = textArea._offsetToX(line,position);
+		int x = textArea._offsetToX(line,position) + this.gutterWidth;
 		gfx.setColor(bracketHighlightColor);
 		// Hack!!! Since there is no fast way to get the character
 		// from the bracket matching routine, we use ( since all
@@ -566,7 +569,7 @@ public class TextAreaPainter
 		if(textArea.isCaretVisible())
 		{
 			int offset = textArea.getCaretPosition() - textArea.getLineStartOffset(line);
-			int caretX = textArea._offsetToX(line,offset);
+			int caretX = textArea._offsetToX(line,offset) + this.gutterWidth;
 			int caretWidth = (textArea.isOverwriteEnabled() ? fm.charWidth('w') : 2);
 			y += fm.getLeading() + fm.getMaxDescent();
 			int height = fm.getHeight();
