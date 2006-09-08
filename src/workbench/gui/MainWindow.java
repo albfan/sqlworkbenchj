@@ -122,7 +122,7 @@ public class MainWindow
 
 	private WbConnection currentConnection;
 	private ConnectionProfile currentProfile;
-	private ConnectionSelector connectionSelector;
+	protected ConnectionSelector connectionSelector;
 
 	private FileDisconnectAction disconnectAction;
 	private ShowDbExplorerAction dbExplorerAction;
@@ -279,7 +279,7 @@ public class MainWindow
 		}
 	}
 	
-	private void checkWorkspaceActions()
+	protected void checkWorkspaceActions()
 	{
 		this.saveWorkspaceAction.setEnabled(this.currentWorkspaceFile != null);
 		this.assignWorkspaceAction.setEnabled(this.currentWorkspaceFile != null && this.currentProfile != null);
@@ -762,11 +762,8 @@ public class MainWindow
 		this.setJMenuBar(menu);
 
 		if (this.currentToolbar != null) content.remove(this.currentToolbar);
-		if (current != null)
-		{
-			this.currentToolbar = current.getToolbar();
-			content.add(this.currentToolbar, BorderLayout.NORTH);
-		}
+		this.currentToolbar = current.getToolbar();
+		content.add(this.currentToolbar, BorderLayout.NORTH);
 		current.panelSelected();
 		this.checkMacroMenuForPanel(anIndex);
 		this.checkViewMenu(anIndex);
@@ -785,7 +782,7 @@ public class MainWindow
 		}
 	}
 
-	private void updateAddMacroAction()
+	protected void updateAddMacroAction()
 	{
 		MainPanel current = this.getCurrentPanel();
 		if (current instanceof SqlPanel)
@@ -1367,7 +1364,7 @@ public class MainWindow
 		}
 	}
 
-	private void updateWindowTitle()
+	protected void updateWindowTitle()
 	{
 		StringBuffer title = new StringBuffer(50);
 		if (this.runningJobs > 0)
@@ -1429,12 +1426,12 @@ public class MainWindow
 		this.setTitle(title.toString());
 	}
 
-	private void closeConnectingInfo()
+	protected void closeConnectingInfo()
 	{
 		this.connectionSelector.closeConnectingInfo();
 	}
 
-	private void showDisconnectInfo()
+	protected void showDisconnectInfo()
 	{
 		this.connectionSelector.showDisconnectInfo();
 	}
@@ -1442,7 +1439,7 @@ public class MainWindow
 	/** Display a little PopupWindow to tell the user that the
 	 *  workbench is currently connecting to the DB
 	 */
-	private void showConnectingInfo()
+	protected void showConnectingInfo()
 	{
 		this.connectionSelector.showConnectingInfo();
 	}

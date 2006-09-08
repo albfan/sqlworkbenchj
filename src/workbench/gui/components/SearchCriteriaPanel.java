@@ -41,8 +41,8 @@ public class SearchCriteriaPanel
 	private JCheckBox wholeWord;
 	private JCheckBox useRegEx;
 	
-	private JTextField criteria;
-	private JLabel label;
+	protected JTextField criteria;
+	protected JLabel label;
 	
 	public SearchCriteriaPanel()
 	{

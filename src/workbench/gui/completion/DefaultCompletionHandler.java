@@ -44,7 +44,7 @@ public class DefaultCompletionHandler
 	private JLabel header;
 	private List listeners;
 	private CompletionPopup window;
-	private StatusBar statusBar;
+	protected StatusBar statusBar;
 	private String currentWord;
 	
 	public DefaultCompletionHandler()
@@ -69,7 +69,7 @@ public class DefaultCompletionHandler
 		this.dbConnection = conn;
 	}
 	
-	private void showPopup()
+	protected void showPopup()
 	{
 		try
 		{

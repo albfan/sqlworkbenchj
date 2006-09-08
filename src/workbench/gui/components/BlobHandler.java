@@ -217,7 +217,6 @@ public class BlobHandler
 		throws IOException, SQLException
 	{
 		OutputStream out = new FileOutputStream(file);
-		File f = new File(file);
 		return saveBlobToFile(data, out);
 	}
 	

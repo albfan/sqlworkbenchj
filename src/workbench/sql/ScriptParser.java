@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
 import workbench.log.LogMgr;
@@ -438,8 +439,9 @@ public class ScriptParser
 	 * @see #getNextCommand()
 	 */
 	public Object next()
+		throws NoSuchElementException
 	{
-		if (this.currentIteratorIndex == -42) throw new IllegalStateException("Iterator not initialized");
+		if (this.currentIteratorIndex == -42) throw new NoSuchElementException("Iterator not initialized");
 		return getNextCommand();
 	}
 
@@ -451,8 +453,9 @@ public class ScriptParser
 	 * @see #next()
 	 */
 	public String getNextCommand()
+		throws NoSuchElementException
 	{
-		if (this.currentIteratorIndex == -42) throw new IllegalStateException("Iterator not initialized");
+		if (this.currentIteratorIndex == -42) throw new NoSuchElementException("Iterator not initialized");
 		ScriptCommandDefinition command = null;
 		String result = null;
 		if (this.iteratingParser != null)

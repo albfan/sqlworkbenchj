@@ -30,9 +30,7 @@ import workbench.util.StringUtil;
  */
 public class SelectCommand extends SqlCommand
 {
-
 	public static final String VERB = "SELECT";
-	private int maxRows = 0;
 
 	public SelectCommand()
 	{

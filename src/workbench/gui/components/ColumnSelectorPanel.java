@@ -273,7 +273,7 @@ class ColumnSelectTableModel
 		}
 		else if (column == 1)
 		{
-			return new Boolean(this.selected[row]);
+			return Boolean.valueOf(this.selected[row]);
 		}
 		return "";
 	}

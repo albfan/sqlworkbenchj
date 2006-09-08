@@ -38,11 +38,11 @@ import workbench.util.WbThread;
  */
 public class ConnectionSelector
 {
-	private Connectable client;
+	protected Connectable client;
 	private boolean connectInProgress;
-	private Frame parent;
-	private JDialog connectingInfo;
-	private JLabel connectLabel;
+	protected Frame parent;
+	protected JDialog connectingInfo;
+	protected JLabel connectLabel;
 	private String propertyKey;
 
 	/** Creates a new instance of ConnectionSelector */

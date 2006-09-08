@@ -188,9 +188,6 @@ public class WbProperties
 		
 		String oldValue = (String)super.setProperty(name, value);
 		
-		// Only fire propertyChanged event if something has changed!
-		if ( oldValue == null && value == null) return oldValue;
-		
 		if ( (oldValue == null && value != null) || 
 			   (oldValue != null && value == null) ||
 			   !oldValue.equals(value))
@@ -231,12 +228,20 @@ public class WbProperties
 	public void loadTextFile(String filename)
 		throws IOException
 	{
-		BufferedReader in = new BufferedReader(new FileReader(filename));
-		String line = in.readLine();
-		while (line != null)
+		BufferedReader in = null;
+		try
 		{
-			this.addPropertyDefinition(line);
-			line = in.readLine();
+			in = new BufferedReader(new FileReader(filename));
+			String line = in.readLine();
+			while (line != null)
+			{
+				this.addPropertyDefinition(line);
+				line = in.readLine();
+			}
+		}
+		finally
+		{
+			in.close();
 		}
 	}
 	

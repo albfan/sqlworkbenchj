@@ -34,6 +34,7 @@ public class SqlFormatterTest extends TestCase
 			SqlFormatter f = new SqlFormatter(sql,100);
 			String nl = f.getLineEnding();
 			String formatted = f.getFormattedSql();
+			System.out.println(formatted);
 			String expected = "--comment\nSELECT *\nFROM blub;";
 			assertEquals("Not correctly formatted", expected, formatted);
 
@@ -119,10 +120,17 @@ public class SqlFormatterTest extends TestCase
 //			System.out.println("---------");
 //			System.out.println(expected);
 			assertEquals(expected, formatted.trim());
+			
+			sql = "update x set (a,b) = (select x,y from k);";
+			f = new SqlFormatter(sql,50);
+			formatted = f.getFormattedSql();
+			expected = "UPDATE x\n   SET (a,b)  = (SELECT x, y FROM K);";
+			assertEquals(expected, formatted.trim());
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
+			fail(e.getMessage());
 		}
 	}
 

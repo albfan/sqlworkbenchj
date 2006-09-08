@@ -304,16 +304,8 @@ public class ReplacePanel
 			{
 				public void run()
 				{
-//					if (selectSearchValue)
-//					{
 						criteriaTextField.selectAll();
 						criteriaTextField.requestFocus();
-//					}
-//					else
-//					{
-//						replaceValueTextField.selectAll();
-//						replaceValueTextField.requestFocus();
-//					}
 				}
 			});
 			this.dialog.setVisible(true);
@@ -449,19 +441,19 @@ public class ReplacePanel
 	}
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JButton closeButton;
-  private javax.swing.JLabel criteriaLabel;
-  private javax.swing.JTextField criteriaTextField;
-  private javax.swing.JButton findButton;
-  private javax.swing.JCheckBox ignoreCaseCheckBox;
-  private javax.swing.JButton replaceAllButton;
-  private javax.swing.JLabel replaceLabel;
-  private javax.swing.JButton replaceNextButton;
-  private javax.swing.JTextField replaceValueTextField;
-  private javax.swing.JCheckBox selectedTextCheckBox;
-  private javax.swing.JPanel spacerPanel;
-  private javax.swing.JCheckBox useRegexCheckBox;
-  private javax.swing.JCheckBox wordsOnlyCheckBox;
+  protected javax.swing.JButton closeButton;
+  protected javax.swing.JLabel criteriaLabel;
+  protected javax.swing.JTextField criteriaTextField;
+  protected javax.swing.JButton findButton;
+  protected javax.swing.JCheckBox ignoreCaseCheckBox;
+  protected javax.swing.JButton replaceAllButton;
+  protected javax.swing.JLabel replaceLabel;
+  protected javax.swing.JButton replaceNextButton;
+  protected javax.swing.JTextField replaceValueTextField;
+  protected javax.swing.JCheckBox selectedTextCheckBox;
+  protected javax.swing.JPanel spacerPanel;
+  protected javax.swing.JCheckBox useRegexCheckBox;
+  protected javax.swing.JCheckBox wordsOnlyCheckBox;
   // End of variables declaration//GEN-END:variables
 
 

@@ -101,6 +101,12 @@ public class ValueConverter
 		this.decimalCharacter = aChar;
 	}
 
+	private static final Integer INT_TRUE = new Integer(1);
+	private static final Integer INT_FALSE = new Integer(0);
+	
+	private static final Integer LONG_TRUE = new Integer(1);
+	private static final Integer LONG_FALSE = new Integer(0);
+	
 	/**
 	 * Convert the given input value to a class instance
 	 * according to the given type (from java.sql.Types)
@@ -113,36 +119,63 @@ public class ValueConverter
 		throws Exception
 	{
 		if (aValue == null) return null;
+		String v = aValue.toString().trim();
 
 		switch (type)
 		{
 			case Types.BIGINT:
-				if (aValue.toString().trim().length() == 0) return null;
-				return new Long(aValue.toString().trim());
+				if (v.length() == 0) return null;
+				try
+				{
+					return new Long(v);
+				}
+				catch (NumberFormatException e)
+				{
+					// When exporting from a database that supports the boolean datatype
+					// into a database that maps this to an integer, we assume that
+					// true/false should be 1/0
+					if ("false".equalsIgnoreCase(v)) return LONG_FALSE;
+					if ("true".equalsIgnoreCase(v)) return LONG_TRUE;
+					throw e;
+				}
+				
 			case Types.INTEGER:
 			case Types.SMALLINT:
 			case Types.TINYINT:
-				if (aValue.toString().trim().length() == 0) return null;
-				return new Integer(aValue.toString().trim());
+				if (v.length() == 0) return null;
+				try
+				{
+					return new Integer(v);
+				}
+				catch (NumberFormatException e)
+				{
+					// When exporting from a database that supports the boolean datatype
+					// into a database that maps this to an integer, we assume that
+					// true/false should be 1/0
+					if ("false".equalsIgnoreCase(v)) return INT_FALSE;
+					if ("true".equalsIgnoreCase(v)) return INT_TRUE;
+					throw e;
+				}
+				
 			case Types.NUMERIC:
 			case Types.DECIMAL:
 			case Types.DOUBLE:
 			case Types.REAL:
 			case Types.FLOAT:
-				if (aValue.toString().trim().length() == 0) return null;
+				if (v.length() == 0) return null;
 				return new BigDecimal(this.adjustDecimalString(aValue.toString()));
 			case Types.CHAR:
 			case Types.VARCHAR:
 			case Types.LONGVARCHAR:
 					return aValue.toString();
 			case Types.DATE:
-				if (aValue.toString().trim().length() == 0) return null;
+				if (v.length() == 0) return null;
 				return this.parseDate((String)aValue);
 			case Types.TIMESTAMP:
-				if (aValue.toString().trim().length() == 0) return null;
+				if (v.length() == 0) return null;
 				return this.parseTimestamp((String)aValue);
 			case Types.TIME:
-				if (aValue.toString().trim().length() == 0) return null;
+				if (v.length() == 0) return null;
 				return this.parseTime((String)aValue);
 			case Types.BLOB:
 			case Types.BINARY:
@@ -162,17 +195,18 @@ public class ValueConverter
 					return aValue;
 				}
 				return null;
+				
 			case Types.BIT:
 			case Types.BOOLEAN:
 				try
 				{
 					if (aValue instanceof String)
 					{
-						return new Boolean(StringUtil.stringToBool((String)aValue));
+						return Boolean.valueOf(StringUtil.stringToBool((String)aValue));
 					}
 					else if (aValue instanceof Number)
 					{
-						return new Boolean(((Number)aValue).intValue() == 1);
+						return Boolean.valueOf(((Number)aValue).intValue() == 1);
 					}
 					else
 					{

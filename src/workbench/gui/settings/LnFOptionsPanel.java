@@ -53,7 +53,7 @@ public class LnFOptionsPanel
 	private JPanel listPanel;
 	private JList lnfList;
 	private LnFDefinitionPanel definitionPanel;
-	private LnFManager manager = new LnFManager();
+	protected LnFManager manager = new LnFManager();
 	private WbToolbar toolbar;
 	private JComboBox lnfSelector;
 	private JLabel currentLabel;

@@ -123,7 +123,6 @@ public class ProducerFactory
 		this.inputColumns = null;
 		this.producer = null;
 		this.fileParser = null;
-		File f = new File(inputFilename);
 	}
 	
 	public void setTargetTable(TableIdentifier tableId)

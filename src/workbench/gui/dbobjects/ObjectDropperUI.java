@@ -33,13 +33,13 @@ import workbench.util.WbThread;
 public class ObjectDropperUI
 	extends javax.swing.JPanel
 {
-	private JDialog dialog;
+	protected JDialog dialog;
 	private List objectNames;
 	private List objectTypes;
 	private WbConnection connection;
-	private boolean cancelled;
-	private boolean running;
-	private ObjectDropper dropper;
+	protected boolean cancelled;
+	protected boolean running;
+	protected ObjectDropper dropper;
 	private Thread dropThread;
 	
 	public ObjectDropperUI()
@@ -68,7 +68,7 @@ public class ObjectDropperUI
 
     buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-    dropButton.setText(ResourceMgr.getString("LblDrop"));
+    dropButton.setText(ResourceMgr.getString("LabelDrop"));
     dropButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -79,7 +79,7 @@ public class ObjectDropperUI
 
     buttonPanel.add(dropButton);
 
-    cancelButton.setText(ResourceMgr.getString("LblCancel"));
+    cancelButton.setText(ResourceMgr.getString("LabelCancel"));
     cancelButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -102,16 +102,15 @@ public class ObjectDropperUI
 
     optionPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-    checkBoxCascadeConstraints.setText(ResourceMgr.getString("LblCascadeConstraints"));
-    checkBoxCascadeConstraints.setToolTipText(ResourceMgr.getDescription("LblCascadeConstraints"));
+    checkBoxCascadeConstraints.setText(ResourceMgr.getString("LabelCascadeConstraints"));
+    checkBoxCascadeConstraints.setToolTipText(ResourceMgr.getDescription("LabelCascadeConstraints"));
     optionPanel.add(checkBoxCascadeConstraints);
 
     mainPanel.add(optionPanel, java.awt.BorderLayout.SOUTH);
 
     add(mainPanel, java.awt.BorderLayout.CENTER);
 
-  }
-  // </editor-fold>//GEN-END:initComponents
+  }// </editor-fold>//GEN-END:initComponents
 
 	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_cancelButtonActionPerformed
 	{//GEN-HEADEREND:event_cancelButtonActionPerformed
@@ -149,7 +148,7 @@ public class ObjectDropperUI
 		dropThread.start();
 	}//GEN-LAST:event_dropButtonActionPerformed
 
-	private void doDrop()
+	protected void doDrop()
 	{
 		if (this.running) return;
 		try
@@ -260,14 +259,14 @@ public class ObjectDropperUI
 	}
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JPanel buttonPanel;
-  private javax.swing.JButton cancelButton;
-  private javax.swing.JCheckBox checkBoxCascadeConstraints;
-  private javax.swing.JButton dropButton;
-  private javax.swing.JScrollPane jScrollPane1;
-  private javax.swing.JPanel mainPanel;
-  private javax.swing.JList objectList;
-  private javax.swing.JPanel optionPanel;
+  protected javax.swing.JPanel buttonPanel;
+  protected javax.swing.JButton cancelButton;
+  protected javax.swing.JCheckBox checkBoxCascadeConstraints;
+  protected javax.swing.JButton dropButton;
+  protected javax.swing.JScrollPane jScrollPane1;
+  protected javax.swing.JPanel mainPanel;
+  protected javax.swing.JList objectList;
+  protected javax.swing.JPanel optionPanel;
   // End of variables declaration//GEN-END:variables
 
 }

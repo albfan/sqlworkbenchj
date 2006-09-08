@@ -47,12 +47,12 @@ public class ColumnMapper
 	private List sourceColumns;
 	private List targetColumns;
 	private ColumnMapRow[] mapping;
-	private JComboBox sourceDropDown;
+	protected JComboBox sourceDropDown;
 	private static final MapDataModel EMPTY_DATA_MODEL = new MapDataModel(new ColumnMapRow[0]);
 	private MapDataModel data;
 
 	private boolean allowTargetEditing = false;
-	private boolean allowSourceEditing = false;
+	protected boolean allowSourceEditing = false;
 
 	public static final SkipColumnIndicator SKIP_COLUMN = new SkipColumnIndicator();
 
@@ -459,7 +459,7 @@ class MapDataModel
 			case 2:
 				if (aValue instanceof Boolean)
 				{
-					boolean key = ((Boolean)aValue) == Boolean.TRUE;
+					boolean key = ((Boolean)aValue).booleanValue();
 					row.getTarget().setIsPkColumn(key);
 				}
 		}

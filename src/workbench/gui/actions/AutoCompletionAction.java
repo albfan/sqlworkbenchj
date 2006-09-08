@@ -11,11 +11,8 @@
  */
 package workbench.gui.actions;
 
-import java.awt.Component;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import javax.swing.FocusManager;
 import javax.swing.KeyStroke;
 import workbench.db.WbConnection;
 import workbench.gui.completion.CompletionHandler;
@@ -84,7 +81,6 @@ public class AutoCompletionAction
 	
 	public void executeAction(ActionEvent e)
 	{
-		Component focus = FocusManager.getCurrentManager().getFocusOwner();
 		handler.showCompletionPopup();
 	}
 }

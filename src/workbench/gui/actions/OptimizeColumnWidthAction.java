@@ -23,7 +23,7 @@ import workbench.util.WbThread;
 public class OptimizeColumnWidthAction 
 	extends WbAction
 {
-	private WbTable client;
+	protected WbTable client;
 
 	public OptimizeColumnWidthAction(WbTable aClient)
 	{

@@ -65,7 +65,7 @@ public class JdbcIndexReader
 			while (tok.hasMoreTokens())
 			{
 				col = tok.nextToken().trim();
-				if (col == null || col.length() == 0) continue;
+				if (col.length() == 0) continue;
 				if (columns.length() > 0) columns.append(',');
 				pos = col.indexOf(' ');
 				if (pos > -1)

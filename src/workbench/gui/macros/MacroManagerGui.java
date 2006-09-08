@@ -52,7 +52,7 @@ public class MacroManagerGui
 	private int lastIndex = -1;
 	private MacroEntry currentEntry;
 	private JSplitPane jSplitPane1;
-	private JList macroList;
+	protected JList macroList;
 	private EditorPanel macroEditor;
 	private StringPropertyEditor macroNameField;
 	private MacroListModel model;

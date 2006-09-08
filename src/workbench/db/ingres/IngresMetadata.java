@@ -36,6 +36,7 @@ public class IngresMetadata
 	
 	public IngresMetadata(Connection conn)
 	{
+		dbConn = conn;
 	}
 
 	/**

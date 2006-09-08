@@ -105,13 +105,13 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.52 2006-08-26 14:04:12 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.53 2006-09-08 16:46:33 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
 	implements MouseWheelListener, Undoable, ClipboardSupport
 {
-	private boolean rightClickMovesCursor = false;
+	protected boolean rightClickMovesCursor = false;
 	protected Pattern lastSearchPattern;
 	protected String lastSearchExpression;
 	private int lastSearchPos = -1;
@@ -128,7 +128,7 @@ public class JEditTextArea
 	 * them left of the horizontal scroll bar. In jEdit, the status
 	 * bar is added this way.
 	 */
-	public static String LEFT_OF_SCROLLBAR = "los";
+	//public static String LEFT_OF_SCROLLBAR = "los";
 
 	/**
 	 * Creates a new JEditTextArea with the default settings.
@@ -2387,8 +2387,8 @@ public class JEditTextArea
 				right = comp;
 			else if(name.equals(BOTTOM))
 				bottom = comp;
-			else if(name.equals(LEFT_OF_SCROLLBAR))
-				leftOfScrollBar.addElement(comp);
+//			else if(name.equals(LEFT_OF_SCROLLBAR))
+//				leftOfScrollBar.addElement(comp);
 		}
 
 		public void removeLayoutComponent(Component comp)
@@ -2530,7 +2530,8 @@ public class JEditTextArea
 			// If this is not done, mousePressed events accumilate
 			// and the result is that scrolling doesn't stop after
 			// the mouse is released
-			EventQueue.invokeLater(new Runnable() {
+			EventQueue.invokeLater(new Runnable() 
+			{
 				public void run()
 				{
 					if(evt.getAdjustable() == vertical)
@@ -2694,7 +2695,7 @@ public class JEditTextArea
 			}
 		}
 
-		private void doSingleClick(MouseEvent evt, int line,int offset, int dot)
+		protected void doSingleClick(MouseEvent evt, int line,int offset, int dot)
 		{
 			if((evt.getModifiers() & InputEvent.SHIFT_MASK) != 0)
 			{
@@ -2707,7 +2708,7 @@ public class JEditTextArea
 			}
 		}
 
-		private void doDoubleClick(MouseEvent evt, int line, int offset, int dot)
+		protected void doDoubleClick(MouseEvent evt, int line, int offset, int dot)
 			throws BadLocationException
 		{
 			// Ignore empty lines
@@ -2782,7 +2783,7 @@ public class JEditTextArea
 			*/
 		}
 
-		private void doTripleClick(MouseEvent evt, int line,int offset, int dot)
+		protected void doTripleClick(MouseEvent evt, int line,int offset, int dot)
 		{
 			select(getLineStartOffset(line),getLineEndOffset(line)-1);
 		}

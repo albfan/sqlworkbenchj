@@ -67,7 +67,6 @@ public class ShowHelpAction
 			// Use reflection to load various dialogs in order to
 			// avoid unnecessary class loading during startup
 			Class cls = Class.forName("workbench.gui.help.HelpViewerFrame");
-			Class[] types = new Class[] {   };
 			Constructor cons = cls.getConstructor(null);
 			helpWindow = (JFrame)cons.newInstance(null);
 			helpWindow.setVisible(true);

@@ -91,7 +91,7 @@ public class TableSearcher
 	public synchronized boolean isRunning() { return this.isRunning; }
 
 
-	private void doSearch()
+	protected void doSearch()
 	{
 		if (this.tablesToSearch == null || this.tablesToSearch.length == 0) return;
 		this.setRunning(true);

@@ -60,11 +60,11 @@ public class SchemaReporter
 	private TagWriter tagWriter = new TagWriter();
 	private RowActionMonitor monitor;
 	private String outputfile;
-	private boolean cancel = false;
+	protected boolean cancel = false;
 	private boolean includeTables = true;
 	private boolean includeProcedures = false;
 	private ProgressPanel progressPanel;
-	private JDialog progressWindow;
+	protected JDialog progressWindow;
 	private boolean showProgress = false;
 	private String schemaNameToUse = null;
 	private JFrame parentWindow;

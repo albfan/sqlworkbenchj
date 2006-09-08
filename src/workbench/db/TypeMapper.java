@@ -42,10 +42,10 @@ public class TypeMapper
 	{
 		Integer key = new Integer(type);
 		if (!this.typeInfo.containsKey(key)) return SqlUtil.getTypeName(type);
-		TypeInfo info = (TypeInfo)this.typeInfo.get(key);
+		String name = (String)this.typeInfo.get(key);
 
 		StringBuffer result = new StringBuffer(30);
-		result.append(info.name);
+		result.append(name);
 
 		// Now we need to check if the data type needs an argument.
 		// I could use the "parameter" column from the driver's type info
@@ -98,12 +98,12 @@ public class TypeMapper
 				if (type == java.sql.Types.ARRAY || type == java.sql.Types.OTHER) continue;
 				if (this.ignoreTypes.contains(name)) continue;
 
-				TypeInfo info = new TypeInfo();
-				info.name = name;
-				info.type = type;
-				info.precision = rs.getLong(3);
-				info.min_scale = rs.getLong(14);
-				info.max_scale = rs.getLong(15);
+//				TypeInfo info = new TypeInfo();
+//				info.name = name;
+//				info.type = type;
+//				info.precision = rs.getLong(3);
+//				info.min_scale = rs.getLong(14);
+//				info.max_scale = rs.getLong(15);
 				Integer key = new Integer(type);
 				if (this.typeInfo.containsKey(key))
 				{
@@ -112,7 +112,7 @@ public class TypeMapper
 				else
 				{
 					LogMgr.logInfo("TypeMapper.createTypeMap()", "Mapping JDBC type "  + SqlUtil.getTypeName(type) + " to DB type " + name);
-					this.typeInfo.put(key, info);
+					this.typeInfo.put(key, name);
 				}
 			}
 		}
@@ -128,11 +128,11 @@ public class TypeMapper
 	}
 }
 
-class TypeInfo
-{
-	String name;
-	int type;
-	long precision;
-	long min_scale;
-	long max_scale;
-}
+//class TypeInfo
+//{
+//	String name;
+//	int type;
+//	long precision;
+//	long min_scale;
+//	long max_scale;
+//}

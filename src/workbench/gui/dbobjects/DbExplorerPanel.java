@@ -70,10 +70,10 @@ public class DbExplorerPanel
 	implements ActionListener, MainPanel, ChangeListener, DbExecutionListener
 {
 	private JTabbedPane tabPane;
-	private TableListPanel tables;
-	private TableSearchPanel searchPanel;
-	private ProcedureListPanel procs;
-	private JComboBox schemaSelector;
+	protected TableListPanel tables;
+	protected TableSearchPanel searchPanel;
+	protected ProcedureListPanel procs;
+	protected JComboBox schemaSelector;
 	private JComboBox catalogSelector;
 	private JLabel schemaLabel;
 	private JLabel catalogLabel;
@@ -83,7 +83,7 @@ public class DbExplorerPanel
 	private DbExplorerWindow window;
 	private WbToolbar toolbar;
 	private ConnectionInfo connectionInfo;
-	private boolean retrievePending;
+	protected boolean retrievePending;
 	private boolean schemaRetrievePending = true;
 	private boolean connectionInitPending = true;
 	private int internalId = 0;
@@ -597,25 +597,21 @@ public class DbExplorerPanel
 		}
 	}
 
-	private void setSelectedCatalog(String s)
-	{
-		if (this.catalogSelector != null)
-		{
-			this.catalogSelector.setSelectedItem(s);
-		}
-	}
+//	private void setSelectedCatalog(String s)
+//	{
+//		if (this.catalogSelector != null)
+//		{
+//			this.catalogSelector.setSelectedItem(s);
+//		}
+//	}
 	
-	private String getSelectedCatalog()
+	protected String getSelectedCatalog()
 	{
 		if (this.catalogSelector == null) return null;
 		return (String)catalogSelector.getSelectedItem();
 	}
 	
-	private void startRetrieve()
-	{
-		
-	}
-	private void retrieve()
+	protected void retrieve()
 	{
 		if (this.isBusy() || isConnectionBusy()) 
 		{

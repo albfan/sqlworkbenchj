@@ -58,14 +58,14 @@ public class ProfileEditorPanel
 {
 	private ProfileListModel model;
 	private JToolBar toolbar;
-	private ConnectionEditorPanel connectionEditor;
+	protected ConnectionEditorPanel connectionEditor;
 	private MouseListener listMouseListener;
 	private ProfileFilter filter;
 	private NewListEntryAction newItem;
 	private CopyProfileAction copyItem;
 	private DeleteListEntryAction deleteItem;
 	private NewGroupAction newGroup;
-	private boolean dummyAdded;
+	protected boolean dummyAdded;
 	
 	/** Creates new form ProfileEditor */
 	public ProfileEditorPanel(String lastProfileKey)
@@ -75,8 +75,7 @@ public class ProfileEditorPanel
 		this.connectionEditor = new ConnectionEditorPanel();
 		JPanel dummy = new JPanel(new BorderLayout());
 		dummy.add(connectionEditor, BorderLayout.CENTER);
-		this.jSplitPane1.setRightComponent(dummy);
-//		this.jSplitPane1.setBorder(null);
+		this.jSplitPane.setRightComponent(dummy);
 		this.fillDrivers();
 		
 		JPanel p = new JPanel();
@@ -91,7 +90,6 @@ public class ProfileEditorPanel
 		this.toolbar.add(copyItem);
 		ProfileTree tree = (ProfileTree)profileTree;
 		tree.setBorder(null);
-//		jScrollPane1.setBorder(new DividerBorder(DividerBorder.TOP));
 		
 		this.toolbar.add(new NewGroupAction(tree));
 		
@@ -164,7 +162,7 @@ public class ProfileEditorPanel
 	{
 		int pos = Settings.getInstance().getProfileDividerLocation();
 		if (pos < 210) pos = 210; // make sure the whole toolbar for the tree is visible!
-		this.jSplitPane1.setDividerLocation(pos);
+		this.jSplitPane.setDividerLocation(pos);
 		String groups = Settings.getInstance().getProperty("workbench.profiles.expandedgroups", null);
 		List l = StringUtil.stringToList(groups, ",", true, true);
 		((ProfileTree)profileTree).expandGroups(l);
@@ -172,7 +170,7 @@ public class ProfileEditorPanel
 	
 	public void saveSettings()
 	{
-		Settings.getInstance().setProfileDividerLocation(this.jSplitPane1.getDividerLocation());
+		Settings.getInstance().setProfileDividerLocation(this.jSplitPane.getDividerLocation());
 		List expandedGroups = ((ProfileTree)profileTree).getExpandedGroupNames();
 		Settings.getInstance().setProperty("workbench.profiles.expandedgroups", StringUtil.listToString(expandedGroups,',', true));
 	}
@@ -198,7 +196,7 @@ public class ProfileEditorPanel
   // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
   private void initComponents()
   {
-    jSplitPane1 = new WbSplitPane();
+    jSplitPane = new WbSplitPane();
 
     listPanel = new javax.swing.JPanel();
     jScrollPane1 = new javax.swing.JScrollPane();
@@ -206,8 +204,8 @@ public class ProfileEditorPanel
 
     setLayout(new java.awt.BorderLayout());
 
-    jSplitPane1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    jSplitPane1.setDividerLocation(110);
+    jSplitPane.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+    jSplitPane.setDividerLocation(110);
     listPanel.setLayout(new java.awt.BorderLayout());
 
     jScrollPane1.setPreferredSize(null);
@@ -230,9 +228,9 @@ public class ProfileEditorPanel
 
     listPanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
-    jSplitPane1.setLeftComponent(listPanel);
+    jSplitPane.setLeftComponent(listPanel);
 
-    add(jSplitPane1, java.awt.BorderLayout.CENTER);
+    add(jSplitPane, java.awt.BorderLayout.CENTER);
 
   }// </editor-fold>//GEN-END:initComponents
 
@@ -294,10 +292,10 @@ public class ProfileEditorPanel
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JScrollPane jScrollPane1;
-  private javax.swing.JSplitPane jSplitPane1;
-  private javax.swing.JPanel listPanel;
-  private javax.swing.JTree profileTree;
+  protected javax.swing.JScrollPane jScrollPane1;
+  protected javax.swing.JSplitPane jSplitPane;
+  protected javax.swing.JPanel listPanel;
+  protected javax.swing.JTree profileTree;
   // End of variables declaration//GEN-END:variables
 
 

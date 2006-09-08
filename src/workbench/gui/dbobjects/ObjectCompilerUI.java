@@ -38,7 +38,7 @@ public class ObjectCompilerUI
 	implements Runnable, WindowListener
 {
 	private Thread worker;
-	private EditorPanel log;
+	protected EditorPanel log;
 	private JFrame window;
 	private List types;
 	private List names;

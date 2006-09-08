@@ -300,7 +300,7 @@ public class OracleMetadata
 		
 		ResultSet rs = null;
 		
-		int pos = table.indexOf('@');
+		int pos = (table != null ? table.indexOf('@') : -1);
 		
 		if (pos > 0)
 		{

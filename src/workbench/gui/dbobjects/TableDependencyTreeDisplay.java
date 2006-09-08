@@ -142,46 +142,43 @@ public class TableDependencyTreeDisplay
 
 			int childrenCount = child.getChildren().size();
 
-			if (treeNode != null)
+			Map columns = child.getColumns();
+			Iterator entries = columns.entrySet().iterator();
+			while (entries.hasNext())
 			{
-				Map columns = child.getColumns();
-				Iterator entries = columns.entrySet().iterator();
-				while (entries.hasNext())
+				table = child.getTable();
+				Entry entry = (Entry)entries.next();
+				StringBuffer coldef = new StringBuffer(100);
+				coldef.append("<html><b>");
+				if (this.showExported)
 				{
-					table = child.getTable();
-					Entry entry = (Entry)entries.next();
-					StringBuffer coldef = new StringBuffer(100);
-					coldef.append("<html><b>");
-					if (this.showExported)
-					{
-						coldef.append(table);
-						coldef.append('.');
-						coldef.append(entry.getKey());
-					}
-					else
-					{
-						coldef.append(parenttable);
-						coldef.append('.');
-						coldef.append(entry.getValue());
-					}
-					coldef.append("</b> REFERENCES <b>");
-					if (this.showExported)
-					{
-						coldef.append(parenttable);
-						coldef.append('.');
-						coldef.append(entry.getValue());
-					}
-					else
-					{
-						coldef.append(table);
-						coldef.append('.');
-						coldef.append(entry.getKey());
-					}
-					coldef.append("</b></html>");
-					DefaultMutableTreeNode colnode = new DefaultMutableTreeNode(coldef.toString());
-					colnode.setAllowsChildren(false);
-					treeNode.add(colnode);
+					coldef.append(table);
+					coldef.append('.');
+					coldef.append(entry.getKey());
 				}
+				else
+				{
+					coldef.append(parenttable);
+					coldef.append('.');
+					coldef.append(entry.getValue());
+				}
+				coldef.append("</b> REFERENCES <b>");
+				if (this.showExported)
+				{
+					coldef.append(parenttable);
+					coldef.append('.');
+					coldef.append(entry.getValue());
+				}
+				else
+				{
+					coldef.append(table);
+					coldef.append('.');
+					coldef.append(entry.getKey());
+				}
+				coldef.append("</b></html>");
+				DefaultMutableTreeNode colnode = new DefaultMutableTreeNode(coldef.toString());
+				colnode.setAllowsChildren(false);
+				treeNode.add(colnode);
 			}
 			
 			if (childrenCount > 0)

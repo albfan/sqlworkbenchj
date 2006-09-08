@@ -174,7 +174,6 @@ public class PrintPreview
 		getContentPane().add(scroll, BorderLayout.CENTER);
 
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		setVisible(true);
 	}
 
 	private void selectPrintFont()
@@ -282,7 +281,7 @@ public class PrintPreview
 		}
 	}
 
-	private void showCrossPlatformPageSetup()
+	protected void showCrossPlatformPageSetup()
 	{
 		if (pageDialogShowing) return;
 		pageDialogShowing = true;
@@ -298,7 +297,7 @@ public class PrintPreview
 
 	private boolean pageDialogShowing = false;
 
-	private void showNativePageSetup()
+	protected void showNativePageSetup()
 	{
 		if (pageDialogShowing) return;
 		pageDialogShowing = true;
@@ -487,7 +486,7 @@ public class PrintPreview
 	{
 	}
 
-	class PreviewContainer
+	static class PreviewContainer
 		extends JPanel
 	{
 		protected int H_GAP = 16;
@@ -562,7 +561,7 @@ public class PrintPreview
 		}
 	}
 
-	class PagePreview
+	static class PagePreview
 		extends JPanel
 	{
 		protected int m_w;

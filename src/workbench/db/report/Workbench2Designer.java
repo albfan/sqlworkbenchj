@@ -1233,7 +1233,7 @@ public class Workbench2Designer
 
 		private String[] params;
 		private String paramString="";
-		private Object[] ret;
+//		private Object[] ret;
 		private String name;
 		private SQLDataType datatype;
 		private int paramCount;

@@ -38,13 +38,6 @@ public class TextRowDataConverter
 	private String additionalEncodeCharacters = null;
 	private String lineEnding = StringUtil.LINE_TERMINATOR;
 	
-	private static final int BLOB_MODE_NONE = -1;
-	private static final int BLOB_MODE_WB = 1;
-	private static final int BLOB_MODE_ORA = 2;
-	
-	private int blobMode = -1;
-	private BlobHandler blobHandler; 
-	
 	public TextRowDataConverter()
 	{
 		super();
@@ -90,7 +83,10 @@ public class TextRowDataConverter
 			boolean needQuote = false;
 			if (SqlUtil.isBlobType(colType))
 			{
-				value = writeBlobFile(row.getValue(c), c, rowIndex);
+				File blobFile = createBlobFile(row, c, rowIndex);
+				
+				value = blobFile.getName();
+				writeBlobFile(row.getValue(c), blobFile);
 				if (this.quoteAlways) 
 				{
 					result.append(this.quoteCharacter);

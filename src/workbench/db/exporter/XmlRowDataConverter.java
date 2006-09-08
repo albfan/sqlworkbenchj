@@ -69,7 +69,6 @@ public class XmlRowDataConverter
 	private String closeColTag = "</" + coltag + ">";
 	private String closeRowTag = "</" + rowtag + ">";
 	private String tableToUse = null;
-	private String baseFilename;
 	private StrBuffer dbInfo;
 	
 	public XmlRowDataConverter()
@@ -139,12 +138,12 @@ public class XmlRowDataConverter
 		return xml;
 	}
 
-	public void setBaseFilename(String name) 
-	{ 
-		if (name == null) return;
-		WbFile f = new WbFile(name);
-		this.baseFilename = f.getFileName() + "_";
-	}
+//	public void setBaseFilename(String name) 
+//	{ 
+//		if (name == null) return;
+//		WbFile f = new WbFile(name);
+//		//this.baseFilename = f.getFileName() + "_";
+//	}
 	
 	public StrBuffer getEnd(long totalRows)
 	{
@@ -229,7 +228,9 @@ public class XmlRowDataConverter
 				}
 				else if (isBlob)
 				{
-					String dataFile = writeBlobFile(data, c, rowIndex);
+					File blobFile = createBlobFile(row, c, rowIndex);
+					String dataFile = blobFile.getName();
+					writeBlobFile(data, blobFile);
 					xml.append(' ');
 					xml.append(ATTR_DATA_FILE);
 					xml.append("=\"");

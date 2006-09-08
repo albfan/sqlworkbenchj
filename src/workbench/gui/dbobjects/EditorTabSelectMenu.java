@@ -52,7 +52,7 @@ public class EditorTabSelectMenu
 		}
 	}
 	
-	private synchronized void updateMenu()
+	protected synchronized void updateMenu()
 	{
 		if (parentWindow == null) return;
 		

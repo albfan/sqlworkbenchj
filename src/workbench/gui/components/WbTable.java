@@ -126,7 +126,7 @@ public class WbTable
 	           FontChangedListener, Searchable, ListSelectionListener, PropertyChangeListener, Resettable
 {
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
-	private JPopupMenu popup;
+	protected JPopupMenu popup;
 
 	private JPopupMenu headerPopup;
 
@@ -144,8 +144,8 @@ public class WbTable
 	private OptimizeAllColumnsAction optimizeAllCol;
 	private SetColumnWidthAction setColWidth;
 
-	private FindDataAction findAction;
-	private FindDataAgainAction findAgainAction;
+	protected FindDataAction findAction;
+	protected FindDataAgainAction findAgainAction;
 	private SaveDataAsAction saveDataAsAction;
 	
 	private CopyAsTextAction copyAsTextAction;
@@ -559,6 +559,7 @@ public class WbTable
 			parent = (JFrame)w;
 		}
 		PrintPreview preview = new PrintPreview(parent, printer);
+		preview.setVisible(true);
 	}
 
 	public void setPrintHeader(String aHeader)
@@ -1277,7 +1278,7 @@ public class WbTable
 			TableColumn col = colMod.getColumn(i);
 			if (col == null) continue;
 			Class clz = null;
-			if (this.dwModel != null) this.dwModel.getColumnClass(i);
+			if (this.dwModel != null) clz = this.dwModel.getColumnClass(i);
 			if (clz != null && Number.class.isAssignableFrom(clz))
 			{
 				col.setCellEditor(this.defaultNumberEditor);
@@ -1421,12 +1422,12 @@ public class WbTable
 
 	private int getAdditionalColumnSpace(int aRow, int aColumn)
 	{
-		TableColumn col = this.getColumnModel().getColumn(aColumn);
-		TableCellRenderer rend;
-		if (aRow == -1)
-			rend = col.getHeaderRenderer();
-		else
-			rend = col.getCellRenderer();
+//		TableColumn col = this.getColumnModel().getColumn(aColumn);
+//		TableCellRenderer rend;
+//		if (aRow == -1)
+//			rend = col.getHeaderRenderer();
+//		else
+//			rend = col.getCellRenderer();
 
 		int addWidth = this.getIntercellSpacing().width * 2;
 		if (this.getShowVerticalLines()) addWidth += 4;
@@ -1518,7 +1519,7 @@ public class WbTable
 
 	public void addTableModelListener(TableModelListener aListener)
 	{
-		if (this.changeListener.add(aListener));
+		if (this.changeListener.add(aListener))
 		{
 			if (this.dwModel != null) this.dwModel.addTableModelListener(aListener);
 		}

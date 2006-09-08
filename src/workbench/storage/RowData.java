@@ -147,7 +147,7 @@ public class RowData
 						LogMgr.logError("RowData.read()", "Error retrieving data for column '" + info.getColumnName(i) + "'", e);
 						// fallback to getObject()
 						
-						value = rs.getObject(i);
+						value = rs.getObject(i+1);
 					}
 					finally
 					{
@@ -226,11 +226,8 @@ public class RowData
 		if (!this.isNew())
 		{
 			Object oldValue = this.colData[aColIndex];
-			if (oldValue == null && aValue == null) return;
-			if (oldValue != null && aValue != null)
-			{
-				if (oldValue.equals(aValue)) return;
-			}
+			if (oldValue == null) return;
+			if (oldValue.equals(aValue)) return;
 			if (this.originalData == null)
 			{
 				this.originalData = new Object[this.colData.length];

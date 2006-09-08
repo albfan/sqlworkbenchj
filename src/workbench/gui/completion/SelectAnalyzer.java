@@ -63,7 +63,7 @@ public class SelectAnalyzer
 		if (wherePos > 0) groupStart = wherePos + 1;
 		else if (fromPos > 0) groupStart = fromPos + 1;
 		
-		int groupPos = SqlUtil.getKeywordPosition("GROUP", sql);
+		int groupPos = SqlUtil.getKeywordPosition("GROUP BY", sql);
 		
 		// find the tables from the FROM clause
 		List tables = SqlUtil.getTables(sql, true);
@@ -89,7 +89,7 @@ public class SelectAnalyzer
 			String q = getQualifierLeftOfCursor();
 			if (q != null)
 			{
-				setOverwriteCurrentWord(!this.dbConnection.getMetadata().isKeyword(q));
+				setOverwriteCurrentWord(true);//!this.dbConnection.getMetadata().isKeyword(q));
 			}
 
 			// If no FROM is present but there is a word with a dot
@@ -145,21 +145,18 @@ public class SelectAnalyzer
 			// tables in the table list or one of the aliases used
 			// in the table list.
 			TableAlias currentAlias = null;
+			String table = null;
 			if (currentWord != null)
 			{
-				String table = null;
-				String column = null;
 				int pos = currentWord.indexOf('.');
-				if (pos == -1)
-				{
-					table = currentWord;
-				}
-				else
+				if (pos > -1)
 				{
 					table = currentWord.substring(0, pos);
-					column = currentWord.substring(pos + 1);
 				}
-				
+			}
+			
+			if (table != null)
+			{
 				for (int i=0; i < count; i++)
 				{
 					String element = (String)tables.get(i);

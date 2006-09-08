@@ -497,7 +497,7 @@ public class BatchRunner
 			DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver(driverclass);
 			if (drv == null)
 			{
-				drv = ConnectionMgr.getInstance().registerDriver(driverclass, jar);
+				ConnectionMgr.getInstance().registerDriver(driverclass, jar);
 			}
 			result = new ConnectionProfile(CMD_LINE_PROFILE_NAME, driverclass, url, user, pwd);
 			result.setRollbackBeforeDisconnect(rollback);

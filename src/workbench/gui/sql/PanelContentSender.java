@@ -20,7 +20,7 @@ import workbench.gui.MainWindow;
 public class PanelContentSender
 {
 	
-	private MainWindow target;
+	protected MainWindow target;
 	
 	public PanelContentSender(MainWindow window)
 	{

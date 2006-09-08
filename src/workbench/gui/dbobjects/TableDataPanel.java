@@ -77,10 +77,10 @@ import workbench.util.WbWorkspace;
  */
 public class TableDataPanel
   extends JPanel
-	implements Reloadable, ActionListener, Interruptable, TableDeleteListener, MouseListener, Resettable
+	implements Reloadable, ActionListener, Interruptable, TableDeleteListener, Resettable
 {
 	private WbConnection dbConnection;
-	private DwPanel dataDisplay;
+	protected DwPanel dataDisplay;
 
 	private ReloadAction reloadAction;
 
@@ -99,7 +99,7 @@ public class TableDataPanel
 	private ImageIcon loadingIcon;
 	private Image loadingImage;
 	private Object retrieveLock = new Object();
-	private StopAction cancelRetrieve;
+	protected StopAction cancelRetrieve;
 
 	public TableDataPanel() throws Exception
 	{
@@ -168,10 +168,8 @@ public class TableDataPanel
 		topPanel.add(rowCountButton);
 		topPanel.add(Box.createHorizontalStrut(5));
 		rowCountLabel = new JLabel();
-		rowCountLabel.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCount"));
 		rowCountLabel.setFont(bold);
 		rowCountLabel.setHorizontalTextPosition(SwingConstants.LEFT);
-		rowCountLabel.addMouseListener(this);
 		topPanel.add(rowCountLabel);
 		topPanel.add(Box.createHorizontalStrut(10));
 
@@ -292,6 +290,8 @@ public class TableDataPanel
 		try
 		{
 			this.dbConnection.executionStart(null, this);
+			rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountCancel"));
+			
 			rowCountRetrieveStmt = this.dbConnection.createStatement();
 			rs = rowCountRetrieveStmt.executeQuery(sql);
 			if (rs.next())
@@ -325,11 +325,12 @@ public class TableDataPanel
 			rowCountRetrieveStmt = null;
 			this.reloadAction.setEnabled(true);
 			this.dbConnection.executionEnd(null, this);
+			rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountButton"));
 		}
 		return rowCount;
 	}
 
-	private void cancelRowCountRetrieve()
+	protected void cancelRowCountRetrieve()
 	{
 		if (this.rowCountRetrieveStmt != null)
 		{
@@ -411,7 +412,7 @@ public class TableDataPanel
 		t.start();
 	}
 
-	private synchronized void retrieveStart()
+	protected void retrieveStart()
 	{
 		synchronized (this.retrieveLock)
 		{
@@ -427,7 +428,7 @@ public class TableDataPanel
 		}
 	}
 
-	private void dbUpdateStart()
+	protected void dbUpdateStart()
 	{
 		this.reloadAction.setEnabled(false);
 		synchronized (this.retrieveLock)
@@ -436,7 +437,7 @@ public class TableDataPanel
 		}
 	}
 
-	private void dbUpdateEnd()
+	protected void dbUpdateEnd()
 	{
 		try
 		{
@@ -703,41 +704,5 @@ public class TableDataPanel
 			this.reset();
 		}
 	}
-
-	public void mouseClicked(java.awt.event.MouseEvent e)
-	{
-		if (e.getSource() == this.rowCountLabel && e.getClickCount() == 2)
-		{
-			WbThread t = new WbThread("RowCount Thread")
-			{
-				public void run()
-				{
-					synchronized (retrieveLock)
-					{
-						showRowCount();
-					}
-				}
-			};
-			t.start();
-		}
-	}
-
-	public void mouseEntered(java.awt.event.MouseEvent e)
-	{
-	}
-
-	public void mouseExited(java.awt.event.MouseEvent e)
-	{
-	}
-
-	public void mousePressed(java.awt.event.MouseEvent e)
-	{
-	}
-
-	public void mouseReleased(java.awt.event.MouseEvent e)
-	{
-	}
-
-
 
 }

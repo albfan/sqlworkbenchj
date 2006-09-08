@@ -87,30 +87,30 @@ public class DwPanel
 	implements TableModelListener, ListSelectionListener, ChangeListener,
 						 DbData, DbUpdater, Interruptable, JobErrorHandler
 {
-	private WbTable dataTable;
+	protected WbTable dataTable;
 	
-	private DwStatusBar statusBar;
+	protected DwStatusBar statusBar;
 	
 	private String sql;
 	private String lastMessage;
-	private WbConnection dbConnection;
+	protected WbConnection dbConnection;
 	private OneLineTableModel errorModel;
 	private OneLineTableModel errorMessageModel;
 	private TableModel resultEmptyMsgModel;
 	private boolean hasResultSet;
 	
-	private WbScrollPane scrollPane;
+	protected WbScrollPane scrollPane;
 	private long lastExecutionTime = 0;
 	
 	private boolean hasWarning;
 	private boolean showLoadProgress;
 	
-	private UpdateDatabaseAction updateAction;
-	private InsertRowAction insertRow;
-	private CopyRowAction duplicateRow;
-	private DeleteRowAction deleteRow;
-	private StartEditAction startEdit;
-	private SelectKeyColumnsAction selectKeys;
+	protected UpdateDatabaseAction updateAction;
+	protected InsertRowAction insertRow;
+	protected CopyRowAction duplicateRow;
+	protected DeleteRowAction deleteRow;
+	protected StartEditAction startEdit;
+	protected SelectKeyColumnsAction selectKeys;
 	
 	private boolean editingStarted;
 	private boolean batchUpdate;
@@ -326,7 +326,7 @@ public class DwPanel
 		t.start();
 	}
 	
-	private synchronized void doSave()
+	protected synchronized void doSave()
 	{
 		try
 		{
@@ -944,21 +944,6 @@ public class DwPanel
 		this.selectKeys.setEnabled(false);
 	}
 	
-	/**
-	 *	Returns a table model which displays a message that the last
-	 *  statement did not produce a result set.
-	 */
-	private TableModel getEmptyMsgTableModel()
-	{
-		if (this.resultEmptyMsgModel == null)
-		{
-			String msg = ResourceMgr.getString("MsgWarningNoResultSet");
-			String title = ResourceMgr.getString("ErrMessageTitle");
-			this.resultEmptyMsgModel = new OneLineTableModel(title, msg);
-		}
-		return this.resultEmptyMsgModel;
-	}
-	
 	public int getActionOnError(int errorRow, String errorColumn, String data, String errorMessage)
 	{
 		String msg = ResourceMgr.getString("ErrUpdateSqlError");
@@ -1005,16 +990,16 @@ public class DwPanel
 		return result;
 	}
 	
-	private TableModel getErrorTableModel()
-	{
-		if (this.errorModel == null)
-		{
-			String msg = ResourceMgr.getString("ErrMessageData");
-			String title = ResourceMgr.getString("ErrMessageTitle");
-			this.errorModel = new OneLineTableModel(title, msg);
-		}
-		return this.errorModel;
-	}
+//	private TableModel getErrorTableModel()
+//	{
+//		if (this.errorModel == null)
+//		{
+//			String msg = ResourceMgr.getString("ErrMessageData");
+//			String title = ResourceMgr.getString("ErrMessageTitle");
+//			this.errorModel = new OneLineTableModel(title, msg);
+//		}
+//		return this.errorModel;
+//	}
 	
 	/**
 	 *	Returns a TableModel which displays an error text.

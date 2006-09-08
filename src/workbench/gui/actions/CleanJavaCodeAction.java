@@ -24,7 +24,7 @@ import workbench.util.StringUtil;
 
 public class CleanJavaCodeAction extends WbAction
 {
-	private TextContainer client;
+	protected TextContainer client;
 
 	public CleanJavaCodeAction(TextContainer aClient)
 	{

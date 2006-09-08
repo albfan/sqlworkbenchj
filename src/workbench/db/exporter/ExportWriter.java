@@ -37,7 +37,6 @@ public abstract class ExportWriter
 	protected RowActionMonitor rowMonitor;
 	protected RowDataConverter converter;
 	private Writer output;
-	private File outputFile;
 	private int progressInterval = 10;
 
 	public ExportWriter(DataExporter exp)

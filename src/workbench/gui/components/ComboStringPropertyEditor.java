@@ -43,7 +43,7 @@ public class ComboStringPropertyEditor
 	private Object source;
 	private Method setter;
 	private Method getter;
-	private boolean changed;
+	protected boolean changed;
 	private boolean immediateUpdate = false;
 	private String propName;
 	private ActionListener listener;

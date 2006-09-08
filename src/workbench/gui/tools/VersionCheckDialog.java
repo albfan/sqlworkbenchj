@@ -73,7 +73,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		super.show();
 	}
 	
-	private void readVersion()
+	protected void readVersion()
 	{
 		try
 		{

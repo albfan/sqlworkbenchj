@@ -129,29 +129,4 @@ public class WbDesCipher
 		return result;
 	}
 	
-	/**
-	 *	Help method for creating the DES key.
-	 */
-	private static void createKey()
-	{
-		try
-		{
-			KeyGenerator keygen = KeyGenerator.getInstance("DES");
-			SecretKey desKey = keygen.generateKey();
-			
-			byte[] keyvalue = desKey.getEncoded();
-			System.out.print("byte[] KEY_DATA = {");
-			for (int i=0; i < keyvalue.length; i++)
-			{
-				System.out.print(keyvalue[i]);
-				if (i < keyvalue.length - 1) System.out.print(",");
-			}
-			System.out.println("};");
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-
 }

@@ -99,7 +99,7 @@ public class BooleanPropertyEditor
   {
     if (!this.changed) return;
     Object args[] = new Object[1];
-    args[0] = new Boolean(this.isSelected());
+    args[0] = Boolean.valueOf(this.isSelected());
     try
     {
       this.setter.invoke(this.source, args);

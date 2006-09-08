@@ -29,7 +29,7 @@ import workbench.log.LogMgr;
  */
 public class RendererFactory
 {
-	private static Map sharedInstances = new HashMap();
+	//private static Map sharedInstances = new HashMap();
 	private static Map dateRenderer = new HashMap();
 	
 	private static TableCellRenderer createRenderer(String className)

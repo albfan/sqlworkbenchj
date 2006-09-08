@@ -76,18 +76,16 @@ public class DataPumper
 	private String sourceFile;
 	private ProducerFactory fileImporter;
 	private ConnectionProfile targetProfile;
-	private WbConnection sourceConnection;
-	private WbConnection targetConnection;
+	protected WbConnection sourceConnection;
+	protected WbConnection targetConnection;
 
 	private JFrame window;
 	
 	private ColumnMapper columnMapper;
 	private final String copyMsg = ResourceMgr.getString("MsgCopyingRow");
-	private boolean copyRunning = false;
+	protected boolean copyRunning = false;
 	private DataCopier copier;
-//	private DataImporter importer;
 	private EditorPanel sqlEditor;
-//	private MainWindow mainWindow;
 	private boolean supportsBatch = false;
 	boolean allowCreateTable = true; //"true".equals(Settings.getInstance().getProperty("workbench.datapumper.allowcreate", "true"));
 
@@ -110,9 +108,7 @@ public class DataPumper
 		this.mapperPanel.setLayout(new BorderLayout());
 		this.mapperPanel.add(this.columnMapper, BorderLayout.CENTER);
 
-		//this.separatorPanel1.setBorder(new DividerBorder(DividerBorder.VERTICAL_MIDDLE));
 		this.updateOptionPanel.setBorder(new DividerBorder(DividerBorder.LEFT));
-    //this.jPanel2.setBorder(new DividerBorder(DividerBorder.BOTTOM));
 		this.checkQueryButton.addActionListener(this);
 		this.showWbCommand.addActionListener(this);
 		this.useQueryCbx.addActionListener(this);
@@ -297,7 +293,7 @@ public class DataPumper
 		this.updateWindowTitle();
 	}
 
-	private void updateWindowTitle()
+	protected void updateWindowTitle()
 	{
 		if (this.targetProfile != null && (this.sourceProfile != null || this.sourceFile != null) && this.window != null)
 		{
@@ -316,7 +312,7 @@ public class DataPumper
 		}
 	}
 
-	private void checkConnections()
+	protected void checkConnections()
 	{
 		this.connectSource(this.sourceProfile);
 		this.connectTarget(this.targetProfile);
@@ -583,6 +579,7 @@ public class DataPumper
     gridBagConstraints.insets = new java.awt.Insets(5, 2, 6, 2);
     add(sourceTable, gridBagConstraints);
 
+    targetTable.setToolTipText("");
     targetTable.setMaximumSize(new java.awt.Dimension(2147483647, 65));
     targetTable.setMinimumSize(new java.awt.Dimension(25, 50));
     targetTable.setPreferredSize(new java.awt.Dimension(25, 50));
@@ -594,7 +591,7 @@ public class DataPumper
     gridBagConstraints.insets = new java.awt.Insets(5, 4, 6, 2);
     add(targetTable, gridBagConstraints);
 
-    targetHeader.setBackground(java.awt.Color.white);
+    targetHeader.setBackground(new java.awt.Color(255, 255, 255));
     targetHeader.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
     targetHeader.setText("<html><b>" + ResourceMgr.getString("LblTargetConnection") + "</b></html>");
     targetHeader.setMaximumSize(new java.awt.Dimension(23768, 22));
@@ -609,7 +606,7 @@ public class DataPumper
     gridBagConstraints.insets = new java.awt.Insets(4, 2, 4, 2);
     add(targetHeader, gridBagConstraints);
 
-    sourceHeader.setBackground(java.awt.Color.white);
+    sourceHeader.setBackground(new java.awt.Color(255, 255, 255));
     sourceHeader.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
     sourceHeader.setText("<html><b>" + ResourceMgr.getString("LblSourceConnection") + "</b></html>");
     sourceHeader.setMaximumSize(new java.awt.Dimension(32768, 22));
@@ -902,48 +899,48 @@ public class DataPumper
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JPanel buttonPanel;
-  private javax.swing.JButton cancelButton;
-  private javax.swing.JButton checkQueryButton;
-  private javax.swing.JButton closeButton;
-  private javax.swing.JTextField commitEvery;
-  private javax.swing.JLabel commitLabel;
-  private javax.swing.JCheckBox continueOnErrorCbx;
-  private javax.swing.JCheckBox deleteTargetCbx;
-  private javax.swing.JCheckBox dropTargetCbx;
-  private javax.swing.JButton helpButton;
-  private javax.swing.JLabel jLabel1;
-  private javax.swing.JPanel jPanel1;
-  private javax.swing.JPanel jPanel2;
-  private javax.swing.JPanel jPanel3;
-  private javax.swing.JPanel jPanel4;
-  private javax.swing.JPanel jPanel5;
-  private javax.swing.JSplitPane jSplitPane1;
-  private javax.swing.JPanel mapperPanel;
-  private javax.swing.JComboBox modeComboBox;
-  private javax.swing.JLabel modeLabel;
-  private javax.swing.JButton openFileButton;
-  private javax.swing.JPanel optionsPanel;
-  private javax.swing.JButton selectSourceButton;
-  private javax.swing.JButton selectTargetButton;
-  private javax.swing.JButton showLogButton;
-  private javax.swing.JButton showWbCommand;
-  private javax.swing.JLabel sourceHeader;
-  private javax.swing.JLabel sourceProfileLabel;
-  private javax.swing.JPanel sourceProfilePanel;
-  private workbench.gui.tools.TableSelectorPanel sourceTable;
-  private javax.swing.JLabel sqlEditorLabel;
-  private javax.swing.JPanel sqlPanel;
-  private javax.swing.JButton startButton;
-  private javax.swing.JLabel statusLabel;
-  private javax.swing.JLabel targetHeader;
-  private javax.swing.JLabel targetProfileLabel;
-  private javax.swing.JPanel targetProfilePanel;
-  private workbench.gui.tools.TableSelectorPanel targetTable;
-  private javax.swing.JPanel updateOptionPanel;
-  private javax.swing.JCheckBox useBatchCheckBox;
-  private javax.swing.JCheckBox useQueryCbx;
-  private javax.swing.JPanel wherePanel;
+  protected javax.swing.JPanel buttonPanel;
+  protected javax.swing.JButton cancelButton;
+  protected javax.swing.JButton checkQueryButton;
+  protected javax.swing.JButton closeButton;
+  protected javax.swing.JTextField commitEvery;
+  protected javax.swing.JLabel commitLabel;
+  protected javax.swing.JCheckBox continueOnErrorCbx;
+  protected javax.swing.JCheckBox deleteTargetCbx;
+  protected javax.swing.JCheckBox dropTargetCbx;
+  protected javax.swing.JButton helpButton;
+  protected javax.swing.JLabel jLabel1;
+  protected javax.swing.JPanel jPanel1;
+  protected javax.swing.JPanel jPanel2;
+  protected javax.swing.JPanel jPanel3;
+  protected javax.swing.JPanel jPanel4;
+  protected javax.swing.JPanel jPanel5;
+  protected javax.swing.JSplitPane jSplitPane1;
+  protected javax.swing.JPanel mapperPanel;
+  protected javax.swing.JComboBox modeComboBox;
+  protected javax.swing.JLabel modeLabel;
+  protected javax.swing.JButton openFileButton;
+  protected javax.swing.JPanel optionsPanel;
+  protected javax.swing.JButton selectSourceButton;
+  protected javax.swing.JButton selectTargetButton;
+  protected javax.swing.JButton showLogButton;
+  protected javax.swing.JButton showWbCommand;
+  protected javax.swing.JLabel sourceHeader;
+  protected javax.swing.JLabel sourceProfileLabel;
+  protected javax.swing.JPanel sourceProfilePanel;
+  protected workbench.gui.tools.TableSelectorPanel sourceTable;
+  protected javax.swing.JLabel sqlEditorLabel;
+  protected javax.swing.JPanel sqlPanel;
+  protected javax.swing.JButton startButton;
+  protected javax.swing.JLabel statusLabel;
+  protected javax.swing.JLabel targetHeader;
+  protected javax.swing.JLabel targetProfileLabel;
+  protected javax.swing.JPanel targetProfilePanel;
+  protected workbench.gui.tools.TableSelectorPanel targetTable;
+  protected javax.swing.JPanel updateOptionPanel;
+  protected javax.swing.JCheckBox useBatchCheckBox;
+  protected javax.swing.JCheckBox useQueryCbx;
+  protected javax.swing.JPanel wherePanel;
   // End of variables declaration//GEN-END:variables
 
 	public void showWindow(MainWindow aParent)
@@ -1293,7 +1290,7 @@ public class DataPumper
 		t.start();
 	}
 
-	private void unregister()
+	protected void unregister()
 	{
 		WbManager.getInstance().unregisterToolWindow(this);
 	}
@@ -1600,7 +1597,7 @@ public class DataPumper
 		w.dispose();
 	}
 
-	private void initColumnMapper()
+	protected void initColumnMapper()
 	{
 		if ( (this.sourceConnection == null && this.fileImporter == null) || this.targetConnection == null || !this.hasSource())
 		{
@@ -1674,7 +1671,7 @@ public class DataPumper
 		t.start();
 	}
 
-	private void doCancel()
+	protected void doCancel()
 	{
 		if (copier != null) copier.cancel();
 		EventQueue.invokeLater(new Runnable()
@@ -1894,7 +1891,7 @@ public class DataPumper
 		}
 	}
 
-	private void showLog()
+	protected void showLog()
 	{
 		if (this.copier == null)
 		{

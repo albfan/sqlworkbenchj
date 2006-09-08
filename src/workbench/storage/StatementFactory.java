@@ -20,6 +20,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -34,10 +35,21 @@ public class StatementFactory
 	private SqlLiteralFormatter literalFormatter;
 	private boolean emptyStringIsNull = false;
 	
+	private static final int CASE_NO_CHANGE = 1;
+	private static final int CASE_UPPER = 2;
+	private static final int CASE_LOWER = 4;
+	private int identifierCase = CASE_NO_CHANGE;
+	
 	public StatementFactory(ResultInfo metaData, WbConnection conn)
 	{
 		this.resultInfo = metaData;
 		this.setCurrentConnection(conn);
+		String s = Settings.getInstance().getAutoCompletionPasteCase();
+		if (!StringUtil.isEmptyString(s))
+		{
+			if (s.equals("lower")) identifierCase = CASE_LOWER;
+			else if (s.equals("upper")) identifierCase = CASE_UPPER;
+		}
 	}
 
 	public DmlStatement createUpdateStatement(RowData aRow)
@@ -111,7 +123,7 @@ public class StatementFactory
 					sql.append(", ");
 					if (newLineAfterColumn) sql.append("\n       ");
 				}
-				String colName = SqlUtil.quoteObjectname(this.resultInfo.getColumnName(col));
+				String colName = adjustIdentifierCase(SqlUtil.quoteObjectname(this.resultInfo.getColumnName(col)));
 				sql.append(colName);
 				Object value = aRow.getValue(col);
 				if (isNull(value))
@@ -237,7 +249,6 @@ public class StatementFactory
 			
 			Object value = aRow.getValue(col);
 			boolean isNull = isNull(value);
-			//if (isNull(value)) value = null;
 			
 			boolean includeCol = (ignoreStatus || aRow.isColumnModified(col));
 			
@@ -264,8 +275,8 @@ public class StatementFactory
 						}
 						else
 						{
-							sql.append(',');
-							valuePart.append(',');
+							sql.append(", ");
+							valuePart.append(", ");
 							sql.append(lineEnd);
 							valuePart.append(lineEnd);
 						}
@@ -273,8 +284,8 @@ public class StatementFactory
 					}
 					else
 					{
-						sql.append(',');
-						valuePart.append(',');
+						sql.append(", ");
+						valuePart.append(", ");
 					}
 				}
 				else
@@ -282,7 +293,7 @@ public class StatementFactory
 					first = false;
 				}
 
-				colName = SqlUtil.quoteObjectname(this.resultInfo.getColumnName(col));
+				colName = adjustIdentifierCase(SqlUtil.quoteObjectname(this.resultInfo.getColumnName(col)));
 				sql.append(colName);
 				valuePart.append('?');
 
@@ -346,7 +357,7 @@ public class StatementFactory
 			{
 				sql.append(" AND ");
 			}
-			String colName = SqlUtil.quoteObjectname(this.resultInfo.getColumnName(j));
+			String colName = adjustIdentifierCase(SqlUtil.quoteObjectname(this.resultInfo.getColumnName(j)));
 			sql.append(colName);
 
 			Object value = aRow.getOriginalValue(j);
@@ -366,6 +377,20 @@ public class StatementFactory
 		return dml;
 	}
 
+	private String adjustIdentifierCase(String value)
+	{
+		if (value == null) return null;
+		if (this.identifierCase == CASE_UPPER)
+		{
+			return value.toUpperCase();
+		}
+		else if (this.identifierCase == CASE_LOWER)
+		{
+			return value.toLowerCase();
+		}
+		return value;
+	}
+	
 	private String getTableNameToUse()
 	{
 		String name = null;
@@ -385,6 +410,7 @@ public class StatementFactory
 		{
 			name = (includeTableOwner ? updateTable.getTableExpression(this.dbConnection) : updateTable.getTableName());
 		}
+		name = adjustIdentifierCase(name);
 		return name;
 	}
 

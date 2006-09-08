@@ -79,6 +79,13 @@ public abstract class BaseAnalyzer
 		return this.columnPrefix;
 	}
 	
+	/**
+	 * Set a prefix for columns that are added. 
+	 * If this value is set, any column that the user
+	 * selects, will be prefixed with this string (plus a dot)
+	 * This is used when the FROM list in a SELECT statement
+	 * contains more than one column
+	 */
 	protected void setColumnPrefix(String prefix)
 	{
 		this.columnPrefix = prefix;

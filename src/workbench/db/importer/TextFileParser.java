@@ -729,7 +729,7 @@ public class TextFileParser
 						String msg = ResourceMgr.getString("ErrTextfileImport");
 						msg = msg.replaceAll("%row%", Integer.toString(importRow + 1));
 						msg = msg.replaceAll("%col%", (this.columns[i] == null ? "n/a" : this.columns[i].getColumnName()));
-						msg = msg.replaceAll("%value%", (value == null ? "(NULL)" : value.toString()));
+						msg = msg.replaceAll("%value%", (value == null ? "(NULL)" : value));
 						msg = msg.replaceAll("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
 						if (this.messages == null) this.messages = new StringBuffer();
 						this.messages.append(msg);
@@ -738,7 +738,7 @@ public class TextFileParser
 						LogMgr.logWarning("TextFileParser.start()", msg, e);
 						if (this.errorHandler != null)
 						{
-							int choice = errorHandler.getActionOnError(importRow + 1, this.columns[i].getColumnName(), (value == null ? "(NULL)" : value.toString()), ExceptionUtil.getDisplay(e, false));
+							int choice = errorHandler.getActionOnError(importRow + 1, this.columns[i].getColumnName(), (value == null ? "(NULL)" : value), ExceptionUtil.getDisplay(e, false));
 							if (choice == JobErrorHandler.JOB_ABORT) throw e;
 							if (choice == JobErrorHandler.JOB_IGNORE_ALL) 
 							{

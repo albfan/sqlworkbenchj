@@ -134,11 +134,6 @@ public class EditorPanel
 		return p;
 	}
 
-	private EditorPanel()
-	{
-		this(null);
-	}
-
 	public EditorPanel(TokenMarker aMarker)
 	{
 		super();
@@ -381,12 +376,13 @@ public class EditorPanel
 		this.makeInList(false);
 	}
 
-	private void makeInList(boolean quoteElements)
+	protected void makeInList(boolean quoteElements)
 	{
 		int startline = this.getSelectionStartLine();
 		int endline = this.getSelectionEndLine();
 		int count = (endline - startline + 1);
 		StringBuffer newText = new StringBuffer(count * 80);
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		
 		try
 		{
@@ -416,9 +412,9 @@ public class EditorPanel
 		
 		for (int i=startline; i <= endline; i++)
 		{
-			String line = this.getLineText(i).trim();
-			if (line == null || line.length() == 0) continue;
-
+			String line = this.getLineText(i);
+			if (StringUtil.isEmptyString(line)) continue;
+			
 			if (i == startline)
 			{
 				newText.append('(');
@@ -429,11 +425,12 @@ public class EditorPanel
 			}
 			if (newLinePending)
 			{
-				newText.append("\n ");
+				newText.append(nl);
+				newText.append(' ');
 				newLinePending = false;
 			}
 			if (quoteElements) newText.append('\'');
-			newText.append(line);
+			newText.append(line.trim());
 			if (quoteElements) newText.append('\'');
 			elements ++;
 			if (i < endline)
@@ -445,7 +442,8 @@ public class EditorPanel
 				}
 			}
 		}
-		newText.append(")\n");
+		newText.append(')');
+		newText.append(nl);
 		this.setSelectedText(newText.toString());
 	}
 

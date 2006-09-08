@@ -80,8 +80,7 @@ public class ListComboBoxModel
 	public void setSelectedItem(Object anItem)
 	{
 		this.selectedItem = anItem;
-		if ((selectedItem != null && !selectedItem.equals( anItem)) ||
-			selectedItem == null && anItem != null)
+		if (selectedItem != null && !selectedItem.equals(anItem))
 		{
 			selectedItem = anItem;
 			fireContentsChanged(this, -1, -1);

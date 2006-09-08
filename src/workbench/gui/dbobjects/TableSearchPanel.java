@@ -148,7 +148,7 @@ public class TableSearchPanel
     entryPanel = new javax.swing.JPanel();
     startButton = new javax.swing.JButton();
     searchText = new javax.swing.JTextField();
-    jLabel1 = new javax.swing.JLabel();
+    likeLabel = new javax.swing.JLabel();
     reloadButton = new WbToolbarButton();
     columnFunction = new javax.swing.JTextField();
     labelRowCount = new javax.swing.JLabel();
@@ -245,13 +245,13 @@ public class TableSearchPanel
     gridBagConstraints.weightx = 1.0;
     entryPanel.add(searchText, gridBagConstraints);
 
-    jLabel1.setText("LIKE");
-    jLabel1.setToolTipText(ResourceMgr.getDescription("LblSearchTableCriteria"));
+    likeLabel.setText("LIKE");
+    likeLabel.setToolTipText(ResourceMgr.getDescription("LblSearchTableCriteria"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
-    entryPanel.add(jLabel1, gridBagConstraints);
+    entryPanel.add(likeLabel, gridBagConstraints);
 
     reloadButton.setMaximumSize(new java.awt.Dimension(24, 24));
     reloadButton.setMinimumSize(new java.awt.Dimension(24, 24));
@@ -634,30 +634,30 @@ public class TableSearchPanel
 	}
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.ButtonGroup buttonGroup1;
-  private javax.swing.JTextField columnFunction;
-  private javax.swing.JPanel entryPanel;
-  private javax.swing.JLabel jLabel1;
-  private javax.swing.JPanel jPanel2;
-  private javax.swing.JSplitPane jSplitPane1;
-  private javax.swing.JLabel labelRowCount;
-  private javax.swing.JButton reloadButton;
-  private javax.swing.JPanel resultPanel;
-  private javax.swing.JScrollPane resultScrollPane;
-  private javax.swing.JTabbedPane resultTabPane;
-  private javax.swing.JTextField rowCount;
-  private javax.swing.JTextField searchText;
-  private javax.swing.JButton selectAllButton;
-  private javax.swing.JPanel selectButtonPanel;
-  private javax.swing.JButton selectNoneButton;
-  private javax.swing.JButton startButton;
-  private javax.swing.JLabel statusInfo;
-  private javax.swing.JScrollPane tableListScrollPane;
-  private javax.swing.JTable tableNames;
-  private javax.swing.JPanel tablePane;
+  protected javax.swing.ButtonGroup buttonGroup1;
+  protected javax.swing.JTextField columnFunction;
+  protected javax.swing.JPanel entryPanel;
+  protected javax.swing.JPanel jPanel2;
+  protected javax.swing.JSplitPane jSplitPane1;
+  protected javax.swing.JLabel labelRowCount;
+  protected javax.swing.JLabel likeLabel;
+  protected javax.swing.JButton reloadButton;
+  protected javax.swing.JPanel resultPanel;
+  protected javax.swing.JScrollPane resultScrollPane;
+  protected javax.swing.JTabbedPane resultTabPane;
+  protected javax.swing.JTextField rowCount;
+  protected javax.swing.JTextField searchText;
+  protected javax.swing.JButton selectAllButton;
+  protected javax.swing.JPanel selectButtonPanel;
+  protected javax.swing.JButton selectNoneButton;
+  protected javax.swing.JButton startButton;
+  protected javax.swing.JLabel statusInfo;
+  protected javax.swing.JScrollPane tableListScrollPane;
+  protected javax.swing.JTable tableNames;
+  protected javax.swing.JPanel tablePane;
   // End of variables declaration//GEN-END:variables
 
-	class ParentWidthScrollPane
+	static class ParentWidthScrollPane
 		extends JScrollPane
 	{
 		private Dimension preferredSize = new Dimension(0,0);
@@ -666,6 +666,7 @@ public class TableSearchPanel
 		{
 			super(view);
 		}
+		
 		public Dimension getPreferredSize()
 		{
 			Dimension d = super.getPreferredSize();
@@ -675,7 +676,7 @@ public class TableSearchPanel
 		}
 	}
 
-	class ResultHighlightingRenderer
+	static class ResultHighlightingRenderer
 		extends DefaultTableCellRenderer
 	{
 		private Like pattern;
@@ -716,7 +717,7 @@ public class TableSearchPanel
 
 			try
 			{
-				if (!isSelected && value != null && displayValue instanceof String && this.pattern.like(displayValue))
+				if (!isSelected && displayValue != null && this.pattern.like(displayValue))
 				{
 					result.setBackground(Color.YELLOW);
 					result.setForeground(Color.BLACK);

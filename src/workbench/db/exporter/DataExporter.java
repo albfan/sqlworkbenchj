@@ -151,7 +151,7 @@ public class DataExporter
 		this.setExportHeaders(Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false));
 	}
 
-	private void createProgressPanel()
+	protected void createProgressPanel()
 	{
 		progressPanel = new ProgressPanel(this);
 		this.progressPanel.setFilename(this.outputfile);
@@ -160,7 +160,7 @@ public class DataExporter
 	/**
 	 *	Open the progress monitor window.
 	 */
-	private void openProgressMonitor(Frame parent, boolean modal)
+	protected void openProgressMonitor(Frame parent, boolean modal)
 	{
 
 		if (this.progressPanel == null) createProgressPanel();
@@ -550,7 +550,7 @@ public class DataExporter
 		{
 			String cleanSql = SqlUtil.makeCleanSql(aSql, false);
 			List tables = SqlUtil.getTables(cleanSql);
-			if (tables.size() == 1);
+			if (tables.size() == 1)
 			{
 				this.sqlTable = (String)tables.get(0);
 			}

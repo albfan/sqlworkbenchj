@@ -32,9 +32,6 @@ import workbench.util.TableAlias;
 public class DeleteAnalyzer
 	extends BaseAnalyzer
 {
-	private final Pattern WHERE_PATTERN = Pattern.compile("\\sWHERE\\s|\\sWHERE$", Pattern.CASE_INSENSITIVE);
-	private final Pattern FROM_PATTERN = Pattern.compile("FROM", Pattern.CASE_INSENSITIVE);
-	
 	public DeleteAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{	
 		super(conn, statement, cursorPos);
@@ -44,7 +41,7 @@ public class DeleteAnalyzer
 	{
 		this.context = -1;
 
-		int wherePos = StringUtil.findPattern(WHERE_PATTERN, sql, 0);
+		int wherePos = SqlUtil.getKeywordPosition("WHERE", sql);
 		checkOverwrite();
 		
 		if ( wherePos == -1 || wherePos > -1 && cursorPos < wherePos)

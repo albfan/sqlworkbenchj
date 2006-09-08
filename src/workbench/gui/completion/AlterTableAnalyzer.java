@@ -70,7 +70,6 @@ public class AlterTableAnalyzer
 			LogMgr.logError("AlterTableAnalyzer", "Error parsing SQL", e);
 		}
 		
-		String verb = SqlUtil.getSqlVerb(this.sql);
 		String q = this.getQualifierLeftOfCursor();
 		if (q != null)
 		{

@@ -39,7 +39,7 @@ public class DbExplorerWindow
 	private DbExplorerPanel panel;
 	private static int instanceCount = 0;
 	private boolean standalone;
-	private ConnectionSelector connectionSelector;
+	protected ConnectionSelector connectionSelector;
 	
 	public DbExplorerWindow(DbExplorerPanel aPanel)
 	{
@@ -89,7 +89,6 @@ public class DbExplorerWindow
 		{
 			public void run()
 			{
-				
 				connectionSelector.selectConnection();
 			}
 		});

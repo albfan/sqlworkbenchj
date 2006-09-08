@@ -175,84 +175,84 @@ public class SqlPanel
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
-	private EditorPanel editor;
+	protected EditorPanel editor;
 	
-	private DwPanel currentData;
-	private SqlHistory sqlHistory;
+	protected DwPanel currentData;
+	protected SqlHistory sqlHistory;
 
-	private JTextArea log;
-	private WbTabbedPane resultTab;
-	private JSplitPane contentPanel;
-	private boolean threadBusy;
-	private boolean cancelExecution;
+	protected JTextArea log;
+	protected WbTabbedPane resultTab;
+	protected JSplitPane contentPanel;
+	protected boolean threadBusy;
+	protected boolean cancelExecution;
 
 	private List actions = new LinkedList();
 	private List toolbarActions = new LinkedList();
 
 	private List filenameChangeListeners;
 
-	private StopAction stopAction;
-	private ExecuteAllAction executeAll;
-	private ExecuteCurrentAction executeCurrent;
-	private ExecuteSelAction executeSelected;
-
-	// Actions from DwPanel
-	private CopyAsTextAction dataToClipboard;
-	private SaveDataAsAction exportDataAction;
-	private CopyAsSqlInsertAction copyAsSqlInsert;
-	private CopyAsSqlUpdateAction copyAsSqlUpdate;
-	private CopyAsSqlDeleteInsertAction copyAsSqlDeleteInsert;
-	private CreateDeleteScriptAction createDeleteScript;
-	private ImportFileAction importFileAction;
-	private PrintAction printDataAction;
-	private PrintPreviewAction printPreviewAction;
-	private UpdateDatabaseAction updateAction;
-	private InsertRowAction insertRow;
-	private CopyRowAction duplicateRow;
-	private DeleteRowAction deleteRow;
-	private StartEditAction startEdit;
-	private SelectKeyColumnsAction selectKeys;
-	private FilterDataAction filterAction;
-	private ResetFilterAction resetFilterAction;
-	private OptimizeAllColumnsAction optimizeAllCol;
-	
-	private CheckPreparedStatementsAction checkPreparedAction;
-	private ClearCompletionCacheAction clearCompletionCache;
-	private AutoCompletionAction autoCompletion;
-
-	private WbMenu copySelectedMenu;
-	private ToggleAutoCommitAction toggleAutoCommit;
-	private CommitAction commitAction;
-	private RollbackAction rollbackAction;
-
-	private FormatSqlAction formatSql;
-	private SpoolDataAction spoolData;
+	protected StopAction stopAction;
+	protected ExecuteAllAction executeAll;
+	protected ExecuteCurrentAction executeCurrent;
+	protected ExecuteSelAction executeSelected;
 
 	private int internalId;
 
-	private FileDiscardAction fileDiscardAction;
-	private FileReloadAction fileReloadAction;
-	private FindDataAction findDataAction;
-	private FindDataAgainAction findDataAgainAction;
-	private WbToolbar toolbar;
-	private ConnectionInfo connectionInfo;
+	// Actions from DwPanel
+	protected CopyAsTextAction dataToClipboard;
+	protected SaveDataAsAction exportDataAction;
+	protected CopyAsSqlInsertAction copyAsSqlInsert;
+	protected CopyAsSqlUpdateAction copyAsSqlUpdate;
+	protected CopyAsSqlDeleteInsertAction copyAsSqlDeleteInsert;
+	protected CreateDeleteScriptAction createDeleteScript;
+	protected ImportFileAction importFileAction;
+	protected PrintAction printDataAction;
+	protected PrintPreviewAction printPreviewAction;
+	protected UpdateDatabaseAction updateAction;
+	protected InsertRowAction insertRow;
+	protected CopyRowAction duplicateRow;
+	protected DeleteRowAction deleteRow;
+	protected StartEditAction startEdit;
+	protected SelectKeyColumnsAction selectKeys;
+	protected FilterDataAction filterAction;
+	protected ResetFilterAction resetFilterAction;
+	protected OptimizeAllColumnsAction optimizeAllCol;
+	
+	protected CheckPreparedStatementsAction checkPreparedAction;
+	protected ClearCompletionCacheAction clearCompletionCache;
+	protected AutoCompletionAction autoCompletion;
 
-	private WbConnection dbConnection;
-	private boolean importRunning;
-	private boolean updateRunning;
-	private boolean textModified;
-	private String tabName;
+	protected WbMenu copySelectedMenu;
+	protected ToggleAutoCommitAction toggleAutoCommit;
+	protected CommitAction commitAction;
+	protected RollbackAction rollbackAction;
+
+	protected FormatSqlAction formatSql;
+	protected SpoolDataAction spoolData;
+
+	protected FileDiscardAction fileDiscardAction;
+	protected FileReloadAction fileReloadAction;
+	protected FindDataAction findDataAction;
+	protected FindDataAgainAction findDataAgainAction;
+	protected WbToolbar toolbar;
+	protected ConnectionInfo connectionInfo;
+
+	protected WbConnection dbConnection;
+	protected boolean importRunning;
+	protected boolean updateRunning;
+	protected boolean textModified;
+	protected String tabName;
 
 	private List execListener;
-	private Thread executionThread;
-	private Interruptable worker;
+	protected Thread executionThread;
+	protected Interruptable worker;
 
 	private static final Border statusBarBorder = new CompoundBorder(new EmptyBorder(2, 1, 0, 1), new EtchedBorder());
 	private static final Border logBorder = new EmptyBorder(0,2,0,0);
 
-	private DwStatusBar statusBar;
-	private StatementRunner stmtRunner;
-	private GenericRowMonitor rowMonitor;
+	protected DwStatusBar statusBar;
+	protected StatementRunner stmtRunner;
+	protected GenericRowMonitor rowMonitor;
 //</editor-fold>
 	
 	public SqlPanel(int anId)
@@ -893,9 +893,8 @@ public class SqlPanel
 		t.start();
 	}
 
-	private void updateDb()
+	protected void updateDb()
 	{
-
 		try
 		{
 			fireDbExecStart();
@@ -1307,7 +1306,7 @@ public class SqlPanel
 	 * and enable/disable the rollback and commit actions
 	 * accordingly
 	 */
-	private void checkAutocommit()
+	protected void checkAutocommit()
 	{
 		SwingUtilities.invokeLater(new Runnable()
 		{
@@ -1476,7 +1475,7 @@ public class SqlPanel
 		}
 	}
 
-	private void cancelRetrieve()
+	protected void cancelRetrieve()
 	{
 		this.showCancelIcon();
 		this.cancelExecution = true;
@@ -2550,7 +2549,7 @@ public class SqlPanel
 		
 	}
 
-	private void highlightError(ScriptParser scriptParser, int commandWithError, int startOffset)
+	protected void highlightError(ScriptParser scriptParser, int commandWithError, int startOffset)
 	{
 		if (this.editor == null) return;
 		int startPos = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
@@ -2561,7 +2560,7 @@ public class SqlPanel
 		this.editor.selectError(startPos, endPos);
 	}
 
-	private void checkResultSetActions()
+	protected void checkResultSetActions()
 	{
 		boolean hasResult = false;
 		boolean mayEdit = false;
@@ -2774,7 +2773,7 @@ public class SqlPanel
 		}
 	}
 
-	private synchronized void setBusy(final boolean busy)
+	protected synchronized void setBusy(final boolean busy)
 	{
 		//if (busy == this.threadBusy) return;
 		this.threadBusy = busy;
@@ -2829,7 +2828,7 @@ public class SqlPanel
 		this.execListener.remove(l);
 	}
 
-	private synchronized void fireDbExecStart()
+	protected synchronized void fireDbExecStart()
 	{
 		if (this.execListener == null) return;
 		int count = this.execListener.size();
@@ -2840,7 +2839,7 @@ public class SqlPanel
 		}
 	}
 	
-	private synchronized void fireDbExecEnd()
+	protected synchronized void fireDbExecEnd()
 	{
 		if (this.execListener == null) return;
 		int count = this.execListener.size();

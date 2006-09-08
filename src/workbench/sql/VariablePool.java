@@ -211,7 +211,7 @@ public class VariablePool
 		return vardata;
 	}
 	
-	public String getParameterValue(String varName)
+	public synchronized String getParameterValue(String varName)
 	{
 		if (varName == null) return null;
 		return (String)this.data.get(varName);

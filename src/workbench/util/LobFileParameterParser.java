@@ -83,7 +83,6 @@ public class LobFileParameterParser
 					}
 					else
 					{
-						File f = new File(value);
 						parameters[index].setFilename(value);
 						parameters[index].setBinary("blobfile".equals(arg));
 					}

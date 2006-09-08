@@ -252,7 +252,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 		this.deleteThread.start();
 	}
 
-	private void doDelete()
+	protected void doDelete()
 	{
 		this.cancelled = false;
 		boolean ignoreAll = false;

@@ -71,8 +71,6 @@ public class ToolTipRenderer
 	private int valign = SwingConstants.TOP; 
 	private int halign = SwingConstants.LEFT;
 	
-	public static final String[] EMPTY_DISPLAY = new String[] { StringUtil.EMPTY_STRING, null };
-	
 	private boolean isAlternatingRow = false;
 	
 	public ToolTipRenderer()
@@ -178,10 +176,8 @@ public class ToolTipRenderer
 		paintIconR.x = paintIconR.y = paintIconR.width = paintIconR.height = 0;
 		paintTextR.x = paintTextR.y = paintTextR.width = paintTextR.height = 0;
 		
-		Icon ic = null;
-		
 		String clippedText = 
-        SwingUtilities.layoutCompoundLabel(this,fm,this.displayValue,ic
+        SwingUtilities.layoutCompoundLabel(this,fm,this.displayValue,(Icon)null
 						,this.valign
 						,this.halign
 						,SwingConstants.TOP

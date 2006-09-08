@@ -29,7 +29,7 @@ public class ProcedureCreator
 {
 	private String sourceSql;
 	private WbConnection dbConnection;
-	private String catalog; 
+//	private String catalog; 
 	private String schema;
 	private String procedureName;
 	private String objectType;
@@ -39,7 +39,7 @@ public class ProcedureCreator
 	{
 		this.sourceSql = source;
 		this.dbConnection = con;
-		this.catalog = cat;
+//		this.catalog = cat;
 		this.schema = schem;
 		this.procedureName = name;
 		this.objectType = findType();

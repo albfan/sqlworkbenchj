@@ -97,6 +97,11 @@ public class TableIdentifier
 		if (this.expression == null) this.initExpression();
 		return this.expression;
 	}
+
+	public int hashCode()
+	{
+		return getTableExpression().hashCode();
+	}
 	
 	public String getTableExpression(WbConnection conn)
 	{
@@ -182,9 +187,7 @@ public class TableIdentifier
 			this.expression = null;
 			return;
 		}
-		
-		int atPos = aTable.indexOf("@");
-		if (atPos < 0) atPos = aTable.length() + 1;
+
 		String[] elements = aTable.split("\\.");
 		if (elements.length == 1)
 		{

@@ -317,7 +317,7 @@ public class StringUtil
 	 * @param aDelimiter the delimiter to user
 	 * @param removeEmpty flag to remove empty entries
 	 * @param trimEntries flag to trim entries (will be applied beore checking for empty entries)
-   * @param checkBrackets flag to check for quoted delimiters
+   * @param checkBrackets flag to check for opening and closing brackets (delimiter inside brackets will not be taken into account)
 	 * @return A List of Strings
 	 */
 	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets)
@@ -805,11 +805,6 @@ public class StringUtil
 		}
 	}	
 	
-	public static int findPattern(String regex, String data)
-	{
-		return findPattern(regex, data);
-	}
-
 	public static int findPattern(String regex, String data, int startAt)
 	{
 		Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);

@@ -34,7 +34,7 @@ public class DbObjectCache
 {
 	private WbConnection dbConnection;
 	private Set schemasInCache = new HashSet();
-	private final String NULL_SCHEMA = "$$wb-null-schema$$";
+	private static final String NULL_SCHEMA = "$$wb-null-schema$$";
 	private boolean retrieveOraclePublicSynonyms = false;
 	
 	// This will map a TableIdentifier to a list of ColumnIdentifier's
@@ -59,7 +59,7 @@ public class DbObjectCache
 		for (int i=0; i < tables.size(); i++)
 		{
 			TableIdentifier tbl = (TableIdentifier)tables.get(i);
-			if (!this.objects.containsKey(tbl));
+			if (!this.objects.containsKey(tbl))
 			{
 				this.objects.put(tbl, Collections.EMPTY_LIST);
 			}

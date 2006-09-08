@@ -203,7 +203,8 @@ public class WbCellEditor
 			Object enterAction = this.getInputMap().get(ENTER);
 
 			this.getInputMap().put(ENTER, "wb-stop-editing");
-			this.getActionMap().put("stopEditing", new AbstractAction("wb-stop-editing")
+			this.getActionMap().put("stopEditing", 
+				new AbstractAction("wb-stop-editing")
 				{
 						public void actionPerformed(ActionEvent e)
 						{

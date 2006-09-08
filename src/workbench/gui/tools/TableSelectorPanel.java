@@ -39,7 +39,7 @@ public class TableSelectorPanel
 {
 	private WbConnection dbConnection;
 	private String currentSchema;
-	private TableIdentifier currentTable;
+	protected TableIdentifier currentTable;
 	private PropertyChangeListener client;
 	private String clientPropName;
 	//private boolean tablesOnly = false;

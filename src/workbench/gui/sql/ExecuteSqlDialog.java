@@ -41,11 +41,11 @@ public class ExecuteSqlDialog
 	extends JDialog
 	implements ActionListener, WindowListener
 {
-	private WbConnection dbConn;
-	private EditorPanel sqlEditor;
-	private WbButton startButton = new WbButton(ResourceMgr.getString("LblStartSql"));
-	private WbButton closeButton = new WbButton(ResourceMgr.getString("LblClose"));
-	private JLabel statusMessage;
+	protected WbConnection dbConn;
+	protected EditorPanel sqlEditor;
+	protected WbButton startButton = new WbButton(ResourceMgr.getString("LblStartSql"));
+	protected WbButton closeButton = new WbButton(ResourceMgr.getString("LblClose"));
+	protected JLabel statusMessage;
 	private Thread worker;
 
 	/** Creates a new instance of ExecuteSqlDialog */
@@ -180,14 +180,14 @@ public class ExecuteSqlDialog
 		this.worker.start();
 	}
 
-	private void createSuccess()
+	protected void createSuccess()
 	{
 		createFinished();
 		WbSwingUtilities.showMessage(this, ResourceMgr.getString("MsgIndexCreated"));
 		this.closeWindow();
 	}
 	
-	private void createFinished()
+	protected void createFinished()
 	{
 		WbSwingUtilities.showDefaultCursor(this);
 		this.startButton.setEnabled(true);
@@ -196,7 +196,7 @@ public class ExecuteSqlDialog
 		this.worker = null;
 	}
 
-	private void createFailure(Exception e)
+	protected void createFailure(Exception e)
 	{
 		createFinished();
 		String error = ExceptionUtil.getDisplay(e);

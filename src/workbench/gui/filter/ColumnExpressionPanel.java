@@ -45,11 +45,11 @@ public class ColumnExpressionPanel
 	private static final ComparatorFactory factory = new ComparatorFactory();
 	private JComboBox comparatorDropDown;
 	private JCheckBox ignoreCase;
-	private JComboBox columnSelector;
+	protected JComboBox columnSelector;
 	private ArrayList comparatorItems;
 	private ListComboBoxModel activeItems;
 	private ResultInfo columnInfo;
-	private JTextField valueField;
+	protected JTextField valueField;
 	private ValueConverter converter = new ValueConverter();
 	private Class lastColumnClass;
 

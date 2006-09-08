@@ -52,7 +52,7 @@ public class DwStatusBar
 {
 	private JTextField tfRowCount;
 
-	private WbTextLabel tfStatus;
+	protected WbTextLabel tfStatus;
 	
 	private JTextField tfMaxRows;
 	private String readyMsg;

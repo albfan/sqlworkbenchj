@@ -107,7 +107,7 @@ public class HtmlViewer
 		this.display.showIndex();
 	}
 	
-	private void saveSettings()
+	protected void saveSettings()
 	{
 		Settings.getInstance().storeWindowPosition(this);
 		Settings.getInstance().storeWindowSize(this);

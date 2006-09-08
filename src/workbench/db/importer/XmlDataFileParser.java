@@ -708,7 +708,7 @@ public class XmlDataFileParser
 				
 			case Types.BIT:
 			case Types.BOOLEAN:
-				this.currentRow[this.realColIndex]  = new Boolean(StringUtil.stringToBool(value));
+				this.currentRow[this.realColIndex]  = Boolean.valueOf(StringUtil.stringToBool(value));
 				break;
 			default:
 				// type not taken into account. Simply use the String 

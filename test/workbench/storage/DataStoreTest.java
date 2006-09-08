@@ -11,17 +11,15 @@
  */
 package workbench.storage;
 
-import java.io.File;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.*;
 import java.sql.Types;
+import java.util.List;
 import workbench.TestUtil;
-import workbench.db.ConnectionProfile;
+import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.storage.filter.AndExpression;
 import workbench.storage.filter.ComplexExpression;
@@ -40,38 +38,24 @@ import workbench.util.SqlUtil;
 public class DataStoreTest 
 	extends TestCase
 {
-	private String dbName;
-	private String basedir;
+//	private String dbName;
+//	private String basedir;
 	private final int rowcount = 10;
 	
 	public DataStoreTest(String testName)
 	{
 		super(testName);
-		try
-		{
-			TestUtil util = new TestUtil();
-			util.prepareEnvironment();
-			this.basedir = util.getBaseDir();
-			this.dbName = util.getDbName();
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
 	}
 
 	private WbConnection prepareDatabase()
-		throws SQLException, ClassNotFoundException
+		throws Exception
 	{
-		File dir = new File(basedir);
-		File[] files = dir.listFiles();
-		for (int i = 0; i < files.length; i++)
-		{
-			files[i].delete();
-		}
-		Class.forName("org.hsqldb.jdbcDriver");
-		String url = "jdbc:hsqldb:" + dbName + ";shutdown=true";
-		Connection con = DriverManager.getConnection(url, "sa", "");
+		TestUtil util = new TestUtil();
+		util.prepareEnvironment();
+		String basedir = util.getBaseDir();
+		String dbName = util.getDbName();
+		WbConnection wb = util.getConnection();
+		Connection con = wb.getSqlConnection();
 		Statement stmt = con.createStatement();
 		stmt.executeUpdate("CREATE TABLE junit_test (nr integer primary key, firstname varchar(100), lastname varchar(100))");
 		stmt.close();
@@ -84,21 +68,6 @@ public class DataStoreTest
 			pstmt.executeUpdate();
 		}
 		con.commit();
-		WbConnection wb = new WbConnection(con);
-		
-		// Create a dummy profiles because the profile
-		// is used all around the Wb sources
-		ConnectionProfile prof = new ConnectionProfile();
-		prof.setAutocommit(false);
-		prof.setEmptyStringIsNull(true);
-		prof.setIgnoreDropErrors(true);
-		prof.setIncludeNullInInsert(true);
-		prof.setName("JunitTest");
-		prof.setDriverName("HSQLDB");
-		prof.setDriverclass("org.hsqldb.jdbcDriver");
-		prof.setUrl(url);
-		prof.setPassword("");
-		wb.setProfile(prof);
 		return wb;
 	}
 
@@ -111,10 +80,19 @@ public class DataStoreTest
 			con = prepareDatabase();
 			
 			stmt = con.createStatement();
-			ResultSet rs = stmt.executeQuery("select nr, lastname, firstname from junit_test");
+			String sql = "select nr, lastname, firstname from junit_test";
+			ResultSet rs = stmt.executeQuery(sql);
 			DataStore ds = new DataStore(rs, con);
-			ds.setUpdateTable("junit_test");
+			
+			List tbl = SqlUtil.getTables(sql);
+			assertEquals("Wrong number of tables retrieved from SQL", 1, tbl.size());
+			
+			String table = (String)tbl.get(0);
+			assertEquals("Wrong update table returned", "junit_test", table);
+			
+			ds.setUpdateTable(table);
 			assertEquals(rowcount, ds.getRowCount());
+			
 			ds.setValue(0, 1, "Dent");
 			ds.setValue(0, 2, "Arthur");
 			ds.updateDb(con, null);
@@ -132,8 +110,8 @@ public class DataStoreTest
 			assertEquals("Updated row not found", true, hasNext);
 			lastname = rs.getString(1);
 			firstname = rs.getString(2);
-			assertEquals("Firstname not updated", "FirstName1", firstname);
-			assertEquals("Lastname not updated", "LastName1", lastname);
+			assertEquals("Firstname updated", "FirstName1", firstname);
+			assertEquals("Lastname updated", "LastName1", lastname);
 			SqlUtil.closeResult(rs);
 			
 			int row = ds.addRow();
@@ -178,7 +156,7 @@ public class DataStoreTest
 		}
 		finally
 		{
-			try { con.getSqlConnection().close(); } catch (Throwable th) {}
+			ConnectionMgr.getInstance().disconnectAll();
 		}
 		
 	}

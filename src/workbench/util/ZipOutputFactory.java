@@ -26,10 +26,9 @@ import java.util.zip.ZipOutputStream;
 public class ZipOutputFactory
 	implements OutputFactory
 {
-	private File archive;
-	private ZipOutputStream zout;
-	private ZipEntry currentEntry;
-	private String comment;
+	protected File archive;
+	protected ZipOutputStream zout;
+	protected ZipEntry currentEntry;
 	
 	public ZipOutputFactory(File zip)
 	{

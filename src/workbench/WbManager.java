@@ -83,7 +83,6 @@ public class WbManager
 	private boolean batchMode = false;
 	private boolean writeSettings = true;
 	
-	private static boolean trace = false;
 	private static PrintStream traceOut;
 	private static final String traceFile = "workbench.trc";
 	
@@ -97,11 +96,10 @@ public class WbManager
 				traceOut = new PrintStream(new FileOutputStream(traceFile));
 				traceOut.println(ResourceMgr.TXT_PRODUCT_NAME + " startup trace enabled");
 				traceOut.close();
-				trace = true;
 			}
 			catch (Exception e)
 			{
-				trace = false;
+				traceOut = null;
 			}
 			
 		}
@@ -128,7 +126,7 @@ public class WbManager
 			}
 			catch (Exception e)
 			{
-				trace = false;
+				traceOut = null;
 			}
 		}
 	}
@@ -154,6 +152,7 @@ public class WbManager
 			}
 			catch (Exception e)
 			{
+				LogMgr.logWarning("WbManager.getDesCipher)", "Could not create WbDesCipher", e);
 				this.desCipher = new WbNullCipher();
 			}
 		}
@@ -286,7 +285,6 @@ public class WbManager
 	public boolean isWindowsClassic() { return isWindowsClassic; }
 	
 	private boolean isWindowsClassic = false;
-	private boolean isNativeLnF = false;
 	
 	private void initializeLookAndFeel()
 	{
@@ -515,7 +513,7 @@ public class WbManager
 		if (window == null)
 		{
 			ConnectionMgr.getInstance().disconnectAll();
-			this.doShutdown();
+			this.doShutdown(0);
 			return;
 		}
 
@@ -560,7 +558,7 @@ public class WbManager
 			{
 				public void actionPerformed(ActionEvent evt)
 				{
-					doShutdown();
+					doShutdown(0);
 				}
 			});
 
@@ -575,7 +573,7 @@ public class WbManager
 		WbSwingUtilities.center(this.closeMessage, parent);
 	}
 
-	private void disconnectWindows()
+	protected void disconnectWindows()
 	{
 		MainWindow w = null;
 		for (int i=0; i < mainWindows.size(); i ++)
@@ -590,7 +588,7 @@ public class WbManager
 	/**
 	 *	this gets called from the thread that disconnects everything
 	 */
-	private void disconnected()
+	protected void disconnected()
 	{
 		if (this.closeMessage != null)
 		{
@@ -605,10 +603,10 @@ public class WbManager
 				closeAllWindows();
 			}
 		});
-		doShutdown();
+		doShutdown(0);
 	}
 
-	private void closeAllWindows()
+	protected void closeAllWindows()
 	{
 		int size = this.mainWindows.size();
 		for (int i=0; i < size; i ++)
@@ -625,12 +623,7 @@ public class WbManager
 		ShowHelpAction.getInstance().closeHelp();
 	}
 
-	private void doShutdown()
-	{
-		doShutdown(0);
-	}
-
-	private void saveSettings()
+	protected void saveSettings()
 	{
 		if (this.writeSettings && !this.isBatchMode()) 
 		{
@@ -639,7 +632,7 @@ public class WbManager
 		}
 	}
 	
-	private void doShutdown(int errorCode)
+	protected void doShutdown(int errorCode)
 	{
 		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
 		this.closeAllWindows();
@@ -875,7 +868,7 @@ public class WbManager
 				this.batchMode = false;
 				String url = cmdLine.getValue(ARG_CONN_URL);
 				String jar = cmdLine.getValue(ARG_CONN_JAR);
-				String profile = cmdLine.getValue(ARG_PROFILE);
+				//String profile = cmdLine.getValue(ARG_PROFILE);
 				if (!StringUtil.isEmptyString(url) && !StringUtil.isEmptyString(jar))
 				{
 					// Do not read the driver templates if a connection is specified directly
@@ -954,7 +947,7 @@ public class WbManager
 		trace("WbManager.init() - done.");
 	}
 
-	private void runGui()
+	protected void runGui()
 	{
 		WbSplash splash = null;
 		if (Settings.getInstance().getShowSplash())

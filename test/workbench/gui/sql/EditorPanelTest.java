@@ -43,7 +43,13 @@ public class EditorPanelTest extends TestCase
 			fail();
 		}
 	}
-
+	
+	protected void setUp() throws Exception
+	{
+		super.setUp();
+		util.emptyBaseDirectory();
+	}
+	
 	private int writeTestFile(File f, String nl)
 		throws IOException
 	{
@@ -62,6 +68,7 @@ public class EditorPanelTest extends TestCase
 	{
 		String dir = util.getBaseDir();
 		File f = new File(dir, "editor.txt");
+		f.delete();
 		try
 		{
 			Settings set = Settings.getInstance();
@@ -81,15 +88,17 @@ public class EditorPanelTest extends TestCase
 
 			String content = p.getText();
 			int pos = content.indexOf("Line2\r\n");
-			assertEquals("Wrong internal line ending used", pos, 7);
+			assertEquals("Wrong internal line ending (DOS) used", pos, 7);
 			
 			p.saveFile(f, "UTF-8", "\n");
 			
 			Reader r = EncodingUtil.createReader(f, "UTF-8");
 			content = FileUtil.readCharacters(r);
 			r.close();
+			f.delete();
+			
 			pos = content.indexOf("Line2\n");
-			assertEquals("Wrong line ending used", pos, 6);
+			assertEquals("Wrong external line ending (Unix) used", pos, 6);
 			
 			set.setExternalEditorLineEnding(Settings.DOS_LINE_TERMINATOR_PROP_VALUE);
 			set.setInternalEditorLineEnding(Settings.UNIX_LINE_TERMINATOR_PROP_VALUE);
@@ -106,7 +115,7 @@ public class EditorPanelTest extends TestCase
 
 			content = p.getText();
 			pos = content.indexOf("Line2\n");
-			assertEquals("Wrong internal line ending used", pos, 6);			
+			assertEquals("Wrong internal line ending (Unix) used", pos, 6);			
 			
 			p.saveFile(f, "UTF-8", "\r\n");
 			r = EncodingUtil.createReader(f, "UTF-8");
@@ -114,7 +123,7 @@ public class EditorPanelTest extends TestCase
 			r.close();
 			
 			pos = content.indexOf("Line2\r\n");
-			assertEquals("Wrong line ending used", pos, 7);			
+			assertEquals("Wrong exteranl line ending (DOS) used", pos, 7);			
 		}
 		catch (Exception e)
 		{
@@ -122,6 +131,7 @@ public class EditorPanelTest extends TestCase
 			fail("Error loading file");
 		}
 	}
+	
 	public void testReadFile()
 	{
 		String dir = util.getBaseDir();
@@ -154,5 +164,4 @@ public class EditorPanelTest extends TestCase
 		}
 	}
 
-	
 }

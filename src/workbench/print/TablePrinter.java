@@ -57,7 +57,7 @@ public class TablePrinter
 	 *	The PageFormat to be used when printing
 	 */
 	private PageFormat format;
-	private JTable table;
+	protected JTable table;
 	private int pageCount = -1;
 
 	private Font printFont;

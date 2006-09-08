@@ -186,7 +186,7 @@ public class TableDefinitionPanel
 		retrieveTableDefinition();
 	}
 
-	private void retrieveTableDefinition()
+	protected void retrieveTableDefinition()
 		throws SQLException
 	{
 		if (this.isBusy()) return;
@@ -305,7 +305,7 @@ public class TableDefinitionPanel
 		}
 	}
 
-	private void createIndex()
+	protected void createIndex()
 	{
 		if (this.tableDefinition.getSelectedRowCount() <= 0) return;
 		int rows[] = this.tableDefinition.getSelectedRows();

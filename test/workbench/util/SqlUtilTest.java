@@ -56,6 +56,24 @@ public class SqlUtilTest
 	{
 	}
 
+	public void testGetInsertTable()
+	{
+		try
+		{
+			String sql = "insert into mytable";
+			String table = SqlUtil.getInsertTable(sql);
+			assertEquals("Wrong table returned", "mytable", table);
+			
+			sql = "insert into theschema.mytable";
+			table = SqlUtil.getInsertTable(sql);
+			assertEquals("Wrong table returned", "theschema.mytable", table);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	public void testCleanSql()
 	{
 		String sql = "select \r\n from project";
@@ -107,11 +125,25 @@ public class SqlUtilTest
 		assertEquals("Not enough columns", 2, l.size());
 		
 		sql = "SELECT to_char(date_col, 'YYYY-MM-DD'), col2 as \"Comma, column\", func('bla,blub')\nFROM   adam   a";
-		l = SqlUtil.getSelectColumns(sql,true);		
+		l = SqlUtil.getSelectColumns(sql,false);		
 		assertEquals("Not enough columns", 3, l.size());
 		assertEquals("Wrong first column", "to_char(date_col, 'YYYY-MM-DD')", l.get(0));
 		assertEquals("Wrong third column", "func('bla,blub')", l.get(2));
+
+		sql = "SELECT extract(year from rec_date) FROM mytable";
+		l = SqlUtil.getSelectColumns(sql,false);		
+		assertEquals("Not enough columns", 1, l.size());
+		assertEquals("Wrong first column", "extract(year from rec_date)", l.get(0));
 		
+		sql = "SELECT extract(year from rec_date) FROM mytable";
+		l = SqlUtil.getSelectColumns(sql,true);		
+		assertEquals("Not enough columns", 1, l.size());
+		assertEquals("Wrong first column", "extract(year from rec_date)", l.get(0));
+		
+		sql = "SELECT extract(year from rec_date) as rec_year FROM mytable";
+		l = SqlUtil.getSelectColumns(sql,true);		
+		assertEquals("Not enough columns", 1, l.size());
+		assertEquals("Wrong first column", "extract(year from rec_date) as rec_year", l.get(0));
 	}
 	
 	public void testStripColumnAlias()
@@ -127,6 +159,11 @@ public class SqlUtilTest
 		expression = "p.name as";
 		col = SqlUtil.striptColumnAlias(expression);
 		assertEquals("p.name", col);
+		
+		expression = "to_char(dt, 'YYYY')";
+		col = SqlUtil.striptColumnAlias(expression);
+		assertEquals("to_char(dt, 'YYYY')", col);
+		
 	}
 	
 	public void testGetSqlVerb()
@@ -141,7 +178,7 @@ public class SqlUtilTest
 		
 			sql = "/* \n" + 
              "* $URL: ddl.sql $ \n" + 
-             "* $Revision: 1.5 $ \n" + 
+             "* $Revision: 1.6 $ \n" + 
              "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
              "*/ \n" + 
              "-- This is the initial creation script for the MTrac database. \n" + 

@@ -126,10 +126,11 @@ public class EncodingUtil
 		String enc = Settings.getInstance().getDefaultFileEncoding();
 		return enc;
 	}
+	
 	/**
 	 * Return all available encodings.
 	 */
-	public static String[] getEncodings()
+	public synchronized static String[] getEncodings()
 	{
 		if (charsets == null)
 		{

@@ -112,16 +112,16 @@ public class TableListPanel
 						 TableModelListener
 {
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
-	private WbConnection dbConnection;
-	private JPanel listPanel;
-	private CriteriaPanel findPanel;
-	private WbTable tableList;
-	private TableDefinitionPanel tableDefinition;
-	private WbTable indexes;
-	private WbTable importedKeys;
-	private WbTable exportedKeys;
+	protected WbConnection dbConnection;
+	protected JPanel listPanel;
+	protected CriteriaPanel findPanel;
+	protected WbTable tableList;
+	protected TableDefinitionPanel tableDefinition;
+	protected WbTable indexes;
+	protected WbTable importedKeys;
+	protected WbTable exportedKeys;
 
-	private TableDataPanel tableData;
+	protected TableDataPanel tableData;
 
 	private TableDependencyTreeDisplay importedTableTree;
 	private WbSplitPane importedPanel;
@@ -132,7 +132,7 @@ public class TableListPanel
 	private JPanel indexPanel;
 	//private WbScrollPane indexPanel;
 	private TriggerDisplayPanel triggers;
-	private DbObjectSourcePanel tableSource;
+	protected DbObjectSourcePanel tableSource;
 	private JTabbedPane displayTab;
 	private WbSplitPane splitPane;
 
@@ -153,20 +153,20 @@ public class TableListPanel
 	private String selectedObjectType;
 
 	private boolean shiftDown = false;
-	private boolean shouldRetrieve;
+	protected boolean shouldRetrieve;
 
-	private boolean shouldRetrieveTable;
-	private boolean shouldRetrieveTableSource;
-	private boolean shouldRetrieveTriggers;
-	private boolean shouldRetrieveIndexes;
-	private boolean shouldRetrieveExportedKeys;
-	private boolean shouldRetrieveImportedKeys;
-	private boolean shouldRetrieveExportedTree;
-	private boolean shouldRetrieveImportedTree;
-	private boolean shouldRetrieveTableDataCount;
+	protected boolean shouldRetrieveTable;
+	protected boolean shouldRetrieveTableSource;
+	protected boolean shouldRetrieveTriggers;
+	protected boolean shouldRetrieveIndexes;
+	protected boolean shouldRetrieveExportedKeys;
+	protected boolean shouldRetrieveImportedKeys;
+	protected boolean shouldRetrieveExportedTree;
+	protected boolean shouldRetrieveImportedTree;
+	protected boolean shouldRetrieveTableDataCount;
 
-	private boolean busy;
-	private boolean ignoreStateChanged = false;
+	protected boolean busy;
+	protected boolean ignoreStateChanged = false;
 
 	private static final String SCHEMA_REPORT_CMD = "create-schema-report";
 	private static final String DROP_CMD = "drop-table";
@@ -187,7 +187,7 @@ public class TableListPanel
 	// e.g. the table search panel
 	private List tableListClients;
 
-	private JDialog infoWindow;
+	protected JDialog infoWindow;
 	private JLabel infoLabel;
 	private JLabel tableInfoLabel;
 	private String tableTypeToSelect;
@@ -546,7 +546,7 @@ public class TableListPanel
 		}
 	}
 	
-	private void invalidateData()
+	protected void invalidateData()
 	{
 		this.shouldRetrieveTable = true;
 		this.shouldRetrieveTableDataCount = true;
@@ -814,7 +814,6 @@ public class TableListPanel
 	public void restoreSettings()
 	{
 		String prefix = this.getClass().getName() + ".";
-		Settings s = Settings.getInstance();
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 		int maxWidth = (int)(d.getWidth() - 50);
 		readSettings(Settings.getInstance(), prefix);
@@ -1046,7 +1045,7 @@ public class TableListPanel
 		return this.dbConnection.getMetadata().objectTypeCanContainData(type);
 	}
 
-	private void retrieveTableSource()
+	protected void retrieveTableSource()
 	{
 		tableSource.setText(ResourceMgr.getString("TxtRetrievingSourceCode"));
 
@@ -1147,12 +1146,12 @@ public class TableListPanel
 		}
 	}
 
-	private void showCancelMessage()
+	protected void showCancelMessage()
 	{
 		this.showPopupMessagePanel(ResourceMgr.getString("MsgTryCancelling"));
 	}
 
-	private void showWaitMessage()
+	protected void showWaitMessage()
 	{
 		this.showPopupMessagePanel(ResourceMgr.getString("MsgWaitRetrieveEnded"));
 	}
@@ -1207,7 +1206,7 @@ public class TableListPanel
 		}
 	}
 
-	private Thread panelRetrieveThread;
+	protected Thread panelRetrieveThread;
 
 	private void startCancelThread()
 	{
@@ -1244,7 +1243,7 @@ public class TableListPanel
 		t.start();
 	}
 
-	private void startRetrieveCurrentPanel()
+	protected void startRetrieveCurrentPanel()
 	{
 		if (isBusy())
 		{
@@ -1256,7 +1255,7 @@ public class TableListPanel
 		}
 	}
 
-	private void startRetrieveThread(final boolean withMessage)
+	protected void startRetrieveThread(final boolean withMessage)
 	{
 		panelRetrieveThread = new WbThread("TableListPanel RetrievePanel")
 		{
@@ -1275,7 +1274,7 @@ public class TableListPanel
 		panelRetrieveThread.start();
 	}
 
-	private void retrieveCurrentPanel(final boolean withMessage)
+	protected void retrieveCurrentPanel(final boolean withMessage)
 	{
 		if (this.isBusy() || this.dbConnection.isBusy())
 		{
@@ -1351,7 +1350,7 @@ public class TableListPanel
 		}
 	}
 
-	private synchronized void setBusy(boolean aFlag)
+	protected void setBusy(boolean aFlag)
 	{
 		synchronized (busyLock)
 		{
@@ -1380,7 +1379,7 @@ public class TableListPanel
 		}
 	}
 
-	private void retrieveIndexes()
+	protected void retrieveIndexes()
 		throws SQLException
 	{
 		try
@@ -1664,7 +1663,7 @@ public class TableListPanel
 		}
 	}
 
-	private void dropIndexes()
+	protected void dropIndexes()
 	{
 		if (this.indexes.getSelectedRowCount() == 0) return;
 		int rows[] = this.indexes.getSelectedRows();
@@ -1714,7 +1713,7 @@ public class TableListPanel
 		return false;
 	}
 
-	private void updateDisplayClients()
+	protected void updateDisplayClients()
 	{
 		if (this.tableListClients == null) return;
 		TableModel model = this.tableList.getModel();
@@ -1775,7 +1774,7 @@ public class TableListPanel
 		deleter.showDialog(f);
 	}
 
-	private void createScript()
+	protected void createScript()
 	{
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		int[] rows = this.tableList.getSelectedRows();
@@ -1796,7 +1795,7 @@ public class TableListPanel
 		scripterUI.show(SwingUtilities.getWindowAncestor(this));
 	}
 
-	private void createDummyInserts()
+	protected void createDummyInserts()
 	{
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		int[] rows = this.tableList.getSelectedRows();
@@ -1821,7 +1820,7 @@ public class TableListPanel
 		scripterUI.show(SwingUtilities.getWindowAncestor(this));
 	}
 
-	private void createDefaultSelects()
+	protected void createDefaultSelects()
 	{
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		int[] rows = this.tableList.getSelectedRows();

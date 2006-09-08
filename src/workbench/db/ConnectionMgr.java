@@ -505,7 +505,8 @@ public class ConnectionMgr
 	{
 		if (con == null) return;
 		String url = con.getUrl();
-		if (url != null && !url.startsWith("jdbc:hsqldb")) return;
+		if (url == null) return;
+		if (!url.startsWith("jdbc:hsqldb")) return;
 
 		// this is a HSQL server connection. Do not shut down this!
 		if (url.startsWith("jdbc:hsqldb:hsql:")) return;

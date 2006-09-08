@@ -29,6 +29,7 @@ import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -43,10 +44,10 @@ public class ObjectScripterUI
 	public static final int TYPE_INSERT = 2;
 	public static final int TYPE_GENERATE = 3;
 
-	private Scripter scripter;
-	private JLabel statusMessage;
-	private EditorPanel editor;
-	private JFrame window;
+	protected Scripter scripter;
+	protected JLabel statusMessage;
+	protected EditorPanel editor;
+	protected JFrame window;
 	private boolean isRunning;
 	private Object runMonitor = new Object();
 
@@ -102,7 +103,7 @@ public class ObjectScripterUI
 					setRunning(false);
 					EventQueue.invokeLater(new Runnable()
 					{
-						public void run() { statusMessage.setText(""); }
+						public void run() { statusMessage.setText(StringUtil.EMPTY_STRING); }
 					});
 				}
 			}
@@ -135,7 +136,7 @@ public class ObjectScripterUI
 			}
 			this.window.addWindowListener(this);
 		}
-		this.window.show();
+		this.window.setVisible(true);
 		this.startScripting();
 	}
 
@@ -176,12 +177,12 @@ public class ObjectScripterUI
 		t.start();
 	}
 	
-	private void closeWindow()
+	protected void closeWindow()
 	{
 		if (isRunning()) return;
 		Settings.getInstance().storeWindowPosition(this.window, ObjectScripterUI.class.getName());
 		Settings.getInstance().storeWindowSize(this.window, ObjectScripterUI.class.getName());
-		this.window.hide();
+		this.window.setVisible(false);
 		this.window.dispose();
 	}
 	

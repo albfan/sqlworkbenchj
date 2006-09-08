@@ -66,6 +66,7 @@ public class WbImportTest extends TestCase
 	
 	protected void setUp() throws Exception
 	{
+		super.setUp();
 		this.connection = prepareDatabase();
 		this.importCmd.setConnection(this.connection);
 	}
@@ -73,6 +74,7 @@ public class WbImportTest extends TestCase
 	protected void tearDown() throws Exception
 	{
 		this.connection.disconnect();
+		super.tearDown();
 	}
 	
 	public void testPartialXmlImport()

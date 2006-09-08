@@ -72,7 +72,7 @@ public class HelpViewerFrame
 		}
 	}
 	
-	private void saveSettings()
+	protected void saveSettings()
 	{
 		Settings.getInstance().storeWindowPosition(this);
 		Settings.getInstance().storeWindowSize(this);

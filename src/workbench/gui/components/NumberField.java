@@ -25,10 +25,9 @@ import javax.swing.text.PlainDocument;
 
 public class NumberField extends JTextField
 {
-	private Toolkit toolkit;
 	private NumberFormat integerFormatter;
-	private boolean allowDecimals = false;
-	private char decimalSep = '.';
+	protected boolean allowDecimals = false;
+	protected char decimalSep = '.';
 	
 	public NumberField()
 	{
@@ -47,7 +46,6 @@ public class NumberField extends JTextField
 
 	private void init()
 	{
-		this.toolkit = Toolkit.getDefaultToolkit();
 		integerFormatter = NumberFormat.getNumberInstance(Locale.getDefault());
 		integerFormatter.setParseIntegerOnly(true);
 	}
@@ -77,7 +75,7 @@ public class NumberField extends JTextField
 		{
 			// This should never happen because insertString allows
 			// only properly formatted data to get in the field.
-			toolkit.beep();
+			Toolkit.getDefaultToolkit().beep();
 		}
 		return retVal;
 	}
@@ -103,15 +101,13 @@ public class NumberField extends JTextField
 			
 			for (int i = 0; i < result.length; i++)
 			{
-				if (Character.isDigit(source[i]) ||
-				    (allowDecimals && source[i] == decimalSep)
-						)
+				if (Character.isDigit(source[i]) || (allowDecimals && source[i] == decimalSep))
 				{
 					result[j++] = source[i];
 				}
 				else
 				{
-					toolkit.beep();
+					Toolkit.getDefaultToolkit().beep();
 					//System.err.println("insertString: " + source[i]);
 				}
 			}

@@ -356,6 +356,10 @@ public class DbMetadata
 		{
 			this.isExcel = true;
 		}
+		else if (productLower.indexOf("access") > -1)
+		{
+			this.isAccess = true;
+		}
 
 		// if the DBMS does not need a specific ProcedureReader
 		// we use the default implementation
@@ -1607,7 +1611,7 @@ public class DbMetadata
 				LogMgr.logError("DbMetadata.getTables()", "Driver returned a NULL ResultSet from getTables()",null);
 				return result;
 			}
-			while (tableRs != null && tableRs.next())
+			while (tableRs.next())
 			{
 				String cat = tableRs.getString(1);
 				String schem = tableRs.getString(2);
@@ -3796,10 +3800,12 @@ public class DbMetadata
 		}
 
 		// now put the real statements together
-		Iterator names = fkCols.keySet().iterator();
+		Iterator names = fkCols.entrySet().iterator();
 		while (names.hasNext())
 		{
-			name = (String)names.next();
+			Map.Entry mapentry = (Map.Entry)names.next();
+			name = (String)mapentry.getKey();
+			colList = (List)mapentry.getValue();
 
 			String stmt = (String)fks.get(name);
 			if (stmt == null)

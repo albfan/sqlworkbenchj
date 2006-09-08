@@ -37,7 +37,7 @@ public class ReplaceCriteriaPanel extends JPanel
 	private static final String PROP_KEY_CASE = "workbench.sql.replace.ignoreCase";
 	private JCheckBox ignoreCase;
 	
-	private JTextField criteria;
+	protected JTextField criteria;
 	private JTextField newValue;
 //	private Replaceable client;
 	

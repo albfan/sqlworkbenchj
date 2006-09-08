@@ -151,6 +151,8 @@ public class SqlFormatter
 		}
 		this.maxSubselectLength = maxSubselectLength;
 		this.nl = Settings.getInstance().getInternalEditorLineEnding();
+		this.dbFunctions = new HashSet();
+		addStandardFunctions(dbFunctions);
 	}
 
 	public String getLineEnding()
@@ -164,10 +166,21 @@ public class SqlFormatter
 	
 	public void setDBFunctions(Set functionNames)
 	{
+		this.dbFunctions = new HashSet();
 		if (functionNames != null)
-			this.dbFunctions = functionNames;
-		else
-			this.dbFunctions = Collections.EMPTY_SET;
+		{
+			this.dbFunctions.addAll(functionNames);
+		}
+		addStandardFunctions(dbFunctions);
+	}
+	
+	private void addStandardFunctions(Set functions)
+	{
+		functions.add("MIN");
+		functions.add("MAX");
+		functions.add("AVG");
+		functions.add("SUM");
+		functions.add("COUNT");
 	}
 	
 	public String getFormattedSql()
@@ -284,20 +297,21 @@ public class SqlFormatter
 		if (last.isWhiteSpace() && current.isWhiteSpace()) return false;
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
 		if (currChar == '(' && isDbFunction(last.getContents())) return false;
-		
+		if (currChar == '(' && last.getContents().equals("SET")) return true;
 		if (last.isLiteral() && (current.isIdentifier() || current.isReservedWord() || current.isOperator())) return true;
-		//if (lastChar == '\'') return false;
+
 		if (last.isLiteral() && current.isLiteral()) return false;
 		if (currChar == '?') return true;
 		if (currChar == '=') return true;
 		if (lastChar == '=') return true;
-		//if (lastChar == '\"') return false;
+		
 		if (lastChar == '.' && current.isIdentifier()) return false;
 		if (lastChar == '(' && current.isReservedWord()) return false;
 		if (lastChar == ')' && !current.isSeparator() ) return true;
 		if ((last.isIdentifier()|| last.isLiteral()) && current.isOperator()) return true;
 		if ((current.isIdentifier() || current.isLiteral()) && last.isOperator()) return true;
 		if (current.isSeparator() || current.isOperator()) return false;
+		if (last.isOperator() && (current.isReservedWord() || current.isIdentifier() || current.isLiteral())) return true;
 		if (last.isSeparator() || last.isOperator()) return false;
 		return true;
 	}
@@ -791,7 +805,18 @@ public class SqlFormatter
 	{
 		int len = this.result.length();
 		if (len == 0) return true;
-		return (this.result.charAt(len - 1) == '\n');
+		
+		// simulates endsWith() on a StringBuffer
+		int pos = result.lastIndexOf(this.nl);
+		if (pos == len - nl.length()) return true; 
+		
+		// Current text does not end with a newline, but
+		// if the "current line" consist of the current indent, it 
+		// is considered as a "start of line" as well.
+		String remain = result.substring(pos + nl.length());
+		int indentLength = (indent == null ? 0 : indent.length());
+		if (remain.trim().length() == 0 && remain.length() == indentLength) return true;
+		return false;
 	}
 
 	private void formatSql()
@@ -817,7 +842,10 @@ public class SqlFormatter
 				if (LINE_BREAK_BEFORE.contains(word))
 				{
 					if (!isStartOfLine()) this.appendNewline();
-					if ("SET".equals(word)) this.indent("   ");
+					if ("SET".equals(word)) 
+					{
+						this.indent("   ");
+					}
 					this.appendText(word);
 				}
 				else
@@ -1100,7 +1128,7 @@ public class SqlFormatter
 		throws Exception
 	{
 		SQLToken t = this.lexer.getNextToken(true, false);
-		String verb = t.getContents().toUpperCase();
+		String verb = t.getContents();
 		if (verb.equals("TABLE"))
 		{
 			this.appendText(' ');
@@ -1112,16 +1140,32 @@ public class SqlFormatter
 		else if (verb.equals("VIEW") || verb.equals("SNAPSHOT"))
 		{
 			this.appendText(' ');
-			this.appendText(t.getContents());
+			this.appendText(verb);
 			this.appendText(' ');
 			return this.processCreateView(t);
 		}
 		else if (verb.equals("INDEX"))
 		{
 			this.appendText(' ');
-			this.appendText(t.getContents());
+			this.appendText(verb);
 			//this.appendText(' ');
 			return this.processCreateIndex(t);
+		}
+		else if (verb.equals("OR"))
+		{
+			// Check for Oracle's CREATE OR REPLACE
+			this.appendText(' ');
+			this.appendText(verb);
+			t = this.lexer.getNextToken(true, false);
+			if (t == null) return t;
+			verb = t.getContents();
+			if (verb.equals("REPLACE"))
+			{
+				this.appendText(' ');
+				this.appendText(verb);
+				this.appendText(' ');
+				return this.processCreateView(t);
+			}
 		}
 
 		return t;

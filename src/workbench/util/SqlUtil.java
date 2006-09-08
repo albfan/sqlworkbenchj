@@ -263,13 +263,16 @@ public class SqlUtil
 	{
 		if (expression == null) return null;
 		
-		String result = expression.trim();
-		int pos = StringUtil.findFirstWhiteSpace(result);
-		if (pos > -1)
-		{
-			result = result.substring(0, pos).trim();
-		}
-		return result;
+		List elements = StringUtil.stringToList(expression, " ", true, true, true);
+		
+		return (String)elements.get(0);
+//		String result = expression.trim();
+//		int pos = StringUtil.findFirstWhiteSpace(result);
+//		if (pos > -1)
+//		{
+//			result = result.substring(0, pos).trim();
+//		}
+//		return result;
 	}
 	
 	public static List getTables(String aSql)

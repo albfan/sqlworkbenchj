@@ -36,9 +36,9 @@ import workbench.util.WbThread;
 public class StartEditAction
 	extends WbAction
 {
-	private DbData client;
+	protected DbData client;
 
-	private boolean switchedOn = false;
+	protected boolean switchedOn = false;
 	private JToggleButton toggleButton;
 	private JCheckBoxMenuItem toggleMenu;
 

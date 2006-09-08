@@ -50,11 +50,11 @@ import workbench.util.WbThread;
 public class CompletionPopup
 	implements FocusListener, MouseListener, KeyListener
 {
-	private JEditTextArea editor;
+	protected JEditTextArea editor;
 	private JScrollPane scroll;
 	private JWindow window;
 	private JPanel content;
-	private JList elementList;
+	protected JList elementList;
 	private ListModel data;
 	private JComponent headerComponent;
 	private String pasteCase;
@@ -62,7 +62,7 @@ public class CompletionPopup
 	private boolean appendSpace;
 	private boolean selectCurrentWordInEditor;
 	private String columnPrefix;
-	private CompletionSearchField searchField;
+	protected CompletionSearchField searchField;
 	
 	public CompletionPopup(JEditTextArea ed, JComponent header, ListModel listData)
 	{
@@ -248,7 +248,6 @@ public class CompletionPopup
 					if (o instanceof TableAlias)
 					{
 						TableAlias a = (TableAlias)o;
-						String name = a.getNameToUse();
 						value = getPasteValue(a.getNameToUse());
 					}
 					else if (o instanceof SelectAllMarker)
@@ -283,7 +282,7 @@ public class CompletionPopup
 						}
 						value = cols.toString();
 					}
-					else if (o != null)
+					else
 					{
 						value = getPasteValue(o.toString());
 					}

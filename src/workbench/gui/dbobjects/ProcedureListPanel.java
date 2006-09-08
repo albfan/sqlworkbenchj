@@ -88,7 +88,7 @@ public class ProcedureListPanel
 	private CriteriaPanel findPanel;
 	private WbTable procList;
 	private WbTable procColumns;
-	private DbObjectSourcePanel source;
+	protected DbObjectSourcePanel source;
 	private JTabbedPane displayTab;
 	private WbSplitPane splitPane;
 	private String currentSchema;
@@ -99,7 +99,7 @@ public class ProcedureListPanel
 	private WbMenuItem createScriptItem;
 	private JLabel infoLabel;
 	private boolean isRetrieving;
-	private ProcStatusRenderer statusRenderer;
+	protected ProcStatusRenderer statusRenderer;
 	//</editor-fold>
 	
 //	private static final String SCRIPT_CMD = "create-script";
@@ -402,7 +402,7 @@ public class ProcedureListPanel
 		retrieveCurrentProcedure();
 	}
 	
-	private void retrieveCurrentProcedure()
+	protected void retrieveCurrentProcedure()
 	{
 		int row = this.procList.getSelectedRow();
 
@@ -502,7 +502,7 @@ public class ProcedureListPanel
 		return 0;
 	}
 	
-	private void createScript()
+	protected void createScript()
 	{
 		if (this.procList.getSelectedRowCount() == 0) return;
 		int rows[] = this.procList.getSelectedRows();

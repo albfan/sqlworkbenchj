@@ -32,9 +32,9 @@ import workbench.util.WbPersistence;
 public class ConnectionProfile
 	implements PropertyChangeListener
 {
-	public static String PROPERTY_PROFILE_GROUP = "profileGroup";
+	public static final String PROPERTY_PROFILE_GROUP = "profileGroup";
 	private static final String CRYPT_PREFIX = "@*@";
-	private String name;
+	protected String name;
 	private String url;
 	private String driverclass;
 	private String username;
@@ -42,7 +42,7 @@ public class ConnectionProfile
 	private String driverName;
 	private String group;
 	private boolean autocommit;
-	private boolean disableUpdateTableCheck;
+	private boolean disableUpdateTableCheck = true;
 	private boolean rollbackBeforeDisconnect;
 	private int id;
 	private static int nextId = 1;
@@ -60,7 +60,7 @@ public class ConnectionProfile
 	private boolean includeNullInInsert = true;
 	private boolean removeComments = false;
 	private boolean rememberExplorerSchema = false;
-	
+
 	static
 	{
 		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
@@ -74,7 +74,7 @@ public class ConnectionProfile
     this.changed = true;
 		Settings.getInstance().addPropertyChangeListener(this);
 	}
-	
+
 	public ConnectionProfile(String aName, String driverClass, String url, String userName, String pwd)
 	{
 		this();
@@ -106,7 +106,7 @@ public class ConnectionProfile
 	{
 		return rememberExplorerSchema;
 	}
-		
+
 	public void setStoreExplorerSchema(boolean value)
 	{
 		if (value != rememberExplorerSchema )
@@ -115,20 +115,20 @@ public class ConnectionProfile
 			changed = true;
 		}
 	}
-	
-	public String getGroup() 
-	{ 
+
+	public String getGroup()
+	{
 		if (this.group == null) return ResourceMgr.getString("LblDefGroup");
-		return this.group; 
+		return this.group;
 	}
-	
-	public void setGroup(String g) 
-	{ 
+
+	public void setGroup(String g)
+	{
 		if (StringUtil.equalString(this.group, g)) return;
-		this.group = g; 
+		this.group = g;
 		this.changed = true;
 	}
-	
+
   public String getIdentifier()
   {
     return Integer.toString(this.id);
@@ -145,15 +145,15 @@ public class ConnectionProfile
 		}
 		return false;
 	}
-	
+
 	public ProfileKey getKey()
 	{
 		return new ProfileKey(this.name, this.getGroup());
 	}
-	
+
 	/**
 	 * Return true if the application should use a separate connection
-	 * per tab or if all SQL tabs including DbExplorer tabs and windows 
+	 * per tab or if all SQL tabs including DbExplorer tabs and windows
 	 * should share the same connection
 	 */
 	public boolean getUseSeparateConnectionPerTab()
@@ -167,10 +167,10 @@ public class ConnectionProfile
 		this.separateConnection = aFlag;
 	}
 
-	public void setIncludeNullInInsert(boolean flag) 
+	public void setIncludeNullInInsert(boolean flag)
 	{
 		if (this.includeNullInInsert != flag) this.changed = true;
-		this.includeNullInInsert = flag; 
+		this.includeNullInInsert = flag;
 	}
 	/**
 	 * Define how columns with a NULL value are treated when creating INSERT statements.
@@ -179,47 +179,47 @@ public class ConnectionProfile
 	 *
 	 * @see workbench.storage.StatementFactory#createInsertStatement(workbench.storage.RowData, boolean, String, java.util.List)
 	 */
-	public boolean getIncludeNullInInsert() 
-	{ 
-		return this.includeNullInInsert; 
+	public boolean getIncludeNullInInsert()
+	{
+		return this.includeNullInInsert;
 	}
 
 	/**
 	 * Define how empty strings (Strings with length == 0) are treated.
-	 * If this is set to true, then they are treated as a NULL value, else an 
+	 * If this is set to true, then they are treated as a NULL value, else an
 	 * empty string is sent to the database during update and insert.
 	 * @see #setIncludeNullInInsert(boolean)
 	 */
-	public void setEmptyStringIsNull(boolean flag) 
+	public void setEmptyStringIsNull(boolean flag)
 	{
 		if (this.emptyStringIsNull != flag) this.changed = true;
-		this.emptyStringIsNull = flag; 
+		this.emptyStringIsNull = flag;
 	}
-	
-	public boolean getEmptyStringIsNull() 
-	{ 
-		return this.emptyStringIsNull; 
+
+	public boolean getEmptyStringIsNull()
+	{
+		return this.emptyStringIsNull;
 	}
 
 	/**
-	 * Define how comments inside SQL statements are handled. 
+	 * Define how comments inside SQL statements are handled.
 	 * If this is set to true, then any comment (single line comments with --
 	 * or multi-line comments using /* are removed from the statement
-	 * before sending it to the database. 
-	 * 
+	 * before sending it to the database.
+	 *
 	 * @see workbench.sql.DefaultStatementRunner#runStatement(String, int, int)
 	 */
-	public void setRemoveComments(boolean flag) 
-	{ 
+	public void setRemoveComments(boolean flag)
+	{
 		if (this.removeComments != flag) this.changed = true;
-		this.removeComments = flag; 
+		this.removeComments = flag;
 	}
-	
-	public boolean getRemoveComments() 
-	{ 
-		return this.removeComments; 
+
+	public boolean getRemoveComments()
+	{
+		return this.removeComments;
 	}
-	
+
 	/**
 	 * @deprecated Replaced by {@link #setUseSeparateConnectionPerTab(boolean)}
 	 */
@@ -388,7 +388,7 @@ public class ConnectionProfile
 	{
 		return id;
 	}
-	
+
 	public boolean equals(Object other)
 	{
 		try

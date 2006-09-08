@@ -26,7 +26,6 @@ import workbench.sql.formatter.SQLToken;
 public class InsertAnalyzer
 	extends BaseAnalyzer
 {
-	private final Pattern INTO_PATTERN = Pattern.compile("\\sINTO\\s|\\sINTO$", Pattern.CASE_INSENSITIVE);
 	
 	public InsertAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{	
@@ -112,11 +111,8 @@ public class InsertAnalyzer
 		{
 			if (cursorPos > tableStart)
 			{
-				if (id != null)
-				{
-					schemaForTableList = id.getSchema();
-				}
-				else
+				schemaForTableList = id.getSchema();
+				if (schemaForTableList == null)
 				{
 					schemaForTableList = this.dbConnection.getMetadata().getCurrentSchema();
 				}

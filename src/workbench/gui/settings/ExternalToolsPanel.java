@@ -73,11 +73,8 @@ public class ExternalToolsPanel
 		listPanel.setLayout(new BorderLayout());
 		listPanel.add(scroll, BorderLayout.CENTER);
 		listPanel.add(this.toolbar, BorderLayout.NORTH);
-		Dimension d = toolbar.getPreferredSize();
 		
 		splitPane.setLeftComponent(listPanel);
-		
-		JPanel infoPanel = new JPanel(new BorderLayout());
 		
 		definitionPanel = new ToolDefinitionPanel();
 		splitPane.setRightComponent(definitionPanel);

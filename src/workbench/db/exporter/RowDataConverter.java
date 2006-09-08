@@ -60,6 +60,8 @@ public abstract class RowDataConverter
 	protected boolean needsUpdateTable = false;
 	private OutputFactory factory;
 	private boolean compressExternalFiles;
+	protected boolean useRowNumForBlobFile = true;
+	protected int[] blobNameCols = null;
 	
 	/**
 	 *	The metadata for the result set that should be exported
@@ -120,20 +122,41 @@ public abstract class RowDataConverter
 		return this.factory.createOutputStream(output);
 	}
 	
-	protected String writeBlobFile(Object value, int colIndex, long rowNum)
+	protected File createBlobFile(RowData row, int colIndex, long rowNum)
 	{
-		if (value == null || value instanceof NullValue) return null;
 		StringBuffer fname = new StringBuffer(baseFilename.length() + 10);
-		
+
 		fname.append(baseFilename);
-		fname.append("_r");
-		fname.append(rowNum+1);
-		fname.append("_c");
-		fname.append(colIndex+1);
+		if (this.useRowNumForBlobFile || this.blobNameCols == null)
+		{
+			fname.append("_r");
+			fname.append(rowNum+1);
+			fname.append("_c");
+			fname.append(colIndex+1);
+		}
+		else
+		{
+			String col = this.metaData.getColumnName(colIndex);
+			fname.append('_');
+			fname.append(StringUtil.makeFilename(col));
+			fname.append("_#");
+			for (int i = 0; i < blobNameCols.length; i++)
+			{
+				int c = blobNameCols[i];
+				Object o = row.getValue(c);
+				if (i > 0) fname.append('_');
+				fname.append(StringUtil.makeFilename(o.toString()));
+			}
+		}
 		fname.append(".data");
-		
 		String realName = fname.toString();
 		File f = new File(getBaseDir(), realName);
+		return f;
+	}
+	
+	protected void writeBlobFile(Object value, File f)
+	{
+		if (value == null || value instanceof NullValue);
 		try
 		{
 			OutputStream out = this.createOutputStream(f);
@@ -142,9 +165,7 @@ public abstract class RowDataConverter
 		catch (Exception e)
 		{
 			LogMgr.logError("TextRowDataConverter.writeBlobFile()", "Error writing blob data", e);
-			return "";
 		}
-		return realName;
 	}
 	
 	protected File getBaseDir()

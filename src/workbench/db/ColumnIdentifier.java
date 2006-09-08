@@ -14,6 +14,7 @@ package workbench.db;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
+import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 
 /**
@@ -273,6 +274,7 @@ public class ColumnIdentifier
 				}
 				catch (Exception e)
 				{
+					LogMgr.logError("ColumnIdentifier.getColumnClass()", "Could not obtain column class", e);
 					this.columnClass = null;
 				}
 			}

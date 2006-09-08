@@ -22,7 +22,7 @@ import java.util.*;
  * cached.
  *
  * @author Slava Pestov
- * @version $Id: TokenMarker.java,v 1.9 2006-08-26 14:04:12 thomas Exp $
+ * @version $Id: TokenMarker.java,v 1.10 2006-09-08 16:46:33 thomas Exp $
  *
  * @see Token
  */
@@ -310,7 +310,7 @@ public abstract class TokenMarker
 	/**
 	 * Inner class for storing information about tokenized lines.
 	 */
-	public class LineInfo
+	static public class LineInfo
 	{
 		/**
 		 * Creates a new LineInfo object with token = Token.NULL

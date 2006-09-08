@@ -37,10 +37,10 @@ public class DbObjectSourcePanel
 	extends JPanel
 	implements ActionListener, Resettable
 {
-	private EditorPanel sourceEditor;
-	private ReloadAction reloadSource;
-	private RunStatement recreateObject;
-	private DropDownButton editButton;
+	protected EditorPanel sourceEditor;
+	protected ReloadAction reloadSource;
+	protected RunStatement recreateObject;
+	protected DropDownButton editButton;
 	private EditorTabSelectMenu selectTabMenu;
 	private MainWindow parentWindow;
 	

@@ -33,6 +33,7 @@ public class SqlServerMetadata
 {
 	private Connection dbConn = null;
 	private DbMetadata meta = null;
+	private final String GET_PROC_SQL = "{call sp_stored_procedures '%', ?}";
 
 	public SqlServerMetadata(DbMetadata db)
 	{
@@ -129,6 +130,4 @@ public class SqlServerMetadata
 		return ds;
 	}
 
-	private final String GET_PROC_SQL = "{call sp_stored_procedures '%', ?}";
-	
 }

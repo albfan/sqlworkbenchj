@@ -582,22 +582,16 @@ public class WbConnection
 		return this.metaData.getDDLNeedsCommit();
 	}
 
-	public void addChangeListener(PropertyChangeListener l)
+	public synchronized void addChangeListener(PropertyChangeListener l)
 	{
 		if (this.listeners == null) this.listeners = new ArrayList();
-		synchronized (this.listeners)
-		{
-			this.listeners.add(l);
-		}
+		this.listeners.add(l);
 	}
 
-	public void removeChangeListener(PropertyChangeListener l)
+	public synchronized void removeChangeListener(PropertyChangeListener l)
 	{
 		if (this.listeners == null) return;
-		synchronized (this.listeners)
-		{
-			this.listeners.remove(l);
-		}
+		this.listeners.remove(l);
 	}
 
 	private void fireConnectionStateChanged(String property, String oldValue, String newValue)

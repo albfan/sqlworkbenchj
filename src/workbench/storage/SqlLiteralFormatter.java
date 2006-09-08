@@ -81,14 +81,13 @@ public class SqlLiteralFormatter
 		
 		if (customizedMap != null)
 		{
-			HashMap m = (HashMap)customizedMap;
 			if (result != null)
 			{
-				result.putAll(m);
+				result.putAll(customizedMap);
 			}
 			else
 			{
-				result = m;
+				result = customizedMap;
 			}
 		}
 		return result;

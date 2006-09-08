@@ -31,7 +31,7 @@ import workbench.resource.Settings;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.23 2006-08-31 22:34:56 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.24 2006-09-08 16:46:33 thomas Exp $
  */
 public class TextAreaPainter 
 	extends JComponent 
@@ -295,39 +295,33 @@ public class TextAreaPainter
 			this.gutterWidth = 0;
 		}
 
-		boolean paintLineNumbers = false;
-		
 		Rectangle clipRect = gfx.getClipBounds();
-		Shape clip = gfx.getClip();
+//		Shape clip = gfx.getClip();
 
 		if (clipRect != null)
 		{
 			gfx.setColor(this.getBackground());
 			gfx.fillRect(clipRect.x,clipRect.y,clipRect.width,clipRect.height);
 
-			if (this.showLineNumbers && clipRect.x < gutterWidth)
+			if (this.showLineNumbers)// && clipRect.x < gutterWidth)
 			{
-				paintLineNumbers = true;
 				gfx.setColor(GUTTER_BACKGROUND);
 				gfx.fillRect(clipRect.x, clipRect.y, gutterWidth - clipRect.x, clipRect.height);
 			}
-		}
-		else
-		{
-			System.out.println("No clip!");
 		}
 		
 		int height = fm.getHeight();
 		
 		int firstInvalid = firstVisible + clipRect.y / height;
-		int lastInvalid = firstVisible + (clipRect.y + clipRect.height) / height;
+		int lastInvalid = firstVisible + ((clipRect.y + clipRect.height) / height);
+		if (lastInvalid > lastLine) lastInvalid = lastLine;
 		
 		try
 		{
 			TokenMarker tokenMarker = textArea.getDocument().getTokenMarker();
 			int x = textArea.getHorizontalOffset();
 
-			Color f = this.getForeground();
+			//Color f = this.getForeground();
 			
 			int endLine = firstVisible + visibleCount;
 			if (endLine > lastLine) endLine = lastLine;
@@ -339,7 +333,7 @@ public class TextAreaPainter
 			for (int line = firstVisible; line <= endLine; line++)
 			{
 				int y = textArea.lineToY(line);
-				if (paintLineNumbers)
+				if (this.showLineNumbers)
 				{
 					String s = Integer.toString(line);
 					int w = s.length() * this.gutterCharWidth;
@@ -347,20 +341,19 @@ public class TextAreaPainter
 					gf2d.drawString(s, gutterX - w, y);
 				}
 				
-				if (line >= firstInvalid && line < lastLine) 
+				if (line >= firstInvalid && line < lastInvalid) 
 				{
-					if (paintLineNumbers)
+					if (this.showLineNumbers)
 					{
 						gfx.setClip(this.gutterWidth, 0, cw, ch);
-//						gfx.translate(this.gutterWidth,0);		
-//						gf2d.setColor(f);
+						gfx.translate(this.gutterWidth,0);		
 					}		
 					
-					paintLine(gfx,tokenMarker,line,y,x+gutterWidth);
+					paintLine(gfx,tokenMarker,line,y,x);
 					
-					if (paintLineNumbers)
+					if (this.showLineNumbers)
 					{
-//						gfx.translate(-this.gutterWidth,0);				
+						gfx.translate(-this.gutterWidth,0);				
 						gfx.setClip(null);
 					}
 				}
@@ -519,28 +512,28 @@ public class TextAreaPainter
 		if(textArea.isSelectionRectangular())
 		{
 			int lineLen = textArea.getLineLength(line);
-			x1 = textArea._offsetToX(line,Math.min(lineLen,selectionStart - textArea.getLineStartOffset(selectionStartLine))) + this.gutterWidth;
-			x2 = textArea._offsetToX(line,Math.min(lineLen,selectionEnd - textArea.getLineStartOffset(selectionEndLine))) + this.gutterWidth;
+			x1 = textArea._offsetToX(line,Math.min(lineLen,selectionStart - textArea.getLineStartOffset(selectionStartLine)));// + this.gutterWidth;
+			x2 = textArea._offsetToX(line,Math.min(lineLen,selectionEnd - textArea.getLineStartOffset(selectionEndLine)));// + this.gutterWidth;
 			if(x1 == x2) x2++;
 		}
 		else if(selectionStartLine == selectionEndLine)
 		{
-			x1 = textArea._offsetToX(line,selectionStart - lineStart) + this.gutterWidth;
-			x2 = textArea._offsetToX(line,selectionEnd - lineStart) + this.gutterWidth;
+			x1 = textArea._offsetToX(line,selectionStart - lineStart);// + this.gutterWidth;
+			x2 = textArea._offsetToX(line,selectionEnd - lineStart);// + this.gutterWidth;
 		}
 		else if(line == selectionStartLine)
 		{
-			x1 = textArea._offsetToX(line,selectionStart - lineStart) + this.gutterWidth;
+			x1 = textArea._offsetToX(line,selectionStart - lineStart);// + this.gutterWidth;
 			x2 = getWidth();
 		}
 		else if(line == selectionEndLine)
 		{
-			x1 = gutterWidth;
-			x2 = textArea._offsetToX(line,selectionEnd - lineStart) + this.gutterWidth;
+			x1 = 0; //gutterWidth;
+			x2 = textArea._offsetToX(line,selectionEnd - lineStart);// + this.gutterWidth;
 		}
 		else
 		{
-			x1 = gutterWidth;
+			x1 = 0; //gutterWidth;
 			x2 = getWidth();
 		}
 
@@ -556,7 +549,7 @@ public class TextAreaPainter
 		if(position == -1) return;
 
 		y += fm.getLeading() + fm.getMaxDescent();
-		int x = textArea._offsetToX(line,position) + this.gutterWidth;
+		int x = textArea._offsetToX(line,position);// + this.gutterWidth;
 		gfx.setColor(bracketHighlightColor);
 		// Hack!!! Since there is no fast way to get the character
 		// from the bracket matching routine, we use ( since all
@@ -569,7 +562,7 @@ public class TextAreaPainter
 		if(textArea.isCaretVisible())
 		{
 			int offset = textArea.getCaretPosition() - textArea.getLineStartOffset(line);
-			int caretX = textArea._offsetToX(line,offset) + this.gutterWidth;
+			int caretX = textArea._offsetToX(line,offset);// + this.gutterWidth;
 			int caretWidth = (textArea.isOverwriteEnabled() ? fm.charWidth('w') : 2);
 			y += fm.getLeading() + fm.getMaxDescent();
 			int height = fm.getHeight();

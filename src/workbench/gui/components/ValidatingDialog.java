@@ -46,8 +46,8 @@ public class ValidatingDialog
 	extends JDialog
 	implements WindowListener, ActionListener
 {
-	private ValidatingComponent validator = null;
-	private JComponent editorComponent;
+	protected ValidatingComponent validator = null;
+	protected JComponent editorComponent;
 	private JButton[] optionButtons;
 	//private JButton okButton;
 	private JButton cancelButton;

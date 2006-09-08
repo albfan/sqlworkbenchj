@@ -44,7 +44,7 @@ public class DbDriver
 	private Driver driverClassInstance;
 	private URLClassLoader classLoader;
 
-	private String name;
+	protected String name;
 	private String driverClass;
 
 	private String identifier;
@@ -400,6 +400,15 @@ public class DbDriver
 			return false;
 		}
 	}
+	
+	public int hashCode() 
+	{ 
+		StringBuffer b = new StringBuffer(60);
+		b.append(driverClass == null ? "" : driverClass);
+		b.append('$');
+		b.append(name);
+		return b.toString().hashCode();
+	} 
 
 	public static Comparator getNameComparator()
 	{

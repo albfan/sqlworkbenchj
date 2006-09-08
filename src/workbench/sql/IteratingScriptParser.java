@@ -48,7 +48,6 @@ public class IteratingScriptParser
 	private boolean commentOn = false;
 	private boolean blockComment = false;
 	private boolean singleLineComment = false;
-	private boolean singleLineDelimiter = false;
 	private boolean startOfLine = true;
 	private int lastNewLineStart = 0;
 	private char lastQuote = 0;
@@ -116,11 +115,6 @@ public class IteratingScriptParser
 		this.checkEscapedQuotes = false;
 		this.storeSqlInCommands = true;
 		this.reset();
-	}
-
-	public void setIsSingleLineDelimiter(boolean flag)
-	{
-		this.singleLineDelimiter = flag;
 	}
 
 	public void setCheckForSingleLineCommands(boolean flag)

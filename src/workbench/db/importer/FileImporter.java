@@ -32,7 +32,6 @@ public class FileImporter
 	private XmlImportOptions xmlOptions;
 	private ImportOptions generalOptions;
 	private String inputFile;
-	private List inputColumns;
 	private TableIdentifier table;
 	private RowDataProducer producer;
 	private WbConnection connection;
@@ -112,7 +111,6 @@ public class FileImporter
 	private void setInputFile(String inputFilename)
 	{
 		this.inputFile = inputFilename;
-		this.inputColumns = null;
 		this.producer = null;
 	}
 	
@@ -146,18 +144,6 @@ public class FileImporter
 			this.producer = factory.getProducer();
 		}
 		return this.producer;
-	}
-
-	/**
-	 *	Return the list of columns defined in the file
-	 */
-	public List getFileColumns()
-	{
-		if (this.inputColumns == null)
-		{
-			getProducer();
-		}
-		return this.inputColumns;
 	}
 
 	public void setImportColumns(List cols)

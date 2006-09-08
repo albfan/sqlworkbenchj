@@ -26,7 +26,7 @@ public class MetaDataSqlManager
 {
 	private String productName;
 	private static final GetMetaDataSql MARKER = new GetMetaDataSql();
-	private static final String NO_STRING = new String();
+	private static final String NO_STRING = "";
 	
 	private GetMetaDataSql procedureSource = MARKER;
 	private GetMetaDataSql viewSource = MARKER;

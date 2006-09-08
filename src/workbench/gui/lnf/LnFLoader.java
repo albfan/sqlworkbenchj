@@ -26,7 +26,6 @@ import workbench.WbManager;
  */
 public class LnFLoader
 {
-	private LookAndFeel instance;
 	private LnFDefinition lnfDef;
 	private String[] liblist;
 	

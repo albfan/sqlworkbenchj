@@ -21,6 +21,7 @@ import java.util.Map;
 import workbench.util.ExceptionUtil;
 
 import workbench.log.LogMgr;
+import workbench.util.SqlUtil;
 
 /**
 * A class to read table level constraints from the database.
@@ -97,8 +98,7 @@ public abstract class AbstractConstraintReader
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
-			//try { stmt.close(); } catch (Throwable th) {}
+			SqlUtil.closeResult(rs);
 		}
 		return result;
 	}
@@ -158,8 +158,7 @@ public abstract class AbstractConstraintReader
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
-			try { stmt.close(); } catch (Throwable th) {}
+			SqlUtil.closeAll(rs, stmt);
 		}
 		return result.toString();
 	}

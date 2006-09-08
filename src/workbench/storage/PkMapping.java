@@ -42,7 +42,12 @@ public class PkMapping
 	
 	private static PkMapping instance;
 	
-	public synchronized static PkMapping getInstance()
+	public static synchronized boolean isInitialized()
+	{
+		return instance != null;
+	}
+	
+	public static synchronized PkMapping getInstance()
 	{
 		if (instance == null)
 		{
@@ -57,7 +62,7 @@ public class PkMapping
 		loadMapping(filename);
 	}
 
-	public String getMappingAsText()
+	public synchronized String getMappingAsText()
 	{
 		if (this.columnMapping == null) return null;
 		if (this.columnMapping.size() == 0) return null;
@@ -73,7 +78,7 @@ public class PkMapping
 		return result.toString();
 	}
 	
-	public void loadMapping(String filename)
+	public synchronized void loadMapping(String filename)
 	{
 		if (filename == null) return;
 		Properties props = new Properties();
@@ -116,20 +121,22 @@ public class PkMapping
 		}
 	}
 
-	public void removeMapping(WbConnection con, String table)
+	public synchronized void removeMapping(WbConnection con, String table)
 	{
 		if (this.columnMapping == null) return;
 		this.columnMapping.remove(table);
 	}
 	
-	public void addMapping(String table, String columns)
+	public synchronized void addMapping(String table, String columns)
 	{
 		if (this.columnMapping == null) this.columnMapping = new HashMap();
-		if (!StringUtil.isEmptyString(table) && !StringUtil.isEmptyString(columns));
-		this.columnMapping.put(table.toLowerCase(), columns);
+		if (!StringUtil.isEmptyString(table) && !StringUtil.isEmptyString(columns))
+		{
+			this.columnMapping.put(table.toLowerCase(), columns);
+		}
 	}
 	
-	public Collection getPKColumns(WbConnection con, TableIdentifier tbl)
+	public synchronized Collection getPKColumns(WbConnection con, TableIdentifier tbl)
 	{
 		if (this.columnMapping == null) return null;
 		String columns = (String) this.columnMapping.get(tbl.getTableName().toLowerCase());
@@ -146,13 +153,13 @@ public class PkMapping
 		return cols;
 	}
 
-	public Map getMapping()
+	public synchronized Map getMapping()
 	{
 		if (this.columnMapping == null) return Collections.EMPTY_MAP;
 		return Collections.unmodifiableMap(this.columnMapping);
 	}
 	
-	public void saveMapping(String filename)
+	public synchronized void saveMapping(String filename)
 	{
 		if (this.columnMapping == null) return;
 		BufferedWriter out = null;
@@ -184,7 +191,7 @@ public class PkMapping
 		}
 	}
 	
-	public void addMapping(String table, ColumnIdentifier[] cols)
+	public synchronized void addMapping(String table, ColumnIdentifier[] cols)
 	{
 		StringBuffer colNames = new StringBuffer(50);
 		for (int i = 0; i < cols.length; i++)

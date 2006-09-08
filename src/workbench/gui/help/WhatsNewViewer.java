@@ -80,13 +80,13 @@ public class WhatsNewViewer
 			public void windowClosing(WindowEvent evt)
 			{
 				saveSettings();
-				hide();
+				setVisible(false);
 				dispose();
 			}
 		});
 	}
 
-	private void saveSettings()
+	protected void saveSettings()
 	{
 		Settings.getInstance().storeWindowPosition(this);
 		Settings.getInstance().storeWindowSize(this);
