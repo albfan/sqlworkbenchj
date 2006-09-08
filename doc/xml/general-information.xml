@@ -51,5 +51,14 @@
     <para>&wb-productname; can be downloaded from <ulink url="http://www.sql-workbench.net">http://www.sql-workbench.net</ulink>
     </para>
   </section>
+	
+	<section id="credits">
+		<title>Credits and thanks</title>
+		<para>
+			Thanks to Christian for his thorough testing, his patience and his continous
+			ideas to improve this tool. His input has influenced and driven a lot of 
+			features and has helped reduce the number of bugs drastically!
+		</para>
+	</section>
 
 </section>

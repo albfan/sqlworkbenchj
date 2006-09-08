@@ -1,5 +1,8 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+
+Build 89, 08.09.2006
+--------------------
 Enh:  (88.23) WbImport will silently convert true/false literals 
       for integer columns into the values 1/0.
 Enh:  (88.23) When generating statements internally, the auto completion paste

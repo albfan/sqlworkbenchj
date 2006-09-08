@@ -46,12 +46,14 @@
 			<para>If this option is not checked, you need to manually enable the <literal>DBMS_OUTPUT</literal>
 				with <xref linkend="command-enableout"/>.
 			</para>
-			<note><para>
-				Due to a bug in the Oracle JDBC driver, you cannot retrieve data from tables that contain 
-				<literal>LONG</literal> or <literal>LONG RAW</literal> columns if the <literal>DBMS_OUTPUT</literal> 
-				package is enabled. In order to be able to display these columns support for <literal>DBMS_OUTPUT</literal> has
+			<note>
+				Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with 
+				the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal> 
+				package is enabled. 
+				In order to be able to display these columns support for <literal>DBMS_OUTPUT</literal> has
 				to be switched off. 
-			</para></note>
+			</note>
+
 		</section>
 
 		<section id="option-animated-icon" xreflabel="Enable animated icons">
@@ -213,7 +215,7 @@
 				this option controls the behaviour when hitting the ESC key. If this option
 				is enabled, the ESC key will also close the popup window with the available
 				choices. If this option is disabled, the ESC key will only close the quicksearch
-				input field.
+				<emphasis>input</emphasis> field.
 			</para>
 		</section>
 		
@@ -223,7 +225,9 @@
 				With this option you can select how the selected object name 
 				from the code completion popup is pasted into the editor. <literal>As is</literal>
 				means, that the values will be inserted into the editor as it was 
-				retrieved from the database. 
+				retrieved from the database. This option will also be used when SQL statements
+				are generated internally (e.g. for updating the result set or when you
+				export/copy data as SQL statements)
 			</para>
 		</section>
 		
@@ -616,12 +620,12 @@
 			the current Look &amp; Feel it will be changed, regardless whether
 			you close the options dialog using Cancel or OK.
 		</para>
-		<note><para>
+		<note>
 			The current look and feel is only changed when you click on the 
 			<guibutton>Make current</guibutton> button. Simply selecting a different entry
 			in the list on the left side will <emphasis role="bold">not</emphasis> 
 			change the look and feel.
-		</para></note>
+		</note>
 	</section>
 	
 </section>

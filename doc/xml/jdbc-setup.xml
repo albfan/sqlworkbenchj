@@ -37,9 +37,8 @@
 		</para>
 
 		<note>
-			<para>When using the JDBC-ODBC bridge you do not need to specify a library as
-				the necessary drivers are already part of the Java runtime.
-			</para>
+			When using the JDBC-ODBC bridge you do not need to specify a library as
+			the necessary drivers are already part of the Java runtime.
 		</note>
 
 		<para>You can assign a sample URL to each driver, which will be put into

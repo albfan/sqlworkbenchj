@@ -102,9 +102,9 @@ another_variable=24</programlisting>
         or you put the quotes around the variable's placeholder, e.g.: <literal>WHERE name='$[name]';</literal>
       </para>
 			
-			<note><para>
+			<note>
 				As you can see the variable substitution is also done inside quoted literals.
-			</para></note>
+			</note>
 			
       <para>
         If you are using values in your regualar statements that actually need the prefix (<literal>$[</literal> or

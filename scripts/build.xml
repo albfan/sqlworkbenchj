@@ -530,8 +530,8 @@
         <include name="Workbench.jar"/>
         <include name="history.txt"/>
       </zipfileset>
-			<zipfileset dir="${doc}">
-				<include name="pdf/SQLWorkbench-Manual.pdf"/>
+			<zipfileset dir="${doc}/pdf">
+				<include name="SQLWorkbench-Manual.pdf"/>
 			</zipfileset>
       <zipfileset dir="${distdir}">
         <include name="JWorkbench.exe"/>

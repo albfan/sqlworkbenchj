@@ -68,7 +68,7 @@ FROM person p, address a;</programlisting>
 where user.user_id = user_profile.user_id and 
 user_profile.user_id = uprof.user_id and user_data.user_role = 1 
 and user_data.delete_flag = 'F' and not exists 
-(select 1 from data_detail where data_detail.id = data.id and 
+(select 1 from data_detail where data_detail.id = user_data.id and 
 data_detail.flag = 'X' and data_detail.value > 42)</programlisting>
 		<para>this will be reformatted to look like this:</para>
 		<programlisting>SELECT user.*
@@ -81,7 +81,7 @@ AND   user_data.user_role = 1
 AND   user_data.delete_flag = 'F'
 AND   NOT EXISTS (SELECT 1
                   FROM data_detail
-                  WHERE data_detail.id = DATA.id
+                  WHERE data_detail.id = user_data.id
                   AND   data_detail.flag = 'x'
                   AND   data_detail.value &gt; 42)</programlisting>
 

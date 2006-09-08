@@ -10,7 +10,7 @@
 	</para>
 	
 	<para>
-		When using &wb-productname; from a batch file (or the commandline that is) it is
+		When using &wb-productname; from a batch file (or the commandline) it is
 		<emphasis role="bold">not</emphasis> recommended to use the <link linkend="launcher-using">launcher</link> 
 		as it will immediately return to the commandline while starting the JVM (and thus &wb-productname;) 
 		in the background. Please refer to <link linkend="starting">Starting &wb-productname;</link> for details
@@ -41,6 +41,18 @@
 		<para>
 			You can also execute several scripts by using the <link linkend="command-wbinclude"><literal>WbInclude</literal></link>
 			command inside a script.
+		</para>
+	</section>
+
+	<section id="scripting-encoding">
+		<title>Specifying an encoding for the file(s)</title>
+		
+		<para>
+			In case your script files are not using the default encoding, you can specify the 
+			encoding of your script files with the <literal>-encoding</literal> parameter. Note that this will set for all 
+			script files passed on the commandline. If you need to run several scriptfiles with different encodings, 
+			you have to create one "master" file, which calls the individual files using the <link linkend="command-wbinclude">WbInclude</link>
+			command together with its <literal>-encoding</literal> parameter.
 		</para>
 	</section>
 	
@@ -132,7 +144,7 @@
 		<para>
 			When running &wb-productname; in batch mode, it is recommended that
 			the <link linkend="options-log-console">logging to the console</link> is disabled.
-			If you are running <literal>SELECT</literal> statements in your script wihtout "using" 
+			If you are running <literal>SELECT</literal> statements in your script without "using" 
 			the data through an <link linkend="command-export"><literal>WbExport</literal></link>,
 			you can optionally display the results to the console using the parameter 
 			<literal>-displayresult=true</literal>. If this parameter is not passed or set
@@ -152,6 +164,26 @@
 			output (stdout, System.out) and can be redirected if desired.
 		</para>
 		
+	</section>
+
+	<section id="cmdline-parameter-progress">
+		<title>Show status information on console</title>
+		<para>
+			Several commands (like <literal>WbExport</literal>) show progress information in the statusbar. 
+			When running in batch mode, this information is usually not shown. When you specifiy <literal>-showprogress=true</literal>
+			these messages will also be displayed on the console.
+		</para>
+	</section>
+	
+	<section id="script-properties">
+		<title>Setting configuration properties</title>
+		<para>
+			When running &wb-productname; in batch mode, with no <literal>workbench.settings</literal>
+			file, you can set any property by passing setting the property as a system property
+			when starting the JVM. To change the loglevel to <literal>DEBUG</literal> you need
+			to pass <literal>-Dworkbench.log.level=DEBUG</literal> when starting the application:
+		</para>
+		<programlisting>java -Dworkbench.log.level=DEBUG -jar Workbench.jar </programlisting>
 	</section>
 	
 	<section id="scripting-examples">

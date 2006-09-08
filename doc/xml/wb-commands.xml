@@ -350,10 +350,10 @@
               </para></entry>
             </row>
 						<row>
-							<entry><para>-writeoracleloader=[true|false]</para></entry>
+							<entry><para>-writeoracleloader= [true|false]</para></entry>
 							<entry><para>
 									This parameter controls the creation of Oracle SQL*Loader
-									control files. If it is set to true, then &wb-productname;
+									control files. If it is set to <literal>true</literal>, then &wb-productname;
 									will generate a control file for each exported text file,
 									that can be used to import the text file using SQL*Loader
 									instead of &wb-productname;. The control file has the same
@@ -592,8 +592,8 @@ WHERE table1.column1 = table2.column1;</programlisting>
 					<row>
 						<entry><para>-mode</para></entry>
 						<entry><para>Defines how the data should be sent to the database. Possible
-								values are <literal>INSERT</literal>, <literal>UPDATE</literal>,
-								<literal>INSERT,UPDATE</literal> and <literal>UPDATE,INSERT</literal>
+								values are '<literal>INSERT</literal>', '<literal>UPDATE</literal>',
+								'<literal>INSERT,UPDATE</literal>' and '<literal>UPDATE,INSERT</literal>'
 								For details please refer to the <link linkend="import-update-mode">update mode</link>
 								explanation.
 							</para>
@@ -925,10 +925,10 @@ WHERE table1.column1 = table2.column1;</programlisting>
 				 would be imported, <literal>Arthur Beeblebrox</literal> would not be imported.
 			</para>
 				 
-				 <para>
-			 If you want to learn more about regular expressions, please have a look
-			 at <ulink url="http://www.regular-expressions.info/"/>
-			</para>
+			 <para>
+				 If you want to learn more about regular expressions, please have a look
+				 at <ulink url="http://www.regular-expressions.info/"/>
+			 </para>
 		 
 			<para>If you want to limit the rows that are updated but cannot filter them
 				from the input file using <literal>-columnfilter</literal> or <literal>-linefilter</literal>,
@@ -951,7 +951,12 @@ WHERE table1.column1 = table2.column1;</programlisting>
 				be extended to <literal>WHERE id=? AND (source &lt;&gt; 'manual')</literal>. Thus skipping
 				records that are flagged as manual even if they are contained in the input file.
 			</para>
-
+			<note>
+				When importing data into integer columns, the values '<literal>false</literal>' and '<literal>true</literal>'
+				will silently be converted to 0 (numeric zero) and 1 (one) during an import. This is necessary
+				when importing files created from a database system that supports the boolean datatype (e.g. PostgreSQL) 
+				into a database system where you have to use a numeric datatype for these columns (e.g. Oracle).
+			</note>
 		</section>
 
 		<section id="import-xml-parameters">
@@ -973,6 +978,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
               </row>
             </thead>
             <tbody valign="top">
+						
               <row>
                 <entry><para>-verboseXML=[true|false]</para></entry>
                 <entry><para>If the XML was generated with <literal>-verboseXML=false</literal>
@@ -983,6 +989,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
                 creating the XML file.
                 </para></entry>
               </row>
+							
               <row>
                 <entry><para>-sourcedir</para></entry>
                 <entry><para>Specify a director which contains the XML files.
@@ -1004,14 +1011,26 @@ WHERE table1.column1 = table2.column1;</programlisting>
                 </para>
                 </entry>
               </row>
-            </tbody>
+							
+							<row>
+								<entry><para>-importColumns</para></entry>
+								<entry><para>
+										Defines the columns that should be imported. If all
+										columns from the input file should be imported (the default), then
+										this parameter can be ommited. When specified, the columns have to match
+										the column names available in the XML file.
+									</para>
+								</entry>
+							</row>
+							
+						</tbody>
           </tgroup>
         </informaltable>
     </section>
 
     <section id="import-update-mode">
       <title>Update mode</title>
-      <para>The <literal>-mode</literal> parameter controls the way the data is send
+      <para>The <literal>-mode</literal> parameter controls the way the data is sent
         to the database. The default is <literal>INSERT</literal>. &wb-productname; will
         generate an <literal>INSERT</literal> statement for each record. If the <literal>INSERT</literal>
         fails no further processing takes place for that record.
@@ -1111,7 +1130,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
               </row>
               <row>
                 <entry><para>-commitEvery</para></entry>
-                <entry><para>The number of rows after which a commit is send to the target database.</para></entry>
+                <entry><para>The number of rows after which a commit is sent to the target database.</para></entry>
               </row>
               <row>
                 <entry><para>-deleteTarget=[true|false]</para></entry>
@@ -1163,32 +1182,38 @@ WHERE table1.column1 = table2.column1;</programlisting>
                 <entry><para>The name of the table into which the data should be written.</para></entry>
               </row>
               <row>
-                <entry><para>-createTarget=[true|false]</para></entry>
+                <entry><para>-createTarget</para></entry>
                 <entry><para>If this parameter is set to <literal>true</literal> the target table
-                will be created, if it doesn't exist.</para></entry>
+                will be created, if it doesn't exist. 
+								Valid values are <literal>true</literal> or <literal>false</literal>.
+                </para></entry>
               </row>
               <row>
-                <entry><para>-dropTarget=[true|false]</para></entry>
+                <entry><para>-dropTarget</para></entry>
                 <entry><para>If this parameter is set to <literal>true</literal> the target table
-                will be dropped before it is create. This parameter is ignored if -createtarget
-                is <literal>false</literal></para></entry>
+                will be dropped before it is create. This parameter is ignored if <literal>-createtarget=true</literal>
+								is specified.
+                </para></entry>
               </row>
               <row>
-                <entry><para>-columns=[&lt;list&gt;|&lt;mapping&gt;]</para></entry>
+                <entry><para>-columns</para></entry>
                 <entry>
                   <para>Defines the columns to be copied. If this parameter is not specified, then
                   all matching columns are copied from source to target. Matching
-                  is done on name <emphasis role="bold">and</emphasis> data type.
+                  is done on name <emphasis role="bold">and</emphasis> data type. You
+									can either specify a list of columns or a column mapping.
                   </para>
-                  <para>&lt;list&gt; is a list of columns in the source table. The data from
-                  each table will be copied into the corresponding column in the target table.
+                  <para>When supplying a list of columns, the data from
+                  each column in the source table will be copied into the corresponding (i.e. one
+									with the same name) column in the target table.
                   If <literal>-createtarget=true</literal>, then
                   the list also defines the columns of the target table. The names have to be separated
                   by comma: <literal>-columns=firstname, lastname, zipcode</literal>
                   </para>
                   <para>
-                  &lt;mapping&gt; defines a column mapping between the source and the target table
-                  if the column names do no match. If <literal>-createtable=true</literal> then the
+                  A column mapping defines which column from the source table maps to which column
+									of the target table (if the column names do not match)
+									If <literal>-createtable=true</literal> then the
                   target table will be created from the specified target names:
                   <literal>-columns=firstname/surname, lastname/name, zipcode/zip</literal> Will copy the column
                   <literal>firstname</literal> from the source table to a column named <literal>surname</literal>
@@ -1215,11 +1240,11 @@ WHERE table1.column1 = table2.column1;</programlisting>
             </thead>
             <tbody>
               <row>
-                <entry><para>-sourcequery=&lt;SELECT statement&gt;</para></entry>
+                <entry><para>-sourcequery</para></entry>
                 <entry><para>The SQL query to be used as the source data (instead of a table).</para></entry>
               </row>
               <row>
-                <entry><para>-columns=&lt;list&gt;</para></entry>
+                <entry><para>-columns</para></entry>
                 <entry><para>The list of columns of the target table, in the order
                 in which they appear in the source table.</para></entry>
               </row>
@@ -1525,29 +1550,33 @@ WHERE id=42;</programlisting>
 							</para></entry>
 						</row>
 						<row>
-							<entry><para>-includePrimaryKeys=[true|false]</para></entry>
+							<entry><para>-includePrimaryKeys</para></entry>
 							<entry><para>Select whether primary key constraint definitions should be compared as well.
-								The default is to compare primary keys.
+								The default is <literal>true</literal>.
+								Valid values are <literal>true</literal> or <literal>false</literal>.
 							</para></entry>
 						</row>
 						<row>
-							<entry><para>-includeForeignKeys=[true|false]</para></entry>
+							<entry><para>-includeForeignKeys</para></entry>
 							<entry><para>Select whether foreign key constraint definitions should be compared as well.
-								The default is to compare foreign keys.
+								The default is <literal>true</literal>.
+								Valid values are <literal>true</literal> or <literal>false</literal>.
 							</para></entry>
 						</row>
 						<row>
-							<entry><para>-includeConstraints=[true|false]</para></entry>
+							<entry><para>-includeConstraints</para></entry>
 							<entry><para>Select whether table and column (check) constraints
 								should be compared as well. &wb-productname; compares the constraint
 								definition (SQL) as stored in the database. When comparing schemas from
 								different DBMS systems this will not return the desired results.</para>
-								<para>The default is to not compare table constraints.</para>
+								<para>The default is to not compare table constraints (<literal>false</literal>)
+								Valid values are <literal>true</literal> or <literal>false</literal>.
+								</para>
 							</entry>
 						</row>
 						<!--
 						<row>
-						<entry><para>-includecomments=[true|false]</para></entry>
+						<entry><para>-includecomments</para></entry>
 						<entry><para>Select whether table and column comments should be compared as well.
 						The default is to not compare comments. When using an Oracle database, you need
 						to <link linkend="oracle-enable-remarks">enable remarks reporting</link> for the JDBC
@@ -1556,27 +1585,32 @@ WHERE id=42;</programlisting>
 						</row>
 						-->
 						<row>
-							<entry><para>-includeViews=[true|false]</para></entry>
-							<entry><para>Select whether views should also be compared. When comparing
+							<entry><para>-includeViews</para></entry>
+							<entry>
+							<para>
+								Select whether views should also be compared. When comparing
 								views, the source as it is stored in the DBMS is compared. This comparison
 								is case-sensitiv, which means <literal>SELECT * FROM foo;</literal> will be
 								reported as a difference to <literal>select * from foo;</literal> even
 								if they are logically the same. A comparison across different DBMS will also not
 								work properly!
 							</para>
-								<para>The default is to include view definitions.</para>
+							<para>The default is <literal>true</literal>
+								Valid values are <literal>true</literal> or <literal>false</literal>.
+							</para>
 							</entry>
 						</row>
 
 						<row>
-							<entry><para>-includeIndex=[true|false]</para></entry>
+							<entry><para>-includeIndex</para></entry>
 							<entry><para>Select whether indexes should be compared as well.  The default
 								is to not compare index definitions.
+								Valid values are <literal>true</literal> or <literal>false</literal>.
 							</para></entry>
 						</row>
 						
 						<row>
-							<entry><para>-useJdbcTypes=[true|false]</para></entry>
+							<entry><para>-useJdbcTypes</para></entry>
 							<entry>
 								<para>
 									Define whether to compare the DBMS specific data types, or 
@@ -1589,6 +1623,9 @@ WHERE id=42;</programlisting>
 									to a <literal>VARCHAR(100)</literal> column in PostgreSQL which is not really true
 									As both drivers ropert the column as java.sql.Types.VARCHAR, 
 									they would be considered as identical when using <literal>-useJdbcType=true</literal>.
+								</para>
+								<para>
+									Valid values are <literal>true</literal> or <literal>false</literal>.
 								</para>
 							</entry>
 						</row>
@@ -1839,6 +1876,15 @@ v_data=id1,id2</programlisting>
 
       <para>The <literal>DBMS_OUTPUT</literal> package can be enabled automatically when a
       connection is established. See <xref linkend="options-enable-out"/></para>
+			
+			<note>
+				Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with 
+				the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal> 
+				package is enabled. 
+				In order to be able to display these columns support for <literal>DBMS_OUTPUT</literal> has
+				to be switched off. 
+			</note>
+			
     </section>
 
     <section id="command-disableout">

@@ -98,7 +98,19 @@
       </para>
       <para>Default value: <literal>15</literal></para>
     </section>
-		
+	
+		<section id="setting-native-print-dialog">
+			<title>Controlling the type of print dialog</title>
+			<para>Property: <literal>workbench.print.nativepagedialog</literal></para>
+			<para>
+				When printing the contents of a table, this settings controls the type
+				of pring dialog to be used. The default setting will open the 
+				native print dialog of the operating system. If you experience problems
+				when trying to pring, set this property to false. &wb-productname; will
+				then open a cross-platform print dialog.
+			</para>
+			<para>Default value: <literal>true</literal></para>
+		</section>
   </section>
 
 	<section id="editor-settings">
@@ -189,21 +201,6 @@
 				</para>
 				<para>Default value: <literal>false</literal></para>
 		</section>
-		
-	  <!--
-		<section id="auto-completion-paste-case">
-				<title>Case for pasting names</title>
-				<para>Property: <literal>workbench.editor.autocompletion.paste.case</literal></para>
-				<para>
-					This property controls how a selected column or table name is written 
-					into the editor. The value <literal>lower</literal> will always write
-					the names with lower case, the value <literal>upper</literal> will always
-					write the names in upper case. If this property is not set, the 
-					name will be written as it is retrieved from the database.
-				</para>
-				<para>Default value: empty</para>
-		</section>
-		-->
 		
 		<section id="auto-completion-empty-line">
 			<title>Empty line to terminate SQL statements</title>
