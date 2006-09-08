@@ -1,5 +1,22 @@
-Build 88.16, 15.08.2006
+Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  (88.23) WbImport will silently convert true/false literals 
+      for integer columns into the values 1/0.
+Enh:  (88.23) When generating statements internally, the auto completion paste
+      case setting is also applied to table and column names
+Enh:  (88.21) The encoding of the scripts in batch mode can now be specified
+      on the commandline using the -encoding switch.
+Enh:  (88.20) The PDF manual can now be displayed from inside 
+      the application. for this to work, the path to the PDF
+      reader executable has to be defined in Tools -> Options
+      and SQLWorkbench-Manual.pdf needs to be available in the
+      directory where workbench.jar is located.
+Enh:  (88.20) Tables can now be filter out using a regular expression 
+      in the DbExplorer. The default setting will remove tables from 
+      Oracle 10g's recylce bin. This is controlled by the property
+      workbench.db.[dbid].exclude.tables=<regex>
+Enh:  (88.20) Improved the performance of the editor on large
+      files (for loading and for scrolling)
 Enh:  (88.19) Column widths can now be optimized automatically after 
       data is retrieved. A new option is available in 
       Tools->Options->Data editing. The column header can also be 
@@ -112,9 +129,16 @@ Fix:  (88.18) If the internal line ending was set to something else then Unix
 Fix:  (88.19) WbImport always used a quote character ("), even if no
       quote character was specified (so it was not possible to run 
       an import without any tests on quotes)
-Fix:  (83.19) Re-introduced fix to prevent sending another SQL Statement while a 
+Fix:  (88.19) Re-introduced fix to prevent sending another SQL Statement while a 
       WbExport is running
-      
+Fix:  (88.20) The automatic retrieval of key columns for the target table 
+      was not working for the WbCopy command.
+Fix:  (88.21) -importcolumn parameter was not working for WbImport
+Fix:  (88.21) Fixed repainting problems in editor
+Fix:  (88.21) The DbExplorer could not be closed any longer, if only on SQL Tab 
+      was open
+Fix:  (88.21) Fixed the progress display in the console for Linux
+
 Build 88, 07.07.2006
 --------------------
 Enh:  (87.14) The help window invoked from the main window is now 

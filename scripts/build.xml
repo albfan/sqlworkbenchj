@@ -175,6 +175,8 @@
       <param name="section.autolabel.max.depth" expression="3"/>
       <param name="alignment" expression="left"/>
       <param name="use.extensions" expression="0"/>
+      <param name="menuchoice.separator" expression=" &#187; "/>
+      <param name="menuchoice.menu.separator" expression=" &#187; "/>
     </xslt>
 
     <delete>
@@ -230,13 +232,14 @@
 			<param name="admon.graphics.extension" expression=".gif"/>
 			<param name="admon.graphics" expression="1"/>
 			-->
-			<param name="admon.textlabel" expression="1"/>
 			<param name="chunk.first.sections" expression="1"/>
 			<param name="chunker.output.indent" expression="yes"/>
 			<param name="chunk.quietly" expression="1"/>
+			<param name="admon.textlabel" expression="1"/>
 			<param name="generate.index" expression="0"/>
 			<param name="index.method" expression="'default'"/>
 			<param name="chunk.fast" expression="1"/>
+			<param name="generate.section.toc.level" expression="1"/>
 			<param name="toc.section.depth" expression="3"/>
 			<param name="use.id.as.filename" expression="1"/>
 			<param name="section.autolabel" expression="1"/>
@@ -270,7 +273,7 @@
 	</target>
 	
 	<!-- Create the HTML files suitable for publishing on the website -->
-	<target name="publish" depends="init-publish,build-html">
+	<target name="publish" depends="copy-history,init-publish,build-html">
 	</target>
 	
 	<target name="init-publish">
@@ -298,7 +301,7 @@
 			</fileset>
 		</copy>
 	</target>
-	
+
 	<target name="build-html" depends="prepare">
 		
 		<echo message="Generating HTML in ${html-outdir}"/>
@@ -318,8 +321,7 @@
 		
 		<copy overwrite="true" tofile="${html-outdir}/history.txt" file="${scriptsrc}/history.new"/>
 		
-		<xslt basedir="${html-outdir}" includes="Manual.xml" style="${doc}/docbook/html/chunk.xsl"
-			destdir="${html-outdir}">
+		<xslt basedir="${html-outdir}" includes="Manual.xml" style="${doc}/docbook/html/chunk.xsl" destdir="${html-outdir}">
 			<xmlcatalog>
 				<dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN"
 				location="${doc}/dtd/docbookx.dtd"/>
@@ -332,14 +334,15 @@
 			<param name="admon.graphics.extension" expression=".gif"/>
 			<param name="admon.graphics" expression="1"/>
 			<param name="admon.textlabel" expression="0"/>
-			<param name="chunk.first.sections" expression="1"/>
-			<param name="chunker.output.indent" expression="yes"/>
 			<param name="generate.index" expression="0"/>
 			<param name="index.method" expression="'default'"/>
 			<param name="chunk.quietly" expression="1"/>
 			<param name="chunk.fast" expression="1"/>
+			<param name="chunk.first.sections" expression="0"/>
+			<param name="chunker.output.indent" expression="yes"/>
 			<param name="use.id.as.filename" expression="1"/>
 			<param name="section.autolabel" expression="1"/>
+			<param name="generate.section.toc.level" expression="1"/>
 			<param name="table.borders.with.css" expression="${html-css-tables}"/>
 			<param name="table.cell.border.style" expression="solid"/>
 			<param name="table.cell.border.thickness" expression="1px"/>
@@ -351,8 +354,7 @@
 			<param name="navig.showtitles" expression="1"/>
 			<param name="css.decoration" expression="1"/>
 		</xslt>
-		<!-- delete file="${html-outdir}/docbookx.dtd"/ -->
-		<delete file="${html-outdir}/Manual.html"/>
+		
 		<delete>
 			<fileset dir="${html-outdir}">
 				<include name="*.xml"/>
@@ -360,13 +362,14 @@
 		</delete>
 		
 		<delete file="${html-outdir}/Manual.xml"/>
+		<delete file="${html-outdir}/Manual.html"/>
 		<copy overwrite="true" todir="${html-outdir}" file="${doc}/css/${html-stylesheet}"/>
 		<replace dir="${distdir}/manual" summary="true">
 			<replacetoken><![CDATA[<a href="mailto:support@sql-workbench.net">support@sql-workbench.net</a>]]></replacetoken> 
 			<replacevalue><![CDATA[<a href=mailto:&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;>&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;</a>]]></replacevalue>
 		</replace>
 	</target>
-	
+
   <!-- End Manual related tasks -->
 
 	<target name="make-jar" depends="prepare,test">
@@ -390,7 +393,7 @@
 	
 	<target name="publish-dev" depends="get-dev-build, copy-history, publish, clean-history">
 	</target>
-	
+
   <target name="make-src-zip">
     <delete file="${srczip}"/>
 
@@ -462,7 +465,7 @@
   </target>
 
   <!-- build a development release -->
-  <target name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile_debug, build-help, release-src-zip, make-jar, clean-history">
+  <target name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile_debug, build-help, make-jar, release-src-zip, clean-history">
   
     <zip zipfile="${distdir}/Workbench-Build${build.number}.zip">
       <zipfileset dir="${distdir}">
@@ -508,8 +511,6 @@
 
     <copy file="${scriptsrc}/history.new" overwrite="true" failonerror="false" tofile="${root}/release/history.txt"/>
 
-    <copy file="${doc}/pdf/SQLWorkbench-Manual.pdf" overwrite="true" todir="${root}/release"/>
-
     <delete dir="${root}/release/manual" failonerror="false"/>
     <mkdir dir="${root}/release/manual"/>
 
@@ -529,6 +530,9 @@
         <include name="Workbench.jar"/>
         <include name="history.txt"/>
       </zipfileset>
+			<zipfileset dir="${doc}">
+				<include name="pdf/SQLWorkbench-Manual.pdf"/>
+			</zipfileset>
       <zipfileset dir="${distdir}">
         <include name="JWorkbench.exe"/>
         <include name="DataPumper.exe"/>
@@ -547,26 +551,7 @@
       </zipfileset>
     </zip>
 
-		<!--
-    <tar destfile="${root}/release/Workbench-Build${build.number}.tar.gz" compression="gzip">
-      <tarfileset dir="${root}/dist">
-        <include name="Workbench.jar"/>
-        <include name="history.txt"/>
-      </tarfileset>
-      <tarfileset dir="${root}/scripts" mode="755">
-          <include name="jworkbench"/>
-          <include name="datapumper"/>
-          <include name="dbexplorer"/>
-      </tarfileset>
-      <tarfileset dir="${html-outdir}" prefix="manual">
-        <include name="**/*.*"/>
-      </tarfileset>
-      <tarfileset dir="${scriptsrc}" prefix="xslt">
-        <include name="**/*.xslt"/>
-      </tarfileset>
-    </tar>
-		-->
-		
+
   </target>
 
 	<target name="release-src-zip" depends="init">
