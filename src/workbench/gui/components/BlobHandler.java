@@ -11,7 +11,6 @@
  */
 package workbench.gui.components;
 
-import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Frame;
 import java.io.BufferedInputStream;
@@ -22,19 +21,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.sql.Blob;
 import java.sql.SQLException;
 import workbench.WbManager;
-import workbench.gui.WbSwingUtilities;
 import workbench.gui.dialogs.BlobInfoDialog;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.NullValue;
-import workbench.util.ExceptionUtil;
-import workbench.util.FileDialogUtil;
+import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
-import workbench.util.StringUtil;
 
 /**
  *
@@ -114,8 +111,7 @@ public class BlobHandler
 			{
 				File f = (File)value;
 				in = new BufferedInputStream(new FileInputStream(f));
-				byte[] buff = new byte[(int)f.length()];
-				in.read(buff);
+				byte[] buff = FileUtil.readBytes(in);
 				return buff;
 			}
 			catch (Exception e)
@@ -190,14 +186,13 @@ public class BlobHandler
 		}
 		else if (value instanceof File)
 		{
-			InputStream in = null;
+			Reader in = null;
 			try
 			{
 				File f = (File)value;
-				in = new BufferedInputStream(new FileInputStream(f));
-				byte[] buff = new byte[(int)f.length()];
-				in.read(buff);
-				return new String(buff, encoding);
+				in = EncodingUtil.createReader(f, encoding);
+				String s = FileUtil.readCharacters(in);
+				return s;
 			}
 			catch (Exception e)
 			{

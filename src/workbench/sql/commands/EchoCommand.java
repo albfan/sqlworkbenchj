@@ -35,14 +35,22 @@ public class EchoCommand extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = null;
+		StatementRunnerResult result = new StatementRunnerResult();
 
 		String param = stripVerb(aSql);
 
 		if (StringUtil.isEmptyString(param))
 		{
-				result.addMessage(ResourceMgr.getString("ErrEchoWrongParameter"));
-				result.setFailure();
+			
+			if (runner.getVerboseLogging())
+			{
+				result.addMessage(ResourceMgr.getString("MsgFeedbackEnabled"));
+			}
+			else
+			{
+				result.addMessage(ResourceMgr.getString("MsgFeedbackDisabled"));
+			}
+			result.setSuccess();
 		}
 		else if ("off".equalsIgnoreCase(param) || "false".equalsIgnoreCase(param))
 		{
@@ -55,6 +63,11 @@ public class EchoCommand extends SqlCommand
 			this.runner.setVerboseLogging(true);
 			result.addMessage(ResourceMgr.getString("MsgFeedbackEnabled"));
 			result.setSuccess();
+		}
+		else
+		{
+				result.addMessage(ResourceMgr.getString("ErrEchoWrongParameter"));
+				result.setFailure();			
 		}
 		return result;
 	}

@@ -221,6 +221,15 @@ public class DefaultStatementRunner
 		this.controller = control;
 	}
 
+	/**
+	 * For testing purposes, to that non-default commands can be added 
+	 * during a JUnit test
+	 */
+	public void addCommand(SqlCommand command)
+	{
+		cmdDispatch.put(command.getVerb(), command);
+	}
+	
 	public void setParameterPrompter(ParameterPrompter filter) { this.prompter = filter; }
 	public void setBaseDir(String dir) { this.baseDir = dir; }
 	public String getBaseDir() { return this.baseDir; }

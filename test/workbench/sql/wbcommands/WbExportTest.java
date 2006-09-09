@@ -109,6 +109,31 @@ public class WbExportTest extends TestCase
 		}
 	}
 
+	public void testAlternateBlobExport()
+	{
+		try
+		{
+			File exportFile = new File(this.basedir, "blob_export.txt");
+			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -blobidcols=nr -sourcetable=blob_test");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			assertEquals("No export file created", true, exportFile.exists());
+			
+			File bfile = new File(this.basedir, "blob_export_data_#1.data");
+			assertEquals("Blob data not exported", true, bfile.exists());
+			assertEquals("Wrong file size", 21378, bfile.length());
+			
+			bfile = new File(this.basedir, "blob_export_data_#2.data");
+			assertEquals("Blob data not exported", true, bfile.exists());
+			assertEquals("Wrong file size", 7218, bfile.length());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testTextBlobExport()
 	{
 		try

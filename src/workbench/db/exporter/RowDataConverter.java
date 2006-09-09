@@ -62,6 +62,7 @@ public abstract class RowDataConverter
 	private boolean compressExternalFiles;
 	protected boolean useRowNumForBlobFile = true;
 	protected int[] blobNameCols = null;
+	protected List blobIdColumns = null;
 	
 	/**
 	 *	The metadata for the result set that should be exported
@@ -73,8 +74,41 @@ public abstract class RowDataConverter
 		this.defaultNumberFormatter = Settings.getInstance().getDefaultDecimalFormatter();
 	}
 
-	public void setResultInfo(ResultInfo meta) { this.metaData = meta; }
+	public void setResultInfo(ResultInfo meta) 
+	{ 
+		this.metaData = meta; 
+		this.useRowNumForBlobFile = true;
+		
+		if (this.blobIdColumns != null) 
+		{
+			int count = this.blobIdColumns.size();
+			int found = 0;
+			blobNameCols = new int[count];
+			for (int i = 0; i < count; i++)
+			{
+				String col = (String)blobIdColumns.get(i);
+				int index = meta.findColumn(col);
+				blobNameCols[i] = index;
+				if (index > -1) found ++;
+			}
+			if (found == 0)
+			{
+				this.blobNameCols = null;
+				this.useRowNumForBlobFile = true;
+			}
+			else
+			{
+				this.useRowNumForBlobFile = false;
+			}
+		}
+	}
+	
 	public ResultInfo getResultInfo() { return this.metaData; }
+	
+	void setBlobIdColumns(List cols)
+	{
+		blobIdColumns = cols;
+	}
 	
 	public void setOutputFile(File f) 
 	{ 
@@ -124,9 +158,10 @@ public abstract class RowDataConverter
 	
 	protected File createBlobFile(RowData row, int colIndex, long rowNum)
 	{
-		StringBuffer fname = new StringBuffer(baseFilename.length() + 10);
+		StringBuffer fname = new StringBuffer(baseFilename.length() + 25);
 
 		fname.append(baseFilename);
+		
 		if (this.useRowNumForBlobFile || this.blobNameCols == null)
 		{
 			fname.append("_r");
@@ -143,20 +178,22 @@ public abstract class RowDataConverter
 			for (int i = 0; i < blobNameCols.length; i++)
 			{
 				int c = blobNameCols[i];
-				Object o = row.getValue(c);
-				if (i > 0) fname.append('_');
-				fname.append(StringUtil.makeFilename(o.toString()));
+				if (c > -1)
+				{
+					Object o = row.getValue(c);
+					if (i > 0) fname.append('_');
+					fname.append(StringUtil.makeFilename(o.toString()));
+				}
 			}
 		}
 		fname.append(".data");
-		String realName = fname.toString();
-		File f = new File(getBaseDir(), realName);
+		File f = new File(getBaseDir(), fname.toString());
 		return f;
 	}
 	
 	protected void writeBlobFile(Object value, File f)
 	{
-		if (value == null || value instanceof NullValue);
+		if (value == null || value instanceof NullValue) return;
 		try
 		{
 			OutputStream out = this.createOutputStream(f);

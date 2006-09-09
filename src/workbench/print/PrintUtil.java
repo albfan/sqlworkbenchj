@@ -66,7 +66,7 @@ public class PrintUtil
 
 	public static boolean pageFormatEquals(PageFormat first, PageFormat second)
 	{
-		if (first != null || second != null) return false;
+		if (first == null || second == null) return false;
 		if (first.getOrientation() != second.getOrientation()) return false;
 		if (first.getHeight() != second.getHeight()) return false;
 		if (first.getWidth() != second.getWidth()) return false;

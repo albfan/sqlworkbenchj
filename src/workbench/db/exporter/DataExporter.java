@@ -130,6 +130,9 @@ public class DataExporter
 	private RowActionMonitor rowMonitor;
 
 	private List keyColumnsToUse;
+	
+	// The columns to be used for generating blob file names
+	private List blobIdCols;
 
 	private ArrayList warnings = new ArrayList();
 	private ArrayList errors = new ArrayList();
@@ -243,6 +246,21 @@ public class DataExporter
 		this.rowMonitor = monitor;
 	}
 
+	/**
+	 * Define the columns whose values should be used
+	 * for creating the blob files during export
+	 * These columns must define a unique key!
+	 */
+	public void setBlobIdColumns(List columns)
+	{
+		this.blobIdCols = columns;
+	}
+	
+	List getBlobIdColumns()
+	{
+		return blobIdCols;
+	}
+	
 	/**
 	 *	Define the columns that should be exported
 	 *  This is only respected for the export of a DataStore, not

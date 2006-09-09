@@ -43,7 +43,6 @@ public class WbExport
 	public static final String VERB = "WBEXPORT";
 	private ArgumentParser cmdLine;
 	private DataExporter exporter;
-	private int maxRows = 0;
 	private boolean directExport = false;
 	private String currentTable;
 	private String defaultExtension;
@@ -89,6 +88,7 @@ public class WbExport
 		cmdLine.addArgument("oraldr");
 		cmdLine.addArgument("writeoracleloader");
 		cmdLine.addArgument("compress");
+		cmdLine.addArgument("blobidcols");
 	}
 
 	public String getVerb() { return VERB; }
@@ -363,6 +363,9 @@ public class WbExport
 			}
 		}
 
+		String cols = cmdLine.getValue("blobidcols");
+		List columns = StringUtil.stringToList(cols, ",", true, true, false);
+		this.exporter.setBlobIdColumns(columns);
 		this.exporter.setCompressOutput(cmdLine.getBoolean("compress", false));
 		
 		file = evaluateFileArgument(file);
