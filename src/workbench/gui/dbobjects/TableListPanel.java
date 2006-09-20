@@ -198,7 +198,21 @@ public class TableListPanel
 	{
 		this.parentWindow = aParent;
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.displayTab = new WbTabbedPane(JTabbedPane.BOTTOM);
+		String tabLocation = Settings.getInstance().getProperty("workbench.gui.dbobjects.tabletabs", "bottom");
+		int location = JTabbedPane.BOTTOM;
+		if (tabLocation.equalsIgnoreCase("top"))
+		{
+			location = JTabbedPane.TOP;
+		}
+		else if (tabLocation.equalsIgnoreCase("left"))
+		{
+			location = JTabbedPane.LEFT;
+		}
+		else if (tabLocation.equalsIgnoreCase("right"))
+		{
+			location = JTabbedPane.RIGHT;
+		}
+		this.displayTab = new WbTabbedPane(location);
 
 		this.tableDefinition = new TableDefinitionPanel();
 		this.tableDefinition.addPropertyChangeListener(this);

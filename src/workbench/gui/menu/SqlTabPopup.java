@@ -19,11 +19,11 @@ import workbench.gui.actions.FileOpenAction;
 import workbench.gui.actions.NewDbExplorerPanelAction;
 import workbench.gui.actions.RemoveTabAction;
 import workbench.gui.actions.RenameTabAction;
-import workbench.gui.actions.WbAction;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.MainPanel;
 import workbench.gui.actions.FileReloadAction;
 import workbench.gui.actions.FileSaveAction;
+import workbench.gui.actions.InsertTabAction;
 import workbench.gui.actions.MoveSqlTab;
 
 /**
@@ -37,15 +37,14 @@ public class SqlTabPopup extends JPopupMenu
 	private RenameTabAction rename;
 	private MoveSqlTab moveLeft;
 	private MoveSqlTab moveRight;
-
+	private InsertTabAction insert;
+	
 	public SqlTabPopup(MainWindow aClient)
 	{
 		this.add = new AddTabAction(aClient);
 		this.add(add.getMenuItem());
-
-		this.newDbExp = new NewDbExplorerPanelAction(aClient, "MnuTxtAddExplorerPanel");
-		this.newDbExp.setIcon(null);
-		this.add(newDbExp);
+		this.insert = new InsertTabAction(aClient);
+		this.add(insert.getMenuItem());
 		
 		this.remove = new RemoveTabAction(aClient);
 		this.add(remove.getMenuItem());
@@ -56,6 +55,12 @@ public class SqlTabPopup extends JPopupMenu
 			this.add(rename.getMenuItem());
 		}
 
+		this.addSeparator();
+		
+		this.newDbExp = new NewDbExplorerPanelAction(aClient, "MnuTxtAddExplorerPanel");
+		this.newDbExp.setIcon(null);
+		this.add(newDbExp);
+		
 		MainPanel panel = aClient.getCurrentPanel();
 		if (panel instanceof SqlPanel)
 		{

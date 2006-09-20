@@ -16,7 +16,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.Toolkit;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -31,7 +31,7 @@ import workbench.resource.Settings;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.24 2006-09-08 16:46:33 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.25 2006-09-20 17:20:27 thomas Exp $
  */
 public class TextAreaPainter 
 	extends JComponent 
@@ -226,12 +226,7 @@ public class TextAreaPainter
 	{
 		if (fm == null)
 		{
-			Font f = this.getFont();
-			Graphics g = this.getGraphics();
-			if (g != null)
-			{
-				fm = g.getFontMetrics(f);
-			}
+			this.fm = getFontMetrics(getFont());
 		}
 		return fm;
 	}
@@ -244,21 +239,42 @@ public class TextAreaPainter
 	public void setFont(Font font)
 	{
 		super.setFont(font);
-		this.fm = this.getFontMetrics(font);
-		this.gutterCharWidth = fm.charWidth('9');
+		this.fm = getFontMetrics(font);
 		calculateTabSize();
+		calculateGutterWidth();
 	}
 
+	private void calculateGutterWidth()
+	{
+		FontMetrics fm = getFontMetrics();
+		if (fm == null) 
+		{
+			this.gutterCharWidth = 18;
+		}
+		else
+		{
+			this.gutterCharWidth = fm.charWidth('9');
+		}
+		if (this.showLineNumbers)
+		{
+			int lastLine = textArea.getLineCount();
+			String s = Integer.toString(lastLine);
+			int	chars = s.length();
+			this.gutterWidth = (chars * gutterCharWidth) + (GUTTER_MARGIN * 2);
+		}
+		else
+		{
+			this.gutterWidth = 0;
+		}		
+	}
 	public void calculateTabSize()
 	{
 		this.tabSize = -1;
 		if (this.textArea == null) return;
 		if (this.textArea.getDocument() == null) return;
-		if (this.fm == null)
-		{
-			this.fm = this.getFontMetrics(getFont());
-			if (this.fm == null) return;
-		}
+		FontMetrics fm = this.getFontMetrics();
+		if (fm == null) return;
+		
 		Object tab = textArea.getDocument().getProperty(PlainDocument.tabSizeAttribute);
 		int t = -1;
 		if (tab == null) 
@@ -283,17 +299,7 @@ public class TextAreaPainter
 		
 		int visibleCount = textArea.getVisibleLines();
 		int firstVisible = textArea.getFirstLine();
-		
-		if (this.showLineNumbers)
-		{
-			String s = Integer.toString(lastLine > visibleCount ? lastLine : visibleCount);
-			int	chars = s.length();
-			this.gutterWidth = (chars * gutterCharWidth) + (GUTTER_MARGIN * 2);
-		}
-		else
-		{
-			this.gutterWidth = 0;
-		}
+		calculateGutterWidth();
 
 		Rectangle clipRect = gfx.getClipBounds();
 //		Shape clip = gfx.getClip();

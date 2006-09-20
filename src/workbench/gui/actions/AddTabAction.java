@@ -23,7 +23,8 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  support@sql-workbench.net
  */
-public class AddTabAction extends WbAction
+public class AddTabAction 
+	extends WbAction
 {
 	private MainWindow client;
 

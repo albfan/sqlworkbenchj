@@ -347,7 +347,9 @@ public class TableDataPanel
 		}
 	}
 	
-	
+	/**
+	 * Define the table for which the data should be displayed
+	 */
 	public void setTable(TableIdentifier aTable)
 	{
 		if (!this.isRetrieving()) reset();
@@ -471,12 +473,12 @@ public class TableDataPanel
 
 		this.cancelRetrieve.setEnabled(true);
 		this.reloadAction.setEnabled(false);
+		boolean error = false;
 		
 		try
 		{
 			dataDisplay.setShowErrorMessages(true);
 			dataDisplay.setStatusMessage(ResourceMgr.getString("LblLoadingProgress"));
-			dataDisplay.setAutomaticUpdateTableCheck(false);
 			dataDisplay.runQuery(sql, respectMaxRows);
 			if (Settings.getInstance().getAutomaticOptimalWidth())
 			{
@@ -486,15 +488,14 @@ public class TableDataPanel
 			{
 				dataDisplay.getTable().adjustColumns();
 			}
-			dataDisplay.setUpdateTable(this.table);
 			dataDisplay.getSelectKeysAction().setEnabled(true);
 			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
 			dataDisplay.setPrintHeader(header);
-			dataDisplay.setStatusMessage("");
 			dataDisplay.showlastExecutionTime();
 		}
 		catch (Throwable e)
 		{
+			error = true;
 			final String msg;
 			
 			if (e instanceof OutOfMemoryError)
@@ -524,10 +525,21 @@ public class TableDataPanel
 		}
 		finally
 		{
+			dataDisplay.clearStatusMessage();
 			cancelRetrieve.setEnabled(false);
 			reloadAction.setEnabled(true);
 			this.retrieveEnd();
 			WbSwingUtilities.showDefaultCursor(this);
+		}
+		if (!error)
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					dataDisplay.getTable().requestFocus();
+				}
+			});
 		}
 	}
 

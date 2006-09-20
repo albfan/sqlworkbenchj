@@ -13,6 +13,7 @@ package workbench.gui.renderer;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
@@ -115,11 +116,12 @@ public class ToolTipRenderer
 		this.highlightBackground = c;
 	}
 	
-	public Component getTableCellRendererComponent(	JTable table, Object value,	boolean isSelected,	boolean hasFocus, int row, int col)
+	public Component getTableCellRendererComponent(JTable table, Object value,	boolean isSelected,	boolean hasFocus, int row, int col)
 	{
 		this.focus = hasFocus;
 		this.isEditing = (row == this.editingRow) && (this.highlightBackground != null);
 		this.currentColumn = col;
+		this.setFont(table.getFont());
 		
 		if (selectedForeground == null)
 		{
@@ -150,12 +152,21 @@ public class ToolTipRenderer
 		return this;
 	}
 
+	public Dimension getPreferredSize()
+	{
+		Dimension d = super.getPreferredSize();
+		FontMetrics fm = getFontMetrics(getFont());
+		
+		d.setSize(d.getWidth(), fm.getHeight());
+		return d;
+	}
+	
 	public void paint(Graphics g)
 	{
 		int w = this.getWidth();
 		int h = this.getHeight();
 		
-		FontMetrics fm = g.getFontMetrics();
+		FontMetrics fm = getFontMetrics(getFont());
 
 		Insets insets;
 		

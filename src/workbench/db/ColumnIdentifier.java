@@ -260,25 +260,23 @@ public class ColumnIdentifier
 	public void setColumnClassName(String columnClass)
 	{
 		this.columnClassName = columnClass;
+		this.columnClass = null;
+		if (this.columnClassName == null) return;
+
+		try
+		{
+			this.columnClass = Class.forName(this.columnClassName);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("ColumnIdentifier.setColumnClassName()", "Could not obtain column class", e);
+			this.columnClass = null;
+		}
+
 	}
 	
 	public Class getColumnClass()
 	{
-		if (this.columnClassName != null)
-		{
-			if (this.columnClass == null)
-			{
-				try
-				{
-					this.columnClass = Class.forName(this.columnClassName);
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("ColumnIdentifier.getColumnClass()", "Could not obtain column class", e);
-					this.columnClass = null;
-				}
-			}
-		}
 		if (this.columnClass != null) return this.columnClass;
 		
 		switch (this.type)
@@ -286,23 +284,32 @@ public class ColumnIdentifier
 			case Types.BIGINT:
 			case Types.INTEGER:
 				return Long.class;
+				
 			case Types.SMALLINT:
 				return Integer.class;
+				
 			case Types.NUMERIC:
 			case Types.DECIMAL:
 				return BigDecimal.class;
+				
 			case Types.DOUBLE:
 				return Double.class;
+				
 			case Types.REAL:
 			case Types.FLOAT:
 				return Float.class;
+
 			case Types.CHAR:
 			case Types.VARCHAR:
+			case Types.LONGVARCHAR:
 				return String.class;
+				
 			case Types.DATE:
 				return java.sql.Date.class;
+				
 			case Types.TIMESTAMP:
 				return Timestamp.class;
+				
 			default:
 				return Object.class;
 		}

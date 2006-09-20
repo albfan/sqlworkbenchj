@@ -98,6 +98,7 @@ import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 import workbench.gui.actions.FileSaveProfiles;
+import workbench.gui.actions.InsertTabAction;
 import workbench.gui.actions.OptionsDialogAction;
 import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.actions.WhatsNewAction;
@@ -465,6 +466,8 @@ public class MainWindow
 		AddTabAction add = new AddTabAction(this);
 		menu.addSeparator();
 		menu.add(add.getMenuItem());
+		InsertTabAction insert = new InsertTabAction(this);
+		menu.add(insert.getMenuItem());
 
 		RemoveTabAction rem = new RemoveTabAction(this);
 		menu.add(rem.getMenuItem());
@@ -1801,7 +1804,7 @@ public class MainWindow
 		result.add(this.newDbExplorerWindow);
 		result.addSeparator();
 
-		result.add(DataPumperAction.getInstance());
+		result.add(new DataPumperAction(this));
 
 		result.addSeparator();
 
@@ -2167,6 +2170,11 @@ public class MainWindow
 		}
 	}
 
+	public MainPanel insertTab()
+	{
+		return addTab(true, true, false);
+	}
+	
 	public MainPanel addTab()
 	{
 		return this.addTab(true);
@@ -2195,7 +2203,21 @@ public class MainWindow
 	 */
 	public MainPanel addTab(boolean selectNew, boolean checkConnection)
 	{
-		int index = this.findFirstExplorerTab();
+		return addTab(selectNew, checkConnection, true);
+	}
+	
+	public MainPanel addTab(boolean selectNew, boolean checkConnection, boolean append)
+	{
+		int index = -1;
+		if (append)
+		{
+			index = this.findFirstExplorerTab();
+		}
+		else
+		{
+			index = this.sqlTab.getSelectedIndex() + 1;
+		}
+		
 		if (index == -1) index = sqlTab.getTabCount();
 		final SqlPanel sql = new SqlPanel(index+1);
 		sql.addDbExecutionListener(this);

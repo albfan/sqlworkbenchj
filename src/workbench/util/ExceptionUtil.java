@@ -68,6 +68,15 @@ public class ExceptionUtil
 			if (th.getMessage() == null)
 			{
 				result = new StringBuffer(th.getClass().getName());
+				if (!includeStackTrace) 
+				{
+					// always include Stacktrace for NPE
+					// sometimes these are not properly logged, and this way
+					// the stacktrace does at least show up in the front end
+					// which should not happen anyway, but if it does, 
+					// we have at least proper error information
+					includeStackTrace = (th instanceof NullPointerException);
+				} 
 			}
 			else
 			{

@@ -158,21 +158,6 @@ public class RowData
 				{
 					value = rs.getObject(i + 1);
 				}
-//				if (type == Types.CLOB)
-//				{
-//					// "Convert" a CLOB to a String object 
-//					// This makes handling the value much easier
-//					try
-//					{
-//						Clob clob = (Clob)value;
-//						int len = (int)clob.length();
-//						value = clob.getSubString(1, len);
-//					}
-//					catch (Exception e)
-//					{
-//						LogMgr.logError("RowData.read()", "Error when converting CLOB column to String",e);
-//					}
-//				}
 			}
 			catch (SQLException e)
 			{

@@ -216,6 +216,18 @@ public class LogMgr
 		logMessage(DEBUG, aCaller, aMsg, null);
 	}
 
+	public static void logSqlError(Object caller, String sql, Throwable th)
+	{
+		if (th instanceof SQLException)
+		{
+			logDebug(caller, "Error executing statement: " + sql, th);
+		}
+		else
+		{
+			logError(caller, "Error executing statement: " + sql, th);
+		}
+	}
+	
 	public static void logDebug(Object aCaller, String aMsg, Throwable th)
 	{
 		if (levelDebug > loglevel)  return;
@@ -338,7 +350,7 @@ public class LogMgr
 		buff.append(StringUtil.LINE_TERMINATOR);
 
 		// always display the stacktrace in debug level
-		if ((showStackTrace || loglevel == levelDebug) && th != null)
+		if (th != null && (showStackTrace || loglevel == levelDebug || th instanceof NullPointerException))
 		{
 			buff.append(getStackTrace(th));
 			buff.append(StringUtil.LINE_TERMINATOR);

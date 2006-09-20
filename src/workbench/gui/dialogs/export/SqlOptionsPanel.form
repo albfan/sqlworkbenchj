@@ -18,7 +18,7 @@
     <Component class="javax.swing.JLabel" name="commitLabel">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelExportCommitEvery&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblExportCommitEvery&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -40,7 +40,7 @@
     <Component class="javax.swing.JCheckBox" name="createTable">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelExportIncludeCreateTable&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblExportIncludeCreateTable&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -55,7 +55,7 @@
           <ComponentRef name="typeGroup"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelExportSqlUpdate&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblExportSqlUpdate&quot;)" type="code"/>
         </Property>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
@@ -72,7 +72,7 @@
         </Property>
         <Property name="selected" type="boolean" value="true"/>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelExportSqlInsert&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblExportSqlInsert&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -94,7 +94,7 @@
     <Component class="javax.swing.JLabel" name="jLabel1">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelUseExportTableName&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblUseExportTableName&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -109,7 +109,7 @@
           <ComponentRef name="typeGroup"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelExportSqlDeleteInsert&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblExportSqlDeleteInsert&quot;)" type="code"/>
         </Property>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
@@ -122,7 +122,7 @@
     <Component class="javax.swing.JButton" name="selectKeys">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelSelectKeyColumns&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblSelectKeyColumns&quot;)" type="code"/>
         </Property>
       </Properties>
       <Events>

@@ -27,6 +27,7 @@ import workbench.gui.components.WbToolbar;
 import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -89,8 +90,9 @@ public class ConnectionPropertiesEditor
 		for (int row=0; row < count; row++)
 		{
 			String key = this.propData.getValueAsString(row, 0);
+			if (StringUtil.isEmptyString(key)) continue;
 			String value = this.propData.getValueAsString(row, 1);
-			props.setProperty(key, value);
+			props.setProperty(key.trim(), value.trim());
 		}
 		return props;
 	}

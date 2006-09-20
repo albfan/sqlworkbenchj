@@ -49,7 +49,6 @@ public class SqlRowDataConverter
 	private int sqlTypeToUse = SQL_INSERT;
 	private int sqlType = SQL_INSERT;
 	
-	
 	private boolean createTable = false;
 	private TableIdentifier alternateUpdateTable;
 	private int commitEvery;
@@ -251,11 +250,12 @@ public class SqlRowDataConverter
 	
 	private boolean checkKeyColumns()
 	{
-		boolean keysPresent = false;
+		boolean keysPresent = metaData.hasPkColumns();
 		
 		if (this.keyColumnsToUse != null && this.keyColumnsToUse.size() > 0)
 		{
 			int keyCount = this.keyColumnsToUse.size();
+			
 			// make sure the default key columns are not used
 			this.metaData.resetPkColumns();
 
@@ -270,7 +270,7 @@ public class SqlRowDataConverter
 		{
 			try
 			{
-				this.metaData.readPkDefinition(this.originalConnection, false);
+				this.metaData.readPkDefinition(this.originalConnection);
 				keysPresent = this.metaData.hasPkColumns();
 			}
 			catch (SQLException e)
@@ -280,6 +280,7 @@ public class SqlRowDataConverter
 		}
 		return keysPresent;
 	}
+	
 	public int getCommitEvery()
 	{
 		return commitEvery;

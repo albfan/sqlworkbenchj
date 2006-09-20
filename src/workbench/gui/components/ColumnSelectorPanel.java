@@ -25,14 +25,18 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelEvent;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import workbench.db.ColumnIdentifier;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 /**
  *
@@ -76,17 +80,17 @@ public class ColumnSelectorPanel
 		col = colMod.getColumn(1);
 		col.setPreferredWidth(100);
 		col.setMinWidth(50);
+
 		WbScrollPane scroll = new WbScrollPane(this.selectTable);
 		this.infoPanel = new JPanel();
 		configureInfoPanel();
 		this.add(this.infoPanel, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
 		
-		selectAll = new JButton(ResourceMgr.getString("LblSelectAll"));
-		selectNone = new JButton(ResourceMgr.getString("LblSelectNone"));
+		selectAll = new FlatButton(ResourceMgr.getString("LblSelectAll"));
+		selectNone = new FlatButton(ResourceMgr.getString("LblSelectNone"));
 		selectAll.addActionListener(this);
 		selectNone.addActionListener(this);
-
     
 		if (showSelectedCheckBox)
 		{
@@ -108,12 +112,14 @@ public class ColumnSelectorPanel
     c.gridy = 0;
     c.weightx = 0.5;
     c.anchor = java.awt.GridBagConstraints.EAST;    
+		c.insets = new Insets(0,0,0,5);
     optionPanel.add(selectAll, c);
     
     c.gridx = 1;
     c.gridy = 0;
     c.anchor = java.awt.GridBagConstraints.WEST;    
     c.weightx = 0.5;
+		c.insets = new Insets(0,5,0,0);
     optionPanel.add(selectNone, c);
 
     if (showSelectedCheckBox)
@@ -154,6 +160,9 @@ public class ColumnSelectorPanel
 	public void setSelectionLabel(String label)
 	{
 		this.model.selectLabel = label;
+		TableColumnModel colMod = this.selectTable.getColumnModel();
+		TableColumn col = colMod.getColumn(1);
+		col.setHeaderValue(label);
 	}
 	
   public boolean selectedOnly() 
@@ -252,7 +261,9 @@ class ColumnSelectTableModel
 	boolean[] selected;
 	private String colLabel = ResourceMgr.getString("LblHeaderKeyColumnColName");
 	String selectLabel = ResourceMgr.getString("LblHeaderUseColumn");
+	
 	private int rows;
+	
 	public ColumnSelectTableModel(ColumnIdentifier[] cols)
 	{
 		this.rows = cols.length;

@@ -53,14 +53,28 @@ public class SqlUtil
 		return col.toString();
 	}
 
+	/**
+	 * Returns the type that is beeing created e.g. TABLE, VIEW, PROCEDURE
+	 */
 	public static String getCreateType(String sql)
 	{
 		try
 		{
 			SQLLexer lexer = new SQLLexer(sql);
 			SQLToken t = lexer.getNextToken(false, false);
-			if (!t.getContents().equals("CREATE")) return null;
+			if (!t.getContents().equals("CREATE") && !t.getContents().equals("RECREATE")) return null;
 			t = lexer.getNextToken(false, false);
+			if (t != null && t.getContents().equals("OR"))
+			{
+				// Handle Oracle's CREATE OR REPLACE ...
+				t = lexer.getNextToken(false, false);
+				if (t != null && t.getContents().equals("REPLACE"))
+				{
+					t = lexer.getNextToken(false, false);
+					return (t != null ? t.getContents() : null);
+				}
+				return null;
+			}
 			return t.getContents();
 		}
 		catch (Exception e)
@@ -69,6 +83,10 @@ public class SqlUtil
 		}
 	}
 
+	/**
+	 * If the given SQL is a DELETE [FROM] returns 
+	 * the table from which rows will be deleted
+	 */
 	public static String getDeleteTable(String sql)
 	{
 		try
@@ -77,7 +95,10 @@ public class SqlUtil
 			SQLToken t = lexer.getNextToken(false, false);
 			if (!t.getContents().equals("DELETE")) return null;
 			t = lexer.getNextToken(false, false);
-			if (!t.getContents().equals("FROM")) return null;
+			// If the next token is not the FROM keyword (which is optional) 
+			// then it must be the table name.
+			if (t == null) return null;
+			if (!t.getContents().equals("FROM")) return t.getContents(); 
 			t = lexer.getNextToken(false, false);
 			if (t == null) return null;
 			return t.getContents();
@@ -87,7 +108,11 @@ public class SqlUtil
 			return null;
 		}
 	}	
-	
+
+	/**
+	 * If the given SQL is an INSERT INTO... 
+	 * returns the target table, otherwise null
+	 */
 	public static String getInsertTable(String sql)
 	{
 		try
@@ -107,6 +132,9 @@ public class SqlUtil
 		}
 	}
 	
+	/**
+	 *  Returns the SQL Verb for the given SQL string.
+	 */
 	public static String getSqlVerb(String sql)
 	{
 		if (sql == null) return "";
@@ -181,7 +209,8 @@ public class SqlUtil
 	
 	/**
 	 * Parse the given SQL SELECT query and return the columns defined
-	 * in the column list.
+	 * in the column list. If the SQL string does not start with SELECT
+	 * returns an empty List
 	 * @param select the SQL String to parse
 	 * @param includeAlias if false, the "raw" column names will be returned, otherwise
 	 *       the column name including the alias (e.g. "p.name AS person_name"
@@ -266,13 +295,6 @@ public class SqlUtil
 		List elements = StringUtil.stringToList(expression, " ", true, true, true);
 		
 		return (String)elements.get(0);
-//		String result = expression.trim();
-//		int pos = StringUtil.findFirstWhiteSpace(result);
-//		if (pos > -1)
-//		{
-//			result = result.substring(0, pos).trim();
-//		}
-//		return result;
 	}
 	
 	public static List getTables(String aSql)
@@ -714,11 +736,6 @@ public class SqlUtil
 			return "UNKNOWN";
 	}
 
-	public static boolean isValidType(int sqlType)
-	{
-		return !getTypeName(sqlType).equals("UNKNOWN");
-	}
-	
 	public static String getWarnings(WbConnection con, Statement stmt, boolean retrieveOutputMsg)
 	{
 		try
@@ -793,12 +810,13 @@ public class SqlUtil
 	{
 		try
 		{
+			System.out.println("Checking if all types defined by java.sql.Types are covered by getTypeName()...");
 			System.out.println(System.getProperty("java.version"));
 			Field fields[] = java.sql.Types.class.getDeclaredFields();
 			for (int i=0; i < fields.length; i++)
 			{
 				int type = fields[i].getInt(null);
-				if (!isValidType(type))
+				if (getTypeName(type).equals("UNKNOWN"))
 				{
 					System.out.println("Type " + fields[i].getName() + " not included in getTypeName()!");
 				}

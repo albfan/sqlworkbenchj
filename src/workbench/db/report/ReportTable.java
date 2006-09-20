@@ -114,7 +114,7 @@ public class ReportTable
 		String schema = this.table.getSchema();
 		if (schema == null || schema.length() == 0)
 		{
-			schema = conn.getMetadata().findSchemaForTable(this.table.getTableName());
+			schema = conn.getMetadata().getSchemaToUse();
 			if (schema != null) this.table.setSchema(schema);
 		}
 

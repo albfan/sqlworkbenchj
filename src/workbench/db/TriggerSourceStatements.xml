@@ -22,7 +22,7 @@
  
   <void method="put">
    <string>Oracle</string>
-   <object class="workbench.db.GetMetaDataSql">
+   <object id="ora_trg_source" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>SELECT 'CREATE OR REPLACE TRIGGER '|| description, trigger_body FROM all_triggers</string>
     </void>
@@ -38,23 +38,10 @@
    </object>
   </void>
   
-  <void method="put">
-   <string>Oracle8</string>
-   <object class="workbench.db.GetMetaDataSql">
-    <void property="baseSql">
-     <string>SELECT 'CREATE OR REPLACE TRIGGER '|| description, trigger_body FROM all_triggers</string>
-    </void>
-    <void property="objectNameField">
-     <string>trigger_name</string>
-    </void>
-    <void property="schemaField">
-     <string>owner</string>
-    </void>
-    <void property="useUpperCase">
-     <boolean>true</boolean>
-    </void>
-   </object>
-  </void>
+  <void method="put"> 
+   <string>Oracle8</string> 
+   <object idref="ora_trg_source"/> 
+  </void> 
   
   <void method="put">
    <string>Microsoft SQL Server</string>
@@ -222,10 +209,10 @@ SELECT 'CREATE TRIGGER ' || trg.triggername || '\n  '
           end
        || case when trg.referencedcolumns is not null then ' OF ' || trg.referencedcolumns else '' end 
        || ' ON ' || t.tablename || '\n' 
-       || case when trg.referencingnew = 'true' then '  REFERENCING NEW AS ' || trg.newreferencingname 
-          else case when trg.referencingold = 'true' then '  REFERENCING OLD AS ' || trg.oldreferencingname end
+       || case when trg.referencingnew = 'true' then '  REFERENCING NEW AS ' || trg.newreferencingname || '\n'
+               when trg.referencingold = 'true' then '  REFERENCING OLD AS ' || trg.oldreferencingname || '\n'
+               when trg.referencingold = 'false' AND trg.referencingnew = 'false' THEN ''
           end
-       || '\n'
        || case when trg.type = 'S' then '  FOR EACH STATEMENT '
                else '  FOR EACH ROW' end
        || ' MODE DB2SQL\n\n'

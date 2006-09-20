@@ -63,27 +63,16 @@ public class DeleteScriptGenerator
 		this.sourceTable = aTable;
 	}
 
-	public void setTable(String aCatalog, String aSchema, String aTable)
+	public void setTable(TableIdentifier table)
 		throws SQLException
 	{
-		if (aTable == null || aTable.trim().length() == 0) throw new IllegalArgumentException("The table name may not be empty");
-		aTable = this.meta.adjustObjectnameCase(aTable);
-		aCatalog = this.meta.adjustObjectnameCase(aCatalog);
+		if (table == null) throw new IllegalArgumentException("The table name may not be empty");
 
-		if (aSchema == null)
+		this.rootTable = table.createCopy();
+		if (rootTable.getSchema() == null)
 		{
-			try
-			{
-				aSchema = this.meta.findSchemaForTable(aTable);
-			}
-			catch (Exception e)
-			{
-				aSchema = null;
-			}
+			rootTable.setSchema(this.meta.getCurrentSchema());
 		}
-		aSchema = this.meta.adjustObjectnameCase(aSchema);
-		this.rootTable = new TableIdentifier(aCatalog, aSchema, aTable);
-
 		this.dependency.setTable(this.rootTable);
 		this.tableDefinition = this.meta.getTableDefinition(this.rootTable);
 	}
@@ -139,7 +128,7 @@ public class DeleteScriptGenerator
 
 		DependencyNode root = this.dependency.getRootNode();
 		sql.append("DELETE FROM ");
-		sql.append(root.getTableId().getTableExpression());
+		sql.append(root.getTableId().getTableExpression(this.connection));
 		sql.append("\n WHERE ");
 		this.addRootTableWhere(sql);
 		sql.append(';');
@@ -161,7 +150,7 @@ public class DeleteScriptGenerator
 		if (node == null) return;
 
 		sql.append("DELETE FROM ");
-		sql.append(node.getTableId().getTableExpression());
+		sql.append(node.getTableId().getTableExpression(this.connection));
 		sql.append("\n WHERE ");
 
 		this.addParentWhere(sql, node);
@@ -197,7 +186,7 @@ public class DeleteScriptGenerator
 					sql.append(" IN ( SELECT ");
 					sql.append(parentColumn);
 					sql.append(" FROM ");
-					sql.append(parent.getTableId().getTableExpression());
+					sql.append(parent.getTableId().getTableExpression(this.connection));
 					sql.append("\n WHERE ");
 					this.addParentWhere(sql, parent, parentColumn);
 					sql.append(")) ");
@@ -330,9 +319,7 @@ public class DeleteScriptGenerator
 		}
 
 		ds.checkUpdateTable();
-		String updatetable = ds.getUpdateTable();
-		String schema = ds.getUpdateTableSchema();
-
+		TableIdentifier tbl = ds.getUpdateTable();
 		int numRows = rows.length;
 		StringBuffer result = new StringBuffer(numRows * 150);
 		int max = Settings.getInstance().getFormatterMaxSubselectLength();
@@ -346,7 +333,7 @@ public class DeleteScriptGenerator
 			for (int i=0; i < numRows; i++)
 			{
 				Map pkvalues = ds.getPkValues(rows[i]);
-				this.setTable(null, schema, updatetable);
+				this.setTable(tbl);
 				this.setValues(pkvalues);
 				this.monitor.setCurrentObject(ResourceMgr.getString("MsgGeneratingScriptForRow") + " " + i);
 				

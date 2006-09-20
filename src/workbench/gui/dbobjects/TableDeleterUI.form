@@ -29,7 +29,7 @@
         <Component class="javax.swing.JButton" name="deleteButton">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LabelDeleteTableData&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;LblDeleteTableData&quot;)" type="code"/>
             </Property>
           </Properties>
           <Events>
@@ -42,7 +42,7 @@
         <Component class="javax.swing.JButton" name="cancelButton">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LabelCancel&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;LblCancel&quot;)" type="code"/>
             </Property>
           </Properties>
           <Events>
@@ -126,7 +126,7 @@
                 <Component class="javax.swing.JCheckBox" name="useTruncateCheckBox">
                   <Properties>
                     <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                      <Connection code="ResourceMgr.getString(&quot;LabelUseTruncate&quot;)" type="code"/>
+                      <Connection code="ResourceMgr.getString(&quot;LblUseTruncate&quot;)" type="code"/>
                     </Property>
                   </Properties>
                   <Events>
@@ -145,7 +145,7 @@
                     </Property>
                     <Property name="selected" type="boolean" value="true"/>
                     <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                      <Connection code="ResourceMgr.getString(&quot;LabelCommitEachTableDelete&quot;)&#xa;" type="code"/>
+                      <Connection code="ResourceMgr.getString(&quot;LblCommitEachTableDelete&quot;)&#xa;" type="code"/>
                     </Property>
                   </Properties>
                   <Constraints>
@@ -160,7 +160,7 @@
                       <ComponentRef name="buttonGroup1"/>
                     </Property>
                     <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                      <Connection code="ResourceMgr.getString(&quot;LabelCommitTableDeleteAtEnd&quot;)" type="code"/>
+                      <Connection code="ResourceMgr.getString(&quot;LblCommitTableDeleteAtEnd&quot;)" type="code"/>
                     </Property>
                   </Properties>
                   <Constraints>

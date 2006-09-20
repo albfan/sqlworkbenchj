@@ -38,6 +38,10 @@ public class SaveDataAsAction
 
 	public void executeAction(ActionEvent e)
 	{
+		if (client.getDataStore().getUpdateTable() == null)
+		{
+			client.detectDefinedPkColumns();
+		}
 		DataStoreExporter exporter = new DataStoreExporter(this.client.getDataStore(), this.client);
 		exporter.saveAs();
 	}

@@ -127,6 +127,11 @@ public class PkMapping
 		this.columnMapping.remove(table);
 	}
 	
+	public synchronized void addMapping(TableIdentifier table, String columns)
+	{
+		addMapping(table.getTableExpression(), columns);
+	}
+	
 	public synchronized void addMapping(String table, String columns)
 	{
 		if (this.columnMapping == null) this.columnMapping = new HashMap();
@@ -191,7 +196,7 @@ public class PkMapping
 		}
 	}
 	
-	public synchronized void addMapping(String table, ColumnIdentifier[] cols)
+	public synchronized void addMapping(TableIdentifier table, ColumnIdentifier[] cols)
 	{
 		StringBuffer colNames = new StringBuffer(50);
 		for (int i = 0; i < cols.length; i++)

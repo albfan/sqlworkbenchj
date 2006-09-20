@@ -69,6 +69,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.ClipboardSupport;
+import workbench.interfaces.EditorStatusbar;
 import workbench.interfaces.TextChangeListener;
 import workbench.interfaces.TextSelectionListener;
 import workbench.interfaces.Undoable;
@@ -105,7 +106,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.53 2006-09-08 16:46:33 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.54 2006-09-20 17:20:27 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -123,6 +124,8 @@ public class JEditTextArea
 	private TokenMarker currentTokenMarker;
 	private int rectangularSelectionModifier = 0;
 	private KeyListener keyEventInterceptor;
+	private EditorStatusbar statusBar;
+	
 	/**
 	 * Adding components with this name to the text area will place
 	 * them left of the horizontal scroll bar. In jEdit, the status
@@ -667,7 +670,7 @@ public class JEditTextArea
 	 * Recalculates the number of visible lines. This should not
 	 * be called directly.
 	 */
-	public final void recalculateVisibleLines()
+	final void recalculateVisibleLines()
 	{
 		if(painter == null)
 			return;
@@ -1061,6 +1064,7 @@ public class JEditTextArea
 
 	public void setFont(Font aNewFont)
 	{
+		super.setFont(aNewFont);
 		this.painter.setFont(aNewFont);
 	}
 
@@ -1253,6 +1257,7 @@ public class JEditTextArea
 			document.tokenizeLines();
 		}
 		updateScrollBars();
+		repaint();
 	}
 
 	/**
@@ -1628,8 +1633,7 @@ public class JEditTextArea
 		// If the new position is the same as the old, we don't
 		// do all this crap, however we still do the stuff at
 		// the end (clearing magic position, scrolling)
-		if(newStart != selectionStart || newEnd != selectionEnd
-			|| newBias != biasLeft)
+		if (newStart != selectionStart || newEnd != selectionEnd || newBias != biasLeft)
 		{
 			this.alternateSelectionColor = alternateColor;
 			this.currentSelectionIsTemporary = (alternateColor != null);
@@ -2278,6 +2282,21 @@ public class JEditTextArea
 		}
 	}
 
+	public void setStatusBar(EditorStatusbar bar)
+	{
+		this.statusBar = bar;
+		updateStatusBar();
+	}
+	
+	private void updateStatusBar()
+	{
+		if (this.statusBar != null)
+		{
+			int line = this.getCaretLine();
+			this.statusBar.setEditorLocation(line + 1, this.getCaretPositionInLine(line) + 1);
+		}
+	}
+	
 	protected void fireCaretEvent()
 	{
 		Object[] list = listeners.getListenerList();
@@ -2288,8 +2307,9 @@ public class JEditTextArea
 				((CaretListener)list[i+1]).caretUpdate(caretEvent);
 			}
 		}
+		updateStatusBar();
 	}
-
+	
 	protected void updateBracketHighlight(int newCaretPosition)
 	{
 		if(newCaretPosition == 0)

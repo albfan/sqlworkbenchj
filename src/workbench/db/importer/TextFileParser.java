@@ -823,6 +823,7 @@ public class TextFileParser
 		List cols = new ArrayList();
 		try
 		{
+			setupFileHandler();
 			in = this.fileHandler.getMainFileReader();
 			String firstLine = in.readLine();
 			WbStringTokenizer tok = new WbStringTokenizer(delimiter.charAt(0), this.quoteChar, false);

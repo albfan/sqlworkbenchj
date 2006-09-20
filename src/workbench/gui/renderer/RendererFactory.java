@@ -30,7 +30,7 @@ import workbench.log.LogMgr;
 public class RendererFactory
 {
 	//private static Map sharedInstances = new HashMap();
-	private static Map dateRenderer = new HashMap();
+//	private static Map dateRenderer = new HashMap();
 	
 	private static TableCellRenderer createRenderer(String className)
 	{
@@ -75,7 +75,7 @@ public class RendererFactory
 				LogMgr.logError("RendererFactory.getDateRenderer()", "Error creating renderer", e);
 				return new DefaultTableCellRenderer();
 			} 
-			dateRenderer.put(format, rend);
+//			dateRenderer.put(format, rend);
 //		}
 		return rend;
 	}

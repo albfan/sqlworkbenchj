@@ -48,8 +48,6 @@ public class WbDefineVar extends SqlCommand
 		StatementRunnerResult result = new StatementRunnerResult();
 		String sql = stripVerb(aSql);
 
-		String msg = null;
-
 		WbStringTokenizer tok = new WbStringTokenizer("=", true, "\"'", false);
 		tok.setSourceString(sql);
 		String value = null;
@@ -75,17 +73,28 @@ public class WbDefineVar extends SqlCommand
 				try
 				{
 					String filename = this.evaluateFileArgument(value);
-					VariablePool.getInstance().readFromFile(filename);
-					msg = ResourceMgr.getString("MsgVarDefFileLoaded");
-					msg = StringUtil.replace(msg, "%file%", filename);
-					result.addMessage(msg);
-					result.setSuccess();
+					File f = new File(filename);
+					if (f.exists())
+					{
+						VariablePool.getInstance().readFromFile(filename);
+						String msg = ResourceMgr.getString("MsgVarDefFileLoaded");
+						msg = StringUtil.replace(msg, "%file%", filename);
+						result.addMessage(msg);
+						result.setSuccess();
+					}
+					else
+					{
+						String msg = ResourceMgr.getString("ErrFileNotFound");
+						msg = StringUtil.replace(msg, "%file%", filename);
+						result.addMessage(msg);
+						result.setFailure();
+					}
 				}
 				catch (Exception e)
 				{
 					File f = new File(value);
 					LogMgr.logError("WbDefineVar.execute()", "Error reading definition file: " + value, e);
-					msg = ResourceMgr.getString("ErrReadingVarDefFile");
+					String msg = ResourceMgr.getString("ErrReadingVarDefFile");
 					msg = StringUtil.replace(msg, "%file%", f.getAbsolutePath());
 					msg = msg + " " + ExceptionUtil.getDisplay(e);
 					result.addMessage(msg);
@@ -100,6 +109,7 @@ public class WbDefineVar extends SqlCommand
 			return result;
 		}
 
+		String msg = null;
 		result.setSuccess();
 
 		if (value != null)
@@ -112,12 +122,12 @@ public class WbDefineVar extends SqlCommand
 					valueSql = value.trim().substring(1);
 					value = this.evaluateSql(aConnection, valueSql);
 				}
-				catch (SQLException e)
+				catch (Exception e)
 				{
 					LogMgr.logError("WbDefineVar.execute()", "Error retrieving variable value using SQL: " + valueSql, e);
-					msg = ResourceMgr.getString("ErrReadingVarSql");
-					msg = StringUtil.replace(msg, "%sql%", valueSql);
-					msg = msg + "\n\n" + ExceptionUtil.getDisplay(e);
+					String err = ResourceMgr.getString("ErrReadingVarSql");
+					err = StringUtil.replace(err, "%sql%", valueSql);
+					err = err + "\n\n" + ExceptionUtil.getDisplay(e);
 					result.addMessage(msg);
 					result.setFailure();
 					return result;
@@ -137,8 +147,8 @@ public class WbDefineVar extends SqlCommand
 			{
 				result.setFailure();
 				msg = ResourceMgr.getString("ErrVarDefWrongName");
+				result.setFailure();
 			}
-
 		}
 		else
 		{

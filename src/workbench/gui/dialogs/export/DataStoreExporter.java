@@ -19,9 +19,7 @@ import workbench.storage.DataStore;
 import workbench.util.WbThread;
 
 /**
- *
  * @author  support@sql-workbench.net
- *
  */
 public class DataStoreExporter
 {

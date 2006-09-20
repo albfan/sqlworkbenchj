@@ -42,7 +42,7 @@ public class ConnectionProfile
 	private String driverName;
 	private String group;
 	private boolean autocommit;
-	private boolean disableUpdateTableCheck = true;
+	private boolean disableUpdateTableCheck = false;
 	private boolean rollbackBeforeDisconnect;
 	private int id;
 	private static int nextId = 1;
@@ -60,7 +60,7 @@ public class ConnectionProfile
 	private boolean includeNullInInsert = true;
 	private boolean removeComments = false;
 	private boolean rememberExplorerSchema = false;
-
+	
 	static
 	{
 		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
@@ -460,7 +460,7 @@ public class ConnectionProfile
 		result.setIgnoreDropErrors(this.ignoreDropErrors);
 		result.setUseSeparateConnectionPerTab(this.separateConnection);
 		result.setRollbackBeforeDisconnect(this.rollbackBeforeDisconnect);
-		result.setDisableUpdateTableCheck(this.disableUpdateTableCheck);
+		//result.setDisableUpdateTableCheck(this.disableUpdateTableCheck);
 		result.setConfirmUpdates(this.confirmUpdates);
 		result.setStorePassword(this.storePassword);
 		result.setStoreExplorerSchema(this.rememberExplorerSchema);
@@ -572,24 +572,24 @@ public class ConnectionProfile
 		this.driverName = driverName;
 	}
 
-	/**
-	 * Getter for property disableUpdateTableCheck.
-	 * @return Value of property disableUpdateTableCheck.
-	 */
-	public boolean getDisableUpdateTableCheck()
-	{
-		return disableUpdateTableCheck;
-	}
-
-	/**
-	 * Setter for property disableUpdateTableCheck.
-	 * @param flag New value of property disableUpdateTableCheck.
-	 */
-	public void setDisableUpdateTableCheck(boolean flag)
-	{
-		if (flag != this.disableUpdateTableCheck) this.changed = true;
-		this.disableUpdateTableCheck = flag;
-	}
+//	/**
+//	 * Getter for property disableUpdateTableCheck.
+//	 * @return Value of property disableUpdateTableCheck.
+//	 */
+//	public boolean getDisableUpdateTableCheck()
+//	{
+//		return disableUpdateTableCheck;
+//	}
+//
+//	/**
+//	 * Setter for property disableUpdateTableCheck.
+//	 * @param flag New value of property disableUpdateTableCheck.
+//	 */
+//	public void setDisableUpdateTableCheck(boolean flag)
+//	{
+//		if (flag != this.disableUpdateTableCheck) this.changed = true;
+//		this.disableUpdateTableCheck = flag;
+//	}
 
 	public boolean isConfirmUpdates()
 	{

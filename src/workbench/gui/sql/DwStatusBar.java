@@ -14,7 +14,6 @@ package workbench.gui.sql;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -36,6 +35,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTextLabel;
+import workbench.interfaces.EditorStatusbar;
 import workbench.interfaces.StatusBar;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -48,7 +48,7 @@ import workbench.util.StringUtil;
  */
 public class DwStatusBar 
 	extends JPanel
-	implements StatusBar
+	implements StatusBar, EditorStatusbar
 {
 	private JTextField tfRowCount;
 
@@ -58,6 +58,7 @@ public class DwStatusBar
 	private String readyMsg;
 	private JTextField tfTimeout;
 	private WbTextLabel execTime;
+	private JLabel editorStatus;
 	
 	private static final int BAR_HEIGHT = 22;
 	private static final int FIELD_HEIGHT = 18;
@@ -65,10 +66,10 @@ public class DwStatusBar
 	
 	public DwStatusBar()
 	{
-		this(false);
+		this(false, false);
 	}
 	
-	public DwStatusBar(boolean showTimeout)
+	public DwStatusBar(boolean showTimeout, boolean showEditorStatus)
 	{
 		Dimension d = new Dimension(40, FIELD_HEIGHT);
 		this.tfRowCount = new JTextField();
@@ -122,12 +123,24 @@ public class DwStatusBar
 		Font f = execTime.getFont();
 		FontMetrics fm = execTime.getFontMetrics(f);
 		
+
+		if (showEditorStatus)
+		{
+			this.editorStatus = new JLabel();
+			this.editorStatus.setHorizontalAlignment(SwingConstants.CENTER);
+			int ew = fm.stringWidth("L:999 C:999");
+			d = new Dimension(ew + 4, FIELD_HEIGHT);
+			editorStatus.setMinimumSize(d);
+			this.editorStatus.setBorder(new CompoundBorder(new DividerBorder(DividerBorder.LEFT), new EmptyBorder(0, 3, 0, 3)));
+			this.editorStatus.setToolTipText(ResourceMgr.getDescription("LblEditorStatus"));
+			p.add(editorStatus);
+		}
+		
+		b = new CompoundBorder(new DividerBorder(DividerBorder.LEFT_RIGHT), new EmptyBorder(0, 3, 0, 3));
 		int width = fm.stringWidth("000000000000s");
 		d = new Dimension(width + 4, FIELD_HEIGHT);
 		execTime.setPreferredSize(d);
 		execTime.setMaximumSize(d);
-		
-		b = new CompoundBorder(new DividerBorder(DividerBorder.LEFT_RIGHT), new EmptyBorder(0, 3, 0, 3));
 		execTime.setBorder(b);	
 		p.add(execTime);
 		
@@ -178,6 +191,17 @@ public class DwStatusBar
 	{
 		this.execTime.setText("");
 		this.execTime.repaint();
+	}
+
+	public void setEditorLocation(int line, int column)
+	{
+		 if (this.editorStatus == null) return;
+		 StringBuffer text = new StringBuffer(20);
+		 text.append("L:");
+		 text.append(line);
+		 text.append(" C:");
+		 text.append(column);
+		 this.editorStatus.setText(text.toString());
 	}
 	
 	public void setExecutionTime(long millis)

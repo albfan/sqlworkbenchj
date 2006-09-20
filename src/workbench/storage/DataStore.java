@@ -63,7 +63,6 @@ public class DataStore
 	private RowActionMonitor rowActionMonitor;
 
 	private boolean modified;
-	private boolean pkColumnsRead = false;
 
 	private RowDataList data;
 	private RowDataList deletedRows;
@@ -73,7 +72,7 @@ public class DataStore
 	private String sql;
 
 	private ResultInfo resultInfo;
-	private String updateTable;
+	private TableIdentifier updateTable;
 
 	private WbConnection originalConnection;
 	private DecimalFormat defaultNumberFormatter;
@@ -435,78 +434,11 @@ public class DataStore
 		return newIndex;
 	}
 
-	public boolean useUpdateTableFromSql(String aSql)
-	{
-		return this.useUpdateTableFromSql(aSql, false);
-	}
-
-	public boolean useUpdateTableFromSql(String aSql, boolean retrievePk)
-	{
-		this.updateTable = null;
-
-		if (aSql == null) return false;
-		List tables = SqlUtil.getTables(aSql);
-		if (tables.size() != 1) return false;
-
-		String table = (String)tables.get(0);
-		this.useUpdateTable(table);
-		if (retrievePk)
-		{
-			try
-			{
-				this.updatePkInformation(this.originalConnection);
-			}
-			catch (Exception e)
-			{
-				return false;
-			}
-			return (this.resultInfo.hasPkColumns());
-		}
-		return true;
-	}
-
-	public void useUpdateTable(String aTablename)
-	{
-		this.useUpdateTable(aTablename, false);
-	}
-	
-	public void useUpdateTable(String aTablename, boolean updatePk)
-	{
-		// A connection-less update table is used to
-		// create INSERT statements regardless if the
-		// table actually exists, or if it really is a table.
-		// this is used e.g. for creating scripts from result sets
-		this.updateTable = aTablename;
-		int colCount = this.resultInfo.getColumnCount();
-		for (int i=0; i < colCount; i++)
-		{
-			this.resultInfo.setIsPkColumn(i, true);
-		}
-		if (updatePk)
-		{
-			try
-			{
-				this.updatePkInformation(this.originalConnection);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("DataStore.useUpdateTable()", "Could not retrieve PK information", e);
-			}
-		}
-	}
-
 	public void setUpdateTable(String aTablename)
 	{
 		this.setUpdateTable(aTablename, this.originalConnection);
 	}
 
-	/**
-	 * Sets the table to be updated for this DataStore.
-	 * Upon setting the table, the column definition for the table
-	 * will be retrieved using {@link workbench.db.DbMetadata}
-	 * @param aTablename
-	 * @param aConn
-	 */
 	public void setUpdateTable(String aTablename, WbConnection aConn)
 	{
 		if (StringUtil.isEmptyString(aTablename))
@@ -525,71 +457,72 @@ public class DataStore
 		setUpdateTable(tbl, this.originalConnection);
 	}
 
+	/**
+	 * Sets the table to be updated for this DataStore.
+	 * Upon setting the table, the column definition for the table
+	 * will be retrieved using {@link workbench.db.DbMetadata}
+	 * @param aTablename
+	 * @param aConn
+	 */
 	public void setUpdateTable(TableIdentifier tbl, WbConnection aConn)
 	{
 		if (tbl == null)
 		{
 			this.updateTable = null;
+			this.resultInfo.setUpdateTable(null);
+			return;
 		}
-		else if (!tbl.getTableExpression(aConn).equalsIgnoreCase(this.updateTable) && aConn != null)
+		
+		if (tbl.equals(this.updateTable) || aConn == null) return;
+		
+		this.updateTable = null;
+		this.resultInfo.setUpdateTable(null);
+		
+		// check the columns which are in that table
+		// so that we can refuse any changes to columns
+		// which do not derive from that table
+		// note that this does not work, if the
+		// columns were renamed via an alias in the
+		// select statement
+		try
 		{
-			this.updateTable = null;
-			// check the columns which are in that table
-			// so that we can refuse any changes to columns
-			// which do not derive from that table
-			// note that this does not work, if the
-			// columns were renamed via an alias in the
-			// select statement
-			try
+			DbMetadata meta = aConn.getMetadata();
+			if (meta == null) return;
+
+			this.updateTable = tbl.createCopy();
+			ColumnIdentifier[] columns = meta.getColumnIdentifiers(tbl);
+			
+			if (columns != null && columns.length > 0)
 			{
-				DbMetadata meta = aConn.getMetadata();
-				if (meta == null) return;
-
-				this.updateTable = tbl.getTableExpression(aConn);
-
-				ColumnIdentifier[] columns = meta.getColumnIdentifiers(tbl);
-				if (columns == null || columns.length == 0)
+				for (int i=0; i < columns.length; i++)
 				{
-					LogMgr.logWarning("Datastore.setUpdateTable()", "No columns found for table " + tbl.getTableExpression() + "! Assuming columns from result set belong to update table", null);
-				}
-				else
-				{
-					for (int i=0; i < columns.length; i++)
+					int index = this.findColumn(columns[i].getColumnName());
+					if (index > -1)
 					{
-						int index = this.findColumn(columns[i].getColumnName());
-						if (index > -1)
-						{
-							this.resultInfo.setUpdateable(index, true);
-							this.resultInfo.setIsPkColumn(index, columns[i].isPkColumn());
-							this.resultInfo.setIsNullable(index, columns[i].isNullable());
-						}
+						this.resultInfo.setUpdateable(index, true);
+						this.resultInfo.setIsPkColumn(index, columns[i].isPkColumn());
+						this.resultInfo.setIsNullable(index, columns[i].isNullable());
 					}
 				}
 			}
-			catch (Exception e)
-			{
-				this.updateTable = null;
-				LogMgr.logError("DataStore.setUpdateTable()", "Could not read table definition", e);
-			}
+			this.resultInfo.setUpdateTable(tbl);
 		}
-		if (this.updateTable == null)
+		catch (Exception e)
 		{
-			this.resultInfo.setUpdateTable(null);
+			this.updateTable = null;
+			LogMgr.logError("DataStore.setUpdateTable()", "Could not read table definition", e);
 		}
-		else
-		{
-			String schema = this.getUpdateTableSchema(aConn);
-			this.resultInfo.setUpdateTable(new TableIdentifier(schema, this.updateTable));
-		}
+
 	}
 
 	/**
 	 * Returns the current table to be updated
 	 * @return The current update table
 	 */
-	public String getUpdateTable()
+	public TableIdentifier getUpdateTable()
 	{
-		return this.updateTable;
+		if (this.updateTable == null) return null;
+		return this.updateTable.createCopy();
 	}
 
 	/**
@@ -704,10 +637,11 @@ public class DataStore
 		RowData row = this.getRow(aRow);
 		Object value = row.getValue(aColumn);
     if (value == null || value instanceof NullValue)
+		{
       return aDefault;
+		}
     else if (value instanceof Number)
 		{
-      //return value.toString();
 			return ((Number)value).longValue();
 		}
 		else
@@ -1192,14 +1126,15 @@ public class DataStore
 	}
 
 	/**
-	 *	Return the table that should be used for INSERTs
+	 *	Return the table that should be used when generating INSERTs
+	 *  ("copy as INSERT")
 	 *	Normally this is the update table. If no update table
 	 *	is defined, the table from the SQL statement will be used
 	 *	but no checking for key columns takes place (which might take long)
 	 */
 	private String getInsertTable()
 	{
-		if (this.updateTable != null) return this.updateTable;
+		if (this.updateTable != null) return this.updateTable.getTableExpression();
 		if (this.sql == null) return null;
 		if (!this.sqlHasUpdateTable()) return null;
 		List tables = SqlUtil.getTables(this.sql);
@@ -1281,8 +1216,17 @@ public class DataStore
 
 		if (includeDelete && !this.hasPkColumns())
 		{
-			includeDelete = false;
+			try
+			{
+				this.updatePkInformation(this.originalConnection);
+			}
+			catch (SQLException e)
+			{
+				LogMgr.logError("DataStore.writeDataAsSqlInsert()", "Could not retrieve PK columns. Delete will not be generated",e);
+				includeDelete = false;
+			}			
 		}
+		
 		SqlRowDataConverter conv = new SqlRowDataConverter(this.originalConnection);
 		conv.setResultInfo(this.resultInfo);
 		conv.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
@@ -1341,7 +1285,7 @@ public class DataStore
 	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns)
 		throws IOException
 	{
-		if (!this.pkColumnsRead)
+		if (!this.hasPkColumns())
 		{
 			try
 			{
@@ -1353,6 +1297,7 @@ public class DataStore
 				return;
 			}
 		}
+		
 		if (!this.resultInfo.hasPkColumns())
 		{
 			LogMgr.logError("DataStore.writeDataAsSqlUpdate()", "No PK columns found. Cannot write as SQL Update", null);
@@ -1900,34 +1845,34 @@ public class DataStore
 		return null;
 	}
 
-	public String getUpdateTableSchema()
-	{
-		return this.getUpdateTableSchema(this.originalConnection);
-	}
-
-	public String getUpdateTableSchema(WbConnection aConnection)
-	{
-		if (this.updateTable == null) return null;
-		int pos = this.updateTable.indexOf(".");
-		String schema = null;
-		if (pos > -1)
-		{
-			schema = this.updateTable.substring(0, pos);
-		}
-
-		if (schema == null || schema.trim().length() == 0)
-		{
-			try
-			{
-				schema = aConnection.getMetadata().findSchemaForTable(this.updateTable);
-			}
-			catch (Exception e)
-			{
-				schema = null;
-			}
-		}
-		return schema;
-	}
+//	public String getUpdateTableSchema()
+//	{
+//		return this.getUpdateTableSchema(this.originalConnection);
+//	}
+//
+//	public String getUpdateTableSchema(WbConnection aConnection)
+//	{
+//		if (this.updateTable == null) return null;
+//		int pos = this.updateTable.indexOf(".");
+//		String schema = null;
+//		if (pos > -1)
+//		{
+//			schema = this.updateTable.substring(0, pos);
+//		}
+//
+//		if (schema == null || schema.trim().length() == 0)
+//		{
+//			try
+//			{
+//				schema = aConnection.getMetadata().findSchemaForTable(this.updateTable);
+//			}
+//			catch (Exception e)
+//			{
+//				schema = null;
+//			}
+//		}
+//		return schema;
+//	}
 
 	public void setPKColumns(ColumnIdentifier[] pkColumns)
 	{
@@ -1946,7 +1891,19 @@ public class DataStore
 
 	public boolean hasPkColumns()
 	{
-		return this.resultInfo.hasPkColumns() && this.resultInfo.hasRealPkColumns();
+		return this.resultInfo.hasPkColumns();
+	}
+
+	/**
+	 *	Check if the currently defined updateTable
+	 *	has any Primary keys defined in the database.
+	 *
+	 *	If it has, a subsequent call to hasPkColumns() returns true
+	 */
+	public void updatePkInformation()
+		throws SQLException
+	{
+		updatePkInformation(this.originalConnection);
 	}
 
 	private void updatePkInformation(WbConnection aConnection)
@@ -1958,23 +1915,6 @@ public class DataStore
 			this.checkUpdateTable();
 		}
 		this.resultInfo.readPkDefinition(aConnection);
-	}
-
-	/**
-	 *	Check if the currently defined updateTable
-	 *	has any Primary keys defined in the database.
-	 *
-	 *	If it has, a subsequent call to hasPkColumns() returns true
-	 */
-	public void checkDefinedPkColumns()
-		throws SQLException
-	{
-		if (this.originalConnection == null) return;
-		if (this.updateTable == null)
-		{
-			this.checkUpdateTable();
-		}
-		this.resultInfo.readPkDefinition(this.originalConnection, false);
 	}
 
 	/** Getter for property progressMonitor.

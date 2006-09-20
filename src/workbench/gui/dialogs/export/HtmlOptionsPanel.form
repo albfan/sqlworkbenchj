@@ -10,7 +10,7 @@
     <Component class="javax.swing.JLabel" name="pageTitleLabel">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelExportHtmlPageTitle&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblExportHtmlPageTitle&quot;)" type="code"/>
         </Property>
         <Property name="horizontalTextPosition" type="int" value="10"/>
       </Properties>
@@ -30,7 +30,7 @@
     <Component class="javax.swing.JCheckBox" name="fullPage">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelExportFullHtml&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblExportFullHtml&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -42,7 +42,7 @@
     <Component class="javax.swing.JCheckBox" name="escapeHtml">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelExportEscapeHtml&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblExportEscapeHtml&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>

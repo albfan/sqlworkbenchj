@@ -21,13 +21,10 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Graphics;
-import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -37,21 +34,17 @@ import java.awt.event.MouseListener;
 import java.awt.print.PageFormat;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.EventObject;
-import java.util.List;
 import javax.swing.ActionMap;
 import javax.swing.CellEditor;
 import javax.swing.InputMap;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -74,9 +67,9 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-import workbench.WbManager;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopyAsSqlInsertAction;
@@ -99,7 +92,6 @@ import workbench.gui.actions.SetColumnWidthAction;
 import workbench.gui.actions.SortAscendingAction;
 import workbench.gui.actions.SortDescendingAction;
 import workbench.gui.actions.WbAction;
-import workbench.gui.dialogs.export.DataStoreExporter;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RowStatusRenderer;
 import workbench.gui.renderer.ToolTipRenderer;
@@ -119,7 +111,7 @@ import workbench.storage.ResultInfo;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.FileDialogUtil;
 import workbench.util.SqlUtil;
-import workbench.util.WbThread;
+
 public class WbTable
 	extends JTable
 	implements ActionListener, FocusListener, MouseListener,
@@ -220,6 +212,8 @@ public class WbTable
 		this.defaultEditor = WbTextCellEditor.createInstance(this);
 		this.defaultEditor.setFont(dataFont);
 
+		setFont(dataFont);
+		
 		// Create a separate editor for numbers that is right alligned
 		numberEditorTextField = new JTextField();
 		numberEditorTextField.setFont(dataFont);
@@ -315,6 +309,46 @@ public class WbTable
 		}
 	}
 
+	/**
+	 * For some reason my Renderers do not display bigger
+	 * fonts properly. So I have to adjust the row height
+	 * when the font is defined
+	 */
+	public void setFont(Font f)
+	{
+		super.setFont(f);
+		adjustRowHeight();
+	}
+	
+	private void adjustRowHeight()
+	{
+		Graphics g = getGraphics();
+		Font f = getFont();
+		if (f == null) return;
+		
+		// Depending on the stage of initialization 
+		// not all calls work the same, so we need
+		// to take care that no exceptioin gets thrown 
+		// in here
+		FontMetrics fm = null;
+		if (g != null)
+		{
+			try
+			{
+				fm = g.getFontMetrics(getFont());
+			}
+			catch (Throwable e)
+			{
+				 fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
+			}
+		}
+		else
+		{
+			fm = getFontMetrics(getFont());
+		}
+		if (fm != null) this.setRowHeight(fm.getHeight() + 2);
+	}
+	
 	public JToolTip createToolTip()
 	{
 		JToolTip tip = new MultiLineToolTip();
@@ -481,12 +515,12 @@ public class WbTable
 		boolean update = false;
 		boolean insert = false;
 
-		if (selected)
-		{
-			DataStore ds = this.getDataStore();
-			update = (ds == null ? false : ds.hasPkColumns());
-			insert = (ds == null ? false : ds.canSaveAsSqlInsert());
-		}
+//		if (selected)
+//		{
+//			DataStore ds = this.getDataStore();
+//			update = (ds == null ? false : ds.hasPkColumns());
+//			insert = (ds == null ? false : ds.canSaveAsSqlInsert());
+//		}
 
 		if (this.copySelectedAsTextAction != null)
 		{
@@ -495,17 +529,17 @@ public class WbTable
 
 		if (this.copySelectedAsInsertAction != null)
 		{
-			this.copySelectedAsInsertAction.setEnabled(selected && insert);
+			this.copySelectedAsInsertAction.setEnabled(selected);
 		}
 
 		if (this.copySelectedAsUpdateAction != null)
 		{
-			this.copySelectedAsUpdateAction.setEnabled(selected & update);
+			this.copySelectedAsUpdateAction.setEnabled(selected);
 		}
 
 		if (this.copySelectedAsDeleteInsertAction != null)
 		{
-			this.copySelectedAsDeleteInsertAction.setEnabled(selected & update && insert);
+			this.copySelectedAsDeleteInsertAction.setEnabled(selected);
 		}
 
 	}
@@ -770,6 +804,7 @@ public class WbTable
 		}
 
 		resetFilter();
+		adjustRowHeight();
 
 		if (aModel instanceof DataStoreTableModel)
 		{
@@ -1766,7 +1801,10 @@ public class WbTable
 	{
 		DataStore ds = this.getDataStore();
 		ColumnIdentifier[] originalCols = ds.getColumns();
-		KeyColumnSelectorPanel panel = new KeyColumnSelectorPanel(originalCols, ds.getUpdateTable());
+		TableIdentifier table = ds.getUpdateTable();
+		if (table == null) return false;
+		
+		KeyColumnSelectorPanel panel = new KeyColumnSelectorPanel(originalCols, table);
 		Window parent = SwingUtilities.getWindowAncestor(this);
 		int choice = JOptionPane.showConfirmDialog(parent, panel, ResourceMgr.getString("MsgSelectKeyColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
@@ -1776,10 +1814,10 @@ public class WbTable
 		{
 			ColumnIdentifier[] cols = panel.getColumns();
 			ds.setPKColumns(cols);
-			checkKeyActions();
+			checkCopyActions();
 			if (panel.getSaveToGlobalPKMap())
 			{
-				PkMapping.getInstance().addMapping(ds.getUpdateTable(), cols);
+				PkMapping.getInstance().addMapping(table, cols);
 				FileDialogUtil.selectPkMapFileIfNecessary(parent);
 			}
 			return true;
@@ -1794,37 +1832,45 @@ public class WbTable
 		if (ds.hasPkColumns()) return true;
 		try
 		{
-			ds.checkDefinedPkColumns();
+			ds.updatePkInformation();
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("WbTable.detectDefinedPkColumns()", "Could not read PK columns", e);
 			return false;
 		}
-		return true;
+		return ds.hasPkColumns();
 	}
 
-	public void checkKeyActions()
+	public void checkCopyActions()
 	{
-		DataStore ds = this.getDataStore();
-		boolean update = (ds == null ? false : ds.hasPkColumns());
-		boolean insert = (ds == null ? false : ds.canSaveAsSqlInsert());
-
+		boolean hasRows = getRowCount() > 0;
+		
 		if (this.copyInsertAction != null)
 		{
-			this.copyInsertAction.setEnabled(insert);
+			this.copyInsertAction.setEnabled(hasRows);
 		}
 
 		if (this.copyUpdateAction != null)
 		{
-			this.copyUpdateAction.setEnabled(update);
+			this.copyUpdateAction.setEnabled(hasRows);
 		}
 
 		if (this.copyDeleteInsertAction != null)
 		{
-			this.copyDeleteInsertAction.setEnabled(update && insert);
+			this.copyDeleteInsertAction.setEnabled(hasRows);
 		}
 	}
 
+	public boolean hasPkColumns()
+	{
+		DataStore ds = this.getDataStore();
+		if (ds == null) return false;
+
+		if (ds.hasPkColumns()) return true;
+		return false;
+	}
+	
 	/**
 	 *	Check for any defined PK columns.
 	 *	If no key columns can be found, the user
@@ -1838,41 +1884,18 @@ public class WbTable
 		DataStore ds = this.getDataStore();
 		if (ds == null) return false;
 
-		if (ds.hasPkColumns()) return true;
-		detectDefinedPkColumns();
-		if (ds.hasPkColumns()) return true;
-		boolean needPk = ds.needPkForUpdate();
-		if (!needPk) return true;
+		boolean hasPK = detectDefinedPkColumns();
+		if (hasPK) return true;
 
-		boolean result = true;
-		if (promptWhenNeeded && needPk)
+		if (promptWhenNeeded)
 		{
-			result = this.selectKeyColumns();
+			hasPK = this.selectKeyColumns();
 		}
-		if (!result && needPk)
+		if (!hasPK)
 		{
 			LogMgr.logWarning("WbTable.checkPkColumns()", "Could not find key columns for updating table " + ds.getUpdateTable());
 		}
-		return result;
-	}
-
-	public void copyAsSqlUpdate(boolean selectedOnly, boolean showSelectColumns)
-	{
-		DataStore ds = this.getDataStore();
-		if (ds == null) return;
-
-		boolean result = true;
-		// we need decent PK columns in order to create update statements
-		if (!ds.hasPkColumns()) detectDefinedPkColumns();
-		if (!ds.hasPkColumns())
-		{
-			result = this.selectKeyColumns();
-		}
-		if (result)
-		{
-			ClipBoardCopier copier = new ClipBoardCopier(this);
-			copier.copyAsSql(true, selectedOnly, showSelectColumns, false);
-		}
+		return hasPK;
 	}
 
 	public void fontChanged(String aFontId, Font newFont)

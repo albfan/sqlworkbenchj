@@ -26,6 +26,7 @@ import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -361,8 +362,24 @@ public class WbManager
 	public String getJarPath()
 	{
 		URL url = this.getClass().getProtectionDomain().getCodeSource().getLocation();
-		File f = new File(url.getFile());
-		return f.getAbsoluteFile().getParentFile().getAbsolutePath();
+		File f = null;
+		try
+		{
+			// Sending the path through the URLDecoder is important
+			// because otherwise a path with %20 will be created 
+			// if the directory contains spaces!
+			URLDecoder decoder = new URLDecoder();
+			String p = decoder.decode(url.getFile(), "UTF-8");
+			f = new File(p);
+		}
+		catch (Exception e)
+		{
+			// Fallback, should not happen
+			String p = url.getFile();
+			p = StringUtil.replace(p, "%20", " ");
+			f = new File(p);
+		}
+		return f.getParentFile().getAbsolutePath();
 	}
 	
 	private void initUI()

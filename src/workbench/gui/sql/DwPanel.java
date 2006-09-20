@@ -104,12 +104,12 @@ public class DwPanel
 	
 	private boolean hasWarning;
 	private boolean showLoadProgress;
+	private boolean savingData = false;
 	
 	protected UpdateDatabaseAction updateAction;
 	protected InsertRowAction insertRow;
 	protected CopyRowAction duplicateRow;
 	protected DeleteRowAction deleteRow;
-	protected StartEditAction startEdit;
 	protected SelectKeyColumnsAction selectKeys;
 	
 	private boolean editingStarted;
@@ -117,7 +117,6 @@ public class DwPanel
 	private boolean manageUpdateAction;
 	private boolean showErrorMessages;
 	private boolean readOnly;
-	private boolean automaticUpdateTableCheck = true;
 	
 	private String[] lastResultMessages;
 	private StatementRunner stmtRunner;
@@ -147,7 +146,7 @@ public class DwPanel
 		this.updateAction = new UpdateDatabaseAction(this);
 		this.insertRow = new InsertRowAction(this);
 		this.deleteRow = new DeleteRowAction(this);
-		this.startEdit = new StartEditAction(this);
+		//this.startEdit = new StartEditAction(this);
 		this.duplicateRow = new CopyRowAction(this);
 		this.selectKeys = new SelectKeyColumnsAction(this);
 		
@@ -170,6 +169,23 @@ public class DwPanel
 	{
 		return this.selectKeys;
 	}
+
+	public boolean retrievePKColumns()
+	{
+		if (dataTable.hasPkColumns()) return true;
+		boolean result = false;
+		try
+		{
+			setStatusMessage(ResourceMgr.getString("MsgRetrievingKeyColumns"));
+			result = dataTable.detectDefinedPkColumns();
+			clearStatusMessage();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DwPanel.checkAndSelectKeyColumns", "Error retrieving key columns", e);
+		}
+		return result;
+	}
 	
 	public void checkAndSelectKeyColumns()
 	{
@@ -178,25 +194,11 @@ public class DwPanel
 		{
 			public void run()
 			{
-				try
-				{
-					setStatusMessage(ResourceMgr.getString("MsgRetrievingKeyColumns"));
-					WbSwingUtilities.showWaitCursorOnWindow(panel);
-					dataTable.detectDefinedPkColumns();
-					setStatusMessage(StringUtil.EMPTY_STRING);
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("DwPanel.checkAndSelectKeyColumns", "Error retrieving key columns", e);
-				}
-				finally
-				{
-					WbSwingUtilities.showDefaultCursorOnWindow(panel);
-				}
 				EventQueue.invokeLater(new Runnable()
 				{
 					public void run()
 					{
+						retrievePKColumns();
 						dataTable.selectKeyColumns();
 					}
 				});
@@ -301,6 +303,40 @@ public class DwPanel
 	}
 	
 	/**
+	 * Prepare the DwPanel for saving any changes to the database.
+	 * This will check for the PK columns and if necessary
+	 * ask the user to specify them. 
+	 * It will also prompt the user to verify the generated
+	 * update statements. 
+	 * If everything is OK, true will be returned
+	 * If the user cancels the PK column selection or the 
+	 * statement preview, false will be returned. In that 
+	 * case saveChanges() should not be called
+	 */
+	boolean prepareDatabaseUpdate()
+	{
+		if (this.dbConnection == null) return false;
+		boolean needPk = this.dataTable.getDataStore().needPkForUpdate();
+		if (needPk)
+		{
+			boolean hasPk = retrievePKColumns();
+			if (!hasPk)
+			{
+				// make sure only one table selected
+				hasPk = getTable().selectKeyColumns();
+			}
+			if (!hasPk) return false;
+		}
+		
+		// check if we really want to save the currentData
+		// it fhe SQL Preview is not enabled this will
+		// always return true, otherwise it depends on the user's
+		// selection after the SQL preview has been displayed
+		if (!this.shouldSaveChanges(this.dbConnection)) return false;
+		return true;
+	}
+	
+	/**
 	 * Starts the saving of the data in the background
 	 */
 	public synchronized void saveChangesToDatabase()
@@ -312,9 +348,7 @@ public class DwPanel
 			return;
 		}
 		
-		if (this.dbConnection == null) return;
-		if (!this.dataTable.checkPkColumns(true)) return;
-		if (!this.shouldSaveChanges(this.dbConnection)) return;
+		if (!this.prepareDatabaseUpdate()) return;
 		
 		WbThread t = new WbThread("DwPanel update")
 		{
@@ -396,8 +430,6 @@ public class DwPanel
 		return doSave;
 	}
 	
-	private boolean savingData = false;
-	
 	public synchronized int saveChanges(WbConnection aConnection, JobErrorHandler errorHandler)
 		throws SQLException
 	{
@@ -411,6 +443,7 @@ public class DwPanel
 		
 		try
 		{
+			setStatusMessage(ResourceMgr.getString("MsgUpdatingDatabase"));
 			savingData = true;
 			DataStore ds = this.dataTable.getDataStore();
 			long start, end;
@@ -490,14 +523,14 @@ public class DwPanel
 	
 	private void fireUpdateTableChanged()
 	{
-		String table = null;
+		TableIdentifier table = null;
 		
 		if (this.getTable() != null)
 		{
 			DataStore ds = this.getTable().getDataStore();
 			if (ds != null) table = ds.getUpdateTable();
 		}
-		if (table != null) firePropertyChange("updateTable", null, table);
+		if (table != null) firePropertyChange("updateTable", null, table.getTableExpression());
 	}
 	
 	public void setReadOnly(boolean aFlag)
@@ -703,15 +736,15 @@ public class DwPanel
 		header.append(this.sql);
 		this.setPrintHeader(header.toString());
 		
-		if (automaticUpdateTableCheck)
-		{
-			long updStart, updEnd;
-			updStart = System.currentTimeMillis();
-			this.checkUpdateTable();
-			updEnd = System.currentTimeMillis();
-			checkUpdateTime = (updEnd - updStart);
-		}
-		this.dataTable.checkKeyActions();
+//		if (automaticUpdateTableCheck)
+//		{
+//			long updStart, updEnd;
+//			updStart = System.currentTimeMillis();
+//			this.checkUpdateTable();
+//			updEnd = System.currentTimeMillis();
+//			checkUpdateTime = (updEnd - updStart);
+//		}
+		this.dataTable.checkCopyActions();
 		this.checkResultSetActions();
 	}
 	
@@ -721,7 +754,7 @@ public class DwPanel
 		boolean mayEdit = hasResult && this.hasUpdateableColumns();
 		boolean updateable = mayEdit && this.isUpdateable();
 		
-		this.startEdit.setEnabled(mayEdit);
+		//this.startEdit.setEnabled(mayEdit);
 		int rows = this.getTable().getSelectedRowCount();
 
 		this.dataTable.getExportAction().setEnabled(hasResult);
@@ -731,7 +764,7 @@ public class DwPanel
 		this.deleteRow.setEnabled(updateable && (rows == 1));
 		this.duplicateRow.setEnabled(mayEdit && (rows == 1));
 		this.selectKeys.setEnabled(hasResult);
-		this.dataTable.checkKeyActions();
+		this.dataTable.checkCopyActions();
 	}
 	
 	private boolean oldVerboseLogging = true;
@@ -886,9 +919,7 @@ public class DwPanel
 	}
 	/**
 	 *	Show a message in the status panel.
-	 *	This method might be called from within a background thread, so we
-	 *  need to make sure the actual setText() stuff is called on the AWT
-	 *  thread in order to update the GUI correctly.
+	 * 
 	 *  @see DwStatusBar#setStatusMessage(String)
 	 */
 	public void setStatusMessage(final String aMsg)
@@ -898,8 +929,7 @@ public class DwPanel
 	
 	/**
 	 *	Clears the display on the status bar.
-	 *  It is ensured that the call to the status bar methods is always called
-	 *  on the AWT thread.
+	 * 
 	 *  @see DwStatusBar#clearStatusMessage()
 	 */
 	public void clearStatusMessage()
@@ -990,17 +1020,6 @@ public class DwPanel
 		return result;
 	}
 	
-//	private TableModel getErrorTableModel()
-//	{
-//		if (this.errorModel == null)
-//		{
-//			String msg = ResourceMgr.getString("ErrMessageData");
-//			String title = ResourceMgr.getString("ErrMessageTitle");
-//			this.errorModel = new OneLineTableModel(title, msg);
-//		}
-//		return this.errorModel;
-//	}
-	
 	/**
 	 *	Returns a TableModel which displays an error text.
 	 *	This is used to show a hint in the table panel that an error
@@ -1047,7 +1066,7 @@ public class DwPanel
 		this.insertRow.setEnabled(this.isUpdateable());
 		this.deleteRow.setEnabled(this.isUpdateable() && rows > 0);
 		this.duplicateRow.setEnabled(this.isUpdateable() && rows == 1);
-		this.startEdit.setSwitchedOn(false);
+		//this.startEdit.setSwitchedOn(false);
 		if (restoreData) this.dataTable.restoreOriginalValues();
 	}
 	
@@ -1075,7 +1094,6 @@ public class DwPanel
 		// determined, then ask the user
 		if (!this.isUpdateable())
 		{
-			
 			if (!this.checkUpdateTable())
 			{
 				String csql = this.getCurrentSql();
@@ -1109,12 +1127,12 @@ public class DwPanel
 			}
 			
 			this.editingStarted = true;
-			this.startEdit.setSwitchedOn(true);
+			//this.startEdit.setSwitchedOn(true);
 		}
-		else
-		{
-			this.startEdit.setSwitchedOn(false);
-		}
+//		else
+//		{
+//			this.startEdit.setSwitchedOn(false);
+//		}
 		
 		int numSelectedRows = selectedRows.length;
 		if (selectedRows.length > 0)
@@ -1141,7 +1159,7 @@ public class DwPanel
 	public CopyRowAction getCopyRowAction() { return this.duplicateRow; }
 	public DeleteRowAction getDeleteRowAction() { return this.deleteRow; }
 	public UpdateDatabaseAction getUpdateDatabaseAction() { return this.updateAction; }
-	public StartEditAction getStartEditAction() { return this.startEdit; }
+	//public StartEditAction getStartEditAction() { return this.startEdit; }
 	
 	/**
 	 *	Turns on the batchUpdate mode.
@@ -1203,10 +1221,10 @@ public class DwPanel
 		this.rowCountChanged();
 	}
 	
-	public void setAutomaticUpdateTableCheck(boolean flag)
-	{
-		this.automaticUpdateTableCheck = flag;
-	}
+//	public void setAutomaticUpdateTableCheck(boolean flag)
+//	{
+//		this.automaticUpdateTableCheck = flag;
+//	}
 
 	public void fatalError(String msg)
 	{

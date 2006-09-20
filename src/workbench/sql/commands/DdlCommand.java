@@ -159,7 +159,7 @@ public class DdlCommand extends SqlCommand
 
 			this.addExtendErrorInfo(aConnection, aSql, result);
 			result.setFailure();
-			LogMgr.logDebug("DdlCommand.execute()", "Error executing statement " + ex,null);
+			LogMgr.logSqlError("DdlCommand.execute()", aSql, e);
 		}
 		finally
 		{

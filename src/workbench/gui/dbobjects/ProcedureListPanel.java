@@ -465,13 +465,14 @@ public class ProcedureListPanel
 			parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 			dbConnection.setBusy(false);
 		}
-		int pos = checkOraclePackage(sql, catalog, proc, type);
-		source.setCaretPosition(pos);
-		source.scrollToCaret();
+		final int pos = checkOraclePackage(sql, catalog, proc, type);
+		
+		//source.scrollToCaret();
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
+				source.setCaretPosition(pos);
 				source.requestFocusInWindow();
 			}
 		});

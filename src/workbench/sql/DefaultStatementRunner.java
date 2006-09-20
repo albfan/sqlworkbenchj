@@ -331,15 +331,6 @@ public class DefaultStatementRunner
 			this.result.clear();
 		}
         
-		// Silently ignore empty statements
-//		if (StringUtil.isEmptyString(aSql))
-//		{
-//			this.result = new StatementRunnerResult();
-//			this.result.clear();
-//			this.result.setSuccess();
-//			return;
-//		}
-
 		if (this.prompter != null)
 		{
 			boolean goOn = this.prompter.processParameterPrompts(aSql);

@@ -11,7 +11,9 @@
  */
 package workbench.gui.actions;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
+import javax.swing.JMenu;
 import workbench.WbManager;
 
 import workbench.db.ConnectionProfile;
@@ -26,23 +28,22 @@ import workbench.resource.Settings;
  *	Action to clear the contents of a entry field
  *	@author  support@sql-workbench.net
  */
-public class DataPumperAction extends WbAction
+public class DataPumperAction 
+	extends WbAction
 {
-	private static DataPumperAction instance = new DataPumperAction();
+	private MainWindow parent;
 	
-	private DataPumperAction()
+	public DataPumperAction(MainWindow win)
 	{
 		super();
 		this.initMenuDefinition("MnuTxtDataPumper");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_TOOLS);
 		this.setIcon(ResourceMgr.getImage("DataPumper"));
+		this.parent = win;
 	}
-	
-	public static DataPumperAction getInstance() { return instance; }
 	
 	public void executeAction(ActionEvent e)
 	{
-		MainWindow parent = WbManager.getInstance().getCurrentWindow();
 		if (parent != null) 
 		{
 			WbSwingUtilities.showWaitCursor(parent);
@@ -50,7 +51,7 @@ public class DataPumperAction extends WbAction
 		try
 		{
 			ConnectionProfile profile = null;
-			if (Settings.getInstance().getAutoConnectDataPumper())
+			if (parent != null && Settings.getInstance().getAutoConnectDataPumper())
 			{
 				profile = parent.getCurrentProfile();
 			}
@@ -61,7 +62,6 @@ public class DataPumperAction extends WbAction
 		{
 			if (parent != null) WbSwingUtilities.showDefaultCursor(parent);
 		}
-		
 	}
 	
 }

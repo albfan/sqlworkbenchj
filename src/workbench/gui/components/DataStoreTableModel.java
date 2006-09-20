@@ -17,15 +17,17 @@ import java.sql.Types;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
+import workbench.db.ConnectionProfile;
+import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -111,11 +113,6 @@ public class DataStoreTableModel
 		return index;
 	}
 
-	public void setUpdateTable(String aTable)
-	{
-		this.dataCache.setUpdateTable(aTable);
-	}
-
 	/**
 	 *	Shows or hides the status column.
 	 *	The status column will display an indicator if the row has
@@ -149,34 +146,51 @@ public class DataStoreTableModel
 		return this.dataCache.isUpdateable();
 	}
 
+	private boolean isNull(Object value, int column)
+	{
+		if (value == null) return true;
+		String s = value.toString(); 
+		int type = this.dataCache.getColumnType(column);
+		if (SqlUtil.isCharacterType(column))
+		{
+			WbConnection con = this.dataCache.getOriginalConnection();
+			ConnectionProfile profile = (con != null ? con.getProfile() : null);
+			if (profile == null || profile.getEmptyStringIsNull())
+			{
+				return (s.length() == 0);
+			}
+			return false;
+		}
+		return StringUtil.isEmptyString(s);
+	}
+	
 	public void setValueAt(Object aValue, int row, int column)
 	{
+		// Updates to the status column shouldn't happen anyway ....
 		if (this.showStatusColumn && column == 0) return;
 
-		if (this.isUpdateable())
+		if (isNull(aValue, column - this.columnStartIndex))
 		{
-			if (aValue == null || aValue.toString().length() == 0)
-			{
-				this.dataCache.setNull(row, column - this.columnStartIndex);
-			}
-			else
-			{
-				try
-				{
-					this.dataCache.setInputValue(row, column - this.columnStartIndex, aValue);
-				}
-				catch (Exception ce)
-				{
-					LogMgr.logError(this, "Error converting input >" + aValue + "< to column type (" + this.getColumnType(column) + ") ", ce);
-					Toolkit.getDefaultToolkit().beep();
-					String msg = ResourceMgr.getString("MsgConvertError");
-					msg = msg + "\r\n" + ce.getLocalizedMessage();
-					WbSwingUtilities.showErrorMessage(parentTable, msg);
-					return;
-				}
-			}
-			fireTableDataChanged();
+			this.dataCache.setNull(row, column - this.columnStartIndex);
 		}
+		else
+		{
+			try
+			{
+				this.dataCache.setInputValue(row, column - this.columnStartIndex, aValue);
+			}
+			catch (Exception ce)
+			{
+				int type = this.getColumnType(column);
+				LogMgr.logError(this, "Error converting input >" + aValue + "< to column type " + SqlUtil.getTypeName(type) + " (" + type + ")", ce);
+				Toolkit.getDefaultToolkit().beep();
+				String msg = ResourceMgr.getString("MsgConvertError");
+				msg = msg + "\r\n" + ce.getLocalizedMessage();
+				WbSwingUtilities.showErrorMessage(parentTable, msg);
+				return;
+			}
+		}
+		fireTableDataChanged();
 	}
 
 	/**

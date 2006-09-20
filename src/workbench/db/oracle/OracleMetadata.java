@@ -15,6 +15,7 @@ import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,7 +27,6 @@ import workbench.db.DbMetadata;
 import workbench.db.ErrorInformationReader;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
-import workbench.db.SchemaInformationReader;
 import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -50,8 +50,11 @@ public class OracleMetadata
 	private PreparedStatement columnStatement;
 	private int version;
 	private boolean retrieveSnapshots = true;
-	
-	/** Creates a new instance of OracleMetaData */
+	private static final int BYTE_SEMANTICS = 1;
+	private static final int CHAR_SEMANTICS = 2;
+	private int defaultLengthSemantics = BYTE_SEMANTICS;
+	private boolean alwaysShowCharSemantics = false;
+
 	public OracleMetadata(DbMetadata meta, WbConnection conn)
 	{
 		this.connection = conn;
@@ -73,10 +76,50 @@ public class OracleMetadata
 		}
 		catch (Throwable th)
 		{
-			// The Oracle 8 driver (classes12.jar) did not implement getDatabaseMajorVersion()
+			// The Oracle 8 driver (classes12.jar) does not implement getDatabaseMajorVersion()
 			// and throws an AbstractMethodError
 			this.version = 8;
 		}
+		
+		alwaysShowCharSemantics = Settings.getInstance().getBoolProperty("workbench.db.oracle.charsemantics.displayalways", true);
+		
+		if (alwaysShowCharSemantics)
+		{
+			defaultLengthSemantics = -1;
+		}
+		else
+		{
+			Statement stmt = null;
+			ResultSet rs = null;
+			try
+			{
+				stmt = this.connection.createStatement();
+				String sql = "select value from v$nls_parameters where parameter = 'NLS_LENGTH_SEMANTICS'";
+				rs = stmt.executeQuery(sql);
+				if (rs.next()) 
+				{
+					String v = rs.getString(1);
+					if ("BYTE".equals(v))
+					{
+						defaultLengthSemantics = BYTE_SEMANTICS;
+					}
+					else if ("CHAR".equals(v))
+					{
+						defaultLengthSemantics = CHAR_SEMANTICS;
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				defaultLengthSemantics = BYTE_SEMANTICS;
+				LogMgr.logWarning("OracleMetadata.<init>", "Could not retrieve LENGTH_SEMANTICS", e);
+			}
+			finally
+			{
+				SqlUtil.closeAll(rs, stmt);
+			}
+		}
+		
 	}
 	
 	public boolean isOracle8()
@@ -244,6 +287,29 @@ public class OracleMetadata
 		return result.toString();
 	}
 
+	
+	public String getVarcharType(String type, int size, int semantics)
+	{
+		StringBuffer result = new StringBuffer();
+		result.append(type);
+		result.append('(');
+		result.append(size);
+		
+		if (alwaysShowCharSemantics || semantics != this.defaultLengthSemantics) 
+		{
+			if (semantics == BYTE_SEMANTICS)
+			{
+				result.append(" Byte");
+			}
+			else if (semantics == CHAR_SEMANTICS)
+			{
+				result.append(" Char");
+			}
+		}
+		result.append(')');
+		return result.toString();
+	}
+	
 	public ResultSet getColumns(String catalog, String schema, String table, String cols)
 		throws SQLException
 	{
@@ -262,7 +328,7 @@ public class OracleMetadata
 			"       10 AS num_prec_radix,  \n" +
 			"       DECODE (t.nullable, 'N', 0, 1) AS nullable,  \n";
 		final String sql2 = "       t.data_default AS column_def,  \n" +
-			"       0 AS sql_data_type,  \n" +
+			"       decode(t.data_type, 'VARCHAR2', decode(t.char_used, 'B', " + BYTE_SEMANTICS + ", 'C', "  + CHAR_SEMANTICS +", 0), 0) AS sql_data_type,  \n" +
 			"       0 AS sql_datetime_sub,  \n" +
 			"       t.data_length AS char_octet_length,  \n" +
 			"       t.column_id AS ordinal_position,   \n" +
@@ -286,7 +352,7 @@ public class OracleMetadata
 		if (prof != null)
 		{
 			Properties prop = prof.getConnectionProperties();
-			if (prop != null) returnComments = "true".equals(prop.getProperty("remarksReporting", "false"));
+			if (prop != null) returnComments = StringUtil.stringToBool(prop.getProperty("remarksReporting", "false"));
 		}
 		
 		if (returnComments)

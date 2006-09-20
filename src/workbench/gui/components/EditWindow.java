@@ -194,7 +194,7 @@ public class EditWindow
 		{
 			this.isCancelled = false;
 		}
-		this.hide();
+		this.setVisible(false);
 	}
 
 	public boolean isCancelled()
@@ -236,6 +236,12 @@ public class EditWindow
 	
 	public void windowOpened(java.awt.event.WindowEvent e)
 	{
+		// Fix for JDK 6, otherwise the editor will not repaint 
+		// properly
+		this.editor.invalidate();
+		this.editor.updateUI();
+		this.editor.validate();
+		this.editor.repaint();
 	}
 	
 }

@@ -397,9 +397,14 @@ public class DataImporter
 		this.isRunning = true;
 		this.canCommitInBatch = true;
 
+		// When using UPDATE/INSERT or INSERT/UPDATE
+		// we cannot use batch mode as we immediately need
+		// the result of the first statement to decide
+		// whether we have to send another one
 		if (this.useBatch && (this.isModeInsertUpdate() || this.isModeUpdateInsert()))
 		{
 			this.useBatch = false;
+			this.messages.append(ResourceMgr.getString("ErrImportNoBatchMode"));
 		}
 		this.source.start();
 	}

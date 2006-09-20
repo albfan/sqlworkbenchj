@@ -223,7 +223,9 @@ public class ColumnMapper
 		for (int i=0; i < count; i++)
 		{
 			ColumnMapRow row = this.mapping[i];
-			if (row.getSource().getColumnName().equals(source.getColumnName()))
+			ColumnIdentifier sourceCol = row.getSource();
+			if (sourceCol == null) continue;
+			if (sourceCol.getColumnName().equals(source.getColumnName()))
 			{
 				return row.getTarget();
 			}

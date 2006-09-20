@@ -97,7 +97,7 @@ public class ReportView
 		String schema = this.view.getSchema();
 		if (schema == null || schema.length() == 0)
 		{
-			schema = conn.getMetadata().findSchemaForTable(this.view.getTableName());
+			schema = conn.getMetadata().getSchemaToUse();
 			if (schema != null) this.view.setSchema(schema);
 		}
 		this.viewSource = conn.getMetadata().getViewSource(tbl);

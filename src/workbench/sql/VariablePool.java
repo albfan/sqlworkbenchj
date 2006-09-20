@@ -382,6 +382,8 @@ public class VariablePool
 	{
 		WbProperties props = new WbProperties();
 		File f = new File(filename);
+		if (!f.exists()) return;
+		
 		props.loadTextFile(filename);
 		Iterator itr = props.entrySet().iterator();
 		while (itr.hasNext())
@@ -407,7 +409,7 @@ class VariableDataStore
 	private static final String cols[] = {ResourceMgr.getString("LblVariableName"), ResourceMgr.getString("LblVariableValue") };
 	private static final int types[] =   {Types.VARCHAR, Types.VARCHAR};
 	private static final int sizes[] =   {20, 50};
-	private static final String TABLE_ID = "$__wb-internal-variable-list__$";
+	private static final String TABLE_ID = "WB$VARIABLE_DEFINITION";
 	
 	public VariableDataStore()
 	{

@@ -14,19 +14,13 @@ package workbench.gui.components;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.io.File;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
 
 import javax.swing.JLabel;
 
 import workbench.db.ColumnIdentifier;
-import workbench.gui.WbSwingUtilities;
+import workbench.db.TableIdentifier;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-import workbench.storage.PkMapping;
-import workbench.util.StringUtil;
 
 /**
  *
@@ -39,13 +33,13 @@ public class KeyColumnSelectorPanel
 	private String tableName;
 	private JCheckBox saveCheckBox;
 	
-	public KeyColumnSelectorPanel(ColumnIdentifier[] cols, String table)
+	public KeyColumnSelectorPanel(ColumnIdentifier[] cols, TableIdentifier table)
 	{
 		super(cols);
-		this.tableName = table;
+		this.tableName = (table == null ? "" : table.getTableName());
+		this.setSelectionLabel(ResourceMgr.getString("LblHeaderKeyColumnPKFlag"));
 		configureInfoPanel();
 		this.doLayout();
-		this.setSelectionLabel(ResourceMgr.getString("LblHeaderKeyColumnPKFlag"));
 		this.columns = new ColumnIdentifier[cols.length];
 		for (int i=0; i < this.columns.length; i++)
 		{

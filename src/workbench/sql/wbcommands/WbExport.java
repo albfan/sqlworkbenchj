@@ -12,6 +12,7 @@
 package workbench.sql.wbcommands;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -31,6 +32,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.db.TableIdentifier;
 import workbench.util.ExceptionUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -398,8 +400,34 @@ public class WbExport
 		}
 		this.showProgress = (this.progressInterval > 0);
 
+		if (file != null)
+		{
+			// Check the outputfile right now, so the user does not have
+			// to wait for a possible error message until the ResultSet
+			// from the SELECT statement comes in...
+			WbFile f = new WbFile(file);
+			try
+			{
+				// File.canWrite() does not work reliably. It will report
+				// an error if the file does not exist, but still could 
+				// be written. As the output file will be created if this
+				// works, and any existing file will be overwritten by
+				// the actual export, I'm assuming a "test" create here
+				// will not delete any unwanted data.
+				f.tryCreate();
+			}
+			catch (IOException e)
+			{
+				String msg = ResourceMgr.getString("ErrExportFileWrite") + " " + e.getMessage();
+				result.addMessage(msg);
+				result.setFailure();
+				return result;
+			}
+		}
+		
 		if (!this.directExport)
 		{
+
 			// Waiting for the next SQL Statement...
 			this.exporter.setRowMonitor(this.rowMonitor);
 			this.exporter.setProgressInterval(this.progressInterval);

@@ -35,7 +35,6 @@ public class CreateDeleteScriptAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtCreateDeleteScript", null);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setEnabled(false);
 		
 		if (this.client != null)
 		{
@@ -47,6 +46,8 @@ public class CreateDeleteScriptAction
 	{
 		try
 		{
+			boolean hasPK = client.checkPkColumns(true);
+			if (!hasPK) return;
 			DeleteScriptGenerator gen = new DeleteScriptGenerator(client.getDataStore().getOriginalConnection());
 			gen.setSource(client);
 			gen.startGenerate();
@@ -65,9 +66,8 @@ public class CreateDeleteScriptAction
 		
 	private void checkSelection()
 	{
-		boolean mayUpdate = (client != null && this.client.isUpdateable());
 		int rows = this.client.getSelectedRowCount();
-		this.setEnabled(mayUpdate && rows > 0);
+		this.setEnabled(rows > 0);
 	}
 	
 	public void setClient(WbTable w)

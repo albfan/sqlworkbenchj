@@ -14,7 +14,7 @@
     <Component class="javax.swing.JLabel" name="delimiterLabel">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelFieldDelimiter&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblFieldDelimiter&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -33,7 +33,7 @@
     <Component class="javax.swing.JCheckBox" name="exportHeaders">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelExportIncludeHeaders&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblExportIncludeHeaders&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" value=""/>
       </Properties>
@@ -46,7 +46,7 @@
     <Component class="javax.swing.JLabel" name="quoteCharLabel">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelQuoteChar&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblQuoteChar&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -74,7 +74,7 @@
     <Component class="javax.swing.JCheckBox" name="quoteAlways">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelExportQuoteAlways&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblExportQuoteAlways&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -98,7 +98,7 @@
     <Component class="javax.swing.JLabel" name="escapeLabel">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelExportEscapeType&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblExportEscapeType&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -110,7 +110,7 @@
     <Component class="javax.swing.JLabel" name="lineEndingLabel">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelExportLineEnding&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblExportLineEnding&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>

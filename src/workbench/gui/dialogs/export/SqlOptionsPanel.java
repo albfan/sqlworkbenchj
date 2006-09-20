@@ -16,6 +16,7 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
 import workbench.gui.components.ColumnSelectorPanel;
 import workbench.gui.components.KeyColumnSelectorPanel;
 import workbench.resource.ResourceMgr;
@@ -42,6 +43,15 @@ public class SqlOptionsPanel
 		if (info == null)
 		{
 			this.selectKeys.setEnabled(false);
+		}
+		TableIdentifier table = info.getUpdateTable();
+		if (table != null)
+		{
+			this.alternateTable.setText(table.getTableName());
+		}
+		else
+		{
+			this.alternateTable.setText("target_table");
 		}
 	}
 
@@ -174,9 +184,10 @@ public class SqlOptionsPanel
 	private void selectColumns()
 	{
 		if (this.tableColumns == null) return;
+		
 		if (this.columnSelectorPanel == null) 
 		{
-			this.columnSelectorPanel = new KeyColumnSelectorPanel(this.tableColumns.getColumns(), this.tableColumns.getUpdateTable().getTableName());
+			this.columnSelectorPanel = new KeyColumnSelectorPanel(this.tableColumns.getColumns(), this.tableColumns.getUpdateTable());
 		}
 		else
 		{

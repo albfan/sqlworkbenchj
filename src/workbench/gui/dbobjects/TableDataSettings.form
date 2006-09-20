@@ -14,10 +14,10 @@
     <Component class="javax.swing.JCheckBox" name="checkBoxEnableWarning">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelEnableDataThresholdWarning&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblEnableDataThresholdWarning&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LabelEnableDataThresholdWarning&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblEnableDataThresholdWarning&quot;)" type="code"/>
         </Property>
         <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
           <Insets value="[0, 0, 0, 0]"/>
@@ -32,10 +32,10 @@
     <Component class="javax.swing.JCheckBox" name="autoloadRowCount">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelAutoLoadRowCount&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblAutoLoadRowCount&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LabelAutoLoadRowCount&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblAutoLoadRowCount&quot;)" type="code"/>
         </Property>
         <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
           <Insets value="[0, 0, 0, 0]"/>
@@ -50,10 +50,10 @@
     <Component class="javax.swing.JCheckBox" name="autoloadData">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelAutoLoadTableData&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblAutoLoadTableData&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LabelAutoLoadTableData&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblAutoLoadTableData&quot;)" type="code"/>
         </Property>
         <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
           <Insets value="[0, 0, 0, 0]"/>
@@ -68,10 +68,10 @@
     <Component class="javax.swing.JLabel" name="thresholdLabel">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelThresholdLevel&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblThresholdLevel&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LabelThresholdLevel&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblThresholdLevel&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>

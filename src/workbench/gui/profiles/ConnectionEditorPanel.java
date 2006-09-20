@@ -87,7 +87,7 @@ public class ConnectionEditorPanel
 		policy.addComponent(cbStorePassword);
 		policy.addComponent(cbSeparateConnections);
 		policy.addComponent(cbIgnoreDropErrors);
-		policy.addComponent(disableTableCheck);
+		//policy.addComponent(disableTableCheck);
 		policy.addComponent(rollbackBeforeDisconnect);
 		policy.addComponent(tfWorkspaceFile);
 		policy.addComponent(confirmUpdates);
@@ -171,7 +171,6 @@ public class ConnectionEditorPanel
     showPassword = new FlatButton();
     wbOptionsPanel = new javax.swing.JPanel();
     cbStorePassword = new BooleanPropertyEditor();
-    disableTableCheck = new BooleanPropertyEditor();
     rollbackBeforeDisconnect = new BooleanPropertyEditor();
     confirmUpdates = new BooleanPropertyEditor();
     cbIgnoreDropErrors = new BooleanPropertyEditor();
@@ -428,17 +427,6 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
     wbOptionsPanel.add(cbStorePassword, gridBagConstraints);
 
-    disableTableCheck.setText(ResourceMgr.getString("LblDisableAutoTableCheck"));
-    disableTableCheck.setToolTipText(ResourceMgr.getDescription("LblDisableAutoTableCheck"));
-    disableTableCheck.setName("disableUpdateTableCheck");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
-    wbOptionsPanel.add(disableTableCheck, gridBagConstraints);
-
     rollbackBeforeDisconnect.setText(ResourceMgr.getString("LblRollbackBeforeDisconnect"));
     rollbackBeforeDisconnect.setToolTipText(ResourceMgr.getDescription("LblRollbackBeforeDisconnect"));
     rollbackBeforeDisconnect.setName("rollbackBeforeDisconnect");
@@ -455,7 +443,7 @@ public class ConnectionEditorPanel
     confirmUpdates.setName("confirmUpdates");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
@@ -500,7 +488,7 @@ public class ConnectionEditorPanel
     includeNull.setName("includeNullInInsert");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
@@ -523,7 +511,7 @@ public class ConnectionEditorPanel
     rememberExplorerSchema.setName("storeExplorerSchema");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
@@ -693,7 +681,6 @@ public class ConnectionEditorPanel
   protected javax.swing.JCheckBox cbSeparateConnections;
   protected javax.swing.JCheckBox cbStorePassword;
   protected javax.swing.JCheckBox confirmUpdates;
-  protected javax.swing.JCheckBox disableTableCheck;
   protected javax.swing.JCheckBox emptyStringIsNull;
   protected javax.swing.JButton extendedProps;
   protected javax.swing.JLabel fetchSizeLabel;

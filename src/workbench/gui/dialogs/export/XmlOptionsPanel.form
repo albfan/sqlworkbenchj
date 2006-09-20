@@ -14,7 +14,7 @@
     <Component class="javax.swing.JCheckBox" name="useCdata">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelExportUseCDATA&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblExportUseCDATA&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -26,10 +26,10 @@
     <Component class="javax.swing.JCheckBox" name="verboseXmlCheckBox">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelExportVerboseXml&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblExportVerboseXml&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LabelExportVerboseXml&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblExportVerboseXml&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>

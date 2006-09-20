@@ -121,12 +121,15 @@ public class Settings
 				File f = new File(System.getProperty("user.dir"), configFile);
 				if (f.exists())
 				{
-					cfd = new File(System.getProperty("user.dir"));
+					cfd = f.getParentFile();//new File(System.getProperty("user.dir"));
+					WbManager.trace("Settings.<init> - Using 'user.dir'");
 				}
 				else
 				{
 					cfd = new File(WbManager.getInstance().getJarPath());
+					WbManager.trace("Settings.<init> - Using Directory of JAR file");
 				}
+				//cfd = new File(System.getProperty("user.dir"));
 				configDir = cfd.getAbsolutePath();
 			}
 			else

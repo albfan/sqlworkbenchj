@@ -41,7 +41,7 @@ public class ObjectDropperUI
 	protected boolean running;
 	protected ObjectDropper dropper;
 	private Thread dropThread;
-	
+
 	public ObjectDropperUI()
 	{
 		initComponents();
@@ -68,7 +68,7 @@ public class ObjectDropperUI
 
     buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-    dropButton.setText(ResourceMgr.getString("LabelDrop"));
+    dropButton.setText(ResourceMgr.getString("LblDrop"));
     dropButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -79,7 +79,7 @@ public class ObjectDropperUI
 
     buttonPanel.add(dropButton);
 
-    cancelButton.setText(ResourceMgr.getString("LabelCancel"));
+    cancelButton.setText(ResourceMgr.getString("LblCancel"));
     cancelButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -102,8 +102,8 @@ public class ObjectDropperUI
 
     optionPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-    checkBoxCascadeConstraints.setText(ResourceMgr.getString("LabelCascadeConstraints"));
-    checkBoxCascadeConstraints.setToolTipText(ResourceMgr.getDescription("LabelCascadeConstraints"));
+    checkBoxCascadeConstraints.setText(ResourceMgr.getString("LblCascadeConstraints"));
+    checkBoxCascadeConstraints.setToolTipText(ResourceMgr.getDescription("LblCascadeConstraints"));
     optionPanel.add(checkBoxCascadeConstraints);
 
     mainPanel.add(optionPanel, java.awt.BorderLayout.SOUTH);
@@ -171,7 +171,7 @@ public class ObjectDropperUI
 			this.running = false;
 			this.connection.setBusy(false);
 		}
-		
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
@@ -188,9 +188,9 @@ public class ObjectDropperUI
 				}
 			}
 		});
-		
+
 	}
-	
+
 	public void setConnection(WbConnection aConn)
 	{
 		this.connection = aConn;
@@ -222,13 +222,13 @@ public class ObjectDropperUI
 	private void checkCascade()
 	{
 		boolean canCascade = false;
-		
+
 		int numTypes = this.objectTypes.size();
 		for (int i=0; i < numTypes; i++)
 		{
 			String type = (String)this.objectTypes.get(i);
 			String verb = this.connection.getMetadata().getCascadeConstraintsVerb(type);
-			
+
 			// if at least one type can be dropped with CASCADE, enable the checkbox
 			if (verb != null)
 			{

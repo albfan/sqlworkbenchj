@@ -212,7 +212,7 @@ public class SqlPanel
 	protected InsertRowAction insertRow;
 	protected CopyRowAction duplicateRow;
 	protected DeleteRowAction deleteRow;
-	protected StartEditAction startEdit;
+	//protected StartEditAction startEdit;
 	protected SelectKeyColumnsAction selectKeys;
 	protected FilterDataAction filterAction;
 	protected ResetFilterAction resetFilterAction;
@@ -263,8 +263,9 @@ public class SqlPanel
 		this.setLayout(new BorderLayout());
 
 		editor = EditorPanel.createSqlEditor();
-		statusBar = new DwStatusBar(true);
+		statusBar = new DwStatusBar(true, true);
 		statusBar.setBorder(statusBarBorder);
+		editor.setStatusBar(statusBar);
 		
 		log = new JTextArea();
 		log.putClientProperty("JTextArea.infoBackground", Boolean.TRUE);
@@ -599,11 +600,11 @@ public class SqlPanel
 		this.updateAction = new UpdateDatabaseAction(null);
 		this.insertRow = new InsertRowAction(null);
 		this.deleteRow = new DeleteRowAction(null);
-		this.startEdit = new StartEditAction(null);
+		//this.startEdit = new StartEditAction(null);
 		this.duplicateRow = new CopyRowAction(null);
 		this.selectKeys = new SelectKeyColumnsAction(null);
 
-		this.actions.add(this.startEdit);
+		//this.actions.add(this.startEdit);
 		this.actions.add(this.selectKeys);
 		this.actions.add(this.updateAction);
 		this.actions.add(this.insertRow);
@@ -715,7 +716,7 @@ public class SqlPanel
 		this.toolbarActions.add(this.sqlHistory.getShowLastStatementAction());
 		
 		this.toolbarActions.add(this.updateAction);
-		this.toolbarActions.add(this.startEdit);
+		//this.toolbarActions.add(this.startEdit);
 		this.toolbarActions.add(this.insertRow);
 		this.toolbarActions.add(this.duplicateRow);
 		this.toolbarActions.add(this.deleteRow);
@@ -867,19 +868,9 @@ public class SqlPanel
 			return;
 		}
 		
-		// Make sure we have real PK columns.
-		boolean hasPk = this.currentData.getTable().checkPkColumns(true);
-		if (!hasPk) return;
-
-		// check if we really want to save the currentData
-		// it fhe SQL Preview is not enabled this will
-		// always return true, otherwise it depends on the user's
-		// selection after the SQL preview has been displayed
-		if (!this.currentData.shouldSaveChanges(this.dbConnection)) return;
-
+		if (!this.currentData.prepareDatabaseUpdate()) return;
+		
 		this.setBusy(true);
-
-		this.showStatusMessage(ResourceMgr.getString("MsgUpdatingDatabase"));
 		this.setCancelState(true);
 		this.setExecuteActionStates(false);
 
@@ -917,7 +908,7 @@ public class SqlPanel
 		}
 		catch (Exception e)
 		{
-			// All other errors are already handled or displayed to the user
+			LogMgr.logError("SqlPanel.updatedb()", "Error during update", e);
 		}
 		finally
 		{
@@ -928,7 +919,6 @@ public class SqlPanel
 			WbSwingUtilities.showDefaultCursor(this);
 		}
 		this.log.append(this.currentData.getLastMessage());
-		this.clearStatusMessage();
 		this.checkResultSetActions();
 	}
 
@@ -1978,7 +1968,7 @@ public class SqlPanel
 			this.updateAction.setOriginal(null);
 			this.insertRow.setOriginal(null);
 			this.deleteRow.setOriginal(null);
-			this.startEdit.setOriginal(null);
+			//this.startEdit.setOriginal(null);
 			this.duplicateRow.setOriginal(null);
 			this.selectKeys.setOriginal(null);
 			this.createDeleteScript.setClient(null);
@@ -2002,7 +1992,7 @@ public class SqlPanel
 			this.updateAction.setOriginal(this.currentData.getUpdateDatabaseAction());
 			this.insertRow.setOriginal(this.currentData.getInsertRowAction());
 			this.deleteRow.setOriginal(this.currentData.getDeleteRowAction());
-			this.startEdit.setOriginal(this.currentData.getStartEditAction());
+			//this.startEdit.setOriginal(this.currentData.getStartEditAction());
 			this.duplicateRow.setOriginal(this.currentData.getCopyRowAction());
 			this.selectKeys.setOriginal(this.currentData.getSelectKeysAction());
 			this.createDeleteScript.setClient(this.currentData.getTable());
@@ -2487,7 +2477,7 @@ public class SqlPanel
 		data.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		data.setConnection(this.dbConnection);
 		data.setUpdateHandler(this);
-		data.setAutomaticUpdateTableCheck(!this.dbConnection.getProfile().getDisableUpdateTableCheck());
+		//data.setAutomaticUpdateTableCheck(!this.dbConnection.getProfile().getDisableUpdateTableCheck());
 		return data;
 	}
 	/**

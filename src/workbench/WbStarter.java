@@ -33,23 +33,24 @@ public class WbStarter
 			version = System.getProperty("java.runtime.version");
 		}
 		
-		boolean is14 = false;
+		boolean versionIsOk = false;
+		int minMinorVersion = 4;
 		
 		try
 		{
 			int majorversion = Integer.parseInt(version.substring(0,1));
 			int minorversion = Integer.parseInt(version.substring(2,3));
-			is14 = (majorversion >= 1) && (minorversion >= 4);
+			versionIsOk = (majorversion >= 1) && (minorversion >= minMinorVersion);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace(System.err);
-			is14 = false;
+			versionIsOk = false;
 		}
 
-		if (!is14)
+		if (!versionIsOk)
 		{
-			String error = "A JVM version 1.4 or higher is needed to run SQL Workbench/J (Found: " + version + ")";
+			String error = "A JVM version 1." + minMinorVersion + " or higher is needed to run SQL Workbench/J (Found: " + version + ")";
 			try
 			{
 				JOptionPane.showMessageDialog(null, error);

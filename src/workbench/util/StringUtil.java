@@ -358,26 +358,36 @@ public class StringUtil
 	}
 	
 	/**
-	 * Create a String from the given list, where the elements are delimited
+	 * Create a String from the given Collection, where the elements are delimited
 	 * with the supplied delimiter
-	 * @return The elements of the list as a String
+	 * 
+	 * @return The elements of the Collection as a String
 	 * @param aList The list to process
 	 * @param aDelimiter The delimiter to use
 	 */
-	public static final String listToString(List aList, char aDelimiter)
+	public static final String listToString(Collection aList, char aDelimiter)
 	{
 		return listToString(aList, aDelimiter, false);
 	}
 	
-	public static final String listToString(List aList, char aDelimiter, boolean quoteEntries)
+	/**
+	 * Create a String from the given list, where the elements are delimited
+	 * with the supplied delimiter
+	 * 
+	 * @return The elements of the Collection as a String
+	 * @param aList The list to process
+	 * @param aDelimiter The delimiter to use
+	 * @param quoteEntries if true, all entries are quoted with a double quote
+	 */
+	public static final String listToString(Collection aList, char aDelimiter, boolean quoteEntries)
 	{
 		if (aList == null || aList.size() == 0) return "";
-		int count = aList.size();
 		int numElements = 0;
-		StringBuffer result = new StringBuffer(count * 50);
-		for (int i=0; i < count; i++)
+		StringBuffer result = new StringBuffer(aList.size() * 50);
+		Iterator itr = aList.iterator();
+		while (itr.hasNext())
 		{
-			Object o = aList.get(i);
+			Object o = itr.next();
 			if (o == null) continue;
 			if (numElements > 0)
 			{

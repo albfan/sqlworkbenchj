@@ -122,20 +122,7 @@ public class ClipBoardCopier
 	 */
 	public void copyAsSqlUpdate(boolean selectedOnly, boolean showSelectColumns)
 	{
-		DataStore ds = this.client.getDataStore();
-		if (ds == null) return;
-
-		boolean result = true;
-		// we need decent PK columns in order to create update statements
-		if (!ds.hasPkColumns()) client.detectDefinedPkColumns();
-		if (!ds.hasPkColumns())
-		{
-			result = this.client.selectKeyColumns();
-		}
-		if (result)
-		{
-			copyAsSql(true, selectedOnly, showSelectColumns, false);
-		}
+		copyAsSql(true, selectedOnly, showSelectColumns, false);
 	}
 	
 
@@ -148,6 +135,13 @@ public class ClipBoardCopier
 		
 		DataStore ds = this.client.getDataStore();
 		if (ds == null) return;
+
+		if (useUpdate || includeDelete)
+		{
+			boolean pkOK = this.client.checkPkColumns(true);
+			// checkPkColumns will return false, if the user cancelled the prompting
+			if (!pkOK) return;
+		}
 
 		List columnsToInclude = null;
 		if (selectedOnly  && !showSelectColumns && this.client.getColumnSelectionAllowed())
@@ -168,7 +162,7 @@ public class ClipBoardCopier
 			WbSwingUtilities.showWaitCursorOnWindow(this.client);
 			int rows[] = null;
 			if (selectedOnly) rows = this.client.getSelectedRows();
-
+			
 			String data;
 			if (useUpdate)
 			{

@@ -26,6 +26,7 @@ import workbench.log.LogMgr;
 public class TextlistReader
 {
 	private List values;
+	
 	/**
 	 * Reads each line of the passed input stream into 
 	 * an element of the internal values collection. 

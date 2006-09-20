@@ -17,7 +17,7 @@
     <Component class="javax.swing.JLabel" name="dateFormatLabel">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelDateFormat&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblDateFormat&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -36,7 +36,7 @@
     <Component class="javax.swing.JLabel" name="timestampFormatLabel">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelTimestampFormat&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblTimestampFormat&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -64,7 +64,7 @@
     <Component class="javax.swing.JButton" name="selectColumnsButton">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelSelectColumns&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblSelectColumns&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>

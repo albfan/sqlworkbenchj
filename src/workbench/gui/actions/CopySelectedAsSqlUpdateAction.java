@@ -12,6 +12,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import workbench.gui.components.ClipBoardCopier;
 
 import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
@@ -40,7 +41,8 @@ public class CopySelectedAsSqlUpdateAction extends WbAction
 	{
 		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
 		ctrlPressed = ctrlPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
-		client.copyAsSqlUpdate(true, ctrlPressed);
+		ClipBoardCopier copier = new ClipBoardCopier(this.client);
+		copier.copyAsSql(true, true, ctrlPressed, false);
 	}
 
 }

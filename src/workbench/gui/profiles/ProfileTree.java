@@ -11,6 +11,10 @@
  */
 package workbench.gui.profiles;
 
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.dnd.DnDConstants;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -46,7 +50,11 @@ import workbench.util.StringUtil;
  */
 public class ProfileTree
 	extends JTree
-	implements TreeModelListener, MouseListener, ClipboardSupport, ActionListener, TreeSelectionListener
+	implements TreeModelListener, 
+	           MouseListener, 
+	           ClipboardSupport, 
+	           ActionListener, 
+						 TreeSelectionListener
 {
 	private ProfileListModel profileModel;
 	private DefaultMutableTreeNode[] clipboardNodes;
@@ -55,6 +63,9 @@ public class ProfileTree
 	private int clipboardType = 0;
 	private CutCopyPastePopup popup;
 	private WbAction pasteToFolderAction;
+	
+	private ProfileTreeDragHandler ds;
+	private Insets autoscrollInsets = new Insets(20, 20, 20, 20);
 	
 	public ProfileTree()
 	{
@@ -90,7 +101,9 @@ public class ProfileTree
 		pasteToFolderAction.removeIcon();
 		pasteToFolderAction.initMenuDefinition("MnuTxtPasteNewFolder");
 		popup.addAction(pasteToFolderAction, false);
-		
+		setCellRenderer(new ProfileTreeCellRenderer());
+    ds = new ProfileTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
+		setAutoscrolls(true);
 	}
 
 	public void setDeleteAction(DeleteListEntryAction delete)
@@ -223,7 +236,7 @@ public class ProfileTree
 	{
 	}
 
-	private boolean isGroup(TreePath p)
+	public boolean isGroup(TreePath p)
 	{
 		if (p == null) return false;
 		TreeNode n = (TreeNode)p.getLastPathComponent();
@@ -367,8 +380,8 @@ public class ProfileTree
 		{
 			this.clipboardNodes[i] = (DefaultMutableTreeNode)p[i].getLastPathComponent();
 		}
-		
 	}
+	
 	public void copy()
 	{
 		storeSelectedNodes();
@@ -416,6 +429,22 @@ public class ProfileTree
 		}
 	}
 
+	public void handleDroppedNodes(DefaultMutableTreeNode[] nodes, DefaultMutableTreeNode newParent, int action)
+	{
+		if (nodes == null || nodes.length < 1) return;
+		if (newParent == null) return;
+		
+		if (action == DnDConstants.ACTION_MOVE)
+		{
+			profileModel.moveProfilesToGroup(nodes, newParent);
+		}
+		else if (action == DnDConstants.ACTION_COPY)
+		{
+			profileModel.copyProfilesToGroup(nodes, newParent);
+		}
+		selectNode(nodes[0]);
+	}
+	
 	public void actionPerformed(ActionEvent e)
 	{
 		// invoked from the "paste into new folder" action
@@ -455,9 +484,33 @@ public class ProfileTree
 		scrollPathToVisible(path);
 	}
 
+	private void selectNode(DefaultMutableTreeNode node)
+	{
+		TreeNode[] nodes = this.profileModel.getPathToRoot(node);
+		TreePath path = new TreePath(nodes);
+		this.selectPath(path);
+	}
+	
 	public void valueChanged(TreeSelectionEvent e)
 	{
 		checkActions();
 	}
+
+	public Insets getAutoscrollInsets()
+	{
+		return this.autoscrollInsets;
+	}
 	
+	public void autoscroll(Point cursorLocation)
+	{
+		Insets insets = getAutoscrollInsets();
+		Rectangle outer = getVisibleRect();
+		Rectangle inner = new Rectangle(outer.x+insets.left, outer.y+insets.top, outer.width-(insets.left+insets.right), outer.height-(insets.top+insets.bottom));
+		if (!inner.contains(cursorLocation))
+		{
+			Rectangle scrollRect = new Rectangle(cursorLocation.x-insets.left, cursorLocation.y-insets.top,	insets.left+insets.right, insets.top+insets.bottom);
+			scrollRectToVisible(scrollRect);
+		}
+	}
+
 }

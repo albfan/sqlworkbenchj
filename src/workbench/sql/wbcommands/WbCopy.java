@@ -18,6 +18,7 @@ import java.util.Map;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
 import workbench.db.datacopy.DataCopier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -57,6 +58,7 @@ public class WbCopy
 	public static final String PARAM_KEYS = "keycolumns";
 	public static final String PARAM_DROPTARGET = "droptarget";
 	public static final String PARAM_CREATETARGET = "createtarget";
+	public static final String PARAM_BATCHSIZE = "batchsize";
 	public static final String PARAM_USEBATCH = "usebatch";
 	public static final String PARAM_PROGRESS = "showprogress";
 
@@ -83,6 +85,7 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_DROPTARGET);
 		cmdLine.addArgument(PARAM_CREATETARGET);
 		cmdLine.addArgument(PARAM_USEBATCH);
+		cmdLine.addArgument(PARAM_BATCHSIZE);
 		cmdLine.addArgument(PARAM_PROGRESS);
 	}
 
@@ -171,6 +174,16 @@ public class WbCopy
 		}
 		else
 		{
+			ConnectionProfile tprof = ConnectionMgr.getInstance().getProfile(targetKey);
+			if (tprof == null)
+			{
+				String msg = ResourceMgr.getString("ErrCopyProfileNotFound");
+				msg = StringUtil.replace(msg, "%profile%", targetKey.toString());
+				result.addMessage(msg);
+				result.setFailure();
+				return result;
+			}
+			
 			try
 			{
 				targetCon = ConnectionMgr.getInstance().getConnection(targetKey, "Wb-Copy-Target");
@@ -189,6 +202,15 @@ public class WbCopy
 		}
 		else
 		{
+			ConnectionProfile tprof = ConnectionMgr.getInstance().getProfile(sourceKey);
+			if (tprof == null)
+			{
+				String msg = ResourceMgr.getString("ErrCopyProfileNotFound");
+				msg = StringUtil.replace(msg, "%profile%", sourceKey.toString());
+				result.addMessage(msg);
+				result.setFailure();
+				return result;
+			}
 			try
 			{
 				sourceCon = ConnectionMgr.getInstance().getConnection(sourceKey, "Wb-Copy-Source");
@@ -228,7 +250,15 @@ public class WbCopy
 		copier.setRowActionMonitor(this.rowMonitor);
 		copier.setContinueOnError(cont);
 		copier.setCommitEvery(commit);
-		copier.setUseBatch(useBatch);
+		
+		int queueSize = cmdLine.getIntValue(PARAM_BATCHSIZE,-1);
+		
+		if (queueSize > 0)
+		{
+			copier.setUseBatch(true);
+			copier.setBatchSize(queueSize);
+		}
+		
 		copier.setDeleteTarget(delete);
 		
 		TableIdentifier targetId = new TableIdentifier(targettable);

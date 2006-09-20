@@ -417,7 +417,7 @@ public class XmlRowDataConverter
 			appendTag(result, "    ", COLUMN_NAME_TAG, this.metaData.getColumnName(i));
 
 			result.append(indent);
-			appendTag(result, "    ", JAVA_CLASS_TAG, this.metaData.getColumnClassName(i));
+			appendTag(result, "    ", JAVA_CLASS_TAG, getReadableClassName(this.metaData.getColumnClassName(i)));
 
 			result.append(indent);
 			appendTag(result, "    ", ReportColumn.TAG_COLUMN_JAVA_TYPE_NAME, SqlUtil.getTypeName(this.metaData.getColumnType(i)));
@@ -463,6 +463,28 @@ public class XmlRowDataConverter
 		return result;
 	}
 
+	private String getReadableClassName(String cls)
+	{
+		if (cls.charAt(0) != '[') return cls;
+		
+		String displayName = cls;
+		if (cls.charAt(0) == '[')
+		{
+			if (cls.charAt(1) == 'B') displayName = "byte[]";
+			else if (cls.charAt(1) == 'C') displayName = "char[]";
+			else if (cls.charAt(1) == 'I') displayName = "int[]";
+			else if (cls.charAt(1) == 'J') displayName = "long[]";
+			else if (cls.charAt(1) == 'L')
+			{
+				// a "class" starting with [L is a "real" Object not 
+				// a native data type, so we'll extract the real class
+				// name, and make that array of that class
+				displayName = cls.substring(2, cls.length() - 1) + "[]";
+			}
+		}
+		return displayName;
+	}
+	
 	private void appendOpenTag(StrBuffer target, String indent, String tag)
 	{
 		target.append(indent);

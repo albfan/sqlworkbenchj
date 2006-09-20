@@ -112,7 +112,7 @@ public class UpdatingCommand extends SqlCommand
 			}
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			result.setFailure();
-			LogMgr.logDebug("UpdatingCommnad.execute()", "Error executing statement: " + sql, e);
+			LogMgr.logSqlError("UpdatingCommnad.execute()", sql, e);
 		}
 		finally
 		{

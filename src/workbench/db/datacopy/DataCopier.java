@@ -96,7 +96,7 @@ public class DataCopier
 
 		if (!this.sourceConnection.getMetadata().tableExists(aSourceTable))
 		{
-			this.addError(ResourceMgr.getString("ErrCopySourceTableNotFound").replaceAll("%name%", aSourceTable.getTableExpression()));
+			this.addError(ResourceMgr.getString("ErrCopySourceTableNotFound").replaceAll("%name%", aSourceTable.getQualifiedName()));
 			throw new SQLException("Table " + aTargetTable.getTableName() + " not found in source connection");
 		}
 
@@ -158,7 +158,7 @@ public class DataCopier
 		}
 		else
 		{
-			this.addError(ResourceMgr.getString("ErrCopyTargetTableNotFound").replaceAll("%name%", aTargetTable.getTableExpression()));
+			this.addError(ResourceMgr.getString("ErrCopyTargetTableNotFound").replaceAll("%name%", aTargetTable.getQualifiedName()));
 			throw new SQLException("Table " + aTargetTable.getTableName() + " not found in target connection");
 		}
 		this.initImporterForTable(additionalWhere);
@@ -402,6 +402,11 @@ public class DataCopier
 	public void setUseBatch(boolean flag)
 	{
 		this.importer.setUseBatch(flag);
+	}
+	
+	public void setBatchSize(int size) 
+	{
+		this.importer.setBatchSize(size);
 	}
 	
 	public void setCommitEvery(int interval)

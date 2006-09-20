@@ -79,7 +79,7 @@ public class DbMetadata
 	implements PropertyChangeListener
 {
 
-	// <editor-fold defaultstate="collapsed" desc="Placeholders for statement templates">
+	// <editor-fold defaultstate="collapsed" desc=" Placeholders for statement templates ">
 	public static final String TABLE_NAME_PLACEHOLDER = "%tablename%";
 	public static final String INDEX_NAME_PLACEHOLDER = "%indexname%";
 	public static final String PK_NAME_PLACEHOLDER = "%pk_name%";
@@ -96,7 +96,7 @@ public class DbMetadata
 	public static final String GENERAL_SQL = "All";
 	// </editor-fold>
 	
-	// <editor-fold defaultstate="collapsed" desc="HashMaps containing statement templates">
+	// <editor-fold defaultstate="collapsed" desc=" HashMaps containing statement templates ">
 	private static HashMap procSourceSql;
 	private static HashMap viewSourceSql;
 	private static HashMap triggerSourceSql;
@@ -649,6 +649,16 @@ public class DbMetadata
 	public boolean isCloudscape() { return this.isCloudscape; }
 	public boolean isApacheDerby() { return this.isApacheDerby; }
 
+	/**
+	 * If a DDLFilter is registered for the current DBMS, this
+	 * method will replace all "problematic" characters in the 
+	 * SQL string, and will return a String that the DBMS will
+	 * understand. 
+	 * Currently this is only implemented for PostgreSQL to 
+	 * mimic pgsql's $$ quoting for stored procedures
+	 * 
+	 * @see workbench.db.postgres.PostgresDDLFilter
+	 */
 	public String filterDDL(String sql)
 	{
 		if (this.ddlFilter == null) return sql;
@@ -810,6 +820,10 @@ public class DbMetadata
 		return result;
 	}
 
+	/**
+	 * Wrapper for DatabaseMetaData.supportsBatchUpdates() that throws
+	 * no exception. If any error occurs, false will be returned
+	 */
 	public boolean supportsBatchUpdates()
 	{
 		try
@@ -942,6 +956,11 @@ public class DbMetadata
 		}
 		return type;
 	}
+	
+	/**
+	 * Return the name of the current user.
+	 * Wrapper for DatabaseMetaData.getUserName() that throws no Exception
+	 */
 	public String getUserName()
 	{
 		try
@@ -1422,64 +1441,6 @@ public class DbMetadata
 	{
 		String schema = this.getCurrentSchema();
 		if (schema == null) return null;
-		if (this.ignoreSchema(schema)) return null;
-		return schema;
-	}
-
-	/**
-	 * Try to find out to which schema a table belongs.
-	 */
-	public String findSchemaForTable(String aTablename)
-		throws SQLException
-	{
-		if (this.ignoreSchema("*")) return null;
-
-		aTablename = this.adjustObjectnameCase(aTablename);
-
-		// First we try the current user as the schema name...
-		String schema = this.adjustObjectnameCase(this.getUserName());
-		ResultSet rs = this.metaData.getTables(null, schema, aTablename, null);
-		String table = null;
-		try
-		{
-			if (rs.next())
-			{
-				table = rs.getString(2);
-			}
-			else
-			{
-				schema = null;
-			}
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
-		}
-
-		if (table == null)
-		{
-			try
-			{
-				// ok, no table found for the current user, so let's
-				// try to find the table without the schema qualifier...
-				rs = this.metaData.getTables(null, schema, aTablename, null);
-				if (rs.next())
-				{
-					schema = rs.getString(2);
-				}
-				// check if there are more rows in the result set
-				// if yes, we have no way of identifying the real
-				// schema name, so we'll return null
-				if (rs.next())
-				{
-					schema = null;
-				}
-			}
-			finally
-			{
-				SqlUtil.closeResult(rs);
-			}
-		}
 		if (this.ignoreSchema(schema)) return null;
 		return schema;
 	}
@@ -2256,7 +2217,9 @@ public class DbMetadata
 		boolean hasEnums = false;
 
 		ResultSet rs = null;
-
+		
+		boolean checkOracleCharSemantics = this.isOracle && Settings.getInstance().useOracleCharSemanticsFix();
+		
 		try
 		{
 			// Oracle's JDBC driver does not return varchar lengths
@@ -2270,8 +2233,6 @@ public class DbMetadata
 			{
 				rs = this.metaData.getColumns(aCatalog, aSchema, aTable, "%");
 			}
-
-			//rs = this.metaData.getColumns(aCatalog, aSchema, aTable, "%");
 
 			while (rs.next())
 			{
@@ -2301,7 +2262,26 @@ public class DbMetadata
 				int position = rs.getInt("ORDINAL_POSITION");
 				String nul = rs.getString("IS_NULLABLE");
 
-				String display = getSqlTypeDisplay(typeName, sqlType, size, digits);
+				String display = null;
+				
+				// Hack to get Oracle's VARCHAR2(xx Byte) or VARCHAR2(xxx Char) display correct
+				// Our own statement to retrieve column information in OracleMetaData
+				// will return the byte/char semantics in the field SQL_DATA_TYPE
+				// Oracle's JDBC driver does not supply this information (because
+				// the JDBC standard does not define a column for this)
+				if (checkOracleCharSemantics && sqlType == Types.VARCHAR && this.oracleMetaData != null)
+				{
+					int byteOrChar = rs.getInt("SQL_DATA_TYPE");
+					display = this.oracleMetaData.getVarcharType(typeName, size, byteOrChar);
+					if (display == null)
+					{
+						display = getSqlTypeDisplay(typeName, sqlType, size, digits);
+					}
+				}
+				else
+				{
+					display = getSqlTypeDisplay(typeName, sqlType, size, digits);
+				}
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_COL_NAME, colName);
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE, display);
 				if (keys.contains(colName.toLowerCase()))
@@ -2857,6 +2837,8 @@ public class DbMetadata
 			LogMgr.logInfo("DbMetadata.getTriggerSource()", "Using query=\n" + query);
 		}
 
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
+		
 		ResultSet rs = null;
 		try
 		{
@@ -2878,7 +2860,7 @@ public class DbMetadata
 				}
 			}
 			String warn = SqlUtil.getWarnings(this.dbConnection, stmt, true);
-			if (warn != null && result.length() > 0) result.append("\n\n");
+			if (warn != null && result.length() > 0) result.append(nl + nl);
 			result.append(warn);
 		}
 		catch (SQLException e)
@@ -2894,9 +2876,9 @@ public class DbMetadata
 			SqlUtil.closeAll(rs, stmt);
 		}
 		
-		if (this.isCloudscape || this.isFirstSql)
+		if (this.isCloudscape || this.isApacheDerby || this.isFirstSql)
 		{
-			String r = result.toString().replaceAll("\\\\n", "\n");
+			String r = result.toString().replaceAll("\\\\n", nl);
 			return r;
 		}
 		else

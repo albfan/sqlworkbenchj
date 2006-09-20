@@ -272,7 +272,7 @@ public class LnFDefinitionPanel
 			String className = lnf.getClassName();
 			this.currentLabel.setText(lnf.getName());
 			Settings.getInstance().setLookAndFeelClass(className);
-			WbSwingUtilities.showMessage(this, ResourceMgr.getString("MsgLnFChanged"));
+			WbSwingUtilities.showMessage(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("MsgLnFChanged"));
 		}
 		else
 		{

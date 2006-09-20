@@ -13,6 +13,7 @@ package workbench.gui.macros;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -20,6 +21,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
@@ -44,7 +46,7 @@ import workbench.resource.Settings;
 
 public class MacroManagerDialog
 	extends JDialog
-	implements ActionListener, ListSelectionListener, MouseListener
+	implements ActionListener, ListSelectionListener, MouseListener, WindowListener
 {
 	private JPanel dummyPanel;
 	private JPanel buttonPanel;
@@ -72,6 +74,7 @@ public class MacroManagerDialog
 		this.replaceEditorText.setVisible(connected && !busy);
 		this.replaceEditorText.setEnabled(connected && !busy);
 		this.initKeys();
+		this.addWindowListener(this);
 	}
 
 	private void initWindow(Frame parent)
@@ -81,7 +84,6 @@ public class MacroManagerDialog
 			this.setSize(600,400);
 		}
 		WbSwingUtilities.center(this, parent);
-		macroPanel.restoreSettings();
 		boolean replace = Settings.getInstance().getBoolProperty("workbench.gui.macros.replaceOnRun", false);
 		this.replaceEditorText.setSelected(replace);
 	}
@@ -271,6 +273,45 @@ public class MacroManagerDialog
 	}
 
 	public void mouseReleased(java.awt.event.MouseEvent e)
+	{
+	}
+
+	public void windowOpened(WindowEvent windowEvent)
+	{
+		// Fix for JDK 6
+		// It seems that the macro editor is not repainted 
+		// correctly if we load the macro text while
+		// it's not visible
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				macroPanel.restoreSettings();
+			}
+		});
+	}
+
+	public void windowClosing(WindowEvent windowEvent)
+	{
+	}
+
+	public void windowClosed(WindowEvent windowEvent)
+	{
+	}
+
+	public void windowIconified(WindowEvent windowEvent)
+	{
+	}
+
+	public void windowDeiconified(WindowEvent windowEvent)
+	{
+	}
+
+	public void windowActivated(WindowEvent windowEvent)
+	{
+	}
+
+	public void windowDeactivated(WindowEvent windowEvent)
 	{
 	}
 

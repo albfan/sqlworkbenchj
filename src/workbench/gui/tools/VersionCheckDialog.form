@@ -30,7 +30,7 @@
     <Component class="javax.swing.JLabel" name="yourVersionLabel">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelYourVersion&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblYourVersion&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -58,7 +58,7 @@
     <Component class="javax.swing.JButton" name="closeButton">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelClose&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblClose&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -70,7 +70,7 @@
     <Component class="javax.swing.JLabel" name="stableVersionLabel">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelStableVersion&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblStableVersion&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -95,7 +95,7 @@
     <Component class="javax.swing.JLabel" name="devVersionLabel">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelDevVersion&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblDevVersion&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>

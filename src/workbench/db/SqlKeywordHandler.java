@@ -114,7 +114,7 @@ public class SqlKeywordHandler
 	{
 		if (verb == null) return false;
 		if (this.keywords == null) return false;
-		return this.keywords.contains(verb.toUpperCase());
+		return this.keywords.contains(verb.trim().toUpperCase());
 	}
 	
 }

@@ -14,6 +14,7 @@ package workbench.sql.commands;
 import java.sql.SQLException;
 
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -72,6 +73,7 @@ public class SingleVerbCommand extends SqlCommand
 			}
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			result.setFailure();
+			LogMgr.logSqlError("SingleVerbCommand.execute()", aSql, e);
 		}
 		finally
 		{

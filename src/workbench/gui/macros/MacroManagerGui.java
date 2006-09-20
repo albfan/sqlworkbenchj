@@ -275,7 +275,7 @@ public class MacroManagerGui
 		this.showMacro(entry);
 	}
 
-	private void showMacro(MacroEntry entry)
+	private void showMacro(final MacroEntry entry)
 	{
 		this.currentEntry = entry;
 		this.macroNameField.setSourceObject(this.currentEntry, "name", entry.getName());

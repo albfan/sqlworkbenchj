@@ -307,6 +307,7 @@ public class SqlFormatter
 		
 		if (lastChar == '.' && current.isIdentifier()) return false;
 		if (lastChar == '(' && current.isReservedWord()) return false;
+		if (lastChar == ')' && currChar == '.') return false;
 		if (lastChar == ')' && !current.isSeparator() ) return true;
 		if ((last.isIdentifier()|| last.isLiteral()) && current.isOperator()) return true;
 		if ((current.isIdentifier() || current.isLiteral()) && last.isOperator()) return true;

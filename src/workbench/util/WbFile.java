@@ -12,6 +12,8 @@
 package workbench.util;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * @author support@sql-workbench.net
@@ -19,7 +21,7 @@ import java.io.File;
 public class WbFile
 	extends File
 {
-
+	
 	public WbFile(File f)
 	{
 		super(f.getAbsolutePath());
@@ -49,4 +51,22 @@ public class WbFile
 		return name.substring(pos + 1);
 	}
 	
+	public void tryCreate()
+		throws IOException
+	{
+		FileOutputStream out = null;
+		try
+		{
+			out = new FileOutputStream(this);
+		}
+		catch (IOException e)
+		{
+			throw e;
+		}
+		finally
+		{
+			try	{ out.close(); } catch (Throwable th) {}
+			this.delete();
+		}
+	}
 }

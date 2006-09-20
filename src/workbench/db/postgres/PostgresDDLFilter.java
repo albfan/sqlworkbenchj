@@ -33,11 +33,13 @@ public class PostgresDDLFilter
 	 * PG's documentation shows CREATE FUNCTION samples that use
 	 * a "dollar quoting" to avoid the nested single quotes
 	 * e.g. http://www.postgresql.org/docs/8.0/static/plpgsql-structure.html
-	 * but the JDBC driver does not (yet) understand this as well (this 
-	 * seems to be only implemented in the psql command line tool
+	 * 
+	 * But the JDBC driver does not (yet) understand this - this 
+	 * seems to be only implemented in the psql command line tool.
+	 * 
 	 * So we'll replace the "dollar quotes" with regular single quotes
 	 * Every single quote inside the function body will be replaced with 
-	 * two single quotes in properly "escape" them
+	 * two single quotes to properly "escape" them
 	 */
 	public String adjustDDL(String sql)
 	{

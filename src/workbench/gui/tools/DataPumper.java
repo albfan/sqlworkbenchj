@@ -1167,10 +1167,10 @@ public class DataPumper
 		{
 			this.showLog();
 		}
-		else if (e.getSource() == this.modeComboBox)
-		{
-			this.checkUseBatch();
-		}
+//		else if (e.getSource() == this.modeComboBox)
+//		{
+//			this.checkUseBatch();
+//		}
 	}
 
 	/**
@@ -1438,15 +1438,17 @@ public class DataPumper
 	private void showImportCommand()
 	{
 		if (this.fileImporter == null || this.targetProfile == null) return;
+		String sql = null;
 		try
 		{
 			this.initImporter();
+			sql = this.fileImporter.getWbCommand();
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("DataPumper.showImportCommand()", "Error creating SQL command", e);
+			sql = ExceptionUtil.getDisplay(e);
 		}
-		String sql = this.fileImporter.getWbCommand();
 		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPScript"), sql, "workbench.datapumper.scriptwindow", true);
 		w.setVisible(true);
 		w.dispose();

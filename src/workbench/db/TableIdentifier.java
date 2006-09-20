@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import javax.xml.transform.Result;
 import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -89,6 +90,7 @@ public class TableIdentifier
 		copy.catalog = this.catalog;
 		copy.expression = null;
 		copy.neverAdjustCase = this.neverAdjustCase;
+		copy.type = this.type;
 		return copy;
 	}
 	
@@ -146,16 +148,36 @@ public class TableIdentifier
 		{
 			DbMetadata meta = conn.getMetadata();
 			this.adjustCase(conn);
-			if (this.catalog != null && meta.needCatalogInDML(this))
+			if (meta.needCatalogInDML(this))
 			{
-				result.append(SqlUtil.quoteObjectname(this.catalog));
-				result.append('.');
+				String catalogToUse = this.catalog;
+				if (catalogToUse == null)
+				{
+					catalogToUse = meta.getCurrentCatalog();
+				}
+				
+				if (catalogToUse != null)
+				{
+					result.append(SqlUtil.quoteObjectname(catalogToUse));
+					result.append('.');
+				}
 			}
-			if (this.schema != null && meta.needSchemaInDML(this))
+			
+			if (meta.needSchemaInDML(this))
 			{
-				result.append(meta.quoteObjectname(this.schema));
-				result.append('.');
+				String schemaToUse = this.schema;
+				if (schemaToUse == null)
+				{
+					schemaToUse = meta.getSchemaToUse();
+				}
+				
+				if (schemaToUse != null)
+				{
+					result.append(meta.quoteObjectname(schemaToUse));
+					result.append('.');
+				}
 			}
+			
 			result.append(meta.quoteObjectname(this.tablename));
 		}
 		return result.toString();
@@ -171,6 +193,28 @@ public class TableIdentifier
 		if (this.schema != null) this.schema = meta.adjustSchemaNameCase(this.schema);
 		if (this.catalog != null) this.catalog = meta.adjustObjectnameCase(this.catalog);
 		this.expression = null;
+	}
+	
+	/**
+	 * Return the fully qualified name of the table 
+	 * (including catalog and schema) but not quote
+	 * even if it needed quotes
+	 */
+	public String getQualifiedName()
+	{
+		StringBuffer result = new StringBuffer(32);
+		if (catalog != null)
+		{
+			result.append(catalog);
+			result.append('.');
+		}
+		if (schema != null)
+		{
+			result.append(schema);
+			result.append('.');
+		}
+		result.append(this.tablename);
+		return result.toString();
 	}
 	
 	public String getTableName() { return this.tablename; }

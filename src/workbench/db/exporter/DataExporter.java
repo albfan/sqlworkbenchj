@@ -510,9 +510,10 @@ public class DataExporter
 			return -1;
 	}
 
-	public void setOutputFilename(String aFilename) 
+	public void setOutputFilename(String aFilename)
 	{ 
 		this.outputfile = aFilename; 
+		if (this.outputfile == null) return;
 	}
 
 	public String getOutputFilename() { return this.outputfile; }
@@ -721,9 +722,9 @@ public class DataExporter
 		}
 		catch (Exception e)
 		{
-			this.addError(ResourceMgr.getString("MsgExecuteError") + this.sql);
+			this.addError(ResourceMgr.getString("ErrExportExecute"));
 			this.addError(ExceptionUtil.getDisplay(e));
-			LogMgr.logError("DataExporter.startExport()", "Could not execute SQL statement: " + this.sql + ", Error: " + e.getMessage(), e);
+			LogMgr.logError("DataExporter.startExport()", "Could not execute SQL statement: " + (currentJob != null ? currentJob.getQuerySql() : this.sql) + ", Error: " + ExceptionUtil.getDisplay(e), e);
 			if (this.showProgressWindow)
 			{
 				if (!jobsRunning) this.closeProgress();
@@ -923,7 +924,6 @@ public class DataExporter
 		}
 		catch (IOException e)
 		{
-			this.errors.add(e.getMessage());
 			LogMgr.logError("DataExporter", "Error writing data file", e);
 			throw e;
 		}

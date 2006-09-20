@@ -187,7 +187,6 @@ public class ExportFileDialog
 		}
 		this.exportOptions.addPropertyChangeListener("exportType", this);
 		this.restoreSettings();
-		this.exportOptions.setIncludeSqlInsert(includeSqlInsert);
 		this.exportOptions.setIncludeSqlUpdate(includeSqlUpdate);
 		this.exportOptions.setIncludeSqlDeleteInsert(includeSqlDeleteInsert);
 			
@@ -261,11 +260,9 @@ public class ExportFileDialog
 				exporter.setHtmlOptions(this.getHtmlOptions());
 				break;
 			case DataExporter.EXPORT_XML:
-				exporter.setOutputTypeXml();
 				exporter.setXmlOptions(this.getXmlOptions());
 				break;
 			default:
-				exporter.setOutputTypeText();
 				exporter.setTextOptions(this.getTextOptions());
 				LogMgr.logWarning("ExportFileDialog.setExporterOptions()", "Unknown file type selected", null);
 				break;

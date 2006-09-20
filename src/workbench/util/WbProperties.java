@@ -241,7 +241,7 @@ public class WbProperties
 		}
 		finally
 		{
-			in.close();
+			try { in.close(); } catch (Throwable th) {}
 		}
 	}
 	

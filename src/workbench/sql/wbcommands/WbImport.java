@@ -507,19 +507,12 @@ public class WbImport
 			imp.setUseTruncate(useTruncate);
 		}
 
-		boolean useBatch = cmdLine.getBoolean(ARG_USEBATCH);
-		imp.setUseBatch(useBatch);
-		if (useBatch && cmdLine.isArgPresent(ARG_BATCHSIZE))
+		int queueSize = cmdLine.getIntValue(ARG_BATCHSIZE,-1);
+		
+		if (queueSize > 0)
 		{
-			int queueSize = cmdLine.getIntValue(ARG_BATCHSIZE,-1);
-			if (queueSize > 0)
-			{
-				imp.setBatchSize(queueSize);
-			}
-			else
-			{
-				result.addMessage(ResourceMgr.getString("ErrImportInvalidBatchSize"));
-			}
+			imp.setUseBatch(true);
+			imp.setBatchSize(queueSize);
 		}
 		try
 		{
