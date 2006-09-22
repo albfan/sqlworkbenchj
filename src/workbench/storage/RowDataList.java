@@ -16,7 +16,6 @@ import java.util.Comparator;
 
 public class RowDataList
 {
-	public static final RowDataList EMPTY_BUFFER = new RowDataList(0);
 	private static final int DEFAULT_SIZE = 150;
 
 	// growth factor when increasing the array

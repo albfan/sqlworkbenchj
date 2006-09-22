@@ -38,6 +38,17 @@ public class FixedSizeList
 	}
 	
 	
+	/**
+	 * Append an entry at the end of the list, without
+	 * checking for duplicates or removing entries
+	 * that exceed the max size. This should be used
+	 * to initially fill the list.
+	 */
+	public synchronized void append(String entry)
+	{
+		entries.add(entry);
+	}
+	
 	public synchronized int addEntry(String entry)
 	{
 		// Don't allow duplicates

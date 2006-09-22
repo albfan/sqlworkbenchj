@@ -15,6 +15,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.gui.components.WbTable;
+import workbench.gui.components.WbToolbarButton;
 import workbench.gui.filter.DefineFilterExpressionPanel;
 import workbench.resource.ResourceMgr;
 
@@ -61,4 +62,5 @@ public class FilterDataAction
 			this.client.addTableModelListener(this);
 		}
 	}
+
 }

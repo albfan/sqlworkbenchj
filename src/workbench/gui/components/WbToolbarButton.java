@@ -11,6 +11,7 @@
  */
 package workbench.gui.components;
 
+import java.awt.Dimension;
 import java.awt.Insets;
 
 import javax.swing.Action;
@@ -21,11 +22,11 @@ import javax.swing.Icon;
  * @author  support@sql-workbench.net
  */
 public class WbToolbarButton 
-	extends javax.swing.JButton
+	extends WbButton
 {
-
 	public static final Insets MARGIN = new Insets(1,1,1,1);
-
+	private Icon additionalIcon;
+	
 	public WbToolbarButton()
 	{
 		super();
@@ -55,4 +56,20 @@ public class WbToolbarButton
 		this.setMargin(MARGIN);
 		this.setText(null);
 	}
+	
+	public Dimension getPreferredSize()
+	{
+		Dimension result = super.getPreferredSize();
+		if (this.additionalIcon != null)
+		{
+			result.setSize(result.getWidth() + 16, result.getHeight());
+		}
+		return result;
+	}
+	
+	public void setSecondIcon(Icon i)
+	{
+		this.additionalIcon = i;
+	}
+	
 }

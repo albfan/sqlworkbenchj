@@ -35,6 +35,7 @@ public class WbButton
 	private Border rolloverBorder;
 	private Border emptyBorder;
 	private Border lastBorder;
+	private boolean iconButton = false;
 	
 	public WbButton()
 	{
@@ -57,6 +58,7 @@ public class WbButton
 	public WbButton(Icon i)
 	{
 		super(i);
+		iconButton = true;
 		init();
 	}
 	
@@ -96,6 +98,7 @@ public class WbButton
 	{
 		this.setUI(new javax.swing.plaf.basic.BasicButtonUI());
 	}
+	
 	public void setRollover(boolean flag)
 	{
 		this.setRolloverEnabled(flag);
@@ -108,15 +111,39 @@ public class WbButton
 				table.getColor("controlDkShadow"),
 				table.getColor("controlHighlight"),
 				table.getColor("controlLtHighlight"));
-			Border in = new EmptyBorder(3,3,3,3);
-			this.rolloverBorder = new CompoundBorder(out, in);
-			this.emptyBorder = new EmptyBorder(6,6,6,6);;
+			
+			if (iconButton)
+			{
+				this.rolloverBorder = out;
+				this.emptyBorder = new EmptyBorder(0,0,0,0);
+			}
+			else
+			{
+				Border in = new EmptyBorder(3,3,3,3);
+				this.rolloverBorder = new CompoundBorder(out, in);
+				this.emptyBorder = new EmptyBorder(6,6,6,6);
+			}
 			this.setBorder(emptyBorder);
 			this.addMouseListener(this);
 		}
 		else
 		{
-			this.addMouseListener(this);
+			this.removeMouseListener(this);
+		}
+	}
+	
+	public void setRolloverBorders(Border rollover, Border nonRollover)
+	{
+		boolean currentIsRollover = this.getBorder() == this.rolloverBorder;
+		this.rolloverBorder = rollover;
+		this.emptyBorder = nonRollover;
+		if (currentIsRollover)
+		{
+			setBorder(rolloverBorder);
+		}
+		else
+		{
+			setBorder(emptyBorder);
 		}
 	}
 	

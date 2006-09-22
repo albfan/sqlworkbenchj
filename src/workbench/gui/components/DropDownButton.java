@@ -11,12 +11,15 @@
  */
 package workbench.gui.components;
 
+import java.awt.Color;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.Action;
-import javax.swing.JButton;
+import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.JPopupMenu;
+import javax.swing.border.Border;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
@@ -24,12 +27,13 @@ import javax.swing.event.PopupMenuListener;
  * @author support@sql-workbench.net
  */
 public class DropDownButton
-	extends JButton
+	extends WbButton
 	implements ActionListener, PopupMenuListener
 {
 	private JPopupMenu popup;
 	private boolean popupVisible = false;
-	
+	private Border menuBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
+
 	public DropDownButton(String label)
 	{
 		super(label);
@@ -42,9 +46,14 @@ public class DropDownButton
 		init();
 	}
 	
+	public DropDownButton(Icon i)
+	{
+		super(i);
+		init();
+	}
+	
 	private void init()
 	{
-//		setBorder(new CompoundBorder(new EtchedBorder(), new EmptyBorder(1, 5, 1, 5)));
 		setFocusable(false);
 		addActionListener(this);
 		setMargin(new Insets(1,5,1,5));
@@ -53,11 +62,14 @@ public class DropDownButton
 	public void setDropDownMenu(JPopupMenu menu)
 	{
 		popup = menu;
+		popup.setBorder(this.menuBorder);
 		popup.addPopupMenuListener(this);
 	}
 
 	public void actionPerformed(ActionEvent evt)
 	{
+		if (this.popup == null) return;
+		
 		if (popupVisible)
 		{
 			popup.setVisible(false);

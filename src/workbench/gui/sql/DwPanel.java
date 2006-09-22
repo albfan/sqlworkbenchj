@@ -189,22 +189,23 @@ public class DwPanel
 	
 	public void checkAndSelectKeyColumns()
 	{
-		final DwPanel panel = this;
-		Thread t = new WbThread("PK Check")
-		{
-			public void run()
-			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						retrievePKColumns();
-						dataTable.selectKeyColumns();
-					}
-				});
-			}
-		};
-		t.start();
+		retrievePKColumns();
+		dataTable.selectKeyColumns();
+//		Thread t = new WbThread("PK Check")
+//		{
+//			public void run()
+//			{
+//				EventQueue.invokeLater(new Runnable()
+//				{
+//					public void run()
+//					{
+//						retrievePKColumns();
+//						dataTable.selectKeyColumns();
+//					}
+//				});
+//			}
+//		};
+//		t.start();
 	}
 	
 	public void setManageUpdateAction(boolean aFlag)
@@ -322,7 +323,6 @@ public class DwPanel
 			boolean hasPk = retrievePKColumns();
 			if (!hasPk)
 			{
-				// make sure only one table selected
 				hasPk = getTable().selectKeyColumns();
 			}
 			if (!hasPk) return false;
@@ -478,11 +478,10 @@ public class DwPanel
 	
 	protected void enableUpdateActions()
 	{
-		boolean update = this.isUpdateable();
-		boolean rows = this.dataTable.getSelectedRowCount() > 0;
-		this.insertRow.setEnabled(update);
-		this.duplicateRow.setEnabled(update && rows);
-		this.deleteRow.setEnabled(rows);
+		int rows = this.dataTable.getSelectedRowCount();
+		this.insertRow.setEnabled(true);
+		this.duplicateRow.setEnabled(rows == 1);
+		this.deleteRow.setEnabled(rows > 0);
 	}
 	
 	protected void disableUpdateActions()
@@ -751,8 +750,8 @@ public class DwPanel
 	private void checkResultSetActions()
 	{
 		boolean hasResult = this.hasResultSet();
-		boolean mayEdit = hasResult && this.hasUpdateableColumns();
-		boolean updateable = mayEdit && this.isUpdateable();
+//		boolean mayEdit = hasResult && this.hasUpdateableColumns();
+//		boolean updateable = mayEdit && this.isUpdateable();
 		
 		//this.startEdit.setEnabled(mayEdit);
 		int rows = this.getTable().getSelectedRowCount();
@@ -760,9 +759,9 @@ public class DwPanel
 		this.dataTable.getExportAction().setEnabled(hasResult);
 		
 		this.updateAction.setEnabled(false);
-		this.insertRow.setEnabled(mayEdit);
-		this.deleteRow.setEnabled(updateable && (rows == 1));
-		this.duplicateRow.setEnabled(mayEdit && (rows == 1));
+		this.insertRow.setEnabled(true);
+		this.deleteRow.setEnabled(rows > 0);
+		this.duplicateRow.setEnabled(rows == 1);
 		this.selectKeys.setEnabled(hasResult);
 		this.dataTable.checkCopyActions();
 	}
@@ -1063,10 +1062,9 @@ public class DwPanel
 		this.dataTable.setShowStatusColumn(false);
 		this.updateAction.setEnabled(false);
 		int rows = this.dataTable.getSelectedRowCount();
-		this.insertRow.setEnabled(this.isUpdateable());
-		this.deleteRow.setEnabled(this.isUpdateable() && rows > 0);
-		this.duplicateRow.setEnabled(this.isUpdateable() && rows == 1);
-		//this.startEdit.setSwitchedOn(false);
+		this.insertRow.setEnabled(true);
+		this.deleteRow.setEnabled(rows > 0);
+		this.duplicateRow.setEnabled(rows == 1);
 		if (restoreData) this.dataTable.restoreOriginalValues();
 	}
 	
@@ -1092,6 +1090,8 @@ public class DwPanel
 		// if the result is not yet updateable (automagically)
 		// then try to find the table. If the table cannot be
 		// determined, then ask the user
+		Window w = SwingUtilities.getWindowAncestor(this);
+		
 		if (!this.isUpdateable())
 		{
 			if (!this.checkUpdateTable())
@@ -1107,6 +1107,12 @@ public class DwPanel
 						JOptionPane.QUESTION_MESSAGE,
 						null,tables.toArray(),null);
 				}
+				else
+				{
+					WbSwingUtilities.showErrorMessage(w, ResourceMgr.getString("MsgNoTables"));
+					this.setUpdateTable((TableIdentifier)null);
+					return false;
+				}
 				
 				if (table != null)
 				{
@@ -1114,7 +1120,10 @@ public class DwPanel
 				}
 			}
 		}
+		
+		// Verify if the data is really updateable!
 		boolean update = this.isUpdateable();
+		
 		if (update)
 		{
 			this.dataTable.setShowStatusColumn(true);
@@ -1127,30 +1136,41 @@ public class DwPanel
 			}
 			
 			this.editingStarted = true;
-			//this.startEdit.setSwitchedOn(true);
-		}
-//		else
-//		{
-//			this.startEdit.setSwitchedOn(false);
-//		}
-		
-		int numSelectedRows = selectedRows.length;
-		if (selectedRows.length > 0)
-		{
-			ListSelectionModel model = this.dataTable.getSelectionModel();
-			model.setValueIsAdjusting(true);
-			// make sure nothing is selected, then restore the old selection
-			model.clearSelection();
-			for (int i = 0; i < numSelectedRows; i++)
+
+			// When changing the table model (which is happening
+			// when the status column is displayed) we need to restore
+			// the selection
+			int numSelectedRows = selectedRows.length;
+			if (selectedRows.length > 0)
 			{
-				model.addSelectionInterval(selectedRows[i], selectedRows[i]);
+				ListSelectionModel model = this.dataTable.getSelectionModel();
+				model.setValueIsAdjusting(true);
+				// make sure nothing is selected, then restore the old selection
+				model.clearSelection();
+				for (int i = 0; i < numSelectedRows; i++)
+				{
+					model.addSelectionInterval(selectedRows[i], selectedRows[i]);
+				}
+				model.setValueIsAdjusting(false);
 			}
-			model.setValueIsAdjusting(false);
+
+			checkResultSetActions();
 		}
-		int rows = this.dataTable.getSelectedRowCount();
-		if (this.insertRow != null) this.insertRow.setEnabled(update);
-		if (this.deleteRow != null) this.deleteRow.setEnabled(update && rows > 0);
-		if (this.duplicateRow != null) this.duplicateRow.setEnabled(update && rows == 1);
+		else
+		{
+			String msg = null;
+			TableIdentifier tbl = (this.dataTable.getDataStore() != null ? this.dataTable.getDataStore().getUpdateTable() : null);
+			if (tbl == null)
+			{
+				msg = ResourceMgr.getString("MsgNoUpdateTable");
+			}
+			else if (!this.hasUpdateableColumns())
+			{
+				msg = ResourceMgr.getString("MsgNoUpdateColumns");
+				msg = StringUtil.replace(msg, "%table%", tbl.getTableExpression());
+			}
+			WbSwingUtilities.showErrorMessage(w, msg);
+		}
 		
 		return update;
 	}
@@ -1207,9 +1227,8 @@ public class DwPanel
 	{
 		if (this.readOnly) return;
 		long rows = this.dataTable.getSelectedRowCount();
-		boolean update = this.isUpdateable();
-		this.deleteRow.setEnabled( (rows > 0) && update);
-		this.duplicateRow.setEnabled(rows == 1 && update);
+		this.deleteRow.setEnabled(rows > 0);
+		this.duplicateRow.setEnabled(rows == 1);
 	}
 	
 	/**
@@ -1221,11 +1240,6 @@ public class DwPanel
 		this.rowCountChanged();
 	}
 	
-//	public void setAutomaticUpdateTableCheck(boolean flag)
-//	{
-//		this.automaticUpdateTableCheck = flag;
-//	}
-
 	public void fatalError(String msg)
 	{
 	}

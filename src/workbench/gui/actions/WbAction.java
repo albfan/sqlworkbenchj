@@ -12,7 +12,6 @@
 package workbench.gui.actions;
 
 import java.awt.EventQueue;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -133,6 +132,11 @@ public class WbAction
 	{
 		this.setMenuTextByKey(aKey);
 		this.setDefaultAccelerator(defaultKey);
+		initializeShortcut();
+	}
+
+	protected void initializeShortcut()
+	{
 		ShortcutManager mgr = Settings.getInstance().getShortcutManager(); 
 		mgr.registerAction(this);
 		KeyStroke key = mgr.getCustomizedKeyStroke(this);
@@ -141,7 +145,6 @@ public class WbAction
 			this.setAccelerator(key);
 		}
 	}
-
 	/**
 	 * Initialize the menu definition for this action. The menu text and tooltip
 	 * will be used directly without retrieving it from the ResourceMgr.  
@@ -155,15 +158,8 @@ public class WbAction
 	{
 		this.setMenuText(aMenuText);
 		this.setTooltip(aTooltip);
-		
 		this.setDefaultAccelerator(defaultKey);
-		ShortcutManager mgr = Settings.getInstance().getShortcutManager(); 
-		mgr.registerAction(this);
-		KeyStroke custom = mgr.getCustomizedKeyStroke(this);
-		if (custom != null)
-		{
-			this.setAccelerator(custom);
-		}
+		initializeShortcut();
 	}
 	
 	/**

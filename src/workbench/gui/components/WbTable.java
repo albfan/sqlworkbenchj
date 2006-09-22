@@ -1802,7 +1802,12 @@ public class WbTable
 		DataStore ds = this.getDataStore();
 		ColumnIdentifier[] originalCols = ds.getColumns();
 		TableIdentifier table = ds.getUpdateTable();
-		if (table == null) return false;
+		if (table == null) 
+		{
+			Window w = SwingUtilities.getWindowAncestor(this);
+			WbSwingUtilities.showErrorMessage(w, ResourceMgr.getString("MsgNoUpdateTable"));
+			return false;
+		}
 		
 		KeyColumnSelectorPanel panel = new KeyColumnSelectorPanel(originalCols, table);
 		Window parent = SwingUtilities.getWindowAncestor(this);

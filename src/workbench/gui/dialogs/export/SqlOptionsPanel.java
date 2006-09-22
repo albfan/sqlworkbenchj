@@ -35,26 +35,37 @@ public class SqlOptionsPanel
 	private ColumnSelectorPanel columnSelectorPanel;	
 	private ResultInfo tableColumns;
 	
-	/** Creates new form SqlOptionsPanel */
 	public SqlOptionsPanel(ResultInfo info)
 	{
 		initComponents();
-		this.tableColumns = info;
-		if (info == null)
-		{
-			this.selectKeys.setEnabled(false);
-		}
-		TableIdentifier table = info.getUpdateTable();
-		if (table != null)
-		{
-			this.alternateTable.setText(table.getTableName());
-		}
-		else
-		{
-			this.alternateTable.setText("target_table");
-		}
+		setResultInfo(info);
 	}
 
+	public void setResultInfo(ResultInfo info)
+	{
+		this.tableColumns = info;
+		
+		boolean hasColumns = tableColumns != null;
+		boolean keysPresent = (info == null ? false : info.hasPkColumns());
+		this.selectKeys.setEnabled(hasColumns);
+		
+		this.setIncludeDeleteInsert(keysPresent);
+		this.setIncludeUpdate(keysPresent);
+		
+		if (info != null)
+		{
+			TableIdentifier table = info.getUpdateTable();
+			if (table != null)
+			{
+				this.alternateTable.setText(table.getTableName());
+			}
+			else
+			{
+				this.alternateTable.setText("target_table");
+			}
+		}
+	}
+	
 	public void saveSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -103,9 +114,9 @@ public class SqlOptionsPanel
 		return result;
 	}
 
-	//public boolean insertEnabled() { return useInsert.isEnabled(); }
 	public boolean updateEnabled() { return useUpdate.isEnabled(); }
 	public boolean deleteInsertEnabled() { return useDeleteInsert.isEnabled(); }
+	
 	public boolean isSqlAllowed()
 	{
 		return updateEnabled() || deleteInsertEnabled();

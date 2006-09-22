@@ -72,7 +72,7 @@ public class WbImport
 	public static final String ARG_TRIM_VALUES = "trimvalues";
 	public static final String ARG_FILE_EXT = "extension";
 	public static final String ARG_UPDATE_WHERE = "updatewhere";
-	public static final String ARG_IGNORE_SCHEMA = "ignoreschema";
+//	public static final String ARG_IGNORE_SCHEMA = "ignoreschema";
 	public static final String ARG_TRUNCATE_TABLE = "truncatetable";
 	public static final String ARG_CREATE_TABLE = "createtarget";
 	public static final String ARG_BLOB_ISFILENAME = "blobisfilename";

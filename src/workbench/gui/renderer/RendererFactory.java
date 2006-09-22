@@ -29,26 +29,20 @@ import workbench.log.LogMgr;
  */
 public class RendererFactory
 {
-	//private static Map sharedInstances = new HashMap();
-//	private static Map dateRenderer = new HashMap();
 	
 	private static TableCellRenderer createRenderer(String className)
 	{
-		TableCellRenderer rend = null;//(TableCellRenderer)sharedInstances.get(className);
-//		if (rend == null)
-//		{
-			try
-			{
-				Class cls = Class.forName(className);
-				rend = (TableCellRenderer)cls.newInstance();
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("RendererFactory.createRenderer()", "Error creating renderer", e);
-				rend = new DefaultTableCellRenderer();
-			}
-			
-//		}
+		TableCellRenderer rend = null;
+		try
+		{
+			Class cls = Class.forName(className);
+			rend = (TableCellRenderer)cls.newInstance();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("RendererFactory.createRenderer()", "Error creating renderer", e);
+			rend = new DefaultTableCellRenderer();
+		}
 		return rend;
 	}	
 	
@@ -59,24 +53,20 @@ public class RendererFactory
 	
 	public static TableCellRenderer getDateRenderer(String format)
 	{
-		TableCellRenderer rend = null;//(TableCellRenderer)dateRenderer.get(format);
-//		if (rend == null)
-//		{
-			try
-			{
-				Class cls = Class.forName("workbench.gui.renderer.DateColumnRenderer");
-				Class[] types = new Class[] { String.class };
-				Constructor cons = cls.getConstructor(types);
-				Object[] args = new Object[] { format };
-				rend = (TableCellRenderer)cons.newInstance(args);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("RendererFactory.getDateRenderer()", "Error creating renderer", e);
-				return new DefaultTableCellRenderer();
-			} 
-//			dateRenderer.put(format, rend);
-//		}
+		TableCellRenderer rend = null;
+		try
+		{
+			Class cls = Class.forName("workbench.gui.renderer.DateColumnRenderer");
+			Class[] types = new Class[] { String.class };
+			Constructor cons = cls.getConstructor(types);
+			Object[] args = new Object[] { format };
+			rend = (TableCellRenderer)cons.newInstance(args);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("RendererFactory.getDateRenderer()", "Error creating renderer", e);
+			return new DefaultTableCellRenderer();
+		} 
 		return rend;
 	}
 

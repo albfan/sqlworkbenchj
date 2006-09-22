@@ -966,8 +966,9 @@ public class DataExporter
 	public boolean selectOutput(Window parent)
 	{
 		ExportFileDialog dialog = new ExportFileDialog(parent);
+		dialog.setQuerySql(this.sql, this.dbConn);
 		dialog.setIncludeSqlInsert(true);
-		dialog.setIncludeSqlUpdate(true);
+		//dialog.setIncludeSqlUpdate(true);
 
 		boolean result = dialog.selectOutput();
 		if (result)

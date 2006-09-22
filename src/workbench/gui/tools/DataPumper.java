@@ -12,7 +12,6 @@
 package workbench.gui.tools;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -29,7 +28,6 @@ import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import workbench.WbManager;
@@ -976,7 +974,7 @@ public class DataPumper
 
 		this.window .setVisible(true);
 		//adjustColumnWidth();
-		SwingUtilities.invokeLater(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
@@ -1362,7 +1360,7 @@ public class DataPumper
 
 		if (this.hasSource() && theTarget != null)
 		{
-			SwingUtilities.invokeLater(new Runnable()
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
@@ -1883,7 +1881,7 @@ public class DataPumper
 
 		if (!this.copier.isSuccess())
 		{
-			SwingUtilities.invokeLater(new Runnable()
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{

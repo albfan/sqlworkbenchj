@@ -56,6 +56,68 @@ public class SqlUtilTest
 	{
 	}
 
+	public void testGetCreateType()
+	{
+		try
+		{
+			String sql = "create\n --comment\n table bla (nr integer);";
+			String type = SqlUtil.getCreateType(sql);
+			assertEquals("Wrong table returned", "TABLE", type);
+			
+			sql = "-- comment\ncreate view blub as select * from bla;";
+			type = SqlUtil.getCreateType(sql);
+			assertEquals("Wrong table returned", "VIEW", type);
+			
+			sql = "/* blubber */\ncreate or replace -- comment\nview blub as select * from bla;";
+			type = SqlUtil.getCreateType(sql);
+			assertEquals("Wrong table returned", "VIEW", type);
+			
+			sql = "/* blubber */\nrecreate VIEW blub as select * from bla;";
+			type = SqlUtil.getCreateType(sql);
+			assertEquals("Wrong table returned", "VIEW", type);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		
+	}
+	public void testGetDeleteTable()
+	{
+		try
+		{
+			String sql = "delete from mytable";
+			String table = SqlUtil.getDeleteTable(sql);
+			assertEquals("Wrong table returned", "mytable", table);
+			
+			sql = "delete mytable";
+			table = SqlUtil.getDeleteTable(sql);
+			assertEquals("Wrong table returned", "mytable", table);
+			
+			sql = "delete myschema.mytable";
+			table = SqlUtil.getDeleteTable(sql);
+			assertEquals("Wrong table returned", "myschema.mytable", table);
+			
+			sql = "delete from myschema.mytable";
+			table = SqlUtil.getDeleteTable(sql);
+			assertEquals("Wrong table returned", "myschema.mytable", table);
+			
+			sql = "delete \"FROM\"";
+			table = SqlUtil.getDeleteTable(sql);
+			assertEquals("Wrong table returned", "\"FROM\"", table);
+			
+			sql = "delete from \"FROM\"";
+			table = SqlUtil.getDeleteTable(sql);
+			assertEquals("Wrong table returned", "\"FROM\"", table);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		
+	}
 	public void testGetInsertTable()
 	{
 		try
@@ -67,10 +129,15 @@ public class SqlUtilTest
 			sql = "insert into theschema.mytable";
 			table = SqlUtil.getInsertTable(sql);
 			assertEquals("Wrong table returned", "theschema.mytable", table);
+			
+			sql = "insert into \"into\"";
+			table = SqlUtil.getInsertTable(sql);
+			assertEquals("Wrong table returned", "\"into\"", table);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
+			fail(e.getMessage());
 		}
 	}
 	
@@ -178,7 +245,7 @@ public class SqlUtilTest
 		
 			sql = "/* \n" + 
              "* $URL: ddl.sql $ \n" + 
-             "* $Revision: 1.6 $ \n" + 
+             "* $Revision: 1.7 $ \n" + 
              "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
              "*/ \n" + 
              "-- This is the initial creation script for the MTrac database. \n" + 
@@ -314,6 +381,28 @@ public class SqlUtilTest
 		
 		l = SqlUtil.getTables(sql, true);
 		assertEquals(13, l.size());
+		
+		sql = "select avg(km_pro_jahr) from ( \n" + 
+             "select min(f.km), max(f.km), max(f.km) - min(f.km) as km_pro_jahr, extract(year from e.exp_date) \n" + 
+             "from fuel f, expense e \n" + 
+             "where f.exp_id = e.exp_id \n" + 
+             "group by extract(year from e.exp_date) \n" + 
+             ")";	
+		
+		l = SqlUtil.getTables(sql, true);
+		assertEquals(0, l.size());
+
+		sql = "select avg(km_pro_jahr) from ( \n" + 
+             "select min(f.km), max(f.km), max(f.km) - min(f.km) as km_pro_jahr, extract(year from e.exp_date) \n" + 
+             "from fuel f, expense e \n" + 
+             "where f.exp_id = e.exp_id \n" + 
+             "group by extract(year from e.exp_date) \n" + 
+             ") t, table2";	
+		
+		l = SqlUtil.getTables(sql, true);
+		assertEquals(2, l.size());
+		assertEquals("table2", l.get(1));
+		
 	}
 
 }

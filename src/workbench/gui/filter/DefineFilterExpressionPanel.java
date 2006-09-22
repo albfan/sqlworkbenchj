@@ -172,7 +172,6 @@ public class DefineFilterExpressionPanel
 			return;
 		}
 			
-		
 		String lastDir = Settings.getInstance().getLastFilterDir();
 		FileFilter ff = ExtensionFileFilter.getXmlFileFilter();
 		JFileChooser fc = new JFileChooser(lastDir);
@@ -189,8 +188,7 @@ public class DefineFilterExpressionPanel
 			Settings.getInstance().setLastFilterDir(dir);
 			try
 			{
-				WbPersistence p = new WbPersistence(file);
-				p.writeObject(filter);
+				FilterDefinitionManager.getInstance().saveFilter(filter, file);
 			} 
 			catch (IOException e)
 			{
@@ -213,13 +211,12 @@ public class DefineFilterExpressionPanel
 			String file = fc.getSelectedFile().getAbsolutePath();
 			String dir = fc.getCurrentDirectory().getAbsolutePath();
 			Settings.getInstance().setLastFilterDir(dir);
-			WbPersistence p = new WbPersistence(file);
 			try
 			{
-				Object o = p.readObject();
-				if (o != null && o instanceof FilterExpression)
+				FilterExpression f = FilterDefinitionManager.getInstance().loadFilter(file);
+				if (f != null)
 				{
-					this.setFilter((FilterExpression)o);
+					this.setFilter(f);
 				}
 			} 
 			catch (Exception e)

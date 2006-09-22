@@ -52,19 +52,13 @@ public class DbObjectSourcePanel
 			reloadSource = new ReloadAction(reloader);
 			reloadSource.setEnabled(false);
 		}
-//		if (runner != null)
-//		{
-//			recreateObject = new RunStatement(runner);
-//			recreateObject.setEnabled(false);
-//		}
-		
+	
 		this.sourceEditor = EditorPanel.createSqlEditor();
 		this.sourceEditor.showFindOnPopupMenu();
 		this.sourceEditor.setEditable(false);
 		this.setLayout(new BorderLayout());
 		WbToolbar toolbar = new WbToolbar();
-//		toolbar.addDefaultBorder();
-		
+	
 		if (recreateObject != null) toolbar.add(recreateObject);
 		if (reloadSource != null) toolbar.add(reloadSource);
 		

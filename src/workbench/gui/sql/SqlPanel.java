@@ -57,11 +57,13 @@ import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.db.importer.DataStoreImporter;
 import workbench.gui.actions.FilterDataAction;
+import workbench.gui.actions.FilterPickerAction;
 import workbench.gui.actions.ResetFilterAction;
 import workbench.gui.actions.ViewMessageLogAction;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.dialogs.dataimport.ImportFileDialog;
+import workbench.interfaces.DbExecutionNotifier;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.StatementRunner;
 import workbench.sql.StatementRunnerResult;
@@ -172,7 +174,7 @@ public class SqlPanel
 	implements FontChangedListener, ActionListener, TextChangeListener,
 		PropertyChangeListener, ChangeListener, 
 		MainPanel, Exporter, TextFileContainer, DbUpdater, Interruptable, FormattableSql, Commitable,
-		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter
+		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected EditorPanel editor;
@@ -215,6 +217,7 @@ public class SqlPanel
 	//protected StartEditAction startEdit;
 	protected SelectKeyColumnsAction selectKeys;
 	protected FilterDataAction filterAction;
+	protected FilterPickerAction filterPicker;
 	protected ResetFilterAction resetFilterAction;
 	protected OptimizeAllColumnsAction optimizeAllCol;
 	
@@ -600,11 +603,9 @@ public class SqlPanel
 		this.updateAction = new UpdateDatabaseAction(null);
 		this.insertRow = new InsertRowAction(null);
 		this.deleteRow = new DeleteRowAction(null);
-		//this.startEdit = new StartEditAction(null);
 		this.duplicateRow = new CopyRowAction(null);
 		this.selectKeys = new SelectKeyColumnsAction(null);
 
-		//this.actions.add(this.startEdit);
 		this.actions.add(this.selectKeys);
 		this.actions.add(this.updateAction);
 		this.actions.add(this.insertRow);
@@ -721,11 +722,15 @@ public class SqlPanel
 		this.toolbarActions.add(this.duplicateRow);
 		this.toolbarActions.add(this.deleteRow);
 		
-		this.filterAction = new FilterDataAction(null); //this.currentData.getTable().getFilterAction();
+		this.filterAction = new FilterDataAction(null); 
+		this.filterPicker = new FilterPickerAction(null);
+
 		filterAction.setCreateToolbarSeparator(true);
 		filterAction.setCreateMenuSeparator(true);
 		this.toolbarActions.add(filterAction);
+		this.toolbarActions.add(filterPicker);
 		this.resetFilterAction = new ResetFilterAction(null);
+		this.resetFilterAction.setCreateToolbarSeparator(true);
 		this.toolbarActions.add(this.resetFilterAction);
 		
 		this.commitAction.setCreateToolbarSeparator(true);
@@ -734,11 +739,11 @@ public class SqlPanel
 		ignore.setCreateToolbarSeparator(true);
 		this.toolbarActions.add(ignore);
 
-		this.findDataAction = new FindDataAction(null); //this.currentData.getTable().getFindAction();
+		this.findDataAction = new FindDataAction(null); 
 		this.findDataAction.setMenuTextByKey("MnuTxtFindData");
 		this.findDataAction.setEnabled(false);
 		this.findDataAction.setCreateMenuSeparator(true);
-		this.findDataAgainAction = new FindDataAgainAction(null);//this.currentData.getTable().getFindAgainAction();
+		this.findDataAgainAction = new FindDataAgainAction(null);
 		this.findDataAgainAction.setMenuTextByKey("MnuTxtFindDataAgain");
 		this.findDataAgainAction.setEnabled(false);
 
@@ -1298,7 +1303,7 @@ public class SqlPanel
 	 */
 	protected void checkAutocommit()
 	{
-		SwingUtilities.invokeLater(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
@@ -1985,6 +1990,7 @@ public class SqlPanel
 			this.printDataAction.setOriginal(null);
 			this.printPreviewAction.setOriginal(null);
 			this.filterAction.setOriginal(null);
+			this.filterPicker.setClient(null);
 			this.resetFilterAction.setOriginal(null);
 		}
 		else
@@ -2010,6 +2016,7 @@ public class SqlPanel
 			this.printDataAction.setOriginal(this.currentData.getTable().getPrintAction());
 			this.printPreviewAction.setOriginal(this.currentData.getTable().getPrintPreviewAction());
 			this.filterAction.setOriginal(this.currentData.getTable().getFilterAction());
+			this.filterPicker.setClient(this.currentData.getTable());
 			this.resetFilterAction.setOriginal(this.currentData.getTable().getResetFilterAction());
 		}
 	}

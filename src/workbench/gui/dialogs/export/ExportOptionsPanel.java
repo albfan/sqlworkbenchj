@@ -24,17 +24,17 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ColumnSelectorPanel;
 import workbench.gui.components.DividerBorder;
 import workbench.interfaces.EncodingSelector;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
-import workbench.gui.dialogs.export.TextOptions;
-import workbench.gui.dialogs.export.XmlOptions;
-import workbench.gui.dialogs.export.XmlOptionsPanel;
-import workbench.gui.dialogs.export.TextOptionsPanel;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -54,11 +54,12 @@ public class ExportOptionsPanel
 	private HtmlOptionsPanel htmlOptions;
 	private XmlOptionsPanel xmlOptions;
 	private int currentType = -1;
-	private boolean allowColumnSelection = false;
 	private List selectedColumns;
 	private Object columnSelectEventSource;
 	private ColumnSelectorPanel columnSelectorPanel;
 	private ResultInfo dataStoreColumns;
+	private String query;
+	private WbConnection dbConnection;
 	
 	public ExportOptionsPanel()
 	{
@@ -69,12 +70,13 @@ public class ExportOptionsPanel
 	{
 		super();
 		this.setLayout(new BorderLayout());
-		this.allowColumnSelection = (columns != null);
+		boolean allowColumnSelection = (columns != null);
 		this.dataStoreColumns = columns;
 		this.generalOptions = new GeneralExportOptionsPanel();
-		generalOptions.allowSelectColumns(this.allowColumnSelection);
-		if (this.allowColumnSelection )
+		generalOptions.allowSelectColumns(allowColumnSelection);
+		if (allowColumnSelection)
 		{
+			generalOptions.showSelectColumnsLabel();
 			this.columnSelectEventSource = generalOptions.addColumnSelectListener(this);
 		}
 		JPanel p = new JPanel();
@@ -113,6 +115,19 @@ public class ExportOptionsPanel
 		
 		this.add(typePanel, BorderLayout.CENTER);
 		typeSelector.addActionListener(this);
+	}
+	
+	public void setQuerySql(String sql, WbConnection con)
+	{
+		this.query = sql;
+		this.dbConnection = con;
+		this.dataStoreColumns = null;
+		generalOptions.allowSelectColumns(true);
+		generalOptions.showRetrieveColumnsLabel();
+		if (this.columnSelectEventSource == null)
+		{
+			this.columnSelectEventSource = generalOptions.addColumnSelectListener(this);
+		}
 	}
 	
 	public void setIncludeSqlUpdate(boolean flag)
@@ -268,9 +283,36 @@ public class ExportOptionsPanel
 		}
 	}
 	
+	private void retrieveQueryColumns()
+	{
+		try
+		{
+			WbSwingUtilities.showWaitCursor(this);
+			this.dataStoreColumns = SqlUtil.getResultInfoFromQuery(this.query, this.dbConnection);
+			sqlOptions.setResultInfo(this.dataStoreColumns);
+		}
+		catch (Exception e)
+		{
+			this.dataStoreColumns = null;
+			LogMgr.logError("ExportOptionsPanel.retrieveQueryColumns()", "Could not retrieve query columns", e);
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(this);
+		}
+	}
+	
 	private void selectColumns()
 	{
+		if (this.dataStoreColumns == null)
+		{
+			if (this.query != null)
+			{
+				retrieveQueryColumns();
+			}
+		}
 		if (this.dataStoreColumns == null) return;
+		
 		if (this.columnSelectorPanel == null) 
 		{
 			this.columnSelectorPanel = new ColumnSelectorPanel(this.dataStoreColumns.getColumns());

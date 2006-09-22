@@ -23,7 +23,9 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ConnectionSelector;
+import workbench.gui.components.RunningJobIndicator;
 import workbench.interfaces.Connectable;
+import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.ToolWindow;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -34,12 +36,13 @@ import workbench.resource.Settings;
  */
 public class DbExplorerWindow
 	extends JFrame
-	implements WindowListener, Connectable, ToolWindow
+	implements WindowListener, Connectable, ToolWindow, DbExecutionListener
 {
 	private DbExplorerPanel panel;
 	private static int instanceCount = 0;
 	private boolean standalone;
 	protected ConnectionSelector connectionSelector;
+	protected RunningJobIndicator jobIndicator;
 	
 	public DbExplorerWindow(DbExplorerPanel aPanel)
 	{
@@ -56,6 +59,8 @@ public class DbExplorerWindow
 		this.setIconImage(ResourceMgr.getImage("Database").getImage());
 		this.setProfileName(aProfileName);
 		this.restorePosition();
+		this.jobIndicator = new RunningJobIndicator(this);
+		aPanel.setDbExecutionListener(this);
 		instanceCount ++;
 	}
 
@@ -94,6 +99,16 @@ public class DbExplorerWindow
 		});
 	}
 	
+	public void executionEnd(WbConnection conn, Object source)
+	{
+		jobIndicator.jobEnded();
+	}
+
+	public void executionStart(WbConnection conn, Object source)
+	{
+		jobIndicator.jobStarted();
+	}
+	
 	public void activateWindow()
 	{
 		this.setVisible(true);
@@ -105,7 +120,7 @@ public class DbExplorerWindow
     this.saveSettings();
 		this.disconnect();
 		this.panel.explorerWindowClosed();
-		this.hide();
+		this.setVisible(false);
 		this.dispose();
 	}
 	

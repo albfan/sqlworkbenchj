@@ -20,6 +20,7 @@ import javax.swing.event.ListDataListener;
 
 /**
  * A ComboBoxModel backed by a List 
+ * 
  * @author support@sql-workbench.net
  */
 public class ListComboBoxModel
@@ -32,6 +33,7 @@ public class ListComboBoxModel
 	
 	public ListComboBoxModel()
 	{
+		data = new ArrayList();
 	}
 	
 	public ListComboBoxModel(List l)
@@ -39,11 +41,6 @@ public class ListComboBoxModel
 		data = l;
 	}
 
-	public List getData()
-	{
-		return this.data;
-	}
-	
 	public void addListDataListener(ListDataListener l)
 	{
 		listener.add(l);

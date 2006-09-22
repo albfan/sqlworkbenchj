@@ -31,8 +31,6 @@ public class HighlightCurrentStatement
 	private boolean switchedOn = false;
 	private JCheckBoxMenuItem toggleMenu;
 
-	public static final AutoJumpNextStatement AUTO_JUMP_ACTION = new AutoJumpNextStatement();
-	
 	public HighlightCurrentStatement()
 	{
 		super();

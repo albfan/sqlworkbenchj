@@ -23,6 +23,7 @@ import workbench.db.datacopy.DataCopier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.profiles.ProfileKey;
+import workbench.storage.ResultInfo;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;

@@ -63,8 +63,6 @@ public class ToolTipRenderer
 
 	private boolean isPrinting = false;
 	
-	public static final ToolTipRenderer DEFAULT_TEXT_RENDERER = new ToolTipRenderer();
-	
 	private Insets focusedInsets;
 
 	protected boolean selected;

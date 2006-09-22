@@ -73,6 +73,21 @@ public class WbExportTest extends TestCase
 		super.tearDown();
 	}
 
+	public void testInvalidFile()
+	{
+		try
+		{
+			File exportFile = new File("/this/is/expected/to/fail/no_export.txt");
+			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=blob_test");
+			assertEquals("Export did not fail", result.isSuccess(), false);
+			System.out.println(result.getMessageBuffer().toString());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	public void testTextExportCompressed() 
 	{
 		try

@@ -492,6 +492,8 @@ public class DataStore
 			this.updateTable = tbl.createCopy();
 			ColumnIdentifier[] columns = meta.getColumnIdentifiers(tbl);
 			
+			int realColumns = 0;
+			
 			if (columns != null && columns.length > 0)
 			{
 				for (int i=0; i < columns.length; i++)
@@ -502,9 +504,15 @@ public class DataStore
 						this.resultInfo.setUpdateable(index, true);
 						this.resultInfo.setIsPkColumn(index, columns[i].isPkColumn());
 						this.resultInfo.setIsNullable(index, columns[i].isNullable());
+						realColumns++;
 					}
 				}
 			}
+			if (realColumns == 0)
+			{
+				LogMgr.logWarning("DataStore.setUpdateTable()", "No columns from the table " + this.updateTable.getTableExpression() + " could be found in the current result set!");
+			}
+			
 			this.resultInfo.setUpdateTable(tbl);
 		}
 		catch (Exception e)

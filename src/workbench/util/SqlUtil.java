@@ -11,7 +11,6 @@
  */
 package workbench.util;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -29,12 +28,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
-import workbench.sql.formatter.Token;
+import workbench.storage.ResultInfo;
 
 public class SqlUtil
 {
@@ -169,9 +169,28 @@ public class SqlUtil
 	{
 		if (conn == null) return null;
 
+		ResultInfo info = getResultInfoFromQuery(sql, conn);
+		if (info == null) return null;
+		
 		ResultSet rs = null;
 		Statement stmt = null;
-		ArrayList result = null;
+		int count = info.getColumnCount();
+		ArrayList result = new ArrayList(count);
+		for (int i = 0; i < count; i++)
+		{
+			result.add(info.getColumn(i));
+		}
+		return result;
+	}
+
+	public static ResultInfo getResultInfoFromQuery(String sql, WbConnection conn)
+		throws SQLException
+	{
+		if (conn == null) return null;
+
+		ResultSet rs = null;
+		Statement stmt = null;
+		ResultInfo result = null;
 
 		try
 		{
@@ -179,17 +198,13 @@ public class SqlUtil
 			stmt.setMaxRows(1);
 			rs = stmt.executeQuery(sql);
 			ResultSetMetaData meta = rs.getMetaData();
-			int count = meta.getColumnCount();
-			result = new ArrayList(count);
-			for (int i=0; i < count; i++)
+			result = new ResultInfo(meta, conn);
+			List tables = getTables(sql, false);
+			if (tables.size() == 1)
 			{
-				String name = meta.getColumnName(i + 1);
-				if (name == null) name = meta.getColumnLabel(i + 1);
-				if (name == null) name = "Col" + (i + 1);
-
-				int type = meta.getColumnType(i + 1);
-				ColumnIdentifier col = new ColumnIdentifier(name, type);
-				result.add(col);
+				String table = (String)tables.get(0);
+				TableIdentifier tbl = new TableIdentifier(table);
+				result.setUpdateTable(tbl);
 			}
 		}
 		finally
@@ -198,7 +213,7 @@ public class SqlUtil
 		}
 		return result;
 	}
-
+	
 	private static String getTableDefinition(String table, boolean keepAlias)
 	{
 		if (keepAlias) return table;
@@ -331,38 +346,65 @@ public class SqlUtil
 
 				boolean collectTable = true;
 				StringBuffer currentTable = new StringBuffer();
+				int bracketCount = 0;
+				boolean subSelect = false;
+				int subSelectBracketCount = -1;
 				
 				while (t != null)
 				{
 					String s = t.getContents();
-					if (JOIN_KEYWORDS.contains(s))
+					
+					if (s.equals("SELECT") && bracketCount > 0)
 					{
-						collectTable = true;
-						if (currentTable.length() > 0)
+						subSelect = true;
+						subSelectBracketCount = bracketCount;
+					}
+					
+					if ("(".equals(s))
+					{
+						bracketCount ++;
+					}
+					else if (")".equals(s))
+					{
+						if (subSelect && bracketCount == subSelectBracketCount)
 						{
+							subSelect = false;
+						}
+						bracketCount --;
+						t = (SQLToken)lex.getNextToken(false, false);
+						continue;
+					}
+					
+					if (!subSelect)
+					{
+						if (JOIN_KEYWORDS.contains(s))
+						{
+							collectTable = true;
+							if (currentTable.length() > 0)
+							{
+								result.add(getTableDefinition(currentTable.toString(), includeAlias));
+								currentTable = new StringBuffer();
+							}
+						}
+						else if (",".equals(s))
+						{
+								collectTable = true;
+								result.add(getTableDefinition(currentTable.toString(), includeAlias));
+								currentTable = new StringBuffer();
+						}
+						else if ("ON".equals(s))
+						{
+							collectTable = false;
 							result.add(getTableDefinition(currentTable.toString(), includeAlias));
 							currentTable = new StringBuffer();
 						}
-					}
-					else if (",".equals(s))
-					{
-							collectTable = true;
-							result.add(getTableDefinition(currentTable.toString(), includeAlias));
-							currentTable = new StringBuffer();
-					}
-					else if ("ON".equals(s))
-					{
-						collectTable = false;
-						result.add(getTableDefinition(currentTable.toString(), includeAlias));
-						currentTable = new StringBuffer();
-					}
-					else if (collectTable && !s.equals("("))
-					{
-						int size = currentTable.length();
-						if (size > 0 && !s.equals(".") && currentTable.charAt(size-1) != '.') currentTable.append(' ');
-						currentTable.append(s);
-					}
-					
+						else if (collectTable && !s.equals("("))
+						{
+							int size = currentTable.length();
+							if (size > 0 && !s.equals(".") && currentTable.charAt(size-1) != '.') currentTable.append(' ');
+							currentTable.append(s);
+						}
+					}					
 					t = (SQLToken)lex.getNextToken(false, false);
 				}
 				

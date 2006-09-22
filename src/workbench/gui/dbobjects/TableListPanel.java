@@ -56,7 +56,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
-import workbench.db.ColumnIdentifier;
 
 import workbench.db.DbMetadata;
 import workbench.db.ObjectScripter;
@@ -96,8 +95,8 @@ import workbench.WbManager;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.sql.PanelContentSender;
 import workbench.interfaces.CriteriaPanel;
+import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.Reloadable;
-import workbench.interfaces.Resettable;
 import workbench.util.WbWorkspace;
 import workbench.util.WbProperties;
 
@@ -248,7 +247,7 @@ public class TableListPanel
 
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.tableSource);
 		this.tableData = new TableDataPanel();
-
+		
 		this.importedKeys = new WbTable();
 		this.importedKeys.setAdjustToColumnLabel(false);
 		WbScrollPane scroll = new WbScrollPane(this.importedKeys);
@@ -405,6 +404,14 @@ public class TableListPanel
 		tableList.addPopupMenu(this.deleteTableItem, false);
 	}
 
+	public void setDbExecutionListener(DbExecutionListener l)
+	{
+		if (l != null)
+		{
+			tableData.addDbExecutionListener(l);
+		}		
+	}
+	
 	private void setupActionMap()
 	{
 		InputMap im = new ComponentInputMap(this);

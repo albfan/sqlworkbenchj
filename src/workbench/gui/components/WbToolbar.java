@@ -67,6 +67,7 @@ public class WbToolbar extends JToolBar
 	{
 		this.addSeparator(this.getComponentCount());
 	}
+
 	public void addSeparator(int index)
 	{
 		if (isRollover())

@@ -387,7 +387,8 @@ public class WbSwingUtilities
 			input.selectAll();
 		}
 		input.addMouseListener(new TextComponentMouseListener());
-		EventQueue.invokeLater(new Runnable() {
+		EventQueue.invokeLater(new Runnable() 
+		{
 			public void run()
 			{
 				input.grabFocus();
@@ -489,7 +490,7 @@ public class WbSwingUtilities
 		{
 			public void windowActivated(WindowEvent evt)
 			{
-				SwingUtilities.invokeLater(new Runnable()
+				EventQueue.invokeLater(new Runnable()
 				{
 					public void run()
 					{

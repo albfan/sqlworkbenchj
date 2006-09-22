@@ -16,7 +16,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -47,9 +46,9 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.ConnectionSelector;
-import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbToolbar;
+import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -113,6 +112,7 @@ public class DbExplorerPanel
 		try
 		{
 			tables = new TableListPanel(aParent);
+			setDbExecutionListener(aParent);
 			procs = new ProcedureListPanel(aParent);
 			this.searchPanel = new TableSearchPanel(tables);
 			tabPane = new WbTabbedPane(JTabbedPane.TOP);
@@ -167,6 +167,14 @@ public class DbExplorerPanel
 		}
 	}
 
+	public void setDbExecutionListener(DbExecutionListener l)
+	{
+		if (this.tables != null)
+		{
+			tables.setDbExecutionListener(l);
+		}
+	}
+	
 	public void setSwitchCatalog(boolean flag)
 	{
 		this.switchCatalog = flag && Settings.getInstance().getSwitchCatalogInExplorer();
@@ -852,12 +860,9 @@ public class DbExplorerPanel
 		this.catalogFromWorkspace = null;
 		try
 		{
-//			if (Settings.getInstance().getStoreExplorerSchema())
-//			{
-				WbProperties p = w.getSettings();
-				this.schemaFromWorkspace = p.getProperty("dbexplorer" + index + ".currentschema", null);
-				this.catalogFromWorkspace = p.getProperty("dbexplorer" + index + ".currentcatalog", null);
-//			}
+			WbProperties p = w.getSettings();
+			this.schemaFromWorkspace = p.getProperty("dbexplorer" + index + ".currentschema", null);
+			this.catalogFromWorkspace = p.getProperty("dbexplorer" + index + ".currentcatalog", null);
 			tables.readFromWorkspace(w, index);
 			searchPanel.readFromWorkspace(w, index);
 			procs.readFromWorkspace(w, index);

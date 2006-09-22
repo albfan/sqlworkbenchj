@@ -21,6 +21,7 @@ import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
+import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 
 import workbench.gui.components.ExtensionFileFilter;
@@ -55,12 +56,18 @@ public class ExportFileDialog
 	{
 		this(caller, null);
 	}
+	
 	public ExportFileDialog(Component caller, ResultInfo columns)
 	{
 		this.exportOptions = new ExportOptionsPanel(columns);
 		this.parentComponent = caller;
 	}
 
+	public void setQuerySql(String sql, WbConnection con)
+	{
+		this.exportOptions.setQuerySql(sql, con);
+	}
+	
 	public List getColumnsToExport()
 	{
 		return this.exportOptions.getColumnsToExport();
@@ -187,8 +194,8 @@ public class ExportFileDialog
 		}
 		this.exportOptions.addPropertyChangeListener("exportType", this);
 		this.restoreSettings();
-		this.exportOptions.setIncludeSqlUpdate(includeSqlUpdate);
-		this.exportOptions.setIncludeSqlDeleteInsert(includeSqlDeleteInsert);
+		//this.exportOptions.setIncludeSqlUpdate(includeSqlUpdate);
+		//this.exportOptions.setIncludeSqlDeleteInsert(includeSqlDeleteInsert);
 			
 		chooser.setAccessory(this.exportOptions);
 		

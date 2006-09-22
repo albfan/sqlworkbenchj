@@ -62,6 +62,7 @@ import workbench.sql.VariablePool;
 import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 import workbench.gui.dialogs.WbSplash;
+import workbench.gui.filter.FilterDefinitionManager;
 import workbench.gui.lnf.LnFManager;
 import workbench.gui.profiles.ProfileKey;
 import workbench.util.FileDialogUtil;
@@ -645,6 +646,7 @@ public class WbManager
 		if (this.writeSettings && !this.isBatchMode()) 
 		{
 			Settings s = Settings.getInstance();
+			FilterDefinitionManager.getInstance().saveMRUList();
 			if (s != null) s.saveSettings();
 		}
 	}

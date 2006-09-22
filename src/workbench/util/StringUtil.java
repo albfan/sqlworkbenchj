@@ -37,7 +37,6 @@ public class StringUtil
 	public static final String LINE_TERMINATOR = System.getProperty("line.separator");
 	public static final String PATH_SEPARATOR = System.getProperty("path.separator");
 	public static final String FILE_SEPARATOR = System.getProperty("file.separator");
-	public static final StringBuffer EMPTY_STRINGBUFFER = new StringBuffer("");
 	public static final String EMPTY_STRING = "";
 
 	public static final String ISO_DATE_FORMAT = "yyyy-MM-dd";

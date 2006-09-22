@@ -169,6 +169,7 @@ public class ObjectScripter
 					String object = (String)key;
 					TableIdentifier tbl = new TableIdentifier(object);
 					tbl.adjustCase(this.dbConnection);
+					tbl.setType(type);
 					if (TYPE_TABLE.equalsIgnoreCase(type))
 					{
 						source = meta.getTableSource(tbl, true, false);

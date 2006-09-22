@@ -18,14 +18,10 @@ import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import java.util.Properties;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -37,14 +33,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.gui.actions.SelectKeyColumnsAction;
 import workbench.gui.components.FlatButton;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Resettable;
@@ -62,11 +53,15 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.interfaces.JobErrorHandler;
 import java.awt.Cursor;
 import java.awt.EventQueue;
+import java.util.ArrayList;
+import java.util.Collections;
+import workbench.gui.actions.FilterPickerAction;
+import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.DbExecutionNotifier;
 import workbench.util.WbWorkspace;
 
 
@@ -77,7 +72,7 @@ import workbench.util.WbWorkspace;
  */
 public class TableDataPanel
   extends JPanel
-	implements Reloadable, ActionListener, Interruptable, TableDeleteListener, Resettable
+	implements Reloadable, ActionListener, Interruptable, TableDeleteListener, Resettable, DbExecutionNotifier
 {
 	private WbConnection dbConnection;
 	protected DwPanel dataDisplay;
@@ -100,6 +95,7 @@ public class TableDataPanel
 	private Image loadingImage;
 	private Object retrieveLock = new Object();
 	protected StopAction cancelRetrieve;
+	private List execListener;
 
 	public TableDataPanel() throws Exception
 	{
@@ -194,6 +190,10 @@ public class TableDataPanel
 		mytoolbar.add(this.dataDisplay.getDeleteRowAction());
 		mytoolbar.addSeparator();
 		mytoolbar.add(this.dataDisplay.getTable().getFilterAction());
+		
+		FilterPickerAction p = new FilterPickerAction(dataDisplay.getTable());
+		mytoolbar.add(p);
+		mytoolbar.addSeparator();
 		mytoolbar.add(this.dataDisplay.getTable().getResetFilterAction());
 
 		this.add(dataDisplay, BorderLayout.CENTER);
@@ -289,7 +289,7 @@ public class TableDataPanel
 
 		try
 		{
-			this.dbConnection.executionStart(null, this);
+			fireDbExecStart();
 			rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountCancel"));
 			
 			rowCountRetrieveStmt = this.dbConnection.createStatement();
@@ -324,7 +324,7 @@ public class TableDataPanel
 			SqlUtil.closeAll(rs, rowCountRetrieveStmt);
 			rowCountRetrieveStmt = null;
 			this.reloadAction.setEnabled(true);
-			this.dbConnection.executionEnd(null, this);
+			fireDbExecEnd();
 			rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountButton"));
 		}
 		return rowCount;
@@ -416,6 +416,7 @@ public class TableDataPanel
 
 	protected void retrieveStart()
 	{
+		fireDbExecStart();
 		synchronized (this.retrieveLock)
 		{
 			this.retrieveRunning = true;
@@ -428,11 +429,13 @@ public class TableDataPanel
 		{
 			this.retrieveRunning = false;
 		}
+		fireDbExecEnd();
 	}
 
 	protected void dbUpdateStart()
 	{
 		this.reloadAction.setEnabled(false);
+		fireDbExecStart();
 		synchronized (this.retrieveLock)
 		{
 			this.updateRunning = true;
@@ -451,6 +454,7 @@ public class TableDataPanel
 			{
 				this.updateRunning = false;
 			}
+			fireDbExecEnd();
 		}
 	}
 
@@ -717,4 +721,40 @@ public class TableDataPanel
 		}
 	}
 
+	public void addDbExecutionListener(DbExecutionListener l)
+	{
+		if (this.execListener == null) this.execListener = Collections.synchronizedList(new ArrayList());
+		this.execListener.add(l);
+	}
+
+	public void removeDbExecutionListener(DbExecutionListener l)
+	{
+		if (this.execListener == null) return;
+		this.execListener.remove(l);
+	}
+
+	protected synchronized void fireDbExecStart()
+	{
+		this.dbConnection.executionStart(null, this);		
+		if (this.execListener == null) return;
+		int count = this.execListener.size();
+		for (int i=0; i < count; i++)
+		{
+			DbExecutionListener l = (DbExecutionListener)this.execListener.get(i);
+			if (l != null) l.executionStart(this.dbConnection, this);
+		}
+	}
+	
+	protected synchronized void fireDbExecEnd()
+	{
+		this.dbConnection.executionEnd(null, this);
+		if (this.execListener == null) return;
+		int count = this.execListener.size();
+		for (int i=0; i < count; i++)
+		{
+			DbExecutionListener l = (DbExecutionListener)this.execListener.get(i);
+			if (l != null) l.executionEnd(this.dbConnection, this);
+		}
+	}
+	
 }
