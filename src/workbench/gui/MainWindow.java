@@ -53,6 +53,7 @@ import workbench.db.WbConnection;
 import workbench.gui.actions.AboutAction;
 import workbench.gui.actions.ConfigureShortcutsAction;
 import workbench.gui.actions.ShowManualAction;
+import workbench.gui.components.RunningJobIndicator;
 import workbench.util.ExceptionUtil;
 import workbench.gui.actions.AddMacroAction;
 import workbench.gui.actions.AddTabAction;
@@ -153,8 +154,7 @@ public class MainWindow
 	private AddMacroAction createMacro;
 	private ManageMacroAction manageMacros;
 	private List explorerWindows = new ArrayList();
-
-	private int runningJobs = 0;
+	private RunningJobIndicator jobIndicator;
 
 	public MainWindow()
 	{
@@ -182,7 +182,7 @@ public class MainWindow
 
 		this.addWindowListener(this);
 		MacroManager.getInstance().addChangeListener(this);
-
+		this.jobIndicator = new RunningJobIndicator(this);
 		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
 	}
 
@@ -1370,10 +1370,10 @@ public class MainWindow
 	protected void updateWindowTitle()
 	{
 		StringBuffer title = new StringBuffer(50);
-		if (this.runningJobs > 0)
-		{
-			title.append("» ");
-		}
+//		if (this.runningJobs > 0)
+//		{
+//			title.append("» ");
+//		}
 		title.append(ResourceMgr.TXT_PRODUCT_NAME);
 
 		title.append("  [");
@@ -2514,8 +2514,7 @@ public class MainWindow
 
 	public void executionEnd(WbConnection conn, Object source)
 	{
-		this.runningJobs --;
-		this.updateWindowTitle();
+		jobIndicator.jobEnded();
 	}
 
 	public void executionStart(WbConnection conn, Object source)
@@ -2524,8 +2523,7 @@ public class MainWindow
 		{
 			this.saveWorkspace();
 		}
-		this.runningJobs ++;
-		this.updateWindowTitle();
+		jobIndicator.jobStarted();
 	}
 
 	public void dragEnter(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
