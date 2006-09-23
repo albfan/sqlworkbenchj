@@ -12,7 +12,6 @@
 package workbench.gui.components;
 
 import java.awt.Color;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.Action;
@@ -20,8 +19,10 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JPopupMenu;
 import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.plaf.basic.BasicBorders;
 
 /**
  * @author support@sql-workbench.net
@@ -33,16 +34,10 @@ public class DropDownButton
 	private JPopupMenu popup;
 	private boolean popupVisible = false;
 	private Border menuBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
-
+	
 	public DropDownButton(String label)
 	{
 		super(label);
-		init();
-	}
-	
-	public DropDownButton(Action a)
-	{
-		super(a);
 		init();
 	}
 	
@@ -56,11 +51,16 @@ public class DropDownButton
 	{
 		setFocusable(false);
 		addActionListener(this);
-		setMargin(new Insets(1,5,1,5));
 	}
 
 	public void setDropDownMenu(JPopupMenu menu)
 	{
+		if (this.popup != null)
+		{
+			this.popup.removePopupMenuListener(this);
+			this.popup.setVisible(false);
+			this.popup.removeAll();
+		}
 		popup = menu;
 		popup.setBorder(this.menuBorder);
 		popup.addPopupMenuListener(this);

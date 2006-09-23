@@ -79,11 +79,13 @@ public class DataImporter
 	private long totalRows = 0;
 	private long updatedRows = 0;
 	private long insertedRows = 0;
-	private int currentImportRow = 0;
+	private long currentImportRow = 0;
 	private int mode = MODE_INSERT;
 	private boolean useBatch = false;
 	private boolean supportsBatch = false;
 	private boolean canCommitInBatch = true;
+	private boolean commitBatch = false;
+	
 	private boolean hasErrors = false;
 	private boolean hasWarnings = false;
 	private int reportInterval = 1;
@@ -112,6 +114,11 @@ public class DataImporter
 	private int batchSize = -1;
 	private ImportFileParser parser;
 
+	// Use for partial imports
+	private long startRow = 0;
+	private long endRow = Long.MAX_VALUE;
+	private boolean partialImportEnded = false;
+	
 	// Additional WHERE clause for UPDATE statements
 	private String whereClauseForUpdate;
 
@@ -146,8 +153,36 @@ public class DataImporter
 			this.parser = (ImportFileParser)producer;
 		}
 	}
+	
+	public void setStartRow(long row) 
+	{ 
+		if (row >= 0) this.startRow = row; 
+		else this.startRow = 0;
+	}
+	
+	public void setEndRow(long row) 
+	{ 
+		if (row >= 0) this.endRow = row; 
+		else this.endRow = Long.MAX_VALUE;
+	}
 
-	public void setCommitEvery(int aCount) { this.commitEvery = aCount; }
+	public void setCommitBatch(boolean flag)
+	{
+		this.commitBatch = flag;
+		if (flag)
+		{
+			this.commitEvery = 0;
+		}
+	}
+	public void setCommitEvery(int aCount) 
+	{ 
+		if (aCount > 0)
+		{
+			this.commitBatch = false;
+		}
+		this.commitEvery = aCount; 
+	}
+	
 	public int getCommitEvery() { return this.commitEvery; }
 
 	public boolean getContinueOnError() { return this.continueOnError; }
@@ -502,6 +537,18 @@ public class DataImporter
 		if (row.length != this.colCount) return;
 
 		currentImportRow++;
+		if (currentImportRow < startRow) return;
+		if (currentImportRow > endRow) 
+		{
+			LogMgr.logInfo("DataImporter.processRow()", "Import limit (" + this.endRow + ") reached. Stopping import");
+			String msg = ResourceMgr.getString("MsgPartialImportEnded");
+			msg = StringUtil.replace(msg, "%rowlimit%", Long.toString(endRow));
+			this.messages.append(msg);
+			this.messages.append('\n');
+			this.source.stop();
+			return;
+		}
+		
 		if (this.progressMonitor != null && this.reportInterval > 0 && (currentImportRow == 1 || currentImportRow % reportInterval == 0))
 		{
 			if (this.totalTables > 0)
@@ -579,7 +626,7 @@ public class DataImporter
 			this.messages.append(ResourceMgr.getString("ErrImportingRow") + " " + currentImportRow + "\n");
 			this.messages.append(ResourceMgr.getString("ErrImportErrorMsg") + " " + e.getMessage() + "\n");
 			this.messages.append(ResourceMgr.getString("ErrImportValues") + " " + this.getValueDisplay(row) + "\n");
-			this.messages.append("\n");
+			this.messages.append('\n');
 			if (!this.continueOnError) throw e;
 		}
 
@@ -603,11 +650,11 @@ public class DataImporter
 		{
 			try
 			{
+				// Oracle seems to have a problem with adding another SQL statement
+				// to the batch of a prepared Statement (works fine with PostgreSQL)
 				if (this.useBatch)
 				{
-					// Oracle seems to have a problem with adding another SQL statement
-					// to the batch of a prepared Statement (works fine with PostgreSQL)
-					if (this.canCommitInBatch)
+					if (canCommitInBatch)
 					{
 						PreparedStatement stmt = null;
 						if (this.isModeInsert())
@@ -1200,23 +1247,36 @@ public class DataImporter
 			}
 			this.updateStatement.clearBatch();
 		}
+		if (this.commitBatch && !this.dbConn.getAutoCommit())
+		{
+			this.dbConn.commit();
+		}
 	}
 
 	private void finishTable()
 		throws SQLException
 	{
+		boolean commitNeeded = !dbConn.getAutoCommit();
 		try
 		{
 			if (this.useBatch)
 			{
 				this.executeBatch();
+				
+				// If the batch is executed and committed, there is no 
+				// need to send another commit. In fact some DBMS don't like
+				// a commit or rollback if no transaction was started.
+				if (commitBatch) commitNeeded = false;
 			}
+			
 			this.closeStatements();
-			if (!this.dbConn.getAutoCommit())
+			
+			if (commitNeeded)
 			{
 				LogMgr.logDebug("DataImporter.finishTable()", this.getAffectedRows() + " row(s) imported. Committing changes");
 				this.dbConn.commit();
 			}
+			
 			this.messages.append(this.source.getMessages());
 			if (this.insertedRows > -1)
 			{
@@ -1232,7 +1292,7 @@ public class DataImporter
 		}
 		catch (SQLException e)
 		{
-			if (!this.dbConn.getAutoCommit())
+			if (commitNeeded)
 			{
 				try { this.dbConn.rollback(); } catch (Throwable ignore) {}
 			}
@@ -1264,7 +1324,7 @@ public class DataImporter
 		catch (Exception e)
 		{
 			// log all others...
-			LogMgr.logError("DataImporter.importFinished()", "Error commiting changes", e);
+			LogMgr.logError("DataImporter.importFinished()", "Error when commiting changes", e);
 			this.messages.append(ExceptionUtil.getDisplay(e));
 		}
 		finally
@@ -1299,6 +1359,11 @@ public class DataImporter
 	public void importCancelled()
 	{
 		if (!isRunning) return;
+		if (this.partialImportEnded)
+		{
+			this.importFinished();
+			return;
+		}
 		
 		try
 		{

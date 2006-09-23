@@ -25,6 +25,7 @@ public interface RowDataProducer
 	void setReceiver(RowDataReceiver receiver);
 	void start() throws Exception;
 	void cancel();
+	void stop();
 	String getMessages();
 	void setAbortOnError(boolean flag);
 	void setErrorHandler(JobErrorHandler handler);

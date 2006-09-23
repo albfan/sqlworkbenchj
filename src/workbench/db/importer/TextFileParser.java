@@ -71,6 +71,7 @@ public class TextFileParser
 
 	private boolean withHeader = true;
 	private boolean cancelImport = false;
+	private boolean regularStop = false;
 	private boolean emptyStringIsNull = false;
 	private boolean trimValues = false;
 
@@ -370,10 +371,18 @@ public class TextFileParser
 		}
 	}
 
+	public void stop()
+	{
+		LogMgr.logDebug("TextFileParser.stop()", "Stopping import");
+		this.cancelImport = true;
+		this.regularStop = true;
+	}
+	
 	public void cancel()
 	{
 		LogMgr.logDebug("TextFileParser.cancel()", "Cancelling import");
 		this.cancelImport = true;
+		this.regularStop = false;
 	}
 
 	public void setDateFormat(String aFormat)
@@ -418,7 +427,7 @@ public class TextFileParser
 		this.converter.setDecimalCharacter(this.decimalChar);
 		this.receiver.setTableCount(-1); // clear multi-table flag in receiver
 		this.receiver.setCurrentTable(-1);
-
+		
 		try
 		{
 			if (this.sourceDir != null)
@@ -428,7 +437,7 @@ public class TextFileParser
 		}
 		finally
 		{
-			if (this.cancelImport)
+			if (this.cancelImport && !regularStop)
 			{
 				this.receiver.importCancelled();
 			}
@@ -498,6 +507,7 @@ public class TextFileParser
 		throws Exception
 	{
 		this.cancelImport = false;
+		this.regularStop = false;
 		
 		File f = new File(this.filename);
 		
@@ -612,6 +622,7 @@ public class TextFileParser
 					}
 					catch (IOException e)
 					{
+						LogMgr.logError("TextFileParser.processOneFile()", "Error reading source file", e);
 						line = null;
 					}
 					continue;
@@ -653,6 +664,7 @@ public class TextFileParser
 						}
 						catch (IOException e)
 						{
+							LogMgr.logError("TextFileParser.processOneFile()", "Error reading source file", e);
 							line = null;
 						}
 						continue;
@@ -756,7 +768,7 @@ public class TextFileParser
 				}
 				catch (Exception e)
 				{
-					LogMgr.logError("TextFileParser.start()", "Error sending line " + importRow + ". Aborting...", e);
+					LogMgr.logError("TextFileParser.processOneFile()", "Error sending line " + importRow + ". Aborting...", e);
 					throw e;
 				}
 
@@ -766,10 +778,9 @@ public class TextFileParser
 				}
 				catch (IOException e)
 				{
+					LogMgr.logError("TextFileParser.processOneFile()", "Error reading source file", e);
 					line = null;
 				}
-
-				if (this.cancelImport) break;
 			}
 		}
 		finally

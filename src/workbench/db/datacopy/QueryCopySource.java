@@ -30,6 +30,7 @@ public class QueryCopySource
 {
 	private RowDataReceiver receiver;
 	private boolean keepRunning = true;
+	private boolean regularStop = false;
 	private WbConnection sourceConnection;
 	private Statement retrieveStatement;
 	private String retrieveSql;
@@ -50,14 +51,14 @@ public class QueryCopySource
 		throws Exception
 	{
 		ResultSet rs = null;
-//		Statement stmt = null;
+		this.keepRunning = true;
+		this.regularStop = false;
 		try
 		{
 			this.retrieveStatement = this.sourceConnection.createStatementForQuery();
 			rs = this.retrieveStatement.executeQuery(this.retrieveSql);
 			ResultInfo info = new ResultInfo(rs.getMetaData(), this.sourceConnection);
 			int colCount = info.getColumnCount();
-			//Object[] rowData = new Object[colCount];
 			RowData row = new RowData(colCount);
 			row.setUseNullValueObject(false);
 			while (this.keepRunning && rs.next())
@@ -70,11 +71,6 @@ public class QueryCopySource
 				// more flexible when copying from Oracle
 				// to other systems
 				row.read(rs, info);
-//				for (int i=0; i < colCount; i++)
-//				{
-//					if (!keepRunning) break;
-//					rowData[i] = rs.getObject(i + 1);
-//				}
 				if (!keepRunning) break;
 				try
 				{
@@ -89,7 +85,7 @@ public class QueryCopySource
 			// if keepRunning == false, cancel() was
 			// called and we have to tell that the Importer
 			// in order to do a rollback
-			if (this.keepRunning) 
+			if (this.keepRunning || regularStop) 
 			{
 				this.receiver.importFinished();
 			}
@@ -105,6 +101,12 @@ public class QueryCopySource
 		}
 	}
 
+	public void stop()
+	{
+		this.regularStop = true;
+		cancel();
+	}
+	
 	public void cancel()
 	{
 		this.keepRunning = false;

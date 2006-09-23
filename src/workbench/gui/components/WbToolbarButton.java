@@ -25,7 +25,6 @@ public class WbToolbarButton
 	extends WbButton
 {
 	public static final Insets MARGIN = new Insets(1,1,1,1);
-	private Icon additionalIcon;
 	
 	public WbToolbarButton()
 	{
@@ -55,21 +54,6 @@ public class WbToolbarButton
 		super.setAction(a);
 		this.setMargin(MARGIN);
 		this.setText(null);
-	}
-	
-	public Dimension getPreferredSize()
-	{
-		Dimension result = super.getPreferredSize();
-		if (this.additionalIcon != null)
-		{
-			result.setSize(result.getWidth() + 16, result.getHeight());
-		}
-		return result;
-	}
-	
-	public void setSecondIcon(Icon i)
-	{
-		this.additionalIcon = i;
 	}
 	
 }

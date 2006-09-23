@@ -50,6 +50,7 @@ public class WbImport
 	public static final String ARG_TIMESTAMP_FORMAT = "timestampformat";
 	public static final String ARG_DECCHAR = "decimal";
 	public static final String ARG_COMMIT = "commitevery";
+	public static final String ARG_COMMIT_BATCH = "commitbatch";
 	public static final String ARG_CONTAINSHEADER = "header";
 	public static final String ARG_ENCODING = "encoding";
 	public static final String ARG_FILECOLUMNS = "filecolumns";
@@ -77,6 +78,8 @@ public class WbImport
 	public static final String ARG_CREATE_TABLE = "createtarget";
 	public static final String ARG_BLOB_ISFILENAME = "blobisfilename";
 	public static final String ARG_MULTI_LINE = "multiline";
+	public static final String ARG_START_ROW = "startrow";
+	public static final String ARG_END_ROW = "endrow";
 	
 	private ArgumentParser cmdLine;
 
@@ -119,6 +122,9 @@ public class WbImport
 		cmdLine.addArgument(ARG_CREATE_TABLE);
 		cmdLine.addArgument(ARG_BLOB_ISFILENAME);
 		cmdLine.addArgument(ARG_MULTI_LINE);
+		cmdLine.addArgument(ARG_START_ROW);
+		cmdLine.addArgument(ARG_END_ROW);
+		cmdLine.addArgument(ARG_COMMIT_BATCH);
 		this.isUpdatingCommand = true;
 	}
 
@@ -333,20 +339,6 @@ public class WbImport
 					}
 				}
 
-//				if (!header && filecolumns == null)
-//				{
-//					result.addMessage(ResourceMgr.getString("ErrHeaderOrColumnDefRequired"));
-//					result.setFailure();
-//					return result;
-//				}
-//
-//				if (!header && importcolumns != null && filecolumns == null)
-//				{
-//					result.addMessage(ResourceMgr.getString("ErrImportNoFileColumns"));
-//					result.setFailure();
-//					return result;
-//				}
-
 				if (filecolumns == null)
 				{
 					// read column definition from header line
@@ -513,7 +505,19 @@ public class WbImport
 		{
 			imp.setUseBatch(true);
 			imp.setBatchSize(queueSize);
+			if (cmdLine.isArgPresent(ARG_COMMIT_BATCH))
+			{
+				// this will disable the commitEvery property
+				imp.setCommitBatch(cmdLine.getBoolean(ARG_COMMIT_BATCH, false));
+			}
 		}
+		
+		int startRow = cmdLine.getIntValue(ARG_START_ROW, -1);
+		if (startRow > 0) imp.setStartRow(startRow);
+		
+		int endRow = cmdLine.getIntValue(ARG_END_ROW, -1);
+		if (endRow > 0) imp.setEndRow(endRow);
+		
 		try
 		{
 			imp.startImport();

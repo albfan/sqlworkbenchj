@@ -47,13 +47,13 @@ public class FilterPickerAction
 {
 	private WbTable client;
 	private DropDownButton dropDownButton;
+	
 	public FilterPickerAction(WbTable aClient)
 	{
 		super();
 		this.setClient(aClient);
-		this.setMenuText("");
+		this.initMenuDefinition("MnuTxtPickFilter");
 		this.setIcon(ResourceMgr.getImage("dropdown"));
-		initializeShortcut();
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		FilterDefinitionManager mgr = FilterDefinitionManager.getInstance();
 		mgr.addPropertyChangeListener(this);
@@ -105,19 +105,17 @@ public class FilterPickerAction
 
 	public JButton getToolbarButton(boolean createNew)
 	{
-    JButton result;
+    JButton result = null;
 		if (this.dropDownButton == null || createNew)
 		{
-      DropDownButton b = new DropDownButton(ResourceMgr.getImage("dropdown"))
-			{
-				public void setBorder(Border b)
-				{
-					super.setBorder(WbSwingUtilities.EMPTY_BORDER);
-				}
-			};
+      DropDownButton b = new DropDownButton(ResourceMgr.getImage("dropdown"));
 			b.setAction(this);
+			b.setText(null);
 			b.setMnemonic(0);
-			b.setMaximumSize(new Dimension(8,16));
+			Dimension d = new Dimension(12,22);
+			b.setMaximumSize(d);
+			b.setPreferredSize(d);
+			b.setMinimumSize(d);
       if (this.dropDownButton == null) this.dropDownButton = b;
       result = b;
 		}

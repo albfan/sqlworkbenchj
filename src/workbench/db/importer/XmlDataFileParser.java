@@ -85,6 +85,7 @@ public class XmlDataFileParser
 	private boolean isNull = false;
 	private StrBuffer chars;
 	private boolean keepRunning;
+	private boolean regularStop;
 	private String rowTag = XmlRowDataConverter.LONG_ROW_TAG;
 	private String columnTag = XmlRowDataConverter.LONG_COLUMN_TAG;
 	
@@ -326,6 +327,9 @@ public class XmlDataFileParser
 	{
 		File f = new File(this.inputFile);
 		
+		this.keepRunning = true;
+		this.regularStop = false;
+			
 		this.fileHandler.setMainFile(f, this.encoding);
 		
 		// readTableDefinition relies on the fileHandler, so this 
@@ -349,16 +353,20 @@ public class XmlDataFileParser
 		Reader in = null;
 		try
 		{
-			//in = new FileInputStream(this.inputFile);
 			in = this.fileHandler.getMainFileReader();
 			InputSource source = new InputSource(in);
-			this.keepRunning = true;
 			saxParser.parse(source, this);
 		}
 		catch (ParsingInterruptedException e)
 		{
-			this.receiver.importCancelled();
-			throw e;
+			if (this.regularStop)
+			{
+				this.receiver.importFinished();
+			}
+			else
+			{
+				this.receiver.importCancelled();
+			}
 		}
 		catch (Exception e)
 		{
@@ -437,30 +445,27 @@ public class XmlDataFileParser
 	public void start()
 		throws Exception
 	{
-		try
+		if (this.sourceDirectory == null)
 		{
-			this.keepRunning = true;
-			if (this.sourceDirectory == null)
-			{
-				processOneFile();
-			}
-			else 
-			{
-				processDirectory();
-			}
-			this.receiver.importFinished();
+			processOneFile();
 		}
-		catch (Exception e)
+		else 
 		{
-			//LogMgr.logError("XmlDataFileParser.start()", "Error during parsing", e);
-			this.receiver.importCancelled();
-			throw e;
+			processDirectory();
 		}
+		this.receiver.importFinished();
 	}
 
+	public void stop()
+	{
+		this.keepRunning = false;
+		this.regularStop = true;
+	}
+	
 	public void cancel()
 	{
 		this.keepRunning = false;
+		this.regularStop = false;
 	}
 
 	private void clearRowData()
