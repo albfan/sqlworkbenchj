@@ -691,38 +691,21 @@ Done.</programlisting>
 
 		<para>
 			Once the data has been retrieved from the database, it can be
-			edited directly in the table. The &wb-productname; assumes that enough
+			edited directly in the table. &wb-productname; assumes that enough
 			columns have been retrieved from the table so that at a unique
 			identifier is available to identify the rows to be updated.
 		</para>
 
 		<para>
-			If you have defined primary keys in your database schema, and they
-			are part of the result set, the primary key columns will be used for the
-			where statements for <literal>UPDATE</literal> and <literal>DELETE</literal>. If no primary key columns are
-			found, the JDBC driver is asked for a <emphasis>best row identifier</emphasis>. If
-			that doesn&#39;t return any information, the original values of all
-			columns in the result set will be used to restrict <literal>DELETE</literal>&#39;s and
-			<literal>UPDATE</literal>&#39;s
+			If you have primary keys defined for the underlying tables, those primary key columns will be used for the
+			<literal>WHERE</literal> statements for <literal>UPDATE</literal> and <literal>DELETE</literal>. 
+			If no primary key columns are found, the JDBC driver is asked for a <emphasis>best row identifier</emphasis>. If
+			that doesn&#39;t return any information, your defined <link linkend="">PK Mapping</link> will 
+			be queried. If still no PK columns can be found you will be prompted to select
+			the key columns based on the current result set.
 		</para>
       
-		<para>
-			After a <literal>SELECT</literal> statement has finished, &wb-productname; analyzes
-			the SQL statement and tries to find out which tables are part of the result.
-			If only one table was used in the <literal>FROM</literal> list, the primary key
-			definition for that table is automatically retrieved from the server. On slow
-			network connections (or databases) this can take some time. If you don't need the automatic
-			retrieval, you can turn it off in the <link linkend="profile-ignore-disable-auto-edit">
-			connection profile</link>.
-		</para>
-		<para>
-			The adavantage of the automatic check is, that you do not need to supply 
-			the primary key information for the base table.
-			If the automatic check is disabled or if you have more then one table
-			in the select list, you will be prompted for the primary key to 
-			be used for updating your changes.
-		</para>
-
+		<!--
 		<para>To enter the Edit mode, choose
 		<menuchoice><guimenu>Data</guimenu><guimenuitem>Enable Data Edit</guimenuitem></menuchoice>
 		from the main menu. The toolbar icon will indicate the edit mode by
@@ -735,41 +718,55 @@ Done.</programlisting>
 			To create a copy of the currently selected row choose
 			<menuchoice><guimenu>Data</guimenu><guimenuitem>Copy row</guimenuitem></menuchoice>
 		</para>
-
+		-->
+		
 		<para>
 			The changes will not be saved to the database until you choose
 			<menuchoice><guimenu>Data</guimenu><guimenuitem>Save</guimenuitem></menuchoice>.
 			If the update is successful (no database errors) a <literal>COMMIT</literal> will be
-			sent to the database automatically. If an error is reported during the
+			sent to the database automatically (if needed). If your <literal>SELECT</literal> was based 
+			on more than one table, you will be prompted to specify which table should be 
+			updated. Only columns for that table will be included in the <litera>UPDATE</litera> or 
+			<literal>INSERT</literal> statements.
+			If no primary key can be found for the update table, you will be prompted to select the 
+			columns that should be used to uniquel identify a row in the update table.
+		</para>
+		
+		<para>
+			If an error is reported during the
 			update, a <literal>ROLLBACK</literal> will be sent to the database. The <literal>COMMIT</literal>
 			or <literal>ROLLBACK</literal> will only be sent if <link linkend="profile-autocommit">autocommit</link> is turned off.
 		</para>
+		
 		<para>
 			Columns containing BLOB data will be displayed with a <guibutton>...</guibutton> button.
 			By clicking on that button, you can view the blob data, save it to a file or upload 
 			the content of a file to the DBMS. Please refer to <xref linkend="blob-support"/> 
 			for details.
 		</para>
-			
+		
+		<!--
 		<para>
 			Once you issue a new <literal>SELECT</literal> statement the edit mode will be
 			turned off again. If you try to enable the edit mode for a result set where more
 			than one table is involved, you will be prompted for the table that should
 			be updated.
 		</para>
-      
+    -->
+		
 		<para>
-			When editing, &wb-productname; highlights columns that are defined as <literal>NOT NULL</literal>
+			When editing, &wb-productname; will highlight columns that are defined as <literal>NOT NULL</literal>
 			in the database. You can turn this feature off, or change the color that is used in the 
 			<link linkend="options-required-field-color">options dialog</link>.
 		</para>
 			
-		<para>
+		<note>
 			When editing date, timestamp or time fields, the format specified 
 			in the <link linkend="options-date-format">options dialog</link> is used 
 			for parsing the entered value and converting that into the internal representation 
 			of a date. The value entered must match the format defined there.
-		</para>
+		</note>
+		
 	</section>
     
 	<section id="using-copy-clipboard">

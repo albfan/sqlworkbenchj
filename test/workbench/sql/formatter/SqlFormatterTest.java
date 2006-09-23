@@ -124,7 +124,7 @@ public class SqlFormatterTest extends TestCase
 			sql = "update x set (a,b) = (select x,y from k);";
 			f = new SqlFormatter(sql,50);
 			formatted = f.getFormattedSql();
-			expected = "UPDATE x\n   SET (a,b)  = (SELECT x, y FROM K);";
+			expected = "UPDATE x\n   SET (a,b)  = (SELECT x, y FROM k);";
 			assertEquals(expected, formatted.trim());
 		}
 		catch (Exception e)

@@ -76,9 +76,18 @@ public class GeneralExportOptionsPanel
 		timestampFormat.setText(format);
 	}
 	
+	public void showRetrieveColumnsLabel()
+	{
+		selectColumnsButton.setText(ResourceMgr.getString("LblRetrieveColumns"));
+	}
+	
+	public void showSelectColumnsLabel()
+	{
+		selectColumnsButton.setText(ResourceMgr.getString("LblSelectColumns"));
+	}
 	public void allowSelectColumns(boolean flag)
 	{
-		this.selectColumnsButton.setVisible(flag);
+		this.selectColumnsButton.setEnabled(flag);
 	}
 	
 	public Object addColumnSelectListener(ActionListener l)

@@ -93,8 +93,8 @@
 			should be ignored. To enable this, pass the parameter <literal>-ignoredroperrors=true</literal>
 			on the commandline. This works when connecting through a profile or through a full
 			connection specification. If this parameter is set to <literal>true</literal>
-			only a warning will be issued, but any (!) error reported from the DBMS will
-			be ignored.
+			only a warning will be issued, but any error reported from the DBMS when 
+			executing a DROP command will be ignored.
 		</para>
 	</section>
 	
@@ -142,8 +142,10 @@
 		<title>Controlling console output during batch execution</title>
 		
 		<para>
+			<!--
 			When running &wb-productname; in batch mode, it is recommended that
 			the <link linkend="options-log-console">logging to the console</link> is disabled.
+			-->
 			If you are running <literal>SELECT</literal> statements in your script without "using" 
 			the data through an <link linkend="command-export"><literal>WbExport</literal></link>,
 			you can optionally display the results to the console using the parameter 
@@ -179,7 +181,7 @@
 		<title>Setting configuration properties</title>
 		<para>
 			When running &wb-productname; in batch mode, with no <literal>workbench.settings</literal>
-			file, you can set any property by passing setting the property as a system property
+			file, you can set any property by passing the property as a system property
 			when starting the JVM. To change the loglevel to <literal>DEBUG</literal> you need
 			to pass <literal>-Dworkbench.log.level=DEBUG</literal> when starting the application:
 		</para>
@@ -215,7 +217,7 @@
 
 		<para><emphasis role="bold">Executing several scripts with a cleanup and failure script:</emphasis></para>
 		<programlisting>java -jar Workbench.jar
-     -script='c:/scripts/script1.sql','c:/scripst/script2.sql'
+     -script='c:/scripts/script1.sql','c:/scripts/script2.sql'
      -profile=Firebird
      -AbortOnError=false
      -CleanupSuccess=commit.sql

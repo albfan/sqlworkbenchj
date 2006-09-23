@@ -17,7 +17,8 @@
 		would be the current database, for Oracle this is the user) can be selected.
 	</para>
   
-	<para>The displayed list can be filtered using the quick filter above the list. To filter
+	<para>
+		The displayed list can be filtered using the quick filter above the list. To filter
 		the list by the object name, simply enter the criteria in the filter field, and 
 		press <literal>ENTER</literal> or click the filter icon
 		<guiicon><inlinegraphic fileref="@IMAGE_DIR@/filter16.gif" format="GIF"/></guiicon>.
@@ -27,6 +28,14 @@
 		menu item of the popup menu. The same filter can be applied on the <literal>Procedures</literal>
 		tab.
 	</para>
+	<para>
+		The list of tables can be pre-filtered to remove unwanted entries such as tables 
+		that have been deleted and now reside in Oracle's "Recycle Bin". The filtering
+		is done through a <link linkend="db-settings-filter-tables">regular expression</link> 
+		on a per-database basis. By default this is only defined for Oracle and will filter out 
+		any table that starts with <literal>BIN$</literal>.
+	</para>
+	
 	<para>
 		For Oracle, synonyms are displayed as well. You can filter out unwanted synonyms 
 		by <link linkend="db-oracle-filter-syns">specifying a regular expression</link> 
@@ -91,7 +100,7 @@
 			<title>Create empty INSERT</title>
         
 			<blockquote>
-				<para>This creates an empty <literal>INSERT</literal>statement for the 
+				<para>This creates an empty <literal>INSERT</literal> statement for the 
 					currently selected table(s). This is intended for programmers that want
 					to use the statement inside their code.
 				</para>
@@ -105,7 +114,7 @@
 				<para>This creates a <literal>SELECT</literal> for the 
 					selected table(s) that includes all columns for the table. If you want to
 					generate a SELECT statement to actually retreive data from within the
-					editor, please use the <literal>Show table data</literal> option.
+					editor, please use the <literal>Put SELECT into</literal> option.
 				</para>
 			</blockquote>
 		</simplesect>

@@ -389,7 +389,7 @@
       <para>Default: <literal>true</literal></para>
     </section>
 
-		<section id="db-filter-tables">
+		<section id="db-settings-filter-tables">
 			<title>Filtering tables</title>
 			<para>Property: <literal>workbench.db.[dbid].exclude.tables</literal></para>
 			<para>

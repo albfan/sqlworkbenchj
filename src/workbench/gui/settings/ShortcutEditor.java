@@ -13,6 +13,7 @@ package workbench.gui.settings;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -36,7 +37,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -323,7 +323,8 @@ public class ShortcutEditor
 		int row = this.keysTable.getSelectedRow();
 		if (row < 0) return;
 		final KeyboardMapper mapper = new KeyboardMapper();
-		SwingUtilities.invokeLater(new Runnable() {
+		EventQueue.invokeLater(new Runnable() 
+		{
 			public void run()
 			{
 				mapper.grabFocus();

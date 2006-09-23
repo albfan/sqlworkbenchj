@@ -584,10 +584,13 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</para></entry>
 					</row>
 					<row>
-						<entry><para>-commitevery</para></entry>
-						<entry><para>Issue a commit every (number) rows. If this parameter
+						<entry><para>-commitEvery</para></entry>
+						<entry><para>
+                Issue a commit every (number) rows. If this parameter
 								is not passed (or a value of zero or lower), then &wb-productname; will commit
-						everything when all rows have been imported. </para></entry>
+						    everything when all rows have been imported. When using batch execution 
+								it is recommended to commit the batch using the -commitBatch parameter.
+						</para></entry>
 					</row>
 					<row>
 						<entry><para>-mode</para></entry>
@@ -648,25 +651,37 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</para></entry>
 					</row>
 					<row>
-						<entry><para>-usebatch</para></entry>
-						<entry><para>Enable or disable the use of the JDBC batch update features. If the
-								JDBC driver supports this, the INSERT (or UPDATE) performance can be increased.
-								This parameter will be ignored if the driver does not support batch updates or if
-								the mode is not UPDATE or INSERT (i.e. if <literal>-mode=update,insert</literal>
-								or <literal>-mode=insert,update</literal>is used).
-								Note that for some JDBC drivers this means that all SQL statements that
-								are generated for the input file will be kept in memory until the batch
-								is execute, so for large input files this might lead to memory problems.
-								In this case the size of the batch queue should be controlled using
-								the <literal>-batchsize</literal> parameter.
-						</para></entry>
+						<entry><para>-batchSize</para></entry>
+						<entry>
+								<para>
+										Enable the use of the JDBC batch update feature, by setting the size
+										of the batch queue. Any value greater than 1 will enable batch mode. If the
+										JDBC driver supports this, the INSERT (or UPDATE) performance can be increased.
+								</para>
+								<para>
+										This parameter will be ignored if the driver does not support batch updates or if
+										the mode is not UPDATE or INSERT (i.e. if <literal>-mode=update,insert</literal>
+										or <literal>-mode=insert,update</literal> is used).
+								</para>
+						</entry>
 					</row>
 					<row>
-						<entry><para>-batchsize</para></entry>
-						<entry><para>
-								Controls the size of the batch if <literal>-usebatch=true</literal>
-								is used. If this parameter is not specified then <emphasis role="bold">all</emphasis>
-							generated SQL statements will be put into the batch queue</para>
+						<entry><para>-commitBatch</para></entry>
+						<entry>
+								<para>
+									If using batch execution (by specifying a batch size using the <literal>-batchSize</literal>
+									parameter) each batch will be committed when this parameter is set to <literal>true</literal>.
+									This is slightly different to using <literal>-commitEvery</literal> with the value of the 
+									<literal>-batchSize</literal> parameter. The latter one will add a COMMIT statement to 
+									the batch queue, rather than calling the JDBC commit() method. Some drivers 
+									do not allow to add different statements in a batch queue. So, if a frequent 
+									<literal>COMMIT</literal> is needed, this parameter should be used.
+								</para>
+								<para>
+									When you specify <literal>-commitBatch</literal> the parameter 
+									<literal>-commitEvery</literal> will be ignored. If no batch size 
+									is given, then <literal>-commitBatch</literal> will be ignored.
+								</para>
 						</entry>
 					</row>
 					<row>
@@ -681,6 +696,26 @@ WHERE table1.column1 = table2.column1;</programlisting>
 								This parameter will be ignored if update mode is not active.
 							</para>
 						</entry>
+					</row>
+					<row>
+						<entry><para>-startRow</para></entry>
+						<entry><para>
+							Define the first row to be imported. Any row before the
+							specified row will be ignored. The header row is not counted 
+							to determine the row number. For a text file with a header 
+							row, the pysical line 2 is row 1 (one) for this parameter.
+						</para></entry>
+					</row>
+					<row>
+						<entry><para>-endRow</para></entry>
+						<entry><para>
+							Define the last row to be imported. The import
+							will be stopped after this row has been imported. When you 
+							specify <literal>-startRow=10</literal> and <literal>-endRow=20</literal>
+							11 rows will be imported (i.e. rows 10 to 20). If this is a text file
+							import with a header row, this would correspond to the physical lines
+							11 to 21 in the input file as the header row is not counted.
+						</para></entry>
 					</row>
 					
 				</tbody>
@@ -752,7 +787,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</row>
 						
 						<row>
-							<entry><para>-dateTimeFormat</para></entry>
+							<entry><para>-timestampFormat</para></entry>
 							<entry><para>The <link linkend="options-date-format">format</link> for datetime (or timestamp) columns in the input file.
 							</para></entry>
 						</row>
@@ -1141,8 +1176,9 @@ WHERE table1.column1 = table2.column1;</programlisting>
                 <entry><para>-mode</para></entry>
                 <entry><para>Defines how the data should be sent to the database. Possible
                 values are <literal>INSERT</literal>, <literal>UPDATE</literal>,
-                <literal>INSERT,UPDATE</literal> and <literal>UPDATE,INSERT</literal>. Please
-                refer to the description of the WbImport command for details on the update mode.
+                '<literal>INSERT,UPDATE</literal>' and '<literal>UPDATE,INSERT</literal>'. Please
+                refer to the description of the <link linkend="command-import">WbImport</link> 
+								command for details on.
                 </para></entry>
               </row>
               <row>
@@ -1151,6 +1187,21 @@ WHERE table1.column1 = table2.column1;</programlisting>
                 is only necessary if import is running in <literal>UPDATE</literal> mode.
                 </para></entry>
               </row>
+							<row>
+								<entry><para>-batchsize</para></entry>
+								<entry>
+								<para>
+										Enable the use of the JDBC batch update feature, by setting the size
+										of the batch queue. Any value greater than 1 will enable batch modee. If the
+										JDBC driver supports this, the INSERT (or UPDATE) performance can be increased.
+								</para>
+								<para>
+										This parameter will be ignored if the driver does not support batch updates or if
+										the mode is not UPDATE or INSERT (i.e. if <literal>-mode=update,insert</literal>
+										or <literal>-mode=insert,update</literal> is used).
+								</para>
+								</entry>
+							</row>
             </tbody>
           </tgroup>
         </informaltable>
@@ -1277,8 +1328,9 @@ WHERE table1.column1 = table2.column1;</programlisting>
        -sourcewhere="lastname LIKE 'D%'
        -targettable=the_other_table;</programlisting>
 
-        <para>Copy only selected columns to a table with different column names. Before the
-                    copy is started all rows are deleted from the target table:
+        <para>
+					Copy only selected columns to a table with different column names. Before the
+					copy is started all rows are deleted from the target table:
         </para>
         <programlisting>WbCopy -sourceprofile=ProfileA
        -targerprofile=ProfileB

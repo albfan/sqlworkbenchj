@@ -261,6 +261,7 @@
 			</para>
 		</section>
 		
+		<!--
 		<section id="profile-ignore-disable-auto-edit">
 			<title>Disable automatic update table check</title>
 			
@@ -271,6 +272,7 @@
 				update check, see <xref linkend="edit-data"/>
 			</para>
 		</section>
+		-->
 		
 		<section id="profile-rollback-before-disconnect">
 			<title>Rollback before disconnect</title>
