@@ -77,7 +77,7 @@ public class WbImportTest extends TestCase
 		super.tearDown();
 	}
 	
-	public void testPartialXmlImport()
+	public void testPartialColumnXmlImport()
 		throws Exception
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
@@ -316,8 +316,52 @@ public class WbImportTest extends TestCase
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testPartialTextImport()
+		throws Exception
+	{
+		int rowCount = 100;
+		try
+		{
+			File importFile  = new File(this.basedir, "partial.txt");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("nr\tfirstname\tlastname");
+			for (int i = 0; i < rowCount; i++)
+			{
+				int id = i+1;
+				out.println(id + "\tFirstname" + id + "\tLastname" + id);
+			}
+			out.close();
+			
+			StatementRunnerResult result = importCmd.execute(this.connection, "-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,firstname,lastname -type=text -header=true -continueonerror=false -startrow=10 -endrow=20 -table=junit_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select min(nr), max(nr), count(*) from junit_test");
+			if (rs.next())
+			{
+				int min = rs.getInt(1);
+				int max = rs.getInt(2);
+				int count = rs.getInt(3);
+				assertEquals("Import started at wrong id", 10, min);
+				assertEquals("Import ended at wrong id", 20, max);
+				assertEquals("Wrong number of rows imported", 11, count);
+			}
+			else
+			{
+				fail("No data imported");
+			}
+			rs.close();
+			stmt.close();
+			
+		}
+		catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testPartialColumnTextImport()
 		throws Exception
 	{
 		int rowCount = 10;
@@ -874,6 +918,114 @@ public class WbImportTest extends TestCase
 	}
 
 
+	public void testPartialXmlImport()
+	{
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
+             "<wb-export> \n" + 
+             "  <meta-data> \n" + 
+             " \n" + 
+             "    <generating-sql> \n" + 
+             "    <![CDATA[ \n" + 
+             "    select id, lastname, firstname from person \n" + 
+             "    ]]> \n" + 
+             "    </generating-sql> \n" + 
+             " \n" + 
+             "    <created>2006-07-29 23:31:40.366 CEST</created> \n" + 
+             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" + 
+             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" + 
+             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" + 
+             "    <database-product-name>HSQL Database Engine</database-product-name> \n" + 
+             "    <database-product-version>1.8.0</database-product-version> \n" + 
+             "    <wb-tag-format>short</wb-tag-format> \n" + 
+             "  </meta-data> \n" + 
+             " \n" + 
+             "  <table-def> \n" + 
+             "    <!-- The following information was retrieved from the JDBC driver's ResultSetMetaData --> \n" + 
+             "    <!-- column-name is retrieved from ResultSetMetaData.getColumnName() --> \n" + 
+             "    <!-- java-class is retrieved from ResultSetMetaData.getColumnClassName() --> \n" + 
+             "    <!-- java-sql-type-name is the constant's name from java.sql.Types --> \n" + 
+             "    <!-- java-sql-type is the constant's numeric value from java.sql.Types as returned from ResultSetMetaData.getColumnType() --> \n" + 
+             "    <!-- dbms-data-type is retrieved from ResultSetMetaData.getColumnTypeName() --> \n" + 
+             " \n" + 
+             "    <!-- For date and timestamp types, the internal long value obtained from java.util.Date.getTime() \n" + 
+             "         is written as an attribute to the <column-data> tag. That value can be used \n" + 
+             "         to create a java.util.Date() object directly, without the need to parse the actual tag content. \n" + 
+             "         If Java is not used to parse this file, the date/time format used to write the data \n" + 
+             "         is provided in the <data-format> tag of the column definition \n" + 
+             "    --> \n" + 
+             " \n" + 
+             "    <table-name>junit_test</table-name> \n" + 
+             "    <column-count>3</column-count> \n" + 
+             " \n" + 
+             "    <column-def index=\"0\"> \n" + 
+             "      <column-name>NR</column-name> \n" + 
+             "      <java-class>java.lang.Integer</java-class> \n" + 
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
+             "      <java-sql-type>4</java-sql-type> \n" + 
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"1\"> \n" + 
+             "      <column-name>LASTNAME</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"2\"> \n" + 
+             "      <column-name>FIRSTNAME</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "  </table-def> \n" + 
+             " \n" + 
+             "<data> \n";
+		String xmlEnd = "</data> \n" + 
+             "</wb-export>";
+		try
+		{
+			File xmlFile = new File(this.basedir, "xml_import2.xml");
+			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
+			out.write(xml);
+			for (int i=0; i < 100; i++)
+			{
+				int id = i + 1;
+				out.write("<rd><cd>" + id + "</cd><cd>Lastname" + id + "</cd><cd>Firstname" + id + "</cd></rd>\n");
+			}
+			out.write(xmlEnd);
+			out.close();
+			
+			String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -startRow = 15 -endrow = 24 -table=junit_test";
+			//System.out.println("cmd=" + cmd);
+			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select min(nr), max(nr), count(*) from junit_test");
+			if (rs.next())
+			{
+				int min = rs.getInt(1);
+				int max = rs.getInt(2);
+				int count = rs.getInt(3);
+				assertEquals("Import started at wrong id", 15, min);
+				assertEquals("Import ended at wrong id", 24, max);
+				assertEquals("Wrong number of rows imported", 10, count);
+			}
+			else
+			{
+				fail("No data imported");
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testXmlBlobImport()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
