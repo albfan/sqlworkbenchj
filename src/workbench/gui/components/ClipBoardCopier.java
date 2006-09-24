@@ -22,10 +22,15 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
+import workbench.db.exporter.SqlRowDataConverter;
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.storage.RowData;
+import workbench.util.StrBuffer;
 
 /**
  * A class to copy the data of a {@link workbench.gui.components.WbTable} to 
@@ -139,6 +144,7 @@ public class ClipBoardCopier
 		if (useUpdate || includeDelete)
 		{
 			boolean pkOK = this.client.checkPkColumns(true);
+			
 			// checkPkColumns will return false, if the user cancelled the prompting
 			if (!pkOK) return;
 		}
@@ -163,21 +169,48 @@ public class ClipBoardCopier
 			int rows[] = null;
 			if (selectedOnly) rows = this.client.getSelectedRows();
 			
-			String data;
+			SqlRowDataConverter converter = new SqlRowDataConverter(ds.getOriginalConnection());
+			converter.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
+			converter.setResultInfo(ds.getResultInfo());
 			if (useUpdate)
 			{
-				data = ds.getDataAsSqlUpdate(rows, columnsToInclude);
+				converter.setCreateUpdate();
 			}
 			else if (includeDelete)
 			{
-				data = ds.getDataAsSqlDeleteInsert(rows, columnsToInclude);
+				converter.setCreateInsertDelete();
 			}
-			else
+			else 
 			{
-				data = ds.getDataAsSqlInsert(rows, columnsToInclude);
+				converter.setCreateInsert();
+				if (ds.getResultInfo().getUpdateTable() == null)
+				{
+					String tbl = ds.getInsertTable();
+					TableIdentifier table = new TableIdentifier(tbl);
+					converter.setAlternateUpdateTable(table);
+				}
 			}
+			converter.setColumnsToExport(columnsToInclude);
+			converter.setBlobTypeDbmsLiteral();
+			
+			int count = 0;
+			if (rows != null) count = rows.length;
+			else count = ds.getRowCount();
+			
+			StringBuffer data = new StringBuffer(count * 100);
+			RowData rowdata = null;
+			
+			for (int row = 0; row < count; row ++)
+			{
+				if (rows == null) rowdata = ds.getRow(row);
+				else rowdata = ds.getRow(rows[row]);
+				
+				StrBuffer sql = converter.convertRowData(rowdata, row);
+				sql.appendTo(data);
+			}
+			
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-			StringSelection sel = new StringSelection(data);
+			StringSelection sel = new StringSelection(data.toString());
 			clp.setContents(sel, sel);
 		}
 		catch (Throwable e)
@@ -190,6 +223,7 @@ public class ClipBoardCopier
 		}
 		WbSwingUtilities.showDefaultCursorOnWindow(this.client);
 	}
+
 	
 	/**
 	 *	A general purpose method to select specific columns from the result set

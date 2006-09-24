@@ -24,9 +24,9 @@ import workbench.storage.DataStore;
 import workbench.storage.DmlStatement;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.StatementFactory;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -222,6 +222,9 @@ public class ObjectScripter
 		ResultInfo info = new ResultInfo(tbl, this.dbConnection);
 		info.setUpdateTable(tbl);
 		StatementFactory factory = new StatementFactory(info, this.dbConnection);
+		
+		SqlLiteralFormatter f = new SqlLiteralFormatter(this.dbConnection);
+		
 		RowData dummyData = new RowData(info.getColumnCount());
 
 		// This is a "trick" to fool the StatementFactory which will
@@ -248,7 +251,7 @@ public class ObjectScripter
 			}
 		}
 		DmlStatement stmt = factory.createInsertStatement(dummyData, true);
-		String sql = stmt.getExecutableStatement(this.meta.getProductName()) + ";" + nl;
+		String sql = stmt.getExecutableStatement(f) + ";" + nl;
 		return sql;
 	}
 	

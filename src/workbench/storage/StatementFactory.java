@@ -133,10 +133,6 @@ public class StatementFactory
 				else
 				{
 					sql.append(" = ?");
-//					if (value instanceof String && SqlUtil.isClobType(this.resultInfo.getColumnType(col)))
-//					{
-//						value = new ClobWrapper(value.toString());
-//					}
 					values.add(new ColumnData(value,this.resultInfo.getColumn(col)));
 				}
 			}
@@ -169,7 +165,7 @@ public class StatementFactory
 			}
 		}
 		
-		dml = new DmlStatement(sql.toString(), values, this.literalFormatter);
+		dml = new DmlStatement(sql.toString(), values);
 		return dml;
 	}
 
@@ -322,7 +318,7 @@ public class StatementFactory
 		sql.append(valuePart);
 		sql.append(')');
 		
-		dml = new DmlStatement(sql.toString(), values, this.literalFormatter);
+		dml = new DmlStatement(sql.toString(), values);
 		return dml;
 	}
 
@@ -373,7 +369,7 @@ public class StatementFactory
 			}
 		}
 		
-		dml = new DmlStatement(sql.toString(), values, this.literalFormatter);
+		dml = new DmlStatement(sql.toString(), values);
 		return dml;
 	}
 
@@ -433,7 +429,6 @@ public class StatementFactory
 		{
 			ConnectionProfile prof = dbConnection.getProfile();
 			emptyStringIsNull = (prof == null ? true : prof.getEmptyStringIsNull());
-			literalFormatter = new SqlLiteralFormatter(dbConnection.getDatabaseProductName());
 		}
 		
 	}

@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import workbench.db.WbConnection;
+import workbench.interfaces.DataFileWriter;
 import workbench.util.SqlUtil;
 
 /**
@@ -37,7 +38,6 @@ public class DmlStatement
 	private String sql;
 	private List values;
 	private boolean usePrepared = true;
-	private SqlLiteralFormatter literalFormatter;
 	private String chrFunc;
 	private String concatString;
 	private String concatFunction;
@@ -50,10 +50,9 @@ public class DmlStatement
 	 *	passed in aValueList. The SQL statement will be executed
 	 *	using a prepared statement.
 	 */
-	public DmlStatement(String aStatement, List aValueList, SqlLiteralFormatter formatter)
+	public DmlStatement(String aStatement, List aValueList)
 	{
 		if (aStatement == null) throw new NullPointerException();
-		this.setLiteralFormatter(formatter);
 		int count = this.countParameters(aStatement);
 		if (count > 0 && aValueList != null && count != aValueList.size())
 		{
@@ -168,16 +167,20 @@ public class DmlStatement
 		this.chrFunc = aFunc;
 	}
 	
+//	public String getExecutableStatement(String dbproduct)
+//	{
+//		SqlLiteralFormatter f = new SqlLiteralFormatter(dbproduct);
+//		return getExecutableStatement(f);
+//	}
+	
 	/**
 	 *	Returns a "real" SQL Statement which can be executed
 	 *	directly. The statement contains the parameter values
 	 *	as literals. No placeholders are used.
 	 *	This statement is executed after setUsePreparedStatement(false) is called
 	 */
-	public String getExecutableStatement(String dbproduct)
+	public String getExecutableStatement(SqlLiteralFormatter literalFormatter)
 	{
-		if (this.literalFormatter == null) this.literalFormatter = new SqlLiteralFormatter(dbproduct);
-		
 		if (this.values.size() > 0)
 		{
 			StringBuffer result = new StringBuffer(this.sql.length() + this.values.size() * 10);
@@ -191,7 +194,7 @@ public class DmlStatement
 				if (c == '?' && !inQuotes && parmIndex < this.values.size())
 				{
 					ColumnData data = (ColumnData)this.values.get(parmIndex);
-					String literal = this.literalFormatter.getDefaultLiteral(data);
+					String literal = literalFormatter.getDefaultLiteral(data);
 					if (this.chrFunc != null && SqlUtil.isCharacterType(data.getIdentifier().getDataType()))
 					{
 						literal = this.createInsertString(literal);
@@ -309,10 +312,4 @@ public class DmlStatement
 	{
 		return sql;
 	}
-
-	public void setLiteralFormatter(SqlLiteralFormatter f)
-	{
-		this.literalFormatter = f;
-	}
-	
 }

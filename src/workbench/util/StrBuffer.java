@@ -307,6 +307,11 @@ public class StrBuffer
 		return result;
 	}
 
+	public void appendTo(StringBuffer buff)
+	{
+		buff.append(this.charData, 0, this.numchar);
+	}
+	
 	public void writeTo(Writer out)
 		throws IOException
 	{

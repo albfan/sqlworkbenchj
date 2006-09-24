@@ -46,13 +46,13 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.WbTextCellEditor;
+import workbench.storage.SqlLiteralFormatter;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyRowAction;
 import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.InsertRowAction;
 import workbench.gui.actions.SelectKeyColumnsAction;
-import workbench.gui.actions.StartEditAction;
 import workbench.gui.actions.UpdateDatabaseAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.OneLineTableModel;
@@ -399,10 +399,11 @@ public class DwPanel
 			JScrollPane scroll = new JScrollPane(preview);
 			scroll.setMaximumSize(max);
 			StringBuffer text = new StringBuffer(stmts.size() * 150);
+			SqlLiteralFormatter f = new SqlLiteralFormatter(aConnection);
 			for (int i=0; i < stmts.size(); i++)
 			{
 				DmlStatement dml = (DmlStatement)stmts.get(i);
-				text.append(dml.getExecutableStatement(aConnection.getDatabaseProductName()));
+				text.append(dml.getExecutableStatement(f));
 				text.append(";\n");
 			}
 			preview.setText(text.toString());

@@ -24,8 +24,10 @@ import workbench.resource.Settings;
 import workbench.storage.DmlStatement;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.StatementFactory;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -34,6 +36,10 @@ import workbench.util.StrBuffer;
 public class SqlRowDataConverter
 	extends RowDataConverter
 {
+	private static final int BLOB_ANSI_LITERAL = 1;
+	private static final int BLOB_DBMS_LITERAL = 2;
+	private static final int BLOB_FILE = 4;
+	
 	public static final int SQL_INSERT = 1;
 	public static final int SQL_UPDATE = 2;
 	public static final int SQL_DELETE_INSERT = 3;
@@ -62,7 +68,9 @@ public class SqlRowDataConverter
 	private String doubleLineTerminator = "\n\n";
 	private boolean includeOwner = true;
 	private boolean doFormatting = true; 
-
+	private int blobType = BLOB_ANSI_LITERAL;
+	private SqlLiteralFormatter literalFormatter;
+	
 	public SqlRowDataConverter(WbConnection con)
 	{
 		super();
@@ -72,6 +80,7 @@ public class SqlRowDataConverter
 	public void setOriginalConnection(WbConnection con)
 	{
 		super.setOriginalConnection(con);
+		this.literalFormatter = new SqlLiteralFormatter(con);
 	}
 
 	public void setResultInfo(ResultInfo meta)
@@ -160,10 +169,11 @@ public class SqlRowDataConverter
 			db = this.originalConnection.getDatabaseProductName();
 		}
 		this.factory.setIncludeTableOwner(this.includeOwner);
+		
 		if (this.sqlTypeToUse == SQL_DELETE_INSERT)
 		{
 			dml = this.factory.createDeleteStatement(row, true);
-			result.append(dml.getExecutableStatement(db));
+			result.append(dml.getExecutableStatement(this.literalFormatter));
 			result.append(';');
 			result.append(lineTerminator);
 		}
@@ -178,9 +188,13 @@ public class SqlRowDataConverter
 		dml.setChrFunction(this.chrFunction);
 		dml.setConcatString(this.concatString);
 		dml.setConcatFunction(this.concatFunction);
-		// passing the db name is important, so that e.g. 
-		// date literals can be formatted correctly
-		result.append(dml.getExecutableStatement(db));
+		
+		// Needed for formatting BLOBs in the literalFormatter
+		this.currentRow = rowIndex;
+		this.currentRowData = row;
+		
+		result.append(dml.getExecutableStatement(this.literalFormatter));
+		
 		result.append(';');
 		if (doFormatting)
 			result.append(doubleLineTerminator);
@@ -401,4 +415,31 @@ public class SqlRowDataConverter
 		this.includeOwner = flag;
 		if (this.factory != null) this.factory.setIncludeTableOwner(flag);
 	}
+
+	public void setBlobTypeNone()
+	{
+		this.literalFormatter.noBlobHandling();
+	}
+	
+	public void setBlobTypeDbmsLiteral()
+	{
+		this.literalFormatter.createDbmsBlobLiterals(originalConnection);
+	}
+	
+	public void setBlobTypeAnsiLiteral()
+	{
+		literalFormatter.createAnsiBlobLiterals();
+	}
+	
+	public void setBlobTypeFile()
+	{
+		literalFormatter.createBlobFiles(this);
+	}
+	
+	public void setClobAsFile(String encoding)
+	{
+		if (StringUtil.isEmptyString(encoding)) return;
+		literalFormatter.setTreatClobAsFile(this, encoding);
+	}
+	
 }

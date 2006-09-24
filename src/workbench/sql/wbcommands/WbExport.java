@@ -91,6 +91,8 @@ public class WbExport
 		cmdLine.addArgument("writeoracleloader");
 		cmdLine.addArgument("compress");
 		cmdLine.addArgument("blobidcols");
+		cmdLine.addArgument("blobtype");
+		cmdLine.addArgument("clobasfile");
 	}
 
 	public String getVerb() { return VERB; }
@@ -274,6 +276,10 @@ public class WbExport
 				List cols = StringUtil.stringToList(c, ",");
 				exporter.setKeyColumnsToUse(cols);
 			}
+			String bmode = cmdLine.getValue("blobtype");
+			exporter.setBlobMode(bmode);
+			exporter.setWriteClobAsFile(cmdLine.getBoolean("clobasfile", false));
+			
 			this.defaultExtension = ".sql";
 		}
 		else if ("xml".equals(type))

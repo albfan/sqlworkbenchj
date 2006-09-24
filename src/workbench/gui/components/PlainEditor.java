@@ -18,6 +18,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.text.Document;
+import javax.swing.text.PlainDocument;
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.TextContainer;
 import workbench.resource.ResourceMgr;
@@ -34,7 +36,6 @@ public class PlainEditor
 	private JTextArea editor;
 	private JCheckBox wordWrap;
 	
-	/** Creates a new instance of PlainEditor */
 	public PlainEditor()
 	{
 		editor = new JTextArea();
@@ -51,6 +52,12 @@ public class PlainEditor
 		this.add(wordWrap, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
 		this.setFocusable(false);
+		Document d = editor.getDocument();
+		if (d != null)
+		{
+			int tabSize = Settings.getInstance().getEditorTabWidth();
+			d.putProperty(PlainDocument.tabSizeAttribute, new Integer(tabSize));
+		}
 	}
 	
 	public void requestFocus()

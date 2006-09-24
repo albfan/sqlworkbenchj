@@ -31,20 +31,44 @@ import workbench.util.EncodingUtil;
  */
 public class WbIncludeTest extends TestCase
 {
+	private TestUtil util;
+	private DefaultStatementRunner runner;
 	
 	public WbIncludeTest(String testName)
 	{
 		super(testName);
+		try
+		{
+			util = new TestUtil();
+			util.prepareEnvironment();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 
-	public void testExecute() throws Exception
+	public void setUp()
+		throws Exception
+	{
+		super.setUp();
+		util.emptyBaseDirectory();
+		runner = util.createConnectedStatementRunner();
+	}
+
+	public void tearDown()
+		throws Exception
+	{
+		ConnectionMgr.getInstance().disconnectAll();
+		super.tearDown();
+	}
+	
+	public void testExecute() 
+		throws Exception
 	{
 		try
 		{
-			TestUtil util = new TestUtil();
-			util.prepareEnvironment();
-			WbConnection con = util.getConnection();
-			DefaultStatementRunner runner = util.createConnectedStatementRunner(con);
+			WbConnection con = runner.getConnection();
 			
 			File subdir1 = new File(util.getBaseDir(), "subdir1");
 			subdir1.mkdir();
@@ -87,10 +111,6 @@ public class WbIncludeTest extends TestCase
 		{
 			e.printStackTrace();
 			fail(e.getMessage());
-		}
-		finally
-		{
-			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 	

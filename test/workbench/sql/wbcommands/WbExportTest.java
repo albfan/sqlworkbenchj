@@ -13,21 +13,19 @@ package workbench.sql.wbcommands;
 
 import junit.framework.*;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
+import java.io.Reader;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 import workbench.TestUtil;
-import workbench.WbManager;
-import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
+import workbench.util.LobFileParameter;
+import workbench.util.LobFileStatement;
 import workbench.util.SqlUtil;
 
 /**
@@ -196,6 +194,98 @@ public class WbExportTest extends TestCase
 			fail(e.getMessage());
 		}
 	}
+
+	public void testSqlClobExport()
+	{
+		try
+		{
+			Statement stmt = this.connection.createStatement();
+			stmt.executeUpdate("CREATE MEMORY TABLE clob_test(nr integer, clob_data LONGVARCHAR)");
+			stmt.executeUpdate("INSERT INTO clob_test (nr, clob_data) values (1, 'First clob')");
+			stmt.executeUpdate("INSERT INTO clob_test (nr, clob_data) values (2, 'Second clob')");
+			this.connection.commit();
+			stmt.close();
+			
+			File exportFile = new File(this.basedir, "clob_export.sql");
+			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sourcetable=clob_test -clobAsFile=true -encoding=utf8");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			assertEquals("Export file not created", true, exportFile.exists());
+			
+			File dataFile = new File(this.basedir, "clob_export_r1_c2.data");
+			assertEquals("First blob file not created", true, dataFile.exists());
+
+			Reader in = EncodingUtil.createReader(dataFile, "UTF8");
+			String contents = FileUtil.readCharacters(in);
+			in.close();
+			assertEquals("Wrong first clob content", "First clob", contents);
+			
+			dataFile = new File(this.basedir, "clob_export_r2_c2.data");
+			assertEquals("Second blob file not created", true, dataFile.exists());
+			in = EncodingUtil.createReader(dataFile, "UTF8");
+			contents = FileUtil.readCharacters(in);
+			in.close();
+			assertEquals("Wrong second clob content", "Second clob", contents);			
+			
+			ScriptParser p = new ScriptParser(1024*1024);
+			p.setFile(exportFile);
+			
+			assertEquals("Wrong number of statements", 3, p.getSize());
+			String sql = p.getCommand(0);
+			String verb = SqlUtil.getSqlVerb(sql);
+			assertEquals("Not an insert file", "INSERT", verb);
+			
+			LobFileStatement lob = new LobFileStatement(sql, this.basedir);
+			assertEquals("No parameter detected", 1, lob.getParameterCount());
+			
+			LobFileParameter[] parms = lob.getParameters();
+			assertNotNull("No encoding found in parameter", parms[0].getEncoding());
+			assertEquals("Wrong parameter", "UTF8", parms[0].getEncoding().toUpperCase());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testSqlBlobExport()
+	{
+		try
+		{
+			File exportFile = new File(this.basedir, "blob_export.sql");
+			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sourcetable=blob_test -blobtype=file");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			assertEquals("Export file not created", true, exportFile.exists());
+			
+			File dataFile = new File(this.basedir, "blob_export_r1_c2.data");
+			assertEquals("First blob file not created", true, dataFile.exists());
+			
+			dataFile = new File(this.basedir, "blob_export_r2_c2.data");
+			assertEquals("Second blob file not created", true, dataFile.exists());
+
+			ScriptParser p = new ScriptParser(1024*1024);
+			p.setFile(exportFile);
+			
+			assertEquals("Wrong number of statements", 3, p.getSize());
+			String sql = p.getCommand(0);
+			String verb = SqlUtil.getSqlVerb(sql);
+			assertEquals("Not an insert file", "INSERT", verb);
+			
+			LobFileStatement lob = new LobFileStatement(sql, this.basedir);
+			assertEquals("No BLOB parameter detected", 1, lob.getParameterCount());
+			
+			LobFileParameter[] parms = lob.getParameters();
+			assertEquals("Wrong parameter", true, parms[0].isBinary());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 
 	public void testSqlExport()
 	{

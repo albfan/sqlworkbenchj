@@ -98,7 +98,7 @@ public class ColumnExpression
 
 	public void setColumnName(String column)
 	{
-		this.columnName = column;
+		this.columnName = (column == null ? null : column.toLowerCase());
 	}
 	
 	public String toString()

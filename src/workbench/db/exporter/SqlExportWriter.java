@@ -45,6 +45,35 @@ public class SqlExportWriter
 		conv.setConcatString(exporter.getConcatString());
 		conv.setConcatFunction(exporter.getConcatFunction());
 		
+		String type = exporter.getBlobMode();
+		if (type == null)
+		{
+			conv.setBlobTypeNone();
+		}
+		else if (type.equalsIgnoreCase(DataExporter.BLOB_MODE_ANSI))
+		{
+			conv.setBlobTypeAnsiLiteral();
+		}
+		else if (type.equalsIgnoreCase(DataExporter.BLOB_MODE_DBMS))
+		{
+			conv.setBlobTypeDbmsLiteral();
+		}
+		else if (type.equalsIgnoreCase(DataExporter.BLOB_MODE_FILE))
+		{
+			conv.setBlobTypeFile();
+		}
+		else
+		{
+			conv.setBlobTypeNone();
+		}
+
+		if (exporter.getWriteClobAsFile())
+		{
+			String encoding = exporter.getEncoding();
+			if (encoding == null) encoding = Settings.getInstance().getDefaultFileEncoding();
+			conv.setClobAsFile(encoding);
+		}
+		
 		// the key columns need to be set before the createInsert flag!
 		conv.setKeyColumnsToUse(exporter.getKeyColumnsToUse());
 		try

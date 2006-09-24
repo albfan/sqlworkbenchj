@@ -15,11 +15,14 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import workbench.WbManager;
+import workbench.db.WbConnection;
+import workbench.interfaces.DataFileWriter;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
@@ -30,21 +33,63 @@ import workbench.util.WbPersistence;
 public class SqlLiteralFormatter
 {
 	public static final String GENERAL_SQL = "All";
-
+	
 	private Map dateLiteralFormats;
 	private DbDateFormatter defaultDateFormatter;
+	private BlobLiteralFormatter blobFormatter;
+	private DataFileWriter blobWriter;
+	private DataFileWriter clobWriter;
+	private boolean treatClobAsFile = false;
+	private String clobEncoding = Settings.getInstance().getDefaultFileEncoding();
 	
-	public SqlLiteralFormatter(String product)
+	public SqlLiteralFormatter(WbConnection con)
 	{
+		String product = "*";
+			
+		if (con != null)
+		{
+			product = con.getMetadata().getProductName();
+		}
 		dateLiteralFormats = readStatementTemplates("DateLiteralFormats.xml");
 		if (dateLiteralFormats == null) dateLiteralFormats = Collections.EMPTY_MAP;
 		defaultDateFormatter = getDateLiteralFormatter(product);
+		
 	}
-
+	public void noBlobHandling()
+	{
+		this.blobWriter = null;
+		this.blobFormatter = null;
+	}
+	
+	public void createAnsiBlobLiterals()
+	{
+		blobFormatter = BlobFormatterFactory.createAnsiFormatter();
+		this.blobWriter = null;
+	}
+	
+	public void createDbmsBlobLiterals(WbConnection con)
+	{
+		blobFormatter = BlobFormatterFactory.createInstance(con.getMetadata());
+		this.blobWriter = null;
+	}
+	
+	public void createBlobFiles(DataFileWriter bw)
+	{
+		this.blobFormatter = null;
+		this.blobWriter = bw;
+	}
+	
+	public void setTreatClobAsFile(DataFileWriter writer, String encoding)
+	{
+		this.treatClobAsFile = true;
+		this.clobWriter = writer;
+		if (!StringUtil.isEmptyString(encoding)) this.clobEncoding = encoding;
+	}
+	
 	private Map readStatementTemplates(String aFilename)
 	{
 		Map result = null;
-
+		
 		BufferedInputStream in = new BufferedInputStream(this.getClass().getResourceAsStream(aFilename));
 		
 		try
@@ -92,7 +137,7 @@ public class SqlLiteralFormatter
 		}
 		return result;
 	}
-
+	
 	public DbDateFormatter getDateLiteralFormatter(String aProductname)
 	{
 		DbDateFormatter format = (DbDateFormatter)dateLiteralFormats.get(aProductname == null ? GENERAL_SQL : aProductname);
@@ -105,7 +150,18 @@ public class SqlLiteralFormatter
 		}
 		return format;
 	}
-
+	
+	private String quoteString(String t)
+	{
+		StringBuffer realValue = new StringBuffer(t.length() + 10);
+		// Single quotes in a String must be "quoted"...
+		realValue.append('\'');
+		// replace to Buffer writes the result of into the passed buffer
+		// so this appends the correct literal to realValue
+		StringUtil.replaceToBuffer(realValue, t, "'", "''");
+		realValue.append("'");
+		return realValue.toString();
+	}
 	public String getDefaultLiteral(ColumnData data)
 	{
 		Object value = data.getValue();
@@ -115,14 +171,24 @@ public class SqlLiteralFormatter
 		if (value instanceof String)
 		{
 			String t = (String)value;
-			StringBuffer realValue = new StringBuffer(t.length() + 10);
-			// Single quotes in a String must be "quoted"...
-			realValue.append('\'');
-			// replace to Buffer writes the result of into the passed buffer
-			// so this appends the correct literal to realValue
-			StringUtil.replaceToBuffer(realValue, t, "'", "''");
-			realValue.append("'");
-			return realValue.toString();
+			if (this.treatClobAsFile && SqlUtil.isClobType(type) && clobWriter != null)
+			{
+				File f = clobWriter.generateDataFileName(data);
+				try
+				{
+					clobWriter.writeClobFile(t, f, this.clobEncoding);
+					return "{$clobfile='" + f.getName() + "' encoding='" + this.clobEncoding + "'}";
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("SqlLiteralFormatter.getDefaultLiteral", "Could not write CLOB file", e);
+					return quoteString(t);
+				}
+			}
+			else
+			{
+				return quoteString(t);
+			}
 		}
 		else if (value instanceof Date)
 		{
@@ -130,7 +196,10 @@ public class SqlLiteralFormatter
 		}
 		else if (value instanceof File)
 		{
-			return "{$blobfile='" + value.toString() + "'}";
+			if (SqlUtil.isBlobType(type))
+				return "{$blobfile='" + value.toString() + "'}";
+			else if (SqlUtil.isClobType(type))
+				return "{$clobfile='" + value.toString() + "'}";
 		}
 		else if (value instanceof NullValue)
 		{
@@ -142,17 +211,43 @@ public class SqlLiteralFormatter
 			// we cannot convert all values denoted as Types.BIT to 0/1 as
 			// e.g. Postgres only accepts the literals true/false for boolean columns
 			// which are reported as Types.BIT as well.
-			// that's why I compare to the DBMS data type bit (hoping that 
+			// that's why I compare to the DBMS data type bit (hoping that
 			// other DBMS's that are also using 'bit' work the same way
 			boolean flag = ((java.lang.Boolean)value).booleanValue();
 			return (flag ? "1" : "0");
 		}
-		else
+		else if (SqlUtil.isBlobType(type))
 		{
-			// This assumes that the JDBC driver returned a class
-			// that implements the approriate toString() method!
-			return value.toString();
+			if (blobWriter != null)
+			{
+				File f = blobWriter.generateDataFileName(data);
+				try
+				{
+					blobWriter.writeBlobFile(value, f);
+					return "{$blobfile='" + f.getName() + "'}";
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("SqlLiteralFormatter.getDefaultLiteral", "Could not write BLOB file", e);
+					return null;
+				}
+			}
+			else if (blobFormatter != null)
+			{
+				try
+				{
+					return blobFormatter.getBlobLiteral(value);
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("SqlLiteralFormatter.getDefaultLiteral", "Error converting BLOB value", e);
+					return null;
+				}
+			}
 		}
+		
+		// Fallback, let the JDBC driver format the value
+		return value.toString();
 	}
-
+	
 }

@@ -18,6 +18,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import javax.swing.ComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
@@ -42,7 +43,7 @@ public class ColumnExpressionPanel
 	extends JPanel
 	implements ActionListener
 {
-	private static final ComparatorFactory factory = new ComparatorFactory();
+	private final ComparatorFactory factory = new ComparatorFactory();
 	private JComboBox comparatorDropDown;
 	private JCheckBox ignoreCase;
 	protected JComboBox columnSelector;
@@ -179,6 +180,12 @@ public class ColumnExpressionPanel
 		}
 	}
 
+	private int findColumnInDropDown(String col)
+	{
+		ListComboBoxModel model = (ListComboBoxModel)this.columnSelector.getModel();
+		return model.findItemIgnoreCase(col);
+	}
+	
 	public void setExpressionValue(ExpressionValue expr)
 	{
 		String col = expr.getColumnName();
@@ -186,7 +193,8 @@ public class ColumnExpressionPanel
 		if (!"*".equals(col)) this.columnInfo.findColumn(col);
 		if (index > -1)
 		{
-			this.columnSelector.setSelectedItem(col);
+			int ddIndex = findColumnInDropDown(col);
+			if (ddIndex > -1) this.columnSelector.setSelectedIndex(ddIndex);
 			ComparatorListItem item = new ComparatorListItem(expr.getComparator());
 			this.comparatorDropDown.setSelectedItem(item);
 			this.ignoreCase.setSelected(expr.isIgnoreCase());

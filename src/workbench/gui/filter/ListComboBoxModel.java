@@ -69,6 +69,19 @@ public class ListComboBoxModel
 		return data.size();
 	}
 
+	public int findItemIgnoreCase(String item)
+	{
+		if (item == null) return -1;
+		int size = data.size();
+		for (int i=0; i < size; i++)
+		{
+			Object o = data.get(i);
+			if (o == null) continue;
+			if (item.equalsIgnoreCase(o.toString())) return i;
+		}
+		return -1;
+	}
+	
 	public void removeListDataListener(ListDataListener l)
 	{
 		listener.remove(l);

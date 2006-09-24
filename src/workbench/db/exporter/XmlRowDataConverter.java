@@ -230,7 +230,14 @@ public class XmlRowDataConverter
 				{
 					File blobFile = createBlobFile(row, c, rowIndex);
 					String dataFile = blobFile.getName();
-					writeBlobFile(data, blobFile);
+					try
+					{
+						writeBlobFile(data, blobFile);
+					}
+					catch (Exception e)
+					{
+						throw new RuntimeException("Error writing BLOB file", e);
+					}
 					xml.append(' ');
 					xml.append(ATTR_DATA_FILE);
 					xml.append("=\"");

@@ -86,7 +86,15 @@ public class TextRowDataConverter
 				File blobFile = createBlobFile(row, c, rowIndex);
 				
 				value = blobFile.getName();
-				writeBlobFile(row.getValue(c), blobFile);
+				try
+				{
+					writeBlobFile(row.getValue(c), blobFile);
+				}
+				catch (Exception e)
+				{
+					throw new RuntimeException("Error writing BLOB file", e);
+				}
+				
 				if (this.quoteAlways) 
 				{
 					result.append(this.quoteCharacter);

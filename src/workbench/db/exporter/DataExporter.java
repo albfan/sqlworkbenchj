@@ -69,6 +69,10 @@ import workbench.util.WbThread;
 public class DataExporter
 	implements Interruptable, ErrorReporter
 {
+	public static final String BLOB_MODE_ANSI = "ansi";
+	public static final String BLOB_MODE_DBMS = "dbms";
+	public static final String BLOB_MODE_FILE = "file";
+	
 	public static final int EXPORT_SQL = 1;
 	public static final int EXPORT_TXT = 2;
 	public static final int EXPORT_XML = 3;
@@ -79,7 +83,6 @@ public class DataExporter
 	private String htmlTitle = null;
 	private String realOutputfile;
 	private String outputfile;
-	//private String fullOutputFileName;
 	private String xsltFile = null;
 	private String transformOutputFile = null;
 	private int exportType;
@@ -96,6 +99,7 @@ public class DataExporter
 	private String encoding;
 	private List columnsToExport;
 
+	private boolean clobAsFile = false;
 	private String delimiter = "\t";
 	private String quoteChar = null;
 	private boolean quoteAlways = false;
@@ -147,6 +151,8 @@ public class DataExporter
 
 	private ZipOutputStream zipArchive;
 	private ZipEntry zipEntry;
+
+	private String blobMode = null;
 	
 	public DataExporter(WbConnection con)
 	{
@@ -185,6 +191,28 @@ public class DataExporter
 		this.progressWindow.setVisible(true);
 	}
 
+	public void setBlobMode(String type)
+	{
+		if (type == null || type.equalsIgnoreCase("none"))
+		{
+			this.blobMode = null;
+		}
+		else if (type.equalsIgnoreCase("dbms") 
+				|| type.equalsIgnoreCase("ansi") 
+				|| type.equalsIgnoreCase("file"))
+		{
+			this.blobMode = type;
+		}
+	}
+	
+	public String getBlobMode()
+	{
+		return this.blobMode;
+	}
+	
+	public void setWriteClobAsFile(boolean flag) { this.clobAsFile = flag; }
+	public boolean getWriteClobAsFile() { return clobAsFile; }
+	
 	public boolean getCompressOutput() { return this.compressOutput; }
 	public void setCompressOutput(boolean flag) { this.compressOutput = flag; }
 	
@@ -1135,7 +1163,7 @@ public class DataExporter
 	 * Getter for property keyColumnsToUse.
 	 * @return Value of property keyColumnsToUse.
 	 */
-	public java.util.List getKeyColumnsToUse()
+	public List getKeyColumnsToUse()
 	{
 		return keyColumnsToUse;
 	}
@@ -1153,7 +1181,7 @@ public class DataExporter
 	 * Getter for property concatFunction.
 	 * @return Value of property concatFunction.
 	 */
-	public java.lang.String getConcatFunction()
+	public String getConcatFunction()
 	{
 		return concatFunction;
 	}

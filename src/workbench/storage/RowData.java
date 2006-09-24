@@ -100,9 +100,9 @@ public class RowData
 				{
 					value = rs.getTimestamp(i+1);
 				}
-				//else if (type == java.sql.Types.LONGVARBINARY) 
 				else if (SqlUtil.isBlobType(type))
 				{
+					// BLOB columns are always converted bot byte[] internally
 					InputStream in = null;
 					try
 					{
@@ -126,9 +126,9 @@ public class RowData
 						try { in.close(); } catch (Throwable th) {}
 					}
 				}
-				//else if (type == java.sql.Types.LONGVARCHAR)
 				else if (SqlUtil.isClobType(type))
 				{
+					// CLOB columns are always converted to String objects internally
 					Reader in = null;
 					try
 					{

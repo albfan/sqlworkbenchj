@@ -43,6 +43,7 @@ import workbench.util.ZipOutputFactory;
  */
 public class WbImportTest extends TestCase
 {
+	private TestUtil util;
 	private String dbName;
 	private String basedir;
 	private WbImport importCmd = new WbImport();
@@ -53,7 +54,7 @@ public class WbImportTest extends TestCase
 		super(testName);
 		try
 		{
-			TestUtil util = new TestUtil();
+			util = new TestUtil();
 			util.prepareEnvironment();
 			this.dbName = util.getDbName();
 			this.basedir = util.getBaseDir();
@@ -1336,37 +1337,16 @@ public class WbImportTest extends TestCase
 	private WbConnection prepareDatabase()
 		throws SQLException, ClassNotFoundException
 	{
-		File dir = new File(basedir);
-		File[] files = dir.listFiles();
-		for (int i = 0; i < files.length; i++)
-		{
-			files[i].delete();
-		}
-		Class.forName("org.hsqldb.jdbcDriver");
-		String url = "jdbc:hsqldb:" + dbName + ";shutdown=true";
-		Connection con = DriverManager.getConnection(url, "sa", "");
-		Statement stmt = con.createStatement();
+		util.emptyBaseDirectory();
+		WbConnection wb = util.getConnection();
+		
+		Statement stmt = wb.createStatement();
 		stmt.executeUpdate("CREATE TABLE junit_test (nr integer, firstname varchar(100), lastname varchar(100))");
 		stmt.executeUpdate("CREATE TABLE datatype_test (int_col integer, double_col double, char_col varchar(50), date_col date, time_col time, ts_col timestamp)");
 		stmt.executeUpdate("CREATE TABLE blob_test (nr integer, binary_data BINARY)");
-		con.commit();
+		wb.commit();
 		stmt.close();
 		
-		WbConnection wb = new WbConnection(con);
-		
-		// Create a dummy profiles as the profile
-		// is used all around the Wb sources
-		ConnectionProfile prof = new ConnectionProfile();
-		prof.setAutocommit(false);
-		prof.setEmptyStringIsNull(true);
-		prof.setIgnoreDropErrors(true);
-		prof.setIncludeNullInInsert(true);
-		prof.setName("JunitTest");
-		prof.setDriverName("HSQLDB");
-		prof.setDriverclass("org.hsqldb.jdbcDriver");
-		prof.setUrl(url);
-		prof.setPassword("");
-		wb.setProfile(prof);
 		return wb;
 	}
 	

@@ -62,7 +62,7 @@ public class UpdatingCommand extends SqlCommand
 			{
 				try
 				{
-					lob = new LobFileStatement(sql);
+					lob = new LobFileStatement(sql, this.runner.getBaseDir());
 				}
 				catch (FileNotFoundException e)
 				{

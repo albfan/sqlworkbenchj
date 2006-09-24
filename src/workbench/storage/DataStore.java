@@ -85,7 +85,7 @@ public class DataStore
 	private boolean cancelRetrieve = false;
 	private boolean cancelUpdate = false;
 	private int reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
-
+	
 	public DataStore(String[] aColNames, int[] colTypes)
 	{
 		this(aColNames, colTypes, null);
@@ -316,7 +316,7 @@ public class DataStore
 			{
 				String col = getColumnName(c);
 				Object value = rowData.getValue(c);
-				valueMap.put(col, value);
+				valueMap.put(col.toLowerCase(), value);
 			}
 
 			if (!filterExpression.evaluate(valueMap))
@@ -1140,7 +1140,7 @@ public class DataStore
 	 *	is defined, the table from the SQL statement will be used
 	 *	but no checking for key columns takes place (which might take long)
 	 */
-	private String getInsertTable()
+	public String getInsertTable()
 	{
 		if (this.updateTable != null) return this.updateTable.getTableExpression();
 		if (this.sql == null) return null;
@@ -1164,6 +1164,10 @@ public class DataStore
 		return (this.getInsertTable() != null);
 	}
 
+	private SqlLiteralFormatter createLiteralFormatter()
+	{
+		return new SqlLiteralFormatter(this.originalConnection);
+	}
 	/**
 	 * Checks if the underlying SQL statement references only one table.
 	 * @return true if only one table is found in the SELECT statement
@@ -1175,167 +1179,6 @@ public class DataStore
 		List tables = SqlUtil.getTables(this.sql);
 		if (tables.size() != 1) return false;
 		return true;
-	}
-
-	public String getDataAsSqlDeleteInsert(int rows[], List columns)
-		throws Exception, SQLException
-	{
-		return this.getDataAsSqlInsert("\n", null, null, rows, columns, true);
-	}
-
-	public String getDataAsSqlInsert(int[] rows, List columns)
-		throws Exception, SQLException
-	{
-		return this.getDataAsSqlInsert("\n", null, null, rows, columns);
-	}
-
-	public String getDataAsSqlInsert(String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns)
-		throws Exception, SQLException
-	{
-		return getDataAsSqlInsert(aLineTerminator, aCharFunc, aConcatString, rows, columns, false);
-	}
-
-	public String getDataAsSqlInsert(String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns, boolean includeDelete)
-		throws Exception, SQLException
-	{
-		if (!this.canSaveAsSqlInsert()) return "";
-
-		StringWriter script = new StringWriter(this.getRowCount() * 150);
-		try
-		{
-			this.writeDataAsSqlInsert(script, aLineTerminator, aCharFunc, aConcatString, rows, columns, includeDelete);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DataStore.getDataAsSqlInsert()", "Error writing script to StringWriter", e);
-			return "";
-		}
-		return script.toString();
-	}
-
-	public void writeDataAsSqlInsert(Writer out, String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns, boolean includeDelete)
-		throws IOException
-	{
-		if (!this.canSaveAsSqlInsert()) return;
-		int count;
-
-		if (rows == null) count = this.getRowCount();
-		else count = rows.length;
-
-		if (includeDelete && !this.hasPkColumns())
-		{
-			try
-			{
-				this.updatePkInformation(this.originalConnection);
-			}
-			catch (SQLException e)
-			{
-				LogMgr.logError("DataStore.writeDataAsSqlInsert()", "Could not retrieve PK columns. Delete will not be generated",e);
-				includeDelete = false;
-			}			
-		}
-		
-		SqlRowDataConverter conv = new SqlRowDataConverter(this.originalConnection);
-		conv.setResultInfo(this.resultInfo);
-		conv.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
-		conv.setLineTerminator(aLineTerminator);
-		conv.setColumnsToExport(columns);
-		if (aCharFunc != null)
-		{
-			conv.setChrFunction(aCharFunc);
-			conv.setConcatString(aConcatString);
-		}
-		if (includeDelete)
-		{
-			conv.setCreateInsertDelete();
-		}
-		else
-		{
-			conv.setCreateInsert();
-		}
-		TableIdentifier tbl = new TableIdentifier(this.getInsertTable());
-		conv.setAlternateUpdateTable(tbl);
-
-		for (int row = 0; row < count; row ++)
-		{
-			int rowIndex = -1;
-			if (rows == null) rowIndex = row;
-			else rowIndex = rows[row];
-
-			RowData rowData = this.getRow(rowIndex);
-			StrBuffer rowsql = conv.convertRowData(rowData, rowIndex);
-			rowsql.writeTo(out);
-		}
-	}
-
-	// =========== SQL Update generation ================
-	public String getDataAsSqlUpdate(int[] rows, List columns)
-	{
-		return this.getDataAsSqlUpdate("\n", null, null, rows, columns);
-	}
-
-	public String getDataAsSqlUpdate(String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns)
-	{
-		if (!this.canSaveAsSqlInsert()) return "";
-		StringWriter script = new StringWriter(this.getRowCount() * 150);
-		try
-		{
-			this.writeDataAsSqlUpdate(script, aLineTerminator, aCharFunc, aConcatString, rows, columns);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DataStore.getDataAsSqlInsert()", "Error writing script to StringWriter", e);
-			return "";
-		}
-		return script.toString();
-	}
-
-	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns)
-		throws IOException
-	{
-		if (!this.hasPkColumns())
-		{
-			try
-			{
-				this.updatePkInformation(this.originalConnection);
-			}
-			catch (SQLException e)
-			{
-				LogMgr.logError("DataStore.writeDataAsSqlUpdate()", "Could not retrieve PK columns",e);
-				return;
-			}
-		}
-		
-		if (!this.resultInfo.hasPkColumns())
-		{
-			LogMgr.logError("DataStore.writeDataAsSqlUpdate()", "No PK columns found. Cannot write as SQL Update", null);
-			return;
-		}
-
-		int count = 0;
-		if (rows != null) count = rows.length;
-		else count = this.getRowCount();
-
-		StatementFactory factory = new StatementFactory(this.resultInfo, this.originalConnection);
-		factory.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
-		for (int row = 0; row < count; row ++)
-		{
-			RowData rowdata;
-			if (rows == null) rowdata = this.getRow(row);
-			else rowdata = this.getRow(rows[row]);
-
-			DmlStatement stmt = factory.createUpdateStatement(rowdata, true, aLineTerminator, columns);
-			if (aCharFunc != null)
-			{
-				stmt.setChrFunction(aCharFunc);
-				stmt.setConcatString(aConcatString);
-			}
-			String rowsql = stmt.getExecutableStatement(this.originalConnection.getMetadata().getProductName());
-			out.write(rowsql);
-			out.write(";");
-			out.write(aLineTerminator);
-			out.write(aLineTerminator);
-		}
 	}
 
 	/**
@@ -1439,13 +1282,14 @@ public class DataStore
 			this.updateHadErrors = true;
 			String dbProduct = null;
 			if (this.originalConnection != null) dbProduct = this.originalConnection.getMetadata().getProductName();
+			String sql = dml.getExecutableStatement(createLiteralFormatter());
 			if (!this.ignoreAllUpdateErrors)
 			{
 				boolean abort = true;
 				int choice = JobErrorHandler.JOB_ABORT;
 				if (errorHandler != null)
 				{
-					choice = errorHandler.getActionOnError(rowNum, null, dml.getExecutableStatement(dbProduct), e.getMessage());
+					choice = errorHandler.getActionOnError(rowNum, null, sql, e.getMessage());
 				}
 				if (choice == JobErrorHandler.JOB_CONTINUE)
 				{
@@ -1460,7 +1304,7 @@ public class DataStore
 			}
 			else
 			{
-				LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + dml.getExecutableStatement(dbProduct) + " for row = " + row + ", error: " + e.getMessage(), null);
+				LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + sql + " for row = " + row + ", error: " + e.getMessage(), null);
 			}
 		}
 		return rowsUpdated;

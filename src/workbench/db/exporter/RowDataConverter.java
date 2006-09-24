@@ -14,6 +14,7 @@ package workbench.db.exporter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -22,13 +23,17 @@ import java.util.List;
 
 import workbench.db.WbConnection;
 import workbench.gui.components.BlobHandler;
+import workbench.interfaces.DataFileWriter;
 import workbench.interfaces.ErrorReporter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.storage.ColumnData;
 import workbench.storage.NullValue;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.DefaultOutputFactory;
+import workbench.util.EncodingUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.OutputFactory;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -42,6 +47,7 @@ import workbench.util.ZipOutputFactory;
  * @author  support@sql-workbench.net
  */
 public abstract class RowDataConverter
+	implements DataFileWriter
 {
 	public static final String BLOB_ARCHIVE_SUFFIX = "_blobs";
 	protected String encoding;
@@ -63,6 +69,8 @@ public abstract class RowDataConverter
 	protected boolean useRowNumForBlobFile = true;
 	protected int[] blobNameCols = null;
 	protected List blobIdColumns = null;
+	protected long currentRow = -1;
+	protected RowData currentRowData;
 	
 	/**
 	 *	The metadata for the result set that should be exported
@@ -156,7 +164,37 @@ public abstract class RowDataConverter
 		return this.factory.createOutputStream(output);
 	}
 	
-	protected File createBlobFile(RowData row, int colIndex, long rowNum)
+	/**
+	 * Needed for the SqlLiteralFormatter 
+	 */
+	public File generateDataFileName(ColumnData data)
+	{
+		StringBuffer fname = new StringBuffer(80);
+		if (this.currentRowData != null && currentRow != -1)
+		{
+			int colIndex = this.metaData.findColumn(data.getIdentifier().getColumnName());
+			return createBlobFile(currentRowData, colIndex, currentRow);
+		}
+		else
+		{
+			fname.append(StringUtil.makeFilename(data.getIdentifier().getColumnName()));
+			fname.append('_');
+			if (this.currentRow == -1)
+			{
+				fname.append(data.getValue().hashCode());
+			}
+			else
+			{
+				fname.append("row_");
+				fname.append(currentRow);
+			}
+			fname.append(".data");
+			File f = new File(getBaseDir(), fname.toString());
+			return f;
+		}
+	}
+	
+	public File createBlobFile(RowData row, int colIndex, long rowNum)
 	{
 		StringBuffer fname = new StringBuffer(baseFilename.length() + 25);
 
@@ -190,22 +228,40 @@ public abstract class RowDataConverter
 		File f = new File(getBaseDir(), fname.toString());
 		return f;
 	}
-	
-	protected void writeBlobFile(Object value, File f)
+
+	public void writeClobFile(String value, File f, String encoding)
+		throws IOException
 	{
-		if (value == null || value instanceof NullValue) return;
+		if (value == null) return;
+		Writer w = null;
 		try
 		{
 			OutputStream out = this.createOutputStream(f);
-			BlobHandler.saveBlobToFile(value, out);
+			w = EncodingUtil.createWriter(out, encoding);
+			w.write(value);
 		}
-		catch (Exception e)
+		finally
 		{
-			LogMgr.logError("TextRowDataConverter.writeBlobFile()", "Error writing blob data", e);
+			try { w.close(); } catch (Throwable th) {}
 		}
 	}
 	
-	protected File getBaseDir()
+	public void writeBlobFile(Object value, File f)
+		throws IOException
+	{
+		if (value == null || value instanceof NullValue) return;
+		OutputStream out = this.createOutputStream(f);
+		try
+		{
+			BlobHandler.saveBlobToFile(value, out);
+		}
+		catch (SQLException e)
+		{
+			throw new IOException(ExceptionUtil.getDisplay(e));
+		}
+	}
+	
+	public File getBaseDir()
 	{
 		if (this.outputFile == null) return new File(".");
 		if (this.outputFile.isAbsolute()) return this.outputFile.getParentFile();
