@@ -47,8 +47,10 @@ import workbench.util.ValueConverter;
  * A class to cache the result of a database query.
  * If the underlying SELECT used only one table, then the
  * DataStore can be updated and the changes can be saved back
- * to the database. For inserting new records key columns are not
- * required, otherwise the base table needs to have a key defined.
+ * to the database. 
+ * For updating or deleting rows, key columns are required
+ * For inserting new rows, no keys are required.
+ * 
  * @author  support@sql-workbench.net
  */
 public class DataStore
@@ -68,7 +70,7 @@ public class DataStore
 	private RowDataList deletedRows;
 	private RowDataList filteredRows;
 	
-	// The SQL statement (SELECT) that produced this DataStore
+	// The SQL statement that was used to generate this DataStore
 	private String sql;
 
 	private ResultInfo resultInfo;
@@ -86,14 +88,28 @@ public class DataStore
 	private boolean cancelUpdate = false;
 	private int reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
 	
-	public DataStore(String[] aColNames, int[] colTypes)
-	{
-		this(aColNames, colTypes, null);
-	}
 	/**
 	 *	Create a DataStore which is not based on a result set
 	 *	and contains the columns defined in the given array
 	 *	The column types need to match the values from from java.sql.Types
+	 *  @param aColNames the column names
+	 *  @param colTypes data types for each column (matching java.sql.Types.XXXX)
+	 */
+	public DataStore(String[] aColNames, int[] colTypes)
+	{
+		this(aColNames, colTypes, null);
+	}
+	
+	/**
+	 *	Create a DataStore which is not based on a result set
+	 *	and contains the columns defined in the given array
+	 *	The column types need to match the values from from java.sql.Types
+	 *  @param aColNames the column names
+	 *  @param colTypes data types for each column (matching java.sql.Types.XXXX)
+	 *  @param colSizes display size for each column
+	 * 
+	 * @see #getColumnDisplaySize(int)
+	 * @see workbench.gui.components.DataStoreTableModel#getColumnWidth(int)
 	 */
 	public DataStore(String[] colNames, int[] colTypes, int[] colSizes)
 	{
@@ -199,12 +215,16 @@ public class DataStore
 		this.reset();
 	}
 
+	/**
+	 * Return the connection that was used to retrieve the result.
+	 * Can be null if the DataStore was not populated using a ResultSet
+	 */
 	public WbConnection getOriginalConnection()
 	{
 		return this.originalConnection;
 	}
 
-	public void setSourceConnection(WbConnection aConn)
+	public void setOriginalConnection(WbConnection aConn)
 	{
 		this.originalConnection = aConn;
 	}
@@ -448,6 +468,7 @@ public class DataStore
 		else
 		{
 			TableIdentifier tbl = new TableIdentifier(aTablename);
+			tbl.setPreserveQuotes(true);
 			setUpdateTable(tbl, aConn);
 		}
 	}
@@ -513,7 +534,7 @@ public class DataStore
 				LogMgr.logWarning("DataStore.setUpdateTable()", "No columns from the table " + this.updateTable.getTableExpression() + " could be found in the current result set!");
 			}
 			
-			this.resultInfo.setUpdateTable(tbl);
+			this.resultInfo.setUpdateTable(updateTable);
 		}
 		catch (Exception e)
 		{
@@ -524,8 +545,12 @@ public class DataStore
 	}
 
 	/**
-	 * Returns the current table to be updated
+	 * Returns the current table to be updated if this DataStore is
+	 * based on a SELECT query
+	 * 
 	 * @return The current update table
+	 * 
+	 * @see #setGeneratingSql(String)
 	 */
 	public TableIdentifier getUpdateTable()
 	{
@@ -544,6 +569,17 @@ public class DataStore
 		return this.resultInfo.getColumnName(aColumn);
 	}
 
+	/**
+	 * Return the suggested display size of the column. This is 
+	 * delegated to the instance of the {@link workbench.storage.ResultInfo} class
+	 * that is used to store the column meta data
+	 * 
+	 * @param aColumn the column index
+	 * @return the suggested display size
+	 * 
+	 * @see workbench.storage.ResultInfo#getColumnSize(int)
+	 * @see workbench.gui.components.DataStoreTableModel#getColumnWidth(int)
+	 */
 	public int getColumnDisplaySize(int aColumn)
 		throws IndexOutOfBoundsException
 	{
@@ -556,6 +592,17 @@ public class DataStore
 		return row.getOriginalValue(aColumn);
 	}
 
+	/**
+	 * Returns the current value of the specified column in the specified row.
+	 * @param aRow the row to get the data from (starts at 0)
+	 * @param aColumn the column to get the data for (starts at 0)
+	 * 
+	 * @return the current value of the column might be different to the value
+	 * retrieved from the database!
+	 * 
+	 * @see workbench.storage.RowData.getValue(int)
+	 * @see #getRow(int)
+	 */
 	public Object getValue(int aRow, int aColumn)
 		throws IndexOutOfBoundsException
 	{
@@ -759,172 +806,6 @@ public class DataStore
 	{
 		RowData row = this.getRow(aRow);
 		return row.isNew();
-	}
-
-	public StringBuffer getRowDataAsString(int aRow)
-	{
-		String delimit = Settings.getInstance().getDefaultTextDelimiter();
-		return this.getRowDataAsString(aRow, delimit);
-	}
-
-	public StringBuffer getRowDataAsString(int aRow, String aDelimiter)
-	{
-		RowData row = this.getRow(aRow);
-		DecimalFormat formatter = Settings.getInstance().getDefaultDecimalFormatter();
-		return row.getDataAsString(aDelimiter, formatter);
-	}
-
-	public StringBuffer getRowDataAsString(int aRow, String aDelimiter, boolean[] columns)
-	{
-		RowData row = this.getRow(aRow);
-		DecimalFormat formatter = Settings.getInstance().getDefaultDecimalFormatter();
-		return row.getDataAsString(aDelimiter, formatter, columns);
-	}
-
-	/**
-	 * Return a StringBuffer with the names of the columns of this DataStore
-	 * @param aFieldDelimiter the delimiter to be used
-	 * @return a string containing the names of all columns
-	 */
-	public StringBuffer getHeaderString(String aFieldDelimiter)
-	{
-		return getHeaderString(aFieldDelimiter, null);
-	}
-
-	/**
-	 * Return a StringBuffer with the names of the columns present in the
-	 * given List.
-	 * @param aFieldDelimiter the delimiter to be used
-	 * @param columns the columns to include. If null, all columns are included
-	 * @return a string containing the names of the selected columns
-	 */
-	public StringBuffer getHeaderString(String aFieldDelimiter, List columns)
-	{
-		int cols = this.resultInfo.getColumnCount();
-		StringBuffer result = new StringBuffer(cols * 30);
-		int numCols = 0;
-		for (int i=0; i < cols; i++)
-		{
-			if (columns != null)
-			{
-				if (!columns.contains(this.resultInfo.getColumn(i))) continue;
-			}
-			String colName = this.getColumnName(i);
-			if (numCols > 0) result.append(aFieldDelimiter);
-
-			if (colName == null || colName.trim().length() == 0) colName = "Col" + i;
-			result.append(colName);
-			numCols ++;
-		}
-		return result;
-	}
-
-	public String getDataString(String aLineTerminator, boolean includeHeaders)
-	{
-		return this.getDataString(Settings.getInstance().getDefaultTextDelimiter(), aLineTerminator, includeHeaders, null);
-	}
-
-	public String getDataString(String aLineTerminator, boolean includeHeaders, List columns)
-	{
-		return this.getDataString(Settings.getInstance().getDefaultTextDelimiter(), aLineTerminator, includeHeaders, columns);
-	}
-
-	public String getDataString(String aFieldDelimiter, String aLineTerminator, boolean includeHeaders)
-	{
-		return this.getDataString(aFieldDelimiter, aLineTerminator, includeHeaders, null);
-	}
-
-	public String getDataString(String aFieldDelimiter, String aLineTerminator, boolean includeHeaders, List columns)
-	{
-		int count = this.getRowCount();
-		StringWriter result = new StringWriter(count * 250);
-		try
-		{
-			this.writeDataString(result, aFieldDelimiter, aLineTerminator, includeHeaders, columns);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DataStore.getDataString()", "Error when writing ASCII data to StringWriter", e);
-			return "";
-		}
-		return result.toString();
-	}
-
-	public void writeDataString(Writer out, String aFieldDelimiter, String aLineTerminator, boolean includeHeaders)
-		throws IOException
-	{
-		this.writeDataString(out, aFieldDelimiter, aLineTerminator, includeHeaders, (List)null);
-	}
-	/**
-	 *	WriteDataString writes the contents of this datastore into the passed Writer.
-	 *	This can be used to write the contents directly to disk without the need
-	 *  to build a complete buffer in memory
-	 */
-	public void writeDataString(Writer out, String aFieldDelimiter, String aLineTerminator, boolean includeHeaders, List columns)
-		throws IOException
-	{
-		int count = this.getRowCount();
-		if (includeHeaders)
-		{
-			out.write(this.getHeaderString(aFieldDelimiter, columns).toString());
-			out.write(aLineTerminator);
-		}
-		boolean[] includeColumns = columnListToBool(columns);
-		for (int i=0; i < count; i++)
-		{
-			out.write(this.getRowDataAsString(i, aFieldDelimiter, includeColumns).toString());
-			out.write(aLineTerminator);
-		}
-	}
-
-	private boolean[] columnListToBool(List columns)
-	{
-		int colCount = this.getColumnCount();
-		boolean[] includeColumns = new boolean[colCount];
-		for (int i=0; i < colCount; i++)
-		{
-			if (columns != null)
-			{
-				includeColumns[i] = columns.contains(this.resultInfo.getColumn(i));
-			}
-			else
-			{
-				includeColumns[i] = true;
-			}
-		}
-		return includeColumns;
-	}
-
-	public void writeDataString(Writer out, String aFieldDelimiter, String aLineTerminator, boolean includeHeaders, int[] rows)
-		throws IOException
-	{
-		writeDataString(out, aFieldDelimiter, aLineTerminator, includeHeaders, rows, null);
-	}
-
-	/**
-	 *	Write the contents of the datastore into the writer but only the rows
-	 *  that have been passed in the rows[] parameter
-	 */
-	public void writeDataString(Writer out, String aFieldDelimiter, String aLineTerminator, boolean includeHeaders, int[] rows, List columns)
-		throws IOException
-	{
-		if (rows == null) 
-		{
-			writeDataString(out, aFieldDelimiter, aLineTerminator, includeHeaders, columns);
-			return;
-		}
-		if (includeHeaders)
-		{
-			out.write(this.getHeaderString(aFieldDelimiter, columns).toString());
-			out.write(aLineTerminator);
-		}
-		int count = rows.length;
-		boolean[] cols = columnListToBool(columns);
-		for (int i=0; i < count; i++)
-		{
-			out.write(this.getRowDataAsString(rows[i], aFieldDelimiter, cols).toString());
-			out.write(aLineTerminator);
-		}
 	}
 
 	/**
@@ -1168,17 +1049,19 @@ public class DataStore
 	{
 		return new SqlLiteralFormatter(this.originalConnection);
 	}
+	
 	/**
 	 * Checks if the underlying SQL statement references only one table.
 	 * @return true if only one table is found in the SELECT statement
+	 * 
+	 * @see workbench.util.SqlUtil#getTables(String)
 	 */
 	public boolean sqlHasUpdateTable()
 	{
 		if (this.updateTable != null) return true;
 		if (this.sql == null) return false;
 		List tables = SqlUtil.getTables(this.sql);
-		if (tables.size() != 1) return false;
-		return true;
+		return (tables.size() == 1);
 	}
 
 	/**
@@ -1192,16 +1075,39 @@ public class DataStore
 		}
 	}
 
+	/**
+	 * Cancels a currently running update. This has to be called
+	 * from a different thread than the one from which updatedb() was
+	 * called
+	 * 
+	 * @see #updateDb(workbench.db.WbConnection, workbench.interfaces.JobErrorHandler)
+	 */
 	public void cancelUpdate()
 	{
 		this.cancelUpdate = true;
 	}
 
+	/**
+	 * If the DataStore is beeing initialized with a ResultSet, this 
+	 * cancels the processing of the ResultSet.
+	 * 
+	 * @see workbench.storage.DataStore(ResultSet)
+	 * @see #initData(ResultSet)
+	 */
 	public void cancelRetrieve()
 	{
 		this.cancelRetrieve = true;
 	}
 
+	/**
+	 * Checks if the last ResultSet processing was cancelled. 
+	 * This will only be correct if initData() was called previously
+	 * 
+	 * @return true if retrieval was cancelled. 
+	 * 
+	 * @see workbench.storage.DataStore(ResultSet)
+	 * @see #initData(ResultSet)
+	 */
 	public boolean isCancelled() 
 	{
 		return this.cancelRetrieve;
@@ -1224,6 +1130,12 @@ public class DataStore
 	 * Returns a List of {@link workbench.storage.DmlStatement}s which
 	 * would be executed in order to store the current content
 	 * of the DataStore.
+	 * The returned list will be empty if no changes were made to the datastore
+	 * 
+	 * @return a List of {@link workbench.storage.DmlStatement}s to be sent to the database
+	 * 
+	 * @see workbench.storage.StatementFactory
+	 * @see workbench.storage.DmlStatement#getExecutableStatement()
 	 */
 	public List getUpdateStatements(WbConnection aConnection)
 		throws SQLException
@@ -1231,39 +1143,41 @@ public class DataStore
 		if (this.updateTable == null) throw new NullPointerException("No update table defined!");
 		this.updatePkInformation(aConnection);
 
-		ArrayList stmt = new ArrayList(this.getModifiedCount());
+		ArrayList stmtList = new ArrayList(this.getModifiedCount());
 		this.resetUpdateRowCounters();
 		DmlStatement dml = null;
 		RowData row = null;
 
 		StatementFactory factory = new StatementFactory(this.resultInfo, this.originalConnection);
 		factory.setIncludeTableOwner(aConnection.getMetadata().needSchemaInDML(resultInfo.getUpdateTable()));
+		
+		String le = Settings.getInstance().getInternalEditorLineEnding();
 
 		row = this.getNextDeletedRow();
 		while (row != null)
 		{
 			dml = factory.createDeleteStatement(row);
-			stmt.add(dml);
+			stmtList.add(dml);
 			row = this.getNextDeletedRow();
 		}
 
 		row = this.getNextChangedRow();
 		while (row != null)
 		{
-			dml = factory.createUpdateStatement(row);
-			stmt.add(dml);
+			dml = factory.createUpdateStatement(row, false, le);
+			stmtList.add(dml);
 			row = this.getNextChangedRow();
 		}
 
 		row = this.getNextInsertedRow();
 		while (row != null)
 		{
-			dml = factory.createInsertStatement(row, false, "\n");
-			stmt.add(dml);
+			dml = factory.createInsertStatement(row, false, le);
+			stmtList.add(dml);
 			row = this.getNextInsertedRow();
 		}
 		this.resetUpdateRowCounters();
-		return stmt;
+		return stmtList;
 	}
 
 	private boolean ignoreAllUpdateErrors = false;
@@ -1318,6 +1232,13 @@ public class DataStore
 	 * <li>Insert statements</li>
 	 * <li>Update statements</li>
 	 * </ul>
+	 * If everything was successful, the changes will be committed automatically
+	 * If an error occurs a rollback will be sent to the database
+	 * 
+	 * @return the number of rows affected
+	 * 
+	 * @see workbench.storage.StatementFactory
+	 * @see workbench.storage.DmlStatement#getExecutableStatement()
 	 */
 	public synchronized int updateDb(WbConnection aConnection, JobErrorHandler errorHandler)
 		throws SQLException
@@ -1338,7 +1259,8 @@ public class DataStore
 
 		StatementFactory factory = new StatementFactory(this.resultInfo, aConnection);
 		factory.setIncludeTableOwner(aConnection.getMetadata().needSchemaInDML(resultInfo.getUpdateTable()));
-
+		String le = Settings.getInstance().getInternalEditorLineEnding();
+		
 		try
 		{
 			this.resetUpdateRowCounters();
@@ -1365,7 +1287,7 @@ public class DataStore
 				this.updateProgressMonitor(currentRow, totalRows);
 				if (!row.isDmlSent())
 				{
-					dml = factory.createUpdateStatement(row, false, "\r\n");
+					dml = factory.createUpdateStatement(row, false, le);
 					rows += this.executeGuarded(aConnection, row, dml, errorHandler, currentUpdateRow);
 				}
 				Thread.yield();
@@ -1380,7 +1302,7 @@ public class DataStore
 				this.updateProgressMonitor(currentRow, totalRows);
 				if (!row.isDmlSent())
 				{
-					dml = factory.createInsertStatement(row, false);
+					dml = factory.createInsertStatement(row, false, le);
 					rows += this.executeGuarded(aConnection, row, dml, errorHandler, currentInsertRow);
 				}
 				Thread.yield();
@@ -1415,8 +1337,10 @@ public class DataStore
 	}
 
 	/**
-	 * Clears the flag for all modified rows that the update
-	 * has already been sent to the database
+	 * Clears the flag for all modified rows that indicates any pending update
+	 * has already been sent to the database.
+	 * This is necessary if an error occurs during update, to ensure the 
+	 * rows are re-send the next time.
 	 */
 	public void resetDmlSentStatus()
 	{
@@ -1494,45 +1418,6 @@ public class DataStore
 		}
 	}
 
-	public String getDefaultDateFormat()
-	{
-		return this.converter.getDatePattern();
-	}
-
-	public void setDefaultTimestampFormat(String aFormat)
-	{
-		if (aFormat == null) return;
-		this.converter.setDefaultTimestampFormat(aFormat);
-	}
-
-	public void setDefaultDateFormat(String aFormat)
-	{
-		if (aFormat == null) return;
-		this.converter.setDefaultDateFormat(aFormat);
-	}
-
-	public String getDefaultNumberFormat()
-	{
-		if (this.defaultNumberFormatter == null) return null;
-		return defaultNumberFormatter.toPattern();
-	}
-
-	public void setDefaultNumberFormat(String aFormat)
-	{
-		if (aFormat == null) return;
-		try
-		{
-			this.defaultNumberFormatter = new DecimalFormat(aFormat);
-			DecimalFormatSymbols symb = this.defaultNumberFormatter.getDecimalFormatSymbols();
-			this.converter.setDecimalCharacter(symb.getDecimalSeparator());
-		}
-		catch (Exception e)
-		{
-			this.defaultNumberFormatter = null;
-			LogMgr.logWarning("DataStore.setDefaultDateFormat()", "Could not create decimal formatter for format " + aFormat);
-		}
-	}
-
 	/**
 	 * Convert the value to the approriate class instance
 	 * for the given column
@@ -1594,6 +1479,13 @@ public class DataStore
 		return this.getPkValues(this.originalConnection, aRow);
 	}
 
+	/**
+	 * Returns a map with the value of all PK columns for the given 
+	 * row. The key to the map is the name of the column.
+	 * 
+	 * @see workbench.storage.ResultInfo#isPkColumn(int)
+	 * @see #getValue(int)
+	 */
 	public Map getPkValues(WbConnection aConnection, int aRow)
 	{
 		if (aConnection == null) return Collections.EMPTY_MAP;
@@ -1766,7 +1658,16 @@ public class DataStore
 		{
 			this.checkUpdateTable();
 		}
-		this.resultInfo.readPkDefinition(aConnection);
+		
+		// If we have found a single update table, but no Primary Keys
+		// we try to find a user-defined PK mapping. 
+		// there is no need to call readPkDefinition() as that 
+		// will only try to find the PK columns of the update table 
+		// first, which we have already tried in checkUpdateTable()
+		if (this.updateTable != null && !this.hasPkColumns())
+		{
+			this.resultInfo.readPkColumnsFromMapping(aConnection);
+		}
 	}
 
 	/** Getter for property progressMonitor.

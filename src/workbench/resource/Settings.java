@@ -1868,7 +1868,28 @@ public class Settings
 
 	public String getDefaultTextDelimiter(boolean readable)
 	{
-		String del = getProperty("workbench.export.text.fielddelimiter", "\\t");
+		return getDelimiter("workbench.export.text.fielddelimiter", "\\t", readable);
+	}
+
+	public void setClipboardDelimiter(String delim)
+	{
+		setDelimiter("workbench.import.clipboard.fielddelimiter", delim);
+	}
+
+	public String getClipboardDelimiter(boolean readable)
+	{
+		return getDelimiter("workbench.import.clipboard.fielddelimiter", "\\t", readable);
+	}
+	
+	public void setDelimiter(String prop, String delim)
+	{
+		if (delim.equals("\t")) delim = "\\t";
+		setProperty("workbench.import.clipboard.fielddelimiter", delim);
+	}
+	
+	public String getDelimiter(String prop, String def, boolean readable)
+	{
+		String del = getProperty(prop, def);
 		if (readable)
 		{
 			if (del.equals("\t"))
@@ -1882,8 +1903,8 @@ public class Settings
 		}
 
 		return del;
+		
 	}
-
 	public void setDefaultTextDelimiter(String aDelimit)
 	{
 		if (aDelimit.equals("\t")) aDelimit = "\\t";
@@ -1893,20 +1914,7 @@ public class Settings
 
 	public String getLastImportDelimiter(boolean readable)
 	{
-		String del = getProperty("workbench.import.text.fielddelimiter", "\\t");
-		if (readable)
-		{
-			if (del.equals("\t"))
-			{
-				del = "\\t";
-			}
-		}
-		else
-		{
-			if (del.equals("\\t")) del = "\t";
-		}
-
-		return del;
+		return getDelimiter("workbench.import.text.fielddelimiter", "\\t", readable);
 	}
 
 	public boolean getConsolidateLogMsg()
@@ -2036,6 +2044,25 @@ public class Settings
 		return this.props.getIntProperty(aProperty, defaultValue);
 	}
 
+	public void setGeneratedSqlTableCase(String value)
+	{
+		if (value != null)
+		{
+			if (value.toLowerCase().startsWith("lower")) setProperty("workbench.sql.generate.table.case", "lower");
+			else if (value.toLowerCase().startsWith("upper")) setProperty("workbench.sql.generate.table.case", "upper");
+			else setProperty("workbench.sql.generate.table.case", "original");
+		}
+		else
+		{
+			setProperty("workbench.sql.generate.table.case", "original");
+		}
+	}
+
+	public String getGeneratedSqlTableCase()
+	{
+		return getProperty("workbench.sql.generate.table.case", getAutoCompletionPasteCase());
+	}
+	
 	public void setAutoCompletionPasteCase(String value)
 	{
 		if (value != null)

@@ -38,7 +38,6 @@ import javax.swing.ComponentInputMap;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
-import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -58,6 +57,7 @@ import workbench.db.exporter.DataExporter;
 import workbench.db.importer.DataStoreImporter;
 import workbench.gui.actions.FilterDataAction;
 import workbench.gui.actions.FilterPickerAction;
+import workbench.gui.actions.ImportClipboardAction;
 import workbench.gui.actions.ResetFilterAction;
 import workbench.gui.actions.ViewMessageLogAction;
 import workbench.gui.components.GenericRowMonitor;
@@ -89,10 +89,6 @@ import workbench.gui.actions.ExecuteSelAction;
 import workbench.gui.actions.ExpandEditorAction;
 import workbench.gui.actions.ExpandResultAction;
 import workbench.gui.actions.FileDiscardAction;
-import workbench.gui.actions.FileOpenAction;
-import workbench.gui.actions.FileReloadAction;
-import workbench.gui.actions.FileSaveAction;
-import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.FindAction;
 import workbench.gui.actions.FindDataAction;
 import workbench.gui.actions.FindDataAgainAction;
@@ -116,7 +112,6 @@ import workbench.gui.actions.SelectKeyColumnsAction;
 import workbench.gui.actions.SelectMaxRowsAction;
 import workbench.gui.actions.SelectResultAction;
 import workbench.gui.actions.SpoolDataAction;
-import workbench.gui.actions.StartEditAction;
 import workbench.gui.actions.StopAction;
 import workbench.gui.actions.ToggleAutoCommitAction;
 import workbench.gui.actions.UndoAction;
@@ -132,6 +127,8 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarSeparator;
+import workbench.gui.dialogs.dataimport.ImportOptions;
+import workbench.gui.dialogs.dataimport.TextImportOptions;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
 import workbench.interfaces.Commitable;
@@ -147,7 +144,6 @@ import workbench.interfaces.MainPanel;
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.Exporter;
 import workbench.interfaces.TextChangeListener;
-import workbench.interfaces.TextFileContainer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -173,12 +169,12 @@ public class SqlPanel
 	extends JPanel
 	implements FontChangedListener, ActionListener, TextChangeListener,
 		PropertyChangeListener, ChangeListener, 
-		MainPanel, Exporter, TextFileContainer, DbUpdater, Interruptable, FormattableSql, Commitable,
-		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier
+		MainPanel, Exporter, DbUpdater, Interruptable, FormattableSql, Commitable,
+		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
+		FilenameChangeListener
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected EditorPanel editor;
-	
 	protected DwPanel currentData;
 	protected SqlHistory sqlHistory;
 
@@ -208,13 +204,13 @@ public class SqlPanel
 	protected CopyAsSqlDeleteInsertAction copyAsSqlDeleteInsert;
 	protected CreateDeleteScriptAction createDeleteScript;
 	protected ImportFileAction importFileAction;
+	protected ImportClipboardAction importClipAction;
 	protected PrintAction printDataAction;
 	protected PrintPreviewAction printPreviewAction;
 	protected UpdateDatabaseAction updateAction;
 	protected InsertRowAction insertRow;
 	protected CopyRowAction duplicateRow;
 	protected DeleteRowAction deleteRow;
-	//protected StartEditAction startEdit;
 	protected SelectKeyColumnsAction selectKeys;
 	protected FilterDataAction filterAction;
 	protected FilterPickerAction filterPicker;
@@ -234,7 +230,6 @@ public class SqlPanel
 	protected SpoolDataAction spoolData;
 
 	protected FileDiscardAction fileDiscardAction;
-	protected FileReloadAction fileReloadAction;
 	protected FindDataAction findDataAction;
 	protected FindDataAgainAction findDataAgainAction;
 	protected WbToolbar toolbar;
@@ -288,7 +283,7 @@ public class SqlPanel
 		JScrollPane scroll = new WbScrollPane(log);
 		this.resultTab.addTab(ResourceMgr.getString("LblTabMessages"), scroll);
 
-		//this.editor.addFilenameChangeListener(this);
+		this.editor.addFilenameChangeListener(this);
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
 		this.contentPanel.setOneTouchExpandable(true);
 		this.contentPanel.setContinuousLayout(true);
@@ -375,63 +370,27 @@ public class SqlPanel
 	public boolean readFile(String aFilename, String encoding)
 	{
 		if (aFilename == null) return false;
+		
 		boolean result = false;
+		
 		File f = new File(aFilename);
-		if (!f.exists()) return false;
 
 		if (this.editor.readFile(f, encoding))
 		{
-			this.fileDiscardAction.setEnabled(true);
-			this.fileReloadAction.setEnabled(true);
-      this.fireFilenameChanged(this.editor.getCurrentFileName());
 			this.selectEditor();
 			result = true;
-			this.showFileIcon();
 		}
 		else
 		{
 			this.removeIconFromTab();
+			result = false;
 		}
 		return result;
-	}
-
-	public boolean openFile()
-	{
-		String oldFile = this.editor.getCurrentFileName();
-		if (!this.canCloseFile())
-		{
-			this.selectEditorLater();
-			return false;
-		}
-		if (this.editor.openFile())
-		{
-			String newFile = this.editor.getCurrentFileName();
-			if (newFile != null && !newFile.equals(oldFile))
-			{
-				this.fileDiscardAction.setEnabled(true);
-				this.fileReloadAction.setEnabled(true);
-	      this.fireFilenameChanged(this.editor.getCurrentFileName());
-				this.selectEditorLater();
-			}
-			this.showFileIcon();
-			return true;
-		}
-		return false;
 	}
 
 	public boolean hasFileLoaded()
 	{
 		return this.editor.hasFileLoaded();
-	}
-
-	public boolean reloadFile()
-	{
-		if (this.editor.reloadFile())
-		{
-			this.showFileIcon();
-			return true;
-		}
-		return false;
 	}
 
 	public boolean checkAndSaveFile()
@@ -446,46 +405,7 @@ public class SqlPanel
 	{
 		return this.editor;
 	}
-	/**
-	 *	Check if the current file has modifications.
-	 *	@return true Modifications saved or user doesn't care
-	 *          false do not close the current
-	 */
-	public boolean canCloseFile()
-	{
-		return this.editor.canCloseFile();
-	}
-
-	public boolean saveCurrentFile()
-	{
-		String oldFile = this.editor.getCurrentFileName();
-		if (this.editor.saveCurrentFile())
-		{
-			String newFile = this.editor.getCurrentFileName();
-			if (newFile != null && !newFile.equals(oldFile))
-			{
-	      this.fireFilenameChanged(this.editor.getCurrentFileName());
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public boolean saveFile()
-	{
-		String oldFile = this.editor.getCurrentFileName();
-		if (this.editor.saveFile())
-		{
-			String newFile = this.editor.getCurrentFileName();
-			if (newFile != null && !newFile.equals(oldFile))
-			{
-				this.fireFilenameChanged(this.editor.getCurrentFileName());
-			}
-			return true;
-		}
-		return false;
-	}
-
+	
 	public void clearSqlHistory(boolean removeEditorText)
 	{
 		if (this.sqlHistory != null) this.sqlHistory.clear();
@@ -507,17 +427,32 @@ public class SqlPanel
 		}
 		if (this.editor.closeFile(emptyEditor))
     {
-			this.fileDiscardAction.setEnabled(false);
-			this.fileReloadAction.setEnabled(false);
-      this.fireFilenameChanged(this.tabName);
 			this.selectEditorLater();
-			this.removeIconFromTab();
 			this.clearSqlHistory(false);
 			return true;
     }
 		return false;
 	}
 
+	public void fileNameChanged(Object sender, String newFilename)
+	{
+		if (sender == this.editor)
+		{
+			boolean hasFile = editor.hasFileLoaded();
+			this.fileDiscardAction.setEnabled(hasFile);
+			
+			if (hasFile)
+			{
+				this.showFileIcon();
+			}
+			else
+			{
+				this.removeIconFromTab();
+			}
+			updateTabTitle();
+		}
+	}
+	
 	private void fireFilenameChanged(String aNewName)
 	{
 		updateTabTitle();
@@ -562,15 +497,13 @@ public class SqlPanel
 
 		TextPopup pop = (TextPopup)this.editor.getRightClickPopup();
 
-		FileOpenAction open = new FileOpenAction(this);
-		open.setCreateMenuSeparator(true);
-		this.actions.add(open);
-		this.actions.add(new FileSaveAction(this));
-		this.actions.add(new FileSaveAsAction(this));
+		this.actions.add(editor.getFileOpenAction());
+		this.actions.add(editor.getFileSaveAction());
+		this.actions.add(editor.getFileSaveAsAction());
+		
 		this.fileDiscardAction = new FileDiscardAction(this);
 		this.actions.add(this.fileDiscardAction);
-		this.fileReloadAction = new FileReloadAction(this);
-		this.actions.add(this.fileReloadAction);
+		this.actions.add(this.editor.getReloadAction());
 
 		this.actions.add(new UndoAction(this.editor));
 		this.actions.add(new RedoAction(this.editor));
@@ -600,6 +533,9 @@ public class SqlPanel
 		this.actions.add(this.editor.getUnCommentAction());
 		this.actions.add(this.editor.getMatchBracketAction());
 
+		// The update actions are proxies for the real ones
+		// Once a result tab (DwPanel) has been displayed
+		// they are "dispatched" to the real ones
 		this.updateAction = new UpdateDatabaseAction(null);
 		this.insertRow = new InsertRowAction(null);
 		this.deleteRow = new DeleteRowAction(null);
@@ -661,6 +597,9 @@ public class SqlPanel
 		this.importFileAction = new ImportFileAction(this);
 		this.importFileAction.setCreateMenuSeparator(true);
 		this.actions.add(this.importFileAction);
+		
+		this.importClipAction = new ImportClipboardAction(this);
+		this.actions.add(this.importClipAction);
 
 		this.printDataAction = new PrintAction(null); 
 		this.printPreviewAction = new PrintPreviewAction(null); 
@@ -1760,8 +1699,9 @@ public class SqlPanel
 	}
 
 	/**
-	 * 	We are implementing our own getUpdateErrorAction() because it's necessary to
-	 *  turn off the loading indicator before displaying a message box.
+	 * 	We are implementing our own getUpdateErrorAction() (and not using the one from 
+	 *  DwPanel) because it's necessary to turn off the loading indicator before displaying a message box.
+	 * 
 	 * 	DwPanel's getUpdateErrorAction is called from here after turning off the loading indicator.
 	 */
 	public int getUpdateErrorAction(int errorRow, String errorColumn, String dataLine, String errorMessage)
@@ -1804,7 +1744,7 @@ public class SqlPanel
 		return result;
 	}
 
-	public synchronized void importFile()
+	public void importFile()
 	{
 		if (this.currentData == null) return;
 		if (!this.currentData.startEdit()) return;
@@ -1812,22 +1752,60 @@ public class SqlPanel
 		dialog.allowImportModeSelection(false);
 		boolean ok = dialog.selectInput(ResourceMgr.getString("TxtWindowTitleSelectImportFile"));
 		if (!ok) return; 
-		
-		this.setActionState(this.importFileAction, false);
-		
-		final DataStoreImporter importer = new DataStoreImporter(currentData.getTable().getDataStore(), currentData.getRowMonitor(), this);
-		final String filename = dialog.getSelectedFilename();
-		
-		importer.setImportOptions(filename, 
+		DataStoreImporter importer = new DataStoreImporter(currentData.getTable().getDataStore(), currentData.getRowMonitor(), this);
+		File importFile = dialog.getSelectedFile();
+		importer.setImportOptions(importFile, 
 			                        dialog.getImportType(), 
 			                        dialog.getGeneralOptions(), 
 			                        dialog.getTextOptions(), 
 			                        dialog.getXmlOptions());
 		
-		File f = new File(filename);
-		Settings.getInstance().setLastImportDir(f.getParent());
+		Settings.getInstance().setLastImportDir(importFile.getParent());
 		dialog.saveSettings();
+		runImporter(importer);
+	}
+	
+	public void importString(String content, boolean showOptions)
+	{
+		if (this.currentData == null) return;
 
+		DataStore ds = currentData.getTable().getDataStore();
+		
+		ImportStringVerifier v = new ImportStringVerifier(content, ds.getResultInfo());
+//		if (!v.isMultiline())
+//		{
+//			WbSwingUtilities.showErrorMessageKey(SwingUtilities.getWindowAncestor(this), "ErrClipNoLines");
+//			return;
+//		}
+		
+		DataStoreImporter importer = new DataStoreImporter(ds, currentData.getRowMonitor(), this);
+		if (showOptions || !v.checkData())
+		{
+			boolean checked = false;
+			while (!checked)
+			{
+				boolean ok = v.showOptionsDialog();
+				if (!ok) return; // user cancelled dialog
+				checked = v.checkData();
+			}
+			//ImportOptions options = v.getGeneralImportOptions();
+			//if (options == null) return;
+			TextImportOptions textOptions = v.getTextImportOptions();
+			ImportOptions options = v.getImportOptions();
+			importer.importString(content, options, textOptions);
+		}
+		else
+		{
+			importer.importString(content);
+		}
+		if (!this.currentData.startEdit()) return;
+		
+		runImporter(importer);
+	}
+	
+	protected synchronized void runImporter(final DataStoreImporter importer)
+	{
+		this.setActionState(this.importFileAction, false);
 		this.setBusy(true);
 		this.setCancelState(true);
 		this.worker = importer;
@@ -1843,7 +1821,7 @@ public class SqlPanel
 				}
 				catch (Throwable e)
 				{
-					LogMgr.logError("SqlPanel.importFile() - worker thread", "Error when importing " + filename, e);
+					LogMgr.logError("SqlPanel.importData() - worker thread", "Error when importing data", e);
 				}
 				finally
 				{
@@ -1853,6 +1831,8 @@ public class SqlPanel
 					currentData.getTable().getDataStoreTableModel().fileImported();
 					currentData.rowCountChanged();
 					currentData.clearStatusMessage();
+					String msg = importer.getMessage();
+					if (!StringUtil.isEmptyString(msg)) appendToLog(msg);
 					setCancelState(false);
 					checkResultSetActions();
 				}
@@ -2213,8 +2193,8 @@ public class SqlPanel
 
 			boolean onErrorAsk = !Settings.getInstance().getIgnoreErrors();
 
-            // Displays the first "result" tab. As no result is available
-            // at this point, it merely shows the message log
+			// Displays the first "result" tab. As no result is available
+			// at this point, it merely shows the message log
 			this.showResultPanel();
 
 			highlightCurrent = ((count > 1 || commandAtIndex > -1) && (!macroRun) && Settings.getInstance().getHighlightCurrentStatement());
@@ -2227,6 +2207,7 @@ public class SqlPanel
 			}
 			
 			long startTime = System.currentTimeMillis();
+			statusBar.executionStart();
 			long stmtTotal = 0;
 			int executedCount = 0;
 			String currentSql = null;
@@ -2358,9 +2339,9 @@ public class SqlPanel
 
 			} // end for loop
 
-			final long end = System.currentTimeMillis();
-			long execTime = (end - startTime);
-			statusBar.setExecutionTime(stmtTotal);
+			long execTime = (System.currentTimeMillis() - startTime);
+			// this will automatically stop the execution timer in the status bar
+			statusBar.setExecutionTime(stmtTotal); 
 			statusBar.clearStatusMessage();
 
 			if (commandWithError > -1 && highlightOnError && !macroRun)
@@ -2484,7 +2465,7 @@ public class SqlPanel
 		data.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		data.setConnection(this.dbConnection);
 		data.setUpdateHandler(this);
-		//data.setAutomaticUpdateTableCheck(!this.dbConnection.getProfile().getDisableUpdateTableCheck());
+		
 		return data;
 	}
 	/**
@@ -2570,8 +2551,20 @@ public class SqlPanel
 			rows = this.currentData.getTable().getSelectedRowCount();
 			findNext = hasResult && (this.currentData.getTable().canSearchAgain());
 		}
-		this.setActionState(new Action[] {this.findDataAction, this.dataToClipboard, this.exportDataAction, this.optimizeAllCol, this.printDataAction, this.printPreviewAction}, hasResult);
+		
+		Action[] actions = new Action[] 
+						{ this.findDataAction, 
+							this.dataToClipboard, 
+							this.exportDataAction, 
+							this.optimizeAllCol, 
+							this.printDataAction, 
+							this.printPreviewAction
+						};
+		this.setActionState(actions, hasResult);
+		
 		this.importFileAction.setEnabled(mayEdit);
+		this.importClipAction.setEnabled(mayEdit);
+		
 		this.findDataAgainAction.setEnabled(findNext);
 		this.copySelectedMenu.setEnabled(hasResult);
 	}

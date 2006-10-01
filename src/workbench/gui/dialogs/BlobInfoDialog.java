@@ -389,7 +389,7 @@ public class BlobInfoDialog
 			byte[] data = handler.getBlobAsArray(this.blobValue);
 			if (data == null) 
 			{
-				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgBlobNotRetrieved"));
+				WbSwingUtilities.showErrorMessageKey(this, "MsgBlobNotRetrieved");
 				return;
 			}
 			HexViewer v = new HexViewer(this, ResourceMgr.getString("TxtBlobData"));

@@ -103,6 +103,7 @@ import workbench.gui.actions.InsertTabAction;
 import workbench.gui.actions.OptionsDialogAction;
 import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.actions.WhatsNewAction;
+import workbench.gui.sql.EditorPanel;
 
 /**
  * The main window for the Workbench.

@@ -727,7 +727,7 @@ public class TableListPanel
 
 		if (dbConnection == null || dbConnection.isClosed())
 		{
-			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrConnectionGone"));
+			WbSwingUtilities.showErrorMessageKey(this, "ErrConnectionGone");
 			return;
 		}
 

@@ -34,7 +34,7 @@ public class ImportFileDialog
 	implements PropertyChangeListener
 {
 	private int importType = -1;
-	private String selectedFilename = null;
+	private File selectedFile = null;
 	private boolean isCancelled = false;
 	private Settings settings = Settings.getInstance();
 	private ImportOptionsPanel importOptions;
@@ -79,9 +79,9 @@ public class ImportFileDialog
 		return importOptions.getGeneralOptions();
 	}
 	
-	public String getSelectedFilename()
+	public File getSelectedFile()
 	{
-		return this.selectedFilename;
+		return this.selectedFile;
 	}
 	
 	public int getImportType()
@@ -111,7 +111,7 @@ public class ImportFileDialog
 	public boolean selectInput(String title)
 	{
 		this.importType = -1;
-		this.selectedFilename = null;
+		this.selectedFile = null;
 		boolean result = false;
 		
 		String lastDir = settings.getProperty(lastDirConfigKey, null);
@@ -160,7 +160,7 @@ public class ImportFileDialog
 				
 			settings.setProperty(this.lastDirConfigKey, lastDir);
 			this.saveSettings();
-			this.selectedFilename = filename;
+			this.selectedFile = new File(filename);
 			result = true;
 		}
 		else

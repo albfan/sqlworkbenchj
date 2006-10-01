@@ -31,25 +31,35 @@ public class TextOptionsPanel
 	{
 		initComponents();
 	}
-
+	
 	public void saveSettings()
 	{
+		saveSettings("text");
+	}
+
+	public void saveSettings(String key)
+	{
 		Settings s = Settings.getInstance();
-		s.setProperty("workbench.import.text.containsheader", this.getContainsHeader());
-		s.setProperty("workbench.import.text.decode", this.getDecode());
-		s.setDefaultTextDelimiter(this.getTextDelimiter());
-		s.setQuoteChar(this.getTextQuoteChar());
-		s.setProperty("workbench.import.text.decimalchar", this.getDecimalChar());
+		s.setProperty("workbench.import."  + key + ".containsheader", this.getContainsHeader());
+		s.setProperty("workbench.import." + key + ".decode", this.getDecode());
+		s.setDelimiter("workbench.import." + key + ".fielddelimiter", getTextDelimiter());
+		s.setProperty("workbench.import." + key + ".quotechar", this.getTextQuoteChar());
+		s.setProperty("workbench.import." + key + ".decimalchar", this.getDecimalChar());
 	}
 	
 	public void restoreSettings()
 	{
+		restoreSettings("text");
+	}
+	
+	public void restoreSettings(String key)
+	{
 		Settings s = Settings.getInstance();
-		this.setContainsHeader(s.getBoolProperty("workbench.import.text.containsheader", true));
-		this.setDecode(s.getBoolProperty("workbench.import.text.decode", false));
-		this.setTextQuoteChar(s.getQuoteChar());
-		this.setTextDelimiter(s.getDefaultTextDelimiter(true));
-		this.setDecimalChar(s.getProperty("workbench.import.text.decimalchar", "."));
+		this.setContainsHeader(s.getBoolProperty("workbench.import." + key + ".containsheader", true));
+		this.setDecode(s.getBoolProperty("workbench.import." + key + ".decode", false));
+		this.setTextQuoteChar(s.getProperty("workbench.import." + key + ".quotechar", s.getQuoteChar()));
+		this.setTextDelimiter(s.getDelimiter("workbench.import." + key + ".fielddelimiter", "\\t", true));
+		this.setDecimalChar(s.getProperty("workbench.import." + key + ".decimalchar", "."));
 	}
 	
 	public boolean getDecode()
@@ -77,6 +87,10 @@ public class TextOptionsPanel
 		return this.quoteChar.getText();
 	}
 
+	public void disableHeaderSelection()
+	{
+		this.headerIncluded.setEnabled(false);
+	}
 	public void setContainsHeader(boolean flag)
 	{
 		this.headerIncluded.setSelected(flag);

@@ -65,6 +65,7 @@ public class ConnectionProfile
 	{
 		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
 		WbPersistence.makeTransient(ConnectionProfile.class, "useSeperateConnectionPerTab");
+		WbPersistence.makeTransient(ConnectionProfile.class, "disableUpdateTableCheck");
 	}
 
 	public ConnectionProfile()
@@ -151,6 +152,8 @@ public class ConnectionProfile
 		return new ProfileKey(this.name, this.getGroup());
 	}
 
+	public void setDisableUpdateTableCheck(boolean flag) { }
+	
 	/**
 	 * Return true if the application should use a separate connection
 	 * per tab or if all SQL tabs including DbExplorer tabs and windows

@@ -77,6 +77,19 @@ public class WbAction
     this.putValue(ACTION_COMMAND_KEY, this.actionName);
 	}
 
+	protected boolean isShiftPressed(ActionEvent e)
+	{
+		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);		
+		return shiftPressed;
+	}
+	
+	protected boolean isCtrlPressed(ActionEvent e)
+	{
+		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+		ctrlPressed = ctrlPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
+		return ctrlPressed;
+	}
+	
 	public boolean hasShiftModifier() { return false; }
 	public boolean hasCtrlModifier() { return false; }
 	

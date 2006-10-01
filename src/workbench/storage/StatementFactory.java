@@ -44,7 +44,7 @@ public class StatementFactory
 	{
 		this.resultInfo = metaData;
 		this.setCurrentConnection(conn);
-		String s = Settings.getInstance().getAutoCompletionPasteCase();
+		String s = Settings.getInstance().getGeneratedSqlTableCase();
 		if (!StringUtil.isEmptyString(s))
 		{
 			if (s.equals("lower")) identifierCase = CASE_LOWER;
@@ -376,6 +376,7 @@ public class StatementFactory
 	private String adjustIdentifierCase(String value)
 	{
 		if (value == null) return null;
+		if (value.startsWith("\"")) return value;
 		if (this.identifierCase == CASE_UPPER)
 		{
 			return value.toUpperCase();

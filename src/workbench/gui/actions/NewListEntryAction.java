@@ -46,10 +46,9 @@ public class NewListEntryAction
 
 	public void executeAction(ActionEvent e)
 	{
-		boolean shiftPressed = checkShift && ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
 		try
 		{
-			this.client.newItem(shiftPressed);
+			this.client.newItem(isShiftPressed(e));
 		}
 		catch (Exception ex)
 		{

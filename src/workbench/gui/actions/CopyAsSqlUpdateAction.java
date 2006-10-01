@@ -21,7 +21,8 @@ import workbench.resource.ResourceMgr;
  *	Action to copy the contents of the data as SQL update statements into the clipboard
  *	@author  support@sql-workbench.net
  */
-public class CopyAsSqlUpdateAction extends WbAction
+public class CopyAsSqlUpdateAction 
+	extends WbAction
 {
 	private WbTable client;
 
@@ -35,15 +36,12 @@ public class CopyAsSqlUpdateAction extends WbAction
 	}
 
 	public boolean hasCtrlModifier() { return true; }
-	public boolean hasShiftModifier() { return true; }
+	public boolean hasShiftModifier() { return false; }
 	
 	public void executeAction(ActionEvent e)
 	{
-		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
-		ctrlPressed = ctrlPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
-		
 		ClipBoardCopier copier = new ClipBoardCopier(this.client);
-		copier.copyAsSql(true, false, ctrlPressed, false);
+		copier.copyAsSql(true, false, this.isCtrlPressed(e), false);
 	}
 
 }

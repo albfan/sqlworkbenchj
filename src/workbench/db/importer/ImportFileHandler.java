@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import workbench.db.exporter.RowDataConverter;
+import workbench.util.ClipboardFile;
 import workbench.util.EncodingUtil;
 import workbench.util.WbFile;
 import workbench.util.ZipUtil;
@@ -65,7 +67,12 @@ public class ImportFileHandler
 		throws IOException
 	{
 		Reader r = null;
-		if (isZip)
+		if (baseFile instanceof ClipboardFile)
+		{
+			ClipboardFile cb = (ClipboardFile)baseFile;
+			r = new StringReader(cb.getContents());
+		}
+		else if (isZip)
 		{
 			mainArchive = new ZipFile(baseFile);
 			Enumeration entries = mainArchive.entries();
@@ -90,6 +97,7 @@ public class ImportFileHandler
 	private void initAttachements()
 		throws IOException
 	{
+		if (baseFile instanceof ClipboardFile) throw new IOException("Attachments not supported for Clipboard");
 		
 		WbFile f = new WbFile(baseFile);
 		String basename = f.getFileName();
@@ -130,6 +138,8 @@ public class ImportFileHandler
 	public InputStream getAttachedFileStream(File f)
 		throws IOException
 	{
+		if (baseFile instanceof ClipboardFile) throw new IOException("Attachments not supported for Clipboard");
+		
 		if (this.isZip)
 		{
 			if (this.attachmentEntries == null) this.initAttachements();

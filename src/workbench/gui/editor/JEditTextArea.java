@@ -106,7 +106,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.54 2006-09-20 17:20:27 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.55 2006-10-01 17:08:40 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -1875,6 +1875,12 @@ public class JEditTextArea
 	public void setEditable(boolean editable)
 	{
 		this.editable = editable;
+		if (this.popup != null)
+		{
+			this.popup.getCutAction().setEnabled(editable);
+			this.popup.getClearAction().setEnabled(editable);
+			this.popup.getPasteAction().setEnabled(editable);
+		}
 	}
 
 	/**

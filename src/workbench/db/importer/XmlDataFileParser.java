@@ -55,7 +55,7 @@ public class XmlDataFileParser
 	implements RowDataProducer, ImportFileParser
 {
 	private String sourceDirectory;
-	private String inputFile;
+	private File inputFile;
 	private String tableName;
 	private String tableNameFromFile;
 	
@@ -107,7 +107,7 @@ public class XmlDataFileParser
 			LogMgr.logError("XmlDataFileParser.<init>", "Error creating XML parser", e);
 		}
 	}
-	public XmlDataFileParser(String inputFile)
+	public XmlDataFileParser(File inputFile)
 	{
 		this();
 		this.inputFile = inputFile;
@@ -265,8 +265,7 @@ public class XmlDataFileParser
 	private void readTableDefinition()
 		throws IOException, SAXException
 	{
-		File f = new File(this.inputFile);
-		fileHandler.setMainFile(f, this.encoding);
+		fileHandler.setMainFile(this.inputFile, this.encoding);
 		
 		XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(this.fileHandler);
 		this.columns = tableDef.getColumns();
@@ -290,10 +289,11 @@ public class XmlDataFileParser
 
 	public String getSourceFilename()
 	{
-		return this.inputFile;
+		if (this.inputFile == null) return null;
+		return this.inputFile.getAbsolutePath();
 	}
 	
-	public void setSourceFile(String file)
+	public void setSourceFile(File file)
 	{
 		this.sourceDirectory = null;
 		this.inputFile = file;
@@ -325,13 +325,9 @@ public class XmlDataFileParser
 	private void processOneFile()
 		throws Exception
 	{
-		File f = new File(this.inputFile);
-		
 		this.keepRunning = true;
 		this.regularStop = false;
 			
-		this.fileHandler.setMainFile(f, this.encoding);
-		
 		// readTableDefinition relies on the fileHandler, so this 
 		// has to be called after creating initializing the fileHandler
 		if (this.columns == null) this.readTableDefinition();
@@ -346,7 +342,8 @@ public class XmlDataFileParser
 		}
 		
 		// Re-initialize the reader in case we are reading from a ZIP archive
-		this.fileHandler.setMainFile(f, this.encoding);
+		// because readTableDefinition() can change the file handler
+		this.fileHandler.setMainFile(this.inputFile, this.encoding);
 		
 		this.messages = new StrBuffer();
 		this.sendTableDefinition();
@@ -418,7 +415,7 @@ public class XmlDataFileParser
 			{
 				try
 				{
-					this.inputFile = files[i].getAbsolutePath();
+					this.inputFile = files[i];
 					this.reset();
 
 					// readTableDefinition() might reset the verbose 
@@ -697,8 +694,7 @@ public class XmlDataFileParser
 			case Types.BLOB:
 			case Types.LONGVARBINARY:
 			case Types.VARBINARY:
-				File thisFile = new File(this.inputFile);
-				String fileDir = thisFile.getParent();
+				String fileDir = this.inputFile.getParent();
 				this.currentRow[this.realColIndex] = new File(fileDir, columnDataFile);
 				break;
 				

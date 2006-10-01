@@ -115,10 +115,6 @@ public class XmlRowDataConverter
 		closeColTag = "</" + coltag + ">";
 		closeRowTag = "</" + rowtag + ">";
 	}
-	public StrBuffer convertData()
-	{
-		return null;
-	}
 
 	public StrBuffer getStart()
 	{
@@ -138,13 +134,6 @@ public class XmlRowDataConverter
 		return xml;
 	}
 
-//	public void setBaseFilename(String name) 
-//	{ 
-//		if (name == null) return;
-//		WbFile f = new WbFile(name);
-//		//this.baseFilename = f.getFileName() + "_";
-//	}
-	
 	public StrBuffer getEnd(long totalRows)
 	{
 		StrBuffer xml = new StrBuffer(100);

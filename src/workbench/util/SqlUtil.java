@@ -40,12 +40,21 @@ public class SqlUtil
 {
 	private static Pattern specialCharPattern = Pattern.compile("[$:\\/ \\.;,]");
 	
-	public static String quoteObjectname(String aColname)
+	public static String quoteObjectname(String object)
+	{
+		return quoteObjectname(object, false);
+	}
+	
+	public static String quoteObjectname(String aColname, boolean quoteAlways)
 	{
 		if (aColname == null) return null;
-		Matcher m = specialCharPattern.matcher(aColname);
-		boolean b = m.find();
-		if (!b) return aColname.trim();
+		boolean doQuote = quoteAlways;
+		if (!doQuote)
+		{
+			Matcher m = specialCharPattern.matcher(aColname);
+			doQuote = m.find();
+		}
+		if (!doQuote) return aColname.trim();
 		StringBuffer col = new StringBuffer(aColname.length() + 5);
 		col.append('"');
 		col.append(aColname.trim());
@@ -131,6 +140,23 @@ public class SqlUtil
 			return null;
 		}
 	}
+
+	public static String getUpdateTable(String sql)
+	{
+		try
+		{
+			SQLLexer lexer = new SQLLexer(sql);
+			SQLToken t = lexer.getNextToken(false, false);
+			if (t == null || !t.getContents().equals("UPDATE")) return null;
+			t = lexer.getNextToken(false, false);
+			if (t == null) return null;
+			return t.getContents();
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}	
 	
 	/**
 	 *  Returns the SQL Verb for the given SQL string.

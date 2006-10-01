@@ -701,6 +701,29 @@ public class StringUtil
 		return ("true".equalsIgnoreCase(aString) || "1".equals(aString) || "y".equalsIgnoreCase(aString) || "yes".equalsIgnoreCase(aString) );
 	}
 
+	public static final StringBuffer getLines(String s, int lineCount)
+	{
+		StringBuffer result = new StringBuffer(lineCount * 100);
+		try
+		{
+			BufferedReader r = new BufferedReader(new StringReader(s));
+			int lines = 0;
+			String line = r.readLine();
+			while (line != null && lines < lineCount)
+			{
+				result.append(line);
+				result.append('\n');
+				lines ++;
+				line = r.readLine();
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 	public static final String getMaxSubstring(String s, int maxLen)
 	{
 		if (maxLen < 1) return s;

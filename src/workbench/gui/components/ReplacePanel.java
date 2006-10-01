@@ -251,7 +251,7 @@ public class ReplacePanel
 		}
 	}//GEN-LAST:event_replaceValueTextFieldFocusGained
 
-	public void showReplaceDialog(Component caller, final String currentText)
+	public void showReplaceDialog(Component caller, final String selectedText)
 	{
 		if (this.dialog != null)
 		{
@@ -278,18 +278,18 @@ public class ReplacePanel
 			}
 			this.dialog.addWindowListener(this);
 
-//			boolean hasCurrentText = false;
-//
-//			if (currentText != null)
-//			{
-//				if (currentText.indexOf('\n') == -1 && currentText.indexOf('\r') == -1)
-//				{
-//					this.criteriaTextField.setText(currentText);
-//					hasCurrentText = true;
-//				}
-//			}
+			boolean hasSelectedText = false;
 
-			//this.selectedTextCheckBox.setEnabled(this.client.isTextSelected());
+			boolean useCurrent = Settings.getInstance().getBoolProperty("workbench.gui.editor.replace.useselected", false);
+			
+			if (useCurrent && selectedText != null)
+			{
+				if (selectedText.indexOf('\n') == -1 && selectedText.indexOf('\r') == -1)
+				{
+					criteriaTextField.setText(selectedText);
+					hasSelectedText = true;
+				}
+			}
 
 			InputMap im = this.dialog.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 			ActionMap am = this.dialog.getRootPane().getActionMap();
@@ -298,14 +298,22 @@ public class ReplacePanel
 			im.put(escAction.getAccelerator(), escAction.getActionName());
 			am.put(escAction.getActionName(), escAction);
 
-//			final boolean selectSearchValue = !hasCurrentText;
+			final boolean criteriaAdded = hasSelectedText;
 
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
+					if (criteriaAdded)
+					{
+						replaceValueTextField.selectAll();
+						replaceValueTextField.requestFocus();
+					}
+					else
+					{
 						criteriaTextField.selectAll();
 						criteriaTextField.requestFocus();
+					}
 				}
 			});
 			this.dialog.setVisible(true);
@@ -384,7 +392,7 @@ public class ReplacePanel
 		{
 			this.saveSettings();
 			this.escAction = null;
-			this.dialog.hide();
+			this.dialog.setVisible(false);
 			this.dialog.dispose();
 			this.dialog = null;
 		}

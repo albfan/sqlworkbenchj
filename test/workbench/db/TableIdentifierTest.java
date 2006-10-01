@@ -38,6 +38,11 @@ public class TableIdentifierTest extends TestCase
 		tbl = new TableIdentifier(sql);
 		assertEquals("APP", tbl.getSchema());
 		assertEquals("BLOB_TEST", tbl.getTableName());
+
+		tbl = new TableIdentifier(sql);
+		tbl.setPreserveQuotes(true);
+		assertEquals("\"APP\"", tbl.getSchema());
+		assertEquals("\"BLOB_TEST\"", tbl.getTableName());
 		
 	}
 	

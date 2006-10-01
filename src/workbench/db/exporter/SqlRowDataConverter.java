@@ -49,7 +49,7 @@ public class SqlRowDataConverter
 	// that one failed export for the requested type
 	// resets the export type for subsequent tables
 	// the requested sqlType is stored in sqlType
-	// once the resultInfo is set in setResultInfo()
+	// Upon setting the ResultInfo in setResultInfo()
 	// the sqlTypeToUse is set accordingly and then 
 	// used in convertRowData()
 	private int sqlTypeToUse = SQL_INSERT;
@@ -113,11 +113,6 @@ public class SqlRowDataConverter
 		
 	}
 	
-	public StrBuffer convertData()
-	{
-		return null;
-	}
-
 	public StrBuffer getEnd(long totalRows)
 	{
 		boolean writeCommit = true;

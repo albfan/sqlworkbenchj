@@ -11,7 +11,6 @@
  */
 package workbench.util;
 
-import com.sun.corba.se.impl.javax.rmi.CORBA.Util;
 import java.io.File;
 import junit.framework.*;
 import java.io.BufferedInputStream;
@@ -35,7 +34,7 @@ import workbench.resource.ResourceMgr;
 public class LobFileStatementTest extends TestCase
 {
 	private TestUtil util;
-	
+
 	public LobFileStatementTest(String testName)
 	{
 		super(testName);
@@ -54,7 +53,7 @@ public class LobFileStatementTest extends TestCase
 	{
 		util.emptyBaseDirectory();
 	}
-	
+
 	public void testGetParameterCount()
 	{
 		File f = new File(util.getBaseDir(), "test.data");
@@ -67,17 +66,17 @@ public class LobFileStatementTest extends TestCase
 			assertEquals("Wrong parameter count", 1, stmt.getParameterCount());
 			LobFileParameter[] parms = stmt.getParameters();
 			assertEquals("Wrong parameter type", true, parms[0].isBinary());
-			
+
 			f = new File(util.getBaseDir(), "some file.data");
 			f.createNewFile();
-			
+
 			sql = "update bla set col = {$clobfile='" + f.getAbsolutePath() + "' encoding=utf8} where x = 1";
 			stmt = new LobFileStatement(sql);
 			assertEquals("Wrong parameter count", 1, stmt.getParameterCount());
 			parms = stmt.getParameters();
 			assertEquals("Wrong parameter type", false, parms[0].isBinary());
 			assertEquals("Wrong encoding", "utf8", parms[0].getEncoding());
-			
+
 			File target = new File(parms[0].getFilename());
 			assertEquals("Wrong filename parsed", "some file.data", f.getName());
 		}
@@ -92,7 +91,7 @@ public class LobFileStatementTest extends TestCase
 		}
 	}
 
-	
+
 	public void testGetPreparedSql()
 	{
 		File f = new File(util.getBaseDir(), "test.data");
@@ -100,12 +99,12 @@ public class LobFileStatementTest extends TestCase
 		{
 			// LobFileStatement checks for the presence of the file!
 			f.createNewFile();
-			
+
 			String sql = "update bla set col = {$blobfile=" + f.getAbsolutePath() + "} where x = 1";
 			LobFileStatement stmt = new LobFileStatement(sql);
 			String newSql = stmt.getPreparedSql();
 			assertEquals("Wrong SQL generated", "update bla set col =  ?  where x = 1", newSql);
-			
+
 			sql = "update bla set col = {$clobfile='" +  f.getAbsolutePath() + "'} where x = 1";
 			stmt = new LobFileStatement(sql);
 			assertEquals("Wrong SQL generated", "update bla set col =  ?  where x = 1", stmt.getPreparedSql());
@@ -113,7 +112,7 @@ public class LobFileStatementTest extends TestCase
 			sql = "update bla set col = {$clobfile='" +  f.getAbsolutePath() + "' encoding='UTF-8'} where x = 1";
 			stmt = new LobFileStatement(sql);
 			assertEquals("Wrong SQL generated", "update bla set col =  ?  where x = 1", stmt.getPreparedSql());
-			
+
 		}
 		catch (Exception e)
 		{

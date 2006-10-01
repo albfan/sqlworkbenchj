@@ -37,20 +37,21 @@ public class TextRowDataConverter
 	private CharacterRange escapeRange = null;
 	private String additionalEncodeCharacters = null;
 	private String lineEnding = StringUtil.LINE_TERMINATOR;
+	private boolean writeBlobFiles = true;
 	
 	public TextRowDataConverter()
 	{
 		super();
 	}
 
+	public void setWriteBlobToFile(boolean flag)
+	{
+		writeBlobFiles = flag;
+	}
+	
 	public void setCleanNonPrintable(boolean flag)
 	{
 		this.cleanCR = flag;
-	}
-
-	public StrBuffer convertData()
-	{
-		return null;
 	}
 
 	public StrBuffer getEnd(long totalRows)
@@ -81,7 +82,7 @@ public class TextRowDataConverter
 			String value = null;
 			
 			boolean needQuote = false;
-			if (SqlUtil.isBlobType(colType))
+			if (writeBlobFiles && SqlUtil.isBlobType(colType))
 			{
 				File blobFile = createBlobFile(row, c, rowIndex);
 				

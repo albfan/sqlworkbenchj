@@ -179,7 +179,7 @@ class ProfileTreeDragHandler
 		TreePath parentpath = profileTree.getClosestPathForLocation(pt.x, pt.y);
 		DefaultMutableTreeNode parent = (DefaultMutableTreeNode) parentpath.getLastPathComponent();
 		
-		if (parent.isLeaf() || draggedProfiles == null)
+		if (!parent.getAllowsChildren() || draggedProfiles == null)
 		{
 			dtde.rejectDrop();
 			dtde.dropComplete(false);

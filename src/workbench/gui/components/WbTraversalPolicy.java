@@ -15,6 +15,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.FocusTraversalPolicy;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  *
@@ -23,11 +24,9 @@ import java.util.ArrayList;
 public class WbTraversalPolicy
 	extends FocusTraversalPolicy
 {
-
 	private ArrayList components = new ArrayList();
 	private Component defaultComponent = null;
 
-	/** Creates a new instance of WbTraversalPolicy */
 	public WbTraversalPolicy()
 	{
 	}
@@ -40,10 +39,25 @@ public class WbTraversalPolicy
 	public void addComponent(Component aComp)
 	{
 		if (!this.components.contains(aComp))
+		{
 			this.components.add(aComp);
+		}
 	}
 
-	/** Returns the Component that should receive the focus after aComponent.
+	private boolean checkAvailable()
+	{
+		if (components.size() == 0) return false;
+		Iterator itr = components.iterator();
+		while (itr.hasNext())
+		{
+			Component c = (Component)itr.next();
+			if (c.isEnabled()) return true;
+		}
+		return false;
+	}
+	
+	/** 
+	 * Returns the Component that should receive the focus after aComponent.
 	 * focusCycleRoot must be a focus cycle root of aComponent.
 	 *
 	 * @param focusCycleRoot a focus cycle root of aComponent
@@ -58,13 +72,25 @@ public class WbTraversalPolicy
 	 */
 	public Component getComponentAfter(Container focusCycleRoot, Component aComponent)
 	{
-		if (this.components.size() == 0) return null;
+		// Make sure we have at least one enabled component
+		// otherwise the recursion would never terminate!
+		if (!checkAvailable()) return null;
+		
 		int index = this.components.indexOf(aComponent);
-		if (index < 0 || index == this.components.size() - 1) return (Component)this.components.get(0);
-		else return (Component)this.components.get(index + 1);
+		Component result = null;
+		if (index < 0 || index == this.components.size() - 1) 
+			result = (Component)this.components.get(0);
+		else 
+			result = (Component)this.components.get(index + 1);
+		if (result.isEnabled())
+		{
+			return result;
+		}
+		return getComponentAfter(focusCycleRoot, result);
 	}
 
-	/** Returns the Component that should receive the focus before aComponent.
+	/** 
+	 * Returns the Component that should receive the focus before aComponent.
 	 * focusCycleRoot must be a focus cycle root of aComponent.
 	 *
 	 * @param focusCycleRoot a focus cycle root of aComponent
@@ -79,10 +105,23 @@ public class WbTraversalPolicy
 	 */
 	public Component getComponentBefore(Container focusCycleRoot, Component aComponent)
 	{
-		if (this.components.size() == 0) return null;
+		// Make sure we have at least one enabled component
+		// otherwise the recursion would never terminate!
+		if (!checkAvailable()) return null;
+		
 		int index = this.components.indexOf(aComponent);
-		if (index <= 0) return (Component)this.components.get(this.components.size() - 1);
-		else return (Component)this.components.get(index - 1);
+		
+		Component result = null;
+		if (index <= 0) 
+			result = (Component)this.components.get(this.components.size() - 1);
+		else 
+			result = (Component)this.components.get(index - 1);
+		
+		if (result.isEnabled())
+		{
+			return result;
+		}
+		return getComponentBefore(focusCycleRoot, result);
 	}
 
 	/** Returns the default Component to focus. This Component will be the first

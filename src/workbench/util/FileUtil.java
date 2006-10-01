@@ -26,25 +26,6 @@ import workbench.resource.Settings;
 public class FileUtil
 {
 	
-	public static final long estimateRecords(String filename)
-		throws IOException
-	{
-		return estimateRecords(filename, 5);
-	}
-
-	public static final long estimateRecords(String filename, long sampleLines)
-		throws IOException
-	{
-		File f = new File(filename);
-		return estimateRecords(f,sampleLines);
-	}
-
-	public static final long estimateRecords(File f)
-		throws IOException
-	{
-		return estimateRecords(f, 5);
-	}
-
 	private static int getBuffSize()
 	{
 		return Settings.getInstance().getIntProperty("workbench.lob.buffsize",32*1024);
@@ -96,6 +77,12 @@ public class FileUtil
 	}
 	
 	
+	public static final long estimateRecords(File f)
+		throws IOException
+	{
+		return estimateRecords(f, 5);
+	}
+
 	public static final long estimateRecords(File f, long sampleLines)
 		throws IOException
 	{

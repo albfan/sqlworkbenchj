@@ -47,11 +47,8 @@ public class CopyAsTextAction
 	
 	public void executeAction(ActionEvent e)
 	{
-		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
-		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
-		ctrlPressed = ctrlPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
 		ClipBoardCopier copier = new ClipBoardCopier(this.client);
-		copier.copyDataToClipboard(!shiftPressed, copySelected, ctrlPressed);
+		copier.copyDataToClipboard(!isShiftPressed(e), copySelected, isCtrlPressed(e));
 	}
 
 }

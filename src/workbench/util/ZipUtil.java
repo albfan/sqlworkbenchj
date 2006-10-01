@@ -24,12 +24,16 @@ public class ZipUtil
 
 	public static boolean isZipFile(File f)
 	{
+		// The JVM crashes (sometimes) if I pass my "fake" ClipboardFile object
+		// to the ZipFile constructor, so this is checked beforehand
+		if (f instanceof ClipboardFile) return false;
+
 		ZipFile archive = null;
 		try
 		{
 			archive = new ZipFile(f);
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			return false;
 		}
@@ -40,15 +44,4 @@ public class ZipUtil
 		return true;
 	}
 	
-	public static void main(String[] args)
-	{
-		try
-		{
-			System.out.println(isZipFile(new File("d:/temp/test.sql")));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
 }

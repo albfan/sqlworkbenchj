@@ -35,14 +35,12 @@ public class CopySelectedAsSqlUpdateAction extends WbAction
 	}
 	
 	public boolean hasCtrlModifier() { return true; }
-	public boolean hasShiftModifier() { return true; }
+	public boolean hasShiftModifier() { return false; }
 	
 	public void executeAction(ActionEvent e)
 	{
-		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
-		ctrlPressed = ctrlPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
 		ClipBoardCopier copier = new ClipBoardCopier(this.client);
-		copier.copyAsSql(true, true, ctrlPressed, false);
+		copier.copyAsSql(true, true, isCtrlPressed(e), false);
 	}
 
 }

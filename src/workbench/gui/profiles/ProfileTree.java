@@ -63,7 +63,7 @@ public class ProfileTree
 	private int clipboardType = 0;
 	private CutCopyPastePopup popup;
 	private WbAction pasteToFolderAction;
-	
+	private RenameGroupAction renameGroup;
 	private ProfileTreeDragHandler ds;
 	private Insets autoscrollInsets = new Insets(20, 20, 20, 20);
 	
@@ -100,7 +100,11 @@ public class ProfileTree
 		pasteToFolderAction = new WbAction(this, "pasteToFolder");
 		pasteToFolderAction.removeIcon();
 		pasteToFolderAction.initMenuDefinition("MnuTxtPasteNewFolder");
-		popup.addAction(pasteToFolderAction, false);
+		popup.addAction(pasteToFolderAction, true);
+		
+		renameGroup = new RenameGroupAction(this);
+		popup.addAction(renameGroup, false);
+		
 		setCellRenderer(new ProfileTreeCellRenderer());
     ds = new ProfileTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
 		setAutoscrolls(true);
@@ -144,14 +148,8 @@ public class ProfileTree
 		
 		if (group.getAllowsChildren())
 		{
-			String newGroup = (String)data;
-			int count = profileModel.getChildCount(group);
-			for (int i = 0; i < count; i++)
-			{
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode)profileModel.getChild(group,i);
-				ConnectionProfile prof = (ConnectionProfile)node.getUserObject();
-				prof.setGroup(newGroup);
-			}
+			String newGroupName = (String)data;
+			renameGroup(group, newGroupName);
 		}
 		else if (data instanceof ConnectionProfile)
 		{
@@ -250,7 +248,8 @@ public class ProfileTree
 	 */
 	private void checkActions()
 	{
-		boolean canPaste = this.clipboardNodes != null && onlyGroupSelected();
+		boolean groupSelected = onlyGroupSelected();
+		boolean canPaste = this.clipboardNodes != null && groupSelected;
 		boolean canCopy = onlyProfilesSelected();
 		
 		pasteToFolderAction.setEnabled(canPaste);
@@ -263,6 +262,7 @@ public class ProfileTree
 
 		a = popup.getCutAction();
 		a.setEnabled(canCopy);
+		
 	}
 	
 	public void mouseClicked(MouseEvent e)
@@ -326,6 +326,17 @@ public class ProfileTree
 			if (!n.getAllowsChildren()) return false;
 		}
 		return true;
+	}
+	
+	protected DefaultMutableTreeNode getSelectedGroupNode()
+	{
+		TreePath[] selection = getSelectionPaths();
+		if (selection == null) return null;
+		if (selection.length != 1) return null;
+		
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode)getLastSelectedPathComponent();
+		if (node != null && node.getAllowsChildren()) return node;
+		return null;
 	}
 	
 	/**
@@ -456,6 +467,32 @@ public class ProfileTree
 	}
 
 	/**
+	 * Prompts the user for a new group name and renames the currently selected group
+	 * to the supplied name.
+	 */
+	public void renameGroup()
+	{
+		DefaultMutableTreeNode group = this.getSelectedGroupNode();
+		if (group == null) return;
+		String newName = WbSwingUtilities.getUserInput(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("LblNewProfileGroup"), "");
+		if (StringUtil.isEmptyString(newName)) return;
+		group.setUserObject(newName);
+		renameGroup(group, newName);
+	}
+
+	private void renameGroup(DefaultMutableTreeNode group, String newGroupName)
+	{
+		if (StringUtil.isEmptyString(newGroupName)) return;
+		int count = profileModel.getChildCount(group);
+		for (int i = 0; i < count; i++)
+		{
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode)profileModel.getChild(group,i);
+			ConnectionProfile prof = (ConnectionProfile)node.getUserObject();
+			prof.setGroup(newGroupName);
+		}
+	}
+	
+	/**
 	 * Prompts the user for a group name and creates a new group 
 	 * with the provided name. The new group node is automatically
 	 * after creation.
@@ -468,7 +505,7 @@ public class ProfileTree
 		List groups = this.profileModel.getGroups();
 		if (groups.contains(group))
 		{
-			WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("ErrGroupNotUnique"));
+			WbSwingUtilities.showErrorMessageKey(SwingUtilities.getWindowAncestor(this), "ErrGroupNotUnique");
 			return null;
 		}
 		TreePath path = this.profileModel.addGroup(group);

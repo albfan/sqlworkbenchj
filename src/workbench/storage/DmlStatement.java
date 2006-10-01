@@ -167,12 +167,6 @@ public class DmlStatement
 		this.chrFunc = aFunc;
 	}
 	
-//	public String getExecutableStatement(String dbproduct)
-//	{
-//		SqlLiteralFormatter f = new SqlLiteralFormatter(dbproduct);
-//		return getExecutableStatement(f);
-//	}
-	
 	/**
 	 *	Returns a "real" SQL Statement which can be executed
 	 *	directly. The statement contains the parameter values

@@ -276,7 +276,7 @@ public class LnFDefinitionPanel
 		}
 		else
 		{
-			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgLnFNotLoaded"));
+			WbSwingUtilities.showErrorMessageKey(this, "MsgLnFNotLoaded");
 		}
 	}//GEN-LAST:event_changeLnfButtonActionPerformed
 

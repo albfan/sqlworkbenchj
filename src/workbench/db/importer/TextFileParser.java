@@ -48,7 +48,7 @@ import workbench.util.WbFile;
 public class TextFileParser
 	implements RowDataProducer, ImportFileParser
 {
-	private String filename;
+	private File inputFile;
 	private File baseDir;
 	private String tableName;
 	private String encoding = "ISO-8859-1";
@@ -101,9 +101,9 @@ public class TextFileParser
 	{
 	}
 
-	public TextFileParser(String aFile)
+	public TextFileParser(File aFile)
 	{
-		this.filename = aFile;
+		this.inputFile = aFile;
 		this.sourceDir = null;
 	}
 
@@ -127,10 +127,10 @@ public class TextFileParser
 		this.receiver = rec;
 	}
 
-	public void setInputFile(String file)
+	public void setInputFile(File file)
 	{
 		this.sourceDir = null;
-		this.filename = file;
+		this.inputFile = file;
 	}
 
 	public void setSourceExtension(String ext)
@@ -142,7 +142,7 @@ public class TextFileParser
 	public void setSourceDirectory(String dir)
 	{
 		this.sourceDir = dir;
-		this.filename = null;
+		this.inputFile = null;
 	}
 
 	public void setTableName(String aName)
@@ -159,7 +159,8 @@ public class TextFileParser
 
 	public String getSourceFilename()
 	{
-		return this.filename;
+		if (this.inputFile == null) return null;
+		return this.inputFile.getAbsolutePath();
 	}
 
 	public void setLineFilter(String regex)
@@ -481,7 +482,7 @@ public class TextFileParser
 				currentFile++;
 				this.messages = new StringBuffer();
 				this.receiver.setCurrentTable(currentFile);
-				this.filename = theFile.getAbsolutePath();
+				this.inputFile = theFile;
 				this.tableName = theFile.getFileName();
 				this.columns = null;
 				this.colCount = 0;
@@ -499,8 +500,7 @@ public class TextFileParser
 	private void setupFileHandler()
 		throws IOException
 	{
-		File f = new File(this.filename);
-		this.fileHandler.setMainFile(f, this.encoding);
+		this.fileHandler.setMainFile(this.inputFile, this.encoding);
 	}
 	
 	private void processOneFile()
@@ -509,11 +509,9 @@ public class TextFileParser
 		this.cancelImport = false;
 		this.regularStop = false;
 		
-		File f = new File(this.filename);
-		
-		if (f.isAbsolute())
+		if (this.inputFile.isAbsolute())
 		{
-			this.baseDir = f.getParentFile();
+			this.baseDir = this.inputFile.getParentFile();
 		}
 		if (baseDir == null) this.baseDir = new File(".");
 		
@@ -567,7 +565,7 @@ public class TextFileParser
 		}
 		catch (IOException e)
 		{
-			LogMgr.logWarning("TextFileParser.processOneFile()", "Error reading input file " + f.getAbsolutePath(), e);
+			LogMgr.logWarning("TextFileParser.processOneFile()", "Error reading input file " + inputFile.getAbsolutePath(), e);
 			try { in.close(); } catch (Throwable ignore) {}
 			throw e;
 		}
@@ -834,6 +832,8 @@ public class TextFileParser
 		List cols = new ArrayList();
 		try
 		{
+			// Make sure the file handler is initialized as this can be called from 
+			// the outside as well.
 			setupFileHandler();
 			in = this.fileHandler.getMainFileReader();
 			String firstLine = in.readLine();
@@ -843,6 +843,7 @@ public class TextFileParser
 			while (tok.hasMoreTokens())
 			{
 				String column = tok.nextToken();
+				if (column == null) continue;
 				String name = null;
 				if (this.withHeader)
 				{
@@ -877,7 +878,6 @@ public class TextFileParser
 		
 		if (this.withHeader)
 		{
-			setupFileHandler();
 			cols = this.getColumnsFromFile();
 		}
 		else
@@ -925,7 +925,7 @@ public class TextFileParser
 			if (numTableCols == 0)
 			{
 				String msg = ResourceMgr.getString("ErrImportTableNotFound").replaceAll("%table%", targetTable.getTableExpression());
-				msg = StringUtil.replace(msg, "%filename%", this.filename);
+				msg = StringUtil.replace(msg, "%filename%", this.inputFile.getAbsolutePath());
 				this.messages.append(msg + "\n\n");
 				this.columns = null;
 				throw new SQLException("Table " + targetTable.getTableExpression() + " not found!");

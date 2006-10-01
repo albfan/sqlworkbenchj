@@ -11,6 +11,7 @@
  */
 package workbench.gui.sql;
 
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Window;
@@ -50,6 +51,7 @@ import javax.swing.text.GapContent;
 import workbench.WbManager;
 
 import workbench.db.WbConnection;
+import workbench.gui.actions.FileSaveAction;
 import workbench.gui.editor.SyntaxUtilities;
 import workbench.interfaces.EncodingSelector;
 import workbench.util.EncodingUtil;
@@ -58,6 +60,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ColumnSelectionAction;
 import workbench.gui.actions.CommentAction;
 import workbench.gui.actions.FileOpenAction;
+import workbench.gui.actions.FileReloadAction;
 import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.FindAction;
 import workbench.gui.actions.FindAgainAction;
@@ -69,6 +72,7 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.ReplacePanel;
 import workbench.gui.components.SearchCriteriaPanel;
+import workbench.gui.components.WbMenuItem;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
 import workbench.gui.editor.SyntaxDocument;
@@ -108,7 +112,13 @@ public class EditorPanel
 	private FindAgainAction findAgainAction;
 	private ReplaceAction replaceAction;
 	private FormatSqlAction formatSql;
-	private FileOpenAction fileOpen;
+	
+	protected FileOpenAction fileOpen;
+	protected FileSaveAsAction fileSaveAs;
+	
+	protected FileSaveAction fileSave;
+	protected FileReloadAction fileReloadAction;
+	
 	private ColumnSelectionAction columnSelection;
 	private MatchBracketAction matchBracket;
 	private CommentAction commentAction;
@@ -117,6 +127,7 @@ public class EditorPanel
 	private List filenameChangeListeners;
 	private File currentFile;
 	private String fileEncoding;
+	private Set dbFunctions = null;
 
 	public static EditorPanel createSqlEditor()
 	{
@@ -145,10 +156,15 @@ public class EditorPanel
 
 		this.setTabSize(Settings.getInstance().getEditorTabWidth());
 		this.setCaretBlinkEnabled(true);
-		this.addPopupMenuItem(new FileSaveAsAction(this), true);
+		this.fileSave = new FileSaveAction(this);
+		this.fileSaveAs = new FileSaveAsAction(this);
+		this.addPopupMenuItem(fileSaveAs, true);
 		this.fileOpen = new FileOpenAction(this);
 		this.addPopupMenuItem(this.fileOpen, false);
 
+		this.fileReloadAction = new FileReloadAction(this);
+		this.fileReloadAction.setEnabled(false);
+		
 		this.findAction = new FindAction(this);
 		this.findAction.setEnabled(true);
 		this.addKeyBinding(this.findAction);
@@ -182,13 +198,6 @@ public class EditorPanel
 		new DropTarget(this, DnDConstants.ACTION_COPY, this);
 	}
 
-	public void setFileOpenAction(FileOpenAction anAction)
-	{
-		this.fileOpen = anAction;
-	}
-
-	private Set dbFunctions = null;
-	
 	public void setDatabaseConnection(WbConnection aConnection)
 	{
 		if (aConnection == null) return;
@@ -250,10 +259,11 @@ public class EditorPanel
 		return this.columnSelection;
 	}
 
-	public FormatSqlAction getFormatSqlAction()
-	{
-		return this.formatSql;
-	}
+	public FileSaveAction getFileSaveAction() { return this.fileSave; }
+	public FileSaveAsAction getFileSaveAsAction() { return this.fileSaveAs; }
+	public FormatSqlAction getFormatSqlAction() { return this.formatSql; }
+	public FileReloadAction getReloadAction() { return this.fileReloadAction; }
+	public FileOpenAction getFileOpenAction() { return this.fileOpen; }
 
 	public void showFormatSql()
 	{
@@ -267,7 +277,23 @@ public class EditorPanel
 	{
 		super.setEditable(editable);
 		this.replaceAction.setEnabled(editable);
-		this.fileOpen.setEnabled(false);
+		this.fileOpen.setEnabled(editable);
+		if (!editable)
+		{
+			Component[] c = this.popup.getComponents();
+			for (int i = 0; i < c.length; i++)
+			{
+				if (c[i] instanceof WbMenuItem)
+				{
+					WbMenuItem menu = (WbMenuItem)c[i];
+					if (menu.getAction() == fileOpen)
+					{
+						popup.remove(c[i]);
+						return;
+					}
+				}
+			}
+		}
 	}
 
 	public void reformatSql()
@@ -487,12 +513,21 @@ public class EditorPanel
 			this.setDocument(new SyntaxDocument());
 			this.clearUndoBuffer();
 		}
+		fireFilenameChanged(null);
 		this.resetModified();
     return true;
 	}
 
+	protected void checkFileActions()
+	{
+		boolean hasFile = this.hasFileLoaded();
+		this.fileSave.setEnabled(hasFile);
+		this.fileReloadAction.setEnabled(hasFile);
+	}
+	
 	public void fireFilenameChanged(String aNewName)
 	{
+		this.checkFileActions();
 		if (this.filenameChangeListeners == null) return;
 		for (int i=0; i < this.filenameChangeListeners.size(); i++)
 		{
@@ -629,7 +664,7 @@ public class EditorPanel
 		if (!aFile.exists()) return false;
 		if (aFile.length() >= Integer.MAX_VALUE / 2)
 		{
-			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgFileTooBig"));
+			WbSwingUtilities.showErrorMessageKey(this, "MsgFileTooBig");
 			return false;
 		}
 		
@@ -809,6 +844,12 @@ public class EditorPanel
 		this.saveFile(aFile, this.fileEncoding, Settings.getInstance().getExternalEditorLineEnding());
 	}
 
+	public void saveFile(File aFile, String encoding)
+		throws IOException
+	{
+		this.saveFile(aFile, encoding, Settings.getInstance().getExternalEditorLineEnding());
+	}
+	
 	public void saveFile(File aFile, String encoding, String lineEnding)
 		throws IOException
 	{
@@ -1115,7 +1156,7 @@ public class EditorPanel
 						{
 							w.toFront();
 							w.requestFocus();
-							WbSwingUtilities.showErrorMessage(w, ResourceMgr.getString("ErrNoMultipleDrop"));
+							WbSwingUtilities.showErrorMessageKey(w, "ErrNoMultipleDrop");
 						}
 					});
 				}

@@ -22,7 +22,6 @@ import javax.swing.KeyStroke;
 
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
-import workbench.util.StringUtil;
 
 public class FileDiscardAction extends WbAction
 {
@@ -47,7 +46,6 @@ public class FileDiscardAction extends WbAction
 	
 	public void executeAction(ActionEvent e)
 	{
-		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
-		this.client.closeFile(!shiftPressed);
+		this.client.closeFile(!isShiftPressed(e));
 	}
 }

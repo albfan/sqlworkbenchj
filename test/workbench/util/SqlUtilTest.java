@@ -245,7 +245,7 @@ public class SqlUtilTest
 		
 			sql = "/* \n" + 
              "* $URL: ddl.sql $ \n" + 
-             "* $Revision: 1.7 $ \n" + 
+             "* $Revision: 1.8 $ \n" + 
              "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
              "*/ \n" + 
              "-- This is the initial creation script for the MTrac database. \n" + 
@@ -402,6 +402,13 @@ public class SqlUtilTest
 		l = SqlUtil.getTables(sql, true);
 		assertEquals(2, l.size());
 		assertEquals("table2", l.get(1));
+		
+		// Make sure the getTables() is case preserving
+		sql = "select * from MyTable";
+		l = SqlUtil.getTables(sql, true);
+		assertEquals(1, l.size());
+		assertEquals("MyTable", l.get(0));
+		
 		
 	}
 

@@ -28,9 +28,13 @@ public class TableIdentifier
 	private String catalog;
 	private String expression;
 	private boolean isNewTable;
+	private boolean tableWasQuoted; 
+	private boolean catalogWasQuoted; 
+	private boolean schemaWasQuoted; 
 	private String pkName;
 	private String type;
 	private boolean neverAdjustCase;
+	private boolean preserveQuotes;
 	
 	public TableIdentifier(String aName)
 	{
@@ -75,6 +79,11 @@ public class TableIdentifier
 		this.setSchema(aSchema);
 	}
 
+	public void setPreserveQuotes(boolean flag)
+	{
+		this.preserveQuotes = flag;
+	}
+	
 	public void setNeverAdjustCase(boolean flag)
 	{
 		this.neverAdjustCase = flag;
@@ -134,15 +143,15 @@ public class TableIdentifier
 		{
 			if (this.catalog != null)
 			{
-				result.append(SqlUtil.quoteObjectname(this.catalog));
+				result.append(SqlUtil.quoteObjectname(this.catalog, preserveQuotes && catalogWasQuoted));
 				result.append('.');
 			}
 			if (this.schema != null)
 			{
-				result.append(SqlUtil.quoteObjectname(this.schema));
+				result.append(SqlUtil.quoteObjectname(this.schema, preserveQuotes && schemaWasQuoted));
 				result.append('.');
 			}
-			result.append(SqlUtil.quoteObjectname(this.tablename));
+			result.append(SqlUtil.quoteObjectname(this.tablename, preserveQuotes && tableWasQuoted));
 		}
 		else
 		{
@@ -158,7 +167,7 @@ public class TableIdentifier
 				
 				if (catalogToUse != null)
 				{
-					result.append(SqlUtil.quoteObjectname(catalogToUse));
+					result.append(SqlUtil.quoteObjectname(catalogToUse, preserveQuotes && catalogWasQuoted));
 					result.append('.');
 				}
 			}
@@ -173,12 +182,12 @@ public class TableIdentifier
 				
 				if (schemaToUse != null)
 				{
-					result.append(meta.quoteObjectname(schemaToUse));
+					result.append(meta.quoteObjectname(schemaToUse, preserveQuotes && schemaWasQuoted));
 					result.append('.');
 				}
 			}
 			
-			result.append(meta.quoteObjectname(this.tablename));
+			result.append(meta.quoteObjectname(this.tablename, preserveQuotes && tableWasQuoted));
 		}
 		return result.toString();
 	}
@@ -189,15 +198,15 @@ public class TableIdentifier
 		if (conn == null) return;
 		DbMetadata meta = conn.getMetadata();
 		
-		if (this.tablename != null) this.tablename = meta.adjustObjectnameCase(this.tablename);
-		if (this.schema != null) this.schema = meta.adjustSchemaNameCase(this.schema);
-		if (this.catalog != null) this.catalog = meta.adjustObjectnameCase(this.catalog);
+		if (this.tablename != null && !tableWasQuoted) this.tablename = meta.adjustObjectnameCase(this.tablename);
+		if (this.schema != null && !schemaWasQuoted) this.schema = meta.adjustSchemaNameCase(this.schema);
+		if (this.catalog != null && !catalogWasQuoted) this.catalog = meta.adjustObjectnameCase(this.catalog);
 		this.expression = null;
 	}
 	
 	/**
 	 * Return the fully qualified name of the table 
-	 * (including catalog and schema) but not quote
+	 * (including catalog and schema) but not quoted
 	 * even if it needed quotes
 	 */
 	public String getQualifiedName()
@@ -217,7 +226,17 @@ public class TableIdentifier
 		return result.toString();
 	}
 	
-	public String getTableName() { return this.tablename; }
+	public String getTableName() 
+	{ 
+		if (tablename == null) return null;
+		if (!tableWasQuoted || !preserveQuotes) return this.tablename; 
+		
+		StringBuffer result = new StringBuffer(tablename.length() + 2);
+		result.append('\"');
+		result.append(tablename);
+		result.append('\"');
+		return result.toString();
+	}
 
 	public void setTable(String aTable)
 	{
@@ -235,24 +254,41 @@ public class TableIdentifier
 		String[] elements = aTable.split("\\.");
 		if (elements.length == 1)
 		{
-			this.tablename = StringUtil.trimQuotes(aTable).trim();
+			setTablename(aTable);
 		}
 		else if (elements.length == 2)
 		{
 			setSchema(elements[0]);
-			this.tablename = StringUtil.trimQuotes(elements[1]).trim();
+			setTablename(elements[1]);
 		}
 		else if (elements.length == 3)
 		{
 			setCatalog(elements[0]);
 			setSchema(elements[1]);
-			this.tablename = StringUtil.trimQuotes(elements[2]).trim();
+			setTablename(elements[2]);
 		}
 
 		this.expression = null;
 	}
 
-	public String getSchema() { return this.schema; }
+	private void setTablename(String name)
+	{
+		tableWasQuoted = name.trim().startsWith("\"");
+		this.tablename = StringUtil.trimQuotes(name).trim();
+	}
+	
+	public String getSchema() 
+	{ 
+		if (schema == null) return null;
+		if (!schemaWasQuoted || !preserveQuotes) return schema;
+		
+		StringBuffer result = new StringBuffer(schema.length() + 2);
+		result.append('\"');
+		result.append(schema);
+		result.append('\"');
+		return result.toString();
+	}
+	
 	public void setSchema(String aSchema)
 	{
 		if (this.isNewTable) return;
@@ -263,12 +299,24 @@ public class TableIdentifier
 		}
 		else
 		{
+			schemaWasQuoted = aSchema.trim().startsWith("\"");
 			this.schema = StringUtil.trimQuotes(aSchema).trim();
 		}
 		this.expression = null;
 	}
 
-	public String getCatalog() { return this.catalog; }
+	public String getCatalog() 
+	{ 
+		if (catalog == null) return null;
+		if (!catalogWasQuoted || !preserveQuotes) return this.catalog; 
+		
+		StringBuffer result = new StringBuffer(catalog.length() + 2);
+		result.append('\"');
+		result.append(catalog);
+		result.append('\"');
+		return result.toString();
+	}
+	
 	public void setCatalog(String aCatalog)
 	{
 		if (this.isNewTable) return;
@@ -279,6 +327,7 @@ public class TableIdentifier
 		}
 		else
 		{
+			catalogWasQuoted = aCatalog.trim().startsWith("\"");
 			this.catalog = StringUtil.trimQuotes(aCatalog).trim();
 		}
 		this.expression = null;

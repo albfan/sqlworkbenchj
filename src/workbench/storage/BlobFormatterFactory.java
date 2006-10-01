@@ -36,6 +36,16 @@ public class BlobFormatterFactory
 		{
 			return new PostgresBlobFormatter();
 		}
+		else if (meta.isOracle())
+		{
+			// this might only work with Oracle 10g...
+			// and will probably fail on BLOBs > 4KB
+			HexBlobFormatter f = new HexBlobFormatter();
+			f.setUseUpperCase(true);
+			f.setPrefix("to_blob(utl_raw.cast_to_raw('0x");
+			f.setSuffix("'))");
+			return f;
+		}
 		else if ("db2_nt".equalsIgnoreCase(meta.getDbId()))
 		{
 			// Although the DB2 Manuals says it supports

@@ -55,7 +55,12 @@ public class HexBlobFormatterTest extends TestCase
 		formatter.setUseUpperCase(true);
 		literal = formatter.getBlobLiteral(blob);
 		assertEquals("Wrong literal created", "X'FF00100F'", literal);		
-		
+	
+		formatter.setUseUpperCase(true);
+		formatter.setPrefix("to_lob(utl_raw.cast_to_raw('0x");
+		formatter.setSuffix("'))");		
+		literal = formatter.getBlobLiteral(blob);
+		assertEquals("Wrong literal created", "to_lob(utl_raw.cast_to_raw('0xFF00100F'))", literal);
 	}
 	
 }

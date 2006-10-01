@@ -280,11 +280,11 @@ public class DataImporter
 	public boolean isModeInsertUpdate() { return (this.mode == MODE_INSERT_UPDATE); }
 	public boolean isModeUpdateInsert() { return (this.mode == MODE_UPDATE_INSERT); }
 
-	public static int estimateReportIntervalFromFileSize(String filename)
+	public static int estimateReportIntervalFromFileSize(File file)
 	{
 		try
 		{
-			long records = FileUtil.estimateRecords(filename, 10);
+			long records = FileUtil.estimateRecords(file, 10);
 			if (records < 100)
 			{
 				return 1;

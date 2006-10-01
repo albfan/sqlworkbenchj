@@ -53,8 +53,8 @@ public class SqlLiteralFormatter
 		dateLiteralFormats = readStatementTemplates("DateLiteralFormats.xml");
 		if (dateLiteralFormats == null) dateLiteralFormats = Collections.EMPTY_MAP;
 		defaultDateFormatter = getDateLiteralFormatter(product);
-		
 	}
+	
 	public void noBlobHandling()
 	{
 		this.blobWriter = null;

@@ -15,15 +15,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
-
-import workbench.gui.sql.SqlPanel;
+import workbench.gui.sql.EditorPanel;
 import workbench.resource.ResourceMgr;
 
 public class FileReloadAction extends WbAction
 {
-	private SqlPanel client;
+	private EditorPanel client;
 
-	public FileReloadAction(SqlPanel aClient)
+	public FileReloadAction(EditorPanel aClient)
 	{
 		super();
 		this.client = aClient;

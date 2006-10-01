@@ -42,10 +42,14 @@ public class SqlFormatterTest extends TestCase
 			f = new SqlFormatter(sql,100);
 			formatted = f.getFormattedSql();
 			expected = "SELECT x\nFROM y\nUNION ALL\nSELECT y\nFROM x";
-//			System.out.println("Formatted: " + StringUtil.escapeUnicode(formatted, CharacterRange.RANGE_NONE));
-//			System.out.println("expected: " + StringUtil.escapeUnicode(expected, CharacterRange.RANGE_NONE));
 			assertEquals(expected, formatted);
 
+			sql = "select x,y from y order by x\n--trailing comment";
+			f = new SqlFormatter(sql,100);
+			formatted = f.getFormattedSql();
+			expected = "SELECT x,\n       y\nFROM y\nORDER BY x\n--trailing comment";
+			assertEquals(expected, formatted.trim());
+			
 			sql = "select x,y,z from y where a = 1 and b = 2";
 			f = new SqlFormatter(sql,100);
 			formatted = f.getFormattedSql();

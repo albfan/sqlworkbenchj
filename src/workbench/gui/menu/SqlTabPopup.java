@@ -19,6 +19,7 @@ import workbench.gui.actions.FileOpenAction;
 import workbench.gui.actions.NewDbExplorerPanelAction;
 import workbench.gui.actions.RemoveTabAction;
 import workbench.gui.actions.RenameTabAction;
+import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.MainPanel;
 import workbench.gui.actions.FileReloadAction;
@@ -78,17 +79,11 @@ public class SqlTabPopup extends JPopupMenu
 			
 			this.addSeparator();
 
-			FileSaveAction save = new FileSaveAction(spanel);
-			save.removeIcon();
-			this.add(save.getMenuItem());
-
-			FileOpenAction open = new FileOpenAction(spanel);
-			open.removeIcon();
-			this.add(open.getMenuItem());
-
-			FileReloadAction reload = new FileReloadAction(spanel);
-			reload.removeIcon();
-			this.add(reload.getMenuItem());
+			EditorPanel editor = spanel.getEditor();
+			
+			this.add(editor.getFileSaveAction().getMenuItem());
+			this.add(editor.getFileOpenAction().getMenuItem());
+			this.add(editor.getReloadAction().getMenuItem());
 			this.addSeparator();
 			FileDiscardAction discard = new FileDiscardAction(spanel);
 			discard.removeIcon();

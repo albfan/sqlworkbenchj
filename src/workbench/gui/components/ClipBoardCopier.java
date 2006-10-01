@@ -28,9 +28,11 @@ import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.storage.DataPrinter;
 import workbench.storage.DataStore;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
+import workbench.util.WbThread;
 
 /**
  * A class to copy the data of a {@link workbench.gui.components.WbTable} to 
@@ -46,7 +48,7 @@ public class ClipBoardCopier
 	{
 		this.client = t;
 	}
-	
+
 	/**
 	 *	Copy data from the table as tab-delimited into the clipboard
 	 *	@param includeHeaders if true, then a header line with the column names is copied as well
@@ -85,11 +87,13 @@ public class ClipBoardCopier
 				count = rows.length;
 			}
 			
+			DataPrinter printer = new DataPrinter(ds, "\t", "\n", columnsToCopy);
 			out = new StringWriter(count * 250);
 			// Do not use StringUtil.LINE_TERMINATOR for the line terminator
 			// because for some reason this creates additional empty lines
 			// under Windows
-			ds.writeDataString(out, "\t", "\n", includeHeaders, rows, columnsToCopy);
+			printer.writeDataString(out, rows);
+			
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			WbSwingUtilities.showWaitCursorOnWindow(this.client);
 			StringSelection sel = new StringSelection(out.toString());
@@ -134,7 +138,22 @@ public class ClipBoardCopier
 	/**
 	 * 	Copy the data of the client table into the clipboard using SQL statements
 	 */
-	public void copyAsSql(boolean useUpdate, boolean selectedOnly, boolean showSelectColumns, boolean includeDelete)
+	public void copyAsSql(final boolean useUpdate, final boolean selectedOnly, final boolean showSelectColumns, final boolean includeDelete)
+	{
+		// For some reason the statusbar will not be updated if 
+		// this is run in the AWT thread, so we have to 
+		// create a new thread to run the actual copy
+		WbThread t = new WbThread("CopyThread")
+		{
+			public void run()
+			{
+				_copyAsSql(useUpdate, selectedOnly, showSelectColumns, includeDelete);
+			}
+		};
+		t.start();
+	}
+	
+	protected void _copyAsSql(boolean useUpdate, boolean selectedOnly, boolean showSelectColumns, boolean includeDelete)
 	{
 		if (this.client.getRowCount() <= 0) return;
 		

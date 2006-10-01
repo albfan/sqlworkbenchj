@@ -238,6 +238,10 @@ public class RowData
 		return this.colData[aColumn];
 	}
 
+	/**
+	 * Returns the value from the specified column as it was retrieved from 
+	 * the database
+	 */
 	public Object getOriginalValue(int aColumn)
 		throws IndexOutOfBoundsException
 	{
@@ -260,6 +264,11 @@ public class RowData
 		this.resetStatus();
 	}
 
+	/**
+	 * Returns true if the indicated column has been modified since the 
+	 * initial retrieve (i.e. since the last time resetStatus() was called
+	 * 
+	 */
 	public boolean isColumnModified(int aColumn)
 	{
 		if (this.isOriginal()) return false;
@@ -270,10 +279,10 @@ public class RowData
 		else
 		{
 			if (this.originalData == null) return false;
-			//if (this.originalData[aColumn] == null && this.colData[aColumn] != null && !(this.colData[aColumn] instanceof NullValue)) return true; 
 			return (this.originalData[aColumn] != null);
 		}
 	}
+	
 	public void setNull(int aColumn, int aType)
 	{
 		NullValue nul = NullValue.getInstance(aType);
@@ -354,58 +363,6 @@ public class RowData
 
 	public boolean isDmlSent() { return this.dmlSent; }
 
-	public StringBuffer getDataAsString(String aDelimiter, DecimalFormat formatter)
-	{
-		return this.getDataAsString(aDelimiter, formatter, null);
-	}
-
-	public StringBuffer getDataAsString(String aDelimiter, DecimalFormat formatter, boolean[] columns)
-	{
-		int count = this.colData.length;
-		StringBuffer result = new StringBuffer(count * 20);
-		//int start = 0;
-		int numCols = 0;
-		if (columns != null && count != columns.length) columns = null;
-
-		for (int c=0; c < count; c++)
-		{
-			if (columns != null)
-			{
-				if (!columns[c]) continue;
-			}
-			Object value = this.getValue(c);
-			if (numCols > 0) result.append(aDelimiter);
-
-			if (value != null)
-			{
-				if ((value instanceof Double ||
-				    value instanceof Float ||
-						value instanceof BigDecimal) && formatter != null)
-				{
-					Number num = (Number)value;
-					result.append(formatter.format(num.doubleValue()));
-				}
-				else
-				{
-					String v = value.toString();
-					if (v.indexOf((char)0) > 0)
-					{
-						LogMgr.logWarning("RowData.getDataAsString()", "Found a zero byte in the data! Replacing with space char.");
-						byte[] d = v.getBytes();
-						int len = d.length;
-						for (int i=0; i < len; i++)
-						{
-							if (d[i] == 0) d[i] = 20;
-						}
-						v = new String(d);
-					}
-					result.append(v);
-				}
-			}
-			numCols ++;
-		}
-		return result;
-	}
 
 	public String toString()
 	{

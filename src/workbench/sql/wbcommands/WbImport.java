@@ -184,7 +184,7 @@ public class WbImport
 		}
 
 		String type = cmdLine.getValue(ARG_TYPE);
-		String file = cmdLine.getValue(ARG_FILE);
+		String filename = cmdLine.getValue(ARG_FILE);
 		String dir = cmdLine.getValue(ARG_DIRECTORY);
 
 		if (type == null)
@@ -195,7 +195,7 @@ public class WbImport
 			return result;
 		}
 
-		if (file == null && dir == null)
+		if (filename == null && dir == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrImportFileMissing"));
 			result.addMessage("");
@@ -204,8 +204,9 @@ public class WbImport
 			return result;
 		}
 
-		file = evaluateFileArgument(file);
-
+		filename = evaluateFileArgument(filename);
+		File inputFile = (filename != null ? new File(filename) : null);
+		
 		int commit = cmdLine.getIntValue(ARG_COMMIT,-1);
 		imp.setCommitEvery(commit);
 
@@ -215,9 +216,9 @@ public class WbImport
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
 		String schema = cmdLine.getValue(ARG_TARGET_SCHEMA);
 
-		if (file != null)
+		if (filename != null)
 		{
-			File f = new File(file);
+			File f = new File(filename);
 			if (!f.exists())
 			{
 				result.addMessage(ResourceMgr.getString("ErrImportFileNotFound"));
@@ -255,9 +256,9 @@ public class WbImport
 
 			TextFileParser textParser = new TextFileParser();
 			textParser.setTableName(table);
-			if (file != null)
+			if (inputFile != null)
 			{
-				textParser.setInputFile(file);
+				textParser.setInputFile(inputFile);
 			}
 			else
 			{
@@ -403,7 +404,7 @@ public class WbImport
 			}
 			else
 			{
-				xmlParser.setSourceFile(file);
+				xmlParser.setSourceFile(inputFile);
 				if (table != null) xmlParser.setTableName(table);
 				String cols = cmdLine.getValue(ARG_IMPORTCOLUMNS);
 				if (cols != null)
@@ -436,9 +437,9 @@ public class WbImport
 
 		this.imp.setRowActionMonitor(this.rowMonitor);
 		String value = cmdLine.getValue(ARG_PROGRESS);
-		if (value == null && file != null)
+		if (value == null && filename != null)
 		{
-			int interval = DataImporter.estimateReportIntervalFromFileSize(file);
+			int interval = DataImporter.estimateReportIntervalFromFileSize(inputFile);
 			imp.setReportInterval(interval);
 		}
 		else if ("true".equalsIgnoreCase(value))
@@ -525,7 +526,7 @@ public class WbImport
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("WbImport.execute()", "Error importing '" + file +"': " + e.getMessage(), e);
+			LogMgr.logError("WbImport.execute()", "Error importing '" + filename +"': " + e.getMessage(), e);
 			result.setFailure();
 		}
 		catch (ParsingInterruptedException e)
@@ -535,7 +536,7 @@ public class WbImport
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("WbImport.execute()", "Error importing '" + file +"': " + e.getMessage(), e);
+			LogMgr.logError("WbImport.execute()", "Error importing '" + filename +"': " + e.getMessage(), e);
 			result.setFailure();
 			result.addMessage(ExceptionUtil.getDisplay(e));
 		}

@@ -37,7 +37,7 @@ public class HexBlobFormatter
 		throws SQLException
 	{
 		if (value == null) return null;
-		
+
 		int addSpace = (prefix != null ? prefix.length() : 0);
 		addSpace += (suffix != null ? suffix.length() : 0);
 		

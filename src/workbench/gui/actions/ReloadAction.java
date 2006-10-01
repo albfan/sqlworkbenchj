@@ -40,7 +40,7 @@ public class ReloadAction extends WbAction
 	
 	public void executeAction(ActionEvent e)
 	{
-		this.ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+		this.ctrlPressed = isCtrlPressed(e);
 		this.client.reload();
 	}
 	

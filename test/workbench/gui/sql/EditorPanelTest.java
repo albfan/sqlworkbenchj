@@ -67,8 +67,6 @@ public class EditorPanelTest extends TestCase
 	public void testSaveFile()
 	{
 		String dir = util.getBaseDir();
-		File f = new File(dir, "editor.txt");
-		f.delete();
 		try
 		{
 			Settings set = Settings.getInstance();
@@ -88,8 +86,10 @@ public class EditorPanelTest extends TestCase
 
 			String content = p.getText();
 			int pos = content.indexOf("Line2\r\n");
-			assertEquals("Wrong internal line ending (DOS) used", pos, 7);
+			assertEquals("Wrong internal line ending (DOS) used", 7, pos);
 			
+			File f = new File(dir, "editor_unx.txt");
+			f.delete();
 			p.saveFile(f, "UTF-8", "\n");
 			
 			Reader r = EncodingUtil.createReader(f, "UTF-8");
@@ -98,7 +98,7 @@ public class EditorPanelTest extends TestCase
 			f.delete();
 			
 			pos = content.indexOf("Line2\n");
-			assertEquals("Wrong external line ending (Unix) used", pos, 6);
+			assertEquals("Wrong external line ending (Unix) used", 6, pos);
 			
 			set.setExternalEditorLineEnding(Settings.DOS_LINE_TERMINATOR_PROP_VALUE);
 			set.setInternalEditorLineEnding(Settings.UNIX_LINE_TERMINATOR_PROP_VALUE);
@@ -115,15 +115,17 @@ public class EditorPanelTest extends TestCase
 
 			content = p.getText();
 			pos = content.indexOf("Line2\n");
-			assertEquals("Wrong internal line ending (Unix) used", pos, 6);			
+			assertEquals("Wrong internal line ending (Unix) used", 6, pos);			
 			
+			f = new File(dir, "editor_dos.txt");
+			f.delete();
 			p.saveFile(f, "UTF-8", "\r\n");
 			r = EncodingUtil.createReader(f, "UTF-8");
 			content = FileUtil.readCharacters(r);
 			r.close();
 			
 			pos = content.indexOf("Line2\r\n");
-			assertEquals("Wrong exteranl line ending (DOS) used", pos, 7);			
+			assertEquals("Wrong exteranl line ending (DOS) used", 7, pos);			
 		}
 		catch (Exception e)
 		{

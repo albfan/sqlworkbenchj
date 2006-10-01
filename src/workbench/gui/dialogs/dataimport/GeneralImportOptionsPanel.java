@@ -29,6 +29,12 @@ public class GeneralImportOptionsPanel
 		initComponents();
 	}
 
+	public void setEncodingVisible(boolean flag)
+	{
+		this.encodingPanel.setEnabled(false);
+		this.encodingPanel.setVisible(false);
+	}
+	
 	public void setModeSelectorEnabled(boolean flag)
 	{
 		this.modeComboBox.setEnabled(flag);
@@ -38,20 +44,28 @@ public class GeneralImportOptionsPanel
 
 	public void saveSettings()
 	{
-		Settings s = Settings.getInstance();
-		s.setProperty("workbench.import.general.dateformat", this.getDateFormat());
-		s.setProperty("workbench.import.general.timestampformat", this.getTimestampFormat());
-		s.setProperty("workbench.import.general.encoding", this.getEncoding());
-		s.setProperty("workbench.import.general.mode", this.getMode());
+		saveSettings("general");
 	}
-
-	public void restoreSettings()
+	public void saveSettings(String key)
 	{
 		Settings s = Settings.getInstance();
-		this.setDateFormat(s.getProperty("workbench.import.general.dateformat", ""));
-		this.setTimestampFormat(s.getProperty("workbench.import.general.timestampformat", ""));
-		this.setEncoding(s.getProperty("workbench.export.import.encoding", s.getDefaultDataEncoding()));
-		this.setMode(s.getProperty("workbench.import.general.mode", "insert"));
+		s.setProperty("workbench.import." + key + ".dateformat", this.getDateFormat());
+		s.setProperty("workbench.import." + key + ".timestampformat", this.getTimestampFormat());
+		s.setProperty("workbench.import." + key + ".encoding", this.getEncoding());
+		s.setProperty("workbench.import." + key + ".mode", this.getMode());
+	}
+	
+	public void restoreSettings()
+	{
+		restoreSettings("general");
+	}
+	public void restoreSettings(String key)
+	{
+		Settings s = Settings.getInstance();
+		this.setDateFormat(s.getProperty("workbench.import." + key + ".dateformat", s.getDefaultDateFormat()));
+		this.setTimestampFormat(s.getProperty("workbench.import." + key + ".timestampformat", s.getDefaultTimestampFormat()));
+		this.setEncoding(s.getProperty("workbench.export." + key + ".encoding", s.getDefaultDataEncoding()));
+		this.setMode(s.getProperty("workbench.import." + key + ".mode", "insert"));
 	}
 
 	public String getMode()
@@ -114,7 +128,6 @@ public class GeneralImportOptionsPanel
     modeComboBox = new javax.swing.JComboBox();
 
     setLayout(new java.awt.GridBagLayout());
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -130,7 +143,6 @@ public class GeneralImportOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 4);
     add(dateFormatLabel, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -147,7 +159,6 @@ public class GeneralImportOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 4);
     add(timestampFormatLabel, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -155,7 +166,6 @@ public class GeneralImportOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(timestampFormat, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 7;
@@ -181,7 +191,6 @@ public class GeneralImportOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(modeComboBox, gridBagConstraints);
-
   }// </editor-fold>//GEN-END:initComponents
 
 

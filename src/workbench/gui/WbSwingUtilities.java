@@ -211,6 +211,11 @@ public class WbSwingUtilities
 		}
 	}
 
+	public static void showErrorMessageKey(Component aCaller, String key)
+	{
+		JOptionPane.showMessageDialog(aCaller, ResourceMgr.getString(key), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);
+	}
+	
 	public static void showErrorMessage(Component aCaller, String aMessage)
 	{
 		JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);

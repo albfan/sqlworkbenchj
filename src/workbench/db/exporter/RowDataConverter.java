@@ -317,16 +317,6 @@ public abstract class RowDataConverter
 	public abstract String getFormatName();
 	
 	/**
-	 *	Returns the data from the source as one String
-	 *  in the format of this exporter.
-	 *	This is equivalent to concatenating the output from:
-	 *	#getStart();
-	 *  #converRowData(RowData) for all rows
-	 *  #getEnd();
-	 */
-	public abstract StrBuffer convertData();
-	
-	/**
 	 *	Returns the data for one specific row as a String in the 
 	 *  correct format
 	 */

@@ -278,18 +278,6 @@ public class ResultInfo
 		}
 		
 		return hasPk;
-//		return false;
-//		this.hasPkColumns = false;
-//		for (int i=0; i < this.colCount; i++)
-//		{
-//			if (this.columns[i].isPkColumn())
-//			{
-//				this.pkFlagValid = true;
-//				this.hasPkColumns = true;
-//				break;
-//			}
-//		}
-//		return this.hasPkColumns;
 	}
 	
 	
@@ -386,9 +374,10 @@ public class ResultInfo
 		return -1;
 	}
 
-	private boolean readPkColumnsFromMapping(WbConnection con)
+	public boolean readPkColumnsFromMapping(WbConnection con)
 	{
-		Collection cols = PkMapping.getInstance().getPKColumns(con, this.updateTable);
+		if (this.updateTable == null) return false;
+		Collection cols = PkMapping.getInstance().getPKColumns(con, this.updateTable.createCopy());
 		if (cols == null) return false;
 		Iterator itr = cols.iterator();
 		boolean found = false;

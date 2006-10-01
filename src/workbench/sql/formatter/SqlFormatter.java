@@ -34,7 +34,7 @@ public class SqlFormatter
 		LINE_BREAK_BEFORE.add("SET");
 		LINE_BREAK_BEFORE.add("FROM");
 		LINE_BREAK_BEFORE.add("WHERE");
-		LINE_BREAK_BEFORE.add("ORDER");
+		LINE_BREAK_BEFORE.add("ORDER BY");
 		LINE_BREAK_BEFORE.add("GROUP BY");
 		LINE_BREAK_BEFORE.add("HAVING");
 		LINE_BREAK_BEFORE.add("VALUES");
@@ -77,7 +77,7 @@ public class SqlFormatter
 	public static final Set WHERE_TERMINAL = new HashSet();
 	static
 	{
-		WHERE_TERMINAL.add("ORDER");
+		WHERE_TERMINAL.add("ORDER BY");
 		WHERE_TERMINAL.add("GROUP BY");
 		WHERE_TERMINAL.add("HAVING");
 		WHERE_TERMINAL.add("UNION");
@@ -99,16 +99,21 @@ public class SqlFormatter
 
 
 	// keywords terminating an GROUP BY clause
-	private final Set BY_TERMINAL = new HashSet();
+	private final Set GROUP_BY_TERMINAL = new HashSet();
 	{
-		BY_TERMINAL.addAll(WHERE_TERMINAL);
-		BY_TERMINAL.add("SELECT");
-		BY_TERMINAL.add("UPDATE");
-		BY_TERMINAL.add("DELETE");
-		BY_TERMINAL.add("INSERT");
-		BY_TERMINAL.add("CREATE");
-		BY_TERMINAL.add("GROUP");
-		BY_TERMINAL.add(";");
+		GROUP_BY_TERMINAL.addAll(WHERE_TERMINAL);
+		GROUP_BY_TERMINAL.add("SELECT");
+		GROUP_BY_TERMINAL.add("UPDATE");
+		GROUP_BY_TERMINAL.add("DELETE");
+		GROUP_BY_TERMINAL.add("INSERT");
+		GROUP_BY_TERMINAL.add("CREATE");
+		GROUP_BY_TERMINAL.add("GROUP");
+		GROUP_BY_TERMINAL.add(";");
+	}
+	
+	private final Set ORDER_BY_TERMINAL = new HashSet();
+	{
+		ORDER_BY_TERMINAL.remove("GROUP BY");
 	}
 
 	public static final Set SELECT_TERMINAL = new HashSet(1);
@@ -829,6 +834,7 @@ public class SqlFormatter
 		//if (this.indent != null) this.appendText(this.indent);
 		while (t != null)
 		{
+			String word = t.getContents().toUpperCase();
 			if (t.isComment())
 			{
 				String text = t.getContents();
@@ -838,8 +844,6 @@ public class SqlFormatter
 			{
 				if (lastToken.isComment() && !isStartOfLine()) this.appendNewline();
 
-				String word = t.getContents().toUpperCase();
-				
 				if (LINE_BREAK_BEFORE.contains(word))
 				{
 					if (!isStartOfLine()) this.appendNewline();
@@ -869,6 +873,7 @@ public class SqlFormatter
 
 				if (word.equals("SELECT"))
 				{
+					lastToken = t;
 					t = this.processList(t,"SELECT".length() + 1, SELECT_TERMINAL);
 					if (t == null) return;
 					continue;
@@ -876,12 +881,15 @@ public class SqlFormatter
 
 				if (word.equals("SET"))
 				{
+					lastToken = t;
 					t = this.processList(t,"SET".length() + 4, SET_TERMINAL);
 					if (t == null) return;
 					continue;
 				}
+				
 				if (word.equals("FROM"))
 				{
+					lastToken = t;
 					t = this.processFrom();
 					if (t == null) return;
 					continue;
@@ -889,19 +897,30 @@ public class SqlFormatter
 
 				if (word.equals("CREATE"))
 				{
+					lastToken = t;
 					t = this.processCreate(t);
 					if (t == null) return;
 					continue;
 				}
-				if (t.getContents().equals("GROUP BY"))
+				
+				if (word.equals("GROUP BY"))
 				{
-					t = this.processList(lastToken, "GROUP BY ".length(), BY_TERMINAL);
+					lastToken = t;
+					t = this.processList(lastToken, (word + " ").length(), GROUP_BY_TERMINAL);
 					if (t == null) return;
 					continue;
+				}
+				
+				if (word.equals("ORDER BY"))
+				{
+					lastToken = t;
+					t = this.processList(lastToken, (word + " ").length(), ORDER_BY_TERMINAL);
+					if (t == null) return;
 				}
 
 				if (word.equalsIgnoreCase("WHERE"))
 				{
+					lastToken = t;
 					t = this.processWhere(t);
 					if (t == null) return;
 					continue;
@@ -909,6 +928,7 @@ public class SqlFormatter
 
 				if (word.equalsIgnoreCase("INTO"))
 				{
+					lastToken = t;
 					t = this.processIntoKeyword();
 					continue;
 				}
@@ -928,6 +948,7 @@ public class SqlFormatter
 					if (t == null) return;
 					continue;
 				}
+				
 				if (wbTester.isWbCommand(word))
 				{
 					t = this.processWbCommand(word.length() + 1);
@@ -936,7 +957,6 @@ public class SqlFormatter
 			}
 			else
 			{
-				String word = t.getContents().toUpperCase();
 				if (LINE_BREAK_BEFORE.contains(word))
 				{
 					if (!isStartOfLine()) this.appendNewline();
@@ -964,7 +984,7 @@ public class SqlFormatter
 				}
 			}
 			lastToken = t;
-			t = this.lexer.getNextToken(false, false);
+			t = this.lexer.getNextToken(true, false);
 		}
 		this.appendNewline();
 		this.appendNewline();

@@ -46,7 +46,7 @@ public class OptimizeAllColumnsAction
 	public void executeAction(ActionEvent e)
 	{
 		if (client == null) return;
-		final boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
+		final boolean shiftPressed = isShiftPressed(e);
 		Thread t = new WbThread("OptimizeAllCols Thread") 
 		{ 	
 			public void run()	

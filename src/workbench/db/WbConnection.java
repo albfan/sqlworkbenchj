@@ -56,13 +56,16 @@ public class WbConnection
 	private ConnectionProfile profile;
 	private PreparedStatementPool preparedStatementPool;
 
-//	private boolean ddlNeedsCommit;
-//	private boolean cancelNeedsReconnect = false;
-
 	private List listeners;
 	private DbObjectCache objectCache;
 
-	/** Creates a new instance of WbConnection */
+	private Method clearSettings = null;
+	private Object dbAccess = null;
+	private boolean doOracleClear = true;
+
+	private boolean busy; 
+	private Object busyLock = new Object();
+	
 	public WbConnection(String anId)
 	{
 		this.id = anId;
@@ -81,12 +84,6 @@ public class WbConnection
 	public void setProfile(ConnectionProfile aProfile)
 	{
 		this.profile = aProfile;
-//		String driverClass = aProfile.getDriverclass();
-//		List drivers = Settings.getInstance().getCancelWithReconnectDrivers();
-//		if (drivers.contains(driverClass))
-//		{
-//			this.cancelNeedsReconnect = true;
-//		}
 	}
 
 	public PreparedStatementPool getPreparedStatementPool()
@@ -131,10 +128,6 @@ public class WbConnection
 			LogMgr.logError(this, "Error initializing DB Meta Data", e);
 		}
 	}
-
-	private Method clearSettings = null;
-	private Object dbAccess = null;
-	private boolean doOracleClear = true;
 
 	public String getWarnings()
 	{
@@ -272,6 +265,7 @@ public class WbConnection
 			// ignore it
 		}
 	}
+	
 	public void setAutoCommit(boolean flag)
 		throws SQLException
 	{
@@ -283,6 +277,26 @@ public class WbConnection
 		}
 	}
 
+	/**
+	 * Some DBMS (e.g. MySQL) seem to start a new transaction in default 
+	 * isolation mode. Which means that if the SELECT is not committed,
+	 * no changes will be visible until a commit is issued.
+	 * In the DbExplorer this is a problem, as the user has no way
+	 * of sending a commit to end the transation if the DbExplorer
+	 * uses a separate connection.
+	 * The {@link workbench.gui.dbobjects.TableDataPanel} will issue
+	 * a commit after retrieving the data if this method returns true.
+	 * 
+	 * @see workbench.gui.dbobjects.TableDataPanel#doRetrieve(boolean)
+	 * @see workbench.gui.dbobjects.TableDataPanel#showRowCount()
+	 */
+	public boolean selectStartsTransaction()
+	{
+		String key = "workbench.db." + this.metaData.getDbId() + ".select.startstransaction";
+		boolean flag = Settings.getInstance().getBoolProperty(key, false);
+		return flag;
+	}
+	
 	public boolean getAutoCommit()
 	{
 		if (this.sqlConnection == null) return false;
@@ -402,11 +416,6 @@ public class WbConnection
 	{
 		return this.metaData.getUseJdbcCommit();
 	}
-
-//	public boolean cancelNeedsReconnect()
-//	{
-//		return this.cancelNeedsReconnect;
-//	}
 
 	public DbMetadata getMetadata()
 	{
@@ -618,9 +627,6 @@ public class WbConnection
 		this.fireConnectionStateChanged(PROP_SCHEMA, oldSchema, newSchema);
 	}
 
-	private boolean busy; 
-	private Object busyLock = new Object();
-	
 	public boolean isBusy()
 	{
 			synchronized (busyLock)

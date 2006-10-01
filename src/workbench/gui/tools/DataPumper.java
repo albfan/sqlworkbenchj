@@ -71,7 +71,7 @@ public class DataPumper
 	           ToolWindow
 {
 	private ConnectionProfile sourceProfile;
-	private String sourceFile;
+	private File sourceFile;
 	private ProducerFactory fileImporter;
 	private ConnectionProfile targetProfile;
 	protected WbConnection sourceConnection;
@@ -224,7 +224,7 @@ public class DataPumper
 		{
 			this.disconnectSource();
 		}
-		this.sourceFile = dialog.getSelectedFilename();
+		this.sourceFile = dialog.getSelectedFile();
 		this.sourceTable.reset();
 		this.sourceTable.setEnabled(false);
 
@@ -274,8 +274,7 @@ public class DataPumper
 		}
 		else if (this.sourceFile != null)
 		{
-			File f = new File(this.sourceFile);
-			this.sourceProfileLabel.setText(ResourceMgr.getString("LblDPSourceFile") + ": " + f.getAbsolutePath());
+			this.sourceProfileLabel.setText(ResourceMgr.getString("LblDPSourceFile") + ": " + sourceFile.getAbsolutePath());
 		}
 		else
 		{
@@ -300,7 +299,7 @@ public class DataPumper
 			if (this.sourceProfile != null)
 				sourceName = this.sourceProfile.getName();
 			else if (this.sourceFile != null)
-				sourceName = this.sourceFile;
+				sourceName = this.sourceFile.getName();
 			title = title + " [" + sourceName + " -> " + this.targetProfile.getName() + "]";
 			if (this.copier != null && this.copyRunning)
 			{
@@ -1716,7 +1715,7 @@ public class DataPumper
 			{
 				this.initImporter();
 				this.copier.copyFromFile(this.fileImporter.getProducer(), this.targetConnection, this.targetTable.getSelectedTable());
-				int interval = DataImporter.estimateReportIntervalFromFileSize(this.fileImporter.getSourceFilename());
+				int interval = DataImporter.estimateReportIntervalFromFileSize(this.fileImporter.getSourceFile());
 				this.copier.setReportInterval(interval);
 			}
 			else if (this.useQueryCbx.isSelected())
@@ -1730,7 +1729,7 @@ public class DataPumper
 				TableIdentifier stable = this.sourceTable.getSelectedTable();
 				if (this.isSelectQuery())
 				{
-					WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgDPIgnoreSelect"));
+					WbSwingUtilities.showErrorMessageKey(this, "MsgDPIgnoreSelect");
 					ignoreSelect = true;
 				}
 				if (!ignoreSelect) where = this.sqlEditor.getText();
@@ -1785,12 +1784,12 @@ public class DataPumper
 		this.copier.setKeyColumns(keys);
 		if (mode.indexOf("update") > -1 && keys.size() == 0)
 		{
-			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrDPNoKeyColumns"));
+			WbSwingUtilities.showErrorMessageKey(this, "ErrDPNoKeyColumns");
 			return false;
 		}
 		if (keys.size() == colMapping.targetColumns.length && mode.indexOf("update") > -1)
 		{
-			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrDPUpdateOnlyKeyColumns"));
+			WbSwingUtilities.showErrorMessageKey(this, "ErrDPUpdateOnlyKeyColumns");
 			return false;
 		}
 		this.copier.setMode(mode);

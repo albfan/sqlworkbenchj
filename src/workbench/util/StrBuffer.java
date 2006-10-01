@@ -16,13 +16,22 @@ import java.io.PrintStream;
 import java.io.Writer;
 
 /**
- * This is a non-synchronized implementation of string buffer, which
+ * This is a non-synchronized implementation of StringBuffer, which
  * offers better performance than the class java.lang.StringBuffer.
  *
- * Copied from http://h21007.www2.hp.com/dspp/tech/tech_TechDocumentDetailPage_IDX/1,1701,2488,00.html
- * @author Thomas Wang
+ * Initially copied from http://h21007.www2.hp.com/dspp/tech/tech_TechDocumentDetailPage_IDX/1,1701,2488,00.html
+ * 
+ * This will only have an advantage if this object is not converted to a String object
+ * too often. java.lang.StringBuffer can re-use the internal char[] array when 
+ * it's toString() method is called, whereas StrBuffer.toString() will allocate 
+ * a new char array due to the constructor of String.
+ * 
+ * So StrBuffer is most efficient when it is never converted to a String object.
+ * For this, methods to write to a Stream and a Writer are provided that
+ * write out the internal char array directly.
+ * 
+ * @author support@sql-workbench.net
  * @see    java.lang.StringBuffer
- * @version  1.01, 10/14/01
  */
 public class StrBuffer
 	implements CharSequence
@@ -98,14 +107,6 @@ public class StrBuffer
 		this.charData = new char[len];
 		this.numchar = 0;
 	}
-	/**
-	 * Calling this method has same effect as setLength(0)
-	 * Clears the contents of the string buffer.
-	 */
-	public void resetLength()
-	{
-		this.numchar = 0;
-	}
 
 	/**
 	 * Expand the storage size to at least 'minStorage' number of characters.
@@ -131,7 +132,7 @@ public class StrBuffer
 	 * Appends the argument string to this string buffer.
 	 *
 	 * @param   str   a string.
-	 * @return  this string buffer
+	 * @return  this StrBuffer
 	 */
 	public StrBuffer append(String str)
 	{
@@ -144,7 +145,9 @@ public class StrBuffer
 		}
 		int newlen = this.numchar + oldlen;
 		if (newlen > this.charData.length)
+		{
 			moreStorage(newlen);
+		}
 		str.getChars(0, oldlen, this.charData, this.numchar);
 		this.numchar = newlen;
 		return this;
@@ -190,15 +193,9 @@ public class StrBuffer
 		if (len == 0) return this;
 		if (len == 1)
 		{
-			return this.append(str.charData[0]);
+			return this.append(str.charData[0]);	
 		}
-		int newlen = this.numchar + len;
-
-		if (newlen > this.charData.length)	moreStorage(newlen);
-
-		System.arraycopy(str.charData, 0, charData, numchar, len);
-		this.numchar = newlen;
-		return this;
+		return append(str.charData, 0, len);
 	}
 
 	public boolean endsWith(char c)
@@ -217,7 +214,7 @@ public class StrBuffer
 	}
 
 	/**
-	 *	Returns the current length of the StrBuffer
+	 *	Returns the current length of this StrBuffer
 	 */
 	public int length()
 	{
@@ -225,7 +222,7 @@ public class StrBuffer
 	}
 
 	/**
-	 * Appends the character to this string buffer.
+	 * Appends the character to this StrBuffer.
 	 *
 	 * @param   c the character to append
 	 * @return  this string buffer
@@ -278,7 +275,7 @@ public class StrBuffer
 	}
 
 	/**
-	 * Returns a new string based on contents of string buffer.
+	 * Returns a new string based on the contents of this StrBuffer.
 	 *
 	 * @return  a string
 	 */
@@ -325,9 +322,5 @@ public class StrBuffer
 			out.print(this.charData[i]);
 		}
 	}
-	public void release()
-	{
-		this.numchar = 0;
-		this.charData = null;
-	}
+	
 }

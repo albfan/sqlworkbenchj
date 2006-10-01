@@ -178,10 +178,10 @@ public class SQLToken
 		{
 			return contents.toUpperCase();
 		}
-		else if (this.isIdentifier())
-		{
-			return contents.toLowerCase();
-		}
+//		else if (this.isIdentifier())
+//		{
+//			return contents.toLowerCase();
+//		}
 		else
 		{
 			return this.contents;

@@ -11,6 +11,7 @@
  */
 package workbench.db.importer;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import workbench.db.TableIdentifier;
@@ -31,12 +32,12 @@ public class FileImporter
 	private TextImportOptions textOptions;
 	private XmlImportOptions xmlOptions;
 	private ImportOptions generalOptions;
-	private String inputFile;
+	private File inputFile;
 	private TableIdentifier table;
 	private RowDataProducer producer;
 	private WbConnection connection;
 	
-	public FileImporter(String inputFile)
+	public FileImporter(File inputFile)
 	{
 		this.setInputFile(inputFile);
 	}
@@ -108,7 +109,7 @@ public class FileImporter
 		this.producer = null;
 	}
 	
-	private void setInputFile(String inputFilename)
+	private void setInputFile(File inputFilename)
 	{
 		this.inputFile = inputFilename;
 		this.producer = null;
@@ -159,7 +160,8 @@ public class FileImporter
 	
 	public String getSourceFilename()
 	{
-		return this.inputFile;
+		if (this.inputFile == null) return null;
+		return this.inputFile.getAbsolutePath();
 	}
 	
 	public String getWbCommand()
@@ -171,9 +173,10 @@ public class FileImporter
 		indent.append(' ');
 		
 		result.append(WbImport.VERB + " -" + WbImport.ARG_FILE + "=");
-		if (inputFile.indexOf('-') > -1) result.append('"');
-		result.append(StringUtil.replace(inputFile, "\\", "/"));
-		if (inputFile.indexOf('-') > -1) result.append('"');
+		String filename = inputFile.getAbsolutePath();
+		if (filename.indexOf('-') > -1) result.append('"');
+		result.append(StringUtil.replace(filename, "\\", "/"));
+		if (filename.indexOf('-') > -1) result.append('"');
 		result.append(indent);
 		result.append('-');
 		result.append(WbImport.ARG_TYPE);

@@ -446,7 +446,7 @@ keyword=("ABORT"|
 "OPTION"|
 "OPTIONS"|
 "OR"|
-"ORDER"|
+"ORDER BY"|
 "ORDINALITY"|
 "ORGANIZATION"|
 "OUT"|

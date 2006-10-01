@@ -36,6 +36,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.EventObject;
 import javax.swing.ActionMap;
@@ -96,6 +97,7 @@ import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RowStatusRenderer;
 import workbench.gui.renderer.ToolTipRenderer;
 import workbench.gui.renderer.WbRenderer;
+import workbench.gui.sql.DwStatusBar;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.Resettable;
 import workbench.interfaces.Searchable;
@@ -104,6 +106,7 @@ import workbench.print.PrintPreview;
 import workbench.print.TablePrinter;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.storage.DataPrinter;
 import workbench.storage.DataStore;
 import workbench.storage.NullValue;
 import workbench.storage.PkMapping;
@@ -164,9 +167,10 @@ public class WbTable
 	private ArrayList changeListener = new ArrayList();
 	private JScrollPane scrollPane;
 
+	private DwStatusBar statusBar;
+	
 	private String defaultPrintHeader = null;
 	private boolean showPopup = true;
-//	private boolean showRowNumbers = false;
 	private boolean selectOnRightButtonClick = false;
 	private boolean highlightRequiredFields = false;
 	private Color requiredColor;
@@ -309,6 +313,11 @@ public class WbTable
 		}
 	}
 
+	public void setStatusBar(DwStatusBar bar)
+	{
+		this.statusBar = bar;
+	}
+	
 	/**
 	 * For some reason my Renderers do not display bigger
 	 * fonts properly. So I have to adjust the row height
@@ -1139,10 +1148,12 @@ public class WbTable
 			start = this.lastFoundRow  + 1;
 		}
 
-		for (int i=start; i < this.dwModel.getRowCount(); i++)
+		DataPrinter printer = new DataPrinter(getDataStore());
+		
+		int rowCount = this.dwModel.getRowCount();
+		for (int i=start; i < rowCount; i++)
 		{
-			String rowString = this.getDataStore().getRowDataAsString(i).toString();
-			if (rowString == null) continue;
+			String rowString = printer.getRowDataAsString(i);
 
 			if (rowString.toLowerCase().indexOf(aText) > -1)
 			{
@@ -1280,11 +1291,6 @@ public class WbTable
 		TableCellRenderer numberRenderer = RendererFactory.createNumberRenderer(maxDigits, sep);
 
 		this.setDefaultRenderer(Object.class, RendererFactory.getTooltipRenderer());
-		
-		// ClobRenderer is no longer needed because CLOBs are transformed into
-		// String objects during read (see RowData.read(ResultSet, ResultInfo);
-		//this.setDefaultRenderer(java.sql.Clob.class, RendererFactory.getClobRenderer());
-		//this.setDefaultRenderer(java.sql.Blob.class, RendererFactory.getBlobRenderer());
 		
 		this.setDefaultRenderer(byte[].class, RendererFactory.getBlobRenderer());
 		
@@ -1457,33 +1463,9 @@ public class WbTable
 
 	private int getAdditionalColumnSpace(int aRow, int aColumn)
 	{
-//		TableColumn col = this.getColumnModel().getColumn(aColumn);
-//		TableCellRenderer rend;
-//		if (aRow == -1)
-//			rend = col.getHeaderRenderer();
-//		else
-//			rend = col.getCellRenderer();
-
 		int addWidth = this.getIntercellSpacing().width * 2;
 		if (this.getShowVerticalLines()) addWidth += 4;
 
-//		if (rend == null)
-//		{
-//			rend = this.getDefaultRenderer(this.getColumnClass(aColumn));
-//		}
-//		if (rend != null)
-//		{
-//			Component c = rend.getTableCellRendererComponent(this, null, false, false, aRow, aColumn);
-//			if (c instanceof JComponent)
-//			{
-//				JComponent jc = (JComponent)c;
-//				Insets ins = jc.getInsets();
-//				if (ins != null)
-//				{
-//					addWidth += ins.left + ins.right;
-//				}
-//			}
-//		}
 		return addWidth;
 	}
 
@@ -1507,6 +1489,7 @@ public class WbTable
 		{
 			return editor.stopCellEditing();
 		}
+		
 		return false;
 	}
 
@@ -1518,7 +1501,6 @@ public class WbTable
 		{
 			this.initDefaultEditors();
 		}
-//		checkActions();
 	}
 
 	public void openEditWindow()
@@ -1805,7 +1787,7 @@ public class WbTable
 		if (table == null) 
 		{
 			Window w = SwingUtilities.getWindowAncestor(this);
-			WbSwingUtilities.showErrorMessage(w, ResourceMgr.getString("MsgNoUpdateTable"));
+			WbSwingUtilities.showErrorMessageKey(w, "MsgNoUpdateTable");
 			return false;
 		}
 		
@@ -1837,7 +1819,9 @@ public class WbTable
 		if (ds.hasPkColumns()) return true;
 		try
 		{
+			if (this.statusBar != null) statusBar.setStatusMessage(ResourceMgr.getString("MsgRetrievingKeyColumns"));
 			ds.updatePkInformation();
+			if (this.statusBar != null) statusBar.clearStatusMessage();
 		}
 		catch (Exception e)
 		{

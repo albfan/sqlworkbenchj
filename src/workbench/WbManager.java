@@ -220,7 +220,7 @@ public class WbManager
 	public void showOutOfMemoryError()
 	{
 		System.gc();
-		WbSwingUtilities.showErrorMessage(getCurrentWindow(), ResourceMgr.getString("MsgOutOfMemoryError"));
+		WbSwingUtilities.showErrorMessageKey(getCurrentWindow(), "MsgOutOfMemoryError");
 	}
 	
 	public MainWindow getCurrentWindow()

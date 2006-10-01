@@ -1,5 +1,5 @@
 /*
- * NewGroupAction.java
+ * RenameGroupAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -12,34 +12,35 @@
 package workbench.gui.profiles;
 
 import java.awt.event.ActionEvent;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import workbench.gui.actions.WbAction;
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 
 /**
  * @author support@sql-workbench.net
  */
-public class NewGroupAction
+public class RenameGroupAction
 	extends WbAction
+	implements TreeSelectionListener
 {
 	private ProfileTree client;
-	public NewGroupAction(ProfileTree panel)
+	
+	public RenameGroupAction(ProfileTree panel)
 	{
 		this.client = panel;
-		this.setIcon(ResourceMgr.getImage("NewFolder"));
-		this.initMenuDefinition("LblNewProfileGroup");
+		this.client.addTreeSelectionListener(this);
+		this.initMenuDefinition("LblRenameProfileGroup");
 	}
 	
 	public void executeAction(ActionEvent e)
 	{
-		try
-		{
-			this.client.addProfileGroup();
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError("NewListEntryAction.executeAction()", "Error copying profile", ex);
-		}
+		client.renameGroup();
+	}
+
+	public void valueChanged(TreeSelectionEvent e)
+	{
+		this.setEnabled(client.onlyGroupSelected());
 	}
 	
 }

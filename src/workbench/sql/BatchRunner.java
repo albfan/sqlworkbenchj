@@ -36,6 +36,7 @@ import workbench.log.LogMgr;
 
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.storage.DataPrinter;
 
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
@@ -379,9 +380,10 @@ public class BatchRunner
 					DataStore[] data = result.getDataStores();
 					for (int nr=0; nr < data.length; nr++)
 					{
-						System.out.println(data[nr].getDataString(StringUtil.LINE_TERMINATOR, true));
+						DataPrinter printer = new DataPrinter(data[nr]);
+						printer.printTo(System.out);
 					}
-					System.out.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + " ----------------------------");
+					System.out.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + "   ----------------------------");
 				}
 				if (!result.isSuccess())
 				{

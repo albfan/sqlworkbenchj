@@ -43,10 +43,8 @@ public class CopyAsSqlInsertAction extends WbAction
 	
 	public void executeAction(ActionEvent e)
 	{
-		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
-		ctrlPressed = ctrlPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
 		ClipBoardCopier copier = new ClipBoardCopier(this.client);
-		copier.copyAsSqlInsert(false, ctrlPressed);
+		copier.copyAsSqlInsert(false, isCtrlPressed(e));
 	}
 
 }

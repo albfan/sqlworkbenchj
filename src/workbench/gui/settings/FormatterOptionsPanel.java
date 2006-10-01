@@ -31,11 +31,15 @@ public class FormatterOptionsPanel
 	public FormatterOptionsPanel()
 	{
 		initComponents();
+		restoreSettings();
 	}
 	
 	public void restoreSettings()
 	{
-		
+		String genCase = Settings.getInstance().getGeneratedSqlTableCase();
+		if ("lower".equals(genCase)) this.tableNameCase.setSelectedIndex(1);
+		else if ("upper".equals(genCase)) this.tableNameCase.setSelectedIndex(2);
+		else this.tableNameCase.setSelectedIndex(0);		
 	}
 	
 	public void saveSettings()
@@ -51,6 +55,7 @@ public class FormatterOptionsPanel
 		set.setFormatterMaxSubselectLength(StringUtil.getIntValue(subselectMaxLength.getText(),60));
 		set.setFormatterMaxColumnsInSelect(StringUtil.getIntValue(selectColumns.getText(),1));
 		set.setIncludeOwnerInSqlExport(includeOwner.isSelected());
+		set.setGeneratedSqlTableCase((String)tableNameCase.getSelectedItem());
 	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -79,6 +84,8 @@ public class FormatterOptionsPanel
     jSeparator2 = new javax.swing.JSeparator();
     includeOwner = new javax.swing.JCheckBox();
     includeOwnerLabel = new WbCheckBoxLabel();
+    tableNameCaseLabel = new javax.swing.JLabel();
+    tableNameCase = new javax.swing.JComboBox();
     editorFormatterPanel = new javax.swing.JPanel();
     subselectMaxLabel = new javax.swing.JLabel();
     subselectMaxLength = new javax.swing.JTextField();
@@ -91,9 +98,9 @@ public class FormatterOptionsPanel
 
     setLayout(new java.awt.GridBagLayout());
 
+    internalFormatterPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Generated Statements"));
     internalFormatterPanel.setLayout(new java.awt.GridBagLayout());
 
-    internalFormatterPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Generated Statements"));
     formatUpdates.setFont(null);
     formatUpdates.setSelected(Settings.getInstance().getDoFormatUpdates());
     formatUpdates.setText("");
@@ -213,9 +220,8 @@ public class FormatterOptionsPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(6, 10, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 11);
     internalFormatterPanel.add(ignoreIdentity, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -243,7 +249,6 @@ public class FormatterOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(7, 18, 0, 0);
     internalFormatterPanel.add(colsPerLineLabel, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 7;
@@ -264,9 +269,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 8;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(6, 10, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(9, 10, 0, 11);
     internalFormatterPanel.add(includeOwner, gridBagConstraints);
 
     includeOwnerLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -278,8 +281,31 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 8;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
     internalFormatterPanel.add(includeOwnerLabel, gridBagConstraints);
+
+    tableNameCaseLabel.setLabelFor(tableNameCase);
+    tableNameCaseLabel.setText(ResourceMgr.getString("LblGenTableNameCase"));
+    tableNameCaseLabel.setToolTipText(ResourceMgr.getDescription("LblGenTableNameCase"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(11, 12, 0, 0);
+    internalFormatterPanel.add(tableNameCaseLabel, gridBagConstraints);
+
+    tableNameCase.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "As is", "Lowercase", "Uppercase" }));
+    tableNameCase.setToolTipText(ResourceMgr.getDescription("LblGenTableNameCase"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(6, 10, 0, 15);
+    internalFormatterPanel.add(tableNameCase, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -290,9 +316,9 @@ public class FormatterOptionsPanel
     gridBagConstraints.weighty = 0.5;
     add(internalFormatterPanel, gridBagConstraints);
 
+    editorFormatterPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Editor"));
     editorFormatterPanel.setLayout(new java.awt.GridBagLayout());
 
-    editorFormatterPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Editor"));
     subselectMaxLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     subselectMaxLabel.setText(ResourceMgr.getString("LblMaxSub"));
     subselectMaxLabel.setToolTipText(ResourceMgr.getDescription("LblMaxSub"));
@@ -385,7 +411,6 @@ public class FormatterOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 0.5;
     add(editorFormatterPanel, gridBagConstraints);
-
   }// </editor-fold>//GEN-END:initComponents
 	
 	
@@ -414,6 +439,8 @@ public class FormatterOptionsPanel
   private javax.swing.JLabel selectColumnsLabel;
   private javax.swing.JLabel subselectMaxLabel;
   private javax.swing.JTextField subselectMaxLength;
+  private javax.swing.JComboBox tableNameCase;
+  private javax.swing.JLabel tableNameCaseLabel;
   private javax.swing.JLabel updateColThresholdLbl;
   private javax.swing.JTextField updateThreshold;
   // End of variables declaration//GEN-END:variables

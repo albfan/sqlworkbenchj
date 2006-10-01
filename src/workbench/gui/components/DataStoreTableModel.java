@@ -207,6 +207,12 @@ public class DataStoreTableModel
 	 *	Returns the current width of the given column.
 	 *	It returns the value of {@link workbench.storage.DataStore#getColumnDisplaySize(int)}
 	 *  for every column which is not the status column.
+	 * 
+	 * @param aColumn the column index
+	 * 
+	 * @return the width of the column as defined by the DataStore or 0
+	 * @see workbench.storage.DataStore#getColumnDisplaySize(int)
+	 * @see #findColumn(String)
 	 */
 	public int getColumnWidth(int aColumn)
 	{

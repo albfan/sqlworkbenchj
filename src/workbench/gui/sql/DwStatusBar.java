@@ -18,6 +18,8 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
@@ -26,6 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -48,7 +51,7 @@ import workbench.util.StringUtil;
  */
 public class DwStatusBar 
 	extends JPanel
-	implements StatusBar, EditorStatusbar
+	implements StatusBar, EditorStatusbar, ActionListener
 {
 	private JTextField tfRowCount;
 
@@ -63,6 +66,13 @@ public class DwStatusBar
 	private static final int BAR_HEIGHT = 22;
 	private static final int FIELD_HEIGHT = 18;
 	private DecimalFormat numberFormatter;
+	
+	private int timerInterval = Settings.getInstance().getIntProperty("workbench.gui.execution.timer.interval", 1000);
+	private int timerDelay = Settings.getInstance().getIntProperty("workbench.gui.execution.timer.interval", 1000);
+	private final boolean showTimer = Settings.getInstance().getBoolProperty("workbench.gui.execution.timer.enabled", true);
+	private long timerStarted;
+	private Timer executionTimer;
+	private boolean timerRunning;
 	
 	public DwStatusBar()
 	{
@@ -123,6 +133,10 @@ public class DwStatusBar
 		Font f = execTime.getFont();
 		FontMetrics fm = execTime.getFontMetrics(f);
 		
+		if (showTimer)
+		{
+			this.executionTimer = new Timer(timerInterval, this);
+		}
 
 		if (showEditorStatus)
 		{
@@ -204,8 +218,45 @@ public class DwStatusBar
 		 this.editorStatus.setText(text.toString());
 	}
 	
+	public void executionStart()
+	{
+		if (!showTimer) return;
+		timerStarted = System.currentTimeMillis();
+		executionTimer.setInitialDelay(timerDelay);
+		executionTimer.setDelay(timerInterval);
+		timerRunning = true;
+		executionTimer.start();	
+	}
+	
+	public void executionEnd()
+	{
+		if (!showTimer) return;
+		timerRunning = false;
+		executionTimer.stop();		
+	}
+
+	private String formatDuration(long millis)
+	{
+		if (millis < 1000)
+			return "0s";
+		else if (millis <= 60000)
+			return Long.toString((long)(millis / 1000)) + "s";
+		else
+			return Long.toString((long)(millis / 60000)) + "m";
+	}
+	
+	public void actionPerformed(ActionEvent e)
+	{
+		if (!timerRunning) return;
+		long time = System.currentTimeMillis() - timerStarted;
+		//this.execTime.setText(elapsedFormatter.format(time));
+		this.execTime.setText(formatDuration(time));
+		//this.execTime.repaint();
+	}
+	
 	public void setExecutionTime(long millis)
 	{
+		if (timerRunning) executionEnd();
 		double time = (double)(millis/1000.0);
 		this.execTime.setText(numberFormatter.format(time));
 		this.execTime.repaint();
@@ -242,7 +293,7 @@ public class DwStatusBar
 	}
 	
 	public String getText() { return this.tfStatus.getText(); }
-	
+
 	/**
 	 *	Show a message in the status panel.
 	 *	This method might be called from within a background thread, so we

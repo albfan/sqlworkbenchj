@@ -1292,6 +1292,10 @@ public class DbMetadata
 		return this.keywordHandler.getSqlKeywords();
 	}
 
+	public String quoteObjectname(String aName)
+	{
+		return quoteObjectname(aName, false);
+	}
 	/**
 	 *	Encloses the given object name in double quotes if necessary.
 	 *	Quoting of names is necessary if the name is a reserved word in the
@@ -1305,7 +1309,7 @@ public class DbMetadata
 	 *  For Oracle and HSQL strings starting with a digit will
 	 *  always be quoted.
 	 */
-	public String quoteObjectname(String aName)
+	public String quoteObjectname(String aName, boolean quoteAlways)
 	{
 		if (aName == null) return null;
 		if (aName.length() == 0) return aName;
@@ -1317,11 +1321,11 @@ public class DbMetadata
 
 		try
 		{
-			boolean needQuote = false;
+			boolean needQuote = quoteAlways;
 
 			// Oracle and HSQL require identifiers starting with a number 
 			// have to be quoted always. 
-			if (this.quoteIdentifierWithDigits)
+			if (needQuote || this.quoteIdentifierWithDigits)
 			{
 				needQuote = (Character.isDigit(aName.charAt(0)));
 			}

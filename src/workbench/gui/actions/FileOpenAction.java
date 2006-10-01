@@ -35,6 +35,7 @@ public class FileOpenAction extends WbAction
 		this.initMenuDefinition("MnuTxtFileOpen", KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
 		this.setIcon(ResourceMgr.getImage("Open"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+		setCreateMenuSeparator(true);
 	}
 
 	public void executeAction(ActionEvent e)

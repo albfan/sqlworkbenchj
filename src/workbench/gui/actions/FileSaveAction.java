@@ -16,6 +16,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
+import workbench.gui.sql.EditorPanel;
 
 import workbench.interfaces.TextFileContainer;
 import workbench.resource.ResourceMgr;
@@ -25,14 +26,15 @@ import workbench.resource.ResourceMgr;
  */
 public class FileSaveAction extends WbAction
 {
-	private TextFileContainer client;
+	private EditorPanel client;
 
-	public FileSaveAction(TextFileContainer aClient)
+	public FileSaveAction(EditorPanel aClient)
 	{
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtFileSave", KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+		this.setEnabled(this.client.hasFileLoaded());
 	}
 
 	public void executeAction(ActionEvent e)

@@ -33,11 +33,6 @@ public class HtmlRowDataConverter
 		super();
 	}
 	
-	public StrBuffer convertData()
-	{
-		return null;
-	}
-
 	public StrBuffer getEnd(long totalRows)
 	{
 		StrBuffer html = new StrBuffer("</table>\n");

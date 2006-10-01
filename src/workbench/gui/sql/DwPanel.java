@@ -146,7 +146,6 @@ public class DwPanel
 		this.updateAction = new UpdateDatabaseAction(this);
 		this.insertRow = new InsertRowAction(this);
 		this.deleteRow = new DeleteRowAction(this);
-		//this.startEdit = new StartEditAction(this);
 		this.duplicateRow = new CopyRowAction(this);
 		this.selectKeys = new SelectKeyColumnsAction(this);
 		
@@ -157,6 +156,7 @@ public class DwPanel
 		this.dataTable.setRowSelectionAllowed(true);
 		this.dataTable.getSelectionModel().addListSelectionListener(this);
 		this.dataTable.setHighlightRequiredFields(Settings.getInstance().getHighlightRequiredFields());
+		this.dataTable.setStatusBar(this.statusBar);
 		
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.setDefaultComponent(dataTable);
@@ -170,42 +170,10 @@ public class DwPanel
 		return this.selectKeys;
 	}
 
-	public boolean retrievePKColumns()
-	{
-		if (dataTable.hasPkColumns()) return true;
-		boolean result = false;
-		try
-		{
-			setStatusMessage(ResourceMgr.getString("MsgRetrievingKeyColumns"));
-			result = dataTable.detectDefinedPkColumns();
-			clearStatusMessage();
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DwPanel.checkAndSelectKeyColumns", "Error retrieving key columns", e);
-		}
-		return result;
-	}
-	
 	public void checkAndSelectKeyColumns()
 	{
-		retrievePKColumns();
+		dataTable.detectDefinedPkColumns();
 		dataTable.selectKeyColumns();
-//		Thread t = new WbThread("PK Check")
-//		{
-//			public void run()
-//			{
-//				EventQueue.invokeLater(new Runnable()
-//				{
-//					public void run()
-//					{
-//						retrievePKColumns();
-//						dataTable.selectKeyColumns();
-//					}
-//				});
-//			}
-//		};
-//		t.start();
 	}
 	
 	public void setManageUpdateAction(boolean aFlag)
@@ -320,7 +288,7 @@ public class DwPanel
 		boolean needPk = this.dataTable.getDataStore().needPkForUpdate();
 		if (needPk)
 		{
-			boolean hasPk = retrievePKColumns();
+			boolean hasPk = dataTable.detectDefinedPkColumns();
 			if (!hasPk)
 			{
 				hasPk = getTable().selectKeyColumns();
@@ -663,6 +631,7 @@ public class DwPanel
 				}
 				checkResultSetActions();
 			}
+			
 		}
 		finally
 		{
@@ -697,7 +666,7 @@ public class DwPanel
 		
 		// passing the maxrows to the datastore is a workaround for JDBC drivers
 		// which do not support the setMaxRows() method.
-		// The datastore will make sure that no more rows are read then really requested
+		// The datastore will make sure that not more rows are read than really requested
 		if (this.showLoadProgress)
 		{
 			newData = new DataStore(result, true, this.genericRowMonitor, this.getMaxRows(), this.dbConnection);
@@ -712,55 +681,49 @@ public class DwPanel
 	public void showData(DataStore newData, String statement)
 		throws SQLException
 	{
-		this.hasResultSet = true;
-		long checkUpdateTime = -1;
-		this.sql = statement;
-		
-		newData.setSourceConnection(this.dbConnection);
-		newData.setProgressMonitor(null);
-		this.clearStatusMessage();
-		
-		this.dataTable.reset();
-		this.dataTable.setAutoCreateColumnsFromModel(true);
-		this.dataTable.setModel(new DataStoreTableModel(newData), true);
-		if (Settings.getInstance().getAutomaticOptimalWidth())
+		try
 		{
-			this.dataTable.optimizeAllColWidth(true);
+			this.setBatchUpdate(true);
+			this.hasResultSet = true;
+			this.sql = statement;
+
+			newData.setOriginalConnection(this.dbConnection);
+			newData.setProgressMonitor(null);
+			this.clearStatusMessage();
+
+			this.dataTable.reset();
+			this.dataTable.setAutoCreateColumnsFromModel(true);
+			this.dataTable.setModel(new DataStoreTableModel(newData), true);
+			if (Settings.getInstance().getAutomaticOptimalWidth())
+			{
+				this.dataTable.optimizeAllColWidth(true);
+			}
+			else
+			{
+				this.dataTable.adjustColumns();
+			}
+			StringBuffer header = new StringBuffer(80);
+			header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
+			header.append(this.sql);
+			this.setPrintHeader(header.toString());
+
+			this.dataTable.checkCopyActions();
+			this.checkResultSetActions();
 		}
-		else
+		finally
 		{
-			this.dataTable.adjustColumns();
+			setBatchUpdate(false);
 		}
-		StringBuffer header = new StringBuffer(80);
-		header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
-		header.append(this.sql);
-		this.setPrintHeader(header.toString());
-		
-//		if (automaticUpdateTableCheck)
-//		{
-//			long updStart, updEnd;
-//			updStart = System.currentTimeMillis();
-//			this.checkUpdateTable();
-//			updEnd = System.currentTimeMillis();
-//			checkUpdateTime = (updEnd - updStart);
-//		}
-		this.dataTable.checkCopyActions();
-		this.checkResultSetActions();
 	}
 	
 	private void checkResultSetActions()
 	{
 		boolean hasResult = this.hasResultSet();
-//		boolean mayEdit = hasResult && this.hasUpdateableColumns();
-//		boolean updateable = mayEdit && this.isUpdateable();
-		
-		//this.startEdit.setEnabled(mayEdit);
 		int rows = this.getTable().getSelectedRowCount();
 
 		this.dataTable.getExportAction().setEnabled(hasResult);
-		
 		this.updateAction.setEnabled(false);
-		this.insertRow.setEnabled(true);
+		this.insertRow.setEnabled(hasResult);
 		this.deleteRow.setEnabled(rows > 0);
 		this.duplicateRow.setEnabled(rows == 1);
 		this.selectKeys.setEnabled(hasResult);
@@ -1108,10 +1071,18 @@ public class DwPanel
 						JOptionPane.QUESTION_MESSAGE,
 						null,tables.toArray(),null);
 				}
-				else
+				else 
 				{
-					WbSwingUtilities.showErrorMessage(w, ResourceMgr.getString("MsgNoTables"));
+					// checkUpdateTable() will have returned true if exactly one table
+					// was found, so if we wind up here, there is no way to update the 
+					// underlying DataStore
+					WbSwingUtilities.showErrorMessageKey(w, "MsgNoTables");
 					this.setUpdateTable((TableIdentifier)null);
+					this.updateAction.setEnabled(false);
+					this.insertRow.setEnabled(false);
+					this.deleteRow.setEnabled(false);
+					this.duplicateRow.setEnabled(false);
+					this.selectKeys.setEnabled(false);
 					return false;
 				}
 				
@@ -1180,7 +1151,6 @@ public class DwPanel
 	public CopyRowAction getCopyRowAction() { return this.duplicateRow; }
 	public DeleteRowAction getDeleteRowAction() { return this.deleteRow; }
 	public UpdateDatabaseAction getUpdateDatabaseAction() { return this.updateAction; }
-	//public StartEditAction getStartEditAction() { return this.startEdit; }
 	
 	/**
 	 *	Turns on the batchUpdate mode.

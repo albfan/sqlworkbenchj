@@ -317,6 +317,7 @@ public class TableDataPanel
 		}
 		finally
 		{
+			commitRetrieveIfNeeded();
 			this.rowCountCancel = false;
 			this.retrieveRunning = false;
 			this.dataDisplay.setStatusMessage("");
@@ -466,7 +467,18 @@ public class TableDataPanel
 		}
 	}
 
-	private void doRetrieve(boolean respectMaxRows)
+	private void commitRetrieveIfNeeded()
+	{
+		if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab())
+		{
+			if (this.dbConnection.selectStartsTransaction())
+			{
+				try { this.dbConnection.commit(); } catch (Throwable th) {}
+			}
+		}
+	}
+		
+	protected void doRetrieve(boolean respectMaxRows)
 	{
 		if (this.isRetrieving()) return;
 
@@ -529,6 +541,7 @@ public class TableDataPanel
 		}
 		finally
 		{
+			commitRetrieveIfNeeded();
 			dataDisplay.clearStatusMessage();
 			cancelRetrieve.setEnabled(false);
 			reloadAction.setEnabled(true);

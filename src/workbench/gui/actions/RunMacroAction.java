@@ -53,7 +53,7 @@ public class RunMacroAction extends WbAction
 	{
 		if (this.client != null && this.macroName != null)
 		{
-			boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
+			boolean shiftPressed = isShiftPressed(e);
 			SqlPanel sql = this.client.getCurrentSqlPanel();
 			if (sql != null)
 			{	

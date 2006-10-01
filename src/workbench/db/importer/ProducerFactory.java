@@ -35,14 +35,14 @@ public class ProducerFactory
 	private TextImportOptions textOptions;
 	private XmlImportOptions xmlOptions;
 	private ImportOptions generalOptions;
-	private String inputFile;
+	private File inputFile;
 	private List inputColumns;
 	private TableIdentifier table;
 	private RowDataProducer producer;
 	private ImportFileParser fileParser;
 	private WbConnection connection;
 	
-	public ProducerFactory(String inputFile)
+	public ProducerFactory(File inputFile)
 	{
 		this.setInputFile(inputFile);
 	}
@@ -117,7 +117,7 @@ public class ProducerFactory
 		this.producer = null;
 	}
 	
-	private void setInputFile(String inputFilename)
+	private void setInputFile(File inputFilename)
 	{
 		this.inputFile = inputFilename;
 		this.inputColumns = null;
@@ -185,7 +185,7 @@ public class ProducerFactory
 		this.fileParser = parser;
 	}
 	
-	public String getSourceFilename()
+	public File getSourceFile()
 	{
 		return this.inputFile;
 	}
@@ -261,9 +261,10 @@ public class ProducerFactory
 		CommandTester ct = new CommandTester();
 		String verb = ct.formatVerb(WbImport.VERB);
 		result.append(verb + " -" + WbImport.ARG_FILE + "=");
-		if (inputFile.indexOf('-') > -1) result.append('"');
-		result.append(StringUtil.replace(inputFile, "\\", "/"));
-		if (inputFile.indexOf('-') > -1) result.append('"');
+		String filename = inputFile.getAbsolutePath();
+		if (filename.indexOf('-') > -1) result.append('"');
+		result.append(StringUtil.replace(filename, "\\", "/"));
+		if (filename.indexOf('-') > -1) result.append('"');
 		result.append(indent);
 		result.append('-');
 		result.append(WbImport.ARG_TYPE);
