@@ -447,7 +447,7 @@ public class ScriptParser
 
 	/**
 	 * Return the next {@link ScriptCommandDefinition} from the script. 
-	 * This is delegated to {@link #getNextCommand()}
+	 * 
 	 * @throws IllegalStateException if the Iterator has not been initialized using {@link #getIterator()}
 	 * @see IteratingScriptParser#getNextCommand()
 	 * @see #next()

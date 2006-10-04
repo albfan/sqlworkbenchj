@@ -49,7 +49,7 @@ public class ValidatingDialog
 	protected ValidatingComponent validator = null;
 	protected JComponent editorComponent;
 	private JButton[] optionButtons;
-	//private JButton okButton;
+
 	private JButton cancelButton;
 	private boolean isCancelled = true;
 	private int selectedOption = -1;

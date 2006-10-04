@@ -14,6 +14,7 @@ package workbench.gui.profiles;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
@@ -22,11 +23,9 @@ import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import javax.swing.ComboBoxModel;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
@@ -45,7 +44,6 @@ import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.BooleanPropertyEditor;
-import workbench.gui.components.ComboStringPropertyEditor;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.IntegerPropertyEditor;
 import workbench.gui.components.PasswordPropertyEditor;
@@ -179,15 +177,16 @@ public class ConnectionEditorPanel
     includeNull = new BooleanPropertyEditor();
     removeComments = new BooleanPropertyEditor();
     rememberExplorerSchema = new BooleanPropertyEditor();
+    editConnectionScriptsButton = new FlatButton();
     jPanel1 = new javax.swing.JPanel();
     tfWorkspaceFile = new StringPropertyEditor();
     selectWkspButton = new javax.swing.JButton();
     workspaceFileLabel = new javax.swing.JLabel();
     autoCommitLabel = new WbCheckBoxLabel();
 
+    setMinimumSize(new java.awt.Dimension(220, 200));
     setLayout(new java.awt.GridBagLayout());
 
-    setMinimumSize(new java.awt.Dimension(220, 200));
     tfProfileName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
     tfProfileName.setName("name");
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -213,7 +212,6 @@ public class ConnectionEditorPanel
         cbDriversItemStateChanged(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
@@ -310,7 +308,6 @@ public class ConnectionEditorPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
     add(lblUrl, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 8;
@@ -319,7 +316,6 @@ public class ConnectionEditorPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
     add(jSeparator2, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 15;
@@ -341,7 +337,6 @@ public class ConnectionEditorPanel
         showDriverEditorDialog(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 17;
@@ -360,7 +355,6 @@ public class ConnectionEditorPanel
         extendedPropsMouseClicked(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 6;
@@ -377,7 +371,6 @@ public class ConnectionEditorPanel
         helpButtonActionPerformed(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 17;
@@ -517,6 +510,22 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
     wbOptionsPanel.add(rememberExplorerSchema, gridBagConstraints);
 
+    editConnectionScriptsButton.setText(ResourceMgr.getString("LblConnScripts"));
+    editConnectionScriptsButton.setToolTipText(ResourceMgr.getDescription("LblConnScripts"));
+    editConnectionScriptsButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        editConnectionScriptsButtonActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+    wbOptionsPanel.add(editConnectionScriptsButton, gridBagConstraints);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 9;
@@ -583,8 +592,13 @@ public class ConnectionEditorPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 3, 0);
     add(autoCommitLabel, gridBagConstraints);
-
   }// </editor-fold>//GEN-END:initComponents
+
+	private void editConnectionScriptsButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_editConnectionScriptsButtonActionPerformed
+	{//GEN-HEADEREND:event_editConnectionScriptsButtonActionPerformed
+		Dialog d = (Dialog)SwingUtilities.getWindowAncestor(this);
+		EditConnectScriptsPanel.editScripts(d, this.getProfile());
+	}//GEN-LAST:event_editConnectionScriptsButtonActionPerformed
 
 	private void helpButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_helpButtonActionPerformed
 	{//GEN-HEADEREND:event_helpButtonActionPerformed
@@ -681,6 +695,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JCheckBox cbSeparateConnections;
   protected javax.swing.JCheckBox cbStorePassword;
   protected javax.swing.JCheckBox confirmUpdates;
+  protected javax.swing.JButton editConnectionScriptsButton;
   protected javax.swing.JCheckBox emptyStringIsNull;
   protected javax.swing.JButton extendedProps;
   protected javax.swing.JLabel fetchSizeLabel;

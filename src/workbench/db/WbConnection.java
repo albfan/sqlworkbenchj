@@ -24,15 +24,19 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import workbench.db.report.TagWriter;
 import workbench.interfaces.DbExecutionListener;
 import workbench.resource.ResourceMgr;
+import workbench.sql.ScriptCommandDefinition;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.sql.ScriptParser;
 import workbench.sql.preparedstatement.PreparedStatementPool;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -51,6 +55,7 @@ public class WbConnection
 	public static final String CONNECTION_OPEN = "open";
 
   private String id;
+	private StringBuffer scriptError = null;
 	private Connection sqlConnection;
 	private DbMetadata metaData;
 	private ConnectionProfile profile;
@@ -115,6 +120,59 @@ public class WbConnection
 		return this.profile;
 	}
 
+	void runPreDisconnectScript()
+	{
+		if (this.profile == null) return;
+		if (this.sqlConnection == null) return;
+		String sql = profile.getPreDisconnectScript();
+		runConnectScript(sql);
+	}
+	
+	void runPostConnectScript()
+	{
+		if (this.profile == null) return;
+		if (this.sqlConnection == null) return;
+		String sql = profile.getPostConnectScript();
+		runConnectScript(sql);
+	}	
+	
+	private void runConnectScript(String sql)
+	{
+		if (StringUtil.isEmptyString(sql)) return;
+		ScriptParser p = new ScriptParser(sql);
+		Iterator itr = p.getIterator();
+		Statement stmt = null;
+		String command = null;
+		try
+		{
+			stmt = this.sqlConnection.createStatement();
+			this.scriptError = new StringBuffer();
+			while (itr.hasNext())
+			{
+				command = p.getNextCommand();
+				LogMgr.logDebug("WbConnection.runConnectScript()", "Executing statement: " + sql);
+				stmt.execute(command);
+				this.scriptError.append(ResourceMgr.getString("MsgBatchExecutingStatement"));
+				this.scriptError.append(": ");
+				this.scriptError.append(StringUtil.getMaxSubstring(command,250));
+				this.scriptError.append("\n\n");
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("WbConnection.runConnectScript()", "Error executing post-connect script", e);
+			this.scriptError = new StringBuffer();
+			this.scriptError.append(ResourceMgr.getString("MsgBatchStatementError"));
+			this.scriptError.append(": ");
+			this.scriptError.append(command + "\n");
+			this.scriptError.append(e.getMessage());
+		}
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
+		}
+	}
+	
 	void setSqlConnection(Connection aConn)
 	{
 		this.sqlConnection = aConn;
@@ -138,10 +196,22 @@ public class WbConnection
 	{
 		try
 		{
+			
 			SQLWarning warn = this.getSqlConnection().getWarnings();
-			if (warn == null) return null;
-
+			if (warn == null) 
+			{
+				if (this.scriptError != null)
+				{
+					String error = this.scriptError.toString();
+					if (clearWarnings) this.scriptError = null;
+					return error;
+				}
+				return null;
+			}
+			
 			StringBuffer msg = new StringBuffer(200);
+			if (this.scriptError != null) msg.append(this.scriptError);
+
 			String s = null;
 			while (warn != null)
 			{
@@ -170,6 +240,7 @@ public class WbConnection
 	 */
 	public void clearWarnings()
 	{
+		this.scriptError = null;
 		if (this.sqlConnection == null) return;
 		if (this.metaData == null) return;
 		try

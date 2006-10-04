@@ -107,6 +107,7 @@ public class ConnectionMgr
 		Connection sql = this.connect(aProfile, anId);
 		conn.setProfile(aProfile);
 		conn.setSqlConnection(sql);
+		conn.runPostConnectScript();
 		
 		String driverVersion = null;
 		try
@@ -465,6 +466,8 @@ public class ConnectionMgr
 			{
 				LogMgr.logInfo("ConnectionMgr.disconnect()", "Disconnecting: [" + conn.getProfile().getName() + "], ID=" + conn.getId());
 			}
+			
+			conn.runPreDisconnectScript();
 			
 			if (conn.getMetadata() == null)
 			{

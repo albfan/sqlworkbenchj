@@ -106,7 +106,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.55 2006-10-01 17:08:40 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.56 2006-10-04 09:28:28 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -188,10 +188,9 @@ public class JEditTextArea
 		this.addKeyBinding("SHIFT+DELETE", this.popup.getCutAction());
 
 		this.addKeyBinding("C+a", this.popup.getSelectAllAction());
-
 		
 		// We don't seem to get the initial focus event?
-		focusedComponent = this;
+		// focusedComponent = this;
 	}
 
 	public int getHScrollBarHeight()

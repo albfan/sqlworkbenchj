@@ -55,11 +55,13 @@ public class ConnectionProfile
 	private boolean ignoreDropErrors;
 	private boolean confirmUpdates;
 	private Integer defaultFetchSize;
-	//private boolean globalProfile = false;
+	
 	private boolean emptyStringIsNull = false;
 	private boolean includeNullInInsert = true;
 	private boolean removeComments = false;
 	private boolean rememberExplorerSchema = false;
+	private String postConnectScript = null;
+	private String preDisconnectScript = null;
 	
 	static
 	{
@@ -658,6 +660,48 @@ public class ConnectionProfile
 			else
 			{
 				this.defaultFetchSize = fetchSize;
+			}
+			this.changed = true;
+		}
+	}
+
+	public String getPostConnectScript()
+	{
+		return postConnectScript;
+	}
+
+	public void setPostConnectScript(String script)
+	{
+		if (!StringUtil.equalString(script, this.postConnectScript))
+		{
+			if (StringUtil.isEmptyString(script))
+			{
+				this.postConnectScript = null;
+			}
+			else
+			{
+				this.postConnectScript = script.trim();
+			}
+			this.changed = true;
+		}
+	}
+
+	public String getPreDisconnectScript()
+	{
+		return preDisconnectScript;
+	}
+
+	public void setPreDisconnectScript(String script)
+	{
+		if (!StringUtil.equalString(script, this.preDisconnectScript))
+		{
+			if (StringUtil.isEmptyString(script))
+			{
+				this.preDisconnectScript = null;
+			}
+			else
+			{
+				this.preDisconnectScript = script.trim();
 			}
 			this.changed = true;
 		}

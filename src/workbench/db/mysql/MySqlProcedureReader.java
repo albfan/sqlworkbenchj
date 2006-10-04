@@ -38,8 +38,7 @@ public class MySqlProcedureReader
 
 	public StringBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
-		StringBuffer source = new StringBuffer();
-		source.append("CREATE ");
+		StringBuffer source = new StringBuffer(150);
 		
 		String sql = "SELECT routine_type, dtd_identifier " +
              "FROM information_schema.routines " +
@@ -62,6 +61,14 @@ public class MySqlProcedureReader
 				proctype = rs.getString(1);
 				returntype = rs.getString(2);
 			}		
+			source.append("DROP ");
+			source.append(proctype);
+			source.append(' ');
+			source.append(aProcname);
+			source.append(';');
+			source.append(nl);
+			source.append(nl);
+			source.append("CREATE ");
 			source.append(proctype);
 			source.append(' ');
 			source.append(aProcname);

@@ -40,7 +40,7 @@ public class ColumnIdentifier
 
 	private int position;
 
-	private int size; // for VARCHAR's etc
+	private int size; // for VARCHAR etc
 	private int digits; // for DECIMAL types
 
 	public ColumnIdentifier()
@@ -70,7 +70,7 @@ public class ColumnIdentifier
 	public ColumnIdentifier(String aName, int aType, boolean isPkColumn)
 	{
 		if (aName == null) throw new IllegalArgumentException("Column name may not be null!");
-		this.name = aName.trim();//.toLowerCase();
+		this.name = aName.trim();
 		this.type = aType;
 		this.isPk = isPkColumn;
 	}
