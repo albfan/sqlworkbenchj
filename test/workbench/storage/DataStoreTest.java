@@ -41,8 +41,6 @@ import workbench.util.SqlUtil;
 public class DataStoreTest 
 	extends TestCase
 {
-//	private String dbName;
-//	private String basedir;
 	private final int rowcount = 10;
 	private TestUtil util;
 	
