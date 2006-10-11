@@ -300,9 +300,11 @@ public class TableDataPanel
 			}
 			this.rowCountLabel.setText(Long.toString(rowCount));
 			this.rowCountLabel.setToolTipText(null);
+			commitRetrieveIfNeeded();
 		}
 		catch (Exception e)
 		{
+			rollbackIfNeeded();
 			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression() + ": " + ExceptionUtil.getDisplay(e), null);
 			if (rowCountCancel)
 			{
@@ -314,10 +316,11 @@ public class TableDataPanel
 				this.rowCountLabel.setText(ResourceMgr.getString("TxtError"));
 				this.rowCountLabel.setToolTipText(ExceptionUtil.getDisplay(e));
 			}
+			String title = ResourceMgr.getString("TxtErrorRowCount");
+			WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), title, ExceptionUtil.getDisplay(e));
 		}
 		finally
 		{
-			commitRetrieveIfNeeded();
 			this.rowCountCancel = false;
 			this.retrieveRunning = false;
 			this.dataDisplay.setStatusMessage("");
@@ -467,9 +470,17 @@ public class TableDataPanel
 		}
 	}
 
+	private void rollbackIfNeeded()
+	{
+		if (!this.dbConnection.getAutoCommit() && this.dbConnection.getProfile().getUseSeparateConnectionPerTab())
+		{
+			try { this.dbConnection.commit(); } catch (Throwable th) {}
+		}
+	}
+	
 	private void commitRetrieveIfNeeded()
 	{
-		if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab())
+		if (!this.dbConnection.getAutoCommit() && this.dbConnection.getProfile().getUseSeparateConnectionPerTab())
 		{
 			if (this.dbConnection.selectStartsTransaction())
 			{
@@ -508,6 +519,7 @@ public class TableDataPanel
 			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
 			dataDisplay.setPrintHeader(header);
 			dataDisplay.showlastExecutionTime();
+			commitRetrieveIfNeeded();
 		}
 		catch (Throwable e)
 		{
@@ -541,7 +553,6 @@ public class TableDataPanel
 		}
 		finally
 		{
-			commitRetrieveIfNeeded();
 			dataDisplay.clearStatusMessage();
 			cancelRetrieve.setEnabled(false);
 			reloadAction.setEnabled(true);

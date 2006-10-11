@@ -261,19 +261,6 @@
 			</para>
 		</section>
 		
-		<!--
-		<section id="profile-ignore-disable-auto-edit">
-			<title>Disable automatic update table check</title>
-			
-			<para>
-				&wb-productname; automatically tries to determine the table
-				which can be updated for a result set. If this check takes too long
-				for your DBMS you can disable it. For more details on the automatic
-				update check, see <xref linkend="edit-data"/>
-			</para>
-		</section>
-		-->
-		
 		<section id="profile-rollback-before-disconnect">
 			<title>Rollback before disconnect</title>
 
@@ -348,6 +335,30 @@
 				tries to pre-select the current schema when its opened
 			</para>
 			
+		</section>
+
+		<section id="profile-connect-scripts">
+			<title>Connect scripts</title>
+			
+			<para>
+				You can define a SQL script that is executed immediately after a connection for this 
+				profile has been established, and a script that is executed before a connection
+				is about to be closed. To define the scripts, click on the button <guibutton>Connect scripts</guibutton>.
+				A new window will be opened that contains two editors. Enter the script that should be
+				executed upon connecting into the upper editor, the script to be executed before 
+				disconnecting into the lower editor. You can put more than one statement into the 
+				scripts. The statements have to be separated by a semicolon. 
+			</para>
+			<para>
+				The statements that are executed will be logged in the message panel of the
+				SQL panel where the connection is created. You will not see the log when 
+				a connection for the DbExplorer is created. 
+			</para>
+			<para>
+				Execution of the script will stop at the first statement that throws an error.
+				The error message will also be logged to the message panel. If the connection 
+				is made for a DbExplorer panel, the errors will only be visible in the log file.
+			</para>
 		</section>
 	
 		<section id="profile-workspace-file">

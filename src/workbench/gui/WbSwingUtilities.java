@@ -220,6 +220,11 @@ public class WbSwingUtilities
 	{
 		JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);
 	}
+	
+	public static void showErrorMessage(Component aCaller, String title, String aMessage)
+	{
+		JOptionPane.showMessageDialog(aCaller, aMessage, title, JOptionPane.ERROR_MESSAGE);
+	}
 
 	public static void showMessage(Component aCaller, Object aMessage)
 	{

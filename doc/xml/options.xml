@@ -38,14 +38,18 @@
 
 		<section id="options-enable-out" xreflabel="Enabling DBMS_OUTPUT">
 			<title>Enable DBMS_OUTPUT</title>
-			<para>If this option is enabled, the <literal>DBMS_OUTPUT</literal> package is
+			
+			<para>
+				If this option is enabled, the <literal>DBMS_OUTPUT</literal> package is
 				automatically enabled when connecting to an Oracle database. This option
 				has no effect on other DBMS. If it is disabled, the <literal>DBMS_OUTPUT</literal> package
 				can be enabled using the <xref linkend="command-enableout"/> command.
 			</para>
-			<para>If this option is not checked, you need to manually enable the <literal>DBMS_OUTPUT</literal>
+			<para>
+				If this option is not checked, you need to manually enable the <literal>DBMS_OUTPUT</literal>
 				with <xref linkend="command-enableout"/>.
 			</para>
+			
 			<note>
 				Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with 
 				the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal> 

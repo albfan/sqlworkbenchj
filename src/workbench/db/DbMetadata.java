@@ -1517,6 +1517,8 @@ public class DbMetadata
 		boolean sequencesReturned = false;
 		boolean checkOracleInternalSynonyms = (isOracle && typeIncluded("SYNONYM", types));
 		boolean checkOracleSnapshots = (isOracle && Settings.getInstance().getBoolProperty("workbench.db.oracle.detectsnapshots", true) && typeIncluded("TABLE", types));
+		boolean checkSyns = typeIncluded("SYNONYM", types);
+		boolean synRetrieved = false;
 		
 		String excludeSynsRegex = Settings.getInstance().getProperty("workbench.db.oracle.exclude.synonyms", null);
 		Pattern synPattern = null;
@@ -1576,6 +1578,7 @@ public class DbMetadata
 				LogMgr.logError("DbMetadata.getTables()", "Driver returned a NULL ResultSet from getTables()",null);
 				return result;
 			}
+			
 			while (tableRs.next())
 			{
 				String cat = tableRs.getString(1);
@@ -1593,6 +1596,15 @@ public class DbMetadata
 						Matcher m = synPattern.matcher(name);
 						if (m.matches()) continue;
 					}
+				}
+			
+				// prevent duplicate retrieval of SYNONYMS if the driver
+				// returns them already, but the Settings have enabled
+				// Synonym retrieval as well
+				// (e.g. because an upgraded Driver now returns the synonyms)
+				if (checkSyns && !synRetrieved && "SYNONYM".equals(ttype))
+				{
+					synRetrieved = true;
 				}
 				
 				if (excludeTablePattern != null && ttype.equalsIgnoreCase("TABLE"))
@@ -1650,7 +1662,7 @@ public class DbMetadata
 		}
 
 		boolean retrieveSyns = (this.synonymReader != null && Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_synonyms", false));
-		if (retrieveSyns && typeIncluded("SYNONYM", types) )
+		if (retrieveSyns && typeIncluded("SYNONYM", types) && !synRetrieved)
 		{
 			LogMgr.logDebug("DbMetadata.getTables()", "Retrieving synonyms...");
 			List syns = this.synonymReader.getSynonymList(this.dbConnection.getSqlConnection(), aSchema);

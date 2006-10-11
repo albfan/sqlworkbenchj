@@ -105,110 +105,145 @@
 				</para>
     </section>
     
-    <section id="import">
-        <title>Import data</title>
+    <section id="import-resultset">
+			<title>Import data</title>
         
-        <para>
-            &wb-productname; can import tab separated text files into the current
-            result set. This means, that you need to issue the approriate <literal>SELECT</literal>
-            statement first. The structure of the file has to match the structure of the result set,
-            otherwise an error will occur. To initiate the import select
-            <menuchoice><guimenu>Data</guimenu><guimenuitem>Import</guimenuitem></menuchoice>
-        </para>
-        
-        <para>When selecting the file, you can change some parameters for the
-        import:</para>
-        
-        <informaltable frame="all">
-        <tgroup cols="2" align="left">
-            <colspec colname="c1" colwidth="5cm" />
-            <colspec colname="c2" colwidth="10cm" />
-            <thead valign="top">
-                <row>
-                    <entry>Option</entry>
-                    <entry>Description</entry>
-                </row>
-            </thead>
-            <tbody valign="top">
-                <row>
-                    <entry><para>Header</para></entry>
-                    <entry><para>if this option this is checked, the first line of the import file will be ignored</para></entry>
-                </row>
-                <row>
-                    <entry><para>Delimiter</para></entry>
-                    <entry><para>the delimiter used to separate column values. Enter \t for the tab character</para></entry>
-                </row>
-                <row>
-                    <entry><para>Date Format</para></entry>
-                    <entry><para>The <link linkend="options-date-format">format</link> in which date fields are specified. 
-										</para></entry>
-                </row>
-                <row>
-                    <entry><para>Decimal char</para></entry>
-                    <entry><para>The character that is used to indicate the decimals
-										in numeric values (typically a dot or a comma)</para></entry>
-                </row>
-                <row>
-                    <entry><para>Quote char</para></entry>
-                    <entry><para>The character used to quote values with special
-                    characters. Make sure that each opening quote is followed by a
-                    closing quote in your text file.</para>
-                    </entry>
-                </row>
-            </tbody>
-        </tgroup>
-        </informaltable>
-        <para>
-            You can also import text and XML files using the <link linkend="command-import">WbImport</link> 
-            command. Using the <literal>WbImport</literal> command is the recommended way to import
-            data, as it is much more flexible, and - more important - it does not read the 
-            data into memory.
-        </para>
+			<section id="import-resultset-file">
+				<title>Import a file into the current result set</title>
+				<para>
+					&wb-productname; can import tab separated text files into the current
+					result set. This means, that you need to issue the approriate <literal>SELECT</literal>
+					statement first. The structure of the file has to match the structure of the result set,
+					otherwise an error will occur. To initiate the import select
+					<menuchoice><guimenu>Data</guimenu><guimenuitem>Import file</guimenuitem></menuchoice>
+				</para>
+
+				<para>When selecting the file, you can change some parameters for the
+				import:</para>
+
+				<informaltable frame="all">
+					<tgroup cols="2" align="left">
+						<colspec colname="c1" colwidth="5cm" />
+						<colspec colname="c2" colwidth="10cm" />
+						<thead valign="top">
+							<row>
+								<entry>Option</entry>
+								<entry>Description</entry>
+							</row>
+						</thead>
+						<tbody valign="top">
+							<row>
+								<entry>Header</entry>
+								<entry>if this option this is checked, the first line of the import file will be ignored</entry>
+							</row>
+							<row>
+								<entry>Delimiter</entry>
+								<entry>the delimiter used to separate column values. Enter \t for the tab character</entry>
+							</row>
+							<row>
+								<entry>Date Format</entry>
+								<entry>
+									The <link linkend="options-date-format">format</link> in which date fields are specified. 
+								</entry>
+							</row>
+							<row>
+								<entry>Decimal char</entry>
+								<entry>
+									The character that is used to indicate the decimals
+									in numeric values (typically a dot or a comma)
+								</entry>
+							</row>
+							<row>
+								<entry>Quote char</entry>
+								<entry>The character used to quote values with special
+									characters. Make sure that each opening quote is followed by a
+									closing quote in your text file.
+								</entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</informaltable>
+				<para>
+					You can also import text and XML files using the <link linkend="command-import">WbImport</link> 
+					command. Using the <literal>WbImport</literal> command is the recommended way to import
+					data, as it is much more flexible, and - more important - it does not read the 
+					data into memory.
+				</para>
+			</section>
+			
+			<section>
+				<title>Import the clipboard into the current result</title>
+				<para>
+					You can import the contents of the clipboard into the current result, if the 
+					format matches the result set. When you select 
+					<menuchoice><guimenu>Data</guimenu><guimenuitem>Import from Clipboar</guimenuitem></menuchoice>
+					&wb-productname; will check if the current clipboard contents can be imported into the current
+					result. The data can automatically be imported if the first row of the data contains
+					the column names. One of the following two conditions must be true in order for the import to succeed
+				</para>
+				<para>
+					<itemizedlist>
+						<listitem>
+							The columns are delimited with a tab character and the first row contains column names. All
+							matching columns will then be imported
+						</listitem>
+						<listitem>
+							If no column name matches (i.e. no header row is present) but the number of columns (identified
+							by the number of tab characters in the first row) is identical to the number of columns
+							in the current result.
+						</listitem>
+					</itemizedlist>
+					If &wb-productname; cannot identify the format of the clipboard a dialog will be opened
+					where you can specify the format of the clipboard contents. This is maily necessary
+					if the delimiter is not the tab character.
+				</para>
+			</section>
+			
     </section>
     
     <section id="xml-export-import" xreflabel="XML Export and Import">
         <title>XML Export and Import</title>
       
         <para>You can use &wb-productname;'s XML files to copy data from
-            one system to another.
+					one system to another.
         </para>
         <para>You need to create the XML file first, using the <literal>WbExpor</literal> command
-            from within the workbench, beeing connected to the source system. Suppose your data
-            is stored in the table <literal>PERSON</literal> on your source system
-            and you want to only select the columns <literal>lastname, firstname, birthday</literal>
-            to be transferred to your target system.
+					from within the workbench, beeing connected to the source system. Suppose your data
+					is stored in the table <literal>PERSON</literal> on your source system
+					and you want to only select the columns <literal>lastname, firstname, birthday</literal>
+					to be transferred to your target system.
         </para>
        
        <para>To create the XML file the following command should be used:</para>
        
        <programlisting>WbExport -type=xml -file=&quot;c:/data/person.xml&quot; -table=contact;
 SELECT lastname, firstname, birthday FROM person;</programlisting>
-        <para>As the data should be imported into the table <literal>CONTACT</literal>
-            the <literal>-table=contact</literal> parameter is passed to the <literal>EXPORT</literal>
-            command. You can achieve the same, by editing the XML file afterwards and
-            change the contents of of the <literal>&lt;table-name&gt; </literal> tag.</para>
-            <para>Once the XML file is generated, you can connect to your source system and
-            import the file with the following command:</para>
-            <programlisting>WbImport -type=xml -file=&quot;c:/data/person.xml&quot;;</programlisting>
-            <para>&wb-productname; will read the XML file and insert every row into the table <literal>CONTACT</literal>
-            of the database. AS the XML format generated by &wb-productname; includes the internal long value for date
-            objects, it is not necessary to set the date or datetime format when importing the data.
-            If you have a file with a lot of rows, you might want to set the parameter <literal>-commitevery=n</literal>.
-            Some DBMS work faster if you commit more frequently instead of commit a huge number of inserts at the end.
-            Please refer to the <link linkend="command-export">WbExport command</link> for more details.
-        </para>
-        <para>If you have XML files in a different format then the one expected by &wb-productname;
-            you can transform the file via XSLT into the correct format. More details on how 
-            to transform XML files to and from &wb-productname; can be found in the 
-            description of the <link linkend="command-xslt">XSLT command</link> and the 
-            <link linkend="command-export">WbExport command</link>
-        </para>
+			<para>As the data should be imported into the table <literal>CONTACT</literal>
+			the <literal>-table=contact</literal> parameter is passed to the <literal>EXPORT</literal>
+			command. You can achieve the same, by editing the XML file afterwards and
+			change the contents of of the <literal>&lt;table-name&gt; </literal> tag.</para>
+			<para>Once the XML file is generated, you can connect to your source system and
+			import the file with the following command:</para>
+			<programlisting>WbImport -type=xml -file=&quot;c:/data/person.xml&quot;;</programlisting>
+			<para>&wb-productname; will read the XML file and insert every row into the table <literal>CONTACT</literal>
+				of the database. AS the XML format generated by &wb-productname; includes the internal long value for date
+				objects, it is not necessary to set the date or datetime format when importing the data.
+				If you have a file with a lot of rows, you might want to set the parameter <literal>-commitevery=n</literal>.
+				Some DBMS work faster if you commit more frequently instead of commit a huge number of inserts at the end.
+				Please refer to the <link linkend="command-export">WbExport command</link> for more details.
+			</para>
+			<para>If you have XML files in a different format then the one expected by &wb-productname;
+				you can transform the file via XSLT into the correct format. More details on how 
+				to transform XML files to and from &wb-productname; can be found in the 
+				description of the <link linkend="command-xslt">XSLT command</link> and the 
+				<link linkend="command-export">WbExport command</link>
+			</para>
         
-        <para>
-            If you want to copy data from one database to another, you can also use the 
-            <link linkend="command-copy">WbCopy</link> command, or the <link linkend="data-pumper">
-            DataPumper tool</link>
-        </para>
+			<para>
+				If you want to copy data from one database to another, you can also use the 
+				<link linkend="command-copy">WbCopy</link> command, or the <link linkend="data-pumper">
+				DataPumper tool</link>
+			</para>
         
     </section>
 		

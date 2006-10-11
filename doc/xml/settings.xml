@@ -104,9 +104,9 @@
 			<para>Property: <literal>workbench.print.nativepagedialog</literal></para>
 			<para>
 				When printing the contents of a table, this settings controls the type
-				of pring dialog to be used. The default setting will open the 
+				of print dialog to be used. The default setting will open the 
 				native print dialog of the operating system. If you experience problems
-				when trying to pring, set this property to false. &wb-productname; will
+				when trying to print, set this property to false. &wb-productname; will
 				then open a cross-platform print dialog.
 			</para>
 			<para>Default value: <literal>true</literal></para>
@@ -116,34 +116,12 @@
 	<section id="editor-settings">
 		<title>Editor related settings</title>
 
-		<section id="editor-internal-lineending">
-			<title>Line terminator used internally</title>
+		<section>
+			<title>Use highlighted text for search &amp; replace</title>
 			<para>Property: <literal>workbench.editor.lineending.internal</literal></para>
-			<para>
-				This property controls the line terminator used by the editor internally. 
-				This might be important, if the DBMS server does not work with a LF (chr(10) or \n) 
-				line ending correctly. Note that this does not impact the saving of editor
-				files. 
-			</para>
-			<para>Default value: <literal>lf</literal></para>
-			<para>
-				Valid values: <literal>default</literal> (Platform default), <literal>lf</literal> (Unix), <literal>crlf</literal> (Windows)
-			</para>
+			
 		</section>
-		
-		<section id="editor-externally-lineending">
-			<title>Line terminator used when saving files</title>
-			<para>Property: <literal>workbench.editor.lineending.external</literal></para>
-			<para>
-				This property controls the line terminator used when a file 
-				is saved by the editor. 
-			</para>
-			<para>Default value: Platform specific</para>
-			<para>
-				Valid values: <literal>default</literal> (Platform default), <literal>lf</literal> (Unix), <literal>crlf</literal> (Windows)
-			</para>
-		</section>
-		
+
     <section id="editor-color-setting">
       <title>Customizing the colors used for syntax highlighting</title>
       <para>Property: <literal>workbench.editor.color.[type]</literal></para>
@@ -177,6 +155,19 @@
 			<para>Default value: <literal>alt</literal></para>
     </section>
 	
+		<section id="default-file-encoding">
+			<title>Default file encoding</title>
+			<para>Property: <literal>workbench.file.encoding</literal></para>
+			<para>
+				Several internal commands use an encoding when writing external text files
+				(e.g. <link linkend="command-export">WbExport</link>). If no encoding is 
+				specified for those commands, the default platform encoding as reported 
+				by the Java runtime system is used. You can overwrite the default encoding
+				that Java assumes by setting this property.
+			</para>
+			<para>Default value: empty, the Java runtime default is used</para>
+		</section>
+		
 	</section>
 	
 	<section id="auto-completion">
@@ -688,5 +679,20 @@
     </section>
 
   </section>
+	<section id="filter-settings">
+		<title>Filter settings</title>
+		
+		<section id="filter-picklist-size">
+			<title>Controlling the number of items in the pick list</title>
+			<para>Property: <literal>workbench.gui.filter.mru.maxsize</literal></para>
+			<para>
+				When saving a filter to an external file, the pick list next to the filter
+				icon will offer a drop down that contains the most recently used filter definitions.
+				This setting will control the maximum size of that dropdown.
+			</para>
+			<para>Default value: <literal>15</literal></para>
+		</section>
+		
+	</section>
 			
 </section>

@@ -121,23 +121,11 @@
 	</target>
 
 	<target name="compile" depends="prepare">
-		<javac debug="off" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" target="1.4" source="1.4" encoding="ISO-8859-1">
-			<exclude name="workbench/test/**"/>
-		</javac>
-	</target>
-	
-	<target name="compile_debug" depends="prepare">
 		<javac debug="on" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" target="1.4" source="1.4" encoding="ISO-8859-1">
 			<exclude name="workbench/test/**"/>
 		</javac>
 	</target>
 	
-	<target name="compile_jikes" depends="prepare">
-		<javac executable="c:/etc/jikes/bin/jikes.exe" compiler="jikes" debug="on" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" >
-			<exclude name="workbench/test/**"/>
-		</javac>
-	</target>
-
   <!-- Manual related tasks -->
 
   <!-- Create the FO file which will in turn be transformed
@@ -461,11 +449,11 @@
     </ant>
   </target>
 
-  <target name="make-dev-jar" depends="get-dev-build, clean, copy-history, prepare, compile_debug, make-jar, clean-history">
+  <target name="make-dev-jar" depends="get-dev-build, clean, copy-history, prepare, compile, make-jar, clean-history">
   </target>
 
   <!-- build a development release -->
-  <target name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile_debug, build-help, make-jar, release-src-zip, clean-history">
+  <target name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile, build-help, make-jar, release-src-zip, clean-history">
   
     <zip zipfile="${distdir}/Workbench-Build${build.number}.zip">
       <zipfileset dir="${distdir}">
@@ -649,6 +637,10 @@
 			</batchtest>			
 			
 		</junit>
+	</target>
+	
+	<target name="javadoc">
+		<javadoc destdir="${javadocdir}" notree="true" sourcepath="${src}" packagenames="workbench.*"/>
 	</target>
 
 	
