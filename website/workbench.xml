@@ -27,7 +27,8 @@
 		<p>Features:</p>
 		<ul>
 			<li>Display result data from SQL queries (<image-link title="Main window" name="MainWindow.png">Screenshot</image-link>)</li>
-			<li>Edit, insert and delete data directly in the result table (<image-link title="Editing data in result set" name="EditData.jpg">Screenshot</image-link>)</li>
+			<li>Edit, insert and delete data directly in the result table (<image-link title="Editing data in result set" name="EditData.png">Screenshot</image-link>)</li>
+			<li>Support for BLOB columns in the result table. Display the BLOB as text, image or hex. Save BLOB data to external files</li>
 			<li>Reformatting (Pretty-Print) of SQL Statements (<image-link title="SQL Formatter" name="SqlFormat.jpg">Screenshot</image-link>)</li>
 			<li>Export the data as text, XML, HTML or SQL script (INSERT, UPDATE or DELETE/INSERT). Text export/import supports encoding of
 			    special characters. All user tables can be exported into a directory with a single command.</li>
@@ -39,15 +40,16 @@
 			<li>Compare two database for differences in the structure. The XML output can be transformed into the approriate SQL ALTER statements using <a href="xslt.html">XSLT</a></li>
 			<li>A DataPumper tool to copy data directly between two servers (<image-link title="Data Pumper" name="DataPumper.png">Screenshot</image-link>).<br/>
 				The functionality of the DataPumper is also available as a SQL command for batch processing</li>
-			<!-- <li>Support for <tt>PreparedStatement</tt> if the JDBC driver implements the necessary meta data calls (Oracle does not)</li> -->
+			<li>Support for <tt>PreparedStatement</tt> if the JDBC driver implements the necessary meta data calls</li>
 			<li>It can be used in batch mode (e.g. for exporting/importing data from the command line)</li>
-			<li>Auto completion for tables and columns in SQL statements</li>
+			<li>Auto completion for tables and columns in SQL statements (<image-link title="Auto-completion" name="completion.png">Screenshot</image-link>)</li>
+			<li>Connection profiles can be grouped for better overview (<image-link title="Connection profiles" name="Profiles.png">Screenshot</image-link>)</li>
 			<li>SQLWorkbench/J is <b>free</b> (<a href="manual/information.html">License agreement</a>)</li>
 		</ul>
 		<p>SQL Workbench/J also displays important information about the structure of a database schema</p>
 		<ul>
 			<li>Display table, view and procedure definitions (<image-link name="TableSource.png" title="SQL source for table definition">Screenshot</image-link>)</li>
-			<li>Display view, procedure and trigger source code (<image-link title="SQL Source Display" name="ViewSource.jpg">Screenshot</image-link>)</li>
+			<li>Display view, procedure and trigger source code (<image-link title="SQL Source Display" name="ViewSource.png">Screenshot</image-link>)</li>
 			<li>Display foreign key constraints between tables (<image-link title="Foreign key display" name="FkDisplay.png">Screenshot</image-link>)</li>
 			<li>Generate delete script with respect to foreign key constraints</li>
 			<li>Search for data across all (character) columns in several tables (<image-link title="Search table data" name="SearchTables.png">Screenshot</image-link>)</li>
@@ -55,11 +57,9 @@
 		<p style="margin-top:25px">Please send your comments or bug reports to <mail-to/><br/>
 		Your feedback is very much welcome!
 		</p>
-		<!--
-		<p style="margin-top:50px">
-			<img src="http://kellerer.org/tinc?key=ANF6MRlA&amp;no=5"></img> visits since June 1st, 2003
+		<p style="margin-top:15px">
+			<img src="http://www.sql-workbench.net/tinc?key=ANF6MRlA"></img> visits since June 1st, 2003
 		</p>
-		-->
 		</content>
 	</page>
 	
@@ -69,15 +69,15 @@
 		<p style="margin-top:10px">SQL Workbench/J is known to work with the following database systems:</p>
 		<ul>
 			<li><a target="_blank" href="http://www.postgresql.org/">PostgreSQL</a> <a target="_blank" href="http://jdbc.postgresql.org/download.html">(Download JDBC driver)</a></li>
-			<li><a target="_blank" href="http://hsqldb.sourceforge.net/">HSQLDB</a></li>
-			<li><a target="_blank" href="http://www.firebirdsql.org">Firebird SQL</a> <a target="_blank" href="http://www.firebirdsql.org/index.php?op=devel&amp;sub=jdbc">(Download JDBC driver)</a></li>
-			<li><a target="_blank" href="http://www.mckoi.com/database/">Mckoi SQL Database</a></li>
-			<li><a target="_blank" href="http://www.ibm.com/software/data/cloudscape/">IBM Cloudscape</a></li>
-			<li><a target="_blank" href="http://www.ibm.com/software/data/db2/">IBM DB2</a></li>
 			<li><a target="_blank" href="http://www.oracle.com">Oracle</a> <a target="_blank" href="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html">(Download JDBC driver)</a></li>
 			<li><a target="_blank" href="http://www.microsoft.com/sql">Microsoft SQL Server</a> <a target="_blank" href="http://jtds.sourceforge.net/">(Download free JDBC driver)</a></li>
-			<li><a target="_blank" href="http://opensource.ca.com/projects/ingres/">Ingres R3</a></li>
+			<li><a target="_blank" href="http://www.firebirdsql.org">Firebird SQL</a> <a target="_blank" href="http://www.firebirdsql.org/index.php?op=devel&amp;sub=jdbc">(Download JDBC driver)</a></li>
 			<li><a target="_blank" href="http://www.mysql.com/">MySQL</a> <a target="_blank" href="http://www.mysql.com/products/connector/j">(Download JDBC Driver)</a></li>
+			<li><a target="_blank" href="http://db.apache.org/derby/">Apache Derby</a></li>
+			<li><a target="_blank" href="http://hsqldb.sourceforge.net/">HSQLDB</a></li>
+			<li><a target="_blank" href="http://www.ibm.com/software/data/db2/">IBM DB2</a></li>
+			<li><a target="_blank" href="http://www.mckoi.com/database/">Mckoi SQL Database</a></li>
+			<li><a target="_blank" href="http://opensource.ca.com/projects/ingres/">Ingres R3</a></li>
 			<li><a target="_blank" href="http://www.thinksql.co.uk">ThinkSQL</a></li>
 			<li><a target="_blank" href="http://www.firstsql.com">FirstSQL/J</a></li>
 		</ul>
@@ -134,8 +134,11 @@
 			</p>
 			<p>On this page you can find some sample XSLT files to transform these output
 			formats into SQL scripts or HTML documents. These scripts are meant to be a
-			starting point that can be enhanced to meet your own needs. They are far from
-			beeing production-quality scripts.</p>
+			starting point that can be enhanced to meet your own needs.
+			</p>
+			<p>They are far from beeing production-quality scripts and are meant
+			as a starting point for your own needs.
+			</p>
 			<p>If you have developed an XSLT file to support the various
 			XML outputs of SQL Workbench/J and would like to share it, please send
 			it to <mail-to/></p>
@@ -174,13 +177,11 @@
         <p>Current stable release: Build <build-number/>, <build-date/>, <a target="_blank" href="history.txt">Change History</a></p>
         <ul>
             <li><zip-link/></li>
-            <li><tar-link/></li>
             <li><source-link/></li>
         </ul>
-        <p>The release archive contains the needed binaries, the manual in HTML format and some sample XSLT
-        scripts.<br/>The manual is also available <a href="manual/workbench-manual.html" target="_blank">online</a>
-        or as a <a href="SQLWorkbench-Manual.pdf">PDF document</a>.
-				</p>
+        <p>	The release archive contains the needed binaries, the manual in HTML and PDF format and some sample XSLT
+	    	scripts.<br/>
+		</p>
         <p>If you are having problems unzipping the distribution archive with WinZip, please read <a href="winzip.html">this</a>.</p>
         <p>If you want to do a full build from the source code including the documentation you need to install
             <a href="http://docbook.sourceforge.net/">DocBook</a> and <a href="http://xml.apache.org/fop/">FOP</a>
@@ -236,9 +237,11 @@
         </p>
 
         <p>You can contact me by using the following email addres: <mail-to/></p><br/><br/>
+        <!--
         <p>If you are looking for consulting, development or training around office
         automation and related topics in Munich, please have a look at <a href="http://www.nutzware.de">nutzware.de</a>
 				(German site)</p>
+				-->
         </content>
     </page>
 

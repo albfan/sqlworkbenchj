@@ -99,7 +99,7 @@
 		<meta http-equiv="Pragma" CONTENT="no-cache"/>
 		<meta http-equiv="Expires" content="-1"/>
 		<meta name="description" content="A free DBMS-independent SQL query tool and front-end"/>
-		<meta name="keywords" lang="en" content="sql,query,tool,analyzer,jdbc,database,isql,viewer,frontend,java,dbms,oracle,postgres,firebirdsql,hsql,hsqldb,sqlserver,sqlplus,replacement,import,export,convert,insert,xml,etl,migrate,compare,diff"/>
+		<meta name="keywords" lang="en" content="sql,query,tool,analyzer,jdbc,database,isql,viewer,frontend,java,dbms,oracle,postgres,firebirdsql,hsql,hsqldb,sqlserver,sqlplus,replacement,import,export,convert,insert,blob,xml,etl,migrate,compare,diff"/>
 	    <meta name="date">
 	    	<xsl:attribute name="content"><xsl:value-of select="$currentDate"/></xsl:attribute>
 	    </meta>
@@ -201,13 +201,15 @@
 
 <xsl:template match="zip-link">
 <!-- <a href="workbench.zip">ZIP File</a>-->
-<a href="Workbench-Build{$buildNumber}.zip">ZIP File</a>
+<a href="Workbench-Build{$buildNumber}.zip">Download stable release</a>
 
 </xsl:template>
 
+<!--
 <xsl:template match="tar-link">
 <a href="Workbench-Build{$buildNumber}.tar.gz">TAR File</a>
 </xsl:template>
+-->
 
 <xsl:template match="build-number">
   <xsl:value-of select="$buildNumber"/>
@@ -230,7 +232,7 @@
         for the development build is also available.
         </p>
       <ul>
-        <li><a href="Workbench-Build{$devBuildNumber}.zip">ZIP Archive</a> (Build <xsl:value-of select="$devBuildNumber"/>,&nbsp;<xsl:value-of select="$devBuildDate"/>)</li>
+        <li><a href="Workbench-Build{$devBuildNumber}.zip">Download development build</a> (<xsl:value-of select="$devBuildNumber"/>,&nbsp;<xsl:value-of select="$devBuildDate"/>)</li>
         <li><a href="WorkbenchSrc-Build{$devBuildNumber}.zip">Source code</a></li>
        </ul>
     </xsl:if>
