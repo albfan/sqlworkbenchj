@@ -8,9 +8,8 @@
 package workbench.sql.formatter;
 
 import junit.framework.*;
+import workbench.TestUtil;
 import workbench.resource.Settings;
-import workbench.util.CharacterRange;
-import workbench.util.StringUtil;
 
 /**
  *
@@ -28,13 +27,16 @@ public class SqlFormatterTest extends TestCase
 	{
 		try
 		{
+			TestUtil util = new TestUtil();
+			util.prepareEnvironment();
+			
 			String sql = "--comment\nselect * from blub;";
 			Settings.getInstance().setInternalEditorLineEnding(Settings.UNIX_LINE_TERMINATOR_PROP_VALUE);
 
 			SqlFormatter f = new SqlFormatter(sql,100);
 			String nl = f.getLineEnding();
 			String formatted = f.getFormattedSql();
-			System.out.println(formatted);
+//			System.out.println(formatted);
 			String expected = "--comment\nSELECT *\nFROM blub;";
 			assertEquals("Not correctly formatted", expected, formatted);
 

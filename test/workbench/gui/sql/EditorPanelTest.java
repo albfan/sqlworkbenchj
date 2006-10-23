@@ -114,6 +114,7 @@ public class EditorPanelTest extends TestCase
 			p.getInputHandler().INSERT_BREAK.actionPerformed(evt);
 
 			content = p.getText();
+			System.out.println(StringUtil.escapeUnicode(content));
 			pos = content.indexOf("Line2\n");
 			assertEquals("Wrong internal line ending (Unix) used", 6, pos);			
 			

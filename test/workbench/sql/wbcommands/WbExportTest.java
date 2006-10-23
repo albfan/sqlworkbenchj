@@ -86,6 +86,7 @@ public class WbExportTest extends TestCase
 			fail(e.getMessage());
 		}
 	}
+	
 	public void testTextExportCompressed() 
 	{
 		try
@@ -94,7 +95,7 @@ public class WbExportTest extends TestCase
 			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=blob_test -compress=true");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
-			File zip = new File(this.basedir, "zip_text_export_blobs.zip");
+			File zip = new File(this.basedir, "zip_text_export_lobs.zip");
 			assertEquals("Archive not created", true, zip.exists());
 		}
 		catch (Exception e)
@@ -112,7 +113,7 @@ public class WbExportTest extends TestCase
 			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=xml -sourcetable=blob_test -compress=true");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
-			File zip = new File(this.basedir, "zip_xml_export_blobs.zip");
+			File zip = new File(this.basedir, "zip_xml_export_lobs.zip");
 			assertEquals("Archive not created", true, zip.exists());
 		}
 		catch (Exception e)
@@ -146,6 +147,7 @@ public class WbExportTest extends TestCase
 			fail(e.getMessage());
 		}
 	}
+	
 	
 	public void testTextBlobExport()
 	{
@@ -195,6 +197,85 @@ public class WbExportTest extends TestCase
 		}
 	}
 
+	public void testXmlClobExport() 
+	{
+		try
+		{
+			File exportFile = new File(this.basedir, "export.xml");
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate("CREATE MEMORY TABLE clob_test(nr integer, clob_data LONGVARCHAR)");
+			String data1 = "This is the first clob content";
+			stmt.executeUpdate("insert into clob_test values (1, '" +  data1+ "')");
+			String data2 = "This is the second clob content";
+			stmt.executeUpdate("insert into clob_test values (2, '" +  data2+ "')");
+			connection.commit();
+			stmt.close();
+			
+			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=xml -header=true -sourcetable=clob_test -clobAsFile=true");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			assertEquals("Export file not created", true, exportFile.exists());
+		
+			File dataFile1 = new File(this.basedir, "export_r1_c2.data");
+			assertEquals("Clob file not created", true, dataFile1.exists());
+			
+			File dataFile2 = new File(this.basedir, "export_r2_c2.data");
+			assertEquals("Clob file not created", true, dataFile2.exists());
+			
+			Reader in = EncodingUtil.createReader(dataFile1, "UTF-8");
+			String content = FileUtil.readCharacters(in);
+			assertEquals("Wrong clob content exported", data1, content);
+			in = EncodingUtil.createReader(dataFile2, "UTF-8");
+			content = FileUtil.readCharacters(in);
+			assertEquals("Wrong clob content exported", data2, content);			
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}		
+	public void testTextClobExport() 
+	{
+		try
+		{
+			File exportFile = new File(this.basedir, "export.txt");
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate("CREATE MEMORY TABLE clob_test(nr integer, clob_data LONGVARCHAR)");
+			String data1 = "This is the first clob content";
+			stmt.executeUpdate("insert into clob_test values (1, '" +  data1+ "')");
+			String data2 = "This is the second clob content";
+			stmt.executeUpdate("insert into clob_test values (2, '" +  data2+ "')");
+			connection.commit();
+			stmt.close();
+			
+			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=clob_test -clobAsFile=true");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			assertEquals("Export file not created", true, exportFile.exists());
+		
+			File dataFile1 = new File(this.basedir, "export_r1_c2.data");
+			assertEquals("Clob file not created", true, dataFile1.exists());
+			
+			File dataFile2 = new File(this.basedir, "export_r2_c2.data");
+			assertEquals("Clob file not created", true, dataFile2.exists());
+			
+			Reader in = EncodingUtil.createReader(dataFile1, "UTF-8");
+			String content = FileUtil.readCharacters(in);
+			assertEquals("Wrong clob content exported", data1, content);
+			in = EncodingUtil.createReader(dataFile2, "UTF-8");
+			content = FileUtil.readCharacters(in);
+			assertEquals("Wrong clob content exported", data2, content);			
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}	
+	
 	public void testSqlClobExport()
 	{
 		try

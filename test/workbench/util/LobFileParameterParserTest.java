@@ -62,6 +62,7 @@ public class LobFileParameterParserTest extends TestCase
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			fail("Could not retrieve blobfile parameter");
 		}
 	}

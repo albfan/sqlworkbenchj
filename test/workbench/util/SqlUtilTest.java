@@ -245,7 +245,7 @@ public class SqlUtilTest
 		
 			sql = "/* \n" + 
              "* $URL: ddl.sql $ \n" + 
-             "* $Revision: 1.8 $ \n" + 
+             "* $Revision: 1.9 $ \n" + 
              "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
              "*/ \n" + 
              "-- This is the initial creation script for the MTrac database. \n" + 

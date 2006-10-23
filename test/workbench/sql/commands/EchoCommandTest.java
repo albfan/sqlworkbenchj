@@ -12,6 +12,7 @@
 package workbench.sql.commands;
 
 import junit.framework.*;
+import workbench.TestUtil;
 import workbench.resource.ResourceMgr;
 import workbench.sql.DefaultStatementRunner;
 import workbench.sql.StatementRunnerResult;
@@ -32,6 +33,8 @@ public class EchoCommandTest extends TestCase
 	{
 		try
 		{
+			TestUtil util = new TestUtil();
+			util.prepareEnvironment();
 			DefaultStatementRunner runner = new DefaultStatementRunner();
 			EchoCommand echo = new EchoCommand();
 			runner.addCommand(echo);

@@ -23,18 +23,16 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import workbench.TestUtil;
-import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.db.exporter.RowDataConverter;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.EncodingUtil;
+import workbench.util.SqlUtil;
 import workbench.util.ZipOutputFactory;
 
 /**
@@ -187,6 +185,65 @@ public class WbImportTest extends TestCase
 			assertEquals("Wrong number of rows", rowCount, 3);
 			rs.close();
 			stmt.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testTextClobImport()
+	{
+		try
+		{
+			File importFile  = new File(this.basedir, "import.txt");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("nr\ttext_data");
+			out.println("1\ttext_data_r1_c2.data");
+			out.println("2\ttext_data_r2_c2.data");
+			out.close();
+			String data1 = "This is a CLOB string to be put into row 1";
+			String data2 = "This is a CLOB string to be put into row 2";
+			
+			File datafile = new File(this.basedir, "text_data_r1_c2.data");
+			out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(datafile), "UTF-8"));
+			out.print(data1);
+			out.close();
+			
+			datafile = new File(this.basedir, "text_data_r2_c2.data");
+			out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(datafile), "UTF-8"));
+			out.print(data2);
+			out.close();
+			
+			StatementRunnerResult result = importCmd.execute(this.connection, "-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -clobIsFilename=true -type=text -header=true -continueonerror=false -table=clob_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+			Statement stmt = this.connection.createStatement();
+			ResultSet rs = stmt.executeQuery("select nr, text_data from clob_test order by nr");
+			if (rs.next())
+			{
+				int nr = rs.getInt(1);
+				String data = rs.getString(2);
+				assertEquals(1, nr);
+				assertEquals(data1, data);
+			}
+			else
+			{
+				fail("Not enough values imported");
+			}
+			if (rs.next())
+			{
+				int nr = rs.getInt(1);
+				String data = rs.getString(2);
+				assertEquals(2, nr);
+				assertEquals(data2, data);
+			}
+			else
+			{
+				fail("Not enough values imported");
+			}
+			SqlUtil.closeAll(rs, stmt);
 		}
 		catch (Exception e)
 		{
@@ -1049,23 +1106,8 @@ public class WbImportTest extends TestCase
              "  </meta-data> \n" + 
              " \n" + 
              "  <table-def> \n" + 
-             "    <!-- The following information was retrieved from the JDBC driver's ResultSetMetaData --> \n" + 
-             "    <!-- column-name is retrieved from ResultSetMetaData.getColumnName() --> \n" + 
-             "    <!-- java-class is retrieved from ResultSetMetaData.getColumnClassName() --> \n" + 
-             "    <!-- java-sql-type-name is the constant's name from java.sql.Types --> \n" + 
-             "    <!-- java-sql-type is the constant's numeric value from java.sql.Types as returned from ResultSetMetaData.getColumnType() --> \n" + 
-             "    <!-- dbms-data-type is retrieved from ResultSetMetaData.getColumnTypeName() --> \n" + 
-             " \n" + 
-             "    <!-- For date and timestamp types, the internal long value obtained from java.util.Date.getTime() \n" + 
-             "         is written as an attribute to the <column-data> tag. That value can be used \n" + 
-             "         to create a java.util.Date() object directly, without the need to parse the actual tag content. \n" + 
-             "         If Java is not used to parse this file, the date/time format used to write the data \n" + 
-             "         is provided in the <data-format> tag of the column definition \n" + 
-             "    --> \n" + 
-             " \n" + 
              "    <table-name>blob_test</table-name> \n" + 
              "    <column-count>2</column-count> \n" + 
-             " \n" + 
              "    <column-def index=\"0\"> \n" + 
              "      <column-name>NR</column-name> \n" + 
              "      <java-class>java.lang.Integer</java-class> \n" + 
@@ -1116,7 +1158,6 @@ public class WbImportTest extends TestCase
 				int nr = rs.getInt(1);
 				assertEquals("Wrong data imported", 1, nr);
 				
-				Object data = rs.getObject(2);
 				Object blob = rs.getObject(2);
 				assertNotNull("No blob data imported", blob);
 				if (blob instanceof byte[])
@@ -1146,6 +1187,95 @@ public class WbImportTest extends TestCase
 			fail(e.getMessage());
 		}
 	}
+
+	public void testXmlClobImport()
+	{
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
+             "<wb-export> \n" + 
+             "  <meta-data> \n" + 
+             " \n" + 
+             "    <generating-sql> \n" + 
+             "    <![CDATA[ \n" + 
+             "    select * from blob_test \n" + 
+             "    ]]> \n" + 
+             "    </generating-sql> \n" + 
+             " \n" + 
+             "    <created>2006-07-30 00:05:59.316 CEST</created> \n" + 
+             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" + 
+             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" + 
+             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" + 
+             "    <database-product-name>HSQL Database Engine</database-product-name> \n" + 
+             "    <database-product-version>1.8.0</database-product-version> \n" + 
+             "    <wb-tag-format>short</wb-tag-format> \n" + 
+             "  </meta-data> \n" + 
+             " \n" + 
+             "  <table-def> \n" + 
+             "    <table-name>clob_test</table-name> \n" + 
+             "    <column-count>2</column-count> \n" + 
+             "    <column-def index=\"0\"> \n" + 
+             "      <column-name>NR</column-name> \n" + 
+             "      <java-class>java.lang.Integer</java-class> \n" + 
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
+             "      <java-sql-type>4</java-sql-type> \n" + 
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"1\"> \n" + 
+             "      <column-name>TEXT_DATA</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>LONGVARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>-1</java-sql-type> \n" + 
+             "      <dbms-data-type>LONGVARCHAR</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "  </table-def> \n" + 
+             " \n" + 
+             "<data> \n" + 
+             "<rd><cd>1</cd><cd dataFile=\"test_r1_c2.data\"/></rd> \n" + 
+             "</data> \n" + 
+             "</wb-export>";
+		try
+		{
+			File xmlFile = new File(this.basedir, "xml_import.xml");
+			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
+			out.write(xml);
+			out.close();
+
+			File datafile = new File(this.basedir, "test_r1_c2.data");
+			String data1 = "This is a CLOB string to be put into row 1";
+			
+			Writer pw = EncodingUtil.createWriter(datafile, "UTF-8", false);			
+			pw.write(data1);
+			pw.close();
+			
+			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=clob_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr, text_data from clob_test");
+			int rowCount = 0;
+			
+			if (rs.next())
+			{
+				rowCount ++;
+				int nr = rs.getInt(1);
+				assertEquals("Wrong data imported", 1, nr);
+				
+				String data = rs.getString(2);
+				assertEquals(data, data);
+			}
+			else
+			{
+				fail("Not enough data imported");
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	
 
 	public void testZippedXmlBlobImport()
@@ -1344,6 +1474,7 @@ public class WbImportTest extends TestCase
 		stmt.executeUpdate("CREATE TABLE junit_test (nr integer, firstname varchar(100), lastname varchar(100))");
 		stmt.executeUpdate("CREATE TABLE datatype_test (int_col integer, double_col double, char_col varchar(50), date_col date, time_col time, ts_col timestamp)");
 		stmt.executeUpdate("CREATE TABLE blob_test (nr integer, binary_data BINARY)");
+		stmt.executeUpdate("CREATE TABLE clob_test (nr integer, text_data LONGVARCHAR)");
 		wb.commit();
 		stmt.close();
 		
