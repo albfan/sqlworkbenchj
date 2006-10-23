@@ -327,9 +327,6 @@ public class ConnectionEditorPanel
 
     manageDriversButton.setText(ResourceMgr.getString("LblEditDrivers"));
     manageDriversButton.setToolTipText(ResourceMgr.getDescription("LblEditDrivers"));
-    manageDriversButton.setMaximumSize(new java.awt.Dimension(220, 25));
-    manageDriversButton.setMinimumSize(new java.awt.Dimension(200, 25));
-    manageDriversButton.setPreferredSize(new java.awt.Dimension(180, 25));
     manageDriversButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)

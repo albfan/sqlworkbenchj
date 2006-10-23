@@ -328,8 +328,27 @@ public class WbSwingUtilities
 
 	public static boolean getOKCancel(String title, Component aCaller, Component message)
 	{
+		return getOKCancel(title, aCaller, message, null);
+	}
+	
+	public static boolean getOKCancel(String title, Component aCaller, Component message, final Runnable doLater)
+	{
 		JOptionPane pane = new JOptionPane(message, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+		
+		
 		JDialog dialog = pane.createDialog(aCaller, title);
+		if (doLater != null)
+		{
+			WindowAdapter w = new WindowAdapter()
+			{
+				public void windowOpened(WindowEvent evt)
+				{
+					EventQueue.invokeLater(doLater);
+				}
+			};
+			dialog.addWindowListener(w);
+		}
+		
 		dialog.setResizable(true);
 		dialog.pack();
 		dialog.setVisible(true);

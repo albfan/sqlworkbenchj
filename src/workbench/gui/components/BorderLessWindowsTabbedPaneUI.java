@@ -20,7 +20,8 @@ import javax.swing.UIManager;
 
 import com.sun.java.swing.plaf.windows.WindowsTabbedPaneUI;
 
-public class BorderLessWindowsTabbedPaneUI extends WindowsTabbedPaneUI
+public class BorderLessWindowsTabbedPaneUI 
+	extends WindowsTabbedPaneUI
 {
 	private Color selColor;
 	

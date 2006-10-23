@@ -77,6 +77,7 @@ public class WbImport
 	public static final String ARG_TRUNCATE_TABLE = "truncatetable";
 	public static final String ARG_CREATE_TABLE = "createtarget";
 	public static final String ARG_BLOB_ISFILENAME = "blobisfilename";
+	public static final String ARG_CLOB_ISFILENAME = "clobisfilename";
 	public static final String ARG_MULTI_LINE = "multiline";
 	public static final String ARG_START_ROW = "startrow";
 	public static final String ARG_END_ROW = "endrow";
@@ -121,6 +122,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_TRUNCATE_TABLE);
 		cmdLine.addArgument(ARG_CREATE_TABLE);
 		cmdLine.addArgument(ARG_BLOB_ISFILENAME);
+		cmdLine.addArgument(ARG_CLOB_ISFILENAME);
 		cmdLine.addArgument(ARG_MULTI_LINE);
 		cmdLine.addArgument(ARG_START_ROW);
 		cmdLine.addArgument(ARG_END_ROW);
@@ -221,7 +223,10 @@ public class WbImport
 			File f = new File(filename);
 			if (!f.exists())
 			{
-				result.addMessage(ResourceMgr.getString("ErrImportFileNotFound"));
+				String msg = ResourceMgr.getString("ErrImportFileNotFound");
+				msg = StringUtil.replace(msg, "%filename%", filename);
+				LogMgr.logError("WbImport.execute()", msg, null);
+				result.addMessage(msg);
 				result.setFailure();
 				return result;
 			}
@@ -231,7 +236,10 @@ public class WbImport
 			File d = new File(dir);
 			if (!d.exists())
 			{
-				result.addMessage(ResourceMgr.getString("ErrImportSourceDirNotFound"));
+				String msg = ResourceMgr.getString("ErrImportSourceDirNotFound");
+				msg = StringUtil.replace(msg, "%dir%", dir);
+				LogMgr.logError("WbImport.execute()", msg, null);
+				result.addMessage(msg);
 				result.setFailure();
 				return result;
 			}
@@ -239,17 +247,22 @@ public class WbImport
 			{
 				String msg = ResourceMgr.getString("ErrImportNoDir");
 				msg = StringUtil.replace(msg, "%dir%", dir);
+				LogMgr.logError("WbImport.execute()", msg, null);
 				result.addMessage(msg);
 				result.setFailure();
 				return result;
 			}
 		}
 
+		String encoding = cmdLine.getValue(ARG_ENCODING);
+		
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
 			if (table == null && dir == null)
 			{
-				result.addMessage(ResourceMgr.getString("ErrTextImportRequiresTableName"));
+				String msg = ResourceMgr.getString("ErrTextImportRequiresTableName");
+				LogMgr.logError("WbImport.execute()", msg, null);
+				result.addMessage(msg);
 				result.setFailure();
 				return result;
 			}
@@ -272,6 +285,8 @@ public class WbImport
 			textParser.setTargetSchema(schema);
 			textParser.setConnection(aConnection);
 			textParser.setAbortOnError(!cmdLine.getBoolean(ARG_CONTINUE, true));
+			textParser.setTreatClobAsFilenames(cmdLine.getBoolean(ARG_CLOB_ISFILENAME, false));
+			
 			String delimiter = cmdLine.getValue(ARG_DELIM);
 			if (delimiter != null) textParser.setDelimiter(delimiter);
 
@@ -290,7 +305,6 @@ public class WbImport
 			textParser.setTrimValues(cmdLine.getBoolean(ARG_TRIM_VALUES, false));
 			textParser.setDecodeUnicode(cmdLine.getBoolean(ARG_DECODE, false));
 
-			String encoding = cmdLine.getValue(ARG_ENCODING);
 			if (encoding != null) textParser.setEncoding(encoding);
 
 			textParser.setEmptyStringIsNull(cmdLine.getBoolean(ARG_EMPTY_STRING_IS_NULL, true));
@@ -390,7 +404,6 @@ public class WbImport
 			// The encoding must be set as early as possible
 			// as the XmlDataFileParser might need it to read
 			// the table structure!
-			String encoding = cmdLine.getValue(ARG_ENCODING);
 			if (encoding != null) xmlParser.setEncoding(encoding);
 
 			boolean verbose = cmdLine.getBoolean(ARG_VERBOSEXML, true);

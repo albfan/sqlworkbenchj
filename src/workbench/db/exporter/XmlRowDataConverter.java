@@ -70,6 +70,7 @@ public class XmlRowDataConverter
 	private String closeRowTag = "</" + rowtag + ">";
 	private String tableToUse = null;
 	private StrBuffer dbInfo;
+	private boolean writeClobFiles = false;
 	
 	public XmlRowDataConverter()
 	{
@@ -81,6 +82,11 @@ public class XmlRowDataConverter
 		this.tableToUse = name;
 	}
 
+	public void setWriteClobToFile(boolean flag)
+	{
+		this.writeClobFiles = flag;
+	}
+	
 	public void setOriginalConnection(WbConnection con)
 	{
 		super.setOriginalConnection(con);
@@ -191,7 +197,7 @@ public class XmlRowDataConverter
 			boolean isNull = (data == null || data instanceof NullValue);
 			boolean writeCloseTag = true;
 			
-			boolean isBlob = SqlUtil.isBlobType(type);
+			boolean externalFile = false;
 				
 			if (this.verboseFormat) xml.append(indent);
 			xml.append(startColTag);
@@ -215,8 +221,29 @@ public class XmlRowDataConverter
 					xml.append(Long.toString(d.getTime()));
 					xml.append('"');
 				}
-				else if (isBlob)
+				else if (writeClobFiles && SqlUtil.isClobType(type))
 				{
+					externalFile = true;
+					File clobFile = createBlobFile(row, c, rowIndex);
+					String dataFile = clobFile.getName();
+					try
+					{
+						writeClobFile((String)data, clobFile, this.encoding);
+					}
+					catch (Exception e)
+					{
+						throw new RuntimeException("Error writing CLOB file", e);
+					}
+					xml.append(' ');
+					xml.append(ATTR_DATA_FILE);
+					xml.append("=\"");
+					xml.append(dataFile);
+					xml.append("\"/");
+					writeCloseTag = false;
+				}
+				else if (SqlUtil.isBlobType(type))
+				{
+					externalFile = true;
 					File blobFile = createBlobFile(row, c, rowIndex);
 					String dataFile = blobFile.getName();
 					try
@@ -239,7 +266,7 @@ public class XmlRowDataConverter
 
 			// Only write the tag content if the value is not null (we have already closed the tag)
 			// or if the value is not a blob value (which has already been written!)
-			if (!isNull && !isBlob)
+			if (!isNull && !externalFile)
 			{
 				// String data needs to be escaped!
 				if (SqlUtil.isCharacterType(type))

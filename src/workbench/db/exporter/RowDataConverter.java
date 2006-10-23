@@ -49,7 +49,7 @@ import workbench.util.ZipOutputFactory;
 public abstract class RowDataConverter
 	implements DataFileWriter
 {
-	public static final String BLOB_ARCHIVE_SUFFIX = "_blobs";
+	public static final String BLOB_ARCHIVE_SUFFIX = "_lobs";
 	protected String encoding;
 	protected WbConnection originalConnection;
 	protected String generatingSql;

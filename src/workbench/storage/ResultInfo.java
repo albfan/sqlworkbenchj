@@ -89,7 +89,7 @@ public class ResultInfo
 			}
 			
 			int type = metaData.getColumnType(i + 1);
-			if (dbMeta != null) type = dbMeta.fixColumnType(type); // currently only for Oracle
+			if (dbMeta != null) type = dbMeta.fixColumnType(type); // currently only for Oracle's DATE type
 			ColumnIdentifier col = new ColumnIdentifier(name);
 			col.setDataType(type);
 			col.setUpdateable(realColumn);

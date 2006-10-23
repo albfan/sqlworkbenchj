@@ -20,12 +20,12 @@ import java.io.StringReader;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import workbench.db.WbConnection;
-import workbench.interfaces.DataFileWriter;
+import workbench.util.CloseableDataStream;
+import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 
 /**
@@ -79,61 +79,57 @@ public class DmlStatement
 	public int execute(WbConnection aConnection)
 		throws SQLException
 	{
-		List readers = new LinkedList();
-		List streams = new LinkedList();
+		List streamsToClose = new LinkedList();
 		
-		PreparedStatement stmt = aConnection.getSqlConnection().prepareStatement(this.sql);
-		for (int i=0; i < this.values.size(); i++)
+		PreparedStatement stmt = null;
+		int rows = -1;
+		
+		try
 		{
-			ColumnData data = (ColumnData)this.values.get(i);
-			int type = data.getIdentifier().getDataType();
-			Object value = data.getValue();
-			if (value == null || value instanceof NullValue)
+			stmt = aConnection.getSqlConnection().prepareStatement(this.sql);
+			for (int i=0; i < this.values.size(); i++)
 			{
-				stmt.setNull(i+1, type);
-			}
-			else if (SqlUtil.isClobType(type) && value instanceof String)
-			{
-				String s = (String)value;
-				Reader in = new StringReader(s);
-				stmt.setCharacterStream(i + 1, in, s.length());
-				readers.add(in);
-			}
-			else if (value instanceof File)
-			{
-				// Wenn storing data into a blob field, the GUI will
-				// put a File object into the DataStore
-				File f = (File)value;
-				try
+				ColumnData data = (ColumnData)this.values.get(i);
+				int type = data.getIdentifier().getDataType();
+				Object value = data.getValue();
+				if (value == null || value instanceof NullValue)
 				{
-					InputStream in = new FileInputStream(f);
-					stmt.setBinaryStream(i + 1, in, (int)f.length());
-					streams.add(in);
+					stmt.setNull(i+1, type);
 				}
-				catch (IOException e)
+				else if (SqlUtil.isClobType(type) && value instanceof String)
 				{
-					throw new SQLException("Input file (" + f.getAbsolutePath() + ") for BLOB not found!");
+					String s = (String)value;
+					Reader in = new StringReader(s);
+					stmt.setCharacterStream(i + 1, in, s.length());
+					streamsToClose.add(new CloseableDataStream(in));
+				}
+				else if (value instanceof File)
+				{
+					// Wenn storing data into a blob field, the GUI will
+					// put a File object into the DataStore
+					File f = (File)value;
+					try
+					{
+						InputStream in = new FileInputStream(f);
+						stmt.setBinaryStream(i + 1, in, (int)f.length());
+						streamsToClose.add(new CloseableDataStream(in));
+					}
+					catch (IOException e)
+					{
+						throw new SQLException("Input file (" + f.getAbsolutePath() + ") for BLOB not found!");
+					}
+				}
+				else
+				{
+					stmt.setObject(i + 1, value);
 				}
 			}
-			else
-			{
-				stmt.setObject(i + 1, value);
-			}
+			rows = stmt.executeUpdate();
 		}
-		int rows = stmt.executeUpdate();
-		stmt.close();
-		Iterator itr = readers.iterator();
-		while (itr.hasNext())
+		finally
 		{
-			Reader r = (Reader)itr.next();
-			try { r.close(); } catch (Throwable th) {}
-		}
-
-		itr = streams.iterator();
-		while (itr.hasNext())
-		{
-			InputStream s = (InputStream)itr.next();
-			try { s.close(); } catch (Throwable th) {}
+			FileUtil.closeStreams(streamsToClose);
+			stmt.close();
 		}
 		
 		return rows;

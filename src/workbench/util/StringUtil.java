@@ -854,6 +854,8 @@ public class StringUtil
 
 	public static String decodeUnicode(String theString)
 	{
+		if (theString == null) return null;
+		
 		char aChar;
 		int len = theString.length();
 		if (len == 0) return theString;

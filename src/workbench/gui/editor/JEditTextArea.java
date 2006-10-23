@@ -106,7 +106,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.56 2006-10-04 09:28:28 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.57 2006-10-23 21:43:32 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -1246,7 +1246,7 @@ public class JEditTextArea
 				document.insertString(0,text,null);
 			}
 		}
-		catch(BadLocationException bl)
+		catch (BadLocationException bl)
 		{
 			bl.printStackTrace();
 		}
@@ -1255,8 +1255,16 @@ public class JEditTextArea
 			document.endCompoundEdit();
 			document.tokenizeLines();
 		}
-		updateScrollBars();
-		repaint();
+		
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				updateScrollBars();
+				painter.invalidateLineRange(0, getLineCount());
+				repaint();
+			}
+		});
 	}
 
 	/**

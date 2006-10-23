@@ -358,7 +358,7 @@ public class DwPanel
 			
 			Dimension max = new Dimension(800,600);
 			Dimension pref = new Dimension(400, 300);
-			EditorPanel preview = EditorPanel.createSqlEditor();
+			final EditorPanel preview = EditorPanel.createSqlEditor();
 			preview.setEditable(false);
 			preview.showFindOnPopupMenu();
 			preview.setBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -366,7 +366,7 @@ public class DwPanel
 			preview.setMaximumSize(max);
 			JScrollPane scroll = new JScrollPane(preview);
 			scroll.setMaximumSize(max);
-			StringBuffer text = new StringBuffer(stmts.size() * 150);
+			final StringBuffer text = new StringBuffer(stmts.size() * 150);
 			SqlLiteralFormatter f = new SqlLiteralFormatter(aConnection);
 			for (int i=0; i < stmts.size(); i++)
 			{
@@ -374,11 +374,28 @@ public class DwPanel
 				text.append(dml.getExecutableStatement(f));
 				text.append(";\n");
 			}
-			preview.setText(text.toString());
-			preview.setCaretPosition(0);
+			
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					preview.setText(text.toString());
+					preview.setCaretPosition(0);
+					preview.repaint();
+				}
+			});
+			
 			WbSwingUtilities.showDefaultCursor(this);
-			int choice = JOptionPane.showConfirmDialog(win, scroll, ResourceMgr.getString("MsgConfirmUpdates"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-			if (choice == JOptionPane.CANCEL_OPTION) doSave = false;
+			Runnable painter = new Runnable()
+			{
+				public void run()
+				{
+					preview.repaint();
+				}
+			};
+			doSave = WbSwingUtilities.getOKCancel(ResourceMgr.getString("MsgConfirmUpdates"), win, scroll, painter);
+//			int choice = JOptionPane.showConfirmDialog(win, scroll, , JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+//			if (choice == JOptionPane.CANCEL_OPTION) doSave = false;
 		}
 		catch (SQLException e)
 		{

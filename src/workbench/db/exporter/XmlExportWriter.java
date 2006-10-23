@@ -40,6 +40,7 @@ public class XmlExportWriter
 		conv.setLineEnding(exporter.getLineEnding());
 		conv.setUseVerboseFormat(exporter.getUseVerboseFormat());
 		conv.setTableNameToUse(exporter.getTableName());
+		conv.setWriteClobToFile(exporter.getWriteClobAsFile());
 		//conv.setBaseFilename(exporter.getOutputFilename());
 	}
 	

@@ -81,6 +81,9 @@ public class WbConnection
 		return this.id;
 	}
 
+	/**
+	 * Create a new connection
+	 */
 	public WbConnection(Connection aConn)
 	{
 		this.setSqlConnection(aConn);
@@ -115,6 +118,9 @@ public class WbConnection
 		return this.metaData.getUserName();
 	}
 
+	/**
+	 * @return The profile associated with this connection
+	 */
 	public ConnectionProfile getProfile()
 	{
 		return this.profile;

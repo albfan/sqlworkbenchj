@@ -20,7 +20,8 @@ import javax.swing.UIManager;
 
 import com.sun.java.swing.plaf.motif.MotifTabbedPaneUI;
 
-public class BorderLessMotifTabbedPaneUI extends MotifTabbedPaneUI
+public class BorderLessMotifTabbedPaneUI 
+	extends MotifTabbedPaneUI
 {
 	private Color selColor;
 	

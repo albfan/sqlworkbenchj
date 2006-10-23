@@ -18,10 +18,12 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JPanel;
 import workbench.db.TableIdentifier;
+import workbench.db.TableNameComparator;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.FlatButton;
@@ -42,13 +44,9 @@ public class TableSelectorPanel
 	protected TableIdentifier currentTable;
 	private PropertyChangeListener client;
 	private String clientPropName;
-	//private boolean tablesOnly = false;
 	private boolean allowNewTable = false;
 	private TableIdentifier newTableId = new TableIdentifier();
-	//private WbMenuItem editNewTableNameItem;
-	//private JPopupMenu popupMenu;
 
-	/** Creates new form TableSelectorPanel */
 	public TableSelectorPanel()
 	{
 		initComponents();
@@ -66,9 +64,6 @@ public class TableSelectorPanel
 		this.tableSelector.removeAllItems();
 	}
 	
-//	public void setTablesOnly(boolean tablesOnly) { this.tablesOnly = tablesOnly; }
-//	public boolean getTablesOnly() { return this.tablesOnly; }
-
 	public void resetNewTableItem()
 	{
 		if (this.newTableId != null)
@@ -224,6 +219,7 @@ public class TableSelectorPanel
 		{
 			this.tableSelector.removeItemListener(this);
 			List tables = this.dbConnection.getMetadata().getSelectableObjectsList(this.currentSchema);
+			Collections.sort(tables, new TableNameComparator());
 			this.tableSelector.removeAllItems();
 			if (this.allowNewTable)
 			{
@@ -232,7 +228,9 @@ public class TableSelectorPanel
 			int count = tables.size();
 			for (int i=0; i < count; i++)
 			{
-				this.tableSelector.addItem(tables.get(i));
+				TableIdentifier t = (TableIdentifier)tables.get(i);
+				t.setShowTablenameOnly(true);
+				this.tableSelector.addItem(t);
 			}
 			this.editNewTableNameButton.setEnabled(false);
 			tableSelector.setSelectedItem(null);

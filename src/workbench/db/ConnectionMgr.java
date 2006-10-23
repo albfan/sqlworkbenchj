@@ -169,8 +169,8 @@ public class ConnectionMgr
 			throw new SQLException("Driver class not registered");
 		}
 
-		try
-		{
+//		try
+//		{
 			Connection sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword(), anId, aProfile.getConnectionProperties());
 
 			try
@@ -184,12 +184,12 @@ public class ConnectionMgr
         LogMgr.logInfo("ConnectionMgr.connect()", "Driver (" + drv.getDriverClass() + ") does not support the autocommit property: " + ExceptionUtil.getDisplay(th));
 			}
 			return sql;
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("ConnectionMgr.connect()", "Error when creating connection", e);
-			throw e;
-		}
+//		}
+//		catch (SQLException e)
+//		{
+//			LogMgr.logError("ConnectionMgr.connect()", "Error when creating connection", e);
+//			throw e;
+//		}
 	}
 
 	public void reconnect(WbConnection aConn)

@@ -38,12 +38,18 @@ public class TextRowDataConverter
 	private String additionalEncodeCharacters = null;
 	private String lineEnding = StringUtil.LINE_TERMINATOR;
 	private boolean writeBlobFiles = true;
+	private boolean writeClobFiles = false;
 	
 	public TextRowDataConverter()
 	{
 		super();
 	}
 
+	public void setWriteClobToFile(boolean flag)
+	{
+		this.writeClobFiles = flag;
+	}
+	
 	public void setWriteBlobToFile(boolean flag)
 	{
 		writeBlobFiles = flag;
@@ -100,6 +106,24 @@ public class TextRowDataConverter
 				{
 					result.append(this.quoteCharacter);
 					needQuote = true;
+				}
+			}
+			else if (writeClobFiles && SqlUtil.isClobType(colType))
+			{
+				Object clobData = row.getValue(c);
+				if (clobData != null)
+				{
+					File clobFile = createBlobFile(row, c, rowIndex);
+					value = clobFile.getName();
+					try
+					{
+						String s = clobData.toString();
+						writeClobFile(s, clobFile, this.encoding);
+					}
+					catch (Exception e)
+					{
+						throw new RuntimeException("Error writing CLOB file", e);
+					}
 				}
 			}
 			else 

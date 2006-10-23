@@ -165,6 +165,16 @@ public class MainWindow
 		sqlTab = new WbTabbedPane();
 		sqlTab.setFocusable(false);
 		
+		String policy = Settings.getInstance().getProperty("workbench.gui.sqltab.policy", "wrap");
+		if ("wrap".equalsIgnoreCase(policy))
+		{
+			sqlTab.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
+		}
+		else if ("scroll".equalsIgnoreCase(policy))
+		{
+			sqlTab.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		}
+		
 		this.connectionSelector = new ConnectionSelector(this, this);
 		this.windowId = new StringBuffer("WbWin-").append(instanceCount).toString();
 		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -1428,6 +1438,7 @@ public class MainWindow
 			}
 		}
 		this.setTitle(title.toString());
+		this.jobIndicator.baseTitleChanged();
 	}
 
 	protected void closeConnectingInfo()
@@ -2515,6 +2526,7 @@ public class MainWindow
 
 	public void executionEnd(WbConnection conn, Object source)
 	{
+		LogMgr.logDebug("MainWindow.executionEnd()", "Execution ended: " + source.getClass().getName() + "@" + source.hashCode());
 		jobIndicator.jobEnded();
 	}
 

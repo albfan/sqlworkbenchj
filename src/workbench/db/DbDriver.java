@@ -241,17 +241,17 @@ public class DbDriver
 		return copy;
 	}
 
-	public Connection connect(String url, String user, String password)
-		throws ClassNotFoundException, SQLException, Exception
-	{
-		return this.connect(url, user, password, null);
-	}
-
-	public Connection connect(String url, String user, String password, String id)
-		throws ClassNotFoundException, SQLException, Exception
-	{
-		return this.connect(url, user, password, id, null);
-	}
+//	public Connection connect(String url, String user, String password)
+//		throws ClassNotFoundException, SQLException, Exception
+//	{
+//		return this.connect(url, user, password, null);
+//	}
+//
+//	public Connection connect(String url, String user, String password, String id)
+//		throws ClassNotFoundException, SQLException, Exception
+//	{
+//		return this.connect(url, user, password, id, null);
+//	}
 
 	public Connection connect(String url, String user, String password, String id, Properties connProps)
 		throws ClassNotFoundException, SQLException
@@ -344,12 +344,14 @@ public class DbDriver
 		}
 		catch (ClassNotFoundException e)
 		{
-			LogMgr.logError("DbDriver.connect()", "Driver class not found", e);
+			// do not log this error, the caller will log it
+			//LogMgr.logError("DbDriver.connect()", "Driver class not found", e);
 			throw e;
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("DbDriver.connect()", "Error connecting to driver " + this.driverClass, e);
+			// do not log this error, the caller will log it
+			//LogMgr.logError("DbDriver.connect()", "Error connecting to driver " + this.driverClass, e);
 			throw e;
 		}
 		catch (Throwable th)

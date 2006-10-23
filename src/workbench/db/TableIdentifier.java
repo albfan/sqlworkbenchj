@@ -35,6 +35,7 @@ public class TableIdentifier
 	private String type;
 	private boolean neverAdjustCase;
 	private boolean preserveQuotes;
+	private boolean showOnlyTableName;
 	
 	public TableIdentifier(String aName)
 	{
@@ -346,6 +347,10 @@ public class TableIdentifier
 				return "(+) " + this.tablename;
 			}
 		}
+		else if (this.showOnlyTableName)
+		{
+			return this.getTableName();
+		}
 		else
 		{
 			return this.getTableExpression();
@@ -359,6 +364,11 @@ public class TableIdentifier
 		this.isNewTable = flag;
 	}
 
+	public void setShowTablenameOnly(boolean flag)
+	{
+		this.showOnlyTableName = flag;
+	}
+	
 	public int compareTo(Object other)
 	{
 		if (other instanceof TableIdentifier)

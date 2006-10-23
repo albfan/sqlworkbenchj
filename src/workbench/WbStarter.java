@@ -65,7 +65,7 @@ public class WbStarter
 			System.err.println(error);
 			System.exit(1);
 		}
-		
+
 		try
 		{
 			WbManager.main(args);

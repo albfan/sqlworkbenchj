@@ -94,6 +94,7 @@ public class TextFileParser
 	private Pattern lineFilter;
 	private String targetSchema;
 	private boolean blobsAreFilenames = true;
+	private boolean clobsAreFilenames = false;
 
 	private ImportFileHandler fileHandler = new ImportFileHandler();
 	
@@ -203,6 +204,11 @@ public class TextFileParser
 		}
 	}
 
+	public void setTreatClobAsFilenames(boolean flag) 
+	{
+		this.clobsAreFilenames = flag;
+	}
+	
 	public void setTreatBlobsAsFilenames(boolean flag)
 	{
 		this.blobsAreFilenames = flag;
@@ -345,6 +351,9 @@ public class TextFileParser
 	{
 		this.connection = aConn;
 	}
+	
+	public String getEncoding() { return this.encoding; }
+	
 	public void setEncoding(String enc)
 	{
 		if (enc == null) return;
@@ -707,17 +716,29 @@ public class TextFileParser
 
 							if (SqlUtil.isCharacterType(colType))
 							{
-								if (this.decodeUnicode)
+								if (clobsAreFilenames && value != null && SqlUtil.isClobType(colType))
 								{
-									value = StringUtil.decodeUnicode((String)value);
+									File cfile = new File(value);
+									if (!cfile.isAbsolute())
+									{
+										cfile = new File(this.baseDir, value);
+									}
+									rowData[targetIndex] = cfile;
 								}
-								if (this.emptyStringIsNull && StringUtil.isEmptyString(value))
+								else
 								{
-									value = null;
+									if (this.decodeUnicode)
+									{
+										value = StringUtil.decodeUnicode((String)value);
+									}
+									if (this.emptyStringIsNull && StringUtil.isEmptyString(value))
+									{
+										value = null;
+									}
+									rowData[targetIndex] = value;
 								}
 							}
-							
-							if (value != null && SqlUtil.isBlobType(colType) && blobsAreFilenames)
+							else if (value != null && blobsAreFilenames && SqlUtil.isBlobType(colType) )
 							{
 								File bfile = new File(value);
 								if (!bfile.isAbsolute())

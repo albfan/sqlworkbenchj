@@ -14,6 +14,7 @@ package workbench.sql;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
 
 import java.util.Iterator;
 import java.util.List;
@@ -150,6 +151,7 @@ public class BatchRunner
 	}
 
 	public void connect()
+		throws SQLException, ClassNotFoundException
 	{
 		if (this.profile == null)
 		{
@@ -165,11 +167,17 @@ public class BatchRunner
 			LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnectOk") + " (" + c.getDisplayString() + ")");
 			System.out.println(ResourceMgr.getString("MsgBatchConnectOk"));
 		}
-		catch (Exception e)
+		catch (ClassNotFoundException e)
+		{
+			success = false;
+			throw e;
+		}
+		catch (SQLException e)
 		{
 			success = false;
 			LogMgr.logError("BatchRunner", ResourceMgr.getString("MsgBatchConnectError") + ": " + ExceptionUtil.getDisplay(e), null);
 			System.out.println(ResourceMgr.getString("MsgBatchConnectError") + ":\n" + ExceptionUtil.getDisplay(e));
+			throw e;
 		}
 	}
 

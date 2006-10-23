@@ -475,10 +475,8 @@ public class XmlDataFileParser
 		this.realColIndex = 0;
 	}
 
-	public void setEncoding(String enc)
-	{
-		this.encoding = enc;
-	}
+	public String getEncoding() { return this.encoding; } 
+	public void setEncoding(String enc) { this.encoding = enc; }
 
 	public void setReceiver(RowDataReceiver aReceiver)
 	{
@@ -644,7 +642,17 @@ public class XmlDataFileParser
 			case Types.VARCHAR:
 			case Types.CLOB:
 			case Types.LONGVARCHAR:
-				this.currentRow[this.realColIndex] = value;
+				// if clobs are exported as external files, than we'll have a filename in the
+				// attribute (just like with BLOBS)
+				if (this.columnDataFile == null)
+				{
+					this.currentRow[this.realColIndex] = value;
+				}
+				else
+				{
+					String fileDir = this.inputFile.getParent();
+					this.currentRow[this.realColIndex] = new File(fileDir, columnDataFile);
+				}
 				break;
 
 			case Types.TIME:

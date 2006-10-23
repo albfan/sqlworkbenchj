@@ -29,6 +29,7 @@ import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.ToolWindow;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -198,7 +199,7 @@ public class DbExplorerWindow
 		DbExplorerWindow window = new DbExplorerWindow(panel);
 		window.setStandalone(true);
 		window.restorePosition();
-		window.show();
+		window.setVisible(true);
 		window.selectConnection();
 		return window;
 	}
@@ -215,6 +216,9 @@ public class DbExplorerWindow
 	{
 		this.setProfileName(null);
 		this.panel.setConnection(null);
+		String msg = ResourceMgr.getString("ErrConnectFailed");
+		msg = StringUtil.replace(msg, "%msg%", error.trim());
+		WbSwingUtilities.showErrorMessage(this, msg);
 	}
 	
 	public void connected(WbConnection conn)

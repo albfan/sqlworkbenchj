@@ -1509,7 +1509,16 @@ public class WbTable
 
 		int col = this.getEditingColumn();
 		int row = this.getEditingRow();
-		String data = this.getValueAsString(row, col);
+		String data = null;
+		WbTextCellEditor  editor = (WbTextCellEditor )this.getCellEditor();
+		if (this.isEditing())
+		{
+			data = editor.getText();
+		}
+		else
+		{
+			data = this.getValueAsString(row, col);
+		}
 		Window owner = SwingUtilities.getWindowAncestor(this);
 		Frame ownerFrame = null;
 		if (owner instanceof Frame)
@@ -1517,7 +1526,6 @@ public class WbTable
 			ownerFrame = (Frame)owner;
 		}
 		String title = ResourceMgr.getString("TxtEditWindowTitle");
-		TableCellEditor editor = this.getCellEditor();
 		EditWindow w = new EditWindow(ownerFrame, title, data);
 		w.setVisible(true);
 		if (editor != null)

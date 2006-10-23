@@ -132,7 +132,6 @@ public class WbSelectBlob
 				}
 				out = new FileOutputStream(f);
 				filesize = FileUtil.copy(in, out);
-				this.appendSuccessMessage(result);
 				String msg = ResourceMgr.getString("MsgBlobSaved");
 				msg = StringUtil.replace(msg, "%filename%", f.getAbsolutePath());
 				msg = msg.replaceAll("%filesize%", Long.toString(filesize));
@@ -140,6 +139,7 @@ public class WbSelectBlob
 				result.setSuccess();
 				row ++;
 			}
+			this.appendSuccessMessage(result);
 		}
 		catch (IOException e)
 		{

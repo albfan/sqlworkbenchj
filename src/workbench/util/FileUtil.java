@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.util.Iterator;
+import java.util.List;
 import workbench.resource.Settings;
 
 /**
@@ -29,6 +31,21 @@ public class FileUtil
 	private static int getBuffSize()
 	{
 		return Settings.getInstance().getIntProperty("workbench.lob.buffsize",32*1024);
+	}
+	
+	/*
+	 * Expects instances of {@link workbench.util.CloseableDataStream} in the list
+	 * and closes all of them
+	 */
+	public static void closeStreams(List streams)
+	{
+		if (streams == null) return;
+		Iterator itr = streams.iterator();
+		while (itr.hasNext())
+		{
+			CloseableDataStream str = (CloseableDataStream)itr.next();
+			if (str != null) str.close();
+		}
 	}
 	
 	public static final int readLines(BufferedReader in, StringBuffer buffer, int numLines, String lineEnd)

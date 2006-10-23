@@ -11,9 +11,10 @@
  */
 package workbench.gui.components;
 
-import java.awt.Window;
+import com.sun.corba.se.impl.orb.PrefixParserAction;
 import javax.swing.JFrame;
-import javax.swing.JWindow;
+import workbench.gui.WbSwingUtilities;
+import workbench.log.LogMgr;
 
 /**
  * @author thomas
@@ -23,19 +24,44 @@ public class RunningJobIndicator
 	private JFrame clientWindow;
 	private int runningJobs = 0;
 	private String lastTitle = null;
+	private final String prefix = "» ";
+	
 	public RunningJobIndicator(JFrame client)
 	{
 		this.clientWindow = client;
 	}
 	
+	public synchronized void baseTitleChanged()
+	{
+		this.lastTitle = this.clientWindow.getTitle();
+		if (lastTitle.startsWith(prefix))
+		{
+			lastTitle = lastTitle.substring(this.prefix.length());
+		}
+		updateTitle();
+	}
+	
+	private synchronized void updateTitle()
+	{
+		if (runningJobs > 0)
+		{
+			
+			String title = this.clientWindow.getTitle();
+			if (!title.startsWith(prefix))
+			{
+				clientWindow.setTitle(prefix + lastTitle);
+			}
+		}
+	}
+	
 	public synchronized void jobStarted()
 	{
-		if (runningJobs == 0)
+		runningJobs ++;
+		if (runningJobs > 0)
 		{
 			this.lastTitle = this.clientWindow.getTitle();
-			this.clientWindow.setTitle("» " + lastTitle);
 		}
-		runningJobs ++;
+		updateTitle();
 	}
 	
 	public synchronized void jobEnded()
@@ -43,8 +69,8 @@ public class RunningJobIndicator
 		runningJobs --;
 		if (runningJobs == 0)
 		{
-			this.clientWindow.setTitle(lastTitle);
+			clientWindow.setTitle(lastTitle);
 		}
 	}
-	
+
 }

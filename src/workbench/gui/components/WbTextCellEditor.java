@@ -63,15 +63,15 @@ public class WbTextCellEditor
 		this.textField = field;
 		this.textField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.textField.addMouseListener(this);
-		this.textField.addMouseListener(new TextComponentMouseListener());
-		
-//		OpenEditWindowAction a = new OpenEditWindowAction(this);
-//		InputMap im = textField.getInputMap(JComponent.WHEN_FOCUSED);
-//		ActionMap am = textField.getActionMap();
-//		a.addToInputMap(im, am);
+		this.textField.addMouseListener(new TextComponentMouseListener());		
 		super.addCellEditorListener(parent);
 	}
 
+	public String getText() 
+	{
+		return this.textField.getText();
+	}
+	
 	public void setFont(Font aFont)
 	{
 		this.textField.setFont(aFont);
@@ -162,8 +162,9 @@ public class WbTextCellEditor
 			Frame owner = (Frame)SwingUtilities.getWindowAncestor(this.textField);
 			String title = ResourceMgr.getString("TxtEditWindowTitle");
 
-			EditWindow w = new EditWindow(owner, title, this.textField.getText());
-			w.show();
+			String value = this.textField.getText();
+			EditWindow w = new EditWindow(owner, title, value);
+			w.setVisible(true);
 			if (!w.isCancelled())
 			{
 				this.textField.setText(w.getText());

@@ -14,6 +14,8 @@ package workbench.db;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import workbench.log.LogMgr;
@@ -37,12 +39,22 @@ public class TableCreator
 	{
 		this.connection = target;
 		this.tablename = newTable;
-		this.columnDefinition = columns;
+		
+		this.columnDefinition = new ColumnIdentifier[columns.length];
+
+		// As we are sorting the columns we have to create a copy of the array
+		// to ensure that the caller does not see a different ordering
+		for (int i = 0; i < columns.length; i++)
+		{
+			this.columnDefinition [i] = columns[i];
+		}
+		
+		// Now sort the columns according to their DBMS position
+		sortColumns();
 
 		//Retrieve the list of datatypes that should be ignored for the current 
 		//connection. The names in that list must match the names returned 
 		//by DatabaseMetaData.getTypeInfo()
-
 		DbMetadata meta = this.connection.getMetadata();
 		String types = Settings.getInstance().getProperty("workbench.ignoretypes." + meta.getDbId(), null);;
 		List ignored = StringUtil.stringToList(types, ",", true, true);
@@ -52,6 +64,25 @@ public class TableCreator
 
 	public void useDbmsDataType(boolean flag) { this.useDbmsDataType = flag; }
 	public TableIdentifier getTable() { return this.tablename; }
+	
+	private void sortColumns()
+	{
+		Comparator c = new Comparator()
+		{
+			public int compare(Object o1, Object o2)
+			{
+				ColumnIdentifier c1 = (ColumnIdentifier)o1;
+				ColumnIdentifier c2 = (ColumnIdentifier)o2;
+				int pos1 = c1.getPosition();
+				int pos2 = c2.getPosition();
+				
+				if (pos1 < pos2) return -1;
+				else if (pos1 > pos2) return 1;
+				return 0;
+			}
+		};
+		Arrays.sort(columnDefinition, c);
+	}
 	
 	public void createTable()
 		throws SQLException

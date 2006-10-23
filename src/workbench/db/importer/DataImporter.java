@@ -40,8 +40,11 @@ import workbench.util.StringUtil;
 import java.io.StringReader;
 import java.io.Reader;
 import java.sql.Clob;
+import java.util.LinkedList;
 import workbench.interfaces.ImportFileParser;
 import workbench.storage.NullValue;
+import workbench.util.CloseableDataStream;
+import workbench.util.EncodingUtil;
 import workbench.util.WbThread;
 
 
@@ -760,6 +763,8 @@ public class DataImporter
 	private int processRowData(PreparedStatement pstmt, Object[] row, boolean addBatch, boolean useColMap)
 		throws SQLException
 	{
+		List streams = new LinkedList();
+		
 		for (int i=0; i < row.length; i++)
 		{
 			int colIndex = i  + 1;
@@ -781,18 +786,57 @@ public class DataImporter
 			else if ( SqlUtil.isClobType(targetSqlType) || "LONG".equals(targetDbmsType) ||
 				       "CLOB".equals(targetDbmsType) )
 			{
-				String value = null;
+				Reader in = null;
+				int size = -1;
+				
 				if (row[i] instanceof Clob)
 				{
 					try
 					{
 						Clob clob = (Clob)row[i];
-						int len = (int)clob.length();
-						value = clob.getSubString(1, len);
+						size = (int)clob.length();
+						String value = clob.getSubString(1, size);
+						in = new StringReader(value);
+						streams.add(new CloseableDataStream(in));
 					}
 					catch (Throwable e)
 					{
-						value = null;
+						LogMgr.logError("DataImporter.processRowData()", "Could not read clob data", e);
+						in = null;
+					}
+				}
+				else if (row[i] instanceof File)
+				{
+					ImportFileHandler handler = (this.parser != null ? parser.getFileHandler() : null);
+					String encoding = (handler != null ? handler.getEncoding() : null);
+					if (encoding == null)
+					{
+						encoding = (this.parser != null ? parser.getEncoding() : EncodingUtil.getDefaultEncoding());
+					}
+					
+					File f = (File)row[i];
+					try
+					{
+						if (handler != null)
+						{
+							in = EncodingUtil.createReader(handler.getAttachedFileStream(f), encoding);
+							size = (int)handler.getLength(f);
+						}
+						else
+						{
+							if (!f.isAbsolute())
+							{
+								File source = new File(this.parser.getSourceFilename());
+								f = new File(source.getParentFile(), f.getName());
+							}
+							in = EncodingUtil.createBufferedReader(f, encoding);
+							streams.add(new CloseableDataStream(in));
+							size = (int)f.length();
+						}
+					}
+					catch (IOException ex)
+					{
+						throw new SQLException("Could not read data file " + f.getAbsolutePath() + " not found");
 					}
 				}
 				else
@@ -800,11 +844,16 @@ public class DataImporter
 					// this assumes that the JDBC driver will actually
 					// implement the toString() for whatever object 
 					// it created when reading that column!
-					value = row[i].toString();
+					String value = row[i].toString();
+					in = new StringReader(value);
+					streams.add(new CloseableDataStream(in));
+					size = value.length();
 				}
-				int size = value.length();
-				Reader in = new StringReader(value);
-				pstmt.setCharacterStream(colIndex, in, size);
+				
+				if (in != null)
+				{
+					pstmt.setCharacterStream(colIndex, in, size);
+				}
 			}
 			else if (SqlUtil.isBlobType(targetSqlType) || "BLOB".equals(targetDbmsType))
 			{
@@ -831,10 +880,7 @@ public class DataImporter
 								File source = new File(this.parser.getSourceFilename());
 								f = new File(source.getParentFile(), f.getName());
 							}
-							else
-							{
-								in = new BufferedInputStream(new FileInputStream(f), 64*1024);
-							}
+							in = new BufferedInputStream(new FileInputStream(f), 64*1024);
 							len = (int)f.length();
 						}
 					}
@@ -842,6 +888,7 @@ public class DataImporter
 					{
 						throw new SQLException("Could not read data file " + f.getAbsolutePath() + " not found");
 					}
+					streams.add(new CloseableDataStream(in));
 				}
 				else if (row[i] instanceof Blob)
 				{
@@ -886,7 +933,14 @@ public class DataImporter
 		}
 		else
 		{
-			rows = pstmt.executeUpdate();
+			try
+			{
+				rows = pstmt.executeUpdate();
+			}
+			finally
+			{
+				FileUtil.closeStreams(streams);
+			}
 		}
 		return rows;
 	}

@@ -27,7 +27,7 @@ public class PanelContentSender
 		this.target = window;
 	}
 	
-	public void sendContent(String text, final int panelIndex)
+	public void sendContent(final String text, final int panelIndex)
 	{
 		if (text == null) return;
 		
@@ -40,18 +40,17 @@ public class PanelContentSender
 		else
 		{
 		 panel = (SqlPanel)this.target.getSqlPanel(panelIndex);
+		 target.selectTab(panelIndex);
 		}
 
 		if (panel == null) return;
 		
-		panel.setStatementText(text);
-
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
+				panel.setStatementText(text);
 				target.requestFocus();
-				if (panelIndex > -1) target.selectTab(panelIndex);
 				panel.selectEditor();
 			}
 		});

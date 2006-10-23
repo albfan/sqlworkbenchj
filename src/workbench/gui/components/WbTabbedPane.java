@@ -69,7 +69,6 @@ public class WbTabbedPane
 	private void init()
 	{
 		this.putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
-		//this.putClientProperty("jgoodies.embeddedTabs", Boolean.TRUE);
 		try
 		{
 			TabbedPaneUI ui = TabbedPaneUIFactory.getBorderLessUI();

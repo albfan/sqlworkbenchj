@@ -91,6 +91,7 @@ public class WbExport
 		cmdLine.addArgument("writeoracleloader");
 		cmdLine.addArgument("compress");
 		cmdLine.addArgument("blobidcols");
+		cmdLine.addArgument("lobidcols");
 		cmdLine.addArgument("blobtype");
 		cmdLine.addArgument("clobasfile");
 	}
@@ -205,7 +206,8 @@ public class WbExport
 		String encoding = cmdLine.getValue("encoding");
 		if (encoding != null) exporter.setEncoding(encoding);
 		exporter.setAppendToFile(cmdLine.getBoolean("append"));
-
+		exporter.setWriteClobAsFile(cmdLine.getBoolean("clobasfile", false));
+		
 		if ("text".equals(type) || "txt".equals(type))
 		{
 			exporter.setWriteOracleControlFile(cmdLine.getBoolean("writeoracleloader", false));
@@ -278,8 +280,6 @@ public class WbExport
 			}
 			String bmode = cmdLine.getValue("blobtype");
 			exporter.setBlobMode(bmode);
-			exporter.setWriteClobAsFile(cmdLine.getBoolean("clobasfile", false));
-			
 			this.defaultExtension = ".sql";
 		}
 		else if ("xml".equals(type))
@@ -371,7 +371,15 @@ public class WbExport
 			}
 		}
 
-		String cols = cmdLine.getValue("blobidcols");
+		String cols = cmdLine.getValue("lobidcols");
+		if (cols == null) 
+		{
+			cols = cmdLine.getValue("blobidcols");
+			if (cols != null) 
+			{
+				result.addMessage("The blobIdCols parameter is deprecated, please use lobIdCols");
+			}
+		}
 		List columns = StringUtil.stringToList(cols, ",", true, true, false);
 		this.exporter.setBlobIdColumns(columns);
 		this.exporter.setCompressOutput(cmdLine.getBoolean("compress", false));

@@ -1017,29 +1017,27 @@ public class WbManager
 			try
 			{
 				runner.connect();
-				step = 2;
-				runner.execute();
+				if (runner.isSuccess())
+				{
+					step = 2;
+					runner.execute();
+				}
 			}
 			catch (Exception e)
 			{
 				exitCode = 1;
-				if (step == 1)
-				{
-					LogMgr.logError("WbManager.runBatch()", "Error connecting to profile", e);
-				}
-				else
+				// no need to log connect errors, already done by ConnectionMgr
+				if (step == 2)
 				{
 					LogMgr.logError("WbManager.runBatch()", "Error running batch scripts", e);
 				}
-
 			}
 			finally
 			{
-				// disconnects everything
 				ConnectionMgr mgr = ConnectionMgr.getInstance();
-				mgr.disconnectAll();
+				if (mgr != null) mgr.disconnectAll();
 			}
-			if (!runner.isSuccess()) exitCode = 2;
+			if (!runner.isSuccess() && exitCode == 0) exitCode = 2;
 		}
 		else
 		{
@@ -1061,6 +1059,13 @@ public class WbManager
 	
 	public static void main(String[] args)
 	{
+		// This property should be set as early as possible to 
+		// ensure that it is defined before any AWT class is loaded
+		// this will make the application menu appear at the correct
+		// location when running on with Aqua look and feel on a Mac
+		System.setProperty("apple.laf.useScreenMenuBar", "true");
+		System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
+		
 		wb = new WbManager();
 		trace("WbManager.main() - start");
 		// the command line needs to be initialized before everything

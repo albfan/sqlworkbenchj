@@ -168,6 +168,8 @@ public class ImportFileHandler
 			return realFile.length();
 		}
 	}
+
+	public String getEncoding() { return this.encoding; }
 	
 	public void done()
 	{

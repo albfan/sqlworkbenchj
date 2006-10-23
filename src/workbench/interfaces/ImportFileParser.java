@@ -20,6 +20,12 @@ import workbench.db.importer.ImportFileHandler;
  */
 public interface ImportFileParser
 {
+	
+	/**
+	 *  Return the encoding used to read input files
+	 */
+	String getEncoding();
+	
 	/**
 	 *	Return the name of the input file
 	 */
