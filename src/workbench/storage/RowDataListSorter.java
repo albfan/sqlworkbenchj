@@ -24,15 +24,30 @@ import workbench.resource.Settings;
 public class RowDataListSorter
 	implements Comparator
 {
-	private int sortColumn;
-	private boolean sortAscending;
+	private int[] sortColumns;
+	private boolean[] sortAscending;
 	private Collator defaultCollator;
 	
 	public RowDataListSorter(int column, boolean ascending)
 	{
-		this.sortColumn = column;
-		this.sortAscending = ascending;
+		this.sortColumns = new int[] { column };
+		this.sortAscending = new boolean[] { ascending };
+		initCollator();
+	}
+	
+	public RowDataListSorter(int[] columns, boolean[] order)
+	{
+		if (columns.length != order.length) throw new IllegalArgumentException("Size of arrays must match");
+		this.sortColumns = new int[columns.length];
+		System.arraycopy(columns, 0, sortColumns, 0, columns.length);
 		
+		this.sortAscending = new boolean[columns.length];
+		System.arraycopy(order, 0, sortAscending, 0, columns.length);
+		initCollator();
+	}
+	
+	private void initCollator()
+	{
 		// Using a Collator to compare Strings is much slower then 
 		// using String.compareTo() so by default this is disabled
 		boolean useCollator = Settings.getInstance().getUseCollator();
@@ -68,10 +83,10 @@ public class RowDataListSorter
 	/**
 	 * Compares the defined sort column 
 	 */
-	private int compareRows(RowData row1, RowData row2)
+	private int compareColumn(int column, RowData row1, RowData row2)
 	{
-		Object o1 = row1.getValue(sortColumn);
-		Object o2 = row2.getValue(sortColumn);
+		Object o1 = row1.getValue(column);
+		Object o2 = row2.getValue(column);
 
 		// Special handling for NULL values 
 		// Even though NullValue implements the Comparable
@@ -123,8 +138,17 @@ public class RowDataListSorter
 		{
 			RowData row1 = (RowData)o1;
 			RowData row2 = (RowData)o2;
-			int result = compareRows(row1, row2);
-			return this.sortAscending ? result : -result;
+			
+			int colIndex = 0;
+			int result = compareColumn(sortColumns[colIndex], row1, row2);
+			result = this.sortAscending[colIndex] ? result : -result;
+			while (result == 0 && colIndex < this.sortColumns.length - 1)
+			{
+				colIndex ++;
+				result = compareColumn(sortColumns[colIndex], row1, row2);
+				result = this.sortAscending[colIndex] ? result : -result;
+			}
+			return result;
 		}
 		catch (ClassCastException e)
 		{

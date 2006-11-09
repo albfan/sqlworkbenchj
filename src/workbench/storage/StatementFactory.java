@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
+import workbench.db.DbMetadata;
 
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -23,6 +24,8 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * A class to generate DELETE, INSERT or UPDATE statements based
+ * on the data in a {@link workbench.db.storage.RowData} object.
  *
  * @author  support@sql-workbench.net
  */
@@ -34,12 +37,16 @@ public class StatementFactory
 	private WbConnection dbConnection;
 	private SqlLiteralFormatter literalFormatter;
 	private boolean emptyStringIsNull = false;
-	
+
 	private static final int CASE_NO_CHANGE = 1;
 	private static final int CASE_UPPER = 2;
 	private static final int CASE_LOWER = 4;
 	private int identifierCase = CASE_NO_CHANGE;
-	
+
+	/**
+	 * @param metaData the description of the resultSet for which the statements are generated
+	 * @param conn the database connection for which the statements are generated
+	 */
 	public StatementFactory(ResultInfo metaData, WbConnection conn)
 	{
 		this.resultInfo = metaData;
@@ -52,32 +59,13 @@ public class StatementFactory
 		}
 	}
 
-	public DmlStatement createUpdateStatement(RowData aRow)
-	{
-		return this.createUpdateStatement(aRow, false, "\n");
-	}
-
-	public DmlStatement createUpdateStatement(RowData aRow, boolean ignoreStatus)
-	{
-		return this.createUpdateStatement(aRow, ignoreStatus, "\n");
-	}
-
 	public DmlStatement createUpdateStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
 	{
 		return createUpdateStatement(aRow, ignoreStatus, lineEnd, null);
 	}
 
-	private boolean isNull(Object value)
-	{
-		if (value == null) return true;
-		if (value instanceof NullValue) return true;
-		String s = value.toString();
-		if (emptyStringIsNull && s.length() == 0) return true;
-		return false;
-	}
-	
 	/**
-	 *	Create an UPDATE Statement based on the data provided 
+	 *	Create an UPDATE Statement based on the data provided
 	 *
 	 *	@param aRow						the RowData that should be used for the UPDATE statement
 	 *	@param ignoreStatus		if set to true all columns will be included (otherwise only modified columns)
@@ -92,7 +80,7 @@ public class StatementFactory
 
 		boolean doFormatting = Settings.getInstance().getDoFormatUpdates();
 		int columnThresholdForNewline = Settings.getInstance().getFormatUpdateColumnThreshold();
-		
+
 		boolean newLineAfterColumn = doFormatting && (cols > columnThresholdForNewline);
 
 		DmlStatement dml;
@@ -105,13 +93,14 @@ public class StatementFactory
 		if (doFormatting) sql.append("\n  ");
 		sql.append(" SET ");
 		first = true;
+
 		for (int col=0; col < cols; col ++)
 		{
 			if (columns != null)
 			{
 				if (!columns.contains(this.resultInfo.getColumn(col))) continue;
 			}
-			
+
 			if (aRow.isColumnModified(col) || (ignoreStatus && !this.resultInfo.isPkColumn(col)))
 			{
 				if (first)
@@ -123,7 +112,8 @@ public class StatementFactory
 					sql.append(", ");
 					if (newLineAfterColumn) sql.append("\n       ");
 				}
-				String colName = adjustIdentifierCase(SqlUtil.quoteObjectname(this.resultInfo.getColumnName(col)));
+				String colName = adjustColumnName(this.resultInfo.getColumnName(col));
+
 				sql.append(colName);
 				Object value = aRow.getValue(col);
 				if (isNull(value))
@@ -152,7 +142,9 @@ public class StatementFactory
 			{
 				sql.append(" AND ");
 			}
-			sql.append(SqlUtil.quoteObjectname(this.resultInfo.getColumnName(j)));
+			String colName = adjustColumnName(this.resultInfo.getColumnName(j));
+			sql.append(colName);
+
 			Object value = aRow.getOriginalValue(j);
 			if (value instanceof NullValue)
 			{
@@ -164,7 +156,7 @@ public class StatementFactory
 				values.add(new ColumnData(value,this.resultInfo.getColumn(j)));
 			}
 		}
-		
+
 		dml = new DmlStatement(sql.toString(), values);
 		return dml;
 	}
@@ -178,7 +170,7 @@ public class StatementFactory
 	{
 		return this.createInsertStatement(aRow, ignoreStatus, lineEnd, null);
 	}
-	
+
 	/**
 	 *	Generate an insert statement for the given row
 	 *	When creating a script for the DataStore the ignoreStatus
@@ -198,14 +190,14 @@ public class StatementFactory
 		if (!ignoreStatus && !aRow.isModified()) return null;
 
 		int cols = this.resultInfo.getColumnCount();
-		
+
 		boolean doFormatting = Settings.getInstance().getDoFormatInserts();
 		int columnThresholdForNewline = Settings.getInstance().getIntProperty("workbench.sql.generate.insert.newlinethreshold",5);
 		boolean newLineAfterColumn = doFormatting && (cols > columnThresholdForNewline);
 		boolean skipIdentityCols = Settings.getInstance().getFormatInsertIgnoreIdentity();
 		int colsPerLine = Settings.getInstance().getFormatInsertColsPerLine();
 		boolean includeNulls = (this.dbConnection.getProfile() == null ? false : this.dbConnection.getProfile().getIncludeNullInInsert());
-		
+
 		ArrayList values = new ArrayList(cols);
 		StringBuffer sql = new StringBuffer(250);
     sql.append("INSERT INTO ");
@@ -214,7 +206,7 @@ public class StatementFactory
 		sql.append(getTableNameToUse());
 		if (doFormatting) sql.append(lineEnd);
 		else sql.append(' ');
-		
+
 		sql.append('(');
 		if (newLineAfterColumn)
 		{
@@ -232,7 +224,7 @@ public class StatementFactory
 		first = true;
     String colName = null;
 		int colsInThisLine = 0;
-		
+
 		for (int col=0; col < cols; col ++)
 		{
 			ColumnIdentifier colId = this.resultInfo.getColumn(col);
@@ -240,14 +232,14 @@ public class StatementFactory
 			{
 				if (!columns.contains(colId)) continue;
 			}
-			
+
 			if (skipIdentityCols && colId.getDbmsType().indexOf("identity") > -1) continue;
-			
+
 			Object value = aRow.getValue(col);
 			boolean isNull = isNull(value);
-			
+
 			boolean includeCol = (ignoreStatus || aRow.isColumnModified(col));
-			
+
 			if (includeCol)
 			{
 				if (isNull)
@@ -255,7 +247,7 @@ public class StatementFactory
 					includeCol = includeNulls;
 				}
 			}
-			
+
 			if (includeCol)
 			{
 				if (!first)
@@ -289,7 +281,8 @@ public class StatementFactory
 					first = false;
 				}
 
-				colName = adjustIdentifierCase(SqlUtil.quoteObjectname(this.resultInfo.getColumnName(col)));
+				colName = adjustColumnName(this.resultInfo.getColumnName(col));
+
 				sql.append(colName);
 				valuePart.append('?');
 
@@ -304,7 +297,7 @@ public class StatementFactory
 		}
 
 		sql.append(')');
-		if (doFormatting) 
+		if (doFormatting)
 		{
 			sql.append(lineEnd);
 			sql.append("VALUES");
@@ -317,7 +310,7 @@ public class StatementFactory
 		sql.append('(');
 		sql.append(valuePart);
 		sql.append(')');
-		
+
 		dml = new DmlStatement(sql.toString(), values);
 		return dml;
 	}
@@ -326,7 +319,7 @@ public class StatementFactory
 	{
 		return createDeleteStatement(aRow, false);
 	}
-	
+
 	public DmlStatement createDeleteStatement(RowData aRow, boolean ignoreStatus)
 	{
 		if (aRow == null) return null;
@@ -342,6 +335,7 @@ public class StatementFactory
 		sql.append(getTableNameToUse());
 		sql.append(" WHERE ");
 		first = true;
+
 		for (int j=0; j < count; j++)
 		{
 			if (!this.resultInfo.isPkColumn(j)) continue;
@@ -353,7 +347,7 @@ public class StatementFactory
 			{
 				sql.append(" AND ");
 			}
-			String colName = adjustIdentifierCase(SqlUtil.quoteObjectname(this.resultInfo.getColumnName(j)));
+			String colName = adjustColumnName(this.resultInfo.getColumnName(j));
 			sql.append(colName);
 
 			Object value = aRow.getOriginalValue(j);
@@ -368,15 +362,64 @@ public class StatementFactory
 				values.add(new ColumnData(value, resultInfo.getColumn(j)));
 			}
 		}
-		
+
 		dml = new DmlStatement(sql.toString(), values);
 		return dml;
+	}
+	
+	/**
+	 * Setter for property tableToUse.
+	 * @param tableToUse New value of property tableToUse.
+	 */
+	public void setTableToUse(TableIdentifier tableToUse)
+	{
+		this.tableToUse = tableToUse;
+	}
+
+	public void setIncludeTableOwner(boolean flag) { this.includeTableOwner = flag; }
+	public boolean getIncludeTableOwner() { return this.includeTableOwner; }
+
+	public void setCurrentConnection(WbConnection conn)
+	{
+		this.dbConnection = conn;
+		if (this.dbConnection != null)
+		{
+			ConnectionProfile prof = dbConnection.getProfile();
+			emptyStringIsNull = (prof == null ? true : prof.getEmptyStringIsNull());
+		}
+	}
+	
+	private String adjustColumnName(String value)
+	{
+		if (value == null) return null;
+		if (value.startsWith("\"")) return value;
+		if (!dbConnection.getMetadata().isDefaultCase(value))
+		{
+			return dbConnection.getMetadata().quoteObjectname(value);
+		}
+		return value;
 	}
 
 	private String adjustIdentifierCase(String value)
 	{
 		if (value == null) return null;
 		if (value.startsWith("\"")) return value;
+		
+		// If the table name is not in the same case the server stores it
+		// and the case may not be changed at all, then we need to quote the table name.
+		
+		// setNeverAdjustCase() will only be set for TableIdentifiers that have
+		// been "retrieved" from the database (e.g. in the DbExplorer)
+		// For table names that the user entered, neverAdjustCase() will be false
+		TableIdentifier updateTable = this.resultInfo.getUpdateTable();
+		
+		boolean neverAdjust = (updateTable == null ? false : updateTable.getNeverAdjustCase());
+		
+		if (neverAdjust && !dbConnection.getMetadata().isDefaultCase(value))
+		{
+			return dbConnection.getMetadata().quoteObjectname(value);
+		}
+		
 		if (this.identifierCase == CASE_UPPER)
 		{
 			return value.toUpperCase();
@@ -385,16 +428,19 @@ public class StatementFactory
 		{
 			return value.toLowerCase();
 		}
+
 		return value;
 	}
-	
+
 	private String getTableNameToUse()
 	{
 		String name = null;
 		TableIdentifier updateTable = this.resultInfo.getUpdateTable();
-		if (this.tableToUse != null || updateTable == null )
+		if (updateTable == null && this.tableToUse == null) throw new IllegalArgumentException("Cannot proceed without update table defined");
+		
+		if (this.tableToUse != null)
 		{
-			if (!includeTableOwner) 
+			if (!includeTableOwner)
 			{
 				name = tableToUse.getTableName();
 			}
@@ -411,26 +457,13 @@ public class StatementFactory
 		return name;
 	}
 
-	/**
-	 * Setter for property tableToUse.
-	 * @param tableToUse New value of property tableToUse.
-	 */
-	public void setTableToUse(TableIdentifier tableToUse)
+	private boolean isNull(Object value)
 	{
-		this.tableToUse = tableToUse;
+		if (value == null) return true;
+		if (value instanceof NullValue) return true;
+		String s = value.toString();
+		if (emptyStringIsNull && s.length() == 0) return true;
+		return false;
 	}
-
-	public void setIncludeTableOwner(boolean flag) { this.includeTableOwner = flag; }
-	public boolean getIncludeTableOwner() { return this.includeTableOwner; }
 	
-	public void setCurrentConnection(WbConnection conn)
-	{
-		this.dbConnection = conn;
-		if (this.dbConnection != null)
-		{
-			ConnectionProfile prof = dbConnection.getProfile();
-			emptyStringIsNull = (prof == null ? true : prof.getEmptyStringIsNull());
-		}
-		
-	}
 }

@@ -75,6 +75,7 @@ public class DataStore
 
 	private ResultInfo resultInfo;
 	private TableIdentifier updateTable;
+	private TableIdentifier updateTableToBeUsed;
 
 	private WbConnection originalConnection;
 	private DecimalFormat defaultNumberFormatter;
@@ -104,7 +105,7 @@ public class DataStore
 	 *	Create a DataStore which is not based on a result set
 	 *	and contains the columns defined in the given array
 	 *	The column types need to match the values from from java.sql.Types
-	 *  @param aColNames the column names
+	 *  @param colNames the column names
 	 *  @param colTypes data types for each column (matching java.sql.Types.XXXX)
 	 *  @param colSizes display size for each column
 	 * 
@@ -454,11 +455,18 @@ public class DataStore
 		return newIndex;
 	}
 
-	public void setUpdateTable(String aTablename)
+	/**
+	 * Prepare the information which table should be updated. This 
+	 * will not trigger the retrieval of the columns. 
+	 * This table will be used the next time checkUpdateTable() will 
+	 * be called. checkUpdateTable() will not retrieve the 
+	 * table name from the original SQL then.
+	 */
+	public void setUpdateTableToBeUsed(TableIdentifier tbl)
 	{
-		this.setUpdateTable(aTablename, this.originalConnection);
+		this.updateTableToBeUsed = (tbl == null ? null : tbl.createCopy());
 	}
-
+	
 	public void setUpdateTable(String aTablename, WbConnection aConn)
 	{
 		if (StringUtil.isEmptyString(aTablename))
@@ -482,10 +490,10 @@ public class DataStore
 	 * Sets the table to be updated for this DataStore.
 	 * Upon setting the table, the column definition for the table
 	 * will be retrieved using {@link workbench.db.DbMetadata}
-	 * @param aTablename
-	 * @param aConn
+	 * @param tbl the table to be used as the update table
+	 * @param conn the connection where this table exists
 	 */
-	public void setUpdateTable(TableIdentifier tbl, WbConnection aConn)
+	public void setUpdateTable(TableIdentifier tbl, WbConnection conn)
 	{
 		if (tbl == null)
 		{
@@ -494,7 +502,7 @@ public class DataStore
 			return;
 		}
 		
-		if (tbl.equals(this.updateTable) || aConn == null) return;
+		if (tbl.equals(this.updateTable) || conn == null) return;
 		
 		this.updateTable = null;
 		this.resultInfo.setUpdateTable(null);
@@ -507,7 +515,7 @@ public class DataStore
 		// select statement
 		try
 		{
-			DbMetadata meta = aConn.getMetadata();
+			DbMetadata meta = conn.getMetadata();
 			if (meta == null) return;
 
 			this.updateTable = tbl.createCopy();
@@ -600,7 +608,7 @@ public class DataStore
 	 * @return the current value of the column might be different to the value
 	 * retrieved from the database!
 	 * 
-	 * @see workbench.storage.RowData.getValue(int)
+	 * @see workbench.storage.RowData#getValue(int)
 	 * @see #getRow(int)
 	 */
 	public Object getValue(int aRow, int aColumn)
@@ -993,24 +1001,32 @@ public class DataStore
 	
 	public boolean checkUpdateTable(WbConnection aConn)
 	{
-		if (this.sql == null) return false;
 		return this.checkUpdateTable(this.sql, aConn);
 	}
 
 	public boolean checkUpdateTable()
 	{
-		if (this.sql == null) return false;
-		if (this.originalConnection == null) return false;
 		return this.checkUpdateTable(this.sql, this.originalConnection);
 	}
 
 	public boolean checkUpdateTable(String aSql, WbConnection aConn)
 	{
-		if (aSql == null) return false;
-		List tables = SqlUtil.getTables(aSql);
-		if (tables.size() != 1) return false;
-		String table = (String)tables.get(0);
-		this.setUpdateTable(table, aConn);
+		if (aConn == null) return false;
+		
+		if (this.updateTableToBeUsed != null)
+		{
+			TableIdentifier ut = this.updateTableToBeUsed;
+			this.updateTableToBeUsed = null;
+			this.setUpdateTable(ut, aConn);
+		}
+		else
+		{
+			if (aSql == null) return false;
+			List tables = SqlUtil.getTables(aSql);
+			if (tables.size() != 1) return false;
+			String table = (String)tables.get(0);
+			this.setUpdateTable(table, aConn);
+		}
 		return true;
 	}
 
@@ -1024,6 +1040,7 @@ public class DataStore
 	public String getInsertTable()
 	{
 		if (this.updateTable != null) return this.updateTable.getTableExpression();
+		if (this.updateTableToBeUsed != null) return this.updateTableToBeUsed.getTableExpression();
 		if (this.sql == null) return null;
 		if (!this.sqlHasUpdateTable()) return null;
 		List tables = SqlUtil.getTables(this.sql);
@@ -1091,7 +1108,7 @@ public class DataStore
 	 * If the DataStore is beeing initialized with a ResultSet, this 
 	 * cancels the processing of the ResultSet.
 	 * 
-	 * @see workbench.storage.DataStore(ResultSet)
+	 * @see #DataStore(java.sql.ResultSet)
 	 * @see #initData(ResultSet)
 	 */
 	public void cancelRetrieve()
@@ -1105,7 +1122,7 @@ public class DataStore
 	 * 
 	 * @return true if retrieval was cancelled. 
 	 * 
-	 * @see workbench.storage.DataStore(ResultSet)
+	 * @see #DataStore(java.sql.ResultSet)
 	 * @see #initData(ResultSet)
 	 */
 	public boolean isCancelled() 
@@ -1135,7 +1152,7 @@ public class DataStore
 	 * @return a List of {@link workbench.storage.DmlStatement}s to be sent to the database
 	 * 
 	 * @see workbench.storage.StatementFactory
-	 * @see workbench.storage.DmlStatement#getExecutableStatement()
+	 * @see workbench.storage.DmlStatement#getExecutableStatement(SqlLiteralFormatter)
 	 */
 	public List getUpdateStatements(WbConnection aConnection)
 		throws SQLException
@@ -1238,7 +1255,7 @@ public class DataStore
 	 * @return the number of rows affected
 	 * 
 	 * @see workbench.storage.StatementFactory
-	 * @see workbench.storage.DmlStatement#getExecutableStatement()
+	 * @see workbench.storage.DmlStatement#getExecutableStatement(SqlLiteralFormatter)
 	 */
 	public synchronized int updateDb(WbConnection aConnection, JobErrorHandler errorHandler)
 		throws SQLException
@@ -1409,6 +1426,15 @@ public class DataStore
 		this.resetUpdateRowCounters();
 	}
 
+	public void sortByColumns(int[] cols, boolean[] ascending)
+	{
+		synchronized (this.data)
+		{
+			RowDataListSorter sorter = new RowDataListSorter(cols, ascending);
+			sorter.sort(this.data);
+		}
+	}
+	
 	public void sortByColumn(int col, boolean ascending)
 	{
 		synchronized (this.data)
@@ -1484,7 +1510,7 @@ public class DataStore
 	 * row. The key to the map is the name of the column.
 	 * 
 	 * @see workbench.storage.ResultInfo#isPkColumn(int)
-	 * @see #getValue(int)
+	 * @see #getValue(int, int)
 	 */
 	public Map getPkValues(WbConnection aConnection, int aRow)
 	{

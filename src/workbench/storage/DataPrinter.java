@@ -33,22 +33,28 @@ public class DataPrinter
 	public DataPrinter(DataStore source)
 	{
 		this.data = source;
-		initConverter("\t", StringUtil.LINE_TERMINATOR, null);
+		initConverter("\t", StringUtil.LINE_TERMINATOR, null, true);
 	}
-	
-	public DataPrinter(DataStore source, String delimiter, String lineEnd, List columns)
+
+	public DataPrinter(DataStore source, boolean includeHeaders)
 	{
 		this.data = source;
-		initConverter(delimiter, lineEnd, columns);
+		initConverter("\t", StringUtil.LINE_TERMINATOR, null, includeHeaders);
+	}
+	
+	public DataPrinter(DataStore source, String delimiter, String lineEnd, List columns, boolean includeHeader)
+	{
+		this.data = source;
+		initConverter(delimiter, lineEnd, columns, includeHeader);
 	}
 	
 
-	private void initConverter(String delimiter, String lineEnd, List columns)
+	private void initConverter(String delimiter, String lineEnd, List columns, boolean includeHeader)
 	{
 		converter = new TextRowDataConverter();
 		converter.setResultInfo(data.getResultInfo());
 		converter.setWriteBlobToFile(false);
-		converter.setWriteHeader(true);
+		converter.setWriteHeader(includeHeader);
 		converter.setLineEnding(lineEnd);
 		converter.setDelimiter(delimiter);
 		converter.setColumnsToExport(columns);

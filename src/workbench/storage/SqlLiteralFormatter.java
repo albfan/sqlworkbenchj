@@ -69,8 +69,11 @@ public class SqlLiteralFormatter
 	
 	public void createDbmsBlobLiterals(WbConnection con)
 	{
-		blobFormatter = BlobFormatterFactory.createInstance(con.getMetadata());
-		this.blobWriter = null;
+		if (con != null)
+		{
+			blobFormatter = BlobFormatterFactory.createInstance(con.getMetadata());
+			this.blobWriter = null;
+		}
 	}
 	
 	public void createBlobFiles(DataFileWriter bw)
