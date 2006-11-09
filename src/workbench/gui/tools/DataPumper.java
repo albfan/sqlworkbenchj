@@ -115,7 +115,7 @@ public class DataPumper
 		this.sqlEditor.showFormatSql();
 		this.wherePanel.add(this.sqlEditor);
 		this.showWbCommand.setEnabled(false);
-		this.useBatchCheckBox.setEnabled(false);
+		this.batchSize.setEnabled(false);
 		if (!this.allowCreateTable)
 		{
 			this.dropTargetCbx.setVisible(this.allowCreateTable);
@@ -172,6 +172,7 @@ public class DataPumper
 		}
 		s.storeWindowSize(this.window, "workbench.datapumper.window");
 		s.storeWindowPosition(this.window, "workbench.datapumper.window");
+		s.setProperty("workbench.datapumper.batchsize", getBatchSize());
 	}
 
 	public void restoreSettings()
@@ -213,6 +214,11 @@ public class DataPumper
 
 		// initialize the depending controls for the usage of a SQL query
 		this.checkType();
+		int size = s.getIntProperty("workbench.datapumper.batchsize", -1);
+		if (size > 0)
+		{
+			this.batchSize.setText(Integer.toString(size));
+		}
 	}
 
 	private void selectInputFile()
@@ -471,7 +477,8 @@ public class DataPumper
     modeLabel = new javax.swing.JLabel();
     jPanel1 = new javax.swing.JPanel();
     jLabel1 = new javax.swing.JLabel();
-    useBatchCheckBox = new javax.swing.JCheckBox();
+    batchSizeLabel = new javax.swing.JLabel();
+    batchSize = new javax.swing.JTextField();
     statusLabel = new javax.swing.JLabel();
     buttonPanel = new javax.swing.JPanel();
     jPanel3 = new javax.swing.JPanel();
@@ -692,7 +699,7 @@ public class DataPumper
     commitLabel.setToolTipText(ResourceMgr.getDescription("LblDPCommitEvery"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(2, 8, 0, 0);
     updateOptionPanel.add(commitLabel, gridBagConstraints);
@@ -701,7 +708,7 @@ public class DataPumper
     commitEvery.setText("\n");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
@@ -758,7 +765,6 @@ public class DataPumper
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(2, 8, 0, 0);
     updateOptionPanel.add(modeLabel, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 8;
@@ -772,15 +778,25 @@ public class DataPumper
     gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 5);
     updateOptionPanel.add(jLabel1, gridBagConstraints);
 
-    useBatchCheckBox.setText(ResourceMgr.getString("LblUseBatchUpdate"));
-    useBatchCheckBox.setToolTipText(ResourceMgr.getDescription("LblUseBatchUpdate"));
+    batchSizeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    batchSizeLabel.setText(ResourceMgr.getString("LblBatchSize"));
+    batchSizeLabel.setToolTipText(ResourceMgr.getDescription("LblBatchSize"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-    updateOptionPanel.add(useBatchCheckBox, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(2, 8, 0, 0);
+    updateOptionPanel.add(batchSizeLabel, gridBagConstraints);
+
+    batchSize.setColumns(5);
+    batchSize.setText("\n");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+    updateOptionPanel.add(batchSize, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -891,11 +907,12 @@ public class DataPumper
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(9, 0, 8, 0);
     add(buttonPanel, gridBagConstraints);
-
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  protected javax.swing.JTextField batchSize;
+  protected javax.swing.JLabel batchSizeLabel;
   protected javax.swing.JPanel buttonPanel;
   protected javax.swing.JButton cancelButton;
   protected javax.swing.JButton checkQueryButton;
@@ -935,7 +952,6 @@ public class DataPumper
   protected javax.swing.JPanel targetProfilePanel;
   protected workbench.gui.tools.TableSelectorPanel targetTable;
   protected javax.swing.JPanel updateOptionPanel;
-  protected javax.swing.JCheckBox useBatchCheckBox;
   protected javax.swing.JCheckBox useQueryCbx;
   protected javax.swing.JPanel wherePanel;
   // End of variables declaration//GEN-END:variables
@@ -1090,20 +1106,21 @@ public class DataPumper
 			String mode = (String)this.modeComboBox.getSelectedItem();
 			if ("insert".equals(mode) || "update".equals(mode))
 			{
-				this.useBatchCheckBox.setEnabled(this.supportsBatch);
+				this.batchSize.setEnabled(this.supportsBatch);
 			}
 			else
 			{
-				this.useBatchCheckBox.setEnabled(false);
-				this.useBatchCheckBox.setSelected(false);
+				this.batchSize.setEnabled(false);
+				this.batchSize.setText("");
 			}
 		}
 		else
 		{
-			this.useBatchCheckBox.setEnabled(false);
-			this.useBatchCheckBox.setSelected(false);
+			this.batchSize.setEnabled(false);
+			this.batchSize.setText("");
 		}
 	}
+	
 	private void showHelp()
 	{
 		HtmlViewer viewer = new HtmlViewer(this.window);
@@ -1164,10 +1181,6 @@ public class DataPumper
 		{
 			this.showLog();
 		}
-//		else if (e.getSource() == this.modeComboBox)
-//		{
-//			this.checkUseBatch();
-//		}
 	}
 
 	/**
@@ -1218,7 +1231,7 @@ public class DataPumper
 	private boolean isSelectQuery()
 	{
 		String sql = this.sqlEditor.getText();
-		if (sql != null && sql.length() > 0)
+		if (sql != null && sql.trim().length() > 0)
 		{
 			sql = SqlUtil.makeCleanSql(sql, false).toLowerCase();
 			return sql.startsWith("select");
@@ -1535,7 +1548,7 @@ public class DataPumper
 			if (s.indexOf(' ') > -1) result.append('"');
 
 			s = sqlEditor.getText();
-			if (s != null && s.length() > 0)
+			if (s != null && s.trim().length() > 0)
 			{
 				result.append("\n     -" + WbCopy.PARAM_SOURCEWHERE + "=\"");
 				result.append(s);
@@ -1577,18 +1590,22 @@ public class DataPumper
 		result.append("\n     -" + WbCopy.PARAM_CONTINUE + "=");
 		result.append(Boolean.toString(this.continueOnErrorCbx.isSelected()));
 
-		int commit = StringUtil.getIntValue(this.commitEvery.getText(), -1);
-		if (commit > 0)
+		int batchSize = getBatchSize();
+		if (batchSize > 0)
 		{
-			result.append("\n     -" + WbCopy.PARAM_COMMITEVERY + "=");
-			result.append(commit);
+			result.append("\n     -" + WbCopy.PARAM_BATCHSIZE + "=" + batchSize);
 		}
 
-		if (this.useBatchCheckBox.isEnabled() && this.useBatchCheckBox.isSelected())
+		if (batchSize <= 0)
 		{
-			result.append("\n     -" + WbCopy.PARAM_USEBATCH + "=true");
+			int commit = StringUtil.getIntValue(this.commitEvery.getText(), -1);
+			if (commit > 0)
+			{
+				result.append("\n     -" + WbCopy.PARAM_COMMITEVERY + "=");
+				result.append(commit);
+			}
 		}
-
+		
 		result.append("\n;");
 
 		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPScript"), result.toString(), "workbench.datapumper.scriptwindow", true);
@@ -1596,6 +1613,16 @@ public class DataPumper
 		w.dispose();
 	}
 
+	protected int getBatchSize()
+	{
+		int size = -1;
+		if (this.batchSize.isEnabled())
+		{
+			size = StringUtil.getIntValue(batchSize.getText(), -1);
+		}
+		return size;
+	}
+	
 	protected void initColumnMapper()
 	{
 		if ( (this.sourceConnection == null && this.fileImporter == null) || this.targetConnection == null || !this.hasSource())
@@ -1782,20 +1809,31 @@ public class DataPumper
 		List keys = this.getKeyColumns();
 
 		this.copier.setKeyColumns(keys);
+		
 		if (mode.indexOf("update") > -1 && keys.size() == 0)
 		{
 			WbSwingUtilities.showErrorMessageKey(this, "ErrDPNoKeyColumns");
 			return false;
 		}
+		
 		if (keys.size() == colMapping.targetColumns.length && mode.indexOf("update") > -1)
 		{
 			WbSwingUtilities.showErrorMessageKey(this, "ErrDPUpdateOnlyKeyColumns");
 			return false;
 		}
+		
 		this.copier.setMode(mode);
+		int batchSize = getBatchSize();
 		int commit = StringUtil.getIntValue(this.commitEvery.getText(), -1);
-		this.copier.setCommitEvery(commit);
-		this.copier.setUseBatch(this.useBatchCheckBox.isSelected());
+		if (batchSize <= 0) this.copier.setCommitEvery(commit);
+		
+		if (batchSize > 0)
+		{
+			this.copier.setUseBatch(true);
+			this.copier.setBatchSize(batchSize);
+			if (commit > 0) this.copier.setCommitBatch(true);
+		}
+		
 		this.copier.setRowActionMonitor(this);
 		this.copier.setReportInterval(10);
 		return true;
