@@ -59,6 +59,18 @@ public class StringUtil
 		return new java.util.Date(System.currentTimeMillis());
 	}
 
+	public static boolean isLowercase(String s)
+	{
+		if (s == null) return false;
+		return s.equals(s.toLowerCase());
+	}
+	
+	public static boolean isUppercase(String s)
+	{
+		if (s == null) return false;
+		return s.equals(s.toUpperCase());
+	}
+	
 	public static Comparator getCaseInsensitiveComparator()
 	{
 		return new Comparator()

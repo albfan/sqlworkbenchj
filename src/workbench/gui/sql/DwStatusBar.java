@@ -21,7 +21,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -42,6 +42,7 @@ import workbench.interfaces.EditorStatusbar;
 import workbench.interfaces.StatusBar;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.StatementRunnerResult;
 import workbench.util.StringUtil;
 
 
@@ -66,7 +67,8 @@ public class DwStatusBar
 	private static final int BAR_HEIGHT = 22;
 	private static final int FIELD_HEIGHT = 18;
 	private DecimalFormat numberFormatter;
-	
+	private SimpleDateFormat timeFormatter = new SimpleDateFormat("m'm' ss's'");
+
 	private int timerInterval = Settings.getInstance().getIntProperty("workbench.gui.execution.timer.interval", 1000);
 	private int timerDelay = Settings.getInstance().getIntProperty("workbench.gui.execution.timer.interval", 1000);
 	private final boolean showTimer = Settings.getInstance().getBoolProperty("workbench.gui.execution.timer.enabled", true);
@@ -182,11 +184,7 @@ public class DwStatusBar
 		this.readyMsg = ResourceMgr.getString("MsgReady");
 		this.clearStatusMessage();
 		
-		DecimalFormatSymbols symb = new DecimalFormatSymbols();
-		String sep = Settings.getInstance().getDecimalSymbol();
-		symb.setDecimalSeparator(sep.charAt(0));		
-		numberFormatter = new DecimalFormat("0.#s", symb);
-		numberFormatter.setMaximumFractionDigits(2);
+		numberFormatter = StatementRunnerResult.createTimingFormatter(); 
 	}
 
 	public void setReadyMsg(String aMsg)
@@ -242,23 +240,28 @@ public class DwStatusBar
 		else if (millis <= 60000)
 			return Long.toString((long)(millis / 1000)) + "s";
 		else
-			return Long.toString((long)(millis / 60000)) + "m";
+			return timeFormatter.format(new java.util.Date(millis));
 	}
 	
 	public void actionPerformed(ActionEvent e)
 	{
 		if (!timerRunning) return;
 		long time = System.currentTimeMillis() - timerStarted;
-		//this.execTime.setText(elapsedFormatter.format(time));
 		this.execTime.setText(formatDuration(time));
-		//this.execTime.repaint();
 	}
 	
 	public void setExecutionTime(long millis)
 	{
 		if (timerRunning) executionEnd();
-		double time = (double)(millis/1000.0);
-		this.execTime.setText(numberFormatter.format(time));
+		if (millis <= 60000)
+		{
+			double time = (double)(millis/1000.0);
+			this.execTime.setText(numberFormatter.format(time));
+		}
+		else
+		{
+			this.execTime.setText(timeFormatter.format(new java.util.Date(millis)));
+		}
 		this.execTime.repaint();
 	}
 	

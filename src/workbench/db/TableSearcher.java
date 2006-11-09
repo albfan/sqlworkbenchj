@@ -136,7 +136,7 @@ public class TableSearcher
 				{
 					break;
 				}
-				if (this.display != null)this.display.addResultRow(table.getTableExpression(), rs);
+				if (this.display != null)this.display.addResultRow(table, rs);
 			}
 		}
 		catch (OutOfMemoryError mem)

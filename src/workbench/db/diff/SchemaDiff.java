@@ -15,11 +15,14 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import workbench.db.DbMetadata;
+import workbench.db.ProcedureDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.report.ReportProcedure;
 import workbench.db.report.ReportTable;
 import workbench.db.report.ReportView;
 import workbench.db.report.TagWriter;
@@ -28,9 +31,10 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
+import workbench.util.StringUtil;
 
 /**
- * Compare to Schemas for differences in the definition of the tables
+ * Compare two Schemas for differences in the definition of the tables
  * 
  * @author  support@sql-workbench.net
  */
@@ -40,20 +44,26 @@ public class SchemaDiff
 	public static final String TAG_ADD_VIEW = "add-view";
 	public static final String TAG_DROP_TABLE = "drop-table";
 	public static final String TAG_DROP_VIEW = "drop-view";
+	public static final String TAG_DROP_PROC = "drop-procedure";
+	public static final String TAG_ADD_PROC = "add-procedure";
+	
 	public static final String TAG_REF_CONN = "reference-connection";
 	public static final String TAG_TARGET_CONN = "target-connection";
 	public static final String TAG_COMPARE_INFO = "compare-settings";
 	public static final String TAG_TABLE_PAIR = "table-info";
+	public static final String TAG_PROC_PAIR = "procedure-info";
 	public static final String TAG_INDEX_INFO = "include-index";
 	public static final String TAG_FK_INFO = "include-foreign-key";
 	public static final String TAG_PK_INFO = "include-primary-key";
 	public static final String TAG_CONSTRAINT_INFO = "include-constraints";
 	public static final String TAG_VIEW_INFO = "include-views";
+	public static final String TAG_PROC_INFO = "include-procs";
 	
 	private WbConnection sourceDb;
 	private WbConnection targetDb;
 	private List objectsToCompare;
 	private List tablesToDelete;
+	private List procsToDelete;
 	private List viewsToDelete;
 	private String namespace;
 	private String encoding = "UTF-8";
@@ -63,7 +73,8 @@ public class SchemaDiff
 	private boolean diffPrimaryKeys = true;
 	private boolean diffConstraints = false;
 	private boolean diffViews = true;
-	//private boolean diffComments;
+	private boolean diffProcs = true;
+	private boolean diffComments;
 	private RowActionMonitor monitor;
 	private boolean cancel = false;
 	private String referenceSchema;
@@ -126,7 +137,9 @@ public class SchemaDiff
 	
 	public void setIncludeViews(boolean flag) { this.diffViews = flag; }
 	
-//	public void setIncludeComments(boolean flag) { this.diffComments = flag; }
+	public void setIncludeProcedures(boolean flag) { this.diffProcs = flag; }
+	
+	public void setIncludeComments(boolean flag) { this.diffComments = flag; }
 	
 	/**
 	 *	Set the {@link workbench.storage.RowActionMonitor} for reporting progress
@@ -284,7 +297,7 @@ public class SchemaDiff
 	 * @see #setTables(List, List)
 	 * @see #setTables(List)
 	 */
-	public void setSchemas(String refSchema, String targetSchema)
+	public void setSchemas(String rSchema, String tSchema)
 		throws SQLException
 	{
 		if (this.monitor != null)
@@ -292,8 +305,8 @@ public class SchemaDiff
 			this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 			this.monitor.setCurrentObject(ResourceMgr.getString("MsgDiffRetrieveDbInfo"), -1, -1);
 		}
-		this.referenceSchema = refSchema;
-		this.targetSchema = targetSchema;
+		this.referenceSchema = (rSchema == null ? this.sourceDb.getMetadata().getSchemaToUse() : this.sourceDb.getMetadata().adjustSchemaNameCase(rSchema));
+		this.targetSchema = (tSchema == null ? this.targetDb.getMetadata().getSchemaToUse() : this.sourceDb.getMetadata().adjustSchemaNameCase(tSchema));
 		
 		String[] types;
 		if (diffViews)
@@ -304,17 +317,24 @@ public class SchemaDiff
 		{
 			types = new String[] { this.sourceDb.getMetadata().getTableTypeName() };
 		}
-		List refTables = sourceDb.getMetadata().getTableList(refSchema, types);
-		List target = targetDb.getMetadata().getTableList(targetSchema, types);
+		List refTables = sourceDb.getMetadata().getTableList(this.referenceSchema, types);
+		List target = targetDb.getMetadata().getTableList(this.targetSchema, types);
 		
 		processTableList(refTables, target);
+		
+		if (diffProcs)
+		{
+			List refProcs = sourceDb.getMetadata().getProcedureList(null, this.referenceSchema);
+			List targetProcs = targetDb.getMetadata().getProcedureList(null, this.targetSchema);
+			processProcedureList(refProcs, targetProcs);
+		}
 	}
 
 	private void processTableList(List refTables, List targetTables)
 		throws SQLException
 	{
 		int count = refTables.size();
-		List refTableNames = new ArrayList(count);
+		HashSet refTableNames = new HashSet();
 		
 		this.objectsToCompare = new ArrayList(count);
 		DbMetadata targetMeta = this.targetDb.getMetadata();
@@ -331,14 +351,19 @@ public class SchemaDiff
 			}
 			
 			TableIdentifier t = (TableIdentifier)refTables.get(i);
-			if (this.tablesToIgnore != null && this.tablesToIgnore.contains(t.getTableName())) continue;
+			String tname = StringUtil.trimQuotes(t.getTableName());
+			if (this.tablesToIgnore != null && this.tablesToIgnore.contains(tname)) continue;
 			
 			if (this.monitor != null)
 			{
-				this.monitor.setCurrentObject(msg + t.getTableName(), -1, -1);
+				this.monitor.setCurrentObject(msg + tname, -1, -1);
 			}
+			t.checkQuotesNeeded(sourceDb);
 			
-			TableIdentifier tid = new TableIdentifier(t.getTableName());
+			TableIdentifier tid = t.createCopy();
+			tid.setSchema(this.targetSchema);
+			tid.checkQuotesNeeded(sourceDb);
+				
 			DiffEntry entry = null;
 			if (targetMeta.objectExists(tid,t.getType()))
 			{
@@ -349,7 +374,7 @@ public class SchemaDiff
 				entry = new DiffEntry(t, null);
 			}
 			objectsToCompare.add(entry);
-			refTableNames.add(t.getTableName());
+			refTableNames.add(tname);
 		}
 
 		if (cancel) return;
@@ -364,8 +389,13 @@ public class SchemaDiff
 			for (int i=0; i < count; i++)
 			{
 				TableIdentifier t = (TableIdentifier)targetTables.get(i);
-				if (this.tablesToIgnore != null && this.tablesToIgnore.contains(t.getTableName())) continue;
-				String tbl = sourceDb.getMetadata().adjustObjectnameCase(t.getTableName());
+				String tbl = StringUtil.trimQuotes(t.getTableName());
+				if (this.tablesToIgnore != null && this.tablesToIgnore.contains(tbl)) continue;
+				
+				if (targetDb.getMetadata().isDefaultCase(tbl))
+				{
+					tbl = sourceDb.getMetadata().adjustObjectnameCase(tbl);
+				}
 				if (!refTableNames.contains(tbl))
 				{
 					if (tableType.equals(t.getType()))
@@ -381,6 +411,64 @@ public class SchemaDiff
 		}
 	}
 	
+	private void processProcedureList(List refProcs, List targetProcs)
+	{
+		int count = refProcs.size();
+		HashSet refProcNames = new HashSet();
+		this.procsToDelete = new ArrayList();
+		
+		DbMetadata targetMeta = this.targetDb.getMetadata();
+		
+		this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+		String msg = ResourceMgr.getString("MsgLoadProcInfo") + " ";
+		
+		Iterator itr = refProcs.iterator();
+		while (itr.hasNext())
+		{
+			if (this.cancel) 
+			{
+				this.objectsToCompare = null;
+				break;
+			}
+			
+			ProcedureDefinition p = (ProcedureDefinition)itr.next();
+			
+			if (this.monitor != null)
+			{
+				this.monitor.setCurrentObject(msg + p.getProcedureName(), -1, -1);
+			}
+			
+			ProcDiffEntry entry = null;
+			ProcedureDefinition tp = new ProcedureDefinition(null, this.targetSchema, p.getProcedureName(), p.getResultType());
+			if (targetMeta.procedureExists(tp))
+			{
+				entry = new ProcDiffEntry(p,tp);
+			}
+			else
+			{
+				entry = new ProcDiffEntry(p, null);
+			}
+			objectsToCompare.add(entry);
+			refProcNames.add(p.getProcedureName());
+		}
+
+		
+		if (cancel) return;
+		
+		if (targetProcs != null)
+		{
+			itr = targetProcs.iterator();
+			while (itr.hasNext())
+			{
+				ProcedureDefinition tp = (ProcedureDefinition)itr.next();
+				String procname = tp.getProcedureName();
+				if (!refProcNames.contains(procname))
+				{
+					this.procsToDelete.add(tp);
+				}
+			}	
+		}
+	}
 	/**
 	 * Define the reference tables to be compared with the matching 
 	 * tables (based on the name) in the target connection. The list 
@@ -467,9 +555,12 @@ public class SchemaDiff
 		// First we have to process the tables
 		for (int i=0; i < count; i++)
 		{
-			DiffEntry entry = (DiffEntry)objectsToCompare.get(i);
+			Object o = objectsToCompare.get(i);
+			if (o instanceof ProcDiffEntry) continue;
 			
+			DiffEntry entry = (DiffEntry)o;
 			if (this.cancel) break;
+			
 			if (this.monitor != null)
 			{
 				this.monitor.setCurrentObject(entry.reference.getTableExpression(), i+1, count);
@@ -534,15 +625,61 @@ public class SchemaDiff
 			this.appendViewDiff(viewDiffs, out);
 			out.write("\n");
 		}
+		if (this.cancel) return;
+		
+		if (this.diffProcs)
+		{
+			this.appendProcDiff(out, indent, tw);
+			out.write("\n");
+		}
 		writeTag(out, null, "schema-diff", false);
+	}
+
+	private void appendProcDiff(Writer out, StrBuffer indent, TagWriter tw)
+		throws IOException
+	{
+		int count = this.objectsToCompare.size();
+		for (int i=0; i < count; i++)
+		{
+			Object o = objectsToCompare.get(i);
+			if (o instanceof DiffEntry) continue;
+			
+			ProcDiffEntry entry = (ProcDiffEntry)o;
+			ReportProcedure rp = new ReportProcedure(entry.reference, this.sourceDb);
+			ReportProcedure tp = new ReportProcedure(entry.target, this.targetDb);
+			ProcDiff diff = new ProcDiff(rp, tp);
+			diff.setIndent(indent);
+			diff.setTagWriter(tw);
+			StrBuffer xml = diff.getMigrateTargetXml();
+			if (xml.length() > 0)
+			{
+				out.write("\n");
+				xml.writeTo(out);
+			}			
+		}
+
+		if (this.procsToDelete == null || procsToDelete.size() == 0) return;
+		
+		out.write('\n');
+		writeTag(out, indent, TAG_DROP_PROC, true);
+		StrBuffer myindent = new StrBuffer(indent);
+		myindent.append("  ");
+		Iterator itr = this.procsToDelete.iterator();
+		while (itr.hasNext())
+		{
+			ProcedureDefinition def = (ProcedureDefinition)itr.next();
+			ReportProcedure rp = new ReportProcedure(def, targetDb);
+			rp.setIndent(myindent);
+			StrBuffer xml = rp.getXml(false);
+			xml.writeTo(out);
+		}
+		writeTag(out, indent, TAG_DROP_PROC, false);
 	}
 	
 	private void appendViewDiff(List diffs, Writer out)
 		throws IOException
 	{
 		Iterator itr = diffs.iterator();
-		if (diffs.size() > 0)
-		
 		while (itr.hasNext())
 		{
 			ViewDiff d = (ViewDiff)itr.next();
@@ -625,19 +762,32 @@ public class SchemaDiff
 			tw.appendTag(info, indent2, "target-schema", this.targetSchema);
 		}
 		int count = this.objectsToCompare.size();
-		String attr[] = new String[] { "referenceTable", "compareTo" };
+		String tattr[] = new String[] { "referenceTable", "compareTo" };
+		String pattr[] = new String[] { "referenceProcedure", "compareTo" };
 		String tbls[] = new String[2];
 		for (int i=0; i < count; i++)
 		{
 			// check for ignored tables
 			//if (this.referenceTables[i] == null) continue;
-			DiffEntry de = (DiffEntry)objectsToCompare.get(i);
-			
-			tbls[0] = de.reference.getTableName();
-			tbls[1] = (de.target == null ? "" : de.target.getTableName());
-			
-			tw.appendOpenTag(info, indent2, TAG_TABLE_PAIR, attr, tbls, false);
+			Object o = objectsToCompare.get(i);
+			if (o instanceof DiffEntry)
+			{
+				DiffEntry de = (DiffEntry)o;
+				tbls[0] = StringUtil.trimQuotes(de.reference.getTableName());
+				tbls[1] = (de.target == null ? "" : StringUtil.trimQuotes(de.target.getTableName()));
+
+				tw.appendOpenTag(info, indent2, TAG_TABLE_PAIR, tattr, tbls, false);
+			}
+			else if (o instanceof ProcDiffEntry)
+			{
+				ProcDiffEntry pe = (ProcDiffEntry)o;
+				tbls[0] = pe.reference.getProcedureName();
+				tbls[1] = (pe.target == null ? "" : pe.target.getProcedureName());
+
+				tw.appendOpenTag(info, indent2, TAG_PROC_PAIR, pattr, tbls, false);
+			}
 			info.append("/>\n");
+			
 		}
 		tw.appendCloseTag(info, indent, TAG_COMPARE_INFO);
 
@@ -699,6 +849,17 @@ public class SchemaDiff
 		}
 		out.write(tag);
 		out.write(">\n");
+	}
+}
+
+class ProcDiffEntry
+{
+	ProcedureDefinition reference;
+	ProcedureDefinition target;
+	public ProcDiffEntry(ProcedureDefinition ref, ProcedureDefinition tar)
+	{
+		reference = ref;
+		target = tar;
 	}
 }
 

@@ -22,7 +22,7 @@ import java.util.*;
  * cached.
  *
  * @author Slava Pestov
- * @version $Id: TokenMarker.java,v 1.10 2006-09-08 16:46:33 thomas Exp $
+ * @version $Id: TokenMarker.java,v 1.11 2006-11-09 23:05:25 thomas Exp $
  *
  * @see Token
  */
@@ -275,7 +275,7 @@ public abstract class TokenMarker
 	 * @param length The length of the token
 	 * @param id The id of the token
 	 */
-	protected void addToken(int length, byte id)
+	protected synchronized void addToken(int length, byte id)
 	{
 		if(id >= Token.INTERNAL_FIRST && id <= Token.INTERNAL_LAST)
 			throw new InternalError("Invalid id: " + id);
@@ -283,18 +283,18 @@ public abstract class TokenMarker
 		if(length == 0 && id != Token.END)
 			return;
 
-		if(firstToken == null)
+		if (firstToken == null)
 		{
 			firstToken = new Token(length,id);
 			lastToken = firstToken;
 		}
-		else if(lastToken == null)
+		else if (lastToken == null)
 		{
 			lastToken = firstToken;
 			firstToken.length = length;
 			firstToken.id = id;
 		}
-		else if(lastToken.next == null)
+		else if (lastToken.next == null)
 		{
 			lastToken.next = new Token(length,id);
 			lastToken = lastToken.next;

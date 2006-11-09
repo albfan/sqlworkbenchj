@@ -51,6 +51,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.util.ExceptionUtil;
 import workbench.util.WbThread;
 
 /**
@@ -107,10 +108,10 @@ public class TableDefinitionPanel
 		cc.insets = new Insets(0, 5, 0, 5);
 		toolbar.add(l, cc);
 
-		Font std = Settings.getInstance().getStandardLabelFont();
-		Font bold = std.deriveFont(Font.BOLD);
+		//Font std = Settings.getInstance().getStandardLabelFont();
+		//Font bold = std.deriveFont(Font.BOLD);
 		tableNameLabel = new JLabel();
-		tableNameLabel.setFont(bold);
+		//tableNameLabel.setFont(bold);
 		cc.gridx ++;
 		cc.weightx = 0.0;
 		cc.fill = GridBagConstraints.NONE;
@@ -180,7 +181,6 @@ public class TableDefinitionPanel
 		throws SQLException
 	{
 		this.currentTable = table;
-		this.tableNameLabel.setText(table.getTableName());
 		this.toolbar.validate();
 		this.currentObjectType = objectType;
 		retrieveTableDefinition();
@@ -194,10 +194,12 @@ public class TableDefinitionPanel
 		{
 			try
 			{
-				tableDefinition.setSuspendRepaint(true);
+				String msg = "<html>" + ResourceMgr.getString("TxtRetrieveTableDef") + " <b>" + this.currentTable.getTableName() + "</b></html>";
+				tableNameLabel.setText(msg);
 				DbMetadata meta = this.dbConnection.getMetadata();
 				DataStore def = meta.getTableDefinition(this.currentTable, false);
 				DataStoreTableModel model = new DataStoreTableModel(def);
+				tableDefinition.setSuspendRepaint(true);
 				tableDefinition.setPrintHeader(this.currentTable.getTableName());
 				tableDefinition.setAutoCreateColumnsFromModel(true);
 				tableDefinition.setModel(model, true);
@@ -238,10 +240,11 @@ public class TableDefinitionPanel
 						// ignore it
 					}
 				}
-				
+				tableNameLabel.setText("<html><b>" + currentTable.getTableName() + "</b></html>");
 			}
 			catch (SQLException e)
 			{
+				tableNameLabel.setText(ExceptionUtil.getDisplay(e));
 				throw e;
 			}
 			finally

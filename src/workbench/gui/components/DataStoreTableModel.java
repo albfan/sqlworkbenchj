@@ -47,8 +47,9 @@ public class DataStoreTableModel
 	private int lockColumn = -1;
 
 	// used for sorting the model
-	private boolean sortAscending = true;
-	private int sortColumn = -1;
+	private boolean[] sortAscending;
+	private int[] sortColumns;
+	
 	private boolean allowEditing = true;
 	private final Object model_change_lock = new Object();
 
@@ -70,7 +71,8 @@ public class DataStoreTableModel
 		this.dataCache = newData;
 		this.showStatusColumn = false;
 		this.columnStartIndex = 0;
-		this.sortColumn = -1;
+		this.sortColumns = null;
+		this.sortAscending = null;
 		this.fireTableStructureChanged();
 	}
 
@@ -126,12 +128,12 @@ public class DataStoreTableModel
 			if (aFlag)
 			{
 				this.columnStartIndex = 1;
-				if (this.sortColumn != -1) this.sortColumn++;
+				//if (this.sortColumn != -1) this.sortColumn++;
 			}
 			else
 			{
 				this.columnStartIndex = 0;
-				if (this.sortColumn != -1) this.sortColumn--;
+				//if (this.sortColumn != -1) this.sortColumn--;
 			}
 			this.showStatusColumn = aFlag;
 		}
@@ -396,34 +398,6 @@ public class DataStoreTableModel
 		this.allowEditing = aFlag;
 	}
 
-	/** 
-	 * Return true if the data is sorted in ascending order.
-	 * @return True if sorted in ascending order
-	 */
-	public boolean isSortAscending()
-	{
-		return sortAscending;
-	}
-
-	/**
-	 * Return the current sort column
-	 * @return the index of the current sort column or -1 if not sorted
-	 */
-	public int getSortColumn()
-	{
-		return this.sortColumn;
-	}
-
-	/**
-	 * Sort the data by the given column. If the data is already
-	 * sorted by this column, then the sort order will be reversed
-	 */
-	public void sortByColumn(int column)
-	{
-		boolean ascending = true;
-		if (this.sortColumn == column) ascending = !this.sortAscending;
-		sortByColumn(column, ascending);
-	}
 
 	/**
 	 * Clears the filter that is currently defined on the underlying 
@@ -459,14 +433,68 @@ public class DataStoreTableModel
 		}
 	}
 	
-	private synchronized void setSortInProgress(final boolean flag)
+	private void setSortInProgress(final boolean flag)
 	{
 		this.sortingInProgress = flag;
 	}
 
-	private synchronized boolean isSortInProgress()
+	private boolean isSortInProgress()
 	{
 		return this.sortingInProgress;
+	}
+
+
+	private int findSortColumnIndex(int column)
+	{
+		if (this.sortColumns == null) return -1;
+		int realCol = column - columnStartIndex;
+		for (int i = 0; i < this.sortColumns.length; i++)
+		{
+			if (sortColumns[i] == realCol) return i;
+		}
+		return -1;
+	}
+	/** 
+	 * Return true if the data is sorted in ascending order.
+	 * @return True if sorted in ascending order
+	 */
+	public boolean isSortAscending(int col)
+	{
+		int index = findSortColumnIndex(col);
+		if (index < 0) return false;
+		return sortAscending[index];
+	}
+
+	
+	public boolean isPrimarySortColumn(int col)
+	{
+		int index = findSortColumnIndex(col);
+		return (index == 0);
+	}
+	
+	/**
+	 * Check if the table is sorted by a column
+	 * @return true if the given column is a sort column
+	 * @see #isSortAscending(int)
+	 */
+	public boolean isSortColumn(int col)
+	{
+		int index = findSortColumnIndex(col);
+		return (index > -1);
+	}
+
+	/**
+	 * Sort the data by the given column. If the data is already
+	 * sorted by this column, then the sort order will be reversed
+	 */
+	public void sortByColumn(int column)
+	{
+		// if the column was not sorted at all isSortAscending will return false
+		// thus negating ascending will sort ascending for non-sorted
+		// columns and will toggle the sort direction for an existing sort column
+		boolean ascending = !isSortAscending(column);
+		
+		sortByColumn(column, ascending, false);
 	}
 	
 	/**
@@ -475,37 +503,106 @@ public class DataStoreTableModel
 	 */
 	public boolean sort()
 	{
-		if (this.sortColumn == -1) return false;
-		this.sortByColumn(this.sortColumn, this.sortAscending);
+		if (this.sortColumns == null) return false;
+		applySortColumns();
 		return true;
 	}
 
+	public void removeSortColumn(int column)
+	{
+		int index = findSortColumnIndex(column);
+		if (index < 0) return;
+
+		if (this.sortColumns.length == 1)
+		{
+			this.sortColumns = null;
+			this.sortAscending = null;
+			return;
+		}
+		
+		int[] newColumns = new int[sortColumns.length-1];
+		boolean[] newDir = new boolean[sortColumns.length-1];
+		
+		System.arraycopy(sortColumns, 0, newColumns, 0, index);
+		System.arraycopy(sortAscending, 0, newDir, 0, index);
+		
+		System.arraycopy(sortColumns, index + 1, newColumns, index, sortColumns.length - index - 1);
+		System.arraycopy(sortAscending, 0, newDir, index, sortColumns.length - index - 1);
+
+		this.sortColumns = newColumns;
+		this.sortAscending = newDir;
+		
+		// if the primary (== first) column was removed
+		// we have to re-apply the sort definition
+		if (index == 0)
+		{
+			applySortColumns();
+		}
+	}
+	
 	/**
 	 * Sort the data by the given column in the defined order
 	 */
-	public void sortByColumn(int aColumn, boolean ascending)
+	public void sortByColumn(int column, boolean ascending, boolean addSortColumn)
 	{
-		this.sortAscending = ascending;
-		this.sortColumn = aColumn;
-		try
+		if (!addSortColumn || sortColumns == null)
 		{
-			setSortInProgress(true);
-			this.dataCache.sortByColumn(aColumn - columnStartIndex, ascending);
+			this.sortColumns = new int[1];
+			this.sortColumns[0] = column - columnStartIndex;
+			this.sortAscending = new boolean[1];
+			this.sortAscending[0] = ascending;
 		}
-		catch (Throwable th)
+		else
 		{
-			LogMgr.logError("DataStoreTableModel.sortByColumn()", "Error when sorting data", th);
+			int index = findSortColumnIndex(column);
+			if (index < 0)
+			{
+				int[] newColumns = new int[sortColumns.length + 1];
+				boolean[] newDir = new boolean[sortColumns.length + 1];
+				
+				System.arraycopy(sortColumns, 0, newColumns, 0, sortColumns.length);
+				System.arraycopy(sortAscending, 0, newDir, 0, sortColumns.length);
+				
+				newColumns[sortColumns.length] = column - columnStartIndex;
+				newDir[sortColumns.length] = ascending;
+				
+				this.sortColumns = newColumns;
+				this.sortAscending = newDir;
+			}
+			else
+			{
+				this.sortAscending[index] = ascending;
+			}
 		}
-		finally
+		applySortColumns();
+	}
+	
+	private void applySortColumns()
+	{
+		if (this.sortColumns == null) return;
+		
+		synchronized (this.dataCache)
 		{
-			setSortInProgress(false);
+			try
+			{
+				setSortInProgress(true);
+				this.dataCache.sortByColumns(this.sortColumns, this.sortAscending);
+			}
+			catch (Throwable th)
+			{
+				LogMgr.logError("DataStoreTableModel.sortByColumn()", "Error when sorting data", th);
+			}
+			finally
+			{
+				setSortInProgress(false);
+			}
 		}
 		fireTableChanged(new TableModelEvent(this));
 	}
 
 	private boolean sortingInProgress = false;
 
-	public void sortInBackground(WbTable table, int aColumn)
+	public void sortInBackground(WbTable table, int aColumn, boolean addSortColumn)
 	{
 		if (sortingInProgress) return;
 
@@ -515,16 +612,15 @@ public class DataStoreTableModel
 			return;
 		}
 
-		boolean ascending = true;
-		if (this.sortColumn == aColumn) ascending = !this.sortAscending;
-		sortInBackground(table, aColumn, ascending);
+		boolean ascending = !this.isSortAscending(aColumn);
+		sortInBackground(table, aColumn, ascending, addSortColumn);
 	}
 
 	/**
 	 *	Start a new thread to sort the data.
 	 *	Any call to this method while the thread is running, will be ignored
 	 */
-	public void sortInBackground(final WbTable table, final int aColumn, final boolean ascending)
+	public void sortInBackground(final WbTable table, final int aColumn, final boolean ascending, final boolean addSortColumn)
 	{
 		if (isSortInProgress()) return;
 
@@ -535,7 +631,7 @@ public class DataStoreTableModel
 				try
 				{
 					table.sortingStarted();
-					sortByColumn(aColumn, ascending);
+					sortByColumn(aColumn, ascending, addSortColumn);
 				}
 				finally
 				{

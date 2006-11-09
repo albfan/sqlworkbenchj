@@ -38,7 +38,9 @@ public class TableCreator
 		throws SQLException
 	{
 		this.connection = target;
-		this.tablename = newTable;
+		this.tablename = newTable.createCopy();
+//		this.tablename.setNeverAdjustCase(false);
+//		this.tablename.adjustCase(this.connection);
 		
 		this.columnDefinition = new ColumnIdentifier[columns.length];
 

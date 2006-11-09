@@ -242,6 +242,17 @@ public class ResourceMgr
 
 				return result;
 			}
+			else
+			{
+				imageIconUrl = ResourceMgr.class.getClassLoader().getResource(aKey);
+				if (imageIconUrl != null)
+				{
+					result = new ImageIcon(imageIconUrl);
+					images.put(aKey.toUpperCase(), result);
+
+					return result;
+				}
+			}
 		}
 		else
 		{

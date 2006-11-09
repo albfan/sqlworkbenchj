@@ -116,12 +116,16 @@
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
      <string>SELECT '$$'|| p.prosrc|| '$$\nLANGUAGE '||l.lanname
-FROM pg_proc p, pg_language l
+FROM pg_proc p, pg_language l, pg_namespace n
 where p.prolang = l.oid
+and p.pronamespace = n.oid
 </string> 
     </void> 
     <void property="objectNameField"> 
      <string>p.proname</string> 
+    </void> 
+    <void property="schemaField"> 
+     <string>n.nspname</string> 
     </void> 
    </object> 
   </void> 

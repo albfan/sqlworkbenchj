@@ -36,6 +36,7 @@ import javax.swing.SwingUtilities;
 
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.gui.actions.SelectionFilterAction;
 import workbench.gui.components.FlatButton;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Resettable;
@@ -188,6 +189,10 @@ public class TableDataPanel
 		mytoolbar.add(this.dataDisplay.getInsertRowAction());
 		mytoolbar.add(this.dataDisplay.getCopyRowAction());
 		mytoolbar.add(this.dataDisplay.getDeleteRowAction());
+		mytoolbar.addSeparator();
+		SelectionFilterAction a = new SelectionFilterAction();
+		a.setClient(this.dataDisplay.getTable());
+		mytoolbar.add(a);
 		mytoolbar.addSeparator();
 		mytoolbar.add(this.dataDisplay.getTable().getFilterAction());
 		
@@ -358,6 +363,8 @@ public class TableDataPanel
 	{
 		if (!this.isRetrieving()) reset();
 		this.table = aTable;
+		this.dataDisplay.getTable().clearLastFilter(true);
+		this.dataDisplay.getTable().resetFilter();
 		this.tableNameLabel.setText(this.table.getTableName());
 		this.topPanel.doLayout();
 		this.topPanel.repaint();
@@ -515,6 +522,7 @@ public class TableDataPanel
 			{
 				dataDisplay.getTable().adjustColumns();
 			}
+			dataDisplay.getTable().getDataStore().setUpdateTableToBeUsed(this.table);
 			dataDisplay.getSelectKeysAction().setEnabled(true);
 			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
 			dataDisplay.setPrintHeader(header);
@@ -523,6 +531,7 @@ public class TableDataPanel
 		}
 		catch (Throwable e)
 		{
+			
 			error = true;
 			final String msg;
 			
@@ -536,11 +545,8 @@ public class TableDataPanel
 			{
 				msg = ExceptionUtil.getDisplay(e);
 			}
-			
-			if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab() && !this.dbConnection.getAutoCommit())
-			{
-				try { this.dbConnection.rollback(); } catch (Throwable th) {}
-			}
+
+			rollbackIfNeeded();
 			
 			LogMgr.logError("TableDataPanel.doRetrieve()", "Error retrieving table data", e);
 			EventQueue.invokeLater(new Runnable()

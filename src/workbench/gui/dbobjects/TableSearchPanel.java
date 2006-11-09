@@ -370,7 +370,7 @@ public class TableSearchPanel
 		}
 	}
 	
-	public synchronized void addResultRow(String aTablename, ResultSet aResult)
+	public synchronized void addResultRow(TableIdentifier table, ResultSet aResult)
 	{
 		try
 		{
@@ -383,6 +383,10 @@ public class TableSearchPanel
 				this.adjustDataTable();
 				
 				this.currentDisplayTable = new WbTable();
+				this.currentDisplayTable.getCopyAsInsertAction().setEnabled(true);
+				this.currentDisplayTable.getCopyAsUpdateAction().setEnabled(true);
+				this.currentDisplayTable.getCopyAsDeleteInsertAction().setEnabled(true);
+				
 				this.currentDisplayTable.setUseDefaultStringRenderer(false);
 				//this.currentDisplayTable.setDefaultRenderer(String.class, renderer);
 				if (this.firstTable == null)
@@ -391,11 +395,14 @@ public class TableSearchPanel
 				}
 				//this.currentDisplayTable.setDefaultRenderer(Object.class, rend);
 				this.currentResult = new DataStore(aResult);
+				this.currentResult.setOriginalConnection(this.connection);
+				this.currentResult.setUpdateTableToBeUsed(table);
 				DataStoreTableModel model = new DataStoreTableModel(this.currentResult);
 				this.currentDisplayTable.setModel(model, true);
+				
 				initRenderer(currentDisplayTable, currentResult.getResultInfo());
 				this.currentScrollPane  = new ParentWidthScrollPane(this.currentDisplayTable);
-				TitledBorder b = new TitledBorder(aTablename);
+				TitledBorder b = new TitledBorder(table.getTableExpression());
 				this.currentBorder = b;
 				Font f = b.getTitleFont();
 				f = f.deriveFont(Font.BOLD);

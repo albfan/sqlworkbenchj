@@ -39,6 +39,34 @@ public class JdbcProcedureReader
 		return StringUtil.emptyBuffer();
 	}
 	
+	public boolean procedureExists(String catalog, String schema, String procName, int procType)
+	{
+		boolean exists = false;
+		ResultSet rs = null;
+		try
+		{
+			rs = this.dbMeta.getJdbcMetadata().getProcedures(catalog, schema, procName);
+			if (rs.next())
+			{
+				int type = rs.getInt(8);
+				if (type == DatabaseMetaData.procedureResultUnknown || 
+					  procType == DatabaseMetaData.procedureResultUnknown ||
+						type == procType)
+				{
+					exists = true;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
+		}
+		return exists;
+	}
+	
 	public DataStore getProcedures(String aCatalog, String aSchema)
 		throws SQLException
 	{
@@ -46,8 +74,8 @@ public class JdbcProcedureReader
 		{
 			aSchema = null;
 		}
-		aSchema = this.dbMeta.adjustObjectnameCase(aSchema);
-		aCatalog = this.dbMeta.adjustObjectnameCase(aCatalog);
+//		aSchema = this.dbMeta.adjustObjectnameCase(aSchema);
+//		aCatalog = this.dbMeta.adjustObjectnameCase(aCatalog);
 		
 		ResultSet rs = this.dbMeta.getSqlConnection().getMetaData().getProcedures(aCatalog, aSchema, "%");
 		return fillProcedureListDataStore(rs);

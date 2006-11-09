@@ -182,8 +182,7 @@ public class ProfileTree
 	/**
 	 * Expand the groups that are contained in th list. 
 	 * The list is expected to contain Sting objects that identify
-	 * the names of the groups. If the name is equal to {@link GroupNode#DEFAULT_GROUP_MARKER}
-	 * the default group will be expanded
+	 * the names of the groups. 
 	 */
 	public void expandGroups(List groupList)
 	{
@@ -203,8 +202,6 @@ public class ProfileTree
 	
 	/**
 	 * Return the names of the expaned groups.
-	 * For the default group {@link GroupNode#DEFAULT_GROUP_MARKER} will 
-	 * be returned instead
 	 */
 	public List getExpandedGroupNames()
 	{

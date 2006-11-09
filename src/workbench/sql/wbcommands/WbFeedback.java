@@ -34,6 +34,8 @@ public class WbFeedback
 
 	public String getVerb() { return VERB; }
 	
+	protected boolean isConnectionRequired() { return false; }
+	
 	public StatementRunnerResult execute(WbConnection aConnection, String sql)
 		throws SQLException
 	{

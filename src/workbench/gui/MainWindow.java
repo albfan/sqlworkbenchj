@@ -2526,7 +2526,6 @@ public class MainWindow
 
 	public void executionEnd(WbConnection conn, Object source)
 	{
-		LogMgr.logDebug("MainWindow.executionEnd()", "Execution ended: " + source.getClass().getName() + "@" + source.hashCode());
 		jobIndicator.jobEnded();
 	}
 

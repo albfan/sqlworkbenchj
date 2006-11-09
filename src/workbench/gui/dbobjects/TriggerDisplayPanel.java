@@ -21,6 +21,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import workbench.db.DbMetadata;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DataStoreTableModel;
@@ -91,17 +92,17 @@ public class TriggerDisplayPanel
 		this.triggerCatalog = null;
 	}
 	
-	public void readTriggers(String aCatalog, String aSchema, String aTable)
+	public void readTriggers(TableIdentifier table)
 	{
 		try
 		{
 			DbMetadata metaData = this.dbConnection.getMetadata();
-			DataStore trg = metaData.getTableTriggers(aCatalog, aSchema, aTable);
+			DataStore trg = metaData.getTableTriggers(table);
 			DataStoreTableModel rs = new DataStoreTableModel(trg);
 			triggers.setModel(rs, true);
 			triggers.adjustColumns();
-			this.triggerCatalog = aCatalog;
-			this.triggerSchema = aSchema;
+			this.triggerCatalog = table.getCatalog();
+			this.triggerSchema = table.getSchema();
 			if (triggers.getRowCount() > 0)
 				this.triggers.getSelectionModel().setSelectionInterval(0,0);
 			else

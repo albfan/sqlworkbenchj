@@ -46,11 +46,11 @@ public class ViewDiff
 		boolean isDifferent = true;
 		String tagToUse = TAG_CREATE_VIEW;
 
-		if (target != null)
+		String refSource = reference.getViewSource();
+		String targetSource = (target == null ? null : target.getViewSource());
+		if (targetSource != null)
 		{
-			String refSource = reference.getViewSource();
-			String targetSource = target.getViewSource();
-			isDifferent = !refSource.equals(targetSource);
+			isDifferent = !refSource.trim().equals(targetSource.trim());
 			tagToUse = TAG_UPDATE_VIEW;
 		}
 		

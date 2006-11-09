@@ -53,29 +53,37 @@ public class WbInclude
 
 	public String getVerb() { return verb; }
 
+	protected boolean isConnectionRequired() { return false; }
+	
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
-
-		String clean = stripVerb(SqlUtil.makeCleanSql(aSql, false, '"'));
-//		int pos = clean.indexOf(' ');
-//		if (pos > -1)
-//			clean = clean.substring(pos);
-//		else
-//			clean = "";
-
-		String file = null;
-
-		cmdLine.parse(clean);
-		if (cmdLine.isArgPresent("file"))
+		
+		String clean = SqlUtil.makeCleanSql(aSql, false, '"');
+		boolean isShortInclude = false;
+		
+		if (clean.charAt(0) == '@')
 		{
-			file = cmdLine.getValue("file");
+			clean = clean.substring(1);
+			isShortInclude = true;
 		}
 		else
 		{
-			file = this.getFilename(aSql);
+			clean = stripVerb(clean);
+		}
+		
+		String file = null;
+
+		if (isShortInclude)
+		{
+			file = clean;
+		}
+		else
+		{
+			cmdLine.parse(clean);
+			file = cmdLine.getValue("file");
 		}
 
 		if (file == null || file.length() == 0)
@@ -98,7 +106,7 @@ public class WbInclude
 			return result;
 		}
 
-		boolean continueOnError = cmdLine.getBoolean("continueonerror", true);
+		boolean continueOnError = cmdLine.getBoolean("continueonerror", false);
 		boolean checkEscape = cmdLine.getBoolean("checkescapedquotes", Settings.getInstance().getCheckEscapedQuotes());
 		boolean verbose = cmdLine.getBoolean("verbose", false);
 		String encoding = cmdLine.getValue("encoding");
@@ -120,7 +128,14 @@ public class WbInclude
 			batchRunner.setEncoding(encoding);
 			batchRunner.setParameterPrompter(this.prompter);
 			batchRunner.execute();
-			result.setSuccess();
+			if (batchRunner.isSuccess())
+			{
+				result.setSuccess();
+			}
+			else
+			{
+				result.setFailure();
+			}
 		}
 		catch (Throwable th)
 		{

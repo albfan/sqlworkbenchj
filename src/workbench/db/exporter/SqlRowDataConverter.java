@@ -418,23 +418,26 @@ public class SqlRowDataConverter
 	
 	public void setBlobTypeDbmsLiteral()
 	{
-		this.literalFormatter.createDbmsBlobLiterals(originalConnection);
+		if (this.literalFormatter != null) this.literalFormatter.createDbmsBlobLiterals(originalConnection);
 	}
 	
 	public void setBlobTypeAnsiLiteral()
 	{
-		literalFormatter.createAnsiBlobLiterals();
+		if (this.literalFormatter != null) literalFormatter.createAnsiBlobLiterals();
 	}
 	
 	public void setBlobTypeFile()
 	{
-		literalFormatter.createBlobFiles(this);
+		if (this.literalFormatter != null) literalFormatter.createBlobFiles(this);
 	}
 	
 	public void setClobAsFile(String encoding)
 	{
 		if (StringUtil.isEmptyString(encoding)) return;
-		literalFormatter.setTreatClobAsFile(this, encoding);
+		if (this.literalFormatter != null) 
+		{
+			literalFormatter.setTreatClobAsFile(this, encoding);
+		}
 	}
 	
 }

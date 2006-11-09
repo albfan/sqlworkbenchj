@@ -12,6 +12,7 @@
 package workbench.interfaces;
 
 import java.sql.ResultSet;
+import workbench.db.TableIdentifier;
 
 /**
  *
@@ -20,7 +21,7 @@ import java.sql.ResultSet;
 public interface TableSearchDisplay
 {
 	void setCurrentTable(String aTablename, String aStatement);
-	void addResultRow(String aTablename, ResultSet aResult);
+	void addResultRow(TableIdentifier table, ResultSet aResult);
 	void setStatusText(String aStatustext);
 	void searchStarted();
 	void searchEnded();

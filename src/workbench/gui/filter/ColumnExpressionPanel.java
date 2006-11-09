@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import workbench.db.ColumnIdentifier;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.resource.ResourceMgr;
 import workbench.storage.ResultInfo;
 import workbench.storage.filter.ColumnComparator;
@@ -123,19 +124,20 @@ public class ColumnExpressionPanel
 		
 		if (filter == null)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					columnSelector.setSelectedIndex(0);
-					valueField.requestFocusInWindow();
-				}
-			});
+			columnSelector.setSelectedIndex(0);
+			columnSelector.repaint();
 		}
 		else
 		{
 			setExpressionValue(filter);
 		}
+		WbTraversalPolicy pol = new WbTraversalPolicy();
+		pol.addComponent(columnSelector);
+		pol.addComponent(comparatorDropDown);
+		pol.addComponent(ignoreCase);
+		pol.addComponent(valueField);
+		pol.setDefaultComponent(valueField);
+		this.setFocusTraversalPolicy(pol);
 	}
 
 
@@ -208,7 +210,8 @@ public class ColumnExpressionPanel
 
 	public void setFocusToColumn()
 	{
-		this.columnSelector.requestFocus();
+		this.valueField.requestFocus();
+		//this.columnSelector.requestFocus();
 	}
 
 	public String getColumnName()

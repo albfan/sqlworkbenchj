@@ -81,6 +81,12 @@ public class SqlHistory
 	
 	public synchronized void addContent(EditorPanel editor)
 	{
+		boolean includeFiles = Settings.getInstance().getStoreFilesInHistory();
+		if (!includeFiles && editor.hasFileLoaded()) return;
+		
+		int maxLength = Settings.getInstance().getIntProperty("workbench.sql.history.maxtextlength", 1024*1024*10);
+		if (editor.getDocumentLength() > maxLength) return;
+		
 		String text = editor.getText();
 		if (text == null || text.length() == 0) return;
 

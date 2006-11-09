@@ -20,8 +20,8 @@ import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 
 /**
+ * A class to store the parameters for a PreparedStatement
  * @author  support@sql-workbench.net
- *	A class to store the parameters for a PreparedStatement
  */
 public class StatementParameters
 {

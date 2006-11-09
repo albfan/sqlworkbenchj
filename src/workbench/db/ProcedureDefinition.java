@@ -24,10 +24,25 @@ public class ProcedureDefinition
 	private String procName;
 	
 	// as returned by the JDBC driver corresponds to 
-	// DatabaseMetadata.DatabaseMetaData.procedureNoResult
-	// DatabaseMetadata.DatabaseMetaData.procedureReturnsResult
+	// DatabaseMetaData.procedureNoResult
+	// DatabaseMetaData.procedureReturnsResult
 	private int resultType; 
-	//private String typeDefinition;
+	
+	private boolean isOraclePackage = false;
+	private String source;
+
+	public static ProcedureDefinition createOraclePackage(String schem, String name)
+	{
+		ProcedureDefinition def = new ProcedureDefinition(null, schem, name, DatabaseMetaData.procedureResultUnknown);
+		def.setOraclePackage(true);
+		return def;
+	}
+	
+	public ProcedureDefinition(String name, int type)
+	{
+		procName = name;
+		resultType = type;
+	}
 	
 	public ProcedureDefinition(String cat, String schem, String name, int type)
 	{
@@ -37,6 +52,12 @@ public class ProcedureDefinition
 		resultType = type;
 	}
 	
+	public void setSource(String s) { this.source = s; }
+	public String getSource() { return this.source; }
+	
+	public void setOraclePackage(boolean flag) { this.isOraclePackage = true; }
+	public boolean isOraclePackage() { return this.isOraclePackage; }
+	
 	public String getCatalog() { return this.catalog; }
 	public String getSchema() { return this.schema; }
 	public String getProcedureName() { return this.procName; }
@@ -44,6 +65,10 @@ public class ProcedureDefinition
 	
 	public String getResultTypeDisplay()
 	{
+		if (this.isOraclePackage)
+		{
+			return "PACKAGE";
+		}
 		if (resultType == DatabaseMetaData.procedureReturnsResult)
 		{
 			return "FUNCTION";
@@ -52,6 +77,7 @@ public class ProcedureDefinition
 		{
 			return "PROCEDURE";
 		}
+		
 		return "";
 	}
 	

@@ -163,19 +163,19 @@ public class SqlUtil
 	 */
 	public static String getSqlVerb(String sql)
 	{
-		if (sql == null) return "";
-		String s = sql.trim();
-		if (s.length() == 0) return "";
-		
-		// The SQLLexer does not recognize @ as a keyword (which is basically
-		// correct, but to support the Oracle style includes we'll treat it
-		// as a keyword here.
-		if (s.charAt(0) == '@') return "@";
+		if (StringUtil.isEmptyString(sql)) return "";
 		
 		SQLLexer l = new SQLLexer(sql);
 		try
 		{
 			SQLToken t = l.getNextToken(false, false);
+			
+			// The SQLLexer does not recognize @ as a keyword (which is basically
+			// correct, but to support the Oracle style includes we'll treat it
+			// as a keyword here.
+			String v = t.getContents();
+			if (v.charAt(0) == '@') return "@";
+			
 			return t.getContents().toUpperCase();
 		}
 		catch (Exception e)
@@ -837,11 +837,10 @@ public class SqlUtil
 			
 			if (retrieveOutputMsg)
 			{
-				if (hasWarnings) msg.append('\n');
-
 				s = con.getOutputMessages();
-				if (s.length() > 0)
+				if (s != null && s.trim().length() > 0)
 				{
+					if (hasWarnings) msg.append('\n');
 					msg.append(s);
 					if (!s.endsWith("\n")) msg.append("\n");
 					hasWarnings = true;
@@ -853,6 +852,9 @@ public class SqlUtil
 			while (warn != null)
 			{
 				s = warn.getMessage();
+				// Some JDBC drivers duplicate the warnings between 
+				// the statement and the connection.
+				// This is to prevent adding them twice
 				if (!added.contains(s))
 				{
 					msg.append(s);

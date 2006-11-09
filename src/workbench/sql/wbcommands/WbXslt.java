@@ -47,6 +47,8 @@ public class WbXslt
 		return VERB;
 	}
 
+	protected boolean isConnectionRequired() { return false; }
+
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{

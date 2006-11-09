@@ -32,7 +32,7 @@ import workbench.resource.Settings;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.22 2006-08-24 23:06:54 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.23 2006-11-09 23:05:25 thomas Exp $
  * @see DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter

@@ -53,6 +53,7 @@ public class WbCopy
 	public static final String PARAM_COLUMNS = "columns";
 	public static final String PARAM_SOURCEWHERE = "sourcewhere";
 	public static final String PARAM_COMMITEVERY = "commitevery";
+	public static final String PARAM_COMMITBATCH = "commitbatch";
 	public static final String PARAM_CONTINUE = "continue";
 	public static final String PARAM_DELETETARGET = "deletetarget";
 	public static final String PARAM_MODE = "mode";
@@ -60,7 +61,6 @@ public class WbCopy
 	public static final String PARAM_DROPTARGET = "droptarget";
 	public static final String PARAM_CREATETARGET = "createtarget";
 	public static final String PARAM_BATCHSIZE = "batchsize";
-	public static final String PARAM_USEBATCH = "usebatch";
 	public static final String PARAM_PROGRESS = "showprogress";
 
 	private ArgumentParser cmdLine;
@@ -79,19 +79,21 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_COLUMNS);
 		cmdLine.addArgument(PARAM_SOURCEWHERE);
 		cmdLine.addArgument(PARAM_COMMITEVERY);
+		cmdLine.addArgument(PARAM_COMMITBATCH);
 		cmdLine.addArgument(PARAM_CONTINUE);
 		cmdLine.addArgument(PARAM_DELETETARGET);
 		cmdLine.addArgument(PARAM_MODE);
 		cmdLine.addArgument(PARAM_KEYS);
 		cmdLine.addArgument(PARAM_DROPTARGET);
 		cmdLine.addArgument(PARAM_CREATETARGET);
-		cmdLine.addArgument(PARAM_USEBATCH);
 		cmdLine.addArgument(PARAM_BATCHSIZE);
 		cmdLine.addArgument(PARAM_PROGRESS);
 	}
 
 	public String getVerb() { return VERB; }
 
+	protected boolean isConnectionRequired() { return false; }
+	
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
@@ -169,7 +171,7 @@ public class WbCopy
 
 		WbConnection targetCon = null;
 		WbConnection sourceCon = null;
-		if (targetProfile == null || aConnection.getProfile().isProfileForKey(targetKey))
+		if (targetProfile == null || (aConnection != null && aConnection.getProfile().isProfileForKey(targetKey)))
 		{
 			targetCon = aConnection;
 		}
@@ -197,7 +199,7 @@ public class WbCopy
 			}
 		}
 
-		if (sourceProfile == null || aConnection.getProfile().isProfileForKey(sourceKey))
+		if (sourceProfile == null || (aConnection != null && aConnection.getProfile().isProfileForKey(sourceKey)))
 		{
 			sourceCon = aConnection;
 		}
@@ -232,7 +234,6 @@ public class WbCopy
 		boolean cont = cmdLine.getBoolean(PARAM_CONTINUE);
 		boolean createTable = cmdLine.getBoolean(PARAM_CREATETARGET);
 		boolean dropTable = cmdLine.getBoolean(PARAM_DROPTARGET);
-		boolean useBatch = cmdLine.getBoolean(PARAM_USEBATCH);
 		String keys = cmdLine.getValue(PARAM_KEYS);
 
 		this.copier = new DataCopier();
@@ -250,7 +251,7 @@ public class WbCopy
 		copier.setReportInterval(cmdLine.getIntValue(PARAM_PROGRESS,10));
 		copier.setRowActionMonitor(this.rowMonitor);
 		copier.setContinueOnError(cont);
-		copier.setCommitEvery(commit);
+		
 		
 		int queueSize = cmdLine.getIntValue(PARAM_BATCHSIZE,-1);
 		
@@ -258,6 +259,26 @@ public class WbCopy
 		{
 			copier.setUseBatch(true);
 			copier.setBatchSize(queueSize);
+			
+			if (cmdLine.isArgPresent(PARAM_COMMITBATCH))
+			{
+				copier.setCommitBatch(cmdLine.getBoolean(PARAM_COMMITBATCH, false));
+				if (cmdLine.isArgPresent(PARAM_COMMITEVERY))
+				{
+					result.addMessage(ResourceMgr.getString("MsgCommitEveryIgnored"));
+				}
+			}
+			else
+			{
+				if (cmdLine.isArgPresent(PARAM_COMMITEVERY))
+				{
+					result.addMessage(ResourceMgr.getString("MsgCommitEveryWrong"));
+				}
+			}
+		}
+		else
+		{
+			copier.setCommitEvery(commit);
 		}
 		
 		copier.setDeleteTarget(delete);

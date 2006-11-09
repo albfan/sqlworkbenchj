@@ -172,6 +172,10 @@ public class CompletionPopup
 		this.searchField = null;
 		this.scroll.setColumnHeaderView(this.headerComponent);
 		this.headerComponent.doLayout();
+		if (Settings.getInstance().getCloseAutoCompletionWithSearch())
+		{
+			this.closePopup(false);
+		}
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()

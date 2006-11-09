@@ -59,6 +59,7 @@ import workbench.gui.actions.FilterDataAction;
 import workbench.gui.actions.FilterPickerAction;
 import workbench.gui.actions.ImportClipboardAction;
 import workbench.gui.actions.ResetFilterAction;
+import workbench.gui.actions.SelectionFilterAction;
 import workbench.gui.actions.ViewMessageLogAction;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.WbTabbedPane;
@@ -213,6 +214,7 @@ public class SqlPanel
 	protected DeleteRowAction deleteRow;
 	protected SelectKeyColumnsAction selectKeys;
 	protected FilterDataAction filterAction;
+	protected SelectionFilterAction selectionFilterAction;
 	protected FilterPickerAction filterPicker;
 	protected ResetFilterAction resetFilterAction;
 	protected OptimizeAllColumnsAction optimizeAllCol;
@@ -662,10 +664,13 @@ public class SqlPanel
 		this.toolbarActions.add(this.deleteRow);
 		
 		this.filterAction = new FilterDataAction(null); 
+		this.selectionFilterAction = new SelectionFilterAction();
 		this.filterPicker = new FilterPickerAction(null);
 
 		filterAction.setCreateToolbarSeparator(true);
 		filterAction.setCreateMenuSeparator(true);
+		this.selectionFilterAction.setCreateToolbarSeparator(true);
+		this.toolbarActions.add(selectionFilterAction);
 		this.toolbarActions.add(filterAction);
 		this.toolbarActions.add(filterPicker);
 		this.resetFilterAction = new ResetFilterAction(null);
@@ -710,7 +715,7 @@ public class SqlPanel
 		this.actions.add(this.findDataAction);
 		this.actions.add(this.findDataAgainAction);
 		this.actions.add(filterAction);
-		
+		this.actions.add(selectionFilterAction);
 		this.actions.add(this.resetFilterAction );
 		
 		this.printDataAction.setCreateMenuSeparator(true);
@@ -1972,6 +1977,7 @@ public class SqlPanel
 			this.filterAction.setOriginal(null);
 			this.filterPicker.setClient(null);
 			this.resetFilterAction.setOriginal(null);
+			this.selectionFilterAction.setClient(null);
 		}
 		else
 		{
@@ -1998,6 +2004,7 @@ public class SqlPanel
 			this.filterAction.setOriginal(this.currentData.getTable().getFilterAction());
 			this.filterPicker.setClient(this.currentData.getTable());
 			this.resetFilterAction.setOriginal(this.currentData.getTable().getResetFilterAction());
+			this.selectionFilterAction.setClient(this.currentData.getTable());
 		}
 	}
 
@@ -2188,8 +2195,7 @@ public class SqlPanel
 			msg = StringUtil.replace(msg, "%total%", Integer.toString(count));
 			finishedMsg2.append(msg);
 			
-			StringBuffer finishedMsg = new StringBuffer(finishedMsg1.length() + finishedMsg2.length() + 5);
-			String currentMsg = null;
+			final int finishedSize = finishedMsg1.length() + finishedMsg2.length() + 5;
 
 			boolean onErrorAsk = !Settings.getInstance().getIgnoreErrors();
 
@@ -2212,14 +2218,13 @@ public class SqlPanel
 			int executedCount = 0;
 			String currentSql = null;
 			
-			StringBuffer logmsg = new StringBuffer(100);
+			
 			int resultSets = 0;
 			this.ignoreStateChange = false;
 			this.macroExecution = false;
 			
 			for (int i=startIndex; i < endIndex; i++)
 			{
-				logmsg.delete(0,logmsg.length());
 				currentSql = scriptParser.getCommand(i);
 
 				// By calling yield() we make sure that
@@ -2252,16 +2257,16 @@ public class SqlPanel
 				// so it needs to be checked each time.
 				if (count > 1) logWasCompressed = logWasCompressed || !this.stmtRunner.getVerboseLogging();
 				
-				finishedMsg.delete(0, finishedMsg.length());
+				StringBuffer finishedMsg = new StringBuffer(finishedSize);
 				finishedMsg.append(finishedMsg1);
 				finishedMsg.append(i + 1);
 				finishedMsg.append(finishedMsg2);
-				currentMsg = finishedMsg.toString();
+				String currentMsg = finishedMsg.toString();
 
 				if (!logWasCompressed)
 				{
-					StringBuffer b = statementResult.getMessageBuffer();
-					if (b != null) logmsg.append(b);
+					showResultMessage(statementResult);
+					StringBuffer logmsg = new StringBuffer(100);
 					String timing = statementResult.getTimingMessage();
 					if (timing != null) 
 					{
@@ -2458,6 +2463,38 @@ public class SqlPanel
 		}
 	}
 
+	private void showResultMessage(StatementRunnerResult result)
+	{
+		if (result.getMessageBuffer() == null) return;
+		try
+		{
+			this.appendToLog(result.getMessageBuffer().toString() + "\n");
+		}
+		catch (OutOfMemoryError oome)
+		{
+			result.clearMessageBuffer();
+			System.gc();
+			final boolean success = result.isSuccess();
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					if (success)
+					{
+						log.append(ResourceMgr.getString("ErrLogNoMemSuccess"));
+					}
+					else
+					{
+						log.append(ResourceMgr.getString("ErrLogNoMemError"));
+					}
+					log.append("\n");
+					log.append(ResourceMgr.getString("ErrLogNoMemCheckLog"));
+					log.append("\n");
+					log.setCaretPosition(log.getDocument().getLength());
+				}
+			});
+		}
+	}
 	private DwPanel createDwPanel()
 		throws SQLException
 	{
@@ -2609,7 +2646,8 @@ public class SqlPanel
 		{
 			if (Settings.getInstance().getUseAnimatedIcon())
 			{
-				this.loadingIcon = ResourceMgr.getPicture("loading");
+				String name = Settings.getInstance().getProperty("workbench.gui.animatedicon.name", "loading");
+				this.loadingIcon = ResourceMgr.getPicture(name);
 			}
 			else
 			{

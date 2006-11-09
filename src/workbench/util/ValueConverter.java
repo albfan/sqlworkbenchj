@@ -52,6 +52,11 @@ public class ValueConverter
 														"MM/dd/yy HH:mm:ss",
 														"MM/dd/yyyy HH:mm:ss.SS",
 														"MM/dd/yyyy HH:mm:ss",
+														"yyyy-MM-dd",
+														"dd.MM.yyyy",
+														"MM/dd/yy",
+														"MM/dd/yyyy",
+														"dd-MMM-yyyy"
 													};
 
 	private static final String[] timeFormats = new String[] { "HH:mm:ss.SS", "HH:mm:ss", "HH:mm" };
@@ -279,13 +284,14 @@ public class ValueConverter
 			}
 			catch (Exception e)
 			{
-				LogMgr.logWarning("ValueConverter.parseTimestamp()", "Could not parse '" + aDate + "' using " + this.timestampFormatter.toPattern(),e);
+				LogMgr.logWarning("ValueConverter.parseTimestamp()", "Could not parse '" + aDate + "' using " + this.timestampFormatter.toPattern() + ". Trying to recognize the format", null);
 				result = null;
 			}
 		}
 		
 		if (result == null)
 		{
+			int usedPattern = -1;
 			synchronized (this.formatter)
 			{
 				for (int i=0; i < dateFormats.length; i++)
@@ -294,6 +300,7 @@ public class ValueConverter
 					{
 						this.formatter.applyPattern(timestampFormats[i]);
 						result = this.formatter.parse(aDate);
+						usedPattern = i;
 						break;
 					}
 					catch (Exception e)
@@ -301,6 +308,10 @@ public class ValueConverter
 						result = null;
 					}
 				}
+			}
+			if (usedPattern > -1)
+			{
+				LogMgr.logWarning("ValueConverter.parseTimestamp()", "Succeeded parsing '" + aDate + "' using the format: " + timestampFormats[usedPattern]);
 			}
 		}
 		
@@ -327,6 +338,7 @@ public class ValueConverter
 			}
 			catch (Exception e)
 			{
+				LogMgr.logWarning("ValueConverter.parseDate()", "Could not parse '" + aDate + "' using " + this.dateFormatter.toPattern() + ". Trying to recognize the format...", null);
 				result = null;
 			}
 		}
@@ -345,6 +357,7 @@ public class ValueConverter
 
 		if (result == null)
 		{
+			int usedPattern = -1;
 			synchronized (this.formatter)
 			{
 				for (int i=0; i < dateFormats.length; i++)
@@ -353,6 +366,7 @@ public class ValueConverter
 					{
 						this.formatter.applyPattern(dateFormats[i]);
 						result = this.formatter.parse(aDate);
+						usedPattern = i;
 						break;
 					}
 					catch (Exception e)
@@ -360,6 +374,10 @@ public class ValueConverter
 						result = null;
 					}
 				}
+			}
+			if (usedPattern > -1)
+			{
+				LogMgr.logWarning("ValueConverter.parseDate()", "Succeeded parsing '" + aDate + "' using the format: " + dateFormats[usedPattern]);
 			}
 		}
 
@@ -369,8 +387,6 @@ public class ValueConverter
 		}
 		return null;
   }
-
-	//private static Pattern DECIMAL = Pattern.compile("^[-+]?\\d+\\.?\\d*e?\\d*$");
 
 	private String adjustDecimalString(String input)
 	{

@@ -682,8 +682,34 @@ public class Settings
 		}
 		String val = 	StringUtil.listToString(servers, ',');
 		setProperty("workbench.db.ddlneedscommit", val);
+		
+		// Fix incorrectly distributed defaults
+		String defaultSelectable = getProperty("workbench.db.objecttype.selectable.default", null);
+		if (defaultSelectable != null)
+		{
+			List types = StringUtil.stringToList(defaultSelectable.toLowerCase(), ",", true, true, false);
+			if (!types.contains("synonym"))
+			{
+				types.add("synonym");
+				setProperty("workbench.db.objecttype.selectable.default", StringUtil.listToString(types, ','));
+			}
+		}
+		upgradeListProp("workbench.db.oracle.syntax.functions");
 	}
 
+	private void upgradeListProp(String key)
+	{
+		String currentValue = getProperty(key, "");
+		List currentList = StringUtil.stringToList(currentValue, ",", true, true, false);
+		
+		WbProperties defProps = getDefaultProperties();
+		String defValue = defProps.getProperty(key, "");
+		List defList = StringUtil.stringToList(defValue, ",", true, true, false);
+		
+		currentList.addAll(defList);
+		this.setProperty(key, StringUtil.listToString(currentList,','));
+	}
+	
 	private void renameOldProps()
 	{
 		this.renameProperty("workbench.sql.maxcolwidth","workbench.gui.optimalwidth.maxsize");
@@ -735,6 +761,7 @@ public class Settings
 			this.props.remove("workbench.sql.search.wholeword");
 			this.props.remove("workbench.sql.search.lastvalue");
 			this.props.remove("workbench.dbexplorer.rememberSchema");
+			this.props.remove("workbench.db.postgres.select.startstransaction");
 
 			// not needed any longer
 			this.props.remove("workbench.db.oracle.quotedigits");
@@ -747,6 +774,20 @@ public class Settings
 		}
 	}
 
+	private WbProperties getDefaultProperties()
+	{
+		WbProperties defProps = new WbProperties();
+		try
+		{
+			defProps.load(ResourceMgr.getDefaultSettings());
+		}
+		catch (IOException e)
+		{
+			LogMgr.logError(this, "Could not read default settings", e);
+		}
+		return defProps;
+	}
+	
 	private void fillDefaults()
 	{
 		WbManager.trace("Setting.fillDefaults() - start");
@@ -1627,6 +1668,16 @@ public class Settings
 		this.props.setProperty("workbench.drivers.lastlibdir", aDir);
 	}
 
+	public boolean getStoreFilesInHistory()
+	{
+		return getBoolProperty("workbench.sql.history.includefiles", true);
+	}
+	
+	public void getStoreFilesInHistory(boolean flag)
+	{
+		setProperty("workbench.sql.history.includefiles", flag);
+	}
+	
 	public int getMaxHistorySize()
 	{
 		return getIntProperty("workbench.sql.historysize", 15);

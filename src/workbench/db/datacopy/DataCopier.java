@@ -403,6 +403,11 @@ public class DataCopier
 	{
 		this.importer.setUseBatch(flag);
 	}
+
+	public void setCommitBatch(boolean flag)
+	{
+		this.importer.setCommitBatch(flag);
+	}
 	
 	public void setBatchSize(int size) 
 	{
@@ -735,7 +740,7 @@ public class DataCopier
 
 	public String getAllMessages()
 	{
-		StringBuffer log = new StringBuffer(250);
+		StringBuffer log = new StringBuffer(2000);
 
 		// No need to append our messages, as the importer will
 		// store any message from its source (that's us)

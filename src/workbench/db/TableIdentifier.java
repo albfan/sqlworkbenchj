@@ -85,11 +85,30 @@ public class TableIdentifier
 		this.preserveQuotes = flag;
 	}
 	
+	public boolean getNeverAdjustCase() 
+	{
+		return this.neverAdjustCase;
+	}
+	
 	public void setNeverAdjustCase(boolean flag)
 	{
 		this.neverAdjustCase = flag;
 	}
 
+	public void checkQuotesNeeded(WbConnection con)
+	{
+		if (con == null) return;
+		DbMetadata meta = con.getMetadata();
+		this.schemaWasQuoted = !meta.isDefaultCase(this.schema);
+		this.catalogWasQuoted = !meta.isDefaultCase(this.catalog);
+		this.tableWasQuoted = !meta.isDefaultCase(this.tablename);
+		this.preserveQuotes = (this.schemaWasQuoted || this.catalogWasQuoted || this.tableWasQuoted );
+		if (!preserveQuotes)
+		{
+			this.setNeverAdjustCase(false);
+		}
+	}
+	
 	public TableIdentifier createCopy()
 	{
 		TableIdentifier copy = new TableIdentifier();
@@ -100,6 +119,11 @@ public class TableIdentifier
 		copy.catalog = this.catalog;
 		copy.expression = null;
 		copy.neverAdjustCase = this.neverAdjustCase;
+		copy.tableWasQuoted = this.tableWasQuoted;
+		copy.catalogWasQuoted = this.catalogWasQuoted;
+		copy.schemaWasQuoted = this.schemaWasQuoted;
+		copy.showOnlyTableName = this.showOnlyTableName;
+		copy.preserveQuotes = this.preserveQuotes;
 		copy.type = this.type;
 		return copy;
 	}
@@ -226,6 +250,10 @@ public class TableIdentifier
 		result.append(this.tablename);
 		return result.toString();
 	}
+	
+	String getRawCatalog() { return this.catalog; }
+	String getRawTableName() { return this.tablename; }
+	String getRawSchema() { return this.schema; }
 	
 	public String getTableName() 
 	{ 

@@ -81,15 +81,14 @@ public class BatchRunner
 	public BatchRunner(String aFilelist)
 	{
 		this.files = StringUtil.stringToList(aFilelist, ",", true);
+		this.stmtRunner = new DefaultStatementRunner();
+		this.stmtRunner.setFullErrorReporting(true);
 	}
 
 	public void setBaseDir(String dir) 
 	{ 
 		baseDir = dir; 
-		if (this.stmtRunner != null)
-		{
-			this.stmtRunner.setBaseDir(dir);
-		}
+		this.stmtRunner.setBaseDir(dir);
 	}
 
 	public WbConnection getConnection() 
@@ -100,7 +99,7 @@ public class BatchRunner
 	public void setParameterPrompter(ParameterPrompter p)
 	{
 		this.prompter = p;
-		if (this.stmtRunner != null) this.stmtRunner.setParameterPrompter(p);
+		this.stmtRunner.setParameterPrompter(p);
 	}
 	
 	public void showResultSets(boolean flag)
@@ -111,10 +110,7 @@ public class BatchRunner
 	public void setVerboseLogging(boolean flag)
 	{
 		this.verboseLogging = flag;
-		if (this.stmtRunner != null)
-		{
-			this.stmtRunner.setVerboseLogging(flag);
-		}
+		this.stmtRunner.setVerboseLogging(flag);
 		this.showTiming = this.verboseLogging;
 	}
 
@@ -141,13 +137,7 @@ public class BatchRunner
 	public void setConnection(WbConnection conn)
 	{
 		this.connection = conn;
-		this.stmtRunner = new DefaultStatementRunner();
 		this.stmtRunner.setConnection(this.connection);
-		this.stmtRunner.setVerboseLogging(this.verboseLogging);
-		this.stmtRunner.setBaseDir(this.baseDir);
-		this.stmtRunner.setFullErrorReporting(true);
-		this.stmtRunner.setRowMonitor(this.rowMonitor);
-		this.stmtRunner.setParameterPrompter(this.prompter);
 	}
 
 	public void connect()
@@ -155,7 +145,9 @@ public class BatchRunner
 	{
 		if (this.profile == null)
 		{
-			LogMgr.logError("BatchRunner.setProfile()", "Called with a <null> profile!", null);
+			// Allow batch run without a profile for e.g. running a single WbCopy
+			LogMgr.logWarning("BatchRunner.connect()", "Called without profile!", null);
+			success = true;
 			return;
 		}
 		
@@ -209,6 +201,7 @@ public class BatchRunner
 	public void setRowMonitor(RowActionMonitor mon)
 	{
 		this.rowMonitor = mon;
+		this.stmtRunner.setRowMonitor(this.rowMonitor);
 	}
 
 	public void execute()
@@ -311,8 +304,11 @@ public class BatchRunner
 		ScriptParser parser = new ScriptParser();
 		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
 		parser.setDelimiter(this.delimiter);
-		parser.setSupportOracleInclude(this.connection.getMetadata().supportSingleLineCommands());
-		parser.setCheckForSingleLineCommands(this.connection.getMetadata().supportShortInclude());
+		if (this.connection != null)
+		{
+			parser.setSupportOracleInclude(this.connection.getMetadata().supportSingleLineCommands());
+			parser.setCheckForSingleLineCommands(this.connection.getMetadata().supportShortInclude());
+		}
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		parser.setFile(scriptFile, this.encoding);
 		String sql = null;
@@ -355,11 +351,9 @@ public class BatchRunner
 				if (result.hasMessages() && (this.stmtRunner.getVerboseLogging() || !result.isSuccess()))
 				{
 					this.printMessage("");
-					String[] msg = result.getMessages();
-					for (int m=0; m < msg.length; m++)
-					{
-						this.printMessage(msg[m]);
-					}
+					// Force a new line for the console
+					if (this.resultDisplay == null) System.out.println("");
+					this.printMessage(result.getMessageBuffer().toString());
 				}
 				executedCount ++;
 
@@ -413,7 +407,7 @@ public class BatchRunner
 		msg.append(executedCount);
 		msg.append(' ');
 		msg.append(ResourceMgr.getString("MsgTotalStatementsExecuted"));
-		if (this.showProgress) this.printMessage("\n");
+		if (this.showProgress || this.resultDisplay == null) this.printMessage("\n");
 		this.printMessage(msg.toString());
 		parser.done();
 
@@ -570,11 +564,13 @@ public class BatchRunner
 			}
 		}
 
-		if (profile == null) return null;
 
-		boolean ignoreDrop = cmdLine.getBoolean(WbManager.ARG_IGNORE_DROP, true);
-		profile.setIgnoreDropErrors(ignoreDrop);
-
+		if (profile != null)
+		{
+			boolean ignoreDrop = cmdLine.getBoolean(WbManager.ARG_IGNORE_DROP, true);
+			profile.setIgnoreDropErrors(ignoreDrop);
+		}
+		
 		String success = cmdLine.getValue(WbManager.ARG_SUCCESS_SCRIPT);
 		String error = cmdLine.getValue(WbManager.ARG_ERROR_SCRIPT);
 

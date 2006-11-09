@@ -56,7 +56,6 @@ public class WbImport
 	public static final String ARG_FILECOLUMNS = "filecolumns";
 	public static final String ARG_MODE = "mode";
 	public static final String ARG_KEYCOLUMNS = "keycolumns";
-	public static final String ARG_USEBATCH = "usebatch";
 	public static final String ARG_BATCHSIZE = "batchsize";
 	public static final String ARG_DELETE_TARGET = "deletetarget";
 	public static final String ARG_EMPTY_STRING_IS_NULL = "emptystringnull";
@@ -73,7 +72,6 @@ public class WbImport
 	public static final String ARG_TRIM_VALUES = "trimvalues";
 	public static final String ARG_FILE_EXT = "extension";
 	public static final String ARG_UPDATE_WHERE = "updatewhere";
-//	public static final String ARG_IGNORE_SCHEMA = "ignoreschema";
 	public static final String ARG_TRUNCATE_TABLE = "truncatetable";
 	public static final String ARG_CREATE_TABLE = "createtarget";
 	public static final String ARG_BLOB_ISFILENAME = "blobisfilename";
@@ -103,7 +101,6 @@ public class WbImport
 		cmdLine.addArgument(ARG_FILECOLUMNS);
 		cmdLine.addArgument(ARG_MODE);
 		cmdLine.addArgument(ARG_KEYCOLUMNS);
-		cmdLine.addArgument(ARG_USEBATCH);
 		cmdLine.addArgument(ARG_BATCHSIZE);
 		cmdLine.addArgument(ARG_DELETE_TARGET);
 		cmdLine.addArgument(ARG_EMPTY_STRING_IS_NULL);
@@ -539,7 +536,7 @@ public class WbImport
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("WbImport.execute()", "Error importing '" + filename +"': " + e.getMessage(), e);
+			LogMgr.logError("WbImport.execute()", "Error importing '" + filename, e);
 			result.setFailure();
 		}
 		catch (ParsingInterruptedException e)
@@ -553,7 +550,7 @@ public class WbImport
 			result.setFailure();
 			result.addMessage(ExceptionUtil.getDisplay(e));
 		}
-		result.addMessage(imp.getMessages().trim());
+		result.addMessage(imp.getMessages());
 
 		return result;
 	}

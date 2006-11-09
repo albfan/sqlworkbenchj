@@ -13,7 +13,8 @@ import workbench.sql.wbcommands.WbSelectBlob;
  * ANSI-SQL token marker.
  *
  */
-public class AnsiSQLTokenMarker extends SQLTokenMarker
+public class AnsiSQLTokenMarker 
+	extends SQLTokenMarker
 {
 	// public members
 	public AnsiSQLTokenMarker()
@@ -145,6 +146,8 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("TRIGGER",Token.KEYWORD1);
 		keywords.add("TRUNCATE",Token.KEYWORD1);
 		keywords.add("UNION",Token.KEYWORD1);
+		keywords.add("MINUS",Token.KEYWORD1);
+		keywords.add("INTERSECT",Token.KEYWORD1);
 		keywords.add("UNIQUE",Token.KEYWORD1);
 		keywords.add("UPDATE",Token.KEYWORD1);
 		keywords.add("VALUES",Token.KEYWORD1);
@@ -169,8 +172,8 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("WBFEEDBACK",Token.KEYWORD2);
 		keywords.add("WBINCLUDE",Token.KEYWORD2);
 		keywords.add("WBCOPY",Token.KEYWORD2);
-		keywords.add(WbDefineVar.DEFINE_LONG.getVerb(),Token.KEYWORD2);
-		keywords.add(WbDefineVar.DEFINE_SHORT.getVerb(),Token.KEYWORD2);
+		keywords.add(WbDefineVar.VERB_DEFINE_LONG,Token.KEYWORD2);
+		keywords.add(WbDefineVar.VERB_DEFINE_SHORT,Token.KEYWORD2);
 		keywords.add("WBVARLIST",Token.KEYWORD2);
 		keywords.add("WBVARDELETE",Token.KEYWORD2);
 		keywords.add("WBSTARTBATCH",Token.KEYWORD2);
@@ -198,6 +201,8 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("float",Token.KEYWORD1);
 		keywords.add("image",Token.KEYWORD1);
 		keywords.add("int",Token.KEYWORD1);
+		keywords.add("int4",Token.KEYWORD1);
+		keywords.add("int8",Token.KEYWORD1);
 		keywords.add("integer",Token.KEYWORD1);
 		keywords.add("money",Token.KEYWORD1);
 		//keywords.add("name",Token.KEYWORD1);
@@ -270,7 +275,6 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("CROSS",Token.KEYWORD1);
 		keywords.add("EXISTS",Token.KEYWORD1);
 		keywords.add("IN",Token.KEYWORD1);
-		keywords.add("INTERSECT",Token.KEYWORD1);
 		keywords.add("JOIN",Token.KEYWORD1);
 		keywords.add("LIKE",Token.KEYWORD1);
 		keywords.add("NOT",Token.KEYWORD1);

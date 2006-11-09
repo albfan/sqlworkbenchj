@@ -146,10 +146,11 @@ public class TableListPanel
 
 	private MainWindow parentWindow;
 
-	private String selectedCatalog;
-	private String selectedSchema;
-	private String selectedTableName;
+//	private String selectedCatalog;
+//	private String selectedSchema;
+//	private String selectedTableName;
 	private String selectedObjectType;
+	private TableIdentifier selectedTable;
 
 	private boolean shiftDown = false;
 	protected boolean shouldRetrieve;
@@ -1004,10 +1005,15 @@ public class TableListPanel
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
 
-		this.selectedCatalog = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
-		this.selectedSchema = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-		this.selectedTableName = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+		String catalog = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
+		String schema = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+		String table = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 		this.selectedObjectType = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE).toLowerCase();
+		
+		this.selectedTable = new TableIdentifier(catalog, schema, table);
+		this.selectedTable.checkQuotesNeeded(this.dbConnection);
+		this.selectedTable.setNeverAdjustCase(true);
+		this.selectedTable.setType(selectedObjectType);
 
 		this.invalidateData();
 
@@ -1036,9 +1042,7 @@ public class TableListPanel
 
 		this.tableData.reset();
 		this.tableData.setReadOnly(!maybeUpdateable(this.selectedObjectType));
-		TableIdentifier id = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-		id.setNeverAdjustCase(true);
-		this.tableData.setTable(id);
+		this.tableData.setTable(this.selectedTable);
 
 		this.setShowDataMenuStatus(this.isTableType(selectedObjectType));
 
@@ -1082,15 +1086,13 @@ public class TableListPanel
 				this.shouldRetrieveIndexes = true;
 				this.shouldRetrieveImportedTree = true;
 			}
-			TableIdentifier tbl = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-			tbl.setType(this.selectedObjectType);
 			if (meta.isViewType(this.selectedObjectType))
 			{
-				sql = meta.getExtendedViewSource(tbl, tableDefinition.getDataStore(), true);
+				sql = meta.getExtendedViewSource(this.selectedTable, tableDefinition.getDataStore(), true);
 			}
 			else if (meta.isSynonymType(this.selectedObjectType))
 			{
-				sql = meta.getSynonymSource(this.selectedSchema, this.selectedTableName);
+				sql = meta.getSynonymSource(this.selectedTable.getSchema(), selectedTable.getTableName());
 				if (sql.length() == 0)
 				{
 					sql = ResourceMgr.getString("MsgSynonymSourceNotImplemented") + " " + meta.getProductName();
@@ -1098,7 +1100,7 @@ public class TableListPanel
 			}
 			else if ("sequence".equals(this.selectedObjectType))
 			{
-				sql = meta.getSequenceSource(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+				sql = meta.getSequenceSource(this.selectedTable.getCatalog(), this.selectedTable.getSchema(), this.selectedTable.getTableName());
 				if (sql.length() == 0)
 				{
 					sql = ResourceMgr.getString("MsgSequenceSourceNotImplemented") + " " + meta.getProductName();
@@ -1111,7 +1113,7 @@ public class TableListPanel
 				// passed to getTableSource() would be empty
 				if (this.shouldRetrieveIndexes) this.retrieveIndexes();
 				if (this.shouldRetrieveImportedTree) this.retrieveImportedTables();
-				sql = meta.getTableSource(tbl, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore(), true);
+				sql = meta.getTableSource(selectedTable, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore(), true);
 			}
 			final String s = sql;
 			EventQueue.invokeLater(new Runnable()
@@ -1149,9 +1151,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			TableIdentifier table = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-			table.setType(this.selectedObjectType);
-			this.tableDefinition.retrieve(table, this.selectedObjectType);
+			this.tableDefinition.retrieve(selectedTable, this.selectedObjectType);
 			this.shouldRetrieveTable = false;
 			shouldRetrieveTable = false;
 		}
@@ -1354,6 +1354,10 @@ public class TableListPanel
 		finally
 		{
 			this.dbConnection.executionEnd(null, this);
+			if (this.dbConnection.selectStartsTransaction() && !this.dbConnection.getAutoCommit())
+			{
+				try { this.dbConnection.commit(); } catch (Throwable th) {}
+			}
 			this.setBusy(false);
 			this.repaint();
 			closeInfoWindow();
@@ -1385,7 +1389,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showDefaultCursor(this);
-			triggers.readTriggers(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+			triggers.readTriggers(this.selectedTable);
 			this.shouldRetrieveTriggers = false;
 		}
 		catch (Throwable th)
@@ -1407,8 +1411,7 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			DbMetadata meta = this.dbConnection.getMetadata();
-			TableIdentifier tbl = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-			DataStore ds = meta.getTableIndexInformation(tbl);
+			DataStore ds = meta.getTableIndexInformation(selectedTable);
 			DataStoreTableModel model = new DataStoreTableModel(ds);
 			indexes.setModel(model, true);
 			indexes.adjustColumns();
@@ -1432,7 +1435,7 @@ public class TableListPanel
 		try
 		{
 			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(this.selectedCatalog, this.selectedSchema, this.selectedTableName));
+			DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(this.selectedTable));
 			exportedKeys.setModel(model, true);
 			exportedKeys.adjustColumns();
 			this.shouldRetrieveExportedKeys = false;
@@ -1452,7 +1455,7 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(this.selectedCatalog, this.selectedSchema, this.selectedTableName, false));
+			DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(this.selectedTable, false));
 			importedKeys.setModel(model, true);
 			importedKeys.adjustColumns();
 			this.shouldRetrieveImportedKeys = false;
@@ -1474,8 +1477,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			TableIdentifier id = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-			importedTableTree.readTree(id, false);
+			importedTableTree.readTree(selectedTable, false);
 			this.shouldRetrieveImportedTree = false;
 		}
 		catch (Throwable th)
@@ -1495,8 +1497,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			TableIdentifier id = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-			exportedTableTree.readTree(id, true);
+			exportedTableTree.readTree(selectedTable, true);
 			this.shouldRetrieveExportedTree = false;
 		}
 		catch (Throwable th)
@@ -1525,7 +1526,7 @@ public class TableListPanel
 
 	private String buildSqlForTable()
 	{
-		if (this.selectedTableName == null || this.selectedTableName.length() == 0) return null;
+		if (this.selectedTable == null) return null;
 
 		if (this.shouldRetrieveTable || this.tableDefinition.getRowCount() == 0)
 		{
@@ -1544,7 +1545,7 @@ public class TableListPanel
 		String sql = tableDefinition.getSelectForTable();
 		if (sql == null)
 		{
-			String msg = ResourceMgr.getString("ErrNoColumnsRetrieved").replaceAll("%table%", this.selectedTableName);
+			String msg = ResourceMgr.getString("ErrNoColumnsRetrieved").replaceAll("%table%", this.selectedTable.getTableName());
 			WbSwingUtilities.showErrorMessage(this, msg);
 		}
 		return sql;
@@ -1563,13 +1564,12 @@ public class TableListPanel
 		for (int i=0; i < count; i++)
 		{
 			int row = rows[i];
-			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-			String schema = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+			
 			String type = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
 
 			if (!"VIEW".equalsIgnoreCase(type)) continue;
 
-			TableIdentifier tbl = new TableIdentifier(schema,table);
+			TableIdentifier tbl = getTable(row);
 			names.add(tbl.getTableExpression());
 			types.add(type);
 		}
@@ -1696,7 +1696,8 @@ public class TableListPanel
 		for (int i=0; i < count; i ++)
 		{
 			String name = this.indexes.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
-			names.add(this.selectedSchema + "." + name);
+			String schema = (this.selectedTable == null ? null : this.selectedTable.getSchema());
+			names.add((schema == null ? name : schema + "." + name));
 			types.add("INDEX");
 		}
 		ObjectDropperUI dropperUI = new ObjectDropperUI();
@@ -1766,6 +1767,21 @@ public class TableListPanel
 		this.tableListClients.remove(aClient);
 	}
 
+	/**
+	 * Return a TableIdentifier for the given row number in the table list
+	 */
+	private TableIdentifier getTable(int row)
+	{
+		String name = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+		String schema = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+		String catalog = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
+		String type = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+		TableIdentifier tbl = new TableIdentifier(catalog, schema, name);
+		tbl.setType(type);
+		tbl.setNeverAdjustCase(true);
+		return tbl;
+	}
+	
 	private void deleteTables()
 	{
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
@@ -1780,11 +1796,7 @@ public class TableListPanel
 		{
 			String type = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
 			if (!"table".equalsIgnoreCase(type) && !"view".equalsIgnoreCase(type)) continue;
-
-			String name = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-			String schema = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-			String catalog = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
-			TableIdentifier tbl = new TableIdentifier(catalog, schema, name);
+			TableIdentifier tbl = getTable(rows[i]);
 			names.add(tbl);
 		}
 		TableDeleterUI deleter = new TableDeleterUI();
@@ -1804,12 +1816,10 @@ public class TableListPanel
 		for (int i=0; i < count; i++)
 		{
 			int row = rows[i];
-			String owner = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-			TableIdentifier tbl = new TableIdentifier(owner, table);
-
-			String type = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-			tables.put(tbl.getTableExpression(this.dbConnection), type.toLowerCase());
+			
+			TableIdentifier tbl = getTable(row);
+			tbl.setCatalog(null);
+			tables.put(tbl, tbl.getType());
 		}
 		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
 		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
@@ -1824,17 +1834,8 @@ public class TableListPanel
 		HashMap tables = new HashMap(count);
 		for (int i=0; i < count; i++)
 		{
-			int row = rows[i];
-			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-			String schema = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-			if (schema != null)
-			{
-				tables.put(schema + "." + table, ObjectScripter.TYPE_INSERT);
-			}
-			else
-			{
-				tables.put(table, ObjectScripter.TYPE_INSERT);
-			}
+			TableIdentifier tbl = getTable(rows[i]);
+			tables.put(tbl, ObjectScripter.TYPE_INSERT);
 		}
 		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
 		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
@@ -1849,17 +1850,8 @@ public class TableListPanel
 		HashMap tables = new HashMap(count);
 		for (int i=0; i < count; i++)
 		{
-			int row = rows[i];
-			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-			String schema = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-			if (schema != null)
-			{
-				tables.put(schema + "." + table, ObjectScripter.TYPE_SELECT);
-			}
-			else
-			{
-				tables.put(table, ObjectScripter.TYPE_SELECT);
-			}
+			TableIdentifier tbl = getTable(rows[i]);
+			tables.put(tbl, ObjectScripter.TYPE_SELECT);
 		}
 		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
 		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
@@ -1879,15 +1871,11 @@ public class TableListPanel
 
 		for (int i=0; i < count; i ++)
 		{
-			String name = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-			String schema = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-			String type = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-
-			TableIdentifier id = new TableIdentifier(schema, name);
+			TableIdentifier id = getTable(rows[i]);
+			id.setNeverAdjustCase(true);
 			String table = id.getTableExpression(this.dbConnection);
-
 			names.add(table);
-			types.add(type);
+			types.add(id.getType());
 		}
 
 		ObjectDropperUI dropperUI = new ObjectDropperUI();
@@ -1917,9 +1905,7 @@ public class TableListPanel
 		for (int i=0; i < count; i++)
 		{
 			int row = rows[i];
-			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-			String schema = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-			result[i] = new TableIdentifier(schema, table);
+			result[i] = getTable(rows[i]);
 		}
 		return result;
 	}
@@ -1986,9 +1972,7 @@ public class TableListPanel
 
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
-		String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-		String schema = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-		TableIdentifier id = new TableIdentifier(schema, table);
+		TableIdentifier id = getTable(row);
 		DataExporter exporter = new DataExporter(this.dbConnection);
 		exporter.setProgressInterval(10);
 		exporter.exportTable(SwingUtilities.getWindowAncestor(this), id);
@@ -2036,15 +2020,12 @@ public class TableListPanel
 			for (int i = 0; i < rows.length; i ++)
 			{
 				if (rows[i] < 0) continue;
-				String table = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-				if (table == null) continue;
+				TableIdentifier id = getTable(rows[i]);
 
-				String ttype = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+				String ttype = id.getType();
 				if (ttype == null) continue;
 				if (!this.isTableType(ttype.toLowerCase())) continue;
-				String schema = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-				TableIdentifier id = new TableIdentifier(schema, table);
-				String fname = StringUtil.makeFilename(table);
+				String fname = StringUtil.makeFilename(id.getTableName());
 				File f = new File(fdir, fname + ext);
 				try
 				{

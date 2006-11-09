@@ -524,13 +524,6 @@ public class WbTable
 		boolean update = false;
 		boolean insert = false;
 
-//		if (selected)
-//		{
-//			DataStore ds = this.getDataStore();
-//			update = (ds == null ? false : ds.hasPkColumns());
-//			insert = (ds == null ? false : ds.canSaveAsSqlInsert());
-//		}
-
 		if (this.copySelectedAsTextAction != null)
 		{
 			this.copySelectedAsTextAction.setEnabled(selected);
@@ -859,6 +852,12 @@ public class WbTable
 	private FilterExpression lastFilter;
 	private FilterExpression currentFilter;
 
+	public void clearLastFilter(boolean keepGeneralFilter)
+	{
+		if (keepGeneralFilter && this.lastFilter != null && !this.lastFilter.isColumnSpecific()) return;
+		this.lastFilter = null;
+	}
+	
 	public void resetFilter()
 	{
 		this.currentFilter = null;
@@ -932,39 +931,6 @@ public class WbTable
 	{
 		this.adjustToColumnLabel = aFlag;
 	}
-
-	public int getSortColum()
-	{
-		if (this.dwModel == null) return -1;
-		return this.dwModel.getSortColumn();
-	}
-
-//	public void setShowRowNumbers(boolean flag)
-//	{
-//		if (flag == this.showRowNumbers) return;
-//		this.showRowNumbers = flag;
-//		updateRowHeader();
-//	}
-
-//	private JTable rowHeaderTable;
-//
-//	private void updateRowHeader()
-//	{
-//		if (this.scrollPane == null) return;
-//
-//		if (this.showRowNumbers && this.dwModel != null && this.getRowCount() > 0)
-//		{
-//			// Only show row numbers for "proper" data
-//			RowNumberTableModel model = new RowNumberTableModel(this);
-//			this.rowHeaderTable = new RowNumberTable(model);
-//			this.scrollPane.setRowHeaderView(this.rowHeaderTable);
-//		}
-//		else
-//		{
-//			this.rowHeaderTable = null;
-//			this.scrollPane.setRowHeaderView(null);
-//		}
-//	}
 
 	public void setShowStatusColumn(boolean aFlag)
 	{
@@ -1075,18 +1041,25 @@ public class WbTable
 		super.repaint();
 	}
 
-	public int getSortedViewColumnIndex()
+	public boolean isPrimarySortColumn(int viewIndex)
 	{
-		if (this.dwModel == null) return -1;
-		int modelIndex = this.dwModel.getSortColumn();
-		int viewIndex = this.convertColumnIndexToView(modelIndex);
-		return viewIndex;
+		if (this.dwModel == null) return false;
+		int col = this.convertColumnIndexToModel(viewIndex);
+		return this.dwModel.isPrimarySortColumn(col);
 	}
-
-	public boolean isSortedColumnAscending()
+	
+	public boolean isViewColumnSorted(int viewIndex)
+	{
+		if (this.dwModel == null) return false;
+		int col = this.convertColumnIndexToModel(viewIndex);
+		return this.dwModel.isSortColumn(col);
+	}
+	
+	public boolean isViewColumnSortAscending(int viewIndex)
 	{
 		if (this.dwModel == null) return true;
-		return this.dwModel.isSortAscending();
+		int col = this.convertColumnIndexToModel(viewIndex);
+		return this.dwModel.isSortAscending(col);
 	}
 
 	public void sortingStarted()
@@ -1148,7 +1121,7 @@ public class WbTable
 			start = this.lastFoundRow  + 1;
 		}
 
-		DataPrinter printer = new DataPrinter(getDataStore());
+		DataPrinter printer = new DataPrinter(getDataStore(), false);
 		
 		int rowCount = this.dwModel.getRowCount();
 		for (int i=start; i < rowCount; i++)
@@ -1661,10 +1634,18 @@ public class WbTable
 			TableColumnModel colMod = this.getColumnModel();
 			int viewColumn = colMod.getColumnIndexAtX(e.getX());
 			int realColumn = this.convertColumnIndexToModel(viewColumn);
-
+			boolean addSortColumn = e.isControlDown(); //(e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
 			if (realColumn >= 0)
 			{
-				this.dwModel.sortInBackground(this, realColumn);
+				if (e.isShiftDown())
+				{
+					this.dwModel.removeSortColumn(realColumn);
+					this.repaint();
+				}
+				else
+				{
+					this.dwModel.sortInBackground(this, realColumn, addSortColumn);
+				}
 			}
 		}
 	}
@@ -1725,11 +1706,11 @@ public class WbTable
 		int column = getPopupColumnIndex();
 		if (e.getSource() == this.sortAscending && this.dwModel != null)
 		{
-			this.dwModel.sortInBackground(this, column, true);
+			this.dwModel.sortInBackground(this, column, true, false);
 		}
 		else if (e.getSource() == this.sortDescending && this.dwModel != null)
 		{
-			this.dwModel.sortInBackground(this, column, false);
+			this.dwModel.sortInBackground(this, column, false, false);
 		}
 		else if (e.getSource() == this.setColWidth)
 		{

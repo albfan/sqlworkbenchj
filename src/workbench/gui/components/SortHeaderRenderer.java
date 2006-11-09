@@ -38,22 +38,36 @@ public class SortHeaderRenderer
   
   public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col)
   {
-    int index = -1;
-    boolean ascending = true;
+    boolean sorted = false;
+		boolean ascending = false;
+		boolean primary = false;
+		
 		String type = null;
 		
     if (table instanceof WbTable)
     {
       WbTable sortTable = (WbTable)table;
-      index = sortTable.getSortedViewColumnIndex();
-      ascending = sortTable.isSortedColumnAscending();
+			
+			sorted = sortTable.isViewColumnSorted(col);
+			if (sorted)
+			{
+				ascending = sortTable.isViewColumnSortAscending(col);
+				primary = sortTable.isPrimarySortColumn(col);
+			}
 			DataStoreTableModel model = sortTable.getDataStoreTableModel();
 			if (model != null) type = model.getDbmsType(col);
     }
 		
-		if (col == index)
+		if (sorted)
 		{
-			this.setIcon(ascending ? SortArrowIcon.ARROW_DOWN : SortArrowIcon.ARROW_UP);
+			if (primary)
+			{
+				this.setIcon(ascending ? SortArrowIcon.ARROW_DOWN : SortArrowIcon.ARROW_UP);
+			}
+			else
+			{
+				this.setIcon(ascending ? SortArrowIcon.SMALL_ARROW_DOWN : SortArrowIcon.SMALL_ARROW_UP);
+			}
 		}
 		else
 		{

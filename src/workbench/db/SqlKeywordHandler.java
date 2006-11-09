@@ -108,6 +108,19 @@ public class SqlKeywordHandler
 		{
 			LogMgr.logError("SqlKeywordHandler.readKeywords", "Error reading SQL keywords", e);
 		}
+		
+		// Now remove any keywords that the user defined.
+		
+		try
+		{
+			String words = Settings.getInstance().getProperty("workbench.db." + dbId + ".syntax.nokeywords", null);
+			List l = StringUtil.stringToList(words, ",", true, true, false);
+			this.keywords.removeAll(l);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public boolean isKeyword(String verb)

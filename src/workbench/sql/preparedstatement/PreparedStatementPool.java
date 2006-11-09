@@ -19,8 +19,8 @@ import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
 
 /**
- *	@author  support@sql-workbench.net
- *	A POOL to store parameters for prepared statements
+ * A Pool to store parameters for prepared statements
+ * @author  support@sql-workbench.net
  */
 public class PreparedStatementPool
 {

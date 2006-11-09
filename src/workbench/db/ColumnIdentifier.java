@@ -235,7 +235,7 @@ public class ColumnIdentifier
 
 	/**
 	 * Setter for property position.
-	 * @param position New value of property position.
+	 * @param pos New value of property position.
 	 */
 	public void setPosition(int pos)
 	{

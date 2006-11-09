@@ -16,6 +16,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import workbench.resource.Settings;
@@ -289,7 +290,7 @@ public class SqlFormatter
 
 	private boolean isDbFunction(String key)
 	{
-		return this.dbFunctions.contains(key);
+		return this.dbFunctions.contains(key.toUpperCase());
 	}
 	
 	/**
@@ -302,7 +303,10 @@ public class SqlFormatter
 		if (last.isWhiteSpace() && current.isWhiteSpace()) return false;
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
 		if (currChar == '(' && isDbFunction(last.getContents())) return false;
-		if (currChar == '(' && last.getContents().equals("SET")) return true;
+		if (currChar == '(' && last.isReservedWord()) return true;
+		//if (currChar == '(' && last.getContents().equals("SET")) return true;
+		if ((lastChar == '-' || lastChar == '+') && current.isLiteral() && StringUtil.isNumber(current.getContents())) return false;
+		
 		if (last.isLiteral() && (current.isIdentifier() || current.isReservedWord() || current.isOperator())) return true;
 
 		if (last.isLiteral() && current.isLiteral()) return false;

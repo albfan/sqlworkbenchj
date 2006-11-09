@@ -46,6 +46,7 @@ public class WbExport
 	private ArgumentParser cmdLine;
 	private DataExporter exporter;
 	private boolean directExport = false;
+	private boolean continueOnError = false;
 	private String currentTable;
 	private String defaultExtension;
 	private boolean showProgress = true;
@@ -94,6 +95,7 @@ public class WbExport
 		cmdLine.addArgument("lobidcols");
 		cmdLine.addArgument("blobtype");
 		cmdLine.addArgument("clobasfile");
+		cmdLine.addArgument("continueonerror");
 	}
 
 	public String getVerb() { return VERB; }
@@ -207,6 +209,8 @@ public class WbExport
 		if (encoding != null) exporter.setEncoding(encoding);
 		exporter.setAppendToFile(cmdLine.getBoolean("append"));
 		exporter.setWriteClobAsFile(cmdLine.getBoolean("clobasfile", false));
+		
+		this.continueOnError = cmdLine.getBoolean("continueonerror", false);
 		
 		if ("text".equals(type) || "txt".equals(type))
 		{
@@ -637,7 +641,23 @@ public class WbExport
 			{
 				String fname = StringUtil.makeFilename(tables[i].getTableExpression());
 				File f = new File(outdir, fname + defaultExtension);
-				exporter.addTableExportJob(f.getAbsolutePath(), tables[i]);
+				try
+				{
+					exporter.addTableExportJob(f.getAbsolutePath(), tables[i]);
+				}
+				catch (SQLException e)
+				{
+					if (continueOnError) 
+					{
+						result.addMessage(ResourceMgr.getString("TxtWarning") + ": " + e.getMessage());
+						result.setWarning(true);
+					}
+					else
+					{
+						throw e;
+					}
+				}
+				
 			}
 		}
 		else
@@ -654,6 +674,7 @@ public class WbExport
 			exporter.addTableExportJob(outfile, tables[0]);
 		}
 		
+		exporter.setContinueOnError(this.continueOnError);
 		exporter.runJobs();
 			
 		if (exporter.isSuccess())

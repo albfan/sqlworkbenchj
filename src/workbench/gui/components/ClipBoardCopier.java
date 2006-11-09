@@ -87,7 +87,7 @@ public class ClipBoardCopier
 				count = rows.length;
 			}
 			
-			DataPrinter printer = new DataPrinter(ds, "\t", "\n", columnsToCopy);
+			DataPrinter printer = new DataPrinter(ds, "\t", "\n", columnsToCopy, includeHeaders);
 			out = new StringWriter(count * 250);
 			// Do not use StringUtil.LINE_TERMINATOR for the line terminator
 			// because for some reason this creates additional empty lines

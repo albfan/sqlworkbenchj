@@ -35,7 +35,6 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import java.io.StringReader;
 import java.io.Reader;
@@ -45,6 +44,7 @@ import workbench.interfaces.ImportFileParser;
 import workbench.storage.NullValue;
 import workbench.util.CloseableDataStream;
 import workbench.util.EncodingUtil;
+import workbench.util.MessageBuffer;
 import workbench.util.WbThread;
 
 
@@ -85,6 +85,7 @@ public class DataImporter
 	private long currentImportRow = 0;
 	private int mode = MODE_INSERT;
 	private boolean useBatch = false;
+	private int batchSize = -1;
 	private boolean supportsBatch = false;
 	private boolean canCommitInBatch = true;
 	private boolean commitBatch = false;
@@ -92,7 +93,7 @@ public class DataImporter
 	private boolean hasErrors = false;
 	private boolean hasWarnings = false;
 	private int reportInterval = 1;
-	private StrBuffer messages;
+	private MessageBuffer messages;
 	private String targetSchema;
 
 	private int colCount;
@@ -114,7 +115,6 @@ public class DataImporter
 
 	private RowActionMonitor progressMonitor;
 	private boolean isRunning = false;
-	private int batchSize = -1;
 	private ImportFileParser parser;
 
 	// Use for partial imports
@@ -127,7 +127,7 @@ public class DataImporter
 
 	public DataImporter()
 	{
-		this.messages = new StrBuffer(1000);
+		this.messages = new MessageBuffer(1000);
 	}
 
 	public void setConnection(WbConnection aConn)
@@ -264,6 +264,7 @@ public class DataImporter
 	{
 		 return this.useBatch;
 	}
+	
 	public void setModeInsert() { this.mode = MODE_INSERT; }
 	public void setModeUpdate() { this.mode = MODE_UPDATE; }
 
@@ -272,6 +273,7 @@ public class DataImporter
 		this.mode = MODE_INSERT_UPDATE;
 		this.useBatch = false;
 	}
+	
 	public void setModeUpdateInsert()
 	{
 		this.mode = MODE_UPDATE_INSERT;
@@ -516,7 +518,6 @@ public class DataImporter
 		this.isRunning = false;
 		this.source.cancel();
 		this.messages.append(ResourceMgr.getString("MsgImportCancelled") + "\n");
-		//if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 	}
 
 	public void setTableCount(int total)
@@ -529,6 +530,27 @@ public class DataImporter
 		this.currentTable = current;
 	}
 
+	private int errorCount = 0;
+	private boolean errorLimitAdded = false;
+	
+	private void addError(String msg)
+	{
+		if (errorCount < 5000)
+		{
+			this.messages.append(msg);
+		}
+		else
+		{
+			if (!errorLimitAdded)
+			{
+				messages.append("\n");
+				messages.append(ResourceMgr.getString("MsgImpTooManyError"));
+				messages.append('\n');
+				errorLimitAdded = true;
+			}
+		}
+	}
+	
 	/**
 	 *	Callback function for RowDataProducer. The order in the data array
 	 * 	has to be the same as initially passed in the setTargetTable() method.
@@ -622,14 +644,39 @@ public class DataImporter
 			}
 			this.totalRows += rows;
 		}
+		catch (OutOfMemoryError oome)
+		{
+			this.hasErrors = true;
+			closeStatements();
+			System.gc();
+			this.messages.ensureBuffer(100);
+			this.messages.append(ResourceMgr.getString("MsgOutOfMemoryGeneric"));
+			this.messages.append('\n');
+			if (this.batchSize > 0)
+			{
+				LogMgr.logError("DataImporter.processRow()", "Not enough memory to hold statement batch! Use the -batchSize parameter to reduce the batch size!", null);
+				this.messages.append(ResourceMgr.getString("MsgOutOfMemoryJdbcBatch"));
+				this.messages.append("\n\n");
+			}
+			else
+			{
+				LogMgr.logError("DataImporter.processRow()", "Not enough memory to run this import!", null);
+			}
+			throw new SQLException("Not enough memory!");
+		}
 		catch (SQLException e)
 		{
 			this.hasErrors = true;
-			LogMgr.logError("DataImporter.processRow()", "Error importing row " + this.totalRows + ": " + e.getMessage(), null);
-			this.messages.append(ResourceMgr.getString("ErrImportingRow") + " " + currentImportRow + "\n");
-			this.messages.append(ResourceMgr.getString("ErrImportErrorMsg") + " " + e.getMessage() + "\n");
-			this.messages.append(ResourceMgr.getString("ErrImportValues") + " " + this.getValueDisplay(row) + "\n");
-			this.messages.append('\n');
+			LogMgr.logError("DataImporter.processRow()", "Error importing row " + currentImportRow + ": " + ExceptionUtil.getDisplay(e), null);
+			this.addError(ResourceMgr.getString("ErrImportingRow") + " " + currentImportRow + "\n");
+			this.addError(ResourceMgr.getString("ErrImportErrorMsg") + " " + e.getMessage() + "\n");
+			String value = this.getValueDisplay(row);
+			this.addError(ResourceMgr.getString("ErrImportValues") + " " + value + "\n\n");
+			if (errorLimitAdded)
+			{
+				LogMgr.logError("DataImporter.processRow()", "Values: " + value, null);
+			}
+			errorCount ++;
 			if (!this.continueOnError) throw e;
 		}
 
@@ -639,12 +686,20 @@ public class DataImporter
 			{
 				this.executeBatch();
 			}
+			catch (OutOfMemoryError oome)
+			{
+				this.hasErrors = true;
+				closeStatements();
+				this.messages.ensureBuffer(100);
+				System.gc();
+				this.messages.append(ResourceMgr.getString("MsgOutOfMemoryGeneric"));
+				throw new SQLException("Not enough memory!");
+			}
 			catch (SQLException e)
 			{
 				this.hasErrors = true;
-				LogMgr.logError("DataImporter.processRow()", "Error executing batch after " + this.totalRows + " rows", e);
-				this.messages.append(ResourceMgr.getString("ErrImportExecuteBatchQueue") + "\n");
-				this.messages.append("\n");
+				LogMgr.logError("DataImporter.processRow()", "Error executing batch after " + currentImportRow + " rows", e);
+				this.addError(ResourceMgr.getString("ErrImportExecuteBatchQueue") + "\n\n");
 				if (!this.continueOnError) throw e;
 			}
 		}
@@ -979,6 +1034,9 @@ public class DataImporter
 			this.messages.append('\n');
 		}
 
+		this.errorCount = 0;
+		this.errorLimitAdded = false;
+		
 		try
 		{
 			this.targetTable = new TableIdentifier(tableName);
@@ -1340,7 +1398,6 @@ public class DataImporter
 			if (this.updatedRows > -1)
 			{
 				this.messages.append(this.updatedRows + " " + ResourceMgr.getString("MsgCopyNumRowsUpdated"));
-				this.messages.append("\n");
 			}
 			this.messages.append('\n');
 		}
@@ -1356,9 +1413,14 @@ public class DataImporter
 		}
 	}
 
-	public String getMessages()
+	/** 
+	 * Return the messages generated during import.
+	 * The reference to the internal Buffer will be cleared
+	 * after this call. So a second call will return null!
+	 */
+	public StringBuffer getMessages()
 	{
-		return this.messages.toString();
+		return messages.getBuffer();
 	}
 
 	/**
@@ -1448,10 +1510,12 @@ public class DataImporter
 	{
 		if (this.insertStatement != null)
 		{
+			try { this.insertStatement.clearBatch(); } catch (Throwable th) {}
 			try { this.insertStatement.close();	} catch (Throwable th) {}
 		}
 		if (this.updateStatement != null)
 		{
+			try { this.updateStatement.clearBatch(); } catch (Throwable th) {}
 			try { this.updateStatement.close();	} catch (Throwable th) {}
 		}
 	}

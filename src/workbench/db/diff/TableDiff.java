@@ -111,7 +111,23 @@ public class TableDiff
 //			commentsEqual = StringUtil.equalString(this.referenceTable.getTableComment(), this.targetTable.getTableComment());
 //		}
 		
-		boolean rename = !ref.getTableName().equalsIgnoreCase(target.getTableName());
+		String refname = ref.getTableName();
+		String tname = target.getTableName();
+		boolean rename = false;
+		
+		// If either one of the table names is quoted
+		// we have to do a case-sensitiv comparison
+		if (refname.charAt(0) == '\"' || tname.charAt(0) == '\"')
+		{
+			refname = StringUtil.trimQuotes(refname);
+			tname = StringUtil.trimQuotes(tname);
+			rename = !refname.equals(tname);
+		}
+		else
+		{
+			rename = !refname.equalsIgnoreCase(tname);
+		}
+		
 		String rc = this.referenceTable.getTableConstraints();
 		String tc = this.targetTable.getTableConstraints();
 		

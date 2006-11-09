@@ -82,17 +82,23 @@ public class DbmsOutput
 		" :buffer := l_buffer; " +
 		"end;" );
 
-		showOutputStatement.registerOutParameter( 2, Types.INTEGER );
-		showOutputStatement.registerOutParameter( 3, Types.VARCHAR );
 		StringBuffer result = new StringBuffer(1024);
-		for(;;)
+		try
 		{
-			showOutputStatement.setInt( 1, 32000 );
-			showOutputStatement.executeUpdate();
-			result.append(showOutputStatement.getString(3).trim());
-			if (showOutputStatement.getInt(2) == 1 ) break;
+			showOutputStatement.registerOutParameter( 2, Types.INTEGER );
+			showOutputStatement.registerOutParameter( 3, Types.VARCHAR );
+			for(;;)
+			{
+				showOutputStatement.setInt( 1, 32000 );
+				showOutputStatement.executeUpdate();
+				result.append(showOutputStatement.getString(3).trim());
+				if (showOutputStatement.getInt(2) == 1 ) break;
+			}
 		}
-		try { showOutputStatement.close(); } catch (Throwable th) {}
+		finally
+		{
+			try { showOutputStatement.close(); } catch (Throwable th) {}
+		}
 		return result.toString().trim();
 	}
 

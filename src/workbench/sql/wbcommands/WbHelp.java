@@ -29,6 +29,8 @@ public class WbHelp extends SqlCommand
 
 	public String getVerb() { return "HELP"; }
 
+	protected boolean isConnectionRequired() { return false; }
+	
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{

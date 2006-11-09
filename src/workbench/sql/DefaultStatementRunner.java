@@ -355,6 +355,11 @@ public class DefaultStatementRunner
 			this.currentCommand = (SqlCommand)this.cmdDispatch.get("*");
 		}
 
+		if (this.dbConnection == null && this.currentCommand.isConnectionRequired())
+		{
+			throw new SQLException("Cannot execute command '" + this.currentCommand.getVerb() + " without a connection!");
+		}
+		
 		this.currentCommand.setConsumerWaiting(this.currentConsumer != null);
 		this.currentCommand.setStatementRunner(this);
 		this.currentCommand.setRowMonitor(this.rowMonitor);

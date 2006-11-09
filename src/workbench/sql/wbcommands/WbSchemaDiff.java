@@ -62,6 +62,7 @@ public class WbSchemaDiff
 	public static final String PARAM_INCLUDE_PK = "includeprimarykeys";
 	public static final String PARAM_INCLUDE_CONSTRAINTS = "includeconstraints";
 	public static final String PARAM_INCLUDE_VIEWS = "includeviews";
+	public static final String PARAM_INCLUDE_PROCS = "includeprocs";
 	public static final String PARAM_DIFF_JDBC_TYPES = "usejdbctypes";
 	
 	private ArgumentParser cmdLine;
@@ -88,11 +89,13 @@ public class WbSchemaDiff
 		cmdLine.addArgument(PARAM_EXCLUDE_TABLES);
 		cmdLine.addArgument(PARAM_INCLUDE_CONSTRAINTS);
 		cmdLine.addArgument(PARAM_INCLUDE_VIEWS);
+		cmdLine.addArgument(PARAM_INCLUDE_PROCS);
 		cmdLine.addArgument(PARAM_DIFF_JDBC_TYPES);
 		//cmdLine.addArgument(PARAM_INCLUDE_COMMENTS);
 	}
 
 	public String getVerb() { return VERB; }
+	protected boolean isConnectionRequired() { return false; }
 
 	public StatementRunnerResult execute(WbConnection aConnection, String sql)
 		throws SQLException
@@ -162,7 +165,7 @@ public class WbSchemaDiff
 
 		this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 
-		if (targetProfile == null || aConnection.getProfile().isProfileForKey(targetKey))
+		if (targetProfile == null || (aConnection != null && aConnection.getProfile().isProfileForKey(targetKey)))
 		{
 			targetCon = aConnection;
 		}
@@ -190,7 +193,7 @@ public class WbSchemaDiff
 			}
 		}
 
-		if (sourceProfile == null || aConnection.getProfile().isProfileForKey(sourceKey))
+		if (sourceProfile == null || (aConnection != null && aConnection.getProfile().isProfileForKey(sourceKey)))
 		{
 			sourceCon = aConnection;
 		}
@@ -234,6 +237,7 @@ public class WbSchemaDiff
 		diff.setIncludeTableConstraints(cmdLine.getBoolean(PARAM_INCLUDE_CONSTRAINTS, true));
 		diff.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
 		diff.setCompareJdbcTypes(cmdLine.getBoolean(PARAM_DIFF_JDBC_TYPES, false));
+		diff.setIncludeProcedures(cmdLine.getBoolean(PARAM_INCLUDE_PROCS, false));
 		//diff.setIncludeComments(cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, false));
 
 		String refTables = cmdLine.getValue(PARAM_SOURCETABLES);
@@ -245,7 +249,7 @@ public class WbSchemaDiff
 			String targetSchema = cmdLine.getValue(PARAM_TARGETSCHEMA);
 			String excludeTables = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
 
-			if (refSchema == null || targetSchema == null)
+			if (refSchema == null && targetSchema == null)
 			{
 				if (sourceCon == targetCon)
 				{

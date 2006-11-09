@@ -24,6 +24,7 @@ import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import workbench.db.TableIdentifier;
 
 import workbench.db.WbConnection;
 import workbench.interfaces.JobErrorHandler;
@@ -32,7 +33,6 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.RowData;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 
@@ -409,7 +409,7 @@ class VariableDataStore
 	private static final String cols[] = {ResourceMgr.getString("LblVariableName"), ResourceMgr.getString("LblVariableValue") };
 	private static final int types[] =   {Types.VARCHAR, Types.VARCHAR};
 	private static final int sizes[] =   {20, 50};
-	private static final String TABLE_ID = "WB$VARIABLE_DEFINITION";
+	private static final TableIdentifier TABLE_ID = new TableIdentifier("WB$VARIABLE_DEFINITION");
 	
 	public VariableDataStore()
 	{

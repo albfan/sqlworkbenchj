@@ -412,6 +412,12 @@ public class OracleMetadata
 		return PROC_HEADER;
 	}
 	
+	public boolean procedureExists(String catalog, String schema, String procname, int type)
+	{
+		JdbcProcedureReader reader = new JdbcProcedureReader(this.connection.getMetadata());
+		return reader.procedureExists(catalog, schema, procname, type);
+	}
+	
 	public DataStore getProcedureColumns(String catalog, String schema, String procname)
 		throws SQLException
 	{

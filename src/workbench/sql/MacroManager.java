@@ -34,7 +34,7 @@ import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
 /**
- *
+ * A class to manage, store and apply SQL macros (alias) 
  * @author  thomas
  */
 public class MacroManager

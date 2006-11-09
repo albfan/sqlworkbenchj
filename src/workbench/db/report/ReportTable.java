@@ -25,6 +25,7 @@ import workbench.storage.DataStore;
 import workbench.util.StrBuffer;
 import java.util.Collections;
 import workbench.db.IndexDefinition;
+import workbench.util.StringUtil;
 
 /**
  * A class to hold information about a database table that 
@@ -96,9 +97,11 @@ public class ReportTable
 	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace, boolean includeIndex, boolean includeFk, boolean includePk, boolean includeConstraints)
 		throws SQLException
 	{
-		this.table = tbl;
+		this.table = tbl.createCopy();
 		this.namespace = nspace;
 		this.includePrimaryKey = includePk; 
+		
+		this.table.checkQuotesNeeded(conn);
 		
 		if (tbl.getSchema() == null)
 		{
@@ -193,7 +196,7 @@ public class ReportTable
 	
 	private void readForeignKeys(WbConnection conn)
 	{
-		DataStore ds = conn.getMetadata().getForeignKeys(this.table.getCatalog(), this.table.getSchema(), this.table.getTableName(), true);
+		DataStore ds = conn.getMetadata().getForeignKeys(this.table, true);
 		int keys = ds.getRowCount();
 		if (keys == 0) return;
 
@@ -283,9 +286,9 @@ public class ReportTable
 	
 	public void appendTableNameXml(StrBuffer toAppend, StrBuffer indent)
 	{
-		tagWriter.appendTag(toAppend, indent, TAG_TABLE_CATALOG, this.table.getCatalog());
-		tagWriter.appendTag(toAppend, indent, TAG_TABLE_SCHEMA, (this.schemaNameToUse == null ? this.table.getSchema() : this.schemaNameToUse));
-		tagWriter.appendTag(toAppend, indent, TAG_TABLE_NAME, this.table.getTableName());
+		tagWriter.appendTag(toAppend, indent, TAG_TABLE_CATALOG, StringUtil.trimQuotes(this.table.getCatalog()));
+		tagWriter.appendTag(toAppend, indent, TAG_TABLE_SCHEMA, (this.schemaNameToUse == null ? StringUtil.trimQuotes(this.table.getSchema()) : this.schemaNameToUse));
+		tagWriter.appendTag(toAppend, indent, TAG_TABLE_NAME, StringUtil.trimQuotes(this.table.getTableName()));
 	}
 
 	/**
@@ -299,7 +302,7 @@ public class ReportTable
 		StrBuffer colindent = new StrBuffer(indent);
 		colindent.append(indent);
 
-		tagWriter.appendOpenTag(line, indent, TAG_TABLE_DEF, "name", this.table.getTableName());
+		tagWriter.appendOpenTag(line, indent, TAG_TABLE_DEF, "name", StringUtil.trimQuotes(this.table.getTableName()));
 		line.append('\n');
 		appendTableNameXml(line, colindent);
 		tagWriter.appendTag(line, colindent, TAG_TABLE_COMMENT, this.tableComment, true);

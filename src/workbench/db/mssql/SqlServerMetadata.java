@@ -46,6 +46,12 @@ public class SqlServerMetadata
 		return StringUtil.emptyBuffer();
 	}
 
+	public boolean procedureExists(String catalog, String schema, String procname, int type)
+	{
+		JdbcProcedureReader reader = new JdbcProcedureReader(this.meta);
+		return reader.procedureExists(catalog, schema, procname, type);
+	}
+	
 	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
 		throws SQLException
 	{

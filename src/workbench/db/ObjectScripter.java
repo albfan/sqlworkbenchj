@@ -118,8 +118,7 @@ public class ObjectScripter
 			String type = (String)entry.getValue();
 			if (!type.equalsIgnoreCase(TYPE_TABLE)) continue;
 
-			String object = (String)key;
-			TableIdentifier tbl = new TableIdentifier(object);
+			TableIdentifier tbl = (TableIdentifier)key;
 			tbl.adjustCase(this.dbConnection);
 			StringBuffer source = meta.getFkSource(tbl);
 			if (source != null && source.length() > 0)
@@ -164,12 +163,10 @@ public class ObjectScripter
 					type = procDef.getResultTypeDisplay();
 					source = meta.getProcedureSource(procDef.getCatalog(), procDef.getSchema(), procDef.getProcedureName(), procDef.getResultType());
 				}
-				else
+				else if (key instanceof TableIdentifier)
 				{
-					String object = (String)key;
-					TableIdentifier tbl = new TableIdentifier(object);
-					tbl.adjustCase(this.dbConnection);
-					tbl.setType(type);
+					TableIdentifier tbl = (TableIdentifier)key;
+					
 					if (TYPE_TABLE.equalsIgnoreCase(type))
 					{
 						source = meta.getTableSource(tbl, true, false);
@@ -182,10 +179,6 @@ public class ObjectScripter
 					{
 						source = meta.getSynonymSource(tbl.getSchema(), tbl.getTableName());
 					}
-					else if (TYPE_SEQUENCE.equalsIgnoreCase(type))
-					{
-						source = this.meta.getSequenceSource(object);
-					}
 					else if (TYPE_INSERT.equalsIgnoreCase(type))
 					{
 						source = this.getEmptyInsert(tbl);
@@ -193,6 +186,14 @@ public class ObjectScripter
 					else if (TYPE_SELECT.equalsIgnoreCase(type))
 					{
 						source = this.getDefaultSelect(tbl);
+					}
+				}
+				else
+				{
+					String object = (String)key;
+					if (TYPE_SEQUENCE.equalsIgnoreCase(type))
+					{
+						source = this.meta.getSequenceSource(object);
 					}
 				}
 			}
@@ -261,7 +262,7 @@ public class ObjectScripter
 	public String getDefaultSelect(TableIdentifier tbl)
 		throws SQLException
 	{
-		DataStore tableDef = this.meta.getTableDefinition(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), true);
+		DataStore tableDef = this.meta.getTableDefinition(tbl, false);
 
 		if (tableDef.getRowCount() == 0) return StringUtil.EMPTY_STRING;
 		int colCount = tableDef.getRowCount();
@@ -285,7 +286,7 @@ public class ObjectScripter
 		}
 		sql.append(nl);
 		sql.append("FROM ");
-		sql.append(tbl.getTableName());
+		sql.append(this.meta.quoteObjectname(tbl.getTableName()));
 		sql.append(';');
 		sql.append(nl);
 

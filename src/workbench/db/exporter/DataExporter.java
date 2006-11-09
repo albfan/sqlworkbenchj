@@ -88,7 +88,7 @@ public class DataExporter
 	private int exportType;
 	private boolean exportHeaders;
 	private boolean includeCreateTable = false;
-	private boolean headerOnly = false;
+	private boolean continueOnError = true;
 
 	private int sqlType = SqlRowDataConverter.SQL_INSERT;
 	private boolean useCDATA = false;
@@ -317,8 +317,7 @@ public class DataExporter
 	public void setAppendToFile(boolean aFlag) { this.append = aFlag; }
 	public boolean getAppendToFile() { return this.append; }
 
-	public void setExportHeaderOnly(boolean aFlag) { this.headerOnly = aFlag; }
-	public boolean getExportHeaderOnly() { return this.headerOnly; }
+	public void setContinueOnError(boolean aFlag) { this.continueOnError = aFlag; }
 
 	public void setCommitEvery(int aCount) { this.commitEvery = aCount; }
 	public int getCommitEvery() { return this.commitEvery; }
@@ -655,7 +654,7 @@ public class DataExporter
 	{
 		if (this.jobQueue == null) return;
 		int count = this.jobQueue.size();
-		//this.pendingJobs = count;
+
 		this.jobsRunning = true;
 		this.cancelJobs = false;
 		this.tablesExported = 0;
@@ -699,11 +698,13 @@ public class DataExporter
 			{
 				LogMgr.logError("DataExporter.runJobs()", "Error exporting data for [" + this.sql + "] to file: " + this.outputfile, th);
 				this.addError(th.getMessage());
+				if (!this.continueOnError)
+				{
+					break;
+				}
 			}
-			//this.pendingJobs --;
 			if (this.cancelJobs) break;
 		}
-		//this.pendingJobs = 0;
 		this.jobsRunning = false;
 		this.closeProgress();
 	}

@@ -79,11 +79,11 @@ public class PostgresDDLFilter
 
 		StringBuffer newSql = new StringBuffer(sql.length() + 10);
 		newSql.append(sql.substring(0, bodyStart - 2));
-		newSql.append('\'');
+		newSql.append(" '");
 		newSql.append(body);
-		newSql.append('\'');
+		newSql.append("' ");
 		newSql.append(sql.substring(bodyEnd + 2));
 		return newSql.toString();
 	}
-	
+
 }

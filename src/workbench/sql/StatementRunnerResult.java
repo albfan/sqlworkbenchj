@@ -12,10 +12,15 @@
 package workbench.sql;
 
 import java.sql.ResultSet;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import javax.swing.text.NumberFormatter;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 import workbench.storage.DataStore;
+import workbench.util.MessageBuffer;
 
 /**
  *
@@ -26,7 +31,7 @@ public class StatementRunnerResult
 	// contains a list of result sets
 	private ArrayList results;
 	private ArrayList updateCounts;
-	private ArrayList messages;
+	private MessageBuffer messages;
 	private ArrayList datastores;
 	private String sourceCommand;
 	
@@ -35,13 +40,16 @@ public class StatementRunnerResult
 	private boolean wasCancelled = false;
 
 	private long executionTime = -1;
+	private DecimalFormat timingFormatter;
 	
 	public StatementRunnerResult()
 	{
+		this.timingFormatter = createTimingFormatter();
 	}
 	
 	public StatementRunnerResult(String aCmd)
 	{
+		this();
 		this.sourceCommand = aCmd;
 	}
 
@@ -50,14 +58,25 @@ public class StatementRunnerResult
 	
 	public void setExecutionTime(long t) { this.executionTime = t; }
 	public long getExecutionTime() { return this.executionTime; }
+	
+	public static final DecimalFormat createTimingFormatter()
+	{
+		DecimalFormatSymbols symb = new DecimalFormatSymbols();
+		String sep = Settings.getInstance().getProperty("workbench.gui.timining.decimal", ".");
+		symb.setDecimalSeparator(sep.charAt(0));		
+		DecimalFormat numberFormatter = new DecimalFormat("0.#s", symb);
+		numberFormatter.setMaximumFractionDigits(2);
+		return numberFormatter;
+	}
+	
 	public String getTimingMessage()
 	{
 		if (executionTime == -1) return null;
 		StringBuffer msg = new StringBuffer(100);
 		msg.append(ResourceMgr.getString("MsgExecTime"));
 		msg.append(' ');
-		msg.append(((double)executionTime) / 1000.0);
-		msg.append('s');
+		double time = ((double)executionTime) / 1000.0;
+		msg.append(timingFormatter.format(time));
 		return msg.toString();
 	}
 	
@@ -98,18 +117,29 @@ public class StatementRunnerResult
 	
 	public void addMessages(String[] msg)
 	{
-		if (this.messages == null) this.messages = new ArrayList();
 		if (msg == null || msg.length == 0) return;
 		for (int i=0; i < msg.length; i++)
 		{
-			this.messages.add(msg[i]);
+			this.addMessage(msg[i]);
 		}
 	}
 
-	public void addMessage(String aMessage)
+	private void checkMessageBuffer()
 	{
-		if (this.messages == null) this.messages = new ArrayList();
-		this.messages.add(aMessage);
+		if (messages == null) messages = new MessageBuffer(500);
+	}
+	public void addMessage(StringBuffer msgBuffer)
+	{
+		checkMessageBuffer();
+		if (messages.getLength() > 0) messages.append('\n');
+		messages.append(msgBuffer);
+	}
+	
+	public void addMessage(String msg)
+	{
+		checkMessageBuffer();
+		if (messages.getLength() > 0) messages.append('\n');
+		messages.append(msg);
 	}
 
 	public boolean hasData()
@@ -119,7 +149,8 @@ public class StatementRunnerResult
 
 	public boolean hasMessages()
 	{
-		return (this.messages != null && this.messages.size() > 0);
+		if (this.messages == null) return false;
+		return (messages.getLength() > 0);
 	}
 
 	public boolean hasUpdateCounts()
@@ -165,26 +196,16 @@ public class StatementRunnerResult
 	public StringBuffer getMessageBuffer()
 	{
 		if (this.messages == null) return null;
-		int size = this.messages.size();
-		StringBuffer result = new StringBuffer(size * 80);
-		for (int i = 0; i < size; i++)
+		StringBuffer b = messages.getBuffer();
+		if (b == null) 
 		{
-			result.append((String)messages.get(i));
-			result.append('\n');
+			// If we have a SoftReference but the buffer is null
+			// this means at least one message was added, but 
+			// the buffer was removed due to tight memory.
+			// In this case a warning is returned.
+			b = new StringBuffer(ResourceMgr.getString("ErrMsgBufferCollected"));
 		}
-		return result;
-	}
-	
-	public String[] getMessages()
-	{
-		if (this.messages == null) return null;
-		int size = this.messages.size();
-		String[] msgs = new String[size];
-		for (int i=0; i< size; i++)
-		{
-			msgs[i] = (String)this.messages.get(i);
-		}
-		return msgs;
+		return b;
 	}
 	
 	public long getTotalUpdateCount()
@@ -243,6 +264,11 @@ public class StatementRunnerResult
 		}
 	}
 
+	public void clearMessageBuffer()
+	{
+		this.messages = null;
+	}
+	
 	public void clear()
 	{
 		if (this.datastores != null)
@@ -250,7 +276,7 @@ public class StatementRunnerResult
 			this.datastores.clear();
 		}
 		this.clearResultSets();
-		if (this.messages != null) this.messages.clear();
+		clearMessageBuffer();
 		if (this.updateCounts !=null) this.updateCounts.clear();
 		this.sourceCommand = null;
 		this.hasWarning = false;

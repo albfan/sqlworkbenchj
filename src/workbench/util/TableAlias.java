@@ -25,7 +25,7 @@ public class TableAlias
 	public TableAlias(String value)
 	{
 		String tablename = null;
-		int apos = value.indexOf(' ');
+		int apos = StringUtil.findFirstWhiteSpace(value);
 		if (apos > -1)
 		{
 			tablename = value.substring(0, apos).trim();

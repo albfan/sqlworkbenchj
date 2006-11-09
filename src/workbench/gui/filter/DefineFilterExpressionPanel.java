@@ -13,7 +13,6 @@ package workbench.gui.filter;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -35,8 +34,10 @@ import javax.swing.filechooser.FileFilter;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.FlatButton;
+import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
+import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -49,10 +50,6 @@ import workbench.storage.filter.FilterExpression;
 import workbench.storage.filter.OrExpression;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
-import workbench.util.WbPersistence;
-
-
-
 
 /**
  * A Panel to display a filter dialog for a {@link workbench.storage.DataStore}
@@ -60,7 +57,7 @@ import workbench.util.WbPersistence;
  */
 public class DefineFilterExpressionPanel
 	extends JPanel
-	implements ActionListener
+	implements ActionListener, ValidatingComponent
 {
 	private ResultInfo columnInfo;
 	private List panels = new ArrayList();
@@ -300,6 +297,7 @@ public class DefineFilterExpressionPanel
 		}
 		return true;
 	}
+	
 	public FilterExpression getExpression()
 	{
 		ComplexExpression exp = null;
@@ -377,13 +375,13 @@ public class DefineFilterExpressionPanel
 		Dimension ps = exp.getPreferredSize();
 		Dimension bs = b.getPreferredSize();
 		Dimension prefSize = new Dimension((int)(ps.getWidth() + bs.getWidth()), (int)ps.getHeight());
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				exp.setFocusToColumn();
-			}
-		});
+//		EventQueue.invokeLater(new Runnable()
+//		{
+//			public void run()
+//			{
+//				exp.setFocusToColumn();
+//			}
+//		});
 		return prefSize;
 	}
 	
@@ -440,7 +438,8 @@ public class DefineFilterExpressionPanel
 		boolean showDialog = true;
 		while (showDialog)
 		{
-			boolean result = WbSwingUtilities.getOKCancel(title, SwingUtilities.getWindowAncestor(source), panel);
+			
+			boolean result = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(source), panel, title);
 			if (result)
 			{
 				if (panel.validateInput())
@@ -461,6 +460,14 @@ public class DefineFilterExpressionPanel
 	{
 		FilterExpression e = this.getExpression();
 		this.saveButton.setEnabled(e != null);
+	}
+
+	public void componentDisplayed()
+	{
+		if (this.panels.size() == 0) return;
+		PanelEntry entry = (PanelEntry)panels.get(0);
+		if (entry == null || entry.expressionPanel == null) return;
+		entry.expressionPanel.setFocusToColumn();
 	}
 	
 }

@@ -30,6 +30,7 @@ import workbench.interfaces.Replaceable;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.ExceptionUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -280,15 +281,10 @@ public class ReplacePanel
 
 			boolean hasSelectedText = false;
 
-			boolean useCurrent = Settings.getInstance().getBoolProperty("workbench.gui.editor.replace.useselected", false);
-			
-			if (useCurrent && selectedText != null)
+			if (!StringUtil.isEmptyString(selectedText) && selectedText.indexOf('\n') == -1 && selectedText.indexOf('\r') == -1)
 			{
-				if (selectedText.indexOf('\n') == -1 && selectedText.indexOf('\r') == -1)
-				{
-					criteriaTextField.setText(selectedText);
-					hasSelectedText = true;
-				}
+				criteriaTextField.setText(selectedText);
+				hasSelectedText = true;
 			}
 
 			InputMap im = this.dialog.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);

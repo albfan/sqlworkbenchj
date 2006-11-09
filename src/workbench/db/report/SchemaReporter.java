@@ -18,16 +18,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.swing.JDialog;
 
 import javax.swing.JFrame;
 
 import workbench.db.DbMetadata;
-import workbench.db.ProcedureReader;
+import workbench.db.ProcedureDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -35,7 +35,6 @@ import workbench.gui.dbobjects.ProgressPanel;
 import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
@@ -410,7 +409,8 @@ public class SchemaReporter
 	{
 		try
 		{
-			return this.dbConn.getMetadata().getTableList(null, name, this.types);
+			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(name);
+			return this.dbConn.getMetadata().getTableList(null, schema, this.types);
 		}
 		catch (SQLException e)
 		{
@@ -447,16 +447,14 @@ public class SchemaReporter
 	{
 		try
 		{
-			DataStore procs = this.dbConn.getMetadata().getProcedures(null, targetSchema);
-			procs.sortByColumn(ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, true);
-			int count = procs.getRowCount();
-			for (int i = 0; i < count; i++)
+			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);
+			List procs = this.dbConn.getMetadata().getProcedureList(null, schema);
+			
+			Iterator itr = procs.iterator();
+			while (itr.hasNext())
 			{
-				String name = procs.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
-				String schema = procs.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
-				String cat = procs.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
-				int type = procs.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
-				ReportProcedure proc = new ReportProcedure(cat, schema, name, type, this.dbConn);
+				ProcedureDefinition def = (ProcedureDefinition)itr.next();
+				ReportProcedure proc = new ReportProcedure(def, this.dbConn);
 				this.procedures.add(proc);
 				if (this.cancel) return;
 			}
@@ -475,7 +473,8 @@ public class SchemaReporter
 		try
 		{
 			if (this.cancel) return;
-			this.tables = this.dbConn.getMetadata().getTableList(targetSchema, this.types);
+			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);	
+			this.tables = this.dbConn.getMetadata().getTableList(schema, this.types);
 		}
 		catch (SQLException e)
 		{

@@ -64,12 +64,29 @@ public class SelectAnalyzer
 		else if (fromPos > 0) groupStart = fromPos + 1;
 		
 		int groupPos = SqlUtil.getKeywordPosition("GROUP BY", sql);
+		int havingPos = SqlUtil.getKeywordPosition("HAVING", sql);
+		int orderPos = SqlUtil.getKeywordPosition("ORDER BY", sql);
 		
 		// find the tables from the FROM clause
 		List tables = SqlUtil.getTables(sql, true);
 		
 		boolean afterWhere = (wherePos > 0 && cursorPos > wherePos);
 		boolean afterGroup = (groupPos > 0 && cursorPos > groupPos);
+		if (havingPos > -1 && afterGroup)
+		{
+			afterGroup = (cursorPos < havingPos);
+		}
+
+		if (orderPos > -1 && afterGroup)
+		{
+			afterGroup = (cursorPos < orderPos);
+		}
+		
+		boolean afterHaving = (havingPos > 0 && cursorPos > havingPos);
+		if (orderPos > -1 && afterHaving)
+		{
+			afterHaving = (cursorPos < orderPos);
+		}
 
 		boolean inTableList = ( fromPos < 0 ||
 			   (wherePos < 0 && cursorPos > fromPos) ||
@@ -132,9 +149,17 @@ public class SelectAnalyzer
 
 			if (afterGroup)
 			{
-				this.elements = getColumnsForGroupBy(fromPos);
+				this.elements = getColumnsForGroupBy();
 				this.addAllMarker = true;
 				this.title = ResourceMgr.getString("TxtTitleColumns");
+				return;
+			}
+			
+			if (afterHaving)
+			{
+				this.elements = getColumnsForHaving();
+				this.addAllMarker = true;
+				this.title = ResourceMgr.getString("TxtTitleGroupFuncs");
 				return;
 			}
 			
@@ -259,7 +284,22 @@ public class SelectAnalyzer
 		return result;
 	}	
 	
-	private List getColumnsForGroupBy(int fromStart)
+	private List getColumnsForHaving()
+	{
+		List cols = SqlUtil.getSelectColumns(this.sql, false);
+		List validCols = new LinkedList();
+		for (int i = 0; i < cols.size(); i++)
+		{
+			String col = (String)cols.get(i);
+			if (col.indexOf('(') > -1 && col.indexOf(')') > -1)
+			{
+				validCols.add(col);
+			}
+		}
+		return validCols;
+	}
+	
+	private List getColumnsForGroupBy()
 	{
 		List cols = SqlUtil.getSelectColumns(this.sql, false);
 		List validCols = new LinkedList();

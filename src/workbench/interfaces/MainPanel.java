@@ -48,7 +48,6 @@ public interface MainPanel
 	boolean isConnected();
 	boolean isBusy();
 	void dispose();
-//	void saveSettings();
 	void panelSelected();
 	void readFromWorkspace(WbWorkspace w, int index) throws IOException;
 	void saveToWorkspace(WbWorkspace w, int index) throws IOException;

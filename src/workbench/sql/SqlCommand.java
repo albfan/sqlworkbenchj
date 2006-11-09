@@ -86,7 +86,7 @@ public class SqlCommand
 		if (warn != null && warn.trim().length() > 0)
 		{
 			hasWarning = true;
-			msg.append(warn);
+			msg.append(warn.trim());
 		}
 		return hasWarning;
 	}
@@ -129,12 +129,6 @@ public class SqlCommand
 			{
 				LogMgr.logWarning("SqlCommand.cancel()", "Error when cancelling statement", th);
 			}
-
-//			if (this.currentConnection != null && this.currentConnection.cancelNeedsReconnect())
-//			{
-//				LogMgr.logInfo(this, "Cancelling needs a reconnect to the database for this DBMS...");
-//				this.currentConnection.reconnect();
-//			}
 		}
 	}
 
@@ -162,6 +156,8 @@ public class SqlCommand
 		this.runner = r;
 	}
 
+	protected boolean isConnectionRequired() { return true; }
+	
 	/**
 	 *	Should be overridden by a specialised SqlCommand
 	 */
