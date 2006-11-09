@@ -26,10 +26,10 @@ public class OrExpression
 	
 	public boolean evaluate(Map columnValues)
 	{
-		int count = filter.size();
-		for (int i=0; i < count; i++)
+		Iterator itr = filter.iterator();
+		while (itr.hasNext())
 		{
-			FilterExpression expr = (FilterExpression)this.filter.get(i);
+			FilterExpression expr = (FilterExpression)itr.next();
 			if (expr.evaluate(columnValues)) return true;
 		}
 		return false;
@@ -50,11 +50,11 @@ public class OrExpression
 	public String toString()
 	{
 		StringBuffer value = new StringBuffer();
-		int count = filter.size();
-		for (int i=0; i < count; i++)
+		Iterator itr = filter.iterator();
+		while (itr.hasNext())
 		{
-			FilterExpression expr = (FilterExpression)this.filter.get(i);
-			if (i > 0) value.append(" OR ");
+			FilterExpression expr = (FilterExpression)itr.next();
+			if (value.length() > 0) value.append(" AND ");
 			value.append(expr.toString());
 		}
 		return value.toString();

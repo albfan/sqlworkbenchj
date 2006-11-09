@@ -19,7 +19,10 @@ import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
 import workbench.storage.NullValue;
 import workbench.storage.filter.AndExpression;
+import workbench.storage.filter.ColumnComparator;
+import workbench.storage.filter.ComparatorFactory;
 import workbench.storage.filter.ComplexExpression;
+import workbench.storage.filter.DateEqualsComparator;
 import workbench.storage.filter.IsNullComparator;
 import workbench.storage.filter.NumberEqualsComparator;
 import workbench.storage.filter.OrExpression;
@@ -116,24 +119,38 @@ public class SelectionFilterAction
 				String name = client.getColumnName(columns[i]);
 				Object value = client.getValueAt(row, columns[i]);
 				int type = client.getDataStore().getColumnType(columns[i]);
+				ColumnComparator comparator = null;
 
 				if (value == null || value instanceof NullValue)
 				{
-					expr.addColumnExpression(name, new IsNullComparator(), null);
+					comparator = new IsNullComparator();
 				}
 				else if (SqlUtil.isCharacterType(type))
 				{
-					expr.addColumnExpression(name, new StringEqualsComparator(), value);
+					comparator = new StringEqualsComparator();
 				}
 				else if (SqlUtil.isNumberType(type) && value instanceof Number)
 				{
-					expr.addColumnExpression(name, new NumberEqualsComparator(), value);
+					comparator = new NumberEqualsComparator();
+				}
+				else if (SqlUtil.isDateType(type) && value instanceof java.util.Date)
+				{
+					comparator = new DateEqualsComparator(type);
+				}
+				else
+				{
+					ComparatorFactory factory = new ComparatorFactory();
+					comparator = factory.findEqualityComparatorFor(value.getClass());
+				}
+				
+				if (comparator != null)
+				{
+					expr.addColumnExpression(name, comparator, value);
 				}
 			}
 
 		}
-		
-		client.applyFilter(expr);
+		if (expr.hasFilter()) client.applyFilter(expr);
 	}	
 
 	private void checkEnabled()

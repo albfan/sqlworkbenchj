@@ -19,4 +19,5 @@ import java.util.Map;
 public interface FilterExpression
 {
 	boolean evaluate(Map columnValues);
+	boolean isColumnSpecific();
 }

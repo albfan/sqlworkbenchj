@@ -59,5 +59,5 @@ public class ContainsComparator
 	
 	public boolean validateInput(String value) { return true; }
 
-	
+	public boolean comparesEquality() { return false; }
 }

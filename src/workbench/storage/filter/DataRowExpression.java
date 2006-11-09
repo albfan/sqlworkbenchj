@@ -113,4 +113,10 @@ public class DataRowExpression
 	}
 	
 	public String getColumnName() { return "*"; }
+	
+	public boolean isColumnSpecific() 
+	{
+		return false;
+	}
+	
 }

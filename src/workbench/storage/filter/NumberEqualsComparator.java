@@ -28,6 +28,7 @@ public class NumberEqualsComparator
 	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
 	public String getOperator() { return "="; }
 	public boolean needsValue() { return true; }
+	public boolean comparesEquality() { return true; }
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{

@@ -115,4 +115,9 @@ public class ColumnExpression
 	{
 		this.ignoreCase = ignoreCase;
 	}
+	
+	public boolean isColumnSpecific() 
+	{
+		return true;
+	}
 }

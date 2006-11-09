@@ -27,6 +27,7 @@ public class StringEqualsComparator
 	public String getOperator() { return "="; }
 	public boolean needsValue() { return true; }
 	public boolean validateInput(String value) { return true; }
+	public boolean comparesEquality() { return true; }
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{

@@ -31,9 +31,13 @@ public class ComparatorFactory
 		{
 			new ContainsComparator(),
 			new StartsWithComparator(),
+			new NotStartsWithComparator(),
 			new ContainsNotComparator(),
 			new StringEqualsComparator(),
+			new StringNotEqualsComparator(),
 			new NumberEqualsComparator(),
+			new DateEqualsComparator(0),
+			new NumberNotEqualsComparator(),
 			new LessThanComparator(),
 			new LessOrEqualComparator(),
 			new GreaterThanComparator(),
@@ -49,4 +53,24 @@ public class ComparatorFactory
 		return comparatorList;
 	}
 
+	public ColumnComparator findEqualityComparatorFor(Class clz)
+	{
+		for (int i=0; i < comparatorList.length; i++)
+		{
+			if (comparatorList[i].supportsType(clz) && comparatorList[i].comparesEquality()) 
+			{
+				return comparatorList[i];
+			}
+		}
+		return null;
+	}
+	
+	public ColumnComparator findComparatorFor(Class clz)
+	{
+		for (int i=0; i < comparatorList.length; i++)
+		{
+			if (comparatorList[i].supportsType(clz)) return comparatorList[i];
+		}
+		return null;
+	}
 }

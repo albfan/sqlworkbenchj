@@ -14,34 +14,33 @@ package workbench.storage.filter;
 /**
  * @author support@sql-workbench.net
  */
-public class StartsWithComparator
+public class NotStartsWithComparator
 	implements ColumnComparator
 {
-	public StartsWithComparator()
+	public NotStartsWithComparator()
 	{
 	}
 	
 	public boolean supportsIgnoreCase() { return true; }
-	
 	public String getValueExpression(Object value) { return "'" + value + "'";}
-	public String getOperator() { return "starts with"; }
+	public String getOperator() { return "does not start with"; }
 	public boolean needsValue() { return true; }
 	public boolean validateInput(String value) { return true; }
 	public boolean comparesEquality() { return false; }
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
-		if (reference == null && value == null) return true;
-		if (reference == null && value != null) return false;
-		if (reference != null && value == null) return false;
+		if (reference == null && value == null) return false;
+		if (reference == null && value != null) return true;
+		if (reference != null && value == null) return true;
 		try
 		{
 			String v = (String)value;
 			String ref = (String)reference;
 			if (ignoreCase)
-				return v.toLowerCase().startsWith(ref.toLowerCase());
+				return !v.toLowerCase().startsWith(ref.toLowerCase());
 			else
-				return v.startsWith(ref);
+				return !v.startsWith(ref);
 		}
 		catch (Exception e)
 		{

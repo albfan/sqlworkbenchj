@@ -58,4 +58,6 @@ public interface ColumnComparator
 	 * can actually deal with the value
 	 */
 	boolean validateInput(String input);
+	
+	boolean comparesEquality();
 }

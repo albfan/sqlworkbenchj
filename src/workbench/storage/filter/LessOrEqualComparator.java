@@ -24,11 +24,10 @@ public class LessOrEqualComparator
 	}
 	
 	public boolean supportsIgnoreCase() { return false; }
-
-	
 	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
 	public String getOperator() { return "\u2264"; }
 	public boolean needsValue() { return true; }
+	public boolean comparesEquality() { return false; }
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{

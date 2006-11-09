@@ -31,11 +31,13 @@ public class RegExComparator
 	public String getValueExpression(Object value) { return "'" + value + "'";}
 	public String getOperator() { return "matches"; }
 	public boolean needsValue() { return true; }
+	public boolean comparesEquality() { return false; }
 	
 	public boolean supportsType(Class valueClass)
 	{
 		return (String.class.isAssignableFrom(valueClass));
 	}
+
 
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{

@@ -28,6 +28,7 @@ public class GreaterOrEqualComparator
 	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
 	public String getOperator() { return "\u2265"; }
 	public boolean needsValue() { return true; }	
+	public boolean comparesEquality() { return false; }
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
