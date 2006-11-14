@@ -25,7 +25,7 @@ import workbench.util.ValueConverter;
  */
 public class ParameterDefinition
 {
-	private static final ValueConverter CONVERTER = new ValueConverter();
+	private final ValueConverter converter = new ValueConverter();
 	private int type;
 	private int index;
 	
@@ -45,7 +45,7 @@ public class ParameterDefinition
 	{
 		try
 		{
-			CONVERTER.convertValue(v, this.type);
+			converter.convertValue(v, this.type);
 			return true;
 		}
 		catch (Exception e)
@@ -58,7 +58,7 @@ public class ParameterDefinition
 	{
 		try
 		{
-			this.value = CONVERTER.convertValue(v, this.type);
+			this.value = converter.convertValue(v, this.type);
 			this.valueValid = true;
 		}
 		catch (Exception e)

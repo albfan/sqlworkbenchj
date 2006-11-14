@@ -37,7 +37,6 @@ public class FixedSizeList
 		this.entries = new LinkedList();
 	}
 	
-	
 	/**
 	 * Append an entry at the end of the list, without
 	 * checking for duplicates or removing entries
@@ -81,7 +80,7 @@ public class FixedSizeList
 	
 	public synchronized String toString()
 	{
-		StringBuffer result = new StringBuffer();
+		StringBuffer result = new StringBuffer(entries.size() * 80);
 		Iterator itr = entries.iterator();
 		while (itr.hasNext())
 		{

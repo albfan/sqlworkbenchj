@@ -12,59 +12,131 @@
 package workbench.util;
 
 import java.lang.ref.SoftReference;
+import java.util.LinkedList;
+import workbench.resource.Settings;
 
 /**
  * @author support@sql-workbench.net
  */
 public class MessageBuffer
 {
-	private SoftReference ref;
+	private final boolean useHardReference = Settings.getInstance().getBoolProperty("workbench.messagebuffer.hardreference", true);
 	
-	public MessageBuffer(int size)
+	private LinkedList messages = new LinkedList();
+	private int length = 0;
+	private final String newLine = "\n";
+	private final int maxSize;
+	private boolean trimmed = false;
+	
+	public MessageBuffer()
 	{
-		ensureBuffer(size);
+		this(Settings.getInstance().getIntProperty("workbench.messagebuffer.maxentries", 1000));
 	}
 	
-	public void ensureBuffer(int size)
+	public MessageBuffer(int maxEntries)
 	{
-		if (ref == null || ref.get() == null)
+		maxSize = maxEntries;
+	}
+
+	public synchronized void clear()
+	{
+		this.messages.clear();
+	}
+		
+	public synchronized StringBuffer getBuffer()
+	{
+		StringBuffer result = new StringBuffer(this.length + 50);
+		if (trimmed) result.append("(...)\n");
+		
+		while (messages.size() > 0)
 		{
-			ref = new SoftReference(new StringBuffer(size));
+			CharSequence s = null;
+			if (useHardReference)
+			{
+				s = (CharSequence)messages.removeFirst();
+				result.append(s);
+			}
+			else
+			{
+				SoftReference r = (SoftReference)messages.removeFirst();
+				s = (CharSequence)r.get();
+				if (s == null) s = "(...)\n";
+				result.append(s);
+				r.clear();
+			}
+		}
+		length = 0;
+		return result;
+	}
+
+	private synchronized void trimSize()
+	{
+		if (maxSize > 0 && messages.size() >= maxSize)
+		{
+			trimmed = true;
+			while (messages.size() >= maxSize) 
+			{
+				String s = (String)messages.removeFirst();
+				if (s != null) this.length -= s.length();
+			}		
 		}
 	}
 	
-	public StringBuffer getBuffer()
+	public synchronized int getLength()
 	{
-		if (ref == null) return null;
-		return (StringBuffer)ref.get();
+		return length;
+	}
+	
+	public synchronized void append(String s)
+	{
+		if (s == null || s.length() == 0) return;
+		if (useHardReference)
+		{
+			trimSize();
+			this.messages.add(s);
+		}
+		else
+		{
+			SoftReference r = new SoftReference(s);
+			this.messages.add(r);
+		}
+		length += s.length();
+	}
+	
+	public synchronized void append(StringBuffer s)
+	{
+		if (s == null || s.length() == 0) return;
+		if (useHardReference)
+		{
+			trimSize();
+			this.messages.add(s);
+		}
+		else
+		{
+			SoftReference r = new SoftReference(s);
+			this.messages.add(r);
+		}
+		length += s.length();
+	}
+	
+	public synchronized void appendNewLine()
+	{
+		if (useHardReference)
+		{
+			trimSize();
+			this.messages.add(newLine);
+		}
+		else
+		{
+			SoftReference r = new SoftReference(newLine);
+			this.messages.add(r);
+		}
+		length ++;
 	}
 
-	public int getLength()
+	public String toString()
 	{
-		StringBuffer b = getBuffer();
-		if (b == null) return 0;
-		return b.length();
-	}
-	
-	public void append(String s)
-	{
-		StringBuffer b = getBuffer();
-		if (b == null) return;
-		b.append(s);
-	}
-	
-	public void append(StringBuffer s)
-	{
-		StringBuffer b = getBuffer();
-		if (b == null) return;
-		b.append(s);
-	}
-	
-	public void append(char c)
-	{
-		StringBuffer b = getBuffer();
-		if (b == null) return;
-		b.append(c);
+		return getBuffer().toString();
 	}
 	
 }

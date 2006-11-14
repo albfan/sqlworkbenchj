@@ -22,12 +22,16 @@ public class SourceStatementsHelp
 	{
 	}
 	
+	public static final String VIEW_ERROR_START = "Support for displaying view source is currently not configured for:";
+	public static final String PROC_ERROR_START = "Support for displaying procedure source is currently not configured for:";
+	
 	public String explainMissingViewSourceSql(String product)
 	{
-		String explain = "Currently no SQL query is configured\n" +
-			" to retrieve the source of a view for your DBMS.\n" + 
-			"To enable this, create a file called ViewSourceStatements.xml\n" +
+		String explain = VIEW_ERROR_START + " " + product +
+			"\n\nTo enable this, create a file called ViewSourceStatements.xml\n" +
 			"in the same directory where Workbench.jar is located,\nand supply the necessary SELECT statement (where indicated) to retrieve the source from the DBMS:\n\n" +
+			"------- Example -----\n" +
+			"---------------------\n\n" +
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>  \n" + 
 			"<java version=\"1.4.0_01\" class=\"java.beans.XMLDecoder\">  \n" + 
 			" \n" + 
@@ -57,13 +61,13 @@ public class SourceStatementsHelp
 
 	public String explainMissingProcSourceSql(String product)
 	{
-		String explain = "Currently no SQL query is configured to retrieve the source\n" +
-			"of a stored procedure for your DBMS.\n" + 
-			"To enable this, create a file called ProcSourceStatements.xml\n" +
-			"in the same directory where Workbench.jar is located,\nand supply the necessary SELECT statement (where indicated) to retrieve the source from your DBMS:\n\n" +
+		String explain = PROC_ERROR_START + " " + product +
+			"\n\nTo enable this, create a file called ProcSourceStatements.xml\n" +
+			"in the same directory where Workbench.jar is located,\nand supply the necessary SELECT statement (where indicated) to retrieve the source from the DBMS:\n\n" +
+			"------- Example -----\n" +
+			"---------------------\n\n" +
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>  \n" + 
 			"<java version=\"1.4.0_01\" class=\"java.beans.XMLDecoder\">  \n" + 
-			" \n" + 
 			" <object class=\"java.util.HashMap\">  \n" + 
 			"  <void method=\"put\">  \n" + 
 			"   <string>" + product + "</string>  \n" + 

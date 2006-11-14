@@ -118,6 +118,12 @@ public class WbConnection
 		return this.metaData.getUserName();
 	}
 
+	public boolean supportsQueryTimeout()
+	{
+		if (this.metaData == null) return true;
+		return this.metaData.supportsQueryTimeout();
+	}
+	
 	/**
 	 * @return The profile associated with this connection
 	 */

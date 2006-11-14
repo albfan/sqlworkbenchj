@@ -30,37 +30,40 @@ public class ValueConverter
 	 *	Often used date formats which are tried when parsing a Date
 	 *  or a TimeStamp column
 	 */
-	private static final String[] dateFormats = new String[] {
+	private final String[] dateFormats = new String[] {
+														"yyyy-MM-dd",
+														"dd.MM.yyyy",
+														"dd.MM.yy",
+														"MM/dd/yy",
+														"MM/dd/yyyy",
+														"dd-MMM-yyyy",
 														"yyyy-MM-dd HH:mm:ss.SS",
 														"yyyy-MM-dd HH:mm:ss",
 														"dd.MM.yyyy HH:mm:ss",
 														"MM/dd/yy HH:mm:ss",
-														"MM/dd/yyyy HH:mm:ss",
-														"yyyy-MM-dd",
-														"dd.MM.yyyy",
-														"MM/dd/yy",
-														"MM/dd/yyyy",
-														"dd-MMM-yyyy"
+														"MM/dd/yyyy HH:mm:ss"
 													};
 													
-	private static final String[] timestampFormats = new String[] {
+	private final String[] timestampFormats = new String[] {
 														"yyyy-MM-dd HH:mm:ss.SS",
 														"yyyy-MM-dd HH:mm:ss",
 														"dd.MM.yyyy HH:mm:ss.SS",
 														"dd.MM.yyyy HH:mm:ss",
-														"MM/dd/yy HH:mm:ss.SS",
-														"MM/dd/yy HH:mm:ss",
+														"dd.MM.yy HH:mm:ss.SS",
+														"dd.MM.yy HH:mm:ss",
 														"MM/dd/yyyy HH:mm:ss.SS",
 														"MM/dd/yyyy HH:mm:ss",
+														"MM/dd/yy HH:mm:ss.SS",
+														"MM/dd/yy HH:mm:ss",
 														"yyyy-MM-dd",
 														"dd.MM.yyyy",
+														"dd.MM.yy",
 														"MM/dd/yy",
 														"MM/dd/yyyy",
-														"dd-MMM-yyyy"
 													};
 
-	private static final String[] timeFormats = new String[] { "HH:mm:ss.SS", "HH:mm:ss", "HH:mm" };
-	private static final SimpleDateFormat timeFormatter = new SimpleDateFormat();
+	private final String[] timeFormats = new String[] { "HH:mm:ss.SS", "HH:mm:ss", "HH:mm" };
+	private final SimpleDateFormat timeFormatter = new SimpleDateFormat();
 	
 	private String defaultDateFormat;
 	private String defaultTimestampFormat;

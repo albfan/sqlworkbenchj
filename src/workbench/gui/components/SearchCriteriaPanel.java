@@ -13,14 +13,14 @@ package workbench.gui.components;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.EventQueue;
 import java.awt.GridLayout;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import workbench.interfaces.ValidatingComponent;
 
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -31,6 +31,7 @@ import workbench.resource.Settings;
  */
 public class SearchCriteriaPanel
 	extends JPanel
+	implements ValidatingComponent
 {
 	private static final String PROP_CLASS = "workbench.sql.search";
 	private static final String PROP_KEY_CASE = PROP_CLASS + ".ignoreCase";
@@ -87,14 +88,6 @@ public class SearchCriteriaPanel
 		p.add(this.useRegEx);
 		
 		this.add(p, BorderLayout.SOUTH);
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				criteria.requestFocusInWindow();
-			}
-		});
-		
 	}
 
 	public String getCriteria()
@@ -128,19 +121,24 @@ public class SearchCriteriaPanel
 	
 	public boolean showFindDialog(Component caller)
 	{
-		EventQueue.invokeLater(new Runnable() {
-			public void run()
-			{
-				criteria.grabFocus();
-			}
-		});
 		String title = ResourceMgr.getString("TxtWindowTitleSearchText");
-		int choice = JOptionPane.showConfirmDialog(caller, this, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		boolean result = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(caller), this, title);
+		
 		Settings.getInstance().setProperty(PROP_KEY_CASE, this.getIgnoreCase());
 		Settings.getInstance().setProperty(PROP_KEY_CRIT, this.getCriteria());
 		Settings.getInstance().setProperty(PROP_KEY_WHOLE_WORD, this.getWholeWordOnly());
 		Settings.getInstance().setProperty(PROP_KEY_REGEX, this.getUseRegex());
-		return (choice == JOptionPane.OK_OPTION);
+		return result;
+	}
+
+	public boolean validateInput()
+	{
+		return true;
+	}
+
+	public void componentDisplayed()
+	{
+		criteria.requestFocusInWindow();
 	}
 	
 }

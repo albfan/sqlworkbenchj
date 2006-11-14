@@ -127,7 +127,7 @@ public class DataImporter
 
 	public DataImporter()
 	{
-		this.messages = new MessageBuffer(1000);
+		this.messages = new MessageBuffer();
 	}
 
 	public void setConnection(WbConnection aConn)
@@ -473,7 +473,7 @@ public class DataImporter
 		{
 			String msg = ResourceMgr.getString("MsgImportTableTruncated").replaceAll("%table%", this.targetTable.getTableExpression(this.dbConn));
 			this.messages.append(msg);
-			this.messages.append('\n');
+			this.messages.appendNewLine();
 		}
 		else
 		{
@@ -543,9 +543,9 @@ public class DataImporter
 		{
 			if (!errorLimitAdded)
 			{
-				messages.append("\n");
+				messages.appendNewLine();
 				messages.append(ResourceMgr.getString("MsgImpTooManyError"));
-				messages.append('\n');
+				messages.appendNewLine();
 				errorLimitAdded = true;
 			}
 		}
@@ -569,7 +569,7 @@ public class DataImporter
 			String msg = ResourceMgr.getString("MsgPartialImportEnded");
 			msg = StringUtil.replace(msg, "%rowlimit%", Long.toString(endRow));
 			this.messages.append(msg);
-			this.messages.append('\n');
+			this.messages.appendNewLine();
 			this.source.stop();
 			return;
 		}
@@ -649,14 +649,14 @@ public class DataImporter
 			this.hasErrors = true;
 			closeStatements();
 			System.gc();
-			this.messages.ensureBuffer(100);
 			this.messages.append(ResourceMgr.getString("MsgOutOfMemoryGeneric"));
-			this.messages.append('\n');
+			this.messages.appendNewLine();
 			if (this.batchSize > 0)
 			{
 				LogMgr.logError("DataImporter.processRow()", "Not enough memory to hold statement batch! Use the -batchSize parameter to reduce the batch size!", null);
 				this.messages.append(ResourceMgr.getString("MsgOutOfMemoryJdbcBatch"));
-				this.messages.append("\n\n");
+				this.messages.appendNewLine();
+				this.messages.appendNewLine();
 			}
 			else
 			{
@@ -690,7 +690,7 @@ public class DataImporter
 			{
 				this.hasErrors = true;
 				closeStatements();
-				this.messages.ensureBuffer(100);
+				this.messages = new MessageBuffer();
 				System.gc();
 				this.messages.append(ResourceMgr.getString("MsgOutOfMemoryGeneric"));
 				throw new SQLException("Not enough memory!");
@@ -699,7 +699,8 @@ public class DataImporter
 			{
 				this.hasErrors = true;
 				LogMgr.logError("DataImporter.processRow()", "Error executing batch after " + currentImportRow + " rows", e);
-				this.addError(ResourceMgr.getString("ErrImportExecuteBatchQueue") + "\n\n");
+				this.addError(ResourceMgr.getString("ErrImportExecuteBatchQueue") + "\n");
+				this.addError(e.getMessage());
 				if (!this.continueOnError) throw e;
 			}
 		}
@@ -1029,9 +1030,9 @@ public class DataImporter
 		if (this.parser != null)
 		{
 			this.messages.append(ResourceMgr.getString("MsgImportingFile"));
-			this.messages.append(' ');
+			this.messages.appendNewLine();
 			this.messages.append(this.parser.getSourceFilename());
-			this.messages.append('\n');
+			this.messages.appendNewLine();
 		}
 
 		this.errorCount = 0;
@@ -1393,13 +1394,13 @@ public class DataImporter
 			if (this.insertedRows > -1)
 			{
 				this.messages.append(this.insertedRows + " " + ResourceMgr.getString("MsgCopyNumRowsInserted"));
-				this.messages.append('\n');
+				this.messages.appendNewLine();
 			}
 			if (this.updatedRows > -1)
 			{
 				this.messages.append(this.updatedRows + " " + ResourceMgr.getString("MsgCopyNumRowsUpdated"));
 			}
-			this.messages.append('\n');
+			this.messages.appendNewLine();
 		}
 		catch (SQLException e)
 		{
@@ -1408,15 +1409,14 @@ public class DataImporter
 				try { this.dbConn.rollback(); } catch (Throwable ignore) {}
 			}
 			LogMgr.logError("DataImporter.finishTable()", "Error commiting changes", e);
-			this.messages.append(ExceptionUtil.getDisplay(e) + "\n");
+			this.messages.append(ExceptionUtil.getDisplay(e));
+			this.messages.appendNewLine();
 			throw e;
 		}
 	}
 
 	/** 
 	 * Return the messages generated during import.
-	 * The reference to the internal Buffer will be cleared
-	 * after this call. So a second call will return null!
 	 */
 	public StringBuffer getMessages()
 	{

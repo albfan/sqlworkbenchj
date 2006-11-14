@@ -45,6 +45,7 @@ public class StatementRunnerResult
 	public StatementRunnerResult()
 	{
 		this.timingFormatter = createTimingFormatter();
+		this.messages = new MessageBuffer();
 	}
 	
 	public StatementRunnerResult(String aCmd)
@@ -103,6 +104,11 @@ public class StatementRunnerResult
 		return this.results.size();
 	}
 
+	void dumpMessageBuffer()
+	{
+		System.out.println((this.messages == null ? "null" : messages.toString()));
+	}
+	
 	public void addUpdateCount(int count)
 	{
 		if (this.updateCounts == null) this.updateCounts = new ArrayList();
@@ -120,25 +126,19 @@ public class StatementRunnerResult
 		if (msg == null || msg.length == 0) return;
 		for (int i=0; i < msg.length; i++)
 		{
-			this.addMessage(msg[i]);
+			this.messages.append(msg[i]);
 		}
 	}
 
-	private void checkMessageBuffer()
-	{
-		if (messages == null) messages = new MessageBuffer(500);
-	}
 	public void addMessage(StringBuffer msgBuffer)
 	{
-		checkMessageBuffer();
-		if (messages.getLength() > 0) messages.append('\n');
+		if (messages.getLength() > 0) messages.appendNewLine();
 		messages.append(msgBuffer);
 	}
 	
 	public void addMessage(String msg)
 	{
-		checkMessageBuffer();
-		if (messages.getLength() > 0) messages.append('\n');
+		if (messages.getLength() > 0) messages.appendNewLine();
 		messages.append(msg);
 	}
 
@@ -197,14 +197,14 @@ public class StatementRunnerResult
 	{
 		if (this.messages == null) return null;
 		StringBuffer b = messages.getBuffer();
-		if (b == null) 
-		{
-			// If we have a SoftReference but the buffer is null
-			// this means at least one message was added, but 
-			// the buffer was removed due to tight memory.
-			// In this case a warning is returned.
-			b = new StringBuffer(ResourceMgr.getString("ErrMsgBufferCollected"));
-		}
+//		if (b == null) 
+//		{
+//			// If we have a SoftReference but the buffer is null
+//			// this means at least one message was added, but 
+//			// the buffer was removed due to tight memory.
+//			// In this case a warning is returned.
+//			b = new StringBuffer(ResourceMgr.getString("ErrMsgBufferCollected"));
+//		}
 		return b;
 	}
 	
@@ -266,7 +266,7 @@ public class StatementRunnerResult
 
 	public void clearMessageBuffer()
 	{
-		this.messages = null;
+		this.messages.clear();
 	}
 	
 	public void clear()

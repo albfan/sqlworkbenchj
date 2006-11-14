@@ -13,7 +13,6 @@ package workbench.sql;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +60,6 @@ import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbXslt;
 import workbench.storage.RowActionMonitor;
-import workbench.util.CharacterRange;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.interfaces.ExecutionController;
@@ -389,10 +387,13 @@ public class DefaultStatementRunner
 			}
 		}
 		
-		long sqlExecStart = System.currentTimeMillis();
 		boolean oldReporting = this.currentCommand.getFullErrorReporting();
+		
 		this.currentCommand.setFullErrorReporting(this.fullErrorReporting);
+		
+		long sqlExecStart = System.currentTimeMillis();
 		this.result = this.currentCommand.execute(this.dbConnection, realSql);
+		
 		this.currentCommand.setFullErrorReporting(oldReporting);
 
 		if (this.currentCommand instanceof WbStartBatch && result.isSuccess())

@@ -30,7 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.Map.Entry;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -173,12 +172,12 @@ public class DbMetadata
 	private String tableTypeName;
 	private boolean neverQuoteObjects;
 
-	public static final String TABLE_TYPE_VIEW = "VIEW";
+	private final String TABLE_TYPE_VIEW = "VIEW";
 
-	private String[] TABLE_TYPES_VIEW = new String[] {TABLE_TYPE_VIEW};
-	private String[] TABLE_TYPES_TABLE; 
-	private String[] TABLE_TYPES_SELECTABLE;
-	private List objectsWithData = null;
+	//private String[] tableTypesView = new String[] {TABLE_TYPE_VIEW};
+	private String[] tableTypesTable; 
+	private String[] tableTypesSelectable;
+	private Set objectsWithData = null;
 	private List schemasToIgnore;
 	private List catalogsToIgnore;
 
@@ -444,14 +443,35 @@ public class DbMetadata
 		}
 
 		tableTypeName = settings.getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
-		TABLE_TYPES_TABLE = new String[] {tableTypeName};
-		if (this.isOracle)
+		tableTypesTable = new String[] {tableTypeName};
+		
+		// The tableTypesSelectable array will be used
+		// to fill the completion cache. In that case 
+		// we do not want system tables include (which 
+		// is done in the objectsWithData as that 
+		// drives the "Data" tab in the DbExplorer
+		Set types = getObjectsWithData();
+		Iterator itr = types.iterator();
+		int count = 0;
+		while (itr.hasNext())
 		{
-			TABLE_TYPES_SELECTABLE = new String[] {tableTypeName, TABLE_TYPE_VIEW, "SYNONYM"};
+			String s = ((String)itr.next()).toUpperCase();
+			if (s.indexOf("SYSTEM") == -1)
+			{
+				count ++;
+			}
 		}
-		else
+		tableTypesSelectable = new String[count];
+		itr = types.iterator();
+		int i = 0;
+		while (itr.hasNext())
 		{
-			TABLE_TYPES_SELECTABLE = new String[] {tableTypeName, TABLE_TYPE_VIEW};
+			String s = ((String)itr.next()).toUpperCase();
+			if (s.indexOf("SYSTEM") == -1)
+			{
+				tableTypesSelectable[i] = s;
+				i++;
+			}
 		}
 
 		String quote = settings.getProperty("workbench.db.neverquote","");
@@ -462,9 +482,6 @@ public class DbMetadata
 
 	public String getTableTypeName() { return tableTypeName; }
 	public String getViewTypeName() { return TABLE_TYPE_VIEW; }
-	public String[] getTypeListView() { return TABLE_TYPES_VIEW; }
-	public String[] getTypeListTable() { return TABLE_TYPES_TABLE; }
-	public String[] getTypeListSelectable() { return TABLE_TYPES_SELECTABLE; }
 
 	public boolean getStripProcedureVersion()
 	{
@@ -497,57 +514,46 @@ public class DbMetadata
 	public boolean objectTypeCanContainData(String type)
 	{
 		if (type == null) return false;
+		String ltype = type.toLowerCase();
+		return objectsWithData.contains(type);
+	}
+
+	private Set getObjectsWithData()
+	{
 		if (this.objectsWithData == null)
 		{
 			String keyPrefix = "workbench.db.objecttype.selectable.";
-			String s = Settings.getInstance().getProperty(keyPrefix + getDbId(), null);
-			if (s == null) 
+			String defValue = Settings.getInstance().getProperty(keyPrefix + "default", null);
+			String types = Settings.getInstance().getProperty(keyPrefix + getDbId(), defValue);
+			
+			objectsWithData = new HashSet();
+			
+			if (types == null)
 			{
-				s = Settings.getInstance().getProperty(keyPrefix + "default", null);
-				if (s != null) 
-				{
-					// As we now support materialized views, we silently add
-					// them to the default list. 
-					if (s.indexOf(MVIEW_NAME.toLowerCase()) == -1)
-					{
-						s += "," + MVIEW_NAME.toLowerCase();
-						Settings.getInstance().setProperty(keyPrefix + "default", s);
-					}
-				}
-			}
-
-			if (s == null)
-			{
-				// if not property is set in the configuration
-				// create a sensible default 
-				objectsWithData = new ArrayList();
 				objectsWithData.add("table");
 				objectsWithData.add("system table");
 				objectsWithData.add("view");
 				objectsWithData.add("system view");
 				objectsWithData.add("synonym");
-				if (this.isPostgres) objectsWithData.add("sequence");
-				if (this.isOracle) 
-				{
-					objectsWithData.add(MVIEW_NAME.toLowerCase());
-				}
 			}
 			else
 			{
-				objectsWithData = StringUtil.stringToList(s.toLowerCase(), ",", true, true);
+				List l = StringUtil.stringToList(types.toLowerCase(), ",", true, true);
+				objectsWithData.addAll(l);
+			}
+			
+			if (this.isPostgres) 
+			{
+				objectsWithData.add("sequence");
+			}
+			
+			if (this.isOracle) 
+			{
+				objectsWithData.add(MVIEW_NAME.toLowerCase());
 			}
 		}
-
-		String ltype = type.toLowerCase();
-		int count = objectsWithData.size();
-		for (int i=0; i < count; i++)
-		{
-			String t = (String)objectsWithData.get(i);
-			if (ltype.equals(t)) return true;
-		}
-		return false;
+		return objectsWithData;
 	}
-
 	/**
 	 *	Return the name of the DBMS as reported by the JDBC driver
 	 */
@@ -604,6 +610,12 @@ public class DbMetadata
 		if ("*".equals(ids)) return true;
 		List dbs = StringUtil.stringToList(ids, ",", true, true);
 		return dbs.contains(this.getDbId());
+	}
+
+	public boolean supportsQueryTimeout()
+	{
+		boolean result = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".supportquerytimeout", true);
+		return result;
 	}
 	
 	public boolean supportsGetPrimaryKeys()
@@ -1764,7 +1776,7 @@ public class DbMetadata
 	 */
 	public boolean tableExists(TableIdentifier aTable)
 	{
-		return objectExists(aTable, TABLE_TYPES_TABLE);
+		return objectExists(aTable, tableTypesTable);
 	}
 	
 	public boolean objectExists(TableIdentifier aTable, String type)
@@ -2143,7 +2155,7 @@ public class DbMetadata
 			String col = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
 			int type = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, Types.OTHER);
 			boolean pk = "YES".equals(ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG));
-			ColumnIdentifier ci = new ColumnIdentifier(col, fixColumnType(type), pk);
+			ColumnIdentifier ci = new ColumnIdentifier(quoteObjectname(col), fixColumnType(type), pk);
 			int size = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_SIZE, 0);
 			int digits = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_DIGITS, 0);
 			String nullable = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
@@ -2472,24 +2484,27 @@ public class DbMetadata
 		{
 			// Retrieve the name of the PK index
 			String pkName = "";
-			ResultSet keysRs = null;
-			try
+			if (this.supportsGetPrimaryKeys())
 			{
-				keysRs = this.metaData.getPrimaryKeys(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
-				while (keysRs.next())
+				ResultSet keysRs = null;
+				try
 				{
-					pkName = keysRs.getString("PK_NAME");
+					keysRs = this.metaData.getPrimaryKeys(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
+					while (keysRs.next())
+					{
+						pkName = keysRs.getString("PK_NAME");
+					}
+				}
+				catch (Exception e)
+				{
+					LogMgr.logWarning("DbMetadata.getTableIndexInformation()", "Error retrieving PK information", e);
+				}
+				finally
+				{
+					try { keysRs.close(); } catch (Throwable th) {}
 				}
 			}
-			catch (Exception e)
-			{
-				LogMgr.logWarning("DbMetadata.getTableIndexInformation()", "Error retrieving PK information", e);
-			}
-			finally
-			{
-				try { keysRs.close(); } catch (Throwable th) {}
-			}
-
+			
 			// the idxInfo will hold an ArrayList with
 			// information for each index. The first entry
 			// int he ArrayList will have the unique/non-unique
@@ -2614,19 +2629,19 @@ public class DbMetadata
 		throws SQLException
 	{
 		String schema = this.getCurrentSchema();
-		return getTableList(null, schema, TABLE_TYPES_TABLE);
+		return getTableList(null, schema, tableTypesTable);
 	}
 
 	public List getTableList(String table, String schema)
 		throws SQLException
 	{
-		return getTableList(table, adjustSchemaNameCase(schema), TABLE_TYPES_TABLE);
+		return getTableList(table, adjustSchemaNameCase(schema), tableTypesTable);
 	}
 
 	public List getSelectableObjectsList(String schema)
 		throws SQLException
 	{
-		return getTableList(null, schema, TABLE_TYPES_SELECTABLE, false);
+		return getTableList(null, schema, tableTypesSelectable, false);
 	}
 
 	public List getTableList(String table, String schema, String[] types)

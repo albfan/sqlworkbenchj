@@ -2465,10 +2465,11 @@ public class SqlPanel
 
 	private void showResultMessage(StatementRunnerResult result)
 	{
-		if (result.getMessageBuffer() == null) return;
+		StringBuffer msg = result.getMessageBuffer();
+		if (msg == null) return;
 		try
 		{
-			this.appendToLog(result.getMessageBuffer().toString() + "\n");
+			this.appendToLog(msg.toString() + "\n");
 		}
 		catch (OutOfMemoryError oome)
 		{

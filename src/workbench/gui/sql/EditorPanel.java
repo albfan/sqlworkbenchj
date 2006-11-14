@@ -198,6 +198,24 @@ public class EditorPanel
 		new DropTarget(this, DnDConstants.ACTION_COPY, this);
 	}
 
+	public void disableSqlHighlight()
+	{
+		this.sqlTokenMarker = null;
+		this.setTokenMarker(null);
+	}
+	
+	public void enableSqlHighlight()
+	{
+		if (this.sqlTokenMarker == null)
+		{
+			this.setTokenMarker(new AnsiSQLTokenMarker());
+		}
+		else
+		{
+			this.setTokenMarker(this.sqlTokenMarker);
+		}
+	}
+	
 	public void setDatabaseConnection(WbConnection aConnection)
 	{
 		if (aConnection == null) return;

@@ -471,7 +471,8 @@ public class ProfileTree
 	{
 		DefaultMutableTreeNode group = this.getSelectedGroupNode();
 		if (group == null) return;
-		String newName = WbSwingUtilities.getUserInput(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("LblNewProfileGroup"), "");
+		String oldName = (String)group.getUserObject();
+		String newName = WbSwingUtilities.getUserInput(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("LblNewProfileGroup"), oldName);
 		if (StringUtil.isEmptyString(newName)) return;
 		group.setUserObject(newName);
 		renameGroup(group, newName);

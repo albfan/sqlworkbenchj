@@ -77,7 +77,7 @@ public class SchemaReporter
 		this.dbConn = conn;
 		types = new String[2];
 		types[0] = conn.getMetadata().getTableTypeName();
-		types[1] = DbMetadata.TABLE_TYPE_VIEW;
+		types[1] = conn.getMetadata().getViewTypeName();
 	}
 
 	public void setProgressMonitor(RowActionMonitor mon)

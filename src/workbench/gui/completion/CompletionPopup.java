@@ -40,6 +40,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.editor.JEditTextArea;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 import workbench.util.TableAlias;
 import workbench.util.WbThread;
 
@@ -197,7 +198,11 @@ public class CompletionPopup
 	{
 		if (value == null) return value;
 		String result;
-		if ("lower".equalsIgnoreCase(pasteCase))
+		if (value.trim().charAt(0) == '"')
+		{
+			result = value;
+		}
+		else if ("lower".equalsIgnoreCase(pasteCase))
 		{
 			result = value.toLowerCase();
 		}
@@ -345,7 +350,7 @@ public class CompletionPopup
 		String search = s.toLowerCase();
 		for (int i=0; i < count; i++)
 		{
-			String entry = this.data.getElementAt(i).toString();
+			String entry = StringUtil.trimQuotes(this.data.getElementAt(i).toString());
 			if (entry.toLowerCase().startsWith(search)) return i;
 		}
 		return -1;

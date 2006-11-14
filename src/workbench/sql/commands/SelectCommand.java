@@ -57,19 +57,19 @@ public class SelectCommand extends SqlCommand
 				{
 					isPrepared = true;
 				}
-				else
-				{
-					this.currentStatement = aConnection.createStatementForQuery();
-				}
 			}
-			else
+			
+			if (this.currentStatement == null)
 			{
 				this.currentStatement = aConnection.createStatementForQuery();
 			}
 			
 			try 
 			{ 
-				if (this.queryTimeout >= 0) this.currentStatement.setQueryTimeout(this.queryTimeout); 
+				if (this.queryTimeout >= 0 && aConnection.supportsQueryTimeout())
+				{
+					this.currentStatement.setQueryTimeout(this.queryTimeout); 
+				}
 			} 
 			catch (Throwable th) 
 			{
@@ -112,7 +112,7 @@ public class SelectCommand extends SqlCommand
 					StringBuffer warnings = new StringBuffer();
 					if (this.appendWarnings(aConnection, this.currentStatement, warnings))
 					{
-						result.addMessage(warnings.toString());
+						result.addMessage(warnings);
 					}
 				}
 				else

@@ -717,10 +717,6 @@ public class WbExport
 		this.maxRows = rows;
 	}
 
-	public void preConsume(SqlCommand producer)
-	{
-		
-	}
 	public void consumeResult(StatementRunnerResult aResult)
 	{
 		// Run an export that is defined by a SQL Statement

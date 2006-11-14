@@ -11,10 +11,12 @@
  */
 package workbench.db;
 
-import javax.xml.transform.Result;
+import java.util.ArrayList;
+import java.util.List;
 import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbStringTokenizer;
 
 /**
  *
@@ -280,21 +282,31 @@ public class TableIdentifier
 			return;
 		}
 
-		String[] elements = aTable.split("\\.");
-		if (elements.length == 1)
+		//String[] elements = aTable.split("\\.");
+		//List l = StringUtil.stringToList(aTable, ".", true, true, false);
+		
+		List elements = new ArrayList(4);
+		WbStringTokenizer tok = new WbStringTokenizer('.', "\"", true);
+		tok.setSourceString(aTable);
+		while (tok.hasMoreTokens())
+		{
+			elements.add(tok.nextToken());
+		}
+		
+		if (elements.size() == 1)
 		{
 			setTablename(aTable);
 		}
-		else if (elements.length == 2)
+		else if (elements.size() == 2)
 		{
-			setSchema(elements[0]);
-			setTablename(elements[1]);
+			setSchema((String)elements.get(0));
+			setTablename((String)elements.get(1));
 		}
-		else if (elements.length == 3)
+		else if (elements.size() == 3)
 		{
-			setCatalog(elements[0]);
-			setSchema(elements[1]);
-			setTablename(elements[2]);
+			setCatalog((String)elements.get(0));
+			setSchema((String)elements.get(1));
+			setTablename((String)elements.get(2));
 		}
 
 		this.expression = null;

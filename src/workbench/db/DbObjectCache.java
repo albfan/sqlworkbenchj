@@ -26,7 +26,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 /**
- * A cache for DbObjects to support Auto-completion in the editor
+ * A cache for database objects to support Auto-completion in the editor
  * @author  support@sql-workbench.net
  */
 public class DbObjectCache

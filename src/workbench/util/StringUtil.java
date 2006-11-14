@@ -808,9 +808,18 @@ public class StringUtil
 		if (data == null) return -1;
 		int count = data.length();
 		if (start >= count) return -1;
+		boolean inQuotes = false;
 		for (int i=start; i < count; i++)
 		{
-			if (Character.isWhitespace(data.charAt(i))) return i;
+			char c = data.charAt(i);
+			if (c == '"') 
+			{
+				inQuotes = !inQuotes;
+			}
+			if (!inQuotes)
+			{
+				if (Character.isWhitespace(data.charAt(i))) return i;
+			}
 		}
 		return -1;
 	}

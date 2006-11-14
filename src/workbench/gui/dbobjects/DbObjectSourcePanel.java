@@ -16,6 +16,7 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JPanel;
+import workbench.db.SourceStatementsHelp;
 import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.ReloadAction;
@@ -110,17 +111,28 @@ public class DbObjectSourcePanel
 	
 	public void setText(final String sql)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
+//		EventQueue.invokeLater(new Runnable()
+//		{
+//			public void run()
+//			{
 				sourceEditor.setText(sql);
 				boolean hasText = !StringUtil.isEmptyString(sql);
 				if (reloadSource != null) reloadSource.setEnabled(hasText);
 				if (recreateObject != null) recreateObject.setEnabled(hasText);
 				if (editButton != null) editButton.setEnabled(hasText);
-			}
-		});
+				if (sql.startsWith(SourceStatementsHelp.VIEW_ERROR_START) || 
+					  sql.startsWith(SourceStatementsHelp.PROC_ERROR_START) ||
+					  sql.startsWith(ResourceMgr.getString("MsgSynonymSourceNotImplemented"))
+					 )
+				{
+					sourceEditor.disableSqlHighlight();
+				}
+				else
+				{
+					sourceEditor.enableSqlHighlight();
+				}
+//			}
+//		});
 	}
 	
 	public String getText()

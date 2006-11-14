@@ -350,7 +350,6 @@ public class SqlCommand
 
 	public void setMaxRows(int max) { maxRows = max; }
 	public boolean isResultSetConsumer() { return false; }
-	public void preConsume(SqlCommand producer) {}
 	public void consumeResult(StatementRunnerResult aResult) {}
 
 	protected String evaluateFileArgument(String fileName)

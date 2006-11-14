@@ -82,12 +82,8 @@ public class DdlAnalyzer
 		else if ("VIEW".equals(type) && cursorPos >= typeToken.getCharEnd())
 		{
 			context = CONTEXT_TABLE_LIST;
-			setTableTypeFilter(DbMetadata.TABLE_TYPE_VIEW);
+			setTableTypeFilter(this.dbConnection.getMetadata().getViewTypeName());
 		}
-//		else if ("INDEX".equals(type) && cursorPos >= typeToken.getCharEnd())
-//		{
-//			context = CONTEXT_INDEX_LIST;
-//		}
 	}
 
 

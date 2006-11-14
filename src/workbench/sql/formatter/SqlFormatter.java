@@ -302,23 +302,30 @@ public class SqlFormatter
 		char currChar = current.getContents().charAt(0);
 		if (last.isWhiteSpace() && current.isWhiteSpace()) return false;
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
-		if (currChar == '(' && isDbFunction(last.getContents())) return false;
-		if (currChar == '(' && last.isReservedWord()) return true;
-		//if (currChar == '(' && last.getContents().equals("SET")) return true;
+		boolean isCurrentOpenBracket = "(".equals(current.getContents());
+		boolean isLastOpenBracket = "(".equals(last.getContents());
+		boolean isLastCloseBracket = ")".equals(last.getContents());
+		
+		if (isCurrentOpenBracket && last.isIdentifier()) return false;
+		if (isCurrentOpenBracket && isDbFunction(last.getContents())) return false;
+		if (isCurrentOpenBracket && last.isReservedWord()) return true;
+		if (isLastCloseBracket && currChar == ',') return false;
+		if (isLastCloseBracket && (current.isIdentifier() || current.isReservedWord())) return true;
+
 		if ((lastChar == '-' || lastChar == '+') && current.isLiteral() && StringUtil.isNumber(current.getContents())) return false;
 		
 		if (last.isLiteral() && (current.isIdentifier() || current.isReservedWord() || current.isOperator())) return true;
 
-		if (last.isLiteral() && current.isLiteral()) return false;
+		//if (last.isLiteral() && current.isLiteral()) return false;
+		
 		if (currChar == '?') return true;
-		if (currChar == '=') return true;
-		if (lastChar == '=') return true;
+		if (current.getContents().equals("=")) return true;
+		if (last.getContents().equals("=")) return true;
 		
 		if (lastChar == '.' && current.isIdentifier()) return false;
-		if (lastChar == '(' && current.isReservedWord()) return false;
-		if (lastChar == ')' && currChar == '.') return false;
-		if (lastChar == ')' && !current.isSeparator() ) return true;
-		if ((last.isIdentifier()|| last.isLiteral()) && current.isOperator()) return true;
+		if (isLastOpenBracket && current.isReservedWord()) return false;
+		if (isLastCloseBracket && !current.isSeparator() ) return true;
+		if ((last.isIdentifier() || last.isLiteral()) && current.isOperator()) return true;
 		if ((current.isIdentifier() || current.isLiteral()) && last.isOperator()) return true;
 		if (current.isSeparator() || current.isOperator()) return false;
 		if (last.isOperator() && (current.isReservedWord() || current.isIdentifier() || current.isLiteral())) return true;
@@ -326,14 +333,14 @@ public class SqlFormatter
 		return true;
 	}
 
-	private SQLToken processFrom()
+	private SQLToken processFrom(SQLToken last)
 		throws Exception
 	{
 		StringBuffer b = new StringBuffer("     ");
 		StringBuffer oldIndent = this.indent;
 		//this.indent = null;
 		SQLToken t = this.lexer.getNextToken(true, false);
-		SQLToken lastToken = t;
+		SQLToken lastToken = last;
 		while (t != null)
 		{
 			String text = t.getContents();
@@ -446,7 +453,7 @@ public class SqlFormatter
 				}
 				else
 				{
-					this.processFunctionCall(t);
+					t = this.processFunctionCall(t);
 				}
 			}
 			else if (t.isSeparator() && text.equals(","))
@@ -707,7 +714,8 @@ public class SqlFormatter
 			else if (t.isSeparator() && text.equals("("))
 			{
 				this.appendText(" (");
-				this.processFunctionCall(t);
+				t = this.processFunctionCall(t);
+				continue;
 			}
 			else if (t.isSeparator() && text.equals(","))
 			{
@@ -894,7 +902,7 @@ public class SqlFormatter
 				if (word.equals("FROM"))
 				{
 					lastToken = t;
-					t = this.processFrom();
+					t = this.processFrom(t);
 					if (t == null) return;
 					continue;
 				}
@@ -970,7 +978,7 @@ public class SqlFormatter
 				{
 					if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
 					this.appendText('(');
-					this.processFunctionCall(t);
+					t = this.processFunctionCall(t);
 				}
 				else
 				{
@@ -1119,7 +1127,7 @@ public class SqlFormatter
 		}
 	}
 
-	private void processFunctionCall(SQLToken last)
+	private SQLToken processFunctionCall(SQLToken last)
 		throws Exception
 	{
 		int bracketCount = 1;
@@ -1141,12 +1149,12 @@ public class SqlFormatter
 
 			if (bracketCount == 0)
 			{
-				this.appendText(' ');
-				break;
+				return t;
 			}
 			lastToken = t;
 			t = this.lexer.getNextToken(true, false);
 		}
+		return null;
 	}
 
 	private SQLToken processCreate(SQLToken previous)

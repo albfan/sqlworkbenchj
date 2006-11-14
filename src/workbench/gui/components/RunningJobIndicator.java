@@ -11,10 +11,7 @@
  */
 package workbench.gui.components;
 
-import com.sun.corba.se.impl.orb.PrefixParserAction;
 import javax.swing.JFrame;
-import workbench.gui.WbSwingUtilities;
-import workbench.log.LogMgr;
 
 /**
  * @author thomas
