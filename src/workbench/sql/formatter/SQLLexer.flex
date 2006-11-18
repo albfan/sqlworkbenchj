@@ -153,7 +153,6 @@ keyword=("ABORT"|
 "BIT_LENGTH"|
 "BITVAR"|
 "BLOB"|
-"BODY"|
 "BOOLEAN"|
 "BOTH"|
 "BREADTH"|
@@ -219,7 +218,6 @@ keyword=("ABORT"|
 "CREATE"|
 "CREATEDB"|
 "CREATEUSER"|
-"CROSS JOIN"|
 "CROSS"|
 "CUBE"|
 "CURRENT"|
@@ -290,7 +288,6 @@ keyword=("ABORT"|
 "EXECUTE"|
 "EXISTING"|
 "EXISTS"|
-"EXPLAIN PLAN"|
 "EXPLAIN"|
 "EXTERNAL"|
 "EXTRACT"|
@@ -308,9 +305,6 @@ keyword=("ABORT"|
 "FREE"|
 "FREEZE"|
 "FROM"|
-"FULL JOIN"|
-"FULL OUTER JOIN"|
-"FULL"|
 "FUNCTION"|
 "GENERAL"|
 "GENERATED"|
@@ -320,7 +314,6 @@ keyword=("ABORT"|
 "GOTO"|
 "GRANT"|
 "GRANTED"|
-"GROUP BY"|
 "GROUPING"|
 "HANDLER"|
 "HAVING"|
@@ -342,8 +335,6 @@ keyword=("ABORT"|
 "INHERITS"|
 "INITIALIZE"|
 "INITIALLY"|
-"INNER JOIN"|
-"INNER"|
 "INOUT"|
 "INPUT"|
 "INSENSITIVE"|
@@ -372,8 +363,6 @@ keyword=("ABORT"|
 "LAST"|
 "LATERAL"|
 "LEADING"|
-"LEFT JOIN"|
-"LEFT OUTER JOIN"|
 "LEFT"|
 "LENGTH"|
 "LESS"|
@@ -391,7 +380,6 @@ keyword=("ABORT"|
 "LOWER"|
 "MAP"|
 "MATCH"|
-"MATERIALIZED VIEW"|
 "MAX"|
 "MAXVALUE"|
 "MESSAGE_LENGTH"|
@@ -424,7 +412,6 @@ keyword=("ABORT"|
 "NOT"|
 "NOTHING"|
 "NOTIFY"|
-"NOT NULL"|
 "NOTNULL"|
 "NULL"|
 "NULLABLE"|
@@ -447,11 +434,9 @@ keyword=("ABORT"|
 "OPTION"|
 "OPTIONS"|
 "OR"|
-"ORDER BY"|
 "ORDINALITY"|
 "ORGANIZATION"|
 "OUT"|
-"OUTER"|
 "OUTPUT"|
 "OVERLAPS"|
 "OVERLAY"|
@@ -508,8 +493,6 @@ keyword=("ABORT"|
 "RETURNED_SQLSTATE"|
 "RETURNS"|
 "REVOKE"|
-"RIGHT JOIN"|
-"RIGHT OUTER JOIN"|
 "RIGHT"|
 "ROLLBACK"|
 "ROLLUP"|
@@ -553,7 +536,6 @@ keyword=("ABORT"|
 "SQLEXCEPTION"|
 "SQLSTATE"|
 "SQLWARNING"|
-"START WITH"|
 "START"|
 "STATEMENT"|
 "STATIC"|
@@ -581,7 +563,6 @@ keyword=("ABORT"|
 "TRUE"|
 "TRUSTED"|
 "TYPE"|
-"UNION ALL"|
 "UNION"|
 "UNIQUE"|
 "UNTIL"|
@@ -630,18 +611,39 @@ keyword=("ABORT"|
 "WORK"|
 "WRITE"|
 "YEAR"|
-"ZONE"
+"ZONE"|
+CASCADE[ \t\r\n]+CONSTRAINTS|
+PRIMARY[ \t\r\n]+KEY|
+FOREIGN[ \t\r\n]+KEY|
+IS[ \t\r\n]+NULL|
+NOT[ \t\r\n]+NULL|
+UNION[ \t\r\n]+ALL|
+GROUP[ \t\r\n]+BY|
+ORDER[ \t\r\n]+BY|
+EXPLAIN[ \t\r\n]+PLAN|
+PACKAGE[ \t\r\n]+BODY|
+CREATE[ \t\r\n]+OR[ \t\r\n]+REPLACE|
+MATERIALIZED[ \t\r\n]+VIEW|
+START[ \t\r\n]+WITH|
+OUTER[ \t\r\n]+JOIN|
+CROSS[ \t\r\n]+JOIN|
+FULL[ \t\r\n]+JOIN|
+FULL[ \t\r\n]+OUTER[ \t\r\n]+JOIN|
+INNER[ \t\r\n]+JOIN|
+LEFT[ \t\r\n]+JOIN|
+LEFT[ \t\r\n]+OUTER[ \t\r\n]+JOIN|
+RIGHT[ \t\r\n]+JOIN|
+RIGHT[ \t\r\n]+OUTER[ \t\r\n]+JOIN
 )
 
 whitespace=([ \r\n\t\f])
-identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\#\%\^\&\'\~\?\(\)\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\[\,\;\:\*]*)|(\"[^\r\n\t\f\+\*\<\>\!\%\^\&\'\"\?\(\)\[\,\;\:\*]*\")
+identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\#\%\^\&\'\~\?\(\)\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\[\,\;\:\*]*)|(\"[^\r\n\t\f\+\*\<\>\!\%\^\&\'\"\?\(\)\;\:\*]*\")
 digit=([0-9])
 digits=({digit}+)
 separator=([\(\)\[\]\,\;\:\*])
 operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"*="|"=*"|"<="|">="|"(+)")
 integer=({digits})
 string=([\'](([^\r\n\']|[\\][\'])*)[\'])
-/* |([\"](([^\r\n\']|[\\][\'])*)[\"]) */
 bitstring=("B"[\']([01]+)[\'])
 stringerror=([\'](([^\r\n\']|[\\][\'])*)[\r\n])
 bitstringerror1=("B"[\']([^01\r\n]*)[\'])

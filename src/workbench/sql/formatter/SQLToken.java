@@ -17,6 +17,8 @@
  */
 package workbench.sql.formatter;
 
+import java.util.regex.Pattern;
+
 /**
  * A SQLToken is a token that is returned by a lexer that is lexing an SQL
  * source file.  It has several attributes describing the token:
@@ -107,6 +109,7 @@ public class SQLToken
 	private int charEnd;
 	private int state;
 
+	private static final Pattern WHITESPACE = Pattern.compile("[ \t\r\n]+");
 	/**
 	 * Create a new token.
 	 * The constructor is typically called by the lexer
@@ -133,10 +136,13 @@ public class SQLToken
 	 * @param charEnd the offset into the input in characters at which this token ended
 	 * @param state the state the tokenizer is in after returning this token.
 	 */
-	public SQLToken(int ID, String contents, int lineNumber, int charBegin, int charEnd, int state)
+	public SQLToken(int ID, String text, int lineNumber, int charBegin, int charEnd, int state)
 	{
 		this.ID = ID;
-		this.contents = contents;
+		// Some keywords can contain whitespace. We need 
+		// to make sure the whitespace is "compressed" i.e. 
+		// multiple whitespace characters are replaced by single one.
+		this.contents = WHITESPACE.matcher(text).replaceAll(" ");
 		this.lineNumber = lineNumber;
 		this.charBegin = charBegin;
 		this.charEnd = charEnd;

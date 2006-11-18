@@ -64,15 +64,7 @@ public class SqlFormatter
 		LINE_BREAK_AFTER.add("INTERSECT");
 		LINE_BREAK_AFTER.add("AS");
 		LINE_BREAK_AFTER.add("FOR");
-		//LINE_BREAK_AFTER.add("JOIN");
 	}
-
-//	private final Set SUBSELECT_START = new HashSet();
-//	{
-//		SUBSELECT_START.add("IN");
-//		SUBSELECT_START.add("EXISTS");
-//		SUBSELECT_START.add("=");
-//	}
 
 	// keywords terminating a WHERE clause
 	public static final Set WHERE_TERMINAL = new HashSet();
@@ -108,13 +100,13 @@ public class SqlFormatter
 		GROUP_BY_TERMINAL.add("DELETE");
 		GROUP_BY_TERMINAL.add("INSERT");
 		GROUP_BY_TERMINAL.add("CREATE");
-		GROUP_BY_TERMINAL.add("GROUP");
-		GROUP_BY_TERMINAL.add(";");
+		GROUP_BY_TERMINAL.add("CREATE OR REPLACE");
 	}
 	
 	private final Set ORDER_BY_TERMINAL = new HashSet();
 	{
 		ORDER_BY_TERMINAL.remove("GROUP BY");
+		ORDER_BY_TERMINAL.add(";");
 	}
 
 	public static final Set SELECT_TERMINAL = new HashSet(1);
@@ -165,6 +157,7 @@ public class SqlFormatter
 	{
 		return nl;
 	}
+	
 	public void setMaxColumnsPerSelect(int cols)
 	{
 		this.selectColumnsPerLine = cols;
@@ -907,7 +900,7 @@ public class SqlFormatter
 					continue;
 				}
 
-				if (word.equals("CREATE"))
+				if (word.equals("CREATE") || word.equals("CREATE OR REPLACE"))
 				{
 					lastToken = t;
 					t = this.processCreate(t);
