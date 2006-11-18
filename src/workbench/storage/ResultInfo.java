@@ -74,6 +74,14 @@ public class ResultInfo
 		throws SQLException
 	{
 		this.columns = conn.getMetadata().getColumnIdentifiers(table);
+		for (int i = 0; i < columns.length; i++)
+		{
+			if (columns[i].isPkColumn())
+			{
+				this.hasPkColumns = true;
+				break;
+			}
+		}
 		this.colCount = this.columns.length;
 	}
 	
