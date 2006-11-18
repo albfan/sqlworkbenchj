@@ -81,8 +81,6 @@ public class FileUtilTest
 			assertEquals("Not enough lines", 10, lines);
 			lines = FileUtil.readLines(in, content, 10, "\n");
 			in.close();
-//			System.out.println("content: " + StringUtil.escapeUnicode(content.toString()));
-//			System.out.println("content: " + StringUtil.escapeUnicode(fileContent.toString()));
 			assertEquals("Not enough lines", 4, lines);
 			assertEquals("Wrong content retrieved", fileContent.toString(), content.toString());
 			

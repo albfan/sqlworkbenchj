@@ -22,6 +22,7 @@ import java.sql.Types;
 import java.util.List;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.storage.filter.AndExpression;
@@ -61,9 +62,10 @@ public class DataStoreTest
 		WbConnection wb = util.getConnection();
 		Connection con = wb.getSqlConnection();
 		Statement stmt = con.createStatement();
-		stmt.executeUpdate("CREATE TABLE junit_test (nr integer primary key, firstname varchar(100), lastname varchar(100))");
+		try { stmt.executeUpdate("DROP TABLE junit_test"); } catch (Throwable th) {}
+		stmt.executeUpdate("CREATE TABLE junit_test (key integer primary key, firstname varchar(100), lastname varchar(100))");
 		stmt.close();
-		PreparedStatement pstmt = con.prepareStatement("insert into junit_test (nr, firstname, lastname) values (?,?,?)");
+		PreparedStatement pstmt = con.prepareStatement("insert into junit_test (key, firstname, lastname) values (?,?,?)");
 		for (int i=0; i < rowcount; i ++)
 		{
 			pstmt.setInt(1, i);
@@ -75,6 +77,34 @@ public class DataStoreTest
 		return wb;
 	}
 	
+	public void testQuotedKeyColumns()
+	{
+		
+		try
+		{
+			WbConnection con = preparePkTestDb();
+			
+			String[] cols = new String[] {"\"KEY\"","LASTNAME", "FIRSTNAME", "LASTNAME" };
+			int[] types = new int[] {java.sql.Types.VARCHAR, java.sql.Types.VARCHAR,  java.sql.Types.VARCHAR, java.sql.Types.VARCHAR};
+			
+			int[] sizes = new int[] { 20,20,20,20 };
+			ResultInfo info = new ResultInfo(cols, types, sizes);
+			DataStore ds = new DataStore(info);
+			ds.setGeneratingSql("SELECT \"KEY\", LASTNAME, FIRSTNAME FROM JUNIT_TEST");
+			TableIdentifier tbl = new TableIdentifier("JUNIT_TEST");
+			ds.setUpdateTableToBeUsed(tbl);
+			ds.checkUpdateTable(con);
+			
+			ResultInfo newInfo = ds.getResultInfo();
+			assertEquals(newInfo.getColumnCount(), 4);
+			assertEquals(newInfo.isPkColumn(0), true);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	public void testCasePreserving()
 	{
 		WbConnection con = null;
@@ -87,7 +117,7 @@ public class DataStoreTest
 			stmt.executeUpdate("delete from junit_test");
 			con.commit();
 			
-			String sql = "select nr, lastname, firstname from JUnit_Test";
+			String sql = "select key, lastname, firstname from JUnit_Test";
 			ResultSet rs = stmt.executeQuery(sql);
 			DataStore ds = new DataStore(rs, con);
 			ds.setGeneratingSql(sql);
@@ -185,7 +215,7 @@ public class DataStoreTest
 		{
 			WbConnection con = preparePkTestDb();
 			Statement stmt = con.createStatement();
-			final String sql = "select nr, firstname, lastname from junit_test";
+			final String sql = "select key, firstname, lastname from junit_test";
 			ResultSet rs = stmt.executeQuery(sql);
 			DataStore ds = new DataStore(rs, con);
 			rs.close();
@@ -196,9 +226,9 @@ public class DataStoreTest
 			assertEquals("Primary key not found", true, ds.hasPkColumns());
 			
 			stmt.executeUpdate("DROP TABLE junit_test");
-			stmt.executeUpdate("CREATE TABLE junit_test (nr integer, firstname varchar(100), lastname varchar(100))");
-			stmt.executeUpdate("insert into junit_test (nr, firstname, lastname) values (42, 'Zaphod', 'Beeblebrox')");
-			stmt.executeUpdate("insert into junit_test (nr, firstname, lastname) values (1, 'Mary', 'Moviestar')");
+			stmt.executeUpdate("CREATE TABLE junit_test (key integer, firstname varchar(100), lastname varchar(100))");
+			stmt.executeUpdate("insert into junit_test (key, firstname, lastname) values (42, 'Zaphod', 'Beeblebrox')");
+			stmt.executeUpdate("insert into junit_test (key, firstname, lastname) values (1, 'Mary', 'Moviestar')");
 			con.commit();
 			
 			rs = stmt.executeQuery(sql);
@@ -218,7 +248,7 @@ public class DataStoreTest
 			int rows = ds.updateDb(con, null);
 			assertEquals("Incorrect number of rows updated", 1, rows);
 			
-			rs = stmt.executeQuery("select firstname, lastname from junit_test where nr = 42");
+			rs = stmt.executeQuery("select firstname, lastname from junit_test where key = 42");
 			boolean hasRows = rs.next();
 			assertEquals("No rows fetched", true, hasRows);
 			
@@ -228,7 +258,7 @@ public class DataStoreTest
 			assertEquals("Lastname incorrectly updated", "Dent", lname);
 			rs.close();
 			
-			rs = stmt.executeQuery("select firstname, lastname from junit_test where nr = 1");
+			rs = stmt.executeQuery("select firstname, lastname from junit_test where key = 1");
 			hasRows = rs.next();
 			assertEquals("No rows fetched", true, hasRows);
 			
@@ -238,7 +268,7 @@ public class DataStoreTest
 			assertEquals("Incorrect lastname affected", "Moviestar", lname);
 			rs.close();
 			
-			String mapping = "junit_test=nr";
+			String mapping = "junit_test=key";
 			File f = new File(util.getBaseDir(), "pk_mapping.properties");
 			FileWriter w = new FileWriter(f);
 			w.write(mapping);
@@ -275,9 +305,10 @@ public class DataStoreTest
 		WbConnection wb = util.getConnection();
 		Connection con = wb.getSqlConnection();
 		Statement stmt = con.createStatement();
-		stmt.executeUpdate("CREATE TABLE junit_test (nr integer primary key, firstname varchar(100), lastname varchar(100))");
+		try { stmt.executeUpdate("DROP TABLE junit_test"); } catch (Throwable th) {}
+		stmt.executeUpdate("CREATE TABLE junit_test (key integer primary key, firstname varchar(100), lastname varchar(100))");
 		stmt.close();
-		PreparedStatement pstmt = con.prepareStatement("insert into junit_test (nr, firstname, lastname) values (?,?,?)");
+		PreparedStatement pstmt = con.prepareStatement("insert into junit_test (key, firstname, lastname) values (?,?,?)");
 		for (int i=0; i < rowcount; i ++)
 		{
 			pstmt.setInt(1, i);
@@ -298,7 +329,7 @@ public class DataStoreTest
 			con = prepareRetrieveDatabase();
 			
 			stmt = con.createStatement();
-			String sql = "select nr, lastname, firstname from junit_test";
+			String sql = "select key, lastname, firstname from junit_test";
 			ResultSet rs = stmt.executeQuery(sql);
 			DataStore ds = new DataStore(rs, con);
 			SqlUtil.closeResult(rs);
@@ -309,14 +340,15 @@ public class DataStoreTest
 			String table = (String)tbl.get(0);
 			assertEquals("Wrong update table returned", "junit_test", table);
 			
-			ds.setUpdateTable(table);
+			TableIdentifier id = new TableIdentifier(table);
+			ds.setUpdateTable(id);
 			assertEquals(rowcount, ds.getRowCount());
 			
 			ds.setValue(0, 1, "Dent");
 			ds.setValue(0, 2, "Arthur");
 			ds.updateDb(con, null);
 			
-			rs = stmt.executeQuery("select lastname, firstname from junit_test where nr = 0");
+			rs = stmt.executeQuery("select lastname, firstname from junit_test where key = 0");
 			boolean hasNext = rs.next();
 			assertEquals("Updated row not found", true, hasNext);
 			String lastname = rs.getString(1);
@@ -325,7 +357,7 @@ public class DataStoreTest
 			assertEquals("Lastname not updated", "Dent", lastname);
 			SqlUtil.closeResult(rs);
 			
-			rs = stmt.executeQuery("select lastname, firstname from junit_test where nr = 1");
+			rs = stmt.executeQuery("select lastname, firstname from junit_test where key = 1");
 			hasNext = rs.next();
 			assertEquals("Updated row not found", true, hasNext);
 			lastname = rs.getString(1);
@@ -341,7 +373,7 @@ public class DataStoreTest
 			ds.setValue(row, 2, "Zaphod");
 			ds.updateDb(con, null);
 			
-			rs = stmt.executeQuery("select lastname, firstname from junit_test where nr = 42");
+			rs = stmt.executeQuery("select lastname, firstname from junit_test where key = 42");
 			hasNext = rs.next();
 			assertEquals("Updated row not found", true, hasNext);
 			lastname = rs.getString(1);
@@ -370,10 +402,10 @@ public class DataStoreTest
 			con = prepareRetrieveDatabase();
 			
 			stmt = con.createStatement();
-			stmt.executeUpdate("insert into junit_test (nr, firstname, lastname) values (42, 'Zaphod', 'Beeblebrox')");
+			stmt.executeUpdate("insert into junit_test (key, firstname, lastname) values (42, 'Zaphod', 'Beeblebrox')");
 			con.commit();
 			
-			String sql = "select nr, lastname, firstname from junit_test";
+			String sql = "select key, lastname, firstname from junit_test";
 			ResultSet rs = stmt.executeQuery(sql);
 			DataStore ds = new DataStore(rs, con);
 			
@@ -385,12 +417,12 @@ public class DataStoreTest
 			assertEquals("AND Filter not correct", 1, ds.getRowCount());
 			
 			expr = new AndExpression();
-			expr.addColumnExpression("NR", new NumberEqualsComparator(), new Integer(100));
+			expr.addColumnExpression("KEY", new NumberEqualsComparator(), new Integer(100));
 			ds.applyFilter(expr);
 			assertEquals("Number Filter not correct", 0, ds.getRowCount());
 			
 			expr = new OrExpression();
-			expr.addColumnExpression("NR", new LessThanComparator(), new Integer(1));
+			expr.addColumnExpression("KEY", new LessThanComparator(), new Integer(1));
 			expr.addColumnExpression("FIRSTNAME", new StringEqualsComparator(), "Zaphod");
 			
 			ds.applyFilter(expr);
@@ -408,6 +440,48 @@ public class DataStoreTest
 		
 	}
 
+	public void testUpdateCaseSensitive()
+	{
+		Statement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			util.emptyBaseDirectory();
+			WbConnection con = util.getConnection();
+			stmt = con.createStatement();
+			stmt.executeUpdate("create table \"case_test\" (nr integer primary key, text_data varchar(100))");
+			String sql = "select * from \"case_test\"";
+			rs = stmt.executeQuery(sql);
+			DataStore ds = new DataStore(rs, con, true);;
+			rs.close();
+			
+			ds.checkUpdateTable(sql, con);
+			int row = ds.addRow();
+			ds.setValue(row, 0, new Integer(42));
+			ds.setValue(row, 1, "TestData");
+			ds.updateDb(con, null);
+			
+			rs = stmt.executeQuery(sql);
+			if (rs.next())
+			{
+				int nr = rs.getInt(1);
+				assertEquals(42, nr);
+				
+				String s = rs.getString(2);
+				assertEquals("TestData", s);
+			}
+			else
+			{
+				fail("New rows not updated");
+			}
+			rs.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	public void testList()
 	{
 		try

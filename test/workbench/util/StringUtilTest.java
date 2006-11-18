@@ -11,29 +11,92 @@
  */
 package workbench.util;
 
+import java.util.LinkedList;
 import junit.framework.*;
-import java.io.BufferedReader;
-import java.io.StringReader;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import workbench.log.LogMgr;
 
 /**
  *
  * @author support@sql-workbench.net
  */
-public class StringUtilTest extends TestCase
+public class StringUtilTest 
+	extends TestCase
 {
 	
 	public StringUtilTest(String testName)
 	{
 		super(testName);
+	}
+
+	public void testCaseCheck()
+	{
+		assertEquals(false, StringUtil.isUpperCase("This is a test"));
+		assertEquals(true, StringUtil.isMixedCase("This is a test"));
+		assertEquals(false, StringUtil.isLowerCase("This is a test"));
+
+		assertEquals(true, StringUtil.isLowerCase("this is a test 12345 #+*-.,;:!\"$%&/()=?"));
+		assertEquals(true, StringUtil.isUpperCase("THIS IS A TEST 12345 #+*-.,;:!\"$%&/()=?"));
+		assertEquals(true, StringUtil.isUpperCase("1234567890"));
+		assertEquals(true, StringUtil.isLowerCase("1234567890"));
+	}
+	
+	public void testToArray()
+	{
+		try
+		{
+			List elements = new LinkedList();
+			elements.add("one");
+			elements.add("two");
+			elements.add("three");
+			
+			String[] result = StringUtil.toArray(elements);
+			assertEquals(result.length, 3);
+			assertEquals(result[1], "two");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	public void testGetDoubleValue()
+	{
+		try
+		{
+			double value = StringUtil.getDoubleValue("123.45", -1);
+			assertEquals(123.45, value, 0.01);
+			
+			value = StringUtil.getDoubleValue(" 123.45 ", -1);
+			assertEquals(123.45, value, 0.01);
+			
+			value = StringUtil.getDoubleValue("bla", -66);
+			assertEquals(-66, value, 0.01);
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testGetIntValue()
+	{
+		try
+		{
+			int iValue = StringUtil.getIntValue(" 123 ", -1);
+			assertEquals(123, iValue);
+			
+			iValue = StringUtil.getIntValue("42", -1);
+			assertEquals(42, iValue);
+			
+			iValue = StringUtil.getIntValue("bla", -24);
+			assertEquals(-24, iValue);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 	}
 	
 	public void testStringToList()

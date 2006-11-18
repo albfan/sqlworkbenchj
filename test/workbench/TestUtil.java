@@ -63,7 +63,7 @@ public class TestUtil
 
 		PrintWriter pw = new PrintWriter(new FileWriter(new File(dir, "workbench.settings")));
 		pw.println("workbench.log.console=false");
-		pw.println("workbench.log.format={type} {timestamp} {source} {message} {error}");
+		pw.println("workbench.log.format={type} {timestamp} {source} {message} {error} {stacktrace}");
 		pw.println("workbench.log.level=DEBUG");
 		pw.println("workbench.log.maxfilesize=150000");
 		pw.close();
@@ -93,6 +93,7 @@ public class TestUtil
 			{
 				deleteFiles(files[i]);
 			}
+			if (files[i].getName().equals("workbench.settings")) continue;
 			files[i].delete();
 		}
 	}

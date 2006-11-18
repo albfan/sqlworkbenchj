@@ -44,6 +44,28 @@ public class TableIdentifierTest extends TestCase
 		assertEquals("\"APP\"", tbl.getSchema());
 		assertEquals("\"BLOB_TEST\"", tbl.getTableName());
 		
+		sql = "\"Some.Table\"";
+		tbl = new TableIdentifier(sql);
+		tbl.setPreserveQuotes(true);
+		assertEquals("\"Some.Table\"", tbl.getTableName());
+	}
+	
+	public void testCopy()
+	{
+		String sql = "\"catalog\".\"schema\".\"table\"";
+		TableIdentifier tbl = new TableIdentifier(sql);
+		tbl.setPreserveQuotes(true);
+		assertEquals("\"catalog\"", tbl.getCatalog());
+		assertEquals("\"schema\"", tbl.getSchema());
+		assertEquals("\"table\"", tbl.getTableName());
+		
+		assertEquals(sql, tbl.getTableExpression());
+		
+		TableIdentifier t2 = tbl.createCopy();
+		assertEquals("\"catalog\"", t2.getCatalog());
+		assertEquals("\"schema\"", t2.getSchema());
+		assertEquals("\"table\"", t2.getTableName());
+		assertEquals(sql, t2.getTableExpression());
 	}
 	
 }

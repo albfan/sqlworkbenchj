@@ -23,13 +23,79 @@ public class SqlFormatterTest extends TestCase
 		super(testName);
 	}
 
-	public void testGetFormattedSql() throws Exception
+	public void setUp()
+		throws Exception
+	{
+		TestUtil util = new TestUtil();
+		util.prepareEnvironment();
+	}
+
+	public void testColumnThreshold()
+		throws Exception
 	{
 		try
 		{
-			TestUtil util = new TestUtil();
-			util.prepareEnvironment();
-			
+			String sql = "SELECT a,b,c from mytable";
+			SqlFormatter f = new SqlFormatter(sql, 100);
+			f.setMaxColumnsPerSelect(5);
+			String formatted = f.getFormattedSql();
+			String expected = "SELECT a, b, c\nFROM mytable";
+
+			sql = "SELECT a,b,c,d,e,f,g,h,i from mytable";
+			f = new SqlFormatter(sql, 100);
+			f.setMaxColumnsPerSelect(5);
+			formatted = f.getFormattedSql();
+			expected = "SELECT a, b, c, d, e,\n       f, g, h, i\nFROM mytable";
+			assertEquals(expected, formatted);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testBracketIdentifier()
+		throws Exception
+	{
+		try
+		{
+			String sql = "SELECT a,b,[MyCol] from mytable";
+			SqlFormatter f = new SqlFormatter(sql, 100);
+			String formatted = f.getFormattedSql();
+			String expected = "SELECT a,\n       b,\n       [MyCol]\nFROM mytable";
+			assertEquals(expected, formatted);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testQuotedIdentifier()
+		throws Exception
+	{
+		try
+		{
+			String sql = "SELECT a,b,\"c d\" from mytable";
+			SqlFormatter f = new SqlFormatter(sql, 100);
+			String formatted = f.getFormattedSql();
+			String expected = "SELECT a,\n       b,\n       \"c d\"\nFROM mytable";
+			assertEquals(expected, formatted);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testGetFormattedSql() 
+		throws Exception
+	{
+		try
+		{
 			String sql = "--comment\nselect * from blub;";
 			Settings.getInstance().setInternalEditorLineEnding(Settings.UNIX_LINE_TERMINATOR_PROP_VALUE);
 
@@ -68,7 +134,7 @@ public class SqlFormatterTest extends TestCase
 			f = new SqlFormatter(sql,10);
 			formatted = f.getFormattedSql();
 //			System.out.println(formatted);
-			expected = "SELECT x,\n       y,\n       z\nFROM y\nWHERE a = 1\nAND   b = (SELECT MIN(x) \n           FROM y)";
+			expected = "SELECT x,\n       y,\n       z\nFROM y\nWHERE a = 1\nAND   b = (SELECT MIN(x)\n           FROM y)";
 //			System.out.println(expected);
 			assertEquals(expected, formatted);
 
@@ -78,7 +144,7 @@ public class SqlFormatterTest extends TestCase
              "                           ELSE 1  " +
              "                        END";
 			expected = "UPDATE customer\n" +
-             "   SET duplicate_flag = CASE (SELECT COUNT(*) \n" +
+             "   SET duplicate_flag = CASE (SELECT COUNT(*)\n" +
              "                              FROM customer c2\n" +
              "                              WHERE c2.f_name = customer.f_name\n" +
              "                              AND   c2.s_name = customer.s_name\n" +
@@ -130,7 +196,7 @@ public class SqlFormatterTest extends TestCase
 			sql = "update x set (a,b) = (select x,y from k);";
 			f = new SqlFormatter(sql,50);
 			formatted = f.getFormattedSql();
-			expected = "UPDATE x\n   SET (a,b)  = (SELECT x, y FROM k);";
+			expected = "UPDATE x\n   SET (a,b) = (SELECT x, y FROM k);";
 			assertEquals(expected, formatted.trim());
 		}
 		catch (Exception e)

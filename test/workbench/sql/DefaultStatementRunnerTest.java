@@ -94,6 +94,14 @@ public class DefaultStatementRunnerTest
 		sql = "-- comment\n\n\ncreate view bla as select * from blub;";
 		command = runner.getCommandToUse(sql);
 		assertSame(command, DdlCommand.CREATE);
+
+		sql = "-- comment\n\n\ncreate \nor \nreplace \nview bla as select * from blub;";
+		command = runner.getCommandToUse(sql);
+		assertSame(command, DdlCommand.CREATE);
+
+		sql = "-- comment\n\n\ncreate trigger bla;";
+		command = runner.getCommandToUse(sql);
+		assertSame(command, DdlCommand.CREATE);
 		
 		sql = "  drop table bla (col integer);";
 		command = runner.getCommandToUse(sql);

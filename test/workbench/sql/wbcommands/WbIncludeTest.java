@@ -63,7 +63,54 @@ public class WbIncludeTest extends TestCase
 		super.tearDown();
 	}
 	
-	public void testExecute() 
+	public void testAlternateInclude()
+	{
+		try
+		{
+			WbConnection con = runner.getConnection();
+			
+			Statement stmt = con.createStatement();
+			stmt.execute("create table include_test (file_name varchar(100))");
+			con.commit();
+			
+			String encoding = "ISO-8859-1";
+			File scriptFile = new File(util.getBaseDir(), "test.sql");
+			
+			Writer w = EncodingUtil.createWriter(scriptFile, encoding, false);
+			w.write("insert into include_test (file_name) values ('" + scriptFile.getAbsolutePath() + "');\n");
+			w.write("commit;\n");
+			w.close();
+			
+			String sql = "-- comment\n\n@test.sql\n";
+			runner.runStatement(sql, -1, -1);
+			StatementRunnerResult result = runner.getResult();
+			assertEquals("Statement not executed", true, result.isSuccess());
+			
+			ResultSet rs = stmt.executeQuery("select count(*) from include_test");
+			
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Rows not inserted", 1, count);
+			}
+			else
+			{
+				fail("Select failed");
+			}
+			rs.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+	
+	public void testNestedInclude() 
 		throws Exception
 	{
 		try
@@ -106,11 +153,18 @@ public class WbIncludeTest extends TestCase
 			assertEquals("Not enough values retrieved", 2, files.size());
 			assertEquals("Main file not run", true, files.contains(main.getAbsolutePath()));
 			assertEquals("Second file not run", true, files.contains(include1.getAbsolutePath()));
+			stmt.close();
+			
+			
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 	

@@ -62,19 +62,27 @@ public class SqlUtilTest
 		{
 			String sql = "create\n --comment\n table bla (nr integer);";
 			String type = SqlUtil.getCreateType(sql);
-			assertEquals("Wrong table returned", "TABLE", type);
+			assertEquals("Wrong type returned", "TABLE", type);
 			
 			sql = "-- comment\ncreate view blub as select * from bla;";
 			type = SqlUtil.getCreateType(sql);
-			assertEquals("Wrong table returned", "VIEW", type);
+			assertEquals("Wrong type returned", "VIEW", type);
 			
-			sql = "/* blubber */\ncreate or replace -- comment\nview blub as select * from bla;";
+			sql = "/* blubber */\ncreate \nor \nreplace -- comment\nview blub as select * from bla;";
 			type = SqlUtil.getCreateType(sql);
-			assertEquals("Wrong table returned", "VIEW", type);
+			assertEquals("Wrong type returned", "VIEW", type);
 			
 			sql = "/* blubber */\nrecreate VIEW blub as select * from bla;";
 			type = SqlUtil.getCreateType(sql);
-			assertEquals("Wrong table returned", "VIEW", type);
+			assertEquals("Wrong type returned", "VIEW", type);
+			
+			sql = "/* blubber */\ncreate package blub;";
+			type = SqlUtil.getCreateType(sql);
+			assertEquals("Wrong type returned", "PACKAGE", type);
+			
+			sql = "--- do something\ncreate\n or replace\n package body blub;";
+			type = SqlUtil.getCreateType(sql);
+			assertEquals("Wrong type returned", "PACKAGE BODY", type);
 		}
 		catch (Exception e)
 		{
@@ -87,15 +95,15 @@ public class SqlUtilTest
 	{
 		try
 		{
-			String sql = "delete from mytable";
+			String sql = "delete \nfrom mytable";
 			String table = SqlUtil.getDeleteTable(sql);
 			assertEquals("Wrong table returned", "mytable", table);
 			
-			sql = "delete mytable";
+			sql = "-- bla\ndelete mytable";
 			table = SqlUtil.getDeleteTable(sql);
 			assertEquals("Wrong table returned", "mytable", table);
 			
-			sql = "delete myschema.mytable";
+			sql = "delete\n--bla\nmyschema.mytable";
 			table = SqlUtil.getDeleteTable(sql);
 			assertEquals("Wrong table returned", "myschema.mytable", table);
 			
@@ -235,7 +243,7 @@ public class SqlUtilTest
 	
 	public void testGetSqlVerb()
 	{
-		String sql = "-- comment line1\nSELECT";
+		String sql = "-- comment line1\nSELECT * from dummy";
 		String verb = SqlUtil.getSqlVerb(sql);
 		assertEquals("SELECT", verb);
 		
@@ -243,24 +251,27 @@ public class SqlUtilTest
 		verb = SqlUtil.getSqlVerb(sql);
 		assertEquals("SELECT", verb);
 		
-			sql = "/* \n" + 
-             "* $URL: ddl.sql $ \n" + 
-             "* $Revision: 1.9 $ \n" + 
-             "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
-             "*/ \n" + 
-             "-- This is the initial creation script for the MTrac database. \n" + 
-             "-- It assumes the database space and schema have been setup. \n" + 
-             "-- Each table can be indivually recreated, if you add foreign keys, make sure that they will be deleted in all \n" + 
-             "-- associated tables before dropping. \n" + 
-             " \n" + 
-             "-- ############################################# \n" + 
-             "-- ##                                         ## \n" + 
-             "-- ##              Organizations              ## \n" + 
-             "-- ##                                         ## \n" + 
-             "alter table participants drop constraint r_05;   -- make sure you recreate this foreign key after inserting data! \n";
+		sql = "/* \n" + 
+					 "* $URL: some_script.sql $ \n" + 
+					 "* $Revision: 1.10 $ \n" + 
+					 "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
+					 "*/ \n" + 
+					 "-- A quis Lorem consequat Aenean tellus risus convallis velit Maecenas arcu. \n" + 
+					 "-- Suspendisse Maecenas tempor Lorem congue laoreet vel congue sit malesuada nibh. \n" + 
+					 "-- Lorem ipsum dolor sit amet consectetuer vitae Suspendisse ante Nullam lacinia \n" + 
+					 " \n" + 
+					 "-- ############################################# \n" + 
+					 "-- ##                                         ## \n" + 
+					 "-- ##              Organizations              ## \n" + 
+					 "-- ##                                         ## \n" + 
+					 "alter table participants drop constraint fk_bla;   -- Laoreet laoreet condimentum iaculis commodo dui id quis tempus accumsan wisi. Justo quam Curabitur dictumst non facilisis arcu Morbi semper pretium volutpat. Vestibulum habitasse Donec sapien adipiscing Suspendisse tempus habitant sed consectetuer pellentesque! \n";
 
-			verb = SqlUtil.getSqlVerb(sql);
-			assertEquals("ALTER", verb);
+		verb = SqlUtil.getSqlVerb(sql);
+		assertEquals("ALTER", verb);
+			
+		sql = "-- comment\n   @bla.sql";
+		verb = SqlUtil.getSqlVerb(sql);
+		assertEquals("@", verb);
 	}
 
 	public void testGetTables()
@@ -283,11 +294,12 @@ public class SqlUtilTest
 		sql = "SELECT cr.dealid, \n" + 
 					 "       cs.state, \n" + 
 					 "       bq.* \n" + 
-					 "FROM dbo.tblcreditrow cr  \n" + 
-					 "INNER JOIN bdb_ie.dbo.tblbdbproduct p ON cr.partnumber = p.partnumber  \n" + 
-					 "RIGHT OUTER JOIN tblbidquantity bq ON bq.partnumber LIKE p.mainpartnumber + '%'AND bq.bidid = cr.bidid  \n" + 
-					 "INNER JOIN tblcredit c ON c.creditid = cr.creditid  \n" + 
-					 "INNER JOIN tblcreditstate cs ON cs.creditstateid = c.creditstateid \n" + 
+					 "FROM dbo.tblcreditrow cr  \n" +
+					 "-- bla blubber \n" + 
+					 "INNER  JOIN bdb_ie.dbo.tblbdbproduct p ON cr.partnumber = p.partnumber  \n" + 
+					 "RIGHT  OUTER  JOIN tblbidquantity bq ON bq.partnumber LIKE p.mainpartnumber + '%'AND bq.bidid = cr.bidid  \n" + 
+					 "INNER  JOIN tblcredit c ON c.creditid = cr.creditid  \n" + 
+					 "INNER  JOIN tblcreditstate cs ON cs.creditstateid = c.creditstateid \n" + 
 					 "WHERE c.arrivaldate >= '2006-04-01'";
 		
 		l = SqlUtil.getTables(sql, true);
