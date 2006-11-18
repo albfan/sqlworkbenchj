@@ -12,12 +12,14 @@
 package workbench.sql.commands;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import workbench.db.WbConnection;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -32,19 +34,19 @@ import workbench.util.StringUtil;
  */
 public class DdlCommand extends SqlCommand
 {
-	public static final SqlCommand CREATE = new DdlCommand("CREATE");
-	public static final SqlCommand DROP = new DdlCommand("DROP");
-	public static final SqlCommand ALTER = new DdlCommand("ALTER");
-	public static final SqlCommand GRANT = new DdlCommand("GRANT");
-	public static final SqlCommand REVOKE = new DdlCommand("REVOKE");
+	public static final DdlCommand CREATE = new DdlCommand("CREATE");
+	public static final DdlCommand DROP = new DdlCommand("DROP");
+	public static final DdlCommand ALTER = new DdlCommand("ALTER");
+	public static final DdlCommand GRANT = new DdlCommand("GRANT");
+	public static final DdlCommand REVOKE = new DdlCommand("REVOKE");
 
-	public static final SqlCommand CHECKPOINT = new DdlCommand("CHECKPOINT");
-	public static final SqlCommand SHUTDOWN = new DdlCommand("SHUTDOWN");
+	public static final DdlCommand CHECKPOINT = new DdlCommand("CHECKPOINT");
+	public static final DdlCommand SHUTDOWN = new DdlCommand("SHUTDOWN");
 
 	// Firebird RECREATE VIEW command
 	public static final SqlCommand RECREATE = new DdlCommand("RECREATE");
 
-	public static final List DDL_COMMANDS = new ArrayList();
+	public static final List DDL_COMMANDS = new LinkedList();
 
 	static
 	{
@@ -98,7 +100,7 @@ public class DdlCommand extends SqlCommand
 				if ("ALTER".equals(verb) && aConnection.getMetadata().isOracle())
 				{
 					// check for schema change in oracle
-					String regex = "alter\\s*session\\s*set\\s*current_schema\\s*=\\s*(\\p{Graph}*)";
+					String regex = "alter\\s+session\\s+set\\s+current_schema\\s*=\\s*(\\p{Graph}*)";
 					Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
 					Matcher m = p.matcher(aSql);
 
@@ -174,46 +176,42 @@ public class DdlCommand extends SqlCommand
 	public boolean isDropCommand(String sql)
 	{
 		if ("DROP".equals(this.verb)) return true;
-		Pattern p = Pattern.compile("\\sDROP\\s*(PRIMARY\\s*KEY|CONSTRAINT)\\s*", Pattern.CASE_INSENSITIVE);
+		Pattern p = Pattern.compile("DROP\\s+(PRIMARY\\s+KEY|CONSTRAINT)\\s+", Pattern.CASE_INSENSITIVE);
 		Matcher m = p.matcher(sql);
 		return m.find();
-	}
-
-	/**
-	 * Extract the type (function, package, procedure) of the created object.
-	 * @see #addExtendErrorInfo(workbench.db.WbConnection, String, workbench.sql.StatementRunnerResult)
-	 */
-	private String getObjectType(String sql)
-	{
-		String regex = "CREATE\\s*(OR\\s*REPLACE|)\\s*(PROCEDURE|FUNCTION|PACKAGE\\s*BODY|PACKAGE)\\s*(\\p{Graph}*)";
-		String type = null;
-		Matcher m = Pattern.compile(regex,Pattern.CASE_INSENSITIVE).matcher(sql);
-		if (m.find() && m.groupCount() > 1)
-		{
-			type = m.group(2).toUpperCase();
-		}
-    return type;
 	}
 
 	/**
 	 * Extract the name of the created object for Oracle stored procedures.
 	 * @see #addExtendErrorInfo(workbench.db.WbConnection, String, workbench.sql.StatementRunnerResult)
 	 */
-	private String getObjectName(String sql)
+	protected String getObjectName(String sql)
 	{
-		String regex = "CREATE\\s*(OR\\s*REPLACE|)\\s*(PROCEDURE|FUNCTION|PACKAGE\\s*BODY|PACKAGE)\\s*(\\p{Graph}*)";
-		String name = null;
-		Matcher m = Pattern.compile(regex,Pattern.CASE_INSENSITIVE).matcher(sql);
-		if (m.find() && m.groupCount() > 2)
-		{
-			name = m.group(3);
-			int pos = name.indexOf('(');
-			if (pos > -1)
-			{
-				name = name.substring(0,pos).toUpperCase();
-			}
-		}
-		return name;
+//		String regex = "CREATE\\s+(OR\\s+REPLACE|)\\s*(TRIGGER|PROCEDURE|FUNCTION|PACKAGE\\s+BODY|PACKAGE)\\s+(\\p{Graph}*)";
+//		String name = null;
+//		Matcher m = Pattern.compile(regex,Pattern.CASE_INSENSITIVE).matcher(sql);
+//		if (m.find() && m.groupCount() > 2)
+//		{
+//			name = m.group(3);
+//			int pos = name.indexOf('(');
+//			if (pos > -1)
+//			{
+//				name = name.substring(0,pos).toUpperCase();
+//			}
+//		}
+//		return name;		
+		SQLLexer l = new SQLLexer(sql);
+		SQLToken t = l.getNextToken(false, false);
+		if (t == null) return null;
+		if (!t.getContents().equals("CREATE") && !t.getContents().equals("CREATE OR REPLACE")) return null;
+		
+		// next token must be the type
+		t = l.getNextToken(false, false);
+		if (t == null) return null;
+		
+		// the token after the type must be the object's name
+		t = l.getNextToken(false, false);
+		return t.getContents();		
 	}
 
 	/**
@@ -226,13 +224,11 @@ public class DdlCommand extends SqlCommand
 	 */
   private boolean addExtendErrorInfo(WbConnection aConnection, String sql, StatementRunnerResult result)
   {
-    //String cleanSql = SqlUtil.makeCleanSql(sql, false).toUpperCase();
-    String sqlverb = SqlUtil.getSqlVerb(sql);
-    if (!"CREATE".equals(sqlverb)) return false;
-    String type = getObjectType(sql);
+    String type = SqlUtil.getCreateType(sql);
+		if (type == null) return false;
+		
     String name = getObjectName(sql);
-
-		if (type == null || name == null) return false;
+		if (name == null) return false;
 
     String msg = aConnection.getMetadata().getExtendedErrorInfo(null, name, type);
 		if (msg != null && msg.length() > 0)

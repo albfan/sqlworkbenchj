@@ -71,19 +71,10 @@ public class SqlUtil
 		{
 			SQLLexer lexer = new SQLLexer(sql);
 			SQLToken t = lexer.getNextToken(false, false);
-			if (!t.getContents().equals("CREATE") && !t.getContents().equals("RECREATE")) return null;
+			String v = t.getContents();
+			if (!v.equals("CREATE") && !v.equals("RECREATE") && !v.equals("CREATE OR REPLACE")) return null;
 			t = lexer.getNextToken(false, false);
-			if (t != null && t.getContents().equals("OR"))
-			{
-				// Handle Oracle's CREATE OR REPLACE ...
-				t = lexer.getNextToken(false, false);
-				if (t != null && t.getContents().equals("REPLACE"))
-				{
-					t = lexer.getNextToken(false, false);
-					return (t != null ? t.getContents() : null);
-				}
-				return null;
-			}
+			if (t == null) return null;
 			return t.getContents();
 		}
 		catch (Exception e)

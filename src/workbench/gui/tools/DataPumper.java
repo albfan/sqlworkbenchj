@@ -39,6 +39,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.ProducerFactory;
+import workbench.sql.wbcommands.CommandTester;
 import workbench.util.ExceptionUtil;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
@@ -160,7 +161,7 @@ public class DataPumper
 		s.setProperty("workbench.datapumper.commitevery", this.commitEvery.getText());
 		s.setProperty("workbench.datapumper.usequery", Boolean.toString(this.useQueryCbx.isSelected()));
 		s.setProperty("workbench.datapumper.droptable", Boolean.toString(this.dropTargetCbx.isSelected()));
-    s.setProperty("workbench.datapumper.updatemode", (String)this.modeComboBox.getSelectedItem());
+		s.setProperty("workbench.datapumper.updatemode", (String)this.modeComboBox.getSelectedItem());
 		String where = this.sqlEditor.getText();
 		if (where != null && where.length() > 0)
 		{
@@ -209,8 +210,8 @@ public class DataPumper
 		boolean useQuery = s.getBoolProperty("workbench.datapumper.usequery", false);
 		this.useQueryCbx.setSelected(useQuery);
 
-    String mode = s.getProperty("workbench.datapumper.updatemode", "insert");
-    this.modeComboBox.setSelectedItem(mode);
+		String mode = s.getProperty("workbench.datapumper.updatemode", "insert");
+		this.modeComboBox.setSelectedItem(mode);
 
 		// initialize the depending controls for the usage of a SQL query
 		this.checkType();
@@ -1155,7 +1156,7 @@ public class DataPumper
 		}
 		else if (e.getSource() == this.showWbCommand)
 		{
-			this.showWbCommand();
+			this.showCopyCommand();
 		}
 		else if (e.getSource() == this.startButton)
 		{
@@ -1462,9 +1463,9 @@ public class DataPumper
 		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPScript"), sql, "workbench.datapumper.scriptwindow", true);
 		w.setVisible(true);
 		w.dispose();
-
 	}
-	private void showWbCommand()
+	
+	private void showCopyCommand()
 	{
 		if (this.fileImporter != null)
 		{
@@ -1474,26 +1475,34 @@ public class DataPumper
 		if (this.sourceProfile == null || this.targetProfile == null) return;
 		if (!this.hasSource()) return;
 
+		CommandTester t = new CommandTester();
+		
 		StringBuffer result = new StringBuffer(150);
-		result.append(WbCopy.VERB + " -" + WbCopy.PARAM_SOURCEPROFILE + "=");
+		result.append(t.formatVerb(WbCopy.VERB) + " -" + WbCopy.PARAM_SOURCEPROFILE + "=");
+		String indent = "\n      ";
+
+		
 		String s = this.sourceProfile.getName();
 		if (s.indexOf(' ') >-1) result.append('\'');
 		result.append(s);
 		if (s.indexOf(' ') >-1) result.append('\'');
 
-		result.append("\n     -" + WbCopy.PARAM_SOURCEPROFILE_GROUP + "=");
+		result.append(indent);
+		result.append("-" + WbCopy.PARAM_SOURCEPROFILE_GROUP + "=");
 		s = this.sourceProfile.getGroup();
 		if (s.indexOf(' ') >-1) result.append('\'');
 		result.append(s);
 		if (s.indexOf(' ') >-1) result.append('\'');
 
 		s = this.targetProfile.getName();
-		result.append("\n     -" + WbCopy.PARAM_TARGETPROFILE + "=");
+		result.append(indent);
+		result.append("-" + WbCopy.PARAM_TARGETPROFILE + "=");
 		if (s.indexOf(' ') >-1) result.append('\'');
 		result.append(s);
 		if (s.indexOf(' ') >-1) result.append('\'');
 
-		result.append("\n     -" + WbCopy.PARAM_TARGETPROFILE_GROUP + "=");
+		result.append(indent);
+		result.append("-" + WbCopy.PARAM_TARGETPROFILE_GROUP + "=");
 		s = this.targetProfile.getGroup();
 		if (s.indexOf(' ') >-1) result.append('\'');
 		result.append(s);
@@ -1506,15 +1515,18 @@ public class DataPumper
 			s = id.getTableName();
 		else
 			s = id.getTableExpression();
-		result.append("\n     -" + WbCopy.PARAM_TARGETTABLE + "=");
+		result.append(indent);
+		result.append("-" + WbCopy.PARAM_TARGETTABLE + "=");
 		result.append(s);
 
 		if (id.isNewTable())
 		{
-			result.append("\n     -" + WbCopy.PARAM_CREATETARGET + "=true");
+			result.append(indent);
+			result.append("-" + WbCopy.PARAM_CREATETARGET + "=true");
 			if (this.dropTargetCbx.isSelected())
 			{
-				result.append("\n     -" + WbCopy.PARAM_DROPTARGET + "=true");
+				result.append(indent);
+				result.append("-" + WbCopy.PARAM_DROPTARGET + "=true");
 			}
 		}
 
@@ -1525,11 +1537,13 @@ public class DataPumper
 		if (this.useQueryCbx.isSelected())
 		{
 			String sql = this.sqlEditor.getText();
-			result.append("\n     -" + WbCopy.PARAM_SOURCEQUERY + "=\"");
+			result.append(indent);
+			result.append("-" + WbCopy.PARAM_SOURCEQUERY + "=\"");
 			result.append(sql);
 			result.append('"');
 
-			result.append("\n     -"+ WbCopy.PARAM_COLUMNS + "=\"");
+			result.append(indent);
+			result.append("-"+ WbCopy.PARAM_COLUMNS + "=\"");
 			for (int i=0; i < count; i++)
 			{
 				if (i > 0) result.append(", ");
@@ -1542,7 +1556,8 @@ public class DataPumper
 			id = this.sourceTable.getSelectedTable();
 			if (id == null) return;
 			s = id.getTableExpression();
-			result.append("\n     -" + WbCopy.PARAM_SOURCETABLE + "=");
+			result.append(indent);
+			result.append("-" + WbCopy.PARAM_SOURCETABLE + "=");
 			if (s.indexOf(' ') > -1) result.append('"');
 			result.append(s);
 			if (s.indexOf(' ') > -1) result.append('"');
@@ -1550,12 +1565,14 @@ public class DataPumper
 			s = sqlEditor.getText();
 			if (s != null && s.trim().length() > 0)
 			{
-				result.append("\n     -" + WbCopy.PARAM_SOURCEWHERE + "=\"");
+				result.append(indent);
+				result.append("-" + WbCopy.PARAM_SOURCEWHERE + "=\"");
 				result.append(s);
 				result.append('"');
 			}
 
-			result.append("\n     -" + WbCopy.PARAM_COLUMNS + "=\"");
+			result.append(indent);
+			result.append("-" + WbCopy.PARAM_COLUMNS + "=\"");
 			for (int i=0; i < count; i++)
 			{
 				if (i > 0) result.append(", ");
@@ -1570,7 +1587,8 @@ public class DataPumper
 		String mode = (String)this.modeComboBox.getSelectedItem();
 		if (!"insert".equals(mode))
 		{
-			result.append("\n     -" + WbCopy.PARAM_MODE + "=" + mode);
+			result.append(indent);
+			result.append("-" + WbCopy.PARAM_MODE + "=" + mode);
 			List keys = this.getKeyColumns();
 			if (keys.size() > 0)
 			{
@@ -1584,16 +1602,19 @@ public class DataPumper
 			}
 		}
 
-		result.append("\n     -" + WbCopy.PARAM_DELETETARGET + "=");
+		result.append(indent);
+		result.append("-" + WbCopy.PARAM_DELETETARGET + "=");
 		result.append(Boolean.toString(this.deleteTargetCbx.isSelected()));
 
-		result.append("\n     -" + WbCopy.PARAM_CONTINUE + "=");
+		result.append(indent);
+		result.append("-" + WbCopy.PARAM_CONTINUE + "=");
 		result.append(Boolean.toString(this.continueOnErrorCbx.isSelected()));
 
 		int batchSize = getBatchSize();
 		if (batchSize > 0)
 		{
-			result.append("\n     -" + WbCopy.PARAM_BATCHSIZE + "=" + batchSize);
+			result.append(indent);
+			result.append("-" + WbCopy.PARAM_BATCHSIZE + "=" + batchSize);
 		}
 
 		if (batchSize <= 0)
@@ -1601,7 +1622,8 @@ public class DataPumper
 			int commit = StringUtil.getIntValue(this.commitEvery.getText(), -1);
 			if (commit > 0)
 			{
-				result.append("\n     -" + WbCopy.PARAM_COMMITEVERY + "=");
+				result.append(indent);
+				result.append("-" + WbCopy.PARAM_COMMITEVERY + "=");
 				result.append(commit);
 			}
 		}
@@ -1721,6 +1743,7 @@ public class DataPumper
 		List cols = columnMapper.getMappingForImport();
 		this.fileImporter.setTargetTable(this.targetTable.getSelectedTable());
 		this.fileImporter.setImportColumns(cols);
+		this.fileImporter.setBatchSize(this.getBatchSize());
 	}
 
 	private void startCopy()

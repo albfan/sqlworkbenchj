@@ -54,7 +54,7 @@ public class WbCopy
 	public static final String PARAM_SOURCEWHERE = "sourcewhere";
 	public static final String PARAM_COMMITEVERY = "commitevery";
 	public static final String PARAM_COMMITBATCH = "commitbatch";
-	public static final String PARAM_CONTINUE = "continue";
+	public static final String PARAM_CONTINUE = "continueonerror";
 	public static final String PARAM_DELETETARGET = "deletetarget";
 	public static final String PARAM_MODE = "mode";
 	public static final String PARAM_KEYS = "keycolumns";
@@ -81,6 +81,7 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_COMMITEVERY);
 		cmdLine.addArgument(PARAM_COMMITBATCH);
 		cmdLine.addArgument(PARAM_CONTINUE);
+		cmdLine.addArgument("continue");
 		cmdLine.addArgument(PARAM_DELETETARGET);
 		cmdLine.addArgument(PARAM_MODE);
 		cmdLine.addArgument(PARAM_KEYS);
@@ -232,6 +233,12 @@ public class WbCopy
 		}
 		boolean delete = cmdLine.getBoolean(PARAM_DELETETARGET);
 		boolean cont = cmdLine.getBoolean(PARAM_CONTINUE);
+		if (cmdLine.isArgPresent("continue"))
+		{
+			result.addMessage("Parameter 'continue' is deprecated. Please use 'continueOnError'");
+			cont = cmdLine.getBoolean("continue");
+		}
+		
 		boolean createTable = cmdLine.getBoolean(PARAM_CREATETARGET);
 		boolean dropTable = cmdLine.getBoolean(PARAM_DROPTARGET);
 		String keys = cmdLine.getValue(PARAM_KEYS);

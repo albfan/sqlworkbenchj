@@ -41,10 +41,16 @@ public class ProducerFactory
 	private RowDataProducer producer;
 	private ImportFileParser fileParser;
 	private WbConnection connection;
+	private int batchSize = -1;
 	
 	public ProducerFactory(File inputFile)
 	{
 		this.setInputFile(inputFile);
+	}
+	
+	public void setBatchSize(int size) 
+	{
+		this.batchSize = (size > 0 ? size : -1);
 	}
 	
 	public void setConnection(WbConnection conn)
@@ -281,11 +287,16 @@ public class ProducerFactory
 		appendArgument(result, WbImport.ARG_TARGETTABLE, this.table.getTableName(), indent);
 		appendArgument(result, WbImport.ARG_ENCODING, this.generalOptions.getEncoding(), indent);
 		appendArgument(result, WbImport.ARG_MODE, this.generalOptions.getMode(), indent);
-		
+		if (this.batchSize > 0)
+		{
+			appendArgument(result, WbImport.ARG_BATCHSIZE, Integer.toString(this.batchSize), indent);
+		}
 		if (this.isXmlImport())
 			this.appendXmlOptions(result, indent);
 		else
 			appendTextOptions(result, indent);
+		
+		result.append("\n;");
 		
 		return result.toString();
 	}

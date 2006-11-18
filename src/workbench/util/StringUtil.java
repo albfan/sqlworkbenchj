@@ -59,16 +59,33 @@ public class StringUtil
 		return new java.util.Date(System.currentTimeMillis());
 	}
 
-	public static boolean isLowercase(String s)
+	public static boolean isMixedCase(String s)
 	{
-		if (s == null) return false;
-		return s.equals(s.toLowerCase());
+		return !isUpperCase(s) && !isLowerCase(s);
 	}
 	
-	public static boolean isUppercase(String s)
+	public static boolean isLowerCase(String s)
 	{
 		if (s == null) return false;
-		return s.equals(s.toUpperCase());
+		int l = s.length();
+		for (int i = 0; i < l; i++)
+		{
+			char c = s.charAt(i);
+			if (Character.isUpperCase(c)) return false;
+		}
+		return true;
+	}
+	
+	public static boolean isUpperCase(String s)
+	{
+		if (s == null) return false;
+		int l = s.length();
+		for (int i = 0; i < l; i++)
+		{
+			char c = s.charAt(i);
+			if (Character.isLowerCase(c)) return false;
+		}
+		return true;
 	}
 	
 	public static Comparator getCaseInsensitiveComparator()
@@ -262,7 +279,7 @@ public class StringUtil
 		double result = aDefault;
 		try
 		{
-			result = Double.parseDouble(aValue);
+			result = Double.parseDouble(aValue.trim());
 		}
 		catch (NumberFormatException e)
 		{
@@ -282,7 +299,7 @@ public class StringUtil
 		int result = aDefault;
 		try
 		{
-			result = Integer.parseInt(aValue);
+			result = Integer.parseInt(aValue.trim());
 		}
 		catch (NumberFormatException e)
 		{
@@ -361,6 +378,8 @@ public class StringUtil
 			Object o = itr.next();
 			if (o != null)
 			{
+				// Casting to a String would be slightly faster
+				// but this is more generic
 				result[i] = o.toString();
 			} 
 			i++;

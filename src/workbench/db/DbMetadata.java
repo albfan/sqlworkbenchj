@@ -130,10 +130,10 @@ public class DbMetadata
 
 	private DbmsOutput oraOutput;
 
-  private boolean caseSensitive;
+	private boolean caseSensitive;
 	private boolean useJdbcCommit;
 	private boolean ddlNeedsCommit;
-  private boolean isOracle;
+	private boolean isOracle;
 	private boolean isPostgres;
 	private boolean isFirstSql;
 	private boolean isHsql;
@@ -451,6 +451,8 @@ public class DbMetadata
 		// is done in the objectsWithData as that 
 		// drives the "Data" tab in the DbExplorer
 		Set types = getObjectsWithData();
+		List realTypes = new LinkedList();
+		
 		Iterator itr = types.iterator();
 		int count = 0;
 		while (itr.hasNext())
@@ -458,21 +460,10 @@ public class DbMetadata
 			String s = ((String)itr.next()).toUpperCase();
 			if (s.indexOf("SYSTEM") == -1)
 			{
-				count ++;
+				realTypes.add(s);
 			}
 		}
-		tableTypesSelectable = new String[count];
-		itr = types.iterator();
-		int i = 0;
-		while (itr.hasNext())
-		{
-			String s = ((String)itr.next()).toUpperCase();
-			if (s.indexOf("SYSTEM") == -1)
-			{
-				tableTypesSelectable[i] = s;
-				i++;
-			}
-		}
+		tableTypesSelectable = StringUtil.toArray(realTypes);
 
 		String quote = settings.getProperty("workbench.db.neverquote","");
 		this.neverQuoteObjects = quote.indexOf(this.getDbId()) > -1;
@@ -1375,11 +1366,11 @@ public class DbMetadata
 			
 			if (!needQuote)
 			{
-				if (this.storesLowerCaseIdentifiers() && !StringUtil.isLowercase(aName))
+				if (this.storesLowerCaseIdentifiers() && !StringUtil.isLowerCase(aName))
 				{
 					needQuote = true;
 				}
-				else if (this.storesUpperCaseIdentifiers() && !StringUtil.isUppercase(aName))
+				else if (this.storesUpperCaseIdentifiers() && !StringUtil.isUpperCase(aName))
 				{
 					needQuote = true;
 				}
@@ -1449,12 +1440,12 @@ public class DbMetadata
 	{
 		if (name == null) return true;
 		
-		if (this.storesUpperCaseIdentifiers() && StringUtil.isUppercase(name))
+		if (this.storesUpperCaseIdentifiers() && StringUtil.isUpperCase(name))
 		{
 			return true;
 		}
 		
-		if (this.storesLowerCaseIdentifiers() && StringUtil.isLowercase(name))
+		if (this.storesLowerCaseIdentifiers() && StringUtil.isLowerCase(name))
 		{
 			return true;
 		}
@@ -2155,7 +2146,7 @@ public class DbMetadata
 			String col = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
 			int type = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, Types.OTHER);
 			boolean pk = "YES".equals(ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG));
-			ColumnIdentifier ci = new ColumnIdentifier(quoteObjectname(col), fixColumnType(type), pk);
+			ColumnIdentifier ci = new ColumnIdentifier(SqlUtil.quoteObjectname(col), fixColumnType(type), pk);
 			int size = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_SIZE, 0);
 			int digits = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_DIGITS, 0);
 			String nullable = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_NULLABLE);

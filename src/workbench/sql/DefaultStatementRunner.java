@@ -16,6 +16,7 @@ import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import workbench.db.DbMetadata;
@@ -136,7 +137,7 @@ public class DefaultStatementRunner
 		cmdDispatch.put("XSLT", sql);
 
 		cmdDispatch.put(WbDefineVar.DEFINE_LONG.getVerb(), WbDefineVar.DEFINE_LONG);
-		cmdDispatch.put( WbDefineVar.DEFINE_SHORT.getVerb(), WbDefineVar.DEFINE_SHORT);
+		cmdDispatch.put(WbDefineVar.DEFINE_SHORT.getVerb(), WbDefineVar.DEFINE_SHORT);
 
 		sql = new WbRemoveVar();
 		cmdDispatch.put(sql.getVerb(), sql);
@@ -194,11 +195,13 @@ public class DefaultStatementRunner
 		
 		cmdDispatch.put(WbSelectBlob.VERB, new WbSelectBlob());
 		
-		for (int i=0; i < DdlCommand.DDL_COMMANDS.size(); i ++)
+		Iterator itr = DdlCommand.DDL_COMMANDS.iterator();
+		while (itr.hasNext())
 		{
-			sql = (SqlCommand)DdlCommand.DDL_COMMANDS.get(i);
+			sql = (SqlCommand)itr.next();
 			cmdDispatch.put(sql.getVerb(), sql);
 		}
+		this.cmdDispatch.put("CREATE OR REPLACE", DdlCommand.CREATE);
 
 		this.dbSpecificCommands = new ArrayList();
 		this.parameterPool = VariablePool.getInstance();
@@ -261,7 +264,6 @@ public class DefaultStatementRunner
 		{
 			this.cmdDispatch.put(WbOraExecute.EXEC.getVerb(), WbOraExecute.EXEC);
 			this.cmdDispatch.put(WbOraExecute.EXECUTE.getVerb(), WbOraExecute.EXECUTE);
-
 			EchoCommand echo = new EchoCommand();
 			this.cmdDispatch.put(echo.getVerb(), echo);
 
@@ -431,6 +433,14 @@ public class DefaultStatementRunner
 	public SqlCommand getCommandToUse(String sql)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
+		
+//		// Some SQL keywords can contain spaces (e.g. CREATE OR REPLACE)
+//		int pos = verb.indexOf(' ');
+//		if (pos > -1)
+//		{
+//			verb = verb.substring(0,pos);
+//		}
+		
 		if (this.supportsSelectInto && !verb.equalsIgnoreCase(WbSelectBlob.VERB) && this.dbConnection != null && this.dbConnection.getMetadata().isSelectIntoNewTable(sql))
 		{
 			LogMgr.logDebug("StatementRunner.getCommandToUse()", "Found 'SELECT ... INTO new_table'");

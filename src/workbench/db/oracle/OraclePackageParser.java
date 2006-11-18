@@ -20,10 +20,8 @@ import workbench.sql.formatter.SQLToken;
  */
 public class OraclePackageParser
 {
-	
 	private String packageDeclaration;
 	private String packageBody;
-	private boolean hasReplace = false;
 	private String packageName;
 	
 	public OraclePackageParser(String sql)
@@ -48,11 +46,6 @@ public class OraclePackageParser
 		return this.packageBody;
 	}
 
-	public boolean hasReplace()
-	{
-		return hasReplace;
-	}
-	
 	public String getPackageName()
 	{
 		return this.packageName;
@@ -64,55 +57,27 @@ public class OraclePackageParser
 		SQLLexer lexer = new SQLLexer(sql);
 		SQLToken t = lexer.getNextToken(false, false);
 		
-		// we expect the package definition to come before the body!
-		int defBegin = t.getCharBegin();
+		int defBegin = -1;
 		int defEnd = -1;
 		int bodyBegin = -1;
 		int bodyEnd = -1;
-		
-		final int INITIAL = 0;
-		final int CREATE = 1;
-		final int PACKAGE = 2;
-		final int INITIAL_DECL = 4;
-		final int BODY = 8;
-		
-		int state = INITIAL;
+		int lastCreateStart = -1;
 		
 		while (t != null)
 		{
-			if (state == INITIAL)
+			String text = t.getContents();
+			
+			if (isCreate(text))
 			{
-				if (t.getContents().equalsIgnoreCase("CREATE"))
-				{
-					state = CREATE;
-				}
+				lastCreateStart = t.getCharBegin();
 			}
-			else if (state == INITIAL_DECL)
+			else if (text.equals("PACKAGE"))
 			{
-				if (t.getContents().equalsIgnoreCase("CREATE"))
-				{
-					state = CREATE;
-					bodyBegin = t.getCharBegin();
-				}
-			}
-			else if (state == CREATE)
-			{
-				if (t.getContents().equalsIgnoreCase("PACKAGE"))
-				{
-					state = PACKAGE;
-				}
-				else if (t.getContents().equalsIgnoreCase("REPLACE"))
-				{
-					hasReplace = true;
-				}
-			}
-			else if (state == PACKAGE)
-			{
-				if (t.getContents().equalsIgnoreCase("BODY"))
-				{
-					state = BODY;
-				}
-				else if (t.isIdentifier())
+				defBegin = lastCreateStart;
+				t = lexer.getNextToken(false, false);
+				if (t == null) continue;
+				
+				if (t.isIdentifier())
 				{
 					this.packageName = t.getContents();
 					t = findEnd(lexer, this.packageName);
@@ -120,11 +85,15 @@ public class OraclePackageParser
 					{
 						defEnd = t.getCharEnd();
 					}
-					state = INITIAL_DECL;
 				}
 			}
-			else if (state == BODY)
+			else if (text.equals("PACKAGE BODY"))
 			{
+				bodyBegin = lastCreateStart;
+				
+				t = lexer.getNextToken(false, false);
+				if (t == null) continue;
+				
 				String name = t.getContents();
 				t = findEnd(lexer, name);
 				if (t != null)
@@ -143,6 +112,11 @@ public class OraclePackageParser
 		{
 			this.packageBody = sql.substring(bodyBegin, bodyEnd);
 		}
+	}
+	
+	private boolean isCreate(String text)
+	{
+		return text.equals("CREATE") || text.equals("CREATE OR REPLACE");
 	}
 	
 	private SQLToken findEnd(SQLLexer lexer, String name)

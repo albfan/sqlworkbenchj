@@ -58,7 +58,7 @@ public class CompletionPopup
 	protected JList elementList;
 	private ListModel data;
 	private JComponent headerComponent;
-	private String pasteCase;
+	
 	private boolean appendDot;
 	private boolean appendSpace;
 	private boolean selectCurrentWordInEditor;
@@ -70,7 +70,7 @@ public class CompletionPopup
 		this.data = listData;
 		this.editor = ed;
 		this.headerComponent = header;
-		this.pasteCase = Settings.getInstance().getAutoCompletionPasteCase();
+		
 		this.elementList = new JList();
 		this.elementList.setModel(this.data);
 		this.elementList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -198,7 +198,8 @@ public class CompletionPopup
 	{
 		if (value == null) return value;
 		String result;
-		if (value.trim().charAt(0) == '"')
+		String pasteCase = Settings.getInstance().getAutoCompletionPasteCase();
+		if (value.trim().charAt(0) == '"' || StringUtil.isMixedCase(value))
 		{
 			result = value;
 		}

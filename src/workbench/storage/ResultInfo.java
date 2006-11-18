@@ -41,6 +41,16 @@ public class ResultInfo
 	private boolean hasPkColumns = false;
 	private TableIdentifier updateTable;
 	
+	public ResultInfo(ColumnIdentifier[] cols)
+	{
+		this.colCount = cols.length;
+		this.columns = new ColumnIdentifier[this.colCount];
+		for (int i=0; i < colCount; i++)
+		{
+			this.columns[i] = cols[i].createCopy();
+		}
+	}
+	
 	public ResultInfo(String[] colNames, int[] colTypes, int[] colSizes)
 	{
 		this(colNames, colTypes, colSizes, null);
@@ -362,9 +372,10 @@ public class ResultInfo
 	{
 		if (name == null) return -1;
 
+		name = StringUtil.trimQuotes(name);
 		for (int i = 0; i < this.colCount; i++)
 		{
-			String col = this.getColumnName(i);
+			String col = StringUtil.trimQuotes(this.getColumnName(i));
 			if (col != null && name.equalsIgnoreCase(col))
 			{
 				return i;

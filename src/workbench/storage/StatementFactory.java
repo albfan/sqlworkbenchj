@@ -25,7 +25,7 @@ import workbench.util.StringUtil;
 
 /**
  * A class to generate DELETE, INSERT or UPDATE statements based
- * on the data in a {@link workbench.db.storage.RowData} object.
+ * on the data in a {@link workbench.storage.RowData} object.
  *
  * @author  support@sql-workbench.net
  */

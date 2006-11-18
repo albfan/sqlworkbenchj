@@ -37,7 +37,7 @@ public class DbObjectCache
 	private static final String NULL_SCHEMA = "$$wb-null-schema$$";
 	private boolean retrieveOraclePublicSynonyms = false;
 	
-	// This will map a TableIdentifier to a list of ColumnIdentifier's
+	// This will map a TableIdentifier to a list of ColumnIdentifier
 	private SortedMap objects = new TreeMap();
 	
 	DbObjectCache(WbConnection conn)
@@ -146,7 +146,7 @@ public class DbObjectCache
 	
 	/**
 	 * Return the columns for the given table
-	 * @return a List with {@link ColumnIdentifier} objects
+	 * @return a List with {@link workbench.db.ColumnIdentifier} objects
 	 */
 	public List getColumns(TableIdentifier tbl)
 	{

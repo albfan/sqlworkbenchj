@@ -65,7 +65,7 @@ public class SqlKeywordHandler
 				List keyList = StringUtil.stringToList(keys, ",");
 				this.keywords.addAll(keyList);
 
-				keys = Settings.getInstance().getProperty("workbench.db.keywordlist." + dbId, null);
+				keys = Settings.getInstance().getProperty("workbench.db. + " + dbId + ".syntax.keywords." + dbId, null);
 				if (keys != null)
 				{
 					List l = StringUtil.stringToList(keys.toUpperCase(), ",");
