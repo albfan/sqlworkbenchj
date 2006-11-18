@@ -22,9 +22,10 @@ import workbench.sql.formatter.Token;
  *
  * @author support@sql-workbench.net
  */
-public class PackageParserTest extends TestCase
+public class OraclePackageParserTest 
+	extends TestCase
 {
-	String decl = "CREATE OR REPLACE PACKAGE emp_actions AS  -- spec \n" + 
+	String decl = "CREATE   OR   REPLACE PACKAGE emp_actions AS  -- spec \n" + 
              "   TYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL); \n" + 
              "   CURSOR desc_salary RETURN EmpRecTyp \n" + 
              "   PROCEDURE hire_employee ( \n" + 
@@ -37,7 +38,7 @@ public class PackageParserTest extends TestCase
              "   PROCEDURE fire_employee (emp_id NUMBER); \n" + 
              "END emp_actions;";
 	
-  String body = "CREATE OR REPLACE PACKAGE BODY emp_actions AS  -- body \n" + 
+  String body = "CREATE \nOR\t    REPLACE PACKAGE BODY emp_actions AS  -- body \n" + 
              "   CURSOR desc_salary RETURN EmpRecTyp IS \n" + 
              "      SELECT empno, sal FROM emp ORDER BY sal DESC; \n" + 
              "   PROCEDURE hire_employee ( \n" + 
@@ -58,7 +59,7 @@ public class PackageParserTest extends TestCase
              "   END fire_employee; \n" +
              "END emp_actions;";
 
-	public PackageParserTest(String testName)
+	public OraclePackageParserTest(String testName)
 	{
 		super(testName);
 	}
