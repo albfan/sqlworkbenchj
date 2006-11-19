@@ -1052,20 +1052,16 @@ public class WbManager
 	public static void prepareForTest(String configDir)
 	{
 		wb = new WbManager();
+		
+		// Avoid saving the settings
 		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
 		String args[] = { "-notemplates -nosettings -configdir=" + configDir };
+		
 		wb.initCmdLine(args);
 	}
 	
 	public static void main(String[] args)
 	{
-		// This property should be set as early as possible to 
-		// ensure that it is defined before any AWT class is loaded
-		// this will make the application menu appear at the correct
-		// location when running on with Aqua look and feel on a Mac
-		System.setProperty("apple.laf.useScreenMenuBar", "true");
-		System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
-		
 		wb = new WbManager();
 		trace("WbManager.main() - start");
 		// the command line needs to be initialized before everything

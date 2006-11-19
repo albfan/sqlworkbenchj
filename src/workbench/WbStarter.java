@@ -12,11 +12,16 @@
 package workbench;
 
 import java.awt.Toolkit;
+import java.lang.reflect.Method;
 
 import javax.swing.JOptionPane;
 
 /**
- *
+ * This is a wrapper to kick-off the actual WbManager class. It should run 
+ * with any JDK > 1.3 as it does no reference any other classes. 
+ * This class is compiled separately in build.xml to allow for a different 
+ * class file version between this class and the rest of the application
+ * 
  * @author  support@sql-workbench.net
  */
 public class WbStarter
@@ -34,7 +39,7 @@ public class WbStarter
 		}
 		
 		boolean versionIsOk = false;
-		int minMinorVersion = 4;
+		final int minMinorVersion = 4;
 		
 		try
 		{
@@ -44,37 +49,49 @@ public class WbStarter
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace(System.err);
 			versionIsOk = false;
 		}
 
 		if (!versionIsOk)
 		{
 			String error = "A JVM version 1." + minMinorVersion + " or higher is needed to run SQL Workbench/J (Found: " + version + ")";
+			System.err.println(error);
 			try
 			{
+				Toolkit.getDefaultToolkit().beep();
+				Toolkit.getDefaultToolkit().beep();
+				Toolkit.getDefaultToolkit().beep();
 				JOptionPane.showMessageDialog(null, error);
-				Toolkit.getDefaultToolkit().beep();
-				Toolkit.getDefaultToolkit().beep();
-				Toolkit.getDefaultToolkit().beep();
 			}
 			catch (Throwable e)
 			{
-				// ignore ...
+				e.printStackTrace(System.err);
 			}
-			System.err.println(error);
 			System.exit(1);
 		}
 
 		try
 		{
-			WbManager.main(args);
+			// This property should be set as early as possible to 
+			// ensure that it is defined before any AWT class is loaded
+			// this will make the application menu appear at the correct
+			// location when running on with Aqua look and feel on a Mac
+			System.setProperty("apple.laf.useScreenMenuBar", "true");
+			System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
+
+			// Do not reference WbManager directly, otherwise a compile
+			// of this class will trigger a compile of the other classes, but they
+			// should be compiled into a different class file version.
+			Class mgr = Class.forName("workbench.WbManager");
+			Method main = mgr.getDeclaredMethod("main", new Class[] { String[].class });
+			main.invoke(null, new Object[] { args });
 		}
-		catch (Throwable e)
+		catch (Exception e)
 		{
-			e.printStackTrace(System.err);
-			System.exit(2);
+			e.printStackTrace();
 		}
+		
+		
 	}
 
 }
