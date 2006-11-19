@@ -32,6 +32,7 @@ public class IndexReporter
 	public static final String TAG_INDEX_NAME = "name";
 	public static final String TAG_INDEX_UNIQUE = "unique";
 	public static final String TAG_INDEX_PK = "primary-key";
+	public static final String TAG_INDEX_TYPE = "type";
 	public static final String TAG_INDEX_EXPR = "index-expression";
 
 	private IndexDefinition[] indexList;
@@ -67,6 +68,7 @@ public class IndexReporter
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_EXPR, indexList[i].getExpression());
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_UNIQUE, indexList[i].isUnique());
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_PK, indexList[i].isPrimaryKeyIndex());
+			tagWriter.appendTag(result, defIndent, TAG_INDEX_TYPE, indexList[i].getIndexType());
 			tagWriter.appendCloseTag(result, indent, TAG_INDEX);
 		}
 		return;

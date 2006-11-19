@@ -21,19 +21,40 @@ public class IndexDefinition
 	private boolean isPK = false;
 	private boolean isUnique = false;
 	private String indexName;
-	
-	public IndexDefinition(String exp)
-	{
-		this(null, exp);
-	}
+	private String indexType;
 	
 	public IndexDefinition(String name, String exp)
 	{
-		if (exp == null) throw new NullPointerException("Expression may not be null");
 		this.indexName = name;
 		this.expression = exp;
 	}
 
+	public void addColumn(String colExpression)
+	{
+		if (this.expression != null && this.expression.trim().length() > 0)
+		{
+			this.expression = this.expression + "," + colExpression;
+		}
+		else
+		{
+			this.expression = colExpression;
+		}
+	}
+	public void setIndexType(String type) 
+	{ 
+		if (type == null)
+		{
+			this.indexType = "NORMAL";
+		}
+		else
+		{
+			this.indexType = type; 
+		}
+	}
+	
+	public String getIndexType() { return this.indexType; }
+
+	public void setExpression(String exp) { this.expression = exp; }
 	public String getExpression() { return this.expression; }
 	public String getName() { return this.indexName; }
 	public void setPrimaryKeyIndex(boolean flag) { this.isPK = flag; }

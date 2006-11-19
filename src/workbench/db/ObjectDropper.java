@@ -16,6 +16,7 @@ import java.sql.Statement;
 import java.util.List;
 
 import workbench.log.LogMgr;
+import workbench.util.StringUtil;
 
 /**
  * A help class to drop different types of objects
@@ -28,18 +29,23 @@ public class ObjectDropper
 	private WbConnection connection;
 	private Statement currentStatement;
 	private boolean cascadeConstraints;
-
+	private TableIdentifier indexTable;
+	
 	public ObjectDropper(List names, List types)
 		throws IllegalArgumentException
 	{
 		if (names == null || types == null) throw new IllegalArgumentException();
 		if (names.size() == 0 || types.size() == 0) throw new IllegalArgumentException();
 		if (names.size() != types.size()) throw new IllegalArgumentException();
-
 		this.objectNames = names;
 		this.objectTypes = types;
 	}
 
+	public void setIndexTable(TableIdentifier tbl)
+	{
+		this.indexTable = tbl;
+	}
+	
 	public void setConnection(WbConnection aConn)
 	{
 		this.connection = aConn;
@@ -56,6 +62,8 @@ public class ObjectDropper
 			currentStatement = this.connection.createStatement();
 			String cascade = null;
 
+			boolean needTableForIndexDrop = this.connection.getMetadata().needsTableForDropIndex();
+			
 			for (int i=0; i < count; i++)
 			{
 				String name = (String)this.objectNames.get(i);
@@ -67,6 +75,12 @@ public class ObjectDropper
 				sql.append(type);
 				sql.append(' ');
 				sql.append(name);
+				
+				if (needTableForIndexDrop && "INDEX".equals(type) && indexTable != null)
+				{
+					sql.append(" ON ");
+					sql.append(indexTable.getTableExpression(this.connection));
+				}
 
 				if (this.cascadeConstraints)
 				{

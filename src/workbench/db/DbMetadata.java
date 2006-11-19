@@ -80,6 +80,7 @@ public class DbMetadata
 
 	// <editor-fold defaultstate="collapsed" desc=" Placeholders for statement templates ">
 	public static final String TABLE_NAME_PLACEHOLDER = "%tablename%";
+	public static final String INDEX_TYPE_PLACEHOLDER = "%indextype% ";
 	public static final String INDEX_NAME_PLACEHOLDER = "%indexname%";
 	public static final String PK_NAME_PLACEHOLDER = "%pk_name%";
 	public static final String UNIQUE_PLACEHOLDER = "%unique_key% ";
@@ -689,6 +690,12 @@ public class DbMetadata
 		return schemasToIgnore.contains("*") || schemasToIgnore.contains(schema);
 	}
 
+	public boolean needsTableForDropIndex()
+	{
+		boolean needsTable = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".dropindex.needstable", false);
+		return needsTable;
+	}
+	
 	/**
 	 * Check if the given {@link TableIdentifier} requires
 	 * the usage of the schema for a DML (select, insert, update, delete)
@@ -1187,13 +1194,6 @@ public class DbMetadata
 
 	public String getProcedureSource(String aCatalog, String aSchema, String aProcname, int type)
 	{
-//		GetMetaDataSql sql = (GetMetaDataSql)procSourceSql.get(this.productName);
-//		if (sql == null)
-//		{
-//			SourceStatementsHelp help = new SourceStatementsHelp();
-//			return help.explainMissingProcSourceSql(this.getProductName());
-//		}
-		
 		try
 		{
 			ProcedureDefinition def = new ProcedureDefinition(aCatalog, aSchema, aProcname, type);
@@ -2460,17 +2460,97 @@ public class DbMetadata
 	public static final int COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG = 1;
 	public static final int COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG = 2;
 	public static final int COLUMN_IDX_TABLE_INDEXLIST_COL_DEF = 3;
-
+	public static final int COLUMN_IDX_TABLE_INDEXLIST_TYPE = 4;
+	
+	private Map indexTypeMapping;
+	public static final String IDX_TYPE_NORMAL = "NORMAL";
+	
+	private String mapIndexType(int type)
+	{
+		if (indexTypeMapping == null)
+		{
+			this.indexTypeMapping = new HashMap();
+			String map = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".indextypes", null);
+			if (map != null)
+			{
+				List entries = StringUtil.stringToList(map, ";", true, true);
+				Iterator itr = entries.iterator();
+				while (itr.hasNext())
+				{
+					String entry = (String)itr.next();
+					String[] mapping = entry.split(",");
+					if (mapping.length != 2) continue;
+					int value = StringUtil.getIntValue(mapping[0], -42);
+					if (value != -42)
+					{
+						indexTypeMapping.put(new Integer(value), mapping[1]);
+					}
+				}
+			}
+		}
+		String dbmsType = (String)this.indexTypeMapping.get(new Integer(type));
+		if (dbmsType == null) 
+		{
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("DbMetadata.mapIndexType()", "No mapping for type = " + type);
+			}
+			return IDX_TYPE_NORMAL;
+		}
+		return dbmsType;
+	}
+	
+	public IndexDefinition[] getIndexList(TableIdentifier tbl)
+	{
+		Collection l = this.getTableIndexList(tbl);
+		int count = l.size();
+		IndexDefinition[] result = new IndexDefinition[count];
+		Iterator itr = l.iterator();
+		int i = 0;
+		while (itr.hasNext())
+		{
+			result[i] = (IndexDefinition)itr.next();
+			i++;
+		}
+		return result;
+	}
+	
 	public DataStore getTableIndexInformation(TableIdentifier table)
 	{
-		String[] cols = {"INDEX_NAME", "UNIQUE", "PK", "DEFINITION"};
-		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		final int sizes[] =   {40, 7, 6, 50};
+		String[] cols = {"INDEX_NAME", "UNIQUE", "PK", "DEFINITION", "TYPE"};
+		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+		final int sizes[] =   {30, 7, 6, 40, 10};
 		DataStore idxData = new DataStore(cols, types, sizes);
+		Collection indexes = getTableIndexList(table);
+		Iterator itr = indexes.iterator();
+		while (itr.hasNext())
+		{
+			int row = idxData.addRow();
+			IndexDefinition idx = (IndexDefinition)itr.next();
+			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME, idx.getName());
+			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG, (idx.isUnique() ? "YES" : "NO"));
+			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG, (idx.isPrimaryKeyIndex() ? "YES" : "NO"));
+			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_COL_DEF, idx.getExpression());
+			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_TYPE, idx.getIndexType());
+		}
+		idxData.sortByColumn(0, true);
+		return idxData;
+	}
+	
+	/**
+	 * Returns a list of IndexDefinition entries
+	 */
+	public Collection getTableIndexList(TableIdentifier table)
+	{
+		
 		ResultSet idxRs = null;
-
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(this.dbConnection);
+		
+		// This will map an indexname to an IndexDefinition object
+		// getIndexInfo() returns one row for each column
+		HashMap defs = new HashMap();
+		
 		try
 		{
 			// Retrieve the name of the PK index
@@ -2489,25 +2569,12 @@ public class DbMetadata
 				catch (Exception e)
 				{
 					LogMgr.logWarning("DbMetadata.getTableIndexInformation()", "Error retrieving PK information", e);
+					pkName = "";
 				}
 				finally
 				{
-					try { keysRs.close(); } catch (Throwable th) {}
+					SqlUtil.closeResult(keysRs);
 				}
-			}
-			
-			// the idxInfo will hold an ArrayList with
-			// information for each index. The first entry
-			// int he ArrayList will have the unique/non-unique
-			// flag, the rest will be the column list
-			HashMap idxInfo = new HashMap();
-			
-			// A list of index names that are functional indexes for Oracle
-			List funcIndexNames = null;
-
-			if (this.isOracle)
-			{
-				funcIndexNames = new ArrayList();
 			}
 			
 			idxRs = this.indexReader.getIndexInfo(tbl, false);
@@ -2520,93 +2587,47 @@ public class DbMetadata
 				if (indexName == null) continue;
 				String colName = idxRs.getString("COLUMN_NAME");
 				String dir = idxRs.getString("ASC_OR_DESC");
-				ArrayList colInfo = (ArrayList)idxInfo.get(indexName);
-				if (colInfo == null)
+				
+				int type = idxRs.getInt("TYPE");
+				
+				
+				IndexDefinition def = (IndexDefinition)defs.get(indexName);
+				if (def == null)
 				{
-					colInfo = new ArrayList(10);
-					idxInfo.put(indexName, colInfo);
-					if (unique)
-						colInfo.add("NO");
-					else
-						colInfo.add("YES");
+					def = new IndexDefinition(indexName, null);
+					def.setIndexType(mapIndexType(type));
+					def.setUnique(!unique);
+					def.setPrimaryKeyIndex(pkName.equals(indexName));
+					defs.put(indexName, def);
 				}
 				if (dir != null)
-					colInfo.add(colName + " " + dir);
+				{
+					def.addColumn(colName + " " + dir);
+				}
 				else
-					colInfo.add(colName);
-
+				{
+					def.addColumn(colName);
+				}
+				
 				if (this.isOracle)
 				{
-					String type = idxRs.getString("INDEX_TYPE");
-					if (type != null && type.startsWith("FUNCTION-BASED"))
-					{
-						if (!funcIndexNames.contains(indexName))
-						{
-							funcIndexNames.add(indexName);
-						}
-					}
+					String oraType = idxRs.getString("INDEX_TYPE");
+					def.setIndexType(oraType);
 				}
 			}
-
-			if (this.isOracle && funcIndexNames.size() > 0)
-			{
-				Map funcIndex = ((OracleIndexReader)this.indexReader).readFunctionIndexDefinition(tbl.getSchema(), tbl.getTableName(), funcIndexNames);
-				Iterator defs = funcIndex.entrySet().iterator();
-				while (defs.hasNext())
-				{
-					Entry entry = (Entry)defs.next();
-					String index = (String)entry.getKey();
-					ArrayList old = (ArrayList)idxInfo.get(index);
-					ArrayList newList = (ArrayList)entry.getValue();
-					newList.add(0, old.get(0));
-					idxInfo.put(index, newList);
-				}
-			}
-
-			Iterator itr = idxInfo.entrySet().iterator();
-			while (itr.hasNext())
-			{
-				Entry entry = (Entry)itr.next();
-				ArrayList colist = (ArrayList)entry.getValue();
-				String index = (String)entry.getKey();
-				int row = idxData.addRow();
-				if (colist != null && colist.size() > 1)
-				{
-					idxData.setValue(row, 0, index);
-
-					String unique = (String)colist.get(0);
-					idxData.setValue(row, 1, unique);
-					StringBuffer def = new StringBuffer();
-					for (int i=1; i < colist.size(); i++)
-					{
-						if (i > 1) def.append(", ");
-						def.append((String)colist.get(i));
-					}
-					if (pkName != null && pkName.equalsIgnoreCase(index))
-					{
-						idxData.setValue(row, 2, "YES");
-					}
-					else
-					{
-						idxData.setValue(row, 2, "NO");
-					}
-					idxData.setValue(row, 3, def.toString());
-				}
-			}
-			idxData.sortByColumn(0, true);
+			
+			this.indexReader.processIndexList(tbl, defs.values());
 		}
 		catch (Exception e)
 		{
 			LogMgr.logWarning("DbMetadata.getTableIndexInformation()", "Could not retrieve indexes!", e);
-			// clear any entries which might have made into the DataStore
-			idxData.reset();
 		}
 		finally
 		{
 			try { idxRs.close(); } catch (Throwable th) {}
 			this.indexReader.indexInfoProcessed();
 		}
-		return idxData;
+		return defs.values();
 	}
 
 	public List getTableList(String schema, String[] types)
@@ -2671,24 +2692,6 @@ public class DbMetadata
 		return tables;
 	}
 
-	public IndexDefinition[] getIndexList(TableIdentifier tbl)
-	{
-		DataStore ds = this.getTableIndexInformation(tbl);
-		int count = ds.getRowCount();
-		IndexDefinition[] result = new IndexDefinition[count];
-		for (int i=0; i < count; i ++)
-		{
-			String name = ds.getValueAsString(i, COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
-			String coldef = ds.getValueAsString(i, COLUMN_IDX_TABLE_INDEXLIST_COL_DEF);
-			boolean unique = "YES".equalsIgnoreCase(ds.getValueAsString(i, COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG));
-			boolean pk = "YES".equalsIgnoreCase(ds.getValueAsString(i, COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG));
-			IndexDefinition def = new IndexDefinition(name, coldef);
-			def.setUnique(unique);
-			def.setPrimaryKeyIndex(pk);
-			result[i] = def;
-		}
-		return result;
-	}
 	/** 	Return the current catalog for this connection. If no catalog is defined
 	 * 	or the DBMS does not support catalogs, an empty string is returned.
 	 *

@@ -1121,7 +1121,7 @@ public class TableListPanel
 				public void run()
 				{
 					tableSource.setText(s);
-					tableSource.setCaretPosition(0);
+					tableSource.setCaretPosition(0, false);
 				}
 			});
 			shouldRetrieveTableSource = false;
@@ -1693,6 +1693,8 @@ public class TableListPanel
 
 		ArrayList names = new ArrayList(count);
 		ArrayList types = new ArrayList(count);
+		ArrayList tables = new ArrayList(count);
+		
 		for (int i=0; i < count; i ++)
 		{
 			String name = this.indexes.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
@@ -1700,8 +1702,10 @@ public class TableListPanel
 			names.add((schema == null ? name : schema + "." + name));
 			types.add("INDEX");
 		}
+		
 		ObjectDropperUI dropperUI = new ObjectDropperUI();
 		dropperUI.setObjects(names, types);
+		dropperUI.setIndexTable(this.selectedTable);
 		dropperUI.setConnection(this.dbConnection);
 		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
 		dropperUI.showDialog(f);

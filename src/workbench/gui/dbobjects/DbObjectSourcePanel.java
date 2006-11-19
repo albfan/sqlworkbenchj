@@ -140,9 +140,29 @@ public class DbObjectSourcePanel
 		return sourceEditor.getText();
 	}
 	
-	public void setCaretPosition(int pos)
+	public void requestFocus()
+	{
+		this.sourceEditor.requestFocus();
+	}
+
+	public boolean requestFocusInWindow()
+	{
+		return this.sourceEditor.requestFocusInWindow();
+	}
+	
+	public void setCaretPosition(int pos, boolean selectLine)
 	{
 		sourceEditor.setCaretPosition(pos);
+		if (selectLine)
+		{
+			int line = sourceEditor.getCaretLine();
+			int length = sourceEditor.getLineLength(line);
+			int lineStart = sourceEditor.getLineStartOffset(line);
+			if (lineStart > 0 && length > 0)
+			{
+				sourceEditor.select(lineStart, lineStart + length - 1);
+			}
+		}
 	}
 	
 	public void scrollToCaret()

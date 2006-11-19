@@ -15,13 +15,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import workbench.db.DbMetadata;
+import workbench.db.IndexDefinition;
 import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
 
@@ -119,9 +118,9 @@ public class OracleIndexReader
 	 * 	as elements. Each Element of the list is one part (=function call to a column)
 	 * 	of the index definition.
 	 */
-	public Map readFunctionIndexDefinition(String schema, String table, List indexNames)
+	public void processIndexList(TableIdentifier tbl, Collection indexDefs)
 	{
-		if (indexNames.size() == 0) return Collections.EMPTY_MAP;
+		if (indexDefs.size() == 0) return;
 		
 		Map result = new HashMap();
 		
@@ -134,28 +133,33 @@ public class OracleIndexReader
 			"    and i.index_type like 'FUNCTION-BASED%' ";
 		StringBuffer sql = new StringBuffer(300);
 		sql.append(base);
+		String schema = tbl.getSchema();
+		
 		if (schema != null && schema.length() > 0)
 		{
 			sql.append(" AND i.owner = '" + schema + "' ");
 		}
-		Iterator keys = indexNames.iterator();
-		boolean first = true;
+		Iterator keys = indexDefs.iterator();
+		boolean found = false;
+		
 		sql.append(" AND i.index_name IN (");
 		while (keys.hasNext())
 		{
-			if (first)
+			IndexDefinition def = (IndexDefinition)keys.next();
+			String type = def.getIndexType();
+			if (type == null) continue;
+			if (type.startsWith("FUNCTION-BASED"))
 			{
-				first = false;
+				if (found) sql.append(',');
+				found = true;
+				sql.append('\'');
+				sql.append(def.getName());
+				sql.append('\'');
 			}
-			else
-			{
-				sql.append(",");
-			}
-			sql.append('\'');
-			sql.append((String)keys.next());
-			sql.append('\'');
 		}
 		sql.append(") ");
+		
+		if (!found) return;
 		
 		ResultSet rs = null;
 		Statement stmt = null;
@@ -167,27 +171,40 @@ public class OracleIndexReader
 			{
 				String name = rs.getString(1);
 				String exp = rs.getString(2);
-				List cols = (List)result.get(name);
-				if (cols == null) 
+				result.put(name, exp);
+			}
+			
+			keys = indexDefs.iterator();
+			while (keys.hasNext())
+			{
+				IndexDefinition def = (IndexDefinition)keys.next();
+				String exp = (String)result.get(def.getName());
+				if (exp != null)
 				{
-					cols = new ArrayList();
-					result.put(name, cols);
+					def.setExpression(exp);
 				}
-				if (!cols.contains(exp))
+				String type = def.getIndexType();
+				if (type.startsWith("FUNCTION-BASED"))
 				{
-					cols.add(exp);
+					def.setIndexType(type.replace("FUNCTION-BASED ", ""));
 				}
+				else if (type.indexOf(' ') > -1 || type.indexOf('-') > -1)
+				{
+					def.setIndexType(DbMetadata.IDX_TYPE_NORMAL);
+				}
+					
 			}
 		}
 		catch (Exception e)
 		{
-			LogMgr.logWarning("OracleMetaData.readFunctionIndexDefinition()", "Error reading function-based index definition", e);
+			LogMgr.logWarning("OracleMetaData.processIndexList()", "Error reading function-based index definition", e);
+			LogMgr.logDebug("OracleMetaData.processIndexList()", "Using sql: "  + sql.toString());
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
-		return result;
+		return;
 	}
 
 }

@@ -71,7 +71,9 @@ public class IndexDiff
 			{
 				boolean uniqueDiff = ind.isUnique() != reference[i].isUnique();
 				boolean pkDiff = ind.isPrimaryKeyIndex() != reference[i].isPrimaryKeyIndex();
-				if (uniqueDiff || pkDiff)
+				boolean typeDiff = !(ind.getIndexType().equals(reference[i].getIndexType()));
+				
+				if (uniqueDiff || pkDiff || typeDiff)
 				{
 					writer.appendOpenTag(result, myindent, TAG_MODIFY_INDEX, "name", ind.getName());
 					result.append('\n');
@@ -82,6 +84,10 @@ public class IndexDiff
 					if (pkDiff)
 					{
 						writer.appendTag(result, idxIndent, IndexReporter.TAG_INDEX_PK, reference[i].isPrimaryKeyIndex());
+					}	
+					if (pkDiff)
+					{
+						writer.appendTag(result, idxIndent, IndexReporter.TAG_INDEX_TYPE, reference[i].getIndexType());
 					}	
 					writer.appendCloseTag(result, myindent, TAG_MODIFY_INDEX);
 				}

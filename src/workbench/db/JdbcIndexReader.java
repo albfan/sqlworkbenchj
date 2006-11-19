@@ -11,12 +11,11 @@
  */
 package workbench.db;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.StringTokenizer;
 import workbench.storage.DataStore;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -58,6 +57,9 @@ public class JdbcIndexReader
 			String unique = indexDefinition.getValue(i, 1).toString();
 			String is_pk  = indexDefinition.getValue(i, 2).toString();
 			String definition = indexDefinition.getValue(i, 3).toString();
+			String type = indexDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_TYPE);
+			if (type == null || type.startsWith("NORMAL")) type = null;
+			
 			StringBuffer columns = new StringBuffer();
 			StringTokenizer tok = new StringTokenizer(definition, ",");
 			String col;
@@ -91,6 +93,7 @@ public class JdbcIndexReader
 				{
 					sql = StringUtil.replace(sql, DbMetadata.UNIQUE_PLACEHOLDER, "");
 				}
+				sql = StringUtil.replace(sql, DbMetadata.INDEX_TYPE_PLACEHOLDER, (type == null ? "" : type + " "));
 				sql = StringUtil.replace(sql, DbMetadata.COLUMNLIST_PLACEHOLDER, columns.toString());
 				sql = StringUtil.replace(sql, DbMetadata.INDEX_NAME_PLACEHOLDER, idx_name);
 				idx.append(sql);
@@ -135,6 +138,11 @@ public class JdbcIndexReader
 		sql = StringUtil.replace(sql, DbMetadata.COLUMNLIST_PLACEHOLDER, cols.toString());
 		sql = StringUtil.replace(sql, DbMetadata.INDEX_NAME_PLACEHOLDER, indexName);
 		return sql;
+	}
+
+	public void processIndexList(TableIdentifier table, Collection indexDefinitions)
+	{
+		// Nothing implemented
 	}
 	
 }

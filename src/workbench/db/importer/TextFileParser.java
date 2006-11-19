@@ -219,6 +219,7 @@ public class TextFileParser
 	 * 	If the list is empty or null, then all columns will be imported
 	 */
 	public void setImportColumns(List columnList)
+		throws IllegalArgumentException
 	{
 		if (columnList == null)
 		{
@@ -263,14 +264,41 @@ public class TextFileParser
 		}
 	}
 	
+	private void removeInvalidColumns(List cols)
+		throws IllegalArgumentException
+	{
+		Iterator itr = cols.iterator();
+		while (itr.hasNext())
+		{
+			Object o = itr.next();
+			String columnName = o.toString();
+			int index = this.getColumnIndex(columnName);
+			if (index == -1)
+			{
+				itr.remove();
+				String msg = ResourceMgr.getString("ErrImpColNotFound");
+				this.messages.append(StringUtil.replace(msg, "%colname%", columnName) + "\n");
+				throw new IllegalArgumentException("Column [" + columnName + "] not found");
+			}
+		}
+	}
 	/**
 	 * Retain only those columns in the defined source file columns
 	 * that are in the passed list
 	 */
 	private void checkPendingImportColumns(List colIds)
+		throws IllegalArgumentException
 	{
 		if (colIds == null || colIds.size() == 0) return;
+		
+		removeInvalidColumns(colIds);
+		
 		int count = colIds.size();
+		if (count == 0) 
+		{
+			this.messages.append(ResourceMgr.getString("ErrImpInvalidColDef") + "\n");
+			throw new IllegalArgumentException("At least one import column must be defined");
+		}
 
 		this.columnMap = new int[this.colCount];
 		for (int i=0; i < this.colCount; i++) this.columnMap[i] = -1;
@@ -287,6 +315,12 @@ public class TextFileParser
 			{
 				this.columnMap[index] = i;
 				this.importColCount ++;
+			}
+			else
+			{
+				String msg = ResourceMgr.getString("ErrImpColNotFound");
+				this.messages.append(StringUtil.replace(msg, "%colname%", columnName) + "\n");
+				throw new IllegalArgumentException("Column [" + columnName + "] not found!");
 			}
 		}
 	}

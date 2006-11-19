@@ -19,6 +19,7 @@ import javax.swing.JDialog;
 import javax.swing.WindowConstants;
 
 import workbench.db.ObjectDropper;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.NoSelectionModel;
@@ -41,7 +42,8 @@ public class ObjectDropperUI
 	protected boolean running;
 	protected ObjectDropper dropper;
 	private Thread dropThread;
-
+	private TableIdentifier indexTable;
+	
 	public ObjectDropperUI()
 	{
 		initComponents();
@@ -148,6 +150,11 @@ public class ObjectDropperUI
 		dropThread.start();
 	}//GEN-LAST:event_dropButtonActionPerformed
 
+	public void setIndexTable(TableIdentifier tbl)
+	{
+		this.indexTable = tbl;
+	}
+	
 	protected void doDrop()
 	{
 		if (this.running) return;
@@ -157,6 +164,7 @@ public class ObjectDropperUI
 			this.cancelled = false;
 			this.connection.setBusy(true);
 			this.dropper = new ObjectDropper(this.objectNames, this.objectTypes);
+			this.dropper.setIndexTable(this.indexTable);
 			dropper.setConnection(this.connection);
 			dropper.setCascadeConstraints(this.checkBoxCascadeConstraints.isSelected());
 			dropper.execute();

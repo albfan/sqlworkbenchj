@@ -296,7 +296,7 @@ public class ColumnExpressionPanel
 		Class columnClass = null;
 		try
 		{
-			columnClass = col.getColumnClass();//Class.forName(col.getColumnClassName());
+			columnClass = col.getColumnClass();
 			buildColumnComparatorDropDown(columnClass);
 		}
 		catch (Exception e)

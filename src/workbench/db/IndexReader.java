@@ -13,8 +13,8 @@ package workbench.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import workbench.storage.DataStore;
-import workbench.util.StrBuffer;
 
 /**
  *
@@ -55,4 +55,11 @@ public interface IndexReader
 	 *  @param columnList - The columns that should build the index
 	 */
 	String buildCreateIndexSql(TableIdentifier table, String indexName, boolean unique, String[] columnList);
+	
+	/**
+	 * Post-Process the index definitions contained in the List
+	 * This can be used to e.g. retrieve additional index information
+	 * that can't be read with getIndexInfo()
+	 */
+	void processIndexList(TableIdentifier table, Collection indexDefinitions);
 }

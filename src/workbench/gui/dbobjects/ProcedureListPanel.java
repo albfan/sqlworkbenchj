@@ -60,7 +60,6 @@ import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import javax.swing.JLabel;
 import workbench.WbManager;
-import workbench.db.ColumnIdentifier;
 import workbench.db.ObjectScripter;
 import workbench.db.ProcedureDefinition;
 import workbench.gui.MainWindow;
@@ -70,6 +69,7 @@ import workbench.gui.components.WbTabbedPane;
 import workbench.interfaces.CriteriaPanel;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.WbWorkspace;
 
 
@@ -467,15 +467,23 @@ public class ProcedureListPanel
 		}
 		final int pos = checkOraclePackage(sql, catalog, proc, type);
 		
-		//source.scrollToCaret();
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
-				source.setCaretPosition(pos);
+				source.setCaretPosition(pos,(pos > 0));
 				source.requestFocusInWindow();
 			}
 		});
+		
+//		EventQueue.invokeLater(new Runnable()
+//		{
+//			public void run()
+//			{
+//				source.requestFocus();
+//			}
+//		});
+		
 	}
 	
 	private int checkOraclePackage(String sql, String catalog, String object, int type)
@@ -483,20 +491,31 @@ public class ProcedureListPanel
 		if (sql == null) return 0;
 		if (this.dbConnection == null) return 0;
 		if (!this.dbConnection.getMetadata().isOracle()) return 0;
+		
+		// The package name is stored in the catalog field
+		// if that is empty, it's not a packaged function
+		
 		if (StringUtil.isEmptyString(catalog)) return 0;
-		String regex = null;
-		if (type == DatabaseMetaData.procedureNoResult)
-		{
-			regex = "PROCEDURE\\s*" + object + "\\s*IS|PROCEDURE\\s*" + object + "\\s*\\([^;]*\\)\\s*IS";
-		}
-		else
-		{
-			regex = "FUNCTION\\s*" + object + ".*RETURN.*AS";
-		}
+		
+		int bodyPos = SqlUtil.getKeywordPosition("PACKAGE BODY", sql);
+		
+		// If no package body was found, start at the beginning
+		// so the function declaration is selected
+		if (bodyPos == -1) bodyPos = 0;
+		
+		String regex = "(PROCEDURE|FUNCTION)\\s+" + object;
+//		if (type == DatabaseMetaData.procedureNoResult)
+//		{
+//			regex = "PROCEDURE\\s*" + object + "\\s*IS|PROCEDURE\\s*" + object + "\\s*\\([^;]*\\)\\s*IS";
+//		}
+//		else
+//		{
+//			regex = "FUNCTION\\s*" + object;
+//		}
 		Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE + Pattern.DOTALL);
 		
 		Matcher m = p.matcher(sql);
-		if (m.find())
+		if (m.find(bodyPos))
 		{
 			return m.start();
 		}

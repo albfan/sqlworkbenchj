@@ -154,10 +154,7 @@ public class WbAction
 		ShortcutManager mgr = Settings.getInstance().getShortcutManager(); 
 		mgr.registerAction(this);
 		KeyStroke key = mgr.getCustomizedKeyStroke(this);
-		if (key != null)
-		{
-			this.setAccelerator(key);
-		}
+		this.setAccelerator(key);
 	}
 	/**
 	 * Initialize the menu definition for this action. The menu text and tooltip

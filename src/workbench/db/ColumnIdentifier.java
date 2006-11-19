@@ -269,10 +269,9 @@ public class ColumnIdentifier
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("ColumnIdentifier.setColumnClassName()", "Could not obtain column class", e);
+			LogMgr.logWarning("ColumnIdentifier.setColumnClassName()", "Could not obtain column class", e);
 			this.columnClass = null;
 		}
-
 	}
 	
 	public Class getColumnClass()
@@ -303,7 +302,7 @@ public class ColumnIdentifier
 			case Types.VARCHAR:
 			case Types.LONGVARCHAR:
 				return String.class;
-				
+
 			case Types.DATE:
 				return java.sql.Date.class;
 				
