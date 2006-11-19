@@ -26,6 +26,8 @@
   <property name="docbook.root" value="${doc}/docbook"/>
   <property name="fop.root" value="c:/etc/fop"/>
 
+	<taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../etc/jarbundler/jarbundler-1.9.jar"/>
+	
   <target name="init">
     <tstamp>
       <format pattern="yyyy-MM-dd HH:mm" property="build_date"/>
@@ -42,40 +44,44 @@
     <pathelement location="${fop.root}/build/fop.jar"/>
   </path>
 
-  <target name="set-build-number" depends="init">
+	<target name="set-build-number" depends="prepare">
 		<property name="release-src-dir" value="release"/>
-    <buildnumber file="build.number"/>
-    <echo message="Build number is ${build.number}"/>
+		<buildnumber file="build.number"/>
+		<echo message="Build number is ${build.number}"/>
 
-    <!-- Reset the sub-build number for dev-builds -->
-    <propertyfile file="devbuild.number">
-        <entry key="dev-build.number" type="int" operation="=" value="0"/>
-    </propertyfile>
+		<!-- Reset the sub-build number for dev-builds -->
+		<propertyfile file="devbuild.number">
+			<entry key="dev-build.number" type="int" operation="=" value="0"/>
+		</propertyfile>
+	</target>
 
-  </target>
-
-	<target name="set-dev-build" depends="init">
+	<target name="replace-build-number">
+		<replace file="${build}/language/wbstrings.properties" token="@BUILD_NUMBER@" value="${build.number}"/>
+		<replace file="${build}/language/wbstrings.properties" token="@BUILD_DATE@" value="${build_date}"/>
+	</target>
+	
+	<target name="set-dev-build" depends="prepare">
 		<property name="release-src-dir" value="dist"/>
 		<propertyfile file="devbuild.number">
 			<entry key="dev-build.number" type="int" operation="+" value="1"/>
 		</propertyfile>
 		
-		<!-- <echo message="sub ${dev-build.number}"/> -->
 		<loadproperties srcFile="release.property"/>
 		<loadproperties srcFile="devbuild.number"/>
 		
 		<property name="build.number" value="${release.build.number}.${dev-build.number}"/>
 		<echo message="Build number is ${build.number}"/>
-		
+		<antcall target="replace-build-number"/>
 	</target>
 
-  <target name="get-dev-build" depends="init">
-    <loadproperties srcFile="release.property"/>
-    <loadproperties srcFile="devbuild.number"/>
+	<target name="get-dev-build" depends="prepare">
+		<loadproperties srcFile="release.property"/>
+		<loadproperties srcFile="devbuild.number"/>
 
-    <property name="build.number" value="${release.build.number}.${dev-build.number}"/>
-    <echo message="Build number is ${build.number}"/>
-  </target>
+		<property name="build.number" value="${release.build.number}.${dev-build.number}"/>
+		<echo message="Build number is ${build.number}"/>
+		<antcall target="replace-build-number"/>
+	</target>
 
 	<target name="clean">
 		<delete dir="${build}/workbench" failonerror="false"/>
@@ -104,26 +110,40 @@
 				<exclude name="**/*.form"/>
 				<exclude name="**/*.class"/>
 				<exclude name="**/*.flex"/>
-				<exclude name="**/*.properties"/>
+				<!-- <exclude name="**/*.properties"/> -->
 			</fileset>
 		</copy>	
-		
-		<copy overwrite="true" todir="${build}">
-			<fileset defaultexcludes="true" dir="${src}">
-				<include name="**/*.properties"/>
-			</fileset>
-			<filterset begintoken="@" endtoken="@">
-				<filter token="BUILD_DATE" value="${build_date}"/>
-				<filter token="BUILD_NUMBER" value="${build.number}"/>
-			</filterset>
-		</copy>	
-		
+
 	</target>
 
 	<target name="compile" depends="prepare">
-		<javac debug="on" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" target="1.4" source="1.4" encoding="ISO-8859-1">
+		
+		<!-- compile the starter class with target=1.3 so that it can actually be loaded by
+		     older JVMs as well and is able to display the error message -->
+		<javac debug="on" 
+					debuglevel="source,lines" 
+					destdir="${build}" 
+					optimize="on" 
+					srcdir="${src}" 
+					target="1.2" 
+					source="1.2" 
+					encoding="ISO-8859-1" 
+					includes="workbench/WbStarter.java"/>
+		
+		<!-- the rest of the application is compiled to the needed class file version -->
+		<javac debug="on" 
+		       debuglevel="source,lines" 
+					 destdir="${build}" 
+					 optimize="on" 
+					 srcdir="${src}" 
+					 target="1.4" 
+					 source="1.4" 
+					 encoding="ISO-8859-1">
+						 
 			<exclude name="workbench/test/**"/>
+			<exclude name="workbench/WbStarter.java"/>
 		</javac>
+		
 	</target>
 	
   <!-- Manual related tasks -->
@@ -177,11 +197,11 @@
   <!-- Create the pdf version of the manual -->
   <target name="pdf" depends="init,fop">
 		
-		<property name="inputFile" location="${doc}/pdf/manual.fo"/>
-		<property name="outputFile" location="${doc}/pdf/SQLWorkbench-Manual.pdf"/>
+	<property name="inputFile" location="${doc}/pdf/manual.fo"/>
+	<property name="outputFile" location="${doc}/pdf/SQLWorkbench-Manual.pdf"/>
 		
     <java failonerror="true" fork="true" dir="${fop.root}" classname="org.apache.fop.cli.Main" classpathref="fop.path">
-			<arg line="-fo ${inputFile} -out application/pdf ${outputFile}"/>
+		<arg line="-fo ${inputFile} -out application/pdf ${outputFile}"/>
     </java>
 		
     <delete file="${doc}/pdf/manual.fo"/>
@@ -277,6 +297,7 @@
 		
 		<copy todir="${html-outdir}/${html-resource-dir}" flatten="true">
 			<fileset dir="${src}/workbench/resource/images">
+				<include name="colfilter16.gif"/>
 				<include name="ExecuteSel16.gif"/>
 				<include name="Remove16.gif"/>
 				<include name="filter16.gif"/>
@@ -433,7 +454,7 @@
   </target>
 
   <!-- build a full relase with documentation and source distribution -->
-  <target name="release" depends="clean, set-build-number, copy-history, build-help, compile, make-jar, pdf, publish, release-src-zip, release-package, restart-history, clean-history">
+  <target name="release" depends="clean, compile, test, set-build-number, copy-history, build-help, make-jar, pdf, publish, release-src-zip, release-package, restart-history, clean-history">
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
@@ -449,16 +470,19 @@
     </ant>
   </target>
 
-  <target name="make-dev-jar" depends="get-dev-build, clean, copy-history, prepare, compile, make-jar, clean-history">
+  <target name="make-dev-jar" depends="clean, compile, test, get-dev-build, copy-history, make-jar, clean-history">
   </target>
 
   <!-- build a development release -->
-  <target name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile, build-help, make-jar, release-src-zip, clean-history">
+  <target name="dev-release" depends="clean, compile, test, set-dev-build, copy-history, build-help, pdf, make-jar, release-src-zip, clean-history">
   
     <zip zipfile="${distdir}/Workbench-Build${build.number}.zip">
       <zipfileset dir="${distdir}">
         <include name="Workbench.jar"/>
         <include name="history.txt"/>
+      </zipfileset>
+      <zipfileset dir="${doc}/pdf">
+        <include name="SQLWorkbench-Manual.pdf"/>
       </zipfileset>
     </zip>
 
@@ -495,8 +519,7 @@
     <delete file="${scriptsrc}/history.new" failonerror="false"/>
   </target>
 
-  <target name="release-package" depends="init">
-
+	<target name="prepare-release-dir" depends="init">
     <copy file="${scriptsrc}/history.new" overwrite="true" failonerror="false" tofile="${root}/release/history.txt"/>
 
     <delete dir="${root}/release/manual" failonerror="false"/>
@@ -512,6 +535,52 @@
         <include name="Workbench-Build*.tar.gz"/>
       </fileset>
     </delete>
+		
+	</target>
+
+	
+	<target name="mac-package" depends="prepare-release-dir,init">
+		<property name="bundledir" value="${distdir}/mac"/>
+		<delete dir="${bundledir}" failonerror="false"/>
+		<mkdir dir="${bundledir}"/>
+
+		<jarbundler dir="${bundledir}"
+			name="SQLWorkbenchJ"
+			mainclass="workbench.WbStarter" 
+			jar="${distdir}/${jarfile}" 
+			jvmversion="1.4+"
+			version="{$build.number}"
+			shortname="SQL Workbench"
+			infostring="SQL Workbench/J"
+			signature="sqwb"
+			icon="Workbench.icns"
+			vmoptions="-Xmx256m -Dcom.apple.mrj.application.growbox.intrudes=false"
+			stubfile="../etc/jarbundler/JavaApplicationStub">
+
+			<javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
+		</jarbundler>
+		
+    <zip zipfile="${root}/release/Workbench-Build${build.number}-Mac.zip">
+      <zipfileset dir="${distdir}">
+        <include name="history.txt"/>
+      </zipfileset>
+			<zipfileset dir="${bundledir}">
+				<include name="**/*"/>
+			</zipfileset>
+			<zipfileset dir="${doc}/pdf">
+				<include name="SQLWorkbench-Manual.pdf"/>
+			</zipfileset>
+      <zipfileset dir="${root}/release/manual" prefix="manual">
+        <include name="**/*.*"/>
+      </zipfileset>
+      <zipfileset dir="${scriptsrc}" prefix="xslt">
+        <include name="**/*.xslt"/>
+      </zipfileset>
+    </zip>
+	</target>
+	
+	
+  <target name="release-package" depends="prepare-release-dir">
 
     <zip zipfile="${root}/release/Workbench-Build${build.number}.zip">
       <zipfileset dir="${distdir}">
@@ -531,7 +600,7 @@
         <include name="datapumper.sh"/>
         <include name="dbexplorer.sh"/>
       </zipfileset>
-      <zipfileset dir="${html-outdir}" prefix="manual">
+      <zipfileset dir="${root}/release/manual" prefix="manual">
         <include name="**/*.*"/>
       </zipfileset>
       <zipfileset dir="${scriptsrc}" prefix="xslt">
@@ -591,7 +660,7 @@
 	
 	<target name="generate-lexer">
 		<java classname="JFlex.Main" classpath="../etc/JFlex.jar" fork="true">
-			<jvmarg value="-Xmx128m"/>
+			<jvmarg value="-Xmx256m"/>
 			<arg value="-q"/>
 			<arg value="../src/workbench/sql/formatter/SQLLexer.flex"/>
 		</java>
@@ -610,18 +679,12 @@
 		</javac>
 	</target>
 
-	<!--	
-	<taskdef name="junit" classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask">
-		<classpath refid="junit.path"/>
-	</taskdef>
-	--> 
-	
 	<target name="test" depends="compile-tests">
 		<delete failonerror="false">
 			<fileset dir="${junitdir}" includes="*.txt"/>
 		</delete>
 		
-		<junit haltonerror="true" haltonfailure="true" includeantruntime="true" fork="true">
+		<junit haltonerror="true" haltonfailure="true" printsummary="false" includeantruntime="true" fork="true">
 			<classpath>
 				<pathelement location="${build}"/>
 				<pathelement location="${build_test}"/>
@@ -630,8 +693,7 @@
 			
 			<batchtest todir="../junit">
 				<formatter type="plain"/>
-			
-				<fileset dir="${testsrc}">
+					<fileset dir="${testsrc}">
 					<include name="**/*Test.java"/>
 				</fileset>
 			</batchtest>			

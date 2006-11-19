@@ -43,6 +43,12 @@ public class ResultInfoTest extends TestCase
 			index = info.findColumn("\"KEY\"");
 			assertEquals(0, index);
 
+			index = info.findColumn("\"key\"");
+			assertEquals(0, index);
+
+			index = info.findColumn("\"Main Cat\"");
+			assertEquals(1, index);
+			
 			index = info.findColumn("firstname");
 			assertEquals(2, index);
 		}

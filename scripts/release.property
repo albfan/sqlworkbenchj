@@ -1,3 +1,5 @@
-#Fri Sep 08 19:00:54 CEST 2006
-release.build.date=2006-09-08
-release.build.number=89
+#Fri Nov 17 17:00:42 CET 2006
+release.build.date=2006-10-11
+dev.build.date=2006-11-17
+release.build.number=90
+dev.build.number=90.6
