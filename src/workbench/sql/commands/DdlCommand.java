@@ -187,19 +187,6 @@ public class DdlCommand extends SqlCommand
 	 */
 	protected String getObjectName(String sql)
 	{
-//		String regex = "CREATE\\s+(OR\\s+REPLACE|)\\s*(TRIGGER|PROCEDURE|FUNCTION|PACKAGE\\s+BODY|PACKAGE)\\s+(\\p{Graph}*)";
-//		String name = null;
-//		Matcher m = Pattern.compile(regex,Pattern.CASE_INSENSITIVE).matcher(sql);
-//		if (m.find() && m.groupCount() > 2)
-//		{
-//			name = m.group(3);
-//			int pos = name.indexOf('(');
-//			if (pos > -1)
-//			{
-//				name = name.substring(0,pos).toUpperCase();
-//			}
-//		}
-//		return name;		
 		SQLLexer l = new SQLLexer(sql);
 		SQLToken t = l.getNextToken(false, false);
 		if (t == null) return null;

@@ -327,7 +327,14 @@ public class WbCopy
 			}
 
 			copier.startCopy();
-			result.setSuccess();
+			if (copier.isSuccess()) 
+			{
+				result.setSuccess();
+			}
+			else
+			{
+				result.setFailure();
+			}
 			result.addMessage(copier.getAllMessages());
 		}
 		catch (SQLException e)

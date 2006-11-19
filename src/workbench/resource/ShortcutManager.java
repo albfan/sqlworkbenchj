@@ -99,7 +99,10 @@ public class ShortcutManager
 		if (!def.hasDefault())
 		{
 			KeyStroke defaultkey = anAction.getDefaultAccelerator();
-			def.assignDefaultKey(defaultkey);
+			if (defaultkey != null)
+			{
+				def.assignDefaultKey(defaultkey);
+			}
 		}
 
 		if (LogMgr.isDebugEnabled())

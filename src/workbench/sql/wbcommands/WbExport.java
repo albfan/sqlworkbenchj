@@ -696,7 +696,13 @@ public class WbExport
 				msg = StringUtil.replace(msg, "%rows%", Long.toString(rows));
 				result.addMessage(msg);
 			}
+			result.setSuccess();
 		}
+		else 
+		{
+			result.setFailure();
+		}
+		
 		if (exporter.hasWarning())
 		{
 			result.addMessages(exporter.getWarnings());
@@ -761,7 +767,14 @@ public class WbExport
 				msg = ResourceMgr.getString("MsgSpoolTarget") + " " + this.exporter.getFullOutputFilename();
 				aResult.addMessage(msg);
 				aResult.clearResultSets();
-				aResult.setSuccess();
+				if (exporter.isSuccess())
+				{
+					aResult.setSuccess();
+				}
+				else
+				{
+					aResult.setFailure();
+				}
 			}
 		}
 		catch (Exception e)

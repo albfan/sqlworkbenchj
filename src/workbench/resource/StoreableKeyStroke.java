@@ -23,7 +23,6 @@ import javax.swing.KeyStroke;
  */
 public class StoreableKeyStroke
 {
-	private KeyStroke key = null;
 	private int keyCode;
 	private int modifier;
 	
@@ -36,17 +35,25 @@ public class StoreableKeyStroke
 
 	public StoreableKeyStroke(KeyStroke aKey)
 	{
-		this.key = aKey;
+		this.keyCode = aKey.getKeyCode();
+		this.modifier = aKey.getModifiers();
+		this.modifierSet = true;
+		this.keyCodeSet = true;
 	}
 	
 	public KeyStroke getKeyStroke()
 	{
-		return this.key;
+		if (keyCodeSet || modifierSet)
+		{
+			return KeyStroke.getKeyStroke(this.keyCode, this.modifier);
+		}
+		return null;
 	}
 	
 	public int getKeyCode()
 	{
-		if (this.key != null) return this.key.getKeyCode();
+		KeyStroke theKey = getKeyStroke();
+		if (theKey != null) return theKey.getKeyCode();
 		return 0;
 	}
 	
@@ -54,54 +61,47 @@ public class StoreableKeyStroke
 	{
 		this.keyCode = c;
 		this.keyCodeSet = true;
-		this.createKeyStroke();
-	}
-	
-	private void createKeyStroke()
-	{
-		if (this.keyCodeSet && this.modifierSet)
-		{	
-			this.key = KeyStroke.getKeyStroke(this.keyCode, this.modifier);
-		}
 	}
 	
 	public void setKeyModifier(int mod)
 	{
 		this.modifier = mod;
 		this.modifierSet = true;
-		this.createKeyStroke();
 	}
 	
 	public int getKeyModifier()
 	{
-		if (this.key != null) return this.key.getModifiers();
+		KeyStroke theKey = getKeyStroke();
+		if (theKey != null) return theKey.getModifiers();
 		return 0;
 	}
 
 	public boolean equals(Object other)
 	{
+		KeyStroke thisKey = getKeyStroke();
 		if (other != null && other instanceof StoreableKeyStroke)
 		{
-			KeyStroke otherKey = ((StoreableKeyStroke)other).key;
-			if (this.key == null && otherKey == null) return true;
-			if (this.key == null && otherKey != null) return false;
-			if (this.key != null && otherKey == null) return false;
-			return this.key.equals(otherKey);
+			KeyStroke otherKey = ((StoreableKeyStroke)other).getKeyStroke();
+			if (thisKey == null && otherKey == null) return true;
+			if (thisKey == null && otherKey != null) return false;
+			if (thisKey != null && otherKey == null) return false;
+			return thisKey.equals(otherKey);
 		}
 		else if (other instanceof KeyStroke)
 		{
-			if (this.key == null && other == null) return true; 
-			return this.key.equals((KeyStroke)other);
+			if (thisKey == null && other == null) return true; 
+			return thisKey.equals((KeyStroke)other);
 		}
 		return false;
 	}
 
 	public String toString()
 	{
-		if (this.key == null) return "";
+		KeyStroke thisKey = getKeyStroke();
+		if (thisKey == null) return "";
 		
-		int mod = this.key.getModifiers();
-		int code = this.key.getKeyCode();
+		int mod = thisKey.getModifiers();
+		int code = thisKey.getKeyCode();
 		
 		String modText = KeyEvent.getKeyModifiersText(mod);
 		if (modText.length() == 0)

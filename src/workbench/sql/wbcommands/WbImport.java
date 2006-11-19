@@ -325,8 +325,18 @@ public class WbImport
 				String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
 				if (importcolumns != null)
 				{
-					List cols = StringUtil.stringToList(importcolumns, ",", true);
-					textParser.setImportColumns(cols);
+					try
+					{	
+						List cols = StringUtil.stringToList(importcolumns, ",", true);
+						textParser.setImportColumns(cols);
+					}
+					catch (IllegalArgumentException e)
+					{
+						result.addMessage(textParser.getMessages());
+						result.setFailure();
+						return result;
+					}
+					
 				}
 
 				if (filecolumns != null)
@@ -344,8 +354,9 @@ public class WbImport
 					}
 					catch (Exception e)
 					{
-						result.addMessage(ResourceMgr.getString("ErrWrongColumnList"));
-						result.addMessage(ExceptionUtil.getDisplay(e));
+						result.addMessage(textParser.getMessages());
+						//result.addMessage(ResourceMgr.getString("ErrWrongColumnList"));
+						//result.addMessage(ExceptionUtil.getDisplay(e));
 						result.setFailure();
 						return result;
 					}
@@ -532,7 +543,14 @@ public class WbImport
 		try
 		{
 			imp.startImport();
-			result.setSuccess();
+			if (imp.isSuccess())
+			{
+				result.setSuccess();
+			}
+			else
+			{
+				result.setFailure();
+			}
 		}
 		catch (SQLException e)
 		{

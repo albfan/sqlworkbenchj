@@ -38,7 +38,6 @@ public class ResultInfo
 	private ColumnIdentifier[] columns;
 	private int colCount;
 	private int realColumns;
-	private boolean hasPkColumns = false;
 	private TableIdentifier updateTable;
 	
 	public ResultInfo(ColumnIdentifier[] cols)
@@ -74,14 +73,6 @@ public class ResultInfo
 		throws SQLException
 	{
 		this.columns = conn.getMetadata().getColumnIdentifiers(table);
-		for (int i = 0; i < columns.length; i++)
-		{
-			if (columns[i].isPkColumn())
-			{
-				this.hasPkColumns = true;
-				break;
-			}
-		}
 		this.colCount = this.columns.length;
 	}
 	
@@ -215,7 +206,6 @@ public class ResultInfo
 		{
 			this.columns[i].setIsPkColumn(false);
 		}
-		this.hasPkColumns = false;
 	}
 	
 	public void setIsPkColumn(String column, boolean flag)
@@ -226,10 +216,6 @@ public class ResultInfo
 	
 	public void setIsPkColumn(int col, boolean flag)
 	{
-		if (flag) 
-		{
-			this.hasPkColumns = true;
-		}
 		this.columns[col].setIsPkColumn(flag);
 	}
 	
@@ -260,7 +246,6 @@ public class ResultInfo
 	
 	public void setPKColumns(ColumnIdentifier[] cols)
 	{
-		this.hasPkColumns = false;
 		for (int i=0; i < cols.length; i++)
 		{
 			String name = cols[i].getColumnName();
@@ -269,33 +254,20 @@ public class ResultInfo
 			{
 				boolean pk = cols[i].isPkColumn();
 				this.columns[col].setIsPkColumn(pk);
-				if (pk) 
-				{
-					this.hasPkColumns = true;
-				}
 			}
 		}
 	}
 	
 	public boolean hasPkColumns()
 	{
-		boolean hasPk = false;
 		for (int i=0; i < this.colCount; i++)
 		{
 			if (this.columns[i].isPkColumn())
 			{
-				hasPk = true; 
-				break;
+				return true; 
 			}
 		}
-		
-		if (hasPk != this.hasPkColumns)
-		{
-			Exception e = new Exception("Incorrect pk column info state, hasPK=" + hasPk + ",this.hasPkColumns=" + this.hasPkColumns);
-			LogMgr.logError("ResultInfo.hasPkColumns()", "Wrong pk info", e);
-		}
-		
-		return hasPk;
+		return false;
 	}
 	
 	
@@ -380,11 +352,12 @@ public class ResultInfo
 	{
 		if (name == null) return -1;
 
-		name = StringUtil.trimQuotes(name);
+		String plain = StringUtil.trimQuotes(name);
+		
 		for (int i = 0; i < this.colCount; i++)
 		{
 			String col = StringUtil.trimQuotes(this.getColumnName(i));
-			if (col != null && name.equalsIgnoreCase(col))
+			if (plain.equalsIgnoreCase(StringUtil.trimQuotes(col)))
 			{
 				return i;
 			}
