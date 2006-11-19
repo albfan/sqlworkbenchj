@@ -2,6 +2,21 @@
 <java version="1.4.0_01" class="java.beans.XMLDecoder"> 
  <object class="java.util.HashMap"> 
  
+  <void method="put">  
+   <string>H2</string>  
+   <object class="workbench.db.GetMetaDataSql">  
+    <void property="baseSql">  
+     <string>SELECT view_definition FROM information_schema.views</string>  
+    </void>  
+    <void property="objectNameField">  
+     <string>table_name</string>  
+    </void>  
+    <void property="schemaField">  
+     <string>table_schema</string>  
+    </void>  
+   </object>  
+  </void>  
+	
   <void method="put"> 
    <string>Microsoft SQL Server</string> 
    <object class="workbench.db.GetMetaDataSql"> 

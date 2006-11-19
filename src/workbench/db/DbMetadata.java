@@ -68,6 +68,8 @@ import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 import workbench.db.hsqldb.HsqlConstraintReader;
 import workbench.db.firebird.FirebirdConstraintReader;
+import workbench.db.h2database.H2ConstraintReader;
+import workbench.db.h2database.H2SequenceReader;
 
 /**
  * Retrieve meta data information from the database.
@@ -175,7 +177,6 @@ public class DbMetadata
 
 	private final String TABLE_TYPE_VIEW = "VIEW";
 
-	//private String[] tableTypesView = new String[] {TABLE_TYPE_VIEW};
 	private String[] tableTypesTable; 
 	private String[] tableTypesSelectable;
 	private Set objectsWithData = null;
@@ -359,6 +360,11 @@ public class DbMetadata
 		else if (productLower.indexOf("access") > -1)
 		{
 			this.isAccess = true;
+		}
+		else if (productLower.equals("h2"))
+		{
+			this.sequenceReader = new H2SequenceReader(this.dbConnection.getSqlConnection());
+			this.constraintReader = new H2ConstraintReader();
 		}
 
 		// if the DBMS does not need a specific ProcedureReader
@@ -1015,14 +1021,15 @@ public class DbMetadata
 		}
 		String source = this.getViewSource(view);
 		
-		if (source == null || source.length() == 0) return StringUtil.EMPTY_STRING;
+		if (StringUtil.isEmptyString(source)) return StringUtil.EMPTY_STRING;
 
 		StringBuffer result = new StringBuffer(source.length() + 100);
 
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
+		String verb = SqlUtil.getSqlVerb(source);
 		
 		// ThinkSQL and DB2 return the full CREATE VIEW statement
-		if (source.toLowerCase().startsWith("create")) 
+		if (verb.equalsIgnoreCase("CREATE"))
 		{
 			String type = SqlUtil.getCreateType(source);
 			result.append("DROP ");
@@ -1714,14 +1721,13 @@ public class DbMetadata
 				"true".equals(Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", "true"))
 				&& !sequencesReturned)
 		{
-			//LogMgr.logDebug("DbMetadata.getTables()", "Retrieving sequences...");
 			List seq = this.sequenceReader.getSequenceList(aSchema);
-			int count = seq.size();
-			for (int i=0; i < count; i++)
+			Iterator itr = seq.iterator();
+			while (itr.hasNext())
 			{
 				int row = result.addRow();
 
-				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, (String)seq.get(i));
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, (String)itr.next());
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, "SEQUENCE");
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, null);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, aSchema);
@@ -3023,7 +3029,9 @@ public class DbMetadata
 			SqlUtil.closeAll(rs, stmt);
 		}
 		
-		if (this.isCloudscape || this.isApacheDerby || this.isFirstSql)
+		String replaceNL = Settings.getInstance().getProperty("workbench.db.trigger.replacenl", "");
+		
+		if (replaceNL.indexOf(this.productName) > -1)
 		{
 			String r = result.toString().replaceAll("\\\\n", nl);
 			return r;

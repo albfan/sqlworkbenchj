@@ -192,7 +192,7 @@ public class TableIdentifier
 					catalogToUse = meta.getCurrentCatalog();
 				}
 				
-				if (catalogToUse != null)
+				if (catalogToUse != null && !meta.ignoreCatalog(catalogToUse))
 				{
 					result.append(SqlUtil.quoteObjectname(catalogToUse, preserveQuotes && catalogWasQuoted));
 					result.append('.');
@@ -207,7 +207,7 @@ public class TableIdentifier
 					schemaToUse = meta.getSchemaToUse();
 				}
 				
-				if (schemaToUse != null)
+				if (schemaToUse != null && !meta.ignoreSchema(schemaToUse))
 				{
 					result.append(meta.quoteObjectname(schemaToUse, preserveQuotes && schemaWasQuoted));
 					result.append('.');

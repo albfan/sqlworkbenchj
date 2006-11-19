@@ -60,7 +60,7 @@ public abstract class AbstractConstraintReader
 	 *	the column name, the value is the full expression which can be appended
 	 *	to the column definition inside a CREATE TABLE statement.
 	 */
-	public Map getColumnConstraints(java.sql.Connection dbConnection, TableIdentifier aTable)
+	public Map getColumnConstraints(Connection dbConnection, TableIdentifier aTable)
 	{
 		String sql = this.getColumnConstraintSql();
 		if (sql == null) return Collections.EMPTY_MAP;

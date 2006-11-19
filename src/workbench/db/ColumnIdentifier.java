@@ -95,6 +95,12 @@ public class ColumnIdentifier
 
 	public void setDbmsType(String type) { this.dbmsType = type; }
 	public String getDbmsType() { return this.dbmsType; }
+	
+	public boolean isIdentityColumn()
+	{
+		if (this.dbmsType == null) return false;
+		return (dbmsType.indexOf("identity") > -1);
+	}
 
 	/**
 	 *	Define this column to be an expression.

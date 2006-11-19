@@ -117,6 +117,7 @@ public class PostgresSequenceReader
 
 	public List getSequenceList(String owner)
 	{
+		// Already returned by JDBC driver
 		return Collections.EMPTY_LIST;
 	}
 	

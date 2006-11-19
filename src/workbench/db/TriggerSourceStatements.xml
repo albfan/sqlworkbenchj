@@ -125,7 +125,23 @@ where trg.tgrelid = tbl.oid
     </void> 
    </object> 
   </void> 
-  
+
+  <void method="put"> 
+   <string>H2</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT 'CREATE TRIGGER '||trigger_name||
+        case before when 'true' then ' BEFORE ' else ' AFTER ' end||
+        trigger_type||' ON '||table_name||'\n  FOR EACH ROW CALL "'||java_class||'";'
+				from information_schema.triggers
+			</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>trigger_name</string> 
+    </void> 
+   </object> 
+  </void> 
+	
   <void method="put"> 
    <string>HSQL Database Engine</string> 
    <object class="workbench.db.GetMetaDataSql"> 

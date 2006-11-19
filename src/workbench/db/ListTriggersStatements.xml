@@ -244,7 +244,24 @@ where trg.tgrelid = tbl.oid
     </void> 
    </object> 
   </void> 
-  
+
+  <void method="put"> 
+   <string>H2</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT trigger_name, trigger_type, 
+   case before when 'true' then 'BEFORE' else 'AFTER' end as trigger_event 
+   from information_schema.triggers</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>table_name</string> 
+    </void> 
+    <void property="orderBy"> 
+     <string>ORDER BY trigger_name</string> 
+    </void> 
+   </object> 
+  </void> 
+	
   <void method="put"> 
    <string>HSQL Database Engine</string> 
    <object class="workbench.db.GetMetaDataSql"> 
