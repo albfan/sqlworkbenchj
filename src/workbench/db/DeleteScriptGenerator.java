@@ -29,6 +29,7 @@ import workbench.resource.Settings;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *	Generates a SQL script to delete a record from the given table and
@@ -275,8 +276,7 @@ public class DeleteScriptGenerator
 			if (aColname.equals(col))
 			{
 				String t = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
-				int type = 0;
-				try { type = Integer.parseInt(t); } catch (Exception e) {}
+				int type = StringUtil.getIntValue(t, 0);
 				return type;
 			}
 		}

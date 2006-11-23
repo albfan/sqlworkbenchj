@@ -24,7 +24,6 @@ public class FixedSizeList
 	
 	private LinkedList entries;
 	private int maxSize;
-	private Iterator currentIterator;
 	
 	public FixedSizeList()
 	{

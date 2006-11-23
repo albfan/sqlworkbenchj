@@ -605,14 +605,6 @@ public class DbExplorerPanel
 		}
 	}
 
-//	private void setSelectedCatalog(String s)
-//	{
-//		if (this.catalogSelector != null)
-//		{
-//			this.catalogSelector.setSelectedItem(s);
-//		}
-//	}
-	
 	protected String getSelectedCatalog()
 	{
 		if (this.catalogSelector == null) return null;

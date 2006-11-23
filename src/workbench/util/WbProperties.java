@@ -51,9 +51,16 @@ public class WbProperties
 	public void saveToFile(String filename)
 		throws IOException
 	{
-		FileOutputStream out = new FileOutputStream(filename);
-		this.save(out);
-		out.close();
+		FileOutputStream out = null;
+		try
+		{
+			out = new FileOutputStream(filename);
+			this.save(out);
+		}
+		finally
+		{
+			out.close();
+		}
 	}
 	
 	public void save(OutputStream out)

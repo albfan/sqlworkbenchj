@@ -200,6 +200,8 @@ public class ConnectionSelector
 
 	private void doConnect(final ConnectionProfile aProfile, final boolean showSelectDialogOnError)
 	{
+		if (isConnectInProgress()) return;
+		
 		boolean connected = false;
 		WbConnection conn = null;
 		String error = null;

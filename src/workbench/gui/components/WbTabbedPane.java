@@ -22,6 +22,7 @@ import javax.swing.JToolTip;
 import javax.swing.UIManager;
 import javax.swing.plaf.TabbedPaneUI;
 import workbench.gui.WbSwingUtilities;
+import workbench.log.LogMgr;
 
 
 /**
@@ -76,7 +77,7 @@ public class WbTabbedPane
 		}
 		catch (Exception e)
 		{
-			// ignore
+			LogMgr.logError("WbTabbedPane.init()", "Error during init",e);
 		}
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 	}

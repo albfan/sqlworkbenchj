@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -79,7 +80,7 @@ public class WbManager
 	implements FontChangedListener, Runnable
 {
 	private static WbManager wb;
-	private List mainWindows = new ArrayList();
+	private List mainWindows = Collections.synchronizedList(new ArrayList());
 	private List toolWindows = new ArrayList();
 	private WbCipher desCipher = null;
 	private boolean batchMode = false;
@@ -185,7 +186,7 @@ public class WbManager
 			Method m = cls.getMethod("showProfileHelp", noArgs);
 			if (m != null)
 			{
-				m.invoke(dialog, noArgs);
+				m.invoke(dialog, new Object[]{});
 			}
 			dialog.setVisible(true);
 		}
@@ -290,7 +291,7 @@ public class WbManager
 	
 	private void initializeLookAndFeel()
 	{
-		trace("WbManager.setLookAndFeel() - start");
+		trace("WbManager.initializeLookAndFeel() - start");
 		try
 		{
 			String className = Settings.getInstance().getLookAndFeelClass();
@@ -302,7 +303,7 @@ public class WbManager
 			LnFDefinition def = mgr.findLookAndFeel(className);
 			if (def == null) 
 			{
-				LogMgr.logError("WbManager.setLookAndFeel", "Specified Look & Feel " + className + " not available!", null);
+				LogMgr.logError("WbManager.initializeLookAndFeel()", "Specified Look & Feel " + className + " not available!", null);
 				return;
 			}
 			
@@ -347,7 +348,7 @@ public class WbManager
 		}
 		catch (Exception e)
 		{
-			LogMgr.logWarning("Settings.setLookAndFeel()", "Could not set look and feel", e);
+			LogMgr.logWarning("Settings.initializeLookAndFeel()", "Could not set look and feel", e);
 		}
 
 		try
@@ -356,8 +357,9 @@ public class WbManager
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("WbManager.initializeLookAndFeel()", "Error setting dynamic layout property", e);
 		}
-		trace("WbManager.setLookAndFeel() - done");
+		trace("WbManager.initializeLookAndFeel() - done");
 	}
 
 	public String getJarPath()
@@ -689,6 +691,28 @@ public class WbManager
     return true;
   }
 
+	class CloseThread
+		extends WbThread
+	{
+		private MainWindow win;
+		public CloseThread(String name, MainWindow w)
+		{
+			super(name);
+			win = w;
+		}
+		
+		public void run()
+		{
+			// First parameter tells the window to disconnect in the
+			// current thread as we are already in a background thread
+			// second parameter tells the window not to close the workspace
+			// third parameter tells the window not to save the workspace
+			win.disconnect(false, false, false);
+			win.setVisible(false);
+			win.dispose();
+		}
+	}
+	
 	public void windowClosing(final MainWindow win)
 	{
 		if (this.mainWindows.size() == 1)
@@ -700,19 +724,7 @@ public class WbManager
 		{
 			if (!win.saveWorkspace()) return;
 			this.mainWindows.remove(win);
-			Thread t = new WbThread("WbManager Window Disconnect")
-			{
-				public void run()
-				{
-					// First parameter tells the window to disconnect in a
-					// separate thread as we are already in a background thread
-					// second parameter tells the window not to close the workspace
-					// third parameter tells the window not to save the workspace
-					win.disconnect(false, false, false);
-					win.setVisible(false);
-					win.dispose();
-				}
-			};
+			CloseThread t = new CloseThread("WindowDisconnect", win);
 			t.start();
 		}
 
@@ -934,6 +946,7 @@ public class WbManager
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 		}
 		trace("WbManager.initCmdLine() - done");
 	}

@@ -15,12 +15,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.resource.Settings;
+import workbench.util.SqlUtil;
 
 /**
  * @author support@sql-workbench.net
@@ -65,8 +65,7 @@ public class DerbySynonymReader
 		}
 		finally
 		{
-			try { rs.close(); } catch (Exception e) {}
-			try { stmt.close(); } catch (Exception e) {}
+			SqlUtil.closeAll(rs, stmt);
 		}
 
 		return result;
@@ -97,8 +96,7 @@ public class DerbySynonymReader
 		}
 		finally
 		{
-			try { rs.close(); } catch (Exception e) {}
-			try { stmt.close(); } catch (Exception e) {}
+			SqlUtil.closeAll(rs,stmt);
 		}
 
 		return result;

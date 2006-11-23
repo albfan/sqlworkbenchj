@@ -157,17 +157,21 @@ public class Settings
 		WbManager.trace("Settings.<init> - using configfile: " + this.filename);
 
 	  WbManager.trace("Settings.<init> - Reading settings");
+		BufferedInputStream in = null;
 	  try
 		{
-			BufferedInputStream in = new BufferedInputStream(new FileInputStream(this.filename));
+			in = new BufferedInputStream(new FileInputStream(this.filename));
 			this.props.load(in);
-			in.close();
 		}
 		catch (IOException e)
 		{
 			fillDefaults();
 		}
-
+		finally
+		{
+			try { in.close(); } catch (Throwable th) {}
+		}
+		
 	  WbManager.trace("Settings.<init> - Done reading settings. Initializing LogMgr");
 
 		boolean logSysErr = getBoolProperty("workbench.log.console", false);

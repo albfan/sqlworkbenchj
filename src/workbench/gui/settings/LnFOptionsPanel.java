@@ -86,13 +86,7 @@ public class LnFOptionsPanel
 		definitionPanel.setPropertyListener(this);
 		infoPanel.add(definitionPanel, BorderLayout.CENTER);
 
-		currentLabel = new JLabel()
-		{
-			public void setText(String name)
-			{
-				super.setText("<html>" + ResourceMgr.getString("LblCurrLnf") + " <b>" + name + "</b></html>");
-			}
-		};
+		currentLabel = new HtmlLabel();
 		
 		currentLabel.setBackground(Color.WHITE);
 		currentLabel.setOpaque(true);
@@ -104,18 +98,7 @@ public class LnFOptionsPanel
 		
 		add(splitPane, java.awt.BorderLayout.CENTER);
 
-		ListModel model = new AbstractListModel()
-		{
-			public Object getElementAt(int index)
-			{
-				return manager.getAvailableLookAndFeels().get(index);
-			}
-			
-			public int getSize()
-			{
-				return manager.getAvailableLookAndFeels().size();
-			}
-		};
+		ListModel model = new LnfList();
 		lnfList.setModel(model);
 		lnfList.addListSelectionListener(this);
 		LnFDefinition clnf = manager.getCurrentLnF();
@@ -195,6 +178,29 @@ public class LnFOptionsPanel
 		if (evt.getPropertyName().equals("name"))
 		{
 			lnfList.repaint();
+		}
+	}
+
+	static class HtmlLabel
+		extends JLabel
+	{
+		public void setText(String name)
+		{
+			super.setText("<html>" + ResourceMgr.getString("LblCurrLnf") + " <b>" + name + "</b></html>");
+		}
+	}
+	
+	class LnfList 
+		extends AbstractListModel
+	{
+		public Object getElementAt(int index)
+		{
+			return manager.getAvailableLookAndFeels().get(index);
+		}
+
+		public int getSize()
+		{
+			return manager.getAvailableLookAndFeels().size();
 		}
 	}
 	

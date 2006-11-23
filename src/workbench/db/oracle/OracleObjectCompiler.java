@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import workbench.db.WbConnection;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -37,7 +38,7 @@ public class OracleObjectCompiler
 	{
 		if (this.stmt != null)
 		{
-			try { stmt.close(); } catch (Exception ignore) {}
+			SqlUtil.closeStatement(stmt);
 		}
 	}
 	

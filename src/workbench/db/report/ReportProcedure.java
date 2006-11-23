@@ -35,8 +35,8 @@ public class ReportProcedure
 	private ProcedureDefinition procDef;
 	private WbConnection dbConn;
 	private TagWriter tagWriter = new TagWriter();
-	private static StrBuffer indent = new StrBuffer("  ");
-	private static StrBuffer indent2 = new StrBuffer("    ");
+	private StrBuffer indent = new StrBuffer("  ");
+	private StrBuffer indent2 = new StrBuffer("    ");
 
 	// </editor-fold>
 	

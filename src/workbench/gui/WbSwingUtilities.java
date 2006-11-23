@@ -24,6 +24,7 @@ import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import javax.swing.JComponent;
 
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -513,7 +514,7 @@ public class WbSwingUtilities
 		return "KeyCode: 0x" + Integer.toString(keyCode, 16);
 	}
 	
-	public static void requestFocus(final Window win, final Component comp)
+	public static void requestFocus(final Window win, final JComponent comp)
 	{
 		win.addWindowListener(new WindowAdapter()
 		{

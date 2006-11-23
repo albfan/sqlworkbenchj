@@ -190,6 +190,7 @@ public class DwPanel
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 		}
 	}
 	
@@ -239,7 +240,7 @@ public class DwPanel
 			try
 			{
 				// Use reflection to create instance to avoid class loading upon startup
-					this.stmtRunner = (StatementRunner)Class.forName("workbench.sql.DefaultStatementRunner").newInstance();
+				this.stmtRunner = (StatementRunner)Class.forName("workbench.sql.DefaultStatementRunner").newInstance();
 			}
 			catch (Exception ignore)
 			{
@@ -391,8 +392,6 @@ public class DwPanel
 				}
 			};
 			doSave = WbSwingUtilities.getOKCancel(ResourceMgr.getString("MsgConfirmUpdates"), win, scroll, painter);
-//			int choice = JOptionPane.showConfirmDialog(win, scroll, , JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-//			if (choice == JOptionPane.CANCEL_OPTION) doSave = false;
 		}
 		catch (SQLException e)
 		{

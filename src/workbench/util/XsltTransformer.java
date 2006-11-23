@@ -63,11 +63,19 @@ public class XsltTransformer
 	{
 		File f = new File(xsltFile);
 		XsltTransformer trans = new XsltTransformer(f);
-		InputStream in = new BufferedInputStream(new FileInputStream(inputFileName),32*1024);
-		OutputStream out = new BufferedOutputStream(new FileOutputStream(outputFilename), 32*1024);
-		trans.transform(in, out);
-		try { in.close(); } catch (Throwable ignore) {} 
-		try { out.close(); } catch (Throwable ignore) {} 
+		InputStream in = null;
+		OutputStream out = null;
+		try
+		{
+			in = new BufferedInputStream(new FileInputStream(inputFileName),32*1024);
+			out = new BufferedOutputStream(new FileOutputStream(outputFilename), 32*1024);
+			trans.transform(in, out);
+		}
+		finally
+		{
+			try { in.close(); } catch (Throwable ignore) {} 
+			try { out.close(); } catch (Throwable ignore) {} 
+		}
 	}
 
 	public static void main(String args[])

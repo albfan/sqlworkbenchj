@@ -49,6 +49,7 @@ public class KeyboardMapper
 		this.display.grabFocus();
 		this.display.requestFocusInWindow();
 	}
+	
 	public void keyPressed(KeyEvent e)
 	{
 	}

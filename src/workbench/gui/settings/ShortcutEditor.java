@@ -332,10 +332,9 @@ public class ShortcutEditor
 		});
 		String[] options = new String[] { ResourceMgr.getString("LblOK").replaceAll("&", ""), ResourceMgr.getString("LblCancel").replaceAll("&", "")};
 		
-		
 		JOptionPane overwritePane = new JOptionPane(mapper, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, options);
 		JDialog dialog = overwritePane.createDialog(this, ResourceMgr.getString("LblEnterKeyWindowTitle"));
-		
+
 		dialog.setResizable(true);
 		dialog.setVisible(true);
 		Object result = overwritePane.getValue();

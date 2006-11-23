@@ -76,46 +76,9 @@ public class DataStoreImporter
 	public void importString(String contents, String delimiter, String quoteChar)
 	{
 		ClipboardFile file = new ClipboardFile(contents);
-		setImportOptions(file, ProducerFactory.IMPORT_TEXT, createDefaultImportOptions(), createDefaultTextOptions(delimiter, quoteChar), null);
+		setImportOptions(file, ProducerFactory.IMPORT_TEXT, new DefaultImportOptions(), new DefaultTextImportOptions(delimiter, quoteChar), null);
 	}
 
-	protected TextImportOptions createDefaultTextOptions(final String delimiter, final String quoteChar)
-	{
-		TextImportOptions textOptions = new TextImportOptions()
-		{
-			public String getTextDelimiter() { return delimiter; }
-			public boolean getContainsHeader() {  return true; }
-			public String getTextQuoteChar() { return quoteChar;	}
-			public boolean getDecode() { return false; }
-			public String getDecimalChar() { return Settings.getInstance().getDecimalSymbol();	}
-
-			public void setTextDelimiter(String delim) { 	}
-			public void setContainsHeader(boolean flag) { }
-			public void setTextQuoteChar(String quote) { }
-			public void setDecode(boolean flag) { }
-			public void setDecimalChar(String s) { }
-		};
-		return textOptions;
-	}
-	
-	protected ImportOptions createDefaultImportOptions()
-	{
-		ImportOptions options = new ImportOptions()
-		{
-			public String getEncoding() {  return "UTF-8"; }
-			public String getDateFormat() {	return Settings.getInstance().getDefaultDateFormat(); }
-			public String getTimestampFormat() { return Settings.getInstance().getDefaultTimestampFormat(); }
-
-			public void setEncoding(String enc) {	}
-			public void setDateFormat(String format) { }
-			public void setTimestampFormat(String format) {	}
-			public void setMode(String mode) { }
-			public String getMode() { return "insert"; }
-		};
-		
-		return options;
-	}
-	
 	public void importString(String content, ImportOptions options, TextImportOptions textOptions)
 	{
 		ClipboardFile file = new ClipboardFile(content);

@@ -74,7 +74,7 @@ public class SchemaDiff
 	private boolean diffConstraints = false;
 	private boolean diffViews = true;
 	private boolean diffProcs = true;
-	private boolean diffComments;
+//	private boolean diffComments;
 	private RowActionMonitor monitor;
 	private boolean cancel = false;
 	private String referenceSchema;
@@ -139,7 +139,7 @@ public class SchemaDiff
 	
 	public void setIncludeProcedures(boolean flag) { this.diffProcs = flag; }
 	
-	public void setIncludeComments(boolean flag) { this.diffComments = flag; }
+//	public void setIncludeComments(boolean flag) { this.diffComments = flag; }
 	
 	/**
 	 *	Set the {@link workbench.storage.RowActionMonitor} for reporting progress

@@ -80,11 +80,7 @@ public class CompletionPopup
 		elementList.addFocusListener(this);
 		elementList.addMouseListener(this);
 		
-		content = new JPanel()
-		{
-			public boolean isManagingFocus() { return false; }
-			public boolean getFocusTraversalKeysEnabled() {	return false;	}
-		};
+		content = new DummyPanel();
 		
 		content.setLayout(new BorderLayout());
 		scroll = new JScrollPane(this.elementList);
@@ -494,4 +490,10 @@ public class CompletionPopup
 	{
 	}
 
+	class DummyPanel
+		extends JPanel
+	{
+		public boolean isManagingFocus() { return false; }
+		public boolean getFocusTraversalKeysEnabled() {	return false;	}
+	}
 }

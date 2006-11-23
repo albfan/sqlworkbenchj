@@ -3334,7 +3334,7 @@ public class DbMetadata
 		}
 		finally
 		{
-			try { rs.close(); } catch (Exception e) {}
+			SqlUtil.closeResult(rs);
 		}
 		return ds;
 	}

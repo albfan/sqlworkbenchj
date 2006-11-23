@@ -591,7 +591,6 @@ public class TableListPanel
 		this.tableDefinition.setConnection(aConnection);
 
 		this.tableTypes.removeActionListener(this);
-		//this.catalogs.removeActionListener(this);
 
 		this.triggers.setConnection(aConnection);
 		this.tableSource.setDatabaseConnection(aConnection);
@@ -700,6 +699,7 @@ public class TableListPanel
 			this.shouldRetrieve = true;
 		}
 	}
+	
 	public void tableChanged(TableModelEvent e)
 	{
 		String info = tableList.getRowCount() + " " + ResourceMgr.getString("TxtTableListObjects");
@@ -751,12 +751,12 @@ public class TableListPanel
 			tableList.setModel(model, true);
 			tableList.getExportAction().setEnabled(true);
 			model.sortByColumn(0);
-			tableList.adjustOrOptimizeColumns();
 			
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
+					tableList.adjustOrOptimizeColumns();
 					updateDisplayClients();
 				}
 			});
@@ -764,7 +764,10 @@ public class TableListPanel
 		}
 		catch (OutOfMemoryError mem)
 		{
+			tableList.reset();
 			WbManager.getInstance().showOutOfMemoryError();
+			invalidateData();
+			this.shouldRetrieve = true;
 		}
 		catch (Throwable e)
 		{
@@ -838,7 +841,7 @@ public class TableListPanel
 	{
 		String prefix = this.getClass().getName() + ".";
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-		int maxWidth = (int)(d.getWidth() - 50);
+//		int maxWidth = (int)(d.getWidth() - 50);
 		readSettings(Settings.getInstance(), prefix);
 		this.triggers.restoreSettings();
 		this.tableData.restoreSettings();
@@ -1601,7 +1604,10 @@ public class TableListPanel
 				this.retrieve();
 				this.setFocusToTableList();
 			}
-			catch (Exception ex) {}
+			catch (Exception ex) 
+			{
+				LogMgr.logError("TableListPanel.actionPerformed()", "Error while retrieving", ex);
+			}
 		}
 		else
 		{

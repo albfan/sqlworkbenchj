@@ -16,7 +16,7 @@ import java.sql.Statement;
 import java.util.List;
 
 import workbench.log.LogMgr;
-import workbench.util.StringUtil;
+import workbench.util.SqlUtil;
 
 /**
  * A help class to drop different types of objects
@@ -111,7 +111,7 @@ public class ObjectDropper
 		}
 		finally
 		{
-			try { currentStatement.close(); } catch (Throwable th) {}
+			SqlUtil.closeStatement(currentStatement);
 			this.currentStatement = null;
 		}
 	}

@@ -20,6 +20,7 @@ import java.util.List;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.resource.Settings;
+import workbench.util.SqlUtil;
 
 /**
  * @author support@sql-workbench.net
@@ -69,8 +70,7 @@ public class Db2SynonymReader
 		}
 		finally
 		{
-			try { rs.close(); } catch (Exception e) {}
-			try { stmt.close(); } catch (Exception e) {}
+			SqlUtil.closeAll(rs, stmt);
 		}
 
 		return result;
