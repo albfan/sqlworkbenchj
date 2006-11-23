@@ -42,7 +42,6 @@ public class StatementFactoryTest extends TestCase
 	{
 		Settings.getInstance().setDoFormatInserts(false);
 		Settings.getInstance().setDoFormatUpdates(false);
-		Settings.getInstance().setFormatInsertIgnoreIdentity(false);
 	}
 	
 	public void testCreateUpdateStatement()
@@ -103,11 +102,11 @@ public class StatementFactoryTest extends TestCase
 			
 			DmlStatement stmt = factory.createInsertStatement(data, false, "\n");
 			String sql = stmt.toString();
-			assertEquals(true, sql.startsWith("INSERT"));
+			assertEquals("Not an INSERT statement", true, sql.startsWith("INSERT"));
 			
 			SqlLiteralFormatter formatter = new SqlLiteralFormatter();
 			sql = stmt.getExecutableStatement(formatter);
-			assertEquals(true, sql.indexOf("VALUES (42, 'Zaphod', 'Beeblebrox')") > -1);
+			assertEquals("Wrong values inserted", true, sql.indexOf("VALUES (42, 'Zaphod', 'Beeblebrox')") > -1);
 		}
 		catch (Exception e)
 		{
@@ -116,7 +115,7 @@ public class StatementFactoryTest extends TestCase
 		}
 	}
 
-	public void testCreateDeleteStatement()
+	public void testCreateInsertIdentityStatement()
 	{
 		try
 		{
@@ -125,6 +124,7 @@ public class StatementFactoryTest extends TestCase
 			
 			ResultInfo info = new ResultInfo(cols, types, null);
 			info.setIsPkColumn(0, true);
+			info.getColumn(0).setDbmsType("identity");
 			TableIdentifier table = new TableIdentifier("person");
 			
 			info.setUpdateTable(table);
@@ -133,15 +133,57 @@ public class StatementFactoryTest extends TestCase
 			data.setValue(0, new Integer(42));
 			data.setValue(1, "Zaphod");
 			data.setValue(2, "Beeblebrox");
+			
+			Settings.getInstance().setFormatInsertIgnoreIdentity(true);
+			DmlStatement stmt = factory.createInsertStatement(data, false, "\n");
+			String sql = stmt.toString();
+			assertEquals("Not an INSERT statement", true, sql.startsWith("INSERT"));
+			
+			SqlLiteralFormatter formatter = new SqlLiteralFormatter();
+			sql = stmt.getExecutableStatement(formatter);
+			assertEquals("Wrong values inserted", true, sql.indexOf("VALUES ('Zaphod', 'Beeblebrox')") > -1);
+			
+			Settings.getInstance().setFormatInsertIgnoreIdentity(false);
+			stmt = factory.createInsertStatement(data, false, "\n");
+			sql = stmt.getExecutableStatement(formatter);
+			assertEquals("Wrong values inserted", true, sql.indexOf("VALUES (42, 'Zaphod', 'Beeblebrox')") > -1);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testCreateDeleteStatement()
+	{
+		try
+		{
+			String[] cols = new String[] { "key", "value", "firstname", "lastname" };
+			int[] types = new int[] { Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR };
+			
+			ResultInfo info = new ResultInfo(cols, types, null);
+			info.setIsPkColumn(0, true);
+			info.setIsPkColumn(1, true);
+			TableIdentifier table = new TableIdentifier("person");
+			
+			info.setUpdateTable(table);
+			StatementFactory factory = new StatementFactory(info, null);
+			RowData data = new RowData(info.getColumnCount());
+			data.setValue(0, new Integer(42));
+			data.setValue(1, "otherkey");
+			data.setValue(2, "Zaphod");
+			data.setValue(3, "Beeblebrox");
 			data.resetStatus();
 			
 			DmlStatement stmt = factory.createDeleteStatement(data, false);
 			String sql = stmt.toString();
-			assertEquals(true, sql.startsWith("DELETE"));
+			assertEquals("Not a delete statement", true, sql.startsWith("DELETE"));
 			
 			SqlLiteralFormatter formatter = new SqlLiteralFormatter();
 			sql = stmt.getExecutableStatement(formatter);
-			assertEquals(true, sql.indexOf("WHERE key = 42") > -1);
+			assertEquals("Wrong WHERE clause created", true, sql.indexOf("key = 42") > -1);
+			assertEquals("Wrong WHERE clause created", true, sql.indexOf("value = 'otherkey'") > -1);
 		}
 		catch (Exception e)
 		{

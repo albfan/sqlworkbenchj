@@ -30,6 +30,21 @@ public class SqlFormatterTest extends TestCase
 		util.prepareEnvironment();
 	}
 
+	public void testWhitespace()
+	{
+		try
+		{
+			String sql = "alter table epg_value add constraint fk_value_attr foreign key (id_attribute) references attribute(id);";
+			String expected = "ALTER TABLE epg_value ADD CONSTRAINT fk_value_attr FOREIGN KEY (id_attribute) REFERENCES attribute(id);";
+			SqlFormatter f = new SqlFormatter(sql, 100);
+			String formatted = f.getFormattedSql();
+			assertEquals("ALTER TABLE not correctly formatted", expected, formatted.trim());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 	public void testColumnThreshold()
 		throws Exception
 	{

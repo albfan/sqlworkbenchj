@@ -40,6 +40,59 @@ public class StringUtilTest
 		assertEquals(true, StringUtil.isLowerCase("1234567890"));
 	}
 	
+	public void testIsWhitespace()
+	{
+		try
+		{
+			String s = "bla";
+			assertEquals(false, StringUtil.isWhitespace(s));
+			
+			s = "   bla   ";
+			assertEquals(false, StringUtil.isWhitespace(s));
+			
+			s = " \n \n";
+			assertEquals(true, StringUtil.isWhitespace(s));
+			
+			s = " \t\r\n   ;";
+			assertEquals(false, StringUtil.isWhitespace(s));
+			
+			s = "";
+			assertEquals(false, StringUtil.isWhitespace(s));
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	public void testTrimBuffer()
+	{
+		try
+		{
+			StringBuffer b = new StringBuffer("bla");
+			StringUtil.trimTrailingWhitespace(b);
+			assertEquals("Buffer was changed", "bla", b.toString());
+			
+			b = new StringBuffer("bla bla ");
+			StringUtil.trimTrailingWhitespace(b);
+			assertEquals("Whitespace not removed", "bla bla", b.toString());
+
+			b = new StringBuffer("bla bla \t");
+			StringUtil.trimTrailingWhitespace(b);
+			assertEquals("Whitespace not removed", "bla bla", b.toString());
+			
+			b = new StringBuffer("bla bla \t\n\r  \t");
+			StringUtil.trimTrailingWhitespace(b);
+			assertEquals("Whitespace not removed", "bla bla", b.toString());
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	public void testToArray()
 	{
 		try
