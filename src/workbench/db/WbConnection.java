@@ -588,7 +588,7 @@ public class WbConnection
 
 	public boolean equals(Object o)
 	{
-		if (o != null && o instanceof WbConnection)
+		if (o instanceof WbConnection)
 		{
 			return (this.id.equals(((WbConnection)o).id));
 		}

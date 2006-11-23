@@ -86,7 +86,6 @@ public class DerbySynonymReader
 		stmt.setString(2, anOwner);
 		ResultSet rs = stmt.executeQuery();
 		String table = null;
-		String owner = null;
 		TableIdentifier result = null;
 		try
 		{
@@ -115,7 +114,7 @@ public class DerbySynonymReader
 		result.append(aSynonym);
 		result.append(nl + "       FOR ");
 		result.append(id.getTableExpression());
-		result.append(";");
+		result.append(';');
 		return result.toString();
 	}
 

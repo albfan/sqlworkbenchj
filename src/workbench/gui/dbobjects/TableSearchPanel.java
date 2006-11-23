@@ -345,7 +345,6 @@ public class TableSearchPanel
 			int rows = this.currentDisplayTable.getRowCount();
 			int height = this.currentDisplayTable.getRowHeight();
 			int width = this.resultScrollPane.getWidth();
-			// Recycle the Dimension object from the ScrollPane
 			String label = this.currentBorder.getTitle();
 			label = label + " (" + rows + " " + (rows == 1 ? ResourceMgr.getString("TxtFoundRow") : ResourceMgr.getString("TxtFoundRows")) + ")";
 			this.currentBorder.setTitle(label);
@@ -401,6 +400,8 @@ public class TableSearchPanel
 				this.currentDisplayTable.setModel(model, true);
 				
 				initRenderer(currentDisplayTable, currentResult.getResultInfo());
+				this.currentDisplayTable.adjustOrOptimizeColumns();
+
 				this.currentScrollPane  = new ParentWidthScrollPane(this.currentDisplayTable);
 				TitledBorder b = new TitledBorder(table.getTableExpression());
 				this.currentBorder = b;

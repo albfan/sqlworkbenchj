@@ -55,7 +55,6 @@ public class PasswordPropertyEditor
 
 		try
 		{
-			//String name = "decryptPassword";
 			String name = "getInputPassword";
 			Class cls = aSource.getClass();
 			this.getter = cls.getMethod(name, (Class[])null);

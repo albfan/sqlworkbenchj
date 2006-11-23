@@ -44,7 +44,6 @@ public class ImportStringVerifier
 {
 	private ResultInfo target;
 	private String content;
-	private String selectedDelimiter;
 	private JPanel optionsPanel;
 	private TextOptionsPanel textOptions;
 	private GeneralImportOptionsPanel generalOptions;

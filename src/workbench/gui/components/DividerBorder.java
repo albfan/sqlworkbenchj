@@ -27,7 +27,6 @@ public class DividerBorder extends AbstractBorder
 	public static final int TOP = 4;
 	public static final int BOTTOM = 8;
 	public static final int LEFT_RIGHT = 3;
-	public static final int RIGHT_TOP = 7;
 	
 	public static final int VERTICAL_MIDDLE = 16;
 	public static final int HORIZONTAL_MIDDLE = 32;

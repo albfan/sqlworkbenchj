@@ -50,9 +50,6 @@ public class VariablePool
 	private int suffixLen = 0;
 	private Pattern validNamePattern = Pattern.compile("[\\w]*");;
 	private Pattern promptPattern;
-//	private Pattern promptAlwaysPattern;
-//	private Pattern conditionalPattern;
-//	private Pattern variablePattern;
 	
 	public static VariablePool getInstance()
 	{
@@ -68,15 +65,6 @@ public class VariablePool
 		
 		String expr = StringUtil.quoteRegexMeta(prefix) + "[\\?\\&][\\w]*" + StringUtil.quoteRegexMeta(suffix);
 		this.promptPattern = Pattern.compile(expr);
-//		expr = StringUtil.quoteRegexMeta(prefix) + "[\\?][\\w]*" + StringUtil.quoteRegexMeta(suffix);
-//		this.promptAlwaysPattern = Pattern.compile(expr);
-
-//		expr = StringUtil.quoteRegexMeta(prefix) + "[\\&][\\w]*" + StringUtil.quoteRegexMeta(suffix);
-//		this.conditionalPattern = Pattern.compile(expr);
-//		
-//		expr = StringUtil.quoteRegexMeta(prefix) + "[\\?\\&]?[\\w]*" + StringUtil.quoteRegexMeta(suffix);
-//		this.variablePattern = Pattern.compile(expr);
-		
 		this.initFromSystemProperties();
 	}
 	
@@ -275,7 +263,7 @@ public class VariablePool
 	{
 		StringBuffer result = new StringBuffer(varName.length() + this.prefixLen + this.suffixLen + 1);
 		result.append(this.prefix);
-		if (forPrompt) result.append("?");
+		if (forPrompt) result.append('?');
 		result.append(varName);
 		result.append(this.suffix);
 		return result.toString();
@@ -362,7 +350,7 @@ public class VariablePool
 		for (int i=0; i < defs.size(); i++)
 		{
 			String line = (String)defs.get(i);
-			int pos = line.indexOf("=");
+			int pos = line.indexOf('=');
 			if (pos == -1) return;
 			String key = line.substring(0, pos);
 			String value = line.substring(pos + 1);

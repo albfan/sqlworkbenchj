@@ -159,10 +159,6 @@ public class DeleteScriptGenerator
 
 	private void addParentWhere(StringBuffer sql, DependencyNode node)
 	{
-		this.addParentWhere(sql, node, null);
-	}
-	private void addParentWhere(StringBuffer sql, DependencyNode node, String nodeColumn)
-	{
 		try
 		{
 			DependencyNode parent = node.getParent();
@@ -181,14 +177,14 @@ public class DeleteScriptGenerator
 				if (count > 0) sql.append("\n          AND ");
 				if (!this.rootTable.equals(parent.getTableId()))
 				{
-					sql.append("(");
+					sql.append('(');
 					sql.append(column);
 					sql.append(" IN ( SELECT ");
 					sql.append(parentColumn);
 					sql.append(" FROM ");
 					sql.append(parent.getTableId().getTableExpression(this.connection));
 					sql.append("\n WHERE ");
-					this.addParentWhere(sql, parent, parentColumn);
+					this.addParentWhere(sql, parent);
 					sql.append(")) ");
 					count ++;
 				}
@@ -198,7 +194,7 @@ public class DeleteScriptGenerator
 				}
 
 			}
-			sql.append(")");
+			sql.append(')');
 		}
 		catch (Throwable th)
 		{

@@ -757,11 +757,11 @@ public class DataImporter
 	{
 		int count = row.length;
 		StringBuffer values = new StringBuffer(count * 20);
-		values.append("[");
+		values.append('[');
 
 		for (int i=0; i < count; i++)
 		{
-			if (i > 0) values.append(",");
+			if (i > 0) values.append(',');
 			if (row[i] == null)
 			{
 				values.append("NULL");
@@ -771,7 +771,7 @@ public class DataImporter
 				values.append(row[i].toString());
 			}
 		}
-		values.append("]");
+		values.append(']');
 		return values.toString();
 	}
 
@@ -920,7 +920,6 @@ public class DataImporter
 					// When importing files created by SQL Workbench/J
 					// blobs will be "passed" as File objects pointing to the external file 
 					ImportFileHandler handler = (this.parser != null ? parser.getFileHandler() : null);
-					InputStream dataStream = null;
 					File f = (File)row[i];
 					try
 					{
@@ -1159,15 +1158,15 @@ public class DataImporter
 		{
 			if (i > 0)
 			{
-				text.append(",");
-				parms.append(",");
+				text.append(',');
+				parms.append(',');
 			}
 			text.append(this.targetColumns[i].getColumnName());
 			parms.append('?');
 		}
 		text.append(") VALUES (");
 		text.append(parms);
-		text.append(")");
+		text.append(')');
 
 		try
 		{

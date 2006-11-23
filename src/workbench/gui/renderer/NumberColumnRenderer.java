@@ -25,7 +25,6 @@ public class NumberColumnRenderer
 	extends ToolTipRenderer
 {
 	private DecimalFormat decimalFormatter;
-	//private HashMap displayCache = new HashMap(500);
 	private DecimalFormatSymbols symb = new DecimalFormatSymbols();
 
 	public NumberColumnRenderer()
@@ -54,7 +53,7 @@ public class NumberColumnRenderer
 		this.setHorizontalAlignment(SwingConstants.RIGHT);
 	}
 	
-	public void setMaxDigits(int maxDigits)
+	public final void setMaxDigits(int maxDigits)
 	{
 		if (maxDigits <= 0) maxDigits = 10;
 		decimalFormatter.setMaximumFractionDigits(maxDigits);

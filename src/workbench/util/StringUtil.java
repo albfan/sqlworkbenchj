@@ -63,6 +63,62 @@ public class StringUtil
 	{
 		return !isUpperCase(s) && !isLowerCase(s);
 	}
+
+	public static final int CASE_UNKNOWN = -1;
+	public static final int CASE_UPPER = 1;
+	public static final int CASE_LOWER = 2;
+	public static final int CASE_MIXED = 4;
+	
+	public static boolean isWhitespace(CharSequence s)
+	{
+		if (s == null) return false;
+		int len = s.length();
+		if (len == 0) return false;
+		int pos = 0;
+		while (pos < len)
+		{
+			char c = s.charAt(pos);
+			if (!Character.isWhitespace(c)) return false;
+			pos++;
+		}
+		return true;
+	}
+	
+	public static void trimTrailingWhitespace(StringBuffer value)
+	{
+		if (value == null || value.length() == 0) return;
+		int len = value.length(); 
+		int pos = len - 1;
+		char c = value.charAt(pos);
+		if (!Character.isWhitespace(c)) return;
+		
+		while (Character.isWhitespace(c))
+		{
+			pos --;
+			c = value.charAt(pos);
+		}
+		value.delete(pos + 1, len);
+	}
+	
+	public static int getCase(String s)
+	{
+		if (s == null) return CASE_UNKNOWN;
+		int l = s.length();
+		boolean hasUpper = false;
+		boolean hasLower = false;
+		
+		for (int i = 0; i < l; i++)
+		{
+			char c = s.charAt(i);
+			
+			if (Character.isLowerCase(c)) hasLower = true;
+			if (Character.isUpperCase(c)) hasUpper = true;
+			if (hasLower && hasUpper) return CASE_MIXED;
+		}
+		if (hasLower) return CASE_LOWER;
+		if (hasUpper) return CASE_UPPER;
+		return CASE_UNKNOWN;
+	}
 	
 	public static boolean isLowerCase(String s)
 	{
@@ -254,6 +310,11 @@ public class StringUtil
 
 	public static String cleanNonPrintable(String aValue)
 	{
+		return cleanNonPrintable(aValue, ' ');
+	}
+	
+	public static String cleanNonPrintable(String aValue, char replacement)
+	{
 		if (aValue == null) return null;
 		int len = aValue.length();
 		StringBuffer result = new StringBuffer(len);
@@ -266,7 +327,7 @@ public class StringUtil
 			}
 			else
 			{
-				result.append(' ');
+				result.append(replacement);
 			}
 		}
 		return result.toString();
@@ -283,6 +344,7 @@ public class StringUtil
 		}
 		catch (NumberFormatException e)
 		{
+			// Ignore
 		}
 		return result;
 	}
@@ -303,6 +365,23 @@ public class StringUtil
 		}
 		catch (NumberFormatException e)
 		{
+			// Ignore
+		}
+		return result;
+	}
+
+	public static long getLongValue(String aValue, long aDefault)
+	{
+		if (aValue == null) return aDefault;
+
+		long result = aDefault;
+		try
+		{
+			result = Long.parseLong(aValue.trim());
+		}
+		catch (NumberFormatException e)
+		{
+			// Ignore
 		}
 		return result;
 	}

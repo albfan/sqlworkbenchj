@@ -26,6 +26,7 @@ import workbench.util.SqlUtil;
  */
 public class SqlTypeRenderer 
 	extends DefaultTableCellRenderer
+	implements WbRenderer
 {
 	private Color selectedForeground;
 	private Color selectedBackground;
@@ -95,6 +96,11 @@ public class SqlTypeRenderer
 		{
 		}
 		return this;
+	}
+
+	public String getDisplayValue()
+	{
+		return getText();
 	}
 	
 }

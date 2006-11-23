@@ -80,7 +80,7 @@ public class NumberField extends JTextField
 		return retVal;
 	}
 	
-	public void setValue(int value)
+	public final void setValue(int value)
 	{
 		setText(integerFormatter.format(value));
 	}

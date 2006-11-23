@@ -27,8 +27,7 @@ import workbench.util.SqlUtil;
  */
 public class WbDescribeTable extends SqlCommand
 {
-	public static final String VERB = "DESC";
-  public static final String VERB_LONG = "DESCRIBE";
+	private static final String VERB = "DESC";
 
 	public WbDescribeTable()
 	{

@@ -514,14 +514,7 @@ public class TableDataPanel
 			dataDisplay.setShowErrorMessages(true);
 			dataDisplay.setStatusMessage(ResourceMgr.getString("LblLoadingProgress"));
 			dataDisplay.runQuery(sql, respectMaxRows);
-			if (Settings.getInstance().getAutomaticOptimalWidth())
-			{
-				dataDisplay.getTable().optimizeAllColWidth();
-			}
-			else
-			{
-				dataDisplay.getTable().adjustColumns();
-			}
+			dataDisplay.getTable().adjustOrOptimizeColumns();
 			dataDisplay.getTable().getDataStore().setUpdateTableToBeUsed(this.table);
 			dataDisplay.getSelectKeysAction().setEnabled(true);
 			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;

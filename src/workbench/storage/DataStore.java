@@ -78,16 +78,12 @@ public class DataStore
 	private TableIdentifier updateTableToBeUsed;
 
 	private WbConnection originalConnection;
-	private DecimalFormat defaultNumberFormatter;
 
 	private boolean allowUpdates = false;
 	private boolean updateHadErrors = false;
 
-	private ValueConverter converter = new ValueConverter();
-
 	private boolean cancelRetrieve = false;
 	private boolean cancelUpdate = false;
-	private int reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
 	
 	/**
 	 *	Create a DataStore which is not based on a result set
@@ -306,10 +302,10 @@ public class DataStore
 		return this.resultInfo.getColumnClass(aColumn);
 	}
 
-	public DecimalFormat getDefaultNumberFormatter()
-	{
-		return defaultNumberFormatter;
-	}
+//	public DecimalFormat getDefaultNumberFormatter()
+//	{
+//		return defaultNumberFormatter;
+//	}
 
 	/**
 	 * Applies a filter based on the given {@link workbench.storage.filter.FilterExpression}
@@ -679,9 +675,7 @@ public class DataStore
 		}
 		else
 		{
-			int result = aDefault;
-			try { result = Integer.parseInt(value.toString()); } catch (Exception e) {}
-			return result;
+			return StringUtil.getIntValue(value.toString(), aDefault);
 		}
 	}
 
@@ -709,9 +703,7 @@ public class DataStore
 		}
 		else
 		{
-			long result = aDefault;
-			try { result = Long.parseLong(value.toString()); } catch (Exception e) {}
-			return result;
+			return StringUtil.getLongValue(value.toString(), aDefault);
 		}
 	}
 
@@ -936,7 +928,8 @@ public class DataStore
 		}
 		
 		this.cancelRetrieve = false;
-
+		final int reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
+		
 		try
 		{
 			int rowCount = 0;
@@ -1211,8 +1204,7 @@ public class DataStore
 		catch (SQLException e)
 		{
 			this.updateHadErrors = true;
-			String dbProduct = null;
-			if (this.originalConnection != null) dbProduct = this.originalConnection.getMetadata().getProductName();
+			
 			String sql = dml.getExecutableStatement(createLiteralFormatter());
 			if (!this.ignoreAllUpdateErrors)
 			{
@@ -1462,6 +1454,8 @@ public class DataStore
 			return NullValue.getInstance(type);
 		}
 
+		ValueConverter converter = new ValueConverter();
+		
 		return converter.convertValue(aValue, type);
 	}
 

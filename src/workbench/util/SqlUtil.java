@@ -73,9 +73,17 @@ public class SqlUtil
 			SQLToken t = lexer.getNextToken(false, false);
 			String v = t.getContents();
 			if (!v.equals("CREATE") && !v.equals("RECREATE") && !v.equals("CREATE OR REPLACE")) return null;
-			t = lexer.getNextToken(false, false);
-			if (t == null) return null;
-			return t.getContents();
+			SQLToken type = lexer.getNextToken(false, false);
+			if (type == null) return null;
+			
+			// check for CREATE FORCE VIEW 
+			if (type.getContents().equals("FORCE"))
+			{
+				SQLToken t2 = lexer.getNextToken(false, false);
+				if (t2 == null) return null;
+				return t2.getContents();
+			}
+			return type.getContents();
 		}
 		catch (Exception e)
 		{

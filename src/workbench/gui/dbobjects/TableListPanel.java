@@ -751,7 +751,8 @@ public class TableListPanel
 			tableList.setModel(model, true);
 			tableList.getExportAction().setEnabled(true);
 			model.sortByColumn(0);
-			tableList.adjustColumns();
+			tableList.adjustOrOptimizeColumns();
+			
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
@@ -1414,7 +1415,8 @@ public class TableListPanel
 			DataStore ds = meta.getTableIndexInformation(selectedTable);
 			DataStoreTableModel model = new DataStoreTableModel(ds);
 			indexes.setModel(model, true);
-			indexes.adjustColumns();
+			indexes.adjustOrOptimizeColumns();
+			
 			this.shouldRetrieveIndexes = false;
 		}
 		catch (Throwable th)
@@ -1437,7 +1439,7 @@ public class TableListPanel
 			DbMetadata meta = this.dbConnection.getMetadata();
 			DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(this.selectedTable));
 			exportedKeys.setModel(model, true);
-			exportedKeys.adjustColumns();
+			exportedKeys.adjustOrOptimizeColumns();
 			this.shouldRetrieveExportedKeys = false;
 		}
 		catch (Throwable th)
@@ -1457,7 +1459,7 @@ public class TableListPanel
 			DbMetadata meta = this.dbConnection.getMetadata();
 			DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(this.selectedTable, false));
 			importedKeys.setModel(model, true);
-			importedKeys.adjustColumns();
+			importedKeys.adjustOrOptimizeColumns();
 			this.shouldRetrieveImportedKeys = false;
 		}
 		catch (Throwable th)
@@ -1752,7 +1754,7 @@ public class TableListPanel
 				if (table instanceof WbTable)
 				{
 					WbTable t = (WbTable)table;
-					t.adjustColumns();
+					t.adjustOrOptimizeColumns();
 				}
 				table.repaint();
 			}

@@ -115,6 +115,11 @@ import java.io.*;
 
 %state COMMENT
 
+/*
+LineTerminator = \r|\n|\r\n
+\^[ \t]*@[a-zA-Z0-9~-_.;#ß+|]+{LineTerminator}\$|
+*/
+
 keyword=("ABORT"|
 "ABS"|
 "ABSOLUTE"|

@@ -159,7 +159,7 @@ public class HsqlSequenceReader
 					result.append(nl + "       INCREMENT BY ");
 					result.append(inc);
 				}
-				result.append(";");
+				result.append(';');
 			}
 		}
 		catch (Throwable e)

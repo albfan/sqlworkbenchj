@@ -40,10 +40,6 @@ public class ObjectScripterUI
 	extends JPanel
 	implements WindowListener, ScriptGenerationMonitor
 {
-	public static final int TPYE_CREATE = 1;
-	public static final int TYPE_INSERT = 2;
-	public static final int TYPE_GENERATE = 3;
-
 	protected Scripter scripter;
 	protected JLabel statusMessage;
 	protected EditorPanel editor;

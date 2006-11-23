@@ -136,7 +136,7 @@ public class WbImport
 		result = StringUtil.replace(result, "%continue_default%", Boolean.toString(continueDefault));
 		
 		boolean multiDefault = Settings.getInstance().getBoolProperty("workbench.import.default.multilinerecord", false);
-		result = StringUtil.replace(result, "%multiline_default%", Boolean.toString(continueDefault));
+		result = StringUtil.replace(result, "%multiline_default%", Boolean.toString(multiDefault));
 		
 		return result;
 	}

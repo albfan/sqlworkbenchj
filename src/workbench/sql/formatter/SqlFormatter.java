@@ -125,6 +125,7 @@ public class SqlFormatter
 	private SQLLexer lexer;
 	private StringBuffer result;
 	private StringBuffer indent = null;
+	private StringBuffer leadingWhiteSpace = null;
 	private int realLength = 0;
 	private int maxSubselectLength = 60;
 	private Set dbFunctions = Collections.EMPTY_SET;
@@ -182,10 +183,35 @@ public class SqlFormatter
 		functions.add("COUNT");
 	}
 	
+	private void saveLeadingWhitespace()
+	{
+		char c = this.sql.charAt(0);
+		int pos = 0;
+		if (!Character.isWhitespace(c)) return;
+		
+		this.leadingWhiteSpace = new StringBuffer(50);
+		while (Character.isWhitespace(c))
+		{
+			this.leadingWhiteSpace.append(c);
+			pos ++;
+			if (pos >= sql.length()) break;
+			c = this.sql.charAt(pos);
+		}
+		this.sql = this.sql.trim();
+	}
+	
 	public String getFormattedSql()
 		throws Exception
 	{
+		saveLeadingWhitespace();
+		if (this.sql.length() == 0) return sql;
+		
 		this.formatSql();
+		StringUtil.trimTrailingWhitespace(result);
+		if (this.leadingWhiteSpace != null)
+		{
+			this.result.insert(0, this.leadingWhiteSpace);
+		}
 		return this.result.toString();
 	}
 
@@ -233,6 +259,7 @@ public class SqlFormatter
 		this.result.append(c);
 	}
 
+	
 	private void appendComment(String text)
 	{
 		if (text.startsWith("--"))
@@ -253,12 +280,13 @@ public class SqlFormatter
 			this.appendText(' ');
 		}
 	}
+	
 	private void appendText(String text)
 	{
 		this.realLength += text.length();
 		this.result.append(text);
 	}
-
+	
 	private void appendText(StringBuffer text)
 	{
 		if (text.length() == 0) return;
@@ -778,7 +806,7 @@ public class SqlFormatter
 				if (b == null)
 				{
 					b = new StringBuffer(text);
-					if (t.isComment()) b.append(" ");
+					if (t.isComment()) b.append(' ');
 					list.set(elementcounter, b);
 				}
 				else
@@ -860,7 +888,8 @@ public class SqlFormatter
 				}
 				else
 				{
-					if (!lastToken.isSeparator() && lastToken != t && !isStartOfLine()) this.appendText(' ');
+					//if (!lastToken.isSeparator() && lastToken != t && !isStartOfLine()) this.appendText(' ');
+					if (needsWhitespace(lastToken, t)) this.appendText(' ');
 					if (wbTester.isWbCommand(word))
 					{
 						this.appendText(wbTester.formatVerb(word));
@@ -967,7 +996,7 @@ public class SqlFormatter
 					if (!isStartOfLine()) this.appendNewline();
 				}
 
-				if (t.isSeparator() && word.equals("("))
+				if (word.equals("("))
 				{
 					if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
 					this.appendText('(');
@@ -975,7 +1004,7 @@ public class SqlFormatter
 				}
 				else
 				{
-					if (t.isSeparator() && word.equals(";"))
+					if (word.equals(";"))
 					{
 						this.appendText(word);
 						this.appendNewline();
@@ -991,8 +1020,8 @@ public class SqlFormatter
 			lastToken = t;
 			t = this.lexer.getNextToken(true, false);
 		}
-		this.appendNewline();
-		this.appendNewline();
+//		this.appendNewline();
+//		this.appendNewline();
 	}
 
 	private SQLToken processWhere(SQLToken previousToken)

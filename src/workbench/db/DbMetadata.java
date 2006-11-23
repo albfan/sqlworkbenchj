@@ -169,13 +169,13 @@ public class DbMetadata
 
 	private static final int UPPERCASE_NAMES = 1;
 	private static final int LOWERCASE_NAMES = 2;
+	private static final int MIXEDCASE_NAMES = 4;
+	
 	private int objectCaseStorage = -1;
 	private int schemaCaseStorage = -1;
 
 	private String tableTypeName;
 	private boolean neverQuoteObjects;
-
-	private final String TABLE_TYPE_VIEW = "VIEW";
 
 	private String[] tableTypesTable; 
 	private String[] tableTypesSelectable;
@@ -187,9 +187,8 @@ public class DbMetadata
 		throws SQLException
 	{
 		Settings settings = Settings.getInstance();
-		Connection c = aConnection.getSqlConnection();
 		this.dbConnection = aConnection;
-		this.metaData = c.getMetaData();
+		this.metaData = aConnection.getSqlConnection().getMetaData();
 
 		if (!templatesRead)
 		{
@@ -435,7 +434,12 @@ public class DbMetadata
 			{
 				this.objectCaseStorage = UPPERCASE_NAMES;
 			}
+			else if ("mixed".equals(nameCase))
+			{
+				this.objectCaseStorage = MIXEDCASE_NAMES;
+			}
 		}
+		
 		nameCase = settings.getProperty("workbench.db.schemaname.case." + this.getDbId(), null);
 		if (nameCase != null)
 		{
@@ -446,6 +450,10 @@ public class DbMetadata
 			else if ("upper".equals(nameCase))
 			{
 				this.schemaCaseStorage = UPPERCASE_NAMES;
+			}
+			else if ("mixed".equals(nameCase))
+			{
+				this.schemaCaseStorage = MIXEDCASE_NAMES;
 			}
 		}
 
@@ -461,7 +469,6 @@ public class DbMetadata
 		List realTypes = new LinkedList();
 		
 		Iterator itr = types.iterator();
-		int count = 0;
 		while (itr.hasNext())
 		{
 			String s = ((String)itr.next()).toUpperCase();
@@ -479,7 +486,10 @@ public class DbMetadata
 	}
 
 	public String getTableTypeName() { return tableTypeName; }
-	public String getViewTypeName() { return TABLE_TYPE_VIEW; }
+	public String getViewTypeName() 
+	{ 
+		return "VIEW"; 
+	}
 
 	public boolean getStripProcedureVersion()
 	{
@@ -512,8 +522,7 @@ public class DbMetadata
 	public boolean objectTypeCanContainData(String type)
 	{
 		if (type == null) return false;
-		String ltype = type.toLowerCase();
-		return objectsWithData.contains(type);
+		return objectsWithData.contains(type.toLowerCase());
 	}
 
 	private Set getObjectsWithData()
@@ -791,7 +800,7 @@ public class DbMetadata
 			value = null;
 		}
 
-		if (value != null && value instanceof HashMap)
+		if (value instanceof HashMap)
 		{
 			result = (HashMap)value;
 		}
@@ -823,7 +832,7 @@ public class DbMetadata
 			{
 				LogMgr.logDebug("DbMetadata.readStatementTemplate()", "Error reading template file " + aFilename, e);
 			}
-			if (value != null && value instanceof HashMap)
+			if (value instanceof HashMap)
 			{
 				HashMap m = (HashMap)value;
 				if (result != null)
@@ -1036,7 +1045,7 @@ public class DbMetadata
 			result.append(type);
 			result.append(' ');
 			result.append(view.getTableName());
-			result.append(";");
+			result.append(';');
 			result.append(lineEnding);
 			result.append(lineEnding);
 			result.append(source);
@@ -1062,7 +1071,7 @@ public class DbMetadata
 				result.append(quoteObjectname(colName));
 				if (i < rows - 1)
 				{
-					result.append(",");
+					result.append(',');
 					result.append(lineEnding);
 				}
 			}
@@ -1162,12 +1171,12 @@ public class DbMetadata
 			{
 				result.append("DROP ");
 				result.append(type.toUpperCase());
-				result.append(" ");
+				result.append(' ');
 				result.append(quoteObjectname(name));
 				String cascade = this.getCascadeConstraintsVerb(type);
 				if (cascade != null)
 				{
-					result.append(" ");
+					result.append(' ');
 					result.append(cascade);
 				}
 				result.append(";\n");
@@ -1177,7 +1186,7 @@ public class DbMetadata
 				drop = drop.replaceAll("%name%", quoteObjectname(name));
 				result.append(drop);
 			}
-			result.append("\n");
+			result.append('\n');
 		}
 
 		if (!replaced)
@@ -1187,7 +1196,7 @@ public class DbMetadata
 			{
 				result.append("CREATE ");
 				result.append(type.toUpperCase());
-				result.append(" ");
+				result.append(' ');
 				result.append(quoteObjectname(name));
 			}
 			else
@@ -1209,7 +1218,6 @@ public class DbMetadata
 		}
 		catch (NoConfigException e)
 		{
-			GetMetaDataSql sql = (GetMetaDataSql)procSourceSql.get(this.productName);
 			SourceStatementsHelp help = new SourceStatementsHelp();
 			return help.explainMissingProcSourceSql(this.getProductName());
 		}
@@ -1371,7 +1379,7 @@ public class DbMetadata
 				needQuote = (Character.isDigit(aName.charAt(0)));
 			}
 			
-			if (!needQuote)
+			if (!needQuote && !this.storesMixedCaseIdentifiers())
 			{
 				if (this.storesLowerCaseIdentifiers() && !StringUtil.isLowerCase(aName))
 				{
@@ -1447,15 +1455,15 @@ public class DbMetadata
 	{
 		if (name == null) return true;
 		
-		if (this.storesUpperCaseIdentifiers() && StringUtil.isUpperCase(name))
-		{
-			return true;
-		}
+		if (supportsMixedCaseIdentifiers()) return true;
+	
+		boolean isUpper = StringUtil.isUpperCase(name);
+		boolean isLower = StringUtil.isLowerCase(name);
+		boolean isMixed = (!isUpper && !isLower);
 		
-		if (this.storesLowerCaseIdentifiers() && StringUtil.isLowerCase(name))
-		{
-			return true;
-		}
+		if (isMixed && supportsMixedCaseQuotedIdentifiers()) return false;
+		if (isUpper && this.storesUpperCaseIdentifiers())  return true;
+		if (isLower && this.storesLowerCaseIdentifiers()) return true;
 		
 		return false;
 	}
@@ -1665,7 +1673,7 @@ public class DbMetadata
 				// filter out "internal" synonyms for Oracle
 				if (checkOracleInternalSynonyms)
 				{
-					if (name.indexOf("/") > -1) continue;
+					if (name.indexOf('/') > -1) continue;
 					if (synPattern != null)
 					{
 						Matcher m = synPattern.matcher(name);
@@ -1812,6 +1820,53 @@ public class DbMetadata
 		return exists;
 	}
 
+	protected boolean supportsMixedCaseIdentifiers()
+	{
+		try
+		{
+			return this.metaData.supportsMixedCaseIdentifiers();
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+	}
+	
+	protected boolean supportsMixedCaseQuotedIdentifiers()
+	{
+		try
+		{
+			return this.metaData.supportsMixedCaseQuotedIdentifiers();
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * Returns true if the server stores identifiers in mixed case.
+	 * Usually this is delegated to the JDBC driver, but as some drivers
+	 * (e.g. Frontbase) implement this incorrectly, this can be overriden
+	 * in workbench.settings with the property:
+	 * workbench.db.objectname.case.<dbid>
+	 */
+	public boolean storesMixedCaseIdentifiers()
+	{
+		if (this.objectCaseStorage != -1)
+		{
+			return this.objectCaseStorage == MIXEDCASE_NAMES;
+		}
+		try
+		{
+			return this.metaData.storesMixedCaseIdentifiers();
+		}
+		catch (SQLException e)
+		{
+			return false;
+		}
+	}
+	
 	/**
 	 * Returns true if the server stores identifiers in lower case.
 	 * Usually this is delegated to the JDBC driver, but as some drivers
@@ -2213,39 +2268,9 @@ public class DbMetadata
 	 *  the integer value of the java datatype from {@link java.sql.Types}
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE = 6;
-	public final static int COLUMN_IDX_TABLE_DEFINITION_SCALE = 7;
 	public final static int COLUMN_IDX_TABLE_DEFINITION_SIZE = 7;
-	public final static int COLUMN_IDX_TABLE_DEFINITION_PRECISION = 8;
 	public final static int COLUMN_IDX_TABLE_DEFINITION_DIGITS = 8;
-
 	public final static int COLUMN_IDX_TABLE_DEFINITION_POSITION = 9;
-
-	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, boolean adjustNames)
-		throws SQLException
-	{
-		return this.getTableDefinition(aCatalog, aSchema, aTable, tableTypeName, adjustNames);
-	}
-
-	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable)
-		throws SQLException
-	{
-		return this.getTableDefinition(aCatalog, aSchema, aTable, tableTypeName, true);
-	}
-
- /**
-  * Retrieve the column definition of the given table
-  * @param aCatalog the catalog of the table (may be null)
-  * @param aSchema  the schema of the table (may be null)
-  * @param aTable   the table name
-  * @param aType    the table type. One of the types retrurned {@link #getTableTypes()}
-  * @throws SQLException
-  * @return a DataStore with the columns of the table
-  */
-	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType)
-		throws SQLException
-	{
-		return this.getTableDefinition(aCatalog, aSchema, aTable, aType, true);
-	}
 
 	public DataStore getTableDefinition(TableIdentifier aTable)
 		throws SQLException
@@ -2272,6 +2297,7 @@ public class DbMetadata
 	}
 
 	public static final String[] TABLE_DEFINITION_COLS = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "java.sql.Types", "SCALE/SIZE", "PRECISION", "POSITION"};
+	
 	private DataStore createTableDefinitionDataStore()
 	{
 		final int[] types = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.INTEGER};
@@ -2290,20 +2316,12 @@ public class DbMetadata
 	 * The individual columns should be accessed using the
 	 * COLUMN_IDX_TABLE_DEFINITION_xxx constants.
 	 */
-	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType, boolean adjustNames)
+	protected DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType, boolean adjustNames)
 		throws SQLException
 	{
 		if (aTable == null) throw new IllegalArgumentException("Tablename may not be null!");
 
 		DataStore ds = this.createTableDefinitionDataStore();
-
-		int pos = aTable.indexOf(".");
-
-		if (pos > -1 && aSchema == null)
-		{
-			aSchema = aTable.substring(0, pos);
-			aTable = aTable.substring(pos + 1);
-		}
 
 		aCatalog = StringUtil.trimQuotes(aCatalog);
 		aSchema = StringUtil.trimQuotes(aSchema);
@@ -3766,7 +3784,7 @@ public class DbMetadata
 
 		template = StringUtil.replace(template, PK_NAME_PLACEHOLDER, pkName);
 		result.append(template);
-		result.append(";");
+		result.append(';');
 		return result;
 	}
 	

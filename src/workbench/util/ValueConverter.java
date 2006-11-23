@@ -63,7 +63,6 @@ public class ValueConverter
 													};
 
 	private final String[] timeFormats = new String[] { "HH:mm:ss.SS", "HH:mm:ss", "HH:mm" };
-	private final SimpleDateFormat timeFormatter = new SimpleDateFormat();
 	
 	private String defaultDateFormat;
 	private String defaultTimestampFormat;

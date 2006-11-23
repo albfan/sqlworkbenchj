@@ -42,6 +42,11 @@ public class SqlLiteralFormatter
 	private boolean treatClobAsFile = false;
 	private String clobEncoding = Settings.getInstance().getDefaultFileEncoding();
 	
+	public SqlLiteralFormatter()
+	{
+		this(null);
+	}
+	
 	public SqlLiteralFormatter(WbConnection con)
 	{
 		String product = "*";
@@ -99,7 +104,7 @@ public class SqlLiteralFormatter
 		{
 			WbPersistence reader = new WbPersistence();
 			Object value = reader.readObject(in);
-			if (value != null && value instanceof Map)
+			if (value instanceof Map)
 			{
 				result = (Map)value;
 			}
@@ -162,7 +167,7 @@ public class SqlLiteralFormatter
 		// replace to Buffer writes the result of into the passed buffer
 		// so this appends the correct literal to realValue
 		StringUtil.replaceToBuffer(realValue, t, "'", "''");
-		realValue.append("'");
+		realValue.append('\'');
 		return realValue.toString();
 	}
 	public String getDefaultLiteral(ColumnData data)

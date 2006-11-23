@@ -1577,7 +1577,7 @@ public class DataPumper
 			{
 				if (i > 0) result.append(", ");
 				result.append(colMapping.sourceColumns[i].getColumnName());
-				result.append("/");
+				result.append('/');
 				ColumnIdentifier col = colMapping.targetColumns[i];
 				result.append(col.getColumnName());
 			}
@@ -1596,7 +1596,7 @@ public class DataPumper
 				result.append("\n     -" + WbCopy.PARAM_KEYS + "=");
 				for (int i=0; i < keycount; i++)
 				{
-					if (i > 0) result.append(",");
+					if (i > 0) result.append(',');
 					result.append(keys.get(i).toString());
 				}
 			}
@@ -1906,7 +1906,7 @@ public class DataPumper
 			{
 				long rows = this.copier.getAffectedRows();
 				copied.append(rows);
-				copied.append(" ");
+				copied.append(' ');
 				copied.append(ResourceMgr.getString("MsgCopyNumRows"));
 			}
 

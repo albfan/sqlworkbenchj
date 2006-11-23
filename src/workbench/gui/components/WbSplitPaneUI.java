@@ -34,7 +34,7 @@ public class WbSplitPaneUI
 	
 	public void setOneTouchTooltip(String tip)
 	{
-		if (divider != null && divider instanceof WbSplitPaneDivider)
+		if (divider instanceof WbSplitPaneDivider)
 		{
 			((WbSplitPaneDivider)divider).setOneTouchTooltip(tip);
 		}

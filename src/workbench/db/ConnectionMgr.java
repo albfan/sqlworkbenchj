@@ -574,7 +574,7 @@ public class ConnectionMgr
 		String command = null;
 		String shutdown = ";shutdown=true";
 
-		int pos = url.indexOf(";");
+		int pos = url.indexOf(';');
 		if (pos > -1)
 		{
 			command = url.substring(0, pos) + shutdown;

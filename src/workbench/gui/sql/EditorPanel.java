@@ -128,6 +128,7 @@ public class EditorPanel
 	private File currentFile;
 	private String fileEncoding;
 	private Set dbFunctions = null;
+	private ReplacePanel replacePanel = null;
 
 	public static EditorPanel createSqlEditor()
 	{
@@ -319,7 +320,7 @@ public class EditorPanel
 		String sql = this.getSelectedStatement();
 		ScriptParser parser = new ScriptParser();
 		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
-		//parser.setSupportOracleInclude(this.dbConnection.getMetadata().supportShortInclude());
+		parser.setReturnStartingWhitespace(true);
 		parser.setScript(sql);
 		
 		String delimit = parser.getDelimiter();
@@ -328,28 +329,20 @@ public class EditorPanel
 		if (count < 1) return;
 
 		StringBuffer newSql = new StringBuffer(sql.length() + 100);
-		String formattedDelimit = StringUtil.EMPTY_STRING;
 
 		String end = Settings.getInstance().getInternalEditorLineEnding();
 		
-		if (count > 1)
-		{
-			// make sure add a delimiter after each statement
-			// if we have more then one
-			formattedDelimit = end + delimit + end + end;
-		}
-		else
-		{
-			String s = sql.trim();
-			if (s.endsWith(delimit))
-			{
-				formattedDelimit = delimit;
-			}
-		}
-
 		for (int i=0; i < count; i++)
 		{
 			String command = parser.getCommand(i);
+
+			// no need to format "empty" strings
+			if (StringUtil.isWhitespace(command))
+			{
+				newSql.append(command);
+				continue;
+			}
+			
 			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getFormatterMaxSubselectLength());
 			f.setDBFunctions(this.dbFunctions);
 			int cols = Settings.getInstance().getFormatterMaxColumnsInSelect();
@@ -357,19 +350,16 @@ public class EditorPanel
 			
 			try
 			{
-				String formattedSql = f.getFormattedSql().trim();
+				String formattedSql = f.getFormattedSql();
 				newSql.append(formattedSql);
 				if (!command.trim().endsWith(delimit))
 				{
-					newSql.append(formattedDelimit);
-				}
-				else
-				{
-					newSql.append(end);
+					newSql.append(delimit);
 				}
 			}
 			catch (Exception e)
 			{
+				LogMgr.logError("EditorPanel.reformatSql()", "Error when formatting SQL", e);
 			}
 		}
 
@@ -690,7 +680,7 @@ public class EditorPanel
 		
 		BufferedReader reader = null;
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
-		int endLength = lineEnding.length();
+//		int endLength = lineEnding.length();
 		SyntaxDocument doc = null;
 		
 		try
@@ -995,7 +985,6 @@ public class EditorPanel
 			return this.findFirst(aValue, ignoreCase, wholeWord, useRegex);
 		}
 	}
-	private ReplacePanel replacePanel = null;
 
 	public void replace()
 	{

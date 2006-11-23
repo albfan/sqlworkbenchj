@@ -42,7 +42,6 @@ public class ConnectionProfile
 	private String driverName;
 	private String group;
 	private boolean autocommit;
-	private boolean disableUpdateTableCheck = false;
 	private boolean rollbackBeforeDisconnect;
 	private int id;
 	private static int nextId = 1;

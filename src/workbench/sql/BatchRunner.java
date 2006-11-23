@@ -74,9 +74,7 @@ public class BatchRunner
 	private boolean verboseLogging = true;
 	private boolean checkEscapedQuotes = false;
 	private String encoding = null;
-	private String baseDir;
 	private boolean showProgress = false;
-	private ParameterPrompter prompter = null;
 	
 	public BatchRunner(String aFilelist)
 	{
@@ -87,7 +85,6 @@ public class BatchRunner
 
 	public void setBaseDir(String dir) 
 	{ 
-		baseDir = dir; 
 		this.stmtRunner.setBaseDir(dir);
 	}
 
@@ -98,7 +95,6 @@ public class BatchRunner
 	
 	public void setParameterPrompter(ParameterPrompter p)
 	{
-		this.prompter = p;
 		this.stmtRunner.setParameterPrompter(p);
 	}
 	

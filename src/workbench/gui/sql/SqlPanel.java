@@ -1163,15 +1163,18 @@ public class SqlPanel
 		this.editor.setText(aStatement);
 	}
 
-	public synchronized void disconnect()
+	public void disconnect()
 	{
-		if (this.dbConnection != null) 
+		synchronized (this)
 		{
-			this.setConnection(null);
+			if (this.dbConnection != null) 
+			{
+				this.setConnection(null);
+			}
+			this.clearResultTabs();
+			this.makeReadOnly();
+			this.log.setText("");
 		}
-		this.clearResultTabs();
-		this.makeReadOnly();
-		this.log.setText("");
 	}
 
 	public WbConnection getConnection()
@@ -1189,53 +1192,57 @@ public class SqlPanel
 		return (this.dbConnection != null);
 	}
 
-	public synchronized void setConnection(WbConnection aConnection)
+	public void setConnection(WbConnection aConnection)
 	{
-		if (this.dbConnection != null)
+		synchronized (this)
 		{
-			this.dbConnection.removeChangeListener(this);
-			this.removeDbExecutionListener(this.dbConnection);
-		}
-
-		this.dbConnection = aConnection;
-		this.toggleAutoCommit.setConnection(this.dbConnection);
-		
-		if (this.clearCompletionCache != null) this.clearCompletionCache.setConnection(this.dbConnection);
-		if (this.autoCompletion != null) this.autoCompletion.setConnection(this.dbConnection);
-		
-		if (this.stmtRunner == null && aConnection != null)
-		{
-			try
+			if (this.dbConnection != null)
 			{
-				// Use reflection to create instance to avoid class loading upon startup
-				this.stmtRunner = (StatementRunner)Class.forName("workbench.sql.DefaultStatementRunner").newInstance();
+				this.dbConnection.removeChangeListener(this);
+				this.removeDbExecutionListener(this.dbConnection);
 			}
-			catch (Exception e)
+
+			this.dbConnection = aConnection;
+			this.toggleAutoCommit.setConnection(this.dbConnection);
+
+			if (this.clearCompletionCache != null) this.clearCompletionCache.setConnection(this.dbConnection);
+			if (this.autoCompletion != null) this.autoCompletion.setConnection(this.dbConnection);
+
+			if (this.stmtRunner == null && aConnection != null)
 			{
+				try
+				{
+					// Use reflection to create instance to avoid class loading upon startup
+					this.stmtRunner = (StatementRunner)Class.forName("workbench.sql.DefaultStatementRunner").newInstance();
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("SqlPanel.setConnection()", "Error creating batch runner", e);
+				}
+				this.stmtRunner.setRowMonitor(this.rowMonitor);
 			}
-			this.stmtRunner.setRowMonitor(this.rowMonitor);
-		}
-		if (this.stmtRunner != null)
-		{
-			this.stmtRunner.setConnection(aConnection);
-			this.stmtRunner.setResultLogger(this);
+			if (this.stmtRunner != null)
+			{
+				this.stmtRunner.setConnection(aConnection);
+				this.stmtRunner.setResultLogger(this);
+			}
+
+			boolean enable = (aConnection != null);
+			if (this.connectionInfo != null) this.connectionInfo.setConnection(aConnection);
+			this.setExecuteActionStates(enable);
+
+			if (aConnection != null)
+			{
+				if (this.editor != null) this.editor.setDatabaseConnection(aConnection);
+			}
+
+			if (this.dbConnection != null)
+			{
+				this.dbConnection.addChangeListener(this);
+				this.addDbExecutionListener(this.dbConnection);
+			}
 		}
 		
-		boolean enable = (aConnection != null);
-		if (this.connectionInfo != null) this.connectionInfo.setConnection(aConnection);
-		this.setExecuteActionStates(enable);
-
-		if (aConnection != null)
-		{
-			if (this.editor != null) this.editor.setDatabaseConnection(aConnection);
-		}
-
-		if (this.dbConnection != null)
-		{
-			this.dbConnection.addChangeListener(this);
-			this.addDbExecutionListener(this.dbConnection);
-		}
-
 		this.checkResultSetActions();
 		this.checkAutocommit();
 	}
@@ -1889,6 +1896,8 @@ public class SqlPanel
 					result = true;
 					this.executeAllStatements = true;
 					break;
+				default:
+					result = false;
 			}
 		}
 		finally
@@ -2277,7 +2286,7 @@ public class SqlPanel
 					logmsg.append('\n');
 					if (count > 1)
 					{
-						logmsg.append("(");
+						logmsg.append('(');
 						logmsg.append(currentMsg);
 						logmsg.append(")\n\n");
 					}
@@ -2580,13 +2589,11 @@ public class SqlPanel
 	{
 		boolean hasResult = false;
 		boolean mayEdit = false;
-		int rows = 0;
 		boolean findNext = false;
 		if (this.currentData != null)
 		{
 			hasResult = this.currentData.hasResultSet();
 			mayEdit = hasResult && this.currentData.hasUpdateableColumns();
-			rows = this.currentData.getTable().getSelectedRowCount();
 			findNext = hasResult && (this.currentData.getTable().canSearchAgain());
 		}
 		
@@ -2802,12 +2809,14 @@ public class SqlPanel
 		}
 	}
 
-	protected synchronized void setBusy(final boolean busy)
+	protected void setBusy(final boolean busy)
 	{
-		//if (busy == this.threadBusy) return;
-		this.threadBusy = busy;
-		this.showBusyIcon(busy);
-		this.setExecuteActionStates(!busy);
+		synchronized (this)
+		{
+			this.threadBusy = busy;
+			this.showBusyIcon(busy);
+			this.setExecuteActionStates(!busy);
+		}
 	}
 
 	public boolean isBusy() { return this.threadBusy; }
@@ -2857,25 +2866,31 @@ public class SqlPanel
 		this.execListener.remove(l);
 	}
 
-	protected synchronized void fireDbExecStart()
+	protected void fireDbExecStart()
 	{
-		if (this.execListener == null) return;
-		int count = this.execListener.size();
-		for (int i=0; i < count; i++)
+		synchronized (this)
 		{
-			DbExecutionListener l = (DbExecutionListener)this.execListener.get(i);
-			if (l != null) l.executionStart(this.dbConnection, this);
+			if (this.execListener == null) return;
+			int count = this.execListener.size();
+			for (int i=0; i < count; i++)
+			{
+				DbExecutionListener l = (DbExecutionListener)this.execListener.get(i);
+				if (l != null) l.executionStart(this.dbConnection, this);
+			}
 		}
 	}
 	
-	protected synchronized void fireDbExecEnd()
+	protected void fireDbExecEnd()
 	{
-		if (this.execListener == null) return;
-		int count = this.execListener.size();
-		for (int i=0; i < count; i++)
+		synchronized (this)
 		{
-			DbExecutionListener l = (DbExecutionListener)this.execListener.get(i);
-			if (l != null) l.executionEnd(this.dbConnection, this);
+			if (this.execListener == null) return;
+			int count = this.execListener.size();
+			for (int i=0; i < count; i++)
+			{
+				DbExecutionListener l = (DbExecutionListener)this.execListener.get(i);
+				if (l != null) l.executionEnd(this.dbConnection, this);
+			}
 		}
 	}
 

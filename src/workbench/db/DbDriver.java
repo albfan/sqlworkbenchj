@@ -104,7 +104,7 @@ public class DbDriver
 				b.append(this.name);
 				b.append(" (");
 				b.append(this.driverClass);
-				b.append(")");
+				b.append(')');
 			}
 			else
 			{

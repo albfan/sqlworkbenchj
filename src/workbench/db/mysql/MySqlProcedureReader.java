@@ -83,7 +83,7 @@ public class MySqlProcedureReader
 				if (ret.equals("RETURN") || ret.equals("RESULTSET")) continue;
 				String vartype = ds.getValueAsString(i,ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
 				String name = ds.getValueAsString(i,ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
-				if (added > 0) source.append(",");
+				if (added > 0) source.append(',');
 				source.append(ret);
 				source.append(' ');
 				source.append(name);
@@ -91,7 +91,7 @@ public class MySqlProcedureReader
 				source.append(vartype);
 				added ++;
 			}
-			source.append(")");
+			source.append(')');
 			source.append(nl);
 			if ("FUNCTION".equals(proctype))
 			{

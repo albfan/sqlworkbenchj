@@ -20,8 +20,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import workbench.interfaces.PropertyStorage;
 
@@ -35,7 +37,7 @@ public class WbProperties
 {
 	private int distinctSections = 2;
 
-	private ArrayList changeListeners = new ArrayList();
+	private List changeListeners = new LinkedList();
 	
 	public WbProperties()
 	{
@@ -170,9 +172,10 @@ public class WbProperties
 		int count = this.changeListeners.size();
 		if (count == 0) return;
 		PropertyChangeEvent evt = new PropertyChangeEvent(this, name, oldValue, newValue);
-		for (int i=0; i < count; i++)
+		Iterator itr = this.changeListeners.iterator();
+		while (itr.hasNext())
 		{
-			PropertyChangeListener l = (PropertyChangeListener)this.changeListeners.get(i);
+			PropertyChangeListener l = (PropertyChangeListener)itr.next();
 			if (l != null) l.propertyChange(evt);
 		}
 	}

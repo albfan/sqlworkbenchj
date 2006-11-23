@@ -79,7 +79,7 @@ public class StoreableKeyStroke
 	public boolean equals(Object other)
 	{
 		KeyStroke thisKey = getKeyStroke();
-		if (other != null && other instanceof StoreableKeyStroke)
+		if (other instanceof StoreableKeyStroke)
 		{
 			KeyStroke otherKey = ((StoreableKeyStroke)other).getKeyStroke();
 			if (thisKey == null && otherKey == null) return true;

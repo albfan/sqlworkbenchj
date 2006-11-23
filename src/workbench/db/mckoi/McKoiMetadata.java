@@ -187,7 +187,7 @@ public class McKoiMetadata
 					result.append("\n      CYCLE");
 				}
 
-				result.append(";");
+				result.append(';');
 			}
 		}
 		catch (Throwable e)

@@ -1176,7 +1176,7 @@ public class Settings
 
 	public boolean getAllowRowHeightResizing()
 	{
-		return getBoolProperty("workbench.gui.display.rowheightresize", true);
+		return getBoolProperty("workbench.gui.display.rowheightresize", false);
 	}
 
 	public void setAllowRowHeightResizing(boolean flag)

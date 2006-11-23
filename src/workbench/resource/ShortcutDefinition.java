@@ -258,7 +258,7 @@ public class ShortcutDefinition
 		{	
 			result.append(" [");
 			result.append(active.toString());
-			result.append("]");
+			result.append(']');
 		}
 		else
 		{

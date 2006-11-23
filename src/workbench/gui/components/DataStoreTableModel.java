@@ -153,7 +153,7 @@ public class DataStoreTableModel
 		if (value == null) return true;
 		String s = value.toString(); 
 		int type = this.dataCache.getColumnType(column);
-		if (SqlUtil.isCharacterType(column))
+		if (SqlUtil.isCharacterType(type))
 		{
 			WbConnection con = this.dataCache.getOriginalConnection();
 			ConnectionProfile profile = (con != null ? con.getProfile() : null);

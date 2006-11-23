@@ -36,13 +36,13 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.EventObject;
 import javax.swing.ActionMap;
 import javax.swing.CellEditor;
 import javax.swing.InputMap;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -521,8 +521,6 @@ public class WbTable
 		if (e.getValueIsAdjusting()) return;
 
 		boolean selected = this.getSelectedRowCount() > 0;
-		boolean update = false;
-		boolean insert = false;
 
 		if (this.copySelectedAsTextAction != null)
 		{
@@ -700,28 +698,25 @@ public class WbTable
 	public void editingCanceled(ChangeEvent e)
 	{
 		int row = this.getEditingRow();
-		int col = this.getEditingColumn();
 		super.editingCanceled(e);
-		resetHighlightRenderers(row, col);
+		resetHighlightRenderers(row);
 	}
 
 	public void editingStopped(ChangeEvent e)
 	{
 		int row = this.getEditingRow();
-		int col = this.getEditingColumn();
 		super.editingStopped(e);
-		resetHighlightRenderers(row, col);
+		resetHighlightRenderers(row);
 	}
 
 	public void removeEditor()
 	{
 		int row = this.getEditingRow();
-		int col = this.getEditingColumn();
 		super.removeEditor();
-		resetHighlightRenderers(row, col);
+		resetHighlightRenderers(row);
 	}
 
-	private void resetHighlightRenderers(int row, int col)
+	private void resetHighlightRenderers(int row)
 	{
 		if (!this.highlightRequiredFields) return;
 		int colcount = this.getColumnCount();
@@ -833,8 +828,6 @@ public class WbTable
 				}
 			}
 		}
-
-		//updateRowHeader();
 
 		if (aModel != EmptyTableModel.EMPTY_MODEL)
 		{
@@ -1308,6 +1301,23 @@ public class WbTable
 		}
 	}
 
+	public void adjustOrOptimizeColumns()
+	{
+		adjustOrOptimizeColumns(true);
+	}
+	
+	public void adjustOrOptimizeColumns(boolean checkHeaders)
+	{
+		if (Settings.getInstance().getAutomaticOptimalWidth())
+		{
+			optimizeAllColWidth(checkHeaders);
+		}
+		else
+		{
+			adjustColumns();
+		}
+	}
+	
 	/**
 	 * Adjusts the columns to the width defined from the 
 	 * underlying tables (i.e. getColumnWidth() for each column)
@@ -1328,8 +1338,8 @@ public class WbTable
 		for (int i=0; i < colMod.getColumnCount(); i++)
 		{
 			TableColumn col = colMod.getColumn(i);
-			int addWidth = this.getAdditionalColumnSpace(0, i);
-			int addHeaderWidth = this.getAdditionalColumnSpace(-1, i);
+			int addWidth = this.getAdditionalColumnSpace();
+			int addHeaderWidth = this.getAdditionalColumnSpace();
 
 			if (this.dwModel != null)
 			{
@@ -1391,7 +1401,7 @@ public class WbTable
 		FontMetrics fm = this.getFontMetrics(f);
 		TableColumnModel colMod = this.getColumnModel();
 		TableColumn col = colMod.getColumn(aColumn);
-		int addWidth = this.getAdditionalColumnSpace(0, aColumn);
+		int addWidth = this.getAdditionalColumnSpace();
 		String s = null;
 		int stringWidth = 0;
 		int optWidth = minWidth;
@@ -1408,9 +1418,14 @@ public class WbTable
 		{
 			TableCellRenderer rend = this.getCellRenderer(row, aColumn);
 			Component c = rend.getTableCellRendererComponent(this, getValueAt(row, aColumn), false, false, row, aColumn);
-			if (rend instanceof WbRenderer)
+			if (c instanceof WbRenderer)
 			{
-				s = ((WbRenderer)rend).getDisplayValue();
+				s = ((WbRenderer)c).getDisplayValue();
+			}
+			else if (c instanceof JLabel)
+			{
+				// DefaultCellRenderer is a JLabel
+				s = ((JLabel)c).getText();
 			}
 			else
 			{
@@ -1434,7 +1449,7 @@ public class WbTable
 		}
 	}
 
-	private int getAdditionalColumnSpace(int aRow, int aColumn)
+	private int getAdditionalColumnSpace()
 	{
 		int addWidth = this.getIntercellSpacing().width * 2;
 		if (this.getShowVerticalLines()) addWidth += 4;

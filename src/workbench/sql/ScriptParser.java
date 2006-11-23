@@ -48,12 +48,25 @@ public class ScriptParser
 	private boolean emptyLineIsSeparator = false;
 	private boolean supportOracleInclude = true;
 	private boolean checkSingleLineCommands = true;
+	private boolean returnTrailingWhitesapce = false;
+	
 	private int maxFileSize;
 	
 	public ScriptParser()
 	{
 		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
 	}
+
+	/**
+	 *	Create a ScriptParser for the given Script.
+	 *	The delimiter to be used will be evaluated dynamically
+	 */
+	public ScriptParser(String aScript)
+	{
+		this.setScript(aScript);
+	}
+
+	
 	/** Create a ScriptParser
 	 *
 	 *	The actual script needs to be specified with setScript()
@@ -145,16 +158,7 @@ public class ScriptParser
 		}
 		this.setScript(content.toString());
 	}
-
-	/**
-	 *	Create a ScriptParser for the given Script.
-	 *	The delimiter to be used will be evaluated dynamically
-	 */
-	public ScriptParser(String aScript)
-	{
-		this.setScript(aScript);
-	}
-
+	
 	public void allowEmptyLineAsSeparator(boolean flag)
 	{
 		this.emptyLineIsSeparator = flag;
@@ -164,6 +168,15 @@ public class ScriptParser
 		}
 	}
 
+	public void setReturnStartingWhitespace(boolean flag)
+	{
+		this.returnTrailingWhitesapce = flag;
+		if (this.iteratingParser != null)
+		{
+			this.iteratingParser.setReturnStartingWhitespace(flag);
+		}
+	}
+	
 	public void setCheckForSingleLineCommands(boolean flag)
 	{
 		this.checkSingleLineCommands = flag;
@@ -391,6 +404,7 @@ public class ScriptParser
 		p.allowEmptyLineAsSeparator(this.emptyLineIsSeparator);
 		p.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		p.setDelimiter(this.delimiter);
+		p.setReturnStartingWhitespace(this.returnTrailingWhitesapce);
 	}
 	
 	/**

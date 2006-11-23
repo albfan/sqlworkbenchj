@@ -193,7 +193,6 @@ public class XmlRowDataConverter
 			if (!this.includeColumnInExport(c)) continue;
 			Object data = row.getValue(c);
 			int type = this.metaData.getColumnType(c);
-			String dbmsType = this.metaData.getDbmsTypeName(c);
 			boolean isNull = (data == null || data instanceof NullValue);
 			boolean writeCloseTag = true;
 			

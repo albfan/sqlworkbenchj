@@ -106,7 +106,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.58 2006-11-09 23:05:25 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.59 2006-11-23 19:07:06 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -2109,11 +2109,6 @@ public class JEditTextArea
 			Clipboard clipboard = getToolkit().getSystemClipboard();
 
 			String selection = getSelectedText();
-
-			//int repeatCount = inputHandler.getRepeatCount();
-			//StrBuffer buf = new StrBuffer();
-			//for(int i = 0; i < repeatCount; i++)
-			//	buf.append(selection);
 
 			clipboard.setContents(new StringSelection(selection),null);
 		}

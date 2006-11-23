@@ -45,7 +45,6 @@ public class ComboStringPropertyEditor
 	private Method getter;
 	protected boolean changed;
 	private boolean immediateUpdate = false;
-	private String propName;
 	private ActionListener listener;
 	public ComboStringPropertyEditor()
 	{
@@ -55,7 +54,6 @@ public class ComboStringPropertyEditor
 	public void setSourceObject(Object aSource, String aProperty)
 	{
 		this.source = aSource;
-		this.propName = aProperty;
 		this.changed = false;
 		String propertyName = Character.toUpperCase(aProperty.charAt(0)) + aProperty.substring(1);
 		stopEvents();

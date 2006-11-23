@@ -413,7 +413,6 @@ public class SchemaDiff
 	
 	private void processProcedureList(List refProcs, List targetProcs)
 	{
-		int count = refProcs.size();
 		HashSet refProcNames = new HashSet();
 		this.procsToDelete = new ArrayList();
 		
@@ -618,7 +617,7 @@ public class SchemaDiff
 		
 		if (this.cancel) return;
 		
-		this.appendDropTables(out, indent, tw);
+		this.appendDropTables(out, indent);
 		out.write("\n");
 		if (this.diffViews)
 		{
@@ -709,7 +708,7 @@ public class SchemaDiff
 //		writeTag(out, indent, TAG_DROP_VIEW, false);
 //	}
 	
-	private void appendDropTables(Writer out, StrBuffer indent, TagWriter tw)
+	private void appendDropTables(Writer out, StrBuffer indent)
 		throws IOException
 	{
 		if (this.tablesToDelete == null || this.tablesToDelete.size() == 0) return;

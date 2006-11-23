@@ -90,7 +90,7 @@ public class SetCommand extends SqlCommand
 					}
 					else if (command.equalsIgnoreCase("feedback"))
 					{
-						result = this.setFeedback(aConnection, param);
+						result = this.setFeedback(param);
 						execSql = false;
 					}
 				}
@@ -208,7 +208,7 @@ public class SetCommand extends SqlCommand
 		return result;
 	}
 
-	private StatementRunnerResult setFeedback(WbConnection aConnection, String param)
+	private StatementRunnerResult setFeedback(String param)
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		if (StringUtil.isEmptyString(param))

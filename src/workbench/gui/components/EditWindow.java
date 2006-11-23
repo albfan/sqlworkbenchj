@@ -99,6 +99,7 @@ public class EditWindow
 	{
 		this.textContainer.setEditable(false);
 	}
+	
 	private void init(Window owner, String text, String settingsId, boolean createSqlEditor, boolean showCloseButtonOnly)
 	{
 		this.settingsId = settingsId;
@@ -125,7 +126,6 @@ public class EditWindow
 			{
 				EditorPanel panel = EditorPanel.createTextEditor();
 				panel.showFindOnPopupMenu();
-				panel.showFormatSql();
 				this.editor = panel;
 				this.textContainer = panel;
 			}

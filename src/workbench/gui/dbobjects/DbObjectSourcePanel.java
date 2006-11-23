@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import workbench.db.SourceStatementsHelp;
 import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.RunStatement;
 import workbench.gui.components.DropDownButton;
@@ -109,30 +110,37 @@ public class DbObjectSourcePanel
 		sender.sendContent(getText(), panelIndex);
 	}
 	
+	/**
+	 * Set the SQL source. If the text contains an error message
+	 * indicating that the source is not available (as returned by DbMetadata
+	 * if the SQL Queries have not been configured for e.g. stored procedures)
+	 * syntax highlighting will be disabled.
+	 */
 	public void setText(final String sql)
 	{
-//		EventQueue.invokeLater(new Runnable()
-//		{
-//			public void run()
-//			{
+		boolean hasText = !StringUtil.isEmptyString(sql);
+		if (reloadSource != null) reloadSource.setEnabled(hasText);
+		if (recreateObject != null) recreateObject.setEnabled(hasText);
+		if (editButton != null) editButton.setEnabled(hasText);
+		if (sql.startsWith(SourceStatementsHelp.VIEW_ERROR_START) || 
+				sql.startsWith(SourceStatementsHelp.PROC_ERROR_START) ||
+				sql.startsWith(ResourceMgr.getString("MsgSynonymSourceNotImplemented"))
+			 )
+		{
+			sourceEditor.disableSqlHighlight();
+		}
+		else
+		{
+			sourceEditor.enableSqlHighlight();
+		}
+		
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
 				sourceEditor.setText(sql);
-				boolean hasText = !StringUtil.isEmptyString(sql);
-				if (reloadSource != null) reloadSource.setEnabled(hasText);
-				if (recreateObject != null) recreateObject.setEnabled(hasText);
-				if (editButton != null) editButton.setEnabled(hasText);
-				if (sql.startsWith(SourceStatementsHelp.VIEW_ERROR_START) || 
-					  sql.startsWith(SourceStatementsHelp.PROC_ERROR_START) ||
-					  sql.startsWith(ResourceMgr.getString("MsgSynonymSourceNotImplemented"))
-					 )
-				{
-					sourceEditor.disableSqlHighlight();
-				}
-				else
-				{
-					sourceEditor.enableSqlHighlight();
-				}
-//			}
-//		});
+			}
+		});
 	}
 	
 	public String getText()
@@ -160,7 +168,7 @@ public class DbObjectSourcePanel
 			int lineStart = sourceEditor.getLineStartOffset(line);
 			if (lineStart > 0 && length > 0)
 			{
-				sourceEditor.select(lineStart, lineStart + length - 1);
+				sourceEditor.select(lineStart, lineStart + length);
 			}
 		}
 	}

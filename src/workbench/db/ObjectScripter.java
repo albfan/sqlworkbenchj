@@ -242,12 +242,12 @@ public class ObjectScripter
 			else
 			{
 				int type = info.getColumnType(i);
-				String name = info.getColumnName(i);
+//				String name = info.getColumnName(i);
 				StringBuffer dummy = new StringBuffer();
-				if (SqlUtil.isCharacterType(type)) dummy.append("'");
+				if (SqlUtil.isCharacterType(type)) dummy.append('\'');
 				dummy.append(info.getColumnName(i));
 				dummy.append("_value");
-				if (SqlUtil.isCharacterType(type)) dummy.append("'");
+				if (SqlUtil.isCharacterType(type)) dummy.append('\'');
 				dummyData.setValue(i, dummy);
 			}
 		}

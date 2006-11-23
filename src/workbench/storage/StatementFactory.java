@@ -35,8 +35,8 @@ public class StatementFactory
 	private TableIdentifier tableToUse;
 	private boolean includeTableOwner = true;
 	private WbConnection dbConnection;
-	private SqlLiteralFormatter literalFormatter;
 	private boolean emptyStringIsNull = false;
+	private boolean includeNullInInsert = true;
 
 	private static final int CASE_NO_CHANGE = 1;
 	private static final int CASE_UPPER = 2;
@@ -83,7 +83,9 @@ public class StatementFactory
 
 		boolean newLineAfterColumn = doFormatting && (cols > columnThresholdForNewline);
 
-		DmlStatement dml;
+		if (!resultInfo.hasPkColumns()) throw new IllegalArgumentException("Cannot proceed without a primary key");
+		
+		DmlStatement dml = null;
 
 		if (!ignoreStatus && !aRow.isModified()) return null;
 		ArrayList values = new ArrayList(cols);
@@ -196,7 +198,6 @@ public class StatementFactory
 		boolean newLineAfterColumn = doFormatting && (cols > columnThresholdForNewline);
 		boolean skipIdentityCols = Settings.getInstance().getFormatInsertIgnoreIdentity();
 		int colsPerLine = Settings.getInstance().getFormatInsertColsPerLine();
-		boolean includeNulls = (this.dbConnection.getProfile() == null ? false : this.dbConnection.getProfile().getIncludeNullInInsert());
 
 		ArrayList values = new ArrayList(cols);
 		StringBuffer sql = new StringBuffer(250);
@@ -233,7 +234,7 @@ public class StatementFactory
 				if (!columns.contains(colId)) continue;
 			}
 
-			if (skipIdentityCols && colId.getDbmsType().indexOf("identity") > -1) continue;
+			if (skipIdentityCols && colId.isIdentityColumn()) continue;
 
 			Object value = aRow.getValue(col);
 			boolean isNull = isNull(value);
@@ -244,7 +245,7 @@ public class StatementFactory
 			{
 				if (isNull)
 				{
-					includeCol = includeNulls;
+					includeCol = this.includeNullInInsert;
 				}
 			}
 
@@ -386,6 +387,7 @@ public class StatementFactory
 		{
 			ConnectionProfile prof = dbConnection.getProfile();
 			emptyStringIsNull = (prof == null ? true : prof.getEmptyStringIsNull());
+			includeNullInInsert = (prof == null ? true : prof.getIncludeNullInInsert());
 		}
 	}
 	
@@ -393,7 +395,7 @@ public class StatementFactory
 	{
 		if (value == null) return null;
 		if (value.startsWith("\"")) return value;
-		if (!dbConnection.getMetadata().isDefaultCase(value))
+		if (dbConnection != null && !dbConnection.getMetadata().isDefaultCase(value))
 		{
 			return dbConnection.getMetadata().quoteObjectname(value);
 		}
@@ -415,7 +417,7 @@ public class StatementFactory
 		
 		boolean neverAdjust = (updateTable == null ? false : updateTable.getNeverAdjustCase());
 		
-		if (neverAdjust && !dbConnection.getMetadata().isDefaultCase(value))
+		if (neverAdjust && dbConnection != null && !dbConnection.getMetadata().isDefaultCase(value))
 		{
 			return dbConnection.getMetadata().quoteObjectname(value);
 		}

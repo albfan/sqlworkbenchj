@@ -97,6 +97,7 @@ public class UpdatingCommand extends SqlCommand
 			{
 				updateCount = this.currentStatement.executeUpdate(sql);
 			}
+			result.addUpdateCount(updateCount);
 			this.appendSuccessMessage(result);
 			processResults(result, false);
 

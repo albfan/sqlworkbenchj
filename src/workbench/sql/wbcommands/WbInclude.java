@@ -160,11 +160,5 @@ public class WbInclude
 		}
 	}
 
-	private String getFilename(String parameter)
-	{
-		String name = parameter.substring(this.verb.length()).trim();
-		name = StringUtil.trimQuotes(name).trim();
-		return name;
-	}
 
 }

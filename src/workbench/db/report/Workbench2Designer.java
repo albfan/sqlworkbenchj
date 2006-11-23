@@ -1303,11 +1303,11 @@ public class Workbench2Designer
 		SQLDataType(String index, int paramRequired, String alias, String name)
 		{
 			this.params=null;
-			this.paramCount=0;
-			this.index=index;
-			this.name=name;
-			this.alias=alias;
-			this.paramRequired=0;
+//			this.paramCount=0;
+//			this.index=index;
+//			this.name=name;
+//			this.alias=alias;
+//			this.paramRequired=0;
 		}
 	}
 
@@ -1317,7 +1317,7 @@ public class Workbench2Designer
 		private String name;
 		private String comment;
 		private String scheme;
-		private TreeMap relations = new TreeMap();
+//		private TreeMap relations = new TreeMap();
 		private TreeMap columns = new TreeMap();
 		private TreeMap indices = new TreeMap();
 		private TreeMap primaryKeys = new TreeMap();

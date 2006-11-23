@@ -272,11 +272,11 @@ public class DwStatusBar
 		{
 			// for some reason the dynamic layout does not leave enough
 			// space to the left of the text, so we'll add some space here
-			s.append(" ");
+			s.append(' ');
 			s.append(start);
-			s.append("-");
+			s.append('-');
 			s.append(end);
-			s.append("/");
+			s.append('/');
 			s.append(count);
 		}
 		this.tfRowCount.setText(s.toString());

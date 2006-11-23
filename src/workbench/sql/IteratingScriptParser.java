@@ -56,7 +56,21 @@ public class IteratingScriptParser
 	private boolean supportOracleInclude = true;
 	private boolean checkSingleLineCommands = true;
 	private boolean storeSqlInCommands = false;
-	
+	private boolean returnStartingWhitespace = false;
+
+	// These patterns cover the statements that
+	// can be used in a single line without a delimiter
+	// This is basically to make the parser as Oracle compatible as possible
+	// while not breaking the SQL queries for other servers
+	private Pattern[] SLC_PATTERNS =
+         { Pattern.compile("(?mi)^\\s*SET\\s*\\w*\\s*(ON|OFF)\\s*;?\\s*$"),
+					 Pattern.compile("(?mi)^\\s*ECHO\\s*((ON)|(OFF))\\s*;?\\s*$"),
+					 Pattern.compile("(?mi)^\\s*WHENEVER\\s*ERROR\\s*$"),
+					 Pattern.compile("(?mi)^\\s*SET\\s*TRANSACTION\\s*READ\\s*((WRITE)|(ONLY))\\s*;?\\s*$")
+	       };
+
+	private Pattern ORA_INCLUDE_PATTERN = Pattern.compile("(?m)^\\s*@.*$");
+		
 	/** Create an InteratingScriptParser
 	 */
 	public IteratingScriptParser()
@@ -104,7 +118,7 @@ public class IteratingScriptParser
 	 * @see #setFile(File, String)
 	 * @see workbench.util.EncodingUtil#getDefaultEncoding()
 	 */
-	public void setFile(File f, String enc)
+	public final void setFile(File f, String enc)
 		throws IOException
 	{
 		this.cleanup();
@@ -120,6 +134,11 @@ public class IteratingScriptParser
 	public void setCheckForSingleLineCommands(boolean flag)
 	{
 		this.checkSingleLineCommands = flag;
+	}
+
+	public void setReturnStartingWhitespace(boolean flag) 
+	{ 
+		this.returnStartingWhitespace = flag;
 	}
 	
 	/**
@@ -143,7 +162,7 @@ public class IteratingScriptParser
 	/**
 	 *	Define the script to be parsed
 	 */
-	public void setScript(String aScript)
+	public final void setScript(String aScript)
 	{
 		this.cleanup();
 		this.storeSqlInCommands = false;
@@ -204,20 +223,6 @@ public class IteratingScriptParser
 		return this.delimiter;
 	}
 
-
-	// These patterns cover the statements that
-	// can be used in a single line without a delimiter
-	// This is basically to make the parser as Oracle compatible as possible
-	// while not breaking the SQL queries for other servers
-	private Pattern[] SLC_PATTERNS =
-         { Pattern.compile("(?mi)^\\s*SET\\s*\\w*\\s*((ON)|(OFF))\\s*;?\\s*$"),
-					 Pattern.compile("(?mi)^\\s*ECHO\\s*((ON)|(OFF))\\s*;?\\s*$"),
-					 Pattern.compile("(?mi)^\\s*WHENEVER\\s*ERROR\\s*$"),
-					 Pattern.compile("(?mi)^\\s*SET\\s*TRANSACTION\\s*READ\\s*((WRITE)|(ONLY))\\s*;?\\s*$")
-	       };
-
-	private Pattern ORA_INCLUDE_PATTERN = Pattern.compile("(?m)^\\s*@.*$");
-	
 	public boolean hasMoreCommands()
 	{
 		if (lastPos < this.scriptLength)
@@ -451,14 +456,17 @@ public class IteratingScriptParser
 		}
 		
 		// remove whitespaces at the start
-		char ch = this.script.charAt(startPos);
-		while (startPos < endPos && Character.isWhitespace(ch))
+		if (!returnStartingWhitespace)
 		{
-			startPos ++;
-			if (startPos < endPos) ch = this.script.charAt(startPos);
+			char ch = this.script.charAt(startPos);
+			while (startPos < endPos && Character.isWhitespace(ch))
+			{
+				startPos ++;
+				if (startPos < endPos) ch = this.script.charAt(startPos);
+			}
 		}
-
-		value = this.script.substring(startPos, endPos).trim();
+		value = this.script.substring(startPos, endPos);
+		
 		if (value.length() == 0) return null;
 
 		ScriptCommandDefinition c = new ScriptCommandDefinition(storeSqlInCommands ? value : null, startPos, endPos);

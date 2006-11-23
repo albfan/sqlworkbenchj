@@ -23,6 +23,7 @@ import workbench.db.JdbcProcedureReader;
  */
 public class ProcStatusRenderer 
 	extends DefaultTableCellRenderer
+	implements WbRenderer
 {
 	public ProcStatusRenderer()
 	{
@@ -42,6 +43,11 @@ public class ProcStatusRenderer
 			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		}
 		
+	}
+
+	public String getDisplayValue()
+	{
+		return getText();
 	}
 	
 }

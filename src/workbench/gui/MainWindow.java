@@ -1381,10 +1381,6 @@ public class MainWindow
 	protected void updateWindowTitle()
 	{
 		StringBuffer title = new StringBuffer(50);
-//		if (this.runningJobs > 0)
-//		{
-//			title.append("» ");
-//		}
 		title.append(ResourceMgr.TXT_PRODUCT_NAME);
 
 		title.append("  [");
@@ -1405,7 +1401,7 @@ public class MainWindow
 			String baseName = f.getName();
 			if (!this.isProfileWorkspace)
 			{
-				title.append("]");
+				title.append(']');
 				appended = true;
 			}
 			title.append(" - (");
@@ -1413,7 +1409,7 @@ public class MainWindow
 			title.append(") ");
 		}
 
-		if (!appended) title.append("]");
+		if (!appended) title.append(']');
 		int showTitle = Settings.getInstance().getShowFilenameInWindowTitle();
 		if (showTitle != Settings.SHOW_NO_FILENAME)
 		{

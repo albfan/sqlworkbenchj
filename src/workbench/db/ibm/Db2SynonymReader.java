@@ -86,7 +86,7 @@ public class Db2SynonymReader
 		result.append(aSynonym);
 		result.append(nl + "       FOR ");
 		result.append(id.getTableExpression());
-		result.append(";");
+		result.append(';');
 		return result.toString();
 	}
 

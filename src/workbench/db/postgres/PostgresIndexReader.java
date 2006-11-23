@@ -57,7 +57,7 @@ public class PostgresIndexReader
 				if (rs.next())
 				{
 					source.append(rs.getString(1));
-					source.append(";");
+					source.append(';');
 					source.append(nl);
 				}
 			}

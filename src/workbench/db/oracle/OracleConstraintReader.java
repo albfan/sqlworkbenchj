@@ -94,7 +94,7 @@ public class OracleConstraintReader
 					}
 					result.append("CHECK (");
 					result.append(constraint);
-					result.append(")");
+					result.append(')');
 					count++;
 				}
 			}

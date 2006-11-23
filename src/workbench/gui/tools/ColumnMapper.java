@@ -158,7 +158,7 @@ public class ColumnMapper
 
 		this.sourceDropDown = this.createDropDown(this.sourceColumns, true);
 		Component c = this.sourceDropDown.getEditor().getEditorComponent();
-		if (c != null && c instanceof JComponent)
+		if (c instanceof JComponent)
 		{
 			JComponent ce = (JComponent)c;
 			ce.setBorder(WbSwingUtilities.EMPTY_BORDER);

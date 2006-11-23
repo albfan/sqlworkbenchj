@@ -94,15 +94,11 @@ public class DwPanel
 	private String sql;
 	private String lastMessage;
 	protected WbConnection dbConnection;
-	private OneLineTableModel errorModel;
-	private OneLineTableModel errorMessageModel;
-	private TableModel resultEmptyMsgModel;
 	private boolean hasResultSet;
 	
 	protected WbScrollPane scrollPane;
 	private long lastExecutionTime = 0;
 	
-	private boolean hasWarning;
 	private boolean showLoadProgress;
 	private boolean savingData = false;
 	
@@ -307,7 +303,7 @@ public class DwPanel
 	/**
 	 * Starts the saving of the data in the background
 	 */
-	public synchronized void saveChangesToDatabase()
+	public void saveChangesToDatabase()
 	{
 		if (savingData) 
 		{
@@ -315,9 +311,9 @@ public class DwPanel
 			LogMgr.logWarning("DwPanel.saveChangesToDatase()", "Save changes called while save in progress", e);
 			return;
 		}
-		
+
 		if (!this.prepareDatabaseUpdate()) return;
-		
+
 		WbThread t = new WbThread("DwPanel update")
 		{
 			public void run()
@@ -326,9 +322,10 @@ public class DwPanel
 			}
 		};
 		t.start();
+
 	}
 	
-	protected synchronized void doSave()
+	protected void doSave()
 	{
 		try
 		{
@@ -416,49 +413,53 @@ public class DwPanel
 		return doSave;
 	}
 	
-	public synchronized int saveChanges(WbConnection aConnection, JobErrorHandler errorHandler)
+	public int saveChanges(WbConnection aConnection, JobErrorHandler errorHandler)
 		throws SQLException
 	{
 		int rows = 0;
-		
-		this.dataTable.stopEditing();
-		if (this.manageUpdateAction)
+	
+		synchronized (this)
 		{
-			this.disableUpdateActions();
-		}
-		
-		try
-		{
-			setStatusMessage(ResourceMgr.getString("MsgUpdatingDatabase"));
-			savingData = true;
-			DataStore ds = this.dataTable.getDataStore();
-			long start, end;
-			ds.setProgressMonitor(this.genericRowMonitor);
-			start = System.currentTimeMillis();
-			rows = ds.updateDb(aConnection, errorHandler);
-			end = System.currentTimeMillis();
-			ds.setProgressMonitor(null);
-			long sqlTime = (end - start);
-			this.lastMessage = ResourceMgr.getString("MsgUpdateSuccessfull");
-			this.lastMessage = this.lastMessage + "\n" + rows + " " + ResourceMgr.getString("MsgRowsAffected") + "\n";
-			this.lastMessage = this.lastMessage + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
-			if (!ds.lastUpdateHadErrors())
+			this.dataTable.stopEditing();
+			if (this.manageUpdateAction)
 			{
-				endEdit();
+				this.disableUpdateActions();
+			}
+
+			try
+			{
+				setStatusMessage(ResourceMgr.getString("MsgUpdatingDatabase"));
+				savingData = true;
+				DataStore ds = this.dataTable.getDataStore();
+				long start, end;
+				ds.setProgressMonitor(this.genericRowMonitor);
+				start = System.currentTimeMillis();
+				rows = ds.updateDb(aConnection, errorHandler);
+				end = System.currentTimeMillis();
+				ds.setProgressMonitor(null);
+				long sqlTime = (end - start);
+				this.lastMessage = ResourceMgr.getString("MsgUpdateSuccessfull");
+				this.lastMessage = this.lastMessage + "\n" + rows + " " + ResourceMgr.getString("MsgRowsAffected") + "\n";
+				this.lastMessage = this.lastMessage + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
+				if (!ds.lastUpdateHadErrors())
+				{
+					endEdit();
+				}
+			}
+			catch (SQLException e)
+			{
+				this.lastMessage = ExceptionUtil.getDisplay(e);
+				rows = -1;
+				throw e;
+			}
+			finally
+			{
+				savingData = false;
+				this.clearStatusMessage();
+				if (this.manageUpdateAction) this.enableUpdateActions();
 			}
 		}
-		catch (SQLException e)
-		{
-			this.lastMessage = ExceptionUtil.getDisplay(e);
-			rows = -1;
-			throw e;
-		}
-		finally
-		{
-			savingData = false;
-			this.clearStatusMessage();
-			if (this.manageUpdateAction) this.enableUpdateActions();
-		}
+		
 		return rows;
 	}
 	
@@ -711,14 +712,7 @@ public class DwPanel
 			this.dataTable.reset();
 			this.dataTable.setAutoCreateColumnsFromModel(true);
 			this.dataTable.setModel(new DataStoreTableModel(newData), true);
-			if (Settings.getInstance().getAutomaticOptimalWidth())
-			{
-				this.dataTable.optimizeAllColWidth(true);
-			}
-			else
-			{
-				this.dataTable.adjustColumns();
-			}
+			this.dataTable.adjustOrOptimizeColumns(Settings.getInstance().getIncludeHeaderInOptimalWidth());
 			StringBuffer header = new StringBuffer(80);
 			header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
 			header.append(this.sql);
@@ -747,9 +741,6 @@ public class DwPanel
 		this.dataTable.checkCopyActions();
 	}
 	
-	private boolean oldVerboseLogging = true;
-	
-	
 	/**
 	 *  This method will update the row info display on the statusbar.
 	 */
@@ -758,13 +749,9 @@ public class DwPanel
 		int startRow = 0;
 		int endRow = 0;
 		int count = 0;
-		TableModel model = this.dataTable.getModel();
-		if (model != resultEmptyMsgModel && model != this.errorModel)
-		{
-			startRow = this.dataTable.getFirstVisibleRow();
-			endRow = this.dataTable.getLastVisibleRow(startRow);
-			count = this.dataTable.getRowCount();
-		}
+		startRow = this.dataTable.getFirstVisibleRow();
+		endRow = this.dataTable.getLastVisibleRow(startRow);
+		count = this.dataTable.getRowCount();
 		statusBar.setRowcount(startRow + 1, endRow + 1, count);
 	}
 	
@@ -1008,16 +995,9 @@ public class DwPanel
 	 */
 	private TableModel getErrorTableModel(String aMsg)
 	{
-		if (this.errorMessageModel == null)
-		{
-			String title = ResourceMgr.getString("ErrMessageTitle");
-			this.errorMessageModel = new OneLineTableModel(title, aMsg);
-		}
-		else
-		{
-			this.errorMessageModel.setMessage(aMsg);
-		}
-		return this.errorMessageModel;
+		String title = ResourceMgr.getString("ErrMessageTitle");
+		OneLineTableModel errorMessageModel = new OneLineTableModel(title, aMsg);
+		return errorMessageModel;
 	}
 	
 	public WbTable getTable() { return this.dataTable; }

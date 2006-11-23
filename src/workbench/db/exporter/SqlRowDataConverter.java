@@ -36,10 +36,6 @@ import workbench.util.StringUtil;
 public class SqlRowDataConverter
 	extends RowDataConverter
 {
-	private static final int BLOB_ANSI_LITERAL = 1;
-	private static final int BLOB_DBMS_LITERAL = 2;
-	private static final int BLOB_FILE = 4;
-	
 	public static final int SQL_INSERT = 1;
 	public static final int SQL_UPDATE = 2;
 	public static final int SQL_DELETE_INSERT = 3;
@@ -68,7 +64,6 @@ public class SqlRowDataConverter
 	private String doubleLineTerminator = "\n\n";
 	private boolean includeOwner = true;
 	private boolean doFormatting = true; 
-	private int blobType = BLOB_ANSI_LITERAL;
 	private SqlLiteralFormatter literalFormatter;
 	
 	public SqlRowDataConverter(WbConnection con)

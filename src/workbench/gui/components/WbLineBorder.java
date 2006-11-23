@@ -25,8 +25,6 @@ public class WbLineBorder extends AbstractBorder
 	public static final int TOP = 4;
 	public static final int BOTTOM = 8;
 	
-	public static final int ALL = LEFT + RIGHT + TOP + BOTTOM;
-	
 	protected int type;
 	protected int thickness;
 	protected Color color;
@@ -50,9 +48,6 @@ public class WbLineBorder extends AbstractBorder
 	public void paintBorder(Component c, Graphics g, int x, int y, int width, int height)
 	{
 		Color oldColor = g.getColor();
-//    Color bg = c.getBackground();
-//    Color light = bg.brighter();
-//    Color shade = bg.darker();
 		g.setColor(this.color);
 		if ((this.type & TOP) == TOP)
 		{

@@ -41,7 +41,7 @@ public class WbCheckBoxLabel
 	public void mouseClicked(MouseEvent e)
 	{
 		Component c = this.getLabelFor();
-		if (c != null && c instanceof JCheckBox)
+		if (c instanceof JCheckBox)
 		{
 			JCheckBox cbx = (JCheckBox)c;
 			cbx.setSelected(!cbx.isSelected());

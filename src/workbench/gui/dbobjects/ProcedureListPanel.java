@@ -117,9 +117,8 @@ public class ProcedureListPanel
 		this.procColumns.setCellSelectionEnabled(false);
 		this.procColumns.setColumnSelectionAllowed(false);
 		this.procColumns.setRowSelectionAllowed(true);
-		//this.procColumns.getSelectionModel().addListSelectionListener(this);
 		this.procColumns.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		this.procColumns.setAdjustToColumnLabel(false);
+		
 		JScrollPane scroll = new WbScrollPane(this.procColumns);
 
 		Reloadable sourceReload = new Reloadable()
@@ -150,7 +149,6 @@ public class ProcedureListPanel
 		this.procList.setRowSelectionAllowed(true);
 		this.procList.getSelectionModel().addListSelectionListener(this);
 		this.procList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		this.procList.setAdjustToColumnLabel(false);
 
 		String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", "CATALOG", "SCHEMA", "REMARKS"};
 		this.findPanel = new QuickFilterPanel(this.procList, cols, false, "procedurelist");
@@ -296,7 +294,7 @@ public class ProcedureListPanel
 			String info = rows + " " + ResourceMgr.getString("TxtTableListObjects");
 			this.infoLabel.setText(info);
 			procList.setModel(model, true);
-			procList.adjustColumns();
+			procList.adjustOrOptimizeColumns();
 			shouldRetrieve = false;
 		}
 		catch (OutOfMemoryError mem)
@@ -436,7 +434,7 @@ public class ProcedureListPanel
 				procColumns.setVisible(false);
 				DataStoreTableModel model = new DataStoreTableModel(meta.getProcedureColumns(catalog, schema, proc));
 				procColumns.setModel(model, true);
-				procColumns.adjustColumns();
+				procColumns.adjustOrOptimizeColumns();
 			}
 			catch (Exception ex)
 			{
@@ -475,15 +473,6 @@ public class ProcedureListPanel
 				source.requestFocusInWindow();
 			}
 		});
-		
-//		EventQueue.invokeLater(new Runnable()
-//		{
-//			public void run()
-//			{
-//				source.requestFocus();
-//			}
-//		});
-		
 	}
 	
 	private int checkOraclePackage(String sql, String catalog, String object, int type)

@@ -59,12 +59,12 @@ public class PostgresProcedureReader
 				}
 				else
 				{
-					if (added > 0) source.append(",");
+					if (added > 0) source.append(',');
 					source.append(vartype);
 					added ++;
 				}
 			}
-			source.append(")");
+			source.append(')');
 			source.append(nl + "RETURNS ");
 			source.append(retType);
 			source.append(nl + "AS" + nl);

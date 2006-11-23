@@ -114,7 +114,7 @@ public class WbStringTokenizer
 		this.setReader(reader);
 	}
 
-	public void setSourceString(String aString)
+	public final void setSourceString(String aString)
 	{
 		StringReader reader = new StringReader(aString);
 		this.setReader(reader);

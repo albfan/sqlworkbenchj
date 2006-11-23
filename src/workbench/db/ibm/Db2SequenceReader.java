@@ -226,7 +226,7 @@ public class Db2SequenceReader
 				}
 				
 				result.append(nl);
-				result.append(";");
+				result.append(';');
 			}
 		}
 		catch (Exception e)

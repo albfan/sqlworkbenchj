@@ -243,11 +243,11 @@ public class ProducerFactory
 			result.append('-');
 			result.append(arg);
 			result.append('=');
-			if (value.indexOf("-") > -1) result.append('"');
+			if (value.indexOf('-') > -1) result.append('"');
 			else if ("\"".equals(value)) result.append('\'');
 			else if ("\'".equals(value)) result.append('\"');
 			result.append(value);
-			if (value.indexOf("-") > -1) result.append('"');
+			if (value.indexOf('-') > -1) result.append('"');
 			else if ("\"".equals(value)) result.append('\'');
 			else if ("\'".equals(value)) result.append('\"');
 		}

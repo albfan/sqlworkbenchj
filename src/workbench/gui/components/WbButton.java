@@ -34,7 +34,6 @@ public class WbButton
 {
 	private Border rolloverBorder;
 	private Border emptyBorder;
-	private Border lastBorder;
 	private boolean iconButton = false;
 	
 	public WbButton()

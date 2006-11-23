@@ -55,9 +55,7 @@ public class LnFOptionsPanel
 	private LnFDefinitionPanel definitionPanel;
 	protected LnFManager manager = new LnFManager();
 	private WbToolbar toolbar;
-	private JComboBox lnfSelector;
 	private JLabel currentLabel;
-	private WbButton switchLnFButton;
 	
 	public LnFOptionsPanel()
 	{

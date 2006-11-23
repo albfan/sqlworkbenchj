@@ -119,12 +119,13 @@ public class WbDefineVar
 
 		if (value != null)
 		{
-			if (value.trim().startsWith("@"))
+			value = value.trim();
+			if (value.startsWith("@"))
 			{
 				String valueSql = null;
 				try
 				{
-					valueSql = value.trim().substring(1);
+					valueSql = value.substring(1);
 					value = this.evaluateSql(aConnection, valueSql);
 				}
 				catch (Exception e)
@@ -133,7 +134,7 @@ public class WbDefineVar
 					String err = ResourceMgr.getString("ErrReadingVarSql");
 					err = StringUtil.replace(err, "%sql%", valueSql);
 					err = err + "\n\n" + ExceptionUtil.getDisplay(e);
-					result.addMessage(msg);
+					result.addMessage(err);
 					result.setFailure();
 					return result;
 				}
@@ -142,7 +143,6 @@ public class WbDefineVar
 			msg = ResourceMgr.getString("MsgVarDefVariableDefined");
 			try
 			{
-				value = value.trim();
 				VariablePool.getInstance().setParameterValue(var, value);
 				msg = StringUtil.replace(msg, "%var%", var);
 				msg = StringUtil.replace(msg, "%value%", value);
@@ -178,16 +178,11 @@ public class WbDefineVar
 	{
 		ResultSet rs = null;
 		String result = StringUtil.EMPTY_STRING;
-		//VariablePool parameterPool = VariablePool.getInstance();
-		//String realSql = parameterPool.replaceAllParameters(sql);
 
 		try
 		{
 			this.currentStatement = conn.createStatement();
-			// HSQL until 1.7.2 has a bug when group functions are used 
-			// together with setMaxRows(). The group function will only
-			// evaluate as many rows as defined via setMaxRows.
-			if (!conn.getMetadata().isHsql()) this.currentStatement.setMaxRows(1);
+			
 			if (sql.endsWith(";"))
 			{
 				sql = sql.substring(0, sql.length() - 1);
@@ -201,10 +196,10 @@ public class WbDefineVar
 					result = value.toString();
 				}
 			}
+			
 		}
 		finally
 		{
-			this.currentStatement.setMaxRows(0);
 			try { rs.close(); } catch (Throwable th) {}
 		}
 		

@@ -36,7 +36,6 @@ public class BlobColumnPanel
 	private static final int BUTTON_WIDTH = 16;
 	private FlatButton openButton = new FlatButton("...");
 	private JLabel label = new JLabel();
-	private BlobHandler blobHandler = new BlobHandler();
 	
 	public BlobColumnPanel()
 	{

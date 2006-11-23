@@ -64,7 +64,7 @@ public class FirstSqlMetadata
 				
 				if (count > 0)
 				{
-					result.append("\n");
+					result.append('\n');
 					result.append(indent);
 					result.append(',');
 				}
@@ -76,7 +76,7 @@ public class FirstSqlMetadata
 				}
 				result.append("CHECK (");
 				result.append(constraint);
-				result.append(")");
+				result.append(')');
 				count ++;
 			}
 		}

@@ -88,7 +88,7 @@ public class OracleSynonymReader
 		result.append(aSynonym);
 		result.append(nl + "       FOR ");
 		result.append(id.getTableExpression());
-		result.append(";");
+		result.append(';');
 		return result.toString();
 	}
 

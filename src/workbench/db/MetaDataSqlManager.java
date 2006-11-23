@@ -207,7 +207,7 @@ public class MetaDataSqlManager
 			value = null;
 		}
 
-		if (value != null && value instanceof HashMap)
+		if (value instanceof HashMap)
 		{
 			result = (HashMap)value;
 		}
@@ -232,7 +232,7 @@ public class MetaDataSqlManager
 			{
 				LogMgr.logDebug("MetaDataSqlManager.readStatementTemplate()", "Error reading template file " + aFilename, e);
 			}
-			if (value != null && value instanceof HashMap)
+			if (value instanceof HashMap)
 			{
 				HashMap m = (HashMap)value;
 				if (result != null)

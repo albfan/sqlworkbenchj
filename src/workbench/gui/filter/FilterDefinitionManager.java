@@ -134,7 +134,7 @@ public class FilterDefinitionManager
 		WbPersistence p = new WbPersistence(filename);
 		FilterExpression result = null;
 		Object o = p.readObject();
-		if (o != null && o instanceof FilterExpression)
+		if (o instanceof FilterExpression)
 		{
 			result = (FilterExpression)o;
 		} 

@@ -445,7 +445,7 @@ public class WbCopy
 		for (int i=0; i < count; i++)
 		{
 			String s = (String)l.get(i);
-			int pos = s.indexOf("/");
+			int pos = s.indexOf('/');
 			String scol = s.substring(0, pos).trim();
 			String tcol = s.substring(pos + 1).trim();
 			mapping.put(scol, tcol);

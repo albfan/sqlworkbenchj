@@ -52,19 +52,19 @@ public class FirebirdProcedureReader
 				{
 					if (added > 0)
 					{
-						source.append(",");
+						source.append(',');
 					}
 					else
 					{
 						source.append(" (");
 					}
 					source.append(name);
-					source.append(" ");
+					source.append(' ');
 					source.append(vartype);
 					added ++;
 				}
 			}
-			if (added > 0) source.append(")");
+			if (added > 0) source.append(')');
 			if (retType != null)
 			{
 				source.append("\nRETURNS ");

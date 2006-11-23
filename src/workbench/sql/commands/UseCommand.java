@@ -45,8 +45,6 @@ public class UseCommand extends SqlCommand
 		StatementRunnerResult result = new StatementRunnerResult();
 		try
 		{
-			String oldCatalog = aConnection.getMetadata().getCurrentCatalog();
-			
 			SQLLexer lexer = new SQLLexer(aSql);
 			
 			// The first token should be the USE verb;

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.sql.Blob;
 import java.sql.SQLException;
 import workbench.WbManager;
@@ -159,6 +160,22 @@ public class BlobHandler
 		}
 		return -1;
 	}
+
+
+	private String convertArray(byte[] value, String encoding)
+	{
+		String data = null;
+		try
+		{
+			data = new String((byte[])value, encoding);
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			LogMgr.logError("BlobHandler.convertArray()", "Could not convert binary to string using encoding: " + encoding, e);
+			data = new String((byte[])value);
+		}
+		return data;
+	}
 	
 	public String getBlobAsString(Object value, String encoding)
 	{
@@ -172,7 +189,7 @@ public class BlobHandler
 			try
 			{
 				byte[] buffer = blob.getBytes(1, (int)blob.length());
-				return new String(buffer, encoding);
+				return convertArray(buffer, encoding);
 			}
 			catch (Exception e)
 			{
@@ -182,7 +199,7 @@ public class BlobHandler
 		}
 		else if (value instanceof byte[])
 		{
-			return new String((byte[])value);
+			return convertArray((byte[])value, encoding);
 		}
 		else if (value instanceof File)
 		{
