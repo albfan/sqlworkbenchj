@@ -28,17 +28,16 @@ import workbench.util.StringUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class SqlServerMetadata
-	implements ProcedureReader
+public class SqlServerProcedureReader
+	extends JdbcProcedureReader
 {
 	private Connection dbConn = null;
-	private DbMetadata meta = null;
 	private final String GET_PROC_SQL = "{call sp_stored_procedures '%', ?}";
 
-	public SqlServerMetadata(DbMetadata db)
+	public SqlServerProcedureReader(DbMetadata db)
 	{
+		super(db);
 		this.dbConn = db.getSqlConnection();
-		this.meta = db;
 	}
 	
 	public StringBuffer getProcedureHeader(String catalog, String schema, String procName, int procType)
@@ -46,19 +45,6 @@ public class SqlServerMetadata
 		return StringUtil.emptyBuffer();
 	}
 
-	public boolean procedureExists(String catalog, String schema, String procname, int type)
-	{
-		JdbcProcedureReader reader = new JdbcProcedureReader(this.meta);
-		return reader.procedureExists(catalog, schema, procname, type);
-	}
-	
-	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
-		throws SQLException
-	{
-		JdbcProcedureReader reader = new JdbcProcedureReader(this.meta);
-		return reader.getProcedureColumns(aCatalog, aSchema, aProcname);
-	}
-	
 	/**
 	 *	The MS JDBC driver does not return the PROCEDURE_TYPE column correctly
 	 *  so we implement it ourselves (MS always returns RESULT which is
@@ -84,7 +70,7 @@ public class SqlServerMetadata
 				cstmt.setString(1, owner);
 			}
 			rs = cstmt.executeQuery();
-			ds = JdbcProcedureReader.buildProcedureListDataStore(this.meta);
+			ds = buildProcedureListDataStore(this.dbMeta);
 			while (rs.next())
 			{
 				String dbname = rs.getString("PROCEDURE_QUALIFIER");
