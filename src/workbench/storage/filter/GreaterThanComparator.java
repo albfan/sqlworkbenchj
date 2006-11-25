@@ -55,8 +55,8 @@ public class GreaterThanComparator
 		return (other instanceof GreaterThanComparator);
 	}
 	
-	public boolean validateInput(String value)
+	public boolean validateInput(Object value)
 	{
-		return StringUtil.isNumber(value);
+		return (value instanceof Comparable);
 	}	
 }

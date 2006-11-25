@@ -54,8 +54,8 @@ public class LessOrEqualComparator
 		return (other instanceof LessOrEqualComparator);
 	}
 	
-	public boolean validateInput(String value)
+	public boolean validateInput(Object value)
 	{
-		return StringUtil.isNumber(value);
+		return (value instanceof Comparable);
 	}	
 }

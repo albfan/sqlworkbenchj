@@ -55,9 +55,9 @@ public class NumberEqualsComparator
 		return (other instanceof NumberEqualsComparator);
 	}
 	
-	public boolean validateInput(String value)
+	public boolean validateInput(Object value)
 	{
-		return StringUtil.isNumber(value);
+		return value == null ? false : StringUtil.isNumber(value.toString());
 	}	
 
 }

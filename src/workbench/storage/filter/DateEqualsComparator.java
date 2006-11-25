@@ -63,12 +63,16 @@ public class DateEqualsComparator
 		return (other instanceof NumberEqualsComparator);
 	}
 	
-	public boolean validateInput(String value)
+	public boolean validateInput(Object value)
 	{
+		if (value == null) return false;
+		
+		if (value instanceof java.util.Date) return true;
+		
 		ValueConverter converter = new ValueConverter();
 		try
 		{
-			converter.convertValue(value, this.sqlType);
+			converter.convertValue(value.toString(), this.sqlType);
 			return true;
 		}
 		catch (Exception e)

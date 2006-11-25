@@ -25,7 +25,7 @@ public class NotStartsWithComparator
 	public String getValueExpression(Object value) { return "'" + value + "'";}
 	public String getOperator() { return "does not start with"; }
 	public boolean needsValue() { return true; }
-	public boolean validateInput(String value) { return true; }
+	public boolean validateInput(Object value) { return value instanceof String; }
 	public boolean comparesEquality() { return false; }
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)

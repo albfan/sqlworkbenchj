@@ -62,11 +62,13 @@ public class RegExComparator
 		return (other instanceof RegExComparator);
 	}
 	
-	public boolean validateInput(String value)
+	public boolean validateInput(Object value)
 	{
+		if (!(value instanceof String)) return false;
+		
 		try
 		{
-			Pattern.compile(value);
+			Pattern.compile((String)value);
 			return true;
 		}
 		catch (Exception e)

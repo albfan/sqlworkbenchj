@@ -223,7 +223,7 @@ public class ColumnExpressionPanel
 	{
 		ColumnComparator comp = getComparator();
 		if (comp == null) return false;
-		String value = valueField.getText();
+		Object value = getFilterValue();
 		return comp.validateInput(value);
 	}
 	

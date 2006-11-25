@@ -26,7 +26,7 @@ public class IsNotNullComparator
 	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
 	public String getOperator() { return "not null"; }
 	public boolean needsValue() { return false; }
-	public boolean validateInput(String value) { return true; }
+	public boolean validateInput(Object value) { return true; }
 	public boolean comparesEquality() { return false; }
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)

@@ -55,9 +55,18 @@ public class ContainsComparator
 		return true;
 	}
 
-	public boolean needsValue() { return true; }
+	public boolean needsValue() 
+	{ 
+		return true; 
+	}
 	
-	public boolean validateInput(String value) { return true; }
+	public boolean validateInput(Object value) 
+	{ 
+		return true; 
+	}
 
-	public boolean comparesEquality() { return false; }
+	public boolean comparesEquality() 
+	{ 
+		return false; 
+	}
 }

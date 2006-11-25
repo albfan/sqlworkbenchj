@@ -57,7 +57,7 @@ public interface ColumnComparator
 	 *	Validate the input whether this comparator
 	 * can actually deal with the value
 	 */
-	boolean validateInput(String input);
+	boolean validateInput(Object input);
 	
 	boolean comparesEquality();
 }
