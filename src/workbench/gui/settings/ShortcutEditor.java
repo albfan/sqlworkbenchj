@@ -40,6 +40,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableColumn;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
@@ -47,6 +48,8 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTable;
+import workbench.gui.settings.ActionDisplay;
+import workbench.gui.settings.ActionDisplayRenderer;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.resource.ShortcutDefinition;
@@ -92,6 +95,7 @@ public class ShortcutEditor
 		JPanel contentPanel = new JPanel(new BorderLayout());
 		
 		this.keysTable = new WbTable();
+		this.keysTable.useMultilineTooltip(false);
 		this.keysTable.setShowPopupMenu(false);
 		this.keysTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		this.setLayout(new BorderLayout());
@@ -213,7 +217,8 @@ public class ShortcutEditor
 	
 	private void createModel()
 	{
-		ShortcutDefinition[] keys = Settings.getInstance().getShortcutManager().getDefinitions();
+		ShortcutManager mgr = Settings.getInstance().getShortcutManager();
+		ShortcutDefinition[] keys = mgr.getDefinitions();
 		
 		String[] cols = new String[] { ResourceMgr.getString("LblKeyDefCommandCol"), 
                                    ResourceMgr.getString("LblKeyDefKeyCol"),
@@ -222,10 +227,15 @@ public class ShortcutEditor
 		
 		this.definitions = new DataStore(cols, types);
 		
+		
 		for (int i=0; i < keys.length; i++)
 		{
 			int row = this.definitions.addRow();
-			this.definitions.setValue(row, 0, Settings.getInstance().getShortcutManager().getActionNameForClass(keys[i].getActionClass()));
+			String cls = keys[i].getActionClass();
+			String title = mgr.getActionNameForClass(cls);
+			String tooltip = mgr.getTooltip(cls);
+			ActionDisplay disp = new ActionDisplay(title, tooltip);
+			this.definitions.setValue(row, 0, disp);
 			this.definitions.setValue(row, 1, new ShortcutDisplay(keys[i], ShortcutDisplay.TYPE_PRIMARY_KEY));
 			this.definitions.setValue(row, 2, new ShortcutDisplay(keys[i], ShortcutDisplay.TYPE_DEFAULT_KEY));
 		}
@@ -233,6 +243,8 @@ public class ShortcutEditor
 		this.model = new DataStoreTableModel(this.definitions);
 		this.model.setAllowEditing(false);
 		this.keysTable.setModel(model, true);
+		TableColumn col = this.keysTable.getColumnModel().getColumn(0);
+		col.setCellRenderer(new ActionDisplayRenderer());
 		this.keysTable.getSelectionModel().addListSelectionListener(this);
 	}
 
