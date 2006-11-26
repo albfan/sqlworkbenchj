@@ -173,6 +173,7 @@ public class WbTable
 	private boolean showPopup = true;
 	private boolean selectOnRightButtonClick = false;
 	private boolean highlightRequiredFields = false;
+	private boolean useMultilineTooltip = true;
 	private Color requiredColor;
 	// </editor-fold>
 	
@@ -358,11 +359,23 @@ public class WbTable
 		if (fm != null) this.setRowHeight(fm.getHeight() + 2);
 	}
 	
+	public void useMultilineTooltip(boolean flag)
+	{
+		this.useMultilineTooltip = flag;
+	}
+	
 	public JToolTip createToolTip()
 	{
-		JToolTip tip = new MultiLineToolTip();
-		tip.setComponent(this);
-		return tip;
+		if (useMultilineTooltip)
+		{
+			JToolTip tip = new MultiLineToolTip();
+			tip.setComponent(this);
+			return tip;
+		}
+		else
+		{
+			return super.createToolTip();
+		}
 	}
 
 	public FilterDataAction getFilterAction() { return this.filterAction; }
