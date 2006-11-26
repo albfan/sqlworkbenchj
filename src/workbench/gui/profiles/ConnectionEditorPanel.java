@@ -85,7 +85,6 @@ public class ConnectionEditorPanel
 		policy.addComponent(cbStorePassword);
 		policy.addComponent(cbSeparateConnections);
 		policy.addComponent(cbIgnoreDropErrors);
-		//policy.addComponent(disableTableCheck);
 		policy.addComponent(rollbackBeforeDisconnect);
 		policy.addComponent(tfWorkspaceFile);
 		policy.addComponent(confirmUpdates);

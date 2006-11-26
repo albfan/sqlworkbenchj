@@ -129,7 +129,8 @@ public class EditorPanel
 	private String fileEncoding;
 	private Set dbFunctions = null;
 	private ReplacePanel replacePanel = null;
-
+	private boolean isMySQL = false;
+	
 	public static EditorPanel createSqlEditor()
 	{
 		AnsiSQLTokenMarker sql = new AnsiSQLTokenMarker();
@@ -236,7 +237,8 @@ public class EditorPanel
 			token.setSqlKeyWords(addKeys);
 			addKeys = StringUtil.stringToList(Settings.getInstance().getProperty(key  + "functions", ""), ",", true, true);
 			token.setSqlFunctions(addKeys);			
-			token.setIsMySQL(aConnection.getMetadata().isMySql());
+			this.isMySQL = aConnection.getMetadata().isMySql();
+			token.setIsMySQL(isMySQL);
 		}
 		
 		if (aConnection.getMetadata().isMySql())
@@ -321,6 +323,7 @@ public class EditorPanel
 		ScriptParser parser = new ScriptParser();
 		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
 		parser.setReturnStartingWhitespace(true);
+		parser.setCheckHashComments(this.isMySQL);
 		parser.setScript(sql);
 		
 		String delimit = parser.getDelimiter();

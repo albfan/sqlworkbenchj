@@ -53,11 +53,12 @@ public class TriggerDisplayPanel
 		this.triggers = new WbTable();
 		WbScrollPane scroll = new WbScrollPane(this.triggers);
 		scroll.setBorder(new EtchedBorder());
+		//scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		
 		this.source = EditorPanel.createSqlEditor();
 		this.source.setEditable(false);
 		this.source.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.setBorder(WbSwingUtilities.BEVEL_BORDER);
+		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		
 		this.setLayout(new BorderLayout());
 		this.splitPane = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, scroll, this.source);

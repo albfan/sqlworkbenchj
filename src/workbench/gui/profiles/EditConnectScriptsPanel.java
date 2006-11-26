@@ -93,7 +93,7 @@ public class EditConnectScriptsPanel
 	public static boolean editScripts(Dialog owner, ConnectionProfile profile)
 	{
 		EditConnectScriptsPanel p = new EditConnectScriptsPanel(profile);
-		ValidatingDialog d = new ValidatingDialog(owner, "LblEditConnScripts", p);
+		ValidatingDialog d = new ValidatingDialog(owner, ResourceMgr.getString("LblEditConnScripts"), p);
 		Settings.getInstance().restoreWindowSize(d,"workbench.gui.connectscripts.window");
 		WbSwingUtilities.center(d, owner);
 		d.setVisible(true);

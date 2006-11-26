@@ -12,6 +12,7 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
@@ -121,6 +122,7 @@ import workbench.gui.actions.UpdateDatabaseAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.EtchedBorderTop;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbScrollPane;
@@ -259,13 +261,14 @@ public class SqlPanel
 	{
 		this.setId(anId);
 		this.setDoubleBuffered(true);
-		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.setBorder(null);
 		this.setLayout(new BorderLayout());
 
 		editor = EditorPanel.createSqlEditor();
 		statusBar = new DwStatusBar(true, true);
 		statusBar.setBorder(statusBarBorder);
 		editor.setStatusBar(statusBar);
+		editor.setBorder(new EtchedBorderTop());
 		
 		log = new JTextArea();
 		log.putClientProperty("JTextArea.infoBackground", Boolean.TRUE);
@@ -1784,12 +1787,6 @@ public class SqlPanel
 		DataStore ds = currentData.getTable().getDataStore();
 		
 		ImportStringVerifier v = new ImportStringVerifier(content, ds.getResultInfo());
-//		if (!v.isMultiline())
-//		{
-//			WbSwingUtilities.showErrorMessageKey(SwingUtilities.getWindowAncestor(this), "ErrClipNoLines");
-//			return;
-//		}
-		
 		DataStoreImporter importer = new DataStoreImporter(ds, currentData.getRowMonitor(), this);
 		if (showOptions || !v.checkData())
 		{
@@ -1800,8 +1797,6 @@ public class SqlPanel
 				if (!ok) return; // user cancelled dialog
 				checked = v.checkData();
 			}
-			//ImportOptions options = v.getGeneralImportOptions();
-			//if (options == null) return;
 			TextImportOptions textOptions = v.getTextImportOptions();
 			ImportOptions options = v.getImportOptions();
 			importer.importString(content, options, textOptions);
@@ -2034,6 +2029,7 @@ public class SqlPanel
 		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
 		scriptParser.setSupportOracleInclude(this.dbConnection.getMetadata().supportShortInclude());
 		scriptParser.setCheckForSingleLineCommands(this.dbConnection.getMetadata().supportSingleLineCommands());
+		scriptParser.setCheckHashComments(this.dbConnection.getMetadata().isMySql());
 		return scriptParser;
 	}
 

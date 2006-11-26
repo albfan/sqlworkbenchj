@@ -580,6 +580,7 @@ public class DataStoreTableModel
 	private void applySortColumns()
 	{
 		if (this.sortColumns == null) return;
+		if (this.dataCache == null) return;
 		
 		synchronized (this.dataCache)
 		{

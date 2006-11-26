@@ -449,7 +449,7 @@ public class ProcedureListPanel
 			try
 			{
 				sql = meta.getProcedureSource(catalog, schema, proc, type);
-				source.setText(sql);
+				source.setText(sql == null ? "" : sql);
 			}
 			catch (Throwable ex)
 			{

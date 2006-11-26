@@ -106,7 +106,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.60 2006-11-23 22:40:44 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.61 2006-11-26 10:30:53 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -1246,12 +1246,6 @@ public class JEditTextArea
 	 */
 	public void setText(String text)
 	{
-		if (text.length() == 0)
-		{
-			setDocument(new SyntaxDocument());
-			return;
-		}
-		
 		try
 		{
 			document.beginCompoundEdit();

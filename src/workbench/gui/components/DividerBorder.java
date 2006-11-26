@@ -123,15 +123,5 @@ public class DividerBorder extends AbstractBorder
 		return insets;
 	}
 	
-
-	public static JPanel createSpacer(int aType, int aWidth)
-	{
-		JPanel p = new JPanel();
-		Dimension d = new Dimension(aWidth, 32768);
-		p.setMaximumSize(d);
-		p.setMinimumSize(d);
-		p.setBorder(new DividerBorder(aType));
-		return p;
-	}
 }
 
