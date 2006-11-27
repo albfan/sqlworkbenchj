@@ -1,5 +1,9 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+
+Build 91, 27.11.2006
+--------------------
+Enh:  (90.8) Added support for H2 Database Engine
 Enh:  (90.7) The type of an index (e.g. BITMAP, HASH) is now shown in the 
       DbExplorer.
 Enh:  (90.4) When running SQL Workbench in batch mode, you can now omit the 
@@ -24,7 +28,12 @@ Enh:  (90.1) WbExport can now also write CLOB contents into external files
       for XML and Text export. Text exports need to be imported using WbImport 
       with the new parameter -clobIsFilename. In the XML format the external
       file is automatically recognized.
-Fix:  (907) Shortcuts without a modifier (e.g. F1) could not be customized
+Fix:  (90.8) Filters were not working with Date columns
+Fix:  (90.8) The hash sign (#) can now also be used as an alternate delimiter
+      if the current connection is not a MySQL connection
+Fix:  (90.8) When WbVarDef was used with a SQL query and the query resulted
+      in an error, the error was not displayed.
+Fix:  (90.7) Shortcuts without a modifier (e.g. F1) could not be customized
 Fix:  (90.7) More fixes to the error handling during batch processing
 Fix:  (90.7) WbImport did not give a proper error message when a non-existing
       column was defined using the -importColumns parameter

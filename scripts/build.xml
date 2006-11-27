@@ -454,7 +454,7 @@
   </target>
 
   <!-- build a full relase with documentation and source distribution -->
-  <target name="release" depends="clean, compile, test, set-build-number, copy-history, build-help, make-jar, pdf, publish, release-src-zip, release-package, restart-history, clean-history">
+  <target name="release" depends="clean, compile, test, set-build-number, copy-history, build-help, make-jar, pdf, publish, release-src-zip, release-package, mac-package, restart-history, clean-history">
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
