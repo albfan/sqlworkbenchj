@@ -14,24 +14,36 @@ package workbench.db;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
+import java.util.List;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
+ * Retrieve information about stored procedures from the database.
+ * To retrieve the source of the Stored procedure, SQL statements need
+ * to be defined in the ProcSourceStatements.xml
+ * 
+ * @see workbench.db.MetaDataSqlManager
+ * 
  * @author  support@sql-workbench.net
  */
 public class JdbcProcedureReader
 	implements ProcedureReader
 {
 	protected DbMetadata dbMeta;
+	private boolean needsTerminator;
 	
 	public JdbcProcedureReader(DbMetadata meta)
 	{
 		this.dbMeta = meta;
+		needsTerminator = proceduresNeedTerminator();
 	}
 	
 	public StringBuffer getProcedureHeader(String catalog, String schema, String procName, int procType)
@@ -39,6 +51,9 @@ public class JdbcProcedureReader
 		return StringUtil.emptyBuffer();
 	}
 	
+	/**
+	 * Checks if the given procedure exists in the database
+	 */
 	public boolean procedureExists(String catalog, String schema, String procName, int procType)
 	{
 		boolean exists = false;
@@ -59,6 +74,7 @@ public class JdbcProcedureReader
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("JdbcProcedureReader.procedureExists()", "Error checking procedure", e);
 		}
 		finally
 		{
@@ -74,14 +90,12 @@ public class JdbcProcedureReader
 		{
 			aSchema = null;
 		}
-//		aSchema = this.dbMeta.adjustObjectnameCase(aSchema);
-//		aCatalog = this.dbMeta.adjustObjectnameCase(aCatalog);
 		
 		ResultSet rs = this.dbMeta.getSqlConnection().getMetaData().getProcedures(aCatalog, aSchema, "%");
 		return fillProcedureListDataStore(rs);
 	}
 
-	public static DataStore buildProcedureListDataStore(DbMetadata meta)
+	public DataStore buildProcedureListDataStore(DbMetadata meta)
 	{
 		String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", meta.getCatalogTerm().toUpperCase(), meta.getSchemaTerm().toUpperCase(), "REMARKS"};
 		final int types[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
@@ -137,7 +151,7 @@ public class JdbcProcedureReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("DbMetadata.getProcedures()", "Error while retrieving procedures", e);
+			LogMgr.logError("JdbcProcedureReader.getProcedures()", "Error while retrieving procedures", e);
 		}
 		finally
 		{
@@ -208,5 +222,92 @@ public class JdbcProcedureReader
 
 		return ds;
 	}
+	
+	public void readProcedureSource(ProcedureDefinition def)
+		throws NoConfigException
+	{
+		if (def == null) return;
 
+		GetMetaDataSql sql = dbMeta.metaSqlMgr.getProcedureSourceSql();
+		if (sql == null)
+		{
+			throw new NoConfigException();
+		}
+		
+		String procName = def.getProcedureName();
+		
+		// MS SQL Server (sometimes?) appends a ;1 to
+		// the end of the procedure name
+		int i = procName.indexOf(';');
+		if (i > -1 && this.dbMeta.isSqlServer())
+		{
+			procName = procName.substring(0, i);
+		}
+
+		StrBuffer source = new StrBuffer(500);
+
+		source.append(this.getProcedureHeader(def.getCatalog(), def.getSchema(), procName, def.getResultType()));
+
+		Statement stmt = null;
+		ResultSet rs = null;
+    int linecount = 0;
+		
+		try
+		{
+			sql.setSchema(def.getSchema());
+			sql.setObjectName(procName);
+			sql.setCatalog(def.getCatalog());
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logInfo("DbMetadata.getProcedureSource()", "Using query=\n" + sql.getSql());
+			}
+
+			stmt = this.dbMeta.getSqlConnection().createStatement();
+			rs = stmt.executeQuery(sql.getSql());
+			while (rs.next())
+			{
+				String line = rs.getString(1);
+				if (line != null)
+				{
+					linecount ++;
+					source.append(line);
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("JdbcProcedureReader.getProcedureSource()", "Error retrieving procedure source", e);
+			source = new StrBuffer(ExceptionUtil.getDisplay(e));
+			if (this.dbMeta.isPostgres()) try { this.dbMeta.getSqlConnection().rollback(); } catch (Throwable th) {}
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		
+		if (!source.endsWith(';') && needsTerminator)
+		{
+			source.append(';');
+		}
+		
+		String result = source.toString();
+		
+		boolean replaceNL = Settings.getInstance().getBoolProperty("workbench.db." + dbMeta.getDbId() + ".replacenl.proceduresource", false);
+		
+		if (replaceNL)
+		{
+			String nl = Settings.getInstance().getInternalEditorLineEnding();
+			result = StringUtil.replace(source.toString(), "\\n", nl);
+		}
+		
+		def.setSource(result);
+	}
+	
+	private boolean proceduresNeedTerminator()
+	{
+		String value = Settings.getInstance().getProperty("workbench.db.noprocterminator", null);
+		if (value == null) return true;
+		List l = StringUtil.stringToList(value, ",");
+		return !l.contains(this.dbMeta.getDbId());
+	}
 }

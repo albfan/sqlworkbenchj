@@ -13,11 +13,12 @@ package workbench.sql;
 
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
-import javax.swing.text.NumberFormatter;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import workbench.gui.sql.DwStatusBar;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 import workbench.storage.DataStore;
 import workbench.util.MessageBuffer;
@@ -29,8 +30,8 @@ import workbench.util.MessageBuffer;
 public class StatementRunnerResult
 {
 	// contains a list of result sets
-	private ArrayList results;
-	private ArrayList updateCounts;
+	private List results;
+	private List updateCounts;
 	private MessageBuffer messages;
 	private ArrayList datastores;
 	private String sourceCommand;
@@ -44,7 +45,7 @@ public class StatementRunnerResult
 	
 	public StatementRunnerResult()
 	{
-		this.timingFormatter = createTimingFormatter();
+		this.timingFormatter = DwStatusBar.createTimingFormatter();
 		this.messages = new MessageBuffer();
 	}
 	
@@ -59,16 +60,6 @@ public class StatementRunnerResult
 	
 	public void setExecutionTime(long t) { this.executionTime = t; }
 	public long getExecutionTime() { return this.executionTime; }
-	
-	public static final DecimalFormat createTimingFormatter()
-	{
-		DecimalFormatSymbols symb = new DecimalFormatSymbols();
-		String sep = Settings.getInstance().getProperty("workbench.gui.timining.decimal", ".");
-		symb.setDecimalSeparator(sep.charAt(0));		
-		DecimalFormat numberFormatter = new DecimalFormat("0.#s", symb);
-		numberFormatter.setMaximumFractionDigits(2);
-		return numberFormatter;
-	}
 	
 	public String getTimingMessage()
 	{
@@ -111,13 +102,13 @@ public class StatementRunnerResult
 	
 	public void addUpdateCount(int count)
 	{
-		if (this.updateCounts == null) this.updateCounts = new ArrayList();
+		if (this.updateCounts == null) this.updateCounts = new LinkedList();
 		this.updateCounts.add(new Integer(count));
-		addUpdateCountMsg(count);
 	}
 
 	public void addUpdateCountMsg(int count)
 	{
+		addUpdateCount(count);
 		addMessage(count + " " + ResourceMgr.getString("MsgRowsAffected"));
 	}
 	
@@ -151,11 +142,6 @@ public class StatementRunnerResult
 	{
 		if (this.messages == null) return false;
 		return (messages.getLength() > 0);
-	}
-
-	public boolean hasUpdateCounts()
-	{
-		return (this.updateCounts != null && this.updateCounts.size() > 0);
 	}
 
 	public boolean hasResultSets()
@@ -197,39 +183,19 @@ public class StatementRunnerResult
 	{
 		if (this.messages == null) return null;
 		StringBuffer b = messages.getBuffer();
-//		if (b == null) 
-//		{
-//			// If we have a SoftReference but the buffer is null
-//			// this means at least one message was added, but 
-//			// the buffer was removed due to tight memory.
-//			// In this case a warning is returned.
-//			b = new StringBuffer(ResourceMgr.getString("ErrMsgBufferCollected"));
-//		}
 		return b;
 	}
 	
 	public long getTotalUpdateCount()
 	{
-		if (this.updateCounts == null) return 0;
-		int size = this.updateCounts.size();
+		if (this.updateCounts == null || this.updateCounts.size() == 0) return 0;
+		Iterator itr = updateCounts.iterator();
 		long result = 0;
-		for (int i=0; i< size; i++)
+		while (itr.hasNext())
 		{
-			result += ((Integer)this.updateCounts.get(i)).intValue();
+			result += ((Integer)itr.next()).intValue();
 		}
 		return result;
-	}
-
-	public int[] getUpdateCounts()
-	{
-		if (this.updateCounts == null) return new int[0];
-		int size = this.updateCounts.size();
-		int[] counts = new int[size];
-		for (int i=0; i< size; i++)
-		{
-			counts[i] = ((Integer)this.updateCounts.get(i)).intValue();
-		}
-		return counts;
 	}
 
 	public void clearResultData()

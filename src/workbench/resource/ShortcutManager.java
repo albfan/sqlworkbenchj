@@ -12,9 +12,10 @@
 package workbench.resource;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.Action;
@@ -41,7 +42,7 @@ public class ShortcutManager
 	
 	// we need the list of registered actions, in order to be able to
 	// display the label for the action for the customization dialog
-	private ArrayList allActions;
+	private List allActions;
 	
 	private HashMap keyDebugMap;
 	
@@ -67,7 +68,7 @@ public class ShortcutManager
 		{
 			this.actionNames = new HashMap(this.keyMap.size());
 		}
-		this.allActions = new ArrayList(150);
+		this.allActions = new LinkedList();
 	}
 
 	public void removeShortcut(String clazz)
@@ -128,6 +129,21 @@ public class ShortcutManager
 		this.allActions.add(anAction);
 	}
 
+	public String getTooltip(String clazz)
+	{
+		Iterator itr = allActions.iterator();
+		while (itr.hasNext())
+		{
+			WbAction action = (WbAction)itr.next();
+			String actionClass = action.getClass().getName();
+			if (actionClass.equals(clazz))
+			{
+				return action.getTooltipText();
+			}
+		}		
+		return null;
+	}
+	
 	/**
 	 * Return the class name of the action to which the passed key is mapped.
 	 * @param key
@@ -187,10 +203,10 @@ public class ShortcutManager
 
 	public void updateActions()
 	{
-		int count = this.allActions.size();
-		for (int i=0; i < count; i++)
+		Iterator itr = allActions.iterator();
+		while (itr.hasNext())
 		{
-			WbAction action = (WbAction)this.allActions.get(i);
+			WbAction action = (WbAction)itr.next();
 			String actionClass = action.getClass().getName();
 			ShortcutDefinition def = this.getDefinition(actionClass);
 			KeyStroke key = def.getActiveKeyStroke();

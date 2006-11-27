@@ -48,7 +48,7 @@ public class JdbcIndexReader
 		int count = indexDefinition.getRowCount();
 		if (count == 0) return StringUtil.emptyBuffer();
 		StringBuffer idx = new StringBuffer();
-		String template = this.metaData.getIndexSqlTemplate();
+		String template = this.metaData.metaSqlMgr.getIndexTemplate();
 		String sql;
 		int idxCount = 0;
 		for (int i = 0; i < count; i++)
@@ -84,18 +84,18 @@ public class JdbcIndexReader
 			if ("NO".equalsIgnoreCase(is_pk))
 			{
 				idxCount ++;
-				sql = StringUtil.replace(template, DbMetadata.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? table.getTableName() : tableNameToUse));
+				sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? table.getTableName() : tableNameToUse));
 				if ("YES".equalsIgnoreCase(unique))
 				{
-					sql = StringUtil.replace(sql, DbMetadata.UNIQUE_PLACEHOLDER, "UNIQUE ");
+					sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "UNIQUE ");
 				}
 				else
 				{
-					sql = StringUtil.replace(sql, DbMetadata.UNIQUE_PLACEHOLDER, "");
+					sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "");
 				}
-				sql = StringUtil.replace(sql, DbMetadata.INDEX_TYPE_PLACEHOLDER, (type == null ? "" : type + " "));
-				sql = StringUtil.replace(sql, DbMetadata.COLUMNLIST_PLACEHOLDER, columns.toString());
-				sql = StringUtil.replace(sql, DbMetadata.INDEX_NAME_PLACEHOLDER, idx_name);
+				sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, (type == null ? "" : type + " "));
+				sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMNLIST_PLACEHOLDER, columns.toString());
+				sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, idx_name);
 				idx.append(sql);
 				idx.append(";\n");
 			}
@@ -116,7 +116,7 @@ public class JdbcIndexReader
 		if (columnList == null) return StringUtil.EMPTY_STRING;
 		int count = columnList.length;
 		if (count == 0) return StringUtil.EMPTY_STRING;
-		String template = this.metaData.getIndexSqlTemplate();
+		String template = this.metaData.metaSqlMgr.getIndexTemplate();
 		StringBuffer cols = new StringBuffer(count * 25);
 
 		for (int i=0; i < count; i++)
@@ -126,17 +126,17 @@ public class JdbcIndexReader
 			cols.append(columnList[i]);
 		}
 
-		String sql = StringUtil.replace(template, DbMetadata.TABLE_NAME_PLACEHOLDER, aTable.getTableExpression(this.metaData.getWbConnection()));
+		String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, aTable.getTableExpression(this.metaData.getWbConnection()));
 		if (unique)
 		{
-			sql = StringUtil.replace(sql, DbMetadata.UNIQUE_PLACEHOLDER, "UNIQUE ");
+			sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "UNIQUE ");
 		}
 		else
 		{
-			sql = StringUtil.replace(sql, DbMetadata.UNIQUE_PLACEHOLDER, "");
+			sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "");
 		}
-		sql = StringUtil.replace(sql, DbMetadata.COLUMNLIST_PLACEHOLDER, cols.toString());
-		sql = StringUtil.replace(sql, DbMetadata.INDEX_NAME_PLACEHOLDER, indexName);
+		sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMNLIST_PLACEHOLDER, cols.toString());
+		sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, indexName);
 		return sql;
 	}
 

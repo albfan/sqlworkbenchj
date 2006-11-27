@@ -20,7 +20,6 @@ import java.io.Reader;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -222,7 +221,7 @@ public class Workbench2Designer
 		Element dbdPluginDataRec = destination.createElement("PLUGINDATARECORDS");
 		Element dbdQueryData = destination.createElement("QUERYDATA");
 		Element dbdQueryDataRec = destination.createElement("QUERYRECORDS");
-//		Element dbdLinkedMod = destination.createElement("LINKEDMODELS");
+		Element dbdLinkedMod = destination.createElement("LINKEDMODELS");
 		Element dbdMetaData = destination.createElement("METADATA");
 		Element dbdRoot = destination.createElement("DBMODEL");
 
@@ -332,13 +331,25 @@ public class Workbench2Designer
 
 	public void setAttributes(TreeMap attributes, Element element)
 	{
-		Iterator it = attributes.keySet().iterator();
+		Iterator it = attributes.entrySet().iterator();
 		while (it.hasNext())
 		{
-			String name=(String) it.next();
-			String value=(String)attributes.get(name);
-			if (value==null)value="";
-			if (name!=null)element.setAttribute(name,value);
+			Map.Entry entry = (Map.Entry)it.next();
+			String name = (String)entry.getKey();
+			if (name == null) continue;
+			Object value = entry.getValue();
+			if (value==null)
+			{
+				element.setAttribute(name, "");
+			}
+			else if (value instanceof String)
+			{
+				if (name!=null)element.setAttribute(name, (String)value);
+			}
+			else
+			{
+				LogMgr.logError("Workbench2Designer.setAttributes()", "Not a String for key=" + name + ", got " + value.getClass().getName() + " instead!", null);
+			}
 		}
 
 	}
@@ -516,9 +527,11 @@ public class Workbench2Designer
 				TreeMap attributes= new TreeMap();
 				String id=Workbench2Designer.dbdIDReference.getRelationDBDID(relation.getID());
 
+				String srcId = Workbench2Designer.dbdIDReference.getTableDBDID(src.getName());
+				String destId = Workbench2Designer.dbdIDReference.getTableDBDID(dest.getName());
 				attributes.put("ID",id);
-				attributes.put("DestTable",destination);
-				attributes.put("SrcTable",source);
+				attributes.put("DestTable",destId);
+				attributes.put("SrcTable",srcId);
 				attributes.put("RelationName",relation.getRelName());
 				attributes.put("RefDef","Matching=0\\n"+onDelete+onUpdate);
 				attributes.put("CaptionOffsetX","0");
@@ -1303,11 +1316,11 @@ public class Workbench2Designer
 		SQLDataType(String index, int paramRequired, String alias, String name)
 		{
 			this.params=null;
-//			this.paramCount=0;
-//			this.index=index;
-//			this.name=name;
-//			this.alias=alias;
-//			this.paramRequired=0;
+			this.paramCount=0;
+			this.index=index;
+			this.name=name;
+			this.alias=alias;
+			this.paramRequired=0;
 		}
 	}
 
@@ -1317,7 +1330,7 @@ public class Workbench2Designer
 		private String name;
 		private String comment;
 		private String scheme;
-//		private TreeMap relations = new TreeMap();
+		private TreeMap relations = new TreeMap();
 		private TreeMap columns = new TreeMap();
 		private TreeMap indices = new TreeMap();
 		private TreeMap primaryKeys = new TreeMap();

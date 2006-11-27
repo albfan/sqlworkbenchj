@@ -169,27 +169,19 @@ public class ConnectionMgr
 			throw new SQLException("Driver class not registered");
 		}
 
-//		try
-//		{
-			Connection sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword(), anId, aProfile.getConnectionProperties());
+		Connection sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword(), anId, aProfile.getConnectionProperties());
 
-			try
-			{
-				sql.setAutoCommit(aProfile.getAutocommit());
-			}
-			catch (Throwable th)
-			{
-				// some drivers do not support this, so
-				// we just ignore the error :-)
-        LogMgr.logInfo("ConnectionMgr.connect()", "Driver (" + drv.getDriverClass() + ") does not support the autocommit property: " + ExceptionUtil.getDisplay(th));
-			}
-			return sql;
-//		}
-//		catch (SQLException e)
-//		{
-//			LogMgr.logError("ConnectionMgr.connect()", "Error when creating connection", e);
-//			throw e;
-//		}
+		try
+		{
+			sql.setAutoCommit(aProfile.getAutocommit());
+		}
+		catch (Throwable th)
+		{
+			// some drivers do not support this, so
+			// we just ignore the error :-)
+			LogMgr.logInfo("ConnectionMgr.connect()", "Driver (" + drv.getDriverClass() + ") does not support the autocommit property: " + ExceptionUtil.getDisplay(th));
+		}
+		return sql;
 	}
 
 	public void reconnect(WbConnection aConn)

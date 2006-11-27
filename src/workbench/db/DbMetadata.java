@@ -12,7 +12,6 @@
 package workbench.db;
 
 import java.beans.PropertyChangeListener;
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -34,7 +33,6 @@ import java.util.Map.Entry;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import workbench.WbManager;
 import workbench.db.derby.DerbyConstraintReader;
 import workbench.db.derby.DerbySynonymReader;
 import workbench.db.firebird.FirebirdProcedureReader;
@@ -45,7 +43,7 @@ import workbench.db.ibm.Db2SynonymReader;
 import workbench.db.ingres.IngresMetadata;
 import workbench.db.mckoi.McKoiMetadata;
 import workbench.db.mssql.SqlServerConstraintReader;
-import workbench.db.mssql.SqlServerMetadata;
+import workbench.db.mssql.SqlServerProcedureReader;
 import workbench.db.mysql.EnumReader;
 import workbench.db.mysql.MySqlProcedureReader;
 import workbench.db.oracle.DbmsOutput;
@@ -65,7 +63,6 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
-import workbench.util.WbPersistence;
 import workbench.db.hsqldb.HsqlConstraintReader;
 import workbench.db.firebird.FirebirdConstraintReader;
 import workbench.db.h2database.H2ConstraintReader;
@@ -79,44 +76,13 @@ import workbench.db.h2database.H2SequenceReader;
 public class DbMetadata
 	implements PropertyChangeListener
 {
-
-	// <editor-fold defaultstate="collapsed" desc=" Placeholders for statement templates ">
-	public static final String TABLE_NAME_PLACEHOLDER = "%tablename%";
-	public static final String INDEX_TYPE_PLACEHOLDER = "%indextype% ";
-	public static final String INDEX_NAME_PLACEHOLDER = "%indexname%";
-	public static final String PK_NAME_PLACEHOLDER = "%pk_name%";
-	public static final String UNIQUE_PLACEHOLDER = "%unique_key% ";
-	public static final String COLUMNLIST_PLACEHOLDER = "%columnlist%";
-	public static final String FK_NAME_PLACEHOLDER = "%constraintname%";
-	public static final String FK_TARGET_TABLE_PLACEHOLDER = "%targettable%";
-	public static final String FK_TARGET_COLUMNS_PLACEHOLDER = "%targetcolumnlist%";
-	public static final String COMMENT_TABLE_PLACEHOLDER = "%table%";
-	public static final String COMMENT_COLUMN_PLACEHOLDER = "%column%";
-	public static final String COMMENT_PLACEHOLDER = "%comment%";
-	public static final String FK_UPDATE_RULE = "%fk_update_rule%";
-	public static final String FK_DELETE_RULE = "%fk_delete_rule%";
-	public static final String GENERAL_SQL = "All";
-	// </editor-fold>
-	
-	// <editor-fold defaultstate="collapsed" desc=" HashMaps containing statement templates ">
-	private static HashMap procSourceSql;
-	private static HashMap viewSourceSql;
-	private static HashMap triggerSourceSql;
-	private static HashMap triggerList;
-	private static HashMap pkStatements;
-	private static HashMap idxStatements;
-	private static HashMap fkStatements;
-	private static HashMap columnCommentStatements;
-	private static HashMap tableCommentStatements;
-	private static boolean templatesRead;
-	// </editor-fold>
-
 	public static final String MVIEW_NAME = "MATERIALIZED VIEW";
 	private String schemaTerm;
 	private String catalogTerm;
 	private String productName;
 	private String dbId;
 
+	protected MetaDataSqlManager metaSqlMgr;
 	private DatabaseMetaData metaData;
 	private WbConnection dbConnection;
 
@@ -189,11 +155,6 @@ public class DbMetadata
 		Settings settings = Settings.getInstance();
 		this.dbConnection = aConnection;
 		this.metaData = aConnection.getSqlConnection().getMetaData();
-
-		if (!templatesRead)
-		{
-			readTemplates();
-		}
 
 		try
 		{
@@ -298,7 +259,7 @@ public class DbMetadata
 			boolean useJdbc = Settings.getInstance().getBoolProperty("workbench.db.mssql.usejdbcprocreader", true);
 			if (!useJdbc)
 			{
-				this.procedureReader = new SqlServerMetadata(this);
+				this.procedureReader = new SqlServerProcedureReader(this);
 			}
 		}
 		else if (productLower.indexOf("db2") > -1)
@@ -391,7 +352,7 @@ public class DbMetadata
 		{
 			this.quoteCharacter = null;
 		}
-		if (this.quoteCharacter == null || this.quoteCharacter.length() == 0) this.quoteCharacter = "\"";
+		if (StringUtil.isEmptyString(quoteCharacter)) this.quoteCharacter = "\"";
 
 		try
 		{
@@ -408,6 +369,8 @@ public class DbMetadata
 		this.createInlineConstraints = settings.getServersWithInlineConstraints().contains(this.productName);
 
 		this.useNullKeyword = !settings.getServersWithNoNullKeywords().contains(this.getDbId());
+
+		this.metaSqlMgr = new MetaDataSqlManager(this.getProductName());
 
 		String regex = settings.getProperty("workbench.sql.selectnewtablepattern." + this.getDbId(), null);
 		if (regex != null)
@@ -593,24 +556,6 @@ public class DbMetadata
 		return this.isHsql;
 	}
 
-	private static void readTemplates()
-	{
-		synchronized (GENERAL_SQL)
-		{
-			if (templatesRead) return;
-			procSourceSql = readStatementTemplates("ProcSourceStatements.xml");
-			viewSourceSql = readStatementTemplates("ViewSourceStatements.xml");
-			fkStatements = readStatementTemplates("CreateFkStatements.xml");
-			pkStatements = readStatementTemplates("CreatePkStatements.xml");
-			idxStatements = readStatementTemplates("CreateIndexStatements.xml");
-			triggerList = readStatementTemplates("ListTriggersStatements.xml");
-			triggerSourceSql = readStatementTemplates("TriggerSourceStatements.xml");
-			columnCommentStatements = readStatementTemplates("ColumnCommentStatements.xml");
-			tableCommentStatements = readStatementTemplates("TableCommentStatements.xml");
-			templatesRead = true;
-		}
-	}
-
 	public boolean supportSingleLineCommands()
 	{
 		String ids = Settings.getInstance().getProperty("workbench.db.checksinglelinecmd", "");
@@ -783,71 +728,6 @@ public class DbMetadata
 		return catalogsToIgnore.contains("*") || catalogsToIgnore.contains(catalog);
 	}
 
-	private static HashMap readStatementTemplates(String aFilename)
-	{
-		HashMap result = null;
-
-		BufferedInputStream in = new BufferedInputStream(DbMetadata.class.getResourceAsStream(aFilename));
-		Object value;
-		try
-		{
-			WbPersistence reader = new WbPersistence();
-			value = reader.readObject(in);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DbMetadata.readStatementTemplate()", "Error reading templates file " + aFilename,e);
-			value = null;
-		}
-
-		if (value instanceof HashMap)
-		{
-			result = (HashMap)value;
-		}
-
-		// When running tests, the WbManager is not necessarily available
-		WbManager mgr = WbManager.getInstance();
-		File baseDir = null;;
-		if (mgr == null)
-		{
-			baseDir = new File(".");
-		}
-		else
-		{
-			baseDir = new File(mgr.getJarPath());
-		}
-			
-		// Try to read the file in the directory where the jar file is locateds
-		File f = new File(baseDir, aFilename);
-		if (f.exists())
-		{
-			LogMgr.logDebug("DbMetadata.readStatementTemplates()", "Reading user define template file " + aFilename);
-			// try to read additional definitions from local file
-			try
-			{
-				WbPersistence reader = new WbPersistence(aFilename);
-				value = reader.readObject();
-			}
-			catch (Exception e)
-			{
-				LogMgr.logDebug("DbMetadata.readStatementTemplate()", "Error reading template file " + aFilename, e);
-			}
-			if (value instanceof HashMap)
-			{
-				HashMap m = (HashMap)value;
-				if (result != null)
-				{
-					result.putAll(m);
-				}
-				else
-				{
-					result = m;
-				}
-			}
-		}
-		return result;
-	}
-
 	/**
 	 * Wrapper for DatabaseMetaData.supportsBatchUpdates() that throws
 	 * no exception. If any error occurs, false will be returned
@@ -1017,7 +897,7 @@ public class DbMetadata
 	public String getExtendedViewSource(TableIdentifier view, DataStore viewTableDefinition, boolean includeDrop)
 		throws SQLException
 	{
-		GetMetaDataSql sql = (GetMetaDataSql)viewSourceSql.get(this.productName);
+		GetMetaDataSql sql = metaSqlMgr.getViewSourceSql();
 		if (sql == null)
 		{
 			SourceStatementsHelp help = new SourceStatementsHelp();
@@ -1110,7 +990,7 @@ public class DbMetadata
 		ResultSet rs = null;
 		try
 		{
-			GetMetaDataSql sql = (GetMetaDataSql)viewSourceSql.get(this.productName);
+			GetMetaDataSql sql = metaSqlMgr.getViewSourceSql();
 			if (sql == null) return StringUtil.EMPTY_STRING;
 			TableIdentifier tbl = viewId.createCopy();
 			tbl.adjustCase(this.dbConnection);
@@ -1226,104 +1106,12 @@ public class DbMetadata
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
 	{
-		if (def == null) return;
-
-		GetMetaDataSql sql = (GetMetaDataSql)procSourceSql.get(this.productName);
-		if (sql == null)
+		if (procedureReader != null)
 		{
-			throw new NoConfigException();
+			this.procedureReader.readProcedureSource(def);
 		}
-		
-		String procName = def.getProcedureName();
-		
-		// this is for MS SQL Server, which appends a ;1 to
-		// the end of the procedure name
-		int i = procName.indexOf(';');
-		if (i > -1 && isSqlServer)
-		{
-			procName = procName.substring(0, i);
-		}
-
-		StrBuffer source = new StrBuffer();
-
-		if (this.procedureReader != null)
-		{
-			source.append(this.procedureReader.getProcedureHeader(def.getCatalog(), def.getSchema(), procName, def.getResultType()));
-		}
-
-		Statement stmt = null;
-		ResultSet rs = null;
-    int linecount = 0;
-		
-		try
-		{
-			sql.setSchema(def.getSchema());
-			sql.setObjectName(procName);
-			sql.setCatalog(def.getCatalog());
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logInfo("DbMetadata.getProcedureSource()", "Using query=\n" + sql.getSql());
-			}
-
-			stmt = this.dbConnection.createStatementForQuery();
-			rs = stmt.executeQuery(sql.getSql());
-			while (rs.next())
-			{
-				String line = rs.getString(1);
-				if (line != null)
-        {
-          linecount ++;
-          source.append(line);
-        }
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("DbMetadata.getProcedureSource()", "Error retrieving procedure source", e);
-			source = new StrBuffer(ExceptionUtil.getDisplay(e));
-			if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-
-		boolean isPackage = false;
-
-		try
-		{
-      if (this.isOracle && linecount == 0)
-      {
-				source = this.oracleMetaData.getPackageSource(def.getSchema(), def.getCatalog());
-				isPackage = (source != null && source.length() > 0);
-      }
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DbMetadata.getProcedureSource()", "Error retrieving package source", e);
-			source = new StrBuffer(ExceptionUtil.getDisplay(e));
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-
-		if (!isPackage && !source.endsWith(';') && proceduresNeedTerminator())
-		{
-			source.append(';');
-		}
-		def.setOraclePackage(isPackage);
-		def.setSource(source.toString().trim());
 	}
 
-	public boolean proceduresNeedTerminator()
-	{
-		String value = Settings.getInstance().getProperty("workbench.db.noprocterminator", null);
-		if (value == null) return true;
-		List l = StringUtil.stringToList(value, ",");
-		return !l.contains(this.getDbId());
-	}
-	
 	private void initKeywordHandler()
 	{
 		this.keywordHandler = new SqlKeywordHandler(this.dbConnection.getSqlConnection(), this.getDbId());
@@ -2013,8 +1801,9 @@ public class DbMetadata
 	/**
 	 * Return a list of stored procedures that are available
 	 * in the database. This call is delegated to the
-	 * currently defined {@link ProcedureReader}
-	 * If no DBMS specific reader is used, this is the {@link JdbcProcedureReader}
+	 * currently defined {@link workbench.db.ProcedureReader}
+	 * If no DBMS specific reader is used, this is the {@link workbench.db.JdbcProcedureReader}
+	 * 
 	 * @return a DataStore with the list of procedures.
 	 */
 	public DataStore getProcedures(String aCatalog, String aSchema)
@@ -2031,6 +1820,8 @@ public class DbMetadata
 	public List getProcedureList(String aCatalog, String aSchema)
 		throws SQLException
 	{
+		assert(procedureReader != null);
+		
 		List result = new LinkedList();
 		DataStore procs = this.procedureReader.getProcedures(aCatalog, aSchema);
 		if (procs == null || procs.getRowCount() == 0) return result;
@@ -2932,13 +2723,10 @@ public class DbMetadata
 
 		DataStore result = new DataStore(cols, types, sizes);
 
-//		if ("*".equals(aCatalog)) aCatalog = null;
-//		if ("*".equals(aSchema)) aSchema = null;
-
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(this.dbConnection);
 
-		GetMetaDataSql sql = (GetMetaDataSql)triggerList.get(this.productName);
+		GetMetaDataSql sql = metaSqlMgr.getListTriggerSql();
 		if (sql == null)
 		{
 			return result;
@@ -2994,7 +2782,7 @@ public class DbMetadata
 		if ("*".equals(aCatalog)) aCatalog = null;
 		if ("*".equals(aSchema)) aSchema = null;
 
-		GetMetaDataSql sql = (GetMetaDataSql)triggerSourceSql.get(this.productName);
+		GetMetaDataSql sql = metaSqlMgr.getTriggerSourceSql();
 		if (sql == null) return StringUtil.EMPTY_STRING;
 
 		sql.setSchema(aSchema);
@@ -3007,7 +2795,7 @@ public class DbMetadata
 		{
 			LogMgr.logInfo("DbMetadata.getTriggerSource()", "Using query=\n" + query);
 		}
-
+		
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		
 		ResultSet rs = null;
@@ -3047,17 +2835,14 @@ public class DbMetadata
 			SqlUtil.closeAll(rs, stmt);
 		}
 		
-		String replaceNL = Settings.getInstance().getProperty("workbench.db.trigger.replacenl", "");
-		
-		if (replaceNL.indexOf(this.productName) > -1)
+		boolean replaceNL = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".replacenl.triggersource", false);
+
+		String source = result.toString();
+		if (replaceNL)
 		{
-			String r = result.toString().replaceAll("\\\\n", nl);
-			return r;
+			source = StringUtil.replace(source, "\\n", nl);
 		}
-		else
-		{
-			return result.toString();
-		}
+		return source;
 	}
 
 	/** Returns the list of schemas as returned by DatabaseMetadata.getSchemas()
@@ -3759,12 +3544,12 @@ public class DbMetadata
 	
 	public StringBuffer getPkSource(String tablename, List pkCols, String pkName)
 	{
-		String template = this.getSqlTemplate(DbMetadata.pkStatements);
+		String template = metaSqlMgr.getPrimaryKeyTemplate();
 		StringBuffer result = new StringBuffer();
 		if (StringUtil.isEmptyString(template)) return result;
 		
-		template = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, tablename);
-		template = StringUtil.replace(template, COLUMNLIST_PLACEHOLDER, StringUtil.listToString(pkCols, ','));
+		template = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tablename);
+		template = StringUtil.replace(template, MetaDataSqlManager.COLUMNLIST_PLACEHOLDER, StringUtil.listToString(pkCols, ','));
 		
 		if (pkName == null)
 		{
@@ -3782,7 +3567,7 @@ public class DbMetadata
 			template = StringUtil.replace(template, " CONSTRAINT ", ""); // remove CONSTRAINT KEYWORD if not name is available
 		}
 
-		template = StringUtil.replace(template, PK_NAME_PLACEHOLDER, pkName);
+		template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, pkName);
 		result.append(template);
 		result.append(';');
 		return result;
@@ -3842,7 +3627,7 @@ public class DbMetadata
 	 */
 	public String getTableColumnCommentsSql(TableIdentifier table, ColumnIdentifier[] columns)
 	{
-		String columnStatement = (String)columnCommentStatements.get(this.productName);
+		String columnStatement = metaSqlMgr.getColumnCommentSql();
 		if (columnStatement == null || columnStatement.trim().length() == 0) return null;
 		StringBuffer result = new StringBuffer(500);
 		int cols = columns.length;
@@ -3851,9 +3636,9 @@ public class DbMetadata
 			String column = columns[i].getColumnName();
 			String remark = columns[i].getComment();
 			if (column == null || remark == null || remark.trim().length() == 0) continue;
-			String comment = columnStatement.replaceAll(COMMENT_TABLE_PLACEHOLDER, table.getTableName());
-			comment = comment.replaceAll(COMMENT_COLUMN_PLACEHOLDER, column);
-			comment = comment.replaceAll(COMMENT_PLACEHOLDER, remark.replaceAll("'", "''"));
+			String comment = columnStatement.replaceAll(MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
+			comment = comment.replaceAll(MetaDataSqlManager.COMMENT_COLUMN_PLACEHOLDER, column);
+			comment = comment.replaceAll(MetaDataSqlManager.COMMENT_PLACEHOLDER, remark.replaceAll("'", "''"));
 			result.append(comment);
 			result.append("\n");
 		}
@@ -3866,15 +3651,15 @@ public class DbMetadata
 	 */
 	public String getTableCommentSql(TableIdentifier table)
 	{
-		String commentStatement = (String)tableCommentStatements.get(this.productName);
+		String commentStatement = metaSqlMgr.getTableCommentSql();
 		if (commentStatement == null || commentStatement.trim().length() == 0) return null;
 
 		String comment = this.getTableComment(table);
 		String result = null;
 		if (comment != null && comment.trim().length() > 0)
 		{
-			result = commentStatement.replaceAll(COMMENT_TABLE_PLACEHOLDER, table.getTableName());
-			result = result.replaceAll(COMMENT_PLACEHOLDER, comment);
+			result = commentStatement.replaceAll(MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
+			result = result.replaceAll(MetaDataSqlManager.COMMENT_PLACEHOLDER, comment);
 		}
 		return result;
 	}
@@ -3926,19 +3711,8 @@ public class DbMetadata
 		int count = aFkDef.getRowCount();
 		if (count == 0) return StringUtil.emptyBuffer();
 
-		String template = (String)DbMetadata.fkStatements.get(this.productName);
+		String template = metaSqlMgr.getForeignKeyTemplate(this.createInlineConstraints);
 
-		if (template == null)
-		{
-			if (this.createInlineConstraints)
-			{
-				template = (String)DbMetadata.fkStatements.get("All-Inline");
-			}
-			else
-			{
-				template = (String)DbMetadata.fkStatements.get(GENERAL_SQL);
-			}
-		}
 		// collects all columns from the base table mapped to the
 		// defining foreign key constraing.
 		// The fk name is the key.
@@ -4004,22 +3778,22 @@ public class DbMetadata
 				stmt = template;
 			}
 			String entry = null;
-			stmt = StringUtil.replace(stmt, TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? aTable : tableNameToUse));
+			stmt = StringUtil.replace(stmt, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? aTable : tableNameToUse));
 			
 			if (this.isSystemConstraintName(name))
 			{
-				stmt = StringUtil.replace(stmt, FK_NAME_PLACEHOLDER, "");
+				stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_NAME_PLACEHOLDER, "");
 				stmt = StringUtil.replace(stmt, " CONSTRAINT ", "");
 			}
 			else
 			{
-				stmt = StringUtil.replace(stmt, FK_NAME_PLACEHOLDER, name);
+				stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_NAME_PLACEHOLDER, name);
 			}
 			
 			entry = StringUtil.listToString(colList, ',');
-			stmt = StringUtil.replace(stmt, COLUMNLIST_PLACEHOLDER, entry);
+			stmt = StringUtil.replace(stmt, MetaDataSqlManager.COLUMNLIST_PLACEHOLDER, entry);
 			String rule = (String)updateRules.get(name);
-			stmt = StringUtil.replace(stmt, FK_UPDATE_RULE, " ON UPDATE " + rule);
+			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_UPDATE_RULE, " ON UPDATE " + rule);
 			rule = (String)deleteRules.get(name);
 			if (this.isOracle())
 			{
@@ -4027,16 +3801,16 @@ public class DbMetadata
 				// remove the placeholder completely
 				if ("restrict".equalsIgnoreCase(rule))
 				{
-					stmt = StringUtil.replace(stmt, FK_DELETE_RULE, StringUtil.EMPTY_STRING);
+					stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_DELETE_RULE, StringUtil.EMPTY_STRING);
 				}
 				else
 				{
-					stmt = StringUtil.replace(stmt, FK_DELETE_RULE, " ON DELETE " + rule);
+					stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_DELETE_RULE, " ON DELETE " + rule);
 				}
 			}
 			else
 			{
-				stmt = StringUtil.replace(stmt, FK_DELETE_RULE, " ON DELETE " + rule);
+				stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_DELETE_RULE, " ON DELETE " + rule);
 			}
 
 			colList = (List)fkTarget.get(name);
@@ -4069,8 +3843,8 @@ public class DbMetadata
 				}
 				colListBuffer.append(col.substring(pos + 1));
 			}
-			stmt = StringUtil.replace(stmt, FK_TARGET_TABLE_PLACEHOLDER, targetTable);
-			stmt = StringUtil.replace(stmt, FK_TARGET_COLUMNS_PLACEHOLDER, colListBuffer.toString());
+			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_TARGET_TABLE_PLACEHOLDER, targetTable);
+			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_TARGET_COLUMNS_PLACEHOLDER, colListBuffer.toString());
 			fks.put(name, stmt.trim());
 		}
 		StringBuffer fk = new StringBuffer();
@@ -4242,21 +4016,6 @@ public class DbMetadata
 		Pattern p = Pattern.compile("\\sINFORMATION_SCHEMA\\.", Pattern.CASE_INSENSITIVE);
 		Matcher m = p.matcher(query);
 		return m.replaceAll(" ");
-	}
-
-	public String getIndexSqlTemplate()
-	{
-		return getSqlTemplate(DbMetadata.idxStatements);
-	}
-	
-	private String getSqlTemplate(HashMap aMap)
-	{
-		String template = (String)aMap.get(this.productName);
-		if (template == null)
-		{
-			template = (String)aMap.get(GENERAL_SQL);
-		}
-		return template;
 	}
 
 	public void propertyChange(java.beans.PropertyChangeEvent evt)

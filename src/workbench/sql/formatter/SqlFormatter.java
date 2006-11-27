@@ -575,6 +575,8 @@ public class SqlFormatter
 		for (int i=0; i < indent; i++) b.append(' ');
 		b.append("      ");
 		
+		boolean newLinePending = false;
+		
 		SQLToken t = this.lexer.getNextToken(true,true);
 		String text = null;
 		int commaCount = 0;
@@ -656,8 +658,11 @@ public class SqlFormatter
 				this.appendNewline();
 				this.indent(current);
 				this.appendText(text);
-				this.appendNewline();
 				t = this.lexer.getNextToken(true, false);
+				if ( t!= null && !t.getContents().equals("AS"))
+				{
+					this.appendNewline();
+				}
 				return t;
 			}
 			else if (t.isComment())

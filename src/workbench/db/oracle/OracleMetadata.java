@@ -26,6 +26,8 @@ import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
 import workbench.db.ErrorInformationReader;
 import workbench.db.JdbcProcedureReader;
+import workbench.db.NoConfigException;
+import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
@@ -54,7 +56,8 @@ public class OracleMetadata
 	private static final int CHAR_SEMANTICS = 2;
 	private int defaultLengthSemantics = BYTE_SEMANTICS;
 	private boolean alwaysShowCharSemantics = false;
-
+	private JdbcProcedureReader jdbcProcReader = null;
+	
 	public OracleMetadata(DbMetadata meta, WbConnection conn)
 	{
 		this.connection = conn;
@@ -119,7 +122,6 @@ public class OracleMetadata
 				SqlUtil.closeAll(rs, stmt);
 			}
 		}
-		
 	}
 	
 	public boolean isOracle8()
@@ -414,22 +416,19 @@ public class OracleMetadata
 	
 	public boolean procedureExists(String catalog, String schema, String procname, int type)
 	{
-		JdbcProcedureReader reader = new JdbcProcedureReader(this.connection.getMetadata());
-		return reader.procedureExists(catalog, schema, procname, type);
+		return getProcReader().procedureExists(catalog, schema, procname, type);
 	}
 	
 	public DataStore getProcedureColumns(String catalog, String schema, String procname)
 		throws SQLException
 	{
-		JdbcProcedureReader reader = new JdbcProcedureReader(this.connection.getMetadata());
-		return reader.getProcedureColumns(catalog, schema, procname);
+		return getProcReader().getProcedureColumns(catalog, schema, procname);
 	}
 	
 	public DataStore getProcedures(String catalog, String schema)
 		throws SQLException
 	{
-		JdbcProcedureReader reader = new JdbcProcedureReader(this.connection.getMetadata());
-		return reader.getProcedures(catalog, schema);
+		return getProcReader().getProcedures(catalog, schema);
 	}
 
 	public StrBuffer getPackageSource(String owner, String packageName)
@@ -496,7 +495,7 @@ public class OracleMetadata
 				}
 			}
 			if (!(result.endsWith('\n') || result.endsWith('\r'))) result.append(nl);
-			result.append("/");
+			if (lineCount > 0) result.append("/");
 			result.append(nl);
 		}
 		catch (Exception e)
@@ -720,5 +719,31 @@ public class OracleMetadata
 			try {  this.columnStatement.close();  } catch (Throwable th) {}
 		}
 	}
+	
+	private JdbcProcedureReader getProcReader()
+	{
+		if (this.jdbcProcReader == null) 
+		{
+			this.jdbcProcReader = new JdbcProcedureReader(this.connection.getMetadata());
+		}
+		return this.jdbcProcReader;
+	}
+	
+	public void readProcedureSource(ProcedureDefinition def)
+		throws NoConfigException
+	{
+		
+		if (def.getCatalog() != null)
+		{
+			StrBuffer source = getPackageSource(def.getSchema(), def.getCatalog());
+			def.setSource(source.toString());
+			def.setOraclePackage(true);			
+		}
+		else
+		{
+			JdbcProcedureReader procReader = getProcReader();
+			procReader.readProcedureSource(def);
+		}
+	}	
 
 }

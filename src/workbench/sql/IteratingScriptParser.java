@@ -57,7 +57,9 @@ public class IteratingScriptParser
 	private boolean checkSingleLineCommands = true;
 	private boolean storeSqlInCommands = false;
 	private boolean returnStartingWhitespace = false;
-
+	private boolean checkHashComment = false;
+	private boolean delimiterOnOwnLine = false;
+	
 	// These patterns cover the statements that
 	// can be used in a single line without a delimiter
 	// This is basically to make the parser as Oracle compatible as possible
@@ -131,6 +133,14 @@ public class IteratingScriptParser
 		this.reset();
 	}
 
+	/**
+	 * Should the parser check for MySQL hash comments? 
+	 */
+	public void setCheckForHashComments(boolean flag)
+	{
+		this.checkHashComment = flag;
+	}
+	
 	public void setCheckForSingleLineCommands(boolean flag)
 	{
 		this.checkSingleLineCommands = flag;
@@ -191,11 +201,13 @@ public class IteratingScriptParser
 		{
 			this.delimiter = ";";
 			this.delimiterLength = 1;
+			this.delimiterOnOwnLine = false;
 		}
 		else
 		{
 			this.delimiter = delim;
 			this.delimiterLength = this.delimiter.length();
+			this.delimiterOnOwnLine = ("GO".equalsIgnoreCase(this.delimiter));
 		}
 	}
 
@@ -301,7 +313,7 @@ public class IteratingScriptParser
 						commentOn = true;
 						//pos ++; // ignore the next character
 					}
-					else if ((startOfLine && firstChar == '#') || (firstChar == '-' && next == '-'))
+					else if ((startOfLine && firstChar == '#' && checkHashComment) || (firstChar == '-' && next == '-'))
 					{
 						singleLineComment = true;
 						blockComment = false;
@@ -343,7 +355,7 @@ public class IteratingScriptParser
 					currChar = this.script.substring(pos, pos + this.delimiterLength).toUpperCase();
 				}
 
-				if ((currChar.equals(this.delimiter) || (pos == scriptLength)))
+				if (!delimiterOnOwnLine && (currChar.equals(this.delimiter) || (pos == scriptLength)))
 				{
 					if (lastPos >= pos && pos < scriptLength - 1) 
 					{
@@ -367,7 +379,8 @@ public class IteratingScriptParser
 						String line = this.script.substring(lastNewLineStart, pos).trim();
 						String clean = SqlUtil.makeCleanSql(line, false, false, '\'');
 						
-						if (clean.length() == 0 && this.emptyLineIsSeparator)
+						if ( (this.emptyLineIsSeparator && clean.length() == 0) ||
+							   (this.delimiterOnOwnLine && line.equalsIgnoreCase(this.delimiter)) )
 						{
 							int start = lastCommandEnd;
 							ScriptCommandDefinition c = this.createCommand(start, pos);

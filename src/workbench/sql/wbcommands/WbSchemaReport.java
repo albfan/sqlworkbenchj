@@ -23,6 +23,7 @@ import workbench.db.WbConnection;
 import workbench.db.report.SchemaReporter;
 import workbench.db.report.Workbench2Designer;
 import workbench.interfaces.ScriptGenerationMonitor;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -216,6 +217,7 @@ public class WbSchemaReport
 			catch (Exception e)
 			{
 				result.setFailure();
+				LogMgr.logError("WbSchemaReport.execute()", "Error generating DBDesigner file", e);
 				String msg = ResourceMgr.getString("ErrGeneratingDbDesigner");
 				msg = StringUtil.replace(msg, "%wbfile%", f.getAbsolutePath());
 				msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));

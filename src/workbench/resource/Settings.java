@@ -754,7 +754,7 @@ public class Settings
 		{
 			// added for build 82
 			this.props.remove("workbench.db.fetchsize");
-
+			
 			// added for build 84
 			this.props.remove("workbench.sql.replace.ignorecase");
 			this.props.remove("workbench.sql.replace.selectedtext");
@@ -771,6 +771,7 @@ public class Settings
 			this.props.remove("workbench.db.oracle.quotedigits");
 			this.props.remove("workbench.gui.macros.replaceonrun");
 			this.props.remove("workbench.db.cancelneedsreconnect");
+			this.props.remove("workbench.db.trigger.replacenl");
 			
 			this.props.remove("workbench.db.keywordlist.oracle");
 			this.props.remove("workbench.db.keywordlist.thinksql_relational_database_management_system");

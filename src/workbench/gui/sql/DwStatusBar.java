@@ -21,6 +21,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 
 import javax.swing.BorderFactory;
@@ -42,7 +43,6 @@ import workbench.interfaces.EditorStatusbar;
 import workbench.interfaces.StatusBar;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.sql.StatementRunnerResult;
 import workbench.util.StringUtil;
 
 
@@ -184,9 +184,19 @@ public class DwStatusBar
 		this.readyMsg = ResourceMgr.getString("MsgReady");
 		this.clearStatusMessage();
 		
-		numberFormatter = StatementRunnerResult.createTimingFormatter(); 
+		numberFormatter = DwStatusBar.createTimingFormatter(); 
 	}
 
+	public static final DecimalFormat createTimingFormatter()
+	{
+		DecimalFormatSymbols symb = new DecimalFormatSymbols();
+		String sep = Settings.getInstance().getProperty("workbench.gui.timining.decimal", ".");
+		symb.setDecimalSeparator(sep.charAt(0));		
+		DecimalFormat numberFormatter = new DecimalFormat("0.#s", symb);
+		numberFormatter.setMaximumFractionDigits(2);
+		return numberFormatter;
+	}
+	
 	public void setReadyMsg(String aMsg)
 	{
 		if (aMsg == null)

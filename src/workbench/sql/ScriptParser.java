@@ -16,15 +16,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
-import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 
 /**
@@ -49,6 +47,7 @@ public class ScriptParser
 	private boolean supportOracleInclude = true;
 	private boolean checkSingleLineCommands = true;
 	private boolean returnTrailingWhitesapce = false;
+	private boolean checkHashComments = false;
 	
 	private int maxFileSize;
 	
@@ -168,6 +167,15 @@ public class ScriptParser
 		}
 	}
 
+	public void setCheckHashComments(boolean flag)
+	{
+		this.checkHashComments = flag;
+		if (this.iteratingParser != null)
+		{
+			this.iteratingParser.setCheckForHashComments(flag);
+		}
+	}
+	
 	public void setReturnStartingWhitespace(boolean flag)
 	{
 		this.returnTrailingWhitesapce = flag;
@@ -220,8 +228,14 @@ public class ScriptParser
 	{
 		this.delimiter = delim;
 		if (this.iteratingParser != null) this.iteratingParser.setDelimiter(delim);
+		if (this.originalScript != null)
+		{
+			findDelimiterToUse();
+		}
 	}
 
+	private Pattern MS_GO = Pattern.compile("(?i)[\\r\\n|\\n]+[ \t]*GO[ \t]*[\\r\\n|\\n]*$");
+	
 	/**
 	 *	Try to find out which delimiter should be used for the current script.
 	 *	First it will check if the script ends with the alternate delimiter
@@ -231,20 +245,32 @@ public class ScriptParser
 	 */
 	private void findDelimiterToUse()
 	{
+		String oldDelimiter = this.delimiter;
+		
 		this.delimiter = ";";
 
-		String cleanSql = SqlUtil.makeCleanSql(this.originalScript, false).trim();
+		if (originalScript == null) return;
+		
+		String cleanSql = this.originalScript.trim();
+		
 		if (this.alternateDelimiter == null)
 		{
 			this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter();
 		}
+		
 		if (cleanSql.endsWith(this.alternateDelimiter))
 		{
 			this.delimiter = this.alternateDelimiter;
 		}
-		else if (cleanSql.matches("(?i).*[\\n\\r|\\n]GO$"))
+		else if (MS_GO.matcher(cleanSql).find())
 		{
 			this.delimiter = "GO";
+		}
+		
+		// if the delimiter changed, we have to clear already parsed commands
+		if (!StringUtil.equalString(oldDelimiter, this.delimiter))
+		{
+			this.commands = null;
 		}
 	}
 
@@ -390,6 +416,10 @@ public class ScriptParser
 	public void setAlternateDelimiter(String delim)
 	{
 		this.alternateDelimiter = delim;
+		if (this.originalScript != null)
+		{
+			findDelimiterToUse();
+		}
 	}
 
 	public String getDelimiter()
@@ -405,6 +435,7 @@ public class ScriptParser
 		p.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		p.setDelimiter(this.delimiter);
 		p.setReturnStartingWhitespace(this.returnTrailingWhitesapce);
+		p.setCheckForHashComments(this.checkHashComments);
 	}
 	
 	/**

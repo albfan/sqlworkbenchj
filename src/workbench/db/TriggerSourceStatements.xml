@@ -132,7 +132,7 @@ where trg.tgrelid = tbl.oid
     <void property="baseSql"> 
      <string>SELECT 'CREATE TRIGGER '||trigger_name||
         case before when 'true' then ' BEFORE ' else ' AFTER ' end||
-        trigger_type||' ON '||table_name||'\n  FOR EACH ROW CALL "'||java_class||'";'
+        trigger_type||' ON '||table_name||char(10)||'  FOR EACH ROW CALL "'||java_class||'";'
 				from information_schema.triggers
 			</string> 
     </void> 
@@ -210,8 +210,8 @@ and  sysobjects.type = &apos;TR&apos;</string>
   </void> 
   
   <void method="put"> 
-   <string>Cloudscape</string> 
-   <object id="id_cloudscape_trg" class="workbench.db.GetMetaDataSql"> 
+   <string>Apache Derby</string> 
+   <object id="id_derby_trg" class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
      <string>
 SELECT 'CREATE TRIGGER ' || trg.triggername || '\n  '
@@ -225,18 +225,19 @@ SELECT 'CREATE TRIGGER ' || trg.triggername || '\n  '
           end
        || case when trg.referencedcolumns is not null then ' OF ' || trg.referencedcolumns else '' end 
        || ' ON ' || t.tablename || '\n' 
-       || case when trg.referencingnew = 'true' then '  REFERENCING NEW AS ' || trg.newreferencingname || '\n'
-               when trg.referencingold = 'true' then '  REFERENCING OLD AS ' || trg.oldreferencingname || '\n'
+       || case when trg.referencingnew = 'true' then '  REFERENCING NEW AS ' || trg.newreferencingname
+               when trg.referencingold = 'true' then '  REFERENCING OLD AS ' || trg.oldreferencingname
                when trg.referencingold = 'false' AND trg.referencingnew = 'false' THEN ''
           end
+       || '\n'
        || case when trg.type = 'S' then '  FOR EACH STATEMENT '
                else '  FOR EACH ROW' end
-       || ' MODE DB2SQL\n\n'
+       || '\n'
        || trg.triggerdefinition
 from sys.systriggers trg, sys.systables t, sys.sysschemas s
 where trg.tableid = t.tableid
 and   t.schemaid = s.schemaid
-     </string> 
+			</string> 
     </void> 
     <void property="objectNameField"> 
      <string>trg.triggername</string> 
@@ -251,8 +252,8 @@ and   t.schemaid = s.schemaid
   </void> 
   
   <void method="put"> 
-   <string>Apache Derby</string> 
-   <object idref="id_cloudscape_trg"/> 
+   <string></string> 
+   <object idref="id_derby_trg"/> 
   </void> 
   
   <void method="put">

@@ -31,6 +31,90 @@ public class ScriptParserTest extends TestCase
 		super(testName);
 	}
 
+	public void testQuotedDelimiter()
+	{
+		String sql = "SELECT id,';' \n" + 
+								 "FROM person; \n" + 
+								 " \n" + 
+								 "select * \n" + 
+								 "from country;";
+		try
+		{
+			ScriptParser p = new ScriptParser(sql);
+			p.setAlternateDelimiter("./");
+			int size = p.getSize();
+			assertEquals("Wrong number of statements", 2, size);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testMsGO()
+	{
+		String sql = "SELECT id \n" + 
+								 "FROM person GO\n" + 
+								 "  GO  \n" + 
+								 " \n" + 
+								 " \n" + 
+								 "select * \n" + 
+								 "from country \n" + 
+								 "  GO \n\n ";		
+		try
+		{
+			ScriptParser p = new ScriptParser(sql);
+			p.setAlternateDelimiter("./");
+			int size = p.getSize();
+			assertEquals("Wrong number of statements", 2, size);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testAlternateDelimiter()
+	{
+		String sql = "SELECT id \n" + 
+								 "FROM person \n" + 
+								 "# \n" + 
+								 " \n" + 
+								 " \n" + 
+								 "select * \n" + 
+								 "from country \n" + 
+								 "#";		
+		try
+		{
+			ScriptParser p = new ScriptParser(sql);
+			p.setAlternateDelimiter("#");
+			int size = p.getSize();
+			assertEquals("Wrong number of statements", 2, size);
+			
+			p.setAlternateDelimiter("./");
+			size = p.getSize();
+			assertEquals("Wrong number of statements", 1, size);			
+			
+			sql = "SELECT id; \n" + 
+								 "FROM person \n" + 
+								 "./ \n" + 
+								 " \n" + 
+								 "select * \n" + 
+								 "from country \n" + 
+								 "./";		
+			p.setScript(sql);
+			size = p.getSize();
+			assertEquals("Wrong number of statements", 2, size);			
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	
 	public void testAccessByCursorPos()
 	{
@@ -175,5 +259,6 @@ public class ScriptParserTest extends TestCase
 		assertEquals(2, p.getSize());
 	}
 
+	
 	
 }

@@ -24,6 +24,22 @@ import workbench.util.WbPersistence;
  */
 public class MetaDataSqlManager
 {
+	public static final String TABLE_NAME_PLACEHOLDER = "%tablename%";
+	public static final String INDEX_TYPE_PLACEHOLDER = "%indextype% ";
+	public static final String INDEX_NAME_PLACEHOLDER = "%indexname%";
+	public static final String PK_NAME_PLACEHOLDER = "%pk_name%";
+	public static final String UNIQUE_PLACEHOLDER = "%unique_key% ";
+	public static final String COLUMNLIST_PLACEHOLDER = "%columnlist%";
+	public static final String FK_NAME_PLACEHOLDER = "%constraintname%";
+	public static final String FK_TARGET_TABLE_PLACEHOLDER = "%targettable%";
+	public static final String FK_TARGET_COLUMNS_PLACEHOLDER = "%targetcolumnlist%";
+	public static final String COMMENT_TABLE_PLACEHOLDER = "%table%";
+	public static final String COMMENT_COLUMN_PLACEHOLDER = "%column%";
+	public static final String COMMENT_PLACEHOLDER = "%comment%";
+	public static final String FK_UPDATE_RULE = "%fk_update_rule%";
+	public static final String FK_DELETE_RULE = "%fk_delete_rule%";
+	public static final String GENERAL_SQL = "All";
+	
 	private String productName;
 	private static final GetMetaDataSql MARKER = new GetMetaDataSql();
 	private static final String NO_STRING = "";
@@ -107,7 +123,7 @@ public class MetaDataSqlManager
 				this.primaryKeyTemplate = (String)sql.get(this.productName);
 				if (this.primaryKeyTemplate == null)
 				{
-					this.primaryKeyTemplate = (String)sql.get(DbMetadata.GENERAL_SQL);
+					this.primaryKeyTemplate = (String)sql.get(GENERAL_SQL);
 				}
 			}
 		}
@@ -130,7 +146,7 @@ public class MetaDataSqlManager
 					}
 					else
 					{
-						template = (String)sql.get(DbMetadata.GENERAL_SQL);
+						template = (String)sql.get(GENERAL_SQL);
 					}
 				}
 				this.foreignKeyTemplate = template;
@@ -149,7 +165,7 @@ public class MetaDataSqlManager
 				this.indexTemplate = (String)sql.get(this.productName);
 				if (indexTemplate == null)
 				{
-					this.indexTemplate = (String)sql.get(DbMetadata.GENERAL_SQL);
+					this.indexTemplate = (String)sql.get(GENERAL_SQL);
 				}
 			}
 		}
@@ -166,7 +182,7 @@ public class MetaDataSqlManager
 				this.columnCommentTemplate = (String)sql.get(this.productName);
 				if (columnCommentTemplate == null)
 				{
-					this.columnCommentTemplate = (String)sql.get(DbMetadata.GENERAL_SQL);
+					this.columnCommentTemplate = (String)sql.get(GENERAL_SQL);
 				}
 			}
 		}
@@ -183,7 +199,7 @@ public class MetaDataSqlManager
 				this.tableCommentTemplate = (String)sql.get(this.productName);
 				if (tableCommentTemplate == null)
 				{
-					this.tableCommentTemplate = (String)sql.get(DbMetadata.GENERAL_SQL);
+					this.tableCommentTemplate = (String)sql.get(GENERAL_SQL);
 				}
 			}
 		}

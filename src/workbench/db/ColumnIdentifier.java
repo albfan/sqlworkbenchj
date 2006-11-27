@@ -265,7 +265,14 @@ public class ColumnIdentifier
 	 */
 	public void setColumnClassName(String columnClass)
 	{
-		this.columnClassName = columnClass;
+		if (columnClass != null && columnClass.endsWith("[]"))
+		{
+			this.columnClassName = columnClass.toUpperCase().charAt(0) + "[";
+		}
+		else
+		{
+			this.columnClassName = columnClass;
+		}
 		this.columnClass = null;
 		if (this.columnClassName == null) return;
 

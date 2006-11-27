@@ -11,9 +11,9 @@
  */
 package workbench.storage.filter;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
-import workbench.util.WbPersistence;
 import junit.framework.*;
 
 /**
@@ -61,6 +61,25 @@ public class ComplexExpressionTest
 		catch (Throwable th)
 		{
 			fail();
+		}
+	}
+	
+	public void testDateComparison()
+	{
+		try
+		{
+			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
+			ComplexExpression expr = new AndExpression();
+			expr.addColumnExpression("changed_on", new GreaterThanComparator(), f.parse("2006-10-01"));
+			
+			Map values = new HashMap();
+			values.put("changed_on", f.parse("2006-11-01"));
+			assertEquals(true, expr.evaluate(values));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
 		}
 	}
 }

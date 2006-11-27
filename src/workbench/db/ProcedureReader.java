@@ -13,7 +13,6 @@ package workbench.db;
 
 import java.sql.SQLException;
 import workbench.storage.DataStore;
-import workbench.util.StrBuffer;
 
 /**
  * Read the definition (source, parameters etc) of a stored procedures from 
@@ -44,4 +43,6 @@ public interface ProcedureReader
 		throws SQLException;
 	DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
 		throws SQLException;
+	void readProcedureSource(ProcedureDefinition def)
+		throws NoConfigException;
 }

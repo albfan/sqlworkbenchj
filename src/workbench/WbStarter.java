@@ -32,6 +32,13 @@ public class WbStarter
 	 */
 	public static void main(String[] args)
 	{
+		// This property should be set as early as possible to 
+		// ensure that it is defined before any AWT class is loaded
+		// this will make the application menu appear at the correct
+		// location when running on with Aqua look and feel on a Mac
+		System.setProperty("apple.laf.useScreenMenuBar", "true");
+		System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
+		
 		String version = System.getProperty("java.version", null);
 		if (version == null)
 		{
@@ -41,10 +48,12 @@ public class WbStarter
 		boolean versionIsOk = false;
 		final int minMinorVersion = 4;
 		
+		int minorversion = -1;
+		
 		try
 		{
 			int majorversion = Integer.parseInt(version.substring(0,1));
-			int minorversion = Integer.parseInt(version.substring(2,3));
+			minorversion = Integer.parseInt(version.substring(2,3));
 			versionIsOk = (majorversion >= 1) && (minorversion >= minMinorVersion);
 		}
 		catch (Exception e)
@@ -70,15 +79,17 @@ public class WbStarter
 			System.exit(1);
 		}
 
+		if (minorversion == 4)
+		{
+			String msg = "<html>You are running Java: " + version + 
+				".<br><br>This version will no longer be supported with the next release of SQL Workbench/J"+ 
+				"<br><br>Please upgrade your Java system as soon as possible.</html>";
+			System.err.println("Warning: Java " + version + " will no longer be supported in the next release! Please upgrade.");
+			JOptionPane.showMessageDialog(null, msg, "Old Java version detected", JOptionPane.WARNING_MESSAGE);
+		}
+		
 		try
 		{
-			// This property should be set as early as possible to 
-			// ensure that it is defined before any AWT class is loaded
-			// this will make the application menu appear at the correct
-			// location when running on with Aqua look and feel on a Mac
-			System.setProperty("apple.laf.useScreenMenuBar", "true");
-			System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
-
 			// Do not reference WbManager directly, otherwise a compile
 			// of this class will trigger a compile of the other classes, but they
 			// should be compiled into a different class file version.

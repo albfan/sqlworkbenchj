@@ -30,6 +30,22 @@ public class SqlFormatterTest extends TestCase
 		util.prepareEnvironment();
 	}
 
+	public void testColumnAlias()
+	{
+		try
+		{
+			String sql = "SELECT case when x = 1 then 2 else 3 end AS y FROM table";
+			String expected = "SELECT CASE\n         WHEN x=1 THEN 2\n         ELSE 3\n       END AS y\nFROM TABLE";
+			SqlFormatter f = new SqlFormatter(sql, 100);
+			String formatted = f.getFormattedSql();
+			assertEquals("CASE alias not formatted", expected, formatted);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	public void testWhitespace()
 	{
 		try

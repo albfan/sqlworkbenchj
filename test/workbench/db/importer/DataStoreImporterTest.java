@@ -69,8 +69,8 @@ public class DataStoreImporterTest extends TestCase
 			DataStore ds = prepareDataStore();
 			DataStoreImporter importer = new DataStoreImporter(ds, null, null);
 			
-			TextImportOptions to = importer.createDefaultTextOptions("\t", "\"");
-			ImportOptions o = importer.createDefaultImportOptions();
+			TextImportOptions to = new DefaultTextImportOptions("\t", "\"");
+			ImportOptions o = new DefaultImportOptions();
 			
 			importer.setImportOptions(f,ProducerFactory.IMPORT_TEXT, o, to, null);
 			importer.startImport();

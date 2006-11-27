@@ -99,6 +99,16 @@ public class WbAction
 		this.putValue(Action.SHORT_DESCRIPTION, aText);
 	}
 	
+	public String getTooltipText()
+	{
+		return (String)getValue(Action.SHORT_DESCRIPTION);
+	}
+
+	public String getTooltipTextWithKeys()
+	{
+		return getTooltipText() + " (" + this.getAcceleratorDisplay() + ")";
+	}
+	
 	public void clearAccelerator()
 	{
 		this.putValue(Action.ACCELERATOR_KEY, null);
@@ -449,12 +459,6 @@ public class WbAction
 			e.setSource(this);
 			this.delegate.actionPerformed(e);
 		}
-	}
-
-	public String getTooltipTextWithKeys()
-	{
-		String tooltip = (String)getValue(Action.SHORT_DESCRIPTION);
-		return tooltip + " (" + this.getAcceleratorDisplay() + ")";
 	}
 	
 	private String getAcceleratorDisplay()

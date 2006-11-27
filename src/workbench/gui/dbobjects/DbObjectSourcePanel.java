@@ -122,7 +122,7 @@ public class DbObjectSourcePanel
 		if (reloadSource != null) reloadSource.setEnabled(hasText);
 		if (recreateObject != null) recreateObject.setEnabled(hasText);
 		if (editButton != null) editButton.setEnabled(hasText);
-		if (sql.startsWith(SourceStatementsHelp.VIEW_ERROR_START) || 
+		if (hasText && sql.startsWith(SourceStatementsHelp.VIEW_ERROR_START) || 
 				sql.startsWith(SourceStatementsHelp.PROC_ERROR_START) ||
 				sql.startsWith(ResourceMgr.getString("MsgSynonymSourceNotImplemented"))
 			 )
@@ -138,7 +138,7 @@ public class DbObjectSourcePanel
 		{
 			public void run()
 			{
-				sourceEditor.setText(sql);
+				sourceEditor.setText(sql == null ? "" : sql);
 			}
 		});
 	}
