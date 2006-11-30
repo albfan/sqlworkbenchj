@@ -44,6 +44,7 @@ import workbench.interfaces.PropertyStorage;
 import workbench.gui.actions.ActionRegistration;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
+import workbench.sql.DelimiterDefinition;
 import workbench.sql.BatchRunner;
 import workbench.storage.PkMapping;
 import workbench.util.FileDialogUtil;
@@ -1872,14 +1873,17 @@ public class Settings
 		this.defaultDecimalFormatter = null;
 	}
 
-	public String getAlternateDelimiter()
+	public DelimiterDefinition getAlternateDelimiter()
 	{
-		return getProperty("workbench.sql.alternatedelimiter", "./");
+		String delim = getProperty("workbench.sql.alternatedelimiter", "/");
+		boolean sld = getBoolProperty("workbench.sql.alternatedelimiter.singleline", true);
+		return new DelimiterDefinition(delim, sld);
 	}
 
-	public void setAlternateDelimiter(String aDelimit)
+	public void setAlternateDelimiter(DelimiterDefinition aDelimit)
 	{
-		this.props.setProperty("workbench.sql.alternatedelimiter", aDelimit);
+		this.setProperty("workbench.sql.alternatedelimiter", aDelimit.getDelimiter());
+		this.setProperty("workbench.sql.alternatedelimiter.singleline", aDelimit.isSingleLine());
 	}
 
 	public String getDefaultTextDelimiter()

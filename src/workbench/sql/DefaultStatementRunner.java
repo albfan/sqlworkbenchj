@@ -93,7 +93,6 @@ public class DefaultStatementRunner
 	private boolean removeComments;
 	private boolean fullErrorReporting = false;
 	private ParameterPrompter prompter;
-	//private boolean logStatements = Settings.getInstance().getBoolProperty("workbench.sql.execution.log", false);
 	private boolean removeNewLines = false;
 	
 	public DefaultStatementRunner()

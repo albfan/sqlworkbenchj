@@ -54,6 +54,7 @@ import workbench.db.WbConnection;
 import workbench.gui.actions.FileSaveAction;
 import workbench.gui.editor.SyntaxUtilities;
 import workbench.interfaces.EncodingSelector;
+import workbench.sql.DelimiterDefinition;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
@@ -130,6 +131,7 @@ public class EditorPanel
 	private Set dbFunctions = null;
 	private ReplacePanel replacePanel = null;
 	private boolean isMySQL = false;
+	private DelimiterDefinition alternateDelimiter;
 	
 	public static EditorPanel createSqlEditor()
 	{
@@ -220,7 +222,11 @@ public class EditorPanel
 	
 	public void setDatabaseConnection(WbConnection aConnection)
 	{
-		if (aConnection == null) return;
+		if (aConnection == null) 
+		{
+			this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter();
+			return;
+		}
 		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
 		this.dbFunctions = aConnection.getMetadata().getDbFunctions();
 		if (token != null) 
@@ -248,6 +254,18 @@ public class EditorPanel
 		else
 		{
 			this.commentChar = "--";
+		}
+
+		this.alternateDelimiter = null;
+		
+		if (aConnection.getProfile() != null)
+		{
+			this.alternateDelimiter = aConnection.getProfile().getAlternateDelimiter();
+		}
+		
+		if (alternateDelimiter == null)
+		{
+			this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter();
 		}
 	}
 
@@ -321,12 +339,12 @@ public class EditorPanel
 	{
 		String sql = this.getSelectedStatement();
 		ScriptParser parser = new ScriptParser();
-		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
+		parser.setAlternateDelimiter(this.alternateDelimiter);
 		parser.setReturnStartingWhitespace(true);
 		parser.setCheckHashComments(this.isMySQL);
 		parser.setScript(sql);
 		
-		String delimit = parser.getDelimiter();
+		String delimit = parser.getDelimiterString();
 
 		int count = parser.getSize();
 		if (count < 1) return;

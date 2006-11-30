@@ -37,9 +37,9 @@ public class ScriptParser
 {
 
 	private String originalScript = null;
-	private ArrayList commands = null;
-	private String delimiter = ";";
-	private String alternateDelimiter;
+	private ArrayList<ScriptCommandDefinition> commands = null;
+	private DelimiterDefinition delimiter = DelimiterDefinition.STANDARD_DELIMITER;
+	private DelimiterDefinition alternateDelimiter;
 	private int currentIteratorIndex = -42;
 	private boolean checkEscapedQuotes = true;
 	private IteratingScriptParser iteratingParser = null;
@@ -224,7 +224,7 @@ public class ScriptParser
 	/**
 	 * Define the delimiter to be used in case it's not a semicolon
 	 */
-	public void setDelimiter(String delim)
+	public void setDelimiter(DelimiterDefinition delim)
 	{
 		this.delimiter = delim;
 		if (this.iteratingParser != null) this.iteratingParser.setDelimiter(delim);
@@ -245,9 +245,9 @@ public class ScriptParser
 	 */
 	private void findDelimiterToUse()
 	{
-		String oldDelimiter = this.delimiter;
+		DelimiterDefinition oldDelimiter = this.delimiter;
 		
-		this.delimiter = ";";
+		this.delimiter = DelimiterDefinition.STANDARD_DELIMITER;
 
 		if (originalScript == null) return;
 		
@@ -258,17 +258,17 @@ public class ScriptParser
 			this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter();
 		}
 		
-		if (cleanSql.endsWith(this.alternateDelimiter))
+		if (cleanSql.endsWith(this.alternateDelimiter.getDelimiter()))
 		{
 			this.delimiter = this.alternateDelimiter;
 		}
 		else if (MS_GO.matcher(cleanSql).find())
 		{
-			this.delimiter = "GO";
+			this.delimiter = DelimiterDefinition.DEFAULT_MS_DELIMITER;
 		}
 		
 		// if the delimiter changed, we have to clear already parsed commands
-		if (!StringUtil.equalString(oldDelimiter, this.delimiter))
+		if (!this.delimiter.equals(oldDelimiter))
 		{
 			this.commands = null;
 		}
@@ -302,13 +302,13 @@ public class ScriptParser
 		if (count == 0) return -1;
 		for (int i=0; i < count - 1; i++)
 		{
-			ScriptCommandDefinition b = (ScriptCommandDefinition)this.commands.get(i);
-			ScriptCommandDefinition next = (ScriptCommandDefinition)this.commands.get(i + 1);
+			ScriptCommandDefinition b = this.commands.get(i);
+			ScriptCommandDefinition next = this.commands.get(i + 1);
 			if (b.getStartPositionInScript() <= cursorPos && b.getEndPositionInScript() >= cursorPos) return i;
 			if (cursorPos > b.getEndPositionInScript() && cursorPos < next.getEndPositionInScript()) return i + 1;
 			if (b.getEndPositionInScript() > cursorPos && next.getStartPositionInScript() <= cursorPos) return i+1;
 		}
-		ScriptCommandDefinition b = (ScriptCommandDefinition)this.commands.get(count - 1);
+		ScriptCommandDefinition b = this.commands.get(count - 1);
 		if (b.getStartPositionInScript() <= cursorPos && b.getEndPositionInScript() >= cursorPos) return count - 1;
 		return -1;
 	}
@@ -320,7 +320,7 @@ public class ScriptParser
 	{
 		if (this.commands == null) this.parseCommands();
 		if (index < 0 || index >= this.commands.size()) return -1;
-		ScriptCommandDefinition b = (ScriptCommandDefinition)this.commands.get(index);
+		ScriptCommandDefinition b = this.commands.get(index);
 		int start = b.getStartPositionInScript();
 		return start;
 	}
@@ -332,7 +332,7 @@ public class ScriptParser
 	{
 		if (this.commands == null) this.parseCommands();
 		if (index < 0 || index >= this.commands.size()) return -1;
-		ScriptCommandDefinition b = (ScriptCommandDefinition)this.commands.get(index);
+		ScriptCommandDefinition b = this.commands.get(index);
 		return b.getEndPositionInScript();
 	}
 
@@ -361,7 +361,7 @@ public class ScriptParser
 	{
 		if (this.commands == null) this.parseCommands();
 		if (index < 0 || index >= this.commands.size()) return null;
-		ScriptCommandDefinition c = (ScriptCommandDefinition)this.commands.get(index);
+		ScriptCommandDefinition c = this.commands.get(index);
 		return originalScript.substring(c.getStartPositionInScript(), c.getEndPositionInScript());
 	}
 
@@ -378,12 +378,17 @@ public class ScriptParser
 	 */
 	public Iterator getIterator()
 	{
+		startIterator();
+		return this;
+	}
+	
+	public void startIterator()
+	{
 		this.currentIteratorIndex = 0;
 		if (this.iteratingParser == null && this.commands == null)
 		{
 			this.parseCommands();
 		}
-		return this;
 	}
 	
 	public void done()
@@ -413,7 +418,7 @@ public class ScriptParser
 		}
 	}
 
-	public void setAlternateDelimiter(String delim)
+	public void setAlternateDelimiter(DelimiterDefinition delim)
 	{
 		this.alternateDelimiter = delim;
 		if (this.originalScript != null)
@@ -422,9 +427,9 @@ public class ScriptParser
 		}
 	}
 
-	public String getDelimiter()
+	public String getDelimiterString()
 	{
-		return this.delimiter;
+		return this.delimiter.getDelimiter();
 	}
 
 	private void configureParserInstance(IteratingScriptParser p)
@@ -511,7 +516,7 @@ public class ScriptParser
 		}
 		else
 		{
-			command = (ScriptCommandDefinition)this.commands.get(this.currentIteratorIndex);
+			command = this.commands.get(this.currentIteratorIndex);
 			result = this.originalScript.substring(command.getStartPositionInScript(), command.getEndPositionInScript());
 			this.currentIteratorIndex ++;
 		}

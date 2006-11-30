@@ -12,8 +12,8 @@
 package workbench.gui.settings;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import workbench.gui.components.DelimiterDefinitionPanel;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.WbCheckBoxLabel;
@@ -62,20 +62,22 @@ public class EditorOptionsPanel
 			ResourceMgr.getString("LblLTDos"),
 			ResourceMgr.getString("LblLTUnix")
 		};
-		
+
 		this.internalLineEnding.setModel(new DefaultComboBoxModel(items));
 		this.externalLineEnding.setModel(new DefaultComboBoxModel(items));
-		
+
 		String value = Settings.getInstance().getInteralLineEndingValue();
 		internalLineEnding.setSelectedIndex(lineEndingValueToIndex(value));
-		
+
 		value = Settings.getInstance().getExternalLineEndingValue();
 		externalLineEnding.setSelectedIndex(lineEndingValueToIndex(value));
-		
+
 		String paste = Settings.getInstance().getAutoCompletionPasteCase();
 		if ("lower".equals(paste)) this.completionPasteCase.setSelectedIndex(0);
 		else if ("upper".equals(paste)) this.completionPasteCase.setSelectedIndex(1);
 		else this.completionPasteCase.setSelectedIndex(2);
+
+		alternateDelim.setDelimiter(Settings.getInstance().getAlternateDelimiter());
 	}
 
 	private String indexToLineEndingValue(int index)
@@ -84,7 +86,7 @@ public class EditorOptionsPanel
 		if (index == 2) return Settings.UNIX_LINE_TERMINATOR_PROP_VALUE;
 		return Settings.DEFAULT_LINE_TERMINATOR_PROP_VALUE;
 	}
-	
+
 	private int lineEndingValueToIndex(String value)
 	{
 		if (Settings.DOS_LINE_TERMINATOR_PROP_VALUE.equals(value))
@@ -106,7 +108,7 @@ public class EditorOptionsPanel
 		set.setCloseAutoCompletionWithSearch(closePopup.isSelected());
 		set.setEditorErrorColor(errorColor.getSelectedColor());
 		set.setEditorFont(editorFont.getSelectedFont());
-		set.setAlternateDelimiter(this.altDelimitTextField.getText());
+		set.setAlternateDelimiter(alternateDelim.getDelimiter());
 		set.setRightClickMovesCursor(rightClickMovesCursor.isSelected());
 		set.setShowFilenameInWindowTitle(this.windowTitleComboBox.getSelectedIndex());
 		set.setEditorSelectionColor(selectionColor.getSelectedColor());
@@ -134,7 +136,6 @@ public class EditorOptionsPanel
     editorTabSizeLabel = new javax.swing.JLabel();
     tabSize = new javax.swing.JTextField();
     altDelimLabel = new javax.swing.JLabel();
-    altDelimitTextField = new javax.swing.JTextField();
     historySizeLabel = new javax.swing.JLabel();
     historySizeField = new NumberField();
     electricScrollLabel = new javax.swing.JLabel();
@@ -159,6 +160,7 @@ public class EditorOptionsPanel
     externalLineEnding = new javax.swing.JComboBox();
     filesInHistoryLabel = new WbCheckBoxLabel();
     includeFilesInHistory = new javax.swing.JCheckBox();
+    alternateDelim = new workbench.gui.components.DelimiterDefinitionPanel();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -215,18 +217,8 @@ public class EditorOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 9;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
     add(altDelimLabel, gridBagConstraints);
-
-    altDelimitTextField.setText(Settings.getInstance().getAlternateDelimiter());
-    altDelimitTextField.setMinimumSize(new java.awt.Dimension(72, 20));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 9;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 11, 0, 15);
-    add(altDelimitTextField, gridBagConstraints);
 
     historySizeLabel.setText(ResourceMgr.getString("LblHistorySize"));
     historySizeLabel.setToolTipText(ResourceMgr.getDescription("LblHistorySize"));
@@ -234,7 +226,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 10;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
     add(historySizeLabel, gridBagConstraints);
 
     historySizeField.setText(Integer.toString(Settings.getInstance().getMaxHistorySize()));
@@ -244,7 +236,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 10;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 11, 0, 15);
+    gridBagConstraints.insets = new java.awt.Insets(6, 11, 0, 15);
     add(historySizeField, gridBagConstraints);
 
     electricScrollLabel.setText(ResourceMgr.getString("LblSettingElectricScroll"));
@@ -465,12 +457,19 @@ public class EditorOptionsPanel
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 11);
     add(includeFilesInHistory, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(4, 10, 0, 5);
+    add(alternateDelim, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JLabel altDelimLabel;
-  private javax.swing.JTextField altDelimitTextField;
+  private workbench.gui.components.DelimiterDefinitionPanel alternateDelim;
   private javax.swing.JCheckBox autoAdvance;
   private javax.swing.JLabel autoAdvanceLabel;
   private javax.swing.JCheckBox closePopup;

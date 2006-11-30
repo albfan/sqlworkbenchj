@@ -14,6 +14,7 @@ package workbench.sql.wbcommands;
 import java.io.File;
 import java.sql.SQLException;
 import workbench.db.WbConnection;
+import workbench.sql.DelimiterDefinition;
 import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
 import workbench.sql.BatchRunner;
@@ -118,7 +119,7 @@ public class WbInclude
 			String dir = f.getCanonicalFile().getParent();
 			batchRunner.setBaseDir(dir);
 			batchRunner.setConnection(aConnection);
-			if (delim != null) batchRunner.setDelimiter(delim);
+			if (delim != null) batchRunner.setDelimiter(DelimiterDefinition.parseCmdLineArgument(delim));
 			batchRunner.setResultLogger(this.resultLogger);
 			batchRunner.setVerboseLogging(verbose);
 			batchRunner.setRowMonitor(this.rowMonitor);

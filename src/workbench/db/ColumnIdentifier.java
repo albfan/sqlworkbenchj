@@ -267,7 +267,16 @@ public class ColumnIdentifier
 	{
 		if (columnClass != null && columnClass.endsWith("[]"))
 		{
-			this.columnClassName = columnClass.toUpperCase().charAt(0) + "[";
+			// Workaround for long[] 
+			if (columnClass.startsWith("long"))
+			{
+				this.columnClassName = "[J";
+			}
+			else if (Character.isLowerCase(columnClass.charAt(0)))
+			{
+				// If it's a lower case class name we assume a native array type
+				this.columnClassName = "[" + columnClass.toUpperCase().charAt(0);
+			}
 		}
 		else
 		{

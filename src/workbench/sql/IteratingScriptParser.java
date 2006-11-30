@@ -36,10 +36,11 @@ import workbench.util.StringSequence;
  *
  * @author  support@sql-workbench.net
  */
+
 public class IteratingScriptParser
 {
 	private CharacterSequence script;
-	private String delimiter = ";";
+	private DelimiterDefinition delimiter = DelimiterDefinition.STANDARD_DELIMITER;
 	private int delimiterLength = 1;
 	private int scriptLength = -1;
 	private int lastPos = 0;
@@ -58,7 +59,6 @@ public class IteratingScriptParser
 	private boolean storeSqlInCommands = false;
 	private boolean returnStartingWhitespace = false;
 	private boolean checkHashComment = false;
-	private boolean delimiterOnOwnLine = false;
 	
 	// These patterns cover the statements that
 	// can be used in a single line without a delimiter
@@ -195,20 +195,17 @@ public class IteratingScriptParser
 		lastQuote = 0;
 	}
 
-	public void setDelimiter(String delim)
+	public void setDelimiter(DelimiterDefinition delim)
 	{
 		if (delim == null)
 		{
-			this.delimiter = ";";
-			this.delimiterLength = 1;
-			this.delimiterOnOwnLine = false;
+			this.delimiter = DelimiterDefinition.STANDARD_DELIMITER;
 		}
 		else
 		{
 			this.delimiter = delim;
-			this.delimiterLength = this.delimiter.length();
-			this.delimiterOnOwnLine = ("GO".equalsIgnoreCase(this.delimiter));
 		}
+		this.delimiterLength = this.delimiter.getDelimiter().length();
 	}
 
 	public int getScriptLength()
@@ -228,11 +225,6 @@ public class IteratingScriptParser
 			c = script.charAt(pos);
 		}
 		return pos;
-	}
-
-	public String getDelimiter()
-	{
-		return this.delimiter;
 	}
 
 	public boolean hasMoreCommands()
@@ -265,6 +257,9 @@ public class IteratingScriptParser
 	{
 		int pos;
 		String currChar;
+		boolean delimiterOnOwnLine = this.delimiter.isSingleLine();
+		String delim = this.delimiter.getDelimiter();
+		
 		for (pos = this.lastPos; pos < this.scriptLength; pos++)
 		{
 			currChar = this.script.substring(pos, pos + 1).toUpperCase();
@@ -355,7 +350,7 @@ public class IteratingScriptParser
 					currChar = this.script.substring(pos, pos + this.delimiterLength).toUpperCase();
 				}
 
-				if (!delimiterOnOwnLine && (currChar.equals(this.delimiter) || (pos == scriptLength)))
+				if (!delimiterOnOwnLine && (currChar.equals(delim) || (pos == scriptLength)))
 				{
 					if (lastPos >= pos && pos < scriptLength - 1) 
 					{
@@ -380,7 +375,7 @@ public class IteratingScriptParser
 						String clean = SqlUtil.makeCleanSql(line, false, false, '\'');
 						
 						if ( (this.emptyLineIsSeparator && clean.length() == 0) ||
-							   (this.delimiterOnOwnLine && line.equalsIgnoreCase(this.delimiter)) )
+							   (delimiterOnOwnLine && line.equalsIgnoreCase(delim)) )
 						{
 							int start = lastCommandEnd;
 							ScriptCommandDefinition c = this.createCommand(start, pos);
@@ -449,7 +444,7 @@ public class IteratingScriptParser
 		{
 			String value = this.script.substring(lastCommandEnd, scriptLength).trim();
 			int endpos = scriptLength;
-			if (value.endsWith(this.delimiter))
+			if (value.endsWith(delim))
 			{
 				endpos = endpos - this.delimiterLength;
 			}

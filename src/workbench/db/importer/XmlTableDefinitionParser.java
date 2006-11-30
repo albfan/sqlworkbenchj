@@ -10,8 +10,6 @@
  *
  */
 package workbench.db.importer;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import javax.xml.parsers.ParserConfigurationException;
@@ -20,12 +18,10 @@ import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.XmlRowDataConverter;
 import workbench.log.LogMgr;
-import workbench.util.EncodingUtil;
 import workbench.util.StringUtil;
 
 /**

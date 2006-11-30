@@ -85,8 +85,7 @@ public class ProfileSelectionDialog
   private void initComponents(String lastProfileKey)
   {
 		profiles = new ProfileEditorPanel(lastProfileKey);
-//		DividerBorder b = new DividerBorder(DividerBorder.BOTTOM + DividerBorder.RIGHT + DividerBorder.TOP, 1);
-//		profiles.setBorder(b);
+
     buttonPanel = new JPanel();
     okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
 		okButton.setEnabled(profiles.getSelectedProfile() != null);

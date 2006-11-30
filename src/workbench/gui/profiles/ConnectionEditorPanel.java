@@ -24,6 +24,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
@@ -44,6 +46,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.BooleanPropertyEditor;
+import workbench.gui.components.DelimiterDefinitionPanel;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.IntegerPropertyEditor;
 import workbench.gui.components.PasswordPropertyEditor;
@@ -68,7 +71,7 @@ public class ConnectionEditorPanel
 	private ConnectionProfile currentProfile;
 	private ProfileListModel sourceModel;
 	private boolean init;
-	private List editors;
+	private List<SimplePropertyEditor> editors;
 
 	public ConnectionEditorPanel()
 	{
@@ -115,8 +118,9 @@ public class ConnectionEditorPanel
 	
 	private void initEditorList()
 	{
-		this.editors = new ArrayList(10);
+		this.editors = new LinkedList();
 		initEditorList(this);
+		altDelimiter.addPropertyChangeListener(this);
 	}
 
 	private void initEditorList(Container parent)
@@ -126,12 +130,13 @@ public class ConnectionEditorPanel
 			Component c = parent.getComponent(i);
 			if (c instanceof SimplePropertyEditor)
 			{
-				this.editors.add(c);
+				SimplePropertyEditor ed = (SimplePropertyEditor)c;
+				this.editors.add(ed);
 				String name = c.getName();
 				c.addPropertyChangeListener(name, this);
-        ((SimplePropertyEditor)c).setImmediateUpdate(true);
+        ed.setImmediateUpdate(true);
 			}
-			else if (c instanceof JPanel)
+			else if (c instanceof JPanel && !(c instanceof DelimiterDefinitionPanel))
 			{
 				initEditorList((JPanel)c);
 			}
@@ -182,6 +187,8 @@ public class ConnectionEditorPanel
     selectWkspButton = new javax.swing.JButton();
     workspaceFileLabel = new javax.swing.JLabel();
     autoCommitLabel = new WbCheckBoxLabel();
+    altDelimiter = new workbench.gui.components.DelimiterDefinitionPanel();
+    altDelimLabel = new javax.swing.JLabel();
 
     setMinimumSize(new java.awt.Dimension(220, 200));
     setLayout(new java.awt.GridBagLayout());
@@ -518,7 +525,7 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
     wbOptionsPanel.add(editConnectionScriptsButton, gridBagConstraints);
 
@@ -562,11 +569,11 @@ public class ConnectionEditorPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 14;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 6);
+    gridBagConstraints.insets = new java.awt.Insets(2, 4, 0, 6);
     add(jPanel1, gridBagConstraints);
 
     workspaceFileLabel.setLabelFor(tfWorkspaceFile);
@@ -574,10 +581,10 @@ public class ConnectionEditorPanel
     workspaceFileLabel.setToolTipText(ResourceMgr.getDescription("LblOpenWksp"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 14;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(2, 5, 0, 0);
     add(workspaceFileLabel, gridBagConstraints);
 
     autoCommitLabel.setLabelFor(cbAutocommit);
@@ -588,6 +595,24 @@ public class ConnectionEditorPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 3, 0);
     add(autoCommitLabel, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 4, 0, 0);
+    add(altDelimiter, gridBagConstraints);
+
+    altDelimLabel.setText(ResourceMgr.getString("LblAltDelimit"));
+    altDelimLabel.setToolTipText(ResourceMgr.getDescription("LblAltDelimit"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 13;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 5, 0, 0);
+    add(altDelimLabel, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 	private void editConnectionScriptsButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_editConnectionScriptsButtonActionPerformed
@@ -684,6 +709,8 @@ public class ConnectionEditorPanel
 	}//GEN-LAST:event_showDriverEditorDialog
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  protected javax.swing.JLabel altDelimLabel;
+  protected workbench.gui.components.DelimiterDefinitionPanel altDelimiter;
   protected javax.swing.JLabel autoCommitLabel;
   protected javax.swing.JCheckBox cbAutocommit;
   protected javax.swing.JComboBox cbDrivers;
@@ -783,13 +810,20 @@ public class ConnectionEditorPanel
 		if (this.editors == null) return;
 		boolean changed = false;
 
-		for (int i=0; i < this.editors.size(); i++)
+		Iterator<SimplePropertyEditor> itr = this.editors.iterator();
+		while (itr.hasNext())
 		{
-			SimplePropertyEditor editor = (SimplePropertyEditor)this.editors.get(i);
+			SimplePropertyEditor editor = itr.next();
 			changed = changed || editor.isChanged();
 			editor.applyChanges();
 		}
-
+		
+		if (altDelimiter.getDelimiter().isChanged())
+		{
+			changed = true;
+			currentProfile.setAlternateDelimiter(altDelimiter.getDelimiter());
+		}
+		
 		if (changed)
 		{
 			this.sourceModel.profileChanged(this.currentProfile);
@@ -807,9 +841,10 @@ public class ConnectionEditorPanel
 		if (this.editors == null) return;
 		if (this.currentProfile == null) return;
 
-		for (int i=0; i < this.editors.size(); i++)
+		Iterator<SimplePropertyEditor> itr = this.editors.iterator();
+		while (itr.hasNext())
 		{
-			SimplePropertyEditor editor = (SimplePropertyEditor)this.editors.get(i);
+			SimplePropertyEditor editor = itr.next();
 			Component c = (Component)editor;
 			String property = c.getName();
 			if (property != null)
@@ -824,6 +859,8 @@ public class ConnectionEditorPanel
 		if (aProfile == null) return;
 
 		this.currentProfile = aProfile;
+		this.altDelimiter.setDelimiter(this.currentProfile.getAlternateDelimiter());
+		
 		//System.out.println("switching to profile: " + aProfile.getName() + "(" + aProfile.getIdentifier() + ")");
 		this.initPropertyEditors();
 
@@ -857,9 +894,17 @@ public class ConnectionEditorPanel
 	 */
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (evt.getSource() instanceof SimplePropertyEditor)
+		if (evt.getSource() instanceof SimplePropertyEditor) 
 		{
-			if (!this.init)	this.sourceModel.profileChanged(this.currentProfile);
+			// As the alternateDelimiter is a not attached to the 
+			// profile itself, we have to propagate any update delimiter object
+			// to the profile
+			this.currentProfile.setAlternateDelimiter(altDelimiter.getDelimiter());
+				
+			if (!this.init)	
+			{
+				this.sourceModel.profileChanged(this.currentProfile);
+			}
 		}
 	}
 	

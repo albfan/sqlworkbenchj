@@ -104,7 +104,6 @@ public class WbManager
 			{
 				traceOut = null;
 			}
-			
 		}
 	}
 	
@@ -813,6 +812,7 @@ public class WbManager
 	public static final String ARG_ERROR_SCRIPT = "cleanuperror";
 	public static final String ARG_SHOW_TIMING = "showtiming";
 	public static final String ARG_WORKSPACE = "workspace";
+	public static final String ARG_ALT_DELIMITER = "altdelimiter";
 
 	// Other parameters
 	public static final String ARG_PROFILE = "profile";
@@ -860,6 +860,7 @@ public class WbManager
 		parser.addArgument(ARG_WORKSPACE);
 		parser.addArgument("nosettings");
 		parser.addArgument("notemplates");
+		parser.addArgument(ARG_ALT_DELIMITER);
 		return parser;
 	}
 	

@@ -20,6 +20,7 @@ import workbench.WbManager;
 import workbench.gui.profiles.ProfileKey;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.DelimiterDefinition;
 import workbench.util.StringUtil;
 import workbench.util.WbCipher;
 import workbench.util.WbPersistence;
@@ -61,6 +62,7 @@ public class ConnectionProfile
 	private boolean rememberExplorerSchema = false;
 	private String postConnectScript = null;
 	private String preDisconnectScript = null;
+	private DelimiterDefinition alternateDelimiter;
 	
 	static
 	{
@@ -104,6 +106,24 @@ public class ConnectionProfile
 		this.changed = false;
 	}
 
+	public void setAlternateDelimiter(DelimiterDefinition def)
+	{
+		if (def == null && this.alternateDelimiter == null) return;
+		
+		if ((def == null && this.alternateDelimiter != null) ||
+			  (def != null && this.alternateDelimiter == null) ||
+				!def.equals(this.alternateDelimiter))
+		{
+			this.alternateDelimiter = def;
+			this.changed = true;
+		}
+	}
+	
+	public DelimiterDefinition getAlternateDelimiter()
+	{
+		return this.alternateDelimiter;
+	}
+	
 	public boolean getStoreExplorerSchema()
 	{
 		return rememberExplorerSchema;

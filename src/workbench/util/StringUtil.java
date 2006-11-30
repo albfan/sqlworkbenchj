@@ -14,11 +14,11 @@ package workbench.util;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -402,17 +402,17 @@ public class StringUtil
 		return one.equalsIgnoreCase(other);
 	}
 
-	public static final List stringToList(String aString, String aDelimiter)
+	public static final List<String> stringToList(String aString, String aDelimiter)
 	{
 		return stringToList(aString, aDelimiter, false, false);
 	}
 
-	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty)
+	public static final List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty)
 	{
 		return stringToList(aString, aDelimiter, removeEmpty, false);
 	}
 	
-	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries)
+	public static final List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries)
 	{
 		return stringToList(aString, aDelimiter, removeEmpty, trimEntries, false);
 	}
@@ -427,13 +427,13 @@ public class StringUtil
    * @param checkBrackets flag to check for opening and closing brackets (delimiter inside brackets will not be taken into account)
 	 * @return A List of Strings
 	 */
-	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets)
+	public static final List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets)
 	{
 		if (aString == null || aString.length() == 0) return Collections.EMPTY_LIST;
 		WbStringTokenizer tok = new WbStringTokenizer(aString, aDelimiter);
 		tok.setDelimiterNeedsWhitspace(false);
 		tok.setCheckBrackets(checkBrackets);
-		ArrayList result = new ArrayList(150);
+		List result = new LinkedList();
 		while (tok.hasMoreTokens())
 		{
 			String element = tok.nextToken();

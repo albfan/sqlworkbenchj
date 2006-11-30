@@ -31,6 +31,28 @@ public class ScriptParserTest extends TestCase
 		super(testName);
 	}
 
+	public void testSingleLineDelimiter()
+	{
+		String sql = "CREATE OR REPLACE PROCEDURE test\n" + 
+								 "IS \n" + 
+								 "BEGIN \n" + 
+								 "  SELECT a / b FROM someTable;\n" + 
+								 "END;\n" +
+								 "/";
+		try
+		{
+			ScriptParser p = new ScriptParser(sql);
+			p.setAlternateDelimiter(new DelimiterDefinition("/", true));
+			int size = p.getSize();
+			assertEquals("Wrong number of statements", 1, size);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testQuotedDelimiter()
 	{
 		String sql = "SELECT id,';' \n" + 
@@ -41,7 +63,6 @@ public class ScriptParserTest extends TestCase
 		try
 		{
 			ScriptParser p = new ScriptParser(sql);
-			p.setAlternateDelimiter("./");
 			int size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);
 		}
@@ -65,7 +86,8 @@ public class ScriptParserTest extends TestCase
 		try
 		{
 			ScriptParser p = new ScriptParser(sql);
-			p.setAlternateDelimiter("./");
+			// Test if the automatic detection of the MS SQL delimiter works
+			p.setAlternateDelimiter(new DelimiterDefinition("./", false));
 			int size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);
 		}
@@ -89,11 +111,11 @@ public class ScriptParserTest extends TestCase
 		try
 		{
 			ScriptParser p = new ScriptParser(sql);
-			p.setAlternateDelimiter("#");
+			p.setAlternateDelimiter(new DelimiterDefinition("#", true));
 			int size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);
 			
-			p.setAlternateDelimiter("./");
+			p.setAlternateDelimiter(new DelimiterDefinition("./", false));
 			size = p.getSize();
 			assertEquals("Wrong number of statements", 1, size);			
 			

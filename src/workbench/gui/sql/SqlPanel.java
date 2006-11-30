@@ -150,6 +150,7 @@ import workbench.interfaces.TextChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.DelimiterDefinition;
 import workbench.sql.MacroManager;
 import workbench.sql.ScriptParser;
 import workbench.sql.commands.SingleVerbCommand;
@@ -2025,7 +2026,13 @@ public class SqlPanel
 	private ScriptParser createScriptParser()
 	{
 		ScriptParser scriptParser = new ScriptParser();
-		scriptParser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
+		DelimiterDefinition altDelim = null;
+		if (this.dbConnection.getProfile() != null)
+		{
+			altDelim = this.dbConnection.getProfile().getAlternateDelimiter();
+		}
+		if (altDelim == null) altDelim = Settings.getInstance().getAlternateDelimiter();
+		scriptParser.setAlternateDelimiter(altDelim);
 		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
 		scriptParser.setSupportOracleInclude(this.dbConnection.getMetadata().supportShortInclude());
 		scriptParser.setCheckForSingleLineCommands(this.dbConnection.getMetadata().supportSingleLineCommands());

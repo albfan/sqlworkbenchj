@@ -63,7 +63,7 @@ public class BatchRunner
 	private boolean abortOnError = false;
 	private String successScript;
 	private String errorScript;
-	private String delimiter = ";";
+	private DelimiterDefinition delimiter = DelimiterDefinition.STANDARD_DELIMITER;
 	private boolean showResultSets = false;
 	private boolean showTiming = true;
 	private boolean success = true;
@@ -128,7 +128,10 @@ public class BatchRunner
 		this.profile = aProfile;
 	}
 
-	public void setDelimiter(String delim) { this.delimiter = delim; }
+	public void setDelimiter(DelimiterDefinition delim) 
+	{ 
+		if (delim != null) this.delimiter = delim; 
+	}
 
 	public void setConnection(WbConnection conn)
 	{
@@ -298,7 +301,13 @@ public class BatchRunner
 		boolean error = false;
 		StatementRunnerResult result = null;
 		ScriptParser parser = new ScriptParser();
-		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
+		DelimiterDefinition altDelim = null;
+		if (this.connection != null && this.connection.getProfile() != null)
+		{
+			altDelim = this.connection.getProfile().getAlternateDelimiter();
+		}
+		if (altDelim == null) altDelim = Settings.getInstance().getAlternateDelimiter();
+		parser.setAlternateDelimiter(altDelim);
 		parser.setDelimiter(this.delimiter);
 		if (this.connection != null)
 		{
@@ -329,13 +338,12 @@ public class BatchRunner
 
 		start = System.currentTimeMillis();
 
-		Iterator itr = parser.getIterator();
+		parser.startIterator();
 
-		while (itr.hasNext())
+		while (parser.hasNext())
 		{
-			Object command = itr.next();
-			if (command == null) continue;
-			sql = command.toString();
+			sql = parser.getNextCommand();
+			if (sql == null) continue;
 
 			try
 			{
@@ -492,6 +500,9 @@ public class BatchRunner
 			String jar = cmdLine.getValue(WbManager.ARG_CONN_JAR);
 			String commit =  cmdLine.getValue(WbManager.ARG_CONN_AUTOCOMMIT);
 			String wksp = cmdLine.getValue(WbManager.ARG_WORKSPACE);
+			String delimDef = cmdLine.getValue(WbManager.ARG_ALT_DELIMITER);
+			DelimiterDefinition delim = DelimiterDefinition.parseCmdLineArgument(delimDef);
+			
 			boolean rollback = cmdLine.getBoolean(WbManager.ARG_CONN_ROLLBACK, false);
 			
 			DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver(driverclass);
@@ -501,7 +512,7 @@ public class BatchRunner
 			}
 			result = new ConnectionProfile(CMD_LINE_PROFILE_NAME, driverclass, url, user, pwd);
 			result.setRollbackBeforeDisconnect(rollback);
-			
+			result.setAlternateDelimiter(delim);
 			if (!StringUtil.isEmptyString(wksp))
 			{
 				wksp = FileDialogUtil.replaceConfigDir(wksp);
