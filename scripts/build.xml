@@ -53,6 +53,7 @@
 		<propertyfile file="devbuild.number">
 			<entry key="dev-build.number" type="int" operation="=" value="0"/>
 		</propertyfile>
+		<antcall target="replace-build-number"/>
 	</target>
 
 	<target name="replace-build-number">
@@ -136,8 +137,8 @@
 					 destdir="${build}" 
 					 optimize="on" 
 					 srcdir="${src}" 
-					 target="1.4" 
-					 source="1.4" 
+					 target="1.5" 
+					 source="1.5" 
 					 encoding="ISO-8859-1">
 						 
 			<exclude name="workbench/test/**"/>
