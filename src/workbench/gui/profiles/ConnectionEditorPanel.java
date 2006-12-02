@@ -56,8 +56,10 @@ import workbench.gui.components.WbButton;
 import workbench.gui.components.WbCheckBoxLabel;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.SimplePropertyEditor;
+import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.sql.DelimiterDefinition;
 import workbench.util.FileDialogUtil;
 
 /**
@@ -66,7 +68,7 @@ import workbench.util.FileDialogUtil;
  */
 public class ConnectionEditorPanel
 	extends JPanel
-	implements PropertyChangeListener, ActionListener
+	implements PropertyChangeListener, ActionListener, ValidatingComponent
 {
 	private ConnectionProfile currentProfile;
 	private ProfileListModel sourceModel;
@@ -83,16 +85,23 @@ public class ConnectionEditorPanel
 		policy.addComponent(tfURL);
 		policy.addComponent(tfUserName);
 		policy.addComponent(tfPwd);
+		policy.addComponent(showPassword);
 		policy.addComponent(tfFetchSize);
 		policy.addComponent(cbAutocommit);
 		policy.addComponent(cbStorePassword);
 		policy.addComponent(cbSeparateConnections);
 		policy.addComponent(cbIgnoreDropErrors);
-		policy.addComponent(rollbackBeforeDisconnect);
-		policy.addComponent(tfWorkspaceFile);
-		policy.addComponent(confirmUpdates);
 		policy.addComponent(emptyStringIsNull);
 		policy.addComponent(removeComments);
+		policy.addComponent(rollbackBeforeDisconnect);
+		policy.addComponent(confirmUpdates);
+		policy.addComponent(includeNull);
+		policy.addComponent(rememberExplorerSchema);
+		policy.addComponent(confirmUpdates);
+		policy.addComponent(editConnectionScriptsButton);
+		policy.addComponent(altDelimiter.getTextField());
+		policy.addComponent(altDelimiter.getCheckBox());
+		policy.addComponent(tfWorkspaceFile);
 		policy.setDefaultComponent(tfProfileName);
 
 		this.setFocusCycleRoot(true);
@@ -899,7 +908,10 @@ public class ConnectionEditorPanel
 			// As the alternateDelimiter is a not attached to the 
 			// profile itself, we have to propagate any update delimiter object
 			// to the profile
-			this.currentProfile.setAlternateDelimiter(altDelimiter.getDelimiter());
+			if (altDelimiter.getDelimiter().isChanged())
+			{
+				this.currentProfile.setAlternateDelimiter(altDelimiter.getDelimiter());
+			}
 				
 			if (!this.init)	
 			{
@@ -931,5 +943,21 @@ public class ConnectionEditorPanel
 			JOptionPane.showMessageDialog(this.getParent(), f, title, JOptionPane.PLAIN_MESSAGE);
 		}
 	}
+
+public boolean validateInput() 
+{
+	DelimiterDefinition delim = getProfile().getAlternateDelimiter();
+	if (delim.isStandard())
+	{
+		WbSwingUtilities.showErrorMessageKey(this, "ErrWrongAltDelim");
+		return false;
+	}
+	return true;
+}
+
+public void componentDisplayed() 
+{
+	// nothing to do
+}
 
 }

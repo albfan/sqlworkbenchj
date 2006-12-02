@@ -2032,6 +2032,7 @@ public class SqlPanel
 			altDelim = this.dbConnection.getProfile().getAlternateDelimiter();
 		}
 		if (altDelim == null) altDelim = Settings.getInstance().getAlternateDelimiter();
+
 		scriptParser.setAlternateDelimiter(altDelim);
 		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
 		scriptParser.setSupportOracleInclude(this.dbConnection.getMetadata().supportShortInclude());

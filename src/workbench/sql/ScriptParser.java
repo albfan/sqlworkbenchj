@@ -234,7 +234,7 @@ public class ScriptParser
 		}
 	}
 
-	private Pattern MS_GO = Pattern.compile("(?i)[\\r\\n|\\n]+[ \t]*GO[ \t]*[\\r\\n|\\n]*$");
+//	private Pattern MS_GO = Pattern.compile("(?i)[\\r\\n|\\n]+[ \t]*GO[ \t]*[\\r\\n|\\n]*$");
 	
 	/**
 	 *	Try to find out which delimiter should be used for the current script.
@@ -251,21 +251,22 @@ public class ScriptParser
 
 		if (originalScript == null) return;
 		
-		String cleanSql = this.originalScript.trim();
+//		String cleanSql = this.originalScript.trim();
 		
 		if (this.alternateDelimiter == null)
 		{
 			this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter();
 		}
 		
-		if (cleanSql.endsWith(this.alternateDelimiter.getDelimiter()))
+		//if (cleanSql.endsWith(this.alternateDelimiter.getDelimiter()))
+		if (alternateDelimiter.terminatesScript(originalScript))
 		{
 			this.delimiter = this.alternateDelimiter;
 		}
-		else if (MS_GO.matcher(cleanSql).find())
-		{
-			this.delimiter = DelimiterDefinition.DEFAULT_MS_DELIMITER;
-		}
+//		else if (MS_GO.matcher(originalScript).find())
+//		{
+//			this.delimiter = DelimiterDefinition.DEFAULT_MS_DELIMITER;
+//		}
 		
 		// if the delimiter changed, we have to clear already parsed commands
 		if (!this.delimiter.equals(oldDelimiter))

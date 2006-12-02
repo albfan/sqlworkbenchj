@@ -150,11 +150,14 @@ public class ProfileSelectionDialog
 
 	public void selectProfile()
 	{
-		this.selectedProfile = this.profiles.getSelectedProfile();
-		if (this.checkPassword())
+		if (this.profiles.validateInput())
 		{
-			this.cancelled = false;
-			this.closeDialog();
+			this.selectedProfile = this.profiles.getSelectedProfile();
+			if (this.checkPassword())
+			{
+				this.cancelled = false;
+				this.closeDialog();
+			}
 		}
 	}
 

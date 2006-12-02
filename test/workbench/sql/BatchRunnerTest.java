@@ -32,8 +32,6 @@ import workbench.util.SqlUtil;
 public class BatchRunnerTest
 	extends TestCase
 {
-	private File[] scriptFiles;
-	private BatchRunner runner;
 	private String basedir;
 	private String dbName;
 	private TestUtil util;
@@ -52,53 +50,34 @@ public class BatchRunnerTest
 		}
 	}
 	
-	private void createScript()
-		throws Exception
-	{
-		scriptFiles = new File[1];
-		scriptFiles[0] = new File(util.getBaseDir(), "preparedata.sql");
-		PrintWriter writer = new PrintWriter(new FileWriter(scriptFiles[0]));
-		System.out.println("Writing script file=" + scriptFiles[0].getAbsolutePath());
-		writer.println("-- test script");
-		writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100));");
-		writer.println("-- first row");
-		writer.println("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent');");
-		writer.println("-- first row");
-		writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect');");
-		writer.println("-- first row");
-		writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox');");
-		writer.println("-- make everything permanent");
-		writer.println("commit;");
-		writer.close();
-	}
-	
-	private void createRunner()
-		throws Exception
-	{
-		util.emptyBaseDirectory();
-		createScript();
-		ArgumentParser parser = WbManager.createArgumentParser();
-		StringBuffer files = new StringBuffer(scriptFiles.length * 50);
-		for (int i = 0; i < scriptFiles.length; i++)
-		{
-			if (i > 0) files.append(' ');
-			files.append("-script='");
-			files.append(scriptFiles[i].getAbsolutePath());
-			files.append('\'');
-		}
-		parser.parse("-url='jdbc:hsqldb:" + util.getDbName() + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver "  + files.toString() + " -rollbackOnDisconnect=true");
-		this.runner = BatchRunner.createBatchRunner(parser);
-		assertNotNull(this.runner);
-	}
-	
 	public void testBatchRunner()
 	{
 		try
 		{
-			createRunner();
-			assertNotNull(this.runner);
+			util.emptyBaseDirectory();
 			
-			this.runner.connect();
+			File scriptFile = new File(util.getBaseDir(), "preparedata.sql");
+			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
+			writer.println("-- test script");
+			writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100));");
+			writer.println("-- first row");
+			writer.println("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent');");
+			writer.println("-- first row");
+			writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect');");
+			writer.println("-- first row");
+			writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox');");
+			writer.println("-- make everything permanent");
+			writer.println("commit;");
+			writer.close();
+
+			ArgumentParser parser = WbManager.createArgumentParser();
+			String script = "-script='" + scriptFile.getAbsolutePath() + "'";
+			parser.parse("-url='jdbc:hsqldb:" + util.getDbName() + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver "  + script + " -rollbackOnDisconnect=true");
+			BatchRunner runner = BatchRunner.createBatchRunner(parser);
+	
+			assertNotNull(runner);
+			
+			runner.connect();
 			WbConnection con = runner.getConnection();
 			assertNotNull(con);
 			assertNotNull(con.getProfile());
@@ -106,7 +85,7 @@ public class BatchRunnerTest
 			boolean rollback = con.getProfile().getRollbackBeforeDisconnect();
 			assertEquals("Rollback property not read from commandline", true, rollback);
 			
-			this.runner.execute();
+			runner.execute();
 			
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery("select count(*) from person");
@@ -120,7 +99,8 @@ public class BatchRunnerTest
 		}
 		catch (Throwable e)
 		{
-			fail("Error running scripts");
+			e.printStackTrace();
+			fail(e.getMessage());
 		}
 		finally
 		{
@@ -128,5 +108,62 @@ public class BatchRunnerTest
 		}
 	}
 	
-	
+	public void testAltDelimiter()
+	{
+		try
+		{
+			util.emptyBaseDirectory();
+			
+			ArgumentParser parser = WbManager.createArgumentParser();
+			File scriptFile = new File(util.getBaseDir(), "preparedata.sql");
+			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
+			writer.println("-- test script");
+			writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100))");
+			writer.println("/");
+			writer.println("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent')");
+			writer.println("/");
+			writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect')");
+			writer.println("/");
+			writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox')");
+			writer.println("/");
+			writer.println("commit");
+			writer.println("/");
+			writer.close();			
+			parser.parse("-url='jdbc:hsqldb:" + util.getDbName() + ";shutdown=true' -altdelimiter='/;nl' -user=sa -driver=org.hsqldb.jdbcDriver -script='" + scriptFile.getAbsolutePath() + "'");
+			BatchRunner runner = BatchRunner.createBatchRunner(parser);
+			
+			assertNotNull(runner);
+
+			runner.connect();
+			WbConnection con = runner.getConnection();
+			assertNotNull(con);
+			assertNotNull(con.getProfile());
+			
+			DelimiterDefinition def = con.getProfile().getAlternateDelimiter();
+			assertNotNull("No alternate delimiter defined", def);
+			assertEquals("Wrong delimiter parsed", "/", def.getDelimiter());
+			assertEquals("Wrong singleLine Property parsed", true, def.isSingleLine());
+			
+			runner.execute();
+			
+			Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery("select count(*) from person");
+			
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Not enough records inserted", 3, count);
+			}
+			SqlUtil.closeAll(rs, stmt);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
 }

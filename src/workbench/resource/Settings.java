@@ -1877,7 +1877,9 @@ public class Settings
 	{
 		String delim = getProperty("workbench.sql.alternatedelimiter", "/");
 		boolean sld = getBoolProperty("workbench.sql.alternatedelimiter.singleline", true);
-		return new DelimiterDefinition(delim, sld);
+		DelimiterDefinition def = new DelimiterDefinition(delim, sld);
+		if (def.isStandard()) return null;
+		return def;
 	}
 
 	public void setAlternateDelimiter(DelimiterDefinition aDelimit)

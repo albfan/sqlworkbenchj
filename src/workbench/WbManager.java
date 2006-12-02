@@ -813,6 +813,7 @@ public class WbManager
 	public static final String ARG_SHOW_TIMING = "showtiming";
 	public static final String ARG_WORKSPACE = "workspace";
 	public static final String ARG_ALT_DELIMITER = "altdelimiter";
+	public static final String ARG_DELIMITER = "delimiter";
 
 	// Other parameters
 	public static final String ARG_PROFILE = "profile";
@@ -861,6 +862,7 @@ public class WbManager
 		parser.addArgument("nosettings");
 		parser.addArgument("notemplates");
 		parser.addArgument(ARG_ALT_DELIMITER);
+		parser.addArgument(ARG_DELIMITER);
 		return parser;
 	}
 	

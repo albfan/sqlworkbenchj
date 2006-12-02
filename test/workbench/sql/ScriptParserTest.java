@@ -14,9 +14,12 @@ package workbench.sql;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.Iterator;
 import junit.framework.*;
 import java.util.List;
+import workbench.TestUtil;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
 /**
@@ -33,18 +36,78 @@ public class ScriptParserTest extends TestCase
 
 	public void testSingleLineDelimiter()
 	{
-		String sql = "CREATE OR REPLACE PROCEDURE test\n" + 
-								 "IS \n" + 
-								 "BEGIN \n" + 
-								 "  SELECT a / b FROM someTable;\n" + 
-								 "END;\n" +
-								 "/";
+//		String sql = "-- test it\r\n" + 
+//			           "DROP PROCEDURE test\r\n" + 
+//			           "/\r\n" + 
+//			           "CREATE OR REPLACE PROCEDURE test\r\n" + 
+//								 "IS \r\n" + 
+//								 "BEGIN \\n" + 
+//								 "  SELECT a / b FROM someTable;\r\n" + 
+//								 "END;\r\n" +
+//								 "/\r\n";
+
+		String sql = "DROP\n" + 
+			           "/\n" + 
+			           "CREATE\n" +
+								 "/\n";
 		try
 		{
-			ScriptParser p = new ScriptParser(sql);
+			ScriptParser p = new ScriptParser();
 			p.setAlternateDelimiter(new DelimiterDefinition("/", true));
+			p.setCheckForSingleLineCommands(false);
+			p.setScript(sql);
 			int size = p.getSize();
-			assertEquals("Wrong number of statements", 1, size);
+			assertEquals("Wrong number of statements", 2, size);
+			
+			assertEquals("Delimiter returned", false, p.getCommand(0).trim().endsWith("/"));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
+	public void testAlternateFileParsing()
+	{
+		try
+		{
+			TestUtil util = new TestUtil();
+			util.prepareEnvironment();
+			
+			File scriptFile = new File(util.getBaseDir(), "testscript.sql");
+			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
+			writer.println("-- test script");
+			writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100))");
+			writer.println("/");
+			writer.println("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent')");
+			writer.println("/");
+			writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect')");
+			writer.println("/");
+			writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox')");
+			writer.println("/");
+			writer.println("commit");
+			writer.println("/");
+			writer.close();	
+			
+			// Make sure the iterating parser is used, by setting
+			// a very low max file size
+			ScriptParser p = new ScriptParser(100); 
+			
+			p.setDelimiter(new DelimiterDefinition("/", true));
+			p.setSupportOracleInclude(false);
+			p.setCheckForSingleLineCommands(false);
+			p.setCheckEscapedQuotes(false);
+			
+			p.setFile(scriptFile);
+			p.startIterator();
+			int size = 0;
+			while (p.hasNext())
+			{
+				size ++;
+				p.getNextCommand();
+			}
+			assertEquals("Wrong number of statements", 5, size);
 		}
 		catch (Exception e)
 		{
@@ -87,7 +150,8 @@ public class ScriptParserTest extends TestCase
 		{
 			ScriptParser p = new ScriptParser(sql);
 			// Test if the automatic detection of the MS SQL delimiter works
-			p.setAlternateDelimiter(new DelimiterDefinition("./", false));
+			//p.setAlternateDelimiter(new DelimiterDefinition("./", false));
+			p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_MS_DELIMITER);
 			int size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);
 		}

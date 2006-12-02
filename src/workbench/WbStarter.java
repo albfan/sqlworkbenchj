@@ -46,7 +46,7 @@ public class WbStarter
 		}
 		
 		boolean versionIsOk = false;
-		final int minMinorVersion = 4;
+		final int minMinorVersion = 5;
 		
 		int minorversion = -1;
 		

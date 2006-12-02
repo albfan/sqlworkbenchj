@@ -377,8 +377,16 @@ public class IteratingScriptParser
 						if ( (this.emptyLineIsSeparator && clean.length() == 0) ||
 							   (delimiterOnOwnLine && line.equalsIgnoreCase(delim)) )
 						{
+							int end = pos;
+							
+							if (clean.length() > 0)
+							{
+								// a single line delimiter was found, we have to make 
+								// sure this is not added to the created command
+								end = lastNewLineStart;
+							}
 							int start = lastCommandEnd;
-							ScriptCommandDefinition c = this.createCommand(start, pos);
+							ScriptCommandDefinition c = this.createCommand(start, end);
 							if (c != null) 
 							{
 								startOfLine = true;
@@ -429,6 +437,7 @@ public class IteratingScriptParser
 							}
 							continue;
 						}
+						lastNewLineStart = pos + 1;
 					}
 					else
 					{

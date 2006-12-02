@@ -128,6 +128,11 @@ public class BatchRunner
 		this.profile = aProfile;
 	}
 
+	public DelimiterDefinition getDelimiter() 
+	{
+		return this.delimiter;
+	}
+	
 	public void setDelimiter(DelimiterDefinition delim) 
 	{ 
 		if (delim != null) this.delimiter = delim; 
@@ -309,6 +314,7 @@ public class BatchRunner
 		if (altDelim == null) altDelim = Settings.getInstance().getAlternateDelimiter();
 		parser.setAlternateDelimiter(altDelim);
 		parser.setDelimiter(this.delimiter);
+		
 		if (this.connection != null)
 		{
 			parser.setSupportOracleInclude(this.connection.getMetadata().supportSingleLineCommands());
@@ -601,6 +607,13 @@ public class BatchRunner
 		if (showProgress)
 		{
 			runner.setRowMonitor(new GenericRowMonitor(new ConsoleStatusBar()));
+		}
+		
+		DelimiterDefinition def = DelimiterDefinition.parseCmdLineArgument(cmdLine.getValue(WbManager.ARG_DELIMITER));
+		
+		if (def != null)
+		{
+			runner.setDelimiter(def);
 		}
 		
 		return runner;

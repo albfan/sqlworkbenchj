@@ -43,6 +43,7 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.FileActions;
+import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -54,7 +55,7 @@ import workbench.util.StringUtil;
  */
 public class ProfileEditorPanel
 	extends JPanel
-	implements FileActions
+	implements FileActions, ValidatingComponent
 {
 	private ProfileListModel model;
 	private JToolBar toolbar;
@@ -448,4 +449,14 @@ public class ProfileEditorPanel
 		return this.profileTree.getRowCount();
 	}
 	
+	public boolean validateInput()
+	{
+		return this.connectionEditor.validateInput();
+	}
+	
+	public void componentDisplayed()
+	{
+		// nothing to do
+	}
+         
 }
