@@ -246,7 +246,7 @@ public class VariablePool
 	 */
 	private String replaceVarValue(String original, String pattern, String replacement)
 	{
-		StringBuffer result = new StringBuffer(original);
+		StringBuilder result = new StringBuilder(original);
 		Pattern p = Pattern.compile(pattern);
 		Matcher m = p.matcher(original);
 		while (m != null && m.find())
@@ -261,7 +261,7 @@ public class VariablePool
 		
 	public String buildVarName(String varName, boolean forPrompt)
 	{
-		StringBuffer result = new StringBuffer(varName.length() + this.prefixLen + this.suffixLen + 1);
+		StringBuilder result = new StringBuilder(varName.length() + this.prefixLen + this.suffixLen + 1);
 		result.append(this.prefix);
 		if (forPrompt) result.append('?');
 		result.append(varName);
@@ -271,7 +271,7 @@ public class VariablePool
 	
 	public String buildVarNamePattern(String varName, boolean forPrompt)
 	{
-		StringBuffer result = new StringBuffer(varName.length() + this.prefixLen + this.suffixLen + 1);
+		StringBuilder result = new StringBuilder(varName.length() + this.prefixLen + this.suffixLen + 1);
 		
 		result.append(StringUtil.quoteRegexMeta(prefix));
 		if (forPrompt)

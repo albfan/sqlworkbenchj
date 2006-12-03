@@ -173,7 +173,7 @@ public class DmlStatement
 	{
 		if (this.values.size() > 0)
 		{
-			StringBuffer result = new StringBuffer(this.sql.length() + this.values.size() * 10);
+			StringBuilder result = new StringBuilder(this.sql.length() + this.values.size() * 10);
 			boolean inQuotes = false;
 			int parmIndex = 0;
 			for (int i = 0; i < this.sql.length(); ++i)
@@ -212,7 +212,7 @@ public class DmlStatement
 		boolean useConcatFunc = (this.concatFunction != null);
 		
 		if (!useConcatFunc && this.concatString == null) this.concatString = "||";
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		boolean funcAppended = false;
 		boolean quotePending = false;
 		
@@ -228,7 +228,7 @@ public class DmlStatement
 				{
 					if (!funcAppended)
 					{
-						StringBuffer temp = new StringBuffer(concatFunction);
+						StringBuilder temp = new StringBuilder(concatFunction);
 						temp.append('(');
 						temp.append(result);
 						result = temp;

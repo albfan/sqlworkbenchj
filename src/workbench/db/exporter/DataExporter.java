@@ -679,7 +679,7 @@ public class DataExporter
 			}
 			if (this.rowMonitor != null && this.currentJob.getTableName() != null)
 			{
-				StringBuffer msg = new StringBuffer(80);
+				StringBuilder msg = new StringBuilder(80);
 				msg.append(this.currentJob.getTableName());
 				msg.append(" [");
 				msg.append(i+1);
@@ -1031,7 +1031,7 @@ public class DataExporter
 		{
 			try
 			{
-				StringBuffer query = new StringBuffer(250);
+				StringBuilder query = new StringBuilder(250);
 				query.append("SELECT ");
 				List cols = dialog.getColumnsToExport();
 				if (cols != null)

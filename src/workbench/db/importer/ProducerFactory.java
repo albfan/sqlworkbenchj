@@ -208,7 +208,7 @@ public class ProducerFactory
 	/**
 	 * Appends text import options to the passed sql command
 	 */
-	private void appendTextOptions(StringBuffer command, StringBuffer indent)
+	private void appendTextOptions(StringBuilder command, StringBuilder indent)
 	{
 		if (this.textOptions == null) return;
 		appendArgument(command, WbImport.ARG_CONTAINSHEADER, textOptions.getContainsHeader(), indent);
@@ -224,18 +224,18 @@ public class ProducerFactory
 	/**
 	 * Appends xml import options to the passed sql command
 	 */
-	private void appendXmlOptions(StringBuffer command, StringBuffer indent)
+	private void appendXmlOptions(StringBuilder command, StringBuilder indent)
 	{
 		if (this.xmlOptions == null) return;
 		appendArgument(command, WbImport.ARG_VERBOSEXML, xmlOptions.getUseVerboseXml(), indent);
 	}
 
-	private void appendArgument(StringBuffer result, String arg, boolean value, StringBuffer indent)
+	private void appendArgument(StringBuilder result, String arg, boolean value, StringBuilder indent)
 	{
 		appendArgument(result, arg, Boolean.toString(value), indent);
 	}
 	
-	private void appendArgument(StringBuffer result, String arg, String value, StringBuffer indent)
+	private void appendArgument(StringBuilder result, String arg, String value, StringBuilder indent)
 	{
 		if (value != null)
 		{
@@ -259,8 +259,8 @@ public class ProducerFactory
 	 */
 	public String getWbCommand()
 	{
-		StringBuffer result = new StringBuffer(150);
-		StringBuffer indent = new StringBuffer();
+		StringBuilder result = new StringBuilder(150);
+		StringBuilder indent = new StringBuilder();
 		indent.append('\n');
 		for (int i=0; i < WbImport.VERB.length(); i++) indent.append(' ');
 		indent.append(' ');

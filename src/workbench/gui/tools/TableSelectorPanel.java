@@ -145,7 +145,7 @@ public class TableSelectorPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			StringBuffer s = new StringBuffer(this.dbConnection.getMetadata().getSchemaTerm().toLowerCase());
+			StringBuilder s = new StringBuilder(this.dbConnection.getMetadata().getSchemaTerm().toLowerCase());
 			s.setCharAt(0, Character.toUpperCase(s.charAt(0)));
 			this.schemaLabel.setText(s.toString());
 

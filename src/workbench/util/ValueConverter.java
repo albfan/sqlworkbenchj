@@ -396,7 +396,7 @@ public class ValueConverter
 		String value = input.trim();
 		int len = value.length();
 		if (len == 0) return value;
-		StringBuffer result = new StringBuffer(len);
+		StringBuilder result = new StringBuilder(len);
 		int pos = value.lastIndexOf(this.decimalCharacter);
 		for (int i=0; i < len; i++)
 		{

@@ -364,7 +364,7 @@ public class DwPanel
 			preview.setMaximumSize(max);
 			JScrollPane scroll = new JScrollPane(preview);
 			scroll.setMaximumSize(max);
-			final StringBuffer text = new StringBuffer(stmts.size() * 150);
+			final StringBuilder text = new StringBuilder(stmts.size() * 150);
 			SqlLiteralFormatter f = new SqlLiteralFormatter(aConnection);
 			for (int i=0; i < stmts.size(); i++)
 			{
@@ -712,7 +712,7 @@ public class DwPanel
 			this.dataTable.setAutoCreateColumnsFromModel(true);
 			this.dataTable.setModel(new DataStoreTableModel(newData), true);
 			this.dataTable.adjustOrOptimizeColumns(Settings.getInstance().getIncludeHeaderInOptimalWidth());
-			StringBuffer header = new StringBuffer(80);
+			StringBuilder header = new StringBuilder(80);
 			header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
 			header.append(this.sql);
 			this.setPrintHeader(header.toString());
@@ -822,7 +822,7 @@ public class DwPanel
 	{
 		if (this.lastResultMessages != null)
 		{
-			StringBuffer msg = new StringBuffer(lastResultMessages.length * 80);
+			StringBuilder msg = new StringBuilder(lastResultMessages.length * 80);
 			for (int i=0; i < lastResultMessages.length; i++)
 			{
 				msg.append(lastResultMessages[i]);

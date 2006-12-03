@@ -89,7 +89,7 @@ public class StatementFactory
 
 		if (!ignoreStatus && !aRow.isModified()) return null;
 		ArrayList values = new ArrayList(cols);
-		StringBuffer sql = new StringBuffer("UPDATE ");
+		StringBuilder sql = new StringBuilder("UPDATE ");
 
 		sql.append(getTableNameToUse());
 		if (doFormatting) sql.append("\n  ");
@@ -200,9 +200,9 @@ public class StatementFactory
 		int colsPerLine = Settings.getInstance().getFormatInsertColsPerLine();
 
 		ArrayList values = new ArrayList(cols);
-		StringBuffer sql = new StringBuffer(250);
+		StringBuilder sql = new StringBuilder(250);
     sql.append("INSERT INTO ");
-		StringBuffer valuePart = new StringBuffer(250);
+		StringBuilder valuePart = new StringBuilder(250);
 
 		sql.append(getTableNameToUse());
 		if (doFormatting) sql.append(lineEnd);
@@ -331,7 +331,7 @@ public class StatementFactory
 		int count = this.resultInfo.getColumnCount();
 
 		ArrayList values = new ArrayList(count);
-		StringBuffer sql = new StringBuffer(250);
+		StringBuilder sql = new StringBuilder(250);
     sql.append("DELETE FROM ");
 		sql.append(getTableNameToUse());
 		sql.append(" WHERE ");

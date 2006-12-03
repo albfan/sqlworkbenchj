@@ -55,7 +55,7 @@ import java.io.*;
 %{
     private int lastToken;
     private int nextState=YYINITIAL;
-    private StringBuffer commentBuffer = new StringBuffer();
+    private StringBuilder commentBuffer = new StringBuilder();
     private int commentNestCount = 0;
     private int commentStartLine = 0;
     private int commentStartChar = 0;

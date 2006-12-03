@@ -70,7 +70,7 @@ public class PostgresSequenceReader
 				long cache = rs.getLong(5);
 				String cycle = rs.getString(6);
 
-				StringBuffer buf = new StringBuffer(250);
+				StringBuilder buf = new StringBuilder(250);
 				buf.append("CREATE SEQUENCE ");
 				buf.append(name);
 				if (inc != 1)

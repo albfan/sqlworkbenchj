@@ -41,7 +41,7 @@ public class Db2SequenceReader
 	
 	public DataStore getSequenceDefinition(String schema, String sequence)
 	{
-		StringBuffer sql = new StringBuffer(100);
+		StringBuilder sql = new StringBuilder(100);
 		sql.append("SELECT * FROM syscat.sequences ");
 		sql.append(" WHERE seqschema  = ? ");
 		sql.append("  AND seqname  = ? ");
@@ -83,7 +83,7 @@ public class Db2SequenceReader
 		PreparedStatement stmt = null;
 		List result = new ArrayList(100);
 		
-		StringBuffer sql = new StringBuffer(200);
+		StringBuilder sql = new StringBuilder(200);
 		sql.append("SELECT seqname FROM syscat.sequences WHERE seqtype = 'S' ");
 		
 		if (schema != null)
@@ -122,7 +122,7 @@ public class Db2SequenceReader
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		StringBuffer result = new StringBuffer(100);
+		StringBuilder result = new StringBuilder(100);
 		
 		String sql ="SELECT SEQNAME, \n" +
 			"       START, \n" +
@@ -232,7 +232,7 @@ public class Db2SequenceReader
 		catch (Exception e)
 		{
 			LogMgr.logError("OracleMetaData.getSequenceList()", "Error when retrieving sequences",e);
-			result = new StringBuffer(ExceptionUtil.getDisplay(e));
+			result = new StringBuilder(ExceptionUtil.getDisplay(e));
 		}
 		finally
 		{

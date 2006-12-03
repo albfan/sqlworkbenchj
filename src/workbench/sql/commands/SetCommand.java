@@ -101,7 +101,7 @@ public class SetCommand extends SqlCommand
 				result = new StatementRunnerResult();
 				this.currentStatement = aConnection.createStatement();
 				this.currentStatement.execute(aSql);
-				StringBuffer warnings = new StringBuffer();
+				StringBuilder warnings = new StringBuilder();
 				if (this.appendWarnings(aConnection, this.currentStatement , warnings))
 				{
 					result.setWarning(true);

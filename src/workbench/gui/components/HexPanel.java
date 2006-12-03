@@ -147,7 +147,7 @@ class ByteBufferTableModel
 		{
 			int rowStart = rowIndex * columns;
 			int rowEnd = Math.min(rowIndex * columns + (columns - 1), data.length);
-			StringBuffer result = new StringBuffer(16);
+			StringBuilder result = new StringBuilder(16);
 			for (int i = rowStart; i < rowEnd; i++)
 			{
 				int c = (data[i] < 0 ? 256 + data[i] : data[i]);

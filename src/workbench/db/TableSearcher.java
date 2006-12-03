@@ -174,7 +174,7 @@ public class TableSearcher
 
 		DataStore def = meta.getTableDefinition(tbl);
 		int cols = def.getRowCount();
-		StringBuffer sql = new StringBuffer(cols * 120);
+		StringBuilder sql = new StringBuilder(cols * 120);
 		sql.append("SELECT * FROM ");
 		sql.append(tbl.getTableExpression(this.connection));
 		sql.append("\n WHERE ");

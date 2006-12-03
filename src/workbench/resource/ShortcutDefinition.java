@@ -251,7 +251,7 @@ public class ShortcutDefinition
 
 	public String toString()
 	{
-		StringBuffer result = new StringBuffer(50);
+		StringBuilder result = new StringBuilder(50);
 		result.append(this.actionClass);
 		StoreableKeyStroke active = (this.currentKey != null) ? this.currentKey : this.defaultKey;
 		if (active != null)

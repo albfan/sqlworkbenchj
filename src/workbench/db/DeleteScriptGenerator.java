@@ -98,7 +98,7 @@ public class DeleteScriptGenerator
 		ArrayList parents = new ArrayList();
 		this.dependency.readDependencyTree(true);
 		List leafs = this.dependency.getLeafs();
-		StringBuffer sql = new StringBuffer(2000);
+		StringBuilder sql = new StringBuilder(2000);
 		DependencyNode p, node;
 		for (int i=0; i < leafs.size(); i++)
 		{
@@ -146,7 +146,7 @@ public class DeleteScriptGenerator
 		}
 	}
 
-	private void addDeleteStatement(StringBuffer sql, DependencyNode node)
+	private void addDeleteStatement(StringBuilder sql, DependencyNode node)
 	{
 		if (node == null) return;
 
@@ -158,7 +158,7 @@ public class DeleteScriptGenerator
 		sql.append(';');
 	}
 
-	private void addParentWhere(StringBuffer sql, DependencyNode node)
+	private void addParentWhere(StringBuilder sql, DependencyNode node)
 	{
 		try
 		{
@@ -209,7 +209,7 @@ public class DeleteScriptGenerator
 		return (this.rootTable.equals(table));
 	}
 
-	private void addRootTableWhere(StringBuffer sql)
+	private void addRootTableWhere(StringBuilder sql)
 	{
 		Iterator itr = this.columnValues.entrySet().iterator();
 		boolean first = true;
@@ -246,7 +246,7 @@ public class DeleteScriptGenerator
 		}
 	}
 
-	private void addRootTableWhere(StringBuffer sql, String parentColumn, String childColumn)
+	private void addRootTableWhere(StringBuilder sql, String parentColumn, String childColumn)
 	{
 		Object data = this.columnValues.get(parentColumn);
 		parentColumn = this.meta.adjustObjectnameCase(parentColumn);
@@ -317,9 +317,9 @@ public class DeleteScriptGenerator
 		ds.checkUpdateTable();
 		TableIdentifier tbl = ds.getUpdateTable();
 		int numRows = rows.length;
-		StringBuffer result = new StringBuffer(numRows * 150);
+		StringBuilder result = new StringBuilder(numRows * 150);
 		int max = Settings.getInstance().getFormatterMaxSubselectLength();
-		StringBuffer sep = new StringBuffer(max + 2);
+		StringBuilder sep = new StringBuilder(max + 2);
 		sep.append('\n');
 		for (int i=0; i < max; i++) sep.append('=');
 		sep.append('\n');

@@ -32,7 +32,7 @@ import workbench.resource.Settings;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.23 2006-11-09 23:05:25 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.24 2006-12-03 11:27:15 thomas Exp $
  * @see DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -1141,7 +1141,7 @@ public abstract class InputHandler extends KeyAdapter
 
 			if(textArea.isEditable())
 			{
-				StringBuffer buf = new StringBuffer();
+				StringBuilder buf = new StringBuilder();
 				for(int i = 0; i < repeatCount; i++) buf.append(str);
 				textArea.overwriteSetSelectedText(buf.toString());
 			}

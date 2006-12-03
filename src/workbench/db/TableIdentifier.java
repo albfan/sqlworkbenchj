@@ -165,7 +165,7 @@ public class TableIdentifier
 			}
 		}
 
-		StringBuffer result = new StringBuffer(30);
+		StringBuilder result = new StringBuilder(30);
 		if (conn == null)
 		{
 			if (this.catalog != null)
@@ -238,7 +238,7 @@ public class TableIdentifier
 	 */
 	public String getQualifiedName()
 	{
-		StringBuffer result = new StringBuffer(32);
+		StringBuilder result = new StringBuilder(32);
 		if (catalog != null)
 		{
 			result.append(catalog);
@@ -262,7 +262,7 @@ public class TableIdentifier
 		if (tablename == null) return null;
 		if (!tableWasQuoted || !preserveQuotes) return this.tablename; 
 		
-		StringBuffer result = new StringBuffer(tablename.length() + 2);
+		StringBuilder result = new StringBuilder(tablename.length() + 2);
 		result.append('\"');
 		result.append(tablename);
 		result.append('\"');
@@ -323,7 +323,7 @@ public class TableIdentifier
 		if (schema == null) return null;
 		if (!schemaWasQuoted || !preserveQuotes) return schema;
 		
-		StringBuffer result = new StringBuffer(schema.length() + 2);
+		StringBuilder result = new StringBuilder(schema.length() + 2);
 		result.append('\"');
 		result.append(schema);
 		result.append('\"');
@@ -351,7 +351,7 @@ public class TableIdentifier
 		if (catalog == null) return null;
 		if (!catalogWasQuoted || !preserveQuotes) return this.catalog; 
 		
-		StringBuffer result = new StringBuffer(catalog.length() + 2);
+		StringBuilder result = new StringBuilder(catalog.length() + 2);
 		result.append('\"');
 		result.append(catalog);
 		result.append('\"');

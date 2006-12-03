@@ -31,7 +31,7 @@ public class PostgresBlobFormatter
 		if (value instanceof byte[])
 		{
 			byte[] buffer = (byte[])value;
-			StringBuffer result = new StringBuffer(buffer.length * 5 + 2);
+			StringBuilder result = new StringBuilder(buffer.length * 5 + 2);
 			result.append('\'');
 			for (int i = 0; i < buffer.length; i++)
 			{

@@ -49,7 +49,7 @@ public class OrExpression
 	
 	public String toString()
 	{
-		StringBuffer value = new StringBuffer();
+		StringBuilder value = new StringBuilder();
 		Iterator itr = filter.iterator();
 		while (itr.hasNext())
 		{

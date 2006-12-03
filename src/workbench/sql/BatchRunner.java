@@ -15,8 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-
 import java.util.Iterator;
+
 import java.util.List;
 
 import workbench.WbManager;
@@ -57,13 +57,13 @@ import workbench.util.StringUtil;
 public class BatchRunner
 {
 	public static final String CMD_LINE_PROFILE_NAME = "WbCommandLineProfile";
-	private List files;
+	private List<String> filenames;
 	private StatementRunner stmtRunner;
 	private WbConnection connection;
 	private boolean abortOnError = false;
 	private String successScript;
 	private String errorScript;
-	private DelimiterDefinition delimiter = DelimiterDefinition.STANDARD_DELIMITER;
+	private DelimiterDefinition delimiter = null;
 	private boolean showResultSets = false;
 	private boolean showTiming = true;
 	private boolean success = true;
@@ -78,7 +78,7 @@ public class BatchRunner
 	
 	public BatchRunner(String aFilelist)
 	{
-		this.files = StringUtil.stringToList(aFilelist, ",", true);
+		this.filenames = StringUtil.stringToList(aFilelist, ",", true);
 		this.stmtRunner = new DefaultStatementRunner();
 		this.stmtRunner.setFullErrorReporting(true);
 	}
@@ -213,22 +213,26 @@ public class BatchRunner
 	{
 		String file = null;
 		boolean error = false;
-		int count = this.files.size();
+		int count = this.filenames.size();
 
 		if (this.rowMonitor  != null)
 		{
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
 		}
 
-		for (int i=0; i < count; i++)
+		Iterator<String> itr = filenames.iterator();
+		//for (int i=0; i < count; i++)
+		int currentFileIndex = 0;
+		while (itr.hasNext())
 		{
-			file = (String)this.files.get(i);
+			currentFileIndex ++;
+			file = itr.next();
 
 			File fo = new File(file);
 
 			if (this.rowMonitor != null)
 			{
-				this.rowMonitor.setCurrentObject(file, i+1, count);
+				this.rowMonitor.setCurrentObject(file, currentFileIndex, count);
 				this.rowMonitor.saveCurrentType("batchrunnerMain");
 			}
 
@@ -307,13 +311,19 @@ public class BatchRunner
 		StatementRunnerResult result = null;
 		ScriptParser parser = new ScriptParser();
 		DelimiterDefinition altDelim = null;
-		if (this.connection != null && this.connection.getProfile() != null)
+		
+		// If no delimiter has been defined, that use
+		// the default fallback rule
+		if (this.delimiter == null)
 		{
-			altDelim = this.connection.getProfile().getAlternateDelimiter();
+			altDelim = Settings.getInstance().getAlternateDelimiter(this.connection);
+			parser.setDelimiters(DelimiterDefinition.STANDARD_DELIMITER, altDelim);
 		}
-		if (altDelim == null) altDelim = Settings.getInstance().getAlternateDelimiter();
-		parser.setAlternateDelimiter(altDelim);
-		parser.setDelimiter(this.delimiter);
+		else
+		{
+			// if a delimiter has been defined, then use only this
+			parser.setDelimiters(this.delimiter, null);
+		}
 		
 		if (this.connection != null)
 		{
@@ -411,7 +421,7 @@ public class BatchRunner
 			if (error && abortOnError) break;
 		}
 		end = System.currentTimeMillis();
-		StringBuffer msg = new StringBuffer();
+		StringBuilder msg = new StringBuilder();
 		msg.append(scriptFile.getCanonicalPath());
 		msg.append(": ");
 		msg.append(executedCount);
@@ -609,11 +619,11 @@ public class BatchRunner
 			runner.setRowMonitor(new GenericRowMonitor(new ConsoleStatusBar()));
 		}
 		
-		DelimiterDefinition def = DelimiterDefinition.parseCmdLineArgument(cmdLine.getValue(WbManager.ARG_DELIMITER));
-		
-		if (def != null)
+		DelimiterDefinition delim = DelimiterDefinition.parseCmdLineArgument(cmdLine.getValue(WbManager.ARG_DELIMITER));
+
+		if (delim != null)
 		{
-			runner.setDelimiter(def);
+			runner.setDelimiter(delim);
 		}
 		
 		return runner;

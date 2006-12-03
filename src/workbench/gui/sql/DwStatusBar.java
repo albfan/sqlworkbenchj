@@ -218,7 +218,7 @@ public class DwStatusBar
 	public void setEditorLocation(int line, int column)
 	{
 		 if (this.editorStatus == null) return;
-		 StringBuffer text = new StringBuffer(20);
+		 StringBuilder text = new StringBuilder(20);
 		 text.append("L:");
 		 text.append(line);
 		 text.append(" C:");
@@ -277,7 +277,7 @@ public class DwStatusBar
 	
 	public void setRowcount(int start, int end, int count)
 	{
-		StringBuffer s = new StringBuffer(20);
+		StringBuilder s = new StringBuilder(20);
 		if (count > 0)
 		{
 			// for some reason the dynamic layout does not leave enough

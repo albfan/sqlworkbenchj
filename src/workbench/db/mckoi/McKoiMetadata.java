@@ -49,7 +49,7 @@ public class McKoiMetadata
 	
 	public workbench.storage.DataStore getSequenceDefinition(String owner, String sequence)
 	{
-		StringBuffer sql = new StringBuffer(100);
+		StringBuilder sql = new StringBuilder(100);
 		sql.append("select sd.* from SYS_INFO.sUSRSequence sd, SYS_INFO.sUSRSequenceInfo si ");
 		sql.append(" where sd.seq_id = si.id AND \"si.schema\"='" + owner + "' and si.name = '" + sequence + "'");
 		PreparedStatement stmt = null;
@@ -82,7 +82,7 @@ public class McKoiMetadata
 		PreparedStatement stmt = null;
 		ArrayList result = new ArrayList(100);
 
-		StringBuffer sql = new StringBuffer(200);
+		StringBuilder sql = new StringBuilder(200);
 		sql.append("select name from SYS_INFO.sUSRSequence ");
 		if (owner != null)
 		{
@@ -129,7 +129,7 @@ public class McKoiMetadata
 
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		StringBuffer result = new StringBuffer(100);
+		StringBuilder result = new StringBuilder(100);
 		
 		try
 		{
@@ -193,7 +193,7 @@ public class McKoiMetadata
 		catch (Throwable e)
 		{
 			LogMgr.logError("OracleMetaData.getSequenceList()", "Error when retrieving sequences",e);
-			result = new StringBuffer(ExceptionUtil.getDisplay(e));
+			result = new StringBuilder(ExceptionUtil.getDisplay(e));
 		}
 		finally
 		{

@@ -148,7 +148,7 @@ public class TableDependencyTreeDisplay
 			{
 				table = child.getTable();
 				Entry entry = (Entry)entries.next();
-				StringBuffer coldef = new StringBuffer(100);
+				StringBuilder coldef = new StringBuilder(100);
 				coldef.append("<html><b>");
 				if (this.showExported)
 				{

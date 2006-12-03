@@ -123,7 +123,7 @@ public class WbCopy
 		if (cmdLine.hasUnknownArguments())
 		{
 			List params = cmdLine.getUnknownArguments();
-			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrUnknownParameter") + " ");
+			StringBuilder msg = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter") + " ");
 			for (int i=0; i < params.size(); i++)
 			{
 				if (i > 0) msg.append(',');

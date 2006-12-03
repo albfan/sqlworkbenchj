@@ -84,7 +84,7 @@ public class DependencyTreeCellRenderer
 				String daction = depnode.getDeleteAction();
 				if (uaction.length() > 0 || daction.length() > 0)
 				{
-					StringBuffer tooltip = new StringBuffer(50);
+					StringBuilder tooltip = new StringBuilder(50);
 					tooltip.append("<html>");
 					boolean needBreak = false;
 					if (uaction.length() > 0) 

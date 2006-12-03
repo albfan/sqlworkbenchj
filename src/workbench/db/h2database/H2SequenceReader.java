@@ -65,7 +65,7 @@ public class H2SequenceReader
 				String name = rs.getString(1);
 				long inc = rs.getLong(2);
 				
-				StringBuffer buf = new StringBuffer(250);
+				StringBuilder buf = new StringBuilder(250);
 				buf.append("DROP SEQUENCE " + name + " IF EXISTS;");
 				buf.append(nl);
 				buf.append("CREATE SEQUENCE ");

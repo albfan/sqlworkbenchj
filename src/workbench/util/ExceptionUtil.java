@@ -29,9 +29,9 @@ public class ExceptionUtil
 	{
 	}
 
-	public static StringBuffer getSqlStateString(SQLException se)
+	public static StringBuilder getSqlStateString(SQLException se)
 	{
-		StringBuffer result = new StringBuffer(30);
+		StringBuilder result = new StringBuilder(30);
 		try
 		{
 			String state = se.getSQLState();
@@ -62,12 +62,12 @@ public class ExceptionUtil
 
 	public static String getDisplay(Throwable th, boolean includeStackTrace)
 	{
-		StringBuffer result;
+		StringBuilder result;
 		try
 		{
 			if (th.getMessage() == null)
 			{
-				result = new StringBuffer(th.getClass().getName());
+				result = new StringBuilder(th.getClass().getName());
 				if (!includeStackTrace) 
 				{
 					// always include Stacktrace for NPE
@@ -80,13 +80,13 @@ public class ExceptionUtil
 			}
 			else
 			{
-				result = new StringBuffer(th.getMessage().trim());
+				result = new StringBuilder(th.getMessage().trim());
 			}
 			
 			if (th instanceof SQLException)
 			{
 				SQLException se = (SQLException)th;
-				StringBuffer state = getSqlStateString(se);
+				StringBuilder state = getSqlStateString(se);
 				if (state.length() > 0)
 				{
 					result.append(" [");
@@ -107,7 +107,7 @@ public class ExceptionUtil
 		catch (Throwable th1)
 		{
 			LogMgr.logError("ExceptionUtil.getDisplay()", "Error while creating display string", th1);
-			result = new StringBuffer("Exception: " + th.getClass().getName());
+			result = new StringBuilder("Exception: " + th.getClass().getName());
 		}
 		return result.toString();
 	}

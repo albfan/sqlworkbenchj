@@ -106,7 +106,7 @@ public class DerbySynonymReader
 		throws SQLException
 	{
 		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);
-		StringBuffer result = new StringBuffer(200);
+		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE SYNONYM ");
 		result.append(aSynonym);

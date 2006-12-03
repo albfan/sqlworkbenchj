@@ -90,7 +90,7 @@ public class WbDesCipher
 	 */
 	private String makeString(byte[] values)
 	{
-		StringBuffer buff = new StringBuffer(values.length * 3);
+		StringBuilder buff = new StringBuilder(values.length * 3);
 		for (int i=0; i < values.length; i++)
 		{
 			buff.append('#');

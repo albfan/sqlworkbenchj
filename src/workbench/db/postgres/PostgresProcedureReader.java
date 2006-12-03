@@ -30,9 +30,9 @@ public class PostgresProcedureReader
 		super(meta);
 	}
 	
-	public StringBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
+	public StringBuilder getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
-		StringBuffer source = new StringBuffer();
+		StringBuilder source = new StringBuilder();
 		
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		

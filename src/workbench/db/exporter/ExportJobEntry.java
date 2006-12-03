@@ -34,7 +34,7 @@ public class ExportJobEntry
 	{
 		resultInfo = new ResultInfo(table, con);
 		outputFileName = outputfile;
-		StringBuffer sql = new StringBuffer(100);
+		StringBuilder sql = new StringBuilder(100);
 		sql.append("SELECT ");
 		ColumnIdentifier[] cols = resultInfo.getColumns();
 		if (cols.length == 0) throw new SQLException("Table '" + table.getTableExpression() + "' not found!");

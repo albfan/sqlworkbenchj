@@ -130,7 +130,7 @@ public class DdlCommand extends SqlCommand
 				}
 				result.addMessage(msg);
 
-				StringBuffer warnings = new StringBuffer();
+				StringBuilder warnings = new StringBuilder();
 				if (this.appendWarnings(aConnection, this.currentStatement, warnings))
 				{
 					result.addMessage(warnings.toString());
@@ -143,7 +143,7 @@ public class DdlCommand extends SqlCommand
 		{
 			result.clear();
 
-			StringBuffer msg = new StringBuffer(150);
+			StringBuilder msg = new StringBuilder(150);
 			msg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
 			if (reportFullStatementOnError)
 			{

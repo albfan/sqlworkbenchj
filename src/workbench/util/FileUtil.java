@@ -48,7 +48,7 @@ public class FileUtil
 		}
 	}
 	
-	public static final int readLines(BufferedReader in, StringBuffer buffer, int numLines, String lineEnd)
+	public static final int readLines(BufferedReader in, StringBuilder buffer, int numLines, String lineEnd)
 		throws IOException
 	{
 		int lines = 0;
@@ -162,7 +162,7 @@ public class FileUtil
 		throws IOException
 	{
 		if (in == null) return null;
-		StringBuffer result = new StringBuffer(1024);
+		StringBuilder result = new StringBuilder(1024);
 		char[] buff = new char[getBuffSize()];
 		int bytesRead = in.read(buff);
 		while (bytesRead > -1)

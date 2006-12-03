@@ -256,7 +256,7 @@ public class SqlHistory
 
 	public void readFromStream(InputStream in)
 	{
-		StringBuffer content = new StringBuffer(500);
+		StringBuilder content = new StringBuilder(500);
 		int pos = 0;
 		int start = -1;
 		int end = -1;
@@ -278,7 +278,7 @@ public class SqlHistory
 						pos = 0;
 						start = -1;
 						end = -1;
-						content = new StringBuffer(500);
+						content = new StringBuilder(500);
 					}
 					catch (Exception e)
 					{

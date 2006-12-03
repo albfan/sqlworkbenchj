@@ -48,7 +48,7 @@ public class IngresMetadata
 		PreparedStatement stmt = null;
 		ArrayList result = new ArrayList(100);
 
-		StringBuffer sql = new StringBuffer(200);
+		StringBuilder sql = new StringBuilder(200);
 		sql.append("SELECT synonym_name FROM iisynonyms ");
 		if (owner != null)
 		{
@@ -80,7 +80,7 @@ public class IngresMetadata
 	public TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
-		StringBuffer sql = new StringBuffer(200);
+		StringBuilder sql = new StringBuilder(200);
 		sql.append("SELECT synonym_name, table_owner, table_name FROM iisynonyms ");
 		sql.append(" WHERE synonym_name = ? AND synonym_owner = ?");
 
@@ -116,7 +116,7 @@ public class IngresMetadata
 		throws SQLException
 	{
 		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);
-		StringBuffer result = new StringBuffer(200);
+		StringBuilder result = new StringBuilder(200);
 		result.append("CREATE SYNONYM ");
 		result.append(aSynonym);
 		result.append("\n       FOR ");
@@ -157,7 +157,7 @@ public class IngresMetadata
 		PreparedStatement stmt = null;
 		ArrayList result = new ArrayList(100);
 
-		StringBuffer sql = new StringBuffer(200);
+		StringBuilder sql = new StringBuilder(200);
 		sql.append("SELECT seq_name FROM iisequences ");
 		if (owner != null)
 		{
@@ -190,7 +190,7 @@ public class IngresMetadata
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		StringBuffer result = new StringBuffer(100);
+		StringBuilder result = new StringBuilder(100);
 
 		String sql = "SELECT trim(SEQ_NAME),  \n" + 
              "       MIN_VALUE,  \n" + 
@@ -267,7 +267,7 @@ public class IngresMetadata
 		catch (Throwable e)
 		{
 			LogMgr.logError("IngresMetaData.getSequenceSource()", "Error when retrieving sequence source",e);
-			result = new StringBuffer(ExceptionUtil.getDisplay(e));
+			result = new StringBuilder(ExceptionUtil.getDisplay(e));
 		}
 		finally
 		{

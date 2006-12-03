@@ -82,7 +82,7 @@ public class SortHeaderRenderer
 		}
 		else
 		{
-			StringBuffer tip = new StringBuffer(text.length() + 20);
+			StringBuilder tip = new StringBuilder(text.length() + 20);
 			tip.append("<html>&nbsp;");
 			tip.append(text);
 			tip.append("&nbsp;<br>&nbsp;<code>");

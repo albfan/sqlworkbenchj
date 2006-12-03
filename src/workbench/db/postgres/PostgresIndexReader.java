@@ -34,7 +34,7 @@ public class PostgresIndexReader
 		super(meta);
 	}
 	
-	public StringBuffer getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
+	public StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
 	{
 		Connection con = this.metaData.getSqlConnection();
 		PreparedStatement stmt = null;
@@ -43,7 +43,7 @@ public class PostgresIndexReader
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		int count = indexDefinition.getRowCount();
 		if (count == 0) return StringUtil.emptyBuffer();
-		StringBuffer source = new StringBuffer(count * 50);
+		StringBuilder source = new StringBuilder(count * 50);
 		try
 		{
 			stmt = con.prepareStatement(sql);
@@ -66,7 +66,7 @@ public class PostgresIndexReader
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			source = new StringBuffer(ExceptionUtil.getDisplay(e));
+			source = new StringBuilder(ExceptionUtil.getDisplay(e));
 		}
 		finally
 		{

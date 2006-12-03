@@ -814,7 +814,7 @@ public class DbMetadata
 		Statement stmt = null;
 		try
 		{
-			StringBuffer sql = new StringBuffer();
+			StringBuilder sql = new StringBuilder();
 			sql.append("DROP TABLE ");
 			sql.append(aTable.getTableExpression());
 			String cascade = this.getCascadeConstraintsVerb("TABLE");
@@ -912,7 +912,7 @@ public class DbMetadata
 		
 		if (StringUtil.isEmptyString(source)) return StringUtil.EMPTY_STRING;
 
-		StringBuffer result = new StringBuffer(source.length() + 100);
+		StringBuilder result = new StringBuilder(source.length() + 100);
 
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
 		String verb = SqlUtil.getSqlVerb(source);
@@ -1028,9 +1028,9 @@ public class DbMetadata
 		return source.toString();
 	}
 
-	private StringBuffer generateCreateObject(boolean includeDrop, String type, String name)
+	private StringBuilder generateCreateObject(boolean includeDrop, String type, String name)
 	{
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		boolean replaced = false;
 
 		String prefix = "workbench.db.";
@@ -1181,7 +1181,7 @@ public class DbMetadata
 			
 			if (needQuote || isKeyword(aName))
 			{
-				StringBuffer result = new StringBuffer(aName.length() + 4);
+				StringBuilder result = new StringBuilder(aName.length() + 4);
 				result.append(this.quoteCharacter);
 				result.append(aName.trim());
 				result.append(this.quoteCharacter);
@@ -1488,7 +1488,7 @@ public class DbMetadata
 				
 				if (checkOracleSnapshots)
 				{
-					StringBuffer t = new StringBuffer(30);
+					StringBuilder t = new StringBuilder(30);
 					t.append(schem);
 					t.append('.');
 					t.append(name);
@@ -3352,7 +3352,7 @@ public class DbMetadata
 		result.append(generateCreateObject(includeDrop, "TABLE", (tableNameToUse == null ? table.getTableName() : tableNameToUse)));
 		result.append("\n(\n");
 		int count = columns.length;
-		//StringBuffer pkCols = new StringBuffer(1000);
+		//StringBuilder pkCols = new StringBuilder(1000);
 		List pkCols = new LinkedList();
 		int maxColLength = 0;
 		int maxTypeLength = 0;
@@ -3469,7 +3469,7 @@ public class DbMetadata
 
 			if (includeFk)
 			{
-				StringBuffer fk = this.getFkSource(table.getTableName(), aFkDef, tableNameToUse);
+				StringBuilder fk = this.getFkSource(table.getTableName(), aFkDef, tableNameToUse);
 				if (fk.length() > 0)
 				{
 					result.append(fk);
@@ -3483,12 +3483,12 @@ public class DbMetadata
 		if (!this.createInlineConstraints && pkCols.size() > 0)
 		{
 			String name = this.getPkIndexName(aIndexDef);
-			StringBuffer pkSource = getPkSource(realTable, pkCols, name);
+			StringBuilder pkSource = getPkSource(realTable, pkCols, name);
 			result.append(pkSource);
 			result.append(lineEnding);
 			result.append(lineEnding);
 		}
-		StringBuffer indexSource = this.indexReader.getIndexSource(table, aIndexDef, tableNameToUse);
+		StringBuilder indexSource = this.indexReader.getIndexSource(table, aIndexDef, tableNameToUse);
 		result.append(indexSource);
 		if (!this.createInlineConstraints && includeFk) result.append(this.getFkSource(table.getTableName(), aFkDef, tableNameToUse));
 
@@ -3542,10 +3542,10 @@ public class DbMetadata
 		return false;
 	}
 	
-	public StringBuffer getPkSource(String tablename, List pkCols, String pkName)
+	public StringBuilder getPkSource(String tablename, List pkCols, String pkName)
 	{
 		String template = metaSqlMgr.getPrimaryKeyTemplate();
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		if (StringUtil.isEmptyString(template)) return result;
 		
 		template = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tablename);
@@ -3629,7 +3629,7 @@ public class DbMetadata
 	{
 		String columnStatement = metaSqlMgr.getColumnCommentSql();
 		if (columnStatement == null || columnStatement.trim().length() == 0) return null;
-		StringBuffer result = new StringBuffer(500);
+		StringBuilder result = new StringBuilder(500);
 		int cols = columns.length;
 		for (int i=0; i < cols; i ++)
 		{
@@ -3691,7 +3691,7 @@ public class DbMetadata
 		return result;
 	}
 
-	public StringBuffer getFkSource(TableIdentifier table)
+	public StringBuilder getFkSource(TableIdentifier table)
 	{
 		DataStore fkDef = this.getForeignKeys(table, false);
 		return getFkSource(table.getTableName(), fkDef, null);
@@ -3705,7 +3705,7 @@ public class DbMetadata
 	 *
 	 *	@return a SQL statement to add the foreign key definitions to the given table
 	 */
-	public StringBuffer getFkSource(String aTable, DataStore aFkDef, String tableNameToUse)
+	public StringBuilder getFkSource(String aTable, DataStore aFkDef, String tableNameToUse)
 	{
 		if (aFkDef == null) return StringUtil.emptyBuffer();
 		int count = aFkDef.getRowCount();
@@ -3821,7 +3821,7 @@ public class DbMetadata
 			}
 			
 			Iterator itr = colList.iterator();
-			StringBuffer colListBuffer = new StringBuffer(30);
+			StringBuilder colListBuffer = new StringBuilder(30);
 			String targetTable = null;
 			boolean first = true;
 			//while (tok.hasMoreTokens())
@@ -3847,7 +3847,7 @@ public class DbMetadata
 			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_TARGET_COLUMNS_PLACEHOLDER, colListBuffer.toString());
 			fks.put(name, stmt.trim());
 		}
-		StringBuffer fk = new StringBuffer();
+		StringBuilder fk = new StringBuilder();
 
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		

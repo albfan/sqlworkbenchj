@@ -259,7 +259,7 @@ public class CompletionPopup
 					else if (o instanceof SelectAllMarker)
 					{
 						int count = this.data.getSize();
-						StringBuffer cols = new StringBuffer(count * 10);
+						StringBuilder cols = new StringBuilder(count * 10);
 						int col = 0;
 						
 						// The first element is the SelectAllMarker, so we do not 

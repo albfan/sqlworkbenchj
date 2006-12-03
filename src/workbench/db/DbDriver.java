@@ -98,7 +98,7 @@ public class DbDriver
 	{
 		if (this.identifier == null)
 		{
-			StringBuffer b = new StringBuffer(100);
+			StringBuilder b = new StringBuilder(100);
 			if (this.name != null)
 			{
 				b.append(this.name);
@@ -405,7 +405,7 @@ public class DbDriver
 	
 	public int hashCode() 
 	{ 
-		StringBuffer b = new StringBuffer(60);
+		StringBuilder b = new StringBuilder(60);
 		b.append(driverClass == null ? "" : driverClass);
 		b.append('$');
 		b.append(name);

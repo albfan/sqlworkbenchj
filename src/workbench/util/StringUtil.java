@@ -47,7 +47,7 @@ public class StringUtil
 	public static final SimpleDateFormat ISO_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TIMESTAMP_FORMAT);
 	public static final SimpleDateFormat ISO_TZ_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TZ_TIMESTAMP_FORMAT);
 
-	public static final StringBuffer emptyBuffer() { return new StringBuffer(0); }
+	public static final StringBuilder emptyBuffer() { return new StringBuilder(0); }
 	
 	public static final String getCurrentTimestampWithTZString()
 	{
@@ -84,7 +84,7 @@ public class StringUtil
 		return true;
 	}
 	
-	public static void trimTrailingWhitespace(StringBuffer value)
+	public static void trimTrailingWhitespace(StringBuilder value)
 	{
 		if (value == null || value.length() == 0) return;
 		int len = value.length(); 
@@ -188,11 +188,6 @@ public class StringUtil
 		return inQuotes;
 	}
 	
-	public static final StringBuffer replaceToBuffer(String aString, String aValue, String aReplacement)
-	{
-		return replaceToBuffer(null, aString, aValue, aReplacement);
-	}
-
 	/**
 	 * Capitalize a single word.
 	 * (write the first character in uppercase, the rest in lower case)
@@ -202,7 +197,7 @@ public class StringUtil
 	{
 		if (word == null) return null;
 		if (word.length() == 0) return word;
-		StringBuffer s = new StringBuffer(word.toLowerCase());
+		StringBuilder s = new StringBuilder(word.toLowerCase());
 		char c = s.charAt(0);
 		s.setCharAt(0, Character.toUpperCase(c));
 		return s.toString();
@@ -213,11 +208,11 @@ public class StringUtil
 		return input.replaceAll("[\t\\:\\\\/\\?\\*\\|<>\"'\\{\\}$%§\\[\\]\\^|\\&]", "").toLowerCase();
 	}
 
-	public static final StringBuffer replaceToBuffer(StringBuffer target, String aString, String aValue, String aReplacement)
+	public static final StringBuilder replaceToBuffer(StringBuilder target, String aString, String aValue, String aReplacement)
 	{
 		if (target == null)
 		{
-			target = new StringBuffer((int)(aString.length() * 1.1));
+			target = new StringBuilder((int)(aString.length() * 1.1));
 		}
 
 		int pos = aString.indexOf(aValue);
@@ -266,7 +261,7 @@ public class StringUtil
 		int pos = aString.indexOf(aValue);
 		if (pos == -1) return aString;
 
-		StringBuffer temp = replaceToBuffer(aString, aValue, aReplacement);
+		StringBuilder temp = replaceToBuffer(null, aString, aValue, aReplacement);
 
 		return temp.toString();
 	}
@@ -284,7 +279,7 @@ public class StringUtil
 		}
 	}
 	
-	public static final boolean isEmptyString(String value)
+	public static final boolean isEmptyString(CharSequence value)
 	{
 		if (value == null) return true;
 		if (value.length() == 0) return true;
@@ -317,7 +312,7 @@ public class StringUtil
 	{
 		if (aValue == null) return null;
 		int len = aValue.length();
-		StringBuffer result = new StringBuffer(len);
+		StringBuilder result = new StringBuilder(len);
 		for (int i=0; i < len; i++)
 		{
 			char c = aValue.charAt(i);
@@ -492,7 +487,7 @@ public class StringUtil
 	{
 		if (aList == null || aList.size() == 0) return "";
 		int numElements = 0;
-		StringBuffer result = new StringBuffer(aList.size() * 50);
+		StringBuilder result = new StringBuilder(aList.size() * 50);
 		Iterator itr = aList.iterator();
 		while (itr.hasNext())
 		{
@@ -515,11 +510,11 @@ public class StringUtil
 	{
 		if (sql == null) return "";
 		if (prefix == null) prefix = "";
-		StringBuffer result = new StringBuffer(sql.length() + prefix.length() + 10);
+		StringBuilder result = new StringBuilder(sql.length() + prefix.length() + 10);
 		result.append(prefix);
 		if (prefix.endsWith("=")) result.append(" ");
 		int k = result.length();
-		StringBuffer indent = new StringBuffer(k);
+		StringBuilder indent = new StringBuilder(k);
 		for (int i=0; i < k; i++) indent.append(' ');
 		BufferedReader reader = new BufferedReader(new StringReader(sql));
 		boolean first = true;
@@ -576,7 +571,7 @@ public class StringUtil
 		if (isEmptyString(aString)) return "";
 		Pattern newline = Pattern.compile("\\\\n|\\\\r");
 		String lines[] = PATTERN_CRLF.split(aString);
-		StringBuffer result = new StringBuffer(aString.length());
+		StringBuilder result = new StringBuilder(aString.length());
 		int count = lines.length;
 		for (int i=0; i < count; i ++)
 		{
@@ -634,7 +629,7 @@ public class StringUtil
 
 	public static final String escapeXML(String s)
 	{
-		StringBuffer result = null;
+		StringBuilder result = null;
 
 		for(int i = 0, max = s.length(), delta = 0; i < max; i++)
 		{
@@ -657,7 +652,7 @@ public class StringUtil
 			{
 				if (result == null)
 				{
-					result = new StringBuffer(s);
+					result = new StringBuilder(s);
 				}
 				result.replace(i + delta, i + delta + 1, replacement);
 				delta += (replacement.length() - 1);
@@ -674,7 +669,7 @@ public class StringUtil
 	public static final String escapeHTML(String s)
 	{
 		if (s == null) return null;
-		StringBuffer sb = new StringBuffer(s.length() + 100);
+		StringBuilder sb = new StringBuilder(s.length() + 100);
 		int n = s.length();
 		for (int i = 0; i < n; i++)
 		{
@@ -811,9 +806,9 @@ public class StringUtil
 		return ("true".equalsIgnoreCase(aString) || "1".equals(aString) || "y".equalsIgnoreCase(aString) || "yes".equalsIgnoreCase(aString) );
 	}
 
-	public static final StringBuffer getLines(String s, int lineCount)
+	public static final StringBuilder getLines(String s, int lineCount)
 	{
-		StringBuffer result = new StringBuffer(lineCount * 100);
+		StringBuilder result = new StringBuilder(lineCount * 100);
 		try
 		{
 			BufferedReader r = new BufferedReader(new StringReader(s));
@@ -856,7 +851,7 @@ public class StringUtil
 			return "";
 		}
 		int len = str.length();
-		StringBuffer buf = new StringBuffer(len + 5);
+		StringBuilder buf = new StringBuilder(len + 5);
 		for (int i = 0; i < len; i++)
 		{
 			char c = str.charAt(i);
@@ -978,7 +973,7 @@ public class StringUtil
 		char aChar;
 		int len = theString.length();
 		if (len == 0) return theString;
-		StringBuffer outBuffer = new StringBuffer(len);
+		StringBuilder outBuffer = new StringBuilder(len);
 
 		for (int x=0; x<len; )
 		{
@@ -1053,7 +1048,7 @@ public class StringUtil
 	{
 		if (value == null) return null;
 		int len = value.length();
-		StringBuffer outBuffer = new StringBuffer(len*2);
+		StringBuilder outBuffer = new StringBuilder(len*2);
 
 		for(int x=0; x<len; x++)
 		{

@@ -47,7 +47,7 @@ public class BlobHandler
 	{
 	}
 	
-	public StringBuffer getByteDisplay(Object value)
+	public StringBuilder getByteDisplay(Object value)
 	{
 		long l = getBlobSize(value);
 		return getByteDisplay(l);
@@ -59,9 +59,9 @@ public class BlobHandler
 		return uploadFile;
 	}
 	
-	public StringBuffer getByteDisplay(long l)
+	public StringBuilder getByteDisplay(long l)
 	{
-		StringBuffer result = new StringBuffer(32);
+		StringBuilder result = new StringBuilder(32);
 		
 		if (l < 1024) 
 		{

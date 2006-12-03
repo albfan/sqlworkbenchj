@@ -224,7 +224,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
 			File[] f = jf.getSelectedFiles();
-			StringBuffer path = new StringBuffer(f.length * 100);
+			StringBuilder path = new StringBuilder(f.length * 100);
 			for (int i=0; i < f.length; i++)
 			{
 				if (i>0) path.append(StringUtil.PATH_SEPARATOR);

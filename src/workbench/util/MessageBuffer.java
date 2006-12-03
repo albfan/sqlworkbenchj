@@ -11,7 +11,6 @@
  */
 package workbench.util;
 
-import java.lang.ref.SoftReference;
 import java.util.LinkedList;
 import workbench.resource.Settings;
 
@@ -20,9 +19,7 @@ import workbench.resource.Settings;
  */
 public class MessageBuffer
 {
-	private final boolean useHardReference = Settings.getInstance().getBoolProperty("workbench.messagebuffer.hardreference", true);
-	
-	private LinkedList messages = new LinkedList();
+	private LinkedList<CharSequence> messages = new LinkedList();
 	private int length = 0;
 	private final String newLine = "\n";
 	private final int maxSize;
@@ -43,27 +40,15 @@ public class MessageBuffer
 		this.messages.clear();
 	}
 		
-	public synchronized StringBuffer getBuffer()
+	public synchronized StringBuilder getBuffer()
 	{
-		StringBuffer result = new StringBuffer(this.length + 50);
+		StringBuilder result = new StringBuilder(this.length + 50);
 		if (trimmed) result.append("(...)\n");
 		
 		while (messages.size() > 0)
 		{
-			CharSequence s = null;
-			if (useHardReference)
-			{
-				s = (CharSequence)messages.removeFirst();
-				result.append(s);
-			}
-			else
-			{
-				SoftReference r = (SoftReference)messages.removeFirst();
-				s = (CharSequence)r.get();
-				if (s == null) s = "(...)\n";
-				result.append(s);
-				r.clear();
-			}
+			CharSequence s = messages.removeFirst();
+			result.append(s);
 		}
 		length = 0;
 		return result;
@@ -87,51 +72,17 @@ public class MessageBuffer
 		return length;
 	}
 	
-	public synchronized void append(String s)
+	public synchronized void append(CharSequence s)
 	{
-		if (s == null || s.length() == 0) return;
-		if (useHardReference)
-		{
-			trimSize();
-			this.messages.add(s);
-		}
-		else
-		{
-			SoftReference r = new SoftReference(s);
-			this.messages.add(r);
-		}
-		length += s.length();
-	}
-	
-	public synchronized void append(StringBuffer s)
-	{
-		if (s == null || s.length() == 0) return;
-		if (useHardReference)
-		{
-			trimSize();
-			this.messages.add(s);
-		}
-		else
-		{
-			SoftReference r = new SoftReference(s);
-			this.messages.add(r);
-		}
+		if (StringUtil.isEmptyString(s)) return;
+		trimSize();
+		this.messages.add(s);
 		length += s.length();
 	}
 	
 	public synchronized void appendNewLine()
 	{
-		if (useHardReference)
-		{
-			trimSize();
-			this.messages.add(newLine);
-		}
-		else
-		{
-			SoftReference r = new SoftReference(newLine);
-			this.messages.add(r);
-		}
-		length ++;
+		append(newLine);
 	}
 
 	public String toString()

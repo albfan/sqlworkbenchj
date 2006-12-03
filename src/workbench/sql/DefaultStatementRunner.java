@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import workbench.db.DbMetadata;
@@ -77,8 +78,8 @@ public class DefaultStatementRunner
 	private StatementRunnerResult result;
 	private VariablePool parameterPool;
 
-	private HashMap cmdDispatch;
-	private ArrayList dbSpecificCommands;
+	private HashMap<String, SqlCommand> cmdDispatch;
+	private List<String> dbSpecificCommands;
 
 	private SqlCommand currentCommand;
 	private SqlCommand currentConsumer;
@@ -100,7 +101,7 @@ public class DefaultStatementRunner
 		this.verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
 		Settings.getInstance().addPropertyChangeListener(this);
 
-		cmdDispatch = new HashMap();
+		cmdDispatch = new HashMap<String, SqlCommand>();
 		cmdDispatch.put("*", new SqlCommand());
 
 		SqlCommand sql = new WbListTables();
@@ -202,7 +203,7 @@ public class DefaultStatementRunner
 		}
 		this.cmdDispatch.put("CREATE OR REPLACE", DdlCommand.CREATE);
 
-		this.dbSpecificCommands = new ArrayList();
+		this.dbSpecificCommands = new LinkedList<String>();
 		this.parameterPool = VariablePool.getInstance();
 	}
 
@@ -244,10 +245,9 @@ public class DefaultStatementRunner
 
 		if (this.dbConnection != null)
 		{
-			int count = this.dbSpecificCommands.size();
-			for (int i=0; i < count; i++)
+			for (String cmd : dbSpecificCommands)
 			{
-				this.cmdDispatch.remove(this.dbSpecificCommands.get(i));
+				this.cmdDispatch.remove(cmd);
 			}
 			this.dbSpecificCommands.clear();
 		}
@@ -433,22 +433,15 @@ public class DefaultStatementRunner
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
 		
-//		// Some SQL keywords can contain spaces (e.g. CREATE OR REPLACE)
-//		int pos = verb.indexOf(' ');
-//		if (pos > -1)
-//		{
-//			verb = verb.substring(0,pos);
-//		}
-		
 		if (this.supportsSelectInto && !verb.equalsIgnoreCase(WbSelectBlob.VERB) && this.dbConnection != null && this.dbConnection.getMetadata().isSelectIntoNewTable(sql))
 		{
 			LogMgr.logDebug("StatementRunner.getCommandToUse()", "Found 'SELECT ... INTO new_table'");
 			// use the generic SqlCommand implementation for this and not the SelectCommand
-			return (SqlCommand)this.cmdDispatch.get("*");
+			return this.cmdDispatch.get("*");
 		}
 		else
 		{
-			return (SqlCommand)this.cmdDispatch.get(verb);
+			return this.cmdDispatch.get(verb);
 		}
 	}
 

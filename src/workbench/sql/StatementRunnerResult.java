@@ -30,10 +30,10 @@ import workbench.util.MessageBuffer;
 public class StatementRunnerResult
 {
 	// contains a list of result sets
-	private List results;
-	private List updateCounts;
+	private List<ResultSet> results;
+	private List<Integer> updateCounts;
 	private MessageBuffer messages;
-	private ArrayList datastores;
+	private List<DataStore> datastores;
 	private String sourceCommand;
 	
 	private boolean success = true;
@@ -64,7 +64,7 @@ public class StatementRunnerResult
 	public String getTimingMessage()
 	{
 		if (executionTime == -1) return null;
-		StringBuffer msg = new StringBuffer(100);
+		StringBuilder msg = new StringBuilder(100);
 		msg.append(ResourceMgr.getString("MsgExecTime"));
 		msg.append(' ');
 		double time = ((double)executionTime) / 1000.0;
@@ -82,7 +82,7 @@ public class StatementRunnerResult
 
 	public int addDataStore(DataStore ds)
 	{
-		if (this.datastores == null) this.datastores = new ArrayList();
+		if (this.datastores == null) this.datastores = new LinkedList<DataStore>();
 		ds.resetCancelStatus();
 		this.datastores.add(ds);
 		return this.datastores.size();
@@ -90,19 +90,14 @@ public class StatementRunnerResult
 
 	public int addResultSet(ResultSet rs)
 	{
-		if (this.results == null) this.results = new ArrayList();
+		if (this.results == null) this.results = new LinkedList<ResultSet>();
 		this.results.add(rs);
 		return this.results.size();
 	}
 
-	void dumpMessageBuffer()
-	{
-		System.out.println((this.messages == null ? "null" : messages.toString()));
-	}
-	
 	public void addUpdateCount(int count)
 	{
-		if (this.updateCounts == null) this.updateCounts = new LinkedList();
+		if (this.updateCounts == null) this.updateCounts = new LinkedList<Integer>();
 		this.updateCounts.add(new Integer(count));
 	}
 
@@ -121,18 +116,12 @@ public class StatementRunnerResult
 		}
 	}
 
-	public void addMessage(StringBuffer msgBuffer)
+	public void addMessage(CharSequence msgBuffer)
 	{
 		if (messages.getLength() > 0) messages.appendNewLine();
 		messages.append(msgBuffer);
 	}
 	
-	public void addMessage(String msg)
-	{
-		if (messages.getLength() > 0) messages.appendNewLine();
-		messages.append(msg);
-	}
-
 	public boolean hasData()
 	{
 		return (this.hasResultSets() || this.hasDataStores());
@@ -179,32 +168,35 @@ public class StatementRunnerResult
 		return rs;
 	}
 
-	public StringBuffer getMessageBuffer()
+	public StringBuilder getMessageBuffer()
 	{
 		if (this.messages == null) return null;
-		StringBuffer b = messages.getBuffer();
-		return b;
+		return messages.getBuffer();
 	}
 	
 	public long getTotalUpdateCount()
 	{
 		if (this.updateCounts == null || this.updateCounts.size() == 0) return 0;
-		Iterator itr = updateCounts.iterator();
+		Iterator<Integer> itr = updateCounts.iterator();
 		long result = 0;
-		while (itr.hasNext())
+		for (Integer value : updateCounts)
 		{
-			result += ((Integer)itr.next()).intValue();
+			result += value.intValue();
 		}
 		return result;
 	}
 
+	/**
+	 * Clears stored ResultSets and DataStores
+	 * @see #clearResultSets()
+	 */
 	public void clearResultData()
 	{
 		if (this.datastores != null)
 		{
-			for (int i = 0; i < datastores.size(); i++)
+			//for (int i = 0; i < datastores.size(); i++)
+			for (DataStore ds : datastores)
 			{
-				DataStore ds = (DataStore)datastores.get(i);
 				if (ds != null) ds.reset();
 			}
 			this.datastores.clear();
@@ -212,18 +204,19 @@ public class StatementRunnerResult
 		this.clearResultSets();
 	}
 	
+	/**
+	 * Closes all "stored" ResultSets
+	 */
 	public void clearResultSets()
 	{
 		if (this.results != null)
 		{
-			for (int i=0; i < this.results.size(); i++)
+			for (ResultSet rs : results)
 			{
-				ResultSet rs = (ResultSet)this.results.get(i);
 				if (rs != null)
 				{
 					try { rs.clearWarnings(); } catch (Throwable th) {}
 					try { rs.close(); } catch (Throwable th) {}
-					rs = null;
 				}
 			}
 			this.results.clear();
@@ -237,11 +230,7 @@ public class StatementRunnerResult
 	
 	public void clear()
 	{
-		if (this.datastores != null)
-		{
-			this.datastores.clear();
-		}
-		this.clearResultSets();
+		this.clearResultData();
 		clearMessageBuffer();
 		if (this.updateCounts !=null) this.updateCounts.clear();
 		this.sourceCommand = null;

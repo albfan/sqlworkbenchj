@@ -79,7 +79,7 @@ public class FixedSizeList
 	
 	public synchronized String toString()
 	{
-		StringBuffer result = new StringBuffer(entries.size() * 80);
+		StringBuilder result = new StringBuilder(entries.size() * 80);
 		Iterator itr = entries.iterator();
 		while (itr.hasNext())
 		{

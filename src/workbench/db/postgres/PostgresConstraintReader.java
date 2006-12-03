@@ -49,7 +49,7 @@ public class PostgresConstraintReader
 	{
 		String sql = this.getTableConstraintSql();
 		if (sql == null) return null;
-		StringBuffer result = new StringBuffer(100);
+		StringBuilder result = new StringBuilder(100);
 
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		

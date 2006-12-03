@@ -89,7 +89,7 @@ public class TableCreator
 	public void createTable()
 		throws SQLException
 	{
-		StringBuffer sql = new StringBuffer(100);
+		StringBuilder sql = new StringBuilder(100);
 		sql.append("CREATE TABLE ");
 		//String name = this.tablename.isNewTable() ? this.tablename.getTableName() : this.tablename.getTableExpression();
 		String name = this.tablename.getTableExpression(this.connection);
@@ -119,7 +119,7 @@ public class TableCreator
 			
 			if (pkCols.size() > 0)
 			{
-				StringBuffer pkSql = this.connection.getMetadata().getPkSource(this.tablename.getTableName(), pkCols, null);
+				StringBuilder pkSql = this.connection.getMetadata().getPkSource(this.tablename.getTableName(), pkCols, null);
 				if (pkSql.length() > 0)
 				{
 					LogMgr.logInfo("TableCreator.createTable()", "Adding primary key using: " + pkSql.toString());
@@ -153,7 +153,7 @@ public class TableCreator
 		int size = col.getColumnSize();
 		int digits = col.getDecimalDigits();
 
-		StringBuffer result = new StringBuffer(30);
+		StringBuilder result = new StringBuilder(30);
 		result.append(col.getColumnName());
 		result.append(' ');
 

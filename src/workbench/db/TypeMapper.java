@@ -44,7 +44,7 @@ public class TypeMapper
 		if (!this.typeInfo.containsKey(key)) return SqlUtil.getTypeName(type);
 		String name = (String)this.typeInfo.get(key);
 
-		StringBuffer result = new StringBuffer(30);
+		StringBuilder result = new StringBuilder(30);
 		result.append(name);
 
 		// Now we need to check if the data type needs an argument.

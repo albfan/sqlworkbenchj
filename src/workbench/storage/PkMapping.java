@@ -67,7 +67,7 @@ public class PkMapping
 		if (this.columnMapping == null) return null;
 		if (this.columnMapping.size() == 0) return null;
 		
-		StringBuffer result = new StringBuffer(this.columnMapping.size() * 50);
+		StringBuilder result = new StringBuilder(this.columnMapping.size() * 50);
 		Iterator itr = this.columnMapping .entrySet().iterator();
 		while (itr.hasNext())
 		{
@@ -198,7 +198,7 @@ public class PkMapping
 	
 	public synchronized void addMapping(TableIdentifier table, ColumnIdentifier[] cols)
 	{
-		StringBuffer colNames = new StringBuffer(50);
+		StringBuilder colNames = new StringBuilder(50);
 		for (int i = 0; i < cols.length; i++)
 		{
 			if (cols[i].isPkColumn())

@@ -24,7 +24,7 @@ import java.util.Iterator;
 public class WbTraversalPolicy
 	extends FocusTraversalPolicy
 {
-	private ArrayList components = new ArrayList();
+	private ArrayList<Component> components = new ArrayList();
 	private Component defaultComponent = null;
 
 	public WbTraversalPolicy()
@@ -47,10 +47,10 @@ public class WbTraversalPolicy
 	private boolean checkAvailable()
 	{
 		if (components.size() == 0) return false;
-		Iterator itr = components.iterator();
+		Iterator<Component> itr = components.iterator();
 		while (itr.hasNext())
 		{
-			Component c = (Component)itr.next();
+			Component c = itr.next();
 			if (c.isEnabled()) return true;
 		}
 		return false;
@@ -79,9 +79,9 @@ public class WbTraversalPolicy
 		int index = this.components.indexOf(aComponent);
 		Component result = null;
 		if (index < 0 || index == this.components.size() - 1) 
-			result = (Component)this.components.get(0);
+			result = this.components.get(0);
 		else 
-			result = (Component)this.components.get(index + 1);
+			result = this.components.get(index + 1);
 		if (result.isEnabled())
 		{
 			return result;
@@ -113,9 +113,9 @@ public class WbTraversalPolicy
 		
 		Component result = null;
 		if (index <= 0) 
-			result = (Component)this.components.get(this.components.size() - 1);
+			result = this.components.get(this.components.size() - 1);
 		else 
-			result = (Component)this.components.get(index - 1);
+			result = this.components.get(index - 1);
 		
 		if (result.isEnabled())
 		{
@@ -140,7 +140,7 @@ public class WbTraversalPolicy
 	{
 		if (this.defaultComponent != null) return this.defaultComponent;
 		if (this.components.size() > 0)
-			return (Component)this.components.get(0);
+			return this.components.get(0);
 		else
 			return null;
 	}
@@ -160,7 +160,7 @@ public class WbTraversalPolicy
 	public Component getFirstComponent(Container focusCycleRoot)
 	{
 		if (this.components.size() > 0)
-			return (Component)this.components.get(0);
+			return this.components.get(0);
 		else
 			return null;
 	}
@@ -180,7 +180,7 @@ public class WbTraversalPolicy
 	public Component getLastComponent(Container focusCycleRoot)
 	{
 		if (this.components.size() > 0)
-			return (Component)this.components.get(this.components.size() - 1);
+			return this.components.get(this.components.size() - 1);
 		else
 			return null;
 	}

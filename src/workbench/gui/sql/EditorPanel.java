@@ -32,6 +32,8 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -125,7 +127,7 @@ public class EditorPanel
 	private CommentAction commentAction;
 	private UnCommentAction unCommentAction;
 
-	private List filenameChangeListeners;
+	private List<FilenameChangeListener> filenameChangeListeners;
 	private File currentFile;
 	private String fileEncoding;
 	private Set dbFunctions = null;
@@ -256,17 +258,7 @@ public class EditorPanel
 			this.commentChar = "--";
 		}
 
-		this.alternateDelimiter = null;
-		
-		if (aConnection.getProfile() != null)
-		{
-			this.alternateDelimiter = aConnection.getProfile().getAlternateDelimiter();
-		}
-		
-		if (alternateDelimiter == null)
-		{
-			this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter();
-		}
+		this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter(aConnection);
 	}
 
 	public void fontChanged(String aKey, Font aFont)
@@ -349,7 +341,7 @@ public class EditorPanel
 		int count = parser.getSize();
 		if (count < 1) return;
 
-		StringBuffer newSql = new StringBuffer(sql.length() + 100);
+		StringBuilder newSql = new StringBuilder(sql.length() + 100);
 
 		String end = Settings.getInstance().getInternalEditorLineEnding();
 		
@@ -436,7 +428,7 @@ public class EditorPanel
 		int startline = this.getSelectionStartLine();
 		int endline = this.getSelectionEndLine();
 		int count = (endline - startline + 1);
-		StringBuffer newText = new StringBuffer(count * 80);
+		StringBuilder newText = new StringBuilder(count * 80);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		
 		try
@@ -558,9 +550,10 @@ public class EditorPanel
 	{
 		this.checkFileActions();
 		if (this.filenameChangeListeners == null) return;
-		for (int i=0; i < this.filenameChangeListeners.size(); i++)
+		Iterator<FilenameChangeListener> itr = filenameChangeListeners.iterator();
+		while (itr.hasNext())
 		{
-			FilenameChangeListener l = (FilenameChangeListener)this.filenameChangeListeners.get(i);
+			FilenameChangeListener l = itr.next();
 			l.fileNameChanged(this, aNewName);
 		}
 	}
@@ -568,7 +561,7 @@ public class EditorPanel
 	public void addFilenameChangeListener(FilenameChangeListener aListener)
 	{
 		if (aListener == null) return;
-		if (this.filenameChangeListeners == null) this.filenameChangeListeners = new ArrayList();
+		if (this.filenameChangeListeners == null) this.filenameChangeListeners = new LinkedList<FilenameChangeListener>();
 		this.filenameChangeListeners.add(aListener);
 	}
 
@@ -746,7 +739,7 @@ public class EditorPanel
 			int pos = 0;
 			
 			final int numLines = 50;
-			StringBuffer lineBuffer = new StringBuffer(numLines * 100);
+			StringBuilder lineBuffer = new StringBuilder(numLines * 100);
 			
 			// Inserting the text in chunks is much faster than 
 			// inserting it line by line. Optimal speed would probably

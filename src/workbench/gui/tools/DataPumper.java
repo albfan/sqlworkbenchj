@@ -1477,7 +1477,7 @@ public class DataPumper
 
 		CommandTester t = new CommandTester();
 		
-		StringBuffer result = new StringBuffer(150);
+		StringBuilder result = new StringBuilder(150);
 		result.append(t.formatVerb(WbCopy.VERB) + " -" + WbCopy.PARAM_SOURCEPROFILE + "=");
 		String indent = "\n      ";
 
@@ -1892,7 +1892,7 @@ public class DataPumper
 
 			String msg = this.copier.getRowsInsertedMessage();
 			String msg2 = this.copier.getRowsUpdatedMessage();
-			StringBuffer copied = new StringBuffer(50);
+			StringBuilder copied = new StringBuilder(50);
 			if (msg != null)
 			{
 				copied.append(msg);

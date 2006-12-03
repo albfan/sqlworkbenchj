@@ -29,6 +29,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -80,8 +81,8 @@ public class WbManager
 	implements FontChangedListener, Runnable
 {
 	private static WbManager wb;
-	private List mainWindows = Collections.synchronizedList(new ArrayList());
-	private List toolWindows = new ArrayList();
+	private List<MainWindow> mainWindows = Collections.synchronizedList(new LinkedList());
+	private List<ToolWindow> toolWindows = new LinkedList();
 	private WbCipher desCipher = null;
 	private boolean batchMode = false;
 	private boolean writeSettings = true;
@@ -230,9 +231,8 @@ public class WbManager
 		{
 			return (MainWindow)this.mainWindows.get(0);
 		}
-		for (int i=0; i < this.mainWindows.size(); i++)
+		for (MainWindow w : mainWindows)
 		{
-			MainWindow w = (MainWindow)this.mainWindows.get(i);
 			if (w.hasFocus()) return w;
 		}
 		return null;
@@ -267,9 +267,8 @@ public class WbManager
 	private void closeToolWindows()
 	{
 		int count = this.toolWindows.size();
-		for (int i=0; i < count; i ++)
+		for (ToolWindow w : toolWindows)
 		{
-			ToolWindow w = (ToolWindow)this.toolWindows.get(i);
 			w.closeWindow();
 		}
 		this.toolWindows.clear();
@@ -490,22 +489,20 @@ public class WbManager
 
 		if (!this.checkProfiles(w)) return false;
 
-		int count = this.mainWindows.size();
 		boolean result = true;
-		for (int i=0; i < count; i++)
+		for (MainWindow win : mainWindows)
 		{
-			w = (MainWindow)this.mainWindows.get(i);
-			if (w == null) continue;
-			if (i == 0 && !settingsSaved)
+			if (win == null) continue;
+			if (!settingsSaved)
 			{
-				w.saveSettings();
+				win.saveSettings();
 				settingsSaved = true;
 			}
-			if (w.isBusy())
+			if (win.isBusy())
 			{
-				if (!this.checkAbort(w)) return false;
+				if (!this.checkAbort(win)) return false;
 			}
-			result = w.saveWorkspace(true);
+			result = win.saveWorkspace(true);
 			if (!result) return false;
 		}
 		return true;
@@ -594,10 +591,8 @@ public class WbManager
 
 	protected void disconnectWindows()
 	{
-		MainWindow w = null;
-		for (int i=0; i < mainWindows.size(); i ++)
+		for (MainWindow w : mainWindows)
 		{
-			w = (MainWindow)this.mainWindows.get(i);
 			if (w == null) continue;
 			w.abortAll();
 			w.disconnect(false, true, false);
@@ -627,10 +622,8 @@ public class WbManager
 
 	protected void closeAllWindows()
 	{
-		int size = this.mainWindows.size();
-		for (int i=0; i < size; i ++)
+		for (MainWindow w : mainWindows)
 		{
-			MainWindow w = (MainWindow)this.mainWindows.get(i);
 			if (w != null)
 			{
 				try { w.setVisible(false); } catch (Throwable th) {}

@@ -136,7 +136,7 @@ public class ImportStringVerifier
 		JPanel p = new JPanel(new BorderLayout(0,5));
 		
 		JTextArea preview = new JTextArea();
-		StringBuffer s = StringUtil.getLines(content, 15);
+		StringBuilder s = StringUtil.getLines(content, 15);
 		int l = s.length();
 		for (int i = 0; i < l; i++)
 		{

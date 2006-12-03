@@ -161,7 +161,7 @@ public class SqlLiteralFormatter
 	
 	private String quoteString(String t)
 	{
-		StringBuffer realValue = new StringBuffer(t.length() + 10);
+		StringBuilder realValue = new StringBuilder(t.length() + 10);
 		// Single quotes in a String must be "quoted"...
 		realValue.append('\'');
 		// replace to Buffer writes the result of into the passed buffer

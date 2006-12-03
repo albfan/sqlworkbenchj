@@ -82,7 +82,7 @@ public class DbmsOutput
 		" :buffer := l_buffer; " +
 		"end;" );
 
-		StringBuffer result = new StringBuffer(1024);
+		StringBuilder result = new StringBuilder(1024);
 		try
 		{
 			showOutputStatement.registerOutParameter( 2, Types.INTEGER );

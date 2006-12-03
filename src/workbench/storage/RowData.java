@@ -367,7 +367,7 @@ public class RowData
 	public String toString()
 	{
 		int count = this.colData.length;
-		StringBuffer result = new StringBuffer(count * 20);
+		StringBuilder result = new StringBuilder(count * 20);
 
 		result.append('{');
 		for (int c=0; c < count; c++)

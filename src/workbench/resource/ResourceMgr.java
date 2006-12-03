@@ -167,7 +167,7 @@ public class ResourceMgr
 			if (pos == -1) return null;
 			
 			char c = label.charAt(pos + 1);
-			StringBuffer b = new StringBuffer(1);
+			StringBuilder b = new StringBuilder(1);
 			b.append(c);
 			return b.toString();
 		}

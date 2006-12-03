@@ -36,7 +36,7 @@ public class XmlTableDefinitionParser
 	private String tableName;
 	//private String filename;
 	private ImportFileHandler fileHandler;
-	private StringBuffer chars;
+	private StringBuilder chars;
 	private String tagFormat;
 	
 	public XmlTableDefinitionParser(ImportFileHandler handler)
@@ -102,7 +102,7 @@ public class XmlTableDefinitionParser
 	public void startElement(String namespaceURI, String sName, String qName, Attributes attrs)
 		throws SAXException
 	{
-		this.chars = new StringBuffer();
+		this.chars = new StringBuilder();
 		if (qName.equals(XmlRowDataConverter.COLUMN_DEF_TAG))
 		{
 			this.columnList[this.currentColIndex] = new ColumnIdentifier();

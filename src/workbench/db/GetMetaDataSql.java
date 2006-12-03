@@ -55,7 +55,7 @@ public class GetMetaDataSql
 	private String getSelectSql()
 	{
 		boolean needsAnd;
-		StringBuffer sql = new StringBuffer(baseSql);
+		StringBuilder sql = new StringBuilder(baseSql);
 		if (baseSql.toLowerCase().indexOf("where") == -1)
 		{
 			sql.append(" WHERE ");
@@ -91,7 +91,7 @@ public class GetMetaDataSql
 
 	private String getProcedureCallSql()
 	{
-		StringBuffer sql = new StringBuffer(this.baseSql);
+		StringBuilder sql = new StringBuilder(this.baseSql);
 		if (this.argumentsNeedParanthesis)
 		{
 			sql.append(" (");

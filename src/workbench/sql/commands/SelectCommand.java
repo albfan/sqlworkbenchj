@@ -109,7 +109,7 @@ public class SelectCommand extends SqlCommand
 				if (this.isConsumerWaiting())
 				{
 					result.addResultSet(rs);
-					StringBuffer warnings = new StringBuffer();
+					StringBuilder warnings = new StringBuilder();
 					if (this.appendWarnings(aConnection, this.currentStatement, warnings))
 					{
 						result.addMessage(warnings);
@@ -146,7 +146,7 @@ public class SelectCommand extends SqlCommand
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(ExceptionUtil.getDisplay(e));
 
-			StringBuffer warnings = new StringBuffer();
+			StringBuilder warnings = new StringBuilder();
 			if (this.appendWarnings(aConnection, this.currentStatement, warnings))
 			{
 				result.addMessage(warnings.toString());

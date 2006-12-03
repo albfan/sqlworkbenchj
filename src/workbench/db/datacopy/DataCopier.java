@@ -52,8 +52,8 @@ public class DataCopier
 	private HashMap columnMap;
 
 	private ColumnIdentifier[] targetColumnsForQuery;
-	private StringBuffer messages = null;
-	private StringBuffer errors = null;
+	private StringBuilder messages = null;
+	private StringBuilder errors = null;
 
 	public DataCopier()
 	{
@@ -530,7 +530,7 @@ public class DataCopier
 		int col = 0;
 		Iterator itr = this.columnMap.entrySet().iterator();
 
-		StringBuffer sql = new StringBuffer(200);
+		StringBuilder sql = new StringBuilder(200);
 		sql.append("SELECT ");
 
 		while (itr.hasNext())
@@ -690,7 +690,7 @@ public class DataCopier
 		int count = targetCols.size();
 		this.columnMap = new HashMap(count);
 		LogMgr.logInfo("DataCopier.readColumnDefinition()", "Copying matching columns from " + this.sourceTable + " to " + this.targetTable);
-		StringBuffer usedColumns = new StringBuffer(100);
+		StringBuilder usedColumns = new StringBuilder(100);
 		for (int i=0; i < count; i++)
 		{
 			ColumnIdentifier column = (ColumnIdentifier)targetCols.get(i);
@@ -714,7 +714,7 @@ public class DataCopier
 
 	private void addError(String msg)
 	{
-		if (this.errors == null) this.errors = new StringBuffer(250);
+		if (this.errors == null) this.errors = new StringBuilder(250);
 		if (this.errors.length() > 0) this.errors.append('\n');
 		this.errors.append(msg);
 	}
@@ -722,7 +722,7 @@ public class DataCopier
 
 	private void addMessage(String msg)
 	{
-		if (this.messages == null) this.messages = new StringBuffer(250);
+		if (this.messages == null) this.messages = new StringBuilder(250);
 		if (this.messages.length() > 0) this.messages.append('\n');
 		this.messages.append(msg);
 	}
@@ -740,7 +740,7 @@ public class DataCopier
 
 	public String getAllMessages()
 	{
-		StringBuffer log = new StringBuffer(2000);
+		StringBuilder log = new StringBuilder(2000);
 
 		// No need to append our messages, as the importer will
 		// store any message from its source (that's us)

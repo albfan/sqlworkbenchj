@@ -33,7 +33,7 @@ public class ConsoleStatusBar
 	private String createDeleteString(String original)
 	{
 		if (original == null) return StringUtil.EMPTY_STRING;
-		StringBuffer result = new StringBuffer(original.length()+2);
+		StringBuilder result = new StringBuilder(original.length()+2);
 		result.append('\r');
 		for (int i = 0; i < original.length(); i++)
 		{

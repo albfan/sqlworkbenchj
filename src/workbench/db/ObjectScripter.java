@@ -46,7 +46,7 @@ public class ObjectScripter
 
 	private Map objectList;
 	private DbMetadata meta;
-	private StringBuffer script;
+	private StringBuilder script;
 	private ScriptGenerationMonitor progressMonitor;
 	private WbConnection dbConnection;
 	private boolean cancel;
@@ -81,7 +81,7 @@ public class ObjectScripter
 		{
 			this.dbConnection.setBusy(true);
 			this.cancel = false;
-			this.script = new StringBuffer(this.objectList.size() * 500);
+			this.script = new StringBuilder(this.objectList.size() * 500);
 			if (!cancel) this.appendObjectType(TYPE_SEQUENCE);
 			if (!cancel) this.appendObjectType(TYPE_TABLE);
 			if (!cancel) this.appendForeignKeys();
@@ -120,7 +120,7 @@ public class ObjectScripter
 
 			TableIdentifier tbl = (TableIdentifier)key;
 			tbl.adjustCase(this.dbConnection);
-			StringBuffer source = meta.getFkSource(tbl);
+			StringBuilder source = meta.getFkSource(tbl);
 			if (source != null && source.length() > 0)
 			{
 				if (first)
@@ -231,7 +231,7 @@ public class ObjectScripter
 		// This is a "trick" to fool the StatementFactory which will
 		// check the type of the Data, in case it does not "know" the 
 		// class, it calls toString() which works fine for 
-		StringBuffer marker = new StringBuffer("?");
+		StringBuilder marker = new StringBuilder("?");
 		
 		for (int i=0; i < info.getColumnCount(); i++)
 		{
@@ -243,7 +243,7 @@ public class ObjectScripter
 			{
 				int type = info.getColumnType(i);
 //				String name = info.getColumnName(i);
-				StringBuffer dummy = new StringBuffer();
+				StringBuilder dummy = new StringBuilder();
 				if (SqlUtil.isCharacterType(type)) dummy.append('\'');
 				dummy.append(info.getColumnName(i));
 				dummy.append("_value");
@@ -268,7 +268,7 @@ public class ObjectScripter
 		int colCount = tableDef.getRowCount();
 		if (colCount == 0) return StringUtil.EMPTY_STRING;
 
-		StringBuffer sql = new StringBuffer(colCount * 80);
+		StringBuilder sql = new StringBuilder(colCount * 80);
 
 		sql.append("SELECT ");
 		for (int i=0; i < colCount; i++)

@@ -166,8 +166,8 @@ public class FileImporter
 	
 	public String getWbCommand()
 	{
-		StringBuffer result = new StringBuffer(150);
-		StringBuffer indent = new StringBuffer();
+		StringBuilder result = new StringBuilder(150);
+		StringBuilder indent = new StringBuilder();
 		indent.append('\n');
 		for (int i=0; i < WbImport.VERB.length(); i++) indent.append(' ');
 		indent.append(' ');

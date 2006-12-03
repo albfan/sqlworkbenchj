@@ -947,7 +947,7 @@ public class ConnectionEditorPanel
 public boolean validateInput() 
 {
 	DelimiterDefinition delim = getProfile().getAlternateDelimiter();
-	if (delim.isStandard())
+	if (delim != null && delim.isStandard())
 	{
 		WbSwingUtilities.showErrorMessageKey(this, "ErrWrongAltDelim");
 		return false;

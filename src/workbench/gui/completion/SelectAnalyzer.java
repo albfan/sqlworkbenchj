@@ -304,7 +304,7 @@ public class SelectAnalyzer
 		List cols = SqlUtil.getSelectColumns(this.sql, false);
 		List validCols = new LinkedList();
 		String[] funcs = new String[]{"sum", "count", "avg", "min", "max" };
-		StringBuffer regex = new StringBuffer(50);
+		StringBuilder regex = new StringBuilder(50);
 		for (int i = 0; i < funcs.length; i++)
 		{
 			if (i > 0) regex.append('|');

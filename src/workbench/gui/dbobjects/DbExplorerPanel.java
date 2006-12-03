@@ -380,7 +380,7 @@ public class DbExplorerPanel
 
 	private void readSchemaLabel()
 	{
-		StringBuffer s = new StringBuffer(this.dbConnection.getMetadata().getSchemaTerm());
+		StringBuilder s = new StringBuilder(this.dbConnection.getMetadata().getSchemaTerm());
 		s.setCharAt(0, Character.toUpperCase(s.charAt(0)));
 		this.schemaLabel.setText(s.toString());
 	}

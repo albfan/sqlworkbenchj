@@ -136,7 +136,7 @@ public class WbStringTokenizer
 	public String nextToken()
 	{
 		boolean inQuotes = false;
-		StringBuffer current = null;
+		StringBuilder current = null;
 		String value = null;
 		int delimIndex = 0;
 		char lastQuote = 0;
@@ -181,7 +181,7 @@ public class WbStringTokenizer
 							lastQuote = 0;
 							if (keepQuotes) 
 							{
-								if (current == null) current = new StringBuffer();
+								if (current == null) current = new StringBuilder();
 								current.append(token);
 							}
 						}
@@ -189,7 +189,7 @@ public class WbStringTokenizer
 						{
 							// quote character inside another quote character
 							// we need to add it 
-							if (current == null) current = new StringBuffer();
+							if (current == null) current = new StringBuilder();
 							current.append(token);
 						}
 					}
@@ -200,7 +200,7 @@ public class WbStringTokenizer
 						inQuotes = true;
 						if (keepQuotes) 
 						{
-							if (current == null) current = new StringBuffer();
+							if (current == null) current = new StringBuilder();
 							current.append(token);
 						}
 					}
@@ -210,7 +210,7 @@ public class WbStringTokenizer
 				if (inQuotes)
 				{
 					// inside quotes, anything has to be added.
-					if (current == null) current = new StringBuffer();
+					if (current == null) current = new StringBuilder();
 					current.append(token);
 					continue;
 				}
@@ -227,7 +227,7 @@ public class WbStringTokenizer
 					}
 					if (bracketCount > 0) 
 					{
-						if (current == null) current = new StringBuffer();
+						if (current == null) current = new StringBuilder();
 						current.append(token);
 						continue;
 					}
@@ -268,14 +268,14 @@ public class WbStringTokenizer
 						}
 						else
 						{
-							if (current == null) current = new StringBuffer();
+							if (current == null) current = new StringBuilder();
 							current.append(token);
 						}
 					}
 				}
 				else
 				{
-					if (current == null) current = new StringBuffer();
+					if (current == null) current = new StringBuilder();
 					current.append(token);
 				}
 				lastToken = token;

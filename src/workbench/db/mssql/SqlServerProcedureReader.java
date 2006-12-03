@@ -40,7 +40,7 @@ public class SqlServerProcedureReader
 		this.dbConn = db.getSqlConnection();
 	}
 	
-	public StringBuffer getProcedureHeader(String catalog, String schema, String procName, int procType)
+	public StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType)
 	{
 		return StringUtil.emptyBuffer();
 	}

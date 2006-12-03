@@ -86,7 +86,7 @@ public class GenericRowMonitor
 		else
 		{
 			this.currentMonitorObject = name;
-			StringBuffer msg = new StringBuffer(40);
+			StringBuilder msg = new StringBuilder(40);
 			msg.append(objectMsg);
 			msg.append(name);
 			if (number > 0)
@@ -106,7 +106,7 @@ public class GenericRowMonitor
 
 	public void setCurrentRow(long currentRow, long totalRows)
 	{
-		StringBuffer msg = new StringBuffer(40);
+		StringBuilder msg = new StringBuilder(40);
 		if (this.updateMsg == null)
 		{
 			msg.append(objectMsg);

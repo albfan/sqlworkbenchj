@@ -74,12 +74,12 @@ public class SqlCommand
 	}
 	/**
 	 *	Append any warnings from the given Statement and Connection to the given
-	 *	StringBuffer. If the connection is a connection to Oracle
+	 *	StringBuilder. If the connection is a connection to Oracle
 	 *	then any messages written with dbms_output are appended as well
 	 *  This behaviour is then similar to MS SQL Server where any messages
 	 *  displayed using the PRINT function are returned in the Warnings as well.
 	 */
-	protected boolean appendWarnings(WbConnection aConn, Statement aStmt, StringBuffer msg)
+	protected boolean appendWarnings(WbConnection aConn, Statement aStmt, StringBuilder msg)
 	{
 		String warn = SqlUtil.getWarnings(aConn, aStmt, !this.isCancelled);
 		boolean hasWarning = false;
@@ -189,7 +189,7 @@ public class SqlCommand
 		catch (Exception e)
 		{
 			result.clear();
-			StringBuffer msg = new StringBuffer(150);
+			StringBuilder msg = new StringBuilder(150);
 			msg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
 			String s = StringUtil.getMaxSubstring(aSql.trim(), 150);
 			msg.append(s);
@@ -221,7 +221,7 @@ public class SqlCommand
 		// Postgres obviously clears the warnings if the getMoreResults()
 		// and stuff is called, so we add the warnings right at the beginning
 		// this shouldn't affect other DBMSs (hopefully :-)
-		StringBuffer warnings = new StringBuffer();
+		StringBuilder warnings = new StringBuilder();
 		if (appendWarnings(this.currentConnection, this.currentStatement, warnings))
 		{
 			result.addMessage(warnings.toString());

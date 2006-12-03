@@ -227,7 +227,7 @@ public class ConnectionSelector
 		}
 		catch (SQLException se)
 		{
-			StringBuffer logmsg = new StringBuffer(200);
+			StringBuilder logmsg = new StringBuilder(200);
 			logmsg.append(ExceptionUtil.getDisplay(se));
 			SQLException next = se.getNextException();
 			while (next != null)

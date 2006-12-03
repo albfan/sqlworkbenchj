@@ -60,7 +60,7 @@ public class OracleConstraintReader
 	{
 		String sql = this.getTableConstraintSql();
 		if (sql == null) return null;
-		StringBuffer result = new StringBuffer(100);
+		StringBuilder result = new StringBuilder(100);
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
 		String nl = Settings.getInstance().getInternalEditorLineEnding();

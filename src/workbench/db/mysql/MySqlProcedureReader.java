@@ -36,9 +36,9 @@ public class MySqlProcedureReader
 		this.conn = con;
 	}
 
-	public StringBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
+	public StringBuilder getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
-		StringBuffer source = new StringBuffer(150);
+		StringBuilder source = new StringBuilder(150);
 		
 		String sql = "SELECT routine_type, dtd_identifier " +
              "FROM information_schema.routines " +

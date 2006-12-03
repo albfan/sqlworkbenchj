@@ -578,7 +578,7 @@ public class DataImporter
 		{
 			if (this.totalTables > 0)
 			{
-				StringBuffer msg = new StringBuffer(this.targetTable.getTableName().length() + 20);
+				StringBuilder msg = new StringBuilder(this.targetTable.getTableName().length() + 20);
 				msg.append(this.targetTable.getTableName());
 				msg.append(" [");
 				msg.append(this.currentTable);
@@ -756,7 +756,7 @@ public class DataImporter
 	private String getValueDisplay(Object[] row)
 	{
 		int count = row.length;
-		StringBuffer values = new StringBuffer(count * 20);
+		StringBuilder values = new StringBuilder(count * 20);
 		values.append('[');
 
 		for (int i=0; i < count; i++)
@@ -1148,8 +1148,8 @@ public class DataImporter
 	private void prepareInsertStatement()
 		throws SQLException
 	{
-		StringBuffer text = new StringBuffer(this.targetColumns.length * 50);
-		StringBuffer parms = new StringBuffer(targetColumns.length * 20);
+		StringBuilder text = new StringBuilder(this.targetColumns.length * 50);
+		StringBuilder parms = new StringBuilder(targetColumns.length * 20);
 
 		text.append("INSERT INTO ");
 		text.append(targetTable.getTableExpression(this.dbConn));
@@ -1205,8 +1205,8 @@ public class DataImporter
 		int pkIndex = this.colCount - this.keyColumns.size();
 		int pkCount = 0;
 		int colIndex = 0;
-		StringBuffer sql = new StringBuffer(this.colCount * 20 + 80);
-		StringBuffer where = new StringBuffer(this.keyColumns.size() * 10);
+		StringBuilder sql = new StringBuilder(this.colCount * 20 + 80);
+		StringBuilder where = new StringBuilder(this.keyColumns.size() * 10);
 		sql.append("UPDATE ");
 		sql.append(this.targetTable.getTableExpression(this.dbConn));
 		sql.append(" SET ");
@@ -1417,7 +1417,7 @@ public class DataImporter
 	/** 
 	 * Return the messages generated during import.
 	 */
-	public StringBuffer getMessages()
+	public StringBuilder getMessages()
 	{
 		return messages.getBuffer();
 	}

@@ -86,7 +86,7 @@ public class TextFileParser
 	private JobErrorHandler errorHandler;
 	private List pendingImportColumns;
 	private ValueConverter converter;
-	private StringBuffer messages;
+	private StringBuilder messages;
 
 	// If a filter for the input file is defined
 	// this will hold the regular expressions per column
@@ -523,7 +523,7 @@ public class TextFileParser
 			try
 			{
 				currentFile++;
-				this.messages = new StringBuffer();
+				this.messages = new StringBuilder();
 				this.receiver.setCurrentTable(currentFile);
 				this.inputFile = theFile;
 				this.tableName = theFile.getFileName();
@@ -673,7 +673,7 @@ public class TextFileParser
 				{
 					try
 					{
-						StringBuffer b = new StringBuffer(line.length() * 2);
+						StringBuilder b = new StringBuilder(line.length() * 2);
 						b.append(line);
 						b.append(lineEnding);
 						String nextLine = in.readLine();
@@ -796,7 +796,7 @@ public class TextFileParser
 						msg = msg.replaceAll("%col%", (this.columns[i] == null ? "n/a" : this.columns[i].getColumnName()));
 						msg = msg.replaceAll("%value%", (value == null ? "(NULL)" : value));
 						msg = msg.replaceAll("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
-						if (this.messages == null) this.messages = new StringBuffer();
+						if (this.messages == null) this.messages = new StringBuilder();
 						this.messages.append(msg);
 						this.messages.append("\n");
 						if (this.abortOnError) throw e;
@@ -956,7 +956,7 @@ public class TextFileParser
 	private void readColumnDefinition(List cols)
 		throws SQLException
 	{
-		if (this.messages == null) messages = new StringBuffer();
+		if (this.messages == null) messages = new StringBuilder();
 		try
 		{
 			this.colCount = cols.size();
@@ -1071,7 +1071,7 @@ public class TextFileParser
 	 */
 	public String getColumns()
 	{
-		StringBuffer result = new StringBuffer(this.colCount * 10);
+		StringBuilder result = new StringBuilder(this.colCount * 10);
 
 		if (this.columnMap == null || this.importColCount == this.colCount)
 		{

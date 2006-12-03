@@ -73,7 +73,7 @@ public class OracleIndexReader
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(this.metaData.getWbConnection());
 		
-		StringBuffer sql = new StringBuffer(200);
+		StringBuilder sql = new StringBuilder(200);
 		sql.append("SELECT null as table_cat, " +
 			"       i.owner as table_schem, " +
 			"       i.table_name, "+
@@ -131,7 +131,7 @@ public class OracleIndexReader
 			"    and i.table_name = e.table_name   \n" +
 			"    and e.index_owner = i.owner \n " +
 			"    and i.index_type like 'FUNCTION-BASED%' ";
-		StringBuffer sql = new StringBuffer(300);
+		StringBuilder sql = new StringBuilder(300);
 		sql.append(base);
 		String schema = tbl.getSchema();
 		

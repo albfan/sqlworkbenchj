@@ -39,6 +39,7 @@ import javax.swing.UIManager;
 
 import workbench.WbManager;
 import workbench.db.ConnectionProfile;
+import workbench.db.WbConnection;
 import workbench.gui.profiles.ProfileKey;
 import workbench.interfaces.PropertyStorage;
 import workbench.gui.actions.ActionRegistration;
@@ -85,7 +86,7 @@ public class Settings
 
 	private static Settings settings;
 
-	public static final Settings getInstance()
+	public synchronized static final Settings getInstance()
 	{
 		if (settings == null)
 		{
@@ -1148,7 +1149,7 @@ public class Settings
 	{
 		if (aFont == null) return;
 
-		String baseKey = new StringBuffer("workbench.font.").append(aFontName).toString();
+		String baseKey = new StringBuilder("workbench.font.").append(aFontName).toString();
 		String name = aFont.getFamily();
 		String size = Integer.toString(aFont.getSize());
 		int style = aFont.getStyle();
@@ -1873,10 +1874,21 @@ public class Settings
 		this.defaultDecimalFormatter = null;
 	}
 
+	public DelimiterDefinition getAlternateDelimiter(WbConnection con)
+	{
+		DelimiterDefinition delim = null;
+		if (con != null && con.getProfile() != null)
+		{
+			delim = con.getProfile().getAlternateDelimiter();
+		}
+		return (delim == null ? getAlternateDelimiter() : delim);
+	}
+	
 	public DelimiterDefinition getAlternateDelimiter()
 	{
 		String delim = getProperty("workbench.sql.alternatedelimiter", "/");
 		boolean sld = getBoolProperty("workbench.sql.alternatedelimiter.singleline", true);
+		if (delim == null || delim.trim().length() == 0) return null;
 		DelimiterDefinition def = new DelimiterDefinition(delim, sld);
 		if (def.isStandard()) return null;
 		return def;

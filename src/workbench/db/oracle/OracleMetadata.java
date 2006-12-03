@@ -131,7 +131,7 @@ public class OracleMetadata
 	
 	public DataStore getSequenceDefinition(String owner, String sequence)
 	{
-		StringBuffer sql = new StringBuffer(100);
+		StringBuilder sql = new StringBuilder(100);
 		sql.append("SELECT * FROM all_sequences ");
 		sql.append(" WHERE sequence_owner = ? ");
 		sql.append("  AND sequence_name = ? ");
@@ -167,7 +167,7 @@ public class OracleMetadata
 		PreparedStatement stmt = null;
 		List result = new ArrayList(100);
 		
-		StringBuffer sql = new StringBuffer(200);
+		StringBuilder sql = new StringBuilder(200);
 		sql.append("SELECT sequence_name FROM all_sequences ");
 		if (owner != null)
 		{
@@ -200,7 +200,7 @@ public class OracleMetadata
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		StringBuffer result = new StringBuffer(100);
+		StringBuilder result = new StringBuilder(100);
 		
 		String sql ="SELECT SEQUENCE_NAME, \n" +
 			"       MIN_VALUE, \n" +
@@ -280,7 +280,7 @@ public class OracleMetadata
 		catch (Exception e)
 		{
 			LogMgr.logError("OracleMetaData.getSequenceList()", "Error when retrieving sequences",e);
-			result = new StringBuffer(ExceptionUtil.getDisplay(e));
+			result = new StringBuilder(ExceptionUtil.getDisplay(e));
 		}
 		finally
 		{
@@ -292,7 +292,7 @@ public class OracleMetadata
 	
 	public String getVarcharType(String type, int size, int semantics)
 	{
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		result.append(type);
 		result.append('(');
 		result.append(size);
@@ -407,9 +407,9 @@ public class OracleMetadata
 		return rs;
 	}
 	
-	private final StringBuffer PROC_HEADER = new StringBuffer("CREATE OR REPLACE ");
+	private final StringBuilder PROC_HEADER = new StringBuilder("CREATE OR REPLACE ");
 	
-	public StringBuffer getProcedureHeader(String catalog, String schema, String procname, int procType)
+	public StringBuilder getProcedureHeader(String catalog, String schema, String procname, int procType)
 	{
 		return PROC_HEADER;
 	}
@@ -579,7 +579,7 @@ public class OracleMetadata
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		StringBuffer result = new StringBuffer(250);
+		StringBuilder result = new StringBuilder(250);
 		try
 		{
 			if (objectName.indexOf('.') > -1)

@@ -55,7 +55,7 @@ public class SqlUtil
 			doQuote = m.find();
 		}
 		if (!doQuote) return aColname.trim();
-		StringBuffer col = new StringBuffer(aColname.length() + 5);
+		StringBuilder col = new StringBuilder(aColname.length() + 5);
 		col.append('"');
 		col.append(aColname.trim());
 		col.append('"');
@@ -370,7 +370,7 @@ public class SqlUtil
 				SQLToken t = (SQLToken)lex.getNextToken(false, false);
 
 				boolean collectTable = true;
-				StringBuffer currentTable = new StringBuffer();
+				StringBuilder currentTable = new StringBuilder();
 				int bracketCount = 0;
 				boolean subSelect = false;
 				int subSelectBracketCount = -1;
@@ -408,20 +408,20 @@ public class SqlUtil
 							if (currentTable.length() > 0)
 							{
 								result.add(getTableDefinition(currentTable.toString(), includeAlias));
-								currentTable = new StringBuffer();
+								currentTable = new StringBuilder();
 							}
 						}
 						else if (",".equals(s))
 						{
 								collectTable = true;
 								result.add(getTableDefinition(currentTable.toString(), includeAlias));
-								currentTable = new StringBuffer();
+								currentTable = new StringBuilder();
 						}
 						else if ("ON".equals(s))
 						{
 							collectTable = false;
 							result.add(getTableDefinition(currentTable.toString(), includeAlias));
-							currentTable = new StringBuffer();
+							currentTable = new StringBuilder();
 						}
 						else if (collectTable && !s.equals("("))
 						{
@@ -557,7 +557,7 @@ public class SqlUtil
 		boolean inQuotes = false;
 		boolean lineComment = false;
 
-		StringBuffer newSql = new StringBuffer(count);
+		StringBuilder newSql = new StringBuilder(count);
 
 		// remove trailing semicolon
 		if (aSql.charAt(count - 1) == ';') count --;
@@ -815,7 +815,7 @@ public class SqlUtil
 			// from the statement. They will not be added when the Warnings from
 			// the connection are retrieved
 			ArrayList added = new ArrayList();
-			StringBuffer msg = new StringBuffer(100);
+			StringBuilder msg = new StringBuilder(100);
 			String s = null;
 			SQLWarning warn = stmt.getWarnings();
 			boolean hasWarnings = warn != null;

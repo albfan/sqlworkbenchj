@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
@@ -189,9 +190,9 @@ public class SqlPanel
 	protected boolean cancelExecution;
 
 	private List actions = new LinkedList();
-	private List toolbarActions = new LinkedList();
+	private List<WbAction> toolbarActions = new LinkedList();
 
-	private List filenameChangeListeners;
+	private List<FilenameChangeListener> filenameChangeListeners;
 
 	protected StopAction stopAction;
 	protected ExecuteAllAction executeAll;
@@ -246,7 +247,7 @@ public class SqlPanel
 	protected boolean textModified;
 	protected String tabName;
 
-	private List execListener;
+	private List<DbExecutionListener> execListener;
 	protected Thread executionThread;
 	protected Interruptable worker;
 
@@ -351,10 +352,10 @@ public class SqlPanel
 	{
 		this.toolbar = new WbToolbar();
 		this.toolbar.addDefaultBorder();
-		Iterator itr = this.toolbarActions.iterator();
+		Iterator<WbAction> itr = this.toolbarActions.iterator();
 		while (itr.hasNext())
 		{
-			WbAction a = (WbAction)itr.next();
+			WbAction a = itr.next();
 			boolean toolbarSep = a.getCreateToolbarSeparator();
 			if (toolbarSep)
 			{
@@ -463,9 +464,10 @@ public class SqlPanel
 	{
 		updateTabTitle();
 		if (this.filenameChangeListeners == null) return;
-		for (int i=0; i < this.filenameChangeListeners.size(); i++)
+		Iterator<FilenameChangeListener> itr = filenameChangeListeners.iterator();
+		while (itr.hasNext())
 		{
-			FilenameChangeListener l = (FilenameChangeListener)this.filenameChangeListeners.get(i);
+			FilenameChangeListener l = itr.next();
 			l.fileNameChanged(this, aNewName);
 		}
 	}
@@ -473,7 +475,7 @@ public class SqlPanel
 	public void addFilenameChangeListener(FilenameChangeListener aListener)
 	{
 		if (aListener == null) return;
-		if (this.filenameChangeListeners == null) this.filenameChangeListeners = new ArrayList();
+		if (this.filenameChangeListeners == null) this.filenameChangeListeners = new LinkedList<FilenameChangeListener>();
 		this.filenameChangeListeners.add(aListener);
 	}
 
@@ -1636,7 +1638,7 @@ public class SqlPanel
 					try
 					{
 						boolean newLineAppended = false;
-						StringBuffer messages = new StringBuffer();
+						StringBuilder messages = new StringBuilder();
 						long start = System.currentTimeMillis();
 						long rowCount = exporter.startExport();
 						long execTime = (System.currentTimeMillis() - start);
@@ -2026,12 +2028,7 @@ public class SqlPanel
 	private ScriptParser createScriptParser()
 	{
 		ScriptParser scriptParser = new ScriptParser();
-		DelimiterDefinition altDelim = null;
-		if (this.dbConnection.getProfile() != null)
-		{
-			altDelim = this.dbConnection.getProfile().getAlternateDelimiter();
-		}
-		if (altDelim == null) altDelim = Settings.getInstance().getAlternateDelimiter();
+		DelimiterDefinition altDelim = Settings.getInstance().getAlternateDelimiter(this.dbConnection);
 
 		scriptParser.setAlternateDelimiter(altDelim);
 		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
@@ -2200,9 +2197,9 @@ public class SqlPanel
 
 			if (count > 1) logWasCompressed = !this.stmtRunner.getVerboseLogging();
 			
-			StringBuffer finishedMsg1 = new StringBuffer(ResourceMgr.getString("TxtScriptStatementFinished1"));
+			StringBuilder finishedMsg1 = new StringBuilder(ResourceMgr.getString("TxtScriptStatementFinished1"));
 			finishedMsg1.append(' ');
-			StringBuffer finishedMsg2 = new StringBuffer(20);
+			StringBuilder finishedMsg2 = new StringBuilder(20);
 			finishedMsg2.append(' ');
 			String msg = ResourceMgr.getString("TxtScriptStatementFinished2");
 			msg = StringUtil.replace(msg, "%total%", Integer.toString(count));
@@ -2270,7 +2267,7 @@ public class SqlPanel
 				// so it needs to be checked each time.
 				if (count > 1) logWasCompressed = logWasCompressed || !this.stmtRunner.getVerboseLogging();
 				
-				StringBuffer finishedMsg = new StringBuffer(finishedSize);
+				StringBuilder finishedMsg = new StringBuilder(finishedSize);
 				finishedMsg.append(finishedMsg1);
 				finishedMsg.append(i + 1);
 				finishedMsg.append(finishedMsg2);
@@ -2279,7 +2276,7 @@ public class SqlPanel
 				if (!logWasCompressed)
 				{
 					showResultMessage(statementResult);
-					StringBuffer logmsg = new StringBuffer(100);
+					StringBuilder logmsg = new StringBuilder(100);
 					String timing = statementResult.getTimingMessage();
 					if (timing != null) 
 					{
@@ -2478,7 +2475,7 @@ public class SqlPanel
 
 	private void showResultMessage(StatementRunnerResult result)
 	{
-		StringBuffer msg = result.getMessageBuffer();
+		StringBuilder msg = result.getMessageBuffer();
 		if (msg == null) return;
 		try
 		{
@@ -2860,7 +2857,7 @@ public class SqlPanel
 
 	public void addDbExecutionListener(DbExecutionListener l)
 	{
-		if (this.execListener == null) this.execListener = Collections.synchronizedList(new ArrayList());
+		if (this.execListener == null) this.execListener = Collections.synchronizedList(new LinkedList());
 		this.execListener.add(l);
 	}
 
@@ -2875,10 +2872,10 @@ public class SqlPanel
 		synchronized (this)
 		{
 			if (this.execListener == null) return;
-			int count = this.execListener.size();
-			for (int i=0; i < count; i++)
+			Iterator<DbExecutionListener> itr = this.execListener.iterator();
+			while (itr.hasNext())
 			{
-				DbExecutionListener l = (DbExecutionListener)this.execListener.get(i);
+				DbExecutionListener l = itr.next();
 				if (l != null) l.executionStart(this.dbConnection, this);
 			}
 		}
@@ -2889,10 +2886,10 @@ public class SqlPanel
 		synchronized (this)
 		{
 			if (this.execListener == null) return;
-			int count = this.execListener.size();
-			for (int i=0; i < count; i++)
+			Iterator<DbExecutionListener> itr = this.execListener.iterator();
+			while (itr.hasNext())
 			{
-				DbExecutionListener l = (DbExecutionListener)this.execListener.get(i);
+				DbExecutionListener l = itr.next();
 				if (l != null) l.executionEnd(this.dbConnection, this);
 			}
 		}

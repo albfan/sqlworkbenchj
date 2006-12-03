@@ -41,12 +41,12 @@ public class HexBlobFormatter
 		int addSpace = (prefix != null ? prefix.length() : 0);
 		addSpace += (suffix != null ? suffix.length() : 0);
 		
-		StringBuffer result = null; 
+		StringBuilder result = null; 
 		
 		if (value instanceof byte[])
 		{
 			byte[] buffer = (byte[])value;
-			result = new StringBuffer(buffer.length * 2 + addSpace);
+			result = new StringBuilder(buffer.length * 2 + addSpace);
 			if (prefix != null) result.append(prefix);
 			appendArray(result, buffer);
 		}
@@ -54,7 +54,7 @@ public class HexBlobFormatter
 		{
 			Blob b = (Blob)value;
 			int len = (int)b.length();
-			result = new StringBuffer(len*2 + addSpace);
+			result = new StringBuilder(len*2 + addSpace);
 			if (prefix != null) result.append(prefix);
 			for (int i = 0; i < len; i++)
 			{
@@ -64,7 +64,7 @@ public class HexBlobFormatter
 		}
 		else
 		{
-			result = new StringBuffer(100+addSpace);
+			result = new StringBuilder(100+addSpace);
 			if (prefix != null) result.append(prefix);
 			result.append(value.toString());
 		}
@@ -72,7 +72,7 @@ public class HexBlobFormatter
 		return result.toString();
 	}
 
-	private void appendArray(StringBuffer result, byte[] buffer)
+	private void appendArray(StringBuilder result, byte[] buffer)
 	{
 		for (int i = 0; i < buffer.length; i++)
 		{

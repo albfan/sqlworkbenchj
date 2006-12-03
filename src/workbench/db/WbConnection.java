@@ -55,7 +55,7 @@ public class WbConnection
 	public static final String CONNECTION_OPEN = "open";
 
   private String id;
-	private StringBuffer scriptError = null;
+	private StringBuilder scriptError = null;
 	private Connection sqlConnection;
 	private DbMetadata metaData;
 	private ConnectionProfile profile;
@@ -158,7 +158,7 @@ public class WbConnection
 		try
 		{
 			stmt = this.sqlConnection.createStatement();
-			this.scriptError = new StringBuffer();
+			this.scriptError = new StringBuilder();
 			while (itr.hasNext())
 			{
 				command = p.getNextCommand();
@@ -173,7 +173,7 @@ public class WbConnection
 		catch (Exception e)
 		{
 			LogMgr.logError("WbConnection.runConnectScript()", "Error executing post-connect script", e);
-			this.scriptError = new StringBuffer();
+			this.scriptError = new StringBuilder();
 			this.scriptError.append(ResourceMgr.getString("MsgBatchStatementError"));
 			this.scriptError.append(": ");
 			this.scriptError.append(command + "\n");
@@ -221,7 +221,7 @@ public class WbConnection
 				return null;
 			}
 			
-			StringBuffer msg = new StringBuffer(200);
+			StringBuilder msg = new StringBuilder(200);
 			if (this.scriptError != null) msg.append(this.scriptError);
 
 			String s = null;
@@ -531,7 +531,7 @@ public class WbConnection
 		try
 		{
 			DbMetadata meta = getMetadata();
-			StringBuffer buff = new StringBuffer(100);
+			StringBuilder buff = new StringBuilder(100);
 			String user = meta.getUserName();
 			buff.append(ResourceMgr.getString("TxtUser"));
 			buff.append('=');
@@ -648,7 +648,7 @@ public class WbConnection
 	{
 		if (value == null) return null;
 		int len = value.length();
-		StringBuffer result = new StringBuffer(len);
+		StringBuilder result = new StringBuilder(len);
 		for (int i=0; i < len; i++)
 		{
 			char c = value.charAt(i);

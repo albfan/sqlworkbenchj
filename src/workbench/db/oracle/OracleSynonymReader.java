@@ -46,7 +46,7 @@ public class OracleSynonymReader
 	public TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
-		StringBuffer sql = new StringBuffer(200);
+		StringBuilder sql = new StringBuilder(200);
 		sql.append("SELECT synonym_name, table_owner, table_name, db_link FROM all_synonyms ");
 		sql.append(" WHERE synonym_name = ? AND owner = ? ");
 
@@ -82,7 +82,7 @@ public class OracleSynonymReader
 		throws SQLException
 	{
 		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);
-		StringBuffer result = new StringBuffer(200);
+		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE SYNONYM ");
 		result.append(aSynonym);

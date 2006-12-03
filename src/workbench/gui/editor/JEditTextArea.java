@@ -106,7 +106,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.61 2006-11-26 10:30:53 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.62 2006-12-03 11:27:15 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -333,7 +333,7 @@ public class JEditTextArea
 		int realEndline = this.getSelectionEndLine();
 		int endline = realEndline;
 		int tabSize = this.getTabSize();
-		StringBuffer buff = new StringBuffer(tabSize);
+		StringBuilder buff = new StringBuilder(tabSize);
 		for (int i=0; i < tabSize; i++) buff.append(' ');
 		String spacer = buff.toString();
 
@@ -1733,7 +1733,7 @@ public class JEditTextArea
 				start = tmp;
 			}
 
-			StringBuffer buf = new StringBuffer();
+			StringBuilder buf = new StringBuilder();
 			Segment seg = new Segment();
 
 			for(int i = selectionStartLine; i <= selectionEndLine; i++)

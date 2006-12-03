@@ -350,7 +350,7 @@ public class TablePrinter
 		pg.setFont(this.printFont);
 		TablePrintPage p = this.pages[pageIndex];
 
-		StringBuffer footer = new StringBuffer(100);
+		StringBuilder footer = new StringBuilder(100);
 		footer.append(this.footerText);
 		footer.append(" ");
 		if (pagesAcross > 1)

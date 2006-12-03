@@ -77,7 +77,7 @@ public class PostgresDDLFilter
 		String body = sql.substring(bodyStart, bodyEnd);
 		body = body.replaceAll("'", "''");
 
-		StringBuffer newSql = new StringBuffer(sql.length() + 10);
+		StringBuilder newSql = new StringBuilder(sql.length() + 10);
 		newSql.append(sql.substring(0, bodyStart - 2));
 		newSql.append(" '");
 		newSql.append(body);

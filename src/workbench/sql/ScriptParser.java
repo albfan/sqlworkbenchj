@@ -48,6 +48,7 @@ public class ScriptParser
 	private boolean checkSingleLineCommands = true;
 	private boolean returnTrailingWhitesapce = false;
 	private boolean checkHashComments = false;
+	private boolean useAlternateDelimiter = false;
 	
 	private int maxFileSize;
 	
@@ -133,10 +134,10 @@ public class ScriptParser
 		throws IOException
 	{
 		BufferedReader in = null;
-		StringBuffer content = null;
+		StringBuilder content = null;
 		try
 		{
-			content = new StringBuffer((int)f.length());
+			content = new StringBuilder((int)f.length());
 			in = EncodingUtil.createBufferedReader(f, encoding);
 			String line = in.readLine();
 			while (line != null)
@@ -149,7 +150,7 @@ public class ScriptParser
 		catch (Exception e)
 		{
 			LogMgr.logError("ScriptParser.readFile()", "Error reading file " + f.getAbsolutePath(), e);
-			content = new StringBuffer(0);
+			content = new StringBuilder(0);
 		}
 		finally
 		{
@@ -220,14 +221,35 @@ public class ScriptParser
 		this.commands = null;
 		this.iteratingParser = null;
 	}
-
-	/**
-	 * Define the delimiter to be used in case it's not a semicolon
-	 */
+	
 	public void setDelimiter(DelimiterDefinition delim)
 	{
-		this.delimiter = delim;
-		if (this.iteratingParser != null) this.iteratingParser.setDelimiter(delim);
+		this.setDelimiters(delim, null);
+	}
+
+	/**
+	 * Sets the alternate delimiter. This implies that 
+	 * by default the semicolon is used, and only if 
+	 * the alternate delimiter is detected, that will be used.
+	 * 
+	 * If only one delimiter should be used (and no automatic checking
+	 * for an alternate delimiter), use {@link #setDelimiter(DelimiterDefinition)}
+	 */
+	public void setAlternateDelimiter(DelimiterDefinition alt)
+	{
+		setDelimiters(DelimiterDefinition.STANDARD_DELIMITER, alt);
+	}
+	
+	/**
+	 * Define the delimiters to be used. If the (in-memory) script ends with 
+	 * the defined alternate delimiter, then the alternate is used, otherwise
+	 * the default
+	 */
+	public void setDelimiters(DelimiterDefinition defaultDelim, DelimiterDefinition alternateDelim)
+	{
+		this.delimiter = defaultDelim;
+		this.alternateDelimiter = alternateDelim;
+		
 		if (this.originalScript != null)
 		{
 			findDelimiterToUse();
@@ -245,34 +267,16 @@ public class ScriptParser
 	 */
 	private void findDelimiterToUse()
 	{
-		DelimiterDefinition oldDelimiter = this.delimiter;
+		if (this.alternateDelimiter == null) return;
+		if (this.originalScript == null) return;
 		
-		this.delimiter = DelimiterDefinition.STANDARD_DELIMITER;
-
-		if (originalScript == null) return;
-		
-//		String cleanSql = this.originalScript.trim();
-		
-		if (this.alternateDelimiter == null)
+		useAlternateDelimiter = (alternateDelimiter.terminatesScript(originalScript));
+		if (this.iteratingParser != null)
 		{
-			this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter();
+			this.iteratingParser.setDelimiter(useAlternateDelimiter ? this.alternateDelimiter : this.delimiter);
 		}
 		
-		//if (cleanSql.endsWith(this.alternateDelimiter.getDelimiter()))
-		if (alternateDelimiter.terminatesScript(originalScript))
-		{
-			this.delimiter = this.alternateDelimiter;
-		}
-//		else if (MS_GO.matcher(originalScript).find())
-//		{
-//			this.delimiter = DelimiterDefinition.DEFAULT_MS_DELIMITER;
-//		}
-		
-		// if the delimiter changed, we have to clear already parsed commands
-		if (!this.delimiter.equals(oldDelimiter))
-		{
-			this.commands = null;
-		}
+		this.commands = null;
 	}
 
 	/**
@@ -419,17 +423,9 @@ public class ScriptParser
 		}
 	}
 
-	public void setAlternateDelimiter(DelimiterDefinition delim)
-	{
-		this.alternateDelimiter = delim;
-		if (this.originalScript != null)
-		{
-			findDelimiterToUse();
-		}
-	}
-
 	public String getDelimiterString()
 	{
+		if (this.useAlternateDelimiter) return this.alternateDelimiter.getDelimiter();
 		return this.delimiter.getDelimiter();
 	}
 
@@ -439,7 +435,7 @@ public class ScriptParser
 		p.setCheckForSingleLineCommands(this.checkSingleLineCommands);
 		p.allowEmptyLineAsSeparator(this.emptyLineIsSeparator);
 		p.setCheckEscapedQuotes(this.checkEscapedQuotes);
-		p.setDelimiter(this.delimiter);
+		p.setDelimiter(useAlternateDelimiter ? this.alternateDelimiter : this.delimiter);
 		p.setReturnStartingWhitespace(this.returnTrailingWhitesapce);
 		p.setCheckForHashComments(this.checkHashComments);
 	}

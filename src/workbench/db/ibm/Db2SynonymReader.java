@@ -46,7 +46,7 @@ public class Db2SynonymReader
 	public TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
-		StringBuffer sql = new StringBuffer(200);
+		StringBuilder sql = new StringBuilder(200);
 
 		sql.append("SELECT base_tabschema, base_tabname FROM syscat.tables ");
 		sql.append(" WHERE TYPE = 'A' and tabname = ? and tabschema = ?");
@@ -80,7 +80,7 @@ public class Db2SynonymReader
 		throws SQLException
 	{
 		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);
-		StringBuffer result = new StringBuffer(200);
+		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE ALIAS ");
 		result.append(aSynonym);

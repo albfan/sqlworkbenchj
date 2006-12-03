@@ -41,7 +41,7 @@ public class HsqlSequenceReader
 	public DataStore getSequenceDefinition(String owner, String sequence)
 	{
 		
-		StringBuffer query = new StringBuffer(100);
+		StringBuilder query = new StringBuilder(100);
 		query.append("SELECT sequence_name, dtd_identifier, maximum_value, minimum_value, increment, start_with FROM ");
 		if (useInformationSchema) query.append("information_schema.");
 		query.append("system_sequences WHERE sequence_name = ?");
@@ -74,7 +74,7 @@ public class HsqlSequenceReader
 		PreparedStatement stmt = null;
 		ArrayList result = new ArrayList(100);
 
-		StringBuffer query = new StringBuffer(100);
+		StringBuilder query = new StringBuilder(100);
 		query.append("SELECT sequence_name FROM ");
 		if (useInformationSchema) query.append("information_schema.");
 		query.append("system_sequences");
@@ -104,14 +104,14 @@ public class HsqlSequenceReader
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		StringBuffer query = new StringBuffer(100);
+		StringBuilder query = new StringBuilder(100);
 		query.append("SELECT sequence_name, dtd_identifier, start_with, maximum_value, increment FROM ");
 		if (useInformationSchema)
 		{
 			query.append("information_schema.");
 		}
 		query.append("system_sequences WHERE sequence_name = ?");
-		StringBuffer result = new StringBuffer(100);
+		StringBuilder result = new StringBuilder(100);
 		result.append("CREATE SEQUENCE ");
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		try

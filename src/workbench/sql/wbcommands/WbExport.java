@@ -152,7 +152,7 @@ public class WbExport
 		if (cmdLine.hasUnknownArguments())
 		{
 			List params = cmdLine.getUnknownArguments();
-			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrUnknownParameter"));
+			StringBuilder msg = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter"));
 			for (int i=0; i < params.size(); i++)
 			{
 				msg.append((String)params.get(i));

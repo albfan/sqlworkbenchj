@@ -16,13 +16,13 @@ import java.io.PrintStream;
 import java.io.Writer;
 
 /**
- * This is a non-synchronized implementation of StringBuffer, which
- * offers better performance than the class java.lang.StringBuffer.
+ * This is a non-synchronized implementation of StringBuilder, which
+ * offers better performance than the class java.lang.StringBuilder.
  *
  * Initially copied from http://h21007.www2.hp.com/dspp/tech/tech_TechDocumentDetailPage_IDX/1,1701,2488,00.html
  * 
  * This will only have an advantage if this object is not converted to a String object
- * too often. java.lang.StringBuffer can re-use the internal char[] array when 
+ * too often. java.lang.StringBuilder can re-use the internal char[] array when 
  * it's toString() method is called, whereas StrBuffer.toString() will allocate 
  * a new char array due to the constructor of String.
  * 
@@ -31,7 +31,7 @@ import java.io.Writer;
  * write out the internal char array directly.
  * 
  * @author support@sql-workbench.net
- * @see    java.lang.StringBuffer
+ * @see    java.lang.StringBuilder
  */
 public class StrBuffer
 	implements CharSequence
@@ -264,7 +264,7 @@ public class StrBuffer
 		return this;
 	}
 
-	public StrBuffer append(StringBuffer b)
+	public StrBuffer append(StringBuilder b)
 	{
 		int len = b.length();
 		int newlen = this.numchar + len;
@@ -304,7 +304,7 @@ public class StrBuffer
 		return result;
 	}
 
-	public void appendTo(StringBuffer buff)
+	public void appendTo(StringBuilder buff)
 	{
 		buff.append(this.charData, 0, this.numchar);
 	}

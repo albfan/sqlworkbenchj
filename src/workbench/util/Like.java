@@ -216,7 +216,7 @@ public class Like {
     }
 
     private String tokensToString( Like.Token[] ts) {
-        StringBuffer b = new StringBuffer();
+        StringBuilder b = new StringBuilder();
         for (int i=0; i<ts.length; ++i) {
             b.append( ts[i].image + "|");
         }

@@ -347,7 +347,7 @@ public class TableDefinitionPanel
 		int colCount = this.tableDefinition.getRowCount();
 		if (colCount == 0) return null;
 
-		StringBuffer sql = new StringBuffer(colCount * 80);
+		StringBuilder sql = new StringBuilder(colCount * 80);
 
 		sql.append("SELECT ");
 		DbMetadata meta = this.dbConnection.getMetadata();

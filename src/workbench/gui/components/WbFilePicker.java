@@ -103,7 +103,7 @@ public class WbFilePicker extends javax.swing.JPanel
 				this.selectedFiles[0] = jf.getSelectedFile();
 			}
 			
-			StringBuffer path = new StringBuffer(this.selectedFiles.length * 100);
+			StringBuilder path = new StringBuilder(this.selectedFiles.length * 100);
 			for (int i=0; i < this.selectedFiles.length; i++)
 			{
 				if (this.selectedFiles.length > 1 && i > 0) path.append(StringUtil.PATH_SEPARATOR);

@@ -216,7 +216,7 @@ public class ClipBoardCopier
 			if (rows != null) count = rows.length;
 			else count = ds.getRowCount();
 			
-			StringBuffer data = new StringBuffer(count * 100);
+			StringBuilder data = new StringBuilder(count * 100);
 			RowData rowdata = null;
 			
 			for (int row = 0; row < count; row ++)

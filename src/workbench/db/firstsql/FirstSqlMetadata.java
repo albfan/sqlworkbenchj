@@ -49,7 +49,7 @@ public class FirstSqlMetadata
 	{
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		StringBuffer result = new StringBuffer(200);
+		StringBuilder result = new StringBuilder(200);
 		try
 		{
 			pstmt = dbConnection.prepareStatement(SQL);

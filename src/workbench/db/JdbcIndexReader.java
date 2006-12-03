@@ -42,12 +42,12 @@ public class JdbcIndexReader
 		return this.metaData.getSqlConnection().getMetaData().getIndexInfo(table.getCatalog(), table.getSchema(), table.getTableName(), unique, false);
 	}
 	
-	public StringBuffer getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
+	public StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
 	{
-		if (indexDefinition == null) return new StringBuffer(0);
+		if (indexDefinition == null) return new StringBuilder(0);
 		int count = indexDefinition.getRowCount();
 		if (count == 0) return StringUtil.emptyBuffer();
-		StringBuffer idx = new StringBuffer();
+		StringBuilder idx = new StringBuilder();
 		String template = this.metaData.metaSqlMgr.getIndexTemplate();
 		String sql;
 		int idxCount = 0;
@@ -60,7 +60,7 @@ public class JdbcIndexReader
 			String type = indexDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_TYPE);
 			if (type == null || type.startsWith("NORMAL")) type = null;
 			
-			StringBuffer columns = new StringBuffer();
+			StringBuilder columns = new StringBuilder();
 			StringTokenizer tok = new StringTokenizer(definition, ",");
 			String col;
 			int pos;
@@ -117,7 +117,7 @@ public class JdbcIndexReader
 		int count = columnList.length;
 		if (count == 0) return StringUtil.EMPTY_STRING;
 		String template = this.metaData.metaSqlMgr.getIndexTemplate();
-		StringBuffer cols = new StringBuffer(count * 25);
+		StringBuilder cols = new StringBuilder(count * 25);
 
 		for (int i=0; i < count; i++)
 		{

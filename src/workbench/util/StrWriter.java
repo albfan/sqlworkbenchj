@@ -109,7 +109,7 @@ public class StrWriter
 	/**
 	 * Return the string buffer itself.
 	 *
-	 * @return StringBuffer holding the current buffer value.
+	 * @return StringBuilder holding the current buffer value.
 	 */
 	public StrBuffer getBuffer()
 	{

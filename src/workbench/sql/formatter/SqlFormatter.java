@@ -123,9 +123,9 @@ public class SqlFormatter
 
 	private String sql;
 	private SQLLexer lexer;
-	private StringBuffer result;
-	private StringBuffer indent = null;
-	private StringBuffer leadingWhiteSpace = null;
+	private StringBuilder result;
+	private StringBuilder indent = null;
+	private StringBuilder leadingWhiteSpace = null;
 	private int realLength = 0;
 	private int maxSubselectLength = 60;
 	private Set dbFunctions = Collections.EMPTY_SET;
@@ -142,10 +142,10 @@ public class SqlFormatter
 		this.sql = aScript;
 		Reader in = new StringReader(this.sql);
 		this.lexer = new SQLLexer(in);
-		this.result = new StringBuffer(this.sql.length() + 100);
+		this.result = new StringBuilder(this.sql.length() + 100);
 		if (indentCount > 0)
 		{
-			this.indent = new StringBuffer(indentCount);
+			this.indent = new StringBuilder(indentCount);
 			for (int i=0; i < indentCount; i++) this.indent.append(' ');
 		}
 		this.maxSubselectLength = maxSubselectLength;
@@ -189,7 +189,7 @@ public class SqlFormatter
 		int pos = 0;
 		if (!Character.isWhitespace(c)) return;
 		
-		this.leadingWhiteSpace = new StringBuffer(50);
+		this.leadingWhiteSpace = new StringBuilder(50);
 		while (Character.isWhitespace(c))
 		{
 			this.leadingWhiteSpace.append(c);
@@ -287,7 +287,7 @@ public class SqlFormatter
 		this.result.append(text);
 	}
 	
-	private void appendText(StringBuffer text)
+	private void appendText(StringBuilder text)
 	{
 		if (text.length() == 0) return;
 		this.realLength += text.length();
@@ -299,7 +299,7 @@ public class SqlFormatter
 		this.result.append(text);
 	}
 
-	private void indent(StringBuffer text)
+	private void indent(StringBuilder text)
 	{
 		this.result.append(text);
 	}
@@ -357,8 +357,8 @@ public class SqlFormatter
 	private SQLToken processFrom(SQLToken last)
 		throws Exception
 	{
-		StringBuffer b = new StringBuffer("     ");
-		StringBuffer oldIndent = this.indent;
+		StringBuilder b = new StringBuilder("     ");
+		StringBuilder oldIndent = this.indent;
 		//this.indent = null;
 		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = last;
@@ -421,7 +421,7 @@ public class SqlFormatter
 	private SQLToken processList(SQLToken last, int indentCount, Set terminalKeys)
 		throws Exception
 	{
-		StringBuffer b = new StringBuffer(indentCount);
+		StringBuilder b = new StringBuilder(indentCount);
 		for (int i=0; i < indentCount; i++) b.append(' ');
 
 		int currentColumnCount = 0;
@@ -512,7 +512,7 @@ public class SqlFormatter
 	{
 		SQLToken t = this.lexer.getNextToken(false, false);
 		int bracketCount = 1;
-		StringBuffer subSql = new StringBuffer(250);
+		StringBuilder subSql = new StringBuilder(250);
 
 		// this method gets called when then "parser" hits an
 		// IN ( situation. If no SELECT is coming, we assume
@@ -567,11 +567,11 @@ public class SqlFormatter
 	private SQLToken processDecode(int indent)
 		throws Exception
 	{
-		StringBuffer current = new StringBuffer(indent);
+		StringBuilder current = new StringBuilder(indent);
 
 		for (int i=0; i < indent; i++) current.append(' ');
 		
-		StringBuffer b = new StringBuffer(indent + 2);
+		StringBuilder b = new StringBuilder(indent + 2);
 		for (int i=0; i < indent; i++) b.append(' ');
 		b.append("      ");
 		
@@ -619,11 +619,11 @@ public class SqlFormatter
 	private SQLToken processCase(int indent)
 		throws Exception
 	{
-		StringBuffer current = new StringBuffer(indent);
+		StringBuilder current = new StringBuilder(indent);
 
 		for (int i=0; i < indent; i++) current.append(' ');
 		
-		StringBuffer b = new StringBuffer(indent + 2);
+		StringBuilder b = new StringBuilder(indent + 2);
 		for (int i=0; i < indent; i++) b.append(' ');
 		b.append("  ");
 		
@@ -682,7 +682,7 @@ public class SqlFormatter
 	private SQLToken processWbCommand(int indent)
 		throws Exception
 	{
-		StringBuffer b = new StringBuffer(indent);
+		StringBuilder b = new StringBuilder(indent);
 
 		for (int i=0; i < indent; i++) b.append(' ');
 
@@ -720,7 +720,7 @@ public class SqlFormatter
 	private SQLToken processBracketList(int indentCount)
 		throws Exception
 	{
-		StringBuffer b = new StringBuffer(indentCount);
+		StringBuilder b = new StringBuilder(indentCount);
 
 		for (int i=0; i < indentCount; i++) b.append(' ');
 
@@ -763,7 +763,7 @@ public class SqlFormatter
 		throws Exception
 	{
 		ArrayList list = new ArrayList(25);
-		list.add(new StringBuffer(""));
+		list.add(new StringBuilder(""));
 		SQLToken t = current;
 
 		int bracketcount = 0;
@@ -781,10 +781,10 @@ public class SqlFormatter
 				}
 				else
 				{
-					StringBuffer b = (StringBuffer)list.get(elementcounter);
+					StringBuilder b = (StringBuilder)list.get(elementcounter);
 					if (b == null)
 					{
-						b = new StringBuffer(text);
+						b = new StringBuilder(text);
 						if (elementcounter < list.size()) list.set(elementcounter, b);
 					}
 					else
@@ -801,16 +801,16 @@ public class SqlFormatter
 			{
 				if (bracketcount == 0)
 				{
-					list.add(new StringBuffer(""));
+					list.add(new StringBuilder(""));
 					elementcounter = list.size() - 1;
 				}
 			}
 			else if (!t.isWhiteSpace())
 			{
-				StringBuffer b = (StringBuffer)list.get(elementcounter);
+				StringBuilder b = (StringBuilder)list.get(elementcounter);
 				if (b == null)
 				{
-					b = new StringBuffer(text);
+					b = new StringBuilder(text);
 					if (t.isComment()) b.append(' ');
 					list.set(elementcounter, b);
 				}
@@ -828,13 +828,13 @@ public class SqlFormatter
 	private void appendCommaList(ArrayList aList)
 	{
 		int indentCount = this.getCurrentLineLength();
-		StringBuffer ind = new StringBuffer(indentCount);
+		StringBuilder ind = new StringBuilder(indentCount);
 		for (int i=0; i < indentCount; i++) ind.append(' ');
 		boolean newline = (aList.size() > 10);
 		int count = aList.size();
 		for (int i=0; i < count; i++)
 		{
-			this.appendText((StringBuffer)aList.get(i));
+			this.appendText((StringBuilder)aList.get(i));
 			if (i < count - 1) this.appendText(", ");
 			if (newline)
 			{
@@ -850,7 +850,7 @@ public class SqlFormatter
 		int len = this.result.length();
 		if (len == 0) return true;
 		
-		// simulates endsWith() on a StringBuffer
+		// simulates endsWith() on a StringBuilder
 		int pos = result.lastIndexOf(this.nl);
 		if (pos == len - nl.length()) return true; 
 		
@@ -1237,7 +1237,7 @@ public class SqlFormatter
 		SQLToken t = this.lexer.getNextToken(false, false);
 		SQLToken last = previous;
 		int bracketCount = 0;
-		StringBuffer definition = new StringBuffer(200);
+		StringBuilder definition = new StringBuilder(200);
 
 		while (t != null)
 		{
@@ -1296,7 +1296,7 @@ public class SqlFormatter
 		return t;
 	}
 
-	private void outputFormattedColumnDefs(StringBuffer source)
+	private void outputFormattedColumnDefs(StringBuilder source)
 	{
 		ArrayList cols = new ArrayList();
 		int size = source.length();
@@ -1375,7 +1375,7 @@ public class SqlFormatter
 	private SQLToken processCommaList(SQLToken previous, int maxElements, int indentCount)
 		throws Exception
 	{
-		StringBuffer definition = new StringBuffer(200);
+		StringBuilder definition = new StringBuilder(200);
 		SQLToken t = previous;
 		SQLToken last = previous;
 		int bracketCount = 0;
@@ -1427,7 +1427,7 @@ public class SqlFormatter
 	 */
 	private void outputElements(List elements, int maxElements, int indentCount)
 	{
-		StringBuffer myIndent = new StringBuffer(indentCount);
+		StringBuilder myIndent = new StringBuilder(indentCount);
 		for (int i=0; i<indentCount; i++) myIndent.append(' ');
 
 		int count = elements.size();
@@ -1486,7 +1486,7 @@ public class SqlFormatter
 		SQLToken t = this.lexer.getNextToken(false, false);
 		SQLToken last = previous;
 		int bracketCount = 0;
-		StringBuffer definition = new StringBuffer(200);
+		StringBuilder definition = new StringBuilder(200);
 
 		while (t != null)
 		{

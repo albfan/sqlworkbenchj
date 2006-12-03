@@ -50,7 +50,7 @@ public class ProcedureCreator
 	{
 		if (this.isReplaceScript) return;
 		
-		StringBuffer sql = new StringBuffer(50);
+		StringBuilder sql = new StringBuilder(50);
 		sql.append("DROP ");
 		sql.append(this.objectType);
 		sql.append(' ');

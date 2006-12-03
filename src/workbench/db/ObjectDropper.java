@@ -70,7 +70,7 @@ public class ObjectDropper
 				String type = (String)this.objectTypes.get(i);
 				// we assume that names with special characters are already quoted!
 
-				StringBuffer sql = new StringBuffer(120);
+				StringBuilder sql = new StringBuilder(120);
 				sql.append("DROP ");
 				sql.append(type);
 				sql.append(' ');

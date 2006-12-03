@@ -134,7 +134,7 @@ public class MainWindow
 
 	private WbTabbedPane sqlTab;
 	private WbToolbar currentToolbar;
-	private ArrayList panelMenus = new ArrayList(5);
+	private ArrayList<JMenuBar> panelMenus = new ArrayList(13);
 
 	private String currentWorkspaceFile;
 
@@ -176,7 +176,7 @@ public class MainWindow
 		}
 		
 		this.connectionSelector = new ConnectionSelector(this, this);
-		this.windowId = new StringBuffer("WbWin-").append(instanceCount).toString();
+		this.windowId = new StringBuilder("WbWin-").append(instanceCount).toString();
 		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
 		initMenu();
@@ -770,7 +770,7 @@ public class MainWindow
 		MainPanel current = this.getCurrentPanel();
 		if (current == null) return;
 
-		JMenuBar menu = (JMenuBar)this.panelMenus.get(anIndex);
+		JMenuBar menu = this.panelMenus.get(anIndex);
 		if (menu == null) return;
 
 		this.setJMenuBar(menu);
@@ -873,7 +873,7 @@ public class MainWindow
 		int index = this.getCurrentPanelIndex();
 		if (this.panelMenus != null && index > -1)
 		{
-			JMenuBar b = (JMenuBar)this.panelMenus.get(index);
+			JMenuBar b = this.panelMenus.get(index);
 			if (b != null)
 			{
 				try
@@ -1380,7 +1380,7 @@ public class MainWindow
 
 	protected void updateWindowTitle()
 	{
-		StringBuffer title = new StringBuffer(50);
+		StringBuilder title = new StringBuilder(50);
 		title.append(ResourceMgr.TXT_PRODUCT_NAME);
 
 		title.append("  [");
@@ -1493,7 +1493,7 @@ public class MainWindow
 	{
 		if (panelIndex < 0 || panelIndex >= this.panelMenus.size()) return null;
 		if (aName == null) return null;
-		JMenuBar menubar = (JMenuBar)this.panelMenus.get(panelIndex);
+		JMenuBar menubar = this.panelMenus.get(panelIndex);
 		int count = menubar.getMenuCount();
 		for (int k=0; k < count; k++)
 		{

@@ -88,7 +88,7 @@ public class TableDependency
 			indent ++;
 			n = n.getParent();
 		}
-		StringBuffer indentString = new StringBuffer(indent * 2);
+		StringBuilder indentString = new StringBuilder(indent * 2);
 		for (int i=0; i < indent; i++) indentString.append("  ");
 		*/
 

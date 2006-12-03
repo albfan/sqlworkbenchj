@@ -169,7 +169,7 @@ public abstract class RowDataConverter
 	 */
 	public File generateDataFileName(ColumnData data)
 	{
-		StringBuffer fname = new StringBuffer(80);
+		StringBuilder fname = new StringBuilder(80);
 		if (this.currentRowData != null && currentRow != -1)
 		{
 			int colIndex = this.metaData.findColumn(data.getIdentifier().getColumnName());
@@ -196,7 +196,7 @@ public abstract class RowDataConverter
 	
 	public File createBlobFile(RowData row, int colIndex, long rowNum)
 	{
-		StringBuffer fname = new StringBuffer(baseFilename.length() + 25);
+		StringBuilder fname = new StringBuilder(baseFilename.length() + 25);
 
 		fname.append(baseFilename);
 		

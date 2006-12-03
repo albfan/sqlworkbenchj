@@ -374,7 +374,7 @@ public class TableDataPanel
 	{
 		if (this.table == null) return null;
 
-		StringBuffer sql = new StringBuffer(100);
+		StringBuilder sql = new StringBuilder(100);
 		if (forRowCount)
 			sql.append("SELECT COUNT(*) FROM ");
 		else
