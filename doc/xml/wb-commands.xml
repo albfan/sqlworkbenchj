@@ -47,7 +47,7 @@
 
           <tbody valign="top">
               <row>
-              <entry><para>-type=</para></entry>
+              <entry>-type</entry>
 
               <entry>
 								<para>
@@ -79,17 +79,18 @@
           </row>
 
           <row>
-              <entry><para>-file</para></entry>
+              <entry>-file</entry>
               <entry>
-									<para>Defines the name of the output file. If the file name 
+									Defines the name of the output file. If the file name 
 									contains spaces, a dash or other special characters it has to 
-									put in single quotes: <literal>-file='c:\my files\test-data.txt'</literal></para>
+									put in single quotes: <literal>-file='c:\my files\test-data.txt'</literal>
               </entry>
           </row>
 
           <row>
-              <entry><para>-sourcetable</para></entry>
-              <entry><para>Defines a list of tables to be exported. If this
+              <entry>-sourcetable</entry>
+              <entry>
+							<para>Defines a list of tables to be exported. If this
               switch is used, <literal>-outputdir</literal> is also required
               unless exactly one table is specified. If one table is
               specified, the -file parameter is used to generate the file
@@ -115,28 +116,35 @@
               </entry>
           </row>
           <row>
-              <entry><para>-outputDir</para></entry>
-              <entry><para>When using the <literal>-sourcetable</literal> switch
+              <entry>-outputDir</entry>
+              <entry>When using the <literal>-sourcetable</literal> switch
               with multiple tables, this parameter is mandatory and defines
               the directory where the generated files should be stored.
-              </para></entry>
+              </entry>
           </row>
           <row>
-              <entry><para>-encoding</para></entry>
-              <entry><para>Defines the encoding in which the file should be
+              <entry>-continueOnError</entry>
+              <entry>When exporting more than one table, this parameter controls
+							whether the whole export will be terminated if an error occurs during 
+							export of one of the tables.
+              </entry>
+          </row>
+          <row>
+              <entry>-encoding</entry>
+              <entry>Defines the encoding in which the file should be
               written. Common encodings are ISO-8859-1, ISO-8859-15, UTF-8 (or UTF8).
               To get a list of available encodings, execut <literal>WbExport</literal>
               with the parameter <literal>-showencoding</literal>
-              </para></entry>
+              </entry>
           </row>
 					<row>
-						<entry><para>-showEncodings</para></entry>
-						<entry><para>Displays the encodings supported by your Java version and
+						<entry>-showEncodings</entry>
+						<entry>Displays the encodings supported by your Java version and
 								operating system. If this parameter is present, all other parameters are ignored.
-						</para></entry>
+						</entry>
 					</row>
 					<row>
-            <entry><para>-lineEnding</para></entry>
+            <entry>-lineEnding</entry>
             <entry>
 							<para>Possible values are: <literal>crlf</literal>, <literal>lf</literal></para>
 							<para>
@@ -156,7 +164,7 @@
             </entry>
           </row>
           <row>
-            <entry><para>-compress</para></entry>
+            <entry>-compress</entry>
             <entry>
 							<para>
 								Selects whether the output file should be compressed 
@@ -165,7 +173,7 @@
 								(e.g. if you specify <literal>data.txt</literal>, an archive <literal>data.zip</literal>
 								will be created containing exactly one entry with the name <literal>data.txt</literal>).
 								If the exported result set contains BLOBs, they will be stored in a separate archive, named 
-								<literal>data_blobs.zip</literal>.
+								<literal>data_lobs.zip</literal>.
 							</para>
 							<para>
 								When exporting multiple tables using the <literal>-sourcetable</literal> parameter, 
@@ -175,7 +183,56 @@
 							</para>
             </entry>
           </row>
-
+					<row>
+						<entry>-clobAsFile</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+								For SQL, XML and Text export this controls how the contents of CLOB fields 
+								are exported. Usually the CLOB content is put directly into the output file
+								When generating SQL scripts with WbExport this can be a problem as not all 
+								DBMS can cope with long character literals (e.g. Oracle has a limit of 
+								4000 bytes). When this parameter is set to true, &wb-productname; will
+								create one file for each CLOB column value. This is the same behaviour 
+								as with BLOB columns.
+							</para>
+							<para>
+								Text files that are created with this parameter set to true, will
+								contain the filename of the generated output file instead of the 
+								actual column value. When importing such a file using <literal>WbImport</literal>
+								you have to specify the <literal>-clobIsFilename=true</literal> parameter.
+								Otherwise the filenames will be stored in the database and not the clob data.
+								This parameter is not necessary when importing XML exports, as <literal>WbImport</literal> will
+								automatically recognize the external files.
+							</para>
+							<note>
+								SQL scripts (<literal>-type=sqlinsert</literal>) generated with <literal>-clobAsFile=true</literal> can only be run with &wb-productname;!
+							</note>
+							<para>
+								All CLOB files that are written using the encoding specified with the 
+								<literal>-encoding</literal> switch.
+								If the <literal>-encoding</literal> parameter is not specified the 
+								<link linkend="default-file-encoding">default file encoding</link> will be used.
+							</para>
+						</entry>
+					</row>
+					<row>
+						<entry>-lobIdCols</entry>
+						<entry>
+							<para>
+								When exporting CLOB or BLOB columns as external files, the filename with the
+								LOB content is generated using the row and column number for the currently 
+								exported LOB column (e.g. data_r15_c4.data). If you prefer to have the value
+								of a unique column combination as part of the file name, you can specify
+								those columns using the <literal>-lobIdCols</literal> parameter. The filename
+								for the LOB will then be generated using the base name of the export file, 
+								the column name of the LOB column and the values of the specified columns.
+								If you export your data into a file called user_info and specify <literal>-lobIdCols=id</literal> 
+								and your result contains a column called <literal>img</literal>, the LOB files 
+								will be named e.g. user_info_img_344.data
+							</para>
+						</entry>
+					</row>
         </tbody>
       </tgroup>
     </informaltable>
@@ -196,45 +253,50 @@
 
           <tbody valign="top">
             <row>
-              <entry><para>-table</para></entry>
-
-              <entry><para>Define the tablename to be used for the UPDATE or INSERT
-              statements. This parameter is required if the SELECT statement has
-              multiple tables in the FROM list.
-              table.</para></entry>
+              <entry>-table</entry>
+              <entry>
+								Define the tablename to be used for the UPDATE or INSERT
+								statements. This parameter is required if the SELECT statement has
+								multiple tables in the FROM list.
+								table.
+							</entry>
             </row>
 
+						<row>
+							<entry id="export-sql-cleanup">-charfunc</entry>
+							<entry>
+								<para>
+									If this parameter is given, any
+									non-printable character in a text/character column will be
+									replaced with a call to the given function with the ASCII
+									value as the parameter. 
+								</para> 
+								<para>
+									If -charfunc=chr is
+									given (e.g. for an Oracle syntax), a CR (=13) inside a
+								character column will be replaced with:</para>
+								<para><literal>INSERT
+										INTO ... VALUES (&#39;First line&#39;||chr(13)||&#39;Second
+									line&#39; ... )</literal>
+								</para>
+								<para>This setting will affect ASCII values from 0 to 31</para>
+							</entry>
+						</row>
+						
+						<row>
+							<entry>-concat</entry>
+							
+							<entry>
+								If the parameter <literal>-charfunc</literal> is used
+								&wb-productname; will concatenate the individual pieces using
+								the ANSI SQL operator for string concatenation. In case
+								your DBMS does not support the ANSI standard (e.g. MS ACCESS)
+								you can specify the operator to be used: <literal>-concat=+</literal>
+							defines the plus sign as the concatenation operator.</entry>
+						</row>
+						
             <row>
-              <entry><para id="export-sql-cleanup">-charfunc</para></entry>
-
-              <entry><para>If this parameter is given, any
-              non-printable character in a text/character column will be
-              replaced with a call to the given function with the ASCII
-              value as the parameter. </para> <para>If -charfunc=chr is
-              given (e.g. for an Oracle syntax), a CR (=13) inside a
-              character column will be replaced with:</para>
-              <para><literal>INSERT
-              INTO ... VALUES (&#39;First line&#39;||chr(13)||&#39;Second
-              line&#39; ... )</literal></para>
-
-              <para>This setting will affect ASCII values from 0 to 31</para>
-              </entry>
-            </row>
-
-            <row>
-              <entry><para>-concat</para></entry>
-
-              <entry><para>If the parameter <literal>-charfunc</literal> is used
-              &wb-productname; will concatenate the individual pieces using
-              the ANSI SQL operator for string concatenation. In case
-              your DBMS does not support the ANSI standard (e.g. MS ACCESS)
-              you can specify the operator to be used:</para>
-              <para><literal>-concat=+</literal></para><para> defines the plus sign
-              as the concatenation operator.</para></entry>
-            </row>
-
-            <row>
-              <entry><para>-blobType</para></entry>
+              <entry>-blobType</entry>
 
               <entry>
 								<para>Possible values: <literal>file</literal>, <literal>ansi</literal>,
@@ -275,32 +337,7 @@
               </entry>
             </row>
             <row>
-              <entry><para>-clobAsFile</para></entry>
-
-              <entry>
-								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-								<para>
-									Usually values from CLOB fields are put as a regular 
-									character literal into the generated SQL statements. Some DBMS
-									do not support character literals that exceed a certain 
-									maximum (e.g. 4000 bytes for Oracle, 32K for others). When 
-									<literal>-clobAsFile=true</literal> is specified, &wb-productname;
-									will generate SQL statements that contain the <link linkend="blob-support">special syntax</link>
-									for reading external files. 
-								</para>
-								<note>
-									SQL scripts generated with <literal>-clobAsFile=true</literal> can only be run with &wb-productname;!
-								</note>
-								<para>
-									It is recommended to supply a file encoding when this parameter is used. 
-									If the <literal>-encoding</literal> parameter is not specified the 
-									<link linkend="default-file-encoding">default file encoding</link> will be used.
-								</para>
-              </entry>
-            </row>
-            <row>
-              <entry><para>-commitEvery</para></entry>
-
+              <entry>-commitEvery</entry>
               <entry>
 									<para>
 										A numeric value which identifies
@@ -313,7 +350,7 @@
             </row>
 
             <row>
-              <entry><para>-createTable</para></entry>
+              <entry>-createTable</entry>
               <entry>
 								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 								<para>
@@ -325,7 +362,7 @@
             </row>
 
             <row>
-              <entry><para>-keyColumns</para></entry>
+              <entry>-keyColumns</entry>
               <entry>
 								<para>
 									A comma separated list of column names that occur in the table
@@ -363,32 +400,32 @@
 
           <tbody valign="top">
             <row>
-              <entry><para>-delimiter</para></entry>
+              <entry>-delimiter</entry>
 
-              <entry><para>The given string sequence will be
+              <entry>The given string sequence will be
               placed between two columns. The default is a tab character
               (<literal>-delimiter=\t</literal>
-              </para></entry>
+              </entry>
             </row>
 
             <row>
-              <entry><para>-dateFormat</para></entry>
+              <entry>-dateFormat</entry>
 
-							<entry><para>The date <link linkend="options-date-format">format</link> to be used when
+							<entry>The date <link linkend="options-date-format">format</link> to be used when
 									writing date columns into the output file. 
-							</para></entry>
+							</entry>
 						</row>
 
             <row>
-              <entry><para>-dateTimeFormat</para></entry>
+              <entry>-dateTimeFormat</entry>
 
-              <entry><para>The <link linkend="options-date-format">format</link> to be used when writing
+              <entry>The <link linkend="options-date-format">format</link> to be used when writing
               datetime (or timestamp) columns into the output file.
-              </para></entry>
+              </entry>
             </row>
 
             <row>
-              <entry><para>-quoteChar</para></entry>
+              <entry>-quoteChar</entry>
 
               <entry>
 								<para>The character (or sequence of characters) to be used
@@ -401,7 +438,7 @@
             </row>
 
             <row>
-              <entry><para>-quoteAlways</para></entry>
+              <entry>-quoteAlways</entry>
 
               <entry>
 								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
@@ -417,31 +454,35 @@
             </row>
 
             <row>
-              <entry><para>-decimal</para></entry>
-
-              <entry><para>The decimal symbol to be used for numbers. The default is a dot (e.g. 3.14152)</para>
+              <entry>-decimal</entry>
+							<entry>
+								The decimal symbol to be used for numbers. The default is a dot (e.g. 3.14152)
               </entry>
             </row>
 
+						<row>
+							<entry id="text-escape-switch">-escapeText</entry>
+							
+							<entry>
+								<para>
+									This parameter controls the escaping of non-printable
+									or non-ASCII characters. Valid options are <literal>ctrl</literal> which
+									will escape everything below ASCII 32 (newline, tab, etc), <literal>7bit</literal>
+									which will escape everything below ASCII 32 and above 126, <literal>8bit</literal>
+									which will escape everything below ASCII 32 and above 255 and <literal>extended</literal>
+									which will escape everything outside the range [32-126] and [161-255]
+								</para>
+								<para>
+									This will write a unicode representation of the character into the
+									text file e.g. \n for a newline, \u00F6 for &ouml;. This file
+									can only be imported using &wb-productname; (at least I don't know
+									of any DBMS specific loader that will decode this properly)
+								</para>
+							</entry>
+						</row>
+						
             <row>
-              <entry><para id="text-escape-switch">-escapeText</para></entry>
-
-              <entry><para>This parameter controls the escaping of non-printable
-              or non-ASCII characters. Valid options are <literal>ctrl</literal> which
-              will escape everything below ASCII 32 (newline, tab, etc), <literal>7bit</literal>
-              which will escape everything below ASCII 32 and above 126, <literal>8bit</literal>
-              which will escape everything below ASCII 32 and above 255 and <literal>extended</literal>
-              which will escape everything outside the range [32-126] and [161-255]
-              </para>
-              <para>This will write a unicode representation of the character into the
-              text file e.g. \n for a newline, \u00F6 for &ouml;. This file
-              can only be imported using &wb-productname; (at least I don't know
-              of any DBMS specific loader that will decode this properly)</para>
-              </entry>
-            </row>
-
-            <row>
-              <entry><para>-header</para></entry>
+              <entry>-header</entry>
 
               <entry>
 								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
@@ -452,8 +493,9 @@
 								</para>
               </entry>
             </row>
+						
 						<row>
-							<entry><para>-writeOracleLoader</para></entry>
+							<entry>-writeOracleLoader</entry>
 							<entry>
 								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 								<para>
@@ -492,31 +534,31 @@
           </thead>
           <tbody valign="top">
             <row>
-              <entry><para>-table</para></entry>
-              <entry><para>The given tablename will be put
-              into the &#60;table&#62; tag as an attribute.</para></entry>
+              <entry>-table</entry>
+              <entry>The given tablename will be put
+              into the &#60;table&#62; tag as an attribute.</entry>
             </row>
 
 						<row>
-							<entry><para>-dateFormat</para></entry>
-							<entry><para>The date <link linkend="options-date-format">format</link> to be used when
+							<entry>-dateFormat</entry>
+							<entry>The date <link linkend="options-date-format">format</link> to be used when
 									writing date columns into the output file. 
-							</para></entry>
+							</entry>
 						</row>
 						
             <row>
-              <entry><para>-dateTimeFormat</para></entry>
-              <entry><para>The <link linkend="options-date-format">format</link> to be used when writing
+              <entry>-dateTimeFormat</entry>
+              <entry>The <link linkend="options-date-format">format</link> to be used when writing
               datetime (or timestamp) columns into the output file.
-              </para></entry>
+              </entry>
             </row>
 
             <row>
-              <entry><para>-decimal</para></entry>
-              <entry><para>The decimal symbol to be used for numbers. The default is a dot (e.g. 3.14152)</para></entry>
+              <entry>-decimal</entry>
+              <entry>The decimal symbol to be used for numbers. The default is a dot (e.g. 3.14152)</entry>
             </row>
             <row>
-              <entry><para>-useCDATA</para></entry>
+              <entry>-useCDATA</entry>
               <entry>
 								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 								<para>
@@ -540,21 +582,21 @@
             </row>
 
             <row>
-              <entry><para>-stylesheet</para></entry>
-              <entry><para>The name of the XSLT stylesheet that should be used
+              <entry>-stylesheet</entry>
+              <entry>The name of the XSLT stylesheet that should be used
               to transform the &wb-productname; specific XML file into a
               different format. If -stylesheet is specified, -xsltoutput has
-              to be specified as well.</para></entry>
+              to be specified as well.</entry>
             </row>
             <row>
-              <entry><para>-xsltOutput</para></entry>
-              <entry><para>The resulting output file (specified
+              <entry>-xsltOutput</entry>
+              <entry>The resulting output file (specified
               with the -file parameter), can be transformed using XSLT after
               the export has finished. This parameter then defines
-              the name of the outputfile of the transformation.</para></entry>
+              the name of the outputfile of the transformation.</entry>
             </row>
             <row>
-              <entry><para>-verboseXML</para></entry>
+              <entry>-verboseXML</entry>
               <entry>
 								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 								<para>This parameter controls the tags that
@@ -671,14 +713,14 @@ WHERE table1.column1 = table2.column1;</programlisting>
 				</thead>
 				<tbody valign="top">
 					<row>
-						<entry><para>-type</para></entry>
+						<entry>-type</entry>
 						<entry>
 							<para>Possible values: <literal>xml</literal>, <literal>text</literal></para>
 							<para>Defines the type of the input file</para>
 						</entry>
 					</row>
 					<row>
-						<entry><para>-file</para></entry>
+						<entry>-file</entry>
 						<entry>
 							<para>
 								Defines the full name of the input file. Alternatively
@@ -688,7 +730,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</entry>
 					</row>
 					<row>
-						<entry><para>-sourcedir</para></entry>
+						<entry>-sourcedir</entry>
 						<entry>
 							<para>
 								Defines a directory which contains import files. All
@@ -699,7 +741,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</entry>
 					</row>
 					<row>
-						<entry><para>-extension</para></entry>
+						<entry>-extension</entry>
 						<entry>
 							<para>
 								When using the <literal>-sourcedir</literal> switch, the
@@ -711,7 +753,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</entry>
 					</row>
 					<row>
-						<entry><para>-commitEvery</para></entry>
+						<entry>-commitEvery</entry>
 						<entry>
 							<para>
                 A numeric value that defines the number of rows after which a <literal>COMMIT</literal>
@@ -722,7 +764,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</entry>
 					</row>
 					<row>
-						<entry><para>-mode</para></entry>
+						<entry>-mode</entry>
 						<entry>
 								<para>Defines how the data should be sent to the database. Possible
 								values are '<literal>INSERT</literal>', '<literal>UPDATE</literal>',
@@ -733,7 +775,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</entry>
 					</row>
 					<row>
-						<entry><para>-continueOnError</para></entry>
+						<entry>-continueOnError</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>This parameter controls the behaviour when errors occur during
@@ -748,7 +790,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</entry>
 					</row>
 					<row>
-						<entry><para>-keyColumns</para></entry>
+						<entry>-keyColumns</entry>
 						<entry>
 							<para>
 								Defines the key columns for the target table. This parameter
@@ -757,10 +799,12 @@ WHERE table1.column1 = table2.column1;</programlisting>
 							<para>
 								This parameter is ignored if files are imported using the <literal>-sourcedir</literal>
 								parameter
-						</para></entry>
+							</para>
+						</entry>
 					</row>
+					
 					<row>
-						<entry><para>-table</para></entry>
+						<entry>-table</entry>
 						<entry>
 							<para>Defines the table into which the data should be imported</para>
 							<para>
@@ -771,24 +815,21 @@ WHERE table1.column1 = table2.column1;</programlisting>
 					</row>
 					
 					<row>
-						<entry><para>-schema</para></entry>
-						<entry><para>Defines the schema into which the data should be imported. This
-								is necessary for DBMS that support schemas, and you want to import
-							the data into a different schema, then the current one.</para>
-						</entry>
-					</row>
-					
-					<row>
-						<entry><para>-encoding</para></entry>
+						<entry>-schema</entry>
 						<entry>
-							<para>
-								Define the encoding of the input file. 
-							</para>
+							Defines the schema into which the data should be imported. This
+							is necessary for DBMS that support schemas, and you want to import
+							the data into a different schema, then the current one.
 						</entry>
 					</row>
 					
 					<row>
-						<entry><para>-deleteTarget</para></entry>
+						<entry>-encoding</entry>
+						<entry>Defines the encoding of the input file (and possible CLOB files)</entry>
+					</row>
+					
+					<row>
+						<entry>-deleteTarget</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
@@ -799,7 +840,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 					</row>
 
 					<row>
-						<entry><para>-truncateTable</para></entry>
+						<entry>-truncateTable</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
@@ -813,44 +854,45 @@ WHERE table1.column1 = table2.column1;</programlisting>
 					</row>
 					
 					<row>
-						<entry><para>-batchSize</para></entry>
+						<entry>-batchSize</entry>
 						<entry>
-								<para>
-									A numeric value that defines the size of the batch queue. 
-									Any value greater than 1 will enable batch mode. If the
-									JDBC driver supports this, the INSERT (or UPDATE) performance can be increased
-									drastically.
-								</para>
-								<para>
-									This parameter will be ignored if the driver does not support batch updates or if
-									the mode is not <literal>UPDATE</literal> or <literal>INSERT</literal> 
-									(i.e. if <literal>-mode=update,insert</literal> or <literal>-mode=insert,update</literal> is used).
-								</para>
+							<para>
+								A numeric value that defines the size of the batch queue. 
+								Any value greater than 1 will enable batch mode. If the
+								JDBC driver supports this, the INSERT (or UPDATE) performance can be increased
+								drastically.
+							</para>
+							<para>
+								This parameter will be ignored if the driver does not support batch updates or if
+								the mode is not <literal>UPDATE</literal> or <literal>INSERT</literal> 
+								(i.e. if <literal>-mode=update,insert</literal> or <literal>-mode=insert,update</literal> is used).
+							</para>
 						</entry>
 					</row>
 					
 					<row>
-						<entry><para>-commitBatch</para></entry>
+						<entry>-commitBatch</entry>
 						<entry>
-								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-								<para>
-									If using batch execution (by specifying a batch size using the <literal>-batchSize</literal>
-									parameter) each batch will be committed when this parameter is set to <literal>true</literal>.
-									This is slightly different to using <literal>-commitEvery</literal> with the value of the 
-									<literal>-batchSize</literal> parameter. The latter one will add a COMMIT statement to 
-									the batch queue, rather than calling the JDBC commit() method. Some drivers 
-									do not allow to add different statements in a batch queue. So, if a frequent 
-									<literal>COMMIT</literal> is needed, this parameter should be used.
-								</para>
-								<para>
-									When you specify <literal>-commitBatch</literal> the parameter 
-									<literal>-commitEvery</literal> will be ignored. If no batch size 
-									is given, then <literal>-commitBatch</literal> will be ignored.
-								</para>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+								If using batch execution (by specifying a batch size using the <literal>-batchSize</literal>
+								parameter) each batch will be committed when this parameter is set to <literal>true</literal>.
+								This is slightly different to using <literal>-commitEvery</literal> with the value of the 
+								<literal>-batchSize</literal> parameter. The latter one will add a COMMIT statement to 
+								the batch queue, rather than calling the JDBC commit() method. Some drivers 
+								do not allow to add different statements in a batch queue. So, if a frequent 
+								<literal>COMMIT</literal> is needed, this parameter should be used.
+							</para>
+							<para>
+								When you specify <literal>-commitBatch</literal> the parameter 
+								<literal>-commitEvery</literal> will be ignored. If no batch size 
+								is given, then <literal>-commitBatch</literal> will be ignored.
+							</para>
 						</entry>
 					</row>
+					
 					<row>
-						<entry><para>-updateWhere</para></entry>
+						<entry>-updateWhere</entry>
 						<entry>
 							<para>
 								When using <link linkend="import-update-mode">update mode</link>
@@ -864,28 +906,26 @@ WHERE table1.column1 = table2.column1;</programlisting>
 							</para>
 						</entry>
 					</row>
+					
 					<row>
-						<entry><para>-startRow</para></entry>
+						<entry>-startRow</entry>
 						<entry>
-							<para>
-								A numeric value to define the first row to be imported. Any row before the
-								specified row will be ignored. The header row is not counted 
-								to determine the row number. For a text file with a header 
-								row, the pysical line 2 is row 1 (one) for this parameter.
-							</para>
+							A numeric value to define the first row to be imported. Any row before the
+							specified row will be ignored. The header row is not counted 
+							to determine the row number. For a text file with a header 
+							row, the pysical line 2 is row 1 (one) for this parameter.
 						</entry>
 					</row>
+					
 					<row>
-						<entry><para>-endRow</para></entry>
+						<entry>-endRow</entry>
 						<entry>
-							<para>
-								A numeric value to define the last row to be imported. The import
-								will be stopped after this row has been imported. When you 
-								specify <literal>-startRow=10</literal> and <literal>-endRow=20</literal>
-								11 rows will be imported (i.e. rows 10 to 20). If this is a text file
-								import with a header row, this would correspond to the physical lines
-								11 to 21 in the input file as the header row is not counted.
-							</para>
+							A numeric value to define the last row to be imported. The import
+							will be stopped after this row has been imported. When you 
+							specify <literal>-startRow=10</literal> and <literal>-endRow=20</literal>
+							11 rows will be imported (i.e. rows 10 to 20). If this is a text file
+							import with a header row, this would correspond to the physical lines
+							11 to 21 in the input file as the header row is not counted.
 						</entry>
 					</row>
 					
@@ -910,7 +950,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 					<tbody valign="top">
 						
 						<row>
-							<entry><para>-fileColumns</para></entry>
+							<entry>-fileColumns</entry>
 							<entry>
 								<para>
 									A comma separated list of the table columns in the import file
@@ -933,7 +973,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</row>
 						
 						<row>
-							<entry><para>-importColumns</para></entry>
+							<entry>-importColumns</entry>
 							<entry>
 								<para>
 									Defines the columns that should be imported. If all
@@ -957,7 +997,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</row>
 						
 						<row>
-							<entry><para>-delimiter</para></entry>
+							<entry>-delimiter</entry>
 							<entry>
 								<para>
 									Define the character which separates columns in one line. Records are always
@@ -967,14 +1007,14 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</row>
 						
 						<row>
-							<entry><para>-dateFormat</para></entry>
+							<entry>-dateFormat</entry>
 							<entry>
 								<para>The <link linkend="options-date-format">format</link> for date columns.</para>
 							</entry>
 						</row>
 						
 						<row>
-							<entry><para>-timestampFormat</para></entry>
+							<entry>-timestampFormat</entry>
 							<entry>
 								<para>
 									The <link linkend="options-date-format">format</link> for datetime (or timestamp) columns in the input file.
@@ -983,7 +1023,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</row>
 						
 						<row>
-							<entry><para>-quoteChar</para></entry>
+							<entry>-quoteChar</entry>
 							<entry>
 								<para>
 									The character which was used to quote values where the delimiter is contained.
@@ -995,7 +1035,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</row>
 						
 						<row>
-							<entry><para>-multiLine</para></entry>
+							<entry>-multiLine</entry>
 							<entry>
 								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 								<para>
@@ -1016,13 +1056,12 @@ WHERE table1.column1 = table2.column1;</programlisting>
 						</row>
 						
 						<row>
-							<entry><para>-decimal</para></entry>
-							<entry><para>The decimal symbol to be used for
-							numbers. The default is a dot.</para></entry>
+							<entry>-decimal</entry>
+							<entry>The decimal symbol to be used for numbers. The default is a dot</entry>
 						</row>
 						
 						<row>
-							<entry><para>-header</para></entry>
+							<entry>-header</entry>
 							<entry>
 								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 								<para>
@@ -1040,8 +1079,9 @@ WHERE table1.column1 = table2.column1;</programlisting>
 								</para>
 							</entry>
 						</row>
+						
 						<row>
-							<entry><para>-decode</para></entry>
+							<entry>-decode</entry>
 							<entry>
 								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 								<para>
@@ -1054,7 +1094,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 							</entry>
 						</row>
 						<row>
-							<entry><para>-columnFilter</para></entry>
+							<entry>-columnFilter</entry>
 							<entry>
 								<para>
 									This defines a filter on column level that selects only certain rows
@@ -1072,7 +1112,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 							</entry>
 						</row>
 						<row>
-							<entry><para>-lineFilter</para></entry>
+							<entry>-lineFilter</entry>
 							<entry>
 								<para>
 									To define a filter on the level of the input row (rather than
@@ -1085,7 +1125,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 							</entry>
 						</row>
 						<row>
-							<entry><para>-emptyStringIsNull</para></entry>
+							<entry>-emptyStringIsNull</entry>
 							<entry>
 								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 								<para>
@@ -1100,7 +1140,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 							</entry>
 						</row>
 						<row>
-							<entry><para>-blobIsFilename</para></entry>
+							<entry>-blobIsFilename</entry>
 							<entry>
 								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 								<para>
@@ -1112,6 +1152,23 @@ WHERE table1.column1 = table2.column1;</programlisting>
 									of the BLOB column "as is" to the DBMS. This will of course only work
 									if the JDBC driver can handle the data that in the BLOB columns of the 
 									text file. The default for this parameter is <literal>true</literal>
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-clobIsFilename</entry>
+							<entry>
+								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+									When exporting tables that have CLOB columns using <link linkend="command-export">WbExport</link>
+									and the parameter <literal>-clobAsFile=true</literal> the generated text file
+									will not contain the actual CLOB contents, but the a filename indicating the 
+									file in which the CLOB content is stored. 
+									In this case <literal>-clobIsFilename=true</literal> has to be specified in 
+									order to read the CLOB contents from the external files. The CLOB files
+									will be read using the encoding specified with the <literal>-encoding</literal>
+									parameter.
 								</para>
 							</entry>
 						</row>
@@ -1233,7 +1290,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
             <tbody valign="top">
 						
               <row>
-                <entry><para>-verboseXML</para></entry>
+                <entry>-verboseXML</entry>
                 <entry>
 									<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 									<para>
@@ -1248,7 +1305,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
               </row>
 							
               <row>
-                <entry><para>-sourceDir</para></entry>
+                <entry>-sourceDir</entry>
                 <entry>
 									<para>Specify a director which contains the XML files.
 										All files in that directory ending with ".xml"
@@ -1272,7 +1329,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
               </row>
 							
 							<row>
-								<entry><para>-importColumns</para></entry>
+								<entry>-importColumns</entry>
 								<entry>
 									<para>
 										Defines the columns that should be imported. If all
@@ -1364,7 +1421,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 
             <tbody valign="top">
               <row>
-                <entry><para>-sourceProfile</para></entry>
+                <entry>-sourceProfile</entry>
                 <entry>
 									<para>
 										The name of the connection profile to use as the source connection.
@@ -1377,7 +1434,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
               </row>
 							
               <row>
-                <entry><para>-sourceGroup</para></entry>
+                <entry>-sourceGroup</entry>
                 <entry>
 									<para>
 										If the name of your source profile is not unique across 
@@ -1391,7 +1448,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
               </row>
 							
               <row>
-                <entry><para>-targetProfile</para></entry>
+                <entry>-targetProfile</entry>
                 <entry>
 									<para>
 										The name of the connection profile to use as the target connection. If
@@ -1404,7 +1461,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
               </row>
 							
               <row>
-                <entry><para>-targetGroup</para></entry>
+                <entry>-targetGroup</entry>
                 <entry>
 									<para>
 										If the name of your target profile is not unique across 
@@ -1418,12 +1475,15 @@ WHERE table1.column1 = table2.column1;</programlisting>
               </row>
 							
               <row>
-                <entry><para>-commitEvery</para></entry>
-                <entry><para>The number of rows after which a commit is sent to the target database.</para></entry>
+                <entry>-commitEvery</entry>
+                <entry>
+									The number of rows after which a commit is sent to the target database. This parameter
+									is ignored if JDBC batching (<literal>-batchSize</literal>) is used.
+								</entry>
               </row>
 							
               <row>
-                <entry><para>-deleteTarget</para></entry>
+                <entry>-deleteTarget</entry>
                 <entry>
 									<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 									<para>
@@ -1434,7 +1494,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
               </row>
 							
               <row>
-                <entry><para>-mode</para></entry>
+                <entry>-mode</entry>
                 <entry>
 									<para>
 										Defines how the data should be sent to the database. Possible
@@ -1447,7 +1507,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
               </row>
 							
               <row>
-                <entry><para>-keyColumns</para></entry>
+                <entry>-keyColumns</entry>
                 <entry>
 									<para>
 										Defines the key columns for the target table. This parameter
@@ -1455,21 +1515,53 @@ WHERE table1.column1 = table2.column1;</programlisting>
 									</para>
                 </entry>
               </row>
+							
 							<row>
-								<entry><para>-batchSize</para></entry>
+								<entry>-batchSize</entry>
 								<entry>
-								<para>
+									<para>
 										Enable the use of the JDBC batch update feature, by setting the size
 										of the batch queue. Any value greater than 1 will enable batch modee. If the
 										JDBC driver supports this, the INSERT (or UPDATE) performance can be increased.
-								</para>
-								<para>
+									</para>
+									<para>
 										This parameter will be ignored if the driver does not support batch updates or if
 										the mode is not UPDATE or INSERT (i.e. if <literal>-mode=update,insert</literal>
 										or <literal>-mode=insert,update</literal> is used).
-								</para>
+									</para>
 								</entry>
 							</row>
+							
+							<row>
+								<entry>-commitBatch</entry>
+								<entry>
+									<para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+									<para>When using the <literal>-batchSiez</literal> parameter, the 
+										<literal>-commitEvery</literal> is ignored (as not all JDBC drivers
+										support a <literal>COMMIT</literal> inside a JDBC batch operation. When 
+										using <literal>-commitBatch=true</literal> &wb-productname; will send a 
+										<literal>COMMIT</literal> to the database server after each JDBC 
+										batch is sent to the server.
+									</para>
+								</entry>
+							</row>
+							
+							<row>
+								<entry>-continueOnError</entry>
+								<entry>
+									<para>
+										Defines the behaviour if an error occurs in one of the statements.
+										If this is set to <literal>true</literal> the copy process will continue
+										even if one statement fails. If set to <literal>false</literal> the copy process
+										will be halted on the first error. The default value is <literal>false</literal>.
+									</para>
+									<para>
+										Note that for some DBMS <literal>continueOnError</literal> will not work. PostgreSQL
+										will not execute any further commands if the current transactions had an error. 
+									</para>
+								</entry>
+							</row>
+							
             </tbody>
           </tgroup>
         </informaltable>
@@ -1489,33 +1581,33 @@ WHERE table1.column1 = table2.column1;</programlisting>
             </thead>
             <tbody valign="top">
               <row>
-                <entry><para>-sourceTable</para></entry>
-                <entry><para>The name of the table to be copied.</para></entry>
+                <entry>-sourceTable</entry>
+                <entry>The name of the table to be copied.</entry>
               </row>
               <row>
-                <entry><para>-sourceWhere</para></entry>
-                <entry><para>A <literal>WHERE</literal> condition that is applied to the source table.</para></entry>
+                <entry>-sourceWhere</entry>
+                <entry>A <literal>WHERE</literal> condition that is applied to the source table.</entry>
               </row>
               <row>
-                <entry><para>-targetTable</para></entry>
-                <entry><para>The name of the table into which the data should be written.</para></entry>
+                <entry>-targetTable</entry>
+                <entry>The name of the table into which the data should be written.</entry>
               </row>
               <row>
-                <entry><para>-createTarget</para></entry>
-                <entry><para>If this parameter is set to <literal>true</literal> the target table
+                <entry>-createTarget</entry>
+                <entry>If this parameter is set to <literal>true</literal> the target table
                 will be created, if it doesn't exist. 
 								Valid values are <literal>true</literal> or <literal>false</literal>.
-                </para></entry>
+                </entry>
               </row>
               <row>
-                <entry><para>-dropTarget</para></entry>
-                <entry><para>If this parameter is set to <literal>true</literal> the target table
+                <entry>-dropTarget</entry>
+                <entry>If this parameter is set to <literal>true</literal> the target table
                 will be dropped before it is create. This parameter is ignored if <literal>-createtarget=true</literal>
 								is specified.
-                </para></entry>
+                </entry>
               </row>
               <row>
-                <entry><para>-columns</para></entry>
+                <entry>-columns</entry>
                 <entry>
                   <para>Defines the columns to be copied. If this parameter is not specified, then
                   all matching columns are copied from source to target. Matching
@@ -1559,13 +1651,13 @@ WHERE table1.column1 = table2.column1;</programlisting>
             </thead>
             <tbody>
               <row>
-                <entry><para>-sourcequery</para></entry>
-                <entry><para>The SQL query to be used as the source data (instead of a table).</para></entry>
+                <entry>-sourcequery</entry>
+                <entry>The SQL query to be used as the source data (instead of a table).</entry>
               </row>
               <row>
-                <entry><para>-columns</para></entry>
-                <entry><para>The list of columns of the target table, in the order
-                in which they appear in the source table.</para></entry>
+                <entry>-columns</entry>
+                <entry>The list of columns of the target table, in the order
+                in which they appear in the source table.</entry>
               </row>
             </tbody>
           </tgroup>
@@ -1700,52 +1792,52 @@ WHERE id=42;</programlisting>
 
           <tbody valign="top">
             <row>
-              <entry><para>-file</para></entry>
-              <entry><para>The filename of the output file.</para></entry>
+              <entry>-file</entry>
+              <entry>The filename of the output file.</entry>
             </row>
             <row>
-                <entry><para>-tables</para></entry>
-                <entry><para>A (comma separated) list of tables to report. Default is
+                <entry>-tables</entry>
+                <entry>A (comma separated) list of tables to report. Default is
                 all tables. If this parameter is specified <literal>-schemas</literal> is ignored.
                 If you want to generate the report on tables from different users/schemas you have
                 to use fully qualified names in the list (e.g. <literal>-tables=MY_USER.TABLE1,OTHER_USER.TABLE2</literal>)
                 You can also specify wildcards in the table name: <literal>-table=CONTRACT_%</literal> will create
                 an XML report for all tables that start with <literal>CONTRACT_</literal>
-                </para></entry>
+                </entry>
             </row>
             <row>
-                <entry><para>-schemas</para></entry>
-                <entry><para>A (comma separated) list of schemas to generate the report from.
+                <entry>-schemas</entry>
+                <entry>A (comma separated) list of schemas to generate the report from.
                 For each user/schema all tables are included in the report. e.g.
                 <literal>-schemas=MY_USER,OTHER_USER</literal> would generate a report
                 for all tables in the schemas <literal>MY_USER</literal> and <literal>OTHER_USER</literal>.
-                </para></entry>
+                </entry>
             </row>
             <row>
-                <entry><para>-namespace</para></entry>
-                <entry><para>The namespace to be used for the XML tags. By default no
+                <entry>-namespace</entry>
+                <entry>The namespace to be used for the XML tags. By default no
                 namespace is used. If you supply a value for this e.g. <literal>wb</literal> the tag <literal>&lt;schema-report&gt;
                 </literal> would be written as <literal>&lt;wb:schema-report&gt;</literal>
-                </para></entry>
+                </entry>
             </row>
             <row>
-                <entry><para>-includetables</para></entry>
-                <entry><para>Control the output of table information for the report. The default is
+                <entry>-includetables</entry>
+                <entry>Control the output of table information for the report. The default is
                           <literal>true</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
-                </para></entry>
+                </entry>
             </row>
             <row>
-                <entry><para>-includeprocedures</para></entry>
-                <entry><para>Control the output of stored procedure information for the report. The default is
+                <entry>-includeprocedures</entry>
+                <entry>Control the output of stored procedure information for the report. The default is
                 <literal>false</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
-                </para></entry>
+                </entry>
             </row>
             <row>
-                <entry><para>-format</para></entry>
-                <entry><para>The format of the outputfile. The default is the &wb-productname;
+                <entry>-format</entry>
+                <entry>The format of the outputfile. The default is the &wb-productname;
                 specific XML format. Using <literal>-format=dbdesigner</literal> you can generate
                 an XML file suitable to be opened with DbDesigner4
-                </para></entry>
+                </entry>
             </row>
           </tbody>
         </tgroup>
@@ -1780,57 +1872,68 @@ WHERE id=42;</programlisting>
 
 					<tbody valign="top">
 						<row>
-							<entry><para>-referenceProfile</para></entry>
-							<entry><para>The name of the connection profile for the reference
-							connection. If this is not specified, then the current connection is
-							used.</para></entry>
+							<entry>-referenceProfile</entry>
+							<entry>The name of the connection profile for the reference
+								connection. If this is not specified, then the current connection is
+							used.</entry>
 						</row>
-              <row>
-                <entry><para>-referenceGroup</para></entry>
-                <entry><para>If the name of your reference profile is not unique across 
+						<row>
+							<entry>-referenceGroup</entry>
+							<entry>If the name of your reference profile is not unique across 
 								all profiles, you will need to specify the group in which the profile 
 								is located with this parameter.
-                </para></entry>
-              </row>
-						<row>
-							<entry><para>-targetProfile</para></entry>
-							<entry><para>The name of the connection profile for the target
-								connection (the one that needs to be migrated). If this is not
-								specified, then the current connection is used.</para>
-								<para>If you use the current connection for reference and target,
-								then you should prefix the table names with schema/user or
-								use the <literal>-referenceschema</literal> and
-								<literal>-targetschema</literal> parameters.</para>
 							</entry>
 						</row>
-              <row>
-                <entry><para>-targetGroup</para></entry>
-                <entry><para>If the name of your target profile is not unique across 
+						<row>
+							<entry>-targetProfile</entry>
+							<entry>
+								<para>
+									The name of the connection profile for the target
+									connection (the one that needs to be migrated). If this is not
+									specified, then the current connection is used.
+								</para>
+								<para>
+									If you use the current connection for reference and target,
+									then you should prefix the table names with schema/user or
+									use the <literal>-referenceschema</literal> and
+									<literal>-targetschema</literal> parameters.
+								</para>
+							</entry>
+						</row>
+						
+						<row>
+							<entry>-targetGroup</entry>
+							<entry>If the name of your target profile is not unique across 
 								all profiles, you will need to specify the group in which the profile 
 								is located with this parameter.
-                </para></entry>
-              </row>
-						<row>
-							<entry><para>-file</para></entry>
-							<entry><para>The filename of the output file. If this
-							is not supplied the output will be written to the message area</para></entry>
+							</entry>
 						</row>
-
+						
 						<row>
-							<entry><para>-referenceTables</para></entry>
-							<entry><para>A (comma separated) list of tables that are the reference
+							<entry>-file</entry>
+							<entry>The filename of the output file. If this
+							is not supplied the output will be written to the message area</entry>
+						</row>
+						
+						<row>
+							<entry>-referenceTables</entry>
+							<entry>A (comma separated) list of tables that are the reference
 								tables, to be checked.
-							</para></entry>
+							</entry>
 						</row>
+						
 						<row>
-							<entry><para>-targetTables</para></entry>
-							<entry><para>A (comma separated) list of tables in the target
-								connection to be compared to the source tables. The tables
-								are "matched" by their position in the list. The first table in the
-								<literal>-referenceTables</literal> parameter is compared to the
-								first table in the <literal>-targetTables</literal> parameter, and so
-								on. Using this parameter you can compare tables that do not have the
-								same name.</para>
+							<entry>-targetTables</entry>
+							<entry>
+								<para>
+									A (comma separated) list of tables in the target
+									connection to be compared to the source tables. The tables
+									are "matched" by their position in the list. The first table in the
+									<literal>-referenceTables</literal> parameter is compared to the
+									first table in the <literal>-targetTables</literal> parameter, and so
+									on. Using this parameter you can compare tables that do not have the
+									same name.
+								</para>
 								<para>If you omit this parameter, then all tables from the
 									target connection with the same names as those listed in
 									<literal>-referenceTables</literal> are compared.
@@ -1842,95 +1945,108 @@ WHERE id=42;</programlisting>
 								</para>
 							</entry>
 						</row>
+						
 						<row>
-							<entry><para>-referenceSchema</para></entry>
-							<entry><para>
-								Compare all tables from the specified schema (user)
-							</para></entry>
-						</row>
-						<row>
-							<entry><para>-targetSchema</para></entry>
-							<entry><para>A schema in the target
-								connection to be compared to the tables from the reference schema.
-							</para>
-							</entry>
-						</row>
-
-						<row>
-							<entry><para>-namespace</para></entry>
-							<entry><para>The namespace to be used for the XML tags. By default no
-								namespace is used. If you supply a value for this e.g. <literal>wb</literal> the tag <literal>&lt;schema-report&gt;
-								</literal> would be written as <literal>&lt;wb:modify-table&gt;</literal>
-							</para></entry>
-						</row>
-						<row>
-							<entry><para>-encoding</para></entry>
-							<entry><para>The encoding to be used for the XML file. The
-								default is UTF-8
-							</para></entry>
-						</row>
-						<row>
-							<entry><para>-includePrimaryKeys</para></entry>
-							<entry><para>Select whether primary key constraint definitions should be compared as well.
-								The default is <literal>true</literal>.
-								Valid values are <literal>true</literal> or <literal>false</literal>.
-							</para></entry>
-						</row>
-						<row>
-							<entry><para>-includeForeignKeys</para></entry>
-							<entry><para>Select whether foreign key constraint definitions should be compared as well.
-								The default is <literal>true</literal>.
-								Valid values are <literal>true</literal> or <literal>false</literal>.
-							</para></entry>
-						</row>
-						<row>
-							<entry><para>-includeConstraints</para></entry>
-							<entry><para>Select whether table and column (check) constraints
-								should be compared as well. &wb-productname; compares the constraint
-								definition (SQL) as stored in the database. When comparing schemas from
-								different DBMS systems this will not return the desired results.</para>
-								<para>The default is to not compare table constraints (<literal>false</literal>)
-								Valid values are <literal>true</literal> or <literal>false</literal>.
-								</para>
-							</entry>
-						</row>
-						<!--
-						<row>
-						<entry><para>-includecomments</para></entry>
-						<entry><para>Select whether table and column comments should be compared as well.
-						The default is to not compare comments. When using an Oracle database, you need
-						to <link linkend="oracle-enable-remarks">enable remarks reporting</link> for the JDBC
-						driver in order to use this feature.
-						</para></entry>
-						</row>
-						-->
-						<row>
-							<entry><para>-includeViews</para></entry>
+							<entry>-referenceSchema</entry>
 							<entry>
-							<para>
-								Select whether views should also be compared. When comparing
-								views, the source as it is stored in the DBMS is compared. This comparison
-								is case-sensitiv, which means <literal>SELECT * FROM foo;</literal> will be
-								reported as a difference to <literal>select * from foo;</literal> even
-								if they are logically the same. A comparison across different DBMS will also not
-								work properly!
-							</para>
-							<para>The default is <literal>true</literal>
-								Valid values are <literal>true</literal> or <literal>false</literal>.
-							</para>
+								Compare all tables from the specified schema (user)
 							</entry>
-						</row>
-
-						<row>
-							<entry><para>-includeIndex</para></entry>
-							<entry><para>Select whether indexes should be compared as well.  The default
-								is to not compare index definitions.
-								Valid values are <literal>true</literal> or <literal>false</literal>.
-							</para></entry>
 						</row>
 						
 						<row>
-							<entry><para>-useJdbcTypes</para></entry>
+							<entry>-targetSchema</entry>
+							<entry>
+								A schema in the target connection to be compared to the tables from the reference schema.
+							</entry>
+						</row>
+						
+						<row>
+							<entry>-namespace</entry>
+							<entry>The namespace to be used for the XML tags. By default no
+								namespace is used. If you supply a value for this e.g. <literal>wb</literal> the tag <literal>&lt;schema-report&gt;
+								</literal> would be written as <literal>&lt;wb:modify-table&gt;</literal>
+							</entry>
+						</row>
+						
+						<row>
+							<entry>-encoding</entry>
+							<entry>The encoding to be used for the XML file. The default is UTF-8</entry>
+						</row>
+						
+						<row>
+							<entry>-includePrimaryKeys</entry>
+							<entry>Select whether primary key constraint definitions should be compared as well.
+								The default is <literal>true</literal>.
+								Valid values are <literal>true</literal> or <literal>false</literal>.
+							</entry>
+						</row>
+						
+						<row>
+							<entry>-includeForeignKeys</entry>
+							<entry>Select whether foreign key constraint definitions should be compared as well.
+								The default is <literal>true</literal>.
+								Valid values are <literal>true</literal> or <literal>false</literal>.
+							</entry>
+						</row>
+						
+						<row>
+							<entry>-includeConstraints</entry>
+							<entry>
+								<para>
+									Select whether table and column (check) constraints
+									should be compared as well. &wb-productname; compares the constraint
+									definition (SQL) as stored in the database. When comparing schemas from
+									different DBMS systems this will not return the desired results.
+								</para>
+								<para>
+									The default is to not compare table constraints (<literal>false</literal>)
+									Valid values are <literal>true</literal> or <literal>false</literal>.
+								</para>
+							</entry>
+						</row>
+						
+						<row>
+							<entry>-includeViews</entry>
+							<entry>
+								<para>
+									Select whether views should also be compared. When comparing
+									views, the source as it is stored in the DBMS is compared. This comparison
+									is case-sensitiv, which means <literal>SELECT * FROM foo;</literal> will be
+									reported as a difference to <literal>select * from foo;</literal> even
+									if they are logically the same. A comparison across different DBMS will also not
+									work properly!
+								</para>
+								<para>The default is <literal>true</literal>
+									Valid values are <literal>true</literal> or <literal>false</literal>.
+								</para>
+							</entry>
+						</row>
+						
+						<row>
+							<entry>-includeProcs</entry>
+							<entry>
+								<para>
+									Select whether stored procedures should also be compared. When comparing
+									procedures the source as it is stored in the DBMS is compared. This comparison
+									is case-sensitiv. A comparison across different DBMS will also not work!
+								</para>
+								<para>The default is <literal>false</literal>
+									Valid values are <literal>true</literal> or <literal>false</literal>.
+								</para>
+							</entry>
+						</row>
+						
+						<row>
+							<entry>-includeIndex</entry>
+							<entry>
+								Select whether indexes should be compared as well.  The default
+								is to not compare index definitions.
+								Valid values are <literal>true</literal> or <literal>false</literal>.
+							</entry>
+						</row>
+						
+						<row>
+							<entry>-useJdbcTypes</entry>
 							<entry>
 								<para>
 									Define whether to compare the DBMS specific data types, or 
@@ -1949,7 +2065,6 @@ WHERE id=42;</programlisting>
 								</para>
 							</entry>
 						</row>
-						
 					</tbody>
 				</tgroup>
       </informaltable>
@@ -1976,16 +2091,16 @@ WHERE id=42;</programlisting>
 
           <tbody valign="top">
             <row>
-              <entry><para>-inputfile</para></entry>
-              <entry><para>The name of the XML source file.</para></entry>
+              <entry>-inputfile</entry>
+              <entry>The name of the XML source file.</entry>
             </row>
             <row>
-              <entry><para>-xsltoutput</para></entry>
-              <entry><para>The name of the generated output file.</para></entry>
+              <entry>-xsltoutput</entry>
+              <entry>The name of the generated output file.</entry>
             </row>
             <row>
-              <entry><para>-stylesheet</para></entry>
-              <entry><para>The name of the XSLT stylesheet to be used.</para></entry>
+              <entry>-stylesheet</entry>
+              <entry>The name of the XSLT stylesheet to be used.</entry>
             </row>
           </tbody>
         </tgroup>
@@ -2091,7 +2206,9 @@ WHERE id=42;</programlisting>
                 <entry>-delimiter</entry>
                 <entry>
 									Specify the delimiter that is used in the script. This defaults 
-									to <literal>;</literal>.
+									to <literal>;</literal>. If you want to define a delimiter that
+									will only be recognized when beeing on a single line, append <literal>;nl</literal>
+									to the value, e.g.: <literal>-delimiter=/;nl</literal>
                 </entry>
             </row>
 						

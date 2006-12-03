@@ -13,7 +13,6 @@ package workbench.sql;
 
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -187,7 +186,8 @@ public class StatementRunnerResult
 	}
 
 	/**
-	 * Clears stored ResultSets and DataStores
+	 * Clears stored ResultSets and DataStores. The content of 
+	 * the datastores will be removed!
 	 * @see #clearResultSets()
 	 */
 	public void clearResultData()
@@ -230,7 +230,15 @@ public class StatementRunnerResult
 	
 	public void clear()
 	{
-		this.clearResultData();
+		// Do not call clearResultData() !!!
+		// otherwise the content of the retrieved DataStores will also 
+		// be removed and as they are re-used by 
+		// We only want to free the list itself.
+		if (this.datastores != null)
+		{
+			this.datastores.clear();
+		}
+		this.clearResultSets();
 		clearMessageBuffer();
 		if (this.updateCounts !=null) this.updateCounts.clear();
 		this.sourceCommand = null;

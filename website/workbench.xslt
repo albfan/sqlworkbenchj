@@ -151,7 +151,7 @@
                     <img src="{$imageName}"/>
                 </td>
             </xsl:if>
-            <xsl:if test="not(imageName)">
+            <xsl:if test="not($imageName)">
                   <td class="content">
                     <xsl:apply-templates select="content"/>
                 </td>
@@ -200,16 +200,12 @@
 </xsl:template>
 
 <xsl:template match="zip-link">
-<!-- <a href="workbench.zip">ZIP File</a>-->
 <a href="Workbench-Build{$buildNumber}.zip">Download stable release</a>
-
 </xsl:template>
 
-<!--
-<xsl:template match="tar-link">
-<a href="Workbench-Build{$buildNumber}.tar.gz">TAR File</a>
+<xsl:template match="mac-link">
+<a href="Workbench-Build{$buildNumber}-Mac.zip">Download for Mac</a>
 </xsl:template>
--->
 
 <xsl:template match="build-number">
   <xsl:value-of select="$buildNumber"/>
@@ -227,14 +223,11 @@
             Basically I'm using these builds myself on a daily basis, and it should be pretty safe to use them.<br/><br/>
             Bugfixes will show up in these builds first. <a href="dev-history.txt" target="_blank">Change history</a>
         </p>
-        <p>The development build is not a full release. It contains only the Workbench.jar binary. The updated
-        help is contained in that file, but no PDF or HTML help files are available. The source code
-        for the development build is also available.
-        </p>
+        <p>Development builds already require JDK 1.5 or higher.</p>
       <ul>
         <li><a href="Workbench-Build{$devBuildNumber}.zip">Download development build</a> (<xsl:value-of select="$devBuildNumber"/>,&nbsp;<xsl:value-of select="$devBuildDate"/>)</li>
         <li><a href="WorkbenchSrc-Build{$devBuildNumber}.zip">Source code</a></li>
-       </ul>
+      </ul>
     </xsl:if>
 </xsl:template>
     

@@ -60,7 +60,7 @@ public class MessageBufferTest
 			b.appendNewLine();
 			b.append("how are you?");
 			
-			StringBuffer s = b.getBuffer();
+			StringBuilder s = b.getBuffer();
 			assertEquals("Hello, world\nhow are you?", s.toString());
 			
 		}

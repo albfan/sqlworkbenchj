@@ -300,21 +300,21 @@
 			</para>
 			<para>In the case of a <literal>CREATE PROCEDURE</literal> statement this should be
 				terminated with the character sequence entered in this input field. The
-				terminator can have more than one character e.g. ./
-				(a dot followed by a slash).
-				It should not be a sequence which is used inside a SQL statement.
+				terminator can have more than one character e.g. <literal>GO</literal>, or <literal>!!</literal>
 			</para>
-			<para>Using a slash as the terminator (as e.g. SQL*Plus does) might lead
-				to problems when stored procedures are created that do calculations such
-				as
+			<para>It is recommende to always define the alternate delimiter as "Single line". This means
+				that the delimiter will only be recognized when put on a single line. If you
+				define the forward slash as the alternate delimiter, the following script
+				would be interpreted as two statements.
 			</para>
-			<para><programlisting>SELECT sum(field)/count(*) FROM table/</programlisting></para>
-			<para>This would lead to problems as the slash is recognized as the
-				statement terminator. Thus the &wb-productname; would send everything up
-				to sum(field) to the database and execute it. The same is true when
-				using the column mapping parameters for the <link linkend="command-copy"><literal>WbCopy</literal></link>
-				command.
+			<para><programlisting>SELECT sum(field)/count(*) FROM table
+/</programlisting></para>
+			<para>To solve this problem, define the delimiter as <literal>Single line</literal>
+			Then the forward slash that divides the two values is not recognized as a delimiter
+			and the script executes normally. It is recommended to always turn on the 
+			single line mode for the alternate delimiter.
 			</para>
+			
 		</section>
 		
 		<section id="options-history-size">

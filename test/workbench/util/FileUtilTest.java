@@ -60,13 +60,13 @@ public class FileUtilTest
 			w.close();
 			
 			BufferedReader in = EncodingUtil.createBufferedReader(f, encoding);
-			StringBuffer content = new StringBuffer();
+			StringBuilder content = new StringBuilder();
 			int lines = FileUtil.readLines(in, content, 5, "\n");
 			in.close();
 			assertEquals("Not enough lines", 2, lines);
 			assertEquals("Content not read properly", "Line 1\nLine 2\n", content.toString());
 			
-			StringBuffer fileContent = new StringBuffer();
+			StringBuilder fileContent = new StringBuilder();
 			for (int i = 0; i < 15; i++)
 			{
 				fileContent.append("Line " + i + "\n");
@@ -75,7 +75,7 @@ public class FileUtilTest
 			w.write(fileContent.toString());
 			w.close();			
 			
-			content = new StringBuffer();
+			content = new StringBuilder();
 			in = EncodingUtil.createBufferedReader(f, encoding);
 			lines = FileUtil.readLines(in, content, 10, "\n");
 			assertEquals("Not enough lines", 10, lines);
@@ -84,7 +84,7 @@ public class FileUtilTest
 			assertEquals("Not enough lines", 4, lines);
 			assertEquals("Wrong content retrieved", fileContent.toString(), content.toString());
 			
-			fileContent = new StringBuffer();
+			fileContent = new StringBuilder();
 			for (int i = 0; i < 237; i++)
 			{
 				fileContent.append("Line " + i + "\n");
@@ -93,7 +93,7 @@ public class FileUtilTest
 			w.write(fileContent.toString());
 			w.close();				
 			
-			content = new StringBuffer(1000);
+			content = new StringBuilder(1000);
 			in = EncodingUtil.createBufferedReader(f, encoding);
 			lines = FileUtil.readLines(in, content, 10, "\n");
 			while (lines == 10)

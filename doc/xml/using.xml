@@ -152,50 +152,18 @@ COMMIT;</programlisting>
 			<para>
 				If you enter more than one statement in the editor and want to execute all statements
 				as a batch script, you need to delimit each statement. The SQL standard for terminating a SQL
-				statement is the semicolon. Alternatively you can separate each statement with the keyword
-				<literal>GO</literal> on a single line (MS SQL Server Syntax).
+				statement is the semicolon. 
 			</para>
 			
 			<para>
-				As a third alternative, an <link linkend="options-alternate-delimiter">alternate delimiter</link>
-				can be defined, which can be used in cases where the semicolon is not suitable. See <xref linkend="execute-ddl"/>
-				for details.
+				You can specifiy an <link linkend="options-alternate-delimiter">alternate delimiter</link>
+				that can be used instead of the semicolon. See the description
+				of the <link linkend="understand-alternate-delim">alternate delimiter</link> for details.
 			</para>
 
 			<para>Valid "scripts" are:</para>
 			<programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox';
 COMMIT;</programlisting>
-
-			<para>
-					or using the keyword <literal>GO</literal>. This is the same syntax as the MS SQL Query Analyzer uses
-			</para>
-			<programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox'
-GO
-COMMIT
-GO</programlisting>
-			<para>or if the alternate delimiter has been set to / the same syntax as Oracle's
-			SQL*Plus can be used.</para>
-			<programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox'
-/
-COMMIT
-/</programlisting>
-
-			<para>
-				The detection of the MS SQL "<literal>GO</literal>" syntax only works if the script
-				that is to be executed is terminated with a <literal>GO</literal> on a single line. The
-				following script will fail on every database that does not know the GO keyword (to my
-				knowledge MS SQL Server is the only one supporting this):
-			</para>
-			<programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox'
-GO
-COMMIT</programlisting>
-
-			<para>
-				As the complete script does <emphasis role="bold">not</emphasis> end with the
-				<literal>GO</literal> keyword, it is not recognized by &wb-productname;. In this case
-				the whole script will be send to the server because no (known) delimiter is used
-				at all.
-			</para>
 
 			<para>
 				You can run any statement that is valid for the current DBMS. If
@@ -211,9 +179,7 @@ COMMIT</programlisting>
 			<para>
 				To execute the statement in which the cursor is currently
 				located use <keycap>Ctrl-Enter</keycap>. The current statement is defined as the text
-				between the previous SQL delimiter and the next SQL delimiter. The
-				delimiter is not necessarily a semicolon. The delimiter can
-				be configured in the <link linkend="options">system preferences</link>.
+				between the previous SQL delimiter and the next SQL delimiter. 
 			</para>
 
 			<para>
@@ -222,8 +188,8 @@ COMMIT</programlisting>
 			</para>
 		</section>
 
-		<section id="execute-ddl" xreflabel="Executing DDL Statements">
-			<title>Executing DDL Statements</title>
+		<section id="understand-alternate-delim">
+			<title>Understanding the alternate delimiter</title>
 
 			<para>
 				&wb-productname; will send every statement to the backend DBMS, so
@@ -259,15 +225,18 @@ END;</programlisting>
 
 			<para>
 				The solution is to terminate the script with a character
-				sequence called "<xref linkend="options-alternate-delimiter"/>".
-				The value of this sequence can be configured in the <link linkend="options">options dialog</link>.
-				The default is <emphasis role="bold">./</emphasis> (a dot followed by a slash).
+				sequence called the <link linkend="options-alternate-delimiter">alternate delimiter</link>".
+				The value of this sequence can be configured in the <link linkend="options">options dialog</link>
+				as a global default, or per connection profile (so you can use different alternate 
+				delimiters for different database systems).
+				The default is the forward slash <emphasis role="bold">/</emphasis> defined as a single
+				line delimiter.
 			</para>
 
 			<para>
 				If a SQL statement is terminated with the alternate delimiter,
 				that delimiter is used instead of a semicolon. This way the semicolons embedded in
-				the <literal>CREATE PROCEDURE</literal> script will be sent correctly to the backend
+				<literal>CREATE PROCEDURE</literal> statements will be sent correctly to the backend
 				DBMS.
 			</para>
 
@@ -279,11 +248,12 @@ BEGIN
   SELECT max(col1) INTO result FROM sometable;
   RETURN result;
 END;
-./</programlisting>
+/</programlisting>
 
 			<para>
-				Note the trailing <literal>./</literal> at the end in order to "turn on" the
-				use of the alternate delimiter.
+				Note the trailing forward slash (<literal>/</literal>) at the end in order to "turn on" the
+				use of the alternate delimiter. If you run scripts with embedded semicolons and you get
+				an error, please verify the setting for your alternate delimiter.
 			</para>
 
 			<para id="alternate-delimiter-usage"><emphasis role="bold">When is the alternate delimiter used?</emphasis></para>
@@ -546,7 +516,7 @@ VALUES
 			<informaltable frame="all">
 				
 				<tgroup cols="2" align="left">
-					<colspec colname="c1" colwidth="2cm" />
+					<colspec colname="c1" colwidth="3.8cm" />
 					<colspec colname="c2" />
 						<thead>
 							<row>
@@ -872,51 +842,140 @@ Done.</programlisting>
 		
 		<para>
 			You can either copy all the data, or only selected rows to the clipboard. 
-			When you select the menu item while holding down the <keycap>Control</keycap> key
+			When you select the menu item while holding down the <keycap>Ctrl</keycap> key
 			you will be able to select the columns that should be part of the data to be copied.
 		</para>
 	</section>
-    
+
+	<section id="sorting-data">
+		<title>Sorting the result</title>
+		<para>
+			The result will be displayed in the order returned by the DBMS (i.e.
+			if you use an <literal>ORDER BY</literal> in your <literal>SELECT</literal>
+			the display will be displayed as sorted by the DBMS).
+			You can change the sorting of the displayed data by clicking on the header
+			of the column that should be used for sorting. Initially the data will be
+			sorted ascending (lower values at the top). If you click on the column again
+			the sort order will be reversed. The sort order will be indicated by a little
+			triangle in the column header. If the triangle points upward the data is sorted
+			ascending, if it points downward the data is sorted descending.
+			Clicking on a column will remove any previous sorting (including the secondary 
+			columns, see below) and apply the new sorting.
+		</para>
+		<para>
+			If you want to sort by more than one column, hold down the <keycap>Ctrl</keycap> key
+			will clicking on the header. The initial sort order is ascending for that column.
+			To change the sort order hold down the <keycap>Ctrl</keycap> key and click on the column
+			header again. The sort order for all "secondary" sort columns will be indicated
+			with a slightly smaller triangle than the one for the primary sort column.
+		</para>
+		<para>
+			To define a different secondary sort column, you first have to remove
+			the current secondary column. This can be done by holding down the <keycap>Shift</keycap> key 
+			and clicking on the secondary column again. Note that the data will not be resorted. Once you 
+			have removed the secondary column, you can define a different secondary sort column.
+		</para>
+	</section>	
+	
 	<section id="filter-data">
 		<title>Filtering the result</title>
 		
 		<para>
 			Once the data has been retrieved from the Server it can be filtered
-			with the need to re-retrieve the data.
+			with the need to re-retrieve the data. You can define the filter in two
+			ways: either enter column and their filter values manually, or create
+			a filter from the currently selected values in the result set.
 		</para>
 		
-		<para>
-			To define a filter, click on the (<literal>Filter</literal> <guiicon><inlinegraphic fileref="@IMAGE_DIR@/filter16.gif" format="GIF"/></guiicon>)
-			button in the toolbar or select <menuchoice><guimenu>Data</guimenu><guimenuitem>Filter data</guimenuitem></menuchoice>.
-			A dialog will appear where you can define a filter for the current result set. Each line
-			in the filter dialog defines an expression that will be applied to the column selected
-			in the first dropdown. If you select <literal>*</literal> for the column, the filter
-			condition will be applied to all columns of the result set.
-		</para>
-		
-		<para>
-			To add a multi-column expression, press the <literal>More</literal> button, to create
-			a new line. To remove a column expression from the filter, click the <literal>Remove</literal> 
-			(<guiicon><inlinegraphic fileref="@IMAGE_DIR@/Remove16.gif" format="GIF"/></guiicon>) button.
-			For character based column data, you can select to ignore the case of the column's data
-			when applying the expression, i.e. when <literal>Ignore case</literal> is selected, the
-			expression <literal>'NAME = arthur'</literal> will match the column value '<literal>Arthur</literal>', 
-			and '<literal>ARTHUR</literal>'.
-		</para>
-		<para>
-			By default, the column expressions are combined with an <literal>OR</literal>, i.e. 
-			that a row will be displayed if at least one of the column expressions evaluates 
-			to true. If you want to view only rows where <emphasis role="bold">all</emphasis>
-			column expressions must match, select the <literal>AND</literal> radio button
-			at the top of the dialog.
-		</para>
+		<section id="filter-manual">
+			<title>Defining a filter manually</title>
+			
+			<para>
+				To define a filter, click on the <literal>Filter</literal> button (<guiicon><inlinegraphic fileref="@IMAGE_DIR@/filter16.gif" format="GIF"/></guiicon>)
+				in the toolbar or select <menuchoice><guimenu>Data</guimenu><guimenuitem>Filter data</guimenuitem></menuchoice>.
+				A dialog will appear where you can define a filter for the current result set. Each line
+				in the filter dialog defines an expression that will be applied to the column selected
+				in the first dropdown. If you select <literal>*</literal> for the column, the filter
+				condition will be applied to all columns of the result set.
+			</para>
 
-		<para>
-			Once you have saved a filter to an external file, this filter will be available
-			in the pick list, next to the filter icon. The list will show the last filters
-			that were saved. The number of items displayed in this drop down can be 
-			controlled in the <link linkend="filter-picklist-size">settings file</link>.
-		</para>
+			<para>
+				To add a multi-column expression, press the <guibutton>More</guibutton> button, to create
+				a new line. To remove a column expression from the filter, click the <literal>Remove</literal> 
+				(<guiicon><inlinegraphic fileref="@IMAGE_DIR@/Remove16.gif" format="GIF"/></guiicon>) button.
+				For character based column data, you can select to ignore the case of the column's data
+				when applying the expression, i.e. when <literal>Ignore case</literal> is selected, the
+				expression <literal>'NAME = arthur'</literal> will match the column value '<literal>Arthur</literal>', 
+				and '<literal>ARTHUR</literal>'.
+			</para>
+			<para>
+				By default, the column expressions are combined with an <literal>OR</literal>, i.e. 
+				that a row will be displayed if at least one of the column expressions evaluates 
+				to true. If you want to view only rows where <emphasis role="bold">all</emphasis>
+				column expressions must match, select the <literal>AND</literal> radio button
+				at the top of the dialog.
+			</para>
+
+			<para>
+				Once you have saved a filter to an external file, this filter will be available
+				in the pick list, next to the filter icon. The list will show the last filters
+				that were saved. The number of items displayed in this drop down can be 
+				controlled in the <link linkend="filter-picklist-size">settings file</link>.
+			</para>
+			
+		</section>
+		
+		<section id="filter-quick-filter">
+			<title>Defining a filter from the selection</title>
+			
+			<para>
+				You can also quickly filter the data based on the value(s) of the currenlty
+				selected column(s). To apply the filter, select the column values by which
+				you want to filter then click on the <literal>Quickfilter</literal> button 
+				(<guiicon><inlinegraphic fileref="@IMAGE_DIR@/colfilter16.gif" format="GIF"/></guiicon>) 
+				in the toolbar or select 
+				<menuchoice><guimenu>Data</guimenu><guimenuitem>Filter by value</guimenuitem></menuchoice>
+				from the menu bar. 
+			</para>
+
+			<para>
+				Using the <keycap>Alt</keycap> key you can select individual columns of one or
+				more rows. Together with the <keycap>Ctrl</keycap> key you can select e.g. the first, 
+				third and fourth column. You can also select the e.g. second column of the first, second
+				and fifth row.
+			</para>
+			
+			<para>
+				Whether the quick filter is available depends on the selected rows 
+				and columns. It will be enabled when:
+				<itemizedlist columns="1">
+					<listitem>You have selected one or more columns in a single row</listitem>
+					<listitem>You have selected one column in multiple rows</listitem>
+				</itemizedlist>
+			</para>
+			
+			<para>
+				If only a single row is selected, the quick filter will use
+				the values of the selected columns combined with <literal>AND</literal> to
+				define the filter (e.g. username = 'Bob' AND job = 'Clerk'). Which columns 
+				are used depends on the way you select the row and columns. 
+				If the whole row in the result is selected, the quick filter will use the 
+				value of the focused column (the one with the yellow rectangle), otherwise
+				the individually selected columns will be used.
+			</para>
+			
+			<para>
+				If you select a single column in multiple rows, this will 
+				create a filter for that column, but with the values will be combined with 
+				<literal>OR</literal> (e.g. name = 'Dent' OR name = 'Prefect'). 
+				The quick filter will not be available if you select more than one column in 
+				multiple rows.
+			</para>
+			<para>
+				Once you have applied a quick filter, you can use the regular filter definition
+				dialog to check the definition of the filter or to further modify it.
+			</para>
+		</section>
 		
 	</section>
     

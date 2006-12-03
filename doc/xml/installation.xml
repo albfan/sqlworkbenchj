@@ -516,6 +516,19 @@ another_variable=24</programlisting>
 							is not specified, the default workspace (<literal>Default.wksp</literal>) will be loaded.
 							</entry>
 						</row>
+						
+						<row>
+							<entry>-altDelim</entry>
+							<entry>
+								The <link linkend="">alternate delimiter</link> to be used for this connection. 
+								To define a single line delimiter append the characters ;nl to the parameter value:
+								e.g. <literal>-altDelimiter=GO;nl</literal> to define a SQL Server like GO as the 
+								alternate delimiter. Note that when running in batchmode you can override 
+								the delimiter completely by specifying the <literal>-delimiter</literal>
+								switch. 
+							</entry>
+						</row>
+						
 					</tbody>
 				</tgroup>
 

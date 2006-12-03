@@ -70,19 +70,19 @@ public class StringUtilTest
 	{
 		try
 		{
-			StringBuffer b = new StringBuffer("bla");
+			StringBuilder b = new StringBuilder("bla");
 			StringUtil.trimTrailingWhitespace(b);
 			assertEquals("Buffer was changed", "bla", b.toString());
 			
-			b = new StringBuffer("bla bla ");
+			b = new StringBuilder("bla bla ");
 			StringUtil.trimTrailingWhitespace(b);
 			assertEquals("Whitespace not removed", "bla bla", b.toString());
 
-			b = new StringBuffer("bla bla \t");
+			b = new StringBuilder("bla bla \t");
 			StringUtil.trimTrailingWhitespace(b);
 			assertEquals("Whitespace not removed", "bla bla", b.toString());
 			
-			b = new StringBuffer("bla bla \t\n\r  \t");
+			b = new StringBuilder("bla bla \t\n\r  \t");
 			StringUtil.trimTrailingWhitespace(b);
 			assertEquals("Whitespace not removed", "bla bla", b.toString());
 			

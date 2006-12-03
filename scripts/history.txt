@@ -1,6 +1,26 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
-
+Enh:  (91.1) The alternate delimiter can now be defined for each profile. If 
+      one is defined in the profile, this will overwrite the globally defined
+      alternate delimiter. Additionally an alternate delimiter can now be 
+      defined as "single line", which means that it has to occur as the only 
+      text on a line in order to be recognized.
+Enh:  (91.1) Delimiter and alternate Delimiter can now be specified in batch mode
+      as well. The parameter -altDelimiter will only have an effect if a 
+      profile-less connection is used (basically defining the alternate 
+      delimiter for the temporary profile)
+      The argument -delimiter overrides the default delimiter and will turn
+      off the usage of an alternate delimiter. This can be used if the scripts
+      are not processed in memory but still use a non-standard delimiter
+      (Similar to the -delimiter argument of the WbInclude command). To define
+      a single line delimiter append the ;nl to the delimiter definition. E.g.
+      -delimter=/;nl will define the forward slash as the delimiter but 
+      only if it's the only character in a line. -delimiter=GO;nl will define
+      a MS SQL Server compatible delimiter. 
+      The additional automatic detection of the GO delimiter has been removed. 
+      If you use GO as the delimiter, please change your profiles to use 
+      that as the delimiter.
+      
 Build 91, 27.11.2006
 --------------------
 Enh:  (90.8) Added support for H2 Database Engine

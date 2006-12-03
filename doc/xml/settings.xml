@@ -168,6 +168,21 @@
 			<para>Default value: empty, the Java runtime default is used</para>
 		</section>
 		
+		<section id="editor-history-text-size">
+			<title>Limitting size of the text put into the history</title>
+			<para>Property: <literal>workbench.sql.history.maxtextlength</literal></para>
+			<para>
+				When you execute a SQL statement in the editor, the current content of the
+				editor is put into the history buffer. If you are editing large scripts, this 
+				can lead to memory problems. This property controls the max. size of the 
+				editor text that is put into the history. 
+			</para>
+			<para>
+				If the current editor text is bigger than the size defined in this property
+				the text is not put into the history. 
+			</para>
+			<para>Default value: 10485760 (10MB)</para>
+		</section>
 	</section>
 	
 	<section id="auto-completion">
