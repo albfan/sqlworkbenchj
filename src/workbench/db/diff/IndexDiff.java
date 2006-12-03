@@ -12,7 +12,10 @@
 package workbench.db.diff;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import workbench.db.IndexDefinition;
 import workbench.db.report.IndexReporter;
@@ -29,15 +32,15 @@ public class IndexDiff
 {
 	public static final String TAG_MODIFY_INDEX = "modify-index";
 	public static final String TAG_ADD_INDEX = "add-index";
-	private IndexDefinition[] reference;
-	private IndexDefinition[] target;
+	private Collection<IndexDefinition> reference;
+	private Collection<IndexDefinition> target;
 	private TagWriter writer;
 	private StrBuffer indent;
 	
-	public IndexDiff(IndexDefinition[] ref, IndexDefinition[] targ)
+	public IndexDiff(Collection<IndexDefinition> ref, Collection<IndexDefinition> targ)
 	{
-		this.reference = (ref == null ? new IndexDefinition[0] : ref);
-		this.target = (targ == null ? new IndexDefinition[0] : targ);
+		this.reference = (ref == null ? Collections.EMPTY_LIST : ref);
+		this.target = (targ == null ? Collections.EMPTY_LIST : targ);
 	}
 	
 	public void setTagWriter(TagWriter w) { this.writer = w; }
@@ -51,8 +54,8 @@ public class IndexDiff
 	{
 		if (this.writer == null) this.writer = new TagWriter();
 		StrBuffer result = new StrBuffer();
-		List indexToAdd = new ArrayList();
-		int count = this.reference.length;
+		List<IndexDefinition> indexToAdd = new LinkedList<IndexDefinition>();
+		int count = this.reference.size();
 		
 		StrBuffer myindent = new StrBuffer(indent);
 		myindent.append("  ");
@@ -60,18 +63,18 @@ public class IndexDiff
 		StrBuffer idxIndent = new StrBuffer(myindent);
 		idxIndent.append("  ");
 		
-		for (int i=0; i < count; i++)
+		for (IndexDefinition refIndex : reference)
 		{
-			IndexDefinition ind = this.findIndex(reference[i].getExpression());
+			IndexDefinition ind = this.findIndex(refIndex.getExpression());
 			if (ind == null)
 			{
-				indexToAdd.add(reference[i]);
+				indexToAdd.add(refIndex);
 			}
 			else
 			{
-				boolean uniqueDiff = ind.isUnique() != reference[i].isUnique();
-				boolean pkDiff = ind.isPrimaryKeyIndex() != reference[i].isPrimaryKeyIndex();
-				boolean typeDiff = !(ind.getIndexType().equals(reference[i].getIndexType()));
+				boolean uniqueDiff = ind.isUnique() != refIndex.isUnique();
+				boolean pkDiff = ind.isPrimaryKeyIndex() != refIndex.isPrimaryKeyIndex();
+				boolean typeDiff = !(ind.getIndexType().equals(refIndex.getIndexType()));
 				
 				if (uniqueDiff || pkDiff || typeDiff)
 				{
@@ -79,15 +82,15 @@ public class IndexDiff
 					result.append('\n');
 					if (uniqueDiff)
 					{
-						writer.appendTag(result, idxIndent, IndexReporter.TAG_INDEX_UNIQUE, reference[i].isUnique());
+						writer.appendTag(result, idxIndent, IndexReporter.TAG_INDEX_UNIQUE, refIndex.isUnique());
 					}
 					if (pkDiff)
 					{
-						writer.appendTag(result, idxIndent, IndexReporter.TAG_INDEX_PK, reference[i].isPrimaryKeyIndex());
+						writer.appendTag(result, idxIndent, IndexReporter.TAG_INDEX_PK, refIndex.isPrimaryKeyIndex());
 					}	
 					if (pkDiff)
 					{
-						writer.appendTag(result, idxIndent, IndexReporter.TAG_INDEX_TYPE, reference[i].getIndexType());
+						writer.appendTag(result, idxIndent, IndexReporter.TAG_INDEX_TYPE, refIndex.getIndexType());
 					}	
 					writer.appendCloseTag(result, myindent, TAG_MODIFY_INDEX);
 				}
@@ -96,12 +99,11 @@ public class IndexDiff
 		
 		if (indexToAdd.size() > 0)
 		{
-			Iterator itr = indexToAdd.iterator();
 			writer.appendOpenTag(result, myindent, TAG_ADD_INDEX);
 			result.append('\n');
-			while (itr.hasNext())
+			for (IndexDefinition idx : indexToAdd)
 			{
-				IndexReporter rep = new IndexReporter((IndexDefinition)itr.next());
+				IndexReporter rep = new IndexReporter(idx);
 				rep.appendXml(result, idxIndent);
 			}
 			writer.appendCloseTag(result, myindent, TAG_ADD_INDEX);
@@ -111,9 +113,9 @@ public class IndexDiff
 	
 	private IndexDefinition findIndex(String expr)
 	{
-		for (int i=0; i < this.target.length; i++)
+		for (IndexDefinition idx : target)
 		{
-			if (target[i].equals(expr)) return target[i];
+			if (idx.equals(expr)) return idx;
 		}
 		return null;
 	}

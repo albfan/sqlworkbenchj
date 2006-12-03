@@ -124,6 +124,8 @@ public class ConnectionProfile
 	
 	public DelimiterDefinition getAlternateDelimiter()
 	{
+		if (this.alternateDelimiter == null) return null;
+		if (this.alternateDelimiter.isEmpty()) return null;
 		return this.alternateDelimiter;
 	}
 	

@@ -42,7 +42,7 @@ public class ImportFileHandler
 	private boolean isZip;
 	private ZipFile mainArchive;
 	private ZipFile attachments;
-	private List attachmentEntries;
+	private List<ZipEntry> attachmentEntries;
 
 	public ImportFileHandler()
 	{
@@ -108,9 +108,9 @@ public class ImportFileHandler
 			this.attachments = new ZipFile(attFile);
 			Enumeration entries = this.attachments.entries();
 			// For performance reasons we are storing the attachment names
-			// in our own set, as I'm not 100% if ZipFile will handle 
+			// in our own set, as I'm not 100% sure if ZipFile will handle 
 			// lots of getEntry()'s efficiently
-			this.attachmentEntries = new LinkedList();
+			this.attachmentEntries = new LinkedList<ZipEntry>();
 			while (entries.hasMoreElements())
 			{
 				ZipEntry entry = (ZipEntry)entries.nextElement();

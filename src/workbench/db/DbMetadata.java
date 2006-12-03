@@ -1716,83 +1716,6 @@ public class DbMetadata
 		return this.procedureReader.getProcedureColumns(aCatalog, aSchema, aProcname);
 	}
 
-	/**
-	 * Construct the SQL verb for the given SQL datatype.
-	 * This is used when re-recreating the source for a table
-	 */
-	public static String getSqlTypeDisplay(String aTypeName, int sqlType, int size, int digits)
-	{
-		String display = aTypeName;
-
-		switch (sqlType)
-		{
-			case Types.VARCHAR:
-			case Types.CHAR:
-				if ("text".equals(aTypeName) && size == Integer.MAX_VALUE) return aTypeName;
-				if (size > 0) 
-				{
-					display = aTypeName + "(" + size + ")";
-				}
-				else
-				{
-					display = aTypeName;
-				}
-				break;
-			case Types.DECIMAL:
-			case Types.DOUBLE:
-			case Types.NUMERIC:
-			case Types.FLOAT:
-				if (aTypeName.equalsIgnoreCase("money")) // SQL Server
-				{
-					display = aTypeName;
-				}
-				else if ((aTypeName.indexOf('(') == -1))
-				{
-					if (digits > 0 && size > 0)
-					{
-						display = aTypeName + "(" + size + "," + digits + ")";
-					}
-					else if (size <= 0 && digits > 0)
-					{
-						display = aTypeName + "(" + digits + ")";
-					}
-					else if (size > 0 && digits <= 0)
-					{
-						display = aTypeName + "(" + size + ")";
-					}
-//					else if (size > 0 && ("NUMBER".equals(aTypeName) || "FLOAT".equals(aTypeName))) // Oracle specific
-//					{
-//						display = aTypeName + "(" + size + ")";
-//					}
-				}
-				break;
-
-			case Types.OTHER:
-				// Oracle specific datatypes
-				if ("NVARCHAR2".equalsIgnoreCase(aTypeName))
-				{
-					display = aTypeName + "(" + size + ")";
-				}
-				else if ("NCHAR".equalsIgnoreCase(aTypeName))
-				{
-					display = aTypeName + "(" + size + ")";
-				}
-				else if ("UROWID".equalsIgnoreCase(aTypeName))
-				{
-					display = aTypeName + "(" + size + ")";
-				}
-				else if ("RAW".equalsIgnoreCase(aTypeName))
-				{
-					display = aTypeName + "(" + size + ")";
-				}
-				break;
-			default:
-				display = aTypeName;
-				break;
-		}
-		return display;
-	}
-
 	public boolean procedureExists(ProcedureDefinition def)
 	{
 		return procedureReader.procedureExists(def.getCatalog(), def.getSchema(), def.getProcedureName(), def.getResultType());
@@ -1956,21 +1879,6 @@ public class DbMetadata
 		if (this.oracleMetaData != null) this.oracleMetaData.columnsProcessed();
 	}
 
-	/**
-	 *	Return a list of ColumnIdentifier's for the given table
-	 */
-	public List getTableColumns(TableIdentifier aTable)
-		throws SQLException
-	{
-		ColumnIdentifier[] cols = getColumnIdentifiers(aTable);
-		List result = new ArrayList(cols.length);
-		for (int i=0; i < cols.length; i++)
-		{
-			result.add(cols[i]);
-		}
-		return result;
-	}
-
 	public int fixColumnType(int type)
 	{
 		if (!this.fixOracleDateBug) return type;
@@ -1978,21 +1886,22 @@ public class DbMetadata
 		return type;
 	}
 	
-	public ColumnIdentifier[] getColumnIdentifiers(TableIdentifier table)
+	/**
+	 * Return the column list for the given table.
+	 * @param table the table for which to retrieve the column definition
+	 * @see #getTableDefinition(String, String, String, String, boolean)
+	 */
+	public List<ColumnIdentifier> getTableColumns(TableIdentifier table)
 		throws SQLException
 	{
-		String type = table.getType();
-		//if (type == null) type = tableTypeName;
-		TableIdentifier tbl = table.createCopy();
-		tbl.adjustCase(this.dbConnection);
-		DataStore ds = this.getTableDefinition(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), type, false);
+		DataStore ds = this.getTableDefinition(table);
 		return createColumnIdentifiers(ds);
 	}
-
-	private ColumnIdentifier[] createColumnIdentifiers(DataStore ds)
+	
+	private List<ColumnIdentifier> createColumnIdentifiers(DataStore ds)
 	{
 		int count = ds.getRowCount();
-		ColumnIdentifier[] result = new ColumnIdentifier[count];
+		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(count);
 		for (int i=0; i < count; i++)
 		{
 			String col = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
@@ -2013,7 +1922,7 @@ public class DbMetadata
 			ci.setComment(comment);
 			ci.setDefaultValue(def);
 			ci.setPosition(position);
-			result[i] = ci;
+			result.add(ci);
 		}
 		return result;
 	}
@@ -2066,7 +1975,7 @@ public class DbMetadata
 	public DataStore getTableDefinition(TableIdentifier aTable)
 		throws SQLException
 	{
-		return getTableDefinition(aTable, true);
+		return getTableDefinition(aTable, !aTable.getNeverAdjustCase());
 	}
 	
 	/**
@@ -2096,6 +2005,7 @@ public class DbMetadata
 		DataStore ds = new DataStore(TABLE_DEFINITION_COLS, types, sizes);
 		return ds;
 	}
+	
 	/** Return a DataStore containing the definition of the given table.
 	 * @param aCatalog The catalog in which the table is defined. This should be null if the DBMS does not support catalogs
 	 * @param aSchema The schema in which the table is defined. This should be null if the DBMS does not support schemas
@@ -2230,12 +2140,12 @@ public class DbMetadata
 					display = this.oracleMetaData.getVarcharType(typeName, size, byteOrChar);
 					if (display == null)
 					{
-						display = getSqlTypeDisplay(typeName, sqlType, size, digits);
+						display = SqlUtil.getSqlTypeDisplay(typeName, sqlType, size, digits);
 					}
 				}
 				else
 				{
-					display = getSqlTypeDisplay(typeName, sqlType, size, digits);
+					display = SqlUtil.getSqlTypeDisplay(typeName, sqlType, size, digits);
 				}
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_COL_NAME, colName);
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE, display);
@@ -2288,11 +2198,9 @@ public class DbMetadata
 			String map = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".indextypes", null);
 			if (map != null)
 			{
-				List entries = StringUtil.stringToList(map, ";", true, true);
-				Iterator itr = entries.iterator();
-				while (itr.hasNext())
+				List<String> entries = StringUtil.stringToList(map, ";", true, true);
+				for (String entry : entries)
 				{
-					String entry = (String)itr.next();
 					String[] mapping = entry.split(",");
 					if (mapping.length != 2) continue;
 					int value = StringUtil.getIntValue(mapping[0], -42);
@@ -2315,33 +2223,25 @@ public class DbMetadata
 		return dbmsType;
 	}
 	
-	public IndexDefinition[] getIndexList(TableIdentifier tbl)
-	{
-		Collection l = this.getTableIndexList(tbl);
-		int count = l.size();
-		IndexDefinition[] result = new IndexDefinition[count];
-		Iterator itr = l.iterator();
-		int i = 0;
-		while (itr.hasNext())
-		{
-			result[i] = (IndexDefinition)itr.next();
-			i++;
-		}
-		return result;
-	}
 	
+	/**
+	 * Return the index information for a table as a DataStore. This is 
+	 * delegated to getTableIndexList() and from the resulting collection
+	 * the datastore is created.
+	 * 
+	 * @param table the table to get the indexes for
+	 * @see #getTableIndexList(TableIdentifier)
+	 */
 	public DataStore getTableIndexInformation(TableIdentifier table)
 	{
 		String[] cols = {"INDEX_NAME", "UNIQUE", "PK", "DEFINITION", "TYPE"};
 		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		final int sizes[] =   {30, 7, 6, 40, 10};
 		DataStore idxData = new DataStore(cols, types, sizes);
-		Collection indexes = getTableIndexList(table);
-		Iterator itr = indexes.iterator();
-		while (itr.hasNext())
+		Collection<IndexDefinition> indexes = getTableIndexList(table);
+		for (IndexDefinition idx : indexes)
 		{
 			int row = idxData.addRow();
-			IndexDefinition idx = (IndexDefinition)itr.next();
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME, idx.getName());
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG, (idx.isUnique() ? "YES" : "NO"));
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG, (idx.isPrimaryKeyIndex() ? "YES" : "NO"));
@@ -2353,18 +2253,18 @@ public class DbMetadata
 	}
 	
 	/**
-	 * Returns a list of IndexDefinition entries
+	 * Returns a list of indexes defined for the given table
+	 * @param table the table to get the indexes for
 	 */
-	public Collection getTableIndexList(TableIdentifier table)
+	public Collection<IndexDefinition> getTableIndexList(TableIdentifier table)
 	{
-		
 		ResultSet idxRs = null;
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(this.dbConnection);
 		
 		// This will map an indexname to an IndexDefinition object
 		// getIndexInfo() returns one row for each column
-		HashMap defs = new HashMap();
+		HashMap<String, IndexDefinition> defs = new HashMap<String, IndexDefinition>();
 		
 		try
 		{
@@ -2406,7 +2306,7 @@ public class DbMetadata
 				int type = idxRs.getInt("TYPE");
 				
 				
-				IndexDefinition def = (IndexDefinition)defs.get(indexName);
+				IndexDefinition def = defs.get(indexName);
 				if (def == null)
 				{
 					def = new IndexDefinition(indexName, null);
@@ -3314,8 +3214,7 @@ public class DbMetadata
 	public String getTableSource(TableIdentifier table, boolean includeDrop, boolean includeFk)
 		throws SQLException
 	{
-		DataStore tableDef = this.getTableDefinition(table, !table.getNeverAdjustCase());
-		ColumnIdentifier[] cols = createColumnIdentifiers(tableDef);
+		List<ColumnIdentifier> cols = getTableColumns(table);
 		DataStore index = this.getTableIndexInformation(table);
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(this.dbConnection);
@@ -3325,43 +3224,38 @@ public class DbMetadata
 		return source;
 	}
 
-	public String getTableSource(TableIdentifier table, DataStore aTableDef, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop)
-	{
-		ColumnIdentifier[] cols = createColumnIdentifiers(aTableDef);
-		return getTableSource(table, cols, aIndexDef, aFkDef, includeDrop, null);
-	}
-
-	public String getTableSource(TableIdentifier table, ColumnIdentifier[] columns, String tableNameToUse)
+	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, String tableNameToUse)
 	{
 		return getTableSource(table, columns, null, null, false, tableNameToUse, true);
 	}
 
-	public String getTableSource(TableIdentifier table, ColumnIdentifier[] columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse)
+	public String getTableSource(TableIdentifier table, DataStore columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse)
 	{
-		return getTableSource(table, columns, aIndexDef, aFkDef, includeDrop, tableNameToUse, true);
+		List<ColumnIdentifier> cols = this.createColumnIdentifiers(columns);
+		return getTableSource(table, cols, aIndexDef, aFkDef, includeDrop, tableNameToUse, true);
 	}
 	
-	public String getTableSource(TableIdentifier table, ColumnIdentifier[] columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
+	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
 	{
-		if (columns == null || columns.length == 0) return StringUtil.EMPTY_STRING;
+		if (columns == null || columns.size() == 0) return StringUtil.EMPTY_STRING;
 
-		StrBuffer result = new StrBuffer();
+		StringBuilder result = new StringBuilder();
 
 		Map columnConstraints = this.getColumnConstraints(table);
 
 		result.append(generateCreateObject(includeDrop, "TABLE", (tableNameToUse == null ? table.getTableName() : tableNameToUse)));
 		result.append("\n(\n");
-		int count = columns.length;
+
 		//StringBuilder pkCols = new StringBuilder(1000);
 		List pkCols = new LinkedList();
 		int maxColLength = 0;
 		int maxTypeLength = 0;
 
 		// calculate the longest column name, so that the display can be formatted
-		for (int i=0; i < count; i++)
+		for (ColumnIdentifier column : columns)
 		{
-			String colName = quoteObjectname(columns[i].getColumnName());
-			String type = columns[i].getDbmsType();
+			String colName = quoteObjectname(column.getColumnName());
+			String type = column.getDbmsType();
 			maxColLength = Math.max(maxColLength, colName.length());
 			maxTypeLength = Math.max(maxTypeLength, type.length());
 		}
@@ -3375,16 +3269,18 @@ public class DbMetadata
 		
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
 		
-		for (int i=0; i < count; i++)
+		Iterator<ColumnIdentifier> itr = columns.iterator();
+		while (itr.hasNext())
 		{
-			String colName = columns[i].getColumnName();
+			ColumnIdentifier column = itr.next();
+			String colName = column.getColumnName();
 			String quotedColName = quoteObjectname(colName);
-			String type = columns[i].getDbmsType();
-			String def = columns[i].getDefaultValue();
+			String type = column.getDbmsType();
+			String def = column.getDefaultValue();
 
 			result.append("   ");
 			result.append(quotedColName);
-			if (columns[i].isPkColumn() && (!this.isFirstSql || this.isFirstSql && !type.equals("sequence")))
+			if (column.isPkColumn() && (!this.isFirstSql || this.isFirstSql && !type.equals("sequence")))
 			{
 				pkCols.add(colName.trim());
 			}
@@ -3396,8 +3292,8 @@ public class DbMetadata
 			// the datatype. If yes, we fill the line with spaces
 			// to align the keywords properly
 			if ( !StringUtil.isEmptyString(def) || 
-				   (!columns[i].isNullable()) ||
-				   (columns[i].isNullable() && this.useNullKeyword)
+				   (!column.isNullable()) ||
+				   (column.isNullable() && this.useNullKeyword)
 					)
 			{
 				for (int k=0; k < maxTypeLength - type.length(); k++) result.append(' ');
@@ -3415,7 +3311,7 @@ public class DbMetadata
 				// with FirstSQL a column of type "sequence" is always the primary key
 				result.append(" PRIMARY KEY");
 			}
-			else if (columns[i].isNullable())
+			else if (column.isNullable())
 			{
 				if (this.useNullKeyword)
 				{
@@ -3441,14 +3337,14 @@ public class DbMetadata
 				result.append(constraint);
 			}
 			
-			if (includeCommentInTableSource && !StringUtil.isEmptyString(columns[i].getComment()))
+			if (includeCommentInTableSource && !StringUtil.isEmptyString(column.getComment()))
 			{
 				result.append(" COMMENT '");
-				result.append(columns[i].getComment());
+				result.append(column.getComment());
 				result.append('\'');
 			}
 			
-			if (i < count - 1) result.append(',');
+			if (itr.hasNext()) result.append(',');
 			result.append(lineEnding);
 		}
 
@@ -3479,7 +3375,6 @@ public class DbMetadata
 
 		result.append(");" + lineEnding); // end of CREATE TABLE
 		
-		
 		if (!this.createInlineConstraints && pkCols.size() > 0)
 		{
 			String name = this.getPkIndexName(aIndexDef);
@@ -3492,23 +3387,23 @@ public class DbMetadata
 		result.append(indexSource);
 		if (!this.createInlineConstraints && includeFk) result.append(this.getFkSource(table.getTableName(), aFkDef, tableNameToUse));
 
-		String comments = this.getTableCommentSql(table);
-		if (comments != null && comments.length() > 0)
+		String tableComment = this.getTableCommentSql(table);
+		if (!StringUtil.isEmptyString(tableComment))
 		{
 			result.append(lineEnding);
-			result.append(comments);
+			result.append(tableComment);
 			result.append(lineEnding);
 		}
 
-		comments = this.getTableColumnCommentsSql(table, columns);
-		if (comments != null && comments.length() > 0)
+		StringBuilder colComments = this.getTableColumnCommentsSql(table, columns);
+		if (colComments != null && colComments.length() > 0)
 		{
 			result.append(lineEnding);
-			result.append(comments);
+			result.append(colComments);
 			result.append(lineEnding);
 		}
 
-		StrBuffer grants = this.getTableGrantSource(table);
+		StringBuilder grants = this.getTableGrantSource(table);
 		if (grants.length() > 0)
 		{
 			result.append(grants);
@@ -3625,16 +3520,15 @@ public class DbMetadata
 	 * Return the SQL that is needed to re-create the comment on the given columns.
 	 * The syntax to be used, can be configured in the ColumnCommentStatements.xml file.
 	 */
-	public String getTableColumnCommentsSql(TableIdentifier table, ColumnIdentifier[] columns)
+	public StringBuilder getTableColumnCommentsSql(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
 		String columnStatement = metaSqlMgr.getColumnCommentSql();
 		if (columnStatement == null || columnStatement.trim().length() == 0) return null;
-		StringBuilder result = new StringBuilder(500);
-		int cols = columns.length;
-		for (int i=0; i < cols; i ++)
+		StringBuilder result = new StringBuilder(columns.size() * 25);
+		for (ColumnIdentifier col : columns)
 		{
-			String column = columns[i].getColumnName();
-			String remark = columns[i].getComment();
+			String column = col.getColumnName();
+			String remark = col.getComment();
 			if (column == null || remark == null || remark.trim().length() == 0) continue;
 			String comment = columnStatement.replaceAll(MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
 			comment = comment.replaceAll(MetaDataSqlManager.COMMENT_COLUMN_PLACEHOLDER, column);
@@ -3642,7 +3536,7 @@ public class DbMetadata
 			result.append(comment);
 			result.append("\n");
 		}
-		return result.toString();
+		return result;
 	}
 
 	/**
@@ -3942,10 +3836,10 @@ public class DbMetadata
 	 *
 	 *	@return SQL script to GRANT access to the table.
 	 */
-	public StrBuffer getTableGrantSource(TableIdentifier table)
+	public StringBuilder getTableGrantSource(TableIdentifier table)
 	{
 		DataStore ds = this.getTableGrants(table);
-		StrBuffer result = new StrBuffer(200);
+		StringBuilder result = new StringBuilder(200);
 		int count = ds.getRowCount();
 
 		// as several grants to several users can be made, we need to collect them

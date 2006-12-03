@@ -560,8 +560,6 @@ public class TextFileParser
 		
 		setupFileHandler();
 		
-		String line;
-
 		if (!this.withHeader && this.sourceDir != null)
 		{
 			this.setColumns(this.getColumnsFromTargetTable());
@@ -592,6 +590,8 @@ public class TextFileParser
 			setupFileHandler();
 			in = this.fileHandler.getMainFileReader();
 		}
+		
+		String line = null;
 		
 		try
 		{
@@ -772,7 +772,7 @@ public class TextFileParser
 									rowData[targetIndex] = value;
 								}
 							}
-							else if (value != null && blobsAreFilenames && SqlUtil.isBlobType(colType) )
+							else if (blobsAreFilenames && value != null && SqlUtil.isBlobType(colType) )
 							{
 								File bfile = new File(value);
 								if (!bfile.isAbsolute())
@@ -881,10 +881,10 @@ public class TextFileParser
 	 *  If the input file does not contain a header row, the columns
 	 *  will be named Column1, Column2, ...
 	 */
-	public List getColumnsFromFile()
+	public List<ColumnIdentifier> getColumnsFromFile()
 	{
 		BufferedReader in = null;
-		List cols = new ArrayList();
+		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
 		try
 		{
 			// Make sure the file handler is initialized as this can be called from 
@@ -942,7 +942,7 @@ public class TextFileParser
 		this.setColumns(cols);
 	}
 	
-	private List getColumnsFromTargetTable()
+	private List<ColumnIdentifier> getColumnsFromTargetTable()
 		throws SQLException
 	{
 		TableIdentifier tbl = new TableIdentifier(this.targetSchema, this.tableName);

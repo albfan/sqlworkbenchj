@@ -61,5 +61,5 @@ public interface IndexReader
 	 * This can be used to e.g. retrieve additional index information
 	 * that can't be read with getIndexInfo()
 	 */
-	void processIndexList(TableIdentifier table, Collection indexDefinitions);
+	void processIndexList(TableIdentifier table, Collection<IndexDefinition> indexDefinitions);
 }

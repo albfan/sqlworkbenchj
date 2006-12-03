@@ -11,7 +11,6 @@
  */
 package workbench.db.importer;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -44,7 +43,6 @@ import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
-import workbench.util.ZipUtil;
 
 /**
  *
@@ -63,7 +61,7 @@ public class XmlDataFileParser
 	private int colCount;
 	private int realColCount;
 
-	private List columnsToImport;
+	private List<ColumnIdentifier> columnsToImport;
 	private ColumnIdentifier[] columns;
 	private String encoding = "UTF-8";
 
@@ -129,7 +127,7 @@ public class XmlDataFileParser
 		if (columnList != null && columnList.trim().length() > 0)
 		{
 			WbStringTokenizer tok = new WbStringTokenizer(columnList, ",");
-			this.columnsToImport = new ArrayList();
+			this.columnsToImport = new ArrayList<ColumnIdentifier>();
 			while (tok.hasMoreTokens())
 			{
 				String col = tok.nextToken();
@@ -240,7 +238,7 @@ public class XmlDataFileParser
 		this.tableName = aName;
 	}
 
-	public List getColumnsFromFile()
+	public List<ColumnIdentifier> getColumnsFromFile()
 	{
 		try
 		{
@@ -269,7 +267,6 @@ public class XmlDataFileParser
 		
 		XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(this.fileHandler);
 		this.columns = tableDef.getColumns();
-		//if (columns == null) throw new IllegalArgumentException("No valid table definition found");
 		this.colCount = this.columns.length;
 		this.tableNameFromFile = tableDef.getTableName();
 		this.warningAdded = new boolean[this.colCount];

@@ -26,6 +26,7 @@ import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.StatementFactory;
+import workbench.util.ArrayUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -208,7 +209,9 @@ public class SqlRowDataConverter
 			LogMgr.logError("SqlRowDataConverter.getStart()", "Cannot write create table without update table!",null);
 			return null;
 		}
-		ColumnIdentifier[] cols = this.metaData.getColumns();
+		
+		ColumnIdentifier[] colArray = this.metaData.getColumns();
+		List<ColumnIdentifier> cols = ArrayUtil.arrayToList(colArray);
 		DbMetadata db = this.originalConnection.getMetadata();
 		String source = db.getTableSource(updatetable, cols, (alternateUpdateTable == null ? updatetable.getTableName() : alternateUpdateTable.getTableName()));
 		StrBuffer createSql = new StrBuffer(source);

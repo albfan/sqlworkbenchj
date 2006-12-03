@@ -25,7 +25,7 @@ import java.util.Map;
 public class ArgumentParser
 {
 	private static final String ARG_PRESENT = "$__ARG_PRESENT__$";
-	private Map arguments = new HashMap();
+	private Map<String, String> arguments = new HashMap<String, String>();
 	private ArrayList unknownParameters = new ArrayList();
 	private int argCount = 0;
 	
@@ -122,10 +122,10 @@ public class ArgumentParser
 	
 	public void reset()
 	{
-		Iterator keys = this.arguments.keySet().iterator();
+		Iterator<String> keys = this.arguments.keySet().iterator();
 		while (keys.hasNext())
 		{
-			String key = (String)keys.next();
+			String key = keys.next();
 			this.arguments.put(key, null);
 		}
 		this.argCount = 0;
@@ -160,7 +160,7 @@ public class ArgumentParser
 	 */
 	public String getValue(String key)
 	{
-		String value = (String)this.arguments.get(key.toLowerCase());
+		String value = this.arguments.get(key.toLowerCase());
 		if (value == ARG_PRESENT) return null;
 		value = StringUtil.trimQuotes(value);
 		return value;

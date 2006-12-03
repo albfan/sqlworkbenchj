@@ -12,6 +12,7 @@
 package workbench.db.importer;
 import java.io.File;
 import java.util.List;
+import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.dialogs.dataimport.ImportOptions;
@@ -36,7 +37,7 @@ public class ProducerFactory
 	private XmlImportOptions xmlOptions;
 	private ImportOptions generalOptions;
 	private File inputFile;
-	private List inputColumns;
+	private List<ColumnIdentifier> inputColumns;
 	private TableIdentifier table;
 	private RowDataProducer producer;
 	private ImportFileParser fileParser;
@@ -154,7 +155,7 @@ public class ProducerFactory
 	/**
 	 *	Return the list of columns defined in the file
 	 */
-	public List getFileColumns()
+	public List<ColumnIdentifier> getFileColumns()
 	{
 		if (this.inputColumns == null)
 		{

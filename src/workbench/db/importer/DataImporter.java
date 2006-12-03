@@ -20,7 +20,6 @@ import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 
 import workbench.db.ColumnIdentifier;
@@ -111,7 +110,7 @@ public class DataImporter
 	private int[] columnMap = null;
 
 	private ColumnIdentifier[] targetColumns;
-	private List keyColumns;
+	private List<ColumnIdentifier> keyColumns;
 
 	private RowActionMonitor progressMonitor;
 	private boolean isRunning = false;
@@ -389,13 +388,12 @@ public class DataImporter
 	{
 		List cols = StringUtil.stringToList(aColumnList, ",");
 		int count = cols.size();
-		ArrayList keys = new ArrayList(count);
+		this.keyColumns = new LinkedList<ColumnIdentifier>();
 		for (int i=0; i < count; i++)
 		{
 			ColumnIdentifier col = new ColumnIdentifier((String)cols.get(i));
-			keys.add(col);
+			keyColumns.add(col);
 		}
-		this.setKeyColumns(keys);
 	}
 
 	/**
@@ -403,7 +401,7 @@ public class DataImporter
 	 * 	for update mode.
 	 * 	The list has to contain objects of type {@link workbench.db.ColumnIdentifier}
 	 */
-	public void setKeyColumns(List cols)
+	public void setKeyColumns(List<ColumnIdentifier> cols)
 	{
 		this.keyColumns = cols;
 	}
@@ -1215,8 +1213,17 @@ public class DataImporter
 		for (int i=0; i < this.colCount; i++)
 		{
 			ColumnIdentifier col = this.targetColumns[i];
-			int index = this.keyColumns.indexOf(col);
-			if (index < 0)
+			if (keyColumns.contains(col))
+			{
+				this.columnMap[i] = pkIndex;
+				if (pkAdded) where.append(" AND ");
+				else pkAdded = true;
+				where.append(col.getColumnName());
+				where.append(" = ?");
+				pkIndex ++;
+				pkCount ++;
+			}
+			else
 			{
 				this.columnMap[i] = colIndex;
 				if (colIndex > 0)
@@ -1226,16 +1233,6 @@ public class DataImporter
 				sql.append(col.getColumnName());
 				sql.append(" = ?");
 				colIndex ++;
-			}
-			else
-			{
-				this.columnMap[i] = pkIndex;
-				if (pkAdded) where.append(" AND ");
-				else pkAdded = true;
-				where.append(col.getColumnName());
-				where.append(" = ?");
-				pkIndex ++;
-				pkCount ++;
 			}
 		}
 		if (!pkAdded)
@@ -1307,14 +1304,13 @@ public class DataImporter
 	{
 		try
 		{
-			ColumnIdentifier cols[] = this.dbConn.getMetadata().getColumnIdentifiers(this.targetTable);
-			int count = cols.length;
-			this.keyColumns = new ArrayList();
-			for (int i=0; i < count; i++)
+			List<ColumnIdentifier> cols = this.dbConn.getMetadata().getTableColumns(this.targetTable);
+			this.keyColumns = new LinkedList<ColumnIdentifier>();
+			for (ColumnIdentifier col : cols)
 			{
-				if (cols[i].isPkColumn())
+				if (col.isPkColumn())
 				{
-					this.keyColumns.add(cols[i]);
+					this.keyColumns.add(col);
 				}
 			}
 		}

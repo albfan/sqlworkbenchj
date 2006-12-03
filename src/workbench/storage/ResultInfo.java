@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
@@ -72,7 +73,14 @@ public class ResultInfo
 	public ResultInfo(TableIdentifier table, WbConnection conn)
 		throws SQLException
 	{
-		this.columns = conn.getMetadata().getColumnIdentifiers(table);
+		List<ColumnIdentifier> cols = conn.getMetadata().getTableColumns(table);
+		this.columns = new ColumnIdentifier[cols.size()];
+		int i = 0;
+		for (ColumnIdentifier col : cols)
+		{
+			columns[i] = col;
+			i++;
+		}
 		this.colCount = this.columns.length;
 	}
 	
@@ -151,13 +159,13 @@ public class ResultInfo
 			}
 
 			col.setDecimalDigits(scale);
-			String dbmsType = DbMetadata.getSqlTypeDisplay(typename, col.getDataType(), prec, scale);; 
+			String dbmsType = SqlUtil.getSqlTypeDisplay(typename, col.getDataType(), prec, scale);; 
 			if (type == Types.VARCHAR)
 			{
 				// HSQL reports the VARCHAR size in displaySize()
 				if (sourceConnection != null && sourceConnection.getMetadata().reportsRealSizeAsDisplaySize())
 				{
-					dbmsType = DbMetadata.getSqlTypeDisplay(typename, col.getDataType(), size, 0);
+					dbmsType = SqlUtil.getSqlTypeDisplay(typename, col.getDataType(), size, 0);
 					col.setColumnSize(size);
 				}
 				else

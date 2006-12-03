@@ -66,7 +66,7 @@ public class BatchRunnerTest
 			writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect');");
 			writer.println("-- first row");
 			writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox');");
-			writer.println("-- make everything permanent");
+			writer.println("/* make everything permanent\nmore comments */");
 			writer.println("commit;");
 			writer.close();
 
@@ -129,7 +129,15 @@ public class BatchRunnerTest
 			writer.println("commit");
 			writer.println("/");
 			writer.close();			
-			parser.parse("-url='jdbc:hsqldb:" + util.getDbName() + ";shutdown=true' -altdelimiter='/;nl' -user=sa -driver=org.hsqldb.jdbcDriver -script='" + scriptFile.getAbsolutePath() + "'");
+			
+			File scriptFile2 = new File(util.getBaseDir(), "insert.sql");
+			PrintWriter writer2 = new PrintWriter(new FileWriter(scriptFile2));
+			writer2.println("-- test script");
+			writer2.println("insert into person (nr, firstname, lastname) values (4,'Tricia', 'McMillian');");
+			writer2.println("commit;");
+			writer2.close();			
+			
+			parser.parse("-url='jdbc:hsqldb:" + util.getDbName() + ";shutdown=true' -altdelimiter='/;nl' -user=sa -driver=org.hsqldb.jdbcDriver -script='" + scriptFile.getAbsolutePath() + "','" + scriptFile2.getAbsolutePath() + "'");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
 			
 			assertNotNull(runner);
@@ -141,7 +149,7 @@ public class BatchRunnerTest
 			
 			DelimiterDefinition def = con.getProfile().getAlternateDelimiter();
 			assertNotNull("No alternate delimiter defined", def);
-			assertEquals("Wrong delimiter parsed", "/", def.getDelimiter());
+			assertEquals("Wrong alternate delimiter parsed", "/", def.getDelimiter());
 			assertEquals("Wrong singleLine Property parsed", true, def.isSingleLine());
 			
 			runner.execute();
@@ -152,7 +160,7 @@ public class BatchRunnerTest
 			if (rs.next())
 			{
 				int count = rs.getInt(1);
-				assertEquals("Not enough records inserted", 3, count);
+				assertEquals("Not enough records inserted", 4, count);
 			}
 			SqlUtil.closeAll(rs, stmt);
 		}

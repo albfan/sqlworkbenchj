@@ -21,8 +21,10 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -1429,12 +1431,12 @@ public class DataPumper
 		this.columnMapper.resetData();
 	}
 
-	private List getKeyColumns()
+	private List<ColumnIdentifier> getKeyColumns()
 	{
 		ColumnMapper.MappingDefinition colMapping = this.columnMapper.getMapping();
 		if (colMapping == null) return Collections.EMPTY_LIST;
 		int count = colMapping.targetColumns.length;
-		List keys = new ArrayList();
+		List<ColumnIdentifier> keys = new ArrayList<ColumnIdentifier>();
 
 		for (int i=0; i < count; i++)
 		{
@@ -1589,15 +1591,16 @@ public class DataPumper
 		{
 			result.append(indent);
 			result.append("-" + WbCopy.PARAM_MODE + "=" + mode);
-			List keys = this.getKeyColumns();
+			Collection<ColumnIdentifier> keys = this.getKeyColumns();
 			if (keys.size() > 0)
 			{
-				int keycount = keys.size();
+				Iterator<ColumnIdentifier> itr = keys.iterator();
 				result.append("\n     -" + WbCopy.PARAM_KEYS + "=");
-				for (int i=0; i < keycount; i++)
+				while (itr.hasNext())
 				{
-					if (i > 0) result.append(',');
-					result.append(keys.get(i).toString());
+					ColumnIdentifier col = itr.next();
+					result.append(col.getColumnName());
+					if (itr.hasNext()) result.append(',');
 				}
 			}
 		}
@@ -1665,7 +1668,7 @@ public class DataPumper
 		boolean useQuery = this.useQueryCbx.isSelected();
 		try
 		{
-			List sourceCols = null;
+			List<ColumnIdentifier> sourceCols = null;
 			if (useQuery)
 			{
 				sourceCols = this.getResultSetColumns();
@@ -1689,7 +1692,7 @@ public class DataPumper
 			}
 			else
 			{
-				List targetCols = this.targetConnection.getMetadata().getTableColumns(target);
+				List<ColumnIdentifier> targetCols = this.targetConnection.getMetadata().getTableColumns(target);
 				boolean syncDataTypes = (this.fileImporter != null);
 				this.columnMapper.defineColumns(sourceCols, targetCols, syncDataTypes);
 			}
@@ -1829,7 +1832,7 @@ public class DataPumper
 		this.copier.setDeleteTarget(this.deleteTargetCbx.isSelected());
 		this.copier.setContinueOnError(this.continueOnErrorCbx.isSelected());
 		String mode = (String)this.modeComboBox.getSelectedItem();
-		List keys = this.getKeyColumns();
+		List<ColumnIdentifier> keys = this.getKeyColumns();
 
 		this.copier.setKeyColumns(keys);
 		

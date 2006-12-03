@@ -1117,7 +1117,7 @@ public class TableListPanel
 				// passed to getTableSource() would be empty
 				if (this.shouldRetrieveIndexes) this.retrieveIndexes();
 				if (this.shouldRetrieveImportedTree) this.retrieveImportedTables();
-				sql = meta.getTableSource(selectedTable, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore(), true);
+				sql = meta.getTableSource(selectedTable, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore(), true, null);
 			}
 			final String s = sql;
 			EventQueue.invokeLater(new Runnable()

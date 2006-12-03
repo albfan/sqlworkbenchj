@@ -118,7 +118,7 @@ public class OracleIndexReader
 	 * 	as elements. Each Element of the list is one part (=function call to a column)
 	 * 	of the index definition.
 	 */
-	public void processIndexList(TableIdentifier tbl, Collection indexDefs)
+	public void processIndexList(TableIdentifier tbl, Collection<IndexDefinition> indexDefs)
 	{
 		if (indexDefs.size() == 0) return;
 		
@@ -139,13 +139,13 @@ public class OracleIndexReader
 		{
 			sql.append(" AND i.owner = '" + schema + "' ");
 		}
-		Iterator keys = indexDefs.iterator();
+		Iterator<IndexDefinition> keys = indexDefs.iterator();
 		boolean found = false;
 		
 		sql.append(" AND i.index_name IN (");
 		while (keys.hasNext())
 		{
-			IndexDefinition def = (IndexDefinition)keys.next();
+			IndexDefinition def = keys.next();
 			String type = def.getIndexType();
 			if (type == null) continue;
 			if (type.startsWith("FUNCTION-BASED"))

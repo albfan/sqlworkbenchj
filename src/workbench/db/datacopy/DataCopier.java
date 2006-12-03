@@ -11,10 +11,9 @@
  */
 package workbench.db.datacopy;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -22,13 +21,12 @@ import java.util.Map;
 
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.RowDataProducer;
-import workbench.db.importer.RowDataReceiver;
 import workbench.interfaces.JobErrorHandler;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
-import workbench.util.SqlUtil;
+import workbench.util.MessageBuffer;
 import workbench.util.WbThread;
 import workbench.db.*;
 
@@ -52,8 +50,8 @@ public class DataCopier
 	private HashMap columnMap;
 
 	private ColumnIdentifier[] targetColumnsForQuery;
-	private StringBuilder messages = null;
-	private StringBuilder errors = null;
+	private MessageBuffer messages = null;
+	private MessageBuffer errors = null;
 
 	public DataCopier()
 	{
@@ -164,7 +162,7 @@ public class DataCopier
 		this.initImporterForTable(additionalWhere);
 	}
 
-	public void setKeyColumns(List keys)
+	public void setKeyColumns(List<ColumnIdentifier> keys)
 	{
 		this.importer.setKeyColumns(keys);
 	}
@@ -463,11 +461,6 @@ public class DataCopier
 			this.sourceData.setAbortOnError(!this.importer.getContinueOnError());
 			this.importer.startImport();
 			
-			String msg = this.getRowsInsertedMessage();
-			if (msg != null) this.addMessage(msg);
-			msg = this.getRowsUpdatedMessage();
-			if (msg != null) this.addMessage(msg);
-
 			LogMgr.logInfo("DataCopier.start()", "Copying of data finished. " + this.importer.getInsertedRows() + " row(s) inserted. " + this.importer.getUpdatedRows() + " row(s) updated.");
 		}
 		catch (Exception e)
@@ -530,7 +523,7 @@ public class DataCopier
 		int col = 0;
 		Iterator itr = this.columnMap.entrySet().iterator();
 
-		StringBuilder sql = new StringBuilder(200);
+		StringBuilder sql = new StringBuilder(count * 25 + 15 + (addWhere != null ? addWhere.length() : 0));
 		sql.append("SELECT ");
 
 		while (itr.hasNext())
@@ -714,16 +707,16 @@ public class DataCopier
 
 	private void addError(String msg)
 	{
-		if (this.errors == null) this.errors = new StringBuilder(250);
-		if (this.errors.length() > 0) this.errors.append('\n');
+		if (this.errors == null) this.errors = new MessageBuffer();
+		if (this.errors.getLength() > 0) this.errors.appendNewLine();
 		this.errors.append(msg);
 	}
 
 
 	private void addMessage(String msg)
 	{
-		if (this.messages == null) this.messages = new StringBuilder(250);
-		if (this.messages.length() > 0) this.messages.append('\n');
+		if (this.messages == null) this.messages = new MessageBuffer();
+		if (this.messages.getLength() > 0) this.messages.appendNewLine();
 		this.messages.append(msg);
 	}
 
@@ -732,21 +725,17 @@ public class DataCopier
 		return this.importer.hasWarnings();
 	}
 
-	public String getMessages()
-	{
-		if (this.messages == null) return null;
-		return this.messages.toString();
-	}
-
 	public String getAllMessages()
 	{
 		StringBuilder log = new StringBuilder(2000);
 
-		// No need to append our messages, as the importer will
-		// store any message from its source (that's us)
-		// when committing a table...
+		if (this.messages != null) 
+		{
+			log.append(messages.getBuffer());
+			log.append('\n');
+		}
 		log.append(this.importer.getMessages());
-		if (this.errors != null) log.append(this.errors);
+		if (this.errors != null) log.append(this.errors.getBuffer());
 
 		return log.toString();
 	}

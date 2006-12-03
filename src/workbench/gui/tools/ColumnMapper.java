@@ -44,8 +44,8 @@ public class ColumnMapper
 {
 	private JTable columnDisplay;
 	private JTextField targetEditor;
-	private List sourceColumns;
-	private List targetColumns;
+	private List<ColumnIdentifier> sourceColumns;
+	private List<ColumnIdentifier> targetColumns;
 	private ColumnMapRow[] mapping;
 	protected JComboBox sourceDropDown;
 	private static final MapDataModel EMPTY_DATA_MODEL = new MapDataModel(new ColumnMapRow[0]);
@@ -122,7 +122,7 @@ public class ColumnMapper
 		return t;
 	}
 
-	public void defineColumns(List source, List target, boolean syncDataTypes)
+	public void defineColumns(List<ColumnIdentifier> source, List<ColumnIdentifier> target, boolean syncDataTypes)
 	{
 		if (source == null || target == null) throw new IllegalArgumentException("Both column lists have to be specified");
 		this.sourceColumns = source;
@@ -135,7 +135,7 @@ public class ColumnMapper
 		for (int i=0; i < numTargetCols; i++)
 		{
 			ColumnMapRow row = new ColumnMapRow();
-			ColumnIdentifier targetCol = (ColumnIdentifier)this.targetColumns.get(i);
+			ColumnIdentifier targetCol = this.targetColumns.get(i);
 			row.setTarget(targetCol);
 
 			ColumnIdentifier sourceCol = this.findSourceColumnByName(targetCol.getColumnName());
@@ -244,7 +244,7 @@ public class ColumnMapper
 		ColumnIdentifier skipId = new ColumnIdentifier(RowDataProducer.SKIP_INDICATOR);
 		for (int i=0; i < count; i++)
 		{
-			ColumnIdentifier col = (ColumnIdentifier)this.sourceColumns.get(i);
+			ColumnIdentifier col = this.sourceColumns.get(i);
 
 			ColumnIdentifier target = getTargetColumn(col);
 			

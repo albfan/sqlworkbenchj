@@ -210,7 +210,7 @@ public class JdbcProcedureReader
 				int size = rs.getInt("LENGTH");
 				String rem = rs.getString("REMARKS");
 
-				String display = DbMetadata.getSqlTypeDisplay(typeName, sqlType, size, digits);
+				String display = SqlUtil.getSqlTypeDisplay(typeName, sqlType, size, digits);
 				ds.setValue(row, 2, display);
 				ds.setValue(row, 3, rem);
 			}

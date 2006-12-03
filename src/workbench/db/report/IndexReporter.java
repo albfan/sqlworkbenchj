@@ -11,6 +11,8 @@
  */
 package workbench.db.report;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import workbench.db.DbMetadata;
 import workbench.db.IndexDefinition;
@@ -35,40 +37,42 @@ public class IndexReporter
 	public static final String TAG_INDEX_TYPE = "type";
 	public static final String TAG_INDEX_EXPR = "index-expression";
 
-	private IndexDefinition[] indexList;
+	private Collection<IndexDefinition> indexList;
 	private TagWriter tagWriter = new TagWriter();
 
 	public IndexReporter(TableIdentifier tbl, WbConnection conn)
 	{
-		indexList  = conn.getMetadata().getIndexList(tbl);
+		indexList  = conn.getMetadata().getTableIndexList(tbl);
 	}
 
-	public IndexReporter(IndexDefinition[] list)
-	{
-		indexList  = list;
-	}	
+//	public IndexReporter(IndexDefinition[] list)
+//	{
+//		indexList  = list;
+//	}	
 	
 	public IndexReporter(IndexDefinition index)
 	{
-		indexList  = new IndexDefinition[] { index };
+		indexList  = new LinkedList();
+		indexList.add(index);
 	}	
 	
 	public void appendXml(StrBuffer result, StrBuffer indent)
 	{
-		int numIndex = this.indexList.length;
+		int numIndex = this.indexList.size();
 		if (numIndex == 0) return;
 		StrBuffer defIndent = new StrBuffer(indent);
 		defIndent.append("  ");
-
-		for (int i=0; i < numIndex; i ++)
+		
+		for (IndexDefinition index : indexList)
 		{
+			if (index == null) continue;
 			tagWriter.appendOpenTag(result, indent, TAG_INDEX);
 			result.append('\n');
-			tagWriter.appendTag(result, defIndent, TAG_INDEX_NAME, indexList[i].getName());
-			tagWriter.appendTag(result, defIndent, TAG_INDEX_EXPR, indexList[i].getExpression());
-			tagWriter.appendTag(result, defIndent, TAG_INDEX_UNIQUE, indexList[i].isUnique());
-			tagWriter.appendTag(result, defIndent, TAG_INDEX_PK, indexList[i].isPrimaryKeyIndex());
-			tagWriter.appendTag(result, defIndent, TAG_INDEX_TYPE, indexList[i].getIndexType());
+			tagWriter.appendTag(result, defIndent, TAG_INDEX_NAME, index.getName());
+			tagWriter.appendTag(result, defIndent, TAG_INDEX_EXPR, index.getExpression());
+			tagWriter.appendTag(result, defIndent, TAG_INDEX_UNIQUE, index.isUnique());
+			tagWriter.appendTag(result, defIndent, TAG_INDEX_PK, index.isPrimaryKeyIndex());
+			tagWriter.appendTag(result, defIndent, TAG_INDEX_TYPE, index.getIndexType());
 			tagWriter.appendCloseTag(result, indent, TAG_INDEX);
 		}
 		return;
@@ -79,7 +83,7 @@ public class IndexReporter
 		this.tagWriter.setNamespace(name);
 	}
 
-	public IndexDefinition[] getIndexList()
+	public Collection<IndexDefinition> getIndexList()
 	{
 		return this.indexList;
 	}

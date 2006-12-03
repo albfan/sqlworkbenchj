@@ -13,6 +13,7 @@ package workbench.interfaces;
 
 import java.sql.SQLException;
 import java.util.List;
+import workbench.db.ColumnIdentifier;
 import workbench.db.importer.ImportFileHandler;
 
 /**
@@ -35,7 +36,7 @@ public interface ImportFileParser
 	 *	Parse the file and return a list of column 
 	 *  names defined in that file
 	 */
-	List getColumnsFromFile();
+	List<ColumnIdentifier> getColumnsFromFile();
 	void setTableName(String table);
 	
 	/**

@@ -42,10 +42,22 @@ public class DelimiterDefinition
 
 	public DelimiterDefinition()
 	{
-		this.delimiter = ";";
+		this.delimiter = "";
 		this.singleLineDelimiter = false;
 		this.allowChange = true;
 		this.changed = false;
+	}
+
+	public DelimiterDefinition(String delim, boolean single)
+	{
+		setDelimiter(delim);
+		this.singleLineDelimiter = single;
+		this.allowChange = false;
+	}
+
+	public boolean isEmpty()
+	{
+		return (this.delimiter == null || this.delimiter.trim().length() == 0);
 	}
 	
 	public boolean isStandard()
@@ -53,13 +65,6 @@ public class DelimiterDefinition
 		return this.delimiter.equals(";");
 	}
 	
-	public DelimiterDefinition(String delim, boolean single)
-	{
-		this.delimiter = delim;
-		this.singleLineDelimiter = single;
-		this.allowChange = false;
-	}
-
 	public static DelimiterDefinition parseCmdLineArgument(String arg)
 	{
 		if (StringUtil.isEmptyString(arg)) return null;

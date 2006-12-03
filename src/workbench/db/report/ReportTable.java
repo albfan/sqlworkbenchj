@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import workbench.db.ColumnIdentifier;
@@ -166,13 +167,12 @@ public class ReportTable
 		if (this.index == null) return null;
 		List pk = this.getPrimaryKeyColumns();
 		if (pk.size() == 0) return null;
-		IndexDefinition[] idx = this.index.getIndexList();
-		int count = idx.length;
-		for (int i=0; i < count; i++)
+		Collection<IndexDefinition> idxList = this.index.getIndexList();
+		for (IndexDefinition index : idxList)
 		{
-			if (idx[i].isPrimaryKeyIndex())
+			if (index.isPrimaryKeyIndex())
 			{
-				return idx[i].getName();
+				return index.getName();
 			}
 		}
 		return null;
@@ -248,7 +248,7 @@ public class ReportTable
 		return result;
 	}
 
-	public IndexDefinition[] getIndexList()
+	public Collection<IndexDefinition> getIndexList()
 	{
 		if (this.index == null) return null;
 		return this.index.getIndexList();

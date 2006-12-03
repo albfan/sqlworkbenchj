@@ -49,7 +49,6 @@ public class ArgumentParserTest
 		assertEquals("argument without parameter not found", true, arg.isArgPresent("nosettings"));
 		assertEquals("boolean argument not retrieved", true, arg.getBoolean("boolarg", false));
 		assertEquals("numeric boolean argument not retrieved", true, arg.getBoolean("otherbool", false));
-		
 	}
 
 }

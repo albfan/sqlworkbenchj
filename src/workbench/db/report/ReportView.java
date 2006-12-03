@@ -90,7 +90,7 @@ public class ReportView
 			// different schemas with the same name
 			tbl.setSchema(conn.getMetadata().getSchemaToUse());
 		}
-		List cols = conn.getMetadata().getTableColumns(tbl);
+		List<ColumnIdentifier> cols = conn.getMetadata().getTableColumns(tbl);
 		Collections.sort(cols);
 
 		this.viewComment = conn.getMetadata().getTableComment(this.view);
@@ -109,17 +109,18 @@ public class ReportView
 	/**
 	 * Define the columns that belong to this table
 	 */
-	public void setColumns(List cols)
+	public void setColumns(List<ColumnIdentifier> cols)
 	{
 		if (cols == null) return;
 		int numCols = cols.size();
 		this.columns = new ReportColumn[numCols];
-		for (int i=0; i < numCols; i++)
+		int i = 0;
+		for (ColumnIdentifier column : cols)
 		{
-			ColumnIdentifier col = (ColumnIdentifier)cols.get(i);
-			this.columns[i] = new ReportColumn(col);
+			this.columns[i] = new ReportColumn(column);
 			this.columns[i].setNamespace(this.namespace);
 			this.columns[i].setRealColumn(false);
+			i++;
 		}
 	}
 

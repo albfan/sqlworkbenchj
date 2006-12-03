@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -802,7 +801,80 @@ public class SqlUtil
 		else
 			return "UNKNOWN";
 	}
+	
+	/**
+	 * Construct the SQL display name for the given SQL datatype.
+	 * This is used when re-recreating the source for a table
+	 */
+	public static String getSqlTypeDisplay(String aTypeName, int sqlType, int size, int digits)
+	{
+		String display = aTypeName;
 
+		switch (sqlType)
+		{
+			case Types.VARCHAR:
+			case Types.CHAR:
+				if ("text".equals(aTypeName) && size == Integer.MAX_VALUE) return aTypeName;
+				if (size > 0) 
+				{
+					display = aTypeName + "(" + size + ")";
+				}
+				else
+				{
+					display = aTypeName;
+				}
+				break;
+			case Types.DECIMAL:
+			case Types.DOUBLE:
+			case Types.NUMERIC:
+			case Types.FLOAT:
+				if (aTypeName.equalsIgnoreCase("money")) // SQL Server
+				{
+					display = aTypeName;
+				}
+				else if ((aTypeName.indexOf('(') == -1))
+				{
+					if (digits > 0 && size > 0)
+					{
+						display = aTypeName + "(" + size + "," + digits + ")";
+					}
+					else if (size <= 0 && digits > 0)
+					{
+						display = aTypeName + "(" + digits + ")";
+					}
+					else if (size > 0 && digits <= 0)
+					{
+						display = aTypeName + "(" + size + ")";
+					}
+				}
+				break;
+
+			case Types.OTHER:
+				// Oracle specific datatypes
+				if ("NVARCHAR2".equalsIgnoreCase(aTypeName))
+				{
+					display = aTypeName + "(" + size + ")";
+				}
+				else if ("NCHAR".equalsIgnoreCase(aTypeName))
+				{
+					display = aTypeName + "(" + size + ")";
+				}
+				else if ("UROWID".equalsIgnoreCase(aTypeName))
+				{
+					display = aTypeName + "(" + size + ")";
+				}
+				else if ("RAW".equalsIgnoreCase(aTypeName))
+				{
+					display = aTypeName + "(" + size + ")";
+				}
+				break;
+			default:
+				display = aTypeName;
+				break;
+		}
+		return display;
+	}
+	
 	public static String getWarnings(WbConnection con, Statement stmt, boolean retrieveOutputMsg)
 	{
 		try

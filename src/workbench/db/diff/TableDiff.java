@@ -14,6 +14,7 @@ package workbench.db.diff;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
@@ -237,8 +238,8 @@ public class TableDiff
 	
 	private void appendIndexDiff(StrBuffer result)
 	{
-		IndexDefinition[] ref = this.referenceTable.getIndexList();
-		IndexDefinition[] targ = this.targetTable.getIndexList();
+		Collection<IndexDefinition> ref = this.referenceTable.getIndexList();
+		Collection<IndexDefinition> targ = this.targetTable.getIndexList();
 		if (ref == null && targ == null) return;
 		IndexDiff id = new IndexDiff(ref, targ);
 		id.setTagWriter(this.writer);

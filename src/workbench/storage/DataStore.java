@@ -515,20 +515,20 @@ public class DataStore
 			if (meta == null) return;
 
 			this.updateTable = tbl.createCopy();
-			ColumnIdentifier[] columns = meta.getColumnIdentifiers(tbl);
+			List<ColumnIdentifier> columns = meta.getTableColumns(tbl);
 			
 			int realColumns = 0;
 			
-			if (columns != null && columns.length > 0)
+			if (columns != null)
 			{
-				for (int i=0; i < columns.length; i++)
+				for (ColumnIdentifier column : columns)
 				{
-					int index = this.findColumn(columns[i].getColumnName());
+					int index = this.findColumn(column.getColumnName());
 					if (index > -1)
 					{
 						this.resultInfo.setUpdateable(index, true);
-						this.resultInfo.setIsPkColumn(index, columns[i].isPkColumn());
-						this.resultInfo.setIsNullable(index, columns[i].isNullable());
+						this.resultInfo.setIsPkColumn(index, column.isPkColumn());
+						this.resultInfo.setIsNullable(index, column.isNullable());
 						realColumns++;
 					}
 				}

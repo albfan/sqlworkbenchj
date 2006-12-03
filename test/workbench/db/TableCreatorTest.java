@@ -12,6 +12,7 @@ import java.sql.Statement;
 import java.util.Iterator;
 import java.util.List;
 import workbench.TestUtil;
+import workbench.util.ArrayUtil;
 
 /**
  *
@@ -54,7 +55,14 @@ public class TableCreatorTest extends TestCase
 			TableIdentifier oldTable = new TableIdentifier("create_test");
 			TableIdentifier newTable = new TableIdentifier("new_table");
 			
-			ColumnIdentifier[] cols  = con.getMetadata().getColumnIdentifiers(oldTable);
+			List<ColumnIdentifier> clist = con.getMetadata().getTableColumns(oldTable);
+			
+			ColumnIdentifier[] cols  = new ColumnIdentifier[clist.size()];
+			int i = 0;
+			for (ColumnIdentifier col : clist)
+			{
+				cols[i++] = col;
+			}
 			ColumnIdentifier c = cols[0];
 			cols[0] = cols[2];
 			cols[2] = c;
@@ -62,10 +70,10 @@ public class TableCreatorTest extends TestCase
 			TableCreator creator = new TableCreator(con, newTable, cols);
 			creator.createTable();
 			
-			cols = con.getMetadata().getColumnIdentifiers(newTable);
-			assertEquals(4, cols.length);
+			clist = con.getMetadata().getTableColumns(newTable);
+			assertEquals(4, clist.size());
 			
-			assertEquals("ZZZ", cols[0].getColumnName());
+			assertEquals("ZZZ", clist.get(0).getColumnName());
 		}
 		catch (Exception e)
 		{

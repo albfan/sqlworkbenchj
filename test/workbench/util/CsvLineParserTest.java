@@ -38,9 +38,25 @@ public class CsvLineParserTest
 		{
 			count ++;
 			String value = parser.getNext();
-			if (count == 2)
+			if (count == 1)
+			{
+				assertEquals("Wrong first value", "one", value);
+			}
+			else if (count == 2)
 			{
 				assertEquals("Wrong second value", "two", value);
+			}
+			else if (count == 3)
+			{
+				assertEquals("Wrong third value", "three", value);
+			}
+			else if (count == 4)
+			{
+				assertEquals("Wrong forth value", "four", value);
+			}
+			else if (count == 5)
+			{
+				assertEquals("Wrong fifth value", "five", value);
 			}
 		}
 		assertEquals("Not enough values", 5, count);
@@ -56,7 +72,7 @@ public class CsvLineParserTest
 		// check for embedded quotes without a quote defined!
 		parser.setReturnEmptyStrings(true);
 		parser.setLine("one\ttwo\"values\tthree");
-		parser.getNext(); // skipt the first
+		parser.getNext(); // skip the first
 		String value = parser.getNext();
 		assertEquals("Invalid element with \" character", "two\"values", value);
 		

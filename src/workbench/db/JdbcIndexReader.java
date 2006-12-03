@@ -140,7 +140,7 @@ public class JdbcIndexReader
 		return sql;
 	}
 
-	public void processIndexList(TableIdentifier table, Collection indexDefinitions)
+	public void processIndexList(TableIdentifier table, Collection<IndexDefinition> indexDefinitions)
 	{
 		// Nothing implemented
 	}
