@@ -14,7 +14,6 @@ package workbench.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 import workbench.WbManager;
 import workbench.interfaces.TableSearchDisplay;
 import workbench.log.LogMgr;

@@ -685,7 +685,7 @@ public class WbExport
 				msg = ResourceMgr.getString("MsgExportNumTables");
 				msg = msg.replaceAll("%numtables%", Integer.toString(count));
 				msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
-				result.addMessage(msg);
+				result.addMessage(msg + "\n");
 			}
 			else
 			{
@@ -694,7 +694,7 @@ public class WbExport
 				msg = StringUtil.replace(msg, "%file%", exporter.getFullOutputFilename());
 				msg = StringUtil.replace(msg, "%tablename%", tables[0].getTableExpression());
 				msg = StringUtil.replace(msg, "%rows%", Long.toString(rows));
-				result.addMessage(msg);
+				result.addMessage(msg + "\n");
 			}
 			result.setSuccess();
 		}

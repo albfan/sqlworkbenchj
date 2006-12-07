@@ -12,6 +12,7 @@
 package workbench.db.importer;
 
 import workbench.interfaces.JobErrorHandler;
+import workbench.util.MessageBuffer;
 
 
 /**
@@ -26,7 +27,9 @@ public interface RowDataProducer
 	void start() throws Exception;
 	void cancel();
 	void stop();
-	String getMessages();
+	MessageBuffer getMessages();
 	void setAbortOnError(boolean flag);
 	void setErrorHandler(JobErrorHandler handler);
+	boolean hasErrors();
+	boolean hasWarnings();
 }

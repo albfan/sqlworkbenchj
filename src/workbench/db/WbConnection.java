@@ -30,7 +30,6 @@ import java.util.List;
 import workbench.db.report.TagWriter;
 import workbench.interfaces.DbExecutionListener;
 import workbench.resource.ResourceMgr;
-import workbench.sql.ScriptCommandDefinition;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -60,7 +59,6 @@ public class WbConnection
 	private DbMetadata metaData;
 	private ConnectionProfile profile;
 	private PreparedStatementPool preparedStatementPool;
-
 	private List listeners;
 	private DbObjectCache objectCache;
 

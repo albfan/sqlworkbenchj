@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.xml.parsers.SAXParser;
@@ -33,12 +34,15 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.db.exporter.XmlRowDataConverter;
 import workbench.interfaces.JobErrorHandler;
 import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.ImportFileParser;
 import workbench.log.LogMgr;
+import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -73,7 +77,7 @@ public class XmlDataFileParser
 	private JobErrorHandler errorHandler;
 	private boolean verboseFormat = false;
 	private String missingColumn;
-	private StrBuffer messages;
+	private MessageBuffer messages;
 	private String extensionToUse;
 	
 	private int currentColIndex = 0;
@@ -81,15 +85,19 @@ public class XmlDataFileParser
 	private long columnLongValue = 0;
 	private String columnDataFile = null;
 	private boolean isNull = false;
-	private StrBuffer chars;
+	private StringBuilder chars;
 	private boolean keepRunning;
 	private boolean regularStop;
 	private String rowTag = XmlRowDataConverter.LONG_ROW_TAG;
 	private String columnTag = XmlRowDataConverter.LONG_COLUMN_TAG;
+
+	private boolean hasErrors = false;
+	private boolean hasWarnings = false;
 	
 	private HashMap constructors = new HashMap();
 	private SAXParser saxParser;
 	private ImportFileHandler fileHandler = new ImportFileHandler();
+	private WbConnection dbConn;
 	
 	public XmlDataFileParser()
 	{
@@ -120,6 +128,18 @@ public class XmlDataFileParser
 	{
 		return StringUtil.listToString(this.columnsToImport, ',', false);
 	}
+
+	public boolean hasErrors() { return this.hasErrors; }
+	public boolean hasWarnings() 
+	{ 
+		if (this.hasWarnings) return true;
+		if (this.warningAdded == null) return false;
+		for (boolean b : warningAdded)
+		{
+			if (b) return true;
+		}
+		return false;
+	}
 	
 	public void setColumns(String columnList)
 		throws SQLException
@@ -147,33 +167,19 @@ public class XmlDataFileParser
 	
 	/**	 Define the columns to be imported
 	 */
-	public void setColumns(List cols)
+	public void setColumns(List<ColumnIdentifier> cols)
 		throws SQLException
 	{
 		if (cols != null && cols.size() > 0)
 		{
-			this.columnsToImport = new ArrayList();
-			Iterator itr = cols.iterator();
+			this.columnsToImport = new ArrayList<ColumnIdentifier>(cols.size());
+			Iterator<ColumnIdentifier> itr = cols.iterator();
 			while (itr.hasNext())
 			{
-				Object o = itr.next();
-				if (o == null) continue;
-				if (o instanceof ColumnIdentifier)
+				ColumnIdentifier id = itr.next();
+				if (!id.getColumnName().equals(RowDataProducer.SKIP_INDICATOR))
 				{
-					ColumnIdentifier id = (ColumnIdentifier)o;
-					if (!id.getColumnName().equals(RowDataProducer.SKIP_INDICATOR))
-					{
-						this.columnsToImport.add(id);
-					}
-				}
-				else 
-				{
-					String colname = o.toString();
-					if (!colname.equals(RowDataProducer.SKIP_INDICATOR))
-					{
-						ColumnIdentifier id = new ColumnIdentifier(colname);
-						this.columnsToImport.add(id);
-					}
+					this.columnsToImport.add(id);
 				}
 			}
 		}
@@ -184,6 +190,53 @@ public class XmlDataFileParser
 		checkImportColumns();
 	}
 
+	public void setConnection(WbConnection conn)
+	{
+		this.dbConn = conn;
+	}
+	
+	public void checkTargetColumns()
+		throws SQLException
+	{
+		if (this.dbConn == null) return;
+		if (this.columns == null) return;
+		TableIdentifier tbl = new TableIdentifier(this.tableName == null ? this.tableNameFromFile : this.tableName);
+		List<ColumnIdentifier> tableCols = this.dbConn.getMetadata().getTableColumns(tbl);
+		List<ColumnIdentifier> validCols = new LinkedList<ColumnIdentifier>();
+		for (ColumnIdentifier c : this.columns)
+		{
+			if (tableCols.contains(c))
+			{
+				validCols.add(c);
+			}
+			else
+			{
+				String msg = ResourceMgr.getString("ErrImportColumnNotFound");
+				msg = StringUtil.replace(msg, "%column%", c.getColumnName());
+				msg = StringUtil.replace(msg, "%table%", tbl.getTableExpression());
+				this.messages.append(msg);
+				if (this.abortOnError)
+				{
+					this.hasErrors = true;
+					throw new SQLException("Column " + c.getColumnName() + " not found in target table");
+				}
+				else
+				{
+					this.hasWarnings = true;
+					LogMgr.logWarning("XmlDataFileParser.checkTargetColumns()", msg);
+				}
+			}
+		}
+		
+		// If we arrive here, and the valid column list is different
+		// to the stored columns, at least one column was not found
+		if (validCols.size() != columns.length)
+		{
+			this.columnsToImport = validCols;
+			this.realColCount = this.columnsToImport.size();
+		}
+	}
+	
 	private void checkImportColumns()
 		throws SQLException
 	{
@@ -194,21 +247,24 @@ public class XmlDataFileParser
 		}
 		
 		this.missingColumn = null;
+		
 		try
 		{
-			if (this.columns == null) this.readTableDefinition();
+			if (this.columns == null) this.readXmlTableDefinition();
 		}
 		catch (Throwable e)
 		{
 			LogMgr.logError("XmlDataFileParser.checkImportColumns()", "Error reading table definition from XML file", e);
+			this.hasErrors = true;
 			throw new SQLException("Could not read table definition from XML file");
 		}
-		for (int i=0; i < this.columnsToImport.size(); i++)
+		
+		for (ColumnIdentifier c : columnsToImport)
 		{
-			ColumnIdentifier c = (ColumnIdentifier)this.columnsToImport.get(i);
 			if (!this.containsColumn(c)) 
 			{
 				this.missingColumn = c.getColumnName();
+				this.hasErrors = true;
 				throw new SQLException("Import column " + c.getColumnName() + " not present in input file!");
 			}
 		}
@@ -242,7 +298,7 @@ public class XmlDataFileParser
 	{
 		try
 		{
-			if (this.columns == null) this.readTableDefinition();
+			if (this.columns == null) this.readXmlTableDefinition();
 		}
 		catch (IOException e)
 		{
@@ -260,7 +316,7 @@ public class XmlDataFileParser
 		return result;
 	}
 
-	private void readTableDefinition()
+	private void readXmlTableDefinition()
 		throws IOException, SAXException
 	{
 		fileHandler.setMainFile(this.inputFile, this.encoding);
@@ -327,7 +383,7 @@ public class XmlDataFileParser
 			
 		// readTableDefinition relies on the fileHandler, so this 
 		// has to be called after creating initializing the fileHandler
-		if (this.columns == null) this.readTableDefinition();
+		if (this.columns == null) this.readXmlTableDefinition();
 		
 		if (this.columnsToImport == null)
 		{
@@ -342,7 +398,7 @@ public class XmlDataFileParser
 		// because readTableDefinition() can change the file handler
 		this.fileHandler.setMainFile(this.inputFile, this.encoding);
 		
-		this.messages = new StrBuffer();
+		this.messages = new MessageBuffer();
 		this.sendTableDefinition();
 		Reader in = null;
 		try
@@ -370,7 +426,7 @@ public class XmlDataFileParser
 				  ", message: " + ExceptionUtil.getDisplay(e);
 			LogMgr.logWarning("XmlDataFileParser.processOneFile()", msg);
 			this.messages.append(msg);
-			this.messages.append('\n');
+			this.messages.appendNewLine();
 			this.receiver.tableImportError();
 			throw e;
 		}
@@ -382,7 +438,7 @@ public class XmlDataFileParser
 
 	private void reset()
 	{
-		messages = new StrBuffer();
+		messages = new MessageBuffer();
 		tableName = null;
 		tableNameFromFile = null;
 		ignoreCurrentRow = false;
@@ -439,6 +495,9 @@ public class XmlDataFileParser
 	public void start()
 		throws Exception
 	{
+		this.hasErrors = false;
+		this.hasWarnings = false;
+		
 		if (this.sourceDirectory == null)
 		{
 			processOneFile();
@@ -508,7 +567,7 @@ public class XmlDataFileParser
 		}
 		else if (qName.equals(this.columnTag))
 		{
-			this.chars = new StrBuffer();
+			this.chars = new StringBuilder();
 			String attrValue = attrs.getValue(XmlRowDataConverter.ATTR_LONGVALUE);
 			if (attrValue != null)
 			{
@@ -721,21 +780,17 @@ public class XmlDataFileParser
 				// value, hoping that the JDBC driver can cope with that :)
 				this.currentRow[this.realColIndex] = value;
 				
-				// Oracle (again this dreaded driver!) reports CLOB columns
-				// as Types.OTHER. For all other column types, we issue a warning
-				if (!"CLOB".equalsIgnoreCase(this.columns[this.realColIndex].getDbmsType()))
+				if (!this.warningAdded[this.realColIndex])
 				{
-					if (!this.warningAdded[this.realColIndex])
-					{
-						String msg = ResourceMgr.getString("ErrConvertError");
-						msg = StringUtil.replace(msg, "%type%", SqlUtil.getTypeName(type));
-						msg = StringUtil.replace(msg, "%column%", this.columns[realColIndex].getColumnName());
-						msg = msg + '\n';
-						this.messages.append(msg);
-						this.warningAdded[this.realColIndex] = true;
-						LogMgr.logWarning("XmlDataFileParser.buildColumnData()", msg, null);
-					}
+					String msg = ResourceMgr.getString("ErrConvertError");
+					msg = StringUtil.replace(msg, "%type%", SqlUtil.getTypeName(type));
+					msg = StringUtil.replace(msg, "%column%", this.columns[realColIndex].getColumnName());
+					msg = msg + '\n';
+					this.messages.append(msg);
+					this.warningAdded[this.realColIndex] = true;
+					LogMgr.logWarning("XmlDataFileParser.buildColumnData()", msg, null);
 				}
+
 				break;
 		}
 		this.realColIndex ++;
@@ -769,6 +824,7 @@ public class XmlDataFileParser
 	{
 		try
 		{
+			checkTargetColumns();
 			if (this.columnsToImport == null)
 			{
 				this.receiver.setTargetTable(this.tableName == null ? this.tableNameFromFile : this.tableName, this.columns);
@@ -792,6 +848,7 @@ public class XmlDataFileParser
 		catch (SQLException e)
 		{
 			this.currentRow = null;
+			this.hasErrors = true;
 			throw e;
 		}
 	}
@@ -808,7 +865,12 @@ public class XmlDataFileParser
 			catch (Exception e)
 			{
 				LogMgr.logError("XmlDataFileParser.sendRowData()", "Error when sending row data to receiver", e);
-				if (this.abortOnError) throw e;
+				if (this.abortOnError) 
+				{
+					this.hasErrors = true;
+					throw e;
+				}
+				this.hasWarnings = true;
 				if (this.errorHandler != null)
 				{
 					int choice = errorHandler.getActionOnError(this.currentRowNumber + 1, null, null, ExceptionUtil.getDisplay(e, false));
@@ -824,10 +886,9 @@ public class XmlDataFileParser
 		if (!this.keepRunning) throw new ParsingInterruptedException();
 	}
 
-	public String getMessages()
+	public MessageBuffer getMessages()
 	{
-		if (this.messages == null) return "";
-		return this.messages.toString();
+		return this.messages;
 	}
 
 	public boolean getUseVerboseFormat()

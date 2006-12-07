@@ -105,11 +105,11 @@ public class ConnectionMgr
 		WbConnection conn = new WbConnection(anId);
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getKey() + "] with ID=" + anId + " for driver=" + aProfile.getDriverclass());
 		Connection sql = this.connect(aProfile, anId);
-		conn.setProfile(aProfile);
 		conn.setSqlConnection(sql);
+		conn.setProfile(aProfile);
 		conn.runPostConnectScript();
-		
 		String driverVersion = null;
+		
 		try
 		{
 			int minor = sql.getMetaData().getDriverMinorVersion();
@@ -170,7 +170,6 @@ public class ConnectionMgr
 		}
 
 		Connection sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword(), anId, aProfile.getConnectionProperties());
-
 		try
 		{
 			sql.setAutoCommit(aProfile.getAutocommit());
@@ -182,31 +181,6 @@ public class ConnectionMgr
 			LogMgr.logInfo("ConnectionMgr.connect()", "Driver (" + drv.getDriverClass() + ") does not support the autocommit property: " + ExceptionUtil.getDisplay(th));
 		}
 		return sql;
-	}
-
-	public void reconnect(WbConnection aConn)
-		throws ClassNotFoundException, SQLException, Exception
-	{
-    aConn.close();
-    // use the stored profile to reconnect as the SQL connection
-    // does not contain information about the username & password
-    Connection sql = this.connect(aConn.getProfile(), aConn.getId());
-    aConn.setSqlConnection(sql);
-	}
-
-	public DbMetadata getMetaDataForConnection(Connection aConn)
-	{
-		Iterator itr = this.activeConnections.entrySet().iterator();
-		while (itr.hasNext())
-		{
-			java.util.Map.Entry e = (Map.Entry)itr.next();
-			WbConnection c = (WbConnection)e.getValue();
-			if (c.getSqlConnection().equals(aConn))
-			{
-				return c.getMetadata();
-			}
-		}
-		return null;
 	}
 
 	public DbDriver findDriverByName(String drvClassName, String aName)

@@ -10,15 +10,14 @@
  */
 package workbench.db;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import junit.framework.*;
 
 /**
  *
- * @author <a href="mailto:thomas.kellerer@mgm-tp.com">Thomas Kellerer</a>
+ * @author support@sql-workbench.net
  */
-public class TableIdentifierTest extends TestCase
+public class TableIdentifierTest 
+	extends TestCase
 {
 	
 	public TableIdentifierTest(String testName)
@@ -66,6 +65,7 @@ public class TableIdentifierTest extends TestCase
 		assertEquals("\"schema\"", t2.getSchema());
 		assertEquals("\"table\"", t2.getTableName());
 		assertEquals(sql, t2.getTableExpression());
+		assertEquals(true, tbl.equals(t2));
 	}
 	
 }

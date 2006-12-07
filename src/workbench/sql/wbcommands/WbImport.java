@@ -408,6 +408,8 @@ public class WbImport
 		else if ("xml".equalsIgnoreCase(type))
 		{
 			XmlDataFileParser xmlParser = new XmlDataFileParser();
+			xmlParser.setConnection(aConnection);
+			xmlParser.setAbortOnError(!cmdLine.getBoolean(ARG_CONTINUE, true));
 			
 			// The encoding must be set as early as possible
 			// as the XmlDataFileParser might need it to read
@@ -551,6 +553,7 @@ public class WbImport
 			{
 				result.setFailure();
 			}
+			result.setWarning(imp.hasWarnings());
 		}
 		catch (SQLException e)
 		{

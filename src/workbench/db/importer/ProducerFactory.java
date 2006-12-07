@@ -165,7 +165,7 @@ public class ProducerFactory
 		return this.inputColumns;
 	}
 
-	public void setImportColumns(List cols)
+	public void setImportColumns(List<ColumnIdentifier> cols)
 		throws Exception
 	{
 		if (this.producer == null) getProducer();

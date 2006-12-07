@@ -242,6 +242,7 @@ public class SqlCommand
 		}
 
 		ResultSet rs = null;
+		boolean multipleUpdateCounts = (this.currentConnection != null ? this.currentConnection.getMetadata().allowsMultipleGetUpdateCounts() : true);
 
 		int counter = 0;
 		while (moreResults || updateCount > -1)
@@ -290,6 +291,10 @@ public class SqlCommand
 							throw e;
 						}
 					}
+					finally
+					{
+						try { rs.close(); } catch (Throwable th) {}
+					}
 					result.addDataStore(this.currentRetrievalData);
 				}
 			}
@@ -298,13 +303,30 @@ public class SqlCommand
 				result.addUpdateCountMsg(updateCount);
 			}
 			moreResults = this.currentStatement.getMoreResults();
-			updateCount = this.currentStatement.getUpdateCount();
+			
+			if (multipleUpdateCounts)
+			{
+				try
+				{
+					updateCount = this.currentStatement.getUpdateCount();
+				}
+				catch (Exception e)
+				{
+					LogMgr.logWarning("SqlCommand.processResult()", "Error when calling getUpdateCount() " + ExceptionUtil.getDisplay(e));
+					updateCount = -1;
+					multipleUpdateCounts = false;
+				}
+			}
+			else
+			{
+				updateCount = -1;
+			}
 			
 			counter ++;
+			
 			// some JDBC drivers do not implement getMoreResults() and getUpdateCount()
 			// correctly, so this is a safety to prevent an endless loop
 			if (counter > 50) break;
-			try { rs.close(); } catch (Throwable th) {}
 		}
 		this.currentRetrievalData = null;
 	}

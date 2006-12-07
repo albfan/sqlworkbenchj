@@ -125,6 +125,8 @@ public class DbMetadata
 	// be initialized through the Settings object
 	private boolean quoteIdentifierWithDigits = false;
 	
+	private boolean allowsMultipleGetUpdateCounts = true;
+	
 	private String quoteCharacter;
 	private String dbVersion;
 	private SqlKeywordHandler keywordHandler;
@@ -446,6 +448,7 @@ public class DbMetadata
 		this.neverQuoteObjects = quote.indexOf(this.getDbId()) > -1;
 		this.trimDefaults = settings.getBoolProperty("workbench.db." + getDbId() + ".trimdefaults", true);
 		this.quoteIdentifierWithDigits = settings.getBoolProperty("workbench.db." + getDbId() + ".quotedigits", false);
+		this.allowsMultipleGetUpdateCounts = settings.getBoolProperty("workbench.db." + getDbId() + ".multipleupdatecounts", true);
 	}
 
 	public String getTableTypeName() { return tableTypeName; }
@@ -454,6 +457,11 @@ public class DbMetadata
 		return "VIEW"; 
 	}
 
+	public boolean allowsMultipleGetUpdateCounts()
+	{
+		return this.allowsMultipleGetUpdateCounts;
+	}
+	
 	public boolean getStripProcedureVersion()
 	{
 		String ids = Settings.getInstance().getProperty("workbench.db.stripprocversion", "");

@@ -28,7 +28,6 @@ import workbench.util.MessageBuffer;
  */
 public class StatementRunnerResult
 {
-	// contains a list of result sets
 	private List<ResultSet> results;
 	private List<Integer> updateCounts;
 	private MessageBuffer messages;
@@ -104,6 +103,11 @@ public class StatementRunnerResult
 	{
 		addUpdateCount(count);
 		addMessage(count + " " + ResourceMgr.getString("MsgRowsAffected"));
+	}
+	
+	public void addMessage(MessageBuffer buffer)
+	{
+		this.messages.append(buffer);
 	}
 	
 	public void addMessages(String[] msg)

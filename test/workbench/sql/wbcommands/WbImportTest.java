@@ -192,6 +192,110 @@ public class WbImportTest extends TestCase
 			fail(e.getMessage());
 		}
 	}
+
+	public void testMissingXmlColumn()
+	{
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
+             "<wb-export> \n" + 
+             "  <meta-data> \n" + 
+             " \n" + 
+             "    <generating-sql> \n" + 
+             "    <![CDATA[ \n" + 
+             "    select id, lastname, firstname from person \n" + 
+             "    ]]> \n" + 
+             "    </generating-sql> \n" + 
+             " \n" + 
+             "    <created>2006-07-29 23:31:40.366 CEST</created> \n" + 
+             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" + 
+             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" + 
+             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" + 
+             "    <database-product-name>HSQL Database Engine</database-product-name> \n" + 
+             "    <database-product-version>1.8.0</database-product-version> \n" + 
+             "    <wb-tag-format>short</wb-tag-format> \n" + 
+             "  </meta-data> \n" + 
+             " \n" + 
+             "  <table-def> \n" + 
+             "    <!-- The following information was retrieved from the JDBC driver's ResultSetMetaData --> \n" + 
+             "    <!-- column-name is retrieved from ResultSetMetaData.getColumnName() --> \n" + 
+             "    <!-- java-class is retrieved from ResultSetMetaData.getColumnClassName() --> \n" + 
+             "    <!-- java-sql-type-name is the constant's name from java.sql.Types --> \n" + 
+             "    <!-- java-sql-type is the constant's numeric value from java.sql.Types as returned from ResultSetMetaData.getColumnType() --> \n" + 
+             "    <!-- dbms-data-type is retrieved from ResultSetMetaData.getColumnTypeName() --> \n" + 
+             " \n" + 
+             "    <!-- For date and timestamp types, the internal long value obtained from java.util.Date.getTime() \n" + 
+             "         is written as an attribute to the <column-data> tag. That value can be used \n" + 
+             "         to create a java.util.Date() object directly, without the need to parse the actual tag content. \n" + 
+             "         If Java is not used to parse this file, the date/time format used to write the data \n" + 
+             "         is provided in the <data-format> tag of the column definition \n" + 
+             "    --> \n" + 
+             " \n" + 
+             "    <table-name>junit_test</table-name> \n" + 
+             "    <column-count>4</column-count> \n" + 
+             " \n" + 
+             "    <column-def index=\"0\"> \n" + 
+             "      <column-name>NR</column-name> \n" + 
+             "      <java-class>java.lang.Integer</java-class> \n" + 
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
+             "      <java-sql-type>4</java-sql-type> \n" + 
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"1\"> \n" + 
+             "      <column-name>LASTNAME</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"2\"> \n" + 
+             "      <column-name>FIRSTNAME</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"3\"> \n" + 
+             "      <column-name>EMAIL</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "  </table-def> \n" + 
+             " \n" + 
+             "<data> \n" + 
+             "<rd><cd>1</cd><cd>Dent</cd><cd>Arthur</cd></rd> \n" + 
+             "<rd><cd>2</cd><cd>Beeblebrox</cd><cd>Zaphod</cd></rd> \n" + 
+             "<rd><cd>3</cd><cd>Prefect</cd><cd>Ford</cd></rd> \n" + 
+             "</data> \n" + 
+             "</wb-export>";
+		try
+		{
+			File xmlFile = new File(this.basedir, "partial_xml_import.xml");
+			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
+			out.write(xml);
+			out.close();
+			
+			String cmd = "wbimport -continueOnError=false -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
+			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			assertEquals("Import succeeded", result.isSuccess(), false);
+
+			cmd = "wbimport -encoding='UTF-8' -continueOnError=true -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
+			result = importCmd.execute(this.connection, cmd);
+			assertEquals("Import failed", result.isSuccess(), true);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
+			int rows = 0;
+			if (rs.next()) rows = rs.getInt(1);
+			assertEquals("Wrong number of rows imported", 3, rows);
+			SqlUtil.closeAll(rs, stmt);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	
 	public void testTextClobImport()
 	{

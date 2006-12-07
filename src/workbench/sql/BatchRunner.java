@@ -46,6 +46,7 @@ import workbench.util.ArgumentParser;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -375,6 +376,16 @@ public class BatchRunner
 					if (this.resultDisplay == null) System.out.println("");
 					this.printMessage(result.getMessageBuffer().toString());
 				}
+				else if (result.hasWarning())
+				{
+					this.printMessage("");
+					// Force a new line for the console
+					if (this.resultDisplay == null) System.out.println("");
+					String verb = SqlUtil.getSqlVerb(sql);
+					String msg = StringUtil.replace(ResourceMgr.getString("MsgStmtCompletedWarn"), "%verb%", verb);	
+					this.printMessage(msg);
+				}
+				
 				executedCount ++;
 
 				if (this.showTiming)
