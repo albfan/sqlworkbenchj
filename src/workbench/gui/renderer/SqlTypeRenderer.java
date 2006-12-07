@@ -13,6 +13,7 @@ package workbench.gui.renderer;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -35,6 +36,7 @@ public class SqlTypeRenderer
 	
 	private Color alternateColor = Settings.getInstance().getAlternateRowColor();
 	private boolean useAlternatingColors = Settings.getInstance().getUseAlternateRowColor();
+	private boolean isPrinting = false;
 	
 	public SqlTypeRenderer()
 	{
@@ -81,7 +83,7 @@ public class SqlTypeRenderer
 					this.unselectedBackground = table.getBackground();
 				}
 				super.setForeground(this.unselectedForeground);
-				if (useAlternatingColors && ((row % 2) == 1))
+				if (useAlternatingColors && ((row % 2) == 1) && !isPrinting)
 				{
 					super.setBackground(this.alternateColor);
 				}
@@ -101,6 +103,13 @@ public class SqlTypeRenderer
 	public String getDisplayValue()
 	{
 		return getText();
+	}
+
+	public void print(Graphics g)
+	{
+		this.isPrinting = true;
+		super.print(g);
+		this.isPrinting = false;
 	}
 	
 }

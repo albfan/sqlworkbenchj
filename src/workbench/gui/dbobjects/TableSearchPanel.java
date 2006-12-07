@@ -23,7 +23,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.sql.Clob;
 import java.sql.ResultSet;
-import java.util.ArrayList;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -66,6 +65,7 @@ import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.util.Like;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbWorkspace;
 
 
@@ -498,7 +498,7 @@ public class TableSearchPanel
 		this.reset();
 
 		int[] selectedTables = this.tableNames.getSelectedRows();
-		//ArrayList searchTables = new ArrayList(this.tableNames.getSelectedRowCount());
+
 		TableIdentifier[] searchTables = new TableIdentifier[this.tableNames.getSelectedRowCount()];
 		DataStore tables = ((WbTable)(this.tableNames)).getDataStore();
 		for (int i=0; i < selectedTables.length; i++)
@@ -512,15 +512,9 @@ public class TableSearchPanel
 			searchTables[i] = new TableIdentifier(catalog, schema, tablename);
 			searchTables[i].setType(type);
 		}
-		int maxRows = 0;
-		try
-		{
-			maxRows = Integer.parseInt(this.rowCount.getText());
-		}
-		catch (Exception e)
-		{
-			maxRows = 0;
-		}
+		
+		int maxRows = StringUtil.getIntValue(this.rowCount.getText(), 0);
+		
 		String text = this.searchText.getText();
 		searcher.setMaxRows(maxRows);
 		searcher.setCriteria(text);

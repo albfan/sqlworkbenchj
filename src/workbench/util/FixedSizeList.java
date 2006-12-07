@@ -21,8 +21,7 @@ import java.util.List;
  */
 public class FixedSizeList
 {
-	
-	private LinkedList entries;
+	private LinkedList<String> entries;
 	private int maxSize;
 	
 	public FixedSizeList()
@@ -33,7 +32,7 @@ public class FixedSizeList
 	public FixedSizeList(int max)
 	{
 		this.maxSize = max;
-		this.entries = new LinkedList();
+		this.entries = new LinkedList<String>();
 	}
 	
 	/**
@@ -80,16 +79,16 @@ public class FixedSizeList
 	public synchronized String toString()
 	{
 		StringBuilder result = new StringBuilder(entries.size() * 80);
-		Iterator itr = entries.iterator();
+		Iterator<String> itr = entries.iterator();
 		while (itr.hasNext())
 		{
-			result.append((String)itr.next());
+			result.append(itr.next());
 			if (itr.hasNext()) result.append(',');
 		}
 		return result.toString();
 	}
 
-	public synchronized List getEntries()
+	public synchronized List<String> getEntries()
 	{
 		return Collections.unmodifiableList(this.entries);
 	}

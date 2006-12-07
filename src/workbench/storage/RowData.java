@@ -14,12 +14,8 @@ package workbench.storage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.math.BigDecimal;
-import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
-import java.text.DecimalFormat;
 
 import workbench.log.LogMgr;
 import workbench.util.FileUtil;

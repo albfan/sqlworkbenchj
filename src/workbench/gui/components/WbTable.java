@@ -1512,7 +1512,7 @@ public class WbTable
 		int row = this.getEditingRow();
 		String data = null;
 		WbTextCellEditor  editor = (WbTextCellEditor )this.getCellEditor();
-		if (this.isEditing())
+		if (this.isEditing() && editor.isModified())
 		{
 			data = editor.getText();
 		}

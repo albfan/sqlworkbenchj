@@ -12,11 +12,8 @@
 package workbench.gui.renderer;
 
 import java.text.SimpleDateFormat;
-
 import javax.swing.SwingConstants;
 import workbench.log.LogMgr;
-
-import workbench.util.StringUtil;
 
 /**
  *

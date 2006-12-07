@@ -30,7 +30,7 @@ import workbench.util.WbPersistence;
  */
 public class FilterDefinitionManager
 {
-	private LinkedList listeners;
+	private LinkedList<PropertyChangeListener> listeners;
 	private FixedSizeList filterFiles;
 	private static FilterDefinitionManager instance;
 	
@@ -105,19 +105,17 @@ public class FilterDefinitionManager
 	private synchronized void firePropertyChanged()
 	{
 		if (this.listeners == null) return;
-		Iterator itr = this.listeners.iterator();
 		PropertyChangeEvent evt = new PropertyChangeEvent(this, "mruList", null, new Integer(filterFiles.size()));
-		while (itr.hasNext())
+		for(PropertyChangeListener l : listeners)
 		{
-			PropertyChangeListener l = (PropertyChangeListener)itr.next();
 			if (l == null) continue;
 			l.propertyChange(evt);
 		}
 	}
 	
-	public List getEntries()
+	public List<String> getEntries()
 	{
-		return Collections.unmodifiableList(filterFiles.getEntries());
+		return filterFiles.getEntries();
 	}
 	
 	public void saveFilter(FilterExpression filter, String file)

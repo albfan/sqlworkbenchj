@@ -18,17 +18,15 @@ import java.awt.Frame;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.EventObject;
-import javax.swing.ActionMap;
 
 import javax.swing.DefaultCellEditor;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.OpenEditWindowAction;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -37,11 +35,12 @@ import workbench.resource.ResourceMgr;
  */
 public class WbTextCellEditor
 	extends DefaultCellEditor
-	implements MouseListener
+	implements MouseListener, DocumentListener
 {
 	private JTextField textField;
 	private WbTable parentTable;
 	private Color defaultBackground;
+	private boolean changed = false;
 	
 	public static final WbTextCellEditor createInstance()
 	{
@@ -64,9 +63,10 @@ public class WbTextCellEditor
 		this.textField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.textField.addMouseListener(this);
 		this.textField.addMouseListener(new TextComponentMouseListener());		
+		this.textField.getDocument().addDocumentListener(this);
 		super.addCellEditorListener(parent);
 	}
-
+	
 	public String getText() 
 	{
 		return this.textField.getText();
@@ -97,6 +97,7 @@ public class WbTextCellEditor
 	{
   	Component result = super.getTableCellEditorComponent(table, value, isSelected, row, column);
 		textField.selectAll();
+		this.changed = false;
 		return result;
   }
 
@@ -175,5 +176,25 @@ public class WbTextCellEditor
 		{
 			this.parentTable.openEditWindow();
 		}
+	}
+
+	public boolean isModified() 
+	{
+		return this.changed;
+	}
+	
+	public void insertUpdate(DocumentEvent arg0)
+	{
+		this.changed = true;
+	}
+	
+	public void removeUpdate(DocumentEvent arg0)
+	{
+		this.changed = true;
+	}
+	
+	public void changedUpdate(DocumentEvent arg0)
+	{
+		this.changed = true;
 	}
 }

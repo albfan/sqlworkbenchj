@@ -21,6 +21,7 @@ import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+import workbench.util.MessageBuffer;
 
 /**
  * @author  support@sql-workbench.net
@@ -35,6 +36,8 @@ public class QueryCopySource
 	private Statement retrieveStatement;
 	private String retrieveSql;
 	private boolean abortOnError;
+	private boolean hasErrors = false;
+	private boolean hasWarnings = false;
 	
 	public QueryCopySource(WbConnection source, String sql)
 	{
@@ -42,6 +45,9 @@ public class QueryCopySource
 		this.retrieveSql = sql;
 	}
 
+	public boolean hasErrors() { return this.hasErrors; }
+	public boolean hasWarnings() { return this.hasWarnings; }
+	
 	public void setReceiver(RowDataReceiver rec)
 	{
 		this.receiver = rec;
@@ -121,9 +127,9 @@ public class QueryCopySource
 		
 	}
 
-	public String getMessages()
+	public MessageBuffer getMessages()
 	{
-		return "";
+		return null;
 	}
 
 	public void setAbortOnError(boolean flag)

@@ -60,7 +60,7 @@ public class DefineFilterExpressionPanel
 	implements ActionListener, ValidatingComponent
 {
 	private ResultInfo columnInfo;
-	private List panels = new ArrayList();
+	private List<PanelEntry> panels = new ArrayList<PanelEntry>();
 	private JButton addLineButton;
 	private JRadioButton andButton;
 	private JRadioButton orButton;
@@ -258,7 +258,7 @@ public class DefineFilterExpressionPanel
 			{
 				ExpressionValue exp = (ExpressionValue)expList.get(i);
 				this.addExpressionPanel(exp);
-				PanelEntry item = (PanelEntry)this.panels.get(this.panels.size() - 1);
+				PanelEntry item = this.panels.get(this.panels.size() - 1);
 				ColumnExpressionPanel panel = item.expressionPanel;
 				panel.setExpressionValue(exp);
 			}
@@ -274,10 +274,8 @@ public class DefineFilterExpressionPanel
 
 	public boolean validateInput()
 	{
-		int count = this.panels.size();
-		for (int i=0; i < count; i++)
+		for (PanelEntry entry : panels)
 		{
-			PanelEntry entry = (PanelEntry)panels.get(i);
 			ColumnComparator comp = entry.expressionPanel.getComparator();
 			if (comp == null)
 			{
@@ -302,10 +300,8 @@ public class DefineFilterExpressionPanel
 	{
 		ComplexExpression exp = null;
 		
-		int count = this.panels.size();
-		for (int i=0; i < count; i++)
+		for (PanelEntry entry : panels)
 		{
-			PanelEntry entry = (PanelEntry)panels.get(i);
 			FilterExpression f = (FilterExpression)entry.expressionPanel.getExpressionValue();
 			if (f != null)
 			{
@@ -332,7 +328,6 @@ public class DefineFilterExpressionPanel
 		final ColumnExpressionPanel exp = new ColumnExpressionPanel(columnInfo, filter);
 		JButton b = new FlatButton(ResourceMgr.getImage("Remove"));
 		b.setPreferredSize(new Dimension(21,21));
-//		b.setBorder(BorderFactory.createEtchedBorder());
 		b.addActionListener(this);
 		JPanel p = new JPanel(new GridBagLayout());
 		GridBagConstraints c1 = new GridBagConstraints();
@@ -375,13 +370,6 @@ public class DefineFilterExpressionPanel
 		Dimension ps = exp.getPreferredSize();
 		Dimension bs = b.getPreferredSize();
 		Dimension prefSize = new Dimension((int)(ps.getWidth() + bs.getWidth()), (int)ps.getHeight());
-//		EventQueue.invokeLater(new Runnable()
-//		{
-//			public void run()
-//			{
-//				exp.setFocusToColumn();
-//			}
-//		});
 		return prefSize;
 	}
 	

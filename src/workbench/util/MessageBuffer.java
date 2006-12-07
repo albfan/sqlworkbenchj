@@ -72,6 +72,18 @@ public class MessageBuffer
 		return length;
 	}
 	
+	public synchronized void append(MessageBuffer buff)
+	{
+		if (buff == null) return;
+		int count = buff.messages.size();
+		while (this.messages.size() + count > maxSize)
+		{
+			String s = (String)messages.removeFirst();
+			if (s != null) this.length -= s.length();
+		}
+		this.messages.addAll(buff.messages);
+	}
+	
 	public synchronized void append(CharSequence s)
 	{
 		if (StringUtil.isEmptyString(s)) return;

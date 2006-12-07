@@ -28,7 +28,6 @@ public class ListComboBoxModel
 	implements ComboBoxModel
 {
 	private List data = Collections.EMPTY_LIST;
-	private List listener = new ArrayList();
 	private Object selectedItem;
 	
 	public ListComboBoxModel()
@@ -39,11 +38,6 @@ public class ListComboBoxModel
 	public ListComboBoxModel(List l)
 	{
 		data = l;
-	}
-
-	public void addListDataListener(ListDataListener l)
-	{
-		listener.add(l);
 	}
 
 	public void setData(List l)
@@ -80,11 +74,6 @@ public class ListComboBoxModel
 			if (item.equalsIgnoreCase(o.toString())) return i;
 		}
 		return -1;
-	}
-	
-	public void removeListDataListener(ListDataListener l)
-	{
-		listener.remove(l);
 	}
 
 	public void setSelectedItem(Object anItem)

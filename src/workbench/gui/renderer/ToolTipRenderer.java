@@ -208,7 +208,7 @@ public class ToolTipRenderer
 			}
 			else 
 			{
-				if (isAlternatingRow)
+				if (isAlternatingRow && !isPrinting)
 				{
 					g.setColor(alternateBackground);
 				}

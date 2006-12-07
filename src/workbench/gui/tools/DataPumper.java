@@ -1743,7 +1743,7 @@ public class DataPumper
 		throws Exception
 	{
 		this.fileImporter.setConnection(this.targetConnection);
-		List cols = columnMapper.getMappingForImport();
+		List<ColumnIdentifier> cols = columnMapper.getMappingForImport();
 		this.fileImporter.setTargetTable(this.targetTable.getSelectedTable());
 		this.fileImporter.setImportColumns(cols);
 		this.fileImporter.setBatchSize(this.getBatchSize());

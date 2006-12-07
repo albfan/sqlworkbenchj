@@ -18,7 +18,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import javax.swing.ComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
@@ -33,9 +32,7 @@ import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ComparatorFactory;
 import workbench.storage.filter.DataRowExpression;
 import workbench.storage.filter.ExpressionValue;
-import workbench.storage.filter.FilterExpression;
 import workbench.util.ValueConverter;
-import java.awt.EventQueue;
 
 /**
  * @author support@sql-workbench.net

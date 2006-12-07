@@ -237,7 +237,7 @@ public class ColumnMapper
 	 * Return the columns from the input file as they should 
 	 * be specified for the WbImport command
 	 */
-	public List getMappingForImport()
+	public List<ColumnIdentifier> getMappingForImport()
 	{
 		int count = this.sourceColumns.size();
 		ArrayList result = new ArrayList(count);

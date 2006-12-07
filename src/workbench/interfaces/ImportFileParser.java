@@ -42,7 +42,7 @@ public interface ImportFileParser
 	/**
 	 * Define the column structure to be used for the import
 	 */
-	void setColumns(List columns)
+	void setColumns(List<ColumnIdentifier> columns)
 		throws SQLException;
 	
 	/**

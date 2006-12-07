@@ -12,8 +12,6 @@
 package workbench.gui.renderer;
 
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.Map;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import workbench.log.LogMgr;
