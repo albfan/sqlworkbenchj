@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.interfaces.CharacterSequence;
-import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
 import workbench.util.FileMappedSequence;
 import workbench.util.SqlUtil;
@@ -264,7 +263,12 @@ public class IteratingScriptParser
 		{
 			currChar = this.script.substring(pos, pos + 1).toUpperCase();
 			char firstChar = currChar.charAt(0);
-
+			
+			// skip CR characters
+			if (firstChar == '\r') continue;
+			
+			char nextChar = (pos < scriptLength - 1 ? this.script.charAt(pos + 1) : 0);
+			
 			// ignore quotes in comments
 			if (!commentOn && (firstChar == '\'' || firstChar == '"'))
 			{
@@ -299,16 +303,14 @@ public class IteratingScriptParser
 			{
 				if (!commentOn)
 				{
-					char next = this.script.charAt(pos + 1);
-
-					if (firstChar == '/' && next == '*')
+					if (firstChar == '/' && nextChar == '*')
 					{
 						blockComment = true;
 						singleLineComment = false;
 						commentOn = true;
 						//pos ++; // ignore the next character
 					}
-					else if ((startOfLine && firstChar == '#' && checkHashComment) || (firstChar == '-' && next == '-'))
+					else if ((startOfLine && firstChar == '#' && checkHashComment) || (firstChar == '-' && nextChar == '-'))
 					{
 						singleLineComment = true;
 						blockComment = false;
@@ -319,7 +321,7 @@ public class IteratingScriptParser
 				{
 					if (singleLineComment)
 					{
-						if (firstChar == '\r' || firstChar == '\n')
+						if (firstChar == '\n')
 						{
 							singleLineComment = false;
 							blockComment = false;
@@ -368,8 +370,7 @@ public class IteratingScriptParser
 				}
 				else
 				{
-					// check for single line commands...
-					if (firstChar == '\r' || firstChar == '\n')
+					if (firstChar == '\n')
 					{
 						String line = this.script.substring(lastNewLineStart, pos).trim();
 						String clean = SqlUtil.makeCleanSql(line, false, false, '\'');
@@ -482,11 +483,21 @@ public class IteratingScriptParser
 				if (startPos < endPos) ch = this.script.charAt(startPos);
 			}
 		}
-		value = this.script.substring(startPos, endPos);
 		
-		if (value.length() == 0) return null;
-
-		ScriptCommandDefinition c = new ScriptCommandDefinition(storeSqlInCommands ? value : null, startPos, endPos);
+		// always clean out trailing whitespace
+		char ch = this.script.charAt(endPos - 1);
+		while (startPos < endPos && Character.isWhitespace(ch))
+		{
+			endPos --;
+			if (startPos < endPos) ch = this.script.charAt(endPos - 1);
+		}
+		
+		if (startPos >= endPos) return null;
+		if (storeSqlInCommands)
+		{
+			value = this.script.substring(startPos, endPos);
+		}
+		ScriptCommandDefinition c = new ScriptCommandDefinition(value, startPos, endPos);
 		
 		return c;
 	}
