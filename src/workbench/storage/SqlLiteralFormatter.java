@@ -13,6 +13,7 @@ package workbench.storage;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -34,8 +35,10 @@ public class SqlLiteralFormatter
 {
 	public static final String GENERAL_SQL = "All";
 	
-	private Map dateLiteralFormats;
+	private Map<String, DbDateFormatter> dateLiteralFormats;
+	private Map<String, DbDateFormatter> timestampFormats;
 	private DbDateFormatter defaultDateFormatter;
+	private DbDateFormatter defaultTimestampFormatter;
 	private BlobLiteralFormatter blobFormatter;
 	private DataFileWriter blobWriter;
 	private DataFileWriter clobWriter;
@@ -58,6 +61,10 @@ public class SqlLiteralFormatter
 		dateLiteralFormats = readStatementTemplates("DateLiteralFormats.xml");
 		if (dateLiteralFormats == null) dateLiteralFormats = Collections.EMPTY_MAP;
 		defaultDateFormatter = getDateLiteralFormatter(product);
+	
+		timestampFormats = readStatementTemplates("TimestampLiteralFormats.xml");
+		if (timestampFormats == null) timestampFormats = Collections.EMPTY_MAP;
+		defaultTimestampFormatter = getDateLiteralFormatter(product);
 	}
 	
 	public void noBlobHandling()
@@ -145,13 +152,23 @@ public class SqlLiteralFormatter
 		}
 		return result;
 	}
+
+	public DbDateFormatter getTimestampFormatter(String product)
+	{
+		return getFormatter(timestampFormats, product);
+	}
 	
 	public DbDateFormatter getDateLiteralFormatter(String aProductname)
 	{
-		DbDateFormatter format = (DbDateFormatter)dateLiteralFormats.get(aProductname == null ? GENERAL_SQL : aProductname);
+		return getFormatter(dateLiteralFormats, aProductname);
+	}
+	
+	private DbDateFormatter getFormatter(Map formats, String product)
+	{
+		DbDateFormatter format = dateLiteralFormats.get(product == null ? GENERAL_SQL : product);
 		if (format == null)
 		{
-			format = (DbDateFormatter)dateLiteralFormats.get(GENERAL_SQL);
+			format = dateLiteralFormats.get(GENERAL_SQL);
 			
 			// Just in case someone messed around with the XML file
 			if (format == null) format = DbDateFormatter.DEFAULT_FORMATTER;
@@ -170,6 +187,7 @@ public class SqlLiteralFormatter
 		realValue.append('\'');
 		return realValue.toString();
 	}
+	
 	public String getDefaultLiteral(ColumnData data)
 	{
 		Object value = data.getValue();
@@ -197,6 +215,10 @@ public class SqlLiteralFormatter
 			{
 				return quoteString(t);
 			}
+		}
+		else if (value instanceof Timestamp)
+		{
+			return this.defaultTimestampFormatter.getLiteral((Date)value);
 		}
 		else if (value instanceof Date)
 		{

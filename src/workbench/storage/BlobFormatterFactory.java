@@ -46,7 +46,7 @@ public class BlobFormatterFactory
 			f.setSuffix("'))");
 			return f;
 		}
-		else if ("db2_nt".equalsIgnoreCase(meta.getDbId()))
+		else if ("db2_nt".equalsIgnoreCase(meta.getDbId()) || "h2".equals(meta.getDbId()))
 		{
 			// Although the DB2 Manuals says it supports
 			// binary string constants, it is very likely
@@ -66,7 +66,6 @@ public class BlobFormatterFactory
 			f.setSuffix("'");
 			return f;
 		}
-
 		return createAnsiFormatter();
 	}
 	

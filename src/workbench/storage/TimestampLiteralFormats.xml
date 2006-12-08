@@ -6,17 +6,17 @@
    <string>h2</string> 
    <object id="DbDateFormatter0" class="workbench.storage.DbDateFormatter"> 
     <void property="format"> 
-     <string>yyyy-MM-dd</string> 
+     <string>yyyy-MM-dd HH:mm:ss</string> 
     </void> 
     <void property="functionCall"> 
-     <string>DATE '%formatted_date_literal%'</string> 
+     <string>TIMESTAMP '%formatted_date_literal%'</string> 
     </void> 
    </object> 
   </void> 
 	 
   <void method="put"> 
    <string>Oracle</string> 
-   <object id="OraFormatter" class="workbench.storage.DbDateFormatter"> 
+   <object id="OracleFormatter" class="workbench.storage.DbDateFormatter"> 
     <void property="format"> 
      <string>yyyy-MM-dd HH:mm:ss</string> 
     </void> 
@@ -25,17 +25,12 @@
     </void> 
    </object> 
   </void> 
-
-  <void method="put"> 
-   <string>Oracle8</string> 
-   <object idref="OraFormatter"/> 
-  </void> 
 	
   <void method="put"> 
    <string>Microsoft SQL Server</string> 
    <object class="workbench.storage.DbDateFormatter"> 
     <void property="format"> 
-     <string>yyyy-MM-dd</string> 
+     <string>yyyy-MM-dd HH:mm:ss</string> 
     </void> 
    </object> 
   </void> 
@@ -44,9 +39,14 @@
    <string>All</string> 
    <object class="workbench.storage.DbDateFormatter"> 
     <void property="format"> 
-     <string>yyyy-MM-dd</string> 
+     <string>yyyy-MM-dd HH:mm:ss</string> 
     </void> 
    </object> 
+  </void> 
+	
+  <void method="put"> 
+   <string>Oracle8</string> 
+   <object idref="OracleFormatter"/> 
   </void> 
 	
  </object> 

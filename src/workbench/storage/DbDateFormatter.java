@@ -32,7 +32,6 @@ public class DbDateFormatter
 
 	private String functionCall;
 
-	/** Creates a new instance of DbDateFormatter */
 	public DbDateFormatter()
 	{
 	}
