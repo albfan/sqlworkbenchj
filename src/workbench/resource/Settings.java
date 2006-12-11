@@ -774,6 +774,7 @@ public class Settings
 			this.props.remove("workbench.gui.macros.replaceonrun");
 			this.props.remove("workbench.db.cancelneedsreconnect");
 			this.props.remove("workbench.db.trigger.replacenl");
+			this.props.remove("workbench.sql.multipleresultsets");
 			
 			this.props.remove("workbench.db.keywordlist.oracle");
 			this.props.remove("workbench.db.keywordlist.thinksql_relational_database_management_system");

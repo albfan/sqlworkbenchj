@@ -694,7 +694,6 @@ public class EditorPanel
 		
 		BufferedReader reader = null;
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
-//		int endLength = lineEnding.length();
 		SyntaxDocument doc = null;
 		
 		try
@@ -893,21 +892,12 @@ public class EditorPanel
 			Writer writer = EncodingUtil.createWriter(aFile, encoding, false);
 			
 			int count = this.getLineCount();
-			String line;
-			int trimLen;
+			
 			for (int i=0; i < count; i++)
 			{
-				line = this.getLineText(i);
-				
-				if (line.endsWith("\r\n") || line.endsWith("\n\r"))
-					trimLen = 2;
-				else if (line.endsWith("\n") || line.endsWith("\r"))
-					trimLen = 1;
-				else
-					trimLen = 0;
-
-				int len = line.length() - trimLen;
-				writer.write(line, 0, len);
+				String line = this.getLineText(i);
+				int len = StringUtil.getRealLineLength(line);
+				if (len > 0) writer.write(line, 0, len);
 				writer.write(lineEnding);
 			}
 			writer.close();

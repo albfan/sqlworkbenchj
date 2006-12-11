@@ -150,6 +150,8 @@ public class DbMetadata
 	private Set objectsWithData = null;
 	private List schemasToIgnore;
 	private List catalogsToIgnore;
+	
+	private boolean reportsRealSizeAsDisplaySize = false;
 
 	public DbMetadata(WbConnection aConnection)
 		throws SQLException
@@ -449,6 +451,7 @@ public class DbMetadata
 		this.trimDefaults = settings.getBoolProperty("workbench.db." + getDbId() + ".trimdefaults", true);
 		this.quoteIdentifierWithDigits = settings.getBoolProperty("workbench.db." + getDbId() + ".quotedigits", false);
 		this.allowsMultipleGetUpdateCounts = settings.getBoolProperty("workbench.db." + getDbId() + ".multipleupdatecounts", true);
+		this.reportsRealSizeAsDisplaySize = settings.getBoolProperty("workbench.db." + getDbId() + ".charsize.usedisplaysize", false);
 	}
 
 	public String getTableTypeName() { return tableTypeName; }
@@ -561,7 +564,7 @@ public class DbMetadata
 
 	public boolean reportsRealSizeAsDisplaySize()
 	{
-		return this.isHsql;
+		return this.reportsRealSizeAsDisplaySize;
 	}
 
 	public boolean supportSingleLineCommands()

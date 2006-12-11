@@ -101,7 +101,7 @@ public class SqlLiteralFormatter
 		if (!StringUtil.isEmptyString(encoding)) this.clobEncoding = encoding;
 	}
 	
-	private Map readStatementTemplates(String aFilename)
+	private Map<String, DbDateFormatter> readStatementTemplates(String aFilename)
 	{
 		Map result = null;
 		
@@ -113,7 +113,7 @@ public class SqlLiteralFormatter
 			Object value = reader.readObject(in);
 			if (value instanceof Map)
 			{
-				result = (Map)value;
+				result = (Map<String, DbDateFormatter>)value;
 			}
 		}
 		catch (Exception e)
@@ -131,7 +131,7 @@ public class SqlLiteralFormatter
 			if (f.exists())
 			{
 				WbPersistence reader = new WbPersistence(f.getAbsolutePath());
-				customizedMap = (Map)reader.readObject();
+				customizedMap = (Map<String, DbDateFormatter>)reader.readObject();
 			}
 		}
 		catch (Exception e)

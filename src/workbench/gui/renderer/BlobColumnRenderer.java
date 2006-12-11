@@ -14,7 +14,6 @@ package workbench.gui.renderer;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -130,8 +129,16 @@ public class BlobColumnRenderer
 	{
 		return currentValue;
 	}
-
-	public String getDisplayValue() { return displayPanel.getLabel(); }
+	
+	public String getDisplayValue() 
+	{ 
+		return displayPanel.getLabel(); 
+	}
+	
+	public void setUseAlternatingColors(boolean flag)
+	{
+		this.useAlternatingColors = flag;
+	}
 	
 	public void actionPerformed(ActionEvent e)
 	{

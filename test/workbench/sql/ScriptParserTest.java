@@ -14,6 +14,7 @@ package workbench.sql;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Iterator;
 import junit.framework.*;
@@ -21,6 +22,7 @@ import java.util.List;
 import workbench.TestUtil;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -34,18 +36,63 @@ public class ScriptParserTest extends TestCase
 		super(testName);
 	}
 
+	public void testEndPosition()
+	{
+		try
+		{
+			// Check if a cursorposition at the far end of the statement is detected propery
+			String sql = "select msg.rn_business_msg_id, msg.direction, msg.error_msg, msg.message, msg.status\nfrom rn_business_msg msg, pip3a1 pip\nwhere msg.rn_business_msg_id = pip.rn_quote_request_ack_id\n;\n\nselect * \nfrom rn_business_msg\nwhere \n;";	
+			ScriptParser p = new ScriptParser();
+			p.allowEmptyLineAsSeparator(false);
+			p.setScript(sql);
+			int index = p.getCommandIndexAtCursorPos(221);
+			assertEquals(1, index);
+			assertEquals(2, p.getSize());
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	public void testEmptyLines()
+	{
+		try
+		{
+			String sql = "select a,b,c\r\nfrom test\r\nwhere x = 1";
+			ScriptParser p = new ScriptParser();
+			p.allowEmptyLineAsSeparator(true);
+			p.setScript(sql);
+			int count = p.getSize();
+			assertEquals("Wrong number of statements", 1 ,count);
+			
+			sql = "select a,b,c\nfrom test\nwhere x = 1";
+			p.setScript(sql);
+			count = p.getSize();
+			assertEquals("Wrong number of statements", 1 ,count);			
+
+			sql = "select a,b,c\nfrom test\nwhere x = 1\n\nselect x from y";
+			p.setScript(sql);
+			count = p.getSize();
+			assertEquals("Wrong number of statements", 2 ,count);			
+			String cmd = p.getCommand(1);
+			assertEquals("Wrong statement returned", "select x from y" ,cmd);			
+
+			sql = "select a,b,c\r\nfrom test\r\nwhere x = 1\r\n\r\nselect x from y";
+			p.setScript(sql);
+			count = p.getSize();
+			assertEquals("Wrong number of statements", 2 ,count);			
+			cmd = p.getCommand(1);
+			assertEquals("Wrong statement returned", "select x from y" ,cmd);			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 	public void testSingleLineDelimiter()
 	{
-//		String sql = "-- test it\r\n" + 
-//			           "DROP PROCEDURE test\r\n" + 
-//			           "/\r\n" + 
-//			           "CREATE OR REPLACE PROCEDURE test\r\n" + 
-//								 "IS \r\n" + 
-//								 "BEGIN \\n" + 
-//								 "  SELECT a / b FROM someTable;\r\n" + 
-//								 "END;\r\n" +
-//								 "/\r\n";
-
 		String sql = "DROP\n" + 
 			           "/\n" + 
 			           "CREATE\n" +
@@ -58,8 +105,20 @@ public class ScriptParserTest extends TestCase
 			p.setScript(sql);
 			int size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);
+			assertEquals("Wrong statement returned", "DROP", p.getCommand(0));
+			assertEquals("Wrong statement returned", "CREATE", p.getCommand(1));
 			
-			assertEquals("Delimiter returned", false, p.getCommand(0).trim().endsWith("/"));
+			sql = "DROP\r\n" + 
+						 "/\r\n" + 
+						 "CREATE\r\n" +
+						 "/\r\n";
+			
+			p.setScript(sql);
+			size = p.getSize();
+			assertEquals("Wrong number of statements", 2, size);
+			assertEquals("Wrong statement returned", "DROP", p.getCommand(0));
+			assertEquals("Wrong statement returned", "CREATE", p.getCommand(1));
+			
 		}
 		catch (Exception e)
 		{
@@ -92,7 +151,7 @@ public class ScriptParserTest extends TestCase
 			
 			// Make sure the iterating parser is used, by setting
 			// a very low max file size
-			ScriptParser p = new ScriptParser(100); 
+			ScriptParser p = new ScriptParser(0); 
 			
 			p.setDelimiter(new DelimiterDefinition("/", true));
 			p.setSupportOracleInclude(false);
@@ -105,7 +164,11 @@ public class ScriptParserTest extends TestCase
 			while (p.hasNext())
 			{
 				size ++;
-				p.getNextCommand();
+				String sql = p.getNextCommand();
+				if (size == 2)
+				{
+					assertEquals("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent')", sql);
+				}
 			}
 			assertEquals("Wrong number of statements", 5, size);
 		}
@@ -128,6 +191,7 @@ public class ScriptParserTest extends TestCase
 			ScriptParser p = new ScriptParser(sql);
 			int size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);
+			assertEquals("Wrong statement returned", "SELECT id,';' \nFROM person", p.getCommand(0));
 		}
 		catch (Exception e)
 		{
@@ -150,10 +214,22 @@ public class ScriptParserTest extends TestCase
 		{
 			ScriptParser p = new ScriptParser(sql);
 			// Test if the automatic detection of the MS SQL delimiter works
-			//p.setAlternateDelimiter(new DelimiterDefinition("./", false));
 			p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_MS_DELIMITER);
 			int size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);
+			//System.out.println("sql=" + p.getCommand(0));
+			assertEquals("Wrong statement returned", "SELECT id \nFROM person GO", p.getCommand(0));
+			sql = "SELECT id \r\n" + 
+						 "FROM person GO\r\n" + 
+						 "  GO  \r\n" + 
+						 " \r\n" + 
+						 "select * \r\n" + 
+						 "from country \r\n" + 
+						 "  GO \r\n";		
+			p.setScript(sql);
+			size = p.getSize();
+			assertEquals("Wrong number of statements", 2, size);
+			assertEquals("Wrong statement returned", "SELECT id \r\nFROM person GO", p.getCommand(0));
 		}
 		catch (Exception e)
 		{
@@ -243,22 +319,38 @@ public class ScriptParserTest extends TestCase
 			fail(e.getMessage());
 		}
 	}
+
+	private File createScript(int counter, String lineEnd)
+		throws IOException
+	{
+		File tempdir = new File(System.getProperty("java.io.tmpdir"));
+		File script = new File(tempdir, "largefile.sql");
+		BufferedWriter out = new BufferedWriter(new FileWriter(script));
+		for (int i = 0; i < counter; i++)
+		{
+			out.write("--- test command");
+			out.write(lineEnd);
+			out.write("insert into test_table");
+			out.write(lineEnd);
+			out.write("col1, col2, col3, col4)");
+			out.write(lineEnd);
+			out.write("values ('1','2''',3,' a two line ");
+			out.write(lineEnd);
+			out.write("; quoted text');");
+			out.write(lineEnd);
+			out.write(lineEnd);
+		}
+		out.close();
+		return script;
+	}
 	
 	public void testFileParsing()
 	{
 		try
 		{
-			File tempdir = new File(System.getProperty("java.io.tmpdir"));
-			File script = new File(tempdir, "largefile.sql");
-			BufferedWriter out = new BufferedWriter(new FileWriter(script));
-			int counter = 5000;
-			for (int i = 0; i < counter; i++)
-			{
-				out.write("--- test command\n");
-				out.write("insert into test_table\n(col1, col2, col3, col4)\nvalues ('1','2''',3,' a two line \n; quoted text');\n\n");
-			}
-			out.close();
-			ScriptParser p = new ScriptParser(500);
+			int counter = 500;
+			File script = createScript(counter, "\n");
+			ScriptParser p = new ScriptParser(100);
 			p.setFile(script);
 			int count = 0;
 			Iterator itr = p.getIterator();
@@ -267,12 +359,29 @@ public class ScriptParserTest extends TestCase
 				String sql = (String)itr.next();
 				assertNotNull("No SQL returned at " + count, sql);
 				String verb = SqlUtil.getSqlVerb(sql);
-				assertEquals("Wrong statement retrieved", "insert", verb.toLowerCase());
+				assertEquals("Wrong statement retrieved using LF", "insert", verb.toLowerCase());
 				count ++;
 			}
 			p.done();
-			assertEquals("Wrong number of statements", counter, count);
+			assertEquals("Wrong number of statements using LF", counter, count);
 			script.delete();
+			
+			script = createScript(counter, "\r\n");
+			p.setFile(script);
+			count = 0;
+			itr = p.getIterator();
+			while (itr.hasNext())
+			{
+				String sql = (String)itr.next();
+				assertNotNull("No SQL returned at " + count, sql);
+				String verb = SqlUtil.getSqlVerb(sql);
+				assertEquals("Wrong statement retrieved using CRLF", "insert", verb.toLowerCase());
+				count ++;
+			}
+			p.done();
+			assertEquals("Wrong number of statements using CRL", counter, count);
+			script.delete();
+			
 		}
 		catch (Exception e)
 		{
@@ -281,7 +390,7 @@ public class ScriptParserTest extends TestCase
 		}
 	}
 	
-	public void testParser()
+	public void testMutliStatements()
 	{
 		String sql = "SELECT '(select l.label from template_field_label l where l.template_field_id = f.id and l.language_code = '''|| l.code ||''') as \"'||l.code||' ('||l.name||')\",' \n" + 
 									"FROM  (SELECT DISTINCT language_code FROM template_field_label) ll,  \n" + 
@@ -325,22 +434,34 @@ public class ScriptParserTest extends TestCase
 		String s = p.getCommand(0);
 		String clean = SqlUtil.makeCleanSql(s, false, false, '\'');
 		assertEquals("alter table participants drop constraint r_05", clean);
-
 		s = p.getCommand(2);
 		assertEquals("@include.sql", s);
+
+		// Now test with Windows linefeeds
+		sql = StringUtil.replace(sql, "\n", "\r\n");
+		p.setScript(sql);
+		assertEquals(4, p.getSize());
+		verb = SqlUtil.getSqlVerb(p.getCommand(1));
+		assertEquals("drop", verb.toLowerCase());
+		s = p.getCommand(0);
+		clean = SqlUtil.makeCleanSql(s, false, false, '\'');
+		assertEquals("alter table participants drop constraint r_05", clean);
+		s = p.getCommand(2);
+		assertEquals("@include.sql", s);
+			
 		
-		sql = "SELECT distinct t.KEY \n" + 
-					"FROM translation t, content_folder f \n" + 
-					"WHERE t.key = f.folder_name \n" + 
-					"--AND   LANGUAGE = 'en' \n" + 
-					"; \n" + 
-					" \n" + 
-					"WBDIFF -sourceprofile=\"CMTS\" \n" + 
-					"       -file=c:/temp/test.xml \n" + 
-					"       -includeindex=false \n" + 
-					"       -includeforeignkeys=false \n" + 
-					"       -includeprimarykeys=false \n" + 
-					";       ";			
+		sql = "SELECT distinct t.KEY \r\n" + 
+					"FROM translation t, content_folder f \r\n" + 
+					"WHERE t.key = f.folder_name \r\n" + 
+					"--AND   LANGUAGE = 'en' \r\n" + 
+					";\r\n" + 
+					"\r\n" + 
+					"WBDIFF -sourceprofile=\"CMTS\" \r\n" + 
+					"       -file=c:/temp/test.xml \r\n" + 
+					"       -includeindex=false \r\n" + 
+					"       -includeforeignkeys=false \r\n" + 
+					"       -includeprimarykeys=false \r\n" + 
+					";\r\n";			
 		p = new ScriptParser(sql);
 		assertEquals(2, p.getSize());
 	}

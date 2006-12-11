@@ -45,6 +45,11 @@ public class ProcStatusRenderer
 		
 	}
 
+	public void setUseAlternatingColors(boolean flag)
+	{
+		// not implemented
+	}
+	
 	public String getDisplayValue()
 	{
 		return getText();

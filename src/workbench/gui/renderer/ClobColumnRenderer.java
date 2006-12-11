@@ -17,7 +17,8 @@ import java.sql.Clob;
  * Renderer for CLOB datatype...
  * @author  support@sql-workbench.net
  */
-public class ClobColumnRenderer extends ToolTipRenderer
+public class ClobColumnRenderer 
+	extends ToolTipRenderer
 {
 	public ClobColumnRenderer()
 	{

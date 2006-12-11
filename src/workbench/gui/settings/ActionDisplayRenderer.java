@@ -44,9 +44,18 @@ public class ActionDisplayRenderer
 		
 	}
 
+	public int getDisplayWidth()
+	{
+		return getText().length();
+	}
+	
 	public String getDisplayValue()
 	{
 		return getText();
+	}
+	
+	public void setUseAlternatingColors(boolean flag)
+	{
 	}
 	
 }

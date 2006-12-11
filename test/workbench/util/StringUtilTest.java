@@ -40,6 +40,30 @@ public class StringUtilTest
 		assertEquals(true, StringUtil.isLowerCase("1234567890"));
 	}
 	
+	public void testGetRealLineLenght()
+	{
+		int len = StringUtil.getRealLineLength("bla\r");
+		assertEquals(3,len);
+		
+		len = StringUtil.getRealLineLength("bla\r\n");
+		assertEquals(3,len);
+		
+		len = StringUtil.getRealLineLength("bla\r\n\n");
+		assertEquals(3,len);
+		
+		len = StringUtil.getRealLineLength("bla \r\n\n\r");
+		assertEquals(4,len);
+
+		len = StringUtil.getRealLineLength("bla");
+		assertEquals(3,len);
+		
+		len = StringUtil.getRealLineLength("\r\n");
+		assertEquals(0,len);
+		
+		len = StringUtil.getRealLineLength("\n");
+		assertEquals(0,len);
+	}
+	
 	public void testIsWhitespace()
 	{
 		try

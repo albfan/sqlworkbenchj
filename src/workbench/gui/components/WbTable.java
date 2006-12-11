@@ -94,8 +94,9 @@ import workbench.gui.actions.SortAscendingAction;
 import workbench.gui.actions.SortDescendingAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.renderer.RendererFactory;
+import workbench.gui.renderer.RequiredFieldHighlighter;
 import workbench.gui.renderer.RowStatusRenderer;
-import workbench.gui.renderer.ToolTipRenderer;
+import workbench.gui.renderer.TextAreaRenderer;
 import workbench.gui.renderer.WbRenderer;
 import workbench.gui.sql.DwStatusBar;
 import workbench.interfaces.FontChangedListener;
@@ -130,6 +131,8 @@ public class WbTable
 	private int lastFoundRow = -1;
 
 	private WbTextCellEditor defaultEditor;
+	private WbCellEditor multiLineEditor;
+	private TextAreaRenderer multiLineRenderer;
 	private WbTextCellEditor defaultNumberEditor;
 	private JTextField numberEditorTextField;
 
@@ -160,6 +163,8 @@ public class WbTable
 	private PrintPreviewAction printPreviewAction;
 
 	private boolean adjustToColumnLabel = false;
+	private boolean modelChanging = false;
+	
 	private int headerPopupX = -1;
 	private int[] savedColumnSizes;
 
@@ -224,6 +229,9 @@ public class WbTable
 		numberEditorTextField.setFont(dataFont);
 		numberEditorTextField.setHorizontalAlignment(SwingConstants.RIGHT);
 		this.defaultNumberEditor = new WbTextCellEditor(this, numberEditorTextField);
+		
+		this.multiLineEditor = new WbCellEditor(this);
+		this.multiLineRenderer = new TextAreaRenderer();
 
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
@@ -690,12 +698,12 @@ public class WbTable
 		for (int i=0; i < tableCols; i++)
 		{
 			TableCellRenderer rend = getCellRenderer(row, i);
-			if (rend instanceof ToolTipRenderer)
+			if (rend instanceof RequiredFieldHighlighter)
 			{
-				ToolTipRenderer wbRenderer = (ToolTipRenderer)rend;
-				wbRenderer.setHighlightBackground(requiredColor);
-				wbRenderer.setEditingRow(row);
-				wbRenderer.setHighlightColumns(highlightCols);
+				RequiredFieldHighlighter highlighter = (RequiredFieldHighlighter)rend;
+				highlighter.setHighlightBackground(requiredColor);
+				highlighter.setEditingRow(row);
+				highlighter.setHighlightColumns(highlightCols);
 			}
 		}
 		this.repaint();
@@ -739,12 +747,12 @@ public class WbTable
 			for (int i=0; i < colcount; i++)
 			{
 				TableCellRenderer renderer = getCellRenderer(row, i);
-				if (renderer instanceof ToolTipRenderer)
+				if (renderer instanceof RequiredFieldHighlighter)
 				{
-					ToolTipRenderer wbRenderer = (ToolTipRenderer)renderer;
-					wbRenderer.setEditingRow(-1);
-					wbRenderer.setHighlightBackground(null);
-					wbRenderer.setHighlightColumns(null);
+					RequiredFieldHighlighter highlighter = (RequiredFieldHighlighter)renderer;
+					highlighter.setEditingRow(-1);
+					highlighter.setHighlightBackground(null);
+					highlighter.setHighlightColumns(null);
 				}
 			}
 		}
@@ -806,11 +814,16 @@ public class WbTable
 
 		try
 		{
+			this.modelChanging = true;
 			super.setModel(aModel);
 		}
 		catch (Throwable th)
 		{
 			LogMgr.logError("WbTable.setModel()", "Error setting table model", th);
+		}
+		finally
+		{
+			this.modelChanging = false;
 		}
 
 		resetFilter();
@@ -970,6 +983,7 @@ public class WbTable
 				}
 			}
 
+			this.initMultiLineRenderer();
 			this.initDefaultEditors();
 			this.restoreColumnSizes();
 
@@ -1243,8 +1257,6 @@ public class WbTable
 	{
 		if (this.dwModel == null) return false;
 		int type = this.dwModel.getColumnType(column);
-		//Class cl = this.dwModel.getColumnClass(column);
-		//if (cl == null) return false;
 		if (SqlUtil.isBlobType(type))// || java.sql.Blob.class.isAssignableFrom(cl))
 		{
 			return true;
@@ -1282,23 +1294,76 @@ public class WbTable
 		this.setDefaultRenderer(BigInteger.class, intRenderer);
 		this.setDefaultRenderer(Integer.class, intRenderer);
 
+		// If useDefaultStringRenderer is set to false
+		// a specialized renderer is already supplied for character
+		// columns. Currently this is only used in the "Search Tables"
+		// display to provide a renderer that highlights values where the
+		// search value was found
 		if (this.useDefaultStringRenderer)
 		{
 			this.setDefaultRenderer(String.class, RendererFactory.getStringRenderer());
+			initMultiLineRenderer();
 		}
-		
 	}
 
+	private void initMultiLineRenderer()
+	{
+		if (!this.useDefaultStringRenderer) return;
+		
+		if (this.dwModel != null) 
+		{
+			TableColumnModel colMod = this.getColumnModel();
+			for (int i=0; i < colMod.getColumnCount(); i++)
+			{
+				TableColumn col = colMod.getColumn(i);
+				if (col == null) continue;
+				if (isMultiLineColumn(i))
+				{
+					col.setCellRenderer(this.multiLineRenderer);
+				}
+			}
+		}
+	}
+	private boolean isMultiLineColumn(int col)
+	{
+		if (this.dwModel == null) return false;
+
+		int offset = (this.dwModel.getShowStatusColumn() ? 1 : 0);
+		int sqlType = this.dwModel.getColumnType(col);
+		int charLength = 0;
+		
+		if (SqlUtil.isClobType(sqlType))
+		{
+			charLength = Integer.MAX_VALUE;
+		}
+		else if (SqlUtil.isCharacterType(sqlType))
+		{
+			charLength = this.dwModel.getDataStore().getResultInfo().getColumn(col - offset).getColumnSize();
+		}
+		else 
+		{
+			return false;
+		}
+		
+		int sizeThreshold = Settings.getInstance().getIntProperty("workbench.gui.display.multilinethreshold", 500);
+		return charLength > sizeThreshold;
+	}
+	
 	public void initDefaultEditors()
 	{
+		Exception e = new Exception();
 		TableColumnModel colMod = this.getColumnModel();
-
+		
 		for (int i=0; i < colMod.getColumnCount(); i++)
 		{
 			TableColumn col = colMod.getColumn(i);
 			if (col == null) continue;
 			Class clz = null;
-			if (this.dwModel != null) clz = this.dwModel.getColumnClass(i);
+			
+			if (this.dwModel != null) 
+			{
+				clz = this.dwModel.getColumnClass(i);
+			}
 			if (clz != null && Number.class.isAssignableFrom(clz))
 			{
 				col.setCellEditor(this.defaultNumberEditor);
@@ -1306,6 +1371,10 @@ public class WbTable
 			else if (this.dwModel != null && isBlobColumn(i))
 			{
 				col.setCellEditor((TableCellEditor)RendererFactory.getBlobRenderer());
+			}
+			else if (isMultiLineColumn(i))
+			{
+				col.setCellEditor(this.multiLineEditor);
 			}
 			else
 			{
@@ -1497,7 +1566,7 @@ public class WbTable
 	public void tableChanged(TableModelEvent evt)
 	{
 		super.tableChanged(evt);
-		if (this.suspendRepaint) return;
+		if (this.suspendRepaint || this.modelChanging) return;
 		if (evt.getFirstRow() == TableModelEvent.HEADER_ROW)
 		{
 			this.initDefaultEditors();
@@ -1511,15 +1580,25 @@ public class WbTable
 		int col = this.getEditingColumn();
 		int row = this.getEditingRow();
 		String data = null;
-		WbTextCellEditor  editor = (WbTextCellEditor )this.getCellEditor();
-		if (this.isEditing() && editor.isModified())
+		TableCellEditor editor = this.getCellEditor();
+		
+		if (editor instanceof WbTextCellEditor)
 		{
-			data = editor.getText();
+			WbTextCellEditor wbeditor = (WbTextCellEditor)editor;
+			if (this.isEditing() && wbeditor.isModified())
+			{
+				data = wbeditor.getText();
+			}
+			else
+			{
+				data = this.getValueAsString(row, col);
+			}
 		}
 		else
 		{
-			data = this.getValueAsString(row, col);
+			data = (String)editor.getCellEditorValue();
 		}
+		
 		Window owner = SwingUtilities.getWindowAncestor(this);
 		Frame ownerFrame = null;
 		if (owner instanceof Frame)

@@ -11,10 +11,11 @@
  */
 package workbench.gui.renderer;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -37,7 +38,7 @@ public class BlobColumnPanel
 	public BlobColumnPanel()
 	{
 		super();
-		setLayout(new BorderLayout(0,0));
+		setLayout(new GridBagLayout());
 		Dimension d = new Dimension(BUTTON_WIDTH,BUTTON_WIDTH);
 		openButton.setBasicUI();
 		openButton.setFlatLook();
@@ -47,8 +48,19 @@ public class BlobColumnPanel
 		openButton.setMinimumSize(d);
 		openButton.setEnabled(true);
 		openButton.setFocusable(false);
-		add(label,BorderLayout.WEST);
-		add(openButton,BorderLayout.EAST);
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.weightx = 1;
+		c.fill = GridBagConstraints.VERTICAL;
+		c.anchor = GridBagConstraints.NORTHWEST;
+		add(label, c);
+		
+		c.gridx = 2;
+		c.fill = GridBagConstraints.NONE;
+		c.weightx = 0;
+		add(openButton, c);
+		
 		openButton.setVisible(true);
 		this.setToolTipText(ResourceMgr.getDescription("LblShowBlobInfo", true));
 	}

@@ -12,12 +12,9 @@
 package workbench.gui.sql;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import workbench.gui.actions.ClearStatementHistoryAction;
@@ -26,7 +23,6 @@ import workbench.gui.actions.WbAction;
 import workbench.log.LogMgr;
 import workbench.util.EncodingUtil;
 import workbench.util.StringUtil;
-import java.io.UnsupportedEncodingException;
 import workbench.gui.actions.FirstStatementAction;
 import workbench.gui.actions.LastStatementAction;
 import workbench.gui.actions.NextStatementAction;
@@ -299,7 +295,11 @@ public class SqlHistory
 				}
 				else
 				{
-					content.append(line);
+					int len = StringUtil.getRealLineLength(line);
+					if (len > 0)
+					{
+						content.append(line, 0, len);
+					}
 					content.append(lineEnding);
 				}
 				line = reader.readLine();

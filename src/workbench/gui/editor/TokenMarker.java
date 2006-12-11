@@ -22,7 +22,7 @@ import java.util.*;
  * cached.
  *
  * @author Slava Pestov
- * @version $Id: TokenMarker.java,v 1.11 2006-11-09 23:05:25 thomas Exp $
+ * @version $Id: TokenMarker.java,v 1.12 2006-12-11 18:46:47 thomas Exp $
  *
  * @see Token
  */
@@ -34,7 +34,7 @@ public abstract class TokenMarker
 	 * @param line The line
 	 * @param lineIndex The line number
 	 */
-	public Token markTokens(Segment line, int lineIndex)
+	public synchronized Token markTokens(Segment line, int lineIndex)
 	{
 		if(lineIndex >= length)
 		{
@@ -301,7 +301,9 @@ public abstract class TokenMarker
 		}
 		else
 		{
-			lastToken = lastToken.next;
+			// sometimes lastToken is null even though this is checked
+			// at the beginning
+			lastToken = (lastToken == null ? firstToken : lastToken.next);
 			lastToken.length = length;
 			lastToken.id = id;
 		}

@@ -28,7 +28,6 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -121,6 +120,8 @@ public class DefaultCompletionHandler
 		
 		int cursorPos = this.editor.getCaretPosition();
 
+//		System.out.println(StringUtil.escapeUnicode(script));
+//		System.out.println("cursor: " + cursorPos);
 		int index = parser.getCommandIndexAtCursorPos(cursorPos);
 		int commandCursorPos = parser.getIndexInCommand(index, cursorPos);
 		String sql = parser.getCommand(index);

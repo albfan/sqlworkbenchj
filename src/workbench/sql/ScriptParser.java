@@ -17,12 +17,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.regex.Pattern;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
-import workbench.util.StringUtil;
 
 
 /**

@@ -27,7 +27,7 @@ import workbench.log.LogMgr;
 
 /**
  *
- * @author  thomas
+ * @author  support@sql-workbench.net
  */
 public class WbWorkspace
 {

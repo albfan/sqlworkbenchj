@@ -36,7 +36,7 @@ import workbench.util.StringUtil;
  */
 public class ToolTipRenderer
 	extends JComponent
-	implements TableCellRenderer, WbRenderer
+	implements TableCellRenderer, WbRenderer, RequiredFieldHighlighter
 {
 	protected String displayValue = StringUtil.EMPTY_STRING;
 	protected String tooltip = null;
@@ -273,5 +273,8 @@ public class ToolTipRenderer
 			tooltip = null;
 	}
 	
-	public String getDisplayValue() { return displayValue; }
+	public String getDisplayValue() 
+	{ 
+		return displayValue; 
+	}
 }

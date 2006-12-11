@@ -69,6 +69,24 @@ public class StringUtil
 	public static final int CASE_LOWER = 2;
 	public static final int CASE_MIXED = 4;
 	
+	/**
+	 * Returns the length of the line without any line ending characters
+	 */
+	public static int getRealLineLength(String line)
+	{
+		int len = line.length();
+		if (len == 0) return 0;
+		
+		char c = line.charAt(len - 1);
+
+		while ((len > 0) && (c == '\r' || c == '\n')) 
+		{
+			len--;
+			if (len > 0) c = line.charAt(len - 1);
+		}
+		return len;
+	}
+	
 	public static boolean isWhitespace(CharSequence s)
 	{
 		if (s == null) return false;

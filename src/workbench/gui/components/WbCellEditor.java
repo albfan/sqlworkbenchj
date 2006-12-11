@@ -20,6 +20,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventObject;
@@ -40,9 +41,10 @@ import workbench.gui.WbSwingUtilities;
 
 public class WbCellEditor 
 	extends AbstractCellEditor
-	implements TableCellEditor
+	implements TableCellEditor, MouseListener
 {
 	private TextAreaEditor editor;
+	private WbTable parentTable;
 	private JScrollPane scroll;
 	private ArrayList listeners;
 	private ChangeEvent changedEvent;
@@ -52,18 +54,21 @@ public class WbCellEditor
 	private static final KeyStroke ENTER = KeyStroke.getKeyStroke("ENTER");
 	private static final KeyStroke CTRL_ENTER = KeyStroke.getKeyStroke("control ENTER");
 	
-	public WbCellEditor()
+	public WbCellEditor(WbTable parent)
 	{
+		parentTable = parent;
 		editor = new TextAreaEditor();
     setDefaultCopyPasteKeys(editor);
+		setFont(parent.getFont());
 		scroll = new TextAreaScrollPane(editor);
-		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		editor.setLineWrap(false);
 		editor.setWrapStyleWord(true);
 		editor.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		editor.addMouseListener(new TextComponentMouseListener());
+		editor.addMouseListener(this);
 	}
 	
   public static void setDefaultCopyPasteKeys(JComponent editor)
@@ -181,6 +186,30 @@ public class WbCellEditor
 		}
 	}
 	
+	public void mouseClicked(MouseEvent evt)
+	{
+		if (evt.getClickCount() == 2 && evt.getButton() == MouseEvent.BUTTON1 && this.parentTable != null)
+		{
+			parentTable.openEditWindow();
+		}		
+	}
+	
+	public void mousePressed(MouseEvent evt)
+	{
+	}
+	
+	public void mouseReleased(MouseEvent evt)
+	{
+	}
+	
+	public void mouseEntered(MouseEvent evt)
+	{
+	}
+	
+	public void mouseExited(MouseEvent evt)
+	{
+	}
+	
 	class TextAreaEditor 
 		extends JTextArea
 		implements ItemListener
@@ -232,15 +261,10 @@ public class WbCellEditor
 //			return super.processKeyBinding(ks, e, condition, pressed);
 //		}
 
-		/* (non-Javadoc)
-		 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
-		 */
 		public void itemStateChanged(ItemEvent e)
 		{
 			stopCellEditing();
 		}
-
-		//public boolean isManagingFocus() { return false; }
 	}
 	
 	public class TextAreaScrollPane 
