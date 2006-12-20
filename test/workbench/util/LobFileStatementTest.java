@@ -13,40 +13,22 @@ package workbench.util;
 
 import java.io.File;
 import junit.framework.*;
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import workbench.TestUtil;
-import workbench.resource.ResourceMgr;
+import workbench.WbTestCase;
 
 /**
  *
  * @author support@sql-workbench.net
  */
-public class LobFileStatementTest extends TestCase
+public class LobFileStatementTest 
+	extends WbTestCase
 {
 	private TestUtil util;
 
 	public LobFileStatementTest(String testName)
 	{
 		super(testName);
-		try
-		{
-			util = new TestUtil();
-			util.prepareBaseDir();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		util = getTestUtil();
 	}
 
 	public void setUp()

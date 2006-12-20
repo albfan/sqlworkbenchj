@@ -7,29 +7,19 @@
 
 package workbench.util;
 
-import junit.framework.TestCase;
-import workbench.TestUtil;
+import workbench.WbTestCase;
 
 /**
  *
  * @author support@sql-workbench.net
  */
 public class MessageBufferTest 
-	extends TestCase
+	extends WbTestCase
 {
 	
 	public MessageBufferTest(String testName)
 	{
 		super(testName);
-		try
-		{
-			TestUtil util = new TestUtil();
-			util.prepareEnvironment();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
 	}
 
 	public void testMaxSize()
@@ -51,6 +41,7 @@ public class MessageBufferTest
 			e.printStackTrace();
 		}
 	}
+	
 	public void testBuffer()
 	{
 		try

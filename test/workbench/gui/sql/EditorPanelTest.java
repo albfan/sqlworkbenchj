@@ -17,7 +17,6 @@ import java.io.Reader;
 import java.io.Writer;
 import workbench.TestUtil;
 import workbench.resource.Settings;
-import workbench.util.CharacterRange;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
@@ -32,7 +31,7 @@ public class EditorPanelTest extends TestCase
 	public EditorPanelTest(String testName)
 	{
 		super(testName);
-		util = new TestUtil();
+		util = new TestUtil(testName);
 		try
 		{
 			util.prepareEnvironment();

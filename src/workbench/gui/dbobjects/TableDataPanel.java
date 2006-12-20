@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -33,7 +32,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.actions.SelectionFilterAction;
@@ -60,6 +58,7 @@ import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.Collections;
+import workbench.gui.MainWindow;
 import workbench.gui.actions.FilterPickerAction;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.DbExecutionNotifier;
@@ -98,7 +97,8 @@ public class TableDataPanel
 	protected StopAction cancelRetrieve;
 	private List execListener;
 
-	public TableDataPanel() throws Exception
+	public TableDataPanel() 
+		throws Exception
 	{
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
@@ -204,6 +204,14 @@ public class TableDataPanel
 		this.add(dataDisplay, BorderLayout.CENTER);
 	}
 
+	public void setResultContainer(MainWindow container)
+	{
+		if (this.dataDisplay != null)
+		{
+			this.dataDisplay.initTableNavigation(container);
+		}
+	}
+	
 	private ImageIcon getLoadingIndicator()
 	{
 		if (this.loadingIcon == null)

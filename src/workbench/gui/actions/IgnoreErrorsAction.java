@@ -28,7 +28,8 @@ import workbench.resource.Settings;
  *	Action to ignore errors when executing scripts
  *	@author  support@sql-workbench.net
  */
-public class IgnoreErrorsAction extends WbAction
+public class IgnoreErrorsAction 
+	extends WbAction
 {
 	private boolean switchedOn = false;
 	private JCheckBoxMenuItem toggleMenu;

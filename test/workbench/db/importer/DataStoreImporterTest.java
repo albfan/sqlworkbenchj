@@ -33,7 +33,7 @@ public class DataStoreImporterTest extends TestCase
 		throws Exception
 	{
 		super(testName);
-		util = new TestUtil();
+		util = new TestUtil(testName);
 		util.prepareEnvironment();
 	}
 
@@ -47,14 +47,6 @@ public class DataStoreImporterTest extends TestCase
 		return ds;
 	}
 	
-	protected void setUp() throws Exception
-	{
-	}
-
-	protected void tearDown() throws Exception
-	{
-	}
-
 	public void testImportFile()
 	{
 		try

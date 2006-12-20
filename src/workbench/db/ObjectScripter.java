@@ -43,6 +43,7 @@ public class ObjectScripter
 	public static final String TYPE_INSERT = "insert";
 	public static final String TYPE_SELECT = "select";
 	public static final String TYPE_PROC = "procedure";
+	public static final String TYPE_MVIEW = "materialized view";
 
 	private Map objectList;
 	private DbMetadata meta;
@@ -87,6 +88,7 @@ public class ObjectScripter
 			if (!cancel) this.appendForeignKeys();
 			if (!cancel) this.appendObjectType(TYPE_VIEW);
 			if (!cancel) this.appendObjectType(TYPE_SYNONYM);
+			if (!cancel) this.appendObjectType(TYPE_MVIEW);
 			if (!cancel) this.appendObjectType(TYPE_INSERT);
 			if (!cancel) this.appendObjectType(TYPE_SELECT);
 			if (!cancel) this.appendObjectType(TYPE_PROC);
@@ -186,6 +188,10 @@ public class ObjectScripter
 					else if (TYPE_SELECT.equalsIgnoreCase(type))
 					{
 						source = this.getDefaultSelect(tbl);
+					}
+					else if (TYPE_MVIEW.equalsIgnoreCase(type))
+					{
+						source = meta.getExtendedViewSource(tbl, false);
 					}
 				}
 				else

@@ -28,7 +28,8 @@ import workbench.util.SqlUtil;
  *
  * @author support@sql-workbench.net
  */
-public class WbSelectBlobTest extends TestCase
+public class WbSelectBlobTest 
+	extends TestCase
 {
 	
 	public WbSelectBlobTest(String testName)
@@ -36,15 +37,11 @@ public class WbSelectBlobTest extends TestCase
 		super(testName);
 	}
 
-	public void testGetVerb()
-	{
-	}
-
 	public void testExecute() throws Exception
 	{
 		try
 		{
-			TestUtil util = new TestUtil();
+			TestUtil util = new TestUtil(getClass().getName()+"_testExecute");
 			util.prepareEnvironment();
 			
 			DefaultStatementRunner runner = util.createConnectedStatementRunner();

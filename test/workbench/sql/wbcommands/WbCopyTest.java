@@ -36,7 +36,7 @@ public class WbCopyTest extends TestCase
 	{
 		try
 		{
-			TestUtil util = new TestUtil();
+			TestUtil util = new TestUtil(getClass().getName()+"_testExecute");
 			util.prepareEnvironment();
 			
 			DefaultStatementRunner runner = util.createConnectedStatementRunner();

@@ -11,7 +11,6 @@
  */
 package workbench.gui.components;
 import java.awt.Toolkit;
-import java.sql.SQLException;
 import java.sql.Types;
 
 import javax.swing.event.EventListenerList;
@@ -103,16 +102,9 @@ public class DataStoreTableModel
 
 	public int findColumn(String aColname)
 	{
-		int index = -1;
-		try
-		{
-			index = this.dataCache.getColumnIndex(aColname) + this.columnStartIndex;
-		}
-		catch (SQLException e)
-		{
-			index = -1;
-		}
-		return index;
+		int index = this.dataCache.getColumnIndex(aColname);
+		if (index == -1) return -1;
+		return index + this.columnStartIndex;
 	}
 
 	/**

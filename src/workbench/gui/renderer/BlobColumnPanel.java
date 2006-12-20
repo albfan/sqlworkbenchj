@@ -19,6 +19,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.FlatButton;
 import workbench.resource.ResourceMgr;
@@ -48,11 +49,14 @@ public class BlobColumnPanel
 		openButton.setMinimumSize(d);
 		openButton.setEnabled(true);
 		openButton.setFocusable(false);
+		label.setHorizontalTextPosition(SwingConstants.LEFT);
+		label.setVerticalTextPosition(SwingConstants.TOP);
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
 		c.weightx = 1;
-		c.fill = GridBagConstraints.VERTICAL;
+		c.weighty = 1;
+		c.fill = GridBagConstraints.NONE;
 		c.anchor = GridBagConstraints.NORTHWEST;
 		add(label, c);
 		

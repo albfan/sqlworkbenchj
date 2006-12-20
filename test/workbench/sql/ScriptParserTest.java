@@ -131,7 +131,7 @@ public class ScriptParserTest extends TestCase
 	{
 		try
 		{
-			TestUtil util = new TestUtil();
+			TestUtil util = new TestUtil("alternateFileParsing");
 			util.prepareEnvironment();
 			
 			File scriptFile = new File(util.getBaseDir(), "testscript.sql");

@@ -72,7 +72,7 @@ public class UseCommand extends SqlCommand
 		{
 			result.clear();
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
-			result.addMessage(ExceptionUtil.getDisplay(e));
+			result.addMessage(ExceptionUtil.getAllExceptions(e));
 			result.setFailure();
 		}
 		finally

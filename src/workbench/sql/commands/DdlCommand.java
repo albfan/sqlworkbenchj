@@ -156,8 +156,7 @@ public class DdlCommand extends SqlCommand
 			}
 			msg.append("\n");
 			result.addMessage(msg.toString());
-			String ex = ExceptionUtil.getDisplay(e);
-			result.addMessage(ex);
+			result.addMessage(ExceptionUtil.getAllExceptions(e));
 
 			this.addExtendErrorInfo(aConnection, aSql, result);
 			result.setFailure();

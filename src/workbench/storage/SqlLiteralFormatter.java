@@ -190,8 +190,9 @@ public class SqlLiteralFormatter
 	
 	public String getDefaultLiteral(ColumnData data)
 	{
+		if (data.isNull()) return "NULL";
+		
 		Object value = data.getValue();
-		if (value == null) return "NULL";
 		int type = data.getIdentifier().getDataType();
 		
 		if (value instanceof String)

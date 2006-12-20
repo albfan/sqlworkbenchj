@@ -30,7 +30,7 @@ public class RowDataListSorterTest extends TestCase
 	{
 		try
 		{
-			TestUtil util = new TestUtil();
+			TestUtil util = new TestUtil(getClass().getName() + "_testSort");
 			util.prepareEnvironment();
 			
 			int cols = 2;

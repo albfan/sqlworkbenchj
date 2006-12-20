@@ -781,8 +781,7 @@ public class WbExport
 		{
 			aResult.setFailure();
 			aResult.addMessage(ResourceMgr.getString("MsgSpoolError"));
-			String msg = ExceptionUtil.getDisplay(e, true);
-			aResult.addMessage(msg);
+			aResult.addMessage(ExceptionUtil.getAllExceptions(e));
 			LogMgr.logError("WbExportCommand.consumeResult()", "Error spooling data", e);
 		}
 	}

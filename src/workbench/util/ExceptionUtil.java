@@ -16,7 +16,6 @@ import java.io.StringWriter;
 import java.sql.SQLException;
 
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 
 /**
  *
@@ -55,19 +54,63 @@ public class ExceptionUtil
 		return result;
 	}
 
+	public static StringBuilder getAllExceptions(Throwable th)
+	{
+		if (th instanceof SQLException)
+		{
+			return getAllExceptions((SQLException)th);
+		}
+		StringBuilder result = new StringBuilder(100);
+		getDisplayBuffer(result, th, false);
+		Throwable cause = th.getCause();
+		while (cause != null)
+		{
+			result.append("\nCaused by: ");
+			getDisplayBuffer(result, cause, false);
+			cause = cause.getCause();
+		}
+		return result;
+	}
+	
+	public static StringBuilder getAllExceptions(SQLException th)
+	{
+		StringBuilder result = new StringBuilder(100);
+		getDisplayBuffer(result, th, false);
+		SQLException next = th.getNextException();
+		while (next != null)
+		{
+			result.append("\nNext: ");
+			getDisplayBuffer(result, next, false);
+			next = next.getNextException();
+		}
+		return result;
+	}
+	
 	public static String getDisplay(Throwable th)
 	{
-		return getDisplay(th, false);
+		if (th instanceof SQLException)
+		{
+			return getAllExceptions((SQLException)th).toString();
+		}
+		else
+		{
+			return getDisplay(th, false);
+		}
 	}
 
 	public static String getDisplay(Throwable th, boolean includeStackTrace)
 	{
-		StringBuilder result;
+		return getDisplayBuffer(null, th, includeStackTrace).toString();
+	}
+	
+	public static StringBuilder getDisplayBuffer(StringBuilder result, Throwable th, boolean includeStackTrace)
+	{
+		if (result == null) result = new StringBuilder(50);
 		try
 		{
 			if (th.getMessage() == null)
 			{
-				result = new StringBuilder(th.getClass().getName());
+				result.append(th.getClass().getName());
 				if (!includeStackTrace) 
 				{
 					// always include Stacktrace for NPE
@@ -80,7 +123,7 @@ public class ExceptionUtil
 			}
 			else
 			{
-				result = new StringBuilder(th.getMessage().trim());
+				result.append(th.getMessage().trim());
 			}
 			
 			if (th instanceof SQLException)
@@ -107,9 +150,9 @@ public class ExceptionUtil
 		catch (Throwable th1)
 		{
 			LogMgr.logError("ExceptionUtil.getDisplay()", "Error while creating display string", th1);
-			result = new StringBuilder("Exception: " + th.getClass().getName());
+			result.append("Exception: " + th.getClass().getName());
 		}
-		return result.toString();
+		return result;
 	}
 
 

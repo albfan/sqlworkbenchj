@@ -11,13 +11,9 @@
  */
 package workbench.db;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 
@@ -31,55 +27,68 @@ public class TableDependency
 	private TableIdentifier theTable;
 	private DependencyNode tableRoot;
 	private DbMetadata wbMetadata;
-	private ArrayList leafs;
-
+	private ArrayList<DependencyNode> leafs;
+	private int currentLevel = 0;
+	private int maxLevel = Integer.MAX_VALUE;
+	
 	public TableDependency()
 	{
 	}
 
+	public void setMaxLevel(int max)
+	{
+		this.maxLevel = max;
+	}
+	
 	public void setConnection(WbConnection aConn)
-		throws SQLException
 	{
 		this.connection = aConn;
 		this.wbMetadata = this.connection.getMetadata();
 	}
 
-//	private void setTableName(String aCatalog, String aSchema, String aTable)
-//	{
-//		aTable = this.wbMetadata.adjustObjectnameCase(aTable);
-//		aCatalog = this.wbMetadata.adjustObjectnameCase(aCatalog);
-//		aSchema = this.wbMetadata.adjustObjectnameCase(aSchema);
-//		this.theTable = new TableIdentifier(aCatalog, aSchema, aTable);
-//	}
-
 	public void setTable(TableIdentifier aTable)
 	{
 		this.theTable = aTable;
 	}
-	public void readDependencyTree()
+	
+	public DependencyNode findLeafNodeForTable(TableIdentifier table)
+	{
+		String findExpr = table.getTableExpression(connection);
+		for (DependencyNode node : leafs)
+		{
+			String expr = node.getTable().getTableExpression(connection);
+			if (expr.equalsIgnoreCase(findExpr)) return node;
+		}
+		return null;
+	}
+	
+	public List<DependencyNode> retrieveReferencingTables()
+	{
+		this.readDependencyTree(false);
+		return Collections.unmodifiableList(leafs);
+	}
+
+	public List<DependencyNode>  retrieveReferencedTables()
 	{
 		this.readDependencyTree(true);
+		return Collections.unmodifiableList(leafs);
 	}
-	public void readDependencyTree(boolean exportedKeys)
+	
+	protected void readDependencyTree(boolean exportedKeys)
 	{
 		if (this.theTable == null) return;
 		if (this.connection == null) return;
-		this.leafs = new ArrayList();
+		this.leafs = new ArrayList<DependencyNode>();
 		this.tableRoot = new DependencyNode(this.theTable);
+		this.currentLevel = 0;
 		this.readTree(this.tableRoot, exportedKeys);
 	}
 
 	/**
 	 *	Create the dependency tree.
-	 *	If treeParent is passed as null, the TreeNode for a display in a JTree
-	 *	are not created.
 	 */
 	private int readTree(DependencyNode parent, boolean exportedKeys)
 	{
-		String parentcatalog = parent.getCatalog();
-		String parentschema = parent.getSchema();
-		String parenttable = parent.getTable();
-
 		/* for debugging !
 		int indent = 0;
 		DependencyNode n = parent.getParent();
@@ -101,7 +110,6 @@ public class TableDependency
 			int fknamecol;
 			int tablecolumncol;
 			int parentcolumncol;
-//			int parenttablecol;
 
 			if (exportedKeys)
 			{
@@ -111,8 +119,7 @@ public class TableDependency
 				fknamecol = 11;
 				tablecolumncol = 7;
 				parentcolumncol = 3;
-//				parenttablecol = 2;
-				ds = this.wbMetadata.getExportedKeys(parentcatalog, parentschema, parenttable);
+				ds = this.wbMetadata.getExportedKeys(parent.getTable());
 			}
 			else
 			{
@@ -122,8 +129,7 @@ public class TableDependency
 				fknamecol = 11;
 				tablecolumncol = 3;
 				parentcolumncol = 7;
-//				parenttablecol = 6;
-				ds = this.wbMetadata.getImportedKeys(parentcatalog, parentschema, parenttable);
+				ds = this.wbMetadata.getImportedKeys(parent.getTable());
 			}
 
 			DependencyNode child = null;
@@ -133,8 +139,7 @@ public class TableDependency
 			String fkname = null;
 
 			int count = ds.getRowCount();
-			//System.out.print(indentString);
-			//System.out.println("processing " + count + " entries for " + parent);
+			
 			for (int i=0; i<count; i++)
 			{
 				catalog = ds.getValueAsString(i, catalogcol);
@@ -142,7 +147,9 @@ public class TableDependency
 				table = ds.getValueAsString(i, tablecol);
         fkname = ds.getValueAsString(i, fknamecol);
 
-				child = parent.addChild(catalog, schema, table, fkname);
+				TableIdentifier tbl = new TableIdentifier(catalog, schema, table);
+				tbl.setNeverAdjustCase(true);
+				child = parent.addChild(tbl, fkname);
 				String tablecolumn = ds.getValueAsString(i, tablecolumncol); // the column in "table" referencing the other table
 				String parentcolumn = ds.getValueAsString(i, parentcolumncol); // the column in the parent table
 
@@ -151,17 +158,16 @@ public class TableDependency
 				child.setUpdateAction(this.wbMetadata.getRuleTypeDisplay(update));
 				child.setDeleteAction(this.wbMetadata.getRuleTypeDisplay(delete));
 				child.addColumnDefinition(tablecolumn, parentcolumn);
-				//System.out.print(indentString);
-				//System.out.println("processed catalog=" + catalog + ",schema=" + schema + ",table=" + table + ",fk=" + fkname + ",column=" + tablecolumn + ",parentcol=" + parentcolumn);
 			}
 
-			List children = parent.getChildren();
+			this.currentLevel ++;
+			
+			List<DependencyNode> children = parent.getChildren();
 			count = children.size();
 			for (int i=0; i < count; i++)
 			{
-				child = (DependencyNode)children.get(i);
-//				int childrenCount = 0;
-				if (!child.isInParentTree(parent))
+				child = children.get(i);
+				if (!child.isInParentTree(parent) && (currentLevel < this.maxLevel))
 				{
 					this.readTree(child, exportedKeys);
 				}
@@ -176,7 +182,14 @@ public class TableDependency
     return 0;
 	}
 
-	public List getLeafs() { return this.leafs; }
-  public DependencyNode getRootNode() { return this.tableRoot; }
+	public List<DependencyNode> getLeafs() 
+	{ 
+		return this.leafs; 
+	}
+  
+	public DependencyNode getRootNode() 
+	{ 
+		return this.tableRoot; 
+	}
 
 }

@@ -12,12 +12,10 @@
 package workbench.db;
 
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import workbench.WbManager;
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.ObjectScripterUI;
@@ -27,7 +25,9 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.formatter.SqlFormatter;
+import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
+import workbench.storage.SqlLiteralFormatter;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -40,15 +40,16 @@ public class DeleteScriptGenerator
 	implements Scripter
 {
 	private WbConnection connection;
-	private Map columnValues;
+	private List<ColumnData> columnValues;
 	private TableDependency dependency;
 	private DbMetadata meta;
 	private DataStore tableDefinition;
 	private TableIdentifier rootTable = null;
 	private WbTable sourceTable = null;
 	private ScriptGenerationMonitor monitor;
-	private List visitedTables = new ArrayList();
+	private List<DependencyNode> visitedTables = new ArrayList<DependencyNode>();
 	private String script;
+	private SqlLiteralFormatter formatter;
 	
 	public DeleteScriptGenerator(WbConnection aConnection)
 		throws SQLException
@@ -57,6 +58,7 @@ public class DeleteScriptGenerator
 		this.meta = this.connection.getMetadata();
 		this.dependency = new TableDependency();
 		this.dependency.setConnection(this.connection);
+		this.formatter = new SqlLiteralFormatter(this.connection);
 	}
 
 	public void setSource(WbTable aTable)
@@ -78,7 +80,7 @@ public class DeleteScriptGenerator
 		this.tableDefinition = this.meta.getTableDefinition(this.rootTable);
 	}
 
-	public void setValues(Map colValues)
+	public void setValues(List<ColumnData> colValues)
 	{
 		this.columnValues = colValues;
 	}
@@ -88,6 +90,7 @@ public class DeleteScriptGenerator
 		// not implemented yet
 		return false;
 	}
+	
 	public void cancel()
 	{
 		// not implemented yet
@@ -129,7 +132,7 @@ public class DeleteScriptGenerator
 
 		DependencyNode root = this.dependency.getRootNode();
 		sql.append("DELETE FROM ");
-		sql.append(root.getTableId().getTableExpression(this.connection));
+		sql.append(root.getTable().getTableExpression(this.connection));
 		sql.append("\n WHERE ");
 		this.addRootTableWhere(sql);
 		sql.append(';');
@@ -151,7 +154,7 @@ public class DeleteScriptGenerator
 		if (node == null) return;
 
 		sql.append("DELETE FROM ");
-		sql.append(node.getTableId().getTableExpression(this.connection));
+		sql.append(node.getTable().getTableExpression(this.connection));
 		sql.append("\n WHERE ");
 
 		this.addParentWhere(sql, node);
@@ -176,14 +179,14 @@ public class DeleteScriptGenerator
 				String parentColumn = (String)entry.getValue();
 				//if (nodeColumn != null && !nodeColumn.equals(column)) continue;
 				if (count > 0) sql.append("\n          AND ");
-				if (!this.rootTable.equals(parent.getTableId()))
+				if (!this.rootTable.equals(parent.getTable()))
 				{
 					sql.append('(');
 					sql.append(column);
 					sql.append(" IN ( SELECT ");
 					sql.append(parentColumn);
 					sql.append(" FROM ");
-					sql.append(parent.getTableId().getTableExpression(this.connection));
+					sql.append(parent.getTable().getTableExpression(this.connection));
 					sql.append("\n WHERE ");
 					this.addParentWhere(sql, parent);
 					sql.append(")) ");
@@ -205,21 +208,15 @@ public class DeleteScriptGenerator
 
 	private boolean isMasterTable(DependencyNode node)
 	{
-		TableIdentifier table = node.getTableId();
+		TableIdentifier table = node.getTable();
 		return (this.rootTable.equals(table));
 	}
 
 	private void addRootTableWhere(StringBuilder sql)
 	{
-		Iterator itr = this.columnValues.entrySet().iterator();
 		boolean first = true;
-		while (itr.hasNext())
+		for (ColumnData col : this.columnValues)
 		{
-			Map.Entry entry = (Map.Entry)itr.next();
-			String column = (String)entry.getKey();
-			column = this.meta.adjustObjectnameCase(column);
-			Object data = entry.getValue();
-			int type = this.getColumnType(tableDefinition, column);
 			if (!first)
 			{
 				sql.append("\n   AND ");
@@ -229,42 +226,57 @@ public class DeleteScriptGenerator
 				first = false;
 			}
 
-			sql.append(SqlUtil.quoteObjectname(column));
+			sql.append(col.getIdentifier().getColumnName());
+			Object data = col.getValue();
 			if (data == null)
 			{
 				sql.append(" IS NULL");
 			}
 			else
 			{
-	      String value = data.toString();
 				sql.append(" = ");
-				boolean charType = (type == Types.VARCHAR || type == Types.CHAR);
-				if (charType)	sql.append('\'');
-				sql.append(value);
-				if (charType)	sql.append('\'');
+				sql.append(formatter.getDefaultLiteral(col));
+//	      String value = data.toString();
+//				sql.append(" = ");
+//				boolean charType = (type == Types.VARCHAR || type == Types.CHAR);
+//				if (charType)	sql.append('\'');
+//				sql.append(value);
+//				if (charType)	sql.append('\'');
 			}
 		}
 	}
 
+	private ColumnData findColData(String column)
+	{
+		for (ColumnData col : this.columnValues)
+		{
+			if (col.getIdentifier().getColumnName().equalsIgnoreCase(column)) return col;
+		}		
+		return null;
+	}
+	
 	private void addRootTableWhere(StringBuilder sql, String parentColumn, String childColumn)
 	{
-		Object data = this.columnValues.get(parentColumn);
+		ColumnData data = findColData(parentColumn);
+		
 		parentColumn = this.meta.adjustObjectnameCase(parentColumn);
 
 		int type = this.getColumnType(tableDefinition, parentColumn);
 		sql.append(SqlUtil.quoteObjectname(childColumn));
-		if (data == null)
+		if (data.isNull())
 		{
 			sql.append(" IS NULL");
 		}
 		else
 		{
-	     String value = data.toString();
 			sql.append(" = ");
-			boolean charType = (type == Types.VARCHAR || type == Types.CHAR);
-			if (charType)	sql.append('\'');
-			sql.append(value);
-			if (charType)	sql.append('\'');
+			sql.append(formatter.getDefaultLiteral(data));
+//	    String value = data.toString();
+//			sql.append(" = ");
+//			boolean charType = (type == Types.VARCHAR || type == Types.CHAR);
+//			if (charType)	sql.append('\'');
+//			sql.append(value);
+//			if (charType)	sql.append('\'');
 		}
 	}
 
@@ -328,7 +340,7 @@ public class DeleteScriptGenerator
 		{
 			for (int i=0; i < numRows; i++)
 			{
-				Map pkvalues = ds.getPkValues(rows[i]);
+				List<ColumnData> pkvalues = ds.getPkValues(rows[i]);
 				this.setTable(tbl);
 				this.setValues(pkvalues);
 				this.monitor.setCurrentObject(ResourceMgr.getString("MsgGeneratingScriptForRow") + " " + i);

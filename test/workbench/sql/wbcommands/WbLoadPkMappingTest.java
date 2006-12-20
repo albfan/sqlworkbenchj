@@ -17,6 +17,7 @@ import java.io.PrintWriter;
 import java.util.Map;
 import junit.framework.*;
 import workbench.TestUtil;
+import workbench.db.ConnectionMgr;
 import workbench.sql.DefaultStatementRunner;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -41,7 +42,7 @@ public class WbLoadPkMappingTest extends TestCase
 		
 		try
 		{
-			util = new TestUtil();
+			util = new TestUtil(getClass().getName()+".testExecute");
 			util.prepareEnvironment();
 			runner = util.createConnectedStatementRunner();
 			
@@ -66,6 +67,10 @@ public class WbLoadPkMappingTest extends TestCase
 		{
 			e.printStackTrace();
 			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 	

@@ -33,7 +33,7 @@ public class DefaultStatementRunnerTest
 	public DefaultStatementRunnerTest(String testName)
 	{
 		super(testName);
-		util = new TestUtil();
+		util = new TestUtil(testName);
 	}
 
 	public void testWbCommands()

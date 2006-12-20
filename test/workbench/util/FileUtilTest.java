@@ -24,28 +24,21 @@ import java.io.Reader;
 import java.io.Writer;
 import junit.framework.*;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 
 /**
  *
  * @author support@sql-workbench.net
  */
 public class FileUtilTest 
-	extends TestCase
+	extends WbTestCase
 {
-	private TestUtil testUtil = new TestUtil();
+	private TestUtil testUtil;
 	
 	public FileUtilTest(String testName)
 	{
 		super(testName);
-		try 
-		{ 
-			this.testUtil.prepareEnvironment(); 
-		} 
-		catch (Throwable th) 
-		{
-			th.printStackTrace();
-			fail("Could not prepare test case!");
-		}
+		testUtil = getTestUtil();
 	}
 
 	public void testReadLines()
@@ -109,6 +102,7 @@ public class FileUtilTest
 			fail(e.getMessage());
 		}
 	}
+	
 	public void testGetLineEnding()
 		throws Exception
 	{

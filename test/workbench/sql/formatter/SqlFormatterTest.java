@@ -15,7 +15,8 @@ import workbench.resource.Settings;
  *
  * @author support@sql-workbench.net
  */
-public class SqlFormatterTest extends TestCase
+public class SqlFormatterTest 
+	extends TestCase
 {
 
 	public SqlFormatterTest(String testName)
@@ -26,7 +27,7 @@ public class SqlFormatterTest extends TestCase
 	public void setUp()
 		throws Exception
 	{
-		TestUtil util = new TestUtil();
+		TestUtil util = new TestUtil(this.getName());
 		util.prepareEnvironment();
 	}
 

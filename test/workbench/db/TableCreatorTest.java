@@ -27,7 +27,7 @@ public class TableCreatorTest extends TestCase
 		super(testName);
 		try
 		{
-			util = new TestUtil();
+			util = new TestUtil(testName);
 			util.prepareEnvironment();
 		}
 		catch (Exception e)

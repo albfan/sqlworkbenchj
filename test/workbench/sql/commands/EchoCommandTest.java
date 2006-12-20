@@ -33,7 +33,7 @@ public class EchoCommandTest extends TestCase
 	{
 		try
 		{
-			TestUtil util = new TestUtil();
+			TestUtil util = new TestUtil("testEchoExec");
 			util.prepareEnvironment();
 			DefaultStatementRunner runner = new DefaultStatementRunner();
 			EchoCommand echo = new EchoCommand();

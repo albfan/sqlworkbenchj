@@ -110,7 +110,7 @@ public class UpdatingCommand extends SqlCommand
 			{
 				result.addMessage(sql);
 			}
-			result.addMessage(ExceptionUtil.getDisplay(e));
+			result.addMessage(ExceptionUtil.getAllExceptions(e));
 			result.setFailure();
 			LogMgr.logSqlError("UpdatingCommnad.execute()", sql, e);
 		}

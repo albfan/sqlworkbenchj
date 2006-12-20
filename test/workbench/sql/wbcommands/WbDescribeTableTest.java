@@ -47,7 +47,7 @@ public class WbDescribeTableTest extends TestCase
 		
 		try
 		{
-			util = new TestUtil();
+			util = new TestUtil(getClass().getName()+"_testExecute");
 			util.prepareEnvironment();
 			runner = util.createConnectedStatementRunner();
 			String sql = "create table describe_test (nr integer, info_text varchar(100));";

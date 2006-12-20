@@ -40,4 +40,9 @@ public class ColumnData
 	
 	public Object getValue() { return data; }
 	public ColumnIdentifier getIdentifier() { return id; }
+	
+	public boolean isNull()
+	{
+		return (data == null || data instanceof NullValue);
+	}
 }

@@ -41,7 +41,7 @@ public class BatchRunnerTest
 		super(testName);
 		try
 		{
-			util = new TestUtil();
+			util = new TestUtil(testName);
 			util.prepareEnvironment();
 		}
 		catch (IOException ex)
@@ -72,7 +72,7 @@ public class BatchRunnerTest
 
 			ArgumentParser parser = WbManager.createArgumentParser();
 			String script = "-script='" + scriptFile.getAbsolutePath() + "'";
-			parser.parse("-url='jdbc:hsqldb:" + util.getDbName() + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver "  + script + " -rollbackOnDisconnect=true");
+			parser.parse("-url='jdbc:hsqldb:mem:testBatchRunner;shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver "  + script + " -rollbackOnDisconnect=true");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
 	
 			assertNotNull(runner);
@@ -137,7 +137,7 @@ public class BatchRunnerTest
 			writer2.println("commit;");
 			writer2.close();			
 			
-			parser.parse("-url='jdbc:hsqldb:" + util.getDbName() + ";shutdown=true' -altdelimiter='/;nl' -user=sa -driver=org.hsqldb.jdbcDriver -script='" + scriptFile.getAbsolutePath() + "','" + scriptFile2.getAbsolutePath() + "'");
+			parser.parse("-url='jdbc:hsqldb:mem:testAltDelimiter;shutdown=true' -altdelimiter='/;nl' -user=sa -driver=org.hsqldb.jdbcDriver -script='" + scriptFile.getAbsolutePath() + "','" + scriptFile2.getAbsolutePath() + "'");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
 			
 			assertNotNull(runner);

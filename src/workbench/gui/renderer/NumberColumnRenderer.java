@@ -11,11 +11,15 @@
  */
 package workbench.gui.renderer;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-
+import java.text.FieldPosition;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.swing.SwingConstants;
-
 import workbench.resource.Settings;
 
 /**
@@ -26,7 +30,7 @@ public class NumberColumnRenderer
 {
 	private DecimalFormat decimalFormatter;
 	private DecimalFormatSymbols symb = new DecimalFormatSymbols();
-
+	private FieldPosition startPos = new FieldPosition(0);
 	public NumberColumnRenderer()
 	{
 		String sep = Settings.getInstance().getDecimalSymbol();
@@ -65,6 +69,16 @@ public class NumberColumnRenderer
 		this.decimalFormatter.setDecimalFormatSymbols(this.symb);
 	}
 	
+	private boolean isInteger(Number n)
+	{
+		return (n instanceof Integer 
+			|| n instanceof Long 
+			|| n instanceof Short 
+			|| n instanceof BigInteger
+			|| n instanceof AtomicInteger
+			|| n instanceof AtomicLong);
+	}
+	
 	public void prepareDisplay(Object aValue)
 	{
 		try
@@ -72,7 +86,24 @@ public class NumberColumnRenderer
 			Number n = (Number) aValue;
 			synchronized (this.decimalFormatter)
 			{
-				displayValue = decimalFormatter.format(n.doubleValue());
+				// BigDecimal cannot be formatted using a DecimalFormatter
+				// without possible loss of precission
+				if (n instanceof BigDecimal)
+				{
+					displayValue = ((BigDecimal)n).toString();
+				}
+				else if (isInteger(n))
+				{
+					// BigInteger cannot be formatted without a possible 
+					// loss of precission as well, but for all other 
+					// "Integer" types, toString() will also produce
+					// correct results.
+					displayValue = n.toString();
+				}
+				else 
+				{
+					displayValue = decimalFormatter.format(n.doubleValue());
+				}
 			}
 			this.tooltip = aValue.toString();
 		}

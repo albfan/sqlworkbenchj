@@ -32,12 +32,11 @@ public class WbDefinePkTest extends TestCase
 
 	public void testExecute() throws Exception
 	{
-		TestUtil util;
 		DefaultStatementRunner runner;
 		
 		try
 		{
-			util = new TestUtil();
+			TestUtil util = new TestUtil(getClass().getName()+"_testExecute");
 			util.prepareEnvironment();
 			runner = util.createConnectedStatementRunner();
 			

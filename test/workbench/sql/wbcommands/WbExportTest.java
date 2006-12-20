@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import workbench.TestUtil;
+import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunnerResult;
@@ -34,7 +35,6 @@ import workbench.util.SqlUtil;
  */
 public class WbExportTest extends TestCase
 {
-	private String dbName;
 	private String basedir;
 	private final int rowcount = 10;
 	private WbExport exportCmd = new WbExport();
@@ -46,9 +46,8 @@ public class WbExportTest extends TestCase
 		
 		try
 		{
-			util = new TestUtil();
+			util = new TestUtil(testName);
 			util.prepareEnvironment();
-			this.dbName = util.getDbName();
 			this.basedir = util.getBaseDir();
 			
 		}
@@ -148,7 +147,6 @@ public class WbExportTest extends TestCase
 		}
 	}
 	
-	
 	public void testTextBlobExport()
 	{
 		try
@@ -236,6 +234,7 @@ public class WbExportTest extends TestCase
 			fail(e.getMessage());
 		}
 	}		
+	
 	public void testTextClobExport() 
 	{
 		try

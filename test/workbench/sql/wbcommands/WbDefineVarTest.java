@@ -22,12 +22,6 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.VariablePool;
 import workbench.util.StringUtil;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import workbench.util.ExceptionUtil;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.util.WbStringTokenizer;
 
 /**
  *
@@ -45,7 +39,7 @@ public class WbDefineVarTest extends TestCase
 	{
 		try
 		{
-			TestUtil util = new TestUtil();
+			TestUtil util = new TestUtil(getClass().getName()+"_testExecute");
 			util.prepareEnvironment();
 			DefaultStatementRunner runner = util.createConnectedStatementRunner();
 			WbConnection con = runner.getConnection();

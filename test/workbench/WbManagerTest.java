@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import junit.framework.TestCase;
+import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.util.EncodingUtil;
 
@@ -53,21 +54,21 @@ public class WbManagerTest extends TestCase
 	{
 		try
 		{
-			TestUtil util = new TestUtil();
-			util.prepareBaseDir();
+			TestUtil util = new TestUtil(getName());
 			System.setProperty("workbench.system.doexit", "false");
+			File db = new File(util.getBaseDir(), getName());
 			String script = createScript(util.getBaseDir());
 			String args[] = { "-embedded", 
 												"-nosettings",
 												"-configdir=" + util.getBaseDir(),
-												"-url='jdbc:hsqldb:" + util.getDbName() + ";shutdown=true'",
+												"-url='jdbc:hsqldb:" + db.getAbsolutePath() + ";shutdown=true'",
 												"-user=sa",
 												"-driver=org.hsqldb.jdbcDriver",
 												"-script='" + script + "'",
 												"-encoding=UTF8"
 												};
 			WbManager.main(args);
-			WbConnection con = util.getConnection();
+			WbConnection con = util.getConnection(db);
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery("select nr, name from batch_test");
 			if (rs.next())
@@ -75,7 +76,7 @@ public class WbManagerTest extends TestCase
 				int nr = rs.getInt(1);
 				String name = rs.getString(2);
 				assertEquals("Wrong id retrieved", 1, nr);
-				assertEquals("Wronb name retrieved", UMLAUTS, name);
+				assertEquals("Wrong name retrieved", UMLAUTS, name);
 			}
 			rs.close();
 			stmt.close();
@@ -84,6 +85,10 @@ public class WbManagerTest extends TestCase
 		{
 			e.printStackTrace();
 			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 

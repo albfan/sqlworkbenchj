@@ -27,7 +27,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -108,8 +107,6 @@ public class WbManager
 		}
 	}
 	
-	//private boolean shutdownInProgress = false;
-
 	private Thread shutdownHook = new Thread(this);
 
 	private WbManager()
@@ -387,10 +384,10 @@ public class WbManager
 	{
 		trace("WbManager.initUI() - start");
 		this.initializeLookAndFeel();
-
+		
 		Settings settings = Settings.getInstance();
 		UIDefaults def = UIManager.getDefaults();
-
+		
 		Font stdFont = settings.getStandardFont();
 		if (stdFont != null)
 		{
@@ -422,23 +419,23 @@ public class WbManager
 			def.put("Tree.font", stdFont);
 			def.put("ViewPort.font", stdFont);
 			
-      def.put("OptionPane.yesButtonText",ResourceMgr.getPlainString("LblYes"));
-      def.put("OptionPane.yesButtonMnemonic",ResourceMgr.getAcceleratorChar("LblYes"));
-      def.put("OptionPane.noButtonText",ResourceMgr.getPlainString("LblNo"));
-      def.put("OptionPane.noButtonMnemonic",ResourceMgr.getAcceleratorChar("LblNo"));
-      def.put("OptionPane.cancelButtonText",ResourceMgr.getPlainString("LblCancel"));
-      def.put("OptionPane.cancelButtonMnemonic",ResourceMgr.getAcceleratorChar("LblCancel"));
-      def.put("OptionPane.okButtonText",ResourceMgr.getPlainString("LblOK"));
-      def.put("OptionPane.okButtonMnemonic",ResourceMgr.getAcceleratorChar("LblOK"));
+			def.put("OptionPane.yesButtonText",ResourceMgr.getPlainString("LblYes"));
+			def.put("OptionPane.yesButtonMnemonic",ResourceMgr.getAcceleratorChar("LblYes"));
+			def.put("OptionPane.noButtonText",ResourceMgr.getPlainString("LblNo"));
+			def.put("OptionPane.noButtonMnemonic",ResourceMgr.getAcceleratorChar("LblNo"));
+			def.put("OptionPane.cancelButtonText",ResourceMgr.getPlainString("LblCancel"));
+			def.put("OptionPane.cancelButtonMnemonic",ResourceMgr.getAcceleratorChar("LblCancel"));
+			def.put("OptionPane.okButtonText",ResourceMgr.getPlainString("LblOK"));
+			def.put("OptionPane.okButtonMnemonic",ResourceMgr.getAcceleratorChar("LblOK"));
 			
 			FileDialogUtil.initFileChooserLabels();
 			
 		}
 		Font dataFont = settings.getDataFont();
-
+		
 		def.put("Table.font", dataFont);
 		def.put("TableHeader.font", dataFont);
-
+		
 		// Polish up the standard look & feel settings
 
 		Color c = settings.getColor("workbench.table.gridcolor", new Color(215,215,215));
@@ -661,27 +658,27 @@ public class WbManager
 		return WbSwingUtilities.getYesNo(win, ResourceMgr.getString("MsgAbortRunningSql"));
 	}
 
-  private boolean checkProfiles(MainWindow win)
-  {
-    if (ConnectionMgr.getInstance().profilesAreModified())
-    {
-      int answer = JOptionPane.showConfirmDialog(win, ResourceMgr.getString("MsgConfirmUnsavedProfiles"), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_CANCEL_OPTION);
-      if (answer == JOptionPane.OK_OPTION)
-      {
-        ConnectionMgr.getInstance().saveProfiles();
-        return true;
-      }
-      else if (answer == JOptionPane.NO_OPTION)
-      {
-        return true;
-      }
-      else
-      {
-        return false;
-      }
-    }
-    return true;
-  }
+	private boolean checkProfiles(MainWindow win)
+	{
+		if (ConnectionMgr.getInstance().profilesAreModified())
+		{
+			int answer = JOptionPane.showConfirmDialog(win, ResourceMgr.getString("MsgConfirmUnsavedProfiles"), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_CANCEL_OPTION);
+			if (answer == JOptionPane.OK_OPTION)
+			{
+				ConnectionMgr.getInstance().saveProfiles();
+				return true;
+			}
+			else if (answer == JOptionPane.NO_OPTION)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 
 	class CloseThread
 		extends WbThread
@@ -708,10 +705,10 @@ public class WbManager
 	public void windowClosing(final MainWindow win)
 	{
 		if (this.mainWindows.size() == 1)
-    {
+		{
 			// If only one window is present, shut down the application
 			this.exitWorkbench(win);
-    }
+		}
 		else
 		{
 			if (!win.saveWorkspace()) return;
@@ -719,7 +716,7 @@ public class WbManager
 			CloseThread t = new CloseThread("WindowDisconnect", win);
 			t.start();
 		}
-
+		
 	}
 
 	// open a new window, but do not check any command line

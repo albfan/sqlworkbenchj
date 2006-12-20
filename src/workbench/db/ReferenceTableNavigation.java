@@ -11,9 +11,7 @@
  */
 package workbench.db;
 
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import workbench.db.TableIdentifier;
@@ -32,63 +30,95 @@ public class ReferenceTableNavigation
 {
 	private TableIdentifier baseTable;
 	private WbConnection dbConn;
-	private List<List<ColumnData>> pkValues;
 	private SqlLiteralFormatter formatter;
+	private TableDependency dependencyTree;
 	
-	public ReferenceTableNavigation(TableIdentifier table, List<List<ColumnData>> values, WbConnection con)
+	public ReferenceTableNavigation(TableIdentifier table, WbConnection con)
 	{
 		this.baseTable = table;
-		this.pkValues = values;
 		this.dbConn = con;
 		this.formatter = new SqlLiteralFormatter(dbConn);
 	}
 
-	public List<String> getSelectsForParents()
+	public void readTreeForChildren()
 	{
-		return generateSelects(false);
+		readDependencyTree(true);
 	}
 	
-	public List<String> getSelectsForChildren()
+	public void readTreeForParents()
 	{
-		return generateSelects(true);
+		readDependencyTree(false);
 	}
 	
-	private List<String> generateSelects(boolean forChildren)
+	public DependencyNode getNodeForTable(TableIdentifier tbl)
 	{
-		List<String> result = new LinkedList<String>();
+		if (this.dependencyTree == null) return null;
+		
+		TableIdentifier table = tbl.createCopy();
+		if (table.getSchema() == null)
+		{
+			table.setSchema(this.dbConn.getMetadata().getSchemaToUse());
+		}
+		if (table.getCatalog() == null)
+		{
+			table.setCatalog(this.dbConn.getMetadata().getCurrentCatalog());
+		}
+		table.adjustCase(dbConn);
+		return dependencyTree.findLeafNodeForTable(table);
+	}
+
+	public TableDependency getTree()
+	{
+		return this.dependencyTree;
+	}
+	
+	private void readDependencyTree(boolean forChildren)
+	{
+		dependencyTree = new TableDependency();
+		dependencyTree.setMaxLevel(1);
+		dependencyTree.setConnection(this.dbConn);
+		dependencyTree.setTable(this.baseTable);
+		dependencyTree.readDependencyTree(forChildren);
+	}
+	
+	public String getSelectForChild(TableIdentifier tbl, List<List<ColumnData>> values)
+	{
+		return generateSelect(tbl, true, values);
+	}
+	
+	public String getSelectForParent(TableIdentifier tbl, List<List<ColumnData>> values)
+	{
+		return generateSelect(tbl, false, values);
+	}
+	
+	private String generateSelect(TableIdentifier tbl, boolean forChildren, List<List<ColumnData>> values)
+	{
+		String result = null;
 		try
 		{
-			TableDependency dep = new TableDependency();
-			dep.setMaxLevel(1);
-			dep.setConnection(this.dbConn);
-			dep.setTable(this.baseTable);
-			dep.readDependencyTree(forChildren);
-			List<DependencyNode> children = dep.getLeafs();
-			Iterator<DependencyNode> itr = children.iterator();
-			while (itr.hasNext())
-			{
-				DependencyNode node = itr.next();
-				StringBuilder sql = new StringBuilder(100);
-				sql.append("SELECT * \nFROM ");
-				sql.append(node.getTable().getTableExpression(this.dbConn));
-				sql.append("\nWHERE ");
-				addWhere(sql, node);
-				result.add(sql.toString());
-			}
+			if (this.dependencyTree == null) this.readDependencyTree(forChildren);
+			
+			DependencyNode node = getNodeForTable(tbl);
+			
+			StringBuilder sql = new StringBuilder(100);
+			sql.append("SELECT * \nFROM ");
+			sql.append(node.getTable().getTableExpression(this.dbConn));
+			sql.append("\nWHERE ");
+			addWhere(sql, node, values);
+			result = sql.toString();
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("TableNavigation.getSelectsForParents()", "Error retrieving parent tables", e);
-			return Collections.EMPTY_LIST;
 		}
 		return result;
 	}	
 	
-	private void addWhere(StringBuilder sql, DependencyNode node)
+	private void addWhere(StringBuilder sql, DependencyNode node, List<List<ColumnData>> values)
 	{
 		Map<String, String> colMapping = node.getColumns();
 		
-		Iterator<List<ColumnData>> rowItr = pkValues.iterator();
+		Iterator<List<ColumnData>> rowItr = values.iterator();
 		while (rowItr.hasNext())
 		{
 			List<ColumnData> row = rowItr.next();

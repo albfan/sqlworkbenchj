@@ -31,7 +31,6 @@ import java.util.LinkedList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.ComponentInputMap;
@@ -55,6 +54,7 @@ import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.db.importer.DataStoreImporter;
+import workbench.gui.actions.AppendResultsAction;
 import workbench.gui.actions.FilterDataAction;
 import workbench.gui.actions.FilterPickerAction;
 import workbench.gui.actions.ImportClipboardAction;
@@ -66,6 +66,7 @@ import workbench.gui.components.WbTabbedPane;
 import workbench.gui.dialogs.dataimport.ImportFileDialog;
 import workbench.interfaces.DbExecutionNotifier;
 import workbench.interfaces.ParameterPrompter;
+import workbench.interfaces.ResultReceiver;
 import workbench.interfaces.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ExceptionUtil;
@@ -159,6 +160,7 @@ import workbench.storage.DataStore;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbProperties;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 
@@ -175,7 +177,7 @@ public class SqlPanel
 		PropertyChangeListener, ChangeListener,
 		MainPanel, Exporter, DbUpdater, Interruptable, FormattableSql, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
-		FilenameChangeListener
+		FilenameChangeListener, ResultReceiver
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected EditorPanel editor;
@@ -221,6 +223,7 @@ public class SqlPanel
 	protected FilterPickerAction filterPicker;
 	protected ResetFilterAction resetFilterAction;
 	protected OptimizeAllColumnsAction optimizeAllCol;
+	protected AppendResultsAction appendResultsAction;
 
 	protected CheckPreparedStatementsAction checkPreparedAction;
 	protected ClearCompletionCacheAction clearCompletionCache;
@@ -253,6 +256,8 @@ public class SqlPanel
 	private static final Border statusBarBorder = new CompoundBorder(new EmptyBorder(2, 1, 0, 1), new EtchedBorder());
 	private static final Border logBorder = new EmptyBorder(0,2,0,0);
 
+	private boolean appendResults = false;
+	
 	protected DwStatusBar statusBar;
 	protected StatementRunner stmtRunner;
 	protected GenericRowMonitor rowMonitor;
@@ -324,6 +329,16 @@ public class SqlPanel
 		this.internalId = anId;
 	}
 
+	public boolean getAppendResults() 
+	{
+		return appendResults;
+	}
+	
+	public void setAppendResults(boolean flag)
+	{
+		this.appendResults = flag;
+	}
+	
 	public void initDivider()
 	{
 		int myHeight = (int)this.getPreferredSize().getHeight();
@@ -642,6 +657,8 @@ public class SqlPanel
 		this.actions.add(this.sqlHistory.getClearHistoryAction());
 
 		this.actions.add(new AutoJumpNextStatement());
+		this.appendResultsAction = new AppendResultsAction(this);
+		this.actions.add(appendResultsAction);
 		a = new HighlightCurrentStatement();
 		a.setCreateMenuSeparator(false);
 		this.actions.add(a);
@@ -687,7 +704,8 @@ public class SqlPanel
 		this.toolbarActions.add(this.rollbackAction);
 		ignore.setCreateToolbarSeparator(true);
 		this.toolbarActions.add(ignore);
-
+		appendResultsAction.setCreateToolbarSeparator(true);
+		this.toolbarActions.add(appendResultsAction);
 		this.findDataAction = new FindDataAction(null);
 		this.findDataAction.setMenuTextByKey("MnuTxtFindData");
 		this.findDataAction.setEnabled(false);
@@ -915,16 +933,33 @@ public class SqlPanel
 	 */
 	public void showLogPanel()
 	{
-		int index = this.resultTab.getTabCount() - 1;
-		this.resultTab.setSelectedIndex(index);
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				int index = resultTab.getTabCount() - 1;
+				resultTab.setSelectedIndex(index);
+			}
+		});
 	}
 
+	public void showResultPanel()
+	{
+		showResultPanel(0);
+	}
+	
 	/**
 	 *	Show the panel with the result set
 	 */
-	public void showResultPanel()
+	public void showResultPanel(final int index)
 	{
-		this.resultTab.setSelectedIndex(0);
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				resultTab.setSelectedIndex(index);
+			}
+		});
 	}
 
 	/**
@@ -1008,19 +1043,15 @@ public class SqlPanel
 			if (cursorPos > -1 && cursorPos < this.editor.getText().length()) this.editor.setCaretPosition(cursorPos);
 		}
 
-		Properties props = w.getSettings();
-		try
-		{
-			int loc = Integer.parseInt(props.getProperty("tab" + (index) + ".divider.location", "0"));
-			if (loc <= 0) loc = 200;
-			this.contentPanel.setDividerLocation(loc);
-			loc = Integer.parseInt(props.getProperty("tab" + (index) + ".divider.lastlocation", "0"));
-			if (loc > 0) this.contentPanel.setLastDividerLocation(loc);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("SqlPanel.restoreSettings()", "Error when restore settings", e);
-		}
+		WbProperties props = w.getSettings();
+		
+		int loc = props.getIntProperty("tab" + (index) + ".divider.location", 200);
+		this.contentPanel.setDividerLocation(loc);
+		loc = props.getIntProperty("tab" + (index) + ".divider.lastlocation", 0);
+		if (loc > 0) this.contentPanel.setLastDividerLocation(loc);
+		
+		this.appendResults = props.getBoolProperty("tab" + (index) + ".append.results", false);		
+		if (this.appendResultsAction != null) this.appendResultsAction.setSwitchedOn(this.appendResults);
 		this.updateTabTitle();
 		this.editor.clearUndoBuffer();
 		this.editor.resetModified();
@@ -1046,7 +1077,8 @@ public class SqlPanel
 		int last = this.contentPanel.getLastDividerLocation();
 		props.setProperty("tab" + (index) + ".divider.location", Integer.toString(location));
 		props.setProperty("tab" + (index) + ".divider.lastlocation", Integer.toString(last));
-
+		props.setProperty("tab" + (index) + ".append.results", Boolean.toString(this.appendResults));
+		
 		w.setMaxRows(index, this.statusBar.getMaxRows());
 		w.setQueryTimeout(index, this.statusBar.getQueryTimeout());
 		if (this.hasFileLoaded())
@@ -1068,6 +1100,14 @@ public class SqlPanel
 		w.addHistoryEntry("WbStatements" + this.internalId + ".txt", this.sqlHistory);
 	}
 
+	/**
+	 * Implementation of the ResultReceiver interface
+	 */
+	public String getTitle()
+	{
+		return getTabTitle();
+	}
+	
 	public String getTabTitle()
 	{
 		String defaultLabel = ResourceMgr.getDefaultTabLabel();
@@ -1468,7 +1508,7 @@ public class SqlPanel
 	{
 		String sql = this.editor.getText();
 		int caret = this.editor.getCaretPosition();
-		startExecution(sql, 0, caret, true);
+		startExecution(sql, 0, caret, true, this.appendResults);
 	}
 
 	public void runSelectedStatement()
@@ -1481,26 +1521,26 @@ public class SqlPanel
 			offset = this.editor.getSelectionStart();
 			highlight = false;
 		}
-		this.startExecution(sql, offset, -1, highlight);
+		this.startExecution(sql, offset, -1, highlight, this.appendResults);
 	}
 
 	public void commit()
 	{
-		this.startExecution(SingleVerbCommand.COMMIT.getVerb(), 0, -1, false);
+		this.startExecution(SingleVerbCommand.COMMIT.getVerb(), 0, -1, false, this.appendResults);
 	}
 
 	public void rollback()
 	{
-		this.startExecution(SingleVerbCommand.ROLLBACK.getVerb(), 0, -1, false);
+		this.startExecution(SingleVerbCommand.ROLLBACK.getVerb(), 0, -1, false, this.appendResults);
 	}
 
 	public void runAll()
 	{
 		String sql = this.editor.getText();
-		this.startExecution(sql, 0, -1, true);
+		this.startExecution(sql, 0, -1, true, this.appendResults);
 	}
 
-	private void startExecution(final String sql, final int offset, final int commandAtIndex, final boolean highlight)
+	private void startExecution(final String sql, final int offset, final int commandAtIndex, final boolean highlight, final boolean appendResult)
 	{
 		if (this.isBusy()) return;
 		if (!this.isConnected()) return;
@@ -1513,7 +1553,7 @@ public class SqlPanel
 		{
 			public void run()
 			{
-				runStatement(sql, offset, commandAtIndex, highlight);
+				runStatement(sql, offset, commandAtIndex, highlight, appendResult);
 			}
 		};
 		this.executionThread.setPriority(Thread.NORM_PRIORITY+2);
@@ -1526,7 +1566,7 @@ public class SqlPanel
 	 *  actions and the menu.
 	 *  The actual execution and display of the result is handled by displayResult()
 	 */
-	private void runStatement(String sql, int selectionOffset, int commandAtIndex, boolean highlightOnError)
+	private void runStatement(String sql, int selectionOffset, int commandAtIndex, boolean highlightOnError, boolean appendResult)
 	{
 		this.showStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
 
@@ -1544,7 +1584,7 @@ public class SqlPanel
 
 		try
 		{
-			this.displayResult(sql, selectionOffset, commandAtIndex, highlightOnError);
+			this.displayResult(sql, selectionOffset, commandAtIndex, highlightOnError, appendResult);
 		}
 		finally
 		{
@@ -1605,7 +1645,7 @@ public class SqlPanel
 		{
 			this.macroExecution = true;
 		}
-		this.startExecution(sql, 0, -1, false);
+		this.startExecution(sql, 0, -1, false, this.appendResults);
 	}
 
 	public void exportData()
@@ -2088,7 +2128,7 @@ public class SqlPanel
 
 	}
 
-	private void displayResult(String script, int selectionOffset, int commandAtIndex, boolean highlightOnError)
+	private void displayResult(String script, int selectionOffset, int commandAtIndex, boolean highlightOnError, boolean appendResult)
 	{
 		if (script == null) return;
 
@@ -2140,14 +2180,22 @@ public class SqlPanel
 
 		int maxRows = this.statusBar.getMaxRows();
 		int timeout = this.statusBar.getQueryTimeout();
-
+		int firstResultIndex = 0;
+		
 		StatementRunnerResult statementResult = null;
 
 		try
 		{
-			this.log.setText("");
-
-			this.clearResultTabs();
+			if (appendResult)
+			{
+				firstResultIndex = this.resultTab.getTabCount() - 1;
+			}
+			else
+			{
+				this.log.setText("");
+				this.clearResultTabs();
+				firstResultIndex = 0;
+			}
 
 			String cleanSql = SqlUtil.makeCleanSql(script, false);
 			String macro = MacroManager.getInstance().getMacroText(cleanSql);
@@ -2260,7 +2308,7 @@ public class SqlPanel
 					continue;
 				}
 
-				resultSets += this.showResult(statementResult);
+				resultSets += this.addResult(statementResult);
 				stmtTotal += statementResult.getExecutionTime();
 
 				// the SET FEEDBACK command might change the feedback level
@@ -2398,7 +2446,7 @@ public class SqlPanel
 			ignoreStateChange = false;
 			if (resultSets > 0)
 			{
-				this.showResultPanel();
+				this.showResultPanel(firstResultIndex);
 			}
 			else
 			{
@@ -2512,6 +2560,7 @@ public class SqlPanel
 			});
 		}
 	}
+	
 	private DwPanel createDwPanel()
 		throws SQLException
 	{
@@ -2519,9 +2568,48 @@ public class SqlPanel
 		data.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		data.setConnection(this.dbConnection);
 		data.setUpdateHandler(this);
-
+		data.initTableNavigation(this);
 		return data;
 	}
+	
+	/**
+	 * Implementation of the ResultReceiver interface. 
+	 * The given sql will be executed and the result will always
+	 * be displayed in a new result tab
+	 */
+	public void showResult(final String sql, String comment, ResultReceiver.ShowType how)
+	{
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
+		if (how != ResultReceiver.ShowType.showNone)
+		{
+			int pos = this.editor.getDocumentLength();
+			if (how == ResultReceiver.ShowType.replaceText)
+			{
+				this.editor.setText("");
+				pos = 0;
+			}
+			else if (comment != null)
+			{
+				this.editor.appendLine(nl);
+				this.editor.appendLine(comment);
+				this.editor.appendLine(nl);
+				pos = this.editor.getDocumentLength();
+			}
+			else
+			{
+				this.editor.appendLine(nl);
+				this.editor.appendLine(nl);
+				pos = this.editor.getDocumentLength();
+			}
+			this.editor.appendLine(sql);
+			this.editor.appendLine(";");
+			this.editor.appendLine(nl);
+			this.editor.setCaretPosition(pos);
+			this.editor.scrollToCaret();
+		}		
+		startExecution(sql, 0, -1, false, true);
+	}
+	
 	/**
 	 * Display the data contained in the StatementRunnerResult.
 	 * For each DataStore or ResultSet in the result, an additional
@@ -2529,7 +2617,7 @@ public class SqlPanel
 	 * @param result the result to be displayed (obtained from a {@link workbench.sql.StatementRunner}
 	 * @see workbench.gui.sql.DwPanel
 	 */
-	private int showResult(StatementRunnerResult result)
+	public int addResult(StatementRunnerResult result)
 		throws SQLException
 	{
 		if (!result.isSuccess()) return 0;

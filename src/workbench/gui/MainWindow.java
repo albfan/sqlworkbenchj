@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
@@ -45,7 +44,6 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -103,7 +101,7 @@ import workbench.gui.actions.InsertTabAction;
 import workbench.gui.actions.OptionsDialogAction;
 import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.actions.WhatsNewAction;
-import workbench.gui.sql.EditorPanel;
+import workbench.interfaces.ResultReceiver;
 
 /**
  * The main window for the Workbench.
@@ -156,7 +154,8 @@ public class MainWindow
 	private ManageMacroAction manageMacros;
 	private List explorerWindows = new ArrayList();
 	private RunningJobIndicator jobIndicator;
-
+	protected WbThread connectThread;
+		
 	public MainWindow()
 	{
 		super(ResourceMgr.TXT_PRODUCT_NAME);
@@ -606,7 +605,7 @@ public class MainWindow
 		}
 		return -1;
 	}
-
+	
 	public String[] getPanelLabels()
 	{
 		int tabCount = this.sqlTab.getTabCount();
@@ -664,11 +663,6 @@ public class MainWindow
 		this.sqlTab.setSelectedIndex(anIndex);
 	}
 
-	private void checkConnectionForPanel(MainPanel aPanel)
-	{
-		this.checkConnectionForPanel(aPanel, true);
-	}
-
 	private Object connectProgressLock = new Object();
 	
 	private boolean isConnectInProgress()
@@ -694,23 +688,23 @@ public class MainWindow
 		}
 	}
 
-	private void checkConnectionForPanel(final MainPanel aPanel, boolean createConnection)
+	private void checkConnectionForPanel(final MainPanel aPanel)
 	{
 		if (aPanel.isConnected()) return;
 		if (this.isConnectInProgress()) return;
 
 		try
 		{
-			if (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab() && createConnection)
+			if (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab())
 			{
-				WbThread t = new WbThread(new Runnable()
+				this.connectThread = new WbThread("Panel Connect " + aPanel.getId())
 				{
 					public void run()
 					{
 						connectPanel(aPanel);
 					}
-				}, "Panel Connect " + aPanel.getId());
-				t.start();
+				};
+				this.connectThread.start();
 			}
 			else if (this.currentConnection != null)
 			{
@@ -745,8 +739,27 @@ public class MainWindow
 			String msg = ResourceMgr.getString("ErrConnectFailed").replaceAll("%msg%", error.trim());
 			WbSwingUtilities.showErrorMessage(this, msg);
 		}
+		finally
+		{
+			this.connectThread = null;
+		}
 	}
 
+	public void waitForConnection()
+	{
+		if (this.connectThread != null)
+		{
+			try
+			{
+				this.connectThread.join();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	private void tabConnected(final MainPanel panel, WbConnection conn, final int anIndex)
 	{
 		this.closeConnectingInfo();
@@ -785,9 +798,21 @@ public class MainWindow
 
 	private void tabSelected(final int anIndex)
 	{
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				updateCurrentTab();
+			}
+		});
+	}
+
+	private void updateCurrentTab()
+	{
 		MainPanel current = this.getCurrentPanel();
+		int index = this.sqlTab.getSelectedIndex();
 		if (current == null) return;
-		this.updateGuiForTab(anIndex);
+		this.updateGuiForTab(index);
 		this.updateAddMacroAction();
 		this.updateWindowTitle();
 		if (!this.isConnectInProgress()) 
@@ -795,7 +820,6 @@ public class MainWindow
 			this.checkConnectionForPanel(current);
 		}
 	}
-
 	protected void updateAddMacroAction()
 	{
 		MainPanel current = this.getCurrentPanel();
@@ -2185,20 +2209,20 @@ public class MainWindow
 	
 	public MainPanel addTab()
 	{
-		return this.addTab(true);
+		return this.addTab(true, true, true);
 	}
-
-	/**
-	 *	Adds a new SQL tab to the main window. This will be inserted
-	 *	before the DbExplorer (if that is displayed as a tab)
-	 *
-	 *  @param selectNew if true the new tab is automatically selected
-	 *
-	 */
-	public MainPanel addTab(boolean selectNew)
-	{
-		return this.addTab(selectNew, true);
-	}
+//
+//	/**
+//	 *	Adds a new SQL tab to the main window. This will be inserted
+//	 *	before the DbExplorer (if that is displayed as a tab)
+//	 *
+//	 *  @param selectNew if true the new tab is automatically selected
+//	 *
+//	 */
+//	public MainPanel addTab(boolean selectNew)
+//	{
+//		return this.addTab(selectNew, true);
+//	}
 
 	/**
 	 *	Adds a new SQL tab to the main window. This will be inserted
@@ -2230,7 +2254,7 @@ public class MainWindow
 		final SqlPanel sql = new SqlPanel(index+1);
 		sql.addDbExecutionListener(this);
 		//sql.addFilenameChangeListener(this);
-		if (checkConnection) this.checkConnectionForPanel(sql, false);
+		if (checkConnection) this.checkConnectionForPanel(sql);
 
 		boolean isSuspended = this.sqlTab.isRepaintSuspended();
 
@@ -2492,7 +2516,10 @@ public class MainWindow
 			this.tabRemovalInProgress = false;
 			if (!inProgress) this.clearConnectIsInProgress();
 		}
-		if (newTab >= 0) this.tabSelected(newTab);
+		if (newTab >= 0) 
+		{
+			this.tabSelected(newTab);
+		}
 	}
 
 	public void mouseClicked(MouseEvent e)
@@ -2562,7 +2589,7 @@ public class MainWindow
 					for (int i=0; i < files; i++)
 					{
 						File file = (File)fileList.get(i);
-						this.addTab(true);
+						this.addTab(true, true, true);
 						SqlPanel sql = this.getCurrentSqlPanel();
 						sql.readFile(file.getAbsolutePath(), null);
 					}

@@ -22,8 +22,6 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.util.CharacterRange;
-import workbench.util.StringUtil;
 
 /**
  * @author  support@sql-workbench.net
@@ -144,7 +142,7 @@ public class SelectCommand extends SqlCommand
 		{
 			result.clear();
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
-			result.addMessage(ExceptionUtil.getDisplay(e));
+			result.addMessage(ExceptionUtil.getAllExceptions(e));
 
 			StringBuilder warnings = new StringBuilder();
 			if (this.appendWarnings(aConnection, this.currentStatement, warnings))

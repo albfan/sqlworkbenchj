@@ -34,4 +34,9 @@ public class ActionDisplay
 		ActionDisplay a = (ActionDisplay)other;
 		return text.compareToIgnoreCase(a.text);
 	}
+	
+	public String toString()
+	{
+		return text;
+	}
 }

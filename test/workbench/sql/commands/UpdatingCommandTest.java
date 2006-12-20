@@ -42,7 +42,7 @@ public class UpdatingCommandTest
 		super(testName);
 		try
 		{
-			util = new TestUtil();
+			util = new TestUtil(testName);
 			util.prepareEnvironment();
 		}
 		catch (Exception e)

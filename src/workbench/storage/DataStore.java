@@ -11,37 +11,29 @@
  */
 package workbench.storage;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.exporter.SqlRowDataConverter;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.storage.ColumnData;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
-
-
 
 /**
  * A class to cache the result of a database query.
@@ -760,7 +752,6 @@ public class DataStore
 	 * @return The column's index (first column starts at 0)
 	 */
 	public int getColumnIndex(String aName)
-		throws SQLException
 	{
 		return this.findColumn(aName);
 	}
@@ -1494,7 +1485,7 @@ public class DataStore
 		}
 	}
 
-	public Map getPkValues(int aRow)
+	public List<ColumnData> getPkValues(int aRow)
 	{
 		return this.getPkValues(this.originalConnection, aRow);
 	}
@@ -1506,39 +1497,32 @@ public class DataStore
 	 * @see workbench.storage.ResultInfo#isPkColumn(int)
 	 * @see #getValue(int, int)
 	 */
-	public Map getPkValues(WbConnection aConnection, int aRow)
+	public List<ColumnData> getPkValues(WbConnection aConnection, int aRow)
 	{
-		if (aConnection == null) return Collections.EMPTY_MAP;
+		if (aConnection == null) return Collections.EMPTY_LIST;
 		try
 		{
 			this.updatePkInformation(this.originalConnection);
 		}
 		catch (SQLException e)
 		{
-			return Collections.EMPTY_MAP;
+			return Collections.EMPTY_LIST;
 		}
 
-		if (!this.resultInfo.hasPkColumns()) return Collections.EMPTY_MAP;
+		if (!this.resultInfo.hasPkColumns()) return Collections.EMPTY_LIST;
 
 		RowData rowdata = this.getRow(aRow);
-		if (rowdata == null) return Collections.EMPTY_MAP;
+		if (rowdata == null) return Collections.EMPTY_LIST;
 
 		int count = this.resultInfo.getColumnCount();
-		HashMap result = new HashMap(count);
+		List<ColumnData> result = new LinkedList<ColumnData>();
 		for (int j=0; j < count ; j++)
 		{
 			if (this.resultInfo.isPkColumn(j))
 			{
-				String name = this.getColumnName(j);
+				ColumnIdentifier col = this.resultInfo.getColumn(j);
 				Object value = rowdata.getValue(j);
-				if (value instanceof NullValue)
-				{
-					result.put(name, null);
-				}
-				else
-				{
-					result.put(name, value);
-				}
+				result.add(new ColumnData(value, col));
 			}
 		}
 		return result;

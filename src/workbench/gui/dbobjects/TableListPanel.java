@@ -248,6 +248,7 @@ public class TableListPanel
 
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.tableSource);
 		this.tableData = new TableDataPanel();
+		this.tableData.setResultContainer(aParent);
 		
 		this.importedKeys = new WbTable();
 		this.importedKeys.setAdjustToColumnLabel(false);
@@ -1482,7 +1483,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			importedTableTree.readTree(selectedTable, false);
+			importedTableTree.readReferencedTables(selectedTable);
 			this.shouldRetrieveImportedTree = false;
 		}
 		catch (Throwable th)
@@ -1502,7 +1503,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			exportedTableTree.readTree(selectedTable, true);
+			exportedTableTree.readReferencingTables(selectedTable);
 			this.shouldRetrieveExportedTree = false;
 		}
 		catch (Throwable th)

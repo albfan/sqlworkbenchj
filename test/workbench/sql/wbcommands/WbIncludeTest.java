@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import junit.framework.*;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.sql.DefaultStatementRunner;
@@ -29,7 +30,8 @@ import workbench.util.EncodingUtil;
  *
  * @author support@sql-workbench.net
  */
-public class WbIncludeTest extends TestCase
+public class WbIncludeTest 
+	extends WbTestCase
 {
 	private TestUtil util;
 	private DefaultStatementRunner runner;
@@ -37,15 +39,7 @@ public class WbIncludeTest extends TestCase
 	public WbIncludeTest(String testName)
 	{
 		super(testName);
-		try
-		{
-			util = new TestUtil();
-			util.prepareEnvironment();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		util = getTestUtil(testName);
 	}
 
 	public void setUp()
@@ -56,13 +50,6 @@ public class WbIncludeTest extends TestCase
 		runner = util.createConnectedStatementRunner();
 	}
 
-	public void tearDown()
-		throws Exception
-	{
-		ConnectionMgr.getInstance().disconnectAll();
-		super.tearDown();
-	}
-	
 	public void testAlternateInclude()
 	{
 		try

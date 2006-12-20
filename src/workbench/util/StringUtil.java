@@ -69,6 +69,19 @@ public class StringUtil
 	public static final int CASE_LOWER = 2;
 	public static final int CASE_MIXED = 4;
 	
+	
+	public static int hashCode(CharSequence val)
+	{
+		int len = val.length();
+		int hash = 0;
+		
+		for (int i = 0; i < len; i++)
+		{
+			hash = 31*hash + val.charAt(i);
+		}
+		return hash;
+	}
+	
 	/**
 	 * Returns the length of the line without any line ending characters
 	 */

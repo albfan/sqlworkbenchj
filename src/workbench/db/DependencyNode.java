@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import workbench.util.StringUtil;
 
 /**
  *	A node in the dependency tree for a cascading delete script.
@@ -23,30 +24,27 @@ import java.util.Map;
  */
 public class DependencyNode
 {
+	private DependencyNode parentNode;
 	private TableIdentifier table;
-	private TableIdentifier parenttable;
 
 	private String updateAction = "";
 	private String deleteAction = "";
 	
-	private DependencyNode parent;
   private String fkName;
-  
-	private HashMap columns = new HashMap();
 
-	private ArrayList childTables = new ArrayList();
+	/**
+	 * Maps the columns of the base table to the matching column
+	 * of the parent table
+	 */
+	private HashMap<String, String> columns = new HashMap<String, String>();
+
+	private ArrayList<DependencyNode> childTables = new ArrayList<DependencyNode>();
 	
-	public DependencyNode(String aCatalog, String aSchema, String aTable)
-	{
-		if (aTable == null) throw new IllegalArgumentException("Table name may not be null");
-		if (aTable.trim().length() == 0) throw new IllegalArgumentException("Table name may not be empty");
-		this.table = new TableIdentifier(adjustCatalogSchemaName(aCatalog), adjustCatalogSchemaName(aSchema), aTable);
-		this.parenttable = null;
-	}
+
 	public DependencyNode(TableIdentifier aTable)
 	{
-		this.table = aTable;
-		this.parenttable = null;
+		this.table = aTable.createCopy();
+		this.parentNode = null;
 	}
 	
 	public void addColumnDefinition(String aColumn, String aParentColumn)
@@ -60,17 +58,8 @@ public class DependencyNode
 	
 	public void setParent(DependencyNode aParent, String aFkName)
 	{
-		this.parent = aParent;
-		this.setParentTable(aParent.getCatalog(), aParent.getSchema(), aParent.getTable(), aFkName);
-	}
-	
-	private void setParentTable(String aCatalog, String aSchema, String aTable, String aName)
-	{
-		if (aTable == null) throw new IllegalArgumentException("Parent table may not be null");
-		if (aTable.trim().length() == 0) throw new IllegalArgumentException("Parent table may not be empty");
-		
-		this.parenttable = new TableIdentifier(adjustCatalogSchemaName(aSchema), adjustCatalogSchemaName(aCatalog), aTable);
-    this.fkName = aName;
+		this.parentNode = aParent;
+		this.fkName = aFkName;
 	}
 	
 	public String toString() 
@@ -84,21 +73,32 @@ public class DependencyNode
 			return this.table.getTableName() + " (" + this.fkName + ")"; 
 		}
 	}
-  public String getFkName() { return this.fkName; }
-	public String getParentTable() { return this.parenttable.getTableName(); }
-	public String getParentCatalog() { return this.parenttable.getCatalog(); }
-	public String getParentSchema() { return this.parenttable.getSchema(); }
+  public String getFkName() 
+	{ 
+		return this.fkName; 
+	}
 	
-	public String getTable() { return this.table.getTableName(); }
-	public String getSchema() { return this.table.getSchema(); }
-	public String getCatalog() { return this.table.getCatalog(); }
-
-	public TableIdentifier getTableId()
+	public TableIdentifier getParentTable() 
+	{ 
+		if (parentNode == null) return null;
+		return this.parentNode.getTable();
+	}
+	
+	public TableIdentifier getTable()
 	{
 		return this.table;
 	}
 	
-	public Map getColumns() 
+	/**
+	 * Returns a Map that maps the columns of the base table to the matching column
+	 * of the related (parent/child) table.
+	 * The keys to the map are columns from this node's table {@link #getTable()}
+	 * The values in this map are columns found in this node's "parent" table
+	 * 
+	 * @see #getTable()
+	 * @see #getParentTable()
+	 */
+	public Map<String, String> getColumns() 
 	{ 
 		if (this.columns == null)
 		{
@@ -114,12 +114,11 @@ public class DependencyNode
 	 *	Checks if this node defines the foreign key constraint name aFkname
 	 *	to the given table
 	 */
-	public boolean isDefinitionFor(String aCatalog, String aSchema, String aTable, String aFkname)
+	public boolean isDefinitionFor(TableIdentifier tbl, String aFkname)
 	{
 		if (aFkname == null) return false;
-		TableIdentifier t = new TableIdentifier(aCatalog, aSchema, aTable);
 		
-		return (this.table.equals(t) && aFkname.equals(this.fkName));
+		return (this.table.equals(tbl) && aFkname.equals(this.fkName));
 	}
 	
 	public boolean equals(Object other)
@@ -128,15 +127,22 @@ public class DependencyNode
 		if (other instanceof DependencyNode)
 		{
 			DependencyNode node = (DependencyNode)other;
-			return this.isDefinitionFor(node.getCatalog(), node.getSchema(), node.getTable(), node.getFkName());
+			return this.isDefinitionFor(node.getTable(), node.getFkName());
 		}
 		return false;
+	}
+	
+	public int hashCode()
+	{
+		StringBuilder sb = new StringBuilder(60);
+		sb.append(this.table.getTableExpression() + "-" + this.fkName);
+		return StringUtil.hashCode(sb);
 	}
 	
 	public boolean isInParentTree(DependencyNode aNode)
 	{
 		if (aNode == null) return false;
-		DependencyNode currentParent = this;//.getParent();
+		DependencyNode currentParent = this;
 		while (currentParent != null)
 		{
 			if (currentParent.equals(aNode)) return true;
@@ -145,54 +151,52 @@ public class DependencyNode
 		return false;
 	}
 	
-	public boolean isRoot() { return this.parent == null; }
+	public boolean isRoot() { return this.parentNode == null; }
 
-	public DependencyNode getParent() { return this.parent; }
-	public List getChildren()
+	public DependencyNode getParent() 
+	{ 
+		return this.parentNode; 
+	}
+	
+	public List<DependencyNode> getChildren()
 	{
 		return this.childTables;
 	}
 	
-	public DependencyNode addChild(String aCatalog, String aSchema, String aTable, String aFkname)
+	public DependencyNode addChild(TableIdentifier table, String aFkname)
 	{
 		int count = this.childTables.size();
 		DependencyNode node = null;
 		for (int i=0; i < count; i++)
 		{
 			node = this.getChild(i);
-			if (node.isDefinitionFor(aCatalog, aSchema, aTable, aFkname))
+			if (node.isDefinitionFor(table, aFkname))
 			{
 				return node;
 			}
 		}
-		node = new DependencyNode(aCatalog, aSchema, aTable);
+		node = new DependencyNode(table);
 		node.setParent(this, aFkname);
 		this.childTables.add(node);
 		return node;
 	}
+	
 	private DependencyNode getChild(int i)
 	{
-		return (DependencyNode)this.childTables.get(i);
+		return this.childTables.get(i);
 	}
+	
 	public boolean containsChild(DependencyNode aNode)
 	{
 		if (aNode == null) return false;
 		return this.childTables.contains(aNode);
 	}
+	
 	public boolean addChild(DependencyNode aTable)
 	{
 		if (this.containsChild(aTable)) return false;
 		this.childTables.add(aTable);
 		return true;
-	}
-
-	private String adjustCatalogSchemaName(String aName)
-	{
-		if (aName == null) return null;
-		if (aName.length() == 0) return null;
-		if ("*".equals(aName)) return null;
-		if ("%".equals(aName)) return null;
-		return aName;
 	}
 
 	public String getDeleteAction() { return this.deleteAction; }

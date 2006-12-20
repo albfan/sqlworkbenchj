@@ -71,7 +71,7 @@ public class SingleVerbCommand extends SqlCommand
 			{
 				result.addMessage(aSql);
 			}
-			result.addMessage(ExceptionUtil.getDisplay(e));
+			result.addMessage(ExceptionUtil.getAllExceptions(e));
 			result.setFailure();
 			LogMgr.logSqlError("SingleVerbCommand.execute()", aSql, e);
 		}

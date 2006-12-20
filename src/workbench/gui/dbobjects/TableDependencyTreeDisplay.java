@@ -59,7 +59,17 @@ public class TableDependencyTreeDisplay
 		this.connection = aConn;
 	}
 	
-	public void readTree(TableIdentifier aTable, boolean exportedKeys)
+	public void readReferencedTables(TableIdentifier table)
+	{
+		readTree(table, true);
+	}
+	
+	public void readReferencingTables(TableIdentifier table)
+	{
+		readTree(table, false);
+	}
+	
+	private void readTree(TableIdentifier aTable, boolean exportedKeys)
 	{
 		this.renderer = new DependencyTreeCellRenderer();
 		this.showExported = exportedKeys;
@@ -69,7 +79,15 @@ public class TableDependencyTreeDisplay
       TableDependency dep = new TableDependency();
       dep.setConnection(this.connection);
       dep.setTable(aTable);
-      dep.readDependencyTree(exportedKeys);
+			if (exportedKeys)
+			{
+				dep.retrieveReferencingTables();
+			}
+			else
+			{
+				dep.retrieveReferencedTables();
+			}
+
       DependencyNode root = dep.getRootNode();
       this.readTreeNodes(root);
     }
@@ -124,7 +142,7 @@ public class TableDependencyTreeDisplay
 	
 	private void buildTree(DependencyNode parent, DefaultMutableTreeNode treeParent)
 	{
-		String parenttable = parent.getTable();
+		String parenttable = parent.getTable().getTableName();
 			
 		DependencyNode child = null;
 		DefaultMutableTreeNode treeNode = null;
@@ -146,7 +164,7 @@ public class TableDependencyTreeDisplay
 			Iterator entries = columns.entrySet().iterator();
 			while (entries.hasNext())
 			{
-				table = child.getTable();
+				table = child.getTable().getTableName();
 				Entry entry = (Entry)entries.next();
 				StringBuilder coldef = new StringBuilder(100);
 				coldef.append("<html><b>");

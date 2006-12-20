@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import workbench.WbManager;
@@ -449,7 +448,7 @@ public class ConnectionMgr
 					this.shutdownCloudscape(prof);
 				}
 			}
-			else if (conn.getMetadata().isHsql() && this.canShutdownHsql(conn))
+			else if (conn.getMetadata().isHsql() && this.canCloseHsql(conn))
 			{
 				this.shutdownHsql(conn);
 				conn.close();
@@ -495,13 +494,13 @@ public class ConnectionMgr
 
 	/**
 	 *	Check if the given (HSQLDB) connection can be safely closed.
-	 *	A in-memory HSQLDB engine allows the creation of several connections
+	 *	A in-process HSQLDB engine allows the creation of several connections
 	 *	to the same database (from within the same JVM)
 	 *	But the connections may not be closed except for the last one, because
 	 *	they seem to "share" something in the driver and closing one
 	 *	will close the others as well.
 	 */
-	private boolean canShutdownHsql(WbConnection aConn)
+	private boolean canCloseHsql(WbConnection aConn)
 	{
 		if (!aConn.getMetadata().isHsql()) return true;
 

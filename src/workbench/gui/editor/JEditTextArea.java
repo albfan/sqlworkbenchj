@@ -106,7 +106,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.62 2006-12-03 11:27:15 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.63 2006-12-20 22:22:50 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -1230,11 +1230,11 @@ public class JEditTextArea
 			document.endCompoundEdit();
 		}
 
-		int newCount = Integer.toString(this.getLineCount()).length();
-		if (newCount > count)
-		{
-			this.repaint();
-		}
+//		int newCount = Integer.toString(this.getLineCount()).length();
+//		if (newCount > count)
+//		{
+//			this.repaint();
+//		}
 	}
 	
 	public void reset()

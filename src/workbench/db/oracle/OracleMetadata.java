@@ -693,6 +693,19 @@ public class OracleMetadata
 			if (rs.next())
 			{
 				result = rs.getString(1);
+				if (rs.wasNull())
+				{
+					result = "";
+				}
+				else
+				{
+					result = result.trim();
+				}
+					
+				if (!result.endsWith(";"))
+				{
+					result = result + ";";
+				}
 			}
 		}
 		catch (SQLException e)

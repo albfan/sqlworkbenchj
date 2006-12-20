@@ -195,7 +195,7 @@ public class SqlCommand
 			msg.append(s);
 			msg.append("\n");
 			result.addMessage(msg.toString());
-			String er = ExceptionUtil.getDisplay(e);
+			StringBuilder er = ExceptionUtil.getAllExceptions(e);
 			result.addMessage(er);
 			result.setFailure();
 			LogMgr.logDebug("SqlCommand.execute()", "Error executing sql statement " + s + "\nError:" + er, null);
@@ -281,7 +281,7 @@ public class SqlCommand
 						if (this.currentRetrievalData != null && this.currentRetrievalData.isCancelled())
 						{
 							result.addMessage(ResourceMgr.getString("MsgErrorDuringRetrieve"));
-							result.addMessage(ExceptionUtil.getDisplay(e));
+							result.addMessage(ExceptionUtil.getAllExceptions(e));
 							result.setWarning(true);
 						}
 						else

@@ -31,7 +31,7 @@ public class PreparedStatementPoolTest extends TestCase
 
 	public void testPool()
 	{
-		TestUtil util = new TestUtil();
+		TestUtil util = new TestUtil(getClass().getName()+"_testPool");
 		try
 		{
 			util.prepareEnvironment();

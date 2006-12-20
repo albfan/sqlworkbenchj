@@ -28,7 +28,7 @@ public class StatementFactoryTest extends TestCase
 		super(testName);
 		try
 		{
-			TestUtil util = new TestUtil();
+			TestUtil util = new TestUtil(testName);
 			util.prepareEnvironment();
 		}
 		catch (Exception e)

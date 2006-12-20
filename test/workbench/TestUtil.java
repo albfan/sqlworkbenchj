@@ -33,33 +33,35 @@ public class TestUtil
 {
 	
 	private String basedir;
-	private String dbName;
+	private String testName;
 	
-	public TestUtil()
+	public TestUtil(String name)
 	{
+		try
+		{
+			testName = name;
+			prepareEnvironment();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public void prepareEnvironment()
 		throws IOException
 	{
-		prepareEnvironment("wbtestdb");
+		prepareBaseDir();
+		WbManager.getInstance().prepareForTest(basedir);
 	}
 	
 	public void prepareBaseDir()
-		throws IOException
-	{
-		prepareBaseDir("wbtestdb");
-	}
-	
-	public void prepareBaseDir(String dbBaseName)
 		throws IOException
 	{
 		File tempdir = new File(System.getProperty("java.io.tmpdir"));
 		File dir = new File(tempdir, "wbtest");
 		dir.mkdir();
 		basedir = dir.getAbsolutePath();
-		File db = new File(basedir, dbBaseName);
-		dbName = db.getAbsolutePath();
 
 		PrintWriter pw = new PrintWriter(new FileWriter(new File(dir, "workbench.settings")));
 		pw.println("workbench.log.console=false");
@@ -70,13 +72,6 @@ public class TestUtil
 		emptyBaseDirectory();
 	}
 	
-	public void prepareEnvironment(String dbBaseName)
-		throws IOException
-	{
-		prepareBaseDir(dbBaseName);
-		WbManager.getInstance().prepareForTest(basedir);
-	}
-
 	public void emptyBaseDirectory()
 	{
 		// Cleanup old database files
@@ -97,17 +92,33 @@ public class TestUtil
 			files[i].delete();
 		}
 	}
-
+	
 	public WbConnection getConnection()
 		throws SQLException, ClassNotFoundException
 	{
+		return getConnection(this.testName);
+	}
+	
+	public WbConnection getConnection(String db)
+		throws SQLException, ClassNotFoundException
+	{
 		ArgumentParser parser = WbManager.createArgumentParser();
-		parser.parse("-url='jdbc:hsqldb:" + getDbName() + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver");
+		parser.parse("-url='jdbc:hsqldb:mem:" + db + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, "WbUnitTest");
 		return con;
 	}
 
+	public WbConnection getConnection(File db)
+		throws SQLException, ClassNotFoundException
+	{
+		ArgumentParser parser = WbManager.createArgumentParser();
+		parser.parse("-url='jdbc:hsqldb:" + db.getAbsolutePath() + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver");
+		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
+		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, "WbUnitTest");
+		return con;
+	}
+	
 	public DefaultStatementRunner createConnectedStatementRunner()
 		throws Exception
 	{
@@ -124,7 +135,6 @@ public class TestUtil
 	}
 
 	public String getBaseDir() { return this.basedir; }
-	public String getDbName() { return this.dbName; }
 
 	public static int countLines(File f)
 		throws IOException

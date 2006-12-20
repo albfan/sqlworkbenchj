@@ -19,7 +19,6 @@ import java.awt.Window;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.CellEditor;
 import javax.swing.JOptionPane;
@@ -42,10 +41,12 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import workbench.db.TableIdentifier;
-
 import workbench.db.WbConnection;
+import workbench.gui.MainWindow;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.WbTextCellEditor;
+import workbench.gui.sql.ReferenceTableNavigator;
+import workbench.interfaces.ResultReceiver;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
@@ -117,6 +118,7 @@ public class DwPanel
 	private String[] lastResultMessages;
 	private StatementRunner stmtRunner;
 	private GenericRowMonitor genericRowMonitor;
+	private ReferenceTableNavigator referenceNavigator;
 	
 	public DwPanel()
 	{
@@ -148,6 +150,7 @@ public class DwPanel
 		dataTable.addPopupAction(this.updateAction, true);
 		dataTable.addPopupAction(this.insertRow, true);
 		dataTable.addPopupAction(this.deleteRow, false);
+		
 		this.dataTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.dataTable.setRowSelectionAllowed(true);
 		this.dataTable.getSelectionModel().addListSelectionListener(this);
@@ -159,6 +162,18 @@ public class DwPanel
 		pol.addComponent(dataTable);
 		this.setFocusTraversalPolicy(pol);
 		this.genericRowMonitor = new GenericRowMonitor(this.statusBar);
+	}
+
+	public void initTableNavigation(MainWindow container)
+	{
+		this.referenceNavigator = new ReferenceTableNavigator(this.dataTable);
+		this.referenceNavigator.setTargetContainer(container);
+	}
+	
+	public void initTableNavigation(ResultReceiver receiver)
+	{
+		this.referenceNavigator = new ReferenceTableNavigator(this.dataTable);
+		this.referenceNavigator.setReceiver(receiver);
 	}
 	
 	public SelectKeyColumnsAction getSelectKeysAction()

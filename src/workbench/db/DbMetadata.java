@@ -972,6 +972,7 @@ public class DbMetadata
 		result.append(lineEnding + "AS " + lineEnding);
 		result.append(source);
 		result.append(lineEnding);
+		
 		if (this.ddlNeedsCommit)
 		{
 			result.append("COMMIT;");
@@ -2356,33 +2357,33 @@ public class DbMetadata
 		return defs.values();
 	}
 
-	public List getTableList(String schema, String[] types)
+	public List<TableIdentifier> getTableList(String schema, String[] types)
 		throws SQLException
 	{
 		if (schema == null) schema = this.getCurrentSchema();
 		return getTableList(null, adjustSchemaNameCase(schema), types);
 	}
 	
-	public List getTableList()
+	public List<TableIdentifier> getTableList()
 		throws SQLException
 	{
 		String schema = this.getCurrentSchema();
 		return getTableList(null, schema, tableTypesTable);
 	}
 
-	public List getTableList(String table, String schema)
+	public List<TableIdentifier> getTableList(String table, String schema)
 		throws SQLException
 	{
 		return getTableList(table, adjustSchemaNameCase(schema), tableTypesTable);
 	}
 
-	public List getSelectableObjectsList(String schema)
+	public List<TableIdentifier> getSelectableObjectsList(String schema)
 		throws SQLException
 	{
 		return getTableList(null, schema, tableTypesSelectable, false);
 	}
 
-	public List getTableList(String table, String schema, String[] types)
+	public List<TableIdentifier> getTableList(String table, String schema, String[] types)
 		throws SQLException
 	{
 		return getTableList(table, schema, types, false);
@@ -2391,12 +2392,12 @@ public class DbMetadata
 	 * Return a list of tables for the given schema
 	 * if the schema is null, all tables will be returned
 	 */
-	public List getTableList(String table, String schema, String[] types, boolean returnAllSchemas)
+	public List<TableIdentifier> getTableList(String table, String schema, String[] types, boolean returnAllSchemas)
 		throws SQLException
 	{
 		DataStore ds = getTables(null, schema, table, types);
 		int count = ds.getRowCount();
-		List tables = new ArrayList(count);
+		List<TableIdentifier> tables = new ArrayList<TableIdentifier>(count);
 		for (int i=0; i < count; i++)
 		{
 			String t = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_NAME);
@@ -2845,29 +2846,29 @@ public class DbMetadata
 	public static final int COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE = 5;
 	public static final int COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE = 6;
 
-	public DataStore getExportedKeys(String aCatalog, String aSchema, String aTable)
+	public DataStore getExportedKeys(TableIdentifier tbl)
 		throws SQLException
 	{
-		return getRawKeyList(aCatalog, aSchema, aTable, true);
+		return getRawKeyList(tbl, true);
 	}
 
-	public DataStore getImportedKeys(String aCatalog, String aSchema, String aTable)
+	public DataStore getImportedKeys(TableIdentifier tbl)
 		throws SQLException
 	{
-		return getRawKeyList(aCatalog, aSchema, aTable, false);
+		return getRawKeyList(tbl, false);
 	}
 
-	private DataStore getRawKeyList(String aCatalog, String aSchema, String aTable, boolean exported)
+	private DataStore getRawKeyList(TableIdentifier tbl, boolean exported)
 		throws SQLException
 	{
-		aCatalog = this.adjustObjectnameCase(aCatalog);
-		aSchema = this.adjustObjectnameCase(aSchema);
-		aTable = this.adjustObjectnameCase(aTable);
+		TableIdentifier table = tbl.createCopy();
+		table.adjustCase(this.dbConnection);
+			
 		ResultSet rs;
 		if (exported)
-			rs = this.metaData.getExportedKeys(aCatalog, aSchema, aTable);
+			rs = this.metaData.getExportedKeys(table.getCatalog(), table.getSchema(), table.getTableName());
 		else
-			rs = this.metaData.getImportedKeys(aCatalog, aSchema, aTable);
+			rs = this.metaData.getImportedKeys(table.getCatalog(), table.getSchema(), table.getTableName());
 
 		DataStore ds = new DataStore(rs, false);
 		try
@@ -2908,12 +2909,13 @@ public class DbMetadata
 	{
 		if (aName == null) return null;
 		if (!this.isPostgres) return aName;
-		if (aName.indexOf("\\000") > -1)
+		int pos = aName.indexOf("\\000");
+		if (pos > -1)
 		{
 			// the Postgres JDBC driver seems to have a bug here,
 			// because it appends the whole FK information to the fk name!
 			// the actual FK name ends at the first \000
-			return aName.substring(0, aName.indexOf("\\000"));
+			return aName.substring(0, pos);
 		}
 		return aName;
 	}
@@ -3003,7 +3005,7 @@ public class DbMetadata
 				String col = rs.getString(colCol);
 				String fk_name = this.fixFKName(rs.getString(fkNameCol));
 				String schema = rs.getString(schemaCol);
-				if (schema != null && !schema.equals(this.getCurrentSchema()))
+				if (!this.ignoreSchema(schema))
 				{
 					table = schema + "." + table;
 				}
@@ -3736,7 +3738,10 @@ public class DbMetadata
 				int pos = col.lastIndexOf('.');
 				if (targetTable == null)
 				{
-					targetTable = col.substring(0, pos);
+					// The last element has to be the column name!
+					String t = col.substring(0, pos);
+					TableIdentifier tbl = new TableIdentifier(t);
+					targetTable = tbl.getTableExpression(this.dbConnection);
 				}
 				if (!first)
 				{

@@ -49,7 +49,7 @@ public class DataStoreTest
 		throws Exception
 	{
 		super(testName);
-		this.util = new TestUtil();
+		this.util = new TestUtil(testName);
 		util.prepareEnvironment();
 	}
 
@@ -57,9 +57,7 @@ public class DataStoreTest
 		throws Exception
 	{
 		util.emptyBaseDirectory();
-		String basedir = util.getBaseDir();
-		String dbName = util.getDbName();
-		WbConnection wb = util.getConnection();
+		WbConnection wb = util.getConnection("pkTestDb");
 		Connection con = wb.getSqlConnection();
 		Statement stmt = con.createStatement();
 		try { stmt.executeUpdate("DROP TABLE junit_test"); } catch (Throwable th) {}
@@ -104,7 +102,13 @@ public class DataStoreTest
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
 	}
+	
+	
 	public void testCasePreserving()
 	{
 		WbConnection con = null;
@@ -300,8 +304,6 @@ public class DataStoreTest
 		throws Exception
 	{
 		util.emptyBaseDirectory();
-		String basedir = util.getBaseDir();
-		String dbName = util.getDbName();
 		WbConnection wb = util.getConnection();
 		Connection con = wb.getSqlConnection();
 		Statement stmt = con.createStatement();
@@ -481,7 +483,12 @@ public class DataStoreTest
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
 	}
+	
 	public void testList()
 	{
 		try
@@ -516,5 +523,10 @@ public class DataStoreTest
 		{
 			fail(e.getMessage());
 		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
 	}
+	
 }

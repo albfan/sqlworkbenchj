@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import workbench.TestUtil;
+import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.db.exporter.RowDataConverter;
 import workbench.sql.StatementRunnerResult;
@@ -39,10 +40,10 @@ import workbench.util.ZipOutputFactory;
  *
  * @author support@sql-workbench.net
  */
-public class WbImportTest extends TestCase
+public class WbImportTest 
+	extends TestCase
 {
 	private TestUtil util;
-	private String dbName;
 	private String basedir;
 	private WbImport importCmd = new WbImport();
 	private WbConnection connection;
@@ -52,9 +53,8 @@ public class WbImportTest extends TestCase
 		super(testName);
 		try
 		{
-			util = new TestUtil();
+			util = new TestUtil(testName);
 			util.prepareEnvironment();
-			this.dbName = util.getDbName();
 			this.basedir = util.getBaseDir();
 		}
 		catch (Exception e)
@@ -1379,8 +1379,6 @@ public class WbImportTest extends TestCase
 			fail(e.getMessage());
 		}
 	}
-	
-	
 
 	public void testZippedXmlBlobImport()
 	{

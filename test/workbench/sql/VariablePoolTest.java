@@ -34,7 +34,7 @@ public class VariablePoolTest extends TestCase
 	public void testPool()
 		throws Exception
 	{
-		TestUtil util = new TestUtil();
+		TestUtil util = new TestUtil("testPool");
 		util.prepareEnvironment();
 		
 		VariablePool pool = VariablePool.getInstance();
