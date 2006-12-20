@@ -2621,30 +2621,58 @@ public class SqlPanel
 		throws SQLException
 	{
 		if (!result.isSuccess()) return 0;
-		String sql = result.getSourceCommand();
+		final String sql = result.getSourceCommand();
 
 		int count = 0;
 		if (result.hasDataStores())
 		{
-			DataStore[] results = result.getDataStores();
+			final DataStore[] results = result.getDataStores();
 			for (int i = 0; i < results.length; i++)
 			{
 				count ++;
-				DwPanel p = createDwPanel();
-				p.showData(results[i], sql);
-				this.addResultTab(p, sql);
+				final int index = i;
+				WbSwingUtilities.invoke(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							DwPanel p = createDwPanel();
+							p.showData(results[index], sql);
+							addResultTab(p, sql);
+						}
+						catch (Exception e)
+						{
+							LogMgr.logError("SqlPanel.addResult()", "Error when adding new DwPanel", e);
+						}
+					}
+				});
 			}
 		}
 
 		if (result.hasResultSets())
 		{
-			ResultSet[] results = result.getResultSets();
+			final ResultSet[] results = result.getResultSets();
 			for (int i = 0; i < results.length; i++)
 			{
 				count ++;
-				DwPanel p = createDwPanel();
-				p.showData(results[i], sql);
-				this.addResultTab(p, sql);
+				final int index = i;
+				WbSwingUtilities.invoke(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							DwPanel p = createDwPanel();
+							p.showData(results[index], sql);
+							addResultTab(p, sql);
+						}
+						catch (Exception e)
+						{
+							LogMgr.logError("SqlPanel.addResult()", "Error when adding new DwPanel", e);
+						}
+					}
+				});
 			}
 		}
 

@@ -678,7 +678,7 @@ public class DwPanel
 	 *
 	 * @see workbench.sql.DefaultStatementRunner
 	 */
-	public void showData(StatementRunnerResult result)
+	public void showData(final StatementRunnerResult result)
 		throws SQLException
 	{
 		if (result.hasDataStores())
@@ -691,7 +691,7 @@ public class DwPanel
 		}			
 	}
 	
-	public void showData(ResultSet result, String sql)
+	public void showData(final ResultSet result, final String sql)
 		throws SQLException
 	{
 		DataStore newData = null;
@@ -710,7 +710,7 @@ public class DwPanel
 		showData(newData, sql);
 	}
 	
-	public void showData(DataStore newData, String statement)
+	public void showData(final DataStore newData, final String statement)
 		throws SQLException
 	{
 		try
@@ -723,17 +723,24 @@ public class DwPanel
 			newData.setProgressMonitor(null);
 			this.clearStatusMessage();
 
-			this.dataTable.reset();
-			this.dataTable.setAutoCreateColumnsFromModel(true);
-			this.dataTable.setModel(new DataStoreTableModel(newData), true);
-			this.dataTable.adjustOrOptimizeColumns(Settings.getInstance().getIncludeHeaderInOptimalWidth());
-			StringBuilder header = new StringBuilder(80);
-			header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
-			header.append(this.sql);
-			this.setPrintHeader(header.toString());
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					dataTable.reset();
+					dataTable.setAutoCreateColumnsFromModel(true);
+					dataTable.setModel(new DataStoreTableModel(newData), true);
+					dataTable.adjustOrOptimizeColumns(Settings.getInstance().getIncludeHeaderInOptimalWidth());
+					StringBuilder header = new StringBuilder(80);
+					header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
+					header.append(sql);
+					setPrintHeader(header.toString());
 
-			this.dataTable.checkCopyActions();
-			this.checkResultSetActions();
+					dataTable.checkCopyActions();
+					checkResultSetActions();
+				}
+			});
+			
 		}
 		finally
 		{
@@ -789,10 +796,11 @@ public class DwPanel
 					{
 						((WbTextCellEditor)edit).requestFocus();
 					}
+					rowCountChanged();
 				}
 			});
 		}
-		this.rowCountChanged();
+		
 		return newRow;
 	}
 	
@@ -853,7 +861,9 @@ public class DwPanel
 	}
 	
 	public boolean hasResultSet()
-	{ return this.hasResultSet; }
+	{ 
+		return this.hasResultSet; 
+	}
 	
 	/**
 	 *	Returns true if the DataStore of the Table has been modified.
@@ -923,14 +933,20 @@ public class DwPanel
 		this.setMessageDisplayModel(this.getErrorTableModel(error));	
 	}
 	
-	private void setMessageDisplayModel(TableModel aModel)
+	protected void setMessageDisplayModel(final TableModel aModel)
 	{
 		if (this.dataTable.getModel() == aModel) return;
-		this.dataTable.setModel(aModel);
-		TableColumnModel colMod = this.dataTable.getColumnModel();
-		TableColumn col = colMod.getColumn(0);
-		col.setPreferredWidth(this.getWidth() - 10);
-		this.statusBar.setRowcount(0,0,0);
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				dataTable.setModel(aModel);
+				TableColumnModel colMod = dataTable.getColumnModel();
+				TableColumn col = colMod.getColumn(0);
+				col.setPreferredWidth(getWidth() - 10);
+				statusBar.setRowcount(0,0,0);
+			}
+		});
 	}
 	
 	/**

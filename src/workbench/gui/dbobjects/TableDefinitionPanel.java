@@ -37,6 +37,7 @@ import javax.swing.table.TableColumnModel;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
@@ -198,42 +199,14 @@ public class TableDefinitionPanel
 				tableNameLabel.setText(msg);
 				DbMetadata meta = this.dbConnection.getMetadata();
 				DataStore def = meta.getTableDefinition(this.currentTable, false);
-				DataStoreTableModel model = new DataStoreTableModel(def);
-				tableDefinition.setSuspendRepaint(true);
-				tableDefinition.setPrintHeader(this.currentTable.getTableName());
-				tableDefinition.setAutoCreateColumnsFromModel(true);
-				tableDefinition.setModel(model, true);
-				tableDefinition.adjustOrOptimizeColumns();
-
-				// remove the last three columns if we are not displaying a SEQUENCE
-				// these columns are "SCALE/SIZE", "PRECISION" and "POSITION"
-				// they don't need to be displayed as this is "included" in the
-				// displayed (DBMS) data type already
-				if (!"SEQUENCE".equalsIgnoreCase(this.currentObjectType))
+				final DataStoreTableModel model = new DataStoreTableModel(def);
+				WbSwingUtilities.invoke(new Runnable()
 				{
-					TableColumnModel colmod = tableDefinition.getColumnModel();
-					
-					// Assign the correct renderer to display java.sql.Types values
-					TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
-					col.setCellRenderer(RendererFactory.getSqlTypeRenderer());
-
-					try
+					public void run()
 					{
-						if (colmod.getColumnCount() == DbMetadata.TABLE_DEFINITION_COLS.length)
-						{
-							for (int i = 0; i < 3; i++)
-							{
-								col = colmod.getColumn(colmod.getColumnCount() - 1);
-								colmod.removeColumn(col);
-							}
-						}
+						applyTableModel(model);
 					}
-					catch (Throwable e)
-					{
-						// ignore it
-					}
-				}
-				tableNameLabel.setText("<html><b>" + currentTable.getTableName() + "</b></html>");
+				});
 			}
 			catch (SQLException e)
 			{
@@ -249,6 +222,45 @@ public class TableDefinitionPanel
 		}
 	}
 
+	protected void applyTableModel(DataStoreTableModel model)
+	{
+		tableDefinition.setSuspendRepaint(true);
+		tableDefinition.setPrintHeader(this.currentTable.getTableName());
+		tableDefinition.setAutoCreateColumnsFromModel(true);
+		tableDefinition.setModel(model, true);
+		tableDefinition.adjustOrOptimizeColumns();
+
+		// remove the last three columns if we are not displaying a SEQUENCE
+		// these columns are "SCALE/SIZE", "PRECISION" and "POSITION"
+		// they don't need to be displayed as this is "included" in the
+		// displayed (DBMS) data type already
+		if (!"SEQUENCE".equalsIgnoreCase(this.currentObjectType))
+		{
+			TableColumnModel colmod = tableDefinition.getColumnModel();
+
+			// Assign the correct renderer to display java.sql.Types values
+			TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
+			col.setCellRenderer(RendererFactory.getSqlTypeRenderer());
+
+			try
+			{
+				if (colmod.getColumnCount() == DbMetadata.TABLE_DEFINITION_COLS.length)
+				{
+					for (int i = 0; i < 3; i++)
+					{
+						col = colmod.getColumn(colmod.getColumnCount() - 1);
+						colmod.removeColumn(col);
+					}
+				}
+			}
+			catch (Throwable e)
+			{
+				// ignore it
+			}
+		}
+		tableNameLabel.setText("<html><b>" + currentTable.getTableName() + "</b></html>");
+	}
+	
 	public void reset()
 	{
 		this.currentTable = null;

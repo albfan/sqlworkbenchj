@@ -101,7 +101,6 @@ import workbench.gui.actions.InsertTabAction;
 import workbench.gui.actions.OptionsDialogAction;
 import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.actions.WhatsNewAction;
-import workbench.interfaces.ResultReceiver;
 
 /**
  * The main window for the Workbench.
