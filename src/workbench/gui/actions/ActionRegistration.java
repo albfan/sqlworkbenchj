@@ -20,6 +20,8 @@ public class ActionRegistration
 {
 	public static void registerActions()
 	{
-		ToggleTableSourceAction action = new ToggleTableSourceAction(null);
+		new ToggleTableSourceAction(null);
+		new MoveSqlTabLeft(null);
+		new MoveSqlTabRight(null);
 	}
 }

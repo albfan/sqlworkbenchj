@@ -25,19 +25,21 @@ import workbench.interfaces.MainPanel;
 import workbench.gui.actions.FileReloadAction;
 import workbench.gui.actions.FileSaveAction;
 import workbench.gui.actions.InsertTabAction;
-import workbench.gui.actions.MoveSqlTab;
+import workbench.gui.actions.MoveSqlTabLeft;
+import workbench.gui.actions.MoveSqlTabRight;
 
 /**
  * @author  support@sql-workbench.net
  */
-public class SqlTabPopup extends JPopupMenu
+public class SqlTabPopup 
+	extends JPopupMenu
 {
 	private AddTabAction add;
 	private NewDbExplorerPanelAction newDbExp;
 	private RemoveTabAction remove;
 	private RenameTabAction rename;
-	private MoveSqlTab moveLeft;
-	private MoveSqlTab moveRight;
+	private MoveSqlTabLeft moveLeft;
+	private MoveSqlTabRight moveRight;
 	private InsertTabAction insert;
 	
 	public SqlTabPopup(MainWindow aClient)
@@ -69,11 +71,11 @@ public class SqlTabPopup extends JPopupMenu
 			
 			SqlPanel spanel = (SqlPanel)panel;
 			int currentIndex = aClient.getCurrentPanelIndex();
-			moveLeft = new MoveSqlTab(aClient, true);
+			moveLeft = new MoveSqlTabLeft(aClient);
 			moveLeft.setEnabled(currentIndex > 0);
 			this.add(moveLeft.getMenuItem());
 			int lastIndex = aClient.getLastSqlPanelIndex();
-			moveRight = new MoveSqlTab(aClient, false);
+			moveRight = new MoveSqlTabRight(aClient);
 			moveRight.setEnabled(currentIndex < lastIndex);
 			this.add(moveRight);
 			

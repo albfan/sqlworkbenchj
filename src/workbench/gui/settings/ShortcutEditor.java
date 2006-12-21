@@ -24,7 +24,6 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.Types;
 import javax.swing.ActionMap;
-
 import javax.swing.Box;
 import javax.swing.InputMap;
 import javax.swing.JButton;
@@ -41,8 +40,8 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
-
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.ActionRegistration;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DividerBorder;
@@ -84,6 +83,10 @@ public class ShortcutEditor
 	public ShortcutEditor(Frame parent)
 	{
 		this.parent = parent;
+		
+		// make sure actions that are not created upon startup are
+		// registered with us!
+		ActionRegistration.registerActions();
 	}
 	
 	public void showWindow()

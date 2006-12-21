@@ -48,7 +48,6 @@ import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.ConnectionSelector;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbToolbar;
-import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -106,8 +105,9 @@ public class DbExplorerPanel
 		synchronized (DbExplorerPanel.class)
 		{
 			instanceCount++;
+			this.internalId = instanceCount;
 		}
-		this.internalId = instanceCount;
+		
 		this.mainWindow = aParent;
 		try
 		{
@@ -573,8 +573,8 @@ public class DbExplorerPanel
 
 	public void restoreSettings()
 	{
-		tables.restoreSettings();
-		procs.restoreSettings();
+		if (tables != null) tables.restoreSettings();
+		if (procs != null) procs.restoreSettings();
 		if (this.searchPanel != null) searchPanel.restoreSettings();
 	}
 

@@ -69,7 +69,7 @@ public class DbObjectSourcePanel
 		{
 			this.add(toolbar, BorderLayout.NORTH);
 		}
-		if (parent != null)
+		if (parentWindow != null)
 		{
 			editButton = new DropDownButton("Edit in");
 			selectTabMenu = new EditorTabSelectMenu(this, ResourceMgr.getString("LblEditScriptSource"), "LblEditInNewTab", "LblEditInTab", parent);
@@ -106,8 +106,11 @@ public class DbObjectSourcePanel
 		
 	private void editText(final int panelIndex)
 	{
-		PanelContentSender sender = new PanelContentSender(this.parentWindow);
-		sender.sendContent(getText(), panelIndex);
+		if (this.parentWindow != null)
+		{
+			PanelContentSender sender = new PanelContentSender(this.parentWindow);
+			sender.sendContent(getText(), panelIndex);
+		}
 	}
 	
 	/**

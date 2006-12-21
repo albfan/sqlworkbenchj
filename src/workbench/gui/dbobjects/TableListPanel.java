@@ -860,16 +860,10 @@ public class TableListPanel
 	{
 		String prefix = this.getClass().getName() + ".";
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-//		int maxWidth = (int)(d.getWidth() - 50);
 		readSettings(Settings.getInstance(), prefix);
 		this.triggers.restoreSettings();
 		this.tableData.restoreSettings();
-		//this.findPanel.restoreSettings();
 		this.tableDefinition.restoreSettings();
-		if (!Settings.getInstance().getStoreExplorerObjectType())
-		{
-			this.tableTypeToSelect = Settings.getInstance().getDefaultObjectType();
-		}
 	}
 
 
@@ -905,14 +899,6 @@ public class TableListPanel
 		String prefix = getWorkspacePrefix(index);
 		readSettings(props, prefix);
 		findPanel.restoreSettings(props, prefix + "quickfilter.");
-		if (Settings.getInstance().getStoreExplorerObjectType())
-		{
-			this.tableTypeToSelect = props.getProperty(prefix + "objecttype", Settings.getInstance().getDefaultObjectType());
-		}
-		else
-		{
-			this.tableTypeToSelect = Settings.getInstance().getDefaultObjectType();
-		}
 	}
 	
 	private void storeSettings(PropertyStorage props, String prefix)
@@ -955,6 +941,15 @@ public class TableListPanel
 		{
 			if (loc == 0 || loc > maxWidth) loc = 200;
 			this.importedPanel.setDividerLocation(loc);
+		}
+		
+		if (Settings.getInstance().getStoreExplorerObjectType())
+		{
+			this.tableTypeToSelect = props.getProperty(prefix + "objecttype", Settings.getInstance().getDefaultObjectType());
+		}
+		else
+		{
+			this.tableTypeToSelect = Settings.getInstance().getDefaultObjectType();
 		}
 	}
 

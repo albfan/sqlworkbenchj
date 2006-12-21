@@ -18,7 +18,6 @@ import java.io.Writer;
 import java.util.List;
 import workbench.db.exporter.TextRowDataConverter;
 import workbench.log.LogMgr;
-import workbench.resource.Settings;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 

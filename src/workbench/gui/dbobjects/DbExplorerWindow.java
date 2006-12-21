@@ -195,10 +195,12 @@ public class DbExplorerWindow
 	public static DbExplorerWindow showWindow()
 	{
 		DbExplorerPanel panel = new DbExplorerPanel();
-		panel.restoreSettings();
 		DbExplorerWindow window = new DbExplorerWindow(panel);
 		window.setStandalone(true);
+		
 		window.restorePosition();
+		panel.restoreSettings();
+		
 		window.setVisible(true);
 		window.selectConnection();
 		return window;

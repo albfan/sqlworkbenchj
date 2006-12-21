@@ -22,7 +22,8 @@ public interface ResultReceiver
 	{
 		showNone,
 		appendText,
-		replaceText;
+		replaceText,
+		logText;
 	}
 	
 	void showResult(String sql, String comment, ShowType how);

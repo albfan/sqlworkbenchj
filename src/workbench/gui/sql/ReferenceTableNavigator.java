@@ -43,6 +43,7 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
+import workbench.util.WbThread;
 
 /**
  * @author support@sql-workbench.net
@@ -92,10 +93,12 @@ public class ReferenceTableNavigator
 
 		selectParentTables = new WbMenu(ResourceMgr.getString("MnuTxtReferencedRows"));
 		selectParentTables.addMenuListener(this);
+		selectParentTables.setEnabled(false);
 		parentMenuInitialized = false;
 		
 		selectChildTables = new WbMenu(ResourceMgr.getString("MnuTxtReferencingRows"));
 		selectChildTables.addMenuListener(this);
+		selectChildTables.setEnabled(false);
 		childMenuInitialized = false;
 		
 		this.source.addPopupMenu(selectParentTables, true);
@@ -157,43 +160,74 @@ public class ReferenceTableNavigator
 	
 	private void rebuildMenu()
 	{
-		if (parentMenuInitialized)
+		synchronized(selectParentTables)
 		{
 			selectParentTables.removeAll();
+			JMenuItem item = new JMenuItem("Retrieving...");
+			item.setVisible(true);
+			selectParentTables.add(item);
 			parentMenuInitialized = false;
 		}
-		
-		if (childMenuInitialized)
+
+		synchronized(selectChildTables)
 		{
 			selectChildTables.removeAll();
+			JMenuItem item = new JMenuItem("Retrieving...");
+			item.setVisible(true);
+			selectChildTables.add(item);
 			childMenuInitialized = false;
 		}
 	}
 	
 	private void buildChildTablesMenu()
 	{
-		getUpdateTable();
-		this.childNavigation = new ReferenceTableNavigation(this.baseTable, getConnection());
-		this.childNavigation.readTreeForChildren();
-		buildMenu(this.selectChildTables, this.childNavigation, "select-child");
-		this.childMenuInitialized = true;
+//		WbThread init = new WbThread("InitChildren")
+//		{
+//			public void run()
+//			{
+				synchronized (getConnection())
+				{
+					this.childNavigation = new ReferenceTableNavigation(getUpdateTable(), getConnection());
+					childNavigation.readTreeForChildren();
+				}
+				synchronized (childNavigation)
+				{
+					buildMenu(selectChildTables, childNavigation, "select-child");
+					childMenuInitialized = true;
+				}
+//			}
+//		};
+//		init.start();
 	}
 	
 	private void buildParentTablesMenu()
 	{
-		getUpdateTable();
-		this.parentNavigation = new ReferenceTableNavigation(this.baseTable, getConnection());
-		this.parentNavigation.readTreeForParents();
-		buildMenu(this.selectParentTables, this.parentNavigation, "select-parent");
-		parentMenuInitialized = true;
+
+//		WbThread init = new WbThread("InitParents")
+//		{
+//			public void run()
+//			{
+				synchronized (getConnection())
+				{
+					this.parentNavigation = new ReferenceTableNavigation(getUpdateTable(), getConnection());
+					parentNavigation.readTreeForParents();
+				}
+				synchronized (parentNavigation)
+				{
+					buildMenu(selectParentTables, parentNavigation, "select-parent");
+					parentMenuInitialized = true;
+				}
+//			}
+//		};
+//		init.start();
 	}
 	
 	private void buildMenu(WbMenu menu, ReferenceTableNavigation navi, String cmd)
 	{
-		menu.setSelected(true);
-		menu.repaint();
-		WbSwingUtilities.showWaitCursor(menu.getParent());
+		List<JMenuItem> itemsToAdd = new LinkedList<JMenuItem>();
+
 		WbSwingUtilities.showWaitCursor(menu);
+		
 		try
 		{
 			TableIdentifier tbl = getUpdateTable();
@@ -202,13 +236,13 @@ public class ReferenceTableNavigator
 				TableDependency dep = navi.getTree();
 				List<DependencyNode> tables = dep.getLeafs();
 				WbConnection con = getConnection();
-				
+
 				if (tables == null || tables.size() == 0)
 				{
 					JMenuItem item = new JMenuItem(ResourceMgr.getString("MnuTxtNoTables"));
 					item.setEnabled(false);
 					item.setVisible(true);
-					menu.add(item);
+					itemsToAdd.add(item);
 				}
 				else
 				{
@@ -226,8 +260,15 @@ public class ReferenceTableNavigator
 						}
 						item.setFont(menuItemFont);
 						item.setVisible(true);
+						boolean hasColumns = hasColumns(node);
+						item.setEnabled(hasColumns);
+						if (!hasColumns)
+						{
+							item.setToolTipText(ResourceMgr.getString("MsgRelatedNoColumns"));
+						}
 						item.setActionCommand(cmd);
-						menu.add(item);
+						
+						itemsToAdd.add(item);
 					}
 				}
 			}
@@ -235,15 +276,46 @@ public class ReferenceTableNavigator
 			{
 				JMenuItem item = new JMenuItem(ResourceMgr.getString("MnuTxtNoUpdTbl"));
 				item.setEnabled(false);
-				menu.add(item);
+				itemsToAdd.add(item);
 			}
-			menu.repaint();
 		}
 		finally
 		{
 			WbSwingUtilities.showDefaultCursor(menu);
-			WbSwingUtilities.showDefaultCursor(menu.getParent());
 		}
+		addMenuItems(menu, itemsToAdd);
+	}
+
+	/**
+	 * Check if our source DataStore has all necessary columns to 
+	 * be able to retrieve the table referenced by the given DependencyNode
+	 */
+	private boolean hasColumns(DependencyNode node)
+	{
+		Map<String, String> cols = node.getColumns();
+		DataStore ds = this.source.getDataStore();
+		for (String col : cols.values())
+		{
+			if (ds.getColumnIndex(col) == -1) return false;
+		}
+		return true;
+	}
+	
+	private void addMenuItems(final WbMenu menu, final List<JMenuItem> items)
+	{
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				menu.removeAll();
+				for (JMenuItem item : items)
+				{
+					menu.add(item);
+				}
+				menu.repaint();
+				menu.setSelected(true);
+			}
+		});
 	}
 	
 	private List<List<ColumnData>> getColumnData(DependencyNode node)
@@ -325,11 +397,7 @@ public class ReferenceTableNavigator
 			LogMgr.logError("ReferenceTableNavigator.actionPerformed", "Could not create sql", null);
 		}
 
-		String comment = null;
-		if (WbAction.isShiftPressed(evt))
-		{
-			comment = "-- Related rows for " + getUpdateTable().getTableExpression(con);
-		}
+		String comment = comment = ResourceMgr.getString("MsgLoadRelatedComment") + " " + getUpdateTable().getTableExpression(con);
 		
 		if (this.container != null) 
 		{
@@ -338,7 +406,9 @@ public class ReferenceTableNavigator
 		}
 		else if (receiver != null) 
 		{
-			receiver.showResult(sql, comment, ResultReceiver.ShowType.appendText);
+			boolean shiftPressed = WbAction.isShiftPressed(evt);
+			ResultReceiver.ShowType how = (shiftPressed ? ResultReceiver.ShowType.appendText : ResultReceiver.ShowType.logText); 
+			receiver.showResult(sql, comment, how);
 		}
 	}	
 	

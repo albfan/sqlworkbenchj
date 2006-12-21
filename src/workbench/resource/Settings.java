@@ -42,7 +42,6 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.gui.profiles.ProfileKey;
 import workbench.interfaces.PropertyStorage;
-import workbench.gui.actions.ActionRegistration;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
 import workbench.sql.DelimiterDefinition;
@@ -232,9 +231,6 @@ public class Settings
 		if (this.keyManager == null)
 		{
 			this.keyManager = new ShortcutManager(this.getShortcutFilename());
-			// make sure actions that are not created upon startup are
-			// registered with us!
-			ActionRegistration.registerActions();
 		}
 		return this.keyManager;
 	}

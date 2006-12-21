@@ -19,7 +19,7 @@ public class RowDataList
 	private static final int DEFAULT_SIZE = 150;
 
 	// growth factor when increasing the array
-	private float grow = 1.25f;
+	private float grow = 1.10f;
 	private int size;
 	private RowData data[];
 

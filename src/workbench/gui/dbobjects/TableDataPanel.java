@@ -206,7 +206,7 @@ public class TableDataPanel
 
 	public void setResultContainer(MainWindow container)
 	{
-		if (this.dataDisplay != null)
+		if (this.dataDisplay != null && container != null)
 		{
 			this.dataDisplay.initTableNavigation(container);
 		}

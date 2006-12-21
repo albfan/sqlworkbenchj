@@ -730,20 +730,20 @@ public class SqlFormatter
 		while (t != null)
 		{
 			String text = t.getContents();
-			if (t.isSeparator() && text.equals(")"))
+			if (text.equals(")"))
 			{
 				this.appendNewline();
 				//this.indent(b);
 				this.appendText(")");
 				return this.lexer.getNextToken();
 			}
-			else if (t.isSeparator() && text.equals("("))
+			else if (text.equals("("))
 			{
 				this.appendText(" (");
 				t = this.processFunctionCall(t);
 				continue;
 			}
-			else if (t.isSeparator() && text.equals(","))
+			else if (text.equals(","))
 			{
 				this.appendText(",");
 				this.appendNewline();
@@ -1159,15 +1159,26 @@ public class SqlFormatter
 	{
 		int bracketCount = 1;
 		SQLToken t = this.lexer.getNextToken(true, false);
+		
+		if (t != null && t.getContents().equals("SELECT"))
+		{
+			t = processSubSelect(true);
+			if (t.getContents().equals(")"))
+			{
+				this.appendText(")");
+			}
+			return this.lexer.getNextToken(true, false);
+		}
+		
 		SQLToken lastToken = last;
 		while (t != null)
 		{
 			String text = t.getContents();
-			if (t.isSeparator() && text.equals(")"))
+			if (text.equals(")"))
 			{
 				bracketCount --;
 			}
-			if (t.isSeparator() && text.equals("("))
+			if (text.equals("("))
 			{
 				bracketCount ++;
 			}

@@ -30,7 +30,7 @@ public class TableDependency
 	private ArrayList<DependencyNode> leafs;
 	private int currentLevel = 0;
 	private int maxLevel = Integer.MAX_VALUE;
-	
+
 	public TableDependency()
 	{
 	}
@@ -39,7 +39,7 @@ public class TableDependency
 	{
 		this.maxLevel = max;
 	}
-	
+
 	public void setConnection(WbConnection aConn)
 	{
 		this.connection = aConn;
@@ -50,7 +50,7 @@ public class TableDependency
 	{
 		this.theTable = aTable;
 	}
-	
+
 	public DependencyNode findLeafNodeForTable(TableIdentifier table)
 	{
 		String findExpr = table.getTableExpression(connection);
@@ -61,7 +61,7 @@ public class TableDependency
 		}
 		return null;
 	}
-	
+
 	public List<DependencyNode> retrieveReferencingTables()
 	{
 		this.readDependencyTree(false);
@@ -73,7 +73,7 @@ public class TableDependency
 		this.readDependencyTree(true);
 		return Collections.unmodifiableList(leafs);
 	}
-	
+
 	protected void readDependencyTree(boolean exportedKeys)
 	{
 		if (this.theTable == null) return;
@@ -139,7 +139,7 @@ public class TableDependency
 			String fkname = null;
 
 			int count = ds.getRowCount();
-			
+
 			for (int i=0; i<count; i++)
 			{
 				catalog = ds.getValueAsString(i, catalogcol);
@@ -161,7 +161,7 @@ public class TableDependency
 			}
 
 			this.currentLevel ++;
-			
+
 			List<DependencyNode> children = parent.getChildren();
 			count = children.size();
 			for (int i=0; i < count; i++)
@@ -182,14 +182,14 @@ public class TableDependency
     return 0;
 	}
 
-	public List<DependencyNode> getLeafs() 
-	{ 
-		return this.leafs; 
+	public List<DependencyNode> getLeafs()
+	{
+		return this.leafs;
 	}
-  
-	public DependencyNode getRootNode() 
-	{ 
-		return this.tableRoot; 
+
+	public DependencyNode getRootNode()
+	{
+		return this.tableRoot;
 	}
 
 }

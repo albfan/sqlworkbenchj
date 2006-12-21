@@ -2580,7 +2580,16 @@ public class SqlPanel
 	public void showResult(final String sql, String comment, ResultReceiver.ShowType how)
 	{
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		if (how != ResultReceiver.ShowType.showNone)
+		if (how == ResultReceiver.ShowType.logText)
+		{
+			this.log.append("\n");
+			this.log.append(ResourceMgr.getString("MsgLoadRelatedData"));
+			this.log.append("\n");
+			this.log.append(sql);
+			this.log.append("\n");
+			this.log.append("\n");
+		}
+		else if (how != ResultReceiver.ShowType.showNone)
 		{
 			int pos = this.editor.getDocumentLength();
 			if (how == ResultReceiver.ShowType.replaceText)

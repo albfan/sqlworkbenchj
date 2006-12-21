@@ -31,6 +31,30 @@ public class SqlFormatterTest
 		util.prepareEnvironment();
 	}
 
+	public void testInsertWithSubselect()
+	{
+		try
+		{
+			String sql = "insert into tble (a,b) values ( (select max(x) from y), 'bla')";
+			String expected = "INSERT INTO tble\n" + 
+             "(\n" + 
+             "  a,\n" + 
+             "  b\n" + 
+             ")  \n" + 
+             "VALUES\n" + 
+             "(\n" + 
+             "   (SELECT MAX(x) FROM y),\n" + 
+             "  'bla'\n" + 
+             ")";
+			SqlFormatter f = new SqlFormatter(sql, 100);
+			String formatted = f.getFormattedSql();
+			assertEquals("SELECT in VALUES not formatted", expected, formatted);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 	public void testColumnAlias()
 	{
 		try

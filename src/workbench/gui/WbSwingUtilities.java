@@ -30,7 +30,6 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
@@ -166,7 +165,8 @@ public class WbSwingUtilities
 
 	public static void showWaitCursor(final Component caller)
 	{
-		caller.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		//caller.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		showCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR), caller, false, true);
 	}
 
 	public static void showDefaultCursor(final Component caller)
