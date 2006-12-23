@@ -129,7 +129,6 @@ public class TableListPanel
 	private WbSplitPane exportedPanel;
 
 	private JPanel indexPanel;
-	//private WbScrollPane indexPanel;
 	private TriggerDisplayPanel triggers;
 	protected DbObjectSourcePanel tableSource;
 	private JTabbedPane displayTab;
@@ -146,9 +145,6 @@ public class TableListPanel
 
 	private MainWindow parentWindow;
 
-//	private String selectedCatalog;
-//	private String selectedSchema;
-//	private String selectedTableName;
 	private String selectedObjectType;
 	private TableIdentifier selectedTable;
 

@@ -32,19 +32,17 @@ public class TableIndexPanel
 	
 	public TableIndexPanel(WbTable indexTable, Reloadable reloader)
 	{
+		this.setLayout(new BorderLayout());
+		WbScrollPane p = new WbScrollPane(indexTable);
+		this.add(p, BorderLayout.CENTER);
 		if (reloader != null)
 		{
 			reloadIndex = new ReloadAction(reloader);
 			reloadIndex.setEnabled(true);
+			WbToolbar toolbar = new WbToolbar();
+			toolbar.add(reloadIndex);
+			this.add(toolbar, BorderLayout.NORTH);
 		}
-		this.setLayout(new BorderLayout());
-		WbToolbar toolbar = new WbToolbar();
-		
-		if (reloadIndex != null) toolbar.add(reloadIndex);
-		
-		WbScrollPane p = new WbScrollPane(indexTable);
-		this.add(p, BorderLayout.CENTER);
-		this.add(toolbar, BorderLayout.NORTH);
 	}
 
 

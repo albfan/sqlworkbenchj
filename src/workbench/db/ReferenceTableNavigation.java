@@ -134,7 +134,7 @@ public class ReferenceTableNavigation
 				sql.append(childColumn);
 				if (data.isNull())
 				{
-					sql.append("IS NULL");
+					sql.append(" IS NULL");
 				}
 				else
 				{

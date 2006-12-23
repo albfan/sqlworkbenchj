@@ -11,7 +11,6 @@
  */
 package workbench.gui.sql;
 
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
@@ -24,6 +23,10 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import javax.swing.event.MenuListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.event.PopupMenuListener;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DependencyNode;
 import workbench.db.ReferenceTableNavigation;
@@ -49,7 +52,7 @@ import workbench.util.WbThread;
  * @author support@sql-workbench.net
  */
 public class ReferenceTableNavigator
-	implements ListSelectionListener, MenuListener, ActionListener
+	implements ListSelectionListener, ActionListener, PopupMenuListener, MenuListener
 {
 	private ResultReceiver receiver;
 	private MainWindow container;
@@ -58,7 +61,6 @@ public class ReferenceTableNavigator
 	private WbMenu selectChildTables;
 	private boolean parentMenuInitialized = false;
 	private boolean childMenuInitialized = false;
-	private Font menuItemFont;
 	private TableIdentifier baseTable;
 	private ReferenceTableNavigation parentNavigation;
 	private ReferenceTableNavigation childNavigation;
@@ -93,19 +95,18 @@ public class ReferenceTableNavigator
 
 		selectParentTables = new WbMenu(ResourceMgr.getString("MnuTxtReferencedRows"));
 		selectParentTables.addMenuListener(this);
+		selectParentTables.getPopupMenu().addPopupMenuListener(this);
 		selectParentTables.setEnabled(false);
 		parentMenuInitialized = false;
 		
 		selectChildTables = new WbMenu(ResourceMgr.getString("MnuTxtReferencingRows"));
 		selectChildTables.addMenuListener(this);
+		selectChildTables.getPopupMenu().addPopupMenuListener(this);
 		selectChildTables.setEnabled(false);
 		childMenuInitialized = false;
 		
 		this.source.addPopupMenu(selectParentTables, true);
 		this.source.addPopupMenu(selectChildTables, false);
-		
-		Font menuFont = this.source.getPopupMenu().getFont();
-		this.menuItemFont = new Font("Monospaced", Font.PLAIN, menuFont.getSize());
 	}
 	
 	public void valueChanged(ListSelectionEvent evt)
@@ -130,27 +131,58 @@ public class ReferenceTableNavigator
 		}
 		return this.baseTable;
 	}
-	
+
 	public void menuSelected(MenuEvent evt)
 	{
-		if (evt.getSource() == this.selectParentTables && !parentMenuInitialized)
+	}
+	
+	public void menuDeselected(MenuEvent evt)
+	{
+		if (evt.getSource() == selectParentTables)
+		{
+			selectParentTables.getPopupMenu().setVisible(false);
+		}
+		if (evt.getSource() == selectChildTables)
+		{
+			selectChildTables.getPopupMenu().setVisible(false);
+		}
+	}
+	
+	public void menuCanceled(MenuEvent arg0)
+	{
+		selectParentTables.getPopupMenu().setVisible(false);
+		selectChildTables.getPopupMenu().setVisible(false);
+	}
+	
+	
+	public void popupMenuWillBecomeVisible(PopupMenuEvent evt)
+	{
+		JPopupMenu pop = (JPopupMenu)evt.getSource();
+		if (pop == this.selectParentTables.getPopupMenu() && !parentMenuInitialized)
 		{
 			buildParentTablesMenu();
 		}
-		if (evt.getSource() == this.selectChildTables && !childMenuInitialized)
+		if (pop == this.selectChildTables.getPopupMenu() && !childMenuInitialized)
 		{
 			buildChildTablesMenu();
 		}
 	}
 	
-	public void menuDeselected(MenuEvent evts)
+	public void popupMenuWillBecomeInvisible(PopupMenuEvent evt)
 	{
 		
 	}
 	
-	public void menuCanceled(MenuEvent evt)
+	public void popupMenuCanceled(PopupMenuEvent evt)
 	{
-		
+		if (evt.getSource() == this.selectParentTables.getPopupMenu())
+		{
+			selectParentTables.getPopupMenu().setVisible(false);
+		}
+		if (evt.getSource() == this.selectChildTables.getPopupMenu())
+		{
+			selectChildTables.getPopupMenu().setVisible(false);
+		}
 	}
 
 	private WbConnection getConnection()
@@ -163,7 +195,7 @@ public class ReferenceTableNavigator
 		synchronized(selectParentTables)
 		{
 			selectParentTables.removeAll();
-			JMenuItem item = new JMenuItem("Retrieving...");
+			JMenuItem item = new JMenuItem(ResourceMgr.getString("MsgLoadDependency"));
 			item.setVisible(true);
 			selectParentTables.add(item);
 			parentMenuInitialized = false;
@@ -172,7 +204,7 @@ public class ReferenceTableNavigator
 		synchronized(selectChildTables)
 		{
 			selectChildTables.removeAll();
-			JMenuItem item = new JMenuItem("Retrieving...");
+			JMenuItem item = new JMenuItem(ResourceMgr.getString("MsgLoadDependency"));
 			item.setVisible(true);
 			selectChildTables.add(item);
 			childMenuInitialized = false;
@@ -181,13 +213,13 @@ public class ReferenceTableNavigator
 	
 	private void buildChildTablesMenu()
 	{
-//		WbThread init = new WbThread("InitChildren")
-//		{
-//			public void run()
-//			{
+		WbThread init = new WbThread("InitChildren")
+		{
+			public void run()
+			{
 				synchronized (getConnection())
 				{
-					this.childNavigation = new ReferenceTableNavigation(getUpdateTable(), getConnection());
+					childNavigation = new ReferenceTableNavigation(getUpdateTable(), getConnection());
 					childNavigation.readTreeForChildren();
 				}
 				synchronized (childNavigation)
@@ -195,21 +227,24 @@ public class ReferenceTableNavigator
 					buildMenu(selectChildTables, childNavigation, "select-child");
 					childMenuInitialized = true;
 				}
-//			}
-//		};
-//		init.start();
+				synchronized (source.getPopupMenu())
+				{
+					source.getPopupMenu().repaint();
+				}
+			}
+		};
+		init.start();
 	}
 	
 	private void buildParentTablesMenu()
 	{
-
-//		WbThread init = new WbThread("InitParents")
-//		{
-//			public void run()
-//			{
+		WbThread init = new WbThread("InitParents")
+		{
+			public void run()
+			{
 				synchronized (getConnection())
 				{
-					this.parentNavigation = new ReferenceTableNavigation(getUpdateTable(), getConnection());
+					parentNavigation = new ReferenceTableNavigation(getUpdateTable(), getConnection());
 					parentNavigation.readTreeForParents();
 				}
 				synchronized (parentNavigation)
@@ -217,9 +252,9 @@ public class ReferenceTableNavigator
 					buildMenu(selectParentTables, parentNavigation, "select-parent");
 					parentMenuInitialized = true;
 				}
-//			}
-//		};
-//		init.start();
+			}
+		};
+		init.start();
 	}
 	
 	private void buildMenu(WbMenu menu, ReferenceTableNavigation navi, String cmd)
@@ -258,7 +293,6 @@ public class ReferenceTableNavigator
 						{ 
 							item = new EditorTabSelectMenu(this, node.getTable().getTableExpression(con), "LblShowDataInNewTab", "LblShowDataInTab", container);
 						}
-						item.setFont(menuItemFont);
 						item.setVisible(true);
 						boolean hasColumns = hasColumns(node);
 						item.setEnabled(hasColumns);
@@ -307,13 +341,21 @@ public class ReferenceTableNavigator
 		{
 			public void run()
 			{
-				menu.removeAll();
-				for (JMenuItem item : items)
+				synchronized (menu)
 				{
-					menu.add(item);
+					menu.removeAll();
+					for (JMenuItem item : items)
+					{
+						menu.add(item);
+					}
+					JPopupMenu pop = menu.getPopupMenu();
+					if (pop.isVisible())
+					{
+						pop.invalidate();
+						pop.setVisible(false);
+						pop.setVisible(true);
+					}
 				}
-				menu.repaint();
-				menu.setSelected(true);
 			}
 		});
 	}
