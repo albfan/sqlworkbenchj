@@ -70,7 +70,6 @@ public class TableDefinitionPanel
 	private TableIdentifier currentTable;
 	private String currentObjectType;
 	private WbConnection dbConnection;
-	private List changeListener = new LinkedList();
 	private WbAction reloadAction;
 	private JPanel toolbar;
 	private boolean busy;
@@ -135,30 +134,11 @@ public class TableDefinitionPanel
 
 		this.tableDefinition.getSelectionModel().addListSelectionListener(this);
 		this.tableDefinition.addPopupAction(this.createIndexAction, true);
-
 	}
 
-	public void addPropertyChangeListener(PropertyChangeListener l)
+	protected void fireIndexChanged(String indexName)
 	{
-		this.changeListener.add(l);
-	}
-
-	public void removePropertyChangeListener(PropertyChangeListener l)
-	{
-		this.changeListener.remove(l);
-	}
-
-	private void fireIndexChanged(String indexName)
-	{
-		if (this.changeListener.size() == 0) return;
-
-		Iterator itr = this.changeListener.iterator();
-		PropertyChangeEvent evt = new PropertyChangeEvent(this, INDEX_PROP, null, indexName);
-		while (itr.hasNext())
-		{
-			PropertyChangeListener l = (PropertyChangeListener)itr.next();
-			l.propertyChange(evt);
-		}
+		firePropertyChange(INDEX_PROP, null, indexName);
 	}
 
 	private final Object busyLock = new Object();

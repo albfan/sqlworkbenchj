@@ -215,7 +215,7 @@ public class TableListPanel
 		this.displayTab = new WbTabbedPane(location);
 
 		this.tableDefinition = new TableDefinitionPanel();
-		this.tableDefinition.addPropertyChangeListener(this);
+		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.INDEX_PROP, this);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), tableDefinition);
 
 		JPanel indexPanel = new JPanel();
