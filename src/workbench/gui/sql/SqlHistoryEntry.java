@@ -72,10 +72,9 @@ public class SqlHistoryEntry
 				editor.setCaretPosition(this.cursorPos);
 				editor.scrollToCaret();
 			}
-			if (this.selectionStart > -1 && this.selectionEnd > this.selectionStart /*&& this.selectionStart < editor.getCaretPosition()*/)
+			if (this.selectionStart > -1 && this.selectionEnd > this.selectionStart && this.selectionEnd < editor.getDocumentLength())
 			{
-				editor.setSelectionStart(this.selectionStart);
-				editor.setSelectionEnd(this.selectionEnd);
+				editor.select(this.selectionStart, this.selectionEnd);
 			}
 		}
 		catch (Exception e)

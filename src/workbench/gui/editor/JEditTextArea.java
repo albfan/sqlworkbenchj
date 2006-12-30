@@ -106,7 +106,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.63 2006-12-20 22:22:50 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.64 2006-12-30 18:07:13 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -1055,7 +1055,7 @@ public class JEditTextArea
 				public void run()
 				{
 					painter.invalidateLineRange(0,getLineCount());
-					setCaretPosition(0);
+					//setCaretPosition(0);
 					painter.repaint();
 					painter.validate();
 					repaint();

@@ -253,7 +253,7 @@ public class SqlUtilTest
 		
 		sql = "/* \n" + 
 					 "* $URL: some_script.sql $ \n" + 
-					 "* $Revision: 1.10 $ \n" + 
+					 "* $Revision: 1.11 $ \n" + 
 					 "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
 					 "*/ \n" + 
 					 "-- A quis Lorem consequat Aenean tellus risus convallis velit Maecenas arcu. \n" + 
@@ -420,6 +420,13 @@ public class SqlUtilTest
 		l = SqlUtil.getTables(sql, true);
 		assertEquals(1, l.size());
 		assertEquals("MyTable", l.get(0));
+
+		// Make sure the getTables() is case preserving
+		sql = "select * from table1 as t1, table2";
+		l = SqlUtil.getTables(sql, true);
+		assertEquals(2, l.size());
+		assertEquals("table1 AS t1", l.get(0));
+		assertEquals("table2", l.get(1));
 		
 		
 	}
