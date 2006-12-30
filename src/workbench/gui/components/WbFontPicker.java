@@ -1,9 +1,14 @@
 /*
  * WbFontPicker.java
  *
- * Created on 22. Februar 2006, 22:36
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2007, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
-
 package workbench.gui.components;
 
 import java.awt.Font;
@@ -12,7 +17,7 @@ import javax.swing.JPanel;
 
 /**
  *
- * @author  thomas
+ * @author support@sql-workbench.net
  */
 public class WbFontPicker 
 	extends JPanel

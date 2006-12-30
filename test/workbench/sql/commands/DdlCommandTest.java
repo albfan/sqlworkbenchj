@@ -1,10 +1,14 @@
 /*
  * DdlCommandTest.java
- * JUnit based test
  *
- * Created on November 17, 2006, 11:09 AM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2007, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
-
 package workbench.sql.commands;
 
 import junit.framework.TestCase;

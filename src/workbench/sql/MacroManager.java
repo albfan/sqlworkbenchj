@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2006, Thomas Kellerer
+ * Copyright 2002-2007, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -35,7 +35,7 @@ import workbench.util.WbPersistence;
 
 /**
  * A class to manage, store and apply SQL macros (alias) 
- * @author  thomas
+ * @author support@sql-workbench.net
  */
 public class MacroManager
 {

@@ -1,10 +1,14 @@
 /*
  * WbManagerTest.java
- * JUnit based test
  *
- * Created on August 28, 2006, 7:10 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2007, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
-
 package workbench;
 
 import java.io.File;
