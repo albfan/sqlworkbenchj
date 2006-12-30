@@ -13,6 +13,7 @@ package workbench.gui.sql;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.EventObject;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -70,12 +72,35 @@ public class ReferenceTableNavigator
 		this.setSourceTable(data);
 	}
 	
-	public void setReceiver(ResultReceiver target)
-	{
-		this.receiver = target;
-		this.container = null;
-		rebuildMenu();
-	}
+//	private void initializeListeners(WbMenu menu)
+//	{
+//		MenuListener[] menuListeners = menu.getMenuListeners();
+//		for (MenuListener l : menuListeners)
+//		{
+//			menu.removeMenuListener(l);
+//		}
+//		
+//		JPopupMenu popup = menu.getPopupMenu(); 
+//		PopupMenuListener[] listeners = popup.getPopupMenuListeners();
+//		for (PopupMenuListener l : listeners)
+//		{
+//			popup.removePopupMenuListener(l);
+//		}
+//	}
+//
+//	public static WbMenu createChildTablesMenu()
+//	{
+//		WbMenu childTables = new WbMenu(ResourceMgr.getString("MnuTxtReferencingRows"));
+//		childTables.setEnabled(false);
+//		return childTables;
+//	}
+//	
+//	public static WbMenu createParentTablesMenu()
+//	{
+//		WbMenu selectParents = new WbMenu(ResourceMgr.getString("MnuTxtReferencedRows"));
+//		selectParents.setEnabled(false);
+//		return selectParents;
+//	}
 	
 	public void setTargetContainer(MainWindow win)
 	{
@@ -138,22 +163,14 @@ public class ReferenceTableNavigator
 	
 	public void menuDeselected(MenuEvent evt)
 	{
-		if (evt.getSource() == selectParentTables)
-		{
-			selectParentTables.getPopupMenu().setVisible(false);
-		}
-		if (evt.getSource() == selectChildTables)
-		{
-			selectChildTables.getPopupMenu().setVisible(false);
-		}
+		closePopup(evt);
 	}
 	
-	public void menuCanceled(MenuEvent arg0)
+	public void menuCanceled(MenuEvent evt)
 	{
 		selectParentTables.getPopupMenu().setVisible(false);
 		selectChildTables.getPopupMenu().setVisible(false);
 	}
-	
 	
 	public void popupMenuWillBecomeVisible(PopupMenuEvent evt)
 	{
@@ -175,6 +192,11 @@ public class ReferenceTableNavigator
 	
 	public void popupMenuCanceled(PopupMenuEvent evt)
 	{
+		closePopup(evt);
+	}
+	
+	private void closePopup(EventObject evt)
+	{
 		if (evt.getSource() == this.selectParentTables.getPopupMenu())
 		{
 			selectParentTables.getPopupMenu().setVisible(false);
@@ -190,23 +212,27 @@ public class ReferenceTableNavigator
 		return this.source.getDataStore().getOriginalConnection();
 	}
 	
+	private JMenuItem createLoadingItem()
+	{
+		JMenuItem item = new JMenuItem(ResourceMgr.getString("MsgLoadDependency"));
+		item.setVisible(true);
+		item.setEnabled(false);
+		return item;
+	}
+	
 	private void rebuildMenu()
 	{
 		synchronized(selectParentTables)
 		{
 			selectParentTables.removeAll();
-			JMenuItem item = new JMenuItem(ResourceMgr.getString("MsgLoadDependency"));
-			item.setVisible(true);
-			selectParentTables.add(item);
+			selectParentTables.add(createLoadingItem());
 			parentMenuInitialized = false;
 		}
 
 		synchronized(selectChildTables)
 		{
 			selectChildTables.removeAll();
-			JMenuItem item = new JMenuItem(ResourceMgr.getString("MsgLoadDependency"));
-			item.setVisible(true);
-			selectChildTables.add(item);
+			selectChildTables.add(createLoadingItem());
 			childMenuInitialized = false;
 		}
 	}
@@ -226,10 +252,6 @@ public class ReferenceTableNavigator
 				{
 					buildMenu(selectChildTables, childNavigation, "select-child");
 					childMenuInitialized = true;
-				}
-				synchronized (source.getPopupMenu())
-				{
-					source.getPopupMenu().repaint();
 				}
 			}
 		};
@@ -261,61 +283,44 @@ public class ReferenceTableNavigator
 	{
 		List<JMenuItem> itemsToAdd = new LinkedList<JMenuItem>();
 
-		WbSwingUtilities.showWaitCursor(menu);
-		
-		try
+		TableIdentifier tbl = getUpdateTable();
+		if (tbl != null)
 		{
-			TableIdentifier tbl = getUpdateTable();
-			if (tbl != null)
-			{
-				TableDependency dep = navi.getTree();
-				List<DependencyNode> tables = dep.getLeafs();
-				WbConnection con = getConnection();
+			TableDependency dep = navi.getTree();
+			List<DependencyNode> tables = dep.getLeafs();
+			WbConnection con = getConnection();
 
-				if (tables == null || tables.size() == 0)
-				{
-					JMenuItem item = new JMenuItem(ResourceMgr.getString("MnuTxtNoTables"));
-					item.setEnabled(false);
-					item.setVisible(true);
-					itemsToAdd.add(item);
-				}
-				else
-				{
-					for (DependencyNode node : tables)
-					{
-						JMenuItem item = null;
-						if (this.container == null)
-						{
-							item = new JMenuItem(node.getTable().getTableExpression(con));
-							item.addActionListener(this);
-						}
-						else
-						{ 
-							item = new EditorTabSelectMenu(this, node.getTable().getTableExpression(con), "LblShowDataInNewTab", "LblShowDataInTab", container);
-						}
-						item.setVisible(true);
-						boolean hasColumns = hasColumns(node);
-						item.setEnabled(hasColumns);
-						if (!hasColumns)
-						{
-							item.setToolTipText(ResourceMgr.getString("MsgRelatedNoColumns"));
-						}
-						item.setActionCommand(cmd);
-						
-						itemsToAdd.add(item);
-					}
-				}
+			if (tables == null || tables.size() == 0)
+			{
+				JMenuItem item = new JMenuItem(ResourceMgr.getString("MnuTxtNoTables"));
+				item.setEnabled(false);
+				item.setVisible(true);
+				itemsToAdd.add(item);
 			}
 			else
 			{
-				JMenuItem item = new JMenuItem(ResourceMgr.getString("MnuTxtNoUpdTbl"));
-				item.setEnabled(false);
-				itemsToAdd.add(item);
+				for (DependencyNode node : tables)
+				{
+					JMenuItem item = null;
+					item = new EditorTabSelectMenu(this, node.getTable().getTableExpression(con), "LblShowDataInNewTab", "MsgRelatedTabHint", container);
+					item.setVisible(true);
+					boolean hasColumns = hasColumns(node);
+					item.setEnabled(hasColumns);
+					if (!hasColumns)
+					{
+						item.setToolTipText(ResourceMgr.getString("MsgRelatedNoColumns"));
+					}
+					item.setActionCommand(cmd);
+
+					itemsToAdd.add(item);
+				}
 			}
 		}
-		finally
+		else
 		{
-			WbSwingUtilities.showDefaultCursor(menu);
+			JMenuItem item = new JMenuItem(ResourceMgr.getString("MnuTxtNoUpdTbl"));
+			item.setEnabled(false);
+			itemsToAdd.add(item);
 		}
 		addMenuItems(menu, itemsToAdd);
 	}
@@ -352,6 +357,9 @@ public class ReferenceTableNavigator
 					if (pop.isVisible())
 					{
 						pop.invalidate();
+						// The popup menu is not repainted correctly
+						// if not made invisible. Neither doLayout() or updateUI()
+						// adjust the height and width of the popup menu correctly
 						pop.setVisible(false);
 						pop.setVisible(true);
 					}
@@ -410,47 +418,73 @@ public class ReferenceTableNavigator
 		
 		ReferenceTableNavigation navi = null;
 		String sql = null;
+		String error = null;
 		List<List<ColumnData>> rowData = null;
-		if ("select-child".equals(cmd))
+		try
 		{
-			DependencyNode node = this.childNavigation.getNodeForTable(tbl);
-			if (node == null) 
+			if ("select-child".equals(cmd))
 			{
-				LogMgr.logError("ReferenceTableNavigator.actionPerformed", "Could not find child table from menu item!", null);
-				return;
+				DependencyNode node = this.childNavigation.getNodeForTable(tbl);
+				if (node == null) 
+				{
+					error = "Could not find child table from menu item!";
+					LogMgr.logError("ReferenceTableNavigator.actionPerformed", error, null);
+				}
+				else
+				{
+					rowData = getColumnData(node);
+					sql = this.childNavigation.getSelectForChild(tbl, rowData);
+				}
 			}
-			
-			rowData = getColumnData(node);
-			sql = this.childNavigation.getSelectForChild(tbl, rowData);
+			else if ("select-parent".equals(cmd))
+			{
+				DependencyNode node = this.parentNavigation.getNodeForTable(tbl);
+				if (node == null) 
+				{
+					error = "Could not find parent table from menu item!";
+					LogMgr.logError("ReferenceTableNavigator.actionPerformed", error, null);
+				}
+				else
+				{
+					rowData = getColumnData(node);
+					sql = this.parentNavigation.getSelectForParent(tbl, rowData);
+				}
+			}
 		}
-		else if ("select-parent".equals(cmd))
+		catch (Exception e)
 		{
-			DependencyNode node = this.parentNavigation.getNodeForTable(tbl);
-			if (node == null) 
-			{
-				LogMgr.logError("ReferenceTableNavigator.actionPerformed", "Could not find parent table from menu item!", null);
-				return;
-			}
-			rowData = getColumnData(node);
-			sql = this.parentNavigation.getSelectForParent(tbl, rowData);
-		}		
-		if (sql == null)
+			LogMgr.logError("ReferenceTableNavigator.actionPerformed", "Error when creating SQL", e);
+			error = ExceptionUtil.getDisplay(e);
+		}
+		if (sql == null || error != null)
 		{
-			LogMgr.logError("ReferenceTableNavigator.actionPerformed", "Could not create sql", null);
+			WbSwingUtilities.showErrorMessage(this.container, error);
+			return;
 		}
 
 		String comment = comment = ResourceMgr.getString("MsgLoadRelatedComment") + " " + getUpdateTable().getTableExpression(con);
-		
+
+		boolean logText = WbAction.isCtrlPressed(evt);
+//		boolean shiftPressed = WbAction.isShiftPressed(evt);
+//		if (receiver != null) 
+//		{
+//			if (this.container != null && ctrlPressed)
+//			{
+//				PanelContentSender sender = new PanelContentSender(container);
+//				sender.showResult(sql, comment, PanelContentSender.NEW_PANEL);
+//			}
+//			else
+//			{
+//				ResultReceiver.ShowType how = (shiftPressed ? ResultReceiver.ShowType.appendText : ResultReceiver.ShowType.logText); 
+//				receiver.showResult(sql, comment, how);
+//			}
+//		}
 		if (this.container != null) 
 		{
 			PanelContentSender sender = new PanelContentSender(container);
-			sender.showResult(sql, comment, containerIndex);
-		}
-		else if (receiver != null) 
-		{
-			boolean shiftPressed = WbAction.isShiftPressed(evt);
-			ResultReceiver.ShowType how = (shiftPressed ? ResultReceiver.ShowType.appendText : ResultReceiver.ShowType.logText); 
-			receiver.showResult(sql, comment, how);
+			// showLog will only be evaluated for existing tabs
+			// if the target tab is the current tab, show
+			sender.showResult(sql, comment, containerIndex, logText);
 		}
 	}	
 	

@@ -31,6 +31,49 @@ public class SqlFormatterTest
 		util.prepareEnvironment();
 	}
 
+	public void testAliasForSubselect()
+	{
+		try
+		{
+			String sql = "select a,b, (select a,b from t2) col4 from t1";
+			SqlFormatter f = new SqlFormatter(sql, 100);
+			String formatted = f.getFormattedSql();
+			String expected = "SELECT a,\n" +
+												"       b,\n" +
+												"       (SELECT a, b FROM t2) col4\n" + 
+												"FROM t1";
+			assertEquals("SELECT in VALUES not formatted", expected, formatted);
+
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testAsInFrom()
+	{
+		try
+		{
+			String sql = "select t1.a, t2.b from bla as t1, t2";
+			SqlFormatter f = new SqlFormatter(sql, 100);
+			String formatted = f.getFormattedSql();
+			String expected = "SELECT t1.a,\n" + 
+												 "       t2.b\n" + 
+												 "FROM bla AS t1,\n" + 
+												 "     t2";
+//			Thread.yield();
+//			System.out.println("sql=" + formatted);
+			assertEquals("SELECT in VALUES not formatted", expected, formatted);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testInsertWithSubselect()
 	{
 		try

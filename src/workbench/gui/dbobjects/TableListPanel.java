@@ -1106,7 +1106,7 @@ public class TableListPanel
 			}
 			else if (meta.isSynonymType(this.selectedObjectType))
 			{
-				sql = meta.getSynonymSource(this.selectedTable.getSchema(), selectedTable.getTableName());
+				sql = meta.getSynonymSource(this.selectedTable);
 				if (sql.length() == 0)
 				{
 					sql = ResourceMgr.getString("MsgSynonymSourceNotImplemented") + " " + meta.getProductName();

@@ -364,7 +364,7 @@ public class WbTable
 		{
 			fm = getFontMetrics(getFont());
 		}
-		if (fm != null) this.setRowHeight(fm.getHeight() + 2);
+		if (fm != null) setRowHeight(fm.getHeight() + 2);
 	}
 	
 	public void useMultilineTooltip(boolean flag)
@@ -1563,15 +1563,15 @@ public class WbTable
 		return false;
 	}
 
-	public void tableChanged(TableModelEvent evt)
-	{
-		super.tableChanged(evt);
-		if (this.suspendRepaint || this.modelChanging) return;
-		if (evt.getFirstRow() == TableModelEvent.HEADER_ROW)
-		{
-			this.initDefaultEditors();
-		}
-	}
+//	public void tableChanged(TableModelEvent evt)
+//	{
+//		super.tableChanged(evt);
+//		if (this.suspendRepaint || this.modelChanging) return;
+//		if (evt.getFirstRow() == TableModelEvent.HEADER_ROW)
+//		{
+//			this.initDefaultEditors();
+//		}
+//	}
 
 	public void openEditWindow()
 	{

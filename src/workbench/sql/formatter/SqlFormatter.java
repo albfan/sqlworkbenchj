@@ -16,7 +16,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import workbench.resource.Settings;
@@ -399,13 +398,13 @@ public class SqlFormatter
 			else
 			{
 				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
-				if (LINE_BREAK_BEFORE.contains(text))
+				if (LINE_BREAK_BEFORE.contains(text) && !text.equalsIgnoreCase("AS"))
 				{
 					this.appendNewline();
 					this.indent(b);
 				}
 				this.appendText(text);
-				if (LINE_BREAK_AFTER.contains(text))
+				if (LINE_BREAK_AFTER.contains(text) && !text.equalsIgnoreCase("AS"))
 				{
 					this.appendNewline();
 					this.indent(b);
@@ -475,6 +474,12 @@ public class SqlFormatter
 				else
 				{
 					t = this.processFunctionCall(t);
+					if (t == null) return null;
+					if (t.isIdentifier())
+					{
+						this.appendText(' ');
+						this.appendText(t.getContents());
+					}
 				}
 			}
 			else if (t.isSeparator() && text.equals(","))
@@ -510,7 +515,7 @@ public class SqlFormatter
 	private SQLToken processSubSelect(boolean addSelectKeyword)
 		throws Exception
 	{
-		SQLToken t = this.lexer.getNextToken(false, false);
+		SQLToken t = this.lexer.getNextToken();
 		int bracketCount = 1;
 		StringBuilder subSql = new StringBuilder(250);
 
@@ -532,24 +537,13 @@ public class SqlFormatter
 		while (t != null)
 		{
 			String text = t.getContents();
-			if (t.isSeparator() && text.equals(")"))
+			if (text.equals(")"))
 			{
 				bracketCount --;
 
 				if (bracketCount == 0)
 				{
-					SqlFormatter f = new SqlFormatter(subSql.toString(), lastIndent, this.maxSubselectLength);
-					String s = f.getFormattedSql();
-					if (f.getRealLength() < this.maxSubselectLength)
-					{
-						s = s.replaceAll(" *" + nl + " *", " ");
-						this.appendText(s.trim());
-					}
-					else
-					{
-						this.appendText(s.trim());
-					}
-
+					appendSubSelect(subSql, lastIndent);
 					return t;
 				}
 			}
@@ -557,11 +551,23 @@ public class SqlFormatter
 			{
 				bracketCount ++;
 			}
-			subSql.append(' ');
 			subSql.append(text);
 			t = this.lexer.getNextToken();
 		}
-		return null;
+		this.appendText(subSql);
+		return t;
+	}
+	
+	private void appendSubSelect(StringBuilder subSql, int lastIndent)
+		throws Exception
+	{
+		SqlFormatter f = new SqlFormatter(subSql.toString(), lastIndent, this.maxSubselectLength);
+		String s = f.getFormattedSql();
+		if (f.getRealLength() < this.maxSubselectLength)
+		{
+			s = s.replaceAll(" *" + this.nl + " *", " ");
+		}
+		this.appendText(s.trim());
 	}
 	
 	private SQLToken processDecode(int indent)
@@ -1163,11 +1169,20 @@ public class SqlFormatter
 		if (t != null && t.getContents().equals("SELECT"))
 		{
 			t = processSubSelect(true);
+			if (t == null) return null;
 			if (t.getContents().equals(")"))
 			{
-				this.appendText(")");
+				this.appendText(')');
+				SQLToken l = t;
+				t = this.lexer.getNextToken(true, false);
+//				if (t != null)
+//				{
+//					if (needsWhitespace(l, t)) this.appendText(' ');
+//					this.appendText(t.getContents());
+//					t = this.lexer.getNextToken(true, false);
+//				}
 			}
-			return this.lexer.getNextToken(true, false);
+			return t;
 		}
 		
 		SQLToken lastToken = last;

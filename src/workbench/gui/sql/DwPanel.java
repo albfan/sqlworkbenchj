@@ -46,7 +46,6 @@ import workbench.gui.MainWindow;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.WbTextCellEditor;
 import workbench.gui.sql.ReferenceTableNavigator;
-import workbench.interfaces.ResultReceiver;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
@@ -168,12 +167,6 @@ public class DwPanel
 	{
 		this.referenceNavigator = new ReferenceTableNavigator(this.dataTable);
 		this.referenceNavigator.setTargetContainer(container);
-	}
-	
-	public void initTableNavigation(ResultReceiver receiver)
-	{
-		this.referenceNavigator = new ReferenceTableNavigator(this.dataTable);
-		this.referenceNavigator.setReceiver(receiver);
 	}
 	
 	public SelectKeyColumnsAction getSelectKeysAction()

@@ -179,7 +179,7 @@ public class ObjectScripter
 					}
 					else if (TYPE_SYNONYM.equalsIgnoreCase(type))
 					{
-						source = meta.getSynonymSource(tbl.getSchema(), tbl.getTableName());
+						source = meta.getSynonymSource(tbl);
 					}
 					else if (TYPE_INSERT.equalsIgnoreCase(type))
 					{

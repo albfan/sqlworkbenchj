@@ -139,10 +139,17 @@ public class ResourceMgr
 	
 	public static String getString(String aKey)
 	{
+		return getString(aKey, false);
+	}
+	public static String getString(String aKey, boolean replaceModifiers)
+	{
 		try
 		{
 			String value = resources.getString(aKey);
-
+			if (replaceModifiers)
+			{
+				return replaceModifierText(value);
+			}
 			return value;
 		}
 		catch (MissingResourceException e)

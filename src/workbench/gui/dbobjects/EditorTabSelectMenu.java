@@ -42,8 +42,8 @@ public class EditorTabSelectMenu
 		super(label);
 		parentWindow = parent;
 		target = l;
-		newTabTooltip = ResourceMgr.getDescription(tooltipKeyNewTab);
-		regularTooltip = ResourceMgr.getDescription(tooltipKeyTab);
+		newTabTooltip = ResourceMgr.getDescription(tooltipKeyNewTab, true);
+		regularTooltip = ResourceMgr.getDescription(tooltipKeyTab, true);
 		if (parentWindow != null)
 		{
 			updateMenu();

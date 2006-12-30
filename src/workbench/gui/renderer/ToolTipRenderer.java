@@ -59,7 +59,6 @@ public class ToolTipRenderer
 	private Rectangle paintIconR = new Rectangle();
 	private Rectangle paintTextR = new Rectangle();
 	private Rectangle paintViewR = new Rectangle();
-	private static Insets emptyInsets = new Insets(0, 0, 0, 0);
 
 	private boolean isPrinting = false;
 	
@@ -174,7 +173,7 @@ public class ToolTipRenderer
 		}
 		else
 		{
-			insets = emptyInsets;
+			insets = WbSwingUtilities.EMPTY_INSETS;
 		}
 			
 		paintViewR.x = insets.left;

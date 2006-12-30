@@ -1040,7 +1040,7 @@ public class MainWindow
 		this.newDbExplorerWindow.setEnabled(true);
 
 		this.disconnectAction.setEnabled(true);
-		selectCurrentEditorLater();
+		selectCurrentEditor();
 		this.getCurrentPanel().clearLog();
 		this.getCurrentPanel().showResultPanel();
 
@@ -1080,11 +1080,6 @@ public class MainWindow
 	{
 		clearMessageForAllPanels();
 		this.clearConnectIsInProgress();
-		MainPanel p = this.getCurrentPanel();
-		if (p instanceof SqlPanel)
-		{
-			((SqlPanel)p).selectEditorLater();
-		}
 	}
 
 	private static final int CREATE_WORKSPACE = 0;
@@ -1113,8 +1108,6 @@ public class MainWindow
 		String msg = StringUtil.replace(ResourceMgr.getString("ErrLoadingWorkspace"), "%error%", error);
 		if (e instanceof OutOfMemoryError)
 		{
-			// try to free memory...
-			System.gc();
 			msg = ResourceMgr.getString("MsgOutOfMemoryError");
 		}
 		boolean create = WbSwingUtilities.getYesNo(this, msg);
@@ -1138,10 +1131,12 @@ public class MainWindow
 		}
 	}
 
+	private boolean closeResult;
+	
 	public boolean loadWorkspace(String filename)
 	{
 		if (filename == null) return false;
-		String realFilename = FileDialogUtil.replaceConfigDir(filename);
+		final String realFilename = FileDialogUtil.replaceConfigDir(filename);
 
 		File f = new File(realFilename);
 	 	if (!f.exists())
@@ -1154,75 +1149,77 @@ public class MainWindow
 			return true;
 		}
 
-		this.sqlTab.setSuspendRepaint(true);
+//		this.sqlTab.setSuspendRepaint(true);
 
-		boolean result = false;
-		WbWorkspace w = null;
 		this.currentWorkspaceFile = null;
-		try
-		{
-			this.closeExplorerPanels();
-			w = new WbWorkspace(realFilename, false);
-			int entryCount = w.getEntryCount();
-			if (entryCount == 0) entryCount = 1;
-			//this.sqlTab.setSelectedIndex(0);
-			this.adjustTabCount(entryCount);
-			//this.sqlTab.setSelectedIndex(0);
-
-			int explorerCount = w.getDbExplorerVisibleCount();
-			this.adjustDbExplorerCount(explorerCount);
+		this.closeResult = false;
 		
-			int count = this.sqlTab.getTabCount();
-			for (int i=0; i < count; i++)
-			{
-				MainPanel p = this.getSqlPanel(i);
-				p.readFromWorkspace(w,i);
-				if (p instanceof SqlPanel)
-				{
-					SqlPanel sql = (SqlPanel)p;
-					updateViewMenu(i, getPlainTabTitle(i));
-				}
-			}
-			this.currentWorkspaceFile = realFilename;
-
-			result = true;
-			
-			int newIndex = w.getSelectedTab();
-			if (newIndex < this.sqlTab.getTabCount())
-			{
-				// the stateChanged event will be ignored as we
-				// have the repainting for the tab suspended
-				sqlTab.setSelectedIndex(newIndex);
-				tabSelected(newIndex);
-			}
-		}
-		catch (Throwable e)
-		{
-			LogMgr.logWarning("MainWindow.loadWorkspace()", "Error loading workspace  " + realFilename, e);
-			this.handleWorkspaceLoadError(e, realFilename);
-		}
-		finally
-		{
-			try { w.close(); } catch (Throwable th) {}
-			this.sqlTab.setSuspendRepaint(false);
-		}
-
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
-				SqlPanel p = getCurrentSqlPanel();
-				if (p != null)
+				WbWorkspace w  = null;
+				try
 				{
-					p.getEditor().scrollToCaret();
+					closeExplorerPanels();
+					
+					w = new WbWorkspace(realFilename, false);
+					int entryCount = w.getEntryCount();
+					if (entryCount == 0) entryCount = 1;
+					
+					adjustTabCount(entryCount);
+
+					int explorerCount = w.getDbExplorerVisibleCount();
+					
+					adjustDbExplorerCount(explorerCount);
+
+					int count = sqlTab.getTabCount();
+					for (int i=0; i < count; i++)
+					{
+						MainPanel p = getSqlPanel(i);
+						p.readFromWorkspace(w,i);
+						if (p instanceof SqlPanel)
+						{
+							SqlPanel sql = (SqlPanel)p;
+							updateViewMenu(i, getPlainTabTitle(i));
+						}
+					}
+					currentWorkspaceFile = realFilename;
+
+					int newIndex = w.getSelectedTab();
+					if (newIndex < sqlTab.getTabCount())
+					{
+						// the stateChanged event will be ignored as we
+						// have the repainting for the tab suspended
+						sqlTab.setSelectedIndex(newIndex);
+//						tabSelected(newIndex);
+					}
+					closeResult = true;
 				}
+				catch (Throwable e)
+				{
+					LogMgr.logWarning("MainWindow.loadWorkspace()", "Error loading workspace  " + realFilename, e);
+					handleWorkspaceLoadError(e, realFilename);
+				}
+				finally
+				{
+					try { w.close(); } catch (Throwable th) {}
+//					sqlTab.setSuspendRepaint(false);
+				}
+
+//				SqlPanel p = getCurrentSqlPanel();
+//				if (p != null)
+//				{
+//					p.getEditor().scrollToCaret();
+//				}
 				validate();
 				updateWindowTitle();
 				checkWorkspaceActions();
 				updateAddMacroAction();
 			}
 		});
-		return result;
+		
+		return closeResult;
 	}
 
 	private void loadWorkspaceForProfile(ConnectionProfile aProfile)
@@ -1292,9 +1289,15 @@ public class MainWindow
 		}
 		else
 		{
-			if (saveWorkspace) saveWorkspace(false);
-			this.doDisconnect();
-			if (closeWorkspace) closeWorkspace(false);
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					if (saveWorkspace) saveWorkspace(false);
+					doDisconnect();
+					if (closeWorkspace) closeWorkspace(false);
+				}
+			});
 		}
 	}
 
@@ -1754,14 +1757,19 @@ public class MainWindow
 
 	public void closeExplorerPanels()
 	{
-		int index = this.findFirstExplorerTab();
+		final int index = this.findFirstExplorerTab();
 		if (index < 0) return;
-		int count = this.sqlTab.getTabCount();
-
-		for (int i=index; i < count; i++)
+		final int count = this.sqlTab.getTabCount();
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			this.removeTab(i);
-		}
+			public void run()
+			{
+				for (int i=index; i < count; i++)
+				{
+					removeTab(i);
+				}
+			}
+		});
 	}
 
 	public void newDbExplorerWindow()
@@ -2032,7 +2040,13 @@ public class MainWindow
 
 	public void closeWorkspace()
 	{
-		closeWorkspace(true);
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				closeWorkspace(true);
+			}
+		});
 	}
 	
 	private boolean shutdownWorkspace = false;

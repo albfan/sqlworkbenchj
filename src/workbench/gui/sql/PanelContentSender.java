@@ -21,6 +21,8 @@ import workbench.util.WbThread;
  */
 public class PanelContentSender
 {
+	public static final int NEW_PANEL = -1;
+	
 	protected MainWindow target;
 	
 	public PanelContentSender(MainWindow window)
@@ -28,7 +30,7 @@ public class PanelContentSender
 		this.target = window;
 	}
 	
-	public void showResult(final String sql, final String comment, final int panelIndex)
+	public void showResult(final String sql, final String comment, final int panelIndex, final boolean logText)
 	{
 		if (sql == null) return;
 		
@@ -46,6 +48,7 @@ public class PanelContentSender
 		{
 			public void run()
 			{
+				final boolean isCurrent = (target.getCurrentPanelIndex() == panelIndex);
 				final SqlPanel panel = selectPanel(panelIndex);
 				target.waitForConnection();
 				
@@ -57,7 +60,20 @@ public class PanelContentSender
 						{
 							target.requestFocus();
 							panel.selectEditor();
-							panel.showResult(sql, comment, ResultReceiver.ShowType.replaceText);
+							ResultReceiver.ShowType type;
+							if (panelIndex == NEW_PANEL)
+							{
+								type = ResultReceiver.ShowType.replaceText;
+							}
+							else if (panel.hasFileLoaded())
+							{
+								type = ResultReceiver.ShowType.logText;
+							}
+							else
+							{
+								type = (logText ? ResultReceiver.ShowType.logText : ResultReceiver.ShowType.appendText);
+							}
+							panel.showResult(sql, comment, type);
 						}
 					}
 				});
@@ -88,7 +104,7 @@ public class PanelContentSender
 	{
 		SqlPanel panel;
 		
-		if (index == -1)
+		if (index == NEW_PANEL)
 		{
 			panel = (SqlPanel)this.target.addTab(true, true);
 		}

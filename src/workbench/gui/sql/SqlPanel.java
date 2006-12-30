@@ -54,6 +54,7 @@ import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.db.importer.DataStoreImporter;
+import workbench.gui.MainWindow;
 import workbench.gui.actions.AppendResultsAction;
 import workbench.gui.actions.FilterDataAction;
 import workbench.gui.actions.FilterPickerAction;
@@ -658,6 +659,7 @@ public class SqlPanel
 
 		this.actions.add(new AutoJumpNextStatement());
 		this.appendResultsAction = new AppendResultsAction(this);
+		this.appendResultsAction.setEnabled(false); 
 		this.actions.add(appendResultsAction);
 		a = new HighlightCurrentStatement();
 		a.setCreateMenuSeparator(false);
@@ -1003,7 +1005,7 @@ public class SqlPanel
 		}
 		catch (Exception e)
 		{
-			LogMgr.logWarning("SqlPanel.readFromWorkspace()", "Could not read history data for index " + (this.internalId - 1));
+			LogMgr.logWarning("SqlPanel.readFromWorkspace()", "Could not read history data for index=" + index);
 			this.clearSqlHistory(false);
 		}
 
@@ -2055,16 +2057,6 @@ public class SqlPanel
 		}
 	}
 
-	private void addResultTab(DwPanel data, String sql)
-	{
-		int newIndex = this.resultTab.getTabCount() - 1;
-		this.resultTab.insertTab(ResourceMgr.getString("LblTabResult"), null, data, sql, newIndex);
-		if (this.resultTab.getTabCount() == 2)
-		{
-			this.resultTab.setSelectedIndex(0);
-		}
-	}
-
 	private ScriptParser createScriptParser()
 	{
 		ScriptParser scriptParser = new ScriptParser();
@@ -2568,7 +2560,21 @@ public class SqlPanel
 		data.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		data.setConnection(this.dbConnection);
 		data.setUpdateHandler(this);
-		data.initTableNavigation(this);
+		MainWindow w = null;
+		try
+		{
+			w = (MainWindow)SwingUtilities.getWindowAncestor(this);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("SqlPanel.createDwPanel()", "Could not find MainWindow!", e);
+			w = null;
+		}
+		
+		if (w != null)
+		{
+			data.initTableNavigation(w);
+		}
 		return data;
 	}
 	
@@ -2618,7 +2624,17 @@ public class SqlPanel
 		}		
 		startExecution(sql, 0, -1, false, true);
 	}
-	
+
+	private void addResultTab(DwPanel data, String sql)
+	{
+		int newIndex = this.resultTab.getTabCount() - 1;
+		this.resultTab.insertTab(ResourceMgr.getString("LblTabResult"), null, data, sql, newIndex);
+		if (this.resultTab.getTabCount() == 2)
+		{
+			this.resultTab.setSelectedIndex(0);
+		}
+	}
+	 
 	/**
 	 * Display the data contained in the StatementRunnerResult.
 	 * For each DataStore or ResultSet in the result, an additional
@@ -2765,6 +2781,7 @@ public class SqlPanel
 					rollbackAction.setEnabled(aFlag);
 				}
 				spoolData.setEnabled(aFlag);
+				appendResultsAction.setEnabled(aFlag); 
 			}
 		});
 	}

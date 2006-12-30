@@ -13,18 +13,16 @@ package workbench.gui.components;
 
 
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventObject;
-
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.InputMap;
@@ -33,10 +31,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
-
 import workbench.gui.WbSwingUtilities;
 
 public class WbCellEditor 
@@ -46,8 +41,6 @@ public class WbCellEditor
 	private TextAreaEditor editor;
 	private WbTable parentTable;
 	private JScrollPane scroll;
-	private ArrayList listeners;
-	private ChangeEvent changedEvent;
 	
 	private static final KeyStroke CTRL_TAB = KeyStroke.getKeyStroke("control TAB");
 	private static final KeyStroke TAB = KeyStroke.getKeyStroke("TAB");
@@ -71,7 +64,7 @@ public class WbCellEditor
 		editor.addMouseListener(this);
 	}
 	
-  public static void setDefaultCopyPasteKeys(JComponent editor)
+  protected void setDefaultCopyPasteKeys(JComponent editor)
   {
     InputMap im = editor.getInputMap();
     KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK);
@@ -110,15 +103,22 @@ public class WbCellEditor
 	
 	public boolean isCellEditable(EventObject anEvent)
 	{
+		boolean result = true;
 		if (anEvent instanceof MouseEvent)
 		{
-			return ((MouseEvent)anEvent).getClickCount() >= 2;
+			result = ((MouseEvent)anEvent).getClickCount() >= 2;
 		}
-		else if (anEvent instanceof KeyEvent)
+		if (result)
 		{
-			return (((KeyEvent)anEvent).getKeyCode() == KeyEvent.VK_F2);
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					editor.requestFocus();
+				}
+			});
 		}
-		return true;
+		return result;
 	}
 	
 	public Component getTableCellEditorComponent(JTable table, Object value,
@@ -135,56 +135,6 @@ public class WbCellEditor
 	}
 
 	public boolean isManagingFocus() { return false; }
-	
-	public void addCellEditorListener(CellEditorListener l)
-	{
-		if (this.listeners == null) this.listeners = new ArrayList();
-		this.listeners.add(l);
-	}
-	
-	public void cancelCellEditing()
-	{
-		this.fireEditingCanceled();
-	}
-	
-	public void removeCellEditorListener(CellEditorListener l)
-	{
-		if (this.listeners == null) return;
-		this.listeners.remove(l);
-	}
-	
-	public boolean startCellEditing()
-	{
-		return true;
-	}
-	
-	public boolean stopCellEditing()
-	{
-		this.fireEditingStopped(); 
-		return true;
-	}
-
-	public void fireEditingCanceled()
-	{
-		if (this.listeners == null) return;
-		for (int i=0; i < this.listeners.size(); i++)
-		{
-			CellEditorListener l = (CellEditorListener)this.listeners.get(i);
-			if (this.changedEvent == null) this.changedEvent = new ChangeEvent(this);
-			if (l != null) l.editingCanceled(this.changedEvent);
-		}
-	}
-	
-	public void fireEditingStopped()
-	{
-		if (this.listeners == null) return;
-		for (int i=0; i < this.listeners.size(); i++)
-		{
-			CellEditorListener l = (CellEditorListener)this.listeners.get(i);
-			if (this.changedEvent == null) this.changedEvent = new ChangeEvent(this);
-			if (l != null) l.editingStopped(this.changedEvent);
-		}
-	}
 	
 	public void mouseClicked(MouseEvent evt)
 	{
@@ -212,20 +162,18 @@ public class WbCellEditor
 	
 	class TextAreaEditor 
 		extends JTextArea
-		implements ItemListener
 	{
 		public TextAreaEditor()
 		{
 			super();
 			this.setFocusCycleRoot(false);
-			//this.setFocusTraversalKeys(WHEN_FOCUSED, Collections.EMPTY_SET);
+			
 			Object tabAction = this.getInputMap().get(TAB);
 			
 			this.getInputMap().put(TAB, "wb-do-nothing-at-all");
 
 			if (tabAction != null) 
 			{
-				this.getInputMap().put(CTRL_TAB, tabAction);
 				this.getInputMap().put(CTRL_TAB, tabAction);
 			}
 
@@ -245,51 +193,30 @@ public class WbCellEditor
 			{
 				this.getInputMap().put(CTRL_ENTER, enterAction);
 			}
-
 		}
 
-//		public boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed)
-//		{
-//			if (ks.equals(TAB))
-//			{
-//				//System.out.println("TAB pressed");
-//				//int pos = this.getCaretPosition();
-//				//this.insert("\t", pos);
-//				e.consume();
-//				return true;
-//			}
-//			return super.processKeyBinding(ks, e, condition, pressed);
-//		}
-
-		public void itemStateChanged(ItemEvent e)
-		{
-			stopCellEditing();
-		}
 	}
 	
 	public class TextAreaScrollPane 
 		extends JScrollPane
-		implements ItemListener
 	{
 		TextAreaEditor editor;
 		
-		public TextAreaScrollPane(Component content)
+		public TextAreaScrollPane(TextAreaEditor content)
 		{
 			super(content);
 			this.setFocusCycleRoot(false);
 			this.setFocusTraversalKeys(WHEN_FOCUSED, Collections.EMPTY_SET);
-			if (content instanceof TextAreaEditor)
-			{
-				editor = (TextAreaEditor)content;
-			}
+			editor = (TextAreaEditor)content;
 		}
 
-//		public boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed)
-//		{
-//			return editor.processKeyBinding(ks, e, condition, pressed);
-//		}
-
-		//public boolean isManagingFocus() { return false; }
+		public boolean isManagingFocus() { return false; }
+		
+		public boolean requestFocus(boolean temp)
+		{
+			return editor.requestFocus(temp);
+		}
+		
 		public void requestFocus()
 		{
 			this.editor.requestFocus();
@@ -300,14 +227,10 @@ public class WbCellEditor
 			return this.editor.requestFocusInWindow();
 		}
 
-		/* (non-Javadoc)
-		 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
-		 */
-		public void itemStateChanged(ItemEvent e)
+		public boolean requestFocusInWindow(boolean temp)
 		{
-			stopCellEditing();
+			return this.editor.requestFocusInWindow();
 		}
-		
 	}
 	
 } 

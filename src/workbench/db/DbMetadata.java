@@ -1341,7 +1341,7 @@ public class DbMetadata
 
 	/**
 	 * The column index of the column in the DataStore returned by getTables()
-	 * the stores the table's type. The available types can be retrieved
+	 * that stores the table's type. The available types can be retrieved
 	 * using {@link #getTableTypes()}
 	 */
 	public final static int COLUMN_IDX_TABLE_LIST_TYPE = 1;
@@ -1364,6 +1364,17 @@ public class DbMetadata
 	 */
 	public final static int COLUMN_IDX_TABLE_LIST_REMARKS = 4;
 
+	public String getTableType(TableIdentifier table)
+		throws SQLException
+	{
+		TableIdentifier tbl = table.createCopy();
+		tbl.adjustCase(this.dbConnection);
+		DataStore ds = getTables(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), null);
+		if (ds == null) return this.tableTypeName;
+		if (ds.getRowCount() != 1) return null;
+		return ds.getValueAsString(0, COLUMN_IDX_TABLE_LIST_TYPE);
+	}
+	
 	public DataStore getTables()
 		throws SQLException
 	{
@@ -2361,7 +2372,7 @@ public class DbMetadata
 		throws SQLException
 	{
 		if (schema == null) schema = this.getCurrentSchema();
-		return getTableList(null, adjustSchemaNameCase(schema), types);
+		return getTableList(null, schema, types);
 	}
 	
 	public List<TableIdentifier> getTableList()
@@ -2374,7 +2385,7 @@ public class DbMetadata
 	public List<TableIdentifier> getTableList(String table, String schema)
 		throws SQLException
 	{
-		return getTableList(table, adjustSchemaNameCase(schema), tableTypesTable);
+		return getTableList(table, schema, tableTypesTable);
 	}
 
 	public List<TableIdentifier> getSelectableObjectsList(String schema)
@@ -2864,6 +2875,8 @@ public class DbMetadata
 		TableIdentifier table = tbl.createCopy();
 		table.adjustCase(this.dbConnection);
 			
+		List<TableIdentifier> l = getTableList(table.getTableName(), table.getSchema());
+		
 		ResultSet rs;
 		if (exported)
 			rs = this.metaData.getExportedKeys(table.getCatalog(), table.getSchema(), table.getTableName());
@@ -3170,20 +3183,50 @@ public class DbMetadata
 	}
 	
 	/**
-	 *	Return the underlying table of a synonym.
-	 *
-	 *	@return the table to which the synonym points.
+	 * Checks if the current DBMS supports synonyms.
+	 * @return true if the synonym support is available (basically if synonymReader != null)
 	 */
-	public TableIdentifier getSynonymTable(String anOwner, String aSynonym)
+	public boolean supportsSynonyms()
+	{
+		return this.synonymReader != null;
+	}
+	
+	/**
+	 *	Return the underlying table of a synonym.
+	 * @param synonym the synonym definition
+	 * 
+	 * @return the table to which the synonym points or null if the passed
+	 *         name does not reference a synonym or if the DBMS does not support synonyms
+	 * @see #getSynonymTable(String, String)
+	 */
+	public TableIdentifier getSynonymTable(TableIdentifier synonym)
+	{
+		if (this.synonymReader == null) return null;
+		TableIdentifier tbl = synonym.createCopy();
+		tbl.adjustCase(this.dbConnection);
+		return getSynonymTable(tbl.getSchema(), tbl.getTableName());
+	}
+	
+	/**
+	 * Return the underlying table of a synonym.
+	 * 
+	 * @param schema the schema of the synonym
+	 * @param synonym the name of the synonym
+	 * 
+	 * @return the table to which the synonym points or null if the passed
+	 *         name does not reference a synonym or if the DBMS does not support synonyms
+	 * @see #getSynonymTable(String, String)
+	 */
+	protected TableIdentifier getSynonymTable(String schema, String synonym)
 	{
 		if (this.synonymReader == null) return null;
 		TableIdentifier id = null;
 		try
 		{
-			id = this.synonymReader.getSynonymTable(this.dbConnection.getSqlConnection(), anOwner, aSynonym);
+			id = this.synonymReader.getSynonymTable(this.dbConnection.getSqlConnection(), schema, synonym);
 			if (id == null && this.isOracle)
 			{
-				id = this.synonymReader.getSynonymTable(this.dbConnection.getSqlConnection(), "PUBLIC", aSynonym);
+				id = this.synonymReader.getSynonymTable(this.dbConnection.getSqlConnection(), "PUBLIC", synonym);
 			}
 		}
 		catch (Exception e)
@@ -3197,14 +3240,15 @@ public class DbMetadata
 	 *	Return the SQL statement to recreate the given synonym.
 	 *	@return the SQL to create the synonym.
 	 */
-	public String getSynonymSource(String anOwner, String aSynonym)
+	public String getSynonymSource(TableIdentifier synonym)
 	{
 		if (this.synonymReader == null) return StringUtil.EMPTY_STRING;
 		String result = null;
-
+		TableIdentifier tbl = synonym.createCopy();
+		tbl.adjustCase(dbConnection);
 		try
 		{
-			result = this.synonymReader.getSynonymSource(this.dbConnection.getSqlConnection(), anOwner, aSynonym);
+			result = this.synonymReader.getSynonymSource(this.dbConnection.getSqlConnection(), tbl.getSchema(), tbl.getTableName());
 		}
 		catch (Exception e)
 		{

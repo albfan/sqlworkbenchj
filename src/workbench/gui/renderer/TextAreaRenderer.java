@@ -14,9 +14,11 @@ package workbench.gui.renderer;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.Insets;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.TableCellRenderer;
+import workbench.gui.WbSwingUtilities;
 import workbench.resource.Settings;
 import workbench.storage.NullValue;
 import workbench.util.StringUtil;
@@ -55,6 +57,15 @@ public class TextAreaRenderer
 		this.isEditing = (row == this.editingRow) && (this.highlightBackground != null);
 		
 		this.setFont(table.getFont());
+		
+		if (hasFocus)
+		{
+			this.setBorder(WbSwingUtilities.FOCUSED_CELL_BORDER);
+		}
+		else
+		{
+			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		}
 		
 		if (selectedForeground == null)
 		{
@@ -124,6 +135,11 @@ public class TextAreaRenderer
 		return this;
 	}
 
+	public Insets getInsets()
+	{
+		return WbSwingUtilities.EMPTY_INSETS;
+	}
+	
 	public void setHighlightColumns(boolean[] cols) 
 	{ 
 		this.highlightCols = cols; 

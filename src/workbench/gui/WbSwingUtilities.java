@@ -18,6 +18,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Window;
@@ -25,7 +26,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.JComponent;
-
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
@@ -38,7 +38,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 import workbench.db.WbConnection;
-
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.ValidatingDialog;
 import workbench.log.LogMgr;
@@ -66,6 +65,7 @@ public class WbSwingUtilities
 					b.getShadowInnerColor());
 	}
 
+	public static final Insets EMPTY_INSETS = new Insets(0, 0, 0, 0);
 	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.YELLOW);
 	public static final Border EMPTY_BORDER = new EmptyBorder(0,0,0,0);
 	public static final Border FLAT_BUTTON_BORDER = new CompoundBorder(new EtchedBorder(), new EmptyBorder(1,6,1,6));

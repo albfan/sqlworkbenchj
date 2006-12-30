@@ -138,8 +138,14 @@ public class ConnectionSelector
 			WbSwingUtilities.showDefaultCursor(this.connectingInfo);
 			try
 			{
-				this.connectingInfo.setVisible(false);
-				this.connectingInfo.dispose();
+				WbSwingUtilities.invoke(new Runnable()
+				{
+					public void run()
+					{
+						connectingInfo.setVisible(false);
+						connectingInfo.dispose();
+					}
+				});
 			}
 			catch (Throwable th)
 			{

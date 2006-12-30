@@ -111,6 +111,15 @@ public class TableDependency
 			int tablecolumncol;
 			int parentcolumncol;
 
+			TableIdentifier ptbl = parent.getTable();
+			if (this.wbMetadata.supportsSynonyms())
+			{
+				String type = this.wbMetadata.getTableType(ptbl);
+				if (wbMetadata.isSynonymType(type))
+				{
+					ptbl = wbMetadata.getSynonymTable(ptbl);
+				}
+			}
 			if (exportedKeys)
 			{
 				catalogcol = 4;
@@ -119,7 +128,7 @@ public class TableDependency
 				fknamecol = 11;
 				tablecolumncol = 7;
 				parentcolumncol = 3;
-				ds = this.wbMetadata.getExportedKeys(parent.getTable());
+				ds = this.wbMetadata.getExportedKeys(ptbl);
 			}
 			else
 			{
@@ -129,7 +138,7 @@ public class TableDependency
 				fknamecol = 11;
 				tablecolumncol = 3;
 				parentcolumncol = 7;
-				ds = this.wbMetadata.getImportedKeys(parent.getTable());
+				ds = this.wbMetadata.getImportedKeys(ptbl);
 			}
 
 			DependencyNode child = null;
@@ -148,6 +157,7 @@ public class TableDependency
         fkname = ds.getValueAsString(i, fknamecol);
 
 				TableIdentifier tbl = new TableIdentifier(catalog, schema, table);
+
 				tbl.setNeverAdjustCase(true);
 				child = parent.addChild(tbl, fkname);
 				String tablecolumn = ds.getValueAsString(i, tablecolumncol); // the column in "table" referencing the other table
