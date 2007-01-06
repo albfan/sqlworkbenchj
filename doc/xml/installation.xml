@@ -520,7 +520,7 @@ another_variable=24</programlisting>
 						<row>
 							<entry>-altDelim</entry>
 							<entry>
-								The <link linkend="">alternate delimiter</link> to be used for this connection. 
+								The <link linkend="understand-alternate-delim">alternate delimiter</link> to be used for this connection. 
 								To define a single line delimiter append the characters ;nl to the parameter value:
 								e.g. <literal>-altDelimiter=GO;nl</literal> to define a SQL Server like GO as the 
 								alternate delimiter. Note that when running in batchmode you can override 

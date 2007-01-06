@@ -966,7 +966,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 									import.
 								</para>
 								<para>
-									This parameter is ignored when the <literal>-sourcedir</literal>
+									This parameter is ignored when the <literal>-sourceDir</literal>
 									parameter is used.
 								</para>
 							</entry>
@@ -1000,9 +1000,11 @@ WHERE table1.column1 = table2.column1;</programlisting>
 							<entry>-delimiter</entry>
 							<entry>
 								<para>
-									Define the character which separates columns in one line. Records are always
-									separated by newlines (either CR/LF or only a LF character).
+									Define the character which separates columns in one line. 
+									Records are always separated by newlines (either CR/LF or a 
+									single a LF character) unless <literal>-multiLine=true</literal> is specified
 								</para>
+								<para>Default value: \t (a tab character)</para>
 							</entry>
 						</row>
 						
@@ -2360,20 +2362,20 @@ v_data=id1,id2</programlisting>
 			
     </section>
 
-    <section id="command-wbfeedback">
-        <title>Control feedback messages - WbFeedback</title>
-        <para>
-            Normally &wb-productname; prints the results for each statement
-            into the message panel. As this feedback can slow down the execution
-            of large scripts, you can disable the feedback using the <literal>WbFeedback</literal>
-            command. When <literal>WbFeedback OFF</literal> is executed, only a summary of the
-            number of executed statements will be displayed, once the script execution has
-            finished. This is the same behaviour as selecting "Consolidate script log" in the
-            options window. The only difference is, that the setting through <literal>WbFeedback</literal>
-            is temporary and does not affect the global setting.
-        </para>
-    </section>
-
+		<section id="command-wbfeedback">
+			<title>Control feedback messages - WbFeedback</title>
+			<para>
+				Normally &wb-productname; prints the results for each statement
+				into the message panel. As this feedback can slow down the execution
+				of large scripts, you can disable the feedback using the <literal>WbFeedback</literal>
+				command. When <literal>WbFeedback OFF</literal> is executed, only a summary of the
+				number of executed statements will be displayed, once the script execution has
+				finished. This is the same behaviour as selecting "Consolidate script log" in the
+				options window. The only difference is, that the setting through <literal>WbFeedback</literal>
+				is temporary and does not affect the global setting.
+			</para>
+		</section>
+		
 		<section id="command-desc">
 			<title>Show table structure - DESCRIBE</title>
 			

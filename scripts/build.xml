@@ -672,7 +672,7 @@
   </path>
 	 
 	<target name="compile-tests" depends="compile">
-		<javac debug="on" destdir="${build_test}" optimize="on" srcdir="${testsrc}" target="1.4" source="1.4" encoding="ISO-8859-1">
+		<javac debug="on" destdir="${build_test}" optimize="on" srcdir="${testsrc}" target="1.5" source="1.5" encoding="ISO-8859-1">
 			<classpath>
 				<pathelement location="${build}"/>
 				<path refid="junit.path"/>

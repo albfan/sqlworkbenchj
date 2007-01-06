@@ -56,7 +56,8 @@
 			the default delimiter for all scripts. The usage of the alternate delimiter will be
 			disabled if this parameter is specified.
 		</para>
-	</secion>
+	</section>
+	
 	<section id="scripting-encoding">
 		<title>Specifying an encoding for the file(s)</title>
 		

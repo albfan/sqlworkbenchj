@@ -302,14 +302,14 @@
 				terminated with the character sequence entered in this input field. The
 				terminator can have more than one character e.g. <literal>GO</literal>, or <literal>!!</literal>
 			</para>
-			<para>It is recommende to always define the alternate delimiter as "Single line". This means
+			<para>It is recommended to always define the alternate delimiter as "Single line". This means
 				that the delimiter will only be recognized when put on a single line. If you
 				define the forward slash as the alternate delimiter, the following script
 				would be interpreted as two statements.
 			</para>
 			<para><programlisting>SELECT sum(field)/count(*) FROM table
 /</programlisting></para>
-			<para>To solve this problem, define the delimiter as <literal>Single line</literal>
+			<para>To solve this problem, define the delimiter as "Single line".
 			Then the forward slash that divides the two values is not recognized as a delimiter
 			and the script executes normally. It is recommended to always turn on the 
 			single line mode for the alternate delimiter.

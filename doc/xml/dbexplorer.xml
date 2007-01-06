@@ -84,7 +84,7 @@
 		</simplesect>
 
 		<simplesect>
-			<title>Put SELECT into</title>
+			<title id="dbexplorer-select-data">Put SELECT into</title>
 
 			<blockquote><para>
 				This will put a SELECT statement into the SQL editor to display

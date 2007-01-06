@@ -1,12 +1,32 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+
+Build 92, 06.01.2007
+--------------------
+Enh:  (91.5) When searching for referencing/referenced tables, synonyms are 
+      now detected.
+Enh:  (91.5) Referenced/referencing rows can now be displayed into a new 
+      SQL panel from within a SQL panel by holding down the Ctrl-Key when
+      selecting the menu item of the popup menu.
+Enh:  (91.4) From within a result display, related records based on 
+      foreign key constrains can now be retrieved for the selected rows
+Enh:  (91.4) When displaying (SQL)Exceptions the whole exception chain is now
+      displayed (if available)
+Enh:  (91.3) New results can now be added to the already displayed result
+      (New Menu item SQL -> Append new results)
+Enh:  (91.2) Large text fields are now displayed in multi-line mode (to be
+      able to see all lines "Allow Row Height Resizing" must be enabled. For
+      performace reasons this mode is only enabled for character columns that
+      can hold more than 500 characters. This threshold can be configured using
+      the property:
+      workbench.gui.display.multilinethreshold
 Enh:  (91.1) The alternate delimiter can now be defined for each profile. If 
       one is defined in the profile, this will overwrite the globally defined
       alternate delimiter. Additionally an alternate delimiter can now be 
       defined as "single line", which means that it has to occur as the only 
       text on a line in order to be recognized.
-Enh:  (91.1) Delimiter and alternate Delimiter can now be specified in batch mode
-      as well. The parameter -altDelimiter will only have an effect if a 
+Enh:  (91.1) Delimiter and alternate Delimiter can now be specified in batch 
+      mode as well. The parameter -altDelimiter will only have an effect if a 
       profile-less connection is used (basically defining the alternate 
       delimiter for the temporary profile)
       The argument -delimiter overrides the default delimiter and will turn
@@ -20,6 +40,36 @@ Enh:  (91.1) Delimiter and alternate Delimiter can now be specified in batch mod
       The additional automatic detection of the GO delimiter has been removed. 
       If you use GO as the delimiter, please change your profiles to use 
       that as the delimiter.
+Fix:  (91.6) When saving changes from within the result set, errors during
+      COMMIT were not reported to the user (e.g. with deferred constraints)
+Fix:  (91.6) The source of a table was not displayed in the DbExplorer if 
+      a comment contained characters that are valid regular expressions.
+Fix:  (91.6) Some minor workarounds to make SQL Workbench/J work with tinySQL
+Fix:  (91.5) When using a table alias with the AS keyword, code completion 
+      did not work properly
+Fix:  (91.4) The DbExplorer was not displayed when running on Debian Linux
+      (Possibly with other Look & Feels as well)
+Fix:  (91.4) The shortcuts for "Move tab left" and "Move tab right" could
+      not be configured
+Fix:  (91.4) Large integer numbers where not displayed correctly
+Fix:  (91.3) "Create DDL Script" in the DbExplorer did not create the 
+      DDL for materialized views in Oracle
+Fix:  (91.3) Code completion was not working properly if the cursor was at 
+      the end of the editor script
+Fix:  (91.2) Fixed some problems with external files when switching line 
+      endings
+Enh:  (91.1) When running with feedback disabled (wbfeedback off) a message
+      will now be printed if a statement finished with a warning
+Fix:  (91.1) WbImport reported the wrong line number, when an error occurred
+      during converting values from a text file.
+Fix:  (91.1) Text values with embedded newlines were not displayed correctly
+      in the edit window. 
+Fix:  (91.1) When importing an XML file that contains a column that does
+      exist in the target table, no error was reported (but the import
+      failed nevertheless)
+Fix:  (91.1) When running on DML Statements (INSERT, DELETE, ...) with the
+      Informix JDBC driver, it would throw an exception when retrieving
+      the update count.
       
 Build 91, 27.11.2006
 --------------------

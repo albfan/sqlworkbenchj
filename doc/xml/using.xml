@@ -108,6 +108,14 @@ COMMIT;</programlisting>
 				statements, the lower pane will show three result tabs and the message tab. If your 
 				statement(s) did not produce any result, only the messages tab will be displayed.
 			</para>
+			<para>
+				When you run a SQL statement, the current results will be cleared and 
+				replaced by the new results. You can turn this off by selecting 
+				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Append new results</guimenuitem></menuchoice>.
+				Every result that is retrieved while this option is turned on, will be added to the 
+				set of result tabs, until you de-select this option. This can also be 
+				toggled using the button on the toolbar.
+			</para>
 			
 			<para>
 				You can also run stored procedures that return result sets. These result will be 
@@ -225,10 +233,10 @@ END;</programlisting>
 
 			<para>
 				The solution is to terminate the script with a character
-				sequence called the <link linkend="options-alternate-delimiter">alternate delimiter</link>".
+				sequence called the "<link linkend="options-alternate-delimiter">alternate delimiter</link>".
 				The value of this sequence can be configured in the <link linkend="options">options dialog</link>
-				as a global default, or per connection profile (so you can use different alternate 
-				delimiters for different database systems).
+				as a global default, or per <link linkend="profile-alternate-delimiter">connection profile</link> 
+				(so you can use different alternate delimiters for different database systems).
 				The default is the forward slash <emphasis role="bold">/</emphasis> defined as a single
 				line delimiter.
 			</para>
@@ -434,10 +442,9 @@ VALUES
 		<title>Performance tuning when executing SQL</title>
 		<para>
 			There are some configuration settings that affect the performance
-			of your SQL statements. On slow computers it is recommended to turn off
+			of &wb-productname;. On slow computers it is recommended to turn off
 			the usage of the <link linkend="option-animated-icon">animated icon</link> 
-			as the indicator when a statement is running. When running large imports, 
-			turning off the animated icon can have a huge impact on the performance.
+			as the indicator for a running statement.
 		</para>
 		<para>
 			When running large scripts, the feedback which statement is executed
@@ -603,6 +610,13 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</programlisting>
 				instead, you have to pay attention to not select the semicolon in the
 				editor before running this macro.
 			</para>
+			
+			<para>
+				For PostgreSQL you can define a similar macro that will automatically run 
+				the <literal>EXPLAIN</literal> command for a statemet:
+				<programlisting>explain ${current_statement}$</programlisting>
+			</para>
+				
 			
 			<para>
 				Another usage of the parameter replacement could be a SQL Statement that
@@ -830,6 +844,62 @@ Done.</programlisting>
 		
 	</section>
     
+	<section id="fk-navigation">
+		<title>Navigating referenced rows</title>
+		<para>
+			Once you have retrieved data from a table that has foreign key relations to 
+			other tables, you can navigate the relationship for specific rows in the result set.
+			Select the rows for which you want to find the data in the related tables, then 
+			right click inside the result set. In the context menu two items are available:
+			<simplelist columns="1">
+				<member>Referenced rows</member>
+				<member>Referencing rows</member>
+			</simplelist>
+		</para>
+		<para>
+			Consider the following tables: 
+			<simplelist columns="1">
+				<member><literal>BASE</literal> (b_id, name)</member>
+				<member><literal>DETAIL</literal> (d_id, base_id, description) with <literal>base_id</literal>
+				referencing BASE(b_id)</member>
+				<member><literal>MORE_DETAIL</literal> (md_id, detail_id, description) with <literal>detail_id</literal>
+				referencing <literal>DETAIL</literal> (d_id)</member>
+			</simplelist>
+		</para>
+			
+
+		<para>
+			The context menu for the selected rows will give you the choice in 
+			which SQL tab you want the generated <literal>SELECT</literal> to be pasted. This is similar
+			to the <link linkend="dbexplorer-select-data">Put SELECT into</link> feature in the table list
+			of the DbExplorer.
+		</para>
+		
+		<para>
+			Once you have obtained a result set from the table <literal>BASE</literal>, select
+			(mark) the rows for which you want to retrieve the related rows, e.g. the one where id=1. Using
+			<menuchoice><guimenu>Referencing rows</guimenu><guimenuitem>DETAIL</guimenuitem></menuchoice>
+			&wb-productname; will create the following statement:
+<programlisting>SELECT *
+FROM DETAIL
+WHERE base_id = 1;</programlisting> 
+			The result of the generated statement will always be added to the existing results of the chosen
+			SQL panel. By default the generated SQL statement will be appended to the text editor. 
+			If you don't want the generated statement to be appended to the editor,
+			hold down the <literal>Ctrl</literal> key while selecting the desired menu item.
+			In that case, the generated statement will only be written to the messages
+			panel of the SQL tab. If the target tab contains an external file, the statement will never
+			be appended to the editor's text.
+		</para>
+		
+		
+		<para>
+			To navigate from the child data to the "parent" data, use
+			<guimenu>Referenced rows</guimenu>
+		</para>
+		
+	</section>
+	
 	<section id="using-copy-clipboard">
 		<title>Copying result data to the clipboard</title>
 		

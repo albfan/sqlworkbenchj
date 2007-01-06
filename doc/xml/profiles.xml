@@ -42,7 +42,7 @@
 	
 </section>
 
-  <section id="profile-groups">
+<section id="profile-groups">
 	<title>Managing profile groups</title>
 	<para>
 		Profiles can be organized in groups, so you can group them by type (test, integration, production)
@@ -54,11 +54,11 @@
 		be created in the currently selected group. If a profile is selected in the tree and not a group
 		node, the new profile will be created in the group of the currently selected profile.
 	</para>
-	
+
 	<para><note>
 			Empty groups are discarded (i.e. not saved) when you restart &wb-productname;
 	</note></para>
-	
+
 	<para>
 		You can move profiles from one group to another but right clicking on the profile, then choose
 		<guimenuitem>Cut</guimenuitem>. Then right-click on the target group and select 
@@ -71,20 +71,20 @@
 		a copy of the selected profile will be pasted into the target group. This is similar to 
 		copying the currently selected profile. 
 	</para>
-	
+
 	<para>
 		To rename a group, select the node in the tree, then press the <guibutton>F2</guibutton> key. 
 		You can now edit the group name.
 	</para>
-	
+
 	<para>
 		To delete a group, simply remove all profiles from that group. The group will then automatically
 		be removed. 
 	</para>
 	
-  </section>
+</section>
   
-	<section id="profile-jdbc-properties">
+<section id="profile-jdbc-properties">
 	<title>JDBC related profile settings</title>
 	<informaltable frame="all">
 		<tgroup cols="2" align="left">
@@ -157,15 +157,15 @@
 							as well. Please refer to the documentation of your DBMS.
 					</para></entry>
 				</row>
-				
+
 			</tbody>
 		</tgroup>
-		
+
 	</informaltable>
+
+</section>
 	
-	</section>
-	
-	<section id="profile-extended-properties">
+<section id="profile-extended-properties">
 	<title>Extended properties for the JDBC driver</title>
 	<para>
 		Most JDBC drivers support additional connection properties where
@@ -186,118 +186,117 @@
 		click on the <literal>Delete</literal> button
 		(<guiicon><inlinegraphic fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>).
 	</para>
-	
-  </section>
+</section>
   
-  <section id="profile-workbench-settings">
-		<title>&wb-productname; specific settings</title>
-	
-		<section id="profile-save-password">
-			<title>Save password</title>
-			
-			<para>
-				If this option is enabled (i.e. checked) the password for the
-				profile will also be stored in the profile file. If the global
-				option <link linkend="options-encrypt-password">Encrypt Passwords</link>
-				is selected, then the password will be stored encrypted,
-				otherwise it will be stored in plain text!
-			</para>
-			<para>
-				If you choose not to store the password, you will be prompted for it each
-				time you connect using the profile.
-			</para>
-		</section>
+<section id="profile-workbench-settings">
+	<title>&wb-productname; specific settings</title>
+
+	<section id="profile-save-password">
+		<title>Save password</title>
+
+		<para>
+			If this option is enabled (i.e. checked) the password for the
+			profile will also be stored in the profile file. If the global
+			option <link linkend="options-encrypt-password">Encrypt Passwords</link>
+			is selected, then the password will be stored encrypted,
+			otherwise it will be stored in plain text!
+		</para>
+		<para>
+			If you choose not to store the password, you will be prompted for it each
+			time you connect using the profile.
+		</para>
+	</section>
 		
-		<section id="profile-separate-connection">
-			<title>One connection per tab</title>
-			
-			<para>
-				If this option is enabled, then each tab in the main window
-				will open a separate connection to the database server. This is
-				useful, if the JDBC driver is not multi-threaded and does not allow
-				to execute two statements concurrently on the same connection.
-			</para>
-			
-			<para>
-				The connection for each tab will not be opened until the tab
-				is actually selected.
-			</para>
-			<para>
-				Enabling this option has impact on transaction handling as well. If 
-				only one connection for all tabs (including the <link linkend="dbexplorer">Database Explorer</link>)
-				is used, then a transaction that is started in one tab is "visible" to all other tabs
-				(as they share the same connection). Changes done in one tab via <literal>UPDATE</literal>
-				are seen in all other tabs (including the Database Explorer).
-				If a separate connection is used for each tab, then each tab will have its own 
-				transaction context. Changes done in one tab will not be visible in other
-				tabs until they are committed (depending on the isolation level of the database of 
-				course)
-			</para>
-			
-			<para>If you intend to execute several statements in parallel then it's strongly
-				recommended to use one connection for each tab. Most JDBC drivers are not multi-threaded
-				and thus cannot run more then on statement on the same connection. &wb-productname; does
-				try to detect conflicting usages of a single connection as far as possible, 
-				but it is still possible to lock the GUI when running multiple statements on 
-				the same connection
-			</para>
-		</section>
+	<section id="profile-separate-connection">
+		<title>One connection per tab</title>
+
+		<para>
+			If this option is enabled, then each tab in the main window
+			will open a separate connection to the database server. This is
+			useful, if the JDBC driver is not multi-threaded and does not allow
+			to execute two statements concurrently on the same connection.
+		</para>
+
+		<para>
+			The connection for each tab will not be opened until the tab
+			is actually selected.
+		</para>
+		<para>
+			Enabling this option has impact on transaction handling as well. If
+			only one connection for all tabs (including the <link linkend="dbexplorer">Database Explorer</link>)
+			is used, then a transaction that is started in one tab is "visible" to all other tabs
+			(as they share the same connection). Changes done in one tab via <literal>UPDATE</literal>
+			are seen in all other tabs (including the Database Explorer).
+			If a separate connection is used for each tab, then each tab will have its own
+			transaction context. Changes done in one tab will not be visible in other
+			tabs until they are committed (depending on the isolation level of the database of
+			course)
+		</para>
+
+		<para>If you intend to execute several statements in parallel then it's strongly
+			recommended to use one connection for each tab. Most JDBC drivers are not multi-threaded
+			and thus cannot run more then on statement on the same connection. &wb-productname; does
+			try to detect conflicting usages of a single connection as far as possible,
+			but it is still possible to lock the GUI when running multiple statements on
+			the same connection
+		</para>
+	</section>
 		
-		<section id="profile-ignore-drop-error">
-			<title>Ignore DROP errors</title>
-			
-			<para>
-				If this option is enabled, any error reported by the database
-				server when issuing a statement that begins with DROP, will be
-				ignored. Only a warning will be printed into the message area. This
-				is useful when executing SQL scripts to build up a schema, where a
-				<literal>DROP TABLE</literal> is executed before each <literal>CREATE TABLE</literal>. If the table does
-				not exist the error which the <literal>DROP</literal> statement will report, is not
-				considered as an error and the script execution continues.
-			</para>
-			<para>
-				When running &wb-productname; in batchmode this option can be defined
-				using a separate command line parameter. See <xref linkend="using-scripting"/> for details.
-			</para>
-		</section>
+	<section id="profile-ignore-drop-error">
+		<title>Ignore DROP errors</title>
+
+		<para>
+			If this option is enabled, any error reported by the database
+			server when issuing a statement that begins with DROP, will be
+			ignored. Only a warning will be printed into the message area. This
+			is useful when executing SQL scripts to build up a schema, where a
+			<literal>DROP TABLE</literal> is executed before each <literal>CREATE TABLE</literal>. If the table does
+			not exist the error which the <literal>DROP</literal> statement will report, is not
+			considered as an error and the script execution continues.
+		</para>
+		<para>
+			When running &wb-productname; in batchmode this option can be defined
+			using a separate command line parameter. See <xref linkend="using-scripting"/> for details.
+		</para>
+	</section>
 		
-		<section id="profile-rollback-before-disconnect">
-			<title>Rollback before disconnect</title>
+	<section id="profile-rollback-before-disconnect">
+		<title>Rollback before disconnect</title>
 
-			<para>
-				Some DBMS require that all open transactions are closed before actually
-				closing the connection to the server. If this option is enabled, &wb-productname; 
-				will send a <literal>ROLLBACK</literal> to the backend server before
-				closing the connection. This is e.g. required for Cloudscape/Derby because executing
-				a <literal>SELECT</literal> query already starts a transaction. If you see
-				errors in your log file while disconnecting, you might need to enable this
-				for your database as well.
-			</para>
-		</section>
+		<para>
+			Some DBMS require that all open transactions are closed before actually
+			closing the connection to the server. If this option is enabled, &wb-productname; 
+			will send a <literal>ROLLBACK</literal> to the backend server before
+			closing the connection. This is e.g. required for Cloudscape/Derby because executing
+			a <literal>SELECT</literal> query already starts a transaction. If you see
+			errors in your log file while disconnecting, you might need to enable this
+			for your database as well.
+		</para>
+	</section>
 
-		<section id="profile-confirm-updates">
-			<title>Confirm updates</title>
+	<section id="profile-confirm-updates">
+		<title>Confirm updates</title>
 
-			<para>
-				If this option is enabled, then &wb-productname; will ask you to confirm
-				the execution of any SQL statement that is updating or changing the database in
-				any way (e.g. UPDATE, DELETE, INSERT, DROP, CREATE, COMMIT, ...). If you save changes
-				from within the result list, you will be prompted even if <link linkend="options-confirm-update">Confirm result set updates</link>
-				is disabled.
-			</para>
-		</section>
+		<para>
+			If this option is enabled, then &wb-productname; will ask you to confirm
+			the execution of any SQL statement that is updating or changing the database in
+			any way (e.g. UPDATE, DELETE, INSERT, DROP, CREATE, COMMIT, ...). If you save changes
+			from within the result list, you will be prompted even if <link linkend="options-confirm-update">Confirm result set updates</link>
+			is disabled.
+		</para>
+	</section>
 
-		<section id="profile-empty-string-is-null">
-			<title>Treat empty strings as NULL</title>
-			<para>
-				When entering data into the result set (grid) this setting controls, how 
-				empty values (for character columns) should be treated. If this option
-				is enabled, then a NULL value will be sent to the database for an empty
-				(zero length) string. Empty values for other datatypes (dates, numbers etc)
-				are always considered NULL. If this option is not enabled, then an empty
-				string ('') will be sent to the database.
-			</para>
-		</section>
+	<section id="profile-empty-string-is-null">
+		<title>Treat empty strings as NULL</title>
+		<para>
+			When entering data into the result set (grid) this setting controls, how 
+			empty values (for character columns) should be treated. If this option
+			is enabled, then a NULL value will be sent to the database for an empty
+			(zero length) string. Empty values for other datatypes (dates, numbers etc)
+			are always considered NULL. If this option is not enabled, then an empty
+			string ('') will be sent to the database.
+		</para>
+	</section>
 
 		<section id="profile-insert-null-column">
 			<title>Include NULL columns in INSERT</title>
@@ -370,7 +369,7 @@
 				define the <literal>GO</literal> keyword for SQL Server connections, and use
 				the forward slash in Oracle connections. The delimiter can be defined as a "single line delimiter", 
 				which means that it will only be recognized if put on a single line. 
-				Please refer to <link linkend=""understand-alternate-delim">understanding the alternate delimiter</link>
+				Please refer to <link linkend="understand-alternate-delim">understanding the alternate delimiter</link>
 				for details on this property.
 			</para>
 		</section>
@@ -471,6 +470,27 @@
 		</para>
 	</section>
 
+	<section id="mysql-select-problems">
+		<title>Problems when running SELECT statements with MySQL</title>
+		<para>
+			In case you receive an error message "<literal>Operation not allowed after ResultSet closed</literal>"
+			please upgrade your JDBC driver to a more recent version. This problem was fixed with the MySQL JDBC
+			driver version 3.1. So upgrading to that or any later version will fix this problem.
+		</para>
+	</section>
+
+	<section id="mysql-zero-date-problems">
+		<title>Problems with zero dates with MySQL</title>
+		<para>
+			MySQL allows the user to store invalid dates in the database (0000-00-00). Since 
+			version 3.1 of the JDBC driver, the driver will throw an exception when trying to retrieve
+			such an invalid date. This behaviour can be controlled by adding an <link linkend="profile-extended-properties">extended property</link>
+			to the connection profile. The property should be named <literal>zeroDateTimeBehavior</literal>. You can
+			set this value to either <literal>convertToNull</literal> or to <literal>round</literal>. For details
+			see <ulink url="http://dev.mysql.com/doc/refman/4.1/en/connector-j-installing-upgrading.html">the MySQL site</ulink>
+		</para>
+	</section>
+	
   <section id="odbc">
 		<title>ODBC connections without a data source</title>
 		<para>
