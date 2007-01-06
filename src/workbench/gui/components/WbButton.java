@@ -32,9 +32,9 @@ public class WbButton
 	extends JButton
 	implements MouseListener
 {
-	private Border rolloverBorder;
+	protected Border rolloverBorder;
 	private Border emptyBorder;
-	private boolean iconButton = false;
+	protected boolean iconButton = false;
 	
 	public WbButton()
 	{
@@ -98,52 +98,39 @@ public class WbButton
 		this.setUI(new javax.swing.plaf.basic.BasicButtonUI());
 	}
 	
-	public void setRollover(boolean flag)
+	public void enableBasicRollover()
 	{
-		this.setRolloverEnabled(flag);
-		if (flag)
+		this.setRolloverEnabled(true);
+		setBasicUI();
+		UIDefaults table = UIManager.getLookAndFeelDefaults();
+		Border out = new BasicBorders.RolloverButtonBorder(
+			table.getColor("controlShadow"),
+			table.getColor("controlDkShadow"),
+			table.getColor("controlHighlight"),
+			table.getColor("controlLtHighlight"));
+
+		if (iconButton)
 		{
-			setBasicUI();
-			UIDefaults table = UIManager.getLookAndFeelDefaults();
-			Border out = new BasicBorders.RolloverButtonBorder(
-				table.getColor("controlShadow"),
-				table.getColor("controlDkShadow"),
-				table.getColor("controlHighlight"),
-				table.getColor("controlLtHighlight"));
-			
-			if (iconButton)
-			{
-				this.rolloverBorder = out;
-				this.emptyBorder = new EmptyBorder(0,0,0,0);
-			}
-			else
-			{
-				Border in = new EmptyBorder(3,3,3,3);
-				this.rolloverBorder = new CompoundBorder(out, in);
-				this.emptyBorder = new EmptyBorder(6,6,6,6);
-			}
-			this.setBorder(emptyBorder);
-			this.addMouseListener(this);
+			this.rolloverBorder = out;
+			this.emptyBorder = new EmptyBorder(0,0,0,0);
 		}
 		else
 		{
-			this.removeMouseListener(this);
+			Border in = new EmptyBorder(3,3,3,3);
+			this.rolloverBorder = new CompoundBorder(out, in);
+			this.emptyBorder = new EmptyBorder(6,6,6,6);
 		}
+		this.setBorderPainted(true);
+		this.setBorder(emptyBorder);
+		this.addMouseListener(this);
 	}
 	
-	public void setRolloverBorders(Border rollover, Border nonRollover)
+	public void enableToolbarRollover()
 	{
-		boolean currentIsRollover = this.getBorder() == this.rolloverBorder;
-		this.rolloverBorder = rollover;
-		this.emptyBorder = nonRollover;
-		if (currentIsRollover)
-		{
-			setBorder(rolloverBorder);
-		}
-		else
-		{
-			setBorder(emptyBorder);
-		}
+		this.rolloverBorder = null;
+		this.emptyBorder = null;
+		this.setBorderPainted(false);
+		this.addMouseListener(this);
 	}
 	
 	public void mouseClicked(MouseEvent e)
@@ -160,12 +147,26 @@ public class WbButton
 	
 	public void mouseEntered(MouseEvent e)
 	{
-		this.setBorder(this.rolloverBorder);
+		if (this.rolloverBorder == null)
+		{
+			this.setBorderPainted(true);
+		}
+		else
+		{
+			this.setBorder(this.rolloverBorder);
+		}
 	}
 	
 	public void mouseExited(MouseEvent e)
 	{
-		this.setBorder(this.emptyBorder);
+		if (this.rolloverBorder == null)
+		{
+			this.setBorderPainted(false);
+		}
+		else
+		{
+			this.setBorder(this.emptyBorder);
+		}
 	}
 	
 }

@@ -11,11 +11,11 @@
  */
 package workbench.gui.components;
 
-import java.awt.Dimension;
 import java.awt.Insets;
-
 import javax.swing.Action;
 import javax.swing.Icon;
+import javax.swing.UIManager;
+import javax.swing.plaf.metal.MetalLookAndFeel;
 
 /**
  *
@@ -29,31 +29,42 @@ public class WbToolbarButton
 	public WbToolbarButton()
 	{
 		super();
+		if (UIManager.getLookAndFeel() instanceof MetalLookAndFeel)
+		{
+			enableToolbarRollover();
+		}
 	}
 
 	public WbToolbarButton(String aText)
 	{
 		super(aText);
-		this.setMargin(MARGIN);
+		initMargin();
 	}
+	
 	public WbToolbarButton(Action a)
 	{
 		super(a);
 		this.setText(null);
-		this.setMargin(MARGIN);
+		iconButton = true;
+		initMargin();
 	}
 
 	public WbToolbarButton(Icon icon)
 	{
-		this.setIcon(icon);
+		super(icon);
 		this.setText(null);
 	}
 	
 	public void setAction(Action a)
 	{
 		super.setAction(a);
-		this.setMargin(MARGIN);
 		this.setText(null);
+		initMargin();
 	}
 	
+	private void initMargin()
+	{
+		this.setMargin(MARGIN);
+	}
+
 }

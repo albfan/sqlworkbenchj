@@ -14,6 +14,7 @@ package workbench.sql.formatter;
 import junit.framework.*;
 import workbench.TestUtil;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -175,7 +176,60 @@ public class SqlFormatterTest
 			fail(e.getMessage());
 		}
 	}
-	
+
+	public void testDecode()
+	{
+		try
+		{
+			String sql = "SELECT DECODE((MOD(INPUT-4,12)+1),1,'RAT',2,'OX',3,'TIGER',4,'RABBIT',5,'DRAGON',6,'SNAKE',7,'HORSE',8,'SHEEP/GOAT',9,'MONKEY',10,'ROOSTER',11,'DOG',12,'PIG')  YR FROM DUAL";
+
+			String expected = "SELECT DECODE((MOD(INPUT-4,12)+1),\n" + 
+             "             1,'RAT',\n" + 
+             "             2,'OX',\n" + 
+             "             3,'TIGER',\n" + 
+             "             4,'RABBIT',\n" + 
+             "             5,'DRAGON',\n" + 
+             "             6,'SNAKE',\n" + 
+             "             7,'HORSE',\n" + 
+             "             8,'SHEEP/GOAT',\n" + 
+             "             9,'MONKEY',\n" + 
+             "             10,'ROOSTER',\n" + 
+             "             11,'DOG',\n" + 
+             "             12,'PIG'\n" + 
+             "       )  YR\n" + 
+             "FROM DUAL";			
+			
+			SqlFormatter f = new SqlFormatter(sql,100);
+			String formatted = f.getFormattedSql();
+			
+//			System.out.println(StringUtil.escapeUnicode(expected));
+//			System.out.println(StringUtil.escapeUnicode(formatted));
+//			System.out.println(formatted);
+			assertEquals("Complex DECODE not formatted correctly", expected, formatted);
+			
+			
+			sql = "select decode(col1, 'a', 1, 'b', 2, 'c', 3, 99) from dual";
+			f = new SqlFormatter(sql,100);
+			formatted = f.getFormattedSql();
+			expected = "SELECT decode(col1,\n" +
+								"              'a', 1,\n" + 
+								"              'b', 2,\n" + 
+								"              'c', 3,\n" + 
+								"              99\n" + 
+								"       ) \n" +
+								"FROM dual";
+				
+//			System.out.println(StringUtil.escapeUnicode(expected));
+//			System.out.println(StringUtil.escapeUnicode(formatted));
+			assertEquals("DECODE not formatted correctly", expected, formatted);
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	public void testQuotedIdentifier()
 		throws Exception
 	{

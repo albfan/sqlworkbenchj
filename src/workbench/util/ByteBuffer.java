@@ -11,12 +11,10 @@
  */
 package workbench.util;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.Writer;
-
 /**
- * A dynamic byte[] array
+ * A dynamic byte[] array which gives direct access to the underlying 
+ * byte[] array which is more efficient than ByteArrayOutputStream which 
+ * copies the array (thus doubling memory usage) when calling toByteArray()
  */
 public class ByteBuffer
 {

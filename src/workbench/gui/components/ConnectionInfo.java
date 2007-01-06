@@ -12,25 +12,15 @@
 package workbench.gui.components;
 
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
 import java.awt.GridLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import javax.swing.JComponent;
 import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import workbench.db.DbMetadata;
-
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 
-
 /**
- *
  * @author  support@sql-workbench.net
  */
 public class ConnectionInfo
@@ -40,21 +30,11 @@ public class ConnectionInfo
 	private JTextField display;
 	private WbConnection sourceConnection;
 
-	/** Creates a new instance of ConnectionInfo */
 	public ConnectionInfo(Color aBackground)
 	{
 		super();
-		EmptyBorder border = new EmptyBorder(0, 2, 0, 2);
-		this.setBorder(border);
 
 		this.display = new JTextField();
-		FontMetrics fm = this.display.getFontMetrics(this.display.getFont());
-		int height = fm.getHeight() + 1;
-		Dimension d = new Dimension(32768, height);
-		this.display.setPreferredSize(d);
-		this.display.setMaximumSize(d);
-		this.setPreferredSize(d);
-		this.setMaximumSize(d);
 
 		this.setLayout(new GridLayout(1,1));
 		this.add(this.display);

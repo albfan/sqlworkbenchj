@@ -11,30 +11,42 @@
  */
 package workbench.gui.components;
 
+import java.awt.Container;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JToolBar;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-
+import workbench.WbManager;
+import workbench.WbManager;
 import workbench.gui.actions.WbAction;
 
 /**
  *
  * @author  support@sql-workbench.net
  */
-public class WbToolbar extends JToolBar
+public class WbToolbar 
+	extends JToolBar
 {
 
-	/** Creates a new instance of WbToolbar */
 	public WbToolbar()
 	{
 		this.setFloatable(false);
 		this.setRollover(true);
 	}
 
+	public void addNotify()
+	{
+		super.addNotify();
+		Container p = getParent();
+		if (p != null)
+		{
+			this.setBackground(p.getBackground());
+		}
+	}
 	public JButton add(Action a)
 	{
 		JButton button;
@@ -81,5 +93,6 @@ public class WbToolbar extends JToolBar
 		Border b = new CompoundBorder(new EmptyBorder(1,0,1,0), new EtchedBorder());
 		this.setBorder(b);
 		this.setBorderPainted(true);
+		this.setRollover(true);
 	}
 }

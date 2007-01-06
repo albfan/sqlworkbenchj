@@ -87,6 +87,8 @@ public class DwPanel
 	implements TableModelListener, ListSelectionListener, ChangeListener,
 						 DbData, DbUpdater, Interruptable, JobErrorHandler
 {
+	public static final String PROP_UPDATE_TABLE = "updateTable";
+	
 	protected WbTable dataTable;
 	
 	protected DwStatusBar statusBar;
@@ -165,8 +167,7 @@ public class DwPanel
 
 	public void initTableNavigation(MainWindow container)
 	{
-		this.referenceNavigator = new ReferenceTableNavigator(this.dataTable);
-		this.referenceNavigator.setTargetContainer(container);
+		this.referenceNavigator = new ReferenceTableNavigator(this, container);
 	}
 	
 	public SelectKeyColumnsAction getSelectKeysAction()
@@ -176,8 +177,11 @@ public class DwPanel
 
 	public void checkAndSelectKeyColumns()
 	{
-		dataTable.detectDefinedPkColumns();
-		dataTable.selectKeyColumns();
+		if (checkUpdateTable())
+		{	
+			//dataTable.detectDefinedPkColumns();
+			dataTable.selectKeyColumns();
+		}
 	}
 	
 	public void setManageUpdateAction(boolean aFlag)
@@ -342,8 +346,8 @@ public class DwPanel
 		}
 		catch (Exception e)
 		{
-			String msg = ResourceMgr.getString("ErrUpdatingDb");
-			WbSwingUtilities.showErrorMessage(this, msg + "\n" + e.getMessage());
+			// Exception have already been displayed to the user --> Log only
+			LogMgr.logError("DwPanel.doSave()", "Error saving data", e);
 		}
 	}
 	
@@ -523,7 +527,7 @@ public class DwPanel
 			DataStore ds = this.getTable().getDataStore();
 			if (ds != null) table = ds.getUpdateTable();
 		}
-		if (table != null) firePropertyChange("updateTable", null, table.getTableExpression());
+		if (table != null) firePropertyChange(PROP_UPDATE_TABLE, null, table.getTableExpression());
 	}
 	
 	public void setReadOnly(boolean aFlag)
@@ -557,10 +561,21 @@ public class DwPanel
 			if (this.dbConnection == null) return false;
 			if (this.sql == null) return false;
 			result = ds.checkUpdateTable(this.sql, this.dbConnection);
+			if (!result)
+			{
+				TableIdentifier tbl = selectUpdateTable();
+				if (tbl != null)
+				{
+					this.setUpdateTable(tbl);
+					result = true;
+				}
+			}
+			
 			if (result)
 			{
 				this.fireUpdateTableChanged();
 			}
+			
 			this.selectKeys.setEnabled(result);
 		}
 		finally
@@ -568,6 +583,27 @@ public class DwPanel
 			this.clearStatusMessage();
 		}
 		return result;
+	}
+	
+	protected TableIdentifier selectUpdateTable()
+	{
+		String csql = this.getCurrentSql();
+		List tables = SqlUtil.getTables(csql, false);
+		TableIdentifier table = null;
+
+		if (tables.size() > 1)
+		{
+			String s = (String)JOptionPane.showInputDialog(SwingUtilities.getWindowAncestor(this),
+				null, ResourceMgr.getString("MsgEnterUpdateTable"),
+				JOptionPane.QUESTION_MESSAGE,
+				null,tables.toArray(),null);
+			
+			if (s != null)
+			{
+				table = new TableIdentifier(s);
+			}
+		}
+		return table;
 	}
 	
 	public boolean hasKeyColumns()
@@ -1023,7 +1059,10 @@ public class DwPanel
 		return errorMessageModel;
 	}
 	
-	public WbTable getTable() { return this.dataTable; }
+	public WbTable getTable() 
+	{ 
+		return this.dataTable; 
+	}
 	
 	/**
 	 *	Stops the editing mode of the displayed WbTable:
@@ -1076,41 +1115,21 @@ public class DwPanel
 		// determined, then ask the user
 		Window w = SwingUtilities.getWindowAncestor(this);
 		
-		if (!this.isUpdateable())
+		if (!this.isUpdateable() && !this.checkUpdateTable()) 
 		{
-			if (!this.checkUpdateTable())
-			{
-				String csql = this.getCurrentSql();
-				List tables = SqlUtil.getTables(csql, false);
-				String table = null;
-				
-				if (tables.size() > 1)
-				{
-					table = (String)JOptionPane.showInputDialog(SwingUtilities.getWindowAncestor(this),
-						null, ResourceMgr.getString("MsgEnterUpdateTable"),
-						JOptionPane.QUESTION_MESSAGE,
-						null,tables.toArray(),null);
-				}
-				else 
-				{
-					// checkUpdateTable() will have returned true if exactly one table
-					// was found, so if we wind up here, there is no way to update the 
-					// underlying DataStore
-					WbSwingUtilities.showErrorMessageKey(w, "MsgNoTables");
-					this.setUpdateTable((TableIdentifier)null);
-					this.updateAction.setEnabled(false);
-					this.insertRow.setEnabled(false);
-					this.deleteRow.setEnabled(false);
-					this.duplicateRow.setEnabled(false);
-					this.selectKeys.setEnabled(false);
-					return false;
-				}
-				
-				if (table != null)
-				{
-					this.setUpdateTable(table);
-				}
-			}
+				// checkUpdateTable() will have taken every attempt to find an update table
+				// including asking the user to select a table from a multi-table result set
+			
+				// So if we wind up here, there is no way to update the 
+				// underlying DataStore
+				WbSwingUtilities.showErrorMessageKey(w, "MsgNoTables");
+				this.setUpdateTable((TableIdentifier)null);
+				this.updateAction.setEnabled(false);
+				this.insertRow.setEnabled(false);
+				this.deleteRow.setEnabled(false);
+				this.duplicateRow.setEnabled(false);
+				this.selectKeys.setEnabled(false);
+				return false;
 		}
 		
 		// Verify if the data is really updateable!

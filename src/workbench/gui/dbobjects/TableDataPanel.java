@@ -157,7 +157,7 @@ public class TableDataPanel
 
 		topPanel.add(Box.createHorizontalStrut(10));
 		rowCountButton = new WbButton(ResourceMgr.getString("LblTableDataRowCount"));
-		rowCountButton.setRollover(true);
+		rowCountButton.enableBasicRollover();
 		rowCountButton.addActionListener(this);
 		rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountButton"));
 		rowCountButton.setFocusable(false);

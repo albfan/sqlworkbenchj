@@ -326,7 +326,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 			LogMgr.logError("TableDeleterUI.doDelete()", "Error on commit/rollback", e);
 			String msg = null;
 
-			if (doCommit) ResourceMgr.getString("ErrCommitDeleteTableData");
+			if (doCommit) ResourceMgr.getString("ErrCommit");
 			else msg = ResourceMgr.getString("ErrRollbackTableData");
 			msg = msg.replaceAll("%error%", e.getMessage());
 

@@ -51,6 +51,7 @@ public class DropDownButton
 	{
 		setFocusable(false);
 		addActionListener(this);
+		enableToolbarRollover();
 	}
 
 	public void setDropDownMenu(JPopupMenu menu)

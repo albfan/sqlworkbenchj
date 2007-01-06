@@ -30,7 +30,7 @@ public class FileUtil
 	
 	private static int getBuffSize()
 	{
-		return Settings.getInstance().getIntProperty("workbench.lob.buffsize",32*1024);
+		return Settings.getInstance().getIntProperty("workbench.lob.buffsize",16*1024);
 	}
 	
 	/*

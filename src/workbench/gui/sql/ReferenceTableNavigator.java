@@ -13,6 +13,9 @@ package workbench.gui.sql;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeListener;
 import java.util.EventObject;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,7 +44,6 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.EditorTabSelectMenu;
-import workbench.interfaces.ResultReceiver;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.ColumnData;
@@ -54,9 +56,9 @@ import workbench.util.WbThread;
  * @author support@sql-workbench.net
  */
 public class ReferenceTableNavigator
-	implements ListSelectionListener, ActionListener, PopupMenuListener, MenuListener
+	implements ListSelectionListener, ActionListener, PopupMenuListener, MenuListener, 
+					   PropertyChangeListener
 {
-	private ResultReceiver receiver;
 	private MainWindow container;
 	private WbTable source;
 	private WbMenu selectParentTables;
@@ -67,44 +69,10 @@ public class ReferenceTableNavigator
 	private ReferenceTableNavigation parentNavigation;
 	private ReferenceTableNavigation childNavigation;
 	
-	public ReferenceTableNavigator(WbTable data)
+	public ReferenceTableNavigator(DwPanel data, MainWindow win)
 	{
-		this.setSourceTable(data);
-	}
-	
-//	private void initializeListeners(WbMenu menu)
-//	{
-//		MenuListener[] menuListeners = menu.getMenuListeners();
-//		for (MenuListener l : menuListeners)
-//		{
-//			menu.removeMenuListener(l);
-//		}
-//		
-//		JPopupMenu popup = menu.getPopupMenu(); 
-//		PopupMenuListener[] listeners = popup.getPopupMenuListeners();
-//		for (PopupMenuListener l : listeners)
-//		{
-//			popup.removePopupMenuListener(l);
-//		}
-//	}
-//
-//	public static WbMenu createChildTablesMenu()
-//	{
-//		WbMenu childTables = new WbMenu(ResourceMgr.getString("MnuTxtReferencingRows"));
-//		childTables.setEnabled(false);
-//		return childTables;
-//	}
-//	
-//	public static WbMenu createParentTablesMenu()
-//	{
-//		WbMenu selectParents = new WbMenu(ResourceMgr.getString("MnuTxtReferencedRows"));
-//		selectParents.setEnabled(false);
-//		return selectParents;
-//	}
-	
-	public void setTargetContainer(MainWindow win)
-	{
-		this.receiver = null;
+		this.setSourceTable(data.getTable());
+		data.addPropertyChangeListener(DwPanel.PROP_UPDATE_TABLE, this);
 		this.container = win;
 		rebuildMenu();
 	}
@@ -144,9 +112,16 @@ public class ReferenceTableNavigator
 	private TableIdentifier getUpdateTable()
 	{
 		if (this.baseTable != null) return this.baseTable;
-		if (this.source.getDataStore().checkUpdateTable())
+		TableIdentifier tbl = this.source.getDataStore().getUpdateTable();
+		if (tbl == null)
 		{
-			TableIdentifier tbl = this.source.getDataStore().getUpdateTable();
+			if (this.source.getDataStore().checkUpdateTable())
+			{
+				tbl = this.source.getDataStore().getUpdateTable();
+			}
+		}
+		if (tbl != null)
+		{
 			this.baseTable = tbl.createCopy();
 			if (this.baseTable.getSchema() == null)
 			{
@@ -488,4 +463,13 @@ public class ReferenceTableNavigator
 		}
 	}	
 	
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (evt.getPropertyName().equals(DwPanel.PROP_UPDATE_TABLE))
+		{
+			this.baseTable = null;
+			this.rebuildMenu();
+		}
+	}
+
 }

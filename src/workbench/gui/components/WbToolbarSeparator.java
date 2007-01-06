@@ -23,13 +23,12 @@ public class WbToolbarSeparator
 	extends JPanel
 {
 
-	/** Creates a new instance of ToolbarSeperator */
 	public WbToolbarSeparator()
 	{
-		Dimension d = new Dimension(9, 18);
+		Dimension d = new Dimension(7, 16);
 		this.setPreferredSize(d);
 		this.setMinimumSize(d);
-		this.setMaximumSize(new Dimension(9, 24));
+		this.setMaximumSize(new Dimension(7, 24));
 		this.setBorder(new DividerBorder(DividerBorder.VERTICAL_MIDDLE));
 	}
 
