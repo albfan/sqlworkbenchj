@@ -585,6 +585,8 @@ public class SqlFormatter
 		SQLToken t = this.lexer.getNextToken(true,true);
 		String text = null;
 		int commaCount = 0;
+		int bracketCount = 0;
+		
 		boolean inQuotes = false;
 		while (t != null)
 		{
@@ -593,9 +595,18 @@ public class SqlFormatter
 			{
 				inQuotes = !inQuotes;
 			}
-			if (",".equals(text) && !inQuotes) commaCount ++;
+			else if (")".equals(text))
+			{
+				bracketCount --;
+			}
+			else if ("(".equals(text))
+			{
+				bracketCount ++;
+			}
 			
-			if (",".equals(text) && !inQuotes)
+			if (",".equals(text) && !inQuotes && bracketCount == 1) commaCount ++;
+			
+			if (",".equals(text) && !inQuotes && bracketCount == 1)
 			{
 				this.appendText(text);
 				if (commaCount % 2 == 1)
@@ -604,7 +615,7 @@ public class SqlFormatter
 					this.indent(b);
 				}
 			}
-			else if (")".equalsIgnoreCase(text) && !inQuotes)
+			else if (")".equalsIgnoreCase(text) && !inQuotes && bracketCount == 0)
 			{
 				this.appendNewline();
 				this.indent(current);

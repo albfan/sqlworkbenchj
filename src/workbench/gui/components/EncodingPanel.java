@@ -21,7 +21,6 @@ import javax.swing.JPanel;
 import workbench.interfaces.EncodingSelector;
 
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
 
 /**

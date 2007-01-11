@@ -64,7 +64,7 @@ public class WbExport
 		cmdLine.addArgument("dateformat");
 		cmdLine.addArgument("timestampformat");
 		cmdLine.addArgument("decimal");
-		cmdLine.addArgument("cleancr");
+//		cmdLine.addArgument("cleancr");
 		cmdLine.addArgument("charfunc");
 		cmdLine.addArgument("concat");
 		cmdLine.addArgument("concatfunc");
@@ -232,7 +232,7 @@ public class WbExport
 			if (format != null) exporter.setDecimalSymbol(format);
 
 			exporter.setExportHeaders(cmdLine.getBoolean("header", getTextHeaderDefault()));
-			exporter.setCleanupCarriageReturns(cmdLine.getBoolean("cleancr"));
+
 			String escape = cmdLine.getValue("escapetext");
 			if (escape != null)
 			{

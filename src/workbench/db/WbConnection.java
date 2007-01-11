@@ -471,7 +471,15 @@ public class WbConnection
 	public Statement createStatementForQuery()
 		throws SQLException
 	{
-		Statement stmt = this.sqlConnection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		Statement stmt = null;
+		if (this.metaData.allowsExtendedCreateStatement())
+		{
+			stmt = this.sqlConnection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		}
+		else
+		{
+			stmt = this.sqlConnection.createStatement();
+		}
 		try
 		{
 			if (this.getProfile() != null)

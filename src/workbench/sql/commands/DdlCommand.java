@@ -94,7 +94,7 @@ public class DdlCommand extends SqlCommand
 			}
 			else
 			{
-				this.currentStatement.execute(aSql);
+				this.currentStatement.executeUpdate(aSql);
 				boolean schemaChanged = false;
 
 				if ("ALTER".equals(verb) && aConnection.getMetadata().isOracle())

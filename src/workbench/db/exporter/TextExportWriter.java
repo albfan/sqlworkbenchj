@@ -51,7 +51,6 @@ public class TextExportWriter
 		conv.setDelimiter(exporter.getTextDelimiter());
 		conv.setWriteHeader(exporter.getExportHeaders());
 		conv.setQuoteCharacter(exporter.getTextQuoteChar());
-		conv.setCleanNonPrintable(exporter.getCleanupCarriageReturns());
 		conv.setQuoteAlways(exporter.getQuoteAlways());
 		conv.setEscapeRange(exporter.getEscapeRange());
 		conv.setLineEnding(exporter.getLineEnding());

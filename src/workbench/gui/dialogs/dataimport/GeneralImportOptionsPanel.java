@@ -11,7 +11,6 @@
  */
 package workbench.gui.dialogs.dataimport;
 
-import java.awt.event.ActionListener;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 

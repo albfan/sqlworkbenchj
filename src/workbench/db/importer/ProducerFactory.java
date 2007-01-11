@@ -175,6 +175,7 @@ public class ProducerFactory
 	private void createTextFileParser()
 	{
 		TextFileParser parser = new TextFileParser(inputFile);
+		parser.setEncoding(this.generalOptions.getEncoding());
 		parser.setContainsHeader(this.textOptions.getContainsHeader());
 		parser.setDateFormat(this.generalOptions.getDateFormat());
 		parser.setTimeStampFormat(this.generalOptions.getTimestampFormat());
@@ -200,6 +201,7 @@ public class ProducerFactory
 	private void createXmlFileParser()
 	{
 		XmlDataFileParser parser = new XmlDataFileParser(inputFile);
+		parser.setEncoding(this.generalOptions.getEncoding());
 		parser.setUseVerboseFormat(this.xmlOptions.getUseVerboseXml());
 		this.inputColumns = null;
 		this.producer = parser;

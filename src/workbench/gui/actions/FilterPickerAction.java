@@ -11,7 +11,6 @@
  */
 package workbench.gui.actions;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -21,13 +20,10 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DropDownButton;
 import workbench.gui.components.WbMenuItem;
@@ -112,7 +108,7 @@ public class FilterPickerAction
 			b.setAction(this);
 			b.setText(null);
 			b.setMnemonic(0);
-			Dimension d = new Dimension(12,22);
+			Dimension d = new Dimension(12,24);
 			b.setMaximumSize(d);
 			b.setPreferredSize(d);
 			b.setMinimumSize(d);

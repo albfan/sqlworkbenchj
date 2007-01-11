@@ -214,16 +214,20 @@ public class WbSwingUtilities
 
 	public static void showErrorMessageKey(Component aCaller, String key)
 	{
-		JOptionPane.showMessageDialog(aCaller, ResourceMgr.getString(key), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);
+		showErrorMessage(aCaller, ResourceMgr.TXT_PRODUCT_NAME, ResourceMgr.getString(key));
 	}
 	
 	public static void showErrorMessage(Component aCaller, String aMessage)
 	{
-		JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);
+		showErrorMessage(aCaller, ResourceMgr.TXT_PRODUCT_NAME, aMessage);
 	}
 	
 	public static void showErrorMessage(Component aCaller, String title, String aMessage)
 	{
+		if (!(aCaller instanceof Window))
+		{
+			aCaller = SwingUtilities.getWindowAncestor(aCaller);
+		}		
 		JOptionPane.showMessageDialog(aCaller, aMessage, title, JOptionPane.ERROR_MESSAGE);
 	}
 

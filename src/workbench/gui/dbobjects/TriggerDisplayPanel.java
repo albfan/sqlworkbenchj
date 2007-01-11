@@ -97,6 +97,7 @@ public class TriggerDisplayPanel
 	{
 		try
 		{
+			if (table == null) return;
 			DbMetadata metaData = this.dbConnection.getMetadata();
 			DataStore trg = metaData.getTableTriggers(table);
 			DataStoreTableModel rs = new DataStoreTableModel(trg);

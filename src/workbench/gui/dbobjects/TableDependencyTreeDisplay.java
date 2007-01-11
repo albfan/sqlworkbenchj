@@ -61,11 +61,13 @@ public class TableDependencyTreeDisplay
 	
 	public void readReferencedTables(TableIdentifier table)
 	{
+		if (table == null) return;
 		readTree(table, true);
 	}
 	
 	public void readReferencingTables(TableIdentifier table)
 	{
+		if (table == null) return;
 		readTree(table, false);
 	}
 	

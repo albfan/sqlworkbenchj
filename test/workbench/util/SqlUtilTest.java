@@ -12,28 +12,7 @@
 package workbench.util;
 
 import junit.framework.*;
-import java.lang.reflect.Field;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import workbench.db.ColumnIdentifier;
-import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLToken;
-import workbench.sql.formatter.SqlFormatter;
-import workbench.sql.formatter.Token;
 
 /**
  *
@@ -253,7 +232,7 @@ public class SqlUtilTest
 		
 		sql = "/* \n" + 
 					 "* $URL: some_script.sql $ \n" + 
-					 "* $Revision: 1.12 $ \n" + 
+					 "* $Revision: 1.13 $ \n" + 
 					 "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
 					 "*/ \n" + 
 					 "-- A quis Lorem consequat Aenean tellus risus convallis velit Maecenas arcu. \n" + 

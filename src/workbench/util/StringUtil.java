@@ -334,30 +334,30 @@ public class StringUtil
 		return result;
 	}
 
-	public static String cleanNonPrintable(String aValue)
-	{
-		return cleanNonPrintable(aValue, ' ');
-	}
-	
-	public static String cleanNonPrintable(String aValue, char replacement)
-	{
-		if (aValue == null) return null;
-		int len = aValue.length();
-		StringBuilder result = new StringBuilder(len);
-		for (int i=0; i < len; i++)
-		{
-			char c = aValue.charAt(i);
-			if (c > 32)
-			{
-				result.append(c);
-			}
-			else
-			{
-				result.append(replacement);
-			}
-		}
-		return result.toString();
-	}
+//	public static String cleanNonPrintable(String aValue)
+//	{
+//		return cleanNonPrintable(aValue, ' ');
+//	}
+//	
+//	public static String cleanNonPrintable(String aValue, char replacement)
+//	{
+//		if (aValue == null) return null;
+//		int len = aValue.length();
+//		StringBuilder result = new StringBuilder(len);
+//		for (int i=0; i < len; i++)
+//		{
+//			char c = aValue.charAt(i);
+//			if (c > 32)
+//			{
+//				result.append(c);
+//			}
+//			else
+//			{
+//				result.append(replacement);
+//			}
+//		}
+//		return result.toString();
+//	}
 
 	public static double getDoubleValue(String aValue, double aDefault)
 	{
@@ -1071,13 +1071,15 @@ public class StringUtil
 	 * Converts unicodes to encoded &#92;uxxxx
 	 * and writes out any of the characters in specialSaveChars
 	 * with a preceding slash.
-	 * This has been "borrowed" from the Properties class, because the code
+	 * This has partially been "borrowed" from the Properties class, because the code
 	 * there is not usable from the outside.
 	 * Backslash, CR, LF, Tab and FormFeed (\f) will always be replaced.
 	 */
 	public static String escapeUnicode(String value, String specialSaveChars, CharacterRange range)
 	{
 		if (value == null) return null;
+		if (range == null || range == CharacterRange.RANGE_NONE) return value;
+		
 		int len = value.length();
 		StringBuilder outBuffer = new StringBuilder(len*2);
 

@@ -12,15 +12,11 @@
 package workbench.db.exporter;
 
 import java.io.File;
-import java.io.OutputStream;
-import workbench.gui.components.BlobHandler;
-import workbench.log.LogMgr;
 import workbench.storage.RowData;
 import workbench.util.CharacterRange;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
-import workbench.util.WbFile;
 
 /**
  *
@@ -32,10 +28,10 @@ public class TextRowDataConverter
 	private String delimiter = "\t";
 	private String quoteCharacter = null;
 	private boolean writeHeader = true;
-	private boolean cleanCR = false;
 	private boolean quoteAlways = false;
 	private CharacterRange escapeRange = null;
 	private String additionalEncodeCharacters = null;
+	private String delimiterAndQuote = null;
 	private String lineEnding = StringUtil.LINE_TERMINATOR;
 	private boolean writeBlobFiles = true;
 	private boolean writeClobFiles = false;
@@ -55,11 +51,6 @@ public class TextRowDataConverter
 		writeBlobFiles = flag;
 	}
 	
-	public void setCleanNonPrintable(boolean flag)
-	{
-		this.cleanCR = flag;
-	}
-
 	public StrBuffer getEnd(long totalRows)
 	{
 		return null;
@@ -79,7 +70,7 @@ public class TextRowDataConverter
 	{
 		int count = this.metaData.getColumnCount();
 		StrBuffer result = new StrBuffer(count * 30);
-		boolean shouldQuote = this.quoteCharacter != null;
+		boolean canQuote = this.quoteCharacter != null;
 		for (int c=0; c < count; c ++)
 		{
 			if (!this.includeColumnInExport(c)) continue;
@@ -87,7 +78,8 @@ public class TextRowDataConverter
 			int colType = this.metaData.getColumnType(c);
 			String value = null;
 			
-			boolean needQuote = false;
+			boolean addQuote = quoteAlways;
+			
 			if (writeBlobFiles && SqlUtil.isBlobType(colType))
 			{
 				File blobFile = createBlobFile(row, c, rowIndex);
@@ -102,11 +94,6 @@ public class TextRowDataConverter
 					throw new RuntimeException("Error writing BLOB file", e);
 				}
 				
-				if (this.quoteAlways) 
-				{
-					result.append(this.quoteCharacter);
-					needQuote = true;
-				}
 			}
 			else if (writeClobFiles && SqlUtil.isClobType(colType))
 			{
@@ -135,22 +122,27 @@ public class TextRowDataConverter
 
 			if (SqlUtil.isCharacterType(colType))
 			{
-				if (this.cleanCR)
+				boolean containsDelimiter = value.indexOf(this.delimiter) > -1;
+				addQuote = (this.quoteAlways || (canQuote && containsDelimiter));
+				
+				if (this.escapeRange != null && this.escapeRange != CharacterRange.RANGE_NONE)
 				{
-					value = StringUtil.cleanNonPrintable(value);
+					if (addQuote)
+					{
+						value = StringUtil.escapeUnicode(value, this.quoteCharacter, this.escapeRange);
+					}
+					else
+					{
+						value = StringUtil.escapeUnicode(value, this.delimiterAndQuote, this.escapeRange);
+					}
 				}
-				if (this.escapeRange != null)
-				{
-					value = StringUtil.escapeUnicode(value, this.additionalEncodeCharacters, this.escapeRange);
-				}
-
-				needQuote = (this.quoteAlways || (shouldQuote && value.indexOf(this.delimiter) > -1));
-				if (needQuote) result.append(this.quoteCharacter);
 			}
 
+			if (addQuote) result.append(this.quoteCharacter);
+			
 			result.append(value);
 
-			if (needQuote) result.append(this.quoteCharacter);
+			if (addQuote) result.append(this.quoteCharacter);
 
 			if (c < count - 1) result.append(this.delimiter);
 		}
@@ -215,19 +207,15 @@ public class TextRowDataConverter
 		if (this.escapeRange == null) return;
 		if (this.quoteCharacter == null && this.delimiter == null) return;
 
+		this.delimiterAndQuote = this.delimiter;
 		// If values should always be quoted, then we need to
 		// escape the quote character in values
-		if (this.quoteAlways)
+		if (this.quoteCharacter != null)
 		{
-			this.additionalEncodeCharacters = (this.quoteCharacter != null ? this.quoteCharacter : "");
+			this.additionalEncodeCharacters = this.quoteCharacter;
+			this.delimiterAndQuote += this.quoteCharacter;
 		}
-		else
-		{
-
-			this.additionalEncodeCharacters =
-					(this.quoteCharacter != null ? this.quoteCharacter : "") +
-					(this.delimiter != null ? this.delimiter : "" );
-		}
+		
 	}
 
 	public String getQuoteCharacter()

@@ -549,9 +549,6 @@ public class DataExporter
 		return this.realOutputfile; 
 	}
 
-	public void setCleanupCarriageReturns(boolean aFlag) { this.cleancr = aFlag; }
-	public boolean getCleanupCarriageReturns() { return this.cleancr; }
-
 	public void setConcatString(String aConcatString)
 	{
 		if (aConcatString == null) return;

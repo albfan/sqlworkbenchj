@@ -47,27 +47,32 @@ public class OracleSynonymReader
 		throws SQLException
 	{
 		StringBuilder sql = new StringBuilder(200);
-		sql.append("SELECT synonym_name, table_owner, table_name, db_link FROM all_synonyms ");
-		sql.append(" WHERE synonym_name = ? AND owner = ? ");
+		sql.append("SELECT s.synonym_name, s.table_owner, s.table_name, s.db_link, o.object_type, s.owner ");
+		sql.append("FROM all_synonyms s, all_objects o  ");
+		sql.append("where s.table_name = o.object_name ");
+		sql.append("and ((s.synonym_name = ? AND s.owner = ?) ");
+		sql.append(" or (s.synonym_name = ? AND s.owner = 'PUBLIC')) ");
+		sql.append("ORDER BY decode(s.owner, 'PUBLIC',9,1)");
 
 		PreparedStatement stmt = con.prepareStatement(sql.toString());
 		stmt.setString(1, aSynonym);
 		stmt.setString(2, anOwner == null ? "PUBLIC" : anOwner);
+		stmt.setString(3, aSynonym);
 
 		ResultSet rs = stmt.executeQuery();
-		String table = null;
-		String owner = null;
-		String dblink = null;
+			
 		TableIdentifier result = null;
 		try
 		{
 			if (rs.next())
 			{
-				owner = rs.getString(2);
-				table = rs.getString(3);
-				dblink = rs.getString(4);
+				String owner = rs.getString(2);
+				String table = rs.getString(3);
+				String dblink = rs.getString(4);
+				String type = rs.getString(5);
 				if (dblink != null) table = table + "@" + dblink;
 				result = new TableIdentifier(null, owner, table);
+				result.setType(type);
 			}
 		}
 		finally

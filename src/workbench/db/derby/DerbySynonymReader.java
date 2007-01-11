@@ -17,6 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import workbench.db.DbMetadata;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.resource.Settings;
@@ -28,9 +29,10 @@ import workbench.util.SqlUtil;
 public class DerbySynonymReader
 	implements SynonymReader
 {
-	
-	public DerbySynonymReader()
+	private DbMetadata meta;
+	public DerbySynonymReader(DbMetadata dbMeta)
 	{
+		this.meta = dbMeta;
 	}
 
 	/**
@@ -98,6 +100,9 @@ public class DerbySynonymReader
 		{
 			SqlUtil.closeAll(rs,stmt);
 		}
+		
+		String type = this.meta.getObjectType(result);
+		result.setType(type);
 
 		return result;
 	}

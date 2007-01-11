@@ -1031,7 +1031,7 @@ public class TableListPanel
 
 		this.invalidateData();
 
-		if (isTable(this.selectedObjectType))
+		if (isTable(this.selectedTable))
 		{
 			addTablePanels();
 		}
@@ -1074,9 +1074,24 @@ public class TableListPanel
 		return (aType.indexOf("table") > -1 || aType.indexOf("view") > -1);
 	}
 
-	private boolean isTable(String type)
+	private boolean checkTableType(String type)
 	{
-		return ((type.indexOf("table") > -1) || type.equalsIgnoreCase(DbMetadata.MVIEW_NAME));
+		return (type.indexOf("table") > -1 || type.indexOf("TABLE") > -1 || type.equalsIgnoreCase(DbMetadata.MVIEW_NAME));
+	}
+	
+	private boolean isTable(TableIdentifier table)
+	{
+		if (table == null) return false;
+		DbMetadata meta = this.dbConnection.getMetadata();
+		String type = table.getType();
+		if (checkTableType(type)) return true;
+		if (meta.supportsSynonyms() && meta.isSynonymType(type))
+		{
+			TableIdentifier realTable = getRealTable(table);
+			if (realTable == null) return false;
+			return checkTableType(realTable.getType());
+		}
+		return false;
 	}
 	
 	private boolean isTableType(String type)
@@ -1397,13 +1412,23 @@ public class TableListPanel
 		}
 	}
 
-	private void retrieveTriggers()
+	protected TableIdentifier getRealTable()
+	{
+		return getRealTable(this.selectedTable);
+	}
+	
+	protected TableIdentifier getRealTable(TableIdentifier tbl)
+	{
+		return this.dbConnection.getMetadata().resolveSynonym(tbl);
+	}
+	
+	protected void retrieveTriggers()
 		throws SQLException
 	{
 		try
 		{
 			WbSwingUtilities.showDefaultCursor(this);
-			triggers.readTriggers(this.selectedTable);
+			triggers.readTriggers(getRealTable());
 			this.shouldRetrieveTriggers = false;
 		}
 		catch (Throwable th)
@@ -1425,7 +1450,7 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStore ds = meta.getTableIndexInformation(selectedTable);
+			DataStore ds = meta.getTableIndexInformation(getRealTable());
 			DataStoreTableModel model = new DataStoreTableModel(ds);
 			indexes.setModel(model, true);
 			indexes.adjustOrOptimizeColumns();
@@ -1444,13 +1469,13 @@ public class TableListPanel
 		}
 	}
 
-	private void retrieveExportedTables()
+	protected void retrieveExportedTables()
 		throws SQLException
 	{
 		try
 		{
 			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(this.selectedTable));
+			DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(getRealTable()));
 			exportedKeys.setModel(model, true);
 			exportedKeys.adjustOrOptimizeColumns();
 			this.shouldRetrieveExportedKeys = false;
@@ -1463,14 +1488,14 @@ public class TableListPanel
 		}
 	}
 
-	private void retrieveImportedTables()
+	protected void retrieveImportedTables()
 		throws SQLException
 	{
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(this.selectedTable, false));
+			DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(getRealTable(), false));
 			importedKeys.setModel(model, true);
 			importedKeys.adjustOrOptimizeColumns();
 			this.shouldRetrieveImportedKeys = false;
@@ -1487,12 +1512,12 @@ public class TableListPanel
 		}
 	}
 
-	private void retrieveImportedTree()
+	protected void retrieveImportedTree()
 	{
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			importedTableTree.readReferencedTables(selectedTable);
+			importedTableTree.readReferencedTables(getRealTable());
 			this.shouldRetrieveImportedTree = false;
 		}
 		catch (Throwable th)
@@ -1507,12 +1532,12 @@ public class TableListPanel
 		}
 	}
 
-	private void retrieveExportedTree()
+	protected void retrieveExportedTree()
 	{
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			exportedTableTree.readReferencingTables(selectedTable);
+			exportedTableTree.readReferencingTables(getRealTable());
 			this.shouldRetrieveExportedTree = false;
 		}
 		catch (Throwable th)

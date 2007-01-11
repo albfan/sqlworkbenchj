@@ -25,8 +25,10 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.ColumnData;
 import workbench.storage.filter.FilterExpression;
@@ -1197,7 +1199,11 @@ public class DataStore
 			this.updateHadErrors = true;
 			
 			String sql = dml.getExecutableStatement(createLiteralFormatter());
-			if (!this.ignoreAllUpdateErrors)
+			if (this.ignoreAllUpdateErrors)
+			{
+				LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + sql + " for row = " + row + ", error: " + e.getMessage(), null);
+			}
+			else
 			{
 				boolean abort = true;
 				int choice = JobErrorHandler.JOB_ABORT;
@@ -1215,10 +1221,6 @@ public class DataStore
 					this.ignoreAllUpdateErrors = true;
 				}
 				if (abort) throw e;
-			}
-			else
-			{
-				LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + sql + " for row = " + row + ", error: " + e.getMessage(), null);
 			}
 		}
 		return rowsUpdated;
@@ -1260,6 +1262,7 @@ public class DataStore
 		StatementFactory factory = new StatementFactory(this.resultInfo, aConnection);
 		factory.setIncludeTableOwner(aConnection.getMetadata().needSchemaInDML(resultInfo.getUpdateTable()));
 		String le = Settings.getInstance().getInternalEditorLineEnding();
+		boolean inCommit = false;
 		
 		try
 		{
@@ -1315,14 +1318,32 @@ public class DataStore
 			// we are sending a commit() to make sure the transaction
 			// is ended. This is especially important for Postgres
 			// in case an error occured during update (and the user chose to proceed)
-			if (!aConnection.getAutoCommit()) aConnection.commit();
+			if (!aConnection.getAutoCommit()) 
+			{
+				inCommit = true;
+				aConnection.commit();
+			}
 			this.resetStatusForSentRows();
 		}
 		catch (SQLException e)
 		{
+			if (inCommit)
+			{
+				String msg = ResourceMgr.getString("ErrCommit");
+				msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));
+				if (errorHandler != null)
+				{
+					errorHandler.fatalError(msg);
+				}
+				else
+				{
+					WbSwingUtilities.showErrorMessage(null, msg);
+				}
+			}
+			
 			if (!aConnection.getAutoCommit())
 			{
-				aConnection.rollback();
+				try { aConnection.rollback(); } catch (Throwable th) {}
 			}
 			LogMgr.logError("DataStore.updateDb()", "Error when saving data for row=" + currentRow + ", error: " + e.getMessage(), null);
 			throw e;

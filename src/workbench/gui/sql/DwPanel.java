@@ -1252,6 +1252,7 @@ public class DwPanel
 	
 	public void fatalError(String msg)
 	{
+		WbSwingUtilities.showErrorMessage(this, msg);
 	}
 	
 }

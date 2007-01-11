@@ -70,7 +70,8 @@ import workbench.db.h2database.H2SequenceReader;
 
 /**
  * Retrieve meta data information from the database.
- * This class returns more information then the generic JDBC DatabaseMetadata.
+ * This class returns more information than the generic JDBC DatabaseMetadata.
+ * 
  *  @author  support@sql-workbench.net
  */
 public class DbMetadata
@@ -119,6 +120,7 @@ public class DbMetadata
 	private boolean useNullKeyword = true;
 	private boolean fixOracleDateBug = false;
 	private boolean columnsListInViewDefinitionAllowed = true;
+	private boolean allowExtendedCreateStatement = true;
 	
 	// This is set to true if identifiers starting with
 	// a digit should always be quoted. This will 
@@ -294,7 +296,7 @@ public class DbMetadata
 		{
 			this.isApacheDerby = true;
 			this.constraintReader = new DerbyConstraintReader();
-			this.synonymReader = new DerbySynonymReader();
+			this.synonymReader = new DerbySynonymReader(this);
 		}
 		else if (productLower.indexOf("ingres") > -1)
 		{
@@ -429,9 +431,9 @@ public class DbMetadata
 		
 		// The tableTypesSelectable array will be used
 		// to fill the completion cache. In that case 
-		// we do not want system tables include (which 
-		// is done in the objectsWithData as that 
-		// drives the "Data" tab in the DbExplorer
+		// we do not want system tables included (which 
+		// is done for the objectsWithData as that 
+		// drives the "Data" tab in the DbExplorer)
 		Set types = getObjectsWithData();
 		List realTypes = new LinkedList();
 		
@@ -452,6 +454,7 @@ public class DbMetadata
 		this.quoteIdentifierWithDigits = settings.getBoolProperty("workbench.db." + getDbId() + ".quotedigits", false);
 		this.allowsMultipleGetUpdateCounts = settings.getBoolProperty("workbench.db." + getDbId() + ".multipleupdatecounts", true);
 		this.reportsRealSizeAsDisplaySize = settings.getBoolProperty("workbench.db." + getDbId() + ".charsize.usedisplaysize", false);
+		this.allowExtendedCreateStatement = settings.getBoolProperty("workbench.db." + getDbId() + ".extended.createstmt", true);
 	}
 
 	public String getTableTypeName() { return tableTypeName; }
@@ -460,6 +463,11 @@ public class DbMetadata
 		return "VIEW"; 
 	}
 
+	public boolean allowsExtendedCreateStatement()
+	{
+		return allowExtendedCreateStatement;
+	}
+	
 	public boolean allowsMultipleGetUpdateCounts()
 	{
 		return this.allowsMultipleGetUpdateCounts;
@@ -2147,7 +2155,17 @@ public class DbMetadata
 				{
 					def = def.trim();
 				}
-				int position = rs.getInt("ORDINAL_POSITION");
+				int position = -1;
+				try
+				{
+					position = rs.getInt("ORDINAL_POSITION");
+				}
+				catch (SQLException e)
+				{
+					LogMgr.logError("DbMetadata", "JDBC driver does not suport ORDINAL_POSITION column for getColumns()", e);
+					position = -1;
+				}
+				
 				String nul = rs.getString("IS_NULLABLE");
 
 				String display = null;
@@ -2246,6 +2264,21 @@ public class DbMetadata
 		return dbmsType;
 	}
 	
+
+	/**
+	 * If the passed TableIdentifier is a Synonym and the current
+	 * DBMS supports synonyms, a TableIdentifier for the "real" 
+	 * table is returned.
+	 * Otherwise the passed TableIdentifier is returned
+	 */
+	public TableIdentifier resolveSynonym(TableIdentifier tbl)
+	{
+		if (tbl == null) return null;
+		if (!supportsSynonyms()) return tbl;
+		String type = tbl.getType();
+		if (type != null && !isSynonymType(type)) return null;
+		return getSynonymTable(tbl);
+	}
 	
 	/**
 	 * Return the index information for a table as a DataStore. This is 
@@ -2261,6 +2294,7 @@ public class DbMetadata
 		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		final int sizes[] =   {30, 7, 6, 40, 10};
 		DataStore idxData = new DataStore(cols, types, sizes);
+		if (table == null) return idxData;
 		Collection<IndexDefinition> indexes = getTableIndexList(table);
 		for (IndexDefinition idx : indexes)
 		{
@@ -2819,7 +2853,7 @@ public class DbMetadata
 		try
 		{
 			rs = this.metaData.getTableTypes();
-			while (rs.next())
+			while (rs != null && rs.next())
 			{
 				String type = rs.getString(1);
 				if (type == null) continue;
@@ -2974,6 +3008,8 @@ public class DbMetadata
 			sizes = new int[] {25, 10, 30, 12, 12};
 		}
 		DataStore ds = new DataStore(cols, types, sizes);
+		if (tableId == null) return ds;
+		
 		ResultSet rs = null;
 
 		try
@@ -3165,6 +3201,15 @@ public class DbMetadata
 		return StringUtil.EMPTY_STRING;
 	}
 
+	public boolean isTableType(String type)
+	{
+		for (String t : tableTypesTable)
+		{
+			if (t.equalsIgnoreCase(type)) return true;
+		}
+		return false;
+	}
+	
 	public boolean isViewType(String type)
 	{
 		if (type == null) return false;
@@ -3224,9 +3269,10 @@ public class DbMetadata
 		try
 		{
 			id = this.synonymReader.getSynonymTable(this.dbConnection.getSqlConnection(), schema, synonym);
-			if (id == null && this.isOracle)
+			if (id != null && id.getType() == null)
 			{
-				id = this.synonymReader.getSynonymTable(this.dbConnection.getSqlConnection(), "PUBLIC", synonym);
+				String type = getTableType(id);
+				id.setType(type);
 			}
 		}
 		catch (Exception e)
@@ -3587,11 +3633,19 @@ public class DbMetadata
 			String column = col.getColumnName();
 			String remark = col.getComment();
 			if (column == null || remark == null || remark.trim().length() == 0) continue;
-			String comment = columnStatement.replaceAll(MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
-			comment = comment.replaceAll(MetaDataSqlManager.COMMENT_COLUMN_PLACEHOLDER, column);
-			comment = comment.replaceAll(MetaDataSqlManager.COMMENT_PLACEHOLDER, remark.replaceAll("'", "''"));
-			result.append(comment);
-			result.append("\n");
+			try
+			{
+				String commentSql = columnStatement.replaceAll(MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
+				commentSql = StringUtil.replace(commentSql, MetaDataSqlManager.COMMENT_COLUMN_PLACEHOLDER, column);//, comment)comment.replaceAll(MetaDataSqlManager.COMMENT_COLUMN_PLACEHOLDER, column);
+				remark = StringUtil.replace(remark, "'", "''");
+				commentSql = StringUtil.replace(commentSql, MetaDataSqlManager.COMMENT_PLACEHOLDER, remark);
+				result.append(commentSql);
+				result.append("\n");
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("DbMetadata.getTableColumnCommentsSql()", "Error creating comments SQL for remark=" + remark, e);
+			}
 		}
 		return result;
 	}

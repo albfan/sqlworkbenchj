@@ -111,15 +111,8 @@ public class TableDependency
 			int tablecolumncol;
 			int parentcolumncol;
 
-			TableIdentifier ptbl = parent.getTable();
-			if (this.wbMetadata.supportsSynonyms())
-			{
-				String type = this.wbMetadata.getTableType(ptbl);
-				if (wbMetadata.isSynonymType(type))
-				{
-					ptbl = wbMetadata.getSynonymTable(ptbl);
-				}
-			}
+			TableIdentifier ptbl = this.wbMetadata.resolveSynonym(parent.getTable());
+			
 			if (exportedKeys)
 			{
 				catalogcol = 4;
