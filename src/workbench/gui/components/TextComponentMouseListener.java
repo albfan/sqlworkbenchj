@@ -12,68 +12,123 @@
 package workbench.gui.components;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.LinkedList;
+import java.util.List;
 import javax.swing.JMenuItem;
-
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.text.JTextComponent;
-
+import workbench.gui.actions.WbAction;
 import workbench.gui.menu.TextPopup;
-import workbench.interfaces.ClipboardSupport;
 
 /**
- *
+ * Provide a Cut, Copy, Paste popup menu for Text components 
+ * 
  * @author support@sql-workbench.net Kellerer
  */
-public class TextComponentMouseListener 
-	implements MouseListener
+public class TextComponentMouseListener
+	implements MouseListener, CaretListener
 {
-	private JMenuItem additionalItem;
+	private List<JMenuItem> additionalItems = new LinkedList();
+	private TextPopup popup;
+	private JTextComponent text;
+	private int originalComponentCount = -1;
 	
-	/** Creates a new instance of WbMouseListener */
+	/**
+	 * Create a listener to display a context menu with Cut, Copy and Paste
+	 * entries. 
+	 */
 	public TextComponentMouseListener()
 	{
 	}
-
+	
+	/**
+	 * Create a listener to display a context menu with Cut, Copy and Paste
+	 * entries. The shortcuts of the menu actions will be added to the input 
+	 * map of the text component.
+	 */
+	public TextComponentMouseListener(JTextComponent component)
+	{
+		this.text = component;
+		this.popup = createPopup(component);
+		this.originalComponentCount = this.popup.getComponentCount();
+		this.popup.getCutAction().addToInputMap(text);
+		this.popup.getClearAction().addToInputMap(text);
+		this.popup.getPasteAction().addToInputMap(text);
+		this.popup.getCopyAction().addToInputMap(text);
+		text.addCaretListener(this);
+		component.addMouseListener(this);
+	}
+	
+	/**
+	 * Add an action to the popup menu. The action's shortcut will 
+	 * also be added to the underlying text component's input map
+	 * (if one was supplied in the constructor)
+	 */
+	public void addAction(WbAction action)
+	{
+		this.addMenuItem(action.getMenuItem());
+		if (this.text != null)
+		{
+			action.addToInputMap(text);
+		}
+	}
+	
+	/**
+	 * Add additional menu items to the popup menu.
+	 */
 	public void addMenuItem(JMenuItem item)
 	{
-		this.additionalItem = item;
+		if (popup != null)
+		{
+			if (this.originalComponentCount > -1 && popup.getComponentCount() == this.originalComponentCount)
+			{
+				this.popup.addSeparator();
+			}
+			this.popup.add(item);
+		}
+		else
+		{
+			this.additionalItems.add(item);
+		}
 	}
-	/** Invoked when the mouse button has been clicked (pressed
-	 * and released) on a component.
-	 *
-	 */
+	
 	public void mouseClicked(MouseEvent e)
 	{
-		if (e.getButton() == MouseEvent.BUTTON3)
+		if (e.getButton() == MouseEvent.BUTTON3 && e.getSource() instanceof JTextComponent)
 		{
-			if (e.getSource() instanceof JTextComponent)
+			try
 			{
-				try
+				JTextComponent component = (JTextComponent)e.getSource();
+				TextPopup pop = this.popup;
+				if (pop == null)
 				{
-					JTextComponent text = (JTextComponent)e.getSource();
-					final ClipboardWrapper wrapp = new ClipboardWrapper(text);
-					TextPopup pop = new TextPopup(wrapp);
-					if (this.additionalItem != null)
-					{
-						pop.addSeparator();
-						pop.add(this.additionalItem);
-					}
-					boolean edit = text.isEditable();
-					boolean selected = text.getSelectionEnd() > text.getSelectionStart();
-					pop.getCutAction().setEnabled(edit);
-					pop.getClearAction().setEnabled(edit);
-					pop.getPasteAction().setEnabled(edit);
-					pop.getCopyAction().setEnabled(selected);
-					//Component parent = text.getParent();
-					pop.show(text,e.getX(),e.getY());
+					pop = createPopup(component);
 				}
-				catch (Exception ex)
-				{
-					ex.printStackTrace();
-				}
+				checkActions(component, pop);
+				pop.show(component,e.getX(),e.getY());
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
 			}
 		}
 	}
 	
+	private TextPopup createPopup(JTextComponent component)
+	{
+		ClipboardWrapper wrapp = new ClipboardWrapper(component);
+		TextPopup pop = new TextPopup(wrapp);
+		if (this.additionalItems.size() > 0)
+		{
+			pop.addSeparator();
+			for (JMenuItem item : additionalItems)
+			{
+				pop.add(item);
+			}
+		}
+		return pop;
+	}
 	/** Invoked when the mouse enters a component.
 	 *
 	 */
@@ -101,27 +156,24 @@ public class TextComponentMouseListener
 	public void mouseReleased(MouseEvent e)
 	{
 	}
-
-	private static class ClipboardWrapper 
-		implements ClipboardSupport
+	
+	public void caretUpdate(CaretEvent evt)
 	{
-		JTextComponent client;
-		public ClipboardWrapper(JTextComponent aClient)
+		if (this.text != null && this.popup != null)
 		{
-			this.client = aClient;
+			checkActions(this.text, this.popup);
 		}
-		public void copy() { this.client.copy(); }
-		public void clear() 
-		{ 
-			if (this.client.isEditable())
-				this.client.replaceSelection(""); 
-		}
-		public void cut() { this.client.cut(); }
-		public void paste() { this.client.paste(); }
-		public void selectAll() 
-		{ 
-			this.client.select(0, this.client.getText().length()); 
-		}
+	}
+	
+	private void checkActions(JTextComponent component, TextPopup pop)
+	{
+		if (component == null || pop == null) return;
 		
+		boolean edit = component.isEditable();
+		boolean selected = component.getSelectionEnd() > component.getSelectionStart();
+		pop.getCutAction().setEnabled(edit && selected);
+		pop.getClearAction().setEnabled(edit && selected);
+		pop.getPasteAction().setEnabled(edit);
+		pop.getCopyAction().setEnabled(selected);
 	}
 }

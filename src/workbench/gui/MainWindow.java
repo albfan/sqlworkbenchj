@@ -1074,6 +1074,10 @@ public class MainWindow
 
 	public void connectCancelled()
 	{
+		if (this.exitOnCancel)
+		{
+			WbManager.getInstance().exitWorkbench();
+		}
 	}
 
 	public void connectEnded()
@@ -1495,6 +1499,15 @@ public class MainWindow
 
 	public void selectConnection()
 	{
+		selectConnection(false);
+	}
+	
+	private boolean exitOnCancel = false;
+	
+	public void selectConnection(boolean exit)
+	{
+		this.exitOnCancel = exit;
+		
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()

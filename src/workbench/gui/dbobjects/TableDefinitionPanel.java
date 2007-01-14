@@ -68,7 +68,6 @@ public class TableDefinitionPanel
 	private QuickFilterPanel columnFilter;
 	private WbAction createIndexAction;
 	private TableIdentifier currentTable;
-	private String currentObjectType;
 	private WbConnection dbConnection;
 	private WbAction reloadAction;
 	private JPanel toolbar;
@@ -158,12 +157,11 @@ public class TableDefinitionPanel
 		}
 	}
 
-	public void retrieve(TableIdentifier table, String objectType)
+	public void retrieve(TableIdentifier table)
 		throws SQLException
 	{
 		this.currentTable = table;
 		this.toolbar.validate();
-		this.currentObjectType = objectType;
 		retrieveTableDefinition();
 	}
 
@@ -214,7 +212,7 @@ public class TableDefinitionPanel
 		// these columns are "SCALE/SIZE", "PRECISION" and "POSITION"
 		// they don't need to be displayed as this is "included" in the
 		// displayed (DBMS) data type already
-		if (!"SEQUENCE".equalsIgnoreCase(this.currentObjectType))
+		if (!"SEQUENCE".equalsIgnoreCase(this.currentTable.getType()))
 		{
 			TableColumnModel colmod = tableDefinition.getColumnModel();
 
@@ -244,7 +242,6 @@ public class TableDefinitionPanel
 	public void reset()
 	{
 		this.currentTable = null;
-		this.currentObjectType = null;
 		this.tableDefinition.reset();
 		reloadAction.setEnabled(false);
 	}
@@ -259,7 +256,6 @@ public class TableDefinitionPanel
 	public void reload()
 	{
 		if (this.currentTable == null) return;
-		if (this.currentObjectType == null) return;
 		if (this.dbConnection == null) return;
 
 		WbThread t = new WbThread("TableDefinition Retrieve")

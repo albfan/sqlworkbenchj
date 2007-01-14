@@ -12,19 +12,18 @@
 package workbench.gui.components;
 
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
-
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 import workbench.gui.WbSwingUtilities;
-
 import workbench.gui.actions.EscAction;
 import workbench.interfaces.Replaceable;
 import workbench.resource.ResourceMgr;
@@ -264,11 +263,16 @@ public class ReplacePanel
 		{
 			Window w = SwingUtilities.getWindowAncestor(caller);
 			Frame f = null;
+			this.dialog = null;
+			
 			if (w instanceof Frame)
 			{
-				f = (Frame)w;
+				this.dialog = new JDialog((Frame)w);
 			}
-			this.dialog = new JDialog(f);
+			else if (w instanceof Dialog)
+			{
+				this.dialog = new JDialog((Dialog)w);
+			}
 			this.dialog.setTitle(ResourceMgr.getString("TxtWindowTitleReplaceText"));
 			this.dialog.getContentPane().add(this);
 			this.dialog.pack();

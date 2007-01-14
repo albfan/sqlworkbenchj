@@ -50,6 +50,7 @@ public class OracleSynonymReader
 		sql.append("SELECT s.synonym_name, s.table_owner, s.table_name, s.db_link, o.object_type, s.owner ");
 		sql.append("FROM all_synonyms s, all_objects o  ");
 		sql.append("where s.table_name = o.object_name ");
+		sql.append("and s.table_owner = o.owner ");
 		sql.append("and ((s.synonym_name = ? AND s.owner = ?) ");
 		sql.append(" or (s.synonym_name = ? AND s.owner = 'PUBLIC')) ");
 		sql.append("ORDER BY decode(s.owner, 'PUBLIC',9,1)");

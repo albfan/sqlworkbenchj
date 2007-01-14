@@ -145,9 +145,11 @@ public class TableListPanel
 
 	private MainWindow parentWindow;
 
-	private String selectedObjectType;
 	private TableIdentifier selectedTable;
-
+	
+	// For synonym resolution
+	private TableIdentifier realTable;
+	
 	private boolean shiftDown = false;
 	protected boolean shouldRetrieve;
 
@@ -1019,25 +1021,24 @@ public class TableListPanel
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
 
-		String catalog = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
-		String schema = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-		String table = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-		this.selectedObjectType = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE).toLowerCase();
-		
-		this.selectedTable = new TableIdentifier(catalog, schema, table);
-		this.selectedTable.checkQuotesNeeded(this.dbConnection);
-		this.selectedTable.setNeverAdjustCase(true);
-		this.selectedTable.setType(selectedObjectType);
+		this.selectedTable = createTableIdentifier(row);
+		this.realTable = null;
 
 		this.invalidateData();
 
-		if (isTable(this.selectedTable))
+		boolean isTable = isTable();
+		boolean hasData = isTable;
+		if (!isTable)
+		{
+			hasData = canContainData();
+		}
+		if (isTable)
 		{
 			addTablePanels();
 		}
 		else
 		{
-			if (isTableType(this.selectedObjectType))
+			if (hasData)
 			{
 				if (this.displayTab.getTabCount() == 2)
 				{
@@ -1055,10 +1056,10 @@ public class TableListPanel
 		}
 
 		this.tableData.reset();
-		this.tableData.setReadOnly(!maybeUpdateable(this.selectedObjectType));
+		this.tableData.setReadOnly(!isTableType(this.selectedTable.getType()));
 		this.tableData.setTable(this.selectedTable);
 
-		this.setShowDataMenuStatus(this.isTableType(selectedObjectType));
+		this.setShowDataMenuStatus(hasData);
 
 		this.startRetrieveCurrentPanel();
 	}
@@ -1068,35 +1069,46 @@ public class TableListPanel
 		if (this.showDataMenu != null) this.showDataMenu.setEnabled(flag);
 	}
 
-	private boolean maybeUpdateable(String aType)
+	private boolean isTableType(String type)
 	{
-		if (aType == null) return false;
-		return (aType.indexOf("table") > -1 || aType.indexOf("view") > -1);
+		if (type == null) return false;
+		return (type.indexOf("TABLE") > -1 || type.indexOf("table") > -1 || type.equalsIgnoreCase(DbMetadata.MVIEW_NAME));
 	}
 
-	private boolean checkTableType(String type)
-	{
-		return (type.indexOf("table") > -1 || type.indexOf("TABLE") > -1 || type.equalsIgnoreCase(DbMetadata.MVIEW_NAME));
-	}
-	
-	private boolean isTable(TableIdentifier table)
+	private boolean isSynonym(TableIdentifier table)
 	{
 		if (table == null) return false;
 		DbMetadata meta = this.dbConnection.getMetadata();
-		String type = table.getType();
-		if (checkTableType(type)) return true;
+		return (meta.supportsSynonyms() && meta.isSynonymType(table.getType()));
+	}
+	
+	private boolean isTable()
+	{
+		if (this.selectedTable == null) return false;
+		DbMetadata meta = this.dbConnection.getMetadata();
+		String type = selectedTable.getType();
+		if (isTableType(type)) return true;
 		if (meta.supportsSynonyms() && meta.isSynonymType(type))
 		{
-			TableIdentifier realTable = getRealTable(table);
-			if (realTable == null) return false;
-			return checkTableType(realTable.getType());
+			TableIdentifier rt = getRealTable();
+			if (rt == null) return false;
+			return isTableType(realTable.getType());
 		}
 		return false;
 	}
 	
-	private boolean isTableType(String type)
+	private boolean canContainData()
 	{
-		return this.dbConnection.getMetadata().objectTypeCanContainData(type);
+		if (selectedTable == null) return false;
+		String type = selectedTable.getType();
+		DbMetadata meta = this.dbConnection.getMetadata();
+		if (meta.supportsSynonyms() && meta.isSynonymType(type))
+		{
+			TableIdentifier rt = getRealTable();
+			if (rt == null) return false;
+			type = rt.getType();
+		}
+		return meta.objectTypeCanContainData(type);
 	}
 
 	protected void retrieveTableSource()
@@ -1115,11 +1127,13 @@ public class TableListPanel
 				this.shouldRetrieveIndexes = true;
 				this.shouldRetrieveImportedTree = true;
 			}
-			if (meta.isViewType(this.selectedObjectType))
+			String type = this.selectedTable.getType();
+			
+			if (meta.isViewType(type))
 			{
 				sql = meta.getExtendedViewSource(this.selectedTable, tableDefinition.getDataStore(), true);
 			}
-			else if (meta.isSynonymType(this.selectedObjectType))
+			else if (meta.isSynonymType(type))
 			{
 				sql = meta.getSynonymSource(this.selectedTable);
 				if (sql.length() == 0)
@@ -1127,7 +1141,7 @@ public class TableListPanel
 					sql = ResourceMgr.getString("MsgSynonymSourceNotImplemented") + " " + meta.getProductName();
 				}
 			}
-			else if ("sequence".equals(this.selectedObjectType))
+			else if ("sequence".equalsIgnoreCase(type))
 			{
 				sql = meta.getSequenceSource(this.selectedTable.getCatalog(), this.selectedTable.getSchema(), this.selectedTable.getTableName());
 				if (sql.length() == 0)
@@ -1135,7 +1149,7 @@ public class TableListPanel
 					sql = ResourceMgr.getString("MsgSequenceSourceNotImplemented") + " " + meta.getProductName();
 				}
 			}
-			else if (this.selectedObjectType.indexOf("table") > -1)
+			else if (isTableType(type))
 			{
 				// the table information has to be retrieved before
 				// the table source, because otherwise the DataStores
@@ -1180,7 +1194,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			this.tableDefinition.retrieve(selectedTable, this.selectedObjectType);
+			this.tableDefinition.retrieve(selectedTable);
 			this.shouldRetrieveTable = false;
 			shouldRetrieveTable = false;
 		}
@@ -1414,7 +1428,14 @@ public class TableListPanel
 
 	protected TableIdentifier getRealTable()
 	{
-		return getRealTable(this.selectedTable);
+		if (this.selectedTable == null) return null;
+		if (!isSynonym(selectedTable)) return selectedTable;
+		
+		if (realTable == null)
+		{
+			realTable = getRealTable(this.selectedTable);
+		}
+		return realTable;
 	}
 	
 	protected TableIdentifier getRealTable(TableIdentifier tbl)
@@ -1605,13 +1626,12 @@ public class TableListPanel
 		{
 			int row = rows[i];
 			
-			String type = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+			TableIdentifier tbl = createTableIdentifier(row);
 
-			if (!"VIEW".equalsIgnoreCase(type)) continue;
+			if (!"VIEW".equalsIgnoreCase(tbl.getType())) continue;
 
-			TableIdentifier tbl = getTable(row);
 			names.add(tbl.getTableExpression());
-			types.add(type);
+			types.add(tbl.getType());
 		}
 
 		try
@@ -1737,18 +1757,21 @@ public class TableListPanel
 		ArrayList names = new ArrayList(count);
 		ArrayList types = new ArrayList(count);
 		ArrayList tables = new ArrayList(count);
+
+		TableIdentifier tbl = getRealTable();
+		String schema = (tbl == null ? null : tbl.getSchema());
 		
 		for (int i=0; i < count; i ++)
 		{
 			String name = this.indexes.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
-			String schema = (this.selectedTable == null ? null : this.selectedTable.getSchema());
+			
 			names.add((schema == null ? name : schema + "." + name));
 			types.add("INDEX");
 		}
 		
 		ObjectDropperUI dropperUI = new ObjectDropperUI();
 		dropperUI.setObjects(names, types);
-		dropperUI.setIndexTable(this.selectedTable);
+		dropperUI.setIndexTable(tbl);
 		dropperUI.setConnection(this.dbConnection);
 		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
 		dropperUI.showDialog(f);
@@ -1817,7 +1840,7 @@ public class TableListPanel
 	/**
 	 * Return a TableIdentifier for the given row number in the table list
 	 */
-	private TableIdentifier getTable(int row)
+	private TableIdentifier createTableIdentifier(int row)
 	{
 		String name = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 		String schema = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
@@ -1826,6 +1849,7 @@ public class TableListPanel
 		TableIdentifier tbl = new TableIdentifier(catalog, schema, name);
 		tbl.setType(type);
 		tbl.setNeverAdjustCase(true);
+		tbl.checkQuotesNeeded(this.dbConnection);
 		return tbl;
 	}
 	
@@ -1843,7 +1867,7 @@ public class TableListPanel
 		{
 			String type = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
 			if (!"table".equalsIgnoreCase(type) && !"view".equalsIgnoreCase(type)) continue;
-			TableIdentifier tbl = getTable(rows[i]);
+			TableIdentifier tbl = createTableIdentifier(rows[i]);
 			names.add(tbl);
 		}
 		TableDeleterUI deleter = new TableDeleterUI();
@@ -1864,7 +1888,7 @@ public class TableListPanel
 		{
 			int row = rows[i];
 			
-			TableIdentifier tbl = getTable(row);
+			TableIdentifier tbl = createTableIdentifier(row);
 			tbl.setCatalog(null);
 			tables.put(tbl, tbl.getType());
 		}
@@ -1881,7 +1905,7 @@ public class TableListPanel
 		HashMap tables = new HashMap(count);
 		for (int i=0; i < count; i++)
 		{
-			TableIdentifier tbl = getTable(rows[i]);
+			TableIdentifier tbl = createTableIdentifier(rows[i]);
 			tables.put(tbl, ObjectScripter.TYPE_INSERT);
 		}
 		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
@@ -1897,7 +1921,7 @@ public class TableListPanel
 		HashMap tables = new HashMap(count);
 		for (int i=0; i < count; i++)
 		{
-			TableIdentifier tbl = getTable(rows[i]);
+			TableIdentifier tbl = createTableIdentifier(rows[i]);
 			tables.put(tbl, ObjectScripter.TYPE_SELECT);
 		}
 		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
@@ -1918,7 +1942,7 @@ public class TableListPanel
 
 		for (int i=0; i < count; i ++)
 		{
-			TableIdentifier id = getTable(rows[i]);
+			TableIdentifier id = createTableIdentifier(rows[i]);
 			id.setNeverAdjustCase(true);
 			String table = id.getTableExpression(this.dbConnection);
 			names.add(table);
@@ -1942,7 +1966,7 @@ public class TableListPanel
 		}
 	}
 
-	private TableIdentifier[] getSelectedTables()
+	private TableIdentifier[] getSelectedObjects()
 	{
 		int[] rows = this.tableList.getSelectedRows();
 		int count = rows.length;
@@ -1952,7 +1976,7 @@ public class TableListPanel
 		for (int i=0; i < count; i++)
 		{
 			int row = rows[i];
-			result[i] = getTable(rows[i]);
+			result[i] = createTableIdentifier(rows[i]);
 		}
 		return result;
 	}
@@ -1961,7 +1985,7 @@ public class TableListPanel
 	public void saveReport()
 	{
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
-		TableIdentifier[] tables = getSelectedTables();
+		TableIdentifier[] tables = getSelectedObjects();
 		if (tables == null) return;
 
 		FileDialogUtil dialog = new FileDialogUtil();
@@ -2019,7 +2043,7 @@ public class TableListPanel
 
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
-		TableIdentifier id = getTable(row);
+		TableIdentifier id = createTableIdentifier(row);
 		DataExporter exporter = new DataExporter(this.dbConnection);
 		exporter.setProgressInterval(10);
 		exporter.exportTable(SwingUtilities.getWindowAncestor(this), id);
@@ -2034,7 +2058,7 @@ public class TableListPanel
 		dialog.restoreSettings();
 
 		String title = ResourceMgr.getString("LblSelectDirTitle");
-
+		DbMetadata meta = this.dbConnection.getMetadata();
 		boolean answer = dialog.selectOutput(title);
 		if (answer)
 		{
@@ -2067,11 +2091,11 @@ public class TableListPanel
 			for (int i = 0; i < rows.length; i ++)
 			{
 				if (rows[i] < 0) continue;
-				TableIdentifier id = getTable(rows[i]);
+				TableIdentifier id = createTableIdentifier(rows[i]);
 
 				String ttype = id.getType();
 				if (ttype == null) continue;
-				if (!this.isTableType(ttype.toLowerCase())) continue;
+				if (!meta.objectTypeCanContainData(ttype)) continue;
 				String fname = StringUtil.makeFilename(id.getTableName());
 				File f = new File(fdir, fname + ext);
 				try

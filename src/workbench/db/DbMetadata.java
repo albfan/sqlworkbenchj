@@ -2276,7 +2276,7 @@ public class DbMetadata
 		if (tbl == null) return null;
 		if (!supportsSynonyms()) return tbl;
 		String type = tbl.getType();
-		if (type != null && !isSynonymType(type)) return null;
+		if (type != null && !isSynonymType(type)) return tbl;
 		return getSynonymTable(tbl);
 	}
 	
@@ -3213,6 +3213,7 @@ public class DbMetadata
 	public boolean isViewType(String type)
 	{
 		if (type == null) return false;
+		type = type.toLowerCase();
 		if (type.toUpperCase().indexOf("VIEW") > -1) return true;
 		String viewTypes = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".additional.viewtypes", "view").toLowerCase();
 		List types = StringUtil.stringToList(viewTypes, ",", true, true, false);

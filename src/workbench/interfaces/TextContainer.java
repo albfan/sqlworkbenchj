@@ -22,5 +22,9 @@ public interface TextContainer
 	void setSelectedText(String aText);
 	void setText(String aText);
 	void setCaretPosition(int pos);
+	int getCaretPosition();
+	int getSelectionStart();
+	int getSelectionEnd();
+	void select(int start, int end);
 	void setEditable(boolean flag);
 }

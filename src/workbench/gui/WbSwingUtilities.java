@@ -100,13 +100,13 @@ public class WbSwingUtilities
 	 *	@param 	aWinToCenter the window to be centered
 	 *	@param	aReference	center against this window. If null -> center on screen
 	 */
-	public static void center(Window aWinToCenter, Window aReference)
+	public static void center(Window aWinToCenter, Component aReference)
 	{
 		Point location = getLocationToCenter(aWinToCenter, aReference);
 		aWinToCenter.setLocation(location);
 	}
 
-	public static Point getLocationToCenter(Window aWinToCenter, Window aReference)
+	public static Point getLocationToCenter(Window aWinToCenter, Component aReference)
 	{
 		int screenWidth, screenHeight;
 		if (aReference == null)
@@ -146,8 +146,9 @@ public class WbSwingUtilities
 
 		if (aReference != null)
 		{
-			x += aReference.getX();
-			y += aReference.getY();
+			Point p = aReference.getLocationOnScreen();
+			x += p.getX();
+			y += p.getY();
 		}
 
 		return new Point(x, y);

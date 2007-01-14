@@ -16,19 +16,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
-
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbToolbarButton;
 import workbench.resource.ResourceMgr;
@@ -356,6 +355,11 @@ public class WbAction
 		return this.actionName;
 	}
 
+	public void addToInputMap(JComponent c)
+	{
+		addToInputMap(c.getInputMap(), c.getActionMap());
+	}
+	
 	public void addToInputMap(InputMap im, ActionMap am)
 	{
 		if (this.getAccelerator() == null) return;

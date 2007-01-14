@@ -782,10 +782,12 @@ public class WbManager
 		}
 
 		boolean autoSelect = Settings.getInstance().getBoolProperty("workbench.gui.autoconnect", true);
+		boolean exitOnCancel = Settings.getInstance().getExitOnFirstConnectCancel();
+		
 		// no connection? then display the connection dialog
 		if (!connected && autoSelect)
 		{
-			main.selectConnection();
+			main.selectConnection(exitOnCancel);
 		}
 	}
 

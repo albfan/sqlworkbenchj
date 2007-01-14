@@ -347,6 +347,16 @@ public class Settings
 		}
 	}
 
+	public boolean getExitOnFirstConnectCancel()
+	{
+		return getBoolProperty("workbench.gui.cancel.firstconnect.exit", false);
+	}
+
+	public void setExitOnFirstConnectCancel(boolean flag)
+	{
+		setProperty("workbench.gui.cancel.firstconnect.exit", flag);
+	}
+	
 	public boolean getIncludeHeaderInOptimalWidth()
 	{
 		return getBoolProperty("workbench.gui.optimalwidth.includeheader", false);

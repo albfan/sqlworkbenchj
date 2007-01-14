@@ -21,16 +21,15 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CollapseTreeAction;
 import workbench.gui.actions.CopyProfileAction;
 import workbench.gui.actions.DeleteListEntryAction;
@@ -315,6 +314,7 @@ public class ProfileEditorPanel
 		Dialog parent = (Dialog)SwingUtilities.getWindowAncestor(this);
 		
 		ValidatingDialog dialog = new ValidatingDialog(parent, ResourceMgr.TXT_PRODUCT_NAME, p, options);
+		WbSwingUtilities.center(dialog, parent);
 		dialog.setVisible(true);
 		if (dialog.isCancelled()) return false;
 		

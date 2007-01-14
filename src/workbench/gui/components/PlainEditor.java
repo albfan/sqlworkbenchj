@@ -12,6 +12,7 @@
 package workbench.gui.components;
 
 import java.awt.BorderLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JCheckBox;
@@ -20,6 +21,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
+import workbench.gui.editor.SearchAndReplace;
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.TextContainer;
 import workbench.resource.ResourceMgr;
@@ -35,12 +37,14 @@ public class PlainEditor
 {
 	private JTextArea editor;
 	private JCheckBox wordWrap;
+	private	SearchAndReplace replacer;
 	
-	public PlainEditor()
+	public PlainEditor(Window parent)
 	{
 		editor = new JTextArea();
 		editor.putClientProperty("JTextArea.infoBackground", Boolean.TRUE);
-		editor.addMouseListener(new TextComponentMouseListener());
+		TextComponentMouseListener l = new TextComponentMouseListener(this.editor);
+		
 		JScrollPane scroll = new JScrollPane(editor);
 		editor.setLineWrap(true);
 		editor.setWrapStyleWord(true); 
@@ -58,7 +62,16 @@ public class PlainEditor
 			int tabSize = Settings.getInstance().getEditorTabWidth();
 			d.putProperty(PlainDocument.tabSizeAttribute, new Integer(tabSize));
 		}
+		replacer = new SearchAndReplace(this, this);
+		l.addAction(replacer.getFindAction());
+		l.addAction(replacer.getFindAgainAction());
+		l.addAction(replacer.getReplaceAction());
 	}
+	
+	public int getCaretPosition() { return this.editor.getCaretPosition(); }
+	public int getSelectionEnd() { return this.editor.getSelectionEnd(); }
+	public int getSelectionStart() { return this.editor.getSelectionStart(); }
+	public void select(int start, int end) { this.editor.select(start, end); }
 	
 	public void requestFocus()
 	{
@@ -116,5 +129,6 @@ public class PlainEditor
 	{
 		this.editor.setEditable(flag);
 	}
+
 
 }

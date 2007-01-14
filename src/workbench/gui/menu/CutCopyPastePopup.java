@@ -13,11 +13,9 @@ package workbench.gui.menu;
 
 import javax.swing.JPopupMenu;
 
-import workbench.gui.actions.ClearAction;
 import workbench.gui.actions.CopyAction;
 import workbench.gui.actions.CutAction;
 import workbench.gui.actions.PasteAction;
-import workbench.gui.actions.SelectAllAction;
 import workbench.gui.actions.WbAction;
 import workbench.interfaces.ClipboardSupport;
 

@@ -12,6 +12,7 @@
 package workbench.gui.components;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -21,7 +22,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-
 import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.InputMap;
@@ -32,7 +32,6 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.border.Border;
 import workbench.WbManager;
-
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.interfaces.ValidatingComponent;
@@ -134,7 +133,6 @@ public class ValidatingDialog
 		this.doLayout();
 		this.pack();
 		this.addWindowListener(this);
-		WbSwingUtilities.center(this, owner);
 	}
 	
 	public int getSelectedOption()
@@ -147,6 +145,11 @@ public class ValidatingDialog
 	}
 	
 	public static boolean showConfirmDialog(Window parent, JComponent editor, String title)
+	{
+		return showConfirmDialog(parent, editor, title, null);
+	}
+	
+	public static boolean showConfirmDialog(Window parent, JComponent editor, String title, Component reference)
 	{
 		ValidatingDialog dialog = null;
 		if (parent == null)
@@ -162,6 +165,15 @@ public class ValidatingDialog
 			else 
 				throw new IllegalArgumentException("Parent component must be Dialog or Frame");
 		}
+		if (reference != null)
+		{
+			WbSwingUtilities.center(dialog, reference);
+		}
+		else
+		{
+			WbSwingUtilities.center(dialog, parent);
+		}
+		
 		dialog.setVisible(true);
 		return !dialog.isCancelled();
 	}

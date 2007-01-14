@@ -106,16 +106,14 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.64 2006-12-30 18:07:13 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.65 2007-01-14 11:19:04 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
 	implements MouseWheelListener, Undoable, ClipboardSupport
 {
 	protected boolean rightClickMovesCursor = false;
-	protected Pattern lastSearchPattern;
-	protected String lastSearchExpression;
-	private int lastSearchPos = -1;
+	
 	private Color alternateSelectionColor;
 	private static final Color ERROR_COLOR = Color.RED.brighter();
 	private static final Color TEMP_COLOR = Color.GREEN.brighter();
@@ -376,105 +374,6 @@ public class JEditTextArea
 		{
 			document.endCompoundEdit();
 		}
-	}
-
-	public int findText(String anExpression, boolean ignoreCase)
-	{
-		return this.findText(anExpression, ignoreCase, false, true);
-	}
-
-	protected String getSearchExpression(String anExpression, boolean ignoreCase, boolean wholeWord, boolean useRegex)
-	{
-		String regex = anExpression;
-		String quoted = StringUtil.quoteRegexMeta(anExpression);
-
-		if (!useRegex)
-		{
-			regex = "(" + quoted + ")";
-		}
-
-		if (wholeWord)
-		{
-			char c = anExpression.charAt(0);
-			// word boundary dos not work if the expression starts with
-			// a special Regex character. So in that case, we'll just ignore it
-			if (StringUtil.REGEX_SPECIAL_CHARS.indexOf(c) == -1)
-			{
-				regex = "\\b" + regex;
-			}
-			c = anExpression.charAt(anExpression.length() - 1);
-			if (StringUtil.REGEX_SPECIAL_CHARS.indexOf(c) == -1)
-			{
-				regex = regex + "\\b";
-			}
-		}
-		return regex;
-	}
-
-	public boolean isCurrentSearchCriteria(String aValue, boolean ignoreCase, boolean wholeWord, boolean useRegex)
-	{
-		if (this.lastSearchExpression == null) return false;
-		if (aValue == null) return false;
-		String regex = this.getSearchExpression(aValue, ignoreCase, wholeWord, useRegex);
-		return regex.equals(this.lastSearchExpression);
-	}
-
-	public int findText(String anExpression, boolean ignoreCase, boolean wholeWord, boolean useRegex)
-	{
-		String regex = this.getSearchExpression(anExpression, ignoreCase, wholeWord, useRegex);
-
-		int end = -1;
-		this.lastSearchPattern = (ignoreCase ? Pattern.compile(regex, Pattern.CASE_INSENSITIVE) : Pattern.compile(regex));
-		this.lastSearchExpression = anExpression;
-		Matcher m = this.lastSearchPattern.matcher(this.getText());
-
-		if (m.find(this.getCaretPosition()))
-		{
-			this.lastSearchPos = m.start();
-			end = m.end();
-			this.select(this.lastSearchPos, end);
-		}
-		else
-		{
-			this.lastSearchPos = -1;
-			Toolkit.getDefaultToolkit().beep();
-			String msg = ResourceMgr.getString("MsgEditorCriteriaNotFound");
-			msg = StringUtil.replace(msg, "%value%", anExpression);
-			WbSwingUtilities.showMessage(this, msg);
-		}
-		return this.lastSearchPos;
-	}
-
-
-	public int findNextText()
-	{
-		if (this.lastSearchPattern == null) return -1;
-		if (this.lastSearchPos == -1) return -1;
-
-		Matcher m = this.lastSearchPattern.matcher(this.getText());
-
-		if (m.find(this.getCaretPosition() + 1))
-		{
-			this.lastSearchPos = m.start();
-			int end = m.end();
-			this.select(this.lastSearchPos, end);
-		}
-		else
-		{
-			this.lastSearchPos = -1;
-			Toolkit.getDefaultToolkit().beep();
-			String msg = ResourceMgr.getString("MsgEditorCriteriaNotFound");
-			msg = StringUtil.replace(msg, "%value%", this.lastSearchExpression);
-			WbSwingUtilities.showMessage(this, msg);
-		}
-		return this.lastSearchPos;
-	}
-
-	public boolean searchPatternMatchesSelectedText()
-	{
-		if (this.lastSearchPattern == null) return false;
-		Matcher m = this.lastSearchPattern.matcher(this.getSelectedText());
-		return m.matches();
 	}
 
 	public void addKeyBinding(String aBinding, ActionListener aListener)

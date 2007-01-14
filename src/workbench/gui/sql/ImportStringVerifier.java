@@ -26,6 +26,7 @@ import javax.swing.border.EmptyBorder;
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.importer.TextFileParser;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.dialogs.dataimport.GeneralImportOptionsPanel;
 import workbench.gui.dialogs.dataimport.ImportOptions;
@@ -168,6 +169,7 @@ public class ImportStringVerifier
 		
 		Frame f = WbManager.getInstance().getCurrentWindow();
 		ValidatingDialog dialog = new ValidatingDialog(f, "Import", p);
+		WbSwingUtilities.center(dialog, f);
 		dialog.setVisible(true);
 		boolean ok = !dialog.isCancelled();
 		textOptions.saveSettings("clipboard");

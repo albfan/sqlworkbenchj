@@ -122,7 +122,7 @@ public class SearchCriteriaPanel
 	public boolean showFindDialog(Component caller)
 	{
 		String title = ResourceMgr.getString("TxtWindowTitleSearchText");
-		boolean result = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(caller), this, title);
+		boolean result = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(caller), this, title, caller);
 		
 		Settings.getInstance().setProperty(PROP_KEY_CASE, this.getIgnoreCase());
 		Settings.getInstance().setProperty(PROP_KEY_CRIT, this.getCriteria());

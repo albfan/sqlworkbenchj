@@ -102,7 +102,7 @@ public class ExecuteSqlDialog
 		if (aText == null || aText.trim().length() == 0) return;
 		sqlEditor.reformatSql();
 		sqlEditor.setCaretPosition(0);
-		int start = sqlEditor.find(aText, true, true, false);
+		int start = sqlEditor.getReplacer().find(aText, true, true, false);
 		int end = start + aText.length();
 		if (start > -1)
 		{
