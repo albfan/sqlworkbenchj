@@ -163,7 +163,7 @@ public class ResultInfo
 			if (type == Types.VARCHAR)
 			{
 				// HSQL reports the VARCHAR size in displaySize()
-				if (sourceConnection != null && sourceConnection.getMetadata().reportsRealSizeAsDisplaySize())
+				if (sourceConnection != null && sourceConnection.getDbSettings().reportsRealSizeAsDisplaySize())
 				{
 					dbmsType = SqlUtil.getSqlTypeDisplay(typename, col.getDataType(), size, 0);
 					col.setColumnSize(size);

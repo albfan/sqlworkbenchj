@@ -248,7 +248,6 @@ public class ObjectScripter
 			else
 			{
 				int type = info.getColumnType(i);
-//				String name = info.getColumnName(i);
 				StringBuilder dummy = new StringBuilder();
 				if (SqlUtil.isCharacterType(type)) dummy.append('\'');
 				dummy.append(info.getColumnName(i));
@@ -268,7 +267,7 @@ public class ObjectScripter
 	public String getDefaultSelect(TableIdentifier tbl)
 		throws SQLException
 	{
-		DataStore tableDef = this.meta.getTableDefinition(tbl, false);
+		DataStore tableDef = this.meta.getTableDefinition(tbl);
 
 		if (tableDef.getRowCount() == 0) return StringUtil.EMPTY_STRING;
 		int colCount = tableDef.getRowCount();
@@ -292,7 +291,7 @@ public class ObjectScripter
 		}
 		sql.append(nl);
 		sql.append("FROM ");
-		sql.append(this.meta.quoteObjectname(tbl.getTableName()));
+		sql.append(tbl.getTableExpression(this.dbConnection));
 		sql.append(';');
 		sql.append(nl);
 

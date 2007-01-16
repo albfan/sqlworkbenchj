@@ -22,6 +22,7 @@ import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 
 /**
+ * Expand the result panel in the editor to the full window size.
  *	@author  support@sql-workbench.net
  */
 public class ExpandResultAction extends WbAction

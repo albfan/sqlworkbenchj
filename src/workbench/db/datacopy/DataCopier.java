@@ -13,12 +13,11 @@ package workbench.db.datacopy;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
+import workbench.db.TableDropper;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.RowDataProducer;
 import workbench.interfaces.JobErrorHandler;
@@ -103,7 +102,8 @@ public class DataCopier
 
 		if (exists && dropTable && createTable)
 		{
-			this.targetConnection.getMetadata().dropTable(aTargetTable);
+			TableDropper dropper = new TableDropper(this.targetConnection);
+			dropper.dropTable(aTargetTable);
 			this.addMessage(ResourceMgr.getString("MsgCopyTableDropped").replaceAll("%name%", aTargetTable.getTableExpression(this.targetConnection)));
 			exists = false;
 		}
@@ -222,7 +222,8 @@ public class DataCopier
 		{
 			if (tableExists && drop)
 			{
-				this.targetConnection.getMetadata().dropTable(newTableName);
+				TableDropper dropper = new TableDropper(this.targetConnection);
+				dropper.dropTable(newTableName);
 				this.addMessage(ResourceMgr.getString("MsgCopyTableDropped").replaceAll("%name%", newTableName.getTableExpression(this.targetConnection)));
 			}
 			this.initNewTable(sourceColumns);

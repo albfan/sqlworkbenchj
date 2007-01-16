@@ -20,7 +20,7 @@ import workbench.gui.sql.SqlHistory;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
+ *	Jump to the first statement in the SQL History
  *	@author  support@sql-workbench.net
  */
 public class FirstStatementAction extends WbAction

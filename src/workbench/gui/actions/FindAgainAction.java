@@ -21,7 +21,7 @@ import workbench.resource.ResourceMgr;
 
 
 /**
- *	Action to clear the contents of a entry field
+ *	Find the next occurance of a search string.
  *	@author  support@sql-workbench.net
  */
 public class FindAgainAction extends WbAction

@@ -19,8 +19,7 @@ import workbench.interfaces.TextSelectionListener;
 import workbench.gui.sql.EditorPanel;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
- *
+ *	@author  support@sql-workbench.net
  */
 public class SpoolDataAction
 	extends WbAction

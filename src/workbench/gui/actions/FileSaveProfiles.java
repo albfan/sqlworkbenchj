@@ -20,7 +20,8 @@ import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
-public class FileSaveProfiles extends WbAction
+public class FileSaveProfiles 
+	extends WbAction
 {
 	public FileSaveProfiles()
 	{

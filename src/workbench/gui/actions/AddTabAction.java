@@ -21,7 +21,12 @@ import workbench.gui.MainWindow;
 import workbench.resource.ResourceMgr;
 
 /**
- *	@author  support@sql-workbench.net
+ * Action to add a new tab to the MainWindow's interface
+ * 
+ * @see workbench.gui.MainWindow
+ * @see workbench.gui.MainWindow#addTab()
+ * 
+ * @author  support@sql-workbench.net
  */
 public class AddTabAction 
 	extends WbAction

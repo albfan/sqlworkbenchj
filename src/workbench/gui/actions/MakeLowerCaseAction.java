@@ -21,7 +21,8 @@ import workbench.interfaces.TextSelectionListener;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
+ *	Make text lower case
+ * @see workbench.gui.sql.EditorPanel#toLowerCase()
  *	@author  support@sql-workbench.net
  */
 public class MakeLowerCaseAction extends WbAction

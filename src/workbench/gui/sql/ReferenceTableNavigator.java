@@ -34,7 +34,6 @@ import javax.swing.event.PopupMenuListener;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DependencyNode;
 import workbench.db.ReferenceTableNavigation;
-import workbench.db.ReferenceTableNavigation;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -53,6 +52,15 @@ import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
+ * A class to manage the popup menu for the reference table navigation. 
+ * This class populates the popup menu according to the passed in base table
+ * to generate the SELECT statements for retrieving referenced database rows.
+ * 
+ * It uses several other classes to build the GUI and retrieve the necessary
+ * database information
+ * @see workbench.db.ReferenceTableNavigation
+ * @see workbench.db.TableDependency
+ * @see workbench.gui.dbobjects.EditorTabSelectMenu
  * @author support@sql-workbench.net
  */
 public class ReferenceTableNavigator

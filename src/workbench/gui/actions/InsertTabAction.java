@@ -21,6 +21,7 @@ import workbench.gui.MainWindow;
 import workbench.resource.ResourceMgr;
 
 /**
+ * Insert a new tab in the MainWindow
  *	@author  support@sql-workbench.net
  */
 public class InsertTabAction extends WbAction

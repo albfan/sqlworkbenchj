@@ -20,7 +20,6 @@ import workbench.gui.sql.DwStatusBar;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
  *	@author  support@sql-workbench.net
  */
 public class SelectMaxRowsAction extends WbAction

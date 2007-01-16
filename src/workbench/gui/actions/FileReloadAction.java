@@ -18,7 +18,12 @@ import javax.swing.KeyStroke;
 import workbench.gui.sql.EditorPanel;
 import workbench.resource.ResourceMgr;
 
-public class FileReloadAction extends WbAction
+/**
+ * Reload the currently loaded file in the SQL Editor
+ * @author support@sql-workbench.net
+ */
+public class FileReloadAction 
+	extends WbAction
 {
 	private EditorPanel client;
 

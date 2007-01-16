@@ -279,12 +279,19 @@ public class SqlPanel
 		editor.setBorder(new EtchedBorderTop());
 
 		log = new JTextArea();
-		log.putClientProperty("JTextArea.infoBackground", Boolean.TRUE);
+		
+		// Save the default background when the component is enabled/editable
+		// because we want to use that color when turning off editing as well
+		// The JGoodies look and feel displays the are in gray if it is not editable
+		Color bg = log.getBackground();
 		log.setBorder(logBorder);
 		log.setFont(Settings.getInstance().getMsgLogFont());
 		log.setEditable(false);
 		log.setLineWrap(true);
 		log.setWrapStyleWord(true);
+		
+		// Now that the text area is set to readonly, re-apply the default background color
+		log.setBackground(bg);
 		log.addMouseListener(new TextComponentMouseListener());
 
 		this.resultTab = new WbTabbedPane();
@@ -2065,8 +2072,8 @@ public class SqlPanel
 
 		scriptParser.setAlternateDelimiter(altDelim);
 		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
-		scriptParser.setSupportOracleInclude(this.dbConnection.getMetadata().supportShortInclude());
-		scriptParser.setCheckForSingleLineCommands(this.dbConnection.getMetadata().supportSingleLineCommands());
+		scriptParser.setSupportOracleInclude(this.dbConnection.getDbSettings().supportShortInclude());
+		scriptParser.setCheckForSingleLineCommands(this.dbConnection.getDbSettings().supportSingleLineCommands());
 		scriptParser.setCheckHashComments(this.dbConnection.getMetadata().isMySql());
 		return scriptParser;
 	}
@@ -2640,7 +2647,7 @@ public class SqlPanel
 	 * Display the data contained in the StatementRunnerResult.
 	 * For each DataStore or ResultSet in the result, an additional
 	 * result {@link workbench.gui.sql.DwPanel} will be added.
-	 * @param result the result to be displayed (obtained from a {@link workbench.sql.StatementRunner}
+	 * @param result the result to be displayed (obtained from a {@link workbench.interfaces.StatementRunner}
 	 * @see workbench.gui.sql.DwPanel
 	 */
 	public int addResult(StatementRunnerResult result)

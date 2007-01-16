@@ -17,7 +17,7 @@ import workbench.interfaces.DbData;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
+ *	Insert a new row 
  *	@author  support@sql-workbench.net
  */
 public class InsertRowAction extends WbAction

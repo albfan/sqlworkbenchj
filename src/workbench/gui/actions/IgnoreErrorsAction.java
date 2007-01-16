@@ -25,7 +25,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- *	Action to ignore errors when executing scripts
+ *	Toggle the "ignore errors" settings
  *	@author  support@sql-workbench.net
  */
 public class IgnoreErrorsAction 

@@ -15,6 +15,8 @@ import java.awt.event.ActionEvent;
 import workbench.WbManager;
 
 /**
+ * Action to display program version information
+ * @see workbench.gui.dialogs.WbAboutDialog
  * @author support@sql-workbench.net
  */
 public class AboutAction

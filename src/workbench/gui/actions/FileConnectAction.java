@@ -20,6 +20,10 @@ import javax.swing.KeyStroke;
 import workbench.gui.MainWindow;
 import workbench.resource.ResourceMgr;
 
+/**
+ * Display the connect dialog
+ * @author support@sql-workbench.net
+ */
 public class FileConnectAction extends WbAction
 {
 	private MainWindow window;

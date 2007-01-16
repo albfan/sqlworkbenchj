@@ -17,8 +17,9 @@ import workbench.interfaces.DbData;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
- *	@author  support@sql-workbench.net
+ * Action to create a copy of the currently selected row in a table.
+ * @see workbench.interfaces.DbData
+ * @author  support@sql-workbench.net
  */
 public class CopyRowAction extends WbAction
 {

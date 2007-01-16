@@ -100,9 +100,6 @@ public class DbMetadata
 
 	private DbmsOutput oraOutput;
 
-	private boolean caseSensitive;
-	private boolean useJdbcCommit;
-	private boolean ddlNeedsCommit;
 	private boolean isOracle;
 	private boolean isPostgres;
 	private boolean isFirstSql;
@@ -115,19 +112,10 @@ public class DbMetadata
 	private boolean isExcel; 
 	private boolean isAccess;
 	
-	private boolean trimDefaults = true;
 	private boolean createInlineConstraints;
 	private boolean useNullKeyword = true;
 	private boolean fixOracleDateBug = false;
 	private boolean columnsListInViewDefinitionAllowed = true;
-	private boolean allowExtendedCreateStatement = true;
-	
-	// This is set to true if identifiers starting with
-	// a digit should always be quoted. This will 
-	// be initialized through the Settings object
-	private boolean quoteIdentifierWithDigits = false;
-	
-	private boolean allowsMultipleGetUpdateCounts = true;
 	
 	private String quoteCharacter;
 	private String dbVersion;
@@ -145,7 +133,6 @@ public class DbMetadata
 	private int schemaCaseStorage = -1;
 
 	private String tableTypeName;
-	private boolean neverQuoteObjects;
 
 	private String[] tableTypesTable; 
 	private String[] tableTypesSelectable;
@@ -153,8 +140,8 @@ public class DbMetadata
 	private List schemasToIgnore;
 	private List catalogsToIgnore;
 	
-	private boolean reportsRealSizeAsDisplaySize = false;
-
+	private DbSettings dbSettings;
+	
 	public DbMetadata(WbConnection aConnection)
 		throws SQLException
 	{
@@ -369,13 +356,10 @@ public class DbMetadata
 			LogMgr.logWarning("DbMetadata.<init>", "errro calling getDatabaseProductVersion()", e);
 		}
 
-		this.caseSensitive = settings.getCaseSensitivServers().contains(this.productName);
-		this.useJdbcCommit = settings.getServersWhichNeedJdbcCommit().contains(this.productName);
-		this.ddlNeedsCommit = settings.getServersWhereDDLNeedsCommit().contains(this.productName);
-		this.createInlineConstraints = settings.getServersWithInlineConstraints().contains(this.productName);
-
+		this.dbSettings = new DbSettings(this.getDbId(), this.productName);
+		this.createInlineConstraints = settings.getServersWithInlineConstraints().contains(productName);
 		this.useNullKeyword = !settings.getServersWithNoNullKeywords().contains(this.getDbId());
-
+		
 		this.metaSqlMgr = new MetaDataSqlManager(this.getProductName());
 
 		String regex = settings.getProperty("workbench.sql.selectnewtablepattern." + this.getDbId(), null);
@@ -447,14 +431,6 @@ public class DbMetadata
 			}
 		}
 		tableTypesSelectable = StringUtil.toArray(realTypes);
-
-		String quote = settings.getProperty("workbench.db.neverquote","");
-		this.neverQuoteObjects = quote.indexOf(this.getDbId()) > -1;
-		this.trimDefaults = settings.getBoolProperty("workbench.db." + getDbId() + ".trimdefaults", true);
-		this.quoteIdentifierWithDigits = settings.getBoolProperty("workbench.db." + getDbId() + ".quotedigits", false);
-		this.allowsMultipleGetUpdateCounts = settings.getBoolProperty("workbench.db." + getDbId() + ".multipleupdatecounts", true);
-		this.reportsRealSizeAsDisplaySize = settings.getBoolProperty("workbench.db." + getDbId() + ".charsize.usedisplaysize", false);
-		this.allowExtendedCreateStatement = settings.getBoolProperty("workbench.db." + getDbId() + ".extended.createstmt", true);
 	}
 
 	public String getTableTypeName() { return tableTypeName; }
@@ -463,28 +439,6 @@ public class DbMetadata
 		return "VIEW"; 
 	}
 
-	public boolean allowsExtendedCreateStatement()
-	{
-		return allowExtendedCreateStatement;
-	}
-	
-	public boolean allowsMultipleGetUpdateCounts()
-	{
-		return this.allowsMultipleGetUpdateCounts;
-	}
-	
-	public boolean getStripProcedureVersion()
-	{
-		String ids = Settings.getInstance().getProperty("workbench.db.stripprocversion", "");
-		List l = StringUtil.stringToList(ids, ",", true, true, false);
-		return l.contains(this.dbId);
-	}
-	
-	public String getProcVersionDelimiter()
-	{
-		return Settings.getInstance().getProperty("workbench.db.procversiondelimiter." + this.getDbId(), "");
-	}
-	
 	public DatabaseMetaData getJdbcMetadata()
 	{
 		return this.metaData;
@@ -543,6 +497,7 @@ public class DbMetadata
 		}
 		return objectsWithData;
 	}
+	
 	/**
 	 *	Return the name of the DBMS as reported by the JDBC driver
 	 */
@@ -566,42 +521,8 @@ public class DbMetadata
 	}
 
 	public String getDbVersion() { return this.dbVersion; }
-	public boolean getDDLNeedsCommit() { return ddlNeedsCommit; }
-	public boolean getUseJdbcCommit() { return this.useJdbcCommit; }
-  public boolean isStringComparisonCaseSensitive() { return this.caseSensitive; }
 
-	public boolean reportsRealSizeAsDisplaySize()
-	{
-		return this.reportsRealSizeAsDisplaySize;
-	}
-
-	public boolean supportSingleLineCommands()
-	{
-		String ids = Settings.getInstance().getProperty("workbench.db.checksinglelinecmd", "");
-		if ("*".equals(ids)) return true;
-		List dbs = StringUtil.stringToList(ids, ",", true, true);
-		return dbs.contains(this.getDbId());
-	}
-
-	public boolean supportsQueryTimeout()
-	{
-		boolean result = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".supportquerytimeout", true);
-		return result;
-	}
-	
-	public boolean supportsGetPrimaryKeys()
-	{
-		boolean result = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".supportgetpk", true);
-		return result;
-	}
-	
-	public boolean supportShortInclude()
-	{
-		String ids = Settings.getInstance().getProperty("workbench.db.supportshortinclude", "");
-		if ("*".equals(ids)) return true;
-		List dbs = StringUtil.stringToList(ids, ",", true, true);
-		return dbs.contains(this.getDbId());
-	}
+	public DbSettings getDbSettings() { return this.dbSettings; }
 	
 	/**
 	 *	Returns true if the current DBMS supports a SELECT syntax
@@ -669,12 +590,6 @@ public class DbMetadata
 		return schemasToIgnore.contains("*") || schemasToIgnore.contains(schema);
 	}
 
-	public boolean needsTableForDropIndex()
-	{
-		boolean needsTable = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".dropindex.needstable", false);
-		return needsTable;
-	}
-	
 	/**
 	 * Check if the given {@link TableIdentifier} requires
 	 * the usage of the schema for a DML (select, insert, update, delete)
@@ -694,7 +609,7 @@ public class DbMetadata
 			{
 				// In oracle we don't need the schema if the it is the current user
 				if (tblSchema == null) return false;
-				return !this.getUserName().equalsIgnoreCase(tblSchema);
+				return !this.dbConnection.getCurrentUser().equalsIgnoreCase(tblSchema);
 			}
 		}
 		catch (Throwable th)
@@ -763,22 +678,6 @@ public class DbMetadata
 		}
 	}
 
-	/**
-	 *	Return the verb which does a DROP ... CASCADE for the given
-	 *  object type. If the current DBMS does not support cascaded dropping
-	 *  of objects, then null will be returned.
-	 *
-	 *	@param aType the database object type to drop (TABLE, VIEW etc)
-	 *  @return a String which can be appended to a DROP type name command in order to drop dependent objects as well
-	 *          or null if the current DBMS does not support this.
-	 */
-	public String getCascadeConstraintsVerb(String aType)
-	{
-		if (aType == null) return null;
-		String verb = Settings.getInstance().getProperty("workbench.db.drop." + aType.toLowerCase() + ".cascade." + this.getDbId(), null);
-		return verb;
-	}
-
 	public Set getDbFunctions()
 	{
 		Set dbFunctions = new HashSet();
@@ -822,88 +721,32 @@ public class DbMetadata
 	}
 
 	/**
-	 * Drop given table. If this is successful and the
-	 * DBMS requires a COMMIT for DDL statements then
-	 * the DROP will be commited (or rolled back in case
-	 * of an error
+	 * Returns the type of the passed TableIdentifier. This could 
+	 * be VIEW, TABLE, SYNONYM, ...
+	 * If the JDBC driver does not return the object through the getTables()
+	 * method, null is returned, otherwise the value reported in TABLE_TYPE
+	 * @see #getTables(String, String, String, String[])
 	 */
-	public void dropTable(TableIdentifier aTable)
-		throws SQLException
-	{
-		Statement stmt = null;
-		try
-		{
-			StringBuilder sql = new StringBuilder();
-			sql.append("DROP TABLE ");
-			sql.append(aTable.getTableExpression());
-			String cascade = this.getCascadeConstraintsVerb("TABLE");
-			if (cascade != null)
-			{
-				sql.append(' ');
-				sql.append(cascade);
-			}
-			stmt = this.dbConnection.createStatement();
-			stmt.executeUpdate(sql.toString());
-			if (this.ddlNeedsCommit && !this.dbConnection.getAutoCommit())
-			{
-				this.dbConnection.commit();
-			}
-		}
-		catch (SQLException e)
-		{
-			if (this.ddlNeedsCommit && !this.dbConnection.getAutoCommit())
-			{
-				try { this.dbConnection.rollback(); } catch (Throwable th) {}
-			}
-			throw e;
-		}
-		finally
-		{
-			try { stmt.close(); } catch (Throwable th) {}
-		}
-	}
-
 	public String getObjectType(TableIdentifier table)
 	{
 		String type = null;
-		ResultSet rs = null;
 		try
 		{
 			TableIdentifier tbl = table.createCopy();
 			tbl.adjustCase(this.dbConnection);
-			rs = this.metaData.getTables(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), null);
-			if (rs.next())
+			DataStore ds = getTables(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), null);
+			if (ds.getRowCount() > 0)
 			{
-				type = rs.getString("TABLE_TYPE");
+				type = ds.getValueAsString(0, COLUMN_IDX_TABLE_LIST_TYPE);
 			}
 		}
 		catch (Exception e)
 		{
 			type = null;
 		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
-		}
 		return type;
 	}
 	
-	/**
-	 * Return the name of the current user.
-	 * Wrapper for DatabaseMetaData.getUserName() that throws no Exception
-	 */
-	public String getUserName()
-	{
-		try
-		{
-			return this.metaData.getUserName();
-		}
-		catch (Exception e)
-		{
-			return StringUtil.EMPTY_STRING;
-		}
-	}
-
 	public String getExtendedViewSource(TableIdentifier tbl, boolean includeDrop)
 		throws SQLException
 	{
@@ -948,7 +791,7 @@ public class DbMetadata
 			result.append(lineEnding);
 			result.append(lineEnding);
 			result.append(source);
-			if (this.ddlNeedsCommit)
+			if (this.dbSettings.ddlNeedsCommit())
 			{
 				result.append(lineEnding);
 				result.append(lineEnding);
@@ -981,7 +824,7 @@ public class DbMetadata
 		result.append(source);
 		result.append(lineEnding);
 		
-		if (this.ddlNeedsCommit)
+		if (this.dbSettings.ddlNeedsCommit())
 		{
 			result.append("COMMIT;");
 		}
@@ -1073,7 +916,7 @@ public class DbMetadata
 				result.append(type.toUpperCase());
 				result.append(' ');
 				result.append(quoteObjectname(name));
-				String cascade = this.getCascadeConstraintsVerb(type);
+				String cascade = this.dbSettings.getCascadeConstraintsVerb(type);
 				if (cascade != null)
 				{
 					result.append(' ');
@@ -1174,7 +1017,7 @@ public class DbMetadata
 		// already quoted?
 		if (aName.startsWith("\"")) return aName;
 
-		if (this.neverQuoteObjects) return StringUtil.trimQuotes(aName);
+		if (this.dbSettings.neverQuoteObjects()) return StringUtil.trimQuotes(aName);
 
 		try
 		{
@@ -1182,7 +1025,7 @@ public class DbMetadata
 
 			// Oracle and HSQL require identifiers starting with a number 
 			// have to be quoted always. 
-			if (needQuote || this.quoteIdentifierWithDigits)
+			if (needQuote || this.dbSettings.quoteIdentifierWithDigits())
 			{
 				needQuote = (Character.isDigit(aName.charAt(0)));
 			}
@@ -1920,7 +1763,7 @@ public class DbMetadata
 	/**
 	 * Return the column list for the given table.
 	 * @param table the table for which to retrieve the column definition
-	 * @see #getTableDefinition(String, String, String, String, boolean)
+	 * @see #getTableDefinition(String, String, String, String)
 	 */
 	public List<ColumnIdentifier> getTableColumns(TableIdentifier table)
 		throws SQLException
@@ -1959,43 +1802,43 @@ public class DbMetadata
 	}
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(String, String, String)} that holds
+	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
 	 *  the column name
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_COL_NAME = 0;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(String, String, String)} that holds
+	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
 	 *  the DBMS specific data type string
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE = 1;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(String, String, String)} that holds
+	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
 	 *  the primary key flag
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_PK_FLAG = 2;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(String, String, String)} that holds
+	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
 	 *  the nullable flag
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_NULLABLE = 3;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(String, String, String)} that holds
+	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
 	 *  the default value for this column
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_DEFAULT = 4;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(String, String, String)} that holds
+	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
 	 *  the remark for this column
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_REMARKS = 5;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(String, String, String)} that holds
+	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
 	 *  the integer value of the java datatype from {@link java.sql.Types}
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE = 6;
@@ -2003,28 +1846,23 @@ public class DbMetadata
 	public final static int COLUMN_IDX_TABLE_DEFINITION_DIGITS = 8;
 	public final static int COLUMN_IDX_TABLE_DEFINITION_POSITION = 9;
 
-	public DataStore getTableDefinition(TableIdentifier aTable)
-		throws SQLException
-	{
-		return getTableDefinition(aTable, !aTable.getNeverAdjustCase());
-	}
-	
 	/**
 	 * Returns the definition of the given
 	 * table in a {@link workbench.storage.DataStore }
 	 * @return definiton of the datastore
 	 * @param id The identifier of the table
-	 * @param adjustCase whether to adjust the case of the tablename
 	 * @throws SQLException If the table was not found or an error occurred 
-	 * @see #getTableDefinition(String, String, String, String, boolean)
+	 * @see #getTableDefinition(String, String, String, String)
 	 */
-	public DataStore getTableDefinition(TableIdentifier id, boolean adjustCase)
+	public DataStore getTableDefinition(TableIdentifier id)
 		throws SQLException
 	{
 		if (id == null) return null;
 		String type = id.getType();
 		if (type == null) type = tableTypeName;
-		return this.getTableDefinition(id.getRawCatalog(), id.getRawSchema(), id.getRawTableName(), type, adjustCase);
+		TableIdentifier tbl = id.createCopy();
+		tbl.adjustCase(dbConnection);
+		return this.getTableDefinition(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName(), type);
 	}
 
 	public static final String[] TABLE_DEFINITION_COLS = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "java.sql.Types", "SCALE/SIZE", "PRECISION", "POSITION"};
@@ -2042,13 +1880,12 @@ public class DbMetadata
 	 * @param aSchema The schema in which the table is defined. This should be null if the DBMS does not support schemas
 	 * @param aTable The name of the table
 	 * @param aType The type of the table
-	 * @param adjustNames If true the object names will be quoted if necessary
 	 * @throws SQLException
 	 * @return A DataStore with the table definition.
 	 * The individual columns should be accessed using the
 	 * COLUMN_IDX_TABLE_DEFINITION_xxx constants.
 	 */
-	protected DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType, boolean adjustNames)
+	protected DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType)
 		throws SQLException
 	{
 		if (aTable == null) throw new IllegalArgumentException("Tablename may not be null!");
@@ -2064,13 +1901,6 @@ public class DbMetadata
 			aSchema = this.getSchemaToUse();
 		}
 		
-		if (adjustNames)
-		{
-			aCatalog = this.adjustObjectnameCase(aCatalog);
-			aSchema = this.adjustObjectnameCase(aSchema);
-			aTable = this.adjustObjectnameCase(aTable);
-		}
-
 		if (this.sequenceReader != null && "SEQUENCE".equalsIgnoreCase(aType))
 		{
 			DataStore seqDs = this.sequenceReader.getSequenceDefinition(aSchema, aTable);
@@ -2089,7 +1919,7 @@ public class DbMetadata
 		}
 
 		ArrayList keys = new ArrayList();
-		if (this.supportsGetPrimaryKeys())
+		if (this.dbSettings.supportsGetPrimaryKeys())
 		{
 			ResultSet keysRs = null;
 			try
@@ -2151,7 +1981,7 @@ public class DbMetadata
 				}
 				String rem = rs.getString("REMARKS");
 				String def = rs.getString("COLUMN_DEF");
-				if (def != null && this.trimDefaults)
+				if (def != null && this.dbSettings.trimDefaults())
 				{
 					def = def.trim();
 				}
@@ -2228,47 +2058,11 @@ public class DbMetadata
 	public static final int COLUMN_IDX_TABLE_INDEXLIST_COL_DEF = 3;
 	public static final int COLUMN_IDX_TABLE_INDEXLIST_TYPE = 4;
 	
-	private Map indexTypeMapping;
-	public static final String IDX_TYPE_NORMAL = "NORMAL";
-	
-	private String mapIndexType(int type)
-	{
-		if (indexTypeMapping == null)
-		{
-			this.indexTypeMapping = new HashMap();
-			String map = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".indextypes", null);
-			if (map != null)
-			{
-				List<String> entries = StringUtil.stringToList(map, ";", true, true);
-				for (String entry : entries)
-				{
-					String[] mapping = entry.split(",");
-					if (mapping.length != 2) continue;
-					int value = StringUtil.getIntValue(mapping[0], -42);
-					if (value != -42)
-					{
-						indexTypeMapping.put(new Integer(value), mapping[1]);
-					}
-				}
-			}
-		}
-		String dbmsType = (String)this.indexTypeMapping.get(new Integer(type));
-		if (dbmsType == null) 
-		{
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("DbMetadata.mapIndexType()", "No mapping for type = " + type);
-			}
-			return IDX_TYPE_NORMAL;
-		}
-		return dbmsType;
-	}
-	
-
 	/**
 	 * If the passed TableIdentifier is a Synonym and the current
 	 * DBMS supports synonyms, a TableIdentifier for the "real" 
 	 * table is returned.
+	 * 
 	 * Otherwise the passed TableIdentifier is returned
 	 */
 	public TableIdentifier resolveSynonym(TableIdentifier tbl)
@@ -2276,8 +2070,10 @@ public class DbMetadata
 		if (tbl == null) return null;
 		if (!supportsSynonyms()) return tbl;
 		String type = tbl.getType();
-		if (type != null && !isSynonymType(type)) return tbl;
-		return getSynonymTable(tbl);
+		if (type != null && !dbSettings.isSynonymType(type)) return tbl;
+		TableIdentifier syn = getSynonymTable(tbl);
+		if (syn == null) return tbl;
+		return syn;
 	}
 	
 	/**
@@ -2327,7 +2123,7 @@ public class DbMetadata
 		{
 			// Retrieve the name of the PK index
 			String pkName = "";
-			if (this.supportsGetPrimaryKeys())
+			if (this.dbSettings.supportsGetPrimaryKeys())
 			{
 				ResultSet keysRs = null;
 				try
@@ -2367,7 +2163,7 @@ public class DbMetadata
 				if (def == null)
 				{
 					def = new IndexDefinition(indexName, null);
-					def.setIndexType(mapIndexType(type));
+					def.setIndexType(dbSettings.mapIndexType(type));
 					def.setUnique(!unique);
 					def.setPrimaryKeyIndex(pkName.equals(indexName));
 					defs.put(indexName, def);
@@ -2409,13 +2205,6 @@ public class DbMetadata
 		return getTableList(null, schema, types);
 	}
 	
-	public List<TableIdentifier> getTableList()
-		throws SQLException
-	{
-		String schema = this.getCurrentSchema();
-		return getTableList(null, schema, tableTypesTable);
-	}
-
 	public List<TableIdentifier> getTableList(String table, String schema)
 		throws SQLException
 	{
@@ -2464,7 +2253,8 @@ public class DbMetadata
 		return tables;
 	}
 
-	/** 	Return the current catalog for this connection. If no catalog is defined
+	/** 	
+	 *  Return the current catalog for this connection. If no catalog is defined
 	 * 	or the DBMS does not support catalogs, an empty string is returned.
 	 *
 	 * 	This method works around a bug in Microsoft's JDBC driver which does
@@ -2515,13 +2305,6 @@ public class DbMetadata
 		if (catalog == null) catalog = StringUtil.EMPTY_STRING;
 
 		return catalog;
-	}
-
-	public boolean supportsTruncate()
-	{
-		String s = Settings.getInstance().getProperty("workbench.db.truncatesupported", StringUtil.EMPTY_STRING);
-		List l = StringUtil.stringToList(s, ",");
-		return l.contains(this.getDbId());
 	}
 
 	public boolean supportsCatalogs()
@@ -3210,24 +2993,6 @@ public class DbMetadata
 		return false;
 	}
 	
-	public boolean isViewType(String type)
-	{
-		if (type == null) return false;
-		type = type.toLowerCase();
-		if (type.toUpperCase().indexOf("VIEW") > -1) return true;
-		String viewTypes = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".additional.viewtypes", "view").toLowerCase();
-		List types = StringUtil.stringToList(viewTypes, ",", true, true, false);
-		return (types.contains(type.toLowerCase()));
-	}
-	
-	public boolean isSynonymType(String type)
-	{
-		if (type == null) return false;
-		String synTypes = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".synonymtypes", "synonym").toLowerCase();
-		List types = StringUtil.stringToList(synTypes, ",", true, true, false);
-		return (types.contains(type.toLowerCase()));
-	}
-	
 	/**
 	 * Checks if the current DBMS supports synonyms.
 	 * @return true if the synonym support is available (basically if synonymReader != null)
@@ -3513,7 +3278,7 @@ public class DbMetadata
 			result.append(grants);
 		}
 		
-		if (this.ddlNeedsCommit)
+		if (this.dbSettings.ddlNeedsCommit())
 		{
 			result.append(lineEnding);
 			result.append("COMMIT;");

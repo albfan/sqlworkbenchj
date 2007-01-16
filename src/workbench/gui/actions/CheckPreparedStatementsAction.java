@@ -16,14 +16,14 @@ import java.awt.event.ActionEvent;
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
-import javax.swing.border.Border;
 
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
- *	@author  support@sql-workbench.net
+ * Action to toggle the detection of prepared statements during SQL execution
+ * @see workbench.resource.Ssettings#setCheckPreparedStatements(boolean);
+ * @author  support@sql-workbench.net
  */
 public class CheckPreparedStatementsAction 
 	extends WbAction

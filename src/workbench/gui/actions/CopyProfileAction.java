@@ -18,7 +18,9 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
- *	@author  support@sql-workbench.net
+ * Action to copy a connection profile in the connect dialog.
+ * 
+ * @author  support@sql-workbench.net
  */
 public class CopyProfileAction 
 	extends WbAction

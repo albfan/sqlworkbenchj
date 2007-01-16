@@ -176,7 +176,7 @@ public class TableDefinitionPanel
 				String msg = "<html>" + ResourceMgr.getString("TxtRetrieveTableDef") + " <b>" + this.currentTable.getTableName() + "</b></html>";
 				tableNameLabel.setText(msg);
 				DbMetadata meta = this.dbConnection.getMetadata();
-				DataStore def = meta.getTableDefinition(this.currentTable, false);
+				DataStore def = meta.getTableDefinition(this.currentTable);
 				final DataStoreTableModel model = new DataStoreTableModel(def);
 				WbSwingUtilities.invoke(new Runnable()
 				{

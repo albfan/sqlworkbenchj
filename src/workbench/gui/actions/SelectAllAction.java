@@ -21,7 +21,6 @@ import workbench.interfaces.ClipboardSupport;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to clear the contents of a entry field
  *	@author  support@sql-workbench.net
  */
 public class SelectAllAction extends WbAction

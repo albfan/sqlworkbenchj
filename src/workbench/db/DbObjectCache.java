@@ -75,19 +75,26 @@ public class DbObjectCache
 	{
 		return getTables(schema, null);
 	}
-	
+
+	private String getSchemaToUse(String schema)
+	{
+		DbMetadata meta = this.dbConnection.getMetadata();
+		return meta.adjustSchemaNameCase(schema);
+	}
 	/**
 	 * Get the tables (and views) the are currently in the cache
 	 */
 	public Set getTables(String schema, String type)
 	{
-		if (this.objects.size() == 0 || (!schemasInCache.contains(schema == null ? NULL_SCHEMA : schema.toUpperCase()))) 
+		String schemaToUse = getSchemaToUse(schema);
+		if (this.objects.size() == 0 || (!schemasInCache.contains(schemaToUse == null ? NULL_SCHEMA : schemaToUse))) 
 		{
 			try
 			{
-				List tables = this.dbConnection.getMetadata().getSelectableObjectsList(schema);
+				DbMetadata meta = this.dbConnection.getMetadata();
+				List tables = meta.getSelectableObjectsList(schemaToUse);
 				this.setTables(tables);
-				this.schemasInCache.add(schema == null ? NULL_SCHEMA : schema.toUpperCase());
+				this.schemasInCache.add(schema == null ? NULL_SCHEMA : schemaToUse);
 			}
 			catch (Exception e)
 			{
@@ -95,14 +102,15 @@ public class DbObjectCache
 			}
 		}
 		if (type != null)
-			return filterTablesByType(schema, type);
+			return filterTablesByType(schemaToUse, type);
 		else
-			return filterTablesBySchema(schema);
+			return filterTablesBySchema(schemaToUse);
 	}
 
 	private Set filterTablesByType(String schema, String type)
 	{
 		this.getTables(schema);
+		String schemaToUse = getSchemaToUse(schema);
 		Iterator itr = this.objects.keySet().iterator();
 		SortedSet result = new TreeSet();
 		while (itr.hasNext())
@@ -111,7 +119,7 @@ public class DbObjectCache
 			String ttype = tbl.getType();
 			String tSchema = tbl.getSchema();
 			if ( type.equalsIgnoreCase(ttype) &&
-				   ((schema == null || schema.equalsIgnoreCase(tSchema) || tSchema == null || "public".equalsIgnoreCase(tSchema)))
+				   ((schemaToUse == null || schemaToUse.equalsIgnoreCase(tSchema) || tSchema == null || "public".equalsIgnoreCase(tSchema)))
 				 )
 			{
 				TableIdentifier copy = tbl.createCopy();
@@ -128,11 +136,12 @@ public class DbObjectCache
 		Iterator itr = this.objects.keySet().iterator();
 		SortedSet result = new TreeSet();
 		DbMetadata meta = this.dbConnection.getMetadata();
+		String schemaToUse = getSchemaToUse(schema);
 		while (itr.hasNext())
 		{
 			TableIdentifier tbl = (TableIdentifier)itr.next();
 			String tSchema = tbl.getSchema();
-			if (schema == null || meta.ignoreSchema(tSchema) || schema.equalsIgnoreCase(tSchema))
+			if (schemaToUse == null || meta.ignoreSchema(tSchema) || schemaToUse.equalsIgnoreCase(tSchema))
 			{
 				TableIdentifier copy = tbl.createCopy();
 				copy.setSchema(null);
@@ -150,9 +159,9 @@ public class DbObjectCache
 	 */
 	public List getColumns(TableIdentifier tbl)
 	{
-		String schema = tbl.getSchema();
-		
-		if (this.objects.size() == 0 || !schemasInCache.contains(schema == null ? NULL_SCHEMA : schema.toUpperCase()))
+		String schema = getSchemaToUse(tbl.getSchema());
+
+		if (this.objects.size() == 0 || !schemasInCache.contains(schema == null ? NULL_SCHEMA : schema))
 		{
 			this.getTables(schema);
 		}

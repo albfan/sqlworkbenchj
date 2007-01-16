@@ -35,7 +35,6 @@ public class DbSettings
 	
 	// This is set to true if identifiers starting with
 	// a digit should always be quoted. This will 
-	// be initialized through the Settings object
 	private boolean quoteIdentifierWithDigits = false;
 	
 	private boolean allowsMultipleGetUpdateCounts = true;

@@ -11,10 +11,7 @@
  */
 package workbench.gui.actions;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
-import javax.swing.JMenu;
-import workbench.WbManager;
 
 import workbench.db.ConnectionProfile;
 import workbench.gui.MainWindow;
@@ -25,8 +22,9 @@ import workbench.resource.Settings;
 
 
 /**
- *	Action to clear the contents of a entry field
- *	@author  support@sql-workbench.net
+ * Action to display the DataPumper window
+ * @see workbench.gui.tools.DataPumper
+ * @author  support@sql-workbench.net
  */
 public class DataPumperAction 
 	extends WbAction

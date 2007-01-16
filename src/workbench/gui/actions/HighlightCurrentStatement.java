@@ -22,7 +22,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
+ *	Toggle highlighting of the currently executed statement.
  *	@author  support@sql-workbench.net
  */
 public class HighlightCurrentStatement 

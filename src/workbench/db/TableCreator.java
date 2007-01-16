@@ -127,7 +127,7 @@ public class TableCreator
 				}
 			}
 			
-			if (this.connection.getMetadata().getDDLNeedsCommit() && !this.connection.getAutoCommit())
+			if (this.connection.getDbSettings().ddlNeedsCommit() && !this.connection.getAutoCommit())
 			{
 				LogMgr.logDebug("TableCreator.createTable()", "Commiting the changes");
 				this.connection.commit();

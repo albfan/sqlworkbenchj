@@ -14,7 +14,6 @@ package workbench.gui.sql;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.sql.Types;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -38,7 +37,10 @@ import workbench.sql.VariablePool;
 import workbench.storage.DataStore;
 
 /**
- *
+ * A panel to enter the value for Workbench variables inside SQL statements
+ * @see VariablePrompter
+ * @see workbench.sql.VariablePool
+ * 
  * @author  support@sql-workbench.net
  */
 public class VariablesEditor 

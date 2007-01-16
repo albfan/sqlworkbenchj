@@ -11,11 +11,8 @@
  */
 package workbench.gui.actions;
 
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import workbench.WbManager;
-import workbench.gui.MainWindow;
-import workbench.gui.help.WhatsNewViewer;
 
 /**
  * @author support@sql-workbench.net

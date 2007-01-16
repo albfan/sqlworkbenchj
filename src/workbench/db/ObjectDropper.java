@@ -19,7 +19,7 @@ import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 
 /**
- * A help class to drop different types of objects
+ * A helper class to drop different types of objects
  * @author  support@sql-workbench.net
  */
 public class ObjectDropper
@@ -62,7 +62,7 @@ public class ObjectDropper
 			currentStatement = this.connection.createStatement();
 			String cascade = null;
 
-			boolean needTableForIndexDrop = this.connection.getMetadata().needsTableForDropIndex();
+			boolean needTableForIndexDrop = this.connection.getDbSettings().needsTableForDropIndex();
 			
 			for (int i=0; i < count; i++)
 			{
@@ -84,7 +84,7 @@ public class ObjectDropper
 
 				if (this.cascadeConstraints)
 				{
-					cascade = this.connection.getMetadata().getCascadeConstraintsVerb(type);
+					cascade = this.connection.getDbSettings().getCascadeConstraintsVerb(type);
 					if (cascade != null)
 					{
 						sql.append(' ');
@@ -95,15 +95,14 @@ public class ObjectDropper
 				currentStatement.execute(sql.toString());
 			}
 
-			// Check if we need to commit the DDL statements
-			if (!this.connection.getAutoCommit() && this.connection.getDdlNeedsCommit())
+			if (this.connection.shouldCommitDDL())
 			{
-				try { this.connection.commit(); } catch (Throwable th) {}
+				this.connection.commit(); 
 			}
 		}
 		catch (SQLException e)
 		{
-			if (!this.connection.getAutoCommit() && this.connection.getDdlNeedsCommit())
+			if (this.connection.shouldCommitDDL())
 			{
 				try { this.connection.rollback(); } catch (Throwable th) {}
 			}

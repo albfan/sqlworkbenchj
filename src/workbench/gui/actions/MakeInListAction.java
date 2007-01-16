@@ -18,8 +18,9 @@ import workbench.interfaces.TextSelectionListener;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
- *	@author  support@sql-workbench.net
+ * Make an "IN" List 
+ * @see workbench.gui.sql.EditorPanel#makeInListForChar()
+ * @author  support@sql-workbench.net
  */
 public class MakeInListAction
 	extends WbAction

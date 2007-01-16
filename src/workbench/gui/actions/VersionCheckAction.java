@@ -10,15 +10,11 @@
  *
  */
 package workbench.gui.actions;
-import java.awt.event.ActionEvent;
-import java.lang.reflect.Constructor;
-import javax.swing.JDialog;
 
-import javax.swing.JFrame;
+import java.awt.event.ActionEvent;
+
 
 import workbench.WbManager;
-import workbench.gui.WbSwingUtilities;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**

@@ -15,7 +15,8 @@ import workbench.log.LogMgr;
 import workbench.util.StringUtil;
 
 /**
- *
+ * A single entry for {@link workbench.gui.sql.SqlHistory}
+ * 
  * @author support@sql-workbench.net
  */
 public class SqlHistoryEntry

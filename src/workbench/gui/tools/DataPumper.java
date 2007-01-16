@@ -27,11 +27,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
-
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
@@ -41,6 +39,8 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.ProducerFactory;
+import workbench.gui.actions.AutoCompletionAction;
+import workbench.interfaces.StatusBar;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.util.ExceptionUtil;
 import workbench.gui.MainWindow;
@@ -71,7 +71,7 @@ import workbench.util.WbThread;
 public class DataPumper
 	extends JPanel
 	implements ActionListener, WindowListener, PropertyChangeListener, RowActionMonitor,
-	           ToolWindow
+	           ToolWindow, StatusBar
 {
 	private ConnectionProfile sourceProfile;
 	private File sourceFile;
@@ -79,6 +79,7 @@ public class DataPumper
 	private ConnectionProfile targetProfile;
 	protected WbConnection sourceConnection;
 	protected WbConnection targetConnection;
+	protected AutoCompletionAction completionAction;
 
 	private JFrame window;
 	
@@ -88,9 +89,8 @@ public class DataPumper
 	private DataCopier copier;
 	private EditorPanel sqlEditor;
 	private boolean supportsBatch = false;
-	boolean allowCreateTable = true; //"true".equals(Settings.getInstance().getProperty("workbench.datapumper.allowcreate", "true"));
+	boolean allowCreateTable = true; 
 
-	/** Creates new form DataPumper */
 	public DataPumper(ConnectionProfile source, ConnectionProfile target)
 	{
 		this.sourceProfile = source;
@@ -116,6 +116,7 @@ public class DataPumper
 		this.modeComboBox.addActionListener(this);
 		this.sqlEditor = EditorPanel.createSqlEditor();
 		this.sqlEditor.showFormatSql();
+		this.completionAction = new AutoCompletionAction(this.sqlEditor, this);
 		this.wherePanel.add(this.sqlEditor);
 		this.showWbCommand.setEnabled(false);
 		this.batchSize.setEnabled(false);
@@ -377,6 +378,7 @@ public class DataPumper
 			  public void run()
 			  {
 				  sourceTable.setConnection(sourceConnection);
+					completionAction.setConnection(sourceConnection);
 			  }
 		  };
 		  t.start();
@@ -1041,6 +1043,7 @@ public class DataPumper
 			this.sourceTable.removeChangeListener();
 			this.sourceConnection.disconnect();
 			this.sourceTable.setConnection(null);
+			this.completionAction.setConnection(sourceConnection);
 		}
 		catch (Exception e)
 		{
@@ -1975,5 +1978,23 @@ public class DataPumper
 		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPLog"), log, "workbench.datapumper.logwindow");
 		w.setVisible(true); // EditWindow is modal
 		w.dispose();
+	}
+
+	/*
+	 * Implementation of the StatusBar interface
+	 */
+	public void setStatusMessage(String message)
+	{
+		this.statusLabel.setText(message);
+	}
+	
+	public void clearStatusMessage()
+	{
+		this.statusLabel.setText("");
+	}
+	
+	public String getText()
+	{
+		return this.statusLabel.getText();
 	}
 }

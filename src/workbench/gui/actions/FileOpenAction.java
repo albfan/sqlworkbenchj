@@ -21,7 +21,7 @@ import workbench.interfaces.TextFileContainer;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
+ *	Open a new file in the SQL Editor
  *	@author  support@sql-workbench.net
  */
 public class FileOpenAction extends WbAction

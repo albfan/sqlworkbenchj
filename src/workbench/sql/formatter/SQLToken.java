@@ -130,7 +130,7 @@ public class SQLToken
 	 * The constructor is typically called by the lexer
 	 *
 	 * @param ID the id number of the token
-	 * @param contents A string representing the text of the token
+	 * @param text A string representing the text of the token
 	 * @param lineNumber the line number of the input on which this token started
 	 * @param charBegin the offset into the input in characters at which this token started
 	 * @param charEnd the offset into the input in characters at which this token ended

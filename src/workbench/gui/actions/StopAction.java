@@ -17,7 +17,6 @@ import workbench.interfaces.Interruptable;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
  *	@author  support@sql-workbench.net
  */
 public class StopAction extends WbAction

@@ -18,7 +18,8 @@ import workbench.gui.dialogs.export.DataStoreExporter;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
+ *	Save the content of the ResultSet as an external file
+ * @see workbench.gui.dialogs.export.DataStoreExporter
  *	@author  support@sql-workbench.net
  */
 public class SaveDataAsAction 

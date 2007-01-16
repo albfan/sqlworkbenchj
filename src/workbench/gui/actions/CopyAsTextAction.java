@@ -15,8 +15,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
 import javax.swing.KeyStroke;
 import workbench.gui.components.ClipBoardCopier;
 import workbench.gui.components.WbTable;
@@ -24,8 +22,9 @@ import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a WbTable as tab-separated text to the clipboard
- *	@author  support@sql-workbench.net
+ * Action to copy the contents of a WbTable as tab-separated text to the clipboard
+ * @see workbench.gui.components.ClipBoardCopier
+ * @author  support@sql-workbench.net
  */
 public class CopyAsTextAction 
 	extends WbAction

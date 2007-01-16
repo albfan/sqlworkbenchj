@@ -21,8 +21,9 @@ import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to paste the contents of the clipboard into the entry field
- *	@author  support@sql-workbench.net
+ * Run all statements in the current SQL Panel
+ * @see workbench.gui.sql.SqlPanel#runAll()
+ * @author  support@sql-workbench.net
  */
 public class ExecuteAllAction extends WbAction
 {

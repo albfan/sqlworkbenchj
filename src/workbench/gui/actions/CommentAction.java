@@ -22,7 +22,10 @@ import workbench.interfaces.Undoable;
 import workbench.resource.ResourceMgr;
 
 /**
- *	@author  support@sql-workbench.net
+ * Action to "comment" the currently selected text in the SQL editor. 
+ * This is done by addin single line comments to each line
+ * @see workbench.gui.sql.EditorPanel#commentSelection()	
+ * @author  support@sql-workbench.net
  */
 public class CommentAction extends WbAction
 {

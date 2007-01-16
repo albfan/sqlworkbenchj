@@ -27,6 +27,7 @@ public class LnFDefinition
 	public LnFDefinition(String desc)
 	{
 		this(desc, null, null);
+		this.isBuiltIn = false;
 	}
 	
 	public LnFDefinition(String desc, String clazz)
@@ -38,8 +39,9 @@ public class LnFDefinition
 	public LnFDefinition(String desc, String clazz, String libs)
 	{
 		this.name = desc;
-		this.className = clazz;
+		this.className = (clazz == null ? clazz : clazz.trim());
 		this.library = libs;
+		this.isBuiltIn = (libs == null);
 	}
 	
 	public boolean isBuiltInLnF()

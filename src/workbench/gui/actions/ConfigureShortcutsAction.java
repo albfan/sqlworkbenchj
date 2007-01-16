@@ -11,13 +11,14 @@
  */
 package workbench.gui.actions;
 
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import workbench.WbManager;
 import workbench.gui.MainWindow;
 import workbench.gui.settings.ShortcutEditor;
 
 /**
+ * Action to open the shortcut manager window.
+ * @see workbench.gui.settings.ShortcutEditor
  * @author support@sql-workbench.net
  */
 public class ConfigureShortcutsAction

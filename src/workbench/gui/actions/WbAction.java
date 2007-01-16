@@ -35,6 +35,7 @@ import workbench.resource.Settings;
 import workbench.resource.ShortcutManager;
 
 /**
+ * Base class for Actions in SQL Workbench/J
  *	@author  support@sql-workbench.net
  */
 public class WbAction 

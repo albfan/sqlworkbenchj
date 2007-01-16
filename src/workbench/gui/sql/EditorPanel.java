@@ -96,6 +96,11 @@ import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 
 /**
+ * An extension to {@link workbench.gui.editor.JEditTextArea}. This class
+ * implements Workbench (SQL) specific extensions to the original jEdit class.
+ * 
+ * @see workbench.gui.editor.JEditTextArea
+ * 
  * @author  support@sql-workbench.net
  */
 public class EditorPanel

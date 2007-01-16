@@ -18,7 +18,6 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 import workbench.gui.sql.EditorPanel;
 
-import workbench.interfaces.Undoable;
 import workbench.resource.ResourceMgr;
 
 /**

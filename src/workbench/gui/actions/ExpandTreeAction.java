@@ -16,7 +16,8 @@ import workbench.gui.profiles.ProfileTree;
 import workbench.resource.ResourceMgr;
 
 /**
- *
+ * Expand all items in the ProfileTree
+ * @see workbench.gui.profiles.ProfileTree#expandAll()
  * @author support@sql-workbench.net
  */
 public class ExpandTreeAction

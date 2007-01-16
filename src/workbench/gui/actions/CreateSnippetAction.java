@@ -26,8 +26,10 @@ import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
- *	Action to clear the contents of a entry field
- *	@author  support@sql-workbench.net
+ * Action to create a piece of Java code that declares the currently
+ * selected SQL statement as a variable.
+ * @see workbench.util.StringUtil#makeJavaString(String, String, boolean)
+ * @author support@sql-workbench.net
  */
 public class CreateSnippetAction extends WbAction
 {

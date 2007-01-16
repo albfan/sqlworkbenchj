@@ -19,7 +19,6 @@ import javax.swing.Action;
 import workbench.gui.components.SortArrowIcon;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
  *	@author  support@sql-workbench.net
  */
 public class SortAscendingAction extends WbAction

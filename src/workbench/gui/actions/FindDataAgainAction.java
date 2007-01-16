@@ -22,7 +22,7 @@ import workbench.resource.ResourceMgr;
 
 
 /**
- *	Action to clear the contents of a entry field
+ *	Search the next occurance in the result set. 
  *	@author  support@sql-workbench.net
  */
 public class FindDataAgainAction extends WbAction

@@ -21,6 +21,8 @@ import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 
 /**
+ * Run all statements in the current SQL Panel
+ * @see workbench.gui.sql.SqlPanel#runCurrentStatement()
  *	@author  support@sql-workbench.net
  */
 public class ExecuteCurrentAction extends WbAction

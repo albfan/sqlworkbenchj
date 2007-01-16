@@ -21,7 +21,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
+ * Toggle the display of line numbers in the editor
  *	@author  support@sql-workbench.net
  */
 public class ViewLineNumbers extends WbAction

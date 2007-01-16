@@ -21,8 +21,9 @@ import workbench.interfaces.Commitable;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to clear the contents of a entry field
- *	@author  support@sql-workbench.net
+ * Action to send a commit to the DBMS
+ * @see workbench.sql.SqlPanel#commit()
+ * @author  support@sql-workbench.net
  */
 public class CommitAction extends WbAction
 {

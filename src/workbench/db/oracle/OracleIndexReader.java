@@ -20,10 +20,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import workbench.db.DbMetadata;
+import workbench.db.DbSettings;
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
-
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 
@@ -190,7 +190,7 @@ public class OracleIndexReader
 				}
 				else if (type.indexOf(' ') > -1 || type.indexOf('-') > -1)
 				{
-					def.setIndexType(DbMetadata.IDX_TYPE_NORMAL);
+					def.setIndexType(DbSettings.IDX_TYPE_NORMAL);
 				}
 					
 			}

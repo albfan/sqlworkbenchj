@@ -110,16 +110,31 @@ public class WbConnection
 		return this.objectCache;
 	}
 
+	public String getCurrentSchema()
+	{
+		return this.metaData.getCurrentSchema();
+	}
+	
+	/**
+	 * Return the name of the current user.
+	 * Wrapper for DatabaseMetaData.getUserName() that throws no Exception
+	 */
 	public String getCurrentUser()
 	{
-		if (this.metaData == null) return null;
-		return this.metaData.getUserName();
+		try
+		{
+			return this.sqlConnection.getMetaData().getUserName();
+		}
+		catch (Exception e)
+		{
+			return StringUtil.EMPTY_STRING;
+		}
 	}
 
 	public boolean supportsQueryTimeout()
 	{
 		if (this.metaData == null) return true;
-		return this.metaData.supportsQueryTimeout();
+		return this.metaData.getDbSettings().supportsQueryTimeout();
 	}
 	
 	/**
@@ -472,7 +487,7 @@ public class WbConnection
 		throws SQLException
 	{
 		Statement stmt = null;
-		if (this.metaData.allowsExtendedCreateStatement())
+		if (this.metaData.getDbSettings().allowsExtendedCreateStatement())
 		{
 			stmt = this.sqlConnection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 		}
@@ -503,9 +518,20 @@ public class WbConnection
 
 	public boolean useJdbcCommit()
 	{
-		return this.metaData.getUseJdbcCommit();
+		return this.metaData.getDbSettings().useJdbcCommit();
 	}
 
+	public boolean shouldCommitDDL()
+	{
+		if (this.getAutoCommit()) return false;
+		return this.getDbSettings().ddlNeedsCommit();
+	}
+	
+	public DbSettings getDbSettings()
+	{
+		return this.metaData.getDbSettings();
+	}
+	
 	public DbMetadata getMetadata()
 	{
 		return this.metaData;
@@ -527,7 +553,7 @@ public class WbConnection
 	 * Return a readable display of a connection. 
 	 * This might actually send a SELECT to the database to 
 	 * retrieve the current user or schema.
-	 * @see DbMetadata#getUserName()
+	 * @see #getCurrentUser()
 	 * @see DbMetadata#getSchemaToUse()
 	 * @see DbMetadata#getCurrentCatalog()
 	 */
@@ -538,7 +564,7 @@ public class WbConnection
 		{
 			DbMetadata meta = getMetadata();
 			StringBuilder buff = new StringBuilder(100);
-			String user = meta.getUserName();
+			String user = getCurrentUser();
 			buff.append(ResourceMgr.getString("TxtUser"));
 			buff.append('=');
 			buff.append(user);
@@ -677,7 +703,7 @@ public class WbConnection
 	 */
 	public boolean getDdlNeedsCommit()
 	{
-		return this.metaData.getDDLNeedsCommit();
+		return this.metaData.getDbSettings().ddlNeedsCommit();
 	}
 
 	public synchronized void addChangeListener(PropertyChangeListener l)

@@ -210,7 +210,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 		if (this.connection != null)
 		{
 
-			this.useTruncateCheckBox.setEnabled(this.connection.getMetadata().supportsTruncate());
+			this.useTruncateCheckBox.setEnabled(this.connection.getDbSettings().supportsTruncate());
 			boolean autoCommit = this.connection.getAutoCommit();
 			if (autoCommit)
 			{

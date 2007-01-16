@@ -328,8 +328,8 @@ public class BatchRunner
 		
 		if (this.connection != null)
 		{
-			parser.setSupportOracleInclude(this.connection.getMetadata().supportSingleLineCommands());
-			parser.setCheckForSingleLineCommands(this.connection.getMetadata().supportShortInclude());
+			parser.setSupportOracleInclude(this.connection.getDbSettings().supportSingleLineCommands());
+			parser.setCheckForSingleLineCommands(this.connection.getDbSettings().supportShortInclude());
 		}
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		parser.setFile(scriptFile, this.encoding);

@@ -17,8 +17,10 @@ import workbench.interfaces.DbData;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
- *	@author  support@sql-workbench.net
+ * Delete the currently highlighted row(s) from a table
+ * @see workbench.interfaces.DbData;
+ * @see workbench.gui.sql.DwPanel
+ * @author  support@sql-workbench.net
  */
 public class DeleteRowAction extends WbAction
 {

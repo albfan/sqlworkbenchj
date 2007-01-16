@@ -146,7 +146,7 @@ public class ProcedureCreator
 					stmt.executeUpdate(sql);
 				}
 				
-				if (!dbConnection.getAutoCommit() && this.dbConnection.getMetadata().getDDLNeedsCommit())
+				if (dbConnection.shouldCommitDDL())
 				{
 					this.dbConnection.commit();
 				}
@@ -154,7 +154,7 @@ public class ProcedureCreator
 			catch (SQLException e)
 			{
 				LogMgr.logError("ProcedureCreator.recreate()", "Error when recreating procedure", e);
-				if (!dbConnection.getAutoCommit() && this.dbConnection.getMetadata().getDDLNeedsCommit())
+				if (dbConnection.shouldCommitDDL())
 				{
 					try { this.dbConnection.rollback(); } catch (Throwable th) {}
 				}

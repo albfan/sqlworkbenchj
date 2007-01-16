@@ -30,7 +30,9 @@ import workbench.gui.actions.PrevStatementAction;
 import workbench.resource.Settings;
 
 /**
- *
+ * Stores the SQL scripts entered in the {@link SqlPanel} and manages
+ * a history of statements. 
+ * 
  * @author  support@sql-workbench.net
  */
 public class SqlHistory

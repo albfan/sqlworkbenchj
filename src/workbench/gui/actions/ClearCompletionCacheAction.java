@@ -16,6 +16,9 @@ import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 
 /**
+ * Action to clear the cache for code completion
+ *
+ * @see workbench.db.DbObjectCache
  * @author  support@sql-workbench.net
  */
 public class ClearCompletionCacheAction

@@ -34,7 +34,7 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.filter.FilterExpression;
 
 /**
- *	Filter data from a WbTable 
+ *	Select a different filter for a table.
  *	@author  support@sql-workbench.net
  */
 public class FilterPickerAction 

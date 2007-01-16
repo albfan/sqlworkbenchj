@@ -21,9 +21,9 @@ import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 
 /**
- *	An action to toggle the auto commit attribute of the 
+ * An action to toggle the auto commit attribute of the 
  * given {@link workbench.db.WbConnection}
- *	@author  support@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class ToggleAutoCommitAction 
 	extends WbAction

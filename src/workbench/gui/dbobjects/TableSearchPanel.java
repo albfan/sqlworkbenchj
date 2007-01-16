@@ -518,7 +518,7 @@ public class TableSearchPanel
 		String text = this.searchText.getText();
 		searcher.setMaxRows(maxRows);
 		searcher.setCriteria(text);
-		boolean sensitive= this.connection.getMetadata().isStringComparisonCaseSensitive();
+		boolean sensitive= this.connection.getDbSettings().isStringComparisonCaseSensitive();
 		boolean ignoreCase = !sensitive;
 		if (sensitive)
 		{

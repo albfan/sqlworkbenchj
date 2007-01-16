@@ -20,7 +20,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
+ *	Delete an etry from a List
  *	@author  support@sql-workbench.net
  */
 public class DeleteListEntryAction extends WbAction

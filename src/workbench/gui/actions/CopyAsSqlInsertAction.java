@@ -22,8 +22,9 @@ import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
- *	@author  support@sql-workbench.net
+ * Action to copy the contents of a table to the clipboard as SQL INSERT statements
+ * @see workbench.gui.components.ClipBoardCopier
+ * @author  support@sql-workbench.net
  */
 public class CopyAsSqlInsertAction extends WbAction
 {

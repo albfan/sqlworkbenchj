@@ -11,15 +11,10 @@
  */
 package workbench.gui.actions;
 
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
 
 import workbench.gui.MainWindow;
-import workbench.resource.ResourceMgr;
 
 /**
  *	@author  support@sql-workbench.net

@@ -23,7 +23,12 @@ import javax.swing.KeyStroke;
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 
-public class FileDiscardAction extends WbAction
+/**
+ * Discard the file currently loaded in the SQL Editor
+ * @author support@sql-workbench.net
+ */
+public class FileDiscardAction 
+	extends WbAction
 {
 	private SqlPanel client;
 

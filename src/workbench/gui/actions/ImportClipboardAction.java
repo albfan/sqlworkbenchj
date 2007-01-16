@@ -26,6 +26,7 @@ import workbench.resource.ResourceMgr;
 import workbench.util.WbStringTokenizer;
 
 /**
+ * Import data from the clipboard into a table
  * @author support@sql-workbench.net
  */
 public class ImportClipboardAction

@@ -18,8 +18,9 @@ import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of the data as SQL update statements into the clipboard
- *	@author  support@sql-workbench.net
+ * Action to copy the selected content of the data as SQL update statements into the clipboard
+ * @see workbench.gui.components.ClipBoardCopier
+ * @author  support@sql-workbench.net
  */
 public class CopySelectedAsSqlUpdateAction extends WbAction
 {

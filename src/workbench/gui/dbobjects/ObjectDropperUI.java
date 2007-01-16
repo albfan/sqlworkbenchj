@@ -235,7 +235,7 @@ public class ObjectDropperUI
 		for (int i=0; i < numTypes; i++)
 		{
 			String type = (String)this.objectTypes.get(i);
-			String verb = this.connection.getMetadata().getCascadeConstraintsVerb(type);
+			String verb = this.connection.getDbSettings().getCascadeConstraintsVerb(type);
 
 			// if at least one type can be dropped with CASCADE, enable the checkbox
 			if (verb != null)

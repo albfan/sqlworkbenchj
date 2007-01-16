@@ -21,7 +21,9 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.MacroManager;
 
 /**
- *	@author  support@sql-workbench.net
+ * Action to add a new macro.
+ * @see workbench.sql.MacroManager
+ * @author  support@sql-workbench.net
  */
 public class AddMacroAction extends WbAction
 	implements TextSelectionListener

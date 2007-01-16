@@ -17,6 +17,7 @@ import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 
 /**
+ * Import a file into the current result set
  *	@author  support@sql-workbench.net
  */
 public class ImportFileAction extends WbAction

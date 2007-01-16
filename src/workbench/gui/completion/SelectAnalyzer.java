@@ -59,10 +59,6 @@ public class SelectAnalyzer
 			wherePos = SqlUtil.getWherePosition(sql);
 		}
 
-		int groupStart = 0;
-		if (wherePos > 0) groupStart = wherePos + 1;
-		else if (fromPos > 0) groupStart = fromPos + 1;
-		
 		int groupPos = SqlUtil.getKeywordPosition("GROUP BY", sql);
 		int havingPos = SqlUtil.getKeywordPosition("HAVING", sql);
 		int orderPos = SqlUtil.getKeywordPosition("ORDER BY", sql);

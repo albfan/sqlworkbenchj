@@ -21,7 +21,7 @@ import workbench.interfaces.Searchable;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to clear the contents of a entry field
+ *	Search inside the result set
  *	@author  support@sql-workbench.net
  */
 public class FindDataAction extends WbAction

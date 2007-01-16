@@ -17,8 +17,9 @@ import workbench.WbManager;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to paste the contents of the clipboard into the entry field
- *	@author  support@sql-workbench.net
+ * Exit and close the application
+ * @see workbench.WbManager#exitWorkbench()
+ * @author  support@sql-workbench.net
  */
 public class FileExitAction extends WbAction
 {

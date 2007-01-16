@@ -21,6 +21,9 @@ import workbench.interfaces.StatusBar;
 import workbench.resource.ResourceMgr;
 
 /**
+ * Action to display the code-completion for SQL statements.
+ * @see workbench.gui.completion.DefaultCompletionHandler
+ * 
  * @author  support@sql-workbench.net
  */
 public class AutoCompletionAction

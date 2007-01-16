@@ -242,7 +242,7 @@ public class SqlCommand
 		}
 
 		ResultSet rs = null;
-		boolean multipleUpdateCounts = (this.currentConnection != null ? this.currentConnection.getMetadata().allowsMultipleGetUpdateCounts() : true);
+		boolean multipleUpdateCounts = (this.currentConnection != null ? this.currentConnection.getDbSettings().allowsMultipleGetUpdateCounts() : true);
 
 		int counter = 0;
 		while (moreResults || updateCount > -1)

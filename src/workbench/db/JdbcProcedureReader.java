@@ -110,8 +110,8 @@ public class JdbcProcedureReader
 	{
 		DataStore ds = buildProcedureListDataStore(this.dbMeta);
 		
-		String versionDelimiter = dbMeta.getProcVersionDelimiter();
-		boolean stripVersion = dbMeta.getStripProcedureVersion();
+		String versionDelimiter = dbMeta.getDbSettings().getProcVersionDelimiter();
+		boolean stripVersion = dbMeta.getDbSettings().getStripProcedureVersion();
 		try
 		{
 			while (rs.next())

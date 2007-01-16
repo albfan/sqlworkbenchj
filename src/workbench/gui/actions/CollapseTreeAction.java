@@ -16,7 +16,8 @@ import workbench.gui.profiles.ProfileTree;
 import workbench.resource.ResourceMgr;
 
 /**
- *
+ * Action to collapse all nodes in the connection profile tree
+ * @see workbench.gui.profiles.ProfileTree#collapseAll()
  * @author support@sql-workbench.net
  */
 public class CollapseTreeAction

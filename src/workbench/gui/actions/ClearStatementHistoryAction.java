@@ -12,17 +12,13 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.KeyStroke;
-
 import workbench.gui.sql.SqlHistory;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
- *	@author  support@sql-workbench.net
+ * Action remove all entries from the SQL history
+ * @see workbench.gui.sql.SqlHistory;
+ * @author  support@sql-workbench.net
  */
 public class ClearStatementHistoryAction extends WbAction
 {

@@ -20,7 +20,9 @@ import workbench.gui.sql.SplitPaneExpander;
 import workbench.resource.ResourceMgr;
 
 /**
- *	@author  support@sql-workbench.net
+ * Expand the editor in a SqlPanel to the full window size.
+ * 
+ * @author  support@sql-workbench.net
  */
 public class ExpandEditorAction extends WbAction
 {

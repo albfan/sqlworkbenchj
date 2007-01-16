@@ -15,7 +15,12 @@ import java.awt.event.ActionEvent;
 
 import workbench.gui.MainWindow;
 
-public class FileDisconnectAction extends WbAction
+/**
+ * Disconnect the current window
+ * @author support@sql-workbench.net
+ */
+public class FileDisconnectAction 
+	extends WbAction
 {
 	private MainWindow window;
 

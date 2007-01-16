@@ -22,7 +22,7 @@ import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
+ *	Display the previous statement from the SQL History
  *	@author  support@sql-workbench.net
  */
 public class PrevStatementAction extends WbAction

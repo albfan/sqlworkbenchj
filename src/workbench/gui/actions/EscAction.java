@@ -18,7 +18,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 /**
- *	Action to clear the contents of a entry field
+ *	An action mapped to the ESC key
  *	@author  support@sql-workbench.net
  */
 public class EscAction extends WbAction

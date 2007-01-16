@@ -17,6 +17,9 @@ import workbench.interfaces.ResultReceiver;
 import workbench.util.WbThread;
 
 /**
+ * This class sends a SQL statement to one of the 
+ * panels in the MainWindow
+ * 
  * @author support@sql-workbench.net
  */
 public class PanelContentSender

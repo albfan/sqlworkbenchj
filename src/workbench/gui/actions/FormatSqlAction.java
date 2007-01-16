@@ -21,7 +21,8 @@ import workbench.interfaces.FormattableSql;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to clear the contents of a entry field
+ *	Reformat the currently selected SQL statement
+ * 
  *	@author  support@sql-workbench.net
  */
 public class FormatSqlAction extends WbAction

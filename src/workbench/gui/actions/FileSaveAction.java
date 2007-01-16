@@ -22,6 +22,7 @@ import workbench.interfaces.TextFileContainer;
 import workbench.resource.ResourceMgr;
 
 /**
+ * Save the current file in the SQL Editor.
  *	@author  support@sql-workbench.net
  */
 public class FileSaveAction extends WbAction

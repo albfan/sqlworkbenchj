@@ -21,7 +21,7 @@ import workbench.interfaces.Commitable;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to clear the contents of a entry field
+ *	Send a rollback() to the client
  *	@author  support@sql-workbench.net
  */
 public class RollbackAction extends WbAction

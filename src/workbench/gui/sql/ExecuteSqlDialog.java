@@ -146,7 +146,7 @@ public class ExecuteSqlDialog
 					stmt = dbConn.createStatement();
 					stmt.executeUpdate(sql);
 					statusMessage.setText(ResourceMgr.getString("MsgIndexCreated"));
-					if (dbConn.getMetadata().getDDLNeedsCommit() && !dbConn.getAutoCommit())
+					if (dbConn.shouldCommitDDL())
 					{
 						dbConn.commit();
 					}
@@ -160,7 +160,7 @@ public class ExecuteSqlDialog
 				}
 				catch (Exception e)
 				{
-					if (dbConn.getMetadata().getDDLNeedsCommit() && !dbConn.getAutoCommit())
+					if (dbConn.shouldCommitDDL())
 					{
 						try { dbConn.rollback(); } catch (Throwable th) {}
 					}

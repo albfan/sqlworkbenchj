@@ -239,8 +239,8 @@ public class DbExplorerPanel
 				workspaceSchema = true;
 			}
 			
-			if (currentSchema == null) currentSchema = this.dbConnection.getMetadata().getCurrentSchema();
-			if (currentSchema == null) currentSchema = this.dbConnection.getMetadata().getUserName();
+			if (currentSchema == null) currentSchema = this.dbConnection.getCurrentSchema();
+			if (currentSchema == null) currentSchema = this.dbConnection.getCurrentUser();
 			
 			if (schemas.size() > 0)
 			{

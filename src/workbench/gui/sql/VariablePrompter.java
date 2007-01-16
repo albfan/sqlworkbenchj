@@ -17,7 +17,11 @@ import workbench.sql.VariablePool;
 import workbench.storage.DataStore;
 
 /**
- *
+ * Examine SQL statements whether they need parameters to be entered. 
+ * If the passed SQL Statement contains Workbench specific variables
+ * the user is prompted to enter them.
+ * @see workbench.sql.VariablePool
+ * 
  * @author  support@sql-workbench.net
  */
 public class VariablePrompter

@@ -17,6 +17,7 @@ import workbench.interfaces.TextFileContainer;
 import workbench.resource.ResourceMgr;
 
 /**
+ * Save the current file in the SQL Editor with a new name.
  *	@author  support@sql-workbench.net
  */
 public class FileSaveAsAction extends WbAction

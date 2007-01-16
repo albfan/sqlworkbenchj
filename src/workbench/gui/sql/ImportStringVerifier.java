@@ -39,6 +39,9 @@ import workbench.util.ClipboardFile;
 import workbench.util.StringUtil;
 
 /**
+ * This class checks the content of an input string and tries to match
+ * it against a ResultInfo.
+ * 
  * @author support@sql-workbench.net
  */
 public class ImportStringVerifier

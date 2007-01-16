@@ -17,7 +17,6 @@ import workbench.gui.sql.DwPanel;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to clear the contents of a entry field
  *	@author  support@sql-workbench.net
  */
 public class SelectKeyColumnsAction 

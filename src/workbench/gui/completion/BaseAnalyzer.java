@@ -14,7 +14,6 @@ package workbench.gui.completion;
 import java.awt.Toolkit;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;

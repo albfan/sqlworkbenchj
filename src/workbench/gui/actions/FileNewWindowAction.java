@@ -16,6 +16,7 @@ import java.awt.event.ActionEvent;
 import workbench.WbManager;
 
 /**
+ * Open a new SQL MainWindow
  *	@author  support@sql-workbench.net
  */
 public class FileNewWindowAction extends WbAction

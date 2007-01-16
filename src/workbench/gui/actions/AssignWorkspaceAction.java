@@ -17,9 +17,15 @@ import workbench.gui.MainWindow;
 import workbench.resource.ResourceMgr;
 
 /**
- *	@author  support@sql-workbench.net
+ * Action to assign the currently loaded workspace to the current connection profile
+ * @see workbench.gui.MainWindow#assignWorkspace()
+ * @see workbench.db.ConnectionProfile
+ * @see workbench.util.WbWorkspace
+ * 
+ * @author  support@sql-workbench.net
  */
-public class AssignWorkspaceAction extends WbAction
+public class AssignWorkspaceAction 
+	extends WbAction
 {
 	private MainWindow client;
 

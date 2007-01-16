@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-
 import javax.swing.ActionMap;
 import javax.swing.ComponentInputMap;
 import javax.swing.InputMap;
@@ -56,8 +55,8 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
-
 import workbench.db.DbMetadata;
+import workbench.db.DbSettings;
 import workbench.db.ObjectScripter;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -1079,16 +1078,18 @@ public class TableListPanel
 	{
 		if (table == null) return false;
 		DbMetadata meta = this.dbConnection.getMetadata();
-		return (meta.supportsSynonyms() && meta.isSynonymType(table.getType()));
+		DbSettings dbs = this.dbConnection.getDbSettings();
+		return (meta.supportsSynonyms() && dbs.isSynonymType(table.getType()));
 	}
 	
 	private boolean isTable()
 	{
 		if (this.selectedTable == null) return false;
 		DbMetadata meta = this.dbConnection.getMetadata();
+		DbSettings dbs = this.dbConnection.getDbSettings();
 		String type = selectedTable.getType();
 		if (isTableType(type)) return true;
-		if (meta.supportsSynonyms() && meta.isSynonymType(type))
+		if (meta.supportsSynonyms() && dbs.isSynonymType(type))
 		{
 			TableIdentifier rt = getRealTable();
 			if (rt == null) return false;
@@ -1102,7 +1103,8 @@ public class TableListPanel
 		if (selectedTable == null) return false;
 		String type = selectedTable.getType();
 		DbMetadata meta = this.dbConnection.getMetadata();
-		if (meta.supportsSynonyms() && meta.isSynonymType(type))
+		DbSettings dbs = this.dbConnection.getDbSettings();
+		if (meta.supportsSynonyms() && dbs.isSynonymType(type))
 		{
 			TableIdentifier rt = getRealTable();
 			if (rt == null) return false;
@@ -1121,6 +1123,7 @@ public class TableListPanel
 			String sql = "";
 
 			DbMetadata meta = this.dbConnection.getMetadata();
+			DbSettings dbs = this.dbConnection.getDbSettings();
 			if (this.shouldRetrieveTable || tableDefinition.getRowCount() == 0)
 			{
 				this.retrieveTableDefinition();
@@ -1129,11 +1132,11 @@ public class TableListPanel
 			}
 			String type = this.selectedTable.getType();
 			
-			if (meta.isViewType(type))
+			if (dbs.isViewType(type))
 			{
 				sql = meta.getExtendedViewSource(this.selectedTable, tableDefinition.getDataStore(), true);
 			}
-			else if (meta.isSynonymType(type))
+			else if (dbs.isSynonymType(type))
 			{
 				sql = meta.getSynonymSource(this.selectedTable);
 				if (sql.length() == 0)

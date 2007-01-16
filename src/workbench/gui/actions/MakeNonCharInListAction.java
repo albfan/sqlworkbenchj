@@ -18,7 +18,8 @@ import workbench.interfaces.TextSelectionListener;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
+ *	Make an "IN" list
+ * @see workbench.gui.sql.EditorPanel#makeInListForNonChar()
  *	@author  support@sql-workbench.net
  */
 public class MakeNonCharInListAction extends WbAction implements TextSelectionListener

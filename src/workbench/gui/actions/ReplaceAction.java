@@ -21,7 +21,7 @@ import workbench.interfaces.Replaceable;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to clear the contents of a entry field
+ *	Start search & replace in the editor
  *	@author  support@sql-workbench.net
  */
 public class ReplaceAction extends WbAction

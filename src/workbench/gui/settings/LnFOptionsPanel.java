@@ -16,7 +16,6 @@ import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.AbstractListModel;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -29,7 +28,6 @@ import javax.swing.event.ListSelectionListener;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.components.DividerBorder;
-import workbench.gui.components.WbButton;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.lnf.LnFDefinition;
@@ -143,6 +141,11 @@ public class LnFOptionsPanel
 		{
 			definitionPanel.setDefinition(null);
 		}
+		if (index >= lnfList.getModel().getSize())
+		{
+			index = lnfList.getModel().getSize() - 1;
+		}
+		lnfList.setSelectedIndex(index);
 		lnfList.repaint();
 	}
 

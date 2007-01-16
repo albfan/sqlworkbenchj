@@ -15,7 +15,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.Action;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 
@@ -23,7 +22,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
  *	@author  support@sql-workbench.net
  */
 public class SelectTabAction extends WbAction

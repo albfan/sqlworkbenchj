@@ -11,7 +11,6 @@
  */
 package workbench.gui.actions;
 
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
 import javax.swing.event.ListSelectionListener;
@@ -21,7 +20,9 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
- *	@author  support@sql-workbench.net
+ * Create a SQL script to delete the selected row from a WbTable.
+ * @see workbench.db.DeleteScriptGenerator
+ * @author  support@sql-workbench.net
  */
 public class CreateDeleteScriptAction 
 	extends WbAction

@@ -11,7 +11,6 @@
  */
 package workbench.gui.actions;
 
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -22,7 +21,6 @@ import workbench.gui.MainWindow;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to paste the contents of the clipboard into the entry field
  *	@author  support@sql-workbench.net
  */
 public class ShowDbExplorerAction
