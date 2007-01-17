@@ -22,7 +22,9 @@ import workbench.resource.Settings;
 
 /**
  * Action to toggle the detection of prepared statements during SQL execution
- * @see workbench.resource.Ssettings#setCheckPreparedStatements(boolean);
+ * 
+ * @see workbench.resource.Settings#setCheckPreparedStatements(boolean)
+ * 
  * @author  support@sql-workbench.net
  */
 public class CheckPreparedStatementsAction 

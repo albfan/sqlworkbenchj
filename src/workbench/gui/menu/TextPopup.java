@@ -18,6 +18,9 @@ import workbench.gui.actions.WbAction;
 import workbench.interfaces.ClipboardSupport;
 
 /**
+ * An popup menu which adds a clear and select all action to the 
+ * {@link CutCopyPastePopup} menu.
+ * 
  * @author  support@sql-workbench.net
  */
 public class TextPopup 
@@ -36,6 +39,11 @@ public class TextPopup
 		this.add(this.selectAll.getMenuItem());
 	}
 	
+	/**
+	 * Add another action to this popup menu.
+	 * @param anAction the action to be added
+	 * @param withSep if true a separator is added to the menu before adding the action
+	 */
 	public void addAction(WbAction anAction, boolean withSep)
 	{
 		if (withSep) this.addSeparator();

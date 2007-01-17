@@ -35,6 +35,9 @@ import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.storage.ResultInfo;
 
+/**
+ * Methods for manipulating and analyzing SQL statements.
+ */
 public class SqlUtil
 {
 	private static Pattern specialCharPattern = Pattern.compile("[$:\\/ \\.;,]");
@@ -139,6 +142,10 @@ public class SqlUtil
 		}
 	}
 
+	/**
+	 * If the given SQL command is an UPDATE command, return 
+	 * the table that is updated, otherwise return null;
+	 */
 	public static String getUpdateTable(String sql)
 	{
 		try

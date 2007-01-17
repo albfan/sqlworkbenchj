@@ -16,7 +16,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -37,13 +36,11 @@ import workbench.util.StringUtil;
 public class JdbcProcedureReader
 	implements ProcedureReader
 {
-	protected DbMetadata dbMeta;
-	private boolean needsTerminator;
+	protected WbConnection connection;
 	
-	public JdbcProcedureReader(DbMetadata meta)
+	public JdbcProcedureReader(WbConnection conn)
 	{
-		this.dbMeta = meta;
-		needsTerminator = proceduresNeedTerminator();
+		this.connection = conn;
 	}
 	
 	public StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType)
@@ -60,7 +57,7 @@ public class JdbcProcedureReader
 		ResultSet rs = null;
 		try
 		{
-			rs = this.dbMeta.getJdbcMetadata().getProcedures(catalog, schema, procName);
+			rs = this.connection.getSqlConnection().getMetaData().getProcedures(catalog, schema, procName);
 			if (rs.next())
 			{
 				int type = rs.getInt(8);
@@ -91,7 +88,7 @@ public class JdbcProcedureReader
 			aSchema = null;
 		}
 		
-		ResultSet rs = this.dbMeta.getSqlConnection().getMetaData().getProcedures(aCatalog, aSchema, "%");
+		ResultSet rs = this.connection.getSqlConnection().getMetaData().getProcedures(aCatalog, aSchema, "%");
 		return fillProcedureListDataStore(rs);
 	}
 
@@ -108,10 +105,10 @@ public class JdbcProcedureReader
 	public DataStore fillProcedureListDataStore(ResultSet rs)
 		throws SQLException
 	{
-		DataStore ds = buildProcedureListDataStore(this.dbMeta);
+		DataStore ds = buildProcedureListDataStore(this.connection.getMetadata());
 		
-		String versionDelimiter = dbMeta.getDbSettings().getProcVersionDelimiter();
-		boolean stripVersion = dbMeta.getDbSettings().getStripProcedureVersion();
+		String versionDelimiter = this.connection.getMetadata().getDbSettings().getProcVersionDelimiter();
+		boolean stripVersion = this.connection.getMetadata().getDbSettings().getStripProcedureVersion();
 		try
 		{
 			while (rs.next())
@@ -181,7 +178,7 @@ public class JdbcProcedureReader
 		ResultSet rs = null;
 		try
 		{
-			rs = this.dbMeta.getSqlConnection().getMetaData().getProcedureColumns(aCatalog, aSchema, dbMeta.adjustObjectnameCase(aProcname), "%");
+			rs = this.connection.getSqlConnection().getMetaData().getProcedureColumns(aCatalog, aSchema, aProcname, "%");
 			while (rs.next())
 			{
 				int row = ds.addRow();
@@ -228,7 +225,7 @@ public class JdbcProcedureReader
 	{
 		if (def == null) return;
 
-		GetMetaDataSql sql = dbMeta.metaSqlMgr.getProcedureSourceSql();
+		GetMetaDataSql sql = this.connection.getMetadata().metaSqlMgr.getProcedureSourceSql();
 		if (sql == null)
 		{
 			throw new NoConfigException();
@@ -239,14 +236,15 @@ public class JdbcProcedureReader
 		// MS SQL Server (sometimes?) appends a ;1 to
 		// the end of the procedure name
 		int i = procName.indexOf(';');
-		if (i > -1 && this.dbMeta.isSqlServer())
+		if (i > -1 && this.connection.getMetadata().isSqlServer())
 		{
 			procName = procName.substring(0, i);
 		}
 
 		StrBuffer source = new StrBuffer(500);
 
-		source.append(this.getProcedureHeader(def.getCatalog(), def.getSchema(), procName, def.getResultType()));
+		StringBuilder header = getProcedureHeader(def.getCatalog(), def.getSchema(), procName, def.getResultType());
+		source.append(header);
 
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -262,7 +260,7 @@ public class JdbcProcedureReader
 				LogMgr.logInfo("DbMetadata.getProcedureSource()", "Using query=\n" + sql.getSql());
 			}
 
-			stmt = this.dbMeta.getSqlConnection().createStatement();
+			stmt = this.connection.createStatement();
 			rs = stmt.executeQuery(sql.getSql());
 			while (rs.next())
 			{
@@ -278,13 +276,18 @@ public class JdbcProcedureReader
 		{
 			LogMgr.logError("JdbcProcedureReader.getProcedureSource()", "Error retrieving procedure source", e);
 			source = new StrBuffer(ExceptionUtil.getDisplay(e));
-			if (this.dbMeta.isPostgres()) try { this.dbMeta.getSqlConnection().rollback(); } catch (Throwable th) {}
+			if (this.connection.getMetadata().isPostgres())
+			{
+				try { this.connection.rollback(); } catch (Throwable th) {}
+			}
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
-		
+
+		boolean needsTerminator = this.connection.getDbSettings().proceduresNeedTerminator();
+
 		if (!source.endsWith(';') && needsTerminator)
 		{
 			source.append(';');
@@ -292,7 +295,8 @@ public class JdbcProcedureReader
 		
 		String result = source.toString();
 		
-		boolean replaceNL = Settings.getInstance().getBoolProperty("workbench.db." + dbMeta.getDbId() + ".replacenl.proceduresource", false);
+		String dbId = this.connection.getMetadata().getDbId();
+		boolean replaceNL = Settings.getInstance().getBoolProperty("workbench.db." + dbId + ".replacenl.proceduresource", false);
 		
 		if (replaceNL)
 		{
@@ -303,11 +307,5 @@ public class JdbcProcedureReader
 		def.setSource(result);
 	}
 	
-	private boolean proceduresNeedTerminator()
-	{
-		String value = Settings.getInstance().getProperty("workbench.db.noprocterminator", null);
-		if (value == null) return true;
-		List l = StringUtil.stringToList(value, ",");
-		return !l.contains(this.dbMeta.getDbId());
-	}
+
 }

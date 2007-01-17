@@ -23,12 +23,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import workbench.db.ConnectionProfile;
-import workbench.db.DbMetadata;
 import workbench.db.ErrorInformationReader;
 import workbench.db.JdbcProcedureReader;
-import workbench.db.NoConfigException;
-import workbench.db.ProcedureDefinition;
-import workbench.db.ProcedureReader;
 import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -38,7 +34,6 @@ import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -46,7 +41,7 @@ import workbench.util.StringUtil;
  * @author  support@sql-workbench.net
  */
 public class OracleMetadata
-	implements SequenceReader, ProcedureReader, ErrorInformationReader
+	implements SequenceReader, ErrorInformationReader
 {
 	private WbConnection connection;
 	private PreparedStatement columnStatement;
@@ -58,7 +53,7 @@ public class OracleMetadata
 	private boolean alwaysShowCharSemantics = false;
 	private JdbcProcedureReader jdbcProcReader = null;
 	
-	public OracleMetadata(DbMetadata meta, WbConnection conn)
+	public OracleMetadata(WbConnection conn)
 	{
 		this.connection = conn;
 		try
@@ -407,108 +402,6 @@ public class OracleMetadata
 		return rs;
 	}
 	
-	private final StringBuilder PROC_HEADER = new StringBuilder("CREATE OR REPLACE ");
-	
-	public StringBuilder getProcedureHeader(String catalog, String schema, String procname, int procType)
-	{
-		return PROC_HEADER;
-	}
-	
-	public boolean procedureExists(String catalog, String schema, String procname, int type)
-	{
-		return getProcReader().procedureExists(catalog, schema, procname, type);
-	}
-	
-	public DataStore getProcedureColumns(String catalog, String schema, String procname)
-		throws SQLException
-	{
-		return getProcReader().getProcedureColumns(catalog, schema, procname);
-	}
-	
-	public DataStore getProcedures(String catalog, String schema)
-		throws SQLException
-	{
-		return getProcReader().getProcedures(catalog, schema);
-	}
-
-	public StrBuffer getPackageSource(String owner, String packageName)
-	{
-		final String sql = "SELECT text \n" +
-			"FROM all_source \n" +
-			"WHERE name = ? \n" +
-			"AND   owner = ? \n" +
-			"AND   type = ? \n" +
-			"ORDER BY line";
-		
-		StrBuffer result = new StrBuffer(1000);
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		
-		try
-		{
-			int lineCount = 0;
-			synchronized (connection)
-			{
-				stmt = this.connection.getSqlConnection().prepareStatement(sql);
-				stmt.setString(1, packageName);
-				stmt.setString(2, owner);
-				stmt.setString(3, "PACKAGE");
-				rs = stmt.executeQuery();
-				while (rs.next())
-				{
-					String line = rs.getString(1);
-					if (line != null)
-					{
-						lineCount ++;
-						if (lineCount == 1)
-						{
-							result.append("CREATE OR REPLACE ");
-						}
-						result.append(line);
-					}
-				}
-				if (!(result.endsWith('\n') || result.endsWith('\r'))) result.append(nl);
-				result.append("/");
-				result.append(nl);
-				result.append(nl);
-				lineCount = 0;
-
-				stmt.clearParameters();
-				stmt.setString(1, packageName);
-				stmt.setString(2, owner);
-				stmt.setString(3, "PACKAGE BODY");
-				rs = stmt.executeQuery();
-				while (rs.next())
-				{
-					String line = rs.getString(1);
-					if (line != null)
-					{
-						lineCount ++;
-						if (lineCount == 1)
-						{
-							result.append("CREATE OR REPLACE ");
-						}
-						result.append(line);
-					}
-				}
-			}
-			if (!(result.endsWith('\n') || result.endsWith('\r'))) result.append(nl);
-			if (lineCount > 0) result.append("/");
-			result.append(nl);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result;
-	}
-	
 	private String getDbLinkTargetSchema(String dblink, String owner)
 	{
 		String sql = null;
@@ -732,31 +625,6 @@ public class OracleMetadata
 			try {  this.columnStatement.close();  } catch (Throwable th) {}
 		}
 	}
-	
-	private JdbcProcedureReader getProcReader()
-	{
-		if (this.jdbcProcReader == null) 
-		{
-			this.jdbcProcReader = new JdbcProcedureReader(this.connection.getMetadata());
-		}
-		return this.jdbcProcReader;
-	}
-	
-	public void readProcedureSource(ProcedureDefinition def)
-		throws NoConfigException
-	{
-		
-		if (def.getCatalog() != null)
-		{
-			StrBuffer source = getPackageSource(def.getSchema(), def.getCatalog());
-			def.setSource(source.toString());
-			def.setOraclePackage(true);			
-		}
-		else
-		{
-			JdbcProcedureReader procReader = getProcReader();
-			procReader.readProcedureSource(def);
-		}
-	}	
+
 
 }

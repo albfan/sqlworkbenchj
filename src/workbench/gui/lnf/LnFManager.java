@@ -19,7 +19,7 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import workbench.resource.Settings;
 
 /**
- *
+ * Retrieve and store LnF definitions in the the Settings object
  * @author support@sql-workbench.net
  */
 public class LnFManager

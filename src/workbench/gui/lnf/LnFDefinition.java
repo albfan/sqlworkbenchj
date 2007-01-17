@@ -14,7 +14,10 @@ package workbench.gui.lnf;
 import workbench.util.StringUtil;
 
 /**
- *
+ * The definition of a pluggable look and feel. It stores the classname
+ * of the Look & Feel together with the library from which the class
+ * should be loaded
+ * 
  * @author support@sql-workbench.net
  */
 public class LnFDefinition

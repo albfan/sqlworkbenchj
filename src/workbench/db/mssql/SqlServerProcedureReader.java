@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
+import workbench.db.WbConnection;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
@@ -31,13 +32,11 @@ import workbench.util.StringUtil;
 public class SqlServerProcedureReader
 	extends JdbcProcedureReader
 {
-	private Connection dbConn = null;
 	private final String GET_PROC_SQL = "{call sp_stored_procedures '%', ?}";
 
-	public SqlServerProcedureReader(DbMetadata db)
+	public SqlServerProcedureReader(WbConnection db)
 	{
 		super(db);
-		this.dbConn = db.getSqlConnection();
 	}
 	
 	public StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType)
@@ -55,7 +54,7 @@ public class SqlServerProcedureReader
 		throws SQLException
 	{
 		//PreparedStatement stmt = this.dbConn.prepareStatement(GET_PROC_SQL);
-		CallableStatement cstmt = this.dbConn.prepareCall(GET_PROC_SQL);
+		CallableStatement cstmt = this.connection.getSqlConnection().prepareCall(GET_PROC_SQL);
 		
 		DataStore ds = null;
 		ResultSet rs = null;
@@ -70,7 +69,7 @@ public class SqlServerProcedureReader
 				cstmt.setString(1, owner);
 			}
 			rs = cstmt.executeQuery();
-			ds = buildProcedureListDataStore(this.dbMeta);
+			ds = buildProcedureListDataStore(this.connection.getMetadata());
 			while (rs.next())
 			{
 				String dbname = rs.getString("PROCEDURE_QUALIFIER");

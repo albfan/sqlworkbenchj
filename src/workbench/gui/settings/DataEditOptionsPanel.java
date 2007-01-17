@@ -21,7 +21,10 @@ import workbench.resource.Settings;
 import workbench.util.FileDialogUtil;
 
 /**
- *
+ * A panel to edit the options for data editing, such as the font to be 
+ * used in the JTable, the PK Mapping file, colors used for required
+ * fields and alternating row coloring.
+ * 
  * @author  support@sql-workbench.net
  */
 public class DataEditOptionsPanel

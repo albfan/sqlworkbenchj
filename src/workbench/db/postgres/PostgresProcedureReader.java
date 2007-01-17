@@ -12,9 +12,9 @@
 package workbench.db.postgres;
 
 import java.sql.DatabaseMetaData;
-import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
+import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
@@ -25,9 +25,9 @@ import workbench.util.StringUtil;
 public class PostgresProcedureReader
 	extends JdbcProcedureReader
 {
-	public PostgresProcedureReader(DbMetadata meta)
+	public PostgresProcedureReader(WbConnection conn)
 	{
-		super(meta);
+		super(conn);
 	}
 	
 	public StringBuilder getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)

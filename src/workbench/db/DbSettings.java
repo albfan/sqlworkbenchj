@@ -19,6 +19,8 @@ import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
+ * Stores and manages db specific settings.
+ * 
  * @author support@sql-workbench.net
  */
 public class DbSettings
@@ -191,5 +193,13 @@ public class DbSettings
 			return IDX_TYPE_NORMAL;
 		}
 		return dbmsType;
+	}	
+	
+	public boolean proceduresNeedTerminator()
+	{
+		String value = Settings.getInstance().getProperty("workbench.db.noprocterminator", null);
+		if (value == null) return true;
+		List l = StringUtil.stringToList(value, ",");
+		return !l.contains(this.dbId);
 	}	
 }

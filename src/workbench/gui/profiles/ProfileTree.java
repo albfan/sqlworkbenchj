@@ -45,7 +45,9 @@ import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 
 /**
- *
+ * A Tree to display connection profiles
+ * It supports drag & drop from profiles into different groups
+ * 
  * @author support@sql-workbench.net
  */
 public class ProfileTree

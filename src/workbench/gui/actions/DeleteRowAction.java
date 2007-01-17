@@ -18,7 +18,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  * Delete the currently highlighted row(s) from a table
- * @see workbench.interfaces.DbData;
+ * @see workbench.interfaces.DbData
  * @see workbench.gui.sql.DwPanel
  * @author  support@sql-workbench.net
  */

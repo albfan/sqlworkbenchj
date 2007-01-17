@@ -50,6 +50,7 @@ import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleConstraintReader;
 import workbench.db.oracle.OracleIndexReader;
 import workbench.db.oracle.OracleMetadata;
+import workbench.db.oracle.OracleProcedureReader;
 import workbench.db.oracle.OracleSynonymReader;
 import workbench.db.postgres.PostgresDDLFilter;
 import workbench.db.postgres.PostgresIndexReader;
@@ -191,7 +192,7 @@ public class DbMetadata
 		if (productLower.indexOf("oracle") > -1)
 		{
 			this.isOracle = true;
-			this.oracleMetaData = new OracleMetadata(this, this.dbConnection);
+			this.oracleMetaData = new OracleMetadata(this.dbConnection);
 			this.constraintReader = new OracleConstraintReader();
 			this.synonymReader = new OracleSynonymReader();
 
@@ -200,7 +201,7 @@ public class DbMetadata
 			settings.addPropertyChangeListener(this);
 			
 			this.sequenceReader = this.oracleMetaData;
-			this.procedureReader = this.oracleMetaData;
+			this.procedureReader = new OracleProcedureReader(this.dbConnection);
 			this.errorInfoReader = this.oracleMetaData;
 			this.fixOracleDateBug = Settings.getInstance().getBoolProperty("workbench.db.oracle.date.usetimestamp", true);
 			this.indexReader = new OracleIndexReader(this);
@@ -211,7 +212,7 @@ public class DbMetadata
 			this.selectIntoPattern = Pattern.compile(SELECT_INTO_PG);
 			this.constraintReader = new PostgresConstraintReader();
 			this.sequenceReader = new PostgresSequenceReader(this.dbConnection.getSqlConnection());
-			this.procedureReader = new PostgresProcedureReader(this);
+			this.procedureReader = new PostgresProcedureReader(this.dbConnection);
 			this.indexReader = new PostgresIndexReader(this);
 			this.ddlFilter = new PostgresDDLFilter();
 		}
@@ -239,7 +240,7 @@ public class DbMetadata
 		{
 			this.isFirebird = true;
 			this.constraintReader = new FirebirdConstraintReader();
-			this.procedureReader = new FirebirdProcedureReader(this);
+			this.procedureReader = new FirebirdProcedureReader(this.dbConnection);
 			// Jaybird 2.0 reports the Firebird version in the 
 			// productname. To ease the DBMS handling we'll use the same
 			// product name that is reported with the 1.5 driver. 
@@ -252,7 +253,7 @@ public class DbMetadata
 			boolean useJdbc = Settings.getInstance().getBoolProperty("workbench.db.mssql.usejdbcprocreader", true);
 			if (!useJdbc)
 			{
-				this.procedureReader = new SqlServerProcedureReader(this);
+				this.procedureReader = new SqlServerProcedureReader(this.dbConnection);
 			}
 		}
 		else if (productLower.indexOf("db2") > -1)
@@ -267,7 +268,7 @@ public class DbMetadata
 		}
 		else if (productLower.indexOf("mysql") > -1)
 		{
-			this.procedureReader = new MySqlProcedureReader(this, this.dbConnection);
+			this.procedureReader = new MySqlProcedureReader(this.dbConnection);
 			this.isMySql = true;
 		}
 		else if (productLower.indexOf("informix") > -1)
@@ -324,7 +325,7 @@ public class DbMetadata
 		// we use the default implementation
 		if (this.procedureReader == null)
 		{
-			this.procedureReader = new JdbcProcedureReader(this);
+			this.procedureReader = new JdbcProcedureReader(this.dbConnection);
 		}
 
 		if (this.indexReader == null)

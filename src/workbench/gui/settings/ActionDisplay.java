@@ -14,6 +14,10 @@ package workbench.gui.settings;
 import workbench.gui.renderer.*;
 
 /**
+ * A wrapper class to display an Action for the {@link ShortCutEditor}
+ * It simply holds a text and a tooltip
+ * 
+ * @see ActionDisplayRenderer
  * @author support@sql-workbench.net
  */
 public class ActionDisplay

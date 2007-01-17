@@ -16,8 +16,9 @@ import workbench.gui.sql.SqlHistory;
 import workbench.resource.ResourceMgr;
 
 /**
- * Action remove all entries from the SQL history
- * @see workbench.gui.sql.SqlHistory;
+ * Action to remove all entries from the SQL history
+ * @see workbench.gui.sql.SqlHistory
+ * 
  * @author  support@sql-workbench.net
  */
 public class ClearStatementHistoryAction extends WbAction

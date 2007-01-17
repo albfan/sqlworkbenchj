@@ -31,7 +31,13 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- *
+ * A single SQL command. This class is used if no special class was found
+ * for a given SQL verb. The execute method checks if the command 
+ * returned a result set or simply an update count.
+ * 
+ * An instance of a SQL command should always be executed in a separate Thread
+ * to allow cancelling of the running statement.
+ * 
  * @author  support@sql-workbench.net
  */
 public class SqlCommand
@@ -91,6 +97,12 @@ public class SqlCommand
 		return hasWarning;
 	}
 
+	/**
+	 * Removes the SQL verb of this command. The verb is defined
+	 * as the first "word" in the SQL string that is not a comment.
+	 * 
+	 * @see workbench.util.SqlUtil#getSqlVerb(String)
+	 */
 	protected String stripVerb(String sql)
 	{
 		String result = "";
@@ -109,6 +121,17 @@ public class SqlCommand
 		return result;
 	}
 	
+	/**
+	 * Cancels this statements execution. Cancelling is done by
+	 * calling <tt>cancel</tt> on the current JDBC Statement object. This requires
+	 * that the JDBC driver actually supports cancelling of statements <b>and</b>
+	 * that this method is called from a differen thread. 
+	 * 
+	 * It also sets the internal cancelled flag so that <tt>SqlCommand</tt>s 
+	 * that process data in a loop can check this flag and exit the loop
+	 * (e.g. {@link workbench.sql.wbcommands.WbExport})
+	 * 
+	 */
 	public void cancel()
 		throws SQLException
 	{
@@ -132,6 +155,14 @@ public class SqlCommand
 		}
 	}
 
+	/**
+	 * This method should be called, once the caller is finished with running
+	 * the SQL command. This releases any database resources that were
+	 * obtained during the execution of the statement (especially it 
+	 * closes the JDBC statement object that was used to run this command).
+	 * 
+	 * If this statement has been cancelled a rollback() is sent to the server.
+	 */
 	public void done()
 	{
 		if (this.currentStatement != null)

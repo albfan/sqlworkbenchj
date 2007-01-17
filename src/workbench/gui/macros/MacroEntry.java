@@ -11,6 +11,9 @@
  */
 package workbench.gui.macros;
 
+/**
+ * One Macro entry in the GUI dialogs
+ */
 public class MacroEntry
 {
 	private String text;

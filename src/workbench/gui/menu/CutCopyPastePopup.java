@@ -20,6 +20,8 @@ import workbench.gui.actions.WbAction;
 import workbench.interfaces.ClipboardSupport;
 
 /**
+ * A popup menu with the usual Cut, Copy and Paste entries for text fields.
+ * 
  * @author  support@sql-workbench.net
  */
 public class CutCopyPastePopup 

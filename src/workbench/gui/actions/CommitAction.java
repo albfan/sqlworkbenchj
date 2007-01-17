@@ -22,7 +22,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  * Action to send a commit to the DBMS
- * @see workbench.sql.SqlPanel#commit()
+ * @see workbench.gui.sql.SqlPanel#commit()
  * @author  support@sql-workbench.net
  */
 public class CommitAction extends WbAction

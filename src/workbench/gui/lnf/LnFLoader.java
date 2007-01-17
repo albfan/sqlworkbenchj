@@ -20,8 +20,7 @@ import javax.swing.UIManager;
 import workbench.WbManager;
 
 /**
- * A class to manage Look and feels that can be 
- * loaded at runtime
+ * A class to manage Look and feels that can be loaded at runtime.
  * @author support@sql-workbench.net
  */
 public class LnFLoader

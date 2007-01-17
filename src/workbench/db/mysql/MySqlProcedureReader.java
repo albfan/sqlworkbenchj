@@ -13,7 +13,6 @@ package workbench.db.mysql;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
@@ -28,12 +27,9 @@ import workbench.util.StringUtil;
 public class MySqlProcedureReader
 	extends JdbcProcedureReader
 {
-	private WbConnection conn;
-	
-	public MySqlProcedureReader(DbMetadata meta, WbConnection con)
+	public MySqlProcedureReader(WbConnection con)
 	{
-		super(meta);
-		this.conn = con;
+		super(con);
 	}
 
 	public StringBuilder getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
@@ -50,7 +46,7 @@ public class MySqlProcedureReader
 		ResultSet rs = null;
 		try
 		{
-			stmt = conn.getSqlConnection().prepareStatement(sql);
+			stmt = this.connection.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, (aSchema == null ? "%" : aSchema));
 			stmt.setString(2, aProcname);
 			rs = stmt.executeQuery();
