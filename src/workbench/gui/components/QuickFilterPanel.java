@@ -46,12 +46,12 @@ import workbench.interfaces.QuickFilter;
 import workbench.resource.ResourceMgr;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
-import workbench.storage.filter.ContainsComparator;
+import workbench.storage.filter.RegExComparator;
 import workbench.util.StringUtil;
 
 /**
  * A small panel with a find and find next button, and a criteria field 
-*  which provides a quick search facitiliy for a WbTable component
+ * which provides a quick search facitiliy for a WbTable component
  * @author  support@sql-workbench.net
  */
 public class QuickFilterPanel 
@@ -66,7 +66,7 @@ public class QuickFilterPanel
 	private JComboBox columnDropDown; 
 	private QuickFilterAction filterAction;	
 	private ResetFilterAction resetFilterAction;
-	private final ColumnComparator comparator = new ContainsComparator();
+	private final ColumnComparator comparator = new RegExComparator();
 	private String[] columnList;
 	private boolean showColumnDropDown;
 	private JCheckBoxMenuItem[] columnItems;

@@ -11,12 +11,12 @@
  */
 package workbench.storage.filter;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Implementation of the ColumnComparator using regular expressions.
+ * 
  * @author support@sql-workbench.net
  */
 public class RegExComparator
@@ -54,7 +54,8 @@ public class RegExComparator
 			p = Pattern.compile((String)reference);
 		}
 		Matcher m = p.matcher((String)value);
-		return m.matches();
+		//return m.matches();
+		return m.find();
 	}
 
 	public boolean equals(Object other)
