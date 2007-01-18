@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
-
 import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -29,8 +28,10 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -43,7 +44,6 @@ public class WbSchemaReport
 {
 	public static final String VERB = "WBREPORT";
 	private SchemaReporter reporter;
-	private ArgumentParser cmdLine;
 	private int currentTable = 0;
 
 	public WbSchemaReport()
@@ -52,12 +52,12 @@ public class WbSchemaReport
 		cmdLine.addArgument("types");
 		cmdLine.addArgument("file");
 		cmdLine.addArgument("namespace");
-		cmdLine.addArgument("tables");
+		cmdLine.addArgument("tables", ArgumentType.TableArgument);
 		cmdLine.addArgument("schemas");
-		cmdLine.addArgument("format");
-		cmdLine.addArgument("useschemaname");
-		cmdLine.addArgument("includeprocedures");
-		cmdLine.addArgument("includetables");
+		cmdLine.addArgument("format", StringUtil.stringToList("wb,dbdesigner"));
+		cmdLine.addArgument("useschemaname", ArgumentType.BoolArgument);
+		cmdLine.addArgument("includeprocedures", ArgumentType.BoolArgument);
+		cmdLine.addArgument("includetables", ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 	}
@@ -71,7 +71,7 @@ public class WbSchemaReport
 		StatementRunnerResult result = new StatementRunnerResult();
 		this.currentConnection = aConnection;
 		
-		sql = stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
+		sql = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
 
 		try
 		{

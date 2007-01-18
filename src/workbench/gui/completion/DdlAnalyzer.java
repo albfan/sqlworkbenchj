@@ -10,9 +10,6 @@
  *
  */
 package workbench.gui.completion;
-import java.util.ArrayList;
-import workbench.db.DbMetadata;
-import workbench.db.IndexDefinition;
 import workbench.db.WbConnection;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
@@ -60,30 +57,32 @@ public class DdlAnalyzer
 			this.schemaForTableList = this.dbConnection.getMetadata().getCurrentSchema();
 		}
 
-		if (!"DROP".equals(verb))
+		if ("DROP".equals(verb))
+		{
+			if (type == null || between(cursorPos,verbToken.getCharEnd(), typeToken.getCharBegin()))
+			{
+				context = CONTEXT_KW_LIST;
+				this.keywordFile = "drop_types.txt";
+			}
+
+			// for DROP etc, we'll need to be after the table keyword
+			// otherwise it could be a DROP PROCEDURE as well.
+			if ("TABLE".equals(type) && cursorPos >= typeToken.getCharEnd())
+			{
+				context = CONTEXT_TABLE_LIST;
+				setTableTypeFilter(this.dbConnection.getMetadata().getTableTypeName());
+			}
+			else if ("VIEW".equals(type) && cursorPos >= typeToken.getCharEnd())
+			{
+				context = CONTEXT_TABLE_LIST;
+				setTableTypeFilter(this.dbConnection.getMetadata().getViewTypeName());
+			}
+		}
+		else
 		{
 			context = NO_CONTEXT;
-			return;
 		}
-		
-		if (type == null || between(cursorPos,verbToken.getCharEnd(), typeToken.getCharBegin()))
-		{
-			context = CONTEXT_KW_LIST;
-			this.keywordFile = "drop_types.txt";
-		}
-		
-		// for DROP etc, we'll need to be after the table keyword
-		// otherwise it could be a DROP PROCEDURE as well.
-		if ("TABLE".equals(type) && cursorPos >= typeToken.getCharEnd())
-		{
-			context = CONTEXT_TABLE_LIST;
-			setTableTypeFilter(this.dbConnection.getMetadata().getTableTypeName());
-		}
-		else if ("VIEW".equals(type) && cursorPos >= typeToken.getCharEnd())
-		{
-			context = CONTEXT_TABLE_LIST;
-			setTableTypeFilter(this.dbConnection.getMetadata().getViewTypeName());
-		}
+			
 	}
 
 

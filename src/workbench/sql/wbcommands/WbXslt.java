@@ -12,13 +12,13 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
+import workbench.util.SqlUtil;
 import workbench.util.XsltTransformer;
 
 /**
@@ -60,7 +60,7 @@ public class WbXslt
 			return result;
 		}
 
-		String parm = stripVerb(aSql); //aSql.trim().substring(this.getVerb().length());
+		String parm = SqlUtil.stripVerb(aSql);
 
 		cmdLine.parse(parm);
 

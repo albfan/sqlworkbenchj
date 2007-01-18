@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.log.LogMgr;
@@ -26,6 +25,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.CharacterRange;
 import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
@@ -43,7 +43,6 @@ public class WbExport
 	implements RowActionMonitor
 {
 	public static final String VERB = "WBEXPORT";
-	private ArgumentParser cmdLine;
 	private DataExporter exporter;
 	private boolean directExport = false;
 	private boolean continueOnError = false;
@@ -55,7 +54,7 @@ public class WbExport
 	public WbExport()
 	{
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument("type");
+		cmdLine.addArgument("type", StringUtil.stringToList("text,xml,sqlinsert,sqlupdate,sqldeleteinsert,html"));
 		cmdLine.addArgument("file");
 		cmdLine.addArgument("title");
 		cmdLine.addArgument("table");
@@ -64,40 +63,39 @@ public class WbExport
 		cmdLine.addArgument("dateformat");
 		cmdLine.addArgument("timestampformat");
 		cmdLine.addArgument("decimal");
-//		cmdLine.addArgument("cleancr");
 		cmdLine.addArgument("charfunc");
 		cmdLine.addArgument("concat");
 		cmdLine.addArgument("concatfunc");
 		cmdLine.addArgument("commitevery");
-		cmdLine.addArgument("header");
-		cmdLine.addArgument("createtable");
-		cmdLine.addArgument("nodata");
+		cmdLine.addArgument("header", ArgumentType.BoolArgument);
+		cmdLine.addArgument("createtable", ArgumentType.BoolArgument);
+		cmdLine.addArgument("nodata", ArgumentType.BoolArgument);
 		cmdLine.addArgument("encoding");
 		cmdLine.addArgument("showprogress");
 		cmdLine.addArgument("keycolumns");
-		cmdLine.addArgument("append");
+		cmdLine.addArgument("append", ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
-		cmdLine.addArgument("escapehtml");
-		cmdLine.addArgument("createfullhtml");
-		cmdLine.addArgument("sourcetable");
+		cmdLine.addArgument("escapehtml", ArgumentType.BoolArgument);
+		cmdLine.addArgument("createfullhtml", ArgumentType.BoolArgument);
+		cmdLine.addArgument("sourcetable", ArgumentType.TableArgument);
 		cmdLine.addArgument("outputdir");
-		cmdLine.addArgument("usecdata");
-		cmdLine.addArgument("escapetext");
-		cmdLine.addArgument("quotealways");
+		cmdLine.addArgument("usecdata", ArgumentType.BoolArgument);
+		cmdLine.addArgument("escapetext", StringUtil.stringToList("control,7bit,8bit,extended,none"));
+		cmdLine.addArgument("quotealways", ArgumentType.BoolArgument);
 		cmdLine.addArgument("lineending");
 		cmdLine.addArgument("showencodings");
-		cmdLine.addArgument("verbosexml");
-		cmdLine.addArgument("oraldr");
-		cmdLine.addArgument("writeoracleloader");
-		cmdLine.addArgument("compress");
+		cmdLine.addArgument("verbosexml", ArgumentType.BoolArgument);
+		//cmdLine.addArgument("oraldr");
+		cmdLine.addArgument("writeoracleloader", ArgumentType.BoolArgument);
+		cmdLine.addArgument("compress", ArgumentType.BoolArgument);
 		cmdLine.addArgument("blobidcols");
 		cmdLine.addArgument("lobidcols");
 		cmdLine.addArgument("blobtype");
-		cmdLine.addArgument("clobasfile");
-		cmdLine.addArgument("continueonerror");
+		cmdLine.addArgument("clobasfile", ArgumentType.BoolArgument);
+		cmdLine.addArgument("continueonerror", ArgumentType.BoolArgument);
 	}
-
+	
 	public String getVerb() { return VERB; }
 
 	private String getWrongArgumentsMessage()
@@ -124,7 +122,7 @@ public class WbExport
 		StatementRunnerResult result = new StatementRunnerResult();
 		this.currentConnection = aConnection;
 		
-		sql = stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
+		sql = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
 
 		try
 		{
@@ -252,7 +250,7 @@ public class WbExport
 				{
 					exporter.setEscapeRange(CharacterRange.RANGE_8BIT_EXTENDED);
 				}
-				else if ("false".equalsIgnoreCase(escape))
+				else if ("none".equalsIgnoreCase(escape) || "false".equalsIgnoreCase(escape))
 				{
 					exporter.setEscapeRange(null);
 				}

@@ -28,6 +28,37 @@ public class StringUtilTest
 		super(testName);
 	}
 
+	public void testEqualString()
+	{
+		String one = "bla";
+		String two = null;
+		
+		assertEquals(false, StringUtil.equalString(one, two));
+		assertEquals(false, StringUtil.equalString(two, one));
+		
+		assertEquals(false, StringUtil.equalStringIgnoreCase(one, two));
+		assertEquals(false, StringUtil.equalStringIgnoreCase(two, one));
+		
+		one = "bla";
+		two = "bla";
+		
+		assertEquals(true, StringUtil.equalString(one, two));
+		assertEquals(true, StringUtil.equalStringIgnoreCase(two, one));
+
+		one = "bla";
+		two = "BLA";
+		
+		assertEquals(false, StringUtil.equalString(one, two));
+		assertEquals(true, StringUtil.equalStringIgnoreCase(two, one));
+		
+		one = "bla";
+		two = "blub";
+		
+		assertEquals(false, StringUtil.equalString(one, two));
+		assertEquals(false, StringUtil.equalStringIgnoreCase(two, one));
+		
+		
+	}
 	public void testCaseCheck()
 	{
 		assertEquals(false, StringUtil.isUpperCase("This is a test"));

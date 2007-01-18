@@ -20,7 +20,13 @@ import java.util.Set;
  * A class to test whether a given SQL Verb is an internal 
  * Workbench command. This is used by the SqlFormatter, because
  * the verbs for WbXXXX commands are not formatted in uppercase.
+ * 
+ * This is also used by the code completion to test if a command is 
+ * a WbCommand
+ * 
  * @see workbench.sql.formatter.SqlFormatter
+ * @see workbench.gui.completion.StatementContext
+ * 
  * @author support@sql-workbench.net
  */
 public class CommandTester
@@ -32,23 +38,23 @@ public class CommandTester
 	{
 		commands = new HashSet();
 		commands.add(WbCopy.VERB);
-		commands.add(WbExport.VERB);
-		commands.add(WbImport.VERB);
-		commands.add(WbSchemaDiff.VERB);
-		commands.add(WbSchemaReport.VERB);
-		commands.add(WbInclude.INCLUDE_LONG);
-		commands.add(WbXslt.VERB);
+		commands.add(WbDefinePk.VERB);
 		commands.add(WbDefineVar.DEFINE_LONG);
 		commands.add(WbDefineVar.DEFINE_SHORT);
-		commands.add(WbRemoveVar.VERB);
+		commands.add(WbEndBatch.VERB);
+		commands.add(WbExport.VERB);
 		commands.add(WbFeedback.VERB);
+		commands.add(WbImport.VERB);
+		commands.add(WbInclude.INCLUDE_LONG);
+		commands.add(WbListPkDef.VERB);
+		commands.add(WbLoadPkMapping.VERB);
+		commands.add(WbRemoveVar.VERB);
+		commands.add(WbSavePkMapping.VERB);
+		commands.add(WbSchemaDiff.VERB);
+		commands.add(WbSchemaReport.VERB);
 		commands.add(WbSelectBlob.VERB);
 		commands.add(WbStartBatch.VERB);
-		commands.add(WbEndBatch.VERB);
-		commands.add(WbDefinePk.VERB);
-		commands.add(WbListPkDef.VERB);
-		commands.add(WbSavePkMapping.VERB);
-		commands.add(WbLoadPkMapping.VERB);
+		commands.add(WbXslt.VERB);
 		
 		formattedWords = new HashMap();
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);

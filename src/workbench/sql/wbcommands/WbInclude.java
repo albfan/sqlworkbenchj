@@ -15,6 +15,7 @@ import java.io.File;
 import java.sql.SQLException;
 import workbench.db.WbConnection;
 import workbench.sql.DelimiterDefinition;
+import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
 import workbench.sql.BatchRunner;
@@ -37,17 +38,16 @@ public class WbInclude
 
 	private final String verb;
 	private BatchRunner batchRunner;
-	private ArgumentParser cmdLine;
 
 	private WbInclude(String aVerb)
 	{
 		this.verb = aVerb;
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("file");
-		cmdLine.addArgument("continueonerror");
-		cmdLine.addArgument("checkescapedquotes");
+		cmdLine.addArgument("continueonerror", ArgumentType.BoolArgument);
+		cmdLine.addArgument("checkescapedquotes", ArgumentType.BoolArgument);
 		cmdLine.addArgument("delimiter");
-		cmdLine.addArgument("verbose");
+		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
 		cmdLine.addArgument("encoding");
 		this.isUpdatingCommand = true;
 	}
@@ -72,7 +72,7 @@ public class WbInclude
 		}
 		else
 		{
-			clean = stripVerb(clean);
+			clean = SqlUtil.stripVerb(clean);
 		}
 		
 		String file = null;

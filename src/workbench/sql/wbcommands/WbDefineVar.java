@@ -14,7 +14,6 @@ package workbench.sql.wbcommands;
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import workbench.db.WbConnection;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
@@ -22,6 +21,7 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.VariablePool;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
 
@@ -51,7 +51,7 @@ public class WbDefineVar
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String sql = stripVerb(aSql);
+		String sql = SqlUtil.stripVerb(aSql);
 
 		WbStringTokenizer tok = new WbStringTokenizer("=", true, "\"'", false);
 		tok.setSourceString(sql);

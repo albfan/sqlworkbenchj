@@ -415,19 +415,22 @@ public class StringUtil
 	public static final boolean equalString(String one, String other)
 	{
 		if (one == null && other == null) return true;
-		if (one == null && other != null) return false;
-		if (one != null && other == null) return false;
+		if (one == null || other == null) return false;
 		return one.equals(other);
 	}
 
 	public static final boolean equalStringIgnoreCase(String one, String other)
 	{
 		if (one == null && other == null) return true;
-		if (one == null && other != null) return false;
-		if (one != null && other == null) return false;
+		if (one == null || other == null) return false;
 		return one.equalsIgnoreCase(other);
 	}
 
+	public static final List<String> stringToList(String aString)
+	{
+		return stringToList(aString, ",");
+	}
+	
 	public static final List<String> stringToList(String aString, String aDelimiter)
 	{
 		return stringToList(aString, aDelimiter, false, false);

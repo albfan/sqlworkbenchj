@@ -11,8 +11,6 @@
  */
 package workbench.gui.completion;
 
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,6 +19,7 @@ import java.util.Set;
 import workbench.db.WbConnection;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.util.SqlUtil;
 
@@ -31,7 +30,7 @@ import workbench.util.SqlUtil;
 public class StatementContext
 {
 	private BaseAnalyzer analyzer;
-	
+	private CommandTester wbTester = new CommandTester();
 	public StatementContext(WbConnection conn, String sql, int pos)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
@@ -62,9 +61,13 @@ public class StatementContext
 			{
 				analyzer = new InsertAnalyzer(conn, sql, pos);
 			}
-			else if ("CREATE".equalsIgnoreCase(verb))
+			else if ("CREATE".equalsIgnoreCase(verb) || "CREATE OR REPLACE".equalsIgnoreCase(verb))
 			{
 				analyzer = new CreateAnalyzer(conn, sql, pos);
+			}
+			else if (wbTester.isWbCommand(verb))
+			{
+				analyzer = new WbCommandAnalyzer(conn, sql, pos);
 			}
 		}
 		
@@ -74,6 +77,18 @@ public class StatementContext
 		}
 	}
 
+	public char quoteCharForValue(String value)
+	{
+		if (analyzer == null) return 0;
+		return analyzer.quoteCharForValue(value);
+	}
+	
+	public boolean isWbParam()
+	{
+		if (analyzer == null) return false;
+		return analyzer.isWbParam();
+	}
+	
 	public boolean isKeywordList()
 	{
 		if (analyzer == null) return false;
@@ -234,7 +249,7 @@ public class StatementContext
 		return false;
 	}
 	
-	
+
 	public boolean isStatementSupported()
 	{
 		return this.analyzer != null;

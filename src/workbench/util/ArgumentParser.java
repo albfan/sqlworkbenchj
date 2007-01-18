@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -26,17 +27,48 @@ public class ArgumentParser
 {
 	private static final String ARG_PRESENT = "$__ARG_PRESENT__$";
 	private Map<String, String> arguments = new HashMap<String, String>();
+	private Map<String, ArgumentType> argTypes = new HashMap<String, ArgumentType>();
 	private ArrayList unknownParameters = new ArrayList();
+	private Map<String, List<String>> allowedValues = new HashMap<String, List<String>>();
 	private int argCount = 0;
-	
+	private boolean needSwitch = true;
+
 	public ArgumentParser()
 	{
 	}
+	
+	public ArgumentParser(boolean parameterSwitchNeeded)
+	{
+		this.needSwitch = parameterSwitchNeeded;
+	}
 
+	public boolean needsSwitch()
+	{
+		return needSwitch;
+	}
+	
+	public List<String> getAllowedValues(String key)
+	{
+		return allowedValues.get(key);
+	}
+	
+	public void addArgument(String key, List<String> values)
+	{
+		addArgument(key, ArgumentType.ListArgument);
+		allowedValues.put(key, values);
+	}
+	
 	public void addArgument(String key)
 	{
+		addArgument(key, ArgumentType.StringArgument);
+	}
+	
+	public void addArgument(String key, ArgumentType type)
+	{
 		if (key == null) throw new NullPointerException("Key may not be null");
+		
 		this.arguments.put(key.toLowerCase(), null);
+		this.argTypes.put(key.toLowerCase(), type);
 	}
 
 	public void parse(String args[])
@@ -93,6 +125,38 @@ public class ArgumentParser
 		}
 	}
 
+	public List getArgumentsOnCommandLine()
+	{
+		ArrayList result = new ArrayList(this.arguments.size());
+		for (Map.Entry entry : arguments.entrySet())
+		{
+			if (entry.getValue() != null)
+			{
+				result.add(entry.getKey());
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Returns the list of known arguments for this ArgumentParser
+	 */
+	public List getRegisteredArguments()
+	{
+		Set params = this.arguments.keySet();
+		List result = new ArrayList(params.size());
+		result.addAll(params);
+		return result;
+	}
+	
+	/**
+	 * Returns the type of an argument
+	 */
+	public ArgumentType getArgumentType(String arg)
+	{
+		return this.argTypes.get(arg);
+	}
+	
 	public boolean hasArguments()
 	{
 		return this.argCount > 0;

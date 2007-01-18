@@ -21,6 +21,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.storage.PkMapping;
 import workbench.util.ArgumentParser;
 import workbench.util.FileDialogUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -32,8 +33,6 @@ public class WbSavePkMapping
 {
 	public static final String VERB = "WBSAVEPKMAP";
 	public static final String FORMATTED_VERB = "WbSavePKMap";
-	
-	private ArgumentParser cmdLine;
 	
 	public WbSavePkMapping()
 	{
@@ -48,7 +47,7 @@ public class WbSavePkMapping
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String sql = stripVerb(aSql);// .trim().substring(this.getVerb().length()).trim();
+		String sql = SqlUtil.stripVerb(aSql);
 		cmdLine.parse(sql);
 		String file = cmdLine.getValue("file");
 		if (file == null)

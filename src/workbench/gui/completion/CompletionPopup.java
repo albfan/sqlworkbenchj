@@ -34,8 +34,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import workbench.db.ColumnIdentifier;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.editor.JEditTextArea;
 import workbench.log.LogMgr;
@@ -59,10 +57,12 @@ public class CompletionPopup
 	private ListModel data;
 	private JComponent headerComponent;
 	
-	private boolean appendDot;
-	private boolean appendSpace;
+//	private boolean appendDot;
+//	private boolean appendSpace;
+//	private boolean makeParam;
+//	private String columnPrefix;
+	private StatementContext context;
 	private boolean selectCurrentWordInEditor;
-	private String columnPrefix;
 	protected CompletionSearchField searchField;
 	
 	public CompletionPopup(JEditTextArea ed, JComponent header, ListModel listData)
@@ -90,6 +90,11 @@ public class CompletionPopup
 		elementList.addKeyListener(this);
 	}
 
+	public void setContext(StatementContext c)
+	{
+		this.context = c;
+	}
+	
 	public void showPopup(String valueToSelect)
 	{
 		//if (window != null) closePopup(false);
@@ -111,7 +116,14 @@ public class CompletionPopup
 				{
 					public void run()
 					{
-						editor.selectWordAtCursor(BaseAnalyzer.SELECT_WORD_DELIM);
+						// Make sure this is executed on the EDT
+						WbSwingUtilities.invoke(new Runnable()
+						{
+							public void run()
+							{
+								editor.selectWordAtCursor(BaseAnalyzer.SELECT_WORD_DELIM);
+							}
+						});
 					}
 				};
 				t.start();
@@ -211,8 +223,17 @@ public class CompletionPopup
 		{
 			result = value;
 		}
-		if (this.appendDot) result += ".";
-		if (this.appendSpace) result += " ";
+		if (this.context.appendDotToSelection()) result += ".";
+		if (this.context.isKeywordList()) result += " ";
+		if (this.context.isWbParam())
+		{
+			result = "-" + result + "=";
+		}
+		char c = this.context.quoteCharForValue(result);
+		if (c != 0)
+		{
+			result = c + result + c;
+		}
 		return result;
 	}
 	
@@ -272,9 +293,9 @@ public class CompletionPopup
 							if (c instanceof ColumnIdentifier) 
 							{
 								v = getPasteValue(c.toString());
-								if (columnPrefix != null)
+								if (context.getColumnPrefix() != null)
 								{
-									cols.append(columnPrefix);
+									cols.append(context.getColumnPrefix());
 									cols.append(".");
 								}
 							}
@@ -307,24 +328,10 @@ public class CompletionPopup
 			selectEditor();
 		}
 	}
-
-	public void setColumnPrefix(String prefix)
-	{
-		this.columnPrefix = prefix;
-	}
-
+	
 	public void selectCurrentWordInEditor(boolean flag)
 	{
 		this.selectCurrentWordInEditor = flag;
-	}
-	
-	public void setAppendSpace(boolean flag)
-	{
-		this.appendSpace = flag;
-	}
-	public void setAppendDot(boolean flag)
-	{
-		this.appendDot = flag;
 	}
 	
 	public void selectMatchingEntry(String s)

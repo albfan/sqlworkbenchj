@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -23,14 +22,16 @@ import workbench.db.datacopy.DataCopier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.profiles.ProfileKey;
-import workbench.storage.ResultInfo;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.SqlUtil;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -63,7 +64,6 @@ public class WbCopy
 	public static final String PARAM_BATCHSIZE = "batchsize";
 	public static final String PARAM_PROGRESS = "showprogress";
 
-	private ArgumentParser cmdLine;
 	private DataCopier copier;
 
 	public WbCopy()
@@ -72,21 +72,21 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_SOURCETABLE);
 		cmdLine.addArgument(PARAM_SOURCEQUERY);
 		cmdLine.addArgument(PARAM_TARGETTABLE);
-		cmdLine.addArgument(PARAM_SOURCEPROFILE);
-		cmdLine.addArgument(PARAM_TARGETPROFILE);
+		cmdLine.addArgument(PARAM_SOURCEPROFILE, ArgumentType.ProfileArgument);
+		cmdLine.addArgument(PARAM_TARGETPROFILE, ArgumentType.ProfileArgument);
 		cmdLine.addArgument(PARAM_SOURCEPROFILE_GROUP);
 		cmdLine.addArgument(PARAM_TARGETPROFILE_GROUP);
 		cmdLine.addArgument(PARAM_COLUMNS);
 		cmdLine.addArgument(PARAM_SOURCEWHERE);
 		cmdLine.addArgument(PARAM_COMMITEVERY);
-		cmdLine.addArgument(PARAM_COMMITBATCH);
-		cmdLine.addArgument(PARAM_CONTINUE);
+		cmdLine.addArgument(PARAM_COMMITBATCH, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_CONTINUE, ArgumentType.BoolArgument);
 		cmdLine.addArgument("continue");
-		cmdLine.addArgument(PARAM_DELETETARGET);
-		cmdLine.addArgument(PARAM_MODE);
+		cmdLine.addArgument(PARAM_DELETETARGET, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_MODE, StringUtil.stringToList("insert,update,update/insert,insert/update"));
 		cmdLine.addArgument(PARAM_KEYS);
-		cmdLine.addArgument(PARAM_DROPTARGET);
-		cmdLine.addArgument(PARAM_CREATETARGET);
+		cmdLine.addArgument(PARAM_DROPTARGET, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_CREATETARGET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_BATCHSIZE);
 		cmdLine.addArgument(PARAM_PROGRESS);
 	}
@@ -107,7 +107,7 @@ public class WbCopy
 		 * in order to make the commandline parser work properly
 		 */
 
-		aSql = stripVerb(aSql);
+		aSql = SqlUtil.stripVerb(aSql);
 
 		try
 		{

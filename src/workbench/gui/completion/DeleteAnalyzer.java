@@ -11,19 +11,9 @@
  */
 package workbench.gui.completion;
 
-import java.awt.Toolkit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
-import workbench.util.TableAlias;
 
 /**
  *

@@ -60,7 +60,16 @@ import workbench.util.WbWorkspace;
 
 
 /**
- *
+ * The main container panel for the DbExplorer. 
+ * 
+ * This panel incorporates the panels to 
+ * <ul>
+ *	<li>Display a list of tables, views, etc {@link workbench.gui.dbobjects.TableListPanel}</li>
+ *  <li>Display a list of procedures: {@link workbench.gui.dbobjects.ProcedureListPanel}</li>
+ *	<li>Allow search across several table and columns: {@link workbench.gui.dbobjects.TableSearchPanel}</li>
+ * </ul>
+ * This panel can either be displayed inside the MainWindow as a tab, or as 
+ * a separate Window (@link workbench.gui.dbobjects.DbExplorerWindow}
  * @author  support@sql-workbench.net
  */
 public class DbExplorerPanel

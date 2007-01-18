@@ -39,6 +39,8 @@ public class CreateAnalyzer
 		boolean showTables = false;
 		int tableStartPos = -1;
 		int tableEndPos = -1;
+		int tokenCount = 0;
+		boolean afterCreate = true;
 		
 		try
 		{
@@ -46,6 +48,12 @@ public class CreateAnalyzer
 			while (token != null)
 			{
 				String t = token.getContents();
+				tokenCount++;
+				if (tokenCount == 2)
+				{
+					afterCreate = (token.getCharBegin() > this.cursorPos);
+				}
+				
 				if (isCreateIndex)
 				{
 					if ("ON".equalsIgnoreCase(t))
@@ -107,6 +115,11 @@ public class CreateAnalyzer
 			if (tableEndPos == -1) tableEndPos = this.sql.length() - 1;
 			String table = this.sql.substring(tableStartPos, tableEndPos).trim();
 			this.tableForColumnList = new TableIdentifier(table);
+		}
+		else if (afterCreate)
+		{
+			context = CONTEXT_KW_LIST;
+			this.keywordFile = "create_types.txt";
 		}
 	}
 	

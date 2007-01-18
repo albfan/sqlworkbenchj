@@ -16,12 +16,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
-
 import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.ParsingInterruptedException;
 import workbench.db.importer.TextFileParser;
 import workbench.db.importer.XmlDataFileParser;
+import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -80,53 +80,51 @@ public class WbImport
 	public static final String ARG_START_ROW = "startrow";
 	public static final String ARG_END_ROW = "endrow";
 	
-	private ArgumentParser cmdLine;
-
 	public WbImport()
 	{
-		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(ARG_TYPE);
+		this.isUpdatingCommand = true;
+		this.cmdLine = new ArgumentParser();
+		cmdLine.addArgument(ARG_TYPE, StringUtil.stringToList("text,xml"));
 		cmdLine.addArgument(ARG_UPDATE_WHERE);
 		cmdLine.addArgument(ARG_FILE);
-		cmdLine.addArgument(ARG_TARGETTABLE);
+		cmdLine.addArgument(ARG_TARGETTABLE, ArgumentType.TableArgument);
 		cmdLine.addArgument(ARG_DELIM);
 		cmdLine.addArgument(ARG_QUOTE);
 		cmdLine.addArgument(ARG_DATE_FORMAT);
 		cmdLine.addArgument(ARG_TIMESTAMP_FORMAT);
 		cmdLine.addArgument(ARG_DECCHAR);
-		cmdLine.addArgument(ARG_COMMIT);
-		cmdLine.addArgument(ARG_CONTAINSHEADER);
+		cmdLine.addArgument(ARG_COMMIT, ArgumentType.IntegerArgument);
+		cmdLine.addArgument(ARG_CONTAINSHEADER, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ENCODING);
 		cmdLine.addArgument("columns");
 		cmdLine.addArgument(ARG_FILECOLUMNS);
 		cmdLine.addArgument(ARG_MODE);
 		cmdLine.addArgument(ARG_KEYCOLUMNS);
 		cmdLine.addArgument(ARG_BATCHSIZE);
-		cmdLine.addArgument(ARG_DELETE_TARGET);
-		cmdLine.addArgument(ARG_EMPTY_STRING_IS_NULL);
-		cmdLine.addArgument(ARG_CONTINUE);
-		cmdLine.addArgument(ARG_DECODE);
-		cmdLine.addArgument(ARG_VERBOSEXML);
+		cmdLine.addArgument(ARG_DELETE_TARGET, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_EMPTY_STRING_IS_NULL, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_CONTINUE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_DECODE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_VERBOSEXML, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_IMPORTCOLUMNS);
 		cmdLine.addArgument(ARG_COL_FILTER);
 		cmdLine.addArgument(ARG_LINE_FILTER);
 		cmdLine.addArgument(ARG_PROGRESS);
 		cmdLine.addArgument(ARG_DIRECTORY);
 		cmdLine.addArgument(ARG_TARGET_SCHEMA);
-		cmdLine.addArgument(ARG_USE_TRUNCATE);
-		cmdLine.addArgument(ARG_TRIM_VALUES);
+		cmdLine.addArgument(ARG_USE_TRUNCATE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_TRIM_VALUES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_FILE_EXT);
-		cmdLine.addArgument(ARG_TRUNCATE_TABLE);
-		cmdLine.addArgument(ARG_CREATE_TABLE);
-		cmdLine.addArgument(ARG_BLOB_ISFILENAME);
-		cmdLine.addArgument(ARG_CLOB_ISFILENAME);
-		cmdLine.addArgument(ARG_MULTI_LINE);
-		cmdLine.addArgument(ARG_START_ROW);
-		cmdLine.addArgument(ARG_END_ROW);
-		cmdLine.addArgument(ARG_COMMIT_BATCH);
-		this.isUpdatingCommand = true;
+		cmdLine.addArgument(ARG_TRUNCATE_TABLE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_CREATE_TABLE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_BLOB_ISFILENAME, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_CLOB_ISFILENAME, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_MULTI_LINE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_START_ROW, ArgumentType.IntegerArgument);
+		cmdLine.addArgument(ARG_END_ROW, ArgumentType.IntegerArgument);
+		cmdLine.addArgument(ARG_COMMIT_BATCH, ArgumentType.BoolArgument);
 	}
-
+	
 	public String getVerb() { return VERB; }
 
 	private String getWrongParamsMessage()
@@ -148,7 +146,7 @@ public class WbImport
 		this.imp.setConnection(aConnection);
 
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
-		aSql = stripVerb(SqlUtil.makeCleanSql(aSql,false, false, '\''));
+		aSql = SqlUtil.stripVerb(SqlUtil.makeCleanSql(aSql,false, false, '\''));
 		
 		try
 		{

@@ -69,6 +69,7 @@ public class WbTabbedPane
 	
 	private void init()
 	{
+		// For use with the jGoodies Plastic look & feel
 		this.putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
 		try
 		{

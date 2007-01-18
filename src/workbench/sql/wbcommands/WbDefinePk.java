@@ -18,6 +18,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.PkMapping;
 import workbench.util.SqlUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
 
@@ -43,7 +44,7 @@ public class WbDefinePk
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		String sql = this.stripVerb(aSql);
+		String sql = SqlUtil.stripVerb(aSql);
 		
 		WbStringTokenizer tok = new WbStringTokenizer("=", true, "\"'", false);
 		tok.setSourceString(sql);

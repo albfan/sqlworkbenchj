@@ -47,6 +47,31 @@ public class SqlUtil
 		return quoteObjectname(object, false);
 	}
 	
+	/**
+	 * Removes the SQL verb of this command. The verb is defined
+	 * as the first "word" in the SQL string that is not a comment.
+	 * 
+	 * @see #getSqlVerb(String)
+	 */
+	public static String stripVerb(String sql)
+	{
+		String result = "";
+		try
+		{
+			SQLLexer l = new SQLLexer(sql);
+			SQLToken t = l.getNextToken(false, false);
+			int pos = -1;
+			if (t != null) pos = t.getCharEnd();
+			if (pos > -1) result = sql.substring(pos).trim();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("SqlCommand.stripVerb()", "Error cleaning up SQL", e);
+		}
+		return result;
+	}
+	
+	
 	public static String quoteObjectname(String aColname, boolean quoteAlways)
 	{
 		if (aColname == null) return null;

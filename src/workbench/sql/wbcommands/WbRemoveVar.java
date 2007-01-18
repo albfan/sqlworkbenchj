@@ -12,12 +12,12 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.VariablePool;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -37,7 +37,7 @@ public class WbRemoveVar extends SqlCommand
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String var = stripVerb(aSql);
+		String var = SqlUtil.stripVerb(aSql);
 
 		String msg = null;
 

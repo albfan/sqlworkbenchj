@@ -19,13 +19,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.TableIdentifier;
-
 import workbench.db.WbConnection;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
@@ -38,11 +38,20 @@ import workbench.util.WbProperties;
 
 
 /**
+ * A class to store workbench specific variables. 
+ * This is a singleton which stores the variables inside a Map.
+ * When the Pool is created it looks for any variable definition 
+ * passed through the system properties. 
+ * Any system property that starts with wbp. is used to define a variable.
+ * The name of the variable is the part after the <tt>wbp.</tt> prefix.
+ * 
+ * @see workbench.sql.wbcommands.WbDefineVar
+ * 
  * @author  support@sql-workbench.net
  */
 public class VariablePool
 {
-	private HashMap data = new HashMap(); 
+	private Map data = Collections.synchronizedMap(new HashMap()); 
 	private static final VariablePool POOL = new VariablePool();
 	private String prefix;
 	private String suffix;
@@ -199,7 +208,7 @@ public class VariablePool
 		return vardata;
 	}
 	
-	public synchronized String getParameterValue(String varName)
+	public String getParameterValue(String varName)
 	{
 		if (varName == null) return null;
 		return (String)this.data.get(varName);
@@ -240,7 +249,7 @@ public class VariablePool
 	}
 	
 	/**
-	 *	Replaces the variable defined through pattern with the replacement string
+	 * Replaces the variable defined through pattern with the replacement string
 	 * inside the string original. 
 	 * String.replaceAll() cannot be used, because it parses escape sequences
 	 */

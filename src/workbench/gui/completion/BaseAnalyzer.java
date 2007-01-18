@@ -49,6 +49,9 @@ public abstract class BaseAnalyzer
 	
 	// List keywords available at this point
 	protected static final int CONTEXT_KW_LIST = 5;
+
+	// List parameters for WB commands
+	protected static final int CONTEXT_WB_PARAMS = 6;
 	
 	private final SelectAllMarker allColumnsMarker = new SelectAllMarker();
 	private String typeFilter;
@@ -73,6 +76,16 @@ public abstract class BaseAnalyzer
 		this.cursorPos = cursorPos;
 	}
 
+	public char quoteCharForValue(String value)
+	{
+		return 0;
+	}
+	
+	public boolean isWbParam()
+	{
+		return false;
+	}
+	
 	public String getSelectionPrefix()
 	{
 		return this.columnPrefix;
@@ -174,9 +187,20 @@ public abstract class BaseAnalyzer
 		}
 		else if (context == CONTEXT_KW_LIST)
 		{
-			// element list has already been filled
 			this.title = ResourceMgr.getString("LblCompletionListKws");
 			this.elements = readKeywords();
+		}
+		else if (context == CONTEXT_WB_PARAMS)
+		{
+			// element list has already been filled
+			if (isWbParam())
+			{
+				this.title = ResourceMgr.getString("LblCompletionListParams");
+			}
+			else
+			{
+				this.title = ResourceMgr.getString("LblCompletionListParmValues");
+			}
 		}
 //		else if (context == CONTEXT_INDEX_LIST)
 //		{

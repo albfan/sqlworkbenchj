@@ -142,9 +142,7 @@ public class DefaultCompletionHandler
 				window.selectCurrentWordInEditor(selectWord);
 				this.elements = ctx.getData();
 				this.header.setText(ctx.getTitle());
-				this.window.setAppendDot(ctx.appendDotToSelection());
-				this.window.setAppendSpace(ctx.isKeywordList());
-				this.window.setColumnPrefix(ctx.getColumnPrefix());
+				this.window.setContext(ctx);
 				
 				result = (this.elements != null && this.elements.size() > 0);
 				if (result)	

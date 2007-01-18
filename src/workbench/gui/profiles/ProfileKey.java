@@ -18,16 +18,32 @@ public class ProfileKey
 {
 	private String name; // the name of the profile
 	private String group; // the profile group
-	
+
 	public ProfileKey(String pname)
 	{
-		if (pname != null) name = pname.trim();
+		if (pname == null) throw new NullPointerException("Name cannot be null!");
+		setName(pname);
 	}
 	
 	public ProfileKey(String pname, String pgroup)
 	{
-		if (pname != null) name = pname.trim();
 		if (pgroup != null) group = pgroup.trim();
+		setName(pname);
+	}
+
+	private void setName(String pname)
+	{
+		String tname = pname.trim();
+		if (tname.charAt(0) == '{')
+		{
+			int pos = tname.indexOf('}');
+			this.name = tname.substring(pos + 2).trim();
+			this.group = tname.substring(1,pos).trim();
+		}
+		else
+		{
+			name = tname;
+		}
 	}
 	
 	public String getName() { return name; }

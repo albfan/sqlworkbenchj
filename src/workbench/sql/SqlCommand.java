@@ -15,10 +15,10 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import workbench.db.WbConnection;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.StatementRunner;
+import workbench.util.ArgumentParser;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.ResultLogger;
 import workbench.log.LogMgr;
@@ -55,6 +55,7 @@ public class SqlCommand
 	protected int maxRows = 0;
 	protected DataStore currentRetrievalData;
 	protected ParameterPrompter prompter;
+	protected ArgumentParser cmdLine;
 
 	public void setRowMonitor(RowActionMonitor monitor)
 	{
@@ -66,6 +67,11 @@ public class SqlCommand
 		this.resultLogger = logger;
 	}
 
+	public ArgumentParser getArgumentParser()
+	{
+		return this.cmdLine;
+	}
+	
 	public boolean getFullErrorReporting() { return reportFullStatementOnError; }
 	public void setFullErrorReporting(boolean flag) { reportFullStatementOnError = flag; }
 	
@@ -97,30 +103,6 @@ public class SqlCommand
 		return hasWarning;
 	}
 
-	/**
-	 * Removes the SQL verb of this command. The verb is defined
-	 * as the first "word" in the SQL string that is not a comment.
-	 * 
-	 * @see workbench.util.SqlUtil#getSqlVerb(String)
-	 */
-	protected String stripVerb(String sql)
-	{
-		String result = "";
-		try
-		{
-			SQLLexer l = new SQLLexer(sql);
-			SQLToken t = l.getNextToken(false, false);
-			int pos = -1;
-			if (t != null) pos = t.getCharEnd();
-			if (pos > -1) result = sql.substring(pos).trim();
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("SqlCommand.stripVerb()", "Error cleaning up SQL", e);
-		}
-		return result;
-	}
-	
 	/**
 	 * Cancels this statements execution. Cancelling is done by
 	 * calling <tt>cancel</tt> on the current JDBC Statement object. This requires

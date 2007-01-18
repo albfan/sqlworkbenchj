@@ -39,7 +39,7 @@ public class WbDescribeTable extends SqlCommand
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String table = stripVerb(SqlUtil.makeCleanSql(sql, false, false, '\''));
+		String table = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false, '\''));
 		
 		TableIdentifier tbl = new TableIdentifier(table);
 		

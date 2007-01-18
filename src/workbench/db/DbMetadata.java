@@ -608,9 +608,11 @@ public class DbMetadata
 
 			if (this.isOracle)
 			{
-				// In oracle we don't need the schema if the it is the current user
-				if (tblSchema == null) return false;
-				return !this.dbConnection.getCurrentUser().equalsIgnoreCase(tblSchema);
+				// The current schema can be changed in Oracle using ALTER SESSION
+				// in that case the current user is still the one used to log-in
+				// but the current schema is different, and we do need to qualify
+				// objects with the schema. 
+				return !getCurrentSchema().equalsIgnoreCase(tblSchema);
 			}
 		}
 		catch (Throwable th)

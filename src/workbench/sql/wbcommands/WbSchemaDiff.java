@@ -29,6 +29,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.SqlUtil;
 import workbench.util.StrWriter;
 import workbench.util.StringUtil;
@@ -65,32 +66,31 @@ public class WbSchemaDiff
 	public static final String PARAM_INCLUDE_PROCS = "includeprocs";
 	public static final String PARAM_DIFF_JDBC_TYPES = "usejdbctypes";
 	
-	private ArgumentParser cmdLine;
 	private SchemaDiff diff;
 
 	public WbSchemaDiff()
 	{
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(PARAM_SOURCEPROFILE);
+		cmdLine.addArgument(PARAM_SOURCEPROFILE, ArgumentType.ProfileArgument);
 		cmdLine.addArgument(PARAM_SOURCEPROFILE_GROUP);
 		cmdLine.addArgument("sourceprofile"); // old name of the parameter
-		cmdLine.addArgument(PARAM_TARGETPROFILE);
+		cmdLine.addArgument(PARAM_TARGETPROFILE, ArgumentType.ProfileArgument);
 		cmdLine.addArgument(PARAM_TARGETPROFILE_GROUP);
 		cmdLine.addArgument(PARAM_FILENAME);
 		cmdLine.addArgument(PARAM_ENCODING);
-		cmdLine.addArgument(PARAM_SOURCETABLES);
-		cmdLine.addArgument(PARAM_TARGETTABLES);
+		cmdLine.addArgument(PARAM_SOURCETABLES, ArgumentType.TableArgument);
+		cmdLine.addArgument(PARAM_TARGETTABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_SOURCESCHEMA);
 		cmdLine.addArgument(PARAM_TARGETSCHEMA);
 		cmdLine.addArgument(PARAM_NAMESPACE);
-		cmdLine.addArgument(PARAM_INCLUDE_FK);
-		cmdLine.addArgument(PARAM_INCLUDE_PK);
-		cmdLine.addArgument(PARAM_INCLUDE_INDEX);
-		cmdLine.addArgument(PARAM_EXCLUDE_TABLES);
-		cmdLine.addArgument(PARAM_INCLUDE_CONSTRAINTS);
-		cmdLine.addArgument(PARAM_INCLUDE_VIEWS);
-		cmdLine.addArgument(PARAM_INCLUDE_PROCS);
-		cmdLine.addArgument(PARAM_DIFF_JDBC_TYPES);
+		cmdLine.addArgument(PARAM_INCLUDE_FK, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_INCLUDE_PK, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_INCLUDE_INDEX, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_EXCLUDE_TABLES, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_INCLUDE_CONSTRAINTS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_INCLUDE_VIEWS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_DIFF_JDBC_TYPES, ArgumentType.BoolArgument);
 		//cmdLine.addArgument(PARAM_INCLUDE_COMMENTS);
 	}
 
@@ -109,7 +109,7 @@ public class WbSchemaDiff
 			result.addMessage("Support for 'WbDiff' will be removed in a future release.\n");
 		}
 		
-		sql = stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
+		sql = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
 		
 		try
 		{

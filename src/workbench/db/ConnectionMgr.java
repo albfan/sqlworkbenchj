@@ -48,8 +48,8 @@ public class ConnectionMgr
 	//private WbConnection currentConnection;
 	private HashMap activeConnections = new HashMap();
 
-	private List profiles;
-	private List drivers;
+	private List<ConnectionProfile> profiles;
+	private List<DbDriver> drivers;
 	private boolean profilesChanged;
 	private boolean readTemplates = true;
 	private boolean templatesImported;
@@ -293,7 +293,7 @@ public class ConnectionMgr
 
 		for (int i=0; i < this.drivers.size(); i++)
 		{
-			drvClass = ((DbDriver)this.drivers.get(i)).getDriverClass();
+			drvClass = this.drivers.get(i).getDriverClass();
 			if (!result.contains(drvClass))
 			{
 				result.add(drvClass);
@@ -378,7 +378,7 @@ public class ConnectionMgr
 	 *	The key to the map is the profile name, the value is the actual profile
 	 *  (i.e. instances of {@link ConnectionProfile}
 	 */
-	public synchronized List getProfiles()
+	public synchronized List<ConnectionProfile> getProfiles()
 	{
 		if (this.profiles == null) this.readProfiles();
 		return Collections.unmodifiableList(this.profiles);
@@ -629,7 +629,7 @@ public class ConnectionMgr
 			Object result = reader.readObject();
 			if (result == null)
 			{
-				this.drivers = new ArrayList();
+				this.drivers = new ArrayList<DbDriver>();
 			}
 			else if (result instanceof ArrayList)
 			{
@@ -667,11 +667,11 @@ public class ConnectionMgr
 			in = this.getClass().getResourceAsStream("DriverTemplates.xml");
 			
 			WbPersistence reader = new WbPersistence();
-			ArrayList templates = (ArrayList)reader.readObject(in);
+			ArrayList<DbDriver> templates = (ArrayList)reader.readObject(in);
 
 			for (int i=0; i < templates.size(); i++)
 			{
-				Object drv = templates.get(i);
+				DbDriver drv = templates.get(i);
 				if (!this.drivers.contains(drv))
 				{
 					this.drivers.add(drv);

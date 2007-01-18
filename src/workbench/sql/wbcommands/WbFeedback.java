@@ -16,8 +16,8 @@ import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLToken;
+import workbench.util.ArgumentParser;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -30,6 +30,9 @@ public class WbFeedback
 	
 	public WbFeedback()
 	{
+		this.cmdLine = new ArgumentParser(false);
+		this.cmdLine.addArgument("on");
+		this.cmdLine.addArgument("off");
 	}
 
 	public String getVerb() { return VERB; }
@@ -41,7 +44,7 @@ public class WbFeedback
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
-		String parm = stripVerb(sql);
+		String parm = SqlUtil.stripVerb(sql);
 		if (parm == null)
 		{
 			result.setFailure();

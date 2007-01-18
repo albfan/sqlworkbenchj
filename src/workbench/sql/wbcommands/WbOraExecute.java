@@ -11,7 +11,6 @@
  */
 package workbench.sql.wbcommands;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.StringTokenizer;
 
@@ -20,7 +19,6 @@ import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
 /**

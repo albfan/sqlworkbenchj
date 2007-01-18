@@ -12,11 +12,11 @@
 package workbench.sql.commands;
 
 import java.sql.SQLException;
-
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -39,7 +39,7 @@ public class EchoCommand extends SqlCommand
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		String param = stripVerb(aSql);
+		String param = SqlUtil.stripVerb(aSql);
 
 		if (StringUtil.isEmptyString(param))
 		{
