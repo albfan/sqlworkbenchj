@@ -75,7 +75,6 @@ public class DefaultCompletionHandler
 			statusBar.setStatusMessage(ResourceMgr.getString("MsgCompletionRetrievingObjects"));
 			if (this.updateSelectionList())
 			{
-
 				this.window.showPopup(currentWord);
 			}
 		}
@@ -120,8 +119,6 @@ public class DefaultCompletionHandler
 		
 		int cursorPos = this.editor.getCaretPosition();
 
-//		System.out.println(StringUtil.escapeUnicode(script));
-//		System.out.println("cursor: " + cursorPos);
 		int index = parser.getCommandIndexAtCursorPos(cursorPos);
 		int commandCursorPos = parser.getIndexInCommand(index, cursorPos);
 		String sql = parser.getCommand(index);
@@ -135,10 +132,13 @@ public class DefaultCompletionHandler
 		try
 		{
 			StatementContext ctx = new StatementContext(this.dbConnection, sql, commandCursorPos);
-			
 			if (ctx.isStatementSupported())
 			{
-				boolean selectWord = (ctx.getOverwriteCurrentWord() && currentWord != null);
+				boolean selectWord = (ctx.getAnalyzer().getOverwriteCurrentWord() && currentWord != null);
+				if (ctx.getAnalyzer().isWbParam() && currentWord.startsWith("-"))
+				{
+					currentWord = currentWord.substring(1);
+				}
 				window.selectCurrentWordInEditor(selectWord);
 				this.elements = ctx.getData();
 				this.header.setText(ctx.getTitle());

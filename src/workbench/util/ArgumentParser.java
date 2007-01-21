@@ -202,6 +202,11 @@ public class ArgumentParser
 		return msg.toString();
 	}
 	
+	public boolean isRegistered(String arg)
+	{
+		return this.arguments.containsKey(arg);
+	}
+	
 	public boolean isArgPresent(String arg)
 	{
 		if (arg == null) return false;

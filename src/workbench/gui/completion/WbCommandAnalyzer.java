@@ -73,7 +73,41 @@ public class WbCommandAnalyzer
 		String parameter = getCurrentParameter();
 		this.isParameter = false;
 		
-		if (parameter == null)
+		if (p.isRegistered(parameter))
+		{
+			ArgumentType type = p.getArgumentType(parameter);
+			if (type == ArgumentType.BoolArgument)
+			{
+				this.elements = new ArrayList(2);
+				this.elements.add("true");
+				this.elements.add("false");
+			}
+			else if (type == ArgumentType.TableArgument)
+			{
+				this.context = CONTEXT_TABLE_LIST;
+				this.schemaForTableList = this.dbConnection.getCurrentSchema();
+			}
+			else if (type == ArgumentType.ListArgument)
+			{
+				this.elements = p.getAllowedValues(parameter);
+			}
+			else if (type == ArgumentType.ProfileArgument)
+			{
+				List<ConnectionProfile> profiles = ConnectionMgr.getInstance().getProfiles();
+				this.elements = new ArrayList<String>(profiles.size());
+				for (ConnectionProfile profile : profiles)
+				{
+					this.elements.add(profile.getKey().toString());
+				}
+				Collections.sort(this.elements);
+			}
+			else
+			{
+				this.context = NO_CONTEXT;
+				this.elements = null;
+			}
+		}
+		else
 		{
 			this.elements = p.getRegisteredArguments();
 			String params = SqlUtil.stripVerb(this.sql);
@@ -82,38 +116,6 @@ public class WbCommandAnalyzer
 			this.elements.removeAll(argsPresent);
 			Collections.sort(this.elements);
 			isParameter = p.needsSwitch();
-			return;
-		}
-		ArgumentType type = p.getArgumentType(parameter);
-		if (type == ArgumentType.BoolArgument)
-		{
-			this.elements = new ArrayList(2);
-			this.elements.add("true");
-			this.elements.add("false");
-		}
-		else if (type == ArgumentType.TableArgument)
-		{
-			this.context = CONTEXT_TABLE_LIST;
-			this.schemaForTableList = this.dbConnection.getCurrentSchema();
-		}
-		else if (type == ArgumentType.ListArgument)
-		{
-			this.elements = p.getAllowedValues(parameter);
-		}
-		else if (type == ArgumentType.ProfileArgument)
-		{
-			List<ConnectionProfile> profiles = ConnectionMgr.getInstance().getProfiles();
-			this.elements = new ArrayList<String>(profiles.size());
-			for (ConnectionProfile profile : profiles)
-			{
-				this.elements.add(profile.getKey().toString());
-			}
-			Collections.sort(this.elements);
-		}
-		else
-		{
-			this.context = NO_CONTEXT;
-			this.elements = null;
 		}
 	}
 	

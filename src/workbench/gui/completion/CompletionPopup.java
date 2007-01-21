@@ -57,10 +57,6 @@ public class CompletionPopup
 	private ListModel data;
 	private JComponent headerComponent;
 	
-//	private boolean appendDot;
-//	private boolean appendSpace;
-//	private boolean makeParam;
-//	private String columnPrefix;
 	private StatementContext context;
 	private boolean selectCurrentWordInEditor;
 	protected CompletionSearchField searchField;
@@ -223,13 +219,13 @@ public class CompletionPopup
 		{
 			result = value;
 		}
-		if (this.context.appendDotToSelection()) result += ".";
-		if (this.context.isKeywordList()) result += " ";
-		if (this.context.isWbParam())
+		if (this.context.getAnalyzer().appendDotToSelection()) result += ".";
+		if (this.context.getAnalyzer().isKeywordList()) result += " ";
+		if (this.context.getAnalyzer().isWbParam())
 		{
 			result = "-" + result + "=";
 		}
-		char c = this.context.quoteCharForValue(result);
+		char c = this.context.getAnalyzer().quoteCharForValue(result);
 		if (c != 0)
 		{
 			result = c + result + c;
@@ -293,9 +289,9 @@ public class CompletionPopup
 							if (c instanceof ColumnIdentifier) 
 							{
 								v = getPasteValue(c.toString());
-								if (context.getColumnPrefix() != null)
+								if (context.getAnalyzer().getColumnPrefix() != null)
 								{
-									cols.append(context.getColumnPrefix());
+									cols.append(context.getAnalyzer().getColumnPrefix());
 									cols.append(".");
 								}
 							}
