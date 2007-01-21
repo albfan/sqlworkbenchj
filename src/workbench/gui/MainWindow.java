@@ -1076,7 +1076,7 @@ public class MainWindow
 	{
 		if (this.exitOnCancel)
 		{
-			WbManager.getInstance().exitWorkbench();
+			WbManager.getInstance().windowClosing(this);
 		}
 	}
 

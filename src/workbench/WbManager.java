@@ -726,9 +726,12 @@ public class WbManager
 		
 	}
 
-	// open a new window, but do not check any command line
-	// parameters. This methode will be called from the GUI
-	// when the user requests a new window
+	/** 
+	 * Open a new main window, but do not check any command line parameters. 
+	 * 
+	 * This methode will be called from the GUI
+	 * when the user requests a new window
+	 */
 	public void openNewWindow()
 	{
 		EventQueue.invokeLater(new Runnable()
