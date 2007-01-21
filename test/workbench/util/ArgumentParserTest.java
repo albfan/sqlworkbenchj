@@ -12,17 +12,11 @@
 package workbench.util;
 
 import junit.framework.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 
 /**
  *
- * @author thomas
+ * @author support@sql-workbench.net
  */
 public class ArgumentParserTest
 	extends TestCase
@@ -34,7 +28,7 @@ public class ArgumentParserTest
 	
 	public void testParser()
 	{
-		String cmdline = "  -otherbool=1 -nosettings -boolarg=true -profile='test-prof' -script=bla.sql -arg2=\"with space and quote\"";
+		String cmdline = "-otherbool=1 -nosettings -boolarg=true -profile='test-prof' -script=bla.sql -arg2=\"with space and quote\"";
 		ArgumentParser arg = new ArgumentParser();
 		arg.addArgument("profile");
 		arg.addArgument("script");

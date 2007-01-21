@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Map.Entry;
@@ -51,7 +52,8 @@ import workbench.util.WbProperties;
  */
 public class VariablePool
 {
-	private Map data = Collections.synchronizedMap(new HashMap()); 
+	public static final String PROP_PREFIX = "wbp.";
+	private Map<String, String> data = new HashMap<String, String>(); 
 	private static final VariablePool POOL = new VariablePool();
 	private String prefix;
 	private String suffix;
@@ -74,33 +76,47 @@ public class VariablePool
 		
 		String expr = StringUtil.quoteRegexMeta(prefix) + "[\\?\\&][\\w]*" + StringUtil.quoteRegexMeta(suffix);
 		this.promptPattern = Pattern.compile(expr);
-		this.initFromSystemProperties();
+		this.initFromProperties(System.getProperties());
 	}
 	
-	private void initFromSystemProperties()
+	void initFromProperties(Properties props)
 	{
-		Iterator itr = System.getProperties().entrySet().iterator();
-		while (itr.hasNext())
+		synchronized (this.data)
 		{
-			Entry entry = (Entry)itr.next();
-			String key = (String)entry.getKey();
-			if (key.startsWith("wbp."))
+			this.data.clear();
+			Iterator itr = props.entrySet().iterator();
+			while (itr.hasNext())
 			{
-				String varName = key.substring(4);
-				String value = (String)entry.getValue();
-				try
+				Entry entry = (Entry)itr.next();
+				String key = (String)entry.getKey();
+				if (key.startsWith(PROP_PREFIX))
 				{
-					if (LogMgr.isDebugEnabled()) LogMgr.logDebug("SqlParameterPool", "Found parameter=[" + varName + "] in system properties with value=[" + value + "]");
-					this.setParameterValue(varName, value);
-				}
-				catch (IllegalArgumentException e)
-				{
-					LogMgr.logError("SqlParameterPool.init()", "Error setting variable", e);
+					String varName = key.substring(PROP_PREFIX.length());
+					String value = (String)entry.getValue();
+					try
+					{
+						this.setParameterValue(varName, value);
+					}
+					catch (IllegalArgumentException e)
+					{
+						LogMgr.logError("SqlParameterPool.init()", "Error setting variable", e);
+					}
 				}
 			}
 		}
 	}
 
+	/**
+	 * Used to reset the pool during testing
+	 */
+	void clear()
+	{
+		synchronized (this.data)
+		{
+			this.data.clear();
+		}
+	}
+	
 	public String replacePrompts(String sql)
 	{
 		Set vars = this.getPromptVariables(sql, false);
@@ -139,24 +155,27 @@ public class VariablePool
 		Matcher m = this.promptPattern.matcher(sql);
 		if (m == null) return Collections.EMPTY_SET;
 		Set variables = new TreeSet();
-		while (m.find())
+		synchronized (this.data)
 		{
-			int start = m.start() + this.prefix.length();
-			int end = m.end() - this.suffix.length();
-			char type = sql.charAt(start);
-			String var = sql.substring(start + 1, end);
-			if (!includeConditional)
+			while (m.find())
 			{
-				if ('&' == type)
+				int start = m.start() + this.prefix.length();
+				int end = m.end() - this.suffix.length();
+				char type = sql.charAt(start);
+				String var = sql.substring(start + 1, end);
+				if (!includeConditional)
 				{
-					String value = this.getParameterValue(var);
-					if (value != null && value.length() > 0) continue;
+					if ('&' == type)
+					{
+						String value = this.getParameterValue(var);
+						if (value != null && value.length() > 0) continue;
+					}
 				}
-			}
-			variables.add(var);
-			if (!this.data.containsKey(var))
-			{
-				this.data.put(var, "");
+				variables.add(var);
+				if (!this.data.containsKey(var))
+				{
+					this.data.put(var, "");
+				}
 			}
 		}
 		return Collections.unmodifiableSet(variables);
@@ -172,36 +191,22 @@ public class VariablePool
 		return this.getVariablesDataStore(Collections.synchronizedSet(this.data.keySet()));
 	}
 
-	/**
-	 *	Ensure that all variable names contained in the passed set
-	 *	are actually declared. If a variable is not defined, it will 
-	 *	be defined with no value
-	 */
-	public void defineVariables(Set names)
-	{
-		Iterator itr = names.iterator();
-		while (itr.hasNext())
-		{
-			String var = (String)itr.next();
-			if (!this.data.containsKey(var))
-			{
-				this.data.put(var, "");
-			}
-		}
-	}
 	public DataStore getVariablesDataStore(Set varNames)
 	{
 		DataStore vardata = new VariableDataStore();
 		
 		Iterator itr = varNames.iterator();
-		while (itr.hasNext())
+		synchronized (this.data)
 		{
-			String key = (String)itr.next();
-			if (!this.data.containsKey(key)) continue;
-			String value = (String)this.data.get(key);
-			int row = vardata.addRow();
-			vardata.setValue(row, 0, key);
-			vardata.setValue(row, 1, value);
+			while (itr.hasNext())
+			{
+				String key = (String)itr.next();
+				if (!this.data.containsKey(key)) continue;
+				String value = (String)this.data.get(key);
+				int row = vardata.addRow();
+				vardata.setValue(row, 0, key);
+				vardata.setValue(row, 1, value);
+			}
 		}
 		vardata.sortByColumn(0, true);
 		vardata.resetStatus();
@@ -211,7 +216,10 @@ public class VariablePool
 	public String getParameterValue(String varName)
 	{
 		if (varName == null) return null;
-		return (String)this.data.get(varName);
+		synchronized (this.data)
+		{
+			return (String)this.data.get(varName);
+		}
 	}
 
 	/**
@@ -220,32 +228,35 @@ public class VariablePool
 	public int getParameterCount()
 	{
 		if (this.data == null) return 0;
-		return this.data.size();
+		synchronized (this.data)
+		{
+			return this.data.size();
+		}
 	}
 	
 	public String replaceAllParameters(String sql)
 	{
 		if (this.data == null || this.data.size() == 0) return sql;
-		Set vars = Collections.synchronizedSet(this.data.keySet());
-		return this.replaceParameters(vars, sql, false);
+		synchronized (this.data)
+		{
+			return this.replaceParameters(this.data.keySet(), sql, false);
+		}
 	}
 	
-	private String replaceParameters(Set varNames, String sql, boolean forPrompt)
+	private String replaceParameters(Set<String> varNames, String sql, boolean forPrompt)
 	{
 		if (sql == null) return null;
 		if (sql.trim().length() == 0) return StringUtil.EMPTY_STRING;
 		if (sql.indexOf(this.prefix) == -1) return sql;
-		Iterator itr = varNames.iterator();
-		String newSql = sql;
-		while (itr.hasNext())
+		StringBuilder newSql = new StringBuilder(sql);
+		for (String name : varNames)
 		{
-			String name = (String)itr.next();
 			String var = this.buildVarNamePattern(name, forPrompt);
-			String value = (String)this.data.get(name);
+			String value = this.data.get(name);
 			if (value == null) continue;
-			newSql = replaceVarValue(newSql, var, value);
+			replaceVarValue(newSql, var, value);
 		}
-		return newSql;
+		return newSql.toString();
 	}
 	
 	/**
@@ -253,19 +264,19 @@ public class VariablePool
 	 * inside the string original. 
 	 * String.replaceAll() cannot be used, because it parses escape sequences
 	 */
-	private String replaceVarValue(String original, String pattern, String replacement)
+	private void replaceVarValue(StringBuilder original, String pattern, String replacement)
 	{
-		StringBuilder result = new StringBuilder(original);
+		//StringBuilder result = new StringBuilder(original);
 		Pattern p = Pattern.compile(pattern);
 		Matcher m = p.matcher(original);
 		while (m != null && m.find())
 		{
 			int start = m.start();
 			int end = m.end();
-			result.replace(start, end, replacement);
-			m = p.matcher(result.toString());
+			original.replace(start, end, replacement);
+			m = p.matcher(original.toString());
 		}
-		return result.toString();
+		//return result.toString();
 	}
 		
 	public String buildVarName(String varName, boolean forPrompt)
@@ -301,21 +312,25 @@ public class VariablePool
 		return (getParameterValue(varName) != null);
 	}
 	
-	public synchronized boolean removeValue(String varName)
+	public boolean removeValue(String varName)
 	{
 		if (varName == null) return false;
-		if (LogMgr.isDebugEnabled()) LogMgr.logDebug("SqlParameterPool", "Removing parameter definition [" + varName + "]");
-		Object old = this.data.remove(varName);
-		return (old != null);
+		synchronized (this.data)
+		{
+			Object old = this.data.remove(varName);
+			return (old != null);
+		}
 	}
 	
-	public synchronized void setParameterValue(String varName, String value)
+	public void setParameterValue(String varName, String value)
 		throws IllegalArgumentException
 	{
-		if (LogMgr.isDebugEnabled()) 	LogMgr.logDebug("SqlParameterPool", "Defining parameter=[" + varName + "] with value=[" + value + "]");
 		if (this.isValidVariableName(varName))
 		{
-			this.data.put(varName, value);
+			synchronized (this.data)
+			{
+				this.data.put(varName, value);	
+			}
 		}
 		else
 		{
@@ -349,16 +364,15 @@ public class VariablePool
 		}
 		else
 		{
-			readFromFile(parameter);
+			readFromFile(parameter, null);
 		}
 	}
 	
-	public void readNameList(String list)
+	private void readNameList(String list)
 	{
-		List defs = StringUtil.stringToList(list, ",");
-		for (int i=0; i < defs.size(); i++)
+		List<String> defs = StringUtil.stringToList(list, ",");
+		for (String line : defs)
 		{
-			String line = (String)defs.get(i);
 			int pos = line.indexOf('=');
 			if (pos == -1) return;
 			String key = line.substring(0, pos);
@@ -374,14 +388,19 @@ public class VariablePool
 		}
 	}
 	
-	public void readFromFile(String filename)
+	/**
+	 * Read the variable defintions from an external file. 
+	 * The file has to be a regular Java properties file, but does not support
+	 * line continuation.
+	 */
+	public void readFromFile(String filename, String encoding)
 		throws IOException
 	{
 		WbProperties props = new WbProperties();
 		File f = new File(filename);
 		if (!f.exists()) return;
 		
-		props.loadTextFile(filename);
+		props.loadTextFile(filename, encoding);
 		Iterator itr = props.entrySet().iterator();
 		while (itr.hasNext())
 		{

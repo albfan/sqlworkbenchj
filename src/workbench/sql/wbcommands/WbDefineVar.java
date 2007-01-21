@@ -15,6 +15,8 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import workbench.db.WbConnection;
+import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -26,7 +28,11 @@ import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
 
 /**
- *
+ * SQL Command to define a variable that gets stored in the system 
+ * wide parameter pool.
+ * 
+ * @see workbench.sql.VariablePool
+ * 
  * @author  support@sql-workbench.net
  */
 public class WbDefineVar 
@@ -41,6 +47,9 @@ public class WbDefineVar
 	private WbDefineVar(String aVerb)
 	{
 		this.verb = aVerb;
+		this.cmdLine = new ArgumentParser();
+		this.cmdLine.addArgument("file", ArgumentType.StringArgument);
+		this.cmdLine.addArgument("encoding", ArgumentType.StringArgument);
 	}
 
 	public String getVerb() { return verb; }
@@ -53,115 +62,112 @@ public class WbDefineVar
 		StatementRunnerResult result = new StatementRunnerResult();
 		String sql = SqlUtil.stripVerb(aSql);
 
-		WbStringTokenizer tok = new WbStringTokenizer("=", true, "\"'", false);
-		tok.setSourceString(sql);
-		String value = null;
-		String var = null;
-
-		if (tok.hasMoreTokens()) var = tok.nextToken();
-
-		if (var == null)
-		{
-			result.addMessage(ResourceMgr.getString("ErrVarDefWrongParameter"));
-			result.setFailure();
-			return result;
-		}
-
-		var = var.trim();
+		cmdLine.parse(sql);
+		String file = cmdLine.getValue("file");
 		
-		if (tok.hasMoreTokens()) value = tok.nextToken();
-
-		if ("-file".equalsIgnoreCase(var))
+		if (file != null)
 		{
-			if (value != null)
+			// if the file argument has been supplied, no variable definition
+			// can be present, but the encoding parameter might have been passed
+			String encoding = cmdLine.getValue("encoding");
+			String filename = this.evaluateFileArgument(file);
+			File f = new File(filename);
+			try
 			{
-				try
+				if (f.exists())
 				{
-					String filename = this.evaluateFileArgument(value);
-					File f = new File(filename);
-					if (f.exists())
-					{
-						VariablePool.getInstance().readFromFile(filename);
-						String msg = ResourceMgr.getString("MsgVarDefFileLoaded");
-						msg = StringUtil.replace(msg, "%file%", filename);
-						result.addMessage(msg);
-						result.setSuccess();
-					}
-					else
-					{
-						String msg = ResourceMgr.getString("ErrFileNotFound");
-						msg = StringUtil.replace(msg, "%file%", filename);
-						result.addMessage(msg);
-						result.setFailure();
-					}
+					VariablePool.getInstance().readFromFile(filename, encoding);
+					String msg = ResourceMgr.getString("MsgVarDefFileLoaded");
+					msg = StringUtil.replace(msg, "%file%", filename);
+					result.addMessage(msg);
+					result.setSuccess();
 				}
-				catch (Exception e)
+				else
 				{
-					File f = new File(value);
-					LogMgr.logError("WbDefineVar.execute()", "Error reading definition file: " + value, e);
-					String msg = ResourceMgr.getString("ErrReadingVarDefFile");
+					String msg = ResourceMgr.getString("ErrFileNotFound");
 					msg = StringUtil.replace(msg, "%file%", f.getAbsolutePath());
-					msg = msg + " " + ExceptionUtil.getDisplay(e);
 					result.addMessage(msg);
 					result.setFailure();
 				}
 			}
-			else
+			catch (Exception e)
 			{
-				result.addMessage(ResourceMgr.getString("ErrReadingVarDefFile"));
-				result.setFailure();
-			}
-			return result;
-		}
-
-		String msg = null;
-		result.setSuccess();
-
-		if (value != null)
-		{
-			value = value.trim();
-			if (value.startsWith("@"))
-			{
-				String valueSql = null;
-				try
-				{
-					valueSql = value.substring(1);
-					value = this.evaluateSql(aConnection, valueSql);
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("WbDefineVar.execute()", "Error retrieving variable value using SQL: " + valueSql, e);
-					String err = ResourceMgr.getString("ErrReadingVarSql");
-					err = StringUtil.replace(err, "%sql%", valueSql);
-					err = err + "\n\n" + ExceptionUtil.getDisplay(e);
-					result.addMessage(err);
-					result.setFailure();
-					return result;
-				}
-			}
-			
-			msg = ResourceMgr.getString("MsgVarDefVariableDefined");
-			try
-			{
-				VariablePool.getInstance().setParameterValue(var, value);
-				msg = StringUtil.replace(msg, "%var%", var);
-				msg = StringUtil.replace(msg, "%value%", value);
-				msg = StringUtil.replace(msg, "%varname%", VariablePool.getInstance().buildVarName(var, false));
-			}
-			catch (IllegalArgumentException e)
-			{
-				result.setFailure();
-				msg = ResourceMgr.getString("ErrVarDefWrongName");
+				LogMgr.logError("WbDefineVar.execute()", "Error reading definition file: " + f.getAbsolutePath(), e);
+				String msg = ResourceMgr.getString("ErrReadingVarDefFile");
+				msg = StringUtil.replace(msg, "%file%", f.getAbsolutePath());
+				msg = msg + " " + ExceptionUtil.getDisplay(e);
+				result.addMessage(msg);
 				result.setFailure();
 			}
 		}
 		else
 		{
-			msg = ResourceMgr.getString("MsgVarDefVariableRemoved");
-			msg = msg.replaceAll("%var%", var);
-		}
+			WbStringTokenizer tok = new WbStringTokenizer("=", true, "\"'", false);
+			tok.setSourceString(sql);
+			String value = null;
+			String var = null;
 
-		result.addMessage(msg);
+			if (tok.hasMoreTokens()) var = tok.nextToken();
+
+			if (var == null)
+			{
+				result.addMessage(ResourceMgr.getString("ErrVarDefWrongParameter"));
+				result.setFailure();
+				return result;
+			}
+
+			var = var.trim();
+
+			if (tok.hasMoreTokens()) value = tok.nextToken();
+
+			String msg = null;
+			result.setSuccess();
+
+			if (value != null)
+			{
+				value = value.trim();
+				if (value.startsWith("@"))
+				{
+					String valueSql = null;
+					try
+					{
+						valueSql = value.substring(1);
+						value = this.evaluateSql(aConnection, valueSql);
+					}
+					catch (Exception e)
+					{
+						LogMgr.logError("WbDefineVar.execute()", "Error retrieving variable value using SQL: " + valueSql, e);
+						String err = ResourceMgr.getString("ErrReadingVarSql");
+						err = StringUtil.replace(err, "%sql%", valueSql);
+						err = err + "\n\n" + ExceptionUtil.getDisplay(e);
+						result.addMessage(err);
+						result.setFailure();
+						return result;
+					}
+				}
+
+				msg = ResourceMgr.getString("MsgVarDefVariableDefined");
+				try
+				{
+					VariablePool.getInstance().setParameterValue(var, value);
+					msg = StringUtil.replace(msg, "%var%", var);
+					msg = StringUtil.replace(msg, "%value%", value);
+					msg = StringUtil.replace(msg, "%varname%", VariablePool.getInstance().buildVarName(var, false));
+				}
+				catch (IllegalArgumentException e)
+				{
+					result.setFailure();
+					msg = ResourceMgr.getString("ErrVarDefWrongName");
+					result.setFailure();
+				}
+			}
+			else
+			{
+				msg = ResourceMgr.getString("MsgVarDefVariableRemoved");
+				msg = msg.replaceAll("%var%", var);
+			}
+			result.addMessage(msg);
+		}
 
 		return result;
 	}
@@ -178,7 +184,11 @@ public class WbDefineVar
 	{
 		ResultSet rs = null;
 		String result = StringUtil.EMPTY_STRING;
-
+		if (conn == null)
+		{
+			throw new SQLException("Cannot evaluate SQL based variable without a connection");
+		}
+		
 		try
 		{
 			this.currentStatement = conn.createStatement();

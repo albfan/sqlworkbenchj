@@ -73,7 +73,18 @@ public class ResultInfo
 	public ResultInfo(TableIdentifier table, WbConnection conn)
 		throws SQLException
 	{
-		List<ColumnIdentifier> cols = conn.getMetadata().getTableColumns(table);
+		DbMetadata meta = conn.getMetadata();
+		// If the TableIdentifier has no type, we need to find
+		// the type. getTableColumns() uses the type "TABLE" if no 
+		// type is passed. This constructor is mainly used when 
+		// exporting data, which might not come from a real 
+		// table, but could also be a VIEW or a SYNONYM
+		if (table.getType() == null)
+		{
+			String type = meta.getObjectType(table);
+			table.setType(type);
+		}
+		List<ColumnIdentifier> cols = meta.getTableColumns(table);
 		this.columns = new ColumnIdentifier[cols.size()];
 		int i = 0;
 		for (ColumnIdentifier col : cols)

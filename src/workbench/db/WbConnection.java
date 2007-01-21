@@ -744,10 +744,10 @@ public class WbConnection
 
 	public boolean isBusy()
 	{
-			synchronized (busyLock)
-			{
-				return this.busy;
-			}
+		synchronized (busyLock)
+		{
+			return this.busy;
+		}
 	}
 	
 	public void setBusy(boolean flag)

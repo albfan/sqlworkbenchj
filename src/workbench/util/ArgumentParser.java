@@ -12,12 +12,13 @@
 package workbench.util;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import workbench.log.LogMgr;
 
 /**
  *
@@ -26,19 +27,25 @@ import java.util.Set;
 public class ArgumentParser
 {
 	private static final String ARG_PRESENT = "$__ARG_PRESENT__$";
-	private Map<String, String> arguments = new HashMap<String, String>();
-	private Map<String, ArgumentType> argTypes = new HashMap<String, ArgumentType>();
-	private ArrayList unknownParameters = new ArrayList();
-	private Map<String, List<String>> allowedValues = new HashMap<String, List<String>>();
+	private Map<String, String> arguments;
+	private Map<String, ArgumentType> argTypes;
+	private List<String> unknownParameters = new ArrayList<String>();
+	private Map<String, List<String>> allowedValues;
 	private int argCount = 0;
 	private boolean needSwitch = true;
 
 	public ArgumentParser()
 	{
+		Comparator<String> c = StringUtil.getCaseInsensitiveComparator();
+		arguments = new TreeMap<String, String>(c);
+		argTypes = new TreeMap<String, ArgumentType>(c);
+		allowedValues = new TreeMap<String, List<String>>(c);
+		
 	}
 	
 	public ArgumentParser(boolean parameterSwitchNeeded)
 	{
+		this();
 		this.needSwitch = parameterSwitchNeeded;
 	}
 
@@ -67,8 +74,8 @@ public class ArgumentParser
 	{
 		if (key == null) throw new NullPointerException("Key may not be null");
 		
-		this.arguments.put(key.toLowerCase(), null);
-		this.argTypes.put(key.toLowerCase(), type);
+		this.arguments.put(key, null);
+		this.argTypes.put(key, type);
 	}
 
 	public void parse(String args[])
@@ -87,41 +94,48 @@ public class ArgumentParser
 	{
 		this.reset();
 
-		WbStringTokenizer tok = new WbStringTokenizer('-', "\"'", false);
-		tok.setDelimiterNeedsWhitspace(true);
-		tok.setSourceString(aCmdLine.trim());
-
-		while (tok.hasMoreTokens())
+		try
 		{
-			String word = tok.nextToken();// String)words.get(i);
-			if (word == null || word.length() == 0) continue;
-			String arg = null;
-			String value = null;
-			int pos = word.indexOf('=');
-			if (pos > -1)
+			WbStringTokenizer tok = new WbStringTokenizer('-', "\"'", false);
+			tok.setDelimiterNeedsWhitspace(true);
+			tok.setSourceString(aCmdLine.trim());
+
+			while (tok.hasMoreTokens())
 			{
-				arg = word.substring(0, pos).trim().toLowerCase();
-				value = word.substring(pos + 1).trim();
+				String word = tok.nextToken();// String)words.get(i);
+				if (word == null || word.length() == 0) continue;
+				String arg = null;
+				String value = null;
+				int pos = word.indexOf('=');
+				if (pos > -1)
+				{
+					arg = word.substring(0, pos).trim().toLowerCase();
+					value = word.substring(pos + 1).trim();
+				}
+				else
+				{
+					arg = word.trim().toLowerCase();
+				}
+
+				if (value == null)
+				{
+					value = ARG_PRESENT;
+				}
+
+				if (arguments.containsKey(arg))
+				{
+					arguments.put(arg, value);
+					this.argCount ++;
+				}
+				else
+				{
+					this.unknownParameters.add(arg);
+				}
 			}
-			else
-			{
-				arg = word.trim().toLowerCase();
-			}
-			
-			if (value == null)
-			{
-				value = ARG_PRESENT;
-			}
-			
-			if (arguments.containsKey(arg))
-			{
-				arguments.put(arg, value);
-				this.argCount ++;
-			}
-			else
-			{
-				this.unknownParameters.add(arg);
-			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("ArgumentParser.parse()", "Error when parsing input line: " + aCmdLine, e);
 		}
 	}
 
@@ -172,9 +186,20 @@ public class ArgumentParser
 		return this.unknownParameters.size() > 0;
 	}
 
-	public List getUnknownArguments()
+	public String getUnknownArguments()
 	{
-		return Collections.unmodifiableList(this.unknownParameters);
+		StringBuilder msg = new StringBuilder();
+		
+		if (unknownParameters.size() > 0)
+		{	
+			for (int i=0; i < unknownParameters.size(); i++)
+			{
+				if (i > 0) msg.append(' ');
+				msg.append('-');
+				msg.append(unknownParameters.get(i));
+			}
+		}
+		return msg.toString();
 	}
 	
 	public boolean isArgPresent(String arg)

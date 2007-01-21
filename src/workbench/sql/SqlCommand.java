@@ -23,8 +23,6 @@ import workbench.util.ExceptionUtil;
 import workbench.interfaces.ResultLogger;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLToken;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
@@ -103,6 +101,15 @@ public class SqlCommand
 		return hasWarning;
 	}
 
+	protected void setUnknownMessage(StatementRunnerResult result, ArgumentParser cmdline, String help)
+	{
+		StringBuilder msg = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter"));
+		msg.append(cmdLine.getUnknownArguments());
+		result.addMessage(msg.toString());
+		result.addMessage(""); // add empty line
+		result.addMessage(help);
+		result.setFailure();
+	}
 	/**
 	 * Cancels this statements execution. Cancelling is done by
 	 * calling <tt>cancel</tt> on the current JDBC Statement object. This requires
@@ -177,15 +184,8 @@ public class SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException, Exception
 	{
-		String clean = SqlUtil.makeCleanSql(aSql,false,false,'\'');
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
-		if (clean.length() == 0) 
-		{
-			result.addMessage(ResourceMgr.getString("MsgWarningEmptySqlIgnored"));
-			result.setWarning(true);
-			result.setSuccess();
-			return result;
-		}
+		
 		this.currentStatement = aConnection.createStatement();
 		setConnection(aConnection);
 		this.isCancelled = false;

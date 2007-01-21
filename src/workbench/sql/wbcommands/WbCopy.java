@@ -44,25 +44,25 @@ public class WbCopy
 {
 	public static final String VERB = "WBCOPY";
 
-	public static final String PARAM_SOURCETABLE = "sourcetable";
-	public static final String PARAM_SOURCEQUERY = "sourcequery";
-	public static final String PARAM_TARGETTABLE = "targettable";
-	public static final String PARAM_SOURCEPROFILE = "sourceprofile";
-	public static final String PARAM_SOURCEPROFILE_GROUP = "sourcegroup";
-	public static final String PARAM_TARGETPROFILE = "targetprofile";
-	public static final String PARAM_TARGETPROFILE_GROUP = "targetgroup";
+	public static final String PARAM_SOURCETABLE = "sourceTable";
+	public static final String PARAM_SOURCEQUERY = "sourceQuery";
+	public static final String PARAM_TARGETTABLE = "targetTable";
+	public static final String PARAM_SOURCEPROFILE = "sourceProfile";
+	public static final String PARAM_SOURCEPROFILE_GROUP = "sourceGroup";
+	public static final String PARAM_TARGETPROFILE = "targetProfile";
+	public static final String PARAM_TARGETPROFILE_GROUP = "targetGroup";
 	public static final String PARAM_COLUMNS = "columns";
-	public static final String PARAM_SOURCEWHERE = "sourcewhere";
-	public static final String PARAM_COMMITEVERY = "commitevery";
-	public static final String PARAM_COMMITBATCH = "commitbatch";
-	public static final String PARAM_CONTINUE = "continueonerror";
-	public static final String PARAM_DELETETARGET = "deletetarget";
+	public static final String PARAM_SOURCEWHERE = "sourceWhere";
+	public static final String PARAM_COMMITEVERY = "commitEvery";
+	public static final String PARAM_COMMITBATCH = "commitBatch";
+	public static final String PARAM_CONTINUE = "continueOnError";
+	public static final String PARAM_DELETETARGET = "deleteTarget";
 	public static final String PARAM_MODE = "mode";
-	public static final String PARAM_KEYS = "keycolumns";
-	public static final String PARAM_DROPTARGET = "droptarget";
-	public static final String PARAM_CREATETARGET = "createtarget";
-	public static final String PARAM_BATCHSIZE = "batchsize";
-	public static final String PARAM_PROGRESS = "showprogress";
+	public static final String PARAM_KEYS = "keyColumns";
+	public static final String PARAM_DROPTARGET = "dropTarget";
+	public static final String PARAM_CREATETARGET = "createTarget";
+	public static final String PARAM_BATCHSIZE = "batchSize";
+	public static final String PARAM_PROGRESS = "showProgress";
 
 	private DataCopier copier;
 
@@ -100,43 +100,16 @@ public class WbCopy
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		
-		/* when using makeCleanSql, a SQL query as the source will
-		 * be modified (i.e. comments will be stripped, which is not good
-		 * if the query contains Oracle hints. We actually only need to make
-		 * sure that the COPY or WBCOPY verb is stripped off the full command
-		 * in order to make the commandline parser work properly
-		 */
-
 		aSql = SqlUtil.stripVerb(aSql);
 
-		try
-		{
-			cmdLine.parse(aSql);
-		}
-		catch (Exception e)
-		{
-			result.addMessage(ResourceMgr.getString("ErrCopyWrongParameters"));
-			result.setFailure();
-			return result;
-		}
-
+		cmdLine.parse(aSql);
+		
 		if (cmdLine.hasUnknownArguments())
 		{
-			List params = cmdLine.getUnknownArguments();
-			StringBuilder msg = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter") + " ");
-			for (int i=0; i < params.size(); i++)
-			{
-				if (i > 0) msg.append(',');
-				msg.append((String)params.get(i));
-			}
-			result.addMessage(msg.toString());
-			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrCopyWrongParameters"));
-			result.setFailure();
+			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrCopyWrongParameters"));
 			return result;
 		}
-
-
+		
 		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
 		String sourceGroup = cmdLine.getValue(PARAM_SOURCEPROFILE_GROUP);
 		ProfileKey sourceKey = null;

@@ -31,8 +31,8 @@ public class WbXslt
 	private ArgumentParser cmdLine;
 	public static final String VERB = "WBXSLT";
 	public static final String ARG_STYLESHEET = "stylesheet";
-	public static final String ARG_OUTPUT = "xsltoutput";
-	public static final String ARG_INPUT = "inputfile";
+	public static final String ARG_OUTPUT = "xsltOutput";
+	public static final String ARG_INPUT = "inputFile";
 
 	public WbXslt()
 	{

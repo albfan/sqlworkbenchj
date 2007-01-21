@@ -175,22 +175,16 @@ public class StringUtil
 		return true;
 	}
 	
-	public static Comparator getCaseInsensitiveComparator()
+	public static Comparator<String> getCaseInsensitiveComparator()
 	{
-		return new Comparator()
+		return new Comparator<String>()
 		{
-			public int compare(Object o1, Object o2)
+			public int compare(String value1, String value2)
 			{
-				if (o1 == null && o2 == null) return 0;
-				if (o1 == null) return -1;
-				if (o2 == null) return 1;
-				if (o1 instanceof String && o2 instanceof String)
-				{
-					String value1 = (String)o1;
-					String value2 = (String)o2;
-					return value1.compareToIgnoreCase(value2);
-				}
-				return 0;
+				if (value1 == null && value2 == null) return 0;
+				if (value1 == null) return -1;
+				if (value2 == null) return 1;
+				return value1.compareToIgnoreCase(value2);
 			}
 		};
 	}

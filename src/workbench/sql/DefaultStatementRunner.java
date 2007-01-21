@@ -60,8 +60,8 @@ public class DefaultStatementRunner
 	{
 		this.verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
 		Settings.getInstance().addPropertyChangeListener(this);
-		this.cmdMapper = new CommandMapper();
 		this.parameterPool = VariablePool.getInstance();
+		this.cmdMapper = new CommandMapper();
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)
@@ -161,6 +161,12 @@ public class DefaultStatementRunner
 		}
 		
 		this.currentCommand = this.cmdMapper.getCommandToUse(aSql);
+		
+		if (this.currentCommand == null) 
+		{
+			this.result = null;
+			return;
+		}
 
 		if (this.dbConnection == null && this.currentCommand.isConnectionRequired())
 		{

@@ -55,9 +55,9 @@ public class WbSchemaReport
 		cmdLine.addArgument("tables", ArgumentType.TableArgument);
 		cmdLine.addArgument("schemas");
 		cmdLine.addArgument("format", StringUtil.stringToList("wb,dbdesigner"));
-		cmdLine.addArgument("useschemaname", ArgumentType.BoolArgument);
-		cmdLine.addArgument("includeprocedures", ArgumentType.BoolArgument);
-		cmdLine.addArgument("includetables", ArgumentType.BoolArgument);
+		cmdLine.addArgument("useSchemaname", ArgumentType.BoolArgument);
+		cmdLine.addArgument("includeProcedures", ArgumentType.BoolArgument);
+		cmdLine.addArgument("includeTables", ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 	}
@@ -73,29 +73,11 @@ public class WbSchemaReport
 		
 		sql = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
 
-		try
-		{
-			cmdLine.parse(sql);
-		}
-		catch (Exception e)
-		{
-			result.addMessage(ResourceMgr.getString("ErrSchemaReportWrongParameters"));
-			result.setFailure();
-			return result;
-		}
+		cmdLine.parse(sql);
 
 		if (cmdLine.hasUnknownArguments())
 		{
-			List params = cmdLine.getUnknownArguments();
-			StringBuilder msg = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter"));
-			for (int i=0; i < params.size(); i++)
-			{
-				msg.append((String)params.get(i));
-				if (i > 0) msg.append(',');
-			}
-			result.addMessage(msg.toString());
-			result.addMessage(ResourceMgr.getString("ErrSchemaReportWrongParameters"));
-			result.setFailure();
+			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrSchemaReportWrongParameters"));
 			return result;
 		}
 

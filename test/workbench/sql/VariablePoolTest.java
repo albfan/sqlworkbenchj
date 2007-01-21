@@ -17,6 +17,9 @@ import java.io.PrintWriter;
 import junit.framework.*;
 import java.util.Set;
 import workbench.TestUtil;
+import workbench.TestUtil;
+import workbench.WbManager;
+import workbench.util.ArgumentParser;
 
 /**
  *
@@ -31,6 +34,59 @@ public class VariablePoolTest extends TestCase
 	}
 
 
+	public void testInitFromCommandLine()
+	{
+		try
+		{
+			TestUtil util = new TestUtil(this.getName());
+			
+			ArgumentParser p = new ArgumentParser();
+			p.addArgument(WbManager.ARG_VARDEF);
+			p.parse("-" + WbManager.ARG_VARDEF + "='#exportfile=/user/home/test.txt'");
+			VariablePool pool = VariablePool.getInstance();
+			pool.readDefinition(p.getValue(WbManager.ARG_VARDEF));
+			assertEquals("Wrong parameter retrieved from commandline", "/user/home/test.txt", pool.getParameterValue("exportfile"));
+			
+			File f = new File(util.getBaseDir(), "vars.properties");
+			
+			FileWriter out = new FileWriter(f);
+			out.write("exportfile=/user/home/export.txt\n");
+			out.write("exporttable=person\n");
+			out.close();
+
+			pool.clear();
+			p.parse("-" + WbManager.ARG_VARDEF + "='" + f.getAbsolutePath() + "'");
+			pool.readDefinition(p.getValue(WbManager.ARG_VARDEF));
+			assertEquals("Wrong parameter retrieved from file", "/user/home/export.txt", pool.getParameterValue("exportfile"));
+			assertEquals("Wrong parameter retrieved from file", "person", pool.getParameterValue("exporttable"));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testInitFromProperties()
+	{
+		try
+		{
+			System.setProperty(VariablePool.PROP_PREFIX + "testvalue", "value1");
+			System.setProperty(VariablePool.PROP_PREFIX + "myprop", "value2");
+			System.setProperty("someprop.testvalue", "value2");
+			VariablePool pool = VariablePool.getInstance();
+		
+			pool.initFromProperties(System.getProperties());
+			assertEquals("Wrong firstvalue", "value1", pool.getParameterValue("testvalue"));
+			assertEquals("Wrong firstvalue", "value2", pool.getParameterValue("myprop"));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testPool()
 		throws Exception
 	{
@@ -67,7 +123,7 @@ public class VariablePoolTest extends TestCase
 		pw.println("lastname=Dent");
 		pw.println("firstname=Arthur");
 		pw.close();
-		pool.readFromFile(f.getAbsolutePath());
+		pool.readFromFile(f.getAbsolutePath(), null);
 		
 		value = pool.getParameterValue("lastname");
 		assertEquals("Lastname not defined", "Dent", value);

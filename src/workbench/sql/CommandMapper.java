@@ -127,7 +127,6 @@ public class CommandMapper
 		
 		sql = new WbSchemaDiff();
 		cmdDispatch.put(sql.getVerb(), sql);
-		cmdDispatch.put("WBDIFF", sql);
 
 		sql = new SetCommand();
 		cmdDispatch.put(sql.getVerb(), sql);
@@ -183,9 +182,14 @@ public class CommandMapper
 		cmdDispatch.put(command.getVerb(), command);
 	}
 	
+	/**
+	 * Initialize the CommandMapper with a database connection. 
+	 * This will add DBMS specific commands to the internal dispatch.
+	 * 
+	 * This method can be called multiple times.
+	 */
 	public void setConnection(WbConnection aConn)
 	{
-
 		for (String cmd : dbSpecificCommands)
 		{
 			this.cmdDispatch.remove(cmd);
@@ -234,7 +238,6 @@ public class CommandMapper
 			this.dbSpecificCommands.add(verb);
 		}
 
-		
 		// this is stored in an instance variable for performance
 		// reasons, so we can skip the call to isSelectIntoNewTable() in 
 		// getCommandToUse()
@@ -250,10 +253,16 @@ public class CommandMapper
 	 * CREATE statement.
 	 * In all other casese, the approriate SqlCommand from commanDispatch will be used
 	 * This is made public in order to be accessible from a JUnit test
+	 * 
+	 * @param sql the statement to be executed
+	 * @return the instance of SqlCommand to be used to run the sql, or null if the 
+	 * given sql is empty or contains comments only
 	 */
 	public SqlCommand getCommandToUse(String sql)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
+		if (StringUtil.isEmptyString(verb)) return null;
+		
 		SqlCommand cmd = null;
 		
 		if (this.supportsSelectInto && !verb.equalsIgnoreCase(WbSelectBlob.VERB) && this.metaData != null && this.metaData.isSelectIntoNewTable(sql))

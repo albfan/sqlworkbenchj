@@ -48,6 +48,15 @@ public class FileUtil
 		}
 	}
 	
+	/**
+	 * Read the contents of the Reader into the provided StringBuilder.
+	 * Max. numLines lines are read.
+	 * @param in the Reader to be used 
+	 * @param buffer the StringBuilder to received the lines
+	 * @param numLines the max. number of lines to be read
+	 * @param lineEnd the lineEnding to be used
+	 * @return the number of lines read
+	 */
 	public static final int readLines(BufferedReader in, StringBuilder buffer, int numLines, String lineEnd)
 		throws IOException
 	{

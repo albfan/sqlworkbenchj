@@ -12,14 +12,13 @@
 package workbench.gui.components;
 
 import java.awt.Component;
-
+import java.awt.Insets;
 import javax.swing.JSplitPane;
 import javax.swing.border.Border;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.SplitPaneUI;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
-
 import workbench.gui.WbSwingUtilities;
 
 /**

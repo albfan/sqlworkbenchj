@@ -475,10 +475,10 @@ public class DbMetadata
 			if (types == null)
 			{
 				objectsWithData.add("table");
-				objectsWithData.add("system table");
 				objectsWithData.add("view");
-				objectsWithData.add("system view");
 				objectsWithData.add("synonym");
+				objectsWithData.add("system view");
+				objectsWithData.add("system table");
 			}
 			else
 			{
@@ -728,6 +728,9 @@ public class DbMetadata
 	 * be VIEW, TABLE, SYNONYM, ...
 	 * If the JDBC driver does not return the object through the getTables()
 	 * method, null is returned, otherwise the value reported in TABLE_TYPE
+	 * If there is more than object with the same name but different types
+	 * (is there a DB that supports that???) than the first object found 
+   * will be returned.
 	 * @see #getTables(String, String, String, String[])
 	 */
 	public String getObjectType(TableIdentifier table)

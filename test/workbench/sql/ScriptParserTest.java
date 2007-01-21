@@ -18,9 +18,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Iterator;
 import junit.framework.*;
-import java.util.List;
 import workbench.TestUtil;
-import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 

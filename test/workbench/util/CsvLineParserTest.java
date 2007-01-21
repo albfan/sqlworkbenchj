@@ -28,39 +28,24 @@ public class CsvLineParserTest
 		super(testName);
 	}
 
-	public void testParser()
+	public void testGetEmptyValues()
 	{
-		String line = "one\ttwo\tthree\tfour\tfive";
+		// Check for empty elements at the end
 		CsvLineParser parser = new CsvLineParser('\t');
-		parser.setLine(line);
-		int count = 0;
-		while (parser.hasNext())
-		{
-			count ++;
-			String value = parser.getNext();
-			if (count == 1)
-			{
-				assertEquals("Wrong first value", "one", value);
-			}
-			else if (count == 2)
-			{
-				assertEquals("Wrong second value", "two", value);
-			}
-			else if (count == 3)
-			{
-				assertEquals("Wrong third value", "three", value);
-			}
-			else if (count == 4)
-			{
-				assertEquals("Wrong forth value", "four", value);
-			}
-			else if (count == 5)
-			{
-				assertEquals("Wrong fifth value", "five", value);
-			}
-		}
-		assertEquals("Not enough values", 5, count);
+		parser.setLine("one\t");
+		parser.setReturnEmptyStrings(true);
+		List<String> result = getParserElements(parser);
+		assertEquals("Not enough values", 2, result.size());
 		
+		assertNotNull("Null string returned", result.get(1));
+		
+		parser.setLine("one\t");
+		parser.setReturnEmptyStrings(false);
+		result = getParserElements(parser);
+		assertEquals("Not enough values", 2, result.size());
+		assertNull("Empty string returned", result.get(1));
+
+		// Check for empty element at the beginning
 		parser.setReturnEmptyStrings(true);
 		parser.setLine("\ttwo\tthree");
 		if (parser.hasNext())
@@ -68,19 +53,45 @@ public class CsvLineParserTest
 			String value = parser.getNext();
 			assertEquals("First value not an empty string", "", value);
 		}
+		else
+		{
+			fail("No value returned");
+		}
+		
+		parser.setReturnEmptyStrings(false);
+		parser.setLine("\ttwo\tthree");
+		if (parser.hasNext())
+		{
+			String value = parser.getNext();
+			assertNull("First value not null", value);
+		}
+		else
+		{
+			fail("No value returned");
+		}
+	}
+	
+	public void testParser()
+	{
+		String line = "one\ttwo\tthree\tfour\tfive";
+		CsvLineParser parser = new CsvLineParser('\t');
+		parser.setLine(line);
+		List<String> elements = getParserElements(parser);
+		assertEquals("Wrong number of elements", 5, elements.size());
+		assertEquals("Wrong first value", "one", elements.get(0));
+		assertEquals("Wrong second value", "two", elements.get(1));
 		
 		// check for embedded quotes without a quote defined!
-		parser.setReturnEmptyStrings(true);
 		parser.setLine("one\ttwo\"values\tthree");
 		parser.getNext(); // skip the first
 		String value = parser.getNext();
-		assertEquals("Invalid element with \" character", "two\"values", value);
+		assertEquals("Invalid second element", "two\"values", value);
 		
 		parser = new CsvLineParser('\t', '"');
 		parser.setTrimValues(false);
 		parser.setReturnEmptyStrings(false);
 		parser.setLine("one\t\"quoted\tdelimiter\"\t  three  ");
-		List l = getParserElements(parser);
+		List<String> l = getParserElements(parser);
 		
 		assertEquals("Not enough values", 3, l.size());
 		assertEquals("Wrong quoted value", "quoted\tdelimiter", l.get(1));
@@ -92,12 +103,21 @@ public class CsvLineParserTest
 		
 		assertEquals("Not enough values", 2, l.size());
 		assertEquals("Value was not trimmed", "two", l.get(1));
+
+		// Test a different delimiter
+		parser = new CsvLineParser(';', '"');
+		parser.setLine("one;two;\"one;element\"");
+		elements = getParserElements(parser);
+		assertEquals("Wrong number of elements", 3, elements.size());
+		assertEquals("Wrong first value", "one", elements.get(0));
+		assertEquals("Wrong second value", "two", elements.get(1));
+		assertEquals("Wrong third value", "one;element", elements.get(2));
 		
 	}
 
-	private List getParserElements(CsvLineParser parser)
+	private List<String> getParserElements(CsvLineParser parser)
 	{
-		List result = new ArrayList();
+		List<String> result = new ArrayList<String>();
 		while (parser.hasNext())
 		{
 			result.add(parser.getNext());

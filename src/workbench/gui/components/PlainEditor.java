@@ -12,6 +12,7 @@
 package workbench.gui.components;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,10 +39,12 @@ public class PlainEditor
 	private JTextArea editor;
 	private JCheckBox wordWrap;
 	private	SearchAndReplace replacer;
+	private Color enabledBackground;
 	
 	public PlainEditor(Window parent)
 	{
 		editor = new JTextArea();
+		this.enabledBackground = editor.getBackground();
 		editor.putClientProperty("JTextArea.infoBackground", Boolean.TRUE);
 		TextComponentMouseListener l = new TextComponentMouseListener(this.editor);
 		
@@ -128,6 +131,7 @@ public class PlainEditor
 	public void setEditable(boolean flag)
 	{
 		this.editor.setEditable(flag);
+		this.editor.setBackground(enabledBackground);
 	}
 
 

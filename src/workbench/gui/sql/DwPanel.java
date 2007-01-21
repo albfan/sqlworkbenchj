@@ -674,6 +674,7 @@ public class DwPanel
 			
 			this.stmtRunner.runStatement(aSql, max, timeout);
 			StatementRunnerResult result = this.stmtRunner.getResult();
+			if (result == null) return;
 
 			if (result.isSuccess())
 			{

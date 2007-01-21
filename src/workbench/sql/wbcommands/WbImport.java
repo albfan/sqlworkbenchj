@@ -46,39 +46,39 @@ public class WbImport
 	public static final String ARG_TARGETTABLE = "table";
 	public static final String ARG_DELIM = "delimiter";
 	public static final String ARG_QUOTE = "quotechar";
-	public static final String ARG_DATE_FORMAT = "dateformat";
-	public static final String ARG_TIMESTAMP_FORMAT = "timestampformat";
+	public static final String ARG_DATE_FORMAT = "dateFormat";
+	public static final String ARG_TIMESTAMP_FORMAT = "timestampFormat";
 	public static final String ARG_DECCHAR = "decimal";
-	public static final String ARG_COMMIT = "commitevery";
-	public static final String ARG_COMMIT_BATCH = "commitbatch";
+	public static final String ARG_COMMIT = "commitEvery";
+	public static final String ARG_COMMIT_BATCH = "commitBatch";
 	public static final String ARG_CONTAINSHEADER = "header";
 	public static final String ARG_ENCODING = "encoding";
-	public static final String ARG_FILECOLUMNS = "filecolumns";
+	public static final String ARG_FILECOLUMNS = "fileColumns";
 	public static final String ARG_MODE = "mode";
-	public static final String ARG_KEYCOLUMNS = "keycolumns";
-	public static final String ARG_BATCHSIZE = "batchsize";
-	public static final String ARG_DELETE_TARGET = "deletetarget";
-	public static final String ARG_EMPTY_STRING_IS_NULL = "emptystringnull";
-	public static final String ARG_CONTINUE = "continueonerror";
+	public static final String ARG_KEYCOLUMNS = "keyColumns";
+	public static final String ARG_BATCHSIZE = "batchSize";
+	public static final String ARG_DELETE_TARGET = "deleteTarget";
+	public static final String ARG_EMPTY_STRING_IS_NULL = "emptyStringIsNull";
+	public static final String ARG_CONTINUE = "continueOnError";
 	public static final String ARG_DECODE = "decode";
-	public static final String ARG_VERBOSEXML = "verbosexml";
-	public static final String ARG_IMPORTCOLUMNS = "importcolumns";
-	public static final String ARG_COL_FILTER = "columnfilter";
-	public static final String ARG_LINE_FILTER = "linefilter";
-	public static final String ARG_PROGRESS = "showprogress";
-	public static final String ARG_DIRECTORY = "sourcedir";
+	public static final String ARG_VERBOSEXML = "verboseXML";
+	public static final String ARG_IMPORTCOLUMNS = "importColumns";
+	public static final String ARG_COL_FILTER = "columnFilter";
+	public static final String ARG_LINE_FILTER = "lineFilter";
+	public static final String ARG_PROGRESS = "showProgress";
+	public static final String ARG_DIRECTORY = "sourceDir";
 	public static final String ARG_TARGET_SCHEMA = "schema";
-	public static final String ARG_USE_TRUNCATE = "usetruncate";
-	public static final String ARG_TRIM_VALUES = "trimvalues";
+	public static final String ARG_USE_TRUNCATE = "useTruncate";
+	public static final String ARG_TRIM_VALUES = "trimValues";
 	public static final String ARG_FILE_EXT = "extension";
-	public static final String ARG_UPDATE_WHERE = "updatewhere";
-	public static final String ARG_TRUNCATE_TABLE = "truncatetable";
-	public static final String ARG_CREATE_TABLE = "createtarget";
-	public static final String ARG_BLOB_ISFILENAME = "blobisfilename";
-	public static final String ARG_CLOB_ISFILENAME = "clobisfilename";
-	public static final String ARG_MULTI_LINE = "multiline";
-	public static final String ARG_START_ROW = "startrow";
-	public static final String ARG_END_ROW = "endrow";
+	public static final String ARG_UPDATE_WHERE = "updateWhere";
+	public static final String ARG_TRUNCATE_TABLE = "truncaTetable";
+	public static final String ARG_CREATE_TABLE = "createTarget";
+	public static final String ARG_BLOB_ISFILENAME = "blobIsFilename";
+	public static final String ARG_CLOB_ISFILENAME = "clobIsFilename";
+	public static final String ARG_MULTI_LINE = "multiLine";
+	public static final String ARG_START_ROW = "startRow";
+	public static final String ARG_END_ROW = "endRow";
 	
 	public WbImport()
 	{
@@ -135,6 +135,9 @@ public class WbImport
 		
 		boolean multiDefault = Settings.getInstance().getBoolProperty("workbench.import.default.multilinerecord", false);
 		result = StringUtil.replace(result, "%multiline_default%", Boolean.toString(multiDefault));
+
+		boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
+		result = StringUtil.replace(result, "%header_default%", Boolean.toString(multiDefault));
 		
 		return result;
 	}
@@ -148,31 +151,14 @@ public class WbImport
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		aSql = SqlUtil.stripVerb(SqlUtil.makeCleanSql(aSql,false, false, '\''));
 		
-		try
-		{
-			cmdLine.parse(aSql);
-		}
-		catch (Exception e)
-		{
-			result.addMessage(getWrongParamsMessage());
-			result.setFailure();
-			return result;
-		}
+		cmdLine.parse(aSql);
 
 		if (cmdLine.hasUnknownArguments())
 		{
-			List params = cmdLine.getUnknownArguments();
-			StringBuilder msg = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter"));
-			for (int i=0; i < params.size(); i++)
-			{
-				msg.append((String)params.get(i));
-				if (i > 0) msg.append(',');
-			}
-			result.addMessage(msg.toString());
-			result.addMessage(getWrongParamsMessage());
-			result.setFailure();
+			setUnknownMessage(result, cmdLine, getWrongParamsMessage());
 			return result;
 		}
+		
 		if (!cmdLine.hasArguments())
 		{
 			result.addMessage(getWrongParamsMessage());
@@ -306,7 +292,8 @@ public class WbImport
 
 			if (dir == null)
 			{
-				boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER);
+				boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
+				boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER, headerDefault);
 				textParser.setContainsHeader(header);
 
 				String filecolumns = cmdLine.getValue(ARG_FILECOLUMNS);

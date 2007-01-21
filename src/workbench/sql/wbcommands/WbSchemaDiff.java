@@ -41,30 +41,30 @@ public class WbSchemaDiff
 	extends SqlCommand
 {
 	public static final String VERB = "WBSCHEMADIFF";
-	public static final String PARAM_SOURCEPROFILE = "referenceprofile";
-	public static final String PARAM_SOURCEPROFILE_GROUP = "referencegroup";
-	public static final String PARAM_TARGETPROFILE = "targetprofile";
-	public static final String PARAM_TARGETPROFILE_GROUP = "targetgroup";
+	public static final String PARAM_SOURCEPROFILE = "referenceProfile";
+	public static final String PARAM_SOURCEPROFILE_GROUP = "referenceGroup";
+	public static final String PARAM_TARGETPROFILE = "targetProfile";
+	public static final String PARAM_TARGETPROFILE_GROUP = "targetGroup";
 	
 	public static final String PARAM_FILENAME = "file";
 	public static final String PARAM_ENCODING = "encoding";
 	public static final String PARAM_NAMESPACE = "namespace";
 
-	public static final String PARAM_SOURCETABLES = "referencetables";
-	public static final String PARAM_TARGETTABLES = "targettables";
+	public static final String PARAM_SOURCETABLES = "referenceTables";
+	public static final String PARAM_TARGETTABLES = "targetTables";
 
-	public static final String PARAM_SOURCESCHEMA = "referenceschema";
-	public static final String PARAM_TARGETSCHEMA = "targetschema";
+	public static final String PARAM_SOURCESCHEMA = "referenceSchema";
+	public static final String PARAM_TARGETSCHEMA = "targetSchema";
 
-	public static final String PARAM_EXCLUDE_TABLES = "excludetables";
+	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
 
-	public static final String PARAM_INCLUDE_INDEX = "includeindex";
-	public static final String PARAM_INCLUDE_FK = "includeforeignkeys";
-	public static final String PARAM_INCLUDE_PK = "includeprimarykeys";
-	public static final String PARAM_INCLUDE_CONSTRAINTS = "includeconstraints";
-	public static final String PARAM_INCLUDE_VIEWS = "includeviews";
-	public static final String PARAM_INCLUDE_PROCS = "includeprocs";
-	public static final String PARAM_DIFF_JDBC_TYPES = "usejdbctypes";
+	public static final String PARAM_INCLUDE_INDEX = "includeIndex";
+	public static final String PARAM_INCLUDE_FK = "includeForeignKeys";
+	public static final String PARAM_INCLUDE_PK = "includePrimaryKeys";
+	public static final String PARAM_INCLUDE_CONSTRAINTS = "includeConstraints";
+	public static final String PARAM_INCLUDE_VIEWS = "includeViews";
+	public static final String PARAM_INCLUDE_PROCS = "includeProcs";
+	public static final String PARAM_DIFF_JDBC_TYPES = "useJdbcTypes";
 	
 	private SchemaDiff diff;
 
@@ -73,7 +73,6 @@ public class WbSchemaDiff
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(PARAM_SOURCEPROFILE, ArgumentType.ProfileArgument);
 		cmdLine.addArgument(PARAM_SOURCEPROFILE_GROUP);
-		cmdLine.addArgument("sourceprofile"); // old name of the parameter
 		cmdLine.addArgument(PARAM_TARGETPROFILE, ArgumentType.ProfileArgument);
 		cmdLine.addArgument(PARAM_TARGETPROFILE_GROUP);
 		cmdLine.addArgument(PARAM_FILENAME);
@@ -91,7 +90,6 @@ public class WbSchemaDiff
 		cmdLine.addArgument(PARAM_INCLUDE_VIEWS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_DIFF_JDBC_TYPES, ArgumentType.BoolArgument);
-		//cmdLine.addArgument(PARAM_INCLUDE_COMMENTS);
 	}
 
 	public String getVerb() { return VERB; }
@@ -103,24 +101,10 @@ public class WbSchemaDiff
 		StatementRunnerResult result = new StatementRunnerResult();
 
 		String verb = SqlUtil.getSqlVerb(sql);
-		if ("wbdiff".equalsIgnoreCase(verb))
-		{
-			result.addMessage("WbDiff has been renamed to WbSchemaDiff. Please use the new command instead.");
-			result.addMessage("Support for 'WbDiff' will be removed in a future release.\n");
-		}
 		
 		sql = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
 		
-		try
-		{
-			cmdLine.parse(sql);
-		}
-		catch (Exception e)
-		{
-			result.addMessage(ResourceMgr.getString("ErrDiffWrongParameters"));
-			result.setFailure();
-			return result;
-		}
+		cmdLine.parse(sql);
 		
 		if (cmdLine.getArgumentCount() == 0)
 		{
@@ -129,20 +113,9 @@ public class WbSchemaDiff
 			return result;
 		}
 
-
 		if (cmdLine.hasUnknownArguments())
 		{
-			List params = cmdLine.getUnknownArguments();
-			StringBuilder msg = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter") + " ");
-			for (int i=0; i < params.size(); i++)
-			{
-				if (i > 0) msg.append(',');
-				msg.append((String)params.get(i));
-			}
-			result.addMessage(msg.toString());
-			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrDiffWrongParameters"));
-			result.setFailure();
+			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrDiffWrongParameters"));
 			return result;
 		}
 

@@ -824,7 +824,7 @@ public class WbManager
 	private static final String ARG_CONFIGDIR = "configdir";
 	private static final String ARG_LIBDIR = "libdir";
 	private static final String ARG_LOGFILE = "logfile";
-	private static final String ARG_VARDEF = "vardef";
+	public static final String ARG_VARDEF = "vardef";
 
 	private static final String ARG_SHOW_PUMPER = "datapumper";
 	private static final String ARG_SHOW_DBEXP = "dbexplorer";
@@ -920,7 +920,6 @@ public class WbManager
 			}
 
 			ConnectionMgr.getInstance().setReadTemplates(readDriverTemplates);
-			
 			
 			value = cmdLine.getValue(ARG_VARDEF);
 			if (!StringUtil.isEmptyString(value))

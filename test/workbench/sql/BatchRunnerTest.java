@@ -11,18 +11,23 @@
  */
 package workbench.sql;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import junit.framework.*;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import workbench.TestUtil;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.util.ArgumentParser;
+import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 
 /**
@@ -32,8 +37,6 @@ import workbench.util.SqlUtil;
 public class BatchRunnerTest
 	extends TestCase
 {
-	private String basedir;
-	private String dbName;
 	private TestUtil util;
 	
 	public BatchRunnerTest(String testName)
@@ -171,6 +174,64 @@ public class BatchRunnerTest
 		}
 		finally
 		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+	
+	public void testConsoleOutput()
+	{
+		WbConnection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		PrintStream console = null;
+		try
+		{
+			util.prepareEnvironment();
+			con = util.getConnection();
+			stmt = con.createStatement();
+			stmt.executeUpdate("CREATE TABLE person (nr integer, firstname varchar(100), lastname varchar(100))");
+			stmt.executeUpdate("INSERT INTO person (nr, firstname, lastname) values (1, 'Arthur', 'Dent')");
+			stmt.executeUpdate("INSERT INTO person (nr, firstname, lastname) values (2, 'Ford', 'Prefect')");
+			con.commit();
+			
+			File scriptFile = new File(util.getBaseDir(), "runselect.sql");
+			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
+			writer.println("select * from person;");
+			writer.close();			
+
+			ArgumentParser parser = WbManager.createArgumentParser();
+			parser.parse("-displayresult=true -altdelimiter='/;nl' -script=" + scriptFile.getAbsolutePath());
+			BatchRunner runner = BatchRunner.createBatchRunner(parser);
+			runner.setConnection(con);
+
+			File out= new File(util.getBaseDir(), "console.txt");
+			console = new PrintStream(out);
+			runner.setConsole(console);
+			runner.execute();
+			console.close();
+			
+			BufferedReader in = new BufferedReader(new FileReader(out));
+			String content = FileUtil.readCharacters(in);
+			in.close();
+
+			int pos = content.indexOf("NR\tFIRSTNAME\tLASTNAME");
+			assertEquals("Header not found", (pos > -1), true);
+			
+			pos = content.indexOf("1\tArthur\tDent");
+			assertEquals("Record not found", (pos > -1), true);
+			
+			pos = content.indexOf("2\tFord\tPrefect");
+			assertEquals("Record not found", (pos > -1), true);
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}

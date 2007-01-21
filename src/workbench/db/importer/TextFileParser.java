@@ -1132,9 +1132,9 @@ public class TextFileParser
 	 * Setter for property emptyStringIsNull.
 	 * @param emptyStringIsNull New value of property emptyStringIsNull.
 	 */
-	public void setEmptyStringIsNull(boolean emptyStringIsNull)
+	public void setEmptyStringIsNull(boolean flag)
 	{
-		this.emptyStringIsNull = emptyStringIsNull;
+		this.emptyStringIsNull = flag;
 	}
 
 	public void setDecodeUnicode(boolean flag)

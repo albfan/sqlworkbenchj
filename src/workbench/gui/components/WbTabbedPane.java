@@ -16,7 +16,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
-
+import java.awt.Insets;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolTip;
 import javax.swing.UIManager;
@@ -83,6 +83,11 @@ public class WbTabbedPane
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 	}
 
+	public Insets getInsets()
+	{
+		return new Insets(0,0,0,0);
+	}
+	
 	boolean stateChangedPending = false;
 	protected void fireStateChanged()
 	{

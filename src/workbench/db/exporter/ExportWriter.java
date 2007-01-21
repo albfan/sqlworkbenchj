@@ -145,7 +145,7 @@ public abstract class ExportWriter
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
 		}
 		int colCount = info.getColumnCount();
-		writeStart();
+		if (!this.exporter.getAppendToFile()) writeStart();
 		StrBuffer data = null;
 		while (rs.next())
 		{

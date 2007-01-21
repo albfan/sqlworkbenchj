@@ -15,8 +15,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -26,9 +26,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import workbench.interfaces.PropertyStorage;
+import workbench.util.EncodingUtil;
 
 /**
- *
+ * An enhanced Properties class
+ * 
  * @author support@sql-workbench.net
  */
 public class WbProperties
@@ -230,22 +232,32 @@ public class WbProperties
 		this.setProperty(key, value.trim());
 	}
 	
-	/**
-	 *	Read the content of the file without replacing the 
-	 *	usual Java escape sequences. This method does not 
-	 *  support Unicode sequences nor line continuation!
-	 */
 	public void loadTextFile(String filename)
 		throws IOException
 	{
+		loadTextFile(filename, null);
+	}
+
+	/**
+	 *	Read the content of the file int this properties object.
+	 *  This method does not support line continuation!
+	 */
+	public void loadTextFile(String filename, String encoding)
+		throws IOException
+	{
 		BufferedReader in = null;
+		File f = new File(filename);
+		if(encoding == null) 
+		{
+			encoding = EncodingUtil.getDefaultEncoding();
+		}
 		try
 		{
-			in = new BufferedReader(new FileReader(filename));
+			in = EncodingUtil.createBufferedReader(f, encoding);
 			String line = in.readLine();
 			while (line != null)
 			{
-				this.addPropertyDefinition(line);
+				this.addPropertyDefinition(StringUtil.decodeUnicode(line));
 				line = in.readLine();
 			}
 		}

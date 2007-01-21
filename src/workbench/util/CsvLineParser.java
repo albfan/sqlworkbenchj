@@ -13,6 +13,7 @@ package workbench.util;
 
 /**
  * A class to efficiently parse a delimited line of data. 
+ * 
  * A quoted delimiter is recognized, line data spanning multiple lines (i.e.
  * data with embedded \n) is not recognized.
  *
@@ -27,6 +28,7 @@ public class CsvLineParser
 	private char quoteChar = 0;
 	private boolean returnEmptyStrings = false;
 	private boolean trimValues = false;
+	private boolean oneMore = false;
 	
 	public CsvLineParser(char delimit)
 	{
@@ -63,17 +65,23 @@ public class CsvLineParser
 		this.returnEmptyStrings = flag;
 	}
 	
-	
 	public boolean hasNext()
 	{
-		return current < len;
+		return oneMore || current < len;
 	}
 	
 	public String getNext()
 	{
-		int beginField;
+		// The line ends with the delimiter
+		// so we have to return an empty string
+		if (oneMore)
+		{
+			oneMore = false;
+			if (returnEmptyStrings) return "";
+			else return null;
+		}
 		
-		beginField = current;
+		int beginField = current;
 		boolean inQuotes = false;
 		int endOffset = 0;
 		while (current < len)
@@ -102,14 +110,16 @@ public class CsvLineParser
 		}
 		
 		this.current ++; // skip the delimiter
+		if (current == len && lineData.charAt(current-1) == delimiter)
+		{
+			// if the line ends with the delimiter, we have one more
+			// (empty) element
+			oneMore = true;
+		}
+		
 		if (this.returnEmptyStrings && next == null) next = StringUtil.EMPTY_STRING;
 		if (trimValues && next != null) return next.trim();
 		else return next;
-	}
-
-	public boolean isTrimValues()
-	{
-		return trimValues;
 	}
 
 	public void setTrimValues(boolean trimValues)

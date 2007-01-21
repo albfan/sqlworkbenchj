@@ -268,8 +268,7 @@ public class SqlPanel
 	public SqlPanel(int anId)
 	{
 		this.setId(anId);
-		this.setDoubleBuffered(true);
-		this.setBorder(null);
+		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
 
 		editor = EditorPanel.createSqlEditor();
@@ -284,6 +283,7 @@ public class SqlPanel
 		// because we want to use that color when turning off editing as well
 		// The JGoodies look and feel displays the are in gray if it is not editable
 		Color bg = log.getBackground();
+		
 		log.setBorder(logBorder);
 		log.setFont(Settings.getInstance().getMsgLogFont());
 		log.setEditable(false);
@@ -305,6 +305,7 @@ public class SqlPanel
 
 		this.editor.addFilenameChangeListener(this);
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
+		this.contentPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.contentPanel.setOneTouchExpandable(true);
 		this.contentPanel.setContinuousLayout(true);
 
@@ -1254,7 +1255,6 @@ public class SqlPanel
 			if (this.dbConnection != null)
 			{
 				this.dbConnection.removeChangeListener(this);
-				this.removeDbExecutionListener(this.dbConnection);
 			}
 
 			this.dbConnection = aConnection;
@@ -1294,7 +1294,6 @@ public class SqlPanel
 			if (this.dbConnection != null)
 			{
 				this.dbConnection.addChangeListener(this);
-				this.addDbExecutionListener(this.dbConnection);
 			}
 		}
 
@@ -1734,8 +1733,8 @@ public class SqlPanel
 					}
 					finally
 					{
-						fireDbExecEnd();
 						setBusy(false);
+						fireDbExecEnd();
 						clearStatusMessage();
 						setCancelState(false);
 						executionThread = null;
@@ -2299,6 +2298,8 @@ public class SqlPanel
 
 				this.stmtRunner.runStatement(currentSql, maxRows, timeout);
 				statementResult = this.stmtRunner.getResult();
+				if (statementResult == null) continue;
+				
 				if (statementResult.promptingWasCancelled())
 				{
 					String cancelMsg = ResourceMgr.getString("MsgSqlCancelledDuringPrompt");
@@ -3027,13 +3028,18 @@ public class SqlPanel
 	{
 		synchronized (this)
 		{
-			if (this.execListener == null) return;
-			Iterator<DbExecutionListener> itr = this.execListener.iterator();
-			while (itr.hasNext())
+			if (this.execListener != null) 
 			{
-				DbExecutionListener l = itr.next();
-				if (l != null) l.executionStart(this.dbConnection, this);
+				for (DbExecutionListener l : this.execListener)
+				{
+					if (l != null) l.executionStart(this.dbConnection, this);
+				}
 			}
+			if (this.dbConnection != null)
+			{
+				this.dbConnection.setBusy(true);
+			}
+			
 		}
 	}
 
@@ -3041,12 +3047,18 @@ public class SqlPanel
 	{
 		synchronized (this)
 		{
-			if (this.execListener == null) return;
-			Iterator<DbExecutionListener> itr = this.execListener.iterator();
-			while (itr.hasNext())
+			// It is important to first tell the connection that we are finished
+			// otherwise the connection still thinks it's "busy" although it is not
+			if (this.dbConnection != null)
 			{
-				DbExecutionListener l = itr.next();
-				if (l != null) l.executionEnd(this.dbConnection, this);
+				this.dbConnection.setBusy(false);
+			}
+			if (this.execListener != null)
+			{
+				for (DbExecutionListener l : this.execListener)
+				{
+					if (l != null) l.executionEnd(this.dbConnection, this);
+				}
 			}
 		}
 	}

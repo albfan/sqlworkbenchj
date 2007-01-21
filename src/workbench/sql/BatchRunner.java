@@ -13,14 +13,12 @@ package workbench.sql;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.Iterator;
-
 import java.util.List;
-
 import workbench.WbManager;
-
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
@@ -29,19 +27,14 @@ import workbench.gui.components.ConsoleStatusBar;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.profiles.ProfileKey;
 import workbench.interfaces.ParameterPrompter;
-
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.StatementRunner;
-
 import workbench.log.LogMgr;
-
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataPrinter;
-
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
-
 import workbench.util.ArgumentParser;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
@@ -76,6 +69,7 @@ public class BatchRunner
 	private boolean checkEscapedQuotes = false;
 	private String encoding = null;
 	private boolean showProgress = false;
+	private PrintStream console = System.out;
 	
 	public BatchRunner(String aFilelist)
 	{
@@ -97,6 +91,14 @@ public class BatchRunner
 	public void setParameterPrompter(ParameterPrompter p)
 	{
 		this.stmtRunner.setParameterPrompter(p);
+	}
+	
+	/**
+	 * For testing purposes to redirect the output to a file
+	 */
+	void setConsole(PrintStream output)
+	{
+		this.console = output;
 	}
 	
 	public void showResultSets(boolean flag)
@@ -369,21 +371,25 @@ public class BatchRunner
 				this.stmtRunner.runStatement(sql, 0, -1);
 				long verbend = System.currentTimeMillis();
 				result = this.stmtRunner.getResult();
-				if (result.hasMessages() && (this.stmtRunner.getVerboseLogging() || !result.isSuccess()))
+				if (result != null)
 				{
-					this.printMessage("");
-					// Force a new line for the console
-					if (this.resultDisplay == null) System.out.println("");
-					this.printMessage(result.getMessageBuffer().toString());
-				}
-				else if (result.hasWarning())
-				{
-					this.printMessage("");
-					// Force a new line for the console
-					if (this.resultDisplay == null) System.out.println("");
-					String verb = SqlUtil.getSqlVerb(sql);
-					String msg = StringUtil.replace(ResourceMgr.getString("MsgStmtCompletedWarn"), "%verb%", verb);	
-					this.printMessage(msg);
+
+					if (result.hasMessages() && (this.stmtRunner.getVerboseLogging() || !result.isSuccess()))
+					{
+						this.printMessage("");
+						// Force a new line for the console
+						if (this.resultDisplay == null) System.out.println("");
+						this.printMessage(result.getMessageBuffer().toString());
+					}
+					else if (result.hasWarning())
+					{
+						this.printMessage("");
+						// Force a new line for the console
+						if (this.resultDisplay == null) System.out.println("");
+						String verb = SqlUtil.getSqlVerb(sql);
+						String msg = StringUtil.replace(ResourceMgr.getString("MsgStmtCompletedWarn"), "%verb%", verb);	
+						this.printMessage(msg);
+					}
 				}
 				
 				executedCount ++;
@@ -405,18 +411,18 @@ public class BatchRunner
 					break;
 				}
 
-				if (this.showResultSets && result.isSuccess() && result.hasDataStores())
+				if (this.showResultSets && result != null && result.isSuccess() && result.hasDataStores() && this.console != null)
 				{
-					System.out.println();
-					System.out.println(sql);
-					System.out.println("---------------- " + ResourceMgr.getString("MsgResultLogStart") + " ----------------------------");
+					console.println();
+					console.println(sql);
+					console.println("---------------- " + ResourceMgr.getString("MsgResultLogStart") + " ----------------------------");
 					DataStore[] data = result.getDataStores();
 					for (int nr=0; nr < data.length; nr++)
 					{
 						DataPrinter printer = new DataPrinter(data[nr]);
-						printer.printTo(System.out);
+						printer.printTo(console);
 					}
-					System.out.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + "   ----------------------------");
+					console.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + "   ----------------------------");
 				}
 				if (!result.isSuccess())
 				{

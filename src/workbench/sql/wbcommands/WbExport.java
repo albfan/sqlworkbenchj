@@ -60,40 +60,40 @@ public class WbExport
 		cmdLine.addArgument("table");
 		cmdLine.addArgument("delimiter");
 		cmdLine.addArgument("quotechar");
-		cmdLine.addArgument("dateformat");
-		cmdLine.addArgument("timestampformat");
+		cmdLine.addArgument("dateFormat");
+		cmdLine.addArgument("timestampFormat");
 		cmdLine.addArgument("decimal");
-		cmdLine.addArgument("charfunc");
+		cmdLine.addArgument("charFunc");
 		cmdLine.addArgument("concat");
-		cmdLine.addArgument("concatfunc");
-		cmdLine.addArgument("commitevery");
+		cmdLine.addArgument("concatFunc");
+		cmdLine.addArgument("commitEvery");
 		cmdLine.addArgument("header", ArgumentType.BoolArgument);
-		cmdLine.addArgument("createtable", ArgumentType.BoolArgument);
+		cmdLine.addArgument("createTable", ArgumentType.BoolArgument);
 		cmdLine.addArgument("nodata", ArgumentType.BoolArgument);
 		cmdLine.addArgument("encoding");
-		cmdLine.addArgument("showprogress");
-		cmdLine.addArgument("keycolumns");
+		cmdLine.addArgument("showProgress");
+		cmdLine.addArgument("keyColumns");
 		cmdLine.addArgument("append", ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
-		cmdLine.addArgument("escapehtml", ArgumentType.BoolArgument);
-		cmdLine.addArgument("createfullhtml", ArgumentType.BoolArgument);
-		cmdLine.addArgument("sourcetable", ArgumentType.TableArgument);
-		cmdLine.addArgument("outputdir");
-		cmdLine.addArgument("usecdata", ArgumentType.BoolArgument);
-		cmdLine.addArgument("escapetext", StringUtil.stringToList("control,7bit,8bit,extended,none"));
-		cmdLine.addArgument("quotealways", ArgumentType.BoolArgument);
-		cmdLine.addArgument("lineending");
-		cmdLine.addArgument("showencodings");
-		cmdLine.addArgument("verbosexml", ArgumentType.BoolArgument);
+		cmdLine.addArgument("escapeHTML", ArgumentType.BoolArgument);
+		cmdLine.addArgument("createFullHTML", ArgumentType.BoolArgument);
+		cmdLine.addArgument("sourceTable", ArgumentType.TableArgument);
+		cmdLine.addArgument("outputDir");
+		cmdLine.addArgument("useCDATA", ArgumentType.BoolArgument);
+		cmdLine.addArgument("escapeText", StringUtil.stringToList("control,7bit,8bit,extended,none"));
+		cmdLine.addArgument("quoteAlways", ArgumentType.BoolArgument);
+		cmdLine.addArgument("lineEnding");
+		cmdLine.addArgument("showEncodings");
+		cmdLine.addArgument("verboseXML", ArgumentType.BoolArgument);
 		//cmdLine.addArgument("oraldr");
-		cmdLine.addArgument("writeoracleloader", ArgumentType.BoolArgument);
+		cmdLine.addArgument("writeOracleLoader", ArgumentType.BoolArgument);
 		cmdLine.addArgument("compress", ArgumentType.BoolArgument);
-		cmdLine.addArgument("blobidcols");
-		cmdLine.addArgument("lobidcols");
-		cmdLine.addArgument("blobtype");
-		cmdLine.addArgument("clobasfile", ArgumentType.BoolArgument);
-		cmdLine.addArgument("continueonerror", ArgumentType.BoolArgument);
+		cmdLine.addArgument("blobIdCols");
+		cmdLine.addArgument("lobIdCols");
+		cmdLine.addArgument("blobType");
+		cmdLine.addArgument("clobAsFile", ArgumentType.BoolArgument);
+		cmdLine.addArgument("continueOnError", ArgumentType.BoolArgument);
 	}
 	
 	public String getVerb() { return VERB; }
@@ -124,17 +124,8 @@ public class WbExport
 		
 		sql = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
 
-		try
-		{
-			cmdLine.parse(sql);
-		}
-		catch (Exception e)
-		{
-			result.addMessage(getWrongArgumentsMessage());
-			result.setFailure();
-			return result;
-		}
-
+		cmdLine.parse(sql);
+		
 		if (cmdLine.isArgPresent("showencodings"))
 		{
 			result.addMessage(ResourceMgr.getString("MsgAvailableEncodings"));
@@ -149,19 +140,10 @@ public class WbExport
 
 		if (cmdLine.hasUnknownArguments())
 		{
-			List params = cmdLine.getUnknownArguments();
-			StringBuilder msg = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter"));
-			for (int i=0; i < params.size(); i++)
-			{
-				msg.append((String)params.get(i));
-				if (i > 0) msg.append(',');
-			}
-			result.addMessage(msg.toString());
-			result.addMessage(getWrongArgumentsMessage());
-			result.setFailure();
+			setUnknownMessage(result, cmdLine, getWrongArgumentsMessage());
 			return result;
 		}
-
+		
 		String type = null;
 		String file = null;
 
@@ -422,19 +404,31 @@ public class WbExport
 			// to wait for a possible error message until the ResultSet
 			// from the SELECT statement comes in...
 			WbFile f = new WbFile(file);
+			boolean canWrite = true;
+			String msg = null;
 			try
 			{
 				// File.canWrite() does not work reliably. It will report
 				// an error if the file does not exist, but still could 
-				// be written. As the output file will be created if this
-				// works, and any existing file will be overwritten by
-				// the actual export, I'm assuming a "test" create here
-				// will not delete any unwanted data.
-				f.tryCreate();
+				// be written. 
+				if (f.exists())
+				{
+					msg = ResourceMgr.getString("ErrExportFileWrite");
+					canWrite = f.canWrite();
+				}
+				else
+				{
+					// try to create the file
+					f.tryCreate();
+				}
 			}
 			catch (IOException e)
 			{
-				String msg = ResourceMgr.getString("ErrExportFileWrite") + " " + e.getMessage();
+				canWrite = false;
+				msg = ResourceMgr.getString("ErrExportFileCreate") + " " + e.getMessage();
+			}
+			if (!canWrite)
+			{
 				result.addMessage(msg);
 				result.setFailure();
 				return result;

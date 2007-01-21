@@ -28,7 +28,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import workbench.TestUtil;
-import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.db.exporter.RowDataConverter;
 import workbench.sql.StatementRunnerResult;
@@ -669,6 +668,61 @@ public class WbImportTest
 			else
 			{
 				fail("No data imported");
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}
+
+	public void testEmptyStringIsNull()
+		throws Exception
+	{
+		try
+		{
+			File importFile  = new File(this.basedir, "import_empty.txt");
+			PrintWriter out = new PrintWriter(new FileWriter(importFile));
+			out.println("1\tFirstname\t");
+			out.close();
+			
+			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -emptyStringIsNull=true -type=text -filecolumns=nr,firstname,lastname -header=false -table=junit_test");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr,firstname,lastname from junit_test order by nr");
+			if (rs.next())
+			{
+				int nr = rs.getInt(1);
+				assertEquals("Wrong values imported", nr, 1);
+				String first = rs.getString(2);
+				assertEquals("Wrong firstname", "Firstname", first);
+				
+				String last = rs.getString(3);
+				assertNull("Lastname not null", last);
+			}
+			rs.close();
+			
+			result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -emptyStringIsNull=false -type=text -filecolumns=nr,firstname,lastname -deleteTarget=true -header=false -table=junit_test");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			rs = stmt.executeQuery("select nr,firstname,lastname from junit_test order by nr");
+			if (rs.next())
+			{
+				int nr = rs.getInt(1);
+				assertEquals("Wrong values imported", nr, 1);
+				String first = rs.getString(2);
+				assertEquals("Wrong firstname", "Firstname", first);
+				
+				String last = rs.getString(3);
+				assertNotNull("Lastname is null", last);
+			}
+			
+			if (rs.next())
+			{
+				fail("Too many rows");
 			}
 			rs.close();
 			stmt.close();

@@ -44,8 +44,8 @@ public class WbInclude
 		this.verb = aVerb;
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("file");
-		cmdLine.addArgument("continueonerror", ArgumentType.BoolArgument);
-		cmdLine.addArgument("checkescapedquotes", ArgumentType.BoolArgument);
+		cmdLine.addArgument("continueOnError", ArgumentType.BoolArgument);
+		cmdLine.addArgument("checkEscapedQuotes", ArgumentType.BoolArgument);
 		cmdLine.addArgument("delimiter");
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
 		cmdLine.addArgument("encoding");

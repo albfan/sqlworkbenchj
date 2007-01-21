@@ -47,6 +47,7 @@ public class WbCommandAnalyzer
 	
 	public char quoteCharForValue(String value)
 	{
+		if (this.isParameter) return 0;
 		if (value.indexOf('-') > -1 || value.indexOf(' ') > -1)
 		{
 			if (value.indexOf('\'') > -1) return '"';

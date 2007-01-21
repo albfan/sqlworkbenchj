@@ -97,6 +97,8 @@ public class SqlUtilTest
 			sql = "delete from \"FROM\"";
 			table = SqlUtil.getDeleteTable(sql);
 			assertEquals("Wrong table returned", "\"FROM\"", table);
+			
+			//sql "table = SqlUtil.getDeleteTable(sql);"
 		}
 		catch (Exception e)
 		{
@@ -232,7 +234,7 @@ public class SqlUtilTest
 		
 		sql = "/* \n" + 
 					 "* $URL: some_script.sql $ \n" + 
-					 "* $Revision: 1.13 $ \n" + 
+					 "* $Revision: 1.14 $ \n" + 
 					 "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
 					 "*/ \n" + 
 					 "-- A quis Lorem consequat Aenean tellus risus convallis velit Maecenas arcu. \n" + 
@@ -251,6 +253,10 @@ public class SqlUtilTest
 		sql = "-- comment\n   @bla.sql";
 		verb = SqlUtil.getSqlVerb(sql);
 		assertEquals("@", verb);
+		
+		sql = "-- comment only";
+		verb = SqlUtil.getSqlVerb(sql);
+		assertEquals("None-empty verb returned", true, StringUtil.isEmptyString(verb));
 	}
 
 	public void testGetTables()

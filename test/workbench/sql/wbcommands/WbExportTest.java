@@ -19,7 +19,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import workbench.TestUtil;
-import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunnerResult;
@@ -70,6 +69,29 @@ public class WbExportTest extends TestCase
 		super.tearDown();
 	}
 
+	public void testAppend()
+	{
+		try
+		{
+			File exportFile = new File(this.basedir, "export_append.txt");
+			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			assertEquals("Export file not created", true, exportFile.exists());
+			// WbExport creates an empty line at the end plus the header line
+			assertEquals("Wrong number of lines", rowcount + 1, TestUtil.countLines(exportFile));
+	
+			result = exportCmd.execute(this.connection, "wbexport -append=true -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+			assertEquals("Wrong number of lines", (rowcount * 2) + 1, TestUtil.countLines(exportFile));
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 	public void testInvalidFile()
 	{
 		try
@@ -365,14 +387,77 @@ public class WbExportTest extends TestCase
 			fail(e.getMessage());
 		}
 	}
-	
 
-	public void testSqlExport()
+	public void testSqlUpdateExport()	
 	{
 		try
 		{
-			File exportFile = new File(this.basedir, "export.sql");
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sourcetable=junit_test -table=other_table");
+			File exportFile = new File(this.basedir, "update_export.sql");
+			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlupdate -sourcetable=junit_test");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			assertEquals("Export file not created", true, exportFile.exists());
+			
+			ScriptParser p = new ScriptParser(1024*1024);
+			p.setFile(exportFile);
+			
+			assertEquals("Wrong number of statements", rowcount + 1, p.getSize());
+			String sql = p.getCommand(0);
+			String verb = SqlUtil.getSqlVerb(sql);
+			assertEquals("Not an insert file", "UPDATE", verb);
+			String table = SqlUtil.getUpdateTable(sql);
+			assertNotNull("No insert table found", table);
+			assertEquals("Wrong target table", "JUNIT_TEST", table.toUpperCase());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+
+	public void testSqlDeleteInsertExport()
+	{
+		try
+		{
+			File exportFile = new File(this.basedir, "delete_insert_export.sql");
+			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqldeleteinsert -sourcetable=junit_test");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			assertEquals("Export file not created", true, exportFile.exists());
+			
+			ScriptParser p = new ScriptParser(1024*1024);
+			p.setFile(exportFile);
+			
+			assertEquals("Wrong number of statements", (rowcount * 2) + 1, p.getSize());
+			String sql = p.getCommand(0);
+			String verb = SqlUtil.getSqlVerb(sql);
+			assertEquals("No DELETE as the first statement", "DELETE", verb);
+
+			String table = SqlUtil.getDeleteTable(sql);
+			assertNotNull("No DELETE table found", table);
+			assertEquals("Wrong target table", "JUNIT_TEST", table.toUpperCase());
+			
+			sql = p.getCommand(1);
+			verb = SqlUtil.getSqlVerb(sql);
+			assertEquals("No INSERT as the second statement", "INSERT", verb);
+			table = SqlUtil.getInsertTable(sql);
+			assertNotNull("No INSERT table found", table);
+			assertEquals("Wrong target table", "JUNIT_TEST", table.toUpperCase());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}	
+	public void testSqlInsertExport()
+	{
+		try
+		{
+			File exportFile = new File(this.basedir, "insert_export.sql");
+			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test -table=other_table");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("Export file not created", true, exportFile.exists());
