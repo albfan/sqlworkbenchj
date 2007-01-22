@@ -281,7 +281,7 @@ public class SqlPanel
 		
 		// Save the default background when the component is enabled/editable
 		// because we want to use that color when turning off editing as well
-		// The JGoodies look and feel displays the are in gray if it is not editable
+		// The JGoodies look and feel displays the area in gray if it is not editable
 		Color bg = log.getBackground();
 		
 		log.setBorder(logBorder);
@@ -1690,28 +1690,21 @@ public class SqlPanel
 						long start = System.currentTimeMillis();
 						long rowCount = exporter.startExport();
 						long execTime = (System.currentTimeMillis() - start);
-						String[] spoolMsg = exporter.getErrors();
-						if (spoolMsg.length > 0)
+						StringBuilder errors = exporter.getErrors();
+						if (errors.length() > 0)
 						{
 							messages.append('\n');
 							newLineAppended = true;
-							for (int i=0; i < spoolMsg.length; i++)
-							{
-								messages.append(spoolMsg[i]);
-								messages.append('\n');
-							}
+							messages.append(errors);
+							messages.append('\n');
 						}
 
-						//String warn = ResourceMgr.getString("TxtWarning");
-						spoolMsg = exporter.getWarnings();
-						if (spoolMsg.length > 0)
+						StringBuilder warnings = exporter.getWarnings();
+						if (warnings.length() > 0)
 						{
 							if (!newLineAppended) messages.append('\n');
-							for (int i=0; i < spoolMsg.length; i++)
-							{
-								messages.append(spoolMsg[i]);
-								messages.append('\n');
-							}
+							messages.append(warnings);
+							messages.append('\n');
 						}
 						if (exporter.isSuccess())
 						{
@@ -2660,54 +2653,52 @@ public class SqlPanel
 		int count = 0;
 		if (result.hasDataStores())
 		{
-			final DataStore[] results = result.getDataStores();
-			for (int i = 0; i < results.length; i++)
+			final List<DataStore> results = result.getDataStores();
+			count += results.size();
+			WbSwingUtilities.invoke(new Runnable()
 			{
-				count ++;
-				final int index = i;
-				WbSwingUtilities.invoke(new Runnable()
+				public void run()
 				{
-					public void run()
+					try
 					{
-						try
+						for (DataStore ds : results)
 						{
 							DwPanel p = createDwPanel();
-							p.showData(results[index], sql);
+							p.showData(ds, sql);
 							addResultTab(p, sql);
 						}
-						catch (Exception e)
-						{
-							LogMgr.logError("SqlPanel.addResult()", "Error when adding new DwPanel", e);
-						}
 					}
-				});
-			}
+					catch (Exception e)
+					{
+						LogMgr.logError("SqlPanel.addResult()", "Error when adding new DwPanel with DataStore", e);
+					}
+				}
+			});
 		}
 
 		if (result.hasResultSets())
 		{
-			final ResultSet[] results = result.getResultSets();
-			for (int i = 0; i < results.length; i++)
+			final List<ResultSet> results = result.getResultSets();
+			count += results.size();
+			WbSwingUtilities.invoke(new Runnable()
 			{
-				count ++;
-				final int index = i;
-				WbSwingUtilities.invoke(new Runnable()
+				public void run()
 				{
-					public void run()
+					try
 					{
-						try
+						for (ResultSet rs : results)
 						{
 							DwPanel p = createDwPanel();
-							p.showData(results[index], sql);
+							p.showData(rs, sql);
 							addResultTab(p, sql);
 						}
-						catch (Exception e)
-						{
-							LogMgr.logError("SqlPanel.addResult()", "Error when adding new DwPanel", e);
-						}
 					}
-				});
-			}
+					catch (Exception e)
+					{
+						LogMgr.logError("SqlPanel.addResult()", "Error when adding new DwPanel with ResultSet", e);
+					}
+				}
+			});
 		}
 
 		return count;
@@ -2728,47 +2719,60 @@ public class SqlPanel
 				editor.selectStatementTemporary(startPos, endPos);
 			}
 		});
-
 	}
 
 	protected void highlightError(ScriptParser scriptParser, int commandWithError, int startOffset)
 	{
 		if (this.editor == null) return;
-		int startPos = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
-		int endPos = scriptParser.getEndPosForCommand(commandWithError) + startOffset;
-		int line = this.editor.getLineOfOffset(startPos);
-		this.editor.select(0, 0);
-		this.editor.scrollTo(line, 0);
-		this.editor.selectError(startPos, endPos);
+		
+		final int startPos = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
+		final int endPos = scriptParser.getEndPosForCommand(commandWithError) + startOffset;
+		final int line = this.editor.getLineOfOffset(startPos);
+		
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				editor.select(0, 0);
+				editor.scrollTo(line, 0);
+				editor.selectError(startPos, endPos);
+			}
+		});
 	}
 
 	protected void checkResultSetActions()
 	{
-		boolean hasResult = false;
-		boolean mayEdit = false;
-		boolean findNext = false;
-		if (this.currentData != null)
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			hasResult = this.currentData.hasResultSet();
-			mayEdit = hasResult && this.currentData.hasUpdateableColumns();
-			findNext = hasResult && (this.currentData.getTable().canSearchAgain());
-		}
+				public void run()
+				{
+				boolean hasResult = false;
+				boolean mayEdit = false;
+				boolean findNext = false;
+				if (currentData != null)
+				{
+					hasResult = currentData.hasResultSet();
+					mayEdit = hasResult && currentData.hasUpdateableColumns();
+					findNext = hasResult && (currentData.getTable().canSearchAgain());
+				}
 
-		Action[] actions = new Action[]
-						{ this.findDataAction,
-							this.dataToClipboard,
-							this.exportDataAction,
-							this.optimizeAllCol,
-							this.printDataAction,
-							this.printPreviewAction
-						};
-		this.setActionState(actions, hasResult);
+				Action[] actions = new Action[]
+								{ findDataAction,
+									dataToClipboard,
+									exportDataAction,
+									optimizeAllCol,
+									printDataAction,
+									printPreviewAction
+								};
+				setActionState(actions, hasResult);
 
-		this.importFileAction.setEnabled(mayEdit);
-		this.importClipAction.setEnabled(mayEdit);
+				importFileAction.setEnabled(mayEdit);
+				importClipAction.setEnabled(mayEdit);
 
-		this.findDataAgainAction.setEnabled(findNext);
-		this.copySelectedMenu.setEnabled(hasResult);
+				findDataAgainAction.setEnabled(findNext);
+				copySelectedMenu.setEnabled(hasResult);
+			}
+		});
 	}
 
 	private void setExecuteActionStates(final boolean aFlag)

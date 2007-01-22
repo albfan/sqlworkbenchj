@@ -43,7 +43,9 @@ import workbench.gui.components.ValidatingDialog;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
-
+/**
+ * Some helper functions to deal with Swing stuff
+ */
 public class WbSwingUtilities
 {
 	public static final Border BEVEL_BORDER;
@@ -71,7 +73,13 @@ public class WbSwingUtilities
 	public static final Border FLAT_BUTTON_BORDER = new CompoundBorder(new EtchedBorder(), new EmptyBorder(1,6,1,6));
 	
 	/**
-	 * Synchronously execute code on the EDT
+	 * Synchronously execute code on the EDT.
+	 * If the current thread is the EDT, this merely
+	 * calls r.run()
+	 * Else EventQueue.invokeAndWait() is called
+	 * with the passed runnable. Exceptions
+	 * that can be thrown by EventQueue.invokeAndWait() are
+	 * caught and logged. 
 	 */
 	public static final void invoke(Runnable r)
 	{
@@ -87,7 +95,7 @@ public class WbSwingUtilities
 			}
 			catch (Exception e)
 			{
-				LogMgr.logWarning("WbSwingUtilities.invoke()", "Error executing on EventQueue",e);
+				LogMgr.logError("WbSwingUtilities.invoke()", "Error executing on EventQueue",e);
 			}
 		}
 	}

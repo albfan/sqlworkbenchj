@@ -448,9 +448,7 @@ public class BlobInfoDialog
 
 	private void showImageButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showImageButtonActionPerformed
 	{//GEN-HEADEREND:event_showImageButtonActionPerformed
-		ImageViewer v = new ImageViewer(this, ResourceMgr.getString("TxtBlobData"));
-		v.setData(this.blobValue);
-		v.setVisible(true);
+		this.handler.showBlobAsImage(this, this.blobValue);
 		closeWindow();
 	}//GEN-LAST:event_showImageButtonActionPerformed
 

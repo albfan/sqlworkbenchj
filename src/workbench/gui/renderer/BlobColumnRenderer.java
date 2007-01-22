@@ -26,6 +26,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import workbench.WbManager;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.*;
 import workbench.resource.Settings;
 
@@ -143,12 +144,17 @@ public class BlobColumnRenderer
 	public void actionPerformed(ActionEvent e)
 	{
 		cancelCellEditing(); 
-		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+		boolean ctrlPressed = WbAction.isCtrlPressed(e);
+		boolean shiftPressed = WbAction.isShiftPressed(e);
 		BlobHandler handler = new BlobHandler();
 		if (ctrlPressed)
 		{
 			handler.showBlobAsText(currentValue);
 		}		
+		else if (shiftPressed)
+		{
+			handler.showBlobAsImage(currentValue);
+		}
 		else
 		{
 			handler.showBlobInfoDialog(WbManager.getInstance().getCurrentWindow(), currentValue);

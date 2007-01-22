@@ -12,7 +12,9 @@
 package workbench.gui.dialogs;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.FlowLayout;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -26,7 +28,6 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
-import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.log.LogMgr;
@@ -45,10 +46,22 @@ public class ImageViewer
 	private final String settingsId = "workbench.gui.imageviewer";
 	private EscAction escAction;
 	
-	/** Creates a new instance of ImageViewer */
-	public ImageViewer(JDialog parent, String title)
+	public ImageViewer(Frame parent, String title)
 	{
 		super(parent, title, true);
+		init();
+		WbSwingUtilities.center(this, parent);
+	}
+
+	public ImageViewer(Dialog parent, String title)
+	{
+		super(parent, title, true);
+		init();
+		WbSwingUtilities.center(this, parent);
+	}
+
+	private void init()
+	{
 		this.getContentPane().setLayout(new BorderLayout());
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		panel = new ImagePanel();
@@ -70,8 +83,6 @@ public class ImageViewer
 		escAction = new EscAction(this);
 		im.put(escAction.getAccelerator(), escAction.getActionName());
 		am.put(escAction.getActionName(), escAction);
-		
-		WbSwingUtilities.center(this, WbManager.getInstance().getCurrentWindow());
 	}
 
 	public void setData(Object data)

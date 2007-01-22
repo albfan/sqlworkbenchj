@@ -135,7 +135,8 @@ public class DefaultCompletionHandler
 			if (ctx.isStatementSupported())
 			{
 				boolean selectWord = (ctx.getAnalyzer().getOverwriteCurrentWord() && currentWord != null);
-				if (ctx.getAnalyzer().isWbParam() && currentWord.startsWith("-"))
+				BaseAnalyzer analyzer = ctx.getAnalyzer();
+				if (analyzer != null && currentWord != null && analyzer.isWbParam() && currentWord.startsWith("-"))
 				{
 					currentWord = currentWord.substring(1);
 				}

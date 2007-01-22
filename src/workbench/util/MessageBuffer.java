@@ -11,35 +11,71 @@
  */
 package workbench.util;
 
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import workbench.resource.Settings;
 
 /**
+ * A class to store messages efficiently.
+ * The messages are internally stored in a LinkedList, but only up to 
+ * a specified maximum number of entries (not total size!)
+ * 
+ * If the maximum is reached {@link #getBuffer()} will add "(...)"
+ * to the generated result to indicate that messages have been cut off.
+ * This ensures that collecting warnings or errors during long running
+ * jobs, does not cause an OutOfMemory error.
+ * 
  * @author support@sql-workbench.net
  */
 public class MessageBuffer
 {
-	private LinkedList<CharSequence> messages = new LinkedList();
+	private LinkedList<CharSequence> messages = new LinkedList<CharSequence>();
 	private int length = 0;
 	private final String newLine = "\n";
 	private final int maxSize;
 	private boolean trimmed = false;
 	
+	/**
+	 * Create a new MessageBuffer, retrieving the max. number of entries
+	 * from the Settings object. If nothing has been specified in the .settings
+	 * file, a maximum number of 1000 entries is used.
+	 */
 	public MessageBuffer()
 	{
 		this(Settings.getInstance().getIntProperty("workbench.messagebuffer.maxentries", 1000));
 	}
 	
+	/**
+	 * Create a new MessageBuffer holding a maximum number of <tt>maxEntries</tt>
+	 * Entries in its internal list
+	 * @param maxEntries the max. number of entries to hold in the internal list
+	 */
 	public MessageBuffer(int maxEntries)
 	{
 		maxSize = maxEntries;
 	}
 
+	/**
+	 * Returns an unmodifiable reference to the stored messages.
+	 */
+	public List<CharSequence> getMessages()
+	{
+		return Collections.unmodifiableList(messages);
+	}
+	
 	public synchronized void clear()
 	{
 		this.messages.clear();
+		this.length = 0;
 	}
-		
+	
+	/**
+	 * Create a StringBuilder that contains the collected messages.
+	 * Once the result is returned, the internal list is emptied. 
+	 * This means the second call to this method returns an empty
+	 * buffer if no messages have been added between the calls.
+	 */
 	public synchronized StringBuilder getBuffer()
 	{
 		StringBuilder result = new StringBuilder(this.length + 50);
@@ -61,12 +97,16 @@ public class MessageBuffer
 			trimmed = true;
 			while (messages.size() >= maxSize) 
 			{
-				String s = (String)messages.removeFirst();
+				CharSequence s = messages.removeFirst();
 				if (s != null) this.length -= s.length();
 			}		
 		}
 	}
 	
+	/**
+	 * Returns the total length in characters of all messages
+	 * that are currently kept in this MessageBuffer
+	 */
 	public synchronized int getLength()
 	{
 		return length;
@@ -78,7 +118,7 @@ public class MessageBuffer
 		int count = buff.messages.size();
 		while (this.messages.size() + count > maxSize)
 		{
-			String s = (String)messages.removeFirst();
+			CharSequence s = messages.removeFirst();
 			if (s != null) this.length -= s.length();
 		}
 		this.messages.addAll(buff.messages);

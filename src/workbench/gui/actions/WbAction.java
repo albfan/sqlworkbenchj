@@ -77,17 +77,21 @@ public class WbAction
     this.putValue(ACTION_COMMAND_KEY, this.actionName);
 	}
 
+	public static boolean isAltPressed(ActionEvent e)
+	{
+		boolean altPressed = ((e.getModifiers() & ActionEvent.ALT_MASK) == ActionEvent.ALT_MASK);		
+		return altPressed;
+	}
+
 	public static boolean isShiftPressed(ActionEvent e)
 	{
 		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);		
-		//shiftPressed = shiftPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
 		return shiftPressed;
 	}
 	
 	public static boolean isCtrlPressed(ActionEvent e)
 	{
 		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
-		//ctrlPressed = ctrlPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
 		return ctrlPressed;
 	}
 	

@@ -122,16 +122,16 @@ public class TextExportWriter
 			
 			String oraFormat = convertJavaDateFormatToOracle(format);
 			List blobColumns = new LinkedList();
-			
+			boolean clobAsFile = exporter.getWriteClobAsFile();
 			for (int i=0; i < count; i++)
 			{
 				String col = resultInfo.getColumnName(i);
 				int type = resultInfo.getColumnType(i);
 				out.print("  ");
-				if (SqlUtil.isBlobType(type))
+				if (SqlUtil.isBlobType(type) || (clobAsFile && SqlUtil.isClobType(type)))
 				{
 					blobColumns.add(col);
-					out.print("blob_file_" + blobColumns.size() + " FILLER");
+					out.print("lob_file_" + blobColumns.size() + " FILLER");
 				}
 				else
 				{
@@ -166,7 +166,7 @@ public class TextExportWriter
 					String col = (String)itr.next();
 					out.print("  ");
 					out.print(col);
-					out.print(" LOBFILE(blob_file_" + i + ") TERMINATED BY EOF");
+					out.print(" LOBFILE(lob_file_" + i + ") TERMINATED BY EOF");
 					if (itr.hasNext()) out.print(",");
 					out.println();
 				}

@@ -416,10 +416,10 @@ public class BatchRunner
 					console.println();
 					console.println(sql);
 					console.println("---------------- " + ResourceMgr.getString("MsgResultLogStart") + " ----------------------------");
-					DataStore[] data = result.getDataStores();
-					for (int nr=0; nr < data.length; nr++)
+					List<DataStore> data = result.getDataStores();
+					for (DataStore ds : data)
 					{
-						DataPrinter printer = new DataPrinter(data[nr]);
+						DataPrinter printer = new DataPrinter(ds);
 						printer.printTo(console);
 					}
 					console.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + "   ----------------------------");

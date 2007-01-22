@@ -13,7 +13,6 @@ package workbench.sql.wbcommands;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import workbench.db.WbConnection;
@@ -540,13 +539,13 @@ public class WbExport
 
 		result.setSuccess();
 
-		int count = tableList.size();
+		int tableCount = tableList.size();
 		
 		String t = (String)tableList.get(0);
 		
 		// If only one table argument is present, we'll have to
 		// to check for wildcards e.g. -sourcetable=theschema.*
-		if (count == 1 && (t.indexOf('*') > -1 || t.indexOf('%') > -1))
+		if (tableCount == 1 && (t.indexOf('*') > -1 || t.indexOf('%') > -1))
 		{
 			TableIdentifier tbl = new TableIdentifier(t);
 			if (tbl.getSchema() == null)
@@ -574,17 +573,17 @@ public class WbExport
 				directExport = false;
 				return;
 			}
-			count = l.size();
-			tables = new TableIdentifier[count];
-			for (int i=0; i < count; i++)
+			tableCount = l.size();
+			tables = new TableIdentifier[tableCount];
+			for (int i=0; i < tableCount; i++)
 			{
 				tables[i] = (TableIdentifier)l.get(i);
 			}
 		}
 		else
 		{
-			tables = new TableIdentifier[count];
-			for (int i=0; i < count; i++)
+			tables = new TableIdentifier[tableCount];
+			for (int i=0; i < tableCount; i++)
 			{
 				tables[i] = new TableIdentifier((String)tableList.get(i));
 			}
@@ -594,7 +593,7 @@ public class WbExport
 		String outfile = exporter.getOutputFilename();
 		String msg = null;
 
-		if (count > 1 || outfile == null)
+		if (tableCount > 1 || outfile == null)
 		{
 			// when more then table is selected or no outputfile is specified
 			// then we require an output directory
@@ -627,9 +626,9 @@ public class WbExport
 		exporter.setRowMonitor(this);
 		exporter.setProgressInterval(this.progressInterval);
 
-		if (count > 1)
+		if (tableCount > 1)
 		{
-			for (int i = 0; i < count; i ++)
+			for (int i = 0; i < tableCount; i ++)
 			{
 				String fname = StringUtil.makeFilename(tables[i].getTableExpression());
 				File f = new File(outdir, fname + defaultExtension);
@@ -671,13 +670,13 @@ public class WbExport
 			
 		if (exporter.isSuccess())
 		{
-			if (count > 1)
+			if (tableCount > 1)
 			{
-				count = exporter.getNumberExportedTables();
+				tableCount = exporter.getNumberExportedTables();
 				msg = ResourceMgr.getString("MsgExportNumTables");
-				msg = msg.replaceAll("%numtables%", Integer.toString(count));
+				msg = msg.replaceAll("%numtables%", Integer.toString(tableCount));
 				msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
-				result.addMessage(msg + "\n");
+				result.addMessage(msg);
 			}
 			else
 			{
@@ -686,7 +685,7 @@ public class WbExport
 				msg = StringUtil.replace(msg, "%file%", exporter.getFullOutputFilename());
 				msg = StringUtil.replace(msg, "%tablename%", tables[0].getTableExpression());
 				msg = StringUtil.replace(msg, "%rows%", Long.toString(rows));
-				result.addMessage(msg + "\n");
+				result.addMessage(msg);
 			}
 			result.setSuccess();
 		}
@@ -695,13 +694,17 @@ public class WbExport
 			result.setFailure();
 		}
 		
+		addMessages(result);
+	}
+
+	private void addMessages(StatementRunnerResult result)
+	{
+		result.addMessage(this.exporter.getErrors());
+
 		if (exporter.hasWarning())
 		{
-			result.addMessages(exporter.getWarnings());
-		}
-		if (exporter.hasError())
-		{
-			result.addMessages(exporter.getErrors());
+			result.addMessage(ResourceMgr.getString("TxtWarnings"));
+			result.addMessage(exporter.getWarnings());
 		}
 	}
 
@@ -723,10 +726,9 @@ public class WbExport
 		{
 			if (aResult.hasResultSets())
 			{
-				ResultSet[] data = aResult.getResultSets();
 				String sql = aResult.getSourceCommand();
 				this.exporter.setSql(sql);
-				long rowCount = this.exporter.startExport(data[0]);
+				long rowCount = this.exporter.startExport(aResult.getResultSets().get(0));
 
 				String msg = null;
 
@@ -735,29 +737,11 @@ public class WbExport
 					msg = ResourceMgr.getString("MsgSpoolOk").replaceAll("%rows%", Long.toString(rowCount));
 					aResult.addMessage(""); // force new line in output
 					aResult.addMessage(msg);
+					msg = ResourceMgr.getString("MsgSpoolTarget") + " " + this.exporter.getFullOutputFilename();
+					aResult.addMessage(msg);
 				}
-				String[] spoolMsg = this.exporter.getErrors();
-				if (spoolMsg.length > 0)
-				{
-					for (int i=0; i < spoolMsg.length; i++)
-					{
-						aResult.addMessage(spoolMsg[i]);
-					}
-					aResult.addMessage("");
-				}
-
-				String warn = ResourceMgr.getString("TxtWarning");
-				spoolMsg = this.exporter.getWarnings();
-				if (spoolMsg.length > 0)
-				{
-					for (int i=0; i < spoolMsg.length; i++)
-					{
-						aResult.addMessage(warn + ": " + spoolMsg[i]);
-					}
-					aResult.addMessage("");
-				}
-				msg = ResourceMgr.getString("MsgSpoolTarget") + " " + this.exporter.getFullOutputFilename();
-				aResult.addMessage(msg);
+				addMessages(aResult);
+				
 				aResult.clearResultSets();
 				if (exporter.isSuccess())
 				{

@@ -110,15 +110,6 @@ public class StatementRunnerResult
 		this.messages.append(buffer);
 	}
 	
-	public void addMessages(String[] msg)
-	{
-		if (msg == null || msg.length == 0) return;
-		for (int i=0; i < msg.length; i++)
-		{
-			this.messages.append(msg[i]);
-		}
-	}
-
 	public void addMessage(CharSequence msgBuffer)
 	{
 		if (messages.getLength() > 0) messages.appendNewLine();
@@ -146,31 +137,22 @@ public class StatementRunnerResult
 		return (this.datastores != null && this.datastores.size() > 0);
 	}
 
-	public DataStore[] getDataStores()
+	public List<DataStore> getDataStores()
 	{
-		if (this.datastores == null) return null;
-		int size = this.datastores.size();
-		DataStore[] ds = new DataStore[size];
-		for (int i=0; i< size; i++)
-		{
-			ds[i] = (DataStore)this.datastores.get(i);
-		}
-		return ds;
+		return this.datastores;
+	}
+	
+	public List<ResultSet> getResultSets()
+	{
+		return this.results;
 	}
 
-	public ResultSet[] getResultSets()
-	{
-		if (this.results == null) return null;
-
-		int size = this.results.size();
-		ResultSet[] rs = new ResultSet[size];
-		for (int i=0; i< size; i++)
-		{
-			rs[i] = (ResultSet)this.results.get(i);
-		}
-		return rs;
-	}
-
+	/**
+	 * Return the messages that have been collected for this result.
+	 * This will clear the internal buffer used to store the messages.
+	 *
+	 * @see {workbench.util.MessageBuffer#getBuffer()}
+	 */
 	public StringBuilder getMessageBuffer()
 	{
 		if (this.messages == null) return null;
@@ -242,7 +224,7 @@ public class StatementRunnerResult
 		{
 			this.datastores.clear();
 		}
-		this.clearResultSets();
+		clearResultSets();
 		clearMessageBuffer();
 		if (this.updateCounts !=null) this.updateCounts.clear();
 		this.sourceCommand = null;

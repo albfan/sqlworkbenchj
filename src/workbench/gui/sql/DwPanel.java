@@ -713,11 +713,11 @@ public class DwPanel
 	{
 		if (result.hasDataStores())
 		{
-			showData(result.getDataStores()[0], result.getSourceCommand());
+			showData(result.getDataStores().get(0), result.getSourceCommand());
 		}
 		else if (result.hasResultSets())
 		{
-			showData(result.getResultSets()[0], result.getSourceCommand());
+			showData(result.getResultSets().get(0), result.getSourceCommand());
 		}			
 	}
 	

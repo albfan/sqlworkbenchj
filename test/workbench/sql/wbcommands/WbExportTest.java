@@ -11,6 +11,7 @@
  */
 package workbench.sql.wbcommands;
 
+import java.io.FileReader;
 import junit.framework.*;
 import java.io.File;
 import java.io.Reader;
@@ -271,7 +272,7 @@ public class WbExportTest extends TestCase
 			connection.commit();
 			stmt.close();
 			
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=clob_test -clobAsFile=true");
+			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=clob_test -clobAsFile=true -writeOracleLoader=true");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("Export file not created", true, exportFile.exists());
@@ -289,6 +290,19 @@ public class WbExportTest extends TestCase
 			content = FileUtil.readCharacters(in);
 			assertEquals("Wrong clob content exported", data2, content);			
 			
+			File ctl = new File(this.basedir, "export.ctl");
+			assertEquals("Oracle loader file not written", true, ctl.exists());
+
+			// Now check if the SQL*Loader file contains the correct
+			// syntax to load the external files.
+			FileReader fr = new FileReader(ctl);
+			String ctlfile = FileUtil.readCharacters(fr);
+			in.close();
+			
+			int pos = ctlfile.indexOf("lob_file_1 FILLER");
+			assertEquals("FILLER not found", true, pos > -1);
+			pos = ctlfile.indexOf("CLOB_DATA LOBFILE(lob_file_1)");
+			assertEquals("File statement not found", true, pos > -1);
 		}
 		catch (Exception e)
 		{

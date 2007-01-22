@@ -12,6 +12,7 @@
 package workbench.gui.components;
 
 import java.awt.Dialog;
+import java.awt.Dialog;
 import java.awt.Frame;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -27,6 +28,7 @@ import java.sql.Blob;
 import java.sql.SQLException;
 import workbench.WbManager;
 import workbench.gui.dialogs.BlobInfoDialog;
+import workbench.gui.dialogs.ImageViewer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -259,6 +261,26 @@ public class BlobHandler
 		return FileUtil.copy(in, out);
 	}
 
+	public void showBlobAsImage(Object value)
+	{
+		showBlobAsImage(null, value);
+	}
+
+	public void showBlobAsImage(Dialog parent, Object value)
+	{
+		ImageViewer v = null;
+		if (parent != null)
+		{
+			v = new ImageViewer(parent, ResourceMgr.getString("TxtBlobData"));
+		}
+		else
+		{
+			v = new ImageViewer(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("TxtBlobData"));
+		}
+		
+		v.setData(value);
+		v.setVisible(true);
+	}
 	public void showBlobAsText(Object value)
 	{
 		showBlobAsText(null, value, null);

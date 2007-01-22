@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.swing.JDialog;
-
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
@@ -56,6 +55,7 @@ import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.util.CharacterRange;
 import workbench.util.EncodingUtil;
+import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -138,8 +138,8 @@ public class DataExporter
 	// The columns to be used for generating blob file names
 	private List blobIdCols;
 
-	private ArrayList warnings = new ArrayList();
-	private ArrayList errors = new ArrayList();
+	private MessageBuffer warnings = new MessageBuffer();
+	private MessageBuffer errors = new MessageBuffer();
 	private ArrayList jobQueue;
 	private ExportWriter exportWriter;
 	private Window parentWindow;
@@ -259,7 +259,7 @@ public class DataExporter
 		if (this.exportWriter != null)
 		{
 			this.exportWriter.cancel();
-			this.warnings.add(ResourceMgr.getString("MsgExportCancelled"));
+			this.addWarning(ResourceMgr.getString("MsgExportCancelled"));
 		}
 	}
 
@@ -425,7 +425,7 @@ public class DataExporter
 			}
 			catch (IllegalArgumentException i)
 			{
-				this.addWarning(ResourceMgr.getString("ErrWrongDateFormat") + " " + this.dateFormat);
+				this.addWarning(ResourceMgr.getString("ErrWrongDateFormat") + " [" + this.dateFormat + "]");
 				dateFormatter = null;
 			}
 		}
@@ -457,7 +457,7 @@ public class DataExporter
 			}
 			catch (Exception e)
 			{
-				this.warnings.add(ResourceMgr.getString("ErrWrongDateFormat") + " " + this.dateTimeFormat);
+				this.addWarning(ResourceMgr.getString("ErrWrongTimestampFormat") + " [" + this.dateTimeFormat + "]");
 				dateTimeFormatter = null;
 			}
 		}
@@ -773,42 +773,32 @@ public class DataExporter
 		return rows;
 	}
 
-	public boolean isSuccess() { return this.errors.size() == 0; }
-	public boolean hasWarning() { return this.warnings.size() > 0; }
-	public boolean hasError() { return this.errors.size() > 0; }
+	public boolean isSuccess() { return this.errors.getLength() == 0; }
+	public boolean hasWarning() { return this.warnings.getLength() > 0; }
+	public boolean hasError() { return this.errors.getLength() > 0; }
 
-	public String[] getErrors()
+	public StringBuilder getErrors()
 	{
-		int count = this.errors.size();
-		String[] result = new String[count];
-		for (int i=0; i < count; i++)
-		{
-			result[i] = (String)this.errors.get(i);
-		}
-		return result;
+		// this will clear the internal buffer of the errors!
+		return this.errors.getBuffer();
 	}
 
-	public String[] getWarnings()
+	public StringBuilder getWarnings()
 	{
-		int count = this.warnings.size();
-		String[] result = new String[count];
-		for (int i=0; i < count; i++)
-		{
-			result[i] = (String)this.warnings.get(i);
-		}
-		return result;
+		// this will clear the internal buffer of the warnings!
+		return this.warnings.getBuffer();
 	}
 
 	public void addWarning(String msg)
 	{
-		if (this.warnings == null) this.warnings = new ArrayList();
-		this.warnings.add(msg);
+		this.warnings.append(msg);
+		this.warnings.appendNewLine();
 	}
 
 	public void addError(String msg)
 	{
-		if (this.errors == null) this.errors = new ArrayList();
-		this.errors.add(msg);
+		this.errors.append(msg);
+		this.errors.appendNewLine();
 	}
 
 	public long startExport(ResultSet rs)
@@ -840,7 +830,7 @@ public class DataExporter
 		}
 		catch (SQLException e)
 		{
-			this.errors.add(e.getMessage());
+			this.addError(e.getMessage());
 			LogMgr.logError("DataExporter.startExport()", "SQL Error", e);
 			throw e;
 		}
@@ -864,7 +854,7 @@ public class DataExporter
 		}
 		catch (SQLException e)
 		{
-			this.errors.add(e.getMessage());
+			this.addError(e.getMessage());
 			LogMgr.logError("DataExporter.startExport()", "SQL Error", e);
 			throw e;
 		}
@@ -901,12 +891,6 @@ public class DataExporter
 	private void configureExportWriter(ResultInfo info)
 		throws IOException, SQLException, Exception
 	{
-		if (!jobsRunning)
-		{
-			this.warnings.clear();
-			this.errors.clear();
-		}
-		
 		if (this.sqlTable != null)
 		{
 			info.setUpdateTable(new TableIdentifier(this.sqlTable));

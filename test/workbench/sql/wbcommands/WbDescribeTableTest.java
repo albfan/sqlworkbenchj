@@ -11,6 +11,7 @@
  */
 package workbench.sql.wbcommands;
 
+import java.util.List;
 import junit.framework.*;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
@@ -60,10 +61,10 @@ public class WbDescribeTableTest extends TestCase
 			result = runner.getResult();
 			assertEquals("Describe failed", true, result.isSuccess());
 			
-			DataStore[] data = result.getDataStores();
+			List<DataStore> data = result.getDataStores();
 			assertNotNull("No description returned", data);
-			assertEquals("No data returned", 1, data.length);
-			assertEquals("Wrong number of rows returned", 2, data[0].getRowCount());
+			assertEquals("No data returned", 1, data.size());
+			assertEquals("Wrong number of rows returned", 2, data.get(0).getRowCount());
 
 			sql = "-- show table definition\ndescribe \"DESCRIBE_TEST\"\n-- for table;";
 			runner.runStatement(sql, -1, -1);
@@ -72,9 +73,9 @@ public class WbDescribeTableTest extends TestCase
 			
 			data = result.getDataStores();
 			assertNotNull("No description returned", data);
-			assertEquals("No data returned", 1, data.length);
+			assertEquals("No data returned", 1, data.size());
 			
-			assertEquals("Wrong number of rows returned", 2, data[0].getRowCount());
+			assertEquals("Wrong number of rows returned", 2, data.get(0).getRowCount());
 			
 		}
 		catch (Exception e)
