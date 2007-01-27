@@ -27,7 +27,8 @@ import workbench.util.WbThread;
 import workbench.util.WbVersionReader;
 
 /**
- *
+ * A Dialog to display available versions from the SQL Workbench/J homepage.
+ * 
  * @author  support@sql-workbench.net
  */
 public class VersionCheckDialog extends javax.swing.JDialog

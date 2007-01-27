@@ -65,7 +65,8 @@ import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
- *
+ * A GUI frontend to the {@link workbench.db.datacopy.DataCopier} tool.
+ * 
  * @author  support@sql-workbench.net
  */
 public class DataPumper

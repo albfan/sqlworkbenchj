@@ -1729,7 +1729,7 @@ public class MainWindow
 		if (explorer == -1)
 			return this.sqlTab.getTabCount() - 1;
 		else
-			return explorer -1;
+			return explorer - 1;
 	}
 
 	/**
@@ -1738,7 +1738,7 @@ public class MainWindow
 	private int findFirstExplorerTab()
 	{
 		int count = this.sqlTab.getTabCount();
-		for (int i=count - 1; i > 0; i--)
+		for (int i=0; i < count; i++)
 		{
 			Component c = this.sqlTab.getComponentAt(i);
 			if (c instanceof DbExplorerPanel)

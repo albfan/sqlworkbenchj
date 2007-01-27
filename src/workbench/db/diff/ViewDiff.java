@@ -11,13 +11,17 @@
  */
 package workbench.db.diff;
 
-import workbench.db.TableIdentifier;
 import workbench.db.report.ReportView;
 import workbench.db.report.TagWriter;
 import workbench.util.StrBuffer;
 
 /**
- *
+ * Compares two database views for differences in their definition. 
+ * The generating source of the views is compared using String.equals(), 
+ * so any difference in Upper/Lowercase writing (even if not important
+ * for the functionality of the view) qualify the two views as 
+ * beeing different.
+ * 
  * @author support@sql-workbench.net
  */
 public class ViewDiff

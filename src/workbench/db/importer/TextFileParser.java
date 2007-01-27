@@ -1130,7 +1130,7 @@ public class TextFileParser
 
 	/**
 	 * Setter for property emptyStringIsNull.
-	 * @param emptyStringIsNull New value of property emptyStringIsNull.
+	 * @param flag New value of property emptyStringIsNull.
 	 */
 	public void setEmptyStringIsNull(boolean flag)
 	{

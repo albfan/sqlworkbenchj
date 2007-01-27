@@ -158,8 +158,8 @@ public class TableDependency
 
 				int update = ds.getValueAsInt(i, 9, -1);
 				int delete = ds.getValueAsInt(i, 10, -1);
-				child.setUpdateAction(this.wbMetadata.getRuleTypeDisplay(update));
-				child.setDeleteAction(this.wbMetadata.getRuleTypeDisplay(delete));
+				child.setUpdateAction(this.wbMetadata.getDbSettings().getRuleDisplay(update));
+				child.setDeleteAction(this.wbMetadata.getDbSettings().getRuleDisplay(delete));
 				child.addColumnDefinition(tablecolumn, parentcolumn);
 			}
 

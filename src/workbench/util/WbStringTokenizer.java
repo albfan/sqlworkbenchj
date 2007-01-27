@@ -17,6 +17,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
@@ -119,7 +121,16 @@ public class WbStringTokenizer
 		StringReader reader = new StringReader(aString);
 		this.setReader(reader);
 	}
-	
+
+	public List<String> getAllTokens()
+	{
+		List<String> result = new LinkedList<String>();
+		while (this.hasMoreTokens())
+		{
+			result.add(this.nextToken());
+		}
+		return result;
+	}
 	private void setReader(Reader aReader)
 	{
 		this.endOfInput = false;

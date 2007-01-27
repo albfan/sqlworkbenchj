@@ -11,7 +11,10 @@
  */
 package workbench.util;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import workbench.util.WbStringTokenizer;
 
 /**
  * @author support@sql-workbench.net
@@ -59,10 +62,28 @@ public class ToolDefinition
 	public void runApplication(String arg)
 		throws IOException
 	{
-		String[] cmd = new String[2];
-		cmd[0] = this.appPath;
-		cmd[1] = arg;
+		List<String> appDef = tokenizePath();
+		String[] cmd = new String[appDef.size() + 1];
+		for (int i = 0; i < appDef.size(); i++)
+		{
+			cmd[i] = appDef.get(i);
+		}
+		cmd[appDef.size()] = arg;
 		Runtime.getRuntime().exec(cmd, null);
+	}
+	
+	public boolean executableExists()
+	{
+		List<String> appDef = tokenizePath();
+		String prgPath = appDef.get(0);
+		File f = new File(prgPath);
+		return f.exists();
+	}
+	
+	private List<String> tokenizePath()
+	{
+		WbStringTokenizer tok = new WbStringTokenizer(this.appPath, " ", true, "\"", true);
+		return tok.getAllTokens();
 	}
 	
 	public boolean equals(Object other)

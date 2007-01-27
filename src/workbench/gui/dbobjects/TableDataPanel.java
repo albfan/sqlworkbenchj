@@ -38,6 +38,7 @@ import workbench.gui.actions.SelectionFilterAction;
 import workbench.gui.components.FlatButton;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Resettable;
+import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
@@ -523,10 +524,21 @@ public class TableDataPanel
 			dataDisplay.setStatusMessage(ResourceMgr.getString("LblLoadingProgress"));
 			dataDisplay.runQuery(sql, respectMaxRows);
 			dataDisplay.getTable().adjustOrOptimizeColumns();
-			dataDisplay.getTable().getDataStore().setUpdateTableToBeUsed(this.table);
-			dataDisplay.getSelectKeysAction().setEnabled(true);
-			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
-			dataDisplay.setPrintHeader(header);
+			DataStore ds = dataDisplay.getTable().getDataStore();
+			if (ds != null)
+			{
+				ds.setUpdateTableToBeUsed(this.table);
+				dataDisplay.getSelectKeysAction().setEnabled(true);
+				String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
+				dataDisplay.setPrintHeader(header);
+			}
+			else
+			{
+				// for some reason no data was retrieved. This seems to happen
+				// sometimes on unreliable DBMS connections.
+				dataDisplay.showError(ResourceMgr.getString("ErroNoData"));
+				WbSwingUtilities.showErrorMessageKey(SwingUtilities.getWindowAncestor(this), "ErroNoData");
+			}
 			dataDisplay.showlastExecutionTime();
 			commitRetrieveIfNeeded();
 		}

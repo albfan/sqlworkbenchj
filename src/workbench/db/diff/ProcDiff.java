@@ -11,9 +11,7 @@
  */
 package workbench.db.diff;
 
-import workbench.db.TableIdentifier;
 import workbench.db.report.ReportProcedure;
-import workbench.db.report.ReportView;
 import workbench.db.report.TagWriter;
 import workbench.util.StrBuffer;
 

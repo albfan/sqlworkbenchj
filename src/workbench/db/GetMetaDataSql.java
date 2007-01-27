@@ -11,9 +11,7 @@
  */
 package workbench.db;
 
-import java.util.HashMap;
-
-import workbench.util.WbPersistence;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -162,15 +160,15 @@ public class GetMetaDataSql
 		{
 			if (this.useLowerCase)
 			{
-				this.schema = schema.toLowerCase();
+				this.schema = StringUtil.trimQuotes(schema.toLowerCase());
 			}
 			else if (this.useUpperCase)
 			{
-				this.schema = schema.toUpperCase();
+				this.schema = StringUtil.trimQuotes(schema.toUpperCase());
 			}
 			else
 			{
-				this.schema = schema;
+				this.schema = StringUtil.trimQuotes(schema);
 			}
 		}
 	}
@@ -198,15 +196,15 @@ public class GetMetaDataSql
 		{
 			if (this.useLowerCase)
 			{
-				this.catalog = catalog.toLowerCase();
+				this.catalog = StringUtil.trimQuotes(catalog.toLowerCase());
 			}
 			else if (this.useUpperCase)
 			{
-				this.catalog = catalog.toUpperCase();
+				this.catalog = StringUtil.trimQuotes(catalog.toUpperCase());
 			}
 			else
 			{
-				this.catalog = catalog;
+				this.catalog = StringUtil.trimQuotes(catalog);
 			}
 		}
 	}
@@ -234,15 +232,15 @@ public class GetMetaDataSql
 		{
 			if (this.useLowerCase)
 			{
-				this.objectName = objectName.toLowerCase();
+				this.objectName = StringUtil.trimQuotes(objectName.toLowerCase());
 			}
 			else if (this.useUpperCase)
 			{
-				this.objectName = objectName.toUpperCase();
+				this.objectName = StringUtil.trimQuotes(objectName.toUpperCase());
 			}
 			else
 			{
-				this.objectName = objectName;
+				this.objectName = StringUtil.trimQuotes(objectName);
 			}
 		}
 	}

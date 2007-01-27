@@ -11,13 +11,10 @@
  */
 package workbench.db.diff;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import workbench.db.ColumnIdentifier;
 import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.report.ReportColumn;
@@ -29,6 +26,8 @@ import workbench.util.StringUtil;
 /**
  * Compares and evaluates the difference between a reference table
  * and a target table.
+ * Comparing the columns is delegated to {@link ColumnDiff}
+ * 
  * @author  support@sql-workbench.net
  */
 public class TableDiff

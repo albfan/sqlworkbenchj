@@ -625,6 +625,9 @@ NOT[ \t\r\n]+NULL|
 UNION[ \t\r\n]+ALL|
 GROUP[ \t\r\n]+BY|
 ORDER[ \t\r\n]+BY|
+NOT[ \t\r\n]+DEFERRABLE|
+INITIALLY[ \t\r\n]+DEFERRED|
+INITIALLY[ \t\r\n]+IMMEDIATE|
 EXPLAIN[ \t\r\n]+PLAN|
 PACKAGE[ \t\r\n]+BODY|
 CREATE[ \t\r\n]+OR[ \t\r\n]+REPLACE|

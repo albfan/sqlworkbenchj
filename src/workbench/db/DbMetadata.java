@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -130,9 +131,6 @@ public class DbMetadata
 	private static final int LOWERCASE_NAMES = 2;
 	private static final int MIXEDCASE_NAMES = 4;
 	
-	private int objectCaseStorage = -1;
-	private int schemaCaseStorage = -1;
-
 	private String tableTypeName;
 
 	private String[] tableTypesTable; 
@@ -374,40 +372,6 @@ public class DbMetadata
 			{
 				this.selectIntoPattern = null;
 				LogMgr.logError("DbMetadata.<init>", "Invalid pattern to identify a SELECT INTO a new table: " + regex, e);
-			}
-		}
-
-		String nameCase = settings.getProperty("workbench.db.objectname.case." + this.getDbId(), null);
-		if (nameCase != null)
-		{
-			if ("lower".equals(nameCase))
-			{
-				this.objectCaseStorage = LOWERCASE_NAMES;
-			}
-			else if ("upper".equals(nameCase))
-			{
-				this.objectCaseStorage = UPPERCASE_NAMES;
-			}
-			else if ("mixed".equals(nameCase))
-			{
-				this.objectCaseStorage = MIXEDCASE_NAMES;
-			}
-		}
-		
-		nameCase = settings.getProperty("workbench.db.schemaname.case." + this.getDbId(), null);
-		if (nameCase != null)
-		{
-			if ("lower".equals(nameCase))
-			{
-				this.schemaCaseStorage = LOWERCASE_NAMES;
-			}
-			else if ("upper".equals(nameCase))
-			{
-				this.schemaCaseStorage = UPPERCASE_NAMES;
-			}
-			else if ("mixed".equals(nameCase))
-			{
-				this.schemaCaseStorage = MIXEDCASE_NAMES;
 			}
 		}
 
@@ -1081,7 +1045,7 @@ public class DbMetadata
 	public String adjustSchemaNameCase(String schema)
 	{
 		if (schema == null) return null;
-		if (this.schemaCaseStorage == -1)
+		if (this.dbSettings.getSchemaNameCase() == IdentifierCase.unknown)
 		{
 			return this.adjustObjectnameCase(schema);
 		}
@@ -1521,9 +1485,10 @@ public class DbMetadata
 	 */
 	public boolean storesMixedCaseIdentifiers()
 	{
-		if (this.objectCaseStorage != -1)
+		IdentifierCase ocase = this.dbSettings.getObjectNameCase();
+		if (ocase != IdentifierCase.unknown)
 		{
-			return this.objectCaseStorage == MIXEDCASE_NAMES;
+			return ocase == IdentifierCase.mixed;
 		}
 		try
 		{
@@ -1544,9 +1509,10 @@ public class DbMetadata
 	 */
 	public boolean storesLowerCaseIdentifiers()
 	{
-		if (this.objectCaseStorage != -1)
+		IdentifierCase ocase = this.dbSettings.getObjectNameCase();
+		if (ocase != IdentifierCase.unknown)
 		{
-			return this.objectCaseStorage == LOWERCASE_NAMES;
+			return ocase == IdentifierCase.lower;
 		}
 		try
 		{
@@ -1560,12 +1526,14 @@ public class DbMetadata
 
 	public boolean storesUpperCaseSchemas()
 	{
-		return this.schemaCaseStorage == UPPERCASE_NAMES;
+		IdentifierCase ocase = this.dbSettings.getSchemaNameCase();
+		return ocase == IdentifierCase.upper;
 	}
 
 	public boolean storesLowerCaseSchemas()
 	{
-		return this.schemaCaseStorage == LOWERCASE_NAMES;
+		IdentifierCase ocase = this.dbSettings.getSchemaNameCase();
+		return ocase == IdentifierCase.lower;
 	}
 
 	/**
@@ -1576,9 +1544,10 @@ public class DbMetadata
 	 */
 	public boolean storesUpperCaseIdentifiers()
 	{
-		if (this.objectCaseStorage != -1)
+		IdentifierCase ocase = this.dbSettings.getObjectNameCase();
+		if (ocase != IdentifierCase.unknown)
 		{
-			return this.objectCaseStorage == UPPERCASE_NAMES;
+			return ocase == IdentifierCase.upper;
 		}
 		try
 		{
@@ -2677,8 +2646,9 @@ public class DbMetadata
 	public static final int COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME = 2;
 	public static final int COLUMN_IDX_FK_DEF_UPDATE_RULE = 3;
 	public static final int COLUMN_IDX_FK_DEF_DELETE_RULE = 4;
-	public static final int COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE = 5;
-	public static final int COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE = 6;
+	public static final int COLUMN_IDX_FK_DEF_DEFERRABLE = 5;
+	public static final int COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE = 6;
+	public static final int COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE = 7;
 
 	public DataStore getExportedKeys(TableIdentifier tbl)
 		throws SQLException
@@ -2786,15 +2756,15 @@ public class DbMetadata
 
 		if (includeNumericRuleValue)
 		{
-			cols = new String[] { "FK_NAME", "COLUMN", refColName , "UPDATE_RULE", "DELETE_RULE", "UPDATE_RULE_VALUE", "DELETE_RULE_VALUE"};
-			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER};
-			sizes = new int[] {25, 10, 30, 12, 12, 1, 1};
+			cols = new String[] { "FK_NAME", "COLUMN", refColName , "UPDATE_RULE", "DELETE_RULE", "DEFERRABLE", "UPDATE_RULE_VALUE", "DELETE_RULE_VALUE"};
+			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER};
+			sizes = new int[] {25, 10, 30, 12, 12, 15, 1, 1};
 		}
 		else
 		{
-			cols = new String[] { "FK_NAME", "COLUMN", refColName , "UPDATE_RULE", "DELETE_RULE"};
-			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-			sizes = new int[] {25, 10, 30, 12, 12};
+			cols = new String[] { "FK_NAME", "COLUMN", refColName , "UPDATE_RULE", "DELETE_RULE", "DEFERRABLE"};
+			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+			sizes = new int[] {25, 10, 30, 12, 12, 15};
 		}
 		DataStore ds = new DataStore(cols, types, sizes);
 		if (tableId == null) return ds;
@@ -2848,15 +2818,20 @@ public class DbMetadata
 					table = schema + "." + table;
 				}
 				int updateAction = rs.getInt(updateActionCol);
-				String updActionDesc = this.getRuleTypeDisplay(updateAction);
+				String updActionDesc = this.dbSettings.getRuleDisplay(updateAction);
 				int deleteAction = rs.getInt(deleteActionCol);
-				String delActionDesc = this.getRuleTypeDisplay(deleteAction);
+				String delActionDesc = this.dbSettings.getRuleDisplay(deleteAction);
+				
+				int deferrableCode = rs.getInt(14);
+				String deferrable = this.dbSettings.getRuleDisplay(deferrableCode);
+				
 				int row = ds.addRow();
 				ds.setValue(row, COLUMN_IDX_FK_DEF_FK_NAME, fk_name);
 				ds.setValue(row, COLUMN_IDX_FK_DEF_COLUMN_NAME, col);
 				ds.setValue(row, COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME, table + "." + fk_col);
 				ds.setValue(row, COLUMN_IDX_FK_DEF_UPDATE_RULE, updActionDesc);
 				ds.setValue(row, COLUMN_IDX_FK_DEF_DELETE_RULE, delActionDesc);
+				ds.setValue(row, COLUMN_IDX_FK_DEF_DEFERRABLE, deferrable);
 				if (includeNumericRuleValue)
 				{
 					ds.setValue(row, COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, new Integer(deleteAction));
@@ -2873,76 +2848,6 @@ public class DbMetadata
 			SqlUtil.closeResult(rs);
 		}
 		return ds;
-	}
-
-	/**
-	 *	Translates the numberic constants of DatabaseMetaData for trigger rules
-	 *	into text (e.g DatabaseMetaData.importedKeyNoAction --> NO ACTION)
-	 *
-	 *	@param aRule the numeric value for a rule as defined by DatabaseMetaData.importedKeyXXXX constants
-	 *	@return String
-	 */
-	public String getRuleTypeDisplay(int aRule)
-	{
-		String display = this.getRuleAction(aRule);
-		if (display != null) return display;
-		switch (aRule)
-		{
-			case DatabaseMetaData.importedKeyNoAction:
-				return "NO ACTION";
-			case DatabaseMetaData.importedKeyRestrict:
-				return "RESTRICT";
-			case DatabaseMetaData.importedKeySetNull:
-				return "SET NULL";
-			case DatabaseMetaData.importedKeyCascade:
-				return "CASCADE";
-			case DatabaseMetaData.importedKeySetDefault:
-				return "SET DEFAULT";
-			case DatabaseMetaData.importedKeyInitiallyDeferred:
-				return "INITIALLY DEFERRED";
-			case DatabaseMetaData.importedKeyInitiallyImmediate:
-				return "INITIALLY IMMEDIATE";
-			case DatabaseMetaData.importedKeyNotDeferrable:
-				return "NOT DEFERRABLE";
-			default:
-				return StringUtil.EMPTY_STRING;
-		}
-	}
-
-	private String getRuleAction(int rule)
-	{
-		String key;
-		switch (rule)
-		{
-			case DatabaseMetaData.importedKeyNoAction:
-				key = "workbench.sql.fkrule.noaction";
-				break;
-			case DatabaseMetaData.importedKeyRestrict:
-				key = "workbench.sql.fkrule.restrict";
-				break;
-			case DatabaseMetaData.importedKeySetNull:
-				key = "workbench.sql.fkrule.setnull";
-				break;
-			case DatabaseMetaData.importedKeyCascade:
-				key = "workbench.sql.fkrule.cascade";
-				break;
-			case DatabaseMetaData.importedKeySetDefault:
-				key = "workbench.sql.fkrule.setdefault";
-				break;
-			case DatabaseMetaData.importedKeyInitiallyDeferred:
-				key = "workbench.sql.fkrule.initiallydeferred";
-				break;
-			case DatabaseMetaData.importedKeyInitiallyImmediate:
-				key = "workbench.sql.fkrule.initiallyimmediate";
-				break;
-			case DatabaseMetaData.importedKeyNotDeferrable:
-				key = "workbench.sql.fkrule.notdeferrable";
-				break;
-			default:
-				return null;
-		}
-		key = key + "." + this.getDbId();
-		return Settings.getInstance().getProperty(key, null);
 	}
 
 	private String getPkIndexName(DataStore anIndexDef)
@@ -3496,46 +3401,49 @@ public class DbMetadata
 		// to the hashtable. The entry will be a HashSet containing the column names
 		// this ensures that each column will only be used once per fk definition
 		// (the postgres driver returns some columns twice!)
-		HashMap fkCols = new HashMap();
+		HashMap<String, List> fkCols = new HashMap<String, List>();
 
 		// this hashmap contains the columns of the referenced table
-		HashMap fkTarget = new HashMap();
+		HashMap<String, List> fkTarget = new HashMap<String, List>();
 
-		HashMap fks = new HashMap();
-		HashMap updateRules = new HashMap();
-		HashMap deleteRules = new HashMap();
-
-		String name;
+		HashMap<String, String> fks = new HashMap();
+		HashMap<String, String> updateRules = new HashMap<String, String>();
+		HashMap<String, String> deleteRules = new HashMap<String, String>();
+		HashMap<String, String> deferrable = new HashMap<String, String>();
+		
+		String fkname;
 		String col;
 		String fkCol;
 		String updateRule;
 		String deleteRule;
-		List colList;
-		//String entry;
-
+		String deferRule;
+		
 		for (int i=0; i < count; i++)
 		{
 			//"FK_NAME", "COLUMN_NAME", "REFERENCES"};
-			name = aFkDef.getValueAsString(i, COLUMN_IDX_FK_DEF_FK_NAME);
+			fkname = aFkDef.getValueAsString(i, COLUMN_IDX_FK_DEF_FK_NAME);
 			col = aFkDef.getValueAsString(i, COLUMN_IDX_FK_DEF_COLUMN_NAME);
 			fkCol = aFkDef.getValueAsString(i, COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
 			updateRule = aFkDef.getValueAsString(i, COLUMN_IDX_FK_DEF_UPDATE_RULE);
 			deleteRule = aFkDef.getValueAsString(i, COLUMN_IDX_FK_DEF_DELETE_RULE);
-			colList = (List)fkCols.get(name);
+			deferRule = aFkDef.getValueAsString(i, COLUMN_IDX_FK_DEF_DEFERRABLE);
+			
+			List colList = fkCols.get(fkname);
 			if (colList == null)
 			{
 				colList = new LinkedList();
-				fkCols.put(name, colList);
+				fkCols.put(fkname, colList);
 			}
 			colList.add(col);
-			updateRules.put(name, updateRule);
-			deleteRules.put(name, deleteRule);
-
-			colList = (List)fkTarget.get(name);
+			updateRules.put(fkname, updateRule);
+			deleteRules.put(fkname, deleteRule);
+			deferrable.put(fkname, deferRule);
+			
+			colList = fkTarget.get(fkname);
 			if (colList == null)
 			{
 				colList = new LinkedList();
-				fkTarget.put(name, colList);
+				fkTarget.put(fkname, colList);
 			}
 			colList.add(fkCol);
 		}
@@ -3544,11 +3452,11 @@ public class DbMetadata
 		Iterator names = fkCols.entrySet().iterator();
 		while (names.hasNext())
 		{
-			Map.Entry mapentry = (Map.Entry)names.next();
-			name = (String)mapentry.getKey();
-			colList = (List)mapentry.getValue();
+			Map.Entry<String, List> mapentry = (Map.Entry)names.next();
+			fkname = mapentry.getKey();
+			List colList = mapentry.getValue();
 
-			String stmt = (String)fks.get(name);
+			String stmt = fks.get(fkname);
 			if (stmt == null)
 			{
 				// first time we hit this FK definition in this loop
@@ -3557,21 +3465,21 @@ public class DbMetadata
 			String entry = null;
 			stmt = StringUtil.replace(stmt, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? aTable : tableNameToUse));
 			
-			if (this.isSystemConstraintName(name))
+			if (this.isSystemConstraintName(fkname))
 			{
 				stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_NAME_PLACEHOLDER, "");
 				stmt = StringUtil.replace(stmt, " CONSTRAINT ", "");
 			}
 			else
 			{
-				stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_NAME_PLACEHOLDER, name);
+				stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_NAME_PLACEHOLDER, fkname);
 			}
 			
 			entry = StringUtil.listToString(colList, ',');
 			stmt = StringUtil.replace(stmt, MetaDataSqlManager.COLUMNLIST_PLACEHOLDER, entry);
-			String rule = (String)updateRules.get(name);
+			String rule = updateRules.get(fkname);
 			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_UPDATE_RULE, " ON UPDATE " + rule);
-			rule = (String)deleteRules.get(name);
+			rule = deleteRules.get(fkname);
 			if (this.isOracle())
 			{
 				// Oracle does not allow ON DELETE RESTRICT, so we'll have to
@@ -3589,11 +3497,23 @@ public class DbMetadata
 			{
 				stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_DELETE_RULE, " ON DELETE " + rule);
 			}
-
-			colList = (List)fkTarget.get(name);
+			
+			rule = getDeferrableVerb(deferrable.get(fkname));
+			if (StringUtil.isEmptyString(rule))
+			{
+				String s = StringUtil.quoteRegexMeta(MetaDataSqlManager.DEFERRABLE) + "[\n|\r\n]";
+				stmt = stmt.replaceAll(s,rule);
+			}
+			else
+			{
+				stmt = StringUtil.replace(stmt, MetaDataSqlManager.DEFERRABLE, rule);
+			}
+			
+			
+			colList = fkTarget.get(fkname);
 			if (colList == null)
 			{
-				LogMgr.logError("DbMetadata.getFkSource()", "Retrieved a null list for constraing [" + name + "] but should contain a list for table [" + aTable + "]",null);
+				LogMgr.logError("DbMetadata.getFkSource()", "Retrieved a null list for constraing [" + fkname + "] but should contain a list for table [" + aTable + "]",null);
 				continue;
 			}
 			
@@ -3625,7 +3545,7 @@ public class DbMetadata
 			}
 			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_TARGET_TABLE_PLACEHOLDER, targetTable);
 			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_TARGET_COLUMNS_PLACEHOLDER, colListBuffer.toString());
-			fks.put(name, stmt.trim());
+			fks.put(fkname, stmt.trim());
 		}
 		StringBuilder fk = new StringBuilder();
 
@@ -3650,6 +3570,12 @@ public class DbMetadata
 		return fk;
 	}
 
+	private String getDeferrableVerb(String type)
+	{
+		if (dbSettings.isNotDeferrable(type)) return StringUtil.EMPTY_STRING;
+		return " DEFERRABLE " + type;
+	}
+	
 	/**
 	 * 	Build the SQL statement to create an Index on the given table.
 	 * 	@param aTable - The table name for which the index should be constructed

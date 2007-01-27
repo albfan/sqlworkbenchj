@@ -273,21 +273,16 @@ public class Settings
 			String path = getProperty("workbench.tools." + i + ".executable", "");
 			String name = getProperty("workbench.tools." + i + ".name", path);
 
-			if (check)
+			ToolDefinition tool = new ToolDefinition(path, name);
+			
+			if (check && tool.executableExists())
 			{
-				if (!StringUtil.isEmptyString(path))
-				{
-					File f = new File(path);
-					if (f.exists())
-					{
-						l.add(new ToolDefinition(path, name));
-						count ++;
-					}
-				}
+				l.add(tool);
+				count++;
 			}
 			else
 			{
-				l.add(new ToolDefinition(path, name));
+				l.add(tool);
 				count ++;
 			}
 		}

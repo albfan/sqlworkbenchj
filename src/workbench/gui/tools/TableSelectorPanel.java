@@ -32,7 +32,12 @@ import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 
 /**
- *
+ * A Panel to select a table. 
+ * 
+ * A list of available schemas and tables is displayed using two dropdowns.
+ * If the selected table has changed, a PropertyChangeListener 
+ * is notified. 
+ * 
  * @author  support@sql-workbench.net
  */
 public class TableSelectorPanel

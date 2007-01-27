@@ -36,7 +36,10 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- *
+ * A panel to map columns from one table definition to another.
+ * Source and target are populated with a list of ColumnIdentifiers. 
+ * Identifiers that have the same name are automatically "mapped".
+ * 
  * @author  support@sql-workbench.net
  */
 public class ColumnMapper

@@ -13,7 +13,6 @@ package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -21,12 +20,7 @@ import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -50,12 +44,14 @@ import workbench.interfaces.Reloadable;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
 import workbench.util.WbThread;
 
 /**
+ * A panel to display the table definition information inside the DbExplorer.
+ * 
+ * @see workbench.db.DbMetadata.getTableDefinition(TableIdentifier)
  * @author  support@sql-workbench.net
  */
 public class TableDefinitionPanel
@@ -73,7 +69,6 @@ public class TableDefinitionPanel
 	private JPanel toolbar;
 	private boolean busy;
 
-	/** Creates a new instance of TableDefinitionPanel */
 	public TableDefinitionPanel()
 	{
 		this.tableDefinition = new WbTable();
@@ -233,7 +228,7 @@ public class TableDefinitionPanel
 			}
 			catch (Throwable e)
 			{
-				// ignore it
+				LogMgr.logError("TableDefinitionPanel.applyTableModel()", "Error when applying the table model", e);
 			}
 		}
 		tableNameLabel.setText("<html><b>" + currentTable.getTableName() + "</b></html>");

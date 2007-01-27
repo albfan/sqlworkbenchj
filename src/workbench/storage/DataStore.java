@@ -448,9 +448,11 @@ public class DataStore
 	/**
 	 * Prepare the information which table should be updated. This 
 	 * will not trigger the retrieval of the columns. 
+	 * 
 	 * This table will be used the next time checkUpdateTable() will 
 	 * be called. checkUpdateTable() will not retrieve the 
 	 * table name from the original SQL then.
+	 * @see #setUpdateTable(TableIdentifier)
 	 */
 	public void setUpdateTableToBeUsed(TableIdentifier tbl)
 	{
@@ -480,8 +482,15 @@ public class DataStore
 	 * Sets the table to be updated for this DataStore.
 	 * Upon setting the table, the column definition for the table
 	 * will be retrieved using {@link workbench.db.DbMetadata}
+	 * 
+	 * To define the table that should be used for updates, but without
+	 * retrieving its definition (for performance reasons) use
+	 * {@link #setUpdateTableToBeUsed(TableIdentifier)}
+	 * 
 	 * @param tbl the table to be used as the update table
 	 * @param conn the connection where this table exists
+	 * 
+	 * @see #setUpdateTableToBeUsed(TableIdentifier)
 	 */
 	public void setUpdateTable(TableIdentifier tbl, WbConnection conn)
 	{

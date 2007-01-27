@@ -25,6 +25,7 @@ import javax.swing.JTextField;
 import workbench.db.ColumnIdentifier;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTraversalPolicy;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.ResultInfo;
 import workbench.storage.filter.ColumnComparator;
@@ -155,26 +156,34 @@ public class ColumnExpressionPanel
 		}
 		else if (evt.getSource() == this.comparatorDropDown)
 		{
-			ComparatorListItem item = (ComparatorListItem)comparatorDropDown.getSelectedItem();
-			if (item != null)
+			try
 			{
-				ignoreCase.setSelected(item.getComparator().supportsIgnoreCase());
-				ignoreCase.setEnabled(item.getComparator().supportsIgnoreCase());
-				boolean needsValue = item.getComparator().needsValue();
-				valueField.setEnabled(needsValue);
-				if (needsValue)
+				ComparatorListItem item = (ComparatorListItem)comparatorDropDown.getSelectedItem();
+				if (item != null)
 				{
-					valueField.setBackground(Color.WHITE);
+					ignoreCase.setSelected(item.getComparator().supportsIgnoreCase());
+					ignoreCase.setEnabled(item.getComparator().supportsIgnoreCase());
+					boolean needsValue = item.getComparator().needsValue();
+					valueField.setEnabled(needsValue);
+					if (needsValue)
+					{
+						valueField.setBackground(Color.WHITE);
+					}
+					else
+					{
+						valueField.setBackground(this.getBackground());
+					}
 				}
 				else
 				{
-					valueField.setBackground(this.getBackground());
+					ignoreCase.setSelected(false);
+					ignoreCase.setEnabled(false);
 				}
+				
 			}
-			else
+			catch (Exception e)
 			{
-				ignoreCase.setSelected(false);
-				ignoreCase.setEnabled(false);
+				LogMgr.logError("ColumnExpressionPanel.actionPerformed()", "Error when updating comparator", e);
 			}
 		}
 	}
@@ -282,7 +291,7 @@ public class ColumnExpressionPanel
 			}
 			catch (Exception e)
 			{
-				// ignore;
+				LogMgr.logWarning("ColumnExpressionPanel.getFilterValue()", "Error converting input value", e);
 			}
 		}
 		return value;
@@ -298,37 +307,44 @@ public class ColumnExpressionPanel
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("ColumnExpressionPanel.buildColumnComparatorDropwDown()", "Error finding column class", e);
 		}
 	}
 
 	private void buildColumnComparatorDropDown(Class columnClass)
 	{
-		if (lastColumnClass != null && columnClass.equals(lastColumnClass))
+		try
 		{
-			if (comparatorDropDown.getSelectedItem() == null)
+			if (lastColumnClass != null && columnClass.equals(lastColumnClass))
 			{
-				comparatorDropDown.setSelectedIndex(0);
+				if (comparatorDropDown.getSelectedItem() == null)
+				{
+					comparatorDropDown.setSelectedIndex(0);
+				}
+				return;
 			}
-			return;
+			int count = comparatorItems.size();
+			int added = 0;
+			ArrayList l = new ArrayList(count);
+			for (int i=0; i < count; i++)
+			{
+				ComparatorListItem item = (ComparatorListItem)comparatorItems.get(i);
+				if (item.getComparator().supportsType(columnClass))
+				{
+					l.add(item);
+					added++;
+				}
+			}
+			this.activeItems.setData(l);
+			comparatorDropDown.setModel(this.activeItems);
+			if (added > 0) comparatorDropDown.setSelectedIndex(0);
+			comparatorDropDown.validate();
+			comparatorDropDown.repaint();
 		}
-		int count = comparatorItems.size();
-		int added = 0;
-		ArrayList l = new ArrayList(count);
-		for (int i=0; i < count; i++)
+		catch (Exception e)
 		{
-			ComparatorListItem item = (ComparatorListItem)comparatorItems.get(i);
-			if (item.getComparator().supportsType(columnClass))
-			{
-				l.add(item);
-				added++;
-			}
+			LogMgr.logError("ColumnExpressionPanel.buildColumnComparatorDropwDown()", "Error building dropdown", e);
 		}
-		this.activeItems.setData(l);
-		comparatorDropDown.setModel(this.activeItems);
-		if (added > 0) comparatorDropDown.setSelectedIndex(0);
-    comparatorDropDown.validate();
-    comparatorDropDown.repaint();
 	}
 }
 

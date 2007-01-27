@@ -79,42 +79,6 @@ public class StatementContext
 
 	public BaseAnalyzer getAnalyzer() { return this.analyzer; }
 	
-//	public char quoteCharForValue(String value)
-//	{
-//		if (analyzer == null) return 0;
-//		return analyzer.quoteCharForValue(value);
-//	}
-//	
-//	public boolean isWbParam()
-//	{
-//		if (analyzer == null) return false;
-//		return analyzer.isWbParam();
-//	}
-//	
-//	public boolean isKeywordList()
-//	{
-//		if (analyzer == null) return false;
-//		return analyzer.isKeywordList();
-//	}
-//	
-//	public boolean appendDotToSelection()
-//	{
-//		if (analyzer == null) return false;
-//		return analyzer.appendDotToSelection();
-//	}
-//	
-//	public boolean getOverwriteCurrentWord()
-//	{
-//		if (analyzer == null) return false;
-//		return analyzer.getOverwriteCurrentWord();
-//	}
-//	
-//	public String getColumnPrefix()
-//	{
-//		if (analyzer == null) return null;
-//		return analyzer.getColumnPrefix();
-//	}
-	
 	private boolean inSubSelect(WbConnection conn, String sql, int pos)
 	{
 		try

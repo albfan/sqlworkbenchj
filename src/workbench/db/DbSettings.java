@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import java.sql.DatabaseMetaData;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -202,4 +203,123 @@ public class DbSettings
 		List l = StringUtil.stringToList(value, ",");
 		return !l.contains(this.dbId);
 	}	
+
+	public IdentifierCase getSchemaNameCase()
+	{
+		// This allows overriding the default value returned by the JDBC driver
+		String nameCase = Settings.getInstance().getProperty("workbench.db."  + this.getDbId() + ".schemaname.case", null);
+		if (nameCase != null)
+		{
+			if ("lower".equals(nameCase))
+			{
+				return IdentifierCase.lower;
+			}
+			else if ("upper".equals(nameCase))
+			{
+				return IdentifierCase.upper;
+			}
+			else if ("mixed".equals(nameCase))
+			{
+				return IdentifierCase.mixed;
+			}
+		}
+		return IdentifierCase.unknown;
+	}
+	
+	public IdentifierCase getObjectNameCase()
+	{
+		// This allows overriding the default value returned by the JDBC driver
+		String nameCase = Settings.getInstance().getProperty("workbench.db."  + this.getDbId() + ".objectname.case", null);
+		if (nameCase != null)
+		{
+			if ("lower".equals(nameCase))
+			{
+				return IdentifierCase.lower;
+			}
+			else if ("upper".equals(nameCase))
+			{
+				return IdentifierCase.upper;
+			}
+			else if ("mixed".equals(nameCase))
+			{
+				return IdentifierCase.mixed;
+			}
+		}
+		return IdentifierCase.unknown;
+	}
+
+	/**
+	 *	Translates the numberic constants of DatabaseMetaData for trigger rules
+	 *	into text (e.g DatabaseMetaData.importedKeyNoAction --> NO ACTION)
+	 *
+	 *	@param code the numeric value for a rule as defined by DatabaseMetaData.importedKeyXXXX constants
+	 *	@return String
+	 */
+	public String getRuleDisplay(int code)
+	{
+		StringBuilder key = new StringBuilder(40);
+		switch (code)
+		{
+			case DatabaseMetaData.importedKeyNoAction:
+				key.append("workbench.sql.fkrule.noaction");
+				break;
+			case DatabaseMetaData.importedKeyRestrict:
+				key.append("workbench.sql.fkrule.restrict");
+				break;
+			case DatabaseMetaData.importedKeySetNull:
+				key.append("workbench.sql.fkrule.setnull");
+				break;
+			case DatabaseMetaData.importedKeyCascade:
+				key.append("workbench.sql.fkrule.cascade");
+				break;
+			case DatabaseMetaData.importedKeySetDefault:
+				key.append("workbench.sql.fkrule.setdefault");
+				break;
+			case DatabaseMetaData.importedKeyInitiallyDeferred:
+				key.append("workbench.sql.fkrule.initiallydeferred");
+				break;
+			case DatabaseMetaData.importedKeyInitiallyImmediate:
+				key.append("workbench.sql.fkrule.initiallyimmediate");
+				break;
+			case DatabaseMetaData.importedKeyNotDeferrable:
+				key.append("workbench.sql.fkrule.notdeferrable");
+				break;
+			default:
+				key = null;
+		}
+		if (key != null)
+		{
+			key.append('.');
+			key.append(this.getDbId());
+			String display = Settings.getInstance().getProperty(key.toString(), null);
+			if (display != null) return display;
+		}
+		switch (code)
+		{
+			case DatabaseMetaData.importedKeyNoAction:
+				return "NO ACTION";
+			case DatabaseMetaData.importedKeyRestrict:
+				return "RESTRICT";
+			case DatabaseMetaData.importedKeySetNull:
+				return "SET NULL";
+			case DatabaseMetaData.importedKeyCascade:
+				return "CASCADE";
+			case DatabaseMetaData.importedKeySetDefault:
+				return "SET DEFAULT";
+			case DatabaseMetaData.importedKeyInitiallyDeferred:
+				return "INITIALLY DEFERRED";
+			case DatabaseMetaData.importedKeyInitiallyImmediate:
+				return "INITIALLY IMMEDIATE";
+			case DatabaseMetaData.importedKeyNotDeferrable:
+				return "NOT DEFERRABLE";
+			default:
+				return StringUtil.EMPTY_STRING;
+		}
+	}
+	
+	public boolean isNotDeferrable(String deferrable)
+	{
+		if (StringUtil.isEmptyString(deferrable)) return true;
+		return (deferrable.equals(getRuleDisplay(DatabaseMetaData.importedKeyNotDeferrable)));
+	}
 }

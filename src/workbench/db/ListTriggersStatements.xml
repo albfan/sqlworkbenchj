@@ -190,8 +190,12 @@ from syscat.triggers</string>
     <void property="orderBy">
      <string>ORDER BY trigger_name</string>
     </void>
+    <void property="userLowerCase">
+     <boolean>true</boolean>
+    </void>
    </object>
   </void>
+	
   <void method="put"> 
    <string>PostgreSQL</string> 
    <object class="workbench.db.GetMetaDataSql"> 

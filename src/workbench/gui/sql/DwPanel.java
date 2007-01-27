@@ -493,12 +493,11 @@ public class DwPanel
 	{
 		return this.sql;
 	}
-	
-	public void setUpdateTable(String aTable)
-	{
-		setUpdateTable(new TableIdentifier(aTable));
-	}
-	
+
+	/**
+	 * Define the update table to be used.
+	 * @see workbench.storage.DataStore#setUpdateTable(TableIdentifier)
+	 */
 	public void setUpdateTable(TableIdentifier table)
 	{
 		this.setStatusMessage(ResourceMgr.getString("MsgRetrieveUpdateTableInfo"));
@@ -653,7 +652,7 @@ public class DwPanel
 	}
 	
 	/**
-	 *	Execute the given SQL statement. 
+	 *	Execute the given SQL statement and display the result. 
 	 */
 	public void runQuery(String aSql, boolean respectMaxRows)
 		throws SQLException, Exception
@@ -674,26 +673,26 @@ public class DwPanel
 			
 			this.stmtRunner.runStatement(aSql, max, timeout);
 			StatementRunnerResult result = this.stmtRunner.getResult();
-			if (result == null) return;
 
-			if (result.isSuccess())
+			if (result != null)
 			{
-				this.hasResultSet = true;
-				this.showData(result);
-
-				this.lastExecutionTime = result.getExecutionTime();
-			}
-			else
-			{
-				this.hasResultSet = false;
-				this.setMessageDisplayModel(this.getErrorTableModel(result.getMessageBuffer().toString()));
-				if (this.showErrorMessages)
+				if (result.isSuccess())
 				{
-					WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), result.getMessageBuffer().toString());
+					this.hasResultSet = true;
+					this.showData(result);
+					this.lastExecutionTime = result.getExecutionTime();
+				}
+				else
+				{
+					this.hasResultSet = false;
+					showError(result.getMessageBuffer().toString());
+					if (this.showErrorMessages)
+					{
+						WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), result.getMessageBuffer().toString());
+					}
 				}
 				checkResultSetActions();
 			}
-			
 		}
 		finally
 		{
