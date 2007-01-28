@@ -417,7 +417,7 @@
 						</row>
 
             <row>
-              <entry>-dateTimeFormat</entry>
+              <entry>-timestampFormat</entry>
 
               <entry>The <link linkend="options-date-format">format</link> to be used when writing
               datetime (or timestamp) columns into the output file.
@@ -444,11 +444,14 @@
 								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 								<para>
 									If quoting is enabled (via <literal>-quotechar</literal>,
-                  then character data will only be quoted
+                  then character data will normally only be quoted
                   if the delimiter is found inside the actual value that is
                   written to the output file. If <literal>-quoteAlways=true</literal> is
-                  specified, character data will always be
-                  enclosed in the specified quote character.
+                  specified, character data will always be enclosed in the specified quote character.
+									This parameter is ignored if not quote character is specified. If you 
+									expect the quote character to be contained in the values, you should enable
+									character escaping, otherwise the quote character that is part of the 
+									exported value will break the quote during import.
 								</para>
               </entry>
             </row>
@@ -466,11 +469,12 @@
 							<entry>
 								<para>
 									This parameter controls the escaping of non-printable
-									or non-ASCII characters. Valid options are <literal>ctrl</literal> which
-									will escape everything below ASCII 32 (newline, tab, etc), <literal>7bit</literal>
-									which will escape everything below ASCII 32 and above 126, <literal>8bit</literal>
-									which will escape everything below ASCII 32 and above 255 and <literal>extended</literal>
-									which will escape everything outside the range [32-126] and [161-255]
+									or non-ASCII characters. Valid options are 
+									<literal>ctrl</literal> which will escape everything below ASCII 32 (newline, tab, etc), 
+									<literal>7bit</literal> which will escape everything below ASCII 32 and above 126, 
+									<literal>8bit</literal> which will escape everything below ASCII 32 and above 255 
+									and <literal>extended</literal> which will escape everything outside the 
+									range [32-126] and [161-255]
 								</para>
 								<para>
 									This will write a unicode representation of the character into the
@@ -478,6 +482,13 @@
 									can only be imported using &wb-productname; (at least I don't know
 									of any DBMS specific loader that will decode this properly)
 								</para>
+								<para>
+									If character escaping is enabled, then the quote character will be escaped
+									inside quoted values and the delimiter will be escaped inside non-quoted
+									values. The delimiter could also be escaped inside a quoted value if the 
+									delimiter falls into the selected escape range (e.g. a tab character).
+								</para>
+									
 							</entry>
 						</row>
 						
@@ -547,7 +558,7 @@
 						</row>
 						
             <row>
-              <entry>-dateTimeFormat</entry>
+              <entry>-timestampFormat</entry>
               <entry>The <link linkend="options-date-format">format</link> to be used when writing
               datetime (or timestamp) columns into the output file.
               </entry>
@@ -1079,6 +1090,11 @@ WHERE table1.column1 = table2.column1;</programlisting>
 									This parameter is always set to true when the <literal>-sourcedir</literal>
 									parameter is used.
 								</para>
+								<para>
+									The default value for this option can be changed in the <link linkend="export-text-header-default">
+									settings file</link> and it will be displayed if you run <literal>WbImport</literal> 
+                  without any parameters. It defaults to <literal>true</literal>
+								</para>
 							</entry>
 						</row>
 						
@@ -1134,6 +1150,9 @@ WHERE table1.column1 = table2.column1;</programlisting>
 									Controls whether input values for character type columns 
 									with a length of zero are treated as <literal>NULL</literal> (value <literal>true</literal>)
 									or as an empty string. 
+								</para>
+								<para>
+									The default value for this parameter is <literal>true</literal>
 								</para>
 								<para>
 									Note that, input values for non character columns (such as numbers or date columns) that are 
@@ -1823,13 +1842,19 @@ WHERE id=42;</programlisting>
                 </entry>
             </row>
             <row>
-                <entry>-includetables</entry>
+                <entry>-includeTables</entry>
                 <entry>Control the output of table information for the report. The default is
-                          <literal>true</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
+                    <literal>true</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
                 </entry>
             </row>
             <row>
-                <entry>-includeprocedures</entry>
+                <entry>-includeTableGrants</entry>
+                <entry>If tables are included in the output, the grants for each table can also be included with 
+                    this parameter. The default value is <literal>false</literal>.
+                </entry>
+            </row>
+            <row>
+                <entry>-includeProcedures</entry>
                 <entry>Control the output of stored procedure information for the report. The default is
                 <literal>false</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
                 </entry>
@@ -1990,6 +2015,13 @@ WHERE id=42;</programlisting>
 								Valid values are <literal>true</literal> or <literal>false</literal>.
 							</entry>
 						</row>
+
+						<row>
+							<entry>-includeTableGrants</entry>
+							<entry>Select whether table grants should be compared as well.
+								The default is <literal>false</literal>.
+							</entry>
+						</row>
 						
 						<row>
 							<entry>-includeConstraints</entry>
@@ -2025,7 +2057,7 @@ WHERE id=42;</programlisting>
 						</row>
 						
 						<row>
-							<entry>-includeProcs</entry>
+							<entry>-includeProcedures</entry>
 							<entry>
 								<para>
 									Select whether stored procedures should also be compared. When comparing
@@ -2122,7 +2154,9 @@ WHERE id=42;</programlisting>
       The syntax is <literal>WBVARDEF -file=&lt;filename&gt;</literal>
       </para>
       <para>You can also specify a file when starting &wb-productname; with the
-      parameter <literal>-vardef=&lt;filename&gt;</literal>.
+      parameter <literal>-vardef=filename.ext</literal>. When specifying a filename
+			you can also define an encoding for the file using the <literal>-encoding</literal>
+			switch. The specified file has to be a regular Java properties file.
       For details see see <link linkend="cmdline-vardef">Reading variables from a file</link>.
       </para>
     </section>

@@ -204,9 +204,12 @@
 		</para>
 
 		<para>
-			When an Oracle synonym is selected, the columns tab will display
+			If the DBMS supports synonyms, the columns tab will display
 			the column definition of the underlying table or view. The source tab
-			will display the statement to re-create the synonym.
+			will display the statement to re-create the synonym. If the underlying object
+			of the synonym is a table, then indexes, foreign keys and triggers for 
+			that table will be displayed as well. Note that if the synonym is for a view,
+			those tabs will still be displayed, but will not show any information.
 		</para>
 
 	</section>

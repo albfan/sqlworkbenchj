@@ -54,6 +54,11 @@ FROM person p, address a;</programlisting>
 			for the auto completion of object names, this behaviour can be <link linkend="auto-completion-empty-line">configured</link>
 			to also	accept an empty line as a separator.
 		</para>
+
+		<para>
+			Parameters for &wb-productname; specific commands are also supported by the command completion.
+		</para>
+
 	</section>
     
 	<section id="editor-reformat-sql" xreflabel="SQL Formatter">

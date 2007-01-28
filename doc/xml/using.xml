@@ -930,11 +930,11 @@ WHERE base_id = 1;</programlisting>
 			triangle in the column header. If the triangle points upward the data is sorted
 			ascending, if it points downward the data is sorted descending.
 			Clicking on a column will remove any previous sorting (including the secondary 
-			columns, see below) and apply the new sorting.
+			columns) and apply the new sorting.
 		</para>
 		<para>
 			If you want to sort by more than one column, hold down the <keycap>Ctrl</keycap> key
-			will clicking on the header. The initial sort order is ascending for that column.
+			will clicking on the (second) header. The initial sort order is ascending for that column.
 			To change the sort order hold down the <keycap>Ctrl</keycap> key and click on the column
 			header again. The sort order for all "secondary" sort columns will be indicated
 			with a slightly smaller triangle than the one for the primary sort column.
