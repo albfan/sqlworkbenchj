@@ -24,16 +24,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import workbench.db.TableGrant;
 import workbench.db.derby.DerbyConstraintReader;
 import workbench.db.derby.DerbySynonymReader;
 import workbench.db.firebird.FirebirdProcedureReader;
@@ -1589,12 +1592,12 @@ public class DbMetadata
 	 * for Oracle only one object per definition is returned (although
 	 * the DbExplorer will list each function of the packages.
 	 */
-	public List getProcedureList(String aCatalog, String aSchema)
+	public List<ProcedureDefinition> getProcedureList(String aCatalog, String aSchema)
 		throws SQLException
 	{
 		assert(procedureReader != null);
 		
-		List result = new LinkedList();
+		List<ProcedureDefinition> result = new LinkedList();
 		DataStore procs = this.procedureReader.getProcedures(aCatalog, aSchema);
 		if (procs == null || procs.getRowCount() == 0) return result;
 		procs.sortByColumn(ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, true);
@@ -2649,6 +2652,7 @@ public class DbMetadata
 	public static final int COLUMN_IDX_FK_DEF_DEFERRABLE = 5;
 	public static final int COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE = 6;
 	public static final int COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE = 7;
+	public static final int COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE = 8;
 
 	public DataStore getExportedKeys(TableIdentifier tbl)
 		throws SQLException
@@ -2756,9 +2760,9 @@ public class DbMetadata
 
 		if (includeNumericRuleValue)
 		{
-			cols = new String[] { "FK_NAME", "COLUMN", refColName , "UPDATE_RULE", "DELETE_RULE", "DEFERRABLE", "UPDATE_RULE_VALUE", "DELETE_RULE_VALUE"};
-			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER};
-			sizes = new int[] {25, 10, 30, 12, 12, 15, 1, 1};
+			cols = new String[] { "FK_NAME", "COLUMN", refColName , "UPDATE_RULE", "DELETE_RULE", "DEFERRABLE", "UPDATE_RULE_VALUE", "DELETE_RULE_VALUE", "DEFER_RULE_VALUE"};
+			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER};
+			sizes = new int[] {25, 10, 30, 12, 12, 15, 1, 1, 1};
 		}
 		else
 		{
@@ -2836,11 +2840,13 @@ public class DbMetadata
 				{
 					ds.setValue(row, COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, new Integer(deleteAction));
 					ds.setValue(row, COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, new Integer(updateAction));
+					ds.setValue(row, COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE, new Integer(deferrableCode));
 				}
 			}
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("DbMetadata.getKeyList()", "Error when retrieving foreign keys", e);
 			ds.reset();
 		}
 		finally
@@ -3588,32 +3594,17 @@ public class DbMetadata
 		return this.indexReader.buildCreateIndexSql(aTable, indexName, unique, columnList);
 	}
 
-	/**	The column index for the DataStore returned by getTableGrants() which contains the object's name */
-	public static final int COLUMN_IDX_TABLE_GRANTS_OBJECT_NAME = 0;
-	/**	The column index for the DataStore returned by getTableGrants() which contains the name of the user which granted the access (GRANTOR) */
-	public static final int COLUMN_IDX_TABLE_GRANTS_GRANTOR = 1;
-	/**	The column index for the DataStore returned by getTableGrants() which contains the name of the user to which the privilege was granted */
-	public static final int COLUMN_IDX_TABLE_GRANTS_GRANTEE = 2;
-	/**	The column index for the DataStore returned by getTableGrants() which contains the privilege's name (SELECT, UPDATE etc) */
-	public static final int COLUMN_IDX_TABLE_GRANTS_PRIV = 3;
-	/** The column index for th DataStore returned by getTableGrants() which contains the information if the GRANTEE may grant the privilege to other users */
-	public static final int COLUMN_IDX_TABLE_GRANTS_GRANTABLE = 4;
-
 	/**
-	 *	Return a String to recreate the GRANTs given for the passed table.
+	 *	Return the GRANTs for the given table
 	 *
 	 *	Some JDBC drivers return all GRANT privileges separately even if the original
 	 *  GRANT was a GRANT ALL ON object TO user.
 	 *
-	 *	The COLUMN_IDX_TABLE_GRANTS_xxx constants should be used to access the DataStore's columns.
-	 *
-	 *	@return a DataStore which contains the grant information.
+	 *	@return a List with TableGrant objects.
 	 */
-	public DataStore getTableGrants(TableIdentifier table)
+	public Collection<TableGrant> getTableGrants(TableIdentifier table)
 	{
-		String[] columns = new String[] { "TABLENAME", "GRANTOR", "GRANTEE", "PRIVILEGE", "GRANTABLE" };
-		int[] colTypes = new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR };
-		DataStore result = new DataStore(columns, colTypes);
+		Collection<TableGrant> result = new HashSet<TableGrant>();
 		ResultSet rs = null;
 		try
 		{
@@ -3622,18 +3613,17 @@ public class DbMetadata
 			rs = this.metaData.getTablePrivileges(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
 			while (rs.next())
 			{
-				int row = result.addRow();
-				result.setValue(row, COLUMN_IDX_TABLE_GRANTS_OBJECT_NAME, rs.getString(3));
-				result.setValue(row, COLUMN_IDX_TABLE_GRANTS_GRANTOR, rs.getString(4));
-				result.setValue(row, COLUMN_IDX_TABLE_GRANTS_GRANTEE, rs.getString(5));
-				result.setValue(row, COLUMN_IDX_TABLE_GRANTS_PRIV, rs.getString(6));
-				result.setValue(row, COLUMN_IDX_TABLE_GRANTS_GRANTABLE, rs.getString(7));
+				String from = rs.getString(4);
+				String to = rs.getString(5);
+				String what = rs.getString(6);
+				boolean grantable = StringUtil.stringToBool(rs.getString(7));
+				TableGrant grant = new TableGrant(to, what, grantable);
+				result.add(grant);
 			}
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("DbMetadata.getTableGrants()", "Error when retrieving table privileges",e);
-			result.reset();
 		}
 		finally
 		{
@@ -3650,43 +3640,40 @@ public class DbMetadata
 	 */
 	public StringBuilder getTableGrantSource(TableIdentifier table)
 	{
-		DataStore ds = this.getTableGrants(table);
+		Collection<TableGrant> grantList = this.getTableGrants(table);
 		StringBuilder result = new StringBuilder(200);
-		int count = ds.getRowCount();
+		int count = grantList.size();
 
 		// as several grants to several users can be made, we need to collect them
 		// first, in order to be able to build the complete statements
-		HashMap grants = new HashMap(count);
-		for (int i=0; i < count; i++)
+		Map<String, List<String>> grants = new HashMap<String, List<String>>(count);
+
+		for (TableGrant grant : grantList)
 		{
-			String grantee = ds.getValueAsString(i, COLUMN_IDX_TABLE_GRANTS_GRANTEE);
-			String priv = ds.getValueAsString(i, COLUMN_IDX_TABLE_GRANTS_PRIV);
+			String grantee = grant.getGrantee();
+			String priv = grant.getPrivilege();
 			if (priv == null) continue;
-			StrBuffer privs;
-			if (!grants.containsKey(grantee))
+			List<String> privs = grants.get(grantee);
+			if (privs == null)
 			{
-				privs = new StrBuffer(priv.trim());
+				privs = new LinkedList<String>();
 				grants.put(grantee, privs);
 			}
-			else
-			{
-				privs = (StrBuffer)grants.get(grantee);
-				if (privs == null) privs = new StrBuffer();
-				privs.append(", ");
-				privs.append(priv.trim());
-			}
+			privs.add(priv.trim());
 		}
-		Set entries = grants.entrySet();
-		Iterator itr = entries.iterator();
+		Iterator<Entry<String, List<String>>> itr = grants.entrySet().iterator();
+
 		String user = dbConnection.getCurrentUser();
 		while (itr.hasNext())
 		{
-			Entry entry = (Entry)itr.next();
-			String grantee = (String)entry.getKey();
+			Entry<String, List<String>> entry = itr.next();
+			String grantee = entry.getKey();
+			// Ignore grants to ourself
 			if (user.equalsIgnoreCase(grantee)) continue;
-			StrBuffer privs = (StrBuffer)entry.getValue();
+			
+			List<String> privs = entry.getValue();
 			result.append("GRANT ");
-			result.append(privs);
+			result.append(StringUtil.listToString(privs, ','));
 			result.append(" ON ");
 			result.append(table.getTableExpression(this.dbConnection));
 			result.append(" TO ");

@@ -26,7 +26,6 @@ import javax.swing.JDialog;
 
 import javax.swing.JFrame;
 
-import workbench.db.DbMetadata;
 import workbench.db.ProcedureDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -62,6 +61,7 @@ public class SchemaReporter
 	protected boolean cancel = false;
 	private boolean includeTables = true;
 	private boolean includeProcedures = false;
+	private boolean includeGrants = false;
 	private ProgressPanel progressPanel;
 	protected JDialog progressWindow;
 	private boolean showProgress = false;
@@ -123,15 +123,9 @@ public class SchemaReporter
 		}
 	}
 
-	public void setIncludeTables(boolean flag)
-	{
-		this.includeTables = flag;
-	}
-	
-	public void setIncludeProcedures(boolean flag)
-	{
-		this.includeProcedures = flag;
-	}
+	public void setIncludeTables(boolean flag) { this.includeTables = flag; }
+	public void setIncludeProcedures(boolean flag) { this.includeProcedures = flag; }
+	public void setIncludeGrants(boolean flag) { this.includeGrants = flag; }
 	
 	public void setOutputFilename(String filename)
 	{
@@ -251,7 +245,7 @@ public class SchemaReporter
 				}
 				else
 				{
-					ReportTable rtable = new ReportTable(table, this.dbConn, this.xmlNamespace, true, true, true, true);
+					ReportTable rtable = new ReportTable(table, this.dbConn, this.xmlNamespace, true, true, true, true, this.includeGrants);
 					rtable.setSchemaNameToUse(this.schemaNameToUse);
 					rtable.writeXml(out);
 					rtable.done();

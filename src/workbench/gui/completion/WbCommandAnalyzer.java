@@ -133,10 +133,10 @@ public class WbCommandAnalyzer
 		if (word == null) return null;
 		if (word.startsWith("-") && word.length() > 2)
 		{
-			int end = word.length() ;
-			if (word.endsWith("="))
+			int end = word.indexOf('=');
+			if (end == -1)
 			{
-				end --;
+				end = word.length() - 1;
 			}
 			return word.substring(1, end);
 		}

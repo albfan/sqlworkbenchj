@@ -19,6 +19,7 @@ import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
+import workbench.db.report.ReportTableGrants;
 import workbench.db.report.TagWriter;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -56,7 +57,7 @@ public class TableDiff
 		this.diff = factory;
 	}
 
-	/**
+/**
 	 * Return the XML that describes how the target table needs to 
 	 * modified in order to get the same structure as the reference table.
 	 * An empty string means that there are no differences
@@ -72,6 +73,7 @@ public class TableDiff
 		ReportColumn[] refCols = this.referenceTable.getColumns();
 		StrBuffer myindent = new StrBuffer(indent);
 		myindent.append("  ");
+		
 		for (int i=0; i < refCols.length; i++)
 		{
 			ReportColumn tcol = targetTable.findColumn(refCols[i].getColumn().getColumnName());
@@ -133,11 +135,19 @@ public class TableDiff
 		
 		boolean constraintsEqual = StringUtil.equalString(rc, tc);
 		
-		List refPk = this.referenceTable.getPrimaryKeyColumns();
-		List tPk = this.targetTable.getPrimaryKeyColumns();
+		List<String> refPk = this.referenceTable.getPrimaryKeyColumns();
+		List<String> tPk = this.targetTable.getPrimaryKeyColumns();
+		
+		StrBuffer indexDiff = getIndexDiff();
+		StrBuffer grantDiff = getGrantDiff();
+		
+		boolean grantDifferent = grantDiff != null && grantDiff.length() > 0;
+		
+		boolean indexDifferent = indexDiff != null && indexDiff.length() > 0;
 		
 		if (colDiff.length() == 0 && !rename && colsToBeAdded.size() == 0 
-			  && colsToBeRemoved.size() == 0 && refPk.equals(tPk) && constraintsEqual) 
+			  && colsToBeRemoved.size() == 0 && refPk.equals(tPk) && constraintsEqual
+				&& !indexDifferent && !grantDifferent) 
 		{
 			return result;
 		}
@@ -153,6 +163,7 @@ public class TableDiff
 			myindent.removeFromEnd(2);
 			writer.appendCloseTag(result, myindent, TAG_RENAME_TABLE);
 		}
+		
 		appendAddColumns(result, colsToBeAdded);
 		appendRemoveColumns(result, colsToBeRemoved);
 		
@@ -194,9 +205,24 @@ public class TableDiff
 			writer.appendCloseTag(result, myindent, pkTagToUse);
 		}
 		
-		result.append(colDiff);
-		if (!constraintsEqual) writer.appendTag(result, myindent, TAG_TABLE_CONS, this.referenceTable.getTableConstraints(), true);
-		appendIndexDiff(result);
+		if (colDiff.length() > 0)
+		{
+			result.append(colDiff);
+		}
+		
+		if (!constraintsEqual) 
+		{
+			writer.appendTag(result, myindent, TAG_TABLE_CONS, this.referenceTable.getTableConstraints(), true);
+		}
+		
+		if (indexDifferent)
+		{
+			result.append(indexDiff);
+		}
+		if (grantDifferent)
+		{
+			result.append(grantDiff);
+		}
 		writer.appendCloseTag(result, this.indent, TAG_MODIFY_TABLE);
 		return result;
 	}
@@ -235,21 +261,30 @@ public class TableDiff
 		}
 	}
 	
-	private void appendIndexDiff(StrBuffer result)
+	private StrBuffer getGrantDiff()
 	{
+		if (!this.diff.getIncludeTableGrants()) return null;
+		ReportTableGrants reference = this.referenceTable.getGrants();
+		ReportTableGrants target = this.targetTable.getGrants();
+		if (reference == null && target == null) return null;
+		
+		TableGrantDiff td = new TableGrantDiff(reference, target);
+		StrBuffer diff = td.getMigrateTargetXml(writer, indent);
+		return diff;
+	}
+	
+	private StrBuffer getIndexDiff()
+	{
+		if (!this.diff.getIncludeIndex()) return null;
+		
 		Collection<IndexDefinition> ref = this.referenceTable.getIndexList();
 		Collection<IndexDefinition> targ = this.targetTable.getIndexList();
-		if (ref == null && targ == null) return;
+		if (ref == null && targ == null) return null;
 		IndexDiff id = new IndexDiff(ref, targ);
 		id.setTagWriter(this.writer);
-		//StrBuffer myindent = new StrBuffer(indent);
-		//myindent.append("  ");
 		id.setIndent(indent);
 		StrBuffer diff = id.getMigrateTargetXml();
-		if (diff.length() > 0)
-		{
-			result.append(diff);
-		}
+		return diff;
 	}
 	
 	/**

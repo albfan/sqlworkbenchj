@@ -23,15 +23,18 @@ public class ColumnReference
 	public static final String TAG_CONSTRAINT_NAME = "constraint-name";
 	public static final String TAG_UPDATE_RULE = "update-rule";
 	public static final String TAG_DELETE_RULE = "delete-rule";
+	public static final String TAG_DEFER_RULE = "deferrable";
 	
 	private String fkName;
 	private String foreignColumn;
 	private ReportTable foreignTable;
 	private String updateRule;
 	private String deleteRule;
+	private String deferRule;
 	private TagWriter tagWriter = new TagWriter();
 	private int updateRuleValue;
 	private int deleteRuleValue;
+	private int deferrableRuleValue;
 	
 	public ColumnReference()
 	{
@@ -43,11 +46,13 @@ public class ColumnReference
 	}
 	public void setUpdateRuleValue(int value) { this.updateRuleValue = value; }
 	public void setDeleteRuleValue(int value) { this.deleteRuleValue = value; }
+	public void setDeferrableRuleValue(int value) { this.deferrableRuleValue = value; }
 	public void setConstraintName(String name) { this.fkName = name; }
 	public void setForeignColumn(String col) { this.foreignColumn = col; }
 	public void setForeignTable(ReportTable tbl) { this.foreignTable = tbl; }
 	public void setUpdateRule(String rule) { this.updateRule = rule; }
 	public void setDeleteRule(String rule) { this.deleteRule = rule; }
+	public void setDeferRule(String rule) { this.deferRule= rule; }
 	
 	public StrBuffer getXml(StrBuffer indent)
 	{
@@ -71,8 +76,10 @@ public class ColumnReference
 		//tagWriter.appendTag(result, indent, ReportTable.TAG_TABLE_NAME, this.foreignTable);
 		tagWriter.appendTag(result, indent, ReportColumn.TAG_COLUMN_NAME, this.foreignColumn);
 		tagWriter.appendTag(result, indent, TAG_CONSTRAINT_NAME, this.fkName);
+
 		tagWriter.appendTag(result, indent, TAG_DELETE_RULE, this.deleteRule, "jdbcValue", Integer.toString(this.deleteRuleValue));
 		tagWriter.appendTag(result, indent, TAG_UPDATE_RULE, this.updateRule, "jdbcValue", Integer.toString(this.updateRuleValue));
+		tagWriter.appendTag(result, indent, TAG_DEFER_RULE, this.deferRule, "jdbcValue", Integer.toString(this.deferrableRuleValue));
 		return result;
 	}
 	
@@ -89,8 +96,9 @@ public class ColumnReference
 		{
 			return (this.foreignColumn.equals(ref.foreignColumn) &&
 			        this.foreignTable.equals(ref.foreignTable) &&
-							this.updateRule.equals(ref.updateRule) &&
-							this.deleteRule.equals(ref.deleteRule)
+							(this.updateRuleValue == ref.updateRuleValue) &&
+							(this.deleteRuleValue == ref.deleteRuleValue) &&
+							(this.deferrableRuleValue == ref.deferrableRuleValue)
 			        );
 		}
 		catch (Exception e)

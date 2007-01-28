@@ -17,7 +17,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.sql.SQLException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+import org.xml.sax.InputSource;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
@@ -105,7 +110,8 @@ public class TestUtil
 		ArgumentParser parser = WbManager.createArgumentParser();
 		parser.parse("-url='jdbc:hsqldb:mem:" + db + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
-		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, "WbUnitTest");
+		prof.setName(db);
+		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, db);
 		return con;
 	}
 
@@ -158,5 +164,19 @@ public class TestUtil
 		return lines;
 	}
 	
-	
+	public static String getXPathValue(String xml, String expression)
+	{
+		try
+		{
+			XPath xpath = XPathFactory.newInstance().newXPath();
+			InputSource inputSource = new InputSource(new StringReader(xml));
+			String value = (String) xpath.evaluate(expression, inputSource, XPathConstants.STRING);		
+			return value;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}	
 }

@@ -23,13 +23,15 @@ import workbench.util.StrBuffer;
 /**
  * Compare two index definitions and create an XML 
  * representation of the differences.
- *
+ * 
  * @author  support@sql-workbench.net
  */
 public class IndexDiff
 {
 	public static final String TAG_MODIFY_INDEX = "modify-index";
 	public static final String TAG_ADD_INDEX = "add-index";
+	public static final String TAG_DROP_INDEX = "drop-index";
+	
 	private Collection<IndexDefinition> reference;
 	private Collection<IndexDefinition> target;
 	private TagWriter writer;
@@ -53,6 +55,7 @@ public class IndexDiff
 		if (this.writer == null) this.writer = new TagWriter();
 		StrBuffer result = new StrBuffer();
 		List<IndexDefinition> indexToAdd = new LinkedList<IndexDefinition>();
+		List<IndexDefinition> indexToDrop = new LinkedList<IndexDefinition>();
 		int count = this.reference.size();
 		
 		StrBuffer myindent = new StrBuffer(indent);
@@ -63,7 +66,7 @@ public class IndexDiff
 		
 		for (IndexDefinition refIndex : reference)
 		{
-			IndexDefinition ind = this.findIndex(refIndex.getExpression());
+			IndexDefinition ind = this.findIndexInTarget(refIndex.getExpression());
 			if (ind == null)
 			{
 				indexToAdd.add(refIndex);
@@ -95,6 +98,16 @@ public class IndexDiff
 			}
 		}
 		
+		for (IndexDefinition targetIndex : target)
+		{
+			String expr = targetIndex.getExpression();
+			IndexDefinition ind = this.findIndexInReference(expr);
+			if (ind == null)
+			{
+				indexToDrop.add(targetIndex);
+			}
+		}		
+		
 		if (indexToAdd.size() > 0)
 		{
 			writer.appendOpenTag(result, myindent, TAG_ADD_INDEX);
@@ -106,12 +119,30 @@ public class IndexDiff
 			}
 			writer.appendCloseTag(result, myindent, TAG_ADD_INDEX);
 		}
+		
+		if (indexToDrop.size() > 0)
+		{
+			for (IndexDefinition idx : indexToDrop)
+			{
+				writer.appendTag(result, myindent, TAG_DROP_INDEX, idx.getName());
+			}
+		}
 		return result;
 	}
 	
-	private IndexDefinition findIndex(String expr)
+	private IndexDefinition findIndexInTarget(String expr)
 	{
-		for (IndexDefinition idx : target)
+		return findIndex(target, expr);
+	}
+	
+	private IndexDefinition findIndexInReference(String expr)
+	{
+		return findIndex(reference, expr);
+	}
+	
+	private IndexDefinition findIndex(Collection<IndexDefinition> defs, String expr)
+	{
+		for (IndexDefinition idx : defs)
 		{
 			if (idx.equals(expr)) return idx;
 		}

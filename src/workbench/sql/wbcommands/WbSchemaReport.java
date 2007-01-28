@@ -42,6 +42,10 @@ public class WbSchemaReport
 	extends SqlCommand
 	implements RowActionMonitor
 {
+	public static final String PARAM_INCLUDE_TABLES = "includeTables";
+	public static final String PARAM_INCLUDE_PROCS = "includeProcedures";
+	public static final String PARAM_INCLUDE_GRANTS = "includeTableGrants";
+	
 	public static final String VERB = "WBREPORT";
 	private SchemaReporter reporter;
 	private int currentTable = 0;
@@ -56,8 +60,9 @@ public class WbSchemaReport
 		cmdLine.addArgument("schemas");
 		cmdLine.addArgument("format", StringUtil.stringToList("wb,dbdesigner"));
 		cmdLine.addArgument("useSchemaname", ArgumentType.BoolArgument);
-		cmdLine.addArgument("includeProcedures", ArgumentType.BoolArgument);
-		cmdLine.addArgument("includeTables", ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_INCLUDE_TABLES, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 	}
@@ -131,9 +136,9 @@ public class WbSchemaReport
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
 		}
 
-		this.reporter.setIncludeTables(cmdLine.getBoolean("includetables", true));
-		this.reporter.setIncludeProcedures(cmdLine.getBoolean("includeprocedures", false));
-		
+		this.reporter.setIncludeTables(cmdLine.getBoolean(PARAM_INCLUDE_TABLES, true));
+		this.reporter.setIncludeProcedures(cmdLine.getBoolean(PARAM_INCLUDE_PROCS, false));
+		this.reporter.setIncludeGrants(cmdLine.getBoolean(PARAM_INCLUDE_GRANTS, false));
 		if (aConnection.getMetadata().isOracle())
 		{
 			// check if remarksReporting is turned on for Oracle, if not issue a warning.

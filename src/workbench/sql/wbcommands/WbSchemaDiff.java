@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -63,7 +64,6 @@ public class WbSchemaDiff
 	public static final String PARAM_INCLUDE_PK = "includePrimaryKeys";
 	public static final String PARAM_INCLUDE_CONSTRAINTS = "includeConstraints";
 	public static final String PARAM_INCLUDE_VIEWS = "includeViews";
-	public static final String PARAM_INCLUDE_PROCS = "includeProcs";
 	public static final String PARAM_DIFF_JDBC_TYPES = "useJdbcTypes";
 	
 	private SchemaDiff diff;
@@ -88,7 +88,8 @@ public class WbSchemaDiff
 		cmdLine.addArgument(PARAM_EXCLUDE_TABLES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_CONSTRAINTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_VIEWS, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_DIFF_JDBC_TYPES, ArgumentType.BoolArgument);
 	}
 
@@ -210,7 +211,9 @@ public class WbSchemaDiff
 		diff.setIncludeTableConstraints(cmdLine.getBoolean(PARAM_INCLUDE_CONSTRAINTS, true));
 		diff.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
 		diff.setCompareJdbcTypes(cmdLine.getBoolean(PARAM_DIFF_JDBC_TYPES, false));
-		diff.setIncludeProcedures(cmdLine.getBoolean(PARAM_INCLUDE_PROCS, false));
+		diff.setIncludeProcedures(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_PROCS, false));
+		diff.setIncludeTableGrants(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_GRANTS, false));
+		
 		//diff.setIncludeComments(cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, false));
 
 		String refTables = cmdLine.getValue(PARAM_SOURCETABLES);
@@ -257,28 +260,30 @@ public class WbSchemaDiff
 		}
 		else if (tarTables == null)
 		{
-			List rl = StringUtil.stringToList(refTables, ",", true, true);
-			for (int i = 0; i < rl.size(); i++)
+			List<String> rl = StringUtil.stringToList(refTables, ",", true, true);
+			List<TableIdentifier> tables = new ArrayList(rl.size());
+			String ttype = this.currentConnection.getMetadata().getTableTypeName();
+			for (String tname : rl)
 			{
-				String t = (String)rl.get(i);
-				TableIdentifier tbl = new TableIdentifier(t);
-				tbl.setType(this.currentConnection.getMetadata().getTableTypeName());
-				rl.set(i, tbl);
+				TableIdentifier tbl = new TableIdentifier(tname);
+				tbl.setType(ttype);
+				tables.add(tbl);
 			}
-			diff.setTables(rl);
+			diff.setTables(tables);
 		}
 		else
 		{
-			List rl = StringUtil.stringToList(refTables, ",", true, true);
-			List tl = StringUtil.stringToList(tarTables, ",", true, true);
+			List<String> rl = StringUtil.stringToList(refTables, ",", true, true);
+			List<String> tl = StringUtil.stringToList(tarTables, ",", true, true);
 			if (rl.size() != tl.size())
 			{
 				result.addMessage(ResourceMgr.getString("ErrDiffTableListNoMatch"));
 				result.setFailure();
 				return result;
 			}
-			diff.setTables(rl, tl);
+			diff.setTableNames(rl, tl);
 		}
+		
 		Writer out = null;
 		boolean outputToConsole = false;
 		try
@@ -301,7 +306,12 @@ public class WbSchemaDiff
 				}
 				out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), encoding), 256*1024);
 			}
-			if (!diff.isCancelled()) diff.writeXml(out);
+			
+			// this will start the actual diff process
+			if (!diff.isCancelled()) 
+			{
+				diff.writeXml(out);
+			}
 		}
 		catch (Exception e)
 		{
@@ -311,6 +321,7 @@ public class WbSchemaDiff
 		{
 			try { out.close(); } catch (Throwable th) {}
 		}
+		
 		if (diff.isCancelled())
 		{
 			result.addMessage(ResourceMgr.getString("MsgDiffCancelled"));

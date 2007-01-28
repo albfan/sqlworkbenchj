@@ -13,11 +13,11 @@ package workbench.db.report;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
@@ -58,7 +58,9 @@ public class ReportTable
 	private String schemaNameToUse = null;
 	private String namespace = null;
 	private boolean includePrimaryKey = true;
+	private boolean includeGrants = false;
 	private String tableConstraints;
+	private ReportTableGrants grants;
 	
 	public ReportTable(TableIdentifier tbl)
 	{
@@ -72,17 +74,17 @@ public class ReportTable
 		tagWriter.setNamespace(this.namespace);
 	}
 	
-	public ReportTable(TableIdentifier tbl, WbConnection conn)
-		throws SQLException
-	{
-		this(tbl, conn, null, true, true, true, true);
-	}
-	
-	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace)
-		throws SQLException
-	{
-		this(tbl, conn, nspace, true, true, true, true);
-	}
+//	public ReportTable(TableIdentifier tbl, WbConnection conn)
+//		throws SQLException
+//	{
+//		this(tbl, conn, null, true, true, true, true, false);
+//	}
+//	
+//	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace)
+//		throws SQLException
+//	{
+//		this(tbl, conn, nspace, true, true, true, true, false);
+//	}
 	
 	/**
 	 * Initialize this ReportTable.
@@ -95,7 +97,7 @@ public class ReportTable
 	 *  <li>Table constraints if includeConstraints == true {@link workbench.db.DbMetadata#getTableConstraints(workbench.db.TableIdentifier, String)}</li>
 	 *</ul>
 	 */
-	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace, boolean includeIndex, boolean includeFk, boolean includePk, boolean includeConstraints)
+	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace, boolean includeIndex, boolean includeFk, boolean includePk, boolean includeConstraints, boolean includeGrants)
 		throws SQLException
 	{
 		this.table = tbl.createCopy();
@@ -111,7 +113,7 @@ public class ReportTable
 			// different schemas with the same name
 			tbl.setSchema(conn.getMetadata().getSchemaToUse());
 		}
-		List cols = conn.getMetadata().getTableColumns(tbl);
+		List<ColumnIdentifier> cols = conn.getMetadata().getTableColumns(tbl);
 		Collections.sort(cols);
 
 		this.tableComment = conn.getMetadata().getTableComment(this.table);
@@ -124,25 +126,44 @@ public class ReportTable
 
 		this.setColumns(cols);
 		this.tagWriter.setNamespace(namespace);
+		
 		if (includeIndex)
 		{
 			this.index = new IndexReporter(tbl, conn);
 			this.index.setNamespace(namespace);
 		}
-		if (includeFk) this.readForeignKeys(conn);
+		if (includeFk) 
+		{
+			this.readForeignKeys(conn);
+		}
+		
 		if (includeConstraints)
 		{
 			this.tableConstraints = conn.getMetadata().getTableConstraints(tbl, "");
 		}
+		
+		if (includeGrants)
+		{
+			grants = new ReportTableGrants(conn, this.table);
+		}
 	}
 
+	/**
+	 * Returns the ReportTableGrants for this table. If table grants
+	 * are not included, it will return null.
+	 */
+	public ReportTableGrants getGrants()
+	{
+		return grants;
+	}
+	
 	/**
 	 *	Return the list of column names (String) 
 	 *  that make up the primary key of this table
 	 *  If the table has no primary key, an empty list
 	 *  is returned.
 	 */
-	public List getPrimaryKeyColumns()
+	public List<String> getPrimaryKeyColumns()
 	{
 		if (!includePrimaryKey) return Collections.EMPTY_LIST;
 		List result = new ArrayList();
@@ -159,7 +180,7 @@ public class ReportTable
 	}
 	
 	/**
-	 *	Return the name of the primary 
+	 *	Return the name of the primary key
 	 */
 	public String getPrimaryKeyName()
 	{
@@ -181,14 +202,14 @@ public class ReportTable
 	/**
 	 * Define the columns that belong to this table
 	 */
-	public void setColumns(List cols)
+	public void setColumns(List<ColumnIdentifier> cols)
 	{
 		if (cols == null) return;
 		int numCols = cols.size();
 		this.columns = new ReportColumn[numCols];
 		for (int i=0; i < numCols; i++)
 		{
-			ColumnIdentifier col = (ColumnIdentifier)cols.get(i);
+			ColumnIdentifier col = cols.get(i);
 			this.columns[i] = new ReportColumn(col);
 			this.columns[i].setNamespace(this.namespace);
 		}
@@ -208,10 +229,12 @@ public class ReportTable
 			{
 				ColumnReference ref = new ColumnReference();
 				ref.setConstraintName(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_FK_NAME));
+				ref.setDeleteRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, DatabaseMetaData.importedKeyNoAction));
+				ref.setUpdateRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, DatabaseMetaData.importedKeyNoAction));
 				ref.setDeleteRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_DELETE_RULE));
 				ref.setUpdateRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_UPDATE_RULE));
-				ref.setDeleteRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, -1));
-				ref.setUpdateRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, -1));
+				ref.setDeferrableRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE, DatabaseMetaData.importedKeyNotDeferrable));
+				ref.setDeferRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_DEFERRABLE));
 				String colExpr = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
 				String reftable = null;
 				String column = null;
@@ -305,6 +328,10 @@ public class ReportTable
 		tagWriter.appendOpenTag(line, indent, TAG_TABLE_DEF, "name", StringUtil.trimQuotes(this.table.getTableName()));
 		line.append('\n');
 		appendTableNameXml(line, colindent);
+		if (this.grants != null)
+		{
+			this.grants.appendXml(line, colindent);
+		}
 		tagWriter.appendTag(line, colindent, TAG_TABLE_COMMENT, this.tableComment, true);
 		int cols = this.columns.length;
 		for (int i=0; i < cols; i++)
