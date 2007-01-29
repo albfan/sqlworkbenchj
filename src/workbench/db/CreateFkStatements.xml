@@ -8,7 +8,7 @@
   ADD CONSTRAINT %constraintname% FOREIGN KEY (%columnlist%)
   REFERENCES %targettable% (%targetcolumnlist%)
   %fk_delete_rule%
-	%deferrable%</string>
+  %deferrable%</string>
   </void>
   
   <void method="put">
@@ -18,7 +18,7 @@
   REFERENCES %targettable% (%targetcolumnlist%)
   %fk_update_rule%
   %fk_delete_rule%
-	%deferrable%</string>
+  %deferrable%</string>
   </void>
  
  <void method="put">

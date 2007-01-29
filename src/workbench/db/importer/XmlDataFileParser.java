@@ -14,25 +14,20 @@ package workbench.db.importer;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-import java.lang.reflect.Constructor;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -44,8 +39,8 @@ import workbench.interfaces.ImportFileParser;
 import workbench.log.LogMgr;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
+import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
 
 /**
@@ -94,10 +89,11 @@ public class XmlDataFileParser
 	private boolean hasErrors = false;
 	private boolean hasWarnings = false;
 	
-	private HashMap constructors = new HashMap();
 	private SAXParser saxParser;
 	private ImportFileHandler fileHandler = new ImportFileHandler();
 	private WbConnection dbConn;
+	
+	private ValueConverter converter = new ValueConverter();
 	
 	public XmlDataFileParser()
 	{
@@ -195,6 +191,17 @@ public class XmlDataFileParser
 		this.dbConn = conn;
 	}
 	
+	/**
+	 * Check if all columns defined for the import (through the table definition
+	 * as part of the XML file, or passed by the user on the command line) are
+	 * actually available in the target table. 
+	 * For this all columns of the target table are retrieved from the database,
+	 * and each column that has been defined through setColumns() is checked 
+	 * whether it exists there. Columns that are not found are dropped from
+	 * the list of import columns
+	 * If continueOnError == true, a warning is added to the messages. Otherwise
+	 * an Exception is thrown.
+	 */
 	public void checkTargetColumns()
 		throws SQLException
 	{
@@ -205,9 +212,15 @@ public class XmlDataFileParser
 		List<ColumnIdentifier> validCols = new LinkedList<ColumnIdentifier>();
 		for (ColumnIdentifier c : this.columns)
 		{
-			if (tableCols.contains(c))
+			int i = tableCols.indexOf(c);
+			
+			if (i != -1)
 			{
-				validCols.add(c);
+				// Use the column definition retrieved from the database
+				// to make sure we are using the correct data types.
+				ColumnIdentifier tc = tableCols.get(i);
+				c.setDataType(tc.getDataType());
+				validCols.add(tc);
 			}
 			else
 			{
@@ -215,6 +228,7 @@ public class XmlDataFileParser
 				msg = StringUtil.replace(msg, "%column%", c.getColumnName());
 				msg = StringUtil.replace(msg, "%table%", tbl.getTableExpression());
 				this.messages.append(msg);
+				this.messages.appendNewLine();
 				if (this.abortOnError)
 				{
 					this.hasErrors = true;
@@ -227,9 +241,8 @@ public class XmlDataFileParser
 				}
 			}
 		}
-		
-		// If we arrive here, and the valid column list is different
-		// to the stored columns, at least one column was not found
+
+		// Make sure we are using the columns collected during the check
 		if (validCols.size() != columns.length)
 		{
 			this.columnsToImport = validCols;
@@ -577,6 +590,7 @@ public class XmlDataFileParser
 				}
 				catch (NumberFormatException e)
 				{
+					LogMgr.logError("XmlDataFileParser.startElement()", "Error converting longvalue", e);
 				}
 			}
 			attrValue = attrs.getValue(XmlRowDataConverter.ATTR_NULL);
@@ -665,6 +679,7 @@ public class XmlDataFileParser
 		throws SAXParseException
 	{
 		this.messages.append(ExceptionUtil.getDisplay(err));
+		this.messages.appendNewLine();
 		if (!this.keepRunning) throw err;
 	}
 
@@ -677,6 +692,7 @@ public class XmlDataFileParser
 	 *  Numeric types contain the actual class to be used {@link #createNumericType(String, String)}
 	 */
 	private void buildColumnData()
+		throws ParsingInterruptedException
 	{
 		if (this.columnsToImport != null && !this.columnsToImport.contains(this.columns[this.currentColIndex])) return;
 		this.currentRow[this.realColIndex] = null;
@@ -692,131 +708,75 @@ public class XmlDataFileParser
 
 		String value = this.chars.toString();
 		int type = this.columns[this.realColIndex].getDataType();
-		switch (type)
-		{
-			case Types.CHAR:
-			case Types.VARCHAR:
-			case Types.CLOB:
-			case Types.LONGVARCHAR:
-				// if clobs are exported as external files, than we'll have a filename in the
-				// attribute (just like with BLOBS)
-				if (this.columnDataFile == null)
-				{
-					this.currentRow[this.realColIndex] = value;
-				}
-				else
-				{
-					String fileDir = this.inputFile.getParent();
-					this.currentRow[this.realColIndex] = new File(fileDir, columnDataFile);
-				}
-				break;
-
-			case Types.TIME:
-				this.currentRow[this.realColIndex] = new java.sql.Time(this.columnLongValue);
-				break;
-
-			case Types.BIGINT:
-				try
-				{
-					this.currentRow[this.realColIndex] = new Long(value);
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("XmlDataFileParser.buildColumnData()", "Could not create Long value from [" + value + "] for column " + realColIndex, e);
-					this.currentRow[this.realColIndex] = null;
-				}
-				break;
-
-			case Types.SMALLINT:
-			case Types.INTEGER:
-			case Types.TINYINT:
-				try
-				{
-					this.currentRow[this.realColIndex] = new Integer(value);
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("XmlDataFileParser.buildColumnData()", "Could not create Integer value from [" + value + "] for column " + realColIndex, e);
-					this.currentRow[this.realColIndex] = null;
-				}
-				break;
-
-			case Types.DATE:
-			case Types.TIMESTAMP:
-				java.sql.Date d = new java.sql.Date(this.columnLongValue);
-				if (type == Types.TIMESTAMP)
-				{
-					this.currentRow[this.realColIndex] = new java.sql.Timestamp(d.getTime());
-				}
-				else
-				{
-					this.currentRow[this.realColIndex] = d;
-				}
-				break;
-
-			case Types.BINARY:
-			case Types.BLOB:
-			case Types.LONGVARBINARY:
-			case Types.VARBINARY:
-				String fileDir = this.inputFile.getParent();
-				this.currentRow[this.realColIndex] = new File(fileDir, columnDataFile);
-				break;
-				
-			case Types.DECIMAL:
-			case Types.FLOAT:
-			case Types.DOUBLE:
-			case Types.NUMERIC:
-			case Types.REAL:
-				Object result = this.createNumericType(this.columns[this.currentColIndex].getColumnClassName(), value);
-				this.currentRow[this.realColIndex] = result;
-				break;
-				
-			case Types.BIT:
-			case Types.BOOLEAN:
-				this.currentRow[this.realColIndex]  = Boolean.valueOf(StringUtil.stringToBool(value));
-				break;
-			default:
-				// type not taken into account. Simply use the String 
-				// value, hoping that the JDBC driver can cope with that :)
-				this.currentRow[this.realColIndex] = value;
-				
-				if (!this.warningAdded[this.realColIndex])
-				{
-					String msg = ResourceMgr.getString("ErrConvertError");
-					msg = StringUtil.replace(msg, "%type%", SqlUtil.getTypeName(type));
-					msg = StringUtil.replace(msg, "%column%", this.columns[realColIndex].getColumnName());
-					msg = msg + '\n';
-					this.messages.append(msg);
-					this.warningAdded[this.realColIndex] = true;
-					LogMgr.logWarning("XmlDataFileParser.buildColumnData()", msg, null);
-				}
-
-				break;
-		}
-		this.realColIndex ++;
-	}
-
-	private Object createNumericType(String aClass, String aValue)
-	{
-		Object result = null;
-		Constructor con = null;
 		try
 		{
-			con = (Constructor)this.constructors.get(aClass);
-			if (con == null)
+			switch (type)
 			{
-				Class cls = Class.forName(aClass);
-				con = cls.getConstructor(new Class[] { String.class });
-				this.constructors.put(aClass, con);
+				case Types.CHAR:
+				case Types.VARCHAR:
+				case Types.CLOB:
+				case Types.LONGVARCHAR:
+					// if clobs are exported as external files, than we'll have a filename in the
+					// attribute (just like with BLOBS)
+					if (this.columnDataFile == null)
+					{
+						this.currentRow[this.realColIndex] = value;
+					}
+					else
+					{
+						String fileDir = this.inputFile.getParent();
+						this.currentRow[this.realColIndex] = new File(fileDir, columnDataFile);
+					}
+					break;
+
+				case Types.BINARY:
+				case Types.BLOB:
+				case Types.LONGVARBINARY:
+				case Types.VARBINARY:
+					String fileDir = this.inputFile.getParent();
+					this.currentRow[this.realColIndex] = new File(fileDir, columnDataFile);
+					break;
+
+				case Types.DATE:
+				case Types.TIMESTAMP:
+					// For Date types we don't need the ValueConverter as already we 
+					// have a suitable long value that doesn't need parsing
+					java.sql.Date d = new java.sql.Date(this.columnLongValue);
+					if (type == Types.TIMESTAMP)
+					{
+						this.currentRow[this.realColIndex] = new java.sql.Timestamp(d.getTime());
+					}
+					else
+					{
+						this.currentRow[this.realColIndex] = d;
+					}
+					break;					
+					
+				default:
+					// for all other types we can use the ValueConverter
+					this.currentRow[this.realColIndex] = converter.convertValue(value, type);
 			}
-			result = con.newInstance(new Object[] { aValue });
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("XmlDataFileParser.createNumericType()", "Could not create instance of " + aClass, e);
-			result = null;
+			String msg = ResourceMgr.getString("ErrConvertError");
+			msg = StringUtil.replace(msg, "%type%", SqlUtil.getTypeName(type));
+			msg = StringUtil.replace(msg, "%column%", this.columns[realColIndex].getColumnName());
+			if (this.abortOnError)
+			{
+				LogMgr.logError("XmlDataFileParser.buildColumnData()", msg, null);
+				throw new ParsingInterruptedException();				
+				//throw new IllegalArgumentException("Could not convert input value [" + value + "] for data type " + SqlUtil.getTypeName(type));
+			}
+			else
+			{
+				this.messages.append(msg);
+				this.messages.appendNewLine();
+				LogMgr.logWarning("XmlDataFileParser.buildColumnData()", msg, null);
+			}
 		}
-		return result;
+		
+		this.realColIndex ++;
 	}
 
 	private void sendTableDefinition()

@@ -3492,7 +3492,7 @@ public class DbMetadata
 				// remove the placeholder completely
 				if ("restrict".equalsIgnoreCase(rule))
 				{
-					stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_DELETE_RULE, StringUtil.EMPTY_STRING);
+					stmt = metaSqlMgr.removePlaceholder(stmt, MetaDataSqlManager.FK_DELETE_RULE, true);;
 				}
 				else
 				{
@@ -3507,14 +3507,12 @@ public class DbMetadata
 			rule = getDeferrableVerb(deferrable.get(fkname));
 			if (StringUtil.isEmptyString(rule))
 			{
-				String s = StringUtil.quoteRegexMeta(MetaDataSqlManager.DEFERRABLE) + "[\n|\r\n]";
-				stmt = stmt.replaceAll(s,rule);
+				stmt = metaSqlMgr.removePlaceholder(stmt, MetaDataSqlManager.DEFERRABLE, true);;
 			}
 			else
 			{
-				stmt = StringUtil.replace(stmt, MetaDataSqlManager.DEFERRABLE, rule);
+				stmt = StringUtil.replace(stmt, MetaDataSqlManager.DEFERRABLE, rule.trim());
 			}
-			
 			
 			colList = fkTarget.get(fkname);
 			if (colList == null)

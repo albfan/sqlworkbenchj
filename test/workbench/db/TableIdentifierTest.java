@@ -11,6 +11,9 @@
  */
 package workbench.db;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
 import junit.framework.*;
 
 /**
@@ -69,4 +72,21 @@ public class TableIdentifierTest
 		assertEquals(true, tbl.equals(t2));
 	}
 	
+	public void testEqualsAndHashCode()
+	{
+		TableIdentifier one = new TableIdentifier("person");
+		TableIdentifier two = new TableIdentifier("person");
+		TableIdentifier three = new TableIdentifier("address");
+		Set<TableIdentifier> ids = new HashSet<TableIdentifier>();
+		ids.add(one);
+		ids.add(two);
+		ids.add(three);
+		assertEquals("Too many entries", 2, ids.size());
+
+		Set<TableIdentifier> tids = new TreeSet<TableIdentifier>();
+		tids.add(one);
+		tids.add(two);
+		tids.add(three);
+		assertEquals("Too many entries", 2, tids.size());
+	}
 }

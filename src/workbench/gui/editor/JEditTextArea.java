@@ -20,7 +20,6 @@ import java.awt.FontMetrics;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Point;
-import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -42,8 +41,6 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.Enumeration;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
@@ -65,7 +62,6 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
 
-import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.ClipboardSupport;
@@ -74,7 +70,6 @@ import workbench.interfaces.TextChangeListener;
 import workbench.interfaces.TextSelectionListener;
 import workbench.interfaces.Undoable;
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
@@ -106,7 +101,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.65 2007-01-14 11:19:04 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.66 2007-01-29 20:58:22 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent

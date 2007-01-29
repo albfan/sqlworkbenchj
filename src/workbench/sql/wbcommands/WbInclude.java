@@ -32,7 +32,8 @@ import workbench.resource.Settings;
 public class WbInclude
 	extends SqlCommand
 {
-	public static final WbInclude INCLUDE_LONG = new WbInclude("WBINCLUDE");
+	public static final String VERB = "WBINCLUDE";
+	public static final WbInclude INCLUDE_LONG = new WbInclude(VERB);
 	public static final WbInclude INCLUDE_SHORT = new WbInclude("@");
 	public static final WbInclude INCLUDE_FB = new WbInclude("INPUT");
 

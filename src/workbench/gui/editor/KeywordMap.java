@@ -20,7 +20,7 @@ import javax.swing.text.Segment;
  * This class is used by <code>CTokenMarker</code> to map keywords to ids.
  *
  * @author Slava Pestov, Mike Dillon
- * @version $Id: KeywordMap.java,v 1.8 2006-12-20 22:22:49 thomas Exp $
+ * @version $Id: KeywordMap.java,v 1.9 2007-01-29 20:58:22 thomas Exp $
  */
 public class KeywordMap
 {
@@ -87,6 +87,7 @@ public class KeywordMap
 	 */
 	public void add(String keyword, byte id)
 	{
+		if (containsKey(keyword)) return;
 		int key = getStringMapKey(keyword);
 		map[key] = new Keyword(keyword.toCharArray(),id,map[key]);
 	}

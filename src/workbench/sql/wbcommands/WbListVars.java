@@ -24,11 +24,12 @@ import workbench.sql.StatementRunnerResult;
  */
 public class WbListVars extends SqlCommand
 {
+	public static final String VERB = "WBVARLIST";
 	public WbListVars()
 	{
 	}
 
-	public String getVerb() { return "WBVARLIST"; }
+	public String getVerb() { return VERB; }
 
 	protected boolean isConnectionRequired() { return false; }
 	

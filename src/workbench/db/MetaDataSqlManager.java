@@ -16,6 +16,7 @@ import java.io.File;
 import java.util.HashMap;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
@@ -207,6 +208,24 @@ public class MetaDataSqlManager
 		return this.tableCommentTemplate;
 	}
 	
+	public static String removePlaceholder(String sql, String placeholder, boolean withNL)
+	{
+		String s = null;
+		if (withNL)
+		{
+			StringBuilder b = new StringBuilder(placeholder.length() + 10);
+			b.append("[ \\t]*");
+			b.append(StringUtil.quoteRegexMeta(placeholder));
+			b.append("[\n|\r\n]?");
+			s = b.toString();
+		}
+		else
+		{
+			s = StringUtil.quoteRegexMeta(placeholder);
+		}
+		return sql.replaceAll(s, StringUtil.EMPTY_STRING);
+	}
+	
 	private HashMap readStatementTemplates(String aFilename)
 	{
 		HashMap result = null;
@@ -268,5 +287,20 @@ public class MetaDataSqlManager
 		}
 		return result;
 	}
-	
+
+	public static void main(String args[])
+	{
+		String sql = "ALTER TABLE CONFIGURATION \n" + 
+								 "  ADD CONSTRAINT FK_CONFIG_RES FOREIGN KEY (RESOURCE_KEY) \n" + 
+								 "  REFERENCES %targettable% (%targetcolumnlist%) \n" + 
+								 "  %fk_delete_rule%\n" +	
+								 "  %deferrable%";	
+		
+		sql = removePlaceholder(sql, FK_DELETE_RULE, true);
+		System.out.println("|" + sql  + "|");
+		//sql = removePlaceholder(sql, DEFERRABLE, true);
+		sql = StringUtil.replace(sql, DEFERRABLE, "deferrable inititially");
+		System.out.println("|" + sql  + "|");
+	}
+
 }

@@ -25,7 +25,7 @@ public class ColumnIdentifier
 {
 	public static final int NO_TYPE = Integer.MIN_VALUE;
 	private String name;
-	private int type;
+	private int type = NO_TYPE;
 	private boolean isPk = false;
 	private boolean isExpression = false;
 	private boolean isNullable = true;
@@ -176,16 +176,15 @@ public class ColumnIdentifier
 
 	public boolean equals(Object o)
 	{
-		if (o instanceof ColumnIdentifier)
+		try
 		{
 			ColumnIdentifier other = (ColumnIdentifier)o;
-			if (this.type == NO_TYPE || other.type == NO_TYPE)
-			{
-				return this.name.equalsIgnoreCase(other.name);
-			}
-			return (this.type == other.type && this.name.equalsIgnoreCase(other.name));
+			return this.name.equalsIgnoreCase(other.name);
 		}
-		return false;
+		catch (Exception e)
+		{
+			return false;
+		}
 	}
 
 	public int hashCode()
