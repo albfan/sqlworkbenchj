@@ -89,6 +89,12 @@ public class ImportStringVerifier
 		parser.setContainsHeader(true);
 		if (this.textOptions != null)
 		{
+			// textOptions != null then we have displayed the options
+			// dialog to the user. If the ClipBoard does not contain 
+			// a header line, we simply assume that it matches the c
+			// columns from the result set.
+			if (!textOptions.getContainsHeader()) return true;
+			
 			parser.setDelimiter(textOptions.getTextDelimiter());
 		}
 		List cols = parser.getColumnsFromFile();

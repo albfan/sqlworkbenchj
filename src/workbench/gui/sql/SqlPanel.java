@@ -2200,11 +2200,13 @@ public class SqlPanel
 
 			if (this.macroExecution)
 			{
-				// executeMacro will set this variable for logging purposes only
-				// the same SQL is actually passed into this method
+				// executeMacro() will set this variable so that we can 
+				// log the macro statement here. Otherwise we wouldn know at this point
+				// that a macro is beeing executed
+				this.macroExecution = false;
+				
 				macroRun = true;
 				appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + script + "\n");
-				macroExecution = false;
 			}
 
 			scriptParser.setScript(script);
@@ -2268,7 +2270,6 @@ public class SqlPanel
 			int executedCount = 0;
 			String currentSql = null;
 
-
 			int resultSets = 0;
 			this.ignoreStateChange = false;
 			this.macroExecution = false;
@@ -2285,8 +2286,6 @@ public class SqlPanel
 				if (highlightCurrent)
 				{
 					highlightStatement(scriptParser, i, selectionOffset);
-					//editor.validate();
-					Thread.yield();
 				}
 
 				this.stmtRunner.runStatement(currentSql, maxRows, timeout);
@@ -2305,7 +2304,7 @@ public class SqlPanel
 				resultSets += this.addResult(statementResult);
 				stmtTotal += statementResult.getExecutionTime();
 
-				// the SET FEEDBACK command might change the feedback level
+				// the WbFeedback command might change the feedback level
 				// so it needs to be checked each time.
 				if (count > 1) logWasCompressed = logWasCompressed || !this.stmtRunner.getVerboseLogging();
 
@@ -2400,9 +2399,10 @@ public class SqlPanel
 				this.stmtRunner.statementDone();
 				if (this.cancelExecution) break;
 
-			} // end for loop
+			} // end for loop over all statements
 
 			long execTime = (System.currentTimeMillis() - startTime);
+			
 			// this will automatically stop the execution timer in the status bar
 			statusBar.setExecutionTime(stmtTotal);
 			statusBar.clearStatusMessage();
@@ -2430,7 +2430,7 @@ public class SqlPanel
 
 			if (logWasCompressed)
 			{
-				msg = executedCount + " " + ResourceMgr.getString("MsgTotalStatementsExecuted") + "\n";
+				msg = executedCount + " " + ResourceMgr.getString("MsgTotalStatementsExecuted");
 				this.appendToLog(msg);
 				long rows = statementResult.getTotalUpdateCount();
 				msg = rows + " " + ResourceMgr.getString("MsgTotalRowsAffected") + "\n";

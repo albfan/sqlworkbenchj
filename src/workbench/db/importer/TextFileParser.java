@@ -781,10 +781,10 @@ public class TextFileParser
 							}
 							else if (blobsAreFilenames && value != null && SqlUtil.isBlobType(colType) )
 							{
-								File bfile = new File(value);
+								File bfile = new File(value.trim());
 								if (!bfile.isAbsolute())
 								{
-									bfile = new File(this.baseDir, value);
+									bfile = new File(this.baseDir, value.trim());
 								}
 								rowData[targetIndex] = bfile;
 							}

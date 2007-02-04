@@ -710,51 +710,43 @@ public class XmlDataFileParser
 		int type = this.columns[this.realColIndex].getDataType();
 		try
 		{
-			switch (type)
+			if (SqlUtil.isCharacterType(type))
 			{
-				case Types.CHAR:
-				case Types.VARCHAR:
-				case Types.CLOB:
-				case Types.LONGVARCHAR:
-					// if clobs are exported as external files, than we'll have a filename in the
-					// attribute (just like with BLOBS)
-					if (this.columnDataFile == null)
-					{
-						this.currentRow[this.realColIndex] = value;
-					}
-					else
-					{
-						String fileDir = this.inputFile.getParent();
-						this.currentRow[this.realColIndex] = new File(fileDir, columnDataFile);
-					}
-					break;
-
-				case Types.BINARY:
-				case Types.BLOB:
-				case Types.LONGVARBINARY:
-				case Types.VARBINARY:
+				// if clobs are exported as external files, than we'll have a filename in the
+				// attribute (just like with BLOBS)
+				if (this.columnDataFile == null)
+				{
+					this.currentRow[this.realColIndex] = value;
+				}
+				else
+				{
 					String fileDir = this.inputFile.getParent();
 					this.currentRow[this.realColIndex] = new File(fileDir, columnDataFile);
-					break;
-
-				case Types.DATE:
-				case Types.TIMESTAMP:
-					// For Date types we don't need the ValueConverter as already we 
-					// have a suitable long value that doesn't need parsing
-					java.sql.Date d = new java.sql.Date(this.columnLongValue);
-					if (type == Types.TIMESTAMP)
-					{
-						this.currentRow[this.realColIndex] = new java.sql.Timestamp(d.getTime());
-					}
-					else
-					{
-						this.currentRow[this.realColIndex] = d;
-					}
-					break;					
-					
-				default:
-					// for all other types we can use the ValueConverter
-					this.currentRow[this.realColIndex] = converter.convertValue(value, type);
+				}
+			}
+			else if (SqlUtil.isBlobType(type))
+			{
+				String fileDir = this.inputFile.getParent();
+				this.currentRow[this.realColIndex] = new File(fileDir, columnDataFile);
+			}
+			else if (SqlUtil.isDateType(type))
+			{
+				// For Date types we don't need the ValueConverter as already we 
+				// have a suitable long value that doesn't need parsing
+				java.sql.Date d = new java.sql.Date(this.columnLongValue);
+				if (type == Types.TIMESTAMP)
+				{
+					this.currentRow[this.realColIndex] = new java.sql.Timestamp(d.getTime());
+				}
+				else
+				{
+					this.currentRow[this.realColIndex] = d;
+				}
+			}
+			else
+			{
+				// for all other types we can use the ValueConverter
+				this.currentRow[this.realColIndex] = converter.convertValue(value, type);
 			}
 		}
 		catch (Exception e)
@@ -766,7 +758,6 @@ public class XmlDataFileParser
 			{
 				LogMgr.logError("XmlDataFileParser.buildColumnData()", msg, null);
 				throw new ParsingInterruptedException();				
-				//throw new IllegalArgumentException("Could not convert input value [" + value + "] for data type " + SqlUtil.getTypeName(type));
 			}
 			else
 			{

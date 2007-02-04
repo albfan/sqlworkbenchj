@@ -109,6 +109,11 @@ public class StatementRunnerResult
 	{
 		this.messages.append(buffer);
 	}
+
+	public void addMessageNewLine()
+	{
+		this.messages.appendNewLine();
+	}
 	
 	public void addMessage(CharSequence msgBuffer)
 	{

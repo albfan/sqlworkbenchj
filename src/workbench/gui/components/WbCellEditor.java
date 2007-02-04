@@ -11,12 +11,10 @@
  */
 package workbench.gui.components;
 
-
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -33,6 +31,7 @@ import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.table.TableCellEditor;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.WbSwingUtilities;
 
 public class WbCellEditor 
 	extends AbstractCellEditor
@@ -41,11 +40,6 @@ public class WbCellEditor
 	private TextAreaEditor editor;
 	private WbTable parentTable;
 	private JScrollPane scroll;
-	
-	private static final KeyStroke CTRL_TAB = KeyStroke.getKeyStroke("control TAB");
-	private static final KeyStroke TAB = KeyStroke.getKeyStroke("TAB");
-	private static final KeyStroke ENTER = KeyStroke.getKeyStroke("ENTER");
-	private static final KeyStroke CTRL_ENTER = KeyStroke.getKeyStroke("control ENTER");
 	
 	public WbCellEditor(WbTable parent)
 	{
@@ -167,34 +161,37 @@ public class WbCellEditor
 		{
 			super();
 			this.setFocusCycleRoot(false);
+			this.setFocusTraversalKeys(WHEN_FOCUSED, Collections.EMPTY_SET);
 			
-			Object tabAction = this.getInputMap().get(TAB);
+			Object tabAction = this.getInputMap().get(WbSwingUtilities.TAB);
 			
-			this.getInputMap().put(TAB, "wb-do-nothing-at-all");
+			this.getInputMap().put(WbSwingUtilities.TAB, "wb-do-nothing-at-all");
 
 			if (tabAction != null) 
 			{
-				this.getInputMap().put(CTRL_TAB, tabAction);
+				this.getInputMap().put(WbSwingUtilities.CTRL_TAB, tabAction);
 			}
 
-			Object enterAction = this.getInputMap().get(ENTER);
+			Object enterAction = this.getInputMap().get(WbSwingUtilities.ENTER);
 
-			this.getInputMap().put(ENTER, "wb-stop-editing");
+			this.getInputMap().put(WbSwingUtilities.ENTER, "wb-stop-editing");
+			
 			this.getActionMap().put("stopEditing", 
 				new AbstractAction("wb-stop-editing")
 				{
 						public void actionPerformed(ActionEvent e)
 						{
-								stopCellEditing();
+							stopCellEditing();
 						}
 				}
 			); 
 			if (enterAction != null)
 			{
-				this.getInputMap().put(CTRL_ENTER, enterAction);
+				this.getInputMap().put(WbSwingUtilities.CTRL_ENTER, enterAction);
+				this.getInputMap().put(WbSwingUtilities.ALT_ENTER, enterAction);
 			}
 		}
-
+		public boolean isManagingFocus() { return false; }
 	}
 	
 	public class TextAreaScrollPane 

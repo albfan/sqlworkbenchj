@@ -389,6 +389,7 @@ public class BatchRunner
 						String verb = SqlUtil.getSqlVerb(sql);
 						String msg = StringUtil.replace(ResourceMgr.getString("MsgStmtCompletedWarn"), "%verb%", verb);	
 						this.printMessage(msg);
+						LogMgr.logWarning("BatchRunner.execute()", result.getMessageBuffer().toString());
 					}
 				}
 				

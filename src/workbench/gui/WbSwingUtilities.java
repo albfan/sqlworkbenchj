@@ -30,6 +30,7 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
@@ -71,6 +72,12 @@ public class WbSwingUtilities
 	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.YELLOW);
 	public static final Border EMPTY_BORDER = new EmptyBorder(0,0,0,0);
 	public static final Border FLAT_BUTTON_BORDER = new CompoundBorder(new EtchedBorder(), new EmptyBorder(1,6,1,6));
+	
+	public static final KeyStroke CTRL_TAB = KeyStroke.getKeyStroke("control TAB");
+	public static final KeyStroke TAB = KeyStroke.getKeyStroke("TAB");
+	public static final KeyStroke ENTER = KeyStroke.getKeyStroke("ENTER");
+	public static final KeyStroke CTRL_ENTER = KeyStroke.getKeyStroke("control ENTER");
+	public static final KeyStroke ALT_ENTER = KeyStroke.getKeyStroke("alt ENTER");
 	
 	/**
 	 * Synchronously execute code on the EDT.

@@ -101,18 +101,15 @@ public class ConnectionMgr
 		}
 		
 		this.disconnect(anId);
-		WbConnection conn = new WbConnection(anId);
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getKey() + "] with ID=" + anId + " for driver=" + aProfile.getDriverclass());
-		Connection sql = this.connect(aProfile, anId);
-		conn.setSqlConnection(sql);
-		conn.setProfile(aProfile);
+		WbConnection conn = this.connect(aProfile, anId);
 		conn.runPostConnectScript();
 		String driverVersion = null;
 		
 		try
 		{
-			int minor = sql.getMetaData().getDriverMinorVersion();
-			int major = sql.getMetaData().getDriverMajorVersion();
+			int minor = conn.getSqlConnection().getMetaData().getDriverMinorVersion();
+			int major = conn.getSqlConnection().getMetaData().getDriverMajorVersion();
 			driverVersion = major + "." + minor;
 		}
 		catch (Throwable th)
@@ -150,12 +147,14 @@ public class ConnectionMgr
 		return drv.loadClassFromDriverLib(className);
 	}
 
-	Connection connect(ConnectionProfile aProfile, String anId)
+	WbConnection connect(ConnectionProfile aProfile, String anId)
 		throws ClassNotFoundException, SQLException
 	{
 		// The DriverManager refuses to use a driver which was not loaded
 		// from the system classloader, so the connection has to be
 		// established directly from the driver.
+		WbConnection conn = new WbConnection(anId);
+
 		String drvClass = aProfile.getDriverclass();
 		String drvName = aProfile.getDriverName();
 		//long start, end;
@@ -179,7 +178,9 @@ public class ConnectionMgr
 			// we just ignore the error :-)
 			LogMgr.logInfo("ConnectionMgr.connect()", "Driver (" + drv.getDriverClass() + ") does not support the autocommit property: " + ExceptionUtil.getDisplay(th));
 		}
-		return sql;
+		conn.setSqlConnection(sql);
+		conn.setProfile(aProfile);
+		return conn;
 	}
 
 	public DbDriver findDriverByName(String drvClassName, String aName)

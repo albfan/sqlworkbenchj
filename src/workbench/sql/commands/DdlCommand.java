@@ -78,7 +78,8 @@ public class DdlCommand extends SqlCommand
 			aSql = aConnection.getMetadata().filterDDL(aSql);
 
 			String msg = null;
-
+			result.setSuccess();
+			
 			if (isDropCommand(aSql) && aConnection.getIgnoreDropErrors())
 			{
 				try
@@ -90,6 +91,7 @@ public class DdlCommand extends SqlCommand
 				{
 					result.addMessage(ResourceMgr.getString("MsgDropWarning"));
 					result.addMessage(ExceptionUtil.getDisplay(th));
+					result.setFailure();
 				}
 			}
 			else
@@ -133,11 +135,14 @@ public class DdlCommand extends SqlCommand
 				StringBuilder warnings = new StringBuilder();
 				if (this.appendWarnings(aConnection, this.currentStatement, warnings))
 				{
-					result.addMessage(warnings.toString());
-					this.addExtendErrorInfo(aConnection, aSql, result);
+					result.setWarning(true);
+					result.addMessage(warnings);
+					if (this.addExtendErrorInfo(aConnection, aSql, result))
+					{
+						result.setFailure();
+					}
 				}
 			}
-			result.setSuccess();
 		}
 		catch (Exception e)
 		{
@@ -154,8 +159,8 @@ public class DdlCommand extends SqlCommand
 				int maxLen = 150;
 				msg.append(StringUtil.getMaxSubstring(aSql.trim(), maxLen));
 			}
-			msg.append("\n");
-			result.addMessage(msg.toString());
+			result.addMessage(msg);
+			result.addMessageNewLine();
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
 
 			this.addExtendErrorInfo(aConnection, aSql, result);

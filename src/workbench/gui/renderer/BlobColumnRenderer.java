@@ -26,6 +26,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import workbench.WbManager;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.*;
 import workbench.resource.Settings;
@@ -88,6 +89,14 @@ public class BlobColumnRenderer
 			{
 				this.displayPanel.setBackground(table.getBackground());
 			}
+		}
+		if (hasFocus)
+		{
+			this.displayPanel.setBorder(WbSwingUtilities.FOCUSED_CELL_BORDER);
+		}
+		else
+		{
+			this.displayPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		}
 		
 		currentValue = value;
@@ -163,6 +172,10 @@ public class BlobColumnRenderer
 		if (f != null) 
 		{
 			currentTable.setValueAt(f, currentRow, currentColumn);
+		}
+		else if (handler.isChanged())
+		{
+			currentTable.setValueAt(handler.getNewValue(), currentRow, currentColumn);
 		}
 		else if (handler.setToNull())
 		{

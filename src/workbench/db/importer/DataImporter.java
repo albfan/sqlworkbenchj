@@ -794,14 +794,9 @@ public class DataImporter
 	private int insertRow(Object[] row)
 		throws SQLException
 	{
-		int rows = 0;
-		if (this.useBatch)
+		int rows = processRowData(this.insertStatement, row, this.useBatch, false);
+		if (!this.useBatch)
 		{
-			rows = processRowData(this.insertStatement, row, true, false);
-		}
-		else
-		{
-			rows = processRowData(this.insertStatement, row, false, false);
 			this.insertedRows += rows;
 		}
 		return rows;
@@ -814,14 +809,9 @@ public class DataImporter
 	private int updateRow(Object[] row)
 		throws SQLException
 	{
-		int rows = 0;
-		if (this.useBatch && this.isModeUpdate())
+		int rows = processRowData(this.updateStatement, row, this.useBatch, true);
+		if (!this.useBatch)
 		{
-			rows = processRowData(this.updateStatement, row, true, true);
-		}
-		else
-		{
-			rows = processRowData(this.updateStatement, row, false, true);
 			this.updatedRows += rows;
 		}
 		return rows;

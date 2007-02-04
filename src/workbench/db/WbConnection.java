@@ -61,7 +61,8 @@ public class WbConnection
 	private PreparedStatementPool preparedStatementPool;
 	private List listeners;
 	private DbObjectCache objectCache;
-
+	private DbDriver driver;
+	
 	private Method clearSettings = null;
 	private Object dbAccess = null;
 	private boolean doOracleClear = true;

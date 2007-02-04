@@ -101,7 +101,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.66 2007-01-29 20:58:22 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.67 2007-02-04 17:22:42 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -651,14 +651,20 @@ public class JEditTextArea
 	 * @return True if scrolling was actually performed, false if the
 	 * line and offset was already visible
 	 */
-	public boolean scrollTo(int line, int offset)
+	public boolean scrollTo(final int line, final int offset)
 	{
-		// visibleLines == 0 before the component is realized
-		// we can't do any proper scrolling then, so we have
-		// this hack...
 		if (visibleLines == 0)
 		{
-			setFirstLine(Math.max(0,line - electricScroll));
+		// visibleLines == 0 before the component is realized
+		// we can't do any proper scrolling, so we'll try again later
+//			setFirstLine(Math.max(0,line - electricScroll));
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					scrollTo(line, offset);
+				}
+			});
 			return true;
 		}
 		

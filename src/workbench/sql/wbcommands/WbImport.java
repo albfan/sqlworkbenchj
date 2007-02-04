@@ -98,7 +98,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_ENCODING);
 		cmdLine.addArgument("columns");
 		cmdLine.addArgument(ARG_FILECOLUMNS);
-		cmdLine.addArgument(ARG_MODE);
+		cmdLine.addArgument(ARG_MODE, StringUtil.stringToList("insert;update;insert,update;update,insert", ";"));
 		cmdLine.addArgument(ARG_KEYCOLUMNS);
 		cmdLine.addArgument(ARG_BATCHSIZE);
 		cmdLine.addArgument(ARG_DELETE_TARGET, ArgumentType.BoolArgument);

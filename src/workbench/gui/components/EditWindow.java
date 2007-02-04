@@ -20,7 +20,6 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
-
 import javax.swing.ActionMap;
 import javax.swing.ComponentInputMap;
 import javax.swing.InputMap;
@@ -29,7 +28,6 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import workbench.WbManager;
-
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.sql.EditorPanel;
@@ -80,18 +78,31 @@ public class EditWindow
 		this(owner, title, text, settingsId, createSqlEditor, modal, false);
 	}
 	
-	public EditWindow(Frame owner, String title, String text, String settingsId, boolean createSqlEditor, boolean modal, boolean showCloseButtonOnly)
+	public EditWindow(final Frame owner, final String title, final String text, final String settingsId, final boolean createSqlEditor, final boolean modal, final boolean showCloseButtonOnly)
 	{
 		super(owner, title, modal);
-		init(owner, text, settingsId, createSqlEditor, showCloseButtonOnly);
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				init(owner, text, settingsId, createSqlEditor, showCloseButtonOnly);
+			}
+		});
+		
 		// pack() needs to be called before center() !!!
 		WbSwingUtilities.center(this, owner);
 	}
 
-	public EditWindow(Dialog owner, String title, String text, boolean createSqlEditor, boolean showCloseButtonOnly)
+	public EditWindow(final Dialog owner, final String title, final String text, final boolean createSqlEditor, final boolean showCloseButtonOnly)
 	{
 		super(owner, title, true);
-		init(owner, text, "workbench.data.edit.window", createSqlEditor, showCloseButtonOnly);
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				init(owner, text, "workbench.data.edit.window", createSqlEditor, showCloseButtonOnly);
+			}
+		});
 		WbSwingUtilities.center(this, WbManager.getInstance().getCurrentWindow());
 	}
 	
@@ -150,7 +161,6 @@ public class EditWindow
 		this.editor.setPreferredSize(new Dimension(300,200));
 		this.textContainer.setCaretPosition(0);
 		
-		
 		this.okButton.addActionListener(this);
 		this.cancelButton.addActionListener(this);
 		
@@ -178,6 +188,14 @@ public class EditWindow
 		this.addWindowListener(this);
 	}
 
+	public void setInfoText(String text)
+	{
+		if (this.editor instanceof PlainEditor)
+		{
+			((PlainEditor)editor).setInfoText(text);
+		}
+	}
+	
 	public void hideCancelButton()
 	{
 		this.cancelButton.removeActionListener(this);
@@ -236,12 +254,6 @@ public class EditWindow
 	
 	public void windowOpened(java.awt.event.WindowEvent e)
 	{
-		// Fix for JDK 6, otherwise the editor will not repaint 
-		// properly
-		this.editor.invalidate();
-		this.editor.updateUI();
-		this.editor.validate();
-		this.editor.repaint();
 	}
 	
 }

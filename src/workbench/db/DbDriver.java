@@ -178,8 +178,7 @@ public class DbDriver
 			{
 				// New Firebird 2.0 driver needs this, and it does not seem to do any harm
 				// for other drivers
-				Thread.currentThread().setContextClassLoader(classLoader);
-				
+				setContextClassLoader();//Thread.currentThread().setContextClassLoader(classLoader);
 				drvClass = this.classLoader.loadClass(this.driverClass);
 			}
 			else
@@ -241,19 +240,7 @@ public class DbDriver
 		return copy;
 	}
 
-//	public Connection connect(String url, String user, String password)
-//		throws ClassNotFoundException, SQLException, Exception
-//	{
-//		return this.connect(url, user, password, null);
-//	}
-//
-//	public Connection connect(String url, String user, String password, String id)
-//		throws ClassNotFoundException, SQLException, Exception
-//	{
-//		return this.connect(url, user, password, id, null);
-//	}
-
-	public Connection connect(String url, String user, String password, String id, Properties connProps)
+	Connection connect(String url, String user, String password, String id, Properties connProps)
 		throws ClassNotFoundException, SQLException
 	{
 		Connection c = null;
@@ -400,6 +387,14 @@ public class DbDriver
 		else
 		{
 			return false;
+		}
+	}
+
+	private void setContextClassLoader()
+	{
+		if (this.classLoader != null)
+		{
+			Thread.currentThread().setContextClassLoader(this.classLoader);
 		}
 	}
 	

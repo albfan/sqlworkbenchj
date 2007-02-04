@@ -38,6 +38,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.EventObject;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.CellEditor;
 import javax.swing.InputMap;
@@ -57,7 +59,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.JPopupMenu.Separator;
 import javax.swing.UIDefaults;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -68,7 +69,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.gui.WbSwingUtilities;
@@ -299,6 +299,18 @@ public class WbTable
 		
 		this.initDefaultRenderers();
 		this.initDefaultEditors();
+					
+		Action a = new AbstractAction()
+		{
+			public void actionPerformed(ActionEvent evt)
+			{
+				stopEditing();
+			}
+		};
+		
+		this.getInputMap().put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
+		this.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
+		this.getActionMap().put("wbtable-stop-editing", a);
 	}
 
 	public void setShowPopupMenu(boolean aFlag)
@@ -716,52 +728,60 @@ public class WbTable
 		return ds.isUpdateable();
 	}
 
-	public void editingCanceled(ChangeEvent e)
-	{
-		int row = this.getEditingRow();
-		super.editingCanceled(e);
-		resetHighlightRenderers(row);
-	}
-
-	public void editingStopped(ChangeEvent e)
-	{
-		int row = this.getEditingRow();
-		super.editingStopped(e);
-		resetHighlightRenderers(row);
-	}
+//	public void editingCanceled(ChangeEvent e)
+//	{
+//		final int row = this.getEditingRow();
+//		final int col = this.getEditingColumn();
+//		super.editingCanceled(e);
+//		EventQueue.invokeLater(new Runnable()
+//		{
+//			public void run()
+//			{
+//				resetHighlightRenderers(row, col);
+//			}
+//		});
+//		
+//	}
+//
+//	public void editingStopped(ChangeEvent e)
+//	{
+//		final int row = this.getEditingRow();
+//		final int col = this.getEditingColumn();
+//		super.editingStopped(e);
+//		EventQueue.invokeLater(new Runnable()
+//		{
+//			public void run()
+//			{
+//				resetHighlightRenderers(row, col);
+//			}
+//		});
+//	}
 
 	public void removeEditor()
 	{
-		int row = this.getEditingRow();
+		final int row = this.getEditingRow();
+		final int col = this.getEditingColumn();
 		super.removeEditor();
-		resetHighlightRenderers(row);
+		resetHighlightRenderers(row, col);
 	}
 
-	private void resetHighlightRenderers(int row)
+	private void resetHighlightRenderers(final int row, final int col)
 	{
 		if (!this.highlightRequiredFields) return;
 		int colcount = this.getColumnCount();
-		try
+		for (int i=0; i < colcount; i++)
 		{
-			this.setSuspendRepaint(true);
-			for (int i=0; i < colcount; i++)
+			TableCellRenderer renderer = getCellRenderer(row, i);
+			if (renderer instanceof RequiredFieldHighlighter)
 			{
-				TableCellRenderer renderer = getCellRenderer(row, i);
-				if (renderer instanceof RequiredFieldHighlighter)
-				{
-					RequiredFieldHighlighter highlighter = (RequiredFieldHighlighter)renderer;
-					highlighter.setEditingRow(-1);
-					highlighter.setHighlightBackground(null);
-					highlighter.setHighlightColumns(null);
-				}
+				RequiredFieldHighlighter highlighter = (RequiredFieldHighlighter)renderer;
+				highlighter.setEditingRow(-1);
+				highlighter.setHighlightBackground(null);
+				highlighter.setHighlightColumns(null);
 			}
 		}
-		finally
-		{
-			this.setSuspendRepaint(false);
-			this.invalidate();
-		}
-		if (row > -1) this.getSelectionModel().setSelectionInterval(row, row);
+		requestFocusInWindow();
+		changeSelection(row, col, false, false);
 	}
 
 	/**
@@ -951,7 +971,18 @@ public class WbTable
 		this.adjustToColumnLabel = aFlag;
 	}
 
-	public void setShowStatusColumn(boolean aFlag)
+	public void setShowStatusColumn(final boolean flag)
+	{
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				_setShowStatusColumn(flag);
+			}
+		});
+	}
+	
+	private void _setShowStatusColumn(boolean aFlag)
 	{
 		if (this.dwModel == null) return;
 		if (aFlag == this.dwModel.getShowStatusColumn()) return;
@@ -961,7 +992,7 @@ public class WbTable
 			int column = this.getSelectedColumn();
 			final int row = this.getSelectedRow();
 
-			this.setSuspendRepaint(true);
+//			this.setSuspendRepaint(true);
 			this.saveColumnSizes();
 			this.dwModel.setShowStatusColumn(aFlag);
 
@@ -1010,7 +1041,7 @@ public class WbTable
 		}
 		finally
 		{
-			this.setSuspendRepaint(false);
+//			this.setSuspendRepaint(false);
 		}
 	}
 

@@ -13,10 +13,13 @@ package workbench.gui.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.Box;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -29,7 +32,10 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- *
+ * A simple text editor based on a JTextArea.
+ * The panel displays also a checkbox to turn word wrapping on and off
+ * and optionally an information label.
+ * 
  * @author support@sql-workbench.net
  */
 public class PlainEditor
@@ -40,6 +46,8 @@ public class PlainEditor
 	private JCheckBox wordWrap;
 	private	SearchAndReplace replacer;
 	private Color enabledBackground;
+	private JLabel infoText;
+	private JPanel toolPanel;
 	
 	public PlainEditor(Window parent)
 	{
@@ -53,10 +61,13 @@ public class PlainEditor
 		editor.setWrapStyleWord(true); 
 		editor.setFont(Settings.getInstance().getDataFont());
 		this.setLayout(new BorderLayout());
+		toolPanel = new JPanel();
+		toolPanel.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
 		wordWrap = new JCheckBox(ResourceMgr.getString("LblWordWrap"));
 		wordWrap.addActionListener(this);
-		//wordWrap.setSelected(true);
-		this.add(wordWrap, BorderLayout.NORTH);
+		toolPanel.add(wordWrap);
+
+		this.add(toolPanel, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
 		this.setFocusable(false);
 		Document d = editor.getDocument();
@@ -75,6 +86,17 @@ public class PlainEditor
 	public int getSelectionEnd() { return this.editor.getSelectionEnd(); }
 	public int getSelectionStart() { return this.editor.getSelectionStart(); }
 	public void select(int start, int end) { this.editor.select(start, end); }
+	
+	public void setInfoText(String text)
+	{
+		if (this.infoText == null)
+		{
+			this.infoText = new JLabel();
+			this.toolPanel.add(Box.createHorizontalStrut(10));
+			this.toolPanel.add(infoText);
+		}
+		this.infoText.setText(text);
+	}
 	
 	public void requestFocus()
 	{

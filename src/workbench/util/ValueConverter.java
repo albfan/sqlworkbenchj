@@ -201,6 +201,10 @@ public class ValueConverter
 				{
 					return aValue;
 				}
+				else if (aValue instanceof byte[])
+				{
+					return aValue;
+				}
 				return null;
 				
 			case Types.BIT:

@@ -45,8 +45,8 @@ public class BlobInfoDialog
 	private BlobHandler handler;
 	private EscAction escAction;
 	private File uploadFile;
-	private boolean setToNull = false;
 	private boolean hasTools = false;
+	private boolean setToNull = false;
 	
 	public BlobInfoDialog(java.awt.Frame parent, boolean modal)
 	{
@@ -86,8 +86,20 @@ public class BlobInfoDialog
 		WbSwingUtilities.center(this, parent);
 	}
 
-	public File getUploadedFile() { return uploadFile; }
-	public boolean setToNull() { return this.setToNull; }
+	public File getUploadedFile() 
+	{ 
+		return uploadFile; 
+	}
+	
+	public boolean setToNull() 
+	{ 
+		return setToNull;
+	}
+	
+	public byte[] getNewValue()
+	{
+		return handler.getNewValue();
+	}
 	
 	public void actionPerformed(ActionEvent e)
 	{
@@ -133,7 +145,7 @@ public class BlobInfoDialog
 			infoLabel.setToolTipText(handler.getByteDisplay(len).toString());
 		}
 		saveAsButton.setEnabled(len > 0);
-		showAsTextButton.setEnabled(len > 0);
+		//showAsTextButton.setEnabled(len > 0);
 		showImageButton.setEnabled(len > 0);
 		showHexButton.setEnabled(len > 0);
 		externalViewer.setEnabled(len > 0 && hasTools);
@@ -406,7 +418,12 @@ public class BlobInfoDialog
 
 	private void showAsTextButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showAsTextButtonActionPerformed
 	{//GEN-HEADEREND:event_showAsTextButtonActionPerformed
-		handler.showBlobAsText(this, this.blobValue, encodingPanel.getEncoding());
+		if (handler.showBlobAsText(this, this.blobValue, encodingPanel.getEncoding()))
+		{
+			// if the blob has been edited, then clear the upload file in case
+			// there was one.
+			this.uploadFile = null;
+		};
 		closeWindow();
 	}//GEN-LAST:event_showAsTextButtonActionPerformed
 

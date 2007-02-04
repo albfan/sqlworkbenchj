@@ -35,6 +35,7 @@ import workbench.resource.Settings;
 import workbench.storage.NullValue;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -43,6 +44,8 @@ import workbench.util.FileUtil;
 public class BlobHandler
 {
 	private File uploadFile;
+	private byte[] newValue;
+	
 	private boolean setToNull = false;
 	
 	public BlobHandler()
@@ -183,6 +186,8 @@ public class BlobHandler
 	{
 		if (value == null) return null;
 		if (value instanceof NullValue) return null;
+		if (getBlobSize(value) == 0) return StringUtil.EMPTY_STRING;
+		
 		if (encoding == null) encoding = Settings.getInstance().getDefaultBlobTextEncoding();
 		
 		if (value instanceof Blob)
@@ -283,27 +288,72 @@ public class BlobHandler
 	}
 	public void showBlobAsText(Object value)
 	{
-		showBlobAsText(null, value, null);
+		showBlobAsText(null, value, Settings.getInstance().getDefaultBlobTextEncoding());
 	}
 	
-	public void showBlobAsText(Dialog parent, Object value, String encoding)
+	/**
+	 * Display the blob content as a text with the specified encoding.
+	 * The window will allow editing of the data, if the user changed the 
+	 * data and closed the window using the OK button, this method will
+	 * return true. In this case the blob value will be updated with 
+	 * the binary representation of the text using the specified encoding
+	 */
+	public boolean showBlobAsText(Dialog parent, Object value, String encoding)
 	{
 		String data = getBlobAsString(value, encoding);
 		String title = ResourceMgr.getString("TxtBlobData");
+		this.newValue = null;
 		EditWindow w;
 		if (parent != null)
 		{
-			w = new EditWindow(parent, title, data, false, true);
+			w = new EditWindow(parent, title, data, false, false);
 		}
 		else
 		{
-			w = new EditWindow(WbManager.getInstance().getCurrentWindow(), title, data, false, true);
+			w = new EditWindow(WbManager.getInstance().getCurrentWindow(), title, data, false, false);
 		}
-		w.setReadOnly();
+		//w.setReadOnly();
+		w.setInfoText(ResourceMgr.getString("LblFileEncoding") + ": " + encoding);
 		w.setVisible(true);
+		boolean result = false;
+		if (!w.isCancelled())
+		{
+			data = w.getText();
+			try
+			{
+				if (encoding != null)
+				{
+					this.newValue = data.getBytes(encoding);
+					this.uploadFile = null;
+					result = true;
+				}
+			}
+			catch (Exception e)
+			{
+				this.newValue = null;
+				result = false;
+				LogMgr.logError("BlobHandler.showBlobAsText", "Error converting text to blob", e);
+			}
+		}
 		w.dispose();
+		return result;
 	}
 
+	public boolean isChanged()
+	{
+		return this.newValue != null;
+	}
+	
+	/**
+	 * Returns thenew value after the user changed the data in the text window.
+	 * Returns null if the user did not change the data.
+	 * @see showBlobAsText(Dialog, Object, String)
+	 */
+	public byte[] getNewValue()
+	{
+		return this.newValue;
+	}
+	
 	public void showBlobInfoDialog(Frame parent, Object blobValue)
 	{
 		BlobInfoDialog d = new BlobInfoDialog(parent, true);
@@ -311,6 +361,7 @@ public class BlobHandler
 		d.setVisible(true);
 		this.uploadFile = d.getUploadedFile();
 		this.setToNull = d.setToNull();
+		this.newValue = d.getNewValue();
 		d.dispose();
 	}
 }

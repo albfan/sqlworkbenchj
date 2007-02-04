@@ -148,8 +148,16 @@ public class ImportFileHandler
 		}
 		else
 		{
-			File realFile = new File(this.baseDir, f.getName());
-			return new FileInputStream(realFile);
+			if (f.isAbsolute())
+			{
+				return new FileInputStream(f);
+			}
+			else
+			{
+				File realFile = new File(this.baseDir, f.getName());
+				return new FileInputStream(realFile);
+			}
+			
 		}
 	}
 
@@ -164,6 +172,10 @@ public class ImportFileHandler
 		}
 		else
 		{
+			if (f.isAbsolute())
+			{
+				return f.length();
+			}
 			File realFile = new File(this.baseDir, f.getName());
 			return realFile.length();
 		}

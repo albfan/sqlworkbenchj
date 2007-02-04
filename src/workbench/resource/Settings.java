@@ -1561,7 +1561,8 @@ public class Settings
 		int y = this.getWindowPosY(id);
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 
-		if (x > 0 && y > 0 && x <= screen.getWidth() - 20 && y <= screen.getHeight() - 20)
+		if (x != Integer.MIN_VALUE && y != Integer.MIN_VALUE 
+			&& x <= screen.getWidth() - 20 && y <= screen.getHeight() - 20)
 		{
 			target.setLocation(new Point(x, y));
 			result = true;
@@ -1610,22 +1611,22 @@ public class Settings
 
 	public int getWindowPosX(String windowClass)
 	{
-		return getIntProperty(windowClass + ".x", 0);
+		return getIntProperty(windowClass + ".x", Integer.MIN_VALUE);
 	}
 
 	public int getWindowPosY(String windowClass)
 	{
-		return getIntProperty(windowClass + ".y", 0);
+		return getIntProperty(windowClass + ".y", Integer.MIN_VALUE);
 	}
 
 	public int getWindowWidth(String windowClass)
 	{
-		return getIntProperty(windowClass + ".width", 0);
+		return getIntProperty(windowClass + ".width", Integer.MIN_VALUE);
 	}
 
 	public int getWindowHeight(String windowClass)
 	{
-		return getIntProperty(windowClass + ".height", 0);
+		return getIntProperty(windowClass + ".height", Integer.MIN_VALUE);
 	}
 
 	public int getEditorTabWidth()

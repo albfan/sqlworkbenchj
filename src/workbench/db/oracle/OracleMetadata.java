@@ -481,7 +481,7 @@ public class OracleMetadata
 			}
 			else if (schema == null)
 			{
-				schema = this.connection.getSqlConnection().getMetaData().getUserName();
+				schema = this.connection.getCurrentSchema();
 			}
 			stmt = this.connection.getSqlConnection().prepareStatement(ERROR_QUERY);
 			stmt.setString(1, schema.toUpperCase());
