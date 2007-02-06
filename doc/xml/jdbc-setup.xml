@@ -216,20 +216,4 @@
 		</informaltable>
 	</section>
 
-	<section id="db2-charset">
-		<title>Using DB2 JDBC drivers</title>
-		<para>
-			When using the DB2 JDBC drivers it is important that the <literal>charsets.jar</literal> 
-			is part of the used JDK (or JRE). Apparently the DB2 JDBC driver needs this library in 
-			order to correctly convert the EBCDIC characterset (used in the database) into the 
-			Unicode encoding that is used by Java.
-			The library <literal>charsets.jar</literal> is usually included in all multi-language
-			JDK/JRE installations. 
-		</para>
-		<para>
-			If you experience intermittent "Connection closed" errors when running SQL statements,
-			please verify that <literal>charsets.jar</literal> is part of your JDK/JRE installation.
-			This file is usually installed in <literal>jre\lib\charsets.jar</literal>.
-		</para>
-	</section>
 </section>

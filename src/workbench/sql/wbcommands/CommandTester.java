@@ -22,7 +22,7 @@ import java.util.Set;
  * the verbs for WbXXXX commands are not formatted in uppercase.
  * 
  * This is also used by the code completion to test if a command is 
- * a WbCommand
+ * a Workbench internal command.
  * 
  * @see workbench.sql.formatter.SqlFormatter
  * @see workbench.gui.completion.StatementContext
@@ -31,21 +31,21 @@ import java.util.Set;
  */
 public class CommandTester
 {
-	private final Set commands;
-	private final Map formattedWords;
+	private final Set<String> commands;
+	private final Map<String, String> formattedWords;
 	
 	public CommandTester()
 	{
-		commands = new HashSet();
+		commands = new HashSet<String>();
 		commands.add(WbCopy.VERB);
 		commands.add(WbDefinePk.VERB);
-		commands.add(WbDefineVar.DEFINE_LONG);
-		commands.add(WbDefineVar.DEFINE_SHORT);
+		commands.add(WbDefineVar.VERB_DEFINE_LONG);
+		commands.add(WbDefineVar.VERB_DEFINE_SHORT);
 		commands.add(WbEndBatch.VERB);
 		commands.add(WbExport.VERB);
 		commands.add(WbFeedback.VERB);
 		commands.add(WbImport.VERB);
-		commands.add(WbInclude.INCLUDE_LONG);
+		commands.add(WbInclude.VERB);
 		commands.add(WbListPkDef.VERB);
 		commands.add(WbLoadPkMapping.VERB);
 		commands.add(WbRemoveVar.VERB);
@@ -55,6 +55,7 @@ public class CommandTester
 		commands.add(WbSelectBlob.VERB);
 		commands.add(WbStartBatch.VERB);
 		commands.add(WbXslt.VERB);
+		
 		
 		formattedWords = new HashMap();
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);

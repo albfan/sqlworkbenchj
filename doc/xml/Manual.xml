@@ -17,6 +17,7 @@
 	<!ENTITY shortcuts SYSTEM "shortcuts.xml">
 	<!ENTITY settings SYSTEM "settings.xml">
 	<!ENTITY variables SYSTEM "script-variables.xml">
+	<!ENTITY problems SYSTEM "problems.xml">
 	<!ENTITY wb-productname	"SQL Workbench/J">
 ]>
 
@@ -36,6 +37,7 @@
 &data-pumper;
 &dbexplorer;
 &shortcuts;
+&problems;
 &options;
 &settings;
 </article>

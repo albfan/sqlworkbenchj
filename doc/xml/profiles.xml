@@ -445,52 +445,6 @@
 		</para>
 	</section>
 	
-  <section id="oracle-enable-remarks">
-		<title>Show table and column comments with Oracle</title>
-		<para>
-			By default Oracle's JDBC driver does not return comments made on columns or tables 
-			(<literal>COMMENT ON ..</literal>). Thus your comments will not be shown in the database 
-			explorer.
-		</para>
-		<para>
-			To enable the display of column comments, you need to pass the property <literal>remarksReporting</literal>
-			to the driver.
-		</para>
-		<para>
-			In the profile dialog, click on the <guibutton>Extended Properties</guibutton> button.
-			Add a new property in the following window with the name <literal>remarksReporting</literal>
-			and the value <literal>true</literal>. Now close the dialog by clicking on the OK button.
-		</para>
-		<para>
-			Turning on this features slows down the retrieval of table information e.g. in the Database Explorer.
-		</para>
-		<para>
-			When you have comments defined in your Oracle database and use the <link linkend="command-schema-report">WbReport</link>
-			command, then you have to enable the remrks reporting, otherwise the comments will not show up in the report.
-		</para>
-	</section>
-
-	<section id="mysql-select-problems">
-		<title>Problems when running SELECT statements with MySQL</title>
-		<para>
-			In case you receive an error message "<literal>Operation not allowed after ResultSet closed</literal>"
-			please upgrade your JDBC driver to a more recent version. This problem was fixed with the MySQL JDBC
-			driver version 3.1. So upgrading to that or any later version will fix this problem.
-		</para>
-	</section>
-
-	<section id="mysql-zero-date-problems">
-		<title>Problems with zero dates with MySQL</title>
-		<para>
-			MySQL allows the user to store invalid dates in the database (0000-00-00). Since 
-			version 3.1 of the JDBC driver, the driver will throw an exception when trying to retrieve
-			such an invalid date. This behaviour can be controlled by adding an <link linkend="profile-extended-properties">extended property</link>
-			to the connection profile. The property should be named <literal>zeroDateTimeBehavior</literal>. You can
-			set this value to either <literal>convertToNull</literal> or to <literal>round</literal>. For details
-			see <ulink url="http://dev.mysql.com/doc/refman/4.1/en/connector-j-installing-upgrading.html">the MySQL site</ulink>
-		</para>
-	</section>
-	
   <section id="odbc">
 		<title>ODBC connections without a data source</title>
 		<para>

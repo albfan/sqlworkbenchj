@@ -79,6 +79,7 @@ public class TextExportWriter
 			out = new PrintWriter(new BufferedWriter(new FileWriter(ctl)));
 			if (exporter.getExportHeaders())
 			{
+				out.println("-- Skip the header row of the input file");
 				out.println("OPTIONS (skip=1)");
 			}
 			
@@ -99,7 +100,8 @@ public class TextExportWriter
 			}
 			File f = new File(exporter.getFullOutputFilename());
 			out.println("INFILE '" + f.getName() + "'");
-			out.println("TRUNCATE");
+			out.println("-- to replace the data in the table use TRUNCATE instead of APPEND");
+			out.println("APPEND");
 			out.print("INTO TABLE ");
 			out.println(resultInfo.getUpdateTable().getTableName());
 			out.print("FIELDS TERMINATED BY '");

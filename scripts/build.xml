@@ -172,8 +172,8 @@
       <param name="paper.type" expression="A4"/>
       <param name="margin.bottom" expression="1.5cm"/>
       <param name="margin.top" expression="1.5cm"/>
-      <param name="margin.left" expression="1.5cm"/>
-      <param name="margin.right" expression="1.5cm"/>
+      <param name="margin.left" expression="1.2cm"/>
+      <param name="margin.right" expression="1.2cm"/>
       <param name="generate.section.toc.level" expression="3"/>
       <param name="toc.indent.width" expression="24"/>
       <param name="toc.max.depth" expression="3"/>
@@ -482,6 +482,16 @@
         <include name="Workbench.jar"/>
         <include name="history.txt"/>
       </zipfileset>
+      <zipfileset dir="${distdir}">
+        <include name="JWorkbench.exe"/>
+        <include name="DataPumper.exe"/>
+        <include name="DbExplorer.exe"/>
+      </zipfileset>
+      <zipfileset dir="${scriptsrc}">
+        <include name="jworkbench.sh"/>
+        <include name="datapumper.sh"/>
+        <include name="dbexplorer.sh"/>
+      </zipfileset>			
       <zipfileset dir="${doc}/pdf">
         <include name="SQLWorkbench-Manual.pdf"/>
       </zipfileset>

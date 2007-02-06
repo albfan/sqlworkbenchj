@@ -2252,6 +2252,14 @@ WHERE id=42;</programlisting>
                 <entry>-encoding</entry>
                 <entry>Specify the encoding of the input file.</entry>
             </row>
+            
+            <row>
+                <entry>-verbose</entry>
+                <entry>Controls the logging level of the executed commands. <literal>-verbose=true</literal>
+								has the same effect as adding a <literal>WbFeedback on</literal> inside
+								the called script. <literal>-verbose=false</literal> has the same effect as adding 
+								a <literal>WbFeedback off</literal> inside of the called script.</entry>
+            </row>
 						
           </tbody>
         </tgroup>

@@ -1891,7 +1891,7 @@ public class Settings
 	{
 		String delim = getProperty("workbench.sql.alternatedelimiter", "/");
 		boolean sld = getBoolProperty("workbench.sql.alternatedelimiter.singleline", true);
-		if (delim == null || delim.trim().length() == 0) return null;
+		if (StringUtil.isEmptyString(delim)) return null;
 		DelimiterDefinition def = new DelimiterDefinition(delim, sld);
 		if (def.isStandard()) return null;
 		return def;

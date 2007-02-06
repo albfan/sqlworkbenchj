@@ -94,6 +94,7 @@ public class AnsiSQLTokenMarker
 		keywords.add("CLOSE",Token.KEYWORD1);
 		keywords.add("CLUSTERED",Token.KEYWORD1);
 		keywords.add("COLUMN",Token.KEYWORD1);
+		keywords.add("COMMENT",Token.KEYWORD1);
 		keywords.add("COMMIT",Token.KEYWORD1);
 		keywords.add("CONSTRAINT",Token.KEYWORD1);
 		keywords.add("CREATE",Token.KEYWORD1);

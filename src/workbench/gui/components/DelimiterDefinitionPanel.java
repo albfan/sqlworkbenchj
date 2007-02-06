@@ -33,7 +33,6 @@ public class DelimiterDefinitionPanel
 	private List<PropertyChangeListener> listener;
 	private DelimiterDefinition delimiter;
 	
-	/** Creates new form DelimiterDefinitionPanel */
 	public DelimiterDefinitionPanel()
 	{
 		initComponents();
@@ -52,7 +51,6 @@ public class DelimiterDefinitionPanel
 		if (delim != null)
 		{
 			this.delimiter = delim;
-			
 		}
 		else
 		{

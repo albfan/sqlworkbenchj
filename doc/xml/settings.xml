@@ -400,7 +400,7 @@
 			<para>Property: <literal>workbench.db.[dbid].exclude.tables</literal></para>
 			<para>
 				Whenever &wb-productname; retrieves a list of tables (e.g. the DbExplorer, 
-				auto completion, <link linkend="command-report">WbSchemaReport</link>)
+				auto completion, <link linkend="command-schema-report">WbSchemaReport</link>)
 				certain tables can be filtered out by supplying a regular expression in 
 				this property. The default setting will filter Oracle tables that reside
 				in the "Recycle bin". This setting can be applied on a per DBMS basis

@@ -406,9 +406,11 @@ VALUES
 				together with a button. 
 				When you click on the button a dialog will be displayed allowing
 				you to save the data to a file, view the data as text (using the selected encoding), 
-				display the blob as an image (Windows bitmap files 
-				(with the extension <literal>BMP</literal>) is only supported starting with 
-				JDK 1.5) or display a hex view of the blob.
+				display the blob as an image or display a hex view of the blob.
+			</para>
+			<para>
+				When displaying the BLOB content as a text, you can edit the text. When saving
+				the data, the entered text will be converted to raw data using the selected encoding.
 			</para>
 			<para>
 				The window will also let you open the contents of the BLOB data with a predefined

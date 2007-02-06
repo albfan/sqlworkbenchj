@@ -1115,7 +1115,7 @@ public class TableListPanel
 
 	protected void retrieveTableSource()
 	{
-		tableSource.setText(ResourceMgr.getString("TxtRetrievingSourceCode"));
+		tableSource.setPlainText(ResourceMgr.getString("TxtRetrievingSourceCode"));
 
 		try
 		{

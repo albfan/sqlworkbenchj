@@ -22,7 +22,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -906,7 +905,7 @@ public class ConnectionEditorPanel
 		if (evt.getSource() instanceof SimplePropertyEditor) 
 		{
 			// As the alternateDelimiter is a not attached to the 
-			// profile itself, we have to propagate any update delimiter object
+			// profile itself, we have to propagate any updated delimiter object
 			// to the profile
 			if (altDelimiter.getDelimiter().isChanged())
 			{

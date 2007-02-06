@@ -201,7 +201,7 @@ public class EditorPanel
 
 	public void disableSqlHighlight()
 	{
-		this.sqlTokenMarker = null;
+//		this.sqlTokenMarker = null;
 		this.setTokenMarker(null);
 	}
 	
@@ -209,12 +209,9 @@ public class EditorPanel
 	{
 		if (this.sqlTokenMarker == null)
 		{
-			this.setTokenMarker(new AnsiSQLTokenMarker());
+			this.sqlTokenMarker = new AnsiSQLTokenMarker();
 		}
-		else
-		{
-			this.setTokenMarker(this.sqlTokenMarker);
-		}
+		this.setTokenMarker(this.sqlTokenMarker);
 	}
 	
 	public void setDatabaseConnection(WbConnection aConnection)
@@ -263,9 +260,15 @@ public class EditorPanel
 			this.setFont(aFont);
 		}
 	}
+	
 	public AnsiSQLTokenMarker getSqlTokenMarker()
 	{
-		return this.sqlTokenMarker;
+		TokenMarker marker = this.getTokenMarker();
+		if (marker instanceof AnsiSQLTokenMarker)
+		{
+			return (AnsiSQLTokenMarker)marker;
+		}
+		return null;
 	}
 
 	public void showFindOnPopupMenu()

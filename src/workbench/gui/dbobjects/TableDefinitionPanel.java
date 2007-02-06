@@ -152,11 +152,14 @@ public class TableDefinitionPanel
 		}
 	}
 
+	/**
+	 * Retrieve the definition of the given table.
+	 */
 	public void retrieve(TableIdentifier table)
 		throws SQLException
 	{
 		this.currentTable = table;
-		this.toolbar.validate();
+		this.tableDefinition.reset();
 		retrieveTableDefinition();
 	}
 
@@ -164,12 +167,20 @@ public class TableDefinitionPanel
 		throws SQLException
 	{
 		if (this.isBusy()) return;
+		
 		synchronized (this.dbConnection)
 		{
 			try
 			{
-				String msg = "<html>" + ResourceMgr.getString("TxtRetrieveTableDef") + " <b>" + this.currentTable.getTableName() + "</b></html>";
-				tableNameLabel.setText(msg);
+				WbSwingUtilities.invoke(new Runnable()
+				{
+					public void run()
+					{
+						reloadAction.setEnabled(false);
+						String msg = "<html>" + ResourceMgr.getString("TxtRetrieveTableDef") + " <b>" + currentTable.getTableName() + "</b></html>";
+						tableNameLabel.setText(msg);
+					}
+				});
 				DbMetadata meta = this.dbConnection.getMetadata();
 				DataStore def = meta.getTableDefinition(this.currentTable);
 				final DataStoreTableModel model = new DataStoreTableModel(def);
@@ -188,7 +199,6 @@ public class TableDefinitionPanel
 			}
 			finally
 			{
-				tableDefinition.setSuspendRepaint(false);
 				reloadAction.setEnabled(true);
 				setBusy(false);
 			}
@@ -197,7 +207,6 @@ public class TableDefinitionPanel
 
 	protected void applyTableModel(DataStoreTableModel model)
 	{
-		tableDefinition.setSuspendRepaint(true);
 		tableDefinition.setPrintHeader(this.currentTable.getTableName());
 		tableDefinition.setAutoCreateColumnsFromModel(true);
 		tableDefinition.setModel(model, true);
@@ -253,6 +262,8 @@ public class TableDefinitionPanel
 		if (this.currentTable == null) return;
 		if (this.dbConnection == null) return;
 
+		this.tableDefinition.reset();
+		
 		WbThread t = new WbThread("TableDefinition Retrieve")
 		{
 			public void run()

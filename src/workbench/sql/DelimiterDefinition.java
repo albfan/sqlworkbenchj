@@ -37,14 +37,12 @@ public class DelimiterDefinition
 	
 	private String delimiter;
 	private boolean singleLineDelimiter;
-	private boolean allowChange = true;
 	private boolean changed = false;
 
 	public DelimiterDefinition()
 	{
 		this.delimiter = "";
 		this.singleLineDelimiter = false;
-		this.allowChange = true;
 		this.changed = false;
 	}
 
@@ -52,7 +50,6 @@ public class DelimiterDefinition
 	{
 		setDelimiter(delim);
 		this.singleLineDelimiter = single;
-		this.allowChange = false;
 	}
 
 	public boolean isEmpty()
@@ -90,7 +87,7 @@ public class DelimiterDefinition
 	public void setDelimiter(String d) 
 	{ 
 		if (d == null) return;
-		if (allowChange && !StringUtil.equalString(this.delimiter, d)) 
+		if (!StringUtil.equalString(this.delimiter, d)) 
 		{
 			this.delimiter = d.trim();
 			this.changed = true;
@@ -109,7 +106,7 @@ public class DelimiterDefinition
 	
 	public void setSingleLine(boolean flag) 
 	{ 
-		if (allowChange && flag != this.singleLineDelimiter)
+		if (flag != this.singleLineDelimiter)
 		{
 			this.singleLineDelimiter = flag; 
 			this.changed = true;

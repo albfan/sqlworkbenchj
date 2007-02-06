@@ -36,7 +36,7 @@ public class ConnectionInfo
 
 		this.display = new JTextField();
 
-		this.setLayout(new GridLayout(1,1));
+		this.setLayout(new GridLayout(1,1,0,0));
 		this.add(this.display);
 
 		this.display.setBackground(aBackground);
@@ -63,12 +63,12 @@ public class ConnectionInfo
 	{
 		if (this.sourceConnection != null)
 		{
-			this.display.setText(this.sourceConnection.getDisplayString());
+			this.display.setText(" " + this.sourceConnection.getDisplayString());
 			this.display.setToolTipText(this.sourceConnection.getDatabaseProductName());
 		}
 		else
 		{
-			this.display.setText(ResourceMgr.getString("TxtNotConnected"));
+			this.display.setText(" " + ResourceMgr.getString("TxtNotConnected"));
 			this.display.setToolTipText(null);
 		}
 	}

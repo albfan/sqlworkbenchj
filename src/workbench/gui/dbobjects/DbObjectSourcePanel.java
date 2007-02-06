@@ -112,6 +112,11 @@ public class DbObjectSourcePanel
 			sender.sendContent(getText(), panelIndex);
 		}
 	}
+
+	public void setPlainText(final String sql)
+	{
+		setEditorText(sql, false);
+	}
 	
 	/**
 	 * Set the SQL source. If the text contains an error message
@@ -130,22 +135,34 @@ public class DbObjectSourcePanel
 				sql.startsWith(ResourceMgr.getString("MsgSynonymSourceNotImplemented"))
 			 )
 		{
-			sourceEditor.disableSqlHighlight();
+			setEditorText(sql, false);
 		}
 		else
 		{
+			setEditorText(sql, true);
+		}
+	}
+
+	private void setEditorText(final String text, final boolean enableHighlight)
+	{
+		if (enableHighlight)
+		{
 			sourceEditor.enableSqlHighlight();
+		}
+		else
+		{
+			sourceEditor.disableSqlHighlight();
 		}
 		
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
-				sourceEditor.setText(sql == null ? "" : sql);
+				sourceEditor.setText(text == null ? "" : text);
 			}
 		});
+		
 	}
-	
 	public String getText()
 	{
 		return sourceEditor.getText();
