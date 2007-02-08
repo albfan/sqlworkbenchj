@@ -73,7 +73,7 @@ public class RowData
 	/**
 	 *	Read the row data from the supplied ResultSet
 	 */
-	public void read(ResultSet rs, ResultInfo info)
+	public synchronized void read(ResultSet rs, ResultInfo info)
 		throws SQLException
 	{
 		int colCount = this.colData.length;
@@ -200,7 +200,7 @@ public class RowData
 	 *
 	 *	@throws IndexOutOfBoundsException
 	 */
-	public void setValue(int aColIndex, Object aValue)
+	public synchronized void setValue(int aColIndex, Object aValue)
 		throws IndexOutOfBoundsException
 	{
 		if (aValue == null) throw new NullPointerException("No null values allowed. Use setNull() instead");
@@ -228,7 +228,7 @@ public class RowData
 	 *
 	 *	@throws IndexOutOfBoundsException
 	 */
-	public Object getValue(int aColumn)
+	public synchronized Object getValue(int aColumn)
 		throws IndexOutOfBoundsException
 	{
 		return this.colData[aColumn];
@@ -238,7 +238,7 @@ public class RowData
 	 * Returns the value from the specified column as it was retrieved from 
 	 * the database
 	 */
-	public Object getOriginalValue(int aColumn)
+	public synchronized Object getOriginalValue(int aColumn)
 		throws IndexOutOfBoundsException
 	{
 		if (this.originalData == null) return this.getValue(aColumn);
@@ -246,7 +246,7 @@ public class RowData
 		return this.originalData[aColumn];
 	}
 
-	public void restoreOriginalValues()
+	public synchronized void restoreOriginalValues()
 	{
 		if (this.originalData == null) return;
 		for (int i=0; i < this.originalData.length; i++)
@@ -265,7 +265,7 @@ public class RowData
 	 * initial retrieve (i.e. since the last time resetStatus() was called
 	 * 
 	 */
-	public boolean isColumnModified(int aColumn)
+	public synchronized boolean isColumnModified(int aColumn)
 	{
 		if (this.isOriginal()) return false;
 		if (this.isNew())
@@ -279,7 +279,7 @@ public class RowData
 		}
 	}
 	
-	public void setNull(int aColumn, int aType)
+	public synchronized void setNull(int aColumn, int aType)
 	{
 		NullValue nul = NullValue.getInstance(aType);
 		this.setValue(aColumn, nul);
@@ -289,7 +289,7 @@ public class RowData
 	 *	Resets the internal status. After a call to resetStatus()
 	 *	isModified() will return false, and isOriginal() will return true.
 	 */
-	public void resetStatus()
+	public synchronized void resetStatus()
 	{
 		this.status = NOT_MODIFIED;
 		this.dmlSent = false;
@@ -299,7 +299,7 @@ public class RowData
 	/**
 	 * Resets data and status
 	 */
-	public void reset()
+	public synchronized void reset()
 	{
 		this.colData = null;
 		this.resetStatus();
@@ -307,7 +307,7 @@ public class RowData
 	/**
 	 *	Sets the status of this row to new.
 	 */
-	public void setNew()
+	public synchronized void setNew()
 	{
 		this.status = NEW;
 	}
@@ -317,7 +317,7 @@ public class RowData
 	 *
 	 *	@return true if the row has not been altered since retrieval
 	 */
-	public boolean isOriginal()
+	public synchronized boolean isOriginal()
 	{
 		return this.status == NOT_MODIFIED;
 	}
@@ -328,7 +328,7 @@ public class RowData
 	 *	@return true if the row has been modified since retrieval
 	 *
 	 */
-	public boolean isModified()
+	public synchronized boolean isModified()
 	{
 		return (this.status & MODIFIED) ==  MODIFIED;
 	}
@@ -339,7 +339,7 @@ public class RowData
 	 *
 	 *	@return true if it's a new row
 	 */
-	public boolean isNew()
+	public synchronized boolean isNew()
 	{
 		return (this.status & NEW) == NEW;
 	}
@@ -347,18 +347,20 @@ public class RowData
 	/**
 	 *	Set the status to modified.
 	 */
-	public void setModified()
+	public synchronized void setModified()
 	{
 		this.status = this.status | MODIFIED;
 	}
 
-	public void setDmlSent(boolean aFlag)
+	synchronized void setDmlSent(boolean aFlag)
 	{
 		this.dmlSent = aFlag;
 	}
 
-	public boolean isDmlSent() { return this.dmlSent; }
-
+	public synchronized boolean isDmlSent() 
+	{ 
+		return this.dmlSent; 
+	}
 
 	public String toString()
 	{

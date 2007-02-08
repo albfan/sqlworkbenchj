@@ -42,8 +42,11 @@ import workbench.util.ValueConverter;
  * If the underlying SELECT used only one table, then the
  * DataStore can be updated and the changes can be saved back
  * to the database. 
+ * 
  * For updating or deleting rows, key columns are required
  * For inserting new rows, no keys are required.
+ * 
+ * @see workbench.db.ResultInfo
  * 
  * @author  support@sql-workbench.net
  */
@@ -119,7 +122,7 @@ public class DataStore
 		this.initData(aResultSet);
   }
 
-	public DataStore(ResultInfo metaData)
+	DataStore(ResultInfo metaData)
 	{
 		this.resultInfo = metaData;
 		this.data = createData();
@@ -738,6 +741,12 @@ public class DataStore
 		if (this.resultInfo.getColumnName(aColumn) == null) return;
 
 		RowData row = this.getRow(aRow);
+		if (row == null)
+		{
+			LogMgr.logError("DataStore.setValue()", "Could not find specified row!", null);
+			return;
+		}
+		
 		if (aValue == null)
 			row.setNull(aColumn, this.resultInfo.getColumnType(aColumn));
 		else

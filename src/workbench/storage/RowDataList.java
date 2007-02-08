@@ -14,6 +14,9 @@ package workbench.storage;
 import java.util.Arrays;
 import java.util.Comparator;
 
+/**
+ * A class to store a dynamic array of {@link RowData} objects
+ */
 public class RowDataList
 {
 	private static final int DEFAULT_SIZE = 150;
@@ -42,9 +45,12 @@ public class RowDataList
 
 		if (this.data != null)
 		{
-			RowData newBuf[] = new RowData[newStorage];
-			System.arraycopy(this.data, 0, newBuf, 0, this.size);
-			this.data = newBuf;
+			synchronized (this.data)
+			{
+				RowData newBuf[] = new RowData[newStorage];
+				System.arraycopy(this.data, 0, newBuf, 0, this.size);
+				this.data = newBuf;
+			}
 		}
 	}
 
@@ -55,7 +61,6 @@ public class RowDataList
 
 	/**
 	 * Free all objects stored in the internal array. 
-	 * The size 
 	 */
 	public void reset()
 	{
@@ -76,7 +81,10 @@ public class RowDataList
 	 */
 	public RowData get(int index)
 	{
-		return this.data[index];
+		synchronized (this.data)
+		{
+			return this.data[index];
+		}
 	}
 
 	/**
@@ -86,12 +94,15 @@ public class RowDataList
 	{
 		int count = size - index - 1;
 
-		if (count > 0)
+		synchronized (this.data)
 		{
-			System.arraycopy(data, index+1, data, index, count);
+			if (count > 0)
+			{
+				System.arraycopy(data, index+1, data, index, count);
+			}
+			this.size --;
+			this.data[size] = null;
 		}
-		this.size --;
-		this.data[size] = null;
 	}
 
 	/**
@@ -101,10 +112,14 @@ public class RowDataList
 	public int add(RowData row)
 	{
 		int newlen = this.size + 1;
-		if (newlen > this.data.length) grow(newlen);
-		this.data[newlen - 1] = row;
-		this.size = newlen;
-		return this.size;
+		
+		synchronized (this.data)
+		{
+			if (newlen > this.data.length) grow(newlen);
+			this.data[newlen - 1] = row;
+			this.size = newlen;
+			return this.size;
+		}
 	}
 
 	/**
@@ -113,27 +128,33 @@ public class RowDataList
 	public int add(int index, RowData row)
 	{
 		int newlen = this.size + 1;
-		if (newlen > this.data.length)
+		synchronized (this.data)
 		{
-			// we are not using ensureCapacity here to optimize
-			// the calls to System.arraycopy
-			RowData newBuf[] = new RowData[(int)(newlen * grow)];
-			System.arraycopy(this.data, 0, newBuf, 0, index);
-			System.arraycopy(this.data, index, newBuf, index + 1, (size - index));
-			this.data = newBuf;
+			if (newlen > this.data.length)
+			{
+				// we are not using ensureCapacity here to optimize
+				// the calls to System.arraycopy
+				RowData newBuf[] = new RowData[(int)(newlen * grow)];
+				System.arraycopy(this.data, 0, newBuf, 0, index);
+				System.arraycopy(this.data, index, newBuf, index + 1, (size - index));
+				this.data = newBuf;
+			}
+			else
+			{
+				System.arraycopy(this.data, index, this.data, index + 1, (size - index));
+			}
+			this.data[index] = row;
+			this.size = newlen;
+			return index;
 		}
-		else
-		{
-			System.arraycopy(this.data, index, this.data, index + 1, (size - index));
-		}
-		this.data[index] = row;
-		this.size = newlen;
-		return index;
 	}
 
 	public void sort(Comparator comp)
 	{
-		Arrays.sort(this.data, 0, this.size, comp);
+		synchronized (this.data)
+		{
+			Arrays.sort(this.data, 0, this.size, comp);
+		}
 	}
 	
 }
