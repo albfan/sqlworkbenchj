@@ -261,12 +261,26 @@ public class ConnectionMgr
 		return db;
 	}
 
+	/**
+	 * Add a new, dynamically defined driver to the list of available
+	 * drivers.
+	 * This is used if a driver definition is passed on the commandline
+	 * 
+	 * @see workbench.sql.BatchRunner#createCmdLineProfile(workbench.util.ArgumentParser)
+	 */
 	public DbDriver registerDriver(String drvClassName, String jarFile)
 	{
 		if (this.drivers == null) this.readDrivers();
 
 		DbDriver drv = new DbDriver("JdbcDriver", drvClassName, jarFile);
-		this.drivers.add(drv);
+		
+		// this method is called from BatchRunner.createCmdLineProfile() when
+		// the user passed all driver information on the command line.
+		// as most likely this is the correct driver it has to be put
+		// at the beginning of the list, to prevent a different driver
+		// with the same driver class in WbDrivers.xml to be used instead
+		this.drivers.add(0,drv);
+		
 		return drv;
 	}
 
@@ -653,7 +667,10 @@ public class ConnectionMgr
 		}
 	}
 
-	public void setReadTemplates(boolean aFlag) { this.readTemplates = aFlag; }
+	public void setReadTemplates(boolean aFlag) 
+	{ 
+		this.readTemplates = aFlag; 
+	}
 
 	private void importTemplateDrivers()
 	{

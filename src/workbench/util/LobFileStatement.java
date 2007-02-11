@@ -21,8 +21,6 @@ import java.io.Reader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -59,6 +57,12 @@ public class LobFileStatement
 		parameterCount = this.parameters.length;
 		for (int index=0; index < parameterCount; index++)
 		{
+			if (parameters[index] == null) 
+			{
+				String msg = ResourceMgr.getString("ErrUpdateBlobSyntax");
+				throw new IllegalArgumentException(msg);
+			}
+			
 			if (parameters[index].getFilename() == null)
 			{
 				String msg = ResourceMgr.getString("ErrUpdateBlobNoFileParameter");

@@ -363,7 +363,7 @@ public class DwPanel
 		Window win = SwingUtilities.getWindowAncestor(this);
 		try
 		{
-			List stmts = ds.getUpdateStatements(aConnection);
+			List<DmlStatement> stmts = ds.getUpdateStatements(aConnection);
 			if (stmts.isEmpty()) return true;
 			
 			Dimension max = new Dimension(800,600);
@@ -378,9 +378,9 @@ public class DwPanel
 			scroll.setMaximumSize(max);
 			final StringBuilder text = new StringBuilder(stmts.size() * 150);
 			SqlLiteralFormatter f = new SqlLiteralFormatter(aConnection);
-			for (int i=0; i < stmts.size(); i++)
+
+			for (DmlStatement dml : stmts)
 			{
-				DmlStatement dml = (DmlStatement)stmts.get(i);
 				text.append(dml.getExecutableStatement(f));
 				text.append(";\n");
 			}

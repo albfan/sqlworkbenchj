@@ -14,6 +14,7 @@ package workbench.gui.components;
 import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Window;
@@ -195,7 +196,22 @@ public class EditWindow
 			((PlainEditor)editor).setInfoText(text);
 		}
 	}
-	
+
+	public void setVisible(boolean show)
+	{
+		super.setVisible(show);
+		if (show)
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					validate();
+					repaint();
+				}
+			});
+		}
+	}
 	public void hideCancelButton()
 	{
 		this.cancelButton.removeActionListener(this);

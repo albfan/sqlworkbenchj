@@ -15,9 +15,9 @@ import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +46,7 @@ import workbench.util.ValueConverter;
  * For updating or deleting rows, key columns are required
  * For inserting new rows, no keys are required.
  * 
- * @see workbench.db.ResultInfo
+ * @see workbench.storage.ResultInfo
  * 
  * @author  support@sql-workbench.net
  */
@@ -1158,13 +1158,13 @@ public class DataStore
 	 * @see workbench.storage.StatementFactory
 	 * @see workbench.storage.DmlStatement#getExecutableStatement(SqlLiteralFormatter)
 	 */
-	public List getUpdateStatements(WbConnection aConnection)
+	public List<DmlStatement> getUpdateStatements(WbConnection aConnection)
 		throws SQLException
 	{
 		if (this.updateTable == null) throw new NullPointerException("No update table defined!");
 		this.updatePkInformation(aConnection);
 
-		ArrayList stmtList = new ArrayList(this.getModifiedCount());
+		List<DmlStatement> stmtList = new LinkedList<DmlStatement>();
 		this.resetUpdateRowCounters();
 		DmlStatement dml = null;
 		RowData row = null;
@@ -1631,35 +1631,6 @@ public class DataStore
 		}
 		return null;
 	}
-
-//	public String getUpdateTableSchema()
-//	{
-//		return this.getUpdateTableSchema(this.originalConnection);
-//	}
-//
-//	public String getUpdateTableSchema(WbConnection aConnection)
-//	{
-//		if (this.updateTable == null) return null;
-//		int pos = this.updateTable.indexOf(".");
-//		String schema = null;
-//		if (pos > -1)
-//		{
-//			schema = this.updateTable.substring(0, pos);
-//		}
-//
-//		if (schema == null || schema.trim().length() == 0)
-//		{
-//			try
-//			{
-//				schema = aConnection.getMetadata().findSchemaForTable(this.updateTable);
-//			}
-//			catch (Exception e)
-//			{
-//				schema = null;
-//			}
-//		}
-//		return schema;
-//	}
 
 	public void setPKColumns(ColumnIdentifier[] pkColumns)
 	{

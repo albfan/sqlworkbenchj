@@ -12,6 +12,7 @@
 package workbench.db.importer;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -21,7 +22,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableCreator;
@@ -38,6 +38,7 @@ import workbench.util.StringUtil;
 import java.io.StringReader;
 import java.io.Reader;
 import java.sql.Clob;
+import java.sql.Types;
 import java.util.LinkedList;
 import workbench.interfaces.ImportFileParser;
 import workbench.storage.NullValue;
@@ -48,9 +49,13 @@ import workbench.util.WbThread;
 
 
 /**
- * Import data that is provided from {@link RowDataProducer} into
+ * Import data that is provided from a {@link RowDataProducer} into
  * a table in the database.
- *
+ * 
+ * @see workbench.sql.wbcommands.WbImport
+ * @see workbench.sql.wbcommands.WbCopy
+ * @see workbench.db.datacopy.DataCopier
+ * 
  * @author  support@sql-workbench.net
  */
 public class DataImporter
@@ -959,6 +964,12 @@ public class DataImporter
 					in = b.getBinaryStream();
 					len = (int)b.length();
 				}
+				else if (row[i] instanceof byte[])
+				{
+					byte[] buffer = (byte[])row[i];
+					in = new ByteArrayInputStream(buffer);
+					len = buffer.length;
+				}
 				
 				if (in != null && len > -1)
 				{
@@ -966,6 +977,7 @@ public class DataImporter
 				}
 				else
 				{
+					pstmt.setNull(colIndex, Types.BLOB);
 					this.messages.append(ResourceMgr.getString("MsgBlobNotRead") + " " + (i+1) +"\n");
 				}
 			}

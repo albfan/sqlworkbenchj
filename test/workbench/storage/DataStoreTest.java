@@ -135,7 +135,7 @@ public class DataStoreTest
 			
 			// Set to case preserving
 			Settings.getInstance().setGeneratedSqlTableCase("original");
-			List l = ds.getUpdateStatements(con);
+			List<DmlStatement> l = ds.getUpdateStatements(con);
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
 			DmlStatement dml = (DmlStatement)l.get(0);

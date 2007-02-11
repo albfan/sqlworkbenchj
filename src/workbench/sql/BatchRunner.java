@@ -21,7 +21,6 @@ import java.util.List;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
-import workbench.db.DbDriver;
 import workbench.db.WbConnection;
 import workbench.gui.components.ConsoleStatusBar;
 import workbench.gui.components.GenericRowMonitor;
@@ -539,11 +538,11 @@ public class BatchRunner
 			
 			boolean rollback = cmdLine.getBoolean(WbManager.ARG_CONN_ROLLBACK, false);
 			
-			DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver(driverclass);
-			if (drv == null)
+			if (jar != null)
 			{
 				ConnectionMgr.getInstance().registerDriver(driverclass, jar);
 			}
+			
 			result = new ConnectionProfile(CMD_LINE_PROFILE_NAME, driverclass, url, user, pwd);
 			result.setRollbackBeforeDisconnect(rollback);
 			result.setAlternateDelimiter(delim);
@@ -614,6 +613,7 @@ public class BatchRunner
 		
 		String success = cmdLine.getValue(WbManager.ARG_SUCCESS_SCRIPT);
 		String error = cmdLine.getValue(WbManager.ARG_ERROR_SCRIPT);
+		boolean feedback = cmdLine.getBoolean(WbManager.ARG_FEEDBACK, true);
 
 		BatchRunner runner = new BatchRunner(scripts);
 		runner.showResultSets(showResult);
@@ -630,6 +630,7 @@ public class BatchRunner
 		runner.setErrorScript(error);
 		runner.setSuccessScript(success);
 		runner.setProfile(profile);
+		runner.setVerboseLogging(feedback);
 		runner.showTiming = cmdLine.getBoolean(WbManager.ARG_SHOW_TIMING, true);
 		runner.showProgress = showProgress;
 		if (showProgress)

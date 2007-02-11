@@ -347,7 +347,7 @@ public class BlobHandler
 	/**
 	 * Returns thenew value after the user changed the data in the text window.
 	 * Returns null if the user did not change the data.
-	 * @see showBlobAsText(Dialog, Object, String)
+	 * @see #showBlobAsText(Dialog, Object, String)
 	 */
 	public byte[] getNewValue()
 	{

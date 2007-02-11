@@ -51,7 +51,8 @@ import workbench.util.WbThread;
 /**
  * A panel to display the table definition information inside the DbExplorer.
  * 
- * @see workbench.db.DbMetadata.getTableDefinition(TableIdentifier)
+ * @see workbench.db.DbMetadata#getTableDefinition(TableIdentifier)
+ * 
  * @author  support@sql-workbench.net
  */
 public class TableDefinitionPanel

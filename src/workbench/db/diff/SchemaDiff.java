@@ -185,7 +185,7 @@ public class SchemaDiff
 	 * tables that might have different names but are supposed to be identical
 	 * otherwise. 
 	 * 
-	 * @see #setTables(List<TableIdentifier>, List<TableIdentifier>)
+	 * @see #setTables(List, List)
 	 * @see #compareAll()
 	 */
 	public void setTableNames(List<String> referenceList, List<String> targetList)

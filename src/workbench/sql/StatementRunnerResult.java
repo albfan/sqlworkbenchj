@@ -156,7 +156,7 @@ public class StatementRunnerResult
 	 * Return the messages that have been collected for this result.
 	 * This will clear the internal buffer used to store the messages.
 	 *
-	 * @see {workbench.util.MessageBuffer#getBuffer()}
+	 * @see workbench.util.MessageBuffer#getBuffer()
 	 */
 	public StringBuilder getMessageBuffer()
 	{
