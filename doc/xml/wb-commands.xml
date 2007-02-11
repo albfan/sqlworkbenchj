@@ -4,23 +4,37 @@
   <section id="command-export">
     <title>Export data - WbExport</title>
 
-    <para>Exports the result of the <emphasis role="bold">next</emphasis>
-        SQL statement (which has to produce a result set) to a file without
-        loading the data into memory. If you want to save the data that is
-        currently displayed in the result area into an external file, please
-        use the <link linkend="export">Save Data as</link> feature.
-    </para>
+		<para>
+			Exports the result of the <emphasis role="bold">next</emphasis>
+			SQL statement (which has to produce a result set) to a file without
+			loading the data into memory. If you want to save the data that is
+			currently displayed in the result area into an external file, please
+			use the <link linkend="export">Save Data as</link> feature.
+		</para>
+		
     <para>If you want to simply export the contents of one or more tables,
       the <literal>-sourcetable</literal> switch can be used to specify the
       tables. In this case no additional SELECT statement is necessary.
       You can also use the <link linkend="dbexplorer-spool">Database Explorer</link>
       to export multiple tables.
     </para>
+		
+		<note>
+			When using a <literal>SELECT</literal> based export, you have to 
+			run both statements (<literal>WbExport</literal> and <literal>SELECT</literal>)
+			as one script. Either select both statements in the editor and choose
+			<menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute selected</guimenuitem></menuchoice>, 
+			or make the two statements the only statements in the editor and choose
+			<menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute all</guimenuitem></menuchoice>.
+		</note>
+		
+		
     <para>
       You can also export the result of a <literal>SELECT</literal> statement, by
       selecting the statment in the editor, and then choose
       <menuchoice><guimenu>SQL</guimenu><guimenuitem>Export query result</guimenuitem></menuchoice>.
     </para>
+		
 		<para>
 			When exporting data into a Text or XML file, the content of BLOB columns
 			is written into separate files. One file for each column of each row. Text files 

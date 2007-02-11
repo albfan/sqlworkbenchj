@@ -1,6 +1,78 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
 
+Build 93, 11.02.2007
+--------------------
+Enh:  (92.6) When displaying a BLOB content as text, the content can now 
+      be modified. The character set conversion will be done using the 
+      selected encoding from the info dialog (both directions)
+Enh:  (92.4) WbReport and WbSchemaDiff can now optionally include the 
+      table grants (new parameter -includeTableGrants)
+Enh:  (92.4) The parameter -includeProcs for WbSchemaDiff has been renamed to 
+      -includeProcedures to be consistent with WbReport
+Enh:  (92.4) The deferrable attribute of a FK reference is now shown
+      in the DbExplorer and the generated SQL source.
+Enh:  (92.2) Workbench specific commands are now supported by the auto 
+      completion
+Enh:  (92.2) The filter in the table list of the DbExplorer now accepts
+      regular expressions. Thanks to Petr for the patch
+Enh:  (92.1) The (plain) editor used to edit column data from within 
+      the result display now supports Search & Replace.
+Enh:  (92.1) A new setting to close the application if the first connect
+      is cancelled is available
+      workbench.gui.cancel.firstconnect.exit
+      If this is set to true, the application is closed if the connection 
+      dialog that is displayed during startup is cancelled
+Enh:  (92.1) For Synonyms, the DbExplorer now displays the foreign keys,
+      indexes and triggers of the underlying table.
+Fix:  (92.7) Copying BLOB columns was broken for WbCopy and DataPumper 
+Fix:  (92.6) The option "Single line" for the default alternate delimiter
+      (Tool -> Options -> Editor) was not saved.
+Fix:  (92.6) The window position was not restored properly if the window
+      was moved to the uper left corner.
+Fix:  (92.5) When importing a text file that references blob files, 
+      absolute filenames for the blob files did not work.
+Fix:  (92.4) WbSchemaDiff did not include the necessary entries to drop 
+      views from the target database if includeViews was set to true
+Fix:  (92.4) The generated report for WbSchemaDiff did not contain tables
+      that only differed in the index definition.
+Fix:  (92.4) Code completion for the WHERE part of a DELETE statement was not 
+      working.
+Fix:  (92.4) A SQL panel could be moved between two DbExplorer panels but 
+      when reloading this workspace the SQL panel would be dropped.
+Fix:  (92.3) When running WbExport using -clobAsFile=true and
+       -writeOracleLoader=true the generated SQL*Loader file did not contain
+      the necessary syntax to load the CLOB data from the generated external
+      files.
+Fix:  (92.3) External tools where a parameter was needed for the executable
+      (e.g. someapp.exe /h) could not be used from within the blob 
+      display window.
+Fix:  (92.3) Triggers and foreign keys were not correctly displayed
+      for SQL Server with the jTDS driver.
+Fix:  (92.3) When an invalid format for -timestampFormat or -dateFormat
+      was specified for WbExport, no warning was displayed.
+Fix:  (92.3) The manual listed incorrectly the parameter -dateTimeFormat instead
+      of -timestampFormat
+Fix:  (92.3) The -emptyStringIsNull switch for WbImport was broken.
+Fix:  (92.3) The -append switch for WbExport was broken.
+Fix:  (92.2) WbExport -sourcetable=something did not work if "something"
+      was not a table (e.g. a Synonym)
+Fix:  (92.2) When the current schema was changed in Oracle using ALTER SESSION
+      the DbExplorer (when using the same connection) failed to retrieve
+      table data for the old schema.
+Fix:  (92.2) Reference navigation was broken outside the DbExplorer
+Fix:  (92.1) Errors when committing changes in the DbExplorer were not shown 
+      to the user.
+Fix:  (92.1) The DataPumper did not use the selected encoding when importing
+      a text or XML file.
+Fix:  (92.1) Escaping of the delimiter has been changed for the WbExport 
+      or the "Save Data as" commands. The following rules are now applied:
+      if no character escaping is selected (-escapeText parameter) then 
+      neither the quote character nor the delimiter are ever escaped. 
+      If escaping is enabled, then the quote character will be escaped
+      inside a quoted value and the delimiter will be escaped inside
+      a non-quoted value regardless of the chosen escape range.
+
 Build 92, 06.01.2007
 --------------------
 Enh:  (91.5) When searching for referencing/referenced tables, synonyms are 
