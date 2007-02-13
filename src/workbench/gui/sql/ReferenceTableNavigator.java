@@ -471,12 +471,23 @@ public class ReferenceTableNavigator
 		}
 	}	
 	
+	/**
+	 * Reset the internal dependency tree and popup menu.
+	 * The next time the menu should be displayed, the 
+	 * source table will then abe queried for the new 
+	 * update table.
+	 */
+	public void reset()
+	{
+		this.baseTable = null;
+		this.rebuildMenu();
+	}
+	
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getPropertyName().equals(DwPanel.PROP_UPDATE_TABLE))
 		{
-			this.baseTable = null;
-			this.rebuildMenu();
+			reset();
 		}
 	}
 

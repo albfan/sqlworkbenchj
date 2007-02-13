@@ -495,6 +495,24 @@ public class DwPanel
 	}
 
 	/**
+	 * Pass the table to be used for future updates to the underlying 
+	 * DataStore. 
+	 * This will also reset the internal cache of the ReferenceTableNavigator.
+	 * 
+	 * @see workbench.gui.sql.ReferenceTableNavigator#reset()
+	 * @see workbench.storage.DataStore#setUpdateTableToBeUsed(workbench.db.TableIdentifier)
+	 */
+	public void setUpdateTableToBeUsed(TableIdentifier table)
+	{
+		DataStore ds = this.dataTable.getDataStore();
+		if (ds != null)
+		{
+			ds.setUpdateTableToBeUsed(table);
+		}
+		referenceNavigator.reset();
+	}
+	
+	/**
 	 * Define the update table to be used.
 	 * @see workbench.storage.DataStore#setUpdateTable(TableIdentifier)
 	 */

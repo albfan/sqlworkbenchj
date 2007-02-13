@@ -535,7 +535,7 @@ public class TableDataPanel
 			DataStore ds = dataDisplay.getTable().getDataStore();
 			if (ds != null)
 			{
-				ds.setUpdateTableToBeUsed(this.table);
+				dataDisplay.setUpdateTableToBeUsed(this.table);
 				dataDisplay.getSelectKeysAction().setEnabled(true);
 				String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
 				dataDisplay.setPrintHeader(header);
