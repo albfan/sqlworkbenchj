@@ -2,6 +2,7 @@ package workbench.gui.editor;
 
 import java.util.Collection;
 import java.util.Iterator;
+import workbench.sql.wbcommands.WbConfirm;
 import workbench.sql.wbcommands.WbCopy;
 import workbench.sql.wbcommands.WbDefinePk;
 import workbench.sql.wbcommands.WbDefineVar;
@@ -183,6 +184,7 @@ public class AnsiSQLTokenMarker
 		keywords.add("WBLISTPROCS",Token.KEYWORD2);
 		keywords.add("WBLISTDB",Token.KEYWORD2);
 		keywords.add("WBLISTCAT",Token.KEYWORD2);
+		keywords.add(WbConfirm.VERB,Token.KEYWORD2);
 		keywords.add(WbEnableOraOutput.VERB,Token.KEYWORD2);
 		keywords.add(WbDisableOraOutput.VERB,Token.KEYWORD2);
 		keywords.add(WbExport.VERB,Token.KEYWORD2);

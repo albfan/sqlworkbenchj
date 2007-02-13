@@ -681,6 +681,7 @@ public class TableListPanel
 		return (w.isActive() && w.isFocused() && w.isVisible());
 
 	}
+	
 	public void setCatalogAndSchema(String aCatalog, String aSchema)
 		throws Exception
 	{
@@ -763,10 +764,17 @@ public class TableListPanel
 				types = new String[] { type };
 			}
 			DataStore ds = dbConnection.getMetadata().getTables(currentCatalog, currentSchema, types);
-			DataStoreTableModel model = new DataStoreTableModel(ds);
-			tableList.setModel(model, true);
-			tableList.getExportAction().setEnabled(true);
-			model.sortByColumn(0);
+			final DataStoreTableModel model = new DataStoreTableModel(ds);
+			
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					tableList.setModel(model, true);
+					tableList.getExportAction().setEnabled(true);
+					model.sortByColumn(0);
+				}
+			});
 			
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -1852,7 +1860,6 @@ public class TableListPanel
 		TableIdentifier tbl = new TableIdentifier(catalog, schema, name);
 		tbl.setType(type);
 		tbl.setNeverAdjustCase(true);
-		tbl.checkQuotesNeeded(this.dbConnection);
 		return tbl;
 	}
 	

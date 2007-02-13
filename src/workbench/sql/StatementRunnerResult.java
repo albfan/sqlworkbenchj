@@ -37,7 +37,8 @@ public class StatementRunnerResult
 	private boolean success = true;
 	private boolean hasWarning = false;
 	private boolean wasCancelled = false;
-
+	private boolean stopScriptExecution = false;
+	
 	private long executionTime = -1;
 	private DecimalFormat timingFormatter;
 	
@@ -53,6 +54,9 @@ public class StatementRunnerResult
 		this.sourceCommand = aCmd;
 	}
 
+	public boolean stopScript() { return stopScriptExecution; }
+	public void setStopScript(boolean flag) { this.stopScriptExecution = flag; }
+	
 	public boolean promptingWasCancelled() { return wasCancelled; }
 	public void setPromptingWasCancelled() { this.wasCancelled = true; }
 	

@@ -24,7 +24,7 @@ import workbench.storage.DataStore;
  */
 public class WbListCatalogs extends SqlCommand
 {
-	public final String VERB;
+	private final String VERB;
 
 	public static final WbListCatalogs LISTDB = new WbListCatalogs("WBLISTDB");
 	public static final WbListCatalogs LISTCAT = new WbListCatalogs("WBLISTCAT");

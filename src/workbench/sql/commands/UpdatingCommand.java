@@ -88,14 +88,13 @@ public class UpdatingCommand extends SqlCommand
 				this.currentStatement = aConnection.createStatement();
 			}
 
-			int updateCount = -1;
 			if (isPrepared)
 			{
-				updateCount = ((PreparedStatement)this.currentStatement).executeUpdate();
+				((PreparedStatement)this.currentStatement).executeUpdate();
 			}
 			else
 			{
-				updateCount = this.currentStatement.executeUpdate(sql);
+				this.currentStatement.executeUpdate(sql);
 			}
 			this.appendSuccessMessage(result);
 			processResults(result, false);

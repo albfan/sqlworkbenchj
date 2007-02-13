@@ -372,11 +372,15 @@ public class TableDataPanel
 	{
 		if (!this.isRetrieving()) reset();
 		this.table = aTable;
-		this.dataDisplay.getTable().clearLastFilter(true);
-		this.dataDisplay.getTable().resetFilter();
-		this.tableNameLabel.setText(this.table.getTableName());
-		this.topPanel.doLayout();
-		this.topPanel.repaint();
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				dataDisplay.getTable().clearLastFilter(true);
+				dataDisplay.getTable().resetFilter();
+				tableNameLabel.setText(table.getTableName());
+			}
+		});
 	}
 
 	private String buildSqlForTable(boolean forRowCount)
@@ -390,8 +394,12 @@ public class TableDataPanel
 			sql.append("SELECT * FROM ");
 
 		sql.append(this.table.getTableExpression(this.dbConnection));
-
-		return sql.toString();
+		String s = sql.toString();
+		if (LogMgr.isDebugEnabled())
+		{
+			LogMgr.logDebug("TableDataPanel.buildSqlForTable()", "Using SQL=" + s);
+		}
+		return s;
 	}
 
 	private void clearLoadingImage()

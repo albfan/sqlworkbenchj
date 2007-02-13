@@ -813,6 +813,7 @@ public class WbManager
 	public static final String ARG_SUCCESS_SCRIPT = "cleanupsuccess";
 	public static final String ARG_ERROR_SCRIPT = "cleanuperror";
 	public static final String ARG_SHOW_TIMING = "showtiming";
+	public static final String ARG_FEEDBACK = "feedback";
 	public static final String ARG_WORKSPACE = "workspace";
 	public static final String ARG_ALT_DELIMITER = "altdelimiter";
 	public static final String ARG_DELIMITER = "delimiter";
@@ -836,6 +837,7 @@ public class WbManager
 	{
 		ArgumentParser parser = new ArgumentParser();
 		parser.addArgument(ARG_PROFILE);
+		parser.addArgument(ARG_FEEDBACK);
 		parser.addArgument(ARG_PROFILE_GROUP);
 		parser.addArgument(ARG_PROFILE_STORAGE);
 		parser.addArgument(ARG_CONFIGDIR);

@@ -28,6 +28,7 @@ import workbench.sql.commands.SetCommand;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.commands.UpdatingCommand;
 import workbench.sql.commands.UseCommand;
+import workbench.sql.wbcommands.WbConfirm;
 import workbench.sql.wbcommands.WbCopy;
 import workbench.sql.wbcommands.WbDefinePk;
 import workbench.sql.wbcommands.WbDefineVar;
@@ -144,6 +145,9 @@ public class CommandMapper
 		cmdDispatch.put(sql.getVerb(), sql);
 		
 		sql = new WbSavePkMapping();
+		cmdDispatch.put(sql.getVerb(), sql);
+
+		sql = new WbConfirm();
 		cmdDispatch.put(sql.getVerb(), sql);
 		
 		cmdDispatch.put(WbInclude.INCLUDE_LONG.getVerb(), WbInclude.INCLUDE_LONG);

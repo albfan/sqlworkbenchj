@@ -2292,6 +2292,15 @@ public class SqlPanel
 				statementResult = this.stmtRunner.getResult();
 				if (statementResult == null) continue;
 				
+				if (statementResult.stopScript())
+				{
+					String cancelMsg = ResourceMgr.getString("MsgScriptCancelled");
+					this.appendToLog(cancelMsg);
+					this.appendToLog("\n");
+					this.showLogPanel();
+					break;
+				}
+				
 				if (statementResult.promptingWasCancelled())
 				{
 					String cancelMsg = ResourceMgr.getString("MsgSqlCancelledDuringPrompt");

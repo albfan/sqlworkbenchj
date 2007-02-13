@@ -833,7 +833,7 @@ public class DbMetadata
 			sql.setSchema(tbl.getSchema());
 			sql.setObjectName(tbl.getTableName());
 			sql.setCatalog(tbl.getCatalog());
-			stmt = this.dbConnection.createStatement();
+			stmt = this.dbConnection.createStatementForQuery();
 			String query = this.adjustHsqlQuery(sql.getSql());
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
@@ -1048,10 +1048,6 @@ public class DbMetadata
 	public String adjustSchemaNameCase(String schema)
 	{
 		if (schema == null) return null;
-		if (this.dbSettings.getSchemaNameCase() == IdentifierCase.unknown)
-		{
-			return this.adjustObjectnameCase(schema);
-		}
 		schema = StringUtil.trimQuotes(schema);
 		try
 		{
@@ -1530,12 +1526,20 @@ public class DbMetadata
 	public boolean storesUpperCaseSchemas()
 	{
 		IdentifierCase ocase = this.dbSettings.getSchemaNameCase();
+		if (ocase == IdentifierCase.unknown)
+		{
+			return storesUpperCaseIdentifiers();
+		}
 		return ocase == IdentifierCase.upper;
 	}
 
 	public boolean storesLowerCaseSchemas()
 	{
 		IdentifierCase ocase = this.dbSettings.getSchemaNameCase();
+		if (ocase == IdentifierCase.unknown)
+		{
+			return storesLowerCaseIdentifiers();
+		}
 		return ocase == IdentifierCase.lower;
 	}
 
@@ -2254,7 +2258,7 @@ public class DbMetadata
 			ResultSet rs = null;
 			try
 			{
-				stmt = this.dbConnection.createStatement();
+				stmt = this.dbConnection.createStatementForQuery();
 				rs = stmt.executeQuery("SELECT db_name()");
 				if (rs.next()) catalog = rs.getString(1);
 			}
@@ -2506,7 +2510,7 @@ public class DbMetadata
 		sql.setSchema(aSchema);
 		sql.setCatalog(aCatalog);
 		sql.setObjectName(aTriggername);
-		Statement stmt = this.dbConnection.createStatement();
+		Statement stmt = this.dbConnection.createStatementForQuery();
 		String query = this.adjustHsqlQuery(sql.getSql());
 
 		if (Settings.getInstance().getDebugMetadataSql())
