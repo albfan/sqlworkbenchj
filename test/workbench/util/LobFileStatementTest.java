@@ -12,6 +12,7 @@
 package workbench.util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import junit.framework.*;
 import workbench.TestUtil;
 import workbench.WbTestCase;
@@ -36,6 +37,61 @@ public class LobFileStatementTest
 		util.emptyBaseDirectory();
 	}
 
+	public void testSyntaxError()
+	{
+		boolean hasException = false;
+		try
+		{
+			String sql = "update bla set col = {$blobfile=dummy_file.data where x = 1";
+			LobFileStatement stmt = new LobFileStatement(sql);
+		}
+		catch (FileNotFoundException e)
+		{
+			// a FileNotFound is not expected as the syntax is not correct
+			hasException = false; 
+		}
+		catch (IllegalArgumentException e)
+		{
+			hasException = true;
+		}
+		assertEquals("Wrong exception or no exception thrown", true, hasException);
+		
+		try
+		{
+			String sql = "insert into test (x,y,z) values (1,2, {$blobfile=dummy_file.data)";
+			LobFileStatement stmt = new LobFileStatement(sql);
+			hasException = false;
+		}
+		catch (FileNotFoundException e)
+		{
+			// a FileNotFound is not expected as the syntax is not correct
+			hasException = false; 
+		}
+		catch (IllegalArgumentException e)
+		{
+			hasException = true;
+		}
+		assertEquals("Wrong exception or no exception thrown", true, hasException);
+
+		try
+		{
+			String sql = "insert into test (x,y,z) values (1,2, {$blobfile=dummy_file_should_not_be_found.data})";
+			LobFileStatement stmt = new LobFileStatement(sql);
+			hasException = false;
+		}
+		catch (FileNotFoundException e)
+		{
+			hasException = true; 
+		}
+		catch (IllegalArgumentException e)
+		{
+			// The syntax is correct, it should not throw an exception
+			hasException = false;
+		}
+		assertEquals("Wrong exception or no exception thrown", true, hasException);
+		
+	}
+	
 	public void testGetParameterCount()
 	{
 		File f = new File(util.getBaseDir(), "test.data");

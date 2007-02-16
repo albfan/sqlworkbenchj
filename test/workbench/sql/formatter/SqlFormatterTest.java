@@ -36,6 +36,23 @@ public class SqlFormatterTest
 		util.prepareEnvironment();
 	}
 
+	public void testWbConfirm()
+	{
+		try
+		{
+			String sql = "wbconfirm 'my message'";
+			SqlFormatter f = new SqlFormatter(sql, 100);
+			String formatted = f.getFormattedSql();
+			String expected = "WbConfirm 'my message'";
+			assertEquals("WbConfirm not formatted correctly", expected, formatted);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testAliasForSubselect()
 	{
 		try
