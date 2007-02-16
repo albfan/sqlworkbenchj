@@ -285,8 +285,6 @@ public class TableDataPanel
 		if (this.dbConnection == null) return -1;
 		if (this.isRetrieving()) return -1;
 
-		this.retrieveRunning = true;
-		
 		this.rowCountLabel.setText("");
 		this.rowCountLabel.setIcon(this.getLoadingIndicator());
 
@@ -301,6 +299,8 @@ public class TableDataPanel
 		Statement stmt = null;
 		ResultSet rs = null;
 
+		this.retrieveRunning = true;
+		
 		try
 		{
 			fireDbExecStart();
@@ -786,7 +786,7 @@ public class TableDataPanel
 
 	protected synchronized void fireDbExecStart()
 	{
-		this.dbConnection.executionStart(null, this);		
+		this.dbConnection.executionStart(this.dbConnection, this);		
 		if (this.execListener == null) return;
 		int count = this.execListener.size();
 		for (int i=0; i < count; i++)
@@ -798,7 +798,7 @@ public class TableDataPanel
 	
 	protected synchronized void fireDbExecEnd()
 	{
-		this.dbConnection.executionEnd(null, this);
+		this.dbConnection.executionEnd(this.dbConnection, this);
 		if (this.execListener == null) return;
 		int count = this.execListener.size();
 		for (int i=0; i < count; i++)

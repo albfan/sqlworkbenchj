@@ -521,7 +521,11 @@ public class DataStore
 			if (meta == null) return;
 
 			this.updateTable = tbl.createCopy();
-			List<ColumnIdentifier> columns = meta.getTableColumns(tbl);
+			
+			TableIdentifier synCheck = tbl.createCopy();
+			synCheck.setSchema(meta.getSchemaToUse());
+			TableIdentifier toCheck = meta.resolveSynonym(synCheck);
+			List<ColumnIdentifier> columns = meta.getTableColumns(toCheck);
 			
 			int realColumns = 0;
 			

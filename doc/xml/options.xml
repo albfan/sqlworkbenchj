@@ -452,6 +452,16 @@
 				column's label.
 			</para>
 		</section>		
+
+		<section id="options-default-date-literaltype">
+			<title>Default literal type</title>
+			<para>
+				Defines the date literal format to be used when copying data
+				as SQL statements to the clipboard. For a detailed description
+				of the different formats please refer to the <link linkend="export-sql-literal-formats">WbExport</link>
+				description.
+			</para>
+		</section>		
 		
 	</section>
 	

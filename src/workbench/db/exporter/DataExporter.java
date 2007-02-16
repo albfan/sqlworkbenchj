@@ -69,8 +69,8 @@ import workbench.util.WbThread;
 public class DataExporter
 	implements Interruptable, ErrorReporter
 {
+	public static final String BLOB_MODE_LITERAL = "dbms";
 	public static final String BLOB_MODE_ANSI = "ansi";
-	public static final String BLOB_MODE_DBMS = "dbms";
 	public static final String BLOB_MODE_FILE = "file";
 	
 	public static final int EXPORT_SQL = 1;
@@ -134,6 +134,7 @@ public class DataExporter
 	private RowActionMonitor rowMonitor;
 
 	private List keyColumnsToUse;
+	private String dateLiteralType = null;
 	
 	// The columns to be used for generating blob file names
 	private List blobIdCols;
@@ -191,17 +192,52 @@ public class DataExporter
 		this.progressWindow.setVisible(true);
 	}
 
+	/**
+	 * Define the date (and timestamp) format for literals
+	 * when writing SQL statements. 
+	 * Valid values are jdbc,ansi,dbms
+	 * dbms selects the format approriate for the current dbms.
+	 * It is the same as passing null
+	 * @param type the literal format to use
+	 */
+	public void setDateLiteralType(String type)
+	{
+		if ("jdbc".equalsIgnoreCase(type))
+		{
+			this.dateLiteralType = "JDBC";
+		}
+		else if ("ansi".equalsIgnoreCase(type))
+		{
+			this.dateLiteralType = "ANSI";
+		}
+		else
+		{
+			this.dateLiteralType = null;
+		}
+	}
+  
+	public String getDateLiteralType()
+  {
+      return dateLiteralType;
+  }
+  
 	public void setBlobMode(String type)
 	{
 		if (type == null || type.equalsIgnoreCase("none"))
 		{
 			this.blobMode = null;
 		}
-		else if (type.equalsIgnoreCase("dbms") 
-				|| type.equalsIgnoreCase("ansi") 
-				|| type.equalsIgnoreCase("file"))
+		else if (BLOB_MODE_LITERAL.equalsIgnoreCase(type) 
+			|| BLOB_MODE_ANSI.equalsIgnoreCase(type) 
+			|| BLOB_MODE_FILE.equalsIgnoreCase(type))
 		{
 			this.blobMode = type;
+		}
+		else
+		{
+			String msg = ResourceMgr.getString("ErrExpInvalidBlobType");
+			msg = StringUtil.replace(msg, "%paramvalue%", type);
+			this.addWarning(msg);
 		}
 	}
 	
@@ -1099,6 +1135,7 @@ public class DataExporter
 		this.setCommitEvery(sqlOptions.getCommitEvery());
 		this.setTableName(sqlOptions.getAlternateUpdateTable());
 		this.setKeyColumnsToUse(sqlOptions.getKeyColumns());
+		this.setDateLiteralType(sqlOptions.getDateLiteralType());
 		this.exportWriter.configureConverter();
 	}
 

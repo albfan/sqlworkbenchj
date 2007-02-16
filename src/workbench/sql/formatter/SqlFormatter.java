@@ -701,6 +701,7 @@ public class SqlFormatter
 		StringBuilder b = new StringBuilder(indent);
 
 		for (int i=0; i < indent; i++) b.append(' ');
+		this.appendText(' ');
 
 		SQLToken t = this.lexer.getNextToken(true,false);
 		boolean first = true;
@@ -715,10 +716,6 @@ public class SqlFormatter
 				{
 					this.appendNewline();
 					this.indent(b);
-				}
-				else 
-				{
-					this.appendText(' ');
 				}
 				isParm = true;
 			}

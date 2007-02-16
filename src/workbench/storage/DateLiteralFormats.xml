@@ -3,17 +3,34 @@
  <object class="java.util.HashMap"> 
 
   <void method="put"> 
-   <string>h2</string> 
-   <object id="DbDateFormatter0" class="workbench.storage.DbDateFormatter"> 
+   <string>JDBC</string> 
+   <object id="jdbc" class="workbench.storage.DbDateFormatter"> 
     <void property="format"> 
      <string>yyyy-MM-dd</string> 
     </void> 
     <void property="functionCall"> 
-     <string>DATE '%formatted_date_literal%'</string> 
+     <string>{d %formatted_date_literal%}</string> 
     </void> 
    </object> 
   </void> 
-	 
+
+  <void method="put"> 
+   <string>ANSI</string> 
+   <object id="ansi" class="workbench.storage.DbDateFormatter"> 
+    <void property="format"> 
+     <string>yyyy-MM-dd</string> 
+    </void> 
+    <void property="functionCall"> 
+     <string>DATE %formatted_date_literal%</string> 
+    </void> 
+   </object> 
+  </void> 
+
+  <void method="put"> 
+   <string>h2</string> 
+   <object idref="ansi"/> 
+  </void> 
+
   <void method="put"> 
    <string>Oracle</string> 
    <object id="OraFormatter" class="workbench.storage.DbDateFormatter"> 
@@ -27,17 +44,27 @@
   </void> 
 
   <void method="put"> 
+   <string>oracle</string> 
+   <object idref="OraFormatter"/> 
+  </void> 
+
+  <void method="put"> 
    <string>Oracle8</string> 
    <object idref="OraFormatter"/> 
   </void> 
 	
   <void method="put"> 
    <string>Microsoft SQL Server</string> 
-   <object class="workbench.storage.DbDateFormatter"> 
+   <object id="mssql" class="workbench.storage.DbDateFormatter"> 
     <void property="format"> 
      <string>yyyy-MM-dd</string> 
     </void> 
    </object> 
+  </void> 
+
+  <void method="put"> 
+   <string>sqlserver</string> 
+   <object idref="mssql"/> 
   </void> 
 	
   <void method="put"> 

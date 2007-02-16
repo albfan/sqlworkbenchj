@@ -955,6 +955,16 @@ public class Settings
 		}
 	}
 
+	public void setDefaultDateLiteralType(String type)
+	{
+		setProperty("workbench.export.copy.sql.dateliterals", type);
+	}
+	
+	public String getDefaultDateLiteralType()
+	{
+		return getProperty("workbench.export.copy.sql.dateliterals", "DBMS");
+	}
+	
 	public boolean getCopySelectedIsDefault()
 	{
 		String value = getProperty("workbench.gui.table.copydefault", "all");

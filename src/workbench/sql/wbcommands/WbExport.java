@@ -68,7 +68,6 @@ public class WbExport
 		cmdLine.addArgument("commitEvery");
 		cmdLine.addArgument("header", ArgumentType.BoolArgument);
 		cmdLine.addArgument("createTable", ArgumentType.BoolArgument);
-		cmdLine.addArgument("nodata", ArgumentType.BoolArgument);
 		cmdLine.addArgument("encoding");
 		cmdLine.addArgument("showProgress");
 		cmdLine.addArgument("keyColumns");
@@ -85,14 +84,14 @@ public class WbExport
 		cmdLine.addArgument("lineEnding");
 		cmdLine.addArgument("showEncodings");
 		cmdLine.addArgument("verboseXML", ArgumentType.BoolArgument);
-		//cmdLine.addArgument("oraldr");
 		cmdLine.addArgument("writeOracleLoader", ArgumentType.BoolArgument);
 		cmdLine.addArgument("compress", ArgumentType.BoolArgument);
 		cmdLine.addArgument("blobIdCols");
 		cmdLine.addArgument("lobIdCols");
-		cmdLine.addArgument("blobType");
+		cmdLine.addArgument("blobType", StringUtil.stringToList(DataExporter.BLOB_MODE_FILE + "," + DataExporter.BLOB_MODE_LITERAL + "," + DataExporter.BLOB_MODE_ANSI));
 		cmdLine.addArgument("clobAsFile", ArgumentType.BoolArgument);
 		cmdLine.addArgument("continueOnError", ArgumentType.BoolArgument);
+		cmdLine.addArgument("sqlDateLiterals", StringUtil.stringToList("jdbc,ansi,dbms"));
 	}
 	
 	public String getVerb() { return VERB; }
@@ -264,6 +263,11 @@ public class WbExport
 			String bmode = cmdLine.getValue("blobtype");
 			exporter.setBlobMode(bmode);
 			this.defaultExtension = ".sql";
+			String literal = cmdLine.getValue("sqlDateLiterals");
+			if (literal != null)
+			{
+				exporter.setDateLiteralType(literal);
+      }
 		}
 		else if ("xml".equals(type))
 		{
@@ -524,8 +528,8 @@ public class WbExport
 		{
 			exporter.setOutputTypeHtml();
 		}
-		
 	}
+	
 	private void runTableExports(List tableList, StatementRunnerResult result, String outputdir)
 		throws SQLException
 	{

@@ -20,7 +20,7 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
-
+import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.components.BlobHandler;
 import workbench.interfaces.DataFileWriter;
@@ -386,7 +386,7 @@ public abstract class RowDataConverter
 	 *	@param columns the list (of ColumnIdentifier objects) of columns to be exported.
 	 *                 null means export all columns
 	 */
-	public void setColumnsToExport(List columns)
+	public void setColumnsToExport(List<ColumnIdentifier> columns)
 	{
 		this.exportColumns = columns;
 		if (columns == null)
@@ -434,7 +434,7 @@ public abstract class RowDataConverter
 			{
 				result = this.defaultTimestampFormatter.format(value);
 			}
-			else if (value instanceof java.util.Date && this.originalConnection.getMetadata().isOracle())
+			else if (value instanceof java.util.Date && this.originalConnection != null && this.originalConnection.getMetadata().isOracle())
 			{
 				// sometimes the Oracle driver create a java.util.Date object, but
 				// DATE columns in Oracle do contain a time part and thus we need to

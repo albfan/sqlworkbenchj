@@ -13,7 +13,6 @@ package workbench.db.exporter;
 
 import java.sql.SQLException;
 import java.util.List;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
@@ -107,6 +106,14 @@ public class SqlRowDataConverter
 			this.sqlTypeToUse = SQL_INSERT;
 		}
 		
+	}
+	
+	public void setSqlLiteralType(String type)
+	{
+		if (this.literalFormatter != null)
+		{
+			this.literalFormatter.setProduct(type);
+		}
 	}
 	
 	public StrBuffer getEnd(long totalRows)

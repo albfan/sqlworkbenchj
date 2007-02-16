@@ -10,8 +10,8 @@
 	</para>
 	
 	<para>
-		When using &wb-productname; from a batch file (or the commandline) it is
-		<emphasis role="bold">not</emphasis> recommended to use the <link linkend="launcher-using">launcher</link> 
+		When using &wb-productname; from a batch file (or the commandline) you should 
+		<emphasis role="bold">not</emphasis> use the <link linkend="launcher-using">Windows launcher</link>, 
 		as it will immediately return to the commandline while starting the JVM (and thus &wb-productname;) 
 		in the background. Please refer to <link linkend="starting">Starting &wb-productname;</link> for details
 		on how to start &wb-productname; with the <literal>java</literal> command.

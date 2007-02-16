@@ -2242,6 +2242,7 @@ public class DbMetadata
 	 * 	This method works around a bug in Microsoft's JDBC driver which does
 	 *  not return the correct database (=catalog) after the database has
 	 *  been changed with the USE <db> command from within the Workbench.
+	 * 
 	 * @return The name of the current catalog or an empty String if there is no current catalog
 	 */
 	public String getCurrentCatalog()

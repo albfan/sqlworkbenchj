@@ -257,8 +257,8 @@ public abstract class BaseAnalyzer
 		{
 			tableForColumnList.setSchema(this.dbConnection.getMetadata().getCurrentSchema());
 		}
-		//tableForColumnList.adjustCase(this.dbConnection);
-		List cols = this.dbConnection.getObjectCache().getColumns(tableForColumnList);
+		TableIdentifier toCheck = this.dbConnection.getMetadata().resolveSynonym(tableForColumnList);
+		List cols = this.dbConnection.getObjectCache().getColumns(toCheck);
 		if (cols != null && cols.size() > 0)
 		{
 			this.title = tableForColumnList.getTableName() + ".*";

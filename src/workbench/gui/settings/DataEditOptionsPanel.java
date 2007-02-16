@@ -51,6 +51,8 @@ public class DataEditOptionsPanel
 		minColSizeField.setText(Integer.toString(Settings.getInstance().getMinColumnWidth()));
 		maxColSizeField.setText(Integer.toString(Settings.getInstance().getMaxColumnWidth()));
 		pkMapFile.setText(Settings.getInstance().getPKMappingFilename());
+		String type = Settings.getInstance().getDefaultDateLiteralType();
+		this.literalType.setSelectedItem(type);
 	}
 
 	public void saveSettings()
@@ -68,6 +70,7 @@ public class DataEditOptionsPanel
 		set.setPKMappingFilename(pkMapFile.getText());
 		set.setAutomaticOptimalWidth(autoColWidth.isSelected());
 		set.setIncludeHeaderInOptimalWidth(includeHeaderWidth.isSelected());
+		set.setDefaultDateLiteralType((String)literalType.getSelectedItem());
 	}
 	
 	/** This method is called from within the constructor to
@@ -107,6 +110,8 @@ public class DataEditOptionsPanel
     autoColWidthLabel = new WbCheckBoxLabel();
     autoColWidth = new javax.swing.JCheckBox();
     dummyPanel = new javax.swing.JPanel();
+    literalType = new javax.swing.JComboBox();
+    jLabel2 = new javax.swing.JLabel();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -132,7 +137,6 @@ public class DataEditOptionsPanel
     selectMapFile.setMinimumSize(new java.awt.Dimension(22, 22));
     selectMapFile.setPreferredSize(new java.awt.Dimension(22, 22));
     selectMapFile.addActionListener(this);
-
     jPanel3.add(selectMapFile, java.awt.BorderLayout.EAST);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -200,7 +204,6 @@ public class DataEditOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(9, 8, 0, 0);
     add(requiredFieldLabel, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 2;
@@ -218,7 +221,6 @@ public class DataEditOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
     add(dataFontLabel, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
@@ -285,7 +287,6 @@ public class DataEditOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 8, 0, 0);
     add(alternateColorLabel, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 3;
@@ -302,7 +303,6 @@ public class DataEditOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
     add(maxColSizeLabel, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 6;
@@ -320,7 +320,6 @@ public class DataEditOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
     add(minColSizeLabel, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 7;
@@ -368,13 +367,31 @@ public class DataEditOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(9, 8, 0, 0);
     add(autoColWidth, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.weighty = 1.0;
     add(dummyPanel, gridBagConstraints);
 
+    literalType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "DBMS", "JDBC", "ANSI" }));
+    literalType.setToolTipText(ResourceMgr.getDescription("LblDefaultLiteralType"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 0);
+    add(literalType, gridBagConstraints);
+
+    jLabel2.setText(ResourceMgr.getString("LblDefaultLiteralType"));
+    jLabel2.setToolTipText(ResourceMgr.getDescription("LblDefaultLiteralType"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 10;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
+    add(jLabel2, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -407,8 +424,10 @@ public class DataEditOptionsPanel
   private javax.swing.JLabel highlightRequiredLabel;
   private javax.swing.JCheckBox includeHeaderWidth;
   private javax.swing.JLabel includeHeaderWidthLabel;
+  private javax.swing.JLabel jLabel2;
   private javax.swing.JPanel jPanel3;
   private javax.swing.JLabel labelRowHeight;
+  private javax.swing.JComboBox literalType;
   private javax.swing.JTextField maxColSizeField;
   private javax.swing.JLabel maxColSizeLabel;
   private javax.swing.JTextField minColSizeField;

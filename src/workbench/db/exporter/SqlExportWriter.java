@@ -44,17 +44,14 @@ public class SqlExportWriter
 		conv.setChrFunction(exporter.getChrFunction());
 		conv.setConcatString(exporter.getConcatString());
 		conv.setConcatFunction(exporter.getConcatFunction());
-		
+		conv.setSqlLiteralType(exporter.getDateLiteralType());
+    
 		String type = exporter.getBlobMode();
 		if (type == null)
 		{
 			conv.setBlobTypeNone();
 		}
-		else if (type.equalsIgnoreCase(DataExporter.BLOB_MODE_ANSI))
-		{
-			conv.setBlobTypeAnsiLiteral();
-		}
-		else if (type.equalsIgnoreCase(DataExporter.BLOB_MODE_DBMS))
+		else if (type.equalsIgnoreCase(DataExporter.BLOB_MODE_LITERAL))
 		{
 			conv.setBlobTypeDbmsLiteral();
 		}

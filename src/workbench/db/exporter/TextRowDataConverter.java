@@ -56,11 +56,6 @@ public class TextRowDataConverter
 		return null;
 	}
 
-	public void setOutputFile(File f)
-	{
-		super.setOutputFile(f);
-	}
-	
 	public String getFormatName()
 	{
 		return "Text";
@@ -71,10 +66,15 @@ public class TextRowDataConverter
 		int count = this.metaData.getColumnCount();
 		StrBuffer result = new StrBuffer(count * 30);
 		boolean canQuote = this.quoteCharacter != null;
+		int currentColIndex = 0;
+
 		for (int c=0; c < count; c ++)
 		{
 			if (!this.includeColumnInExport(c)) continue;
-			
+			if (currentColIndex > 0)
+			{
+				result.append(this.delimiter);
+			}
 			int colType = this.metaData.getColumnType(c);
 			String value = null;
 			
@@ -144,7 +144,8 @@ public class TextRowDataConverter
 
 			if (addQuote) result.append(this.quoteCharacter);
 
-			if (c < count - 1) result.append(this.delimiter);
+			//if (c < count - 1) result.append(this.delimiter);
+			currentColIndex ++;
 		}
 		result.append(lineEnding);
 		return result;
@@ -159,7 +160,7 @@ public class TextRowDataConverter
 	{
 		this.setAdditionalEncodeCharacters();
 
-		if (!this.isWriteHeader()) return null;
+		if (!this.writeHeader) return null;
 
 		StrBuffer result = new StrBuffer();
 		int colCount = this.metaData.getColumnCount();
@@ -174,17 +175,12 @@ public class TextRowDataConverter
 			}
 			else
 			{
-				result.append(this.getDelimiter());
+				result.append(this.delimiter);
 			}
 			result.append(name);
 		}
 		result.append(lineEnding);
 		return result;
-	}
-
-	public String getDelimiter()
-	{
-		return delimiter;
 	}
 
 	public void setDelimiter(String delimit)
@@ -218,11 +214,6 @@ public class TextRowDataConverter
 		
 	}
 
-	public String getQuoteCharacter()
-	{
-		return quoteCharacter;
-	}
-
 	public void setQuoteCharacter(String quote)
 	{
 		if (quote != null && quote.trim().length() > 0)
@@ -232,19 +223,9 @@ public class TextRowDataConverter
 		}
 	}
 
-	public boolean isWriteHeader()
-	{
-		return writeHeader;
-	}
-
 	public void setWriteHeader(boolean writeHeader)
 	{
 		this.writeHeader = writeHeader;
-	}
-
-	public boolean getQuoteAlways()
-	{
-		return quoteAlways;
 	}
 
 	public void setQuoteAlways(boolean flag)
@@ -261,8 +242,4 @@ public class TextRowDataConverter
 		this.escapeRange = range;
 	}
 
-	public CharacterRange getEscapeRange()
-	{
-		return this.escapeRange;
-	}
 }

@@ -65,23 +65,28 @@ public class DbDateFormatter
 
 	public String getLiteral(Date aDate)
 	{
-		String dateStr;
+		StringBuilder dateStr = new StringBuilder(24);
 		try
 		{
+      dateStr.append('\'');
 			synchronized (this.formatter)
 			{
-				dateStr = "'" + this.formatter.format(aDate) + "'";
+        dateStr.append(this.formatter.format(aDate));
 			}
+      dateStr.append('\'');
+      
 			if (this.functionCall != null)
 			{
-				dateStr = StringUtil.replace(this.functionCall, DATE_PLACEHOLDER, dateStr);
+				return StringUtil.replace(this.functionCall, DATE_PLACEHOLDER, dateStr.toString());
 			}
 		}
 		catch (Throwable th)
 		{
-			dateStr = "'" + aDate.toString() + "'";
+			dateStr.append('\'');
+      dateStr.append(aDate.toString());
+      dateStr.append('\'');
 		}
-		return dateStr;
+		return dateStr.toString();
 	}
 
 }

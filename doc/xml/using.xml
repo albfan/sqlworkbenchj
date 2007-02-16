@@ -380,6 +380,13 @@ VALUES
 				whereas with an encoding it will use the <literal>PreparedStatement.setCharacterStream()</literal> method).
 			</para>
 		</section>
+		
+		<note>
+			The format of the <literal>{$clobfile=}</literal> or <literal>{$blobfile=}</literal> parameter
+			has to be entered exactly as described here. You may not put e.g. spaces before or after
+			the equal sign or the braces. If you do this, &wb-productname; will not recognize the parameter and 
+			will pass the statement "as is" to the JDBC driver.
+		</note>
 
 		<section id="read-blob">
 			<title>Saving BLOB data to a file using SQL</title>
@@ -390,11 +397,11 @@ VALUES
 				except that a target file has to be specified where the read data should be stored. 
 			</para>
 			
-			<note>
-				When using the <link linkend="command-export">WbExport</link> command to export
-				data, blob data will also be saved into separate files. This works for both 
+			<para>
+				You can also use the <link linkend="command-export">WbExport</link> command to export
+				data. The contents of the BLOB columns will be saved into separate files. This works for both 
 				export formats (XML and Text).
-			</note>
+			</para>
 			
 		</section>
 			

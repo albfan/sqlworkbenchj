@@ -481,9 +481,12 @@ public class WbConnection
 	/**
 	 * Create a statement that produces ResultSets that
 	 * are read only and forward only (for performance)
+	 * 
 	 * If the profile defined a default fetch size, this
 	 * will be set as well.
-	 */
+	 * 
+	 * @throws java.sql.SQLException 
+  */
 	public Statement createStatementForQuery()
 		throws SQLException
 	{
@@ -496,6 +499,7 @@ public class WbConnection
 		{
 			stmt = this.sqlConnection.createStatement();
 		}
+		
 		try
 		{
 			if (this.getProfile() != null)

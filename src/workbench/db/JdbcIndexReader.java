@@ -36,12 +36,25 @@ public class JdbcIndexReader
 	{
 	}
 
+	/**
+	 * Return information about the indexes defined for the given table.
+	 * 
+	 * @throws java.sql.SQLException 
+  */
 	public ResultSet getIndexInfo(TableIdentifier table, boolean unique)
 		throws SQLException
 	{
 		return this.metaData.getSqlConnection().getMetaData().getIndexInfo(table.getCatalog(), table.getSchema(), table.getTableName(), unique, false);
 	}
 	
+	/**
+	 * Return the SQL to re-create the indexes defined for the table.
+	 * 
+	 * @param table 
+	 * @param indexDefinition 
+	 * @param tableNameToUse 
+	 * @return SQL Script to create indexes
+	 */
 	public StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
 	{
 		if (indexDefinition == null) return new StringBuilder(0);
@@ -106,10 +119,13 @@ public class JdbcIndexReader
 
 	/**
 	 * 	Build the SQL statement to create an Index on the given table.
+	 * 
 	 * 	@param aTable - The table name for which the index should be constructed
 	 * 	@param indexName - The name of the Index
 	 * 	@param unique - Should the index be unique
 	 *  @param columnList - The columns that should build the index
+	 * 
+	 *  @return the SQL statement to create the index
 	 */
 	public String buildCreateIndexSql(TableIdentifier aTable, String indexName, boolean unique, String[] columnList)
 	{
@@ -141,6 +157,11 @@ public class JdbcIndexReader
 		return sql;
 	}
 
+	/**
+	 * 
+	 * @param table 
+	 * @param indexDefinitions 
+	 */
 	public void processIndexList(TableIdentifier table, Collection<IndexDefinition> indexDefinitions)
 	{
 		// Nothing implemented

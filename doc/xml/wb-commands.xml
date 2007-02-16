@@ -313,8 +313,7 @@
               <entry>-blobType</entry>
 
               <entry>
-								<para>Possible values: <literal>file</literal>, <literal>ansi</literal>,
-								<literal>dbms</literal>
+								<para>Possible values: <literal>file</literal>, <literal>dbms</literal>, <literal>ansi</literal>
 								</para>
 								<para>
 									This parameter controls how BLOB data will be put into 
@@ -344,12 +343,49 @@
 								</para>
 								<para>
 									The parameter value <literal>dbms</literal>, will create a DBMS
-									specific "binary string". For MySQL and Microsoft SQL Server this
-									is the same as <literal>ansi</literal>. For HSQLDB and PostgreSQL 
-									a different syntax is needed. 
+									specific "binary string". MySQL, HSQLDB, H2 and PostgreSQL 
+									are known to support literals for binary data. For other DBMS
+									using this option will still create an ansi literal but this 
+									might result in an invalid SQL statement. 
 								</para>
               </entry>
             </row>
+						
+						<row id="export-sql-literal-formats">
+							<entry>-sqlDateLiterals</entry>
+							<entry>
+								<para>Possible values: <literal>DBMS</literal>, <literal>ANSI</literal>, <literal>JDBC</literal></para>
+								<para>
+									This parameter controls the generation of date or timestamp
+									literals. By default literals that are specific for the current
+									DBMS are created. You can also choose to create literals that 
+									comply with the JDBC specification or ANSI SQL literals for dates
+									and timestamps.
+								</para>
+								<para>
+									SQL statements with JDBC literals should be usable with every
+									JDBC based tool, including your own Java code. The use the JDBC 
+									escape syntax with curly braces, e.g. 
+									<literal>{d '2004-04-28'}</literal> or 
+									<literal>{ts '2002-04-02 12:04:00'}</literal>. This is the 
+									recommended format if you plan to use &wb-productname; (or any 
+									other JDBC based tool) to run the generated statement.
+								</para>
+								<para>
+									The ANSI format is very similar to the JDBC format except that
+									it does not use the braces:
+									<literal>DATE '2004-04-28'</literal> or 
+									<literal>TIMESTAMP '2002-04-02 12:04:00'</literal>. Please consult the 
+									manual of the target DBMS, to find out whether it supports ANSI compliant
+									date literals.
+								</para>
+								<para>
+									You can specify a default format to be used when copying statements to the 
+									clipboard in the <link linkend="options-default-date-literaltype">options dialog</link>.
+								</para>
+							</entry>
+						</row>
+							
             <row>
               <entry>-commitEvery</entry>
               <entry>
@@ -2191,6 +2227,24 @@ WHERE id=42;</programlisting>
       </para>
     </section>
 
+    <section id="command-wbconfirm">
+      <title>Confirm script execution - WbConfirm</title>
+			<para>
+				The <literal>WbConfirm</literal> command pauses the execution of the
+				current script and displays a message. You can then choose to stop
+				the script or continue. The message can be supplied as a parameter of
+				the command. If no message is supplied, a default message is
+				displayed.
+			</para>
+			<para>
+				This command can be used to prevent accidental execution of a script
+				even if <link linkend="profile-confirm-updates">confirm updates</link> is not enabled.
+			</para>
+			<para>
+				This command has no effect in batch mode.
+			</para>
+		</section>
+			
     <section id="command-wbinclude">
       <title>Execute a SQL script - WbInclude (@)</title>
       <para>

@@ -60,25 +60,57 @@ public class SqlLiteralFormatter
 		}
 		dateLiteralFormats = readStatementTemplates("DateLiteralFormats.xml");
 		if (dateLiteralFormats == null) dateLiteralFormats = Collections.EMPTY_MAP;
-		defaultDateFormatter = getDateLiteralFormatter(product);
 	
 		timestampFormats = readStatementTemplates("TimestampLiteralFormats.xml");
 		if (timestampFormats == null) timestampFormats = Collections.EMPTY_MAP;
-		defaultTimestampFormatter = getDateLiteralFormatter(product);
+		
+		setProduct(product);
 	}
 	
+	/**
+	 * Use a specific product name for formatting date and timestamp values
+	 * @param product the product to use. This is the key to the map defining the formats
+	 */
+	public void setProduct(String product)
+	{
+		defaultDateFormatter = getDateLiteralFormatter(product);
+		defaultTimestampFormatter = getTimestampFormatter(product);
+	}
+	
+	/**
+	 * Selects the JDBC product. This is equivalent to calling setProduct("JDBC")
+	 * @see #setProduct(String)
+	 */
+	public void useJdbcDates()
+	{
+		setProduct("JDBC");
+	}
+
+	/**
+	 * Do not write BLOBs as SQL Literals.
+	 */
 	public void noBlobHandling()
 	{
 		this.blobWriter = null;
 		this.blobFormatter = null;
 	}
 	
+	/**
+	 * Create ANSI compatible BLOB literals
+	 */
 	public void createAnsiBlobLiterals()
 	{
 		blobFormatter = BlobFormatterFactory.createAnsiFormatter();
 		this.blobWriter = null;
 	}
 	
+	/**
+	 * Create BLOB literals that are compatible with the 
+	 * DBMS identified by the connection.
+	 * If no specific formatter for the given DMBS can be found, the generic
+	 * ANSI formatter will be used. 
+	 * @param con the connection (i.e. the DBMS) for which the literals should be created
+	 */
 	public void createDbmsBlobLiterals(WbConnection con)
 	{
 		if (con != null)
@@ -87,13 +119,30 @@ public class SqlLiteralFormatter
 			this.blobWriter = null;
 		}
 	}
-	
+
+	/**
+	 * Create external BLOB files instead of BLOB literals.
+	 * This will reset any literal formatting selected with createAnsiBlobLiterals()
+	 * or createDbmsBlobLiterals().
+	 * The generated SQL Literal will be compatible with SQL Workbench extended
+	 * blob handling and will generate literals in the format <code>{$blobfile=...}</code>
+	 * 
+	 * @param bw the writer to be used for writing the BLOB content
+	 */
 	public void createBlobFiles(DataFileWriter bw)
 	{
 		this.blobFormatter = null;
 		this.blobWriter = bw;
 	}
 	
+	/**
+	 * Create external files for CLOB columns (instead of String literals).
+	 * The generated SQL Literal will be compatible with SQL Workbench extended
+	 * LOB handling and will generate literals in the format <code>{$clobfile='...' encoding='encoding'}</code>
+	 * 
+	 * @param writer the writer to be used for writing the BLOB content
+	 * @param encoding the encoding to be used to write the CLOB files
+	 */
 	public void setTreatClobAsFile(DataFileWriter writer, String encoding)
 	{
 		this.treatClobAsFile = true;
@@ -163,12 +212,12 @@ public class SqlLiteralFormatter
 		return getFormatter(dateLiteralFormats, aProductname);
 	}
 	
-	private DbDateFormatter getFormatter(Map formats, String product)
+	private DbDateFormatter getFormatter(Map<String, DbDateFormatter> formats, String product)
 	{
-		DbDateFormatter format = dateLiteralFormats.get(product == null ? GENERAL_SQL : product);
+		DbDateFormatter format = formats.get(product == null ? GENERAL_SQL : product);
 		if (format == null)
 		{
-			format = dateLiteralFormats.get(GENERAL_SQL);
+			format = formats.get(GENERAL_SQL);
 			
 			// Just in case someone messed around with the XML file
 			if (format == null) format = DbDateFormatter.DEFAULT_FORMATTER;
@@ -219,7 +268,7 @@ public class SqlLiteralFormatter
 		}
 		else if (value instanceof Timestamp)
 		{
-			return this.defaultTimestampFormatter.getLiteral((Date)value);
+			return this.defaultTimestampFormatter.getLiteral((Timestamp)value);
 		}
 		else if (value instanceof Date)
 		{

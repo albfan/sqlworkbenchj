@@ -30,5 +30,6 @@ public interface SqlOptions
 	String getAlternateUpdateTable();
 	void setAlternateUpdateTable(String table);
 	java.util.List getKeyColumns();
+	String getDateLiteralType();
 	
 }
