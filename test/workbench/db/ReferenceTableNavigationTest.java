@@ -118,7 +118,7 @@ public class ReferenceTableNavigationTest
 			ReferenceTableNavigation nav = new ReferenceTableNavigation(base, con);
 			nav.readTreeForChildren();
 			
-			TableIdentifier t1 = new TableIdentifier("public", "child1");
+			TableIdentifier t1 = new TableIdentifier("child1");
 			t1.adjustCase(con);
 			
 			String select = nav.getSelectForChild(t1, rows);
@@ -151,7 +151,7 @@ public class ReferenceTableNavigationTest
 			assertEquals(3, count);
 			rs.close();
 			
-			TableIdentifier t2 = new TableIdentifier("public", "child2");
+			TableIdentifier t2 = new TableIdentifier("child2");
 			t2.adjustCase(con);
 			
 			String select2 = nav.getSelectForChild(t2, rows);
