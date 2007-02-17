@@ -35,12 +35,6 @@ import workbench.util.WbPersistence;
  */
 public class SqlLiteralFormatter
 {
-	private final int JDBC_FORMAT = 1;
-	private final int ANSI_FORMAT = 2;
-	private final int DEFAULT_FORMAT = 4;
-	
-	private int timeFormat = DEFAULT_FORMAT;
-	
 	/**
 	 * The "product" for the jdbc date literal format
 	 */
@@ -52,21 +46,13 @@ public class SqlLiteralFormatter
 	public static final String ANSI_DATE_LITERAL_TYPE = "ansi";
 
 	/**
-	 * The "product" for the jdbc literal format
+	 * The "product" for the standard date literal format
 	 */
-	public static final String DEFAULT_DATE_LITERAL_TYPE = "standard";
-	
-	/**
-	 * The "product" identifying a general (default) 
-	 * formatting for date and timestamp literals
-	 */
-	public static final String GENERAL_SQL = "All";
-	
-	private Map<String, DbDateFormatter> dateLiteralFormats;
-	private Map<String, DbDateFormatter> timestampFormats;
-	private DbDateFormatter defaultDateFormatter;
-	private DbDateFormatter defaultTimestampFormatter;
-	private SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");;
+	public static final String STANDARD_DATE_LITERAL_TYPE = "ansi";
+
+	private SimpleDateFormat dateFormatter;
+	private SimpleDateFormat timestampFormatter;
+	private SimpleDateFormat timeFormatter;
 	private BlobLiteralFormatter blobFormatter;
 	private DataFileWriter blobWriter;
 	private DataFileWriter clobWriter;
@@ -93,19 +79,13 @@ public class SqlLiteralFormatter
   */
 	public SqlLiteralFormatter(WbConnection con)
 	{
-		String product = "*";
+		String product = null;
 			
 		if (con != null)
 		{
 			product = con.getMetadata().getProductName();
 		}
-		dateLiteralFormats = readStatementTemplates("DateLiteralFormats.xml");
-		if (dateLiteralFormats == null) dateLiteralFormats = Collections.EMPTY_MAP;
-	
-		timestampFormats = readStatementTemplates("TimestampLiteralFormats.xml");
-		if (timestampFormats == null) timestampFormats = Collections.EMPTY_MAP;
-		
-		setProduct(product);
+		setProduct(product == null ? STANDARD_DATE_LITERAL_TYPE : product);
 	}
 	
 	/**
@@ -125,20 +105,9 @@ public class SqlLiteralFormatter
 	 */
 	public void setProduct(String product)
 	{
-		defaultDateFormatter = getDateLiteralFormatter(product);
-		defaultTimestampFormatter = getTimestampFormatter(product);
-		if ("jdbc".equalsIgnoreCase(product))
-		{
-			this.timeFormat = JDBC_FORMAT;
-		}
-		else if ("ansi".equalsIgnoreCase(product))
-		{
-			this.timeFormat = ANSI_FORMAT;
-		}
-		else
-		{
-			this.timeFormat = DEFAULT_FORMAT;
-		}
+		dateFormatter = createFormatter(product, "date", "''yyyy-MM-dd''");
+		timestampFormatter = createFormatter(product, "timestamp", "''yyyy-MM-dd HH:mm:ss''");
+		timeFormatter = createFormatter(product, "time", "''HH:mm:ss''");
 	}
 
 
@@ -206,84 +175,28 @@ public class SqlLiteralFormatter
 		if (!StringUtil.isEmptyString(encoding)) this.clobEncoding = encoding;
 	}
 	
-	private Map<String, DbDateFormatter> readStatementTemplates(String aFilename)
+	private SimpleDateFormat createFormatter(String format, String type, String defaultPattern)
 	{
-		Map result = null;
-		
-		BufferedInputStream in = new BufferedInputStream(this.getClass().getResourceAsStream(aFilename));
-		
+		String key = "workbench.sql.literals." + format + "." + type + ".pattern";
+		SimpleDateFormat f = null;
+		String pattern = null;
 		try
 		{
-			WbPersistence reader = new WbPersistence();
-			Object value = reader.readObject(in);
-			if (value instanceof Map)
+			pattern = Settings.getInstance().getProperty(key, null);
+			if (pattern == null)
 			{
-				result = (Map<String, DbDateFormatter>)value;
+				LogMgr.logInfo("SqlLiteralFormatter.createFormatter()", "No pattern found for '" + format + "' for type=" + type + ". Using 'standard'");
+				key = "workbench.sql.literals." + STANDARD_DATE_LITERAL_TYPE + "." + type + ".pattern";
+				pattern = Settings.getInstance().getProperty(key, defaultPattern);
 			}
+			f = new SimpleDateFormat(pattern);
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("SqlSyntaxFormatter.readStatementTemplates()", "Error reading template file " + aFilename,e);
+			LogMgr.logError("SqlLiteralFormatter.createFormatter()", "Could not create formatter with pattern [" + pattern + "], using default [" + defaultPattern + "]", e);
+			f = new SimpleDateFormat(defaultPattern);
 		}
-		
-		Map customizedMap = null;
-		
-		// try to read additional definitions from local file
-		try
-		{
-			File f = new File(WbManager.getInstance().getJarPath(), aFilename);
-			if (f.exists())
-			{
-				LogMgr.logInfo("SqlLiteralFormatter", "Adding customized literal format using file " + f.getAbsolutePath());
-				WbPersistence reader = new WbPersistence(f.getAbsolutePath());
-				customizedMap = (Map<String, DbDateFormatter>)reader.readObject();
-			}
-			else
-			{
-				LogMgr.logDebug("SqlLiteralFormatter", "No customized formatter file found (" + f.getAbsolutePath() + ")");
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("SqlLiteralFormatter", "Error when reading customized format file", e);
-			customizedMap = null;
-		}
-		
-		if (customizedMap != null)
-		{
-			if (result != null)
-			{
-				result.putAll(customizedMap);
-			}
-			else
-			{
-				result = customizedMap;
-			}
-		}
-		return result;
-	}
-
-	public DbDateFormatter getTimestampFormatter(String product)
-	{
-		return getFormatter(timestampFormats, product);
-	}
-	
-	public DbDateFormatter getDateLiteralFormatter(String aProductname)
-	{
-		return getFormatter(dateLiteralFormats, aProductname);
-	}
-	
-	private DbDateFormatter getFormatter(Map<String, DbDateFormatter> formats, String product)
-	{
-		DbDateFormatter format = formats.get(product == null ? GENERAL_SQL : product);
-		if (format == null)
-		{
-			format = formats.get(GENERAL_SQL);
-			
-			// Just in case someone messed around with the XML file
-			if (format == null) format = DbDateFormatter.DEFAULT_FORMATTER;
-		}
-		return format;
+		return f;
 	}
 	
 	private String quoteString(String t)
@@ -296,34 +209,6 @@ public class SqlLiteralFormatter
 		StringUtil.replaceToBuffer(realValue, t, "'", "''");
 		realValue.append('\'');
 		return realValue.toString();
-	}
-	
-	private String getTimeLiteral(Time tm)
-	{
-		StringBuilder result = new StringBuilder(12);
-		if (this.timeFormat == JDBC_FORMAT)
-		{
-			result.append("{t '");
-		}
-		else if (this.timeFormat == ANSI_FORMAT)
-		{
-			result.append("TIME '");
-		}
-		else
-		{
-			result.append('\'');
-		}
-		synchronized (this.timeFormatter)
-		{
-			result.append(this.timeFormatter.format(tm));
-		}
-		
-		result.append('\'');
-		if (this.timeFormat == JDBC_FORMAT)
-		{
-			result.append('}');
-		}
-		return result.toString();
 	}
 	
 	public String getDefaultLiteral(ColumnData data)
@@ -359,15 +244,15 @@ public class SqlLiteralFormatter
 		}
 		else if (value instanceof Time)
 		{
-			return this.getTimeLiteral((Time)value);
+			return this.timeFormatter.format((Time)value);
 		}
 		else if (value instanceof Timestamp)
 		{
-			return this.defaultTimestampFormatter.getLiteral((Timestamp)value);
+			return this.timestampFormatter.format((Timestamp)value);
 		}
 		else if (value instanceof Date)
 		{
-			return this.defaultDateFormatter.getLiteral((Date)value);
+			return this.dateFormatter.format((Date)value);
 		}
 		else if (value instanceof File)
 		{
