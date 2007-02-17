@@ -40,6 +40,7 @@ public class WbExportTest extends TestCase
 	private WbExport exportCmd = new WbExport();
 	private WbConnection connection;
 	private TestUtil util;
+	
 	public WbExportTest(String testName)
 	{
 		super(testName);
@@ -70,6 +71,100 @@ public class WbExportTest extends TestCase
 		super.tearDown();
 	}
 
+	/**
+	 * Test the creation of date literals
+	 */
+	public void testDateLiterals()
+	{
+		try
+		{
+			File exportFile = new File(this.basedir, "date_literal_test.sql");
+			exportFile.delete();
+			
+			Statement stmt = this.connection.createStatement();
+			stmt.executeUpdate("CREATE TABLE literal_test (nr integer, date_col DATE, ts_col TIMESTAMP)");
+			stmt.executeUpdate("insert into literal_test (nr, date_col, ts_col) values (1, '2006-01-01', '2007-02-02 14:15:16')");
+			this.connection.commit();
+			
+			// Test JDBC literals
+			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=jdbc -sourcetable=literal_test");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Export file not created", true, exportFile.exists());
+			
+			FileReader in = new FileReader(exportFile);
+			String script = FileUtil.readCharacters(in);
+			in.close();
+			ScriptParser p = new ScriptParser(script);
+			
+			// WbExport creates 2 statements: the INSERT and the COMMIT
+			assertEquals("Wrong number of statements", 2, p.getSize());
+			
+			String sql = p.getCommand(0);
+			String verb = SqlUtil.getSqlVerb(sql);
+			assertEquals("Not an insert statement", "INSERT", verb);
+			assertEquals("JDBC Date literal not found", true, sql.indexOf("{d '2006-01-01'}") > -1);
+			assertEquals("JDBC Timestamp literal not found", true, sql.indexOf("{ts '2007-02-02 14:15:16") > -1);
+
+			// Test ANSI literals
+			exportFile.delete();
+			result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=ansi -sourcetable=literal_test");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Export file not created", true, exportFile.exists());
+			
+			in = new FileReader(exportFile);
+			script = FileUtil.readCharacters(in);
+			in.close();
+			p = new ScriptParser(script);
+			sql = p.getCommand(0);
+			verb = SqlUtil.getSqlVerb(script);
+			assertEquals("Not an insert statement", "INSERT", verb);
+			assertEquals("ANSI Date literal not found", true, sql.indexOf("DATE '2006-01-01'") > -1);
+			assertEquals("ANSI Timestamp literal not found", true, sql.indexOf("TIMESTAMP '2007-02-02 14:15:16'") > -1);
+
+			// Test Standard literals
+			exportFile.delete();
+			result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=standard -sourcetable=literal_test");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Export file not created", true, exportFile.exists());
+			
+			in = new FileReader(exportFile);
+			script = FileUtil.readCharacters(in);
+			in.close();
+			p = new ScriptParser(script);
+			sql = p.getCommand(0);
+			verb = SqlUtil.getSqlVerb(script);
+			assertEquals("Not an insert statement", "INSERT", verb);
+			assertEquals("STANDARD Date literal not found", true, sql.indexOf("'2006-01-01'") > -1);
+			assertEquals("STANDARD Timestamp literal not found", true, sql.indexOf("'2007-02-02 14:15:16'") > -1);
+			
+			// Test Oracle literals
+			exportFile.delete();
+			result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=Oracle -sourcetable=literal_test");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Export file not created", true, exportFile.exists());
+			
+			in = new FileReader(exportFile);
+			script = FileUtil.readCharacters(in);
+			in.close();
+			p = new ScriptParser(script);
+			sql = p.getCommand(0);
+			verb = SqlUtil.getSqlVerb(script);
+			assertEquals("Not an insert statement", "INSERT", verb);
+			assertEquals("Oracle Date literal not found", true, sql.indexOf("to_date('2006-01-01 00:00:00'") > -1);
+			assertEquals("Oracle Timestamp literal not found", true, sql.indexOf("to_date('2007-02-02 14:15:16'") > -1);
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		
+	}
+	
+	/**
+	 * Test if the -append parameter is working properly
+	 */
 	public void testAppend()
 	{
 		try
@@ -93,6 +188,10 @@ public class WbExportTest extends TestCase
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Test if an invalid file results in an error message
+	 */
 	public void testInvalidFile()
 	{
 		try
@@ -109,6 +208,9 @@ public class WbExportTest extends TestCase
 		}
 	}
 	
+	/**
+	 * Test the export to compressed text files
+	 */
 	public void testTextExportCompressed() 
 	{
 		try
@@ -127,6 +229,9 @@ public class WbExportTest extends TestCase
 		}
 	}
 
+	/**
+	 * Test the export to compressed xml files
+	 */
 	public void testXmlExportCompressed() 
 	{
 		try

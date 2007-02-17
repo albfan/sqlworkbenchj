@@ -24,7 +24,6 @@ import java.awt.print.Pageable;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
-
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -34,8 +33,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-
+import workbench.gui.components.WbTable;
 import workbench.gui.renderer.ToolTipRenderer;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 /**
  *	Prints the content of a JTable.
@@ -57,7 +58,7 @@ public class TablePrinter
 	 *	The PageFormat to be used when printing
 	 */
 	private PageFormat format;
-	protected JTable table;
+	protected WbTable table;
 	private int pageCount = -1;
 
 	private Font printFont;
@@ -70,13 +71,29 @@ public class TablePrinter
 	private int lineSpacing = 5;
 	private int colSpacing = 6;
 
-	public TablePrinter(JTable toPrint, PageFormat aFormat, Font aFont)
+	public TablePrinter(WbTable toPrint)
+	{
+		PageFormat format = Settings.getInstance().getPageFormat();
+		Font printerFont = Settings.getInstance().getPrinterFont();
+		init(toPrint, format, printerFont);
+	}
+	public TablePrinter(WbTable toPrint, PageFormat aFormat, Font aFont)
+	{
+		init(toPrint, aFormat, aFont);
+	}
+
+	protected void init(WbTable toPrint, PageFormat aFormat, Font aFont)
 	{
 		this.table = toPrint;
 		this.printFont = aFont;
 		this.setPageFormat(aFormat);
+		String header = this.table.getPrintHeader();
+		if (header != null)
+		{
+			setHeaderText(header);
+		}
+		setFooterText(ResourceMgr.getString("TxtPageFooter"));		
 	}
-
 	public void setFooterText(String aText)
 	{
 		this.footerText = aText;

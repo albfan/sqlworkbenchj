@@ -42,13 +42,21 @@ import workbench.util.WbThread;
  */
 public class ClipBoardCopier
 {
+	private DataStore data;
 	private WbTable client;
 	
 	public ClipBoardCopier(WbTable t)
 	{
 		this.client = t;
+		this.data = client.getDataStore();
 	}
 
+	public ClipBoardCopier(DataStore ds)
+	{
+		this.client = null;
+		this.data = ds;
+	}
+	
 	/**
 	 *	Copy data from the table as tab-delimited into the clipboard
 	 *	@param includeHeaders if true, then a header line with the column names is copied as well
@@ -57,7 +65,7 @@ public class ClipBoardCopier
 	 */
 	public void copyDataToClipboard(boolean includeHeaders, boolean selectedOnly, final boolean showSelectColumns)
 	{
-		if (this.client.getRowCount() <= 0) return;
+		if (this.data.getRowCount() <= 0) return;
 		
 		List columnsToCopy = null;
 		if (selectedOnly  && !showSelectColumns && this.client.getColumnSelectionAllowed())
@@ -77,9 +85,8 @@ public class ClipBoardCopier
 
 		try
 		{
-			DataStore ds = this.client.getDataStore();
 			StringWriter out = null;
-			int count = this.client.getRowCount();
+			int count = this.data.getRowCount();
 			int[] rows = null;
 			if (selectedOnly)
 			{
@@ -87,7 +94,7 @@ public class ClipBoardCopier
 				count = rows.length;
 			}
 			
-			DataPrinter printer = new DataPrinter(ds, "\t", "\n", columnsToCopy, includeHeaders);
+			DataPrinter printer = new DataPrinter(this.data, "\t", "\n", columnsToCopy, includeHeaders);
 			out = new StringWriter(count * 250);
 			// Do not use StringUtil.LINE_TERMINATOR for the line terminator
 			// because for some reason this creates additional empty lines
@@ -155,17 +162,23 @@ public class ClipBoardCopier
 	
 	protected void _copyAsSql(boolean useUpdate, boolean selectedOnly, boolean showSelectColumns, boolean includeDelete)
 	{
-		if (this.client.getRowCount() <= 0) return;
+		if (this.data == null) return;
 		
-		DataStore ds = this.client.getDataStore();
-		if (ds == null) return;
-
+		if (this.data.getRowCount() <= 0) return;
+		
 		if (useUpdate || includeDelete)
 		{
-			boolean pkOK = this.client.checkPkColumns(true);
-			
-			// checkPkColumns will return false, if the user cancelled the prompting
-			if (!pkOK) return;
+			boolean pkOK = this.data.hasPkColumns();
+			if (!pkOK && this.client != null)
+			{
+				this.client.checkPkColumns(true);
+			}
+			// Can't do anything if we don't have PK
+			if (!pkOK) 
+			{
+				LogMgr.logWarning("ClipBoardCopier._copyAsSql()", "Cannot create UPDATE or DELETE statements without a primary key!");
+				return;
+			}
 		}
 
 		List columnsToInclude = null;
@@ -188,9 +201,9 @@ public class ClipBoardCopier
 			int rows[] = null;
 			if (selectedOnly) rows = this.client.getSelectedRows();
 			
-			SqlRowDataConverter converter = new SqlRowDataConverter(ds.getOriginalConnection());
+			SqlRowDataConverter converter = new SqlRowDataConverter(data.getOriginalConnection());
 			converter.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
-			converter.setResultInfo(ds.getResultInfo());
+			converter.setResultInfo(data.getResultInfo());
 			converter.setSqlLiteralType(Settings.getInstance().getDefaultDateLiteralType());
 			if (useUpdate)
 			{
@@ -203,9 +216,9 @@ public class ClipBoardCopier
 			else 
 			{
 				converter.setCreateInsert();
-				if (ds.getResultInfo().getUpdateTable() == null)
+				if (data.getResultInfo().getUpdateTable() == null)
 				{
-					String tbl = ds.getInsertTable();
+					String tbl = data.getInsertTable();
 					TableIdentifier table = new TableIdentifier(tbl);
 					converter.setAlternateUpdateTable(table);
 				}
@@ -215,22 +228,22 @@ public class ClipBoardCopier
 			
 			int count = 0;
 			if (rows != null) count = rows.length;
-			else count = ds.getRowCount();
+			else count = data.getRowCount();
 			
-			StringBuilder data = new StringBuilder(count * 100);
+			StringBuilder result = new StringBuilder(count * 100);
 			RowData rowdata = null;
 			
 			for (int row = 0; row < count; row ++)
 			{
-				if (rows == null) rowdata = ds.getRow(row);
-				else rowdata = ds.getRow(rows[row]);
+				if (rows == null) rowdata = this.data.getRow(row);
+				else rowdata = data.getRow(rows[row]);
 				
 				StrBuffer sql = converter.convertRowData(rowdata, row);
-				sql.appendTo(data);
+				sql.appendTo(result);
 			}
 			
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-			StringSelection sel = new StringSelection(data.toString());
+			StringSelection sel = new StringSelection(result.toString());
 			clp.setContents(sel, sel);
 		}
 		catch (Throwable e)
@@ -252,14 +265,13 @@ public class ClipBoardCopier
 	 */
 	public ColumnSelectionResult selectColumns(boolean includeHeader, boolean selectedOnly, boolean showHeaderSelection, boolean showSelectedRowsSelection)
 	{
-		DataStore ds = this.client.getDataStore();
-		if (ds == null) return null;
+		if (this.data == null) return null;
 
     ColumnSelectionResult result = new ColumnSelectionResult();
     result.includeHeaders = includeHeader;
     result.selectedOnly = selectedOnly;
 
-		ColumnIdentifier[] originalCols = ds.getColumns();
+		ColumnIdentifier[] originalCols = this.data.getColumns();
 		ColumnSelectorPanel panel = new ColumnSelectorPanel(originalCols, includeHeader, selectedOnly, showHeaderSelection, showSelectedRowsSelection);
 		panel.selectAll();
 		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this.client), panel, ResourceMgr.getString("MsgSelectColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);

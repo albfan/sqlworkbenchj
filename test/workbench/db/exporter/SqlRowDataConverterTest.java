@@ -15,19 +15,23 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import junit.framework.TestCase;
+import workbench.TestUtil;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.SqlRowDataConverter;
 import workbench.sql.ScriptParser;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+import workbench.storage.SqlLiteralFormatter;
+import workbench.storage.SqlLiteralFormatter;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 
 /**
  *
  * @author support@sql-workbench.net
  */
-public class SqlRowDataConverterTest extends junit.framework.TestCase
+public class SqlRowDataConverterTest 
+	extends TestCase
 {
 	
 	public SqlRowDataConverterTest(String testName)
@@ -40,6 +44,9 @@ public class SqlRowDataConverterTest extends junit.framework.TestCase
 	{
 		try
 		{
+			TestUtil util = new TestUtil("testDateLiterals");
+			util.prepareEnvironment();
+			
 			String[] cols = new String[] { "char_col", "int_col", "date_col", "ts_col"};
 			int[] types = new int[] { Types.VARCHAR, Types.INTEGER, Types.DATE, Types.TIMESTAMP };
 			int[] sizes = new int[] { 10, 10, 10, 10 };
@@ -66,16 +73,19 @@ public class SqlRowDataConverterTest extends junit.framework.TestCase
 			data.setValue(3, ts);
 			data.resetStatus();
 
-			converter.setSqlLiteralType("JDBC");
+			converter.setSqlLiteralType(SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE);
 			converter.setCreateInsert();
 			String line = converter.convertRowData(data, 0).toString().trim();
 			String verb = SqlUtil.getSqlVerb(line);
 			assertEquals("No insert generated", "INSERT", verb);
 
-			assertEquals("JDBC literal not found", true, line.indexOf("{d '2006-10-26'}") > -1);
-			converter.setSqlLiteralType("ANSI");
+			assertEquals("JDBC date literal not found", true, line.indexOf("{d '2006-10-26'}") > -1);
+			assertEquals("JDBC timestamp literal not found", true, line.indexOf("{ts '2006-10-26 ") > -1);
+			
+			converter.setSqlLiteralType(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
 			line = converter.convertRowData(data, 0).toString().trim();
-			assertEquals("ANSI literal not found", true, line.indexOf("DATE '2006-10-26'") > -1);
+			assertEquals("ANSI date literal not found", true, line.indexOf("DATE '2006-10-26'") > -1);
+			assertEquals("ANSI timestamp literal not found", true, line.indexOf("TIMESTAMP '2006-10-26") > -1);
 			
 			converter.setCreateUpdate();
 			line = converter.convertRowData(data, 0).toString().trim();
@@ -90,6 +100,7 @@ public class SqlRowDataConverterTest extends junit.framework.TestCase
 			converter.setColumnsToExport(columns);
 			line = converter.convertRowData(data, 0).toString().trim();
 			assertEquals("date_col included", -1, line.indexOf("date_col ="));
+			assertEquals("ts_col included", -1, line.indexOf("ts_col ="));
 			assertEquals("int_col not updated", true, line.indexOf("SET int_col = 42") > -1);
 			
 			converter.setCreateInsertDelete();

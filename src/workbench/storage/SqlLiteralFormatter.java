@@ -13,14 +13,16 @@ package workbench.storage;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.interfaces.DataFileWriter;
-
+import workbench.log.LogMgr;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
@@ -33,23 +35,62 @@ import workbench.util.WbPersistence;
  */
 public class SqlLiteralFormatter
 {
+	private final int JDBC_FORMAT = 1;
+	private final int ANSI_FORMAT = 2;
+	private final int DEFAULT_FORMAT = 4;
+	
+	private int timeFormat = DEFAULT_FORMAT;
+	
+	/**
+	 * The "product" for the jdbc date literal format
+	 */
+	public static final String JDBC_DATE_LITERAL_TYPE = "jdbc";
+
+	/**
+	 * The "product" for the ansi date literal format
+	 */
+	public static final String ANSI_DATE_LITERAL_TYPE = "ansi";
+
+	/**
+	 * The "product" for the jdbc literal format
+	 */
+	public static final String DEFAULT_DATE_LITERAL_TYPE = "standard";
+	
+	/**
+	 * The "product" identifying a general (default) 
+	 * formatting for date and timestamp literals
+	 */
 	public static final String GENERAL_SQL = "All";
 	
 	private Map<String, DbDateFormatter> dateLiteralFormats;
 	private Map<String, DbDateFormatter> timestampFormats;
 	private DbDateFormatter defaultDateFormatter;
 	private DbDateFormatter defaultTimestampFormatter;
+	private SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");;
 	private BlobLiteralFormatter blobFormatter;
 	private DataFileWriter blobWriter;
 	private DataFileWriter clobWriter;
 	private boolean treatClobAsFile = false;
 	private String clobEncoding = Settings.getInstance().getDefaultFileEncoding();
 	
+	/**
+	 * Create a new formatter with default formatting. 
+	 */
 	public SqlLiteralFormatter()
 	{
 		this(null);
 	}
 	
+	/**
+	 * Create  new formatter specifically for the DBMS identified
+	 * by the connection.
+	 * The type of date literals used, can be changed to a different
+	 * "product" using {@link #setProduct(String)}
+	 * 
+	 * @param con the connection identifying the DBMS
+	 * 
+	 * @see workbench.db.DbMetadata#getProductName()
+  */
 	public SqlLiteralFormatter(WbConnection con)
 	{
 		String product = "*";
@@ -68,23 +109,38 @@ public class SqlLiteralFormatter
 	}
 	
 	/**
-	 * Use a specific product name for formatting date and timestamp values
+	 * Use a specific product name for formatting date and timestamp values.
+	 * <br/>
+	 * Valid values are: 
+	 * <ul>
+	 *	<li>jdbc - to produce JDBC escape literals (e.g. {d '2010-01-02'})</li> 
+	 *  <li>ansi - to produce ANSI literals (e.g. DATE '2010-01-02')</li> 
+	 * </ul>
+	 * Any other value will either use the formatting available in the XML files
+	 * or a default literal.
+	 * 
 	 * @param product the product to use. This is the key to the map defining the formats
+	 * 
+	 * @see workbench.db.DbMetadata#getProductName()
 	 */
 	public void setProduct(String product)
 	{
 		defaultDateFormatter = getDateLiteralFormatter(product);
 		defaultTimestampFormatter = getTimestampFormatter(product);
+		if ("jdbc".equalsIgnoreCase(product))
+		{
+			this.timeFormat = JDBC_FORMAT;
+		}
+		else if ("ansi".equalsIgnoreCase(product))
+		{
+			this.timeFormat = ANSI_FORMAT;
+		}
+		else
+		{
+			this.timeFormat = DEFAULT_FORMAT;
+		}
 	}
-	
-	/**
-	 * Selects the JDBC product. This is equivalent to calling setProduct("JDBC")
-	 * @see #setProduct(String)
-	 */
-	public void useJdbcDates()
-	{
-		setProduct("JDBC");
-	}
+
 
 	/**
 	 * Do not write BLOBs as SQL Literals.
@@ -167,7 +223,6 @@ public class SqlLiteralFormatter
 		}
 		catch (Exception e)
 		{
-			result = null;
 			LogMgr.logError("SqlSyntaxFormatter.readStatementTemplates()", "Error reading template file " + aFilename,e);
 		}
 		
@@ -179,12 +234,18 @@ public class SqlLiteralFormatter
 			File f = new File(WbManager.getInstance().getJarPath(), aFilename);
 			if (f.exists())
 			{
+				LogMgr.logInfo("SqlLiteralFormatter", "Adding customized literal format using file " + f.getAbsolutePath());
 				WbPersistence reader = new WbPersistence(f.getAbsolutePath());
 				customizedMap = (Map<String, DbDateFormatter>)reader.readObject();
+			}
+			else
+			{
+				LogMgr.logDebug("SqlLiteralFormatter", "No customized formatter file found (" + f.getAbsolutePath() + ")");
 			}
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("SqlLiteralFormatter", "Error when reading customized format file", e);
 			customizedMap = null;
 		}
 		
@@ -237,11 +298,41 @@ public class SqlLiteralFormatter
 		return realValue.toString();
 	}
 	
+	private String getTimeLiteral(Time tm)
+	{
+		StringBuilder result = new StringBuilder(12);
+		if (this.timeFormat == JDBC_FORMAT)
+		{
+			result.append("{t '");
+		}
+		else if (this.timeFormat == ANSI_FORMAT)
+		{
+			result.append("TIME '");
+		}
+		else
+		{
+			result.append('\'');
+		}
+		synchronized (this.timeFormatter)
+		{
+			result.append(this.timeFormatter.format(tm));
+		}
+		
+		result.append('\'');
+		if (this.timeFormat == JDBC_FORMAT)
+		{
+			result.append('}');
+		}
+		return result.toString();
+	}
+	
 	public String getDefaultLiteral(ColumnData data)
 	{
 		if (data.isNull()) return "NULL";
 		
 		Object value = data.getValue();
+		if (value == null) return "NULL";
+		
 		int type = data.getIdentifier().getDataType();
 		
 		if (value instanceof String)
@@ -265,6 +356,10 @@ public class SqlLiteralFormatter
 			{
 				return quoteString(t);
 			}
+		}
+		else if (value instanceof Time)
+		{
+			return this.getTimeLiteral((Time)value);
 		}
 		else if (value instanceof Timestamp)
 		{

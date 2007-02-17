@@ -37,6 +37,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.interfaces.ErrorReporter;
+import workbench.storage.SqlLiteralFormatter;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.ProgressPanel;
@@ -53,6 +54,7 @@ import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
+import workbench.storage.SqlLiteralFormatter;
 import workbench.util.CharacterRange;
 import workbench.util.EncodingUtil;
 import workbench.util.MessageBuffer;
@@ -198,21 +200,34 @@ public class DataExporter
 	 * Valid values are jdbc,ansi,dbms
 	 * dbms selects the format approriate for the current dbms.
 	 * It is the same as passing null
+	 * 
 	 * @param type the literal format to use
+	 * @see workbench.storage.SqlLiteralFormatter#setProduct(String)
 	 */
 	public void setDateLiteralType(String type)
 	{
-		if ("jdbc".equalsIgnoreCase(type))
+		if (SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE.equalsIgnoreCase(type))
 		{
-			this.dateLiteralType = "JDBC";
+			this.dateLiteralType = SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE;
 		}
-		else if ("ansi".equalsIgnoreCase(type))
+		else if (SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE.equalsIgnoreCase(type))
 		{
-			this.dateLiteralType = "ANSI";
+			this.dateLiteralType = SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE;
+		}
+		else if ("dbms".equalsIgnoreCase(type))
+		{
+			this.dateLiteralType = null;
+		}
+		else if (SqlLiteralFormatter.DEFAULT_DATE_LITERAL_TYPE.equalsIgnoreCase(type))
+		{
+			this.dateLiteralType = SqlLiteralFormatter.DEFAULT_DATE_LITERAL_TYPE;
 		}
 		else
 		{
-			this.dateLiteralType = null;
+			// if the user added a customized mapping we have to use
+			// the type as provided as it is used as a key to retrieve 
+			// the date format
+			this.dateLiteralType = type;
 		}
 	}
   

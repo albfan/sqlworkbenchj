@@ -11,10 +11,15 @@
  */
 package workbench.gui.actions;
 
+import java.awt.Window;
 import java.awt.event.ActionEvent;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.gui.components.WbTable;
+import workbench.print.PrintPreview;
+import workbench.print.TablePrinter;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -36,7 +41,16 @@ public class PrintPreviewAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.printPreview();
+		TablePrinter printer = new TablePrinter(this.client);
+
+		Window w = SwingUtilities.getWindowAncestor(this.client);
+		JFrame parent = null;
+		if (w instanceof JFrame)
+		{
+			parent = (JFrame)w;
+		}
+		PrintPreview preview = new PrintPreview(parent, printer);
+		preview.setVisible(true);
 	}
 	
 	public void tableChanged(TableModelEvent tableModelEvent)

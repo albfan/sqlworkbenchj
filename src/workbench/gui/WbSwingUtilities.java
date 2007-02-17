@@ -181,7 +181,6 @@ public class WbSwingUtilities
 
 	public static void showWaitCursor(final Component caller)
 	{
-		//caller.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		showCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR), caller, false, true);
 	}
 

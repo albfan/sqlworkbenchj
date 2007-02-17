@@ -14,6 +14,7 @@ package workbench.gui.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -43,6 +44,7 @@ import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.CellEditor;
 import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -548,6 +550,7 @@ public class WbTable
 			this.popup.add(item);
 		}
 	}
+	
 	public void valueChanged(ListSelectionEvent e)
 	{
 		super.valueChanged(e);
@@ -615,46 +618,26 @@ public class WbTable
 		th.addMouseListener(this);
 	}
 
-	public void printPreview()
-	{
-		TablePrinter printer = this.getTablePrinter();
-
-		Window w = SwingUtilities.getWindowAncestor(this);
-		JFrame parent = null;
-		if (w instanceof JFrame)
-		{
-			parent = (JFrame)w;
-		}
-		PrintPreview preview = new PrintPreview(parent, printer);
-		preview.setVisible(true);
-	}
-
+	/**
+	 * Set the header to be used for printing.
+	 * 
+	 * @param aHeader the print header
+	 * @see workbench.print#setHeaderText(String)
+	 */
 	public void setPrintHeader(String aHeader)
 	{
 		this.defaultPrintHeader = aHeader;
 	}
 
+	/**
+	 * Return the header to be used for printing.
+	 * 
+	 * @return the print header
+	 * @see workbench.print.TablePrinter(WbTable)
+	 */
 	public String getPrintHeader()
 	{
 		return this.defaultPrintHeader;
-	}
-
-	public void printTable()
-	{
-		this.getTablePrinter().startPrint();
-	}
-
-	private TablePrinter getTablePrinter()
-	{
-		PageFormat format = Settings.getInstance().getPageFormat();
-		Font printerFont = Settings.getInstance().getPrinterFont();
-		TablePrinter printer = new TablePrinter(this, format, printerFont);
-		if (this.defaultPrintHeader != null)
-		{
-			printer.setHeaderText(this.defaultPrintHeader);
-		}
-		printer.setFooterText(ResourceMgr.getString("TxtPageFooter"));
-		return printer;
 	}
 
 	public Component prepareEditor(TableCellEditor editor, int row, int column)
@@ -727,35 +710,6 @@ public class WbTable
 		if (ds == null) return false;
 		return ds.isUpdateable();
 	}
-
-//	public void editingCanceled(ChangeEvent e)
-//	{
-//		final int row = this.getEditingRow();
-//		final int col = this.getEditingColumn();
-//		super.editingCanceled(e);
-//		EventQueue.invokeLater(new Runnable()
-//		{
-//			public void run()
-//			{
-//				resetHighlightRenderers(row, col);
-//			}
-//		});
-//		
-//	}
-//
-//	public void editingStopped(ChangeEvent e)
-//	{
-//		final int row = this.getEditingRow();
-//		final int col = this.getEditingColumn();
-//		super.editingStopped(e);
-//		EventQueue.invokeLater(new Runnable()
-//		{
-//			public void run()
-//			{
-//				resetHighlightRenderers(row, col);
-//			}
-//		});
-//	}
 
 	public void removeEditor()
 	{
@@ -982,114 +936,59 @@ public class WbTable
 		});
 	}
 	
-	private void _setShowStatusColumn(boolean aFlag)
+	protected void _setShowStatusColumn(boolean aFlag)
 	{
 		if (this.dwModel == null) return;
 		if (aFlag == this.dwModel.getShowStatusColumn()) return;
 
-		try
+		int column = this.getSelectedColumn();
+		final int row = this.getSelectedRow();
+
+		this.saveColumnSizes();
+		this.dwModel.setShowStatusColumn(aFlag);
+
+		if (aFlag)
 		{
-			int column = this.getSelectedColumn();
-			final int row = this.getSelectedRow();
+			TableColumn col = this.getColumnModel().getColumn(0);
+			col.setCellRenderer(new RowStatusRenderer());
+			col.setMaxWidth(20);
+			col.setMinWidth(20);
+			col.setPreferredWidth(20);
+		}
+		else
+		{
+			TableColumnModel model = this.getTableHeader().getColumnModel();
+			if (model.getColumnCount() > this.dwModel.getColumnCount())
+			{
+				TableColumn col = model.getColumn(0);
+				model.removeColumn(col);
+			}
+		}
 
-//			this.setSuspendRepaint(true);
-			this.saveColumnSizes();
-			this.dwModel.setShowStatusColumn(aFlag);
+		this.initMultiLineRenderer();
+		this.initDefaultEditors();
+		this.restoreColumnSizes();
 
+		if (row >= 0)
+		{
+			this.getSelectionModel().setSelectionInterval(row, row);
+			final int newColumn;
 			if (aFlag)
-			{
-				TableColumn col = this.getColumnModel().getColumn(0);
-				col.setCellRenderer(new RowStatusRenderer());
-				col.setMaxWidth(20);
-				col.setMinWidth(20);
-				col.setPreferredWidth(20);
-			}
+				newColumn = column + 1;
 			else
+				newColumn = column - 1;
+
+			if (newColumn >= 0)
 			{
-				TableColumnModel model = this.getTableHeader().getColumnModel();
-				if (model.getColumnCount() > this.dwModel.getColumnCount())
+				EventQueue.invokeLater(new Runnable()
 				{
-					TableColumn col = model.getColumn(0);
-					model.removeColumn(col);
-				}
-			}
-
-			this.initMultiLineRenderer();
-			this.initDefaultEditors();
-			this.restoreColumnSizes();
-
-			if (row >= 0)
-			{
-				this.getSelectionModel().setSelectionInterval(row, row);
-				final int newColumn;
-				if (aFlag)
-					newColumn = column + 1;
-				else
-					newColumn = column - 1;
-
-				if (newColumn >= 0)
-				{
-					EventQueue.invokeLater(new Runnable()
+					public void run()
 					{
-						public void run()
-						{
-							changeSelection(row, newColumn, true, true);
-						}
-					});
-				}
+						changeSelection(row, newColumn, true, true);
+					}
+				});
 			}
 		}
-		finally
-		{
-//			this.setSuspendRepaint(false);
-		}
-	}
-
-	private boolean suspendRepaint = false;
-
-	public synchronized void setSuspendRepaint(boolean suspend)
-	{
-		if (this.suspendRepaint == suspend) return;
-		boolean wasSuspended = this.suspendRepaint;
-		this.suspendRepaint = suspend;
-		this.setIgnoreRepaint(!suspend);
-		// if repainting was re-enabled, then queue
-		// a repaint event right away
-		if (wasSuspended && !suspend)
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					invalidate();
-					repaint();
-				}
-			});
-		}
-	}
-
-	public void paintComponents(Graphics g)
-	{
-		if (this.suspendRepaint) return;
-		super.paintComponents(g);
-	}
-
-	public void paintComponent(Graphics g)
-	{
-		if (this.suspendRepaint) return;
-		super.paintComponent(g);
-	}
-
-	public void paint(Graphics g)
-	{
-		if (this.suspendRepaint) return;
-		super.paint(g);
-	}
-	
-	public void repaint()
-	{
-		if (this.suspendRepaint) return;
-		super.repaint();
 	}
 
 	public boolean isPrimarySortColumn(int viewIndex)
@@ -1115,49 +1014,36 @@ public class WbTable
 
 	public void sortingStarted()
 	{
-		if (this.scrollPane != null)
+		final Container c = (this.scrollPane == null ? this : scrollPane);
+		
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			WbSwingUtilities.showWaitCursor(this.scrollPane);
-		}
-		else
-		{
-			WbSwingUtilities.showWaitCursor(this);
-			//WbSwingUtilities.showWaitCursor(this.getTableHeader());
-		}
-		//this.setIgnoreRepaint(true);
+			public void run()
+			{
+				WbSwingUtilities.showWaitCursor(c);
+			}
+		});
 	}
 
 	public void sortingFinished()
 	{
-		if (this.scrollPane != null)
-		{
-			WbSwingUtilities.showDefaultCursor(this.scrollPane);
-		}
-		else
-		{
-			//this.setIgnoreRepaint(false);
-			WbSwingUtilities.showDefaultCursor(this.getParent());
-			//WbSwingUtilities.showDefaultCursor(this.getTableHeader());
-		}
+		final Container c = (this.scrollPane == null ? this : scrollPane);
 		
-		this.getTableHeader().validate();
-		this.getTableHeader().repaint();
-//		this.getTableHeader().doLayout();
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				WbSwingUtilities.showDefaultCursor(c);
+				// The sorting indicator is not properly displayed
+				// if repaint() is not called
+				getTableHeader().repaint();
+			}
+		});
 	}
 
 	public boolean canSearchAgain()
 	{
 		return this.lastFoundRow >= 0;
-	}
-
-	public int search(String aText)
-	{
-		return this.search(aText, false);
-	}
-
-	public int searchNext()
-	{
-		return this.search(this.lastSearchCriteria, true);
 	}
 
 	public int search(String aText, boolean doContinue)
@@ -1229,10 +1115,12 @@ public class WbTable
 	}
 
 	private boolean useDefaultStringRenderer = true;
+	
 	public void setUseDefaultStringRenderer(boolean aFlag)
 	{
 		this.useDefaultStringRenderer = aFlag;
 	}
+	
 	public boolean getUseDefaultStringRenderer() { return this.useDefaultStringRenderer; }
 
 	private void initDateRenderers()
@@ -1380,7 +1268,7 @@ public class WbTable
 		return charLength > sizeThreshold;
 	}
 	
-	public void initDefaultEditors()
+	protected void initDefaultEditors()
 	{
 		Exception e = new Exception();
 		TableColumnModel colMod = this.getColumnModel();
@@ -1414,11 +1302,25 @@ public class WbTable
 		}
 	}
 
+	/**
+	 * Calls adjustOrOptimizeColumns(true).
+	 * 
+	 * @see #adjustOrOptimizeColumns(boolean)
+	 */
 	public void adjustOrOptimizeColumns()
 	{
 		adjustOrOptimizeColumns(true);
 	}
 	
+	/**
+	 * Enhance the column width display.
+	 * 
+	 * If the user chose to automatically optimize the column
+	 * width according to the content, this will 
+	 * call {@link #optimizeAllColWidth()}
+	 * otherwise this will call {@link #adjustColumns()}
+	 * @param checkheaders to be passed to optimizeAllColWidth() in case the column width should be optimized
+	 */
 	public void adjustOrOptimizeColumns(boolean checkHeaders)
 	{
 		if (Settings.getInstance().getAutomaticOptimalWidth())
@@ -1434,7 +1336,9 @@ public class WbTable
 	/**
 	 * Adjusts the columns to the width defined from the 
 	 * underlying tables (i.e. getColumnWidth() for each column)
-	 * If 
+	 * This does not adjust the width of the columns to the content.
+	 * 
+	 * @see #optimizeAllColWidth()
 	 */
 	public void adjustColumns()
 	{
@@ -1594,16 +1498,6 @@ public class WbTable
 		return false;
 	}
 
-//	public void tableChanged(TableModelEvent evt)
-//	{
-//		super.tableChanged(evt);
-//		if (this.suspendRepaint || this.modelChanging) return;
-//		if (evt.getFirstRow() == TableModelEvent.HEADER_ROW)
-//		{
-//			this.initDefaultEditors();
-//		}
-//	}
-
 	public void openEditWindow()
 	{
 		if (!this.isEditing()) return;
@@ -1708,7 +1602,8 @@ public class WbTable
 		return first + lastRow;
 	}
 
-	/** Scroll the given row into view.
+	/** 
+	 * Scroll the given row into view.
 	 */
 	public void scrollToRow(int aRow)
 	{
@@ -1717,8 +1612,8 @@ public class WbTable
 	}
 
 	/**
-	 *	Start sorting if the column header has been clicked.
-	 *
+	 * Start sorting if the column header has been clicked.
+	 * @param e the MouseEvent triggering the click
 	 */
 	public void mouseClicked(MouseEvent e)
 	{
@@ -1881,12 +1776,17 @@ public class WbTable
 	}
 
 	/**
-	 *	Open the Find dialog for searching strings in the result set
+	 * Open the Find dialog for searching strings in the result set.
+	 * If the text was found, {@link #canSearchAgain()} will return true
+	 * after this. In that case {@link #findNext()} may be called again.
+	 * 
+	 * @return the row in which the text was found, 
+	 *         -1 if nothing was found or the user cancelled the dialog
+	 * @see #search(String, boolean)
 	 */
 	public int find()
 	{
-		String criteria;
-		criteria = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgEnterSearchCriteria"), this.lastSearchCriteria);
+		String criteria = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgEnterSearchCriteria"), this.lastSearchCriteria);
 		if (criteria == null) return -1;
 		int row = this.search(criteria, false);
 		this.lastSearchCriteria = criteria;
@@ -1896,7 +1796,7 @@ public class WbTable
 
 	public int findNext()
 	{
-		return this.searchNext();
+		return this.search(this.lastSearchCriteria, true);
 	}
 
 
@@ -1958,6 +1858,11 @@ public class WbTable
 		return ds.hasPkColumns();
 	}
 
+	/**
+	 * Enables the actions related to copying data to the clipboard
+	 * if this table contains rows. If this table is empty
+	 * the actions are disabled
+	 */
 	public void checkCopyActions()
 	{
 		boolean hasRows = getRowCount() > 0;
@@ -1978,13 +1883,16 @@ public class WbTable
 		}
 	}
 
+	/**
+	 * Checks if the underlying DataStore has PrimaryKey columns defined.
+	 * @return true, if the DataStore has PK columns. false if no PKs defined or no DataStore attached to this Table
+	 * @see workbench.storage.DataStore#hasPkColumns()
+	 */
 	public boolean hasPkColumns()
 	{
 		DataStore ds = this.getDataStore();
 		if (ds == null) return false;
-
-		if (ds.hasPkColumns()) return true;
-		return false;
+		return ds.hasPkColumns();
 	}
 	
 	/**
@@ -1992,6 +1900,9 @@ public class WbTable
 	 *	If no key columns can be found, the user
 	 *  is prompted for the key columns
 	 *
+	 *  @param promptWhenNeeded if true, the user is asked to supply PK columns if none were found
+	 *  @return true, if primary key columns where found for the underlying table.
+	 * 
 	 *	@see #detectDefinedPkColumns()
 	 *	@see #selectKeyColumns()
 	 */

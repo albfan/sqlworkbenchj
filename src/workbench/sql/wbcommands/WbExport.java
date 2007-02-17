@@ -23,6 +23,7 @@ import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
+import workbench.storage.SqlLiteralFormatter;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CharacterRange;
@@ -91,7 +92,7 @@ public class WbExport
 		cmdLine.addArgument("blobType", StringUtil.stringToList(DataExporter.BLOB_MODE_FILE + "," + DataExporter.BLOB_MODE_LITERAL + "," + DataExporter.BLOB_MODE_ANSI));
 		cmdLine.addArgument("clobAsFile", ArgumentType.BoolArgument);
 		cmdLine.addArgument("continueOnError", ArgumentType.BoolArgument);
-		cmdLine.addArgument("sqlDateLiterals", StringUtil.stringToList("jdbc,ansi,dbms"));
+		cmdLine.addArgument("sqlDateLiterals", StringUtil.stringToList(SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE + "," + SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE + ",dbms," + SqlLiteralFormatter.DEFAULT_DATE_LITERAL_TYPE));
 	}
 	
 	public String getVerb() { return VERB; }
@@ -101,7 +102,13 @@ public class WbExport
 		String msg = ResourceMgr.getString("ErrExportWrongParameters");
 		msg = StringUtil.replace(msg, "%header_flag_default%", Boolean.toString(getTextHeaderDefault()));
 		msg = StringUtil.replace(msg, "%verbose_default%", Boolean.toString(getVerboseXmlDefault()));
+		msg = StringUtil.replace(msg, "%date_literal_default%", getDateLiteralDefault());
 		return msg;
+	}
+	
+	private String getDateLiteralDefault()
+	{
+		return Settings.getInstance().getProperty("workbench.export.sql.default.dateliteral", "dbms");
 	}
 	
 	private boolean getVerboseXmlDefault()
