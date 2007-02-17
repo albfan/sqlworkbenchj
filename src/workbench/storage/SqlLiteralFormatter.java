@@ -48,8 +48,13 @@ public class SqlLiteralFormatter
 	/**
 	 * The "product" for the standard date literal format
 	 */
-	public static final String STANDARD_DATE_LITERAL_TYPE = "ansi";
+	public static final String STANDARD_DATE_LITERAL_TYPE = "default";
 
+	/**
+	 * The "product" for the dbms specific date literal format
+	 */
+	public static final String DBMS_DATE_LITERAL_TYPE = "dbms";
+	
 	private SimpleDateFormat dateFormatter;
 	private SimpleDateFormat timestampFormatter;
 	private SimpleDateFormat timeFormatter;
@@ -58,6 +63,7 @@ public class SqlLiteralFormatter
 	private DataFileWriter clobWriter;
 	private boolean treatClobAsFile = false;
 	private String clobEncoding = Settings.getInstance().getDefaultFileEncoding();
+	private boolean isDbId;
 	
 	/**
 	 * Create a new formatter with default formatting. 
@@ -80,24 +86,36 @@ public class SqlLiteralFormatter
 	public SqlLiteralFormatter(WbConnection con)
 	{
 		String product = null;
-			
+		isDbId = false;
 		if (con != null)
 		{
-			product = con.getMetadata().getProductName();
+			product = con.getMetadata().getDbId();
+			isDbId = true;
 		}
-		setProduct(product == null ? STANDARD_DATE_LITERAL_TYPE : product);
+		setProduct(product);
+	}
+	
+	/**
+	 * Select the DBMS specific date literal according to the 
+	 * DBMS identified by the connection.
+	 * @param con the connection to identify the DBMS
+	 * @see #setProduct(String)
+	 */
+	public void setProduct(WbConnection con)
+	{
+		if (con != null)
+		{
+			String product = con.getMetadata().getDbId();
+			isDbId = true;
+			this.setProduct(product);
+		}
 	}
 	
 	/**
 	 * Use a specific product name for formatting date and timestamp values.
-	 * <br/>
-	 * Valid values are: 
-	 * <ul>
-	 *	<li>jdbc - to produce JDBC escape literals (e.g. {d '2010-01-02'})</li> 
-	 *  <li>ansi - to produce ANSI literals (e.g. DATE '2010-01-02')</li> 
-	 * </ul>
-	 * Any other value will either use the formatting available in the XML files
-	 * or a default literal.
+	 * This call is ignored if the passed value is DBMS and this instance has 
+	 * been initialised with a Connection (thus the DBMS specific formatter is already
+	 * selected).
 	 * 
 	 * @param product the product to use. This is the key to the map defining the formats
 	 * 
@@ -105,6 +123,14 @@ public class SqlLiteralFormatter
 	 */
 	public void setProduct(String product)
 	{
+		// If the DBMS specific format is selected and we already have a DBID
+		// then this call is simply ignored.
+		if (DBMS_DATE_LITERAL_TYPE.equalsIgnoreCase(product) && this.isDbId)
+		{
+			LogMgr.logDebug("SqlLiteralFormatter.setProduct()", "Ignoring request for DBMS as a DBID is already used");
+			return;
+		}
+		
 		dateFormatter = createFormatter(product, "date", "''yyyy-MM-dd''");
 		timestampFormatter = createFormatter(product, "timestamp", "''yyyy-MM-dd HH:mm:ss''");
 		timeFormatter = createFormatter(product, "time", "''HH:mm:ss''");
@@ -177,7 +203,7 @@ public class SqlLiteralFormatter
 	
 	private SimpleDateFormat createFormatter(String format, String type, String defaultPattern)
 	{
-		String key = "workbench.sql.literals." + format + "." + type + ".pattern";
+		String key = "workbench.sql.literals." + (format == null ? STANDARD_DATE_LITERAL_TYPE : format) + "." + type + ".pattern";
 		SimpleDateFormat f = null;
 		String pattern = null;
 		try
@@ -202,15 +228,27 @@ public class SqlLiteralFormatter
 	private String quoteString(String t)
 	{
 		StringBuilder realValue = new StringBuilder(t.length() + 10);
-		// Single quotes in a String must be "quoted"...
+		
+		// Surround the value with single quotes
 		realValue.append('\'');
-		// replace to Buffer writes the result of into the passed buffer
-		// so this appends the correct literal to realValue
+		
+		// Single quotes in a String must be "quoted"...
+		// replaceToBuffer writes the result directly into the passed buffer
 		StringUtil.replaceToBuffer(realValue, t, "'", "''");
+		
 		realValue.append('\'');
 		return realValue.toString();
 	}
 	
+	/**
+	 * Return the default literal for the given column data.
+	 * Date and Timestamp data will be formatted according to the 
+	 * syntax defined by the {@link #setProduct(String)} method
+	 * or through the connection provided in the constructor.
+	 * @param data the data to be converted into a literal.
+	 * @return the literal to be used in a SQL statement
+	 * @see #setProduct(String)
+	 */
 	public String getDefaultLiteral(ColumnData data)
 	{
 		if (data.isNull()) return "NULL";

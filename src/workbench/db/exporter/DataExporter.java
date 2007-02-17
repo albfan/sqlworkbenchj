@@ -206,28 +206,13 @@ public class DataExporter
 	 */
 	public void setDateLiteralType(String type)
 	{
-		if (SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE.equalsIgnoreCase(type))
-		{
-			this.dateLiteralType = SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE;
-		}
-		else if (SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE.equalsIgnoreCase(type))
-		{
-			this.dateLiteralType = SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE;
-		}
-		else if ("dbms".equalsIgnoreCase(type))
+		if ("dbms".equalsIgnoreCase(type) || type == null)
 		{
 			this.dateLiteralType = null;
 		}
-		else if (SqlLiteralFormatter.DEFAULT_DATE_LITERAL_TYPE.equalsIgnoreCase(type))
-		{
-			this.dateLiteralType = SqlLiteralFormatter.DEFAULT_DATE_LITERAL_TYPE;
-		}
 		else
 		{
-			// if the user added a customized mapping we have to use
-			// the type as provided as it is used as a key to retrieve 
-			// the date format
-			this.dateLiteralType = type;
+			this.dateLiteralType = type.trim().toLowerCase();
 		}
 	}
   

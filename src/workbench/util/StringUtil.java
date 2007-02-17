@@ -40,10 +40,9 @@ public class StringUtil
 	public static final String EMPTY_STRING = "";
 
 	public static final String ISO_DATE_FORMAT = "yyyy-MM-dd";
-	public static final String ISO_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SS";
-	public static final String ISO_TZ_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SS z";
+	public static final String ISO_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+	public static final String ISO_TZ_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS z";
 	
-	//public static final SimpleDateFormat ISO_DATE_FORMATTER = new SimpleDateFormat(ISO_DATE_FORMAT);
 	public static final SimpleDateFormat ISO_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TIMESTAMP_FORMAT);
 	public static final SimpleDateFormat ISO_TZ_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TZ_TIMESTAMP_FORMAT);
 
@@ -233,33 +232,41 @@ public class StringUtil
 		return input.replaceAll("[\t\\:\\\\/\\?\\*\\|<>\"'\\{\\}$%§\\[\\]\\^|\\&]", "").toLowerCase();
 	}
 
-	public static final StringBuilder replaceToBuffer(StringBuilder target, String aString, String aValue, String aReplacement)
+	/**
+	 * Replaces all occurances of aValue in aString with aReplacement and appends the resulting
+	 * String to the passed target.
+	 * @param target the buffer to append the result to. If target is null a new StringBuilder will be created
+	 * @param haystack the String in which to search the value
+	 * @param needle the value to search for
+	 * @param replacement the value with which needle is replaced
+	 * @return the resulting buffer
+	 */
+	public static final StringBuilder replaceToBuffer(StringBuilder target, String haystack, String needle, String aReplacement)
 	{
 		if (target == null)
 		{
-			target = new StringBuilder((int)(aString.length() * 1.1));
+			target = new StringBuilder((int)(haystack.length() * 1.1));
 		}
 
-		int pos = aString.indexOf(aValue);
+		int pos = haystack.indexOf(needle);
 		if (pos == -1)
 		{
-			target.append(aString);
+			target.append(haystack);
 			return target;
 		}
 
-
 		int lastpos = 0;
-		int len = aValue.length();
+		int len = needle.length();
 		while (pos != -1)
 		{
-			target.append(aString.substring(lastpos, pos));
+			target.append(haystack.substring(lastpos, pos));
 			if (aReplacement != null) target.append(aReplacement);
 			lastpos = pos + len;
-			pos = aString.indexOf(aValue, lastpos);
+			pos = haystack.indexOf(needle, lastpos);
 		}
-		if (lastpos < aString.length())
+		if (lastpos < haystack.length())
 		{
-			target.append(aString.substring(lastpos));
+			target.append(haystack.substring(lastpos));
 		}
 		return target;
 	}
@@ -327,31 +334,6 @@ public class StringUtil
 		String result = aLine.substring(0, pos);
 		return result;
 	}
-
-//	public static String cleanNonPrintable(String aValue)
-//	{
-//		return cleanNonPrintable(aValue, ' ');
-//	}
-//	
-//	public static String cleanNonPrintable(String aValue, char replacement)
-//	{
-//		if (aValue == null) return null;
-//		int len = aValue.length();
-//		StringBuilder result = new StringBuilder(len);
-//		for (int i=0; i < len; i++)
-//		{
-//			char c = aValue.charAt(i);
-//			if (c > 32)
-//			{
-//				result.append(c);
-//			}
-//			else
-//			{
-//				result.append(replacement);
-//			}
-//		}
-//		return result.toString();
-//	}
 
 	public static double getDoubleValue(String aValue, double aDefault)
 	{

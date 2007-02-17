@@ -92,7 +92,7 @@ public class WbExport
 		cmdLine.addArgument("blobType", StringUtil.stringToList(DataExporter.BLOB_MODE_FILE + "," + DataExporter.BLOB_MODE_LITERAL + "," + DataExporter.BLOB_MODE_ANSI));
 		cmdLine.addArgument("clobAsFile", ArgumentType.BoolArgument);
 		cmdLine.addArgument("continueOnError", ArgumentType.BoolArgument);
-		cmdLine.addArgument("sqlDateLiterals", StringUtil.stringToList(SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE + "," + SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE + ",dbms," + SqlLiteralFormatter.DEFAULT_DATE_LITERAL_TYPE));
+		cmdLine.addArgument("sqlDateLiterals", Settings.getInstance().getLiteralTypeList());
 	}
 	
 	public String getVerb() { return VERB; }

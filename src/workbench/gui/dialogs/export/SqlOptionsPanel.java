@@ -14,6 +14,8 @@ package workbench.gui.dialogs.export;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import workbench.db.ColumnIdentifier;
@@ -40,6 +42,9 @@ public class SqlOptionsPanel
 	{
 		initComponents();
 		setResultInfo(info);
+		List<String> types = Settings.getInstance().getLiteralTypeList();
+		ComboBoxModel model = new DefaultComboBoxModel(types.toArray());
+		literalTypes.setModel(model);
 	}
 
 	public void setResultInfo(ResultInfo info)
@@ -81,12 +86,12 @@ public class SqlOptionsPanel
 		this.setCommitEvery(s.getIntProperty("workbench.export.sql.commitevery", 0));
 		this.setCreateTable(s.getBoolProperty("workbench.export.sql.createtable"));
 		String type = s.getProperty("workbench.export.sql.dateliterals", "DBMS");
-		this.literalType.setSelectedItem(type);
+		this.literalTypes.setSelectedItem(type);
 	}
 
 	public String getDateLiteralType()
 	{
-		return (String)literalType.getSelectedItem();
+		return (String)literalTypes.getSelectedItem();
 	}
 	
 	public String getAlternateUpdateTable()
@@ -255,7 +260,7 @@ public class SqlOptionsPanel
     selectKeys = new javax.swing.JButton();
     jPanel1 = new javax.swing.JPanel();
     jLabel2 = new javax.swing.JLabel();
-    literalType = new javax.swing.JComboBox();
+    literalTypes = new javax.swing.JComboBox();
     jPanel2 = new javax.swing.JPanel();
     commitLabel = new javax.swing.JLabel();
     commitCount = new javax.swing.JTextField();
@@ -329,9 +334,8 @@ public class SqlOptionsPanel
     jLabel2.setText(ResourceMgr.getString("LblLiteralType"));
     jPanel1.add(jLabel2, java.awt.BorderLayout.WEST);
 
-    literalType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "DBMS", "JDBC", "ANSI" }));
-    literalType.setToolTipText(ResourceMgr.getDescription("LblLiteralType"));
-    jPanel1.add(literalType, java.awt.BorderLayout.CENTER);
+    literalTypes.setToolTipText(ResourceMgr.getDescription("LblLiteralType"));
+    jPanel1.add(literalTypes, java.awt.BorderLayout.CENTER);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -379,7 +383,7 @@ private void selectKeysActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
   public javax.swing.JLabel jLabel2;
   public javax.swing.JPanel jPanel1;
   public javax.swing.JPanel jPanel2;
-  public javax.swing.JComboBox literalType;
+  public javax.swing.JComboBox literalTypes;
   public javax.swing.JButton selectKeys;
   public javax.swing.ButtonGroup typeGroup;
   public javax.swing.JRadioButton useDeleteInsert;

@@ -11,6 +11,9 @@
  */
 package workbench.gui.settings;
 
+import java.util.List;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.FlatButton;
@@ -38,6 +41,10 @@ public class DataEditOptionsPanel
 		initComponents();
 		setBorder(DividerBorder.BOTTOM_DIVIDER);
 		restoreSettings();
+		
+		List<String> types = Settings.getInstance().getLiteralTypeList();
+		ComboBoxModel model = new DefaultComboBoxModel(types.toArray());
+		literalTypes.setModel(model);
 	}
 
 	public void restoreSettings()
@@ -52,7 +59,7 @@ public class DataEditOptionsPanel
 		maxColSizeField.setText(Integer.toString(Settings.getInstance().getMaxColumnWidth()));
 		pkMapFile.setText(Settings.getInstance().getPKMappingFilename());
 		String type = Settings.getInstance().getDefaultDateLiteralType();
-		this.literalType.setSelectedItem(type);
+		this.literalTypes.setSelectedItem(type);
 	}
 
 	public void saveSettings()
@@ -70,7 +77,7 @@ public class DataEditOptionsPanel
 		set.setPKMappingFilename(pkMapFile.getText());
 		set.setAutomaticOptimalWidth(autoColWidth.isSelected());
 		set.setIncludeHeaderInOptimalWidth(includeHeaderWidth.isSelected());
-		set.setDefaultDateLiteralType((String)literalType.getSelectedItem());
+		set.setDefaultDateLiteralType((String)literalTypes.getSelectedItem());
 	}
 	
 	/** This method is called from within the constructor to
@@ -110,7 +117,7 @@ public class DataEditOptionsPanel
     autoColWidthLabel = new WbCheckBoxLabel();
     autoColWidth = new javax.swing.JCheckBox();
     dummyPanel = new javax.swing.JPanel();
-    literalType = new javax.swing.JComboBox();
+    literalTypes = new javax.swing.JComboBox();
     jLabel2 = new javax.swing.JLabel();
 
     setLayout(new java.awt.GridBagLayout());
@@ -373,15 +380,14 @@ public class DataEditOptionsPanel
     gridBagConstraints.weighty = 1.0;
     add(dummyPanel, gridBagConstraints);
 
-    literalType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "DBMS", "JDBC", "ANSI" }));
-    literalType.setToolTipText(ResourceMgr.getDescription("LblDefaultLiteralType"));
+    literalTypes.setToolTipText(ResourceMgr.getDescription("LblDefaultLiteralType"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 10;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 0);
-    add(literalType, gridBagConstraints);
+    add(literalTypes, gridBagConstraints);
 
     jLabel2.setText(ResourceMgr.getString("LblDefaultLiteralType"));
     jLabel2.setToolTipText(ResourceMgr.getDescription("LblDefaultLiteralType"));
@@ -427,7 +433,7 @@ public class DataEditOptionsPanel
   private javax.swing.JLabel jLabel2;
   private javax.swing.JPanel jPanel3;
   private javax.swing.JLabel labelRowHeight;
-  private javax.swing.JComboBox literalType;
+  private javax.swing.JComboBox literalTypes;
   private javax.swing.JTextField maxColSizeField;
   private javax.swing.JLabel maxColSizeLabel;
   private javax.swing.JTextField minColSizeField;

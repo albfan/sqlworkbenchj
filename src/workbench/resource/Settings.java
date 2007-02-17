@@ -955,6 +955,17 @@ public class Settings
 		}
 	}
 
+	public String getLiteralTypes()
+	{
+		return getProperty("workbench.sql.literals.types", "jdbc,ansi,default");
+	}
+	
+	public List<String> getLiteralTypeList()
+	{
+		String types = getLiteralTypes();
+		return StringUtil.stringToList(types, ",", true, true, false);	
+	}
+	
 	public void setDefaultDateLiteralType(String type)
 	{
 		setProperty("workbench.export.copy.sql.dateliterals", type);
