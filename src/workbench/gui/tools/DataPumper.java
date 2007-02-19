@@ -42,6 +42,7 @@ import workbench.db.importer.ProducerFactory;
 import workbench.gui.actions.AutoCompletionAction;
 import workbench.interfaces.StatusBar;
 import workbench.sql.wbcommands.CommandTester;
+import workbench.sql.wbcommands.CommonArgs;
 import workbench.util.ExceptionUtil;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
@@ -1594,7 +1595,7 @@ public class DataPumper
 		if (!"insert".equals(mode))
 		{
 			result.append(indent);
-			result.append("-" + WbCopy.PARAM_MODE + "=" + mode);
+			result.append("-" + CommonArgs.ARG_IMPORT_MODE + "=" + mode);
 			Collection<ColumnIdentifier> keys = this.getKeyColumns();
 			if (keys.size() > 0)
 			{
@@ -1614,14 +1615,14 @@ public class DataPumper
 		result.append(Boolean.toString(this.deleteTargetCbx.isSelected()));
 
 		result.append(indent);
-		result.append("-" + WbCopy.PARAM_CONTINUE + "=");
+		result.append("-" + CommonArgs.ARG_CONTINUE + "=");
 		result.append(Boolean.toString(this.continueOnErrorCbx.isSelected()));
 
 		int batchSize = getBatchSize();
 		if (batchSize > 0)
 		{
 			result.append(indent);
-			result.append("-" + WbCopy.PARAM_BATCHSIZE + "=" + batchSize);
+			result.append("-" + CommonArgs.ARG_BATCHSIZE + "=" + batchSize);
 		}
 
 		if (batchSize <= 0)
@@ -1630,7 +1631,7 @@ public class DataPumper
 			if (commit > 0)
 			{
 				result.append(indent);
-				result.append("-" + WbCopy.PARAM_COMMITEVERY + "=");
+				result.append("-" + CommonArgs.ARG_COMMIT + "=");
 				result.append(commit);
 			}
 		}

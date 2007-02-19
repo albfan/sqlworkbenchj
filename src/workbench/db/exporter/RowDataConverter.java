@@ -68,7 +68,7 @@ public abstract class RowDataConverter
 	private boolean compressExternalFiles;
 	protected boolean useRowNumForBlobFile = true;
 	protected int[] blobNameCols = null;
-	protected List blobIdColumns = null;
+	protected List<String> blobIdColumns = null;
 	protected long currentRow = -1;
 	protected RowData currentRowData;
 	
@@ -82,6 +82,9 @@ public abstract class RowDataConverter
 		this.defaultNumberFormatter = Settings.getInstance().getDefaultDecimalFormatter();
 	}
 
+	/**
+	 * Define the structure of the result to be exported.
+	 */
 	public void setResultInfo(ResultInfo meta) 
 	{ 
 		this.metaData = meta; 
@@ -92,12 +95,13 @@ public abstract class RowDataConverter
 			int count = this.blobIdColumns.size();
 			int found = 0;
 			blobNameCols = new int[count];
-			for (int i = 0; i < count; i++)
+			int nameIndex = 0;
+			for (String col : blobIdColumns)
 			{
-				String col = (String)blobIdColumns.get(i);
 				int index = meta.findColumn(col);
-				blobNameCols[i] = index;
+				blobNameCols[nameIndex] = index;
 				if (index > -1) found ++;
+				nameIndex ++;
 			}
 			if (found == 0)
 			{
@@ -113,7 +117,7 @@ public abstract class RowDataConverter
 	
 	public ResultInfo getResultInfo() { return this.metaData; }
 	
-	void setBlobIdColumns(List cols)
+	void setBlobIdColumns(List<String> cols)
 	{
 		blobIdColumns = cols;
 	}

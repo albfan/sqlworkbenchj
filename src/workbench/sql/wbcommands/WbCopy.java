@@ -53,22 +53,22 @@ public class WbCopy
 	public static final String PARAM_TARGETPROFILE_GROUP = "targetGroup";
 	public static final String PARAM_COLUMNS = "columns";
 	public static final String PARAM_SOURCEWHERE = "sourceWhere";
-	public static final String PARAM_COMMITEVERY = "commitEvery";
-	public static final String PARAM_COMMITBATCH = "commitBatch";
-	public static final String PARAM_CONTINUE = "continueOnError";
 	public static final String PARAM_DELETETARGET = "deleteTarget";
-	public static final String PARAM_MODE = "mode";
 	public static final String PARAM_KEYS = "keyColumns";
 	public static final String PARAM_DROPTARGET = "dropTarget";
 	public static final String PARAM_CREATETARGET = "createTarget";
-	public static final String PARAM_BATCHSIZE = "batchSize";
-	public static final String PARAM_PROGRESS = "showProgress";
 
 	private DataCopier copier;
 
 	public WbCopy()
 	{
 		cmdLine = new ArgumentParser();
+		CommonArgs.addCommitParameter(cmdLine);
+		CommonArgs.addImportModeParameter(cmdLine);
+		CommonArgs.addContinueParameter(cmdLine);
+		CommonArgs.addProgressParameter(cmdLine);
+		CommonArgs.addCommitAndBatchParams(cmdLine);
+		
 		cmdLine.addArgument(PARAM_SOURCETABLE);
 		cmdLine.addArgument(PARAM_SOURCEQUERY);
 		cmdLine.addArgument(PARAM_TARGETTABLE);
@@ -78,17 +78,11 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_TARGETPROFILE_GROUP);
 		cmdLine.addArgument(PARAM_COLUMNS);
 		cmdLine.addArgument(PARAM_SOURCEWHERE);
-		cmdLine.addArgument(PARAM_COMMITEVERY);
-		cmdLine.addArgument(PARAM_COMMITBATCH, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_CONTINUE, ArgumentType.BoolArgument);
-		cmdLine.addArgument("continue");
 		cmdLine.addArgument(PARAM_DELETETARGET, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_MODE, StringUtil.stringToList("insert,update,update/insert,insert/update"));
 		cmdLine.addArgument(PARAM_KEYS);
 		cmdLine.addArgument(PARAM_DROPTARGET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_CREATETARGET, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_BATCHSIZE);
-		cmdLine.addArgument(PARAM_PROGRESS);
+		cmdLine.addArgument(CommonArgs.ARG_BATCHSIZE);
 	}
 
 	public String getVerb() { return VERB; }
@@ -120,8 +114,6 @@ public class WbCopy
 		ProfileKey targetKey = null;
 		if (targetProfile != null) targetKey = new ProfileKey(targetProfile, targetGroup);
 		
-		int commit = StringUtil.getIntValue(cmdLine.getValue(PARAM_COMMITEVERY),-1);
-
 		String sourcetable = cmdLine.getValue(PARAM_SOURCETABLE);
 		String sourcequery = cmdLine.getValue(PARAM_SOURCEQUERY);
 		if (sourcetable == null && sourcequery == null)
@@ -205,12 +197,7 @@ public class WbCopy
 			}
 		}
 		boolean delete = cmdLine.getBoolean(PARAM_DELETETARGET);
-		boolean cont = cmdLine.getBoolean(PARAM_CONTINUE);
-		if (cmdLine.isArgPresent("continue"))
-		{
-			result.addMessage("Parameter 'continue' is deprecated. Please use 'continueOnError'");
-			cont = cmdLine.getBoolean("continue");
-		}
+		boolean cont = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE);
 		
 		boolean createTable = cmdLine.getBoolean(PARAM_CREATETARGET);
 		boolean dropTable = cmdLine.getBoolean(PARAM_DROPTARGET);
@@ -219,7 +206,7 @@ public class WbCopy
 		this.copier = new DataCopier();
 		copier.setKeyColumns(keys);
 
-		String mode = cmdLine.getValue(PARAM_MODE);
+		String mode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
 		if (mode != null)
 		{
 			if (!this.copier.setMode(mode))
@@ -228,38 +215,12 @@ public class WbCopy
 			}
 		}
 
-		copier.setReportInterval(cmdLine.getIntValue(PARAM_PROGRESS,10));
+		CommonArgs.setProgressInterval(copier, cmdLine);
+
 		copier.setRowActionMonitor(this.rowMonitor);
 		copier.setContinueOnError(cont);
 		
-		
-		int queueSize = cmdLine.getIntValue(PARAM_BATCHSIZE,-1);
-		
-		if (queueSize > 0)
-		{
-			copier.setUseBatch(true);
-			copier.setBatchSize(queueSize);
-			
-			if (cmdLine.isArgPresent(PARAM_COMMITBATCH))
-			{
-				copier.setCommitBatch(cmdLine.getBoolean(PARAM_COMMITBATCH, false));
-				if (cmdLine.isArgPresent(PARAM_COMMITEVERY))
-				{
-					result.addMessage(ResourceMgr.getString("MsgCommitEveryIgnored"));
-				}
-			}
-			else
-			{
-				if (cmdLine.isArgPresent(PARAM_COMMITEVERY))
-				{
-					result.addMessage(ResourceMgr.getString("MsgCommitEveryWrong"));
-				}
-			}
-		}
-		else
-		{
-			copier.setCommitEvery(commit);
-		}
+		CommonArgs.setCommitAndBatchParams(copier, cmdLine);
 		
 		copier.setDeleteTarget(delete);
 		

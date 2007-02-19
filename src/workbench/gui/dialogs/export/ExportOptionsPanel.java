@@ -24,6 +24,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.gui.WbSwingUtilities;
@@ -54,7 +55,7 @@ public class ExportOptionsPanel
 	private HtmlOptionsPanel htmlOptions;
 	private XmlOptionsPanel xmlOptions;
 	private int currentType = -1;
-	private List selectedColumns;
+	private List<ColumnIdentifier> selectedColumns;
 	private Object columnSelectEventSource;
 	private ColumnSelectorPanel columnSelectorPanel;
 	private ResultInfo dataStoreColumns;
@@ -140,7 +141,7 @@ public class ExportOptionsPanel
 		this.sqlOptions.setIncludeDeleteInsert(flag);
 	}
 
-	public List getColumnsToExport()
+	public List<ColumnIdentifier> getColumnsToExport()
 	{
 		return this.selectedColumns;
 	}

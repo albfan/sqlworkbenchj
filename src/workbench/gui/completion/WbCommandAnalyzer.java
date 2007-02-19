@@ -126,6 +126,8 @@ public class WbCommandAnalyzer
 	 * corresponding string is returned. 
 	 * Otherwise it is assumed that the cursor is "between" two parameters 
 	 * and the list of available parameters should be displayed.
+	 * 
+	 * @return the value of the current parameter or null if no parameter was found
 	 */
 	protected String getCurrentParameter()
 	{

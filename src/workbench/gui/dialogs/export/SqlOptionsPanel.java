@@ -77,7 +77,7 @@ public class SqlOptionsPanel
 		Settings s = Settings.getInstance();
 		s.setProperty("workbench.export.sql.commitevery", this.getCommitEvery());
 		s.setProperty("workbench.export.sql.createtable", this.getCreateTable());
-		s.setProperty("workbench.export.sql.dateliterals", this.getDateLiteralType());
+		s.setProperty("workbench.export.sql.saveas.dateliterals", this.getDateLiteralType());
 	}
 	
 	public void restoreSettings()
@@ -85,7 +85,8 @@ public class SqlOptionsPanel
 		Settings s = Settings.getInstance();
 		this.setCommitEvery(s.getIntProperty("workbench.export.sql.commitevery", 0));
 		this.setCreateTable(s.getBoolProperty("workbench.export.sql.createtable"));
-		String type = s.getProperty("workbench.export.sql.dateliterals", "DBMS");
+		String def = s.getProperty("workbench.export.sql.default.dateliterals", "dbms");
+		String type = s.getProperty("workbench.export.sql.saveas.dateliterals", def);
 		this.literalTypes.setSelectedItem(type);
 	}
 

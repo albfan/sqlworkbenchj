@@ -27,6 +27,8 @@ import workbench.db.DbMetadata;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.interfaces.Committer;
+import workbench.interfaces.ProgressReporter;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
@@ -40,6 +42,7 @@ import java.io.Reader;
 import java.sql.Clob;
 import java.sql.Types;
 import java.util.LinkedList;
+import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ImportFileParser;
 import workbench.storage.NullValue;
 import workbench.util.CloseableDataStream;
@@ -59,7 +62,7 @@ import workbench.util.WbThread;
  * @author  support@sql-workbench.net
  */
 public class DataImporter
-	implements Interruptable, RowDataReceiver
+	implements Interruptable, RowDataReceiver, ProgressReporter, BatchCommitter
 {
 	public static final int MODE_INSERT = 0;
 	public static final int MODE_UPDATE = 1;
@@ -181,9 +184,25 @@ public class DataImporter
 			this.commitEvery = 0;
 		}
 	}
+	
+	/**
+	 * Do not commit any changes after finishing the import
+	 */
+	public void commitNothing()
+	{
+		this.commitBatch = false;
+		this.commitEvery = Committer.NO_COMMIT_FLAG; 
+	}
+	
+	/**
+	 * Set the commit interval.
+	 * When this parameter is set, commitBatch is set to false.
+	 * 
+	 * @param aCount the interval in which commits should be sent
+	 */
 	public void setCommitEvery(int aCount) 
 	{ 
-		if (aCount > 0)
+		if (aCount > 0 || aCount == Committer.NO_COMMIT_FLAG)
 		{
 			this.commitBatch = false;
 		}
@@ -884,6 +903,7 @@ public class DataImporter
 						{
 							in = EncodingUtil.createReader(handler.getAttachedFileStream(f), encoding);
 							size = (int)handler.getLength(f);
+							streams.add(new CloseableDataStream(in));
 						}
 						else
 						{
@@ -912,7 +932,6 @@ public class DataImporter
 					// it created when reading that column!
 					String value = row[i].toString();
 					in = new StringReader(value);
-					streams.add(new CloseableDataStream(in));
 					size = value.length();
 				}
 				
@@ -1387,8 +1406,11 @@ public class DataImporter
 			}
 			this.updateStatement.clearBatch();
 		}
+		LogMgr.logDebug("DataImporter", "Batch sent to database");
+			
 		if (this.commitBatch && !this.dbConn.getAutoCommit())
 		{
+			LogMgr.logDebug("DataImporter", "Committing batch...");
 			this.dbConn.commit();
 		}
 	}
@@ -1396,7 +1418,8 @@ public class DataImporter
 	private void finishTable()
 		throws SQLException
 	{
-		boolean commitNeeded = !dbConn.getAutoCommit();
+		boolean commitNeeded = !dbConn.getAutoCommit() && (this.commitEvery != Committer.NO_COMMIT_FLAG);
+		
 		try
 		{
 			if (this.useBatch)
@@ -1447,6 +1470,9 @@ public class DataImporter
 
 	/** 
 	 * Return the messages generated during import.
+	 * Calling this, clears the message buffer
+	 * @return the message buffer.
+	 * @see workbench.util.MessageBuffer#getBuffer()
 	 */
 	public StringBuilder getMessages()
 	{

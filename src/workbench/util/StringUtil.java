@@ -438,7 +438,7 @@ public class StringUtil
 		WbStringTokenizer tok = new WbStringTokenizer(aString, aDelimiter);
 		tok.setDelimiterNeedsWhitspace(false);
 		tok.setCheckBrackets(checkBrackets);
-		List result = new LinkedList();
+		List<String> result = new LinkedList<String>();
 		while (tok.hasMoreTokens())
 		{
 			String element = tok.nextToken();

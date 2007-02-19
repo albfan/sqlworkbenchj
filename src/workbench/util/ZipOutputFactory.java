@@ -27,6 +27,7 @@ public class ZipOutputFactory
 	implements OutputFactory
 {
 	protected File archive;
+	protected OutputStream baseOut;
 	protected ZipOutputStream zout;
 	protected ZipEntry currentEntry;
 	
@@ -38,9 +39,9 @@ public class ZipOutputFactory
 	private void initArchive()
 		throws IOException
 	{
-		OutputStream out = new FileOutputStream(archive);
-		this.zout = new ZipOutputStream(out);
-		this.zout.setLevel(9);
+		baseOut = new FileOutputStream(archive);
+		zout = new ZipOutputStream(baseOut);
+		zout.setLevel(9);
 	}
 	
 	public OutputStream createOutputStream(File output) throws IOException
@@ -92,6 +93,10 @@ public class ZipOutputFactory
 		if (this.zout != null) 
 		{
 			zout.close();
+		}
+		if (baseOut != null)
+		{
+			baseOut.close();
 		}
 	}
 	

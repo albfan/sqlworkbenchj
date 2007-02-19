@@ -43,6 +43,7 @@ public class ImportFileHandler
 	private ZipFile mainArchive;
 	private ZipFile attachments;
 	private List<ZipEntry> attachmentEntries;
+	private BufferedReader mainReader;
 
 	public ImportFileHandler()
 	{
@@ -63,9 +64,15 @@ public class ImportFileHandler
 		isZip = ZipUtil.isZipFile(baseFile);
 	}
 	
+	boolean isZip() { return isZip; }
+
 	public BufferedReader getMainFileReader()
 		throws IOException
 	{
+		if (this.mainReader != null)
+		{
+			try { mainReader.close(); } catch (Throwable th) {}
+		}
 		Reader r = null;
 		if (baseFile instanceof ClipboardFile)
 		{
@@ -91,7 +98,8 @@ public class ImportFileHandler
 		{
 			r = EncodingUtil.createReader(baseFile, encoding);
 		}
-		return new BufferedReader(r, 32*1024);
+		mainReader = new BufferedReader(r, 32*1024);
+		return mainReader;
 	}
 
 	private void initAttachements()
@@ -185,24 +193,20 @@ public class ImportFileHandler
 	
 	public void done()
 	{
-		try 
-		{ 
-			if (mainArchive != null) mainArchive.close(); 
-			mainArchive = null;
-		} 
-		catch (Throwable th) 
-		{
-		}
+
+		try { if (mainReader != null) mainReader.close(); } catch (Throwable th) {}
+		try { if (mainArchive != null) mainArchive.close(); } catch (Throwable th) {}
 		
 		try 
 		{ 
 			if (attachments != null) attachments.close(); 
-			attachments = null;
 			if (attachmentEntries != null) attachmentEntries.clear();
-			attachmentEntries = null;
 		} 
 		catch (Throwable th) 
 		{
 		}
+		mainArchive = null;
+		attachmentEntries = null;
+		attachments = null;
 	}
 }

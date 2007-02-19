@@ -44,28 +44,21 @@ public class WbImport
 	public static final String ARG_TYPE = "type";
 	public static final String ARG_FILE = "file";
 	public static final String ARG_TARGETTABLE = "table";
-	public static final String ARG_DELIM = "delimiter";
 	public static final String ARG_QUOTE = "quotechar";
 	public static final String ARG_DATE_FORMAT = "dateFormat";
 	public static final String ARG_TIMESTAMP_FORMAT = "timestampFormat";
 	public static final String ARG_DECCHAR = "decimal";
-	public static final String ARG_COMMIT = "commitEvery";
-	public static final String ARG_COMMIT_BATCH = "commitBatch";
 	public static final String ARG_CONTAINSHEADER = "header";
-	public static final String ARG_ENCODING = "encoding";
 	public static final String ARG_FILECOLUMNS = "fileColumns";
 	public static final String ARG_MODE = "mode";
 	public static final String ARG_KEYCOLUMNS = "keyColumns";
-	public static final String ARG_BATCHSIZE = "batchSize";
+	
 	public static final String ARG_DELETE_TARGET = "deleteTarget";
 	public static final String ARG_EMPTY_STRING_IS_NULL = "emptyStringIsNull";
-	public static final String ARG_CONTINUE = "continueOnError";
 	public static final String ARG_DECODE = "decode";
-	public static final String ARG_VERBOSEXML = "verboseXML";
 	public static final String ARG_IMPORTCOLUMNS = "importColumns";
 	public static final String ARG_COL_FILTER = "columnFilter";
 	public static final String ARG_LINE_FILTER = "lineFilter";
-	public static final String ARG_PROGRESS = "showProgress";
 	public static final String ARG_DIRECTORY = "sourceDir";
 	public static final String ARG_TARGET_SCHEMA = "schema";
 	public static final String ARG_USE_TRUNCATE = "useTruncate";
@@ -84,32 +77,32 @@ public class WbImport
 	{
 		this.isUpdatingCommand = true;
 		this.cmdLine = new ArgumentParser();
+		CommonArgs.addDelimiterParameter(cmdLine);
+		CommonArgs.addEncodingParameter(cmdLine);
+		CommonArgs.addProgressParameter(cmdLine);
+		CommonArgs.addCommitParameter(cmdLine);
+		CommonArgs.addContinueParameter(cmdLine);
+		CommonArgs.addCommitAndBatchParams(cmdLine);
+		
 		cmdLine.addArgument(ARG_TYPE, StringUtil.stringToList("text,xml"));
 		cmdLine.addArgument(ARG_UPDATE_WHERE);
 		cmdLine.addArgument(ARG_FILE);
 		cmdLine.addArgument(ARG_TARGETTABLE, ArgumentType.TableArgument);
-		cmdLine.addArgument(ARG_DELIM);
 		cmdLine.addArgument(ARG_QUOTE);
 		cmdLine.addArgument(ARG_DATE_FORMAT);
 		cmdLine.addArgument(ARG_TIMESTAMP_FORMAT);
 		cmdLine.addArgument(ARG_DECCHAR);
-		cmdLine.addArgument(ARG_COMMIT, ArgumentType.IntegerArgument);
 		cmdLine.addArgument(ARG_CONTAINSHEADER, ArgumentType.BoolArgument);
-		cmdLine.addArgument(ARG_ENCODING);
 		cmdLine.addArgument("columns");
 		cmdLine.addArgument(ARG_FILECOLUMNS);
 		cmdLine.addArgument(ARG_MODE, StringUtil.stringToList("insert;update;insert,update;update,insert", ";"));
 		cmdLine.addArgument(ARG_KEYCOLUMNS);
-		cmdLine.addArgument(ARG_BATCHSIZE);
 		cmdLine.addArgument(ARG_DELETE_TARGET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_EMPTY_STRING_IS_NULL, ArgumentType.BoolArgument);
-		cmdLine.addArgument(ARG_CONTINUE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_DECODE, ArgumentType.BoolArgument);
-		cmdLine.addArgument(ARG_VERBOSEXML, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_IMPORTCOLUMNS);
 		cmdLine.addArgument(ARG_COL_FILTER);
 		cmdLine.addArgument(ARG_LINE_FILTER);
-		cmdLine.addArgument(ARG_PROGRESS);
 		cmdLine.addArgument(ARG_DIRECTORY);
 		cmdLine.addArgument(ARG_TARGET_SCHEMA);
 		cmdLine.addArgument(ARG_USE_TRUNCATE, ArgumentType.BoolArgument);
@@ -122,7 +115,6 @@ public class WbImport
 		cmdLine.addArgument(ARG_MULTI_LINE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_START_ROW, ArgumentType.IntegerArgument);
 		cmdLine.addArgument(ARG_END_ROW, ArgumentType.IntegerArgument);
-		cmdLine.addArgument(ARG_COMMIT_BATCH, ArgumentType.BoolArgument);
 	}
 	
 	public String getVerb() { return VERB; }
@@ -190,11 +182,11 @@ public class WbImport
 		filename = evaluateFileArgument(filename);
 		File inputFile = (filename != null ? new File(filename) : null);
 		
-		int commit = cmdLine.getIntValue(ARG_COMMIT,-1);
-		imp.setCommitEvery(commit);
+		CommonArgs.setCommitAndBatchParams(imp, cmdLine);
 
 		boolean continueDefault = Settings.getInstance().getBoolProperty("workbench.import.default.continue", false);
-		imp.setContinueOnError(cmdLine.getBoolean(ARG_CONTINUE, continueDefault));
+		boolean continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, continueDefault);
+		imp.setContinueOnError(continueOnError);
 
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
 		String schema = cmdLine.getValue(ARG_TARGET_SCHEMA);
@@ -235,7 +227,7 @@ public class WbImport
 			}
 		}
 
-		String encoding = cmdLine.getValue(ARG_ENCODING);
+		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
 		
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
@@ -265,10 +257,10 @@ public class WbImport
 			textParser.setEnableMultilineRecords(multi);
 			textParser.setTargetSchema(schema);
 			textParser.setConnection(aConnection);
-			textParser.setAbortOnError(!cmdLine.getBoolean(ARG_CONTINUE, true));
+			textParser.setAbortOnError(!continueOnError);
 			textParser.setTreatClobAsFilenames(cmdLine.getBoolean(ARG_CLOB_ISFILENAME, false));
 			
-			String delimiter = cmdLine.getValue(ARG_DELIM);
+			String delimiter = cmdLine.getValue(CommonArgs.ARG_DELIM);
 			if (delimiter != null) textParser.setDelimiter(delimiter);
 
 			String quote = cmdLine.getValue(ARG_QUOTE);
@@ -394,16 +386,13 @@ public class WbImport
 		{
 			XmlDataFileParser xmlParser = new XmlDataFileParser();
 			xmlParser.setConnection(aConnection);
-			xmlParser.setAbortOnError(!cmdLine.getBoolean(ARG_CONTINUE, true));
+			xmlParser.setAbortOnError(!continueOnError);
 			
 			// The encoding must be set as early as possible
 			// as the XmlDataFileParser might need it to read
 			// the table structure!
 			if (encoding != null) xmlParser.setEncoding(encoding);
 
-			boolean verbose = cmdLine.getBoolean(ARG_VERBOSEXML, true);
-			xmlParser.setUseVerboseFormat(verbose);
-			
 			if (dir != null)
 			{
 				String ext = cmdLine.getValue(ARG_FILE_EXT);
@@ -444,7 +433,7 @@ public class WbImport
 		}
 
 		this.imp.setRowActionMonitor(this.rowMonitor);
-		String value = cmdLine.getValue(ARG_PROGRESS);
+		String value = cmdLine.getValue(CommonArgs.ARG_PROGRESS);
 		if (value == null && filename != null)
 		{
 			int interval = DataImporter.estimateReportIntervalFromFileSize(inputFile);
@@ -508,19 +497,6 @@ public class WbImport
 			imp.setUseTruncate(useTruncate);
 		}
 
-		int queueSize = cmdLine.getIntValue(ARG_BATCHSIZE,-1);
-		
-		if (queueSize > 0)
-		{
-			imp.setUseBatch(true);
-			imp.setBatchSize(queueSize);
-			if (cmdLine.isArgPresent(ARG_COMMIT_BATCH))
-			{
-				// this will disable the commitEvery property
-				imp.setCommitBatch(cmdLine.getBoolean(ARG_COMMIT_BATCH, false));
-			}
-		}
-		
 		int startRow = cmdLine.getIntValue(ARG_START_ROW, -1);
 		if (startRow > 0) imp.setStartRow(startRow);
 		

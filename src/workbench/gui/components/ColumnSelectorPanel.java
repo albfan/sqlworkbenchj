@@ -177,11 +177,20 @@ public class ColumnSelectorPanel
       return includeHeaderCheckBox.isSelected(); 
   }
   
-	public boolean isColumnSelected(int i) 
+	/**
+	 * Check if the column with the specified index is selected.
+	 * @param the index to be checked
+	 * @return true if selected, false otherwise
+	 */
+	public boolean isColumnSelected(int index) 
 	{
-		return this.model.selected[i];
+		return this.model.selected[index];
 	}
 
+	/**
+	 * Return the number of selected columns.
+	 * @return int
+	 */
 	public int getSelectedCount()
 	{
 		int selected = 0;
@@ -192,10 +201,14 @@ public class ColumnSelectorPanel
 		return selected;
 	}
 	
-	public List getSelectedColumns()
+	/**
+	 * Return the columns that have been selected.
+	 * @return the selected columns
+	 */
+	public List<ColumnIdentifier> getSelectedColumns()
 	{
 		int selected = this.getSelectedCount();
-		List result = new ArrayList(selected);
+		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(selected);
 		for (int i=0; i < this.model.selected.length; i++)
 		{
 			if (this.model.selected[i])

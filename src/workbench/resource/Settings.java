@@ -342,6 +342,10 @@ public class Settings
 		}
 	}
 
+	public String getPopularEncodings()
+	{
+		return getProperty("workbench.export.defaultencodings", "UTF-8,ISO-8859-1,ISO-8859-15,<name>");
+	}
 	public boolean getExitOnFirstConnectCancel()
 	{
 		return getBoolProperty("workbench.gui.cancel.firstconnect.exit", false);
@@ -957,23 +961,38 @@ public class Settings
 
 	public String getLiteralTypes()
 	{
-		return getProperty("workbench.sql.literals.types", "jdbc,ansi,default");
+		return getProperty("workbench.sql.literals.types", "jdbc,ansi,dbms,default");
 	}
 	
 	public List<String> getLiteralTypeList()
 	{
 		String types = getLiteralTypes();
-		return StringUtil.stringToList(types, ",", true, true, false);	
+		List<String> result = StringUtil.stringToList(types, ",", true, true, false);	
+		if (!result.contains("dbms"))
+		{
+			result.add("dbms");
+		}
+		return result;
 	}
 	
-	public void setDefaultDateLiteralType(String type)
+	public void setDefaultCopyDateLiteralType(String type)
 	{
 		setProperty("workbench.export.copy.sql.dateliterals", type);
 	}
 	
-	public String getDefaultDateLiteralType()
+	public String getDefaultCopyDateLiteralType()
 	{
-		return getProperty("workbench.export.copy.sql.dateliterals", "DBMS");
+		return getProperty("workbench.export.copy.sql.dateliterals", "dbms");
+	}
+
+	public void setDefaultExportDateLiteralType(String type)
+	{
+		setProperty("workbench.export.sql.default.dateliterals", type);
+	}
+	
+	public String getDefaultExportDateLiteralType()
+	{
+		return getProperty("workbench.export.sql.default.dateliterals", "dbms");
 	}
 	
 	public boolean getCopySelectedIsDefault()

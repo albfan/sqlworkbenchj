@@ -77,6 +77,7 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.dialogs.export.ExportFileDialog;
 import workbench.gui.menu.GenerateScriptMenuItem;
+import workbench.interfaces.ProgressReporter;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.ShareableDisplay;
 import workbench.interfaces.Exporter;
@@ -2055,7 +2056,7 @@ public class TableListPanel
 		if (row < 0) return;
 		TableIdentifier id = createTableIdentifier(row);
 		DataExporter exporter = new DataExporter(this.dbConnection);
-		exporter.setProgressInterval(10);
+		exporter.setReportInterval(ProgressReporter.DEFAULT_PROGRESS_INTERVAL);
 		exporter.exportTable(SwingUtilities.getWindowAncestor(this), id);
 	}
 
@@ -2118,7 +2119,7 @@ public class TableListPanel
 					WbSwingUtilities.showMessage(this, e.getMessage());
 				}
 			}
-			exporter.setProgressInterval(10);
+			exporter.setReportInterval(ProgressReporter.DEFAULT_PROGRESS_INTERVAL);
 			exporter.startExportJobs((Frame)SwingUtilities.getWindowAncestor(this));
 		}
 	}

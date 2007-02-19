@@ -20,7 +20,9 @@ import java.util.Map;
 import workbench.db.TableDropper;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.RowDataProducer;
+import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.JobErrorHandler;
+import workbench.interfaces.ProgressReporter;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -34,6 +36,7 @@ import workbench.db.*;
  * @author  support@sql-workbench.net
  */
 public class DataCopier
+	implements BatchCommitter, ProgressReporter
 {
 	private WbConnection sourceConnection;
 	private WbConnection targetConnection;
@@ -411,6 +414,11 @@ public class DataCopier
 	public void setBatchSize(int size) 
 	{
 		this.importer.setBatchSize(size);
+	}
+	
+	public void commitNothing()
+	{
+		this.importer.commitNothing();
 	}
 	
 	public void setCommitEvery(int interval)

@@ -23,7 +23,7 @@ import workbench.storage.ResultInfo;
 public class SqlExportWriter
 	extends ExportWriter
 {
-
+	
 	/** Creates a new instance of SqlExportWriter */
 	public SqlExportWriter(DataExporter exp)
 	{
@@ -82,7 +82,7 @@ public class SqlExportWriter
 			LogMgr.logError("SqlExportWriter.createConverter()", "Illegal SQL type requested. Reverting to INSERT", null);
 			conv.setCreateInsert();
 		}
-		conv.setSql(exporter.getSql());
+		
 		String table = exporter.getTableName();
 		if (table != null)
 		{

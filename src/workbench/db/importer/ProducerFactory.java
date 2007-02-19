@@ -20,6 +20,9 @@ import workbench.gui.dialogs.dataimport.TextImportOptions;
 import workbench.gui.dialogs.dataimport.XmlImportOptions;
 import workbench.interfaces.ImportFileParser;
 import workbench.sql.wbcommands.CommandTester;
+import workbench.sql.wbcommands.CommonArgs;
+import workbench.sql.wbcommands.CommonArgs;
+import workbench.sql.wbcommands.WbExport;
 import workbench.sql.wbcommands.WbImport;
 import workbench.util.StringUtil;
 import workbench.util.ZipUtil;
@@ -202,7 +205,7 @@ public class ProducerFactory
 	{
 		XmlDataFileParser parser = new XmlDataFileParser(inputFile);
 		parser.setEncoding(this.generalOptions.getEncoding());
-		parser.setUseVerboseFormat(this.xmlOptions.getUseVerboseXml());
+		//parser.setUseVerboseFormat(this.xmlOptions.getUseVerboseXml());
 		this.inputColumns = null;
 		this.producer = parser;
 		this.fileParser = parser;
@@ -218,21 +221,12 @@ public class ProducerFactory
 		appendArgument(command, WbImport.ARG_DECODE, textOptions.getDecode(), indent);
 		String delim = textOptions.getTextDelimiter();
 		if ("\t".equals(delim)) delim = "\\t";
-		appendArgument(command, WbImport.ARG_DELIM, "'" + delim + "'", indent);
+		appendArgument(command, CommonArgs.ARG_DELIM, "'" + delim + "'", indent);
 		appendArgument(command, WbImport.ARG_QUOTE, textOptions.getTextQuoteChar(), indent);
 		appendArgument(command, WbImport.ARG_DECCHAR, textOptions.getDecimalChar(), indent);
 		appendArgument(command, WbImport.ARG_FILECOLUMNS, this.fileParser.getColumns(), indent);
 	}
 	
-	/**
-	 * Appends xml import options to the passed sql command
-	 */
-	private void appendXmlOptions(StringBuilder command, StringBuilder indent)
-	{
-		if (this.xmlOptions == null) return;
-		appendArgument(command, WbImport.ARG_VERBOSEXML, xmlOptions.getUseVerboseXml(), indent);
-	}
-
 	private void appendArgument(StringBuilder result, String arg, boolean value, StringBuilder indent)
 	{
 		appendArgument(result, arg, Boolean.toString(value), indent);
@@ -288,16 +282,14 @@ public class ProducerFactory
 		}
 		
 		appendArgument(result, WbImport.ARG_TARGETTABLE, this.table.getTableName(), indent);
-		appendArgument(result, WbImport.ARG_ENCODING, this.generalOptions.getEncoding(), indent);
+		appendArgument(result, CommonArgs.ARG_ENCODING, this.generalOptions.getEncoding(), indent);
 		appendArgument(result, WbImport.ARG_MODE, this.generalOptions.getMode(), indent);
 		if (this.batchSize > 0)
 		{
-			appendArgument(result, WbImport.ARG_BATCHSIZE, Integer.toString(this.batchSize), indent);
+			appendArgument(result, CommonArgs.ARG_BATCHSIZE, Integer.toString(this.batchSize), indent);
 		}
-		if (this.isXmlImport())
-			this.appendXmlOptions(result, indent);
-		else
-			appendTextOptions(result, indent);
+		
+		appendTextOptions(result, indent);
 		
 		result.append("\n;");
 		

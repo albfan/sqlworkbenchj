@@ -27,7 +27,7 @@ import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -36,7 +36,9 @@ import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.interfaces.Committer;
 import workbench.interfaces.ErrorReporter;
+import workbench.interfaces.ProgressReporter;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
@@ -69,15 +71,45 @@ import workbench.util.WbThread;
  * @author  support@sql-workbench.net
  */
 public class DataExporter
-	implements Interruptable, ErrorReporter
+	implements Interruptable, ErrorReporter, ProgressReporter, Committer
 {
+	/**
+	 * Use a DBMS specific literals for BLOBs in SQL statements.
+	 * @see #setBlobMode(String)
+	 */
 	public static final String BLOB_MODE_LITERAL = "dbms";
+	
+	/**
+	 * Use ANSI literals for BLOBs in SQL statements.
+	 * @see #setBlobMode(String)
+	 */
 	public static final String BLOB_MODE_ANSI = "ansi";
+	
+	/**
+	 * Generate WB Specific {$blobfile=...} statements
+	 * @see #setBlobMode(String)
+	 */
 	public static final String BLOB_MODE_FILE = "file";
 	
+	/**
+	 * Export to SQL statements.
+	 */
 	public static final int EXPORT_SQL = 1;
+	
+	/**
+	 * Export to plain text.
+	 */
 	public static final int EXPORT_TXT = 2;
+	
+	/**
+	 * Export to XML file (WB specific).
+	 */
 	public static final int EXPORT_XML = 3;
+	
+	
+	/**
+	 * Export to HTML.
+	 */
 	public static final int EXPORT_HTML = 4;
 
 	private WbConnection dbConn;
@@ -111,7 +143,7 @@ public class DataExporter
 	private String chrFunc = null;
 	private String concatString = "||";
 	private String concatFunction = null;
-	private int commitEvery=0;
+	private int commitEvery = 0;
 
 	private SimpleDateFormat dateFormatter = null;
 	private	SimpleDateFormat dateTimeFormatter = null;
@@ -124,8 +156,7 @@ public class DataExporter
 	private boolean verboseFormat = true;
 
 	private boolean showProgressWindow = false;
-	public static final int DEFAULT_PROGRESS_INTERVAL = 10;
-	private int progressInterval = DEFAULT_PROGRESS_INTERVAL;
+	private int progressInterval = ProgressReporter.DEFAULT_PROGRESS_INTERVAL;
 
 	private ProgressPanel progressPanel;
 	private JDialog progressWindow;
@@ -139,11 +170,11 @@ public class DataExporter
 	private String dateLiteralType = null;
 	
 	// The columns to be used for generating blob file names
-	private List blobIdCols;
+	private List<String> blobIdCols;
 
 	private MessageBuffer warnings = new MessageBuffer();
 	private MessageBuffer errors = new MessageBuffer();
-	private ArrayList jobQueue;
+	private List<ExportJobEntry> jobQueue;
 	private ExportWriter exportWriter;
 	private Window parentWindow;
 	private int tablesExported;
@@ -156,7 +187,10 @@ public class DataExporter
 	private ZipEntry zipEntry;
 
 	private String blobMode = null;
-	
+
+	/**
+	 * Create a DataExporter for the specified connection.
+	 */
 	public DataExporter(WbConnection con)
 	{
 		this.dbConn = con;
@@ -170,18 +204,18 @@ public class DataExporter
 		this.progressPanel.setInfoText(ResourceMgr.getString("MsgSpoolStart"));
 	}
 	/**
-	 *	Open the progress monitor window.
+	 * Open the progress monitor window.
+	 * @param parent the window acting as the parent for the progress monitor
 	 */
-	protected void openProgressMonitor(Frame parent, boolean modal)
+	protected void openProgressMonitor(Frame parent)
 	{
-
 		if (this.progressPanel == null) createProgressPanel();
 
-		this.progressWindow = new JDialog(parent, modal);
+		this.progressWindow = new JDialog(parent, true);
 		this.progressWindow.getContentPane().add(progressPanel);
 		this.progressWindow.pack();
 		this.progressWindow.setTitle(ResourceMgr.getString("MsgSpoolWindowTitle"));
-		//this.progressWindow.setIconImage(ResourceMgr.getPicture("SpoolData16").getImage());
+		
 		this.progressWindow.addWindowListener(new WindowAdapter()
 		{
 			public void windowClosing(WindowEvent e)
@@ -195,9 +229,11 @@ public class DataExporter
 	}
 
 	/**
-	 * Define the date (and timestamp) format for literals
+	 * Define the format for date and timestamp literals
 	 * when writing SQL statements. 
-	 * Valid values are jdbc,ansi,dbms
+	 * 
+	 * Valid values are <tt>jdbc,ansi,dbms</tt>
+	 * 
 	 * dbms selects the format approriate for the current dbms.
 	 * It is the same as passing null
 	 * 
@@ -206,9 +242,9 @@ public class DataExporter
 	 */
 	public void setDateLiteralType(String type)
 	{
-		if ("dbms".equalsIgnoreCase(type) || type == null)
+		if (SqlLiteralFormatter.DBMS_DATE_LITERAL_TYPE.equalsIgnoreCase(type) || type == null)
 		{
-			this.dateLiteralType = null;
+			this.dateLiteralType = SqlLiteralFormatter.DBMS_DATE_LITERAL_TYPE;
 		}
 		else
 		{
@@ -216,11 +252,32 @@ public class DataExporter
 		}
 	}
   
+	/**
+	 * Return the type of date literals to be created when generating
+	 * SQL statements. 
+	 * @return the date literal type
+	 * @see workbench.db.SqlExportWriter#configureConverter()
+	 * @see workbench.storage.SqlLiteralFormatter
+	 */
 	public String getDateLiteralType()
   {
       return dateLiteralType;
   }
   
+	/**
+	 * Define how blobs should be handled during export.
+	 * Modes allowed are 
+	 * <ul>
+	 *	<li>BLOB_MODE_LITERAL</li>
+	 *  <li>BLOB_MODE_ANSI</li>
+	 *  <li>BLOB_MODE_FILE</li>
+	 * </ul>
+	 * @param type the blob mode to be used. 
+	 *        null means no special treatment (toString() will be called)
+	 * @see #BLOB_MODE_LITERAL
+	 * @see #BLOB_MODE_ANSI
+	 * @see #BLOB_MODE_FILE
+	 */
 	public void setBlobMode(String type)
 	{
 		if (type == null || type.equalsIgnoreCase("none"))
@@ -241,6 +298,10 @@ public class DataExporter
 		}
 	}
 	
+	/**
+	 * Returns the currently selected mode for BLOB literals.
+	 * @return the current type or null, if nothing was selected
+	 */
 	public String getBlobMode()
 	{
 		return this.blobMode;
@@ -264,7 +325,7 @@ public class DataExporter
 	{
 		if (this.jobQueue == null)
 		{
-			this.jobQueue = new ArrayList();
+			this.jobQueue = new LinkedList<ExportJobEntry>();
 		}
 		ExportJobEntry job = new ExportJobEntry(anOutputfile, table, this.dbConn);
 		this.jobQueue.add(job);
@@ -315,22 +376,23 @@ public class DataExporter
 	 * for creating the blob files during export
 	 * These columns must define a unique key!
 	 */
-	public void setBlobIdColumns(List columns)
+	public void setBlobIdColumns(List<String> columns)
 	{
 		this.blobIdCols = columns;
 	}
 	
-	List getBlobIdColumns()
+	List<String> getBlobIdColumns()
 	{
 		return blobIdCols;
 	}
 	
 	/**
-	 *	Define the columns that should be exported
-	 *  This is only respected for the export of a DataStore, not
-	 *  for exporting a ResultSet
-	 *
-	 *	@see #startExport(workbench.storage.DataStore)
+	 * Define the columns that should be exported
+	 * This is only respected for the export of a DataStore, not
+	 * for exporting a ResultSet
+	 * 
+	 * @param columns the columns to be exported
+	 * @see #startExport(workbench.storage.DataStore)
 	 */
 	public void setColumnsToExport(List columns)
 	{
@@ -355,7 +417,23 @@ public class DataExporter
 
 	public void setContinueOnError(boolean aFlag) { this.continueOnError = aFlag; }
 
-	public void setCommitEvery(int aCount) { this.commitEvery = aCount; }
+	/**
+	 * Do not write any COMMITs to generated SQL scripts
+	 */
+	public void commitNothing()
+	{
+		this.commitEvery = Committer.NO_COMMIT_FLAG;
+	}
+	/**
+	 * Set the number of statements after which to add a commit to
+	 * generated SQL scripts. 
+	 * @param count the number of statements after which a COMMIT should be added
+	 */
+	public void setCommitEvery(int count) 
+	{ 
+		this.commitEvery = count; 
+	}
+		
 	public int getCommitEvery() { return this.commitEvery; }
 
 	public String getTypeDisplay()
@@ -389,8 +467,10 @@ public class DataExporter
 	 * This is used by the WBEXPORT command to turn off the row
 	 * progress display. Turning off the display will speed up
 	 * the export because the GUI does not need to be updated
+	 * 
+	 * @param interval the new progress interval
 	 */
-	public void setProgressInterval(int interval)
+	public void setReportInterval(int interval)
 	{
 		if (interval <= 0)
 			this.progressInterval = 0;
@@ -667,7 +747,7 @@ public class DataExporter
 				public void run()
 				{
 					createProgressPanel();
-					openProgressMonitor(parent, true);
+					openProgressMonitor(parent);
 				}
 			};
 			p.start();
@@ -1050,13 +1130,14 @@ public class DataExporter
 			{
 				StringBuilder query = new StringBuilder(250);
 				query.append("SELECT ");
-				List cols = dialog.getColumnsToExport();
+				List<ColumnIdentifier> cols = dialog.getColumnsToExport();
 				if (cols != null)
 				{
-					for (int i=0; i < cols.size(); i++)
+					boolean first = true;
+					for (ColumnIdentifier col : cols)
 					{
-						if (i > 0) query.append(", ");
-						ColumnIdentifier col = (ColumnIdentifier)cols.get(i);
+						if (!first) query.append(", ");
+						else first = false;
 						query.append(col.getColumnName());
 					}
 					query.append(" FROM ");
@@ -1094,7 +1175,7 @@ public class DataExporter
 				else
 				{
 					this.startBackgroundThread();
-					this.openProgressMonitor(parent, true);
+					this.openProgressMonitor(parent);
 				}
 			}
 			catch (Exception e)

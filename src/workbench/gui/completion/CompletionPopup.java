@@ -313,6 +313,10 @@ public class CompletionPopup
 				if (value != null)
 				{
 					editor.setSelectedText(value);
+					if (value.startsWith("<") && value.endsWith(">"))
+					{
+						editor.selectWordAtCursor(" =-\t\n");
+					}
 				}
 			}
 		}

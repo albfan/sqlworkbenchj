@@ -11,15 +11,11 @@
  */
 package workbench.storage;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
-import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.interfaces.DataFileWriter;
 import workbench.log.LogMgr;
@@ -27,7 +23,6 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-import workbench.util.WbPersistence;
 
 /**
  *
@@ -125,10 +120,14 @@ public class SqlLiteralFormatter
 	{
 		// If the DBMS specific format is selected and we already have a DBID
 		// then this call is simply ignored.
-		if (DBMS_DATE_LITERAL_TYPE.equalsIgnoreCase(product) && this.isDbId)
+		if (DBMS_DATE_LITERAL_TYPE.equalsIgnoreCase(product))
 		{
-			LogMgr.logDebug("SqlLiteralFormatter.setProduct()", "Ignoring request for DBMS as a DBID is already used");
-			return;
+			if (this.isDbId)
+			{
+				LogMgr.logDebug("SqlLiteralFormatter.setProduct()", "Ignoring request for DBMS as a DBID is already used");
+				return;
+			}
+			product = null;
 		}
 		
 		dateFormatter = createFormatter(product, "date", "''yyyy-MM-dd''");
@@ -294,10 +293,20 @@ public class SqlLiteralFormatter
 		}
 		else if (value instanceof File)
 		{
+			File f = (File)value;
+			String path = null;
+			try
+			{
+				path = f.getCanonicalPath();
+			}
+			catch (Exception e)
+			{
+				path = f.getAbsolutePath();
+			}
 			if (SqlUtil.isBlobType(type))
-				return "{$blobfile='" + value.toString() + "'}";
+				return "{$blobfile='" + path + "'}";
 			else if (SqlUtil.isClobType(type))
-				return "{$clobfile='" + value.toString() + "'}";
+				return "{$clobfile='" + path + "' encoding='" + this.clobEncoding + "'}";
 		}
 		else if (value instanceof NullValue)
 		{
@@ -327,7 +336,6 @@ public class SqlLiteralFormatter
 				catch (Exception e)
 				{
 					LogMgr.logError("SqlLiteralFormatter.getDefaultLiteral", "Could not write BLOB file", e);
-					return null;
 				}
 			}
 			else if (blobFormatter != null)
@@ -339,7 +347,6 @@ public class SqlLiteralFormatter
 				catch (Exception e)
 				{
 					LogMgr.logError("SqlLiteralFormatter.getDefaultLiteral", "Error converting BLOB value", e);
-					return null;
 				}
 			}
 		}

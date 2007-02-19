@@ -32,6 +32,7 @@ import workbench.db.WbConnection;
 import workbench.db.exporter.RowDataConverter;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.ZipOutputFactory;
 
@@ -184,6 +185,10 @@ public class WbImportTest
 			assertEquals("Wrong number of rows", rowCount, 3);
 			rs.close();
 			stmt.close();
+			if (!xmlFile.delete())
+			{
+				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
+			}					
 		}
 		catch (Exception e)
 		{
@@ -269,7 +274,7 @@ public class WbImportTest
              "</wb-export>";
 		try
 		{
-			File xmlFile = new File(this.basedir, "partial_xml_import.xml");
+			File xmlFile = new File(this.basedir, "missing_xml_import.xml");
 			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
 			out.write(xml);
 			out.close();
@@ -288,6 +293,10 @@ public class WbImportTest
 			if (rs.next()) rows = rs.getInt(1);
 			assertEquals("Wrong number of rows imported", 3, rows);
 			SqlUtil.closeAll(rs, stmt);
+			if (!xmlFile.delete())
+			{
+				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
+			}					
 		}
 		catch (Exception e)
 		{
@@ -300,7 +309,7 @@ public class WbImportTest
 	{
 		try
 		{
-			File importFile  = new File(this.basedir, "import.txt");
+			File importFile  = new File(this.basedir, "import_text_clob.txt");
 			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
 			out.println("nr\ttext_data");
 			out.println("1\ttext_data_r1_c2.data");
@@ -347,6 +356,10 @@ public class WbImportTest
 				fail("Not enough values imported");
 			}
 			SqlUtil.closeAll(rs, stmt);
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
 		}
 		catch (Exception e)
 		{
@@ -362,7 +375,7 @@ public class WbImportTest
 		try
 		{
 			String name = "\u0627\u0644\u0633\u0639\u0631 \u0627\u0644\u0645\u0642\u062A\u0631\u062D \u0644\u0644\u0645\u0633\u0647\u0644\u0643";
-			File importFile  = new File(this.basedir, "import.txt");
+			File importFile  = new File(this.basedir, "regular_import.txt");
 			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
 			out.println("nr\tfirstname\tlastname");
 			for (int i = 0; i < rowCount; i++)
@@ -422,7 +435,10 @@ public class WbImportTest
 			}
 			rs.close();
 			stmt.close();
-			
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
 		}
 		catch (Exception e)
 		{
@@ -436,7 +452,7 @@ public class WbImportTest
 		int rowCount = 10;
 		try
 		{
-			File importFile  = new File(this.basedir, "partial.txt");
+			File importFile  = new File(this.basedir, "partial_skip.txt");
 			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
 			out.println("nr\tfirstname\tlastname");
 			out.println("1\tArthur\tDent");
@@ -470,6 +486,10 @@ public class WbImportTest
 
 			rs.close();
 			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
 			
 		}
 		catch (Exception e)
@@ -484,7 +504,7 @@ public class WbImportTest
 		int rowCount = 100;
 		try
 		{
-			File importFile  = new File(this.basedir, "partial.txt");
+			File importFile  = new File(this.basedir, "partial1.txt");
 			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
 			out.println("nr\tfirstname\tlastname");
 			for (int i = 0; i < rowCount; i++)
@@ -514,6 +534,10 @@ public class WbImportTest
 			}
 			rs.close();
 			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
 			
 		}
 		catch (Exception e)
@@ -528,7 +552,7 @@ public class WbImportTest
 		int rowCount = 10;
 		try
 		{
-			File importFile  = new File(this.basedir, "partial.txt");
+			File importFile  = new File(this.basedir, "partial2.txt");
 			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
 			out.println("nr\tfirstname\tlastname");
 			out.println("1\tArthur\tDent");
@@ -562,6 +586,10 @@ public class WbImportTest
 
 			rs.close();
 			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
 			
 		}
 		catch (Exception e)
@@ -621,6 +649,11 @@ public class WbImportTest
 			assertEquals("Wrong number of rows imported", 4, count);
 			rs.close();
 			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
+			
 		}
 		catch (Exception e)
 		{
@@ -630,21 +663,17 @@ public class WbImportTest
 	
 	public void testZipMultiLineImport()
 	{
-		int rowCount = 10;
 		try
 		{
-			
 			File importFile  = new File(this.basedir, "zipmulti.txt");
 			
 			File archive = new File(this.basedir, "zipmulti.zip");
 			ZipOutputFactory zout = new ZipOutputFactory(archive);
 			PrintWriter out = new PrintWriter(zout.createWriter(importFile, "UTF-8"));
 			
-			out.println("nr\tfirstname\tlastname");
-			out.print(Integer.toString(1));
-			out.print('\t');
-			out.println("First\t\"Last");
-			out.println("name\"");
+			out.print("nr\tfirstname\tlastname\n");
+			out.print("1\tFirst\t\"Last\n");
+			out.print("name\"\n");
 			out.close();
 			zout.done();
 			
@@ -663,7 +692,7 @@ public class WbImportTest
 				assertEquals("Wrong firstname imported", "First", first);
 				
 				String last = rs.getString(3);
-				assertEquals("Wrong firstname imported", "Last\r\nname", last);
+				assertEquals("Wrong firstname imported", "Last\nname", last);
 			}
 			else
 			{
@@ -671,6 +700,10 @@ public class WbImportTest
 			}
 			rs.close();
 			stmt.close();
+			if (!archive.delete())
+			{
+				fail("Could not delete archive! " + archive.getAbsolutePath());
+			}
 		}
 		catch (Exception e)
 		{
@@ -726,6 +759,11 @@ public class WbImportTest
 			}
 			rs.close();
 			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
+			
 		}
 		catch (Exception e)
 		{
@@ -739,7 +777,7 @@ public class WbImportTest
 		int rowCount = 10;
 		try
 		{
-			File importFile  = new File(this.basedir, "import.txt");
+			File importFile  = new File(this.basedir, "import_no_header.txt");
 			PrintWriter out = new PrintWriter(new FileWriter(importFile));
 			for (int i = 0; i < rowCount; i++)
 			{
@@ -769,6 +807,10 @@ public class WbImportTest
 			}
 			rs.close();
 			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
 		}
 		catch (Exception e)
 		{
@@ -782,7 +824,7 @@ public class WbImportTest
 		int rowCount = 10;
 		try
 		{
-			File importFile  = new File(this.basedir, "import.txt");
+			File importFile  = new File(this.basedir, "import_tbl_cols.txt");
 			PrintWriter out = new PrintWriter(new FileWriter(importFile));
 			for (int i = 0; i < rowCount; i++)
 			{
@@ -812,6 +854,11 @@ public class WbImportTest
 			}
 			rs.close();
 			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
+			
 		}
 		catch (Exception e)
 		{
@@ -863,6 +910,11 @@ public class WbImportTest
 			
 			rs.close();
 			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
+			
 		}
 		catch (Exception e)
 		{
@@ -900,6 +952,10 @@ public class WbImportTest
 			assertEquals("Not enough values imported", rowCount, count);
 			rs.close();
 			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
 		}
 		catch (Exception e)
 		{
@@ -919,7 +975,7 @@ public class WbImportTest
 			out.println("42\t42.1234\tfortytwo\t2006-02-01\t22:30\t2006-04-01 22:34\t");
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=datatype_test -dateformat=yyyy-MM-dd -timestampformat=yyyy-MM-dd HH:mm");
+			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=datatype_test -dateformat='yyyy-MM-dd' -timestampformat='yyyy-MM-dd HH:mm'");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -947,7 +1003,6 @@ public class WbImportTest
 				df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 				d2 = df.parse("2006-04-01 22:34");
 				assertEquals("Wrong timestamp imported", d2, ts);
-				
 			}
 			else
 			{
@@ -955,6 +1010,10 @@ public class WbImportTest
 			}
 			rs.close();
 			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
 		}
 		catch (Exception e)
 		{
@@ -977,7 +1036,8 @@ public class WbImportTest
 			out.println("nr\tbinary_data");
 			out.println("1\tblob_data_r1_c1.data");
 			out.close();
-			
+
+			w.close();
 			zout.done();
 			
 			File blobarchive = new File(this.basedir, "blob_test" + RowDataConverter.BLOB_ARCHIVE_SUFFIX + ".zip");
@@ -1026,9 +1086,105 @@ public class WbImportTest
 			}
 			rs.close();
 			stmt.close();
+			if (!archive.delete())
+			{
+				fail("Could not delete input file: " + archive.getCanonicalPath());
+			}			
 		}
 		catch (Exception e)
 		{
+			fail(e.getMessage());
+		}
+	}
+
+	public void testVerboseXmlImport()
+	{
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
+             "<wb-export> \n" + 
+             "  <meta-data> \n" + 
+             " \n" + 
+             "    <generating-sql> \n" + 
+             "    <![CDATA[ \n" + 
+             "    select id, lastname, firstname from person \n" + 
+             "    ]]> \n" + 
+             "    </generating-sql> \n" + 
+             " \n" + 
+             "    <wb-tag-format>long</wb-tag-format> \n" + 
+             "  </meta-data> \n" + 
+             " \n" + 
+             "  <table-def> \n" + 
+             "    <table-name>junit_test</table-name> \n" + 
+             "    <column-count>3</column-count> \n" + 
+             " \n" + 
+             "    <column-def index=\"0\"> \n" + 
+             "      <column-name>NR</column-name> \n" + 
+             "      <java-class>java.lang.Integer</java-class> \n" + 
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
+             "      <java-sql-type>4</java-sql-type> \n" + 
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"1\"> \n" + 
+             "      <column-name>LASTNAME</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"2\"> \n" + 
+             "      <column-name>FIRSTNAME</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "  </table-def> \n" + 
+             " \n" + 
+             "<data> \n" + 
+             "<row-data row-num=\"1\">" +
+						 "  <column-data index=\"0\">1</column-data>" +
+						 "  <column-data index=\"1\">Dent</column-data>" +
+						 "  <column-data index=\"2\">Arthur</column-data>" +
+						 "</row-data> \n" + 
+             "<row-data row-num=\"1\">" +
+						 "  <column-data index=\"0\">2</column-data>" +
+						 "  <column-data index=\"1\">Beeblebrox</column-data>" +
+						 "  <column-data index=\"2\">Zaphod</column-data>" +
+						 "</row-data> \n" + 
+             "</data> \n" + 
+             "</wb-export>";
+		try
+		{
+			File xmlFile = new File(this.basedir, "xml_verbose_import.xml");
+			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
+			out.write(xml);
+			out.close();
+			
+			String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
+			//System.out.println("cmd=" + cmd);
+			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
+			int rowCount = 0;
+			
+			while (rs.next())
+			{
+				rowCount ++;
+				int nr = rs.getInt(1);
+				assertEquals("Wrong data imported", rowCount, nr);
+			}
+			assertEquals("Wrong number of rows", rowCount, 2);
+			rs.close();
+			stmt.close();
+			if (!xmlFile.delete())
+			{
+				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
+			}			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
@@ -1045,30 +1201,10 @@ public class WbImportTest
              "    ]]> \n" + 
              "    </generating-sql> \n" + 
              " \n" + 
-             "    <created>2006-07-29 23:31:40.366 CEST</created> \n" + 
-             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" + 
-             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" + 
-             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" + 
-             "    <database-product-name>HSQL Database Engine</database-product-name> \n" + 
-             "    <database-product-version>1.8.0</database-product-version> \n" + 
              "    <wb-tag-format>short</wb-tag-format> \n" + 
              "  </meta-data> \n" + 
              " \n" + 
              "  <table-def> \n" + 
-             "    <!-- The following information was retrieved from the JDBC driver's ResultSetMetaData --> \n" + 
-             "    <!-- column-name is retrieved from ResultSetMetaData.getColumnName() --> \n" + 
-             "    <!-- java-class is retrieved from ResultSetMetaData.getColumnClassName() --> \n" + 
-             "    <!-- java-sql-type-name is the constant's name from java.sql.Types --> \n" + 
-             "    <!-- java-sql-type is the constant's numeric value from java.sql.Types as returned from ResultSetMetaData.getColumnType() --> \n" + 
-             "    <!-- dbms-data-type is retrieved from ResultSetMetaData.getColumnTypeName() --> \n" + 
-             " \n" + 
-             "    <!-- For date and timestamp types, the internal long value obtained from java.util.Date.getTime() \n" + 
-             "         is written as an attribute to the <column-data> tag. That value can be used \n" + 
-             "         to create a java.util.Date() object directly, without the need to parse the actual tag content. \n" + 
-             "         If Java is not used to parse this file, the date/time format used to write the data \n" + 
-             "         is provided in the <data-format> tag of the column definition \n" + 
-             "    --> \n" + 
-             " \n" + 
              "    <table-name>junit_test</table-name> \n" + 
              "    <column-count>3</column-count> \n" + 
              " \n" + 
@@ -1125,6 +1261,10 @@ public class WbImportTest
 			assertEquals("Wrong number of rows", rowCount, 2);
 			rs.close();
 			stmt.close();
+			if (!xmlFile.delete())
+			{
+				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
+			}			
 		}
 		catch (Exception e)
 		{
@@ -1234,6 +1374,10 @@ public class WbImportTest
 			}
 			rs.close();
 			stmt.close();
+			if (!xmlFile.delete())
+			{
+				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
+			}			
 		}
 		catch (Exception e)
 		{
@@ -1338,6 +1482,10 @@ public class WbImportTest
 			}
 			rs.close();
 			stmt.close();
+			if (!xmlFile.delete())
+			{
+				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
+			}			
 		}
 		catch (Exception e)
 		{
@@ -1426,6 +1574,10 @@ public class WbImportTest
 			}
 			rs.close();
 			stmt.close();
+			if (!xmlFile.delete())
+			{
+				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
+			}
 		}
 		catch (Exception e)
 		{
@@ -1434,6 +1586,123 @@ public class WbImportTest
 		}
 	}
 
+	public void testCommit()
+	{
+		try
+		{
+			util.emptyBaseDirectory();
+			File dbFile = new File(util.getBaseDir(), "commit_test");
+			WbConnection wb = util.getConnection(dbFile);
+		
+			Statement stmt = wb.createStatement();
+			stmt.executeUpdate("CREATE TABLE junit_test (nr integer, firstname varchar(100), lastname varchar(100))");
+			wb.commit();
+			stmt.close();
+			
+			String data = "nr;firstname;lastname\n1;Arthur;Dent\n2;Zaphod;Beeblebrox\n";
+			File dataFile = new File(util.getBaseDir(), "commit_test_data.txt");
+			FileWriter w = new FileWriter(dataFile);
+			w.write(data);
+			w.close();
+			
+			String cmd = "wbimport -file='" + dataFile.getAbsolutePath() + "' -type=text -delimiter=';' -table=junit_test -header=true";
+			StatementRunnerResult result = importCmd.execute(wb, cmd);
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			wb.disconnect();
+			
+			// Shutdown and restart the engine to make sure the data was committed
+			wb = util.getConnection(dbFile);
+			stmt = wb.createStatement();
+			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
+			int row = 0;
+			while (rs.next())
+			{
+				row ++;
+				if (row == 1)
+				{
+					int nr = rs.getInt(1);
+					assertEquals("Wrong data imported", 1, nr);
+					String firstname = rs.getString(2);
+					assertEquals("Wrong data imported", "Arthur", firstname);
+					String lastname = rs.getString(3);
+					assertEquals("Wrong data imported", "Dent", lastname);
+				}
+				else if (row == 2)
+				{
+					int nr = rs.getInt(1);
+					assertEquals("Wrong data imported", 2, nr);
+					String firstname = rs.getString(2);
+					assertEquals("Wrong data imported", "Zaphod", firstname);
+					String lastname = rs.getString(3);
+					assertEquals("Wrong data imported", "Beeblebrox", lastname);
+				}
+				else
+				{
+					fail("Wrong number of rows imported");
+				}
+			}
+			rs.close();
+			wb.disconnect();
+			
+			// Make sure the import command has released all file handles
+			if (!dataFile.delete())
+			{
+				fail("Could not delete dataFile=" + dataFile.getCanonicalPath());
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}		
+	}
+	
+	public void testNoCommit()
+	{
+		try
+		{
+			util.emptyBaseDirectory();
+			File dbFile = new File(util.getBaseDir(), "no_commit_test");
+			WbConnection wb = util.getConnection(dbFile);
+		
+			Statement stmt = wb.createStatement();
+			stmt.executeUpdate("CREATE TABLE junit_test (nr integer, firstname varchar(100), lastname varchar(100))");
+			wb.commit();
+			stmt.close();
+			
+			String data = "nr;firstname;lastname\n1;Arthur;Dent\n2;Zaphod;Beeblebrox\n";
+			File dataFile = new File(util.getBaseDir(), "no_commit_test_data.txt");
+			FileWriter w = new FileWriter(dataFile);
+			w.write(data);
+			w.close();
+
+			String cmd = "wbimport -file='" + dataFile.getAbsolutePath() + "' -type=text -delimiter=';' -commitEvery=none -table=junit_test -header=true";
+			StatementRunnerResult result = importCmd.execute(wb, cmd);
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			wb.disconnect();
+			
+			// Shutdown and restart the engine to make sure the data was committed
+			wb = util.getConnection(dbFile);
+			stmt = wb.createStatement();
+			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
+			int count = -1;
+			if (rs.next()) count = rs.getInt(1);
+			rs.close();
+			assertEquals("Wrong number of rows in table", 0, count);
+			wb.disconnect();
+			
+			if (!dataFile.delete())
+			{
+				fail("Could not delete datafile: " + dataFile.getCanonicalPath());
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}		
+	}
+	
 	public void testZippedXmlBlobImport()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 

@@ -204,7 +204,7 @@ public class ClipBoardCopier
 			SqlRowDataConverter converter = new SqlRowDataConverter(data.getOriginalConnection());
 			converter.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
 			converter.setResultInfo(data.getResultInfo());
-			converter.setSqlLiteralType(Settings.getInstance().getDefaultDateLiteralType());
+			converter.setSqlLiteralType(Settings.getInstance().getDefaultCopyDateLiteralType());
 			if (useUpdate)
 			{
 				converter.setCreateUpdate();

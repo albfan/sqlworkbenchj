@@ -116,6 +116,10 @@ public class ColumnIdentifier
 		this.type = NO_TYPE;
 	}
 
+	/**
+	 * Creates a deep copy of this ColumnIdentifier.
+	 * @return a copy of this identifier
+	 */
 	public ColumnIdentifier createCopy()
 	{
 		ColumnIdentifier result = new ColumnIdentifier();
@@ -136,11 +140,22 @@ public class ColumnIdentifier
 		return result;
 	}
 
+	/**
+	 * Get the column's name
+	 * @return the name of this column
+	 */
 	public String getColumnName()
 	{
 		return this.name;
 	}
 
+	/**
+	 * Define the name of this column. 
+	 * This will also reset the PK and Nullable attributes. isPkColumn() 
+	 * and isNullable() will return false after setting the name.
+	 * 
+	 * @param aName the (new) name for this identifier
+	 */
 	public void setColumnName(String aName)
 	{
 		this.name = aName;
@@ -163,6 +178,8 @@ public class ColumnIdentifier
 	 *	Returns the java.sql.Types data type as returned
 	 *  by the jdbc driver. If no type has been defined
 	 *  Types.OTHER will be returned
+	 * 
+	 * @return the current datatype
 	 */
 	public int getDataType()
 	{
@@ -175,12 +192,20 @@ public class ColumnIdentifier
 		return this.name;
 	}
 
-	public boolean equals(Object o)
+	/**
+	 * Compare two identifiers. 
+	 * The comparison is only done on the name column and 
+	 * case-insesitive. If the object is not a ColumnIdentifier
+	 * it returns false
+	 * @param other the object to compare
+	 * @return true if the other ColumnIdentifier has the same name
+	 */
+	public boolean equals(Object other)
 	{
 		try
 		{
-			ColumnIdentifier other = (ColumnIdentifier)o;
-			return this.name.equalsIgnoreCase(other.name);
+			ColumnIdentifier col = (ColumnIdentifier)other;
+			return this.name.equalsIgnoreCase(col.name);
 		}
 		catch (Exception e)
 		{
@@ -190,7 +215,8 @@ public class ColumnIdentifier
 
 	public int hashCode()
 	{
-		return this.name.hashCode();
+		if (this.name == null) return 0;
+		return this.name.toUpperCase().hashCode();
 	}
 	
 	/**
@@ -290,7 +316,7 @@ public class ColumnIdentifier
 		}
 		catch (Exception e)
 		{
-			LogMgr.logDebug("ColumnIdentifier.setColumnClassName()", "Could not obtain column class", e);
+			//LogMgr.logDebug("ColumnIdentifier.setColumnClassName()", "Could not obtain column class", e);
 			this.columnClass = null;
 		}
 	}

@@ -70,7 +70,8 @@ public class XmlDataFileParser
 	private boolean abortOnError = false;
 	private boolean[] warningAdded;
 	private JobErrorHandler errorHandler;
-	private boolean verboseFormat = false;
+	private boolean verboseFormat = true;
+	private boolean formatKnown = false;
 	private String missingColumn;
 	private MessageBuffer messages;
 	private String extensionToUse;
@@ -329,16 +330,23 @@ public class XmlDataFileParser
 		return result;
 	}
 
-	private void readXmlTableDefinition()
-		throws IOException, SAXException
+	private void detectTagFormat()
 	{
-		fileHandler.setMainFile(this.inputFile, this.encoding);
-		
-		XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(this.fileHandler);
-		this.columns = tableDef.getColumns();
-		this.colCount = this.columns.length;
-		this.tableNameFromFile = tableDef.getTableName();
-		this.warningAdded = new boolean[this.colCount];
+		try
+		{
+			fileHandler.setMainFile(this.inputFile, this.encoding);
+			XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(this.fileHandler);
+			detectTagFormat(tableDef);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("XmlDataFileParser", "Could not detect XML tag format. Assuming 'verbose'", e);
+			this.setUseVerboseFormat(true);
+		}
+	}
+	
+	private void detectTagFormat(XmlTableDefinitionParser tableDef)
+	{
 		String format = tableDef.getTagFormat();
 		if (format != null)
 		{
@@ -351,6 +359,19 @@ public class XmlDataFileParser
 				this.setUseVerboseFormat(false);
 			}
 		}
+	}
+	
+	private void readXmlTableDefinition()
+		throws IOException, SAXException
+	{
+		fileHandler.setMainFile(this.inputFile, this.encoding);
+		
+		XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(this.fileHandler);
+		this.columns = tableDef.getColumns();
+		this.colCount = this.columns.length;
+		this.tableNameFromFile = tableDef.getTableName();
+		this.warningAdded = new boolean[this.colCount];
+		detectTagFormat(tableDef);
 	}
 
 	public String getSourceFilename()
@@ -395,8 +416,12 @@ public class XmlDataFileParser
 		this.regularStop = false;
 			
 		// readTableDefinition relies on the fileHandler, so this 
-		// has to be called after creating initializing the fileHandler
+		// has to be called after initializing the fileHandler
 		if (this.columns == null) this.readXmlTableDefinition();
+		if (!this.formatKnown)
+		{
+			detectTagFormat();
+		}
 		
 		if (this.columnsToImport == null)
 		{
@@ -446,6 +471,7 @@ public class XmlDataFileParser
 		finally
 		{
 			try { in.close(); } catch (Throwable th) {}
+			try { this.fileHandler.done(); } catch (Throwable th) {}
 		}
 	}
 
@@ -842,13 +868,9 @@ public class XmlDataFileParser
 		return this.messages;
 	}
 
-	public boolean getUseVerboseFormat()
+	private void setUseVerboseFormat(boolean flag)
 	{
-		return verboseFormat;
-	}
-
-	public void setUseVerboseFormat(boolean flag)
-	{
+		this.formatKnown = true;
 		this.verboseFormat = flag;
 		if (this.verboseFormat)
 		{

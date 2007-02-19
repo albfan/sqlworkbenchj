@@ -71,6 +71,58 @@ public class WbExportTest extends TestCase
 		super.tearDown();
 	}
 
+	public void testCommit()
+	{
+		try
+		{
+			File exportFile = new File(this.basedir, "commit_test.sql");
+			
+			// Test default behaviour
+			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Export file not created", true, exportFile.exists());
+			
+			ScriptParser p = new ScriptParser();
+			p.setFile(exportFile);
+			
+			assertEquals("Wrong number of statements", rowcount + 1, p.getSize());
+
+			// Test no commit at all
+			exportFile.delete();
+			result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test -commitEvery=none");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Export file not created", true, exportFile.exists());
+			
+			p = new ScriptParser();
+			p.setFile(exportFile);
+			assertEquals("Wrong number of statements", rowcount, p.getSize());
+			
+			// Test commit each statement
+			exportFile.delete();
+			result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test -commitEvery=1");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Export file not created", true, exportFile.exists());
+			
+			p = new ScriptParser();
+			p.setFile(exportFile);
+			assertEquals("Wrong number of statements", rowcount * 2, p.getSize());
+			
+			String verb = SqlUtil.getSqlVerb(p.getCommand(0));
+			assertEquals("Wrong first statement", "INSERT", verb);
+			
+			verb = SqlUtil.getSqlVerb(p.getCommand(1));
+			assertEquals("No commit as second statement", "COMMIT", verb);
+
+			verb = SqlUtil.getSqlVerb(p.getCommand(3));
+			assertEquals("No commit", "COMMIT", verb);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	/**
 	 * Test the creation of date literals
 	 */

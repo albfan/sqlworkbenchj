@@ -17,13 +17,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.List;
-
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
+import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
-
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -68,7 +67,7 @@ public class ExportFileDialog
 		this.exportOptions.setQuerySql(sql, con);
 	}
 	
-	public List getColumnsToExport()
+	public List<ColumnIdentifier> getColumnsToExport()
 	{
 		return this.exportOptions.getColumnsToExport();
 	}

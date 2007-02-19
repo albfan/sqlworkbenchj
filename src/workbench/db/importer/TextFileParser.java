@@ -592,7 +592,6 @@ public class TextFileParser
 			// close and re-open that. To make sure we start at the beginning
 			// as we cannot rely on mark() and reset() to be available for the ZIP archives
 			// setupFileHandler will re-initialize the ImportFileHandler 
-			// which in turn will take care of setting up the 
 			in.close();
 			setupFileHandler();
 			in = this.fileHandler.getMainFileReader();
@@ -851,6 +850,7 @@ public class TextFileParser
 		finally
 		{
 			try { in.close(); } catch (IOException e) {}
+			try { this.fileHandler.done(); } catch (Throwable th) {}
 		}
 
 	}
@@ -932,7 +932,7 @@ public class TextFileParser
 		}
 		finally
 		{
-			try { in.close(); } catch (Throwable th) {}
+			this.fileHandler.done();
 		}
 		return cols;
 	}

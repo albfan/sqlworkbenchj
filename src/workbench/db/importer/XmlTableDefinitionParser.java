@@ -95,7 +95,7 @@ public class XmlTableDefinitionParser
 		}
 		finally
 		{
-			try { in.close(); } catch (Throwable th) {}
+			try { fileHandler.done(); } catch (Throwable th) {}
 		}
 	}
 	

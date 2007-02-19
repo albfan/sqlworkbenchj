@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.List;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
+import workbench.interfaces.ProgressReporter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -40,7 +41,7 @@ import workbench.util.WbFile;
  */
 public class WbExport
 	extends SqlCommand
-	implements RowActionMonitor
+	implements RowActionMonitor, ProgressReporter
 {
 	public static final String VERB = "WBEXPORT";
 	private DataExporter exporter;
@@ -54,11 +55,16 @@ public class WbExport
 	public WbExport()
 	{
 		cmdLine = new ArgumentParser();
+		CommonArgs.addDelimiterParameter(cmdLine);
+		CommonArgs.addEncodingParameter(cmdLine);
+		CommonArgs.addProgressParameter(cmdLine);
+		CommonArgs.addCommitParameter(cmdLine);
+		CommonArgs.addVerboseXmlParameter(cmdLine);
+		
 		cmdLine.addArgument("type", StringUtil.stringToList("text,xml,sqlinsert,sqlupdate,sqldeleteinsert,html"));
 		cmdLine.addArgument("file");
 		cmdLine.addArgument("title");
 		cmdLine.addArgument("table");
-		cmdLine.addArgument("delimiter");
 		cmdLine.addArgument("quotechar");
 		cmdLine.addArgument("dateFormat");
 		cmdLine.addArgument("timestampFormat");
@@ -66,11 +72,8 @@ public class WbExport
 		cmdLine.addArgument("charFunc");
 		cmdLine.addArgument("concat");
 		cmdLine.addArgument("concatFunc");
-		cmdLine.addArgument("commitEvery");
 		cmdLine.addArgument("header", ArgumentType.BoolArgument);
 		cmdLine.addArgument("createTable", ArgumentType.BoolArgument);
-		cmdLine.addArgument("encoding");
-		cmdLine.addArgument("showProgress");
 		cmdLine.addArgument("keyColumns");
 		cmdLine.addArgument("append", ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
@@ -82,9 +85,8 @@ public class WbExport
 		cmdLine.addArgument("useCDATA", ArgumentType.BoolArgument);
 		cmdLine.addArgument("escapeText", StringUtil.stringToList("control,7bit,8bit,extended,none"));
 		cmdLine.addArgument("quoteAlways", ArgumentType.BoolArgument);
-		cmdLine.addArgument("lineEnding");
+		cmdLine.addArgument("lineEnding", StringUtil.stringToList("dos,unix"));
 		cmdLine.addArgument("showEncodings");
-		cmdLine.addArgument("verboseXML", ArgumentType.BoolArgument);
 		cmdLine.addArgument("writeOracleLoader", ArgumentType.BoolArgument);
 		cmdLine.addArgument("compress", ArgumentType.BoolArgument);
 		cmdLine.addArgument("blobIdCols");
@@ -102,13 +104,8 @@ public class WbExport
 		String msg = ResourceMgr.getString("ErrExportWrongParameters");
 		msg = StringUtil.replace(msg, "%header_flag_default%", Boolean.toString(getTextHeaderDefault()));
 		msg = StringUtil.replace(msg, "%verbose_default%", Boolean.toString(getVerboseXmlDefault()));
-		msg = StringUtil.replace(msg, "%date_literal_default%", getDateLiteralDefault());
+		msg = StringUtil.replace(msg, "%date_literal_default%", Settings.getInstance().getDefaultExportDateLiteralType());
 		return msg;
-	}
-	
-	private String getDateLiteralDefault()
-	{
-		return Settings.getInstance().getProperty("workbench.export.sql.default.dateliteral", "dbms");
 	}
 	
 	private boolean getVerboseXmlDefault()
@@ -257,8 +254,9 @@ public class WbExport
 			exporter.setChrFunction(cmdLine.getValue("charfunc"));
 			exporter.setConcatFunction(cmdLine.getValue("concatfunc"));
 			exporter.setConcatString(cmdLine.getValue("concat"));
-			int commit = StringUtil.getIntValue(cmdLine.getValue("commitevery"),-1);
-			exporter.setCommitEvery(commit);
+			
+			CommonArgs.setCommitEvery(exporter, cmdLine);
+			
 			exporter.setAppendToFile(cmdLine.getBoolean("append"));
 			if (updateTable != null) exporter.setTableName(updateTable);
 			String c = cmdLine.getValue("keycolumns");
@@ -291,7 +289,7 @@ public class WbExport
 			String output = cmdLine.getValue(WbXslt.ARG_OUTPUT);
 
 			boolean verboseDefault = getVerboseXmlDefault(); 
-			boolean verbose = cmdLine.getBoolean("verbosexml", verboseDefault);
+			boolean verbose = cmdLine.getBoolean(CommonArgs.ARG_VERBOSE_XML, verboseDefault);
 			exporter.setUseVerboseFormat(verbose);
 
 			if (xsl != null && output != null)
@@ -393,19 +391,7 @@ public class WbExport
 			this.directExport = (tablesToExport.size() > 0);
 		}
 
-		String value = cmdLine.getValue("showprogress");
-		if (value == null || "true".equalsIgnoreCase(value))
-		{
-			this.progressInterval = DataExporter.DEFAULT_PROGRESS_INTERVAL;
-		}
-		else if ("false".equalsIgnoreCase(value))
-		{
-			this.progressInterval = 0;
-		}
-		else
-		{
-			this.progressInterval = StringUtil.getIntValue(value, -1);
-		}
+		CommonArgs.setProgressInterval(this, cmdLine);
 		this.showProgress = (this.progressInterval > 0);
 
 		if (file != null)
@@ -447,10 +433,9 @@ public class WbExport
 		
 		if (!this.directExport)
 		{
-
 			// Waiting for the next SQL Statement...
 			this.exporter.setRowMonitor(this.rowMonitor);
-			this.exporter.setProgressInterval(this.progressInterval);
+			this.exporter.setReportInterval(this.progressInterval);
 
 			String msg = ResourceMgr.getString("MsgSpoolInit");
 			msg = StringUtil.replace(msg, "%type%", exporter.getTypeDisplay());
@@ -635,7 +620,7 @@ public class WbExport
 		}
 
 		exporter.setRowMonitor(this);
-		exporter.setProgressInterval(this.progressInterval);
+		exporter.setReportInterval(this.progressInterval);
 
 		if (tableCount > 1)
 		{
@@ -814,6 +799,11 @@ public class WbExport
 		}
 	}
 
+	public void setReportInterval(int interval)
+	{
+		this.progressInterval = interval;
+	}
+	
 	public int getMonitorType() { return RowActionMonitor.MONITOR_PLAIN; }
 	public void setMonitorType(int aType) {}
 	public void saveCurrentType(String type) {}

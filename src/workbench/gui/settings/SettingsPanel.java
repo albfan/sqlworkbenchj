@@ -58,13 +58,13 @@ public class SettingsPanel
 
 	private JDialog dialog;
 	private String escActionCommand;
-	private List pages;
+	private List<Restoreable> pages;
 
 	public SettingsPanel()
 	{
 		initComponents();
-		pages = new LinkedList();
-		JPanel page = new GeneralOptionsPanel();
+		pages = new LinkedList<Restoreable>();
+		GeneralOptionsPanel page = new GeneralOptionsPanel();
 		mainTab.add(ResourceMgr.getString("LblSettingsGeneral"), page);
 		pages.add(page);
 
@@ -72,10 +72,12 @@ public class SettingsPanel
 		mainTab.addTab(ResourceMgr.getString("LblDataEdit"), new JPanel());
 		mainTab.addTab(ResourceMgr.getString("LblSettingsDbExplorer"), new JPanel());
 		mainTab.addTab(ResourceMgr.getString("LblSqlFormat"), new JPanel());
+		mainTab.addTab(ResourceMgr.getString("LblSqlGeneration"), new JPanel());
 		mainTab.addTab(ResourceMgr.getString("LblExternalTools"), new JPanel());
 		mainTab.addTab(ResourceMgr.getString("LblLnFOptions"), new JPanel());
 		mainTab.addChangeListener(this);
 	}
+	
 	public void stateChanged(ChangeEvent e)
 	{
 		Component c = this.mainTab.getSelectedComponent();
@@ -100,13 +102,16 @@ public class SettingsPanel
 					page = new FormatterOptionsPanel();
 					break;
 				case 5:
-					page = new ExternalToolsPanel();
+					page = new SqlGenerationOptionsPanel();
 					break;
 				case 6:
+					page = new ExternalToolsPanel();
+					break;
+				case 7:
 					page = new LnFOptionsPanel();
 					break;
 			}
-			pages.add(page);
+			pages.add((Restoreable)page);
 			mainTab.setComponentAt(index, page);
 		}
 		finally

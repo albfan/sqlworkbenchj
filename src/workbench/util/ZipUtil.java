@@ -12,6 +12,7 @@
 package workbench.util;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.zip.ZipFile;
 
@@ -20,28 +21,43 @@ import java.util.zip.ZipFile;
  */
 public class ZipUtil
 {
-	
 
+	/**
+	 * Test if the given File is a ZIP Archive.
+	 * @param f the File to test
+	 * @return true if the file is a ZIP Archive, false otherwise
+	 */
 	public static boolean isZipFile(File f)
 	{
 		// The JVM crashes (sometimes) if I pass my "fake" ClipboardFile object
 		// to the ZipFile constructor, so this is checked beforehand
 		if (f instanceof ClipboardFile) return false;
 
-		ZipFile archive = null;
+		if (!f.exists()) return false;
+		
+		boolean isZip = false;
+		
+		InputStream in = null;
 		try
 		{
-			archive = new ZipFile(f);
+			in = new FileInputStream(f);
+			byte[] buffer = new byte[4];
+			int bytes = in.read(buffer);
+			if (bytes == 4)
+			{
+				isZip = (buffer[0] == 'P' && buffer[1] == 'K');
+				isZip = isZip && (buffer[2] == 3 && buffer[3] == 4);
+			}
 		}
 		catch (Throwable e)
 		{
-			return false;
+			isZip = false;
 		}
 		finally
 		{
-			try { archive.close(); } catch (Throwable th) {}
+			try { in.close(); } catch (Throwable th) {}
 		}
-		return true;
+		return isZip;
 	}
 	
 }

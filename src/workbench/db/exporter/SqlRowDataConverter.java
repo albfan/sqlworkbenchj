@@ -17,6 +17,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.interfaces.Committer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -57,7 +58,6 @@ public class SqlRowDataConverter
 	private String concatString;
 	private String chrFunction;
 	private String concatFunction;
-	private String sql;
 	private StatementFactory factory;
 	private List keyColumnsToUse;
 	private String lineTerminator = "\n";
@@ -119,7 +119,8 @@ public class SqlRowDataConverter
 	public StrBuffer getEnd(long totalRows)
 	{
 		boolean writeCommit = true;
-		if (commitEvery > 0 && (totalRows % commitEvery == 0))
+		if ( (commitEvery == Committer.NO_COMMIT_FLAG) 
+			   || (commitEvery > 0 && (totalRows % commitEvery == 0)))
 		{
 			writeCommit = false;
 		}
@@ -295,19 +296,9 @@ public class SqlRowDataConverter
 		return keysPresent;
 	}
 	
-	public int getCommitEvery()
-	{
-		return commitEvery;
-	}
-
 	public void setCommitEvery(int commitEvery)
 	{
 		this.commitEvery = commitEvery;
-	}
-
-	public String getConcatString()
-	{
-		return concatString;
 	}
 
 	public void setConcatString(String concat)
@@ -315,11 +306,6 @@ public class SqlRowDataConverter
 		if (concat == null) return;
 		this.concatString = concat;
 		this.concatFunction = null;
-	}
-
-	public String getConcatFunction()
-	{
-		return concatFunction;
 	}
 
 	public void setConcatFunction(String func)
@@ -337,16 +323,6 @@ public class SqlRowDataConverter
 	public void setChrFunction(String chrFunction)
 	{
 		this.chrFunction = chrFunction;
-	}
-
-	public String getSql()
-	{
-		return sql;
-	}
-
-	public void setSql(String sql)
-	{
-		this.sql = sql;
 	}
 
 	/**
