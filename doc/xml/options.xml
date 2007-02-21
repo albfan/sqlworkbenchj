@@ -452,16 +452,6 @@
 				column's label.
 			</para>
 		</section>		
-
-		<section id="options-default-date-literaltype">
-			<title>Default literal type</title>
-			<para>
-				Defines the date literal format to be used when copying data
-				as SQL statements to the clipboard. For a detailed description
-				of the different formats please refer to the <link linkend="export-sql-literal-formats">WbExport</link>
-				description.
-			</para>
-		</section>		
 		
 	</section>
 	
@@ -509,6 +499,50 @@
 	
 	<section id="options-sql-formatting">
 		<title>SQL Formatting</title>		
+		
+			<section>
+				<title>Max. length for sub-select</title>
+				<para>
+					When the SQL formatter hits a sub-SELECT while
+					parsing it will not reformat any statement which is shorter
+					then the length specified with this option, i.e. any sub-SELECT
+					shorter then this value will be formatted as one single statement without
+					line breaks or indention. See <xref linkend="editor-reformat-sql"/> for
+					details on how the SQL formatting works.
+				</para>
+			</section>
+			
+			<section>
+				<title>Columns in SELECT</title>
+				<para>
+					This property defines the number of columns the formatter puts in on line 
+					when formatting a <literal>SELECT</literal> statement.
+				</para>
+			</section>
+
+			<section>
+				<title>Quoted elements per line</title>
+				<para>
+					When using the editor to <link linkend="editor-make-in-list">transform</link>
+					lines into lists suitable for an <literal>IN</literal> list, this option 
+					defines how many values will be put into a single line when creating 
+					quoted elements ("Create SQL List").
+				</para>
+			</section>
+
+			<section>
+				<title>Other elements per line</title>
+				<para>
+					This option defines how many values will be put into a single 
+					line when creating non-quoted elements ("Create non-char SQL List").
+				</para>
+			</section>
+			
+	</section>
+
+	<section id="options-sql-generation">
+		<title>SQL Generation</title>		
+		
 		<section id="options-generated-update">
 			<title>Generated UPDATE statements</title>
 			<para>
@@ -557,50 +591,35 @@
 			</para>
 		</section>
 		
-		<section id="options-editor-formatter">
-			<title>SQL formatting in the editor</title>
-			<section>
-				<title>Max. length for sub-select</title>
-				<para>
-					When the SQL formatter hits a sub-SELECT while
-					parsing it will not reformat any statement which is shorter
-					then the length specified with this option, i.e. any sub-SELECT
-					shorter then this value will be formatted as one single statement without
-					line breaks or indention. See <xref linkend="editor-reformat-sql"/> for
-					details on how the SQL formatting works.
-				</para>
-			</section>
-			
-			<section>
-				<title>Columns in SELECT</title>
-				<para>
-					This property defines the number of columns the formatter puts in on line 
-					when formatting a <literal>SELECT</literal> statement.
-				</para>
-			</section>
+		<section id="options-default-copy-literaltype">
+			<title>Date literals for clipboard</title>
+			<para>
+				Defines the date literal format to be used when copying data
+				as SQL statements <emphasis>to the clipboard</emphasis>. For a detailed description
+				of the different formats please refer to the 
+				<link linkend="export-sql-literal-formats">WbExport</link> description.
+				This option does not influence the default format used by the <literal>WbExport</literal>
+				command.
+			</para>
+			<note>
+				When you copy data as "Text" (tab-separated) to the clipboard, the date and 
+				timestamp format from the <link linkend="options-date-format">general options</link> is used.
+			</note>
+		</section>		
 
-			<section>
-				<title>Quoted elements per line</title>
-				<para>
-					When using the editor to <link linkend="editor-make-in-list">transform</link>
-					lines into lists suitable for an <literal>IN</literal> list, this option 
-					defines how many values will be put into a single line when creating 
-					quoted elements ("Create SQL List").
-				</para>
-			</section>
-
-			<section>
-				<title>Other elements per line</title>
-				<para>
-					This option defines how many values will be put into a single 
-					line when creating non-quoted elements ("Create non-char SQL List").
-				</para>
-			</section>
-			
-		</section>
+		<section id="options-default-export-literaltype">
+			<title>Date literals for WbExport</title>
+			<para>
+				Defines the date literal format to be used for the <link linkend="export-sql-literal-formats">WbExport</link>
+				command. The value of this option is used if the <literal>-sqlDateLiterals</literal>
+				switch is not supplied when running <literal>WbExport</literal>.
+				This default value is reported when <literal>WbExport</literal> is executed
+				without parameters.
+			</para>
+		</section>		
 		
 	</section>
-
+	
 	<section id="options-external-tools">
 		<title>External tools</title>
 		<para>

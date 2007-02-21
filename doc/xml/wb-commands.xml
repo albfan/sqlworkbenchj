@@ -164,8 +164,9 @@
 							<para>
 								Defines the line ending to be used for XML or text files. 
 								<literal>crlf</literal> puts the ASCII characters #13 and #10 after each line. 
-								This is the standard format on Windows based systems (<literal>dos</literal> and
-								<literal>win</literal> are synonym values for <literal>crl</literal>).
+								This is the standard format on Windows based systems. <literal>dos</literal> and
+								<literal>win</literal> are synonym values for <literal>crlf</literal>,
+								<literal>unix</literal> is a synonym for <literal>lf</literal>.
 							</para>
 							<para>
 								<literal>lf</literal> puts only the ASCII character #10 at the end of each line. 
@@ -354,7 +355,7 @@
 						<row id="export-sql-literal-formats">
 							<entry>-sqlDateLiterals</entry>
 							<entry>
-								<para>Possible values: <literal>DBMS</literal>, <literal>ANSI</literal>, <literal>JDBC</literal></para>
+								<para>Possible values: <literal>jdbc</literal>, <literal>ansi</literal>, <literal>dbms</literal>, <literal>default</literal></para>
 								<para>
 									This parameter controls the generation of date or timestamp
 									literals. By default literals that are specific for the current
@@ -363,25 +364,43 @@
 									and timestamps.
 								</para>
 								<para>
-									SQL statements with JDBC literals should be usable with every
-									JDBC based tool, including your own Java code. The use the JDBC 
-									escape syntax with curly braces, e.g. 
+									<literal>jdbc</literal> selects the creation of JDBC compliant literals. 
+									These should be usable with every JDBC based tool, including your own Java code:
 									<literal>{d '2004-04-28'}</literal> or 
-									<literal>{ts '2002-04-02 12:04:00'}</literal>. This is the 
+									<literal>{ts '2002-04-02 12:02:00.042'}</literal>. This is the 
 									recommended format if you plan to use &wb-productname; (or any 
-									other JDBC based tool) to run the generated statement.
+									other JDBC based tool) to run the generated statements.
 								</para>
 								<para>
-									The ANSI format is very similar to the JDBC format except that
-									it does not use the braces:
-									<literal>DATE '2004-04-28'</literal> or 
+									The value <literal>ansi</literal> selects the creation of ANSI SQL compliant 
+									date literals: <literal>DATE '2004-04-28'</literal> or 
 									<literal>TIMESTAMP '2002-04-02 12:04:00'</literal>. Please consult the 
 									manual of the target DBMS, to find out whether it supports ANSI compliant
 									date literals.
 								</para>
 								<para>
-									You can specify a default format to be used when copying statements to the 
-									clipboard in the <link linkend="options-default-date-literaltype">options dialog</link>.
+									The value <literal>default</literal> selects the creation of quoted date and timestamp
+									literals in ISO format (e.g. '2004-04-28'). Several DBMS support this format (e.g. Postgres, Microsoft SQL Server)
+								</para>
+
+								<para>
+									The value <literal>dbms</literal> selects the creation of specific 
+									literals to be used with the current DBMS (using e.g. the <literal>to_date()</literal>
+									function for Oracle). The format of these literals can be customized if necessary
+									in <literal>workbench.settings</literal> using the keys
+									<literal>workbench.sql.literals.[type].[datatype].pattern</literal> where 
+									[type] is the type specified with this parameter and [datatype] is one of
+									<literal>time, date, timestamp</literal>. If you add new literal types, 
+									please also adjust the key <literal>workbench.sql.literals.types</literal>
+									which is used to show the possible values in the GUI (auto-completion
+									"Save As" dialog, Options dialog).
+									If no type is specified (or <emphasis>dbms</emphasis>), &wb-productname; first looks for an entry
+									where [type] is the current <link linkend="dbid">dbid</link>. If no value
+									is found, <literal>default</literal> is used.
+								</para>
+								<para>
+									You can define the default literal format to be used for the WbExport command
+									in the <link linkend="options-default-copy-literaltype">options dialog</link>.
 								</para>
 							</entry>
 						</row>
@@ -396,6 +415,12 @@
 									</para>
 									<para>-commitevery=100</para>
 									<para>will create a <literal>COMMIT;</literal> after every 100th statement.</para>
+									<para>
+										If this is not specified one <literal>COMMIT;</literal> will be added at the 
+										end of the script. To suppress the final COMMIT, you can use
+										<literal>-commitEvery=none</literal>. Passing <literal>-commitEvery=atEnd</literal>
+										is equivalent to <literal>-commitEvery=0</literal>
+									</para>
               </entry>
             </row>
 

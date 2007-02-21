@@ -1152,6 +1152,33 @@ public class TableListPanel
 				{
 					sql = ResourceMgr.getString("MsgSynonymSourceNotImplemented") + " " + meta.getProductName();
 				}
+				else
+				{
+					try
+					{
+						TableIdentifier tbl = meta.getSynonymTable(this.selectedTable);
+						String tableSql = meta.getTableSource(tbl, false, true);
+						if (!StringUtil.isEmptyString(tableSql))
+						{
+							StringBuilder sb = new StringBuilder(sql.length() + tableSql.length() + 50);
+							String nl = Settings.getInstance().getInternalEditorLineEnding();
+							sb.append(sql);
+							sb.append(nl);
+							sb.append(nl);
+							sb.append("-------------- ");
+							sb.append(tbl.getTableExpression(dbConnection));
+							sb.append(" --------------");
+							sb.append(nl);
+							sb.append(nl);
+							sb.append(tableSql);
+							sql = sb.toString();
+						}
+					}
+					catch (Exception e)
+					{
+						LogMgr.logError("TableListPanel.retrieveTableSource()", "Error when retrieving source for synonym table", e);
+					}
+				}
 			}
 			else if ("sequence".equalsIgnoreCase(type))
 			{

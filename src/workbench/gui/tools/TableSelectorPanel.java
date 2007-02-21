@@ -76,7 +76,7 @@ public class TableSelectorPanel
 			this.newTableId.setNewTable(true);
 			this.newTableId.setTable(null);
 			this.newTableId.setSchema(null);
-			this.repaint();
+			WbSwingUtilities.repaintNow(this);
 		}
 	}
 

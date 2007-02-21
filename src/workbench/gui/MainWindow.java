@@ -1570,8 +1570,7 @@ public class MainWindow
 					}
 				}
 			}
-			view.validate();
-			view.repaint();
+			WbSwingUtilities.repaintNow(view);
 		}
 	}
 
@@ -1955,43 +1954,22 @@ public class MainWindow
 	 */
 	private void adjustTabCount(int newCount)
 	{
-		boolean suspended = this.sqlTab.isRepaintSuspended();
+      int tabCount = this.sqlTab.getTabCount() - getNumberOfExplorerPanels();
 
-		if (!suspended) this.sqlTab.setSuspendRepaint(true);
-		try
-		{
-			int tabCount = this.sqlTab.getTabCount() - getNumberOfExplorerPanels();
-
-			if (newCount > tabCount)
-			{
-				for (int i=0; i < (newCount - tabCount); i++)
-				{
-					this.addTab(false, false);
-				}
-			}
-			else if (newCount < tabCount)
-			{
-				for (int i=0; i < (tabCount - newCount); i++)
-				{
-					this.removeLastTab(newCount == 1);
-				}
-			}
-		}
-		finally
-		{
-			if (!suspended) 
-			{
-				this.sqlTab.setSuspendRepaint(false);
-				EventQueue.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						validate();
-						repaint();
-					}
-				});
-			}
-		}
+      if (newCount > tabCount)
+      {
+        for (int i=0; i < (newCount - tabCount); i++)
+        {
+          this.addTab(false, false);
+        }
+      }
+      else if (newCount < tabCount)
+      {
+        for (int i=0; i < (tabCount - newCount); i++)
+        {
+          this.removeLastTab(newCount == 1);
+        }
+      }
 	}
 
 	/**
@@ -2222,7 +2200,7 @@ public class MainWindow
 	{
 		if (e.getSource() == this.sqlTab)
 		{
-			if (this.tabRemovalInProgress || this.sqlTab.isRepaintSuspended()) return;
+			if (this.tabRemovalInProgress) return;
 			int index = this.sqlTab.getSelectedIndex();
 			this.tabSelected(index);
 		}
@@ -2279,47 +2257,27 @@ public class MainWindow
 		if (index == -1) index = sqlTab.getTabCount();
 		final SqlPanel sql = new SqlPanel(index+1);
 		sql.addDbExecutionListener(this);
-		//sql.addFilenameChangeListener(this);
+
 		if (checkConnection) this.checkConnectionForPanel(sql);
 
-		boolean isSuspended = this.sqlTab.isRepaintSuspended();
+		JMenuBar menuBar = this.createMenuForPanel(sql);
+		this.panelMenus.add(index, menuBar);
+		this.sqlTab.add(sql, index);
 
-		try
-		{
-			// suspending the repaint will also prevent
-			// our own stateChanged event to carry out its work
-			// if the new tab index is lower then the currently
-			// selected index, Swing will select the new index
-			// But as the new tab is not setup completely, we have to
-			// prevent our own stateChanged event to do its work!
-			if (!isSuspended) this.sqlTab.setSuspendRepaint(true);
+		// setTabTitle needs to be called after adding the panel!
+		// this will set the correct title with Mnemonics
+		this.setTabTitle(index, ResourceMgr.getDefaultTabLabel());
 
-			JMenuBar menuBar = this.createMenuForPanel(sql);
-			this.panelMenus.add(index, menuBar);
-			this.sqlTab.add(sql, index);
-			
-			// setTabTitle needs to be called after adding the panel!
-			// this will set the correct title with Mnemonics
-			this.setTabTitle(index, ResourceMgr.getDefaultTabLabel());
+		this.setMacroMenuEnabled(sql.isConnected());
 
-			this.setMacroMenuEnabled(sql.isConnected());
-
-			this.renumberTabs();
-		}
-		finally
-		{
-			if (!isSuspended) this.sqlTab.setSuspendRepaint(false);
-		}
+		this.renumberTabs();
 
 		sql.initDivider(sqlTab.getHeight() - sqlTab.getTabHeight());
 		
-		// This needs to be done after re-enabling repaint 
-		// otherwise the tab will not change properly!
 		if (selectNew) 	
 		{
 			this.sqlTab.setSelectedIndex(index);
 		}
-			
 
 		return sql;
 	}
@@ -2436,8 +2394,7 @@ public class MainWindow
 		}
 		if (this.sqlTab.getSelectedIndex() == panel)
 		{
-			menu.validate();
-			menu.repaint();
+			WbSwingUtilities.repaintNow(menu);
 		}
 	}
 

@@ -187,6 +187,7 @@ public class EditWindow
 		}
 
 		this.addWindowListener(this);
+    WbSwingUtilities.repaintLater(this);
 	}
 
 	public void setInfoText(String text)
@@ -197,21 +198,6 @@ public class EditWindow
 		}
 	}
 
-	public void setVisible(boolean show)
-	{
-		super.setVisible(show);
-		if (show)
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					validate();
-					repaint();
-				}
-			});
-		}
-	}
 	public void hideCancelButton()
 	{
 		this.cancelButton.removeActionListener(this);

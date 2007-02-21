@@ -41,6 +41,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ActionRegistration;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.DataStoreTableModel;
@@ -391,7 +392,7 @@ public class ShortcutEditor
 		ShortcutDisplay d = (ShortcutDisplay)this.definitions.getValue(row, 1);
 		d.resetToDefault();
 		this.model.fireTableRowsUpdated(row, row);
-		this.repaint();
+		WbSwingUtilities.repaintNow(this);
 	}
 
 	private void resetAllKeys()

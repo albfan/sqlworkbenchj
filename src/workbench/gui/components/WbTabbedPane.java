@@ -11,10 +11,8 @@
  */
 package workbench.gui.components;
 
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Insets;
 import javax.swing.JTabbedPane;
@@ -33,9 +31,6 @@ public class WbTabbedPane
 	extends JTabbedPane
 {
 
-	private boolean suspendRepaint = false;
-
-	/** Creates a new instance of WbTabbedPane */
 	public WbTabbedPane()
 	{
 		super();
@@ -88,66 +83,4 @@ public class WbTabbedPane
 		return new Insets(0,0,0,0);
 	}
 	
-	boolean stateChangedPending = false;
-	protected void fireStateChanged()
-	{
-		if (!isRepaintSuspended())
-		{
-			super.fireStateChanged();
-		}
-		else
-		{
-			stateChangedPending = true;
-		}
-	}
-
-	public synchronized void setSuspendRepaint(boolean suspendNow)
-	{
-		boolean wasSuspended = this.suspendRepaint;
-		this.suspendRepaint = suspendNow;
-
-		// if repainting was re-enabled, then queue
-		// a repaint event right away
-		// I'm using invokeLater() to make sure, that
-		// this is executed on the AWT thread.
-		if (wasSuspended && !suspendNow)
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					validate();
-					repaint();
-					if (stateChangedPending)
-					{
-						stateChangedPending = false;
-						fireStateChanged();
-					}
-				}
-			});
-		}
-	}
-
-	public boolean isRepaintSuspended()
-	{
-		 return this.suspendRepaint;
-	}
-
-	public void repaint()
-	{
-		if (this.suspendRepaint) return;
-		super.repaint();
-	}
-
-	public void paintComponent(Graphics g)
-	{
-		if (this.suspendRepaint) return;
-		super.paintComponent(g);
-	}
-
-	public void paintComponents(Graphics g)
-	{
-		if (this.suspendRepaint) return;
-		super.paintComponents(g);
-	}
 }

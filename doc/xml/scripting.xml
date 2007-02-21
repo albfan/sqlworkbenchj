@@ -52,7 +52,7 @@
 			parameter. The alternate delimiter should be used if you have several scripts that use
 			the regular semicolon and the alternate delimiter. If your scripts exceed a certain size, 
 			they won't be processed in memory and detecting the alternate delimiter does not work in that case.
-			If this is the case you can use the <literal>-delimitery</literal> switch to change 
+			If this is the case you can use the <literal>-delimiter</literal> switch to change 
 			the default delimiter for all scripts. The usage of the alternate delimiter will be
 			disabled if this parameter is specified.
 		</para>

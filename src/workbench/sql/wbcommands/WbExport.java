@@ -24,7 +24,6 @@ import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
-import workbench.storage.SqlLiteralFormatter;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CharacterRange;
@@ -85,7 +84,7 @@ public class WbExport
 		cmdLine.addArgument("useCDATA", ArgumentType.BoolArgument);
 		cmdLine.addArgument("escapeText", StringUtil.stringToList("control,7bit,8bit,extended,none"));
 		cmdLine.addArgument("quoteAlways", ArgumentType.BoolArgument);
-		cmdLine.addArgument("lineEnding", StringUtil.stringToList("dos,unix"));
+		cmdLine.addArgument("lineEnding", StringUtil.stringToList("crlf,lf"));
 		cmdLine.addArgument("showEncodings");
 		cmdLine.addArgument("writeOracleLoader", ArgumentType.BoolArgument);
 		cmdLine.addArgument("compress", ArgumentType.BoolArgument);

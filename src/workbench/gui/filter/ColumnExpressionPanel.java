@@ -22,6 +22,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import workbench.db.ColumnIdentifier;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTraversalPolicy;
@@ -335,11 +336,19 @@ public class ColumnExpressionPanel
 					added++;
 				}
 			}
-			this.activeItems.setData(l);
-			comparatorDropDown.setModel(this.activeItems);
-			if (added > 0) comparatorDropDown.setSelectedIndex(0);
-			comparatorDropDown.validate();
-			comparatorDropDown.repaint();
+			activeItems.setData(l);
+			
+			final boolean setIndex = (added > 0);
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					comparatorDropDown.setModel(activeItems);
+					if (setIndex) comparatorDropDown.setSelectedIndex(0);
+					comparatorDropDown.validate();
+					comparatorDropDown.repaint();
+				}
+			});
 		}
 		catch (Exception e)
 		{

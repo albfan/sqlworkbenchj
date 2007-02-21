@@ -1,5 +1,31 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  (93.3) The DbExplorer now displays the source for the underlying 
+      table as well, when displaying the source for a synonym
+Enh:  (93.3) WbExport now can optionally create ANSI or JDBC style date
+      and timestamp literals when exporting to SQL statements. This is
+      selected with the new switch -sqlDateLiterals
+      The default literal type for copying SQL statements to the clipboard
+      can be defined in the options dialog.
+      Additional literal types can be defined through workbench.settings
+      by supplying the approriate SimpleDateFormat patterns
+Enh:  (93.2) When finding primary key columns to update the result set
+      synonyms are now resolved as well.
+Enh:  (93.1) A new command to prompt for a confirmation has been added. 
+      WbConfirm will display the provided message and will allow to stop
+      the current execution or continue. This will only be evaluated 
+      in GUI mode (e.g. to prevent the accidental execution of "dangerous"
+      scripts)
+Fix:  (93.3) WbImport did not always close the input files correctly.
+Fix:  (93.3) When exporting data to SQL scripts, timestamp columns were
+      not formatted correctly
+Fix:  (93.2) Code completion was not working for (Oracle) synonyms
+Fix:  (93.1) The DbExplorer failed to retrieve the table definition and table 
+      data for MS SQL Server if the server was defined with a case sensitive
+      collation.
+Fix:  (93.1) The table reference navigation was not always reset in the 
+      DbExplorer data tab and displayed the referenced tables from a previous
+      table
 
 Build 93, 11.02.2007
 --------------------

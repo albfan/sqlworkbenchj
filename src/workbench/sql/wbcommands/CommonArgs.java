@@ -47,7 +47,7 @@ public class CommonArgs
 	
 	public static void addImportModeParameter(ArgumentParser cmdLine)
 	{
-		cmdLine.addArgument(ARG_IMPORT_MODE, StringUtil.stringToList("insert,update,update/insert,insert/update"));
+		cmdLine.addArgument(ARG_IMPORT_MODE, StringUtil.stringToList("insert,update,\"update,insert\",\"insert,update\""));
 	}
 	
 	public static void addVerboseXmlParameter(ArgumentParser cmdLine)

@@ -244,8 +244,7 @@ public class PrintPreview
 		}
 		finally
 		{
-			this.validate();
-			this.repaint();
+			WbSwingUtilities.repaintLater(this);
 			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
 

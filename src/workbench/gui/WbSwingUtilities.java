@@ -532,7 +532,31 @@ public class WbSwingUtilities
 		}
 		return "KeyCode: 0x" + Integer.toString(keyCode, 16);
 	}
-	
+
+	public static void repaintNow(final Component c)
+	{
+		invoke(new Runnable()
+		{
+			public void run()
+			{
+				c.validate();
+				c.repaint();
+			}
+		});
+	}
+
+	public static void repaintLater(final Component c)
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				c.validate();
+				c.repaint();
+			}
+		});
+	}
+  
 	public static void requestFocus(final Window win, final JComponent comp)
 	{
 		win.addWindowListener(new WindowAdapter()

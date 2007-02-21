@@ -1,42 +1,55 @@
 <section id="settings">
   <title>Properties in the .settings file</title>
 		 
-  <para>This section describes the additional options for &wb-productname; which
-      are not (yet) available in the options dialog.</para>
+  <para>
+		This section describes the additional options for &wb-productname; which
+    are not (yet) available in the options dialog.
+	</para>
 
-  <para>The name of the setting refers to the entry in the file <literal>workbench.settings</literal>
-      which is located in the <link linkend="config-dir">configuration directory</link>. Not all
-      listed properties will be present in <literal>workbench.settings</literal>. In this case
-			simply create a new line with the property name and the value as described here. 
-			The position where you add this entry does not matter.
-  </para>
-        
+	<para>
+		The name of the setting refers to the entry in the file <literal>workbench.settings</literal>
+		which is located in the <link linkend="config-dir">configuration directory</link>. Not all
+		listed properties will be present in <literal>workbench.settings</literal>. In this case, 
+		simply create a new line with the property name and the value as described here. 
+		The position where you add this entry does not matter.
+	</para>
+	
   <section id="dbms-identifier">
     <title>Database Identifier</title>
-    <para>Some parameters define a list of "Database Identifiers".
-        The identifier that needs to be put there can be obtained by hovering the mouse over the connection
-        URL information in the main window, or from the log file.
-        After a successful connect to a database, there will be an entry in the log file similar to this:
-    </para>
+		
+		<para>
+			Some parameters define a list of "Database Identifiers".
+			The identifier that needs to be put there can be obtained by hovering the mouse over the connection
+			URL information in the main window, or from the log file.
+			After a successful connect to a database, there will be an entry in the log file similar to this:
+		</para>
+		
     <programlisting>INFO  15.08.2004 10:24:42 Connected to: [HSQL Database Engine]</programlisting>
-    <para>If the description for a property in this chapter refers to 
+		
+    <para>
+			If the description for a property in this chapter refers to 
 			a "Database Identifier", the text between (but not including) the square brackets has to be used.
     </para>
+		
   </section>
         
   <section id="dbid">
     <title>DBID</title>
-    <para>For some settings, where the ID is part of the property's key, a "clean" version of
-      	the Database Identifer, called the DBID, is used. This DBID is also reported in the log
-      	file:
-    </para>
-    <programlisting>INFO  15.08.2004 10:24:42 Using DBID=hsql_database_engine</programlisting>
+		
+		<para>
+			For some settings, where the ID is part of the property's key, a "clean" version of
+			the Database Identifer, called the DBID, is used. This DBID is also reported in the log
+			file:
+		</para>
+		
+		<programlisting>INFO  15.08.2004 10:24:42 Using DBID=hsql_database_engine</programlisting>
+		
 		<para> 
 			If the description for a property in this chapter refers to the "DBID", then this value has to be used. 
-			If the DBID is part of the property key this will be referred to as <literal>[dbid]</literal> in the
-			key.
+			If the DBID is part of the property key this will be referred to as <literal>[dbid]</literal> in the key.
 		</para>
-  </section>
+		
+	</section>
 
   <section id="gui-settings">
     <title>GUI related settings</title>
@@ -55,9 +68,10 @@
     <section id="settings-save-workspace">
       <title>Save workspaces automatically</title>
       <para><literal>workbench.workspace.autosave</literal></para>
-      <para>If this is enabled, the current workspace will
-          be saved automatically, when a SQL statement is executed. This
-          setting was introduced with Build 61.</para>
+      <para>
+				If this is enabled, the current workspace will
+        be saved automatically, when a SQL statement is executed.
+			</para>
       <para>Default: <literal>false</literal></para>
     </section>
         
@@ -115,12 +129,6 @@
 
 	<section id="editor-settings">
 		<title>Editor related settings</title>
-
-		<section>
-			<title>Use highlighted text for search &amp; replace</title>
-			<para>Property: <literal>workbench.editor.lineending.internal</literal></para>
-			
-		</section>
 
     <section id="editor-color-setting">
       <title>Customizing the colors used for syntax highlighting</title>
@@ -442,7 +450,7 @@
 		</section>
 
 		<section id="db-oracle-char-semantics-fix">
-		  <title>Fix tye display for varchar columns in Oracle</title>
+		  <title>Fix type display for varchar columns in Oracle</title>
 		  <para>Property: <literal>workbench.db.oracle.fixcharsemantics</literal></para>
 		  <para>
 			  The Oracle driver does not report the size of VARCHAR2 columns correctly
@@ -543,6 +551,15 @@
 	
 	<section id="import-export-default">
 		<title>Default settings for Export/Import</title>
+
+		<para>
+			For some switches of the WbExport and WbImport command, you can override
+			the default values used by &wb-productname; if the parameter is not supplied.
+			The default values mentioned in this chapter apply, if no property is defined
+			in the <literal>workbench.settings</literal> file. The current default for
+			these properties is displayed in the help message when you run the 
+			corresponding command without any parameters.
+		</para>
 		
 		<section id="export-text-header-default">
 			<title>Controlling header lines in text exports</title>
@@ -550,10 +567,21 @@
 			<para>
 				This property controls whether default value for the <literal>-header</literal>
 				parameter of the <link linkend="command-export">WbExport</link> command. 
-				The current default will be displayed in the help message when you run 
-				<literal>WbExport</literal> without any parameters.				
 			</para>
 			<para>Default: <literal>false</literal></para>
+		</section>
+
+		<section id="export-sql-dateliteral-default">
+			<title>Default date literal for SQL exports</title>
+			<para>Property: <literal>workbench.export.sql.default.dateliteral</literal></para>
+			<para>
+				This property controls the default value for the 
+				<link linkend="export-sql-literal-formats"><literal>-sqlDateLiterals</literal></link> switch
+				of the <literal>WbExport</literal> command. Note that this is a different property than the 
+				default value defined in the <link linkend="options-default-date-literaltype">options dialog</link>,
+				which defines the default format for copying SQL statements to the <emphasis>clipboard</emphasis>.
+			</para>
+			<para>Default: <literal>dbms</literal></para>
 		</section>
 		
 		<section id="export-xml-verbose">
@@ -563,8 +591,6 @@
 				This property controls whether XML exports are done using verbose XML or 
 				short tags and only basic formatting. This property sets the default 
 				value of the <literal>-verbosexml</literal> parameter for the <link linkend="command-export">WbExport</link> command. 
-				The current default will be displayed in the help message when you run 
-				<literal>WbExport</literal> without any parameters.				
 			</para>
 			<para>Default: <literal>true</literal></para>
 		</section>
@@ -574,9 +600,7 @@
 			<para>Property: <literal>workbench.import.default.continue</literal></para>
 			<para>
 				This property controls the default value for the parameter <literal>-continueOnError</literal>
-				of the <link linkend="command-import">WbImport</link> command. The current default will 
-				be displayed in the help message when you run <literal>WbImport</literal> without any
-				parameters.
+				of the <link linkend="command-import">WbImport</link> command. 
 			</para>
 		</section>
 		
@@ -585,9 +609,7 @@
 			<para>Property: <literal>workbench.import.default.multilinerecord</literal></para>
 			<para>
 				This property controls the default value for the parameter <literal>-multiLine</literal>
-				of the <link linkend="command-import">WbImport</link> command. The current default will 
-				be displayed in the help message when you run <literal>WbImport</literal> without any
-				parameters.
+				of the <link linkend="command-import">WbImport</link> command. 
 			</para>
 		</section>
 		

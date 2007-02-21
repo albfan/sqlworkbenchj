@@ -1376,7 +1376,7 @@ public class SqlPanel
 					}
 				}
 				this.currentData.rowCountChanged();
-				this.repaint();
+				WbSwingUtilities.repaintLater(this);
 			}
 			else
 			{
@@ -2377,14 +2377,7 @@ public class SqlPanel
 						if (!macroRun) this.highlightError(scriptParser, commandWithError, selectionOffset);
 
 						// force a refresh in order to display the selection
-						EventQueue.invokeLater(new Runnable()
-						{
-							public void run()
-							{
-								validate();
-								repaint();
-							}
-						});
+						WbSwingUtilities.repaintLater(this);
 						Thread.yield();
 
 						String question = ResourceMgr.getString("MsgScriptStatementError");
@@ -2974,8 +2967,7 @@ public class SqlPanel
 				{
 					LogMgr.logWarning("SqlPanel.setBusy()", "Error when setting busy icon!", th);
 				}
-				tab.invalidate();
-				tab.repaint();
+				WbSwingUtilities.repaintLater(tab);
 			}
 		}
 	}
