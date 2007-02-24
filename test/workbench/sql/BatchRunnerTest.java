@@ -29,6 +29,7 @@ import workbench.db.WbConnection;
 import workbench.util.ArgumentParser;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -52,6 +53,40 @@ public class BatchRunnerTest
 			fail(ex.getMessage());
 		}
 	}
+
+	public void testEmptyStatement()
+	{
+		try
+		{
+			String sql = "-- comment only";
+			util.emptyBaseDirectory();
+			
+			File scriptFile = new File(util.getBaseDir(), "testbatch.sql");
+			FileWriter writer = new FileWriter(scriptFile);
+			writer.write(sql);
+			writer.close();
+
+			ArgumentParser parser = WbManager.createArgumentParser();
+			String script = "-script='" + scriptFile.getAbsolutePath() + "'";
+			parser.parse("-url='jdbc:hsqldb:mem:testEmptyStmt;shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver "  + script  + " -displayresult=true -ignoredroperrors=true -showprogress=true -showtiming=false");
+			BatchRunner runner = BatchRunner.createBatchRunner(parser);
+	
+			assertNotNull(runner);
+			
+			runner.connect();
+			WbConnection con = runner.getConnection();
+			assertNotNull(con);
+			assertNotNull(con.getProfile());
+			
+			runner.execute();
+			assertEquals(true, runner.isSuccess());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	
 	public void testBatchRunner()
 	{
@@ -59,7 +94,7 @@ public class BatchRunnerTest
 		{
 			util.emptyBaseDirectory();
 			
-			File scriptFile = new File(util.getBaseDir(), "preparedata.sql");
+			WbFile scriptFile = new WbFile(util.getBaseDir(), "preparedata.sql");
 			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
 			writer.println("-- test script");
 			writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100));");
@@ -74,7 +109,7 @@ public class BatchRunnerTest
 			writer.close();
 
 			ArgumentParser parser = WbManager.createArgumentParser();
-			String script = "-script='" + scriptFile.getAbsolutePath() + "'";
+			String script = "-script='" + scriptFile.getFullPath() + "'";
 			parser.parse("-url='jdbc:hsqldb:mem:testBatchRunner;shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver "  + script + " -rollbackOnDisconnect=true");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
 	

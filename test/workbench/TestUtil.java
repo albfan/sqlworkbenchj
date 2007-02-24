@@ -94,6 +94,8 @@ public class TestUtil
 				deleteFiles(files[i]);
 			}
 			if (files[i].getName().equals("workbench.settings")) continue;
+			if (files[i].getName().equals("workbench.log")) continue;
+			
 			if (!files[i].delete())
 			{
 				System.out.println("Could not delete file: " + files[i].getAbsolutePath());
