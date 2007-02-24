@@ -14,6 +14,7 @@ package workbench.gui.actions;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import javax.swing.JFrame;
+import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;

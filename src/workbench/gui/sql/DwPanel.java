@@ -1133,21 +1133,21 @@ public class DwPanel
 		// determined, then ask the user
 		Window w = SwingUtilities.getWindowAncestor(this);
 		
-		if (!this.isUpdateable() && !this.checkUpdateTable()) 
+		if (!this.isUpdateable() && !this.checkUpdateTable())
 		{
-				// checkUpdateTable() will have taken every attempt to find an update table
-				// including asking the user to select a table from a multi-table result set
+			// checkUpdateTable() will have taken every attempt to find an update table
+			// including asking the user to select a table from a multi-table result set
 			
-				// So if we wind up here, there is no way to update the 
-				// underlying DataStore
-				WbSwingUtilities.showErrorMessageKey(w, "MsgNoTables");
-				this.setUpdateTable((TableIdentifier)null);
-				this.updateAction.setEnabled(false);
-				this.insertRow.setEnabled(false);
-				this.deleteRow.setEnabled(false);
-				this.duplicateRow.setEnabled(false);
-				this.selectKeys.setEnabled(false);
-				return false;
+			// So if we wind up here, there is no way to update the
+			// underlying DataStore
+			WbSwingUtilities.showErrorMessageKey(w, "MsgNoTables");
+			this.setUpdateTable((TableIdentifier)null);
+			this.updateAction.setEnabled(false);
+			this.insertRow.setEnabled(false);
+			this.deleteRow.setEnabled(false);
+			this.duplicateRow.setEnabled(false);
+			this.selectKeys.setEnabled(false);
+			return false;
 		}
 		
 		// Verify if the data is really updateable!
@@ -1225,7 +1225,7 @@ public class DwPanel
 		return this.genericRowMonitor;
 	}
 	/**
-	 *	If the user changes something in the database (which is possible, as
+	 *	If the user changes something in the result set (which is possible, as
 	 *  the table defaults to beeing editable) the edit mode (with status column
 	 *  and the different actions enabled) is switched on automatically.
 	 */

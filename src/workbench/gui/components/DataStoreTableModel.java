@@ -12,19 +12,18 @@
 package workbench.gui.components;
 import java.awt.Toolkit;
 import java.sql.Types;
-
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
-
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.filter.FilterExpression;
+import workbench.util.ConverterException;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -173,7 +172,7 @@ public class DataStoreTableModel
 			{
 				this.dataCache.setInputValue(row, column - this.columnStartIndex, aValue);
 			}
-			catch (Exception ce)
+			catch (ConverterException ce)
 			{
 				int type = this.getColumnType(column);
 				LogMgr.logError(this, "Error converting input >" + aValue + "< to column type " + SqlUtil.getTypeName(type) + " (" + type + ")", ce);

@@ -14,7 +14,6 @@ package workbench.db;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
-import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 
 /**
@@ -42,7 +41,8 @@ public class ColumnIdentifier
 
 	private int size; // for VARCHAR etc
 	private int digits; // for DECIMAL types
-
+	private int hashCode;
+	
 	public ColumnIdentifier()
 	{
 	}
@@ -70,7 +70,7 @@ public class ColumnIdentifier
 	public ColumnIdentifier(String aName, int aType, boolean isPkColumn)
 	{
 		if (aName == null) throw new IllegalArgumentException("Column name may not be null!");
-		this.name = aName.trim();
+		setColumnName(aName.trim());
 		this.type = aType;
 		this.isPk = isPkColumn;
 	}
@@ -124,6 +124,7 @@ public class ColumnIdentifier
 	{
 		ColumnIdentifier result = new ColumnIdentifier();
 		result.name = this.name;
+		result.hashCode = this.hashCode;
 		result.digits = this.digits;
 		result.isExpression = this.isExpression;
 		result.isNullable = this.isNullable;
@@ -162,6 +163,7 @@ public class ColumnIdentifier
 		this.isExpression = false;
 		this.isPk = false;
 		this.isNullable = true;
+		this.hashCode = (name == null ? -1 : name.toUpperCase().hashCode());
 	}
 
 	/**
@@ -215,8 +217,7 @@ public class ColumnIdentifier
 
 	public int hashCode()
 	{
-		if (this.name == null) return 0;
-		return this.name.toUpperCase().hashCode();
+		return hashCode;
 	}
 	
 	/**

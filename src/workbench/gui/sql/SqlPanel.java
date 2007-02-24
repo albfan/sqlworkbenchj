@@ -60,6 +60,7 @@ import workbench.gui.actions.AppendResultsAction;
 import workbench.gui.actions.FilterDataAction;
 import workbench.gui.actions.FilterPickerAction;
 import workbench.gui.actions.ImportClipboardAction;
+import workbench.gui.actions.ReplaceDataAction;
 import workbench.gui.actions.ResetFilterAction;
 import workbench.gui.actions.SelectionFilterAction;
 import workbench.gui.actions.ViewMessageLogAction;
@@ -242,6 +243,7 @@ public class SqlPanel
 	protected FileDiscardAction fileDiscardAction;
 	protected FindDataAction findDataAction;
 	protected FindDataAgainAction findDataAgainAction;
+	protected ReplaceDataAction replaceDataAction;
 	protected WbToolbar toolbar;
 	protected ConnectionInfo connectionInfo;
 
@@ -724,7 +726,9 @@ public class SqlPanel
 		this.findDataAgainAction = new FindDataAgainAction(null);
 		this.findDataAgainAction.setMenuTextByKey("MnuTxtFindDataAgain");
 		this.findDataAgainAction.setEnabled(false);
-
+		this.replaceDataAction = new ReplaceDataAction(null);
+		this.replaceDataAction.setEnabled(false);
+		
 		this.autoCompletion = new AutoCompletionAction(this.editor, this.statusBar);
 		this.autoCompletion.setCreateMenuSeparator(true);
 		this.actions.add(this.autoCompletion);
@@ -748,6 +752,7 @@ public class SqlPanel
 		this.findDataAction.setCreateMenuSeparator(true);
 		this.actions.add(this.findDataAction);
 		this.actions.add(this.findDataAgainAction);
+		this.actions.add(this.replaceDataAction);
 		this.actions.add(filterAction);
 		this.actions.add(selectionFilterAction);
 		this.actions.add(this.resetFilterAction );
@@ -2043,8 +2048,9 @@ public class SqlPanel
 			this.copyAsSqlInsert.setOriginal(this.currentData.getTable().getCopyAsInsertAction());
 			this.copyAsSqlUpdate.setOriginal(this.currentData.getTable().getCopyAsUpdateAction());
 			this.copyAsSqlDeleteInsert.setOriginal(this.currentData.getTable().getCopyAsDeleteInsertAction());
-			this.findDataAction.setOriginal(this.currentData.getTable().getFindAction());
-			this.findDataAgainAction.setOriginal(this.currentData.getTable().getFindAgainAction());
+			this.findDataAction.setOriginal(this.currentData.getTable().getReplacer().getFindAction());
+			this.findDataAgainAction.setOriginal(this.currentData.getTable().getReplacer().getFindAgainAction());
+			this.replaceDataAction.setOriginal(this.currentData.getTable().getReplacer().getReplaceAction());
 			copySelectedMenu.removeAll();
 			this.currentData.getTable().populateCopySelectedMenu(copySelectedMenu);
 			copySelectedMenu.setEnabled(true);
@@ -2432,10 +2438,10 @@ public class SqlPanel
 
 			if (logWasCompressed)
 			{
-				msg = executedCount + " " + ResourceMgr.getString("MsgTotalStatementsExecuted");
+				msg = executedCount + " " + ResourceMgr.getString("MsgTotalStatementsExecuted") + "\n";
 				this.appendToLog(msg);
 				long rows = statementResult.getTotalUpdateCount();
-				msg = rows + " " + ResourceMgr.getString("MsgTotalRowsAffected") + "\n";
+				msg = rows + " " + ResourceMgr.getString("MsgTotalRowsAffected") + "\n\n";
 				this.appendToLog(msg);
 			}
 
@@ -2759,8 +2765,7 @@ public class SqlPanel
 				}
 
 				Action[] actions = new Action[]
-								{ findDataAction,
-									dataToClipboard,
+								{ dataToClipboard,
 									exportDataAction,
 									optimizeAllCol,
 									printDataAction,

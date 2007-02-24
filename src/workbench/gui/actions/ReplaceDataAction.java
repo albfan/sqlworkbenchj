@@ -12,35 +12,30 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.KeyStroke;
-
-import workbench.interfaces.Searchable;
+import workbench.interfaces.Replaceable;
+import workbench.interfaces.Replaceable;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Search inside the result set
+ *	Search and replace inside the result set
  * 
  *	@author  support@sql-workbench.net
  */
-public class FindDataAction extends WbAction
+public class ReplaceDataAction extends WbAction
 {
-	private Searchable client;
+	private Replaceable client;
 
-	public FindDataAction(Searchable aClient)
+	public ReplaceDataAction(Replaceable aClient)
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtFindInTableData", KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-		this.setIcon(ResourceMgr.getImage("Find"));
+		this.initMenuDefinition("MnuTxtReplaceInTableData");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setCreateToolbarSeparator(true);
+		this.setCreateToolbarSeparator(false);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.find();
+		this.client.replace();
 	}
 }

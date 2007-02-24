@@ -14,6 +14,7 @@ package workbench.util;
 import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Types;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -123,7 +124,7 @@ public class ValueConverter
 	 * @see workbench.storage.DataStore#convertCellValue(Object, int)
 	 */
 	public Object convertValue(Object aValue, int type)
-		throws Exception
+		throws ConverterException
 	{
 		if (aValue == null) return null;
 		String v = aValue.toString().trim();
@@ -142,8 +143,8 @@ public class ValueConverter
 					// into a database that maps this to an integer, we assume that
 					// true/false should be 1/0
 					if ("false".equalsIgnoreCase(v)) return LONG_FALSE;
-					if ("true".equalsIgnoreCase(v)) return LONG_TRUE;
-					throw e;
+					else if ("true".equalsIgnoreCase(v)) return LONG_TRUE;
+					else throw new ConverterException(aValue, type, e);
 				}
 				
 			case Types.INTEGER:
@@ -160,8 +161,8 @@ public class ValueConverter
 					// into a database that maps this to an integer, we assume that
 					// true/false should be 1/0
 					if ("false".equalsIgnoreCase(v)) return INT_FALSE;
-					if ("true".equalsIgnoreCase(v)) return INT_TRUE;
-					throw e;
+					else if ("true".equalsIgnoreCase(v)) return INT_TRUE;
+					else throw new ConverterException(aValue, type, e);
 				}
 				
 			case Types.NUMERIC:
@@ -170,17 +171,42 @@ public class ValueConverter
 			case Types.REAL:
 			case Types.FLOAT:
 				if (v.length() == 0) return null;
-				return new BigDecimal(this.adjustDecimalString(aValue.toString()));
+				try
+				{
+					return new BigDecimal(this.adjustDecimalString(aValue.toString()));
+				}
+				catch (NumberFormatException e)
+				{
+					throw new ConverterException(aValue, type, e);
+				}
+				
 			case Types.CHAR:
 			case Types.VARCHAR:
 			case Types.LONGVARCHAR:
 					return aValue.toString();
+					
 			case Types.DATE:
 				if (v.length() == 0) return null;
-				return this.parseDate((String)aValue);
+				try
+				{
+					return this.parseDate((String)aValue);
+				}
+				catch (Exception e)
+				{
+					throw new ConverterException(aValue, type, e);
+				}
+				
 			case Types.TIMESTAMP:
 				if (v.length() == 0) return null;
+				try
+				{
 				return this.parseTimestamp((String)aValue);
+				}
+				catch (Exception e)
+				{
+					throw new ConverterException(aValue, type, e);
+				}
+				
 			case Types.TIME:
 				if (v.length() == 0) return null;
 				return this.parseTime((String)aValue);
@@ -190,7 +216,15 @@ public class ValueConverter
 			case Types.VARBINARY:
 				if (aValue instanceof String)
 				{
-					LobFileParameterParser p = new LobFileParameterParser(aValue.toString());
+					LobFileParameterParser p = null;
+					try
+					{
+						p = new LobFileParameterParser(aValue.toString());
+					}
+					catch (Exception e)
+					{
+						throw new ConverterException(aValue, type, e);
+					}
 					LobFileParameter[] parms = p.getParameters();
 					if (parms == null) return null;
 					String fname = parms[0].getFilename();
@@ -226,8 +260,7 @@ public class ValueConverter
 				}
 				catch (Exception e)
 				{
-					LogMgr.logError("ValueConverter.convertValue()", "Could not convert [" + aValue + "] to Boolean",e);
-					return null;
+					throw new ConverterException(aValue, type, e);
 				}
 			default:
 				return aValue;
@@ -276,6 +309,7 @@ public class ValueConverter
 	}
 	
   public java.sql.Timestamp parseTimestamp(String aDate)
+		throws ParseException
   {
 		java.util.Date result = null;
 		
@@ -288,10 +322,10 @@ public class ValueConverter
 					result = this.timestampFormatter.parse(aDate);
 				}
 			}
-			catch (Exception e)
+			catch (ParseException e)
 			{
 				LogMgr.logWarning("ValueConverter.parseTimestamp()", "Could not parse '" + aDate + "' using " + this.timestampFormatter.toPattern() + ". Trying to recognize the format", null);
-				result = null;
+				throw e;
 			}
 		}
 		
@@ -309,9 +343,9 @@ public class ValueConverter
 						usedPattern = i;
 						break;
 					}
-					catch (Exception e)
+					catch (ParseException e)
 					{
-						result = null;
+						throw e;
 					}
 				}
 			}
@@ -330,6 +364,7 @@ public class ValueConverter
 	}
 	
   public java.sql.Date parseDate(String aDate)
+		throws ParseException
   {
 		java.util.Date result = null;
 		
@@ -342,10 +377,10 @@ public class ValueConverter
 					result = this.dateFormatter.parse(aDate);
 				}
 			}
-			catch (Exception e)
+			catch (ParseException e)
 			{
 				LogMgr.logWarning("ValueConverter.parseDate()", "Could not parse '" + aDate + "' using " + this.dateFormatter.toPattern() + ". Trying to recognize the format...", null);
-				result = null;
+				throw e;
 			}
 		}
 
@@ -355,9 +390,9 @@ public class ValueConverter
 			{
 				result = this.timestampFormatter.parse(aDate);
 			}
-			catch (Exception e)
+			catch (ParseException e)
 			{
-				result = null;
+				throw e;
 			}
 		}
 
@@ -384,6 +419,10 @@ public class ValueConverter
 			if (usedPattern > -1)
 			{
 				LogMgr.logWarning("ValueConverter.parseDate()", "Succeeded parsing '" + aDate + "' using the format: " + dateFormats[usedPattern]);
+			}
+			else
+			{
+				throw new ParseException("Could not convert [" + aDate + "] to a date", 0);
 			}
 		}
 

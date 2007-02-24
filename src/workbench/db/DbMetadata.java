@@ -2319,6 +2319,7 @@ public class DbMetadata
 	
 		String old = getCurrentCatalog();
 		boolean useSetCatalog = Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".usesetcatalog", true);
+		boolean clearWarnings = Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".setcatalog.clearwarnings", true);
 		
 		// MySQL does not seem to like changing the current database by executing a USE command
 		// through Statement.execute(), so we'll use setCatalog() instead
@@ -2335,12 +2336,15 @@ public class DbMetadata
 			{
 				stmt = this.dbConnection.createStatement();
 				stmt.execute("USE " + newCatalog);
+				if (clearWarnings) stmt.clearWarnings();
 			}
 			finally
 			{
 				SqlUtil.closeStatement(stmt);
 			}
 		}
+		
+		if (clearWarnings) this.dbConnection.clearWarnings();
 		
 		String newCat = getCurrentCatalog();
 		if (!StringUtil.equalString(old, newCat))

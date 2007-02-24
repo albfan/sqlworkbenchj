@@ -11,15 +11,12 @@
  */
 package workbench.gui.actions;
 
-import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.print.PageFormat;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.gui.components.WbTable;
 import workbench.print.TablePrinter;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 /**
  *	@author  support@sql-workbench.net

@@ -15,7 +15,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Container;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -32,7 +31,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.print.PageFormat;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
@@ -44,8 +42,6 @@ import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.CellEditor;
 import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -84,8 +80,6 @@ import workbench.gui.actions.CopySelectedAsTextAction;
 import workbench.gui.actions.CopyAsTextAction;
 import workbench.gui.actions.FilterDataAction;
 import workbench.gui.actions.ResetFilterAction;
-import workbench.gui.actions.FindDataAction;
-import workbench.gui.actions.FindDataAgainAction;
 import workbench.gui.actions.OptimizeAllColumnsAction;
 import workbench.gui.actions.OptimizeColumnWidthAction;
 import workbench.gui.actions.PrintAction;
@@ -103,13 +97,9 @@ import workbench.gui.renderer.WbRenderer;
 import workbench.gui.sql.DwStatusBar;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.Resettable;
-import workbench.interfaces.Searchable;
 import workbench.log.LogMgr;
-import workbench.print.PrintPreview;
-import workbench.print.TablePrinter;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.storage.DataPrinter;
 import workbench.storage.DataStore;
 import workbench.storage.NullValue;
 import workbench.storage.PkMapping;
@@ -121,7 +111,7 @@ import workbench.util.SqlUtil;
 public class WbTable
 	extends JTable
 	implements ActionListener, FocusListener, MouseListener,
-	           FontChangedListener, Searchable, ListSelectionListener, PropertyChangeListener, Resettable
+	           FontChangedListener, ListSelectionListener, PropertyChangeListener, Resettable
 {
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected JPopupMenu popup;
@@ -144,8 +134,8 @@ public class WbTable
 	private OptimizeAllColumnsAction optimizeAllCol;
 	private SetColumnWidthAction setColWidth;
 
-	protected FindDataAction findAction;
-	protected FindDataAgainAction findAgainAction;
+	private TableReplacer replacer;
+	
 	private SaveDataAsAction saveDataAsAction;
 	
 	private CopyAsTextAction copyAsTextAction;
@@ -237,11 +227,7 @@ public class WbTable
 
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-		this.findAction = new FindDataAction(this);
-		this.findAction.setEnabled(false);
-		this.findAction.setCreateMenuSeparator(true);
-		this.findAgainAction = new FindDataAgainAction(this);
-		this.findAgainAction.setEnabled(false);
+		this.replacer = new TableReplacer(this);
 
 		this.copyAsTextAction = new CopyAsTextAction(this);
 		if (sqlCopyAllowed)
@@ -259,6 +245,7 @@ public class WbTable
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.addPopupAction(this.saveDataAsAction, false);
 		this.addPopupAction(this.copyAsTextAction, true);
+		
 		if (copyUpdateAction != null) this.addPopupAction(this.copyUpdateAction, false);
 		if (copyInsertAction != null) this.addPopupAction(this.copyInsertAction, false);
 		if (copyDeleteInsertAction != null) this.addPopupAction(this.copyDeleteInsertAction, false);
@@ -274,8 +261,9 @@ public class WbTable
 			this.addPopupAction(this.copySelectedAsTextAction, false);
 		}
 
-		this.addPopupAction(this.findAction, true);
-		this.addPopupAction(this.findAgainAction, false);
+		this.addPopupAction(this.replacer.getFindAction(), true);
+		this.addPopupAction(this.replacer.getFindAgainAction(), false);
+		this.addPopupAction(this.replacer.getReplaceAction(), false);
 
 		if (printEnabled)
 		{
@@ -290,8 +278,8 @@ public class WbTable
 
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
-		this.findAction.addToInputMap(im, am);
-		this.findAgainAction.addToInputMap(im, am);
+		this.replacer.getFindAction().addToInputMap(im, am);
+		this.replacer.getFindAgainAction().addToInputMap(im, am);
 		this.copyAsTextAction.addToInputMap(im, am);
 		this.saveDataAsAction.addToInputMap(im, am);
 		this.optimizeAllCol.addToInputMap(im, am);
@@ -491,16 +479,9 @@ public class WbTable
 		return this.copyAsTextAction;
 	}
 
-	public FindDataAction getFindAction()
-	{
-		return this.findAction;
-	}
 
-	public FindDataAgainAction getFindAgainAction()
-	{
-		return this.findAgainAction;
-	}
-
+	public TableReplacer getReplacer() { return this.replacer; }
+	
 	public void setSelectOnRightButtonClick(boolean flag) { this.selectOnRightButtonClick = flag; }
 	public boolean getSelectOnRightButtonClick() { return this.selectOnRightButtonClick; }
 
@@ -1044,43 +1025,6 @@ public class WbTable
 	public boolean canSearchAgain()
 	{
 		return this.lastFoundRow >= 0;
-	}
-
-	public int search(String aText, boolean doContinue)
-	{
-		if (aText == null) return -1;
-		aText = aText.toLowerCase();
-		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		int foundRow = -1;
-		int start = 0;
-		if (doContinue && this.lastFoundRow >= 0)
-		{
-			start = this.lastFoundRow  + 1;
-		}
-
-		DataPrinter printer = new DataPrinter(getDataStore(), false);
-		
-		int rowCount = this.dwModel.getRowCount();
-		for (int i=start; i < rowCount; i++)
-		{
-			String rowString = printer.getRowDataAsString(i);
-
-			if (rowString.toLowerCase().indexOf(aText) > -1)
-			{
-				this.getSelectionModel().setSelectionInterval(i,i);
-				foundRow = i;
-				this.lastSearchCriteria = aText;
-				break;
-			}
-		}
-		this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-		this.lastFoundRow = foundRow;
-		if (foundRow >= 0)
-		{
-			this.scrollToRow(foundRow);
-		}
-
-		return foundRow;
 	}
 
 	public void saveColumnSizes()
@@ -1643,10 +1587,7 @@ public class WbTable
 							}
 						});
 					}
-				}
-
-				final boolean findEnabled = (this.getRowCount() > 0);
-				final boolean findAgainEnabled = (this.lastFoundRow > 0);
+				}	
 				final int x = e.getX();
 				final int y = e.getY();
 
@@ -1654,8 +1595,6 @@ public class WbTable
 				{
 					public void run()
 					{
-						findAction.setEnabled(findEnabled);
-						findAgainAction.setEnabled(findAgainEnabled);
 						popup.show(WbTable.this, x,y);
 					}
 				});
@@ -1774,31 +1713,6 @@ public class WbTable
 		this.headerPopupX = -1;
 		this.popup = null;
 	}
-
-	/**
-	 * Open the Find dialog for searching strings in the result set.
-	 * If the text was found, {@link #canSearchAgain()} will return true
-	 * after this. In that case {@link #findNext()} may be called again.
-	 * 
-	 * @return the row in which the text was found, 
-	 *         -1 if nothing was found or the user cancelled the dialog
-	 * @see #search(String, boolean)
-	 */
-	public int find()
-	{
-		String criteria = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgEnterSearchCriteria"), this.lastSearchCriteria);
-		if (criteria == null) return -1;
-		int row = this.search(criteria, false);
-		this.lastSearchCriteria = criteria;
-		this.findAgainAction.setEnabled(row >= 0);
-		return row;
-	}
-
-	public int findNext()
-	{
-		return this.search(this.lastSearchCriteria, true);
-	}
-
 
 	/**
 	 *	Display dialog window to let the user

@@ -32,6 +32,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.ColumnData;
 import workbench.storage.filter.FilterExpression;
+import workbench.util.ConverterException;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -723,7 +724,7 @@ public class DataStore
 	 *  correct class
 	 */
 	public void setInputValue(int row, int col, Object value)
-		throws Exception
+		throws ConverterException
 	{
 		Object realValue = this.convertCellValue(value, col);
 		this.setValue(row, col, realValue);
@@ -1480,7 +1481,7 @@ public class DataStore
 	 * @see ValueConverter#convertValue(Object, int)
 	 */
 	public Object convertCellValue(Object aValue, int aColumn)
-		throws Exception
+		throws ConverterException
 	{
 		int type = this.getColumnType(aColumn);
 		if (aValue == null)

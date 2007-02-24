@@ -14,30 +14,33 @@ package workbench.gui.components;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridLayout;
-
+import java.awt.Window;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import workbench.interfaces.ValidatingComponent;
-
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- *
+ * A search dialog panel.
+ * 
+ * @see workbench.gui.component.TableReplacer
+ * @see workbench.gui.editor.SearchAndReplace
+ * 
  * @author support@sql-workbench.net
  */
 public class SearchCriteriaPanel
 	extends JPanel
 	implements ValidatingComponent
 {
-	private static final String PROP_CLASS = "workbench.sql.search";
-	private static final String PROP_KEY_CASE = PROP_CLASS + ".ignoreCase";
-	private static final String PROP_KEY_WHOLE_WORD = PROP_CLASS + ".wholeWord";
-	private static final String PROP_KEY_REGEX = PROP_CLASS + ".useRegEx";
-	private static final String PROP_KEY_CRIT = PROP_CLASS + ".lastValue";
+	private String caseProperty;
+	private String wordProperty;
+	private String regexProperty;
+	private String criteriaProperty;
+	
 	private JCheckBox ignoreCase;
 	private JCheckBox wholeWord;
 	private JCheckBox useRegEx;
@@ -52,17 +55,27 @@ public class SearchCriteriaPanel
 	
 	public SearchCriteriaPanel(String initialValue)
 	{
+		this(null, "workbench.sql.search");
+	}
+	
+	public SearchCriteriaPanel(String initialValue, String settingsKey)
+	{
+		caseProperty = settingsKey + ".ignoreCase";
+		wordProperty = settingsKey + ".wholeWord";
+		regexProperty = settingsKey + ".useRegEx";
+		criteriaProperty = settingsKey + ".lastValue";
+		
 		this.ignoreCase = new JCheckBox(ResourceMgr.getString("LblSearchIgnoreCase"));
 		this.ignoreCase.setToolTipText(ResourceMgr.getDescription("LblSearchIgnoreCase"));
-		this.ignoreCase.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_CASE, true));
+		this.ignoreCase.setSelected(Settings.getInstance().getBoolProperty(caseProperty, true));
 		
 		this.wholeWord = new JCheckBox(ResourceMgr.getString("LblSearchWordsOnly"));
 		this.wholeWord.setToolTipText(ResourceMgr.getDescription("LblSearchWordsOnly"));
-		this.wholeWord.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_WHOLE_WORD, false));
+		this.wholeWord.setSelected(Settings.getInstance().getBoolProperty(wordProperty, false));
 
 		this.useRegEx = new JCheckBox(ResourceMgr.getString("LblSearchRegEx"));
 		this.useRegEx.setToolTipText(ResourceMgr.getDescription("LblSearchRegEx"));
-		this.useRegEx.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_REGEX, false));
+		this.useRegEx.setSelected(Settings.getInstance().getBoolProperty(regexProperty, false));
 		
 		this.label = new JLabel(ResourceMgr.getString("LblSearchCriteria"));
 		this.criteria = new JTextField();
@@ -121,13 +134,26 @@ public class SearchCriteriaPanel
 	
 	public boolean showFindDialog(Component caller)
 	{
-		String title = ResourceMgr.getString("TxtWindowTitleSearchText");
-		boolean result = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(caller), this, title, caller);
+		return showFindDialog(caller, ResourceMgr.getString("TxtWindowTitleSearchText"));
+	}
+	
+	public boolean showFindDialog(Component caller, String title)
+	{
+		Window w = null;
+		if (caller instanceof Window)
+		{
+			w = (Window)caller;
+		}
+		else
+		{
+			w = SwingUtilities.getWindowAncestor(caller);
+		}
+		boolean result = ValidatingDialog.showConfirmDialog(w, this, title, caller);
 		
-		Settings.getInstance().setProperty(PROP_KEY_CASE, this.getIgnoreCase());
-		Settings.getInstance().setProperty(PROP_KEY_CRIT, this.getCriteria());
-		Settings.getInstance().setProperty(PROP_KEY_WHOLE_WORD, this.getWholeWordOnly());
-		Settings.getInstance().setProperty(PROP_KEY_REGEX, this.getUseRegex());
+		Settings.getInstance().setProperty(caseProperty, this.getIgnoreCase());
+		Settings.getInstance().setProperty(criteriaProperty, this.getCriteria());
+		Settings.getInstance().setProperty(wordProperty, this.getWholeWordOnly());
+		Settings.getInstance().setProperty(regexProperty, this.getUseRegex());
 		return result;
 	}
 

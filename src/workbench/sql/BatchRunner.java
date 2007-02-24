@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.util.Iterator;
 import java.util.List;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
@@ -40,6 +39,7 @@ import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  * A class to run several statements from a script file. This is used
@@ -152,7 +152,7 @@ public class BatchRunner
 		if (this.profile == null)
 		{
 			// Allow batch run without a profile for e.g. running a single WbCopy
-			LogMgr.logWarning("BatchRunner.connect()", "Called without profile!", null);
+			LogMgr.logWarning("BatchRunner.connect()", "Called without profile!");
 			success = true;
 			return;
 		}
@@ -213,7 +213,6 @@ public class BatchRunner
 	public void execute()
 		throws IOException
 	{
-		String file = null;
 		boolean error = false;
 		int count = this.filenames.size();
 
@@ -222,15 +221,13 @@ public class BatchRunner
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
 		}
 
-		Iterator<String> itr = filenames.iterator();
-		//for (int i=0; i < count; i++)
 		int currentFileIndex = 0;
-		while (itr.hasNext())
+
+		for (String file : filenames)
 		{
 			currentFileIndex ++;
-			file = itr.next();
 
-			File fo = new File(file);
+			WbFile fo = new WbFile(file);
 
 			if (this.rowMonitor != null)
 			{
@@ -240,7 +237,7 @@ public class BatchRunner
 
 			try
 			{
-				String msg = ResourceMgr.getString("MsgBatchProcessingFile") + " " + fo.getCanonicalPath();
+				String msg = ResourceMgr.getString("MsgBatchProcessingFile") + " " + fo.getFullPath();
 				LogMgr.logInfo("BatchRunner", msg);
 				if (this.resultDisplay != null)
 				{
@@ -369,10 +366,15 @@ public class BatchRunner
 				long verbstart = System.currentTimeMillis();
 				this.stmtRunner.runStatement(sql, 0, -1);
 				long verbend = System.currentTimeMillis();
+				
+				error = false;
+				
 				result = this.stmtRunner.getResult();
+				
 				if (result != null)
 				{
-
+					error = !result.isSuccess();
+					
 					if (result.hasMessages() && (this.stmtRunner.getVerboseLogging() || !result.isSuccess()))
 					{
 						this.printMessage("");
@@ -390,9 +392,8 @@ public class BatchRunner
 						this.printMessage(msg);
 						LogMgr.logWarning("BatchRunner.execute()", result.getMessageBuffer().toString());
 					}
+					executedCount ++;
 				}
-				
-				executedCount ++;
 
 				if (this.showTiming)
 				{
@@ -424,10 +425,6 @@ public class BatchRunner
 					}
 					console.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + "   ----------------------------");
 				}
-				if (!result.isSuccess())
-				{
-					error = true;
-				}
 			}
 			catch (Throwable e)
 			{
@@ -437,6 +434,7 @@ public class BatchRunner
 			}
 			if (error && abortOnError) break;
 		}
+		
 		end = System.currentTimeMillis();
 		StringBuilder msg = new StringBuilder();
 		msg.append(scriptFile.getCanonicalPath());
@@ -599,8 +597,9 @@ public class BatchRunner
 			if (profile == null)
 			{
 				String msg = "Profile [" + def + "] not found!";
-				System.out.println(msg);
+				System.err.println(msg);
 				LogMgr.logError("BatchRunner.initFromCommandLine", msg, null);
+				return null;
 			}
 		}
 

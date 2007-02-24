@@ -38,13 +38,6 @@ public interface Replaceable
 	int findNext();
 	
 	/**
-	 *	Find and highlight the next occurance of the given search string
-	 *	If the parameters passed to this method differ from the 
-	 *	last call to findFirst() an implicit findFirst() is issued
-	 */
-	int find(String aValue, boolean ignoreCase, boolean wholeWord, boolean useRegex);
-	
-	/**
 	 *	Replace the currently highlighted (=found) text with the given value
 	 */
 	boolean replaceCurrent(String aReplacement);

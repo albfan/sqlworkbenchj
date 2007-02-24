@@ -22,6 +22,16 @@ public class WbFile
 	extends File
 {
 	
+	public WbFile(String parent, String filename)
+	{
+		super(parent, filename);
+	}
+	
+	public WbFile(File parent, String filename)
+	{
+		super(parent, filename);
+	}
+	
 	public WbFile(File f)
 	{
 		super(f.getAbsolutePath());
@@ -67,6 +77,22 @@ public class WbFile
 		{
 			try	{ out.close(); } catch (Throwable th) {}
 			this.delete();
+		}
+	}
+	
+	/**
+	 * Returns the canoncial name for this file
+	 * @return the canonical filename or the absolute filename if getCanonicalPath threw an Exception
+	 */
+	public String getFullPath()
+	{
+		try
+		{
+			return this.getCanonicalPath();
+		}
+		catch (Throwable th)
+		{
+			return this.getAbsolutePath();
 		}
 	}
 }

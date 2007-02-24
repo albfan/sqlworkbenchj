@@ -32,9 +32,11 @@ import workbench.util.StringUtil;
  * so that the connection display in the main window can be updated.
  * @author  support@sql-workbench.net
  */
-public class UseCommand extends SqlCommand
+public class UseCommand 
+	extends SqlCommand
 {
 	public static final String VERB = "USE";
+	
 	public UseCommand()
 	{
 	}
@@ -67,6 +69,7 @@ public class UseCommand extends SqlCommand
 			msg = StringUtil.replace(msg, "%catalogterm%", StringUtil.capitalize(term));
 			result.addMessage(msg);
 			result.setSuccess();
+			
 		}
 		catch (Exception e)
 		{
