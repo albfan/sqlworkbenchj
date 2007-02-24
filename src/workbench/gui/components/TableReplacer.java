@@ -130,7 +130,7 @@ public class TableReplacer
 		{
 			return;
 		}
-		ReplacePanel panel = new ReplacePanel(this, "workbench.data.replace");
+		ReplacePanel panel = new ReplacePanel(this, "workbench.data.replace", ResourceMgr.getString("LblSelectedRowsOnly"));
 		String title = ResourceMgr.getString("TxtWindowTitleReplaceDataText");
 		panel.showReplaceDialog(this.client, this.replacer.getLastCriteria(), title);
 	}
@@ -196,7 +196,6 @@ public class TableReplacer
 				event = new TableModelEvent(this.client.getModel(), pos.getRow(), pos.getRow());
 			}
 			this.client.getDataStoreTableModel().fireTableDataChanged();
-			this.client.tableChanged(event);
 		}
 		finally
 		{

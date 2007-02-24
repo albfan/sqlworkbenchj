@@ -54,10 +54,10 @@ public class ReplacePanel
 	
 	public ReplacePanel(Replaceable aClient)
 	{
-		this(aClient, "workbench.sql.replace");
+		this(aClient, "workbench.sql.replace", null);
 	}
 
-	public ReplacePanel(Replaceable aClient,String key)
+	public ReplacePanel(Replaceable aClient, String key, String selectedText)
 	{
 		initComponents();
 		this.client = aClient;
@@ -94,6 +94,11 @@ public class ReplacePanel
 
 		this.criteriaTextField.addMouseListener(new TextComponentMouseListener());
 		this.replaceValueTextField.addMouseListener(new TextComponentMouseListener());
+		if (selectedText != null)
+		{
+			this.selectedTextCheckBox.setText(selectedText);
+		}
+		
 		this.restoreSettings();
 	}
 

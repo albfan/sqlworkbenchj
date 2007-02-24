@@ -17,6 +17,7 @@ import java.util.regex.PatternSyntaxException;
 import workbench.gui.editor.SearchAndReplace;
 import workbench.log.LogMgr;
 import workbench.util.ConverterException;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -178,6 +179,8 @@ public class DataStoreReplacer
 			
 			for (int col=startCol; col < colCount; col++)
 			{
+				int type = client.getColumnType(col);
+				if (SqlUtil.isBlobType(type)) continue;
 				String colValue = client.getValueAsString(row, col);
 				if (StringUtil.isEmptyString(colValue)) continue;
 				Matcher m = p.matcher(colValue);
