@@ -2296,7 +2296,8 @@ public class DbMetadata
 		try
 		{
 			supportsCatalogs = metaData.supportsCatalogsInDataManipulation()
-		                  || metaData.supportsCatalogsInTableDefinitions();
+		                  || metaData.supportsCatalogsInTableDefinitions()
+											|| metaData.supportsCatalogsInProcedureCalls();
 		}
 		catch (Exception e)
 		{
@@ -2318,7 +2319,7 @@ public class DbMetadata
 		if (StringUtil.isEmptyString(newCatalog)) return false;
 	
 		String old = getCurrentCatalog();
-		boolean useSetCatalog = Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".usesetcatalog", true);
+		boolean useSetCatalog = dbSettings.useSetCatalog();
 		boolean clearWarnings = Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".setcatalog.clearwarnings", true);
 		
 		// MySQL does not seem to like changing the current database by executing a USE command

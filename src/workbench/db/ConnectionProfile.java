@@ -110,12 +110,12 @@ public class ConnectionProfile
 	{
 		if (def == null && this.alternateDelimiter == null) return;
 		
-		// Do not accept a semicolon as the delimiter
+		// Do not accept a semicolon as the alternate delimiter
 		if (def != null && def.isStandard()) return;
 		
 		if ((def == null && this.alternateDelimiter != null) ||
 			  (def != null && this.alternateDelimiter == null) ||
-				!def.equals(this.alternateDelimiter))
+				(def != null && def.isChanged()))
 		{
 			this.alternateDelimiter = def;
 			this.changed = true;

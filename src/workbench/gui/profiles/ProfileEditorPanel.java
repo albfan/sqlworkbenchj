@@ -36,7 +36,6 @@ import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.ExpandTreeAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.actions.SaveListFileAction;
-import workbench.gui.components.DividerBorder;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
@@ -117,11 +116,17 @@ public class ProfileEditorPanel
 		this.setFocusTraversalPolicy(policy);
 		
 		buildTree();
-		
-		ProfileKey last = Settings.getInstance().getLastConnection(lastProfileKey);
-		((ProfileTree)profileTree).selectProfile(last);
-		
 		restoreSettings();
+		
+		final ProfileKey last = Settings.getInstance().getLastConnection(lastProfileKey);
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				((ProfileTree)profileTree).selectProfile(last);
+			}
+		});
+		
 	}
 
 	public void done()

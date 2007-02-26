@@ -28,7 +28,7 @@ public class ArgumentParserTest
 	
 	public void testParser()
 	{
-		String cmdline = "-otherbool=1 -nosettings -boolarg=true -profile='test-prof' -script=bla.sql -arg2=\"with space and quote\"";
+		String cmdline = "-otherbool=1 -nosettings -table='\"MIND\"' -boolarg=true -profile='test-prof' -script=bla.sql -arg2=\"with space and quote\"";
 		ArgumentParser arg = new ArgumentParser();
 		arg.addArgument("profile");
 		arg.addArgument("script");
@@ -36,13 +36,15 @@ public class ArgumentParserTest
 		arg.addArgument("nosettings");
 		arg.addArgument("boolarg");
 		arg.addArgument("otherbool");
+		arg.addArgument("table");
 		arg.parse(cmdline);
 		assertEquals("profile not retrieved", "test-prof", arg.getValue("profile"));
 		assertEquals("script not retrieved", "bla.sql", arg.getValue("script"));
 		assertEquals("double quoted value not retrieved", "with space and quote", arg.getValue("arg2"));
-		assertEquals("argument without parameter not found", true, arg.isArgPresent("nosettings"));
-		assertEquals("boolean argument not retrieved", true, arg.getBoolean("boolarg", false));
-		assertEquals("numeric boolean argument not retrieved", true, arg.getBoolean("otherbool", false));
+		assertEquals("argument without parameter not found", true, arg.isArgPresent("noSettings"));
+		assertEquals("boolean argument not retrieved", true, arg.getBoolean("boolArg", false));
+		assertEquals("numeric boolean argument not retrieved", true, arg.getBoolean("otherBool", false));
+		assertEquals("Embedded quotes were removed", "\"MIND\"", arg.getValue("TABLE"));
 	}
 
 }

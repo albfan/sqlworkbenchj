@@ -293,7 +293,7 @@ public class ReplacePanel
 		}
 		try
 		{
-			Window w = SwingUtilities.getWindowAncestor(caller);
+			Window w = WbSwingUtilities.getWindowAncestor(caller);
 			Frame f = null;
 			this.dialog = null;
 			
@@ -311,7 +311,7 @@ public class ReplacePanel
 			this.dialog.setResizable(false);
 			if (!Settings.getInstance().restoreWindowPosition(this.dialog, settingsKey + ".window"))
 			{
-				this.dialog.setLocationRelativeTo(caller);
+				WbSwingUtilities.center(dialog, w);
 			}
 			this.dialog.addWindowListener(this);
 

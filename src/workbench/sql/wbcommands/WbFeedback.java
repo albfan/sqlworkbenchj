@@ -16,6 +16,8 @@ import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 import workbench.util.ArgumentParser;
 import workbench.util.SqlUtil;
 
@@ -27,15 +29,21 @@ public class WbFeedback
 	extends SqlCommand
 {
 	public static final String VERB = "WBFEEDBACK";
+	private final String command; 
 	
 	public WbFeedback()
 	{
+		this(VERB);
+	}
+	public WbFeedback(String verb)
+	{
+		this.command = verb;
 		this.cmdLine = new ArgumentParser(false);
 		this.cmdLine.addArgument("on");
 		this.cmdLine.addArgument("off");
 	}
 
-	public String getVerb() { return VERB; }
+	public String getVerb() { return command; }
 	
 	protected boolean isConnectionRequired() { return false; }
 	
@@ -44,15 +52,28 @@ public class WbFeedback
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
-		String parm = SqlUtil.stripVerb(sql);
+		
+		SQLLexer lexer = new SQLLexer(sql);
+		// Skip the SQL Verb
+		SQLToken token = lexer.getNextToken(false, false);
+		
+		// get the parameter
+		token = lexer.getNextToken(false, false);
+		String parm = (token != null ? token.getContents() : null);
+		
 		if (parm == null)
 		{
-			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrFeedbackWrongParameter"));
-			return result;
+			if (runner.getVerboseLogging())
+			{
+				result.addMessage(ResourceMgr.getString("MsgFeedbackEnabled"));
+			}
+			else
+			{
+				result.addMessage(ResourceMgr.getString("MsgFeedbackDisabled"));
+			}
+			result.setSuccess();
 		}
-		
-		if ("off".equalsIgnoreCase(parm) || "false".equalsIgnoreCase(parm))
+		else if ("off".equalsIgnoreCase(parm) || "false".equalsIgnoreCase(parm))
 		{
 			this.runner.setVerboseLogging(false);
 			result.addMessage(ResourceMgr.getString("MsgFeedbackDisabled"));

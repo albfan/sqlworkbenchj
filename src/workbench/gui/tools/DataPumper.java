@@ -40,6 +40,7 @@ import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.ProducerFactory;
 import workbench.gui.actions.AutoCompletionAction;
+import workbench.gui.components.RunningJobIndicator;
 import workbench.interfaces.StatusBar;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.CommonArgs;
@@ -315,7 +316,7 @@ public class DataPumper
 			title = title + " [" + sourceName + " -> " + this.targetProfile.getName() + "]";
 			if (this.copier != null && this.copyRunning)
 			{
-				title = "» " + title;
+				title = RunningJobIndicator.TITLE_PREFIX + title;
 			}
 			this.window.setTitle(title);
 		}

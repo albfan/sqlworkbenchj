@@ -59,7 +59,7 @@ public class DataStoreReplacer
 	 * Limit all search and replace actions to the selected rows.
 	 * To reset search & replace in the selected rows, setSelecteRows()
 	 * has to be called again with a null value
-	 * @param the selected rows to be searched, null to reset row selection
+	 * @param rows the selected rows to be searched, null to reset row selection
 	 */
 	public void setSelectedRows(int[] rows)
 	{
@@ -80,13 +80,13 @@ public class DataStoreReplacer
 	/**
 	 * Find the given text in the datastore.
 	 * 
-	 * @param the text to search for
+	 * @param text the text to search for
 	 * @param ignoreCase if true, search is case-insesitive
 	 * @param wholeWord if true, only text in word bounderies is found
 	 * @param useRegex treat the text as a regular expression
 	 * @return the position where the text was found
 	 * 
-	 * @see workbench.gui.editor.SeachAndReplace#getSearchExpression(String, boolean, boolean, boolean)
+	 * @see workbench.gui.editor.SearchAndReplace#getSearchExpression(String, boolean, boolean, boolean)
 	 */
 	public Position find(String text, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 		throws PatternSyntaxException
@@ -115,8 +115,6 @@ public class DataStoreReplacer
 	 * This returns NO_POSITION if find(String, boolean) has not 
 	 * been called before. 
 	 * @return the position of the next occurance
-	 * @see #find(String)
-	 * @see #find(String, boolean)
 	 */
 	public Position findNext()
 	{
@@ -199,7 +197,7 @@ public class DataStoreReplacer
 	/**
 	 * Replace all occurances of a value with the given replacement value.
 	 * 
-	 * @param expression the value to search for
+	 * @param text the value to search for
 	 * @param replacement the replacement value
 	 * @param rows if not null search and replace is only done in these rows
 	 * @param ignoreCase should the search pattern be applied case-insensitive
@@ -207,8 +205,8 @@ public class DataStoreReplacer
 	 * @param useRegex if true, expression is treated as a regular expression
 	 * 
 	 * @return the number of occurances replaced
-	 * @see workbench.gui.editor.SeachAndReplace#getSearchExpression(String, boolean, boolean, boolean)
-	 * @see workbench.gui.editor.SeachAndReplace#fixSpecialreplacementChars(String)
+	 * @see workbench.gui.editor.SearchAndReplace#getSearchExpression(String, boolean, boolean, boolean)
+	 * @see workbench.gui.editor.SearchAndReplace#fixSpecialReplacementChars(String)
 	 */
 	public int replaceAll(String text, String replacement, int[] rows, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 		throws ConverterException, PatternSyntaxException

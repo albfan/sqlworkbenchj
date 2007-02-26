@@ -529,6 +529,7 @@ public class WbManager
 		// files should be changed
 		boolean canExit = this.saveWindowSettings();
 		if (!canExit) return;
+		
 		//shutdownInProgress = true;
 		if (window == null)
 		{
@@ -608,16 +609,15 @@ public class WbManager
 	 */
 	protected void disconnected()
 	{
-		if (this.closeMessage != null)
-		{
-			this.closeMessage.setVisible(false);
-			this.closeMessage.dispose();
-		}
-
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
+				if (closeMessage != null)
+				{
+					closeMessage.setVisible(false);
+					closeMessage.dispose();
+				}
 				closeAllWindows();
 			}
 		});

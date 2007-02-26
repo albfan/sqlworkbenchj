@@ -178,6 +178,7 @@ class ProfileListModel
 	
 	public TreePath getPath(ConnectionProfile prof)
 	{
+		if (prof == null) return null;
 		String pGroup = prof.getGroup();
 		Object groupNode = null;
 		if (StringUtil.isEmptyString(pGroup))

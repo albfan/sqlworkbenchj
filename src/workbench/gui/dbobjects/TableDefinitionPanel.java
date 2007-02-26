@@ -72,7 +72,7 @@ public class TableDefinitionPanel
 
 	public TableDefinitionPanel()
 	{
-		this.tableDefinition = new WbTable();
+		this.tableDefinition = new WbTable(true, false, false);
 		this.tableDefinition.setAdjustToColumnLabel(false);
 		this.tableDefinition.setSelectOnRightButtonClick(true);
 		this.tableDefinition.getExportAction().setEnabled(true);

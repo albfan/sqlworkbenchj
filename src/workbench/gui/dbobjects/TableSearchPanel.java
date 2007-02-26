@@ -139,7 +139,7 @@ public class TableSearchPanel
     resultPanel = new javax.swing.JPanel();
     tablePane = new javax.swing.JPanel();
     tableListScrollPane = new WbScrollPane();
-    tableNames = new WbTable();
+    tableNames = new WbTable(true, false, false);
     selectButtonPanel = new javax.swing.JPanel();
     selectAllButton = new javax.swing.JButton();
     jPanel2 = new javax.swing.JPanel();
@@ -158,11 +158,12 @@ public class TableSearchPanel
 
     jSplitPane1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
     jSplitPane1.setDividerLocation(150);
+
     resultScrollPane.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
     resultScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-    resultPanel.setLayout(new java.awt.GridBagLayout());
 
     resultPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    resultPanel.setLayout(new java.awt.GridBagLayout());
     resultScrollPane.setViewportView(resultPanel);
 
     resultTabPane.addTab(ResourceMgr.getString("LblTableSearchResultTab"), resultScrollPane);
@@ -186,7 +187,6 @@ public class TableSearchPanel
         selectAllButtonActionPerformed(evt);
       }
     });
-
     selectButtonPanel.add(selectAllButton);
 
     jPanel2.setMaximumSize(new java.awt.Dimension(5, 0));
@@ -202,7 +202,6 @@ public class TableSearchPanel
         selectNoneButtonActionPerformed(evt);
       }
     });
-
     selectButtonPanel.add(selectNoneButton);
 
     tablePane.add(selectButtonPanel, java.awt.BorderLayout.SOUTH);
@@ -226,7 +225,6 @@ public class TableSearchPanel
         startButtonActionPerformed(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
@@ -294,7 +292,6 @@ public class TableSearchPanel
     entryPanel.add(rowCount, gridBagConstraints);
 
     add(entryPanel, java.awt.BorderLayout.NORTH);
-
   }// </editor-fold>//GEN-END:initComponents
 
 	private void selectNoneButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_selectNoneButtonActionPerformed
@@ -381,7 +378,7 @@ public class TableSearchPanel
 				// therefor it's important to call this in searchEnded() as well
 				this.adjustDataTable();
 				
-				this.currentDisplayTable = new WbTable();
+				this.currentDisplayTable = new WbTable(true, true, false);
 				this.currentDisplayTable.getCopyAsInsertAction().setEnabled(true);
 				this.currentDisplayTable.getCopyAsUpdateAction().setEnabled(true);
 				this.currentDisplayTable.getCopyAsDeleteInsertAction().setEnabled(true);

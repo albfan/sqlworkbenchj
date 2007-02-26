@@ -36,10 +36,10 @@ import java.util.List;
 import java.util.StringTokenizer;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
-
 import workbench.WbManager;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.profiles.ProfileKey;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.FontChangedListener;
@@ -1574,17 +1574,23 @@ public class Settings
 		return this.restoreWindowSize(target, target.getClass().getName());
 	}
 
-	public boolean restoreWindowSize(Component target, String id)
+	public boolean restoreWindowSize(final Component target, final String id)
 	{
 		boolean result = false;
-		int w = this.getWindowWidth(id);
-		int h = this.getWindowHeight(id);
+		final int w = this.getWindowWidth(id);
+		final int h = this.getWindowHeight(id);
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 
 		if (w > 0 && h > 0 && w <= screen.getWidth() && h <= screen.getHeight())
 		{
-			target.setSize(new Dimension(w, h));
 			result = true;
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					target.setSize(new Dimension(w, h));
+				}
+			});
 		}
 		return result;
 	}
@@ -1594,18 +1600,24 @@ public class Settings
 		return this.restoreWindowPosition(target, target.getClass().getName());
 	}
 
-	public boolean restoreWindowPosition(Component target, String id)
+	public boolean restoreWindowPosition(final Component target, final String id)
 	{
 		boolean result = false;
-		int x = this.getWindowPosX(id);
-		int y = this.getWindowPosY(id);
+		final int x = this.getWindowPosX(id);
+		final int y = this.getWindowPosY(id);
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 
 		if (x != Integer.MIN_VALUE && y != Integer.MIN_VALUE 
 			&& x <= screen.getWidth() - 20 && y <= screen.getHeight() - 20)
 		{
-			target.setLocation(new Point(x, y));
 			result = true;
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					target.setLocation(new Point(x, y));
+				}
+			});
 		}
 		return result;
 	}

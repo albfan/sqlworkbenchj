@@ -11,14 +11,13 @@
  */
 package workbench.gui.components;
 
+import java.awt.EventQueue;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.lang.reflect.Method;
-
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.log.LogMgr;
 
@@ -34,9 +33,12 @@ public class StringPropertyEditor
 	private Object source;
 	private Method setter;
 	private Method getter;
-	private boolean changed;
-	private boolean immediateUpdate = false;
 	
+	// "dirty" flag, if this is true, the target object
+	// has not been updated to reflect the state of this editor
+	private boolean changed;
+	
+	private boolean immediateUpdate = false;
 	private String propName;
 	
 	public StringPropertyEditor()
@@ -126,7 +128,13 @@ public class StringPropertyEditor
 		{
 			this.applyChanges();
 		}
-		firePropertyChange(this.propName, null, null);
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				firePropertyChange(propName, null, getText());
+			}
+		});
 	}
 
 	public void setImmediateUpdate(boolean aFlag)

@@ -176,15 +176,15 @@ public class WbTable
 	
 	public WbTable()
 	{
-		this(true, true);
+		this(true, true, false);
 	}
 
 	public WbTable(boolean printEnabled)
   {
-      this(printEnabled, true);
+      this(printEnabled, true, false);
   }
 
-	public WbTable(boolean printEnabled, boolean sqlCopyAllowed)
+	public WbTable(boolean printEnabled, boolean sqlCopyAllowed, boolean replaceAllowed)
 	{
 		super(EmptyTableModel.EMPTY_MODEL);
 		
@@ -263,7 +263,10 @@ public class WbTable
 
 		this.addPopupAction(this.replacer.getFindAction(), true);
 		this.addPopupAction(this.replacer.getFindAgainAction(), false);
-		this.addPopupAction(this.replacer.getReplaceAction(), false);
+		if (replaceAllowed) 
+		{
+			this.addPopupAction(this.replacer.getReplaceAction(), false);
+		}
 
 		if (printEnabled)
 		{
@@ -614,7 +617,7 @@ public class WbTable
 	 * Return the header to be used for printing.
 	 * 
 	 * @return the print header
-	 * @see workbench.print.TablePrinter(WbTable)
+	 * @see workbench.print.TablePrinter
 	 */
 	public String getPrintHeader()
 	{
@@ -1263,7 +1266,8 @@ public class WbTable
 	 * width according to the content, this will 
 	 * call {@link #optimizeAllColWidth()}
 	 * otherwise this will call {@link #adjustColumns()}
-	 * @param checkheaders to be passed to optimizeAllColWidth() in case the column width should be optimized
+	 * 
+	 * @param checkHeaders to be passed to optimizeAllColWidth() in case the column width should be optimized
 	 */
 	public void adjustOrOptimizeColumns(boolean checkHeaders)
 	{

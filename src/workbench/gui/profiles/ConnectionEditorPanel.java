@@ -128,7 +128,8 @@ public class ConnectionEditorPanel
 	{
 		this.editors = new LinkedList();
 		initEditorList(this);
-		altDelimiter.addPropertyChangeListener(this);
+		altDelimiter.addPropertyChangeListener(DelimiterDefinitionPanel.PROP_SLD, this);
+		altDelimiter.addPropertyChangeListener(DelimiterDefinitionPanel.PROP_DELIM, this);
 	}
 
 	private void initEditorList(Container parent)
@@ -778,7 +779,6 @@ public class ConnectionEditorPanel
 			{
 				this.init = false;
 			}
-
 		}
 	}
 
@@ -867,9 +867,7 @@ public class ConnectionEditorPanel
 		if (aProfile == null) return;
 
 		this.currentProfile = aProfile;
-		this.altDelimiter.setDelimiter(this.currentProfile.getAlternateDelimiter());
 		
-		//System.out.println("switching to profile: " + aProfile.getName() + "(" + aProfile.getIdentifier() + ")");
 		this.initPropertyEditors();
 
 		String drvClass = aProfile.getDriverclass();
@@ -883,6 +881,7 @@ public class ConnectionEditorPanel
 		try
 		{
 			this.init = true;
+			this.altDelimiter.setDelimiter(this.currentProfile.getAlternateDelimiter());
 			cbDrivers.setSelectedItem(drv);
 		}
 		catch (Exception e)
@@ -902,20 +901,18 @@ public class ConnectionEditorPanel
 	 */
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (evt.getSource() instanceof SimplePropertyEditor) 
+		System.out.println("propertyChange: " + evt);
+		
+		if (!this.init)	
 		{
-			// As the alternateDelimiter is a not attached to the 
-			// profile itself, we have to propagate any updated delimiter object
-			// to the profile
-			if (altDelimiter.getDelimiter().isChanged())
+			if (evt.getSource() == this.altDelimiter)
 			{
+				DelimiterDefinition del = altDelimiter.getDelimiter();
+				// As the alternateDelimiter is a not attached to the profile itself, 
+				// we have to propagate any updated delimiter object to the profile
 				this.currentProfile.setAlternateDelimiter(altDelimiter.getDelimiter());
 			}
-				
-			if (!this.init)	
-			{
-				this.sourceModel.profileChanged(this.currentProfile);
-			}
+			this.sourceModel.profileChanged(this.currentProfile);
 		}
 	}
 	
@@ -942,21 +939,21 @@ public class ConnectionEditorPanel
 			JOptionPane.showMessageDialog(this.getParent(), f, title, JOptionPane.PLAIN_MESSAGE);
 		}
 	}
-
-public boolean validateInput() 
-{
-	DelimiterDefinition delim = getProfile().getAlternateDelimiter();
-	if (delim != null && delim.isStandard())
+	
+	public boolean validateInput()
 	{
-		WbSwingUtilities.showErrorMessageKey(this, "ErrWrongAltDelim");
-		return false;
+		DelimiterDefinition delim = getProfile().getAlternateDelimiter();
+		if (delim != null && delim.isStandard())
+		{
+			WbSwingUtilities.showErrorMessageKey(this, "ErrWrongAltDelim");
+			return false;
+		}
+		return true;
 	}
-	return true;
-}
-
-public void componentDisplayed() 
-{
-	// nothing to do
-}
+	
+	public void componentDisplayed()
+	{
+		// nothing to do
+	}
 
 }

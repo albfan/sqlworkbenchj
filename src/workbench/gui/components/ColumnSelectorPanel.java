@@ -179,7 +179,7 @@ public class ColumnSelectorPanel
   
 	/**
 	 * Check if the column with the specified index is selected.
-	 * @param the index to be checked
+	 * @param index the index to be checked
 	 * @return true if selected, false otherwise
 	 */
 	public boolean isColumnSelected(int index) 

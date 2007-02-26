@@ -316,6 +316,10 @@ public class DbSettings
 				return StringUtil.EMPTY_STRING;
 		}
 	}
+	public boolean useSetCatalog()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".usesetcatalog", true);
+	}
 	
 	public boolean isNotDeferrable(String deferrable)
 	{

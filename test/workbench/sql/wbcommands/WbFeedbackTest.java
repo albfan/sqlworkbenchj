@@ -1,5 +1,5 @@
 /*
- * EchoCommandTest.java
+ * WbFeedbackTest.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -9,8 +9,9 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.sql.commands;
+package workbench.sql.wbcommands;
 
+import workbench.sql.commands.*;
 import junit.framework.*;
 import workbench.TestUtil;
 import workbench.resource.ResourceMgr;
@@ -21,22 +22,22 @@ import workbench.sql.StatementRunnerResult;
  *
  * @author support@sql-workbench.net
  */
-public class EchoCommandTest extends TestCase
+public class WbFeedbackTest extends TestCase
 {
 	
-	public EchoCommandTest(String testName)
+	public WbFeedbackTest(String testName)
 	{
 		super(testName);
 	}
 
-	public void testExecute() throws Exception
+	public void testEcho() throws Exception
 	{
 		try
 		{
 			TestUtil util = new TestUtil("testEchoExec");
 			util.prepareEnvironment();
 			DefaultStatementRunner runner = new DefaultStatementRunner();
-			EchoCommand echo = new EchoCommand();
+			WbFeedback echo = new WbFeedback("ECHO");
 			runner.addCommand(echo);
 			String sql = "--this is a test\n\techo\t    off";
 			runner.runStatement(sql, 0, 0);
@@ -60,8 +61,8 @@ public class EchoCommandTest extends TestCase
 			result = runner.getResult();
 			String msg = result.getMessageBuffer().toString().trim();
 			String expected = ResourceMgr.getString("MsgFeedbackEnabled");
-			assertEquals("Echo command not successful", true, result.isSuccess());
 			assertEquals("Wrong message returned", expected, msg);
+			assertEquals("Echo command not successful", true, result.isSuccess());
 		}
 		catch (Exception e)
 		{

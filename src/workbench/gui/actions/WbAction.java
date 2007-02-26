@@ -36,7 +36,10 @@ import workbench.resource.ShortcutManager;
 
 /**
  * Base class for Actions in SQL Workbench/J
- *	@author  support@sql-workbench.net
+ * the actual work should be implemented in executeAction()
+ * which is guaranteed to be called on the EDT.
+ * 
+ * @author  support@sql-workbench.net
  */
 public class WbAction 
 	extends AbstractAction
@@ -444,20 +447,20 @@ public class WbAction
 	{
 		if (this.isEnabled()) 
 		{
-			if (this.original != null) 
+			EventQueue.invokeLater(new Runnable()
 			{
-				this.original.executeAction(e);
-			}
-			else
-			{
-				EventQueue.invokeLater(new Runnable()
+				public void run()
 				{
-					public void run()
+					if (original != null) 
+					{
+						original.executeAction(e);
+					}
+					else
 					{
 						executeAction(e);
 					}
-				});
-			}
+				}
+			});
 		}
 	}
 	
@@ -491,7 +494,6 @@ public class WbAction
 	{
 		super.setEnabled(flag);
 		if (this.proxy != null) this.proxy.setEnabled(flag);
-//		else if (this.original != null) this.original.setEnabled(flag);
 	}
 	
 	public void setOriginal(WbAction org)

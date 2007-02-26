@@ -927,7 +927,7 @@ public class DwPanel
 	{
 		this.setLayout(new BorderLayout());
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.dataTable = new WbTable();
+		this.dataTable = new WbTable(true, true, true);
 		this.dataTable.setRowResizeAllowed(Settings.getInstance().getAllowRowHeightResizing());
 		if (status != null)
 		{

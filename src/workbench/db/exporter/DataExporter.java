@@ -256,7 +256,7 @@ public class DataExporter
 	 * Return the type of date literals to be created when generating
 	 * SQL statements. 
 	 * @return the date literal type
-	 * @see workbench.db.SqlExportWriter#configureConverter()
+	 * @see workbench.db.exporter.SqlExportWriter#configureConverter()
 	 * @see workbench.storage.SqlLiteralFormatter
 	 */
 	public String getDateLiteralType()

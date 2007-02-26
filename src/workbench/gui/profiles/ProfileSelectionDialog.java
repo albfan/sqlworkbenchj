@@ -29,15 +29,12 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
 import workbench.db.ConnectionProfile;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
-import workbench.gui.components.DividerBorder;
 import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;

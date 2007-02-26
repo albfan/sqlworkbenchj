@@ -21,7 +21,7 @@ public class RunningJobIndicator
 	private JFrame clientWindow;
 	private int runningJobs = 0;
 	private String lastTitle = null;
-	private final String prefix = "» ";
+	public static final String TITLE_PREFIX = "\u00bb ";
 	
 	public RunningJobIndicator(JFrame client)
 	{
@@ -31,9 +31,9 @@ public class RunningJobIndicator
 	public synchronized void baseTitleChanged()
 	{
 		this.lastTitle = this.clientWindow.getTitle();
-		if (lastTitle.startsWith(prefix))
+		if (lastTitle.startsWith(TITLE_PREFIX))
 		{
-			lastTitle = lastTitle.substring(this.prefix.length());
+			lastTitle = lastTitle.substring(TITLE_PREFIX.length());
 		}
 		updateTitle();
 	}
@@ -44,9 +44,9 @@ public class RunningJobIndicator
 		{
 			
 			String title = this.clientWindow.getTitle();
-			if (!title.startsWith(prefix))
+			if (!title.startsWith(TITLE_PREFIX))
 			{
-				clientWindow.setTitle(prefix + lastTitle);
+				clientWindow.setTitle(TITLE_PREFIX + lastTitle);
 			}
 		}
 	}

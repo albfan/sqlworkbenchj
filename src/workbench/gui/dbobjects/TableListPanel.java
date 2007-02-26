@@ -271,7 +271,7 @@ public class TableListPanel
 		this.triggers = new TriggerDisplayPanel();
 
 		this.listPanel = new JPanel();
-		this.tableList = new WbTable(true, false);
+		this.tableList = new WbTable(true, false, false);
 		this.tableList.setSelectOnRightButtonClick(true);
 		this.tableList.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		this.tableList.setCellSelectionEnabled(false);

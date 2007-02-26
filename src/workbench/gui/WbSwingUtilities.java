@@ -121,6 +121,15 @@ public class WbSwingUtilities
 		aWinToCenter.setLocation(location);
 	}
 
+	public static Window getWindowAncestor(Component caller)
+	{
+		if (caller instanceof Window)
+		{
+			return (Window)caller;
+		}
+		return SwingUtilities.getWindowAncestor(caller);
+	}
+	
 	public static Point getLocationToCenter(Window aWinToCenter, Component aReference)
 	{
 		int screenWidth, screenHeight;

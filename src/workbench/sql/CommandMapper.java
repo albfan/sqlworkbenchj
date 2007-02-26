@@ -21,7 +21,6 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.commands.DdlCommand;
-import workbench.sql.commands.EchoCommand;
 import workbench.sql.commands.IgnoredCommand;
 import workbench.sql.commands.SelectCommand;
 import workbench.sql.commands.SetCommand;
@@ -209,7 +208,7 @@ public class CommandMapper
 		{
 			this.cmdDispatch.put(WbOraExecute.EXEC.getVerb(), WbOraExecute.EXEC);
 			this.cmdDispatch.put(WbOraExecute.EXECUTE.getVerb(), WbOraExecute.EXECUTE);
-			EchoCommand echo = new EchoCommand();
+			WbFeedback echo = new WbFeedback("ECHO");
 			this.cmdDispatch.put(echo.getVerb(), echo);
 
 			this.dbSpecificCommands.add(WbOraExecute.EXEC.getVerb());

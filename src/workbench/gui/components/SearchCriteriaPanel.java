@@ -19,7 +19,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
+import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -27,7 +27,7 @@ import workbench.resource.Settings;
 /**
  * A search dialog panel.
  * 
- * @see workbench.gui.component.TableReplacer
+ * @see workbench.gui.components.TableReplacer
  * @see workbench.gui.editor.SearchAndReplace
  * 
  * @author support@sql-workbench.net
@@ -139,15 +139,7 @@ public class SearchCriteriaPanel
 	
 	public boolean showFindDialog(Component caller, String title)
 	{
-		Window w = null;
-		if (caller instanceof Window)
-		{
-			w = (Window)caller;
-		}
-		else
-		{
-			w = SwingUtilities.getWindowAncestor(caller);
-		}
+		Window w = WbSwingUtilities.getWindowAncestor(caller);
 		boolean result = ValidatingDialog.showConfirmDialog(w, this, title, caller);
 		
 		Settings.getInstance().setProperty(caseProperty, this.getIgnoreCase());

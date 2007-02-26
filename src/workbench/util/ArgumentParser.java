@@ -26,7 +26,7 @@ import workbench.log.LogMgr;
  */
 public class ArgumentParser
 {
-	private static final String ARG_PRESENT = "$__ARG_PRESENT__$";
+	private static final String ARG_PRESENT = "$WB$__ARG_PRESENT__$WB$";
 	private Map<String, String> arguments;
 	private Map<String, ArgumentType> argTypes;
 	private List<String> unknownParameters = new ArrayList<String>();
@@ -102,7 +102,7 @@ public class ArgumentParser
 
 			while (tok.hasMoreTokens())
 			{
-				String word = tok.nextToken();// String)words.get(i);
+				String word = tok.nextToken();
 				if (word == null || word.length() == 0) continue;
 				String arg = null;
 				String value = null;
@@ -186,6 +186,15 @@ public class ArgumentParser
 		return this.unknownParameters.size() > 0;
 	}
 
+	/**
+	 * Return a list of unknown arguments. 
+	 * Each argument passed in the original command line
+	 * that has not been registered using addArgument()
+	 * will be listed in the result. For each argument 
+	 * in this list, isRegistered() would return false.
+	 * 
+	 * @return a comma separated string with unknown arguments
+	 */
 	public String getUnknownArguments()
 	{
 		StringBuilder msg = new StringBuilder();
@@ -202,19 +211,35 @@ public class ArgumentParser
 		return msg.toString();
 	}
 	
+	/**
+	 * Check if the given argument is a valid argument for the current commandline
+	 * @return true if arg was registered with addArgument()
+	 */
 	public boolean isRegistered(String arg)
 	{
 		return this.arguments.containsKey(arg);
 	}
 	
+	/**
+	 * Check if the given argument was passed on the commandline. 
+	 * This does not check if a value has been supplied with the 
+	 * argument. This can be used for argument-less parameters
+	 * e.g. -showEncodings
+	 * 
+	 * @return true if the given argument was part of the commandline
+	 */
 	public boolean isArgPresent(String arg)
 	{
 		if (arg == null) return false;
+		// Even arguments without a value will have something 
+		// in the map (the ARG_PRESENT marker object), otherwise
+		// they could not be distinguished from arguments that
+		// are merely registered.
 		Object value = this.arguments.get(arg);
 		return (value != null);
 	}
 	
-	public void reset()
+	private void reset()
 	{
 		Iterator<String> keys = this.arguments.keySet().iterator();
 		while (keys.hasNext())
@@ -254,9 +279,8 @@ public class ArgumentParser
 	 */
 	public String getValue(String key)
 	{
-		String value = this.arguments.get(key.toLowerCase());
+		String value = this.arguments.get(key);
 		if (value == ARG_PRESENT) return null;
-		value = StringUtil.trimQuotes(value);
 		return value;
 	}
 	

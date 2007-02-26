@@ -15,7 +15,7 @@ import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
-import workbench.util.StringUtil;
+import workbench.util.HtmlUtil;
 
 /**
  *
@@ -96,7 +96,7 @@ public class HtmlRowDataConverter
 			{
 				if (this.escapeHtml)
 				{
-					value = StringUtil.escapeHTML(value);
+					value = HtmlUtil.escapeHTML(value);
 				}
 				result.append(value);
 			}

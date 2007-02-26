@@ -282,9 +282,6 @@ public class TableIdentifier
 			return;
 		}
 
-		//String[] elements = aTable.split("\\.");
-		//List l = StringUtil.stringToList(aTable, ".", true, true, false);
-		
 		List elements = new ArrayList(4);
 		WbStringTokenizer tok = new WbStringTokenizer('.', "\"", true);
 		tok.setSourceString(aTable);

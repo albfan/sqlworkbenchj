@@ -115,7 +115,7 @@
                     </Property>
                   </Properties>
                   <AuxValues>
-                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new WbTable();"/>
+                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new WbTable(true, false, false);"/>
                   </AuxValues>
                 </Component>
               </SubComponents>

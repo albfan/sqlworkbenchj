@@ -1406,7 +1406,7 @@ public class DataImporter
 			}
 			this.updateStatement.clearBatch();
 		}
-		LogMgr.logDebug("DataImporter", "Batch sent to database");
+//		LogMgr.logDebug("DataImporter", "Batch sent to database");
 			
 		if (this.commitBatch && !this.dbConn.getAutoCommit())
 		{
