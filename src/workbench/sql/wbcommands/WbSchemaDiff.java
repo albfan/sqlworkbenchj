@@ -101,9 +101,7 @@ public class WbSchemaDiff
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		String verb = SqlUtil.getSqlVerb(sql);
-		
-		sql = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
+		sql = SqlUtil.stripVerb(sql);
 		
 		cmdLine.parse(sql);
 		

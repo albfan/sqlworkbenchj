@@ -21,6 +21,14 @@ import workbench.util.ArgumentType;
 import workbench.util.StringUtil;
 
 /**
+ * A class to manage common parameters for various WbCommands.
+ * 
+ * When adding the parameters to the ArgumentParser, the necessary
+ * values for the code completion are also supplied. 
+ * For parameters with no fixed set of values a sample list
+ * with popular (or so I think) values is added, e.g. the -encoding 
+ * parameter.
+ * 
  * @author support@sql-workbench.net
  */
 public class CommonArgs
@@ -37,7 +45,7 @@ public class CommonArgs
 	
 	private static List<String> getDelimiterArguments()
 	{
-		return StringUtil.stringToList("\\t,;,\",\",|,<char>");
+		return StringUtil.stringToList("'\\t',';',\"','\",'|',<char>");
 	}
 	
 	public static void addContinueParameter(ArgumentParser cmdLine)
@@ -65,6 +73,13 @@ public class CommonArgs
 		cmdLine.addArgument(ARG_DELIM, getDelimiterArguments());
 	}	
 
+	/**
+	 * Adds the -encoding parameter to the ArgumentParser.
+	 * The encodings that are added to the code completion list
+	 * are retrieved from the Settings class.
+	 * @param cmdLine the ArgumentParser to which the parameter should be added
+	 * @see workbench.resource.Settings#getPopularEncodings()
+	 */
 	public static void addEncodingParameter(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_ENCODING, StringUtil.stringToList(Settings.getInstance().getPopularEncodings()));

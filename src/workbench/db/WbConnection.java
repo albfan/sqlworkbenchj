@@ -268,12 +268,11 @@ public class WbConnection
 	{
 		this.scriptError = null;
 		if (this.sqlConnection == null) return;
-		if (this.metaData == null) return;
 		try
 		{
 			this.sqlConnection.clearWarnings();
 
-			if (doOracleClear && this.metaData.isOracle())
+			if (doOracleClear && this.metaData != null && this.metaData.isOracle())
 			{
 				// obviously the Oracle driver does NOT clear the warnings
 				// (as discovered when looking at the source code)
@@ -282,7 +281,8 @@ public class WbConnection
 				// reset the warnings there
 				// this is done via reflection so that the Oracle driver
 				// does not need to be present when compiling
-
+				
+				// this is not true for newer drivers (10.x) 
 				if (this.clearSettings == null || dbAccess == null)
 				{
 					Class ora = this.sqlConnection.getClass();
@@ -294,7 +294,7 @@ public class WbConnection
 						dbAccess = dbAccessField.get(this.sqlConnection);
 						try
 						{
-							clearSettings = dbAccessClass.getDeclaredMethod("setWarnings", new Class[] {SQLWarning.class} );
+							clearSettings = dbAccessClass.getMethod("setWarnings", new Class[] {SQLWarning.class} );
 						}
 						catch (NoSuchMethodException e)
 						{
@@ -637,6 +637,20 @@ public class WbConnection
 		return this.getDatabaseInfoAsXml(indent, null);
 	}
 
+	public String getDriverVersion()
+	{
+		DatabaseMetaData db = null;
+		try
+		{
+			db = this.sqlConnection.getMetaData();
+			return db.getDriverVersion();
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
+	
 	/**
 	 *	Returns information about the DBMS and the JDBC driver
 	 *	in the XML format used for the XML export

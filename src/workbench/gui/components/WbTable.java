@@ -37,6 +37,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.EventObject;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -161,7 +162,7 @@ public class WbTable
 	private int[] savedColumnSizes;
 
 	private RowHeightResizer rowResizer;
-	private ArrayList changeListener = new ArrayList();
+	private List<TableModelListener> changeListener = new ArrayList<TableModelListener>();
 	private JScrollPane scrollPane;
 
 	private DwStatusBar statusBar;
@@ -728,10 +729,8 @@ public class WbTable
 	private void removeListeners()
 	{
 		if (this.dwModel == null) return;
-		int count = this.changeListener.size();
-		for (int i=0; i < count; i++)
+		for (TableModelListener l : changeListener)
 		{
-			TableModelListener l = (TableModelListener)changeListener.get(i);
 			this.dwModel.removeTableModelListener(l);
 		}
 	}
@@ -739,11 +738,9 @@ public class WbTable
 	private void addListeners()
 	{
 		if (this.dwModel == null) return;
-		int count = this.changeListener.size();
 		TableModelEvent evt = new TableModelEvent(this.dwModel);
-		for (int i=0; i < count; i++)
+		for (TableModelListener l : changeListener)
 		{
-			TableModelListener l = (TableModelListener)changeListener.get(i);
 			l.tableChanged(evt);
 			this.dwModel.addTableModelListener(l);
 		}

@@ -55,6 +55,10 @@ public class SqlCommand
 	protected ParameterPrompter prompter;
 	protected ArgumentParser cmdLine;
 
+	public SqlCommand()
+	{
+	}
+	
 	public void setRowMonitor(RowActionMonitor monitor)
 	{
 		this.rowMonitor = monitor;
@@ -201,17 +205,8 @@ public class SqlCommand
 		}
 		catch (Exception e)
 		{
-			result.clear();
-			StringBuilder msg = new StringBuilder(150);
-			msg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
-			String s = StringUtil.getMaxSubstring(aSql.trim(), 150);
-			msg.append(s);
-			msg.append("\n");
-			result.addMessage(msg.toString());
-			StringBuilder er = ExceptionUtil.getAllExceptions(e);
-			result.addMessage(er);
-			result.setFailure();
-			LogMgr.logDebug("SqlCommand.execute()", "Error executing sql statement " + s + "\nError:" + er, null);
+			addErrorInfo(result, aSql, e);
+			LogMgr.logDebug("SqlCommand.execute()", "Error executing sql statement: " + aSql + "\nError:" + ExceptionUtil.getDisplay(e), null);
 		}
 		finally
 		{
@@ -413,6 +408,28 @@ public class SqlCommand
 			}
 		}
 		return fname;
+	}
+	
+	protected void addErrorInfo(StatementRunnerResult result, String sql, Throwable e)
+	{
+		result.clear();
+
+		StringBuilder msg = new StringBuilder(150);
+		msg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
+		if (reportFullStatementOnError)
+		{
+			msg.append(sql);
+		}
+		else
+		{
+			int maxLen = 150;
+			msg.append(StringUtil.getMaxSubstring(sql.trim(), maxLen));
+		}
+		result.addMessage(msg);
+		result.addMessageNewLine();
+		result.addMessage(ExceptionUtil.getAllExceptions(e));
+
+		result.setFailure();
 	}
 	
 }

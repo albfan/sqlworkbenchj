@@ -251,30 +251,50 @@ public class ArgumentParser
 		this.unknownParameters.clear();
 	}
 	
+	/**
+	 * Return a parameter as a boolean.
+	 * @return the value as passed on the command line
+	 *         false if no value was specified
+	 * 
+	 * @see #getBoolean(String, boolean)
+	 */
 	public boolean getBoolean(String key)
 	{
 		return getBoolean(key, false);
 	}
 	
 	/**
-	 * Return a parameter value as a boolean. If no 
-	 * value was specified the given default value will be returned
+	 * Return a parameter value as a boolean. 
+	 * If no value was specified the given default value will be returned
+	 * 
+	 * @param key the parameter key
+	 * @param defaultValue the default to be returned if the parameter is not present
+	 * 
+	 * @return the value as passed on the commandline 
+	 *         the defaultValue if the parameter was not supplied by the user
+	 * 
 	 * @see #getValue(String)
+	 * @see #getBoolean(String)
 	 * @see StringUtil#stringToBool(String)
 	 */
-	public boolean getBoolean(String key, boolean def)
+	public boolean getBoolean(String key,boolean defaultValue)
 	{
 		String value = this.getValue(key);
-		if (value == null || value.trim().length() == 0) return def;
+		if (value == null || value.trim().length() == 0) return defaultValue;
 		return StringUtil.stringToBool(value);
 	}
 
 	/**
 	 * Return the parameter for the give argument. 
+	 * 
 	 * If no value was specified or the parameter was not 
 	 * passed on the commandline null will be returned.
 	 * Any leading or trailing quotes will be removed from the argument
-	 * before it is returned
+	 * before it is returned.
+	 * 
+	 * @param key the parameter to retrieve
+	 * @return the value as provided by the user or null if no value specified
+	 * 
 	 * @see StringUtil#trimQuotes(String)
 	 */
 	public String getValue(String key)

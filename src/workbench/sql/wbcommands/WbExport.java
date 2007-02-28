@@ -456,7 +456,7 @@ public class WbExport
 			catch (Exception e)
 			{
 				LogMgr.logError("WbExport.execute()", "Error when running table export", e);
-				result.addMessage(e.getMessage());
+				addErrorInfo(result, sql, e);
 				result.setFailure();
 			}
 		}

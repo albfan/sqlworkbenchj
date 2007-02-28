@@ -64,7 +64,12 @@ public class ConnectionInfo
 		if (this.sourceConnection != null)
 		{
 			this.display.setText(" " + this.sourceConnection.getDisplayString());
-			this.display.setToolTipText(this.sourceConnection.getDatabaseProductName());
+			StringBuilder tip = new StringBuilder(30);
+			tip.append(this.sourceConnection.getDatabaseProductName());
+			tip.append(" (");
+			tip.append(this.sourceConnection.getDriverVersion());
+			tip.append(')');
+			this.display.setToolTipText(tip.toString());
 		}
 		else
 		{

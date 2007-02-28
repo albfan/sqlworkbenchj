@@ -282,7 +282,7 @@ public class WbCopy
 		{
 			LogMgr.logError("WbCopy.execute()", "Error when copying data", e);
 			result.setFailure();
-			result.addMessage(ExceptionUtil.getDisplay(e));
+			addErrorInfo(result, aSql, e);
 			result.addMessage(copier.getAllMessages());
 		}
 		finally

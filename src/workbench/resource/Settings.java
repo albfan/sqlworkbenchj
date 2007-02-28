@@ -25,6 +25,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -266,7 +267,7 @@ public class Settings
 	private ToolDefinition[] getExternalTools(boolean check)
 	{
 		int numTools = getIntProperty("workbench.tools.count", 0);
-		LinkedList l = new LinkedList();
+		LinkedList<ToolDefinition> l = new LinkedList<ToolDefinition>();
 		int count = 0;
 		for (int i = 0; i < numTools; i++)
 		{
@@ -287,11 +288,11 @@ public class Settings
 			}
 		}
 		ToolDefinition[] result = new ToolDefinition[count];
-		Iterator itr = l.iterator();
+		Iterator<ToolDefinition> itr = l.iterator();
 		int i=0;
 		while (itr.hasNext())
 		{
-			result[i] = (ToolDefinition)itr.next();
+			result[i] = itr.next();
 			i++;
 		}
 		return result;
@@ -342,10 +343,20 @@ public class Settings
 		}
 	}
 
+	/**
+	 * Return a list of popular encodings to be used for the code-completion
+	 * of the -encoding parameter.
+	 * @see workbench.sql.wbcommands.CommonArgs#addEncodingParameter(workbench.util.ArgumentParser)
+	 */
 	public String getPopularEncodings()
 	{
 		return getProperty("workbench.export.defaultencodings", "UTF-8,ISO-8859-1,ISO-8859-15,<name>");
 	}
+	
+	/**
+	 * Return true if the application should be terminated if the first connect
+	 * dialog is cancelled.
+	 */
 	public boolean getExitOnFirstConnectCancel()
 	{
 		return getBoolProperty("workbench.gui.cancel.firstconnect.exit", false);
@@ -808,13 +819,18 @@ public class Settings
 	{
 		WbManager.trace("Setting.fillDefaults() - start");
 
+		InputStream in = ResourceMgr.getDefaultSettings();
 		try
 		{
-			this.props.load(ResourceMgr.getDefaultSettings());
+			this.props.load(in);
 		}
 		catch (IOException e)
 		{
 			LogMgr.logError(this, "Could not read default settings", e);
+		}
+		finally
+		{
+			try { in.close(); } catch (Throwable th) {}
 		}
 		WbManager.trace("Setting.fillDefaults() - done");
 	}

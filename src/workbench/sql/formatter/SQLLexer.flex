@@ -618,6 +618,7 @@ keyword=("ABORT"|
 "WRITE"|
 "YEAR"|
 "ZONE"|
+ALTER[ \t\r\n]+SESSION|
 CASCADE[ \t\r\n]+CONSTRAINTS|
 PRIMARY[ \t\r\n]+KEY|
 FOREIGN[ \t\r\n]+KEY|

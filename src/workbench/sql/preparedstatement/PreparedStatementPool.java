@@ -20,6 +20,7 @@ import workbench.util.SqlUtil;
 
 /**
  * A Pool to store parameters for prepared statements
+ * 
  * @author  support@sql-workbench.net
  */
 public class PreparedStatementPool

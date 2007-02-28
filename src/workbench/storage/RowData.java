@@ -96,6 +96,10 @@ public class RowData
 				{
 					value = rs.getTimestamp(i+1);
 				}
+				else if (type == java.sql.Types.DATE)
+				{
+					value = rs.getDate(i+1);
+				}
 				else if (SqlUtil.isBlobType(type))
 				{
 					// BLOB columns are always converted bot byte[] internally

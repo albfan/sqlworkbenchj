@@ -13,6 +13,7 @@ package workbench.gui.components;
 
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.Rectangle;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -41,7 +42,7 @@ public class TableReplacer
 	private ReplaceDataAction replaceAction;
 	private DataStoreReplacer replacer;
 	private boolean tableChanging = false;
-	
+	private boolean oldColumnSelection = false;
 	public TableReplacer(WbTable table)
 	{
 		this.client = table;
@@ -54,6 +55,7 @@ public class TableReplacer
 		this.findAgainAction.setEnabled(false);
 		this.replaceAction = new ReplaceDataAction(this);
 		this.replaceAction.setEnabled(false);
+		oldColumnSelection = client.getColumnSelectionAllowed();
 	}
 	
 	public FindDataAction getFindAction() { return this.findAction; }
@@ -97,22 +99,26 @@ public class TableReplacer
 		return pos.getRow();
 	}
 	
-	protected void highlightRow(Position pos)
+	protected void highlightRow(final Position pos)
 	{
-		if (pos.isValid())
+		final int row = pos.getRow();
+		final int col = pos.getColumn();
+		EventQueue.invokeLater(new Runnable()
 		{
-			final int row = pos.getRow();
-			final int col = pos.getColumn();
-			EventQueue.invokeLater(new Runnable()
+			public void run()
 			{
-				public void run()
+				client.clearSelection();
+				if (pos.isValid())
 				{
+					client.scrollToRow(row);		
+					Rectangle rect = client.getCellRect(row,col,true);
+					client.setColumnSelectionAllowed(true);
+					client.scrollRectToVisible(rect); 
 					client.setRowSelectionInterval(row, row);
 					client.setColumnSelectionInterval(col, col);
-					client.scrollToRow(row);		
 				}
-			});
-		}
+			}
+		});
 	}
 	
 	public int findNext()

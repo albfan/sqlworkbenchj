@@ -12,6 +12,9 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.KeyStroke;
 import workbench.interfaces.Replaceable;
 import workbench.interfaces.Replaceable;
 import workbench.resource.ResourceMgr;
@@ -29,7 +32,7 @@ public class ReplaceDataAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtReplaceInTableData");
+		this.initMenuDefinition("MnuTxtReplaceInTableData", KeyStroke.getKeyStroke(KeyEvent.VK_H, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
 	}

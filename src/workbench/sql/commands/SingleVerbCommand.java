@@ -15,7 +15,6 @@ import java.sql.SQLException;
 
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
-import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -65,14 +64,7 @@ public class SingleVerbCommand extends SqlCommand
 		}
 		catch (Exception e)
 		{
-			result.clear();
-			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
-			if (reportFullStatementOnError)
-			{
-				result.addMessage(aSql);
-			}
-			result.addMessage(ExceptionUtil.getAllExceptions(e));
-			result.setFailure();
+			addErrorInfo(result, aSql, e);
 			LogMgr.logSqlError("SingleVerbCommand.execute()", aSql, e);
 		}
 		finally

@@ -530,7 +530,7 @@ public class WbImport
 		{
 			LogMgr.logError("WbImport.execute()", "Error importing '" + filename +"': " + e.getMessage(), e);
 			result.setFailure();
-			result.addMessage(ExceptionUtil.getDisplay(e));
+			addErrorInfo(result, aSql, e);
 		}
 		result.addMessage(imp.getMessages());
 
@@ -540,15 +540,18 @@ public class WbImport
 	private void addColumnFilter(String filters, TextFileParser textParser)
 	{
 		if (filters == null || filters.trim().length() == 0) return;
-		List filterList = StringUtil.stringToList(filters, ",", false);
-		if (filterList.size() == 0) return;
-		for (int i=0; i < filterList.size(); i++)
+		
+		List<String> filterList = StringUtil.stringToList(filters, ",", false);
+		
+		if (filterList.size() < 1) return;
+		
+		for (String filterDef : filterList)
 		{
-			String filterDef = (String)filterList.get(i);
-			List l = StringUtil.stringToList(filterDef, "=", true);
+			List<String> l = StringUtil.stringToList(filterDef, "=", true);
 			if (l.size() != 2) continue;
-			String col = (String)l.get(0);
-			String regex = (String)l.get(1);
+			
+			String col = l.get(0);
+			String regex = l.get(1);
 			textParser.addColumnFilter(col, StringUtil.trimQuotes(regex));
 		}
 	}

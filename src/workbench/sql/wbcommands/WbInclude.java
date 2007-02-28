@@ -47,9 +47,9 @@ public class WbInclude
 		cmdLine.addArgument("file");
 		cmdLine.addArgument("continueOnError", ArgumentType.BoolArgument);
 		cmdLine.addArgument("checkEscapedQuotes", ArgumentType.BoolArgument);
-		cmdLine.addArgument("delimiter");
+		cmdLine.addArgument("delimiter",StringUtil.stringToList("';','/',<char>"));
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
-		cmdLine.addArgument("encoding");
+		CommonArgs.addEncodingParameter(cmdLine);
 		this.isUpdatingCommand = true;
 	}
 

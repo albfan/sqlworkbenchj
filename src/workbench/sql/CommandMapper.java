@@ -12,7 +12,6 @@
 package workbench.sql;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import workbench.db.DbMetadata;
@@ -20,6 +19,7 @@ import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.sql.commands.AlterSessionCommand;
 import workbench.sql.commands.DdlCommand;
 import workbench.sql.commands.IgnoredCommand;
 import workbench.sql.commands.SelectCommand;
@@ -165,11 +165,9 @@ public class CommandMapper
 		
 		cmdDispatch.put(WbSelectBlob.VERB, new WbSelectBlob());
 		
-		Iterator itr = DdlCommand.DDL_COMMANDS.iterator();
-		while (itr.hasNext())
+		for (DdlCommand cmd : DdlCommand.DDL_COMMANDS)
 		{
-			sql = (SqlCommand)itr.next();
-			cmdDispatch.put(sql.getVerb(), sql);
+			cmdDispatch.put(cmd.getVerb(), cmd);
 		}
 		this.cmdDispatch.put("CREATE OR REPLACE", DdlCommand.CREATE);
 
@@ -206,11 +204,15 @@ public class CommandMapper
 		
 		if (metaData.isOracle())
 		{
+			AlterSessionCommand alter = new AlterSessionCommand();
 			this.cmdDispatch.put(WbOraExecute.EXEC.getVerb(), WbOraExecute.EXEC);
 			this.cmdDispatch.put(WbOraExecute.EXECUTE.getVerb(), WbOraExecute.EXECUTE);
+			this.cmdDispatch.put(alter.getVerb(), alter);
+			
 			WbFeedback echo = new WbFeedback("ECHO");
 			this.cmdDispatch.put(echo.getVerb(), echo);
 
+			this.dbSpecificCommands.add(alter.getVerb());
 			this.dbSpecificCommands.add(WbOraExecute.EXEC.getVerb());
 			this.dbSpecificCommands.add(WbOraExecute.EXECUTE.getVerb());
 			this.dbSpecificCommands.add(echo.getVerb());

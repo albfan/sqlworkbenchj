@@ -12,11 +12,10 @@
 package workbench.sql.commands;
 
 import java.sql.SQLException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import workbench.db.WbConnection;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
@@ -40,13 +39,10 @@ public class DdlCommand extends SqlCommand
 	public static final DdlCommand GRANT = new DdlCommand("GRANT");
 	public static final DdlCommand REVOKE = new DdlCommand("REVOKE");
 
-	public static final DdlCommand CHECKPOINT = new DdlCommand("CHECKPOINT");
-	public static final DdlCommand SHUTDOWN = new DdlCommand("SHUTDOWN");
-
 	// Firebird RECREATE VIEW command
 	public static final SqlCommand RECREATE = new DdlCommand("RECREATE");
 
-	public static final List DDL_COMMANDS = new LinkedList();
+	public static final List<DdlCommand> DDL_COMMANDS = new ArrayList<DdlCommand>(5);
 
 	static
 	{
@@ -55,8 +51,6 @@ public class DdlCommand extends SqlCommand
 		DDL_COMMANDS.add(ALTER);
 		DDL_COMMANDS.add(GRANT);
 		DDL_COMMANDS.add(REVOKE);
-		DDL_COMMANDS.add(CHECKPOINT);
-		DDL_COMMANDS.add(SHUTDOWN);
 	}
 
 	private String verb;
@@ -97,28 +91,8 @@ public class DdlCommand extends SqlCommand
 			else
 			{
 				this.currentStatement.executeUpdate(aSql);
-				boolean schemaChanged = false;
 
-				if ("ALTER".equals(verb) && aConnection.getMetadata().isOracle())
-				{
-					// check for schema change in oracle
-					String regex = "alter\\s+session\\s+set\\s+current_schema\\s*=\\s*(\\p{Graph}*)";
-					Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
-					Matcher m = p.matcher(aSql);
-
-					if (m.find() && m.groupCount() > 0)
-					{
-						String schema = m.group(1);
-						aConnection.schemaChanged(null, schema);
-						schemaChanged = true;
-					}
-				}
-
-				if (schemaChanged)
-				{
-					msg = ResourceMgr.getString("MsgSchemaChanged");
-				}
-				else if ("DROP".equals(verb))
+				if ("DROP".equals(verb))
 				{
 					msg = ResourceMgr.getString("MsgDropSuccess");
 				}

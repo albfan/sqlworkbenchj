@@ -184,10 +184,6 @@ public class SQLToken
 		{
 			return contents.toUpperCase();
 		}
-//		else if (this.isIdentifier())
-//		{
-//			return contents.toLowerCase();
-//		}
 		else
 		{
 			return this.contents;
@@ -226,8 +222,6 @@ public class SQLToken
 
 	/**
 	 * Checks this token to see if it is a reserved word.
-	 * Reserved words are explained in <A Href=http://java.sun.com/docs/books/jls/html/>Java
-	 * Language Specification</A>.
 	 *
 	 * @return true if this token is a reserved word, false otherwise
 	 */
@@ -238,8 +232,6 @@ public class SQLToken
 
 	/**
 	 * Checks this token to see if it is an identifier.
-	 * Identifiers are explained in <A Href=http://java.sun.com/docs/books/jls/html/>Java
-	 * Language Specification</A>.
 	 *
 	 * @return true if this token is an identifier, false otherwise
 	 */
@@ -250,8 +242,6 @@ public class SQLToken
 
 	/**
 	 * Checks this token to see if it is a literal.
-	 * Literals are explained in <A Href=http://java.sun.com/docs/books/jls/html/>Java
-	 * Language Specification</A>.
 	 *
 	 * @return true if this token is a literal, false otherwise
 	 */
@@ -262,8 +252,6 @@ public class SQLToken
 
 	/**
 	 * Checks this token to see if it is a Separator.
-	 * Separators are explained in <A Href=http://java.sun.com/docs/books/jls/html/>Java
-	 * Language Specification</A>.
 	 *
 	 * @return true if this token is a Separator, false otherwise
 	 */
@@ -274,8 +262,6 @@ public class SQLToken
 
 	/**
 	 * Checks this token to see if it is a Operator.
-	 * Operators are explained in <A Href=http://java.sun.com/docs/books/jls/html/>Java
-	 * Language Specification</A>.
 	 *
 	 * @return true if this token is a Operator, false otherwise
 	 */
@@ -328,28 +314,36 @@ public class SQLToken
 		if (isReservedWord())
 		{
 			return("reservedWord");
-		} else if (isIdentifier())
+		} 
+		else if (isIdentifier())
 		{
 			return("identifier");
-		} else if (isLiteral())
+		} 
+		else if (isLiteral())
 		{
 			return("literal");
-		} else if (isSeparator())
+		} 
+		else if (isSeparator())
 		{
 			return("separator");
-		} else if (isOperator())
+		} 
+		else if (isOperator())
 		{
 			return("operator");
-		} else if (isComment())
+		} 
+		else if (isComment())
 		{
 			return("comment");
-		} else if (isWhiteSpace())
+		} 
+		else if (isWhiteSpace())
 		{
 			return("whitespace");
-		} else if (isError())
+		} 
+		else if (isError())
 		{
 			return("error");
-		} else
+		} 
+		else
 		{
 			return("unknown");
 		}

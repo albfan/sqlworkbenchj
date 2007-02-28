@@ -1121,12 +1121,7 @@ public class DbMetadata
 	}
 
 	/**
-	 * Returns the "active" schema. Currently this is only
-	 * implemented for Oracle where the "current" schema
-	 * is the user name.
-	 * Note that in Oracle this could be changed
-	 * using ALTER SESSION SET SCHEMA=...
-	 * This is not taken into account in this method
+	 * Returns the current schema. 
 	 */
 	public String getCurrentSchema()
 	{
@@ -1737,8 +1732,16 @@ public class DbMetadata
 
 	public int fixColumnType(int type)
 	{
-		if (!this.fixOracleDateBug) return type;
-		if (type == Types.DATE) return Types.TIMESTAMP;
+		if (this.fixOracleDateBug) 
+		{
+			if (type == Types.DATE) return Types.TIMESTAMP;
+		}
+		
+		// Oracle reports TIMESTAMP WITH TIMEZONE with the numeric 
+		// value -101 (which is not an official java.sql.Types value
+		// TIMESTAMP WITH LOCAL TIMEZONE is reported as -102
+		if (this.isOracle && (type == -101 || type == -102)) return Types.TIMESTAMP;
+		
 		return type;
 	}
 	

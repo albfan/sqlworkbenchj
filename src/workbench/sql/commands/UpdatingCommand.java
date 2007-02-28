@@ -11,23 +11,16 @@
  */
 package workbench.sql.commands;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import workbench.db.WbConnection;
-import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.LobFileStatement;
-import workbench.util.StringUtil;
 
 /**
  * @author  support@sql-workbench.net
@@ -103,14 +96,7 @@ public class UpdatingCommand extends SqlCommand
 		}
 		catch (Exception e)
 		{
-			result.clear();
-			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
-			if (reportFullStatementOnError)
-			{
-				result.addMessage(sql);
-			}
-			result.addMessage(ExceptionUtil.getAllExceptions(e));
-			result.setFailure();
+			addErrorInfo(result, sql, e);
 			LogMgr.logSqlError("UpdatingCommnad.execute()", sql, e);
 		}
 		finally

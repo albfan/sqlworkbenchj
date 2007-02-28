@@ -12,8 +12,6 @@
 package workbench.sql.commands;
 
 import java.sql.SQLException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
@@ -107,15 +105,6 @@ public class SetCommand extends SqlCommand
 					result.setWarning(true);
 					result.addMessage(warnings.toString());
 				}
-			}
-			String regex = "set\\s*(current|)\\s*schema";
-			Matcher m = Pattern.compile(regex,Pattern.CASE_INSENSITIVE).matcher(aSql);
-			// I'm not using the Lexer to test this, because Oracle's Syntax 
-			// includes an ALTER SESSION
-			if (m.find())
-			{
-				aConnection.schemaChanged(null, null);
-				result.addMessage(ResourceMgr.getString("MsgSchemaChanged"));
 			}
 		}
 		catch (Throwable e)
