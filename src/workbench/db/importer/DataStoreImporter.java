@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
 import workbench.gui.dialogs.dataimport.ImportOptions;
 import workbench.gui.dialogs.dataimport.TextImportOptions;
 import workbench.gui.dialogs.dataimport.XmlImportOptions;
@@ -146,7 +147,7 @@ public class DataStoreImporter
 	{
 	}
 	
-	public void setTargetTable(String tableName, ColumnIdentifier[] columns) 
+	public void setTargetTable(TableIdentifier table, ColumnIdentifier[] columns) 
 		throws SQLException
 	{
 		if (columns.length != this.target.getColumnCount())

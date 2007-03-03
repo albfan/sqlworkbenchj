@@ -83,4 +83,9 @@ public class WbTabbedPane
 		return new Insets(0,0,0,0);
 	}
 	
+	public void fireStateChanged()
+	{
+		super.fireStateChanged();
+	}
+	
 }

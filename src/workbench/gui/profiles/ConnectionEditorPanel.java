@@ -868,19 +868,20 @@ public class ConnectionEditorPanel
 
 		this.currentProfile = aProfile;
 		
-		this.initPropertyEditors();
-
-		String drvClass = aProfile.getDriverclass();
-		DbDriver drv = null;
-		if (drvClass != null)
-		{
-			String name = aProfile.getDriverName();
-			drv = ConnectionMgr.getInstance().findDriverByName(drvClass, name);
-		}
-
 		try
 		{
 			this.init = true;
+
+			this.initPropertyEditors();
+
+			String drvClass = aProfile.getDriverclass();
+			DbDriver drv = null;
+			if (drvClass != null)
+			{
+				String name = aProfile.getDriverName();
+				drv = ConnectionMgr.getInstance().findDriverByName(drvClass, name);
+			}
+
 			this.altDelimiter.setDelimiter(this.currentProfile.getAlternateDelimiter());
 			cbDrivers.setSelectedItem(drv);
 		}
@@ -901,8 +902,6 @@ public class ConnectionEditorPanel
 	 */
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		System.out.println("propertyChange: " + evt);
-		
 		if (!this.init)	
 		{
 			if (evt.getSource() == this.altDelimiter)
@@ -910,6 +909,9 @@ public class ConnectionEditorPanel
 				DelimiterDefinition del = altDelimiter.getDelimiter();
 				// As the alternateDelimiter is a not attached to the profile itself, 
 				// we have to propagate any updated delimiter object to the profile
+//				System.out.println("**** changed!");
+//				Exception e = new Exception();
+//				e.printStackTrace();
 				this.currentProfile.setAlternateDelimiter(altDelimiter.getDelimiter());
 			}
 			this.sourceModel.profileChanged(this.currentProfile);

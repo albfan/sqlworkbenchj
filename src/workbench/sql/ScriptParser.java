@@ -17,10 +17,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
+import workbench.util.StringUtil;
 
 
 /**
@@ -365,7 +365,8 @@ public class ScriptParser
 		if (this.commands == null) this.parseCommands();
 		if (index < 0 || index >= this.commands.size()) return null;
 		ScriptCommandDefinition c = this.commands.get(index);
-		return originalScript.substring(c.getStartPositionInScript(), c.getEndPositionInScript());
+		String s = originalScript.substring(c.getStartPositionInScript(), c.getEndPositionInScript());
+		return StringUtil.rtrim(s);
 	}
 
 	public int getSize() 

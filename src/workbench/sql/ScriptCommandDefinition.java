@@ -11,6 +11,8 @@
  */
 package workbench.sql;
 
+import workbench.util.StringUtil;
+
 /**
  * @author  support@sql-workbench.net
  */
@@ -28,7 +30,7 @@ public class ScriptCommandDefinition
 	
 	public ScriptCommandDefinition(String c, int start, int end, int index)
 	{
-		this.command = c;
+		this.command = StringUtil.rtrim(c);
 		this.startPosInScript = start;
 		this.endPosInScript = end;
 		this.indexInScript = index;

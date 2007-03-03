@@ -50,6 +50,7 @@ public class DelimiterDefinition
 	{
 		setDelimiter(delim);
 		this.singleLineDelimiter = single;
+		this.changed = false;
 	}
 
 	public boolean isEmpty()

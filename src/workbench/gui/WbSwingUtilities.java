@@ -336,7 +336,14 @@ public class WbSwingUtilities
 
 	public static int getYesNo(Component aCaller, String aMessage, String[] options)
 	{
+		return getYesNo(aCaller, aMessage, options, JOptionPane.PLAIN_MESSAGE);
+	}
+	
+	public static int getYesNo(Component aCaller, String aMessage, String[] options, int type)
+	{
 		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, null, options);
+		ignorePane.setMessageType(type);
+		ignorePane.setInitialSelectionValue(options[1]);
 		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
 		try
 		{
@@ -355,6 +362,7 @@ public class WbSwingUtilities
 		}
 	}
 
+	
 	public static boolean getOKCancel(String title, Component aCaller, Component message)
 	{
 		return getOKCancel(title, aCaller, message, null);
@@ -423,11 +431,24 @@ public class WbSwingUtilities
 		else return DO_ROLLBACK;
 	}
 
+//	public static boolean getContinueWarning(Component caller, String aTitle, String message)
+//	{
+//		Window parent = (Window)SwingUtilities.getWindowAncestor(caller);
+//
+//		JPanel p = new JPanel(new BorderLayout());
+//		JLabel label = new JLabel( UIManager.getIcon("OptionPane.warningIcon"));
+//		p.add(label, BorderLayout.WEST);
+//		p.add(new JLabel(message), BorderLayout.CENTER);
+//		
+//		boolean ok = ValidatingDialog.showConfirmDialog(parent, p, aTitle);
+//		return ok;
+//	}
+	
 	public static String getUserInput(Component caller, String aTitle, String initialValue)
 	{
 		return getUserInput(caller, aTitle, initialValue, false);
 	}
-	
+
 	public static String getUserInput(Component caller, String aTitle, String initialValue, boolean hideInput)
 	{
 		Window parent = (Window)SwingUtilities.getWindowAncestor(caller);
@@ -452,10 +473,10 @@ public class WbSwingUtilities
 				input.grabFocus();
 			}
 		});
-		//int choice = JOptionPane.showConfirmDialog(parent, input, aTitle, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
 		boolean ok = ValidatingDialog.showConfirmDialog(parent, input, aTitle);
 		if (!ok) return null;
-		//if (choice == JOptionPane.CANCEL_OPTION) return null;
+
 		String value = input.getText();
 		return value;
 	}

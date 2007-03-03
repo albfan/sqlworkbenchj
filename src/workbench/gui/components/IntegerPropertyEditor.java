@@ -73,9 +73,19 @@ public class IntegerPropertyEditor
 		this.source = aSource;
 		this.changed = false;
 		this.propName = aProperty;
-		String propertyName = Character.toUpperCase(aProperty.charAt(0)) + aProperty.substring(1);
 		
 		this.getDocument().removeDocumentListener(this);
+		
+		if (this.source == null)
+		{
+			this.setter = null;
+			this.getter = null;
+			this.setText("");
+			return;
+		}
+		
+		String propertyName = Character.toUpperCase(aProperty.charAt(0)) + aProperty.substring(1);
+		
 		if (initialText != null)
 		{
 			this.setText(initialText);

@@ -58,6 +58,9 @@ public class StringPropertyEditor
 		this.source = aSource;
 		this.changed = false;
 		this.propName = aProperty;
+		
+		this.getDocument().removeDocumentListener(this);
+		
 		if (aSource == null)
 		{
 			this.setText("");
@@ -68,7 +71,6 @@ public class StringPropertyEditor
 
 		String propertyName = Character.toUpperCase(aProperty.charAt(0)) + aProperty.substring(1);
 		
-		this.getDocument().removeDocumentListener(this);
 		if (initialText != null)
 		{
 			this.setText(initialText);

@@ -1749,6 +1749,7 @@ public class WbTable
 				PkMapping.getInstance().addMapping(table, cols);
 				FileDialogUtil.selectPkMapFileIfNecessary(parent);
 			}
+			
 			return true;
 		}
 		return false;
@@ -1827,11 +1828,20 @@ public class WbTable
 		if (ds == null) return false;
 
 		boolean hasPK = detectDefinedPkColumns();
-		if (hasPK) return true;
+		boolean pkColumnsComplete = ds.pkColumnsComplete();
+		
+		if (hasPK && pkColumnsComplete) return true;
 
 		if (promptWhenNeeded)
 		{
-			hasPK = this.selectKeyColumns();
+			if (hasPK && !pkColumnsComplete)
+			{
+				hasPK = WbSwingUtilities.getYesNo(this, "Not enough PK columns. Continue?");
+			}
+			else
+			{
+				hasPK = this.selectKeyColumns();
+			}
 		}
 		if (!hasPK)
 		{

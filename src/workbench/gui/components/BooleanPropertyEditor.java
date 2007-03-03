@@ -45,15 +45,16 @@ public class BooleanPropertyEditor
 		this.source = aSource;
 		this.changed = false;
 		this.propName = aProperty;
+		this.removeItemListener(this);
+		
 		if (aSource == null)
 		{
 			this.getter = null;
 			this.setter = null;
 			return;
 		}		
-		String propertyName = Character.toUpperCase(aProperty.charAt(0)) + aProperty.substring(1);
 		
-		this.removeItemListener(this);
+		String propertyName = Character.toUpperCase(aProperty.charAt(0)) + aProperty.substring(1);
 		
 		try
 		{
@@ -106,6 +107,7 @@ public class BooleanPropertyEditor
 	public void applyChanges()
 	{
 		if (!this.changed) return;
+		if (this.setter == null) return;
 		Object args[] = new Object[1];
 		args[0] = Boolean.valueOf(this.isSelected());
 		try

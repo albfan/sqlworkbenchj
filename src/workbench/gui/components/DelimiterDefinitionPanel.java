@@ -16,9 +16,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeListener;
-import java.util.List;
 import javax.swing.JPanel;
-import workbench.interfaces.SimplePropertyEditor;
 import workbench.resource.ResourceMgr;
 import workbench.sql.DelimiterDefinition;
 
@@ -35,6 +33,7 @@ public class DelimiterDefinitionPanel
   private BooleanPropertyEditor singleLineCheckBox;
 	public static final String PROP_DELIM = "delimiter";
 	public static final String PROP_SLD = "singleLine";
+	private boolean updating = false;
 	
 	public DelimiterDefinitionPanel()
 	{
@@ -45,23 +44,38 @@ public class DelimiterDefinitionPanel
 
 	public void setDelimiter(DelimiterDefinition delim)
 	{
-		if (delim != null)
+		try
 		{
-			this.delimiter = delim;
+			updating = true;
+			
+			delimitTextField.removePropertyChangeListener(PROP_DELIM, this);
+			singleLineCheckBox.removePropertyChangeListener(PROP_SLD, this);
+			
+			if (delim != null)
+			{
+				this.delimiter = delim;
+			}
+			else
+			{
+				this.delimiter = new DelimiterDefinition();
+			}
+
+			this.delimitTextField.setSourceObject(null, PROP_DELIM);
+			this.singleLineCheckBox.setSourceObject(null, PROP_SLD);
+
+			this.delimitTextField.setText(this.delimiter.getDelimiter());
+			this.singleLineCheckBox.setSelected(this.delimiter.isSingleLine());
+
+			this.delimitTextField.setSourceObject(delimiter, PROP_DELIM);
+			this.singleLineCheckBox.setSourceObject(delimiter, PROP_SLD);
 		}
-		else
+		finally
 		{
-			this.delimiter = new DelimiterDefinition();
+			updating = false;
 		}
 		
-		this.delimitTextField.setSourceObject(null, PROP_DELIM);
-		this.singleLineCheckBox.setSourceObject(null, PROP_SLD);
-		
-		this.delimitTextField.setText(this.delimiter.getDelimiter());
-		this.singleLineCheckBox.setSelected(this.delimiter.isSingleLine());
-		
-		this.delimitTextField.setSourceObject(delimiter, PROP_DELIM);
-		this.singleLineCheckBox.setSourceObject(delimiter, PROP_SLD);
+		delimitTextField.addPropertyChangeListener(PROP_DELIM, this);
+		singleLineCheckBox.addPropertyChangeListener(PROP_SLD, this);
 	}
 
 	public DelimiterDefinition getDelimiter()
@@ -85,8 +99,6 @@ public class DelimiterDefinitionPanel
 
     delimitTextField = new StringPropertyEditor();
     singleLineCheckBox = new BooleanPropertyEditor();
-		delimitTextField.addPropertyChangeListener(PROP_DELIM, this);
-		singleLineCheckBox.addPropertyChangeListener(PROP_SLD, this);
 		
     setLayout(new java.awt.GridBagLayout());
 
@@ -116,6 +128,7 @@ public class DelimiterDefinitionPanel
 
 	public void propertyChange(PropertyChangeEvent evt)
 	{
+		if (updating) return;
 		if (evt.getSource() == this.delimitTextField || evt.getSource() == this.singleLineCheckBox)
 		{
 			if (evt.getPropertyName().equals(PROP_DELIM) || evt.getPropertyName().equals(PROP_SLD))

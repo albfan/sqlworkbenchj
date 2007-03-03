@@ -14,7 +14,6 @@ package workbench.sql.formatter;
 import junit.framework.*;
 import workbench.TestUtil;
 import workbench.resource.Settings;
-import workbench.util.StringUtil;
 
 /**
  *

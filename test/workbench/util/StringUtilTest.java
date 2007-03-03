@@ -28,6 +28,27 @@ public class StringUtilTest
 		super(testName);
 	}
 
+	public void testRtrim()
+	{
+		String s = "bla";
+		assertEquals(s, StringUtil.rtrim(s));
+		
+		s = " \tbla";
+		assertEquals(s, StringUtil.rtrim(s));
+		
+		s = "bla \t\n";
+		assertEquals("bla", StringUtil.rtrim(s));
+		
+		s = "bla \t\nbla";
+		assertEquals(s, StringUtil.rtrim(s));
+		
+		s = " \n\r\t";
+		assertEquals("", StringUtil.rtrim(s));
+		
+		s = "";
+		assertEquals(s, StringUtil.rtrim(s));
+	}
+	
 	public void testEqualString()
 	{
 		String one = "bla";

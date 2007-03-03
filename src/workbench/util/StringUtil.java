@@ -112,6 +112,20 @@ public class StringUtil
 		}
 		return true;
 	}
+
+	public static String rtrim(String s)
+	{
+		if (s == null) return s;
+		int pos = s.length();
+		if (pos == 0) return s;
+		
+		while (pos > 0 && Character.isWhitespace(s.charAt(pos - 1)))
+		{
+			pos --;
+		}
+		
+		return s.substring(0, pos);
+	}
 	
 	public static void trimTrailingWhitespace(StringBuilder value)
 	{

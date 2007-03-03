@@ -57,6 +57,7 @@ import workbench.db.exporter.DataExporter;
 import workbench.db.importer.DataStoreImporter;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.AppendResultsAction;
+import workbench.gui.actions.CloseResultTabAction;
 import workbench.gui.actions.FilterDataAction;
 import workbench.gui.actions.FilterPickerAction;
 import workbench.gui.actions.ImportClipboardAction;
@@ -301,11 +302,9 @@ public class SqlPanel
 		this.resultTab.setDoubleBuffered(true);
 		this.resultTab.setFocusable(false);
 
-		this.resultTab.addChangeListener(this);
 		JScrollPane scroll = new WbScrollPane(log);
 		this.resultTab.addTab(ResourceMgr.getString("LblTabMessages"), scroll);
-
-		this.editor.addFilenameChangeListener(this);
+		
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
 		this.contentPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.contentPanel.setOneTouchExpandable(true);
@@ -329,6 +328,12 @@ public class SqlPanel
 
 		this.editor.addTextChangeListener(this);
 		this.rowMonitor = new GenericRowMonitor(this.statusBar);
+
+		// The listeners have to be added as late as possible to ensure
+		// that everything is created properly in case an event is fired
+		this.resultTab.addChangeListener(this);
+		this.editor.addFilenameChangeListener(this);
+		
 	}
 
 	public String getId()
@@ -400,6 +405,11 @@ public class SqlPanel
 		if (withSeperator) this.toolbar.add(new WbToolbarSeparator(), this.toolbar.getComponentCount() - 1);
 	}
 
+	public void addResultTabChangeListener(ChangeListener l)
+	{
+		this.resultTab.addChangeListener(l);
+	}
+	
 	public boolean readFile(String aFilename, String encoding)
 	{
 		if (aFilename == null) return false;
@@ -756,7 +766,10 @@ public class SqlPanel
 		this.actions.add(filterAction);
 		this.actions.add(selectionFilterAction);
 		this.actions.add(this.resetFilterAction );
-
+		CloseResultTabAction closeResult = new CloseResultTabAction(this);
+		closeResult.setCreateMenuSeparator(true);
+		this.actions.add(closeResult);
+		
 		this.printDataAction.setCreateMenuSeparator(true);
 		this.actions.add(this.printDataAction);
 		this.actions.add(this.printPreviewAction);
@@ -1969,14 +1982,54 @@ public class SqlPanel
 		}
 
 		int newIndex = this.resultTab.getSelectedIndex();
-		// If the log panel is selected, do nothing
-		if (newIndex == this.resultTab.getTabCount() - 1) return;
-		this.currentData = (DwPanel)this.resultTab.getSelectedComponent();
-		this.currentData.updateStatusBar();
-		this.currentData.addPropertyChangeListener("updateTable", this);
+		
+		if (newIndex == this.resultTab.getTabCount() - 1) 
+		{
+			this.currentData = null;
+		}
+		else
+		{
+			this.currentData = (DwPanel)this.resultTab.getSelectedComponent();
+			this.currentData.updateStatusBar();
+			this.currentData.addPropertyChangeListener("updateTable", this);
+		}
 		updateProxiedActions();
 		checkResultSetActions();
 
+	}
+	
+	public void closeCurrentResult()
+	{
+		int index = resultTab.getSelectedIndex();
+		if (index == resultTab.getTabCount() - 1) return;
+			
+		try
+		{
+			DwPanel panel = (DwPanel)resultTab.getComponentAt(index);
+			panel.removePropertyChangeListener(SqlPanel.this);
+			panel.clearContent();
+			resultTab.removeTabAt(index);
+			currentData = null;
+			// if the index stayed the same (e.g. because the first tab is still selected)
+			// no stateChange has been fired and we need to "fake" that because
+			// several actions need to be informed that a different ResultTab is 
+			// now active
+			if (index == resultTab.getSelectedIndex())
+			{
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						resultTab.fireStateChanged();
+					}
+				});
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("SqlPanel.closeCurrentResult()", "Error closing current result tab", e);
+		}
+		
 	}
 	private void clearResultTabs()
 	{
@@ -1992,7 +2045,7 @@ public class SqlPanel
 					panel.removePropertyChangeListener(SqlPanel.this);
 					panel.clearContent();
 				}
-				resultTab.remove(0);
+				resultTab.removeTabAt(0);
 			}
 			resultTab.setSelectedIndex(0);
 			currentData = null;

@@ -633,7 +633,7 @@ public class TextFileParser
 		ColumnIdentifier[] cols = this.getColumnsToImport();
 		try
 		{
-			this.receiver.setTargetTable(this.tableName, cols);
+			this.receiver.setTargetTable(getTargetTable(), cols);
 		}
 		catch (Exception e)
 		{
@@ -958,8 +958,27 @@ public class TextFileParser
 	private List<ColumnIdentifier> getColumnsFromTargetTable()
 		throws SQLException
 	{
-		TableIdentifier tbl = new TableIdentifier(this.targetSchema, this.tableName);
-		return this.connection.getMetadata().getTableColumns(tbl);
+		return this.connection.getMetadata().getTableColumns(getTargetTable());
+	}
+	
+	private TableIdentifier getTargetTable()
+	{
+		if (this.tableName == null) return null;
+		TableIdentifier targetTable = new TableIdentifier(this.tableName);
+		targetTable.setPreserveQuotes(true);
+		if (this.targetSchema != null)
+		{
+			targetTable.setSchema(this.targetSchema);
+		}
+		if (this.connection != null)
+		{
+			targetTable.adjustCase(this.connection);
+			if (targetTable.getSchema() == null)
+			{
+				targetTable.setSchema(this.connection.getCurrentSchema());
+			}
+		}		
+		return targetTable;
 	}
 	
 	/**
@@ -976,16 +995,7 @@ public class TextFileParser
 			ArrayList realCols = new ArrayList();
 			boolean partialImport = false;
 			DbMetadata meta = this.connection.getMetadata();
-			TableIdentifier targetTable = new TableIdentifier(this.tableName);
-			if (this.targetSchema != null)
-			{
-				targetTable.setSchema(this.targetSchema);
-			}
-			targetTable.adjustCase(this.connection);
-			if (targetTable.getSchema() == null)
-			{
-				targetTable.setSchema(meta.getCurrentSchema());
-			}
+			TableIdentifier targetTable = getTargetTable();
 			List tableCols = meta.getTableColumns(targetTable);
 			int numTableCols = tableCols.size();
 

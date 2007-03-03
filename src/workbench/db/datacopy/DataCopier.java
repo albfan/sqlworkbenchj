@@ -514,7 +514,7 @@ public class DataCopier
 		throws SQLException
 	{
 		if (this.targetColumnsForQuery == null) return;
-		this.importer.setTargetTable(this.targetTable.getTableExpression(), this.targetColumnsForQuery);
+		this.importer.setTargetTable(this.targetTable, this.targetColumnsForQuery);
 		initQuerySource(query);
 	}
 
@@ -567,7 +567,7 @@ public class DataCopier
 		
 		try
 		{
-			this.importer.setTargetTable(this.targetTable.getTableExpression(this.targetConnection), cols);
+			this.importer.setTargetTable(this.targetTable, cols);
 		}
 		catch (SQLException e)
 		{

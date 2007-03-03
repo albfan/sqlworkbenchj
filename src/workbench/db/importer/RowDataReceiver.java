@@ -12,8 +12,8 @@
 package workbench.db.importer;
 
 import java.sql.SQLException;
-
 import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
 
 /**
  *
@@ -24,7 +24,7 @@ public interface RowDataReceiver
 	void processRow(Object[] row) throws SQLException;
 	void setTableCount(int total);
 	void setCurrentTable(int current);
-	void setTargetTable(String tableName, ColumnIdentifier[] columns)	throws SQLException;
+	void setTargetTable(TableIdentifier table, ColumnIdentifier[] columns)	throws SQLException;
 	void importFinished();
 	void importCancelled();
 	void tableImportError();

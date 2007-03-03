@@ -11,6 +11,7 @@
  */
 package workbench.gui.sql;
 
+import java.awt.EventQueue;
 import javax.swing.JSplitPane;
 
 /**
@@ -24,7 +25,6 @@ public class SplitPaneExpander
 	private boolean lowerPartExpanded = false;
 	
 	
-	/** Creates a new instance of SplitPaneExpander */
 	public SplitPaneExpander(JSplitPane client)
 	{
 		this.contentPanel = client;
@@ -42,6 +42,7 @@ public class SplitPaneExpander
 			this.contentPanel.setDividerLocation(newLoc);
 		}
 		this.lastDivider = -1;
+		repaintClient();
 	}
 
 	public void toggleUpperComponentExpand()
@@ -61,6 +62,7 @@ public class SplitPaneExpander
 			upperPartExpanded = true;
 		}
 		this.lowerPartExpanded = false;
+		repaintClient();
 	}
 
 	public void toggleLowerComponentExpand()
@@ -80,6 +82,18 @@ public class SplitPaneExpander
 			this.lowerPartExpanded = true;
 		}
 		this.upperPartExpanded = false;
+		repaintClient();
 	}
 
+	private void repaintClient()
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				contentPanel.validate();
+				contentPanel.repaint();
+			}
+		});
+	}
 }

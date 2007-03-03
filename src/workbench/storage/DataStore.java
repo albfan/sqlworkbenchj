@@ -15,6 +15,7 @@ import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -82,6 +83,8 @@ public class DataStore
 
 	private boolean cancelRetrieve = false;
 	private boolean cancelUpdate = false;
+	
+	private List<ColumnIdentifier> missingPkcolumns;
 	
 	/**
 	 *	Create a DataStore which is not based on a result set
@@ -476,7 +479,17 @@ public class DataStore
 			setUpdateTable(tbl, aConn);
 		}
 	}
+	
+	public List<ColumnIdentifier> getMissingPkColumns()
+	{
+		return this.missingPkcolumns;
+	}
 
+	public boolean pkColumnsComplete()
+	{
+		return (this.missingPkcolumns == null || this.missingPkcolumns.size() == 0);
+	}
+	
 	public void setUpdateTable(TableIdentifier tbl)
 	{
 		setUpdateTable(tbl, this.originalConnection);
@@ -509,6 +522,7 @@ public class DataStore
 		
 		this.updateTable = null;
 		this.resultInfo.setUpdateTable(null);
+		this.missingPkcolumns = null;
 		
 		// check the columns which are in that table
 		// so that we can refuse any changes to columns
@@ -527,11 +541,14 @@ public class DataStore
 			synCheck.setSchema(meta.getSchemaToUse());
 			TableIdentifier toCheck = meta.resolveSynonym(synCheck);
 			List<ColumnIdentifier> columns = meta.getTableColumns(toCheck);
-			
 			int realColumns = 0;
+			int myPkColumns = 0;
+			int tablePkColumns = 0;
 			
 			if (columns != null)
 			{
+				this.missingPkcolumns = new ArrayList<ColumnIdentifier>(columns.size());
+				
 				for (ColumnIdentifier column : columns)
 				{
 					int index = this.findColumn(column.getColumnName());
@@ -542,13 +559,16 @@ public class DataStore
 						this.resultInfo.setIsNullable(index, column.isNullable());
 						realColumns++;
 					}
+					else if (column.isPkColumn())
+					{
+						this.missingPkcolumns.add(column);
+					}
 				}
 			}
 			if (realColumns == 0)
 			{
 				LogMgr.logWarning("DataStore.setUpdateTable()", "No columns from the table " + this.updateTable.getTableExpression() + " could be found in the current result set!");
 			}
-			
 			this.resultInfo.setUpdateTable(updateTable);
 		}
 		catch (Exception e)
@@ -1640,6 +1660,7 @@ public class DataStore
 	public void setPKColumns(ColumnIdentifier[] pkColumns)
 	{
 		this.resultInfo.setPKColumns(pkColumns);
+		this.missingPkcolumns = null;
 	}
 
 	public ResultInfo getResultInfo()

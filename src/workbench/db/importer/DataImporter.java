@@ -1042,7 +1042,7 @@ public class DataImporter
 	/**
 	 *	Callback function from the RowDataProducer
 	 */
-	public void setTargetTable(String tableName, ColumnIdentifier[] columns)
+	public void setTargetTable(TableIdentifier table, ColumnIdentifier[] columns)
 		throws SQLException
 	{
 		// be prepared to import more then one table...
@@ -1082,11 +1082,12 @@ public class DataImporter
 		
 		try
 		{
-			this.targetTable = new TableIdentifier(tableName);
-			if (this.targetSchema != null)
-			{
-				targetTable.setSchema(this.targetSchema);
-			}
+			this.targetTable = table.createCopy();
+//			this.targetTable.setPreserveQuotes(true);
+//			if (this.targetSchema != null)
+//			{
+//				targetTable.setSchema(this.targetSchema);
+//			}
 			this.targetColumns = columns;
 			this.colCount = this.targetColumns.length;
 
@@ -1153,13 +1154,13 @@ public class DataImporter
 			}
 			if (LogMgr.isInfoEnabled())
 			{
-				LogMgr.logInfo("DataImporter.setTargetTable()", "Starting import for table " + tableName);
+				LogMgr.logInfo("DataImporter.setTargetTable()", "Starting import for table " + this.targetTable.getTableExpression());
 			}
 		}
 		catch (RuntimeException th)
 		{
 			this.hasErrors = true;
-			LogMgr.logError("DataImporter.setTargetTable()", "Error when setting target table " + tableName, th);
+			LogMgr.logError("DataImporter.setTargetTable()", "Error when setting target table " + this.targetTable.getTableExpression(), th);
 			throw th;
 		}
 	}

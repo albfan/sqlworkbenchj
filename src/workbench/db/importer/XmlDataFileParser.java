@@ -796,15 +796,31 @@ public class XmlDataFileParser
 		this.realColIndex ++;
 	}
 
+	private TableIdentifier getTargetTable()
+	{
+		TableIdentifier tbl = null;
+		if (this.tableName == null)
+		{
+			tbl = new TableIdentifier(this.tableNameFromFile);
+		}
+		else
+		{
+			tbl = new TableIdentifier(this.tableName);
+		}
+		return tbl;
+	}
+	
 	private void sendTableDefinition()
 		throws SQLException
 	{
 		try
 		{
+			TableIdentifier tbl = getTargetTable();
+			
 			checkTargetColumns();
 			if (this.columnsToImport == null)
 			{
-				this.receiver.setTargetTable(this.tableName == null ? this.tableNameFromFile : this.tableName, this.columns);
+				this.receiver.setTargetTable(tbl, this.columns);
 			}
 			else
 			{
@@ -818,7 +834,7 @@ public class XmlDataFileParser
 						index ++;
 					}
 				}
-				this.receiver.setTargetTable(this.tableName == null ? this.tableNameFromFile : this.tableName, cols);
+				this.receiver.setTargetTable(tbl, cols);
 			}
 			this.currentRow = new Object[this.realColCount];
 		}

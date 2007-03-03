@@ -22,6 +22,8 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.CellEditor;
 import javax.swing.JOptionPane;
+import javax.swing.JOptionPane;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -40,6 +42,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
@@ -303,6 +306,15 @@ public class DwPanel
 				hasPk = getTable().selectKeyColumns();
 			}
 			if (!hasPk) return false;
+		}
+		
+		boolean pkComplete = this.getTable().getDataStore().pkColumnsComplete();
+		if (needPk && !pkComplete)
+		{
+			List<ColumnIdentifier> columns = this.getTable().getDataStore().getMissingPkColumns();
+			MissingPkDialog dialog = new MissingPkDialog(columns);
+			boolean ok = dialog.checkContinue(this);
+			if (!ok) return false;
 		}
 		
 		// check if we really want to save the currentData
@@ -578,6 +590,7 @@ public class DwPanel
 			if (this.dbConnection == null) return false;
 			if (this.sql == null) return false;
 			result = ds.checkUpdateTable(this.sql, this.dbConnection);
+			
 			if (!result)
 			{
 				TableIdentifier tbl = selectUpdateTable();

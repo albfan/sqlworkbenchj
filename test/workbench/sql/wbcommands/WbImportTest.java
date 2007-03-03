@@ -32,7 +32,6 @@ import workbench.db.WbConnection;
 import workbench.db.exporter.RowDataConverter;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.EncodingUtil;
-import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.ZipOutputFactory;
 

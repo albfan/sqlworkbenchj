@@ -484,14 +484,6 @@ public class IteratingScriptParser
 			}
 		}
 		
-		// always clean out trailing whitespace
-		char ch = this.script.charAt(endPos - 1);
-		while (startPos < endPos && (ch == '\n' || ch == '\r'))
-		{
-			endPos --;
-			if (startPos < endPos) ch = this.script.charAt(endPos - 1);
-		}
-		
 		if (startPos >= endPos) return null;
 		if (storeSqlInCommands)
 		{

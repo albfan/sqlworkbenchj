@@ -38,15 +38,15 @@ public class ScriptParserTest extends TestCase
 	{
 		try
 		{
-			// Check if a cursorposition at the far end of the statement is detected propery
-			String sql = "select msg.rn_business_msg_id, msg.direction, msg.error_msg, msg.message, msg.status\nfrom rn_business_msg msg, pip3a1 pip\nwhere msg.rn_business_msg_id = pip.rn_quote_request_ack_id\n;\n\nselect * \nfrom rn_business_msg\nwhere \n;";	
+			// Check if a cursorposition at the far end of the statement is detected properly
+			String sql = "select 42 from dual;\n\nselect * \nfrom table\n;";	
 			ScriptParser p = new ScriptParser();
 			p.allowEmptyLineAsSeparator(false);
 			p.setScript(sql);
-			int index = p.getCommandIndexAtCursorPos(221);
-			assertEquals(1, index);
+			int pos = sql.lastIndexOf(";");
+			int index = p.getCommandIndexAtCursorPos(pos);
 			assertEquals(2, p.getSize());
-			
+			assertEquals(1, index);
 		}
 		catch (Exception e)
 		{

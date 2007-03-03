@@ -51,6 +51,12 @@ public class TableIdentifierTest
 		tbl = new TableIdentifier(sql);
 		tbl.setPreserveQuotes(true);
 		assertEquals("\"Some.Table\"", tbl.getTableName());
+		
+		sql = "\"123\".mytable";
+		tbl = new TableIdentifier(sql);
+		tbl.setPreserveQuotes(true);
+		System.out.println("table=" + tbl.getTableExpression());
+		
 	}
 	
 	public void testCopy()
