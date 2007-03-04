@@ -172,8 +172,7 @@ public class SqlRowDataConverter
 		if (this.sqlTypeToUse == SQL_DELETE_INSERT)
 		{
 			dml = this.factory.createDeleteStatement(row, true);
-			result.append(dml.getExecutableStatement(this.literalFormatter));
-			result.append(';');
+			result.append(dml.getExecutableStatement(this.literalFormatter, true));
 			result.append(lineTerminator);
 		}
 		if (this.sqlTypeToUse == SQL_DELETE_INSERT || this.sqlType == SQL_INSERT)
@@ -192,9 +191,8 @@ public class SqlRowDataConverter
 		this.currentRow = rowIndex;
 		this.currentRowData = row;
 		
-		result.append(dml.getExecutableStatement(this.literalFormatter));
+		result.append(dml.getExecutableStatement(this.literalFormatter, true));
 		
-		result.append(';');
 		if (doFormatting)
 			result.append(doubleLineTerminator);
 		else

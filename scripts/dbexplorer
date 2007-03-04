@@ -1,0 +1,3 @@
+#!/bin/sh 
+# Start the SQL Workbench/J Database Explorer directly
+java -Xms24m -jar Workbench.jar -dbexplorer $@

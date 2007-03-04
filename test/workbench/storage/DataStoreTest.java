@@ -21,6 +21,7 @@ import junit.framework.*;
 import java.sql.Types;
 import java.util.List;
 import workbench.TestUtil;
+import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -74,6 +75,38 @@ public class DataStoreTest
 		con.commit();
 		return wb;
 	}
+
+	public void testMissingPkColumns()
+	{
+		try
+		{
+			util.emptyBaseDirectory();
+			WbConnection con = util.getConnection("pkTestDb");
+			Statement stmt = con.createStatement();
+			stmt.executeUpdate("CREATE TABLE junit_test (id1 integer, id2 integer, id3 integer, some_data varchar(100), primary key (id1, id2, id3))");
+			stmt.executeUpdate("insert into junit_test (id1,id2,id3, some_data) values (1,2,3,'bla')");
+
+			String sql = "select id1, id2, some_data from JUnit_Test";
+			
+			ResultSet rs = stmt.executeQuery(sql);
+			DataStore ds = new DataStore(rs, con);
+			rs.close();
+			stmt.close();
+			ds.setGeneratingSql(sql);
+			ds.checkUpdateTable(con);
+			assertEquals("Missing PK columns not detected", false, ds.pkColumnsComplete());
+			List<ColumnIdentifier> cols = ds.getMissingPkColumns();
+			assertEquals("Not all missing columns detected", 1, cols.size());
+			String col1 = cols.get(0).getColumnName();
+			assertEquals("Wrong column detected", true, col1.equals("ID3"));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	
 	public void testQuotedKeyColumns()
 	{
@@ -96,6 +129,7 @@ public class DataStoreTest
 			ResultInfo newInfo = ds.getResultInfo();
 			assertEquals(newInfo.getColumnCount(), 4);
 			assertEquals(newInfo.isPkColumn(0), true);
+			assertEquals(ds.pkColumnsComplete(), true);
 		}
 		catch (Exception e)
 		{
@@ -133,6 +167,8 @@ public class DataStoreTest
 			
 			ds.checkUpdateTable(con);
 			
+			assertEquals("Not all PK columns detected", ds.pkColumnsComplete(), true);
+			
 			// Set to case preserving
 			Settings.getInstance().setGeneratedSqlTableCase("original");
 			List<DmlStatement> l = ds.getUpdateStatements(con);
@@ -140,7 +176,7 @@ public class DataStoreTest
 			
 			DmlStatement dml = (DmlStatement)l.get(0);
 			SqlLiteralFormatter f = new SqlLiteralFormatter(con);
-			String insert = dml.getExecutableStatement(f);
+			String insert = dml.getExecutableStatement(f, false);
 			String verb = SqlUtil.getSqlVerb(insert);
 			assertEquals("Wrong statement generated", "INSERT", verb.toUpperCase());
 			String table = SqlUtil.getInsertTable(insert);
@@ -152,7 +188,7 @@ public class DataStoreTest
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
 			dml = (DmlStatement)l.get(0);
-			insert = dml.getExecutableStatement(f);
+			insert = dml.getExecutableStatement(f, false);
 			table = SqlUtil.getInsertTable(insert);
 			assertEquals("JUNIT_TEST", table);
 
@@ -162,7 +198,7 @@ public class DataStoreTest
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
 			dml = (DmlStatement)l.get(0);
-			insert = dml.getExecutableStatement(f);
+			insert = dml.getExecutableStatement(f, false);
 			table = SqlUtil.getInsertTable(insert);
 			assertEquals("junit_test", table);
 			
@@ -175,7 +211,7 @@ public class DataStoreTest
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
 			dml = (DmlStatement)l.get(0);
-			String update = dml.getExecutableStatement(f);
+			String update = dml.getExecutableStatement(f, false);
 			verb = SqlUtil.getSqlVerb(update);
 			table = SqlUtil.getUpdateTable(update);
 			assertEquals("UPDATE", verb);
@@ -187,7 +223,7 @@ public class DataStoreTest
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
 			dml = (DmlStatement)l.get(0);
-			update = dml.getExecutableStatement(f);
+			update = dml.getExecutableStatement(f, false);
 			table = SqlUtil.getUpdateTable(update);
 			assertEquals("junit_test", table);
 
@@ -197,7 +233,7 @@ public class DataStoreTest
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
 			dml = (DmlStatement)l.get(0);
-			update = dml.getExecutableStatement(f);
+			update = dml.getExecutableStatement(f, false);
 			table = SqlUtil.getUpdateTable(update);
 			assertEquals("JUnit_Test", table);
 			
@@ -228,6 +264,7 @@ public class DataStoreTest
 			assertEquals("Non-existing primary key found", false, ds.hasPkColumns());
 			ds.checkUpdateTable();
 			assertEquals("Primary key not found", true, ds.hasPkColumns());
+			assertEquals("Not all PK columns detected", ds.pkColumnsComplete(), true);
 			
 			stmt.executeUpdate("DROP TABLE junit_test");
 			stmt.executeUpdate("CREATE TABLE junit_test (key integer, firstname varchar(100), lastname varchar(100))");

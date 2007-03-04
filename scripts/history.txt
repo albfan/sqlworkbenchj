@@ -1,5 +1,13 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  (93.5) If a result set does not include all pk columns from the update 
+      table, a warning is show when trying to save changes for the result.
+Enh:  (93.5) Individual result tabs (when using "Append new results") can 
+      now be closed (Data- > Close result)
+Enh:  (93.5) The tooltip for the connection info now displays the driver
+      version as well.
+Enh:  (93.4) Data can now be changed in the result set by using 
+      search & replace (Data -> Replace In Data)
 Enh:  (93.3) The DbExplorer now displays the source for the underlying 
       table as well, when displaying the source for a synonym
 Enh:  (93.3) WbExport now can optionally create ANSI or JDBC style date
@@ -16,6 +24,27 @@ Enh:  (93.1) A new command to prompt for a confirmation has been added.
       the current execution or continue. This will only be evaluated 
       in GUI mode (e.g. to prevent the accidental execution of "dangerous"
       scripts)
+Fix:  (93.5) Quoting only the schema name for WbImport did not work (e.g.
+      -table='"123".table'
+Fix:  (93.5) If the semicolon for the last statement in the editor was
+      placed on a single line, and the cursor was located left of the 
+      semicolon in the same line, Ctrl-Enter would not work.
+Fix:  (93.5) For Oracle, columns with 'TIMESTAMP WITH [LOCAL] TIMEZONE' 
+      data type are not retrieved using getTimestamp() instead of getObject()
+      to be able to properly display the data for those columns. 
+Fix:  (93.5) To be able to use columns with the data type 
+      TIMESTAMP WITH LOCAL TIMEZONE, the current timezone needs to be set
+      for the session. The ALTER SESSION SET TIME_ZONE is now captured 
+      and translated into the approriate Java call on the Oracle driver as 
+      described in 
+      http://download-uk.oracle.com/docs/cd/B19306_01/java.102/b14355/oraint.htm#sthref175
+Fix:  (93.4) Quoted table names could not be passed to the WbImport command
+      (e.g. -table='"MYTABLE"') which is necessary for case-sensitive servers
+Fix:  (93.4) Warnings that are reported by the JDBC driver after switching
+      the current database are now ignored and do not set the "warning"
+      state for the executed command.
+Fix:  (93.4) When running a script in batch mode that ended with a comment
+      the process was terminated with an error status.
 Fix:  (93.3) WbImport did not always close the input files correctly.
 Fix:  (93.3) When exporting data to SQL scripts, timestamp columns were
       not formatted correctly

@@ -1,0 +1,3 @@
+#!/bin/sh 
+# Start SQL Workbench/J
+java -Xms24m -jar Workbench.jar $@

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="bundle" name="WorkbenchMac">
+	<taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../etc/jarbundler/jarbundler-1.9.jar"/>
+
+	<property name="bundledir" value="../dist/mac"/>
+	<delete dir="${bundledir}" failonerror="false"/>
+	<mkdir dir="${bundledir}"/>
+
+	<target name="bundle">
+		<jarbundler dir="${bundledir}"
+							name="SQLWorkbenchJ"
+							mainclass="workbench.WbStarter" 
+							jar="../dist/Workbench.jar" 
+							jvmversion="1.4+"
+							version="90"
+							shortname="SQL Workbench"
+							infostring="SQL Workbench/J"
+							signature="sqwb"
+							icon="Workbench.icns"
+							vmoptions="-Xmx256m -Dcom.apple.mrj.application.growbox.intrudes=false"
+							stubfile="../etc/jarbundler/JavaApplicationStub">
+							
+				<javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
+		</jarbundler>
+	</target>
+	
+</project>

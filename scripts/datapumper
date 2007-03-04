@@ -1,0 +1,3 @@
+#!/bin/sh 
+# Start the SQL Workbench/J DataPumper directly
+java -Xms24m -jar Workbench.jar -datapumper $@

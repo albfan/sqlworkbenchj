@@ -140,7 +140,7 @@ public class SearchCriteriaPanel
 	public boolean showFindDialog(Component caller, String title)
 	{
 		Window w = WbSwingUtilities.getWindowAncestor(caller);
-		boolean result = ValidatingDialog.showConfirmDialog(w, this, title, caller);
+		boolean result = ValidatingDialog.showConfirmDialog(w, this, title, caller, 0);
 		
 		Settings.getInstance().setProperty(caseProperty, this.getIgnoreCase());
 		Settings.getInstance().setProperty(criteriaProperty, this.getCriteria());

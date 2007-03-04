@@ -114,14 +114,15 @@ COMMIT;</programlisting>
 				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Append new results</guimenuitem></menuchoice>.
 				Every result that is retrieved while this option is turned on, will be added to the 
 				set of result tabs, until you de-select this option. This can also be 
-				toggled using the button on the toolbar.
-			</para>
+				toggled using the button on the toolbar. Additional result tabs can be closed using
+				<menuchoice><guimenu>Data</guimenu><guimenuitem>Close result</guimenuitem></menuchoice>
+			</para>				
 			
 			<para>
 				You can also run stored procedures that return result sets. These result will be 
 				displayed in the same way. For DBMS's that support mulitple result sets from 
-				a single stored procedure (e.g. Microsoft SQL Server), on result tab will 
-				be displayed for each result returned. 
+				a single stored procedure (e.g. Microsoft SQL Server), one tab will be displayed 
+				for each result returned. 
 			</para>
 			
 			<note>
@@ -906,7 +907,10 @@ WHERE base_id = 1;</programlisting>
 			To navigate from the child data to the "parent" data, use
 			<guimenu>Referenced rows</guimenu>
 		</para>
-		
+		<para>
+			The additional result tabs can be closed using
+			<menuchoice><guimenu>Data</guimenu><guimenuitem>Close result</guimenuitem></menuchoice>
+		</para>
 	</section>
 	
 	<section id="using-copy-clipboard">

@@ -169,7 +169,7 @@ public class DmlStatement
 	 *	as literals. No placeholders are used.
 	 *	This statement is executed after setUsePreparedStatement(false) is called
 	 */
-	public String getExecutableStatement(SqlLiteralFormatter literalFormatter)
+	public String getExecutableStatement(SqlLiteralFormatter literalFormatter, boolean withSemicolon)
 	{
 		if (this.values.size() > 0)
 		{
@@ -197,11 +197,12 @@ public class DmlStatement
 					result.append(c);
 				}
 			}
+			if (withSemicolon) result.append(';');
 			return result.toString();
 		}
 		else
 		{
-			return this.sql;
+			return (withSemicolon ? this.sql + ";" : this.sql);
 		}
 	}
 

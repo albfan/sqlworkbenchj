@@ -341,9 +341,8 @@ public class WbSwingUtilities
 	
 	public static int getYesNo(Component aCaller, String aMessage, String[] options, int type)
 	{
-		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, null, options);
+		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, null, options, options[1]);
 		ignorePane.setMessageType(type);
-		ignorePane.setInitialSelectionValue(options[1]);
 		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
 		try
 		{

@@ -172,11 +172,14 @@
 	<section id="launcher-using">
 		<title>Using the Windows launcher</title>
 
-		<para>On the Windows&reg; platform the supplied JWorkbench.exe can be used to
-		start the program when using a Sun JDK. The native launcher searches for an installed
-		JDK (querying the registry) and then starts the &wb-productname;. The file
-		workbench.jar has to be located in the same directory as the
-		JWorkbench.exe, otherwise it doesn&#39;t work.</para>
+		<para>
+			On the Windows&reg; platform the supplied JWorkbench.exe can be used to
+			start the program when using a Sun JDK. The native launcher searches for an installed
+			JDK (querying the registry) and then starts the &wb-productname;. The file
+			workbench.jar has to be located in the same directory as the
+			JWorkbench.exe, otherwise it doesn&#39;t work.
+		</para>
+
 		<note>
 			The launcher only works with JDK&apos;s from Sun, as it directly calls the
 			JDK dll&apos;s to start the virtual machine. If you are using a different JDK,
@@ -184,9 +187,11 @@
 			directory layout and filenames as the Sun JDK).
 		</note>
 
-		<para>By default the launcher increases the maximum JVM heap size to 128
-		MB (the default for JDK 1.4 is 96MB). If you need more heap memory, you
-		need to pass the appropriate JVM parameter to the launcher</para>
+		<para>
+			By default the launcher increases the maximum JVM heap size to 128
+			MB (the default for JDK 1.4 is 96MB). If you need more heap memory, you
+			need to pass the appropriate JVM parameter to the launcher.
+		</para>
 
 		<section id="launcher-jdk-search">
 			<title>How the Windows launcher searches for a Sun JDK</title>
@@ -324,6 +329,20 @@
 
 			<programlisting>java -Dsun.java2d.noddraw=true -jar Workbench.jar -configdir=c:\MyConf</programlisting>
 		</section>
+
+		<section id="launcher-vista">
+			<title>Windows Vista</title>
+			<para>
+				With Windows Vista, Microsoft changed the way needed DLLs are searched when an executable
+				is loaded. This affects the &wb-productname; launcher as described in 
+				<ulink url="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_CRT_C_Run.2d.Time_Libraries.asp">Microsoft C runtime distribution model</ulink>
+				If you want to run &wb-productname; under Windows Vista, please copy the file <literal>msvcr71.dll</literal>
+				into the directory where <literal>JWorkbench.exe</literal> is located. This file can be found
+				under <literal>%SystemRoot%\System32\msvcr71.dll</literal> (usually this is 
+				<literal>c:\Windows\System32\msvcr71.dll</literal>)
+			</para>
+		</section>
+
 	</section>
 
 	<section id="commandline" xreflabel="command line parameters">

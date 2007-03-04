@@ -1241,7 +1241,7 @@ public class DataStore
 		{
 			this.updateHadErrors = true;
 			
-			String sql = dml.getExecutableStatement(createLiteralFormatter());
+			String sql = dml.getExecutableStatement(createLiteralFormatter(), false);
 			if (this.ignoreAllUpdateErrors)
 			{
 				LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + sql + " for row = " + row + ", error: " + e.getMessage(), null);

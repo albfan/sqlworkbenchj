@@ -1,0 +1,26 @@
+Features
+--------
+- Check number of PK columns available vs. PK columns in update table
+- "Idle" statement um Verbindung offen zu halten
+- Re-retrieve selected rows
+- Checkbox dropdown für die Objekttypen im DbExplorer
+- Show table data aus "Search table data" heraus
+- WbImport: Datei mit fehlerhaften Datensätzen falls continueOnError=true 
+- Search in view & procedure source
+- specify extension for blob files for WbExport
+- BLOB als Text durchsuchen in "Search table data"
+- Allow full script in DataPumper as SQL Query source 
+  (pre-copy and post-copy scripts)
+- Workspace "Explorer"
+- Macro Toolbar Dropdown
+- Option dialog to include number of macros in menu
+- Option panel to modify DB specific stuff (ddlneedscommit etc)
+- Result set info display
+- Close button for tabs
+- Shortcuts für Macros
+- Export for OpenOffice Calc
+
+
+JUnit
+-----
+- WbSchemaReport

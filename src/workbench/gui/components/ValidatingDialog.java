@@ -77,6 +77,19 @@ public class ValidatingDialog
 		init(owner, editor, options, addCancelButton);
 	}
 	
+	public void setDefaultButton(int index)
+	{
+		JRootPane root = this.getRootPane();
+		if (index >= optionButtons.length && cancelButton != null)  
+		{
+			root.setDefaultButton(cancelButton);
+		}
+		else
+		{
+			root.setDefaultButton(optionButtons[index]);		
+		}
+	}
+	
 	private void init(Window owner, JComponent editor, String[] options, boolean addCancelButton)
 	{
 		if (editor instanceof ValidatingComponent)
@@ -146,10 +159,15 @@ public class ValidatingDialog
 	
 	public static boolean showConfirmDialog(Window parent, JComponent editor, String title)
 	{
-		return showConfirmDialog(parent, editor, title, null);
+		return showConfirmDialog(parent, editor, title, null, 0);
 	}
 	
-	public static boolean showConfirmDialog(Window parent, JComponent editor, String title, Component reference)
+	public static boolean showConfirmDialog(Window parent, JComponent editor, String title, int defaultButton)
+	{
+		return showConfirmDialog(parent, editor, title, null, defaultButton);
+	}
+	
+	public static boolean showConfirmDialog(Window parent, JComponent editor, String title, Component reference, int defaultButton)
 	{
 		ValidatingDialog dialog = null;
 		if (parent == null)
@@ -174,6 +192,7 @@ public class ValidatingDialog
 			WbSwingUtilities.center(dialog, parent);
 		}
 		
+		dialog.setDefaultButton(defaultButton);
 		dialog.setVisible(true);
 		return !dialog.isCancelled();
 	}

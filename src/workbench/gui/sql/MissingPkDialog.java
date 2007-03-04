@@ -14,10 +14,11 @@ package workbench.gui.sql;
 import java.awt.Component;
 import java.awt.Window;
 import java.util.List;
-import javax.swing.JOptionPane;
+import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import workbench.db.ColumnIdentifier;
-import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.ValidatingDialog;
+import workbench.gui.components.ValidatingDialog;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -52,13 +53,8 @@ public class MissingPkDialog
 		msg.append(ResourceMgr.getString("TxtMissingPk3"));
 		msg.append("</b></center><br><br></html>");
 
-		String[] options = new String[] {
-			ResourceMgr.getString("ButtonLabelCont"),
-			ResourceMgr.getString("ButtonLabelCancel")
-		};
-
 		Window parent = SwingUtilities.getWindowAncestor(caller);
-		boolean ok = (0 == WbSwingUtilities.getYesNo(parent, msg.toString(), options, JOptionPane.WARNING_MESSAGE));
+		boolean ok = ValidatingDialog.showConfirmDialog(parent, new JLabel(msg.toString()), ResourceMgr.getString("TxtMissingPkTitle"), 1);
 		return ok;
 		
 	}

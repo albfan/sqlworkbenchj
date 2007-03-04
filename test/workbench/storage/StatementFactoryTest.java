@@ -71,7 +71,7 @@ public class StatementFactoryTest extends TestCase
 			assertEquals(true, sql.startsWith("UPDATE"));
 			
 			SqlLiteralFormatter formatter = new SqlLiteralFormatter();
-			sql = stmt.getExecutableStatement(formatter);
+			sql = stmt.getExecutableStatement(formatter, false);
 			assertEquals(true, sql.indexOf("key = 42") > -1);
 			assertEquals(true, sql.indexOf("section = 'start'") > -1);
 		}
@@ -105,7 +105,7 @@ public class StatementFactoryTest extends TestCase
 			assertEquals("Not an INSERT statement", true, sql.startsWith("INSERT"));
 			
 			SqlLiteralFormatter formatter = new SqlLiteralFormatter();
-			sql = stmt.getExecutableStatement(formatter);
+			sql = stmt.getExecutableStatement(formatter, false);
 			assertEquals("Wrong values inserted", true, sql.indexOf("VALUES (42, 'Zaphod', 'Beeblebrox')") > -1);
 		}
 		catch (Exception e)
@@ -140,12 +140,12 @@ public class StatementFactoryTest extends TestCase
 			assertEquals("Not an INSERT statement", true, sql.startsWith("INSERT"));
 			
 			SqlLiteralFormatter formatter = new SqlLiteralFormatter();
-			sql = stmt.getExecutableStatement(formatter);
+			sql = stmt.getExecutableStatement(formatter, false);
 			assertEquals("Wrong values inserted", true, sql.indexOf("VALUES ('Zaphod', 'Beeblebrox')") > -1);
 			
 			Settings.getInstance().setFormatInsertIgnoreIdentity(false);
 			stmt = factory.createInsertStatement(data, false, "\n");
-			sql = stmt.getExecutableStatement(formatter);
+			sql = stmt.getExecutableStatement(formatter, false);
 			assertEquals("Wrong values inserted", true, sql.indexOf("VALUES (42, 'Zaphod', 'Beeblebrox')") > -1);
 		}
 		catch (Exception e)
@@ -181,7 +181,7 @@ public class StatementFactoryTest extends TestCase
 			assertEquals("Not a delete statement", true, sql.startsWith("DELETE"));
 			
 			SqlLiteralFormatter formatter = new SqlLiteralFormatter();
-			sql = stmt.getExecutableStatement(formatter);
+			sql = stmt.getExecutableStatement(formatter, false);
 			assertEquals("Wrong WHERE clause created", true, sql.indexOf("key = 42") > -1);
 			assertEquals("Wrong WHERE clause created", true, sql.indexOf("value = 'otherkey'") > -1);
 		}

@@ -13,7 +13,6 @@ package workbench.gui.sql;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Window;
 import java.sql.ResultSet;
@@ -25,7 +24,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JOptionPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
@@ -49,7 +47,6 @@ import workbench.gui.MainWindow;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.WbTextCellEditor;
 import workbench.gui.sql.ReferenceTableNavigator;
-import workbench.storage.SqlLiteralFormatter;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyRowAction;
@@ -73,7 +70,6 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
-import workbench.storage.DmlStatement;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -182,7 +178,6 @@ public class DwPanel
 	{
 		if (checkUpdateTable())
 		{	
-			//dataTable.detectDefinedPkColumns();
 			dataTable.selectKeyColumns();
 		}
 	}
@@ -199,14 +194,7 @@ public class DwPanel
 	
 	public void disconnect()
 	{
-		try
-		{
-			this.setConnection(null);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		this.setConnection(null);
 	}
 	
 	public void setCursor(Cursor newCursor)
@@ -237,7 +225,6 @@ public class DwPanel
 	 *	Defines the connection for this DwPanel.
 	 */
 	public void setConnection(WbConnection aConn)
-		throws SQLException
 	{
 		this.clearContent();
 		this.sql = null;
@@ -297,7 +284,10 @@ public class DwPanel
 	boolean prepareDatabaseUpdate()
 	{
 		if (this.dbConnection == null) return false;
-		boolean needPk = this.dataTable.getDataStore().needPkForUpdate();
+		DataStore ds = this.dataTable.getDataStore();
+		if (ds == null) return false;
+		
+		boolean needPk = ds.needPkForUpdate();
 		if (needPk)
 		{
 			boolean hasPk = dataTable.detectDefinedPkColumns();
@@ -308,10 +298,10 @@ public class DwPanel
 			if (!hasPk) return false;
 		}
 		
-		boolean pkComplete = this.getTable().getDataStore().pkColumnsComplete();
+		boolean pkComplete = ds.pkColumnsComplete();
 		if (needPk && !pkComplete)
 		{
-			List<ColumnIdentifier> columns = this.getTable().getDataStore().getMissingPkColumns();
+			List<ColumnIdentifier> columns = ds.getMissingPkColumns();
 			MissingPkDialog dialog = new MissingPkDialog(columns);
 			boolean ok = dialog.checkContinue(this);
 			if (!ok) return false;
@@ -369,70 +359,10 @@ public class DwPanel
 		
 		this.dataTable.stopEditing();
 		DataStore ds = this.dataTable.getDataStore();
+		DwUpdatePreview preview = new DwUpdatePreview();
 		
-		boolean doSave = true;
+		boolean doSave = preview.confirmUpdate(this, ds, dbConnection);
 		
-		Window win = SwingUtilities.getWindowAncestor(this);
-		try
-		{
-			List<DmlStatement> stmts = ds.getUpdateStatements(aConnection);
-			if (stmts.isEmpty()) return true;
-			
-			Dimension max = new Dimension(800,600);
-			Dimension pref = new Dimension(400, 300);
-			final EditorPanel preview = EditorPanel.createSqlEditor();
-			preview.setEditable(false);
-			preview.showFindOnPopupMenu();
-			preview.setBorder(WbSwingUtilities.EMPTY_BORDER);
-			preview.setPreferredSize(pref);
-			preview.setMaximumSize(max);
-			JScrollPane scroll = new JScrollPane(preview);
-			scroll.setMaximumSize(max);
-			final StringBuilder text = new StringBuilder(stmts.size() * 150);
-			SqlLiteralFormatter f = new SqlLiteralFormatter(aConnection);
-
-			for (DmlStatement dml : stmts)
-			{
-				text.append(dml.getExecutableStatement(f));
-				text.append(";\n");
-			}
-			
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				public void run()
-				{
-					preview.setText(text.toString());
-					preview.setCaretPosition(0);
-					preview.repaint();
-				}
-			});
-			
-			WbSwingUtilities.showDefaultCursor(this);
-			Runnable painter = new Runnable()
-			{
-				public void run()
-				{
-					preview.repaint();
-				}
-			};
-			doSave = WbSwingUtilities.getOKCancel(ResourceMgr.getString("MsgConfirmUpdates"), win, scroll, painter);
-		}
-		catch (SQLException e)
-		{
-			this.lastMessage = ExceptionUtil.getDisplay(e);
-			int choice = JOptionPane.showConfirmDialog(win, this.lastMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION);
-			if (choice == JOptionPane.NO_OPTION) doSave = false;
-		}
-		catch (OutOfMemoryError mem)
-		{
-			String msg = ResourceMgr.getString("MsgOutOfMemorySQLPreview");
-			int choice = JOptionPane.showConfirmDialog(win, msg, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION);
-			if (choice == JOptionPane.NO_OPTION) doSave = false;
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logError("DwPanel.shouldSaveChanges()", "Error when previewing SQL", th);
-		}
 		return doSave;
 	}
 	
@@ -889,16 +819,6 @@ public class DwPanel
 		{
 			this.stmtRunner.cancel();
 		}
-	}
-	
-	/**
-	 *	Replaces the current values in the underlying DataStore of the 
-	 *  the values initially retrieved from the database.
-	 *	@see workbench.storage.DataStore#restoreOriginalValues()
-	 */
-	public void restoreOriginalValues()
-	{
-		dataTable.restoreOriginalValues();
 	}
 	
 	public String getLastMessage()
