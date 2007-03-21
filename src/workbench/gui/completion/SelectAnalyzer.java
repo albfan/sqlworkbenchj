@@ -89,6 +89,7 @@ public class SelectAnalyzer
 			   (wherePos > -1 && cursorPos > fromPos && cursorPos <= wherePos));
 		
 		if (inTableList && afterGroup) inTableList = false;
+		if (inTableList && orderPos > -1 && cursorPos > orderPos) inTableList = false;
 		
 		int joinState = inJoinONPart();
 			

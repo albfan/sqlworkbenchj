@@ -89,9 +89,6 @@ public class RowData
 				// when using getObject() on a TIMESTAMP column
 				// I simply assume that this is working properly
 				// for other JDBC drivers as well.
-				// On the other hand we may not use getDate()
-				// for Oracle DATE columns as this will remove
-				// the time part of the column
 				if (type == java.sql.Types.TIMESTAMP)
 				{
 					value = rs.getTimestamp(i+1);

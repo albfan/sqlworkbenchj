@@ -94,15 +94,16 @@ public class TableReplacer
 			}
 		}
 		
-		highlightRow(pos);
+		highlightPosition(pos);
 		
 		return pos.getRow();
 	}
 	
-	protected void highlightRow(final Position pos)
+	protected void highlightPosition(final Position pos)
 	{
 		final int row = pos.getRow();
-		final int col = pos.getColumn();
+		int col = pos.getColumn();
+		final int realCol = (this.client.getShowStatusColumn() ? col + 1 : col);
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
@@ -111,11 +112,11 @@ public class TableReplacer
 				if (pos.isValid())
 				{
 					client.scrollToRow(row);		
-					Rectangle rect = client.getCellRect(row,col,true);
+					Rectangle rect = client.getCellRect(row,realCol,true);
 					client.setColumnSelectionAllowed(true);
 					client.scrollRectToVisible(rect); 
 					client.setRowSelectionInterval(row, row);
-					client.setColumnSelectionInterval(col, col);
+					client.setColumnSelectionInterval(realCol, realCol);
 				}
 			}
 		});
@@ -124,7 +125,7 @@ public class TableReplacer
 	public int findNext()
 	{
 		Position pos = this.replacer.findNext();
-		highlightRow(pos);
+		highlightPosition(pos);
 		return pos.getRow();
 	}
 	
@@ -148,7 +149,7 @@ public class TableReplacer
 	{
 		this.replacer.reset();
 		Position pos = this.replacer.find(text, ignoreCase, wholeWord, useRegex);
-		highlightRow(pos);
+		highlightPosition(pos);
 		return pos.getRow();
 	}
 	
@@ -179,7 +180,7 @@ public class TableReplacer
 		if (replaced) 
 		{
 			Position pos = this.replacer.findNext();
-			highlightRow(pos);
+			highlightPosition(pos);
 		}
 		return replaced;
 	}

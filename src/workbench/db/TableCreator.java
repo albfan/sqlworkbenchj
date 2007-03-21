@@ -14,7 +14,8 @@ package workbench.db;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -29,39 +30,26 @@ import workbench.util.StringUtil;
 public class TableCreator
 {
 	private WbConnection connection;
-	private ColumnIdentifier[] columnDefinition;
+	private List<ColumnIdentifier> columnDefinition;
 	private TableIdentifier tablename;
 	private TypeMapper mapper;
 	private boolean useDbmsDataType = false;
 
-	public TableCreator(WbConnection target, TableIdentifier newTable, ColumnIdentifier[] columns)
+	public TableCreator(WbConnection target, TableIdentifier newTable, Collection<ColumnIdentifier> columns)
 		throws SQLException
 	{
 		this.connection = target;
 		this.tablename = newTable.createCopy();
-//		this.tablename.setNeverAdjustCase(false);
-//		this.tablename.adjustCase(this.connection);
 		
-		this.columnDefinition = new ColumnIdentifier[columns.length];
-
 		// As we are sorting the columns we have to create a copy of the array
 		// to ensure that the caller does not see a different ordering
-		for (int i = 0; i < columns.length; i++)
-		{
-			this.columnDefinition [i] = columns[i];
-		}
+		this.columnDefinition = new ArrayList<ColumnIdentifier>(columns.size());
+		this.columnDefinition.addAll(columns);
 		
 		// Now sort the columns according to their DBMS position
 		sortColumns();
 
-		//Retrieve the list of datatypes that should be ignored for the current 
-		//connection. The names in that list must match the names returned 
-		//by DatabaseMetaData.getTypeInfo()
-		DbMetadata meta = this.connection.getMetadata();
-		String types = Settings.getInstance().getProperty("workbench.ignoretypes." + meta.getDbId(), null);;
-		List ignored = StringUtil.stringToList(types, ",", true, true);
-		
-		this.mapper = new TypeMapper(this.connection, ignored);
+		this.mapper = new TypeMapper(this.connection);
 	}
 
 	public void useDbmsDataType(boolean flag) { this.useDbmsDataType = flag; }
@@ -83,7 +71,7 @@ public class TableCreator
 				return 0;
 			}
 		};
-		Arrays.sort(columnDefinition, c);
+		Collections.sort(columnDefinition, c);
 	}
 	
 	public void createTable()
@@ -95,13 +83,12 @@ public class TableCreator
 		String name = this.tablename.getTableExpression(this.connection);
 		sql.append(name);
 		sql.append(" (");
-		int count = this.columnDefinition.length;
+		int count = this.columnDefinition.size();
 		int numCols = 0;
 		List pkCols = new ArrayList();
 		
-		for (int i=0; i < count; i++)
+		for (ColumnIdentifier col : columnDefinition)
 		{
-			ColumnIdentifier col = this.columnDefinition[i];
 			if (col.isPkColumn()) pkCols.add(col.getColumnName());
 			String def = this.getColumnDefintionString(col);
 			if (def == null) continue;

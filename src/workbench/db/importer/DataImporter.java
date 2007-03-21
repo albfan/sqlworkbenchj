@@ -21,12 +21,14 @@ import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.importer.BadfileWriter;
 import workbench.interfaces.Committer;
 import workbench.interfaces.ProgressReporter;
 import workbench.util.ExceptionUtil;
@@ -41,6 +43,7 @@ import java.io.StringReader;
 import java.io.Reader;
 import java.sql.Clob;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ImportFileParser;
@@ -131,6 +134,8 @@ public class DataImporter
 	
 	// Additional WHERE clause for UPDATE statements
 	private String whereClauseForUpdate;
+	private BadfileWriter badWriter;
+	private String badfileName;
 
 	public DataImporter()
 	{
@@ -217,6 +222,10 @@ public class DataImporter
 	public boolean getDeleteTarget() { return deleteTarget; }
 	public void setBatchSize(int size) { this.batchSize = size; }
 
+	public void setBadfileName(String fname)
+	{
+		this.badfileName = fname;
+	}
 	
 	public void setWhereClauseForUpdate(String clause)
 	{
@@ -515,7 +524,7 @@ public class DataImporter
 	private void createTarget()
 		throws SQLException
 	{
-		TableCreator creator = new TableCreator(this.dbConn, this.targetTable, this.targetColumns);
+		TableCreator creator = new TableCreator(this.dbConn, this.targetTable, Arrays.asList(this.targetColumns));
 		creator.useDbmsDataType(true);
 		creator.createTable();
 		String table = creator.getTable().getTableName();
@@ -579,6 +588,14 @@ public class DataImporter
 				messages.appendNewLine();
 				errorLimitAdded = true;
 			}
+		}
+	}
+	
+	public void recordRejected(String record)
+	{
+		if (badWriter != null && record != null)
+		{
+			badWriter.recordRejected(record);
 		}
 	}
 	
@@ -682,6 +699,7 @@ public class DataImporter
 		{
 			this.hasErrors = true;
 			closeStatements();
+			this.messages.clear();
 			System.gc();
 			this.messages.append(ResourceMgr.getString("MsgOutOfMemoryGeneric"));
 			this.messages.appendNewLine();
@@ -702,16 +720,25 @@ public class DataImporter
 		{
 			this.hasErrors = true;
 			LogMgr.logError("DataImporter.processRow()", "Error importing row " + currentImportRow + ": " + ExceptionUtil.getDisplay(e), null);
-			this.addError(ResourceMgr.getString("ErrImportingRow") + " " + currentImportRow + "\n");
-			this.addError(ResourceMgr.getString("ErrImportErrorMsg") + " " + e.getMessage() + "\n");
-			String value = this.getValueDisplay(row);
-			this.addError(ResourceMgr.getString("ErrImportValues") + " " + value + "\n\n");
-			if (errorLimitAdded)
+			if (this.badWriter == null)
 			{
-				LogMgr.logError("DataImporter.processRow()", "Values: " + value, null);
+				String value = this.getValueDisplay(row);			
+				this.addError(ResourceMgr.getString("ErrImportingRow") + " " + currentImportRow + "\n");
+				this.addError(ResourceMgr.getString("ErrImportErrorMsg") + " " + e.getMessage() + "\n");
+				this.addError(ResourceMgr.getString("ErrImportValues") + " " + value + "\n\n");
+				if (errorLimitAdded)
+				{
+					LogMgr.logError("DataImporter.processRow()", "Values: " + value, null);
+				}
 			}
 			errorCount ++;
 			if (!this.continueOnError) throw e;
+			String rec = this.source.getLastRecord();
+			if (rec == null)
+			{
+				rec = this.getValueDisplay(row);
+			}
+			recordRejected(rec);
 		}
 
 		if (this.useBatch && this.batchSize > 0 && ((this.totalRows % this.batchSize) == 0))
@@ -844,7 +871,7 @@ public class DataImporter
 	private int processRowData(PreparedStatement pstmt, Object[] row, boolean addBatch, boolean useColMap)
 		throws SQLException
 	{
-		List streams = new LinkedList();
+		List<CloseableDataStream> streams = new LinkedList<CloseableDataStream>();
 		
 		for (int i=0; i < row.length; i++)
 		{
@@ -981,6 +1008,7 @@ public class DataImporter
 				{
 					Blob b = (Blob)row[i];
 					in = b.getBinaryStream();
+					streams.add(new CloseableDataStream(in));
 					len = (int)b.length();
 				}
 				else if (row[i] instanceof byte[])
@@ -1155,6 +1183,15 @@ public class DataImporter
 			if (LogMgr.isInfoEnabled())
 			{
 				LogMgr.logInfo("DataImporter.setTargetTable()", "Starting import for table " + this.targetTable.getTableExpression());
+			}
+			
+			if (this.badfileName != null)
+			{
+				this.badWriter = new BadfileWriter(this.badfileName, this.targetTable, "UTF8");
+			}
+			else
+			{
+				this.badWriter = null;
 			}
 		}
 		catch (RuntimeException th)
@@ -1450,6 +1487,11 @@ public class DataImporter
 			if (this.updatedRows > -1)
 			{
 				this.messages.append(this.updatedRows + " " + ResourceMgr.getString("MsgCopyNumRowsUpdated"));
+			}
+			if (this.badWriter != null && badWriter.getRows() > 0)
+			{
+				this.messages.appendNewLine();
+				this.messages.append(this.badWriter.getMessage());
 			}
 			this.messages.appendNewLine();
 			this.hasErrors = this.source.hasErrors();

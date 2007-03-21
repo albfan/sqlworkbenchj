@@ -38,6 +38,7 @@ public class QueryCopySource
 	private boolean abortOnError;
 	private boolean hasErrors = false;
 	private boolean hasWarnings = false;
+	private RowData currentRow;
 	
 	public QueryCopySource(WbConnection source, String sql)
 	{
@@ -65,8 +66,8 @@ public class QueryCopySource
 			rs = this.retrieveStatement.executeQuery(this.retrieveSql);
 			ResultInfo info = new ResultInfo(rs.getMetaData(), this.sourceConnection);
 			int colCount = info.getColumnCount();
-			RowData row = new RowData(colCount);
-			row.setUseNullValueObject(false);
+			currentRow = new RowData(colCount);
+			currentRow.setUseNullValueObject(false);
 			while (this.keepRunning && rs.next())
 			{
 				// RowData will make some transformation 
@@ -76,11 +77,11 @@ public class QueryCopySource
 				// CLOB data as a String which I hope will be
 				// more flexible when copying from Oracle
 				// to other systems
-				row.read(rs, info);
+				currentRow.read(rs, info);
 				if (!keepRunning) break;
 				try
 				{
-					this.receiver.processRow(row.getData());
+					this.receiver.processRow(currentRow.getData());
 				}
 				catch (SQLException e)
 				{
@@ -107,6 +108,11 @@ public class QueryCopySource
 		}
 	}
 
+	public String getLastRecord()
+	{
+		if (currentRow == null) return null;
+		return currentRow.toString();
+	}
 	public void stop()
 	{
 		this.regularStop = true;

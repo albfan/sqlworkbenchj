@@ -16,7 +16,6 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -31,7 +30,7 @@ import workbench.resource.Settings;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.26 2006-11-09 23:05:25 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.27 2007-03-21 22:05:47 thomas Exp $
  */
 public class TextAreaPainter 
 	extends JComponent 

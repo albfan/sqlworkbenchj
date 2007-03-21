@@ -28,6 +28,74 @@ public class StringUtilTest
 		super(testName);
 	}
 
+	public void testDecodeUnicode()
+	{
+		try
+		{
+			String value = "Incorrect \\ string";
+			String decoded = StringUtil.decodeUnicode(value);
+//			System.out.println("decoded=" + value);
+//			System.out.println("decoded=" + decoded);
+			assertEquals("Wrong string not decoded", value, decoded);
+			
+			value = "Test \\u00E4\\u00E5";
+			decoded = StringUtil.decodeUnicode(value);
+//			System.out.println("decoded=" + value);
+//			System.out.println("decoded=" + decoded);
+			assertEquals("Wrong string not decoded", "Test \u00E4\u00E5", decoded);
+			
+			value = "Wrong \\uxyz encoded";
+			decoded = StringUtil.decodeUnicode(value);
+//			System.out.println("decoded=" + value);
+//			System.out.println("decoded=" + decoded);
+			assertEquals("Wrong string not decoded", value, decoded);
+			
+			value = "Wrong \\u04";
+			decoded = StringUtil.decodeUnicode(value);
+//			System.out.println("decoded=" + value);
+//			System.out.println("decoded=" + decoded);
+			assertEquals("Wrong string not decoded", value, decoded);
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+
+	}
+	
+	public void testEncodeUnicode()
+	{
+		String value = "\u00E4";
+		String enc = StringUtil.escapeUnicode(value, null, CharacterRange.RANGE_7BIT, false);
+		assertEquals("Umlaut not replaced", "\\u00E4", enc);
+		
+		value = "\n";
+		enc = StringUtil.escapeUnicode(value, null, CharacterRange.RANGE_7BIT, true);
+		assertEquals("NL not replaced" , "\\u000A", enc);
+		
+		enc = StringUtil.escapeUnicode(value, null, CharacterRange.RANGE_7BIT, false);
+		assertEquals("NL not replaced" , "\\n", enc);
+		
+		value = "abcdefghijk";
+		enc = StringUtil.escapeUnicode(value, null, CharacterRange.RANGE_7BIT, true);
+		assertEquals("NL not replaced" , value, enc);
+
+		value = "abc;def;ghi";
+		enc = StringUtil.escapeUnicode(value, ";", CharacterRange.RANGE_7BIT, true);
+		assertEquals("Additional characters not replaced", "abc\\u003Bdef\\u003Bghi", enc);
+		//System.out.println("enc=" + enc);
+		
+	}
+	
+	public void testMakePlainLF()
+	{
+		String line = "line1\r\nline2";
+		String newline = StringUtil.makePlainLinefeed(line);
+		assertEquals("No LF", "line1\nline2", newline);
+	}
+	
 	public void testRtrim()
 	{
 		String s = "bla";

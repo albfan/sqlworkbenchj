@@ -87,23 +87,12 @@ public class ConnectionProfile
 		this.setUsername(userName);
 		this.setPassword(pwd);
 		this.setName(aName);
-		this.changed = false;
+		this.reset();
 	}
 
 	private static synchronized int getNextId()
 	{
 		return nextId++;
-	}
-
-	public ConnectionProfile(String driverClass, String url, String userName, String pwd)
-	{
-		this();
-		this.setUrl(url);
-		this.setDriverclass(driverClass);
-		this.setUsername(userName);
-		this.setPassword(pwd);
-		this.setName("");
-		this.changed = false;
 	}
 
 	public void setAlternateDelimiter(DelimiterDefinition def)
@@ -393,6 +382,7 @@ public class ConnectionProfile
 	{
 		this.changed = false;
 		this.isNew = false;
+		if (this.alternateDelimiter != null) this.alternateDelimiter.resetChanged();
 	}
 
 	private String encryptPassword(String aPwd)

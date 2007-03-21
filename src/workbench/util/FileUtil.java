@@ -20,30 +20,23 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.util.Iterator;
 import java.util.List;
-import workbench.resource.Settings;
 
 /**
  * @author  support@sql-workbench.net
  */
 public class FileUtil
 {
-	
-	private static int getBuffSize()
-	{
-		return Settings.getInstance().getIntProperty("workbench.lob.buffsize",16*1024);
-	}
+	private static final int BUFF_SIZE = 8192;
 	
 	/*
-	 * Expects instances of {@link workbench.util.CloseableDataStream} in the list
-	 * and closes all of them
+	 * Closes all streams in the list.
+	 * @param a list of streams to close
 	 */
-	public static void closeStreams(List streams)
+	public static void closeStreams(List<CloseableDataStream> streams)
 	{
 		if (streams == null) return;
-		Iterator itr = streams.iterator();
-		while (itr.hasNext())
+		for (CloseableDataStream str : streams)
 		{
-			CloseableDataStream str = (CloseableDataStream)itr.next();
 			if (str != null) str.close();
 		}
 	}
@@ -109,16 +102,22 @@ public class FileUtil
 		return estimateRecords(f, 5);
 	}
 
+	/**
+	 * Tries to estimate the number of records in the given file.
+	 * This is done by reading the first <tt>sampleLines</tt> records
+	 * of the file and assuming the average size of an row in the first
+	 * lines is close to the average row in the complete file.
+	 */
 	public static final long estimateRecords(File f, long sampleLines)
 		throws IOException
 	{
+		if (sampleLines <= 0) throw new IllegalArgumentException("Sample size must be greater then zero");
 		if (!f.exists()) return -1;
 		if (!f.isFile()) return -1;
 		long size = f.length();
 		if (size == 0) return 0;
 		
 		long lineSize = 0;
-		if (sampleLines <= 0) throw new IllegalArgumentException("Sample size must be greater then zero");
 
 		BufferedReader in = null;
 		try
@@ -146,7 +145,7 @@ public class FileUtil
 		long filesize = 0;
 		try
 		{
-			byte[] buffer = new byte[getBuffSize()];
+			byte[] buffer = new byte[BUFF_SIZE];
 			int bytesRead = in.read(buffer);
 			while (bytesRead != -1)
 			{
@@ -172,7 +171,7 @@ public class FileUtil
 	{
 		if (in == null) return null;
 		StringBuilder result = new StringBuilder(1024);
-		char[] buff = new char[getBuffSize()];
+		char[] buff = new char[BUFF_SIZE];
 		int bytesRead = in.read(buff);
 		while (bytesRead > -1)
 		{
@@ -187,7 +186,7 @@ public class FileUtil
 	{
 		if (in == null) return null;
 		ByteBuffer result = new ByteBuffer();
-		byte[] buff = new byte[getBuffSize()];
+		byte[] buff = new byte[BUFF_SIZE];
 		int bytesRead = in.read(buff);
 		while (bytesRead > -1)
 		{

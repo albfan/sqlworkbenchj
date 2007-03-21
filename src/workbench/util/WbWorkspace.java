@@ -84,7 +84,7 @@ public class WbWorkspace
 					ZipEntry entry = (ZipEntry)tempEntries.get(i);
 					String filename = entry.getName().toLowerCase();
 					int pos = filename.indexOf('.');
-					try { ind = Integer.parseInt(filename.substring(12,pos)); } catch (Throwable th) {ind = -1;}
+					ind = StringUtil.getIntValue(filename.substring(12,pos), -1);
 					realIndex = ind - 1;
 					if (realIndex >= 0 && realIndex < count)
 					{

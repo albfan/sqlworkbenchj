@@ -909,11 +909,12 @@ public class ConnectionEditorPanel
 				DelimiterDefinition del = altDelimiter.getDelimiter();
 				// As the alternateDelimiter is a not attached to the profile itself, 
 				// we have to propagate any updated delimiter object to the profile
-//				System.out.println("**** changed!");
-//				Exception e = new Exception();
-//				e.printStackTrace();
+
 				this.currentProfile.setAlternateDelimiter(altDelimiter.getDelimiter());
 			}
+//			System.out.println("**** changed!");
+//			Exception e = new Exception();
+//			e.printStackTrace();			
 			this.sourceModel.profileChanged(this.currentProfile);
 		}
 	}

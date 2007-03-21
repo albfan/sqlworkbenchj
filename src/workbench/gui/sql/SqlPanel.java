@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.ComponentInputMap;
@@ -73,6 +74,7 @@ import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultReceiver;
 import workbench.interfaces.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.CharacterRange;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.AutoCompletionAction;
@@ -2189,6 +2191,11 @@ public class SqlPanel
 		boolean restoreSelection = false;
 		boolean shouldRestoreSelection = Settings.getInstance().getBoolProperty("workbench.gui.sql.restoreselection", true);
 		boolean macroRun = false;
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
+		boolean replaceNL = !nl.equals("\n");
+		Pattern fixNLPattern = null;
+		if (replaceNL) fixNLPattern = Pattern.compile("\n");
+		
 		this.checkPrepared = Settings.getInstance().getCheckPreparedStatements();
 		this.executeAllStatements = false;
 		this.cancelAll = false;
@@ -2240,6 +2247,7 @@ public class SqlPanel
 			if (appendResult)
 			{
 				firstResultIndex = this.resultTab.getTabCount() - 1;
+				appendToLog("\n");
 			}
 			else
 			{
@@ -2336,7 +2344,10 @@ public class SqlPanel
 			for (int i=startIndex; i < endIndex; i++)
 			{
 				currentSql = scriptParser.getCommand(i);
-
+				if (replaceNL)
+				{
+					currentSql = fixNLPattern.matcher(currentSql).replaceAll(nl);
+				}
 				// By calling yield() we make sure that
 				// this thread can actually be interrupted!
 				Thread.yield();
@@ -2648,7 +2659,6 @@ public class SqlPanel
 	 */
 	public void showResult(final String sql, String comment, ResultReceiver.ShowType how)
 	{
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		if (how == ResultReceiver.ShowType.logText)
 		{
 			this.log.append("\n");
@@ -2668,20 +2678,19 @@ public class SqlPanel
 			}
 			else if (comment != null)
 			{
-				this.editor.appendLine(nl);
+				this.editor.appendLine("\n");
 				this.editor.appendLine(comment);
-				this.editor.appendLine(nl);
+				this.editor.appendLine("\n");
 				pos = this.editor.getDocumentLength();
 			}
 			else
 			{
-				this.editor.appendLine(nl);
-				this.editor.appendLine(nl);
+				this.editor.appendLine("\n\n");
 				pos = this.editor.getDocumentLength();
 			}
 			this.editor.appendLine(sql);
 			this.editor.appendLine(";");
-			this.editor.appendLine(nl);
+			this.editor.appendLine("\n");
 			this.editor.setCaretPosition(pos);
 			this.editor.scrollToCaret();
 		}		

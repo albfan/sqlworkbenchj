@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import workbench.gui.actions.ClearStatementHistoryAction;
@@ -212,7 +213,7 @@ public class SqlHistory
 	public void writeToStream(OutputStream out)
 	{
 		
-		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
+		String lineEnding = "\n";
 		try
 		{
 			Writer writer = EncodingUtil.createWriter(out, "UTF-8");
@@ -233,8 +234,21 @@ public class SqlHistory
 				writer.write(Integer.toString(entry.getSelectionEnd()));
 				writer.write(lineEnding);
 
-				writer.write(entry.getText());
-				writer.write(lineEnding);
+				// Make sure the editor text is converted to the correct line ending
+				BufferedReader reader = new BufferedReader(new StringReader(entry.getText()));
+				String line = reader.readLine();
+				while(line != null)
+				{
+					int len = StringUtil.getRealLineLength(line);
+					if (len > 0)
+					{
+						writer.write(line.substring(0,len));
+					}
+					writer.write(lineEnding);
+					line = reader.readLine();
+				}
+				
+				//writer.write(lineEnding);
 				writer.write(LIST_DELIMITER);
 				writer.write(lineEnding);
 			}
@@ -259,7 +273,7 @@ public class SqlHistory
 		int start = -1;
 		int end = -1;
 		
-		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
+		String lineEnding = "\n";
 		BufferedReader reader = null;
 		try
 		{

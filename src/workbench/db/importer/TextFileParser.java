@@ -100,6 +100,7 @@ public class TextFileParser
 	private boolean clobsAreFilenames = false;
 
 	private ImportFileHandler fileHandler = new ImportFileHandler();
+	private String currentLine;
 	
 	public TextFileParser()
 	{
@@ -183,7 +184,12 @@ public class TextFileParser
 		}
 	}
 
-	public boolean hasColumnFilter()
+	public String getLastRecord()
+	{
+		return this.currentLine;
+	}
+	
+	protected boolean hasColumnFilter()
 	{
 		if (this.columnFilter == null) return false;
 		for (int i=0; i < this.columnFilter.length; i++)
@@ -597,20 +603,20 @@ public class TextFileParser
 			in = this.fileHandler.getMainFileReader();
 		}
 		
-		String line = null;
+		currentLine = null;
 		
 		try
 		{
-			line = in.readLine();
+			currentLine = in.readLine();
 			if (this.withHeader)
 			{
-				if (this.columns == null) this.readColumns(line);
-				line = in.readLine();
+				if (this.columns == null) this.readColumns(currentLine);
+				currentLine = in.readLine();
 			}
 		}
 		catch (EOFException eof)
 		{
-			line = null;
+			currentLine = null;
 		}
 		catch (IOException e)
 		{
@@ -630,6 +636,7 @@ public class TextFileParser
 			throw new Exception("Cannot import file without a column definition");
 		}
 
+		
 		ColumnIdentifier[] cols = this.getColumnsToImport();
 		try
 		{
@@ -656,31 +663,31 @@ public class TextFileParser
 			boolean hasColumnFilter = this.hasColumnFilter();
 			boolean hasLineFilter = this.lineFilter != null;
 
-			while (line != null)
+			while (currentLine != null)
 			{
 				if (this.cancelImport) break;
 
 				// silently ignore empty lines...
-				if (StringUtil.isEmptyString(line))
+				if (StringUtil.isEmptyString(currentLine))
 				{
 					try
 					{
-						line = in.readLine();
+						currentLine = in.readLine();
 					}
 					catch (IOException e)
 					{
 						LogMgr.logError("TextFileParser.processOneFile()", "Error reading source file", e);
-						line = null;
+						currentLine = null;
 					}
 					continue;
 				}
 
-				if (enableMultiLineMode && StringUtil.hasOpenQuotes(line, quoteCharToUse))
+				if (enableMultiLineMode && StringUtil.hasOpenQuotes(currentLine, quoteCharToUse))
 				{
 					try
 					{
-						StringBuilder b = new StringBuilder(line.length() * 2);
-						b.append(line);
+						StringBuilder b = new StringBuilder(currentLine.length() * 2);
+						b.append(currentLine);
 						b.append(lineEnding);
 						String nextLine = in.readLine();
 
@@ -690,7 +697,7 @@ public class TextFileParser
 						if (nextLine != null)
 						{
 							b.append(nextLine);
-							line = b.toString();
+							currentLine = b.toString();
 							continue;
 						}
 					}
@@ -702,17 +709,17 @@ public class TextFileParser
 				
 				if (hasLineFilter)
 				{
-					Matcher m = this.lineFilter.matcher(line);
+					Matcher m = this.lineFilter.matcher(currentLine);
 					if (!m.matches())
 					{
 						try
 						{
-							line = in.readLine();
+							currentLine = in.readLine();
 						}
 						catch (IOException e)
 						{
 							LogMgr.logError("TextFileParser.processOneFile()", "Error reading source file", e);
-							line = null;
+							currentLine = null;
 						}
 						continue;
 					}
@@ -721,7 +728,7 @@ public class TextFileParser
 				this.clearRowData();
 				importRow ++;
 
-				tok.setLine(line);
+				tok.setLine(currentLine);
 				includeLine = true;
 				int targetIndex = -1;
 				
@@ -796,6 +803,8 @@ public class TextFileParser
 					}
 					catch (Exception e)
 					{
+						e.printStackTrace();
+						System.out.println("value: [" + value + "]");
 						if (targetIndex != -1) rowData[targetIndex] = null;
 						String msg = ResourceMgr.getString("ErrTextfileImport");
 						msg = msg.replaceAll("%row%", Integer.toString(importRow));
@@ -810,7 +819,6 @@ public class TextFileParser
 							throw e;
 						}
 						this.hasWarnings = true;
-						
 						LogMgr.logWarning("TextFileParser.start()", msg, e);
 						if (this.errorHandler != null)
 						{
@@ -821,6 +829,8 @@ public class TextFileParser
 								this.abortOnError = false;
 							}
 						}
+						this.receiver.recordRejected(currentLine);
+						includeLine = false;
 					}
 				}
 
@@ -838,12 +848,12 @@ public class TextFileParser
 
 				try
 				{
-					line = in.readLine();
+					currentLine = in.readLine();
 				}
 				catch (IOException e)
 				{
 					LogMgr.logError("TextFileParser.processOneFile()", "Error reading source file", e);
-					line = null;
+					currentLine = null;
 				}
 			}
 		}

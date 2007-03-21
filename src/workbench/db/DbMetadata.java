@@ -996,13 +996,6 @@ public class DbMetadata
 		{
 			boolean needQuote = quoteAlways;
 
-			// Oracle and HSQL require identifiers starting with a number 
-			// have to be quoted always. 
-			if (needQuote || this.dbSettings.quoteIdentifierWithDigits())
-			{
-				needQuote = (Character.isDigit(aName.charAt(0)));
-			}
-			
 			if (!needQuote && !this.storesMixedCaseIdentifiers())
 			{
 				if (this.storesLowerCaseIdentifiers() && !StringUtil.isLowerCase(aName))
@@ -1031,7 +1024,7 @@ public class DbMetadata
 		}
 
 		// if it is not a keyword, we have to check for special characters such
-		// as a space, $ etec
+		// as a space, $, digits at the beginning etc
 		return SqlUtil.quoteObjectname(aName);
 	}
 
@@ -3013,6 +3006,7 @@ public class DbMetadata
 	public String getTableSource(TableIdentifier table, boolean includeDrop, boolean includeFk)
 		throws SQLException
 	{
+		if (getViewTypeName().equalsIgnoreCase(table.getType())) return getExtendedViewSource(table, includeDrop);
 		List<ColumnIdentifier> cols = getTableColumns(table);
 		DataStore index = this.getTableIndexInformation(table);
 		TableIdentifier tbl = table.createCopy();

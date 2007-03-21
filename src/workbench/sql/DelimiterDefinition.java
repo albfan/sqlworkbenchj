@@ -62,6 +62,11 @@ public class DelimiterDefinition
 	{
 		return this.delimiter.equals(";");
 	}
+
+	public void resetChanged()
+	{
+		this.changed = false;
+	}
 	
 	public static DelimiterDefinition parseCmdLineArgument(String arg)
 	{

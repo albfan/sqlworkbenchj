@@ -72,6 +72,7 @@ public class WbImport
 	public static final String ARG_MULTI_LINE = "multiLine";
 	public static final String ARG_START_ROW = "startRow";
 	public static final String ARG_END_ROW = "endRow";
+	public static final String ARG_BADFILE = "badFile";
 	
 	public WbImport()
 	{
@@ -115,6 +116,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_MULTI_LINE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_START_ROW, ArgumentType.IntegerArgument);
 		cmdLine.addArgument(ARG_END_ROW, ArgumentType.IntegerArgument);
+		cmdLine.addArgument(ARG_BADFILE);
 	}
 	
 	public String getVerb() { return VERB; }
@@ -134,16 +136,16 @@ public class WbImport
 		return result;
 	}
 	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(WbConnection aConnection, String sqlCommand)
 		throws SQLException
 	{
 		imp = new DataImporter();
 		this.imp.setConnection(aConnection);
 
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
-		aSql = SqlUtil.stripVerb(SqlUtil.makeCleanSql(aSql,false, false, '\''));
+		StatementRunnerResult result = new StatementRunnerResult(sqlCommand);
+		String options = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sqlCommand,false, false, '\''));
 		
-		cmdLine.parse(aSql);
+		cmdLine.parse(options);
 
 		if (cmdLine.hasUnknownArguments())
 		{
@@ -178,10 +180,22 @@ public class WbImport
 			result.setFailure();
 			return result;
 		}
-
+		
 		filename = evaluateFileArgument(filename);
 		File inputFile = (filename != null ? new File(filename) : null);
-		
+
+		String badFile = cmdLine.getValue(ARG_BADFILE);
+		if (badFile != null)
+		{
+			boolean multiFileImport = (dir != null && filename == null);		
+			File bf = new File(badFile);
+			if (multiFileImport && !bf.isDirectory())
+			{
+				result.addMessage(ResourceMgr.getString("ErrImportBadFileNoDir"));
+				result.setFailure();
+				return result;
+			}
+		}		
 		CommonArgs.setCommitAndBatchParams(imp, cmdLine);
 
 		boolean continueDefault = Settings.getInstance().getBoolProperty("workbench.import.default.continue", false);
@@ -431,6 +445,8 @@ public class WbImport
 			result.setFailure();
 			return result;
 		}
+		
+		if (badFile != null) imp.setBadfileName(badFile);
 
 		this.imp.setRowActionMonitor(this.rowMonitor);
 		String value = cmdLine.getValue(CommonArgs.ARG_PROGRESS);
@@ -530,7 +546,7 @@ public class WbImport
 		{
 			LogMgr.logError("WbImport.execute()", "Error importing '" + filename +"': " + e.getMessage(), e);
 			result.setFailure();
-			addErrorInfo(result, aSql, e);
+			addErrorInfo(result, sqlCommand, e);
 		}
 		result.addMessage(imp.getMessages());
 

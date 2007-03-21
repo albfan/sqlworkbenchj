@@ -41,6 +41,9 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.Enumeration;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
@@ -101,7 +104,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.67 2007-02-04 17:22:42 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.68 2007-03-21 22:05:47 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -118,7 +121,7 @@ public class JEditTextArea
 	private int rectangularSelectionModifier = 0;
 	private KeyListener keyEventInterceptor;
 	private EditorStatusbar statusBar;
-	
+
 	/**
 	 * Adding components with this name to the text area will place
 	 * them left of the horizontal scroll bar. In jEdit, the status
@@ -181,9 +184,6 @@ public class JEditTextArea
 		this.addKeyBinding("SHIFT+DELETE", this.popup.getCutAction());
 
 		this.addKeyBinding("C+a", this.popup.getSelectAllAction());
-		
-		// We don't seem to get the initial focus event?
-		// focusedComponent = this;
 	}
 
 	public int getHScrollBarHeight()
@@ -215,6 +215,11 @@ public class JEditTextArea
 		return this.painter.getShowLineNumbers();
 	}
 
+	private String fixLinefeed(String input)
+	{
+		return StringUtil.makePlainLinefeed(input);
+	}
+	
 	private void changeCase(boolean toLower)
 	{
 		String sel = this.getSelectedText();
@@ -1057,12 +1062,13 @@ public class JEditTextArea
 	}
 
 	/**
-	 * Returns the length of the specified line.
+	 * Returns the length of the specified line, without the line end terminator 
 	 * @param line The line
 	 */
 	public int getLineLength(int line)
 	{
 		Element lineElement = document.getDefaultRootElement().getElement(line);
+		
 		if(lineElement == null)
 			return -1;
 		else
@@ -1074,6 +1080,8 @@ public class JEditTextArea
 	 */
 	public String getText()
 	{
+		int len = document.getLength();
+		if (len < 0) return null;
 		try
 		{
 			return document.getText(0,document.getLength());
@@ -1114,12 +1122,10 @@ public class JEditTextArea
 
 	public void appendLine(String aLine)
 	{
-		int count = Integer.toString(this.getLineCount()).length();
-		
 		try
 		{
 			document.beginCompoundEdit();
-			document.insertString(document.getLength(),aLine,null);
+			document.insertString(document.getLength(),fixLinefeed(aLine),null);
 		}
 		catch(BadLocationException bl)
 		{
@@ -1129,12 +1135,6 @@ public class JEditTextArea
 		{
 			document.endCompoundEdit();
 		}
-
-//		int newCount = Integer.toString(this.getLineCount()).length();
-//		if (newCount > count)
-//		{
-//			this.repaint();
-//		}
 	}
 	
 	public void reset()
@@ -1156,7 +1156,8 @@ public class JEditTextArea
 			}
 			if (text != null && text.length() > 0)
 			{
-				document.insertString(0,text,null);
+				String realtext = fixLinefeed(text);
+				document.insertString(0,realtext,null);
 			}
 		}
 		catch (BadLocationException bl)
@@ -1251,7 +1252,7 @@ public class JEditTextArea
 		}
 	}
 	/**
-	 * Returns the text on the specified line.
+	 * Returns the text on the specified line without the line terminator
 	 * @param lineIndex The line
 	 * @return The text, or null if the line is invalid
 	 */
@@ -1670,8 +1671,8 @@ public class JEditTextArea
 
 		try
 		{
+			selectedText = fixLinefeed(selectedText);
 			document.beginCompoundEdit();
-			String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
 
 			if (rectSelect)
 			{
@@ -1702,7 +1703,7 @@ public class JEditTextArea
 
 					if (selectedText == null) continue;
 
-					currNewline = selectedText.indexOf(lineEnding,lastNewline);
+					currNewline = selectedText.indexOf("\n",lastNewline);
 					if (currNewline == -1)
 					{
 						currNewline = selectedText.length();
@@ -1715,7 +1716,7 @@ public class JEditTextArea
 				if (selectedText != null && currNewline != selectedText.length())
 				{
 					int offset = map.getElement(selectionEndLine).getEndOffset() - 1;
-					document.insertString(offset,lineEnding,null);
+					document.insertString(offset,"\n",null);
 					document.insertString(offset + 1,selectedText.substring(currNewline + 1),null);
 				}
 			}
@@ -1730,7 +1731,7 @@ public class JEditTextArea
 				if (this.autoIndent)
 				{
 					int c = this.getCaretLine();
-					if (c > 0 && selectedText.equals(lineEnding))
+					if (c > 0 && selectedText.equals("\n"))
 					{
 						String s = this.getLineText(c - 1);
 						String p = StringUtil.getStartingWhiteSpace(s);
@@ -1768,7 +1769,7 @@ public class JEditTextArea
 		try
 		{
 			document.beginCompoundEdit();
-			document.insertString(position, text, null);
+			document.insertString(position, fixLinefeed(text), null);
 		}
 		catch(Exception e)
 		{
@@ -1872,6 +1873,7 @@ public class JEditTextArea
 
 		try
 		{
+			str = fixLinefeed(str);
 			document.remove(caret,str.length());
 			document.insertString(caret,str,null);
 		}
@@ -2029,9 +2031,7 @@ public class JEditTextArea
 			Clipboard clipboard = getToolkit().getSystemClipboard();
 			try
 			{
-				// The MacOS MRJ doesn't convert \r to \n,
-				// so do it here
-				String selection = ((String)clipboard.getContents(this).getTransferData(DataFlavor.stringFlavor)).replaceAll("\r\n",Settings.getInstance().getInternalEditorLineEnding());
+				String selection = ((String)clipboard.getContents(this).getTransferData(DataFlavor.stringFlavor));
 				setSelectedText(selection);
 			}
 			catch(Exception e)

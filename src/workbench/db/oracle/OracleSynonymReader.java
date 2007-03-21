@@ -46,7 +46,7 @@ public class OracleSynonymReader
 	public TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
-		StringBuilder sql = new StringBuilder(200);
+		StringBuilder sql = new StringBuilder(400);
 		sql.append("SELECT s.synonym_name, s.table_owner, s.table_name, s.db_link, o.object_type, s.owner ");
 		sql.append("FROM all_synonyms s, all_objects o  ");
 		sql.append("where s.table_name = o.object_name ");
@@ -55,16 +55,19 @@ public class OracleSynonymReader
 		sql.append(" or (s.synonym_name = ? AND s.owner = 'PUBLIC')) ");
 		sql.append("ORDER BY decode(s.owner, 'PUBLIC',9,1)");
 
-		PreparedStatement stmt = con.prepareStatement(sql.toString());
-		stmt.setString(1, aSynonym);
-		stmt.setString(2, anOwner == null ? "PUBLIC" : anOwner);
-		stmt.setString(3, aSynonym);
+		PreparedStatement stmt = null;
 
-		ResultSet rs = stmt.executeQuery();
+		ResultSet rs = null;
 			
 		TableIdentifier result = null;
 		try
 		{
+			stmt = con.prepareStatement(sql.toString());
+			stmt.setString(1, aSynonym);
+			stmt.setString(2, anOwner == null ? con.getMetaData().getUserName() : anOwner);
+			stmt.setString(3, aSynonym);			
+			
+			rs = stmt.executeQuery();
 			if (rs.next())
 			{
 				String owner = rs.getString(2);

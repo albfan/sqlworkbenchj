@@ -49,7 +49,7 @@ public class DataCopier
 	private DataImporter importer;
 
 	// the columnMap will contain elements of type ColumnIdentifier
-	private HashMap columnMap;
+	private HashMap<ColumnIdentifier, ColumnIdentifier> columnMap;
 
 	private ColumnIdentifier[] targetColumnsForQuery;
 	private MessageBuffer messages = null;
@@ -94,7 +94,7 @@ public class DataCopier
 		this.targetTable = aTargetTable;
 		this.targetColumnsForQuery = null;
 
-		if (!this.sourceConnection.getMetadata().tableExists(aSourceTable))
+		if (!this.sourceConnection.getMetadata().objectExists(aSourceTable, (String)null))
 		{
 			this.addError(ResourceMgr.getString("ErrCopySourceTableNotFound").replaceAll("%name%", aSourceTable.getQualifiedName()));
 			throw new SQLException("Table " + aTargetTable.getTableName() + " not found in source connection");
@@ -135,16 +135,9 @@ public class DataCopier
 					this.columnMap.put(sourceCol, targetCol);
 				}
 			}
-			int count = this.columnMap.size();
-			ColumnIdentifier[] cols = new ColumnIdentifier[count];
-			itr = this.columnMap.values().iterator();
-			for (int i=0; i < count; i++)
-			{
-				cols[i] = (ColumnIdentifier)itr.next();
-			}
 			try
 			{
-				TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, cols);
+				TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, this.columnMap.values());
 				creator.useDbmsDataType(this.sourceConnection.getDatabaseProductName().equals(this.targetConnection.getDatabaseProductName()));
 				creator.createTable();
 				this.addMessage(ResourceMgr.getString("MsgCopyTableCreated").replaceAll("%name%", aTargetTable.getTableExpression(this.targetConnection)) + "\n");
@@ -245,7 +238,7 @@ public class DataCopier
 	private void initNewTable(ColumnIdentifier[] sourceColumns)
 		throws SQLException
 	{
-		List sourceCols = null;
+		List<ColumnIdentifier> sourceCols = null;
 		if (this.sourceTable != null)
 		{
 			sourceCols = this.sourceConnection.getMetadata().getTableColumns(this.sourceTable);
@@ -264,7 +257,7 @@ public class DataCopier
 		// a List, in order to preserve the column order
 		// which is either defined by the user (through the sourceColumns list)
 		// or by the order of the existing table.
-		List targetCols = null;
+		List<ColumnIdentifier> targetCols = null;
 		if (sourceColumns == null || sourceColumns.length == 0)
 		{
 			int count = sourceCols.size();
@@ -279,8 +272,8 @@ public class DataCopier
 		else
 		{
 			int count = sourceColumns.length;
-			this.columnMap = new HashMap(count);
-			targetCols = new ArrayList(count);
+			this.columnMap = new HashMap<ColumnIdentifier, ColumnIdentifier>(count);
+			targetCols = new ArrayList<ColumnIdentifier>(count);
 			for (int i=0; i < count; i++)
 			{
 				int index = sourceCols.indexOf(sourceColumns[i]);
@@ -293,16 +286,9 @@ public class DataCopier
 			}
 		}
 
-		int count = targetCols.size();
-		ColumnIdentifier[] realCols = new ColumnIdentifier[count];
-		for (int i=0; i < count; i++)
-		{
-			realCols[i] = (ColumnIdentifier)targetCols.get(i);
-		}
-
 		try
 		{
-			TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, realCols);
+			TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, targetCols);
 			creator.useDbmsDataType(this.sourceConnection.getDatabaseProductName().equals(this.targetConnection.getDatabaseProductName()));
 			creator.createTable();
 
@@ -525,19 +511,21 @@ public class DataCopier
 	private void initImporterForTable(String addWhere)
 		throws SQLException
 	{
-		if (this.columnMap == null || this.columnMap.size() == 0)  return;
+		if (this.columnMap == null || this.columnMap.size() == 0)  
+		{
+			throw new SQLException("No columns defined");
+		}
 		int count = this.columnMap.size();
 		ColumnIdentifier[] cols = new ColumnIdentifier[count];
 
 		int col = 0;
-		Iterator itr = this.columnMap.entrySet().iterator();
 
 		StringBuilder sql = new StringBuilder(count * 25 + 15 + (addWhere != null ? addWhere.length() : 0));
 		sql.append("SELECT ");
 
-		while (itr.hasNext())
+		//while (itr.hasNext())
+		for (Map.Entry<ColumnIdentifier, ColumnIdentifier> entry : this.columnMap.entrySet())
 		{
-			Map.Entry entry = (Map.Entry)itr.next();
 			ColumnIdentifier sid = (ColumnIdentifier)entry.getKey();
 			ColumnIdentifier tid = (ColumnIdentifier)entry.getValue();
 			if (col > 0)
@@ -591,7 +579,7 @@ public class DataCopier
 	 *	exist in both tables).
 	 *	If no mapping is provided, all matching columns from both tables are copied
 	 */
-	private void initColumnMapping(Map aMapping)
+	private void initColumnMapping(Map<String, String> aMapping)
 		throws SQLException
 	{
 		if (this.sourceConnection == null || this.targetConnection == null ||
@@ -605,20 +593,20 @@ public class DataCopier
 			return;
 		}
 
-		List sourceCols = this.sourceConnection.getMetadata().getTableColumns(this.sourceTable);
-		List targetCols = this.targetConnection.getMetadata().getTableColumns(this.targetTable);
+		DbMetadata sourceMeta = this.sourceConnection.getMetadata();
+		TableIdentifier tbl = sourceMeta.resolveSynonym(this.sourceTable);
+		List<ColumnIdentifier> sourceCols = sourceMeta.getTableColumns(tbl);
+		List<ColumnIdentifier> targetCols = this.targetConnection.getMetadata().getTableColumns(this.targetTable);
 
-		Iterator itr = aMapping.entrySet().iterator();
 		this.columnMap = new HashMap(targetCols.size());
 
-		while (itr.hasNext())
+		for (Map.Entry<String, String> entry : aMapping.entrySet())
 		{
-			Map.Entry entry = (Map.Entry)itr.next();
-			String sc = (String)entry.getKey();
-			String tc = (String)entry.getValue();
+			String sc = entry.getKey();
+			String tc = entry.getValue();
 			if (sc == null || sc.trim().length() == 0 || tc == null || tc.trim().length() == 0) continue;
 
-			// we are creating the Identifier without a type, so that when
+			// I'm creating the Identifier without a type, so that when
 			// comparing the ID's the type will not be considered
 			ColumnIdentifier sid = new ColumnIdentifier(sc);
 			ColumnIdentifier tid = new ColumnIdentifier(tc);
@@ -667,12 +655,12 @@ public class DataCopier
 		if (this.sourceConnection == null || this.targetConnection == null ||
 		this.sourceTable == null || this.targetTable == null) return;
 
-		List cols = this.sourceConnection.getMetadata().getTableColumns(this.sourceTable);
-		List sourceCols = null;
+		List<ColumnIdentifier> cols = this.sourceConnection.getMetadata().getTableColumns(this.sourceTable);
+		List<ColumnIdentifier> sourceCols = null;
 		if (requestedCols != null)
 		{
 			int count = requestedCols.size();
-			sourceCols = new ArrayList(count);
+			sourceCols = new ArrayList<ColumnIdentifier>(count);
 			for (int i=0; i < count; i++)
 			{
 				int index = cols.indexOf(requestedCols.get(i));
@@ -687,10 +675,10 @@ public class DataCopier
 			sourceCols = cols;
 		}
 
-		List targetCols = this.targetConnection.getMetadata().getTableColumns(this.targetTable);
+		List<ColumnIdentifier> targetCols = this.targetConnection.getMetadata().getTableColumns(this.targetTable);
 
 		int count = targetCols.size();
-		this.columnMap = new HashMap(count);
+		this.columnMap = new HashMap<ColumnIdentifier, ColumnIdentifier>(count);
 		LogMgr.logInfo("DataCopier.readColumnDefinition()", "Copying matching columns from " + this.sourceTable + " to " + this.targetTable);
 		StringBuilder usedColumns = new StringBuilder(100);
 		for (int i=0; i < count; i++)

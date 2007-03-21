@@ -32,4 +32,10 @@ public interface RowDataProducer
 	void setErrorHandler(JobErrorHandler handler);
 	boolean hasErrors();
 	boolean hasWarnings();
+	
+	/**
+	 * Return the last "raw" record that was sent to the RowDataReceiver.
+	 * This is used to log invalid records
+	 */
+	String getLastRecord();
 }

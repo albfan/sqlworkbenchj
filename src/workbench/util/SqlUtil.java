@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -40,12 +39,8 @@ import workbench.storage.ResultInfo;
  */
 public class SqlUtil
 {
-	private static Pattern specialCharPattern = Pattern.compile("[$:\\/ \\.;,]");
-	
-	public static String quoteObjectname(String object)
-	{
-		return quoteObjectname(object, false);
-	}
+	//private static final Pattern SPECIAL_CHAR_PATTERN = Pattern.compile("[$:\\\\/ \\.;,]");
+	private static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_][\\w\\$#@]*");
 	
 	/**
 	 * Removes the SQL verb of this command. The verb is defined
@@ -72,19 +67,29 @@ public class SqlUtil
 	}
 	
 	
+	public static String quoteObjectname(String object)
+	{
+		return quoteObjectname(object, false);
+	}
+	
 	public static String quoteObjectname(String aColname, boolean quoteAlways)
 	{
 		if (aColname == null) return null;
+		if (aColname.length() == 0) return "";
+		aColname = aColname.trim();
+		
 		boolean doQuote = quoteAlways;
-		if (!doQuote)
+		
+		if (!quoteAlways)
 		{
-			Matcher m = specialCharPattern.matcher(aColname);
-			doQuote = m.find();
+			Matcher m = SQL_IDENTIFIER.matcher(aColname);
+			//doQuote = m.find() || Character.isDigit(aColname.charAt(0));;
+			doQuote = !m.matches();
 		}
-		if (!doQuote) return aColname.trim();
-		StringBuilder col = new StringBuilder(aColname.length() + 5);
+		if (!doQuote) return aColname;
+		StringBuilder col = new StringBuilder(aColname.length() + 2);
 		col.append('"');
-		col.append(aColname.trim());
+		col.append(aColname);
 		col.append('"');
 		return col.toString();
 	}

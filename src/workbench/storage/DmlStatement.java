@@ -79,7 +79,7 @@ public class DmlStatement
 	public int execute(WbConnection aConnection)
 		throws SQLException
 	{
-		List streamsToClose = new LinkedList();
+		List<CloseableDataStream> streamsToClose = new LinkedList<CloseableDataStream>();
 		
 		PreparedStatement stmt = null;
 		int rows = -1;

@@ -11,12 +11,11 @@
  */
 package workbench.db;
 
+import java.util.ArrayList;
 import junit.framework.TestCase;
 import java.sql.Statement;
-import java.util.Iterator;
 import java.util.List;
 import workbench.TestUtil;
-import workbench.util.ArrayUtil;
 
 /**
  *
@@ -61,15 +60,19 @@ public class TableCreatorTest extends TestCase
 			
 			List<ColumnIdentifier> clist = con.getMetadata().getTableColumns(oldTable);
 			
-			ColumnIdentifier[] cols  = new ColumnIdentifier[clist.size()];
-			int i = 0;
+			
+			// Make sure the table is created with the same column 
+			// ordering as the original table.
+			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+			
 			for (ColumnIdentifier col : clist)
 			{
-				cols[i++] = col;
+				cols.add(col);
 			}
-			ColumnIdentifier c = cols[0];
-			cols[0] = cols[2];
-			cols[2] = c;
+			ColumnIdentifier c1 = cols.get(0);
+			ColumnIdentifier c2 = cols.get(2);
+			cols.set(0, c2);
+			cols.set(2, c1);
 			
 			TableCreator creator = new TableCreator(con, newTable, cols);
 			creator.createTable();

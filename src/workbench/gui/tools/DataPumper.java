@@ -1601,7 +1601,7 @@ public class DataPumper
 			if (keys.size() > 0)
 			{
 				Iterator<ColumnIdentifier> itr = keys.iterator();
-				result.append("\n     -" + WbCopy.PARAM_KEYS + "=");
+				result.append("\n      -" + WbCopy.PARAM_KEYS + "=");
 				while (itr.hasNext())
 				{
 					ColumnIdentifier col = itr.next();

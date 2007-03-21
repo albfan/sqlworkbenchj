@@ -21,7 +21,6 @@ import java.util.Iterator;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.text.BadLocationException;
-import workbench.resource.Settings;
 
 /**
  * An input handler converts the user's key strokes into concrete actions.
@@ -32,7 +31,7 @@ import workbench.resource.Settings;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.24 2006-12-03 11:27:15 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.25 2007-03-21 22:05:47 thomas Exp $
  * @see DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -127,9 +126,6 @@ public abstract class InputHandler extends KeyAdapter
 		actions.put("repeat",REPEAT);
 		actions.put("toggle-rect",TOGGLE_RECT);
 		actions.put("insert-char",INSERT_CHAR);
-		//actions.put("match-bracket", MATCH_BRACKET);
-		//actions.put("make-upper", MAKE_UPPER_CASE);
-		//actions.put("make-lower", MAKE_LOWER_CASE);
 	}
 
 	/**
@@ -504,6 +500,7 @@ public abstract class InputHandler extends KeyAdapter
 					textArea.getToolkit().beep();
 					return;
 				}
+				int linePos = textArea.getCaretPositionInLine(textArea.getCaretLine());
 				SyntaxDocument doc = textArea.getDocument();
 				try
 				{
@@ -642,7 +639,7 @@ public abstract class InputHandler extends KeyAdapter
 
 	public static class end implements ActionListener
 	{
-		private boolean select;
+		private final boolean select;
 
 		public end(boolean select)
 		{
@@ -653,9 +650,10 @@ public abstract class InputHandler extends KeyAdapter
 		{
 			JEditTextArea textArea = getTextArea(evt);
 
+			int line = textArea.getCaretLine();
 			int caret = textArea.getCaretPosition();
-
-			int lastOfLine = textArea.getLineEndOffset(textArea.getCaretLine()) - 1;
+			
+			int lastOfLine = textArea.getLineEndOffset(line) - 1;
 			int lastVisibleLine = textArea.getFirstLine()	+ textArea.getVisibleLines();
 			if(lastVisibleLine >= textArea.getLineCount())
 			{
@@ -665,7 +663,7 @@ public abstract class InputHandler extends KeyAdapter
 			{
 				lastVisibleLine -= (textArea.getElectricScroll() + 1);
 			}
-
+			
 			int lastVisible = textArea.getLineEndOffset(lastVisibleLine) - 1;
 			int lastDocument = textArea.getDocumentLength();
 
@@ -678,8 +676,7 @@ public abstract class InputHandler extends KeyAdapter
 				}
 				return;
 			}
-			else if(!Boolean.TRUE.equals(textArea.getClientProperty(
-				SMART_HOME_END_PROPERTY)))
+			else if(!Boolean.TRUE.equals(textArea.getClientProperty(SMART_HOME_END_PROPERTY)))
 				caret = lastOfLine;
 			else if(caret == lastVisible)
 				caret = lastDocument;
@@ -798,7 +795,7 @@ public abstract class InputHandler extends KeyAdapter
 				return;
 			}
 
-			textArea.setSelectedText(Settings.getInstance().getInternalEditorLineEnding());
+			textArea.setSelectedText("\n");
 		}
 	}
 
@@ -989,8 +986,7 @@ public abstract class InputHandler extends KeyAdapter
 			}
 
 			if(select)
-				textArea.select(textArea.getMarkPosition(),
-					caret - 1);
+				textArea.select(textArea.getMarkPosition(),caret - 1);
 			else
 				textArea.setCaretPosition(caret - 1);
 		}
@@ -1021,8 +1017,7 @@ public abstract class InputHandler extends KeyAdapter
 			int magic = textArea.getMagicCaretPosition();
 			if(magic == -1)
 			{
-				magic = textArea.offsetToX(line,
-					caret - textArea.getLineStartOffset(line));
+				magic = textArea.offsetToX(line,caret - textArea.getLineStartOffset(line));
 			}
 
 			caret = textArea.getLineStartOffset(line - 1) + textArea.xToOffset(line - 1,magic);

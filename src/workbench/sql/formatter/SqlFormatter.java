@@ -128,7 +128,7 @@ public class SqlFormatter
 	private int maxSubselectLength = 60;
 	private Set dbFunctions = Collections.EMPTY_SET;
 	private int selectColumnsPerLine = 1;
-	private String nl = null;
+	private static final String NL = "\n";
 	
 	public SqlFormatter(String aScript, int maxSubselectLength)
 	{
@@ -147,14 +147,13 @@ public class SqlFormatter
 			for (int i=0; i < indentCount; i++) this.indent.append(' ');
 		}
 		this.maxSubselectLength = maxSubselectLength;
-		this.nl = Settings.getInstance().getInternalEditorLineEnding();
 		this.dbFunctions = new HashSet();
 		addStandardFunctions(dbFunctions);
 	}
 
 	public String getLineEnding()
 	{
-		return nl;
+		return NL;
 	}
 	
 	public void setMaxColumnsPerSelect(int cols)
@@ -238,7 +237,7 @@ public class SqlFormatter
 	private void appendNewline()
 	{
 		if (this.result.length() == 0) return;
-		this.result.append(this.nl);
+		this.result.append(this.NL);
 		if (this.indent != null) this.result.append(indent);
 	}
 
@@ -564,7 +563,7 @@ public class SqlFormatter
 		String s = f.getFormattedSql();
 		if (f.getRealLength() < this.maxSubselectLength)
 		{
-			s = s.replaceAll(" *" + this.nl + " *", " ");
+			s = s.replaceAll(" *" + this.NL + " *", " ");
 		}
 		this.appendText(s.trim());
 	}
@@ -864,13 +863,13 @@ public class SqlFormatter
 		if (len == 0) return true;
 		
 		// simulates endsWith() on a StringBuilder
-		int pos = result.lastIndexOf(this.nl);
-		if (pos == len - nl.length()) return true; 
+		int pos = result.lastIndexOf(this.NL);
+		if (pos == len - NL.length()) return true; 
 		
 		// Current text does not end with a newline, but
 		// if the "current line" consist of the current indent, it 
 		// is considered as a "start of line" as well.
-		String remain = result.substring(pos + nl.length());
+		String remain = result.substring(pos + NL.length());
 		int indentLength = (indent == null ? 0 : indent.length());
 		if (remain.trim().length() == 0 && remain.length() == indentLength) return true;
 		return false;

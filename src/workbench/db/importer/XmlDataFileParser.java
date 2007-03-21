@@ -126,6 +126,11 @@ public class XmlDataFileParser
 		return StringUtil.listToString(this.columnsToImport, ',', false);
 	}
 
+	public String getLastRecord()
+	{
+		return null;
+	}
+	
 	public boolean hasErrors() { return this.hasErrors; }
 	public boolean hasWarnings() 
 	{ 

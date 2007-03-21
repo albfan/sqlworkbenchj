@@ -19,6 +19,8 @@ import workbench.db.AbstractConstraintReader;
 import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 
 /**
  *
@@ -79,7 +81,7 @@ public class OracleConstraintReader
 				if (constraint != null)
 				{
 					// NOT NULL constraints do not need to be taken into account
-          if (constraint.trim().endsWith("NOT NULL")) continue;
+          if (isDefaultNNConstraint(constraint)) continue;
 					if (count > 0)
 					{
 						result.append(nl);
@@ -111,7 +113,45 @@ public class OracleConstraintReader
 		return result.toString();
 	}
 
-	public void done()
+	/**
+	 * Checks if the constraint definition is a "default" Not null definition 
+	 * as created by Oracle. Those constraints will be included in the column 
+	 * definition already and do not need to be returned.
+	 * but a definition like COL_1 IS NOT NULL OR COL_2 IS NOT NULL must 
+	 * not be treated as a "default" constraint.
+	 * 
+	 * A "default" NN constraint is assumed if an identifier is 
+	 * immediately followed by the keyword IS NOT NULL and no further
+	 * definitions exist.
+	 */
+	protected boolean isDefaultNNConstraint(String definition)
 	{
+		try
+		{
+			SQLLexer lexer = new SQLLexer(definition);
+			SQLToken tok = lexer.getNextToken(false, false);
+			if (tok == null) return false;
+			
+			if (!tok.isIdentifier()) return false;
+			
+			// If no further tokens exist, this cannot be a not null constraint
+			tok = lexer.getNextToken(false, false);
+			if (tok == null) return false;
+			
+			SQLToken tok2 = lexer.getNextToken(false, false);
+			if (tok2 == null)
+			{
+				return "IS NOT NULL".equalsIgnoreCase(tok.getContents());
+			}
+			else 
+			{
+				return false;
+			}
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
 	}
+
 }

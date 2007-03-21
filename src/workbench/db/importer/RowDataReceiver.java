@@ -28,4 +28,10 @@ public interface RowDataReceiver
 	void importFinished();
 	void importCancelled();
 	void tableImportError();
+	
+	/**
+	 * Log an error with the receiver that might have occurred
+	 * during parsing of the source data. 
+	 */
+	void recordRejected(String record);
 }

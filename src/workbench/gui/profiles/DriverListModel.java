@@ -19,6 +19,7 @@ import javax.swing.ListModel;
 import javax.swing.event.ListDataListener;
 
 import workbench.db.DbDriver;
+import workbench.db.DbDriver;
 
 /**
  *
@@ -28,11 +29,11 @@ class DriverListModel
 	implements ListModel
 {
 
-	ArrayList drivers;
+	ArrayList<DbDriver> drivers;
 	/** Creates a new instance of ProfileListModel */
-	public DriverListModel(List aDriverList)
+	public DriverListModel(List<DbDriver> aDriverList)
 	{
-		this.drivers = new ArrayList(aDriverList.size());
+		this.drivers = new ArrayList<DbDriver>(aDriverList.size());
 		this.drivers.addAll(0, aDriverList);
 		Collections.sort(this.drivers, DbDriver.getNameComparator());
 	}
@@ -58,8 +59,7 @@ class DriverListModel
 
 	public DbDriver getDriver(int index)
 	{
-		DbDriver drv = (DbDriver)this.drivers.get(index);
-		return drv;
+		return this.drivers.get(index);
 	}
 
 	/**
@@ -92,7 +92,7 @@ class DriverListModel
 		index = 1;
 	}
 
-	public List getValues()
+	public List<DbDriver> getValues()
 	{
 		return this.drivers;
 	}

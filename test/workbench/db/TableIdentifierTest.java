@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import junit.framework.*;
+import workbench.TestUtil;
 
 /**
  *
@@ -27,6 +28,73 @@ public class TableIdentifierTest
 	public TableIdentifierTest(String testName)
 	{
 		super(testName);
+	}
+
+	public void testQuoteSpecialChars()
+	{
+		try
+		{
+			TestUtil util = new TestUtil("tableIdentifierTest");
+			WbConnection con = util.getConnection("tidTest");
+			String t = "\"123\".TABLENAME";
+			TableIdentifier tbl = new TableIdentifier(t);
+			tbl.setPreserveQuotes(true);
+			String exp = tbl.getTableExpression(con);
+			assertEquals("Wrong expression", t, exp);
+			
+			t = "table:bla";
+			tbl = new TableIdentifier(t);
+			tbl.setPreserveQuotes(true);
+			exp = tbl.getTableExpression(con);
+			assertEquals("Wrong expression", "\""+ t.toUpperCase() + "\"", exp);
+
+			t = "table\\bla";
+			tbl = new TableIdentifier(t);
+			tbl.setPreserveQuotes(true);
+			exp = tbl.getTableExpression(con);
+			assertEquals("Wrong expression", "\""+ t.toUpperCase() + "\"", exp);
+			
+			t = "table bla";
+			tbl = new TableIdentifier(t);
+			tbl.setPreserveQuotes(true);
+			exp = tbl.getTableExpression(con);
+			assertEquals("Wrong expression", "\""+ t.toUpperCase() + "\"", exp);
+
+			t = "\"TABLE.BLA\"";
+			tbl = new TableIdentifier(t);
+			//tbl.setPreserveQuotes(true);
+			exp = tbl.getTableExpression();
+			assertEquals("Wrong expression", t.toUpperCase(), exp);
+			assertNull("Schema present", tbl.getSchema());
+
+			t = "table;1";
+			tbl = new TableIdentifier(t);
+			//tbl.setPreserveQuotes(true);
+			exp = tbl.getTableExpression(con);
+			assertEquals("Wrong expression", "\"" + t.toUpperCase() + "\"", exp);
+			assertNull("Schema present", tbl.getSchema());
+
+			t = "table,1";
+			tbl = new TableIdentifier(t);
+			//tbl.setPreserveQuotes(true);
+			exp = tbl.getTableExpression(con);
+			assertEquals("Wrong expression", "\"" + t.toUpperCase() + "\"", exp);
+			assertNull("Schema present", tbl.getSchema());
+			
+			t = "123.TABLENAME";
+			tbl = new TableIdentifier(t);
+			exp = tbl.getTableExpression(con);
+			assertEquals("Wrong expression", "\"123\".TABLENAME", exp);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
 	}
 
 	public void testIdentifier()
@@ -55,7 +123,8 @@ public class TableIdentifierTest
 		sql = "\"123\".mytable";
 		tbl = new TableIdentifier(sql);
 		tbl.setPreserveQuotes(true);
-		System.out.println("table=" + tbl.getTableExpression());
+		assertEquals("mytable", tbl.getTableName());
+		assertEquals("\"123\"", tbl.getSchema());
 		
 	}
 	

@@ -14,7 +14,6 @@ package workbench.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -28,13 +27,13 @@ import workbench.util.SqlUtil;
 public class TypeMapper
 {
 	private WbConnection dbConn;
-	private HashMap typeInfo;
-	private List ignoreTypes;
+	private HashMap<Integer, String> typeInfo;
+	private List<String> ignoreTypes;
 
-	public TypeMapper(WbConnection aConnection, List ignoreList)
+	public TypeMapper(WbConnection aConnection)
 	{
 		this.dbConn = aConnection;
-		this.ignoreTypes = ignoreList;
+		this.ignoreTypes = aConnection.getDbSettings().getDataTypesToIgnore();
 		this.createTypeMap();
 	}
 
@@ -42,7 +41,7 @@ public class TypeMapper
 	{
 		Integer key = new Integer(type);
 		if (!this.typeInfo.containsKey(key)) return SqlUtil.getTypeName(type);
-		String name = (String)this.typeInfo.get(key);
+		String name = this.typeInfo.get(key);
 
 		StringBuilder result = new StringBuilder(30);
 		result.append(name);
@@ -85,7 +84,7 @@ public class TypeMapper
 	private void createTypeMap()
 	{
 		ResultSet rs = null;
-		this.typeInfo = new HashMap(27);
+		this.typeInfo = new HashMap<Integer, String>(27);
 		try
 		{
 			rs = this.dbConn.getSqlConnection().getMetaData().getTypeInfo();
@@ -98,12 +97,6 @@ public class TypeMapper
 				if (type == java.sql.Types.ARRAY || type == java.sql.Types.OTHER) continue;
 				if (this.ignoreTypes.contains(name)) continue;
 
-//				TypeInfo info = new TypeInfo();
-//				info.name = name;
-//				info.type = type;
-//				info.precision = rs.getLong(3);
-//				info.min_scale = rs.getLong(14);
-//				info.max_scale = rs.getLong(15);
 				Integer key = new Integer(type);
 				if (this.typeInfo.containsKey(key))
 				{
@@ -119,20 +112,12 @@ public class TypeMapper
 		catch (SQLException e)
 		{
 			LogMgr.logError("TypeMapper.createTypeMap()", "Error reading type info for target connection", e);
-			this.typeInfo = new HashMap();
+			this.typeInfo = new HashMap<Integer, String>();
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
+			SqlUtil.closeResult(rs);
 		}
 	}
 }
 
-//class TypeInfo
-//{
-//	String name;
-//	int type;
-//	long precision;
-//	long min_scale;
-//	long max_scale;
-//}

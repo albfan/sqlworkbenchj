@@ -14,7 +14,6 @@ package workbench.gui.components;
 import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Window;
@@ -187,7 +186,6 @@ public class EditWindow
 		}
 
 		this.addWindowListener(this);
-    WbSwingUtilities.repaintLater(this);
 	}
 
 	public void setInfoText(String text)
@@ -229,7 +227,6 @@ public class EditWindow
 
 	public void windowActivated(java.awt.event.WindowEvent e)
 	{
-		editor.requestFocus();
 	}
 	
 	public void windowClosed(java.awt.event.WindowEvent e)
@@ -256,6 +253,8 @@ public class EditWindow
 	
 	public void windowOpened(java.awt.event.WindowEvent e)
 	{
+		editor.requestFocus();
+    WbSwingUtilities.repaintLater(editor);
 	}
 	
 }

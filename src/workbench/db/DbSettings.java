@@ -36,10 +36,6 @@ public class DbSettings
 	private boolean reportsRealSizeAsDisplaySize = false;
 	private boolean allowExtendedCreateStatement = true;
 	
-	// This is set to true if identifiers starting with
-	// a digit should always be quoted. This will 
-	private boolean quoteIdentifierWithDigits = false;
-	
 	private boolean allowsMultipleGetUpdateCounts = true;
 	
 	private Map indexTypeMapping;
@@ -56,13 +52,12 @@ public class DbSettings
 		String quote = settings.getProperty("workbench.db.neverquote","");
 		this.neverQuoteObjects = quote.indexOf(this.getDbId()) > -1;
 		this.trimDefaults = settings.getBoolProperty("workbench.db." + getDbId() + ".trimdefaults", true);
-		this.quoteIdentifierWithDigits = settings.getBoolProperty("workbench.db." + getDbId() + ".quotedigits", false);
 		this.allowsMultipleGetUpdateCounts = settings.getBoolProperty("workbench.db." + getDbId() + ".multipleupdatecounts", true);
 		this.reportsRealSizeAsDisplaySize = settings.getBoolProperty("workbench.db." + getDbId() + ".charsize.usedisplaysize", false);
 		this.allowExtendedCreateStatement = settings.getBoolProperty("workbench.db." + getDbId() + ".extended.createstmt", true);
 	}
 	
-	private String getDbId() { return this.dbId; }
+	String getDbId() { return this.dbId; }
 
 	public boolean allowsExtendedCreateStatement() { return allowExtendedCreateStatement; }
 	public boolean allowsMultipleGetUpdateCounts() { return this.allowsMultipleGetUpdateCounts; }
@@ -70,7 +65,6 @@ public class DbSettings
 
 	public boolean ddlNeedsCommit() { return ddlNeedsCommit; }
 	public boolean neverQuoteObjects() { return neverQuoteObjects; }
-	public boolean quoteIdentifierWithDigits() { return quoteIdentifierWithDigits; }
 	
 	public boolean trimDefaults() { return trimDefaults; }
 	public boolean useJdbcCommit() { return useJdbcCommit; }
@@ -325,5 +319,17 @@ public class DbSettings
 	{
 		if (StringUtil.isEmptyString(deferrable)) return true;
 		return (deferrable.equals(getRuleDisplay(DatabaseMetaData.importedKeyNotDeferrable)));
+	}
+
+	/**
+	 * Retrieve the list of datatypes that should be ignored for the current 
+	 * dbms. The names in that list must match the names returned   
+	 * by DatabaseMetaData.getTypeInfo() 
+	 */
+	public List<String> getDataTypesToIgnore()
+	{
+		String types = Settings.getInstance().getProperty("workbench.ignoretypes." + getDbId(), null);;
+		List<String> ignored = StringUtil.stringToList(types, ",", true, true);
+		return ignored;
 	}
 }

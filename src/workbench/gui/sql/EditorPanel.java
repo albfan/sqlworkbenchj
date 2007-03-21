@@ -30,14 +30,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -72,8 +69,6 @@ import workbench.gui.actions.ReplaceAction;
 import workbench.gui.actions.UnCommentAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ExtensionFileFilter;
-import workbench.gui.components.ReplacePanel;
-import workbench.gui.components.SearchCriteriaPanel;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
@@ -83,8 +78,6 @@ import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.FormattableSql;
-import workbench.interfaces.Replaceable;
-import workbench.interfaces.Searchable;
 import workbench.interfaces.TextContainer;
 import workbench.interfaces.TextFileContainer;
 import workbench.log.LogMgr;
@@ -697,7 +690,6 @@ public class EditorPanel
 		boolean result = false;
 		
 		BufferedReader reader = null;
-		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
 		SyntaxDocument doc = null;
 		
 		try
@@ -749,13 +741,13 @@ public class EditorPanel
 			// when reading everything into a buffer, and then call insertString()
 			// only once, but that will cost too much memory (the memory footprint
 			// of the editor is already too high...)
-			int lines = FileUtil.readLines(reader, lineBuffer, numLines, lineEnding);
+			int lines = FileUtil.readLines(reader, lineBuffer, numLines, "\n");
 			while (lines > 0)
 			{
 				doc.insertString(pos, lineBuffer.toString(), null);
 				pos += lineBuffer.length();
 				lineBuffer.setLength(0);
-				lines = FileUtil.readLines(reader, lineBuffer, numLines, lineEnding);
+				lines = FileUtil.readLines(reader, lineBuffer, numLines, "\n");
 			}
 			
 			doc.resumeUndo();

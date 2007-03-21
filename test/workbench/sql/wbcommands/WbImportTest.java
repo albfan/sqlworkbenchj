@@ -11,6 +11,7 @@
  */
 package workbench.sql.wbcommands;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.sql.Date;
 import java.sql.Time;
@@ -18,6 +19,7 @@ import java.sql.Timestamp;
 import junit.framework.*;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -1888,6 +1890,66 @@ public class WbImportTest
 		}
 	}
 	
+	public void testBadFile()
+	{
+		try
+		{
+			File importFile  = new File(this.basedir, "bad_import.txt");
+			File badFile = new File(this.basedir, "import.bad");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("nr\tfirstname\tlastname");
+			out.println("1\tMary\tMoviestar");
+			out.println("2\tHarry\tHandsome");
+			out.println("1\tZaphod\tBeeblebrox");
+			out.close();
+			
+			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=true -continueonerror=true -table=junit_test_pk -badFile='" + badFile.getCanonicalPath() + "'");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			assertEquals("Bad file not created", true, badFile.exists());
+			
+			BufferedReader r = new BufferedReader(new FileReader(badFile));
+			String line = r.readLine();
+			r.close();
+			assertEquals("Wrong record rejected", "1\tZaphod\tBeeblebrox", line);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr from junit_test_pk order by nr");
+			int row = 0;
+			while (rs.next())
+			{
+				int id = rs.getInt(1);
+				if (row == 0)
+				{
+					assertEquals("Wrong ID imported", 1, id);
+				}
+				else if (row == 1)
+				{
+					assertEquals("Wrong ID imported", 2, id);
+				}
+				else 
+				{
+					fail("Too many rows");
+				}
+				row ++;
+			}
+			rs.close();
+			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
+			if (!badFile.delete())
+			{
+				fail("Could not delete bad file: " + badFile.getCanonicalPath());
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	private WbConnection prepareDatabase()
 		throws SQLException, ClassNotFoundException
 	{
@@ -1896,6 +1958,7 @@ public class WbImportTest
 		
 		Statement stmt = wb.createStatement();
 		stmt.executeUpdate("CREATE TABLE junit_test (nr integer, firstname varchar(100), lastname varchar(100))");
+		stmt.executeUpdate("CREATE TABLE junit_test_pk (nr integer primary key, firstname varchar(100), lastname varchar(100))");
 		stmt.executeUpdate("CREATE TABLE datatype_test (int_col integer, double_col double, char_col varchar(50), date_col date, time_col time, ts_col timestamp)");
 		stmt.executeUpdate("CREATE TABLE blob_test (nr integer, binary_data BINARY)");
 		stmt.executeUpdate("CREATE TABLE clob_test (nr integer, text_data LONGVARCHAR)");

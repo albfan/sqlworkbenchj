@@ -11,7 +11,6 @@
  */
 package workbench.storage;
 
-import java.text.CollationKey;
 import java.text.Collator;
 import java.util.Comparator;
 import java.util.Locale;
@@ -150,7 +149,7 @@ public class RowDataListSorter
 			}
 			return result;
 		}
-		catch (ClassCastException e)
+		catch (Exception e)
 		{
 			// should not happen
 		}

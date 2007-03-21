@@ -139,6 +139,11 @@ public class DataStoreImporter
 		if (this.rowMonitor != null) this.rowMonitor.setCurrentRow(currentRowNumber, -1);		
 	}
 	
+	public void recordRejected(String record)
+	{
+		
+	}
+	
 	public void setTableCount(int total)
 	{
 	}

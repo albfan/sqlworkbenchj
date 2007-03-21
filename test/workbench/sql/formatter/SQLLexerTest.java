@@ -90,7 +90,8 @@ public class SQLLexerTest extends TestCase
 					"left join\n"+
 					"left        outer join\n"+
 					"right join\n" + 
-					"right \nouter\n\n join\njoin";
+					"right \nouter\n\n join\njoin\n" + 
+					"is not null";
 		tokens = getTokenList(sql);
 		for (int i = 0; i < tokens.size(); i++)
 		{
@@ -155,6 +156,9 @@ public class SQLLexerTest extends TestCase
 					break;
 				case 18:
 					assertEquals("JOIN",v);
+					break;
+				case 19:
+					assertEquals("IS NOT NULL",v);
 					break;
 			}
 			

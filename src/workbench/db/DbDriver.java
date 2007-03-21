@@ -295,8 +295,8 @@ public class DbDriver
 				// it seems that the Oracle 10 driver does not 
 				// add this to the properties automatically
 				// (as the drivers for 8 and 9 did)
-				user = System.getProperty("user.name");
-				props.put("v$session.osuser", user);
+				user = System.getProperty("user.name",null);
+				if (user != null) props.put("v$session.osuser", user);
 			}
 			else if (url.startsWith("jdbc:inetdae"))
 			{

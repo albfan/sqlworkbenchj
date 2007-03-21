@@ -117,7 +117,7 @@ import java.io.*;
 
 /*
 LineTerminator = \r|\n|\r\n
-\^[ \t]*@[a-zA-Z0-9~-_.;#ß+|]+{LineTerminator}\$|
+\^[ \t]*@[a-zA-Z0-9~-_.;#ï¿½+|]+{LineTerminator}\$|
 */
 
 keyword=("ABORT"|
@@ -624,6 +624,7 @@ PRIMARY[ \t\r\n]+KEY|
 FOREIGN[ \t\r\n]+KEY|
 IS[ \t\r\n]+NULL|
 NOT[ \t\r\n]+NULL|
+IS[ \t\r\n]+NOT[ \t\r\n]+NULL|
 UNION[ \t\r\n]+ALL|
 GROUP[ \t\r\n]+BY|
 ORDER[ \t\r\n]+BY|
