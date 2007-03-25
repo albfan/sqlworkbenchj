@@ -11,8 +11,6 @@
  */
 package workbench.db;
 
-import workbench.util.StringUtil;
-
 /**
  *
  * @author  support@sql-workbench.net
@@ -52,31 +50,48 @@ public class GetMetaDataSql
 
 	private String getSelectSql()
 	{
-		boolean needsAnd;
+		boolean needsAnd = false;
+		boolean needsWhere = false;
 		StringBuilder sql = new StringBuilder(baseSql);
 		if (baseSql.toLowerCase().indexOf("where") == -1)
 		{
-			sql.append(" WHERE ");
-			needsAnd = false;
+			needsWhere = true;
 		}
 		else
 		{
 			needsAnd = true;
-		}	
+		}
+		
 		if (schema != null && schemaField != null)
 		{
+			if (needsWhere) 
+			{
+				sql.append(" WHERE ");
+				needsWhere = false;
+			}
+			
 			if (needsAnd) sql.append(" AND ");
 			sql.append(schemaField + " = '" + schema + "'");
 			needsAnd = true;
 		}
 		if (catalog != null && catalogField != null)
 		{
+			if (needsWhere) 
+			{
+				sql.append(" WHERE ");
+				needsWhere = false;
+			}
 			if (needsAnd) sql.append(" AND ");
 			sql.append(catalogField + " = '" + catalog + "'");
 			needsAnd = true;
 		}
 		if (objectName != null && objectNameField != null)
 		{
+			if (needsWhere) 
+			{
+				sql.append(" WHERE ");
+				needsWhere = false;
+			}
 			if (needsAnd) sql.append(" AND ");
 			sql.append(objectNameField + " = '" + objectName + "'");
 		}
@@ -150,27 +165,9 @@ public class GetMetaDataSql
 	 * @param schema New value of property schema.
 	 *
 	 */
-	public void setSchema(String schema)
+	public void setSchema(String schem)
 	{
-		if (schema == null) 
-		{
-			this.schema = null;
-		}
-		else
-		{
-			if (this.useLowerCase)
-			{
-				this.schema = StringUtil.trimQuotes(schema.toLowerCase());
-			}
-			else if (this.useUpperCase)
-			{
-				this.schema = StringUtil.trimQuotes(schema.toUpperCase());
-			}
-			else
-			{
-				this.schema = StringUtil.trimQuotes(schema);
-			}
-		}
+		this.schema = schem;
 	}
 	
 	/** Getter for property catalog.
@@ -186,27 +183,9 @@ public class GetMetaDataSql
 	 * @param catalog New value of property catalog.
 	 *
 	 */
-	public void setCatalog(String catalog)
+	public void setCatalog(String cat)
 	{
-		if (catalog == null) 
-		{
-			this.catalog = null;
-		}
-		else
-		{
-			if (this.useLowerCase)
-			{
-				this.catalog = StringUtil.trimQuotes(catalog.toLowerCase());
-			}
-			else if (this.useUpperCase)
-			{
-				this.catalog = StringUtil.trimQuotes(catalog.toUpperCase());
-			}
-			else
-			{
-				this.catalog = StringUtil.trimQuotes(catalog);
-			}
-		}
+		this.catalog = cat;
 	}
 	
 	/** Getter for property objectName.
@@ -224,25 +203,7 @@ public class GetMetaDataSql
 	 */
 	public void setObjectName(String objectName)
 	{
-		if (objectName == null) 
-		{
-			this.objectName = null;
-		}
-		else
-		{
-			if (this.useLowerCase)
-			{
-				this.objectName = StringUtil.trimQuotes(objectName.toLowerCase());
-			}
-			else if (this.useUpperCase)
-			{
-				this.objectName = StringUtil.trimQuotes(objectName.toUpperCase());
-			}
-			else
-			{
-				this.objectName = StringUtil.trimQuotes(objectName);
-			}
-		}
+		this.objectName = objectName;
 	}
 	
 	public String toString() { return getSql(); }

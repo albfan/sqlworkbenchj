@@ -21,7 +21,6 @@ import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
-import workbench.gui.actions.RunStatement;
 import workbench.gui.components.DropDownButton;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.sql.EditorPanel;
@@ -41,7 +40,6 @@ public class DbObjectSourcePanel
 {
 	protected EditorPanel sourceEditor;
 	protected ReloadAction reloadSource;
-	protected RunStatement recreateObject;
 	protected DropDownButton editButton;
 	private EditorTabSelectMenu selectTabMenu;
 	private MainWindow parentWindow;
@@ -61,11 +59,10 @@ public class DbObjectSourcePanel
 		this.setLayout(new BorderLayout());
 		WbToolbar toolbar = new WbToolbar();
 	
-		if (recreateObject != null) toolbar.add(recreateObject);
 		if (reloadSource != null) toolbar.add(reloadSource);
 		
 		this.add(this.sourceEditor, BorderLayout.CENTER);
-		if (recreateObject != null || reloadSource != null)
+		if (reloadSource != null)
 		{
 			this.add(toolbar, BorderLayout.NORTH);
 		}
@@ -128,7 +125,7 @@ public class DbObjectSourcePanel
 	{
 		boolean hasText = !StringUtil.isEmptyString(sql);
 		if (reloadSource != null) reloadSource.setEnabled(hasText);
-		if (recreateObject != null) recreateObject.setEnabled(hasText);
+
 		if (editButton != null) editButton.setEnabled(hasText);
 		if (hasText && sql.startsWith(SourceStatementsHelp.VIEW_ERROR_START) || 
 				sql.startsWith(SourceStatementsHelp.PROC_ERROR_START) ||

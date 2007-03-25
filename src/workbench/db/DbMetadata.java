@@ -1578,6 +1578,21 @@ public class DbMetadata
 	{
 		return this.procedureReader.getProcedures(aCatalog, aSchema);
 	}
+
+	/**
+	 * Return a list of stored procedures that are available
+	 * in the database. This call is delegated to the
+	 * currently defined {@link workbench.db.ProcedureReader}
+	 * If no DBMS specific reader is used, this is the {@link workbench.db.JdbcProcedureReader}
+	 * 
+	 * @return a DataStore with the list of procedures.
+	 */
+	public DataStore getProceduresAndTriggers(String aCatalog, String aSchema)
+		throws SQLException
+	{
+		DataStore ds = this.procedureReader.getProcedures(aCatalog, aSchema);
+		return ds;
+	}	
 	
 	/**
 	 * Return a List of {@link workbench.db.ProcedureDefinition} objects
@@ -2435,30 +2450,44 @@ public class DbMetadata
 	public static final int COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT = 2;
 
 	/**
+	 * Return a list of triggers available in the given schema.
+	 */
+	public DataStore getTriggers(String catalog, String schema)
+		throws SQLException
+	{
+		return getTriggers(catalog, schema, null);
+	}
+	
+	/**
 	 *	Return the list of defined triggers for the given table.
 	 */
-//	public DataStore getTableTriggers(String aCatalog, String aSchema, String aTable)
 	public DataStore getTableTriggers(TableIdentifier table)
 		throws SQLException
 	{
-		String[] cols = {"NAME", "TYPE", "EVENT"};
+		TableIdentifier tbl = table.createCopy();
+		tbl.adjustCase(this.dbConnection);
+		return getTriggers(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
+	}
+	
+	protected DataStore getTriggers(String catalog, String schema, String tableName)
+		throws SQLException
+	{
+		final String[] cols = {"NAME", "TYPE", "EVENT"};
 		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		final int sizes[] =   {30, 30, 20};
 
 		DataStore result = new DataStore(cols, types, sizes);
-
-		TableIdentifier tbl = table.createCopy();
-		tbl.adjustCase(this.dbConnection);
-
+		
 		GetMetaDataSql sql = metaSqlMgr.getListTriggerSql();
 		if (sql == null)
 		{
 			return result;
 		}
 
-		sql.setSchema(tbl.getSchema());
-		sql.setCatalog(tbl.getCatalog());
-		sql.setObjectName(tbl.getTableName());
+		sql.setSchema(schema);
+		sql.setCatalog(catalog);
+		sql.setObjectName(tableName);
+
 		Statement stmt = this.dbConnection.createStatementForQuery();
 		String query = this.adjustHsqlQuery(sql.getSql());
 
@@ -2492,6 +2521,7 @@ public class DbMetadata
 
 	/**
 	 * Retrieve the SQL Source of the given trigger.
+	 * 
 	 * @param aCatalog The catalog in which the trigger is defined. This should be null if the DBMS does not support catalogs
 	 * @param aSchema The schema in which the trigger is defined. This should be null if the DBMS does not support schemas
 	 * @param aTriggername

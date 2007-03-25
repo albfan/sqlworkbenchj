@@ -16,7 +16,6 @@ import java.io.File;
 import java.util.HashMap;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 

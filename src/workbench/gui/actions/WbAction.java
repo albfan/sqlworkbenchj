@@ -433,11 +433,6 @@ public class WbAction
 		this.putValue(Action.SMALL_ICON, icon);
 	}
 	
-	protected void setBlankIcon()
-	{
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("blank"));
-	}
-	
 	public void removeIcon()
 	{
 		this.putValue(Action.SMALL_ICON, null);

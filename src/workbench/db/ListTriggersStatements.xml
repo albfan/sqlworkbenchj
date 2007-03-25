@@ -28,9 +28,6 @@ and   t.schemaid = s.schemaid
     <void property="schemaField">
      <string>s.schemaname</string>
     </void>
-    <void property="useUpperCase">
-     <boolean>true</boolean>
-    </void>
    </object>
   </void>
 
@@ -60,9 +57,6 @@ from syscat.triggers</string>
     <void property="schemaField">
      <string>tabschema</string>
     </void>
-    <void property="useUpperCase">
-     <boolean>true</boolean>
-    </void>
    </object>
   </void>
 	
@@ -80,9 +74,6 @@ from syscat.triggers</string>
     </void>
     <void property="schemaField">
      <string>owner</string>
-    </void>
-    <void property="useUpperCase">
-     <boolean>true</boolean>
     </void>
    </object>
   </void>
@@ -158,9 +149,6 @@ from syscat.triggers</string>
     <void property="schemaField">
      <string>owner</string>
     </void>
-    <void property="useUpperCase">
-     <boolean>true</boolean>
-    </void>
    </object>
   </void>
 	
@@ -189,9 +177,6 @@ from syscat.triggers</string>
     </void>
     <void property="orderBy">
      <string>ORDER BY trigger_name</string>
-    </void>
-    <void property="userLowerCase">
-     <boolean>true</boolean>
     </void>
    </object>
   </void>
@@ -310,9 +295,6 @@ FROM rdb$triggers
     <void property="objectNameField"> 
      <string>rdb$relation_name</string> 
     </void> 
-    <void property="useUpperCase"> 
-     <boolean>true</boolean> 
-    </void> 
     <void property="schemaField"> 
      <string>RDB$OWNER_NAME</string> 
     </void> 
@@ -342,9 +324,6 @@ where rdef.rule_name = rlist.rule_name
     </void> 
     <void property="objectNameField"> 
      <string>rlist.table_name</string> 
-    </void> 
-    <void property="useUpperCase"> 
-     <boolean>false</boolean> 
     </void> 
     <void property="schemaField"> 
      <string>rlist.rule_owner</string> 

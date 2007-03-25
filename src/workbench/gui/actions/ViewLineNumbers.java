@@ -67,8 +67,6 @@ public class ViewLineNumbers extends WbAction
 				this.toggleMenu.setMnemonic((int)mnemonic);
 			}
 			this.toggleMenu.setText(text);
-			//this.toggleMenu.setIconTextGap(0);
-			//this.toggleMenu.setIcon(ResourceMgr.getImage("blank"));
 			this.toggleMenu.setSelected(this.switchedOn);
 		}
 		aMenu.add(this.toggleMenu);

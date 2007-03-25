@@ -44,6 +44,7 @@ public class DbExplorerOptionsPanel
 		set.setStoreExplorerObjectType(this.rememberObject.isSelected());
 		set.setProperty("workbench.dbexplorer.defTableType", this.defTableTypeField.getText());
 		set.setAutoGeneratePKName(autogeneratePK.isSelected());
+		set.setShowTriggerPanel(showTriggerPanel.isSelected());
 	}
 
 	public void restoreSettings()
@@ -71,6 +72,8 @@ public class DbExplorerOptionsPanel
     rememberObject = new javax.swing.JCheckBox();
     autogeneratePkLabel = new WbCheckBoxLabel();
     autogeneratePK = new javax.swing.JCheckBox();
+    showTriggerPanelLabel = new WbCheckBoxLabel();
+    showTriggerPanel = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -110,7 +113,7 @@ public class DbExplorerOptionsPanel
     retrieveDbExplorer.setIconTextGap(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
@@ -122,7 +125,7 @@ public class DbExplorerOptionsPanel
     retrieveDbExplorerLabel.setToolTipText(ResourceMgr.getDescription("LblRetrieveDbExplorer"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
     add(retrieveDbExplorerLabel, gridBagConstraints);
@@ -131,7 +134,7 @@ public class DbExplorerOptionsPanel
     defTableTypeLabel.setToolTipText(ResourceMgr.getDescription("LblDefTableType"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(11, 12, 0, 0);
@@ -142,7 +145,7 @@ public class DbExplorerOptionsPanel
     defTableTypeField.setMinimumSize(new java.awt.Dimension(72, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
@@ -154,7 +157,7 @@ public class DbExplorerOptionsPanel
     rememberObjectLabel.setToolTipText(ResourceMgr.getDescription("LblRememberObjectType"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
     add(rememberObjectLabel, gridBagConstraints);
@@ -165,7 +168,7 @@ public class DbExplorerOptionsPanel
     rememberObject.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 9, 0, 0);
@@ -176,7 +179,7 @@ public class DbExplorerOptionsPanel
     autogeneratePkLabel.setToolTipText(ResourceMgr.getDescription("LblGeneratePkName"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
     add(autogeneratePkLabel, gridBagConstraints);
@@ -187,12 +190,33 @@ public class DbExplorerOptionsPanel
     autogeneratePK.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 9, 0, 0);
     add(autogeneratePK, gridBagConstraints);
 
+    showTriggerPanelLabel.setLabelFor(showTriggerPanel);
+    showTriggerPanelLabel.setText(ResourceMgr.getString("LblShowTriggerPanel"));
+    showTriggerPanelLabel.setToolTipText(ResourceMgr.getDescription("LblShowTriggerPanel"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
+    add(showTriggerPanelLabel, gridBagConstraints);
+
+    showTriggerPanel.setSelected(Settings.getInstance().getShowTriggerPanel());
+    showTriggerPanel.setText("");
+    showTriggerPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    showTriggerPanel.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 9, 0, 5);
+    add(showTriggerPanel, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -207,6 +231,8 @@ public class DbExplorerOptionsPanel
   private javax.swing.JCheckBox retrieveDbExplorer;
   private javax.swing.JLabel retrieveDbExplorerLabel;
   private javax.swing.JCheckBox showDbExplorer;
+  private javax.swing.JCheckBox showTriggerPanel;
+  private javax.swing.JLabel showTriggerPanelLabel;
   // End of variables declaration//GEN-END:variables
 
 }

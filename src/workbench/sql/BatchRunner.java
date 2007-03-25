@@ -12,6 +12,7 @@
 package workbench.sql;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
@@ -248,6 +249,14 @@ public class BatchRunner
 				this.setBaseDir(dir);
 				
 				error = this.executeScript(fo);
+			}
+			catch (FileNotFoundException nf)
+			{
+				error = true;
+				String msg = ResourceMgr.getString("ErrFileNotFound");
+				msg = StringUtil.replace(msg, "%file%", file);
+				printMessage(msg);
+				LogMgr.logError("BatchRunner", ResourceMgr.getString("MsgBatchScriptFileError") + " " + file, nf);
 			}
 			catch (Exception e)
 			{
@@ -612,6 +621,7 @@ public class BatchRunner
 		
 		String success = cmdLine.getValue(WbManager.ARG_SUCCESS_SCRIPT);
 		String error = cmdLine.getValue(WbManager.ARG_ERROR_SCRIPT);
+		String feed = cmdLine.getValue(WbManager.ARG_FEEDBACK);
 		boolean feedback = cmdLine.getBoolean(WbManager.ARG_FEEDBACK, true);
 
 		BatchRunner runner = new BatchRunner(scripts);
@@ -630,7 +640,18 @@ public class BatchRunner
 		runner.setSuccessScript(success);
 		runner.setProfile(profile);
 		runner.setVerboseLogging(feedback);
-		runner.showTiming = cmdLine.getBoolean(WbManager.ARG_SHOW_TIMING, true);
+		
+		// if no showTiming argument was provided but feedback was disabled
+		// disable the display of the timing information as well.
+		String tim = cmdLine.getValue(WbManager.ARG_SHOW_TIMING);
+		if (tim == null && feed != null && !feedback)  
+		{
+			runner.showTiming = false;
+		}
+		else
+		{
+			runner.showTiming = cmdLine.getBoolean(WbManager.ARG_SHOW_TIMING, true);
+		}
 		runner.showProgress = showProgress;
 		if (showProgress)
 		{

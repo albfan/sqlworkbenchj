@@ -39,7 +39,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableCellRenderer;
 
 import workbench.db.DbMetadata;
-import workbench.db.ProcedureCreator;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -53,7 +52,6 @@ import workbench.gui.menu.GenerateScriptMenuItem;
 import workbench.gui.renderer.ProcStatusRenderer;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
-import workbench.interfaces.RunnableStatement;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -68,7 +66,6 @@ import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.WbTabbedPane;
 import workbench.interfaces.CriteriaPanel;
 import workbench.storage.DataStore;
-import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.WbWorkspace;
 
@@ -80,9 +77,11 @@ import workbench.util.WbWorkspace;
  */
 public class ProcedureListPanel
 	extends JPanel
-	implements ListSelectionListener, Reloadable, ActionListener, RunnableStatement
+	implements ListSelectionListener, Reloadable, ActionListener
 {
-	//<editor-fold defaultstate="collapsed" desc="Variables">
+	private static final String DROP_CMD = "drop-object";
+	private static final String COMPILE_CMD = "compile-procedure";
+	
 	private WbConnection dbConnection;
 	private JPanel listPanel;
 	private CriteriaPanel findPanel;
@@ -100,11 +99,6 @@ public class ProcedureListPanel
 	private JLabel infoLabel;
 	private boolean isRetrieving;
 	protected ProcStatusRenderer statusRenderer;
-	//</editor-fold>
-	
-//	private static final String SCRIPT_CMD = "create-script";
-	private static final String DROP_CMD = "drop-object";
-	private static final String COMPILE_CMD = "compile-procedure";
 
 	public ProcedureListPanel(MainWindow parent) 
 		throws Exception
@@ -200,7 +194,6 @@ public class ProcedureListPanel
 		this.dropTableItem.setActionCommand(DROP_CMD);
 		this.dropTableItem.addActionListener(this);
 		this.dropTableItem.setEnabled(false);
-		this.dropTableItem.setIcon(ResourceMgr.getImage("blank"));
 		popup.add(this.dropTableItem);
 	}
 
@@ -235,7 +228,6 @@ public class ProcedureListPanel
 			this.recompileItem.setActionCommand(COMPILE_CMD);
 			this.recompileItem.addActionListener(this);
 			this.recompileItem.setEnabled(false);
-			this.recompileItem.setIcon(ResourceMgr.getImage("blank"));
 			popup.add(this.recompileItem);
 		}
 		else
@@ -262,7 +254,6 @@ public class ProcedureListPanel
 			this.reset();
 			this.shouldRetrieve = true;
 		}
-
 	}
 
 	public void panelSelected()
@@ -415,13 +406,20 @@ public class ProcedureListPanel
 		final String schema = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
 		final String catalog = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
 		final int type = this.procList.getDataStore().getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
-		retrieveProcDefinition(catalog, schema, proc, type);
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				retrieveProcDefinition(catalog, schema, proc, type);
+			}
+		});
 	}
 
 	private void retrieveProcDefinition(String catalog, String schema, String proc, int type)
 	{
-		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		if (this.dbConnection == null) return;
+		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
+		
 		DbMetadata meta = dbConnection.getMetadata();
 		Container parent = this.getParent();
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -493,14 +491,7 @@ public class ProcedureListPanel
 		if (bodyPos == -1) bodyPos = 0;
 		
 		String regex = "(PROCEDURE|FUNCTION)\\s+" + object;
-//		if (type == DatabaseMetaData.procedureNoResult)
-//		{
-//			regex = "PROCEDURE\\s*" + object + "\\s*IS|PROCEDURE\\s*" + object + "\\s*\\([^;]*\\)\\s*IS";
-//		}
-//		else
-//		{
-//			regex = "FUNCTION\\s*" + object;
-//		}
+
 		Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE + Pattern.DOTALL);
 		
 		Matcher m = p.matcher(sql);
@@ -619,44 +610,7 @@ public class ProcedureListPanel
 		this.reset();
 		this.retrieve();
 	}
-
-	/**
-	 * Execute the SQL Source currently in the editor
-	 */
-	public void runStatement()
-	{
-		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
-		if (this.isRetrieving) return;
-		
-		int row = this.procList.getSelectedRow();
-		if (row < 0) return;
-		
-		try
-		{
-			source.setEditable(false);
-			WbSwingUtilities.showWaitCursor(this);
-			
-			String sql = source.getText();
-			String proc = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
-			String schema = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
-			String catalog = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
-			
-			ProcedureCreator creator = new ProcedureCreator(this.dbConnection, catalog, schema, proc, sql);
-			creator.recreate();
-			String msg = creator.getType() + " " + ResourceMgr.getString("MsgReCreated");
-			WbSwingUtilities.showMessage(this, msg);
-		}
-		catch (Exception e)
-		{
-			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(e));
-		}
-		finally
-		{
-			this.source.setEditable(true);
-			WbSwingUtilities.showDefaultCursor(this);
-		}
-
-	}
+	
 	public void actionPerformed(ActionEvent e)
 	{
 		String command = e.getActionCommand();

@@ -80,6 +80,7 @@ public class DbExplorerPanel
 	protected TableListPanel tables;
 	protected TableSearchPanel searchPanel;
 	protected ProcedureListPanel procs;
+	protected TriggerListPanel triggers;
 	protected JComboBox schemaSelector;
 	private JComboBox catalogSelector;
 	private JLabel schemaLabel;
@@ -127,11 +128,36 @@ public class DbExplorerPanel
 			tabPane = new WbTabbedPane(JTabbedPane.TOP);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);
 			tabPane.setToolTipTextAt(0, ResourceMgr.getDescription("TxtDbExplorerTables"));
-
+			
+			String tabLocation = Settings.getInstance().getProperty("workbench.gui.dbobjects.maintabs", "top");
+			int location = JTabbedPane.TOP;
+			if (tabLocation.equalsIgnoreCase("bottom"))
+			{
+				location = JTabbedPane.BOTTOM;
+			}
+			else if (tabLocation.equalsIgnoreCase("left"))
+			{
+				location = JTabbedPane.LEFT;
+			}
+			else if (tabLocation.equalsIgnoreCase("right"))
+			{
+				location = JTabbedPane.RIGHT;
+			}
+			tabPane.setTabPlacement(location);
+			
+			int index = 1;
+			
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerProcs"), procs);
-			tabPane.setToolTipTextAt(1, ResourceMgr.getDescription("TxtDbExplorerProcs"));
+			tabPane.setToolTipTextAt(index, ResourceMgr.getDescription("TxtDbExplorerProcs"));
+			
+			if (Settings.getInstance().getShowTriggerPanel())
+			{
+				triggers = new TriggerListPanel(aParent);
+				tabPane.add(ResourceMgr.getString("TxtDbExplorerTriggers"), triggers);
+				tabPane.setToolTipTextAt(index ++, ResourceMgr.getDescription("TxtDbExplorerTriggers"));
+			}			
 			tabPane.add(ResourceMgr.getString("TxtSearchTables"), this.searchPanel);
-			tabPane.setToolTipTextAt(2, ResourceMgr.getDescription("TxtSearchTables"));
+			tabPane.setToolTipTextAt(index ++, ResourceMgr.getDescription("TxtSearchTables"));
 			tabPane.setFocusable(false);
 
 			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -377,6 +403,7 @@ public class DbExplorerPanel
 		{
 			this.tables.setConnection(this.dbConnection);
 			this.procs.setConnection(dbConnection);
+			if (this.triggers != null) this.triggers.setConnection(dbConnection);
 			if (this.searchPanel != null) this.searchPanel.setConnection(dbConnection);
 			readSchemaLabel();
 			this.connectionInitPending = false;
@@ -549,6 +576,10 @@ public class DbExplorerPanel
 		{
 			this.procs.panelSelected();
 		}
+		else if (panel == this.triggers)
+		{
+			this.triggers.panelSelected();
+		}
 	}
 	
 	public WbConnection getConnection()
@@ -569,6 +600,7 @@ public class DbExplorerPanel
 		this.reset();
 		this.tables.disconnect();
 		this.procs.disconnect();
+		if (this.triggers != null) this.triggers.disconnect();
 		this.searchPanel.disconnect();
 		this.dbConnection = null;
 	}
@@ -577,6 +609,7 @@ public class DbExplorerPanel
 	{
 		this.tables.saveSettings();
 		this.procs.saveSettings();
+		if (this.triggers != null) this.triggers.saveSettings();
 		if (this.searchPanel != null) this.searchPanel.saveSettings();
 	}
 
@@ -584,6 +617,7 @@ public class DbExplorerPanel
 	{
 		if (tables != null) tables.restoreSettings();
 		if (procs != null) procs.restoreSettings();
+		if (this.triggers != null) triggers.restoreSettings();
 		if (this.searchPanel != null) searchPanel.restoreSettings();
 	}
 
@@ -651,6 +685,7 @@ public class DbExplorerPanel
 					WbSwingUtilities.showWaitCursorOnWindow(c);
 					tables.setCatalogAndSchema(getSelectedCatalog(), schema, true);
 					procs.setCatalogAndSchema(getSelectedCatalog(), schema, true);
+					if (triggers != null) triggers.setCatalogAndSchema(getSelectedCatalog(), schema, true);
 				}
 				catch (Exception ex)
 				{
@@ -847,6 +882,7 @@ public class DbExplorerPanel
 		tables.saveToWorkspace(w, index);
 		searchPanel.saveToWorkspace(w, index);
 		procs.saveToWorkspace(w, index);
+		if (triggers != null) triggers.saveToWorkspace(w, index);
 	}
 
 	public boolean prepareWorkspaceSaving()
@@ -867,6 +903,7 @@ public class DbExplorerPanel
 			tables.readFromWorkspace(w, index);
 			searchPanel.readFromWorkspace(w, index);
 			procs.readFromWorkspace(w, index);
+			if (triggers != null) triggers.readFromWorkspace(w, index);
 		}
 		catch (Exception e)
 		{

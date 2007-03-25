@@ -593,6 +593,20 @@ public class Settings
 		setProperty("workbench.sql.generate.insert.doformat", flag);
 	}
 
+	/**
+	 * Returns true if the DbExplorer should show an additional 
+	 * panel with all triggers
+	 */
+	public boolean getShowTriggerPanel()
+	{
+		return getBoolProperty("workbench.dbexplorer.triggerpanel.show", true);
+	}
+	
+	public void setShowTriggerPanel(boolean flag)
+	{
+		setProperty("workbench.dbexplorer.triggerpanel.show", flag);
+	}
+	
 	public String getDefaultObjectType()
 	{
 		return getProperty("workbench.dbexplorer.defTableType", null);
