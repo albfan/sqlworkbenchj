@@ -725,13 +725,25 @@ public class StringUtil
 		}
 		return result;
 	}
-	
-	public static final String getMaxSubstring(String s, int maxLen)
+
+	public static final String getMaxSubstring(String s, int maxLen, String add)
 	{
 		if (maxLen < 1) return s;
 		if (s == null) return null;
 		if (s.length() < maxLen) return s;
-		return s.substring(0, maxLen - 1) + "...";
+		if (add == null)
+		{
+			return s.substring(0, maxLen);
+		}
+		else
+		{
+			return s.substring(0, maxLen) + add;
+		}
+	}
+	
+	public static final String getMaxSubstring(String s, int maxLen)
+	{
+		return getMaxSubstring(s, maxLen, "...");
 	}
 
 	public static final String REGEX_SPECIAL_CHARS = "\\[](){}.*+?$^|";

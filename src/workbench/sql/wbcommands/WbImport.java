@@ -73,6 +73,7 @@ public class WbImport
 	public static final String ARG_START_ROW = "startRow";
 	public static final String ARG_END_ROW = "endRow";
 	public static final String ARG_BADFILE = "badFile";
+	public static final String ARG_SIZELIMIT = "maxLength";
 	
 	public WbImport()
 	{
@@ -117,6 +118,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_START_ROW, ArgumentType.IntegerArgument);
 		cmdLine.addArgument(ARG_END_ROW, ArgumentType.IntegerArgument);
 		cmdLine.addArgument(ARG_BADFILE);
+		cmdLine.addArgument(ARG_SIZELIMIT);
 	}
 	
 	public String getVerb() { return VERB; }
@@ -445,7 +447,25 @@ public class WbImport
 			result.setFailure();
 			return result;
 		}
-		
+
+		try 
+		{
+			// The maxLength parameter should only be evaluated for 
+			// single file imports to avoid confusion of columns
+			if (dir == null)
+			{
+				String lvalue = cmdLine.getValue(ARG_SIZELIMIT);
+				ColumnLimits cl = new ColumnLimits(lvalue);
+				imp.setColumnLimits(cl.getLimits());
+			}
+		}
+		catch (NumberFormatException e)
+		{
+			result.addMessage(ResourceMgr.getString("ErrImportWrongLimit"));
+			result.setFailure();
+			return result;
+		}
+			
 		if (badFile != null) imp.setBadfileName(badFile);
 
 		this.imp.setRowActionMonitor(this.rowMonitor);
@@ -506,7 +526,7 @@ public class WbImport
 			delete = cmdLine.getBoolean(ARG_DELETE_TARGET);
 			useTruncate = cmdLine.getBoolean(ARG_USE_TRUNCATE, false);
 		}
-
+		
 		imp.setDeleteTarget(delete);
 		if (delete)
 		{

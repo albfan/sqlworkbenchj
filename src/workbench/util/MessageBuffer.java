@@ -116,6 +116,7 @@ public class MessageBuffer
 	{
 		if (buff == null) return;
 		int count = buff.messages.size();
+		this.length += buff.length;
 		while (this.messages.size() + count > maxSize)
 		{
 			CharSequence s = messages.removeFirst();

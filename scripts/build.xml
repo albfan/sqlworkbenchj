@@ -26,7 +26,7 @@
   <property name="docbook.root" value="${doc}/docbook"/>
   <property name="fop.root" value="c:/etc/fop"/>
 
-	<taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../etc/jarbundler/jarbundler-1.9.jar"/>
+  <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../etc/jarbundler/jarbundler-1.9.jar"/>
 	
   <target name="init">
     <tstamp>
@@ -169,6 +169,7 @@
         <dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN"
              location="${doc}/dtd/docbookx.dtd"/>
       </xmlcatalog>
+      <param name="text-indent" expression="0.5cm"/>
       <param name="paper.type" expression="A4"/>
       <param name="margin.bottom" expression="1.5cm"/>
       <param name="margin.top" expression="1.5cm"/>
@@ -177,7 +178,7 @@
       <param name="generate.section.toc.level" expression="3"/>
       <param name="toc.indent.width" expression="24"/>
       <param name="toc.max.depth" expression="3"/>
-      <param name="toc.section.depth" expression="3"/>
+      <param name="toc.section.depth" expression="2"/>
       <param name="title.margin.left" expression="0pt"/>
       <param name="body.start.indent" expression="0pt"/>
       <param name="section.autolabel" expression="1"/>
@@ -205,7 +206,7 @@
 		<arg line="-fo ${inputFile} -out application/pdf ${outputFile}"/>
     </java>
 		
-    <delete file="${doc}/pdf/manual.fo"/>
+    <!-- <delete file="${doc}/pdf/manual.fo"/> -->
 		
   </target>
 
@@ -249,7 +250,7 @@
 			<param name="index.method" expression="'default'"/>
 			<param name="chunk.fast" expression="1"/>
 			<param name="generate.section.toc.level" expression="1"/>
-			<param name="toc.section.depth" expression="3"/>
+			<param name="toc.section.depth" expression="2"/>
 			<param name="use.id.as.filename" expression="1"/>
 			<param name="section.autolabel" expression="1"/>
 			<param name="table.borders.with.css" expression="0"/>
@@ -352,13 +353,16 @@
 			<param name="chunker.output.indent" expression="yes"/>
 			<param name="use.id.as.filename" expression="1"/>
 			<param name="section.autolabel" expression="1"/>
-			<param name="generate.section.toc.level" expression="1"/>
+
+      <param name="generate.section.toc.level" expression="3"/>
+      <param name="toc.max.depth" expression="2"/>
+      <param name="toc.section.depth" expression="2"/>
+			
 			<param name="table.borders.with.css" expression="${html-css-tables}"/>
 			<param name="table.cell.border.style" expression="solid"/>
 			<param name="table.cell.border.thickness" expression="1px"/>
 			<param name="table.frame.border.style" expression="solid"/>
 			<param name="table.frame.border.thickness" expression="1px"/>
-			<param name="toc.section.depth" expression="3"/>
 			<param name="make.valid.html" expression="1"/>
 			<param name="html.cleanup" expression="1"/>
 			<param name="navig.showtitles" expression="1"/>
@@ -550,7 +554,7 @@
 	</target>
 
 	
-	<target name="mac-package" depends="prepare-release-dir,init">
+	<target name="mac-package" depends="init,init-publish,prepare-release-dir">
 		<property name="bundledir" value="${distdir}/mac"/>
 		<delete dir="${bundledir}" failonerror="false"/>
 		<mkdir dir="${bundledir}"/>
@@ -559,10 +563,13 @@
 			name="SQLWorkbenchJ"
 			mainclass="workbench.WbStarter" 
 			jar="${distdir}/${jarfile}" 
-			jvmversion="1.4+"
+			jvmversion="1.5+"
 			version="{$build.number}"
 			shortname="SQL Workbench"
 			infostring="SQL Workbench/J"
+      antialiasedgraphics="true"
+			antialiasedtext="true"
+      liveresize="true"
 			signature="sqwb"
 			icon="Workbench.icns"
 			vmoptions="-Xmx256m -Dcom.apple.mrj.application.growbox.intrudes=false"
@@ -571,23 +578,27 @@
 			<javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
 		</jarbundler>
 		
-    <zip zipfile="${root}/release/Workbench-Build${build.number}-Mac.zip">
-      <zipfileset dir="${distdir}">
+    <tar compression="gzip" destfile="${root}/release/Workbench-Build${build.number}-Mac.tgz">
+      <tarfileset dir="${distdir}">
         <include name="history.txt"/>
-      </zipfileset>
-			<zipfileset dir="${bundledir}">
+      </tarfileset>
+			<tarfileset dir="${bundledir}">
 				<include name="**/*"/>
-			</zipfileset>
-			<zipfileset dir="${doc}/pdf">
+				<exclude name="**/JavaApplicationStub"/>
+			</tarfileset>
+			<tarfileset mode="555" dir="${bundledir}">
+				<include name="**/JavaApplicationStub"/>
+			</tarfileset>
+			<tarfileset dir="${doc}/pdf">
 				<include name="SQLWorkbench-Manual.pdf"/>
-			</zipfileset>
-      <zipfileset dir="${root}/release/manual" prefix="manual">
+			</tarfileset>
+      <tarfileset dir="${root}/release/manual" prefix="manual">
         <include name="**/*.*"/>
-      </zipfileset>
-      <zipfileset dir="${scriptsrc}" prefix="xslt">
+      </tarfileset>
+      <tarfileset dir="${scriptsrc}" prefix="xslt">
         <include name="**/*.xslt"/>
-      </zipfileset>
-    </zip>
+      </tarfileset>
+    </tar>
 	</target>
 	
 	

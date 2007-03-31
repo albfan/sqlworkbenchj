@@ -2,7 +2,7 @@
 	<title>Installing and starting &wb-productname;</title>
 
 	<para>To run &wb-productname; a <ulink url="http://java.sun.com/j2se/">Java runtime environment</ulink> 
-		version 1.4 (or above) is required. You can either use a JRE ("Runtime") or a JDK ("Development Kit") to
+		version 1.5 (or above) is required. You can either use a JRE ("Runtime") or a JDK ("Development Kit") to
 		run &wb-productname;. Once you have downloaded the application, unzip the archive into 
 		a directory of your choice. Apart from that, no special installation procedure is needed. 
 		When upgrading to a newer version of &wb-productname; simply overwrite the old 
@@ -188,9 +188,8 @@
 		</note>
 
 		<para>
-			By default the launcher increases the maximum JVM heap size to 128
-			MB (the default for JDK 1.4 is 96MB). If you need more heap memory, you
-			need to pass the appropriate JVM parameter to the launcher.
+			By default the launcher increases the maximum JVM heap size to 128 MB. 
+			If you need more heap memory, you	need to pass the appropriate JVM parameter to the launcher.
 		</para>
 
 		<section id="launcher-jdk-search">
@@ -207,7 +206,7 @@
 			If that is not defined, <literal>HKLM\Software\JavaSoft\Java Development Kit</literal>
 			is queried.</para>
 
-			<para>In the registry key, a subkey for the version 1.4 is retrieved, and
+			<para>In the registry key, a subkey for the version 1.5 is retrieved, and
 			the directory specified by that key is used as the base JDK
 			directory.</para>
 			<para>If your JDK/JRE installation cannot be found by the launcher, but you do have

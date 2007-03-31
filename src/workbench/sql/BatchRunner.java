@@ -12,7 +12,6 @@
 package workbench.sql;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
@@ -250,14 +249,6 @@ public class BatchRunner
 				
 				error = this.executeScript(fo);
 			}
-			catch (FileNotFoundException nf)
-			{
-				error = true;
-				String msg = ResourceMgr.getString("ErrFileNotFound");
-				msg = StringUtil.replace(msg, "%file%", file);
-				printMessage(msg);
-				LogMgr.logError("BatchRunner", ResourceMgr.getString("MsgBatchScriptFileError") + " " + file, nf);
-			}
 			catch (Exception e)
 			{
 				error = true;
@@ -384,7 +375,7 @@ public class BatchRunner
 				{
 					error = !result.isSuccess();
 					
-					if (result.hasMessages() && (this.stmtRunner.getVerboseLogging() || !result.isSuccess()))
+					if (result.hasMessages() && (this.stmtRunner.getVerboseLogging() || error))
 					{
 						this.printMessage("");
 						// Force a new line for the console

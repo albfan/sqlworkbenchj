@@ -654,7 +654,15 @@ public class MainWindow
 
 	public MainPanel getSqlPanel(int anIndex)
 	{
-		return (MainPanel)this.sqlTab.getComponentAt(anIndex);
+		try
+		{
+			return (MainPanel)this.sqlTab.getComponentAt(anIndex);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logDebug("MainWindow.getSqlPanel()", "Invalid index [" + anIndex + "] specified!", e);
+			return null;
+		}
 	}
 
 	public void selectTab(int anIndex)
@@ -1772,16 +1780,10 @@ public class MainWindow
 		final int index = this.findFirstExplorerTab();
 		if (index < 0) return;
 		final int count = this.sqlTab.getTabCount();
-		WbSwingUtilities.invoke(new Runnable()
+		for (int i=index; i < count; i++)
 		{
-			public void run()
-			{
-				for (int i=index; i < count; i++)
-				{
-					removeTab(i);
-				}
-			}
-		});
+			removeTab(i);
+		}
 	}
 
 	public void newDbExplorerWindow()
@@ -1954,22 +1956,22 @@ public class MainWindow
 	 */
 	private void adjustTabCount(int newCount)
 	{
-      int tabCount = this.sqlTab.getTabCount() - getNumberOfExplorerPanels();
+		int tabCount = this.sqlTab.getTabCount() - getNumberOfExplorerPanels();
 
-      if (newCount > tabCount)
-      {
-        for (int i=0; i < (newCount - tabCount); i++)
-        {
-          this.addTab(false, false);
-        }
-      }
-      else if (newCount < tabCount)
-      {
-        for (int i=0; i < (tabCount - newCount); i++)
-        {
-          this.removeLastTab(newCount == 1);
-        }
-      }
+		if (newCount > tabCount)
+		{
+			for (int i=0; i < (newCount - tabCount); i++)
+			{
+				this.addTab(false, false);
+			}
+		}
+		else if (newCount < tabCount)
+		{
+			for (int i=0; i < (tabCount - newCount); i++)
+			{
+				this.removeLastTab(newCount == 1);
+			}
+		}
 	}
 
 	/**

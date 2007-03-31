@@ -1001,7 +1001,7 @@ public class DataStore
 			}
 			else
 			{
-				LogMgr.logError("DataStore.initData()", "Error during retrieve", e);
+				LogMgr.logError("DataStore.initData()", "SQL Error during retrieve", e);
 				throw e;
 			}
 		}

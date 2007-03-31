@@ -354,6 +354,25 @@ public class StringUtilTest
 		assertEquals(false, isNumber);
 	}
 	
+	public void testMaxString()
+	{
+		String s = StringUtil.getMaxSubstring("Dent", 4, null);
+		assertEquals("Truncated", "Dent", s);
+		
+		s = StringUtil.getMaxSubstring("Dent1", 4, null);
+		assertEquals("Truncated", "Dent", s);
+		
+		s = StringUtil.getMaxSubstring("Den", 4, null);
+		assertEquals("Truncated", "Den", s);
+		
+		s = StringUtil.getMaxSubstring("Beeblebrox", 5, null);
+		assertEquals("Truncated", "Beebl", s);
+		
+		s = StringUtil.getMaxSubstring("Beeblebrox", 5, "...");
+		assertEquals("Truncated", "Beebl...", s);
+		
+	}
+	
 	public void testTrimQuotes()
 	{
 		String s = StringUtil.trimQuotes(" \"bla\" ");

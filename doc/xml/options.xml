@@ -235,31 +235,31 @@
 			</para>
 		</section>
 		
-		<section id="options-internal-lineending">
-			<title>Internal line terminator</title>
-			<para>
-				This property controls the line terminator used by the editor internally. This 
-				line ending will also be sent to the DBMS when execution SQL statements that you 
-				have entered in the editor. Please select the value that is approriate for your
-				DBMS server. The value "Platform default" relates to the platform where you 
-				run &wb-productname; this is not the platform of the DBMS server. 
-			</para>
-			<para>
-				Changing this property will only affect new editor tabs, existing 
-				editors are not affected by a change to this property. If you want 
-				to make sure that all internal editors use the new setting, please
-				restart the application.
-			</para>
-		</section>
-		
 		<section id="options-externally-lineending">
-			<title>Line terminator used when saving files</title>
+			<title>File format</title>
 			<para>
 				This property controls the line terminator used when a file is saved by the editor. 
 				Changing this property affects the next save operation.
 			</para>
 		</section>
 
+		<section id="options-internal-lineending">
+			<title>Line ending for DBMS</title>
+			<para>
+				This property controls the line terminator used by the editor when sending SQL statements
+				to the database. The value "Platform default" relates to the platform where you 
+				run &wb-productname; this is not the platform of the DBMS server. 
+			</para>
+			<para>
+				The editor always uses "unix" line ending internally. If you select a different
+				value for this property, &wb-productname; will convert the SQL statements to use
+				the desired line ending before sending them to the DBMS. As this can slow down 
+				the execution of statements, it is highly recommended to leave the default setting
+				of Unix line endings. You should only change this, if your DBMS does not understand
+				the single linefeed character (ASCII value 10) properly.
+			</para>
+		</section>
+		
 		<section id="options-editor-font">
 			<title>Editor font</title>
 			<para>

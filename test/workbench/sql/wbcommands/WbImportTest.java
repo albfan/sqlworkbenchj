@@ -447,10 +447,61 @@ public class WbImportTest
 		}
 	}
 
+	public void testColumnLimit()
+		throws Exception
+	{
+		try
+		{
+			File importFile  = new File(this.basedir, "col_limit.txt");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("nr\tfirstname\tlastname");
+			out.println("1\tArthur\tDent");
+			out.println("2\tZaphod\tBeeblebrox");
+			out.close();
+			
+			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -maxLength='firstname=50,lastname=4' -type=text -header=true -continueonerror=false -table=junit_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
+			while (rs.next())
+			{
+				int nr = rs.getInt(1);
+				String fname = rs.getString(2);
+				String lname = rs.getString(3);
+				if (nr == 1)
+				{
+					assertEquals("Wrong lastname", "Dent", lname);
+					assertEquals("Wrong firstname", "Arthur", fname);
+				}
+				else if (nr == 2)
+				{
+					assertEquals("Wrong lastname", "Beeb", lname);
+					assertEquals("Wrong firstname", "Zaphod", fname);
+				}
+				else
+				{
+					fail("Wrong lines imported");
+				}
+			}
+
+			rs.close();
+			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
+			
+		}
+		catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testSkipImport()
 		throws Exception
 	{
-		int rowCount = 10;
 		try
 		{
 			File importFile  = new File(this.basedir, "partial_skip.txt");

@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableCreator;
@@ -43,7 +44,6 @@ import java.io.StringReader;
 import java.io.Reader;
 import java.sql.Clob;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ImportFileParser;
@@ -87,7 +87,6 @@ public class DataImporter
 	private boolean deleteTarget = false;
 	private boolean createTarget = false;
 	private boolean continueOnError = true;
-	private boolean useLongTags = true;
 
 	private long totalRows = 0;
 	private long updatedRows = 0;
@@ -122,7 +121,12 @@ public class DataImporter
 
 	private ColumnIdentifier[] targetColumns;
 	private List<ColumnIdentifier> keyColumns;
-
+	
+	// A mapping that stores the max. length for specific columns
+	// The index maps to the index in targetColumns
+	private Map<ColumnIdentifier, Integer> columnLimitMap;
+	private int[] columnLimits;
+	
 	private RowActionMonitor progressMonitor;
 	private boolean isRunning = false;
 	private ImportFileParser parser;
@@ -282,16 +286,6 @@ public class DataImporter
 		}
 	}
 
-	public boolean getUseLongTags()
-	{
-		return useLongTags;
-	}
-
-	public void setUseLongTags(boolean flag)
-	{
-		this.useLongTags = flag;
-	}
-
 	public boolean getUseBatch()
 	{
 		 return this.useBatch;
@@ -413,6 +407,52 @@ public class DataImporter
 		return true;
 	}
 
+	/**
+	 * Set a max. length for specific columns. This limit will only 
+	 * be checked for VARCHAR columns. Setting a limit for other columns
+	 * will be ignored during import
+	 */
+	public void setColumnLimits(Map<ColumnIdentifier, Integer> limits)
+	{
+		this.columnLimitMap = limits;
+	}
+	
+//	private void applyColumnLimits()
+//	{
+//		if (this.targetColumns == null) return;
+//		
+//		if (this.columnLimitMap == null)
+//		{
+//			this.columnLimits = null;
+//			return;
+//		}
+//		this.columnLimits = new int[this.targetColumns.length];
+//		
+//		for (Map.Entry<ColumnIdentifier, Integer> entry : columnLimitMap.entrySet())
+//		{
+//			
+//			int index = this.findColumn(entry.getKey());
+//			if (index > -1)
+//			{
+//				Integer size = entry.getValue();
+//				this.columnLimits[index] = size.intValue();
+//			}
+//		}
+//	}
+	
+//	private int findColumn(ColumnIdentifier column)
+//	{
+//		if (column == null) return -1;
+//		if (this.targetColumns == null) return -1;
+//		for (int i=0; i < targetColumns.length; i++)
+//		{
+//			ColumnIdentifier col = targetColumns[i];
+//			if (col == null) continue;
+//			if (col.getColumnName().equalsIgnoreCase(column.getColumnName())) return i;
+//		}
+//		return -1;
+//	}
+	
 	/**
 	 *	Define the key columns by supplying a comma separated
 	 *	list of column names
@@ -878,6 +918,8 @@ public class DataImporter
 			int colIndex = i  + 1;
 			if (useColMap)
 			{
+				// The colIndex points to the correct location in the PreparedStatement
+				// when using UPDATE with different column names
 				colIndex = this.columnMap[i] + 1;
 			}
 			
@@ -1028,6 +1070,13 @@ public class DataImporter
 					this.messages.append(ResourceMgr.getString("MsgBlobNotRead") + " " + (i+1) +"\n");
 				}
 			}
+			else if (targetSqlType == Types.VARCHAR && this.columnLimitMap != null)
+			{
+				Integer size = this.columnLimitMap.get(this.targetColumns[i]);
+				int msize = (size == null ? -1 : size.intValue());
+				String newValue = StringUtil.getMaxSubstring((String)row[i], msize, null);
+				pstmt.setString(colIndex, newValue);
+			}
 			else
 			{
 				if (this.dbConn.getMetadata().isOracle() &&	targetSqlType == java.sql.Types.DATE && row[i] instanceof java.sql.Date)
@@ -1111,11 +1160,6 @@ public class DataImporter
 		try
 		{
 			this.targetTable = table.createCopy();
-//			this.targetTable.setPreserveQuotes(true);
-//			if (this.targetSchema != null)
-//			{
-//				targetTable.setSchema(this.targetSchema);
-//			}
 			this.targetColumns = columns;
 			this.colCount = this.targetColumns.length;
 

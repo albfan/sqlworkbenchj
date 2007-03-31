@@ -46,6 +46,22 @@ public class MessageBufferTest
 		}
 	}
 	
+	public void testAppendBuffer()
+	{
+		MessageBuffer b1 = new MessageBuffer();
+		b1.append("Line one");
+		int l = b1.getLength();
+		MessageBuffer b2 = new MessageBuffer();
+		b2.append(b1);
+		assertEquals("Wrong length", b2.getLength(), l);
+		
+		b2 = new MessageBuffer();
+		b2.append("Some stuff");
+		int l2 = b2.getLength();
+		b2.append(b1);
+		assertEquals("Wrong length", b2.getLength(), l + l2);
+	}
+	
 	public void testBuffer()
 	{
 		try

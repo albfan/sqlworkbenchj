@@ -18,6 +18,9 @@
 	<!ENTITY settings SYSTEM "settings.xml">
 	<!ENTITY variables SYSTEM "script-variables.xml">
 	<!ENTITY problems SYSTEM "problems.xml">
+	<!ENTITY wbexport SYSTEM "wbexport.xml">
+	<!ENTITY wbimport SYSTEM "wbimport.xml">
+	<!ENTITY wbcopy SYSTEM "wbcopy.xml">
 	<!ENTITY wb-productname	"SQL Workbench/J">
 ]>
 
