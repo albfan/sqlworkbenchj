@@ -170,8 +170,8 @@ public class DbSettings
 				{
 					String[] mapping = entry.split(",");
 					if (mapping.length != 2) continue;
-					int value = StringUtil.getIntValue(mapping[0], -42);
-					if (value != -42)
+					int value = StringUtil.getIntValue(mapping[0], Integer.MIN_VALUE);
+					if (value != Integer.MIN_VALUE)
 					{
 						indexTypeMapping.put(new Integer(value), mapping[1]);
 					}

@@ -130,10 +130,6 @@ public class DbMetadata
 	private static final String SELECT_INTO_INFORMIX = "(?i)(?s)SELECT.*FROM.*INTO\\s*\\p{Print}*";
 	private Pattern selectIntoPattern = null;
 
-	private static final int UPPERCASE_NAMES = 1;
-	private static final int LOWERCASE_NAMES = 2;
-	private static final int MIXEDCASE_NAMES = 4;
-	
 	private String tableTypeName;
 
 	private String[] tableTypesTable; 
@@ -505,6 +501,7 @@ public class DbMetadata
 	 *	Checks if the given SQL string is actually some kind of table
 	 *	creation "disguised" as a SELECT. This will always return false
 	 *	if supportsSelectIntoNewTable() returns false.
+	 * 
 	 *	Otherwise it will check for the DB specific syntax.
 	 */
 	public boolean isSelectIntoNewTable(String sql)
@@ -2149,18 +2146,25 @@ public class DbMetadata
 				String colName = idxRs.getString("COLUMN_NAME");
 				String dir = idxRs.getString("ASC_OR_DESC");
 				
-				int type = idxRs.getInt("TYPE");
-				
-				
 				IndexDefinition def = defs.get(indexName);
 				if (def == null)
 				{
 					def = new IndexDefinition(indexName, null);
-					def.setIndexType(dbSettings.mapIndexType(type));
 					def.setUnique(!unique);
 					def.setPrimaryKeyIndex(pkName.equals(indexName));
 					defs.put(indexName, def);
 				}
+				if (this.isOracle)
+				{
+					String oraType = idxRs.getString("INDEX_TYPE");
+					def.setIndexType(oraType);
+				}
+				else
+				{
+					int type = idxRs.getInt("TYPE");					
+					def.setIndexType(dbSettings.mapIndexType(type));
+				}
+				
 				if (dir != null)
 				{
 					def.addColumn(colName + " " + dir);
@@ -2170,11 +2174,6 @@ public class DbMetadata
 					def.addColumn(colName);
 				}
 				
-				if (this.isOracle)
-				{
-					String oraType = idxRs.getString("INDEX_TYPE");
-					def.setIndexType(oraType);
-				}
 			}
 			
 			this.indexReader.processIndexList(tbl, defs.values());

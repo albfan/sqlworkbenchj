@@ -97,7 +97,6 @@ public class EditorPanelTest extends TestCase
 			
 			Reader r = EncodingUtil.createReader(f, "UTF-8");
 			content = FileUtil.readCharacters(r);
-			r.close();
 			f.delete();
 			
 			pos = content.indexOf("Line2\n");
@@ -126,7 +125,6 @@ public class EditorPanelTest extends TestCase
 			p.saveFile(f, "UTF-8", "\r\n");
 			r = EncodingUtil.createReader(f, "UTF-8");
 			content = FileUtil.readCharacters(r);
-			r.close();
 			
 			pos = content.indexOf("Line2\r\n");
 			assertEquals("Wrong exteranl line ending (DOS) used", 7, pos);			

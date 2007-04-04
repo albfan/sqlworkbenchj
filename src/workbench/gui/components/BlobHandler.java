@@ -223,11 +223,6 @@ public class BlobHandler
 				LogMgr.logError("BlobHandler.getBlobAsString()", "Error retrieving blob value", e);
 				return "";
 			}
-			finally
-			{
-				try { in.close(); } catch (Throwable th) {}
-			}
-			
 		}
 		return value.toString();
 	}

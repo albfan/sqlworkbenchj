@@ -145,7 +145,6 @@ public class WbExportTest extends TestCase
 			
 			FileReader in = new FileReader(exportFile);
 			String script = FileUtil.readCharacters(in);
-			in.close();
 			ScriptParser p = new ScriptParser(script);
 			
 			// WbExport creates 2 statements: the INSERT and the COMMIT
@@ -165,7 +164,6 @@ public class WbExportTest extends TestCase
 			
 			in = new FileReader(exportFile);
 			script = FileUtil.readCharacters(in);
-			in.close();
 			p = new ScriptParser(script);
 			sql = p.getCommand(0);
 			verb = SqlUtil.getSqlVerb(script);
@@ -181,7 +179,6 @@ public class WbExportTest extends TestCase
 			
 			in = new FileReader(exportFile);
 			script = FileUtil.readCharacters(in);
-			in.close();
 			p = new ScriptParser(script);
 			sql = p.getCommand(0);
 			verb = SqlUtil.getSqlVerb(script);
@@ -197,7 +194,6 @@ public class WbExportTest extends TestCase
 			
 			in = new FileReader(exportFile);
 			script = FileUtil.readCharacters(in);
-			in.close();
 			p = new ScriptParser(script);
 			sql = p.getCommand(0);
 			verb = SqlUtil.getSqlVerb(script);
@@ -455,7 +451,6 @@ public class WbExportTest extends TestCase
 			// syntax to load the external files.
 			FileReader fr = new FileReader(ctl);
 			String ctlfile = FileUtil.readCharacters(fr);
-			in.close();
 			
 			int pos = ctlfile.indexOf("lob_file_1 FILLER");
 			assertEquals("FILLER not found", true, pos > -1);
@@ -491,14 +486,12 @@ public class WbExportTest extends TestCase
 
 			Reader in = EncodingUtil.createReader(dataFile, "UTF8");
 			String contents = FileUtil.readCharacters(in);
-			in.close();
 			assertEquals("Wrong first clob content", "First clob", contents);
 			
 			dataFile = new File(this.basedir, "clob_export_r2_c2.data");
 			assertEquals("Second blob file not created", true, dataFile.exists());
 			in = EncodingUtil.createReader(dataFile, "UTF8");
 			contents = FileUtil.readCharacters(in);
-			in.close();
 			assertEquals("Wrong second clob content", "Second clob", contents);			
 			
 			ScriptParser p = new ScriptParser(1024*1024);

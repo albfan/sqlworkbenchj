@@ -146,10 +146,6 @@ public class RowData
 						
 						value = rs.getObject(i+1);
 					}
-					finally
-					{
-						try { in.close(); } catch (Throwable th) {}
-					}
 				}
 				else
 				{

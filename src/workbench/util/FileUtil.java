@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -140,7 +139,12 @@ public class FileUtil
 
 	}
 
+	/**
+	 * Copies the content of the InputStream to the OutputStream.
+	 * Both streams are closed automatically.
+	 */
 	public static long copy(InputStream in, OutputStream out)
+		throws IOException
 	{
 		long filesize = 0;
 		try
@@ -154,10 +158,6 @@ public class FileUtil
 				bytesRead = in.read(buffer);
 			}
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
 		finally
 		{
 			try { out.close(); } catch (Throwable th) {}
@@ -166,6 +166,10 @@ public class FileUtil
 		return filesize;
 	}
 
+	/**
+	 * Read the content of the Reader into a String.
+	 * The Reader is closed automatically.
+	 */
 	public static String readCharacters(Reader in)
 		throws IOException
 	{
@@ -173,25 +177,45 @@ public class FileUtil
 		StringBuilder result = new StringBuilder(1024);
 		char[] buff = new char[BUFF_SIZE];
 		int bytesRead = in.read(buff);
-		while (bytesRead > -1)
+		try
 		{
-			result.append(buff, 0, bytesRead);
-			bytesRead = in.read(buff);
+			while (bytesRead > -1)
+			{
+				result.append(buff, 0, bytesRead);
+				bytesRead = in.read(buff);
+			}
+		}
+		finally
+		{
+			try { in.close(); } catch (Throwable th) {}
 		}
 		return result.toString();
 	}
 	
+	/**
+	 * Read the content of the InputStream into a ByteArray.
+ * The InputStream is closed automatically.
+	 */
 	public static byte[] readBytes(InputStream in)
 		throws IOException
 	{
 		if (in == null) return null;
 		ByteBuffer result = new ByteBuffer();
-		byte[] buff = new byte[BUFF_SIZE];
-		int bytesRead = in.read(buff);
-		while (bytesRead > -1)
+		byte[] buff = new byte[BUFF_SIZE];	
+
+		try
 		{
-			result.append(buff, 0, bytesRead);
-			bytesRead = in.read(buff);
+			int bytesRead = in.read(buff);
+
+			while (bytesRead > -1)
+			{
+				result.append(buff, 0, bytesRead);
+				bytesRead = in.read(buff);
+			}
+		}
+		finally
+		{
+			try { in.close(); } catch (Throwable th) {}
 		}
 		return result.getBuffer();
 	}

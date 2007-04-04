@@ -247,7 +247,6 @@ public class BatchRunnerTest
 			
 			BufferedReader in = new BufferedReader(new FileReader(out));
 			String content = FileUtil.readCharacters(in);
-			in.close();
 
 			int pos = content.indexOf("NR\tFIRSTNAME\tLASTNAME");
 			assertEquals("Header not found", (pos > -1), true);
