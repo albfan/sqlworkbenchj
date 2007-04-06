@@ -11,9 +11,6 @@
  */
 package workbench.gui.settings;
 
-import java.util.List;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.FlatButton;
@@ -39,7 +36,6 @@ public class DataEditOptionsPanel
 	public DataEditOptionsPanel()
 	{
 		initComponents();
-		setBorder(DividerBorder.BOTTOM_DIVIDER);
 		
 		restoreSettings();
 		

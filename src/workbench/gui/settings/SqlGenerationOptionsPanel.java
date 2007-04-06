@@ -35,7 +35,6 @@ public class SqlGenerationOptionsPanel
 	public SqlGenerationOptionsPanel()
 	{
 		initComponents();
-		setBorder(DividerBorder.BOTTOM_DIVIDER);
 		
 		List<String> types = Settings.getInstance().getLiteralTypeList();
 		ComboBoxModel model1 = new DefaultComboBoxModel(types.toArray());

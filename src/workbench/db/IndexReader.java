@@ -25,7 +25,10 @@ public interface IndexReader
 	/**
 	 * Replacement for the JDBC's getIndexInfo method.
 	 * After the returned ResultSet has been processed, indexInfoProcessed() has to be called!
-	 *
+	 * The TYPE column may not be an integer value but a String value that indicates
+	 * the type of the index in plain text. So the column "TYPE" from the result set
+	 * should always be accessed using getObject("TYPE")
+	 * 
 	 * @see #indexInfoProcessed()
 	 */
 	ResultSet getIndexInfo(TableIdentifier table, boolean unique)

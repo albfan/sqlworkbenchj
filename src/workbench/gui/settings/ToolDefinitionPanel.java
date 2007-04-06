@@ -92,7 +92,7 @@ public class ToolDefinitionPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(15, 10, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(4, 10, 0, 7);
     add(lblName, gridBagConstraints);
 
     tfName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
@@ -107,7 +107,7 @@ public class ToolDefinitionPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(15, 3, 0, 3);
+    gridBagConstraints.insets = new java.awt.Insets(4, 3, 0, 3);
     add(tfName, gridBagConstraints);
 
     lblPath.setText(ResourceMgr.getString("LblLnFLib"));
@@ -136,7 +136,6 @@ public class ToolDefinitionPanel
     selectLibButton.setMinimumSize(new java.awt.Dimension(20, 20));
     selectLibButton.setPreferredSize(new java.awt.Dimension(20, 20));
     selectLibButton.addActionListener(this);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
@@ -152,7 +151,6 @@ public class ToolDefinitionPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
-
   }
 
   // Code for dispatching events from components to event handlers.

@@ -33,7 +33,6 @@ public class GeneralOptionsPanel
 	{
 		initComponents();
 		pdfReaderPath.setAllowMultiple(false);
-		setBorder(DividerBorder.BOTTOM_DIVIDER);
 		restoreSettings();
 	}
 

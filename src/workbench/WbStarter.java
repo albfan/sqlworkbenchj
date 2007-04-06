@@ -20,7 +20,8 @@ import javax.swing.JOptionPane;
  * This is a wrapper to kick-off the actual WbManager class. It should run 
  * with any JDK > 1.3 as it does no reference any other classes. 
  * This class is compiled separately in build.xml to allow for a different 
- * class file version between this class and the rest of the application
+ * class file version between this class and the rest of the application.
+ * Thus a check for the correct JDK version can be done inside the Java code.
  * 
  * @author  support@sql-workbench.net
  */
@@ -38,6 +39,7 @@ public class WbStarter
 		// location when running on with Aqua look and feel on a Mac
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
 		System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
+		System.setProperty("apple.awt.rendering", "speed");
 		
 		String version = System.getProperty("java.version", null);
 		if (version == null)
@@ -79,15 +81,6 @@ public class WbStarter
 			System.exit(1);
 		}
 
-		if (minorversion == 4)
-		{
-			String msg = "<html>You are running Java: " + version + 
-				".<br><br>This version will no longer be supported with the next release of SQL Workbench/J"+ 
-				"<br><br>Please upgrade your Java system as soon as possible.</html>";
-			System.err.println("Warning: Java " + version + " will no longer be supported in the next release! Please upgrade.");
-			JOptionPane.showMessageDialog(null, msg, "Old Java version detected", JOptionPane.WARNING_MESSAGE);
-		}
-		
 		try
 		{
 			// Do not reference WbManager directly, otherwise a compile

@@ -808,6 +808,10 @@ public class Settings
 			
 			this.props.remove("workbench.db.keywordlist.oracle");
 			this.props.remove("workbench.db.keywordlist.thinksql_relational_database_management_system");
+			
+			this.props.remove("workbench.gui.settings.ExternalToolsPanel.divider");
+			this.props.remove("workbench.gui.settings.LnFOptionsPanel.divider");
+			this.props.remove("workbench.gui.profiles.DriverlistEditorPanel.divider");
 		}
 		catch (Throwable e)
 		{

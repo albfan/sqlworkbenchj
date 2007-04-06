@@ -61,6 +61,7 @@ import workbench.sql.BatchRunner;
 import workbench.sql.MacroManager;
 import workbench.sql.VariablePool;
 import workbench.util.ArgumentParser;
+import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
 import workbench.gui.dialogs.WbSplash;
 import workbench.gui.filter.FilterDefinitionManager;
@@ -994,6 +995,10 @@ public class WbManager
 			splash = new WbSplash();
 			splash.setVisible(true);
 		}
+
+		// This will install the application listener if running under MacOS
+		new MacOSHelper();
+		
 		try
 		{
 			trace("WbManager.init() - initializing UI defaults");

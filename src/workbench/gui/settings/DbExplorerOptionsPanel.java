@@ -31,7 +31,6 @@ public class DbExplorerOptionsPanel
 	public DbExplorerOptionsPanel()
 	{
 		initComponents();
-		setBorder(DividerBorder.BOTTOM_DIVIDER);
 		restoreSettings();
 	}
 

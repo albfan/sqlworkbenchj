@@ -12,14 +12,14 @@
 package workbench.gui.settings;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
+import javax.swing.AbstractListModel;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JButton;
@@ -27,18 +27,24 @@ import javax.swing.JComponent;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
+import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionListener;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
-import workbench.gui.components.WbTabbedPane;
 import workbench.gui.help.HtmlViewer;
-import workbench.interfaces.Restoreable;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -48,71 +54,56 @@ import workbench.resource.Settings;
  */
 public class SettingsPanel
 	extends JPanel
-	implements ActionListener, ChangeListener
+	implements ActionListener, ListSelectionListener
 {
   private JPanel buttonPanel;
   private JButton cancelButton;
   private JButton helpButton;
-  private WbTabbedPane mainTab;
+//  private WbSplitPane splitPane;
+	private JPanel content;
+	private JList pageList;
+	private JPanel currentPanel;
+	
   private JButton okButton;
 
 	private JDialog dialog;
 	private String escActionCommand;
-	private List<Restoreable> pages;
+	private List<OptionPanelPage> pages;
 
 	public SettingsPanel()
 	{
+		pages = new ArrayList<OptionPanelPage>();
+		pages.add(new OptionPanelPage("GeneralOptionsPanel", "LblSettingsGeneral"));
+		pages.add(new OptionPanelPage("EditorOptionsPanel", "LblSettingsEditor"));
+		pages.add(new OptionPanelPage("DataEditOptionsPanel", "LblDataEdit"));
+		pages.add(new OptionPanelPage("DbExplorerOptionsPanel", "LblSettingsDbExplorer"));
+		pages.add(new OptionPanelPage("FormatterOptionsPanel", "LblSqlFormat"));
+		pages.add(new OptionPanelPage("SqlGenerationOptionsPanel", "LblSqlGeneration"));
+		pages.add(new OptionPanelPage("ExternalToolsPanel", "LblExternalTools"));
+		pages.add(new OptionPanelPage("LnFOptionsPanel", "LblLnFOptions"));
+		
 		initComponents();
-		pages = new LinkedList<Restoreable>();
-		GeneralOptionsPanel page = new GeneralOptionsPanel();
-		mainTab.add(ResourceMgr.getString("LblSettingsGeneral"), page);
-		pages.add(page);
-
-		mainTab.addTab(ResourceMgr.getString("LblSettingsEditor"), new JPanel());
-		mainTab.addTab(ResourceMgr.getString("LblDataEdit"), new JPanel());
-		mainTab.addTab(ResourceMgr.getString("LblSettingsDbExplorer"), new JPanel());
-		mainTab.addTab(ResourceMgr.getString("LblSqlFormat"), new JPanel());
-		mainTab.addTab(ResourceMgr.getString("LblSqlGeneration"), new JPanel());
-		mainTab.addTab(ResourceMgr.getString("LblExternalTools"), new JPanel());
-		mainTab.addTab(ResourceMgr.getString("LblLnFOptions"), new JPanel());
-		mainTab.addChangeListener(this);
 	}
 	
-	public void stateChanged(ChangeEvent e)
+	public void valueChanged(ListSelectionEvent e)
 	{
-		Component c = this.mainTab.getSelectedComponent();
-		if (c instanceof Restoreable) return;
+		if (e.getValueIsAdjusting()) return;
+		
+		int index = this.pageList.getSelectedIndex();
+		
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			int index = mainTab.getSelectedIndex();
-			JPanel page = null;
-			switch (index)
+			OptionPanelPage option = pages.get(index);
+			JPanel panel = option.getPanel();
+			if (currentPanel != null)
 			{
-				case 1:
-					page = new EditorOptionsPanel();
-					break;
-				case 2:
-					page = new DataEditOptionsPanel();
-					break;
-				case 3:
-					page = new DbExplorerOptionsPanel();
-					break;
-				case 4:
-					page = new FormatterOptionsPanel();
-					break;
-				case 5:
-					page = new SqlGenerationOptionsPanel();
-					break;
-				case 6:
-					page = new ExternalToolsPanel();
-					break;
-				case 7:
-					page = new LnFOptionsPanel();
-					break;
+				content.remove(currentPanel);
 			}
-			pages.add((Restoreable)page);
-			mainTab.setComponentAt(index, page);
+			content.add(panel, BorderLayout.CENTER);
+			content.validate();
+			content.repaint();
+			this.currentPanel = panel;
 		}
 		finally
 		{
@@ -123,8 +114,27 @@ public class SettingsPanel
 
   private void initComponents()
   {
-    mainTab = new WbTabbedPane();
-		mainTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		ListModel model = new AbstractListModel()
+		{
+			public Object getElementAt(int index)
+			{
+				return pages.get(index);
+			}
+		
+			public int getSize()
+			{
+				return pages.size();
+			}
+		};
+		
+		pageList = new JList(model);
+		pageList.setBorder(new CompoundBorder(new EtchedBorder(), new EmptyBorder(2, 2, 2, 2)));
+		pageList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		pageList.addListSelectionListener(this);
+		
+		content = new JPanel(new BorderLayout());
+		content.setBorder(new EmptyBorder(2,2,2,2));
+		content.add(pageList, BorderLayout.WEST);
 		
     okButton = new WbButton(ResourceMgr.getString("LblOK"));
     cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
@@ -161,18 +171,16 @@ public class SettingsPanel
     constraints.insets = new Insets(7, 0, 7, 4);
     buttonPanel.add(cancelButton, constraints);
 
-    add(mainTab, BorderLayout.CENTER);
+    add(content, BorderLayout.CENTER);
     add(buttonPanel, BorderLayout.SOUTH);
 
   }
 
 	private void saveSettings()
 	{
-		Iterator itr = pages.iterator();
-		while (itr.hasNext())
+		for (OptionPanelPage page : pages)
 		{
-			Restoreable p = (Restoreable)itr.next();
-			p.saveSettings();
+			page.saveSettings();
 		}
 	}
 
@@ -204,6 +212,13 @@ public class SettingsPanel
 		am.put(esc.getActionName(), esc);
 
 		WbSwingUtilities.center(this.dialog, aReference);
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				pageList.setSelectedIndex(0);
+			}
+		});		
 		this.dialog.setVisible(true);
 	}
 

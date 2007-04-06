@@ -32,7 +32,6 @@ public class FormatterOptionsPanel
 	public FormatterOptionsPanel()
 	{
 		initComponents();
-		setBorder(DividerBorder.BOTTOM_DIVIDER);
 		restoreSettings();
 	}
 	

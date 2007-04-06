@@ -155,7 +155,7 @@ public class BlobInfoDialog
 	{
 		try
 		{
-			File f = File.createTempFile("wb$", ".data");
+			File f = File.createTempFile("wb$tmp_", ".data");
 			f.deleteOnExit();
 			handler.saveBlobToFile(this.blobValue, f.getAbsolutePath());
 			ToolDefinition tool = (ToolDefinition)this.externalTools.getSelectedItem();

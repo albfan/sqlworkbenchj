@@ -80,7 +80,7 @@ public class OracleIndexReader
 			"       decode (i.uniqueness, 'UNIQUE', 0, 1) as non_unique, " +
 			"       null as index_qualifier, " +
 			"       i.index_name, "+
-			"       1 as type, " +
+			"       i.index_type as type, " +
 			"       c.column_position as ordinal_position, " +
 			"       c.column_name, " +
 			"       null as asc_or_desc, " +

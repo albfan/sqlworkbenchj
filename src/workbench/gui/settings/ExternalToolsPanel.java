@@ -12,6 +12,7 @@
 package workbench.gui.settings;
 
 import java.awt.BorderLayout;
+import java.awt.FontMetrics;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Enumeration;
@@ -23,12 +24,12 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.components.DividerBorder;
-import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.interfaces.FileActions;
 import workbench.interfaces.Restoreable;
@@ -44,8 +45,6 @@ public class ExternalToolsPanel
 	implements Restoreable, ListSelectionListener, FileActions, 
 	           PropertyChangeListener
 {
-	public WbSplitPane splitPane;
-	private JPanel listPanel;
 	private JList toolList;
 	private ToolDefinitionPanel definitionPanel;
 	private WbToolbar toolbar;
@@ -56,29 +55,24 @@ public class ExternalToolsPanel
 	{
 		setLayout(new BorderLayout());
 		
-		splitPane = new WbSplitPane();
-		listPanel = new JPanel();
 		toolList = new JList();
 		toolList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		
+		toolList.setBorder(new EmptyBorder(2,1,2,1));
+		FontMetrics fm = getFontMetrics(getFont());
+		int width= fm.stringWidth("MMMMMMMMMMMMMMM");
+		toolList.setFixedCellWidth(width);
 		JScrollPane scroll = new JScrollPane(toolList);
 
 		this.toolbar = new WbToolbar();
-		this.toolbar.addDefaultBorder();
 		this.toolbar.add(new NewListEntryAction(this));
 		this.toolbar.add(new DeleteListEntryAction(this));
-		setBorder(DividerBorder.BOTTOM_DIVIDER);
-		
-		listPanel.setLayout(new BorderLayout());
-		listPanel.add(scroll, BorderLayout.CENTER);
-		listPanel.add(this.toolbar, BorderLayout.NORTH);
-		
-		splitPane.setLeftComponent(listPanel);
+		toolbar.setBorder(DividerBorder.BOTTOM_DIVIDER);
 		
 		definitionPanel = new ToolDefinitionPanel();
-		splitPane.setRightComponent(definitionPanel);
 		
-		add(splitPane, java.awt.BorderLayout.CENTER);
+		add(toolbar, BorderLayout.NORTH);
+		add(scroll, BorderLayout.WEST);
+		add(definitionPanel, BorderLayout.CENTER);
 
 		tools = new DefaultListModel();
 		ToolDefinition[] t = Settings.getInstance().getAllExternalTools();
@@ -94,8 +88,6 @@ public class ExternalToolsPanel
 	
 	public void saveSettings()
 	{
-		int divider = splitPane.getDividerLocation();
-		Settings.getInstance().setProperty(this.getClass().getName() + ".divider", divider);
 		List l = new LinkedList();
 		Enumeration e = this.tools.elements();
 		while (e.hasMoreElements())
@@ -107,8 +99,6 @@ public class ExternalToolsPanel
 	
 	public void restoreSettings()
 	{
-		int divider = Settings.getInstance().getIntProperty(this.getClass().getName() + ".divider", 120);
-		splitPane.setDividerLocation(divider);
 	}
 	
 	public void valueChanged(ListSelectionEvent evt)

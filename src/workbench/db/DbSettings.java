@@ -157,6 +157,17 @@ public class DbSettings
 		return (types.contains(type.toLowerCase()));
 	}
 	
+	String mapIndexType(Object type)
+	{
+		if (type == null) return null;
+		if (type instanceof String) return (String)type;
+		if (type instanceof Number)
+		{
+			return mapIndexType(((Number)type).intValue());
+		}
+		return null;
+	}
+	
 	String mapIndexType(int type)
 	{
 		if (indexTypeMapping == null)

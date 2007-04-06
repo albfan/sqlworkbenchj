@@ -50,7 +50,7 @@ public class SqlKeywordHandler
 	/**
 	 * Read the keywords for the current DBMS that the JDBC driver returns.
 	 * If the driver does not return all keywords, this list can be manually
-	 * extended by defining the property workbench.db.keywordlist.<dbid>
+	 * extended by defining the property workbench.db.<dbid>.syntax.keywords
 	 * with a comma separated list of additional keywords
 	 */
 	private void readKeywords(Connection con, String dbId)
@@ -64,7 +64,7 @@ public class SqlKeywordHandler
 				List keyList = StringUtil.stringToList(keys, ",");
 				this.keywords.addAll(keyList);
 
-				keys = Settings.getInstance().getProperty("workbench.db. + " + dbId + ".syntax.keywords." + dbId, null);
+				keys = Settings.getInstance().getProperty("workbench.db. + " + dbId + ".syntax.keywords", null);
 				if (keys != null)
 				{
 					List l = StringUtil.stringToList(keys.toUpperCase(), ",");

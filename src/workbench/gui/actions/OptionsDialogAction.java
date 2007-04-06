@@ -16,7 +16,6 @@ import java.awt.event.ActionEvent;
 import workbench.WbManager;
 import workbench.gui.MainWindow;
 import workbench.gui.settings.SettingsPanel;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -36,6 +35,11 @@ public class OptionsDialogAction
 	}
 	
 	public void executeAction(ActionEvent e)
+	{
+		showOptionsDialog();
+	}
+	
+	public void showOptionsDialog()
 	{
 		final MainWindow parent = WbManager.getInstance().getCurrentWindow();
 		EventQueue.invokeLater(new Runnable()

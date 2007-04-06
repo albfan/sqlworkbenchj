@@ -2153,18 +2153,10 @@ public class DbMetadata
 					def.setUnique(!unique);
 					def.setPrimaryKeyIndex(pkName.equals(indexName));
 					defs.put(indexName, def);
-				}
-				if (this.isOracle)
-				{
-					String oraType = idxRs.getString("INDEX_TYPE");
-					def.setIndexType(oraType);
-				}
-				else
-				{
-					int type = idxRs.getInt("TYPE");					
+					Object type = idxRs.getObject("TYPE");
 					def.setIndexType(dbSettings.mapIndexType(type));
 				}
-				
+
 				if (dir != null)
 				{
 					def.addColumn(colName + " " + dir);

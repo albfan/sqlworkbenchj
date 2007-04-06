@@ -12,11 +12,10 @@
 package workbench.gui.settings;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.FontMetrics;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.AbstractListModel;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -47,76 +46,56 @@ public class LnFOptionsPanel
 	implements Restoreable, ListSelectionListener, FileActions, 
 	           PropertyChangeListener
 {
-	public WbSplitPane splitPane;
-	private JPanel listPanel;
 	private JList lnfList;
 	private LnFDefinitionPanel definitionPanel;
 	protected LnFManager manager = new LnFManager();
 	private WbToolbar toolbar;
-	private JLabel currentLabel;
 	
 	public LnFOptionsPanel()
 	{
 		setLayout(new BorderLayout());
 		
-		splitPane = new WbSplitPane();
-		listPanel = new JPanel();
 		lnfList = new JList();
 		lnfList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		lnfList.setBorder(new EmptyBorder(2,1,2,1));
+		FontMetrics fm = getFontMetrics(getFont());
+		int width= fm.stringWidth("MMMMMMMMMMMMMMM");
+		lnfList.setFixedCellWidth(width);
 		
 		JScrollPane scroll = new JScrollPane(lnfList);
 
 		this.toolbar = new WbToolbar();
-		this.toolbar.addDefaultBorder();
 		this.toolbar.add(new NewListEntryAction(this));
 		this.toolbar.add(new DeleteListEntryAction(this));
-		setBorder(DividerBorder.BOTTOM_DIVIDER);
-		
-		listPanel.setLayout(new BorderLayout());
-		listPanel.add(scroll, BorderLayout.CENTER);
-		listPanel.add(this.toolbar, BorderLayout.NORTH);
-		
-		splitPane.setLeftComponent(listPanel);
-		
-		JPanel infoPanel = new JPanel(new BorderLayout());
+		toolbar.setBorder(DividerBorder.BOTTOM_DIVIDER);
 		
 		definitionPanel = new LnFDefinitionPanel();
 		definitionPanel.setPropertyListener(this);
-		infoPanel.add(definitionPanel, BorderLayout.CENTER);
 
-		currentLabel = new HtmlLabel();
-		
-		currentLabel.setBackground(Color.WHITE);
-		currentLabel.setOpaque(true);
-		//currentLabel.setBorder(DividerBorder.BOTTOM_DIVIDER);
-		currentLabel.setBorder(new EmptyBorder(2,2,2,0));
-		infoPanel.add(currentLabel, BorderLayout.NORTH);
-		
-		splitPane.setRightComponent(infoPanel);
-		
-		add(splitPane, java.awt.BorderLayout.CENTER);
+		add(scroll, BorderLayout.WEST);
+		add(toolbar, BorderLayout.NORTH);
+		add(definitionPanel, java.awt.BorderLayout.CENTER);
 
 		ListModel model = new LnfList();
 		lnfList.setModel(model);
 		lnfList.addListSelectionListener(this);
 		LnFDefinition clnf = manager.getCurrentLnF();
-		definitionPanel.setCurrentInfoDisplay(currentLabel);
 		lnfList.setSelectedValue(clnf, true);
-		if (clnf != null) currentLabel.setText(clnf.getName());
+		definitionPanel.setCurrentLookAndFeeld(clnf);
 		restoreSettings();
 	}
 	
 	public void saveSettings()
 	{
-		int divider = splitPane.getDividerLocation();
-		Settings.getInstance().setProperty(this.getClass().getName() + ".divider", divider);
+//		int divider = splitPane.getDividerLocation();
+//		Settings.getInstance().setProperty(this.getClass().getName() + ".divider", divider);
 		manager.saveLookAndFeelDefinitions();
 	}
 	
 	public void restoreSettings()
 	{
-		int divider = Settings.getInstance().getIntProperty(this.getClass().getName() + ".divider", 120);
-		splitPane.setDividerLocation(divider);
+//		int divider = Settings.getInstance().getIntProperty(this.getClass().getName() + ".divider", 120);
+//		splitPane.setDividerLocation(divider);
 	}
 	
 	public void valueChanged(ListSelectionEvent evt)
@@ -184,15 +163,6 @@ public class LnFOptionsPanel
 		}
 	}
 
-	static class HtmlLabel
-		extends JLabel
-	{
-		public void setText(String name)
-		{
-			super.setText("<html>" + ResourceMgr.getString("LblCurrLnf") + " <b>" + name + "</b></html>");
-		}
-	}
-	
 	class LnfList 
 		extends AbstractListModel
 	{

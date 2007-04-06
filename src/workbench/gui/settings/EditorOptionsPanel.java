@@ -34,7 +34,6 @@ public class EditorOptionsPanel
 	public EditorOptionsPanel()
 	{
 		initComponents();
-		setBorder(DividerBorder.BOTTOM_DIVIDER);
 		editorFont.setListMonospacedOnly(true);
 		restoreSettings();
 	}

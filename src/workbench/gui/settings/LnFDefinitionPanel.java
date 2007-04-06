@@ -45,7 +45,6 @@ public class LnFDefinitionPanel
 {
 	private LnFDefinition currentLnF;
 	private PropertyChangeListener changeListener;
-	private JLabel currentLabel;
 	
 	/** Creates new form BeanForm */
 	public LnFDefinitionPanel()
@@ -74,11 +73,6 @@ public class LnFDefinitionPanel
 		infoText.setBackground(this.getBackground());
 	}
 
-	public void setCurrentInfoDisplay(JLabel label)
-	{
-		this.currentLabel = label;
-	}
-	
 	public void setPropertyListener(PropertyChangeListener l)
 	{
 		this.changeListener = l;
@@ -134,6 +128,7 @@ public class LnFDefinitionPanel
     infoText = new javax.swing.JTextArea();
     jSeparator1 = new javax.swing.JSeparator();
     changeLnfButton = new WbButton();
+    currentLabel = new HtmlLabel();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -142,7 +137,7 @@ public class LnFDefinitionPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(15, 10, 1, 7);
+    gridBagConstraints.insets = new java.awt.Insets(4, 10, 1, 7);
     add(lblName, gridBagConstraints);
 
     tfName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
@@ -157,7 +152,7 @@ public class LnFDefinitionPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(11, 3, 1, 3);
+    gridBagConstraints.insets = new java.awt.Insets(4, 3, 1, 3);
     add(tfName, gridBagConstraints);
 
     lblClassName.setText(ResourceMgr.getString("LblLnFClass"));
@@ -207,7 +202,6 @@ public class LnFDefinitionPanel
     selectLibButton.setMinimumSize(new java.awt.Dimension(20, 20));
     selectLibButton.setPreferredSize(new java.awt.Dimension(20, 20));
     selectLibButton.addActionListener(this);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 2;
@@ -227,7 +221,6 @@ public class LnFDefinitionPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 10);
     add(infoText, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -236,18 +229,28 @@ public class LnFDefinitionPanel
     gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
     add(jSeparator1, gridBagConstraints);
 
-    changeLnfButton.setText("Make Current");
+    changeLnfButton.setText(ResourceMgr.getString("LblActivateLnf"));
     ((WbButton)changeLnfButton).setResourceKey("LblSwitchLnF");
     changeLnfButton.addActionListener(this);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(10, 8, 0, 0);
     add(changeLnfButton, gridBagConstraints);
 
+    currentLabel.setBackground(new java.awt.Color(255, 255, 255));
+    currentLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 2, 3, 2));
+    currentLabel.setOpaque(true);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(13, 8, 0, 8);
+    add(currentLabel, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -317,7 +320,11 @@ public class LnFDefinitionPanel
 		}
 	}
 
-
+	public void setCurrentLookAndFeeld(LnFDefinition lnf)
+	{
+		if (lnf != null) currentLabel.setText(lnf.getName());
+	}
+	
 	public void setDefinition(LnFDefinition lnf)
 	{
 		this.currentLnF = lnf;
@@ -332,6 +339,7 @@ public class LnFDefinitionPanel
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   public javax.swing.JButton changeLnfButton;
+  public javax.swing.JLabel currentLabel;
   public javax.swing.JTextArea infoText;
   public javax.swing.JSeparator jSeparator1;
   public javax.swing.JLabel lblClassName;
@@ -343,5 +351,12 @@ public class LnFDefinitionPanel
   public javax.swing.JTextField tfName;
   // End of variables declaration//GEN-END:variables
 
-
+	static class HtmlLabel
+		extends JLabel
+	{
+		public void setText(String name)
+		{
+			super.setText("<html>" + ResourceMgr.getString("LblCurrLnf") + " <b>" + name + "</b></html>");
+		}
+	}
 }
