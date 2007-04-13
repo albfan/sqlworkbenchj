@@ -36,15 +36,12 @@ public class MacOSHelper
 	
 	public MacOSHelper()
 	{
-		String osName = System.getProperty("os.name");
-		if (osName.startsWith("Mac OS"))
-		{
-			installApplicationHandler();
-		}
 	}
 	
-	private void installApplicationHandler()
+	public void installApplicationHandler()
 	{
+		String osName = System.getProperty("os.name");
+		if (!osName.startsWith("Mac OS")) return;
 		try
 		{
 			LogMgr.logDebug("MacOSHelper.installApplicationHandler()", "Trying to install Mac OS ApplicationListener");

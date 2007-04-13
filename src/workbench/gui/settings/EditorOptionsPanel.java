@@ -357,7 +357,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
     add(labelCloseSearch, gridBagConstraints);
 
     closePopup.setSelected(Settings.getInstance().getCloseAutoCompletionWithSearch());
@@ -371,7 +371,7 @@ public class EditorOptionsPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(6, 10, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 11);
     add(closePopup, gridBagConstraints);
 
     completionPasteCase.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Lowercase", "Uppercase", "As is" }));

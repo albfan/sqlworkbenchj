@@ -82,8 +82,8 @@ public class SearchAndReplace
 	public int find()
 	{
 		boolean showDialog = true;
-		String crit = this.lastSearchCriteria;
-		if (crit == null) crit = this.getSelectedText();
+		String crit = this.getSelectedText();
+		if (crit == null) crit = this.lastSearchCriteria;
 		SearchCriteriaPanel p = new SearchCriteriaPanel(crit);
 
 		int pos = -1;

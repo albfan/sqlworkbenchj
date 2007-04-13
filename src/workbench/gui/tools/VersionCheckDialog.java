@@ -17,12 +17,12 @@ import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.swing.Timer;
 import workbench.resource.ResourceMgr;
 import workbench.util.BrowserLauncher;
+import workbench.util.UpdateVersion;
+import workbench.util.VersionNumber;
 import workbench.util.WbThread;
 import workbench.util.WbVersionReader;
 
@@ -87,8 +87,8 @@ public class VersionCheckDialog extends javax.swing.JDialog
 			{
 				this.stableVersion.setText(" " + ResourceMgr.getString("TxtBuild") + " " + this.versionReader.getStableBuildNumber() + " (" + this.versionReader.getStableBuildDate() + ")");
 				String date = this.versionReader.getDevBuildDate();
-				String nr = this.versionReader.getDevBuildNumber();
-				if (date != null && nr != null)
+				VersionNumber nr = this.versionReader.getDevBuildNumber();
+				if (date != null && nr.isValid())
 				{
 					this.devVersion.setText(" " + ResourceMgr.getString("TxtBuild") + " " + nr + " (" + date + ")");
 				}
@@ -114,66 +114,18 @@ public class VersionCheckDialog extends javax.swing.JDialog
 
 	private void checkDisplay()
 	{
-		if (ResourceMgr.isDevBuild())
-			checkDevVersion();
-		else
-			checkStableVersion();
-	}
-
-	private void checkDevVersion()
-	{
-		String builddate = this.versionReader.getDevBuildDate();
-		String stableDate = this.versionReader.getStableBuildDate();
-
-		Date current = ResourceMgr.getBuildDate();
-		Date last = null;
-		Date lastStable = null;
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-		try
-		{
-			last = format.parse(builddate);
-			lastStable = format.parse(stableDate);
-		}
-		catch (Exception e)
-		{
-			last = new Date(0);
-			lastStable = new Date(0);
-		}
-
+		UpdateVersion version = this.versionReader.getAvailableUpdate();
+		
 		String msg = ResourceMgr.getString("LblVersionUpToDate");
-
-		if (lastStable.getTime() > current.getTime())
+		if (version == UpdateVersion.stable)
 		{
 			this.stableVersion.setBackground(Color.YELLOW);
 			msg = ResourceMgr.getString("LblVersionNewStableAvailable");
 		}
-		else if (last.getTime() > current.getTime())
+		else if (version == UpdateVersion.devBuild)
 		{
 			this.devVersion.setBackground(Color.YELLOW);
 			msg = ResourceMgr.getString("LblVersionNewDevAvailable");
-		}
-		this.statusLabel.setText(msg);
-	}
-
-	private void checkStableVersion()
-	{
-		int current = ResourceMgr.getBuildNumber();
-		String last = this.versionReader.getStableBuildNumber();
-		int releaseVersion = -1;
-		try
-		{
-			releaseVersion = Integer.parseInt(last);
-		}
-		catch (Exception e)
-		{
-			releaseVersion = -1;
-		}
-
-		String msg = ResourceMgr.getString("LblVersionUpToDate");
-		if (releaseVersion > current)
-		{
-			this.stableVersion.setBackground(Color.YELLOW);
-			msg = ResourceMgr.getString("LblVersionNewStableAvailable");
 		}
 		this.statusLabel.setText(msg);
 	}

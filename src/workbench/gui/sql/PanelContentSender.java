@@ -85,7 +85,7 @@ public class PanelContentSender
 		t.start();
 	}
 	
-	public void sendContent(final String text, final int panelIndex)
+	public void sendContent(final String text, final int panelIndex, final boolean appendText)
 	{
 		if (text == null) return;
 		
@@ -96,7 +96,14 @@ public class PanelContentSender
 		{
 			public void run()
 			{
-				panel.setStatementText(text);
+				if (appendText)
+				{
+					panel.appendStatementText(text);
+				}
+				else
+				{
+					panel.setStatementText(text);
+				}
 				target.requestFocus();
 				panel.selectEditor();
 			}

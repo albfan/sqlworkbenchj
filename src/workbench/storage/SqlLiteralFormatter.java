@@ -210,7 +210,7 @@ public class SqlLiteralFormatter
 			pattern = Settings.getInstance().getProperty(key, null);
 			if (pattern == null)
 			{
-				LogMgr.logInfo("SqlLiteralFormatter.createFormatter()", "No pattern found for '" + format + "' for type=" + type + ". Using 'standard'");
+				LogMgr.logDebug("SqlLiteralFormatter.createFormatter()", "No pattern found for '" + format + "' for type=" + type + ". Using 'standard'");
 				key = "workbench.sql.literals." + STANDARD_DATE_LITERAL_TYPE + "." + type + ".pattern";
 				pattern = Settings.getInstance().getProperty(key, defaultPattern);
 			}

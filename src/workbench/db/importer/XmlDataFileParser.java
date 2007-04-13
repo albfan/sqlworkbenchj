@@ -216,29 +216,33 @@ public class XmlDataFileParser
 		TableIdentifier tbl = new TableIdentifier(this.tableName == null ? this.tableNameFromFile : this.tableName);
 		List<ColumnIdentifier> tableCols = this.dbConn.getMetadata().getTableColumns(tbl);
 		List<ColumnIdentifier> validCols = new LinkedList<ColumnIdentifier>();
-		for (ColumnIdentifier c : this.columns)
+		//for (ColumnIdentifier c : this.columns)
+		for (int colIndex=0; colIndex < this.columns.length; colIndex++)
 		{
-			int i = tableCols.indexOf(c);
+			int i = tableCols.indexOf(this.columns[colIndex]);
 			
 			if (i != -1)
 			{
 				// Use the column definition retrieved from the database
 				// to make sure we are using the correct data types.
+				// this is also important to get quoting of column names
+				// with special characters correctly (as this is handled by DbMetadata already
+				// but the columns retrieved from the XML file are not quoted correctly)
 				ColumnIdentifier tc = tableCols.get(i);
-				c.setDataType(tc.getDataType());
+				this.columns[colIndex] = tc;
 				validCols.add(tc);
 			}
 			else
 			{
 				String msg = ResourceMgr.getString("ErrImportColumnNotFound");
-				msg = StringUtil.replace(msg, "%column%", c.getColumnName());
+				msg = StringUtil.replace(msg, "%column%", this.columns[colIndex].getColumnName());
 				msg = StringUtil.replace(msg, "%table%", tbl.getTableExpression());
 				this.messages.append(msg);
 				this.messages.appendNewLine();
 				if (this.abortOnError)
 				{
 					this.hasErrors = true;
-					throw new SQLException("Column " + c.getColumnName() + " not found in target table");
+					throw new SQLException("Column " + this.columns[colIndex].getColumnName() + " not found in target table");
 				}
 				else
 				{

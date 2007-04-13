@@ -12,7 +12,6 @@
 package workbench.gui.completion;
 
 import java.awt.Color;
-import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.BorderFactory;
@@ -31,9 +30,9 @@ public class CompletionSearchField
 {
 	private CompletionPopup parent;
 	
-	public CompletionSearchField(CompletionPopup popup)
+	public CompletionSearchField(CompletionPopup popup, String text)
 	{
-		super();
+		super(text);
 		this.parent = popup;
 		this.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
 		this.addKeyListener(this);

@@ -21,6 +21,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -47,7 +49,7 @@ import workbench.util.WbThread;
  * @author  support@sql-workbench.net
  */
 public class CompletionPopup
-	implements FocusListener, MouseListener, KeyListener
+	implements FocusListener, MouseListener, KeyListener, WindowListener
 {
 	protected JEditTextArea editor;
 	private JScrollPane scroll;
@@ -154,6 +156,7 @@ public class CompletionPopup
 			window.setContentPane(content);
 			window.addKeyListener(this);
 			window.pack();
+			window.addWindowListener(this);
 			if (window.getWidth() < d.width + 5)
 			{
 				window.setSize(d.width + 5, window.getHeight());
@@ -172,22 +175,40 @@ public class CompletionPopup
 		}
 	}
 	
+	private void cleanup()
+	{
+		this.searchField = null;
+		if (editor != null) editor.removeKeyEventInterceptor();
+		if (this.window != null)
+		{
+			this.window.removeWindowListener(this);
+			this.window.setVisible(false);
+			this.window.dispose();
+		}
+		this.scroll.setColumnHeaderView(this.headerComponent);
+		this.headerComponent.doLayout();
+	}
+	
 	public void closeQuickSearch()
 	{
 		this.searchField = null;
 		this.scroll.setColumnHeaderView(this.headerComponent);
 		this.headerComponent.doLayout();
+		
 		if (Settings.getInstance().getCloseAutoCompletionWithSearch())
 		{
 			this.closePopup(false);
 		}
-		EventQueue.invokeLater(new Runnable()
+		else
 		{
-			public void run()
+			EventQueue.invokeLater(new Runnable()
 			{
-				elementList.requestFocusInWindow();
-			}
-		});
+				public void run()
+				{
+					elementList.requestFocusInWindow();
+				}
+			});
+		}
 	}
 	
 	/**
@@ -261,6 +282,7 @@ public class CompletionPopup
 		
 		try
 		{
+			this.window.removeWindowListener(this);
 			this.window.setVisible(false);
 			if (pasteEntry)
 			{
@@ -478,29 +500,79 @@ public class CompletionPopup
 	{
 		if (this.searchField == null)
 		{
-			this.searchField = new CompletionSearchField(this);
-			String text = "" + evt.getKeyChar();
-			this.searchField.setText(text);
+			String text = String.valueOf(evt.getKeyChar());
+			this.searchField = new CompletionSearchField(this, text);
 			this.scroll.setColumnHeaderView(this.searchField);
 			this.scroll.doLayout();
 		}
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				if (searchField != null) 
+				{
+					searchField.requestFocusInWindow();
+				}
+			}
+		});
+		// The JGoodies look and feel automatically selects 
+		// the content of the text field when a focusGained event
+		// occurs. The moving of the caret has to come later
+		// than the focusGained that's why the requestFocus()
+		// and the moving of the caret are done in two steps
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
-				if (searchField != null) searchField.requestFocusInWindow();
+				if (searchField != null) 
+				{
+					int len = searchField.getText().length();
+					searchField.setCaretPosition(len);
+					searchField.select(len, len);
+				}
 			}
 		});
+		
 	}
 
 	public void keyReleased(KeyEvent keyEvent)
 	{
 	}
 
+	public void windowOpened(WindowEvent e)
+	{
+	}
+	
+	public void windowClosing(WindowEvent e)
+	{
+	}
+	
+	public void windowClosed(WindowEvent e)
+	{
+		this.cleanup();
+	}
+	
+	public void windowIconified(WindowEvent e)
+	{
+	}
+	
+	public void windowDeiconified(WindowEvent e)
+	{
+	}
+	
+	public void windowActivated(WindowEvent e)
+	{
+	}
+	
+	public void windowDeactivated(WindowEvent e)
+	{
+	}
+	
 	class DummyPanel
 		extends JPanel
 	{
 		public boolean isManagingFocus() { return false; }
 		public boolean getFocusTraversalKeysEnabled() {	return false;	}
 	}
+
 }

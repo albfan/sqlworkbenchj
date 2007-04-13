@@ -59,7 +59,7 @@ public class WbSchemaReport
 		cmdLine.addArgument("tables", ArgumentType.TableArgument);
 		cmdLine.addArgument("schemas");
 		cmdLine.addArgument("format", StringUtil.stringToList("wb,dbdesigner"));
-		cmdLine.addArgument("useSchemaname", ArgumentType.BoolArgument);
+		cmdLine.addArgument("useSchemaName", ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_TABLES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
@@ -97,7 +97,7 @@ public class WbSchemaReport
 
 		file = StringUtil.trimQuotes(file);
 		String format = cmdLine.getValue("format");
-		if (format == null || format.length() == 0) format = "xml";
+		if (StringUtil.isEmptyString(format)) format = "xml";
 
 		if ("dbdesigner".equalsIgnoreCase(format))
 		{

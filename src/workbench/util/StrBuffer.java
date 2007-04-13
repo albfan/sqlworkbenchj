@@ -16,8 +16,8 @@ import java.io.PrintStream;
 import java.io.Writer;
 
 /**
- * This is a non-synchronized implementation of StringBuilder, which
- * offers better performance than the class java.lang.StringBuilder.
+ * This is a non-synchronized implementation of StringBuffer, which
+ * offers better performance than the class java.lang.StringBuffer.
  *
  * Initially copied from http://h21007.www2.hp.com/dspp/tech/tech_TechDocumentDetailPage_IDX/1,1701,2488,00.html
  * 

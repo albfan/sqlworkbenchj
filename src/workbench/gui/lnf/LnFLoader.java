@@ -95,6 +95,7 @@ public class LnFLoader
 				// This is important otherwise, the LnF will no
 				// initialize correctly
 				UIManager.getDefaults().put("ClassLoader", loader);
+				Thread.currentThread().setContextClassLoader(loader);
 				lnfClass = loader.loadClass(this.lnfDef.getClassName());
 			}
 			else

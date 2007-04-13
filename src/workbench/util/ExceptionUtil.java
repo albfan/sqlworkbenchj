@@ -155,12 +155,4 @@ public class ExceptionUtil
 		return result;
 	}
 
-	public static void printStackTrace()
-	{
-		Exception e = new Exception();
-//		StackTraceElement[] st = e.getStackTrace();
-//		st[0].
-		e.printStackTrace();
-	}
-	
 }

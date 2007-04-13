@@ -55,7 +55,7 @@ public class SearchCriteriaPanel
 	
 	public SearchCriteriaPanel(String initialValue)
 	{
-		this(null, "workbench.sql.search");
+		this(initialValue, "workbench.sql.search");
 	}
 	
 	public SearchCriteriaPanel(String initialValue, String settingsKey)
@@ -140,7 +140,7 @@ public class SearchCriteriaPanel
 	public boolean showFindDialog(Component caller, String title)
 	{
 		Window w = WbSwingUtilities.getWindowAncestor(caller);
-		boolean result = ValidatingDialog.showConfirmDialog(w, this, title, caller, 0);
+		boolean result = ValidatingDialog.showConfirmDialog(w, this, title, caller, 0, false);
 		
 		Settings.getInstance().setProperty(caseProperty, this.getIgnoreCase());
 		Settings.getInstance().setProperty(criteriaProperty, this.getCriteria());

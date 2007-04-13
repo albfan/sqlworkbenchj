@@ -430,19 +430,6 @@ public class WbSwingUtilities
 		else return DO_ROLLBACK;
 	}
 
-//	public static boolean getContinueWarning(Component caller, String aTitle, String message)
-//	{
-//		Window parent = (Window)SwingUtilities.getWindowAncestor(caller);
-//
-//		JPanel p = new JPanel(new BorderLayout());
-//		JLabel label = new JLabel( UIManager.getIcon("OptionPane.warningIcon"));
-//		p.add(label, BorderLayout.WEST);
-//		p.add(new JLabel(message), BorderLayout.CENTER);
-//		
-//		boolean ok = ValidatingDialog.showConfirmDialog(parent, p, aTitle);
-//		return ok;
-//	}
-	
 	public static String getUserInput(Component caller, String aTitle, String initialValue)
 	{
 		return getUserInput(caller, aTitle, initialValue, false);
@@ -568,6 +555,7 @@ public class WbSwingUtilities
 		{
 			public void run()
 			{
+				c.invalidate();
 				c.validate();
 				c.repaint();
 			}
@@ -576,10 +564,16 @@ public class WbSwingUtilities
 
 	public static void repaintLater(final Component c)
 	{
+		repaintLater(c, false);
+	}
+	public static void repaintLater(final Component c, final boolean doLayout)
+	{
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
+				c.invalidate();
+				if (doLayout) c.doLayout();
 				c.validate();
 				c.repaint();
 			}

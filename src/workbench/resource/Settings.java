@@ -31,9 +31,12 @@ import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -97,7 +100,6 @@ public class Settings
 
 	private Settings()
 	{
-		WbManager.trace("Settings.<init> - start");
 		this.props = new WbProperties();
 		String configFile = System.getProperty("workbench.settings.file", "workbench.settings");
 
@@ -124,12 +126,10 @@ public class Settings
 				if (f.exists())
 				{
 					cfd = f.getParentFile();//new File(System.getProperty("user.dir"));
-					WbManager.trace("Settings.<init> - Using 'user.dir'");
 				}
 				else
 				{
 					cfd = new File(WbManager.getInstance().getJarPath());
-					WbManager.trace("Settings.<init> - Using Directory of JAR file");
 				}
 				//cfd = new File(System.getProperty("user.dir"));
 				configDir = cfd.getAbsolutePath();
@@ -151,14 +151,9 @@ public class Settings
 
 		configDir = cfd.getAbsolutePath();
 
-		WbManager.trace("Settings.<init> - using configDir: " + configDir);
-
 		File cf = new File(this.configDir, configFile);
 		this.filename = cf.getAbsolutePath();
 
-		WbManager.trace("Settings.<init> - using configfile: " + this.filename);
-
-	  WbManager.trace("Settings.<init> - Reading settings");
 		BufferedInputStream in = null;
 	  try
 		{
@@ -174,8 +169,6 @@ public class Settings
 			try { in.close(); } catch (Throwable th) {}
 		}
 		
-	  WbManager.trace("Settings.<init> - Done reading settings. Initializing LogMgr");
-
 		boolean logSysErr = getBoolProperty("workbench.log.console", false);
 		String sysLog = System.getProperty("workbench.log.console", null);
 		if (sysLog != null)
@@ -321,6 +314,56 @@ public class Settings
 		return StringUtil.replace(fName, FileDialogUtil.CONFIG_DIR_KEY, dir);
 	}
 
+	public Date getLastUpdateCheck()
+	{
+		String dt = getProperty("workbench.gui.updatecheck.lastcheck", null);
+		if (dt == null) return null;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date last = null;
+		try
+		{
+			last = sdf.parse(dt);
+			return last;
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
+	
+	public void setLastUpdateCheck()
+	{
+		Date now = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		setProperty("workbench.gui.updatecheck.lastcheck", sdf.format(now));
+	}
+	
+	public int getUpdateCheckInterval()
+	{
+		String prop = getProperty("workbench.gui.updatecheck.interval", "7");
+		if (prop.equals("never")) return -1;
+		
+		int interval = -1;
+		try
+		{
+			interval = Integer.parseInt(prop);
+		}
+		catch (Exception e)
+		{
+			interval = -1;
+		}
+		return interval;
+	}
+	
+	public void setUpdateCheckInterval(String days)
+	{
+		if (days.indexOf(' ') > 0)
+		{
+			days = days.substring(0, days.indexOf(' '));
+		}
+		setProperty("workbench.gui.updatecheck.interval", days);
+	}
+	
 	public void setPKMappingFilename(String file)
 	{
 		setProperty(PK_MAPPING_FILENAME_PROPERTY,file);
@@ -736,14 +779,17 @@ public class Settings
 	private void upgradeListProp(String key)
 	{
 		String currentValue = getProperty(key, "");
-		List currentList = StringUtil.stringToList(currentValue, ",", true, true, false);
+		List<String> currentList = StringUtil.stringToList(currentValue, ",", true, true, false);
+		
+		// Use a HashSet to ensure that no duplicates are contained in the list
+		Set<String> currentProps = new HashSet<String>();
+		currentProps.addAll(currentList);
 		
 		WbProperties defProps = getDefaultProperties();
 		String defValue = defProps.getProperty(key, "");
-		List defList = StringUtil.stringToList(defValue, ",", true, true, false);
-		
-		currentList.addAll(defList);
-		this.setProperty(key, StringUtil.listToString(currentList,','));
+		List<String> defList = StringUtil.stringToList(defValue, ",", true, true, false);
+		currentProps.addAll(defList);
+		this.setProperty(key, StringUtil.listToString(currentProps,','));
 	}
 	
 	private void renameOldProps()
@@ -822,21 +868,24 @@ public class Settings
 	private WbProperties getDefaultProperties()
 	{
 		WbProperties defProps = new WbProperties();
+		InputStream in = ResourceMgr.getDefaultSettings();
 		try
 		{
-			defProps.load(ResourceMgr.getDefaultSettings());
+			defProps.load(in);
 		}
 		catch (IOException e)
 		{
 			LogMgr.logError(this, "Could not read default settings", e);
+		}
+		finally
+		{
+			try { in.close(); } catch (Throwable th) {}
 		}
 		return defProps;
 	}
 	
 	private void fillDefaults()
 	{
-		WbManager.trace("Setting.fillDefaults() - start");
-
 		InputStream in = ResourceMgr.getDefaultSettings();
 		try
 		{
@@ -850,7 +899,6 @@ public class Settings
 		{
 			try { in.close(); } catch (Throwable th) {}
 		}
-		WbManager.trace("Setting.fillDefaults() - done");
 	}
 
 	public int getMaxMacrosInMenu()

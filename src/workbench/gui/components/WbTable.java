@@ -37,7 +37,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.EventObject;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -45,7 +47,6 @@ import javax.swing.CellEditor;
 import javax.swing.InputMap;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -159,7 +160,7 @@ public class WbTable
 	private boolean modelChanging = false;
 	
 	private int headerPopupX = -1;
-	private int[] savedColumnSizes;
+	private Map<String, Integer> savedColumnSizes;
 
 	private RowHeightResizer rowResizer;
 	private List<TableModelListener> changeListener = new ArrayList<TableModelListener>();
@@ -1031,29 +1032,29 @@ public class WbTable
 	{
 		TableColumnModel colMod = this.getColumnModel();
 		int count = colMod.getColumnCount();
-		this.savedColumnSizes = new int[count];
+		this.savedColumnSizes = new HashMap<String, Integer>();
 		int start = 0;
 		if (this.dwModel.getShowStatusColumn()) start = 1;
 
 		for (int i=start; i < count; i++)
 		{
 			TableColumn col = colMod.getColumn(i);
-			savedColumnSizes[i-start] = col.getPreferredWidth();
+			String name = this.getColumnName(i);
+			savedColumnSizes.put(name, new Integer(col.getPreferredWidth()));
 		}
 	}
 
 	public void restoreColumnSizes()
 	{
-		if (this.savedColumnSizes == null || this.savedColumnSizes.length == 0) return;
-		int start = 0;
-		TableColumnModel colMod = this.getColumnModel();
-		int count = colMod.getColumnCount();
-		if (this.dwModel.getShowStatusColumn()) start = 1;
-
-		for (int i=start; i < count; i++)
+		if (this.savedColumnSizes == null) return;
+		for (Map.Entry<String, Integer> entry : this.savedColumnSizes.entrySet())
 		{
-			TableColumn col = colMod.getColumn(i);
-			col.setPreferredWidth(savedColumnSizes[i-start]);
+			TableColumn col = this.getColumn(entry.getKey());
+			if (col != null)
+			{
+				int width = entry.getValue().intValue();
+				col.setPreferredWidth(width);
+			}
 		}
 		this.savedColumnSizes = null;
 	}
@@ -1735,11 +1736,9 @@ public class WbTable
 		
 		KeyColumnSelectorPanel panel = new KeyColumnSelectorPanel(originalCols, table);
 		Window parent = SwingUtilities.getWindowAncestor(this);
-		int choice = JOptionPane.showConfirmDialog(parent, panel, ResourceMgr.getString("MsgSelectKeyColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
-		// KeyColumnSelectorPanel works on a copy of the ColumnIdentifiers so
-		// we need to copy the PK flag back to the original ones..
-		if (choice == JOptionPane.OK_OPTION)
+		boolean selected = ValidatingDialog.showConfirmDialog(parent, panel, ResourceMgr.getString("MsgSelectKeyColumnsWindowTitle"), null, 0, true);
+		
+		if (selected)
 		{
 			ColumnIdentifier[] cols = panel.getColumns();
 			ds.setPKColumns(cols);
@@ -1817,7 +1816,7 @@ public class WbTable
 	 *  is prompted for the key columns
 	 *
 	 *  @param promptWhenNeeded if true, the user is asked to supply PK columns if none were found
-	 *  @return true, if primary key columns where found for the underlying table.
+	 *  @return true, if primary key columns where found (or selected by the user) for the underlying table.
 	 * 
 	 *	@see #detectDefinedPkColumns()
 	 *	@see #selectKeyColumns()
@@ -1836,7 +1835,7 @@ public class WbTable
 		{
 			if (hasPK && !pkColumnsComplete)
 			{
-				hasPK = WbSwingUtilities.getYesNo(this, "Not enough PK columns. Continue?");
+				hasPK = WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgIgnoreMissingPK"));
 			}
 			else
 			{

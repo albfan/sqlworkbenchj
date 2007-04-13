@@ -25,12 +25,12 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -80,11 +80,9 @@ public class ProfileTree
 		addMouseListener(this);
 		getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
 		addTreeSelectionListener(this);
-		DefaultTreeCellRenderer rend = (DefaultTreeCellRenderer)getCellRenderer();
-		rend.setOpenIcon(ResourceMgr.getImage("Tree"));
-		rend.setClosedIcon(ResourceMgr.getImage("Tree"));
-		rend.setLeafIcon(ResourceMgr.getImage("profile"));
-		
+		UIManager.put("Tree.openIcon", ResourceMgr.getImage("Tree"));
+		UIManager.put("Tree.closedIcon", ResourceMgr.getImage("Tree"));
+		UIManager.put("Tree.leafIcon", ResourceMgr.getImage("profile"));
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
 		

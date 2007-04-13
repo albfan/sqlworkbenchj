@@ -45,7 +45,10 @@ public class WbTabbedPane
 		if (metrics == null) return 0;
 		int fontHeight = metrics.getHeight();
     Insets tabInsets = UIManager.getInsets("TabbedPane.tabInsets");
-		fontHeight += tabInsets.top + tabInsets.bottom + 2;
+		if (tabInsets != null)
+		{
+			fontHeight += tabInsets.top + tabInsets.bottom + 2;
+		}
 		return fontHeight + 5;
 	}
 	

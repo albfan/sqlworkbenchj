@@ -25,18 +25,14 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
-import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelEvent;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import workbench.db.ColumnIdentifier;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 /**
  *
@@ -48,7 +44,6 @@ public class ColumnSelectorPanel
 {
 	private JTable selectTable;
 	protected JPanel infoPanel;
-	//private JLabel infoLabel;
 	private ColumnSelectTableModel model;
 	private JButton selectAll;
 	private JButton selectNone;
@@ -68,18 +63,19 @@ public class ColumnSelectorPanel
 	{
 		this.setLayout(new BorderLayout());
 		this.selectTable = new JTable();
-		this.selectTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		this.selectTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		this.selectTable.setRowSelectionAllowed(false);
 		this.selectTable.setColumnSelectionAllowed(false);
 		this.model = new ColumnSelectTableModel(columns);
 		this.selectTable.setModel(this.model);
+		
 		TableColumnModel colMod = this.selectTable.getColumnModel();
 		TableColumn col = colMod.getColumn(0);
 		col.setPreferredWidth(150);
 		col.setMinWidth(50);
 		col = colMod.getColumn(1);
-		col.setPreferredWidth(100);
-		col.setMinWidth(50);
+		col.setPreferredWidth(65);
+		col.setMinWidth(35);
 
 		WbScrollPane scroll = new WbScrollPane(this.selectTable);
 		this.infoPanel = new JPanel();
@@ -146,7 +142,7 @@ public class ColumnSelectorPanel
 
     optionPanel.setBorder(new EmptyBorder(5,0,10,0));
     this.add(optionPanel, BorderLayout.SOUTH);
-		Dimension d = new Dimension(300, 190);
+		Dimension d = new Dimension(300, 250);
 		this.setPreferredSize(d);
 	}
 
@@ -272,7 +268,7 @@ class ColumnSelectTableModel
 {
 	ColumnIdentifier[] columns;
 	boolean[] selected;
-	private String colLabel = ResourceMgr.getString("LblHeaderKeyColumnColName");
+	String colLabel = ResourceMgr.getString("LblHeaderKeyColumnColName");
 	String selectLabel = ResourceMgr.getString("LblHeaderUseColumn");
 	
 	private int rows;

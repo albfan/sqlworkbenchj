@@ -53,6 +53,7 @@ public class ValidatingDialog
 	private boolean isCancelled = true;
 	private int selectedOption = -1;
 	private EscAction esc;
+	private JPanel buttonPanel;
 	
 	public ValidatingDialog(Dialog owner, String title, JComponent editor)
 	{
@@ -132,7 +133,7 @@ public class ValidatingDialog
 		Border b = BorderFactory.createEmptyBorder(10,10,10,10);
 		content.setBorder(b);
 		content.add(editor, BorderLayout.CENTER);
-		JPanel buttonPanel = new JPanel();
+		buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		for (int i = 0; i < optionButtons.length; i++)
 		{
@@ -159,15 +160,15 @@ public class ValidatingDialog
 	
 	public static boolean showConfirmDialog(Window parent, JComponent editor, String title)
 	{
-		return showConfirmDialog(parent, editor, title, null, 0);
+		return showConfirmDialog(parent, editor, title, null, 0, false);
 	}
 	
 	public static boolean showConfirmDialog(Window parent, JComponent editor, String title, int defaultButton)
 	{
-		return showConfirmDialog(parent, editor, title, null, defaultButton);
+		return showConfirmDialog(parent, editor, title, null, defaultButton, false);
 	}
 	
-	public static boolean showConfirmDialog(Window parent, JComponent editor, String title, Component reference, int defaultButton)
+	public static boolean showConfirmDialog(Window parent, JComponent editor, String title, Component reference, int defaultButton, boolean centeredButtons)
 	{
 		ValidatingDialog dialog = null;
 		if (parent == null)
@@ -193,7 +194,12 @@ public class ValidatingDialog
 		}
 		
 		dialog.setDefaultButton(defaultButton);
+		if (centeredButtons)
+		{
+			dialog.buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+		}
 		dialog.setVisible(true);
+		
 		return !dialog.isCancelled();
 	}
 	

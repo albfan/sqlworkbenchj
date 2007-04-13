@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -81,9 +82,23 @@ public class ValueConverter
 
 	public ValueConverter(String aDateFormat, String aTimeStampFormat)
 	{
-		this();
-		this.setDefaultDateFormat(aDateFormat);
-		this.setDefaultTimestampFormat(aTimeStampFormat);
+		if (StringUtil.isEmptyString(aDateFormat))
+		{
+			this.setDefaultDateFormat(Settings.getInstance().getDefaultDateFormat());
+		}
+		else
+		{
+			this.setDefaultDateFormat(aDateFormat);
+		}
+
+		if (StringUtil.isEmptyString(aTimeStampFormat))
+		{
+			this.setDefaultTimestampFormat(Settings.getInstance().getDefaultTimestampFormat());
+		}
+		else
+		{
+			this.setDefaultTimestampFormat(aTimeStampFormat);
+		}
 	}
 
 	public void setDefaultDateFormat(String aFormat)
@@ -279,6 +294,15 @@ public class ValueConverter
 
   public java.sql.Time parseTime(String time)
 	{
+		if (isToday(time))
+		{
+			Calendar c = Calendar.getInstance();
+			c.clear(Calendar.YEAR);
+			c.clear(Calendar.DAY_OF_MONTH);
+			c.clear(Calendar.MONTH);
+			java.util.Date now = c.getTime();
+			return new java.sql.Time(now.getTime());
+		}
 		java.sql.Time result = null;
 		java.util.Date parsed = null;
 		synchronized (this.formatter)
@@ -311,6 +335,12 @@ public class ValueConverter
   public java.sql.Timestamp parseTimestamp(String aDate)
 		throws ParseException
   {
+		if (isToday(aDate))
+		{
+			java.util.Date now = new java.util.Date();
+			return new java.sql.Timestamp(now.getTime());
+		}
+		
 		java.util.Date result = null;
 		
 		if (this.defaultTimestampFormat != null)
@@ -362,10 +392,23 @@ public class ValueConverter
 		return null;
 		
 	}
-	
+
   public java.sql.Date parseDate(String aDate)
 		throws ParseException
   {
+		if (isToday(aDate))
+		{
+			// This is the only way I know to construct a Date object
+			// where I can be sure that no time part is included
+			// as java.util.Date(int, int, int) is deprecated
+			Calendar c = Calendar.getInstance();
+			c.set(Calendar.HOUR_OF_DAY, 0);
+			c.clear(Calendar.SECOND);
+			c.clear(Calendar.MINUTE);
+			c.clear(Calendar.MILLISECOND);
+			java.util.Date now = c.getTime();
+			return new java.sql.Date(now.getTime());
+		}
 		java.util.Date result = null;
 		
 		if (this.defaultDateFormat != null)
@@ -433,6 +476,17 @@ public class ValueConverter
 		return null;
   }
 
+	private boolean isToday(String arg)
+	{
+		return ("current_date".equalsIgnoreCase(arg) 
+				|| "current_timestamp".equalsIgnoreCase(arg) 
+				|| "current_time".equalsIgnoreCase(arg) 
+				|| "today".equalsIgnoreCase(arg) 
+				|| "sysdate".equalsIgnoreCase(arg) 
+				|| "now".equalsIgnoreCase(arg));
+		
+	}
+	
 	private String adjustDecimalString(String input)
 	{
 		if (input == null)  return input;

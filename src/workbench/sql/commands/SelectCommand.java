@@ -24,6 +24,12 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
 /**
+ * Implementation of the SELECT statement. 
+ * The result of the SELECT is passed back in the StatementRunnerResult object.
+ * If a ResultSetConsumer is registered in the StatementRunner executing this
+ * statement, the ResultSet will be returned directly, otherwise the 
+ * ResultSet will be completely read into a DataStore.
+ * 
  * @author  support@sql-workbench.net
  */
 public class SelectCommand extends SqlCommand
@@ -32,8 +38,13 @@ public class SelectCommand extends SqlCommand
 
 	public SelectCommand()
 	{
+		
 	}
 
+	/**
+	 * Runs the passed SQL statement using Statement.executeQuery()
+	 * 
+	 */
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
@@ -97,7 +108,6 @@ public class SelectCommand extends SqlCommand
 			{
 				// if a ResultSetConsumer is waiting, we have to store the
 				// result set, so that not all the data is read into memory
-				// when exporting data
 				// If the result set is not consumed, we can create the DataStore
 				// right away. This is necessary, because with Oracle, the stream to
 				// read LONG columns would be closed, if any other statement

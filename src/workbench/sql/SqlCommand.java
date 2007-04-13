@@ -92,6 +92,8 @@ public class SqlCommand
 	 *	then any messages written with dbms_output are appended as well
 	 *  This behaviour is then similar to MS SQL Server where any messages
 	 *  displayed using the PRINT function are returned in the Warnings as well.
+	 * 
+	 *  @see workbench.util.SqlUtil#getWarnings(WbConnection, Statement, boolean)
 	 */
 	protected boolean appendWarnings(WbConnection aConn, Statement aStmt, StringBuilder msg)
 	{
@@ -100,6 +102,9 @@ public class SqlCommand
 		if (warn != null && warn.trim().length() > 0)
 		{
 			hasWarning = true;
+			msg.append('\n');
+			msg.append(ResourceMgr.getString("TxtWarnings"));
+			msg.append('\n');
 			msg.append(warn.trim());
 		}
 		return hasWarning;
@@ -241,8 +246,28 @@ public class SqlCommand
 		if (hasResult == false) 
 		{
 			// the first "result" is an updateCount
-			updateCount = this.currentStatement.getUpdateCount();
-			moreResults = this.currentStatement.getMoreResults();
+			try
+			{
+				updateCount = this.currentStatement.getUpdateCount();
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("SqlCommand.processResults()", "Error when calling getUpdateCount()", e);
+				updateCount = -1;
+			}
+
+			try
+			{
+				moreResults = this.currentStatement.getMoreResults();
+			}
+			catch (Exception e)
+			{
+				// Some drivers throw errors if no result is available. In this case
+				// simply assume there are no more results.
+				LogMgr.logError("SqlCommand.processResults()", "Error when calling getMoreResults()", e);
+				moreResults = false;
+			}
+			
 		}
 		else
 		{
@@ -250,7 +275,7 @@ public class SqlCommand
 		}
 
 		ResultSet rs = null;
-		boolean multipleUpdateCounts = (this.currentConnection != null ? this.currentConnection.getDbSettings().allowsMultipleGetUpdateCounts() : true);
+		boolean multipleUpdateCounts = (this.currentConnection != null ? this.currentConnection.getDbSettings().allowsMultipleGetUpdateCounts() : false);
 
 		int counter = 0;
 		while (moreResults || updateCount > -1)

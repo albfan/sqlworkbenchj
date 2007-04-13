@@ -1618,10 +1618,10 @@ public class TableListPanel
 		this.retrieve();
 	}
 
-	private void showTableData(final int panelIndex)
+	private void showTableData(final int panelIndex, final boolean appendText)
 	{
 		PanelContentSender sender = new PanelContentSender(this.parentWindow);
-		sender.sendContent(buildSqlForTable(), panelIndex);
+		sender.sendContent(buildSqlForTable(), panelIndex, appendText);
 	}
 
 	private String buildSqlForTable()
@@ -1642,7 +1642,7 @@ public class TableListPanel
 				return null;
 			}
 		}
-		String sql = tableDefinition.getSelectForTable();
+		String sql = tableDefinition.getSelectForTable() + ";";
 		if (sql == null)
 		{
 			String msg = ResourceMgr.getString("ErrNoColumnsRetrieved").replaceAll("%table%", this.selectedTable.getTableName());
@@ -1712,13 +1712,14 @@ public class TableListPanel
 				try
 				{
 					final int panelIndex = Integer.parseInt(command.substring(6));
+					final boolean appendText = WbAction.isCtrlPressed(e);
 					// Allow the selection change to finish so that
 					// we have the correct table name in the instance variables
 					EventQueue.invokeLater(new Runnable()
 					{
 						public void run()
 						{
-							showTableData(panelIndex);
+							showTableData(panelIndex, appendText);
 						}
 					});
 				}

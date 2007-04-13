@@ -1231,6 +1231,15 @@ public class SqlPanel
 		return this.editor.getCurrentFileName();
 	}
 
+	public void appendStatementText(String text)
+	{
+		this.editor.appendLine("\n\n");
+		int pos = this.editor.getText().length();
+		this.editor.appendLine(text);
+		this.editor.setCaretPosition(pos);
+		this.editor.scrollToCaret();
+	}
+	
 	public void setStatementText(String aStatement)
 	{
 		this.storeStatementInHistory();

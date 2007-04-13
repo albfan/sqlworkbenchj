@@ -21,6 +21,7 @@ import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.DropDownButton;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.sql.EditorPanel;
@@ -84,13 +85,14 @@ public class DbObjectSourcePanel
 			try
 			{
 				final int panelIndex = Integer.parseInt(command.substring(6));
+				
 				// Allow the selection change to finish so that
 				// we have the correct table name in the instance variables
 				EventQueue.invokeLater(new Runnable()
 				{
 					public void run()
 					{
-						editText(panelIndex);
+						editText(panelIndex, false);
 					}
 				});
 			}
@@ -101,12 +103,12 @@ public class DbObjectSourcePanel
 		}
 	}
 		
-	private void editText(final int panelIndex)
+	private void editText(final int panelIndex, final boolean appendText)
 	{
 		if (this.parentWindow != null)
 		{
 			PanelContentSender sender = new PanelContentSender(this.parentWindow);
-			sender.sendContent(getText(), panelIndex);
+			sender.sendContent(getText(), panelIndex, appendText);
 		}
 	}
 

@@ -129,7 +129,7 @@ public class SqlHistoryEntry
 		}
 		else 
 		{
-			this.text = this.trimEmptyLines(value);
+			this.text = value;
 		}
 	}
 }

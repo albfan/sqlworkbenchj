@@ -31,5 +31,27 @@ public class ColumnIdentifierTest
 		assertEquals("Copy not equals", true, col.equals(copy));
 		
 	}
+
+	public void testCompare()
+	{
+		ColumnIdentifier col1 = new ColumnIdentifier("mycol", Types.VARCHAR, true);
+		ColumnIdentifier col2 = new ColumnIdentifier("\"mycol\"", Types.VARCHAR, true);
+		assertEquals("Columns are not equal", true, col1.equals(col2));
+		assertEquals("Columns are not equal", 0, col1.compareTo(col2));
+		assertEquals("Columns are not equal", true, col1.hashCode() == col2.hashCode());
+		
+		col1 = new ColumnIdentifier("mycol", Types.VARCHAR, true);
+		col2 = new ColumnIdentifier("MYCOL", Types.VARCHAR, true);
+		assertEquals("Columns are not equal", true, col1.equals(col2));
+		assertEquals("Columns are not equal", 0, col1.compareTo(col2));
+		assertEquals("Columns are not equal", true, col1.hashCode() == col2.hashCode());
+		
+		col1 = new ColumnIdentifier("Pr\u00e4fix", Types.VARCHAR, true);
+		col2 = new ColumnIdentifier("\"PR\u00c4FIX\"", Types.VARCHAR, true);
+		assertEquals("Columns are not equal", true, col1.equals(col2));
+		assertEquals("Columns are not equal", 0, col1.compareTo(col2));
+		assertEquals("Columns are not equal", true, col1.hashCode() == col2.hashCode());
+
+	}
 	
 }

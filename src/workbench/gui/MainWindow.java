@@ -2166,7 +2166,14 @@ public class MainWindow
 				MainPanel p = getSqlPanel(i);
 				p.saveToWorkspace(w,i);
 			}
-			if (!Settings.getInstance().getCreateWorkspaceBackup())
+			if (WbManager.getInstance().outOfMemoryOcurred())
+			{
+				// sometimes when an OoM occurred, saving of the workspace
+				// succeeds but the ZIP file is not written correctly. 
+				// This tries to prevent the old file from beeing overwritten, just in case...
+				bck.renameTo(new File(realFilename + ".saved"));
+			}
+			else if (!Settings.getInstance().getCreateWorkspaceBackup())
 			{
 				bck.delete();
 			}

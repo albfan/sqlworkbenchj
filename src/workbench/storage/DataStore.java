@@ -504,10 +504,14 @@ public class DataStore
 	 * retrieving its definition (for performance reasons) use
 	 * {@link #setUpdateTableToBeUsed(TableIdentifier)}
 	 * 
+	 * any PK column that is not found in the current ResultInfo
+	 * will be stored and can be retrieved using getMissingPkColumns()
+	 * 
 	 * @param tbl the table to be used as the update table
 	 * @param conn the connection where this table exists
 	 * 
 	 * @see #setUpdateTableToBeUsed(TableIdentifier)
+	 * @see #getMissingPkColumns()
 	 */
 	public void setUpdateTable(TableIdentifier tbl, WbConnection conn)
 	{
@@ -542,8 +546,6 @@ public class DataStore
 			TableIdentifier toCheck = meta.resolveSynonym(synCheck);
 			List<ColumnIdentifier> columns = meta.getTableColumns(toCheck);
 			int realColumns = 0;
-			int myPkColumns = 0;
-			int tablePkColumns = 0;
 			
 			if (columns != null)
 			{
@@ -1699,6 +1701,11 @@ public class DataStore
 			this.checkUpdateTable();
 		}
 		
+		if (this.updateTable == null)
+		{
+			LogMgr.logDebug("Datastore.updatePkInformation()", "No update table found, PK information not available");
+		}
+		
 		// If we have found a single update table, but no Primary Keys
 		// we try to find a user-defined PK mapping. 
 		// there is no need to call readPkDefinition() as that 
@@ -1706,6 +1713,7 @@ public class DataStore
 		// first, which we have already tried in checkUpdateTable()
 		if (this.updateTable != null && !this.hasPkColumns())
 		{
+			LogMgr.logDebug("Datastore.updatePkInformation()", "Trying to retrieve PK information retrieved from pk mapping");
 			this.resultInfo.readPkColumnsFromMapping(aConnection);
 		}
 	}

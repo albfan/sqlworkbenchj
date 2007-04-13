@@ -47,13 +47,16 @@ import workbench.db.TableSearcher;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.EmptyTableModel;
+import workbench.gui.components.FlatButton;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbTable;
+import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.PropertyStorage;
@@ -91,7 +94,7 @@ public class TableSearchPanel
 	private WbTable firstTable;
 	private EditorPanel sqlDisplay;
 	private ResultHighlightingRenderer renderer;
-
+	private FlatButton startButton;
 	public TableSearchPanel(ShareableDisplay aTableListSource)
 	{
 		this.tableListModel = EmptyTableModel.EMPTY_MODEL;
@@ -106,9 +109,22 @@ public class TableSearchPanel
 		WbTable tables = (WbTable)this.tableNames;
 		tables.setAdjustToColumnLabel(false);
 
-		this.reloadButton.setAction(new ReloadAction(this.tableListSource));
-		this.reloadButton.setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
-
+		WbToolbar toolbar = new WbToolbar();
+		WbAction reload = new ReloadAction(this.tableListSource);
+		reload.setTooltip(ResourceMgr.getString("TxtRefreshTableList"));
+		toolbar.add(reload);
+		buttonPanel.add(toolbar);
+		
+		startButton = new FlatButton();
+    startButton.setText(ResourceMgr.getString("LblStartSearch"));
+    startButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        startSearch();
+      }
+    });		
+		buttonPanel.add(startButton);
 		this.searcher = new TableSearcher();
 		this.searcher.setDisplay(this);
 		
@@ -122,6 +138,19 @@ public class TableSearchPanel
 		this.statusInfo.setBorder(b2);
 	}
 
+	private void startSearch()                                            
+	{                                                
+		if (this.searcher.isRunning())
+		{
+			setStartButtonEnabled(false);
+			this.searcher.cancelSearch();
+			//setStartButtonEnabled(true);
+		}
+		else
+		{
+			this.searchData();
+		}
+	} 	
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -146,13 +175,12 @@ public class TableSearchPanel
     selectNoneButton = new javax.swing.JButton();
     statusInfo = new javax.swing.JLabel();
     entryPanel = new javax.swing.JPanel();
-    startButton = new javax.swing.JButton();
     searchText = new javax.swing.JTextField();
     likeLabel = new javax.swing.JLabel();
-    reloadButton = new WbToolbarButton();
     columnFunction = new javax.swing.JTextField();
     labelRowCount = new javax.swing.JLabel();
     rowCount = new javax.swing.JTextField();
+    buttonPanel = new javax.swing.JPanel();
 
     setLayout(new java.awt.BorderLayout());
 
@@ -217,21 +245,6 @@ public class TableSearchPanel
 
     entryPanel.setLayout(new java.awt.GridBagLayout());
 
-    startButton.setText(ResourceMgr.getString("LblStartSearch"));
-    startButton.addActionListener(new java.awt.event.ActionListener()
-    {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
-      {
-        startButtonActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 1);
-    entryPanel.add(startButton, gridBagConstraints);
-
     searchText.setColumns(20);
     searchText.setText("% ... %");
     searchText.setToolTipText(ResourceMgr.getDescription("LblSearchTableCriteria"));
@@ -250,16 +263,6 @@ public class TableSearchPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
     entryPanel.add(likeLabel, gridBagConstraints);
-
-    reloadButton.setMaximumSize(new java.awt.Dimension(24, 24));
-    reloadButton.setMinimumSize(new java.awt.Dimension(24, 24));
-    reloadButton.setPreferredSize(new java.awt.Dimension(24, 24));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
-    entryPanel.add(reloadButton, gridBagConstraints);
 
     columnFunction.setColumns(8);
     columnFunction.setText("$col$");
@@ -291,6 +294,14 @@ public class TableSearchPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 5);
     entryPanel.add(rowCount, gridBagConstraints);
 
+    buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 2, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    entryPanel.add(buttonPanel, gridBagConstraints);
+
     add(entryPanel, java.awt.BorderLayout.NORTH);
   }// </editor-fold>//GEN-END:initComponents
 
@@ -303,20 +314,6 @@ public class TableSearchPanel
 	{//GEN-HEADEREND:event_selectAllButtonActionPerformed
 		this.tableNames.getSelectionModel().setSelectionInterval(0, this.tableNames.getRowCount() - 1);
 	}//GEN-LAST:event_selectAllButtonActionPerformed
-
-	private void startButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_startButtonActionPerformed
-	{//GEN-HEADEREND:event_startButtonActionPerformed
-		if (this.searcher.isRunning())
-		{
-			setStartButtonEnabled(false);
-			this.searcher.cancelSearch();
-			//setStartButtonEnabled(true);
-		}
-		else
-		{
-			this.searchData();
-		}
-	}//GEN-LAST:event_startButtonActionPerformed
 
 	private void setStartButtonEnabled(final boolean flag)
 	{
@@ -634,13 +631,13 @@ public class TableSearchPanel
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   protected javax.swing.ButtonGroup buttonGroup1;
+  protected javax.swing.JPanel buttonPanel;
   protected javax.swing.JTextField columnFunction;
   protected javax.swing.JPanel entryPanel;
   protected javax.swing.JPanel jPanel2;
   protected javax.swing.JSplitPane jSplitPane1;
   protected javax.swing.JLabel labelRowCount;
   protected javax.swing.JLabel likeLabel;
-  protected javax.swing.JButton reloadButton;
   protected javax.swing.JPanel resultPanel;
   protected javax.swing.JScrollPane resultScrollPane;
   protected javax.swing.JTabbedPane resultTabPane;
@@ -649,7 +646,6 @@ public class TableSearchPanel
   protected javax.swing.JButton selectAllButton;
   protected javax.swing.JPanel selectButtonPanel;
   protected javax.swing.JButton selectNoneButton;
-  protected javax.swing.JButton startButton;
   protected javax.swing.JLabel statusInfo;
   protected javax.swing.JScrollPane tableListScrollPane;
   protected javax.swing.JTable tableNames;

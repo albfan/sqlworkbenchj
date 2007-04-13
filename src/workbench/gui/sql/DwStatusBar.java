@@ -20,6 +20,8 @@ import java.awt.FontMetrics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -40,9 +42,12 @@ import workbench.gui.components.DividerBorder;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTextLabel;
 import workbench.interfaces.EditorStatusbar;
+import workbench.interfaces.EventDisplay;
 import workbench.interfaces.StatusBar;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.EventNotifier;
+import workbench.util.NotifierEvent;
 import workbench.util.StringUtil;
 
 
@@ -52,7 +57,7 @@ import workbench.util.StringUtil;
  */
 public class DwStatusBar 
 	extends JPanel
-	implements StatusBar, EditorStatusbar, ActionListener
+	implements StatusBar, EditorStatusbar, ActionListener, EventDisplay, MouseListener
 {
 	private JTextField tfRowCount;
 
@@ -63,6 +68,7 @@ public class DwStatusBar
 	private JTextField tfTimeout;
 	private WbTextLabel execTime;
 	private JLabel editorStatus;
+	private JPanel infoPanel;
 	
 	private static final int BAR_HEIGHT = 22;
 	private static final int FIELD_HEIGHT = 18;
@@ -75,6 +81,8 @@ public class DwStatusBar
 	private long timerStarted;
 	private Timer executionTimer;
 	private boolean timerRunning;
+	private ActionListener notificationHandler;
+	private JLabel notificationLabel;
 	
 	public DwStatusBar()
 	{
@@ -117,16 +125,16 @@ public class DwStatusBar
 		tfStatus.setMaximumSize(new Dimension(32768, FIELD_HEIGHT));
 		tfStatus.setMinimumSize(new Dimension(80, FIELD_HEIGHT));
 		tfStatus.setPreferredSize(null);
-		
-		JPanel p = new JPanel();
-		p.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		FlowLayout fl = new FlowLayout(FlowLayout.RIGHT);
-		fl.setHgap(0);
-		fl.setVgap(0);
-		p.setLayout(fl);
-		p.setMaximumSize(new Dimension(300, FIELD_HEIGHT));
-		
+
 		this.add(tfStatus, BorderLayout.CENTER);
+		
+		JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0,0));
+		p.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		p.setMaximumSize(new Dimension(300, FIELD_HEIGHT));
+
+		this.infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+		setBorder(WbSwingUtilities.EMPTY_BORDER);
+		p.add(infoPanel);
 		
 		this.execTime = new WbTextLabel();
 		execTime.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -184,7 +192,8 @@ public class DwStatusBar
 		this.readyMsg = ResourceMgr.getString("MsgReady");
 		this.clearStatusMessage();
 		
-		numberFormatter = DwStatusBar.createTimingFormatter(); 
+		numberFormatter = DwStatusBar.createTimingFormatter();
+		EventNotifier.getInstance().addEventDisplay(this);
 	}
 
 	public static final DecimalFormat createTimingFormatter()
@@ -277,7 +286,7 @@ public class DwStatusBar
 	
 	public void setRowcount(int start, int end, int count)
 	{
-		StringBuilder s = new StringBuilder(20);
+		final StringBuilder s = new StringBuilder(20);
 		if (count > 0)
 		{
 			// for some reason the dynamic layout does not leave enough
@@ -289,7 +298,7 @@ public class DwStatusBar
 			s.append('/');
 			s.append(count);
 		}
-		this.tfRowCount.setText(s.toString());
+		tfRowCount.setText(s.toString());
 		this.doRepaint();
 	}
 	
@@ -299,7 +308,7 @@ public class DwStatusBar
 		this.doRepaint();
 	}
 
-	private void doRepaint()
+	protected void doRepaint()
 	{
 		this.invalidate();
 		this.validate();
@@ -307,6 +316,18 @@ public class DwStatusBar
 	
 	public String getText() { return this.tfStatus.getText(); }
 
+	// As I need to ensure that tfStatus.setText() is executed
+	// on the AWT I'm pre-creating the necessary Runnable to avoid
+	// creating a new Object each time setStatusMessage() is called.
+	protected String _newMsg;
+	protected Runnable textSetter = new Runnable()
+	{
+		public void run()
+		{
+			tfStatus.setText(_newMsg);
+		}
+	};
+	
 	/**
 	 *	Show a message in the status panel.
 	 *	This method might be called from within a background thread, so we
@@ -317,13 +338,8 @@ public class DwStatusBar
 	public void setStatusMessage(final String aMsg)
 	{
 		if (aMsg == null) return;
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			public void run()
-			{
-				tfStatus.setText(aMsg);
-			}
-		});
+		_newMsg = aMsg;
+		WbSwingUtilities.invoke(textSetter);
 	}
 	
 	/**
@@ -365,4 +381,56 @@ public class DwStatusBar
     this.tfMaxRows.requestFocusInWindow();
   }
 
+	public void showAlert(NotifierEvent evt)
+	{
+		if (this.notificationHandler != null)
+		{
+			this.removeAlert();
+		}
+		this.infoPanel.removeAll();
+		this.notificationHandler = evt.getHandler();
+		this.notificationLabel = new JLabel(ResourceMgr.getImage(evt.getIconKey()));
+		notificationLabel.setText(null);
+		notificationLabel.setToolTipText(evt.getTooltip());
+		notificationLabel.setIconTextGap(0);
+		this.notificationLabel.addMouseListener(this);
+		this.infoPanel.add(notificationLabel );
+		WbSwingUtilities.repaintLater(this);
+	}
+	
+	public void removeAlert()
+	{
+		this.infoPanel.removeAll();
+		this.notificationLabel.removeMouseListener(this);
+		this.notificationHandler = null;
+		WbSwingUtilities.repaintLater(this);
+	}
+
+	public void mouseClicked(MouseEvent e)
+	{
+		if (e.getSource() != this.notificationLabel) return;
+		if (this.notificationHandler == null) return;
+		
+		if (e.getButton() == MouseEvent.BUTTON1)
+		{
+			ActionEvent evt = new ActionEvent(this, -1, "notifierClicked");
+			this.notificationHandler.actionPerformed(evt);;
+		}
+	}
+	
+	public void mousePressed(MouseEvent e)
+	{
+	}
+	
+	public void mouseReleased(MouseEvent e)
+	{
+	}
+	
+	public void mouseEntered(MouseEvent e)
+	{
+	}
+	
+	public void mouseExited(MouseEvent e)
+	{
+	}
 }

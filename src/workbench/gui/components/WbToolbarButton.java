@@ -16,6 +16,7 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.UIManager;
 import javax.swing.plaf.metal.MetalLookAndFeel;
+import workbench.gui.WbSwingUtilities;
 
 /**
  *
@@ -66,5 +67,13 @@ public class WbToolbarButton
 	{
 		this.setMargin(MARGIN);
 	}
-
+	
+	public void setFlatLook()
+	{
+//		if (WbManager.getInstance().isWindowsClassic())
+//		{
+			this.setBorder(WbSwingUtilities.FLAT_BUTTON_BORDER);
+//		}
+	}
+	
 }

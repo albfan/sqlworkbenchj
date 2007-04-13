@@ -21,7 +21,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import workbench.WbManager;
-import workbench.WbManager;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 
 /**
@@ -36,6 +36,7 @@ public class WbToolbar
 	{
 		this.setFloatable(false);
 		this.setRollover(true);
+		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 	}
 
 	public void addNotify()

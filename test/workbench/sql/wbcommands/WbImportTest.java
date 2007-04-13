@@ -35,6 +35,7 @@ import workbench.db.exporter.RowDataConverter;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.ZipOutputFactory;
 
 /**
@@ -198,6 +199,89 @@ public class WbImportTest
 		}
 	}
 
+	public void testImportQuotedColumn()
+	{
+		String xml1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
+             "<wb-export> \n" + 
+             "  <meta-data> \n" + 
+             "    <created>2007-04-11 21:33:05.000 CEST</created> \n" + 
+             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" + 
+             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" + 
+             "    <connection>User=SA, URL=jdbc:hsqldb:c:/daten/db/hsql18/test</connection> \n" + 
+             "    <database-product-name>HSQL Database Engine</database-product-name> \n" + 
+             "    <database-product-version>1.8.0</database-product-version> \n" + 
+             "    <wb-tag-format>short</wb-tag-format> \n" + 
+             "  </meta-data> \n" + 
+             " \n" + 
+             "  <table-def> \n" + 
+             "    <table-name>TEST1</table-name> \n" + 
+             "    <column-count>1</column-count> \n" + 
+             " \n" + 
+             "    <column-def index=\"0\"> \n" + 
+             "      <column-name>Pr\u00e4fix</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "  </table-def> \n" + 
+             " \n" + 
+             "<data> \n" + 
+             "<rd><cd>one</cd></rd> \n" + 
+             "<rd><cd>two</cd></rd> \n" + 
+             "</data> \n" + 
+             "</wb-export>";
+		try
+		{
+			File xmlFile = new File(this.basedir, "quoted_column_xml_import.xml");
+			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
+			out.write(xml1);
+			out.close();
+
+			Statement stmt = this.connection.createStatement();
+			stmt.executeUpdate("create table qtest (\"Pr\u00e4fix\" varchar(100))");
+			
+			String cmd = "wbimport -continueOnError=false -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=qtest";
+			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			assertEquals("Import did not succeed", result.isSuccess(), true);
+
+			ResultSet rs = stmt.executeQuery("select count(*) from qtest");
+			int rows = 0;
+			if (rs.next()) rows = rs.getInt(1);
+			assertEquals("Wrong number of rows imported", 2, rows);
+			rs.close();
+
+			if (!xmlFile.delete())
+			{
+				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
+			}					
+			
+			xmlFile = new File(this.basedir, "quoted_column_xml_import.xml");
+			out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
+			String xml2 = StringUtil.replace(xml1, "<column-name>Pr\u00e4fix</column-name>" , "<column-name>\"Pr\u00e4fix\"</column-name>");
+			out.write(xml2);
+			out.close();
+			
+			// Re-run with quoted column name
+			result = importCmd.execute(this.connection, cmd);
+			assertEquals("Import did not succeed", result.isSuccess(), true);
+
+			rs = stmt.executeQuery("select count(*) from qtest");
+			rows = 0;
+			if (rs.next()) rows = rs.getInt(1);
+			assertEquals("Wrong number of rows imported", 4, rows);
+			SqlUtil.closeAll(rs, stmt);
+			
+			if (!xmlFile.delete())
+			{
+				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
+			}					
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 	public void testMissingXmlColumn()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 

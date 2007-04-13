@@ -104,6 +104,7 @@ public class WbExport
 		msg = StringUtil.replace(msg, "%header_flag_default%", Boolean.toString(getTextHeaderDefault()));
 		msg = StringUtil.replace(msg, "%verbose_default%", Boolean.toString(getVerboseXmlDefault()));
 		msg = StringUtil.replace(msg, "%date_literal_default%", Settings.getInstance().getDefaultExportDateLiteralType());
+		msg = StringUtil.replace(msg, "%default_encoding%", Settings.getInstance().getDefaultDataEncoding());
 		return msg;
 	}
 	
@@ -187,7 +188,10 @@ public class WbExport
 		type = type.trim().toLowerCase();
 
 		String encoding = cmdLine.getValue("encoding");
-		if (encoding != null) exporter.setEncoding(encoding);
+		if (encoding != null) 
+		{
+			exporter.setEncoding(encoding);
+		}
 		exporter.setAppendToFile(cmdLine.getBoolean("append"));
 		exporter.setWriteClobAsFile(cmdLine.getBoolean("clobasfile", false));
 		
@@ -309,6 +313,11 @@ public class WbExport
 			this.exporter.setUseCDATA(cmdLine.getBoolean("usecdata"));
 			if (updateTable != null) exporter.setTableName(updateTable);
 			this.defaultExtension = ".xml";
+			if (encoding == null)
+			{
+				// Make sure to use UTF-8 as the default if no encoding is specified
+				this.exporter.setEncoding("UTF-8");
+			}
 		}
 		else if ("html".equals(type))
 		{

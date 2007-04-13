@@ -134,7 +134,8 @@ public class WbImport
 
 		boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
 		result = StringUtil.replace(result, "%header_default%", Boolean.toString(multiDefault));
-		
+
+		result = StringUtil.replace(result, "%default_encoding%", Settings.getInstance().getDefaultDataEncoding());
 		return result;
 	}
 	

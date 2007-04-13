@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * An object containing the definition for a table column.
@@ -163,7 +164,7 @@ public class ColumnIdentifier
 		this.isExpression = false;
 		this.isPk = false;
 		this.isNullable = true;
-		this.hashCode = (name == null ? -1 : name.toUpperCase().hashCode());
+		this.hashCode = (name == null ? -1 : StringUtil.trimQuotes(name).toUpperCase().hashCode());
 	}
 
 	/**
@@ -207,7 +208,7 @@ public class ColumnIdentifier
 		try
 		{
 			ColumnIdentifier col = (ColumnIdentifier)other;
-			return this.name.equalsIgnoreCase(col.name);
+			return StringUtil.trimQuotes(this.name).equalsIgnoreCase(StringUtil.trimQuotes(col.name));
 		}
 		catch (Exception e)
 		{
@@ -410,7 +411,8 @@ public class ColumnIdentifier
 		if (other instanceof ColumnIdentifier)
 		{
 			ColumnIdentifier c = (ColumnIdentifier)other;
-			return this.name.compareToIgnoreCase(c.name);
+			
+			return StringUtil.trimQuotes(name).compareToIgnoreCase(StringUtil.trimQuotes(c.name));
 		}
 		return 1;
 	}

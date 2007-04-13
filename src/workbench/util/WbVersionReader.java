@@ -11,20 +11,16 @@
  */
 package workbench.util;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
-import java.util.jar.Attributes;
-import java.util.jar.JarInputStream;
-import java.util.jar.Manifest;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import workbench.util.ExceptionUtil;
 
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.util.UpdateVersion;
+import workbench.util.VersionNumber;
 
 /**
  *
@@ -32,34 +28,45 @@ import workbench.resource.ResourceMgr;
  */
 public class WbVersionReader
 {
-
-	private String currentDevBuildNumber;
+	private VersionNumber currentDevBuildNumber;
 	private String currentDevBuildDate;
 
-	private String currentStableBuildNumber;
+	private VersionNumber currentStableBuildNumber;
 	private String currentStableBuildDate;
 	private final String userAgent;
-
+	private boolean success = false;
+	
 	public WbVersionReader()
-		throws Exception
+	{
+		this("");
+	}
+	
+	public WbVersionReader(String type)
 	{
 
-		this.userAgent = "SQL Workbench/J Update Check (" + ResourceMgr.getString("TxtBuildNumber") + ")";
+		this.userAgent = "SQL Workbench/J " +  type + "update check (" + ResourceMgr.getString("TxtBuildNumber") + ")";
 		long start, end;
 		start = System.currentTimeMillis();
 		try
 		{
 			this.readBuildInfo();
+			success = true;
 		}
 		catch (Exception e)
 		{
 			LogMgr.logWarning("WbVersionReader.<init>", "Error when retrieving build version", e);
+			this.success = false;
 		}
 
 		end = System.currentTimeMillis();
 		LogMgr.logDebug("WbVersionReader.<init>", "Retrieving version information took " + (end - start) + "ms");
 	}
 
+	public boolean success()
+	{
+		return success;
+	}
+	
 	private void readBuildInfo()
 		throws Exception
 	{
@@ -76,9 +83,9 @@ public class WbVersionReader
 			Properties props = new Properties();
 			props.load(in);
 			
-			this.currentDevBuildNumber = props.getProperty("dev.build.number", null);
+			this.currentDevBuildNumber = new VersionNumber(props.getProperty("dev.build.number", null));
 			this.currentDevBuildDate = props.getProperty("dev.build.date", null);
-			this.currentStableBuildNumber = props.getProperty("release.build.number", null);
+			this.currentStableBuildNumber = new VersionNumber(props.getProperty("release.build.number", null));
 			this.currentStableBuildDate = props.getProperty("release.build.date", null);
 		}
 		catch (Exception e)
@@ -92,9 +99,19 @@ public class WbVersionReader
 		}
 	}
 
-	public String getDevBuildNumber() { return this.currentDevBuildNumber; }
+	public UpdateVersion getAvailableUpdate()
+	{
+		VersionNumber current = ResourceMgr.getBuildNumber();
+		//VersionNumber current = new VersionNumber("93");
+		if (currentDevBuildNumber != null && currentDevBuildNumber.isNewerThan(current)) return UpdateVersion.devBuild;
+		if (currentStableBuildNumber!= null && currentStableBuildNumber.isNewerThan(current)) return UpdateVersion.stable;
+		return UpdateVersion.none;
+	}
+	
+	public VersionNumber getDevBuildNumber() { return this.currentDevBuildNumber; }
 	public String getDevBuildDate() { return this.currentDevBuildDate; }
 
-	public String getStableBuildNumber() { return this.currentStableBuildNumber; }
+	public VersionNumber getStableBuildNumber() { return this.currentStableBuildNumber; }
 	public String getStableBuildDate() { return this.currentStableBuildDate; }
+	
 }

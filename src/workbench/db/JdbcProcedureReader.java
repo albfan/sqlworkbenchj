@@ -21,7 +21,6 @@ import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -241,7 +240,7 @@ public class JdbcProcedureReader
 			procName = procName.substring(0, i);
 		}
 
-		StrBuffer source = new StrBuffer(500);
+		StringBuilder source = new StringBuilder(500);
 
 		StringBuilder header = getProcedureHeader(def.getCatalog(), def.getSchema(), procName, def.getResultType());
 		source.append(header);
@@ -275,7 +274,7 @@ public class JdbcProcedureReader
 		catch (SQLException e)
 		{
 			LogMgr.logError("JdbcProcedureReader.getProcedureSource()", "Error retrieving procedure source", e);
-			source = new StrBuffer(ExceptionUtil.getDisplay(e));
+			source = new StringBuilder(ExceptionUtil.getDisplay(e));
 			if (this.connection.getMetadata().isPostgres())
 			{
 				try { this.connection.rollback(); } catch (Throwable th) {}
@@ -288,7 +287,7 @@ public class JdbcProcedureReader
 
 		boolean needsTerminator = this.connection.getDbSettings().proceduresNeedTerminator();
 
-		if (!source.endsWith(';') && needsTerminator)
+		if (!StringUtil.endsWith(source, ';') && needsTerminator)
 		{
 			source.append(';');
 		}

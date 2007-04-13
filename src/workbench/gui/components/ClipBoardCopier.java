@@ -31,7 +31,9 @@ import workbench.resource.Settings;
 import workbench.storage.DataPrinter;
 import workbench.storage.DataStore;
 import workbench.storage.RowData;
+import workbench.util.ExceptionUtil;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -50,21 +52,23 @@ public class ClipBoardCopier
 		this.client = t;
 		this.data = client.getDataStore();
 	}
-
-	public ClipBoardCopier(DataStore ds)
-	{
-		this.client = null;
-		this.data = ds;
-	}
 	
 	/**
 	 *	Copy data from the table as tab-delimited into the clipboard
+	 * 
 	 *	@param includeHeaders if true, then a header line with the column names is copied as well
 	 *  @param selectedOnly if true, then only selected rows are copied, else all rows
 	 *  @param showSelectColumns if true, a dialog will be presented to the user to select the columns to be included
 	 */
 	public void copyDataToClipboard(boolean includeHeaders, boolean selectedOnly, final boolean showSelectColumns)
 	{
+		if (this.data == null) 
+		{
+			WbSwingUtilities.showErrorMessage(client, "No DataStore available!");
+			LogMgr.logError("ClipBoardCopier._copyAsSql()", "Cannot copy without a DataStore!", null);
+			return;
+		}
+		
 		if (this.data.getRowCount() <= 0) return;
 		
 		List columnsToCopy = null;
@@ -94,11 +98,11 @@ public class ClipBoardCopier
 				count = rows.length;
 			}
 			
-			DataPrinter printer = new DataPrinter(this.data, "\t", "\n", columnsToCopy, includeHeaders);
-			out = new StringWriter(count * 250);
 			// Do not use StringUtil.LINE_TERMINATOR for the line terminator
 			// because for some reason this creates additional empty lines
 			// under Windows
+			DataPrinter printer = new DataPrinter(this.data, "\t", "\n", columnsToCopy, includeHeaders);
+			out = new StringWriter(count * 250);
 			printer.writeDataString(out, rows);
 			
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -111,6 +115,12 @@ public class ClipBoardCopier
 			if (ex instanceof OutOfMemoryError)
 			{
 				WbManager.getInstance().showOutOfMemoryError();
+			}
+			else
+			{
+				String msg = ResourceMgr.getString("ErrClipCopy");
+				msg = StringUtil.replace(msg, "%errmsg%", ExceptionUtil.getDisplay(ex));
+				WbSwingUtilities.showErrorMessage(client, msg);
 			}
 			LogMgr.logError(this, "Could not copy text data to clipboard", ex);
 		}
@@ -160,9 +170,14 @@ public class ClipBoardCopier
 		t.start();
 	}
 	
-	protected void _copyAsSql(boolean useUpdate, boolean selectedOnly, boolean showSelectColumns, boolean includeDelete)
+	protected void _copyAsSql(final boolean useUpdate, boolean selectedOnly, final boolean showSelectColumns, final boolean includeDelete)
 	{
-		if (this.data == null) return;
+		if (this.data == null) 
+		{
+			WbSwingUtilities.showErrorMessage(client, "No DataStore available!");
+			LogMgr.logError("ClipBoardCopier._copyAsSql()", "Cannot copy without a DataStore!", null);
+			return;
+		}
 		
 		if (this.data.getRowCount() <= 0) return;
 		
@@ -173,10 +188,16 @@ public class ClipBoardCopier
 			{
 				this.client.checkPkColumns(true);
 			}
+			
+			// re-check in case the user simply clicked OK during the PK prompt
+			pkOK = this.data.hasPkColumns();
+			
 			// Can't do anything if we don't have PK
 			if (!pkOK) 
 			{
-				LogMgr.logWarning("ClipBoardCopier._copyAsSql()", "Cannot create UPDATE or DELETE statements without a primary key!");
+				LogMgr.logError("ClipBoardCopier._copyAsSql()", "Cannot create UPDATE or DELETE statements without a primary key!", null);
+				String msg = ResourceMgr.getString("ErrCopyNotAvailable");
+				WbSwingUtilities.showErrorMessage(client, msg);
 				return;
 			}
 		}
@@ -241,7 +262,7 @@ public class ClipBoardCopier
 				StrBuffer sql = converter.convertRowData(rowdata, row);
 				sql.appendTo(result);
 			}
-			
+
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			StringSelection sel = new StringSelection(result.toString());
 			clp.setContents(sel, sel);
@@ -252,7 +273,13 @@ public class ClipBoardCopier
 			{
 				WbManager.getInstance().showOutOfMemoryError();
 			}
-			LogMgr.logError(this, "Error when copying SQL inserts", e);
+			else
+			{
+				String msg = ResourceMgr.getString("ErrClipCopy");
+				msg = StringUtil.replace(msg, "%errmsg%", ExceptionUtil.getDisplay(e));
+				WbSwingUtilities.showErrorMessage(client, msg);
+			}
+			LogMgr.logError(this, "Error when copying as SQL", e);
 		}
 		WbSwingUtilities.showDefaultCursorOnWindow(this.client);
 	}

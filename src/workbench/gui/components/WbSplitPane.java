@@ -12,7 +12,6 @@
 package workbench.gui.components;
 
 import java.awt.Component;
-import java.awt.Insets;
 import javax.swing.JSplitPane;
 import javax.swing.border.Border;
 import javax.swing.plaf.ComponentUI;
@@ -24,6 +23,7 @@ import workbench.gui.WbSwingUtilities;
 /**
  * A JSplitPane which restores the divider size after a UI Change
  * and an updateUI()
+ * 
  * @author  support@sql-workbench.net
  */
 public class WbSplitPane
@@ -64,9 +64,11 @@ public class WbSplitPane
 	{
 		int divider = this.getDividerSize();
 		//super.updateUI();
-		super.setUI(new WbSplitPaneUI());
+		if (this.getUI() == null)
+		{
+			super.setUI(new WbSplitPaneUI());
+		}
 		revalidate();
-
 		this.setDividerSize(divider);
 	}
 

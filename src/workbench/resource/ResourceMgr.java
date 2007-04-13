@@ -23,6 +23,7 @@ import javax.swing.ImageIcon;
 
 import workbench.log.LogMgr;
 import workbench.util.StringUtil;
+import workbench.util.VersionNumber;
 
 /**
  * @author support@sql-workbench.net.kellerer
@@ -103,35 +104,12 @@ public class ResourceMgr
 		return (c == '[' || c == '@');
 	}
 
-	public static String getBuildId()
+	public static VersionNumber getBuildNumber()
 	{
 		String nr = getString("TxtBuildNumber");
-		if ("@BUILD_NUMBER@".equals(nr)) return "Dev";
-		return nr;
+		return new VersionNumber(nr);
 	}
-	public static int getBuildNumber()
-	{
-		String nr = getString("TxtBuildNumber");
-		if ("@BUILD_NUMBER@".equals(nr)) return Integer.MAX_VALUE;
-		if (nr.startsWith("[")) return -1;
-
-		int result = -1;
-
-		try
-		{
-			if (nr.indexOf('.') > -1)
-			{
-				nr = nr.substring(0,nr.indexOf('.'));
-			}
-			result = Integer.parseInt(nr);
-		}
-		catch (Exception e)
-		{
-			result = -1;
-		}
-		return result;
-	}
-
+	
 	public static String getDefaultTabLabel()
 	{
 		return getString("LblTabStatement");

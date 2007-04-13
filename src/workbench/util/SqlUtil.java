@@ -919,11 +919,12 @@ public class SqlUtil
 			// some DBMS return warnings on the connection rather then on the
 			// statement. We need to check them here as well. Then some of
 			// the DBMS return the same warnings on the Statement AND the
-			// Connection object.
+			// Connection object (and MySQL returns an error as the Exception itself
+			// and additionally as a warning on the Statement...)
 			// For this we keep a list of warnings which have been added
 			// from the statement. They will not be added when the Warnings from
 			// the connection are retrieved
-			ArrayList added = new ArrayList();
+			Set added = new HashSet();
 			StringBuilder msg = new StringBuilder(100);
 			String s = null;
 			SQLWarning warn = stmt.getWarnings();
@@ -937,9 +938,9 @@ public class SqlUtil
 				{
 					msg.append(s);
 					if (!s.endsWith("\n")) msg.append('\n');
+					added.add(s);
 				}
-				added.add(s);
-				if (count > 25) break; // prevent endless loop
+				if (count > 15) break; // prevent endless loop
 				warn = warn.getNextWarning();
 			}
 			

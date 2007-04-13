@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import workbench.WbManager;
 import workbench.util.ExceptionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -135,6 +134,16 @@ public class LogMgr
 	{
 		logSystemErr = flag;
 	}
+	
+	public static String getLevel()
+	{
+		if (loglevel == levelDebug) return "DEBUG";
+		if (loglevel == levelWarning) return "WARNING";
+		if (loglevel == levelError) return "ERROR";
+		if (loglevel == levelInfo) return "INFO";
+		return "ERROR";
+	}
+	
 	public static void setLevel(String aType)
 	{
 		if (aType == null) return;
@@ -171,7 +180,6 @@ public class LogMgr
 
 	public static void setOutputFile(String aFilename, int maxFilesize)
 	{
-	  WbManager.trace("LogMgr.setOutputFile() - " + aFilename);
 		if (aFilename == null || aFilename.length() == 0) return;
 		if (aFilename.startsWith("System")) return;
 		try
@@ -181,7 +189,6 @@ public class LogMgr
 				logOut.close();
 				logOut = null;
 			}
-      WbManager.trace("LogMgr.checkOutput() - Opening logfile " + aFilename);
 			File f = new File(aFilename);
 
 			if (f.exists() && f.length() > maxFilesize)
@@ -198,7 +205,6 @@ public class LogMgr
 			logOut = null;
 			logError("LogMgr.checkOutput()", "Error when opening logfile=" + aFilename, th);
 		}
-	  WbManager.trace("LogMgr.setOutputFile() - done");
 	}
 
 	public static boolean isInfoEnabled()

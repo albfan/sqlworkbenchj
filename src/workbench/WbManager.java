@@ -20,7 +20,6 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
@@ -68,6 +67,7 @@ import workbench.gui.filter.FilterDefinitionManager;
 import workbench.gui.lnf.LnFManager;
 import workbench.gui.profiles.ProfileKey;
 import workbench.util.FileDialogUtil;
+import workbench.util.UpdateCheck;
 import workbench.util.WbCipher;
 import workbench.util.WbNullCipher;
 import workbench.util.WbThread;
@@ -89,24 +89,7 @@ public class WbManager
 	
 	private static PrintStream traceOut;
 	private static final String traceFile = "workbench.trc";
-	
-	static
-	{
-		boolean doTrace = "true".equalsIgnoreCase(System.getProperty("workbench.startuptrace", "false"));
-		if (doTrace)
-		{
-			try
-			{
-				traceOut = new PrintStream(new FileOutputStream(traceFile));
-				traceOut.println(ResourceMgr.TXT_PRODUCT_NAME + " startup trace enabled");
-				traceOut.close();
-			}
-			catch (Exception e)
-			{
-				traceOut = null;
-			}
-		}
-	}
+	private boolean outOfMemoryOcurred = false;
 	
 	private Thread shutdownHook = new Thread(this);
 
@@ -115,24 +98,6 @@ public class WbManager
 		Runtime.getRuntime().addShutdownHook(this.shutdownHook);
 	}
 
-	public static void trace(String msg)
-	{
-		if (traceOut != null) 
-		{
-			try
-			{
-				traceOut = new PrintStream(new FileOutputStream(traceFile,true));
-				traceOut.println(msg);
-				traceOut.close();
-			}
-			catch (Exception e)
-			{
-				traceOut = null;
-			}
-		}
-	}
-	
-	
 	/**
 	 *	return an instance of the WbDesCipher.
 	 *
@@ -216,9 +181,15 @@ public class WbManager
 		}
 	}
 
+	public boolean outOfMemoryOcurred()
+	{
+		return this.outOfMemoryOcurred;
+	}
+	
 	public void showOutOfMemoryError()
 	{
 		System.gc();
+		outOfMemoryOcurred = true;
 		WbSwingUtilities.showErrorMessageKey(getCurrentWindow(), "MsgOutOfMemoryError");
 	}
 	
@@ -293,10 +264,10 @@ public class WbManager
 	
 	private void initializeLookAndFeel()
 	{
-		trace("WbManager.initializeLookAndFeel() - start");
+//		trace("WbManager.initializeLookAndFeel() - start");
+		String className = Settings.getInstance().getLookAndFeelClass();
 		try
 		{
-			String className = Settings.getInstance().getLookAndFeelClass();
 			if (StringUtil.isEmptyString(className))
 			{
 				className = UIManager.getSystemLookAndFeelClassName();
@@ -309,9 +280,20 @@ public class WbManager
 				return;
 			}
 			
-			LnFLoader loader = new LnFLoader(def);
+			// JGoodies Looks settings
 			UIManager.put("jgoodies.useNarrowButtons", Boolean.FALSE);
+			UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
+			
+			// Remove Synthetica's own window decorations
+			UIManager.put("Synthetica.window.decoration", Boolean.FALSE);
+			
+			// Remove the extra icons for read only text fields and 
+			// the "search bar" in the main menu for the Substance Look & Feel
+			System.setProperty("substancelaf.noExtraElements", "");
+			
+			LnFLoader loader = new LnFLoader(def);
 			LookAndFeel lnf = loader.getLookAndFeel();
+//			trace("WbManager.initializeLookAndFeel() - calling UIManager.setLookAndFeel()");
 			UIManager.setLookAndFeel(lnf);
 			try
 			{
@@ -351,7 +333,9 @@ public class WbManager
 		}
 		catch (Exception e)
 		{
-			LogMgr.logWarning("Settings.initializeLookAndFeel()", "Could not set look and feel", e);
+			LogMgr.logError("Settings.initializeLookAndFeel()", "Could not set look and feel", e);
+			LogMgr.logWarning("Settings.initializeLookAndFeel()", "Current look and feel class [" + className + "] will be removed");
+			Settings.getInstance().setLookAndFeelClass(null);
 		}
 
 		try
@@ -362,7 +346,7 @@ public class WbManager
 		{
 			LogMgr.logError("WbManager.initializeLookAndFeel()", "Error setting dynamic layout property", e);
 		}
-		trace("WbManager.initializeLookAndFeel() - done");
+//		trace("WbManager.initializeLookAndFeel() - done");
 	}
 
 	public String getJarPath()
@@ -390,7 +374,7 @@ public class WbManager
 	
 	private void initUI()
 	{
-		trace("WbManager.initUI() - start");
+//		trace("WbManager.initUI() - start");
 		this.initializeLookAndFeel();
 		
 		Settings settings = Settings.getInstance();
@@ -464,15 +448,15 @@ public class WbManager
 		}
 
 		settings.addFontChangedListener(this);
-		trace("WbManager.initUI() - done");
+//		trace("WbManager.initUI() - done");
 	}
 
 	public MainWindow createWindow()
 	{
-		trace("WbManager.createWindow() - start");
+//		trace("WbManager.createWindow() - start");
 		MainWindow win = new MainWindow();
 		this.mainWindows.add(win);
-		trace("WbManager.createWindow() - done");
+//		trace("WbManager.createWindow() - done");
 		return win;
 	}
 
@@ -747,8 +731,6 @@ public class WbManager
 
 	private void openNewWindow(boolean checkCmdLine)
 	{
-		trace("WbManager.openNewWindow()");
-
 		final MainWindow main = this.createWindow();
 		main.display();
 		boolean connected = false;
@@ -873,8 +855,6 @@ public class WbManager
 	
 	private void initCmdLine(String[] args)
 	{
-		trace("WbManager.initCmdLine() - start");
-
 		cmdLine = createArgumentParser();
 		
 		try
@@ -947,7 +927,6 @@ public class WbManager
 			
 			if (cmdLine.isArgPresent("nosettings"))
 			{
-				trace("WbManager.initCmdLine() - Parameter nosettings specified. Settings will not be written!");
 				this.writeSettings = false;
 			}
 		}
@@ -955,16 +934,13 @@ public class WbManager
 		{
 			e.printStackTrace();
 		}
-		trace("WbManager.initCmdLine() - done");
 	}
 
 	public void init()
 	{
-		trace("WbManager.init() - start");
-
 		LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
-		LogMgr.logInfo("WbManager.init()", "Using Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
-		LogMgr.logDebug("WbManager.init()", "Use -Dworkbench.startuptrace=true to log messages during startup");
+		LogMgr.logInfo("WbManager.init()", "Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
+		LogMgr.logInfo("WbManager.init()", "Operating System=" + System.getProperty("os.name")  + ", version=" + System.getProperty("os.version") + ", platform=" + System.getProperty("os.arch"));
 
     if (this.cmdLine == null) this.initCmdLine(null);
 
@@ -983,7 +959,6 @@ public class WbManager
 				}
 			});
 		}
-		trace("WbManager.init() - done.");
 	}
 
 	protected void runGui()
@@ -991,17 +966,19 @@ public class WbManager
 		WbSplash splash = null;
 		if (Settings.getInstance().getShowSplash())
 		{
-			trace("WbManager.init() - opening splash window");
 			splash = new WbSplash();
 			splash.setVisible(true);
 		}
 
+		MacOSHelper m = new MacOSHelper();
 		// This will install the application listener if running under MacOS
-		new MacOSHelper();
+		m.installApplicationHandler();
+		
+		UpdateCheck upd = new UpdateCheck();
+		upd.startUpdateCheck();		
 		
 		try
 		{
-			trace("WbManager.init() - initializing UI defaults");
 			this.initUI();
 			boolean pumper = cmdLine.isArgPresent(ARG_SHOW_PUMPER);
 			boolean explorer = cmdLine.isArgPresent(ARG_SHOW_DBEXP);
@@ -1023,7 +1000,6 @@ public class WbManager
 		{
 			if (splash != null)
 			{
-				trace("WbManager.init() - closing splash window");
 				splash.setVisible(false);
 				splash.dispose();
 			}
@@ -1087,13 +1063,11 @@ public class WbManager
 	public static void main(String[] args)
 	{
 		wb = new WbManager();
-		trace("WbManager.main() - start");
 		// the command line needs to be initialized before everything
 		// else, in order to set some of the system poperties correctly
 		// e.g. the configdir.
 		wb.initCmdLine(args);
 		wb.init();
-		trace("WbManager.main() - done");
 	}
 
 	/**

@@ -162,7 +162,7 @@ public class GetMetaDataSql
 	}
 	
 	/** Setter for property schema.
-	 * @param schema New value of property schema.
+	 * @param schem New value of property schema.
 	 *
 	 */
 	public void setSchema(String schem)
@@ -180,7 +180,7 @@ public class GetMetaDataSql
 	}
 	
 	/** Setter for property catalog.
-	 * @param catalog New value of property catalog.
+	 * @param cat New value of property catalog.
 	 *
 	 */
 	public void setCatalog(String cat)

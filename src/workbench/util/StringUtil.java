@@ -87,6 +87,14 @@ public class StringUtil
 		return m.replaceAll("\n");
 	}
 	
+	public static boolean endsWith(CharSequence s, char c)
+	{
+		if (s == null) return false;
+		int len = s.length();
+		if (len == 0) return false;
+		return s.charAt(len - 1) == c;
+	}
+		
 	/**
 	 * Returns the length of the line without any line ending characters
 	 */

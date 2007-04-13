@@ -27,6 +27,7 @@ import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.interfaces.JobErrorHandler;
+import workbench.resource.Settings;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.ImportFileParser;
 import workbench.log.LogMgr;
@@ -52,7 +53,7 @@ public class TextFileParser
 	private File inputFile;
 	private File baseDir;
 	private String tableName;
-	private String encoding = "ISO-8859-1";
+	private String encoding = null;
 	private String delimiter = "\t";
 	private String quoteChar = null;
 	private boolean decodeUnicode = false;
@@ -400,7 +401,10 @@ public class TextFileParser
 		this.connection = aConn;
 	}
 	
-	public String getEncoding() { return this.encoding; }
+	public String getEncoding() 
+	{ 
+		return (this.encoding == null ? Settings.getInstance().getDefaultDataEncoding() : this.encoding);
+	}
 	
 	public void setEncoding(String enc)
 	{
@@ -556,7 +560,7 @@ public class TextFileParser
 	private void setupFileHandler()
 		throws IOException
 	{
-		this.fileHandler.setMainFile(this.inputFile, this.encoding);
+		this.fileHandler.setMainFile(this.inputFile, this.getEncoding());
 	}
 	
 	private void processOneFile()

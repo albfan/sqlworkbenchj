@@ -11,12 +11,7 @@
  */
 package workbench.db.exporter;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.sql.Blob;
 import java.sql.Types;
 
 import workbench.db.TableIdentifier;
@@ -24,13 +19,11 @@ import workbench.db.WbConnection;
 import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
 import workbench.db.report.TagWriter;
-import workbench.log.LogMgr;
 import workbench.storage.NullValue;
 import workbench.storage.RowData;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
-import workbench.util.WbFile;
 
 /**
  *
@@ -436,7 +429,7 @@ public class XmlRowDataConverter
 			result.append(this.lineEnding);
 
 			result.append(indent);
-			appendTag(result, "    ", COLUMN_NAME_TAG, this.metaData.getColumnName(i));
+			appendTag(result, "    ", COLUMN_NAME_TAG, StringUtil.trimQuotes(this.metaData.getColumnName(i)));
 
 			result.append(indent);
 			appendTag(result, "    ", JAVA_CLASS_TAG, getReadableClassName(this.metaData.getColumnClassName(i)));

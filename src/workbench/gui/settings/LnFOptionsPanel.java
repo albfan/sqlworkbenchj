@@ -125,6 +125,7 @@ public class LnFOptionsPanel
 			index = lnfList.getModel().getSize() - 1;
 		}
 		lnfList.setSelectedIndex(index);
+		valueChanged(null);
 		lnfList.repaint();
 	}
 

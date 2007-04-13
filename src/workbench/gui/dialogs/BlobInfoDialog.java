@@ -192,8 +192,6 @@ public class BlobInfoDialog
     externalTools = new javax.swing.JComboBox();
     setNullButton = new FlatButton();
 
-    getContentPane().setLayout(new java.awt.GridBagLayout());
-
     setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
     setTitle(ResourceMgr.getString("TxtBlobInfo"));
     setResizable(false);
@@ -204,6 +202,7 @@ public class BlobInfoDialog
         formWindowClosed(evt);
       }
     });
+    getContentPane().setLayout(new java.awt.GridBagLayout());
 
     closeButton.setText(ResourceMgr.getString("LblClose"));
     closeButton.addMouseListener(new java.awt.event.MouseAdapter()
@@ -213,7 +212,6 @@ public class BlobInfoDialog
         closeButtonMouseClicked(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -221,9 +219,9 @@ public class BlobInfoDialog
     gridBagConstraints.insets = new java.awt.Insets(12, 0, 10, 0);
     getContentPane().add(closeButton, gridBagConstraints);
 
+    jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray));
     jPanel1.setLayout(new java.awt.GridBagLayout());
 
-    jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray));
     infoLabel.setText("jLabel1");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridwidth = 2;
@@ -240,14 +238,13 @@ public class BlobInfoDialog
         showAsTextButtonActionPerformed(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.5;
-    gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 5);
+    gridBagConstraints.insets = new java.awt.Insets(9, 10, 0, 5);
     jPanel1.add(showAsTextButton, gridBagConstraints);
 
     saveAsButton.setText(ResourceMgr.getString("MnuTxtFileSaveAs"));
@@ -258,7 +255,6 @@ public class BlobInfoDialog
         saveAsButtonActionPerformed(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -275,7 +271,7 @@ public class BlobInfoDialog
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.5;
-    gridBagConstraints.insets = new java.awt.Insets(5, 8, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(9, 8, 0, 10);
     jPanel1.add(encodingPanel, gridBagConstraints);
 
     showImageButton.setText(ResourceMgr.getString("LblShowAsImg"));
@@ -286,7 +282,6 @@ public class BlobInfoDialog
         showImageButtonActionPerformed(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -304,7 +299,6 @@ public class BlobInfoDialog
         uploadButtonActionPerformed(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
@@ -321,7 +315,6 @@ public class BlobInfoDialog
         showHexButtonActionPerformed(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
@@ -339,7 +332,6 @@ public class BlobInfoDialog
         externalViewerActionPerformed(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
@@ -366,7 +358,6 @@ public class BlobInfoDialog
         setNullButtonActionPerformed(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
