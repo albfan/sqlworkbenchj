@@ -337,8 +337,8 @@ public class ValueConverter
   {
 		if (isToday(aDate))
 		{
-			java.util.Date now = new java.util.Date();
-			return new java.sql.Timestamp(now.getTime());
+			java.sql.Timestamp ts = new java.sql.Timestamp(System.currentTimeMillis());
+			return ts;
 		}
 		
 		java.util.Date result = null;
@@ -483,6 +483,7 @@ public class ValueConverter
 				|| "current_time".equalsIgnoreCase(arg) 
 				|| "today".equalsIgnoreCase(arg) 
 				|| "sysdate".equalsIgnoreCase(arg) 
+				|| "systimestamp".equalsIgnoreCase(arg) 
 				|| "now".equalsIgnoreCase(arg));
 		
 	}

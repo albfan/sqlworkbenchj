@@ -14,6 +14,7 @@ package workbench.db.exporter;
 import java.io.File;
 import workbench.storage.RowData;
 import workbench.util.CharacterRange;
+import workbench.util.QuoteEscapeType;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -35,6 +36,7 @@ public class TextRowDataConverter
 	private String lineEnding = StringUtil.LINE_TERMINATOR;
 	private boolean writeBlobFiles = true;
 	private boolean writeClobFiles = false;
+	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
 	
 	public TextRowDataConverter()
 	{
@@ -61,6 +63,16 @@ public class TextRowDataConverter
 		return "Text";
 	}
 
+	public void setQuoteEscaping(QuoteEscapeType type)
+	{
+		this.quoteEscape = type;
+	}
+	
+	public QuoteEscapeType getQuoteEscaping()
+	{
+		return this.quoteEscape;
+	}
+	
 	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
 		int count = this.metaData.getColumnCount();
@@ -136,6 +148,17 @@ public class TextRowDataConverter
 						value = StringUtil.escapeUnicode(value, this.delimiterAndQuote, this.escapeRange);
 					}
 				}
+				if (this.quoteCharacter != null && this.quoteEscape != QuoteEscapeType.none && value.indexOf(this.quoteCharacter) > -1)
+				{
+					if (this.quoteEscape == QuoteEscapeType.escape)
+					{
+						value = StringUtil.replace(value, this.quoteCharacter, "\\" + this.quoteCharacter);
+					}
+					else
+					{
+						value = StringUtil.replace(value, this.quoteCharacter, this.quoteCharacter + this.quoteCharacter);
+					}
+				}
 			}
 
 			if (addQuote) result.append(this.quoteCharacter);
@@ -144,7 +167,6 @@ public class TextRowDataConverter
 
 			if (addQuote) result.append(this.quoteCharacter);
 
-			//if (c < count - 1) result.append(this.delimiter);
 			currentColIndex ++;
 		}
 		result.append(lineEnding);

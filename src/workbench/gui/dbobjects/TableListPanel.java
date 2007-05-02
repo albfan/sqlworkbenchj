@@ -854,9 +854,10 @@ public class TableListPanel
 	{
 		this.triggers.saveSettings();
 		this.tableData.saveSettings();
-		//this.findPanel.saveSettings();
 		this.tableDefinition.saveSettings();
-		storeSettings(Settings.getInstance(), this.getClass().getName() + ".");
+		String prefix = this.getClass().getName() + ".";
+		storeSettings(Settings.getInstance(), prefix);
+		findPanel.saveSettings(Settings.getInstance(), "workbench.quickfilter.");
 	}
 	
 	/**
@@ -867,6 +868,7 @@ public class TableListPanel
 		String prefix = this.getClass().getName() + ".";
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 		readSettings(Settings.getInstance(), prefix);
+		findPanel.restoreSettings(Settings.getInstance(), "workbench.quickfilter.");
 		this.triggers.restoreSettings();
 		this.tableData.restoreSettings();
 		this.tableDefinition.restoreSettings();
@@ -882,7 +884,7 @@ public class TableListPanel
 		WbProperties props = w.getSettings();
 		String prefix = getWorkspacePrefix(index);
 		storeSettings(props, prefix);
-		this.findPanel.saveSettings(props, prefix + "quickfilter.");
+		this.findPanel.saveSettings(props, "workbench.quickfilter.");
 		if (Settings.getInstance().getStoreExplorerObjectType())
 		{
 			String type = (String)tableTypes.getSelectedItem();
@@ -904,7 +906,7 @@ public class TableListPanel
 		WbProperties props = w.getSettings();
 		String prefix = getWorkspacePrefix(index);
 		readSettings(props, prefix);
-		findPanel.restoreSettings(props, prefix + "quickfilter.");
+		findPanel.restoreSettings(props, "workbench.quickfilter.");
 	}
 	
 	private void storeSettings(PropertyStorage props, String prefix)

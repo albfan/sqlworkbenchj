@@ -55,7 +55,7 @@ public class NotStartsWithComparator
 	
 	public boolean equals(Object other)
 	{
-		return (other instanceof StartsWithComparator);
+		return (other instanceof NotStartsWithComparator);
 	}
 	
 }

@@ -45,11 +45,6 @@ public class IndexReporter
 		indexList  = conn.getMetadata().getTableIndexList(tbl);
 	}
 
-//	public IndexReporter(IndexDefinition[] list)
-//	{
-//		indexList  = list;
-//	}	
-	
 	public IndexReporter(IndexDefinition index)
 	{
 		indexList  = new LinkedList();

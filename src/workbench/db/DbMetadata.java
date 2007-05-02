@@ -398,6 +398,11 @@ public class DbMetadata
 	}
 
 	public String getTableTypeName() { return tableTypeName; }
+	public String getMViewTypeName() 
+	{
+		return MVIEW_NAME;
+	}
+	
 	public String getViewTypeName() 
 	{ 
 		return "VIEW"; 
@@ -793,6 +798,21 @@ public class DbMetadata
 		result.append(lineEnding + "AS " + lineEnding);
 		result.append(source);
 		result.append(lineEnding);
+		
+		// Oracle and MS SQL Server support materialized views. For those
+		// the index definitions are of interest as well.
+		DataStore indexInfo = this.getTableIndexInformation(view);
+		if (indexInfo.getRowCount() > 0)
+		{
+			StringBuilder idx = this.indexReader.getIndexSource(view, indexInfo, null);
+			if (idx.length() > 0)
+			{
+				result.append(lineEnding);
+				result.append(lineEnding);
+				result.append(idx);
+				result.append(lineEnding);
+			}
+		}
 		
 		if (this.dbSettings.ddlNeedsCommit())
 		{
@@ -3049,11 +3069,40 @@ public class DbMetadata
 		return getTableSource(table, cols, aIndexDef, aFkDef, includeDrop, tableNameToUse, true);
 	}
 	
+	protected String getMViewSource(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, boolean includeDrop)
+	{
+		StringBuilder result = new StringBuilder(250);
+	
+		try
+		{
+			result.append(getExtendedViewSource(table, includeDrop));
+		}
+		catch (SQLException e)
+		{
+			result.append(ExceptionUtil.getDisplay(e));
+		}
+		result.append("\n\n");
+		StringBuilder indexSource = this.indexReader.getIndexSource(table, aIndexDef, table.getTableName());
+		result.append(indexSource);
+		if (this.dbSettings.ddlNeedsCommit())
+		{
+			result.append('\n');
+			result.append("COMMIT;");
+			result.append('\n');
+		}
+		return result.toString();
+	}
+	
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
 	{
 		if (columns == null || columns.size() == 0) return StringUtil.EMPTY_STRING;
 
-		StringBuilder result = new StringBuilder();
+		if (table.getType().equals(MVIEW_NAME))
+		{
+			return getMViewSource(table, columns, aIndexDef, includeDrop);
+		}
+		
+		StringBuilder result = new StringBuilder(250);
 
 		Map columnConstraints = this.getColumnConstraints(table);
 

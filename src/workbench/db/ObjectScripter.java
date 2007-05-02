@@ -43,7 +43,7 @@ public class ObjectScripter
 	public static final String TYPE_INSERT = "insert";
 	public static final String TYPE_SELECT = "select";
 	public static final String TYPE_PROC = "procedure";
-	public static final String TYPE_MVIEW = "materialized view";
+	public static final String TYPE_MVIEW = DbMetadata.MVIEW_NAME.toLowerCase();
 
 	private Map objectList;
 	private DbMetadata meta;
@@ -235,8 +235,9 @@ public class ObjectScripter
 		RowData dummyData = new RowData(info.getColumnCount());
 
 		// This is a "trick" to fool the StatementFactory which will
-		// check the type of the Data, in case it does not "know" the 
-		// class, it calls toString() which works fine for 
+		// check the type of the Data. In case it does not "know" the 
+		// class, it calls toString() to get the value of the column
+		// this way we get a question mark for each value
 		StringBuilder marker = new StringBuilder("?");
 		
 		for (int i=0; i < info.getColumnCount(); i++)

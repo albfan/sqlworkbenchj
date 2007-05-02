@@ -59,6 +59,7 @@ public class WbExport
 		CommonArgs.addProgressParameter(cmdLine);
 		CommonArgs.addCommitParameter(cmdLine);
 		CommonArgs.addVerboseXmlParameter(cmdLine);
+		CommonArgs.addQuoteEscapting(cmdLine);
 		
 		cmdLine.addArgument("type", StringUtil.stringToList("text,xml,sqlinsert,sqlupdate,sqldeleteinsert,html"));
 		cmdLine.addArgument("file");
@@ -249,6 +250,8 @@ public class WbExport
 				}
 			}
 			exporter.setQuoteAlways(cmdLine.getBoolean("quotealways"));
+			exporter.setQuoteEscaping(CommonArgs.getQuoteEscaping(cmdLine));
+			
 			this.defaultExtension = ".txt";
 		}
 		else if (type.startsWith("sql"))

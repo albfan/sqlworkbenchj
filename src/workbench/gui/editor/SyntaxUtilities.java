@@ -24,7 +24,7 @@ import workbench.resource.Settings;
  * subsystem.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxUtilities.java,v 1.6 2006-11-09 23:05:25 thomas Exp $
+ * @version $Id: SyntaxUtilities.java,v 1.7 2007-05-02 20:13:11 thomas Exp $
  */
 public class SyntaxUtilities
 {
@@ -125,6 +125,7 @@ public class SyntaxUtilities
 	 * @param gfx The graphics context
 	 * @param x The x co-ordinate
 	 * @param y The y co-ordinate
+	 * @param addwidth Additional spacing to be added to the line width
 	 * @return The x co-ordinate, plus the width of the painted string
 	 */
 	public static int paintSyntaxLine(Segment line, Token tokens,
@@ -135,7 +136,7 @@ public class SyntaxUtilities
 		Color defaultColor = gfx.getColor();
 
 		int offset = 0;
-		for(;;)
+		while (true)
 		{
 			byte id = tokens.id;
 			if(id == Token.END)
@@ -144,14 +145,15 @@ public class SyntaxUtilities
 			int length = tokens.length;
 			if(id == Token.NULL)
 			{
-				if(!defaultColor.equals(gfx.getColor()))
+//				if(!defaultColor.equals(gfx.getColor()))
 					gfx.setColor(defaultColor);
-				if(!defaultFont.equals(gfx.getFont()))
+//				if(!defaultFont.equals(gfx.getFont()))
 					gfx.setFont(defaultFont);
 			}
 			else
+			{
 				styles[id].setGraphicsFlags(gfx,defaultFont);
-
+			}
 			line.count = length;
 			x = Utilities.drawTabbedText(line,x,y,gfx,expander,addwidth);
 			line.offset += length;

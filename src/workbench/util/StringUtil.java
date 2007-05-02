@@ -326,6 +326,39 @@ public class StringUtil
 		return temp.toString();
 	}
 
+	static final int [] limits=
+	{
+		9,99,999,9999,99999,999999,9999999,99999999,999999999,Integer.MAX_VALUE
+	};
+
+	/**
+	 * Returns the number of Digits of the value
+	 * @param x the value to check
+	 * @return the number of digits that x consists of
+	 */
+	public static int numDigits(int x )
+	{
+		for (int i = 0; i < limits.length; i++)
+		{
+			if ( x <= limits[i])
+			{
+				return i+1;
+			}
+		}
+		return limits.length + 1;
+	}
+	
+	public static boolean isInteger(String value)
+	{
+		if (isEmptyString(value)) return false;
+		String s = value.trim();
+		int l = s.length();
+		for (int i=0; i < l; i++)
+		{
+			if (!Character.isDigit(s.charAt(i))) return false;
+		}
+		return true;
+	}
 	public static boolean isNumber(String value)
 	{
 		try

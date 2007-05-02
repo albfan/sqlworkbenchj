@@ -53,7 +53,7 @@ public class StringNotEqualsComparator
 
 	public boolean equals(Object other)
 	{
-		return (other instanceof StringEqualsComparator);
+		return (other instanceof StringNotEqualsComparator);
 	}
 	
 }

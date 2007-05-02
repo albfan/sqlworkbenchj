@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
@@ -147,6 +149,29 @@ public class TestUtil
 
 	public String getBaseDir() { return this.basedir; }
 
+	public static List<String> readLines(File f)
+		throws IOException
+	{
+		ArrayList<String> result = new ArrayList<String>();
+		BufferedReader in = null;
+		int lines = 0;
+		try
+		{
+			in = new BufferedReader(new FileReader(f));
+			String s = in.readLine();
+			while (s != null)
+			{
+				result.add(s);
+				s = in.readLine();
+			}
+		}
+		finally
+		{
+			try { in.close(); } catch (Throwable th) {}
+		}
+		return result;
+	}
+	
 	public static int countLines(File f)
 		throws IOException
 	{

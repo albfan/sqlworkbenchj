@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import workbench.db.ColumnIdentifier;
@@ -49,6 +50,7 @@ public class ReportView
 	private ReportColumn[] columns;
 	private String viewComment;
 	private TagWriter tagWriter = new TagWriter();
+	private IndexReporter index;
 	
 	/** The schema name to be used in the generated XML */
 	private String schemaNameToUse = null;
@@ -77,7 +79,7 @@ public class ReportView
 	 *  <li>the source for the view using{@link workbench.db.DbMetadata#getViewSource(workbench.db.TableIdentifier)}</li>
 	 *</ul>
 	 */
-	public ReportView(TableIdentifier tbl, WbConnection conn, String nspace)
+	public ReportView(TableIdentifier tbl, WbConnection conn, boolean includeIndex, String nspace)
 		throws SQLException
 	{
 		this.view = tbl;
@@ -104,8 +106,23 @@ public class ReportView
 		if (viewSource == null) viewSource = StringUtil.EMPTY_STRING;
 		this.setColumns(cols);
 		this.tagWriter.setNamespace(namespace);
+		if (includeIndex)
+		{
+			this.index = new IndexReporter(tbl, conn);
+			this.index.setNamespace(namespace);
+		}
 	}
 
+	/**
+	 * Return the list of IndexDefinitions for this view
+	 * @return defined indexes, maybe null
+	 */
+	public Collection<IndexDefinition> getIndexList()
+	{
+		if (this.index == null) return null;
+		return this.index.getIndexList();
+	}
+	
 	/**
 	 * Define the columns that belong to this table
 	 */
@@ -135,7 +152,6 @@ public class ReportView
 		StrBuffer line = this.getXml();
 		line.writeTo(out);
 	}
-
 	
 	public StrBuffer getXml()
 	{
@@ -153,12 +169,17 @@ public class ReportView
 		tagWriter.appendTag(toAppend, indent, TAG_VIEW_NAME, this.view.getTableName());
 	}
 
+	public StrBuffer getXml(StrBuffer indent)
+	{
+		return getXml(indent, true);
+	}
+	
 	/**
 	 * Return an XML representation of this view information.
 	 * The columns will be listed alphabetically not in the order
 	 * they were retrieved from the database.
 	 */
-	public StrBuffer getXml(StrBuffer indent)
+	public StrBuffer getXml(StrBuffer indent, boolean includeIndex)
 	{
 		StrBuffer line = new StrBuffer(this.viewSource.length() + 200);
 		StrBuffer colindent = new StrBuffer(indent);
@@ -173,16 +194,24 @@ public class ReportView
 		{
 			this.columns[i].appendXml(line, colindent);
 		}
-		tagWriter.appendOpenTag(line, colindent, TAG_VIEW_SOURCE);
-		line.append(TagWriter.CDATA_START);
-		line.append(this.viewSource);
-		line.append(TagWriter.CDATA_END);
-		line.append('\n');
-		tagWriter.appendCloseTag(line, colindent, TAG_VIEW_SOURCE);
+		writeSourceTag(tagWriter, line, colindent, viewSource);
+		if (includeIndex && this.index != null) this.index.appendXml(line, colindent);
 		tagWriter.appendCloseTag(line, indent, TAG_VIEW_DEF);
 		return line;
 	}
 
+	public static final void writeSourceTag(TagWriter tagWriter, StrBuffer target, StrBuffer indent, String source)
+	{
+		if (source == null) return;
+		tagWriter.appendOpenTag(target, indent, TAG_VIEW_SOURCE);
+		target.append(TagWriter.CDATA_START);
+		target.append(source);
+		target.append(TagWriter.CDATA_END);
+		target.append('\n');
+		tagWriter.appendCloseTag(target, indent, TAG_VIEW_SOURCE);
+		
+	}
+		
 	/**
 	 * The namespace to be used for the XML representation
 	 */

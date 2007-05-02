@@ -33,20 +33,24 @@ public class UpdateCheckTest extends TestCase
 			boolean need = check.needCheck(interval, now, last);
 			assertFalse(need);
 
-			now = new Date(2007, 3, 17);
+			now = new Date(2007, 3, 16);
 			need = check.needCheck(interval, now, last);
 			assertFalse(need);
 
-			now = new Date(2007, 3, 18);
+			now = new Date(2007, 3, 17);
 			need = check.needCheck(interval, now, last);
 			assertTrue(need);
 
 			need = check.needCheck(interval, now, null);
 			assertTrue(need);
 			
-			need = check.needCheck(interval, new Date(), null);
-			assertTrue(need);
+			now = new Date(2007, 3, 10);
+			need = check.needCheck(1, now, last);
+			assertFalse(need);
 			
+			now = new Date(2007, 3, 11);
+			need = check.needCheck(1, now, last);
+			assertTrue(need);
 		}
 		catch (Exception e)
 		{

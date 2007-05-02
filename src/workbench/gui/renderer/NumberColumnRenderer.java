@@ -31,6 +31,7 @@ public class NumberColumnRenderer
 	private DecimalFormat decimalFormatter;
 	private DecimalFormatSymbols symb = new DecimalFormatSymbols();
 	private FieldPosition startPos = new FieldPosition(0);
+	
 	public NumberColumnRenderer()
 	{
 		String sep = Settings.getInstance().getDecimalSymbol();

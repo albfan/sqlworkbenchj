@@ -42,8 +42,6 @@ import java.awt.event.MouseWheelListener;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.regex.Matcher;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
@@ -104,7 +102,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.68 2007-03-21 22:05:47 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.69 2007-05-02 20:13:11 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent

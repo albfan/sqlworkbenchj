@@ -46,17 +46,21 @@ public class GeneralOptionsPanel
 		pdfReaderPath.setFilename(Settings.getInstance().getPDFReaderPath());
 		logLevel.setSelectedItem(LogMgr.getLevel());
 		int days = Settings.getInstance().getUpdateCheckInterval();
-		if (days == 7)
+		if (days == 1)
 		{
 			checkInterval.setSelectedIndex(1);
 		}
-		else if (days == 14)
+		else if (days == 7)
 		{
 			checkInterval.setSelectedIndex(2);
 		}
-		else if (days == 30)
+		else if (days == 14)
 		{
 			checkInterval.setSelectedIndex(3);
+		}
+		else if (days == 30)
+		{
+			checkInterval.setSelectedIndex(4);
 		}
 		else
 		{
@@ -495,7 +499,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
     add(checkUpdatesLabel, gridBagConstraints);
 
-    checkInterval.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "never", "7 days", "14 days", "30 days" }));
+    checkInterval.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "never", "daily", "7 days", "14 days", "30 days" }));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;

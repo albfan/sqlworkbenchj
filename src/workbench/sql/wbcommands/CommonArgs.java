@@ -18,6 +18,7 @@ import workbench.interfaces.ProgressReporter;
 import workbench.resource.Settings;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.QuoteEscapeType;
 import workbench.util.StringUtil;
 
 /**
@@ -42,6 +43,7 @@ public class CommonArgs
 	public static final String ARG_CONTINUE = "continueOnError";
 	public static final String ARG_BATCHSIZE = "batchSize";
 	public static final String ARG_COMMIT_BATCH = "commitBatch";
+	public static final String ARG_QUOTE_ESCAPE = "quoteCharEscaping";
 	
 	private static List<String> getDelimiterArguments()
 	{
@@ -73,6 +75,16 @@ public class CommonArgs
 		cmdLine.addArgument(ARG_DELIM, getDelimiterArguments());
 	}	
 
+	/**
+	 * Adds the quoteCharEscaping argument. Valid values 
+	 * are none, duplicate, escape.
+	 * @see workbench.util.QuoteEscapeType
+	 */
+	public static void addQuoteEscapting(ArgumentParser cmdLine)
+	{
+		cmdLine.addArgument(ARG_QUOTE_ESCAPE, StringUtil.stringToList("none,duplicate,escape"));
+	}
+	
 	/**
 	 * Adds the -encoding parameter to the ArgumentParser.
 	 * The encodings that are added to the code completion list
@@ -163,5 +175,23 @@ public class CommonArgs
 		{
 			setCommitEvery(committer, cmdLine);
 		}
+	}
+	
+	public static QuoteEscapeType getQuoteEscaping(ArgumentParser cmdLine)
+	{
+		String esc = cmdLine.getValue(ARG_QUOTE_ESCAPE);
+		if (esc != null)
+		{
+			try
+			{
+				QuoteEscapeType escapeType = QuoteEscapeType.valueOf(esc.trim().toLowerCase());
+				return escapeType;
+			}
+			catch (Exception e)
+			{
+				// ignore --> return none
+			}
+		}
+		return QuoteEscapeType.none;
 	}
 }

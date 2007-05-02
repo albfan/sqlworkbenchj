@@ -199,6 +199,76 @@ public class WbImportTest
 		}
 	}
 
+	public void testEscapedQuotes()
+	{
+		String data = 
+			"nr\ttestvalue\n" + 
+			"1\tone\n" + 
+			"2\twith\"quote";
+		try
+		{
+			
+			// Test with escape character
+			String content = StringUtil.replace(data, "\"", "\\\"");
+			
+			File datafile = new File(this.basedir, "escaped_quotes1.txt");
+			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(datafile, "UTF-8", false));
+			out.write(content);
+			out.close();
+
+			Statement stmt = this.connection.createStatement();
+			stmt.executeUpdate("create table imp_test (nr integer, testvalue varchar(100))");
+			
+			String cmd = "wbimport -quoteChar='\"' -header=true -continueOnError=false -encoding='UTF-8' -file='" + datafile.getAbsolutePath() + "' -type=text -table=imp_test -quoteCharEscaping=escape";
+			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			assertEquals("Import did not succeed: " + result.getMessageBuffer(), result.isSuccess(), true);
+
+			ResultSet rs = stmt.executeQuery("select testvalue from imp_test where nr = 2");
+			String value = null;
+			if (rs.next()) value = rs.getString(1);
+			rs.close();
+			assertEquals("Wrong value imported", "with\"quote", value);
+
+			if (!datafile.delete())
+			{
+				fail("Could not delete input file: " + datafile.getCanonicalPath());
+			}	
+			
+			// test with duplicated quotes
+			content = StringUtil.replace(data, "\"", "\"\"");
+			
+			datafile = new File(this.basedir, "escaped_quotes2.txt");
+			out = new BufferedWriter(EncodingUtil.createWriter(datafile, "UTF-8", false));
+			out.write(content);
+			out.close();
+
+			stmt.executeUpdate("delete from imp_test");
+			this.connection.commit();
+			
+			cmd = "wbimport  -quoteChar='\"' -header=true -continueOnError=false -encoding='UTF-8' -file='" + datafile.getAbsolutePath() + "' -type=text -table=imp_test -quoteCharEscaping=duplicate";
+			result = importCmd.execute(this.connection, cmd);
+			assertEquals("Import did not succeed: " + result.getMessageBuffer(), result.isSuccess(), true);
+
+			rs = stmt.executeQuery("select testvalue from imp_test where nr = 2");
+			value = null;
+			if (rs.next()) value = rs.getString(1);
+			rs.close();
+			stmt.close();
+			assertEquals("Wrong value imported", "with\"quote", value);
+
+			if (!datafile.delete())
+			{
+				fail("Could not delete input file: " + datafile.getCanonicalPath());
+			}	
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testImportQuotedColumn()
 	{
 		String xml1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
@@ -280,6 +350,7 @@ public class WbImportTest
 		catch (Exception e)
 		{
 			e.printStackTrace();
+			fail(e.getMessage());
 		}
 	}
 	public void testMissingXmlColumn()

@@ -28,6 +28,46 @@ public class CsvLineParserTest
 		super(testName);
 	}
 
+	public void testEscapedQuotes()
+	{
+		try
+		{
+			CsvLineParser parser = new CsvLineParser('\t','"');
+			parser.setLine("one\twith\\\"quotes\t\"three\tvalues\\\"\"");
+			parser.setQuoteEscaping(QuoteEscapeType.escape);
+			List<String> result = getParserElements(parser);
+			assertEquals("Not enough values", 3, result.size());
+			String v = result.get(1);
+			assertEquals("Wrong second value", "with\"quotes", v);
+			v = result.get(2);
+			assertEquals("Wrong third value", "three\tvalues\"", v);
+		}
+		catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testDuplicatedQuotes()
+	{
+		try
+		{
+			CsvLineParser parser = new CsvLineParser('\t','"');
+			parser.setLine("one\twith\"\"quotes\t\"three\tvalues\"");
+			parser.setQuoteEscaping(QuoteEscapeType.duplicate);
+			List<String> result = getParserElements(parser);
+			assertEquals("Not enough values", 3, result.size());
+			String v = result.get(1);
+			assertEquals("Wrong second value", "with\"quotes", v);
+			v = result.get(2);
+			assertEquals("Wrong third value", "three\tvalues", v);
+		}
+		catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testGetEmptyValues()
 	{
 		// Check for empty elements at the end

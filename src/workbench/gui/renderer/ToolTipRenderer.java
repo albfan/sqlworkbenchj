@@ -144,7 +144,6 @@ public class ToolTipRenderer
 		else
 		{
 			this.prepareDisplay(value);
-			this.setToolTipText(this.tooltip);
 		}
 		return this;
 	}
@@ -264,6 +263,11 @@ public class ToolTipRenderer
 		setTooltip(displayValue);
 	}
 
+	public String getToolTipText()
+	{
+		return this.tooltip;
+	}
+	
 	protected void setTooltip(String tip)
 	{
 		if (tip != null && tip.length() > 0)

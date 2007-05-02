@@ -52,7 +52,7 @@ public class NumberNotEqualsComparator
 
 	public boolean equals(Object other)
 	{
-		return (other instanceof NumberEqualsComparator);
+		return (other instanceof NumberNotEqualsComparator);
 	}
 	
 	public boolean validateInput(Object value)

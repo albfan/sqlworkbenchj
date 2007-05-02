@@ -540,9 +540,6 @@
     </Component>
     <Component class="javax.swing.JLabel" name="checkUpdatesLabel">
       <Properties>
-        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
-          <ComponentRef name="default"/>
-        </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getString(&quot;LblCheckForUpdate&quot;)" type="code"/>
         </Property>
@@ -562,11 +559,12 @@
     <Component class="javax.swing.JComboBox" name="checkInterval">
       <Properties>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-          <StringArray count="4">
+          <StringArray count="5">
             <StringItem index="0" value="never"/>
-            <StringItem index="1" value="7 days"/>
-            <StringItem index="2" value="14 days"/>
-            <StringItem index="3" value="30 days"/>
+            <StringItem index="1" value="daily"/>
+            <StringItem index="2" value="7 days"/>
+            <StringItem index="3" value="14 days"/>
+            <StringItem index="4" value="30 days"/>
           </StringArray>
         </Property>
       </Properties>

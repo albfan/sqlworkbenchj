@@ -52,19 +52,19 @@ public class HistoryTextField
 
 	public void saveSettings(PropertyStorage props, String prefix)
 	{
-		props.setProperty(prefix + "history", StringUtil.listToString(historyValues, ';', true));
-		props.setProperty(prefix + "lastvalue", this.getText());
+		props.setProperty(prefix + propName + ".history", StringUtil.listToString(historyValues, ';', true));
+		props.setProperty(prefix + propName + ".lastvalue", this.getText());
 	}
 	
 	public void restoreSettings(PropertyStorage props, String prefix)
 	{
-		String s = props.getProperty(prefix + "history", "");
+		String s = props.getProperty(prefix + propName + ".history", "");
 		List l = StringUtil.stringToList(s, ";", true, true);
 		this.setText("");
 		this.historyValues.clear();
 		this.historyValues.addAll(l);
 		this.updateModel();
-		String lastValue = props.getProperty(prefix + "lastvalue", null);
+		String lastValue = props.getProperty(prefix + propName + ".lastvalue", null);
 		
 		if (lastValue != null) this.setText(lastValue);
 	}

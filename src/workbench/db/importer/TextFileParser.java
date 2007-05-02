@@ -41,6 +41,7 @@ import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import workbench.util.QuoteEscapeType;
 import workbench.util.WbFile;
 
 /**
@@ -102,6 +103,7 @@ public class TextFileParser
 
 	private ImportFileHandler fileHandler = new ImportFileHandler();
 	private String currentLine;
+	private QuoteEscapeType quoteEscape;
 	
 	public TextFileParser()
 	{
@@ -154,6 +156,16 @@ public class TextFileParser
 	public void setTableName(String aName)
 	{
 		this.tableName = aName;
+	}
+
+	public void setQuoteEscaping(QuoteEscapeType type)
+	{
+		this.quoteEscape = type;
+	}
+	
+	public QuoteEscapeType getQuoteEscaping()
+	{
+		return this.quoteEscape;
 	}
 
 	public boolean hasErrors() { return this.hasErrors; }
@@ -227,12 +239,23 @@ public class TextFileParser
 		this.blobsAreFilenames = flag;
 	}
 	
-	/**
-	 * 	Define the columns that should be imported.
-	 * 	If the list is empty or null, then all columns will be imported
-	 */
-	public void setImportColumns(List columnList)
+	public void setImportColumnNames(List<String> columnList)
 		throws IllegalArgumentException
+	{
+		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>(columnList.size());
+		for (String col : columnList)
+		{
+			columns.add(new ColumnIdentifier(col));
+		}
+		setImportColumns(columns);
+	}
+	
+	/**
+	 * Define the columns that should be imported.
+	 * If the list is empty or null, then all columns will be imported
+	 * @param columnList the columns to be imported
+	 */
+	public void setImportColumns(List<ColumnIdentifier> columnList)
 	{
 		if (columnList == null)
 		{
@@ -247,33 +270,33 @@ public class TextFileParser
 			return;
 		}
 
-		// Make sure the list only contains ColumnIdentifiers
-		ArrayList cols = new ArrayList(count);
-		for (int i=0; i < count; i++)
-		{
-			Object o = columnList.get(i);
-			if (o instanceof String)
-			{
-				String colname = (String)columnList.get(i);
-				cols.add(new ColumnIdentifier(colname));
-			}
-			else if (o instanceof ColumnIdentifier)
-			{
-				cols.add((ColumnIdentifier)o);
-			}
-		}
+//		// Make sure the list only contains ColumnIdentifiers
+//		ArrayList cols = new ArrayList(count);
+//		for (int i=0; i < count; i++)
+//		{
+//			Object o = columnList.get(i);
+//			if (o instanceof String)
+//			{
+//				String colname = (String)columnList.get(i);
+//				cols.add(new ColumnIdentifier(colname));
+//			}
+//			else if (o instanceof ColumnIdentifier)
+//			{
+//				cols.add((ColumnIdentifier)o);
+//			}
+//		}
 		
 		if (this.columns == null)
 		{
 			// store the list so that when the columns
 			// are retrieved or defined later, the real columns to be imported
 			// can be defined
-			this.pendingImportColumns = cols;
+			this.pendingImportColumns = columnList;
 		}
 		else
 		{
 			this.pendingImportColumns = null;
-			checkPendingImportColumns(cols);
+			checkPendingImportColumns(columnList);
 		}
 	}
 	
@@ -299,7 +322,7 @@ public class TextFileParser
 	 * Retain only those columns in the defined source file columns
 	 * that are in the passed list
 	 */
-	private void checkPendingImportColumns(List colIds)
+	private void checkPendingImportColumns(List<ColumnIdentifier> colIds)
 		throws IllegalArgumentException
 	{
 		if (colIds == null || colIds.size() == 0) return;
@@ -322,9 +345,8 @@ public class TextFileParser
 		{
 			// We use toString() so that either ColumnIds or Strings
 			// can be put into the passed list
-			Object o = colIds.get(i);
-			String columnName = o.toString();
-			int index = this.getColumnIndex(columnName);
+			ColumnIdentifier col = colIds.get(i);
+			int index = this.getColumnIndex(col.getColumnName());
 			if (index > -1)
 			{
 				this.columnMap[index] = i;
@@ -333,9 +355,9 @@ public class TextFileParser
 			else
 			{
 				String msg = ResourceMgr.getString("ErrImpColNotFound");
-				this.messages.append(StringUtil.replace(msg, "%colname%", columnName) + "\n");
+				this.messages.append(StringUtil.replace(msg, "%colname%", col.getColumnName()) + "\n");
 				this.hasErrors = true;
-				throw new IllegalArgumentException("Column [" + columnName + "] not found!");
+				throw new IllegalArgumentException("Column [" + col.getColumnName() + "] not found!");
 			}
 		}
 	}
@@ -374,6 +396,7 @@ public class TextFileParser
 
 	/**
 	 * 	Define the columns in the input file.
+	 * @param columnList the list of columns present in the input file
 	 */
 	public void setColumns(List<ColumnIdentifier> columnList)
 		throws SQLException
@@ -660,6 +683,7 @@ public class TextFileParser
 		CsvLineParser tok = new CsvLineParser(delimiter.charAt(0), quoteCharToUse);
 		tok.setReturnEmptyStrings(true);
 		tok.setTrimValues(this.trimValues);
+		tok.setQuoteEscaping(this.quoteEscape);
 
 		try
 		{
@@ -1006,7 +1030,7 @@ public class TextFileParser
 		{
 			this.colCount = cols.size();
 			this.columns = new ColumnIdentifier[colCount];
-			ArrayList realCols = new ArrayList();
+			ArrayList<ColumnIdentifier> realCols = new ArrayList<ColumnIdentifier>();
 			boolean partialImport = false;
 			DbMetadata meta = this.connection.getMetadata();
 			TableIdentifier targetTable = getTargetTable();
@@ -1038,7 +1062,7 @@ public class TextFileParser
 					if (index > -1)
 					{
 						this.columns[i] = (ColumnIdentifier)tableCols.get(index);
-						realCols.add(this.columns[i].getColumnName());
+						realCols.add(this.columns[i]);
 					}
 					else
 					{

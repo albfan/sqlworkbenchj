@@ -160,7 +160,12 @@ public class DbSettings
 	String mapIndexType(Object type)
 	{
 		if (type == null) return null;
-		if (type instanceof String) return (String)type;
+		if (type instanceof String) 
+		{
+			int t = StringUtil.getIntValue((String)type, Integer.MIN_VALUE);
+			if (t == Integer.MIN_VALUE) return (String)type;
+			return mapIndexType(t);
+		}
 		if (type instanceof Number)
 		{
 			return mapIndexType(((Number)type).intValue());
@@ -321,6 +326,12 @@ public class DbSettings
 				return StringUtil.EMPTY_STRING;
 		}
 	}
+	
+	public boolean useSavepointForInsertUpdate()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".import.usesavepoint", false);
+	}
+	
 	public boolean useSetCatalog()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".usesetcatalog", true);

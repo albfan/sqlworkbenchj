@@ -29,6 +29,7 @@ import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
+import workbench.util.QuoteEscapeType;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -85,6 +86,7 @@ public class WbImport
 		CommonArgs.addCommitParameter(cmdLine);
 		CommonArgs.addContinueParameter(cmdLine);
 		CommonArgs.addCommitAndBatchParams(cmdLine);
+		CommonArgs.addQuoteEscapting(cmdLine);
 		
 		cmdLine.addArgument(ARG_TYPE, StringUtil.stringToList("text,xml"));
 		cmdLine.addArgument(ARG_UPDATE_WHERE);
@@ -321,8 +323,8 @@ public class WbImport
 				{
 					try
 					{	
-						List cols = StringUtil.stringToList(importcolumns, ",", true);
-						textParser.setImportColumns(cols);
+						List<String> cols = StringUtil.stringToList(importcolumns, ",", true);
+						textParser.setImportColumnNames(cols);
 					}
 					catch (IllegalArgumentException e)
 					{
@@ -397,6 +399,7 @@ public class WbImport
 			{
 				textParser.setLineFilter(StringUtil.trimQuotes(filter));
 			}
+			textParser.setQuoteEscaping(CommonArgs.getQuoteEscaping(cmdLine));
 			imp.setProducer(textParser);
 		}
 		else if ("xml".equalsIgnoreCase(type))

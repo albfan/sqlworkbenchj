@@ -33,12 +33,12 @@ public class ClobColumnRenderer
 			Clob clob = (Clob)aValue;
 			long len = clob.length();
 			this.displayValue = clob.getSubString(1, (int)len);
-			setTooltip(displayValue);
 		}
 		catch (Throwable e)
 		{
 			displayValue = aValue.toString();
 		}
+		setTooltip(displayValue);
 	}
 
 }

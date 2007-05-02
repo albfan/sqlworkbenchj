@@ -15,10 +15,12 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import workbench.db.DbMetadata;
+import workbench.db.DbSettings;
 import workbench.db.ProcedureDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -50,6 +52,7 @@ public class SchemaDiff
 	public static final String TAG_REF_CONN = "reference-connection";
 	public static final String TAG_TARGET_CONN = "target-connection";
 	public static final String TAG_COMPARE_INFO = "compare-settings";
+	public static final String TAG_VIEW_PAIR = "view-info";
 	public static final String TAG_TABLE_PAIR = "table-info";
 	public static final String TAG_PROC_PAIR = "procedure-info";
 	public static final String TAG_INDEX_INFO = "include-index";
@@ -260,7 +263,7 @@ public class SchemaDiff
 		throws SQLException
 	{
 		tbl.adjustCase(con);
-		ReportView view = new ReportView(tbl, con, this.namespace);
+		ReportView view = new ReportView(tbl, con, diffIndex, this.namespace);
 		return view;
 	}
 	
@@ -624,8 +627,8 @@ public class SchemaDiff
 				}
 				else
 				{
-					// We cannot write out the diff ror the views immediately
-					// because that has to be listed after the table diffs
+					// We cannot write out the diff for the views immediately
+					// because they should be listed after the table diffs
 					ReportView source = createReportViewInstance(entry.reference, sourceDb);
 					ReportView target = null;
 					if (entry.target != null)
@@ -792,9 +795,10 @@ public class SchemaDiff
 			tw.appendTag(info, indent2, "target-schema", this.targetSchema);
 		}
 		int count = this.objectsToCompare.size();
-		String tattr[] = new String[] { "referenceTable", "compareTo" };
+		String tattr[] = new String[] { "type", "reference", "compareTo"};
 		String pattr[] = new String[] { "referenceProcedure", "compareTo" };
-		String tbls[] = new String[2];
+		String tbls[] = new String[3];
+		DbSettings dbs = this.sourceDb.getMetadata().getDbSettings();
 		for (int i=0; i < count; i++)
 		{
 			// check for ignored tables
@@ -803,10 +807,17 @@ public class SchemaDiff
 			if (o instanceof DiffEntry)
 			{
 				DiffEntry de = (DiffEntry)o;
-				tbls[0] = StringUtil.trimQuotes(de.reference.getTableName());
+				tbls[0] = de.reference.getType();
 				tbls[1] = (de.target == null ? "" : StringUtil.trimQuotes(de.target.getTableName()));
-
-				tw.appendOpenTag(info, indent2, TAG_TABLE_PAIR, tattr, tbls, false);
+				tbls[2] = StringUtil.trimQuotes(de.reference.getTableName());
+				if (dbs.isViewType(tbls[0]))
+				{
+					tw.appendOpenTag(info, indent2, TAG_VIEW_PAIR, tattr, tbls, false);
+				}
+				else
+				{
+					tw.appendOpenTag(info, indent2, TAG_TABLE_PAIR, tattr, tbls, false);
+				}
 			}
 			else if (o instanceof ProcDiffEntry)
 			{

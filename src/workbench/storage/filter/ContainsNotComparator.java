@@ -28,5 +28,10 @@ public class ContainsNotComparator
 	{
 		return !super.evaluate(reference, value, ignoreCase);
 	}
+	
+	public boolean equals(Object other)
+	{
+		return (other instanceof ContainsNotComparator);
+	}	
 }
 

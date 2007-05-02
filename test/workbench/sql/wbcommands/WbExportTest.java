@@ -19,7 +19,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import workbench.TestUtil;
+import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunnerResult;
@@ -71,6 +73,61 @@ public class WbExportTest extends TestCase
 		super.tearDown();
 	}
 
+	public void testQuoteEscaping()
+	{
+		try
+		{
+			File exportFile = new File(this.basedir, "quote_escaping_test.txt");
+			WbConnection wb = util.getConnection();
+
+			Statement stmt = wb.createStatement();
+			stmt.executeUpdate("CREATE TABLE quote_test (nr integer, testvalue varchar(100))");
+			stmt.executeUpdate("insert into quote_test (nr, testvalue) values (1, 'first')");
+			stmt.executeUpdate("insert into quote_test (nr, testvalue) values (2, 'with\"quote')");
+			stmt.executeUpdate("insert into quote_test (nr, testvalue) values (3, 'with\ttab')");
+			wb.commit();
+			
+			// Test escaping 
+			StatementRunnerResult result = exportCmd.execute(wb, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -sourcetable=quote_test -quoteCharEscaping=escape -quoteChar='\"' -header=false");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Export file not created", true, exportFile.exists());
+			
+			List<String> lines = TestUtil.readLines(exportFile);
+			assertEquals("Not enough lines exported", 3, lines.size());
+			assertEquals("Wrong second line", "2\twith\\\"quote", lines.get(1));
+			assertEquals("Wrong third line", "3\t\"with\ttab\"", lines.get(2));
+			
+			// Test escaping 
+			result = exportCmd.execute(wb, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -sourcetable=quote_test -quoteCharEscaping=duplicate -quoteChar='\"' -header=false");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Export file not created", true, exportFile.exists());
+			
+			lines = TestUtil.readLines(exportFile);
+			assertEquals("Not enough lines exported", 3, lines.size());
+			assertEquals("Wrong second line", "2\twith\"\"quote", lines.get(1));
+
+			// Test without quote character
+			result = exportCmd.execute(wb, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -sourcetable=quote_test -quoteCharEscaping=duplicate -quoteChar=\"'\" -header=false");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Export file not created", true, exportFile.exists());
+			
+			lines = TestUtil.readLines(exportFile);
+			assertEquals("Not enough lines exported", 3, lines.size());
+			assertEquals("Wrong second line", "2\twith\"quote", lines.get(1));
+			assertEquals("Wrong third line", "3\t'with\ttab'", lines.get(2));
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+	
 	public void testCommit()
 	{
 		try
@@ -674,6 +731,23 @@ public class WbExportTest extends TestCase
 		{
 			e.printStackTrace();
 			fail(e.getMessage());
+		}
+		finally
+		{
+			File f = new File(basedir, "blob_test.xml");
+			f.delete();
+			
+			f = new File(basedir, "junit_test.xml");
+			f.delete();
+
+			f = new File(basedir, "person.xml");
+			f.delete();
+			
+			f = new File(basedir, "blob_test_r1_c2.data");
+			f.delete();
+			
+			f = new File(basedir, "blob_test_r2_c2.data");
+			f.delete();
 		}
 	}
 

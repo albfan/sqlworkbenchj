@@ -25,6 +25,9 @@ import java.util.List;
 import javax.swing.JDialog;
 
 import javax.swing.JFrame;
+import workbench.db.DbMetadata;
+import workbench.db.DbMetadata;
+import workbench.db.DbSettings;
 
 import workbench.db.ProcedureDefinition;
 import workbench.db.TableIdentifier;
@@ -75,9 +78,10 @@ public class SchemaReporter
 	public SchemaReporter(WbConnection conn)
 	{
 		this.dbConn = conn;
-		types = new String[2];
+		types = new String[3];
 		types[0] = conn.getMetadata().getTableTypeName();
 		types[1] = conn.getMetadata().getViewTypeName();
+		types[2] = DbMetadata.MVIEW_NAME;
 	}
 
 	public void setProgressMonitor(RowActionMonitor mon)
@@ -214,7 +218,9 @@ public class SchemaReporter
 		int totalCount = count + this.procedures.size();
 		int totalCurrent = 1;
 		
+		DbSettings dbs = dbConn.getMetadata().getDbSettings();
 		TableIdentifier table  = null;
+		
 		for (int i=0; i < count; i++)
 		{
 			try
@@ -236,10 +242,12 @@ public class SchemaReporter
 				if (type == null)
 				{
 					type = this.dbConn.getMetadata().getObjectType(table);
+					table.setType(type);
 				}
-				if ("VIEW".equals(type))
+				
+				if (dbs.isViewType(type))
 				{
-					ReportView rview = new ReportView(table, this.dbConn, this.xmlNamespace);
+					ReportView rview = new ReportView(table, this.dbConn, true, this.xmlNamespace);
 					rview.setSchemaNameToUse(this.schemaNameToUse);
 					rview.writeXml(out);
 				}

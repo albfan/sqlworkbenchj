@@ -53,7 +53,7 @@ public class UpdateCheck
 	
 	public boolean needCheck(int interval, Date today, Date lastCheck)
 	{
-		if (interval < 7) return false;
+		if (interval < 1) return false;
 		
 		Calendar next = Calendar.getInstance();
 		long nextCheck = Long.MIN_VALUE;
@@ -77,7 +77,7 @@ public class UpdateCheck
 		
 		long nowMillis = now.getTimeInMillis();
 		
-		return nextCheck < nowMillis;
+		return nextCheck <= nowMillis;
 	}
 	
 	public void run()

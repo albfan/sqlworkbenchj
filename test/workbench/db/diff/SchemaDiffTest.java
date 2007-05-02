@@ -53,11 +53,14 @@ public class SchemaDiffTest
 			diff.setIncludeViews(true);
 			diff.compareAll();
 			String xml = diff.getMigrateTargetXml();
-//			Thread.yield();
-//			System.out.println(xml);
+			Thread.yield();
+			System.out.println(xml);
 
 			String count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
-			assertEquals("Incorrect number of tables listed", "4", count);
+			assertEquals("Incorrect number of tables listed", "3", count);
+
+			count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/view-info)");
+			assertEquals("Incorrect number of views listed", "1", count);
 			
 			// Check if email column 
 			String col = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='ADDRESS']/add-column/column-def[@name='EMAIL']/column-name");

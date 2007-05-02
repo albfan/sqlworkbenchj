@@ -60,6 +60,7 @@ import workbench.storage.SqlLiteralFormatter;
 import workbench.util.CharacterRange;
 import workbench.util.EncodingUtil;
 import workbench.util.MessageBuffer;
+import workbench.util.QuoteEscapeType;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -187,6 +188,7 @@ public class DataExporter
 	private ZipEntry zipEntry;
 
 	private String blobMode = null;
+	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
 
 	/**
 	 * Create a DataExporter for the specified connection.
@@ -331,6 +333,16 @@ public class DataExporter
 		this.jobQueue.add(job);
 	}
 
+	public void setQuoteEscaping(QuoteEscapeType type)
+	{
+		this.quoteEscape = type;
+	}
+	
+	public QuoteEscapeType getQuoteEscaping()
+	{
+		return this.quoteEscape;
+	}
+	
 	public WbConnection getConnection()
 	{
 		return this.dbConn;

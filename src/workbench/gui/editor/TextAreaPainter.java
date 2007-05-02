@@ -25,12 +25,13 @@ import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.27 2007-03-21 22:05:47 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.28 2007-05-02 20:13:11 thomas Exp $
  */
 public class TextAreaPainter 
 	extends JComponent 
@@ -257,8 +258,9 @@ public class TextAreaPainter
 		if (this.showLineNumbers)
 		{
 			int lastLine = textArea.getLineCount();
-			String s = Integer.toString(lastLine);
-			int	chars = s.length();
+//			String s = Integer.toString(lastLine);
+//			int	chars = s.length();
+			int chars = StringUtil.numDigits(lastLine);
 			this.gutterWidth = (chars * gutterCharWidth) + (GUTTER_MARGIN * 2);
 		}
 		else

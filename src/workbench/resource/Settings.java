@@ -342,7 +342,7 @@ public class Settings
 	{
 		String prop = getProperty("workbench.gui.updatecheck.interval", "7");
 		if (prop.equals("never")) return -1;
-		
+		if (prop.equals("daily")) return 1;
 		int interval = -1;
 		try
 		{
@@ -858,6 +858,19 @@ public class Settings
 			this.props.remove("workbench.gui.settings.ExternalToolsPanel.divider");
 			this.props.remove("workbench.gui.settings.LnFOptionsPanel.divider");
 			this.props.remove("workbench.gui.profiles.DriverlistEditorPanel.divider");
+			
+			this.props.remove("workbench.gui.dbobjects.TableListPanel.quickfilter.history");
+			this.props.remove("workbench.gui.dbobjects.TableListPanel.quickfilter.lastvalue");
+
+			boolean mySQLRemoved = getBoolProperty("workbench.migrate.settings.mysql.cascade", false);
+			if (!mySQLRemoved)
+			{
+				// Only remove them once!
+				this.props.remove("workbench.db.drop.table.cascade.mysql");
+				this.props.remove("workbench.db.drop.view.cascade.mysql");
+				this.props.remove("workbench.db.drop.function.cascade.mysql");
+				setProperty("workbench.migrate.settings.mysql.cascade", true);
+			}
 		}
 		catch (Throwable e)
 		{

@@ -43,6 +43,7 @@ import workbench.util.StringUtil;
 import java.io.StringReader;
 import java.io.Reader;
 import java.sql.Clob;
+import java.sql.Savepoint;
 import java.sql.Types;
 import java.util.LinkedList;
 import workbench.interfaces.BatchCommitter;
@@ -51,6 +52,7 @@ import workbench.storage.NullValue;
 import workbench.util.CloseableDataStream;
 import workbench.util.EncodingUtil;
 import workbench.util.MessageBuffer;
+import workbench.util.QuoteEscapeType;
 import workbench.util.WbThread;
 
 
@@ -141,6 +143,9 @@ public class DataImporter
 	private BadfileWriter badWriter;
 	private String badfileName;
 
+	private boolean useSavepoint;
+	private Savepoint preInsert;
+	
 	public DataImporter()
 	{
 		this.messages = new MessageBuffer();
@@ -151,6 +156,8 @@ public class DataImporter
 		this.dbConn = aConn;
 		this.supportsBatch = this.dbConn.getMetadata().supportsBatchUpdates();
 		this.useBatch = this.useBatch && supportsBatch;
+		this.useSavepoint = this.dbConn.getDbSettings().useSavepointForInsertUpdate();
+		this.useSavepoint = this.useSavepoint && !this.dbConn.getAutoCommit();
 	}
 
 	public void setRowActionMonitor(RowActionMonitor rowMonitor)
@@ -417,43 +424,7 @@ public class DataImporter
 	{
 		this.columnLimitMap = limits;
 	}
-	
-//	private void applyColumnLimits()
-//	{
-//		if (this.targetColumns == null) return;
-//		
-//		if (this.columnLimitMap == null)
-//		{
-//			this.columnLimits = null;
-//			return;
-//		}
-//		this.columnLimits = new int[this.targetColumns.length];
-//		
-//		for (Map.Entry<ColumnIdentifier, Integer> entry : columnLimitMap.entrySet())
-//		{
-//			
-//			int index = this.findColumn(entry.getKey());
-//			if (index > -1)
-//			{
-//				Integer size = entry.getValue();
-//				this.columnLimits[index] = size.intValue();
-//			}
-//		}
-//	}
-	
-//	private int findColumn(ColumnIdentifier column)
-//	{
-//		if (column == null) return -1;
-//		if (this.targetColumns == null) return -1;
-//		for (int i=0; i < targetColumns.length; i++)
-//		{
-//			ColumnIdentifier col = targetColumns[i];
-//			if (col == null) continue;
-//			if (col.getColumnName().equalsIgnoreCase(column.getColumnName())) return i;
-//		}
-//		return -1;
-//	}
-	
+
 	/**
 	 *	Define the key columns by supplying a comma separated
 	 *	list of column names
@@ -705,6 +676,10 @@ public class DataImporter
 					// fail as well.
 					try
 					{
+						if (this.useSavepoint)
+						{
+							setSavepoint();
+						}
 						rows = this.insertRow(row);
 						inserted = true;
 					}
@@ -712,7 +687,13 @@ public class DataImporter
 					{
 						LogMgr.logDebug("DataImporter.processRow()", "Error inserting row, trying update");
 						inserted = false;
+						if (this.useSavepoint)
+						{
+							this.rollbackToSavePoint();
+						}
 					}
+					releaseSavepoint();
+					
 					if (!inserted)
 					{
 						rows = this.updateRow(row);
@@ -856,6 +837,53 @@ public class DataImporter
 		}
 	}
 
+	private void setSavepoint()
+	{
+		try
+		{
+			this.preInsert = this.dbConn.getSqlConnection().setSavepoint();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DataImporter", "Could not set pre-insert SavePoint", e);
+		}
+	}
+	
+	private void rollbackToSavePoint()
+	{
+		if (this.preInsert == null) return;
+		try
+		{
+			this.dbConn.getSqlConnection().rollback(this.preInsert);
+			if (LogMgr.isDebugEnabled()) 
+			{
+				LogMgr.logDebug("DataImporter.rollbackToSavePoint()", "Savepoint created, id=" + this.preInsert.getSavepointId());
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DataImporter.rollbackToSavePoint()", "Error when performing rollback to savepoint", e);
+		}
+		finally
+		{
+			preInsert = null;
+		}
+	}
+	
+	private void releaseSavepoint()
+	{
+		if (this.preInsert == null) return;
+		try
+		{
+			this.dbConn.getSqlConnection().releaseSavepoint(preInsert);
+			this.preInsert = null;
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("DataImporter.processrow()", "Error when releasing savepoint", th);
+		}
+	}
+	
 	private String getValueDisplay(Object[] row)
 	{
 		int count = row.length;

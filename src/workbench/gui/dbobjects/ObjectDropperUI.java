@@ -25,6 +25,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.NoSelectionModel;
 import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -238,7 +239,7 @@ public class ObjectDropperUI
 			String verb = this.connection.getDbSettings().getCascadeConstraintsVerb(type);
 
 			// if at least one type can be dropped with CASCADE, enable the checkbox
-			if (verb != null)
+			if (!StringUtil.isEmptyString(verb))
 			{
 				canCascade = true;
 				break;

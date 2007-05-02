@@ -11,6 +11,9 @@
  */
 package workbench.db.report;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -98,26 +101,22 @@ public class TagWriter
 	 */
 	public void appendEmptyTag(StrBuffer target, StrBuffer indent, String tag, String attribute, String attValue)
 	{
-		String[] attr = new String[1];
-		String[] values = new String[1];
-		attr[0] = attribute;
-		values[0] = attValue;
-		appendOpenTag(target, indent, tag, attr, values, false);
+		List<TagAttribute> att = new ArrayList<TagAttribute>(1);
+		att.add(new TagAttribute(attribute, attValue));
+		appendOpenTag(target, indent, tag, att, false);
 		target.append("/>");
 	}
 	
 	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag)
 	{
-		this.appendOpenTag(target, indent, tag, (String[])null, (String[])null);
+		this.appendOpenTag(target, indent, tag, null, true);
 	}
 	
 	public  void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String attribute, String attValue)
 	{
-		String[] attr = new String[1];
-		String[] values = new String[1];
-		attr[0] = attribute;
-		values[0] = attValue;
-		this.appendOpenTag(target, indent, tag, attr, values);
+		List<TagAttribute> att = new ArrayList<TagAttribute>(1);
+		att.add(new TagAttribute(attribute, attValue));
+		appendOpenTag(target, indent, tag, att, true);
 	}
 	
 	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String[] attributes, String[] values)
@@ -131,6 +130,20 @@ public class TagWriter
 	 */
 	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String[] attributes, String[] values, boolean closeTag)
 	{
+		List<TagAttribute> att = null;
+		if (attributes != null)
+		{
+			att = new ArrayList<TagAttribute>(attributes.length);
+			for (int i=0; i < attributes.length; i++)
+			{
+				att.add(new TagAttribute(attributes[i], values[i]));
+			}
+		}
+		appendOpenTag(target, indent, tag, att, closeTag);
+	}
+	
+	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, Collection<TagAttribute> attributes, boolean closeTag)		
+	{
 		if (indent != null) target.append(indent);
 		target.append('<');
 		if (this.xmlNamespace != null)
@@ -139,18 +152,12 @@ public class TagWriter
 			target.append(':');
 		}
 		target.append(tag);
-		if (attributes != null && values != null)
+		if (attributes != null && attributes.size() > 0)
 		{
-			for (int i=0; i < attributes.length; i++)
+			for (TagAttribute att : attributes)
 			{
-				if (attributes[i] != null && values[i] != null)
-				{
-					target.append(' ');
-					target.append(attributes[i]);
-					target.append("=\"");
-					target.append(values[i]);
-					target.append('"');
-				}
+				target.append(' ');
+				target.append(att.getTagText());
 			}
 		}
 		if (closeTag) target.append('>');

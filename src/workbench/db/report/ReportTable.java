@@ -61,6 +61,7 @@ public class ReportTable
 	private boolean includeGrants = false;
 	private String tableConstraints;
 	private ReportTableGrants grants;
+//	private String mviewSource;
 	
 	public ReportTable(TableIdentifier tbl)
 	{
@@ -132,6 +133,7 @@ public class ReportTable
 			this.index = new IndexReporter(tbl, conn);
 			this.index.setNamespace(namespace);
 		}
+		
 		if (includeFk) 
 		{
 			this.readForeignKeys(conn);
@@ -146,6 +148,11 @@ public class ReportTable
 		{
 			grants = new ReportTableGrants(conn, this.table);
 		}
+		
+//		if (DbMetadata.MVIEW_NAME.equals(table.getType()))
+//		{
+//			this.mviewSource = conn.getMetadata().getViewSource(table);
+//		}
 	}
 
 	/**
@@ -325,23 +332,43 @@ public class ReportTable
 		StrBuffer colindent = new StrBuffer(indent);
 		colindent.append(indent);
 
-		tagWriter.appendOpenTag(line, indent, TAG_TABLE_DEF, "name", StringUtil.trimQuotes(this.table.getTableName()));
+		String type = this.table.getType();
+
+		if (!"TABLE".equalsIgnoreCase(type))
+		{
+			String[] att = new String[2];
+			String[] val = new String[2];
+			
+			att[0] = "name";
+			val[0] = StringUtil.trimQuotes(this.table.getTableName());
+			att[1] = "type";
+			val[1] = type;
+			tagWriter.appendOpenTag(line, indent, TAG_TABLE_DEF, att, val);
+		}
+		else
+		{
+			tagWriter.appendOpenTag(line, indent, TAG_TABLE_DEF, "name", StringUtil.trimQuotes(this.table.getTableName()));
+		}
 		line.append('\n');
 		appendTableNameXml(line, colindent);
-		if (this.grants != null)
-		{
-			this.grants.appendXml(line, colindent);
-		}
 		tagWriter.appendTag(line, colindent, TAG_TABLE_COMMENT, this.tableComment, true);
 		int cols = this.columns.length;
 		for (int i=0; i < cols; i++)
 		{
 			this.columns[i].appendXml(line, colindent);
 		}
+//		if (this.mviewSource != null)
+//		{
+//			ReportView.writeSourceTag(tagWriter, line, colindent, mviewSource);
+//		}
 		if (this.index != null) this.index.appendXml(line, colindent);
 		if (this.tableConstraints != null && this.tableConstraints.length() > 0)
 		{
 			tagWriter.appendTag(line, colindent, TAG_TABLE_CONSTRAINT, this.tableConstraints, true);
+		}
+		if (this.grants != null)
+		{
+			this.grants.appendXml(line, colindent);
 		}
 		tagWriter.appendCloseTag(line, indent, TAG_TABLE_DEF);
 		return line;

@@ -11,7 +11,12 @@
  */
 package workbench.db.diff;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import workbench.db.IndexDefinition;
 import workbench.db.report.ReportView;
+import workbench.db.report.TagAttribute;
 import workbench.db.report.TagWriter;
 import workbench.util.StrBuffer;
 
@@ -47,25 +52,73 @@ public class ViewDiff
 		
 		StrBuffer myindent = new StrBuffer(indent);
 		myindent.append("  ");
-		boolean isDifferent = true;
+		boolean sourceDifferent = false;
+		boolean indexDifferent = false;
+		boolean createView = (target == null);
+		
 		String tagToUse = TAG_CREATE_VIEW;
 
 		String refSource = reference.getViewSource();
 		String targetSource = (target == null ? null : target.getViewSource());
+		
 		if (targetSource != null)
 		{
-			isDifferent = !refSource.trim().equals(targetSource.trim());
-			tagToUse = TAG_UPDATE_VIEW;
+			sourceDifferent = !refSource.trim().equals(targetSource.trim());
 		}
 		
-		if (isDifferent)
+		StrBuffer indexDiff = getIndexDiff();
+		if (indexDiff != null && indexDiff.length() > 0)
 		{
-			writer.appendOpenTag(result, this.indent, tagToUse);
-			result.append('\n');
-			result.append(reference.getXml(myindent));
-			writer.appendCloseTag(result, this.indent, tagToUse);
+			indexDifferent = true;
 		}
+		
+		if (!sourceDifferent && !createView && !indexDifferent) return result;
+		
+		List<TagAttribute> att = new ArrayList<TagAttribute>();
+			
+		String type = reference.getView().getType();
+		if (!"VIEW".equals(type))
+		{
+			att.add(new TagAttribute("type", type));
+		}
+		
+		if (indexDifferent && !sourceDifferent)
+		{
+			att.add(new TagAttribute("name", target.getView().getTableName()));
+		}
+		
+		writer.appendOpenTag(result, this.indent, (createView ? TAG_CREATE_VIEW : TAG_UPDATE_VIEW), att, true);
+		
+		result.append('\n');
+		if (createView)
+		{
+			result.append(reference.getXml(myindent, true));
+		}
+		else if (sourceDifferent)
+		{
+			result.append(reference.getXml(myindent, indexDifferent));
+		}
+		else
+		{
+			result.append(indexDiff);
+		}
+		writer.appendCloseTag(result, this.indent, (createView ? TAG_CREATE_VIEW : TAG_UPDATE_VIEW));
+
 		return result;
+	}	
+	
+	private StrBuffer getIndexDiff()
+	{
+		if (this.target == null) return null;
+		
+		Collection<IndexDefinition> ref = this.reference.getIndexList();
+		Collection<IndexDefinition> targ = this.target.getIndexList();
+		if (ref == null && targ == null) return null;
+		IndexDiff id = new IndexDiff(ref, targ);
+		id.setTagWriter(this.writer);
+		id.setIndent(indent);
+		StrBuffer diff = id.getMigrateTargetXml();
+		return diff;
 	}	
 	
 	/**

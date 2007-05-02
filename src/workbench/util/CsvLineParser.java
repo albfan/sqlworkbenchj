@@ -29,6 +29,7 @@ public class CsvLineParser
 	private boolean returnEmptyStrings = false;
 	private boolean trimValues = false;
 	private boolean oneMore = false;
+	private QuoteEscapeType escapeType = QuoteEscapeType.none;
 	
 	public CsvLineParser(char delimit)
 	{
@@ -65,6 +66,11 @@ public class CsvLineParser
 		this.returnEmptyStrings = flag;
 	}
 	
+	public void setQuoteEscaping(QuoteEscapeType type)
+	{
+		this.escapeType = type;
+	}
+	
 	public boolean hasNext()
 	{
 		return oneMore || current < len;
@@ -95,11 +101,38 @@ public class CsvLineParser
 			{
 				// don't return the quote at the end
 				if (inQuotes) endOffset = 1;
-				
+
 				// don't return the quote at the beginning
 				if (current == beginField) beginField ++;
-				inQuotes = !inQuotes;
+				
+				if (this.escapeType == QuoteEscapeType.escape)
+				{
+					char last = 0;
+					if (current > 1) last = this.lineData.charAt(current - 1);
+					if (last != '\\') 
+					{
+						inQuotes = !inQuotes;
+					}
+				}
+				else if (this.escapeType == QuoteEscapeType.duplicate)
+				{
+					char next = 0;
+					if (current < lineData.length() - 1) next = this.lineData.charAt(current + 1);
+					if (next == '"') 
+					{
+						current ++;
+					}
+					else
+					{
+						inQuotes = !inQuotes;
+					}
+				}
+				else
+				{
+					inQuotes = !inQuotes;
+				}
 			}
+				
 			current ++;
 		}
 		
@@ -115,6 +148,15 @@ public class CsvLineParser
 			// if the line ends with the delimiter, we have one more
 			// (empty) element
 			oneMore = true;
+		}
+		
+		if (this.escapeType == QuoteEscapeType.escape)
+		{
+			next = StringUtil.replace(next, "\\", "");
+		}
+		else if (this.escapeType == QuoteEscapeType.duplicate)
+		{
+			next = StringUtil.replace(next, "\"\"", "\"");
 		}
 		
 		if (this.returnEmptyStrings && next == null) next = StringUtil.EMPTY_STRING;
