@@ -468,6 +468,8 @@ public class IteratingScriptParser
 	{
 		String value = null;
 
+		if (startPos >= scriptLength) return null;
+		
 		if (endPos == -1)
 		{
 			endPos = scriptLength;

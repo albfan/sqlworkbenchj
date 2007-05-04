@@ -318,6 +318,45 @@ public class ScriptParserTest extends TestCase
 		}
 	}
 
+	public void testShortInclude()
+	{
+		try
+		{
+			String sql = "-- comment line 1\n" +
+				"select * from person where name = 'Dent';\n" +
+				"\n" +
+				"-- next comment\n" +
+				"insert into bla (nr, name) values (1,'laber');\n" +
+				"\n" +
+				"@myfile.sql";
+			ScriptParser p = new ScriptParser(sql);
+			p.setCheckForSingleLineCommands(true);
+			assertEquals("Not enough commands", 3, p.getSize());
+			assertEquals("Wrong command", "@myfile.sql", p.getCommand(2));
+			
+			sql = "-- comment line 1\n" +
+				"select * from person where name = 'Dent';\n" +
+				"\n" +
+				"-- next comment\n" +
+				"insert into bla (nr, name) values (1,'laber');\n" +
+				"\n" +
+				"@myfile.sql\n" +
+				"\n" +
+				"delete from theTable;";
+			p = new ScriptParser(sql);
+			p.setCheckForSingleLineCommands(true);
+			assertEquals("Not enough commands", 4, p.getSize());
+			assertEquals("Wrong command", "@myfile.sql", p.getCommand(2));
+			assertEquals("Wrong command", "delete from theTable", p.getCommand(3));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	
 	private File createScript(int counter, String lineEnd)
 		throws IOException
 	{

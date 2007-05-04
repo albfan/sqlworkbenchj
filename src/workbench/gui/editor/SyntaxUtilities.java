@@ -24,7 +24,7 @@ import workbench.resource.Settings;
  * subsystem.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxUtilities.java,v 1.7 2007-05-02 20:13:11 thomas Exp $
+ * @version $Id: SyntaxUtilities.java,v 1.8 2007-05-04 17:50:05 thomas Exp $
  */
 public class SyntaxUtilities
 {
