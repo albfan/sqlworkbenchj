@@ -59,7 +59,7 @@ public class PlainEditor
 		JScrollPane scroll = new JScrollPane(editor);
 		editor.setLineWrap(true);
 		editor.setWrapStyleWord(true); 
-		editor.setFont(Settings.getInstance().getDataFont());
+		editor.setFont(Settings.getInstance().getEditorFont());
 		this.setLayout(new BorderLayout());
 		toolPanel = new JPanel();
 		toolPanel.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));

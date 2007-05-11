@@ -27,16 +27,11 @@ import workbench.util.StringUtil;
 public class ShowManualAction
 	extends WbAction
 {
-	private static final ShowManualAction instance = new ShowManualAction();
-	
-	private JFrame helpWindow;
-	private ShowManualAction()
+	public ShowManualAction()
 	{
 		super();
 		initMenuDefinition("MnuTxtHelpManual");
 	}
-	
-	public static ShowManualAction getInstance() { return instance; } 
 	
 	public void executeAction(ActionEvent e)
 	{

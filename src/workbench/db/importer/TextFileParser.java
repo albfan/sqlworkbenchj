@@ -88,7 +88,7 @@ public class TextFileParser
 	private String extensionToUse;
 	private JobErrorHandler errorHandler;
 	private List pendingImportColumns;
-	private ValueConverter converter;
+	private ValueConverter converter = new ValueConverter();
 	private MessageBuffer messages = new MessageBuffer();
 	boolean hasErrors = false;
 	boolean hasWarnings = false;
@@ -196,7 +196,12 @@ public class TextFileParser
 			LogMgr.logError("TextFileParser.addColumnFilter()", "Error compiling regular expression " + regex, e);
 		}
 	}
-
+	
+	public void setAutoConvertBooleanNumbers(boolean flag)
+	{
+		this.converter.setAutoConvertBooleanNumbers(flag);
+	}
+	
 	public String getLastRecord()
 	{
 		return this.currentLine;
@@ -507,7 +512,8 @@ public class TextFileParser
 	public void start()
 		throws Exception
 	{
-		this.converter = new ValueConverter(this.dateFormat, this.timestampFormat);
+		this.converter.setDefaultDateFormat(this.dateFormat);
+		this.converter.setDefaultTimestampFormat(this.timestampFormat);
 		this.converter.setDecimalCharacter(this.decimalChar);
 		this.receiver.setTableCount(-1); // clear multi-table flag in receiver
 		this.receiver.setCurrentTable(-1);
@@ -735,10 +741,20 @@ public class TextFileParser
 					}
 				}
 				
+				boolean processRow = receiver.shouldProcessNextRow();
+				if (!processRow) receiver.nextRowSkipped();
+				
 				if (hasLineFilter)
 				{
 					Matcher m = this.lineFilter.matcher(currentLine);
-					if (!m.matches())
+					processRow = !m.matches();
+				}
+				
+				this.clearRowData();
+				importRow ++;
+
+				if (!processRow)
+				{
 					{
 						try
 						{
@@ -752,10 +768,7 @@ public class TextFileParser
 						continue;
 					}
 				}
-
-				this.clearRowData();
-				importRow ++;
-
+				
 				tok.setLine(currentLine);
 				includeLine = true;
 				int targetIndex = -1;

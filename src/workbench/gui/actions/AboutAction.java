@@ -22,10 +22,6 @@ import workbench.WbManager;
 public class AboutAction
 	extends WbAction
 {
-	
-	private static AboutAction instance = new AboutAction();
-	public static AboutAction getInstance() { return instance; }
-	
 	public AboutAction()
 	{
 		super();

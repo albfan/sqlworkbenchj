@@ -72,7 +72,7 @@ public class Settings
 	public static final String PROPERTY_PDF_READER_PATH = "workbench.gui.pdfreader.path";
 
 	public static final String PROPERTY_EDITOR_FONT = "editor";
-	public static final String PROPERTY_STANDARD_FONT = "standard";
+	public static final String PROPERTY_STANDARD_FONT = "std";
 	public static final String PROPERTY_MSGLOG_FONT = "msglog";
 	public static final String PROPERTY_DATA_FONT = "data";
 	public static final String PROPERTY_PRINTER_FONT = "printer";
@@ -218,6 +218,7 @@ public class Settings
 
 		this.renameOldProps();
 		this.migrateProps();
+		this.removeObsolete();
 	}
 
 	public ShortcutManager getShortcutManager()
@@ -734,7 +735,6 @@ public class Settings
 	{
 		if (this.props == null) return;
 		if (keyManager!= null) this.keyManager.saveSettings();
-		this.removeObsolete();
 		try
 		{
 			this.props.saveToFile(this.filename);
@@ -871,6 +871,15 @@ public class Settings
 				this.props.remove("workbench.db.drop.function.cascade.mysql");
 				setProperty("workbench.migrate.settings.mysql.cascade", true);
 			}
+			
+			// Starting with build 95 no default standard font should be used 
+			// (to make sure the default font of the Look & Feel is used)
+			// Only if the user sets one through the Options dialog
+			// The "user-defined" standard font is then saved with 
+			// the property key workbench.font.std.XXXX
+			this.props.remove("workbench.font.standard.name");
+			this.props.remove("workbench.font.standard.size");
+			this.props.remove("workbench.font.standard.style");
 		}
 		catch (Throwable e)
 		{
@@ -919,44 +928,6 @@ public class Settings
 		return getIntProperty("workbench.gui.macro.maxmenuitems", 9);
 	}
 
-	public Font getStandardFont()
-	{
-		Font f = this.getFont(PROPERTY_STANDARD_FONT,false);
-		if (f == null)
-		{
-			UIDefaults def = UIManager.getLookAndFeelDefaults();
-			f = def.getFont("Menu.font");
-		}
-		return f;
-	}
-
-	public void setStandardFont(Font f)
-	{
-		setFont(PROPERTY_STANDARD_FONT,f);
-	}
-
-	public Font getStandardLabelFont()
-	{
-		Font f = this.getStandardFont();
-		if (f == null)
-		{
-			UIDefaults def = UIManager.getLookAndFeelDefaults();
-			f = def.getFont("Label.font");
-		}
-		return f;
-	}
-
-	public Font getStandardMenuFont()
-	{
-		Font f = this.getStandardFont();
-		if (f == null)
-		{
-			UIDefaults def = UIManager.getLookAndFeelDefaults();
-			f = def.getFont("Menu.font");
-		}
-		return f;
-	}
-
 	public void setEditorFont(Font f)
 	{
 		this.setFont(PROPERTY_EDITOR_FONT, f);
@@ -964,7 +935,7 @@ public class Settings
 
 	public Font getEditorFont()
 	{
-		return this.getFont(PROPERTY_EDITOR_FONT);
+		return this.getFont(PROPERTY_EDITOR_FONT, true);
 	}
 
 	public void setMsgLogFont(Font f)
@@ -974,7 +945,7 @@ public class Settings
 
 	public Font getMsgLogFont()
 	{
-		return this.getFont(PROPERTY_MSGLOG_FONT);
+		return this.getFont(PROPERTY_MSGLOG_FONT, true);
 	}
 
 	public void setDataFont(Font f)
@@ -982,49 +953,54 @@ public class Settings
 		this.setFont(PROPERTY_DATA_FONT, f);
 	}
 
-	public Font getDataFont()
+	public Font getDataFont(boolean returnDefault)
 	{
 		Font f = this.getFont(PROPERTY_DATA_FONT, false);
-		if (f == null) f = this.getStandardFont();
+		if (f == null && returnDefault)
+		{
+			UIDefaults def = UIManager.getLookAndFeelDefaults();
+			f = def.getFont("Table.font");
+		}
 		return f;
 	}
 
 	public Font getPrinterFont()
 	{
-		Font f  = this.getFont(PROPERTY_PRINTER_FONT);
+		Font f  = this.getFont(PROPERTY_PRINTER_FONT, false);
 		if (f == null)
 		{
-			f = this.getDataFont();
+			f = this.getDataFont(true);
 		}
 		return f;
 	}
 
-	public Font getFont(String aFontName)
+	 public Font getStandardFont()
 	{
-		return this.getFont(aFontName, true);
+		return this.getFont(PROPERTY_STANDARD_FONT, false);
 	}
-
+	
+	public void setStandardFont(Font f)
+	{
+		this.setFont(PROPERTY_STANDARD_FONT, f);
+	}
+	
 	/**
 	 *	Returns the font configured for this keyword
 	 */
 	public Font getFont(String aFontName, boolean returnDefault)
 	{
-		Font result;
+		Font result = null;
 
 		String baseKey = "workbench.font." + aFontName;
-		String name = null;
-
-		if (returnDefault)
-			name = this.props.getProperty(baseKey + ".name", "Dialog");
-		else
-			name = this.props.getProperty(baseKey + ".name", null);
-
+		String name = this.props.getProperty(baseKey + ".name", null);
+		if (name == null && returnDefault) name = "Dialog";
+		
 		if (name == null) return null;
 
 		String sizeS = this.props.getProperty(baseKey + ".size", "11");
 		String type = this.props.getProperty(baseKey + ".style", "Plain");
 		int style = Font.PLAIN;
-		int size = 11;
+		int size = 12;
 		StringTokenizer tok = new StringTokenizer(type);
 		while (tok.hasMoreTokens())
 		{
@@ -1284,9 +1260,15 @@ public class Settings
 
 	public void setFont(String aFontName, Font aFont)
 	{
-		if (aFont == null) return;
+		String baseKey = "workbench.font." + aFontName;
+		if (aFont == null)
+		{
+			this.props.remove(baseKey + ".name");
+			this.props.remove(baseKey + ".size");
+			this.props.remove(baseKey + ".style");
+			return;
+		}
 
-		String baseKey = new StringBuilder("workbench.font.").append(aFontName).toString();
 		String name = aFont.getFamily();
 		String size = Integer.toString(aFont.getSize());
 		int style = aFont.getStyle();
@@ -2261,6 +2243,16 @@ public class Settings
 		return System.getProperty(aProperty, this.props.getProperty(aProperty, aDefault));
 	}
 
+	public List<String> getListProperty(String aProperty, boolean makeLowerCase)
+	{
+		String list = System.getProperty(aProperty, this.props.getProperty(aProperty, null));
+		if (makeLowerCase && list != null)
+		{
+			list = list.toLowerCase();
+		}
+		return StringUtil.stringToList(list, ",", true, true, false);
+	}
+	
 	public int getIntProperty(String aProperty, int defaultValue)
 	{
 		String sysValue = System.getProperty(aProperty, null);

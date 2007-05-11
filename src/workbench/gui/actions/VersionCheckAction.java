@@ -22,11 +22,7 @@ import workbench.resource.ResourceMgr;
  */
 public class VersionCheckAction extends WbAction
 {
-
-	private static VersionCheckAction instance = new VersionCheckAction();
-	public static VersionCheckAction getInstance() { return instance; }
-	
-	private VersionCheckAction()
+	public VersionCheckAction()
 	{
 		super();
 		this.initMenuDefinition("MnuTxtVersionCheck");

@@ -11,33 +11,20 @@
  */
 package workbench.gui.help;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.Frame;
-import java.awt.Rectangle;
-import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.URL;
 
-import javax.swing.JDialog;
-import javax.swing.JEditorPane;
 import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.html.HTML;
-import javax.swing.text.html.HTMLDocument;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.log.LogMgr;
+import workbench.interfaces.ToolWindow;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 
 public class HelpViewerFrame 
 	extends JFrame
+	implements ToolWindow
 {
 	private HtmlPanel display;
 	
@@ -77,5 +64,17 @@ public class HelpViewerFrame
 		Settings.getInstance().storeWindowPosition(this);
 		Settings.getInstance().storeWindowSize(this);
 	}
+
+  public void closeWindow()
+  {
+		saveSettings();
+    this.setVisible(false);
+		this.dispose();
+  }
+
+  public void disconnect()
+  {
+		// not needed
+  }
 
 }

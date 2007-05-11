@@ -24,10 +24,7 @@ import workbench.resource.ResourceMgr;
 public class OptionsDialogAction
 	extends WbAction
 {
-	private static OptionsDialogAction instance = new OptionsDialogAction();
-	public static OptionsDialogAction getInstance() { return instance; }
-	
-	private OptionsDialogAction()
+	public OptionsDialogAction()
 	{
 		super();
 		initMenuDefinition(ResourceMgr.MNU_TXT_OPTIONS);
@@ -39,7 +36,7 @@ public class OptionsDialogAction
 		showOptionsDialog();
 	}
 	
-	public void showOptionsDialog()
+	public static void showOptionsDialog()
 	{
 		final MainWindow parent = WbManager.getInstance().getCurrentWindow();
 		EventQueue.invokeLater(new Runnable()

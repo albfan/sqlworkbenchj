@@ -26,8 +26,4 @@ public interface ToolWindow
 	 */
 	void disconnect();
 	
-	/**
-	 * Makes the window visible, or brings it to front
-	 */
-	void activateWindow();
 }

@@ -46,7 +46,7 @@ public class DataEditOptionsPanel
 		pkMapFile.setCaretPosition(0);
 		alternateColor.setSelectedColor(Settings.getInstance().getAlternateRowColor());
 		requiredFieldColor.setSelectedColor(Settings.getInstance().getRequiredFieldColor());
-		dataFont.setSelectedFont(Settings.getInstance().getDataFont());
+		dataFont.setSelectedFont(Settings.getInstance().getDataFont(false));
 		autoColWidth.setSelected(Settings.getInstance().getAutomaticOptimalWidth());
 		includeHeaderWidth.setSelected(Settings.getInstance().getIncludeHeaderInOptimalWidth());
 		minColSizeField.setText(Integer.toString(Settings.getInstance().getMinColumnWidth()));

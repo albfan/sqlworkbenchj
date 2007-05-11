@@ -24,10 +24,7 @@ import workbench.gui.settings.ShortcutEditor;
 public class ConfigureShortcutsAction
 	extends WbAction
 {
-	private static ConfigureShortcutsAction instance = new ConfigureShortcutsAction();
-	public static ConfigureShortcutsAction getInstance() { return instance; }
-	
-	private ConfigureShortcutsAction()
+	public ConfigureShortcutsAction()
 	{
 		super();
 		initMenuDefinition("MnuTxtConfigureShortcuts");
@@ -39,6 +36,5 @@ public class ConfigureShortcutsAction
 		final MainWindow main = WbManager.getInstance().getCurrentWindow();
 		ShortcutEditor editor = new ShortcutEditor(main);
 		editor.showWindow();
-		//WbManager.getInstance().showDialog("workbench.gui.settings.ShortcutEditor");
 	}
 }

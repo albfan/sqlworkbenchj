@@ -11,9 +11,15 @@
  */
 package workbench.gui.components;
 
+import java.awt.Dimension;
 import java.awt.Font;
 import java.io.Serializable;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import workbench.gui.WbSwingUtilities;
+import workbench.resource.ResourceMgr;
 
 /**
  *
@@ -25,11 +31,20 @@ public class WbFontPicker
 {
 	private Font selectedFont;
 	private boolean monospacedOnly = false;
+	private boolean allowFontReset = false;
 	
 	/** Creates new form WbFontPicker */
 	public WbFontPicker()
 	{
 		initComponents();
+		this.setAllowFontReset(false);
+	}
+	
+	public void setAllowFontReset(boolean flag)
+	{
+		this.allowFontReset = flag;
+		this.resetButton.setVisible(flag);
+		this.resetButton.setEnabled(flag);
 	}
 	
 	public void setListMonospacedOnly(boolean flag)
@@ -49,6 +64,7 @@ public class WbFontPicker
 
     fontName = new javax.swing.JLabel();
     selectFontButton = new FlatButton();
+    resetButton = new FlatButton();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -76,20 +92,71 @@ public class WbFontPicker
         selectFontButtonMouseClicked(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     add(selectFontButton, gridBagConstraints);
 
+    resetButton.setIcon(ResourceMgr.getImage("delete"));
+    resetButton.setToolTipText(ResourceMgr.getDescription("LblResetFont"));
+    resetButton.setMaximumSize(new java.awt.Dimension(22, 22));
+    resetButton.setMinimumSize(new java.awt.Dimension(22, 22));
+    resetButton.setPreferredSize(new java.awt.Dimension(22, 22));
+    resetButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        resetButtonActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 3);
+    add(resetButton, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
+
+private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetButtonActionPerformed
+	this.setSelectedFont(null);
+}//GEN-LAST:event_resetButtonActionPerformed
 
 	private void selectFontButtonMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_selectFontButtonMouseClicked
 	{//GEN-HEADEREND:event_selectFontButtonMouseClicked
-		Font f = WbFontChooser.chooseFont(this, this.selectedFont, monospacedOnly);
-		if (f != null)
+		WbFontChooser chooser = new WbFontChooser(monospacedOnly, allowFontReset);
+		chooser.setSelectedFont(getSelectedFont());
+		Dimension d = new Dimension(320, 240);
+		chooser.setSize(d);
+		chooser.setPreferredSize(d);
+		
+		JOptionPane option = new JOptionPane(chooser, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+		JDialog dialog = option.createDialog(this, ResourceMgr.getString("TxtWindowTitleChooseFont"));
+		dialog.pack();
+		WbSwingUtilities.center(dialog, SwingUtilities.getWindowAncestor(this));
+		dialog.setVisible(true);
+		
+		if (chooser.isFontReset())
 		{
-			this.setSelectedFont(f);
+			this.setSelectedFont(null);
+			return;
 		}
+		
+		Object value= option.getValue();
+		if (value == null) return;
+		Font result = null;
+		if (value instanceof Integer)
+		{
+			int answer = ((Integer)value).intValue();
+			if (answer == JOptionPane.OK_OPTION)
+			{
+				result = chooser.getSelectedFont();
+			}
+		}
+		if (result != null)
+		{
+			this.setSelectedFont(result);
+		}
+		
 	}//GEN-LAST:event_selectFontButtonMouseClicked
 	
 	public Font getSelectedFont()
@@ -99,20 +166,21 @@ public class WbFontPicker
 	
 	public void setSelectedFont(Font f)
 	{
+		this.selectedFont = f;
+		this.fontName.setFont(f);
 		if (f == null) 
 		{
-			this.fontName.setText("");
+			this.fontName.setText(ResourceMgr.getString("LblDefaultFontIndicator"));
 		}
 		else
 		{
-			this.selectedFont = f;
 			this.fontName.setText(f.getFontName() + ", " + f.getSize());
-			this.fontName.setFont(f);
 		}
 	}
 	
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JLabel fontName;
+  private javax.swing.JButton resetButton;
   private javax.swing.JButton selectFontButton;
   // End of variables declaration//GEN-END:variables
 	

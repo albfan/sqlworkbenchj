@@ -17,6 +17,10 @@ import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -72,6 +76,7 @@ public class ValueConverter
 	private SimpleDateFormat dateFormatter;
 	private SimpleDateFormat timestampFormatter;
 	private SimpleDateFormat formatter = new SimpleDateFormat();
+	private boolean autoConvertBooleanNumbers = true;
 	
 	public ValueConverter()
 	{
@@ -123,12 +128,20 @@ public class ValueConverter
 	{
 		this.decimalCharacter = aChar;
 	}
-
-	private static final Integer INT_TRUE = new Integer(1);
-	private static final Integer INT_FALSE = new Integer(0);
 	
-	private static final Integer LONG_TRUE = new Integer(1);
-	private static final Integer LONG_FALSE = new Integer(0);
+	public void setAutoConvertBooleanNumbers(boolean flag)
+	{
+		this.autoConvertBooleanNumbers = flag;
+	}
+
+	private final Integer INT_TRUE = Integer.valueOf(1);
+	private final Integer INT_FALSE = Integer.valueOf(0);
+	
+	private final Long LONG_TRUE = Long.valueOf(1);
+	private final Long LONG_FALSE = Long.valueOf(0);
+
+	private final BigDecimal BIG_TRUE = BigDecimal.valueOf(1);
+	private final BigDecimal BIG_FALSE = BigDecimal.valueOf(0);
 	
 	/**
 	 * Convert the given input value to a class instance
@@ -157,9 +170,12 @@ public class ValueConverter
 					// When exporting from a database that supports the boolean datatype
 					// into a database that maps this to an integer, we assume that
 					// true/false should be 1/0
-					if ("false".equalsIgnoreCase(v)) return LONG_FALSE;
-					else if ("true".equalsIgnoreCase(v)) return LONG_TRUE;
-					else throw new ConverterException(aValue, type, e);
+					if (autoConvertBooleanNumbers)
+					{
+						if ("false".equalsIgnoreCase(v)) return LONG_FALSE;
+						else if ("true".equalsIgnoreCase(v)) return LONG_TRUE;
+					}
+					throw new ConverterException(aValue, type, e);
 				}
 				
 			case Types.INTEGER:
@@ -175,9 +191,12 @@ public class ValueConverter
 					// When exporting from a database that supports the boolean datatype
 					// into a database that maps this to an integer, we assume that
 					// true/false should be 1/0
-					if ("false".equalsIgnoreCase(v)) return INT_FALSE;
-					else if ("true".equalsIgnoreCase(v)) return INT_TRUE;
-					else throw new ConverterException(aValue, type, e);
+					if (autoConvertBooleanNumbers)
+					{
+						if ("false".equalsIgnoreCase(v)) return INT_FALSE;
+						else if ("true".equalsIgnoreCase(v)) return INT_TRUE;
+					}
+					throw new ConverterException(aValue, type, e);
 				}
 				
 			case Types.NUMERIC:
@@ -192,6 +211,14 @@ public class ValueConverter
 				}
 				catch (NumberFormatException e)
 				{
+					// When exporting from a database that supports the boolean datatype
+					// into a database that maps this to an integer, we assume that
+					// true/false should be 1/0
+					if (autoConvertBooleanNumbers)
+					{
+						if ("false".equalsIgnoreCase(v)) return BIG_FALSE;
+						else if ("true".equalsIgnoreCase(v)) return BIG_TRUE;
+					}
 					throw new ConverterException(aValue, type, e);
 				}
 				
@@ -476,18 +503,46 @@ public class ValueConverter
 		return null;
   }
 
-	private boolean isToday(String arg)
+	private boolean isCurrentTime(String arg)
 	{
-		return ("current_date".equalsIgnoreCase(arg) 
-				|| "current_timestamp".equalsIgnoreCase(arg) 
-				|| "current_time".equalsIgnoreCase(arg) 
-				|| "today".equalsIgnoreCase(arg) 
-				|| "sysdate".equalsIgnoreCase(arg) 
-				|| "systimestamp".equalsIgnoreCase(arg) 
-				|| "now".equalsIgnoreCase(arg));
-		
+		return isKeyword("current_time", arg);
 	}
 	
+	private boolean isCurrentDate(String arg)
+	{
+		return isKeyword("current_date", arg);
+	}
+	
+	private boolean isCurrentTimestamp(String arg)
+	{
+		return isKeyword("current_timestamp", arg);
+	}
+
+	private boolean isKeyword(String type, String arg)
+	{
+		if (StringUtil.isEmptyString(arg)) return false;
+		
+		List<String> keywords = Settings.getInstance().getListProperty("workbench.db.keyword." + type, true);
+		return keywords.contains(arg.toLowerCase());
+	}
+	
+	private boolean isToday(String arg)
+	{
+		if (StringUtil.isEmptyString(arg)) return false;
+		
+		Collection<String> keywords = getCurrentKeywords();
+		return keywords.contains(arg.toLowerCase());
+	}
+	
+	private Collection<String> getCurrentKeywords()
+	{
+		Set<String> allKeywords = new HashSet<String>(7);
+		allKeywords.addAll(Settings.getInstance().getListProperty("workbench.db.keyword.current_time", true));
+		allKeywords.addAll(Settings.getInstance().getListProperty("workbench.db.keyword.current_date", true));
+		allKeywords.addAll(Settings.getInstance().getListProperty("workbench.db.keyword.current_timestamp", true));
+		return allKeywords;
+	}
+		
 	private String adjustDecimalString(String input)
 	{
 		if (input == null)  return input;

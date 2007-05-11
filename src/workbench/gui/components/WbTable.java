@@ -302,7 +302,7 @@ public class WbTable
 				stopEditing();
 			}
 		};
-		
+
 		this.getInputMap().put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
 		this.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
 		this.getActionMap().put("wbtable-stop-editing", a);
@@ -653,9 +653,19 @@ public class WbTable
 		return comp;
 	}
 
-	public boolean editCellAt(int row, int column, EventObject e)
+	public void changeSelection(int rowIndex, int columnIndex, boolean toggle, boolean extend) 
+	{
+		// Prevent selection/focus on the status column
+		if (columnIndex == 0 && this.dwModel != null && this.dwModel.getShowStatusColumn()) return;
+		super.changeSelection(rowIndex, columnIndex, toggle, extend);
+	}	
+	
+	public boolean editCellAt(final int row, int column, EventObject e)
 	{
 		boolean result = super.editCellAt(row, column, e);
+		
+		this.clearSelection();
+		
 		if (result && this.highlightRequiredFields)
 		{
 			initRendererHighlight(row);
@@ -663,7 +673,7 @@ public class WbTable
 		return result;
 	}
 
-	private void initRendererHighlight(int row)
+	protected void initRendererHighlight(int row)
 	{
 		ResultInfo info = this.getDataStore().getResultInfo();
 		int offset = 0;
@@ -675,7 +685,7 @@ public class WbTable
 			boolean nullable = info.isNullable(i);
 			highlightCols[i+offset] = !nullable;
 		}
-
+		
 		for (int i=0; i < tableCols; i++)
 		{
 			TableCellRenderer rend = getCellRenderer(row, i);
@@ -687,7 +697,6 @@ public class WbTable
 				highlighter.setHighlightColumns(highlightCols);
 			}
 		}
-		this.repaint();
 	}
 
 	public boolean isUpdateable()
@@ -702,7 +711,13 @@ public class WbTable
 		final int row = this.getEditingRow();
 		final int col = this.getEditingColumn();
 		super.removeEditor();
+		
 		resetHighlightRenderers(row, col);
+		
+		requestFocusInWindow();
+		// Make sure the editing column/row is selected
+		changeSelection(row, -1, false, false);
+		changeSelection(row, col, false, false);
 	}
 
 	private void resetHighlightRenderers(final int row, final int col)
@@ -720,8 +735,6 @@ public class WbTable
 				highlighter.setHighlightColumns(null);
 			}
 		}
-		requestFocusInWindow();
-		changeSelection(row, col, false, false);
 	}
 
 	/**
@@ -918,18 +931,18 @@ public class WbTable
 		});
 	}
 	
-	protected void _setShowStatusColumn(boolean aFlag)
+	protected void _setShowStatusColumn(boolean flag)
 	{
 		if (this.dwModel == null) return;
-		if (aFlag == this.dwModel.getShowStatusColumn()) return;
+		if (flag == this.dwModel.getShowStatusColumn()) return;
 
 		int column = this.getSelectedColumn();
 		final int row = this.getSelectedRow();
 
 		this.saveColumnSizes();
-		this.dwModel.setShowStatusColumn(aFlag);
+		this.dwModel.setShowStatusColumn(flag);
 
-		if (aFlag)
+		if (flag)
 		{
 			TableColumn col = this.getColumnModel().getColumn(0);
 			col.setCellRenderer(new RowStatusRenderer());
@@ -953,9 +966,9 @@ public class WbTable
 
 		if (row >= 0)
 		{
-			this.getSelectionModel().setSelectionInterval(row, row);
+			//this.getSelectionModel().setSelectionInterval(row, row);
 			final int newColumn;
-			if (aFlag)
+			if (flag)
 				newColumn = column + 1;
 			else
 				newColumn = column - 1;
@@ -966,7 +979,8 @@ public class WbTable
 				{
 					public void run()
 					{
-						changeSelection(row, newColumn, true, true);
+						changeSelection(row, -1, false, false);
+						changeSelection(row, newColumn, false, true);
 					}
 				});
 			}
@@ -1430,6 +1444,7 @@ public class WbTable
 				editor.cancelCellEditing();
 			}
 		}
+		WbSwingUtilities.repaintLater(this);
 	}
 
 	public boolean stopEditing()
@@ -1440,7 +1455,7 @@ public class WbTable
 		{
 			return editor.stopCellEditing();
 		}
-		
+		WbSwingUtilities.repaintLater(this);
 		return false;
 	}
 

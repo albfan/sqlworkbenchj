@@ -103,7 +103,7 @@ public class MacOSHelper
 			else if ("handlePreferences".equals(method))
 			{
 				setHandled(args[0], true);
-				OptionsDialogAction.getInstance().showOptionsDialog();
+				OptionsDialogAction.showOptionsDialog();
 			}
 		}
 		catch (Exception e)

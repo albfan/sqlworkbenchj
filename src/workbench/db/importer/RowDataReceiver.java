@@ -21,6 +21,9 @@ import workbench.db.TableIdentifier;
  */
 public interface RowDataReceiver
 {
+	boolean shouldProcessNextRow(); 
+	void nextRowSkipped();
+	
 	void processRow(Object[] row) throws SQLException;
 	void setTableCount(int total);
 	void setCurrentTable(int current);

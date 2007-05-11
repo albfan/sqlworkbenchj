@@ -196,6 +196,11 @@ public class XmlDataFileParser
 	{
 		this.dbConn = conn;
 	}
+
+	public void setAutoConvertBooleanNumbers(boolean flag)
+	{
+		this.converter.setAutoConvertBooleanNumbers(flag);
+	}
 	
 	/**
 	 * Check if all columns defined for the import (through the table definition
@@ -234,15 +239,16 @@ public class XmlDataFileParser
 			}
 			else
 			{
+				String errorColumn = (this.columns[colIndex] != null ? this.columns[colIndex].getColumnName() : "n/a");
 				String msg = ResourceMgr.getString("ErrImportColumnNotFound");
-				msg = StringUtil.replace(msg, "%column%", this.columns[colIndex].getColumnName());
+				msg = StringUtil.replace(msg, "%column%", errorColumn);
 				msg = StringUtil.replace(msg, "%table%", tbl.getTableExpression());
 				this.messages.append(msg);
 				this.messages.appendNewLine();
 				if (this.abortOnError)
 				{
 					this.hasErrors = true;
-					throw new SQLException("Column " + this.columns[colIndex].getColumnName() + " not found in target table");
+					throw new SQLException("Column " + errorColumn + " not found in target table");
 				}
 				else
 				{
@@ -463,6 +469,7 @@ public class XmlDataFileParser
 			else
 			{
 				this.receiver.importCancelled();
+				this.hasErrors = true;
 			}
 		}
 		catch (Exception e)
@@ -644,16 +651,23 @@ public class XmlDataFileParser
 		if (!this.keepRunning) throw new ParsingInterruptedException();
 		if (qName.equals(this.rowTag))
 		{
-			if (!this.ignoreCurrentRow)
+			if (!this.receiver.shouldProcessNextRow())
 			{
-				try
+				this.receiver.nextRowSkipped();
+			}
+			else 
+			{
+				if (!this.ignoreCurrentRow)
 				{
-					this.sendRowData();
-				}
-				catch (Exception e)
-				{
-					// don't need to log the error as sendRowData() has already done that.
-					if (this.abortOnError) throw new ParsingInterruptedException();
+					try
+					{
+						this.sendRowData();
+					}
+					catch (Exception e)
+					{
+						// don't need to log the error as sendRowData() has already done that.
+						if (this.abortOnError) throw new ParsingInterruptedException();
+					}
 				}
 			}
 			this.ignoreCurrentRow = false;
@@ -732,6 +746,7 @@ public class XmlDataFileParser
 		if (this.columnsToImport != null && !this.columnsToImport.contains(this.columns[this.currentColIndex])) return;
 		this.currentRow[this.realColIndex] = null;
 
+		if (!this.receiver.shouldProcessNextRow()) return;
 		
 		// the isNull flag will be set by the startElement method
 		// as that is an attribute of the tag
@@ -787,17 +802,25 @@ public class XmlDataFileParser
 		catch (Exception e)
 		{
 			String msg = ResourceMgr.getString("ErrConvertError");
-			msg = StringUtil.replace(msg, "%type%", SqlUtil.getTypeName(type));
+			msg = StringUtil.replace(msg, "%type%", SqlUtil.getTypeName(this.columns[realColIndex].getDataType()));
 			msg = StringUtil.replace(msg, "%column%", this.columns[realColIndex].getColumnName());
+			msg = StringUtil.replace(msg, "%error%", e.getMessage());
+			msg = StringUtil.replace(msg, "%value%", value);
+			msg = StringUtil.replace(msg, "%row%", Integer.toString(this.currentRowNumber));
+			
+			this.messages.append(msg);
+			this.messages.appendNewLine();
+			
 			if (this.abortOnError)
 			{
-				LogMgr.logError("XmlDataFileParser.buildColumnData()", msg, null);
+				LogMgr.logError("XmlDataFileParser.buildColumnData()", msg, e);
+				this.hasErrors = true;
 				throw new ParsingInterruptedException();				
 			}
 			else
 			{
-				this.messages.append(msg);
-				this.messages.appendNewLine();
+				this.messages.append(ResourceMgr.getString("ErrConvertWarning"));
+				this.hasWarnings = true;
 				LogMgr.logWarning("XmlDataFileParser.buildColumnData()", msg, null);
 			}
 		}

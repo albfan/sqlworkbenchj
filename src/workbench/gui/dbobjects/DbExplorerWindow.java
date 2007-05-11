@@ -110,12 +110,6 @@ public class DbExplorerWindow
 		jobIndicator.jobStarted();
 	}
 	
-	public void activateWindow()
-	{
-		this.setVisible(true);
-		this.toFront();
-	}
-	
 	public void closeWindow()
 	{
     this.saveSettings();

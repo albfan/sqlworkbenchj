@@ -37,6 +37,50 @@ public class ValueConverterTest
 		super.tearDown();
 	}
 	
+	public void testBooleanConvert()
+		throws Exception
+	{
+		String value = "true";
+		ValueConverter converter = new ValueConverter();
+		converter.setAutoConvertBooleanNumbers(true);
+		try
+		{
+			Object i = converter.convertValue("true", Types.INTEGER);
+			assertEquals("Wrong value returned", new Integer(1), i);
+			i = converter.convertValue("false", Types.INTEGER);
+			assertEquals("Wrong value returned", new Integer(0), i);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		
+		boolean exception = false;
+		try
+		{
+			Object i = converter.convertValue("gaga", Types.INTEGER);
+		}
+		catch (Exception e)
+		{
+			exception = true;
+		}
+		assertEquals("Not exception thrown", true, exception);
+
+		converter.setAutoConvertBooleanNumbers(false);
+		exception = false;
+		try
+		{
+			Object i = converter.convertValue("true", Types.INTEGER);
+		}
+		catch (Exception e)
+		{
+			exception = true;
+		}
+		assertEquals("Not exception thrown", true, exception);
+		
+	}
+	
 	public void testConvertValue() throws Exception
 	{
 		String aDate = "2007-04-01";

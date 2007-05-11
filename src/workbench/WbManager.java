@@ -45,7 +45,6 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.lnf.LnFDefinition;
@@ -374,7 +373,9 @@ public class WbManager
 	
 	private void initUI()
 	{
-//		trace("WbManager.initUI() - start");
+		// Disable bold fonts for the Default Metal Look & Feel
+		System.setProperty("swing.boldMetal", "false");
+		
 		this.initializeLookAndFeel();
 		
 		Settings settings = Settings.getInstance();
@@ -410,33 +411,35 @@ public class WbManager
 			def.put("ToolTip.font", stdFont);
 			def.put("Tree.font", stdFont);
 			def.put("ViewPort.font", stdFont);
-			
-			def.put("OptionPane.yesButtonText",ResourceMgr.getPlainString("LblYes"));
-			def.put("OptionPane.yesButtonMnemonic",ResourceMgr.getAcceleratorChar("LblYes"));
-			def.put("OptionPane.noButtonText",ResourceMgr.getPlainString("LblNo"));
-			def.put("OptionPane.noButtonMnemonic",ResourceMgr.getAcceleratorChar("LblNo"));
-			def.put("OptionPane.cancelButtonText",ResourceMgr.getPlainString("LblCancel"));
-			def.put("OptionPane.cancelButtonMnemonic",ResourceMgr.getAcceleratorChar("LblCancel"));
-			def.put("OptionPane.okButtonText",ResourceMgr.getPlainString("LblOK"));
-			def.put("OptionPane.okButtonMnemonic",ResourceMgr.getAcceleratorChar("LblOK"));
-			
-			FileDialogUtil.initFileChooserLabels();
-			
 		}
-		Font dataFont = settings.getDataFont();
 		
-		def.put("Table.font", dataFont);
-		def.put("TableHeader.font", dataFont);
+		def.put("OptionPane.yesButtonText",ResourceMgr.getPlainString("LblYes"));
+		def.put("OptionPane.yesButtonMnemonic",ResourceMgr.getAcceleratorChar("LblYes"));
+		def.put("OptionPane.noButtonText",ResourceMgr.getPlainString("LblNo"));
+		def.put("OptionPane.noButtonMnemonic",ResourceMgr.getAcceleratorChar("LblNo"));
+		def.put("OptionPane.cancelButtonText",ResourceMgr.getPlainString("LblCancel"));
+		def.put("OptionPane.cancelButtonMnemonic",ResourceMgr.getAcceleratorChar("LblCancel"));
+		def.put("OptionPane.okButtonText",ResourceMgr.getPlainString("LblOK"));
+		def.put("OptionPane.okButtonMnemonic",ResourceMgr.getAcceleratorChar("LblOK"));
+
+		FileDialogUtil.initFileChooserLabels();
+		
+		Font dataFont = settings.getDataFont(false);
+		if (dataFont != null)
+		{
+			def.put("Table.font", dataFont);
+			def.put("TableHeader.font", dataFont);
+		}
 		
 		// Polish up the standard look & feel settings
-
 		Color c = settings.getColor("workbench.table.gridcolor", new Color(215,215,215));
 		def.put("Table.gridColor", c);
 
 		// use our own classes for some GUI elements
 		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
 		def.put("SplitPaneUI", "workbench.gui.components.WbSplitPaneUI");
-		def.put("TabbedPaneUI", TabbedPaneUIFactory.getTabbedPaneUIClass());
+		String cls = TabbedPaneUIFactory.getTabbedPaneUIClass();
+		if (cls != null) def.put("TabbedPaneUI", cls);
 		
 		if (settings.getShowMnemonics())
 		{
@@ -621,7 +624,7 @@ public class WbManager
 		}
 		this.mainWindows.clear();
 		this.closeToolWindows();
-		ShowHelpAction.getInstance().closeHelp();
+		//ShowHelpAction.getInstance().closeHelp();
 	}
 
 	protected void saveSettings()

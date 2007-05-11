@@ -28,29 +28,47 @@ import workbench.util.StringUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class WbFontChooser 
+public class WbFontChooser
 	extends javax.swing.JPanel
 {
 	private boolean updateing;
+	private boolean fontReset = false;
 	
 	public WbFontChooser(boolean monospacedOnly)
 	{
+		this(monospacedOnly, false);
+	}
+	public WbFontChooser(boolean monospacedOnly, boolean allowReset)
+	{
 		initComponents();
+		resetButton.setVisible(allowReset);
+		resetButton.setEnabled(allowReset);
 		fillFontList(monospacedOnly);
 	}
 	
 	public void setSelectedFont(Font aFont)
 	{
-		String name = aFont.getFamily();
-		String size = Integer.toString(aFont.getSize());
-		int style = aFont.getStyle();
 		this.updateing = true;
 		try
 		{
-			this.fontNameList.setSelectedValue(name, true);
-			this.fontSizeComboBox.setSelectedItem(size);
-			this.boldCheckBox.setSelected((style & Font.BOLD) == Font.BOLD);
-			this.italicCheckBox.setSelected((style & Font.ITALIC) == Font.ITALIC);
+			if (aFont != null)
+			{
+				String name = aFont.getFamily();
+				String size = Integer.toString(aFont.getSize());
+				int style = aFont.getStyle();
+				
+				this.fontNameList.setSelectedValue(name, true);
+				this.fontSizeComboBox.setSelectedItem(size);
+				this.boldCheckBox.setSelected((style & Font.BOLD) == Font.BOLD);
+				this.italicCheckBox.setSelected((style & Font.ITALIC) == Font.ITALIC);
+				fontReset = false;
+			}
+			else
+			{
+				this.fontNameList.clearSelection();
+				this.boldCheckBox.setSelected(false);
+				this.italicCheckBox.setSelected(false);
+			}
 		}
 		catch (Exception e)
 		{
@@ -58,10 +76,16 @@ public class WbFontChooser
 		this.updateing = false;
 		this.updateFontDisplay();
 	}
+
+	public boolean isFontReset()
+	{
+		return this.fontReset;
+	}
 	
 	public Font getSelectedFont()
 	{
 		String fontName = (String)this.fontNameList.getSelectedValue();
+		if (fontName == null) return null;
 		int size = StringUtil.getIntValue((String)this.fontSizeComboBox.getSelectedItem());
 		int style = Font.PLAIN;
 		if (this.italicCheckBox.isSelected())
@@ -73,15 +97,10 @@ public class WbFontChooser
 		return f;
 	}
 	
-  public static Font chooseFont(JComponent owner, Font defaultFont)
+	public static Font chooseFont(JComponent owner, Font defaultFont, boolean monospacedOnly, boolean allowReset)
 	{
-		return chooseFont(owner, defaultFont, false);
-	}
-	
-  public static Font chooseFont(JComponent owner, Font defaultFont, boolean monospacedOnly)
-  {
-		WbFontChooser chooser = new WbFontChooser(monospacedOnly);
-		chooser.setSelectedFont(defaultFont);
+		WbFontChooser chooser = new WbFontChooser(monospacedOnly, allowReset);
+		if (defaultFont != null) chooser.setSelectedFont(defaultFont);
 		Dimension d = new Dimension(320, 240);
 		chooser.setSize(d);
 		chooser.setPreferredSize(d);
@@ -91,7 +110,7 @@ public class WbFontChooser
 		JDialog dialog = option.createDialog(owner, ResourceMgr.getString("TxtWindowTitleChooseFont"));
 		dialog.pack();//setSize(320,240);
 		WbSwingUtilities.center(dialog, SwingUtilities.getWindowAncestor(owner));
-		dialog.show();
+		dialog.setVisible(true);
 		Object value= option.getValue();
 		if (value == null) return null;
 		Font result = null;
@@ -104,7 +123,7 @@ public class WbFontChooser
 			}
 		}
 		return result;
-  }
+	}
 	
 	
 	private void fillFontList(boolean monospacedOnly)
@@ -126,9 +145,9 @@ public class WbFontChooser
 		}
 		this.fontNameList.setModel(model);
 	}
-
+	
 	private void updateFontDisplay()
-	{                                       
+	{
 		if (!this.updateing)
 		{
 			synchronized (this)
@@ -137,8 +156,15 @@ public class WbFontChooser
 				try
 				{
 					Font f = this.getSelectedFont();
-					this.sampleLabel.setFont(f);
-					this.sampleLabel.setText((String)this.fontNameList.getSelectedValue());
+					if (f != null)
+					{
+						this.sampleLabel.setFont(f);
+						this.sampleLabel.setText((String)this.fontNameList.getSelectedValue());
+					}
+					else
+					{
+						this.sampleLabel.setText("");
+					}
 				}
 				finally
 				{
@@ -146,7 +172,7 @@ public class WbFontChooser
 				}
 			}
 		}
-	}                                  
+	}
 	
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -164,11 +190,12 @@ public class WbFontChooser
     boldCheckBox = new javax.swing.JCheckBox();
     italicCheckBox = new javax.swing.JCheckBox();
     sampleLabel = new javax.swing.JLabel();
-
-    setLayout(new java.awt.GridBagLayout());
+    resetButton = new javax.swing.JButton();
 
     setMinimumSize(new java.awt.Dimension(320, 240));
     setPreferredSize(new java.awt.Dimension(320, 240));
+    setLayout(new java.awt.GridBagLayout());
+
     fontSizeComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24" }));
     fontSizeComboBox.setMaximumSize(new java.awt.Dimension(200, 22));
     fontSizeComboBox.setMinimumSize(new java.awt.Dimension(30, 22));
@@ -180,7 +207,6 @@ public class WbFontChooser
         fontSizeComboBoxupdateFontDisplay(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
@@ -204,13 +230,12 @@ public class WbFontChooser
         fontNameListValueChanged(evt);
       }
     });
-
     jScrollPane1.setViewportView(fontNameList);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridheight = 3;
+    gridBagConstraints.gridheight = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 0.5;
@@ -225,7 +250,6 @@ public class WbFontChooser
         boldCheckBoxupdateFontDisplay(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
@@ -241,7 +265,6 @@ public class WbFontChooser
         italicCheckBoxupdateFontDisplay(evt);
       }
     });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
@@ -249,47 +272,67 @@ public class WbFontChooser
     gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 0);
     add(italicCheckBox, gridBagConstraints);
 
-    sampleLabel.setText("jLabel1");
     sampleLabel.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createTitledBorder("Preview"), javax.swing.BorderFactory.createEmptyBorder(1, 1, 5, 1)));
     sampleLabel.setMaximumSize(new java.awt.Dimension(43, 100));
     sampleLabel.setMinimumSize(new java.awt.Dimension(48, 60));
     sampleLabel.setPreferredSize(new java.awt.Dimension(48, 60));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     add(sampleLabel, gridBagConstraints);
 
+    resetButton.setText(ResourceMgr.getString("LblResetFont"));
+    resetButton.setToolTipText(ResourceMgr.getDescription("LblResetFont"));
+    resetButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        resetButtonActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(10, 7, 0, 0);
+    add(resetButton, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
+	
+private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetButtonActionPerformed
+	setSelectedFont(null);
+	fontReset = true;
+}//GEN-LAST:event_resetButtonActionPerformed
 
 	private void fontNameListValueChanged(javax.swing.event.ListSelectionEvent evt)//GEN-FIRST:event_fontNameListValueChanged
 	{//GEN-HEADEREND:event_fontNameListValueChanged
 		updateFontDisplay();
 	}//GEN-LAST:event_fontNameListValueChanged
-
+	
 	private void italicCheckBoxupdateFontDisplay(java.awt.event.ItemEvent evt)//GEN-FIRST:event_italicCheckBoxupdateFontDisplay
 	{//GEN-HEADEREND:event_italicCheckBoxupdateFontDisplay
 		updateFontDisplay();
 	}//GEN-LAST:event_italicCheckBoxupdateFontDisplay
-
+	
 	private void boldCheckBoxupdateFontDisplay(java.awt.event.ItemEvent evt)//GEN-FIRST:event_boldCheckBoxupdateFontDisplay
 	{//GEN-HEADEREND:event_boldCheckBoxupdateFontDisplay
 		updateFontDisplay();
 	}//GEN-LAST:event_boldCheckBoxupdateFontDisplay
-
+	
 	private void fontSizeComboBoxupdateFontDisplay(java.awt.event.ItemEvent evt)//GEN-FIRST:event_fontSizeComboBoxupdateFontDisplay
 	{//GEN-HEADEREND:event_fontSizeComboBoxupdateFontDisplay
 		updateFontDisplay();
 	}//GEN-LAST:event_fontSizeComboBoxupdateFontDisplay
-
+	
   // Variables declaration - do not modify//GEN-BEGIN:variables
   public javax.swing.JCheckBox boldCheckBox;
   public javax.swing.JList fontNameList;
   public javax.swing.JComboBox fontSizeComboBox;
   public javax.swing.JCheckBox italicCheckBox;
   public javax.swing.JScrollPane jScrollPane1;
+  public javax.swing.JButton resetButton;
   public javax.swing.JLabel sampleLabel;
   // End of variables declaration//GEN-END:variables
-
+	
 }

@@ -73,8 +73,6 @@ public class EditorTabSelectMenu
 
 		int current = this.parentWindow.getCurrentPanelIndex();
 
-		Font boldFont = Settings.getInstance().getStandardMenuFont().deriveFont(Font.BOLD);
-		
 		JMenuItem item = null;
 		
 		item = new WbMenuItem(ResourceMgr.getString("LblShowDataInNewTab"));
@@ -83,13 +81,16 @@ public class EditorTabSelectMenu
 		item.addActionListener(target);
 		this.add(item);
 		
+		Font boldFont = item.getFont();
+		if (boldFont != null) boldFont = boldFont.deriveFont(Font.BOLD);
+
 		addSeparator();
 
 		for (int i=0; i < panels.length; i++)
 		{
 			item = new WbMenuItem(panels[i]);
 			item.setActionCommand("panel-" + i);
-			if (i == current)
+			if (i == current && boldFont != null)
 			{
 				item.setFont(boldFont);
 			}

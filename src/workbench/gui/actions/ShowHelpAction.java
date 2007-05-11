@@ -25,19 +25,15 @@ import workbench.resource.ResourceMgr;
 public class ShowHelpAction
 	extends WbAction
 {
-	private static final ShowHelpAction instance = new ShowHelpAction();
-	
-	private JFrame helpWindow;
-	private ShowHelpAction()
+	private static JFrame helpWindow;
+	public ShowHelpAction()
 	{
 		super();
 		initMenuDefinition("MnuTxtHelpContents",KeyStroke.getKeyStroke(KeyEvent.VK_F1,0));
 		setIcon(ResourceMgr.getImage("help"));
 	}
 	
-	public static ShowHelpAction getInstance() { return instance; } 
-	
-	public void executeAction(ActionEvent e)
+	public synchronized void executeAction(ActionEvent e)
 	{
 		if (helpWindow != null)
 		{
@@ -50,7 +46,7 @@ public class ShowHelpAction
 		}
 	}
 	
-	public void closeHelp()
+	public synchronized void closeHelp()
 	{
 		if (this.helpWindow != null)
 		{
@@ -60,11 +56,11 @@ public class ShowHelpAction
 		}
 	}
 	
-	public void showHelp()
+	public synchronized void showHelp()
 	{
 		try
 		{
-			// Use reflection to load various dialogs in order to
+			// Use reflection to load the dialog in order to
 			// avoid unnecessary class loading during startup
 			Class cls = Class.forName("workbench.gui.help.HelpViewerFrame");
 			Constructor cons = cls.getConstructor((Class[])null);

@@ -70,7 +70,7 @@ public class TabbedPaneUIFactory
 				return "workbench.gui.components.BorderLessMetalTabbedPaneUI";
 			}
 		}
-		return null;// UIManager.getDefaults().getString("TabbedPaneUI");
+		return null;
 	}
 	
 	public static TabbedPaneUI getBorderLessUI()

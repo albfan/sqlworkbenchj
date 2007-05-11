@@ -610,6 +610,18 @@ public class DataImporter
 			badWriter.recordRejected(record);
 		}
 	}
+
+	public boolean shouldProcessNextRow()
+	{
+		if (currentImportRow + 1 < startRow) return false;
+		if (currentImportRow + 1 > endRow) return false;
+		return true;
+	}
+
+	public void nextRowSkipped()
+	{
+		this.currentImportRow ++;
+	}
 	
 	/**
 	 *	Callback function for RowDataProducer. The order in the data array
@@ -1621,6 +1633,8 @@ public class DataImporter
 			this.isRunning = false;
 			if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 		}
+		this.hasErrors = this.hasErrors || this.source.hasErrors();
+		this.hasWarnings = this.hasWarnings || this.source.hasWarnings();
 	}
 
 	private void cleanupRollback()
@@ -1665,6 +1679,9 @@ public class DataImporter
 		LogMgr.logDebug("DataImporter.importCancelled()", "Ending import...");
 
 		cleanupRollback();
+		this.hasErrors = this.hasErrors || this.source.hasErrors();
+		this.hasWarnings = this.hasWarnings || this.source.hasWarnings();
+		
 	}
 
 	private void closeStatements()

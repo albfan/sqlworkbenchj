@@ -51,6 +51,7 @@ import workbench.db.WbConnection;
 import workbench.gui.actions.AboutAction;
 import workbench.gui.actions.ConfigureShortcutsAction;
 import workbench.gui.actions.ShowManualAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.RunningJobIndicator;
 import workbench.util.ExceptionUtil;
 import workbench.gui.actions.AddMacroAction;
@@ -1830,13 +1831,13 @@ public class MainWindow
 	{
 		JMenu result = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_HELP));
 		result.setName(ResourceMgr.MNU_TXT_HELP);
-		result.add(ShowHelpAction.getInstance());
-		result.add(ShowManualAction.getInstance());
+		new ShowHelpAction().addToMenu(result);
+		new ShowManualAction().addToMenu(result);
 		result.addSeparator();
 
 		result.add(WhatsNewAction.getInstance());
-		result.add(VersionCheckAction.getInstance());
-		result.add(AboutAction.getInstance());
+		new VersionCheckAction().addToMenu(result);
+		new AboutAction().addToMenu(result);;
 		
 		return result;
 	}
@@ -1861,8 +1862,8 @@ public class MainWindow
 
 		result.addSeparator();
 
-		result.add(OptionsDialogAction.getInstance());
-		result.add(ConfigureShortcutsAction.getInstance());
+		new OptionsDialogAction().addToMenu(result);
+		new ConfigureShortcutsAction().addToMenu(result);
 
 		return result;
 	}

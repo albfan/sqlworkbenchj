@@ -75,6 +75,7 @@ public class WbImport
 	public static final String ARG_END_ROW = "endRow";
 	public static final String ARG_BADFILE = "badFile";
 	public static final String ARG_SIZELIMIT = "maxLength";
+	public static final String ARG_AUTO_BOOLEAN = "booleanToNumber";
 	
 	public WbImport()
 	{
@@ -121,6 +122,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_END_ROW, ArgumentType.IntegerArgument);
 		cmdLine.addArgument(ARG_BADFILE);
 		cmdLine.addArgument(ARG_SIZELIMIT);
+		cmdLine.addArgument(ARG_AUTO_BOOLEAN, ArgumentType.BoolArgument);
 	}
 	
 	public String getVerb() { return VERB; }
@@ -246,6 +248,7 @@ public class WbImport
 			}
 		}
 
+		boolean autoConvertBoolean = cmdLine.getBoolean(ARG_AUTO_BOOLEAN, true);
 		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
 		
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
@@ -261,6 +264,7 @@ public class WbImport
 
 			TextFileParser textParser = new TextFileParser();
 			textParser.setTableName(table);
+			textParser.setAutoConvertBooleanNumbers(autoConvertBoolean);
 			if (inputFile != null)
 			{
 				textParser.setInputFile(inputFile);
@@ -407,6 +411,7 @@ public class WbImport
 			XmlDataFileParser xmlParser = new XmlDataFileParser();
 			xmlParser.setConnection(aConnection);
 			xmlParser.setAbortOnError(!continueOnError);
+			xmlParser.setAutoConvertBooleanNumbers(autoConvertBoolean);
 			
 			// The encoding must be set as early as possible
 			// as the XmlDataFileParser might need it to read

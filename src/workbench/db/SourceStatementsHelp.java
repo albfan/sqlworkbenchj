@@ -29,9 +29,9 @@ public class SourceStatementsHelp
 	{
 		String explain = VIEW_ERROR_START + " " + product +
 			"\n\nTo enable this, create a file called ViewSourceStatements.xml\n" +
-			"in the same directory where Workbench.jar is located,\nand supply the necessary SELECT statement (where indicated) to retrieve the source from the DBMS:\n\n" +
-			"------- Example -----\n" +
-			"---------------------\n\n" +
+			"in the same directory where Workbench.jar is located by using the supplied sample below\n" + 
+			"filling out the necessary SELECT statement where indicated to retrieve the source from the DBMS:\n\n" +
+			"--- Example ViewSourceStatements.xml starts here ---\n" +
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>  \n" + 
 			"<java version=\"1.4.0_01\" class=\"java.beans.XMLDecoder\">  \n" + 
 			" \n" + 
@@ -63,9 +63,9 @@ public class SourceStatementsHelp
 	{
 		String explain = PROC_ERROR_START + " " + product +
 			"\n\nTo enable this, create a file called ProcSourceStatements.xml\n" +
-			"in the same directory where Workbench.jar is located,\nand supply the necessary SELECT statement (where indicated) to retrieve the source from the DBMS:\n\n" +
-			"------- Example -----\n" +
-			"---------------------\n\n" +
+			"in the same directory where Workbench.jar is located by using the supplied sample below\n" + 
+			"filling out the necessary SELECT statement where indicated to retrieve the source from the DBMS:\n\n" +
+			"--- Example ProcSourceStatements.xml starts here ---\n" +
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>  \n" + 
 			"<java version=\"1.4.0_01\" class=\"java.beans.XMLDecoder\">  \n" + 
 			" <object class=\"java.util.HashMap\">  \n" + 

@@ -69,6 +69,9 @@ public class DataStoreImporter
 		}
 	}
 	
+	public boolean shouldProcessNextRow() { return true; }
+	public void nextRowSkipped() {}
+	
 	public void importString(String contents)
 	{
 		importString(contents, "\t", "\"");

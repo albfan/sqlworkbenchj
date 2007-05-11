@@ -33,6 +33,7 @@ public class GeneralOptionsPanel
 	{
 		initComponents();
 		pdfReaderPath.setAllowMultiple(false);
+		standardFont.setAllowFontReset(true);
 		restoreSettings();
 	}
 
@@ -66,7 +67,6 @@ public class GeneralOptionsPanel
 		{
 			checkInterval.setSelectedIndex(0);
 		}
-		
 	}
 
 	public void saveSettings()
@@ -178,7 +178,6 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 11);
     add(useEncryption, gridBagConstraints);
 
-    dateFormatLabel.setFont(null);
     dateFormatLabel.setText(ResourceMgr.getString("LblDateFormat"));
     dateFormatLabel.setToolTipText(ResourceMgr.getDescription("LblDateFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -381,7 +380,6 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(4, 3, 0, 0);
     add(bufferSizeLabel, gridBagConstraints);
 
-    timestampFormatLabel.setFont(null);
     timestampFormatLabel.setText(ResourceMgr.getString("LblTimestampFormat"));
     timestampFormatLabel.setToolTipText(ResourceMgr.getDescription("LblTimestampFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -436,7 +434,6 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(4, 10, 0, 15);
     add(standardFont, gridBagConstraints);
 
-    timeFormatLabel.setFont(null);
     timeFormatLabel.setText(ResourceMgr.getString("LblTimeFormat"));
     timeFormatLabel.setToolTipText(ResourceMgr.getDescription("LblTimeFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();

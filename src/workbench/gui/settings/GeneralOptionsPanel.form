@@ -60,9 +60,6 @@
     </Component>
     <Component class="javax.swing.JLabel" name="dateFormatLabel">
       <Properties>
-        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="null" type="code"/>
-        </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getString(&quot;LblDateFormat&quot;)" type="code"/>
         </Property>
@@ -385,9 +382,6 @@
     </Component>
     <Component class="javax.swing.JLabel" name="timestampFormatLabel">
       <Properties>
-        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="null" type="code"/>
-        </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getString(&quot;LblTimestampFormat&quot;)" type="code"/>
         </Property>
@@ -456,9 +450,6 @@
     </Component>
     <Component class="javax.swing.JLabel" name="timeFormatLabel">
       <Properties>
-        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="null" type="code"/>
-        </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getString(&quot;LblTimeFormat&quot;)" type="code"/>
         </Property>

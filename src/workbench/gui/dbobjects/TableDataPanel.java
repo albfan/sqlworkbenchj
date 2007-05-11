@@ -148,8 +148,9 @@ public class TableDataPanel
 		mytoolbar.addSeparator();
 
 		topPanel.add(Box.createHorizontalStrut(15));
-		topPanel.add(new JLabel(ResourceMgr.getString("LblTable") + ":"));
-		Font std = Settings.getInstance().getStandardLabelFont();
+		JLabel l = new JLabel(ResourceMgr.getString("LblTable") + ":");
+		topPanel.add(l);
+		Font std = l.getFont();
 		Font bold = std.deriveFont(Font.BOLD);
 		tableNameLabel = new JLabel();
 		tableNameLabel.setFont(bold);

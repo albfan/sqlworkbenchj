@@ -353,42 +353,16 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
+
 	public void testMissingXmlColumn()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
              "<wb-export> \n" + 
              "  <meta-data> \n" + 
-             " \n" + 
-             "    <generating-sql> \n" + 
-             "    <![CDATA[ \n" + 
-             "    select id, lastname, firstname from person \n" + 
-             "    ]]> \n" + 
-             "    </generating-sql> \n" + 
-             " \n" + 
-             "    <created>2006-07-29 23:31:40.366 CEST</created> \n" + 
-             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" + 
-             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" + 
-             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" + 
-             "    <database-product-name>HSQL Database Engine</database-product-name> \n" + 
-             "    <database-product-version>1.8.0</database-product-version> \n" + 
              "    <wb-tag-format>short</wb-tag-format> \n" + 
              "  </meta-data> \n" + 
              " \n" + 
              "  <table-def> \n" + 
-             "    <!-- The following information was retrieved from the JDBC driver's ResultSetMetaData --> \n" + 
-             "    <!-- column-name is retrieved from ResultSetMetaData.getColumnName() --> \n" + 
-             "    <!-- java-class is retrieved from ResultSetMetaData.getColumnClassName() --> \n" + 
-             "    <!-- java-sql-type-name is the constant's name from java.sql.Types --> \n" + 
-             "    <!-- java-sql-type is the constant's numeric value from java.sql.Types as returned from ResultSetMetaData.getColumnType() --> \n" + 
-             "    <!-- dbms-data-type is retrieved from ResultSetMetaData.getColumnTypeName() --> \n" + 
-             " \n" + 
-             "    <!-- For date and timestamp types, the internal long value obtained from java.util.Date.getTime() \n" + 
-             "         is written as an attribute to the <column-data> tag. That value can be used \n" + 
-             "         to create a java.util.Date() object directly, without the need to parse the actual tag content. \n" + 
-             "         If Java is not used to parse this file, the date/time format used to write the data \n" + 
-             "         is provided in the <data-format> tag of the column definition \n" + 
-             "    --> \n" + 
-             " \n" + 
              "    <table-name>junit_test</table-name> \n" + 
              "    <column-count>4</column-count> \n" + 
              " \n" + 
@@ -437,11 +411,11 @@ public class WbImportTest
 			
 			String cmd = "wbimport -continueOnError=false -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
-			assertEquals("Import succeeded", result.isSuccess(), false);
+			assertEquals("Import succeeded", false, result.isSuccess());
 
 			cmd = "wbimport -encoding='UTF-8' -continueOnError=true -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 			result = importCmd.execute(this.connection, cmd);
-			assertEquals("Import failed", result.isSuccess(), true);
+			assertEquals("Import failed", true, result.isSuccess());
 			
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
@@ -453,6 +427,82 @@ public class WbImportTest
 			{
 				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
 			}					
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}	
+	
+	public void testAutoConvertBoolean()
+	{
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
+             "<wb-export> \n" + 
+             "  <meta-data> \n" + 
+             "    <wb-tag-format>short</wb-tag-format> \n" + 
+             "  </meta-data> \n" + 
+             " \n" + 
+             "  <table-def> \n" + 
+             "    <table-name>junit_test</table-name> \n" + 
+             "    <column-count>2</column-count> \n" + 
+             " \n" + 
+             "    <column-def index=\"0\"> \n" + 
+             "      <column-name>NR</column-name> \n" + 
+             "      <java-class>java.lang.Integer</java-class> \n" + 
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
+             "      <java-sql-type>4</java-sql-type> \n" + 
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"1\"> \n" + 
+             "      <column-name>INT_FLAG</column-name> \n" + 
+             "      <java-class>java.lang.Integer</java-class> \n" + 
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
+             "      <java-sql-type>4</java-sql-type> \n" + 
+             "      <dbms-data-type>int</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "  </table-def> \n" + 
+             " \n" + 
+             "<data> \n" + 
+             "<rd><cd>1</cd><cd>true</cd></rd> \n" + 
+             "<rd><cd>2</cd><cd>false</cd></rd> \n" + 
+             "<rd><cd>3</cd><cd>gaga</cd></rd> \n" + 
+             "</data> \n" + 
+             "</wb-export>";
+		try
+		{
+			File xmlFile = new File(this.basedir, "bool_convert_xml_import.xml");
+			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
+			out.write(xml);
+			out.close();
+			
+			// Test importing only correct true/false values
+			String cmd = "wbimport -continueOnError=false -startRow=1 -endRow=2 -booleanToNumber=true -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=bool_test";
+			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			String msg = result.getMessageBuffer().toString();
+			assertEquals(msg, true, result.isSuccess());
+			System.out.println("messages: " + msg);
+			Statement stmt = this.connection.createStatement();
+			ResultSet rs = stmt.executeQuery("select count(*) from bool_test");
+			int rows = 0;
+			if (rs.next()) rows = rs.getInt(1);
+			assertEquals("Wrong number of rows imported", 2, rows);
+			SqlUtil.closeAll(rs, stmt);
+
+			stmt = this.connection.createStatement();
+			stmt.executeUpdate("delete from bool_test");
+			this.connection.commit();
+			SqlUtil.closeStatement(stmt);
+			
+			cmd = "wbimport -continueOnError=false -booleanToNumber=true -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=bool_test";
+			result = importCmd.execute(this.connection, cmd);
+			msg = result.getMessageBuffer().toString();
+			assertEquals("Import did not fail", false, result.isSuccess());
+			
+			if (!xmlFile.delete())
+			{
+				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
+			}
 		}
 		catch (Exception e)
 		{
@@ -2168,6 +2218,7 @@ public class WbImportTest
 		stmt.executeUpdate("CREATE TABLE datatype_test (int_col integer, double_col double, char_col varchar(50), date_col date, time_col time, ts_col timestamp)");
 		stmt.executeUpdate("CREATE TABLE blob_test (nr integer, binary_data BINARY)");
 		stmt.executeUpdate("CREATE TABLE clob_test (nr integer, text_data LONGVARCHAR)");
+		stmt.executeUpdate("CREATE TABLE bool_test (nr integer, int_flag INTEGER)");
 		wb.commit();
 		stmt.close();
 		

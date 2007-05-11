@@ -1275,14 +1275,6 @@ public class DataPumper
 		}
 	}
 
-	public void activateWindow()
-	{
-		if (this.window != null)
-		{
-			this.window.setVisible(true);
-			this.window.toFront();
-		}
-	}
 	public void disconnect()
 	{
 		this.disconnectSource();

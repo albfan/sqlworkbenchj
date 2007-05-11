@@ -37,7 +37,6 @@ import workbench.sql.wbcommands.WbEnableOraOutput;
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbExport;
 import workbench.sql.wbcommands.WbFeedback;
-import workbench.sql.wbcommands.WbHelp;
 import workbench.sql.wbcommands.WbImport;
 import workbench.sql.wbcommands.WbInclude;
 import workbench.sql.wbcommands.WbListCatalogs;
@@ -73,9 +72,6 @@ public class CommandMapper
 		cmdDispatch.put("*", new SqlCommand());
 
 		SqlCommand sql = new WbListTables();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new WbHelp();
 		cmdDispatch.put(sql.getVerb(), sql);
 
 		sql = new WbListProcedures();
