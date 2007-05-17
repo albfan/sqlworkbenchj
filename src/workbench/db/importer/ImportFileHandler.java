@@ -19,10 +19,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Collection;
 import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import workbench.db.exporter.RowDataConverter;
@@ -42,26 +43,25 @@ public class ImportFileHandler
 	private boolean isZip;
 	private ZipFile mainArchive;
 	private ZipFile attachments;
-	private List<ZipEntry> attachmentEntries;
 	private BufferedReader mainReader;
-
+	
 	public ImportFileHandler()
 	{
 	}
-
+	
 	public void setMainFile(File mainFile, String enc)
 		throws IOException
 	{
 		this.done();
 		this.mainArchive = null;
-		this.attachmentEntries = null;
 		this.attachments = null;
 		this.encoding = enc;
-		
+	
 		this.baseFile = mainFile;
 		this.baseDir = baseFile.getParentFile();
 		if (this.baseDir == null) baseDir = new File(".");
 		isZip = ZipUtil.isZipFile(baseFile);
+		this.initAttachements();
 	}
 	
 	boolean isZip() { return isZip; }
@@ -105,7 +105,7 @@ public class ImportFileHandler
 	private void initAttachements()
 		throws IOException
 	{
-		if (baseFile instanceof ClipboardFile) throw new IOException("Attachments not supported for Clipboard");
+		if (baseFile instanceof ClipboardFile) return;
 		
 		WbFile f = new WbFile(baseFile);
 		String basename = f.getFileName();
@@ -114,32 +114,15 @@ public class ImportFileHandler
 		if (attFile.exists())
 		{
 			this.attachments = new ZipFile(attFile);
-			Enumeration entries = this.attachments.entries();
-			// For performance reasons we are storing the attachment names
-			// in our own set, as I'm not 100% sure if ZipFile will handle 
-			// lots of getEntry()'s efficiently
-			this.attachmentEntries = new LinkedList<ZipEntry>();
-			while (entries.hasMoreElements())
-			{
-				ZipEntry entry = (ZipEntry)entries.nextElement();
-				this.attachmentEntries.add(entry);
-			}
 		}
 	}
-	
-	private ZipEntry findEntry(File f)
+
+	protected ZipEntry findEntry(File f)
 		throws IOException
 	{
-		if (this.attachmentEntries == null) 
-			throw new FileNotFoundException("Attachment file " + f.getName() + " not found in archive " + this.attachments.getName());
-		Iterator itr = this.attachmentEntries.iterator();
-		while (itr.hasNext())
-		{
-			ZipEntry entry = (ZipEntry)itr.next();
-			if (f.getName().equals(entry.getName())) return entry;
-		}
+		ZipEntry entry = this.attachments.getEntry(f.getName());
+		if (entry != null) return entry;
 		
-		// Nothing found!
 		throw new FileNotFoundException("Attachment file " + f.getName() + " not found in archive " + this.attachments.getName());	
 	}
 	
@@ -150,7 +133,6 @@ public class ImportFileHandler
 		
 		if (this.isZip)
 		{
-			if (this.attachmentEntries == null) this.initAttachements();
 			ZipEntry entry = findEntry(f);
 			return attachments.getInputStream(entry);
 		}
@@ -174,7 +156,6 @@ public class ImportFileHandler
 	{
 		if (this.isZip)
 		{
-			if (this.attachmentEntries == null) this.initAttachements();
 			ZipEntry entry = findEntry(f);
 			return entry.getSize();
 		}
@@ -196,17 +177,9 @@ public class ImportFileHandler
 
 		try { if (mainReader != null) mainReader.close(); } catch (Throwable th) {}
 		try { if (mainArchive != null) mainArchive.close(); } catch (Throwable th) {}
-		
-		try 
-		{ 
-			if (attachments != null) attachments.close(); 
-			if (attachmentEntries != null) attachmentEntries.clear();
-		} 
-		catch (Throwable th) 
-		{
-		}
+		try { if (attachments != null) attachments.close(); } catch (Throwable th) {}
+		mainReader = null;
 		mainArchive = null;
-		attachmentEntries = null;
 		attachments = null;
 	}
 }

@@ -210,6 +210,11 @@ public class DataImporter
 		this.commitEvery = Committer.NO_COMMIT_FLAG; 
 	}
 	
+	public RowDataProducer getProducer()
+	{
+		return this.source;
+	}
+	
 	/**
 	 * Set the commit interval.
 	 * When this parameter is set, commitBatch is set to false.
@@ -541,7 +546,7 @@ public class DataImporter
 		creator.createTable();
 		String table = creator.getTable().getTableName();
 		String msg = StringUtil.replace(ResourceMgr.getString("MsgImporterTableCreated"), "%table%", table);
-		this.messages.append(msg + "\n");
+		this.messages.append(msg);
 	}
 
 	public void setUseTruncate(boolean flag)
@@ -697,7 +702,7 @@ public class DataImporter
 					}
 					catch (Exception e)
 					{
-						LogMgr.logDebug("DataImporter.processRow()", "Error inserting row, trying update");
+						//LogMgr.logDebug("DataImporter.processRow()", "Error inserting row, trying update");
 						inserted = false;
 						if (this.useSavepoint)
 						{
@@ -1030,7 +1035,7 @@ public class DataImporter
 					catch (IOException ex)
 					{
 						hasErrors = true;
-						String msg = "Could not read data file " + f.getAbsolutePath() + " not found";
+						String msg = "CLOB data file " + f.getAbsolutePath() + " not found";
 						messages.append(msg);
 						throw new SQLException(msg);
 					}
@@ -1081,7 +1086,7 @@ public class DataImporter
 					catch (IOException ex)
 					{
 						hasErrors = true;
-						String msg = "Could not read data file " + f.getAbsolutePath() + " not found";
+						String msg = "BLOB data file " + f.getAbsolutePath() + " not found";
 						messages.append(msg);
 						throw new SQLException(msg);
 					}
@@ -1212,6 +1217,11 @@ public class DataImporter
 				}
 				catch (SQLException e)
 				{
+					String msg = ResourceMgr.getString("ErrImportTableNotCreated");
+					msg = StringUtil.replace(msg, "%table%", this.targetTable.getTableExpression(this.dbConn));
+					msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));
+					this.messages.append(msg);
+					this.messages.appendNewLine();
 					LogMgr.logError("DataImporter.setTargetTable()", "Could not create target: " + this.targetTable, e);
 					this.hasErrors = true;
 					throw e;
@@ -1231,7 +1241,8 @@ public class DataImporter
 					msg = msg + " " + StringUtil.replace(s, "%filename%", this.parser.getSourceFilename());
 				}
 				this.hasErrors = true;
-				this.messages.append(msg + "\n");
+				this.messages.append(msg);
+				this.messages.appendNewLine();
 				this.targetTable = null;
 				throw e;
 			}
@@ -1251,9 +1262,20 @@ public class DataImporter
 				{
 					this.deleteTarget();
 				}
-				catch (Exception e)
+				catch (SQLException e)
 				{
+					this.hasErrors = true;
+					String msg = ResourceMgr.getString("ErrDeleteTableData");
+					msg = msg.replaceAll("%table%",table.toString());
+					msg = msg.replaceAll("%error%", ExceptionUtil.getDisplay(e));
+					this.messages.append(msg);
+					this.messages.appendNewLine();
+					
 					LogMgr.logError("DataImporter.setTargetTable()", "Could not delete contents of table " + this.targetTable, e);
+					if (!this.continueOnError)
+					{
+						throw e;
+					}
 				}
 			}
 				
@@ -1341,7 +1363,7 @@ public class DataImporter
 		{
 			this.insertSql = text.toString();
 			this.insertStatement = this.dbConn.getSqlConnection().prepareStatement(this.insertSql);
-			if (LogMgr.isDebugEnabled()) LogMgr.logDebug("DataImporter.prepareInsertStatement()", "Statement for insert: " + this.insertSql);
+			LogMgr.logDebug("DataImporter.prepareInsertStatement()", "Statement for insert: " + this.insertSql);
 		}
 		catch (SQLException e)
 		{
@@ -1455,7 +1477,7 @@ public class DataImporter
 		{
 			this.updateSql = sql.toString();
 			this.updateStatement = this.dbConn.getSqlConnection().prepareStatement(this.updateSql);
-			if (LogMgr.isDebugEnabled()) LogMgr.logDebug("DataImporter.prepareUpdateStatement()", "Statement for update: " + this.updateSql);
+			LogMgr.logDebug("DataImporter.prepareUpdateStatement()", "Statement for update: " + this.updateSql);
 		}
 		catch (SQLException e)
 		{
@@ -1529,11 +1551,9 @@ public class DataImporter
 			}
 			this.updateStatement.clearBatch();
 		}
-//		LogMgr.logDebug("DataImporter", "Batch sent to database");
 			
 		if (this.commitBatch && !this.dbConn.getAutoCommit())
 		{
-			LogMgr.logDebug("DataImporter", "Committing batch...");
 			this.dbConn.commit();
 		}
 	}
@@ -1676,8 +1696,6 @@ public class DataImporter
 			return;
 		}
 		
-		LogMgr.logDebug("DataImporter.importCancelled()", "Ending import...");
-
 		cleanupRollback();
 		this.hasErrors = this.hasErrors || this.source.hasErrors();
 		this.hasWarnings = this.hasWarnings || this.source.hasWarnings();

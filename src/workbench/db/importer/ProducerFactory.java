@@ -25,6 +25,7 @@ import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.WbExport;
 import workbench.sql.wbcommands.WbImport;
 import workbench.util.StringUtil;
+import workbench.util.ValueConverter;
 import workbench.util.ZipUtil;
 
 /**
@@ -180,13 +181,18 @@ public class ProducerFactory
 		TextFileParser parser = new TextFileParser(inputFile);
 		parser.setEncoding(this.generalOptions.getEncoding());
 		parser.setContainsHeader(this.textOptions.getContainsHeader());
-		parser.setDateFormat(this.generalOptions.getDateFormat());
-		parser.setTimeStampFormat(this.generalOptions.getTimestampFormat());
 		parser.setQuoteChar(this.textOptions.getTextQuoteChar());
-		parser.setDecimalChar(this.textOptions.getDecimalChar());
 		parser.setDecodeUnicode(this.textOptions.getDecode());
 		parser.setDelimiter(this.textOptions.getTextDelimiter());
 		parser.setConnection(this.connection);
+		
+		ValueConverter converter = new ValueConverter();
+		converter.setDefaultDateFormat(this.generalOptions.getDateFormat());
+		converter.setDefaultTimestampFormat(this.generalOptions.getTimestampFormat());
+		String dec = this.textOptions.getDecimalChar();
+		if (dec != null) converter.setDecimalCharacter(dec.charAt(0));
+		parser.setValueConverter(converter);
+		
 		if (this.table != null)
 		{
 			parser.setTableName(this.table.getTableExpression());
@@ -223,7 +229,7 @@ public class ProducerFactory
 		if ("\t".equals(delim)) delim = "\\t";
 		appendArgument(command, CommonArgs.ARG_DELIM, "'" + delim + "'", indent);
 		appendArgument(command, WbImport.ARG_QUOTE, textOptions.getTextQuoteChar(), indent);
-		appendArgument(command, WbImport.ARG_DECCHAR, textOptions.getDecimalChar(), indent);
+		appendArgument(command, CommonArgs.ARG_DECCHAR, textOptions.getDecimalChar(), indent);
 		appendArgument(command, WbImport.ARG_FILECOLUMNS, this.fileParser.getColumns(), indent);
 	}
 	

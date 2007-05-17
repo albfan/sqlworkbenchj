@@ -143,6 +143,11 @@ public class XmlDataFileParser
 		return false;
 	}
 	
+	public void setValueConverter(ValueConverter convert)
+	{
+		this.converter = convert;
+	}
+	
 	public void setColumns(String columnList)
 		throws SQLException
 	{
@@ -197,11 +202,6 @@ public class XmlDataFileParser
 		this.dbConn = conn;
 	}
 
-	public void setAutoConvertBooleanNumbers(boolean flag)
-	{
-		this.converter.setAutoConvertBooleanNumbers(flag);
-	}
-	
 	/**
 	 * Check if all columns defined for the import (through the table definition
 	 * as part of the XML file, or passed by the user on the command line) are
@@ -454,6 +454,8 @@ public class XmlDataFileParser
 		this.messages = new MessageBuffer();
 		this.sendTableDefinition();
 		Reader in = null;
+		boolean finished = false;
+		
 		try
 		{
 			in = this.fileHandler.getMainFileReader();
@@ -471,6 +473,7 @@ public class XmlDataFileParser
 				this.receiver.importCancelled();
 				this.hasErrors = true;
 			}
+			finished = true;
 		}
 		catch (Exception e)
 		{
@@ -487,7 +490,10 @@ public class XmlDataFileParser
 		finally
 		{
 			try { in.close(); } catch (Throwable th) {}
-			try { this.fileHandler.done(); } catch (Throwable th) {}
+			if (!finished)
+			{
+				this.receiver.importFinished();
+			}
 		}
 	}
 
@@ -536,7 +542,7 @@ public class XmlDataFileParser
 				}
 				catch (ParsingInterruptedException e)
 				{
-					// canel the import
+					// cancel the import
 					break;
 				}
 				catch (Exception e)
@@ -553,15 +559,24 @@ public class XmlDataFileParser
 		this.hasErrors = false;
 		this.hasWarnings = false;
 		
-		if (this.sourceDirectory == null)
+		this.receiver.setTableCount(-1); // clear multi-table flag in receiver
+		this.receiver.setCurrentTable(-1);		
+		
+		try
 		{
-			processOneFile();
+			if (this.sourceDirectory == null)
+			{
+				processOneFile();
+			}
+			else 
+			{
+				processDirectory();
+			}
 		}
-		else 
+		finally
 		{
-			processDirectory();
+			try { this.fileHandler.done(); } catch (Throwable th) {}
 		}
-		this.receiver.importFinished();
 	}
 
 	public void stop()

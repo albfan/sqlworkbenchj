@@ -13,6 +13,7 @@ package workbench.db.importer;
 
 import workbench.interfaces.JobErrorHandler;
 import workbench.util.MessageBuffer;
+import workbench.util.ValueConverter;
 
 
 /**
@@ -32,6 +33,7 @@ public interface RowDataProducer
 	void setErrorHandler(JobErrorHandler handler);
 	boolean hasErrors();
 	boolean hasWarnings();
+	void setValueConverter(ValueConverter converter);
 	
 	/**
 	 * Return the last "raw" record that was sent to the RowDataReceiver.
