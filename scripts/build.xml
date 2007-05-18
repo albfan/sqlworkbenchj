@@ -13,7 +13,6 @@
   <property name="build" value="../build/classes"/>
 	<property name="build_test" value="../build/test"/>
   <property name="distdir" value="../dist"/>
-  <property name="version" value="0.1"/>
   <property name="jarfile" value="Workbench.jar"/>
   <property name="javadocdir" value="../javadoc"/>
   <property name="srczipname" value="WorkbenchSrc.zip"/>
@@ -24,7 +23,7 @@
 
   <!-- location of the docbook installation and the FOP installation -->
   <property name="docbook.root" value="${doc}/docbook"/>
-  <property name="fop.root" value="c:/etc/fop"/>
+  <property name="fop.root" value="../etc/fop"/>
 
   <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../etc/jarbundler/jarbundler-1.9.jar"/>
 	
@@ -194,19 +193,21 @@
         <include name="*.xml"/>
       </fileset>
     </delete>
+
   </target>
 
   <!-- Create the pdf version of the manual -->
-  <target name="pdf" depends="init,fop">
+  <target name="pdf" depends="fop">
 		
-	<property name="inputFile" location="${doc}/pdf/manual.fo"/>
-	<property name="outputFile" location="${doc}/pdf/SQLWorkbench-Manual.pdf"/>
+		<property name="inputFile" location="${doc}/pdf/manual.fo"/>
+		<property name="outputFile" location="${distdir}/SQLWorkbench-Manual.pdf"/>
 		
     <java failonerror="true" fork="true" dir="${fop.root}" classname="org.apache.fop.cli.Main" classpathref="fop.path">
-		<arg line="-fo ${inputFile} -out application/pdf ${outputFile}"/>
+			<arg line="-fo ${inputFile} -pdf ${outputFile}"/>
     </java>
 		
-    <!-- <delete file="${doc}/pdf/manual.fo"/> -->
+    <delete file="${doc}/pdf/manual.fo"/>
+
 		
   </target>
 
@@ -471,7 +472,7 @@
       <entry key="release.build.number" value="${build.number}"/>
       <entry key="release.build.date" value="${today}"/>
     </propertyfile>
-    <ant dir="..\website" inheritall="false" target="noDev">
+    <ant dir="..\website" inheritall="false" target="release">
     </ant>
   </target>
 
@@ -485,20 +486,16 @@
       <zipfileset dir="${distdir}">
         <include name="Workbench.jar"/>
         <include name="history.txt"/>
-      </zipfileset>
-      <zipfileset dir="${distdir}">
         <include name="JWorkbench.exe"/>
         <include name="DataPumper.exe"/>
         <include name="DbExplorer.exe"/>
+        <include name="SQLWorkbench-Manual.pdf"/>
       </zipfileset>
       <zipfileset dir="${scriptsrc}">
         <include name="jworkbench.sh"/>
         <include name="datapumper.sh"/>
         <include name="dbexplorer.sh"/>
       </zipfileset>			
-      <zipfileset dir="${doc}/pdf">
-        <include name="SQLWorkbench-Manual.pdf"/>
-      </zipfileset>
     </zip>
 
     <tstamp>
@@ -510,7 +507,7 @@
         <entry key="dev.build.number" value="${build.number}"/>
     </propertyfile>
 
-    <ant dir="..\website" inheritall="false" target="withDev">
+    <ant dir="..\website" inheritall="false" target="dev-release">
     </ant>
   </target>
 
@@ -564,7 +561,7 @@
 			mainclass="workbench.WbStarter" 
 			jar="${distdir}/${jarfile}" 
 			jvmversion="1.5+"
-			version="{$build.number}"
+			version="${build.number}"
 			shortname="SQL Workbench"
 			infostring="SQL Workbench/J"
       antialiasedgraphics="true"
@@ -572,15 +569,17 @@
       liveresize="true"
 			signature="sqwb"
 			icon="Workbench.icns"
-			vmoptions="-Xmx256m -Dcom.apple.mrj.application.growbox.intrudes=false"
+			vmoptions="-Xmx256m"
 			stubfile="../etc/jarbundler/JavaApplicationStub">
 
 			<javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
+			<javaproperty name="apple.awt.showGrowBox" value="true"/>
 		</jarbundler>
 		
     <tar compression="gzip" destfile="${root}/release/Workbench-Build${build.number}-Mac.tgz">
       <tarfileset dir="${distdir}">
         <include name="history.txt"/>
+				<include name="SQLWorkbench-Manual.pdf"/>
       </tarfileset>
 			<tarfileset dir="${bundledir}">
 				<include name="**/*"/>
@@ -588,9 +587,6 @@
 			</tarfileset>
 			<tarfileset mode="555" dir="${bundledir}">
 				<include name="**/JavaApplicationStub"/>
-			</tarfileset>
-			<tarfileset dir="${doc}/pdf">
-				<include name="SQLWorkbench-Manual.pdf"/>
 			</tarfileset>
       <tarfileset dir="${root}/release/manual" prefix="manual">
         <include name="**/*.*"/>
@@ -608,11 +604,7 @@
       <zipfileset dir="${distdir}">
         <include name="Workbench.jar"/>
         <include name="history.txt"/>
-      </zipfileset>
-			<zipfileset dir="${doc}/pdf">
 				<include name="SQLWorkbench-Manual.pdf"/>
-			</zipfileset>
-      <zipfileset dir="${distdir}">
         <include name="JWorkbench.exe"/>
         <include name="DataPumper.exe"/>
         <include name="DbExplorer.exe"/>
@@ -656,7 +648,9 @@
 			<zipfileset dir="${scriptsrc}" prefix="scripts">
 				<include name="build.xml"/>
 				<include name="history.txt"/>
+				<include name="devbuild.number"/>
 				<include name="build.number"/>
+				<include name="release.property"/>
 				<include name="history.header"/>
 				<include name="jworkbench"/>
 				<include name="datapumper"/>

@@ -1,11 +1,9 @@
 Features
 --------
-- Check number of PK columns available vs. PK columns in update table
 - "Idle" statement um Verbindung offen zu halten
 - Re-retrieve selected rows
 - Checkbox dropdown für die Objekttypen im DbExplorer
 - Show table data aus "Search table data" heraus
-- WbImport: Datei mit fehlerhaften Datensätzen falls continueOnError=true 
 - Search in view & procedure source
 - specify extension for blob files for WbExport
 - BLOB als Text durchsuchen in "Search table data"
