@@ -11,6 +11,7 @@
  */
 package workbench.util;
 
+import java.util.Comparator;
 import java.util.LinkedList;
 import junit.framework.*;
 import java.util.List;
@@ -34,27 +35,42 @@ public class StringUtilTest
 		{
 			String value = "Incorrect \\ string";
 			String decoded = StringUtil.decodeUnicode(value);
-//			System.out.println("decoded=" + value);
-//			System.out.println("decoded=" + decoded);
-			assertEquals("Wrong string not decoded", value, decoded);
+			assertEquals(value, decoded);
 			
 			value = "Test \\u00E4\\u00E5";
 			decoded = StringUtil.decodeUnicode(value);
-//			System.out.println("decoded=" + value);
-//			System.out.println("decoded=" + decoded);
-			assertEquals("Wrong string not decoded", "Test \u00E4\u00E5", decoded);
+			assertEquals("Test \u00E4\u00E5", decoded);
 			
 			value = "Wrong \\uxyz encoded";
 			decoded = StringUtil.decodeUnicode(value);
-//			System.out.println("decoded=" + value);
-//			System.out.println("decoded=" + decoded);
-			assertEquals("Wrong string not decoded", value, decoded);
+			assertEquals(value, decoded);
 			
 			value = "Wrong \\u04";
 			decoded = StringUtil.decodeUnicode(value);
-//			System.out.println("decoded=" + value);
-//			System.out.println("decoded=" + decoded);
 			assertEquals("Wrong string not decoded", value, decoded);
+
+			value = "test \\u";
+			decoded = StringUtil.decodeUnicode(value);
+			assertEquals("Wrong string not decoded", value, decoded);
+
+			value = "test \\u wrong";
+			decoded = StringUtil.decodeUnicode(value);
+			assertEquals("Wrong string not decoded", value, decoded);
+			
+			decoded = StringUtil.decodeUnicode("\\r\\n");
+			assertEquals("Single char not replaced correctly", "\r\n", decoded);
+
+			decoded = StringUtil.decodeUnicode("Hello \\t World");
+			assertEquals("Single char not replaced correctly", "Hello \t World", decoded);
+			
+			decoded = StringUtil.decodeUnicode("test\\t");
+			assertEquals("Single char not replaced correctly", "test\t", decoded);
+			
+			decoded = StringUtil.decodeUnicode("test\\x");
+			assertEquals("Single char not replaced correctly", "test\\x", decoded);
+
+			decoded = StringUtil.decodeUnicode("test\\");
+			assertEquals("Single char not replaced correctly", "test\\", decoded);
 			
 		}
 		catch (Exception e)
@@ -87,6 +103,22 @@ public class StringUtilTest
 		assertEquals("Additional characters not replaced", "abc\\u003Bdef\\u003Bghi", enc);
 		//System.out.println("enc=" + enc);
 		
+	}
+	
+	public void testComparator()
+	{
+		Comparator<String> c = StringUtil.getCaseInsensitiveComparator();
+		int i = c.compare("Test", "TEST");
+		assertEquals(0, i);
+		
+		i = c.compare("TEST", "test");
+		assertEquals(0, i);
+		
+		i = c.compare("test", "test");
+		assertEquals(0, i);
+		
+		i = c.compare("test", "tesd");
+		assertEquals(false, (i == 0));
 	}
 	
 	public void testMakePlainLF()

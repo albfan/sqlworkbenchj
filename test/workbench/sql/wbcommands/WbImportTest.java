@@ -435,7 +435,87 @@ public class WbImportTest
 		}
 	}	
 	
-	public void testAutoConvertBoolean()
+	public void testBooleanLiterals()
+	{
+		try
+		{
+			File importfile = new File(this.basedir, "bool_literal.txt");
+			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(importfile, "UTF-8", false));
+			out.write("nr,flag\n");
+			out.write("1,yes\n");
+			out.write("2,5\n");
+			out.write("3,99\n");
+			out.write("4,no\n");
+			out.write("5,no\n");
+			out.close();
+			
+			// Test importing correct true/false values
+			String cmd = "wbimport -literalsFalse='no,99' -literalsTrue='yes,5' -type=text -header=true  -table=bool_test -continueOnError=false -delimiter=',' -booleanToNumber=true -encoding='UTF-8' -file='" + importfile.getAbsolutePath() + "'";
+			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			String msg = result.getMessageBuffer().toString();
+			assertEquals(msg, true, result.isSuccess());
+			
+			Statement stmt = this.connection.createStatement();
+			ResultSet rs = stmt.executeQuery("select count(*) from bool_test where flag = false");
+			int rows = 0;
+			if (rs.next()) rows = rs.getInt(1);
+			assertEquals("Wrong number of rows imported", 3, rows);
+			rs.close();
+			
+			rs = stmt.executeQuery("select count(*) from bool_test where flag = true");
+			rows = 0;
+			if (rs.next()) rows = rs.getInt(1);
+			assertEquals("Wrong number of rows imported", 2, rows);
+			rs.close();
+			
+			stmt.executeUpdate("delete from bool_test");
+			this.connection.commit();
+
+			// Test importing incorrect values
+			// as -continueOnError=false is supplied no rows should make into the table
+			cmd = "wbimport -literalsFalse='no,false' -literalsTrue='yes,true' -type=text -header=true  -table=bool_test -continueOnError=false -delimiter=',' -booleanToNumber=true -encoding='UTF-8' -file='" + importfile.getAbsolutePath() + "'";
+			result = importCmd.execute(this.connection, cmd);
+			msg = result.getMessageBuffer().toString();
+			assertEquals(msg, false, result.isSuccess());
+			
+			rs = stmt.executeQuery("select count(*) from bool_test");
+			rows = 0;
+			if (rs.next()) rows = rs.getInt(1);
+			assertEquals("Rows were imported", 0, rows);
+			rs.close();
+
+			stmt.executeUpdate("delete from bool_test");
+			this.connection.commit();
+
+			// Test importing incorrect values
+			// as -continueOnError=true is supplied only 3 rows should make into the table
+			cmd = "wbimport -literalsFalse='no,false' -literalsTrue='yes,true' -type=text -header=true  -table=bool_test -continueOnError=true -delimiter=',' -booleanToNumber=true -encoding='UTF-8' -file='" + importfile.getAbsolutePath() + "'";
+			result = importCmd.execute(this.connection, cmd);
+			msg = result.getMessageBuffer().toString();
+			assertEquals(msg, true, result.isSuccess());
+			assertEquals(msg, true, result.hasWarning());
+			
+			rs = stmt.executeQuery("select count(*) from bool_test");
+			rows = 0;
+			if (rs.next()) rows = rs.getInt(1);
+			assertEquals("Wrong number of rows imported", 3, rows);
+			rs.close();
+			
+			SqlUtil.closeAll(rs, stmt);
+
+			if (!importfile.delete())
+			{
+				fail("Could not delete input file: " + importfile.getCanonicalPath());
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testAutoConvertBooleanToNumber()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
              "<wb-export> \n" + 
@@ -477,24 +557,24 @@ public class WbImportTest
 			out.close();
 			
 			// Test importing only correct true/false values
-			String cmd = "wbimport -continueOnError=false -startRow=1 -endRow=2 -booleanToNumber=true -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=bool_test";
+			String cmd = "wbimport -continueOnError=false -startRow=1 -endRow=2 -booleanToNumber=true -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=bool_int_test";
 			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
 			String msg = result.getMessageBuffer().toString();
 			assertEquals(msg, true, result.isSuccess());
 			System.out.println("messages: " + msg);
 			Statement stmt = this.connection.createStatement();
-			ResultSet rs = stmt.executeQuery("select count(*) from bool_test");
+			ResultSet rs = stmt.executeQuery("select count(*) from bool_int_test");
 			int rows = 0;
 			if (rs.next()) rows = rs.getInt(1);
 			assertEquals("Wrong number of rows imported", 2, rows);
 			SqlUtil.closeAll(rs, stmt);
 
 			stmt = this.connection.createStatement();
-			stmt.executeUpdate("delete from bool_test");
+			stmt.executeUpdate("delete from bool_int_test");
 			this.connection.commit();
 			SqlUtil.closeStatement(stmt);
 			
-			cmd = "wbimport -continueOnError=false -booleanToNumber=true -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=bool_test";
+			cmd = "wbimport -continueOnError=false -booleanToNumber=true -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=bool_int_test";
 			result = importCmd.execute(this.connection, cmd);
 			msg = result.getMessageBuffer().toString();
 			assertEquals("Import did not fail", false, result.isSuccess());
@@ -1021,6 +1101,45 @@ public class WbImportTest
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
 			}					
 			
+		}
+		catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}
+
+	public void testMissingTarget()
+		throws Exception
+	{
+		int rowCount = 10;
+		try
+		{
+			File importFile  = new File(this.basedir, "dummy.txt");
+			PrintWriter out = new PrintWriter(new FileWriter(importFile));
+			for (int i = 0; i < 10; i++)
+			{
+				out.print(Integer.toString(i));
+				out.print('\t');
+				out.println("First" + i + "\tLastname" + i);
+			}
+			out.close();
+			
+			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -filecolumns=nr,firstname,lastname -header=false -table=not_there");
+			String msg = result.getMessageBuffer().toString();
+			assertEquals("Export did not fail", false, result.isSuccess());
+			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE] not found") > -1);
+			
+			result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -table=not_there");
+			msg = result.getMessageBuffer().toString();
+			assertEquals("Export did not fail", false, result.isSuccess());
+			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE] not found") > -1);
+
+			result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -table=not_there");
+			msg = result.getMessageBuffer().toString();
+			assertEquals("Export did not fail", false, result.isSuccess());
+			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE] not found") > -1);
+			
+			importFile.delete();
 		}
 		catch (Exception e)
 		{
@@ -2206,6 +2325,49 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
+	
+	public void testDeleteTargetFails()
+	{
+		try
+		{
+			Statement stmt = this.connection.createStatement();
+			stmt.executeUpdate("create table parent_table (id integer primary key, some_val integer)");
+			stmt.executeUpdate("insert into parent_table (id, some_val) values (1, 1)");
+			stmt.executeUpdate("insert into parent_table (id, some_val) values (2, 1)");
+			stmt.executeUpdate("insert into parent_table (id, some_val) values (3, 1)");
+			
+			stmt.executeUpdate("create table child (id integer primary key, parent_id integer, data integer, foreign key (parent_id) references parent_table(id))");
+			stmt.executeUpdate("insert into child (id, parent_id, data) values (1, 1, 1)");
+			stmt.executeUpdate("insert into child (id, parent_id, data) values (2, 1, 2)");
+			this.connection.commit();
+			
+			File importFile  = new File(this.basedir, "imp_delete_test.txt");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("id\tsome_val");
+			out.println("1\t42");
+			out.close();	
+
+			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -continueonerror=false -table=parent_table -deleteTarget=true");
+			assertEquals("Import did not fail", false, result.isSuccess());
+			String msg = result.getMessageBuffer().toString();
+			assertEquals("No error reported", true, msg.indexOf("Integrity constraint violation") > 0);
+			
+			ResultSet rs = stmt.executeQuery("select count(*) from parent_table");
+			int count = -1;
+			if (rs.next())
+			{
+				count = rs.getInt(1);
+			}
+			SqlUtil.closeAll(rs, stmt);
+			assertEquals("Wrong number of rows", 3, count);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	private WbConnection prepareDatabase()
 		throws SQLException, ClassNotFoundException
 	{
@@ -2218,7 +2380,8 @@ public class WbImportTest
 		stmt.executeUpdate("CREATE TABLE datatype_test (int_col integer, double_col double, char_col varchar(50), date_col date, time_col time, ts_col timestamp)");
 		stmt.executeUpdate("CREATE TABLE blob_test (nr integer, binary_data BINARY)");
 		stmt.executeUpdate("CREATE TABLE clob_test (nr integer, text_data LONGVARCHAR)");
-		stmt.executeUpdate("CREATE TABLE bool_test (nr integer, int_flag INTEGER)");
+		stmt.executeUpdate("CREATE TABLE bool_int_test (nr integer, int_flag INTEGER)");
+		stmt.executeUpdate("CREATE TABLE bool_test (nr integer, flag BOOLEAN)");
 		wb.commit();
 		stmt.close();
 		

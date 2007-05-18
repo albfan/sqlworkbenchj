@@ -267,7 +267,37 @@ public class ScriptParserTest extends TestCase
 			p.setScript(sql);
 			size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);			
-			
+
+			sql = "CREATE PROCEDURE remove_emp (employee_id NUMBER) AS\n" + 
+					"  tot_emps NUMBER;\n" + 
+					"  BEGIN\n" + 
+					"			DELETE FROM employees\n"+ 
+					"			WHERE employees.employee_id = remove_emp.employee_id;\n"+
+					"	 tot_emps := tot_emps - 1;\n"+
+					"	 END;\n"+
+					"/";
+			p.setScript(sql);
+			p.setAlternateDelimiter(new DelimiterDefinition("/", true));
+			size = p.getSize();
+			assertEquals("Wrong number of statements", 1, size);			
+
+			sql = "DECLARE \n" + 
+             "   Last_name    VARCHAR2(10) \n" + 
+             "   Cursor       c1 IS SELECT last_name  \n" + 
+             "                       FROM employees \n" + 
+             "                       WHERE department_id = 20 \n" + 
+             "BEGIN \n" + 
+             "   OPEN c1 \n" + 
+             "   LOOP \n" + 
+             "      FETCH c1 INTO Last_name \n" + 
+             "      EXIT WHEN c1%NOTFOUND \n" + 
+             "      DBMS_OUTPUT.PUT_LINE(Last_name) \n" + 
+             "   END LOOP \n" + 
+             "END \n" + 
+             "/";			
+			p.setScript(sql);
+			size = p.getSize();
+			assertEquals("Wrong number of statements", 1, size);			
 		}
 		catch (Exception e)
 		{
@@ -503,6 +533,26 @@ public class ScriptParserTest extends TestCase
 		assertEquals(2, p.getSize());
 	}
 
+	public void testSingleLineStatements()
+	{
+		try
+		{
+			String sql = "set nocount on\ndeclare @x int\nselect 123;";
+			ScriptParser p = new ScriptParser(sql);
+			p.setCheckForSingleLineCommands(true);
+			assertEquals(3, p.getSize());
+			
+			sql = "declare @x int\nset nocount on\nselect 123;";
+			p = new ScriptParser(sql);
+			p.setCheckForSingleLineCommands(true);
+			assertEquals(3, p.getSize());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	
 	
 }
