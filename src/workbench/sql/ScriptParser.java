@@ -160,46 +160,26 @@ public class ScriptParser
 	public void allowEmptyLineAsSeparator(boolean flag)
 	{
 		this.emptyLineIsSeparator = flag;
-		if (this.iteratingParser != null)
-		{
-			this.iteratingParser.allowEmptyLineAsSeparator(this.emptyLineIsSeparator);
-		}
 	}
 
 	public void setCheckHashComments(boolean flag)
 	{
 		this.checkHashComments = flag;
-		if (this.iteratingParser != null)
-		{
-			this.iteratingParser.setCheckForHashComments(flag);
-		}
 	}
 	
 	public void setReturnStartingWhitespace(boolean flag)
 	{
 		this.returnTrailingWhitesapce = flag;
-		if (this.iteratingParser != null)
-		{
-			this.iteratingParser.setReturnStartingWhitespace(flag);
-		}
 	}
 	
 	public void setCheckForSingleLineCommands(boolean flag)
 	{
 		this.checkSingleLineCommands = flag;
-		if (this.iteratingParser != null)
-		{
-			this.iteratingParser.setCheckForSingleLineCommands(flag);
-		}
 	}
 	
 	public void setSupportOracleInclude(boolean flag)
 	{
 		this.supportOracleInclude = flag;
-		if (this.iteratingParser != null)
-		{
-			this.iteratingParser.setSupportOracleInclude(flag);
-		}
 	}
 	
 	/**
@@ -254,8 +234,6 @@ public class ScriptParser
 		}
 	}
 
-//	private Pattern MS_GO = Pattern.compile("(?i)[\\r\\n|\\n]+[ \t]*GO[ \t]*[\\r\\n|\\n]*$");
-	
 	/**
 	 *	Try to find out which delimiter should be used for the current script.
 	 *	First it will check if the script ends with the alternate delimiter
@@ -269,11 +247,6 @@ public class ScriptParser
 		if (this.originalScript == null) return;
 		
 		useAlternateDelimiter = (alternateDelimiter.terminatesScript(originalScript));
-		if (this.iteratingParser != null)
-		{
-			this.iteratingParser.setDelimiter(useAlternateDelimiter ? this.alternateDelimiter : this.delimiter);
-		}
-		
 		this.commands = null;
 	}
 
@@ -393,6 +366,12 @@ public class ScriptParser
 		{
 			this.parseCommands();
 		}
+		else if (this.iteratingParser != null)
+		{
+			configureParserInstance(this.iteratingParser);
+			this.iteratingParser.reset();
+				
+		}
 	}
 	
 	public void done()
@@ -416,10 +395,6 @@ public class ScriptParser
 	public void setCheckEscapedQuotes(boolean flag)
 	{
 		this.checkEscapedQuotes = flag;
-		if (this.iteratingParser != null)
-		{
-			this.iteratingParser.setCheckEscapedQuotes(flag);
-		}
 	}
 
 	public String getDelimiterString()
@@ -431,12 +406,21 @@ public class ScriptParser
 	private void configureParserInstance(IteratingScriptParser p)
 	{
 		p.setSupportOracleInclude(this.supportOracleInclude);
-		p.setCheckForSingleLineCommands(this.checkSingleLineCommands);
 		p.allowEmptyLineAsSeparator(this.emptyLineIsSeparator);
 		p.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		p.setDelimiter(useAlternateDelimiter ? this.alternateDelimiter : this.delimiter);
 		p.setReturnStartingWhitespace(this.returnTrailingWhitesapce);
 		p.setCheckForHashComments(this.checkHashComments);
+		p.setDelimiter(useAlternateDelimiter ? this.alternateDelimiter : this.delimiter);
+
+		if (useAlternateDelimiter)
+		{
+			p.setCheckForSingleLineCommands(false);
+		}
+		else
+		{
+			p.setCheckForSingleLineCommands(this.checkSingleLineCommands);
+		}
 	}
 	
 	/**

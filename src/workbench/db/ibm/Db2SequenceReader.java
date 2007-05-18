@@ -26,7 +26,8 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
 /**
- *
+ * A class to read sequence definitions from a DB2 database.
+ * 
  * @author  support@sql-workbench.net
  */
 public class Db2SequenceReader

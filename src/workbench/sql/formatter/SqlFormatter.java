@@ -316,29 +316,31 @@ public class SqlFormatter
 	 */
 	private boolean needsWhitespace(SQLToken last, SQLToken current, boolean ignoreStartOfline)
 	{
-		char lastChar = last.getContents().charAt(0);
-		char currChar = current.getContents().charAt(0);
+		String lastV = last.getContents();
+		String currentV = current.getContents();
+		char lastChar = lastV.charAt(0);
+		char currChar = currentV.charAt(0);
 		if (last.isWhiteSpace() && current.isWhiteSpace()) return false;
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
-		boolean isCurrentOpenBracket = "(".equals(current.getContents());
-		boolean isLastOpenBracket = "(".equals(last.getContents());
-		boolean isLastCloseBracket = ")".equals(last.getContents());
+		boolean isCurrentOpenBracket = "(".equals(currentV);
+		boolean isLastOpenBracket = "(".equals(lastV);
+		boolean isLastCloseBracket = ")".equals(lastV);
 		
 		if (isCurrentOpenBracket && last.isIdentifier()) return false;
-		if (isCurrentOpenBracket && isDbFunction(last.getContents())) return false;
+		if (isCurrentOpenBracket && isDbFunction(lastV)) return false;
 		if (isCurrentOpenBracket && last.isReservedWord()) return true;
 		if (isLastCloseBracket && currChar == ',') return false;
 		if (isLastCloseBracket && (current.isIdentifier() || current.isReservedWord())) return true;
 
-		if ((lastChar == '-' || lastChar == '+') && current.isLiteral() && StringUtil.isNumber(current.getContents())) return false;
+		if ((lastChar == '-' || lastChar == '+') && current.isLiteral() && StringUtil.isNumber(currentV)) return false;
 		
 		if (last.isLiteral() && (current.isIdentifier() || current.isReservedWord() || current.isOperator())) return true;
 
 		//if (last.isLiteral() && current.isLiteral()) return false;
 		
 		if (currChar == '?') return true;
-		if (current.getContents().equals("=")) return true;
-		if (last.getContents().equals("=")) return true;
+		if (currentV.equals("=")) return true;
+		if (lastV.equals("=")) return true;
 		
 		if (lastChar == '.' && current.isIdentifier()) return false;
 		if (isLastOpenBracket && current.isReservedWord()) return false;
@@ -1181,12 +1183,6 @@ public class SqlFormatter
 				this.appendText(')');
 				SQLToken l = t;
 				t = this.lexer.getNextToken(true, false);
-//				if (t != null)
-//				{
-//					if (needsWhitespace(l, t)) this.appendText(' ');
-//					this.appendText(t.getContents());
-//					t = this.lexer.getNextToken(true, false);
-//				}
 			}
 			return t;
 		}

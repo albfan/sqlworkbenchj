@@ -30,6 +30,7 @@ import workbench.util.ZipUtil;
 
 /**
  *	A factory for RowDataProducer to import text or XML files. 
+ * 
  * @author  support@sql-workbench.net
  */
 public class ProducerFactory

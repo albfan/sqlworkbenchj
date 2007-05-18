@@ -37,6 +37,7 @@ public class DbSettings
 	private boolean allowExtendedCreateStatement = true;
 	
 	private boolean allowsMultipleGetUpdateCounts = true;
+	private boolean supportsBatchedStatements = false;
 	
 	private Map indexTypeMapping;
 	public static final String IDX_TYPE_NORMAL = "NORMAL";
@@ -55,10 +56,12 @@ public class DbSettings
 		this.allowsMultipleGetUpdateCounts = settings.getBoolProperty("workbench.db." + getDbId() + ".multipleupdatecounts", true);
 		this.reportsRealSizeAsDisplaySize = settings.getBoolProperty("workbench.db." + getDbId() + ".charsize.usedisplaysize", false);
 		this.allowExtendedCreateStatement = settings.getBoolProperty("workbench.db." + getDbId() + ".extended.createstmt", true);
+		this.supportsBatchedStatements = settings.getBoolProperty("workbench.db." + getDbId() + ".batchedstatements", false);
 	}
 	
 	String getDbId() { return this.dbId; }
 
+	public boolean supportsBatchedStatements() { return this.supportsBatchedStatements; }
 	public boolean allowsExtendedCreateStatement() { return allowExtendedCreateStatement; }
 	public boolean allowsMultipleGetUpdateCounts() { return this.allowsMultipleGetUpdateCounts; }
 	public boolean reportsRealSizeAsDisplaySize() { return this.reportsRealSizeAsDisplaySize; }

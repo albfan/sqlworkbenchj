@@ -497,13 +497,13 @@ public class TableSearchPanel
 		DataStore tables = ((WbTable)(this.tableNames)).getDataStore();
 		for (int i=0; i < selectedTables.length; i++)
 		{
-			String type = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-
 			String catalog = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
 			String schema = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 			String tablename = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+			String type = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
 
 			searchTables[i] = new TableIdentifier(catalog, schema, tablename);
+			searchTables[i].setNeverAdjustCase(true);
 			searchTables[i].setType(type);
 		}
 		

@@ -127,11 +127,12 @@ public class OraclePackageParser
 		
 		while (t != null)
 		{
-			if (t.getContents().equalsIgnoreCase("END"))
+			String v = t.getContents();
+			if (v.equalsIgnoreCase("END"))
 			{
 				lastWasEnd = true;
 			}
-			else if (lastWasEnd && name.equalsIgnoreCase(t.getContents()))
+			else if (lastWasEnd && name.equalsIgnoreCase(v))
 			{
 				SQLToken t2 = lexer.getNextToken(false, false);
 				if (t2 != null) return t2;

@@ -40,7 +40,6 @@ public class GenericRowMonitor
 	
 	public void setMonitorType(int type)
 	{
-		statusBar.clearStatusMessage();
 		this.monitorType = type;
 		try
 		{

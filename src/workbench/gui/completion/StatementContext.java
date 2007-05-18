@@ -106,7 +106,8 @@ public class StatementContext
 			
 			while (t != null)
 			{
-				String value = t.getContents();
+				final String value = t.getContents();
+				
 				if ("(".equals(value)) 
 				{
 					bracketCount ++;
@@ -142,9 +143,9 @@ public class StatementContext
 						return true;
 					}
 				}
-				else if (bracketCount == 0 && unionKeywords.contains(t.getContents()))
+				else if (bracketCount == 0 && unionKeywords.contains(value))
 				{
-					if (t.getContents().equals("UNION"))
+					if (value.equals("UNION"))
 					{
 						SQLToken t2 = lexer.getNextToken(false, false);
 						if (t2.getContents().equals("ALL"))
@@ -168,7 +169,7 @@ public class StatementContext
 					}
 				}
 				
-				if (bracketCount == 1 && lastToken.getContents().equals("(") && t.getContents().equals("SELECT"))
+				if (bracketCount == 1 && lastToken.getContents().equals("(") && value.equals("SELECT"))
 				{
 					inSubselect = true;
 				}

@@ -44,21 +44,22 @@ public class AlterTableAnalyzer
 			SQLToken token = lexer.getNextToken(false, false);
 			while (token != null)
 			{
-				if ("TABLE".equalsIgnoreCase(token.getContents()))
+				String v = token.getContents();
+				if ("TABLE".equalsIgnoreCase(v))
 				{
 					tablePos = token.getCharEnd();
 				}
-				else if ("ADD".equalsIgnoreCase(token.getContents()))
+				else if ("ADD".equalsIgnoreCase(v))
 				{
 					addPos = token.getCharEnd();
 					tableEnd = token.getCharBegin() - 1;
 				}
-				else if ("MODIFY".equalsIgnoreCase(token.getContents()) || "DROP".equalsIgnoreCase(token.getContents()))
+				else if ("MODIFY".equalsIgnoreCase(v) || "DROP".equalsIgnoreCase(v))
 				{
 					modifyPos = token.getCharEnd();
 					tableEnd = token.getCharBegin() - 1;
 				}
-				else if ("COLUMN".equalsIgnoreCase(token.getContents()))
+				else if ("COLUMN".equalsIgnoreCase(v))
 				{
 					columnKeyWordPos = token.getCharEnd();
 				}

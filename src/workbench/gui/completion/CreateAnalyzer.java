@@ -47,7 +47,7 @@ public class CreateAnalyzer
 			SQLToken token = lexer.getNextToken(false, false);
 			while (token != null)
 			{
-				String t = token.getContents();
+				final String t = token.getContents();
 				tokenCount++;
 				if (tokenCount == 2)
 				{
@@ -83,7 +83,7 @@ public class CreateAnalyzer
 						}
 					}
 				}
-				else if ("INDEX".equalsIgnoreCase(token.getContents()))
+				else if ("INDEX".equalsIgnoreCase(t))
 				{
 					isCreateIndex = true;
 				}

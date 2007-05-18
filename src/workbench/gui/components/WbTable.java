@@ -29,6 +29,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
@@ -58,6 +59,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.JPopupMenu.Separator;
+import javax.swing.KeyStroke;
 import javax.swing.UIDefaults;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -303,7 +305,7 @@ public class WbTable
 			}
 		};
 
-		this.getInputMap().put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
+		this.getInputMap(WHEN_FOCUSED).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
 		this.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
 		this.getActionMap().put("wbtable-stop-editing", a);
 	}
@@ -626,6 +628,30 @@ public class WbTable
 		return this.defaultPrintHeader;
 	}
 
+	protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed)
+	{
+		boolean result = true;
+		
+		try
+		{
+			// Don't start when non-printing keys are typed. 
+			// Keystrokes like Alt-F4 should not automatically start editing mode
+			int code = e.getModifiers();
+			boolean modifierKeyPressed = ((code & KeyEvent.ALT_MASK) == KeyEvent.ALT_MASK || (code & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK);
+			if (modifierKeyPressed)
+			{
+				// temporarily disable auto-editing
+				putClientProperty("JTable.autoStartsEdit", Boolean.FALSE);
+			}
+			result = super.processKeyBinding(ks, e, condition, pressed);
+		}
+		finally
+		{
+			putClientProperty("JTable.autoStartsEdit", Boolean.TRUE);
+		}
+		return result;
+	}
+	 
 	public Component prepareEditor(TableCellEditor editor, int row, int column)
 	{
 		Component comp = super.prepareEditor(editor, row, column);
@@ -663,12 +689,13 @@ public class WbTable
 	public boolean editCellAt(final int row, int column, EventObject e)
 	{
 		boolean result = super.editCellAt(row, column, e);
-		
-		this.clearSelection();
-		
-		if (result && this.highlightRequiredFields)
+		if (result) 
 		{
-			initRendererHighlight(row);
+			this.clearSelection();
+			if (this.highlightRequiredFields)
+			{
+				initRendererHighlight(row);
+			}
 		}
 		return result;
 	}
@@ -800,27 +827,11 @@ public class WbTable
 
 		if (aModel instanceof DataStoreTableModel)
 		{
-
 			this.dwModel = (DataStoreTableModel)aModel;
 			if (sortIt && header != null)
 			{
 				header.setDefaultRenderer(RendererFactory.getSortHeaderRenderer());
 				header.addMouseListener(this);
-			}
-			
-			// If none of the columns is a BLOB column
-			// getCellRenderer() does not need to check for the BLOB renderer
-			int cols = this.dwModel.getColumnCount();
-			this.checkForBlobs = false;
-			for (int i=0; i < cols; i++)
-			{
-				//Class cl = this.dwModel.getColumnClass(i);
-				int type = this.dwModel.getColumnType(i);
-				if (SqlUtil.isBlobType(type))// || java.sql.Blob.class.isAssignableFrom(cl))
-				{
-					this.checkForBlobs = true;
-					break;
-				}
 			}
 		}
 
@@ -1110,13 +1121,17 @@ public class WbTable
 		initDefaultRenderers();
 	}
 
-	private boolean checkForBlobs = false;
-	
+	/**
+	 * For some reason setting a default renderer for BLOB columns
+	 * is not working. So getCellRenderer is overwritten, to first
+	 * check for a BLOB column. If the specified column is not 
+	 * a BLOB column, the default handling from JTable will be used.
+	 */
 	public TableCellRenderer getCellRenderer(int row, int column) 
 	{
 		TableCellRenderer rend = null;
 		
-		if (this.checkForBlobs && isBlobColumn(column)) 
+		if (isBlobColumn(column)) 
 		{
 			rend = RendererFactory.getBlobRenderer();
 		}
@@ -1242,11 +1257,12 @@ public class WbTable
 			{
 				clz = this.dwModel.getColumnClass(i);
 			}
+			
 			if (clz != null && Number.class.isAssignableFrom(clz))
 			{
 				col.setCellEditor(this.defaultNumberEditor);
 			}
-			else if (this.dwModel != null && isBlobColumn(i))
+			else if (isBlobColumn(i))
 			{
 				col.setCellEditor((TableCellEditor)RendererFactory.getBlobRenderer());
 			}

@@ -95,17 +95,19 @@ import java.io.*;
      * @param yycolumn The position (relative to the line) of the first token.
      * @throws IOException if an IOExecption occurs while switching readers.
      */
-    public void reset(java.io.Reader reader, int yyline, int yychar, int yycolumn) throws IOException{
+    public void reset(java.io.Reader reader, int yyline, int yychar, int yycolumn) 
+      throws IOException
+    {
         yyreset(reader);
         this.yyline = yyline;
-		this.yychar = yychar;
-		this.yycolumn = yycolumn;
-	}
+	this.yychar = yychar;
+	this.yycolumn = yycolumn;
+    }
 
-	public SQLLexer(String source)
-	{
-		this(new StringReader(source));
-	}
+    public SQLLexer(String source)
+    {
+	this(new StringReader(source));
+    }
 %}
 
 %line
@@ -418,6 +420,7 @@ keyword=("ABORT"|
 "NOTHING"|
 "NOTIFY"|
 "NOTNULL"|
+"NOW"|
 "NULL"|
 "NULLABLE"|
 "NULLIF"|
@@ -551,6 +554,8 @@ keyword=("ABORT"|
 "SYMMETRIC"|
 "SYNONYM"|
 "SYSTEM_USER"|
+"SYSTIMESTAMP"|
+"SYSDATE"|
 "TABLE"|
 "TEMPORARY"|
 "THEN"|
@@ -559,6 +564,7 @@ keyword=("ABORT"|
 "TIMEZONE_HOUR"|
 "TIMEZONE_MINUTE"|
 "TO"|
+"TODAY"|
 "TRAILING"|
 "TRANSACTION"|
 "TRANSLATE"|

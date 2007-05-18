@@ -139,10 +139,7 @@ public class SQLToken
 	public SQLToken(int ID, String text, int lineNumber, int charBegin, int charEnd, int state)
 	{
 		this.ID = ID;
-		// Some keywords can contain whitespace. We need 
-		// to make sure the whitespace is "compressed" i.e. 
-		// multiple whitespace characters are replaced by single one.
-		this.contents = WHITESPACE.matcher(text).replaceAll(" ");
+		this.contents = text;
 		this.lineNumber = lineNumber;
 		this.charBegin = charBegin;
 		this.charEnd = charEnd;
@@ -174,15 +171,31 @@ public class SQLToken
 	}
 
 	/**
-	 * get the contents of this token
+	 * Returned an uparsed version of the contents of this 
+	 * token. To get a 
+	 */
+	public String getText()
+	{
+		return this.contents;
+	}
+	
+	/**
+	 * Get the contents of this token. Reserved words (keywords)
+	 * will be returned in upper case and with multiple whitespaces
+	 * replaced by a single whitespace to make comparisons easier.
+	 * "is    Null" will be returned as "IS NULL".
+	 * To get the real text from the underlying SQL, use getText().
+	 * For all tokens where isReservedWord() == false getText and 
+	 * getContents() will return exactly the same.
 	 *
 	 * @return A string representing the text of the token
+	 * @see #getText()
 	 */
 	public String getContents()
 	{
 		if (this.isReservedWord())
 		{
-			return contents.toUpperCase();
+			return WHITESPACE.matcher(contents).replaceAll(" ").toUpperCase();
 		}
 		else
 		{

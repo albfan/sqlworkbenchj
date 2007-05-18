@@ -90,7 +90,7 @@ public class DdlCommand extends SqlCommand
 			}
 			else
 			{
-				this.currentStatement.executeUpdate(aSql);
+				boolean hasResult = this.currentStatement.execute(aSql);
 
 				if ("DROP".equals(verb))
 				{
@@ -105,12 +105,15 @@ public class DdlCommand extends SqlCommand
 					msg = this.verb + " " + ResourceMgr.getString("MsgKnownStatementOK");
 				}
 				result.addMessage(msg);
-
-				StringBuilder warnings = new StringBuilder();
-				if (this.appendWarnings(aConnection, this.currentStatement, warnings))
+				
+				// Using a generic execute and result processing ensures that servers that 
+				// can process more than one statement with a single SQL are treated correctly. 
+				// e.g. when sending a SELECT and other statements as a "batch" with SQL Server
+				processMoreResults(aSql, result, hasResult);
+				
+				// Process result will have added any warnings and set the warning flag
+				if (result.hasWarning())
 				{
-					result.setWarning(true);
-					result.addMessage(warnings);
 					if (this.addExtendErrorInfo(aConnection, aSql, result))
 					{
 						result.setFailure();
@@ -168,7 +171,8 @@ public class DdlCommand extends SqlCommand
 		SQLLexer l = new SQLLexer(sql);
 		SQLToken t = l.getNextToken(false, false);
 		if (t == null) return null;
-		if (!t.getContents().equals("CREATE") && !t.getContents().equals("CREATE OR REPLACE")) return null;
+		String v = t.getContents();
+		if (!v.equals("CREATE") && !v.equals("CREATE OR REPLACE")) return null;
 		
 		// next token must be the type
 		t = l.getNextToken(false, false);

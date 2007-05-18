@@ -382,18 +382,19 @@ public class DbMetadata
 		// we do not want system tables included (which 
 		// is done for the objectsWithData as that 
 		// drives the "Data" tab in the DbExplorer)
-		Set types = getObjectsWithData();
-		List realTypes = new LinkedList();
+		Set<String> types = getObjectsWithData();
+		List<String> realTypes = new ArrayList<String>(types.size());
 		
 		Iterator itr = types.iterator();
-		while (itr.hasNext())
+		for (String s : types)
 		{
-			String s = ((String)itr.next()).toUpperCase();
-			if (s.indexOf("SYSTEM") == -1)
+			if (s.toUpperCase().indexOf("SYSTEM") == -1)
 			{
 				realTypes.add(s);
 			}
 		}
+		// As the selectable types are used to retrieve meta-data information
+		// from the driver, we have to convert this to an array
 		tableTypesSelectable = StringUtil.toArray(realTypes);
 	}
 
@@ -430,7 +431,7 @@ public class DbMetadata
 		return objectsWithData.contains(type.toLowerCase());
 	}
 
-	private Set getObjectsWithData()
+	private Set<String> getObjectsWithData()
 	{
 		if (this.objectsWithData == null)
 		{
@@ -438,7 +439,7 @@ public class DbMetadata
 			String defValue = Settings.getInstance().getProperty(keyPrefix + "default", null);
 			String types = Settings.getInstance().getProperty(keyPrefix + getDbId(), defValue);
 			
-			objectsWithData = new HashSet();
+			objectsWithData = new HashSet<String>(7);
 			
 			if (types == null)
 			{
@@ -2542,7 +2543,7 @@ public class DbMetadata
 	public String getTriggerSource(String aCatalog, String aSchema, String aTriggername)
 		throws SQLException
 	{
-		StrBuffer result = new StrBuffer(500);
+		StringBuilder result = new StringBuilder(500);
 
 		if ("*".equals(aCatalog)) aCatalog = null;
 		if ("*".equals(aSchema)) aSchema = null;
@@ -2583,7 +2584,7 @@ public class DbMetadata
 					}
 				}
 			}
-			String warn = SqlUtil.getWarnings(this.dbConnection, stmt, true);
+			CharSequence warn = SqlUtil.getWarnings(this.dbConnection, stmt, true);
 			if (warn != null && result.length() > 0) result.append(nl + nl);
 			result.append(warn);
 		}

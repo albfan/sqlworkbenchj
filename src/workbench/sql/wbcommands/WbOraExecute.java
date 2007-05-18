@@ -66,9 +66,8 @@ public class WbOraExecute extends SqlCommand
 		{
 			this.currentStatement = aConnection.createStatement();
 			boolean hasResult = this.currentStatement.execute(realSql);
-
-			processResults(result, hasResult);
 			result.setSuccess();
+			processResults(result, hasResult);
 		}
 		catch (Exception e)
 		{

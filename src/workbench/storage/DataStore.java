@@ -1183,7 +1183,7 @@ public class DataStore
 	 * @return a List of {@link workbench.storage.DmlStatement}s to be sent to the database
 	 * 
 	 * @see workbench.storage.StatementFactory
-	 * @see workbench.storage.DmlStatement#getExecutableStatement(SqlLiteralFormatter)
+	 * @see workbench.storage.DmlStatement#getExecutableStatement(SqlLiteralFormatter, boolean)
 	 */
 	public List<DmlStatement> getUpdateStatements(WbConnection aConnection)
 		throws SQLException
@@ -1282,10 +1282,12 @@ public class DataStore
 	 * If everything was successful, the changes will be committed automatically
 	 * If an error occurs a rollback will be sent to the database
 	 * 
+	 * @param aConnection the connection where the database should be updated
+	 * @param errorHandler callback for error handling
 	 * @return the number of rows affected
 	 * 
 	 * @see workbench.storage.StatementFactory
-	 * @see workbench.storage.DmlStatement#getExecutableStatement(SqlLiteralFormatter)
+	 * @see workbench.storage.DmlStatement#getExecutableStatement(SqlLiteralFormatter, boolean)
 	 */
 	public synchronized int updateDb(WbConnection aConnection, JobErrorHandler errorHandler)
 		throws SQLException
@@ -1713,7 +1715,7 @@ public class DataStore
 		// first, which we have already tried in checkUpdateTable()
 		if (this.updateTable != null && !this.hasPkColumns())
 		{
-			LogMgr.logDebug("Datastore.updatePkInformation()", "Trying to retrieve PK information retrieved from pk mapping");
+			LogMgr.logInfo("Datastore.updatePkInformation()", "Trying to retrieve PK information retrieved from pk mapping");
 			this.resultInfo.readPkColumnsFromMapping(aConnection);
 		}
 	}

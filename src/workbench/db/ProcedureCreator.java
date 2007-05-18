@@ -97,16 +97,17 @@ public class ProcedureCreator
 			boolean nextTokenIsType = false;
 			while (t != null)
 			{
-				if ("CREATE".equals(t.getContents()))
+				String v = t.getContents();
+				if ("CREATE".equals(v))
 				{
 					nextTokenIsType = true;
 				}
-				else if (nextTokenIsType && "OR".equalsIgnoreCase(t.getContents()))
+				else if (nextTokenIsType && "OR".equalsIgnoreCase(v))
 				{
 					// waiting for REPLACE 
 					nextTokenIsType = false;
 				}
-				else if ("REPLACE".equalsIgnoreCase(t.getContents()))
+				else if ("REPLACE".equalsIgnoreCase(v))
 				{
 					isReplaceScript = true;
 					nextTokenIsType = true;

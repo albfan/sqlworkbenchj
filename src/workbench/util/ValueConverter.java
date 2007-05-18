@@ -77,6 +77,8 @@ public class ValueConverter
 	private SimpleDateFormat timestampFormatter;
 	private SimpleDateFormat formatter = new SimpleDateFormat();
 	private boolean autoConvertBooleanNumbers = true;
+	private Collection<String> booleanTrueValues = null;
+	private Collection<String> booleanFalseValues = null;
 	
 	public ValueConverter()
 	{
@@ -134,6 +136,30 @@ public class ValueConverter
 		this.autoConvertBooleanNumbers = flag;
 	}
 
+	/**
+	 * Define a list of literals that should be treated as true or
+	 * false when converting input values.
+	 * If either collection is null, both are considered null
+	 * If these values are not defined, the default boolean conversion implemented
+	 * in {@link workbench.util.StringUtil#stringToBool(String)} is used (this is the 
+	 * default)
+	 * @param trueValues String literals to be considered as <tt>true</tt>
+	 * @param falseValues String literals to be considered as <tt>false</tt>
+	 */
+	public void setBooleanLiterals(Collection<String> trueValues, Collection<String> falseValues)
+	{
+		if (trueValues == null || falseValues == null || trueValues.size() == 0 || falseValues.size() == 0)
+		{
+			this.booleanFalseValues = null;
+			this.booleanTrueValues = null;
+		}
+		else
+		{
+			this.booleanFalseValues = new HashSet<String>(falseValues);
+			this.booleanTrueValues = new HashSet<String>(trueValues);
+		}
+	}
+	
 	private final Integer INT_TRUE = Integer.valueOf(1);
 	private final Integer INT_FALSE = Integer.valueOf(0);
 	
@@ -172,8 +198,12 @@ public class ValueConverter
 					// true/false should be 1/0
 					if (autoConvertBooleanNumbers)
 					{
-						if ("false".equalsIgnoreCase(v)) return LONG_FALSE;
-						else if ("true".equalsIgnoreCase(v)) return LONG_TRUE;
+						Boolean b = getBoolean(v); 
+						if (b != null) 
+						{
+							if (b.booleanValue()) return LONG_TRUE;
+							else return LONG_FALSE;
+						}
 					}
 					throw new ConverterException(aValue, type, e);
 				}
@@ -193,8 +223,12 @@ public class ValueConverter
 					// true/false should be 1/0
 					if (autoConvertBooleanNumbers)
 					{
-						if ("false".equalsIgnoreCase(v)) return INT_FALSE;
-						else if ("true".equalsIgnoreCase(v)) return INT_TRUE;
+						Boolean b = getBoolean(v); 
+						if (b != null) 
+						{
+							if (b.booleanValue()) return INT_TRUE;
+							else return INT_FALSE;
+						}
 					}
 					throw new ConverterException(aValue, type, e);
 				}
@@ -216,8 +250,12 @@ public class ValueConverter
 					// true/false should be 1/0
 					if (autoConvertBooleanNumbers)
 					{
-						if ("false".equalsIgnoreCase(v)) return BIG_FALSE;
-						else if ("true".equalsIgnoreCase(v)) return BIG_TRUE;
+						Boolean b = getBoolean(v); 
+						if (b != null) 
+						{
+							if (b.booleanValue()) return BIG_TRUE;
+							else return BIG_FALSE;
+						}
 					}
 					throw new ConverterException(aValue, type, e);
 				}
@@ -252,6 +290,7 @@ public class ValueConverter
 			case Types.TIME:
 				if (v.length() == 0) return null;
 				return this.parseTime((String)aValue);
+				
 			case Types.BLOB:
 			case Types.BINARY:
 			case Types.LONGVARBINARY:
@@ -285,25 +324,8 @@ public class ValueConverter
 				
 			case Types.BIT:
 			case Types.BOOLEAN:
-				try
-				{
-					if (aValue instanceof String)
-					{
-						return Boolean.valueOf(StringUtil.stringToBool((String)aValue));
-					}
-					else if (aValue instanceof Number)
-					{
-						return Boolean.valueOf(((Number)aValue).intValue() == 1);
-					}
-					else
-					{
-						return aValue;
-					}
-				}
-				catch (Exception e)
-				{
-					throw new ConverterException(aValue, type, e);
-				}
+				return convertBool(v, type);
+
 			default:
 				return aValue;
 		}
@@ -321,7 +343,7 @@ public class ValueConverter
 
   public java.sql.Time parseTime(String time)
 	{
-		if (isToday(time))
+		if (isCurrentTime(time))
 		{
 			Calendar c = Calendar.getInstance();
 			c.clear(Calendar.YEAR);
@@ -330,6 +352,7 @@ public class ValueConverter
 			java.util.Date now = c.getTime();
 			return new java.sql.Time(now.getTime());
 		}
+		
 		java.sql.Time result = null;
 		java.util.Date parsed = null;
 		synchronized (this.formatter)
@@ -359,13 +382,30 @@ public class ValueConverter
 		return result;
 	}
 	
+	private java.sql.Date getToday()
+	{
+		Calendar c = Calendar.getInstance();
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.HOUR, 0);
+		c.clear(Calendar.MINUTE);
+		c.clear(Calendar.SECOND);
+		c.clear(Calendar.MILLISECOND);
+		java.util.Date now = c.getTime();
+		return new java.sql.Date(now.getTime());
+	}
+	
   public java.sql.Timestamp parseTimestamp(String aDate)
 		throws ParseException
   {
-		if (isToday(aDate))
+		if (isCurrentTimestamp(aDate))
 		{
 			java.sql.Timestamp ts = new java.sql.Timestamp(System.currentTimeMillis());
 			return ts;
+		}
+		
+		if (isCurrentDate(aDate))
+		{
+			return new java.sql.Timestamp(getToday().getTime());
 		}
 		
 		java.util.Date result = null;
@@ -423,19 +463,16 @@ public class ValueConverter
   public java.sql.Date parseDate(String aDate)
 		throws ParseException
   {
-		if (isToday(aDate))
+		if (isCurrentDate(aDate))
 		{
-			// This is the only way I know to construct a Date object
-			// where I can be sure that no time part is included
-			// as java.util.Date(int, int, int) is deprecated
-			Calendar c = Calendar.getInstance();
-			c.set(Calendar.HOUR_OF_DAY, 0);
-			c.clear(Calendar.SECOND);
-			c.clear(Calendar.MINUTE);
-			c.clear(Calendar.MILLISECOND);
-			java.util.Date now = c.getTime();
-			return new java.sql.Date(now.getTime());
+			return getToday();
 		}
+		
+		if (isCurrentTimestamp(aDate))
+		{
+			return new java.sql.Date(System.currentTimeMillis());
+		}
+		
 		java.util.Date result = null;
 		
 		if (this.defaultDateFormat != null)
@@ -526,22 +563,14 @@ public class ValueConverter
 		return keywords.contains(arg.toLowerCase());
 	}
 	
-	private boolean isToday(String arg)
-	{
-		if (StringUtil.isEmptyString(arg)) return false;
-		
-		Collection<String> keywords = getCurrentKeywords();
-		return keywords.contains(arg.toLowerCase());
-	}
-	
-	private Collection<String> getCurrentKeywords()
-	{
-		Set<String> allKeywords = new HashSet<String>(7);
-		allKeywords.addAll(Settings.getInstance().getListProperty("workbench.db.keyword.current_time", true));
-		allKeywords.addAll(Settings.getInstance().getListProperty("workbench.db.keyword.current_date", true));
-		allKeywords.addAll(Settings.getInstance().getListProperty("workbench.db.keyword.current_timestamp", true));
-		return allKeywords;
-	}
+//	private Collection<String> getCurrentKeywords()
+//	{
+//		Set<String> allKeywords = new HashSet<String>(7);
+//		allKeywords.addAll(Settings.getInstance().getListProperty("workbench.db.keyword.current_time", true));
+//		allKeywords.addAll(Settings.getInstance().getListProperty("workbench.db.keyword.current_date", true));
+//		allKeywords.addAll(Settings.getInstance().getListProperty("workbench.db.keyword.current_timestamp", true));
+//		return allKeywords;
+//	}
 		
 	private String adjustDecimalString(String input)
 	{
@@ -557,6 +586,7 @@ public class ValueConverter
 			if (i == pos)
 			{
 				// replace the decimal char with a . as that is required by BigDecimal(String)
+				// this way we only leave the last decimal character
 				result.append('.');
 			}
 			// filter out everything but valid number characters
@@ -568,5 +598,30 @@ public class ValueConverter
 
 		return result.toString();
 	}
+	
+	private Boolean getBoolean(Object value)
+		throws ConverterException
+	{
+		if (this.booleanFalseValues != null && this.booleanTrueValues != null)
+		{
+			if (booleanFalseValues.contains(value)) return Boolean.FALSE;
+			if (booleanTrueValues.contains(value)) return Boolean.TRUE;
+			throw new ConverterException("Input value [" + value + "] not in the list of defined true or false literals");
+		}
+		else if (value instanceof String)
+		{
+			if ("false".equalsIgnoreCase((String)value)) return Boolean.FALSE;
+			if ("true".equalsIgnoreCase((String)value)) return Boolean.TRUE;
+		}
+		return null;
+	}
+	
+	private Boolean convertBool(Object value, int type)
+		throws ConverterException
+	{
+		Boolean b = getBoolean(value);
+		if (b != null) return b;
 
+		throw new ConverterException(value, type, null);
+	}
 }

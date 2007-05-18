@@ -284,6 +284,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 					String question = ResourceMgr.getString("ErrDeleteTableData");
 					question = question.replaceAll("%table%", table.toString());
 					question = question.replaceAll("%error%", error);
+					question = question + "\n" + ResourceMgr.getString("MsgContinueQ");
 
 					int choice = WbSwingUtilities.getYesNoIgnoreAll(this.dialog,  question);
 					if (choice == JOptionPane.NO_OPTION)
@@ -358,7 +359,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 				deleteSql = "DELETE FROM " + tableName;
 			}
 			Statement stmt = this.connection.createStatement();
-			LogMgr.logDebug("TableDeleterUI.deleteTable()", "Executing: [" + deleteSql + "] to delete target table...");
+			LogMgr.logInfo("TableDeleterUI.deleteTable()", "Executing: [" + deleteSql + "] to delete target table...");
 			stmt.executeUpdate(deleteSql);
 			if (doCommit && !this.connection.getAutoCommit())
 			{

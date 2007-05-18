@@ -20,6 +20,7 @@ import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.QuoteEscapeType;
 import workbench.util.StringUtil;
+import workbench.util.ValueConverter;
 
 /**
  * A class to manage common parameters for various WbCommands.
@@ -44,6 +45,12 @@ public class CommonArgs
 	public static final String ARG_BATCHSIZE = "batchSize";
 	public static final String ARG_COMMIT_BATCH = "commitBatch";
 	public static final String ARG_QUOTE_ESCAPE = "quoteCharEscaping";
+	public static final String ARG_AUTO_BOOLEAN = "booleanToNumber";
+	public static final String ARG_DATE_FORMAT = "dateFormat";
+	public static final String ARG_TIMESTAMP_FORMAT = "timestampFormat";
+	public static final String ARG_DECCHAR = "decimal";
+	public static final String ARG_FALSE_LITERALS = "literalsFalse";
+	public static final String ARG_TRUE_LITERALS = "literalsTrue";
 	
 	private static List<String> getDelimiterArguments()
 	{
@@ -194,4 +201,41 @@ public class CommonArgs
 		}
 		return QuoteEscapeType.none;
 	}
+
+	public static void addConverterOptions(ArgumentParser cmdLine, boolean includeDateFormats)
+	{
+		cmdLine.addArgument(ARG_AUTO_BOOLEAN, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_DECCHAR);
+		if (includeDateFormats)
+		{
+			cmdLine.addArgument(ARG_DATE_FORMAT);
+			cmdLine.addArgument(ARG_TIMESTAMP_FORMAT);
+		}
+		cmdLine.addArgument(ARG_FALSE_LITERALS);
+		cmdLine.addArgument(ARG_TRUE_LITERALS);
+	}
+	
+	public static ValueConverter getConverter(ArgumentParser cmdLine)
+	{
+		ValueConverter converter = new ValueConverter();
+		converter.setAutoConvertBooleanNumbers(cmdLine.getBoolean(ARG_AUTO_BOOLEAN, true));
+
+		String format = cmdLine.getValue(ARG_DATE_FORMAT);
+		if (format != null) converter.setDefaultDateFormat(format);
+
+		format = cmdLine.getValue(ARG_TIMESTAMP_FORMAT);
+		if (format != null) converter.setDefaultTimestampFormat(format);
+
+		String decimal = cmdLine.getValue(ARG_DECCHAR);
+		if (decimal != null) converter.setDecimalCharacter(decimal.charAt(0));
+		
+		List<String> falseValues = StringUtil.stringToList(cmdLine.getValue(ARG_FALSE_LITERALS), ",", true, true, false);
+		List<String> trueValues = StringUtil.stringToList(cmdLine.getValue(ARG_TRUE_LITERALS), ",", true, true, false);
+		if (falseValues.size() > 0 && trueValues.size() > 0)
+		{
+			converter.setBooleanLiterals(trueValues, falseValues);
+		}
+		return converter;
+	}
+	
 }

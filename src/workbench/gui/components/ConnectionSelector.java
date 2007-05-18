@@ -30,6 +30,7 @@ import workbench.interfaces.Connectable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -230,6 +231,7 @@ public class ConnectionSelector
 		catch (ClassNotFoundException cnf)
 		{
 			error = ResourceMgr.getString("ErrDriverNotFound");
+			error = StringUtil.replace(error, "%class%", aProfile.getDriverclass());
 		}
 		catch (SQLException se)
 		{

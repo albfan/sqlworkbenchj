@@ -20,6 +20,11 @@ import workbench.util.SqlUtil;
 public class ConverterException extends java.lang.Exception
 {
 	
+	public ConverterException(String msg)
+	{
+		super(msg);
+	}
+	
 	public ConverterException(Object input, int type,  Exception cause)
 	{
 		super("Could not convert [" + input + "] for datatype " + SqlUtil.getTypeName(type), cause);

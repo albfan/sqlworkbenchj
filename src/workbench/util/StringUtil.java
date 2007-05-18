@@ -57,17 +57,6 @@ public class StringUtil
 	{
 		return new java.util.Date(System.currentTimeMillis());
 	}
-
-	public static boolean isMixedCase(String s)
-	{
-		return !isUpperCase(s) && !isLowerCase(s);
-	}
-
-	public static final int CASE_UNKNOWN = -1;
-	public static final int CASE_UPPER = 1;
-	public static final int CASE_LOWER = 2;
-	public static final int CASE_MIXED = 4;
-	
 	
 	public static int hashCode(CharSequence val)
 	{
@@ -158,26 +147,11 @@ public class StringUtil
 		value.delete(pos + 1, len);
 	}
 	
-	public static int getCase(String s)
+	public static boolean isMixedCase(String s)
 	{
-		if (s == null) return CASE_UNKNOWN;
-		int l = s.length();
-		boolean hasUpper = false;
-		boolean hasLower = false;
-		
-		for (int i = 0; i < l; i++)
-		{
-			char c = s.charAt(i);
-			
-			if (Character.isLowerCase(c)) hasLower = true;
-			if (Character.isUpperCase(c)) hasUpper = true;
-			if (hasLower && hasUpper) return CASE_MIXED;
-		}
-		if (hasLower) return CASE_LOWER;
-		if (hasUpper) return CASE_UPPER;
-		return CASE_UNKNOWN;
+		return !isUpperCase(s) && !isLowerCase(s);
 	}
-	
+
 	public static boolean isLowerCase(String s)
 	{
 		if (s == null) return false;
@@ -255,6 +229,11 @@ public class StringUtil
 		return s.toString();
 	}
 	
+	/**
+	 * Remove all characters that might not be allowed in a filename from the input string.
+	 * @param input the value to be used as a filename
+	 * @return input value without any characters that might not be allowed for a filename
+	 */
 	public static final String makeFilename(String input)
 	{
 		return input.replaceAll("[\t\\:\\\\/\\?\\*\\|<>\"'\\{\\}$%�\\[\\]\\^|\\&]", "").toLowerCase();
@@ -314,19 +293,19 @@ public class StringUtil
 
 	}
 
-	public static final String replace(String aString, String aValue, String aReplacement)
+	public static final String replace(String haystack,String needle, String aReplacement)
 	{
-		if (aReplacement == null) return aString;
+		if (aReplacement == null) return haystack;
 
-		int pos = aString.indexOf(aValue);
-		if (pos == -1) return aString;
+		int pos = haystack.indexOf(needle);
+		if (pos == -1) return haystack;
 
-		StringBuilder temp = replaceToBuffer(null, aString, aValue, aReplacement);
+		StringBuilder temp = replaceToBuffer(null,haystack,needle, aReplacement);
 
 		return temp.toString();
 	}
 
-	static final int [] limits=
+	static final int[] limits =
 	{
 		9,99,999,9999,99999,999999,9999999,99999999,999999999,Integer.MAX_VALUE
 	};
@@ -359,6 +338,7 @@ public class StringUtil
 		}
 		return true;
 	}
+	
 	public static boolean isNumber(String value)
 	{
 		try
@@ -511,23 +491,16 @@ public class StringUtil
 		return result;
 	}
 
-	public static final String[] toArray(Collection c)
+	public static final String[] toArray(Collection<String> strings)
 	{
-		if (c == null) return null;
-		if (c.size() == 0) return new String[0];
-		Iterator itr = c.iterator();
+		if (strings == null) return null;
+		if (strings.size() == 0) return new String[0];
+
 		int i = 0;
-		String[] result = new String[c.size()];
-		while (itr.hasNext())
+		String[] result = new String[strings.size()];
+		for (String s : strings)
 		{
-			Object o = itr.next();
-			if (o != null)
-			{
-				// Casting to a String would be slightly faster
-				// but this is more generic
-				result[i] = o.toString();
-			} 
-			i++;
+			result[i++] = s;
 		}
 		return result;
 	}
@@ -560,9 +533,8 @@ public class StringUtil
 		int numElements = 0;
 		StringBuilder result = new StringBuilder(aList.size() * 50);
 		Iterator itr = aList.iterator();
-		while (itr.hasNext())
+		for (Object o : aList)
 		{
-			Object o = itr.next();
 			if (o == null) continue;
 			if (numElements > 0)
 			{
@@ -925,10 +897,10 @@ public class StringUtil
 		if (len == 0) return theString;
 		StringBuilder outBuffer = new StringBuilder(len);
 
-		for (int x=0; x<len ; )
+		for (int x=0; x < len ; )
 		{
 			aChar = theString.charAt(x++);
-			if (aChar == '\\' && x < len - 1)
+			if (aChar == '\\' && x < len)
 			{
 				aChar = theString.charAt(x++);
 				
@@ -976,9 +948,9 @@ public class StringUtil
 					{
 						// Invalid encoded unicode character
 						// do not convert the stuff, but copy the 
-						// characters into the result buffer;
+						// characters into the result buffer
 						outBuffer.append("\\u");
-						if (i == 0) 
+						if (i == 0 && x < len) 
 						{
 							outBuffer.append(aChar);
 						}
@@ -996,11 +968,8 @@ public class StringUtil
 					else if (aChar == 'r') aChar = '\r';
 					else if (aChar == 'n') aChar = '\n';
 					else if (aChar == 'f') aChar = '\f';
-					else 
-					{
-						outBuffer.append('\\');
-						outBuffer.append(aChar);
-					}
+					else outBuffer.append('\\');
+					outBuffer.append(aChar);
 				}
 			}
 			else
@@ -1018,7 +987,9 @@ public class StringUtil
 		for (int i = 0; i < size; i++)
 		{
 			int c = value.charAt(i);
-			System.out.print(Integer.toHexString(c));
+			String s = Integer.toHexString(c);
+			if (s.length() == 1) System.out.print("0");
+			System.out.print(s);
 			System.out.print(" ");
 		}
 		System.out.println("");
@@ -1111,13 +1082,14 @@ public class StringUtil
 		return outBuffer.toString();
 	}
 
-	static void appendUnicode(StringBuilder buffer, char c)
+	private static void appendUnicode(StringBuilder buffer, char c)
 	{
 		buffer.append(hexDigit(c >> 12));
 		buffer.append(hexDigit(c >>  8));
 		buffer.append(hexDigit(c >>  4));
 		buffer.append(hexDigit(c));
 	}
+	
 	private static char hexDigit(int nibble)
 	{
 		return hexDigit[(nibble & 0xF)];

@@ -1880,7 +1880,9 @@ public class TableListPanel
 	}
 
 	/**
-	 * Return a TableIdentifier for the given row number in the table list
+	 * Return a TableIdentifier for the given row number in the table list.
+	 * @param row the row from the tableList Table
+	 * @return a TableIdentifier for that row
 	 */
 	private TableIdentifier createTableIdentifier(int row)
 	{

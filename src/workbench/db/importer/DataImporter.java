@@ -524,7 +524,7 @@ public class DataImporter
 			deleteSql = "DELETE FROM " + this.targetTable.getTableExpression(this.dbConn);
 		}
 		Statement stmt = this.dbConn.createStatement();
-		LogMgr.logDebug("DataImporter.deleteTarget()", "Executing: [" + deleteSql + "] to delete target table...");
+		LogMgr.logInfo("DataImporter.deleteTarget()", "Executing: [" + deleteSql + "] to delete target table...");
 		int rows = stmt.executeUpdate(deleteSql);
 		if (this.useTruncate)
 		{
@@ -1363,7 +1363,7 @@ public class DataImporter
 		{
 			this.insertSql = text.toString();
 			this.insertStatement = this.dbConn.getSqlConnection().prepareStatement(this.insertSql);
-			LogMgr.logDebug("DataImporter.prepareInsertStatement()", "Statement for insert: " + this.insertSql);
+			LogMgr.logInfo("DataImporter.prepareInsertStatement()", "Statement for insert: " + this.insertSql);
 		}
 		catch (SQLException e)
 		{
@@ -1477,7 +1477,7 @@ public class DataImporter
 		{
 			this.updateSql = sql.toString();
 			this.updateStatement = this.dbConn.getSqlConnection().prepareStatement(this.updateSql);
-			LogMgr.logDebug("DataImporter.prepareUpdateStatement()", "Statement for update: " + this.updateSql);
+			LogMgr.logInfo("DataImporter.prepareUpdateStatement()", "Statement for update: " + this.updateSql);
 		}
 		catch (SQLException e)
 		{
@@ -1579,7 +1579,7 @@ public class DataImporter
 			
 			if (commitNeeded)
 			{
-				LogMgr.logDebug("DataImporter.finishTable()", this.getAffectedRows() + " row(s) imported. Committing changes");
+				LogMgr.logInfo("DataImporter.finishTable()", this.getAffectedRows() + " row(s) imported. Committing changes");
 				this.dbConn.commit();
 			}
 			
@@ -1664,7 +1664,7 @@ public class DataImporter
 			this.closeStatements();
 			if (!this.dbConn.getAutoCommit())
 			{
-				LogMgr.logDebug("DataImporter.cleanupRollback()", "Rollback changes");
+				LogMgr.logInfo("DataImporter.cleanupRollback()", "Rollback changes");
 				this.dbConn.rollback();
 				this.updatedRows = 0;
 				this.insertedRows = 0;

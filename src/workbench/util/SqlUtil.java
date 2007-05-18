@@ -315,7 +315,7 @@ public class SqlUtil
 				{
 					bracketCount --;
 				}
-				else if (bracketCount == 0 && (",".equals(v) || SqlFormatter.SELECT_TERMINAL.contains(t.getContents())))
+				else if (bracketCount == 0 && (",".equals(v) || SqlFormatter.SELECT_TERMINAL.contains(v)))
 				{
 					String col = select.substring(lastColStart, t.getCharBegin());
 					if (includeAlias)
@@ -326,7 +326,7 @@ public class SqlUtil
 					{
 						result.add(striptColumnAlias(col));
 					}
-					if (SqlFormatter.SELECT_TERMINAL.contains(t.getContents()))
+					if (SqlFormatter.SELECT_TERMINAL.contains(v))
 					{
 						nextIsCol = false;
 						lastColStart = -1;
@@ -912,7 +912,7 @@ public class SqlUtil
 		return display;
 	}
 	
-	public static String getWarnings(WbConnection con, Statement stmt, boolean retrieveOutputMsg)
+	public static CharSequence getWarnings(WbConnection con, Statement stmt, boolean retrieveOutputMsg)
 	{
 		try
 		{
@@ -976,8 +976,8 @@ public class SqlUtil
 			// make sure the warnings are cleared from both objects!
 			stmt.clearWarnings();
 			con.clearWarnings();
-
-			return msg.toString();
+			StringUtil.trimTrailingWhitespace(msg);
+			return msg;
 		}
 		catch (Exception e)
 		{

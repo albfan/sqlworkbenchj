@@ -22,6 +22,7 @@ import workbench.log.LogMgr;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.MessageBuffer;
+import workbench.util.ValueConverter;
 
 /**
  * @author  support@sql-workbench.net
@@ -48,6 +49,8 @@ public class QueryCopySource
 
 	public boolean hasErrors() { return this.hasErrors; }
 	public boolean hasWarnings() { return this.hasWarnings; }
+	
+	public void setValueConverter(ValueConverter converter) {}
 	
 	public void setReceiver(RowDataReceiver rec)
 	{

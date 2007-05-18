@@ -66,6 +66,7 @@ public class IteratingScriptParser
 	private Pattern[] SLC_PATTERNS =
          { Pattern.compile("(?mi)^\\s*SET\\s*\\w*\\s*(ON|OFF)\\s*;?\\s*$"),
 					 Pattern.compile("(?mi)^\\s*ECHO\\s*((ON)|(OFF))\\s*;?\\s*$"),
+					 Pattern.compile("(?mi)^\\s*DECLARE\\s*\\S*.*$"),
 					 Pattern.compile("(?mi)^\\s*WHENEVER\\s*ERROR\\s*$"),
 					 Pattern.compile("(?mi)^\\s*SET\\s*TRANSACTION\\s*READ\\s*((WRITE)|(ONLY))\\s*;?\\s*$")
 	       };
@@ -78,7 +79,6 @@ public class IteratingScriptParser
 	{
 	}
 	
-
 	/**
 	 * Initialize a ScriptParser from a file with a given encoding.
 	 * @see #setFile(File, String)
@@ -181,7 +181,7 @@ public class IteratingScriptParser
 		this.reset();
 	}
 	
-	private void reset()
+	public void reset()
 	{
 		lastCommandEnd = 0;
 		lastPos = 0;

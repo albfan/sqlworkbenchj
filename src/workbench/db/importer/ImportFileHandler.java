@@ -33,6 +33,10 @@ import workbench.util.WbFile;
 import workbench.util.ZipUtil;
 
 /**
+ * This class manages access to an import file and possible attachments that 
+ * were created by {@link workbench.db.exporter.DataExporter. 
+ * The import file can either be a regular file, or stored in a ZIP archive. 
+ * 
  * @author support@sql-workbench.net
  */
 public class ImportFileHandler
@@ -49,6 +53,15 @@ public class ImportFileHandler
 	{
 	}
 	
+	/**
+	 * Define the main input file used by this handler.
+	 * If the file is a ZIP Archive getMainFileReader() will 
+	 * return a Reader for the first file in the archive.
+	 * (DataExporter creates an archive with a single
+	 * file in it).
+	 * @param mainFile the basefile
+	 * @param enc the encoding for the basefile
+	 */ 
 	public void setMainFile(File mainFile, String enc)
 		throws IOException
 	{
@@ -66,6 +79,13 @@ public class ImportFileHandler
 	
 	boolean isZip() { return isZip; }
 
+	/**
+	 * Return a Reader that is suitable for reading the contents
+	 * of the main file. The reader will be created with the 
+	 * encoding that was specified in {@link #setMainFile(File, String)}
+	 * @return a BufferedReader for the main file
+	 * @see #setMainFile(File, String)
+	 */
 	public BufferedReader getMainFileReader()
 		throws IOException
 	{
@@ -126,28 +146,35 @@ public class ImportFileHandler
 		throw new FileNotFoundException("Attachment file " + f.getName() + " not found in archive " + this.attachments.getName());	
 	}
 	
-	public InputStream getAttachedFileStream(File f)
+	/**
+	 * When exporting LOB data {@link workbench.db.exporter.DataExporter} will write
+	 * the LOB data for each row/column into separate files. These files might 
+	 * reside in a second ZIP archive.
+	 * @param attachmentFile the attachment to read
+	 * @return an InputStream to read the attachment
+	 */
+	
+	public InputStream getAttachedFileStream(File attachmentFile)
 		throws IOException
 	{
 		if (baseFile instanceof ClipboardFile) throw new IOException("Attachments not supported for Clipboard");
 		
 		if (this.isZip)
 		{
-			ZipEntry entry = findEntry(f);
+			ZipEntry entry = findEntry(attachmentFile);
 			return attachments.getInputStream(entry);
 		}
 		else
 		{
-			if (f.isAbsolute())
+			if (attachmentFile.isAbsolute())
 			{
-				return new FileInputStream(f);
+				return new FileInputStream(attachmentFile);
 			}
 			else
 			{
-				File realFile = new File(this.baseDir, f.getName());
+				File realFile = new File(this.baseDir,attachmentFile.getName());
 				return new FileInputStream(realFile);
 			}
-			
 		}
 	}
 

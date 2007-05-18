@@ -168,6 +168,9 @@ public class DmlStatement
 	 *	directly. The statement contains the parameter values
 	 *	as literals. No placeholders are used.
 	 *	This statement is executed after setUsePreparedStatement(false) is called
+	 * @param literalFormatter the Formatter for date and other literals
+	 * @param withSemicolon if true, a semicolon will be appended to the generated SQL
+	 * @return a SQL statement that can be executed
 	 */
 	public String getExecutableStatement(SqlLiteralFormatter literalFormatter, boolean withSemicolon)
 	{

@@ -124,7 +124,6 @@ public class SqlLiteralFormatter
 		{
 			if (this.isDbId)
 			{
-				LogMgr.logDebug("SqlLiteralFormatter.setProduct()", "Ignoring request for DBMS as a DBID is already used");
 				return;
 			}
 			product = null;
@@ -210,7 +209,6 @@ public class SqlLiteralFormatter
 			pattern = Settings.getInstance().getProperty(key, null);
 			if (pattern == null)
 			{
-				LogMgr.logDebug("SqlLiteralFormatter.createFormatter()", "No pattern found for '" + format + "' for type=" + type + ". Using 'standard'");
 				key = "workbench.sql.literals." + STANDARD_DATE_LITERAL_TYPE + "." + type + ".pattern";
 				pattern = Settings.getInstance().getProperty(key, defaultPattern);
 			}

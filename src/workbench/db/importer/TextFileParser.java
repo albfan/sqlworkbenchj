@@ -614,7 +614,7 @@ public class TextFileParser
 				this.messages.append(ResourceMgr.getString("ErrNoMultiLine") + "\n");
 				enableMultiLineMode = false;
 			}
-			LogMgr.logDebug("TextFileParser.processOneFile()", "Using line ending: " + lineEnding.replaceAll("\\r", "\\\\r").replaceAll("\\n", "\\\\n"));
+			LogMgr.logInfo("TextFileParser.processOneFile()", "Using line ending: " + lineEnding.replaceAll("\\r", "\\\\r").replaceAll("\\n", "\\\\n"));
 			// now that we have already used the Reader supplied by the fileHandler, 
 			// we have to close and re-open the ZIP archive in order to make sure we start at the beginning
 			// as we cannot rely on mark() and reset() to be available for the ZIP archives.

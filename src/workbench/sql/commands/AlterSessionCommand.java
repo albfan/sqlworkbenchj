@@ -64,7 +64,7 @@ public class AlterSessionCommand
 			{
 				oldSchema = meta.getCurrentSchema();
 			}
-			else if ("TIME_ZONE".equalsIgnoreCase(parm))
+			else if ("TIME_ZONE".equalsIgnoreCase(parm) && meta.isOracle())
 			{
 				// this should be the = sign, skip it
 				token = lexer.getNextToken(false, false);
@@ -99,6 +99,7 @@ public class AlterSessionCommand
 					result.addMessage(ResourceMgr.getString("MsgSchemaChanged") + " " + schema);
 				}
 			}
+			
 			result.setSuccess();
 		}
 		catch (Exception e)

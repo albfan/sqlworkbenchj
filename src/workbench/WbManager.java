@@ -890,7 +890,6 @@ public class WbManager
 				this.batchMode = false;
 				String url = cmdLine.getValue(ARG_CONN_URL);
 				String jar = cmdLine.getValue(ARG_CONN_JAR);
-				//String profile = cmdLine.getValue(ARG_PROFILE);
 				if (!StringUtil.isEmptyString(url) && !StringUtil.isEmptyString(jar))
 				{
 					// Do not read the driver templates if a connection is specified directly
@@ -1013,34 +1012,36 @@ public class WbManager
 	{
 		int exitCode = 0;
 		BatchRunner runner = BatchRunner.createBatchRunner(cmdLine);
-		int step = 1;
 
 		if (runner != null)
 		{
 			try
 			{
 				runner.connect();
-				if (runner.isSuccess())
-				{
-					step = 2;
-					runner.execute();
-				}
 			}
 			catch (Exception e)
 			{
 				exitCode = 1;
-				// no need to log connect errors, already done by ConnectionMgr
-				if (step == 2)
+				// no need to log connect errors, already done by BatchRunner and ConnectionMgr
+			}
+			
+			try
+			{
+				if (runner.isConnected())
 				{
-					LogMgr.logError("WbManager.runBatch()", "Error running batch scripts", e);
+					runner.execute();
 				}
+				if (!runner.isSuccess()) exitCode = 2;
+			}
+			catch (Exception e)
+			{
+				exitCode = 2;
 			}
 			finally
 			{
 				ConnectionMgr mgr = ConnectionMgr.getInstance();
 				if (mgr != null) mgr.disconnectAll();
 			}
-			if (!runner.isSuccess() && exitCode == 0) exitCode = 2;
 		}
 		else
 		{

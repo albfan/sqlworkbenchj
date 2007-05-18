@@ -151,7 +151,11 @@ public class WbConnection
 		if (this.profile == null) return;
 		if (this.sqlConnection == null) return;
 		String sql = profile.getPreDisconnectScript();
-		runConnectScript(sql);
+		if (!StringUtil.isEmptyString(sql))
+		{
+			LogMgr.logInfo("WbConnection.runPreDisconnectScript()", "Executing statement: " + sql);
+			runConnectScript(sql);
+		}
 	}
 	
 	void runPostConnectScript()
@@ -159,7 +163,11 @@ public class WbConnection
 		if (this.profile == null) return;
 		if (this.sqlConnection == null) return;
 		String sql = profile.getPostConnectScript();
-		runConnectScript(sql);
+		if (!StringUtil.isEmptyString(sql))
+		{
+			LogMgr.logInfo("WbConnection.runPostConnectScript()", "Executing statement: " + sql);
+			runConnectScript(sql);
+		}
 	}	
 	
 	private void runConnectScript(String sql)
@@ -176,7 +184,7 @@ public class WbConnection
 			while (itr.hasNext())
 			{
 				command = p.getNextCommand();
-				LogMgr.logDebug("WbConnection.runConnectScript()", "Executing statement: " + sql);
+				
 				stmt.execute(command);
 				this.scriptError.append(ResourceMgr.getString("MsgBatchExecutingStatement"));
 				this.scriptError.append(": ");

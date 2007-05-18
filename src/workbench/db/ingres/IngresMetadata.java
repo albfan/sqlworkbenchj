@@ -27,6 +27,8 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
 /**
+ * Ingres related metadata information.
+ * 
  * @author  support@sql-workbench.net
  */
 public class IngresMetadata

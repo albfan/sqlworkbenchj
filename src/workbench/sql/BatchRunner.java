@@ -45,6 +45,7 @@ import workbench.util.WbFile;
  * A class to run several statements from a script file. This is used
  * when running SQL Workbench in batch mode and for the {@link workbench.sql.wbcommands.WbInclude}
  * command.
+ * 
  * @author  support@sql-workbench.net
  */
 public class BatchRunner
@@ -77,6 +78,13 @@ public class BatchRunner
 		this.stmtRunner.setFullErrorReporting(true);
 	}
 
+	/**
+	 * The baseDir is used when including other scripts using WbInclude
+	 * If the filename of the included script is a relative filename
+	 * then the scriptrunner will assume the script is located in the 
+	 * baseDir
+	 * @see StatementRunner#setBaseDir(String)
+	 */
 	public void setBaseDir(String dir) 
 	{ 
 		this.stmtRunner.setBaseDir(dir);
@@ -146,9 +154,16 @@ public class BatchRunner
 		this.stmtRunner.setConnection(this.connection);
 	}
 
+	public boolean isConnected()
+	{
+		return this.connection != null;
+	}
+	
 	public void connect()
 		throws SQLException, ClassNotFoundException
 	{
+		this.connection = null;
+		
 		if (this.profile == null)
 		{
 			// Allow batch run without a profile for e.g. running a single WbCopy
@@ -167,14 +182,18 @@ public class BatchRunner
 		}
 		catch (ClassNotFoundException e)
 		{
+			String error = ResourceMgr.getString("ErrDriverNotFound");
+			error = StringUtil.replace(error, "%class%", profile.getDriverclass());
+			System.out.println(error);
 			success = false;
 			throw e;
 		}
 		catch (SQLException e)
 		{
 			success = false;
-			LogMgr.logError("BatchRunner", ResourceMgr.getString("MsgBatchConnectError") + ": " + ExceptionUtil.getDisplay(e), null);
-			System.out.println(ResourceMgr.getString("MsgBatchConnectError") + ":\n" + ExceptionUtil.getDisplay(e));
+			String msg = ResourceMgr.getString("MsgBatchConnectError") + ": " + ExceptionUtil.getDisplay(e);
+			LogMgr.logError("BatchRunner", msg, null);
+			System.out.println(msg);
 			throw e;
 		}
 	}

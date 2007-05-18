@@ -98,13 +98,13 @@ public class SetCommand extends SqlCommand
 			{
 				result = new StatementRunnerResult();
 				this.currentStatement = aConnection.createStatement();
-				this.currentStatement.execute(aSql);
-				StringBuilder warnings = new StringBuilder();
-				if (this.appendWarnings(aConnection, this.currentStatement , warnings))
-				{
-					result.setWarning(true);
-					result.addMessage(warnings.toString());
-				}
+				// Using a generic execute ensures that servers that 
+				// can process more than one statement with a single SQL 
+				// are treated correctly. E.g. when sending a SET and a SELECT 
+				// as one statement for SQL Server
+				boolean hasResult = this.currentStatement.execute(aSql);
+				result.setSuccess();
+				processMoreResults(aSql, result, hasResult);
 			}
 		}
 		catch (Throwable e)
