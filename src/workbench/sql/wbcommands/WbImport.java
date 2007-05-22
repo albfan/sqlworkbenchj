@@ -15,6 +15,7 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
@@ -31,7 +32,6 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ConverterException;
-import workbench.util.QuoteEscapeType;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
@@ -123,6 +123,15 @@ public class WbImport
 	
 	public String getVerb() { return VERB; }
 
+	private void addWrongParamsMessage(StatementRunnerResult result)
+	{
+		if (WbManager.getInstance().isBatchMode()) return;
+		String msg = getWrongParamsMessage();
+		result.addMessageNewLine();
+		result.addMessage(msg);
+		result.setFailure();
+	}
+	
 	private String getWrongParamsMessage()
 	{
 		String result = ResourceMgr.getString("ErrImportWrongParameters");
@@ -158,8 +167,7 @@ public class WbImport
 		
 		if (!cmdLine.hasArguments())
 		{
-			result.addMessage(getWrongParamsMessage());
-			result.setFailure();
+			addWrongParamsMessage(result);
 			return result;
 		}
 
@@ -170,9 +178,7 @@ public class WbImport
 		if (filename == null && dir == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrImportFileMissing"));
-			result.addMessage("");
-			result.addMessage(getWrongParamsMessage());
-			result.setFailure();
+			addWrongParamsMessage(result);
 			return result;
 		}
 
@@ -184,8 +190,7 @@ public class WbImport
 		if (type == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrImportTypeMissing"));
-			result.addMessage(getWrongParamsMessage());
-			result.setFailure();
+			addWrongParamsMessage(result);
 			return result;
 		}
 

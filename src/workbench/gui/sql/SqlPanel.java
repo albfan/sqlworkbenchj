@@ -261,7 +261,6 @@ public class SqlPanel
 	protected Interruptable worker;
 
 	private static final Border statusBarBorder = new CompoundBorder(new EmptyBorder(2, 1, 0, 1), new EtchedBorder());
-	private static final Border logBorder = new EmptyBorder(0,2,0,0);
 
 	private boolean appendResults = false;
 	
@@ -281,24 +280,8 @@ public class SqlPanel
 		statusBar.setBorder(statusBarBorder);
 		editor.setStatusBar(statusBar);
 		editor.setBorder(new EtchedBorderTop());
-
-		log = new JTextArea();
+		log = new LogArea();
 		
-		// Save the default background when the component is enabled/editable
-		// because we want to use that color when turning off editing as well
-		// The JGoodies look and feel displays the area in gray if it is not editable
-		Color bg = log.getBackground();
-		
-		log.setBorder(logBorder);
-		log.setFont(Settings.getInstance().getMsgLogFont());
-		log.setEditable(false);
-		log.setLineWrap(true);
-		log.setWrapStyleWord(true);
-		
-		// Now that the text area is set to readonly, re-apply the default background color
-		log.setBackground(bg);
-		log.addMouseListener(new TextComponentMouseListener());
-
 		this.resultTab = new WbTabbedPane();
 		this.resultTab.setTabPlacement(JTabbedPane.TOP);
 		this.resultTab.setDoubleBuffered(true);
@@ -485,14 +468,10 @@ public class SqlPanel
 		{
 			boolean hasFile = editor.hasFileLoaded();
 			this.fileDiscardAction.setEnabled(hasFile);
-
 			if (hasFile)
 			{
-				this.showFileIcon();
-			}
-			else
-			{
-				this.removeIconFromTab();
+				// reset a user-defined tab name if a file is loaded
+				this.tabName = null;
 			}
 			updateTabTitle();
 		}
@@ -705,7 +684,6 @@ public class SqlPanel
 		this.toolbarActions.add(this.sqlHistory.getShowLastStatementAction());
 
 		this.toolbarActions.add(this.updateAction);
-		//this.toolbarActions.add(this.startEdit);
 		this.toolbarActions.add(this.insertRow);
 		this.toolbarActions.add(this.duplicateRow);
 		this.toolbarActions.add(this.deleteRow);
@@ -893,13 +871,12 @@ public class SqlPanel
 		{
 			fireDbExecStart();
 			this.updateRunning = true;
-			this.log.setText(ResourceMgr.getString("MsgUpdatingDatabase"));
-			this.log.append("\n");
+			setLogText(ResourceMgr.getString("MsgUpdatingDatabase") + "\n");
 			this.currentData.saveChanges(this.dbConnection, this);
 		}
 		catch (OutOfMemoryError mem)
 		{
-			this.log.setText(ExceptionUtil.getDisplay(mem));
+			setLogText(ExceptionUtil.getDisplay(mem));
 			showBusyIcon(false);
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -921,7 +898,7 @@ public class SqlPanel
 			fireDbExecEnd();
 			WbSwingUtilities.showDefaultCursor(this);
 		}
-		this.log.append(this.currentData.getLastMessage());
+		appendToLog(this.currentData.getLastMessage());
 		this.checkResultSetActions();
 	}
 
@@ -948,7 +925,7 @@ public class SqlPanel
 	public void showLogMessage(String aMsg)
 	{
 		this.showLogPanel();
-		this.log.setText(aMsg);
+		setLogText(aMsg);
 	}
 
 	/**
@@ -956,9 +933,20 @@ public class SqlPanel
 	 */
 	public void clearLog()
 	{
-		this.log.setText("");
+		setLogText("");
 	}
 
+	protected void setLogText(final String msg)
+	{
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				log.setText(msg);
+			}
+		});
+	}
+	
 	/**
 	 *	Show the panel with the log messages.
 	 */
@@ -1258,7 +1246,7 @@ public class SqlPanel
 			}
 			this.clearResultTabs();
 			this.makeReadOnly();
-			this.log.setText("");
+			setLogText("");
 		}
 	}
 
@@ -1925,7 +1913,7 @@ public class SqlPanel
 
 	public void appendToLog(final String aString)
 	{
-		EventQueue.invokeLater(new Runnable()
+		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
@@ -1946,7 +1934,7 @@ public class SqlPanel
 		this.showBusyIcon(false);
 		try
 		{
-			String msg = ResourceMgr.getString("MsgConfirmExecution") + "\n" + StringUtil.leftString(command, 60, true);
+			String msg = ResourceMgr.getString("MsgConfirmExecution") + "\n" + StringUtil.getMaxSubstring(command, 60);
 			int choice = WbSwingUtilities.getYesNoExecuteAll(this, msg);
 			switch (choice)
 			{
@@ -2042,6 +2030,7 @@ public class SqlPanel
 		}
 		
 	}
+	
 	private void clearResultTabs()
 	{
 		try
@@ -2260,7 +2249,7 @@ public class SqlPanel
 			}
 			else
 			{
-				this.log.setText("");
+				setLogText("");
 				this.clearResultTabs();
 				firstResultIndex = 0;
 			}
@@ -2670,12 +2659,7 @@ public class SqlPanel
 	{
 		if (how == ResultReceiver.ShowType.logText)
 		{
-			this.log.append("\n");
-			this.log.append(ResourceMgr.getString("MsgLoadRelatedData"));
-			this.log.append("\n");
-			this.log.append(sql);
-			this.log.append("\n");
-			this.log.append("\n");
+			appendToLog("\n" + ResourceMgr.getString("MsgLoadRelatedData") + "\n" + sql + "\n\n");
 		}
 		else if (how != ResultReceiver.ShowType.showNone)
 		{
@@ -2687,9 +2671,7 @@ public class SqlPanel
 			}
 			else if (comment != null)
 			{
-				this.editor.appendLine("\n");
-				this.editor.appendLine(comment);
-				this.editor.appendLine("\n");
+				this.editor.appendLine("\n" + comment + "\n");
 				pos = this.editor.getDocumentLength();
 			}
 			else
@@ -2697,9 +2679,7 @@ public class SqlPanel
 				this.editor.appendLine("\n\n");
 				pos = this.editor.getDocumentLength();
 			}
-			this.editor.appendLine(sql);
-			this.editor.appendLine(";");
-			this.editor.appendLine("\n");
+			this.editor.appendLine(sql + ";\n");
 			this.editor.setCaretPosition(pos);
 			this.editor.scrollToCaret();
 		}		

@@ -13,6 +13,7 @@ package workbench.gui.renderer;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Graphics;
 
 import javax.swing.JTable;
@@ -29,14 +30,10 @@ public class SqlTypeRenderer
 	extends DefaultTableCellRenderer
 	implements WbRenderer
 {
-	private Color selectedForeground;
-	private Color selectedBackground;
-	private Color unselectedForeground;
-	private Color unselectedBackground;
-	
 	private Color alternateColor = Settings.getInstance().getAlternateRowColor();
 	private boolean useAlternatingColors = Settings.getInstance().getUseAlternateRowColor();
 	private boolean isPrinting = false;
+	private Font printFont;
 	
 	public SqlTypeRenderer()
 	{
@@ -55,7 +52,12 @@ public class SqlTypeRenderer
 			String display = SqlUtil.getTypeName(type);
 			this.setText(display);
 			this.setToolTipText(display);
-			
+			Font oldFont = null;
+			if (isPrinting && printFont != null)
+			{
+				oldFont = getFont();
+				this.setFont(printFont);
+			}
 			if (hasFocus)
 			{
 				this.setBorder(WbSwingUtilities.FOCUSED_CELL_BORDER);
@@ -65,34 +67,27 @@ public class SqlTypeRenderer
 				this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 			}
 
-			if (isSelected)
+			if (isSelected && !isPrinting)
 			{
-				if (selectedForeground == null)
-				{
-					this.selectedForeground = table.getSelectionForeground();
-					this.selectedBackground = table.getSelectionBackground();
-				}
-				super.setForeground(this.selectedForeground);
-				super.setBackground(this.selectedBackground);
+				setForeground(table.getSelectionForeground());
+				setBackground(table.getSelectionBackground());
 			}
 			else
 			{
-				if (selectedForeground == null)
-				{
-					this.unselectedForeground = table.getForeground();
-					this.unselectedBackground = table.getBackground();
-				}
-				super.setForeground(this.unselectedForeground);
+				setForeground(table.getForeground());
 				if (useAlternatingColors && ((row % 2) == 1) && !isPrinting)
 				{
-					super.setBackground(this.alternateColor);
+					setBackground(this.alternateColor);
 				}
 				else
 				{
-					super.setBackground(this.unselectedBackground);
+					setBackground(table.getBackground());
 				}
 			}
-			
+			if (oldFont != null)
+			{
+				setFont(oldFont);
+			}
 		}
 		catch (Exception e)
 		{
@@ -108,6 +103,7 @@ public class SqlTypeRenderer
 	public void print(Graphics g)
 	{
 		this.isPrinting = true;
+		printFont = g.getFont();
 		super.print(g);
 		this.isPrinting = false;
 	}

@@ -44,18 +44,6 @@ public class EditorOptionsPanel
 		selectionColor.setSelectedColor(Settings.getInstance().getEditorSelectionColor());
 		editorFont.setSelectedFont(Settings.getInstance().getEditorFont());
 
-		// It is important to add these in the correct order
-		// which is defined by the numeric values from Settings.SHOW_NO_FILENAME
-		// SHOW_FILENAME and SHOW_FULL_PATH
-		this.windowTitleComboBox.addItem(ResourceMgr.getString("TxtShowNone"));
-		this.windowTitleComboBox.addItem(ResourceMgr.getString("TxtShowName"));
-		this.windowTitleComboBox.addItem(ResourceMgr.getString("TxtShowPath"));
-		int type = Settings.getInstance().getShowFilenameInWindowTitle();
-		if (type >= Settings.SHOW_NO_FILENAME && type <= Settings.SHOW_FULL_PATH)
-		{
-			this.windowTitleComboBox.setSelectedIndex(type);
-		}
-
 		String[] items = new String[] {
 			ResourceMgr.getString("LblLTDefault"),
 			ResourceMgr.getString("LblLTDos"),
@@ -109,7 +97,6 @@ public class EditorOptionsPanel
 		set.setEditorFont(editorFont.getSelectedFont());
 		set.setAlternateDelimiter(alternateDelim.getDelimiter());
 		set.setRightClickMovesCursor(rightClickMovesCursor.isSelected());
-		set.setShowFilenameInWindowTitle(this.windowTitleComboBox.getSelectedIndex());
 		set.setEditorSelectionColor(selectionColor.getSelectedColor());
 		set.setAutoJumpNextStatement(this.autoAdvance.isSelected());
 		set.setEditorTabWidth(StringUtil.getIntValue(this.tabSize.getText(), 2));
@@ -141,8 +128,6 @@ public class EditorOptionsPanel
     electricScroll = new javax.swing.JTextField();
     rightClickLabel = new WbCheckBoxLabel();
     rightClickMovesCursor = new javax.swing.JCheckBox();
-    windowTitleLabel = new javax.swing.JLabel();
-    windowTitleComboBox = new javax.swing.JComboBox();
     selectionColorLabel = new javax.swing.JLabel();
     errorColor = new workbench.gui.components.WbColorPicker();
     errorColorLabel = new javax.swing.JLabel();
@@ -282,23 +267,6 @@ public class EditorOptionsPanel
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 11);
     add(rightClickMovesCursor, gridBagConstraints);
-
-    windowTitleLabel.setText(ResourceMgr.getString("LblShowEditorInfo"));
-    windowTitleLabel.setToolTipText(ResourceMgr.getDescription("LblShowEditorInfo"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 13;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(3, 12, 0, 0);
-    add(windowTitleLabel, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 13;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(3, 11, 0, 15);
-    add(windowTitleComboBox, gridBagConstraints);
 
     selectionColorLabel.setText(ResourceMgr.getString("LblSelectionColor"));
     selectionColorLabel.setToolTipText(ResourceMgr.getDescription("LblSelectionColor"));
@@ -495,8 +463,6 @@ public class EditorOptionsPanel
   private workbench.gui.components.WbColorPicker selectionColor;
   private javax.swing.JLabel selectionColorLabel;
   private javax.swing.JTextField tabSize;
-  private javax.swing.JComboBox windowTitleComboBox;
-  private javax.swing.JLabel windowTitleLabel;
   // End of variables declaration//GEN-END:variables
 
 }

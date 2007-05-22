@@ -131,6 +131,12 @@ public class WbCommandAnalyzer
 	 */
 	protected String getCurrentParameter()
 	{
+		if (cursorPos > 1 && cursorPos <= this.sql.length())
+		{
+			char c = this.sql.charAt(cursorPos - 1);
+			if (Character.isWhitespace(c)) return null;
+		}
+		
 		String word = StringUtil.getWordLeftOfCursor(this.sql, this.cursorPos, " \t");
 		if (word == null) return null;
 		if (word.startsWith("-") && word.length() > 2)

@@ -29,7 +29,7 @@ import workbench.util.MessageBuffer;
 public class StatementRunnerResult
 {
 	private List<ResultSet> results;
-	private List<Integer> updateCounts;
+	private long totalUpdateCount;
 	private MessageBuffer messages;
 	private List<DataStore> datastores;
 	private String sourceCommand;
@@ -97,20 +97,15 @@ public class StatementRunnerResult
 		return this.results.size();
 	}
 
-	public void addUpdateCount(int count)
-	{
-		if (this.updateCounts == null) this.updateCounts = new LinkedList<Integer>();
-		this.updateCounts.add(new Integer(count));
-	}
-
 	public void addUpdateCountMsg(int count)
 	{
-		addUpdateCount(count);
+		this.totalUpdateCount += count;
 		addMessage(count + " " + ResourceMgr.getString("MsgRowsAffected"));
 	}
 	
 	public void addMessage(MessageBuffer buffer)
 	{
+		if (buffer == null) return;
 		this.messages.append(buffer);
 	}
 
@@ -121,6 +116,7 @@ public class StatementRunnerResult
 	
 	public void addMessage(CharSequence msgBuffer)
 	{
+		if (msgBuffer == null) return;
 		if (messages.getLength() > 0) messages.appendNewLine();
 		messages.append(msgBuffer);
 	}
@@ -170,14 +166,7 @@ public class StatementRunnerResult
 	
 	public long getTotalUpdateCount()
 	{
-		if (this.updateCounts == null || this.updateCounts.size() == 0) return 0;
-		Iterator<Integer> itr = updateCounts.iterator();
-		long result = 0;
-		for (Integer value : updateCounts)
-		{
-			result += value.intValue();
-		}
-		return result;
+		return totalUpdateCount;
 	}
 
 	/**
@@ -235,7 +224,7 @@ public class StatementRunnerResult
 		}
 		clearResultSets();
 		clearMessageBuffer();
-		if (this.updateCounts !=null) this.updateCounts.clear();
+		this.totalUpdateCount = 0;
 		this.sourceCommand = null;
 		this.hasWarning = false;
 		this.executionTime = -1;

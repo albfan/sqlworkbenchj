@@ -1339,6 +1339,26 @@ public class Settings
 		return SHOW_NO_FILENAME;
 	}
 
+	public void setShowWorkspaceInWindowTitle(boolean flag)
+	{
+		setProperty("workbench.gui.display.showpworkspace", flag);
+	}
+	
+	public boolean getShowWorkspaceInWindowTitle()
+	{
+		return getBoolProperty("workbench.gui.display.showpworkspace", true);
+	}
+	
+	public void setShowProfileGroupInWindowTitle(boolean flag)
+	{
+		setProperty("workbench.gui.display.showprofilegroup", flag);
+	}
+	
+	public boolean getShowProfileGroupInWindowTitle()
+	{
+		return getBoolProperty("workbench.gui.display.showprofilegroup", false);
+	}
+	
 	public String getSqlParameterPrefix()
 	{
 		String value = getProperty("workbench.sql.parameter.prefix", "$[");

@@ -278,21 +278,29 @@ public class StringUtil
 		return target;
 	}
 
-	public static final String leftString(String aString, int count, boolean includeDots)
+	/**
+	 * Replacement for StringBuilder.lastIndexOf() which does
+	 * a lot of object creation and copying to achieve this.
+	 * This implementation should be a lot faster for StringBuilder
+	 * and StringBuffer, and will basically be the same for String
+	 * objects.
+	 * 
+	 * @param s the string to search in 
+	 * @param c the character to look for 
+	 * @return -1 if c was not found, the position of c in s otherwise
+	 */
+	public static final int lastIndexOf(CharSequence s, char c)
 	{
-		if (aString == null) return null;
-		if (aString.length() <= count) return aString;
-		if (includeDots)
+		int len = s.length();
+		if (s == null || len == 0) return -1;
+		
+		for (int i=(len - 1); i > 0; i--)
 		{
-			return aString.substring(0, count) + "...";
+			if (s.charAt(i) == c) return i;
 		}
-		else
-		{
-			return aString.substring(0, count);
-		}
-
+		return -1;
 	}
-
+	
 	public static final String replace(String haystack,String needle, String aReplacement)
 	{
 		if (aReplacement == null) return haystack;

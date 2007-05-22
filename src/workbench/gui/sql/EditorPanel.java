@@ -572,7 +572,8 @@ public class EditorPanel
 	public boolean openFile()
 	{
 		boolean result = false;
-		if (!this.canCloseFile())
+		YesNoCancelResult choice = this.canCloseFile();
+		if (choice == YesNoCancelResult.cancel)
 		{
 			this.requestFocusInWindow();
 			return false;
@@ -594,14 +595,7 @@ public class EditorPanel
 			
 			result = readFile(fc.getSelectedFile(), encoding);
 			
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				public void run()
-				{
-					SwingUtilities.getWindowAncestor(EditorPanel.this).validate();
-					SwingUtilities.getWindowAncestor(EditorPanel.this).repaint();
-				}
-			});
+			WbSwingUtilities.repaintLater(this.getParent());
 			
 			lastDir = fc.getCurrentDirectory().getAbsolutePath();
 			Settings.getInstance().setLastSqlDir(lastDir);
@@ -657,18 +651,22 @@ public class EditorPanel
 		return result;
 	}
 
-	public boolean canCloseFile()
+	public YesNoCancelResult canCloseFile()
 	{
-		if (!this.hasFileLoaded()) return true;
-		if (!this.isModified()) return true;
+		if (!this.hasFileLoaded()) return YesNoCancelResult.yes;
+		if (!this.isModified()) return YesNoCancelResult.yes;
 		int choice = this.checkAndSaveFile();
 		if (choice == JOptionPane.YES_OPTION)
 		{
-			return true;
+			return YesNoCancelResult.yes;
 		}
-		else
+		else if (choice == JOptionPane.NO_OPTION)
 		{
-			return false;
+			return YesNoCancelResult.no;
+		}
+		else 
+		{
+			return YesNoCancelResult.cancel;
 		}
 	}
 
@@ -972,7 +970,7 @@ public class EditorPanel
 				if (fileList != null && fileList.size() == 1)
 				{
 					File file = (File)fileList.get(0);
-					if (this.canCloseFile())
+					if (this.canCloseFile() != YesNoCancelResult.cancel)
 					{
 						this.readFile(file);
 						dropTargetDropEvent.getDropTargetContext().dropComplete(true);

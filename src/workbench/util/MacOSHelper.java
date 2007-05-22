@@ -22,6 +22,7 @@ import workbench.log.LogMgr;
 /**
  * This class - if running on Mac OS - will install an ApplicationListener
  * that responds to the Apple-Q keystroke (handleQuit).
+ * 
  * Information taken from
  * 
  * http://developer.apple.com/documentation/Java/Reference/1.4.2/appledoc/api/com/apple/eawt/Application.html
@@ -46,8 +47,7 @@ public class MacOSHelper
 		{
 			LogMgr.logDebug("MacOSHelper.installApplicationHandler()", "Trying to install Mac OS ApplicationListener");
 			Class appClass = Class.forName("com.apple.eawt.Application");
-			Method getApp = appClass.getMethod("getApplication", new Class[] {} );
-			Object application = getApp.invoke(null, new Object[] {});
+			Object application = appClass.newInstance();
 			if (application != null)
 			{
 				LogMgr.logDebug("MacOSHelper.installApplicationHandler()", "Obtained Application object");
@@ -69,6 +69,10 @@ public class MacOSHelper
 				enablePrefs.invoke(application, Boolean.TRUE);
 				LogMgr.logDebug("MacOSHelper.installApplicationHandler()", "Registered for Preferences event");
 			}
+			else
+			{
+				LogMgr.logError("MacOSHelper.installApplicationHandler()", "Could not create com.apple.eawt.Application",null);
+			}
 		}
 		catch (Exception e)
 		{
@@ -86,27 +90,35 @@ public class MacOSHelper
 		}
 		try
 		{
-			LogMgr.logDebug("MacOSHelper.invoke()", "ApplicationEvent [" + method.getName() + "] received.");
-			if ("handleQuit".equals(method))
+			String methodName = method.getName();
+			LogMgr.logDebug("MacOSHelper.invoke()", "ApplicationEvent [" + methodName + "] received.");
+			if ("handleQuit".equals(methodName))
 			{
 				// According to the Apple docs, one should call ApplicationEvent.setHandled(false);
 				// in order to be able to cancel exiting.
 				// See http://developer.apple.com/samplecode/OSXAdapter/listing2.html
 				setHandled(args[0], false);
+//				LogMgr.logDebug("MacOSHelper.invoke()", "Calling exitWorkbench()");
 				WbManager.getInstance().exitWorkbench();
 			}
-			else if ("handleAbout".equals(method))
+			else if ("handleAbout".equals(methodName))
 			{
-				setHandled(args[0], true);
+//				LogMgr.logDebug("MacOSHelper.invoke()", "Showing about dialog...");
 				WbManager.getInstance().showDialog("workbench.gui.dialogs.WbAboutDialog");			
-			}
-			else if ("handlePreferences".equals(method))
-			{
 				setHandled(args[0], true);
+			}
+			else if ("handlePreferences".equals(methodName))
+			{
+//				LogMgr.logDebug("MacOSHelper.invoke()", "Showing options dialog...");
 				OptionsDialogAction.showOptionsDialog();
+				setHandled(args[0], true);
+			}
+			else 
+			{
+				LogMgr.logInfo("MacOSHelper.invoke()", "Ignoring unknown event.");
 			}
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			StringBuilder arguments = new StringBuilder();
 			

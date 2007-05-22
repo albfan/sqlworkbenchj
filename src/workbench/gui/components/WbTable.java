@@ -21,6 +21,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -32,6 +33,8 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
@@ -67,6 +70,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -210,15 +214,13 @@ public class WbTable
 		this.headerPopup.add(this.optimizeAllCol.getMenuItem());
 		this.headerPopup.add(this.setColWidth.getMenuItem());
 
-		this.setDoubleBuffered(true);
-
-		Font dataFont = this.getFont();
+		Font dataFont = Settings.getInstance().getDataFont(true);
 		if (dataFont == null) dataFont = (Font)UIManager.get("Table.font");
 
 		this.defaultEditor = WbTextCellEditor.createInstance(this);
 		this.defaultEditor.setFont(dataFont);
 
-		setFont(dataFont);
+		super.setFont(dataFont);
 		
 		// Create a separate editor for numbers that is right alligned
 		numberEditorTextField = new JTextField();
@@ -1387,30 +1389,39 @@ public class WbTable
 
 	public void optimizeColWidth(int aColumn, int minWidth, int maxWidth, boolean respectColumnName)
 	{
-		if (this.dwModel == null) return;
 		if (aColumn < 0 || aColumn > this.getColumnCount() - 1) return;
 
-		Font f = this.getFont();
-		FontMetrics fm = this.getFontMetrics(f);
+//		Font f = this.getFont();
+//		FontMetrics fm = this.getFontMetrics(f);
 		TableColumnModel colMod = this.getColumnModel();
 		TableColumn col = colMod.getColumn(aColumn);
 		int addWidth = this.getAdditionalColumnSpace();
-		String s = null;
-		int stringWidth = 0;
 		int optWidth = minWidth;
-
+		
 		if (respectColumnName)
 		{
-			s = this.dwModel.getColumnName(aColumn);
-			stringWidth = fm.stringWidth(s) + 5;
-			optWidth = Math.max(optWidth, stringWidth + addWidth);
+			JTableHeader th = this.getTableHeader();
+			TableCellRenderer rend = col.getCellRenderer();
+			if (rend == null) rend = th.getDefaultRenderer();
+			String colName = getColumnName(aColumn);
+			Component c = rend.getTableCellRendererComponent(this, colName, false, false, 0, aColumn);
+			Font headerFont = c.getFont();
+			FontMetrics hfm = c.getFontMetrics(headerFont);
+			int headerWidth = hfm.stringWidth(colName) + addWidth + 5;
+			optWidth = Math.max(minWidth, headerWidth);
 		}
+		
 		int rowCount = this.getRowCount();
 
+		String s = null;
+		int stringWidth = 0;
+		
 		for (int row = 0; row < rowCount; row ++)
 		{
 			TableCellRenderer rend = this.getCellRenderer(row, aColumn);
 			Component c = rend.getTableCellRendererComponent(this, getValueAt(row, aColumn), false, false, row, aColumn);
+			Font f = c.getFont();
+			FontMetrics fm = c.getFontMetrics(f);
 			if (c instanceof WbRenderer)
 			{
 				s = ((WbRenderer)c).getDisplayValue();

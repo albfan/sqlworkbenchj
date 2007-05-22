@@ -15,6 +15,7 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import workbench.WbManager;
 import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 import workbench.interfaces.ParameterPrompter;
@@ -121,8 +122,11 @@ public class SqlCommand
 		StringBuilder msg = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter"));
 		msg.append(cmdLine.getUnknownArguments());
 		result.addMessage(msg.toString());
-		result.addMessage(""); // add empty line
-		result.addMessage(help);
+		if (!WbManager.getInstance().isBatchMode()) 
+		{
+			result.addMessage(""); // add empty line
+			result.addMessage(help);
+		}
 		result.setFailure();
 	}
 	/**

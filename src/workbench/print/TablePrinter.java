@@ -240,6 +240,9 @@ public class TablePrinter
 		pageHeight -= (lineHeight + 10); // reserve one row for the column headers
 
     int rowsPerPage = (int)(pageHeight / lineHeight);
+		if (this.headerText != null) rowsPerPage--;
+		if (this.footerText != null) rowsPerPage--;
+		
     TableColumnModel colModel = table.getColumnModel();
 		int colCount = colModel.getColumnCount();
 
@@ -347,6 +350,13 @@ public class TablePrinter
 		}
 	}
 
+	public int _print(Graphics g, PageFormat pageFormat, int pageIndex)
+		throws PrinterException
+	{
+		Printable p = this.table.getPrintable(JTable.PrintMode.NORMAL, null, null);
+		return p.print(g, pageFormat, pageIndex);
+	}
+	
 	public int print(Graphics g, PageFormat pageFormat, int pageIndex)
 		throws PrinterException
 	{
@@ -365,7 +375,7 @@ public class TablePrinter
 
     pg.setColor(Color.BLACK);
 		pg.setFont(this.printFont);
-		TablePrintPage p = this.pages[pageIndex];
+		TablePrintPage currentPage = this.pages[pageIndex];
 
 		StringBuilder footer = new StringBuilder(100);
 		footer.append(this.footerText);
@@ -373,19 +383,18 @@ public class TablePrinter
 		if (pagesAcross > 1)
 		{
 			footer.append("(");
-			footer.append(p.getPageIndexDisplay());
+			footer.append(currentPage.getPageIndexDisplay());
 			footer.append("/");
 			footer.append(this.pagesAcross);
 			footer.append(")");
 		}
 		else
 		{
-			footer.append(p.getPageIndexDisplay());
+			footer.append(currentPage.getPageIndexDisplay());
 		}
 		footer.append("/");
 		footer.append(this.pageCount);
 
-		//String footer = this.footerText + " " +  + + (this.pageCount);
 		FontMetrics fm = pg.getFontMetrics(this.printFont);
 		Rectangle2D bounds = fm.getStringBounds(footer.toString(), pg);
 		double len = bounds.getWidth();
@@ -396,10 +405,10 @@ public class TablePrinter
 		{
 			bounds = fm.getStringBounds(this.headerText, pg);
 			len = bounds.getWidth();
-			pg.drawString(this.headerText, (int)((wPage - len)/2), (int)(lineSpacing));
-			pg.translate(0,(int)(lineSpacing  + 5));
+			pg.drawString(this.headerText, (int)((wPage - len)/2), (int)(lineSpacing) + 5);
+			pg.translate(0,(int)(lineSpacing  + 10));
 		}
-		p.print(pg);
+		currentPage.print(pg);
 
 		pg.setTransform(oldTransform);
 		pg.setClip(null);

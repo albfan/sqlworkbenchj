@@ -82,7 +82,7 @@ public class TextAreaRenderer
 		this.isAlternatingRow = this.useAlternatingColors && ((row % 2) == 1);
 		if (!this.isEditing)
 		{
-			if (isSelected)
+			if (isSelected && !isPrinting)
 			{
 				setBackground(selectedBackground);
 				setForeground(selectedForeground);

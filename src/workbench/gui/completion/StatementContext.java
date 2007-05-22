@@ -31,10 +31,11 @@ public class StatementContext
 {
 	private BaseAnalyzer analyzer;
 	private CommandTester wbTester = new CommandTester();
+	
 	public StatementContext(WbConnection conn, String sql, int pos)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
-		
+	
 		if (!inSubSelect(conn, sql, pos))
 		{
 			if ("SELECT".equalsIgnoreCase(verb) || WbSelectBlob.VERB.equalsIgnoreCase(verb))

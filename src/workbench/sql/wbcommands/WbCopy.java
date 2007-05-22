@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -88,7 +89,16 @@ public class WbCopy
 	public String getVerb() { return VERB; }
 
 	protected boolean isConnectionRequired() { return false; }
-	
+
+	private void addWrongParams(StatementRunnerResult result)
+	{
+		if (!WbManager.getInstance().isBatchMode())
+		{
+			result.addMessageNewLine();
+			result.addMessage(ResourceMgr.getString("ErrCopyWrongParameters"));
+			result.setFailure();
+		}
+	}
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
@@ -119,9 +129,7 @@ public class WbCopy
 		if (sourcetable == null && sourcequery == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrCopyNoSourceSpecified"));
-			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrCopyWrongParameters"));
-			result.setFailure();
+			addWrongParams(result);
 			return result;
 		}
 
@@ -129,9 +137,7 @@ public class WbCopy
 		if (targettable == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrCopyNoTarget"));
-			result.addMessage(""); // force empty line
-			result.addMessage(ResourceMgr.getString("ErrCopyWrongParameters"));
-			result.setFailure();
+			addWrongParams(result);
 			return result;
 		}
 

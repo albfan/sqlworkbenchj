@@ -505,25 +505,33 @@ public class WbManager
 	  return this.batchMode;
 	}
 
+	public boolean canExit()
+	{
+		return this.saveWindowSettings();
+	}
+	
 	public void exitWorkbench()
 	{
 		MainWindow w = this.getCurrentWindow();
 		this.exitWorkbench(w);
 	}
 
-	public void exitWorkbench(JFrame window)
+	public boolean exitWorkbench(JFrame window)
 	{
 		// saveSettings() will also prompt if any modified
 		// files should be changed
 		boolean canExit = this.saveWindowSettings();
-		if (!canExit) return;
+		if (!canExit) 
+		{
+			LogMgr.logInfo("WbManaer.exitWorkbench()", "Exiting application was cancelled during saveWindowSettings()");
+			return false;
+		}
 		
-		//shutdownInProgress = true;
 		if (window == null)
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 			this.doShutdown(0);
-			return;
+			return true;
 		}
 
 		// When disconnecting it can happen that the disconnect itself
@@ -547,6 +555,7 @@ public class WbManager
 		};
 		t.setDaemon(false);
 		t.start();
+		return true;
 	}
 
 	private void createCloseMessageWindow(JFrame parent)
@@ -597,6 +606,7 @@ public class WbManager
 	 */
 	protected void disconnected()
 	{
+		
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -606,6 +616,7 @@ public class WbManager
 					closeMessage.setVisible(false);
 					closeMessage.dispose();
 				}
+				LogMgr.logDebug("WbManager.disconnected()", "Closing all windows...");
 				closeAllWindows();
 			}
 		});
@@ -624,7 +635,6 @@ public class WbManager
 		}
 		this.mainWindows.clear();
 		this.closeToolWindows();
-		//ShowHelpAction.getInstance().closeHelp();
 	}
 
 	protected void saveSettings()
@@ -644,6 +654,8 @@ public class WbManager
 		saveSettings();
 		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.shutdown();
+		// The property workbench.system.doexit can be used to embedd the workbench.jar
+		// in other applications and still be able to call doShutdown()
 		boolean doExit = "true".equals(System.getProperty("workbench.system.doexit", "true"));
 		if (doExit) System.exit(errorCode);
 	}

@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.interfaces.ProgressReporter;
@@ -99,6 +100,14 @@ public class WbExport
 	
 	public String getVerb() { return VERB; }
 
+	private void addWrongArgumentsMessage(StatementRunnerResult result)
+	{
+		if (WbManager.getInstance().isBatchMode()) return;
+		String msg = getWrongArgumentsMessage();
+		result.addMessageNewLine();
+		result.addMessage(msg);
+	}
+
 	private String getWrongArgumentsMessage()
 	{
 		String msg = ResourceMgr.getString("ErrExportWrongParameters");
@@ -155,8 +164,7 @@ public class WbExport
 		if (!isTypeValid(type))
 		{
 			result.addMessage(ResourceMgr.getString("ErrExportWrongType"));
-			result.addMessage("");
-			result.addMessage(getWrongArgumentsMessage());
+			addWrongArgumentsMessage(result);
 			result.setFailure();
 			return result;
 		}
@@ -170,8 +178,7 @@ public class WbExport
 		if (type == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrExportTypeRequired"));
-			result.addMessage("");
-			result.addMessage(getWrongArgumentsMessage());
+			addWrongArgumentsMessage(result);
 			result.setFailure();
 			return result;
 		}
@@ -179,8 +186,7 @@ public class WbExport
 		if (file == null && outputdir == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrExportFileRequired"));
-			result.addMessage("");
-			result.addMessage(getWrongArgumentsMessage());
+			addWrongArgumentsMessage(result);
 			result.setFailure();
 			return result;
 		}
@@ -381,6 +387,7 @@ public class WbExport
 			if (cols != null) 
 			{
 				result.addMessage("The blobIdCols parameter is deprecated, please use lobIdCols");
+				result.setWarning(true);
 			}
 		}
 		List columns = StringUtil.stringToList(cols, ",", true, true, false);

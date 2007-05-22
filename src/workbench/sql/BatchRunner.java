@@ -393,13 +393,17 @@ public class BatchRunner
 				if (result != null)
 				{
 					error = !result.isSuccess();
+					String feedback = result.getMessageBuffer().toString();
+					
+					if (error) LogMgr.logError("BatchRunner.execute()", feedback, null);
+					else if (result.hasWarning()) LogMgr.logWarning("BatchRunner.execute()", feedback);
 					
 					if (result.hasMessages() && (this.stmtRunner.getVerboseLogging() || error))
 					{
 						this.printMessage("");
 						// Force a new line for the console
 						if (this.resultDisplay == null) System.out.println("");
-						this.printMessage(result.getMessageBuffer().toString());
+						this.printMessage(feedback);
 					}
 					else if (result.hasWarning())
 					{
@@ -409,7 +413,6 @@ public class BatchRunner
 						String verb = SqlUtil.getSqlVerb(sql);
 						String msg = StringUtil.replace(ResourceMgr.getString("MsgStmtCompletedWarn"), "%verb%", verb);	
 						this.printMessage(msg);
-						LogMgr.logWarning("BatchRunner.execute()", result.getMessageBuffer().toString());
 					}
 					executedCount ++;
 				}

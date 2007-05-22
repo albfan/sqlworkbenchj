@@ -13,14 +13,15 @@ package workbench.gui.renderer;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.FieldPosition;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.swing.SwingConstants;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  * @author  support@sql-workbench.net
@@ -30,7 +31,7 @@ public class NumberColumnRenderer
 {
 	private DecimalFormat decimalFormatter;
 	private DecimalFormatSymbols symb = new DecimalFormatSymbols();
-	private FieldPosition startPos = new FieldPosition(0);
+	private int maxDigits = -1;
 	
 	public NumberColumnRenderer()
 	{
@@ -58,16 +59,23 @@ public class NumberColumnRenderer
 		this.setHorizontalAlignment(SwingConstants.RIGHT);
 	}
 	
-	public final void setMaxDigits(int maxDigits)
+	public final void setMaxDigits(int digits)
 	{
-		if (maxDigits <= 0) maxDigits = 10;
-		decimalFormatter.setMaximumFractionDigits(maxDigits);
+		synchronized (this.decimalFormatter)
+		{
+			if (digits <= 0) this.maxDigits = 10;
+			else this.maxDigits = digits;
+			decimalFormatter.setMaximumFractionDigits(maxDigits);
+		}
 	}
 	
 	public void setDecimalSymbol(char aSymbol)
 	{
-		this.symb.setDecimalSeparator(aSymbol);
-		this.decimalFormatter.setDecimalFormatSymbols(this.symb);
+		synchronized (this.decimalFormatter)
+		{
+			this.symb.setDecimalSeparator(aSymbol);
+			this.decimalFormatter.setDecimalFormatSymbols(this.symb);
+		}
 	}
 	
 	private boolean isInteger(Number n)
@@ -85,23 +93,54 @@ public class NumberColumnRenderer
 		try
 		{
 			Number n = (Number) aValue;
-			synchronized (this.decimalFormatter)
+			
+			// BigDecimal cannot be formatted using a DecimalFormatter
+			// without possible loss of precission
+			if (n instanceof BigDecimal)
 			{
-				// BigDecimal cannot be formatted using a DecimalFormatter
-				// without possible loss of precission
-				if (n instanceof BigDecimal)
+				BigDecimal d = (BigDecimal)n;
+
+				// Oracle returns all numeric values as BigDecimal
+				// but if the value is actual an "Integer" toString() will
+				// return a String without a decimal separator
+				// in that case we won't apply the rounding to the 
+				// required number of decimal digits
+				String v = d.toString();
+				if (v.lastIndexOf('.') > -1)
 				{
-					displayValue = ((BigDecimal)n).toString();
+					char sepChar = this.symb.getDecimalSeparator();
+					// if a decimal point was found, then we have to apply rounding rules
+					BigDecimal rounded = d.setScale(this.maxDigits, RoundingMode.HALF_UP);
+
+					v = rounded.toString();
+					// toString() will use a dot as the decimal separator
+					// if the user configured a different one, we have to 
+					// replace the last dot in the string with the user
+					// defined decimal separator.
+					if (sepChar != '.')
+					{
+						int pos = v.lastIndexOf('.');
+						if (pos > -1)
+						{
+							char[] ca = v.toCharArray();
+							ca[pos] = sepChar;
+							v = new String(ca);
+						}
+					}
 				}
-				else if (isInteger(n))
-				{
-					// BigInteger cannot be formatted without a possible 
-					// loss of precission as well, but for all other 
-					// "Integer" types, toString() will also produce
-					// correct results.
-					displayValue = n.toString();
-				}
-				else 
+				
+				this.displayValue = v;
+			}
+			else if (isInteger(n))
+			{
+				// BigInteger cannot be formatted without a possible 
+				// loss of precission as well, but for "Integer" types, 
+				// toString() should produce the correct results
+				displayValue = n.toString();
+			}
+			else 
+			{
+				synchronized (this.decimalFormatter)
 				{
 					displayValue = decimalFormatter.format(n.doubleValue());
 				}

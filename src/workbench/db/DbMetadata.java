@@ -393,9 +393,12 @@ public class DbMetadata
 				realTypes.add(s);
 			}
 		}
-		// As the selectable types are used to retrieve meta-data information
-		// from the driver, we have to convert this to an array
-		tableTypesSelectable = StringUtil.toArray(realTypes);
+		tableTypesSelectable = new String[realTypes.size()];
+		int i = 0;
+		for (String s : realTypes)
+		{
+			tableTypesSelectable[i++] = s.toUpperCase();
+		}
 	}
 
 	public String getTableTypeName() { return tableTypeName; }

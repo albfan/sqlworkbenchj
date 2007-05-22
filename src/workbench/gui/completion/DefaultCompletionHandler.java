@@ -121,12 +121,13 @@ public class DefaultCompletionHandler
 
 		int index = parser.getCommandIndexAtCursorPos(cursorPos);
 		int commandCursorPos = parser.getIndexInCommand(index, cursorPos);
-		String sql = parser.getCommand(index);
+		String sql = parser.getCommand(index, false);
 		if (sql == null) 
 		{
 			showNoObjectsFoundMessage();
 			return false;
 		}
+		
 		this.currentWord = editor.getWordAtCursor(BaseAnalyzer.SELECT_WORD_DELIM);
 		
 		try

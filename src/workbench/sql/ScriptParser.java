@@ -261,8 +261,19 @@ public class ScriptParser
 	 */
 	public int getIndexInCommand(int commandIndex, int cursorPos)
 	{
-		int start = this.getStartPosForCommand(commandIndex);
-		return (cursorPos - start);
+		if (this.commands == null) this.parseCommands();
+		if (commandIndex < 0 || commandIndex >= this.commands.size()) return -1;
+		ScriptCommandDefinition b = this.commands.get(commandIndex);
+		int start = b.getStartPositionInScript();
+		int end = b.getEndPositionInScript();
+		int relativePos = (cursorPos - start);
+		int commandLength = (end - start);
+		if (relativePos > commandLength)
+		{
+			// This can happen when trimming the statements.
+			relativePos = commandLength;
+		}
+		return relativePos;
 	}
 	
 	/**
@@ -335,11 +346,20 @@ public class ScriptParser
 	 */
 	public String getCommand(int index)
 	{
+		return getCommand(index, true);
+	}
+	
+	/**
+	 * Return the command at the given index position.
+	 */
+	public String getCommand(int index, boolean rightTrimCommand)
+	{
 		if (this.commands == null) this.parseCommands();
 		if (index < 0 || index >= this.commands.size()) return null;
 		ScriptCommandDefinition c = this.commands.get(index);
 		String s = originalScript.substring(c.getStartPositionInScript(), c.getEndPositionInScript());
-		return StringUtil.rtrim(s);
+		if (rightTrimCommand) return StringUtil.rtrim(s);
+		else return s;
 	}
 
 	public int getSize() 

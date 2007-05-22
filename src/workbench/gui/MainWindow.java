@@ -1419,36 +1419,34 @@ public class MainWindow
 
 	protected void updateWindowTitle()
 	{
-		StringBuilder title = new StringBuilder(50);
+		final StringBuilder title = new StringBuilder(50);
 		title.append(ResourceMgr.TXT_PRODUCT_NAME);
+		title.append(" - ");
 
-		title.append("  [");
-
+		boolean showProfileGroup = Settings.getInstance().getShowProfileGroupInWindowTitle();
+		boolean showWorkspace = Settings.getInstance().getShowWorkspaceInWindowTitle();
+		
 		if (this.currentProfile == null)
 		{
 			title.append(ResourceMgr.getString("TxtNotConnected"));
 		}
 		else
 		{
-			title.append(this.currentProfile.getName());
+			if (showProfileGroup)
+				title.append(this.currentProfile.getKey());
+			else
+				title.append(this.currentProfile.getName());
 		}
-		boolean appended = false;
 
-		if (this.currentWorkspaceFile != null)
+		if (this.currentWorkspaceFile != null && showWorkspace)
 		{
 			File f = new File(this.currentWorkspaceFile);
 			String baseName = f.getName();
-			if (!this.isProfileWorkspace)
-			{
-				title.append(']');
-				appended = true;
-			}
-			title.append(" - (");
+			title.append(" - ");
 			title.append(baseName);
-			title.append(") ");
+			title.append(" ");
 		}
 
-		if (!appended) title.append(']');
 		int showTitle = Settings.getInstance().getShowFilenameInWindowTitle();
 		if (showTitle != Settings.SHOW_NO_FILENAME)
 		{
@@ -1472,8 +1470,16 @@ public class MainWindow
 				}
 			}
 		}
-		this.setTitle(title.toString());
-		this.jobIndicator.baseTitleChanged();
+		
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				setTitle(title.toString());
+				jobIndicator.baseTitleChanged();
+			}
+		});
+		
 	}
 
 	protected void closeConnectingInfo()

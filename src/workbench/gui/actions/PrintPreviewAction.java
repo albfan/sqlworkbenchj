@@ -19,6 +19,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.gui.components.WbTable;
+import workbench.print.Preview;
 import workbench.print.PrintPreview;
 import workbench.print.TablePrinter;
 import workbench.resource.ResourceMgr;

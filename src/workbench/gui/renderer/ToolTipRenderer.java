@@ -198,7 +198,7 @@ public class ToolTipRenderer
 
 		if (!this.isEditing)
 		{
-			if (this.selected)
+			if (this.selected && !isPrinting)
 			{
 				g.setColor(selectedBackground);
 				g.fillRect(0,0,w,h);
