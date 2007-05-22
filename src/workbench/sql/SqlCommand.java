@@ -492,12 +492,18 @@ public class SqlCommand
 	/**
 	 * Check if the passed SQL is a "batched" statement.
 	 * 
-	 * Returns true if the passed SQL Statement could be a "batched" 
+	 * Returns true if the passed SQL string could be a "batched" 
 	 * statement that actually contains more than one statement.
-	 * SQL Server supports these kind of "batches"
+	 * SQL Server supports these kind of "batches". If this is 
+	 * affected rows will always be shown, because we cannot know
+	 * if the statement did not update anything or if it actually
+	 * updated only 0 rows (for some reason SQL Server seems to 
+	 * return 0 as the updatecount even if no update was involved).
+	 * 
+	 * Currently this is only checking for newlines in the passed string.
 	 * 
 	 * @param sql the statement/script to check
-	 * @return true if the passed sql could contain more than one (independen) statement 
+	 * @return true if the passed sql could contain more than one (independent) statements
 	 */
 	protected boolean isMultiple(String sql)
 	{
@@ -505,8 +511,8 @@ public class SqlCommand
 		DbSettings settings = currentConnection.getDbSettings();
 		if(settings.supportsBatchedStatements())
 		{
-			// TODO: analyze the statement, if it is really a batched statement.
-			return (sql.indexOf(' ') > -1 || sql.indexOf('\n') > -1);
+			// TODO: analyze the statement properly to find out if it is really a batched statement.
+			return (sql.indexOf('\n') > -1);
 		}
 		return false;
 	}

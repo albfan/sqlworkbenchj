@@ -54,6 +54,32 @@ public class ScriptParserTest extends TestCase
 			fail(e.getMessage());
 		}
 	}
+
+	public void testCursorPosInCommand()
+	{
+		try
+		{
+			String script = "select 42 from dual;\n\nselect x\n        from y\n        \n        \n        ;";
+			int pos = script.length() - 3;
+			ScriptParser p = new ScriptParser();
+			p.allowEmptyLineAsSeparator(false);
+			p.setScript(script);
+			int index = p.getCommandIndexAtCursorPos(pos);
+			assertEquals(2, p.getSize());
+			assertEquals(1, index);
+			int sqlPos = p.getIndexInCommand(index, pos);
+			System.out.println("pos=" + sqlPos);
+			System.out.println("sqlpos=" + sqlPos);
+			String sql = p.getCommand(index);
+			System.out.println("sql length=" + sql.length());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testEmptyLines()
 	{
 		try

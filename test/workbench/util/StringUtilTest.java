@@ -29,6 +29,38 @@ public class StringUtilTest
 		super(testName);
 	}
 
+	public void testLastIndexOf()
+	{
+		try
+		{
+			String s = "this is a test.";
+			int pos = StringUtil.lastIndexOf(s, '.');
+			assertEquals(s.length() - 1, pos);
+			
+			s = "this. is. a. test.";
+			pos = StringUtil.lastIndexOf(s, '.');
+			assertEquals(s.length() - 1, pos);
+			
+			s = "this is a test";
+			pos = StringUtil.lastIndexOf(s, '.');
+			assertEquals(-1, pos);
+			
+			StringBuilder b = new StringBuilder("this is a test.");
+			pos = StringUtil.lastIndexOf(b, '.');
+			assertEquals(b.length() - 1, pos);
+			
+			b = new StringBuilder("this. is a test");
+			pos = StringUtil.lastIndexOf(b, '.');
+			assertEquals(4, pos);
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testDecodeUnicode()
 	{
 		try
