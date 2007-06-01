@@ -102,7 +102,6 @@ public class WbVersionReader
 	public UpdateVersion getAvailableUpdate()
 	{
 		VersionNumber current = ResourceMgr.getBuildNumber();
-		//VersionNumber current = new VersionNumber("93");
 		if (currentDevBuildNumber != null && currentDevBuildNumber.isNewerThan(current)) return UpdateVersion.devBuild;
 		if (currentStableBuildNumber!= null && currentStableBuildNumber.isNewerThan(current)) return UpdateVersion.stable;
 		return UpdateVersion.none;

@@ -616,7 +616,6 @@ public class WbManager
 					closeMessage.setVisible(false);
 					closeMessage.dispose();
 				}
-				LogMgr.logDebug("WbManager.disconnected()", "Closing all windows...");
 				closeAllWindows();
 			}
 		});
@@ -750,7 +749,6 @@ public class WbManager
 		main.display();
 		boolean connected = false;
 
-
 		if (checkCmdLine)
 		{
 			// get profile name from commandline
@@ -806,20 +804,21 @@ public class WbManager
 	public static final String ARG_CONN_PWD = "password";
 	public static final String ARG_CONN_AUTOCOMMIT = "autocommit";
 	public static final String ARG_CONN_ROLLBACK = "rollbackondisconnect";
-	public static final String ARG_IGNORE_DROP = "ignoredroperrors";
-	public static final String ARG_DISPLAY_RESULT = "displayresult";
-	public static final String ARG_SUCCESS_SCRIPT = "cleanupsuccess";
-	public static final String ARG_ERROR_SCRIPT = "cleanuperror";
-	public static final String ARG_SHOW_TIMING = "showtiming";
+	public static final String ARG_IGNORE_DROP = "ignoreDropErrors";
+	public static final String ARG_DISPLAY_RESULT = "displayResult";
+	public static final String ARG_SUCCESS_SCRIPT = "cleanupSuccess";
+	public static final String ARG_ERROR_SCRIPT = "cleanupError";
+	public static final String ARG_SHOW_TIMING = "showTiming";
 	public static final String ARG_FEEDBACK = "feedback";
 	public static final String ARG_WORKSPACE = "workspace";
-	public static final String ARG_ALT_DELIMITER = "altdelimiter";
+	public static final String ARG_ALT_DELIMITER = "altDelimiter";
 	public static final String ARG_DELIMITER = "delimiter";
 
 	// Other parameters
 	public static final String ARG_PROFILE = "profile";
 	public static final String ARG_PROFILE_GROUP = "profilegroup";
 	public static final String ARG_SHOWPROGRESS = "showprogress";
+	public static final String ARG_QUIET = "quiet";
 
 	private static final String ARG_PROFILE_STORAGE = "profilestorage";
 
@@ -865,6 +864,7 @@ public class WbManager
 		parser.addArgument("notemplates");
 		parser.addArgument(ARG_ALT_DELIMITER);
 		parser.addArgument(ARG_DELIMITER);
+		parser.addArgument(ARG_QUIET);
 		return parser;
 	}
 	
@@ -1044,6 +1044,12 @@ public class WbManager
 					runner.execute();
 				}
 				if (!runner.isSuccess()) exitCode = 2;
+			}
+			catch (OutOfMemoryError e)
+			{
+				LogMgr.logError("WbManager.runBatch()", "Not enough memory to finish the operation. Aborting execution!", null);
+				System.err.println("Not enough memory to finish the operation. Aborting execution!");
+				exitCode = 10;
 			}
 			catch (Exception e)
 			{

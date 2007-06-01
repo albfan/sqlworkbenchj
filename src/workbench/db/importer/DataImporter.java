@@ -45,6 +45,7 @@ import java.io.Reader;
 import java.sql.Clob;
 import java.sql.Savepoint;
 import java.sql.Types;
+import java.text.MessageFormat;
 import java.util.LinkedList;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ImportFileParser;
@@ -52,7 +53,6 @@ import workbench.storage.NullValue;
 import workbench.util.CloseableDataStream;
 import workbench.util.EncodingUtil;
 import workbench.util.MessageBuffer;
-import workbench.util.QuoteEscapeType;
 import workbench.util.WbThread;
 
 
@@ -1192,13 +1192,6 @@ public class DataImporter
 				}
 			}
 		}
-		if (this.parser != null)
-		{
-			this.messages.append(ResourceMgr.getString("MsgImportingFile"));
-			this.messages.appendNewLine();
-			this.messages.append(this.parser.getSourceFilename());
-			this.messages.appendNewLine();
-		}
 
 		this.errorCount = 0;
 		this.errorLimitAdded = false;
@@ -1209,6 +1202,13 @@ public class DataImporter
 			this.targetColumns = columns;
 			this.colCount = this.targetColumns.length;
 
+			if (this.parser != null)
+			{
+				String msg = ResourceMgr.getFormattedString("MsgImportingFile", this.parser.getSourceFilename(), this.targetTable.getTableName());
+				this.messages.append(msg);
+				this.messages.appendNewLine();
+			}
+			
 			if (this.createTarget)
 			{
 				try

@@ -43,6 +43,8 @@ public class ZipOutputFactory
 		zout = new ZipOutputStream(baseOut);
 		zout.setLevel(9);
 	}
+
+	public boolean isArchive() { return true; }
 	
 	public OutputStream createOutputStream(File output) throws IOException
 	{

@@ -1417,69 +1417,31 @@ public class MainWindow
 		}
 	}
 
+	protected String getCurrentEditorFile()
+	{
+		String filename = null;
+
+		MainPanel p  = this.getCurrentPanel();
+		if (p instanceof SqlPanel)
+		{
+			SqlPanel sql = (SqlPanel)p;
+			filename = sql.getCurrentFileName();
+		}
+		return filename;
+	}
+	
 	protected void updateWindowTitle()
 	{
-		final StringBuilder title = new StringBuilder(50);
-		title.append(ResourceMgr.TXT_PRODUCT_NAME);
-		title.append(" - ");
-
-		boolean showProfileGroup = Settings.getInstance().getShowProfileGroupInWindowTitle();
-		boolean showWorkspace = Settings.getInstance().getShowWorkspaceInWindowTitle();
-		
-		if (this.currentProfile == null)
-		{
-			title.append(ResourceMgr.getString("TxtNotConnected"));
-		}
-		else
-		{
-			if (showProfileGroup)
-				title.append(this.currentProfile.getKey());
-			else
-				title.append(this.currentProfile.getName());
-		}
-
-		if (this.currentWorkspaceFile != null && showWorkspace)
-		{
-			File f = new File(this.currentWorkspaceFile);
-			String baseName = f.getName();
-			title.append(" - ");
-			title.append(baseName);
-			title.append(" ");
-		}
-
-		int showTitle = Settings.getInstance().getShowFilenameInWindowTitle();
-		if (showTitle != Settings.SHOW_NO_FILENAME)
-		{
-			MainPanel p  = this.getCurrentPanel();
-			if (p instanceof SqlPanel)
-			{
-				SqlPanel sql = (SqlPanel)p;
-				String file = sql.getCurrentFileName();
-				if (file != null)
-				{
-					title.append(" - ");
-					if (showTitle == Settings.SHOW_FULL_PATH)
-					{
-						title.append(file);
-					}
-					else
-					{
-						File f = new File(file);
-						title.append(f.getName());
-					}
-				}
-			}
-		}
-		
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
-				setTitle(title.toString());
+				WindowTitleBuilder titleBuilder = new WindowTitleBuilder();
+				String title = titleBuilder.getWindowTitle(currentProfile, currentWorkspaceFile, getCurrentEditorFile());
+				setTitle(title);
 				jobIndicator.baseTitleChanged();
 			}
 		});
-		
 	}
 
 	protected void closeConnectingInfo()

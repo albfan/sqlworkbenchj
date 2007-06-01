@@ -84,7 +84,7 @@ public class WbSelectBlob
 		File f = new File(filename);
 		if (f.isDirectory())
 		{
-			String msg = ResourceMgr.getString("ErrUpdateBlobFileNotFound").replaceAll("%filename%", filename);
+			String msg = ResourceMgr.getFormattedString("ErrFileNotFound", filename);
 			result.addMessage(msg);
 			result.setFailure();
 			return result;

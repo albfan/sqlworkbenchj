@@ -1060,7 +1060,10 @@ public class DwPanel
 		
 		this.editingStarted = false;
 		
-		int[] selectedRows = this.dataTable.getSelectedRows();
+//		final int[] selectedRows = this.dataTable.getSelectedRows();
+		final int currentRow = this.dataTable.getEditingRow();
+		final int currentColumn = this.dataTable.getEditingColumn();
+		
 		// if the result is not yet updateable (automagically)
 		// then try to find the table. If the table cannot be
 		// determined, then ask the user
@@ -1098,23 +1101,28 @@ public class DwPanel
 			}
 			
 			this.editingStarted = true;
+			
 
 			// When changing the table model (which is happening
 			// when the status column is displayed) we need to restore
-			// the selection
-			int numSelectedRows = selectedRows.length;
-			if (selectedRows.length > 0)
+			// the current editing column/row
+			EventQueue.invokeLater(new Runnable()
 			{
-				ListSelectionModel model = this.dataTable.getSelectionModel();
-				model.setValueIsAdjusting(true);
-				// make sure nothing is selected, then restore the old selection
-				model.clearSelection();
-				for (int i = 0; i < numSelectedRows; i++)
+				public void run()
 				{
-					model.addSelectionInterval(selectedRows[i], selectedRows[i]);
+					if (currentRow > -1 && currentColumn > -1)
+					{
+						dataTable.selectCell(currentRow, currentColumn + 1);
+					}
+					else if (currentRow > -1)
+					{
+						dataTable.scrollToRow(currentRow);		
+						dataTable.setRowSelectionInterval(currentRow, currentRow);
+					}
+						
+					dataTable.requestFocusInWindow();
 				}
-				model.setValueIsAdjusting(false);
-			}
+			});
 
 			checkResultSetActions();
 		}
@@ -1133,7 +1141,7 @@ public class DwPanel
 			}
 			WbSwingUtilities.showErrorMessage(w, msg);
 		}
-		
+
 		return update;
 	}
 	

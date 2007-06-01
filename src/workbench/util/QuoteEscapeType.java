@@ -13,7 +13,7 @@ package workbench.util;
 
 /**
  *
- * @author info@sql-workbench.net
+ * @author support@sql-workbench.net
  */
 public enum QuoteEscapeType
 {

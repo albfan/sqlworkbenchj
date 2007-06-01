@@ -14,6 +14,7 @@ package workbench.resource;
 import java.awt.event.KeyEvent;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.MissingResourceException;
@@ -115,10 +116,16 @@ public class ResourceMgr
 		return getString("LblTabStatement");
 	}
 	
+	public static String getFormattedString(String key, Object ... values)
+	{
+		return MessageFormat.format(getString(key), values);
+	}
+	
 	public static String getString(String aKey)
 	{
 		return getString(aKey, false);
 	}
+	
 	public static String getString(String aKey, boolean replaceModifiers)
 	{
 		try

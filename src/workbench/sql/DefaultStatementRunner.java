@@ -49,11 +49,11 @@ public class DefaultStatementRunner
 	private WbStartBatch batchCommand;
 	private ResultLogger resultLogger;
 	private boolean verboseLogging;
-	private boolean supportsSelectInto = false;
 	private boolean removeComments;
 	private boolean fullErrorReporting = false;
 	private ParameterPrompter prompter;
 	private boolean removeNewLines = false;
+	private boolean ignoreDropErrors = false;
 	protected CommandMapper cmdMapper;
 	
 	public DefaultStatementRunner()
@@ -79,6 +79,16 @@ public class DefaultStatementRunner
 		this.controller = control;
 	}
 
+	public void setIgnoreDropErrors(boolean flag)
+	{
+		this.ignoreDropErrors = flag;
+	}
+	
+	public boolean getIgnoreDropErrors()
+	{
+		return this.ignoreDropErrors;
+	}
+	
 	/**
 	 * For testing purposes, to that non-default commands can be added 
 	 * during a JUnit test
@@ -103,6 +113,7 @@ public class DefaultStatementRunner
 		this.dbConnection = aConn;
 		
 		if (aConn == null) return;
+		this.ignoreDropErrors = aConn.getProfile().getIgnoreDropErrors();
 		
 		DbMetadata meta = this.dbConnection.getMetadata();
 		
@@ -268,7 +279,7 @@ public class DefaultStatementRunner
 				this.currentCommand.cancel();
 			}
 		}
-		catch (Throwable th)
+		catch (Exception th)
 		{
 			LogMgr.logWarning("StatementRunner.cancel()", "Error when cancelling statement", th);
 		}

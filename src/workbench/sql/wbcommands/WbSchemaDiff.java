@@ -193,7 +193,7 @@ public class WbSchemaDiff
 				// disconnect the target connection only if it was created by this command
 				if (targetCon.getId().startsWith("Wb-Diff"))
 				{
-					try { targetCon.disconnect(); } catch (Throwable th) {}
+					try { targetCon.disconnect(); } catch (Exception th) {}
 				}
 				return result;
 			}
@@ -231,11 +231,11 @@ public class WbSchemaDiff
 					result.setFailure();
 					if (targetCon.getId().startsWith("Wb-Diff"))
 					{
-						try { targetCon.disconnect(); } catch (Throwable th) {}
+						try { targetCon.disconnect(); } catch (Exception th) {}
 					}
 					if (sourceCon.getId().startsWith("Wb-Diff"))
 					{
-						try { sourceCon.disconnect(); } catch (Throwable th) {}
+						try { sourceCon.disconnect(); } catch (Exception th) {}
 					}
 					return result;
 				}
@@ -317,7 +317,7 @@ public class WbSchemaDiff
 		}
 		finally
 		{
-			try { out.close(); } catch (Throwable th) {}
+			try { out.close(); } catch (Exception th) {}
 		}
 		
 		if (diff.isCancelled())

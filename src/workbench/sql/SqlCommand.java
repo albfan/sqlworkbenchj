@@ -156,7 +156,7 @@ public class SqlCommand
 				this.currentStatement.cancel();
 				LogMgr.logDebug("SqlCommand.cancel()", "Cancelled.");
 			}
-			catch (Throwable th)
+			catch (Exception th)
 			{
 				LogMgr.logWarning("SqlCommand.cancel()", "Error when cancelling statement", th);
 			}
@@ -177,14 +177,14 @@ public class SqlCommand
 		{
 			if (!this.isCancelled)
 			{
-				try { this.currentStatement.clearWarnings(); } catch (Throwable th) {}
-				try { this.currentStatement.clearBatch(); } catch (Throwable th) {}
+				try { this.currentStatement.clearWarnings(); } catch (Exception th) {}
+				try { this.currentStatement.clearBatch(); } catch (Exception th) {}
 			}
-			try { this.currentStatement.close(); } catch (Throwable th) {}
+			try { this.currentStatement.close(); } catch (Exception th) {}
 		}
 		if (this.isCancelled)
 		{
-			try { this.currentConnection.rollback(); } catch (Throwable th) {}
+			try { this.currentConnection.rollback(); } catch (Exception th) {}
 		}
 		this.currentStatement = null;
 		this.isCancelled = false;
@@ -243,11 +243,11 @@ public class SqlCommand
 	{
 		if (this.isMultiple(sql))
 		{
-			this.processResults(result, hasResult);
+			processResults(result, hasResult);
 		}
 		else
 		{
-			this.appendWarnings(result);
+			appendWarnings(result);
 		}
 	}
 	
@@ -362,7 +362,7 @@ public class SqlCommand
 					}
 					finally
 					{
-						try { rs.close(); } catch (Throwable th) {}
+						try { rs.close(); } catch (Exception th) {}
 					}
 					result.addDataStore(this.currentRetrievalData);
 				}

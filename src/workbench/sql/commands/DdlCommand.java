@@ -74,18 +74,18 @@ public class DdlCommand extends SqlCommand
 			String msg = null;
 			result.setSuccess();
 			
-			if (isDropCommand(aSql) && aConnection.getIgnoreDropErrors())
+			if (isDropCommand(aSql) && this.runner.getIgnoreDropErrors())
 			{
 				try
 				{
 					this.currentStatement.executeUpdate(aSql);
 					result.addMessage(ResourceMgr.getString("MsgDropSuccess"));
 				}
-				catch (Throwable th)
+				catch (Exception th)
 				{
 					result.addMessage(ResourceMgr.getString("MsgDropWarning"));
 					result.addMessage(ExceptionUtil.getDisplay(th));
-					result.setFailure();
+					result.setSuccess();
 				}
 			}
 			else

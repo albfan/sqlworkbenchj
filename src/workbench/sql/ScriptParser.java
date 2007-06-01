@@ -148,13 +148,13 @@ public class ScriptParser
 		catch (Exception e)
 		{
 			LogMgr.logError("ScriptParser.readFile()", "Error reading file " + f.getAbsolutePath(), e);
-			content = new StringBuilder(0);
+			content = null;
 		}
 		finally
 		{
-			try { in.close(); } catch (Throwable th) {}
+			try { in.close(); } catch (Exception th) {}
 		}
-		this.setScript(content.toString());
+		this.setScript(content == null ? "" : content.toString());
 	}
 	
 	public void allowEmptyLineAsSeparator(boolean flag)

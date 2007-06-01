@@ -121,9 +121,9 @@ public class AlterSessionCommand
 			Class cls = sqlCon.getClass();
 			setTimezone = cls.getMethod("setSessionTimeZone", new Class[] {String.class} );
 		}
-		catch (Throwable e)
+		catch (Exception e)
 		{
-			e.printStackTrace();
+			// Ignore
 			return false;
 		}
 		

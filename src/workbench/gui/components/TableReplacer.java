@@ -111,12 +111,7 @@ public class TableReplacer
 				client.clearSelection();
 				if (pos.isValid())
 				{
-					client.scrollToRow(row);		
-					Rectangle rect = client.getCellRect(row,realCol,true);
-					client.setColumnSelectionAllowed(true);
-					client.scrollRectToVisible(rect); 
-					client.setRowSelectionInterval(row, row);
-					client.setColumnSelectionInterval(realCol, realCol);
+					client.selectCell(row, realCol);
 				}
 			}
 		});

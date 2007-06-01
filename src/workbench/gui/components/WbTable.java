@@ -681,23 +681,32 @@ public class WbTable
 		return comp;
 	}
 
-	public void changeSelection(int rowIndex, int columnIndex, boolean toggle, boolean extend) 
+	public void selectCell(int row, int col)
 	{
-		// Prevent selection/focus on the status column
-		if (columnIndex == 0 && this.dwModel != null && this.dwModel.getShowStatusColumn()) return;
-		super.changeSelection(rowIndex, columnIndex, toggle, extend);
-	}	
+		scrollToRow(row);		
+		Rectangle rect = getCellRect(row,col,true);
+		setColumnSelectionAllowed(true);
+		scrollRectToVisible(rect); 
+		setRowSelectionInterval(row, row);
+		setColumnSelectionInterval(col, col);
+	}
 	
 	public boolean editCellAt(final int row, int column, EventObject e)
 	{
 		boolean result = super.editCellAt(row, column, e);
 		if (result) 
 		{
-			this.clearSelection();
 			if (this.highlightRequiredFields)
 			{
 				initRendererHighlight(row);
 			}
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					clearSelection();
+				}
+			});
 		}
 		return result;
 	}

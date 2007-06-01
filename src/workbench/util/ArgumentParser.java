@@ -154,12 +154,21 @@ public class ArgumentParser
 	
 	/**
 	 * Returns the list of known arguments for this ArgumentParser
+	 * @return the registered argument types
 	 */
-	public List getRegisteredArguments()
+	public List<String> getRegisteredArguments()
 	{
-		Set params = this.arguments.keySet();
-		List result = new ArrayList(params.size());
-		result.addAll(params);
+		Iterator<Map.Entry<String, ArgumentType>> itr = this.argTypes.entrySet().iterator();
+
+		List<String> result = new ArrayList(this.argTypes.size());
+		while (itr.hasNext())
+		{
+			Map.Entry<String, ArgumentType> entry = itr.next();
+			if (entry.getValue() != ArgumentType.Deprecated)
+			{
+				result.add(entry.getKey());
+			}
+		}
 		return result;
 	}
 	

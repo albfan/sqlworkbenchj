@@ -107,7 +107,7 @@ public class SetCommand extends SqlCommand
 				processMoreResults(aSql, result, hasResult);
 			}
 		}
-		catch (Throwable e)
+		catch (Exception e)
 		{
 			result = new StatementRunnerResult();
 			result.clear();

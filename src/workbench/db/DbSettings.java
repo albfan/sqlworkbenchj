@@ -357,4 +357,11 @@ public class DbSettings
 		List<String> ignored = StringUtil.stringToList(types, ",", true, true);
 		return ignored;
 	}
+	
+	public String getQueryForCurrentCatalog()
+	{
+		String query = Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".currentcatalog.query", null);
+		return query;
+	}
+	
 }

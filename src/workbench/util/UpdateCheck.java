@@ -28,11 +28,11 @@ import workbench.util.ExceptionUtil;
 public class UpdateCheck
 	implements Runnable, ActionListener
 {
-
+	
 	public UpdateCheck()
 	{
 	}
-
+	
 	public void startUpdateCheck()
 	{
 		int interval = Settings.getInstance().getUpdateCheckInterval();
@@ -82,39 +82,51 @@ public class UpdateCheck
 	
 	public void run()
 	{
-			try
+		try
+		{
+			LogMgr.logDebug("UpdateCheck.run()", "Checking versions...");
+			WbVersionReader reader = new WbVersionReader("automatic ");
+			if (reader.success())
 			{
-				LogMgr.logDebug("UpdateCheck.run()", "Checking versions...");
-				WbVersionReader reader = new WbVersionReader("automatic ");
-				if (reader.success())
+				try
 				{
 					Settings.getInstance().setLastUpdateCheck();
 				}
-				
-				LogMgr.logDebug("UpdateCheck.run()", "Current stable version: " + reader.getStableBuildNumber());
-				LogMgr.logDebug("UpdateCheck.run()", "Current dev version: " + reader.getDevBuildNumber());
-				
-				UpdateVersion update = reader.getAvailableUpdate();
-				NotifierEvent event = null;
-				if (update == UpdateVersion.stable)
+				catch (Exception e)
 				{
-					LogMgr.logDebug("UpdateCheck.run()", "New stable version available");
-					event = new NotifierEvent("updates", ResourceMgr.getString("LblVersionNewStableAvailable"), this);
-				}
-				else if (update == UpdateVersion.devBuild)
-				{
-					LogMgr.logDebug("UpdateCheck.run()", "New dev build available");
-					event = new NotifierEvent("updates", ResourceMgr.getString("LblVersionNewDevAvailable"), this);
-				}
-				if (event != null)
-				{
-					EventNotifier.getInstance().displayNotification(event);
+					LogMgr.logError("UpdateCheck.run()", "Error when updating last update date", e);
 				}
 			}
-			catch (Exception e)
+			
+			LogMgr.logDebug("UpdateCheck.run()", "Current stable version: " + reader.getStableBuildNumber());
+			LogMgr.logDebug("UpdateCheck.run()", "Current dev version: " + reader.getDevBuildNumber());
+			
+			UpdateVersion update = reader.getAvailableUpdate();
+			NotifierEvent event = null;
+			if (update == UpdateVersion.stable)
 			{
-				LogMgr.logError("WbVersionReader.backgroundCheck()", "Could not check for updates", e);
+				LogMgr.logInfo("UpdateCheck.run()", "New stable version available");
+				event = new NotifierEvent("updates", ResourceMgr.getString("LblVersionNewStableAvailable"), this);
 			}
+			else if (update == UpdateVersion.devBuild)
+			{
+				LogMgr.logInfo("UpdateCheck.run()", "New dev build available");
+				event = new NotifierEvent("updates", ResourceMgr.getString("LblVersionNewDevAvailable"), this);
+			}
+			else
+			{
+				LogMgr.logInfo("UpdateCheck.run()", "No updates found");
+			}
+			
+			if (event != null)
+			{
+				EventNotifier.getInstance().displayNotification(event);
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("WbVersionReader.backgroundCheck()", "Could not check for updates", e);
+		}
 	}
 	
 	
@@ -130,5 +142,5 @@ public class UpdateCheck
 			WbSwingUtilities.showMessage(null, "Could not open browser (" + ExceptionUtil.getDisplay(ex)+ ")");
 		}
 	}
-
+	
 }

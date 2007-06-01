@@ -13,7 +13,7 @@ package workbench.gui.sql;
 
 /**
  *
- * @author info@sql-workbench.net
+ * @author support@sql-workbench.net
  */
 public enum YesNoCancelResult
 {

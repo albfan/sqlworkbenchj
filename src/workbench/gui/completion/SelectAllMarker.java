@@ -15,7 +15,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *
- * @author info@sql-workbench.net
+ * @author support@sql-workbench.net
  */
 public class SelectAllMarker
 {

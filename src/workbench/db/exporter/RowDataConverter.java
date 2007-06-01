@@ -202,11 +202,17 @@ public abstract class RowDataConverter
 	{
 		StringBuilder fname = new StringBuilder(baseFilename.length() + 25);
 
-		fname.append(baseFilename);
+		if (this.factory == null) initOutputFactory();
+		
+		if (!this.factory.isArchive()) 
+		{
+			fname.append(baseFilename);
+			fname.append('_');
+		}
 		
 		if (this.useRowNumForBlobFile || this.blobNameCols == null)
 		{
-			fname.append("_r");
+			fname.append("r");
 			fname.append(rowNum+1);
 			fname.append("_c");
 			fname.append(colIndex+1);
@@ -214,7 +220,6 @@ public abstract class RowDataConverter
 		else
 		{
 			String col = this.metaData.getColumnName(colIndex);
-			fname.append('_');
 			fname.append(StringUtil.makeFilename(col));
 			fname.append("_#");
 			for (int i = 0; i < blobNameCols.length; i++)
@@ -224,7 +229,16 @@ public abstract class RowDataConverter
 				{
 					Object o = row.getValue(c);
 					if (i > 0) fname.append('_');
-					fname.append(StringUtil.makeFilename(o.toString()));
+					if (o == null)
+					{
+						fname.append("col#");
+						fname.append(i);
+						fname.append("NULL");
+					}
+					else
+					{
+						fname.append(StringUtil.makeFilename(o.toString()));
+					}
 				}
 			}
 		}

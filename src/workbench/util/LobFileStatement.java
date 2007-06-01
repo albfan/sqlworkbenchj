@@ -78,8 +78,7 @@ public class LobFileStatement
 						
 			if (f.isDirectory() || !f.exists())
 			{
-				String msg = ResourceMgr.getString("ErrUpdateBlobFileNotFound");
-				msg = StringUtil.replace(msg, "%filename%", parameters[index].getFilename());
+				String msg = ResourceMgr.getFormattedString("ErrFileNotFound", parameters[index].getFilename());
 				throw new FileNotFoundException(msg);
 			}
 		}

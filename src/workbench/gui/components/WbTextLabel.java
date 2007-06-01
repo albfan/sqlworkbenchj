@@ -46,9 +46,12 @@ public class WbTextLabel
 		this.setForeground(textColor);
 		this.setOpaque(false);
 		Font f = UIManager.getFont("Label.font");
-		super.setFont(f);
-		this.fm = this.getFontMetrics(f);
-		textY = fm.getAscent() + 2;
+		if (f != null)
+		{
+			super.setFont(f);
+			this.fm = this.getFontMetrics(f);
+			textY = fm.getAscent() + 2;
+		}
 	}
 	
 	public void setBorder(Border b)

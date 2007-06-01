@@ -36,9 +36,7 @@ public class DataEditOptionsPanel
 	public DataEditOptionsPanel()
 	{
 		initComponents();
-		
 		restoreSettings();
-		
 	}
 
 	public void restoreSettings()

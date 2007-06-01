@@ -84,8 +84,7 @@ public class WbDefineVar
 				}
 				else
 				{
-					String msg = ResourceMgr.getString("ErrFileNotFound");
-					msg = StringUtil.replace(msg, "%file%", f.getAbsolutePath());
+					String msg = ResourceMgr.getFormattedString("ErrFileNotFound", f.getAbsolutePath());
 					result.addMessage(msg);
 					result.setFailure();
 				}

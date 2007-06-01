@@ -199,8 +199,8 @@ public class StatementRunnerResult
 			{
 				if (rs != null)
 				{
-					try { rs.clearWarnings(); } catch (Throwable th) {}
-					try { rs.close(); } catch (Throwable th) {}
+					try { rs.clearWarnings(); } catch (Exception th) {}
+					try { rs.close(); } catch (Exception th) {}
 				}
 			}
 			this.results.clear();

@@ -17,45 +17,6 @@ package workbench.util;
 public class HtmlUtil
 {
 	
-	public static final String escapeXML(String s)
-	{
-		StringBuilder result = null;
-
-		for(int i = 0, max = s.length(), delta = 0; i < max; i++)
-		{
-			char c = s.charAt(i);
-			String replacement = null;
-
-			switch (c)
-			{
-				case '&': replacement = "&amp;"; break;
-				case '<': replacement = "&lt;"; break;
-				case '\r': replacement = "&#13;"; break;
-				case '\n': replacement = "&#10;"; break;
-				case '>': replacement = "&gt;"; break;
-				case '"': replacement = "&quot;"; break;
-				case '\'': replacement = "&apos;"; break;
-				case (char)0: replacement = ""; break;
-			}
-
-			if (replacement != null)
-			{
-				if (result == null)
-				{
-					result = new StringBuilder(s);
-				}
-				result.replace(i + delta, i + delta + 1, replacement);
-				delta += (replacement.length() - 1);
-			}
-		}
-		if (result == null)
-		{
-			return s;
-		}
-		return result.toString();
-
-	}
-
 	public static final String escapeHTML(String s)
 	{
 		if (s == null) return null;
@@ -70,6 +31,7 @@ public class HtmlUtil
 				case '>': sb.append("&gt;"); break;
 				case '&': sb.append("&amp;"); break;
 				case '"': sb.append("&quot;"); break;
+				case '\'': sb.append("&apos;"); break;
 				case '\u00e0': sb.append("&agrave;");break;
 				case '\u00c0': sb.append("&Agrave;");break;
 				case '\u00e2': sb.append("&acirc;");break;

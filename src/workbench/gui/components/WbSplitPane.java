@@ -63,13 +63,13 @@ public class WbSplitPane
 	public void updateUI()
 	{
 		int divider = this.getDividerSize();
+		this.setDividerSize(divider);
 		//super.updateUI();
 		if (this.getUI() == null)
 		{
 			super.setUI(new WbSplitPaneUI());
 		}
 		revalidate();
-		this.setDividerSize(divider);
 	}
 
 	public void setUI(ComponentUI newUI)

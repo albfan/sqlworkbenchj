@@ -49,7 +49,7 @@ public class StatementParameters
 				}
 			}
 		}
-		catch (Throwable e)
+		catch (Exception e)
 		{
 			LogMgr.logError("StatementParameter.<init>", "Error when checking parameters", e);
 			if (e instanceof SQLException) throw (SQLException)e;

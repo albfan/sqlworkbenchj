@@ -20,5 +20,6 @@ public enum ArgumentType
 	IntegerArgument, 
 	TableArgument, 
 	ListArgument,
-	ProfileArgument;
+	ProfileArgument,
+	Deprecated;
 }

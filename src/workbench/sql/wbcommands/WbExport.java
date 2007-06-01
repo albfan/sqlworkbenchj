@@ -90,7 +90,7 @@ public class WbExport
 		cmdLine.addArgument("showEncodings");
 		cmdLine.addArgument("writeOracleLoader", ArgumentType.BoolArgument);
 		cmdLine.addArgument("compress", ArgumentType.BoolArgument);
-		cmdLine.addArgument("blobIdCols");
+		cmdLine.addArgument("blobIdCols", ArgumentType.Deprecated);
 		cmdLine.addArgument("lobIdCols");
 		cmdLine.addArgument("blobType", StringUtil.stringToList(DataExporter.BLOB_MODE_FILE + "," + DataExporter.BLOB_MODE_LITERAL + "," + DataExporter.BLOB_MODE_ANSI));
 		cmdLine.addArgument("clobAsFile", ArgumentType.BoolArgument);
@@ -405,7 +405,7 @@ public class WbExport
 		List tablesToExport = null;
 		if (tables != null)
 		{
-			tablesToExport = StringUtil.stringToList(tables, ",");
+			tablesToExport = StringUtil.getObjectNames(tables);
 			this.directExport = (tablesToExport.size() > 0);
 		}
 

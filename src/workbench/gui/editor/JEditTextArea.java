@@ -102,7 +102,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.70 2007-05-04 17:50:05 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.71 2007-06-01 23:00:15 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -242,9 +242,33 @@ public class JEditTextArea
 		this.changeCase(false);
 	}
 
+	protected boolean isSelectionCommented()
+	{
+		int startline = this.getSelectionStartLine();
+		int realEndline = this.getSelectionEndLine();
+		int endline = realEndline;
+		if (this.commentChar == null) this.commentChar = "--";
+		int cLength = this.commentChar.length();
+		
+		int pos = this.getSelectionEnd(endline) - this.getLineStartOffset(endline);
+		if (pos == 0) endline --;
+		
+		for (int line = startline; line <= endline; line ++)
+		{
+			String text = this.getLineText(line);
+			if (text == null || text.trim().length() == 0) continue;
+			if (text.startsWith(this.commentChar)) return true;
+		}
+		return false;
+	}
+	
 	public void commentSelection()
 	{
-		doComment(true);
+		boolean isCommented = this.isSelectionCommented();
+		// Comment Selection acts as a toggle.
+		// if the complete selection is already commented
+		// the comments will be removed.
+		doComment(!isCommented);
 	}
 	
 	public void unCommentSelection()

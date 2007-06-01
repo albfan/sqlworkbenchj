@@ -16,7 +16,7 @@ import java.sql.SQLException;
 
 /**
  *
- * @author info@sql-workbench.net
+ * @author support@sql-workbench.net
  */
 public class HsqlMetadata
 {

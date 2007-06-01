@@ -29,6 +29,8 @@ public class DefaultOutputFactory
 	{
 	}
 
+	public boolean isArchive() { return false; }
+	
 	public OutputStream createOutputStream(File output) 
 		throws IOException
 	{

@@ -89,9 +89,9 @@ public class UpdatingCommand extends SqlCommand
 			{
 				this.currentStatement.executeUpdate(sql);
 			}
-			this.appendSuccessMessage(result);
+			appendSuccessMessage(result);
 			result.setSuccess();
-			processMoreResults(sql, result, false);
+			processResults(result, false);
 		}
 		catch (Exception e)
 		{

@@ -50,7 +50,7 @@ public class WbProperties
 		this.distinctSections = num;
 	}
 
-	public void saveToFile(String filename)
+	public synchronized void saveToFile(String filename)
 		throws IOException
 	{
 		FileOutputStream out = null;
@@ -65,7 +65,7 @@ public class WbProperties
 		}
 	}
 	
-	public void save(OutputStream out)
+	public synchronized void save(OutputStream out)
 		throws IOException
 	{
 		Object[] keys = this.keySet().toArray();
@@ -119,31 +119,31 @@ public class WbProperties
 		bw.flush();
 	}
 
-	public int getIntProperty(String property, int defaultValue)
+	public synchronized int getIntProperty(String property, int defaultValue)
 	{
 		String value = this.getProperty(property, null);
 		if (value == null) return defaultValue;
 		return StringUtil.getIntValue(value, defaultValue);
 	}
 	
-	public boolean getBoolProperty(String property, boolean defaultValue)
+	public synchronized boolean getBoolProperty(String property, boolean defaultValue)
 	{
 		String value = this.getProperty(property, null);
 		if (value == null) return defaultValue;
 		return StringUtil.stringToBool(value);
 	}
 	
-	public void setProperty(String property, int value)
+	public synchronized void setProperty(String property, int value)
 	{
 		this.setProperty(property, Integer.toString(value));
 	}
 	
-	public void setProperty(String property, boolean value)
+	public synchronized void setProperty(String property, boolean value)
 	{
 		this.setProperty(property, Boolean.toString(value));
 	}
 	
-	private String getSections(String aString, int aNum)
+	private synchronized String getSections(String aString, int aNum)
 	{
 		int pos = aString.indexOf(".");
 		String result = null;
@@ -166,17 +166,17 @@ public class WbProperties
 		return result;
 	}
 
-	public void addPropertyChangeListener(PropertyChangeListener aListener)
+	public synchronized void addPropertyChangeListener(PropertyChangeListener aListener)
 	{
 		this.changeListeners.add(aListener);
 	}
 	
-	public void removePropertyChangeListener(PropertyChangeListener aListener)
+	public synchronized void removePropertyChangeListener(PropertyChangeListener aListener)
 	{
 		this.changeListeners.remove(aListener);
 	}
 	
-	private void firePropertyChanged(String name, String oldValue, String newValue)
+	private synchronized void firePropertyChanged(String name, String oldValue, String newValue)
 	{
 		int count = this.changeListeners.size();
 		if (count == 0) return;
@@ -189,7 +189,7 @@ public class WbProperties
 		}
 	}
 	
-	public Object setProperty(String name, String value)
+	public synchronized Object setProperty(String name, String value)
 	{
 		if (name == null) return null;
 		if (value == null) 
@@ -215,7 +215,7 @@ public class WbProperties
 	 *	Lines that do not contain a = character are ignored
 	 *  Any text after a # sign in the value is ignored
 	 */
-	public void addPropertyDefinition(String line)
+	public synchronized void addPropertyDefinition(String line)
 	{
 		if (line == null) return;
 		if (line.trim().length() == 0) return;
@@ -232,7 +232,7 @@ public class WbProperties
 		this.setProperty(key, value.trim());
 	}
 	
-	public void loadTextFile(String filename)
+	public synchronized void loadTextFile(String filename)
 		throws IOException
 	{
 		loadTextFile(filename, null);
@@ -242,7 +242,7 @@ public class WbProperties
 	 *	Read the content of the file int this properties object.
 	 *  This method does not support line continuation!
 	 */
-	public void loadTextFile(String filename, String encoding)
+	public synchronized void loadTextFile(String filename, String encoding)
 		throws IOException
 	{
 		BufferedReader in = null;

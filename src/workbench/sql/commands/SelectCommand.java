@@ -80,7 +80,7 @@ public class SelectCommand extends SqlCommand
 					this.currentStatement.setQueryTimeout(this.queryTimeout); 
 				}
 			} 
-			catch (Throwable th) 
+			catch (Exception th) 
 			{
 				LogMgr.logWarning("SelectCommand.execute()", "Error when setting query timeout", th);
 			}

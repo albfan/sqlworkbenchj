@@ -14,6 +14,7 @@ package workbench.gui.components;
 import java.util.HashMap;
 import java.util.Map;
 import workbench.interfaces.StatusBar;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 
@@ -41,38 +42,35 @@ public class GenericRowMonitor
 	public void setMonitorType(int type)
 	{
 		this.monitorType = type;
-		try
+		switch (type)
 		{
-			switch (type)
-			{
-				case RowActionMonitor.MONITOR_INSERT:
-					this.updateMsg = ResourceMgr.getString("MsgImportingRow") + " ";
-					break;
-				case RowActionMonitor.MONITOR_UPDATE:
-					this.updateMsg = ResourceMgr.getString("MsgUpdatingRow") + " ";
-					break;
-				case RowActionMonitor.MONITOR_LOAD:
-					this.updateMsg = ResourceMgr.getString("MsgLoadingRow") + " ";
-					break;
-				case RowActionMonitor.MONITOR_EXPORT:
-					this.updateMsg = ResourceMgr.getString("MsgWritingRow") + " ";
-					break;
-				case RowActionMonitor.MONITOR_COPY:
-					this.updateMsg = ResourceMgr.getString("MsgCopyingRow") + " ";
-					break;
-				case RowActionMonitor.MONITOR_PROCESS_TABLE:
-					this.updateMsg = ResourceMgr.getString("MsgProcessTable") + " ";
-					break;
-				case RowActionMonitor.MONITOR_PLAIN:
-					this.updateMsg = null;
-					break;
-				default:
-					clearRowMonitorSettings();
-			}
-		}
-		catch (Exception e)
-		{
-			clearRowMonitorSettings();
+			case RowActionMonitor.MONITOR_INSERT:
+				this.updateMsg = ResourceMgr.getString("MsgImportingRow") + " ";
+				break;
+			case RowActionMonitor.MONITOR_UPDATE:
+				this.updateMsg = ResourceMgr.getString("MsgUpdatingRow") + " ";
+				break;
+			case RowActionMonitor.MONITOR_LOAD:
+				this.updateMsg = ResourceMgr.getString("MsgLoadingRow") + " ";
+				break;
+			case RowActionMonitor.MONITOR_EXPORT:
+				this.updateMsg = ResourceMgr.getString("MsgWritingRow") + " ";
+				break;
+			case RowActionMonitor.MONITOR_COPY:
+				this.updateMsg = ResourceMgr.getString("MsgCopyingRow") + " ";
+				break;
+			case RowActionMonitor.MONITOR_PROCESS_TABLE:
+				this.updateMsg = ResourceMgr.getString("MsgProcessTable") + " ";
+				break;
+			case RowActionMonitor.MONITOR_PROCESS:
+				this.updateMsg = ResourceMgr.getString("MsgProcessObject") + " ";
+			case RowActionMonitor.MONITOR_PLAIN:
+				this.updateMsg = null;
+				break;
+			default:
+				LogMgr.logWarning("GenericRowMonitor.setMonitorType()", "Invalid monitor type " + type + " specified!");
+				this.monitorType = RowActionMonitor.MONITOR_PLAIN;
+				this.updateMsg = null;
 		}
 	}
 
@@ -86,7 +84,7 @@ public class GenericRowMonitor
 		{
 			this.currentMonitorObject = name;
 			StringBuilder msg = new StringBuilder(40);
-			msg.append(objectMsg);
+			if (objectMsg != null) msg.append(objectMsg);
 			msg.append(name);
 			if (number > 0)
 			{
@@ -131,13 +129,6 @@ public class GenericRowMonitor
 		statusBar.clearStatusMessage();
 	}
 
-	private void clearRowMonitorSettings()
-	{
-		this.updateMsg = null;
-		this.monitorType = -1;
-		statusBar.clearStatusMessage();
-	}
-	
 	public void saveCurrentType(String type) 
 	{
 		TypeEntry entry = new TypeEntry();
@@ -145,7 +136,6 @@ public class GenericRowMonitor
 		entry.type = this.monitorType;
 		entry.obj = this.currentMonitorObject;
 		this.typeStack.put(type, entry);
-		//statusBar.clearStatusMessage();
 	}
 	
 	public void restoreType(String type) 
@@ -155,9 +145,8 @@ public class GenericRowMonitor
 		this.updateMsg = entry.msg;
 		this.currentMonitorObject = entry.obj;
 		this.monitorType = entry.type;
-		//statusBar.clearStatusMessage();
 	}
-	
+
 }
 
 class TypeEntry

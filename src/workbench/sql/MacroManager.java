@@ -217,7 +217,7 @@ public class MacroManager
 			{ 
 				writer.writeObject(this.macros); 
 			} 
-			catch (Throwable th) 
+			catch (Exception th) 
 			{
 				LogMgr.logError("MacroManager.saveMacros()", "Error saving macros", th);
 			}

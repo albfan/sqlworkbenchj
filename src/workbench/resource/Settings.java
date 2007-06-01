@@ -880,6 +880,12 @@ public class Settings
 			this.props.remove("workbench.font.standard.name");
 			this.props.remove("workbench.font.standard.size");
 			this.props.remove("workbench.font.standard.style");
+			
+			this.props.remove("workbench.db.sql_server.batchedstatements");
+			this.props.remove("workbench.db.sql_server.currentcatalog.query");
+			this.props.remove("workbench.db.sql_server.objectname.case");
+			this.props.remove("workbench.db.sql_server.schemaname.case");
+			
 		}
 		catch (Throwable e)
 		{
@@ -1339,6 +1345,29 @@ public class Settings
 		return SHOW_NO_FILENAME;
 	}
 
+	public String getTitleGroupSeparator()
+	{
+		String sep = getProperty("workbench.gui.display.titlegroupsep", "/");
+		if ("XXX".equals(sep)) return "";
+		return sep;
+	}
+	
+	public void setTitleGroupSeparator(String sep)
+	{
+		if (StringUtil.isEmptyString(sep) || sep.trim().length() == 0) sep = "XXX";
+		setProperty("workbench.gui.display.titlegroupsep", sep);
+	}
+	
+	public String getTitleGroupBracket()
+	{
+		return getProperty("workbench.gui.display.titlegroupbracket", null);
+	}
+	
+	public void setTitleGroupBracket(String bracket)
+	{
+		setProperty("workbench.gui.display.titlegroupbracket", bracket);
+	}
+	
 	public void setShowWorkspaceInWindowTitle(boolean flag)
 	{
 		setProperty("workbench.gui.display.showpworkspace", flag);
@@ -1357,6 +1386,16 @@ public class Settings
 	public boolean getShowProfileGroupInWindowTitle()
 	{
 		return getBoolProperty("workbench.gui.display.showprofilegroup", false);
+	}
+
+	public void setShowProductNameAtEnd(boolean flag)
+	{
+		setProperty("workbench.gui.display.name_at_end", flag);
+	}
+	
+	public boolean getShowProductNameAtEnd()
+	{
+		return getBoolProperty("workbench.gui.display.name_at_end", false);
 	}
 	
 	public String getSqlParameterPrefix()

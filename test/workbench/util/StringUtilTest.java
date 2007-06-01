@@ -29,6 +29,23 @@ public class StringUtilTest
 		super(testName);
 	}
 
+	public void testGetObjectNames()
+	{
+		try
+		{
+			String s = "\"MIND\",\"test\"";
+			List<String> tables = StringUtil.getObjectNames(s);
+			assertEquals(2, tables.size());
+			assertEquals("\"MIND\"", tables.get(0));
+			assertEquals("\"test\"", tables.get(1));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testLastIndexOf()
 	{
 		try
@@ -89,8 +106,8 @@ public class StringUtilTest
 			decoded = StringUtil.decodeUnicode(value);
 			assertEquals("Wrong string not decoded", value, decoded);
 			
-			decoded = StringUtil.decodeUnicode("\\r\\n");
-			assertEquals("Single char not replaced correctly", "\r\n", decoded);
+			decoded = StringUtil.decodeUnicode("\\r\\ntest");
+			assertEquals("Single char not replaced correctly", "\r\ntest", decoded);
 
 			decoded = StringUtil.decodeUnicode("Hello \\t World");
 			assertEquals("Single char not replaced correctly", "Hello \t World", decoded);
@@ -103,7 +120,14 @@ public class StringUtilTest
 
 			decoded = StringUtil.decodeUnicode("test\\");
 			assertEquals("Single char not replaced correctly", "test\\", decoded);
+
+			decoded = StringUtil.decodeUnicode("test\\\\");
+			assertEquals("test\\", decoded);
 			
+			value = "abc\\\\def";
+			decoded = StringUtil.decodeUnicode(value);
+			assertEquals("abc\\def", decoded);
+				
 		}
 		catch (Exception e)
 		{

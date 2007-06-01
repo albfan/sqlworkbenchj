@@ -95,7 +95,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_TARGETTABLE, ArgumentType.TableArgument);
 		cmdLine.addArgument(ARG_QUOTE);
 		cmdLine.addArgument(ARG_CONTAINSHEADER, ArgumentType.BoolArgument);
-		cmdLine.addArgument("columns");
+//		cmdLine.addArgument("columns");
 		cmdLine.addArgument(ARG_FILECOLUMNS);
 		cmdLine.addArgument(ARG_MODE, StringUtil.stringToList("insert;update;insert,update;update,insert", ";"));
 		cmdLine.addArgument(ARG_KEYCOLUMNS);
@@ -313,16 +313,6 @@ public class WbImport
 				boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER, headerDefault);
 				textParser.setContainsHeader(header);
 
-				String filecolumns = cmdLine.getValue(ARG_FILECOLUMNS);
-				if (filecolumns == null) 
-				{
-					filecolumns = cmdLine.getValue("columns");
-					if (filecolumns != null)
-					{
-						result.addMessage(ResourceMgr.getString("MsgImpColumnsDeprecated"));
-						result.setWarning(true);
-					}
-				}
 
 				String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
 				if (importcolumns != null)
@@ -341,6 +331,7 @@ public class WbImport
 					
 				}
 
+				String filecolumns = cmdLine.getValue(ARG_FILECOLUMNS);
 				if (filecolumns != null)
 				{
 					List cols = StringUtil.stringToList(filecolumns, ",", true);

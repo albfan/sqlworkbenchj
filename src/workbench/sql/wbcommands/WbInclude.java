@@ -13,6 +13,7 @@ package workbench.sql.wbcommands;
 
 import java.io.File;
 import java.sql.SQLException;
+import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.sql.DelimiterDefinition;
 import workbench.util.ArgumentType;
@@ -49,6 +50,7 @@ public class WbInclude
 		cmdLine.addArgument("checkEscapedQuotes", ArgumentType.BoolArgument);
 		cmdLine.addArgument("delimiter",StringUtil.stringToList("';','/',<char>"));
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
+		cmdLine.addArgument(WbManager.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
 		CommonArgs.addEncodingParameter(cmdLine);
 		this.isUpdatingCommand = true;
 	}
@@ -111,6 +113,8 @@ public class WbInclude
 		boolean continueOnError = cmdLine.getBoolean("continueonerror", false);
 		boolean checkEscape = cmdLine.getBoolean("checkescapedquotes", Settings.getInstance().getCheckEscapedQuotes());
 		boolean verbose = cmdLine.getBoolean("verbose", false);
+		boolean defaultIgnore = aConnection.getProfile().getIgnoreDropErrors();
+		boolean ignoreDrop = cmdLine.getBoolean(WbManager.ARG_IGNORE_DROP, defaultIgnore);
 		String encoding = cmdLine.getValue("encoding");
 
 		String delim = cmdLine.getValue("delimiter");
@@ -129,6 +133,7 @@ public class WbInclude
 			batchRunner.setShowTiming(false);
 			batchRunner.setEncoding(encoding);
 			batchRunner.setParameterPrompter(this.prompter);
+			batchRunner.setIgnoreDropErrors(ignoreDrop);
 			batchRunner.execute();
 			if (batchRunner.isSuccess())
 			{
@@ -139,7 +144,7 @@ public class WbInclude
 				result.setFailure();
 			}
 		}
-		catch (Throwable th)
+		catch (Exception th)
 		{
 			result.setFailure();
 			result.addMessage(ExceptionUtil.getDisplay(th));

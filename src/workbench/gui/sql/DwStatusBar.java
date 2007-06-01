@@ -141,7 +141,8 @@ public class DwStatusBar
 		this.execTime.setToolTipText(ResourceMgr.getString("MsgTotalSqlTime"));
 
 		Font f = execTime.getFont();
-		FontMetrics fm = execTime.getFontMetrics(f);
+		FontMetrics fm = null;
+		if (f != null) fm = execTime.getFontMetrics(f);
 		
 		if (showTimer)
 		{
@@ -152,7 +153,7 @@ public class DwStatusBar
 		{
 			this.editorStatus = new JLabel();
 			this.editorStatus.setHorizontalAlignment(SwingConstants.CENTER);
-			int ew = fm.stringWidth("L:999 C:999");
+			int ew = (fm == null ? 85 : fm.stringWidth("L:999 C:999"));
 			d = new Dimension(ew + 4, FIELD_HEIGHT);
 			editorStatus.setMinimumSize(d);
 			this.editorStatus.setBorder(new CompoundBorder(new DividerBorder(DividerBorder.LEFT), new EmptyBorder(0, 3, 0, 3)));
@@ -161,7 +162,7 @@ public class DwStatusBar
 		}
 		
 		b = new CompoundBorder(new DividerBorder(DividerBorder.LEFT_RIGHT), new EmptyBorder(0, 3, 0, 3));
-		int width = fm.stringWidth("000000000000s");
+		int width = (fm == null ? 100 : fm.stringWidth("000000000000s"));
 		d = new Dimension(width + 4, FIELD_HEIGHT);
 		execTime.setPreferredSize(d);
 		execTime.setMaximumSize(d);

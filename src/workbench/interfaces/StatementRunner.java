@@ -37,4 +37,6 @@ public interface StatementRunner
 	void setBaseDir(String dir);
 	String getBaseDir();
 	void setFullErrorReporting(boolean flag);
+	boolean getIgnoreDropErrors();
+	void setIgnoreDropErrors(boolean flag);
 }

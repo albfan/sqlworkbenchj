@@ -234,13 +234,11 @@ public class EditorPanel
 			token.setIsMySQL(isMySQL);
 		}
 		
-		if (aConnection.getMetadata().isMySql())
+		this.commentChar = "--";
+		
+		if (aConnection.getMetadata().isMySql() && Settings.getInstance().getBoolProperty("workbench.editor.mysql.usehashcomment", false))
 		{
 			this.commentChar = "#";
-		}
-		else
-		{
-			this.commentChar = "--";
 		}
 
 		this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter(aConnection);

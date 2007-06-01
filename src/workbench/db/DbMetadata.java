@@ -1051,21 +1051,22 @@ public class DbMetadata
 
 	/**
 	 * Adjusts the case of the given schema name to the
-	 * case in which the server stores objects
+	 * case in which the server stores schema names.
+	 * 
 	 * This is needed e.g. when the user types a
 	 * table name, and that value is used to retrieve
-	 * the table definition. Usually the getColumns()
-	 * method is case sensitiv. If no special case
-	 * for schemas is configured then this method
-	 * is simply delegating to {@link #adjustObjectnameCase(String)}
+	 * the table definition. 
+	 * 
+	 * @param name the schema name to adjust
+	 * @return the adjusted schema name
 	 */
 	public String adjustSchemaNameCase(String schema)
 	{
 		if (schema == null) return null;
-		schema = StringUtil.trimQuotes(schema);
+		schema = StringUtil.trimQuotes(schema).trim();
 		try
 		{
-			if (this.storesLowerCaseSchemas())
+			if (this.storesUpperCaseSchemas())
 			{
 				return schema.toUpperCase();
 			}
@@ -1077,7 +1078,7 @@ public class DbMetadata
 		catch (Exception e)
 		{
 		}
-		return schema.trim();
+		return schema;
 	}
 
 	/**
@@ -1093,11 +1094,9 @@ public class DbMetadata
 	
 		boolean isUpper = StringUtil.isUpperCase(name);
 		boolean isLower = StringUtil.isLowerCase(name);
-		boolean isMixed = (!isUpper && !isLower);
 		
-		if (isMixed && supportsMixedCaseQuotedIdentifiers()) return false;
-		if (isUpper && this.storesUpperCaseIdentifiers())  return true;
-		if (isLower && this.storesLowerCaseIdentifiers()) return true;
+		if (isUpper && storesUpperCaseIdentifiers())  return true;
+		if (isLower && storesLowerCaseIdentifiers()) return true;
 		
 		return false;
 	}
@@ -1110,6 +1109,9 @@ public class DbMetadata
 	 * table name, and that value is used to retrieve
 	 * the table definition. Usually the getColumns()
 	 * method is case sensitiv.
+	 * 
+	 * @param name the object name to adjust
+	 * @return the adjusted object name
 	 */
 	public String adjustObjectnameCase(String name)
 	{
@@ -2262,12 +2264,18 @@ public class DbMetadata
 	}
 
 	/** 	
-	 *  Return the current catalog for this connection. If no catalog is defined
-	 * 	or the DBMS does not support catalogs, an empty string is returned.
+	 * Return the current catalog for this connection. If no catalog is defined
+	 * or the DBMS does not support catalogs, an empty string is returned.
 	 *
-	 * 	This method works around a bug in Microsoft's JDBC driver which does
-	 *  not return the correct database (=catalog) after the database has
-	 *  been changed with the USE <db> command from within the Workbench.
+	 * This method works around a bug in Microsoft's JDBC driver which does
+	 * not return the correct database (=catalog) after the database has
+	 * been changed with the USE <db> command from within the Workbench.
+	 * 
+	 * If no query has been configured for the current DBMS, DatabaseMetaData.getCatalog()
+	 * is used, otherwise the query that is configured with the property
+	 * workbench.db.[dbid].currentcatalog.query
+	 * 
+	 * @see DbSettings#getQueryForCurrentCatalog()
 	 * 
 	 * @return The name of the current catalog or an empty String if there is no current catalog
 	 */
@@ -2275,23 +2283,24 @@ public class DbMetadata
 	{
 		String catalog = null;
 
-		if (this.isSqlServer)
+		String query = this.dbSettings.getQueryForCurrentCatalog();
+		if (query != null)
 		{
 			// for some reason, getCatalog() does not return the correct
 			// information when using Microsoft's JDBC driver.
-			// So we are using SQL Server's db_name() function to retrieve
-			// the current catalog
+			// If this is the case, a SQL query can be defined that is
+			// used instead of the JDBC call, e.g. SELECT db_name()
 			Statement stmt = null;
 			ResultSet rs = null;
 			try
 			{
 				stmt = this.dbConnection.createStatementForQuery();
-				rs = stmt.executeQuery("SELECT db_name()");
+				rs = stmt.executeQuery(query);
 				if (rs.next()) catalog = rs.getString(1);
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("DbMetadata.getCurrentCatalog()", "Error retrieving catalog", e);
+				LogMgr.logWarning("DbMetadata.getCurrentCatalog()", "Error retrieving current catalog using query=[" + query + "]", e);
 				catalog = null;
 			}
 			finally
@@ -2308,6 +2317,7 @@ public class DbMetadata
 			}
 			catch (Exception e)
 			{
+				LogMgr.logWarning("DbMetadata.getCurrentCatalog", "Could not retrieve catalog using getCatalog()", e);
 				catalog = StringUtil.EMPTY_STRING;
 			}
 		}

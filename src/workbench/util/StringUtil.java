@@ -499,6 +499,35 @@ public class StringUtil
 		return result;
 	}
 
+	/**
+	 * Returns all DB Object names from the comma separated list.
+	 * This is different to stringToList() as it keeps any quotes that 
+	 * are present in the list.
+	 * @param list a comma separated list of elements (optionally with quotes)
+	 * @return a List of Strings as defined by the input string
+	 */
+	public static final List<String> getObjectNames(String list)
+	{
+		if (isEmptyString(list)) return Collections.EMPTY_LIST;
+		WbStringTokenizer tok = new WbStringTokenizer(list, ",");
+		tok.setDelimiterNeedsWhitspace(false);
+		tok.setCheckBrackets(false);
+		tok.setKeepQuotes(true);
+		List<String> result = new LinkedList<String>();
+		while (tok.hasMoreTokens())
+		{
+			String element = tok.nextToken();
+			if (element == null) continue;
+			element = element.trim();
+			if (element.length() > 0)
+			{
+				result.add(element);
+			}
+		}
+		return result;
+	}
+
+	
 	public static final String[] toArray(Collection<String> strings)
 	{
 		if (strings == null) return null;
@@ -972,12 +1001,16 @@ public class StringUtil
 				}
 				else
 				{
+					// The character after the backslash was not a 'u'
+					// so we are not dealing with a uXXXX value
+					// This applies popular "encodings" for non-printable characters
 					if (aChar == 't') aChar = '\t';
 					else if (aChar == 'r') aChar = '\r';
 					else if (aChar == 'n') aChar = '\n';
 					else if (aChar == 'f') aChar = '\f';
-					else outBuffer.append('\\');
-					outBuffer.append(aChar);
+					else if (aChar == '\\') aChar = '\\';
+					else outBuffer.append('\\'); 
+					outBuffer.append(aChar); 
 				}
 			}
 			else

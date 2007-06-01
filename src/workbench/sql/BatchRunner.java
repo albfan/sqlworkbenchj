@@ -12,6 +12,7 @@
 package workbench.sql;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
@@ -70,6 +71,7 @@ public class BatchRunner
 	private String encoding = null;
 	private boolean showProgress = false;
 	private PrintStream console = System.out;
+	private boolean quiet = false;
 	
 	public BatchRunner(String aFilelist)
 	{
@@ -120,6 +122,11 @@ public class BatchRunner
 		this.showTiming = this.verboseLogging;
 	}
 
+	public void setIgnoreDropErrors(boolean flag)
+	{
+		this.stmtRunner.setIgnoreDropErrors(flag);
+	}
+	
 	public void setProfile(ProfileKey def)
 	{
 		LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnecting") + " [" + def.getName() + "]");
@@ -176,15 +183,26 @@ public class BatchRunner
 		{
 			ConnectionMgr mgr = ConnectionMgr.getInstance();
 			WbConnection c = mgr.getConnection(this.profile, "BatchRunner");
+			
 			this.setConnection(c);
-			LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnectOk") + " (" + c.getDisplayString() + ")");
-			System.out.println(ResourceMgr.getString("MsgBatchConnectOk"));
+			String info = null;
+			if (c.getProfile().getName().equals(CMD_LINE_PROFILE_NAME))
+			{
+				info = c.getDisplayString();
+			}
+			else
+			{
+				info = c.getProfile().getName();
+			}
+			LogMgr.logInfo("BatchRunner.connect()",  ResourceMgr.getFormattedString("MsgBatchConnectOk", c.getDisplayString()));
+			if (!quiet) this.printMessage(ResourceMgr.getFormattedString("MsgBatchConnectOk", info));
 		}
 		catch (ClassNotFoundException e)
 		{
 			String error = ResourceMgr.getString("ErrDriverNotFound");
 			error = StringUtil.replace(error, "%class%", profile.getDriverclass());
-			System.out.println(error);
+			LogMgr.logError("BatchRunner.connect()", error, null);
+			printMessage(error);
 			success = false;
 			throw e;
 		}
@@ -192,8 +210,8 @@ public class BatchRunner
 		{
 			success = false;
 			String msg = ResourceMgr.getString("MsgBatchConnectError") + ": " + ExceptionUtil.getDisplay(e);
-			LogMgr.logError("BatchRunner", msg, null);
-			System.out.println(msg);
+			LogMgr.logError("BatchRunner.connect()", msg, null);
+			printMessage(msg);
 			throw e;
 		}
 	}
@@ -247,7 +265,7 @@ public class BatchRunner
 			currentFileIndex ++;
 
 			WbFile fo = new WbFile(file);
-
+			
 			if (this.rowMonitor != null)
 			{
 				this.rowMonitor.setCurrentObject(file, currentFileIndex, count);
@@ -257,7 +275,7 @@ public class BatchRunner
 			try
 			{
 				String msg = ResourceMgr.getString("MsgBatchProcessingFile") + " " + fo.getFullPath();
-				LogMgr.logInfo("BatchRunner", msg);
+				LogMgr.logInfo("BatchRunner.execute()", msg);
 				if (this.resultDisplay != null)
 				{
 					this.resultDisplay.appendToLog(msg);
@@ -271,7 +289,19 @@ public class BatchRunner
 			catch (Exception e)
 			{
 				error = true;
-				LogMgr.logError("BatchRunner", ResourceMgr.getString("MsgBatchScriptFileError") + " " + file, e);
+				LogMgr.logError("BatchRunner.execute()", ResourceMgr.getString("MsgBatchScriptFileError") + " " + file, e);
+				String msg = null;
+				
+				if (e instanceof FileNotFoundException)
+				{
+					msg = ResourceMgr.getFormattedString("ErrFileNotFound", file);
+				}
+				else
+				{
+					msg = e.getMessage();
+				}
+				if (showProgress) printMessage("\n"); // force newline in case progress reporting was turned on
+				printMessage(ResourceMgr.getString("TxtError") + ": " + msg);
 			}
 			if (error && abortOnError)
 			{
@@ -330,8 +360,7 @@ public class BatchRunner
 		ScriptParser parser = new ScriptParser();
 		DelimiterDefinition altDelim = null;
 		
-		// If no delimiter has been defined, that use
-		// the default fallback rule
+		// If no delimiter has been defined, than use the default fallback 
 		if (this.delimiter == null)
 		{
 			altDelim = Settings.getInstance().getAlternateDelimiter(this.connection);
@@ -393,26 +422,25 @@ public class BatchRunner
 				if (result != null)
 				{
 					error = !result.isSuccess();
+					
+					// We have to store the result of hasMessages() 
+					// as the getMessageBuffer() will clear the buffer
+					// and a subsequent call to hasMessages() will return false;
+					boolean hasMessage = result.hasMessages();
 					String feedback = result.getMessageBuffer().toString();
 					
 					if (error) LogMgr.logError("BatchRunner.execute()", feedback, null);
 					else if (result.hasWarning()) LogMgr.logWarning("BatchRunner.execute()", feedback);
 					
-					if (result.hasMessages() && (this.stmtRunner.getVerboseLogging() || error))
+					if (hasMessage && (this.stmtRunner.getVerboseLogging() || error))
 					{
-						this.printMessage("");
-						// Force a new line for the console
-						if (this.resultDisplay == null) System.out.println("");
-						this.printMessage(feedback);
+						this.printMessage("\n" + feedback);
 					}
 					else if (result.hasWarning())
 					{
-						this.printMessage("");
-						// Force a new line for the console
-						if (this.resultDisplay == null) System.out.println("");
 						String verb = SqlUtil.getSqlVerb(sql);
 						String msg = StringUtil.replace(ResourceMgr.getString("MsgStmtCompletedWarn"), "%verb%", verb);	
-						this.printMessage(msg);
+						this.printMessage("\n" + msg);
 					}
 					executedCount ++;
 				}
@@ -430,11 +458,15 @@ public class BatchRunner
 
 				if (this.cancelExecution)
 				{
-					this.printMessage(ResourceMgr.getString("MsgStatementCancelled"));
+					if (!quiet) this.printMessage(ResourceMgr.getString("MsgStatementCancelled"));
 					break;
 				}
 
-				if (this.showResultSets && result != null && result.isSuccess() && result.hasDataStores() && this.console != null)
+				if (this.showResultSets 
+					&& result != null 
+					&& result.isSuccess() 
+					&& result.hasDataStores() 
+					&& this.console != null)
 				{
 					console.println();
 					console.println(sql);
@@ -448,9 +480,10 @@ public class BatchRunner
 					console.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + "   ----------------------------");
 				}
 			}
-			catch (Throwable e)
+			catch (Exception e)
 			{
 				LogMgr.logError("BatchRunner", ResourceMgr.getString("MsgBatchStatementError") + " "  + sql, e);
+				printMessage(ExceptionUtil.getDisplay(e));
 				error = true;
 				break;
 			}
@@ -458,14 +491,16 @@ public class BatchRunner
 		}
 		
 		end = System.currentTimeMillis();
+		
 		StringBuilder msg = new StringBuilder();
 		msg.append(scriptFile.getCanonicalPath());
 		msg.append(": ");
 		msg.append(executedCount);
 		msg.append(' ');
 		msg.append(ResourceMgr.getString("MsgTotalStatementsExecuted"));
-		if (this.showProgress || this.resultDisplay == null) this.printMessage("\n");
+		if (resultDisplay == null) msg.insert(0, '\n'); // force newline on console
 		this.printMessage(msg.toString());
+		
 		parser.done();
 
 		if (this.showTiming)
@@ -602,7 +637,7 @@ public class BatchRunner
 		boolean abort = cmdLine.getBoolean(WbManager.ARG_ABORT, true);
 		boolean showResult = cmdLine.getBoolean(WbManager.ARG_DISPLAY_RESULT);
 		boolean showProgress = cmdLine.getBoolean(WbManager.ARG_SHOWPROGRESS, false);
-
+		
 		String encoding = cmdLine.getValue(WbManager.ARG_SCRIPT_ENCODING);
 		
 		ConnectionProfile profile = null;
@@ -653,6 +688,7 @@ public class BatchRunner
 		runner.setSuccessScript(success);
 		runner.setProfile(profile);
 		runner.setVerboseLogging(feedback);
+		runner.quiet = cmdLine.isArgPresent(WbManager.ARG_QUIET);
 		
 		// if no showTiming argument was provided but feedback was disabled
 		// disable the display of the timing information as well.
