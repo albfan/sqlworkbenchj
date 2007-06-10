@@ -32,11 +32,11 @@ public class WbStartBatch
 
 	public String getVerb() { return VERB; }
 	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
-		if (!aConnection.getMetadata().supportsBatchUpdates())
+		if (!currentConnection.getMetadata().supportsBatchUpdates())
 		{
 			this.batch = null;
 			result.setFailure();
@@ -44,7 +44,7 @@ public class WbStartBatch
 		}
 		else
 		{
-			this.batch = aConnection.createStatement();
+			this.batch = currentConnection.createStatement();
 			result.setSuccess();
 			result.addMessage(ResourceMgr.getString("MsgJdbcBatchProcessingStarted"));
 		}

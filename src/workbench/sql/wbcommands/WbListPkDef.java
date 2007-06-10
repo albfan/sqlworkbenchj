@@ -38,7 +38,7 @@ public class WbListPkDef
 	
 	protected boolean isConnectionRequired() { return false; }
 	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();

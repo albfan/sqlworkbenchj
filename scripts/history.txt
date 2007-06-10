@@ -1,8 +1,28 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
-Enh:  (94.6) WbImport does not require the -type parameter. If no type 
-      is supplied then xml import is assumed for files ending with 
-      xml and text import is assumed for files ending with txt or csv.
+
+Build 95, 09.06.2007
+--------------------
+Enh:  (94.8) A special date and timestampformat "millis" can now be specified
+      for WbImport (e.g. -timestampFormat=millis). This will treat the value
+      as a numeric value representing the milliseconds since 1970-01-01 00:00:00
+      (and thus can be used to create a java.util.Date() object directly)
+Enh:  (94.8) When using -lobIdCols with WbExport the name of the export
+      file is no longer part of the generated LOB filename if -compress=true
+      is used.
+Enh:  (94.6) Ctrl-Shif-C (Comment Selection) now acts as a toggle. If this
+      is invoked on a text that is not commented, the line comment character
+      will be added. If the complete selection is already commented, then 
+      the comments will be removed. 
+      Ctrl-Shift-U (Uncomment Selection) works as before
+Enh:  (94.6) You can now select the elements that should be shown in the 
+      main window's title bar. The name of profile group and the current
+      workspace can be enabled/disabled. The display of the current editor's
+      filename has been moved from the "Editor" page in the options dialog
+      to the new "Window Title" page.
+Enh:  (94.6) WbImport tries to figure the import type according to the file 
+      extension of the import file. Text import is assumed for the extensions
+      txt or csv whereas XML import is assumed for the extension xml
       When importing compressed exports, the type parameter is still 
       necesary.
 Enh:  (94.5) The handling of date/datetime keywords when entering data 
@@ -62,6 +82,27 @@ Enh:  If no encoding is supplied WbExport now uses UTF-8 as the encoding for
       reports the default encoding in the help when no parameter is supplied. 
       The default encoding for text exports can be changed using the property
       workbench.file.data.encoding
+Fix:  (94.8) When entering values in the result set that could not be 
+      converted to the correct data type, no error message was shown.
+Fix:  (94.7) Auto-completion for tables from other schemas was broken
+Fix:  (94.7) The update count for DELETE and UPDATE statements was not 
+      shown properly.
+Fix:  (94.7) -decode now correctly decodes a \\ to a (single) \ 
+Fix:  (94.7) "Ignore Drop Errors" was not working any longer (that included
+      the commandline switch for running in batch mode)
+Fix:  (94.7) The automatic update check did not always work.
+Fix:  (94.7) The -sourceTable switch from WbExport did not preserve quotes
+      so that exports with case-sensitive table names could only be done
+      using a SELECT after the WbExport.
+Fix:  (94.6) Not all error messages (e.g. missing parameters for WbExport) 
+      were reported in the log file during batch execution.
+Fix:  (94.6) When opening a file in a SQL tab that contained a modified
+      file, No and Cancel would both do the same when beeing asked to 
+      save or discard the changes.
+Fix:  (94.6) Numeric values that were returned as BigDecimal by the 
+      JDBC Driver were not displayed according to the chosen max. number of 
+      digits (in the options dialog)
+Fix:  (94.6) The integration with Mac OS is now working properly.
 Fix:  (94.6) Fixed the processing of "batches" sent to SQL Server. If a 
       multi-statement SQL is sent to SQL Server that also returned result
       sets, the result was not always shown.

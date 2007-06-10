@@ -96,7 +96,7 @@ public class WbSchemaDiff
 	public String getVerb() { return VERB; }
 	protected boolean isConnectionRequired() { return false; }
 
-	public StatementRunnerResult execute(WbConnection aConnection, String sql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
@@ -137,9 +137,9 @@ public class WbSchemaDiff
 
 		this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 
-		if (targetProfile == null || (aConnection != null && aConnection.getProfile().isProfileForKey(targetKey)))
+		if (targetProfile == null || (currentConnection != null && currentConnection.getProfile().isProfileForKey(targetKey)))
 		{
-			targetCon = aConnection;
+			targetCon = currentConnection;
 		}
 		else
 		{
@@ -165,9 +165,9 @@ public class WbSchemaDiff
 			}
 		}
 
-		if (sourceProfile == null || (aConnection != null && aConnection.getProfile().isProfileForKey(sourceKey)))
+		if (sourceProfile == null || (currentConnection != null && currentConnection.getProfile().isProfileForKey(sourceKey)))
 		{
-			sourceCon = aConnection;
+			sourceCon = currentConnection;
 		}
 		else
 		{

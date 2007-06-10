@@ -41,7 +41,7 @@ public class UseCommand
 	{
 	}
 
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
@@ -58,12 +58,12 @@ public class UseCommand
 			// DbMetadata.setCurrentCatalog() will fire the 
 			// catalogChanged() event on the connection!
 			// no need to do this here
-			aConnection.getMetadata().setCurrentCatalog(catName);
+			currentConnection.getMetadata().setCurrentCatalog(catName);
 			
-			String newCatalog = aConnection.getMetadata().getCurrentCatalog();
+			String newCatalog = currentConnection.getMetadata().getCurrentCatalog();
 			
 			String msg = ResourceMgr.getString("MsgCatalogChanged");
-			String term = aConnection.getMetadata().getCatalogTerm();
+			String term = currentConnection.getMetadata().getCatalogTerm();
 			
 			msg = StringUtil.replace(msg, "%newcatalog%", newCatalog);
 			msg = StringUtil.replace(msg, "%catalogterm%", StringUtil.capitalize(term));

@@ -36,26 +36,26 @@ public class SingleVerbCommand extends SqlCommand
 		this.isUpdatingCommand = "COMMIT".equalsIgnoreCase(this.verb);
 	}
 
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
 		{
-			if (aConnection.useJdbcCommit())
+			if (currentConnection.useJdbcCommit())
 			{
 				if ("COMMIT".equals(this.verb))
 				{
-					aConnection.getSqlConnection().commit();
+					currentConnection.getSqlConnection().commit();
 				}
 				else if ("ROLLBACK".equals(this.verb))
 				{
-					aConnection.getSqlConnection().rollback();
+					currentConnection.getSqlConnection().rollback();
 				}
 			}
 			else
 			{
-				this.currentStatement = aConnection.createStatement();
+				this.currentStatement = currentConnection.createStatement();
 				this.currentStatement.execute(verb);
 			}
 

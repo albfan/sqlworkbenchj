@@ -39,7 +39,7 @@ public class WbDefinePk
 	
 	protected boolean isConnectionRequired() { return false; }
 	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
@@ -64,7 +64,7 @@ public class WbDefinePk
 		String msg = null;
 		if (columns == null)
 		{
-			PkMapping.getInstance().removeMapping(aConnection, table);
+			PkMapping.getInstance().removeMapping(currentConnection, table);
 			msg = ResourceMgr.getString("MsgPkDefinitionRemoved");
 		}
 		else

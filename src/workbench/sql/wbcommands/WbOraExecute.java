@@ -39,7 +39,7 @@ public class WbOraExecute extends SqlCommand
 
 	public String getVerb() { return this.sqlcommand; }
 
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
@@ -58,13 +58,11 @@ public class WbOraExecute extends SqlCommand
 		}
 		realSql = realSql + "{call " + sql.substring(startpos + this.sqlcommand.length() + 1) + "}";
 
-		setConnection(aConnection);
-		
 		result.addMessage(ResourceMgr.getString("MsgProcCallConverted") + " " + realSql);
 
 		try
 		{
-			this.currentStatement = aConnection.createStatement();
+			this.currentStatement = currentConnection.createStatement();
 			boolean hasResult = this.currentStatement.execute(realSql);
 			result.setSuccess();
 			processResults(result, hasResult);

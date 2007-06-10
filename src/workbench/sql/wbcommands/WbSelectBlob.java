@@ -48,7 +48,7 @@ public class WbSelectBlob
 	
 	public String getVerb() { return VERB; }
 	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
@@ -90,9 +90,7 @@ public class WbSelectBlob
 			return result;
 		}
 		LogMgr.logDebug("WbSelectBlob.execute()", "Using SQL=" + sql + " for file: " + filename);
-		Statement stmt = null;
 		ResultSet rs = null;
-		this.currentConnection = aConnection;
 		OutputStream out = null;
 		InputStream in = null;
 		long filesize = 0;
@@ -106,9 +104,8 @@ public class WbSelectBlob
 		
 		try
 		{
-			stmt = aConnection.createStatementForQuery();
-			this.currentStatement = stmt;
-			rs = stmt.executeQuery(sql);
+			currentStatement = currentConnection.createStatementForQuery();
+			rs = currentStatement.executeQuery(sql);
 			int row = 0;
 			while (rs.next())
 			{
@@ -158,7 +155,7 @@ public class WbSelectBlob
 		}
 		finally
 		{
-			SqlUtil.closeAll(rs, stmt);
+			SqlUtil.closeAll(rs, currentStatement);
 		}
 
 		return result;

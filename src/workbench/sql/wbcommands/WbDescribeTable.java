@@ -35,7 +35,7 @@ public class WbDescribeTable extends SqlCommand
 
 	public String getVerb() { return VERB; }
 
-	public StatementRunnerResult execute(WbConnection aConnection, String sql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
@@ -43,7 +43,7 @@ public class WbDescribeTable extends SqlCommand
 		
 		TableIdentifier tbl = new TableIdentifier(table);
 		
-		DataStore ds = aConnection.getMetadata().getTableDefinition(tbl);
+		DataStore ds = currentConnection.getMetadata().getTableDefinition(tbl);
     if (ds == null || ds.getRowCount() == 0)
     {
       result.setFailure();

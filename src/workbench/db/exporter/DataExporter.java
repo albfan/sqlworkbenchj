@@ -553,7 +553,7 @@ public class DataExporter
 			}
 			catch (IllegalArgumentException i)
 			{
-				this.addWarning(ResourceMgr.getString("ErrWrongDateFormat") + " [" + this.dateFormat + "]");
+				this.addWarning(ResourceMgr.getFormattedString("MsgIllegalDateFormatIgnored", this.dateFormat));
 				dateFormatter = null;
 			}
 		}
@@ -585,7 +585,7 @@ public class DataExporter
 			}
 			catch (Exception e)
 			{
-				this.addWarning(ResourceMgr.getString("ErrWrongTimestampFormat") + " [" + this.dateTimeFormat + "]");
+				this.addWarning(ResourceMgr.getFormattedString("MsgIllegalDateFormatIgnored", this.dateTimeFormat));
 				dateTimeFormatter = null;
 			}
 		}

@@ -410,11 +410,11 @@ public class StatementFactory
 		// If the table name is not in the same case the server stores it
 		// and the case may not be changed at all, then we need to quote the table name.
 		
+		TableIdentifier updateTable = this.resultInfo.getUpdateTable();
+		
 		// setNeverAdjustCase() will only be set for TableIdentifiers that have
 		// been "retrieved" from the database (e.g. in the DbExplorer)
 		// For table names that the user entered, neverAdjustCase() will be false
-		TableIdentifier updateTable = this.resultInfo.getUpdateTable();
-		
 		boolean neverAdjust = (updateTable == null ? false : updateTable.getNeverAdjustCase());
 		
 		if (neverAdjust && dbConnection != null && !dbConnection.getMetadata().isDefaultCase(value))

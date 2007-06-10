@@ -155,7 +155,7 @@ public class WbImportTest
 			out.close();
 			
 			String cmd = "wbimport -importcolumns=nr,lastname -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
-			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -220,7 +220,7 @@ public class WbImportTest
 			stmt.executeUpdate("create table imp_test (nr integer, testvalue varchar(100))");
 			
 			String cmd = "wbimport -quoteChar='\"' -header=true -continueOnError=false -encoding='UTF-8' -file='" + datafile.getAbsolutePath() + "' -type=text -table=imp_test -quoteCharEscaping=escape";
-			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import did not succeed: " + result.getMessageBuffer(), result.isSuccess(), true);
 
 			ResultSet rs = stmt.executeQuery("select testvalue from imp_test where nr = 2");
@@ -246,7 +246,7 @@ public class WbImportTest
 			this.connection.commit();
 			
 			cmd = "wbimport  -quoteChar='\"' -header=true -continueOnError=false -encoding='UTF-8' -file='" + datafile.getAbsolutePath() + "' -type=text -table=imp_test -quoteCharEscaping=duplicate";
-			result = importCmd.execute(this.connection, cmd);
+			result = importCmd.execute(cmd);
 			assertEquals("Import did not succeed: " + result.getMessageBuffer(), result.isSuccess(), true);
 
 			rs = stmt.executeQuery("select testvalue from imp_test where nr = 2");
@@ -312,7 +312,7 @@ public class WbImportTest
 			stmt.executeUpdate("create table qtest (\"Pr\u00e4fix\" varchar(100))");
 			
 			String cmd = "wbimport -continueOnError=false -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=qtest";
-			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import did not succeed", result.isSuccess(), true);
 
 			ResultSet rs = stmt.executeQuery("select count(*) from qtest");
@@ -333,7 +333,7 @@ public class WbImportTest
 			out.close();
 			
 			// Re-run with quoted column name
-			result = importCmd.execute(this.connection, cmd);
+			result = importCmd.execute(cmd);
 			assertEquals("Import did not succeed", result.isSuccess(), true);
 
 			rs = stmt.executeQuery("select count(*) from qtest");
@@ -410,11 +410,11 @@ public class WbImportTest
 			out.close();
 			
 			String cmd = "wbimport -continueOnError=false -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
-			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import succeeded", false, result.isSuccess());
 
 			cmd = "wbimport -encoding='UTF-8' -continueOnError=true -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
-			result = importCmd.execute(this.connection, cmd);
+			result = importCmd.execute(cmd);
 			assertEquals("Import failed", true, result.isSuccess());
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -451,7 +451,7 @@ public class WbImportTest
 			
 			// Test importing correct true/false values
 			String cmd = "wbimport -literalsFalse='no,99' -literalsTrue='yes,5' -type=text -header=true  -table=bool_test -continueOnError=false -delimiter=',' -booleanToNumber=true -encoding='UTF-8' -file='" + importfile.getAbsolutePath() + "'";
-			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			StatementRunnerResult result = importCmd.execute(cmd);
 			String msg = result.getMessageBuffer().toString();
 			assertEquals(msg, true, result.isSuccess());
 			
@@ -474,7 +474,7 @@ public class WbImportTest
 			// Test importing incorrect values
 			// as -continueOnError=false is supplied no rows should make into the table
 			cmd = "wbimport -literalsFalse='no,false' -literalsTrue='yes,true' -type=text -header=true  -table=bool_test -continueOnError=false -delimiter=',' -booleanToNumber=true -encoding='UTF-8' -file='" + importfile.getAbsolutePath() + "'";
-			result = importCmd.execute(this.connection, cmd);
+			result = importCmd.execute(cmd);
 			msg = result.getMessageBuffer().toString();
 			assertEquals(msg, false, result.isSuccess());
 			
@@ -490,7 +490,7 @@ public class WbImportTest
 			// Test importing incorrect values
 			// as -continueOnError=true is supplied only 3 rows should make into the table
 			cmd = "wbimport -literalsFalse='no,false' -literalsTrue='yes,true' -type=text -header=true  -table=bool_test -continueOnError=true -delimiter=',' -booleanToNumber=true -encoding='UTF-8' -file='" + importfile.getAbsolutePath() + "'";
-			result = importCmd.execute(this.connection, cmd);
+			result = importCmd.execute(cmd);
 			msg = result.getMessageBuffer().toString();
 			assertEquals(msg, true, result.isSuccess());
 			assertEquals(msg, true, result.hasWarning());
@@ -558,7 +558,7 @@ public class WbImportTest
 			
 			// Test importing only correct true/false values
 			String cmd = "wbimport -continueOnError=false -startRow=1 -endRow=2 -booleanToNumber=true -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=bool_int_test";
-			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			StatementRunnerResult result = importCmd.execute(cmd);
 			String msg = result.getMessageBuffer().toString();
 			assertEquals(msg, true, result.isSuccess());
 			System.out.println("messages: " + msg);
@@ -575,7 +575,7 @@ public class WbImportTest
 			SqlUtil.closeStatement(stmt);
 			
 			cmd = "wbimport -continueOnError=false -booleanToNumber=true -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=bool_int_test";
-			result = importCmd.execute(this.connection, cmd);
+			result = importCmd.execute(cmd);
 			msg = result.getMessageBuffer().toString();
 			assertEquals("Import did not fail", false, result.isSuccess());
 			
@@ -614,7 +614,7 @@ public class WbImportTest
 			out.print(data2);
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -clobIsFilename=true -type=text -header=true -continueonerror=false -table=clob_test");
+			StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -clobIsFilename=true -type=text -header=true -continueonerror=false -table=clob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
 			Statement stmt = this.connection.createStatement();
@@ -683,7 +683,7 @@ public class WbImportTest
 			rowCount ++;
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=true -continueonerror=false -table=junit_test");
+			StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -744,7 +744,7 @@ public class WbImportTest
 			out.println("2\tZaphod\tBeeblebrox");
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -maxLength='firstname=50,lastname=4' -type=text -header=true -continueonerror=false -table=junit_test");
+			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -maxLength='firstname=50,lastname=4' -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -796,7 +796,7 @@ public class WbImportTest
 			out.println("2\tZaphod\tBeeblebrox");
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,$wb_skip$,lastname -type=text -header=true -continueonerror=false -table=junit_test");
+			StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,$wb_skip$,lastname -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -851,7 +851,7 @@ public class WbImportTest
 			}
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,firstname,lastname -type=text -header=true -continueonerror=false -startrow=10 -endrow=20 -table=junit_test");
+			StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,firstname,lastname -type=text -header=true -continueonerror=false -startrow=10 -endrow=20 -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -896,7 +896,7 @@ public class WbImportTest
 			out.println("2\tZaphod\tBeeblebrox");
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,firstname,lastname -importcolumns=nr,lastname -type=text -header=true -continueonerror=false -table=junit_test");
+			StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,firstname,lastname -importcolumns=nr,lastname -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -949,7 +949,7 @@ public class WbImportTest
 			out.println("first4\t\"last4\tlast4\"\t4");
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
+			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -1014,7 +1014,7 @@ public class WbImportTest
 			out.close();
 			zout.done();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + archive.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
+			StatementRunnerResult result = importCmd.execute("wbimport -file='" + archive.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -1058,7 +1058,7 @@ public class WbImportTest
 			out.println("1\tFirstname\t");
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -emptyStringIsNull=true -type=text -filecolumns=nr,firstname,lastname -header=false -table=junit_test");
+			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -emptyStringIsNull=true -type=text -filecolumns=nr,firstname,lastname -header=false -table=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -1075,7 +1075,7 @@ public class WbImportTest
 			}
 			rs.close();
 			
-			result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -emptyStringIsNull=false -type=text -filecolumns=nr,firstname,lastname -deleteTarget=true -header=false -table=junit_test");
+			result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -emptyStringIsNull=false -type=text -filecolumns=nr,firstname,lastname -deleteTarget=true -header=false -table=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			rs = stmt.executeQuery("select nr,firstname,lastname from junit_test order by nr");
@@ -1124,17 +1124,17 @@ public class WbImportTest
 			}
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -filecolumns=nr,firstname,lastname -header=false -table=not_there");
+			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -filecolumns=nr,firstname,lastname -header=false -table=not_there");
 			String msg = result.getMessageBuffer().toString();
 			assertEquals("Export did not fail", false, result.isSuccess());
 			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE] not found") > -1);
 			
-			result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -table=not_there");
+			result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -table=not_there");
 			msg = result.getMessageBuffer().toString();
 			assertEquals("Export did not fail", false, result.isSuccess());
 			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE] not found") > -1);
 
-			result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -table=not_there");
+			result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -table=not_there");
 			msg = result.getMessageBuffer().toString();
 			assertEquals("Export did not fail", false, result.isSuccess());
 			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE] not found") > -1);
@@ -1163,7 +1163,7 @@ public class WbImportTest
 			}
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true  -type=text -filecolumns=nr,firstname,lastname -header=false -table=junit_test");
+			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true  -type=text -filecolumns=nr,firstname,lastname -header=false -table=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -1210,7 +1210,7 @@ public class WbImportTest
 			}
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -type=text -header=false -table=junit_test");
+			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -type=text -header=false -table=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -1264,7 +1264,7 @@ public class WbImportTest
 			out.println("42\t42.1234\tfortytwo\t2006-02-01\t22:30\t2006-04-01 22:34:14\t");
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -header=false -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text");
+			StatementRunnerResult result = importCmd.execute("wbimport -header=false -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -1315,7 +1315,7 @@ public class WbImportTest
 			}
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -continueonerror=true -header=true -table=junit_test");
+			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -continueonerror=true -header=true -table=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -1351,7 +1351,7 @@ public class WbImportTest
 			out.println("42\t42.1234\tfortytwo\t2006-02-01\t22:30\t2006-04-01 22:34\t");
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=datatype_test -dateformat='yyyy-MM-dd' -timestampformat='yyyy-MM-dd HH:mm'");
+			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=datatype_test -dateformat='yyyy-MM-dd' -timestampformat='yyyy-MM-dd HH:mm'");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -1430,7 +1430,7 @@ public class WbImportTest
 
 			zout.done();
 
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + archive.getAbsolutePath() + "' -decimal='.' -multiline=true -encoding='UTF-8' -type=text -header=true -table=blob_test");
+			StatementRunnerResult result = importCmd.execute("wbimport -file='" + archive.getAbsolutePath() + "' -decimal='.' -multiline=true -encoding='UTF-8' -type=text -header=true -table=blob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -1537,7 +1537,7 @@ public class WbImportTest
 			
 			String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 			//System.out.println("cmd=" + cmd);
-			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -1621,7 +1621,7 @@ public class WbImportTest
 			
 			String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 			//System.out.println("cmd=" + cmd);
-			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -1730,7 +1730,7 @@ public class WbImportTest
 			
 			String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -startRow = 15 -endrow = 24 -table=junit_test";
 			//System.out.println("cmd=" + cmd);
-			StatementRunnerResult result = importCmd.execute(this.connection, cmd);
+			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -1823,7 +1823,7 @@ public class WbImportTest
 			binaryOut.write(testData);
 			binaryOut.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=blob_test");
+			StatementRunnerResult result = importCmd.execute("wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=blob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -1928,7 +1928,7 @@ public class WbImportTest
 			pw.write(data1);
 			pw.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=clob_test");
+			StatementRunnerResult result = importCmd.execute("wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=clob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -1969,7 +1969,8 @@ public class WbImportTest
 			util.emptyBaseDirectory();
 			File dbFile = new File(util.getBaseDir(), "commit_test");
 			WbConnection wb = util.getConnection(dbFile);
-		
+			importCmd.setConnection(wb);
+			
 			Statement stmt = wb.createStatement();
 			stmt.executeUpdate("CREATE TABLE junit_test (nr integer, firstname varchar(100), lastname varchar(100))");
 			wb.commit();
@@ -1982,7 +1983,7 @@ public class WbImportTest
 			w.close();
 			
 			String cmd = "wbimport -file='" + dataFile.getAbsolutePath() + "' -type=text -delimiter=';' -table=junit_test -header=true";
-			StatementRunnerResult result = importCmd.execute(wb, cmd);
+			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 			wb.disconnect();
 			
@@ -2040,7 +2041,8 @@ public class WbImportTest
 			util.emptyBaseDirectory();
 			File dbFile = new File(util.getBaseDir(), "no_commit_test");
 			WbConnection wb = util.getConnection(dbFile);
-		
+			importCmd.setConnection(wb);
+			
 			Statement stmt = wb.createStatement();
 			stmt.executeUpdate("CREATE TABLE junit_test (nr integer, firstname varchar(100), lastname varchar(100))");
 			wb.commit();
@@ -2053,7 +2055,7 @@ public class WbImportTest
 			w.close();
 
 			String cmd = "wbimport -file='" + dataFile.getAbsolutePath() + "' -type=text -delimiter=';' -commitEvery=none -table=junit_test -header=true";
-			StatementRunnerResult result = importCmd.execute(wb, cmd);
+			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 			wb.disconnect();
 			
@@ -2162,7 +2164,7 @@ public class WbImportTest
 			binaryOut.close();
 			zout.done();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -encoding='UTF-8' -file='" + archive.getAbsolutePath() + "' -type=xml -table=blob_test");
+			StatementRunnerResult result = importCmd.execute("wbimport -encoding='UTF-8' -file='" + archive.getAbsolutePath() + "' -type=xml -table=blob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -2226,7 +2228,7 @@ public class WbImportTest
 			binaryOut.write(testData);
 			binaryOut.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=blob_test");
+			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=blob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();
@@ -2278,7 +2280,7 @@ public class WbImportTest
 			out.println("1\tZaphod\tBeeblebrox");
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=true -continueonerror=true -table=junit_test_pk -badFile='" + badFile.getCanonicalPath() + "'");
+			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=true -continueonerror=true -table=junit_test_pk -badFile='" + badFile.getCanonicalPath() + "'");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("Bad file not created", true, badFile.exists());
@@ -2347,7 +2349,7 @@ public class WbImportTest
 			out.println("1\t42");
 			out.close();	
 
-			StatementRunnerResult result = importCmd.execute(this.connection, "wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -continueonerror=false -table=parent_table -deleteTarget=true");
+			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -continueonerror=false -table=parent_table -deleteTarget=true");
 			assertEquals("Import did not fail", false, result.isSuccess());
 			String msg = result.getMessageBuffer().toString();
 			assertEquals("No error reported", true, msg.indexOf("Integrity constraint violation") > 0);

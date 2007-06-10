@@ -13,6 +13,7 @@ package workbench.sql.commands;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,15 +43,17 @@ public class DdlCommand extends SqlCommand
 	// Firebird RECREATE VIEW command
 	public static final SqlCommand RECREATE = new DdlCommand("RECREATE");
 
-	public static final List<DdlCommand> DDL_COMMANDS = new ArrayList<DdlCommand>(5);
+	public static final List<DdlCommand> DDL_COMMANDS;
 
 	static
 	{
-		DDL_COMMANDS.add(DROP);
-		DDL_COMMANDS.add(CREATE);
-		DDL_COMMANDS.add(ALTER);
-		DDL_COMMANDS.add(GRANT);
-		DDL_COMMANDS.add(REVOKE);
+		List<DdlCommand> l = new ArrayList<DdlCommand>(5);
+		l.add(DROP);
+		l.add(CREATE);
+		l.add(ALTER);
+		l.add(GRANT);
+		l.add(REVOKE);
+		DDL_COMMANDS = Collections.unmodifiableList(l);
 	}
 
 	private String verb;
@@ -61,15 +64,15 @@ public class DdlCommand extends SqlCommand
 		this.isUpdatingCommand = true;
 	}
 
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		try
 		{
-			this.currentStatement = aConnection.createStatement();
+			this.currentStatement = currentConnection.createStatement();
 
-			aSql = aConnection.getMetadata().filterDDL(aSql);
+			aSql = currentConnection.getMetadata().filterDDL(aSql);
 
 			String msg = null;
 			result.setSuccess();
@@ -106,7 +109,7 @@ public class DdlCommand extends SqlCommand
 				}
 				result.addMessage(msg);
 				
-				// Using a generic execute and result processing ensures that servers that 
+				// Using a generic execute and result processing ensures that DBMS that 
 				// can process more than one statement with a single SQL are treated correctly. 
 				// e.g. when sending a SELECT and other statements as a "batch" with SQL Server
 				processMoreResults(aSql, result, hasResult);
@@ -114,7 +117,7 @@ public class DdlCommand extends SqlCommand
 				// Process result will have added any warnings and set the warning flag
 				if (result.hasWarning())
 				{
-					if (this.addExtendErrorInfo(aConnection, aSql, result))
+					if (this.addExtendErrorInfo(currentConnection, aSql, result))
 					{
 						result.setFailure();
 					}
@@ -140,7 +143,7 @@ public class DdlCommand extends SqlCommand
 			result.addMessageNewLine();
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
 
-			this.addExtendErrorInfo(aConnection, aSql, result);
+			this.addExtendErrorInfo(currentConnection, aSql, result);
 			result.setFailure();
 			LogMgr.logSqlError("DdlCommand.execute()", aSql, e);
 		}

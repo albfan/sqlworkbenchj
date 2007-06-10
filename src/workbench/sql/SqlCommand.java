@@ -100,9 +100,6 @@ public class SqlCommand
 	 */
 	protected boolean appendWarnings(StatementRunnerResult result)
 	{
-		if (this.currentConnection == null) return false;
-		if (this.currentStatement == null) return false;
-		
 		CharSequence warn = SqlUtil.getWarnings(this.currentConnection, this.currentStatement, !this.isCancelled);
 		boolean hasWarning = false;
 		if (warn != null && warn.length() > 0)
@@ -186,6 +183,7 @@ public class SqlCommand
 		{
 			try { this.currentConnection.rollback(); } catch (Exception th) {}
 		}
+		try { currentConnection.clearWarnings(); } catch (Exception e) {}
 		this.currentStatement = null;
 		this.isCancelled = false;
 	}
@@ -198,15 +196,15 @@ public class SqlCommand
 	protected boolean isConnectionRequired() { return true; }
 	
 	/**
-	 *	Should be overridden by a specialised SqlCommand
+	 *	Should be overridden by a specialised SqlCommand. 
+	 * setConnection should have been called before calling execute()
 	 */
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 
-		this.currentStatement = aConnection.createStatement();
-		setConnection(aConnection);
+		this.currentStatement = this.currentConnection.createStatement();
 		this.isCancelled = false;
 
 		try
@@ -266,9 +264,9 @@ public class SqlCommand
 	{
 		if (result == null) return;
 		
-		// Postgres obviously clears the warnings if the getMoreResults()
-		// and stuff is called, so we add the warnings before calling getMoreResults()
-		StringBuilder warnings = new StringBuilder();
+		// Postgres obviously clears the warnings if the getMoreResults() is called,
+		// so we add the warnings before calling getMoreResults(). This doesn't seem
+		// to do any harm for other DBMS as well.
 		appendWarnings(result);
 
 		int updateCount = -1;
@@ -362,7 +360,7 @@ public class SqlCommand
 					}
 					finally
 					{
-						try { rs.close(); } catch (Exception th) {}
+						SqlUtil.closeResult(rs);
 					}
 					result.addDataStore(this.currentRetrievalData);
 				}
@@ -394,6 +392,7 @@ public class SqlCommand
 			// correctly, so this is a safety to prevent an endless loop
 			if (counter > 50) break;
 		}
+		
 		this.currentRetrievalData = null;
 	}
 	

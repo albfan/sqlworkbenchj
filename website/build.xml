@@ -1,34 +1,115 @@
 <?xml version="1.0"?>
 <project name="MakeDoc" default="noDev" basedir=".">
 
-	<target name="init">
+  <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="xmltask-v1.15.jar"/>
+
+  <property file="..\scripts\release.property"/>
+
+  <target name="updateRss">
     <tstamp>
-      <format pattern="yyyy-MM-dd" property="currentDate"/>
+      <format pattern="EEE, dd MMM yyyy" property="pubDate"/>
     </tstamp>
-	</target>
-	
-	<property file="..\scripts\release.property"/>
-	
-	<target name="clean" depends="init">
+
+    <xmltask source="wb_news.xml" dest="wb_news.xml" outputter="simple" encoding="UTF-8">
+      <insert path="/rss/channel/item[1]" position="before" expandProperties="true">
+        <![CDATA[
+          <item>
+              <title>New ${pub.build.name} build (${pub.build.number}) available</title>
+              <description>A new ${pub.build.name} build has been released. To download, please visit the homepage</description>
+              <link>http://www.sql-workbench.net/downloads.html</link>
+              <author>Thomas Kellerer</author>
+              <pubDate>${pubDate}</pubDate>
+          </item>
+        ]]>
+      </insert>
+    </xmltask>
+  </target>
+
+	<path id="script.path">
+		<pathelement location="bsf.jar"/>
+		<pathelement location="commons-logging-1.1.jar"/>
+		<pathelement location="js.jar"/>
+	</path>
+
+  <scriptdef name="getfs" language="javascript">
+    <attribute name="file"/>
+    <![CDATA[
+      fileName = attributes.get("file");
+      propName = attributes.get("property");
+
+      file = new java.io.File(fileName);
+      size = file.length();
+      sizeKB = size >> 10;
+      sizeMB = sizeKB / 1024;
+      symb = new java.text.DecimalFormatSymbols();
+      symb.setDecimalSeparator('.');
+
+      f = new java.text.DecimalFormat("#.##", symb);
+
+      project.setNewProperty("filesize", size);
+      project.setNewProperty("filesizeKB", sizeKB);
+      project.setNewProperty("filesizeMB", f.format(sizeMB));
+    ]]>
+  </scriptdef>
+
+
+  <target name="updatePad">
+    <tstamp>
+      <format pattern="yyyy" property="pub.year"/>
+    </tstamp>
+    <tstamp>
+      <format pattern="MM" property="pub.month"/>
+    </tstamp>
+    <tstamp>
+      <format pattern="dd" property="pub.day"/>
+    </tstamp>
+
+    <property name="distfile" value="Workbench-Build${pub.build.number}.zip"/>
+
+    <getfs file="../release/${distfile}"/>
+
+    <xmltask source="workbench_pad.xml" dest="workbench_pad.xml" encoding="UTF-8" outputter="simple">
+      <replace path="/XML_DIZ_INFO/Program_Info/Program_Version/text()" withText="${release.build.number}"/>
+      <replace path="/XML_DIZ_INFO/Program_Info/Program_Release_Year/text()" withText="${pub.year}"/>
+      <replace path="/XML_DIZ_INFO/Program_Info/Program_Release_Month/text()" withText="${pub.month}"/>
+      <replace path="/XML_DIZ_INFO/Program_Info/Program_Release_Day/text()" withText="${pub.day}"/>
+      <replace path="/XML_DIZ_INFO/Program_Info/File_Info/File_Size_Bytes/text()" withText="${filesize}"/>
+      <replace path="/XML_DIZ_INFO/Program_Info/File_Info/File_Size_K/text()" withText="${filesizeKB}"/>
+      <replace path="/XML_DIZ_INFO/Program_Info/File_Info/File_Size_MB/text()" withText="${filesizeMB}"/>
+      <replace path="/XML_DIZ_INFO/Web_Info/Download_URLs/Primary_Download_URL/text()" withText="http://www.sql-workbench.net/${distfile}"/>
+    </xmltask>
+
+  </target>
+
+  <target name="clean">
     <delete>
       <fileset dir=".">
         <include name="*.html"/>
       </fileset>
     </delete>
-	</target>
-	
-	<target name="noDev" depends="-noDev, makeHTML"/>
-	<target name="withDev" depends="-withDev, makeHTML"/>
+  </target>
 
-	<target name="-noDev">
-	  <property name="dev.build" value="0"/>
-	</target>
-	
-	<target name="-withDev">
-	  <property name="dev.build" value="1"/>
-	</target>
+  <target name="release" depends="-noDev, makeHTML, updateRss, updatePad"/>
+  <target name="dev-release" depends="-withDev, makeHTML, updateRss"/>
+  
+  <target name="noDev" depends="-noDev, makeHTML"/>
+  <target name="withDev" depends="-withDev, makeHTML"/>
 
-  <target name="makeHTML" depends="init,clean">
+  <target name="-noDev">
+    <property name="pub.build.name" value="stable"/>
+    <property name="dev.build" value="0"/>
+  </target>
+
+  <target name="-withDev">
+    <property name="pub.build.name" value="development"/>
+    <property name="pub.build.number" value="${dev.build.number}"/>
+    <property name="dev.build" value="1"/>
+  </target>
+
+  <target name="makeHTML" depends="clean">
+    <tstamp>
+      <format pattern="yyyy-mm-dd" property="currentDate"/>
+    </tstamp>
     <xslt in="workbench.xml" out="index.html" style="workbench.xslt" force="true">
       <param name="buildNumber" expression="${release.build.number}"/>
       <param name="devBuildDate" expression="${dev.build.date}"/>

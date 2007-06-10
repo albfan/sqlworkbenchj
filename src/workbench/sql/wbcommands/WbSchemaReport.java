@@ -69,12 +69,11 @@ public class WbSchemaReport
 
 	public String getVerb() { return VERB; }
 
-	public StatementRunnerResult execute(WbConnection aConnection, String sql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
 		boolean dbDesigner = false;
 		StatementRunnerResult result = new StatementRunnerResult();
-		this.currentConnection = aConnection;
 		
 		sql = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
 
@@ -112,7 +111,7 @@ public class WbSchemaReport
 			return result;
 		}
 		String namespace = cmdLine.getValue("namespace");
-		this.reporter = new SchemaReporter(aConnection);
+		this.reporter = new SchemaReporter(currentConnection);
 		this.reporter.setNamespace(namespace);
 
 		TableIdentifier[] tables = this.parseTables();
@@ -139,10 +138,10 @@ public class WbSchemaReport
 		this.reporter.setIncludeTables(cmdLine.getBoolean(PARAM_INCLUDE_TABLES, true));
 		this.reporter.setIncludeProcedures(cmdLine.getBoolean(PARAM_INCLUDE_PROCS, false));
 		this.reporter.setIncludeGrants(cmdLine.getBoolean(PARAM_INCLUDE_GRANTS, false));
-		if (aConnection.getMetadata().isOracle())
+		if (currentConnection.getMetadata().isOracle())
 		{
 			// check if remarksReporting is turned on for Oracle, if not issue a warning.
-			ConnectionProfile prof = aConnection.getProfile();
+			ConnectionProfile prof = currentConnection.getProfile();
 			Properties props = prof.getConnectionProperties();
 			String value = "false";
 			if (props != null)

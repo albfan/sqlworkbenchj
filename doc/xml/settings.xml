@@ -255,6 +255,11 @@
       	When you sort the result set, characters values will be sorted case-sensitiv by default.
       	This is caused by the <literal>compareTo()</literal> method available in the Java
       	environment which puts lower case characters in front of upper case characters when sorting.
+				When setting <literal>workbench.sort.usecollator</literal> to <literal>true</literal> a 
+				language sensitive comparison is used to sort character values, that will treat lowercase
+				and uppercase letters the same during sorting. As the policy on how special characters 
+				are sorted is different for each language, you can also define the language and country
+				that should be used when initializing these sorting rules. 
       </para>
       <para>Default value: false</para>
     </section>
@@ -264,11 +269,7 @@
       <para>Property: <literal>workbench.sort.language</literal></para>
       <para>
         If you want to use a language/country specific collation sequence, 
-        this property defines the sort language to be used. <!-- By default this language
-        is english as &wb-productname; is only available in english, and thus the
-        Windows launcher sets the language for the Java runtime to english as well 
-        (For details please refer to <link linkend="launcher-nolang">Windows launcher parameters</link>).
-				-->
+        this property defines the sort language to be used.
       </para>
       <para>Default value: en</para>
     </section>
@@ -571,19 +572,6 @@
 			<para>Default: <literal>false</literal></para>
 		</section>
 
-		<section id="export-sql-dateliteral-default">
-			<title>Default date literal for SQL exports</title>
-			<para>Property: <literal>workbench.export.sql.default.dateliteral</literal></para>
-			<para>
-				This property controls the default value for the 
-				<link linkend="export-sql-literal-formats"><literal>-sqlDateLiterals</literal></link> switch
-				of the <literal>WbExport</literal> command. Note that this is a different property than the 
-				default value defined in the <link linkend="options-default-date-literaltype">options dialog</link>,
-				which defines the default format for copying SQL statements to the <emphasis>clipboard</emphasis>.
-			</para>
-			<para>Default: <literal>dbms</literal></para>
-		</section>
-		
 		<section id="export-xml-verbose">
 			<title>Controlling XML export format</title>
 			<para>Property: <literal>workbench.export.xml.default.verbose</literal></para>
@@ -622,10 +610,10 @@
       <para>Property: <literal>workbench.log.level</literal></para>
       <para>Set the log level for the log file. Valid values are
         <itemizedlist spacing="compact">
-          <listitem>DEBUG</listitem>
-          <listitem>INFO</listitem>
-          <listitem>WARN</listitem>
-          <listitem>ERROR</listitem>
+          <listitem><para>DEBUG</para></listitem>
+          <listitem><para>INFO</para></listitem>
+          <listitem><para>WARN</para></listitem>
+          <listitem><para>ERROR</para></listitem>
         </itemizedlist>
       </para>
       <para>Default: <literal>INFO</literal></para>
@@ -636,12 +624,12 @@
       <para>Property: <literal>workbench.log.format</literal></para>
       <para>Define the format of the log messages. The following placeholders are supported:
         <itemizedlist spacing="compact">
-          <listitem>{type}</listitem>
-          <listitem>{timestamp}</listitem>
-          <listitem>{message}</listitem>
-          <listitem>{error}</listitem>
-          <listitem>{source}</listitem>
-          <listitem>{stacktrace}</listitem>
+          <listitem><para>{type}</para></listitem>
+          <listitem><para>{timestamp}</para></listitem>
+          <listitem><para>{message}</para></listitem>
+          <listitem><para>{error}</para></listitem>
+          <listitem><para>{source}</para></listitem>
+          <listitem><para>{stacktrace}</para></listitem>
         </itemizedlist>
 				The order of the placeholders defines the order in the log file, except
 				for the stacktrace which will always be printed after the message.

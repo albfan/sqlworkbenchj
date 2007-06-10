@@ -38,6 +38,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
+import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.ValidatingDialog;
@@ -240,6 +241,11 @@ public class WbSwingUtilities
 	{
 		showErrorMessage(aCaller, ResourceMgr.TXT_PRODUCT_NAME, ResourceMgr.getString(key));
 	}
+
+	public static void showErrorMessage(String aMessage)
+	{
+		showErrorMessage(null, ResourceMgr.TXT_PRODUCT_NAME, aMessage);
+	}
 	
 	public static void showErrorMessage(Component aCaller, String aMessage)
 	{
@@ -248,7 +254,12 @@ public class WbSwingUtilities
 	
 	public static void showErrorMessage(Component aCaller, String title, String aMessage)
 	{
-		if (!(aCaller instanceof Window))
+		if (WbManager.getInstance().isBatchMode()) return;
+		if (aCaller == null)
+		{
+			aCaller = WbManager.getInstance().getCurrentWindow();
+		}
+		else if (!(aCaller instanceof Window))
 		{
 			aCaller = SwingUtilities.getWindowAncestor(aCaller);
 		}		

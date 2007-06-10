@@ -768,11 +768,18 @@ public class DwPanel
 	
 	public int duplicateRow()
 	{
+		if (this.dataTable.getSelectedRowCount() != 1) return -1;
+		int row = this.dataTable.getSelectedRow();
+		if (row < 0) return -1;
+		
 		if (this.readOnly) return -1;
-		if (!this.startEdit()) return -1;
-		final int newRow = this.dataTable.duplicateRow();
+		if (!this.startEdit(false)) return -1;
+		final int newRow = this.dataTable.duplicateRow(row);
+		
 		if (newRow >= 0) 
 		{
+			// Make the new row the current row
+			// and start editing in the first column
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
@@ -797,7 +804,7 @@ public class DwPanel
 	public void deleteRow()
 	{
 		if (this.readOnly) return;
-		if (!this.startEdit()) return;
+		if (!this.startEdit(true)) return;
 		this.dataTable.deleteRow();
 		this.rowCountChanged();
 	}
@@ -1041,6 +1048,11 @@ public class DwPanel
 		this.duplicateRow.setEnabled(rows == 1);
 		if (restoreData) this.dataTable.restoreOriginalValues();
 	}
+
+	public boolean startEdit()
+	{
+		return startEdit(true);
+	}
 	
 	/**
 	 *	Starts the "edit" mode of the table. It will not start the edit
@@ -1053,14 +1065,15 @@ public class DwPanel
 	 *  <li>the corresponding actions (insert row, delete row) are enabled</li>
 	 *  <li>the startEdit action is turned to "switched on"</li>
 	 *  </ul>
+	 * @param restoreSelection if true the selected rows before starting the edit mode are restored
 	 */
-	public boolean startEdit()
+	public boolean startEdit(boolean restoreSelection)
 	{
 		if (this.readOnly) return false;
 		
 		this.editingStarted = false;
 		
-//		final int[] selectedRows = this.dataTable.getSelectedRows();
+		final int[] selectedRows = this.dataTable.getSelectedRows();
 		final int currentRow = this.dataTable.getEditingRow();
 		final int currentColumn = this.dataTable.getEditingColumn();
 		
@@ -1106,24 +1119,39 @@ public class DwPanel
 			// When changing the table model (which is happening
 			// when the status column is displayed) we need to restore
 			// the current editing column/row
-			EventQueue.invokeLater(new Runnable()
+			if (restoreSelection)
 			{
-				public void run()
+				WbSwingUtilities.invoke(new Runnable()
 				{
-					if (currentRow > -1 && currentColumn > -1)
+					public void run()
 					{
-						dataTable.selectCell(currentRow, currentColumn + 1);
+						if (currentRow > -1 && currentColumn > -1)
+						{
+							dataTable.selectCell(currentRow, currentColumn + 1);
+							dataTable.setColumnSelectionAllowed(false);
+						}
+						else if (currentRow > -1)
+						{
+							dataTable.scrollToRow(currentRow);		
+							dataTable.setRowSelectionInterval(currentRow, currentRow);
+						}
+						else if (selectedRows != null)
+						{
+							ListSelectionModel model = dataTable.getSelectionModel();
+							model.setValueIsAdjusting(true);
+							// make sure nothing is selected, then restore the old selection
+							model.clearSelection();
+							for (int i = 0; i < selectedRows.length; i++)
+							{
+								model.addSelectionInterval(selectedRows[i], selectedRows[i]);
+							}
+							model.setValueIsAdjusting(false);
+						}
+						dataTable.requestFocusInWindow();
 					}
-					else if (currentRow > -1)
-					{
-						dataTable.scrollToRow(currentRow);		
-						dataTable.setRowSelectionInterval(currentRow, currentRow);
-					}
-						
-					dataTable.requestFocusInWindow();
-				}
-			});
-
+				});
+			}
+			
 			checkResultSetActions();
 		}
 		else

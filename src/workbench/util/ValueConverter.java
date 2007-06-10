@@ -79,6 +79,8 @@ public class ValueConverter
 	private boolean autoConvertBooleanNumbers = true;
 	private Collection<String> booleanTrueValues = null;
 	private Collection<String> booleanFalseValues = null;
+
+	private static final String FORMAT_MILLIS = "millis";
 	
 	public ValueConverter()
 	{
@@ -109,20 +111,38 @@ public class ValueConverter
 	}
 
 	public void setDefaultDateFormat(String aFormat)
+		throws IllegalArgumentException
 	{
 		if (!StringUtil.isEmptyString(aFormat))
 		{
-			this.defaultDateFormat = aFormat;
-			this.dateFormatter = new SimpleDateFormat(aFormat);
+      if (aFormat.equalsIgnoreCase(FORMAT_MILLIS))
+			{
+        this.defaultTimestampFormat = FORMAT_MILLIS;
+				this.dateFormatter = null;
+			}
+			else
+			{
+				this.defaultDateFormat = aFormat;
+				this.dateFormatter = new SimpleDateFormat(aFormat);
+			}
 		}
 	}
 
 	public void setDefaultTimestampFormat(String aFormat)
+		throws IllegalArgumentException
 	{
 		if (!StringUtil.isEmptyString(aFormat))
 		{
-			this.defaultTimestampFormat = aFormat;
-			this.timestampFormatter = new SimpleDateFormat(aFormat);
+      if (aFormat.equalsIgnoreCase(FORMAT_MILLIS))
+      {
+        this.defaultTimestampFormat = FORMAT_MILLIS;
+				this.dateFormatter = null;
+      }
+      else
+      {
+        this.defaultTimestampFormat = aFormat;
+        this.timestampFormatter = new SimpleDateFormat(aFormat);
+      }
 		}
 	}
 
@@ -280,7 +300,7 @@ public class ValueConverter
 				if (v.length() == 0) return null;
 				try
 				{
-				return this.parseTimestamp((String)aValue);
+					return this.parseTimestamp((String)aValue);
 				}
 				catch (Exception e)
 				{
@@ -289,7 +309,14 @@ public class ValueConverter
 				
 			case Types.TIME:
 				if (v.length() == 0) return null;
-				return this.parseTime((String)aValue);
+				try
+				{
+					return this.parseTime((String)aValue);
+				}
+				catch (Exception e)
+				{
+					throw new ConverterException(aValue, type, e);
+				}
 				
 			case Types.BLOB:
 			case Types.BINARY:
@@ -342,6 +369,7 @@ public class ValueConverter
 	}
 
   public java.sql.Time parseTime(String time)
+		throws ParseException
 	{
 		if (isCurrentTime(time))
 		{
@@ -353,8 +381,8 @@ public class ValueConverter
 			return new java.sql.Time(now.getTime());
 		}
 		
-		java.sql.Time result = null;
 		java.util.Date parsed = null;
+		
 		synchronized (this.formatter)
 		{
 			for (int i=0; i < timeFormats.length; i++)
@@ -363,23 +391,21 @@ public class ValueConverter
 				{
 					this.formatter.applyPattern(timeFormats[i]);
 					parsed = this.formatter.parse(time);
+					LogMgr.logInfo("ValueConverter.parseTime()", "Succeeded parsing the time string [" + time + "] using the format: " + formatter.toPattern());
 					break;
 				}
 				catch (Exception e)
 				{
-					result = null;
+					parsed = null;
 				}
 			}
 		}
 		
-		if (parsed == null) 
+		if (parsed != null) 
 		{
-			LogMgr.logWarning("ValueConverter.parseTime()", "Could not parse time value '" + time + "'");
-			return null;
+			return new java.sql.Time(parsed.getTime());
 		}
-		
-		result = new java.sql.Time(parsed.getTime());
-		return result;
+		throw new ParseException("Could not parse [" + time + "] as a time value!", 0);
 	}
 	
 	private java.sql.Date getToday()
@@ -395,7 +421,7 @@ public class ValueConverter
 	}
 	
   public java.sql.Timestamp parseTimestamp(String aDate)
-		throws ParseException
+		throws ParseException, NumberFormatException
   {
 		if (isCurrentTimestamp(aDate))
 		{
@@ -414,15 +440,23 @@ public class ValueConverter
 		{
 			try
 			{
-				synchronized (this.timestampFormatter)
+				if (FORMAT_MILLIS.equalsIgnoreCase(defaultTimestampFormat))
 				{
-					result = this.timestampFormatter.parse(aDate);
+					long value = Long.parseLong(aDate);
+          result = new java.util.Date(value);
+				}
+				else
+				{
+					synchronized (this.timestampFormatter)
+					{
+						result = this.timestampFormatter.parse(aDate);
+					}
 				}
 			}
-			catch (ParseException e)
+			catch (Exception e)
 			{
-				LogMgr.logWarning("ValueConverter.parseTimestamp()", "Could not parse '" + aDate + "' using " + this.timestampFormatter.toPattern() + ". Trying to recognize the format", null);
-				throw e;
+				LogMgr.logWarning("ValueConverter.parseTimestamp()", "Could not parse '" + aDate + "' using default format " + this.timestampFormatter.toPattern() + ". Trying to recognize the format...", null);
+				result = null;
 			}
 		}
 		
@@ -442,13 +476,13 @@ public class ValueConverter
 					}
 					catch (ParseException e)
 					{
-						throw e;
+						result = null;
 					}
 				}
 			}
 			if (usedPattern > -1)
 			{
-				LogMgr.logWarning("ValueConverter.parseTimestamp()", "Succeeded parsing '" + aDate + "' using the format: " + timestampFormats[usedPattern]);
+				LogMgr.logInfo("ValueConverter.parseTimestamp()", "Succeeded parsing '" + aDate + "' using the format: " + timestampFormats[usedPattern]);
 			}
 		}
 		
@@ -456,8 +490,7 @@ public class ValueConverter
 		{
 			return new java.sql.Timestamp(result.getTime());
 		}
-		return null;
-		
+		throw new ParseException("Could not convert [" + aDate + "] to a timestamp value!",0);
 	}
 
   public java.sql.Date parseDate(String aDate)
@@ -479,15 +512,24 @@ public class ValueConverter
 		{
 			try
 			{
-				synchronized (this.dateFormatter)
+				if (FORMAT_MILLIS.equalsIgnoreCase(defaultTimestampFormat))
 				{
-					result = this.dateFormatter.parse(aDate);
+					long value = Long.parseLong(aDate);
+          result = new java.util.Date(value);
+				}
+				else
+				{
+					synchronized (this.dateFormatter)
+					{
+						result = this.dateFormatter.parse(aDate);
+					}
 				}
 			}
-			catch (ParseException e)
+			catch (Exception e)
 			{
-				LogMgr.logWarning("ValueConverter.parseDate()", "Could not parse '" + aDate + "' using " + this.dateFormatter.toPattern() + ". Trying to recognize the format...", null);
-				throw e;
+				LogMgr.logWarning("ValueConverter.parseDate()", "Could not parse [" + aDate + "] using: " + this.dateFormatter.toPattern(), null);
+				// Do not throw the exception yet as we will try the defaultTimestampFormat as well.
+				result = null;
 			}
 		}
 
@@ -499,13 +541,12 @@ public class ValueConverter
 			}
 			catch (ParseException e)
 			{
-				throw e;
+				LogMgr.logWarning("ValueConverter.parseDate()", "Could not parse [" + aDate + "] using: " + this.timestampFormatter.toPattern() + ". Trying to recognize the format...", null);
 			}
 		}
 
 		if (result == null)
 		{
-			int usedPattern = -1;
 			synchronized (this.formatter)
 			{
 				for (int i=0; i < dateFormats.length; i++)
@@ -514,7 +555,7 @@ public class ValueConverter
 					{
 						this.formatter.applyPattern(dateFormats[i]);
 						result = this.formatter.parse(aDate);
-						usedPattern = i;
+						LogMgr.logInfo("ValueConverter.parseDate()", "Succeeded parsing [" + aDate + "] using the format: " + dateFormats[i]);
 						break;
 					}
 					catch (Exception e)
@@ -523,21 +564,14 @@ public class ValueConverter
 					}
 				}
 			}
-			if (usedPattern > -1)
-			{
-				LogMgr.logWarning("ValueConverter.parseDate()", "Succeeded parsing '" + aDate + "' using the format: " + dateFormats[usedPattern]);
-			}
-			else
-			{
-				throw new ParseException("Could not convert [" + aDate + "] to a date", 0);
-			}
 		}
 
 		if (result != null)
 		{
 			return new java.sql.Date(result.getTime());
 		}
-		return null;
+		
+		throw new ParseException("Could not convert [" + aDate + "] to a date", 0);
   }
 
 	private boolean isCurrentTime(String arg)

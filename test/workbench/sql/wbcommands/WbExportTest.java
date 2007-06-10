@@ -78,17 +78,16 @@ public class WbExportTest extends TestCase
 		try
 		{
 			File exportFile = new File(this.basedir, "quote_escaping_test.txt");
-			WbConnection wb = util.getConnection();
-
-			Statement stmt = wb.createStatement();
+			
+			Statement stmt = connection.createStatement();
 			stmt.executeUpdate("CREATE TABLE quote_test (nr integer, testvalue varchar(100))");
 			stmt.executeUpdate("insert into quote_test (nr, testvalue) values (1, 'first')");
 			stmt.executeUpdate("insert into quote_test (nr, testvalue) values (2, 'with\"quote')");
 			stmt.executeUpdate("insert into quote_test (nr, testvalue) values (3, 'with\ttab')");
-			wb.commit();
+			connection.commit();
 			
 			// Test escaping 
-			StatementRunnerResult result = exportCmd.execute(wb, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -sourcetable=quote_test -quoteCharEscaping=escape -quoteChar='\"' -header=false");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -sourcetable=quote_test -quoteCharEscaping=escape -quoteChar='\"' -header=false");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertEquals("Export file not created", true, exportFile.exists());
 			
@@ -98,7 +97,7 @@ public class WbExportTest extends TestCase
 			assertEquals("Wrong third line", "3\t\"with\ttab\"", lines.get(2));
 			
 			// Test escaping 
-			result = exportCmd.execute(wb, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -sourcetable=quote_test -quoteCharEscaping=duplicate -quoteChar='\"' -header=false");
+			result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -sourcetable=quote_test -quoteCharEscaping=duplicate -quoteChar='\"' -header=false");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertEquals("Export file not created", true, exportFile.exists());
 			
@@ -107,7 +106,7 @@ public class WbExportTest extends TestCase
 			assertEquals("Wrong second line", "2\twith\"\"quote", lines.get(1));
 
 			// Test without quote character
-			result = exportCmd.execute(wb, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -sourcetable=quote_test -quoteCharEscaping=duplicate -quoteChar=\"'\" -header=false");
+			result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -sourcetable=quote_test -quoteCharEscaping=duplicate -quoteChar=\"'\" -header=false");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertEquals("Export file not created", true, exportFile.exists());
 			
@@ -135,7 +134,7 @@ public class WbExportTest extends TestCase
 			File exportFile = new File(this.basedir, "commit_test.sql");
 			
 			// Test default behaviour
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertEquals("Export file not created", true, exportFile.exists());
 			
@@ -146,7 +145,7 @@ public class WbExportTest extends TestCase
 
 			// Test no commit at all
 			exportFile.delete();
-			result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test -commitEvery=none");
+			result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test -commitEvery=none");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertEquals("Export file not created", true, exportFile.exists());
 			
@@ -156,7 +155,7 @@ public class WbExportTest extends TestCase
 			
 			// Test commit each statement
 			exportFile.delete();
-			result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test -commitEvery=1");
+			result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test -commitEvery=1");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertEquals("Export file not created", true, exportFile.exists());
 			
@@ -196,7 +195,7 @@ public class WbExportTest extends TestCase
 			this.connection.commit();
 			
 			// Test JDBC literals
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=jdbc -sourcetable=literal_test");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=jdbc -sourcetable=literal_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertEquals("Export file not created", true, exportFile.exists());
 			
@@ -215,7 +214,7 @@ public class WbExportTest extends TestCase
 
 			// Test ANSI literals
 			exportFile.delete();
-			result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=ansi -sourcetable=literal_test");
+			result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=ansi -sourcetable=literal_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertEquals("Export file not created", true, exportFile.exists());
 			
@@ -230,7 +229,7 @@ public class WbExportTest extends TestCase
 
 			// Test Standard literals
 			exportFile.delete();
-			result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=standard -sourcetable=literal_test");
+			result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=standard -sourcetable=literal_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertEquals("Export file not created", true, exportFile.exists());
 			
@@ -245,7 +244,7 @@ public class WbExportTest extends TestCase
 			
 			// Test Oracle literals
 			exportFile.delete();
-			result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=Oracle -sourcetable=literal_test");
+			result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=Oracle -sourcetable=literal_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertEquals("Export file not created", true, exportFile.exists());
 			
@@ -276,14 +275,14 @@ public class WbExportTest extends TestCase
 		try
 		{
 			File exportFile = new File(this.basedir, "export_append.txt");
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("Export file not created", true, exportFile.exists());
 			// WbExport creates an empty line at the end plus the header line
 			assertEquals("Wrong number of lines", rowcount + 1, TestUtil.countLines(exportFile));
 	
-			result = exportCmd.execute(this.connection, "wbexport -append=true -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test");
+			result = exportCmd.execute("wbexport -append=true -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
 			assertEquals("Wrong number of lines", (rowcount * 2) + 1, TestUtil.countLines(exportFile));
@@ -303,7 +302,7 @@ public class WbExportTest extends TestCase
 		try
 		{
 			File exportFile = new File("/this/is/expected/to/fail/no_export.txt");
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=blob_test");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=blob_test");
 			assertEquals("Export did not fail", result.isSuccess(), false);
 			System.out.println(result.getMessageBuffer().toString());
 		}
@@ -322,7 +321,7 @@ public class WbExportTest extends TestCase
 		try
 		{
 			File exportFile = new File(this.basedir, "zip_text_export.txt");
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=blob_test -compress=true");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=blob_test -compress=true");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			File zip = new File(this.basedir, "zip_text_export_lobs.zip");
@@ -343,7 +342,7 @@ public class WbExportTest extends TestCase
 		try
 		{
 			File exportFile = new File(this.basedir, "zip_xml_export.xml");
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=xml -sourcetable=blob_test -compress=true");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=xml -sourcetable=blob_test -compress=true");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			File zip = new File(this.basedir, "zip_xml_export_lobs.zip");
@@ -361,7 +360,7 @@ public class WbExportTest extends TestCase
 		try
 		{
 			File exportFile = new File(this.basedir, "blob_export.txt");
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -blobidcols=nr -sourcetable=blob_test");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -blobidcols=nr -sourcetable=blob_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("No export file created", true, exportFile.exists());
@@ -386,7 +385,7 @@ public class WbExportTest extends TestCase
 		try
 		{
 			File exportFile = new File(this.basedir, "blob_export.txt");
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=blob_test");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=blob_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("No export file created", true, exportFile.exists());
@@ -411,7 +410,7 @@ public class WbExportTest extends TestCase
 		try
 		{
 			File exportFile = new File(this.basedir, "export.txt");
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test -writeoracleloader=true");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test -writeoracleloader=true");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("Export file not created", true, exportFile.exists());
@@ -443,7 +442,7 @@ public class WbExportTest extends TestCase
 			connection.commit();
 			stmt.close();
 			
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=xml -header=true -sourcetable=clob_test -clobAsFile=true");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=xml -header=true -sourcetable=clob_test -clobAsFile=true");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("Export file not created", true, exportFile.exists());
@@ -483,7 +482,7 @@ public class WbExportTest extends TestCase
 			connection.commit();
 			stmt.close();
 			
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=clob_test -clobAsFile=true -writeOracleLoader=true");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=clob_test -clobAsFile=true -writeOracleLoader=true");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("Export file not created", true, exportFile.exists());
@@ -533,7 +532,7 @@ public class WbExportTest extends TestCase
 			stmt.close();
 			
 			File exportFile = new File(this.basedir, "clob_export.sql");
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sourcetable=clob_test -clobAsFile=true -encoding=utf8");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sourcetable=clob_test -clobAsFile=true -encoding=utf8");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("Export file not created", true, exportFile.exists());
@@ -578,7 +577,7 @@ public class WbExportTest extends TestCase
 		try
 		{
 			File exportFile = new File(this.basedir, "blob_export.sql");
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sourcetable=blob_test -blobtype=file");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sourcetable=blob_test -blobtype=file");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("Export file not created", true, exportFile.exists());
@@ -615,7 +614,7 @@ public class WbExportTest extends TestCase
 		try
 		{
 			File exportFile = new File(this.basedir, "update_export.sql");
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlupdate -sourcetable=junit_test");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlupdate -sourcetable=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("Export file not created", true, exportFile.exists());
@@ -644,7 +643,7 @@ public class WbExportTest extends TestCase
 		try
 		{
 			File exportFile = new File(this.basedir, "delete_insert_export.sql");
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqldeleteinsert -sourcetable=junit_test");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqldeleteinsert -sourcetable=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("Export file not created", true, exportFile.exists());
@@ -679,7 +678,7 @@ public class WbExportTest extends TestCase
 		try
 		{
 			File exportFile = new File(this.basedir, "insert_export.sql");
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test -table=other_table");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test -table=other_table");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("Export file not created", true, exportFile.exists());
@@ -706,7 +705,7 @@ public class WbExportTest extends TestCase
 	{
 		try
 		{
-			StatementRunnerResult result = exportCmd.execute(this.connection, "wbexport -outputdir='" + basedir + "' -type=xml -sourcetable=*");
+			StatementRunnerResult result = exportCmd.execute("wbexport -outputdir='" + basedir + "' -type=xml -sourcetable=*");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
 			File dir = new File(basedir);

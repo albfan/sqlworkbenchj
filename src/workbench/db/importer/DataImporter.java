@@ -127,7 +127,10 @@ public class DataImporter
 	// A mapping that stores the max. length for specific columns
 	// The index maps to the index in targetColumns
 	private Map<ColumnIdentifier, Integer> columnLimitMap;
-	private int[] columnLimits;
+
+	// A map that stores constant values for the import. 
+	// e.g. for columns not part of the input file.
+	private Map<ColumnIdentifier, String> columnConstants;
 	
 	private RowActionMonitor progressMonitor;
 	private boolean isRunning = false;
@@ -420,6 +423,11 @@ public class DataImporter
 		return true;
 	}
 
+	public void setConstantColumnValues(Map<ColumnIdentifier, String> constantValues)
+	{
+		this.columnConstants = constantValues;
+	}
+	
 	/**
 	 * Set a max. length for specific columns. This limit will only 
 	 * be checked for VARCHAR columns. Setting a limit for other columns

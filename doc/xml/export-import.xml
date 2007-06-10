@@ -8,10 +8,10 @@
         </para>
         
         <itemizedlist>
-        <listitem>HTML</listitem>
-        <listitem>SQL statements (INSERT, UPDATE or DELETE &amp; INSERT)</listitem>
-        <listitem>XML format</listitem>
-        <listitem>Tab separated text file. Columns are separated with a tab, rows are separated with a newline character</listitem>
+        <listitem><para>HTML</para></listitem>
+        <listitem><para>SQL statements (INSERT, UPDATE or DELETE &amp; INSERT)</para></listitem>
+        <listitem><para>XML format</para></listitem>
+        <listitem><para>Tab separated text file. Columns are separated with a tab, rows are separated with a newline character</para></listitem>
         </itemizedlist>
 
 				<para>To save the data from the current result set into an external file, 
@@ -87,12 +87,12 @@
             define the key columns to be used, using <menuchoice><guimenu>Data</guimenu>
             <guimenuitem>Define key columns</guimenuitem></menuchoice>
         </para>
-				<note>
+				<note><para>
 					If you do not want to copy all columns to the clipboard, hold down the 
 					the <keycap>CTRL</keycap> key while selecting one of the
 					menu items related to the clipboard. A dialog will then let you select the 
 					columns that you want to copy.
-				</note>
+				</para></note>
 				<para>
 					Alternatively you can hold down the <keycap>Alt</keycap> key while 
 					selecting rows/columns in the result set. This will allow you to 
@@ -183,15 +183,15 @@
 				</para>
 				<para>
 					<itemizedlist>
-						<listitem>
+						<listitem><para>
 							The columns are delimited with a tab character and the first row contains column names. All
 							matching columns will then be imported
-						</listitem>
-						<listitem>
+						</para></listitem>
+						<listitem><para>
 							If no column name matches (i.e. no header row is present) but the number of columns (identified
 							by the number of tab characters in the first row) is identical to the number of columns
 							in the current result.
-						</listitem>
+						</para></listitem>
 					</itemizedlist>
 					If &wb-productname; cannot identify the format of the clipboard a dialog will be opened
 					where you can specify the format of the clipboard contents. This is maily necessary

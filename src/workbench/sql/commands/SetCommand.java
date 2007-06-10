@@ -44,7 +44,7 @@ public class SetCommand extends SqlCommand
 	{
 	}
 
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = null; //
@@ -76,14 +76,14 @@ public class SetCommand extends SqlCommand
 				// everything else is sent to the server
 				if (command.equalsIgnoreCase("autocommit"))
 				{
-					result = this.setAutocommit(aConnection, param);
+					result = this.setAutocommit(currentConnection, param);
 					execSql = false;
 				}
-				else if (aConnection.getMetadata().isOracle())
+				else if (currentConnection.getMetadata().isOracle())
 				{
 					if (command.equalsIgnoreCase("serveroutput"))
 					{
-						result = this.setServeroutput(aConnection, param);
+						result = this.setServeroutput(currentConnection, param);
 						execSql = false;
 					}
 					else if (command.equalsIgnoreCase("feedback"))
@@ -97,7 +97,7 @@ public class SetCommand extends SqlCommand
 			if (execSql)
 			{
 				result = new StatementRunnerResult();
-				this.currentStatement = aConnection.createStatement();
+				this.currentStatement = currentConnection.createStatement();
 				// Using a generic execute ensures that servers that 
 				// can process more than one statement with a single SQL 
 				// are treated correctly. E.g. when sending a SET and a SELECT 
@@ -111,7 +111,7 @@ public class SetCommand extends SqlCommand
 		{
 			result = new StatementRunnerResult();
 			result.clear();
-			if (aConnection.getMetadata().isOracle())
+			if (currentConnection.getMetadata().isOracle())
 			{
 				// for oracle we'll simply ignore the error as the SET command
 				// is a SQL*Plus command

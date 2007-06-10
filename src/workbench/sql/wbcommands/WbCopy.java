@@ -99,7 +99,7 @@ public class WbCopy
 			result.setFailure();
 		}
 	}
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
@@ -143,9 +143,9 @@ public class WbCopy
 
 		WbConnection targetCon = null;
 		WbConnection sourceCon = null;
-		if (targetProfile == null || (aConnection != null && aConnection.getProfile().isProfileForKey(targetKey)))
+		if (targetProfile == null || (currentConnection != null && currentConnection.getProfile().isProfileForKey(targetKey)))
 		{
-			targetCon = aConnection;
+			targetCon = currentConnection;
 		}
 		else
 		{
@@ -171,9 +171,9 @@ public class WbCopy
 			}
 		}
 
-		if (sourceProfile == null || (aConnection != null && aConnection.getProfile().isProfileForKey(sourceKey)))
+		if (sourceProfile == null || (currentConnection != null && currentConnection.getProfile().isProfileForKey(sourceKey)))
 		{
-			sourceCon = aConnection;
+			sourceCon = currentConnection;
 		}
 		else
 		{

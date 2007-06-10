@@ -36,13 +36,13 @@
 			</para>
 			<para>The configuration files are:
 				<itemizedlist>
-					<listitem>General configuration settings (<filename>workbench.settings</filename>)</listitem>
-					<listitem>Connection profiles (<filename>WbProfiles.xml</filename>)</listitem>
-					<listitem>JDBC Driver definitions (<filename>WbDrivers.xml</filename>)</listitem>
-					<listitem>Customized shortcut definitions (<filename>WbShortcuts.xml</filename>)</listitem>
-					<listitem>Macro definitions (<filename>WbMacros.xml</filename>)</listitem>
-					<listitem>Log file (<filename>workbench.log</filename>)</listitem>
-					<listitem>Workspace files (<filename>*.wksp</filename>)</listitem>
+					<listitem><para>General configuration settings (<filename>workbench.settings</filename>)</para></listitem>
+					<listitem><para>Connection profiles (<filename>WbProfiles.xml</filename>)</para></listitem>
+					<listitem><para>JDBC Driver definitions (<filename>WbDrivers.xml</filename>)</para></listitem>
+					<listitem><para>Customized shortcut definitions (<filename>WbShortcuts.xml</filename>)</para></listitem>
+					<listitem><para>Macro definitions (<filename>WbMacros.xml</filename>)</para></listitem>
+					<listitem><para>Log file (<filename>workbench.log</filename>)</para></listitem>
+					<listitem><para>Workspace files (<filename>*.wksp</filename>)</para></listitem>
 				</itemizedlist>
 			</para>
 
@@ -123,11 +123,11 @@
 			system and your JDK implementation. Most JDKs use a default of 96MB as the
 			default maximum heap size.
 		</para>
-		<note>
+		<note><para>
 			The -Xmx parameter increases the <emphasis role="bold">maximum</emphasis>
 			memory to the given value. This does not mean that the application will use
 			that much memory
-		</note>
+		</para></note>
 	</section>
 
 	<section id="no-ddraw">
@@ -180,12 +180,12 @@
 			JWorkbench.exe, otherwise it doesn&#39;t work.
 		</para>
 
-		<note>
+		<note><para>
 			The launcher only works with JDK&apos;s from Sun, as it directly calls the
 			JDK dll&apos;s to start the virtual machine. If you are using a different JDK,
 			you cannot use the launcher to start &wb-productname; (unless it uses the same
 			directory layout and filenames as the Sun JDK).
-		</note>
+		</para></note>
 
 		<para>
 			By default the launcher increases the maximum JVM heap size to 128 MB. 
@@ -273,7 +273,7 @@
 							<entry>Select the JVM type to be loaded. For the Sun JVM this 
 								may be either <literal>client</literal> or <literal>server</literal> (equivalent
 								to the -server or -client switches). If the JDK identified with the
-								-jdk switch points to BEA's JRockit&tm; JVM, this should be
+								-jdk switch points to BEA's JRockit JVM, this should be
 								<literal>jrockit</literal> (i.e. -jvmtype=jrockit). Basically the value
 								of this switch is used to locate the <literal>jvm.dll</literal>
 								in the base directory specified with the -jdk switch.
@@ -428,9 +428,9 @@ another_variable=24</programlisting>
 				its settings to the file <literal>workbench.settings</literal> when it's beeing closed. Note 
 				that in <link linkend="using-scripting">batch mode</link>, this file is never written.
 			</para>
-			<note>
+			<note><para>
 				Note that if this parameter is supplied, the workspace will not be saved automatically as well!
-			</note>
+			</para></note>
 		</section>
 
 		<section id="commandline-connect-profile">

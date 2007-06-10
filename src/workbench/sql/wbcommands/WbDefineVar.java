@@ -56,7 +56,7 @@ public class WbDefineVar
 
 	protected boolean isConnectionRequired() { return false; }
 	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
@@ -131,7 +131,7 @@ public class WbDefineVar
 					try
 					{
 						valueSql = value.substring(1);
-						value = this.evaluateSql(aConnection, valueSql);
+						value = this.evaluateSql(currentConnection, valueSql);
 					}
 					catch (Exception e)
 					{

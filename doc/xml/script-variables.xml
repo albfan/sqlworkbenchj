@@ -14,9 +14,9 @@
         to nothing: <literal>wbvardef myvar=</literal>. Alternatevily you can use the command
         <literal>wbvardelete myvar</literal> to remove a variable definition.
       </para>
-			<note>
+			<note><para>
 				Variables are case sensitive.
-			</note>
+			</para></note>
       <para>
         Variables can also be read from a properties file, either by specifying 
         <literal>-file=filename</literal> for the <literal>WbVarDef</literal> command, 
@@ -92,10 +92,10 @@ another_variable=24</programlisting>
         <literal>$[id_variable]</literal> will be replaced with the current value of the 
         variable.
        </para>
-				<note>
+				<note><para>
 					Variables will be replaced <emphasis>after</emphasis> replacing 
 					macro <link linkend="macro-parameters">parameters</link>.
-				</note>
+				</para></note>
        <para>
         If the SQL statement requires quotes for the SQL literal, you can either put
         the quotes into the value of the variable (e.g. <literal>wbvardef name="'Arthur'"</literal>)
@@ -103,7 +103,7 @@ another_variable=24</programlisting>
       </para>
 			
 			<note>
-				As you can see the variable substitution is also done inside quoted literals.
+				<para>As you can see the variable substitution is also done inside quoted literals.</para>
 			</note>
 			
       <para>

@@ -128,11 +128,10 @@ public class WbExport
 		return Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false);
 	}
 	
-	public StatementRunnerResult execute(WbConnection aConnection, String sql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		this.currentConnection = aConnection;
 		
 		sql = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
 

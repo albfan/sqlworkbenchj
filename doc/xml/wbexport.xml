@@ -16,14 +16,14 @@
       to export multiple tables.
     </para>
 		
-		<note>
+		<note><para>
 			When using a <literal>SELECT</literal> based export, you have to 
 			run both statements (<literal>WbExport</literal> and <literal>SELECT</literal>)
 			as one script. Either select both statements in the editor and choose
 			<menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute selected</guimenuitem></menuchoice>, 
 			or make the two statements the only statements in the editor and choose
 			<menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute all</guimenuitem></menuchoice>.
-		</note>
+		</para></note>
 		
 		
     <para>
@@ -217,9 +217,9 @@
 								This parameter is not necessary when importing XML exports, as <literal>WbImport</literal> will
 								automatically recognize the external files.
 							</para>
-							<note>
+							<note><para>
 								SQL scripts (<literal>-type=sqlinsert</literal>) generated with <literal>-clobAsFile=true</literal> can only be run with &wb-productname;!
-							</note>
+							</para></note>
 							<para>
 								All CLOB files that are written using the encoding specified with the 
 								<literal>-encoding</literal> switch.
@@ -329,10 +329,10 @@
 									If you are planning to run the generated SQL scripts using 
 									&wb-productname; this is the recommended format.
 								</para>
-								<note>
+								<note><para>
 									When using <literal>-blobType=file</literal> the generated SQL script 
 									can only be run with &wb-productname;!
-								</note>
+								</para></note>
 								<para>
 									The parameter value <literal>ansi</literal>, will generate
 									"binary strings" that are compatible with the ANSI 
@@ -509,6 +509,30 @@
               </entry>
             </row>
 
+						<row>
+							<entry>-quoteCharEscaping</entry>
+							<entry>
+								<para>Possible values: <literal>none</literal>, <literal>escape</literal>, <literal>duplicate</literal></para>
+								<para>
+									Defines how quote characters that appear in the actual data are written to the output file.
+								</para>
+								<para>
+									If no quote character has been defined using the -quoteChar switch, 
+									this option is ignored.
+								</para>
+								<para>
+									If <literal>escape</literal> is specified a quote character (defined through 
+									-quoteChar) that is embedded in the exported (character) data is written as 
+									e.g. <literal>here is a \" quote character</literal>.
+								</para>
+								<para>
+									If <literal>duplicate</literal> is specified, a quote character (defined through 
+									-quoteChar) that is embedded in the exported (character) data is written as 
+									two quotes e.g. <literal>here is a "" quote character</literal>.
+								</para>
+							</entry>
+						</row>
+						
             <row>
               <entry>-quoteAlways</entry>
 

@@ -31,7 +31,7 @@ public class WbEndBatch
 	
 	public String getVerb() { return VERB; }
 	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult();

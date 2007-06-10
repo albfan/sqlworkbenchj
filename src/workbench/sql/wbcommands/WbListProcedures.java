@@ -33,11 +33,11 @@ public class WbListProcedures
 
 	public String getVerb() { return VERB; }
 
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		DataStore ds = aConnection.getMetadata().getProcedures(null, null);
+		DataStore ds = currentConnection.getMetadata().getProcedures(null, null);
 		result.addDataStore(ds);
 		result.setSuccess();
 		return result;

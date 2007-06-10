@@ -37,7 +37,6 @@ public class DataStoreTableModel
 	extends AbstractTableModel
 {
 	private DataStore dataCache;
-	private WbTable parentTable;
 	private boolean showStatusColumn = false;
 	
 	private int columnStartIndex = 0;
@@ -179,7 +178,7 @@ public class DataStoreTableModel
 				Toolkit.getDefaultToolkit().beep();
 				String msg = ResourceMgr.getString("MsgConvertError");
 				msg = msg + "\r\n" + ce.getLocalizedMessage();
-				WbSwingUtilities.showErrorMessage(parentTable, msg);
+				WbSwingUtilities.showErrorMessage(msg);
 				return;
 			}
 		}

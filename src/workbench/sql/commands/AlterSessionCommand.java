@@ -40,7 +40,7 @@ public class AlterSessionCommand
 
 	public String getVerb() { return VERB; }
 	
-	public StatementRunnerResult execute(WbConnection con, String sql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
@@ -49,7 +49,7 @@ public class AlterSessionCommand
 		String oldSchema = null;
 		SQLLexer lexer = new SQLLexer(sql);
 		
-		DbMetadata meta = con.getMetadata();
+		DbMetadata meta = currentConnection.getMetadata();
 		
 		// Skip the ALTER SESSION verb
 		SQLToken token = lexer.getNextToken(false, false);
@@ -73,7 +73,7 @@ public class AlterSessionCommand
 				token = lexer.getNextToken(false, false);
 				if (token != null)
 				{
-					if (changeOracleTimeZone(con, result, token.getContents()))
+					if (changeOracleTimeZone(currentConnection, result, token.getContents()))
 					{
 						return result;
 					}
@@ -83,7 +83,7 @@ public class AlterSessionCommand
 
 		try
 		{
-			this.currentStatement = con.createStatement();
+			this.currentStatement = currentConnection.createStatement();
 			this.currentStatement.executeUpdate(sql);
 			if (oldSchema == null)
 			{
@@ -95,7 +95,7 @@ public class AlterSessionCommand
 				String schema = meta.getCurrentSchema();
 				if (!oldSchema.equalsIgnoreCase(schema))
 				{
-					con.schemaChanged(oldSchema, schema);
+					currentConnection.schemaChanged(oldSchema, schema);
 					result.addMessage(ResourceMgr.getString("MsgSchemaChanged") + " " + schema);
 				}
 			}
@@ -113,12 +113,12 @@ public class AlterSessionCommand
 	
 	private boolean changeOracleTimeZone(WbConnection con, StatementRunnerResult result, String tz)
 	{
-		Connection sqlCon = con.getSqlConnection();
+		Connection sqlCon = currentConnection.getSqlConnection();
 		Method setTimezone = null;
 		
 		try
 		{
-			Class cls = sqlCon.getClass();
+			Class cls = currentConnection.getSqlConnection().getClass();
 			setTimezone = cls.getMethod("setSessionTimeZone", new Class[] {String.class} );
 		}
 		catch (Exception e)

@@ -8,8 +8,8 @@
 		of settings:
 		
 		<itemizedlist>
-			<listitem>JDBC related properties such as the JDBC driver class, the connection URL, the username etc.</listitem>
-			<listitem>&wb-productname; related properties such as the profile name the associated workspace, etc.</listitem>
+			<listitem><para>JDBC related properties such as the JDBC driver class, the connection URL, the username etc.</para></listitem>
+			<listitem><para>&wb-productname; related properties such as the profile name the associated workspace, etc.</para></listitem>
 		</itemizedlist>
 	</para>
 	
@@ -55,9 +55,9 @@
 		node, the new profile will be created in the group of the currently selected profile.
 	</para>
 
-	<para><note>
+	<note><para>
 			Empty groups are discarded (i.e. not saved) when you restart &wb-productname;
-	</note></para>
+	</para></note>
 
 	<para>
 		You can move profiles from one group to another but right clicking on the profile, then choose
@@ -417,11 +417,11 @@
 				will be opened when you click the button with <literal>...</literal> to the right
 				of the input field.
 			</para>
-			<note>
+			<note><para>
 				As the workspace stores several settings that are related to the connection
 				(e.g. the selected schema in the <link linkend="dbexplorer">DbExplorer</link>) it is recommended to create one
 				workspace for each connection profile.
-			</note>
+			</para></note>
 		</section>
 		
   </section>

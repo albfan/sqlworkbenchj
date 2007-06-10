@@ -33,11 +33,11 @@ public class WbListTables extends SqlCommand
 
 	public String getVerb() { return VERB; }
 
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		DataStore ds = aConnection.getMetadata().getTables();
+		DataStore ds = currentConnection.getMetadata().getTables();
 		result.addDataStore(ds);
 		return result;
 	}

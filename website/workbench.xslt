@@ -7,7 +7,7 @@
     <!ENTITY reg "&#174;">
 ]>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
-                xmlns:redirect="org.apache.xalan.xslt.extensions.Redirect"
+                xmlns:redirect="http://xml.apache.org/xalan/redirect"
                 extension-element-prefixes="redirect"
                 >
 
@@ -32,7 +32,8 @@
 <!-- Generate the table of content which will be displayed for each
   page in the left hand navigation
 -->
-<xsl:variable name="toc">
+<!-- <xsl:variable name="toc"> -->
+<xsl:template name="make-toc">
   <xsl:for-each select="/site/page">
     <xsl:variable name="pageTitle" select="@title"/>
         <xsl:variable name="notoc" select="@notoc"/>
@@ -50,13 +51,20 @@
 
             <!-- A link that should be included in the toc, but points to a different "site" -->
             <xsl:if test="@link">
-              <xsl:variable name="linkTarget" select="@link"/>
-              <a target="_blank" href="{$linkTarget}"><xsl:value-of select="$pageTitle"/></a><br/>
+							<xsl:variable name="linkTarget" select="@target"/>
+							<xsl:variable name="href" select="@link"/>
+              <xsl:if test="@target">
+              	<a href="{$href}"><xsl:value-of select="@title"/></a><br/>
+							</xsl:if>
+              <xsl:if test="not (@target)">
+              	<a target="{$linkTarget}" href="{$href}"><xsl:value-of select="@title"/></a><br/>
+							</xsl:if>
             </xsl:if>
 
         </xsl:if>
   </xsl:for-each>
-</xsl:variable>
+</xsl:template>
+<!-- </xsl:variable> -->
 
 <!-- entry point template to select the whole site document -->
 <xsl:template match="site">
@@ -71,7 +79,7 @@
                 <xsl:value-of select="concat($pageName,'.html')"/>
             </xsl:variable>
     
-            <redirect:write select="$filename">
+            <redirect:write file="{$filename}">
                 <xsl:call-template name="main">
                   <xsl:with-param name="pageTitle" select="$pageTitle"/>
                 </xsl:call-template>
@@ -98,8 +106,9 @@
         </title>
 		<meta http-equiv="Pragma" CONTENT="no-cache"/>
 		<meta http-equiv="Expires" content="-1"/>
+		<link rel="SHORTCUT ICON" href="favicon.ico"/>
 		<meta name="description" content="A free DBMS-independent SQL query tool and front-end"/>
-		<meta name="keywords" lang="en" content="sql,query,tool,analyzer,jdbc,database,isql,viewer,frontend,java,dbms,oracle,postgres,firebirdsql,hsql,hsqldb,sqlserver,sqlplus,replacement,import,export,convert,insert,blob,xml,etl,migrate,compare,diff"/>
+		<meta name="keywords" lang="en" content="sql,query,tool,analyzer,jdbc,database,isql,viewer,frontend,java,dbms,oracle,postgres,h2database,h2,firebirdsql,hsql,hsqldb,sqlserver,sqlplus,replacement,import,export,convert,insert,blob,clob,xml,etl,migrate,compare,diff,structure,table"/>
 	    <meta name="date">
 	    	<xsl:attribute name="content"><xsl:value-of select="$currentDate"/></xsl:attribute>
 	    </meta>
@@ -142,7 +151,7 @@
                 <table class="tocTable" border="0" cellpadding="0" cellspacing="0" margin="0">
                     <tr><td class="toc" style="background-color:#E0E0E0"><b>Content</b></td></tr>
                     <tr><td class="toc">
-                        <xsl:copy-of select="$toc"/>
+                        <xsl:call-template name="make-toc"/>
                     </td></tr>
                 </table>
             </td>
@@ -204,7 +213,7 @@
 </xsl:template>
 
 <xsl:template match="mac-link">
-<a href="Workbench-Build{$buildNumber}-Mac.zip">Download for Mac</a>
+<a href="Workbench-Build{$buildNumber}-Mac.tgz">Download for Mac</a>
 </xsl:template>
 
 <xsl:template match="build-number">
@@ -223,7 +232,6 @@
             Basically I'm using these builds myself on a daily basis, and it should be pretty safe to use them.<br/><br/>
             Bugfixes will show up in these builds first. <a href="dev-history.txt" target="_blank">Change history</a>
         </p>
-        <p>Development builds already require JDK 1.5 or higher.</p>
       <ul>
         <li><a href="Workbench-Build{$devBuildNumber}.zip">Download development build</a> (<xsl:value-of select="$devBuildNumber"/>,&nbsp;<xsl:value-of select="$devBuildDate"/>)</li>
         <li><a href="WorkbenchSrc-Build{$devBuildNumber}.zip">Source code</a></li>
@@ -242,7 +250,7 @@
   <xsl:variable name="imageTitle" select="@title"/>
   <xsl:variable name="imagePreviewFile" select="concat(translate(@name,'.','_'),'.html')"/>
   <a href="{$imagePreviewFile}"><xsl:value-of select="."/></a>
-    <redirect:write select="$imagePreviewFile">
+    <redirect:write file="{$imagePreviewFile}">
         <xsl:call-template name="main">
           <xsl:with-param name="imageName" select="$imageName"/>
           <xsl:with-param name="pageTitle" select="'SQL Workbench/J'"/>

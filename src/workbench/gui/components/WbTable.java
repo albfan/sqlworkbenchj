@@ -1966,12 +1966,10 @@ public class WbTable
 		return newRow;
 	}
 
-	public int duplicateRow()
+	public int duplicateRow(int row)
 	{
 		DataStoreTableModel model = this.getDataStoreTableModel();
 		if (model == null) return -1;
-		if (this.getSelectedRowCount() != 1) return -1;
-		int row = this.getSelectedRow();
 		int newRow = model.duplicateRow(row);
 		return newRow;
 	}

@@ -257,6 +257,7 @@
 					<row>
 						<entry>-badFile</entry>
 						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>If <literal>-continueOnError=true</literal> is used, you can specify a file
 								to which rejected rows are written. If the provided filename denotes a directory
 								a file with the name of the import table will be created in that directory. 
@@ -294,6 +295,54 @@
 						</entry>
 					</row>
 
+					<row>
+						<entry>-booleanToNumber</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+								When exporting data from a DBMS that supports the BOOLEAN
+								datatype, the export file will contain the literals "true" or 
+								"false" for the value of the boolean columns. When importing
+								this file into a DBMS that does not support the BOOLEAN
+								datatype, the import would fail. 
+							</para>
+							<para>
+								In case you are importing the boolean column into a numeric
+								column in the target DBMS, &wb-productname; will automatically
+								convert the literal <literal>true</literal> to the numeric value 1 (one)
+								and the literal <literal>false</literal> to the numeric value 0 (zero).
+								If you do not want this automatic conversion, you have to 
+								specify <literal>-booleanToNumber=false</literal> for the import. 
+								The default values for the true/false literals can be overwritten 
+								with the -literalsFalse and -literalsTrue switches.
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-literalsFalse -literalsTrue</entry>
+						<entry>
+							<para>
+								When dealing with boolean values in the input file, these two switches define
+								the literals that represent the value <literal>false</literal> and the 
+								value <literal>true</literal> when parsing the input data. 
+							</para>
+							<para>
+								The value to these switches is a comma separated list of literals
+								that should be treated as the specified value, e.g.:
+								<literal>-literalsFalse='false,0' -literalsTrue='true,1'</literal>
+								will define the most commonly used values for true/false. 
+							</para>
+							<para>
+								Please note:
+								<itemizedlist>
+									<listitem>The definition of the literals is case sensitive!</listitem>
+									<listitem>You always have to specify both switches, otherwise the definition will 
+									be ignored</listitem>
+								</itemizedlist>
+							</para>
+						</entry>
+					</row>
 					
 				</tbody>
 			</tgroup>
@@ -402,6 +451,36 @@
 							</entry>
 						</row>
 						
+
+						<row>
+							<entry>-quoteCharEscaping</entry>
+							<entry>
+								<para>Possible values: <literal>none</literal>, <literal>escape</literal>, <literal>duplicate</literal></para>
+								<para>
+									Defines how quote characters that appear in the actual data
+									are stored in the input file.
+								</para>
+								<para>
+									You have to define a quote character in order for this option
+									to have an effect. The character defined with the -quoteChar switch
+									will then be imported according to the setting defined by this switch.
+								</para>
+								<para>	
+									If <literal>escape</literal> is specified, it is expected that a quote that 
+									is part of the data is preceded with a backslas, 
+									e.g. the input value <literal>here is a \" quote character</literal> will be imported 
+									as <literal>here is a " quote character</literal>
+								</para>
+								<para>
+									If <literal>duplicate</literal> is specified, it is expected that the
+									quote character is duplicated in the input data. This is similar to the 
+									handling of single quotes in SQL literals.
+									The input value <literal>here is a "" quote character</literal> will be imported 
+									as <literal>here is a " quote character</literal>
+								</para>
+							</entry>
+						</row>
+						
 						<row>
 							<entry>-multiLine</entry>
 							<entry>
@@ -466,6 +545,7 @@
 								</para>
 							</entry>
 						</row>
+						
 						<row>
 							<entry>-columnFilter</entry>
 							<entry>
@@ -484,6 +564,7 @@
 								</para>
 							</entry>
 						</row>
+						
 						<row>
 							<entry>-lineFilter</entry>
 							<entry>
@@ -497,6 +578,7 @@
 								</para>
 							</entry>
 						</row>
+						
 						<row>
 							<entry>-emptyStringIsNull</entry>
 							<entry>
@@ -515,6 +597,7 @@
 								</para>
 							</entry>
 						</row>
+						
 						<row>
 							<entry>-blobIsFilename</entry>
 							<entry>
@@ -637,12 +720,12 @@
 				be extended to <literal>WHERE id=? AND (source &lt;&gt; 'manual')</literal>. Thus skipping
 				records that are flagged as manual even if they are contained in the input file.
 			</para>
-			<note>
+			<note><para>
 				When importing data into integer columns, the values '<literal>false</literal>' and '<literal>true</literal>'
 				will silently be converted to 0 (numeric zero) and 1 (one) during an import. This is necessary
 				when importing files created from a database system that supports the boolean datatype (e.g. PostgreSQL) 
 				into a database system where you have to use a numeric datatype for these columns (e.g. Oracle).
-			</note>
+			</para></note>
 		</section>
 
 		<section id="import-xml-parameters">
@@ -761,8 +844,8 @@
         For maximum performance, choose the update strategy that will result in a succssful
         first statement more often. As a rule of thumb:
         <itemizedlist>
-          <listitem>Use <literal>-mode=insert,update</literal>, if you expect more rows to be inserted then updated.</listitem>
-          <listitem>Use <literal>-mode=update,insert</literal>, if you expect more rows to be updated then inserted.</listitem>
+          <listitem><para>Use <literal>-mode=insert,update</literal>, if you expect more rows to be inserted then updated.</para></listitem>
+          <listitem><para>Use <literal>-mode=update,insert</literal>, if you expect more rows to be updated then inserted.</para></listitem>
         </itemizedlist>
       </para>
     </section>

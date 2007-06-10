@@ -11,8 +11,8 @@
 		<para>The configuration of a specific driver requires at least two properties:</para>
 
 		<itemizedlist>
-			<listitem>the driver&apos;s class name</listitem>
-			<listitem>the library where to find the classes</listitem>
+			<listitem><para>the driver&apos;s class name</para></listitem>
+			<listitem><para>the library where to find the classes</para></listitem>
 		</itemizedlist>
 
 		<para>
@@ -36,10 +36,10 @@
 			your driver's library will not work.
 		</para>
 
-		<note>
+		<note><para>
 			When using the JDBC-ODBC bridge you do not need to specify a library as
 			the necessary drivers are already part of the Java runtime.
-		</note>
+		</para></note>
 
 		<para>You can assign a sample URL to each driver, which will be put into
 			the URL property of the profile, when the driver class is selected.

@@ -89,3 +89,13 @@ h3 {
 li {
 	padding-bottom:3px;
 }
+
+.programlisting {
+		font-family: monospace;
+    background: #F0F0F0;
+    border: 1px solid gray;
+    padding: 2px;
+    font-size: 10pt;
+    white-space: pre;
+}
+

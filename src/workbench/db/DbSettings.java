@@ -217,6 +217,19 @@ public class DbSettings
 		return !l.contains(this.dbId);
 	}	
 
+	/**
+	 * Returns true if unquoted object names are case sensitive.
+	 * Usually this is not the case, but SQL Server can be setup
+	 * that way. This is used when generating SQL Statements. 
+	 * 
+	 * @return true if mytable is different to MYTABLE
+	 */
+	public boolean objectNamesAreCoseSensitive()
+	{
+		boolean caseSensitive = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".case.sensitive.unquoted", false);
+		return caseSensitive;
+	}
+	
 	public IdentifierCase getSchemaNameCase()
 	{
 		// This allows overriding the default value returned by the JDBC driver

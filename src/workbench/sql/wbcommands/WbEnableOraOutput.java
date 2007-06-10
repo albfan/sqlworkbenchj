@@ -34,7 +34,7 @@ public class WbEnableOraOutput extends SqlCommand
 
 	public String getVerb() { return VERB; }
 
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException, Exception
 	{
 		SQLLexer lexer = new SQLLexer(aSql);
@@ -58,7 +58,7 @@ public class WbEnableOraOutput extends SqlCommand
 				limit = -1;
 			}
 		}
-		aConnection.getMetadata().enableOutput(limit);
+		currentConnection.getMetadata().enableOutput(limit);
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.addMessage(ResourceMgr.getString("MsgDbmsOutputEnabled"));
 		return result;

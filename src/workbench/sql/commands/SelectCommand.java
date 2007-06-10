@@ -45,7 +45,7 @@ public class SelectCommand extends SqlCommand
 	 * Runs the passed SQL statement using Statement.executeQuery()
 	 * 
 	 */
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		this.isCancelled = false;
@@ -55,13 +55,12 @@ public class SelectCommand extends SqlCommand
 
 		try
 		{
-			this.currentConnection = aConnection;
 			boolean isPrepared = false;
 
 			if (Settings.getInstance().getCheckPreparedStatements()
-				  && aConnection.getPreparedStatementPool().isRegistered(aSql))
+				  && currentConnection.getPreparedStatementPool().isRegistered(aSql))
 			{
-				this.currentStatement = aConnection.getPreparedStatementPool().prepareStatement(aSql);
+				this.currentStatement = currentConnection.getPreparedStatementPool().prepareStatement(aSql);
 				if (this.currentStatement != null)
 				{
 					isPrepared = true;
@@ -70,12 +69,12 @@ public class SelectCommand extends SqlCommand
 			
 			if (this.currentStatement == null)
 			{
-				this.currentStatement = aConnection.createStatementForQuery();
+				this.currentStatement = currentConnection.createStatementForQuery();
 			}
 			
 			try 
 			{ 
-				if (this.queryTimeout >= 0 && aConnection.supportsQueryTimeout())
+				if (this.queryTimeout >= 0 && currentConnection.supportsQueryTimeout())
 				{
 					this.currentStatement.setQueryTimeout(this.queryTimeout); 
 				}

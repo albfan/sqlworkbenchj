@@ -19,12 +19,12 @@
 			workspace (e.g. by connecting using a profile that is linked to that workspace) the
 			external file will be loaded as well.
 		</para>
-		<note>
-			The editor is not suited for editing very large amounts of text. If you need to edit
-			and run large SQL scripts it is recommended to use the 
-			<link linkend="command-wbinclude">WbInclude</link> command to run the script 
-			without loading it into memory.
-		</note>
+		<note><para>
+			If you want to run very large SQL scripts (e.g. over 100MB) it is recommended
+			to execute them using <link linkend="command-wbinclude">WbInclude</link> rather
+			than loading them completely into the editor. <literal>WbInclude</literal>
+			will not load the script into memory, thus you can even run scripts that would not fit into memory.
+		</para></note>
 	</section>
     
 	<section id="command-completion">
@@ -57,6 +57,14 @@ FROM person p, address a;</programlisting>
 
 		<para>
 			Parameters for &wb-productname; specific commands are also supported by the command completion.
+			The parameters will only be shown, if you have already typed the leading dash, e.g. 
+			<literal>WbImport -</literal>. If you press the shortcut for the command completion while
+			the cursor is located after the dash, a list of available options for the current comand is 
+			shown. Once the parameter has been added, you can display a list of possible values 
+			for the parameter if the cursor is located after the equals sign. 
+			for <literal>WbImport -mode=</literal> will display a list of allowed values for the 
+			<literal>-mode</literal> parameter. For parameters where table names can be supplied
+			the usual table list will be shown.
 		</para>
 
 	</section>
@@ -266,15 +274,20 @@ WHERE p.person_id = a.person_id;</programlisting>
 			<para>Prepared statements are supported for <literal>SELECT</literal>, <literal>INSERT</literal>,
 				<literal>UPDATE</literal> and <literal>DELETE</literal> statements.
 			</para>
-			<note>This feature requires that the <ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/ParameterMetaData.html#getParameterCount()">getParameterCount()</ulink> and
-				<ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/ParameterMetaData.html#getParameterType(int)">getParameterType()</ulink>
-				methods of the <literal>ParameterMetaData</literal> class are implemented by the JDBC driver and return the correct
-				information about the available parameters.
+			<note>
+				<para>
+					This feature requires that the <ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/ParameterMetaData.html#getParameterCount()">getParameterCount()</ulink> and
+					<ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/ParameterMetaData.html#getParameterType(int)">getParameterType()</ulink>
+					methods of the <literal>ParameterMetaData</literal> class are implemented by the JDBC driver and return the correct
+					information about the available parameters.
+				</para>
 			</note>
 			<para>The following
 				drivers have been tested succesfully with this feature:
 				<simplelist>
 					<member><ulink url="http://www.postgresql.org">PostgreSQL</ulink>, driver version 8.1-build 405</member>
+					<member><ulink url="http://www.h2database.com">H2 Database Engine</ulink>, Version 1.0</member>
+					<member><ulink url="http://db.apache.org/derby/">Apache Derby</ulink>, Version 10.2</member>
 					<member><ulink url="http://www.firebirdsql.org/">Firebird SQL</ulink>, Jaybird 2.0 driver</member>
 					<member><ulink url="http://hsqldb.sourceforge.net">HSQLDB</ulink>, version 1.8.0</member>
 					<member><ulink url="http://jtds.sourceforge.net">jTDS driver for MS SQL Server</ulink>, driver version 1.2</member>

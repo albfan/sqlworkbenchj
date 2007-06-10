@@ -30,12 +30,14 @@
 				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Clear history</guimenuitem></menuchoice>
 			</para>
 			<note>
+				<para>
 				When you clear the content of the editor (e.g. by selecting the whole text 
 				and then pressing the <keycap>Del</keycap> key) this will not clear the statement
 				history. When you load the associated workspace the next time, the editor will 
 				automatically display the last statement from the history. You need to manually
 				clear the statement history, if you want an empty editor the next time you 
 				load the workspace.
+				</para>
 			</note>
 		</section>
 
@@ -126,11 +128,13 @@ COMMIT;</programlisting>
 			</para>
 			
 			<note>
-				Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with 
-				the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal> 
-				package is enabled. 
-				In order to be able to display these columns, the support for 
-				<link linkend="options-enable-out"><literal>DBMS_OUTPUT</literal></link> has to be switched off. 
+				<para>
+					Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with 
+					the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal> 
+					package is enabled. 
+					In order to be able to display these columns, the support for 
+					<link linkend="options-enable-out"><literal>DBMS_OUTPUT</literal></link> has to be switched off. 
+				</para>
 			</note>
 		</section>
 		
@@ -322,10 +326,10 @@ END;
 			data.
 		</para>
 		
-		<note>
+		<note><para>
 			When working with Oracle, only the 10g driver supports the standard JDBC calls used by &wb-productname; 
 			to read and write the LOB data. Earlier drivers will not work as described in this chapter. 
-		</note>
+		</para></note>
 
 		<section>
 			<title>Updating binary data through SQL</title>
@@ -380,14 +384,15 @@ VALUES
 				to the JDBC driver (technically, it will use the <literal>PreapredStatement.setAsciiStream()</literal> method
 				whereas with an encoding it will use the <literal>PreparedStatement.setCharacterStream()</literal> method).
 			</para>
-		</section>
 		
-		<note>
-			The format of the <literal>{$clobfile=}</literal> or <literal>{$blobfile=}</literal> parameter
-			has to be entered exactly as described here. You may not put e.g. spaces before or after
-			the equal sign or the braces. If you do this, &wb-productname; will not recognize the parameter and 
-			will pass the statement "as is" to the JDBC driver.
-		</note>
+			<note><para>
+				The format of the <literal>{$clobfile=}</literal> or <literal>{$blobfile=}</literal> parameter
+				has to be entered exactly as described here. You may not put e.g. spaces before or after
+				the equal sign or the braces. If you do this, &wb-productname; will not recognize the parameter and 
+				will pass the statement "as is" to the JDBC driver.
+			</para></note>
+
+		</section>
 
 		<section id="read-blob">
 			<title>Saving BLOB data to a file using SQL</title>
@@ -437,13 +442,13 @@ VALUES
 				changes you make directly in the result set, for details please refer 
 				to <xref linkend="edit-data"/>)
 			</para>
-			<note>
+			<note><para>
 				When using the upload function in the BLOB info dialog, &wb-productname;
 				will use the file content for any subsequent display of the binary data or the
 				the size information in the information dialog.
 				You will need to re-retrieve the data, in order to use
 				the blob data from the server. 
-			</note>
+			</para></note>
 		</section>
 			
 	</section>
@@ -516,9 +521,9 @@ VALUES
 				option "Replace current SQL", then the text in the editor will be replaced with the
 				text from the macro when you click on the run button.
 			</para>
-			<note>
+			<note><para>
 				Macros will no be evaluated when running in batch mode!
-			</note>
+			</para></note>
 		</section>
 		
 		<section id="macro-parameters">
@@ -591,10 +596,10 @@ VALUES
 				then executing the "statement").
 			</para>
 			
-			<note>
+			<note><para>
 				The parameter keywords are case sensitiv, i.e. 
 				the text <literal>${SELECTION}$</literal> will not be replaced!
-			</note>
+			</para></note>
 			
 			<para>
 				This feature can be used to create SQL scripts that work only with 
@@ -706,12 +711,12 @@ ${current_statement}$
 			<keycap>(Ctrl-F4)</keycap> or use the context menu on the tab label itself.
 		</para>
 		
-		<note>
+		<note><para>
 			Detaching a file from the editor will remove the text from editor as well.
 			If you only want to detach the filename from the editor
 			but keep the text, then press <keycap>Ctrl-Shift-F4</keycap> or hold down the <keycap>Shift</keycap> key
 			while selecting the Discard menu item.
-		</note>
+		</para></note>
 		
 		<para>
 			When you load a SQL script and execute the statements, be aware that due to the history management
@@ -845,12 +850,22 @@ Done.</programlisting>
 			<link linkend="options-required-field-color">options dialog</link>.
 		</para>
 			
-		<note>
+		<note><para>
 			When editing date, timestamp or time fields, the format specified 
 			in the <link linkend="options-date-format">options dialog</link> is used 
 			for parsing the entered value and converting that into the internal representation 
 			of a date. The value entered must match the format defined there.
-		</note>
+		</para></note>
+
+		<para>
+			If you want to input the current date and time you can use <literal>now, today, sysdate, 
+			current_timestamp, current_date</literal> instead. This will then use the current 
+			date &amp; time and will convert this to the approriate data type for that column.
+			e.g. <literal>now</literal> will be converted to the current time for a time column, 
+			the current date for a date column and the current date/time for a timestamp column. 
+			These keywords also work when importing text files using <link linkend="command-import">WbImport</link>
+			or importing a text file into the result set.
+		</para>
 		
 	</section>
     
@@ -1031,9 +1046,9 @@ WHERE base_id = 1;</programlisting>
 			<para>
 				Whether the quick filter is available depends on the selected rows 
 				and columns. It will be enabled when:
-				<itemizedlist columns="1">
-					<listitem>You have selected one or more columns in a single row</listitem>
-					<listitem>You have selected one column in multiple rows</listitem>
+				<itemizedlist>
+					<listitem><para>You have selected one or more columns in a single row</para></listitem>
+					<listitem><para>You have selected one column in multiple rows</para></listitem>
 				</itemizedlist>
 			</para>
 			

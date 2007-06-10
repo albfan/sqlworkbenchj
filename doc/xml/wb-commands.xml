@@ -22,18 +22,19 @@
 INTO c:/temp/image.bmp
 FROM theTable
 WHERE id=42;</programlisting>
-            <para>Even if you specify more then one column in the column list, &wb-productname; will only
-                use the first column. If the SELECT returns more then one row, then one 
-								outputfile will be created for each row. Additional files will be created with 
-								a counter indicating the row number from the result. In the above
-								example, image.bmp, image_1.bmp, image_3.bmp and so on, would be created.
-                If you want to export addtional columns together with the BLOB contents, please
-                use the <link linkend="command-export">WbExport</link> together with the XML format.
-            </para>
-            <note>
-                You can fully manipulate (save, view, upload) the contents of BLOB columns in a result set.
-                Please refer to <xref linkend="blob-support"/> for details.
-            </note>
+			<para>
+					Even if you specify more then one column in the column list, &wb-productname; will only
+					use the first column. If the SELECT returns more then one row, then one 
+					outputfile will be created for each row. Additional files will be created with 
+					a counter indicating the row number from the result. In the above
+					example, image.bmp, image_1.bmp, image_3.bmp and so on, would be created.
+					If you want to export addtional columns together with the BLOB contents, please
+					use the <link linkend="command-export">WbExport</link> together with the XML format.
+			</para>
+			<note><para>
+				You can fully manipulate (save, view, upload) the contents of BLOB columns in a result set.
+				Please refer to <xref linkend="blob-support"/> for details.
+			</para></note>
     </section>
 
 
@@ -121,9 +122,11 @@ WHERE id=42;</programlisting>
             </row>
             <row>
                 <entry>-format</entry>
-                <entry>The format of the outputfile. The default is the &wb-productname;
-                specific XML format. Using <literal>-format=dbdesigner</literal> you can generate
-                an XML file suitable to be opened with DbDesigner4
+                <entry>
+									The format of the outputfile. The default is the &wb-productname;
+									specific XML format. Using <literal>-format=dbdesigner</literal> you can generate
+									an XML file suitable to be opened with DbDesigner4. MySQL Workbench is the successor
+									of DbDesigner4 and can import DbDesigner4 files.
                 </entry>
             </row>
           </tbody>
@@ -460,10 +463,12 @@ WHERE id=42;</programlisting>
       <para>
          With the <literal>WbInclude</literal> command you run SQL scripts without
          actually loading them into the editor, or call other scripts from within
-         a script. The format of the command is <literal>WbInclude filename;</literal>.
+         a script. The format of the command is <literal>WbInclude -file=filename;</literal>.
          For DBMS other then MS SQL, the command can be abbreviated using the @ sign: <literal>@filename;</literal>
-         is equivalent to <literal>WbInclude filename;</literal>.
-         The script that is run in this way may also include other scripts.
+         is equivalent to <literal>WbInclude -file=filename;</literal>.
+         The called script way may also include other scripts. Relative filens (e.g. as parameters 
+				 for &wb-productname; commands) in the script are always resolved to the directory
+				 where the script is located, not the current directory of the application.
       </para>
       <para>
          The reason for excluding MS SQL is, that when creating stored procedures in MS SQL, the procedure
@@ -472,10 +477,10 @@ WHERE id=42;</programlisting>
          with MS SQL, you can <link linkend="options-enable-shortinclude">configure</link> this in your
          <literal>workbench.settings</literal> configuration file.
       </para>
-			<note>
+			<note><para>
 				If the included SQL script contains <literal>SELECT</literal> queries, the result
 				of those queries will <emphasis role="bold">not</emphasis> be displayed in the GUI
-			</note>
+			</para></note>
       <para>The long version of the command accepts additional parameters.
         When using the long version, the filename needs to be passed as a parameter as well.
       </para>
@@ -604,9 +609,9 @@ v_data=id1,id2</programlisting>
 				will be added to the global map (just as if you had executed <literal>WbDefinePk</literal>
 				manually.
       </para>
-      <note>
+      <note><para>
 				The mappings will be stored with lowercase table names internally, regardless how you specify them.
-      </note>
+      </para></note>
 
     </section>
 
@@ -657,13 +662,13 @@ v_data=id1,id2</programlisting>
 				connection is established. See <xref linkend="options-enable-out"/>
       </para>
 			
-			<note>
+			<note><para>
 				Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with 
 				the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal> 
 				package is enabled. 
 				In order to be able to display these columns support for <literal>DBMS_OUTPUT</literal> has
 				to be switched off. 
-			</note>
+			</para></note>
 			
     </section>
 

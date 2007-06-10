@@ -59,7 +59,7 @@ public class WbInclude
 
 	protected boolean isConnectionRequired() { return false; }
 	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
@@ -113,7 +113,7 @@ public class WbInclude
 		boolean continueOnError = cmdLine.getBoolean("continueonerror", false);
 		boolean checkEscape = cmdLine.getBoolean("checkescapedquotes", Settings.getInstance().getCheckEscapedQuotes());
 		boolean verbose = cmdLine.getBoolean("verbose", false);
-		boolean defaultIgnore = aConnection.getProfile().getIgnoreDropErrors();
+		boolean defaultIgnore = currentConnection.getProfile().getIgnoreDropErrors();
 		boolean ignoreDrop = cmdLine.getBoolean(WbManager.ARG_IGNORE_DROP, defaultIgnore);
 		String encoding = cmdLine.getValue("encoding");
 
@@ -123,7 +123,7 @@ public class WbInclude
 			batchRunner = new BatchRunner(f.getCanonicalPath());
 			String dir = f.getCanonicalFile().getParent();
 			batchRunner.setBaseDir(dir);
-			batchRunner.setConnection(aConnection);
+			batchRunner.setConnection(currentConnection);
 			if (delim != null) batchRunner.setDelimiter(DelimiterDefinition.parseCmdLineArgument(delim));
 			batchRunner.setResultLogger(this.resultLogger);
 			batchRunner.setVerboseLogging(verbose);

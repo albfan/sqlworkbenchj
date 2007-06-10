@@ -21,7 +21,7 @@ import javax.swing.KeyStroke;
  * The default input handler. It maps sequences of keystrokes into actions
  * and inserts key typed events into the text area.
  * @author Slava Pestov
- * @version $Id: DefaultInputHandler.java,v 1.21 2007-06-01 23:00:15 thomas Exp $
+ * @version $Id: DefaultInputHandler.java,v 1.22 2007-06-10 20:10:12 thomas Exp $
  */
 public class DefaultInputHandler 
 	extends InputHandler
@@ -252,28 +252,12 @@ public class DefaultInputHandler
 	 */
 	public void keyTyped(KeyEvent evt)
 	{
-		int modifiers = evt.getModifiers();
+		// 
+		if (evt.isControlDown() || evt.isAltDown()) return; 
+		
 		char c = evt.getKeyChar();
 		
-		if(evt.isControlDown()) return; 
-		
-		if (c == ' ' && modifiers != 0)
-		{
-			// check if the Space key with a modifier is bound to an action
-			if (  ((modifiers & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK) ||
-				    ((modifiers & KeyEvent.SHIFT_MASK) == KeyEvent.SHIFT_MASK))
-			{
-				KeyStroke key = KeyStroke.getKeyStroke(c, modifiers);
-				Object o = currentBindings.get(key);
-				if (o != null)
-				{
-					evt.consume();
-					return;
-				}
-			}
-		}
-		
-		if(c != KeyEvent.CHAR_UNDEFINED && (modifiers & KeyEvent.ALT_MASK) == 0)
+		if(c != KeyEvent.CHAR_UNDEFINED)
 		{
 			if(c >= 0x20 && c != 0x7f)
 			{

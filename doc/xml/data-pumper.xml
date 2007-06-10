@@ -25,11 +25,11 @@
 			scripts which copy several tables.
 		</para>
 
-		<para><note>The DataPumper can also be started as a stand-alone application - without the
+		<note><para>The DataPumper can also be started as a stand-alone application - without the
 			main window - by specifying -datapumper=true in the command line when starting &wb-productname;.
 			You can also use the supplied Windows executable <literal>DataPumper.exe</literal> or
 			the Linux/Unix shell script <literal>datapumper</literal>
-		</note></para>
+		</para></note>
 		<para>When opening the DatPumper from the main window, the main window's current connection
 			will be used as the initial source connection. You can disable the automatic connection upon
 			startup with the property <literal>workbench.datapumper.autoconnect</literal> in the <filename>workbench.settings</filename> file.
@@ -161,8 +161,8 @@
 				For maximum performance, choose the update strategy that will result in a succssful
 				first statement more often. As a rule of thumb:
 				<itemizedlist>
-					<listitem>Use <literal>-mode=insert,upadte</literal>, if you expect more rows to be inserted then updated.</listitem>
-					<listitem>Use <literal>-mode=update,insert</literal>, if you expect more rows to be updated then inserted.</listitem>
+					<listitem><para>Use <literal>-mode=insert,upadte</literal>, if you expect more rows to be inserted then updated.</para></listitem>
+					<listitem><para>Use <literal>-mode=update,insert</literal>, if you expect more rows to be updated then inserted.</para></listitem>
 				</itemizedlist>
 			</para>
 		</section>

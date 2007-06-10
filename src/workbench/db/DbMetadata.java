@@ -1019,11 +1019,11 @@ public class DbMetadata
 
 			if (!needQuote && !this.storesMixedCaseIdentifiers())
 			{
-				if (this.storesLowerCaseIdentifiers() && !StringUtil.isLowerCase(aName))
+				if (this.storesUpperCaseIdentifiers() && !StringUtil.isUpperCase(aName))
 				{
 					needQuote = true;
 				}
-				else if (this.storesUpperCaseIdentifiers() && !StringUtil.isUpperCase(aName))
+				else if (this.storesLowerCaseIdentifiers() && !StringUtil.isLowerCase(aName))
 				{
 					needQuote = true;
 				}
@@ -1491,7 +1491,7 @@ public class DbMetadata
 	 * Usually this is delegated to the JDBC driver, but as some drivers
 	 * (e.g. Frontbase) implement this incorrectly, this can be overriden
 	 * in workbench.settings with the property:
-	 * workbench.db.objectname.case.<dbid>
+	 * workbench.db.[dbid].objectname.case
 	 */
 	public boolean storesMixedCaseIdentifiers()
 	{
@@ -1502,31 +1502,11 @@ public class DbMetadata
 		}
 		try
 		{
-			return this.metaData.storesMixedCaseIdentifiers();
-		}
-		catch (SQLException e)
-		{
-			return false;
-		}
-	}
-	
-	/**
-	 * Returns true if the server stores identifiers in lower case.
-	 * Usually this is delegated to the JDBC driver, but as some drivers
-	 * (e.g. Frontbase) implement this incorrectly, this can be overriden
-	 * in workbench.settings with the property:
-	 * workbench.db.objectname.case.<dbid>
-	 */
-	public boolean storesLowerCaseIdentifiers()
-	{
-		IdentifierCase ocase = this.dbSettings.getObjectNameCase();
-		if (ocase != IdentifierCase.unknown)
-		{
-			return ocase == IdentifierCase.lower;
-		}
-		try
-		{
-			return this.metaData.storesLowerCaseIdentifiers();
+			boolean upper = this.metaData.storesUpperCaseIdentifiers();
+			boolean lower = this.metaData.storesLowerCaseIdentifiers();
+			boolean mixed = this.metaData.storesMixedCaseIdentifiers();
+			
+			return  mixed || (upper && lower);
 		}
 		catch (SQLException e)
 		{
@@ -1552,6 +1532,31 @@ public class DbMetadata
 			return storesLowerCaseIdentifiers();
 		}
 		return ocase == IdentifierCase.lower;
+	}
+
+	
+	/**
+	 * Returns true if the server stores identifiers in lower case.
+	 * Usually this is delegated to the JDBC driver, but as some drivers
+	 * (e.g. Frontbase) implement this incorrectly, this can be overriden
+	 * in workbench.settings with the property:
+	 * workbench.db.objectname.case.<dbid>
+	 */
+	public boolean storesLowerCaseIdentifiers()
+	{
+		IdentifierCase ocase = this.dbSettings.getObjectNameCase();
+		if (ocase != IdentifierCase.unknown)
+		{
+			return ocase == IdentifierCase.lower;
+		}
+		try
+		{
+			return this.metaData.storesLowerCaseIdentifiers();
+		}
+		catch (SQLException e)
+		{
+			return false;
+		}
 	}
 
 	/**

@@ -15,6 +15,7 @@ import java.util.List;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.Committer;
 import workbench.interfaces.ProgressReporter;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
@@ -216,19 +217,29 @@ public class CommonArgs
 	}
 	
 	public static ValueConverter getConverter(ArgumentParser cmdLine)
+		throws IllegalArgumentException
 	{
 		ValueConverter converter = new ValueConverter();
 		converter.setAutoConvertBooleanNumbers(cmdLine.getBoolean(ARG_AUTO_BOOLEAN, true));
+		
+		String format = null;
+		try
+		{
+			format = cmdLine.getValue(ARG_DATE_FORMAT);
+			if (format != null) converter.setDefaultDateFormat(format);
 
-		String format = cmdLine.getValue(ARG_DATE_FORMAT);
-		if (format != null) converter.setDefaultDateFormat(format);
-
-		format = cmdLine.getValue(ARG_TIMESTAMP_FORMAT);
-		if (format != null) converter.setDefaultTimestampFormat(format);
-
+			format = cmdLine.getValue(ARG_TIMESTAMP_FORMAT);
+			if (format != null) converter.setDefaultTimestampFormat(format);
+		}
+		catch (Exception e)
+		{
+			String msg = ResourceMgr.getFormattedString("ErrIllegalDateTimeFormat", format);
+			throw new IllegalArgumentException(msg);
+		}
+		
 		String decimal = cmdLine.getValue(ARG_DECCHAR);
 		if (decimal != null) converter.setDecimalCharacter(decimal.charAt(0));
-		
+
 		List<String> falseValues = StringUtil.stringToList(cmdLine.getValue(ARG_FALSE_LITERALS), ",", true, true, false);
 		List<String> trueValues = StringUtil.stringToList(cmdLine.getValue(ARG_TRUE_LITERALS), ",", true, true, false);
 		if (falseValues.size() > 0 && trueValues.size() > 0)

@@ -47,7 +47,7 @@ public class WbFeedback
 	
 	protected boolean isConnectionRequired() { return false; }
 	
-	public StatementRunnerResult execute(WbConnection aConnection, String sql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();

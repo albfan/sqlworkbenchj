@@ -42,7 +42,7 @@ public class UpdatingCommand extends SqlCommand
 		checkLobParameter = aVerb.equals("UPDATE") || aVerb.equals("INSERT");
 	}
 
-	public StatementRunnerResult execute(WbConnection aConnection, String sql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
@@ -68,17 +68,17 @@ public class UpdatingCommand extends SqlCommand
 			if (lob != null && lob.containsParameter())
 			{
 				isPrepared = true;
-				this.currentStatement = lob.prepareStatement(aConnection.getSqlConnection());
+				this.currentStatement = lob.prepareStatement(currentConnection.getSqlConnection());
 			}
 			else if (Settings.getInstance().getCheckPreparedStatements() &&
-					aConnection.getPreparedStatementPool().isRegistered(sql))
+					currentConnection.getPreparedStatementPool().isRegistered(sql))
 			{
-				this.currentStatement = aConnection.getPreparedStatementPool().prepareStatement(sql);
+				this.currentStatement = currentConnection.getPreparedStatementPool().prepareStatement(sql);
 				isPrepared = true;
 			}
 			else
 			{
-				this.currentStatement = aConnection.createStatement();
+				this.currentStatement = currentConnection.createStatement();
 			}
 
 			if (isPrepared)

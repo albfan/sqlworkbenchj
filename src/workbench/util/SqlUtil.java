@@ -751,6 +751,7 @@ public class SqlUtil
 	 */
 	public static void closeResult(ResultSet rs)
 	{
+//		try { rs.clearWarnings(); } catch (Throwable th) {}
 		try { rs.close(); } catch (Throwable th) {}
 	}
 
@@ -760,6 +761,7 @@ public class SqlUtil
 	 */
 	public static void closeStatement(Statement stmt)
 	{
+//		try { stmt.clearWarnings(); } catch (Throwable th) {}
 		try { stmt.close(); } catch (Throwable th) {}
 	}
 
@@ -769,8 +771,8 @@ public class SqlUtil
 	 */
 	public static void closeAll(ResultSet rs, Statement stmt)
 	{
-		try { rs.close(); } catch (Throwable th) {}
-		try { stmt.close(); } catch (Throwable th) {}
+		closeResult(rs);
+		closeStatement(stmt);
 	}
 
 	public static final String getTypeName(int aSqlType)
@@ -925,18 +927,19 @@ public class SqlUtil
 			// from the statement. They will not be added when the Warnings from
 			// the connection are retrieved
 			Set added = new HashSet();
-			StringBuilder msg = new StringBuilder(100);
+			StringBuilder msg = null; 
 			String s = null;
-			SQLWarning warn = stmt.getWarnings();
+			SQLWarning warn = (stmt == null ? null : stmt.getWarnings());
 			boolean hasWarnings = warn != null;
 			int count = 0;
+			
 			while (warn != null)
 			{
 				count ++;
 				s = warn.getMessage();
 				if (s != null && s.length() > 0)
 				{
-					msg.append(s);
+					msg = append(msg, s);
 					if (!s.endsWith("\n")) msg.append('\n');
 					added.add(s);
 				}
@@ -950,12 +953,12 @@ public class SqlUtil
 				if (s != null && s.trim().length() > 0)
 				{
 					if (hasWarnings) msg.append('\n');
-					msg.append(s);
+					msg = append(msg, s);
 					if (!s.endsWith("\n")) msg.append("\n");
 					hasWarnings = true;
 				}
 			}
-			warn = con.getSqlConnection().getWarnings();
+			warn = (con == null ? null : con.getSqlConnection().getWarnings());
 			hasWarnings = hasWarnings || (warn != null);
 			count = 0;
 			while (warn != null)
@@ -966,7 +969,7 @@ public class SqlUtil
 				// This is to prevent adding them twice
 				if (!added.contains(s))
 				{
-					msg.append(s);
+					msg = append(msg, s);
 					if (!s.endsWith("\n")) msg.append('\n');
 				}
 				if (count > 25) break; // prevent endless loop
@@ -974,8 +977,8 @@ public class SqlUtil
 			}
 
 			// make sure the warnings are cleared from both objects!
-			stmt.clearWarnings();
 			con.clearWarnings();
+			stmt.clearWarnings();
 			StringUtil.trimTrailingWhitespace(msg);
 			return msg;
 		}
@@ -984,6 +987,14 @@ public class SqlUtil
 			return null;
 		}
 	}
+	
+	private static StringBuilder append(StringBuilder msg, CharSequence s)
+	{
+		if (msg == null) msg = new StringBuilder(100);
+		msg.append(s);
+		return msg;
+	}
+	
 	
 	public static void main(String args[])
 	{

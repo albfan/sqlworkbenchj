@@ -148,11 +148,11 @@ public class WbImport
 		return result;
 	}
 	
-	public StatementRunnerResult execute(WbConnection aConnection, String sqlCommand)
+	public StatementRunnerResult execute(String sqlCommand)
 		throws SQLException
 	{
 		imp = new DataImporter();
-		this.imp.setConnection(aConnection);
+		this.imp.setConnection(currentConnection);
 
 		StatementRunnerResult result = new StatementRunnerResult(sqlCommand);
 		String options = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sqlCommand,false, false, '\''));
@@ -290,7 +290,7 @@ public class WbImport
 			boolean multi = cmdLine.getBoolean(ARG_MULTI_LINE, multiDefault);
 			textParser.setEnableMultilineRecords(multi);
 			textParser.setTargetSchema(schema);
-			textParser.setConnection(aConnection);
+			textParser.setConnection(currentConnection);
 			textParser.setAbortOnError(!continueOnError);
 			textParser.setTreatClobAsFilenames(cmdLine.getBoolean(ARG_CLOB_ISFILENAME, false));
 			
@@ -400,7 +400,7 @@ public class WbImport
 		else if ("xml".equalsIgnoreCase(type))
 		{
 			XmlDataFileParser xmlParser = new XmlDataFileParser();
-			xmlParser.setConnection(aConnection);
+			xmlParser.setConnection(currentConnection);
 			xmlParser.setAbortOnError(!continueOnError);
 			
 			// The encoding must be set as early as possible
@@ -441,7 +441,18 @@ public class WbImport
 			imp.setProducer(xmlParser);
 		}
 
-		ValueConverter converter = CommonArgs.getConverter(cmdLine);
+		ValueConverter converter = null;
+		try
+		{
+			converter = CommonArgs.getConverter(cmdLine);
+		}
+		catch (Exception e)
+		{
+			result.setFailure();
+			result.addMessage(e.getMessage());
+			return result;
+		}
+		
 		RowDataProducer prod = imp.getProducer();
 		if (prod != null) prod.setValueConverter(converter);
 		

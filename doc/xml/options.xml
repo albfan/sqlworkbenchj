@@ -9,6 +9,23 @@
 
 	<section id="options-general">
 		<title>General options</title>
+
+		<section id="options-automatic-update">
+			<title>Check for updates</title>
+			<para>
+				With this option you can enable an automatic update check when 
+				&wb-productname; is started. You can define the interval in days
+				after which the application should check for updates on the 
+				homepage. If a newer version is found on the website this will 
+				be indicated with a little globe in the statusbar. Clicking on the
+				icon will open your default internet browser with the application's homepage.
+			</para>
+			<para>
+				If you disable this option, you can manually check 
+				for updates using the menu 
+				<menuchoice><guimenu>Help</guimenu><guimenuitem>Check for updates...</guimenuitem></menuchoice>.
+			</para>
+		</section>
 		
 		<section id="options-encrypt-password">
 			<title>Encrypt passwords</title>
@@ -16,11 +33,12 @@
 				profile will be encrypted. Whether the password should be stored at all
 				can be selected in the profile itself.
 			</para>
-			<note>Using this option only supplies very limited security. As the 
+			<note><para>
+				Using this option only supplies very limited security. As the 
 				source code for &wb-productname; is freely available, the algorithm 
 				to decrypt the passwords stored in this way can easily be extracted
 				to retrieve the plain text passwords.
-			</note>
+			</para></note>
 		</section>
 
 		<section id="options-consolidate-log">
@@ -50,13 +68,13 @@
 				with <xref linkend="command-enableout"/>.
 			</para>
 			
-			<note>
+			<note><para>
 				Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with 
 				the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal> 
 				package is enabled. 
 				In order to be able to display these columns support for <literal>DBMS_OUTPUT</literal> has
 				to be switched off. 
-			</note>
+			</para></note>
 
 		</section>
 
@@ -183,9 +201,55 @@
 				<menuchoice><guimenu>Help</guimenu><guimenuitem>Manual</guimenuitem></menuchoice>.
 			</para>
 		</section>
-		
+
+		<section id="options-log-level">
+			<title>Log Level</title>
+			<para>
+				With this option you can control the level of information written to the 
+				application log. The most verbose level is <literal>DEBUG</literal>. With 
+				<literal>ERROR</literal> only severe errors (either resulting from running
+				a user command or from an internal error) are written to the application log.
+			</para>
+		</section>		
 	</section>
 
+	<section id="options-window-title">
+		<title>Window Title</title>
+		<para>
+			The title bar of the main window displays displays information
+			about the current connection, workspace and editor file. Some 
+			of these elements can be enabled or disabled with the options 
+			on this page.
+		</para>
+		<section id="options-window-showgroupname">
+			<title>Show Profile Group</title>
+			<para>
+				If this option is enabled, the group of the current connection
+				profile will be displayed in the main window's title. The name 
+				of the current connection profile will always be shown.
+			</para>
+		</section>
+		
+		<section id="options-window-showworkspace">
+			<title>Show Workspace name</title>
+			<para>
+				If this option is enabled, the currently loaded workspace name 
+				will be displayed in the main window's title.
+			</para>
+		</section>
+		
+		<section id="options-editor-filename">
+			<title>Editor Filename</title>
+			<para>
+				If the current editor tab contains an external file, you 
+				can choose if and which information about the file should be displayed
+				in the window title. You can display nothing, only the filename or
+				the full path information about the current file. The information 
+				will be displayed behind the current profile and workspace name.
+			</para>
+		</section>
+	</section>
+		
 	<section id="options-editor">
 		<title>Editor options</title>
 
@@ -339,16 +403,6 @@
 			</para>
 		</section>
 		
-		<section id="options-window-title">
-			<title>Window title</title>
-			<para>If the current editor tab contains an external file, you 
-		  can choose if and which information about the file should be displayed
-		  in the window title. You can display nothing, only the filename or
-		  the full path information about the current file. The information 
-		  will be displayed behind the current profile and workspace name.
-			</para>
-		</section>
-	  
 		<section id="options-tab-width">
 			<title>Editor tab width</title>
 			<para>The number of spaces that are assumed for the <literal>TAB</literal>
@@ -369,7 +423,8 @@
 				are not correct. The generated statements can also be saved to a file
 				from that window.
 			</para>
-			<note>The statement(s) that are displayed in the confirmation window can not be changed!
+			<note>
+				<para>The statement(s) that are displayed in the confirmation window can not be changed!</para>
 			</note>
 		</section>
 
@@ -488,11 +543,11 @@
 				available on all used DBMS. If the value entered in this property is not found
 				in the list, the selection defaults to "*" which means all object types.
 			</para>
-			<note>
+			<note><para>
 				Don't forget to enable <xref linkend="options-retrieve-explorer"/> so
 				that the table list in the DbExplorer will be retrieved automatically with the desired object
 				type, when you open it.
-			</note>
+			</para></note>
 		</section>
 
 	</section>
@@ -601,10 +656,10 @@
 				This option does not influence the default format used by the <literal>WbExport</literal>
 				command.
 			</para>
-			<note>
+			<note><para>
 				When you copy data as "Text" (tab-separated) to the clipboard, the date and 
 				timestamp format from the <link linkend="options-date-format">general options</link> is used.
-			</note>
+			</para></note>
 		</section>		
 
 		<section id="options-default-export-literaltype">
@@ -653,12 +708,12 @@
 			the current Look &amp; Feel it will be changed, regardless whether
 			you close the options dialog using Cancel or OK.
 		</para>
-		<note>
+		<note><para>
 			The current look and feel is only changed when you click on the 
 			<guibutton>Make current</guibutton> button. Simply selecting a different entry
 			in the list on the left side will <emphasis role="bold">not</emphasis> 
 			change the look and feel.
-		</note>
+		</para></note>
 	</section>
 	
 </section>

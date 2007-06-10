@@ -36,11 +36,11 @@ public class WbListCatalogs extends SqlCommand
 
 	public String getVerb() { return VERB; }
 
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		DataStore ds = aConnection.getMetadata().getCatalogInformation();
+		DataStore ds = currentConnection.getMetadata().getCatalogInformation();
 		result.addDataStore(ds);
 		result.setSuccess();
 		return result;

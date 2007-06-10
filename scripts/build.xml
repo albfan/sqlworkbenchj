@@ -17,8 +17,6 @@
   <property name="javadocdir" value="../javadoc"/>
   <property name="srczipname" value="WorkbenchSrc.zip"/>
   <property name="srczip" value="${root}/${srczipname}"/>
-  <property name="packagezip" value="${root}/release/workbench.zip"/>
-  <property name="packagetar" value="${root}/release/workbench.tar.gz"/>
   <property name="doczip" value="${root}/release/html-manual.zip"/>
 
   <!-- location of the docbook installation and the FOP installation -->
@@ -35,6 +33,13 @@
       <format pattern="dd.MM.yyyy" property="formatted_build_date"/>
     </tstamp>
   </target>
+
+  <path id="xalan.path">
+		<fileset dir="${fop.root}/lib">
+			<include name="xalan*.jar"/>
+			<include name="serializer*.jar"/>
+		</fileset>
+	</path>
 
   <path id="fop.path">
     <fileset dir="${fop.root}/lib">
@@ -163,7 +168,7 @@
       </filterset>
     </copy>
 
-    <xslt in="${doc}/pdf/Manual.xml" out="${doc}/pdf/manual.fo" style="${doc}/xsl/workbench-pdf.xsl">
+    <xslt classpathref="xalan.path" in="${doc}/pdf/Manual.xml" out="${doc}/pdf/manual.fo" style="${doc}/xsl/workbench-pdf.xsl">
       <xmlcatalog>
         <dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN"
              location="${doc}/dtd/docbookx.dtd"/>
@@ -231,7 +236,7 @@
 			</filterset>
 		</copy>
 		
-		<xslt basedir="${build}/help" includes="Manual.xml" style="${doc}/docbook/html/chunk.xsl" destdir="${build}/help">
+		<xslt classpathref="xalan.path" basedir="${build}/help" includes="Manual.xml" style="${doc}/docbook/html/chunk.xsl" destdir="${build}/help">
 			<xmlcatalog>
 				<dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN" location="${doc}/dtd/docbookx.dtd"/>
 			</xmlcatalog>
@@ -333,11 +338,17 @@
 		
 		<copy overwrite="true" tofile="${html-outdir}/history.txt" file="${scriptsrc}/history.new"/>
 		
-		<xslt basedir="${html-outdir}" includes="Manual.xml" style="${doc}/docbook/html/chunk.xsl" destdir="${html-outdir}">
-			<xmlcatalog>
-				<dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN"
-				location="${doc}/dtd/docbookx.dtd"/>
+
+		<xslt classpathref="xalan.path"
+          basedir="${html-outdir}" 
+          includes="Manual.xml" 
+          style="${doc}/docbook/html/chunk.xsl" 
+          destdir="${html-outdir}">
+			
+      <xmlcatalog>
+				<dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN" location="${doc}/dtd/docbookx.dtd"/>
 			</xmlcatalog>
+			
 			<param name="use.extensions" expression="0"/>
 			<param name="textinsert.extension" expression="1"/>
 			<param name="root.filename" expression="${index-file-name}"/>
@@ -387,7 +398,7 @@
 
   <!-- End Manual related tasks -->
 
-	<target name="make-jar" depends="prepare,test">
+	<target name="make-jar" depends="prepare">
 		<copy failonerror="false" overwrite="true" file="${scriptsrc}/history.new" tofile="${build}/help/history.txt" />
 		<copy failonerror="false" overwrite="true" file="${scriptsrc}/history.new" tofile="${distdir}/history.txt" />
 		
@@ -443,7 +454,7 @@
         <exclude name="html/**/*.*"/>
         <exclude name="openoffice/**/*.*"/>
         <exclude name="documentation.project"/>
-        <exclude name="docbook/**/*.*"/>
+        <exclude name="*docbook*/**"/>
         <exclude name="manual/**/*.*"/>
         <exclude name="jhelp/**/*.*"/>
         <exclude name="**/*pdf*/*.*"/>
@@ -700,7 +711,7 @@
 			<fileset dir="${junitdir}" includes="*.txt"/>
 		</delete>
 		
-		<junit haltonerror="true" haltonfailure="true" printsummary="false" includeantruntime="true" fork="true">
+		<junit haltonerror="true" haltonfailure="true" printsummary="false" includeantruntime="true" fork="false">
 			<classpath>
 				<pathelement location="${build}"/>
 				<pathelement location="${build_test}"/>

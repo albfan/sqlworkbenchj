@@ -36,7 +36,7 @@ public class IgnoredCommand extends SqlCommand
 		this.verb = aVerb;
 	}
 
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();

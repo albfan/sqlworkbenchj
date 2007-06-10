@@ -218,7 +218,7 @@ public class DefaultStatementRunner
 		this.currentCommand.setFullErrorReporting(this.fullErrorReporting);
 		
 		long sqlExecStart = System.currentTimeMillis();
-		this.result = this.currentCommand.execute(this.dbConnection, realSql);
+		this.result = this.currentCommand.execute(realSql);
 		
 		this.currentCommand.setFullErrorReporting(oldReporting);
 
