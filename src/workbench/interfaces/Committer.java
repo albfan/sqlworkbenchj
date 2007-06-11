@@ -9,7 +9,6 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-
 package workbench.interfaces;
 
 /**

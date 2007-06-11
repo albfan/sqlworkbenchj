@@ -11,13 +11,14 @@
  */
 package workbench.sql.wbcommands;
 
+import workbench.db.importer.ConstantColumnValues;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
-import workbench.db.WbConnection;
+import workbench.db.importer.ConstantColumnValues;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.ParsingInterruptedException;
 import workbench.db.importer.RowDataProducer;
@@ -75,6 +76,7 @@ public class WbImport
 	public static final String ARG_END_ROW = "endRow";
 	public static final String ARG_BADFILE = "badFile";
 	public static final String ARG_SIZELIMIT = "maxLength";
+	public static final String ARG_CONSTANTS = "constantValues";
 	
 	public WbImport()
 	{
@@ -95,7 +97,6 @@ public class WbImport
 		cmdLine.addArgument(ARG_TARGETTABLE, ArgumentType.TableArgument);
 		cmdLine.addArgument(ARG_QUOTE);
 		cmdLine.addArgument(ARG_CONTAINSHEADER, ArgumentType.BoolArgument);
-//		cmdLine.addArgument("columns");
 		cmdLine.addArgument(ARG_FILECOLUMNS);
 		cmdLine.addArgument(ARG_MODE, StringUtil.stringToList("insert;update;insert,update;update,insert", ";"));
 		cmdLine.addArgument(ARG_KEYCOLUMNS);
@@ -119,6 +120,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_END_ROW, ArgumentType.IntegerArgument);
 		cmdLine.addArgument(ARG_BADFILE);
 		cmdLine.addArgument(ARG_SIZELIMIT);
+		cmdLine.addArgument(ARG_CONSTANTS);
 	}
 	
 	public String getVerb() { return VERB; }
@@ -500,6 +502,23 @@ public class WbImport
 			this.imp.setReportInterval(10);
 		}
 
+		String constants = cmdLine.getValue(ARG_CONSTANTS);
+		if (!StringUtil.isEmptyString(constants))
+		{
+			try
+			{
+				ConstantColumnValues values = new ConstantColumnValues(constants, this.currentConnection, table, converter);
+ 				imp.setConstantColumnValues(values);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("WbImport.execute()", "Column constants could no be parsed", e);
+				result.setFailure();
+				result.addMessage(e.getMessage());
+				return result;
+			}
+		}
+		
 		String mode = cmdLine.getValue(ARG_MODE);
 		if (mode != null)
 		{

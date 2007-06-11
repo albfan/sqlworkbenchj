@@ -1,5 +1,5 @@
 /*
- * NofitierEvent.java
+ * NotifierEvent.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *

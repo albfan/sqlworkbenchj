@@ -272,15 +272,34 @@ public class DwStatusBar
 	
 	public void setExecutionTime(long millis)
 	{
+		final long oneMinute = (1000 * 60);
+		final long oneHour = oneMinute * 60;
+		
 		if (timerRunning) executionEnd();
-		if (millis <= 60000)
+		
+		if (millis < oneMinute)
 		{
 			double time = (double)(millis/1000.0);
-			this.execTime.setText(numberFormatter.format(time));
+			synchronized (this.numberFormatter)
+			{
+				this.execTime.setText(numberFormatter.format(time));
+			}
+		}
+		else if (millis < oneHour)
+		{
+			synchronized (this.timeFormatter)
+			{
+				this.execTime.setText(timeFormatter.format(new java.util.Date(millis)));
+			}
 		}
 		else
 		{
-			this.execTime.setText(timeFormatter.format(new java.util.Date(millis)));
+			synchronized (this.timeFormatter)
+			{
+				long hours = (millis / oneHour);
+				long rest = millis - (hours * oneHour);
+				this.execTime.setText(Long.toString(hours) + "h " + timeFormatter.format(new java.util.Date(rest)));
+			}
 		}
 		this.execTime.repaint();
 	}

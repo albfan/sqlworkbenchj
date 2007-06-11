@@ -1,12 +1,14 @@
 /*
  * IdentifierCase.java
  *
- * Created on January 23, 2007, 4:13 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
+ * Copyright 2002-2007, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
-
 package workbench.db;
 
 /**

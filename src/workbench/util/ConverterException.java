@@ -1,7 +1,6 @@
 /*
  * ConverterException.java
  *
- *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2007, Thomas Kellerer

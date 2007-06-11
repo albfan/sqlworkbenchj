@@ -45,7 +45,6 @@ import java.io.Reader;
 import java.sql.Clob;
 import java.sql.Savepoint;
 import java.sql.Types;
-import java.text.MessageFormat;
 import java.util.LinkedList;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ImportFileParser;
@@ -130,7 +129,7 @@ public class DataImporter
 
 	// A map that stores constant values for the import. 
 	// e.g. for columns not part of the input file.
-	private Map<ColumnIdentifier, String> columnConstants;
+	private ConstantColumnValues columnConstants;
 	
 	private RowActionMonitor progressMonitor;
 	private boolean isRunning = false;
@@ -423,9 +422,18 @@ public class DataImporter
 		return true;
 	}
 
-	public void setConstantColumnValues(Map<ColumnIdentifier, String> constantValues)
+	/**
+	 * Define column constants for the import. 
+	 * It is expected that the value object is already converted to the correct
+	 * class. DataImporter will not convert the passed values in any way.
+	 */
+	public void setConstantColumnValues(ConstantColumnValues constantValues)
 	{
-		this.columnConstants = constantValues;
+		this.columnConstants = null;
+		if (constantValues != null && constantValues.getColumnCount() > 0)
+		{
+			this.columnConstants = constantValues;
+		}
 	}
 	
 	/**
@@ -1145,6 +1153,18 @@ public class DataImporter
 			}
 		}
 
+		if (this.columnConstants != null && pstmt == this.insertStatement)
+		{
+			int count = this.columnConstants.getColumnCount();
+			for (int i=0; i < count; i++)
+			{
+				int colIndex = row.length + 1 + i;
+				ColumnIdentifier col = columnConstants.getColumn(i);
+				Object data = columnConstants.getValue(i);
+				pstmt.setObject(colIndex, data, col.getDataType());
+			}
+		}
+		
 		int rows = 0;
 		if (addBatch)
 		{
@@ -1362,6 +1382,16 @@ public class DataImporter
 			}
 			text.append(this.targetColumns[i].getColumnName());
 			parms.append('?');
+		}
+		if (this.columnConstants != null)
+		{
+			int cols = columnConstants.getColumnCount();
+			for (int i=0; i < cols; i++)
+			{
+				text.append(',');
+				text.append(columnConstants.getColumn(i).getColumnName());
+				parms.append(",?");
+			}
 		}
 		text.append(") VALUES (");
 		text.append(parms);
