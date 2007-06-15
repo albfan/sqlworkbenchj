@@ -149,7 +149,10 @@
 						</tbody>
 					</tgroup>
 				</informaltable>
-				
+        <note><para>
+          A special format <literal>millis</literal> has been added to identify times represented in 
+          milliseconds (since January 1, 1970, 00:00:00 GMT).
+        </para></note>				
 			</para>
 		</section>
 

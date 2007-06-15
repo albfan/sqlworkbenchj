@@ -29,7 +29,7 @@ WHERE id=42;</programlisting>
 					a counter indicating the row number from the result. In the above
 					example, image.bmp, image_1.bmp, image_3.bmp and so on, would be created.
 					If you want to export addtional columns together with the BLOB contents, please
-					use the <link linkend="command-export">WbExport</link> together with the XML format.
+					use the <link linkend="command-export">WbExport</link> command.
 			</para>
 			<note><para>
 				You can fully manipulate (save, view, upload) the contents of BLOB columns in a result set.

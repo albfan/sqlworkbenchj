@@ -857,14 +857,15 @@ Done.</programlisting>
 			of a date. The value entered must match the format defined there.
 		</para></note>
 
-		<para>
+		<para id="editing-date-keywords">
 			If you want to input the current date and time you can use <literal>now, today, sysdate, 
 			current_timestamp, current_date</literal> instead. This will then use the current 
 			date &amp; time and will convert this to the approriate data type for that column.
 			e.g. <literal>now</literal> will be converted to the current time for a time column, 
 			the current date for a date column and the current date/time for a timestamp column. 
 			These keywords also work when importing text files using <link linkend="command-import">WbImport</link>
-			or importing a text file into the result set.
+			or importing a text file into the result set. The exact keywords that are recognized can be 
+			configure in the <link linkend="settings-date-keywords">settings file</link>
 		</para>
 		
 	</section>

@@ -481,6 +481,28 @@
 		  </para>
 		  <para>No default</para>
 		</section>
+		
+		<section id="settings-date-keywords">
+			<title>Defining keywords for date or timestamp input</title>
+			<para>Property: <literal>workbench.db.keyword.current_date</literal></para>
+			<para>
+				The "literals" that are accepted for DATE columns to identify 
+				the current date. Default values are <literal>current_date, today</literal>
+			</para>
+
+			<para>Property: <literal>workbench.db.keyword.current_timestamp</literal></para>
+			<para>
+				The "literals" that are accepted for TIMESTAMP columns to identify 
+				the current date/time. Default values are <literal>current_timestamp,sysdate,systimestamp</literal>
+			</para>
+			
+			<para>Property: <literal>workbench.db.keyword.current_time</literal></para>
+			<para>
+				The "literals" that are accepted for TIME columns to identify 
+				the current time. Default values are <literal>current_time, now</literal>
+			</para>
+			
+		</section>
           
   </section>
 			
