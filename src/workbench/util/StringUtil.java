@@ -236,7 +236,7 @@ public class StringUtil
 	 */
 	public static final String makeFilename(String input)
 	{
-		return input.replaceAll("[\t\\:\\\\/\\?\\*\\|<>\"'\\{\\}$%�\\[\\]\\^|\\&]", "").toLowerCase();
+		return input.replaceAll("[\t\\:\\\\/\\?\\*\\|<>\"'\\{\\}$%�\\[\\]\\^|\\&]", "");
 	}
 
 	/**

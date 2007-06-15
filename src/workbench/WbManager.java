@@ -1040,10 +1040,17 @@ public class WbManager
 			
 			try
 			{
-				if (runner.isConnected())
+				// Do not check for runner.isConnected() as the in batch mode
+				// the application might be started without a profile 
+				// (e.g. for a single WbCopy command)
+				if (runner.isSuccess())
 				{
 					runner.execute();
 				}
+				
+				// Not all exceptions will be re-thrown by the batch runner
+				// in order to be able to run the error script, so it is important
+				// to check isSuccess() in order to return the correct status 
 				if (!runner.isSuccess()) exitCode = 2;
 			}
 			catch (OutOfMemoryError e)

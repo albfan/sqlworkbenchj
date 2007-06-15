@@ -37,12 +37,14 @@ public class ConstantColumnValuesTest extends TestCase
 		List<workbench.db.ColumnIdentifier> columns = new ArrayList();
 		columns.add(new workbench.db.ColumnIdentifier("test_run_id", java.sql.Types.INTEGER));
 		columns.add(new workbench.db.ColumnIdentifier("title", java.sql.Types.VARCHAR));
+		columns.add(new workbench.db.ColumnIdentifier("modified", java.sql.Types.TIMESTAMP));
     try
     {
-      ConstantColumnValues values = new ConstantColumnValues("test_run_id=42,title=\"hello, world\"", columns);
-			assertEquals(2, values.getColumnCount());
+      ConstantColumnValues values = new ConstantColumnValues("test_run_id=42,title=\"hello, world\",modified=current_timestamp", columns);
+			assertEquals(3, values.getColumnCount());
 			assertEquals(new Integer(42), values.getValue(0));
 			assertEquals("hello, world", values.getValue(1));
+			assertEquals(true, values.getValue(2) instanceof java.sql.Timestamp);
     }
     catch (Exception ex)
     {

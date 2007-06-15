@@ -1,5 +1,15 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  (95.1) When importing files using mode=insert static values can now 
+      be specified for specific columns in case those columns are not part
+      of the import file but they need to be populated nevertheless. Only
+      constants are supported. The parameter is called -constantValues 
+Enh:  (95.1) The filenames generated for blob files are not converted
+      to lowercase anymore. This means when using -lobIdCols to create the
+      blob filenames from the column data, the original case will be preserved.
+Fix:  (95.1) It was no longer possible to run SQL Workbench in batch mode
+      without a profile (for e.g. a single WbCopy command where the 
+      profiles are specified as part of the WbCopy parameters)
 
 Build 95, 09.06.2007
 --------------------

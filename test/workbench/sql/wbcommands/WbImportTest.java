@@ -78,6 +78,59 @@ public class WbImportTest
 		super.tearDown();
 	}
 	
+	public void testConstantValues()
+	{
+		try
+		{
+			File importFile  = new File(this.basedir, "constant_import.txt");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("nr\tlastname");
+			out.println("1\tDent");
+			out.println("2\tPrefect");
+			out.println("3\tBeeblebrox");
+			out.close();
+
+			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -constantValues=\"firstname=Unknown\" -type=text -header=true -continueonerror=false -table=junit_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
+			int count = -1;
+			if (rs.next())
+			{
+				count = rs.getInt(1);
+			}
+			assertEquals("Not enough values imported", 3, count);
+			
+			rs.close();
+			
+			rs = stmt.executeQuery("select lastname, firstname from junit_test where nr = 1");
+			if (rs.next())
+			{
+				String lname = rs.getString(1);
+				String fname = rs.getString(2);
+				assertEquals("Wrong lastname", "Dent", lname);
+				assertEquals("Wrong firstname", "Unknown", fname);
+			}
+			else
+			{
+				fail("First row not imported");
+			}
+			rs.close();
+			
+			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	public void testPartialColumnXmlImport()
 		throws Exception
 	{

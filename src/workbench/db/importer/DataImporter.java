@@ -1159,9 +1159,7 @@ public class DataImporter
 			for (int i=0; i < count; i++)
 			{
 				int colIndex = row.length + 1 + i;
-				ColumnIdentifier col = columnConstants.getColumn(i);
-				Object data = columnConstants.getValue(i);
-				pstmt.setObject(colIndex, data, col.getDataType());
+				columnConstants.setParameter(pstmt, colIndex, i);
 			}
 		}
 		
@@ -1190,6 +1188,28 @@ public class DataImporter
 		return rows;
 	}
 
+	private void checkConstantValues()
+		throws SQLException
+	{
+		if (this.columnConstants == null) return;
+		for (ColumnIdentifier col : this.targetColumns)
+		{
+			if (this.columnConstants.removeColumn(col))
+			{
+				String msg = ResourceMgr.getFormattedString("MsgImporterConstIgnored", col.getColumnName());
+				this.messages.append(msg);
+				this.messages.appendNewLine();
+				if (this.continueOnError)
+				{
+					LogMgr.logWarning("DataImporter.checkConstanValues()", msg);
+				}
+				else
+				{
+					throw new SQLException(msg);
+				}
+			}
+		}
+	}
 	/**
 	 *	Callback function from the RowDataProducer
 	 */
@@ -1275,6 +1295,8 @@ public class DataImporter
 				throw e;
 			}
 
+			checkConstantValues();
+			
 			if (this.mode != MODE_UPDATE)
 			{
 				this.prepareInsertStatement();
@@ -1390,7 +1412,15 @@ public class DataImporter
 			{
 				text.append(',');
 				text.append(columnConstants.getColumn(i).getColumnName());
-				parms.append(",?");
+				parms.append(',');
+				if (columnConstants.isFunctionCall(i))
+				{
+					parms.append(columnConstants.getFunctionLiteral(i));
+				}
+				else
+				{
+					parms.append('?');
+				}
 			}
 		}
 		text.append(") VALUES (");

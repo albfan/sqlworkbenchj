@@ -11,12 +11,14 @@
  */
 package workbench.db.importer;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.util.ConverterException;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
@@ -78,7 +80,24 @@ public class ConstantColumnValues
 				ColumnIdentifier col = findColumn(tableColumns, colname);
 				if (col != null)
 				{
-					data.add(converter.convertValue(parts[1], col.getDataType()));
+					String value = parts[1];
+					if (!StringUtil.isEmptyString(value))
+					{
+						if (value.startsWith("${"))
+						{
+							// DBMS Function call
+							data.add(value.trim());
+						}
+						else
+						{
+							data.add(converter.convertValue(parts[1], col.getDataType()));
+						}
+					}
+					else
+					{
+						data.add(null);
+						LogMgr.logWarning("ConstanColumnValues.init()", "Empty value for column '" + col + "' assumed as NULL");
+					}
 					columns.add(col);
 				}
 				else
@@ -98,6 +117,28 @@ public class ConstantColumnValues
 		return null;
 	}
 
+	public String getFunctionLiteral(int index)
+	{
+		if (!this.isFunctionCall(index)) return null;
+		String data = (String)this.getValue(index);
+		
+		// The function call is enclosed in ${...}
+		return data.substring(2, data.length() - 1);
+	}
+	
+	public boolean isFunctionCall(int index)
+	{
+		Object data = this.getValue(index);
+		if (data == null) return false;
+		
+		if (data instanceof String)
+		{
+			String f = (String)data;
+			return f.startsWith("${") && f.endsWith("}");
+		}
+		return false;
+	}
+	
 	public int getColumnCount()
 	{
 		if (this.columns == null) return 0;
@@ -112,5 +153,40 @@ public class ConstantColumnValues
 	public Object getValue(int index)
 	{
 		return this.data.get(index);
+	}
+	
+	public boolean removeColumn(ColumnIdentifier col)
+	{
+		if (this.columns == null) return false;
+		int index = this.columns.indexOf(col);
+		if (index > -1)
+		{
+			this.columns.remove(index);
+			this.data.remove(index);
+		}
+		return (index > -1);
+	}
+	
+	public void setParameter(PreparedStatement pstmt, int statementIndex, int columnIndex)
+	 throws SQLException	
+	{
+		ColumnIdentifier col = getColumn(columnIndex);
+		Object data = getValue(columnIndex);
+		
+		// If the column value is a function call, this will not
+		// be used in a prepared statement. It is expected that the caller
+		// (that prepared the statement) inserted the literal value of the 
+		// function call into the SQL instead of a ? placeholder
+		if (!isFunctionCall(columnIndex))
+		{
+			if (data == null)
+			{
+				pstmt.setNull(statementIndex, col.getDataType());
+			}
+			else
+			{
+				pstmt.setObject(statementIndex, data, col.getDataType());
+			}
+		}
 	}
 }

@@ -196,6 +196,7 @@ public class BatchRunner
 			}
 			LogMgr.logInfo("BatchRunner.connect()",  ResourceMgr.getFormattedString("MsgBatchConnectOk", c.getDisplayString()));
 			if (!quiet) this.printMessage(ResourceMgr.getFormattedString("MsgBatchConnectOk", info));
+			success = true;
 		}
 		catch (ClassNotFoundException e)
 		{
@@ -248,7 +249,6 @@ public class BatchRunner
 	}
 
 	public void execute()
-		throws IOException
 	{
 		boolean error = false;
 		int count = this.filenames.size();
