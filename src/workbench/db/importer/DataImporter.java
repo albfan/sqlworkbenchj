@@ -29,7 +29,6 @@ import workbench.db.DbMetadata;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.importer.BadfileWriter;
 import workbench.interfaces.Committer;
 import workbench.interfaces.ProgressReporter;
 import workbench.util.ExceptionUtil;
@@ -1040,8 +1039,8 @@ public class DataImporter
 						{
 							if (!f.isAbsolute())
 							{
-								File source = new File(this.parser.getSourceFilename());
-								f = new File(source.getParentFile(), f.getName());
+								File sourcefile = new File(this.parser.getSourceFilename());
+								f = new File(sourcefile.getParentFile(), f.getName());
 							}
 							in = EncodingUtil.createBufferedReader(f, encoding);
 							streams.add(new CloseableDataStream(in));
@@ -1092,8 +1091,8 @@ public class DataImporter
 						{
 							if (!f.isAbsolute())
 							{
-								File source = new File(this.parser.getSourceFilename());
-								f = new File(source.getParentFile(), f.getName());
+								File sourcefile = new File(this.parser.getSourceFilename());
+								f = new File(sourcefile.getParentFile(), f.getName());
 							}
 							in = new BufferedInputStream(new FileInputStream(f), 64*1024);
 							len = (int)f.length();

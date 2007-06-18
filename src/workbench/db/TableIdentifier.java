@@ -23,7 +23,7 @@ import workbench.util.WbStringTokenizer;
  * @author  support@sql-workbench.net
  */
 public class TableIdentifier
-	implements Comparable
+	implements Comparable<TableIdentifier>
 {
 	private String tablename;
 	private String schema;
@@ -282,7 +282,7 @@ public class TableIdentifier
 			return;
 		}
 
-		List elements = new ArrayList(4);
+		List<String> elements = new ArrayList<String>(4);
 		WbStringTokenizer tok = new WbStringTokenizer('.', "\"", true);
 		tok.setSourceString(aTable);
 		while (tok.hasMoreTokens())
@@ -296,14 +296,14 @@ public class TableIdentifier
 		}
 		else if (elements.size() == 2)
 		{
-			setSchema((String)elements.get(0));
-			setTablename((String)elements.get(1));
+			setSchema(elements.get(0));
+			setTablename(elements.get(1));
 		}
 		else if (elements.size() == 3)
 		{
-			setCatalog((String)elements.get(0));
-			setSchema((String)elements.get(1));
-			setTablename((String)elements.get(2));
+			setCatalog(elements.get(0));
+			setSchema(elements.get(1));
+			setTablename(elements.get(2));
 		}
 
 		this.expression = null;
@@ -406,14 +406,9 @@ public class TableIdentifier
 		this.showOnlyTableName = flag;
 	}
 	
-	public int compareTo(Object other)
+	public int compareTo(TableIdentifier other)
 	{
-		if (other instanceof TableIdentifier)
-		{
-			TableIdentifier t = (TableIdentifier)other;
-			return this.getTableExpression().compareTo(t.getTableExpression());
-		}
-		return -1;
+		return this.getTableExpression().compareTo(other.getTableExpression());
 	}
 	
 	public boolean equals(Object other)

@@ -15,8 +15,7 @@ import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import workbench.db.SequenceReader;
 import workbench.util.ExceptionUtil;
@@ -76,11 +75,11 @@ public class McKoiMetadata
 		return result;
 	}
 	
-	public List getSequenceList(String owner)
+	public List<String> getSequenceList(String owner)
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		ArrayList result = new ArrayList(100);
+		List<String> result = new LinkedList<String>();
 
 		StringBuilder sql = new StringBuilder(200);
 		sql.append("select name from SYS_INFO.sUSRSequence ");

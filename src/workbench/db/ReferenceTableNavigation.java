@@ -14,7 +14,6 @@ package workbench.db;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 import workbench.storage.ColumnData;
 import workbench.storage.SqlLiteralFormatter;

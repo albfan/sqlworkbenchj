@@ -39,10 +39,10 @@ public class DerbySynonymReader
 	 * The DB2 JDBC driver returns Alias' automatically, so there 
 	 * is no need to retrieve them here
 	 */
-	public List getSynonymList(Connection con, String owner) 
+	public List<String> getSynonymList(Connection con, String owner) 
 		throws SQLException
 	{
-		LinkedList result = new LinkedList();
+		List<String> result = new LinkedList<String>();
 		String sql = "select a.alias " + 
              "from sys.sysaliases a, sys.sysschemas s \n" + 
              "where a.schemaid = s.schemaid \n" + 

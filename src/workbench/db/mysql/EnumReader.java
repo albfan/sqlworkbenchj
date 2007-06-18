@@ -31,7 +31,7 @@ public class EnumReader
 	{
 		Statement stmt = null;
 		ResultSet rs = null;
-		HashMap defs = new HashMap(17);
+		HashMap<String, String> defs = new HashMap<String, String>(17);
 		
 		try
 		{
@@ -56,7 +56,7 @@ public class EnumReader
 			for (int row=0; row < count; row ++)
 			{
 				String column = tableDefinition.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-				String type = (String)defs.get(column);
+				String type = defs.get(column);
 				if (type != null)
 				{
 					tableDefinition.setValue(row, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE, type);

@@ -11,10 +11,7 @@
  */
 package workbench.db.h2database;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import workbench.db.*;
-
+import workbench.db.AbstractConstraintReader;
 
 /**
  * Constraint reader for HSQLDB

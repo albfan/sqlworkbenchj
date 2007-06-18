@@ -124,7 +124,7 @@ public class TextExportWriter
 			//if (format == null) format = exporter.getDateFormat();
 			
 			String oraFormat = convertJavaDateFormatToOracle(format);
-			List blobColumns = new LinkedList();
+			List<String> blobColumns = new LinkedList<String>();
 			boolean clobAsFile = exporter.getWriteClobAsFile();
 			for (int i=0; i < count; i++)
 			{

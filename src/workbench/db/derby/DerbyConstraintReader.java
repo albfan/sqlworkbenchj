@@ -11,8 +11,7 @@
  */
 package workbench.db.derby;
 
-import workbench.db.*;
-
+import workbench.db.AbstractConstraintReader;
 
 /**
  * Constraint reader for Cloudscape database

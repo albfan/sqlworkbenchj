@@ -52,8 +52,8 @@ public class SchemaReporter
 	implements Interruptable
 {
 	private WbConnection dbConn;
-	private List tables = new ArrayList();
-	private List procedures = new ArrayList();
+	private List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
+	private List<ReportProcedure> procedures = new ArrayList<ReportProcedure>();
 	private String xmlNamespace;
 	private String[] types;
 	private List schemas;
@@ -94,12 +94,12 @@ public class SchemaReporter
 	 */
 	public void setTableList(TableIdentifier[] tableList)
 	{
-		this.tables = new ArrayList();
+		this.tables = new ArrayList<TableIdentifier>();
 		for (int i=0; i < tableList.length; i++)
 		{
 			if (tableList[i].getTableName().indexOf('%') > -1)
 			{
-				List tlist = retrieveWildcardTables(tableList[i].getTableName());
+				List<TableIdentifier> tlist = retrieveWildcardTables(tableList[i].getTableName());
 				if (tlist != null)
 				{
 					this.tables.addAll(tlist);
@@ -219,15 +219,13 @@ public class SchemaReporter
 		int totalCurrent = 1;
 		
 		DbSettings dbs = dbConn.getMetadata().getDbSettings();
-		TableIdentifier table  = null;
 		
-		for (int i=0; i < count; i++)
+		for (TableIdentifier table : tables)
 		{
 			try
 			{
 				if (this.cancel) break;
 
-				table = (TableIdentifier)this.tables.get(i);
 				String tableName = table.getTableExpression();
 				if (this.monitor != null)
 				{
@@ -268,9 +266,8 @@ public class SchemaReporter
 		}
 		count = this.procedures.size();
 		if (count > 0) out.write("\n");
-		for (int i = 0; i < count; i++)
+		for (ReportProcedure proc : procedures)
 		{
-			ReportProcedure proc = (ReportProcedure)procedures.get(i);
 			if (this.monitor != null)
 			{
 				this.monitor.setCurrentObject(proc.getProcedureName(), totalCurrent, totalCount);
@@ -407,7 +404,7 @@ public class SchemaReporter
 		}
 	}
 
-	private List retrieveWildcardTables(String name)
+	private List<TableIdentifier> retrieveWildcardTables(String name)
 	{
 		try
 		{

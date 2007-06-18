@@ -17,7 +17,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
@@ -122,7 +121,7 @@ public class OracleIndexReader
 	{
 		if (indexDefs.size() == 0) return;
 		
-		Map result = new HashMap();
+		Map<String, String> result = new HashMap<String, String>();
 		
 		String base="SELECT i.index_name, e.column_expression, e.column_position \n" +
 			"FROM all_indexes i, all_ind_expressions e  \n" +
@@ -139,13 +138,11 @@ public class OracleIndexReader
 		{
 			sql.append(" AND i.owner = '" + schema + "' ");
 		}
-		Iterator<IndexDefinition> keys = indexDefs.iterator();
 		boolean found = false;
 		
 		sql.append(" AND i.index_name IN (");
-		while (keys.hasNext())
+		for (IndexDefinition def : indexDefs)
 		{
-			IndexDefinition def = keys.next();
 			String type = def.getIndexType();
 			if (type == null) continue;
 			if (type.startsWith("FUNCTION-BASED"))
@@ -174,11 +171,9 @@ public class OracleIndexReader
 				result.put(name, exp);
 			}
 			
-			keys = indexDefs.iterator();
-			while (keys.hasNext())
+			for (IndexDefinition def : indexDefs)
 			{
-				IndexDefinition def = (IndexDefinition)keys.next();
-				String exp = (String)result.get(def.getName());
+				String exp = result.get(def.getName());
 				if (exp != null)
 				{
 					def.setExpression(exp);

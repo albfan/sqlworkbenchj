@@ -25,7 +25,7 @@ public interface ConstraintReader
 	 *	the column name, the value is the full expression which can be appended
 	 *	to the column definition inside a CREATE TABLE statement.
 	 */
-	Map getColumnConstraints(Connection dbConnection, TableIdentifier aTable);
+	Map<String, String> getColumnConstraints(Connection dbConnection, TableIdentifier aTable);
 	
 	
 	/**

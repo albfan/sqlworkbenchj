@@ -13,7 +13,7 @@ package workbench.db.report;
 
 /**
  *
- * @author tkellerer
+ * @author support@sql-workbench.net
  */
 public class TagAttribute
 {

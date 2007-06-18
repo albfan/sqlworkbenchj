@@ -11,6 +11,9 @@
  */
 package workbench.db.report;
 
+/**
+ * @author tstill
+ */
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;

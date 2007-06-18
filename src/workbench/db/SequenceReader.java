@@ -29,7 +29,7 @@ public interface SequenceReader
 	 * 	Get a list of sequences for the given owner. The 
 	 *  contains objects of type String.
 	 */
-	public List getSequenceList(String owner);
+	public List<String> getSequenceList(String owner);
 	
 	public DataStore getSequenceDefinition(String owner, String sequence);
 	

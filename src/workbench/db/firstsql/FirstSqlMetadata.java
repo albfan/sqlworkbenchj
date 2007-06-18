@@ -39,9 +39,9 @@ public class FirstSqlMetadata
 	{
 	}
 
-	public Map getColumnConstraints(Connection dbConnection, TableIdentifier aTable)
+	public Map<String, String> getColumnConstraints(Connection dbConnection, TableIdentifier aTable)
 	{
-		return Collections.EMPTY_MAP;
+		return Collections.emptyMap();
 	}
 
 	public String getTableConstraints(Connection dbConnection, TableIdentifier aTable, String indent) 

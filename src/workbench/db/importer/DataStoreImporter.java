@@ -98,7 +98,7 @@ public class DataStoreImporter
 		factory.setType(type);
 		ResultInfo info = this.target.getResultInfo();
 		
-		List<ColumnIdentifier> cols = new ArrayList(info.getColumnCount());
+		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(info.getColumnCount());
 		for (int i = 0; i < info.getColumnCount(); i++)
 		{
 			cols.add(info.getColumn(i));

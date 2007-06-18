@@ -91,9 +91,9 @@ public class H2SequenceReader
 		return result;
 	}
 	
-	public List getSequenceList(String owner)
+	public List<String> getSequenceList(String owner)
 	{
-		List result = new LinkedList();
+		List<String> result = new LinkedList<String>();
 		ResultSet rs = null;
 		Statement stmt = null;
 		try

@@ -14,7 +14,7 @@ package workbench.db.ibm;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import workbench.db.SequenceReader;
 import workbench.db.WbConnection;
@@ -78,11 +78,11 @@ public class Db2SequenceReader
 	/**
 	 * 	Get a list of sequences for the given owner
 	 */
-	public List getSequenceList(String schema)
+	public List<String> getSequenceList(String schema)
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		List result = new ArrayList(100);
+		List<String> result = new LinkedList<String>();
 		
 		StringBuilder sql = new StringBuilder(200);
 		sql.append("SELECT seqname FROM syscat.sequences WHERE seqtype = 'S' ");

@@ -19,6 +19,23 @@
    </object>
   </void>
 
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>org.h2.Driver</string>
+    </void>
+    <void property="library">
+     <string>h2.jar</string>
+    </void>
+    <void property="name">
+     <string>H2 Database Engine</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:h2:&lt;/path/to/database&gt;</string>
+    </void>
+   </object>
+  </void>
 	
   <void method="add">
    <object class="workbench.db.DbDriver">

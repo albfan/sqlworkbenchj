@@ -33,35 +33,35 @@ public class DbObjectCache
 	implements PropertyChangeListener
 {
 	private WbConnection dbConnection;
-	private Set schemasInCache = new HashSet();
 	private static final String NULL_SCHEMA = "$$wb-null-schema$$";
 	private boolean retrieveOraclePublicSynonyms = false;
 	
-	// This will map a TableIdentifier to a list of ColumnIdentifier
-	private SortedMap objects = new TreeMap();
+	private Set<String> schemasInCache;
+	private SortedMap<TableIdentifier, List<ColumnIdentifier>> objects;
 	
 	DbObjectCache(WbConnection conn)
 	{
 		this.dbConnection = conn;
+		this.createCache();
 		retrieveOraclePublicSynonyms = conn.getMetadata().isOracle() && Settings.getInstance().getBoolProperty("workbench.editor.autocompletion.oracle.public_synonyms", false);
 		conn.addChangeListener(this);
 	}
-	
+
+	private void createCache()
+	{
+		schemasInCache = new HashSet<String>();
+		objects = new TreeMap<TableIdentifier, List<ColumnIdentifier>>();
+	}
 	/**
 	 * Add this list of tables to the current cache. 
 	 */
-	private void setTables(List tables)
+	private void setTables(List<TableIdentifier> tables)
 	{
-		if (this.objects == null)
+		for (TableIdentifier tbl : tables)
 		{
-			this.objects = new TreeMap();
-		}
-		for (int i=0; i < tables.size(); i++)
-		{
-			TableIdentifier tbl = (TableIdentifier)tables.get(i);
 			if (!this.objects.containsKey(tbl))
 			{
-				this.objects.put(tbl, Collections.EMPTY_LIST);
+				this.objects.put(tbl, null);
 			}
 		}
 	}
@@ -92,7 +92,7 @@ public class DbObjectCache
 			try
 			{
 				DbMetadata meta = this.dbConnection.getMetadata();
-				List tables = meta.getSelectableObjectsList(schemaToUse);
+				List<TableIdentifier> tables = meta.getSelectableObjectsList(schemaToUse);
 				this.setTables(tables);
 				this.schemasInCache.add(schema == null ? NULL_SCHEMA : schemaToUse);
 			}
@@ -107,15 +107,13 @@ public class DbObjectCache
 			return filterTablesBySchema(schemaToUse);
 	}
 
-	private Set filterTablesByType(String schema, String type)
+	private Set<TableIdentifier> filterTablesByType(String schema, String type)
 	{
 		this.getTables(schema);
 		String schemaToUse = getSchemaToUse(schema);
-		Iterator itr = this.objects.keySet().iterator();
-		SortedSet result = new TreeSet();
-		while (itr.hasNext())
+		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>();
+		for (TableIdentifier tbl : objects.keySet())
 		{
-			TableIdentifier tbl = (TableIdentifier)itr.next();
 			String ttype = tbl.getType();
 			String tSchema = tbl.getSchema();
 			if ( type.equalsIgnoreCase(ttype) &&
@@ -130,16 +128,13 @@ public class DbObjectCache
 		return result;
 	}
 	
-	private Set filterTablesBySchema(String schema)
+	private Set<TableIdentifier> filterTablesBySchema(String schema)
 	{
-		//if (schema == null)	return Collections.unmodifiableSet(this.objects.keySet());
-		Iterator itr = this.objects.keySet().iterator();
-		SortedSet result = new TreeSet();
+		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>();
 		DbMetadata meta = this.dbConnection.getMetadata();
 		String schemaToUse = getSchemaToUse(schema);
-		while (itr.hasNext())
+		for (TableIdentifier tbl : objects.keySet())
 		{
-			TableIdentifier tbl = (TableIdentifier)itr.next();
 			String tSchema = tbl.getSchema();
 			if (schemaToUse == null || meta.ignoreSchema(tSchema) || schemaToUse.equalsIgnoreCase(tSchema))
 			{
@@ -157,7 +152,7 @@ public class DbObjectCache
 	 * Return the columns for the given table
 	 * @return a List with {@link workbench.db.ColumnIdentifier} objects
 	 */
-	public List getColumns(TableIdentifier tbl)
+	public List<ColumnIdentifier> getColumns(TableIdentifier tbl)
 	{
 		String schema = getSchemaToUse(tbl.getSchema());
 
@@ -166,7 +161,7 @@ public class DbObjectCache
 			this.getTables(schema);
 		}
 		
-		List cols = (List)this.objects.get(tbl);
+		List<ColumnIdentifier> cols = this.objects.get(tbl);
 		
 		TableIdentifier tblToUse = null;
 		TableIdentifier t2 = null;
@@ -174,20 +169,19 @@ public class DbObjectCache
 		// if we didn't find an entry with the schema in the table, try
 		// to find a table with that name but without the schema
 		// (this is to support oracle public synonyms/objects)
-		if (tbl.getSchema() != null && cols == null || cols == Collections.EMPTY_LIST)
+		if (tbl.getSchema() != null && cols == null)
 		{
 			if (!this.objects.containsKey(tbl))
 			{
 				t2 = tbl.createCopy();
 				t2.setSchema(null);
 				t2.setType(null);
-				cols = (List)this.objects.get(t2);
+				cols = this.objects.get(t2);
 				if (cols == null && retrieveOraclePublicSynonyms)
 				{
 					// retrieve Oracle PUBLIC synonyms
 					this.getTables("PUBLIC");
-					//t2.setType("SYNONYM");
-					cols = (List)this.objects.get(t2);
+					cols = this.objects.get(t2);
 				}
 			}
 		}
@@ -220,7 +214,7 @@ public class DbObjectCache
 			catch (Throwable e)
 			{
 				LogMgr.logError("DbObjectCache.getColumns", "Error retrieving columns for " + tbl, e);
-				cols = Collections.EMPTY_LIST;
+				cols = null;
 			}
 			this.objects.put(tbl, cols);
 				

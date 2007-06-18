@@ -13,12 +13,9 @@ package workbench.db.report;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
-import workbench.db.DbMetadata;
 import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.storage.DataStore;
 import workbench.util.StrBuffer;
 
 /**
@@ -47,7 +44,7 @@ public class IndexReporter
 
 	public IndexReporter(IndexDefinition index)
 	{
-		indexList  = new LinkedList();
+		indexList  = new LinkedList<IndexDefinition>();
 		indexList.add(index);
 	}	
 	

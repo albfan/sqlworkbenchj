@@ -52,7 +52,7 @@ public class ReportTable
 
 	private TableIdentifier table;
 	private ReportColumn[] columns;
-	private IndexReporter index;
+	private IndexReporter reporter;
 	private String tableComment;
 	private TagWriter tagWriter = new TagWriter();
 	private String schemaNameToUse = null;
@@ -74,18 +74,6 @@ public class ReportTable
 		this.namespace = nspace;
 		tagWriter.setNamespace(this.namespace);
 	}
-	
-//	public ReportTable(TableIdentifier tbl, WbConnection conn)
-//		throws SQLException
-//	{
-//		this(tbl, conn, null, true, true, true, true, false);
-//	}
-//	
-//	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace)
-//		throws SQLException
-//	{
-//		this(tbl, conn, nspace, true, true, true, true, false);
-//	}
 	
 	/**
 	 * Initialize this ReportTable.
@@ -130,8 +118,8 @@ public class ReportTable
 		
 		if (includeIndex)
 		{
-			this.index = new IndexReporter(tbl, conn);
-			this.index.setNamespace(namespace);
+			this.reporter = new IndexReporter(tbl, conn);
+			this.reporter.setNamespace(namespace);
 		}
 		
 		if (includeFk) 
@@ -148,11 +136,6 @@ public class ReportTable
 		{
 			grants = new ReportTableGrants(conn, this.table);
 		}
-		
-//		if (DbMetadata.MVIEW_NAME.equals(table.getType()))
-//		{
-//			this.mviewSource = conn.getMetadata().getViewSource(table);
-//		}
 	}
 
 	/**
@@ -172,8 +155,8 @@ public class ReportTable
 	 */
 	public List<String> getPrimaryKeyColumns()
 	{
-		if (!includePrimaryKey) return Collections.EMPTY_LIST;
-		List result = new ArrayList();
+		if (!includePrimaryKey) return Collections.emptyList();
+		List<String> result = new ArrayList<String>();
 		int count = this.columns.length;
 		for (int i=0; i < count; i++)
 		{
@@ -192,15 +175,15 @@ public class ReportTable
 	public String getPrimaryKeyName()
 	{
 		if (!includePrimaryKey) return null;
-		if (this.index == null) return null;
+		if (this.reporter == null) return null;
 		List pk = this.getPrimaryKeyColumns();
 		if (pk.size() == 0) return null;
-		Collection<IndexDefinition> idxList = this.index.getIndexList();
-		for (IndexDefinition index : idxList)
+		Collection<IndexDefinition> idxList = this.reporter.getIndexList();
+		for (IndexDefinition idx : idxList)
 		{
-			if (index.isPrimaryKeyIndex())
+			if (idx.isPrimaryKeyIndex())
 			{
-				return index.getName();
+				return idx.getName();
 			}
 		}
 		return null;
@@ -280,8 +263,8 @@ public class ReportTable
 
 	public Collection<IndexDefinition> getIndexList()
 	{
-		if (this.index == null) return null;
-		return this.index.getIndexList();
+		if (this.reporter == null) return null;
+		return this.reporter.getIndexList();
 	}
 	
 	public ReportColumn[] getColumns()
@@ -361,7 +344,7 @@ public class ReportTable
 //		{
 //			ReportView.writeSourceTag(tagWriter, line, colindent, mviewSource);
 //		}
-		if (this.index != null) this.index.appendXml(line, colindent);
+		if (this.reporter != null) this.reporter.appendXml(line, colindent);
 		if (this.tableConstraints != null && this.tableConstraints.length() > 0)
 		{
 			tagWriter.appendTag(line, colindent, TAG_TABLE_CONSTRAINT, this.tableConstraints, true);
@@ -385,7 +368,7 @@ public class ReportTable
 	public void done()
 	{
 		this.columns = null;
-		this.index.done();
+		this.reporter.done();
 	}
 
 	public boolean equals(Object other)

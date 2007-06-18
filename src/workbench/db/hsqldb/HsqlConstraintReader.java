@@ -12,8 +12,7 @@
 package workbench.db.hsqldb;
 
 import java.sql.Connection;
-import java.sql.SQLException;
-import workbench.db.*;
+import workbench.db.AbstractConstraintReader;
 
 
 /**

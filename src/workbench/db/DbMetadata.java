@@ -36,7 +36,6 @@ import java.util.Map.Entry;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import workbench.db.TableGrant;
 import workbench.db.derby.DerbyConstraintReader;
 import workbench.db.derby.DerbySynonymReader;
 import workbench.db.firebird.FirebirdProcedureReader;
@@ -134,7 +133,7 @@ public class DbMetadata
 
 	private String[] tableTypesTable; 
 	private String[] tableTypesSelectable;
-	private Set objectsWithData = null;
+	private Set<String> objectsWithData = null;
 	private List schemasToIgnore;
 	private List catalogsToIgnore;
 	
@@ -454,7 +453,7 @@ public class DbMetadata
 			}
 			else
 			{
-				List l = StringUtil.stringToList(types.toLowerCase(), ",", true, true);
+				List<String> l = StringUtil.stringToList(types.toLowerCase(), ",", true, true);
 				objectsWithData.addAll(l);
 			}
 			
@@ -654,9 +653,9 @@ public class DbMetadata
 		}
 	}
 
-	public Set getDbFunctions()
+	public Set<String> getDbFunctions()
 	{
-		Set dbFunctions = new HashSet();
+		Set<String> dbFunctions = new HashSet<String>();
 		try
 		{
 			String funcs = this.metaData.getSystemFunctions();
@@ -684,10 +683,10 @@ public class DbMetadata
 		return dbFunctions;
 	}
 
-	private void addStringList(Set target, String list)
+	private void addStringList(Set<String> target, String list)
 	{
 		if (list == null) return;
-		List tokens = StringUtil.stringToList(list, ",", true, true, false);
+		List<String> tokens = StringUtil.stringToList(list, ",", true, true, false);
 		Iterator itr = tokens.iterator();
 		while (itr.hasNext())
 		{
@@ -1282,7 +1281,7 @@ public class DbMetadata
 			// and return nothing when passing null for the types
 			// so we retrieve all possible types, and pass them 
 			// as this is the meaning of "null" for the types parameter
-			Collection typeList = this.getTableTypes();
+			Collection<String> typeList = this.getTableTypes();
 			types = StringUtil.toArray(typeList);
 		}
 		
@@ -1371,13 +1370,12 @@ public class DbMetadata
 				"true".equals(Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", "true"))
 				&& !sequencesReturned)
 		{
-			List seq = this.sequenceReader.getSequenceList(aSchema);
-			Iterator itr = seq.iterator();
-			while (itr.hasNext())
+			List<String> seq = this.sequenceReader.getSequenceList(aSchema);
+			for (String seqName : seq)
 			{
 				int row = result.addRow();
 
-				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, (String)itr.next());
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, seqName);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, "SEQUENCE");
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, null);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, aSchema);
@@ -1389,13 +1387,12 @@ public class DbMetadata
 		if (retrieveSyns && typeIncluded("SYNONYM", types) && !synRetrieved)
 		{
 			LogMgr.logDebug("DbMetadata.getTables()", "Retrieving synonyms...");
-			List syns = this.synonymReader.getSynonymList(this.dbConnection.getSqlConnection(), aSchema);
-			int count = syns.size();
-			for (int i=0; i < count; i++)
+			List<String> syns = this.synonymReader.getSynonymList(this.dbConnection.getSqlConnection(), aSchema);
+			for (String synName : syns)
 			{
 				int row = result.addRow();
 
-				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, (String)syns.get(i));
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, synName);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, "SYNONYM");
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, null);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, aSchema);
@@ -1632,12 +1629,12 @@ public class DbMetadata
 	{
 		assert(procedureReader != null);
 		
-		List<ProcedureDefinition> result = new LinkedList();
+		List<ProcedureDefinition> result = new LinkedList<ProcedureDefinition>();
 		DataStore procs = this.procedureReader.getProcedures(aCatalog, aSchema);
 		if (procs == null || procs.getRowCount() == 0) return result;
 		procs.sortByColumn(ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, true);
 		int count = procs.getRowCount();
-		Set oraPackages = new HashSet();
+		Set<String> oraPackages = new HashSet<String>();
 		
 		for (int i = 0; i < count; i++)
 		{
@@ -1650,7 +1647,7 @@ public class DbMetadata
 			{
 				// The package name for Oracle is reported in the catalog column.
 				// each function/procedure of the package is listed separately,
-				// but we only wnat to create one ProcedureDefinition for the whole package
+				// but we only want to create one ProcedureDefinition for the whole package
 				if (!oraPackages.contains(cat))
 				{
 					def = ProcedureDefinition.createOraclePackage(schema, cat);
@@ -1939,7 +1936,7 @@ public class DbMetadata
 			}
 		}
 
-		ArrayList keys = new ArrayList();
+		ArrayList<String> keys = new ArrayList<String>();
 		if (this.dbSettings.supportsGetPrimaryKeys())
 		{
 			ResultSet keysRs = null;
@@ -2632,9 +2629,9 @@ public class DbMetadata
 	/** Returns the list of schemas as returned by DatabaseMetadata.getSchemas()
 	 * @return List
 	 */
-	public List getSchemas()
+	public List<String> getSchemas()
 	{
-		ArrayList result = new ArrayList();
+		ArrayList<String> result = new ArrayList<String>();
 		ResultSet rs = null;
 		try
 		{
@@ -2671,9 +2668,9 @@ public class DbMetadata
 		return (isPostgres && Settings.getInstance().getBoolProperty("workbench.db.postgres.hideindex", true));
 	}
 
-	public Collection getTableTypes()
+	public Collection<String> getTableTypes()
 	{
-		TreeSet result = new TreeSet();
+		TreeSet<String> result = new TreeSet<String>();
 		ResultSet rs = null;
 		boolean hideIndexes = hideIndexes();
 
@@ -2693,7 +2690,7 @@ public class DbMetadata
 				result.add(type);
 			}
 			String additional = Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".additional.tabletypes",null);
-			List addTypes = StringUtil.stringToList(additional, ",", true, true);
+			List<String> addTypes = StringUtil.stringToList(additional, ",", true, true);
 			result.addAll(addTypes);
 		}
 		catch (Exception e)
@@ -3123,13 +3120,12 @@ public class DbMetadata
 		
 		StringBuilder result = new StringBuilder(250);
 
-		Map columnConstraints = this.getColumnConstraints(table);
+		Map<String, String> columnConstraints = this.getColumnConstraints(table);
 
 		result.append(generateCreateObject(includeDrop, "TABLE", (tableNameToUse == null ? table.getTableName() : tableNameToUse)));
 		result.append("\n(\n");
 
-		//StringBuilder pkCols = new StringBuilder(1000);
-		List pkCols = new LinkedList();
+		List<String> pkCols = new LinkedList<String>();
 		int maxColLength = 0;
 		int maxTypeLength = 0;
 
@@ -3357,9 +3353,9 @@ public class DbMetadata
 	 * The value is the SQL source for the column. The actual retrieval is delegated to a {@link ConstraintReader}
 	 * @see ConstraintReader#getColumnConstraints(java.sql.Connection, TableIdentifier)
 	 */
-	public Map getColumnConstraints(TableIdentifier table)
+	public Map<String, String> getColumnConstraints(TableIdentifier table)
 	{
-		Map columnConstraints = Collections.EMPTY_MAP;
+		Map<String, String> columnConstraints = Collections.emptyMap();
 		if (this.constraintReader != null)
 		{
 			try
@@ -3369,7 +3365,7 @@ public class DbMetadata
 			catch (Exception e)
 			{
 				if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
-				columnConstraints = Collections.EMPTY_MAP;
+				columnConstraints = Collections.emptyMap();
 			}
 		}
 		return columnConstraints;
@@ -3503,12 +3499,12 @@ public class DbMetadata
 		// to the hashtable. The entry will be a HashSet containing the column names
 		// this ensures that each column will only be used once per fk definition
 		// (the postgres driver returns some columns twice!)
-		HashMap<String, List> fkCols = new HashMap<String, List>();
+		HashMap<String, List<String>> fkCols = new HashMap<String, List<String>>();
 
 		// this hashmap contains the columns of the referenced table
-		HashMap<String, List> fkTarget = new HashMap<String, List>();
+		HashMap<String, List<String>> fkTarget = new HashMap<String, List<String>>();
 
-		HashMap<String, String> fks = new HashMap();
+		HashMap<String, String> fks = new HashMap<String, String>();
 		HashMap<String, String> updateRules = new HashMap<String, String>();
 		HashMap<String, String> deleteRules = new HashMap<String, String>();
 		HashMap<String, String> deferrable = new HashMap<String, String>();
@@ -3530,10 +3526,10 @@ public class DbMetadata
 			deleteRule = aFkDef.getValueAsString(i, COLUMN_IDX_FK_DEF_DELETE_RULE);
 			deferRule = aFkDef.getValueAsString(i, COLUMN_IDX_FK_DEF_DEFERRABLE);
 			
-			List colList = fkCols.get(fkname);
+			List<String> colList = fkCols.get(fkname);
 			if (colList == null)
 			{
-				colList = new LinkedList();
+				colList = new LinkedList<String>();
 				fkCols.put(fkname, colList);
 			}
 			colList.add(col);
@@ -3544,19 +3540,19 @@ public class DbMetadata
 			colList = fkTarget.get(fkname);
 			if (colList == null)
 			{
-				colList = new LinkedList();
+				colList = new LinkedList<String>();
 				fkTarget.put(fkname, colList);
 			}
 			colList.add(fkCol);
 		}
 
 		// now put the real statements together
-		Iterator names = fkCols.entrySet().iterator();
+		Iterator<Map.Entry<String, List<String>>> names = fkCols.entrySet().iterator();
 		while (names.hasNext())
 		{
-			Map.Entry<String, List> mapentry = (Map.Entry)names.next();
+			Map.Entry<String, List<String>> mapentry = names.next();
 			fkname = mapentry.getKey();
-			List colList = mapentry.getValue();
+			List<String> colList = mapentry.getValue();
 
 			String stmt = fks.get(fkname);
 			if (stmt == null)
@@ -3588,7 +3584,7 @@ public class DbMetadata
 				// remove the placeholder completely
 				if ("restrict".equalsIgnoreCase(rule))
 				{
-					stmt = metaSqlMgr.removePlaceholder(stmt, MetaDataSqlManager.FK_DELETE_RULE, true);;
+					stmt = metaSqlMgr.removePlaceholder(stmt, MetaDataSqlManager.FK_DELETE_RULE, true);
 				}
 				else
 				{
@@ -3603,7 +3599,7 @@ public class DbMetadata
 			rule = getDeferrableVerb(deferrable.get(fkname));
 			if (StringUtil.isEmptyString(rule))
 			{
-				stmt = metaSqlMgr.removePlaceholder(stmt, MetaDataSqlManager.DEFERRABLE, true);;
+				stmt = metaSqlMgr.removePlaceholder(stmt, MetaDataSqlManager.DEFERRABLE, true);
 			}
 			else
 			{

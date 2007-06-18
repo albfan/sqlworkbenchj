@@ -65,7 +65,7 @@ public class SchemaDiff
 	
 	private WbConnection sourceDb;
 	private WbConnection targetDb;
-	private List objectsToCompare;
+	private List<Object> objectsToCompare;
 	private List<TableIdentifier> tablesToDelete;
 	private List<ProcedureDefinition> procsToDelete;
 	private List<TableIdentifier> viewsToDelete;
@@ -194,8 +194,8 @@ public class SchemaDiff
 	public void setTableNames(List<String> referenceList, List<String> targetList)
 		throws SQLException
 	{
-		ArrayList<TableIdentifier> reference = new ArrayList(referenceList.size());
-		ArrayList<TableIdentifier> target = new ArrayList(targetList.size());
+		ArrayList<TableIdentifier> reference = new ArrayList<TableIdentifier>(referenceList.size());
+		ArrayList<TableIdentifier> target = new ArrayList<TableIdentifier>(targetList.size());
 		
 		String ttype = this.sourceDb.getMetadata().getTableTypeName();
 		for (String tname : referenceList)
@@ -234,7 +234,7 @@ public class SchemaDiff
 		if (targetList == null) throw new NullPointerException("Target tables may not be null");
 		if (referenceList.size() != targetList.size()) throw new IllegalArgumentException("Number of source and target tables have to match");
 		int count = referenceList.size();
-		this.objectsToCompare = new ArrayList(count);
+		this.objectsToCompare<Object> = new ArrayList<Object>(count);
 		
 		if (this.monitor != null)
 		{
@@ -348,8 +348,8 @@ public class SchemaDiff
 		{
 			types = new String[] { this.sourceDb.getMetadata().getTableTypeName() };
 		}
-		List refTables = sourceDb.getMetadata().getTableList(this.referenceSchema, types);
-		List target = targetDb.getMetadata().getTableList(this.targetSchema, types);
+		List<TableIdentifier> refTables = sourceDb.getMetadata().getTableList(this.referenceSchema, types);
+		List<TableIdentifier> target = targetDb.getMetadata().getTableList(this.targetSchema, types);
 		
 		processTableList(refTables, target);
 		
@@ -365,9 +365,9 @@ public class SchemaDiff
 		throws SQLException
 	{
 		int count = refTables.size();
-		HashSet refTableNames = new HashSet();
+		HashSet<String> refTableNames = new HashSet<String>();
 		
-		this.objectsToCompare = new ArrayList(count);
+		this.objectsToCompare = new ArrayList<Object>(count);
 		DbMetadata targetMeta = this.targetDb.getMetadata();
 
 		if (this.monitor != null)
@@ -451,8 +451,8 @@ public class SchemaDiff
 	
 	private void processProcedureList(List<ProcedureDefinition> refProcs, List<ProcedureDefinition> targetProcs)
 	{
-		HashSet<String> refProcNames = new HashSet();
-		this.procsToDelete = new ArrayList();
+		HashSet<String> refProcNames = new HashSet<String>();
+		this.procsToDelete = new ArrayList<ProcedureDefinition>();
 		
 		DbMetadata targetMeta = this.targetDb.getMetadata();
 		
@@ -581,7 +581,7 @@ public class SchemaDiff
 		writeTag(out, null, "schema-diff", true);
 		writeDiffInfo(out);
 		int count = this.objectsToCompare.size();
-		List viewDiffs = new ArrayList();
+		List<ViewDiff> viewDiffs = new ArrayList<ViewDiff>();
 		String tableType = sourceDb.getMetadata().getTableTypeName();
 		// First we have to process the tables
 		for (int i=0; i < count; i++)
@@ -843,7 +843,7 @@ public class SchemaDiff
 	private void writeTag(Writer out, StrBuffer indent, String tag, boolean isOpeningTag, String attr, String attrValue)
 		throws IOException
 	{
-		if (indent != null) indent.writeTo(out);;
+		if (indent != null) indent.writeTo(out);
 		if (isOpeningTag)
 		{
 			out.write("<");
@@ -872,7 +872,7 @@ public class SchemaDiff
 	private void writeTagValue(Writer out, StrBuffer indent, String tag, String value)
 		throws IOException
 	{
-		if (indent != null) indent.writeTo(out);;
+		if (indent != null) indent.writeTo(out);
 		out.write("<");
 		if (this.namespace != null)
 		{

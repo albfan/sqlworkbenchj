@@ -39,7 +39,7 @@ public class DbSettings
 	private boolean allowsMultipleGetUpdateCounts = true;
 	private boolean supportsBatchedStatements = false;
 	
-	private Map indexTypeMapping;
+	private Map<Integer, String> indexTypeMapping;
 	public static final String IDX_TYPE_NORMAL = "NORMAL";
 
 	public DbSettings(String id, String productName)
@@ -180,7 +180,7 @@ public class DbSettings
 	{
 		if (indexTypeMapping == null)
 		{
-			this.indexTypeMapping = new HashMap();
+			this.indexTypeMapping = new HashMap<Integer, String>();
 			String map = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".indextypes", null);
 			if (map != null)
 			{
@@ -197,7 +197,7 @@ public class DbSettings
 				}
 			}
 		}
-		String dbmsType = (String)this.indexTypeMapping.get(new Integer(type));
+		String dbmsType = this.indexTypeMapping.get(new Integer(type));
 		if (dbmsType == null) 
 		{
 			if (Settings.getInstance().getDebugMetadataSql())
@@ -217,19 +217,6 @@ public class DbSettings
 		return !l.contains(this.dbId);
 	}	
 
-	/**
-	 * Returns true if unquoted object names are case sensitive.
-	 * Usually this is not the case, but SQL Server can be setup
-	 * that way. This is used when generating SQL Statements. 
-	 * 
-	 * @return true if mytable is different to MYTABLE
-	 */
-	public boolean objectNamesAreCoseSensitive()
-	{
-		boolean caseSensitive = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".case.sensitive.unquoted", false);
-		return caseSensitive;
-	}
-	
 	public IdentifierCase getSchemaNameCase()
 	{
 		// This allows overriding the default value returned by the JDBC driver

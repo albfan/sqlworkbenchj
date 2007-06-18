@@ -32,15 +32,15 @@ public class IndexDiff
 	public static final String TAG_ADD_INDEX = "add-index";
 	public static final String TAG_DROP_INDEX = "drop-index";
 	
-	private Collection<IndexDefinition> reference;
-	private Collection<IndexDefinition> target;
+	private Collection<IndexDefinition> reference = Collections.emptyList();
+	private Collection<IndexDefinition> target = Collections.emptyList();
 	private TagWriter writer;
 	private StrBuffer indent;
 	
 	public IndexDiff(Collection<IndexDefinition> ref, Collection<IndexDefinition> targ)
 	{
-		this.reference = (ref == null ? Collections.EMPTY_LIST : ref);
-		this.target = (targ == null ? Collections.EMPTY_LIST : targ);
+		if (ref != null) this.reference = ref;
+		if (targ != null) this.target = targ;
 	}
 	
 	public void setTagWriter(TagWriter w) { this.writer = w; }

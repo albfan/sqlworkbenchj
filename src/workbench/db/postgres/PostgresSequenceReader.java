@@ -63,7 +63,7 @@ public class PostgresSequenceReader
 			rs = stmt.executeQuery(sql);
 			if (rs.next())
 			{
-				String name = rs.getString(1);;
+				String name = rs.getString(1);
 				String max = rs.getString(2);
 				long min = rs.getLong(3);
 				long inc = rs.getLong(4);
@@ -115,10 +115,10 @@ public class PostgresSequenceReader
 		return result;
 	}
 
-	public List getSequenceList(String owner)
+	public List<String> getSequenceList(String owner)
 	{
 		// Already returned by JDBC driver
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 	
 	public DataStore getSequenceDefinition(String owner, String sequence)

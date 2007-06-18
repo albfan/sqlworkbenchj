@@ -16,7 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import workbench.db.SequenceReader;
 import workbench.db.SynonymReader;
@@ -44,11 +44,11 @@ public class IngresMetadata
 	/**
 	 * 	Get a list of synonyms for the given owner
 	 */
-	public List getSynonymList(Connection conn, String owner)
+	public List<String> getSynonymList(Connection conn, String owner)
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		ArrayList result = new ArrayList(100);
+		List<String> result = new LinkedList<String>();
 
 		StringBuilder sql = new StringBuilder(200);
 		sql.append("SELECT synonym_name FROM iisynonyms ");
@@ -153,11 +153,11 @@ public class IngresMetadata
 		return result;
 	}
 
-	public List getSequenceList(String owner)
+	public List<String> getSequenceList(String owner)
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		ArrayList result = new ArrayList(100);
+		List<String> result = new LinkedList<String>();
 
 		StringBuilder sql = new StringBuilder(200);
 		sql.append("SELECT seq_name FROM iisequences ");

@@ -22,7 +22,7 @@ import workbench.util.StringUtil;
  * @author  support@sql-workbench.net
  */
 public class ColumnIdentifier
-	implements Comparable
+	implements Comparable<ColumnIdentifier>
 {
 	public static final int NO_TYPE = Integer.MIN_VALUE;
 	private String name;
@@ -404,16 +404,10 @@ public class ColumnIdentifier
 		this.isUpdateable = isUpdateable;
 	}
 
-	public int compareTo(Object other)
+	public int compareTo(ColumnIdentifier other)
 	{
 		if (other == null) return 1;
 		if (this.name == null) return -1;
-		if (other instanceof ColumnIdentifier)
-		{
-			ColumnIdentifier c = (ColumnIdentifier)other;
-			
-			return StringUtil.trimQuotes(name).compareToIgnoreCase(StringUtil.trimQuotes(c.name));
-		}
-		return 1;
+		return StringUtil.trimQuotes(name).compareToIgnoreCase(StringUtil.trimQuotes(other.name));
 	}
 }

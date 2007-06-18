@@ -40,10 +40,10 @@ public class Db2SynonymReader
 	 * 
 	 * @return an empty list
 	 */
-	public List getSynonymList(Connection con, String owner) 
+	public List<String> getSynonymList(Connection con, String owner) 
 		throws SQLException
 	{
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 	public TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)

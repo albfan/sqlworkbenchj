@@ -20,7 +20,7 @@ package workbench.interfaces;
  * method to close the file handles, which would not be offered by 
  * the CharSequence interface.
  * 
- * @author tkellerer
+ * @author support@sql-workbench.net
  */
 public interface CharacterSequence
 {

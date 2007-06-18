@@ -14,7 +14,6 @@ package workbench.db.exporter;
 import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.storage.ResultInfo;
 
 /**
  *

@@ -331,13 +331,13 @@ public class XmlDataFileParser
 		}
 		catch (IOException e)
 		{
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 		catch (SAXException e)
 		{
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
-		ArrayList result = new ArrayList(this.columns.length);
+		ArrayList<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(this.columns.length);
 		for (int i=0; i < this.columns.length; i++)
 		{
 			result.add(this.columns[i]);

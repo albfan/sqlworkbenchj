@@ -20,8 +20,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import workbench.log.LogMgr;
-import workbench.resource.Settings;
-import workbench.util.StringUtil;
 
 /**
  *
@@ -57,14 +55,12 @@ public class TableCreator
 	
 	private void sortColumns()
 	{
-		Comparator c = new Comparator()
+		Comparator<ColumnIdentifier> c = new Comparator<ColumnIdentifier>()
 		{
-			public int compare(Object o1, Object o2)
+			public int compare(ColumnIdentifier o1, ColumnIdentifier o2)
 			{
-				ColumnIdentifier c1 = (ColumnIdentifier)o1;
-				ColumnIdentifier c2 = (ColumnIdentifier)o2;
-				int pos1 = c1.getPosition();
-				int pos2 = c2.getPosition();
+				int pos1 = o1.getPosition();
+				int pos2 = o2.getPosition();
 				
 				if (pos1 < pos2) return -1;
 				else if (pos1 > pos2) return 1;
@@ -85,7 +81,7 @@ public class TableCreator
 		sql.append(" (");
 		int count = this.columnDefinition.size();
 		int numCols = 0;
-		List pkCols = new ArrayList();
+		List<String> pkCols = new ArrayList<String>();
 		
 		for (ColumnIdentifier col : columnDefinition)
 		{

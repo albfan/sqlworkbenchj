@@ -11,7 +11,6 @@
  */
 package workbench.db.exporter;
 
-import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;

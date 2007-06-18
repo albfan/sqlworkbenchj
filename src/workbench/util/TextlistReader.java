@@ -25,7 +25,7 @@ import workbench.log.LogMgr;
  */
 public class TextlistReader
 {
-	private List values;
+	private List<String> values;
 	
 	/**
 	 * Reads each line of the passed input stream into 
@@ -36,7 +36,7 @@ public class TextlistReader
 	{
 		try
 		{
-			values = new LinkedList();
+			values = new LinkedList<String>();
 			BufferedReader r = new BufferedReader(new InputStreamReader(in));
 			String line = r.readLine();
 			while (line != null)
@@ -56,7 +56,7 @@ public class TextlistReader
 		}
 	}
 	
-	public Collection getValues()
+	public Collection<String> getValues()
 	{
 		return values;
 	}

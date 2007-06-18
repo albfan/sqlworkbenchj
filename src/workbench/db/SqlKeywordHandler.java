@@ -31,7 +31,7 @@ import workbench.util.TextlistReader;
  */
 public class SqlKeywordHandler
 {
-	private Set keywords;
+	private Set<String> keywords;
 	
 	public SqlKeywordHandler(Connection con)
 	{
@@ -55,19 +55,19 @@ public class SqlKeywordHandler
 	 */
 	private void readKeywords(Connection con, String dbId)
 	{
-		this.keywords = new TreeSet();
+		this.keywords = new TreeSet<String>();
 		if (dbId != null)
 		{
 			try
 			{
 				String keys = con.getMetaData().getSQLKeywords();
-				List keyList = StringUtil.stringToList(keys, ",");
+				List<String> keyList = StringUtil.stringToList(keys, ",");
 				this.keywords.addAll(keyList);
 
 				keys = Settings.getInstance().getProperty("workbench.db. + " + dbId + ".syntax.keywords", null);
 				if (keys != null)
 				{
-					List l = StringUtil.stringToList(keys.toUpperCase(), ",");
+					List<String> l = StringUtil.stringToList(keys.toUpperCase(), ",");
 					this.keywords.addAll(l);
 				}
 			}
@@ -84,7 +84,7 @@ public class SqlKeywordHandler
 			
 			// TextlistReader will close the input stream
 			TextlistReader reader = new TextlistReader(in);
-			Collection values = reader.getValues();
+			Collection<String> values = reader.getValues();
 			if (values != null) this.keywords.addAll(values);
 			
 			// When running tests, the WbManager is not necessarily available
@@ -96,7 +96,7 @@ public class SqlKeywordHandler
 				if (f.exists()) 
 				{
 					LogMgr.logDebug("SqlKeywordHandler.readKeywords()", "Reading addtional keywords from " + f.getCanonicalPath());
-					in = new FileInputStream(f);;
+					in = new FileInputStream(f);
 					reader = new TextlistReader(in);
 					values = reader.getValues();
 					if (values != null) this.keywords.addAll(values);

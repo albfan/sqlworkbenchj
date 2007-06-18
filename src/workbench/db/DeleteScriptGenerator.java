@@ -98,18 +98,17 @@ public class DeleteScriptGenerator
 	
 	private String createScriptForCurrentObject()
 	{
-		ArrayList parents = new ArrayList();
+		ArrayList<DependencyNode> parents = new ArrayList<DependencyNode>();
 		this.dependency.readDependencyTree(true);
-		List leafs = this.dependency.getLeafs();
+		List<DependencyNode> leafs = this.dependency.getLeafs();
 		StringBuilder sql = new StringBuilder(2000);
-		DependencyNode p, node;
-		for (int i=0; i < leafs.size(); i++)
+		
+		for (DependencyNode node : leafs)
 		{
-			node = (DependencyNode)leafs.get(i);
 			if (this.visitedTables.contains(node)) continue;
 			this.addDeleteStatement(sql, node);
 			this.visitedTables.add(node);
-			p = node.getParent();
+			DependencyNode p = node.getParent();
 			while (p != null)
 			{
 				if (!isMasterTable(p) && !parents.contains(p) && !leafs.contains(p))
@@ -121,12 +120,11 @@ public class DeleteScriptGenerator
 			sql.append("\n\n");
 		}
 
-		for (int i=0; i < parents.size(); i++)
+		for (DependencyNode pnode : parents)
 		{
-			p = (DependencyNode)parents.get(i);
-			if (this.visitedTables.contains(p)) continue;
-			this.addDeleteStatement(sql, p);
-			this.visitedTables.add(p);
+			if (this.visitedTables.contains(pnode)) continue;
+			this.addDeleteStatement(sql, pnode);
+			this.visitedTables.add(pnode);
 			sql.append("\n");
 		}
 

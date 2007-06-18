@@ -19,18 +19,16 @@ import workbench.util.StringUtil;
  * @author support@sql-workbench.net
  */
 public class TableNameComparator
-	implements Comparator
+	implements Comparator<TableIdentifier>
 {
-	private Comparator stringComparator = StringUtil.getCaseInsensitiveComparator();
+	private Comparator<String> stringComparator = StringUtil.getCaseInsensitiveComparator();
 	
 	public TableNameComparator()
 	{
 	}
 
-	public int compare(Object o1, Object o2)
+	public int compare(TableIdentifier t1, TableIdentifier t2)
 	{
-		TableIdentifier t1 = (TableIdentifier)o1;
-		TableIdentifier t2 = (TableIdentifier)o2;
 		return stringComparator.compare(t1.getTableName(), t2.getTableName());
 	}
 	

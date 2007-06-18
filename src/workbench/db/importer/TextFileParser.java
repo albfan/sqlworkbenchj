@@ -87,7 +87,7 @@ public class TextFileParser
 	private String sourceDir;
 	private String extensionToUse;
 	private JobErrorHandler errorHandler;
-	private List pendingImportColumns;
+	private List<ColumnIdentifier> pendingImportColumns;
 	private ValueConverter converter = new ValueConverter();
 	private MessageBuffer messages = new MessageBuffer();
 	boolean hasErrors = false;
@@ -257,12 +257,12 @@ public class TextFileParser
 	public void setImportColumnNames(List<String> columnList)
 		throws IllegalArgumentException
 	{
-		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>(columnList.size());
+		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(columnList.size());
 		for (String col : columnList)
 		{
-			columns.add(new ColumnIdentifier(col));
+			cols.add(new ColumnIdentifier(col));
 		}
-		setImportColumns(columns);
+		setImportColumns(cols);
 	}
 	
 	/**
@@ -535,7 +535,7 @@ public class TextFileParser
 		int count = files.length;
 		if (this.extensionToUse == null) this.extensionToUse = ".txt";
 
-		List toProcess = new LinkedList();
+		List<File> toProcess = new LinkedList<File>();
 		for (int i=0; i < count; i++)
 		{
 			if (files[i].getName().endsWith(this.extensionToUse) )
@@ -546,14 +546,13 @@ public class TextFileParser
 		count = toProcess.size();
 		this.receiver.setTableCount(count);
 		int currentFile=0;
-		Iterator itr = toProcess.iterator();
-		while (itr.hasNext())
+		for (File f : toProcess)
 		{
 			if (this.cancelImport)
 			{
 				break;
 			}
-			WbFile theFile = new WbFile((File)itr.next());
+			WbFile theFile = new WbFile(f);
 			try
 			{
 				currentFile++;
@@ -805,7 +804,7 @@ public class TextFileParser
 								{
 									if (this.decodeUnicode)
 									{
-										value = StringUtil.decodeUnicode((String)value);
+										value = StringUtil.decodeUnicode(value);
 									}
 									if (this.emptyStringIsNull && StringUtil.isEmptyString(value))
 									{
@@ -910,7 +909,7 @@ public class TextFileParser
 	private void readColumns(String headerLine)
 		throws Exception
 	{
-		List cols = new ArrayList();
+		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
 		WbStringTokenizer tok = new WbStringTokenizer(delimiter.charAt(0), this.quoteChar, false);
 		tok.setDelimiterNeedsWhitspace(false);
 		tok.setSourceString(headerLine);
@@ -999,7 +998,7 @@ public class TextFileParser
 	public void setupFileColumns()
 		throws SQLException, IOException
 	{
-		List cols = null;
+		List<ColumnIdentifier> cols = null;
 		
 		checkTargetTable();
 		

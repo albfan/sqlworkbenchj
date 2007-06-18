@@ -132,7 +132,7 @@ public class DataExporter
 	private String tableName;
 	private String sqlTable;
 	private String encoding;
-	private List columnsToExport;
+	private List<ColumnIdentifier> columnsToExport;
 
 	private boolean clobAsFile = false;
 	private String delimiter = "\t";
@@ -406,12 +406,12 @@ public class DataExporter
 	 * @param columns the columns to be exported
 	 * @see #startExport(workbench.storage.DataStore)
 	 */
-	public void setColumnsToExport(List columns)
+	public void setColumnsToExport(List<ColumnIdentifier> columns)
 	{
 		this.columnsToExport = columns;
 	}
 
-	public List getColumnsToExport()
+	public List<ColumnIdentifier> getColumnsToExport()
 	{
 		return this.columnsToExport;
 	}
@@ -793,7 +793,7 @@ public class DataExporter
 		
 		for (int i=0; i < count; i++)
 		{
-			this.currentJob = (ExportJobEntry)this.jobQueue.get(i);
+			this.currentJob = this.jobQueue.get(i);
 			
 			this.setOutputFilename(this.currentJob.getOutputFile());
 			if (this.progressPanel != null)

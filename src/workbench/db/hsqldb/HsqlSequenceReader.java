@@ -15,7 +15,7 @@ import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import workbench.db.SequenceReader;
 import workbench.log.LogMgr;
@@ -68,11 +68,11 @@ public class HsqlSequenceReader
 		return result;	
 	}
 
-	public List getSequenceList(String owner)
+	public List<String> getSequenceList(String owner)
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		ArrayList result = new ArrayList(100);
+		List<String> result = new LinkedList<String>();
 
 		StringBuilder query = new StringBuilder(100);
 		query.append("SELECT sequence_name FROM ");

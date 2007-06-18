@@ -81,8 +81,8 @@ public class WbManager
 	implements FontChangedListener, Runnable
 {
 	private static WbManager wb;
-	private List<MainWindow> mainWindows = Collections.synchronizedList(new LinkedList());
-	private List<ToolWindow> toolWindows = new LinkedList();
+	private List<MainWindow> mainWindows = Collections.synchronizedList(new LinkedList<MainWindow>());
+	private List<ToolWindow> toolWindows = new LinkedList<ToolWindow>();
 	private WbCipher desCipher = null;
 	private boolean batchMode = false;
 	private boolean writeSettings = true;
@@ -198,7 +198,7 @@ public class WbManager
 		if (this.mainWindows == null) return null;
 		if (this.mainWindows.size() == 1)
 		{
-			return (MainWindow)this.mainWindows.get(0);
+			return this.mainWindows.get(0);
 		}
 		for (MainWindow w : mainWindows)
 		{
@@ -235,7 +235,6 @@ public class WbManager
 
 	private void closeToolWindows()
 	{
-		int count = this.toolWindows.size();
 		for (ToolWindow w : toolWindows)
 		{
 			w.closeWindow();
@@ -297,8 +296,8 @@ public class WbManager
 			UIManager.setLookAndFeel(lnf);
 			try
 			{
-				String cls = lnf.getClass().getName();
-				if (cls.indexOf("com.sun.java.swing.plaf.windows") > -1)
+				String clsname = lnf.getClass().getName();
+				if (clsname.indexOf("com.sun.java.swing.plaf.windows") > -1)
 				{
 					isWindowsLNF = true;
 					String osVersion = System.getProperty("os.version", "1.0");
@@ -309,7 +308,7 @@ public class WbManager
 					}
 					else
 					{
-						isWindowsClassic = (cls.indexOf("WindowsClassicLookAndFeel") > -1);
+						isWindowsClassic = (clsname.indexOf("WindowsClassicLookAndFeel") > -1);
 						if (!isWindowsClassic)
 						{
 							Toolkit toolkit = Toolkit.getDefaultToolkit();

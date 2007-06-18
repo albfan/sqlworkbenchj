@@ -20,25 +20,27 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.util.ConverterException;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
 
 /**
- * A class to parse a column size limit definition for the WbImport command
+ * A class to parse column constants for the DataImporter
+ *
  * @author support@sql-workbench.net
  */
 public class ConstantColumnValues
 {
-	// I'm using two arraylists to ensure that the 
+	// I'm using two arraylists to ensure that the
 	// order of the columns is always maintained.
 	private List<ColumnIdentifier> columns;
 	private List<Object> data;
-
+	
 	/**
 	 * Parses a parameter value for column value definitions.
 	 * e.g. description=something,firstname=arthur
 	 * The values from the Commandline are converted to the correct
-	 * datatype in the targettable. 
+	 * datatype in the targettable.
 	 * @throws SQLException if the target table was not found
 	 * @throws ConverterException if a value could not be converted to the target data type
 	 */
@@ -50,7 +52,7 @@ public class ConstantColumnValues
 		
 		init(parameterValue, tableColumns, converter);
 	}
-
+	
 	/**
 	 * For Unit-Testing without a Database Connection
 	 */
@@ -65,7 +67,7 @@ public class ConstantColumnValues
 		throws SQLException, ConverterException
 	{
 		if (parameterValue == null) return;
-
+		
 		List<String> entries = StringUtil.stringToList(parameterValue, ",", true, true, false);
 		if (entries.size() == 0) return;
 		
@@ -90,7 +92,14 @@ public class ConstantColumnValues
 						}
 						else
 						{
-							data.add(converter.convertValue(parts[1], col.getDataType()));
+							if (SqlUtil.isCharacterType(col.getDataType()))
+							{
+								if (value.charAt(0) == '\'' && value.charAt(value.length() - 1) == '\'')
+								{
+									value = value.substring(1, value.length() - 1);
+								}
+							}
+							data.add(converter.convertValue(value, col.getDataType()));
 						}
 					}
 					else
@@ -107,7 +116,7 @@ public class ConstantColumnValues
 			}
 		}
 	}
-
+	
 	private ColumnIdentifier findColumn(List<ColumnIdentifier> columns, String name)
 	{
 		for (ColumnIdentifier col : columns)
@@ -116,24 +125,24 @@ public class ConstantColumnValues
 		}
 		return null;
 	}
-
+	
 	public String getFunctionLiteral(int index)
 	{
 		if (!this.isFunctionCall(index)) return null;
-		String data = (String)this.getValue(index);
+		String value = (String)this.getValue(index);
 		
 		// The function call is enclosed in ${...}
-		return data.substring(2, data.length() - 1);
+		return value.substring(2, value.length() - 1);
 	}
 	
 	public boolean isFunctionCall(int index)
 	{
-		Object data = this.getValue(index);
-		if (data == null) return false;
+		Object value = this.getValue(index);
+		if (value == null) return false;
 		
-		if (data instanceof String)
+		if (value instanceof String)
 		{
-			String f = (String)data;
+			String f = (String)value;
 			return f.startsWith("${") && f.endsWith("}");
 		}
 		return false;
@@ -168,24 +177,24 @@ public class ConstantColumnValues
 	}
 	
 	public void setParameter(PreparedStatement pstmt, int statementIndex, int columnIndex)
-	 throws SQLException	
+		throws SQLException
 	{
 		ColumnIdentifier col = getColumn(columnIndex);
-		Object data = getValue(columnIndex);
+		Object value = getValue(columnIndex);
 		
 		// If the column value is a function call, this will not
 		// be used in a prepared statement. It is expected that the caller
-		// (that prepared the statement) inserted the literal value of the 
+		// (that prepared the statement) inserted the literal value of the
 		// function call into the SQL instead of a ? placeholder
 		if (!isFunctionCall(columnIndex))
 		{
-			if (data == null)
+			if (value == null)
 			{
 				pstmt.setNull(statementIndex, col.getDataType());
 			}
 			else
 			{
-				pstmt.setObject(statementIndex, data, col.getDataType());
+				pstmt.setObject(statementIndex, value, col.getDataType());
 			}
 		}
 	}

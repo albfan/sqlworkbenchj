@@ -13,7 +13,7 @@ package workbench.db;
 
 /**
  *
- * @author tkellerer
+ * @author support@sql-workbench.net
  */
 public enum IdentifierCase
 {

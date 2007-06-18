@@ -139,7 +139,7 @@ public class ProcedureCreator
 				dropIfNecessary();
 				stmt = this.dbConnection.createStatement();
 				
-				List sqls = this.parseScript();
+				List<String> sqls = this.parseScript();
 				Iterator itr = sqls.iterator();
 				while (itr.hasNext())
 				{
@@ -169,9 +169,9 @@ public class ProcedureCreator
 		}
 	}
 	
-	private List parseScript()
+	private List<String> parseScript()
 	{
-		List result = new LinkedList();
+		List<String> result = new LinkedList<String>();
 		if (this.dbConnection.getMetadata().isOracle())
 		{
 			OraclePackageParser parser = new OraclePackageParser(this.sourceSql);

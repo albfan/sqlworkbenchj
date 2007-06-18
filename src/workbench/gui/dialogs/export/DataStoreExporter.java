@@ -12,11 +12,9 @@
 package workbench.gui.dialogs.export;
 
 import java.awt.Component;
-import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
-import workbench.util.WbThread;
 
 /**
  * @author  support@sql-workbench.net

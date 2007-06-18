@@ -11,8 +11,6 @@
  */
 package workbench.db.exporter;
 
-import workbench.storage.ResultInfo;
-
 /**
  *
  * @author  support@sql-workbench.net

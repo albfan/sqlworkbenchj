@@ -69,7 +69,7 @@ public class TableDiff
 		TableIdentifier target = this.targetTable.getTable();
 		if (this.writer == null) this.writer = new TagWriter();
 		StrBuffer colDiff = new StrBuffer(500);
-		ArrayList colsToBeAdded = new ArrayList();
+		ArrayList<ReportColumn> colsToBeAdded = new ArrayList<ReportColumn>();
 		ReportColumn[] refCols = this.referenceTable.getColumns();
 		StrBuffer myindent = new StrBuffer(indent);
 		myindent.append("  ");
@@ -89,15 +89,15 @@ public class TableDiff
 				d.setCompareJdbcTypes(diff.getCompareJdbcTypes());
 				d.setTagWriter(this.writer);
 				d.setIndent(myindent);
-				StrBuffer diff = d.getMigrateTargetXml();
-				if (diff.length() > 0)
+				StrBuffer diffXml = d.getMigrateTargetXml();
+				if (diffXml.length() > 0)
 				{
-					colDiff.append(diff);
+					colDiff.append(diffXml);
 					//colDiff.append('\n');
 				}
 			}
 		}
-		ArrayList colsToBeRemoved = new ArrayList();
+		ArrayList<ReportColumn> colsToBeRemoved = new ArrayList<ReportColumn>();
 		ReportColumn[] tcols = this.targetTable.getColumns();
 		for (int i=0; i < tcols.length; i++)
 		{
@@ -269,8 +269,8 @@ public class TableDiff
 		if (reference == null && target == null) return null;
 		
 		TableGrantDiff td = new TableGrantDiff(reference, target);
-		StrBuffer diff = td.getMigrateTargetXml(writer, indent);
-		return diff;
+		StrBuffer diffXml = td.getMigrateTargetXml(writer, indent);
+		return diffXml;
 	}
 	
 	private StrBuffer getIndexDiff()
@@ -283,8 +283,8 @@ public class TableDiff
 		IndexDiff id = new IndexDiff(ref, targ);
 		id.setTagWriter(this.writer);
 		id.setIndent(indent);
-		StrBuffer diff = id.getMigrateTargetXml();
-		return diff;
+		StrBuffer diffXml = id.getMigrateTargetXml();
+		return diffXml;
 	}
 	
 	/**

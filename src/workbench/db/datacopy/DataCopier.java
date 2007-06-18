@@ -63,7 +63,7 @@ public class DataCopier
 	public void copyFromTable(WbConnection source, WbConnection target, TableIdentifier aSourceTable, TableIdentifier aTargetTable)
 		throws SQLException
 	{
-		this.copyFromTable(source, target, aSourceTable, aTargetTable, (Map)null, null, false, false);
+		this.copyFromTable(source, target, aSourceTable, aTargetTable, (Map<String, String>)null, null, false, false);
 	}
 
 	public void copyFromFile(RowDataProducer source, WbConnection target, TableIdentifier targetTbl)
@@ -84,7 +84,7 @@ public class DataCopier
 	 *	It is expected that the mapping contains String objects. The key is the name of the
 	 *	source column, the mapped value is the name of the target column
 	 */
-	public void copyFromTable(WbConnection source, WbConnection target, TableIdentifier aSourceTable, TableIdentifier aTargetTable, Map columnMapping, String additionalWhere, boolean createTable, boolean dropTable)
+	public void copyFromTable(WbConnection source, WbConnection target, TableIdentifier aSourceTable, TableIdentifier aTargetTable, Map<String, String> columnMapping, String additionalWhere, boolean createTable, boolean dropTable)
 		throws SQLException
 	{
 		this.sourceConnection = source;
@@ -119,7 +119,7 @@ public class DataCopier
 		{
 			List sourceCols = source.getMetadata().getTableColumns(aSourceTable);
 
-			this.columnMap = new HashMap(columnMapping.size());
+			this.columnMap = new HashMap<ColumnIdentifier, ColumnIdentifier>(columnMapping.size());
 			Iterator itr = columnMapping.entrySet().iterator();
 			while (itr.hasNext())
 			{
@@ -202,11 +202,11 @@ public class DataCopier
 		if (tableExists && !drop)
 		{
 			LogMgr.logInfo("DataCopier.copyToNewTable()", "New table " + newTableName.getTableExpression() + " does already exist!");
-			List requestedCols = null;
+			List<ColumnIdentifier> requestedCols = null;
 			if (sourceColumns != null)
 			{
 				int count = sourceColumns.length;
-				requestedCols = new ArrayList(count);
+				requestedCols = new ArrayList<ColumnIdentifier>(count);
 				for (int i=0; i < count; i++)
 				{
 					requestedCols.add(sourceColumns[i]);
@@ -246,7 +246,7 @@ public class DataCopier
 		else
 		{
 			int count = this.targetColumnsForQuery.length;
-			sourceCols = new ArrayList(count);
+			sourceCols = new ArrayList<ColumnIdentifier>(count);
 			for (int i=0; i < count; i++)
 			{
 				sourceCols.add(this.targetColumnsForQuery[i]);
@@ -261,8 +261,8 @@ public class DataCopier
 		if (sourceColumns == null || sourceColumns.length == 0)
 		{
 			int count = sourceCols.size();
-			targetCols = new ArrayList(count);
-			this.columnMap = new HashMap(count);
+			targetCols = new ArrayList<ColumnIdentifier>(count);
+			this.columnMap = new HashMap<ColumnIdentifier, ColumnIdentifier>(count);
 			for (int i=0; i < count; i++)
 			{
 				this.columnMap.put(sourceCols.get(i), sourceCols.get(i));
@@ -279,7 +279,7 @@ public class DataCopier
 				int index = sourceCols.indexOf(sourceColumns[i]);
 				if (index > -1)
 				{
-					ColumnIdentifier col = (ColumnIdentifier)sourceCols.get(i);
+					ColumnIdentifier col = sourceCols.get(i);
 					this.columnMap.put(col, col);
 					targetCols.add(col);
 				}
@@ -359,7 +359,7 @@ public class DataCopier
 		{
 			int count = sourceColumns.length;
 
-			this.columnMap = new HashMap(count);
+			this.columnMap = new HashMap<ColumnIdentifier, ColumnIdentifier>(count);
 			for (int i=0; i < count; i++)
 			{
 				this.columnMap.put(sourceColumns[i], targetColumns[i]);
@@ -526,8 +526,8 @@ public class DataCopier
 		//while (itr.hasNext())
 		for (Map.Entry<ColumnIdentifier, ColumnIdentifier> entry : this.columnMap.entrySet())
 		{
-			ColumnIdentifier sid = (ColumnIdentifier)entry.getKey();
-			ColumnIdentifier tid = (ColumnIdentifier)entry.getValue();
+			ColumnIdentifier sid = entry.getKey();
+			ColumnIdentifier tid = entry.getValue();
 			if (col > 0)
 			{
 				sql.append("\n       , ");
@@ -598,7 +598,7 @@ public class DataCopier
 		List<ColumnIdentifier> sourceCols = sourceMeta.getTableColumns(tbl);
 		List<ColumnIdentifier> targetCols = this.targetConnection.getMetadata().getTableColumns(this.targetTable);
 
-		this.columnMap = new HashMap(targetCols.size());
+		this.columnMap = new HashMap<ColumnIdentifier, ColumnIdentifier>(targetCols.size());
 
 		for (Map.Entry<String, String> entry : aMapping.entrySet())
 		{
@@ -683,7 +683,7 @@ public class DataCopier
 		StringBuilder usedColumns = new StringBuilder(100);
 		for (int i=0; i < count; i++)
 		{
-			ColumnIdentifier column = (ColumnIdentifier)targetCols.get(i);
+			ColumnIdentifier column = targetCols.get(i);
 			// ColumnIdentifier's equals() method checks the name and the data type!
 			// so only columns where the name and the data type match, will be copied
 			// note that this can be overridden by explicitly defining the column mapping

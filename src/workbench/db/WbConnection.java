@@ -59,7 +59,7 @@ public class WbConnection
 	private DbMetadata metaData;
 	private ConnectionProfile profile;
 	private PreparedStatementPool preparedStatementPool;
-	private List listeners;
+	private List<PropertyChangeListener> listeners;
 	private DbObjectCache objectCache;
 	private DbDriver driver;
 	
@@ -735,7 +735,7 @@ public class WbConnection
 
 	public synchronized void addChangeListener(PropertyChangeListener l)
 	{
-		if (this.listeners == null) this.listeners = new ArrayList();
+		if (this.listeners == null) this.listeners = new ArrayList<PropertyChangeListener>();
 		this.listeners.add(l);
 	}
 
@@ -753,7 +753,7 @@ public class WbConnection
 			PropertyChangeEvent evt = new PropertyChangeEvent(this, property, oldValue, newValue);
 			for (int i=0; i < count; i++)
 			{
-				PropertyChangeListener l = (PropertyChangeListener)this.listeners.get(i);
+				PropertyChangeListener l = this.listeners.get(i);
 				l.propertyChange(evt);
 			}
 		}
