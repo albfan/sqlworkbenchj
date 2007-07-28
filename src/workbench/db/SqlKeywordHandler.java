@@ -37,12 +37,13 @@ public class SqlKeywordHandler
 	{
 		readKeywords(con, null);
 	}
+	
 	public SqlKeywordHandler(Connection con, String dbid)
 	{
 		readKeywords(con, dbid);
 	}
 
-	public Collection getSqlKeywords()
+	public Collection<String> getSqlKeywords()
 	{
 		return this.keywords;
 	}

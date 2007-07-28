@@ -68,7 +68,7 @@ public class FixedSizeList
 	
 	public synchronized String getFirst()
 	{
-		return (String)entries.getFirst();
+		return entries.getFirst();
 	}
 
 	public Iterator iterator()

@@ -14,6 +14,9 @@ package workbench.db;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -197,9 +200,10 @@ public class ColumnIdentifier
 
 	/**
 	 * Compare two identifiers. 
-	 * The comparison is only done on the name column and 
-	 * case-insesitive. If the object is not a ColumnIdentifier
-	 * it returns false
+	 * The comparison is only done on the name column and is
+	 * case-insesitive. 
+	 * If the object is not a ColumnIdentifier it returns false
+	 * 
 	 * @param other the object to compare
 	 * @return true if the other ColumnIdentifier has the same name
 	 */
@@ -409,5 +413,22 @@ public class ColumnIdentifier
 		if (other == null) return 1;
 		if (this.name == null) return -1;
 		return StringUtil.trimQuotes(name).compareToIgnoreCase(StringUtil.trimQuotes(other.name));
+	}
+	
+	public static void sortByPosition(List<ColumnIdentifier> columnList)
+	{
+		Comparator<ColumnIdentifier> c = new Comparator<ColumnIdentifier>()
+		{
+			public int compare(ColumnIdentifier o1, ColumnIdentifier o2)
+			{
+				int pos1 = o1.getPosition();
+				int pos2 = o2.getPosition();
+				
+				if (pos1 < pos2) return -1;
+				else if (pos1 > pos2) return 1;
+				return 0;
+			}
+		};
+		Collections.sort(columnList, c);
 	}
 }

@@ -21,7 +21,7 @@ import workbench.resource.Settings;
  * @author  support@sql-workbench.net
  */
 public class RowDataListSorter
-	implements Comparator
+	implements Comparator<RowData>
 {
 	private int[] sortColumns;
 	private boolean[] sortAscending;
@@ -131,13 +131,10 @@ public class RowDataListSorter
 		return result;
 	}
 
-	public int compare(Object o1, Object o2)
+	public int compare(RowData row1, RowData row2)
 	{
 		try
 		{
-			RowData row1 = (RowData)o1;
-			RowData row2 = (RowData)o2;
-			
 			int colIndex = 0;
 			int result = compareColumn(sortColumns[colIndex], row1, row2);
 			result = this.sortAscending[colIndex] ? result : -result;

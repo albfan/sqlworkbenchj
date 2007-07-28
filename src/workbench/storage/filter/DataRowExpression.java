@@ -81,7 +81,7 @@ public class DataRowExpression
 		}
 	}
 
-	public boolean evaluate(Map columnValues)
+	public boolean evaluate(Map<String, Object> columnValues)
 	{
 		//Object value = columnValues.get(this.columnName);
 		Iterator itr = columnValues.values().iterator();

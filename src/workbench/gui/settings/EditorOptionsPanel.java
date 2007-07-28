@@ -13,10 +13,9 @@ package workbench.gui.settings;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
-import workbench.gui.components.DelimiterDefinitionPanel;
-import workbench.gui.components.DividerBorder;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.WbCheckBoxLabel;
+import workbench.resource.ColumnSortType;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
@@ -65,6 +64,22 @@ public class EditorOptionsPanel
 		else this.completionPasteCase.setSelectedIndex(2);
 
 		alternateDelim.setDelimiter(Settings.getInstance().getAlternateDelimiter());
+		
+		String[] sortItems = new String[] {
+			ResourceMgr.getString("LblSortPastColName"),
+			ResourceMgr.getString("LblSortPastColPos")
+		};
+		this.completionColumnSort.setModel(new DefaultComboBoxModel(sortItems));
+		
+		ColumnSortType sort = Settings.getInstance().getAutoCompletionColumnSortType();
+		if (sort == ColumnSortType.position)
+		{
+			this.completionColumnSort.setSelectedIndex(1);
+		}
+		else
+		{
+			this.completionColumnSort.setSelectedIndex(0);
+		}
 	}
 
 	private String indexToLineEndingValue(int index)
@@ -105,6 +120,15 @@ public class EditorOptionsPanel
 		set.setInternalEditorLineEnding(value);
 		value = indexToLineEndingValue(externalLineEnding.getSelectedIndex());
 		set.setExternalEditorLineEnding(value);
+		int index = completionColumnSort.getSelectedIndex();
+		if (index == 1)
+		{
+			set.setAutoCompletionColumnSort(ColumnSortType.position);
+		}
+		else
+		{
+			set.setAutoCompletionColumnSort(ColumnSortType.name);
+		}
 	}
 
 	/** This method is called from within the constructor to
@@ -145,6 +169,8 @@ public class EditorOptionsPanel
     filesInHistoryLabel = new WbCheckBoxLabel();
     includeFilesInHistory = new javax.swing.JCheckBox();
     alternateDelim = new workbench.gui.components.DelimiterDefinitionPanel();
+    pasterOrderLabel = new javax.swing.JLabel();
+    completionColumnSort = new javax.swing.JComboBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -199,7 +225,7 @@ public class EditorOptionsPanel
     altDelimLabel.setToolTipText(ResourceMgr.getDescription("LblAltDelimit"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
     add(altDelimLabel, gridBagConstraints);
@@ -208,7 +234,7 @@ public class EditorOptionsPanel
     historySizeLabel.setToolTipText(ResourceMgr.getDescription("LblHistorySize"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
     add(historySizeLabel, gridBagConstraints);
@@ -217,7 +243,7 @@ public class EditorOptionsPanel
     historySizeField.setMinimumSize(new java.awt.Dimension(72, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(6, 11, 0, 15);
@@ -227,7 +253,7 @@ public class EditorOptionsPanel
     electricScrollLabel.setToolTipText(ResourceMgr.getDescription("LblSettingElectricScroll"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
     add(electricScrollLabel, gridBagConstraints);
@@ -236,7 +262,7 @@ public class EditorOptionsPanel
     electricScroll.setMinimumSize(new java.awt.Dimension(72, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(7, 11, 0, 15);
@@ -272,14 +298,14 @@ public class EditorOptionsPanel
     selectionColorLabel.setToolTipText(ResourceMgr.getDescription("LblSelectionColor"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
     add(selectionColorLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 0);
     add(errorColor, gridBagConstraints);
@@ -288,14 +314,14 @@ public class EditorOptionsPanel
     errorColorLabel.setToolTipText(ResourceMgr.getDescription("LblSelectErrorColor"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
     add(errorColorLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 5, 0, 0);
     add(selectionColor, gridBagConstraints);
@@ -304,14 +330,14 @@ public class EditorOptionsPanel
     editorFontLabel.setToolTipText(ResourceMgr.getDescription("LblEditorFont"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
     add(editorFontLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 11, 0, 15);
@@ -352,6 +378,7 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(6, 11, 0, 15);
     add(completionPasteCase, gridBagConstraints);
 
+    pasteLabel.setLabelFor(completionPasteCase);
     pasteLabel.setText(ResourceMgr.getString("LblPasteCase"));
     pasteLabel.setToolTipText(ResourceMgr.getDescription("LblPasteCase"));
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -366,7 +393,7 @@ public class EditorOptionsPanel
     internalLineEndingLabel.setToolTipText(ResourceMgr.getDescription("LblIntLineEnding"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
@@ -375,7 +402,7 @@ public class EditorOptionsPanel
     internalLineEnding.setToolTipText(ResourceMgr.getDescription("LblIntLineEnding"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(6, 11, 0, 15);
@@ -385,7 +412,7 @@ public class EditorOptionsPanel
     externalLineEndingLabel.setToolTipText(ResourceMgr.getDescription("LblExtLineEnding"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
@@ -394,7 +421,7 @@ public class EditorOptionsPanel
     externalLineEnding.setToolTipText(ResourceMgr.getDescription("LblExtLineEnding"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(6, 11, 0, 15);
@@ -405,7 +432,7 @@ public class EditorOptionsPanel
     filesInHistoryLabel.setToolTipText(ResourceMgr.getDescription("TxtHistoryIncFiles"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
@@ -418,7 +445,7 @@ public class EditorOptionsPanel
     includeFilesInHistory.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
@@ -426,11 +453,31 @@ public class EditorOptionsPanel
     add(includeFilesInHistory, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 10, 0, 5);
     add(alternateDelim, gridBagConstraints);
+
+    pasterOrderLabel.setLabelFor(completionColumnSort);
+    pasterOrderLabel.setText(ResourceMgr.getString("LblPasteSort"));
+    pasterOrderLabel.setToolTipText(ResourceMgr.getDescription("LblPasteSort"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
+    add(pasterOrderLabel, gridBagConstraints);
+
+    completionColumnSort.setToolTipText(ResourceMgr.getDescription("LblPasteSort"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 11, 0, 15);
+    add(completionColumnSort, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -440,6 +487,7 @@ public class EditorOptionsPanel
   private javax.swing.JCheckBox autoAdvance;
   private javax.swing.JLabel autoAdvanceLabel;
   private javax.swing.JCheckBox closePopup;
+  private javax.swing.JComboBox completionColumnSort;
   private javax.swing.JComboBox completionPasteCase;
   private workbench.gui.components.WbFontPicker editorFont;
   private javax.swing.JLabel editorFontLabel;
@@ -458,6 +506,7 @@ public class EditorOptionsPanel
   private javax.swing.JLabel internalLineEndingLabel;
   private javax.swing.JLabel labelCloseSearch;
   private javax.swing.JLabel pasteLabel;
+  private javax.swing.JLabel pasterOrderLabel;
   private javax.swing.JLabel rightClickLabel;
   private javax.swing.JCheckBox rightClickMovesCursor;
   private workbench.gui.components.WbColorPicker selectionColor;

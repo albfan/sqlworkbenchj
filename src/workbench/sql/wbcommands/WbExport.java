@@ -13,10 +13,10 @@ package workbench.sql.wbcommands;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import workbench.WbManager;
-import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.interfaces.ProgressReporter;
 import workbench.log.LogMgr;
@@ -389,7 +389,7 @@ public class WbExport
 				result.setWarning(true);
 			}
 		}
-		List columns = StringUtil.stringToList(cols, ",", true, true, false);
+		List<String> columns = StringUtil.stringToList(cols, ",", true, true, false);
 		this.exporter.setBlobIdColumns(columns);
 		this.exporter.setCompressOutput(cmdLine.getBoolean("compress", false));
 		
@@ -401,12 +401,27 @@ public class WbExport
 		// that depends on the other properties
 		setExportType(exporter, type);
 		
-		List tablesToExport = null;
-		if (tables != null)
+		List<TableIdentifier> tablesToExport = null;
+		try
 		{
-			tablesToExport = StringUtil.getObjectNames(tables);
-			this.directExport = (tablesToExport.size() > 0);
+			SourceTableArgument argParser = new SourceTableArgument(tables, this.currentConnection);
+			tablesToExport = argParser.getTables();
+			if (tablesToExport.size() == 0 && argParser.wasWildCardArgument())
+			{
+				result.addMessage(ResourceMgr.getString("ErrExportNoTablesFound") + " " + tables);
+				result.setFailure();
+				return result;
+			}
 		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("WbExport.runTableExports()", "Could not retrieve table list", e);
+			result.addMessage(ExceptionUtil.getDisplay(e));
+			result.setFailure();
+			return result;
+		}
+		
+		this.directExport = (tablesToExport.size() > 0);
 
 		CommonArgs.setProgressInterval(this, cmdLine);
 		this.showProgress = (this.progressInterval > 0);
@@ -469,7 +484,12 @@ public class WbExport
 		{
 			try
 			{
-				runTableExports(tablesToExport, result, outputdir);
+				File outdir = (StringUtil.isEmptyString(outputdir) ? null : new File(outputdir));
+				exporter.setRowMonitor(this);
+				exporter.setReportInterval(this.progressInterval);
+				exporter.setContinueOnError(this.continueOnError);
+				runDirectExport(tablesToExport, result, outdir);
+				addMessages(result);
 			}
 			catch (Exception e)
 			{
@@ -538,176 +558,120 @@ public class WbExport
 			exporter.setOutputTypeHtml();
 		}
 	}
-	
-	private void runTableExports(List tableList, StatementRunnerResult result, String outputdir)
+
+	private void runDirectExport(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir)
 		throws SQLException
 	{
-		if (tableList == null || tableList.size() == 0)
+		if (tableList.size() > 1)
 		{
-			this.directExport = false;
-			return;
+			exportTableList(tableList, result, outdir);
 		}
-
-		TableIdentifier[] tables = null;
-
+		else
+		{
+			exportSingleTable(tableList.get(0), result, outdir);
+		}
+	}	
+	
+	private void exportSingleTable(TableIdentifier table, StatementRunnerResult result, File outdir)
+		throws SQLException
+	{
+		String outfile = this.exporter.getOutputFilename();
+		
+		if (StringUtil.isEmptyString(outfile))
+		{
+			outfile = StringUtil.makeFilename(table.getTableName());
+			File f = new File(outdir, outfile + defaultExtension);
+			outfile = f.getAbsolutePath();
+		}
+		exporter.addTableExportJob(outfile, table);
+		exporter.runJobs();
+		if (exporter.isSuccess())
+		{
+			long rows = exporter.getTotalRows();
+			String msg = ResourceMgr.getString("MsgExportTableExported");
+			msg = StringUtil.replace(msg, "%file%", exporter.getFullOutputFilename());
+			msg = StringUtil.replace(msg, "%tablename%", table.getTableExpression());
+			msg = StringUtil.replace(msg, "%rows%", Long.toString(rows));
+			result.addMessage(msg);
+		}
+		else 
+		{
+			result.setFailure();
+		}
+	}
+	
+	private void exportTableList(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir)
+		throws SQLException
+	{
 		result.setSuccess();
 
 		int tableCount = tableList.size();
-		
-		String t = (String)tableList.get(0);
-		
-		// If only one table argument is present, we'll have to
-		// to check for wildcards e.g. -sourcetable=theschema.*
-		if (tableCount == 1 && (t.indexOf('*') > -1 || t.indexOf('%') > -1))
+
+		// when more than one table is selected or no outputfile is specified
+		// then we require an output directory
+		if (outdir == null)
 		{
-			TableIdentifier tbl = new TableIdentifier(t);
-			if (tbl.getSchema() == null)
-			{
-				tbl.setSchema(this.currentConnection.getMetadata().getSchemaToUse());
-			}
-			tbl.adjustCase(this.currentConnection);
-			List l = null;
+			result.setFailure();
+			result.addMessage(ResourceMgr.getString("ErrExportOutputDirRequired"));
+			return;
+		}
+
+		if (outdir == null || !outdir.exists())
+		{
+			String msg = ResourceMgr.getString("ErrExportOutputDirNotFound");
+			msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
+			result.addMessage(msg);
+			result.setFailure();
+			return;
+		}
+
+		if (!outdir.isDirectory())
+		{
+			String msg = ResourceMgr.getString("ErrExportOutputDirNotDir");
+			msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
+			result.addMessage(msg);
+			result.setFailure();
+			return;
+		}
+
+
+		for (TableIdentifier tbl : tableList)
+		{
+			String fname = StringUtil.makeFilename(tbl.getTableExpression());
+			File f = new File(outdir, fname + defaultExtension);
 			try
 			{
-				l = this.currentConnection.getMetadata().getTableList(tbl.getTableName(), tbl.getSchema());
+				exporter.addTableExportJob(f.getAbsolutePath(), tbl);
 			}
 			catch (SQLException e)
 			{
-				LogMgr.logError("WbExport.runTableExports()", "Could not retrieve table list", e);
-				result.addMessage(ExceptionUtil.getDisplay(e));
-				result.setFailure();
-				return;
-			}
-
-			if (l.size() == 0)
-			{
-				result.addMessage(ResourceMgr.getString("ErrExportNoTablesFound") + " " + t);
-				result.setFailure();
-				directExport = false;
-				return;
-			}
-			tableCount = l.size();
-			tables = new TableIdentifier[tableCount];
-			for (int i=0; i < tableCount; i++)
-			{
-				tables[i] = (TableIdentifier)l.get(i);
-			}
-		}
-		else
-		{
-			tables = new TableIdentifier[tableCount];
-			for (int i=0; i < tableCount; i++)
-			{
-				tables[i] = new TableIdentifier((String)tableList.get(i));
-			}
-		}
-
-		File outdir = (outputdir == null ? null : new File(outputdir));
-		String outfile = exporter.getOutputFilename();
-		String msg = null;
-
-		if (tableCount > 1 || outfile == null)
-		{
-			// when more then table is selected or no outputfile is specified
-			// then we require an output directory
-			if (outputdir == null || outputdir.trim().length() == 0)
-			{
-				result.setFailure();
-				result.addMessage(ResourceMgr.getString("ErrExportOutputDirRequired"));
-				return;
-			}
-
-			if (outdir == null || !outdir.exists())
-			{
-				msg = ResourceMgr.getString("ErrExportOutputDirNotFound");
-				msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
-				result.addMessage(msg);
-				result.setFailure();
-				return;
-			}
-
-			if (!outdir.isDirectory())
-			{
-				msg = ResourceMgr.getString("ErrExportOutputDirNotDir");
-				msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
-				result.addMessage(msg);
-				result.setFailure();
-				return;
-			}
-		}
-
-		exporter.setRowMonitor(this);
-		exporter.setReportInterval(this.progressInterval);
-
-		if (tableCount > 1)
-		{
-			for (int i = 0; i < tableCount; i ++)
-			{
-				String fname = StringUtil.makeFilename(tables[i].getTableExpression());
-				File f = new File(outdir, fname + defaultExtension);
-				try
+				if (continueOnError) 
 				{
-					exporter.addTableExportJob(f.getAbsolutePath(), tables[i]);
+					result.addMessage(ResourceMgr.getString("TxtWarning") + ": " + e.getMessage());
+					result.setWarning(true);
 				}
-				catch (SQLException e)
+				else
 				{
-					if (continueOnError) 
-					{
-						result.addMessage(ResourceMgr.getString("TxtWarning") + ": " + e.getMessage());
-						result.setWarning(true);
-					}
-					else
-					{
-						throw e;
-					}
+					throw e;
 				}
-				
 			}
-		}
-		else
-		{
-			// if only one table should be exported
-			// we have to use the supplied filename, and cannot use
-			// the above loop
-			if (StringUtil.isEmptyString(outfile))
-			{
-				outfile = StringUtil.makeFilename(tables[0].getTableName());
-				File f = new File(outdir, outfile + defaultExtension);
-				outfile = f.getAbsolutePath();
-			}
-			exporter.addTableExportJob(outfile, tables[0]);
 		}
 		
-		exporter.setContinueOnError(this.continueOnError);
 		exporter.runJobs();
 			
 		if (exporter.isSuccess())
 		{
-			if (tableCount > 1)
-			{
-				tableCount = exporter.getNumberExportedTables();
-				msg = ResourceMgr.getString("MsgExportNumTables");
-				msg = msg.replaceAll("%numtables%", Integer.toString(tableCount));
-				msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
-				result.addMessage(msg);
-			}
-			else
-			{
-				long rows = exporter.getTotalRows();
-				msg = ResourceMgr.getString("MsgExportTableExported");
-				msg = StringUtil.replace(msg, "%file%", exporter.getFullOutputFilename());
-				msg = StringUtil.replace(msg, "%tablename%", tables[0].getTableExpression());
-				msg = StringUtil.replace(msg, "%rows%", Long.toString(rows));
-				result.addMessage(msg);
-			}
+			tableCount = exporter.getNumberExportedTables();
+			String msg = ResourceMgr.getString("MsgExportNumTables");
+			msg = msg.replaceAll("%numtables%", Integer.toString(tableCount));
+			msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
+			result.addMessage(msg);
 			result.setSuccess();
 		}
 		else 
 		{
 			result.setFailure();
 		}
-		
-		addMessages(result);
 	}
 
 	private void addMessages(StatementRunnerResult result)
@@ -741,8 +705,14 @@ public class WbExport
 			{
 				String sql = aResult.getSourceCommand();
 				this.exporter.setSql(sql);
-				long rowCount = this.exporter.startExport(aResult.getResultSets().get(0));
-
+				ResultSet toExport = aResult.getResultSets().get(0);
+				// The exporter has already closed the resultSet that it exported
+				// so we can remove it from the list of ResultSets in the StatementRunnerResult
+				// object. Thus the later call to clearResultSets() will only free any not used
+				// ResultSet
+				aResult.getResultSets().remove(0);
+				long rowCount = this.exporter.startExport(toExport);
+				
 				String msg = null;
 
 				if (exporter.isSuccess())
@@ -755,7 +725,6 @@ public class WbExport
 				}
 				addMessages(aResult);
 				
-				aResult.clearResultSets();
 				if (exporter.isSuccess())
 				{
 					aResult.setSuccess();
@@ -772,6 +741,10 @@ public class WbExport
 			aResult.addMessage(ResourceMgr.getString("MsgSpoolError"));
 			aResult.addMessage(ExceptionUtil.getAllExceptions(e));
 			LogMgr.logError("WbExportCommand.consumeResult()", "Error spooling data", e);
+		}
+		finally
+		{
+			aResult.clearResultSets();
 		}
 	}
 

@@ -11,9 +11,7 @@
  */
 package workbench.storage.filter;
 
-import java.util.Comparator;
 import java.util.Map;
-import workbench.util.StringUtil;
 
 /**
  * A class to define the filter criteria for a single column 

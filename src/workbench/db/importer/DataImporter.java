@@ -1155,10 +1155,14 @@ public class DataImporter
 		if (this.columnConstants != null && pstmt == this.insertStatement)
 		{
 			int count = this.columnConstants.getColumnCount();
+			int colIndex = row.length + 1;
 			for (int i=0; i < count; i++)
 			{
-				int colIndex = row.length + 1 + i;
-				columnConstants.setParameter(pstmt, colIndex, i);
+				if (!this.columnConstants.isFunctionCall(i))
+				{
+					columnConstants.setParameter(pstmt, colIndex, i);
+					colIndex ++;
+				}
 			}
 		}
 		

@@ -40,12 +40,12 @@ public class ObjectCompilerUI
 	private Thread worker;
 	protected EditorPanel log;
 	private JFrame window;
-	private List types;
-	private List names;
+	private List<String> types;
+	private List<String> names;
 	private OracleObjectCompiler compiler;
 	private WbConnection dbConnection;
 	
-	public ObjectCompilerUI(List names, List types, WbConnection conn)
+	public ObjectCompilerUI(List<String> names, List<String> types, WbConnection conn)
 		throws SQLException
 	{
 		super();
@@ -74,8 +74,8 @@ public class ObjectCompilerUI
 			this.dbConnection.setBusy(true);
 			for (int i=0; i < count; i++)
 			{
-				String name = (String)this.names.get(i);
-				String type = (String)this.types.get(i);
+				String name = this.names.get(i);
+				String type = this.types.get(i);
 				if (i > 0) appendLog("\n");
 				appendLog(msg + " " + name + " ... ");
 				if (this.compiler.compileObject(name, type))

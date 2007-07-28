@@ -1,7 +1,6 @@
 package workbench.gui.editor;
 
 import java.util.Collection;
-import java.util.Iterator;
 import workbench.sql.wbcommands.WbConfirm;
 import workbench.sql.wbcommands.WbCopy;
 import workbench.sql.wbcommands.WbDefinePk;
@@ -38,23 +37,21 @@ public class AnsiSQLTokenMarker
 		initKeywordMap();
 	}
 
-	public void setSqlKeyWords(Collection keywords)
+	public void setSqlKeyWords(Collection<String> keywords)
 	{
 		this.addKeywordList(keywords, Token.KEYWORD1);
 	}
 
-	public void setSqlFunctions(Collection functions)
+	public void setSqlFunctions(Collection<String> functions)
 	{
 		this.addKeywordList(functions, Token.KEYWORD3);
 	}
 
-	private void addKeywordList(Collection words, byte anId)
+	private void addKeywordList(Collection<String> words, byte anId)
 	{
 		if (words == null) return;
-		Iterator itr = words.iterator();
-		while (itr.hasNext())
+		for (String keyword : words)
 		{
-			String keyword = (String)itr.next();
 			if (!keywords.containsKey(keyword))
 			{
 				//System.out.println("adding key=" + keyword);

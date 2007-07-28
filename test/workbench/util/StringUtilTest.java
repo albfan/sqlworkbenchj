@@ -46,6 +46,25 @@ public class StringUtilTest
 		}
 	}
 	
+	public void testReplace()
+	{
+		try
+		{
+			String s = StringUtil.replace(null, "gaga", "gogo");
+			assertNull(s);
+			
+			s = StringUtil.replace("gaga", null, "gogo");
+			assertEquals("gaga", s);
+			
+			s = StringUtil.replace("gaga", "gogo", null);
+			assertEquals("gaga", s);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	public void testLastIndexOf()
 	{
 		try
@@ -329,7 +348,7 @@ public class StringUtilTest
 	{
 		try
 		{
-			List elements = new LinkedList();
+			List<String> elements = new LinkedList<String>();
 			elements.add("one");
 			elements.add("two");
 			elements.add("three");

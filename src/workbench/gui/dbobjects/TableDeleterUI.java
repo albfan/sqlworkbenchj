@@ -38,11 +38,11 @@ import workbench.util.WbThread;
 public class TableDeleterUI extends javax.swing.JPanel
 {
 	private JDialog dialog;
-	private List objectNames;
+	private List<TableIdentifier> objectNames;
 	private boolean cancelled;
 	private WbConnection connection;
 	private Thread deleteThread;
-	private List deleteListener;
+	private List<TableDeleteListener> deleteListener;
 
 	public TableDeleterUI()
 	{
@@ -261,13 +261,13 @@ public class TableDeleterUI extends javax.swing.JPanel
 		boolean useTruncate = this.useTruncateCheckBox.isSelected();
 		if (useTruncate) doCommitEach = false;
 		boolean hasError = false;
-		List tables = new ArrayList();
+		List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 		int count = this.objectNames.size();
 		TableIdentifier table = null;
 		for (int i=0; i < count; i++)
 		{
 			if (this.cancelled) break;
-			table = (TableIdentifier)this.objectNames.get(i);
+			table = this.objectNames.get(i);
 			this.statusLabel.setText(ResourceMgr.getString("TxtDeletingTable") + " " + table + " ...");
 			try
 			{
@@ -382,7 +382,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 		return this.cancelled;
 	}
 	
-	public void setObjects(List objects)
+	public void setObjects(List<TableIdentifier> objects)
 	{
 		this.objectNames = objects;
 		int numNames = this.objectNames.size();
@@ -412,7 +412,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 
 	public void addDeleteListener(TableDeleteListener listener)
 	{
-		if (this.deleteListener == null) this.deleteListener = new ArrayList();
+		if (this.deleteListener == null) this.deleteListener = new ArrayList<TableDeleteListener>();
 		this.deleteListener.add(listener);
 	}
 	
@@ -425,9 +425,8 @@ public class TableDeleterUI extends javax.swing.JPanel
 	public void fireTableDeleted(List tables)
 	{
 		if (this.deleteListener == null) return;
-		for (int i=0; i<this.deleteListener.size(); i++)
+		for (TableDeleteListener l : this.deleteListener)
 		{
-			TableDeleteListener l = (TableDeleteListener)this.deleteListener.get(i);
 			l.tableDataDeleted(tables);
 		}
 	}

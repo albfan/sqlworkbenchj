@@ -202,7 +202,18 @@ public class ClipBoardCopier
 			}
 		}
 
-		List columnsToInclude = null;
+		TableIdentifier updateTable = data.getUpdateTable();
+		if (updateTable == null)
+		{
+			updateTable = client.selectUpdateTable();
+			if (updateTable != null)
+			{
+				client.getDataStore().setUpdateTable(updateTable);
+			}
+		}
+		
+		
+		List<ColumnIdentifier> columnsToInclude = null;
 		if (selectedOnly  && !showSelectColumns && this.client.getColumnSelectionAllowed())
 		{
 			columnsToInclude = getColumnsFromSelection();
@@ -316,12 +327,12 @@ public class ClipBoardCopier
 		return result;
 	}
 
-	private List getColumnsFromSelection()
+	private List<ColumnIdentifier> getColumnsFromSelection()
 	{
 		int[] cols = this.client.getSelectedColumns();
 		DataStore ds = this.client.getDataStore();
-		if (ds == null) return Collections.EMPTY_LIST;
-		List result = new ArrayList(cols.length);
+		if (ds == null) return Collections.emptyList();
+		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(cols.length);
 		for (int i=0; i < cols.length; i++)
 		{
 			result.add(ds.getResultInfo().getColumn(cols[i]));
@@ -334,5 +345,5 @@ class ColumnSelectionResult
 {
     public boolean includeHeaders;
     public boolean selectedOnly;
-    public List columns;
+    public List<ColumnIdentifier> columns;
 }

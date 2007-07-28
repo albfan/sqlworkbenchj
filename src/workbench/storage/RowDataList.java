@@ -149,7 +149,7 @@ public class RowDataList
 		}
 	}
 
-	public void sort(Comparator comp)
+	public void sort(Comparator<RowData> comp)
 	{
 		synchronized (this.data)
 		{

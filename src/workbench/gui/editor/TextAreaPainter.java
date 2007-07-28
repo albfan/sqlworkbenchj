@@ -31,7 +31,7 @@ import workbench.util.StringUtil;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.29 2007-05-04 17:50:05 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.30 2007-07-28 13:52:33 thomas Exp $
  */
 public class TextAreaPainter 
 	extends JComponent 
@@ -246,14 +246,14 @@ public class TextAreaPainter
 
 	private void calculateGutterWidth()
 	{
-		FontMetrics fm = getFontMetrics();
-		if (fm == null) 
+		FontMetrics cfm = getFontMetrics();
+		if (cfm == null) 
 		{
 			this.gutterCharWidth = 18;
 		}
 		else
 		{
-			this.gutterCharWidth = fm.charWidth('9');
+			this.gutterCharWidth = cfm.charWidth('9');
 		}
 		if (this.showLineNumbers)
 		{
@@ -273,8 +273,8 @@ public class TextAreaPainter
 		this.tabSize = -1;
 		if (this.textArea == null) return;
 		if (this.textArea.getDocument() == null) return;
-		FontMetrics fm = this.getFontMetrics();
-		if (fm == null) return;
+		FontMetrics cfm = this.getFontMetrics();
+		if (cfm == null) return;
 		
 		Object tab = textArea.getDocument().getProperty(PlainDocument.tabSizeAttribute);
 		int t = -1;
@@ -287,7 +287,7 @@ public class TextAreaPainter
 			Integer tsize = (Integer)tab;
 			t = tsize.intValue();
 		}
-		this.tabSize = fm.charWidth(' ') * t;
+		this.tabSize = cfm.charWidth(' ') * t;
 	}
 	
 	public void paint(Graphics gfx)

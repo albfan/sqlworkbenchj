@@ -12,6 +12,7 @@
 package workbench.sql.wbcommands;
 
 import java.io.FileReader;
+import java.io.PrintWriter;
 import junit.framework.*;
 import java.io.File;
 import java.io.Reader;
@@ -23,6 +24,7 @@ import java.util.List;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+import workbench.sql.BatchRunner;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.EncodingUtil;
@@ -519,6 +521,37 @@ public class WbExportTest extends TestCase
 			fail(e.getMessage());
 		}
 	}	
+	
+	public void testExportWithSelect()
+	{
+		try
+		{
+			File script = new File(this.basedir, "export.sql");
+			File output = new File(this.basedir, "test.txt");
+			PrintWriter writer = new PrintWriter(script);
+			writer.println("wbexport -file='" + output.getAbsolutePath() + "' -type=text -header=true;");
+			writer.println("select * from junit_test;");
+			writer.close();
+			
+			BatchRunner runner = new BatchRunner(script.getAbsolutePath());
+			runner.setBaseDir(this.basedir);
+			runner.setConnection(this.connection);
+			runner.execute();
+			assertEquals("Script not executed", true, runner.isSuccess());
+			assertEquals("Export file not created", true, output.exists());
+			
+			int lines = TestUtil.countLines(output);
+			assertEquals("Not enough lines", rowcount + 1, lines);
+			
+			boolean deleted = output.delete();
+			assertEquals("Export file is still locked", true, deleted);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	
 	public void testSqlClobExport()
 	{

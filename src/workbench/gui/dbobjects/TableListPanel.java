@@ -183,7 +183,7 @@ public class TableListPanel
 	// holds a reference to other WbTables which
 	// need to display the same table list
 	// e.g. the table search panel
-	private List tableListClients;
+	private List<JTable> tableListClients;
 
 	protected JDialog infoWindow;
 	private JLabel infoLabel;
@@ -216,15 +216,26 @@ public class TableListPanel
 		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.INDEX_PROP, this);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), tableDefinition);
 
-		JPanel indexPanel = new JPanel();
-		indexPanel.setLayout(new BorderLayout());
-		
 		Reloadable indexReload = new Reloadable()
 		{
 			public void reload()
 			{
 				shouldRetrieveIndexes = true;
-				try { retrieveIndexes(); } catch (Throwable th) {}
+				if (dbConnection.isBusy()) return;
+				try 
+				{ 
+					dbConnection.setBusy(true);
+					retrieveIndexes(); 
+				} 
+				catch (SQLException e)
+				{
+					LogMgr.logError("TableListPanel.indexReloader", "Error retrieving indexes", e);
+				}
+				finally
+				{
+					dbConnection.setBusy(true);
+					
+				}
 			}
 		};
 		
@@ -239,9 +250,20 @@ public class TableListPanel
 			public void reload()
 			{
 				shouldRetrieveTable = true;
-				retrieveTableSource();
+				if (dbConnection.isBusy()) return;
+				
+				try
+				{
+					dbConnection.setBusy(true);
+					retrieveTableSource();
+				}
+				finally
+				{
+					dbConnection.setBusy(false);
+				}
 			}
 		};
+		
 		this.tableSource = new DbObjectSourcePanel(aParent, sourceReload);
 
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.tableSource);
@@ -757,7 +779,7 @@ public class TableListPanel
 			// do not call setBusy() before reset() because
 			// reset will do nothing if the panel is busy
 			setBusy(true);
-
+			
 			String[] types = null;
 			String type = (String)tableTypes.getSelectedItem();
 			if (!"*".equals(type))
@@ -1397,7 +1419,6 @@ public class TableListPanel
 
 		try
 		{
-			this.dbConnection.executionStart(null, this);
 			synchronized (this.dbConnection)
 			{
 				switch (index)
@@ -1437,7 +1458,6 @@ public class TableListPanel
 		}
 		finally
 		{
-			this.dbConnection.executionEnd(null, this);
 			if (this.dbConnection.selectStartsTransaction() && !this.dbConnection.getAutoCommit())
 			{
 				try { this.dbConnection.commit(); } catch (Throwable th) {}
@@ -1464,6 +1484,7 @@ public class TableListPanel
 		synchronized (busyLock)
 		{
 			this.busy = aFlag;
+			this.dbConnection.setBusy(aFlag);
 		}
 	}
 
@@ -1660,8 +1681,8 @@ public class TableListPanel
 		int count = rows.length;
 		if (count == 0) return;
 
-		ArrayList names = new ArrayList(count);
-		ArrayList types = new ArrayList(count);
+		ArrayList<String> names = new ArrayList<String>(count);
+		ArrayList<String> types = new ArrayList<String>(count);
 
 		for (int i=0; i < count; i++)
 		{
@@ -1796,9 +1817,8 @@ public class TableListPanel
 		int count = rows.length;
 		if (count == 0) return;
 
-		ArrayList names = new ArrayList(count);
-		ArrayList types = new ArrayList(count);
-		ArrayList tables = new ArrayList(count);
+		ArrayList<String> names = new ArrayList<String>(count);
+		ArrayList<String> types = new ArrayList<String>(count);
 
 		TableIdentifier tbl = getRealTable();
 		String schema = (tbl == null ? null : tbl.getSchema());
@@ -1839,9 +1859,8 @@ public class TableListPanel
 	private boolean isClientVisible()
 	{
 		if (this.tableListClients == null) return false;
-		for (int i=0; i < this.tableListClients.size(); i++)
+		for (JTable table : tableListClients)
 		{
-			JTable table = (JTable)this.tableListClients.get(i);
 			if (table.isVisible()) return true;
 		}
 		return false;
@@ -1851,9 +1870,8 @@ public class TableListPanel
 	{
 		if (this.tableListClients == null) return;
 		TableModel model = this.tableList.getModel();
-		for (int i=0; i < this.tableListClients.size(); i++)
+		for (JTable table : tableListClients)
 		{
-			JTable table = (JTable)this.tableListClients.get(i);
 			if (table != null && model != null)
 			{
 				table.setModel(model);
@@ -1869,7 +1887,7 @@ public class TableListPanel
 
 	public void addTableListDisplayClient(JTable aClient)
 	{
-		if (this.tableListClients == null) this.tableListClients = new ArrayList();
+		if (this.tableListClients == null) this.tableListClients = new ArrayList<JTable>();
 		if (!this.tableListClients.contains(aClient)) this.tableListClients.add(aClient);
 	}
 
@@ -1904,7 +1922,7 @@ public class TableListPanel
 		int count = rows.length;
 		if (count == 0) return;
 
-		ArrayList names = new ArrayList(count);
+		ArrayList<TableIdentifier> names = new ArrayList<TableIdentifier>(count);
 
 		for (int i=0; i < count; i ++)
 		{
@@ -1926,7 +1944,7 @@ public class TableListPanel
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		int[] rows = this.tableList.getSelectedRows();
 		int count = rows.length;
-		HashMap tables = new HashMap(count);
+		HashMap<TableIdentifier, String> tables = new HashMap<TableIdentifier, String>(count);
 		for (int i=0; i < count; i++)
 		{
 			int row = rows[i];
@@ -1945,7 +1963,7 @@ public class TableListPanel
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		int[] rows = this.tableList.getSelectedRows();
 		int count = rows.length;
-		HashMap tables = new HashMap(count);
+		HashMap<TableIdentifier, String> tables = new HashMap<TableIdentifier, String>(count);
 		for (int i=0; i < count; i++)
 		{
 			TableIdentifier tbl = createTableIdentifier(rows[i]);
@@ -1961,7 +1979,7 @@ public class TableListPanel
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		int[] rows = this.tableList.getSelectedRows();
 		int count = rows.length;
-		HashMap tables = new HashMap(count);
+		HashMap<TableIdentifier, String> tables = new HashMap<TableIdentifier, String>(count);
 		for (int i=0; i < count; i++)
 		{
 			TableIdentifier tbl = createTableIdentifier(rows[i]);
@@ -1980,8 +1998,8 @@ public class TableListPanel
 		int count = rows.length;
 		if (count == 0) return;
 
-		ArrayList names = new ArrayList(count);
-		ArrayList types = new ArrayList(count);
+		ArrayList<String> names = new ArrayList<String>(count);
+		ArrayList<String> types = new ArrayList<String>(count);
 
 		for (int i=0; i < count; i ++)
 		{

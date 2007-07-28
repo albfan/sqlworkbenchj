@@ -45,7 +45,7 @@ class ProfileListModel
 		buildTree();
 	}
 
-	private void sortList(List toSort)
+	private void sortList(List<ConnectionProfile> toSort)
 	{
 		if (toSort == null) return;
 		Collections.sort(toSort, ConnectionProfile.getNameComparator());
@@ -106,10 +106,10 @@ class ProfileListModel
 		return nodes;
 	}
 	
-	public List getGroups()
+	public List<String> getGroups()
 	{
 		if (this.rootNode == null) return null;
-		List result = new LinkedList();
+		List<String> result = new LinkedList<String>();
 		int children = this.getChildCount(this.rootNode);
 		for (int i = 0; i < children; i++)
 		{
@@ -160,7 +160,7 @@ class ProfileListModel
 
 	public TreePath getFirstProfile()
 	{
-		TreeNode defGroup = (TreeNode)this.rootNode.getChildAt(0);
+		TreeNode defGroup = this.rootNode.getChildAt(0);
 		Object profile = defGroup.getChildAt(0);
 		return new TreePath( new Object[] { rootNode, defGroup, profile });
 	}
@@ -254,44 +254,37 @@ class ProfileListModel
 	
 	private void buildTree()
 	{
-		ArrayList profiles = new ArrayList(ConnectionMgr.getInstance().getProfiles());
+		ArrayList<ConnectionProfile> profiles = new ArrayList<ConnectionProfile>(ConnectionMgr.getInstance().getProfiles());
 		if (profiles.size() == 0) return;
 		
 		sortList(profiles);
 		
-		Map groupMap = new HashMap(profiles.size());
-		
-		Iterator itr = profiles.iterator();
+		Map<String, List<ConnectionProfile>> groupMap = new HashMap<String, List<ConnectionProfile>>(profiles.size());
 		
 		this.size = profiles.size();
 		
-		while (itr.hasNext())
+		for (ConnectionProfile profile : profiles)
 		{
-			ConnectionProfile profile = (ConnectionProfile)itr.next();
 			String group = profile.getGroup();
-			List l = (List)groupMap.get(group);
+			List<ConnectionProfile> l = groupMap.get(group);
 			if (l == null)
 			{
-				l = new ArrayList();
+				l = new ArrayList<ConnectionProfile>();
 				groupMap.put(group, l);
 			}
 			l.add(profile);
 		}
 		
 		// Make sure the default group is added as the first item!
-		List groups = new ArrayList();
+		List<String> groups = new ArrayList<String>();
 		groups.addAll(groupMap.keySet());
 		Collections.sort(groups, StringUtil.getCaseInsensitiveComparator());
 		
-		// Now add all the other groups
-		itr = groups.iterator();
-		while (itr.hasNext())
+		for (String group : groups)
 		{
-			String group = (String)itr.next();
-			
 			DefaultMutableTreeNode groupNode = new DefaultMutableTreeNode(group, true);
 			rootNode.add(groupNode);
-			List groupProfiles = (List)groupMap.get(group);
+			List<ConnectionProfile> groupProfiles = groupMap.get(group);
 			
 			this.sortList(groupProfiles);
 			Iterator p = groupProfiles.iterator();

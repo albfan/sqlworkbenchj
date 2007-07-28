@@ -35,6 +35,25 @@ public class SqlUtilTest
 	{
 	}
 
+	public void testTrimSemicolon()
+	{
+		String input = "hello, world";
+		String result = SqlUtil.removeTrailingSemicolon(input);
+		assertEquals(input, result);
+		
+		input = "select * from test;";
+		result = SqlUtil.removeTrailingSemicolon(input);
+		assertEquals("select * from test", result);
+
+		input = "select * from test;;;;;;";
+		result = SqlUtil.removeTrailingSemicolon(input);
+		assertEquals("select * from test", result);
+		
+		input = "delete from gaga; commit;";
+		result = SqlUtil.removeTrailingSemicolon(input);
+		assertEquals("delete from gaga; commit", result);
+	}
+	
 	public void testGetCreateType()
 	{
 		try
@@ -159,7 +178,7 @@ public class SqlUtilTest
 	public void testGetSelectColumns()
 	{
 		String sql = "select x,y,z from bla";
-		List l = SqlUtil.getSelectColumns(sql,true);
+		List<String> l = SqlUtil.getSelectColumns(sql,true);
 		assertEquals("Not enough columns", 3, l.size());
 		assertEquals("x", l.get(0));
 		assertEquals("z", l.get(2));
@@ -234,7 +253,7 @@ public class SqlUtilTest
 		
 		sql = "/* \n" + 
 					 "* $URL: some_script.sql $ \n" + 
-					 "* $Revision: 1.14 $ \n" + 
+					 "* $Revision: 1.15 $ \n" + 
 					 "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
 					 "*/ \n" + 
 					 "-- A quis Lorem consequat Aenean tellus risus convallis velit Maecenas arcu. \n" + 

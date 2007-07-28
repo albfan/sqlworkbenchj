@@ -119,15 +119,43 @@ public class SqlFormatterTest
 			e.printStackTrace();
 		}
 	}
-	public void testColumnAlias()
+	
+	public void testCase()
 	{
 		try
 		{
-			String sql = "SELECT case when x = 1 then 2 else 3 end AS y FROM table";
-			String expected = "SELECT CASE\n         WHEN x=1 THEN 2\n         ELSE 3\n       END AS y\nFROM TABLE";
+			String sql = "SELECT col1 as bla, case when x = 1 then 2 else 3 end AS y FROM table";
+			String expected = "SELECT col1 AS bla,\n       CASE\n         WHEN x=1 THEN 2\n         ELSE 3\n       END AS y\nFROM TABLE";
 			SqlFormatter f = new SqlFormatter(sql, 100);
 			String formatted = f.getFormattedSql();
 			assertEquals("CASE alias not formatted", expected, formatted);
+			
+			sql = "SELECT case when x = 1 then 2 else 3 end AS y FROM table";
+			expected = "SELECT CASE\n         WHEN x=1 THEN 2\n         ELSE 3\n       END AS y\nFROM TABLE";
+			f = new SqlFormatter(sql, 100);
+			formatted = f.getFormattedSql();
+			assertEquals("CASE alias not formatted", expected, formatted);
+			
+			sql = "SELECT a,b,c from table order by b,case when a=1 then 2 when a=2 then 1 else 3 end";
+			expected =  "SELECT a,\n" + 
+									"       b,\n"+
+									"       c\n"+
+									"FROM TABLE\n"+
+									"ORDER BY b,\n"+
+									"         CASE \n"+
+									"           WHEN a=1 THEN 2\n"+
+									"           WHEN a=2 THEN 1\n"+
+									"           ELSE 3\n"+
+									"         END";
+			f = new SqlFormatter(sql, 100);
+			formatted = f.getFormattedSql();
+//			System.out.println("=================");
+//			System.out.println(formatted);
+//			System.out.println("=================");
+//			System.out.println(expected);
+//			System.out.println("=================");
+			assertEquals("CASE alias not formatted", expected, formatted);
+			
 		}
 		catch (Exception e)
 		{
@@ -135,6 +163,7 @@ public class SqlFormatterTest
 			fail(e.getMessage());
 		}
 	}
+	
 	public void testWhitespace()
 	{
 		try

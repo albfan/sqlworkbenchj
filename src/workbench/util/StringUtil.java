@@ -301,14 +301,16 @@ public class StringUtil
 		return -1;
 	}
 	
-	public static final String replace(String haystack,String needle, String aReplacement)
+	public static final String replace(String haystack, String needle, String replacement)
 	{
-		if (aReplacement == null) return haystack;
-
+		if (replacement == null) return haystack;
+		if (needle == null) return haystack;
+		if (haystack == null) return null;
+		
 		int pos = haystack.indexOf(needle);
 		if (pos == -1) return haystack;
 
-		StringBuilder temp = replaceToBuffer(null,haystack,needle, aReplacement);
+		StringBuilder temp = replaceToBuffer(null,haystack,needle, replacement);
 
 		return temp.toString();
 	}
@@ -358,6 +360,16 @@ public class StringUtil
 		{
 			return false;
 		}
+	}
+	
+	/**
+	 * Checks if the given parameter is "empty", i.e: either null, length == 0 or 
+	 * only whitespace
+	 */
+	public static final boolean isWhitespaceOrEmpty(CharSequence value)
+	{
+		if (isEmptyString(value)) return true;
+		return isWhitespace(value);
 	}
 	
 	public static final boolean isEmptyString(CharSequence value)
@@ -437,13 +449,32 @@ public class StringUtil
 		return result;
 	}
 
+	/**
+	 * Checks if both Strings are equals considering null values. 
+	 * a null String and an empty String (length==0 or all whitespace) are
+	 * considered equal as well (because both are "empty")
+	 * @see isWhitespaceOrEmpty(CharSequence)
+	 */
+	public static final boolean equalStringOrEmpty(String one, String other)
+	{
+		if (isWhitespaceOrEmpty(one) && isWhitespaceOrEmpty(other)) return true;
+		return equalString(one, other);
+	}
+	
 	public static final boolean equalString(String one, String other)
 	{
-		if (one == null && other == null) return true;
-		if (one == null || other == null) return false;
-		return one.equals(other);
+		return compareStrings(one, other, false) == 0;
 	}
 
+	public static int compareStrings(String value1, String value2, boolean ignoreCase)
+	{
+		if (value1 == null && value2 == null) return 0;
+		if (value1 == null) return -1;
+		if (value2 == null) return 1;
+		if (ignoreCase) return value1.compareToIgnoreCase(value2);
+		return value1.compareTo(value2);
+	}
+	
 	public static final boolean equalStringIgnoreCase(String one, String other)
 	{
 		if (one == null && other == null) return true;
@@ -483,7 +514,7 @@ public class StringUtil
 	 */
 	public static final List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets)
 	{
-		if (isEmptyString(aString)) return Collections.EMPTY_LIST;
+		if (isEmptyString(aString)) return Collections.emptyList();
 		WbStringTokenizer tok = new WbStringTokenizer(aString, aDelimiter);
 		tok.setDelimiterNeedsWhitspace(false);
 		tok.setCheckBrackets(checkBrackets);
@@ -508,7 +539,7 @@ public class StringUtil
 	 */
 	public static final List<String> getObjectNames(String list)
 	{
-		if (isEmptyString(list)) return Collections.EMPTY_LIST;
+		if (isEmptyString(list)) return Collections.emptyList();
 		WbStringTokenizer tok = new WbStringTokenizer(list, ",");
 		tok.setDelimiterNeedsWhitspace(false);
 		tok.setCheckBrackets(false);

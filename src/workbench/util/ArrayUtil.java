@@ -11,8 +11,7 @@
  */
 package workbench.util;
 
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,7 +22,7 @@ public class ArrayUtil
 
 	public static <T> List<T> arrayToList(T[] a) 
 	{ 
-		List<T> l = new LinkedList<T>();
+		List<T> l = new ArrayList<T>(a.length);
 		for (T o : a) 
 		{ 
 			l.add(o);
@@ -31,11 +30,4 @@ public class ArrayUtil
 		return l;
 	}	
 
-	public static <T> void arrayToCollection(T[] a, Collection<T> c) 
-	{ 
-		for (T o : a) 
-		{ 
-			c.add(o);
-		}
-	}	
 }

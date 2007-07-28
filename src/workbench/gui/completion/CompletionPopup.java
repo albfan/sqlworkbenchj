@@ -23,6 +23,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -39,6 +42,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.editor.JEditTextArea;
 import workbench.log.LogMgr;
+import workbench.resource.ColumnSortType;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -273,6 +277,33 @@ public class CompletionPopup
 		});
 	}
 	
+	private List<ColumnIdentifier> getColumnsFromData()
+	{
+		int count = data.getSize();
+		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(count);
+		
+		// The first element is the SelectAllMarker, so we do not 
+		// need to include it
+		for (int i=1; i < count; i++)
+		{
+			Object c = this.data.getElementAt(i);
+			if (c instanceof ColumnIdentifier) 
+			{
+				result.add((ColumnIdentifier)c);
+			}
+		}
+		
+		if (Settings.getInstance().getAutoCompletionColumnSortType() == ColumnSortType.position)
+		{
+			ColumnIdentifier.sortByPosition(result);
+		}
+//		else
+//		{
+//			Collections.sort(result);
+//		}
+		return result;
+	}
+	
 	private void closePopup(boolean pasteEntry)
 	{
 		editor.removeKeyEventInterceptor();
@@ -297,33 +328,25 @@ public class CompletionPopup
 					}
 					else if (o instanceof SelectAllMarker)
 					{
-						int count = this.data.getSize();
+						// The SelectAllMarker is only used when columns are beeing displayed
+						List<ColumnIdentifier> columns = getColumnsFromData();
+						
+						int count = columns.size();
 						StringBuilder cols = new StringBuilder(count * 10);
-						int col = 0;
 						
 						// The first element is the SelectAllMarker, so we do not 
 						// need to include it
-						for (int i=1; i < count; i++)
+						for (int i=0; i < count; i++)
 						{
-							Object c = this.data.getElementAt(i);
-							if (c == null) continue;
-							String v = c.toString();
-							if (c instanceof ColumnIdentifier) 
+							ColumnIdentifier c = columns.get(i);
+							String v = c.getColumnName();
+							if (context.getAnalyzer().getColumnPrefix() != null)
 							{
-								v = getPasteValue(c.toString());
-								if (context.getAnalyzer().getColumnPrefix() != null)
-								{
-									cols.append(context.getAnalyzer().getColumnPrefix());
-									cols.append(".");
-								}
+								cols.append(context.getAnalyzer().getColumnPrefix());
+								cols.append(".");
 							}
-							else if (c instanceof String)
-							{
-								v = (String)c;
-							}
-							if (col > 0) cols.append(", ");
+							if (i > 0) cols.append(", ");
 							cols.append(v);
-							col ++;
 						}
 						value = cols.toString();
 					}

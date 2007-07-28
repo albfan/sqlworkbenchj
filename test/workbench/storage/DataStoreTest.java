@@ -174,7 +174,7 @@ public class DataStoreTest
 			List<DmlStatement> l = ds.getUpdateStatements(con);
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
-			DmlStatement dml = (DmlStatement)l.get(0);
+			DmlStatement dml = l.get(0);
 			SqlLiteralFormatter f = new SqlLiteralFormatter(con);
 			String insert = dml.getExecutableStatement(f, false);
 			String verb = SqlUtil.getSqlVerb(insert);
@@ -187,7 +187,7 @@ public class DataStoreTest
 			l = ds.getUpdateStatements(con);
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
-			dml = (DmlStatement)l.get(0);
+			dml = l.get(0);
 			insert = dml.getExecutableStatement(f, false);
 			table = SqlUtil.getInsertTable(insert);
 			assertEquals("JUNIT_TEST", table);
@@ -197,7 +197,7 @@ public class DataStoreTest
 			l = ds.getUpdateStatements(con);
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
-			dml = (DmlStatement)l.get(0);
+			dml = l.get(0);
 			insert = dml.getExecutableStatement(f, false);
 			table = SqlUtil.getInsertTable(insert);
 			assertEquals("junit_test", table);
@@ -210,7 +210,7 @@ public class DataStoreTest
 			l = ds.getUpdateStatements(con);
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
-			dml = (DmlStatement)l.get(0);
+			dml = l.get(0);
 			String update = dml.getExecutableStatement(f, false);
 			verb = SqlUtil.getSqlVerb(update);
 			table = SqlUtil.getUpdateTable(update);
@@ -222,7 +222,7 @@ public class DataStoreTest
 			l = ds.getUpdateStatements(con);
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
-			dml = (DmlStatement)l.get(0);
+			dml = l.get(0);
 			update = dml.getExecutableStatement(f, false);
 			table = SqlUtil.getUpdateTable(update);
 			assertEquals("junit_test", table);
@@ -232,7 +232,7 @@ public class DataStoreTest
 			l = ds.getUpdateStatements(con);
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
-			dml = (DmlStatement)l.get(0);
+			dml = l.get(0);
 			update = dml.getExecutableStatement(f, false);
 			table = SqlUtil.getUpdateTable(update);
 			assertEquals("JUnit_Test", table);
@@ -491,10 +491,11 @@ public class DataStoreTest
 			stmt.executeUpdate("create table \"case_test\" (nr integer primary key, text_data varchar(100))");
 			String sql = "select * from \"case_test\"";
 			rs = stmt.executeQuery(sql);
-			DataStore ds = new DataStore(rs, con, true);;
+			DataStore ds = new DataStore(rs, con, true);
+			ds.setGeneratingSql(sql);
 			rs.close();
 			
-			ds.checkUpdateTable(sql, con);
+			ds.checkUpdateTable(con);
 			int row = ds.addRow();
 			ds.setValue(row, 0, new Integer(42));
 			ds.setValue(row, 1, "TestData");

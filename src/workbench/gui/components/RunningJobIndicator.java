@@ -14,7 +14,7 @@ package workbench.gui.components;
 import javax.swing.JFrame;
 
 /**
- * @author thomas
+ * @author support@sql-workbench.net
  */
 public class RunningJobIndicator
 {

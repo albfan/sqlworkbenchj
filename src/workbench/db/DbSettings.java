@@ -353,7 +353,7 @@ public class DbSettings
 	 */
 	public List<String> getDataTypesToIgnore()
 	{
-		String types = Settings.getInstance().getProperty("workbench.ignoretypes." + getDbId(), null);;
+		String types = Settings.getInstance().getProperty("workbench.ignoretypes." + getDbId(), null);
 		List<String> ignored = StringUtil.stringToList(types, ",", true, true);
 		return ignored;
 	}

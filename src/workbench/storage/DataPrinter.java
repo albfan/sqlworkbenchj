@@ -16,6 +16,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.List;
+import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.TextRowDataConverter;
 import workbench.log.LogMgr;
 import workbench.util.StrBuffer;
@@ -41,14 +42,14 @@ public class DataPrinter
 		initConverter("\t", StringUtil.LINE_TERMINATOR, null, includeHeaders);
 	}
 	
-	public DataPrinter(DataStore source, String delimiter, String lineEnd, List columns, boolean includeHeader)
+	public DataPrinter(DataStore source, String delimiter, String lineEnd, List<ColumnIdentifier> columns, boolean includeHeader)
 	{
 		this.data = source;
 		initConverter(delimiter, lineEnd, columns, includeHeader);
 	}
 	
 
-	private void initConverter(String delimiter, String lineEnd, List columns, boolean includeHeader)
+	private void initConverter(String delimiter, String lineEnd, List<ColumnIdentifier> columns, boolean includeHeader)
 	{
 		converter = new TextRowDataConverter();
 		converter.setResultInfo(data.getResultInfo());

@@ -10,7 +10,7 @@
  *
  */
 package workbench.storage.filter;
-import java.util.Iterator;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +21,7 @@ import java.util.Map;
 public abstract class ComplexExpression
 	implements FilterExpression
 {
-	protected List filter = new LinkedList();
+	protected List<FilterExpression> filter = new LinkedList<FilterExpression>();
 	
 	public ComplexExpression()
 	{
@@ -60,7 +60,7 @@ public abstract class ComplexExpression
 	 */
 	public List getExpressions() { return filter; }
 	
-	public void setExpressions(List l) { this.filter = l;}
+	public void setExpressions(List<FilterExpression> l) { this.filter = l;}
 	
 	public boolean equals(Object other)
 	{
@@ -76,14 +76,12 @@ public abstract class ComplexExpression
 	}
 	public boolean isColumnSpecific()
 	{
-		Iterator itr = filter.iterator();
-		while (itr.hasNext())
-		{
-			FilterExpression expr = (FilterExpression)itr.next();
+		for (FilterExpression expr : filter)
+		{	
 			if (expr.isColumnSpecific()) return true;
 		}
 		return false;
 	}
 	
-	public abstract boolean evaluate(Map columnValues);
+	public abstract boolean evaluate(Map<String, Object> columnValues);
 }

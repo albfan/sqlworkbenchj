@@ -13,7 +13,6 @@ package workbench.sql;
 
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import workbench.gui.sql.DwStatusBar;

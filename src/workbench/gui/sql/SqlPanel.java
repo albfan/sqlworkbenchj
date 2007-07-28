@@ -197,7 +197,7 @@ public class SqlPanel
 	protected boolean cancelExecution;
 
 	private List actions = new LinkedList();
-	private List<WbAction> toolbarActions = new LinkedList();
+	private List<WbAction> toolbarActions = new LinkedList<WbAction>();
 
 	private List<FilenameChangeListener> filenameChangeListeners;
 
@@ -2346,6 +2346,8 @@ public class SqlPanel
 				{
 					currentSql = fixNLPattern.matcher(currentSql).replaceAll(nl);
 				}
+				if (currentSql.length() == 0) continue;
+				
 				// By calling yield() we make sure that
 				// this thread can actually be interrupted!
 				Thread.yield();
@@ -2774,7 +2776,7 @@ public class SqlPanel
 		{
 			public void run()
 			{
-				editor.scrollTo(line, 0);;
+				editor.scrollTo(line, 0);
 				editor.selectStatementTemporary(startPos, endPos);
 			}
 		});
@@ -3075,7 +3077,7 @@ public class SqlPanel
 
 	public void addDbExecutionListener(DbExecutionListener l)
 	{
-		if (this.execListener == null) this.execListener = Collections.synchronizedList(new LinkedList());
+		if (this.execListener == null) this.execListener = Collections.synchronizedList(new LinkedList<DbExecutionListener>());
 		this.execListener.add(l);
 	}
 

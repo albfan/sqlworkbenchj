@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
@@ -38,7 +39,7 @@ import workbench.util.StringUtil;
  */
 public class PkMapping
 {
-	private HashMap columnMapping;
+	private HashMap<String, String> columnMapping = new HashMap<String, String>();
 	
 	private static PkMapping instance;
 	
@@ -68,11 +69,11 @@ public class PkMapping
 		if (this.columnMapping.size() == 0) return null;
 		
 		StringBuilder result = new StringBuilder(this.columnMapping.size() * 50);
-		Iterator itr = this.columnMapping .entrySet().iterator();
+		Iterator<Entry<String, String>> itr = this.columnMapping.entrySet().iterator();
 		while (itr.hasNext())
 		{
-			Map.Entry entry = (Map.Entry)itr.next();
-			result.append(entry.getKey().toString() + "=" + (String)entry.getValue());
+			Map.Entry entry = itr.next();
+			result.append(entry.getKey() + "=" + entry.getValue());
 			result.append("\n");
 		}
 		return result.toString();
@@ -107,11 +108,10 @@ public class PkMapping
 		
 		LogMgr.logInfo("PkMapping.readMappingFile()", "Using PK mappings from " + f.getAbsolutePath());
 		
-		this.columnMapping = new HashMap(props.size());
-		Iterator itr = props.entrySet().iterator();
+		Iterator<Entry<Object, Object>> itr = props.entrySet().iterator();
 		while (itr.hasNext())
 		{
-			Map.Entry entry = (Map.Entry)itr.next();
+			Entry<Object, Object> entry = itr.next();
 			String table = (String)entry.getKey();
 			String columns = (String)entry.getValue();
 			if (!StringUtil.isEmptyString(columns)) 
@@ -131,25 +131,27 @@ public class PkMapping
 	{
 		addMapping(table.getTableExpression(), columns);
 	}
-	
+
+	/**
+	 * Defines a PK mapping for the specified table name
+	 */
 	public synchronized void addMapping(String table, String columns)
 	{
-		if (this.columnMapping == null) this.columnMapping = new HashMap();
 		if (!StringUtil.isEmptyString(table) && !StringUtil.isEmptyString(columns))
 		{
 			this.columnMapping.put(table.toLowerCase(), columns);
 		}
 	}
 	
-	public synchronized Collection getPKColumns(WbConnection con, TableIdentifier tbl)
+	public synchronized Collection<String> getPKColumns(WbConnection con, TableIdentifier tbl)
 	{
 		if (this.columnMapping == null) return null;
-		String columns = (String) this.columnMapping.get(tbl.getTableName().toLowerCase());
+		String columns = this.columnMapping.get(tbl.getTableName().toLowerCase());
 		if (columns == null)
 		{
-			columns = (String)this.columnMapping.get(tbl.getTableExpression(con).toLowerCase());
+			columns = this.columnMapping.get(tbl.getTableExpression(con).toLowerCase());
 		}
-		List cols = null;
+		List<String> cols = null;
 		if (columns != null)
 		{
 			cols = StringUtil.stringToList(columns, ",", true, true);
@@ -158,9 +160,9 @@ public class PkMapping
 		return cols;
 	}
 
-	public synchronized Map getMapping()
+	public synchronized Map<String, String> getMapping()
 	{
-		if (this.columnMapping == null) return Collections.EMPTY_MAP;
+		if (this.columnMapping == null) return Collections.emptyMap();
 		return Collections.unmodifiableMap(this.columnMapping);
 	}
 	
@@ -170,16 +172,16 @@ public class PkMapping
 		BufferedWriter out = null;
 		try
 		{
-			Iterator itr = this.columnMapping.entrySet().iterator();
+			Iterator<Entry<String, String>> itr = this.columnMapping.entrySet().iterator();
 			File f = new File(filename);
 			out = new BufferedWriter(new FileWriter(f));
 			out.write("# Primary key mapping for " + ResourceMgr.TXT_PRODUCT_NAME);
 			out.newLine();
 			while (itr.hasNext())
 			{
-				Map.Entry entry = (Map.Entry)itr.next();
-				String table = (String)entry.getKey();
-				String cols = (String)entry.getValue();
+				Map.Entry<String, String> entry = itr.next();
+				String table = entry.getKey();
+				String cols = entry.getValue();
 				out.write(table);
 				out.write('=');
 				out.write(cols);

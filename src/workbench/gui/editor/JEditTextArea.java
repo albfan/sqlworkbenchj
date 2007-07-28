@@ -41,7 +41,6 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.Enumeration;
 import java.util.Vector;
-import java.util.regex.Matcher;
 
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
@@ -102,7 +101,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.71 2007-06-01 23:00:15 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.72 2007-07-28 13:52:33 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -116,9 +115,10 @@ public class JEditTextArea
 	private boolean currentSelectionIsTemporary;
 	protected String commentChar;
 	private TokenMarker currentTokenMarker;
-	private int rectangularSelectionModifier = 0;
+	//private int rectangularSelectionModifier = 0;
 	private KeyListener keyEventInterceptor;
 	private EditorStatusbar statusBar;
+	private AdjustHandler horizontalAdjustListener = new AdjustHandler();
 
 	/**
 	 * Adding components with this name to the text area will place
@@ -186,7 +186,10 @@ public class JEditTextArea
 
 	public int getHScrollBarHeight()
 	{
-		return (int)horizontal.getPreferredSize().getHeight();
+		if (horizontal != null && horizontal.isVisible())
+			return (int)horizontal.getPreferredSize().getHeight();
+		else
+			return 0;
 	}
 	
 	public Point getCursorLocation()
@@ -390,7 +393,7 @@ public class JEditTextArea
 		}
 		catch (BadLocationException e)
 		{
-			LogMgr.logError("JEditTextArea.doComment()", "Error when shifting selection", e);
+			LogMgr.logError("JEditTextArea.shiftSelection()", "Error when shifting selection", e);
 		}
 		finally
 		{
@@ -549,12 +552,15 @@ public class JEditTextArea
 			}
 		}
 
+		int charWidth = painter.getFontMetrics().charWidth('w');
+		int maxLineLength = getDocument().getMaxLineLength();
+		int maxLineWidth = charWidth * (maxLineLength + 2);
 		int width = painter.getWidth();
-		if(horizontal != null && width != 0)
+		if (horizontal != null && width != 0)
 		{
-			horizontal.setValues(-horizontalOffset,width,0,width * 5);
-			horizontal.setUnitIncrement(painter.getFontMetrics().charWidth('w'));
-			horizontal.setBlockIncrement(width / 2);
+			horizontal.setValues(-horizontalOffset,width,0,maxLineWidth);
+			horizontal.setUnitIncrement(charWidth);
+			horizontal.setBlockIncrement(width / 3);
 		}
 	}
 
@@ -619,7 +625,7 @@ public class JEditTextArea
 	{
 		if(horizontalOffset == this.horizontalOffset) return;
 		this.horizontalOffset = horizontalOffset;
-		if(horizontalOffset != horizontal.getValue())	updateScrollBars();
+		if (horizontal != null && horizontalOffset != horizontal.getValue())	updateScrollBars();
 		painter.repaint();
 	}
 
@@ -1108,9 +1114,9 @@ public class JEditTextArea
 		{
 			return document.getText(0,document.getLength());
 		}
-		catch(BadLocationException bl)
+		catch (BadLocationException bl)
 		{
-			bl.printStackTrace();
+			LogMgr.logError("JEditTextArea.getText()", "Error setting text", bl);
 			return null;
 		}
 	}
@@ -1149,9 +1155,9 @@ public class JEditTextArea
 			document.beginCompoundEdit();
 			document.insertString(document.getLength(),fixLinefeed(aLine),null);
 		}
-		catch(BadLocationException bl)
+		catch (BadLocationException bl)
 		{
-			bl.printStackTrace();
+			LogMgr.logError("JEditTextArea.appendLine()", "Error setting text", bl);
 		}
 		finally
 		{
@@ -1184,7 +1190,7 @@ public class JEditTextArea
 		}
 		catch (BadLocationException bl)
 		{
-			bl.printStackTrace();
+			LogMgr.logError("JEditTextArea.setText()", "Error setting text", bl);
 		}
 		finally
 		{
@@ -1215,9 +1221,9 @@ public class JEditTextArea
 		{
 			return document.getText(start,len);
 		}
-		catch(BadLocationException bl)
+		catch (BadLocationException bl)
 		{
-			bl.printStackTrace();
+			LogMgr.logError("JEditTextArea.getText()", "Error setting text", bl);
 			return null;
 		}
 	}
@@ -1238,7 +1244,7 @@ public class JEditTextArea
 		}
 		catch(BadLocationException bl)
 		{
-			bl.printStackTrace();
+			LogMgr.logError("JEditTextArea.getText()", "Error setting text", bl);
 			segment.offset = segment.count = 0;
 		}
 	}
@@ -1765,9 +1771,9 @@ public class JEditTextArea
 				}
 			}
 		}
-		catch(BadLocationException bl)
+		catch (BadLocationException bl)
 		{
-			bl.printStackTrace();
+			LogMgr.logError("JEditTextArea.setSelectedText()", "Error setting text", bl);
 			throw new InternalError("Cannot replace selection");
 		}
 		finally
@@ -1793,9 +1799,9 @@ public class JEditTextArea
 			document.beginCompoundEdit();
 			document.insertString(position, fixLinefeed(text), null);
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("JEditTextArea.insertText()", "Error setting text", e);
 		}
 		finally
 		{
@@ -1899,9 +1905,9 @@ public class JEditTextArea
 			document.remove(caret,str.length());
 			document.insertString(caret,str,null);
 		}
-		catch(BadLocationException bl)
+		catch (BadLocationException bl)
 		{
-			bl.printStackTrace();
+			LogMgr.logError("JEditTextArea.overwriteSelectedText()", "Error setting text", bl);
 		}
 		finally
 		{
@@ -2275,9 +2281,9 @@ public class JEditTextArea
 				return;
 			}
 		}
-		catch(BadLocationException bl)
+		catch (BadLocationException bl)
 		{
-			bl.printStackTrace();
+			LogMgr.logError("JEditTextArea.updateBracketHighlight()", "Error setting text", bl);
 		}
 
 		bracketLine = bracketPosition = -1;
@@ -2504,7 +2510,7 @@ public class JEditTextArea
 					if(evt.getAdjustable() == vertical)
 						setFirstLine(vertical.getValue());
 					else
-						setHorizontalOffset(-horizontal.getValue());
+						setHorizontalOffset(horizontal != null ? -horizontal.getValue() : 0);
 				}
 			});
 		}
@@ -2653,7 +2659,7 @@ public class JEditTextArea
 					}
 					catch(BadLocationException bl)
 					{
-						bl.printStackTrace();
+						LogMgr.logError("MouseHandler.mousePressed()", "Error setting text", bl);
 					}
 					break;
 				case 3:

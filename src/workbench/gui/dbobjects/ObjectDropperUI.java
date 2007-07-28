@@ -36,8 +36,8 @@ public class ObjectDropperUI
 	extends javax.swing.JPanel
 {
 	protected JDialog dialog;
-	private List objectNames;
-	private List objectTypes;
+	private List<String> objectNames;
+	private List<String> objectTypes;
 	private WbConnection connection;
 	protected boolean cancelled;
 	protected boolean running;
@@ -211,7 +211,7 @@ public class ObjectDropperUI
 		return this.cancelled;
 	}
 
-	public void setObjects(List objects, List types)
+	public void setObjects(List<String> objects, List<String> types)
 	{
 		this.objectNames = objects;
 		this.objectTypes = types;
@@ -235,7 +235,7 @@ public class ObjectDropperUI
 		int numTypes = this.objectTypes.size();
 		for (int i=0; i < numTypes; i++)
 		{
-			String type = (String)this.objectTypes.get(i);
+			String type = this.objectTypes.get(i);
 			String verb = this.connection.getDbSettings().getCascadeConstraintsVerb(type);
 
 			// if at least one type can be dropped with CASCADE, enable the checkbox

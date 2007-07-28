@@ -15,12 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
-import workbench.db.DbMetadata;
 
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -88,7 +86,7 @@ public class StatementFactory
 		DmlStatement dml = null;
 
 		if (!ignoreStatus && !aRow.isModified()) return null;
-		ArrayList values = new ArrayList(cols);
+		ArrayList<ColumnData> values = new ArrayList<ColumnData>(cols);
 		StringBuilder sql = new StringBuilder("UPDATE ");
 
 		sql.append(getTableNameToUse());
@@ -199,7 +197,7 @@ public class StatementFactory
 		boolean skipIdentityCols = Settings.getInstance().getFormatInsertIgnoreIdentity();
 		int colsPerLine = Settings.getInstance().getFormatInsertColsPerLine();
 
-		ArrayList values = new ArrayList(cols);
+		ArrayList<ColumnData> values = new ArrayList<ColumnData>(cols);
 		StringBuilder sql = new StringBuilder(250);
     sql.append("INSERT INTO ");
 		StringBuilder valuePart = new StringBuilder(250);
@@ -330,7 +328,7 @@ public class StatementFactory
 		DmlStatement dml;
 		int count = this.resultInfo.getColumnCount();
 
-		ArrayList values = new ArrayList(count);
+		ArrayList<ColumnData> values = new ArrayList<ColumnData>(count);
 		StringBuilder sql = new StringBuilder(250);
     sql.append("DELETE FROM ");
 		sql.append(getTableNameToUse());
@@ -417,9 +415,12 @@ public class StatementFactory
 		// For table names that the user entered, neverAdjustCase() will be false
 		boolean neverAdjust = (updateTable == null ? false : updateTable.getNeverAdjustCase());
 		
-		if (neverAdjust && dbConnection != null && !dbConnection.getMetadata().isDefaultCase(value))
+		if (neverAdjust && dbConnection != null)
 		{
-			return dbConnection.getMetadata().quoteObjectname(value);
+			boolean caseSensitive =  dbConnection.getMetadata().isCaseSensitive();
+			boolean defaultCase = dbConnection.getMetadata().isDefaultCase(value);
+			if (caseSensitive) return value;
+			if (!defaultCase) return dbConnection.getMetadata().quoteObjectname(value);
 		}
 		
 		if (this.identifierCase == CASE_UPPER)

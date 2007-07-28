@@ -46,7 +46,6 @@ import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.WbTextCellEditor;
-import workbench.gui.sql.ReferenceTableNavigator;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyRowAction;
@@ -71,7 +70,6 @@ import workbench.resource.Settings;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -431,11 +429,6 @@ public class DwPanel
 		this.deleteRow.setEnabled(false);
 	}
 	
-	public String getCurrentSql()
-	{
-		return this.sql;
-	}
-
 	/**
 	 * Pass the table to be used for future updates to the underlying 
 	 * DataStore. 
@@ -519,11 +512,11 @@ public class DwPanel
 			if (ds == null) return false;
 			if (this.dbConnection == null) return false;
 			if (this.sql == null) return false;
-			result = ds.checkUpdateTable(this.sql, this.dbConnection);
+			result = ds.checkUpdateTable(this.dbConnection);
 			
 			if (!result)
 			{
-				TableIdentifier tbl = selectUpdateTable();
+				TableIdentifier tbl = dataTable.selectUpdateTable();
 				if (tbl != null)
 				{
 					this.setUpdateTable(tbl);
@@ -543,27 +536,6 @@ public class DwPanel
 			this.clearStatusMessage();
 		}
 		return result;
-	}
-	
-	protected TableIdentifier selectUpdateTable()
-	{
-		String csql = this.getCurrentSql();
-		List tables = SqlUtil.getTables(csql, false);
-		TableIdentifier table = null;
-
-		if (tables.size() > 1)
-		{
-			String s = (String)JOptionPane.showInputDialog(SwingUtilities.getWindowAncestor(this),
-				null, ResourceMgr.getString("MsgEnterUpdateTable"),
-				JOptionPane.QUESTION_MESSAGE,
-				null,tables.toArray(),null);
-			
-			if (s != null)
-			{
-				table = new TableIdentifier(s);
-			}
-		}
-		return table;
 	}
 	
 	public boolean hasKeyColumns()

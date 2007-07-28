@@ -21,6 +21,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -116,12 +117,22 @@ public class ProcedureListPanel
 		JScrollPane scroll = new WbScrollPane(this.procColumns);
 
 		Reloadable sourceReload = new Reloadable()
-															{
-																public void reload()
-																{
-																	retrieveCurrentProcedure();
-																}
-															};
+		{
+			public void reload()
+			{
+				if (dbConnection.isBusy()) return;
+				try
+				{
+					dbConnection.setBusy(true);
+					retrieveCurrentProcedure();
+				}
+				finally
+				{
+					dbConnection.setBusy(false);
+				}
+			}
+		};
+		
 		source = new DbObjectSourcePanel(parent, sourceReload);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), source);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), scroll);
@@ -313,8 +324,8 @@ public class ProcedureListPanel
 		int count = rows.length;
 		if (count == 0) return;
 
-		ArrayList names = new ArrayList(count);
-		ArrayList types = new ArrayList(count);
+		ArrayList<String> names = new ArrayList<String>(count);
+		ArrayList<String> types = new ArrayList<String>(count);
 
 		this.readSelectedItems(names, types);
 
@@ -507,7 +518,7 @@ public class ProcedureListPanel
 		if (this.procList.getSelectedRowCount() == 0) return;
 		int rows[] = this.procList.getSelectedRows();
 		int count = rows.length;
-		HashMap procs = new HashMap(count);
+		HashMap<ProcedureDefinition, String> procs = new HashMap<ProcedureDefinition, String>(count);
 		for (int i = 0; i < count; i++)
 		{
 			String proc = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
@@ -523,7 +534,7 @@ public class ProcedureListPanel
 		
 	}
 	
-	private void readSelectedItems(ArrayList names, ArrayList types)
+	private void readSelectedItems(List<String> names, List<String> types)
 	{
 		if (this.procList.getSelectedRowCount() == 0) return;
 		int rows[] = this.procList.getSelectedRows();
@@ -589,8 +600,8 @@ public class ProcedureListPanel
 		int count = rows.length;
 		if (count == 0) return;
 
-		ArrayList names = new ArrayList(count);
-		ArrayList types = new ArrayList(count);
+		List<String> names = new ArrayList<String>(count);
+		List<String> types = new ArrayList<String>(count);
 
 		this.readSelectedItems(names, types);
 

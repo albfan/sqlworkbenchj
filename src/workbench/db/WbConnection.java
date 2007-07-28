@@ -26,6 +26,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import workbench.WbManager;
 
 import workbench.db.report.TagWriter;
 import workbench.interfaces.DbExecutionListener;
@@ -69,8 +70,9 @@ public class WbConnection
 
 	private boolean busy; 
 	private Object busyLock = new Object();
+	private KeepAliveDaemon keepAlive = null;
 	
-	public WbConnection(String anId)
+		public WbConnection(String anId)
 	{
 		this.id = anId;
 	}
@@ -91,6 +93,7 @@ public class WbConnection
 	public void setProfile(ConnectionProfile aProfile)
 	{
 		this.profile = aProfile;
+		initKeepAlive();
 	}
 
 	public PreparedStatementPool getPreparedStatementPool()
@@ -150,6 +153,10 @@ public class WbConnection
 	{
 		if (this.profile == null) return;
 		if (this.sqlConnection == null) return;
+		if (this.keepAlive != null)
+		{
+			this.keepAlive.shutdown();
+		}
 		String sql = profile.getPreDisconnectScript();
 		if (!StringUtil.isEmptyString(sql))
 		{
@@ -315,8 +322,8 @@ public class WbConnection
 					}
 				}
 				// the following line is equivalent to:
-				//   OracleConnection con = (OracleConnection)this.sqlConnection;
-				//   con.db_access.setWarnings(null);
+				// OracleConnection con = (OracleConnection)this.sqlConnection;
+				// con.db_access.setWarnings(null);
 				if (clearSettings != null) clearSettings.invoke(dbAccess, new Object[] { null });
 			}
 		}
@@ -488,7 +495,7 @@ public class WbConnection
 
 	/**
 	 * Create a statement that produces ResultSets that
-	 * are read only and forward only (for performance)
+	 * are read only and forward only (for performance reasons)
 	 * 
 	 * If the profile defined a default fetch size, this
 	 * will be set as well.
@@ -631,6 +638,11 @@ public class WbConnection
 		return this.metaData.getOutputMessages();
 	}
 
+	public int hashCode()
+	{
+		return this.id.hashCode();
+	}
+	
 	public boolean equals(Object o)
 	{
 		if (o instanceof WbConnection)
@@ -769,6 +781,25 @@ public class WbConnection
 		this.fireConnectionStateChanged(PROP_SCHEMA, oldSchema, newSchema);
 	}
 
+	private void initKeepAlive()
+	{
+		if (this.keepAlive != null) 
+		{
+			this.keepAlive.shutdown();
+			this.keepAlive = null;
+		}
+		
+		if (this.profile == null) return;
+		if (WbManager.getInstance().isBatchMode()) return;
+
+		String sql = this.profile.getIdleScript();
+		if (sql == null || sql.trim().length() == 0) return;
+		long idleTime = this.profile.getIdleTime();
+		if (idleTime <= 0) return;
+		this.keepAlive = new KeepAliveDaemon(idleTime, this, sql);
+		this.keepAlive.startThread();
+	}
+	
 	public boolean isBusy()
 	{
 		synchronized (busyLock)
@@ -782,6 +813,10 @@ public class WbConnection
 		synchronized (busyLock)
 		{
 			this.busy = flag;
+			if (flag && this.keepAlive != null)
+			{
+				this.keepAlive.setLastDbAction(System.currentTimeMillis());
+			}
 		}
 	}
 	

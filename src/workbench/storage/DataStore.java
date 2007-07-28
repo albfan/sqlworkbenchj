@@ -31,7 +31,6 @@ import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.storage.ColumnData;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.ConverterException;
 import workbench.util.ExceptionUtil;
@@ -322,7 +321,7 @@ public class DataStore
 	{
 		this.clearFilter();
 		int cols = getColumnCount();
-		Map valueMap = new HashMap(cols);
+		Map<String, Object> valueMap = new HashMap<String, Object>(cols);
 		this.filteredRows = createData();
 		int count = this.getRowCount();
 		for (int i= (count - 1); i >= 0; i--)
@@ -1030,17 +1029,12 @@ public class DataStore
 
 	public String getGeneratingSql() { return this.sql; }
 	
-	public boolean checkUpdateTable(WbConnection aConn)
-	{
-		return this.checkUpdateTable(this.sql, aConn);
-	}
-
 	public boolean checkUpdateTable()
 	{
-		return this.checkUpdateTable(this.sql, this.originalConnection);
+		return this.checkUpdateTable(this.originalConnection);
 	}
 
-	public boolean checkUpdateTable(String aSql, WbConnection aConn)
+	public boolean checkUpdateTable(WbConnection aConn)
 	{
 		if (aConn == null) return false;
 		
@@ -1052,8 +1046,8 @@ public class DataStore
 		}
 		else
 		{
-			if (aSql == null) return false;
-			List tables = SqlUtil.getTables(aSql);
+			if (this.sql == null) return false;
+			List tables = SqlUtil.getTables(this.sql);
 			if (tables.size() != 1) return false;
 			String table = (String)tables.get(0);
 			this.setUpdateTable(table, aConn);
@@ -1243,10 +1237,10 @@ public class DataStore
 		{
 			this.updateHadErrors = true;
 			
-			String sql = dml.getExecutableStatement(createLiteralFormatter(), false);
+			String esql = dml.getExecutableStatement(createLiteralFormatter(), false);
 			if (this.ignoreAllUpdateErrors)
 			{
-				LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + sql + " for row = " + row + ", error: " + e.getMessage(), null);
+				LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + esql + " for row = " + row + ", error: " + e.getMessage(), null);
 			}
 			else
 			{
@@ -1254,7 +1248,7 @@ public class DataStore
 				int choice = JobErrorHandler.JOB_ABORT;
 				if (errorHandler != null)
 				{
-					choice = errorHandler.getActionOnError(rowNum, null, sql, e.getMessage());
+					choice = errorHandler.getActionOnError(rowNum, null, esql, e.getMessage());
 				}
 				if (choice == JobErrorHandler.JOB_CONTINUE)
 				{
@@ -1567,20 +1561,20 @@ public class DataStore
 	 */
 	public List<ColumnData> getPkValues(WbConnection aConnection, int aRow)
 	{
-		if (aConnection == null) return Collections.EMPTY_LIST;
+		if (aConnection == null) return Collections.emptyList();
 		try
 		{
 			this.updatePkInformation(this.originalConnection);
 		}
 		catch (SQLException e)
 		{
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 
-		if (!this.resultInfo.hasPkColumns()) return Collections.EMPTY_LIST;
+		if (!this.resultInfo.hasPkColumns()) return Collections.emptyList();
 
 		RowData rowdata = this.getRow(aRow);
-		if (rowdata == null) return Collections.EMPTY_LIST;
+		if (rowdata == null) return Collections.emptyList();
 
 		int count = this.resultInfo.getColumnCount();
 		List<ColumnData> result = new LinkedList<ColumnData>();

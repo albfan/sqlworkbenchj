@@ -587,7 +587,7 @@ public class TableDataPanel
 			this.retrieveEnd();
 			WbSwingUtilities.showDefaultCursor(this);
 		}
-		if (!error)
+		if (!error && Settings.getInstance().getSelectDataPanelAfterRetrieve())
 		{
 			EventQueue.invokeLater(new Runnable()
 			{

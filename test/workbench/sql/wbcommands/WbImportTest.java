@@ -78,6 +78,70 @@ public class WbImportTest
 		super.tearDown();
 	}
 	
+	public void testFunctionConstant()
+	{
+		try
+		{
+			File importFile  = new File(this.basedir, "constant_func_import.txt");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("firstname\tlastname");
+			out.println("Arthur\tDent");
+			out.println("Ford\tPrefect");
+			out.println("Zaphod\tBeeblebrox");
+			out.close();
+
+			Statement stmt = this.connection.createStatementForQuery();
+			stmt.executeUpdate("create sequence seq_junit start with 1");
+			
+			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -constantValues=\"nr=${next value for seq_junit}\" -type=text -header=true -continueonerror=false -table=junit_test_pk");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			ResultSet rs = stmt.executeQuery("select count(*) from junit_test_pk");
+			int count = -1;
+			if (rs.next())
+			{
+				count = rs.getInt(1);
+			}
+			assertEquals("Not enough values imported", 3, count);
+			
+			rs.close();
+			
+			rs = stmt.executeQuery("select nr, lastname, firstname from junit_test_pk order by nr");
+			if (rs.next())
+			{
+				int id = rs.getInt(1);
+				String lname = rs.getString(2);
+				String fname = rs.getString(3);
+				if (id == 1)
+				{
+					assertEquals("Wrong lastname", "Dent", lname);
+					assertEquals("Wrong firstname", "Arthur", fname);
+				}
+				else if (id == 2)
+				{
+					assertEquals("Wrong lastname", "Prefect", lname);
+					assertEquals("Wrong firstname", "Ford", fname);
+				}
+			}
+			else
+			{
+				fail("First row not imported");
+			}
+			rs.close();
+			
+			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	public void testConstantValues()
 	{
 		try

@@ -150,7 +150,7 @@ public class ImportStringVerifier
 		int l = s.length();
 		for (int i = 0; i < l; i++)
 		{
-			if (s.charAt(i) == '\t') s.setCharAt(i, '»');
+			if (s.charAt(i) == '\t') s.setCharAt(i, '\u00bb');
 		}
 		preview.setText(s.toString());
 		preview.setFont(Settings.getInstance().getEditorFont());

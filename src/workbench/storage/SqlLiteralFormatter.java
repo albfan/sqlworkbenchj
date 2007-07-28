@@ -82,7 +82,7 @@ public class SqlLiteralFormatter
 	{
 		String product = null;
 		isDbId = false;
-		if (con != null)
+		if (con != null && con.getMetadata() != null)
 		{
 			product = con.getMetadata().getDbId();
 			isDbId = true;

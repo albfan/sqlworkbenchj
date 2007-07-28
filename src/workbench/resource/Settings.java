@@ -82,7 +82,7 @@ public class Settings
 
 	private WbProperties props;
 	private String filename;
-	private ArrayList fontChangeListeners = new ArrayList();
+	private ArrayList<FontChangedListener> fontChangeListeners = new ArrayList<FontChangedListener>();
 	private String configDir;
 
 	private ShortcutManager keyManager;
@@ -486,6 +486,16 @@ public class Settings
 		setLineEndingProperty("workbench.editor.lineending.internal", value);
 	}
 
+	public boolean getSelectDataPanelAfterRetrieve()
+	{
+		return getBoolProperty("workbench.gui.dbobjects.autoselectdatapanel", true);
+	}
+	
+	public void setSelectDataPanelAfterRetrieve(boolean flag)
+	{
+		setProperty("workbench.gui.dbobjects.autoselectdatapanel", flag);
+	}
+	
 	/**
 	 * The real setting for the external line ending property
 	 * to be used by the options dialog
@@ -754,7 +764,7 @@ public class Settings
 
 	private void migrateProps()
 	{
-		List servers = getServersWhereDDLNeedsCommit();
+		List<String> servers = getServersWhereDDLNeedsCommit();
 		if (!servers.contains("Microsoft SQL Server"))
 		{
 			servers.add("Microsoft SQL Server");
@@ -766,7 +776,7 @@ public class Settings
 		String defaultSelectable = getProperty("workbench.db.objecttype.selectable.default", null);
 		if (defaultSelectable != null)
 		{
-			List types = StringUtil.stringToList(defaultSelectable.toLowerCase(), ",", true, true, false);
+			List<String> types = StringUtil.stringToList(defaultSelectable.toLowerCase(), ",", true, true, false);
 			if (!types.contains("synonym"))
 			{
 				types.add("synonym");
@@ -885,6 +895,8 @@ public class Settings
 			this.props.remove("workbench.db.sql_server.currentcatalog.query");
 			this.props.remove("workbench.db.sql_server.objectname.case");
 			this.props.remove("workbench.db.sql_server.schemaname.case");
+
+			this.props.remove("workbench.dbexplorer.visible");
 			
 		}
 		catch (Throwable e)
@@ -1295,9 +1307,8 @@ public class Settings
 
 	public void fireFontChangedEvent(String aKey, Font aFont)
 	{
-		for (int i=0; i < this.fontChangeListeners.size(); i++)
+		for (FontChangedListener listener : fontChangeListeners)
 		{
-			FontChangedListener listener = (FontChangedListener)this.fontChangeListeners.get(i);
 			if (listener != null)	listener.fontChanged(aKey, aFont);
 		}
 	}
@@ -2355,6 +2366,37 @@ public class Settings
 		}
 	}
 
+	public ColumnSortType getAutoCompletionColumnSortType()
+	{
+		String sort = getProperty("workbench.editor.autocompletion.paste.sort", "name");
+		try
+		{
+			return ColumnSortType.valueOf(sort);
+		}
+		catch (Exception e)
+		{
+			return ColumnSortType.name;
+		}
+	}
+
+	public void setAutoCompletionColumnSort(String sort)
+	{
+		
+		try
+		{
+			setAutoCompletionColumnSort(ColumnSortType.valueOf(sort));
+		}
+		catch (Exception e)
+		{
+			setAutoCompletionColumnSort(ColumnSortType.name);
+		}
+	}
+	
+	public void setAutoCompletionColumnSort(ColumnSortType sort)
+	{
+		setProperty("workbench.editor.autocompletion.paste.sort", (sort == ColumnSortType.position ? "position" : "name"));
+	}
+	
 	public String getAutoCompletionPasteCase()
 	{
 		return getProperty("workbench.editor.autocompletion.paste.case", null);
@@ -2460,30 +2502,30 @@ public class Settings
 		return getBoolProperty("workbench.db.retrievepklist", true);
 	}
 
-	public List getServersWhereDDLNeedsCommit()
+	public List<String> getServersWhereDDLNeedsCommit()
 	{
 		String list = getProperty("workbench.db.ddlneedscommit", "");
     return StringUtil.stringToList(list, ",");
 	}
 
-	public List getServersWithInlineConstraints()
+	public List<String> getServersWithInlineConstraints()
 	{
 		String list = getProperty("workbench.db.inlineconstraints", "");
 		return StringUtil.stringToList(list, ",");
 	}
-	public List getServersWhichNeedJdbcCommit()
+	public List<String> getServersWhichNeedJdbcCommit()
 	{
 		String list = getProperty("workbench.db.usejdbccommit", "");
     return StringUtil.stringToList(list, ",");
 	}
 
-	public List getServersWithNoNullKeywords()
+	public List<String> getServersWithNoNullKeywords()
 	{
 		String list = getProperty("workbench.db.nonullkeyword", "");
 		return StringUtil.stringToList(list, ",");
 	}
 
-	public List getCaseSensitivServers()
+	public List<String> getCaseSensitivServers()
 	{
 		String list = getProperty("workbench.db.casesensitive", "");
 		return StringUtil.stringToList(list, ",");

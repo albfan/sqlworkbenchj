@@ -17,7 +17,7 @@ import workbench.db.ColumnIdentifier;
 
 /**
  *
- * @author tkellerer
+ * @author support@sql-workbench.net
  */
 public class ColumnLimitsTest extends TestCase
 {

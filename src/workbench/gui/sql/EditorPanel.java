@@ -125,7 +125,7 @@ public class EditorPanel
 	private List<FilenameChangeListener> filenameChangeListeners;
 	private File currentFile;
 	private String fileEncoding;
-	private Set dbFunctions = null;
+	private Set<String> dbFunctions = null;
 	private boolean isMySQL = false;
 	private DelimiterDefinition alternateDelimiter;
 	
@@ -220,13 +220,13 @@ public class EditorPanel
 		{
 			token.initKeywordMap(); // reset keywords, to get rid of old DBMS specific ones
 			
-			Collection keywords = aConnection.getMetadata().getSqlKeywords();
+			Collection<String> keywords = aConnection.getMetadata().getSqlKeywords();
 			token.setSqlKeyWords(keywords);
 			token.setSqlFunctions(this.dbFunctions);
 			
 			String key = "workbench.db." + aConnection.getMetadata().getDbId() + ".syntax.";
 
-			List addKeys = StringUtil.stringToList(Settings.getInstance().getProperty(key  + "keywords", ""), ",", true, true);
+			List<String> addKeys = StringUtil.stringToList(Settings.getInstance().getProperty(key  + "keywords", ""), ",", true, true);
 			token.setSqlKeyWords(addKeys);
 			addKeys = StringUtil.stringToList(Settings.getInstance().getProperty(key  + "functions", ""), ",", true, true);
 			token.setSqlFunctions(addKeys);			

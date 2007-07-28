@@ -11,11 +11,15 @@
  */
 package workbench.db.report;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
+import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.report.TagAttribute;
 import workbench.util.StrBuffer;
 
 /**
@@ -33,6 +37,8 @@ public class IndexReporter
 	public static final String TAG_INDEX_PK = "primary-key";
 	public static final String TAG_INDEX_TYPE = "type";
 	public static final String TAG_INDEX_EXPR = "index-expression";
+	public static final String TAG_INDEX_COLUMN_LIST = "column-list";
+	public static final String TAG_INDEX_COLUMN_NAME = "column";
 
 	private Collection<IndexDefinition> indexList;
 	private TagWriter tagWriter = new TagWriter();
@@ -65,6 +71,28 @@ public class IndexReporter
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_UNIQUE, index.isUnique());
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_PK, index.isPrimaryKeyIndex());
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_TYPE, index.getIndexType());
+			List<IndexColumn> columns = index.getColumns();
+			if (columns.size() > 0)
+			{
+				StrBuffer colIndent = new StrBuffer(defIndent);
+				colIndent.append("  ");
+				tagWriter.appendOpenTag(result, defIndent, TAG_INDEX_COLUMN_LIST);
+				result.append('\n');
+				for (IndexColumn col : columns)
+				{
+					
+					List<TagAttribute> attrs = new ArrayList<TagAttribute>(2);
+					attrs.add(new TagAttribute("name", col.getColumn()));
+					
+					if (col.getDirection() != null)
+					{
+						attrs.add(new TagAttribute("direction", col.getDirection()));
+					}
+					tagWriter.appendOpenTag(result, colIndent, TAG_INDEX_COLUMN_NAME, attrs, false);
+					result.append("/>\n");
+				}
+				tagWriter.appendCloseTag(result, defIndent, TAG_INDEX_COLUMN_LIST);
+			}
 			tagWriter.appendCloseTag(result, indent, TAG_INDEX);
 		}
 		return;

@@ -895,7 +895,7 @@ public class DbMetadata
 		String replace = Settings.getInstance().getProperty(prefix + "replace" + suffix, null);
 		if (replace != null)
 		{
-			replace = replace.replaceAll("%name%", name);
+			replace = StringUtil.replace(replace, "%name%", quoteObjectname(name));
 			result.append(replace);
 			replaced = true;
 		}
@@ -919,7 +919,7 @@ public class DbMetadata
 			}
 			else
 			{
-				drop = drop.replaceAll("%name%", quoteObjectname(name));
+				drop = StringUtil.replace(drop, "%name%", quoteObjectname(name));
 				result.append(drop);
 			}
 			result.append('\n');
@@ -937,7 +937,7 @@ public class DbMetadata
 			}
 			else
 			{
-				create = create.replaceAll("%name%", quoteObjectname(name));
+				create = StringUtil.replace(create, "%name%", quoteObjectname(name));
 				result.append(create);
 			}
 		}
@@ -979,7 +979,7 @@ public class DbMetadata
 		return this.keywordHandler.isKeyword(name);
 	}
 	
-	public Collection getSqlKeywords()
+	public Collection<String> getSqlKeywords()
 	{
 		if (this.keywordHandler == null) this.initKeywordHandler();
 		return this.keywordHandler.getSqlKeywords();
@@ -1531,6 +1531,21 @@ public class DbMetadata
 		return ocase == IdentifierCase.lower;
 	}
 
+	public boolean isCaseSensitive()
+	{
+    try
+    {
+			// According to the JDBC docs, supportsMixedCaseIdentifiers()
+			// should only return true if the server is case sensitive...
+			return this.metaData.supportsMixedCaseIdentifiers();
+    }
+    catch (SQLException ex)
+    {
+			LogMgr.logWarning("DbMetadata.isCaseSensitive()", "Error when calling supportsMixedCaseIdentifiers()", ex);
+			// Standard SQL identifiers are not case sensitive.
+      return false;
+    }
+	}
 	
 	/**
 	 * Returns true if the server stores identifiers in lower case.
@@ -2185,15 +2200,7 @@ public class DbMetadata
 					def.setIndexType(dbSettings.mapIndexType(type));
 				}
 
-				if (dir != null)
-				{
-					def.addColumn(colName + " " + dir);
-				}
-				else
-				{
-					def.addColumn(colName);
-				}
-				
+				def.addColumn(colName, dir);
 			}
 			
 			this.indexReader.processIndexList(tbl, defs.values());
@@ -3208,7 +3215,7 @@ public class DbMetadata
 				result.append(def.trim());
 			}
 
-			String constraint = (String)columnConstraints.get(colName);
+			String constraint = columnConstraints.get(colName);
 			if (constraint != null && constraint.length() > 0)
 			{
 				result.append(' ');
@@ -3584,7 +3591,7 @@ public class DbMetadata
 				// remove the placeholder completely
 				if ("restrict".equalsIgnoreCase(rule))
 				{
-					stmt = metaSqlMgr.removePlaceholder(stmt, MetaDataSqlManager.FK_DELETE_RULE, true);
+					stmt = MetaDataSqlManager.removePlaceholder(stmt, MetaDataSqlManager.FK_DELETE_RULE, true);
 				}
 				else
 				{
@@ -3599,7 +3606,7 @@ public class DbMetadata
 			rule = getDeferrableVerb(deferrable.get(fkname));
 			if (StringUtil.isEmptyString(rule))
 			{
-				stmt = metaSqlMgr.removePlaceholder(stmt, MetaDataSqlManager.DEFERRABLE, true);
+				stmt = MetaDataSqlManager.removePlaceholder(stmt, MetaDataSqlManager.DEFERRABLE, true);
 			}
 			else
 			{

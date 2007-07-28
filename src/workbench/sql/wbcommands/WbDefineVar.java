@@ -103,6 +103,7 @@ public class WbDefineVar
 		{
 			WbStringTokenizer tok = new WbStringTokenizer("=", true, "\"'", false);
 			tok.setSourceString(sql);
+			tok.setKeepQuotes(true);
 			String value = null;
 			String var = null;
 
@@ -124,13 +125,15 @@ public class WbDefineVar
 
 			if (value != null)
 			{
-				value = value.trim();
-				if (value.startsWith("@"))
+				if (value.trim().startsWith("@") || StringUtil.trimQuotes(value).startsWith("@"))
 				{
 					String valueSql = null;
 					try
 					{
-						valueSql = value.substring(1);
+						// In case the @ sign was placed inside the quotes, make sure
+						// there are no quotes before removing the @ sign
+						value = StringUtil.trimQuotes(value);
+						valueSql = StringUtil.trimQuotes(value.trim().substring(1));
 						value = this.evaluateSql(currentConnection, valueSql);
 					}
 					catch (Exception e)
@@ -143,6 +146,12 @@ public class WbDefineVar
 						result.setFailure();
 						return result;
 					}
+				}
+				else
+				{
+					// WbStringTokenizer returned any quotes that were used, so 
+					// we have to remove them again as they should not be part of the variable value
+					value = StringUtil.trimQuotes(value.trim());
 				}
 
 				msg = ResourceMgr.getString("MsgVarDefVariableDefined");

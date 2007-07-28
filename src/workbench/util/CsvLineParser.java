@@ -150,13 +150,16 @@ public class CsvLineParser
 			oneMore = true;
 		}
 		
-		if (this.escapeType == QuoteEscapeType.escape)
+		if (next != null)
 		{
-			next = StringUtil.replace(next, "\\", "");
-		}
-		else if (this.escapeType == QuoteEscapeType.duplicate)
-		{
-			next = StringUtil.replace(next, "\"\"", "\"");
+			if (this.escapeType == QuoteEscapeType.escape)
+			{
+				next = StringUtil.replace(next, "\\", "");
+			}
+			else if (this.escapeType == QuoteEscapeType.duplicate)
+			{
+				next = StringUtil.replace(next, "\"\"", "\"");
+			}
 		}
 		
 		if (this.returnEmptyStrings && next == null) next = StringUtil.EMPTY_STRING;

@@ -89,12 +89,22 @@ public class TriggerListPanel
 		throws Exception
 	{
 		Reloadable sourceReload = new Reloadable()
-															{
-																public void reload()
-																{
-																	retrieveCurrentTrigger();
-																}
-															};
+		{
+			public void reload()
+			{
+				if (dbConnection.isBusy()) return;
+				try
+				{
+					dbConnection.setBusy(true);
+					retrieveCurrentTrigger();
+				}
+				finally
+				{
+					dbConnection.setBusy(false);
+				}
+			}
+		};
+		
 		this.source = new DbObjectSourcePanel(parent, sourceReload);
 
 		this.listPanel = new JPanel();

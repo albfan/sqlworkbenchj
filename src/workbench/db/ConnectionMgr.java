@@ -91,7 +91,7 @@ public class ConnectionMgr
 		
 		if (reUse)
 		{
-			WbConnection old = (WbConnection)this.activeConnections.get(anId);
+			WbConnection old = this.activeConnections.get(anId);
 			
 			if (old != null)
 			{
@@ -193,7 +193,7 @@ public class ConnectionMgr
 		
 		for (int i=0; i < this.drivers.size(); i ++)
 		{
-			db = (DbDriver)this.drivers.get(i);
+			db = this.drivers.get(i);
 			if (db.getDriverClass().equals(drvClassName))
 			{
 				// if the classname and the driver name are the same return the driver immediately
@@ -229,7 +229,7 @@ public class ConnectionMgr
 		
 		for (int i=0; i < this.drivers.size(); i ++)
 		{
-			db = (DbDriver)this.drivers.get(i);
+			db = this.drivers.get(i);
 			if (db.getDriverClass().equals(drvClassName)) return db;
 		}
 		return null;
@@ -446,12 +446,11 @@ public class ConnectionMgr
 			}
 			else if (conn.getMetadata().isCloudscape() || conn.getMetadata().isApacheDerby())
 			{
-				ConnectionProfile prof = conn.getProfile();
 				boolean shutdown = this.canShutdownCloudscape(conn);
 				conn.close();
 				if (shutdown)
 				{
-					this.shutdownCloudscape(prof);
+					this.shutdownCloudscape(conn);
 				}
 			}
 			else if (conn.getMetadata().isHsql() && this.canCloseHsql(conn))
@@ -536,24 +535,18 @@ public class ConnectionMgr
 	/**
 	 *	Shut down the connection to an internal Cloudscape/Derby database
 	 */
-	private void shutdownCloudscape(ConnectionProfile prof)
+	private void shutdownCloudscape(WbConnection conn)
 	{
+		ConnectionProfile prof = conn.getProfile();
+		
 		String drvClass = prof.getDriverclass();
 		String drvName = prof.getDriverName();
-		
+
 		String url = prof.getUrl();
-		String command = null;
-		String shutdown = ";shutdown=true";
+		int pos = url.indexOf(";");
+		if (pos < 0) pos = url.length();
+		String command = url.substring(0, pos) + ";shutdown=true";
 		
-		int pos = url.indexOf(';');
-		if (pos > -1)
-		{
-			command = url.substring(0, pos) + shutdown;
-		}
-		else
-		{
-			command = url + shutdown;
-		}
 		try
 		{
 			DbDriver drv = this.findDriverByName(drvClass, drvName);
@@ -576,6 +569,11 @@ public class ConnectionMgr
 	{
 		if (!aConn.getMetadata().isCloudscape() && !aConn.getMetadata().isApacheDerby()) return true;
 		
+		String cls = aConn.getProfile().getDriverclass();
+		
+		// Derby server connections should not send a shutdown
+		if (!cls.equals("org.apache.derby.jdbc.EmbeddedDriver")) return false;
+		
 		String url = aConn.getUrl();
 		String prefix;
 		if (aConn.getMetadata().isCloudscape())
@@ -583,12 +581,14 @@ public class ConnectionMgr
 		else
 			prefix = "jdbc:derby:";
 		
-		
 		// check for cloudscape connection
 		if (!url.startsWith(prefix)) return true;
 		
-		// do not shutdown server connections!
+		// do not shutdown cloudscape server connections!
 		if (url.startsWith(prefix + "net:")) return false;
+		
+		// Derby network URL starts with a // 
+		if (url.startsWith(prefix + "//")) return false;
 		
 		String id = aConn.getId();
 		
@@ -639,18 +639,23 @@ public class ConnectionMgr
 			}
 			else if (result instanceof ArrayList)
 			{
-				this.drivers = (ArrayList)result;
+				this.drivers = (List<DbDriver>)result;
 			}
 		}
 		catch (FileNotFoundException fne)
 		{
 			LogMgr.logDebug("ConnectionMgr.readDrivers()", "WbDrivers.xml not found. Using defaults.");
-			this.drivers = new ArrayList();
+			this.drivers = null;
 		}
 		catch (Exception e)
 		{
 			LogMgr.logDebug(this, "Could not load driver definitions. Creating new one...", e);
-			this.drivers = new ArrayList();
+			this.drivers = null;
+		}
+		
+		if (this.drivers == null)
+		{
+			this.drivers = new ArrayList<DbDriver>();
 		}
 		if (this.readTemplates)
 		{

@@ -15,8 +15,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import workbench.log.LogMgr;
@@ -45,30 +43,13 @@ public class TableCreator
 		this.columnDefinition.addAll(columns);
 		
 		// Now sort the columns according to their DBMS position
-		sortColumns();
+		ColumnIdentifier.sortByPosition(columnDefinition);
 
 		this.mapper = new TypeMapper(this.connection);
 	}
 
 	public void useDbmsDataType(boolean flag) { this.useDbmsDataType = flag; }
 	public TableIdentifier getTable() { return this.tablename; }
-	
-	private void sortColumns()
-	{
-		Comparator<ColumnIdentifier> c = new Comparator<ColumnIdentifier>()
-		{
-			public int compare(ColumnIdentifier o1, ColumnIdentifier o2)
-			{
-				int pos1 = o1.getPosition();
-				int pos2 = o2.getPosition();
-				
-				if (pos1 < pos2) return -1;
-				else if (pos1 > pos2) return 1;
-				return 0;
-			}
-		};
-		Collections.sort(columnDefinition, c);
-	}
 	
 	public void createTable()
 		throws SQLException

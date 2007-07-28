@@ -15,7 +15,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import workbench.db.WbConnection;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -25,6 +24,7 @@ import workbench.sql.StatementRunnerResult;
 
 /**
  * Implementation of the SELECT statement. 
+ * 
  * The result of the SELECT is passed back in the StatementRunnerResult object.
  * If a ResultSetConsumer is registered in the StatementRunner executing this
  * statement, the ResultSet will be returned directly, otherwise the 
@@ -43,7 +43,6 @@ public class SelectCommand extends SqlCommand
 
 	/**
 	 * Runs the passed SQL statement using Statement.executeQuery()
-	 * 
 	 */
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException

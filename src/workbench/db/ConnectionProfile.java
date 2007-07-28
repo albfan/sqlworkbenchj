@@ -62,6 +62,9 @@ public class ConnectionProfile
 	private boolean rememberExplorerSchema = false;
 	private String postConnectScript = null;
 	private String preDisconnectScript = null;
+	private String idleScript = null;
+	private long idleTime = 0;
+	
 	private DelimiterDefinition alternateDelimiter;
 	
 	static
@@ -479,7 +482,6 @@ public class ConnectionProfile
 		result.setIgnoreDropErrors(this.ignoreDropErrors);
 		result.setUseSeparateConnectionPerTab(this.separateConnection);
 		result.setRollbackBeforeDisconnect(this.rollbackBeforeDisconnect);
-		//result.setDisableUpdateTableCheck(this.disableUpdateTableCheck);
 		result.setConfirmUpdates(this.confirmUpdates);
 		result.setStorePassword(this.storePassword);
 		result.setStoreExplorerSchema(this.rememberExplorerSchema);
@@ -500,22 +502,16 @@ public class ConnectionProfile
 		return result;
 	}
 
-	public static Comparator getNameComparator()
+	public static Comparator<ConnectionProfile> getNameComparator()
 	{
-		return new Comparator()
+		return new Comparator<ConnectionProfile>()
 		{
-			public int compare(Object o1, Object o2)
+			public int compare(ConnectionProfile o1, ConnectionProfile o2)
 			{
 				if (o1 == null && o2 == null) return 0;
 				if (o1 == null) return -1;
 				if (o2 == null) return 1;
-				if (o1 instanceof ConnectionProfile && o2 instanceof ConnectionProfile)
-				{
-					String name1 = ((ConnectionProfile)o1).name;
-					String name2 = ((ConnectionProfile)o2).name;
-					return name1.compareTo(name2);
-				}
-				return 0;
+				return StringUtil.compareStrings(o1.name, o2.name, true);
 			}
 		};
 	}
@@ -590,25 +586,6 @@ public class ConnectionProfile
 	{
 		this.driverName = driverName;
 	}
-
-//	/**
-//	 * Getter for property disableUpdateTableCheck.
-//	 * @return Value of property disableUpdateTableCheck.
-//	 */
-//	public boolean getDisableUpdateTableCheck()
-//	{
-//		return disableUpdateTableCheck;
-//	}
-//
-//	/**
-//	 * Setter for property disableUpdateTableCheck.
-//	 * @param flag New value of property disableUpdateTableCheck.
-//	 */
-//	public void setDisableUpdateTableCheck(boolean flag)
-//	{
-//		if (flag != this.disableUpdateTableCheck) this.changed = true;
-//		this.disableUpdateTableCheck = flag;
-//	}
 
 	public boolean isConfirmUpdates()
 	{
@@ -686,9 +663,9 @@ public class ConnectionProfile
 
 	public void setPostConnectScript(String script)
 	{
-		if (!StringUtil.equalString(script, this.postConnectScript))
+		if (!StringUtil.equalStringOrEmpty(script, this.postConnectScript))
 		{
-			if (StringUtil.isEmptyString(script))
+			if (StringUtil.isEmptyString(script) || script.trim().length() == 0)
 			{
 				this.postConnectScript = null;
 			}
@@ -707,9 +684,9 @@ public class ConnectionProfile
 
 	public void setPreDisconnectScript(String script)
 	{
-		if (!StringUtil.equalString(script, this.preDisconnectScript))
+		if (!StringUtil.equalStringOrEmpty(script, this.preDisconnectScript))
 		{
-			if (StringUtil.isEmptyString(script))
+			if (StringUtil.isEmptyString(script) || script.trim().length() == 0)
 			{
 				this.preDisconnectScript = null;
 			}
@@ -721,4 +698,39 @@ public class ConnectionProfile
 		}
 	}
 
+	public long getIdleTime()
+	{
+		return this.idleTime;
+	}
+	
+	public void setIdleTime(long time)
+	{
+		if (time != this.idleTime)
+		{
+			this.idleTime = time;
+			this.changed = true;
+		}
+	}
+	
+	public String getIdleScript()
+	{
+		return idleScript;
+	}
+
+	public void setIdleScript(String script)
+	{
+		if (!StringUtil.equalStringOrEmpty(script, this.idleScript))
+		{
+			if (StringUtil.isEmptyString(script) || script.trim().length() == 0)
+			{
+				this.idleScript = null;
+			}
+			else
+			{
+				this.idleScript = script.trim();
+			}
+			this.changed = true;
+		}
+	}
+	
 }

@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import workbench.resource.Settings;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.util.StringUtil;
 
@@ -27,7 +26,7 @@ import workbench.util.StringUtil;
  */
 public class SqlFormatter
 {
-	private final Set LINE_BREAK_BEFORE = new HashSet();
+	private final Set<String> LINE_BREAK_BEFORE = new HashSet<String>();
 	{
 		LINE_BREAK_BEFORE.add("SELECT");
 		LINE_BREAK_BEFORE.add("SET");
@@ -54,7 +53,7 @@ public class SqlFormatter
 		LINE_BREAK_BEFORE.add("CONNECT BY");
 	}
 
-	private final Set LINE_BREAK_AFTER = new HashSet();
+	private final Set<String> LINE_BREAK_AFTER = new HashSet<String>();
 	{
 		LINE_BREAK_AFTER.add("UNION");
 		LINE_BREAK_AFTER.add("UNION ALL");
@@ -65,7 +64,7 @@ public class SqlFormatter
 	}
 
 	// keywords terminating a WHERE clause
-	public static final Set WHERE_TERMINAL = new HashSet();
+	public static final Set<String> WHERE_TERMINAL = new HashSet<String>();
 	static
 	{
 		WHERE_TERMINAL.add("ORDER BY");
@@ -79,7 +78,7 @@ public class SqlFormatter
 	}
 
 	// keywords terminating the FROM part
-	public static final Set FROM_TERMINAL = new HashSet();
+	public static final Set<String> FROM_TERMINAL = new HashSet<String>();
 	static
 	{
 		FROM_TERMINAL.addAll(WHERE_TERMINAL);
@@ -90,7 +89,7 @@ public class SqlFormatter
 
 
 	// keywords terminating an GROUP BY clause
-	private final Set GROUP_BY_TERMINAL = new HashSet();
+	private final Set<String> GROUP_BY_TERMINAL = new HashSet<String>();
 	{
 		GROUP_BY_TERMINAL.addAll(WHERE_TERMINAL);
 		GROUP_BY_TERMINAL.add("SELECT");
@@ -101,19 +100,19 @@ public class SqlFormatter
 		GROUP_BY_TERMINAL.add("CREATE OR REPLACE");
 	}
 	
-	private final Set ORDER_BY_TERMINAL = new HashSet();
+	private final Set<String> ORDER_BY_TERMINAL = new HashSet<String>();
 	{
 		ORDER_BY_TERMINAL.remove("GROUP BY");
 		ORDER_BY_TERMINAL.add(";");
 	}
 
-	public static final Set SELECT_TERMINAL = new HashSet(1);
+	public static final Set<String> SELECT_TERMINAL = new HashSet<String>(1);
 	static
 	{
 		SELECT_TERMINAL.add("FROM");
 	}
 
-	private final Set SET_TERMINAL = new HashSet();
+	private final Set<String> SET_TERMINAL = new HashSet<String>();
 	{
 		SET_TERMINAL.add("FROM");
 		SET_TERMINAL.add("WHERE");
@@ -126,7 +125,7 @@ public class SqlFormatter
 	private StringBuilder leadingWhiteSpace = null;
 	private int realLength = 0;
 	private int maxSubselectLength = 60;
-	private Set dbFunctions = Collections.EMPTY_SET;
+	private Set<String> dbFunctions = Collections.emptySet();
 	private int selectColumnsPerLine = 1;
 	private static final String NL = "\n";
 	
@@ -147,7 +146,7 @@ public class SqlFormatter
 			for (int i=0; i < indentCount; i++) this.indent.append(' ');
 		}
 		this.maxSubselectLength = maxSubselectLength;
-		this.dbFunctions = new HashSet();
+		this.dbFunctions = new HashSet<String>();
 		addStandardFunctions(dbFunctions);
 	}
 
@@ -161,9 +160,9 @@ public class SqlFormatter
 		this.selectColumnsPerLine = cols;
 	}
 	
-	public void setDBFunctions(Set functionNames)
+	public void setDBFunctions(Set<String> functionNames)
 	{
-		this.dbFunctions = new HashSet();
+		this.dbFunctions = new HashSet<String>();
 		if (functionNames != null)
 		{
 			this.dbFunctions.addAll(functionNames);
@@ -171,7 +170,7 @@ public class SqlFormatter
 		addStandardFunctions(dbFunctions);
 	}
 	
-	private void addStandardFunctions(Set functions)
+	private void addStandardFunctions(Set<String> functions)
 	{
 		functions.add("MIN");
 		functions.add("MAX");
@@ -320,7 +319,7 @@ public class SqlFormatter
 		String currentV = current.getContents();
 		char lastChar = lastV.charAt(0);
 		char currChar = currentV.charAt(0);
-		if (last.isWhiteSpace() && current.isWhiteSpace()) return false;
+		if (last.isWhiteSpace()) return false;
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
 		boolean isCurrentOpenBracket = "(".equals(currentV);
 		boolean isLastOpenBracket = "(".equals(lastV);
@@ -417,7 +416,7 @@ public class SqlFormatter
 		return null;
 	}
 
-	private SQLToken processList(SQLToken last, int indentCount, Set terminalKeys)
+	private SQLToken processList(SQLToken last, int indentCount, Set<String> terminalKeys)
 		throws Exception
 	{
 		StringBuilder b = new StringBuilder(indentCount);
@@ -675,23 +674,36 @@ public class SqlFormatter
 				this.appendNewline();
 				this.indent(current);
 				this.appendText(text);
+				// Get the next token after the END. If that is the keyword AS, 
+				// the CASE statement ist not yet ended and we have to add the AS keyword
+				// and the alias that was given before returning to the caller
 				t = this.lexer.getNextToken(true, false);
-				if ( t!= null && !t.getContents().equals("AS"))
+				if (t != null && t.getContents().equals("AS"))
 				{
-					this.appendNewline();
+					this.appendText(' ');
+					this.appendText(t.getContents());
+					t = this.lexer.getNextToken(true, false);
+					if (t != null) 
+					{
+						this.appendText(' ');
+						this.appendText(t.getContents());
+						t = this.lexer.getNextToken(true, false);
+					}
 				}
+				this.appendNewline();
 				return t;
 			}
 			else if (t.isComment())
 			{
 				this.appendComment(text);
 			}
-			else if (text.trim().length() > 0)
+			else if (!t.isWhiteSpace())
 			{
+//				if (this.needsWhitespace(last, t)) this.appendText(' ');
 				this.appendText(text);
 			}
 			last = t;
-			t = this.lexer.getNextToken(true,true);
+			t = this.lexer.getNextToken(true,false);
 		}
 		return null;
 	}
@@ -776,7 +788,7 @@ public class SqlFormatter
 	private SQLToken processInList(SQLToken current)
 		throws Exception
 	{
-		ArrayList list = new ArrayList(25);
+		ArrayList<StringBuilder> list = new ArrayList<StringBuilder>(25);
 		list.add(new StringBuilder(""));
 		SQLToken t = current;
 
@@ -795,7 +807,7 @@ public class SqlFormatter
 				}
 				else
 				{
-					StringBuilder b = (StringBuilder)list.get(elementcounter);
+					StringBuilder b = list.get(elementcounter);
 					if (b == null)
 					{
 						b = new StringBuilder(text);
@@ -821,7 +833,7 @@ public class SqlFormatter
 			}
 			else if (!t.isWhiteSpace())
 			{
-				StringBuilder b = (StringBuilder)list.get(elementcounter);
+				StringBuilder b = list.get(elementcounter);
 				if (b == null)
 				{
 					b = new StringBuilder(text);
@@ -1326,7 +1338,7 @@ public class SqlFormatter
 
 	private void outputFormattedColumnDefs(StringBuilder source)
 	{
-		ArrayList cols = new ArrayList();
+		ArrayList<String> cols = new ArrayList<String>();
 		int size = source.length();
 		int bracketCount = 0;
 		int lastPos = 0;
@@ -1353,9 +1365,8 @@ public class SqlFormatter
 		int count = cols.size();
 		int width = 0;
 
-		for (int i=0; i < count; i++)
+		for (String def : cols)
 		{
-			String def = (String)cols.get(i);
 			int pos = def.indexOf(' ');
 			if (pos > width) width = pos;
 		}
@@ -1364,7 +1375,7 @@ public class SqlFormatter
 		// third pass, output the definitions aligned to the longest column name
 		for (int i=0; i < count; i++)
 		{
-			String def = (String)cols.get(i);
+			String def = cols.get(i);
 			int pos = def.indexOf(' ');
 
 			this.indent("   ");

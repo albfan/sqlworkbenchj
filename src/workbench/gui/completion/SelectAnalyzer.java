@@ -155,7 +155,7 @@ public class SelectAnalyzer
 			if (afterHaving)
 			{
 				this.elements = getColumnsForHaving();
-				this.addAllMarker = true;
+				this.addAllMarker = false;
 				this.title = ResourceMgr.getString("TxtTitleGroupFuncs");
 				return;
 			}
@@ -283,11 +283,11 @@ public class SelectAnalyzer
 	
 	private List getColumnsForHaving()
 	{
-		List cols = SqlUtil.getSelectColumns(this.sql, false);
-		List validCols = new LinkedList();
+		List<String> cols = SqlUtil.getSelectColumns(this.sql, false);
+		List<String> validCols = new LinkedList<String>();
 		for (int i = 0; i < cols.size(); i++)
 		{
-			String col = (String)cols.get(i);
+			String col = cols.get(i);
 			if (col.indexOf('(') > -1 && col.indexOf(')') > -1)
 			{
 				validCols.add(col);
@@ -298,8 +298,8 @@ public class SelectAnalyzer
 	
 	private List getColumnsForGroupBy()
 	{
-		List cols = SqlUtil.getSelectColumns(this.sql, false);
-		List validCols = new LinkedList();
+		List<String> cols = SqlUtil.getSelectColumns(this.sql, false);
+		List<String> validCols = new LinkedList<String>();
 		String[] funcs = new String[]{"sum", "count", "avg", "min", "max" };
 		StringBuilder regex = new StringBuilder(50);
 		for (int i = 0; i < funcs.length; i++)
@@ -312,7 +312,7 @@ public class SelectAnalyzer
 		Pattern aggregate = Pattern.compile(regex.toString(), Pattern.CASE_INSENSITIVE);
 		for (int i = 0; i < cols.size(); i++)
 		{
-			String col = (String)cols.get(i);
+			String col = cols.get(i);
 			if (StringUtil.findPattern(aggregate, col, 0) == -1)
 			{
 				validCols.add(col);

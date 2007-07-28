@@ -453,12 +453,15 @@ public class IteratingScriptParser
 		if (lastPos < pos && !blockComment && !quoteOn)
 		{
 			String value = this.script.substring(lastCommandEnd, scriptLength).trim();
-			int endpos = scriptLength;
-			if (value.endsWith(delim))
+			if (!this.delimiter.equals(value.trim()))
 			{
-				endpos = endpos - this.delimiterLength;
+				int endpos = scriptLength;
+				if (value.endsWith(delim))
+				{
+					endpos = endpos - this.delimiterLength;
+				}
+				c = createCommand(lastCommandEnd, endpos);
 			}
-			c = createCommand(lastCommandEnd, endpos);
 		}
 		this.lastPos = scriptLength;
 		return c;

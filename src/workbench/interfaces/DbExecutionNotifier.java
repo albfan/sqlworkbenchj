@@ -12,8 +12,7 @@
 package workbench.interfaces;
 
 /**
- *
- * @author thomas
+ * @author support@sql-workbench.net
  */
 public interface DbExecutionNotifier
 {

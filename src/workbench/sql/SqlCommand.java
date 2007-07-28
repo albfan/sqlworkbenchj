@@ -296,7 +296,6 @@ public class SqlCommand
 				LogMgr.logError("SqlCommand.processResults()", "Error when calling getMoreResults()", e);
 				moreResults = false;
 			}
-			
 		}
 		else
 		{
@@ -366,7 +365,17 @@ public class SqlCommand
 				}
 			}
 			
-			moreResults = this.currentStatement.getMoreResults();
+			try
+			{
+				moreResults = this.currentStatement.getMoreResults();
+			}
+			catch (Throwable th)
+			{
+				// Some older Postgres drivers throw a NPE when getMoreResults() is called multiple
+				// times. This exception is simply ignored, so that processing can proceed normally
+				LogMgr.logError("SqlCommand.processResults()", "Error when calling getMoreResults()", th);
+				break;
+			}
 			
 			if (multipleUpdateCounts)
 			{
@@ -418,7 +427,6 @@ public class SqlCommand
 	{
 		this.consumerWaiting = flag;
 	}
-
 
 	public boolean isConsumerWaiting()
 	{

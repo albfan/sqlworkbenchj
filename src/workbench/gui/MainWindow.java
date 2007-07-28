@@ -132,7 +132,7 @@ public class MainWindow
 
 	private WbTabbedPane sqlTab;
 	private WbToolbar currentToolbar;
-	private ArrayList<JMenuBar> panelMenus = new ArrayList(13);
+	private ArrayList<JMenuBar> panelMenus = new ArrayList<JMenuBar>(13);
 
 	private String currentWorkspaceFile;
 
@@ -152,7 +152,7 @@ public class MainWindow
 
 	private AddMacroAction createMacro;
 	private ManageMacroAction manageMacros;
-	private List explorerWindows = new ArrayList();
+	private List<DbExplorerPanel> explorerWindows = new ArrayList<DbExplorerPanel>();
 	private RunningJobIndicator jobIndicator;
 	protected WbThread connectThread;
 		
@@ -333,7 +333,7 @@ public class MainWindow
 
 	private JMenuBar createMenuForPanel(MainPanel aPanel)
 	{
-		HashMap menus = new HashMap(10);
+		HashMap<String, JMenu> menus = new HashMap<String, JMenu>(10);
 
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setBorderPainted(false);
@@ -441,7 +441,7 @@ public class MainWindow
 				LogMgr.logWarning(this, "Action " + action.getClass() + " does not define a main menu entry!");
 				continue;
 			}
-			menu = (JMenu)menus.get(menuName);
+			menu = menus.get(menuName);
 			if (menu == null)
 			{
 				menu = new WbMenu(ResourceMgr.getString(menuName));
@@ -464,7 +464,7 @@ public class MainWindow
 			menu.setVisible(true);
 		}
 
-		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_FILE);
+		menu = menus.get(ResourceMgr.MNU_TXT_FILE);
 		menu.addSeparator();
 		menu.add(new ManageDriversAction());
 		menu.addSeparator();
@@ -472,7 +472,7 @@ public class MainWindow
 		action = new FileExitAction();
 		menu.add(action.getMenuItem());
 
-		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_VIEW);
+		menu = menus.get(workbench.resource.ResourceMgr.MNU_TXT_VIEW);
 		AddTabAction add = new AddTabAction(this);
 		menu.addSeparator();
 		menu.add(add.getMenuItem());
@@ -557,7 +557,7 @@ public class MainWindow
 		int count = this.sqlTab.getTabCount();
 		for (int i=0; i < count; i++)
 		{
-			JMenu macros = (JMenu)this.getMacroMenu(i);
+			JMenu macros = this.getMacroMenu(i);
 			if (macros != null)
 			{
 				this.buildMacroMenu(macros);
@@ -573,7 +573,7 @@ public class MainWindow
 		this.createMacro.addToMenu(macroMenu);
 		this.manageMacros.addToMenu(macroMenu);
 
-		List macros = MacroManager.getInstance().getMacroList();
+		List<String> macros = MacroManager.getInstance().getMacroList();
 		if (macros == null || macros.size() == 0) return;
 
 		macroMenu.addSeparator();
@@ -584,7 +584,7 @@ public class MainWindow
 		int maxItems = Settings.getInstance().getMaxMacrosInMenu();
 		for (int i=0; (i < count && i < maxItems); i++)
 		{
-			String name = (String)macros.get(i);
+			String name = macros.get(i);
 			run = new RunMacroAction(this, name, i+1);
 			run.addToMenu(macroMenu);
 		}
@@ -941,7 +941,7 @@ public class MainWindow
 			{
 				for (int i=0; i < tab.getTabCount(); i++)
 				{
-					MainPanel sql = getSqlPanel(i);;
+					MainPanel sql = getSqlPanel(i);
 					sql.clearStatusMessage();
 				}
 			}
@@ -1631,7 +1631,7 @@ public class MainWindow
 		throws Exception
 	{
 		if (this.currentConnection != null) return this.currentConnection;
-		String id = this.getConnectionIdForPanel(aPanel);;
+		String id = this.getConnectionIdForPanel(aPanel);
 		aPanel.showStatusMessage(ResourceMgr.getString("MsgConnectingTo") + " " + this.currentProfile.getName() + " ...");
 		ConnectionMgr mgr = ConnectionMgr.getInstance();
 		WbConnection conn = null;
@@ -1685,7 +1685,7 @@ public class MainWindow
 		{
 			if (this.explorerWindows.size() > 0)
 			{
-				DbExplorerPanel p = (DbExplorerPanel)this.explorerWindows.get(0);
+				DbExplorerPanel p = this.explorerWindows.get(0);
 				p.activateWindow();
 			}
 			else
@@ -1727,20 +1727,18 @@ public class MainWindow
 
 	public void closeExplorerWindows(boolean doDisconnect)
 	{
-		for (int i=0; i < this.explorerWindows.size(); i++)
+		for (DbExplorerPanel panel : explorerWindows)
 		{
-			DbExplorerPanel p = (DbExplorerPanel)this.explorerWindows.get(i);
-
 			if (doDisconnect)
 			{
-				WbConnection conn = p.getConnection();
+				WbConnection conn = panel.getConnection();
 				if (conn != this.currentConnection)
 				{
 					ConnectionMgr.getInstance().disconnect(conn);
 				}
 			}
-			p.disconnect();
-			p.closeWindow();
+			panel.disconnect();
+			panel.closeWindow();
 		}
 	}
 
@@ -1805,7 +1803,7 @@ public class MainWindow
 
 		result.add(WhatsNewAction.getInstance());
 		new VersionCheckAction().addToMenu(result);
-		new AboutAction().addToMenu(result);;
+		new AboutAction().addToMenu(result);
 		
 		return result;
 	}

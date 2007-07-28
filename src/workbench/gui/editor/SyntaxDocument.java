@@ -4,14 +4,11 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.AbstractDocument;
-import javax.swing.text.AbstractDocument.Content;
 import javax.swing.text.AbstractDocument.DefaultDocumentEvent;
-import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.PlainDocument;
 import javax.swing.text.Segment;
-import javax.swing.text.StyleConstants;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
@@ -34,7 +31,8 @@ public class SyntaxDocument
 	private int compoundLevelCounter = 0;
 	private WbCompoundEdit compoundEditItem = null;
 	private boolean undoSuspended = false;
-
+	private int maxLineLength = 0;
+	
 	public SyntaxDocument()
 	{
 		super();
@@ -182,6 +180,36 @@ public class SyntaxDocument
 		}
 	}
 
+	private void calcMaxLineLength()
+	{
+		Segment lineSegment = new Segment();
+		Element map = getDefaultRootElement();
+
+		int len = getDefaultRootElement().getElementCount();
+
+		this.maxLineLength = 0;
+		
+		try
+		{
+			for (int i = 0; i < len; i++)
+			{
+				Element lineElement = map.getElement(i);
+				int lineStart = lineElement.getStartOffset();
+				getText(lineStart,lineElement.getEndOffset() - lineStart - 1,lineSegment);
+				if (lineSegment.count > this.maxLineLength) this.maxLineLength = lineSegment.count;
+			}
+		}
+		catch(BadLocationException bl)
+		{
+			// Ignore
+		}
+	}
+	
+	public int getMaxLineLength()
+	{
+		return this.maxLineLength;
+	}
+	
 	public synchronized void undoableEditHappened(UndoableEditEvent e)
 	{
 		if (undoSuspended) return;
@@ -214,6 +242,7 @@ public class SyntaxDocument
 	 */
 	public synchronized void endCompoundEdit() 
 	{
+		this.calcMaxLineLength();
 		if (undoSuspended) return;
 		if (compoundLevelCounter == 1)
 		{

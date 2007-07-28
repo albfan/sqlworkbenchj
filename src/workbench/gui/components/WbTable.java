@@ -21,7 +21,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -33,8 +32,6 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
@@ -51,6 +48,7 @@ import javax.swing.CellEditor;
 import javax.swing.InputMap;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -1778,7 +1776,17 @@ public class WbTable
 		DataStore ds = this.getDataStore();
 		ColumnIdentifier[] originalCols = ds.getColumns();
 		TableIdentifier table = ds.getUpdateTable();
+		
 		if (table == null) 
+		{
+			table = selectUpdateTable();
+			if (table != null) 
+			{
+				ds.setUpdateTable(table);
+			}
+		}
+		
+		if (table == null)
 		{
 			Window w = SwingUtilities.getWindowAncestor(this);
 			WbSwingUtilities.showErrorMessageKey(w, "MsgNoUpdateTable");
@@ -1849,6 +1857,37 @@ public class WbTable
 		}
 	}
 
+	public TableIdentifier selectUpdateTable()
+	{
+		if (this.getDataStore() == null) return null;
+		
+		String csql = this.getDataStore().getGeneratingSql();
+		List<String> tables = SqlUtil.getTables(csql, false);
+		TableIdentifier table = null;
+
+		if (tables.size() > 1)
+		{
+			String s = (String)JOptionPane.showInputDialog(SwingUtilities.getWindowAncestor(this),
+				null, ResourceMgr.getString("MsgEnterUpdateTable"),
+				JOptionPane.QUESTION_MESSAGE,
+				null,tables.toArray(),null);
+			
+			if (s != null)
+			{
+				table = new TableIdentifier(s);
+			}
+		}
+		else if (tables.size() == 1)
+		{
+			table = getDataStore().getUpdateTable();
+			if (table == null)
+			{
+				table = new TableIdentifier(tables.get(0));
+			}
+		}
+		return table;
+	}
+	
 	/**
 	 * Checks if the underlying DataStore has PrimaryKey columns defined.
 	 * @return true, if the DataStore has PK columns. false if no PKs defined or no DataStore attached to this Table

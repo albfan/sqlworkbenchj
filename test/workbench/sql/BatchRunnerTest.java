@@ -191,6 +191,7 @@ public class BatchRunnerTest
 			assertEquals("Wrong singleLine Property parsed", true, def.isSingleLine());
 			
 			runner.execute();
+			assertEquals("Runner not successful!", true, runner.isSuccess());
 			
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery("select count(*) from person");

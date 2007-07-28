@@ -54,7 +54,9 @@ public class SchemaDiffTest
 			diff.compareAll();
 			String xml = diff.getMigrateTargetXml();
 			Thread.yield();
+			System.out.println("---------------");
 			System.out.println(xml);
+			System.out.println("---------------");
 
 			String count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
 			assertEquals("Incorrect number of tables listed", "3", count);

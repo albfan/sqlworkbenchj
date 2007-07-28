@@ -40,9 +40,9 @@ import workbench.util.WbPersistence;
 public class MacroManager
 {
 	private static MacroManager instance = new MacroManager();
-	private HashMap macros;
+	private HashMap<String, String> macros;
 	private boolean modified = false;
-	private List changeListeners = null;
+	private List<MacroChangeListener> changeListeners = null;
 	private boolean errorDuringLoad = false;
 	private String selectedTextKey = Settings.getInstance().getProperty("workbench.macro.key.selectioin", "${selection}$");
 	private String selectedStatementKey = Settings.getInstance().getProperty("workbench.macro.key.selectedstmt", "${selected_statement}$");
@@ -63,7 +63,7 @@ public class MacroManager
 	{
 		loadIfNecessary();
 		if (aKey == null) return null;
-		String sql = (String)this.macros.get(aKey.toLowerCase());
+		String sql = this.macros.get(aKey.toLowerCase());
 		return sql;
 	}
 
@@ -126,11 +126,11 @@ public class MacroManager
 		this.fireMacroListChange();
 	}
 
-	public synchronized List getMacroList()
+	public synchronized List<String> getMacroList()
 	{
 		loadIfNecessary();
-		Set keys = this.macros.keySet();
-		ArrayList result = new ArrayList(keys);
+		Set<String> keys = this.macros.keySet();
+		ArrayList<String> result = new ArrayList<String>(keys);
 		return result;
 	}
 
@@ -156,14 +156,13 @@ public class MacroManager
 		this.fireMacroListChange();
 	}
 	
-	public synchronized void setMacros(Collection newMacros)
+	public synchronized void setMacros(Collection<MacroEntry> newMacros)
 	{
 		if (newMacros == null) return;
-		this.macros = new HashMap(); // clear out the old entries
-		Iterator itr = newMacros.iterator();
-		while (itr.hasNext())
+		this.macros = new HashMap<String, String>(); // clear out the old entries
+		
+		for (MacroEntry entry : newMacros)
 		{
-			MacroEntry entry = (MacroEntry)itr.next();
 			this.macros.put(entry.getName().toLowerCase(), entry.getText());
 		}
 		this.modified = true;
@@ -180,7 +179,7 @@ public class MacroManager
 		}
 		else
 		{
-			this.macros = new HashMap();
+			this.macros = new HashMap<String, String>();
 		}
 		this.modified = true;
 		this.fireMacroListChange();
@@ -190,7 +189,7 @@ public class MacroManager
 	{
 		if (this.changeListeners == null)
 		{
-			this.changeListeners = new ArrayList();
+			this.changeListeners = new ArrayList<MacroChangeListener>();
 		}
 		this.changeListeners.add(aListener);
 	}
@@ -254,18 +253,18 @@ public class MacroManager
 			}
 			else
 			{
-				this.macros = new HashMap(20);
+				this.macros = new HashMap<String, String>(20);
 			}
 		}
 		catch (FileNotFoundException fne)
 		{
 			this.errorDuringLoad = false;
-			this.macros = new HashMap(20);
+			this.macros = new HashMap<String, String>(20);
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("MacroManager.loadMacros()", "Error loading macro file", e);
-			this.macros = new HashMap(20);
+			this.macros = new HashMap<String, String>(20);
 			this.errorDuringLoad = true;
 		}
 		this.modified = false;
@@ -274,10 +273,8 @@ public class MacroManager
 	private void fireMacroListChange()
 	{
 		if (this.changeListeners == null) return;
-		int count = this.changeListeners.size();
-		for (int i=0; i < count; i++)
+		for (MacroChangeListener listener : this.changeListeners)
 		{
-			MacroChangeListener listener = (MacroChangeListener)this.changeListeners.get(i);
 			if (listener != null)
 			{
 				listener.macroListChanged();

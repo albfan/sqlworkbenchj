@@ -24,7 +24,7 @@ import workbench.resource.Settings;
  */
 public class LnFManager
 {
-	private List lnfList = new ArrayList();
+	private List<LnFDefinition> lnfList = new ArrayList<LnFDefinition>();
 	
 	public LnFManager()
 	{
@@ -53,7 +53,7 @@ public class LnFManager
 	
 	public void removeDefinition(int index)
 	{
-		LnFDefinition def = (LnFDefinition)lnfList.get(index);
+		LnFDefinition def = lnfList.get(index);
 		if (!def.isBuiltInLnF())
 		{
 			this.lnfList.remove(index);
@@ -78,9 +78,8 @@ public class LnFManager
 		removeLnFEntries();
 		int count = this.lnfList.size();
 		int lnfCount = 0;
-		for (int i = 0; i < count; i++)
+		for (LnFDefinition lnf : lnfList)
 		{
-			LnFDefinition lnf = (LnFDefinition)lnfList.get(i);
 			if (!lnf.isBuiltInLnF())
 			{
 				set.setProperty("workbench.lnf." + lnfCount + ".classpath", lnf.getLibrary());
@@ -122,8 +121,6 @@ public class LnFManager
 				return lnf;
 			}
 		}
-		
-		
 		return null;
 	}
 }

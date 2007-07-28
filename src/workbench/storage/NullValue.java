@@ -18,13 +18,13 @@ import workbench.util.StringUtil;
 public class NullValue
 	implements Comparable
 {
-	private static HashMap valueCache = new HashMap();
+	private static HashMap<Integer, NullValue> valueCache = new HashMap<Integer, NullValue>();
 	private int type;
 	
 	public static NullValue getInstance(int aType)
 	{
-		Integer key = new Integer(aType);
-		NullValue val = (NullValue)valueCache.get(key);
+		Integer key = Integer.valueOf(aType);
+		NullValue val = valueCache.get(key);
 		if (val == null)
 		{
 			val = new NullValue(aType);

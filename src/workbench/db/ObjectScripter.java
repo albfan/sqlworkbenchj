@@ -193,6 +193,11 @@ public class ObjectScripter
 					{
 						source = meta.getExtendedViewSource(tbl, false);
 					}
+					else if (TYPE_SEQUENCE.equalsIgnoreCase(type))
+					{
+						String object = tbl.getTableExpression(this.dbConnection);
+						source = this.meta.getSequenceSource(object);
+					}
 				}
 				else
 				{

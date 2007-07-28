@@ -170,7 +170,7 @@ public class ResultInfo
 			}
 
 			col.setDecimalDigits(scale);
-			String dbmsType = SqlUtil.getSqlTypeDisplay(typename, col.getDataType(), prec, scale);; 
+			String dbmsType = SqlUtil.getSqlTypeDisplay(typename, col.getDataType(), prec, scale);
 			if (type == Types.VARCHAR)
 			{
 				// HSQL reports the VARCHAR size in displaySize()

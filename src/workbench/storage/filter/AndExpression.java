@@ -11,7 +11,6 @@
  */
 package workbench.storage.filter;
 
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -24,12 +23,10 @@ public class AndExpression
 	{
 	}
 	
-	public boolean evaluate(Map columnValues)
+	public boolean evaluate(Map<String, Object> columnValues)
 	{
-		Iterator itr = filter.iterator();
-		while (itr.hasNext())
+		for (FilterExpression expr : filter)
 		{
-			FilterExpression expr = (FilterExpression)itr.next();
 			if (!expr.evaluate(columnValues)) return false;
 		}
 		return true;
@@ -50,10 +47,8 @@ public class AndExpression
 	public String toString()
 	{
 		StringBuilder value = new StringBuilder();
-		Iterator itr = filter.iterator();
-		while (itr.hasNext())
+		for (FilterExpression expr : filter)
 		{
-			FilterExpression expr = (FilterExpression)itr.next();
 			if (value.length() > 0) value.append(" AND ");
 			value.append(expr.toString());
 		}

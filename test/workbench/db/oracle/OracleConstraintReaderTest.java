@@ -15,7 +15,7 @@ import junit.framework.TestCase;
 
 /**
  *
- * @author tkellerer
+ * @author support@sql-workbench.net
  */
 public class OracleConstraintReaderTest extends TestCase
 {

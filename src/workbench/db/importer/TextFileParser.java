@@ -79,9 +79,6 @@ public class TextFileParser
 	private boolean trimValues = false;
 
 	private RowDataReceiver receiver;
-	private String dateFormat;
-	private String timestampFormat;
-	private char decimalChar = '.';
 	private boolean abortOnError = false;
 	private WbConnection connection;
 	private String sourceDir;
@@ -258,9 +255,16 @@ public class TextFileParser
 		throws IllegalArgumentException
 	{
 		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(columnList.size());
-		for (String col : columnList)
+		for (String colname : columnList)
 		{
-			cols.add(new ColumnIdentifier(col));
+			ColumnIdentifier col = new ColumnIdentifier(colname);
+			if (!colname.equals(RowDataProducer.SKIP_INDICATOR) && cols.contains(col))
+			{
+				String msg = ResourceMgr.getFormattedString("ErrImpDupColumn", colname);
+				this.messages.append(msg);
+				throw new IllegalArgumentException("Duplicate column " + colname);
+			}
+			cols.add(col);
 		}
 		setImportColumns(cols);
 	}
@@ -727,17 +731,18 @@ public class TextFileParser
 						LogMgr.logError("TextFileParser.processOneFile()", "Could not read next line for multi-line record", e);
 					}
 				}
+
+				this.clearRowData();
 				
 				boolean processRow = receiver.shouldProcessNextRow();
 				if (!processRow) receiver.nextRowSkipped();
 				
-				if (hasLineFilter)
+				if (hasLineFilter && processRow)
 				{
 					Matcher m = this.lineFilter.matcher(currentLine);
-					processRow = !m.matches();
+					processRow = m.matches();
 				}
 				
-				this.clearRowData();
 				importRow ++;
 
 				if (!processRow)
@@ -834,9 +839,9 @@ public class TextFileParser
 						if (targetIndex != -1) rowData[targetIndex] = null;
 						String msg = ResourceMgr.getString("ErrTextfileImport");
 						msg = msg.replaceAll("%row%", Integer.toString(importRow));
-						msg = msg.replaceAll("%col%", (this.columns[i] == null ? "n/a" : this.columns[i].getColumnName()));
+						msg = StringUtil.replace(msg, "%col%", (this.columns[i] == null ? "n/a" : this.columns[i].getColumnName()));
 						msg = msg.replaceAll("%value%", (value == null ? "(NULL)" : value));
-						msg = msg.replaceAll("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
+						msg = StringUtil.replace(msg, "%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
 						this.messages.append(msg);
 						this.messages.appendNewLine();
 						if (this.abortOnError) 
@@ -869,7 +874,11 @@ public class TextFileParser
 				}
 				catch (Exception e)
 				{
-					LogMgr.logError("TextFileParser.processOneFile()", "Error sending line " + importRow + ". Aborting...", e);
+					this.hasErrors = true;
+					this.cancelImport = true;
+					// processRow() will only throw an exception if abortOnError is true
+					// so we can always re-throw the exception here.
+					LogMgr.logError("TextFileParser.processOneFile()", "Error sending line " + importRow, e);
 					throw e;
 				}
 

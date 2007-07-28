@@ -79,6 +79,11 @@ public class WbDefineVarTest extends TestCase
 			varValue = VariablePool.getInstance().getParameterValue("theanswer");
 			assertEquals("SQL Variable not set", "7", varValue);
 
+			sql = "--define some vars\nwbvardef theanswer = \"@select nr from vartest\"";
+			runner.runStatement(sql, -1, -1);
+			varValue = VariablePool.getInstance().getParameterValue("theanswer");
+			assertEquals("SQL Variable not set", "7", varValue);
+			
 			File f = new File(util.getBaseDir(), "vardef.props");
 
 			PrintWriter pw = new PrintWriter(new FileWriter(f));
@@ -107,6 +112,12 @@ public class WbDefineVarTest extends TestCase
 			varValue = VariablePool.getInstance().getParameterValue("lastname");
 			assertEquals("SQL Variable still available ", true, StringUtil.isEmptyString(varValue));
 			
+			sql = "WbVardef var5=' a '";
+			runner.runStatement(sql, -1, -1);
+			varValue = VariablePool.getInstance().getParameterValue("var5");
+			result = runner.getResult();
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals("Quoted spaces trimmed", " a ", varValue);
 		}
 		catch (Exception e)
 		{

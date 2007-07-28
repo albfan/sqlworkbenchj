@@ -39,10 +39,10 @@ public class LogMgr
 	private static final String WARNING_DISPLAY = "WARN ";
 	private static final String INFO_DISPLAY = "INFO ";
 
-	public static final List LEVELS;
+	public static final List<String> LEVELS;
 	static
 	{
-		LEVELS = new ArrayList(4);
+		LEVELS = new ArrayList<String>(4);
 		LEVELS.add(ERROR);
 		LEVELS.add(WARNING);
 		LEVELS.add(INFO);

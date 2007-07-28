@@ -26,7 +26,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- * @author thomas
+ * @author support@sql-workbench.net
  */
 public class EditorTabSelectMenu
 	extends WbMenu

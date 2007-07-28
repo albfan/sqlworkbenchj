@@ -296,7 +296,7 @@ public class WbImport
 			textParser.setAbortOnError(!continueOnError);
 			textParser.setTreatClobAsFilenames(cmdLine.getBoolean(ARG_CLOB_ISFILENAME, false));
 			
-			String delimiter = cmdLine.getValue(CommonArgs.ARG_DELIM);
+			String delimiter = StringUtil.trimQuotes(cmdLine.getValue(CommonArgs.ARG_DELIM));
 			if (delimiter != null) textParser.setDelimiter(delimiter);
 
 			String quote = cmdLine.getValue(ARG_QUOTE);
@@ -321,7 +321,7 @@ public class WbImport
 				{
 					try
 					{	
-						List<String> cols = StringUtil.stringToList(importcolumns, ",", true);
+						List<String> cols = StringUtil.stringToList(importcolumns, ",", true, true);
 						textParser.setImportColumnNames(cols);
 					}
 					catch (IllegalArgumentException e)
@@ -330,19 +330,26 @@ public class WbImport
 						result.setFailure();
 						return result;
 					}
-					
 				}
 
 				String filecolumns = cmdLine.getValue(ARG_FILECOLUMNS);
 				if (filecolumns != null)
 				{
-					List cols = StringUtil.stringToList(filecolumns, ",", true);
+					List<String> cols = StringUtil.stringToList(filecolumns, ",", true, true);
 					try
 					{
-						List colIds = new ArrayList(cols.size());
-						for (int i=0; i < cols.size(); i++)
+						List<ColumnIdentifier> colIds = new ArrayList<ColumnIdentifier>(cols.size());
+						for (String colname : cols)
 						{
-							ColumnIdentifier col = new ColumnIdentifier((String)cols.get(i));
+							ColumnIdentifier col = new ColumnIdentifier(colname);
+							if (!colname.equals(RowDataProducer.SKIP_INDICATOR) && colIds.contains(col))
+							{
+								String msg = ResourceMgr.getFormattedString("ErrImpDupColumn", colname);
+								LogMgr.logError("WbImport.execute()", msg, null);
+								result.addMessage(msg);
+								result.setFailure();
+								return result;
+							}
 							colIds.add(col);
 						}
 						textParser.setColumns(colIds, true);

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -66,6 +67,12 @@ public class SqlUtil
 		return result;
 	}
 	
+	public static String removeTrailingSemicolon(String input)
+	{
+		final Pattern p = Pattern.compile(";+$");
+		Matcher m = p.matcher(input);
+		return m.replaceAll("");
+	}
 	
 	public static String quoteObjectname(String object)
 	{
@@ -225,7 +232,7 @@ public class SqlUtil
 	 * This method will actually execute the given SQL query, but will 
 	 * not retrieve any rows (using setMaxRows(1).
 	 */
-	public static List getResultSetColumns(String sql, WbConnection conn)
+	public static List<ColumnIdentifier> getResultSetColumns(String sql, WbConnection conn)
 		throws SQLException
 	{
 		if (conn == null) return null;
@@ -236,7 +243,7 @@ public class SqlUtil
 		ResultSet rs = null;
 		Statement stmt = null;
 		int count = info.getColumnCount();
-		ArrayList result = new ArrayList(count);
+		ArrayList<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(count);
 		for (int i = 0; i < count; i++)
 		{
 			result.add(info.getColumn(i));
@@ -292,14 +299,14 @@ public class SqlUtil
 	 *       the column name including the alias (e.g. "p.name AS person_name"
 	 * @return a List of String objecs. 
 	 */
-	public static List getSelectColumns(String select, boolean includeAlias)
+	public static List<String> getSelectColumns(String select, boolean includeAlias)
 	{
-		List result = new LinkedList();
+		List<String> result = new LinkedList<String>();
 		try
 		{
 			SQLLexer lex = new SQLLexer(select);
 			SQLToken t = lex.getNextToken(false, false);
-			if (!"SELECT".equalsIgnoreCase(t.getContents())) return Collections.EMPTY_LIST;
+			if (!"SELECT".equalsIgnoreCase(t.getContents())) return Collections.emptyList();
 			t = lex.getNextToken(false, false);
 			int lastColStart = t.getCharBegin();
 			int bracketCount = 0;
@@ -358,7 +365,7 @@ public class SqlUtil
 		catch (Exception e)
 		{
 			LogMgr.logError("SqlUtil.getColumnsFromSelect()", "Error parsing SELECT statement", e);
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 		
 		return result;
@@ -378,7 +385,7 @@ public class SqlUtil
 		return getTables(aSql, false);
 	}
 
-	public static final Set JOIN_KEYWORDS = new HashSet(6);
+	public static final Set<String> JOIN_KEYWORDS = new HashSet<String>(6);
 	static
 	{
 			JOIN_KEYWORDS.add("INNER JOIN");
@@ -395,15 +402,15 @@ public class SqlUtil
 	 * Returns a List of tables defined in the SQL query. If the 
 	 * query is not a SELECT query the result is undefined
 	 */
-	public static List getTables(String sql, boolean includeAlias)
+	public static List<String> getTables(String sql, boolean includeAlias)
 	{
 		String from = SqlUtil.getFromPart(sql);
-		if (from == null || from.trim().length() == 0) return Collections.EMPTY_LIST;
-		List result = new LinkedList();
+		if (from == null || from.trim().length() == 0) return Collections.emptyList();
+		List<String> result = new LinkedList<String>();
 		try
 		{
 				SQLLexer lex = new SQLLexer(from);
-				SQLToken t = (SQLToken)lex.getNextToken(false, false);
+				SQLToken t = lex.getNextToken(false, false);
 
 				boolean collectTable = true;
 				StringBuilder currentTable = new StringBuilder();
@@ -432,7 +439,7 @@ public class SqlUtil
 							subSelect = false;
 						}
 						bracketCount --;
-						t = (SQLToken)lex.getNextToken(false, false);
+						t = lex.getNextToken(false, false);
 						continue;
 					}
 					
@@ -466,7 +473,7 @@ public class SqlUtil
 							currentTable.append(s);
 						}
 					}					
-					t = (SQLToken)lex.getNextToken(false, false);
+					t = lex.getNextToken(false, false);
 				}
 				
 				if (currentTable.length() > 0)
@@ -504,14 +511,14 @@ public class SqlUtil
 	 */
 	public static int getFromPosition(String sql)
 	{
-		Set s = new HashSet();
+		Set<String> s = new HashSet<String>();
 		s.add("FROM");
 		return getKeywordPosition(s, sql);
 	}
 	
 	public static int getWherePosition(String sql)
 	{
-		Set s = new HashSet();
+		Set<String> s = new HashSet<String>();
 		s.add("WHERE");
 		return getKeywordPosition(s, sql);
 	}
@@ -519,12 +526,12 @@ public class SqlUtil
 	public static int getKeywordPosition(String keyword, String sql)
 	{
 		if (keyword == null) return -1;
-		Set s = new HashSet();
+		Set<String> s = new HashSet<String>();
 		s.add(keyword.toUpperCase());
 		return getKeywordPosition(s, sql);
 	}
 	
-	public static int getKeywordPosition(Set keywords, String sql)
+	public static int getKeywordPosition(Set<String> keywords, String sql)
 	{
 		int pos = -1;
 		try
@@ -926,7 +933,7 @@ public class SqlUtil
 			// For this we keep a list of warnings which have been added
 			// from the statement. They will not be added when the Warnings from
 			// the connection are retrieved
-			Set added = new HashSet();
+			Set<String> added = new HashSet<String>();
 			StringBuilder msg = null; 
 			String s = null;
 			SQLWarning warn = (stmt == null ? null : stmt.getWarnings());

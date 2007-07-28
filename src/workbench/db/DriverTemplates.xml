@@ -11,7 +11,7 @@
      <string>derby.jar</string>
     </void>
     <void property="name">
-     <string>Apache Derby</string>
+     <string>Apache Derby Embedded</string>
     </void>
     <void property="sampleUrl">
      <string>jdbc:derby:&lt;/path/to/database&gt;</string>
@@ -19,6 +19,22 @@
    </object>
   </void>
 
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>org.apache.derby.jdbc.ClientDriver</string>
+    </void>
+    <void property="library">
+     <string>derbyclient.jar</string>
+    </void>
+    <void property="name">
+		 <string>Apache Derby Network Client</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:derby://server:1527/databasename</string>
+    </void>
+   </object>
+  </void>
 
   <void method="add">
    <object class="workbench.db.DbDriver">

@@ -11,8 +11,6 @@
  */
 package workbench.storage.filter;
 
-import java.util.Map;
-
 /**
  * @author support@sql-workbench.net
  */

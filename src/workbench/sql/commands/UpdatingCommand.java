@@ -15,7 +15,6 @@ import java.io.FileNotFoundException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
@@ -46,11 +45,11 @@ public class UpdatingCommand extends SqlCommand
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
+		LobFileStatement lob = null;
 		
 		try
 		{
 			boolean isPrepared = false;
-			LobFileStatement lob = null;
 			if (checkLobParameter)
 			{
 				try
@@ -100,6 +99,7 @@ public class UpdatingCommand extends SqlCommand
 		}
 		finally
 		{
+			if (lob != null) lob.done();
 			this.done();
 		}
 		return result;

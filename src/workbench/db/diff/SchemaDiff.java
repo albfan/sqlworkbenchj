@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -234,7 +233,7 @@ public class SchemaDiff
 		if (targetList == null) throw new NullPointerException("Target tables may not be null");
 		if (referenceList.size() != targetList.size()) throw new IllegalArgumentException("Number of source and target tables have to match");
 		int count = referenceList.size();
-		this.objectsToCompare<Object> = new ArrayList<Object>(count);
+		this.objectsToCompare = new ArrayList<Object>(count);
 		
 		if (this.monitor != null)
 		{
@@ -384,7 +383,7 @@ public class SchemaDiff
 				break;
 			}
 			
-			TableIdentifier rid = (TableIdentifier)refTables.get(i);
+			TableIdentifier rid = refTables.get(i);
 			
 			// The table names to be excluded have been put into 
 			// the list after calling adjustObjectnameCase() on the input values

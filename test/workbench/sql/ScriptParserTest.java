@@ -34,6 +34,24 @@ public class ScriptParserTest extends TestCase
 		super(testName);
 	}
 
+	public void testEmptyStatement()
+	{
+		try
+		{
+			// Check if a cursorposition at the far end of the statement is detected properly
+			String sql = "select 42 from dual;\n\nselect * \nfrom table\n;;\n";	
+			ScriptParser p = new ScriptParser();
+			p.allowEmptyLineAsSeparator(false);
+			p.setScript(sql);
+			assertEquals(2, p.getSize());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testEndPosition()
 	{
 		try
@@ -68,10 +86,7 @@ public class ScriptParserTest extends TestCase
 			assertEquals(2, p.getSize());
 			assertEquals(1, index);
 			int sqlPos = p.getIndexInCommand(index, pos);
-			System.out.println("pos=" + sqlPos);
-			System.out.println("sqlpos=" + sqlPos);
 			String sql = p.getCommand(index);
-			System.out.println("sql length=" + sql.length());
 		}
 		catch (Exception e)
 		{

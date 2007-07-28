@@ -116,7 +116,10 @@ public class DataExporter
 	private WbConnection dbConn;
 	private String sql;
 	private String htmlTitle = null;
+	
+	// When compressing the output this holds the name of the archive.
 	private String realOutputfile;
+	
 	private String outputfile;
 	private String xsltFile = null;
 	private String transformOutputFile = null;
@@ -965,9 +968,11 @@ public class DataExporter
 		finally
 		{
 			exportFinished();
+			try { rs.clearWarnings(); } catch (Throwable th) {}
 			try { rs.close(); } catch (Throwable th) {}
 		}
 		long numRows = this.exportWriter.getNumberOfRecords();
+		LogMgr.logInfo("DataExporter.startExport()", "Exported " + numRows + " rows to " + this.outputfile);
 		return numRows;
 	}
 
@@ -1033,7 +1038,7 @@ public class DataExporter
 
 		try
 		{
-			File f = new File(this.outputfile);
+			WbFile f = new WbFile(this.outputfile);
 			
 			OutputStream out = null;
 			if (this.getCompressOutput())
@@ -1048,12 +1053,12 @@ public class DataExporter
 				this.zipEntry = new ZipEntry(wf.getName());
 				this.zipArchive.putNextEntry(zipEntry);
 				out = this.zipArchive;
-				this.realOutputfile = zipfile.getAbsolutePath();
+				this.realOutputfile = zipfile.getCanonicalPath();
 			}
 			else
 			{
 				out = new FileOutputStream(f, append);
-				this.realOutputfile = f.getAbsolutePath();
+				this.realOutputfile = f.getCanonicalPath();
 			}
 			Writer w = EncodingUtil.createWriter(out, this.encoding);
 			

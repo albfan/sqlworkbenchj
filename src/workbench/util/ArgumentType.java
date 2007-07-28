@@ -13,7 +13,8 @@ package workbench.util;
 
 /**
  * Available argument types for the ArgumentParser
- * @author thomas
+ * 
+ * @author support@sql-workbench.net
  */
 public enum ArgumentType
 {

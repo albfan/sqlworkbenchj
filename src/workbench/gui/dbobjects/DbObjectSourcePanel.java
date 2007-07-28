@@ -21,7 +21,6 @@ import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
-import workbench.gui.actions.WbAction;
 import workbench.gui.components.DropDownButton;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.sql.EditorPanel;

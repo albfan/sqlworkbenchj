@@ -52,7 +52,7 @@ public class ResourceMgr
 	public static final String MNU_TXT_OPTIONS = "MnuTxtOptions";
 
 	private static ResourceBundle resources = ResourceBundle.getBundle("language/wbstrings");
-	private static HashMap images = new HashMap();
+	private static HashMap<String, ImageIcon> images = new HashMap<String, ImageIcon>();
 
 	private static String BUILD_INFO;
 
@@ -202,45 +202,50 @@ public class ResourceMgr
 
 	public static ImageIcon getLargeImage(String aKey)
 	{
-		return retrieveImage(aKey + "24");
+		return retrieveImage(aKey + "24", ".gif");
 	}
 
 	public static ImageIcon getBlankImage()
 	{
-		return retrieveImage("blank16");
+		return retrieveImage("blank16", ".gif");
 	}
 	
 	public static ImageIcon getImage(String aKey)
 	{
-		return retrieveImage(aKey + "16");
+		return retrieveImage(aKey + "16", ".gif");
 	}
 
 	public static ImageIcon getPicture(String aName)
 	{
-		return retrieveImage(aName);
+		return retrieveImage(aName, ".gif");
+	}
+	
+	public static ImageIcon getPng(String aName)
+	{
+		return retrieveImage(aName, ".png");
 	}
 
-	private static ImageIcon retrieveImage(String aKey)
+	private static ImageIcon retrieveImage(String filename, String extension)
 	{
-		Object    value = images.get(aKey.toUpperCase());
+		Object    value = images.get(filename.toUpperCase());
 		ImageIcon result = null;
 		if (value == null)
 		{
-			URL imageIconUrl = ResourceMgr.class.getClassLoader().getResource("workbench/resource/images/" + aKey + ".gif");
+			URL imageIconUrl = ResourceMgr.class.getClassLoader().getResource("workbench/resource/images/" + filename + extension);
 			if (imageIconUrl != null)
 			{
 				result = new ImageIcon(imageIconUrl);
-				images.put(aKey.toUpperCase(), result);
+				images.put(filename.toUpperCase(), result);
 
 				return result;
 			}
 			else
 			{
-				imageIconUrl = ResourceMgr.class.getClassLoader().getResource(aKey);
+				imageIconUrl = ResourceMgr.class.getClassLoader().getResource(filename);
 				if (imageIconUrl != null)
 				{
 					result = new ImageIcon(imageIconUrl);
-					images.put(aKey.toUpperCase(), result);
+					images.put(filename.toUpperCase(), result);
 
 					return result;
 				}
