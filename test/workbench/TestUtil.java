@@ -101,7 +101,7 @@ public class TestUtil
 			if (!files[i].delete())
 			{
 				System.out.println("Could not delete file: " + files[i].getAbsolutePath());
-			};
+			}
 		}
 	}
 	

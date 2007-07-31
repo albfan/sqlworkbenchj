@@ -101,7 +101,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.72 2007-07-28 13:52:33 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.73 2007-07-31 18:17:27 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent

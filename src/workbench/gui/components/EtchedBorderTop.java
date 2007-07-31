@@ -13,11 +13,8 @@ package workbench.gui.components;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
-
-import javax.swing.JPanel;
 import javax.swing.border.AbstractBorder;
 
 public class EtchedBorderTop 

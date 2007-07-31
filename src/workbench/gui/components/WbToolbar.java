@@ -20,7 +20,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 

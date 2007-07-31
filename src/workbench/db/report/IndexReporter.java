@@ -19,7 +19,6 @@ import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.report.TagAttribute;
 import workbench.util.StrBuffer;
 
 /**

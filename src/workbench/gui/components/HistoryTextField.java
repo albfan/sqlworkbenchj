@@ -25,7 +25,7 @@ public class HistoryTextField
 	extends JComboBox
 {
 	private String propName;
-	private List historyValues = new ArrayList();
+	private List<String> historyValues = new ArrayList<String>();
 	private int maxHistorySize = 25;
 		
 	public HistoryTextField(String prop)
@@ -59,7 +59,7 @@ public class HistoryTextField
 	public void restoreSettings(PropertyStorage props, String prefix)
 	{
 		String s = props.getProperty(prefix + propName + ".history", "");
-		List l = StringUtil.stringToList(s, ";", true, true);
+		List<String> l = StringUtil.stringToList(s, ";", true, true);
 		this.setText("");
 		this.historyValues.clear();
 		this.historyValues.addAll(l);

@@ -75,12 +75,12 @@ public class BlobHandler
 		}
 		else if (l < 1024*1024)
 		{
-			result.append(Long.toString((long)l/1024));
+			result.append(Long.toString(l/1024));
 			result.append(" K");
 		}
 		else 
 		{
-			result.append(Long.toString((long)l/(1024*1024)));
+			result.append(Long.toString(l/(1024*1024)));
 			result.append(" M");
 		}
 		result.append('B');
@@ -172,12 +172,12 @@ public class BlobHandler
 		String data = null;
 		try
 		{
-			data = new String((byte[])value, encoding);
+			data = new String( value,encoding);
 		}
 		catch (UnsupportedEncodingException e)
 		{
 			LogMgr.logError("BlobHandler.convertArray()", "Could not convert binary to string using encoding: " + encoding, e);
-			data = new String((byte[])value);
+			data = new String(value);
 		}
 		return data;
 	}

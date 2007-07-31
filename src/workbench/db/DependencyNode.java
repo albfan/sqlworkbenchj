@@ -102,7 +102,7 @@ public class DependencyNode
 	{ 
 		if (this.columns == null)
 		{
-			return Collections.EMPTY_MAP;
+			return Collections.emptyMap();
 		}
 		else
 		{

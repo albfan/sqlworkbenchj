@@ -31,7 +31,7 @@ import workbench.util.StringUtil;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.30 2007-07-28 13:52:33 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.31 2007-07-31 18:17:27 thomas Exp $
  */
 public class TextAreaPainter 
 	extends JComponent 

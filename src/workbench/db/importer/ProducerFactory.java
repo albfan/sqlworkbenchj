@@ -22,11 +22,9 @@ import workbench.interfaces.ImportFileParser;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.CommonArgs;
-import workbench.sql.wbcommands.WbExport;
 import workbench.sql.wbcommands.WbImport;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
-import workbench.util.ZipUtil;
 
 /**
  *	A factory for RowDataProducer to import text or XML files. 

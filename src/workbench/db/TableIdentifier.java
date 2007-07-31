@@ -311,6 +311,7 @@ public class TableIdentifier
 
 	private void setTablename(String name)
 	{
+		if (name == null) return;
 		tableWasQuoted = name.trim().startsWith("\"");
 		this.tablename = StringUtil.trimQuotes(name).trim();
 	}

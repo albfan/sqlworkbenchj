@@ -13,7 +13,6 @@ package workbench.gui.components;
 
 import java.awt.Component;
 import java.awt.EventQueue;
-import java.awt.Rectangle;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;

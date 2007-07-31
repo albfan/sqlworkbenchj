@@ -18,7 +18,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import javax.swing.JPanel;
 import javax.swing.JTable;
-import javax.swing.border.LineBorder;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
@@ -107,7 +106,7 @@ class ByteBufferTableModel
 	public ByteBufferTableModel(byte[] buffer)
 	{
 		data = buffer;
-		rowCount = (int)(buffer.length  / columns) + 1;
+		rowCount = (buffer.length / columns) + 1;
 		labels = new String[columns + 1];
 		for (int i=0; i < columns; i++)
 		{

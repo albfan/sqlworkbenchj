@@ -14,7 +14,6 @@ package workbench.gui.components;
 import java.awt.Color;
 import java.io.Serializable;
 import javax.swing.JColorChooser;
-import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import workbench.resource.ResourceMgr;
 

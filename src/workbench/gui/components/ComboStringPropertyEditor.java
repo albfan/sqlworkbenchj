@@ -27,7 +27,6 @@ import javax.swing.event.DocumentListener;
 
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.log.LogMgr;
-import workbench.util.StringUtil;
 
 
 

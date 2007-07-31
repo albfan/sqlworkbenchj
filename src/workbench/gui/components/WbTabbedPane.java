@@ -71,8 +71,8 @@ public class WbTabbedPane
 		this.putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
 		try
 		{
-			TabbedPaneUI ui = TabbedPaneUIFactory.getBorderLessUI();
-			if (ui != null) this.setUI(ui);
+			TabbedPaneUI tui = TabbedPaneUIFactory.getBorderLessUI();
+			if (tui != null) this.setUI(tui);
 		}
 		catch (Exception e)
 		{

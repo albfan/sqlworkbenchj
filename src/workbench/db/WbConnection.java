@@ -26,7 +26,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import workbench.WbManager;
 
 import workbench.db.report.TagWriter;
 import workbench.interfaces.DbExecutionListener;
@@ -790,8 +789,6 @@ public class WbConnection
 		}
 		
 		if (this.profile == null) return;
-		if (WbManager.getInstance().isBatchMode()) return;
-
 		String sql = this.profile.getIdleScript();
 		if (sql == null || sql.trim().length() == 0) return;
 		long idleTime = this.profile.getIdleTime();

@@ -517,13 +517,13 @@ public class OracleMetadata
    * In case the retrieve throws an error, this method will return
    * an empty set in subsequent calls.
    */
-  public Set getSnapshots(String schema)
+  public Set<String> getSnapshots(String schema)
   {
     if (!retrieveSnapshots)
     {
-      return Collections.EMPTY_SET;
+      return Collections.emptySet();
     }
-    Set result = new HashSet();
+    Set<String> result = new HashSet<String>();
     String sql = "SELECT owner||\'.\'||mview_name FROM all_mviews";
     if (schema != null)
     {
@@ -554,7 +554,7 @@ public class OracleMetadata
       // To avoid further (unnecessary) calls, we are disabling the support
       // for snapshots
       this.retrieveSnapshots = false;
-      result = Collections.EMPTY_SET;
+      result = Collections.emptySet();
     }
     finally
     {
@@ -603,8 +603,7 @@ public class OracleMetadata
       LogMgr.logWarning("OracleMetadata.getSnapshotSource()", "Error accessing all_mviews", e);
       this.retrieveSnapshots = false;
       result = ExceptionUtil.getDisplay(e);
-      ;
-    }
+		}
     finally
     {
       SqlUtil.closeAll(rs, stmt);

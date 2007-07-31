@@ -71,7 +71,7 @@ public class ClipBoardCopier
 		
 		if (this.data.getRowCount() <= 0) return;
 		
-		List columnsToCopy = null;
+		List<ColumnIdentifier> columnsToCopy = null;
 		if (selectedOnly  && !showSelectColumns && this.client.getColumnSelectionAllowed())
 		{
 			columnsToCopy = getColumnsFromSelection();

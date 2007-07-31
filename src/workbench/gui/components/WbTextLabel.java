@@ -19,7 +19,6 @@ import javax.swing.JComponent;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
-import workbench.resource.ResourceMgr;
 
 /**
  *  Displays a Label left aligned with no further overhead in painting

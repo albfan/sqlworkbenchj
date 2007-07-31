@@ -15,7 +15,6 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JMenuItem;
 
-import workbench.resource.ResourceMgr;
 
 /**
  *

@@ -44,8 +44,8 @@ public class InsertAnalyzer
 		int valuesPos = Integer.MAX_VALUE;
 		boolean inColumnBracket = false;
 		
-		String schema = null;
-		String table = null;
+		String schemaName = null;
+		String tableName = null;
 		try
 		{
 			int bracketCount = 0;
@@ -82,7 +82,7 @@ public class InsertAnalyzer
 					if (nextTokenIsTable)
 					{
 						tableStart = t.getCharBegin();
-						table = t.getContents();
+						tableName = t.getContents();
 						nextTokenIsTable = false;
 					}
 					if ("INTO".equals(value))
@@ -105,23 +105,29 @@ public class InsertAnalyzer
 			this.context = NO_CONTEXT;
 		}
 		
-		TableIdentifier id = new TableIdentifier(table);
+		TableIdentifier table = null;
+		if (tableName != null)
+		{
+			table = new TableIdentifier(tableName);
+		}
 		
 		if (cursorPos > intoStart && cursorPos < intoEnd)
 		{
 			if (cursorPos > tableStart)
 			{
-				schemaForTableList = id.getSchema();
-				if (schemaForTableList == null)
-				{
-					schemaForTableList = this.dbConnection.getMetadata().getCurrentSchema();
-				}
+				if (table != null) schemaForTableList = table.getSchema();
 			}
+			
+			if (schemaForTableList == null)
+			{
+				schemaForTableList = this.dbConnection.getMetadata().getSchemaToUse();
+			}
+			
 			context = CONTEXT_TABLE_LIST;
 		}
 		else if (cursorPos >= columnBracketStart && cursorPos <= columnBracketEnd)
 		{
-			tableForColumnList = id;
+			tableForColumnList = table;
 			context = CONTEXT_COLUMN_LIST;
 		}
 	}

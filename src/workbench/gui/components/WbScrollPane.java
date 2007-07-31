@@ -12,12 +12,8 @@
 package workbench.gui.components;
 
 import java.awt.Component;
-import java.awt.Dimension;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JViewport;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;

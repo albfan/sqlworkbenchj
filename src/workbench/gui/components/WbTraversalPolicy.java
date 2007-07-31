@@ -24,7 +24,7 @@ import java.util.Iterator;
 public class WbTraversalPolicy
 	extends FocusTraversalPolicy
 {
-	private ArrayList<Component> components = new ArrayList();
+	private ArrayList<Component> components = new ArrayList<Component>();
 	private Component defaultComponent = null;
 
 	public WbTraversalPolicy()
