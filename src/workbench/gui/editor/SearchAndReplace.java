@@ -83,6 +83,10 @@ public class SearchAndReplace
 	{
 		boolean showDialog = true;
 		String crit = this.getSelectedText();
+		
+		// Do not use multi-line selections as the default search criteria
+		if (crit.indexOf('\n') > -1) crit = null;
+		
 		if (crit == null) crit = this.lastSearchCriteria;
 		SearchCriteriaPanel p = new SearchCriteriaPanel(crit);
 

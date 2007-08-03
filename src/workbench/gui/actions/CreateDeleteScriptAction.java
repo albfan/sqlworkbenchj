@@ -33,14 +33,9 @@ public class CreateDeleteScriptAction
 	public CreateDeleteScriptAction(WbTable aClient)
 	{
 		super();
-		this.client = aClient;
 		this.initMenuDefinition("MnuTxtCreateDeleteScript", null);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		
-		if (this.client != null)
-		{
-			this.client.getSelectionModel().addListSelectionListener(this);
-		}
+		setClient(aClient);
 	}
 
 	public void executeAction(ActionEvent e)
@@ -67,6 +62,7 @@ public class CreateDeleteScriptAction
 		
 	private void checkSelection()
 	{
+		if (this.client == null) return;
 		int rows = this.client.getSelectedRowCount();
 		this.setEnabled(rows > 0);
 	}
@@ -84,5 +80,6 @@ public class CreateDeleteScriptAction
 			checkSelection();
 		}
 		this.setEnabled(this.client != null);
+		checkSelection();
 	}
 }
