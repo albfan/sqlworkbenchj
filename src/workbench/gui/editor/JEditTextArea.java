@@ -101,7 +101,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.73 2007-07-31 18:17:27 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.74 2007-08-03 20:00:28 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -115,18 +115,61 @@ public class JEditTextArea
 	private boolean currentSelectionIsTemporary;
 	protected String commentChar;
 	private TokenMarker currentTokenMarker;
-	//private int rectangularSelectionModifier = 0;
+	
 	private KeyListener keyEventInterceptor;
 	private EditorStatusbar statusBar;
-	private AdjustHandler horizontalAdjustListener = new AdjustHandler();
+	
+	protected static final String CENTER = "center";
+	protected static final String RIGHT = "right";
+	protected static final String BOTTOM = "bottom";
 
-	/**
-	 * Adding components with this name to the text area will place
-	 * them left of the horizontal scroll bar. In jEdit, the status
-	 * bar is added this way.
-	 */
-	//public static String LEFT_OF_SCROLLBAR = "los";
+	protected Timer caretTimer;
 
+	protected TextAreaPainter painter;
+
+	protected TextPopup popup;
+
+	protected EventListenerList listeners;
+	protected MutableCaretEvent caretEvent;
+
+	protected boolean caretBlinks;
+	protected boolean caretVisible;
+	protected boolean blink;
+
+	protected boolean editable;
+	protected boolean autoIndent;
+
+	protected int firstLine;
+	protected int visibleLines;
+	protected int electricScroll;
+
+	protected int horizontalOffset;
+
+	protected JScrollBar vertical;
+	protected JScrollBar horizontal;
+	protected boolean scrollBarsInitialized;
+
+	protected InputHandler inputHandler;
+	protected SyntaxDocument document;
+	protected DocumentHandler documentHandler;
+
+	protected Segment lineSegment;
+
+	protected int selectionStart;
+	protected int selectionStartLine;
+	protected int selectionEnd;
+	protected int selectionEndLine;
+	protected boolean biasLeft;
+	protected Color currentColor = null;
+
+	protected int bracketPosition;
+	protected int bracketLine;
+
+	protected int magicCaret;
+	protected boolean overwrite;
+	protected boolean rectSelect;
+	protected boolean modified;
+	
 	/**
 	 * Creates a new JEditTextArea with the default settings.
 	 */
@@ -183,7 +226,7 @@ public class JEditTextArea
 
 		this.addKeyBinding("C+a", this.popup.getSelectAllAction());
 	}
-
+	
 	public int getHScrollBarHeight()
 	{
 		if (horizontal != null && horizontal.isVisible())
@@ -458,6 +501,32 @@ public class JEditTextArea
 		return caretBlinks;
 	}
 
+	protected void stopBlinkTimer()
+	{
+		if (this.caretTimer != null)
+		{
+			caretTimer.stop();
+		}
+		caretTimer = null;
+	}
+	
+	private void startBlinkTimer()
+	{
+		if (caretTimer != null) return;
+		
+		final int blinkInterval = 750;
+		caretTimer = new Timer(blinkInterval,
+		 new ActionListener()
+			{
+				public void actionPerformed(ActionEvent evt)
+				{
+					blinkCaret();
+				}
+			});
+		caretTimer.setInitialDelay(blinkInterval);
+		caretTimer.start();
+	}
+	
 	/**
 	 * Toggles caret blinking.
 	 * @param caretBlinks True if the caret should blink, false otherwise
@@ -469,7 +538,14 @@ public class JEditTextArea
 		{
 			blink = false;
 		}
-		
+		if (caretBlinks)
+		{
+			startBlinkTimer();
+		}
+		else
+		{
+			stopBlinkTimer();
+		}
 		painter.invalidateSelectedLines();
 	}
 
@@ -487,6 +563,7 @@ public class JEditTextArea
 		int end = this.getSelectionEnd();
 		return (start < end);
 	}
+	
 	/**
 	 * Sets if the caret should be visible.
 	 * @param caretVisible True if the caret should be visible, false
@@ -496,7 +573,6 @@ public class JEditTextArea
 	{
 		this.caretVisible = caretVisible;
 		blink = true;
-
 		painter.invalidateSelectedLines();
 	}
 
@@ -505,13 +581,15 @@ public class JEditTextArea
 	 */
 	public final void blinkCaret()
 	{
-		if(caretBlinks)
+		if (caretBlinks)
 		{
 			blink = !blink;
 			painter.invalidateSelectedLines();
 		}
 		else
+		{
 			blink = true;
+		}
 	}
 
 	/**
@@ -2070,17 +2148,6 @@ public class JEditTextArea
 		}
 	}
 
-	/**
-	 * Called by the AWT when this component is removed from it's parent.
-	 * This stops clears the currently focused component.
-	 */
-	public void removeNotify()
-	{
-		super.removeNotify();
-		if(focusedComponent == this)
-			focusedComponent = null;
-	}
-
 	public void setKeyEventInterceptor(KeyListener c)
 	{
 		this.keyEventInterceptor = c;
@@ -2156,60 +2223,6 @@ public class JEditTextArea
 			this.repaint();
 		}
 	}
-
-	// protected members
-	protected static final String CENTER = "center";
-	protected static final String RIGHT = "right";
-	protected static final String BOTTOM = "bottom";
-
-	protected static JEditTextArea focusedComponent;
-	protected static Timer caretTimer;
-
-	protected TextAreaPainter painter;
-
-	protected TextPopup popup;
-
-	protected EventListenerList listeners;
-	protected MutableCaretEvent caretEvent;
-
-	protected boolean caretBlinks;
-	protected boolean caretVisible;
-	protected boolean blink;
-
-	protected boolean editable;
-	protected boolean autoIndent;
-
-	protected int firstLine;
-	protected int visibleLines;
-	protected int electricScroll;
-
-	protected int horizontalOffset;
-
-	protected JScrollBar vertical;
-	protected JScrollBar horizontal;
-	protected boolean scrollBarsInitialized;
-
-	protected InputHandler inputHandler;
-	protected SyntaxDocument document;
-	protected DocumentHandler documentHandler;
-
-	protected Segment lineSegment;
-
-	protected int selectionStart;
-	protected int selectionStartLine;
-	protected int selectionEnd;
-	protected int selectionEndLine;
-	protected boolean biasLeft;
-	//protected boolean currentSelectionIsError = false;
-	protected Color currentColor = null;
-
-	protected int bracketPosition;
-	protected int bracketLine;
-
-	protected int magicCaret;
-	protected boolean overwrite;
-	protected boolean rectSelect;
-	protected boolean modified;
 
 	protected void fireTextStatusChanged(boolean isModified)
 	{
@@ -2465,6 +2478,7 @@ public class JEditTextArea
 		private Vector leftOfScrollBar = new Vector();
 	}
 
+	/*
 	static class CaretBlinker implements ActionListener
 	{
 		public void actionPerformed(ActionEvent evt)
@@ -2474,7 +2488,8 @@ public class JEditTextArea
 				focusedComponent.blinkCaret();
 		}
 	}
-
+	*/
+		
 	class MutableCaretEvent extends CaretEvent
 	{
 		MutableCaretEvent()
@@ -2609,13 +2624,11 @@ public class JEditTextArea
 		public void focusGained(FocusEvent evt)
 		{
 			setCaretVisible(true);
-			focusedComponent = JEditTextArea.this;
 		}
 
 		public void focusLost(FocusEvent evt)
 		{
 			setCaretVisible(false);
-			focusedComponent = null;
 		}
 	}
 
@@ -2627,7 +2640,6 @@ public class JEditTextArea
 
 			// Focus events not fired sometimes?
 			setCaretVisible(true);
-			focusedComponent = JEditTextArea.this;
 
 			int x = evt.getX() - painter.getGutterWidth();
 			int line = yToLine(evt.getY());
@@ -2811,13 +2823,6 @@ public class JEditTextArea
 			else
 				return false;
 		}
-	}
-
-	static
-	{
-		caretTimer = new Timer(500,new CaretBlinker());
-		caretTimer.setInitialDelay(500);
-		caretTimer.start();
 	}
 
 	public boolean isRightClickMovesCursor()

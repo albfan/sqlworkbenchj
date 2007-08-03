@@ -337,6 +337,7 @@ public class MainWindow
 
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setBorderPainted(false);
+		menuBar.putClientProperty("jgoodies.headerStyle", "Single");
 
 		// Create the file menu for all tabs
 		JMenu menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_FILE));

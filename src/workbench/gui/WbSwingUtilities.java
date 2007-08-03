@@ -162,18 +162,25 @@ public class WbSwingUtilities
 		// Get center points
 		if (screenWidth > winWidth)
 		{
-			x = (int)((screenWidth / 2) - (winWidth / 2));
+			x = ((screenWidth / 2) - (winWidth / 2));
 		}
 		if (screenHeight > winHeight)
 		{
-			y = (int)((screenHeight/ 2) - (winHeight / 2));
+			y = ((screenHeight / 2) - (winHeight / 2));
 		}
 
-		if (aReference != null)
+		if (aReference != null && aReference.isVisible())
 		{
-			Point p = aReference.getLocationOnScreen();
-			x += p.getX();
-			y += p.getY();
+			try
+			{
+				Point p = aReference.getLocationOnScreen();
+				x += p.getX();
+				y += p.getY();
+			}
+			catch (Exception e)
+			{
+				LogMgr.logWarning("WbSwingUtilities.getLocationToCenter()", "Error getting parent location!", e);
+			}
 		}
 
 		return new Point(x, y);
@@ -448,7 +455,7 @@ public class WbSwingUtilities
 
 	public static String getUserInput(Component caller, String aTitle, String initialValue, boolean hideInput)
 	{
-		Window parent = (Window)SwingUtilities.getWindowAncestor(caller);
+		Window parent = SwingUtilities.getWindowAncestor(caller);
 
 		final JTextField input;
 		if (hideInput)

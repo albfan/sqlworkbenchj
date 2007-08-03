@@ -23,8 +23,8 @@ public class Position
 	 */
 	public static final Position NO_POSITION = new Position(-1, -1);
 	
-	public final int row;
-	public final int column;
+	private final int row;
+	private final int column;
 	
 	public Position(int line, int col)
 	{
@@ -46,6 +46,7 @@ public class Position
 		return (this.column > -1 && this.row > -1);
 	}
 	
+	@Override
 	public boolean equals(Object other)
 	{
 		if (other instanceof Position)
@@ -56,11 +57,13 @@ public class Position
 		return false;
 	}
 	
+	@Override
 	public String toString()
 	{
 		return "[" + Integer.toString(row) + ","  + Integer.toString(column) + "]";
 	}
 	
+	@Override
 	public int hashCode()
 	{
 		int result = 37 * column;

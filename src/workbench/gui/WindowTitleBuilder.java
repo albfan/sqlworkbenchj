@@ -13,8 +13,6 @@ package workbench.gui;
 
 import java.io.File;
 import workbench.db.ConnectionProfile;
-import workbench.gui.sql.SqlPanel;
-import workbench.interfaces.MainPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;

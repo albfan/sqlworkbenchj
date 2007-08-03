@@ -22,6 +22,7 @@ import javax.swing.JScrollPane;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.TableColumnOptimizer;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.interfaces.FileActions;
@@ -66,7 +67,8 @@ public class ConnectionPropertiesEditor
 		this.propTable = new WbTable();
 
 		this.propTable.setModel(new DataStoreTableModel(this.propData));
-		this.propTable.optimizeAllColWidth(100, -1, true);
+		TableColumnOptimizer optimizer = new TableColumnOptimizer(this.propTable);
+		optimizer.optimizeAllColWidth(100, -1, true);
 
 		this.setLayout(new BorderLayout());
 		JScrollPane scroll = new JScrollPane(this.propTable);

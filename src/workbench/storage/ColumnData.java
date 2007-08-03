@@ -24,8 +24,8 @@ import workbench.db.ColumnIdentifier;
  */
 public class ColumnData
 {
-	private Object data;
-	private ColumnIdentifier id;
+	final private Object data;
+	final private ColumnIdentifier id;
 	
 	/**
 	 * Creates a new instance of ColumnData

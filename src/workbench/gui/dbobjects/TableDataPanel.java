@@ -96,7 +96,7 @@ public class TableDataPanel
 	private Image loadingImage;
 	private Object retrieveLock = new Object();
 	protected StopAction cancelRetrieve;
-	private List execListener;
+	private List<DbExecutionListener> execListener;
 
 	public TableDataPanel() 
 		throws Exception
@@ -319,6 +319,7 @@ public class TableDataPanel
 		}
 		catch (Exception e)
 		{
+			rowCount = -1;
 			rollbackIfNeeded();
 			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression() + ": " + ExceptionUtil.getDisplay(e), null);
 			if (rowCountCancel)
@@ -499,7 +500,7 @@ public class TableDataPanel
 	{
 		if (!this.dbConnection.getAutoCommit() && this.dbConnection.getProfile().getUseSeparateConnectionPerTab())
 		{
-			try { this.dbConnection.commit(); } catch (Throwable th) {}
+			try { this.dbConnection.rollback(); } catch (Throwable th) {}
 		}
 	}
 	
@@ -531,7 +532,8 @@ public class TableDataPanel
 		{
 			dataDisplay.setShowErrorMessages(true);
 			dataDisplay.setStatusMessage(ResourceMgr.getString("LblLoadingProgress"));
-			dataDisplay.runQuery(sql, respectMaxRows);
+			error = !dataDisplay.runQuery(sql, respectMaxRows);
+			
 			dataDisplay.getTable().adjustOrOptimizeColumns();
 			DataStore ds = dataDisplay.getTable().getDataStore();
 			if (ds != null)
@@ -541,19 +543,15 @@ public class TableDataPanel
 				String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
 				dataDisplay.setPrintHeader(header);
 			}
-			else
-			{
-				// for some reason no data was retrieved. This seems to happen
-				// sometimes on unreliable DBMS connections.
-				dataDisplay.showError(ResourceMgr.getString("ErroNoData"));
-				WbSwingUtilities.showErrorMessageKey(SwingUtilities.getWindowAncestor(this), "ErroNoData");
-			}
+//			else
+//			{
+//				dataDisplay.showError(ResourceMgr.getString("ErroNoData"));
+//				WbSwingUtilities.showErrorMessageKey(SwingUtilities.getWindowAncestor(this), "ErroNoData");
+//			}
 			dataDisplay.showlastExecutionTime();
-			commitRetrieveIfNeeded();
 		}
 		catch (Throwable e)
 		{
-			
 			error = true;
 			final String msg;
 			
@@ -568,8 +566,6 @@ public class TableDataPanel
 				msg = ExceptionUtil.getDisplay(e);
 			}
 
-			rollbackIfNeeded();
-			
 			LogMgr.logError("TableDataPanel.doRetrieve()", "Error retrieving table data", e);
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -586,7 +582,16 @@ public class TableDataPanel
 			reloadAction.setEnabled(true);
 			this.retrieveEnd();
 			WbSwingUtilities.showDefaultCursor(this);
+			if (error) 
+			{
+				commitRetrieveIfNeeded();
+			}
+			else
+			{
+				rollbackIfNeeded();
+			}
 		}
+		
 		if (!error && Settings.getInstance().getSelectDataPanelAfterRetrieve())
 		{
 			EventQueue.invokeLater(new Runnable()
@@ -705,6 +710,9 @@ public class TableDataPanel
 		this.reset();
 		long rows = -1;
 		if (this.autoloadRowCount) rows = this.showRowCount();
+		
+		// -1 means an error occurred. No need to continue in that case.
+		if (rows == -1) return;
 
 		if (this.autoRetrieve.isSelected() && includeData)
 		{
@@ -725,7 +733,13 @@ public class TableDataPanel
 	public void reload()
 	{
 		this.reset();
-		if (this.autoloadRowCount) this.showRowCount();
+		long rows = -1;
+		if (this.autoloadRowCount) 
+		{
+			rows = this.showRowCount();
+		}
+		// An error occurred --> no need to continue
+		if (rows == -1) return;
 		boolean ctrlPressed = this.reloadAction.ctrlPressed();
 		this.retrieve(!ctrlPressed);
 	}
@@ -775,7 +789,7 @@ public class TableDataPanel
 
 	public void addDbExecutionListener(DbExecutionListener l)
 	{
-		if (this.execListener == null) this.execListener = Collections.synchronizedList(new ArrayList());
+		if (this.execListener == null) this.execListener = Collections.synchronizedList(new ArrayList<DbExecutionListener>());
 		this.execListener.add(l);
 	}
 
@@ -789,10 +803,8 @@ public class TableDataPanel
 	{
 		this.dbConnection.executionStart(this.dbConnection, this);		
 		if (this.execListener == null) return;
-		int count = this.execListener.size();
-		for (int i=0; i < count; i++)
+		for (DbExecutionListener l : execListener)
 		{
-			DbExecutionListener l = (DbExecutionListener)this.execListener.get(i);
 			if (l != null) l.executionStart(this.dbConnection, this);
 		}
 	}
@@ -801,10 +813,8 @@ public class TableDataPanel
 	{
 		this.dbConnection.executionEnd(this.dbConnection, this);
 		if (this.execListener == null) return;
-		int count = this.execListener.size();
-		for (int i=0; i < count; i++)
+		for (DbExecutionListener l : execListener)
 		{
-			DbExecutionListener l = (DbExecutionListener)this.execListener.get(i);
 			if (l != null) l.executionEnd(this.dbConnection, this);
 		}
 	}

@@ -590,7 +590,7 @@ public class BatchRunner
 			String wksp = cmdLine.getValue(WbManager.ARG_WORKSPACE);
 			String delimDef = cmdLine.getValue(WbManager.ARG_ALT_DELIMITER);
 			DelimiterDefinition delim = DelimiterDefinition.parseCmdLineArgument(delimDef);
-			
+			boolean trimCharData = cmdLine.getBoolean(WbManager.ARG_TRIM_CHAR, false);
 			boolean rollback = cmdLine.getBoolean(WbManager.ARG_CONN_ROLLBACK, false);
 			
 			if (jar != null)
@@ -601,6 +601,7 @@ public class BatchRunner
 			result = new ConnectionProfile(CMD_LINE_PROFILE_NAME, driverclass, url, user, pwd);
 			result.setRollbackBeforeDisconnect(rollback);
 			result.setAlternateDelimiter(delim);
+			result.setTrimCharData(trimCharData);
 			if (!StringUtil.isEmptyString(wksp))
 			{
 				wksp = FileDialogUtil.replaceConfigDir(wksp);

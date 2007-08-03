@@ -16,10 +16,12 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import workbench.log.LogMgr;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *	A class to hold the data for a single row retrieved from the database.
@@ -46,6 +48,7 @@ public class RowData
 	private boolean dmlSent = false;
 	
 	private boolean useNullValueObject = true;
+	private boolean trimCharData = false;
 	
 	private Object[] colData;
 	private Object[] originalData;
@@ -68,6 +71,8 @@ public class RowData
 	}
 
 	public void setUseNullValueObject(boolean flag) { this.useNullValueObject = flag; }
+	public void setTrimCharData(boolean flag) { this.trimCharData = flag; }
+	
 	public Object[] getData() { return this.colData; }
 	
 	/**
@@ -150,6 +155,17 @@ public class RowData
 				else
 				{
 					value = rs.getObject(i + 1);
+					if (trimCharData && value != null && type == Types.CHAR)
+					{
+						try
+						{
+							value = StringUtil.rtrim((String)value);
+						}
+						catch (Throwable th)
+						{
+							LogMgr.logError("RowData.read()", "Error trimming CHAR data", th);
+						}
+					}
 				}
 			}
 			catch (SQLException e)

@@ -587,13 +587,15 @@ public class DwPanel
 	/**
 	 *	Execute the given SQL statement and display the result. 
 	 */
-	public void runQuery(String aSql, boolean respectMaxRows)
+	public boolean runQuery(String aSql, boolean respectMaxRows)
 		throws SQLException, Exception
 	{
 		this.lastMessage = null;
 		this.statusBar.clearExecutionTime();
 
 		if (this.stmtRunner == null) this.createStatementRunner();
+		
+		boolean success = false;
 		
 		try
 		{
@@ -611,6 +613,7 @@ public class DwPanel
 			{
 				if (result.isSuccess())
 				{
+					success = true;
 					this.hasResultSet = true;
 					this.showData(result);
 					this.lastExecutionTime = result.getExecutionTime();
@@ -618,10 +621,11 @@ public class DwPanel
 				else
 				{
 					this.hasResultSet = false;
-					showError(result.getMessageBuffer().toString());
+					String err = result.getMessageBuffer().toString();
+					showError(err);
 					if (this.showErrorMessages)
 					{
-						WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), result.getMessageBuffer().toString());
+						WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), err);
 					}
 				}
 				checkResultSetActions();
@@ -632,6 +636,7 @@ public class DwPanel
 			this.setBatchUpdate(false);
 			this.clearStatusMessage();
 		}
+		return success;
 	}
 	
 	/**
@@ -692,7 +697,7 @@ public class DwPanel
 					dataTable.reset();
 					dataTable.setAutoCreateColumnsFromModel(true);
 					dataTable.setModel(new DataStoreTableModel(newData), true);
-					dataTable.adjustOrOptimizeColumns(Settings.getInstance().getIncludeHeaderInOptimalWidth());
+					dataTable.adjustOrOptimizeColumns();
 					StringBuilder header = new StringBuilder(80);
 					header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
 					header.append(sql);

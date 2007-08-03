@@ -453,7 +453,7 @@ public class StringUtil
 	 * Checks if both Strings are equals considering null values. 
 	 * a null String and an empty String (length==0 or all whitespace) are
 	 * considered equal as well (because both are "empty")
-	 * @see isWhitespaceOrEmpty(CharSequence)
+	 * @see #isWhitespaceOrEmpty(CharSequence)
 	 */
 	public static final boolean equalStringOrEmpty(String one, String other)
 	{

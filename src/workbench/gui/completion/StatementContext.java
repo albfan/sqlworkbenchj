@@ -95,12 +95,12 @@ public class StatementContext
 			
 			// Will contain the position of each SELECT verb
 			// if a UNION is encountered.
-			List unionStarts = new ArrayList();
+			List<Integer> unionStarts = new ArrayList<Integer>();
 			int bracketCount = 0;
 			boolean inSubselect = false;
 			boolean checkForInsertSelect = verb.equals("INSERT") || verb.equals("CREATE");
 			
-			Set unionKeywords = new HashSet();
+			Set<String> unionKeywords = new HashSet<String>();
 			unionKeywords.add("UNION");
 			unionKeywords.add("MINUS");
 			unionKeywords.add("INTERSECT");
@@ -186,7 +186,7 @@ public class StatementContext
 				int lastPos = 0;
 				while (index < unionStarts.size())
 				{
-					int startPos = ((Integer)unionStarts.get(index)).intValue();
+					int startPos = (unionStarts.get(index)).intValue();
 					if (lastPos <= pos && pos <= startPos)
 					{
 						int newPos = pos - lastPos;
@@ -197,7 +197,7 @@ public class StatementContext
 					index ++;
 				}
 				// check last union
-				int startPos = ((Integer)unionStarts.get(unionStarts.size()-1)).intValue();
+				int startPos = (unionStarts.get(unionStarts.size() - 1)).intValue();
 				if (pos >= startPos)
 				{
 					int newPos = pos - startPos;

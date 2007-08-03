@@ -46,7 +46,6 @@ import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.CellEditor;
 import javax.swing.InputMap;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -99,7 +98,6 @@ import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RequiredFieldHighlighter;
 import workbench.gui.renderer.RowStatusRenderer;
 import workbench.gui.renderer.TextAreaRenderer;
-import workbench.gui.renderer.WbRenderer;
 import workbench.gui.sql.DwStatusBar;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.Resettable;
@@ -1287,187 +1285,27 @@ public class WbTable
 	}
 
 	/**
-	 * Calls adjustOrOptimizeColumns(true).
-	 * 
-	 * @see #adjustOrOptimizeColumns(boolean)
-	 */
-	public void adjustOrOptimizeColumns()
-	{
-		adjustOrOptimizeColumns(true);
-	}
-	
-	/**
 	 * Enhance the column width display.
 	 * 
 	 * If the user chose to automatically optimize the column
 	 * width according to the content, this will 
-	 * call {@link #optimizeAllColWidth()}
-	 * otherwise this will call {@link #adjustColumns()}
-	 * 
-	 * @param checkHeaders to be passed to optimizeAllColWidth() in case the column width should be optimized
+	 * call {@link TableColumnOptimizer#optimizeAllColWidth()}
+	 * otherwise this will call {@link TableColumnOptimizer#adjustColumns(boolean)}
 	 */
-	public void adjustOrOptimizeColumns(boolean checkHeaders)
+	public void adjustOrOptimizeColumns()
 	{
+		TableColumnOptimizer optimizer = new TableColumnOptimizer(this);
+		boolean checkHeaders = Settings.getInstance().getIncludeHeaderInOptimalWidth();
 		if (Settings.getInstance().getAutomaticOptimalWidth())
 		{
-			optimizeAllColWidth(checkHeaders);
+			optimizer.optimizeAllColWidth(checkHeaders);
 		}
 		else
 		{
-			adjustColumns();
+			optimizer.adjustColumns(this.adjustToColumnLabel);
 		}
 	}
 	
-	/**
-	 * Adjusts the columns to the width defined from the 
-	 * underlying tables (i.e. getColumnWidth() for each column)
-	 * This does not adjust the width of the columns to the content.
-	 * 
-	 * @see #optimizeAllColWidth()
-	 */
-	public void adjustColumns()
-	{
-		if (this.getModel() == null) return;
-		Font f = this.getFont();
-		FontMetrics fm = this.getFontMetrics(f);
-		int charWidth = fm.stringWidth("n");
-		TableColumnModel colMod = this.getColumnModel();
-		if (colMod == null) return;
-
-		int minWidth = Settings.getInstance().getMinColumnWidth();
-		int maxWidth = Settings.getInstance().getMaxColumnWidth();
-		
-		for (int i=0; i < colMod.getColumnCount(); i++)
-		{
-			TableColumn col = colMod.getColumn(i);
-			int addWidth = this.getAdditionalColumnSpace();
-			int addHeaderWidth = this.getAdditionalColumnSpace();
-
-			if (this.dwModel != null)
-			{
-				int lblWidth = 0;
-				if (this.adjustToColumnLabel)
-				{
-					String s = this.dwModel.getColumnName(i);
-					lblWidth = fm.stringWidth(s) + addHeaderWidth;
-				}
-				int width = (this.dwModel.getColumnWidth(i) * charWidth) + addWidth;
-				int w = Math.max(width, lblWidth);
-				if (maxWidth > 0) w	= Math.min(w, maxWidth);
-				if (minWidth > 0) w = Math.max(w, minWidth);
-				col.setPreferredWidth(w);
-			}
-		}
-	}
-
-	public void optimizeAllColWidth()
-	{
-		this.optimizeAllColWidth(Settings.getInstance().getMinColumnWidth(), Settings.getInstance().getMaxColumnWidth(), Settings.getInstance().getIncludeHeaderInOptimalWidth());
-	}
-
-	public void optimizeAllColWidth(boolean respectColName)
-	{
-		this.optimizeAllColWidth(Settings.getInstance().getMinColumnWidth(), Settings.getInstance().getMaxColumnWidth(), respectColName);
-	}
-
-	public void optimizeAllColWidth(int minWidth, int maxWidth, boolean respectColName)
-	{
-		int count = this.getColumnCount();
-		for (int i=0; i < count; i++)
-		{
-			this.optimizeColWidth(i, minWidth, maxWidth, respectColName);
-		}
-	}
-
-	public void optimizeColWidth(int aColumn)
-	{
-		this.optimizeColWidth(aColumn, 0, -1, false);
-	}
-
-	public void optimizeColWidth(int aColumn, boolean respectColName)
-	{
-		this.optimizeColWidth(aColumn, Settings.getInstance().getMinColumnWidth(), Settings.getInstance().getMaxColumnWidth(), respectColName);
-	}
-
-	public void optimizeColWidth(int aColumn, int minWidth, int maxWidth)
-	{
-		this.optimizeColWidth(aColumn, minWidth, maxWidth, false);
-	}
-
-	public void optimizeColWidth(int aColumn, int minWidth, int maxWidth, boolean respectColumnName)
-	{
-		if (aColumn < 0 || aColumn > this.getColumnCount() - 1) return;
-
-//		Font f = this.getFont();
-//		FontMetrics fm = this.getFontMetrics(f);
-		TableColumnModel colMod = this.getColumnModel();
-		TableColumn col = colMod.getColumn(aColumn);
-		int addWidth = this.getAdditionalColumnSpace();
-		int optWidth = minWidth;
-		
-		if (respectColumnName)
-		{
-			JTableHeader th = this.getTableHeader();
-			TableCellRenderer rend = col.getCellRenderer();
-			if (rend == null) rend = th.getDefaultRenderer();
-			String colName = getColumnName(aColumn);
-			Component c = rend.getTableCellRendererComponent(this, colName, false, false, 0, aColumn);
-			Font headerFont = c.getFont();
-			FontMetrics hfm = c.getFontMetrics(headerFont);
-			int headerWidth = hfm.stringWidth(colName) + addWidth + 5;
-			optWidth = Math.max(minWidth, headerWidth);
-		}
-		
-		int rowCount = this.getRowCount();
-
-		String s = null;
-		int stringWidth = 0;
-		
-		for (int row = 0; row < rowCount; row ++)
-		{
-			TableCellRenderer rend = this.getCellRenderer(row, aColumn);
-			Component c = rend.getTableCellRendererComponent(this, getValueAt(row, aColumn), false, false, row, aColumn);
-			Font f = c.getFont();
-			FontMetrics fm = c.getFontMetrics(f);
-			if (c instanceof WbRenderer)
-			{
-				s = ((WbRenderer)c).getDisplayValue();
-			}
-			else if (c instanceof JLabel)
-			{
-				// DefaultCellRenderer is a JLabel
-				s = ((JLabel)c).getText();
-			}
-			else
-			{
-				s = this.getValueAsString(row, aColumn);
-			}
-			
-			if (s == null || s.length() == 0)
-				stringWidth = 0;
-			else
-				stringWidth = fm.stringWidth(s);
-			
-			optWidth = Math.max(optWidth, stringWidth + addWidth);
-		}
-		if (maxWidth > 0)
-		{
-			optWidth = Math.min(optWidth, maxWidth);
-		}
-		if (optWidth > 0)
-		{
-			col.setPreferredWidth(optWidth);
-		}
-	}
-
-	private int getAdditionalColumnSpace()
-	{
-		int addWidth = this.getIntercellSpacing().width * 2;
-		if (this.getShowVerticalLines()) addWidth += 4;
-
-		return addWidth;
-	}
-
 	public void cancelEditing()
 	{
 		if (this.isEditing())
@@ -1692,9 +1530,9 @@ public class WbTable
 	 */
 	public void mousePressed(MouseEvent e)
 	{
-		if (e.getButton() == e.BUTTON1)
+		if (e.getButton() == MouseEvent.BUTTON1)
 		{
-			boolean altDown = ((e.getModifiersEx() & e.ALT_DOWN_MASK) == e.ALT_DOWN_MASK);
+			boolean altDown = ((e.getModifiersEx() & MouseEvent.ALT_DOWN_MASK) == MouseEvent.ALT_DOWN_MASK);
 			this.setColumnSelectionAllowed(altDown);
 		}
 	}

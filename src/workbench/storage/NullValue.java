@@ -19,7 +19,7 @@ public class NullValue
 	implements Comparable
 {
 	private static HashMap<Integer, NullValue> valueCache = new HashMap<Integer, NullValue>();
-	private int type;
+	final private int type;
 	
 	public static NullValue getInstance(int aType)
 	{

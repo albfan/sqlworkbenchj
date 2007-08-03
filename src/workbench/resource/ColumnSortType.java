@@ -12,7 +12,10 @@
 package workbench.resource;
 
 /**
- *
+ * An Enum to indicate the setting how a pasted column list should be sorted
+ * 
+ * @see workbench.gui.completion.CompletionPopup
+ * 
  * @author support@sql-workbench.net
  */
 public enum ColumnSortType

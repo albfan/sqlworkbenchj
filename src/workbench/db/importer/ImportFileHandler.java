@@ -30,7 +30,7 @@ import workbench.util.ZipUtil;
 
 /**
  * This class manages access to an import file and possible attachments that 
- * were created by {@link workbench.db.exporter.DataExporter. 
+ * were created by {@link workbench.db.exporter.DataExporter} 
  * The import file can either be a regular file, or stored in a ZIP archive. 
  * 
  * @author support@sql-workbench.net

@@ -54,6 +54,7 @@ public class ConnectionProfile
 	private String workspaceFile;
 	private boolean ignoreDropErrors;
 	private boolean confirmUpdates;
+	private boolean trimCharData;
 	private Integer defaultFetchSize;
 	
 	private boolean emptyStringIsNull = false;
@@ -112,6 +113,13 @@ public class ConnectionProfile
 			this.alternateDelimiter = def;
 			this.changed = true;
 		}
+	}
+	
+	public boolean getTrimCharData() { return trimCharData; }
+	public void setTrimCharData(boolean flag) 
+	{ 
+		changed = (flag != trimCharData);
+		trimCharData = flag; 
 	}
 	
 	public DelimiterDefinition getAlternateDelimiter()

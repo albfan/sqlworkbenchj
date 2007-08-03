@@ -1056,7 +1056,7 @@ public class DbMetadata
 	 * table name, and that value is used to retrieve
 	 * the table definition. 
 	 * 
-	 * @param name the schema name to adjust
+	 * @param schema the schema name to adjust
 	 * @return the adjusted schema name
 	 */
 	public String adjustSchemaNameCase(String schema)

@@ -12,7 +12,6 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
@@ -74,7 +73,6 @@ import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultReceiver;
 import workbench.interfaces.StatementRunner;
 import workbench.sql.StatementRunnerResult;
-import workbench.util.CharacterRange;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.AutoCompletionAction;
@@ -129,7 +127,7 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.EtchedBorderTop;
-import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.TableColumnOptimizer;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
@@ -179,7 +177,7 @@ import workbench.util.WbWorkspace;
  */
 public class SqlPanel
 	extends JPanel
-	implements FontChangedListener, ActionListener, TextChangeListener,
+	implements FontChangedListener, TextChangeListener,
 		PropertyChangeListener, ChangeListener,
 		MainPanel, Exporter, DbUpdater, Interruptable, FormattableSql, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
@@ -368,6 +366,7 @@ public class SqlPanel
 	{
 		this.toolbar = new WbToolbar();
 		this.toolbar.addDefaultBorder();
+		
 		Iterator<WbAction> itr = this.toolbarActions.iterator();
 		while (itr.hasNext())
 		{
@@ -2065,7 +2064,6 @@ public class SqlPanel
 			this.updateAction.setOriginal(null);
 			this.insertRow.setOriginal(null);
 			this.deleteRow.setOriginal(null);
-			//this.startEdit.setOriginal(null);
 			this.duplicateRow.setOriginal(null);
 			this.selectKeys.setOriginal(null);
 			this.createDeleteScript.setClient(null);
@@ -2091,7 +2089,6 @@ public class SqlPanel
 			this.updateAction.setOriginal(this.currentData.getUpdateDatabaseAction());
 			this.insertRow.setOriginal(this.currentData.getInsertRowAction());
 			this.deleteRow.setOriginal(this.currentData.getDeleteRowAction());
-			//this.startEdit.setOriginal(this.currentData.getStartEditAction());
 			this.duplicateRow.setOriginal(this.currentData.getCopyRowAction());
 			this.selectKeys.setOriginal(this.currentData.getSelectKeysAction());
 			this.createDeleteScript.setClient(this.currentData.getTable());
@@ -3054,17 +3051,6 @@ public class SqlPanel
 	public Window getParentWindow()
 	{
 		return SwingUtilities.getWindowAncestor(this);
-	}
-
-	/** Invoked when an action occurs.
-	 *
-	 */
-	public void actionPerformed(ActionEvent e)
-	{
-		if (e.getSource() == this.optimizeAllCol)
-		{
-			this.currentData.getTable().optimizeAllColWidth();
-		}
 	}
 
 	public void textStatusChanged(boolean modified)

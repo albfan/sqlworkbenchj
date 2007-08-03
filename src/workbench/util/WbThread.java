@@ -11,12 +11,15 @@
  */
 package workbench.util;
 
+import workbench.log.LogMgr;
+
 /**
  *
  * @author support@sql-workbench.net
  */
 public class WbThread
 	extends Thread
+	implements Thread.UncaughtExceptionHandler 	
 {
 
 	/** Creates a new instance of WbThread */
@@ -25,6 +28,7 @@ public class WbThread
 		super();
 		this.setName(name);
 		this.setDaemon(true);
+		this.setUncaughtExceptionHandler(this);
 	}
 
 	public WbThread(Runnable run, String name)
@@ -32,6 +36,12 @@ public class WbThread
 		super(run);
 		this.setName(name);
 		this.setDaemon(true);
+		this.setUncaughtExceptionHandler(this);
 	}
+
+  public void uncaughtException(Thread thread, Throwable error)
+  {
+    LogMgr.logError("WbThread.uncaughtException", "Thread + " + thread.getName() + " caused an exception", error);
+  }
 
 }

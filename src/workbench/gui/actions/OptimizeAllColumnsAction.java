@@ -15,9 +15,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
 import javax.swing.KeyStroke;
+import workbench.gui.components.TableColumnOptimizer;
 
 import workbench.gui.components.WbTable;
 import workbench.resource.Settings;
@@ -29,12 +28,12 @@ import workbench.util.WbThread;
 public class OptimizeAllColumnsAction 
 	extends WbAction
 {
-	protected WbTable client;
+	protected TableColumnOptimizer optimizer;
 
-	public OptimizeAllColumnsAction(WbTable aClient)
+	public OptimizeAllColumnsAction(WbTable client)
 	{
 		super();
-		this.client = aClient;
+		this.setClient(client);
 		this.initMenuDefinition("MnuTxtOptimizeAllCol",KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK));
 	}
 
@@ -45,13 +44,13 @@ public class OptimizeAllColumnsAction
 
 	public void executeAction(ActionEvent e)
 	{
-		if (client == null) return;
+		if (optimizer == null) return;
 		final boolean shiftPressed = isShiftPressed(e);
 		Thread t = new WbThread("OptimizeAllCols Thread") 
 		{ 	
 			public void run()	
 			{ 
-				client.optimizeAllColWidth(shiftPressed || Settings.getInstance().getIncludeHeaderInOptimalWidth()); 
+				optimizer.optimizeAllColWidth(shiftPressed || Settings.getInstance().getIncludeHeaderInOptimalWidth()); 
 			}  
 		};
 		t.start();
@@ -59,9 +58,9 @@ public class OptimizeAllColumnsAction
 
 	public boolean hasShiftModifier() { return true; }
 	
-	public void setClient(WbTable c)
+	public void setClient(WbTable client)
 	{
-		this.client = c;
-		this.setEnabled(this.client != null);
+		this.optimizer = (client != null ? new TableColumnOptimizer(client) : null);
+		this.setEnabled(client != null);
 	}
 }

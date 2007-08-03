@@ -504,6 +504,7 @@ public class EditorPanel
 		this.clearUndoBuffer();
 		this.popup.removeAll();
 		this.popup = null;
+		this.stopBlinkTimer();
 		this.setDocument(new SyntaxDocument());
 	}
 	/**

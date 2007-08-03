@@ -103,7 +103,7 @@ public class WbManager
 	 *	this method uses class.forName() to create a new
 	 *	instance of WbDesCipher() so that WbManager itself
 	 *	does not reference the javax.crypto classes and
-	 *	it can at least be loaded in JDK < 1.4 to give
+	 *	it can at least be loaded in JDK prior 1.4 to give
 	 *	out an error message.
 	 */
 	public WbCipher getDesCipher()
@@ -356,8 +356,7 @@ public class WbManager
 			// Sending the path through the URLDecoder is important
 			// because otherwise a path with %20 will be created 
 			// if the directory contains spaces!
-			URLDecoder decoder = new URLDecoder();
-			String p = decoder.decode(url.getFile(), "UTF-8");
+			String p = URLDecoder.decode(url.getFile(), "UTF-8");
 			f = new File(p);
 		}
 		catch (Exception e)
@@ -374,6 +373,7 @@ public class WbManager
 	{
 		// Disable bold fonts for the Default Metal Look & Feel
 		System.setProperty("swing.boldMetal", "false");
+		UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
 		
 		this.initializeLookAndFeel();
 		
@@ -448,7 +448,7 @@ public class WbManager
 		{
 			def.put("Button.showMnemonics", Boolean.FALSE);
 		}
-
+		
 		settings.addFontChangedListener(this);
 //		trace("WbManager.initUI() - done");
 	}
@@ -688,7 +688,7 @@ public class WbManager
 	class CloseThread
 		extends WbThread
 	{
-		private MainWindow win;
+		final private MainWindow win;
 		public CloseThread(String name, MainWindow w)
 		{
 			super(name);
@@ -818,6 +818,7 @@ public class WbManager
 	public static final String ARG_PROFILE_GROUP = "profilegroup";
 	public static final String ARG_SHOWPROGRESS = "showprogress";
 	public static final String ARG_QUIET = "quiet";
+	public static final String ARG_TRIM_CHAR = "trimCharData";
 
 	private static final String ARG_PROFILE_STORAGE = "profilestorage";
 
@@ -864,6 +865,7 @@ public class WbManager
 		parser.addArgument(ARG_ALT_DELIMITER);
 		parser.addArgument(ARG_DELIMITER);
 		parser.addArgument(ARG_QUIET);
+		parser.addArgument(ARG_TRIM_CHAR);
 		return parser;
 	}
 	

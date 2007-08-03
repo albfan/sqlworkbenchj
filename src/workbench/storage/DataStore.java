@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -964,6 +965,16 @@ public class DataStore
 			this.rowActionMonitor.setMonitorType(RowActionMonitor.MONITOR_LOAD);
 		}
 		
+		
+		boolean trimCharData = false;
+		if (this.originalConnection != null)
+		{
+			ConnectionProfile prof = this.originalConnection.getProfile();
+			if (prof != null)
+			{
+				trimCharData = prof.getTrimCharData();
+			}
+		}
 		this.cancelRetrieve = false;
 		final int reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
 		
@@ -982,6 +993,7 @@ public class DataStore
 				}
 
 				RowData row = new RowData(cols);
+				row.setTrimCharData(trimCharData);
 				row.read(aResultSet, this.resultInfo);
 				this.data.add(row);
 				if (this.cancelRetrieve) break;

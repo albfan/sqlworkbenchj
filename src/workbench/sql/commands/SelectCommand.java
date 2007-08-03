@@ -21,6 +21,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.StringUtil;
 
 /**
  * Implementation of the SELECT statement. 
@@ -145,7 +146,7 @@ public class SelectCommand extends SqlCommand
 		catch (Exception e)
 		{
 			result.clear();
-			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
+			result.addMessage(ResourceMgr.getString("MsgExecuteError") + " " + StringUtil.getMaxSubstring(aSql, 80));
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
 			appendWarnings(result);
 			LogMgr.logSqlError("SelectCommand.execute()", aSql, e);

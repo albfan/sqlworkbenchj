@@ -15,6 +15,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
@@ -315,6 +316,15 @@ public class DbDriver
 			{
 				// New SQL Server 2005 JDBC driver
 				propName = "applicationName";
+				if (!props.containsKey("workstationID"))
+				{
+					InetAddress localhost = InetAddress.getLocalHost();
+					String localName = (localhost != null ? localhost.getHostName() : null);
+					if (localName != null)
+					{
+						props.put("workstationID", localName);
+					}
+				}
 			}
 			if (propName != null && !props.containsKey(propName))
 			{

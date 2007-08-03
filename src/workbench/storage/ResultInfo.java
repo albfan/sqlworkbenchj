@@ -36,8 +36,8 @@ import workbench.util.StringUtil;
 public class ResultInfo
 {
 	// Cached ResultSetMetaData information
-	private ColumnIdentifier[] columns;
-	private int colCount;
+	final private ColumnIdentifier[] columns;
+	final private int colCount;
 	private int realColumns;
 	private TableIdentifier updateTable;
 	
