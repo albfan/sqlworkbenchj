@@ -68,6 +68,7 @@ import workbench.gui.profiles.ProfileKey;
 import workbench.util.FileDialogUtil;
 import workbench.util.UpdateCheck;
 import workbench.util.WbCipher;
+import workbench.util.WbFile;
 import workbench.util.WbNullCipher;
 import workbench.util.WbThread;
 
@@ -347,7 +348,7 @@ public class WbManager
 //		trace("WbManager.initializeLookAndFeel() - done");
 	}
 
-	public String getJarPath()
+	public File getJarFile()
 	{
 		URL url = this.getClass().getProtectionDomain().getCodeSource().getLocation();
 		File f = null;
@@ -366,7 +367,13 @@ public class WbManager
 			p = StringUtil.replace(p, "%20", " ");
 			f = new File(p);
 		}
-		return f.getParentFile().getAbsolutePath();
+		return f;
+	}
+	
+	public String getJarPath()
+	{
+		WbFile parent = new WbFile(getJarFile().getParentFile());
+		return parent.getFullPath();
 	}
 	
 	private void initUI()
@@ -866,6 +873,7 @@ public class WbManager
 		parser.addArgument(ARG_DELIMITER);
 		parser.addArgument(ARG_QUIET);
 		parser.addArgument(ARG_TRIM_CHAR);
+		parser.addArgument("language");
 		return parser;
 	}
 	
@@ -876,6 +884,12 @@ public class WbManager
 		try
 		{
 			cmdLine.parse(args);
+			
+			String lang = cmdLine.getValue("language");
+			if (lang != null)
+			{
+				System.setProperty("workbench.gui.language", lang);
+			}
 			
 			String value = cmdLine.getValue(ARG_CONFIGDIR);
 			if (!StringUtil.isEmptyString(value))
@@ -1024,6 +1038,10 @@ public class WbManager
 	private void runBatch()
 	{
 		int exitCode = 0;
+		
+		// Make sure batch mode is always using English 
+		System.setProperty("workbench.gui.language", "en");
+		
 		BatchRunner runner = BatchRunner.createBatchRunner(cmdLine);
 
 		if (runner != null)
@@ -1086,6 +1104,7 @@ public class WbManager
 		// Avoid saving the settings
 		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
 		String args[] = { "-notemplates -nosettings -configdir=" + configDir };
+		System.setProperty("workbench.gui.language", "en");
 		
 		wb.initCmdLine(args);
 	}

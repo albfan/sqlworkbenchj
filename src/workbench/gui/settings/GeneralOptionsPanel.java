@@ -11,6 +11,10 @@
  */
 package workbench.gui.settings;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
 import javax.swing.JPanel;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.WbCheckBoxLabel;
@@ -18,6 +22,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
+import workbench.util.WbLocale;
 
 /**
  *
@@ -67,6 +72,25 @@ public class GeneralOptionsPanel
 		{
 			checkInterval.setSelectedIndex(0);
 		}
+		languageDropDown.removeAllItems();
+		String currentLang = Settings.getInstance().getLanguage().getLanguage();
+		
+		Collection<WbLocale> locales = ResourceMgr.getAvailableLocales();
+		int index = 0;
+		int currentIndex = -1;
+		for (WbLocale l : locales)
+		{
+			languageDropDown.addItem(l);
+			if (l.getLocale().getLanguage().equals(currentLang))
+			{
+				currentIndex = index;
+			}
+			index++;
+		}
+		if (currentIndex != -1)
+		{
+			languageDropDown.setSelectedIndex(currentIndex);
+		}
 	}
 
 	public void saveSettings()
@@ -93,6 +117,8 @@ public class GeneralOptionsPanel
 		String level = (String)logLevel.getSelectedItem();
 		LogMgr.setLevel(level);
 		set.setProperty("workbench.log.level", level);
+		WbLocale wl = (WbLocale)languageDropDown.getSelectedItem();
+		set.setLanguage(wl.getLocale());
 	}
 
 	public void actionPerformed(java.awt.event.ActionEvent e)
@@ -148,6 +174,8 @@ public class GeneralOptionsPanel
     logLevel = new javax.swing.JComboBox();
     checkUpdatesLabel = new WbCheckBoxLabel();
     checkInterval = new javax.swing.JComboBox();
+    langLabel = new javax.swing.JLabel();
+    languageDropDown = new javax.swing.JComboBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -172,7 +200,6 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 11);
@@ -326,7 +353,6 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(4, 10, 1, 25);
@@ -353,7 +379,6 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(6, 10, 1, 11);
@@ -376,6 +401,7 @@ public class GeneralOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 3, 0, 0);
     add(bufferSizeLabel, gridBagConstraints);
@@ -500,10 +526,29 @@ public class GeneralOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(7, 10, 0, 0);
     add(checkInterval, gridBagConstraints);
+
+    langLabel.setText(ResourceMgr.getString("LblLanguage"));
+    langLabel.setToolTipText(ResourceMgr.getDescription("LblLanguage"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(7, 10, 0, 0);
+    add(langLabel, gridBagConstraints);
+
+    languageDropDown.setToolTipText(ResourceMgr.getDescription("LblLanguage"));
+    languageDropDown.setMinimumSize(new java.awt.Dimension(80, 20));
+    languageDropDown.setPreferredSize(new java.awt.Dimension(80, 22));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(7, 3, 0, 10);
+    add(languageDropDown, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -566,6 +611,8 @@ public class GeneralOptionsPanel
   private javax.swing.JCheckBox enableDbmsOutput;
   private javax.swing.JLabel enableDbmsOutputLabel;
   private javax.swing.JPanel jPanel1;
+  private javax.swing.JLabel langLabel;
+  private javax.swing.JComboBox languageDropDown;
   private javax.swing.JComboBox logLevel;
   private javax.swing.JLabel logLevelLabel;
   private javax.swing.JTextField maxDigitsField;

@@ -259,7 +259,7 @@ public class WbTable
 		}
 		else
 		{
-			this.copySelectedAsTextAction = new CopySelectedAsTextAction(this, "MnuTxtCopySelected");
+			this.copySelectedAsTextAction = new CopySelectedAsTextAction(this);
 			this.addPopupAction(this.copySelectedAsTextAction, false);
 		}
 
