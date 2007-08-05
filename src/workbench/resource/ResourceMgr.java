@@ -268,22 +268,30 @@ public class ResourceMgr
 	public static Collection<WbLocale> getAvailableLocales()
 	{
 		List<WbLocale> result = new ArrayList<WbLocale>();
-		Locale[] locales = Locale.getAvailableLocales();
-		ClassLoader cl = ResourceMgr.class.getClassLoader();
-		for (Locale l : locales)
+		try
 		{
-			String code = l.getLanguage();
-			if (!StringUtil.isEmptyString(l.getCountry()))
+			Locale[] locales = Locale.getAvailableLocales();
+			ClassLoader cl = ResourceMgr.class.getClassLoader();
+			for (Locale l : locales)
 			{
-				code = code + "_" + l.getCountry();
-			}
-			URL res = cl.getResource("language/wbstrings_" + code + ".properties");
-			WbLocale wl = new WbLocale(l);
-			if (res != null && !result.contains(wl))
-			{
-				result.add(wl);
+				String code = l.getLanguage();
+				if (!StringUtil.isEmptyString(l.getCountry()))
+				{
+					code = code + "_" + l.getCountry();
+				}
+				URL res = cl.getResource("language/wbstrings_" + code + ".properties");
+				WbLocale wl = new WbLocale(l);
+				if (res != null && !result.contains(wl))
+				{
+					result.add(wl);
+				}
 			}
 		}
+		catch (Exception e)
+		{
+			LogMgr.logError("ResourceMgr.getAvailableLocales()", "Error retrieving locales", e);
+		}
+		
 		if (result.size() == 0)
 		{
 			result.add(new WbLocale(new Locale("en")));
@@ -298,7 +306,6 @@ public class ResourceMgr
 		{
 			if (resources == null)
 			{
-				getAvailableLocales();
 				Locale l = Settings.getInstance().getLanguage();
 				resources = ResourceBundle.getBundle("language/wbstrings", l);
 			}
