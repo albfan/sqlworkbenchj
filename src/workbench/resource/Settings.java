@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.StringTokenizer;
 import javax.swing.UIDefaults;
@@ -221,6 +222,26 @@ public class Settings
 		this.removeObsolete();
 	}
 
+	public void setLanguage(Locale locale)
+	{
+		setProperty("workbench.gui.language", locale.getLanguage());
+	}
+	
+	public Locale getLanguage()
+	{
+		String lanCode = getProperty("workbench.gui.language", "en");
+		Locale l = null;
+		try
+		{
+			l = new Locale(lanCode);
+		}
+		catch (Exception e)
+		{
+			l = new Locale("en");
+		}
+		return l;
+	}
+	
 	public ShortcutManager getShortcutManager()
 	{
 		if (this.keyManager == null)

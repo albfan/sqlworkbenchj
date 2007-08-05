@@ -13,7 +13,6 @@ package workbench.sql.wbcommands;
 
 import java.io.File;
 import java.sql.SQLException;
-import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
@@ -62,7 +61,7 @@ public class WbSavePkMapping
 		if (file == null)
 		{
 			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrPkSaveNoFile"));
+			result.addMessage(ResourceMgr.getString("ErrPkDefNoFile"));
 			return result;
 		}
 		

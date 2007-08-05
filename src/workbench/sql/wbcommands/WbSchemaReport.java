@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Properties;
 import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
 import workbench.db.report.SchemaReporter;
 import workbench.db.report.Workbench2Designer;
 import workbench.interfaces.ScriptGenerationMonitor;

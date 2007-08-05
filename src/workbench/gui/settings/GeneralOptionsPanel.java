@@ -303,7 +303,7 @@ public class GeneralOptionsPanel
     add(quoteCharField, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 18;
+    gridBagConstraints.gridy = 17;
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
 
@@ -547,7 +547,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 3, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(7, 3, 0, 15);
     add(languageDropDown, gridBagConstraints);
   }
 

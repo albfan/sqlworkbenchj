@@ -16,7 +16,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -25,6 +30,7 @@ import javax.swing.ImageIcon;
 import workbench.log.LogMgr;
 import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
+import workbench.util.WbLocale;
 
 /**
  * @author support@sql-workbench.net.kellerer
@@ -51,7 +57,7 @@ public class ResourceMgr
 	public static final String MNU_TXT_HELP = "MnuTxtHelp";
 	public static final String MNU_TXT_OPTIONS = "MnuTxtOptions";
 
-	private static ResourceBundle resources = ResourceBundle.getBundle("language/wbstrings");
+	private static ResourceBundle resources;
 	private static HashMap<String, ImageIcon> images = new HashMap<String, ImageIcon>();
 
 	private static String BUILD_INFO;
@@ -130,7 +136,7 @@ public class ResourceMgr
 	{
 		try
 		{
-			String value = resources.getString(aKey);
+			String value = getResources().getString(aKey);
 			if (replaceModifiers)
 			{
 				return replaceModifierText(value);
@@ -258,5 +264,46 @@ public class ResourceMgr
 
 		return result;
 	}
+
+	public static Collection<WbLocale> getAvailableLocales()
+	{
+		List<WbLocale> result = new ArrayList<WbLocale>();
+		Locale[] locales = Locale.getAvailableLocales();
+		ClassLoader cl = ResourceMgr.class.getClassLoader();
+		for (Locale l : locales)
+		{
+			String code = l.getLanguage();
+			if (!StringUtil.isEmptyString(l.getCountry()))
+			{
+				code = code + "_" + l.getCountry();
+			}
+			URL res = cl.getResource("language/wbstrings_" + code + ".properties");
+			WbLocale wl = new WbLocale(l);
+			if (res != null && !result.contains(wl))
+			{
+				result.add(wl);
+			}
+		}
+		if (result.size() == 0)
+		{
+			result.add(new WbLocale(new Locale("en")));
+		}
+		Collections.sort(result);
+		return result;
+	}
+	
+  public static ResourceBundle getResources()
+  {
+		synchronized (TXT_PRODUCT_NAME)
+		{
+			if (resources == null)
+			{
+				getAvailableLocales();
+				Locale l = Settings.getInstance().getLanguage();
+				resources = ResourceBundle.getBundle("language/wbstrings", l);
+			}
+			return resources;
+		}
+  }
 
 }
