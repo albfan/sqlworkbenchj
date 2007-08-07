@@ -85,15 +85,30 @@ public class DbSettings
 	public String getCascadeConstraintsVerb(String aType)
 	{
 		if (aType == null) return null;
-		String verb = Settings.getInstance().getProperty("workbench.db.drop." + aType.toLowerCase() + ".cascade." + this.dbId, null);
+		String verb = Settings.getInstance().getProperty("workbench.db.drop." + aType.toLowerCase() + ".cascade." + getDbId(), null);
 		return verb;
 	}
 	
 	public boolean needsTableForDropIndex()
 	{
-		boolean needsTable = Settings.getInstance().getBoolProperty("workbench.db." + this.dbId + ".dropindex.needstable", false);
+		boolean needsTable = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".dropindex.needstable", false);
 		return needsTable;
 	}	
+
+	public boolean useSavepointForImport()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".import.usesavepoint", false);
+	}
+
+	public boolean useSavePointForAll()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".sql.usesavepoint", false);
+	}
+	
+	public boolean useSavePointForDDL()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".ddl.usesavepoint", false);
+	}
 	
 	public boolean supportSingleLineCommands()
 	{
@@ -328,11 +343,6 @@ public class DbSettings
 			default:
 				return StringUtil.EMPTY_STRING;
 		}
-	}
-	
-	public boolean useSavepointForInsertUpdate()
-	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".import.usesavepoint", false);
 	}
 	
 	public boolean useSetCatalog()

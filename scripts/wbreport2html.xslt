@@ -78,7 +78,7 @@
 
   <xsl:for-each select="/schema-report/table-def">
 
-    <xsl:sort select="dbms-position"/>
+    <xsl:sort select="table-name"/>
     <xsl:variable name="table" select="table-name"/>
 
     <div class="tableNameHeading">
@@ -100,6 +100,7 @@
       </tr>
 
       <xsl:for-each select="column-def">
+        <xsl:sort select="dbms-position"/>
         <tr>
           <td class="tdTableDefinition"><xsl:value-of select="column-name"/></td>
           <td class="tdTableDefinition">

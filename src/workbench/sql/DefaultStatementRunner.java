@@ -14,6 +14,7 @@ package workbench.sql;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
@@ -55,6 +56,8 @@ public class DefaultStatementRunner
 	private boolean removeNewLines = false;
 	private boolean ignoreDropErrors = false;
 	protected CommandMapper cmdMapper;
+	private boolean useSavepoint;
+	private Savepoint savepoint;
 	
 	public DefaultStatementRunner()
 	{
@@ -109,6 +112,7 @@ public class DefaultStatementRunner
 	
 	public void setConnection(WbConnection aConn)
 	{
+		this.releaseSavepoint();
 		this.cmdMapper.setConnection(aConn);
 		this.dbConnection = aConn;
 		
@@ -218,8 +222,16 @@ public class DefaultStatementRunner
 		this.currentCommand.setFullErrorReporting(this.fullErrorReporting);
 		
 		long sqlExecStart = System.currentTimeMillis();
+		this.setSavepoint();
 		this.result = this.currentCommand.execute(realSql);
-		
+		if (this.result.isSuccess())
+		{
+			this.releaseSavepoint();
+		}
+		else
+		{
+			this.rollbackSavepoint();
+		}
 		this.currentCommand.setFullErrorReporting(oldReporting);
 
 		if (this.currentCommand instanceof WbStartBatch && result.isSuccess())
@@ -289,9 +301,57 @@ public class DefaultStatementRunner
 	{
 		if (this.result != null) this.result.clear();
 		this.result = null;
+		this.releaseSavepoint();
 		this.statementDone();
 		this.currentConsumer = null;
 		this.dbConnection.clearWarnings();
 	}
 
+	private void setSavepoint()
+	{
+		if (!useSavepoint) return;
+		try
+		{
+			this.savepoint = this.dbConnection.getSqlConnection().setSavepoint();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DefaultStatementRunner.setSavepoint()", "Error creating savepoint", e);
+		}
+	}
+	
+	private void releaseSavepoint()
+	{
+		if (this.savepoint == null) return;
+		try
+		{
+			this.dbConnection.getSqlConnection().releaseSavepoint(savepoint);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DefaultStatementRunner.releaseSavepoint()", "Error releasing savepoint", e);
+		}
+		finally
+		{
+			this.savepoint = null;
+		}
+	}
+	
+	private void rollbackSavepoint()
+	{
+		if (this.savepoint == null) return;
+		try
+		{
+			this.dbConnection.getSqlConnection().rollback(savepoint);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DefaultStatementRunner.rollbackSavepoint()", "Error rolling back savepoint", e);
+		}
+		finally
+		{
+			this.savepoint = null;
+		}
+	}
+	
 }

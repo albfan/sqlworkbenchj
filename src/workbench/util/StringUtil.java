@@ -1154,6 +1154,40 @@ public class StringUtil
 		return outBuffer.toString();
 	}
 
+	public static String padRight(String input, int length)
+	{
+		if (input == null) return null;
+		if (input.length() >= length) return input;
+		StringBuilder result = new StringBuilder(length);
+		result.append(input);
+		while (result.length() < length) 
+		{
+			result.append(' ');
+		}
+		return result.toString();
+	}
+	
+	public static String formatNumber(int value, int length, boolean fillRight)
+	{
+		String s = Integer.toString(value);
+		int l = s.length();
+		if (l >= length) return s;
+		StringBuilder result = new StringBuilder(length);
+		if (fillRight)
+		{
+			result.append(s);
+		}
+		for (int k = l; k < length; k++)
+		{
+			result.append(' ');
+		}
+		if (!fillRight)
+		{
+			result.append(s);
+		}
+		return result.toString();
+	}
+	
 	private static void appendUnicode(StringBuilder buffer, char c)
 	{
 		buffer.append(hexDigit(c >> 12));

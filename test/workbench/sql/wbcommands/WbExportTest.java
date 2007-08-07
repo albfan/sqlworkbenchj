@@ -29,6 +29,7 @@ import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
+import workbench.util.FileUtil;
 import workbench.util.LobFileParameter;
 import workbench.util.LobFileStatement;
 import workbench.util.SqlUtil;
@@ -412,7 +413,7 @@ public class WbExportTest extends TestCase
 		try
 		{
 			File exportFile = new File(this.basedir, "export.txt");
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test -writeoracleloader=true");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test -formatFile=oracle,sqlserver");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("Export file not created", true, exportFile.exists());
@@ -422,6 +423,22 @@ public class WbExportTest extends TestCase
 			
 			File ctl = new File(this.basedir, "export.ctl");
 			assertEquals("Control file not created", true, ctl.exists());
+			
+			List<String> lines = TestUtil.readLines(ctl);
+			System.out.println("first line: " + lines.get(0));
+			assertTrue(lines.get(0).startsWith("--"));
+			assertTrue(lines.get(1).indexOf("skip=1") > -1);
+			
+			File bcp = new File(this.basedir, "export.fmt");
+			assertEquals("BCP format file not created", true, bcp.exists());
+			lines = TestUtil.readLines(bcp);
+			assertEquals("7.0", lines.get(0));
+			assertEquals("3", lines.get(1));
+			assertTrue(lines.get(2).indexOf(" NR") > -1);
+			assertTrue(lines.get(2).indexOf(" \"\\t\"") > -1);
+			assertTrue(lines.get(3).indexOf(" FIRSTNAME") > -1);
+			assertTrue(lines.get(4).indexOf(" LASTNAME") > -1);
+			assertTrue(lines.get(4).indexOf(" \"\\n\"") > -1);
 		}
 		catch (Exception e)
 		{
@@ -791,7 +808,7 @@ public class WbExportTest extends TestCase
 		Connection con = wb.getSqlConnection();
 		
 		Statement stmt = wb.createStatement();
-		stmt.executeUpdate("CREATE TABLE junit_test (nr integer primary key, firstname varchar(100), lastname varchar(100))");
+		stmt.executeUpdate("CREATE MEMORY TABLE junit_test (nr integer primary key, firstname varchar(100), lastname varchar(100))");
 		PreparedStatement pstmt = con.prepareStatement("insert into junit_test (nr, firstname, lastname) values (?,?,?)");
 		for (int i=0; i < rowcount; i ++)
 		{

@@ -21,7 +21,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -86,11 +85,7 @@ public class WbManager
 	private WbCipher desCipher = null;
 	private boolean batchMode = false;
 	private boolean writeSettings = true;
-	
-	private static PrintStream traceOut;
-	private static final String traceFile = "workbench.trc";
 	private boolean outOfMemoryOcurred = false;
-	
 	private Thread shutdownHook = new Thread(this);
 
 	private WbManager()
@@ -734,7 +729,7 @@ public class WbManager
 	/** 
 	 * Open a new main window, but do not check any command line parameters. 
 	 * 
-	 * This methode will be called from the GUI
+	 * This method will be called from the GUI
 	 * when the user requests a new window
 	 */
 	public void openNewWindow()
@@ -749,6 +744,21 @@ public class WbManager
 
 	}
 
+	private void startLocalizationRetrieval()
+	{
+		// This is to speed up the initial display of the Options dialog
+		WbThread t = new WbThread("LocaleHelper")
+		{
+			public void run()
+			{
+				try { Thread.sleep(250); } catch (Throwable th) {}
+				ResourceMgr.getAvailableLocales();
+			}
+		};
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.start();
+	}
+	
 	private void openNewWindow(boolean checkCmdLine)
 	{
 		final MainWindow main = this.createWindow();
@@ -1022,6 +1032,7 @@ public class WbManager
 			}
 			else
 			{
+				startLocalizationRetrieval();
 				this.openNewWindow(true);
 			}
 		}

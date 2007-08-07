@@ -115,7 +115,6 @@
 				<exclude name="**/*.form"/>
 				<exclude name="**/*.class"/>
 				<exclude name="**/*.flex"/>
-				<!-- <exclude name="**/*.properties"/> -->
 			</fileset>
 		</copy>	
 
@@ -441,6 +440,7 @@
       <zipfileset dir="${scriptsrc}" prefix="scripts">
         <exclude name="**/.nb*"/>
         <exclude name="**/.new"/>
+        <exclude name="**/*test*"/>
         <exclude name="publish-dev.cmd"/>
       </zipfileset>
       
@@ -487,6 +487,11 @@
     </ant>
   </target>
 
+	<target name="website">
+    <ant antfile="../website/build.xml" inheritall="false" target="release">
+    </ant>
+	</target>
+	
   <target name="make-dev-jar" depends="clean, compile, test, get-dev-build, copy-history, make-jar, clean-history">
   </target>
 
@@ -604,13 +609,13 @@
       </tarfileset>
       <tarfileset dir="${scriptsrc}" prefix="xslt">
         <include name="**/*.xslt"/>
+        <exclude name="**/*test*"/>
       </tarfileset>
     </tar>
 	</target>
 	
 	
   <target name="release-package" depends="prepare-release-dir">
-
     <zip zipfile="${root}/release/Workbench-Build${build.number}.zip">
       <zipfileset dir="${distdir}">
         <include name="Workbench.jar"/>
@@ -630,10 +635,9 @@
       </zipfileset>
       <zipfileset dir="${scriptsrc}" prefix="xslt">
         <include name="**/*.xslt"/>
+        <exclude name="**/*test*"/>
       </zipfileset>
     </zip>
-
-
   </target>
 
 	<target name="release-src-zip" depends="init">
@@ -663,10 +667,11 @@
 				<include name="build.number"/>
 				<include name="release.property"/>
 				<include name="history.header"/>
-				<include name="jworkbench"/>
-				<include name="datapumper"/>
-				<include name="dbexplorer"/>
+				<include name="jworkbench.sh"/>
+				<include name="datapumper.sh"/>
+				<include name="dbexplorer.sh"/>
 				<include name="*.xslt"/>
+        <exclude name="**/*test*"/>
 			</zipfileset>
 			
 			<zipfileset dir="${doc}" prefix="doc">
@@ -711,7 +716,7 @@
 			<fileset dir="${junitdir}" includes="*.txt"/>
 		</delete>
 		
-		<junit haltonerror="true" haltonfailure="true" printsummary="false" includeantruntime="true" fork="false">
+		<junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="false" includeantruntime="true">
 			<classpath>
 				<pathelement location="${build}"/>
 				<pathelement location="${build_test}"/>

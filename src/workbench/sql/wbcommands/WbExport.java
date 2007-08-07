@@ -89,6 +89,7 @@ public class WbExport
 		cmdLine.addArgument("lineEnding", StringUtil.stringToList("crlf,lf"));
 		cmdLine.addArgument("showEncodings");
 		cmdLine.addArgument("writeOracleLoader", ArgumentType.BoolArgument);
+		cmdLine.addArgument("formatFile", StringUtil.stringToList("oracle,sqlserver"));
 		cmdLine.addArgument("compress", ArgumentType.BoolArgument);
 		cmdLine.addArgument("blobIdCols", ArgumentType.Deprecated);
 		cmdLine.addArgument("lobIdCols");
@@ -206,6 +207,19 @@ public class WbExport
 		if ("text".equals(type) || "txt".equals(type))
 		{
 			exporter.setWriteOracleControlFile(cmdLine.getBoolean("writeoracleloader", false));
+			String v = cmdLine.getValue("formatFile");
+			if (!StringUtil.isEmptyString(v))
+			{
+				List<String> formats = StringUtil.stringToList(v.toLowerCase());
+				if (formats.contains("oracle"))
+				{
+					exporter.setWriteOracleControlFile(true);
+				}
+				if (formats.contains("sqlserver"))
+				{
+					exporter.setWriteBcpFormatFile(true);
+				}
+			}
 			
 			String delimiter = cmdLine.getValue("delimiter");
 			if (delimiter != null) exporter.setTextDelimiter(delimiter);

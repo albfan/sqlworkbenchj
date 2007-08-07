@@ -445,6 +445,12 @@ public class WbConnection
 	 */
 	void close()
 	{
+		if (this.keepAlive != null) 
+		{
+			this.keepAlive.shutdown();
+			this.keepAlive = null;
+		}
+			
 		if (this.profile != null && this.profile.getRollbackBeforeDisconnect() && this.sqlConnection != null)
 		{
 			try
@@ -535,6 +541,18 @@ public class WbConnection
 		return this.sqlConnection.createStatement();
 	}
 
+	public boolean supportsSavepoints()
+	{
+		if (this.sqlConnection == null) return false;
+		try
+		{
+			return sqlConnection.getMetaData().supportsSavepoints();
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+	}
 	public boolean useJdbcCommit()
 	{
 		return this.metaData.getDbSettings().useJdbcCommit();

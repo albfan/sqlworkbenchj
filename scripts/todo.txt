@@ -1,8 +1,5 @@
 Features
 --------
-- Fixed column values für WbImport (z.B. -fixedValues='column1=test,column2=5')
-- dateFormat=millis zum importieren von "longs" in eine Date/time spalte
-- "Idle" statement um Verbindung offen zu halten
 - Re-retrieve selected rows
 - Checkbox dropdown für die Objekttypen im DbExplorer
 - Show table data aus "Search table data" heraus
@@ -23,4 +20,3 @@ Features
 
 JUnit
 -----
-- WbSchemaReport

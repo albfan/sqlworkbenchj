@@ -11,10 +11,8 @@
  */
 package workbench.gui.settings;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.WbCheckBoxLabel;
@@ -39,6 +37,14 @@ public class GeneralOptionsPanel
 		initComponents();
 		pdfReaderPath.setAllowMultiple(false);
 		standardFont.setAllowFontReset(true);
+		String[] updTypes = new String[] {
+			ResourceMgr.getString("LblUpdCheckNever"),
+			ResourceMgr.getString("LblUpdCheckDaily"),
+			ResourceMgr.getString("LblUpdCheck7"),
+			ResourceMgr.getString("LblUpdCheck14"),
+			ResourceMgr.getString("LblUpdCheck30")
+		};
+		checkInterval.setModel(new DefaultComboBoxModel(updTypes));
 		restoreSettings();
 	}
 
@@ -113,7 +119,28 @@ public class GeneralOptionsPanel
 		set.setDecimalSymbol(this.decimalField.getText());
 		set.setDefaultTextDelimiter(this.textDelimiterField.getText());
 		set.setPDFReaderPath(pdfReaderPath.getFilename());
-		set.setUpdateCheckInterval((String)checkInterval.getSelectedItem());
+		int index = checkInterval.getSelectedIndex();
+		switch (index)
+		{
+			case 0:
+				set.setUpdateCheckInterval(-1);
+				break;
+			case 1:
+				set.setUpdateCheckInterval(1);
+				break;
+			case 2: 
+				set.setUpdateCheckInterval(7);
+				break;
+			case 3: 
+				set.setUpdateCheckInterval(14);
+				break;
+			case 4: 
+				set.setUpdateCheckInterval(30);
+				break;
+			default:
+				set.setUpdateCheckInterval(-1);
+				break;
+		}
 		String level = (String)logLevel.getSelectedItem();
 		LogMgr.setLevel(level);
 		set.setProperty("workbench.log.level", level);

@@ -362,27 +362,11 @@ public class Settings
 	
 	public int getUpdateCheckInterval()
 	{
-		String prop = getProperty("workbench.gui.updatecheck.interval", "7");
-		if (prop.equals("never")) return -1;
-		if (prop.equals("daily")) return 1;
-		int interval = -1;
-		try
-		{
-			interval = Integer.parseInt(prop);
-		}
-		catch (Exception e)
-		{
-			interval = -1;
-		}
-		return interval;
+		return getIntProperty("workbench.gui.updatecheck.interval", 7);
 	}
 	
-	public void setUpdateCheckInterval(String days)
+	public void setUpdateCheckInterval(int days)
 	{
-		if (days.indexOf(' ') > 0)
-		{
-			days = days.substring(0, days.indexOf(' '));
-		}
 		setProperty("workbench.gui.updatecheck.interval", days);
 	}
 	

@@ -12,11 +12,13 @@
 package workbench.sql.commands;
 
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
@@ -44,7 +46,9 @@ public class DdlCommand extends SqlCommand
 	public static final SqlCommand RECREATE = new DdlCommand("RECREATE");
 
 	public static final List<DdlCommand> DDL_COMMANDS;
-
+	
+	private Savepoint ddlSavepoint;
+	
 	static
 	{
 		List<DdlCommand> l = new ArrayList<DdlCommand>(5);
@@ -68,6 +72,17 @@ public class DdlCommand extends SqlCommand
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
+		
+		DbSettings dbset = this.currentConnection.getMetadata().getDbSettings();
+//		boolean globalSavePoint = dbset.useSavePointForAll();
+		boolean useSavepoint = dbset.useSavePointForDDL() && !this.currentConnection.getAutoCommit();
+
+		if (!this.currentConnection.supportsSavepoints())
+		{
+			useSavepoint = false;
+			LogMgr.logWarning("DdlCommand.execute()", "A savepoint should be used for this DDL command, but the driver does not support savepoints!");
+		}
+		
 		try
 		{
 			this.currentStatement = currentConnection.createStatement();
@@ -77,15 +92,28 @@ public class DdlCommand extends SqlCommand
 			String msg = null;
 			result.setSuccess();
 			
+			if (useSavepoint)
+			{
+				setSavepoint();
+			}
+			
 			if (isDropCommand(aSql) && this.runner.getIgnoreDropErrors())
 			{
 				try
 				{
 					this.currentStatement.executeUpdate(aSql);
 					result.addMessage(ResourceMgr.getString("MsgDropSuccess"));
+					if (useSavepoint)
+					{
+						releaseSavepoint();
+					}
 				}
 				catch (Exception th)
 				{
+					if (useSavepoint)
+					{
+						rollbackSavepoint();
+					}
 					result.addMessage(ResourceMgr.getString("MsgDropWarning"));
 					result.addMessage(ExceptionUtil.getDisplay(th));
 					result.setSuccess();
@@ -122,10 +150,18 @@ public class DdlCommand extends SqlCommand
 						result.setFailure();
 					}
 				}
+				if (useSavepoint)
+				{
+					releaseSavepoint();
+				}
 			}
 		}
 		catch (Exception e)
 		{
+			if (useSavepoint)
+			{
+				rollbackSavepoint();
+			}
 			result.clear();
 
 			StringBuilder msg = new StringBuilder(150);
@@ -157,6 +193,61 @@ public class DdlCommand extends SqlCommand
 		return result;
 	}
 
+	private void setSavepoint()
+	{
+		try
+		{
+			this.ddlSavepoint = this.currentConnection.getSqlConnection().setSavepoint();
+			LogMgr.logDebug("DdlCommand.setSavepoint()", "DDL Savepoint created");
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DdlCommand.setSavepoint()", "Error setting savepoint", e);
+			this.ddlSavepoint = null;
+		}
+	}
+	
+	private void releaseSavepoint()
+	{
+		try
+		{
+			if (this.ddlSavepoint != null)
+			{
+				this.currentConnection.getSqlConnection().releaseSavepoint(this.ddlSavepoint);
+				LogMgr.logDebug("DdlCommand.releaseSavepoint()", "DDL Savepoint released.");
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DdlCommand.setSavepoint()", "Error releasing savepoint", e);
+		}
+		finally
+		{
+			this.ddlSavepoint = null;
+		}
+	}
+
+	private void rollbackSavepoint()
+	{
+		try
+		{
+			if (this.ddlSavepoint != null)
+			{
+				this.currentConnection.getSqlConnection().rollback(this.ddlSavepoint);
+				LogMgr.logDebug("DdlCommand.releaseSavepoint()", "Rollback to DDL savepoint successful");
+				this.ddlSavepoint = null;
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DdlCommand.rollbackSavepoint()", "Error rolling back savepoint", e);
+		}
+		finally
+		{
+			this.ddlSavepoint = null;
+		}
+	}
+	
 	public boolean isDropCommand(String sql)
 	{
 		if ("DROP".equals(this.verb)) return true;

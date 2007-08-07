@@ -110,7 +110,9 @@
     <tstamp>
       <format pattern="yyyy-mm-dd" property="currentDate"/>
     </tstamp>
-    <xslt in="workbench.xml" out="index.html" style="workbench.xslt" force="true">
+    <dirname property="current.dir" file="build.xml"/>
+    <xslt in="workbench.xml" out="${current.dir}/index.html" destdir="${current.dir}" style="workbench.xslt" force="true">
+     	<param name="filedir" expressioN="${current.dir}"/>
       <param name="buildNumber" expression="${release.build.number}"/>
       <param name="devBuildDate" expression="${dev.build.date}"/>
       <param name="devBuildNumber" expression="${dev.build.number}"/>

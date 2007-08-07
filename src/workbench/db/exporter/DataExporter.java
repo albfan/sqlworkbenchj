@@ -185,6 +185,7 @@ public class DataExporter
 	private long totalRows;
 	
 	private boolean writeOracleControlFile = false;
+	private boolean writeBcpFormatFile = false;
 	private boolean compressOutput = false;
 
 	private ZipOutputStream zipArchive;
@@ -1363,4 +1364,14 @@ public class DataExporter
 		this.writeOracleControlFile = flag;
 	}
 
+	public boolean getWriteBcpFormatFile()
+	{
+		return writeBcpFormatFile;
+	}
+	
+	public void setWriteBcpFormatFile(boolean flag)
+	{
+		this.writeBcpFormatFile = flag;
+	}
+	
 }

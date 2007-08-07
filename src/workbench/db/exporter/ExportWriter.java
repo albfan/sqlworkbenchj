@@ -168,6 +168,7 @@ public abstract class ExportWriter
 	protected void writeStart()
 		throws IOException
 	{
+		writeFormatFile();
 		StrBuffer data = converter.getStart();
 		if (data != null)
 		{
@@ -225,4 +226,17 @@ public abstract class ExportWriter
 		this.tableToUse = tableToUse;
 	}
 
+	private void writeFormatFile()
+	{
+		if (exporter.getWriteOracleControlFile())
+		{
+			FormatFileWriter writer = new OracleControlFileWriter();
+			writer.writeFormatFile(exporter, converter);
+		}
+		if (exporter.getWriteBcpFormatFile())
+		{
+			FormatFileWriter writer = new SqlServerFormatFileWriter();
+			writer.writeFormatFile(exporter, converter);
+		}
+	}
 }

@@ -56,6 +56,7 @@ public class KeepAliveDaemon
 			try
 			{
 				this.stopThread = true;
+				this.dbConnection = null;
 				this.idleThread.interrupt();
 			}
 			catch (Exception e)
@@ -101,7 +102,7 @@ public class KeepAliveDaemon
 			
 			synchronized (this)
 			{
-				if ( ((now - lastAction) > idleTime) && this.dbConnection != null && !this.dbConnection.isBusy())
+				if ( ((now - lastAction) > idleTime))
 				{
 					runSqlScript();
 					this.lastAction = now;
@@ -126,6 +127,7 @@ public class KeepAliveDaemon
 	{
 		if (this.dbConnection == null) return;
 		if (this.dbConnection.isBusy()) return;
+		if (this.dbConnection.isClosed()) return;
 		
 		Statement stmt = null;
 		synchronized (this.dbConnection)

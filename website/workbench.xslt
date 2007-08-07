@@ -21,13 +21,19 @@
           />
 
 
+
 <xsl:variable name="siteName" select="/site/@name"/>
+<xsl:param name="filedir"/>
 <xsl:param name="buildNumber"/>
 <xsl:param name="buildDate"/>
 <xsl:param name="devBuildDate"/>
 <xsl:param name="devBuildNumber"/>
 <xsl:param name="currentDate"/>
 <xsl:param name="includeDev" select="'0'"/>
+<xsl:variable name="fdir">
+    <xsl:value-of select="concat($filedir, '\')"/>
+</xsl:variable>
+
 
 <!-- Generate the table of content which will be displayed for each
   page in the left hand navigation
@@ -46,6 +52,7 @@
             <xsl:variable name="fileName">
               <xsl:value-of select="concat($pageName,'.html')"/>
             </xsl:variable>
+            
             <A href="{$fileName}"><xsl:value-of select="$pageTitle"/></A><br/>
             </xsl:if>
 
@@ -75,10 +82,14 @@
             <xsl:variable name="pageName" select="@name"/>
             <xsl:variable name="pageTitle" select="@title"/>
     
-            <xsl:variable name="filename">
+            <xsl:variable name="fname">
                 <xsl:value-of select="concat($pageName,'.html')"/>
             </xsl:variable>
-    
+
+            <xsl:variable name="filename">
+                <xsl:value-of select="concat($fdir, $fname)"/>
+            </xsl:variable>
+
             <redirect:write file="{$filename}">
                 <xsl:call-template name="main">
                   <xsl:with-param name="pageTitle" select="$pageTitle"/>
@@ -248,9 +259,10 @@
 <xsl:template match="image-link">
   <xsl:variable name="imageName" select="@name"/>
   <xsl:variable name="imageTitle" select="@title"/>
-  <xsl:variable name="imagePreviewFile" select="concat(translate(@name,'.','_'),'.html')"/>
-  <a href="{$imagePreviewFile}"><xsl:value-of select="."/></a>
-    <redirect:write file="{$imagePreviewFile}">
+  <xsl:variable name="fname" select="concat(translate(@name,'.','_'),'.html')"/>
+  <xsl:variable name="imgFile" select="concat($fdir, $fname)"/>
+  <a href="{$fname}"><xsl:value-of select="."/></a>
+    <redirect:write file="{$imgFile}">
         <xsl:call-template name="main">
           <xsl:with-param name="imageName" select="$imageName"/>
           <xsl:with-param name="pageTitle" select="'SQL Workbench/J'"/>

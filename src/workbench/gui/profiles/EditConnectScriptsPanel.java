@@ -116,7 +116,7 @@ public class EditConnectScriptsPanel
 		return keepAliveScriptEditor.getText().trim();
 	}
 	
-	public long getIdleTime()
+	private long getIdleTime()
 	{
 		String s = this.keepAliveInterval.getText().trim().toLowerCase();
 		if (s.length() == 0) return 0;
@@ -154,7 +154,11 @@ public class EditConnectScriptsPanel
 	{
 		EditConnectScriptsPanel p = new EditConnectScriptsPanel(profile);
 		ValidatingDialog d = new ValidatingDialog(owner, ResourceMgr.getString("LblEditConnScripts"), p);
-		Settings.getInstance().restoreWindowSize(d,"workbench.gui.connectscripts.window");
+		boolean hasSize = Settings.getInstance().restoreWindowSize(d,"workbench.gui.connectscripts.window");
+		if (!hasSize)
+		{
+				d.setSize(600,550);
+		}
 		WbSwingUtilities.center(d, owner);
 		d.setVisible(true);
 		Settings.getInstance().storeWindowSize(d, "workbench.gui.connectscripts.window");

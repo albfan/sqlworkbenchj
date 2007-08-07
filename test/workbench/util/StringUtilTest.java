@@ -490,5 +490,27 @@ public class StringUtilTest
 		assertEquals("bla", s);
 	}
 	
+
+	public void testPadRight()
+	{
+		String result = StringUtil.padRight("someStuff", 20);
+		assertEquals(20, result.length());
+		assertTrue(result.startsWith("someStuff"));
+	}
 	
+	public void testFormatNumber()
+	{
+		String result = StringUtil.formatNumber(10, 10, true);
+		assertEquals(10, result.length());
+		assertEquals("10        ", result);
+		
+		result = StringUtil.formatNumber(10, 10, false);
+		assertEquals(10, result.length());
+		assertEquals("        10", result);
+
+		result = StringUtil.formatNumber(100000, 5, false);
+		assertEquals(6, result.length());
+		assertEquals("100000", result);
+		
+	}
 }

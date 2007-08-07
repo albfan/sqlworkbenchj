@@ -145,7 +145,8 @@ public class DataImporter
 	private String badfileName;
 
 	private boolean useSavepoint;
-	private Savepoint preInsert;
+	private Savepoint insertSavepoint;
+	private Savepoint updateSavepoint;
 	
 	public DataImporter()
 	{
@@ -155,10 +156,16 @@ public class DataImporter
 	public void setConnection(WbConnection aConn)
 	{
 		this.dbConn = aConn;
+		if (dbConn == null) return;
 		this.supportsBatch = this.dbConn.getMetadata().supportsBatchUpdates();
 		this.useBatch = this.useBatch && supportsBatch;
-		this.useSavepoint = this.dbConn.getDbSettings().useSavepointForInsertUpdate();
+		this.useSavepoint = this.dbConn.getDbSettings().useSavepointForImport();
 		this.useSavepoint = this.useSavepoint && !this.dbConn.getAutoCommit();
+		if (!this.dbConn.supportsSavepoints())
+		{
+			LogMgr.logWarning("DataImporter.setConnection", "A savepoint should be used for each statement but the driver does not support savepoints!");
+			this.useSavepoint = false;
+		}
 	}
 
 	public void setRowActionMonitor(RowActionMonitor rowMonitor)
@@ -234,7 +241,10 @@ public class DataImporter
 	public int getCommitEvery() { return this.commitEvery; }
 
 	public boolean getContinueOnError() { return this.continueOnError; }
-	public void setContinueOnError(boolean flag) { this.continueOnError = flag; }
+	public void setContinueOnError(boolean flag) 
+	{ 
+		this.continueOnError = flag; 
+	}
 
 	public boolean getDeleteTarget() { return deleteTarget; }
 	public void setBatchSize(int size) { this.batchSize = size; }
@@ -694,7 +704,7 @@ public class DataImporter
 			switch (this.mode)
 			{
 				case MODE_INSERT:
-					rows = this.insertRow(row);
+					rows = this.insertRow(row, useSavepoint && continueOnError);
 					break;
 
 				case MODE_INSERT_UPDATE:
@@ -708,27 +718,18 @@ public class DataImporter
 					// fail as well.
 					try
 					{
-						if (this.useSavepoint)
-						{
-							setSavepoint();
-						}
-						rows = this.insertRow(row);
+						rows = this.insertRow(row, useSavepoint);
 						inserted = true;
 					}
 					catch (Exception e)
 					{
 						//LogMgr.logDebug("DataImporter.processRow()", "Error inserting row, trying update");
 						inserted = false;
-						if (this.useSavepoint)
-						{
-							this.rollbackToSavePoint();
-						}
 					}
-					releaseSavepoint();
 					
 					if (!inserted)
 					{
-						rows = this.updateRow(row);
+						rows = this.updateRow(row, useSavepoint && continueOnError);
 					}
 					break;
 
@@ -738,13 +739,13 @@ public class DataImporter
 					// zero. If the update violates any constraints, then the
 					// INSERT will fail as well, so any exception thrown, indicates
 					// an error with this row, so we will not proceed with the insert
-					rows = this.updateRow(row);
+					rows = this.updateRow(row, useSavepoint && continueOnError);
 					if (rows <= 0)
-						rows = this.insertRow(row);
+						rows = this.insertRow(row, useSavepoint && continueOnError);
 					break;
 
 				case MODE_UPDATE:
-					rows = this.updateRow(row);
+					rows = this.updateRow(row, useSavepoint && continueOnError);
 					break;
 			}
 			this.totalRows += rows;
@@ -869,46 +870,73 @@ public class DataImporter
 		}
 	}
 
-	private void setSavepoint()
+	private void setUpdateSavepoint()
 	{
 		try
 		{
-			this.preInsert = this.dbConn.getSqlConnection().setSavepoint();
+			this.updateSavepoint = this.dbConn.getSqlConnection().setSavepoint();
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("DataImporter", "Could not set pre-insert SavePoint", e);
+			LogMgr.logError("DataImporter", "Could not create pre-update Savepoint", e);
 		}
 	}
 	
-	private void rollbackToSavePoint()
+	private void setInsertSavepoint()
 	{
-		if (this.preInsert == null) return;
 		try
 		{
-			this.dbConn.getSqlConnection().rollback(this.preInsert);
-			if (LogMgr.isDebugEnabled()) 
-			{
-				LogMgr.logDebug("DataImporter.rollbackToSavePoint()", "Savepoint created, id=" + this.preInsert.getSavepointId());
-			}
+			this.insertSavepoint = this.dbConn.getSqlConnection().setSavepoint();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DataImporter", "Could not set pre-insert Savepoint", e);
+		}
+	}
+
+	private void rollbackUpdate()
+	{
+		rollbackToSavepoint(updateSavepoint);
+		updateSavepoint = null;
+	}
+	
+	private void rollbackInsert()
+	{
+		rollbackToSavepoint(insertSavepoint);
+		insertSavepoint = null;
+	}
+	
+	private void rollbackToSavepoint(Savepoint savepoint)
+	{
+		if (savepoint == null) return;
+		try
+		{
+			this.dbConn.getSqlConnection().rollback(savepoint);
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("DataImporter.rollbackToSavePoint()", "Error when performing rollback to savepoint", e);
 		}
-		finally
-		{
-			preInsert = null;
-		}
+	}
+
+	private void releaseInsertSavepoint()
+	{
+		releaseSavepoint(insertSavepoint);
+		insertSavepoint = null;
 	}
 	
-	private void releaseSavepoint()
+	private void releaseUpdateSavepoint()
 	{
-		if (this.preInsert == null) return;
+		releaseSavepoint(updateSavepoint);
+		updateSavepoint = null;
+	}
+	
+	private void releaseSavepoint(Savepoint savepoint)
+	{
+		if (savepoint == null) return;
 		try
 		{
-			this.dbConn.getSqlConnection().releaseSavepoint(preInsert);
-			this.preInsert = null;
+			this.dbConn.getSqlConnection().releaseSavepoint(savepoint);
 		}
 		catch (Throwable th)
 		{
@@ -943,30 +971,56 @@ public class DataImporter
 	 *	This method relies on insertStatement correctly initialized with
 	 *	all parameters at the correct location.
 	 */
-	private int insertRow(Object[] row)
+	private int insertRow(Object[] row, boolean useSP)
 		throws SQLException
 	{
-		int rows = processRowData(this.insertStatement, row, this.useBatch, false);
-		if (!this.useBatch)
+		try
 		{
-			this.insertedRows += rows;
+			if (useSP) setInsertSavepoint();
+			int rows = processRowData(this.insertStatement, row, this.useBatch, false);
+			if (!this.useBatch)
+			{
+				this.insertedRows += rows;
+			}
+			releaseInsertSavepoint();
+			return rows;
 		}
-		return rows;
+		catch (SQLException e)
+		{
+			if (useSP)
+			{
+				rollbackInsert();
+			}
+			throw e;
+		}
 	}
 
 	/**
 	 *	Update the data in the target table using the PreparedStatement
 	 *	available in updateStatement
 	 */
-	private int updateRow(Object[] row)
+	private int updateRow(Object[] row, boolean useSP)
 		throws SQLException
 	{
-		int rows = processRowData(this.updateStatement, row, this.useBatch, true);
-		if (!this.useBatch)
+		try
 		{
-			this.updatedRows += rows;
+			if (useSP) setUpdateSavepoint();
+			int rows = processRowData(this.updateStatement, row, this.useBatch, true);
+			if (!this.useBatch)
+			{
+				this.updatedRows += rows;
+			}
+			releaseUpdateSavepoint();
+			return rows;
 		}
-		return rows;
+		catch (SQLException e)
+		{
+			if (useSP)
+			{
+				rollbackUpdate();
+			}
+			throw e;
+		}
 	}
 
 	private int processRowData(PreparedStatement pstmt, Object[] row, boolean addBatch, boolean useColMap)

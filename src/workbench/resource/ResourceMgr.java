@@ -59,7 +59,8 @@ public class ResourceMgr
 
 	private static ResourceBundle resources;
 	private static HashMap<String, ImageIcon> images = new HashMap<String, ImageIcon>();
-
+	private static List<WbLocale> languages;
+	
 	private static String BUILD_INFO;
 
 	private ResourceMgr()
@@ -267,37 +268,59 @@ public class ResourceMgr
 
 	public static Collection<WbLocale> getAvailableLocales()
 	{
-		List<WbLocale> result = new ArrayList<WbLocale>();
-		try
+		synchronized (TXT_PRODUCT_NAME)
 		{
-			Locale[] locales = Locale.getAvailableLocales();
-			ClassLoader cl = ResourceMgr.class.getClassLoader();
-			for (Locale l : locales)
+			if (languages == null)
 			{
-				String code = l.getLanguage();
-				if (!StringUtil.isEmptyString(l.getCountry()))
+				long start = System.currentTimeMillis();
+				List<WbLocale> result = new ArrayList<WbLocale>();
+				try
 				{
-					code = code + "_" + l.getCountry();
+					Locale[] locales = Locale.getAvailableLocales();
+					ClassLoader cl = ResourceMgr.class.getClassLoader();
+					for (Locale l : locales)
+					{
+						String code = l.getLanguage();
+						if (!StringUtil.isEmptyString(l.getCountry()))
+						{
+							code = code + "_" + l.getCountry();
+						}
+						URL res = null;
+						try 
+						{ 
+							res = cl.getResource ("language/wbstrings_" + code + ".properties");
+						}
+						catch (Exception e)
+						{
+							res = null;
+						}
+						
+						if (res != null)
+						{
+							WbLocale wl = new WbLocale(l);
+							if (!result.contains(wl))
+							{
+								result.add(wl);
+							}
+						}
+					}
 				}
-				URL res = cl.getResource("language/wbstrings_" + code + ".properties");
-				WbLocale wl = new WbLocale(l);
-				if (res != null && !result.contains(wl))
+				catch (Exception e)
 				{
-					result.add(wl);
+					LogMgr.logError("ResourceMgr.getAvailableLocales()", "Error retrieving locales", e);
 				}
+
+				if (result.size() == 0)
+				{
+					result.add(new WbLocale(new Locale("en")));
+				}
+				Collections.sort(result);
+				long end = System.currentTimeMillis();
+				LogMgr.logDebug("ResourceMgr.getAvailableLocales()", "Retrieving localizations took: " + (end - start) + "ms");
+				languages = Collections.unmodifiableList(result);
 			}
+			return languages;
 		}
-		catch (Exception e)
-		{
-			LogMgr.logError("ResourceMgr.getAvailableLocales()", "Error retrieving locales", e);
-		}
-		
-		if (result.size() == 0)
-		{
-			result.add(new WbLocale(new Locale("en")));
-		}
-		Collections.sort(result);
-		return result;
 	}
 	
   public static ResourceBundle getResources()

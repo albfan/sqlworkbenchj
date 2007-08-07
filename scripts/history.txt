@@ -1,12 +1,70 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  (96.1) WbExport can now also write a format file for SQL Server's 
+      bcp utility. The file is created by using the new switch 
+      -formatFile=sqlserver  
+      The switch can also be used to write an SQL*Loader file using 
+      '-formatFile=oracle'. Creating both files is possible using 
+      '-formatFile=oracle,sqlserver'
+      The old parameter '-writeOracleLoader=true' is still supported
+Enh:  (96.1) For DDL Statements a Savepoint can now be enabled so that 
+      DBMS which cannot continue the current transaction after a DDL error
+      do not require a manual rollback (e.g. Postgres). This makes the 
+      option "Ignore DROP Errors" work for Postgres when not running in 
+      autocommit mode.
+
+Build 96, 05.08.2007
+--------------------
+Enh:  (95.5) A German localization for the GUI is now available. The GUI 
+      language can be switched from within the Options Panel (General Options).
+Enh:  (95.5) A new option "Trim CHAR data" has been added to the connection.
+      profile. If this is enabled, values retrieved from columns with 
+      the CHAR datatype are trimmed (as the CHAR data is padded on 
+      most DBMS)
+Enh:  (95.4) A "keep alive" statement can now be defined in the 
+      "Connect Scripts" dialog, that will send a statement at defined
+      intervals to the server to prevent the connection from beeing
+      closed.
+Enh:  (95.2) A new option to sort pasted columns (for auto-completion)
+       according to their position in the database has been added 
+      (Tools -> Options -> Editor)
 Enh:  (95.1) When importing files using mode=insert static values can now 
-      be specified for specific columns in case those columns are not part
-      of the import file but they need to be populated nevertheless. Only
-      constants are supported. The parameter is called -constantValues 
+      be specified for specific columns that are not part of the input file
+      (using the switch -constantValues)
 Enh:  (95.1) The filenames generated for blob files are not converted
       to lowercase anymore. This means when using -lobIdCols to create the
       blob filenames from the column data, the original case will be preserved.
+Fix:  (95.5) Improved the error handling when displaying table data in the
+      DbExplorer
+Fix:  (95.5) No tables where shown when invoking code completion for an 
+      INSERT INTO statement was broken.
+Fix:  (95.5) "Create DDL Script" in the DbExplorer was not working for 
+      sequences.
+Fix:  (95.4) The selected case for table name when generating statements (from
+      withing the options dialog) is now ignored if the driver reports that 
+      the server is case sensitive for object names.
+Fix:  (95.4) SQL Workbench/J would send a SHUTDOWN command to a Derby server
+      when disconnection. This no only done for the embedded driver.
+Fix:  (95.4) Copying data as INSERT or UPDATE to the clipboard from 
+      a SELECT that contained more than row failed (and did not ask
+      for the update table)
+Fix:  (95.4) -lineFilter did exclude the specified columns instead of 
+      including only the matching rows.
+Fix:  (95.4) Mixing function calls and constants with the -constantValues
+      switch for WbImport did not work
+Fix:  (95.4) It was not possible to specify a blank as the delimiter when 
+      importing text files. This can now be done using -delimiter="' '"
+Fix:  (95.4) WbImport would fail with a NullPointerException if a column was
+      listed twice in the -fileColumns argument.
+Fix:  (95.4) When importing text files with -quoteCharEscaping enabled,
+      WbImport would fail if a column had a null value
+Fix:  (95.3) WbExport with a SELECT as the source was broken
+Fix:  (95.3) The source for tables that contained $ characters (or other 
+      characters that are used for regular expressions) could not be displayed.
+Fix:  (95.2) WbVardef trimmed spaces inside quoted values.
+Fix:  (95.2) When reformatting SELECT statements with a CASE that defines a 
+      column alias (CASE .. END AS someCol) no whitespace was put before 
+      the AS during reformatting.
 Fix:  (95.1) It was no longer possible to run SQL Workbench in batch mode
       without a profile (for e.g. a single WbCopy command where the 
       profiles are specified as part of the WbCopy parameters)
@@ -20,7 +78,7 @@ Enh:  (94.8) A special date and timestampformat "millis" can now be specified
 Enh:  (94.8) When using -lobIdCols with WbExport the name of the export
       file is no longer part of the generated LOB filename if -compress=true
       is used.
-Enh:  (94.6) Ctrl-Shif-C (Comment Selection) now acts as a toggle. If this
+Enh:  (94.6) Ctrl-Shift-C (Comment Selection) now acts as a toggle. If this
       is invoked on a text that is not commented, the line comment character
       will be added. If the complete selection is already commented, then 
       the comments will be removed. 
