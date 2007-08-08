@@ -90,9 +90,7 @@ public class BadfileWriter
 		b.append(this.badRows);
 		b.append(' ');
 		b.append(ResourceMgr.getString("MsgCopyNumRowsRejected") + "\n");
-		b.append(ResourceMgr.getString("MsgCopyBadFile"));
-		b.append(' ');
-		b.append(this.badFile.getFullPath());
+		b.append(ResourceMgr.getFormattedString("MsgCopyBadFile", this.badFile.getFullPath()));
 		return b;
 	}
 }

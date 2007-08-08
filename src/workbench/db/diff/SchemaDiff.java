@@ -373,7 +373,6 @@ public class SchemaDiff
 		{
 			this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 		}
-		String msg = ResourceMgr.getString("MsgLoadTableInfo") + " ";
 		
 		for (int i=0; i < count; i++)
 		{
@@ -394,7 +393,7 @@ public class SchemaDiff
 			
 			if (this.monitor != null)
 			{
-				this.monitor.setCurrentObject(msg + tname, -1, -1);
+				this.monitor.setCurrentObject(ResourceMgr.getFormattedString("MsgLoadTableInfo", tname), -1, -1);
 			}
 			
 			TableIdentifier tid = rid.createCopy();
@@ -456,7 +455,6 @@ public class SchemaDiff
 		DbMetadata targetMeta = this.targetDb.getMetadata();
 		
 		this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-		String msg = ResourceMgr.getString("MsgLoadProcInfo") + " ";
 		
 		for (ProcedureDefinition refProc : refProcs)
 		{
@@ -468,7 +466,7 @@ public class SchemaDiff
 			
 			if (this.monitor != null)
 			{
-				this.monitor.setCurrentObject(msg + refProc.getProcedureName(), -1, -1);
+				this.monitor.setCurrentObject(ResourceMgr.getFormattedString("MsgLoadProcInfo", refProc.getProcedureName()), -1, -1);
 			}
 			
 			ProcDiffEntry entry = null;

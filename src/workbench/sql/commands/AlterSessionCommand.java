@@ -96,7 +96,7 @@ public class AlterSessionCommand
 				if (!oldSchema.equalsIgnoreCase(schema))
 				{
 					currentConnection.schemaChanged(oldSchema, schema);
-					result.addMessage(ResourceMgr.getString("MsgSchemaChanged") + " " + schema);
+					result.addMessage(ResourceMgr.getFormattedString("MsgSchemaChanged", schema));
 				}
 			}
 			

@@ -10,6 +10,7 @@
  *
  */
 package workbench.gui.completion;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -24,7 +25,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JList;
@@ -47,7 +47,6 @@ import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
 import workbench.util.WbThread;
-
 
 /**
  * @author  support@sql-workbench.net
