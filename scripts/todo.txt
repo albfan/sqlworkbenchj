@@ -1,5 +1,6 @@
 Features
 --------
+- Import von fixed-length Spalten
 - Re-retrieve selected rows
 - Checkbox dropdown für die Objekttypen im DbExplorer
 - Show table data aus "Search table data" heraus

@@ -496,7 +496,7 @@
   </target>
 
   <!-- build a development release -->
-  <target name="dev-release" depends="clean, compile, test, set-dev-build, copy-history, build-help, pdf, make-jar, release-src-zip, clean-history">
+  <target name="dev-release" depends="clean, compile, test, set-dev-build, copy-history, build-help, pdf, make-jar, release-src-zip, clean-history, fixshellscripts">
   
     <zip zipfile="${distdir}/Workbench-Build${build.number}.zip">
       <zipfileset dir="${distdir}">
@@ -615,7 +615,7 @@
 	</target>
 	
 	
-  <target name="release-package" depends="prepare-release-dir">
+  <target name="release-package" depends="prepare-release-dir,fixshellscripts">
     <zip zipfile="${root}/release/Workbench-Build${build.number}.zip">
       <zipfileset dir="${distdir}">
         <include name="Workbench.jar"/>
@@ -640,7 +640,7 @@
     </zip>
   </target>
 
-	<target name="release-src-zip" depends="init">
+	<target name="release-src-zip" depends="init,fixshellscripts">
 		
 		<zip zipfile="${root}/${release-src-dir}/WorkbenchSrc-Build${build.number}.zip">
 			<zipfileset dir="${src}" prefix="src">
@@ -737,5 +737,12 @@
 		<javadoc destdir="${javadocdir}" notree="true" sourcepath="${src}" packagenames="workbench.*"/>
 	</target>
 
+  <target name="fixshellscripts">
+    <fixcrlf srcdir="${scriptsrc}"
+       eol="lf" 
+       eof="remove"
+       includes="**/*.sh"
+    />
+  </target>
 	
 </project>

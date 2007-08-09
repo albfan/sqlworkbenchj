@@ -1,5 +1,6 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  (96.1) The code-completion dropdown now allows multi-selection
 Enh:  (96.1) WbExport can now also write a format file for SQL Server's 
       bcp utility. The file is created by using the new switch 
       -formatFile=sqlserver  
@@ -12,6 +13,8 @@ Enh:  (96.1) For DDL Statements a Savepoint can now be enabled so that
       do not require a manual rollback (e.g. Postgres). This makes the 
       option "Ignore DROP Errors" work for Postgres when not running in 
       autocommit mode.
+Fix:  (96.1) Added some missing german localizations.
+Fix:  (96.1) Search did not work in the editor if no text was selected.
 
 Build 96, 05.08.2007
 --------------------
