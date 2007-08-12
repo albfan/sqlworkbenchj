@@ -66,12 +66,12 @@ public class DbObjectCache
 		}
 	}
 	
-	public Set getTables()
+	public Set<TableIdentifier> getTables()
 	{
 		return getTables(null, null);
 	}
 	
-	public Set getTables(String schema)
+	public Set<TableIdentifier> getTables(String schema)
 	{
 		return getTables(schema, null);
 	}
@@ -84,7 +84,7 @@ public class DbObjectCache
 	/**
 	 * Get the tables (and views) the are currently in the cache
 	 */
-	public Set getTables(String schema, String type)
+	public Set<TableIdentifier> getTables(String schema, String type)
 	{
 		String schemaToUse = getSchemaToUse(schema);
 		if (this.objects.size() == 0 || (!schemasInCache.contains(schemaToUse == null ? NULL_SCHEMA : schemaToUse))) 

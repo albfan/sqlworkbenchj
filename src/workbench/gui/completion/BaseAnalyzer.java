@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
@@ -215,7 +216,7 @@ public abstract class BaseAnalyzer
 		else
 		{
 			// no proper sql found
-			this.elements = Collections.EMPTY_LIST;
+			this.elements = Collections.emptyList();
 			this.title = null;
 			Toolkit.getDefaultToolkit().beep();
 		}
@@ -236,7 +237,7 @@ public abstract class BaseAnalyzer
 	
 	private void retrieveTables()
 	{
-		Set tables = this.dbConnection.getObjectCache().getTables(schemaForTableList, typeFilter);
+		Set<TableIdentifier> tables = this.dbConnection.getObjectCache().getTables(schemaForTableList, typeFilter);
 		if (schemaForTableList == null)
 		{
 			this.title = ResourceMgr.getString("LblCompletionListTables");
@@ -258,7 +259,7 @@ public abstract class BaseAnalyzer
 			tableForColumnList.setSchema(this.dbConnection.getMetadata().getCurrentSchema());
 		}
 		TableIdentifier toCheck = this.dbConnection.getMetadata().resolveSynonym(tableForColumnList);
-		List cols = this.dbConnection.getObjectCache().getColumns(toCheck);
+		List<ColumnIdentifier> cols = this.dbConnection.getObjectCache().getColumns(toCheck);
 		if (cols != null && cols.size() > 0)
 		{
 			this.title = tableForColumnList.getTableName() + ".*";
@@ -301,6 +302,11 @@ public abstract class BaseAnalyzer
 		return word;
 	}
 
+	public boolean isColumnList()
+	{
+		return this.context == CONTEXT_COLUMN_LIST;
+	}
+	
 	protected String getCurrentWord()
 	{
 		return StringUtil.getWordLeftOfCursor(this.sql, cursorPos, WORD_DELIM);

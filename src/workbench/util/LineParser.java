@@ -1,5 +1,5 @@
 /*
- * WbRenderer.java
+ * LineParser.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -9,15 +9,16 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.gui.renderer;
+package workbench.util;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
-public interface WbRenderer
+public interface LineParser
 {
-	String getDisplayValue();
-	void setUseAlternatingColors(boolean flag);
-	int getHorizontalAlignment();
+	boolean hasNext();
+	String getNext();
+	void setLine(String line);
+	void setTrimValues(boolean trimValues);
 }

@@ -19,12 +19,6 @@ import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.MediaPrintableArea;
 import javax.print.attribute.standard.OrientationRequested;
 
-/*
- * PrintUtil.java
- *
- * Created on May 17, 2003, 9:06 PM
- */
-
 /**
  *
  * @author support@sql-workbench.net

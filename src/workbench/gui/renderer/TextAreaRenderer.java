@@ -52,6 +52,11 @@ public class TextAreaRenderer
 	{
 	}
 	
+	public int getHorizontalAlignment()
+	{
+		return this.getHorizontalAlignment();
+	}
+	
 	public Component getTableCellRendererComponent(JTable table, Object value,	boolean isSelected,	boolean hasFocus, int row, int col)
 	{
 		this.isEditing = (row == this.editingRow) && (this.highlightBackground != null);

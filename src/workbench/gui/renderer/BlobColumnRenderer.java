@@ -14,7 +14,6 @@ package workbench.gui.renderer;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -22,6 +21,7 @@ import java.io.File;
 import java.util.EventObject;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -63,6 +63,11 @@ public class BlobColumnRenderer
 	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,int row, int column)
 	{
 		return getComponent(table, value, true, isSelected, row, column);
+	}
+
+	public int getHorizontalAlignment()
+	{
+		return SwingConstants.LEFT;
 	}
 	
 	public Component getTableCellRendererComponent(JTable table, Object value, 

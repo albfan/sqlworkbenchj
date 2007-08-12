@@ -138,10 +138,10 @@ public class ArgumentParser
 		}
 	}
 
-	public List getArgumentsOnCommandLine()
+	public List<String> getArgumentsOnCommandLine()
 	{
-		ArrayList result = new ArrayList(this.arguments.size());
-		for (Map.Entry entry : arguments.entrySet())
+		ArrayList<String> result = new ArrayList<String>(this.arguments.size());
+		for (Map.Entry<String, String> entry : arguments.entrySet())
 		{
 			if (entry.getValue() != null)
 			{
@@ -159,7 +159,7 @@ public class ArgumentParser
 	{
 		Iterator<Map.Entry<String, ArgumentType>> itr = this.argTypes.entrySet().iterator();
 
-		List<String> result = new ArrayList(this.argTypes.size());
+		List<String> result = new ArrayList<String>(this.argTypes.size());
 		while (itr.hasNext())
 		{
 			Map.Entry<String, ArgumentType> entry = itr.next();

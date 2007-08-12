@@ -122,6 +122,29 @@ public class ResourceMgr
 	{
 		return getString("LblTabStatement");
 	}
+
+	public static String getFormattedString(String key, int value1)
+	{
+		return MessageFormat.format(getString(key), Integer.toString(value1));
+	}
+	
+	public static String getFormattedString(String key, int value1, int value2)
+	{
+		return MessageFormat.format(getString(key), 
+			Integer.toString(value1),
+			Integer.toString(value2)
+			);
+	}
+	
+	public static String getFormattedString(String key, int value1, int value2, int value3, int value4)
+	{
+		return MessageFormat.format(getString(key), 
+			Integer.toString(value1),
+			Integer.toString(value2),
+			Integer.toString(value3),
+			Integer.toString(value4)
+			);
+	}
 	
 	public static String getFormattedString(String key, Object ... values)
 	{

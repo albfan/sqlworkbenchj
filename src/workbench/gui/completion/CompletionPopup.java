@@ -74,7 +74,7 @@ public class CompletionPopup
 		
 		this.elementList = new JList();
 		this.elementList.setModel(this.data);
-		this.elementList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		this.elementList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		Border b = new CompoundBorder(elementList.getBorder(), new EmptyBorder(0,2,0,2));
 		this.elementList.setBorder(b);
 		
@@ -290,86 +290,111 @@ public class CompletionPopup
 			{
 				result.add((ColumnIdentifier)c);
 			}
+			else if (c instanceof String)
+			{
+				result.add(new ColumnIdentifier((String)c));
+			}
 		}
 		
 		if (Settings.getInstance().getAutoCompletionColumnSortType() == ColumnSortType.position)
 		{
 			ColumnIdentifier.sortByPosition(result);
 		}
-//		else
-//		{
-//			Collections.sort(result);
-//		}
 		return result;
 	}
 	
 	private void closePopup(boolean pasteEntry)
 	{
 		editor.removeKeyEventInterceptor();
-		this.scroll.setColumnHeaderView(this.headerComponent);
-		
-		if (this.window == null) return;
-		
+		scroll.setColumnHeaderView(this.headerComponent);
+
+		if (this.window == null)
+		{
+			return;
+		}
+
 		try
 		{
-			this.window.removeWindowListener(this);
-			this.window.setVisible(false);
 			if (pasteEntry)
 			{
-				Object o = this.elementList.getSelectedValue();
-				String value = null;
-				if (o != null)
-				{
-					if (o instanceof TableAlias)
-					{
-						TableAlias a = (TableAlias)o;
-						value = getPasteValue(a.getNameToUse());
-					}
-					else if (o instanceof SelectAllMarker)
-					{
-						// The SelectAllMarker is only used when columns are beeing displayed
-						List<ColumnIdentifier> columns = getColumnsFromData();
-						
-						int count = columns.size();
-						StringBuilder cols = new StringBuilder(count * 10);
-						
-						// The first element is the SelectAllMarker, so we do not 
-						// need to include it
-						for (int i=0; i < count; i++)
-						{
-							ColumnIdentifier c = columns.get(i);
-							String v = c.getColumnName();
-							if (context.getAnalyzer().getColumnPrefix() != null)
-							{
-								cols.append(context.getAnalyzer().getColumnPrefix());
-								cols.append(".");
-							}
-							if (i > 0) cols.append(", ");
-							cols.append(v);
-						}
-						value = cols.toString();
-					}
-					else
-					{
-						value = getPasteValue(o.toString());
-					}
-				}
-				if (value != null)
-				{
-					editor.setSelectedText(value);
-					if (value.startsWith("<") && value.endsWith(">"))
-					{
-						editor.selectWordAtCursor(" =-\t\n");
-					}
-				}
+				doPaste();
 			}
 		}
 		finally
 		{
+			this.window.removeWindowListener(this);
+			this.window.setVisible(false);
 			this.window.dispose();
 			this.window = null;
 			this.searchField = null;
 			selectEditor();
+		}
+	}
+	
+	private void doPaste()
+	{
+		Object[] selected = this.elementList.getSelectedValues();
+		if (selected == null)
+		{
+			return;
+		}
+		String value = "";
+		
+		for (Object o : selected)
+		{
+			if (o instanceof TableAlias)
+			{
+				TableAlias a = (TableAlias) o;
+				String table = getPasteValue(a.getNameToUse());
+				if (value.length() > 0)
+				{
+					value += ", ";
+				}
+				value += table;
+			}
+			else if (o instanceof SelectAllMarker)
+			{
+				// The SelectAllMarker is only used when columns are beeing displayed
+				List<ColumnIdentifier> columns = getColumnsFromData();
+
+				int count = columns.size();
+				StringBuilder cols = new StringBuilder(count * 10);
+
+				for (int i = 0; i < count; i++)
+				{
+					ColumnIdentifier c = columns.get(i);
+					String v = c.getColumnName();
+					if (i > 0)
+					{
+						cols.append(", ");
+					}
+					if (context.getAnalyzer().getColumnPrefix() != null && i > 0)
+					{
+						cols.append(context.getAnalyzer().getColumnPrefix());
+						cols.append(".");
+					}
+					cols.append(v);
+				}
+				value = cols.toString();
+				break;
+			}
+			else
+			{
+				if (value.length() > 0)
+				{
+					value += ", ";
+				}
+				value += getPasteValue(o.toString());
+			}
+		}
+
+		if (!StringUtil.isEmptyString(value))
+		{
+			editor.setSelectedText(value);
+			if (value.startsWith("<") && value.endsWith(">"))
+			{
+				editor.selectWordAtCursor(" =-\t\n");
+			}
 		}
 	}
 	
@@ -455,59 +480,34 @@ public class CompletionPopup
 	public void mousePressed(MouseEvent mouseEvent)	{}
 	public void mouseReleased(MouseEvent mouseEvent) {}
 	
-	public void keyPressed(KeyEvent evt)
-	{
-		int index = -1;
-		switch(evt.getKeyCode())
-		{
-			case KeyEvent.VK_HOME:
-				elementList.setSelectedIndex(0);
-				elementList.ensureIndexIsVisible(0);
-				evt.consume();
-				break;
-			case KeyEvent.VK_END:
-				index = data.getSize() - 1;
-				elementList.setSelectedIndex(index);
-				elementList.ensureIndexIsVisible(index);
-				evt.consume();
-				break;
-			case KeyEvent.VK_TAB:
-				evt.consume();
-				break;
-			case KeyEvent.VK_ENTER:
-				closePopup(true);
-				evt.consume();
-				break;
-			case KeyEvent.VK_ESCAPE:
-				closePopup(false);
-				evt.consume();
-				break;
-			case KeyEvent.VK_RIGHT:
-			case KeyEvent.VK_LEFT:
-				forwardKeyToList(evt);
-				break;
-			case KeyEvent.VK_UP:
-				index = elementList.getSelectedIndex();
-				if (index > 0)
-				{
-					elementList.setSelectedIndex(index - 1);
-					elementList.ensureIndexIsVisible(index - 1);
-				}
-				evt.consume();
-				break;
-			case KeyEvent.VK_DOWN:
-				index = elementList.getSelectedIndex();
-				if (index < data.getSize() - 1)
-				{
-					elementList.setSelectedIndex(index + 1);
-					elementList.ensureIndexIsVisible(index + 1);
-				}
-				evt.consume();
-				break;
-			default:
-				evt.consume();
-		}
-	}
+  public void keyPressed(KeyEvent evt)
+  {
+    int index = -1;
+    switch (evt.getKeyCode())
+    {
+      case KeyEvent.VK_TAB:
+        evt.consume();
+        break;
+      case KeyEvent.VK_ENTER:
+        closePopup(true);
+        evt.consume();
+        break;
+      case KeyEvent.VK_ESCAPE:
+        closePopup(false);
+        evt.consume();
+        break;
+//			case KeyEvent.VK_HOME:
+//			case KeyEvent.VK_END:
+//      case KeyEvent.VK_RIGHT:
+//      case KeyEvent.VK_LEFT:
+//      case KeyEvent.VK_UP:
+//      case KeyEvent.VK_DOWN:
+//        forwardKeyToList(evt);
+//        break;
+      default:
+        forwardKeyToList(evt);
+    }
+  }
 	
 	private void forwardKeyToList(KeyEvent evt)
 	{

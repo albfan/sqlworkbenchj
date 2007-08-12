@@ -20,6 +20,7 @@ package workbench.util;
  * @author  support@sql-workbench.net
  */
 public class CsvLineParser
+	implements LineParser
 {
 	private String lineData = null;
 	private int len = 0;

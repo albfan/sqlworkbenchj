@@ -94,7 +94,7 @@ public class WbCommandAnalyzer
 			else if (type == ArgumentType.ProfileArgument)
 			{
 				List<ConnectionProfile> profiles = ConnectionMgr.getInstance().getProfiles();
-				this.elements = new ArrayList<String>(profiles.size());
+				this.elements = new ArrayList(profiles.size());
 				for (ConnectionProfile profile : profiles)
 				{
 					this.elements.add(profile.getKey().toString());

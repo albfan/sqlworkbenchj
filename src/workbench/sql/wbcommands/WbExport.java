@@ -177,6 +177,11 @@ public class WbExport
 
 		if (type == null)
 		{
+				type = findTypeFromFilename(file);
+		}
+		
+		if (type == null)
+		{
 			result.addMessage(ResourceMgr.getString("ErrExportTypeRequired"));
 			addWrongArgumentsMessage(result);
 			result.setFailure();
@@ -812,5 +817,18 @@ public class WbExport
 	public void setMonitorType(int aType) {}
 	public void saveCurrentType(String type) {}
 	public void restoreType(String type) {}
+
+	protected String findTypeFromFilename(String fname)
+	{
+		if (fname == null) return null;
+		if (fname.toLowerCase().endsWith(".txt")) return "text";
+		if (fname.toLowerCase().endsWith(".xml")) return "xml";
+		if (fname.toLowerCase().endsWith(".text")) return "text";
+		if (fname.toLowerCase().endsWith(".csv")) return "text";
+		if (fname.toLowerCase().endsWith(".htm")) return "html";
+		if (fname.toLowerCase().endsWith(".html")) return "html";
+		if (fname.toLowerCase().endsWith(".sql")) return "sqlinsert";
+		return null;
+	}
 
 }

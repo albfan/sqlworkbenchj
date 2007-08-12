@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
@@ -41,6 +42,8 @@ import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import workbench.util.FixedLengthLineParser;
+import workbench.util.LineParser;
 import workbench.util.QuoteEscapeType;
 import workbench.util.WbFile;
 
@@ -64,12 +67,19 @@ public class TextFileParser
 	private int importColCount = -1;
 
 	private ColumnIdentifier[] columns;
+	
+	// When importing a file with fixed column widths
+	// each entry in this array defines the width of the corresponding 
+	// column in the columns array
+	private int[] columnWidthMap;
+	
 	// for each column from columns
 	// the value for the respective index
-	// defines its real index
+	// defines its real index (in rowData)
 	// if the value is -1 then the column
 	// will not be imported
 	private int[] columnMap;
+	
 	private Object[] rowData;
 
 	private boolean withHeader = true;
@@ -87,8 +97,9 @@ public class TextFileParser
 	private List<ColumnIdentifier> pendingImportColumns;
 	private ValueConverter converter = new ValueConverter();
 	private MessageBuffer messages = new MessageBuffer();
-	boolean hasErrors = false;
-	boolean hasWarnings = false;
+	private boolean hasErrors = false;
+	private boolean hasWarnings = false;
+	
 
 	// If a filter for the input file is defined
 	// this will hold the regular expressions per column
@@ -381,6 +392,7 @@ public class TextFileParser
 		}
 		return result;
 	}
+	
 	/**
 	 * Return the index of the specified column
 	 * in the import file.
@@ -436,6 +448,33 @@ public class TextFileParser
 		}
 	}
 
+	/**
+	 * Define the width for each column.
+	 * This will reset a delimiter defined using setDelimiter()
+	 */
+	public void setColumnWidths(Map<ColumnIdentifier, Integer> widthMapping)
+	{
+		if (widthMapping == null)
+		{
+			return;
+		}
+		if (this.columns == null)
+		{
+			throw new IllegalArgumentException("No columns defined!");
+		}
+
+		this.delimiter = null;
+		this.columnWidthMap = new int[this.columns.length];
+		for (int i = 0; i < columns.length; i++)
+		{
+			Integer width = widthMapping.get(columns[i]);
+			if (width != null)
+			{
+				this.columnWidthMap[i] = width.intValue();
+			}
+		}
+	}
+	
 	public void setConnection(WbConnection aConn)
 	{
 		this.connection = aConn;
@@ -677,11 +716,22 @@ public class TextFileParser
 		int importRow = 0;
 
 		char quoteCharToUse = (quoteChar == null ? 0 : quoteChar.charAt(0));
-		CsvLineParser tok = new CsvLineParser(delimiter.charAt(0), quoteCharToUse);
-		tok.setReturnEmptyStrings(true);
+		LineParser tok = null;
+		
+		if (this.columnWidthMap != null)
+		{
+			tok = new FixedLengthLineParser(this.columnWidthMap);
+		}
+		else
+		{
+			CsvLineParser csv = new CsvLineParser(delimiter.charAt(0), quoteCharToUse);
+			csv.setReturnEmptyStrings(true);
+			csv.setQuoteEscaping(this.quoteEscape);
+			tok = csv;
+		}
+		
 		tok.setTrimValues(this.trimValues);
-		tok.setQuoteEscaping(this.quoteEscape);
-
+		
 		try
 		{
 			boolean includeLine = true;

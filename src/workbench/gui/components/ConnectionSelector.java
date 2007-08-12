@@ -12,6 +12,7 @@
 package workbench.gui.components;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.sql.SQLException;
 
@@ -19,6 +20,8 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -183,21 +186,27 @@ public class ConnectionSelector
 		if (this.connectingInfo != null)
 		{
 			this.connectLabel.setText(aMsg);
+			this.connectingInfo.pack();
+			this.connectingInfo.doLayout();
 			this.connectingInfo.repaint();
 			Thread.yield();
 			return;
 		}
 		JPanel p = new JPanel();
-		p.setBorder(WbSwingUtilities.BEVEL_BORDER_RAISED);
-		p.setLayout(new BorderLayout());
+		p.setBorder(new CompoundBorder(WbSwingUtilities.BEVEL_BORDER_RAISED, new EmptyBorder(15,10,15,10)));
+		p.setLayout(new BorderLayout(15,10));
+		p.setMinimumSize(new Dimension(250,50));
 		this.connectLabel = new JLabel(aMsg);
+		this.connectLabel.setMinimumSize(new Dimension(200,50));
 		this.connectLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		
 		p.add(this.connectLabel, BorderLayout.CENTER);
 		this.connectingInfo = new JDialog(this.parent, false);
+		
 		this.connectingInfo.getContentPane().setLayout(new BorderLayout());
 		this.connectingInfo.getContentPane().add(p, BorderLayout.CENTER);
 		this.connectingInfo.setUndecorated(true);
-		this.connectingInfo.setSize(200,50);
+		this.connectingInfo.pack();
 		WbSwingUtilities.center(this.connectingInfo, this.parent);
 		this.connectingInfo.setVisible(true);
 		WbSwingUtilities.showWaitCursor(this.parent);

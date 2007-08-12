@@ -17,12 +17,17 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
+import javax.swing.Icon;
 
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
+import workbench.gui.renderer.WbRenderer;
 
 
 /**
@@ -52,7 +57,6 @@ public class TablePrintPage
 	private int lineSpacing;
 	private int colSpacing;
 	private String[] colHeaders;
-	private int[] colHeadersX;
 	
 	public TablePrintPage(JTable source, int startRow, int endRow, int startColumn, int endColumn)
 	{
@@ -80,17 +84,6 @@ public class TablePrintPage
 	public void setPageIndex(int aNum) { this.pageIndex = aNum; }
 	public int getPageIndex() { return this.pageIndex; }
 
-	public String getPageIndexDisplay()
-	{
-		if (this.pageNumAcross == -1 && this.pageNumDown == -1)
-		{
-			return Integer.toString(this.pageIndex);
-		}
-		else
-		{
-			return this.pageNumDown + "-" + this.pageNumAcross;
-		}
-	}
 	public void setColumnHeaders(String[] headers)
 	{
 		this.colHeaders = headers;
@@ -101,15 +94,11 @@ public class TablePrintPage
 		this.colWidth = widths;
 	}
 	
-	public void setColumnLabelsXPos(int[] xpos)
-	{
-		this.colHeadersX = xpos;
-	}
-	
 	public String toString()
 	{
 		return "Page V:" + this.pageNumDown + ", H:" + this.pageNumAcross + ", from row " + this.startRow + " to " + this.endRow + ", from column " + this.startCol + " to " + this.endCol;
 	}
+	
 	public void setSpacing(int line, int column)
 	{
 		this.lineSpacing = line;
@@ -139,48 +128,83 @@ public class TablePrintPage
 		
 		Font headerFont = dataFont.deriveFont(Font.BOLD);
 		FontMetrics fm = pg.getFontMetrics(headerFont);
-    int lineHeight = fm.getAscent();
+    int lineHeight = fm.getHeight();
 		
 		AffineTransform oldTransform= pg.getTransform();
 		
 		pg.setFont(headerFont);
     pg.setColor(Color.BLACK);
 
-		double x = 0;
-		double y = 0;
+		int x = 0;
+		int y = 0;
 		pg.translate(0, lineHeight);
 		for (int col= this.startCol; col <= this.endCol; col++)
 		{
 			if (this.colHeaders[col] != null)
 			{
-				pg.drawString(this.colHeaders[col], (int)x + this.colHeadersX[col], (int)y);
+				pg.drawString(this.colHeaders[col], x, 0);
 			}
 			x += this.colWidth[col] + this.colSpacing;
 		}
 
 		Stroke s = pg.getStroke();
 		pg.setStroke(new BasicStroke(0.3f));
-		pg.drawLine(0, (int)y + 1, (int)x, (int)y + 1);
+		pg.drawLine(0, 1, x, 1);
 		if (s != null) pg.setStroke(s);
 		fm = pg.getFontMetrics(dataFont);
-    lineHeight = fm.getAscent();
+    lineHeight = fm.getHeight();
 		
 		pg.setTransform(oldTransform);
 		y += (lineHeight + lineSpacing);
 		pg.translate(0, y);
 		pg.setFont(dataFont);
 		
+
+		Rectangle paintIconR = new Rectangle();
+		Rectangle paintTextR = new Rectangle();
+		Rectangle paintViewR = new Rectangle();
+		
 		for (int row = this.startRow; row <= this.endRow; row++) 
 		{
+			int cx = 0;
 			for (int col= this.startCol; col <= this.endCol; col++)
 			{
 				Object value = this.table.getValueAt(row, col);
 				if (value == null) continue;
 				TableCellRenderer rend = table.getCellRenderer(row, col);
 				Component c = rend.getTableCellRendererComponent(table, value, false, false, row, col);
-				c.setSize(this.colWidth[col], lineHeight);
-				c.print(pg);
-				pg.translate(this.colWidth[col] + colSpacing, 0);
+				if (c instanceof WbRenderer)
+				{
+					WbRenderer wb = (WbRenderer) c;
+
+					// Clip the value returned by the renderer
+					// according to the current column's width
+					String data = wb.getDisplayValue();
+
+					paintViewR.x = 0;
+					paintViewR.y = 0;
+					paintViewR.width = colWidth[col];
+					paintViewR.height = lineHeight;
+
+					paintIconR.x = paintIconR.y = paintIconR.width = paintIconR.height = 0;
+					paintTextR.x = paintTextR.y = paintTextR.width = paintTextR.height = 0;
+
+					String display = SwingUtilities.layoutCompoundLabel(fm, data, (Icon) null, 
+						SwingConstants.TOP, 
+						wb.getHorizontalAlignment(), 
+						SwingConstants.TOP, 
+						SwingConstants.RIGHT, 
+						paintViewR, paintIconR, paintTextR, 0);
+					pg.drawString(display, cx + paintTextR.x, lineHeight);
+					
+					cx += this.colWidth[col] + colSpacing;
+				}
+				else
+				{
+					c.setSize(this.colWidth[col], lineHeight);
+					c.print(pg);
+					pg.translate(this.colWidth[col] + colSpacing, 0);
+				}
 			}
 			pg.setTransform(oldTransform);
 			y += (lineHeight + lineSpacing);

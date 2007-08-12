@@ -178,18 +178,19 @@ public class PrintPreview
 
 	private void selectPrintFont()
 	{
-		Font f = WbFontChooser.chooseFont(this.getRootPane(), this.printTarget.getFont(), false, false);
+		final Font f = WbFontChooser.chooseFont(this.getRootPane(), this.printTarget.getFont(), false, false);
 		if (f != null)
 		{
-			this.printTarget.setFont(f);
 			Settings.getInstance().setPrintFont(f);
-			final PrintPreview thePreview = this;
+      printTarget.setFont(f);
+      currentPage = 0;
 			Thread t = new WbThread("PrintPreview update font")
 			{
 				public void run()
 				{
-					thePreview.showCurrentPage();
-					thePreview.doLayout();
+					invalidate();
+					showCurrentPage();
+					repaint();
 				}
 			};
 			t.start();
@@ -200,7 +201,7 @@ public class PrintPreview
 		this.scroll.getVerticalScrollBar().setBlockIncrement((int)printTarget.getPageFormat().getImageableHeight());
 		Font f = this.printTarget.getFont();
 		FontMetrics fm = this.getFontMetrics(f);
-		this.scroll.getVerticalScrollBar().setUnitIncrement((int)fm.getHeight());
+		this.scroll.getVerticalScrollBar().setUnitIncrement(fm.getHeight());
 	}
 
 	private void showCurrentPage()
@@ -212,8 +213,8 @@ public class PrintPreview
 			this.pageWidth = (int)(pageFormat.getWidth());
 			this.pageHeight = (int)(pageFormat.getHeight());
 
-			int w = (int)(this.pageWidth * this.scale/100);
-			int h = (int)(this.pageHeight* this.scale/100);
+			int w = (this.pageWidth * this.scale / 100);
+			int h = (this.pageHeight * this.scale / 100);
 
 			try
 			{

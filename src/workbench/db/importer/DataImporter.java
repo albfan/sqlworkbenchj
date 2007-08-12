@@ -1182,7 +1182,8 @@ public class DataImporter
 				else
 				{
 					pstmt.setNull(colIndex, Types.BLOB);
-					this.messages.append(ResourceMgr.getFormattedString("MsgBlobNotRead", Integer.toString(i+1)) +"\n");
+					this.messages.append(ResourceMgr.getFormattedString("MsgBlobNotRead", i+1));
+					this.messages.appendNewLine();
 				}
 			}
 			else if (targetSqlType == Types.VARCHAR && this.columnLimitMap != null)

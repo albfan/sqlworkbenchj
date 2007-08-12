@@ -45,7 +45,6 @@ public class WbImport
 	extends SqlCommand
 {
 	public static final String VERB = "WBIMPORT";
-	private DataImporter imp;
 	public static final String ARG_TYPE = "type";
 	public static final String ARG_FILE = "file";
 	public static final String ARG_TARGETTABLE = "table";
@@ -54,7 +53,6 @@ public class WbImport
 	public static final String ARG_FILECOLUMNS = "fileColumns";
 	public static final String ARG_MODE = "mode";
 	public static final String ARG_KEYCOLUMNS = "keyColumns";
-	
 	public static final String ARG_DELETE_TARGET = "deleteTarget";
 	public static final String ARG_EMPTY_STRING_IS_NULL = "emptyStringIsNull";
 	public static final String ARG_DECODE = "decode";
@@ -77,7 +75,10 @@ public class WbImport
 	public static final String ARG_BADFILE = "badFile";
 	public static final String ARG_SIZELIMIT = "maxLength";
 	public static final String ARG_CONSTANTS = "constantValues";
+	public static final String ARG_COL_WIDTHS = "columnWidths";
 	
+	private DataImporter imp;
+
 	public WbImport()
 	{
 		this.isUpdatingCommand = true;
@@ -121,6 +122,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_BADFILE);
 		cmdLine.addArgument(ARG_SIZELIMIT);
 		cmdLine.addArgument(ARG_CONSTANTS);
+		cmdLine.addArgument(ARG_COL_WIDTHS);
 	}
 	
 	public String getVerb() { return VERB; }
@@ -137,17 +139,32 @@ public class WbImport
 	private String getWrongParamsMessage()
 	{
 		String result = ResourceMgr.getString("ErrImportWrongParameters");
-		boolean continueDefault = Settings.getInstance().getBoolProperty("workbench.import.default.continue", false);
-		result = StringUtil.replace(result, "%continue_default%", Boolean.toString(continueDefault));
-		
-		boolean multiDefault = Settings.getInstance().getBoolProperty("workbench.import.default.multilinerecord", false);
-		result = StringUtil.replace(result, "%multiline_default%", Boolean.toString(multiDefault));
-
-		boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
-		result = StringUtil.replace(result, "%header_default%", Boolean.toString(multiDefault));
-
+		result = StringUtil.replace(result, "%continue_default%", Boolean.toString(getContinueDefault()));
+		result = StringUtil.replace(result, "%multiline_default%", Boolean.toString(getMultiDefault()));
+		result = StringUtil.replace(result, "%header_default%", Boolean.toString(getHeaderDefault()));
+		result = StringUtil.replace(result, "%trim_default%", Boolean.toString(getTrimDefault()));
 		result = StringUtil.replace(result, "%default_encoding%", Settings.getInstance().getDefaultDataEncoding());
 		return result;
+	}
+
+	private boolean getContinueDefault()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.import.default.continue", false);
+	}
+
+	private boolean getHeaderDefault()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
+	}
+
+	private boolean getMultiDefault()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.import.default.multilinerecord", false);
+	}
+
+	private boolean getTrimDefault()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.import.default.trimvalues", false);
 	}
 	
 	public StatementRunnerResult execute(String sqlCommand)
@@ -220,8 +237,7 @@ public class WbImport
 		}		
 		CommonArgs.setCommitAndBatchParams(imp, cmdLine);
 
-		boolean continueDefault = Settings.getInstance().getBoolProperty("workbench.import.default.continue", false);
-		boolean continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, continueDefault);
+		boolean continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, getContinueDefault());
 		imp.setContinueOnError(continueOnError);
 
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
@@ -288,8 +304,8 @@ public class WbImport
 				String ext = cmdLine.getValue(ARG_FILE_EXT);
 				if (ext != null) textParser.setSourceExtension(ext);
 			}
-			boolean multiDefault = Settings.getInstance().getBoolProperty("workbench.import.default.multilinerecord", false);
-			boolean multi = cmdLine.getBoolean(ARG_MULTI_LINE, multiDefault);
+			
+			boolean multi = cmdLine.getBoolean(ARG_MULTI_LINE, getMultiDefault());
 			textParser.setEnableMultilineRecords(multi);
 			textParser.setTargetSchema(schema);
 			textParser.setConnection(currentConnection);
@@ -302,7 +318,7 @@ public class WbImport
 			String quote = cmdLine.getValue(ARG_QUOTE);
 			if (quote != null) textParser.setQuoteChar(quote);
 
-			textParser.setTrimValues(cmdLine.getBoolean(ARG_TRIM_VALUES, false));
+			textParser.setTrimValues(cmdLine.getBoolean(ARG_TRIM_VALUES, getTrimDefault()));
 			textParser.setDecodeUnicode(cmdLine.getBoolean(ARG_DECODE, false));
 
 			if (encoding != null) textParser.setEncoding(encoding);
@@ -314,7 +330,6 @@ public class WbImport
 				boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
 				boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER, headerDefault);
 				textParser.setContainsHeader(header);
-
 
 				String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
 				if (importcolumns != null)
@@ -404,6 +419,24 @@ public class WbImport
 				textParser.setLineFilter(StringUtil.trimQuotes(filter));
 			}
 			textParser.setQuoteEscaping(CommonArgs.getQuoteEscaping(cmdLine));
+			
+			// when all columns are defined we can check for a fixed-width import
+			String width = cmdLine.getValue(ARG_COL_WIDTHS);
+			if (!StringUtil.isEmptyString(width))
+			{
+				try
+				{
+					ColumnWidthDefinition def = new ColumnWidthDefinition(width);
+					textParser.setColumnWidths(def.getColumnWidths());
+				}
+				catch (MissingWidthDefinition e)
+				{
+					result.addMessage(ResourceMgr.getFormattedString("ErrImpWrongWidth", e.getColumnName()));
+					result.setFailure();
+					return result;
+				}
+			}
+			
 			imp.setProducer(textParser);
 		}
 		else if ("xml".equalsIgnoreCase(type))
