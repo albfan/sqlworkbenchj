@@ -12,6 +12,7 @@
 package workbench.util;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.util.List;
+import workbench.log.LogMgr;
 
 /**
  * @author  support@sql-workbench.net
@@ -31,12 +33,23 @@ public class FileUtil
 	 * Closes all streams in the list.
 	 * @param a list of streams to close
 	 */
-	public static void closeStreams(List<CloseableDataStream> streams)
+	public static void closeStreams(List<Closeable> streams)
 	{
 		if (streams == null) return;
-		for (CloseableDataStream str : streams)
+
+		for (Closeable str : streams)
 		{
-			if (str != null) str.close();
+			try
+			{
+				if (str != null)
+				{
+					str.close();
+				}
+			}
+			catch (IOException io)
+			{
+				LogMgr.logError("FileUtil.closeStreams()", "Error closing stream", io);
+			}
 		}
 	}
 	

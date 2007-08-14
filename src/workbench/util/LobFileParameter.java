@@ -11,12 +11,14 @@
  */
 package workbench.util;
 
+import java.io.Closeable;
+
 /**
  * @author support@sql-workbench.net
  */
 public class LobFileParameter
 {
-	private CloseableDataStream dataStream;
+	private Closeable dataStream;
 	private String filename;
 	private String encoding;
 	private boolean binary;
@@ -37,12 +39,25 @@ public class LobFileParameter
 		return "filename=[" + filename + "], binary=" + binary + ", encoding=" + encoding;
 	}
 	
-	public void setDataStream(CloseableDataStream in)
+	public void setDataStream(Closeable in)
 	{
 		this.dataStream = in;
 	}
 
-	public CloseableDataStream getDataStream() { return dataStream; }
+	public void close()
+	{
+		if (this.dataStream != null)
+		{
+			try
+			{
+				dataStream.close();
+			}
+			catch (Exception e)
+			{
+				// ignore
+			}
+		}
+	}
 	
 	public void setBinary(boolean flag) { binary = flag; }
 	public boolean isBinary() { return binary; }

@@ -117,19 +117,19 @@ public class LobFileStatement
 			if (parameters[i].isBinary())
 			{
 				InputStream in = new BufferedInputStream(new FileInputStream(f), buffSize);
-				parameters[i].setDataStream(new CloseableDataStream(in));
+				parameters[i].setDataStream(in);
 				pstmt.setBinaryStream(i+1, in, length);
 			}
 			else if (parameters[i].getEncoding() == null)
 			{
 				InputStream in = new BufferedInputStream(new FileInputStream(f), buffSize);
-				parameters[i].setDataStream(new CloseableDataStream(in));
+				parameters[i].setDataStream(in);
 				pstmt.setAsciiStream(i+1, in, length);
 			}
 			else
 			{
 				Reader in = EncodingUtil.createBufferedReader(f, parameters[i].getEncoding());
-				parameters[i].setDataStream(new CloseableDataStream(in));
+				parameters[i].setDataStream(in);
 				pstmt.setCharacterStream(i+1, in, length);
 			}
 		}
@@ -139,11 +139,12 @@ public class LobFileStatement
 	public void done()
 	{
 		if (this.parameters == null) return;
+		
 		for (int i = 0; i < parameters.length; i++)
 		{
-			if (parameters[i].getDataStream() != null)
+			if (parameters[i] != null)
 			{
-				parameters[i].getDataStream().close();
+				parameters[i].close();
 			}
 		}
 	}

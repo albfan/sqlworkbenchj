@@ -20,7 +20,6 @@ import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.util.ExceptionUtil;
 
 /**
  * @author support@sql-workbench.net
@@ -43,7 +42,7 @@ public class UpdateCheck
 			WbThread upd = new WbThread(this, "UpdateCheck");
 			upd.start();
 		}
-		else if (interval > 6)
+		else
 		{
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			LogMgr.logInfo("UpdateCheck.startUpdateCheck()", "Check not necessary. Last check on: " + sdf.format(lastCheck) + ", interval="+ interval + " days");
@@ -125,7 +124,7 @@ public class UpdateCheck
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("WbVersionReader.backgroundCheck()", "Could not check for updates", e);
+			LogMgr.logError("UpdateCheck.run()", "Could not check for updates", e);
 		}
 	}
 	
