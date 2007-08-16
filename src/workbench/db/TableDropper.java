@@ -13,6 +13,7 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import workbench.util.SqlUtil;
 
 /**
  * @author support@sql-workbench.net
@@ -67,7 +68,7 @@ public class TableDropper
 		}
 		finally
 		{
-			try { stmt.close(); } catch (Throwable th) {}
+			SqlUtil.closeStatement(stmt);
 		}
 	}	
 }

@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.List;
 
 import workbench.log.LogMgr;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -99,7 +100,7 @@ public class TableCreator
 		}
 		finally
 		{
-			try { stmt.close(); } catch (Throwable th) {}
+			SqlUtil.closeStatement(stmt);
 		}
 	}
 

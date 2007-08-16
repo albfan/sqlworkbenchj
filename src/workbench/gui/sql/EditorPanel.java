@@ -773,7 +773,7 @@ public class EditorPanel
 		finally
 		{
 			this.resetModified();
-			try { reader.close(); } catch (Throwable th) {}
+			FileUtil.closeQuitely(reader);
 		}
 		return result;
 	}

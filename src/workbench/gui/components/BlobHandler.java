@@ -127,7 +127,7 @@ public class BlobHandler
 			}
 			finally
 			{
-				try { in.close(); } catch (Throwable th) {}
+				FileUtil.closeQuitely(in);
 			}
 			
 		}
@@ -299,6 +299,8 @@ public class BlobHandler
 		String title = ResourceMgr.getString("TxtBlobData");
 		this.newValue = null;
 		EditWindow w;
+		boolean result = false;
+		
 		if (parent != null)
 		{
 			w = new EditWindow(parent, title, data, false, false);
@@ -309,28 +311,33 @@ public class BlobHandler
 		}
 		//w.setReadOnly();
 		w.setInfoText(ResourceMgr.getString("LblFileEncoding") + ": " + encoding);
-		w.setVisible(true);
-		boolean result = false;
-		if (!w.isCancelled())
+		try
 		{
-			data = w.getText();
-			try
+			w.setVisible(true);
+			if (!w.isCancelled())
 			{
-				if (encoding != null)
+				data = w.getText();
+				try
 				{
-					this.newValue = data.getBytes(encoding);
-					this.uploadFile = null;
-					result = true;
+					if (encoding != null)
+					{
+						this.newValue = data.getBytes(encoding);
+						this.uploadFile = null;
+						result = true;
+					}
+				}
+				catch (Exception e)
+				{
+					this.newValue = null;
+					result = false;
+					LogMgr.logError("BlobHandler.showBlobAsText", "Error converting text to blob", e);
 				}
 			}
-			catch (Exception e)
-			{
-				this.newValue = null;
-				result = false;
-				LogMgr.logError("BlobHandler.showBlobAsText", "Error converting text to blob", e);
-			}
 		}
-		w.dispose();
+		finally
+		{
+			w.dispose();
+		}
 		return result;
 	}
 

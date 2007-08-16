@@ -34,6 +34,7 @@ import workbench.storage.RowData;
 import workbench.util.DefaultOutputFactory;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
+import workbench.util.FileUtil;
 import workbench.util.OutputFactory;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -260,7 +261,7 @@ public abstract class RowDataConverter
 		}
 		finally
 		{
-			try { w.close(); } catch (Throwable th) {}
+			FileUtil.closeQuitely(w);
 		}
 	}
 	

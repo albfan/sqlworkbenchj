@@ -14,7 +14,11 @@ package workbench.util;
 /**
  * A dynamic byte[] array which gives direct access to the underlying 
  * byte[] array which is more efficient than ByteArrayOutputStream which 
- * copies the array (thus doubling memory usage) when calling toByteArray()
+ * copies the array when calling toByteArray() (thus doubling memory usage) 
+ * It is not as efficient as it does not pre-allocate bytes (in order to 
+ * be able to give direct access to the underlying array. 
+ * {@link #getLength()} returns the physical length of the internal array
+ * and is equivalent to getBuffer().length;
  */
 public class ByteBuffer
 {
@@ -47,6 +51,7 @@ public class ByteBuffer
 
 	/**
 	 * Returns a reference to the internal buffer. 
+	 * May be null if append() has never been called.
 	 */
 	public byte[] getBuffer()
 	{
@@ -69,7 +74,8 @@ public class ByteBuffer
 	}
 
 	/**
-	 * Returns the current length of the ByteBuffer. 
+	 * Returns the current length of this ByteBuffer. 
+	 * This is equivalent to getBuffer().length
 	 */
 	public int getLength()
 	{

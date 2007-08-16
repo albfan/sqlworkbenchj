@@ -160,17 +160,23 @@ public class WbTextCellEditor
 	{
 		if (this.parentTable == null)
 		{
-			Frame owner = (Frame)SwingUtilities.getWindowAncestor(this.textField);
+			Frame owner = (Frame) SwingUtilities.getWindowAncestor(this.textField);
 			String title = ResourceMgr.getString("TxtEditWindowTitle");
-
 			String value = this.textField.getText();
 			EditWindow w = new EditWindow(owner, title, value);
-			w.setVisible(true);
-			if (!w.isCancelled())
+
+			try
 			{
-				this.textField.setText(w.getText());
+				w.setVisible(true);
+				if (!w.isCancelled())
+				{
+					this.textField.setText(w.getText());
+				}
 			}
-			w.dispose();
+			finally
+			{
+				w.dispose();
+			}
 		}
 		else
 		{

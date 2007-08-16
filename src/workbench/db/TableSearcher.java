@@ -19,6 +19,7 @@ import workbench.interfaces.TableSearchDisplay;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -148,21 +149,8 @@ public class TableSearcher
 		}
 		finally
 		{
-			try
-			{
-				if (rs != null) rs.close();
-			}
-			catch (Exception ex)
-			{
-			}
-			try
-			{
-				if (this.query != null) this.query.close();
-				this.query = null;
-			}
-			catch (Exception ex)
-			{
-			}
+			SqlUtil.closeAll(rs, query);
+			this.query = null;
 		}
 	}
 

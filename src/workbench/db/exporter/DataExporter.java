@@ -897,8 +897,7 @@ public class DataExporter
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
-			try { stmt.close(); } catch (Throwable th) {}
+			SqlUtil.closeAll(rs, stmt);
 			if (!jobsRunning) this.closeProgress();
 			if (busyControl) this.dbConn.setBusy(false);
 		}

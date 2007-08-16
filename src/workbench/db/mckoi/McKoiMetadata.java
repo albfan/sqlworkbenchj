@@ -68,8 +68,7 @@ public class McKoiMetadata
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
-			try { stmt.close(); } catch (Throwable th) {}
+			SqlUtil.closeAll(rs, stmt);
 		}
 		
 		return result;
@@ -105,8 +104,7 @@ public class McKoiMetadata
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
-			try { stmt.close(); } catch (Throwable th) {}
+			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
 	}

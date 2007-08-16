@@ -27,6 +27,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import workbench.util.FileUtil;
 
 /**
  *  Xslt transformer using the JDK built-in XSLT stuff
@@ -54,8 +55,8 @@ public class XsltTransformer
 		Source xmlSource = new StreamSource(inXml);
 		StreamResult res = new StreamResult(out);
 		transformer.transform(xmlSource, res);
-		try { inXml.close(); } catch (Throwable ignore) {} 
-		try { out.close(); } catch (Throwable ignore) {} 
+		FileUtil.closeQuitely(inXml);
+		FileUtil.closeQuitely(out);
 	}
 
 	public static void transformFile(String inputFileName, String outputFilename, String xsltFile)
@@ -73,8 +74,8 @@ public class XsltTransformer
 		}
 		finally
 		{
-			try { in.close(); } catch (Throwable ignore) {} 
-			try { out.close(); } catch (Throwable ignore) {} 
+			FileUtil.closeQuitely(in);
+			FileUtil.closeQuitely(out);
 		}
 	}
 

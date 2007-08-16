@@ -17,6 +17,7 @@ import java.awt.Graphics;
 import java.awt.Insets;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.Settings;
@@ -54,7 +55,7 @@ public class TextAreaRenderer
 	
 	public int getHorizontalAlignment()
 	{
-		return this.getHorizontalAlignment();
+		return SwingConstants.LEFT;
 	}
 	
 	public Component getTableCellRendererComponent(JTable table, Object value,	boolean isSelected,	boolean hasFocus, int row, int col)

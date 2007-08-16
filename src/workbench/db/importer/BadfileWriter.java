@@ -16,6 +16,7 @@ import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -78,7 +79,7 @@ public class BadfileWriter
 		}
 		finally
 		{
-			try { w.close(); } catch (Throwable th) {}
+			FileUtil.closeQuitely(w);
 		}
 	}
 	

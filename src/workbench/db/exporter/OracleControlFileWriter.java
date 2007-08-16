@@ -23,6 +23,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
 import workbench.util.CharacterRange;
+import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -171,13 +172,7 @@ public class OracleControlFileWriter
     }
     finally
     {
-      try
-      {
-        out.close();
-      }
-      catch (Throwable th)
-      {
-      }
+			FileUtil.closeQuitely(out);
     }
   }
 

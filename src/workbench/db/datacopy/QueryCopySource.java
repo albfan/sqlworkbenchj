@@ -22,6 +22,7 @@ import workbench.log.LogMgr;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.MessageBuffer;
+import workbench.util.SqlUtil;
 import workbench.util.ValueConverter;
 
 /**
@@ -106,8 +107,7 @@ public class QueryCopySource
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
-			try { retrieveStatement.close(); } catch (Throwable th) {}
+			SqlUtil.closeAll(rs, retrieveStatement);
 		}
 	}
 

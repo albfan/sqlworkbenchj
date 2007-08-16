@@ -20,6 +20,7 @@ import java.util.NoSuchElementException;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 
 
@@ -152,7 +153,7 @@ public class ScriptParser
 		}
 		finally
 		{
-			try { in.close(); } catch (Exception th) {}
+			FileUtil.closeQuitely(in);
 		}
 		this.setScript(content == null ? "" : content.toString());
 	}

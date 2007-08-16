@@ -374,4 +374,8 @@ public class DbSettings
 		return query;
 	}
 	
+	public boolean needsExactClobLength()
+	{
+			return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".exactcloblength", false);
+	}
 }

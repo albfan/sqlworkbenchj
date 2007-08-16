@@ -36,6 +36,7 @@ import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
@@ -698,10 +699,7 @@ public class ConnectionMgr
 		}
 		finally
 		{
-			try
-			{ in.close(); }
-			catch (Throwable ignore)
-			{}
+			FileUtil.closeQuitely(in);
 		}
 		this.templatesImported = true;
 	}

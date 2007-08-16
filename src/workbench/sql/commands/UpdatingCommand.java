@@ -67,7 +67,7 @@ public class UpdatingCommand extends SqlCommand
 			if (lob != null && lob.containsParameter())
 			{
 				isPrepared = true;
-				this.currentStatement = lob.prepareStatement(currentConnection.getSqlConnection());
+				this.currentStatement = lob.prepareStatement(currentConnection);
 			}
 			else if (Settings.getInstance().getCheckPreparedStatements() &&
 					currentConnection.getPreparedStatementPool().isRegistered(sql))

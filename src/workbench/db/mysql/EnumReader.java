@@ -18,6 +18,7 @@ import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -69,8 +70,7 @@ public class EnumReader
 		}
 		finally 
 		{
-			try { rs.close(); } catch (Throwable th) {}
-			try { stmt.close(); } catch (Throwable th) {}
+			SqlUtil.closeAll(rs, stmt);
 		}
 	}
 }

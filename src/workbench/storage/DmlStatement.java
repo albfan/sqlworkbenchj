@@ -11,6 +11,7 @@
  */
 package workbench.storage;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,7 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import workbench.db.WbConnection;
-import workbench.util.CloseableDataStream;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 
@@ -80,7 +80,7 @@ public class DmlStatement
 	public int execute(WbConnection aConnection)
 		throws SQLException
 	{
-		List<CloseableDataStream> streamsToClose = new LinkedList<CloseableDataStream>();
+		List<Closeable> streamsToClose = new LinkedList<Closeable>();
 		
 		PreparedStatement stmt = null;
 		int rows = -1;
@@ -102,7 +102,7 @@ public class DmlStatement
 					String s = (String)value;
 					Reader in = new StringReader(s);
 					stmt.setCharacterStream(i + 1, in, s.length());
-					streamsToClose.add(new CloseableDataStream(in));
+					streamsToClose.add(in);
 				}
 				else if (value instanceof File)
 				{
@@ -113,7 +113,7 @@ public class DmlStatement
 					{
 						InputStream in = new FileInputStream(f);
 						stmt.setBinaryStream(i + 1, in, (int)f.length());
-						streamsToClose.add(new CloseableDataStream(in));
+						streamsToClose.add(in);
 					}
 					catch (IOException e)
 					{

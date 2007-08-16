@@ -20,14 +20,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.util.List;
-import workbench.log.LogMgr;
 
 /**
  * @author  support@sql-workbench.net
  */
 public class FileUtil
 {
-	private static final int BUFF_SIZE = 8192;
+	private static final int BUFF_SIZE = 16*1024;
 	
 	/*
 	 * Closes all streams in the list.
@@ -39,17 +38,7 @@ public class FileUtil
 
 		for (Closeable str : streams)
 		{
-			try
-			{
-				if (str != null)
-				{
-					str.close();
-				}
-			}
-			catch (IOException io)
-			{
-				LogMgr.logError("FileUtil.closeStreams()", "Error closing stream", io);
-			}
+			closeQuitely(str);
 		}
 	}
 	
@@ -94,8 +83,11 @@ public class FileUtil
 			if (c == '\r')
 			{ 
 				char n = (char)in.read();
-				ending = "\r\n";
-				break;
+				if (n == '\n')
+				{
+					ending = "\r\n";
+					break;
+				}
 			}
 			else if (c == '\n')
 			{
@@ -146,7 +138,7 @@ public class FileUtil
 		}
 		finally
 		{
-			try { in.close(); } catch (Throwable th) { }
+			closeQuitely(in);
 		}
 		return (size / (lineSize / sampleLines));
 
@@ -173,8 +165,8 @@ public class FileUtil
 		}
 		finally
 		{
-			try { out.close(); } catch (Throwable th) {}
-			try { in.close(); } catch (Throwable th) {}
+			closeQuitely(out);
+			closeQuitely(in);
 		}
 		return filesize;
 	}
@@ -200,14 +192,14 @@ public class FileUtil
 		}
 		finally
 		{
-			try { in.close(); } catch (Throwable th) {}
+			closeQuitely(in);
 		}
 		return result.toString();
 	}
-	
+
 	/**
 	 * Read the content of the InputStream into a ByteArray.
- * The InputStream is closed automatically.
+	 * The InputStream is closed automatically.
 	 */
 	public static byte[] readBytes(InputStream in)
 		throws IOException
@@ -228,9 +220,53 @@ public class FileUtil
 		}
 		finally
 		{
-			try { in.close(); } catch (Throwable th) {}
+			closeQuitely(in);
 		}
 		return result.getBuffer();
 	}
+
+	/**
+	 * Returns the number of characters according to the 
+	 * encoding in the specified file. For single-byte 
+	 * encodings this should be identical to source.length()
+	 * 
+	 * For large files this might take some time!
+	 * 
+	 * @param source the (text) file to check
+	 * @param encoding the encoding of the text file
+	 * @return the number of characters (not bytes) in the file
+	 */
+	public static long getCharacterLength(File source, String encoding)
+		throws IOException
+	{
+		BufferedReader r = null;
+		long result = 0;
+		try
+		{
+			r = EncodingUtil.createBufferedReader(source, encoding, 32*1024);
+			// Not very efficient, but I can't think of a different solution
+			// to retrieve the number of characters
+			result = r.skip(Long.MAX_VALUE);
+		}
+		finally
+		{
+			closeQuitely(r);
+		}
+
+		return result;
+	}
 	
+	public static void closeQuitely(Closeable c)
+	{
+		if (c == null) return;
+		
+		try
+		{
+			c.close();
+		}
+		catch (IOException e)
+		{
+			// ignore
+		}
+	}
 }

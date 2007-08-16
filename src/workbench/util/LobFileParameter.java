@@ -12,6 +12,7 @@
 package workbench.util;
 
 import java.io.Closeable;
+import workbench.util.FileUtil;
 
 /**
  * @author support@sql-workbench.net
@@ -46,17 +47,7 @@ public class LobFileParameter
 
 	public void close()
 	{
-		if (this.dataStream != null)
-		{
-			try
-			{
-				dataStream.close();
-			}
-			catch (Exception e)
-			{
-				// ignore
-			}
-		}
+    FileUtil.closeQuitely(dataStream);
 	}
 	
 	public void setBinary(boolean flag) { binary = flag; }

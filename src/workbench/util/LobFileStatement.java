@@ -18,9 +18,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -103,12 +103,12 @@ public class LobFileStatement
 		return (parameterCount > 0);
 	}
 
-	public PreparedStatement prepareStatement(Connection conn)
+	public PreparedStatement prepareStatement(WbConnection conn)
 		throws SQLException, IOException
 	{
 		if (this.parameters == null) return null;
 		if (this.parameters.length == 0) return null;
-		PreparedStatement pstmt = conn.prepareStatement(sqlToUse);
+		PreparedStatement pstmt = conn.getSqlConnection().prepareStatement(sqlToUse);
 		final int buffSize = 64*1024;
 		for (int i = 0; i < parameters.length; i++)
 		{
@@ -130,6 +130,14 @@ public class LobFileStatement
 			{
 				Reader in = EncodingUtil.createBufferedReader(f, parameters[i].getEncoding());
 				parameters[i].setDataStream(in);
+				// The value of the length parameter is actually wrong if 
+				// a multi-byte encoding is used. So far only Derby seems to choke
+				// on this, so we need to calculate the file length in characters
+				// which is probably very slow so this is not turned on by default.
+				if (conn.getDbSettings().needsExactClobLength())
+				{
+					length = (int) FileUtil.getCharacterLength(f, parameters[i].getEncoding());
+				}
 				pstmt.setCharacterStream(i+1, in, length);
 			}
 		}

@@ -50,6 +50,9 @@ public class UpdateCheck
 		
 	}
 	
+	/**
+	 * This is so that the method is accessible for Unit-Testing
+	 */
 	public boolean needCheck(int interval, Date today, Date lastCheck)
 	{
 		if (interval < 1) return false;

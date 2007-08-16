@@ -38,6 +38,7 @@ import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
+import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
 import workbench.util.WbThread;
@@ -184,7 +185,7 @@ public class SchemaReporter
 		}
 		finally
 		{
-			try { bw.close(); } catch (Throwable th) {}
+			FileUtil.closeQuitely(bw);
 			closeProgress();
 		}
 	}

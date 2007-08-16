@@ -22,6 +22,7 @@ import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
+import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
 
 /**
@@ -188,10 +189,7 @@ public abstract class ExportWriter
 
 	public void exportFinished()
 	{
-		if (this.output != null)
-		{
-			try { this.output.close(); } catch (Throwable th) {}
-		}
+		FileUtil.closeQuitely(output);
 		try
 		{
 			if (this.converter != null) this.converter.exportFinished();

@@ -19,6 +19,7 @@ import workbench.db.*;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.util.SqlUtil;
 
 
 /**
@@ -92,8 +93,7 @@ public class PostgresConstraintReader
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
-			try { stmt.close(); } catch (Throwable th) {}
+			SqlUtil.closeAll(rs, stmt);
 		}
 		return result.toString();
 	}

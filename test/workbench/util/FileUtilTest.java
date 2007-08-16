@@ -19,6 +19,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
@@ -239,8 +240,8 @@ public class FileUtilTest
 			InputStream in = new FileInputStream(sf);
 
 			byte[] b = FileUtil.readBytes(in);
-			assertEquals("Wrong file size", (int)sf.length(), b.length);
-			
+			assertEquals("Wrong file size", (int) sf.length(), b.length);
+
 			assertEquals("Wrong content read from file", 1, b[1]);
 			assertEquals("Wrong content read from file", 2, b[2]);
 			assertEquals("Wrong content read from file", 3, b[3]);
@@ -253,4 +254,34 @@ public class FileUtilTest
 		}
 	}
 	
+	public void testGetCharacterLength()
+	{
+		try
+		{
+			File f = new File(testUtil.getBaseDir(), "mydata.txt");
+			String encoding = "ISO-8859-1";
+			Writer out = new OutputStreamWriter(new FileOutputStream(f),encoding);
+			String content = "This is a test";
+			out.write(content);
+			out.close();
+			
+			assertEquals(content.length(), FileUtil.getCharacterLength(f, encoding));
+			
+			encoding = "UTF-8";
+			content = "\u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153";
+			out = new OutputStreamWriter(new FileOutputStream(f),encoding);
+			out.write(content);
+			out.close();
+			
+			assertEquals(content.length(), FileUtil.getCharacterLength(f, encoding));
+			
+			f.delete();
+		}
+		catch (Throwable e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+			
+	}
 }

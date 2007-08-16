@@ -104,16 +104,10 @@ public class WbPersistence
 			e.writeObject(aValue);
 			e.close();
 		}
-//		catch (Throwable e)
-//		{
-//			LogMgr.logError("WbPersistence.writeObject()", "Error writing " + filename, e);
-//			return false;
-//		}
 		finally
 		{
 			try { out.close(); } catch (Throwable th) {}
 		}
-//		return true;
 	}
 
 	public void exceptionThrown(Exception e)

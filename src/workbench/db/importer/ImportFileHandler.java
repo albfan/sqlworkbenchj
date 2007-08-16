@@ -25,6 +25,7 @@ import java.util.zip.ZipFile;
 import workbench.db.exporter.RowDataConverter;
 import workbench.util.ClipboardFile;
 import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
 import workbench.util.WbFile;
 import workbench.util.ZipUtil;
 
@@ -174,6 +175,26 @@ public class ImportFileHandler
 		}
 	}
 
+	public long getCharacterLength(File f) throws IOException
+	{
+		if (this.isZip)
+		{
+			return getLength(f);
+		}
+
+		long result = 0;
+		if (f.isAbsolute())
+		{
+			result = FileUtil.getCharacterLength(f, this.encoding);
+		}
+		else
+		{
+			File realFile = new File(this.baseDir, f.getName());
+			result = FileUtil.getCharacterLength(realFile, this.encoding);
+		}
+		return result;
+	}
+	
 	public long getLength(File f)
 		throws IOException
 	{

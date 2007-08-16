@@ -16,7 +16,6 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
@@ -35,7 +34,6 @@ import workbench.interfaces.Restoreable;
 import workbench.interfaces.TextContainer;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-
 
 /**
  *
@@ -85,7 +83,7 @@ public class EditWindow
 		{
 			public void run()
 			{
-				init(owner, text, settingsId, createSqlEditor, showCloseButtonOnly);
+				init(text, settingsId, createSqlEditor, showCloseButtonOnly);
 			}
 		});
 		
@@ -100,7 +98,7 @@ public class EditWindow
 		{
 			public void run()
 			{
-				init(owner, text, "workbench.data.edit.window", createSqlEditor, showCloseButtonOnly);
+				init(text, "workbench.data.edit.window", createSqlEditor, showCloseButtonOnly);
 			}
 		});
 		WbSwingUtilities.center(this, WbManager.getInstance().getCurrentWindow());
@@ -111,7 +109,7 @@ public class EditWindow
 		this.textContainer.setEditable(false);
 	}
 	
-	private void init(Window owner, String text, String settingsId, boolean createSqlEditor, boolean showCloseButtonOnly)
+	private void init(String text, String settingsId, boolean createSqlEditor, boolean showCloseButtonOnly)
 	{
 		this.settingsId = settingsId;
 		this.getContentPane().setLayout(new BorderLayout());

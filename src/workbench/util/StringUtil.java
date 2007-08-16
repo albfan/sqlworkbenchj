@@ -671,7 +671,7 @@ public class StringUtil
 		}
 		finally
 		{
-			try { reader.close(); } catch (Exception e) {}
+			FileUtil.closeQuitely(reader);
 		}
 		return result.toString();
 	}

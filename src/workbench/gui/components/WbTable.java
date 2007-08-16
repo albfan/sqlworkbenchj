@@ -1363,21 +1363,28 @@ public class WbTable
 		{
 			ownerFrame = (Frame)owner;
 		}
+		
 		String title = ResourceMgr.getString("TxtEditWindowTitle");
 		EditWindow w = new EditWindow(ownerFrame, title, data);
-		w.setVisible(true);
-		if (editor != null)
+		try
 		{
-			// we need to "cancel" the editor so that the data
-			// in the editor component will not be written into the
-			// table model!
-			editor.cancelCellEditing();
+			w.setVisible(true);
+			if (editor != null)
+			{
+				// we need to "cancel" the editor so that the data
+				// in the editor component will not be written into the
+				// table model!
+				editor.cancelCellEditing();
+			}
+			if (!w.isCancelled())
+			{
+				this.setValueAt(w.getText(), row, col);
+			}
 		}
-		if (!w.isCancelled())
+		finally
 		{
-			this.setValueAt(w.getText(), row, col);
+			w.dispose();
 		}
-		w.dispose();
 	}
 
 	public void addTableModelListener(TableModelListener aListener)

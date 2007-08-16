@@ -21,6 +21,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -107,8 +108,7 @@ public class OracleConstraintReader
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
-			try { stmt.close(); } catch (Throwable th) {}
+			SqlUtil.closeAll(rs, stmt);
 		}
 		return result.toString();
 	}

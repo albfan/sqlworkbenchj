@@ -2444,7 +2444,152 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
+
+	public void testPartialFixedWidthImport()
+	{
+		try
+		{
+			File importFile = new File(this.basedir, "fixed_import.txt");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("  1      MaryMoviestar      ");
+			out.println("  2     HarryHandsome       ");
+			out.println("  3Zaphod    Beeblebrox     ");
+			out.close();
+
+			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -trimValues=true -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=false -filecolumns=nr,firstname,lastname -importcolumns=nr,lastname -columnWidths='nr=3,firstname=10,lastname=15' -continueonerror=true -table=junit_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr,firstname,lastname from junit_test_pk order by nr");
+			while (rs.next())
+			{
+				int id = rs.getInt(1);
+				String firstname = rs.getString(2);
+				String lastname = rs.getString(3);
+				if (id == 1)
+				{
+					assertNull("Firstname not null", firstname);
+					assertEquals("Wrong Lastname imported", "Moviestar", firstname);
+				}
+				else if (id == 2)
+				{
+					assertNull("Firstname not null", firstname);
+					assertEquals("Wrong Lastname imported", "Handsome", firstname);
+				}
+				else if (id == 2)
+				{
+					assertNull("Firstname not null", firstname);
+					assertEquals("Wrong Lastname imported", "Beeblebrox", firstname);
+				}
+				else
+				{
+					fail("Wrong id retrieved");
+				}
+			}
+			rs.close();
+			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	
+	public void testFixedWidthImport()
+	{
+		try
+		{
+			File importFile = new File(this.basedir, "fixed_import.txt");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("  1      MaryMoviestar      ");
+			out.println("  2     HarryHandsome       ");
+			out.println("  3Zaphod    Beeblebrox     ");
+			out.close();
+
+			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -trimValues=true -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=false -filecolumns=nr,firstname,lastname -columnWidths='nr=3,firstname=10,lastname=15' -continueonerror=true -table=junit_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr,firstname,lastname from junit_test_pk order by nr");
+			while (rs.next())
+			{
+				int id = rs.getInt(1);
+				String firstname = rs.getString(2);
+				String lastname = rs.getString(3);
+				if (id == 1)
+				{
+					assertEquals("Wrong Firstname imported", "Mary", firstname);
+					assertEquals("Wrong Lastname imported", "Moviestar", firstname);
+				}
+				else if (id == 2)
+				{
+					assertEquals("Wrong Firstname imported", "Harry", firstname);
+					assertEquals("Wrong Lastname imported", "Handsome", firstname);
+				}
+				else if (id == 2)
+				{
+					assertEquals("Wrong Firstname imported", "Zaphod", firstname);
+					assertEquals("Wrong Lastname imported", "Beeblebrox", firstname);
+				}
+				else
+				{
+					fail("Wrong id retrieved");
+				}
+			}
+
+			rs.close();
+			stmt.executeUpdate("delete from junit_test");
+			connection.commit();
+			stmt.close();
+
+			result = importCmd.execute("wbimport -encoding=utf8 -trimValues=false -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=false -filecolumns=nr,firstname,lastname -columnWidths='nr=3,firstname=10,lastname=15' -continueonerror=true -table=junit_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+			stmt = this.connection.createStatementForQuery();
+			rs = stmt.executeQuery("select nr,firstname,lastname from junit_test_pk order by nr");
+			while (rs.next())
+			{
+				int id = rs.getInt(1);
+				String firstname = rs.getString(2);
+				String lastname = rs.getString(3);
+				if (id == 1)
+				{
+					assertEquals("Wrong Firstname imported", "      Mary", firstname);
+					assertEquals("Wrong Lastname imported", "Moviestar      ", firstname);
+				}
+				else if (id == 2)
+				{
+					assertEquals("Wrong Firstname imported", "     Harry", firstname);
+					assertEquals("Wrong Lastname imported", "Handsome       ", firstname);
+				}
+				else if (id == 2)
+				{
+					assertEquals("Wrong Firstname imported", "Zaphod    ", firstname);
+					assertEquals("Wrong Lastname imported", "Beeblebrox     ", firstname);
+				}
+				else
+				{
+					fail("Wrong id retrieved");
+				}
+			}
+
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
 	public void testDeleteTargetFails()
 	{
 		try

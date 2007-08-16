@@ -758,7 +758,6 @@ public class SqlUtil
 	 */
 	public static void closeResult(ResultSet rs)
 	{
-//		try { rs.clearWarnings(); } catch (Throwable th) {}
 		try { rs.close(); } catch (Throwable th) {}
 	}
 
@@ -768,7 +767,6 @@ public class SqlUtil
 	 */
 	public static void closeStatement(Statement stmt)
 	{
-//		try { stmt.clearWarnings(); } catch (Throwable th) {}
 		try { stmt.close(); } catch (Throwable th) {}
 	}
 

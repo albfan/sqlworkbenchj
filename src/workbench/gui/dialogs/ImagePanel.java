@@ -29,6 +29,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.util.FileUtil;
 
 
 /**
@@ -94,18 +95,9 @@ public class ImagePanel
 		}
 		finally
 		{
-			try { in.close(); } catch (Throwable th) {}
+			FileUtil.closeQuitely(in);
 		}
 		
-//		try
-//		{
-//			MediaTracker tracker = new MediaTracker( this );
-//			tracker.addImage( displayImage, 0 );
-//			tracker.waitForID( 0 );
-//		}
-//		catch ( InterruptedException e )
-//		{
-//		}
 		if (displayImage == null)
 		{
 			label.setText(ResourceMgr.getString("ErrImgNotSupp"));

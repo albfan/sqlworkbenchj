@@ -20,9 +20,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import workbench.interfaces.PropertyStorage;
@@ -38,7 +37,7 @@ public class WbProperties
 {
 	private int distinctSections;
 
-	private List<PropertyChangeListener> changeListeners = Collections.synchronizedList(new LinkedList<PropertyChangeListener>());
+	private List<PropertyChangeListener> changeListeners = new ArrayList<PropertyChangeListener>();
 	
 	public WbProperties()
 	{
@@ -168,27 +167,34 @@ public class WbProperties
 
 	public void addPropertyChangeListener(PropertyChangeListener aListener)
 	{
-		this.changeListeners.add(aListener);
+		synchronized (this.changeListeners)
+		{
+			this.changeListeners.add(aListener);
+		}
 	}
 	
 	public void removePropertyChangeListener(PropertyChangeListener aListener)
 	{
-		this.changeListeners.remove(aListener);
+		synchronized (this.changeListeners)
+		{
+			this.changeListeners.remove(aListener);
+		}
 	}
 	
 	private void firePropertyChanged(String name, String oldValue, String newValue)
 	{
 		int count = this.changeListeners.size();
-		if (count == 0)
+		if (count == 0) return;
+		
+		synchronized (this.changeListeners)
 		{
-			return;
-		}
-		PropertyChangeEvent evt = new PropertyChangeEvent(this, name, oldValue, newValue);
-		for (PropertyChangeListener l : changeListeners)
-		{
-			if (l != null)
+			PropertyChangeEvent evt = new PropertyChangeEvent(this, name, oldValue, newValue);
+			for (PropertyChangeListener l : changeListeners)
 			{
-				l.propertyChange(evt);
+				if (l != null)
+				{
+					l.propertyChange(evt);
+				}
 			}
 		}
 	}
@@ -201,12 +207,12 @@ public class WbProperties
 		
 		synchronized (this)
 		{
-        if (value == null) 
-        {
-          super.remove(name);
-          return null;
-        }
-        oldValue = (String)super.setProperty(name, value);
+			if (value == null)
+			{
+				super.remove(name);
+				return null;
+			}
+			oldValue = (String) super.setProperty(name, value);
 		}
 		
 		if (!StringUtil.equalString(oldValue, value))

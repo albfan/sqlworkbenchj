@@ -19,6 +19,7 @@ import java.io.PrintWriter;
 import workbench.log.LogMgr;
 import workbench.storage.ResultInfo;
 import workbench.util.CharacterRange;
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -91,13 +92,7 @@ public class SqlServerFormatFileWriter
     }
     finally
     {
-      try
-      {
-        out.close();
-      }
-      catch (Throwable th)
-      {
-      }
+			FileUtil.closeQuitely(out);
     }
   }
 

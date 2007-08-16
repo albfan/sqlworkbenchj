@@ -656,6 +656,8 @@ public class DbExplorerPanel
 	
 	protected void retrieve()
 	{
+		if (this.dbConnection == null || this.dbConnection.isClosed()) return;
+		
 		if (this.isBusy() || isConnectionBusy()) 
 		{
 			this.retrievePending = true;

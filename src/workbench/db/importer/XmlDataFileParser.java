@@ -37,6 +37,7 @@ import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.ImportFileParser;
 import workbench.log.LogMgr;
+import workbench.util.FileUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -489,7 +490,7 @@ public class XmlDataFileParser
 		}
 		finally
 		{
-			try { in.close(); } catch (Throwable th) {}
+			FileUtil.closeQuitely(in);
 			if (!finished)
 			{
 				this.receiver.importFinished();

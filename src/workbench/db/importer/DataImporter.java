@@ -13,6 +13,7 @@ package workbench.db.importer;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -48,7 +49,6 @@ import java.util.LinkedList;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ImportFileParser;
 import workbench.storage.NullValue;
-import workbench.util.CloseableDataStream;
 import workbench.util.EncodingUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.WbThread;
@@ -147,6 +147,8 @@ public class DataImporter
 	private boolean useSavepoint;
 	private Savepoint insertSavepoint;
 	private Savepoint updateSavepoint;
+
+	private boolean checkRealClobLength = false;
 	
 	public DataImporter()
 	{
@@ -166,6 +168,7 @@ public class DataImporter
 			LogMgr.logWarning("DataImporter.setConnection", "A savepoint should be used for each statement but the driver does not support savepoints!");
 			this.useSavepoint = false;
 		}
+		this.checkRealClobLength = this.dbConn.getDbSettings().needsExactClobLength();
 	}
 
 	public void setRowActionMonitor(RowActionMonitor rowMonitor)
@@ -1026,7 +1029,7 @@ public class DataImporter
 	private int processRowData(PreparedStatement pstmt, Object[] row, boolean addBatch, boolean useColMap)
 		throws SQLException
 	{
-		List<CloseableDataStream> streams = new LinkedList<CloseableDataStream>();
+		List<Closeable> streams = new LinkedList<Closeable>();
 		
 		for (int i=0; i < row.length; i++)
 		{
@@ -1062,7 +1065,7 @@ public class DataImporter
 						size = (int)clob.length();
 						String value = clob.getSubString(1, size);
 						in = new StringReader(value);
-						streams.add(new CloseableDataStream(in));
+						streams.add(in);
 					}
 					catch (Throwable e)
 					{
@@ -1086,8 +1089,15 @@ public class DataImporter
 						if (handler != null)
 						{
 							in = EncodingUtil.createReader(handler.getAttachedFileStream(f), encoding);
-							size = (int)handler.getLength(f);
-							streams.add(new CloseableDataStream(in));
+							if (checkRealClobLength)
+							{
+								size = (int) handler.getCharacterLength(f);
+							}
+							else
+							{
+								size = (int) handler.getLength(f);
+							}
+							streams.add(in);
 						}
 						else
 						{
@@ -1097,8 +1107,15 @@ public class DataImporter
 								f = new File(sourcefile.getParentFile(), f.getName());
 							}
 							in = EncodingUtil.createBufferedReader(f, encoding);
-							streams.add(new CloseableDataStream(in));
-							size = (int)f.length();
+							streams.add(in);
+							if (checkRealClobLength)
+							{
+								size = (int) FileUtil.getCharacterLength(f, encoding);
+							}
+							else
+							{
+								size = (int) f.length();
+							}
 						}
 					}
 					catch (IOException ex)
@@ -1159,13 +1176,13 @@ public class DataImporter
 						messages.append(msg);
 						throw new SQLException(msg);
 					}
-					streams.add(new CloseableDataStream(in));
+					streams.add(in);
 				}
 				else if (row[i] instanceof Blob)
 				{
 					Blob b = (Blob)row[i];
 					in = b.getBinaryStream();
-					streams.add(new CloseableDataStream(in));
+					streams.add(in);
 					len = (int)b.length();
 				}
 				else if (row[i] instanceof byte[])

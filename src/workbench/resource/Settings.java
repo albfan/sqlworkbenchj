@@ -731,12 +731,12 @@ public class Settings
 		this.fontChangeListeners.add(aListener);
 	}
 
-	public void removeFontChangedListener(FontChangedListener aListener)
+	public synchronized void removeFontChangedListener(FontChangedListener aListener)
 	{
 		this.fontChangeListeners.remove(aListener);
 	}
 
-	public void addPropertyChangeListener(PropertyChangeListener l)
+	public synchronized void addPropertyChangeListener(PropertyChangeListener l)
 	{
 		this.props.addPropertyChangeListener(l);
 	}
