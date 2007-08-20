@@ -11,20 +11,13 @@
  */
 package workbench.gui.completion;
 
-import java.awt.Toolkit;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 import workbench.util.TableAlias;
 
 /**
@@ -110,5 +103,13 @@ public class UpdateAnalyzer
 		}
 	}
 
+	public List<TableAlias> getTables()
+	{
+		String table = SqlUtil.getUpdateTable(this.sql);
+		TableAlias a = new TableAlias(table);
+		List<TableAlias> result = new ArrayList<TableAlias>(1);
+		result.add(a);
+		return result;
+	}
 
 }

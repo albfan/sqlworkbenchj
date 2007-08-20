@@ -11,9 +11,12 @@
  */
 package workbench.gui.completion;
 
+import java.util.ArrayList;
+import java.util.List;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
+import workbench.util.TableAlias;
 
 /**
  *
@@ -57,6 +60,15 @@ public class DeleteAnalyzer
 			String table = SqlUtil.getDeleteTable(sql);
 			if (table != null) tableForColumnList = new TableIdentifier(table);
 		}
+	}
+
+	public List<TableAlias> getTables()
+	{
+		String table = SqlUtil.getDeleteTable(this.sql);
+		TableAlias a = new TableAlias(table);
+		List<TableAlias> result = new ArrayList<TableAlias>(1);
+		result.add(a);
+		return result;
 	}
 
 

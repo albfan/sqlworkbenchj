@@ -22,6 +22,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
+import workbench.util.TableAlias;
 import workbench.util.TextlistReader;
 
 /**
@@ -69,6 +70,7 @@ public abstract class BaseAnalyzer
 	private boolean overwriteCurrentWord;
 	private boolean appendDot; 
 	private String columnPrefix;
+	protected BaseAnalyzer parentAnalyzer;
 	
 	public BaseAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
@@ -157,18 +159,32 @@ public abstract class BaseAnalyzer
 	
 	protected abstract void checkContext();
 	
+	// For use with hierarchical Analyzers (so that a child 
+	// analyzer can ask its parent directly for a table list
+	// This should be overwritten by any Analyzer supporting
+	// Sub-Selects
+	protected List<TableAlias> getTables()
+	{
+		return Collections.emptyList();
+	}
+	
+	public void setParent(BaseAnalyzer analyzer)
+	{
+		this.parentAnalyzer = analyzer;
+	}
+
 	protected boolean between(int toTest, int start, int end)
 	{
 		if (start == -1 || end == -1) return false;
 		return (toTest > start && toTest < end);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void buildResult()
 	{
 		if (context == CONTEXT_TABLE_OR_COLUMN_LIST && tableForColumnList != null)
 		{
-			List cols = retrieveColumns();
-			if (cols == null || cols.size() == 0)
+			if (!retrieveColumns())
 			{
 				retrieveTables();
 			}
@@ -226,6 +242,7 @@ public abstract class BaseAnalyzer
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private List readKeywords()
 	{
 		if (this.keywordFile == null) return null;
@@ -235,6 +252,7 @@ public abstract class BaseAnalyzer
 		return result;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void retrieveTables()
 	{
 		Set<TableIdentifier> tables = this.dbConnection.getObjectCache().getTables(schemaForTableList, typeFilter);
@@ -250,9 +268,10 @@ public abstract class BaseAnalyzer
 		this.elements.addAll(tables);
 	}
 	
-	private List retrieveColumns()
+	@SuppressWarnings("unchecked")
+	private boolean retrieveColumns()
 	{
-		if (tableForColumnList == null) return null;
+		if (tableForColumnList == null) return false;
 		String s = tableForColumnList.getSchema();
 		if (s == null)
 		{
@@ -267,7 +286,7 @@ public abstract class BaseAnalyzer
 			this.elements = new ArrayList(cols.size() + 1);
 			this.elements.addAll(cols);
 		}
-		return cols;
+		return (elements == null ? false : (elements.size() > 0));
 	}
 	
 	protected void setTableTypeFilter(String filter)
@@ -324,5 +343,11 @@ public abstract class BaseAnalyzer
 		{
 			setOverwriteCurrentWord(false);
 		}
+	}
+	
+	// Used by JUnit tests
+	TableIdentifier getTableForColumnList()
+	{
+		return tableForColumnList;
 	}
 }

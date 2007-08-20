@@ -17,8 +17,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.util.Iterator;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JMenu;
@@ -32,6 +30,7 @@ import workbench.gui.filter.FilterDefinitionManager;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.filter.FilterExpression;
+import workbench.util.WbFile;
 
 /**
  *	Select a different filter for a table.
@@ -131,27 +130,17 @@ public class FilterPickerAction
 	
 	private void buildPopup()
 	{
-		List entries = FilterDefinitionManager.getInstance().getEntries();
+		List<WbFile> entries = FilterDefinitionManager.getInstance().getEntries();
 		if (entries == null || entries.size() == 0) return;
 		
 		JMenu menu = new JMenu("filters");
-		Iterator itr = entries.iterator();
-		while (itr.hasNext())
+		for (WbFile f : entries)
 		{
-			String file = (String)itr.next();
-			File f = new File(file);
-			if (f.exists())
-			{
-				JMenuItem item = new WbMenuItem(f.getName());
-				item.setToolTipText(f.getAbsolutePath());
-				item.setActionCommand(f.getAbsolutePath());
-				item.addActionListener(this);
-				menu.add(item);			
-			}
-			else
-			{
-				LogMgr.logDebug("FilterPickerAction.buildPopup()", "Filter file '" + file + "' ignored because file was not found");
-			}
+			JMenuItem item = new WbMenuItem(f.getName());
+			item.setToolTipText(f.getFullPath());
+			item.setActionCommand(f.getFullPath());
+			item.addActionListener(this);
+			menu.add(item);
 		}
 		if (this.dropDownButton == null)
 		{

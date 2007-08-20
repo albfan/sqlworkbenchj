@@ -14,13 +14,13 @@ package workbench.gui.filter;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.FixedSizeList;
+import workbench.util.WbFile;
 import workbench.util.WbPersistence;
 
 /**
@@ -31,8 +31,9 @@ import workbench.util.WbPersistence;
 public class FilterDefinitionManager
 {
 	private LinkedList<PropertyChangeListener> listeners;
-	private FixedSizeList filterFiles;
+	private FixedSizeList<WbFile> filterFiles;
 	private static FilterDefinitionManager instance;
+	private static final int DEFAULT_MAX_SIZE = 15;
 	
 	public static synchronized FilterDefinitionManager getInstance() 
 	{
@@ -45,8 +46,8 @@ public class FilterDefinitionManager
 	
 	private FilterDefinitionManager()
 	{
-		int size = Settings.getInstance().getIntProperty("workbench.gui.filter.mru.maxsize", 15);
-		this.filterFiles = new FixedSizeList(size);
+		int size = Settings.getInstance().getIntProperty("workbench.gui.filter.mru.maxsize", DEFAULT_MAX_SIZE);
+		this.filterFiles = new FixedSizeList<WbFile>(size);
 		loadMRUList();
 	}
 
@@ -59,7 +60,15 @@ public class FilterDefinitionManager
 			String filename = s.getProperty("workbench.gui.filter.mru.entry." + i, null);
 			if (filename != null)
 			{
-				filterFiles.append(filename);
+				WbFile f = new WbFile(filename);
+				if (f.exists())
+				{
+					filterFiles.append(f);
+				}
+				else
+				{
+					LogMgr.logInfo("FilterDefinitionManager.loadMRUList()", "Removed filter file '" + f.getFullPath() + "' from list because it does not longer exist");
+				}
 			}
 		}
 	}
@@ -67,7 +76,7 @@ public class FilterDefinitionManager
 	private void removeOldSettings()
 	{
 		Settings s = Settings.getInstance();
-		int size = s.getIntProperty("workbench.gui.filter.mru.maxsize", 15);
+		int size = s.getIntProperty("workbench.gui.filter.mru.maxsize", DEFAULT_MAX_SIZE);
 		for (int i=0; i < size; i++)
 		{
 			s.removeProperty("workbench.gui.filter.mru.entry." + i);
@@ -79,12 +88,10 @@ public class FilterDefinitionManager
 		removeOldSettings();
 		
 		Settings s = Settings.getInstance();
-		Iterator itr = filterFiles.iterator();
 		int index = 0;
-		while (itr.hasNext())
+		for (WbFile f : filterFiles.getEntries())
 		{
-			String file = (String)itr.next();
-			s.setProperty("workbench.gui.filter.mru.entry." + index, file);
+			s.setProperty("workbench.gui.filter.mru.entry." + index, f.getFullPath());
 			index ++;
 		}
 		s.setProperty("workbench.gui.filter.mru.size", index);
@@ -92,11 +99,11 @@ public class FilterDefinitionManager
 	
 	public synchronized void addPropertyChangeListener(PropertyChangeListener l)
 	{
-		if (this.listeners == null) this.listeners = new LinkedList();
+		if (this.listeners == null) this.listeners = new LinkedList<PropertyChangeListener>();
 		this.listeners.add(l);
 	}
 	
-	public void filterSaved(String filename)
+	public synchronized void filterSaved(WbFile filename)
 	{
 		filterFiles.addEntry(filename);
 		firePropertyChanged();
@@ -113,15 +120,15 @@ public class FilterDefinitionManager
 		}
 	}
 	
-	public List<String> getEntries()
+	public List<WbFile> getEntries()
 	{
 		return filterFiles.getEntries();
 	}
 	
-	public void saveFilter(FilterExpression filter, String file)
+	public void saveFilter(FilterExpression filter, WbFile file)
 		throws IOException
 	{
-		WbPersistence p = new WbPersistence(file);
+		WbPersistence p = new WbPersistence(file.getFullPath());
 		p.writeObject(filter);
 		filterSaved(file);
 	}

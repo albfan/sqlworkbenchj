@@ -19,9 +19,9 @@ import java.util.List;
 /**
  * @author support@sql-workbench.net
  */
-public class FixedSizeList
+public class FixedSizeList<T>
 {
-	private LinkedList<String> entries;
+	private LinkedList<T> entries;
 	private int maxSize;
 	
 	public FixedSizeList()
@@ -32,7 +32,7 @@ public class FixedSizeList
 	public FixedSizeList(int max)
 	{
 		this.maxSize = max;
-		this.entries = new LinkedList<String>();
+		this.entries = new LinkedList<T>();
 	}
 	
 	/**
@@ -41,13 +41,16 @@ public class FixedSizeList
 	 * that exceed the max size. This should be used
 	 * to initially fill the list.
 	 */
-	public synchronized void append(String entry)
+	public synchronized void append(T entry)
 	{
+    if (entry == null) return;
 		entries.add(entry);
 	}
 	
-	public synchronized int addEntry(String entry)
+	public synchronized int addEntry(T entry)
 	{
+    if (entry == null) return -1;
+		
 		// Don't allow duplicates
 		if (entries.contains(entry))
 		{
@@ -66,7 +69,7 @@ public class FixedSizeList
 		return entries.size();
 	}
 	
-	public synchronized String getFirst()
+	public synchronized T getFirst()
 	{
 		return entries.getFirst();
 	}
@@ -79,16 +82,16 @@ public class FixedSizeList
 	public synchronized String toString()
 	{
 		StringBuilder result = new StringBuilder(entries.size() * 80);
-		Iterator<String> itr = entries.iterator();
+		Iterator<T> itr = entries.iterator();
 		while (itr.hasNext())
 		{
-			result.append(itr.next());
+			result.append(itr.next().toString());
 			if (itr.hasNext()) result.append(',');
 		}
 		return result.toString();
 	}
 
-	public synchronized List<String> getEntries()
+	public synchronized List<T> getEntries()
 	{
 		return Collections.unmodifiableList(this.entries);
 	}

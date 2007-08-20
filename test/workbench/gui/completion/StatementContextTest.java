@@ -48,10 +48,88 @@ public class StatementContextTest extends TestCase
 		ConnectionMgr.getInstance().disconnectAll();
     super.tearDown();
   }
+
+	public void testSubSelect()
+	{
+		try
+		{
+			StatementContext context = new StatementContext(con, "select * from one where x in (select  from two)", 36);
+			BaseAnalyzer analyzer = context.getAnalyzer();
+			assertTrue(analyzer instanceof SelectAnalyzer);
+			List columns = analyzer.getData();
+			assertNotNull(columns);
+			assertEquals(3, columns.size());
+			Object o = columns.get(1);
+			assertTrue(o instanceof ColumnIdentifier);
+			ColumnIdentifier t = (ColumnIdentifier)o;
+			assertEquals("id2", t.getColumnName().toLowerCase());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
+	public void testCombinedSubSelect()
+	{
+		try
+		{
+			String sql = "select * from one o where x in (select id2 from two where o. )";
+			int pos = sql.indexOf("o.") + 2;
+			StatementContext context = new StatementContext(con, sql, pos);
+			BaseAnalyzer analyzer = context.getAnalyzer();
+			assertTrue(analyzer instanceof SelectAnalyzer);
+			TableIdentifier tbl = analyzer.getTableForColumnList();
+			assertEquals("one", tbl.getTableName().toLowerCase());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testUpdateSubSelect()
+	{
+		try
+		{
+			String sql = "update one set firstname = 'xx' where id1 in (select id2 from two where one. )";
+			int pos = sql.indexOf("one.") + 4;
+			StatementContext context = new StatementContext(con, sql, pos);
+			BaseAnalyzer analyzer = context.getAnalyzer();
+			assertTrue(analyzer instanceof SelectAnalyzer);
+			TableIdentifier tbl = analyzer.getTableForColumnList();
+			assertEquals("one", tbl.getTableName().toLowerCase());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
+	public void testDeleteSubSelect()
+	{
+		try
+		{
+			String sql = "delete from one where id1 in (select id2 from two where one. )";
+			int pos = sql.indexOf("one.") + 4;
+			StatementContext context = new StatementContext(con, sql, pos);
+			BaseAnalyzer analyzer = context.getAnalyzer();
+			assertTrue(analyzer instanceof SelectAnalyzer);
+			TableIdentifier tbl = analyzer.getTableForColumnList();
+			assertEquals("one", tbl.getTableName().toLowerCase());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	
   public void testSelectColumnList()
   {
-		
 		try
 		{
 			StatementContext context = new StatementContext(con, "select  from one", 7);

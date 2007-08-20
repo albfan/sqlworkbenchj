@@ -398,6 +398,31 @@ public class SqlUtil
 			JOIN_KEYWORDS.add("FULL OUTER JOIN");
 	}
 	
+	public static List<String> getReferencedTables(String sql, boolean includeAlias)
+	{
+		String verb = getSqlVerb(sql);
+		if ("SELECT".equalsIgnoreCase(verb)) 
+		{
+				return getTables(sql, includeAlias);
+		}
+		List<String> result = new ArrayList<String>(1);
+		String table = null;
+		if ("UPDATE".equalsIgnoreCase(verb))
+		{
+			table = getUpdateTable(sql);
+		}
+		else if ("UPDATE".equalsIgnoreCase(verb))
+		{
+			table = getDeleteTable(sql);
+		}
+		
+		if (table != null)
+		{
+			result.add(table);
+		}
+		return result;
+	}
+	
 	/**
 	 * Returns a List of tables defined in the SQL query. If the 
 	 * query is not a SELECT query the result is undefined

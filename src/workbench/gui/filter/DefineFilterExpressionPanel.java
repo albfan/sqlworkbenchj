@@ -50,6 +50,7 @@ import workbench.storage.filter.FilterExpression;
 import workbench.storage.filter.OrExpression;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  * A Panel to display a filter dialog for a {@link workbench.storage.DataStore}
@@ -185,8 +186,9 @@ public class DefineFilterExpressionPanel
 			Settings.getInstance().setLastFilterDir(dir);
 			try
 			{
-				FilterDefinitionManager.getInstance().saveFilter(filter, file);
-			} 
+				WbFile f = new WbFile(file);
+				FilterDefinitionManager.getInstance().saveFilter(filter, f);
+			}
 			catch (IOException e)
 			{
 				String msg = ResourceMgr.getString("ErrLoadingFilter");
@@ -358,7 +360,7 @@ public class DefineFilterExpressionPanel
 		GridBagLayout l = (GridBagLayout)expressions.getLayout();
 		for (int i=0; i < this.panels.size(); i++)
 		{
-			PanelEntry entry = (PanelEntry)panels.get(i);
+			PanelEntry entry = panels.get(i);
 			GridBagConstraints cons = l.getConstraints(entry.container);
 			cons.weighty = 0;
 			l.setConstraints(entry.container, cons);
@@ -398,7 +400,7 @@ public class DefineFilterExpressionPanel
 			int count = this.panels.size();
 			for (int i=0; i < count; i++)
 			{
-				entry = (PanelEntry)panels.get(i);
+				entry = panels.get(i);
 				GridBagConstraints cons = l.getConstraints(entry.container);
 				if (i < count - 1)
 					cons.weighty = 0;
@@ -453,7 +455,7 @@ public class DefineFilterExpressionPanel
 	public void componentDisplayed()
 	{
 		if (this.panels.size() == 0) return;
-		PanelEntry entry = (PanelEntry)panels.get(0);
+		PanelEntry entry = panels.get(0);
 		if (entry == null || entry.expressionPanel == null) return;
 		entry.expressionPanel.setFocusToColumn();
 	}

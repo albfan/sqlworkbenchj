@@ -57,7 +57,7 @@ public class ImageViewer
 	{
 		super(parent, title, true);
 		init();
-		WbSwingUtilities.center(this, parent);
+		WbSwingUtilities.center(this, parent.getParent());
 	}
 
 	private void init()

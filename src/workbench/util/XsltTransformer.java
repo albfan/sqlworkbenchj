@@ -27,7 +27,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import workbench.util.FileUtil;
 
 /**
  *  Xslt transformer using the JDK built-in XSLT stuff

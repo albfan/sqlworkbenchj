@@ -414,7 +414,7 @@ public class BlobInfoDialog
 			// if the blob has been edited, then clear the upload file in case
 			// there was one.
 			this.uploadFile = null;
-		};
+		}
 		closeWindow();
 	}//GEN-LAST:event_showAsTextButtonActionPerformed
 

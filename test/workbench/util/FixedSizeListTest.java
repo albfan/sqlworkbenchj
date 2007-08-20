@@ -12,8 +12,6 @@
 package workbench.util;
 
 import junit.framework.*;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 /**
  *
@@ -31,7 +29,7 @@ public class FixedSizeListTest extends TestCase
 	{
 		try
 		{
-			FixedSizeList list = new FixedSizeList(5);
+			FixedSizeList<String> list = new FixedSizeList<String>(5);
 			list.addEntry("One");
 			list.addEntry("Two");
 			list.addEntry("Three");
@@ -51,29 +49,28 @@ public class FixedSizeListTest extends TestCase
 			firstEntry = list.getFirst();
 			assertEquals("Wrong entry", "Three", firstEntry);
 			
-			Iterator itr = list.iterator();
 			int index = 0;
-			while (itr.hasNext())
+			for (String entry : list.getEntries())
 			{
 				if (index == 0)
 				{
-					assertEquals("Wrong entry", "Three", itr.next());
+					assertEquals("Wrong entry", "Three", entry);
 				}
 				else if (index == 1)
 				{
-					assertEquals("Wrong entry", "Six", itr.next());
+					assertEquals("Wrong entry", "Six", entry);
 				}
 				else if (index == 2)
 				{
-					assertEquals("Wrong entry", "Five", itr.next());
+					assertEquals("Wrong entry", "Five", entry);
 				}
 				else if (index == 3)
 				{
-					assertEquals("Wrong entry", "Four", itr.next());
+					assertEquals("Wrong entry", "Four", entry);
 				}
 				else if (index == 4)
 				{
-					assertEquals("Wrong entry", "Two", itr.next());
+					assertEquals("Wrong entry", "Two", entry);
 				}
 				index ++;
 			}

@@ -40,7 +40,7 @@ public class SqlHistory
 {
 	private static final String LIST_DELIMITER = "----------- WbStatement -----------";
 
-	private ArrayList history;
+	private ArrayList<SqlHistoryEntry> history;
 	private int currentEntry;
 	private int maxSize;
 	private boolean changed = false;
@@ -54,7 +54,7 @@ public class SqlHistory
 	public SqlHistory(EditorPanel ed, int maxSize)
 	{
 		this.maxSize = maxSize;
-		this.history = new ArrayList(maxSize + 2);
+		this.history = new ArrayList<SqlHistoryEntry>(maxSize + 2);
 		this.editor = ed;
 		this.firstStmtAction = new FirstStatementAction(this);
 		this.firstStmtAction.setEnabled(false);
@@ -145,7 +145,7 @@ public class SqlHistory
 	{
 		if (this.history.size() == 0) return;
 		this.currentEntry = this.history.size() - 1;
-		SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(this.currentEntry);
+		SqlHistoryEntry entry = this.history.get(this.currentEntry);
 		entry.applyTo(editor);
 		checkActions();
 	}
@@ -154,7 +154,7 @@ public class SqlHistory
 	{
 		if (this.history.size() == 0) return;
 		this.currentEntry = 0;
-		SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(this.currentEntry);
+		SqlHistoryEntry entry = this.history.get(this.currentEntry);
 		entry.applyTo(editor);
 		checkActions();
 	}
@@ -162,7 +162,7 @@ public class SqlHistory
 	public void showCurrent()
 	{
 		if (this.currentEntry >= this.history.size()) return;
-		SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(this.currentEntry);
+		SqlHistoryEntry entry = this.history.get(this.currentEntry);
 		entry.applyTo(editor);
 		checkActions();
 	}
@@ -186,7 +186,7 @@ public class SqlHistory
 	public SqlHistoryEntry getTopEntry()
 	{
 		if (this.history.size() < 1) return null;
-		SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(this.history.size() - 1);
+		SqlHistoryEntry entry = this.history.get(this.history.size() - 1);
 		return entry;
 	}
 
@@ -194,7 +194,7 @@ public class SqlHistory
 	{
 		if (this.currentEntry <= 0) return null;
 		this.currentEntry--;
-		SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(this.currentEntry);
+		SqlHistoryEntry entry = this.history.get(this.currentEntry);
 		return entry;
 	}
 
@@ -202,7 +202,7 @@ public class SqlHistory
 	{
 		if (this.currentEntry >= this.history.size() - 1) return null;
 		this.currentEntry++;
-		SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(this.currentEntry);
+		SqlHistoryEntry entry = this.history.get(this.currentEntry);
 		return entry;
 	}
 
@@ -221,7 +221,7 @@ public class SqlHistory
 			int count = this.history.size();
 			for (int i=0; i < count; i++)
 			{
-				SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(i);
+				SqlHistoryEntry entry = this.history.get(i);
 				writer.write(KEY_POS);
 				writer.write(Integer.toString(entry.getCursorPosition()));
 				writer.write(lineEnding);

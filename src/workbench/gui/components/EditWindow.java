@@ -79,28 +79,14 @@ public class EditWindow
 	public EditWindow(final Frame owner, final String title, final String text, final String settingsId, final boolean createSqlEditor, final boolean modal, final boolean showCloseButtonOnly)
 	{
 		super(owner, title, modal);
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			public void run()
-			{
-				init(text, settingsId, createSqlEditor, showCloseButtonOnly);
-			}
-		});
-		
-		// pack() needs to be called before center() !!!
+		init(text, settingsId, createSqlEditor, showCloseButtonOnly);
 		WbSwingUtilities.center(this, owner);
 	}
 
 	public EditWindow(final Dialog owner, final String title, final String text, final boolean createSqlEditor, final boolean showCloseButtonOnly)
 	{
 		super(owner, title, true);
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			public void run()
-			{
-				init(text, "workbench.data.edit.window", createSqlEditor, showCloseButtonOnly);
-			}
-		});
+		init(text, "workbench.data.edit.window", createSqlEditor, showCloseButtonOnly);
 		WbSwingUtilities.center(this, WbManager.getInstance().getCurrentWindow());
 	}
 	

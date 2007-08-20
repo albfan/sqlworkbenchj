@@ -101,16 +101,16 @@ public class RendererFactory
 		}
 	}
 
+	public static TableCellRenderer getMultiLineRenderer()
+	{
+		return createRenderer("workbench.gui.renderer.TextAreaRenderer");
+	}
+	
 	public static TableCellRenderer getSqlTypeRenderer()
 	{
 		return createRenderer("workbench.gui.renderer.SqlTypeRenderer");
 	}
 	
-	public static TableCellRenderer getClobRenderer()
-	{
-		return createRenderer("workbench.gui.renderer.ClobColumnRenderer");
-	}
-
 	public static TableCellRenderer getBlobRenderer()
 	{
 		return createRenderer("workbench.gui.renderer.BlobColumnRenderer");

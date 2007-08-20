@@ -193,8 +193,8 @@ public class ConnectionSelector
 			return;
 		}
 		JPanel p = new JPanel();
-		p.setBorder(new CompoundBorder(WbSwingUtilities.BEVEL_BORDER_RAISED, new EmptyBorder(15,10,15,10)));
-		p.setLayout(new BorderLayout(15,10));
+		p.setBorder(new CompoundBorder(WbSwingUtilities.BEVEL_BORDER_RAISED, new EmptyBorder(15,20,15,20)));
+		p.setLayout(new BorderLayout(0,0));
 		p.setMinimumSize(new Dimension(250,50));
 		this.connectLabel = new JLabel(aMsg);
 		this.connectLabel.setMinimumSize(new Dimension(200,50));

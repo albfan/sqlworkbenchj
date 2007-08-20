@@ -682,7 +682,7 @@ public class ConnectionMgr
 			in = this.getClass().getResourceAsStream("DriverTemplates.xml");
 			
 			WbPersistence reader = new WbPersistence();
-			ArrayList<DbDriver> templates = (ArrayList)reader.readObject(in);
+			ArrayList<DbDriver> templates = (ArrayList<DbDriver>)reader.readObject(in);
 			
 			for (int i=0; i < templates.size(); i++)
 			{

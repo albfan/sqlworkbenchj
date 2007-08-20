@@ -42,6 +42,7 @@ public class SelectAnalyzer
 		super(conn, statement, cursorPos);
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void checkContext()
 	{
 		this.context = NO_CONTEXT;
@@ -64,7 +65,7 @@ public class SelectAnalyzer
 		int orderPos = SqlUtil.getKeywordPosition("ORDER BY", sql);
 		
 		// find the tables from the FROM clause
-		List tables = SqlUtil.getTables(sql, true);
+		List<String> tables = SqlUtil.getTables(sql, true);
 		
 		boolean afterWhere = (wherePos > 0 && cursorPos > wherePos);
 		boolean afterGroup = (groupPos > 0 && cursorPos > groupPos);
@@ -179,22 +180,46 @@ public class SelectAnalyzer
 			
 			if (table != null)
 			{
-				for (int i=0; i < count; i++)
+//				for (String element : tables)
+//				{
+//					TableAlias tbl = new TableAlias(element);
+//
+//					if (tbl.isTableOrAlias(table))
+//					{
+//						tableForColumnList = tbl.getTable();
+//						currentAlias = tbl;
+//						break;
+//					}
+//				}				
+					
+				currentAlias = findAlias(table, tables);
+				
+				if (currentAlias != null)
 				{
-					String element = (String)tables.get(i);
-					TableAlias tbl = new TableAlias(element);
-
-					if (tbl.isTableOrAlias(table))
+						tableForColumnList = currentAlias.getTable();
+				}
+				else if (this.parentAnalyzer != null)
+				{
+					// if we didn't find the alias in the current SELECT's
+					// tables we check the "parent" statement as we might be inside
+					// a sub-select
+					List<TableAlias> outerTables = this.parentAnalyzer.getTables();
+					if (outerTables != null)
 					{
-						tableForColumnList = tbl.getTable();
-						currentAlias = tbl;
-						break;
+						for (TableAlias outer : outerTables)
+						{
+							if (outer.isTableOrAlias(table))
+							{
+								tableForColumnList = outer.getTable();
+								currentAlias = outer;
+							}
+						}
 					}
 				}
 			}
 			else if (count == 1)
 			{
-				TableAlias tbl = new TableAlias((String)tables.get(0));
+				TableAlias tbl = new TableAlias(tables.get(0));
 				tableForColumnList = tbl.getTable();
 			}
 
@@ -202,9 +227,8 @@ public class SelectAnalyzer
 			{
 				context = CONTEXT_FROM_LIST;
 				this.elements = new ArrayList();
-				for (int i=0; i < count; i++)
+				for (String entry : tables)
 				{
-					String entry = (String)tables.get(i);
 					TableAlias tbl = new TableAlias(entry);
 					this.elements.add(tbl);
 					setAppendDot(true);
@@ -217,6 +241,20 @@ public class SelectAnalyzer
 		}
 	}
 
+	private TableAlias findAlias(String toSearch, List<String> possibleTables)
+	{
+		for (String element : possibleTables)
+		{
+			TableAlias tbl = new TableAlias(element);
+
+			if (tbl.isTableOrAlias(toSearch))
+			{
+				return tbl;
+			}
+		}
+		return null;
+	}
+	
 	private int inJoinONPart()
 	{
 		int result = NO_JOIN_ON;
@@ -319,5 +357,20 @@ public class SelectAnalyzer
 			}
 		}
 		return validCols;
+	}
+	
+	/**
+	 * This will only return any tables in the FROM clause to 
+	 * support correlated sub-queries
+	 */
+	public List<TableAlias> getTables()
+	{
+		List<String> tables = SqlUtil.getTables(sql, true);
+		List<TableAlias> result = new ArrayList<TableAlias>(tables.size());
+		for (String s : tables)
+		{
+			result.add(new TableAlias(s));
+		}
+		return result;
 	}
 }

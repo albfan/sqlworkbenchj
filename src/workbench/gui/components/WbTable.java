@@ -97,7 +97,6 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RequiredFieldHighlighter;
 import workbench.gui.renderer.RowStatusRenderer;
-import workbench.gui.renderer.TextAreaRenderer;
 import workbench.gui.sql.DwStatusBar;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.Resettable;
@@ -128,7 +127,7 @@ public class WbTable
 
 	private WbTextCellEditor defaultEditor;
 	private WbCellEditor multiLineEditor;
-	private TextAreaRenderer multiLineRenderer;
+	private TableCellRenderer multiLineRenderer;
 	private WbTextCellEditor defaultNumberEditor;
 	private JTextField numberEditorTextField;
 
@@ -225,7 +224,7 @@ public class WbTable
 		this.defaultNumberEditor = new WbTextCellEditor(this, numberEditorTextField);
 		
 		this.multiLineEditor = new WbCellEditor(this);
-		this.multiLineRenderer = new TextAreaRenderer();
+		this.multiLineRenderer = RendererFactory.getMultiLineRenderer();
 
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 

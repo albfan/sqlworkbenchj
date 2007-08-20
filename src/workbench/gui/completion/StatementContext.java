@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.wbcommands.CommandTester;
@@ -35,41 +36,52 @@ public class StatementContext
 	public StatementContext(WbConnection conn, String sql, int pos)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
-	
-		if (!inSubSelect(conn, sql, pos))
+
+		BaseAnalyzer subSelectAnalyzer = checkSubselect(conn, sql, pos);
+		BaseAnalyzer verbAnalyzer = null;
+		
+		if ("SELECT".equalsIgnoreCase(verb) || WbSelectBlob.VERB.equalsIgnoreCase(verb))
 		{
-			if ("SELECT".equalsIgnoreCase(verb) || WbSelectBlob.VERB.equalsIgnoreCase(verb))
-			{
-				analyzer = new SelectAnalyzer(conn, sql, pos);
-			}
-			else if ("UPDATE".equalsIgnoreCase(verb))
-			{
-				analyzer = new UpdateAnalyzer(conn, sql, pos);
-			}
-			else if ("DELETE".equalsIgnoreCase(verb))
-			{
-				analyzer = new DeleteAnalyzer(conn, sql, pos);
-			}
-			else if ("DROP".equalsIgnoreCase(verb) || "TRUNCATE".equalsIgnoreCase(verb))
-			{
-				analyzer = new DdlAnalyzer(conn, sql, pos);
-			}
-			else if ("ALTER".equalsIgnoreCase(verb))
-			{
-				analyzer = new AlterTableAnalyzer(conn, sql, pos);
-			}
-			else if ("INSERT".equalsIgnoreCase(verb))
-			{
-				analyzer = new InsertAnalyzer(conn, sql, pos);
-			}
-			else if ("CREATE".equalsIgnoreCase(verb) || "CREATE OR REPLACE".equalsIgnoreCase(verb))
-			{
-				analyzer = new CreateAnalyzer(conn, sql, pos);
-			}
-			else if (wbTester.isWbCommand(verb))
-			{
-				analyzer = new WbCommandAnalyzer(conn, sql, pos);
-			}
+			verbAnalyzer = new SelectAnalyzer(conn, sql, pos);
+		}
+		else if ("UPDATE".equalsIgnoreCase(verb))
+		{
+			verbAnalyzer = new UpdateAnalyzer(conn, sql, pos);
+		}
+		else if ("DELETE".equalsIgnoreCase(verb))
+		{
+			verbAnalyzer = new DeleteAnalyzer(conn, sql, pos);
+		}
+		else if ("DROP".equalsIgnoreCase(verb) || "TRUNCATE".equalsIgnoreCase(verb))
+		{
+			verbAnalyzer = new DdlAnalyzer(conn, sql, pos);
+		}
+		else if ("ALTER".equalsIgnoreCase(verb))
+		{
+			verbAnalyzer = new AlterTableAnalyzer(conn, sql, pos);
+		}
+		else if ("INSERT".equalsIgnoreCase(verb))
+		{
+			verbAnalyzer = new InsertAnalyzer(conn, sql, pos);
+		}
+		else if ("CREATE".equalsIgnoreCase(verb) || "CREATE OR REPLACE".equalsIgnoreCase(verb))
+		{
+			verbAnalyzer = new CreateAnalyzer(conn, sql, pos);
+		}
+		else if (wbTester.isWbCommand(verb))
+		{
+			verbAnalyzer = new WbCommandAnalyzer(conn, sql, pos);
+		}
+		
+		if (subSelectAnalyzer != null)
+		{
+			this.analyzer = subSelectAnalyzer;
+			this.analyzer.setParent(verbAnalyzer);
+		}
+		else
+		{
+			this.analyzer = verbAnalyzer;
+			this.analyzer.setParent(null);
 		}
 		
 		if (analyzer != null)
@@ -80,7 +92,7 @@ public class StatementContext
 
 	public BaseAnalyzer getAnalyzer() { return this.analyzer; }
 	
-	private boolean inSubSelect(WbConnection conn, String sql, int pos)
+	private BaseAnalyzer checkSubselect(WbConnection conn, String sql, int pos)
 	{
 		try
 		{
@@ -124,8 +136,7 @@ public class StatementContext
 						{
 							int newpos = pos - lastStart - 1;
 							String sub = sql.substring(lastStart + 1, lastEnd);
-							analyzer = new SelectAnalyzer(conn, sub, newpos);
-							return true;
+							return new SelectAnalyzer(conn, sub, newpos);
 						}
 					}
 					if (bracketCount == 0)
@@ -140,8 +151,7 @@ public class StatementContext
 					if (pos >= t.getCharBegin())
 					{
 						int newPos = pos - t.getCharBegin();
-						analyzer = new SelectAnalyzer(conn, sql.substring(t.getCharBegin()), newPos);
-						return true;
+						return new SelectAnalyzer(conn, sql.substring(t.getCharBegin()), newPos);
 					}
 				}
 				else if (bracketCount == 0 && unionKeywords.contains(value))
@@ -190,8 +200,7 @@ public class StatementContext
 					if (lastPos <= pos && pos <= startPos)
 					{
 						int newPos = pos - lastPos;
-						analyzer = new SelectAnalyzer(conn, sql.substring(lastPos, startPos), newPos);
-						return true;
+						return new SelectAnalyzer(conn, sql.substring(lastPos, startPos), newPos);
 					}
 					lastPos = startPos;
 					index ++;
@@ -201,17 +210,16 @@ public class StatementContext
 				if (pos >= startPos)
 				{
 					int newPos = pos - startPos;
-					analyzer = new SelectAnalyzer(conn, sql.substring(startPos), newPos);
-					return true;
+					return new SelectAnalyzer(conn, sql.substring(startPos), newPos);
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("StatementContenxt.inSubSelect()", "Error when checking sub-select", e);
 		}
 		
-		return false;
+		return null;
 	}
 	
 
