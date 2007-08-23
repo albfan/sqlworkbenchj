@@ -2614,7 +2614,8 @@ public class WbImportTest
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -continueonerror=false -table=parent_table -deleteTarget=true");
 			assertEquals("Import did not fail", false, result.isSuccess());
 			String msg = result.getMessageBuffer().toString();
-			assertEquals("No error reported", true, msg.indexOf("Integrity constraint violation") > 0);
+			System.out.println(" ***** message=" + msg);
+			assertEquals("No error reported", true, msg.toLowerCase().indexOf("integrity constraint violation") > 0);
 			
 			ResultSet rs = stmt.executeQuery("select count(*) from parent_table");
 			int count = -1;
@@ -2643,7 +2644,7 @@ public class WbImportTest
 		stmt.executeUpdate("CREATE TABLE junit_test_pk (nr integer primary key, firstname varchar(100), lastname varchar(100))");
 		stmt.executeUpdate("CREATE TABLE datatype_test (int_col integer, double_col double, char_col varchar(50), date_col date, time_col time, ts_col timestamp)");
 		stmt.executeUpdate("CREATE TABLE blob_test (nr integer, binary_data BINARY)");
-		stmt.executeUpdate("CREATE TABLE clob_test (nr integer, text_data LONGVARCHAR)");
+		stmt.executeUpdate("CREATE TABLE clob_test (nr integer, text_data CLOB)");
 		stmt.executeUpdate("CREATE TABLE bool_int_test (nr integer, int_flag INTEGER)");
 		stmt.executeUpdate("CREATE TABLE bool_test (nr integer, flag BOOLEAN)");
 		wb.commit();

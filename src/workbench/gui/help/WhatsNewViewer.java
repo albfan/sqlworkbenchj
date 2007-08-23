@@ -18,11 +18,11 @@ import java.awt.event.WindowEvent;
 import java.net.URL;
 
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -34,8 +34,8 @@ public class WhatsNewViewer
 	
 	public WhatsNewViewer(java.awt.Frame owner)
 	{
-		
-		super(owner, ResourceMgr.getString("TxtWhatsNewWindowTitle"), false);
+		super(owner, false);
+		setTitle(ResourceMgr.getFormattedString("TxtWhatsNewWindowTitle", ResourceMgr.getBuildNumber().toString()));
 		display = new JTextPane();
 		display.setFont(new Font("Monospaced", Font.PLAIN, 12));
 		display.setEditable(false);
@@ -54,8 +54,6 @@ public class WhatsNewViewer
 			WbSwingUtilities.center(this, owner);
 		}
 		
-//		setSize(800, 600);
-		
 		try
 		{
 
@@ -72,7 +70,7 @@ public class WhatsNewViewer
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("WhatsNewViewer.<init>", "Error creating dialog", e);
 		}
 		
 		addWindowListener(new WindowAdapter()

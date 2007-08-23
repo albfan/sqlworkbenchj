@@ -68,7 +68,7 @@ public class BatchRunnerTest
 
 			ArgumentParser parser = WbManager.createArgumentParser();
 			String script = "-script='" + scriptFile.getAbsolutePath() + "'";
-			parser.parse("-url='jdbc:hsqldb:mem:testEmptyStmt;shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver "  + script  + " -displayresult=true -ignoredroperrors=true -showprogress=true -showtiming=false");
+			parser.parse("-url='jdbc:h2:mem:testEmptyStmt' -user=sa -driver=org.h2.Driver "  + script  + " -displayresult=true -ignoredroperrors=true -showprogress=true -showtiming=false");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
 	
 			assertNotNull(runner);
@@ -110,7 +110,7 @@ public class BatchRunnerTest
 
 			ArgumentParser parser = WbManager.createArgumentParser();
 			String script = "-script='" + scriptFile.getFullPath() + "'";
-			parser.parse("-url='jdbc:hsqldb:mem:testBatchRunner;shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver "  + script + " -rollbackOnDisconnect=true");
+			parser.parse("-url='jdbc:h2:mem:testBatchRunner' -user=sa -driver=org.h2.Driver "  + script + " -rollbackOnDisconnect=true");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
 	
 			assertNotNull(runner);
@@ -175,7 +175,7 @@ public class BatchRunnerTest
 			writer2.println("commit;");
 			writer2.close();			
 			
-			parser.parse("-url='jdbc:hsqldb:mem:testAltDelimiter;shutdown=true' -altdelimiter='/;nl' -user=sa -driver=org.hsqldb.jdbcDriver -script='" + scriptFile.getAbsolutePath() + "','" + scriptFile2.getAbsolutePath() + "'");
+			parser.parse("-url='jdbc:h2:mem:testAltDelimiter' -altdelimiter='/;nl' -user=sa -driver=org.h2.Driver -script='" + scriptFile.getAbsolutePath() + "','" + scriptFile2.getAbsolutePath() + "'");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
 			
 			assertNotNull(runner);

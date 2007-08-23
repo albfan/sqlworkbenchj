@@ -74,10 +74,9 @@ public class DdlCommand extends SqlCommand
 		StatementRunnerResult result = new StatementRunnerResult();
 		
 		DbSettings dbset = this.currentConnection.getMetadata().getDbSettings();
-//		boolean globalSavePoint = dbset.useSavePointForAll();
 		boolean useSavepoint = dbset.useSavePointForDDL() && !this.currentConnection.getAutoCommit();
 
-		if (!this.currentConnection.supportsSavepoints())
+		if (useSavepoint && !this.currentConnection.supportsSavepoints())
 		{
 			useSavepoint = false;
 			LogMgr.logWarning("DdlCommand.execute()", "A savepoint should be used for this DDL command, but the driver does not support savepoints!");

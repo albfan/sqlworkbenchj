@@ -44,7 +44,7 @@ public class WbCopyTest extends TestCase
 			
 			Statement stmt = con.createStatement();
 			
-			stmt.executeUpdate("create table source_data (nr integer primary key, lastname varchar(50), firstname varchar(50), binary_data binary)");
+			stmt.executeUpdate("create table source_data (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob)");
 			
 			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (1,'Dent', 'Arthur', '01')");
 			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (2,'Beeblebrox', 'Zaphod','0202')");

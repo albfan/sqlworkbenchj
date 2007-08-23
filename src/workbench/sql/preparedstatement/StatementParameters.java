@@ -16,7 +16,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
-import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 
 /**

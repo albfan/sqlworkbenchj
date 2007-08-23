@@ -80,7 +80,7 @@ public class ConnectionProfile
 		this.id = getNextId();
     this.isNew = true;
     this.changed = true;
-		Settings.getInstance().addPropertyChangeListener(this);
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_ENCRYPT_PWD);
 	}
 
 	public ConnectionProfile(String aName, String driverClass, String url, String userName, String pwd)

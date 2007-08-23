@@ -766,7 +766,7 @@ public class SqlUtil
 
 	public static final boolean isClobType(int aSqlType)
 	{
-		return (aSqlType == Types.LONGVARCHAR || aSqlType == Types.CLOB);
+		return (aSqlType == Types.CLOB);
 	}
 	
 	public static final boolean isBlobType(int aSqlType)

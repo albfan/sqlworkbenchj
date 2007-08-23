@@ -35,7 +35,8 @@ public class PreparedStatementPoolTest extends TestCase
 		try
 		{
 			util.prepareEnvironment();
-			WbConnection con = util.getConnection();
+			// Still using HSQLDB as H2 does not implement getParameterMetaData() correctly
+			WbConnection con = util.getHSQLConnection("testPool");
 			Statement stmt = con.createStatement();
 			stmt.executeUpdate("CREATE TABLE prep_test (nr integer, name varchar(100))");
 			PreparedStatementPool pool = new PreparedStatementPool(con);

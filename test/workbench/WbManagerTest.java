@@ -65,9 +65,9 @@ public class WbManagerTest extends TestCase
 			String args[] = { "-embedded", 
 												"-nosettings",
 												"-configdir=" + util.getBaseDir(),
-												"-url='jdbc:hsqldb:" + db.getAbsolutePath() + ";shutdown=true'",
+												"-url='jdbc:h2:" + db.getAbsolutePath() + "'",
 												"-user=sa",
-												"-driver=org.hsqldb.jdbcDriver",
+												"-driver=org.h2.Driver",
 												"-script='" + script + "'",
 												"-encoding=UTF8"
 												};

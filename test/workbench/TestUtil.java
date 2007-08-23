@@ -105,6 +105,17 @@ public class TestUtil
 		}
 	}
 	
+	public WbConnection getHSQLConnection(String dbName)
+		throws SQLException, ClassNotFoundException
+	{
+		ArgumentParser parser = WbManager.createArgumentParser();
+		parser.parse("-url='jdbc:hsqldb:mem:" + dbName + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver");
+		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
+		prof.setName(dbName);
+		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, dbName);
+		return con;
+	}
+	
 	public WbConnection getConnection()
 		throws SQLException, ClassNotFoundException
 	{
@@ -115,8 +126,10 @@ public class TestUtil
 		throws SQLException, ClassNotFoundException
 	{
 		ArgumentParser parser = WbManager.createArgumentParser();
-		parser.parse("-url='jdbc:hsqldb:mem:" + db + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver");
+		//parser.parse("-url='jdbc:hsqldb:mem:" + db + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver");
+		parser.parse("-url='jdbc:h2:mem:" + db + "' -user=sa -driver=org.h2.Driver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
+//		prof.setPreDisconnectScript("SHUTDOWN IMMEDIATELY");
 		prof.setName(db);
 		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, db);
 		return con;
@@ -126,8 +139,10 @@ public class TestUtil
 		throws SQLException, ClassNotFoundException
 	{
 		ArgumentParser parser = WbManager.createArgumentParser();
-		parser.parse("-url='jdbc:hsqldb:" + db.getAbsolutePath() + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver");
+		//parser.parse("-url='jdbc:hsqldb:" + db.getAbsolutePath() + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver");
+		parser.parse("-url='jdbc:h2:" + db.getAbsolutePath() + "' -user=sa -driver=org.h2.Driver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
+//		prof.setPreDisconnectScript("SHUTDOWN IMMEDIATELY");
 		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, "WbUnitTest");
 		return con;
 	}

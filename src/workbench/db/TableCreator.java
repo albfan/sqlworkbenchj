@@ -117,6 +117,7 @@ public class TableCreator
 		//Integer typeKey = new Integer(type);
 		int size = col.getColumnSize();
 		int digits = col.getDecimalDigits();
+		String def = col.getDefaultValue();
 
 		StringBuilder result = new StringBuilder(30);
 		result.append(col.getColumnName());
@@ -132,6 +133,11 @@ public class TableCreator
 			typeName = this.mapper.getTypeName(type, size, digits);
 		}
 		result.append(typeName);
+
+		if (!col.isNullable())
+		{
+			result.append(" NOT NULL");
+		}
 
 		return result.toString();
 	}

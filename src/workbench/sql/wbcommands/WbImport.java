@@ -65,7 +65,7 @@ public class WbImport
 	public static final String ARG_TRIM_VALUES = "trimValues";
 	public static final String ARG_FILE_EXT = "extension";
 	public static final String ARG_UPDATE_WHERE = "updateWhere";
-	public static final String ARG_TRUNCATE_TABLE = "truncaTetable";
+	public static final String ARG_TRUNCATE_TABLE = "truncateTable";
 	public static final String ARG_CREATE_TABLE = "createTarget";
 	public static final String ARG_BLOB_ISFILENAME = "blobIsFilename";
 	public static final String ARG_CLOB_ISFILENAME = "clobIsFilename";

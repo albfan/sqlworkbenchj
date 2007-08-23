@@ -289,7 +289,7 @@ public class WbTable
 		this.optimizeAllCol.addToInputMap(im, am);
 		
 		Settings.getInstance().addFontChangedListener(this);
-		Settings.getInstance().addPropertyChangeListener(this);
+		Settings.getInstance().registerDateFormatChangeListener(this);
 		
 		this.initDefaultRenderers();
 		this.initDefaultEditors();
@@ -1033,7 +1033,7 @@ public class WbTable
 		{
 			public void run()
 			{
-				WbSwingUtilities.showWaitCursor(c);
+				WbSwingUtilities.showWaitCursor(c.getParent());
 			}
 		});
 	}
@@ -1046,7 +1046,7 @@ public class WbTable
 		{
 			public void run()
 			{
-				WbSwingUtilities.showDefaultCursor(c);
+				WbSwingUtilities.showDefaultCursor(c.getParent());
 				// The sorting indicator is not properly displayed
 				// if repaint() is not called
 				getTableHeader().repaint();

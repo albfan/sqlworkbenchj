@@ -202,7 +202,7 @@ public class WbWorkspace
 		catch (Exception e)
 		{
 			LogMgr.logError("WbWorkspace", "Could not read tab info!", e);
-			this.tabInfo = new WbProperties();
+			this.tabInfo = new WbProperties(this);
 		}
 	}
 

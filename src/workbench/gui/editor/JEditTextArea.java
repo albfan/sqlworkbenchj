@@ -71,6 +71,7 @@ import workbench.interfaces.TextSelectionListener;
 import workbench.interfaces.Undoable;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.util.StringIntegerCache;
 import workbench.util.StringUtil;
 
 /**
@@ -101,7 +102,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.74 2007-08-03 20:00:28 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.75 2007-08-23 23:15:42 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -2189,7 +2190,7 @@ public class JEditTextArea
 			return;
 		}
 		
-		int oldcount = Integer.toString(this.getLineCount()).length();
+		int oldcount = StringIntegerCache.getNumberString(this.getLineCount()).length();
 		switch(evt.getID())
 		{
 			case KeyEvent.KEY_TYPED:
@@ -2206,7 +2207,7 @@ public class JEditTextArea
 		{
 			super.processKeyEvent(evt);
 		}
-		int newcount = Integer.toString(this.getLineCount()).length();
+		int newcount = StringIntegerCache.getNumberString(this.getLineCount()).length();
 		boolean changed = false;
 
 		if(this.getFirstLine() < 0)

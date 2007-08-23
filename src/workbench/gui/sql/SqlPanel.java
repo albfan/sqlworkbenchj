@@ -17,8 +17,6 @@ import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -127,7 +125,6 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.EtchedBorderTop;
-import workbench.gui.components.TableColumnOptimizer;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
@@ -304,7 +301,7 @@ public class SqlPanel
 
 		Settings s = Settings.getInstance();
 		s.addFontChangedListener(this);
-		s.addPropertyChangeListener(this);
+		s.addPropertyChangeListener(this, Settings.PROPERTY_ANIMATED_ICONS);
 
 		this.makeReadOnly();
 		this.checkResultSetActions();
@@ -502,6 +499,7 @@ public class SqlPanel
 		this.filenameChangeListeners.remove(aListener);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void initActions()
 	{
 		WbAction a;
@@ -3140,7 +3138,7 @@ public class SqlPanel
 	{
 		String prop = evt.getPropertyName();
 		if (prop == null) return;
-		if (prop.equals(Settings.PROPERTY_ANIMATED_ICONS))
+		if (evt.getSource() == Settings.getInstance() && prop.equals(Settings.PROPERTY_ANIMATED_ICONS))
 		{
 			if (this.cancelIcon != null)
 			{

@@ -62,7 +62,7 @@ public class DefaultStatementRunner
 	public DefaultStatementRunner()
 	{
 		this.verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
-		Settings.getInstance().addPropertyChangeListener(this);
+		Settings.getInstance().addPropertyChangeListener(this, "workbench.gui.log.consolidate");
 		this.parameterPool = VariablePool.getInstance();
 		this.cmdMapper = new CommandMapper();
 	}

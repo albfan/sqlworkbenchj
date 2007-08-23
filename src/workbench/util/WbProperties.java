@@ -22,7 +22,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import workbench.interfaces.PropertyStorage;
 
@@ -37,15 +39,22 @@ public class WbProperties
 {
 	private int distinctSections;
 
-	private List<PropertyChangeListener> changeListeners = new ArrayList<PropertyChangeListener>();
-	
-	public WbProperties()
+	private Map<String, List<PropertyChangeListener>> changeListeners = new HashMap<String, List<PropertyChangeListener>>();
+  private Object changeNotificationSource = null;
+
+	protected WbProperties()
 	{
-		this(2);
+		this(null, 2);
+	}
+
+	public WbProperties(Object notificationSource)
+	{
+		this(notificationSource, 2);
 	}
 	
-	public WbProperties(int num)
+	public WbProperties(Object notificationSource, int num)
 	{
+    this.changeNotificationSource = (notificationSource == null ? this : notificationSource);
 		this.distinctSections = num;
 	}
 
@@ -165,11 +174,20 @@ public class WbProperties
 		return result;
 	}
 
-	public void addPropertyChangeListener(PropertyChangeListener aListener)
+	public void addPropertyChangeListener(PropertyChangeListener aListener, String ... properties)
 	{
 		synchronized (this.changeListeners)
 		{
-			this.changeListeners.add(aListener);
+			for (String prop : properties)
+			{
+				List<PropertyChangeListener> listeners = this.changeListeners.get(prop);
+				if (listeners == null)
+				{
+					listeners = new ArrayList<PropertyChangeListener>();
+					this.changeListeners.put(prop, listeners);
+				}
+				listeners.add(aListener);
+			}
 		}
 	}
 	
@@ -177,7 +195,13 @@ public class WbProperties
 	{
 		synchronized (this.changeListeners)
 		{
-			this.changeListeners.remove(aListener);
+			for (List<PropertyChangeListener> listeners : changeListeners.values())
+			{
+				if (listeners != null)
+				{
+					listeners.remove(aListener);
+				}
+			}
 		}
 	}
 	
@@ -188,8 +212,12 @@ public class WbProperties
 		
 		synchronized (this.changeListeners)
 		{
+      List<PropertyChangeListener> listeners = this.changeListeners.get(name);
+      if (listeners == null) return;
+
 			PropertyChangeEvent evt = new PropertyChangeEvent(this, name, oldValue, newValue);
-			for (PropertyChangeListener l : changeListeners)
+
+			for (PropertyChangeListener l : listeners)
 			{
 				if (l != null)
 				{
@@ -200,6 +228,11 @@ public class WbProperties
 	}
 	
 	public Object setProperty(String name, String value)
+	{
+    return setProperty(name, value, true);
+	}
+
+	public Object setProperty(String name, String value, boolean firePropChange)
 	{
 		if (name == null) return null;
 		
@@ -215,7 +248,7 @@ public class WbProperties
 			oldValue = (String) super.setProperty(name, value);
 		}
 		
-		if (!StringUtil.equalString(oldValue, value))
+		if (firePropChange && !StringUtil.equalString(oldValue, value))
 		{
 			this.firePropertyChanged(name, oldValue, value);
 		}

@@ -396,7 +396,7 @@ public class VariablePool
 	public void readFromFile(String filename, String encoding)
 		throws IOException
 	{
-		WbProperties props = new WbProperties();
+		WbProperties props = new WbProperties(this);
 		File f = new File(filename);
 		if (!f.exists()) return;
 		

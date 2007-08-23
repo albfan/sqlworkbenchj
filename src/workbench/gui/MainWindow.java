@@ -102,6 +102,7 @@ import workbench.gui.actions.InsertTabAction;
 import workbench.gui.actions.OptionsDialogAction;
 import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.actions.WhatsNewAction;
+import workbench.util.StringIntegerCache;
 
 /**
  * The main window for the Workbench.
@@ -627,11 +628,11 @@ public class MainWindow
 			MainPanel p = this.getSqlPanel(i);
 			if (i < 9)
 			{
-				result[i] = p.getTabTitle() + " &" + Integer.toString(i+1);
+				result[i] = p.getTabTitle() + " &" + StringIntegerCache.getNumberString(i+1);
 			}
 			else
 			{
-				result[i] = p.getTabTitle() + " " + Integer.toString(i+1);
+				result[i] = p.getTabTitle() + " " + StringIntegerCache.getNumberString(i+1);
 			}
 		}
 		return result;

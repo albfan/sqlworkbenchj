@@ -25,38 +25,37 @@ import workbench.resource.Settings;
  * @author support@sql-workbench.net
  */
 public class UpdateCheck
-	implements Runnable, ActionListener
+	implements ActionListener
 {
-	
+	private WbVersionReader versionReader;
+
 	public UpdateCheck()
 	{
 	}
-	
+
 	public void startUpdateCheck()
 	{
 		int interval = Settings.getInstance().getUpdateCheckInterval();
 		Date lastCheck = Settings.getInstance().getLastUpdateCheck();
-		
+
 		if (needCheck(interval, new java.util.Date(), lastCheck))
 		{
-			WbThread upd = new WbThread(this, "UpdateCheck");
-			upd.start();
+			startRead();
 		}
 		else
 		{
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			LogMgr.logInfo("UpdateCheck.startUpdateCheck()", "Check not necessary. Last check on: " + sdf.format(lastCheck) + ", interval="+ interval + " days");
+			LogMgr.logInfo("UpdateCheck.startUpdateCheck()",
+										 "Check not necessary. Last check on: " + sdf.format(lastCheck) + ", interval=" + interval + " days");
 		}
-		
 	}
-	
+
 	/**
 	 * This is so that the method is accessible for Unit-Testing
 	 */
 	public boolean needCheck(int interval, Date today, Date lastCheck)
 	{
 		if (interval < 1) return false;
-		
 		Calendar next = Calendar.getInstance();
 		long nextCheck = Long.MIN_VALUE;
 		if (lastCheck != null)
@@ -69,41 +68,42 @@ public class UpdateCheck
 			next.add(Calendar.DAY_OF_MONTH, interval);
 			nextCheck = next.getTimeInMillis();
 		}
-		
+
 		Calendar now = Calendar.getInstance();
 		now.setTime(today);
 		now.set(Calendar.HOUR_OF_DAY, 0);
 		now.clear(Calendar.MINUTE);
 		now.clear(Calendar.SECOND);
 		now.clear(Calendar.MILLISECOND);
-		
+
 		long nowMillis = now.getTimeInMillis();
-		
+
 		return nextCheck <= nowMillis;
 	}
-	
-	public void run()
+
+	public void startRead()
 	{
 		try
 		{
 			LogMgr.logDebug("UpdateCheck.run()", "Checking versions...");
-			WbVersionReader reader = new WbVersionReader("automatic ");
-			if (reader.success())
-			{
-				try
-				{
-					Settings.getInstance().setLastUpdateCheck();
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("UpdateCheck.run()", "Error when updating last update date", e);
-				}
-			}
-			
-			LogMgr.logDebug("UpdateCheck.run()", "Current stable version: " + reader.getStableBuildNumber());
-			LogMgr.logDebug("UpdateCheck.run()", "Current dev version: " + reader.getDevBuildNumber());
-			
-			UpdateVersion update = reader.getAvailableUpdate();
+			this.versionReader = new WbVersionReader("automatic ", this);
+			Thread.currentThread().sleep(350);
+			versionReader.startCheckThread();
+		}
+		catch (InterruptedException ex)
+		{
+			// ignore
+		}
+	}
+
+	private void versionAvailable()
+	{
+		try
+		{
+			LogMgr.logDebug("UpdateCheck.run()", "Current stable version: " + versionReader.getStableBuildNumber());
+			LogMgr.logDebug("UpdateCheck.run()", "Current development version: " + versionReader.getDevBuildNumber());
+
+			UpdateVersion update = this.versionReader.getAvailableUpdate();
 			NotifierEvent event = null;
 			if (update == UpdateVersion.stable)
 			{
@@ -119,10 +119,22 @@ public class UpdateCheck
 			{
 				LogMgr.logInfo("UpdateCheck.run()", "No updates found");
 			}
-			
+
 			if (event != null)
 			{
 				EventNotifier.getInstance().displayNotification(event);
+			}
+
+			if (this.versionReader.success())
+			{
+				try
+				{
+					Settings.getInstance().setLastUpdateCheck();
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("UpdateCheck.run()", "Error when updating last update date", e);
+				}
 			}
 		}
 		catch (Exception e)
@@ -130,10 +142,14 @@ public class UpdateCheck
 			LogMgr.logError("UpdateCheck.run()", "Could not check for updates", e);
 		}
 	}
-	
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
+		if (e.getSource() == this.versionReader)
+		{
+			versionAvailable();
+			return;
+		}
 		try
 		{
 			EventNotifier.getInstance().removeNotification();
@@ -141,8 +157,7 @@ public class UpdateCheck
 		}
 		catch (Exception ex)
 		{
-			WbSwingUtilities.showMessage(null, "Could not open browser (" + ExceptionUtil.getDisplay(ex)+ ")");
+			WbSwingUtilities.showMessage(null, "Could not open browser (" + ExceptionUtil.getDisplay(ex) + ")");
 		}
 	}
-	
 }

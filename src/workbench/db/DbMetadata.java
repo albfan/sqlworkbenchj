@@ -194,7 +194,7 @@ public class DbMetadata
 
 			// register with the Settings Object to be notified for
 			// changes to the "enable dbms output" property
-			settings.addPropertyChangeListener(this);
+			settings.addPropertyChangeListener(this, "workbench.sql.enable_dbms_output");
 			
 			this.sequenceReader = this.oracleMetaData;
 			this.procedureReader = new OracleProcedureReader(this.dbConnection);
@@ -3148,7 +3148,7 @@ public class DbMetadata
 		maxTypeLength++;
 		
 		// Some RDBMS require the "DEFAULT" clause before the [NOT] NULL clause
-		boolean defaultBeforeNull = Settings.getInstance().getBoolProperty("workbench.db.defaultbeforenull." + this.getDbId(), false);//this.isOracle || this.isFirebird || this.isIngres;
+		boolean defaultBeforeNull = this.dbSettings.getDefaultBeforeNull(); 
 		String nullKeyword = Settings.getInstance().getProperty("workbench.db.nullkeyword." + getDbId(), "NULL");
 		boolean includeCommentInTableSource = Settings.getInstance().getBoolProperty("workbench.db.colcommentinline." + this.getDbId(), false);
 		

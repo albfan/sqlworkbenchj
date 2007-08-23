@@ -14,16 +14,15 @@ package workbench.gui.tools;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import javax.swing.Timer;
 import workbench.resource.ResourceMgr;
 import workbench.util.BrowserLauncher;
 import workbench.util.UpdateVersion;
 import workbench.util.VersionNumber;
-import workbench.util.WbThread;
 import workbench.util.WbVersionReader;
 
 /**
@@ -34,9 +33,6 @@ import workbench.util.WbVersionReader;
 public class VersionCheckDialog extends javax.swing.JDialog
 	implements ActionListener, MouseListener
 {
-	private Thread readThread;
-	private Timer timeout;
-	private boolean timedOut = false;
 	private WbVersionReader versionReader;
 
 	/** Creates new form VersionCheckDialog */
@@ -50,66 +46,25 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		this.headingLabel.setText(ResourceMgr.getString("LblReadingVersion"));
 		this.headingLabel.addMouseListener(this);
 		this.headingLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		this.stableVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
+		this.devVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
 	}
 
 	private void startRetrieveVersions()
 	{
-		this.readThread = new WbThread("WbVersionCheck Thread")
-		{
-			public void run()
-			{
-				readVersion();
-			}
-		};
-		readThread.start();
-
-		this.timeout = new Timer(60 * 1000, this);
-		this.timedOut = false;
-		this.timeout.start();
+		readVersion();
 	}
 
-	public void show()
+	public void setVisible(boolean flag)
 	{
-		startRetrieveVersions();
-		super.show();
+		if (flag == true) startRetrieveVersions();
+		super.setVisible(flag);
 	}
 	
 	protected void readVersion()
 	{
-		try
-		{
-			this.versionReader = new WbVersionReader();
-
-			this.stableVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
-			this.devVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
-
-			if (!this.timedOut)
-			{
-				this.stableVersion.setText(" " + ResourceMgr.getString("TxtBuild") + " " + this.versionReader.getStableBuildNumber() + " (" + this.versionReader.getStableBuildDate() + ")");
-				String date = this.versionReader.getDevBuildDate();
-				VersionNumber nr = this.versionReader.getDevBuildNumber();
-				if (date != null && nr.isValid())
-				{
-					this.devVersion.setText(" " + ResourceMgr.getString("TxtBuild") + " " + nr + " (" + date + ")");
-				}
-			}
-			checkDisplay();
-		}
-		catch (Exception e)
-		{
-			this.stableVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
-			this.devVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
-		}
-		finally
-		{
-			if (this.timeout != null)
-			{
-				this.timeout.stop();
-				this.timeout = null;
-			}
-			this.headingLabel.setText(ResourceMgr.getString("LblVersionsAvailable"));
-			this.headingLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		}
+		this.versionReader = new WbVersionReader(this);
+		this.versionReader.startCheckThread();
 	}
 
 	private void checkDisplay()
@@ -117,7 +72,11 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		UpdateVersion version = this.versionReader.getAvailableUpdate();
 		
 		String msg = ResourceMgr.getString("LblVersionUpToDate");
-		if (version == UpdateVersion.stable)
+		if (!this.versionReader.success())
+		{
+			msg = ResourceMgr.getString("LblVersionReadError");
+		}
+		else if (version == UpdateVersion.stable)
 		{
 			this.stableVersion.setBackground(Color.YELLOW);
 			msg = ResourceMgr.getString("LblVersionNewStableAvailable");
@@ -273,20 +232,34 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		dispose();
 	}//GEN-LAST:event_closeDialog
 
-	public void actionPerformed(java.awt.event.ActionEvent e)
+	public void actionPerformed(ActionEvent e)
 	{
-		if (e.getSource() == this.closeButton)
+		if (e.getSource() == this.versionReader)
+		{
+			if (this.versionReader.success())
+			{
+				this.stableVersion.setText(" " + ResourceMgr.getString("TxtBuild") + " " + this.versionReader.getStableBuildNumber() + " (" + this.versionReader.getStableBuildDate() + ")");
+				String date = this.versionReader.getDevBuildDate();
+				VersionNumber nr = this.versionReader.getDevBuildNumber();
+				if (date != null && nr.isValid())
+				{
+					this.devVersion.setText(" " + ResourceMgr.getString("TxtBuild") + " " + nr + " (" + date + ")");
+				}
+			}
+			else
+			{
+				this.stableVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
+				this.devVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
+			}
+			this.headingLabel.setText(ResourceMgr.getString("LblVersionsAvailable"));
+			this.headingLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+			checkDisplay();
+		}
+		else if (e.getSource() == this.closeButton)
 		{
 			setVisible(false);
 			dispose();
-		}
-		else if (e.getSource() == this.timeout)
-		{
-			this.readThread.interrupt();
-			this.readThread = null;
-			this.timedOut = true;
-			this.stableVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
-			this.devVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
 		}
 	}
 

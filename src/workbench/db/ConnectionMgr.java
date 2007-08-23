@@ -60,7 +60,7 @@ public class ConnectionMgr
 	/** Creates new ConnectionMgr */
 	private ConnectionMgr()
 	{
-		Settings.getInstance().addPropertyChangeListener(this);
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_PROFILE_STORAGE);
 	}
 	
 	public static ConnectionMgr getInstance()

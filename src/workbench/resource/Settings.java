@@ -101,7 +101,7 @@ public class Settings
 
 	private Settings()
 	{
-		this.props = new WbProperties();
+		this.props = new WbProperties(this);
 		String configFile = System.getProperty("workbench.settings.file", "workbench.settings");
 
 		// first read the built-in defaults
@@ -137,9 +137,10 @@ public class Settings
 			}
 			else
 			{
-				if ("${user.home}".equals(configDir))
+				String userHome = System.getProperty("user.home");
+				if (configDir.indexOf("${user.home}") > -1)
 				{
-					this.configDir = System.getProperty("user.home");
+					configDir = StringUtil.replace(configDir, "${user.home}", userHome);
 				}
 				cfd = new File(configDir);
 			}
@@ -151,8 +152,13 @@ public class Settings
 		}
 
 		configDir = cfd.getAbsolutePath();
-
+		if (!cfd.exists())
+		{
+			cfd.mkdirs();
+		}
+		
 		File cf = new File(this.configDir, configFile);
+		
 		this.filename = cf.getAbsolutePath();
 
 		BufferedInputStream in = null;
@@ -237,6 +243,7 @@ public class Settings
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("Settings.getLanguage()", "Error creating Locale for language=" + lanCode, e);
 			l = new Locale("en");
 		}
 		return l;
@@ -357,7 +364,7 @@ public class Settings
 	{
 		Date now = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		setProperty("workbench.gui.updatecheck.lastcheck", sdf.format(now));
+		this.props.setProperty("workbench.gui.updatecheck.lastcheck", sdf.format(now), false);
 	}
 	
 	public int getUpdateCheckInterval()
@@ -736,9 +743,10 @@ public class Settings
 		this.fontChangeListeners.remove(aListener);
 	}
 
-	public synchronized void addPropertyChangeListener(PropertyChangeListener l)
+	public synchronized void addPropertyChangeListener(PropertyChangeListener l, String property, String ... properties)
 	{
-		this.props.addPropertyChangeListener(l);
+		this.props.addPropertyChangeListener(l, property);
+		if (properties.length > 0) this.props.addPropertyChangeListener(l, properties);
 	}
 
 	public void removePropertyChangeLister(PropertyChangeListener l)
@@ -912,7 +920,7 @@ public class Settings
 
 	private WbProperties getDefaultProperties()
 	{
-		WbProperties defProps = new WbProperties();
+		WbProperties defProps = new WbProperties(this);
 		InputStream in = ResourceMgr.getDefaultSettings();
 		try
 		{
@@ -1994,6 +2002,12 @@ public class Settings
 	{
 		this.defaultDateFormatter = null;
 		this.props.setProperty(PROPERTY_DATE_FORMAT, aFormat);
+	}
+
+
+	public void registerDateFormatChangeListener(PropertyChangeListener l)
+	{
+    this.addPropertyChangeListener(l, PROPERTY_DATE_FORMAT, PROPERTY_DATETIME_FORMAT, PROPERTY_TIME_FORMAT);
 	}
 
 	public boolean isDateFormatProperty(String prop)

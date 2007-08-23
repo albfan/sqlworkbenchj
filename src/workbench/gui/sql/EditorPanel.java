@@ -187,7 +187,7 @@ public class EditorPanel
 
 		//this.setSelectionRectangular(true);
 		Settings.getInstance().addFontChangedListener(this);
-		Settings.getInstance().addPropertyChangeListener(this);
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_SHOW_LINE_NUMBERS, Settings.PROPERTY_EDITOR_TAB_WIDTH);
 		this.setRightClickMovesCursor(Settings.getInstance().getRightClickMovesCursor());
 		new DropTarget(this, DnDConstants.ACTION_COPY, this);
 	}

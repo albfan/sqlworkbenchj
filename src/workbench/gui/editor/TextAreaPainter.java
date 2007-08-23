@@ -25,13 +25,14 @@ import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
 import workbench.resource.Settings;
+import workbench.util.StringIntegerCache;
 import workbench.util.StringUtil;
 
 /**
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.31 2007-07-31 18:17:27 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.32 2007-08-23 23:15:42 thomas Exp $
  */
 public class TextAreaPainter 
 	extends JComponent 
@@ -61,7 +62,7 @@ public class TextAreaPainter
 	protected static final int GUTTER_MARGIN = 2;
 	private static final Color GUTTER_BACKGROUND = new Color(238,240,238);
 	private static final Color GUTTER_COLOR = Color.DARK_GRAY;
-	
+
 	public TextAreaPainter(JEditTextArea textArea)
 	{
 		this.textArea = textArea;
@@ -83,7 +84,7 @@ public class TextAreaPainter
 		selectionColor = Settings.getInstance().getEditorSelectionColor();
 		bracketHighlightColor = Color.BLACK;
 		bracketHighlight = true;
-		Settings.getInstance().addPropertyChangeListener(this);
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_TAB_WIDTH);
 	}
 
 
@@ -342,7 +343,7 @@ public class TextAreaPainter
 				int y = textArea.lineToY(line);
 				if (this.showLineNumbers)
 				{
-					String s = Integer.toString(line);
+					String s = StringIntegerCache.getNumberString(line);
 					int w = s.length() * this.gutterCharWidth;
 					gf2d.setColor(GUTTER_COLOR);
 					gf2d.drawString(s, gutterX - w, y);

@@ -61,19 +61,13 @@ public class ResourceMgr
 	private static HashMap<String, ImageIcon> images = new HashMap<String, ImageIcon>();
 	private static List<WbLocale> languages;
 	
-	private static String BUILD_INFO;
-
 	private ResourceMgr()
 	{
 	}
 
 	public static String getBuildInfo()
 	{
-		if (BUILD_INFO == null)
-		{
-			BUILD_INFO = getString("TxtBuild") + " " + getString("TxtBuildNumber") + " (" + getString("TxtBuildDate") + ")";
-		}
-		return BUILD_INFO;
+		return getString("TxtBuild") + " " + getBuildNumber().toString() + " (" + getString("TxtBuildDate") + ")";
 	}
 
 	private static final String shiftText = KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK);

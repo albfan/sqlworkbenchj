@@ -73,6 +73,11 @@ public class DbSettings
 	public boolean useJdbcCommit() { return useJdbcCommit; }
 	public boolean isStringComparisonCaseSensitive() { return this.caseSensitive; }
 
+	public boolean getDefaultBeforeNull()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db.defaultbeforenull." + this.getDbId(), false);
+	}
+	
 	/**
 	 *	Return the verb which does a DROP ... CASCADE for the given
 	 *  object type. If the current DBMS does not support cascaded dropping

@@ -28,13 +28,12 @@ public class PreparedStatementPool
 	// A map to store the statements and their parameter definitions
 	// The key to the map is the SQL Statement, the value is an Object
 	// of type StatementParameter
-	private Map statements;
+	private Map<String, StatementParameters> statements = new HashMap<String, StatementParameters>();
 	private WbConnection dbConnection;
 	
 	public PreparedStatementPool(WbConnection conn)
 	{
 		setConnection(conn);
-		this.statements = new HashMap();
 	}
 	
 	private void setConnection(WbConnection conn)
@@ -49,14 +48,9 @@ public class PreparedStatementPool
 		if (this.statements != null) this.statements.clear();
 	}
 	
-	private PreparedStatementPool()
-	{
-		this.statements = new HashMap();
-	}
-
 	public synchronized StatementParameters getParameters(String sql)
 	{
-		return (StatementParameters)this.statements.get(sql);
+		return this.statements.get(sql);
 	}
 	
 	public synchronized boolean addPreparedStatement(String sql)

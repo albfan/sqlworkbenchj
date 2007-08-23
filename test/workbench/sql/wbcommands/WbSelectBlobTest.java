@@ -19,7 +19,6 @@ import java.sql.Statement;
 import junit.framework.*;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
-import workbench.sql.BatchRunner;
 import workbench.sql.DefaultStatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.SqlUtil;
@@ -102,7 +101,7 @@ public class WbSelectBlobTest
 			ResultSet rs = stmt.executeQuery("select length(data) from blob_test where id = 1");
 			assertEquals("Blob row not found", true, rs.next());
 			int size = rs.getInt(1);
-			assertEquals("Wrong size", 200, size); // HSQL reports twice the size with the length() function...
+			assertEquals("Wrong size", 100, size); 
 			SqlUtil.closeAll(rs, stmt);
 		}
 		catch (Exception e)

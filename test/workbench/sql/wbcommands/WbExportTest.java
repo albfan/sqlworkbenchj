@@ -453,7 +453,7 @@ public class WbExportTest extends TestCase
 		{
 			File exportFile = new File(this.basedir, "export.xml");
 			Statement stmt = connection.createStatement();
-			stmt.executeUpdate("CREATE MEMORY TABLE clob_test(nr integer, clob_data LONGVARCHAR)");
+			stmt.executeUpdate("CREATE MEMORY TABLE clob_test(nr integer, clob_data CLOB)");
 			String data1 = "This is the first clob content";
 			stmt.executeUpdate("insert into clob_test values (1, '" +  data1+ "')");
 			String data2 = "This is the second clob content";
@@ -493,7 +493,7 @@ public class WbExportTest extends TestCase
 		{
 			File exportFile = new File(this.basedir, "export.txt");
 			Statement stmt = connection.createStatement();
-			stmt.executeUpdate("CREATE MEMORY TABLE clob_test(nr integer, clob_data LONGVARCHAR)");
+			stmt.executeUpdate("CREATE MEMORY TABLE clob_test(nr integer, clob_data CLOB)");
 			String data1 = "This is the first clob content";
 			stmt.executeUpdate("insert into clob_test values (1, '" +  data1+ "')");
 			String data2 = "This is the second clob content";
@@ -575,7 +575,7 @@ public class WbExportTest extends TestCase
 		try
 		{
 			Statement stmt = this.connection.createStatement();
-			stmt.executeUpdate("CREATE MEMORY TABLE clob_test(nr integer, clob_data LONGVARCHAR)");
+			stmt.executeUpdate("CREATE MEMORY TABLE clob_test(nr integer, clob_data CLOB)");
 			stmt.executeUpdate("INSERT INTO clob_test (nr, clob_data) values (1, 'First clob')");
 			stmt.executeUpdate("INSERT INTO clob_test (nr, clob_data) values (2, 'Second clob')");
 			this.connection.commit();

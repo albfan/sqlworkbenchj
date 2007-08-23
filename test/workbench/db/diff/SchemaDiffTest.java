@@ -187,14 +187,13 @@ public class SchemaDiffTest
 		{
 			stmt = source.createStatement();
 			stmt.executeUpdate("create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100))");
-			stmt.executeUpdate("CREATE USER unit_test PASSWORD secret");
+			stmt.executeUpdate("CREATE USER unit_test PASSWORD 'secret'");
 			stmt.executeUpdate("GRANT SELECT ON PERSON to unit_test");
 			
 			stmt = target.createStatement();
 			stmt.executeUpdate("create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100))");
-			stmt.executeUpdate("CREATE USER unit_test PASSWORD secret");
+			stmt.executeUpdate("CREATE USER unit_test PASSWORD 'secret'");
 			stmt.executeUpdate("GRANT DELETE ON PERSON to unit_test");
-			
 		}
 		finally
 		{

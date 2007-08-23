@@ -245,7 +245,7 @@ public class WbCopy
 
 				if ((containsMapping || !hasColumns) && !createTable)
 				{
-					Map mapping = this.parseMapping();
+					Map<String, String> mapping = this.parseMapping();
 					copier.copyFromTable(sourceCon, targetCon, srcTable, targetId, mapping, where, createTable, dropTable);
 				}
 				else if (createTable)
@@ -374,14 +374,14 @@ public class WbCopy
 		return result;
 	}
 
-	private Map parseMapping()
+	private Map<String, String> parseMapping()
 	{
 		String cols = cmdLine.getValue(PARAM_COLUMNS);
 		if (cols == null || cols.length() == 0) return null;
 
 		List l = StringUtil.stringToList(cols, ",");
 		int count = l.size();
-		HashMap mapping = new HashMap(count);
+		HashMap<String, String> mapping = new HashMap<String, String>(count);
 		for (int i=0; i < count; i++)
 		{
 			String s = (String)l.get(i);
@@ -396,7 +396,7 @@ public class WbCopy
 	public void done()
 	{
 		super.done();
-		this.copier = null;;
+		this.copier = null;
 	}
 
 	public void cancel()

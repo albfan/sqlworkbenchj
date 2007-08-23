@@ -1597,6 +1597,7 @@ public class DataImporter
 			this.updateStatement = null;
 			throw new SQLException("Only key columns defined for update mode");
 		}
+		
 		sql.append(where);
 		if (!StringUtil.isEmptyString(this.whereClauseForUpdate))
 		{
@@ -1665,7 +1666,7 @@ public class DataImporter
 	{
 		if (!this.useBatch) return;
 
-		if (this.isModeInsert())
+		if (this.isModeInsert() && this.insertStatement != null)
 		{
 			int rows[] = this.insertStatement.executeBatch();
 			if (rows != null)
@@ -1681,7 +1682,7 @@ public class DataImporter
 			}
 			this.insertStatement.clearBatch();
 		}
-		else if (this.isModeUpdate())
+		else if (this.isModeUpdate() && this.updateStatement != null)
 		{
 			int rows[] = this.updateStatement.executeBatch();
 			if (rows != null)
