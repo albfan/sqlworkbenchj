@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.ColumnIdentifier;
+import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -726,6 +727,10 @@ public class SqlUtil
 		}
 	}
 
+	/**
+	 * returns true if the passed JDBC data type (from java.sql.Types)
+	 * indicates a data type which maps to a integer type
+	 */
 	public static final boolean isIntegerType(int aSqlType)
 	{
 		return (aSqlType == Types.BIGINT ||
@@ -733,7 +738,22 @@ public class SqlUtil
 		        aSqlType == Types.SMALLINT ||
 		        aSqlType == Types.TINYINT);
 	}
+
+	/**
+	 * Returns true if the given JDBC type maps to the String class. This
+	 * returns fals for CLOB data.
+	 */
+	public static final boolean isStringType(int aSqlType)
+	{
+		return (aSqlType == Types.VARCHAR || 
+		        aSqlType == Types.CHAR ||
+		        aSqlType == Types.LONGVARCHAR);
+	}
 	
+	/**
+	 * Returns true if the given JDBC type indicates some kind of 
+	 * character data (including CLOBs)
+	 */
 	public static final boolean isCharacterType(int aSqlType)
 	{
 		return (aSqlType == Types.VARCHAR || 
@@ -767,6 +787,12 @@ public class SqlUtil
 	public static final boolean isClobType(int aSqlType)
 	{
 		return (aSqlType == Types.CLOB);
+	}
+	
+	public static final boolean isClobType(int aSqlType, DbSettings dbInfo)
+	{
+		if (dbInfo == null || !dbInfo.longVarcharIsClob()) return isClobType(aSqlType);
+		return (aSqlType == Types.CLOB || aSqlType == Types.LONGVARCHAR);
 	}
 	
 	public static final boolean isBlobType(int aSqlType)

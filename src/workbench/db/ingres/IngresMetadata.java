@@ -100,9 +100,9 @@ public class IngresMetadata
 			{
 				owner = rs.getString(2);
 				table = rs.getString(3);
-				if (owner != null && table != null)
+				if (table != null)
 				{
-					result = new TableIdentifier(null, owner.trim(), table.trim());
+					result = new TableIdentifier(null, owner, table);
 				}
 			}
 		}

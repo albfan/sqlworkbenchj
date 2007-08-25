@@ -207,22 +207,18 @@ public class WbProperties
 	
 	private void firePropertyChanged(String name, String oldValue, String newValue)
 	{
-		int count = this.changeListeners.size();
-		if (count == 0) return;
+		List<PropertyChangeListener> listeners = this.changeListeners.get(name);
+		if (listeners == null || listeners.size() == 0) return;
 		
-		synchronized (this.changeListeners)
+		// Making a shallow copy of the list prevents a ConcurrentModificationException
+		List<PropertyChangeListener> l2 = new ArrayList<PropertyChangeListener>(listeners);
+		PropertyChangeEvent evt = new PropertyChangeEvent(this, name, oldValue, newValue);
+
+		for (PropertyChangeListener l : l2)
 		{
-      List<PropertyChangeListener> listeners = this.changeListeners.get(name);
-      if (listeners == null) return;
-
-			PropertyChangeEvent evt = new PropertyChangeEvent(this, name, oldValue, newValue);
-
-			for (PropertyChangeListener l : listeners)
+			if (l != null)
 			{
-				if (l != null)
-				{
-					l.propertyChange(evt);
-				}
+				l.propertyChange(evt);
 			}
 		}
 	}

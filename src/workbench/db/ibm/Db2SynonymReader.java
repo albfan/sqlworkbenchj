@@ -68,7 +68,10 @@ public class Db2SynonymReader
 			{
 				owner = rs.getString(1);
 				table = rs.getString(2);
-				result = new TableIdentifier(null, owner, table);
+				if (table != null)
+				{
+					result = new TableIdentifier(null, owner, table);
+				}
 			}
 		}
 		finally

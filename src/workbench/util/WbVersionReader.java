@@ -58,32 +58,11 @@ public class WbVersionReader
 		this.timedOut = false;
 		this.timeout.start();
 		
-		this.readThread = new WbThread("VersionReadThread")
+		this.readThread = new WbThread("VersionReaderThread")
 		{
 			public void run()
 			{
-				try
-				{
-					readBuildInfo();
-					success = true;
-				}
-				catch (Exception e)
-				{
-					success = false;
-				}
-				finally
-				{
-					if (timeout != null)
-					{
-						timeout.stop();
-						timeout = null;
-					}
-					if (client != null)
-					{
-						ActionEvent e = new ActionEvent(WbVersionReader.this, 1, (success ? "versionChecked" : "error"));
-						client.actionPerformed(e);
-					}
-				}
+				readBuildInfo();
 			}
 		};
 		readThread.start();
@@ -95,7 +74,6 @@ public class WbVersionReader
 	}
 
 	private void readBuildInfo()
-		throws Exception
 	{
 		long start = System.currentTimeMillis();
 		InputStream in = null;
@@ -116,19 +94,30 @@ public class WbVersionReader
 			this.currentDevBuildDate = props.getProperty("dev.build.date", null);
 			this.currentStableBuildNumber = new VersionNumber(props.getProperty("release.build.number", null));
 			this.currentStableBuildDate = props.getProperty("release.build.date", null);
+			success = true;
+			
+			long end = System.currentTimeMillis();
+			LogMgr.logDebug("WbVersionReader.readBuildInfo()", "Retrieving version information took " + (end - start) + "ms");
 		}
 		catch (Exception e)
 		{
-			LogMgr.logWarning("WbVersionReader.readBuildInfo()",
-												"Could not read version information from website: " + ExceptionUtil.getDisplay(e));
-			throw e;
+			LogMgr.logWarning("WbVersionReader.readBuildInfo()","Could not read version information", e);
+			success = false;
 		}
 		finally
 		{
 			FileUtil.closeQuitely(in);
+			if (timeout != null)
+			{
+				timeout.stop();
+				timeout = null;
+			}
+			if (client != null)
+			{
+				ActionEvent e = new ActionEvent(WbVersionReader.this, 1, success ? "versionChecked" : "error");
+				client.actionPerformed(e);
+			}
 		}
-		long end = System.currentTimeMillis();
-		LogMgr.logDebug("WbVersionReader.<init>", "Retrieving version information took " + (end - start) + "ms");
 	}
 
 	public UpdateVersion getAvailableUpdate()

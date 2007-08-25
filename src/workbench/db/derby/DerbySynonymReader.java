@@ -93,16 +93,22 @@ public class DerbySynonymReader
 			if (rs.next())
 			{
 				table = rs.getString(1);
-				result = new TableIdentifier(table);
+				if (table != null)
+				{
+					result = new TableIdentifier(table);
+				}
 			}
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs,stmt);
 		}
-		
-		String type = this.meta.getObjectType(result);
-		result.setType(type);
+
+		if (result != null)
+		{
+			String type = this.meta.getObjectType(result);
+			result.setType(type);
+		}
 
 		return result;
 	}

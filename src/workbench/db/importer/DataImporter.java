@@ -1048,9 +1048,6 @@ public class DataImporter
 			{
 				pstmt.setNull(colIndex, targetSqlType);
 			}
-			// For Oracle, this will only work with Oracle 10g drivers.
-			// Oracle 9i drivers do not implement the setCharacterStream() 
-			// and associated methods properly
 			else if ( SqlUtil.isClobType(targetSqlType) || "LONG".equals(targetDbmsType) ||
 				       "CLOB".equals(targetDbmsType) )
 			{
@@ -1059,20 +1056,9 @@ public class DataImporter
 				
 				if (row[i] instanceof Clob)
 				{
-					try
-					{
-						Clob clob = (Clob)row[i];
-						size = (int)clob.length();
-						String value = clob.getSubString(1, size);
-						in = new StringReader(value);
-						streams.add(in);
-					}
-					catch (Throwable e)
-					{
-						LogMgr.logError("DataImporter.processRowData()", "Could not read clob data", e);
-						hasErrors = true;
-						throw new SQLException("Could not read CLOB data! " + e.getMessage());
-					}
+					Clob clob = (Clob) row[i];
+					in = clob.getCharacterStream();
+					streams.add(in);
 				}
 				else if (row[i] instanceof File)
 				{
@@ -1121,9 +1107,9 @@ public class DataImporter
 					catch (IOException ex)
 					{
 						hasErrors = true;
-						String msg = "CLOB data file " + f.getAbsolutePath() + " not found";
+						String msg = ResourceMgr.getFormattedString("ErrFileNotAccessible", f.getAbsolutePath(), ex.getMessage());
 						messages.append(msg);
-						throw new SQLException(msg);
+						throw new SQLException(ex.getMessage());
 					}
 				}
 				else
@@ -1138,6 +1124,9 @@ public class DataImporter
 				
 				if (in != null)
 				{
+          // For Oracle, this will only work with Oracle 10g drivers.
+          // Oracle 9i drivers do not implement the setCharacterStream() 
+          // and associated methods properly
 					pstmt.setCharacterStream(colIndex, in, size);
 				}
 			}
@@ -1172,9 +1161,9 @@ public class DataImporter
 					catch (IOException ex)
 					{
 						hasErrors = true;
-						String msg = "BLOB data file " + f.getAbsolutePath() + " not found";
+						String msg = ResourceMgr.getFormattedString("ErrFileNotAccessible", f.getAbsolutePath(), ex.getMessage());
 						messages.append(msg);
-						throw new SQLException(msg);
+						throw new SQLException(ex.getMessage());
 					}
 					streams.add(in);
 				}
@@ -1203,7 +1192,7 @@ public class DataImporter
 					this.messages.appendNewLine();
 				}
 			}
-			else if (targetSqlType == Types.VARCHAR && this.columnLimitMap != null)
+			else if (SqlUtil.isStringType(targetSqlType)&& this.columnLimitMap != null)
 			{
 				Integer size = this.columnLimitMap.get(this.targetColumns[i]);
 				int msize = (size == null ? -1 : size.intValue());

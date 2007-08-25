@@ -12,6 +12,8 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
@@ -29,9 +31,11 @@ import workbench.resource.Settings;
  */
 public class CheckPreparedStatementsAction 
 	extends WbAction
+	implements PropertyChangeListener
 {
 	private boolean switchedOn = false;
 	private JCheckBoxMenuItem toggleMenu;
+	private boolean inSetter = false;
 
 	public CheckPreparedStatementsAction()
 	{
@@ -39,6 +43,7 @@ public class CheckPreparedStatementsAction
 		this.initMenuDefinition("MnuTxtCheckPrepared");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.switchedOn = Settings.getInstance().getCheckPreparedStatements();
+		Settings.getInstance().addPropertyChangeListener(this, "workbench.sql.checkprepared");
 	}
 
 	public void executeAction(ActionEvent e)
@@ -48,11 +53,19 @@ public class CheckPreparedStatementsAction
 
 	public boolean isSwitchedOn() { return this.switchedOn; }
 
-	public void setSwitchedOn(boolean aFlag)
+	private void setSwitchedOn(boolean aFlag)
 	{
-		this.switchedOn = aFlag;
-		if (this.toggleMenu != null) this.toggleMenu.setSelected(aFlag);
-		Settings.getInstance().setCheckPreparedStatements(this.switchedOn);
+		try
+		{
+			this.switchedOn = aFlag;
+			if (this.toggleMenu != null) this.toggleMenu.setSelected(aFlag);
+			inSetter = true;
+			Settings.getInstance().setCheckPreparedStatements(this.switchedOn);
+		}
+		finally
+		{
+			inSetter = false;
+		}
 	}
 
 	public void addToMenu(JMenu aMenu)
@@ -73,6 +86,15 @@ public class CheckPreparedStatementsAction
 			this.toggleMenu.setSelected(this.switchedOn);
 		}
 		aMenu.add(this.toggleMenu);
+	}
+
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (!inSetter)
+		{
+			this.switchedOn = Settings.getInstance().getCheckPreparedStatements();
+			if (this.toggleMenu != null) this.toggleMenu.setSelected(this.switchedOn);
+		}
 	}
 	
 }

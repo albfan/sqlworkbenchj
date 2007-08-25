@@ -38,6 +38,7 @@ public class DbSettings
 	
 	private boolean allowsMultipleGetUpdateCounts = true;
 	private boolean supportsBatchedStatements = false;
+	private boolean longVarcharIsClob = false;
 	
 	private Map<Integer, String> indexTypeMapping;
 	public static final String IDX_TYPE_NORMAL = "NORMAL";
@@ -57,10 +58,12 @@ public class DbSettings
 		this.reportsRealSizeAsDisplaySize = settings.getBoolProperty("workbench.db." + getDbId() + ".charsize.usedisplaysize", false);
 		this.allowExtendedCreateStatement = settings.getBoolProperty("workbench.db." + getDbId() + ".extended.createstmt", true);
 		this.supportsBatchedStatements = settings.getBoolProperty("workbench.db." + getDbId() + ".batchedstatements", false);
+		this.longVarcharIsClob = settings.getBoolProperty("workbench.db." + getDbId() + ".clob.longvarchar", false);
 	}
 	
 	String getDbId() { return this.dbId; }
 
+	public boolean longVarcharIsClob() { return this.longVarcharIsClob; }
 	public boolean supportsBatchedStatements() { return this.supportsBatchedStatements; }
 	public boolean allowsExtendedCreateStatement() { return allowExtendedCreateStatement; }
 	public boolean allowsMultipleGetUpdateCounts() { return this.allowsMultipleGetUpdateCounts; }
