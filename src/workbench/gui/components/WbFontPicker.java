@@ -134,6 +134,7 @@ private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 		dialog.pack();
 		WbSwingUtilities.center(dialog, SwingUtilities.getWindowAncestor(this));
 		dialog.setVisible(true);
+		dialog.dispose();
 		
 		if (chooser.isFontReset())
 		{

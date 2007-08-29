@@ -59,7 +59,7 @@ public class TestUtil
 		throws IOException
 	{
 		prepareBaseDir();
-		WbManager.getInstance().prepareForTest(basedir);
+		WbManager.prepareForTest(basedir);
 	}
 	
 	public void prepareBaseDir()

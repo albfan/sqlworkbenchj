@@ -11,32 +11,22 @@
  */
 package workbench.gui.help;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.Frame;
-import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.URL;
+import java.awt.event.WindowListener;
 
 import javax.swing.JDialog;
-import javax.swing.JEditorPane;
-import javax.swing.JScrollPane;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.html.HTML;
-import javax.swing.text.html.HTMLDocument;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 
 public class HtmlViewer 
-	extends JDialog 
+	extends JDialog
+	implements WindowListener
 {
 	private HtmlPanel display;
 	
@@ -111,6 +101,36 @@ public class HtmlViewer
 	{
 		Settings.getInstance().storeWindowPosition(this);
 		Settings.getInstance().storeWindowSize(this);
+	}
+
+	public void windowOpened(WindowEvent e)
+	{
+	}
+
+	public void windowClosing(WindowEvent e)
+	{
+		setVisible(false);
+		dispose();
+	}
+
+	public void windowClosed(WindowEvent e)
+	{
+	}
+
+	public void windowIconified(WindowEvent e)
+	{
+	}
+
+	public void windowDeiconified(WindowEvent e)
+	{
+	}
+
+	public void windowActivated(WindowEvent e)
+	{
+	}
+
+	public void windowDeactivated(WindowEvent e)
+	{
 	}
 
 }

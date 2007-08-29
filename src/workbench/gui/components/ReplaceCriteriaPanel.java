@@ -15,7 +15,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
-import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
@@ -31,15 +30,14 @@ import workbench.resource.Settings;
  *
  * @author support@sql-workbench.net
  */
-public class ReplaceCriteriaPanel extends JPanel
-	implements ActionListener
+public class ReplaceCriteriaPanel 
+	extends JPanel
 {
 	private static final String PROP_KEY_CASE = "workbench.sql.replace.ignoreCase";
 	private JCheckBox ignoreCase;
 	
 	protected JTextField criteria;
 	private JTextField newValue;
-//	private Replaceable client;
 	
 	public ReplaceCriteriaPanel(Replaceable aClient)
 	{
@@ -48,7 +46,6 @@ public class ReplaceCriteriaPanel extends JPanel
 	
 	public ReplaceCriteriaPanel(Replaceable aClient, String initialValue)
 	{
-//		this.client = aClient;
 		this.ignoreCase = new JCheckBox(ResourceMgr.getString("LblSearchIgnoreCase"));
 		this.ignoreCase.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_CASE, true));
 	
@@ -126,13 +123,10 @@ public class ReplaceCriteriaPanel extends JPanel
 			}
 		});
 		JDialog d = new JDialog();
+		d.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		d.getContentPane().add(this, BorderLayout.CENTER);
 		d.setVisible(true);
 		return true;
 	}
 	
-	public void actionPerformed(java.awt.event.ActionEvent e)
-	{
-	}
-
 }

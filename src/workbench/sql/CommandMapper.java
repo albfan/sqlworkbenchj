@@ -197,6 +197,10 @@ public class CommandMapper
 		if (aConn == null) return;
 		
 		this.metaData = aConn.getMetadata();
+		if (metaData == null)
+		{
+			LogMgr.logError("CommandMapper.setConnection()","Received connection without metaData!", null);
+		}
 		
 		if (metaData.isOracle())
 		{

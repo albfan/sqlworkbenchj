@@ -1075,10 +1075,10 @@ public class SqlPanel
 
 	/** Do any work which should be done during the process of saving the
 	 *  current workspace, but before the workspace file is actually opened!
-	 *  This is to ensure a corrupted workspace due to interrupting the saving
+	 *  This is to prevent a corrupted workspace due to interrupting the saving
 	 *  because of the check for unsaved changes in the current editor file
 	 */
-	public boolean prepareWorkspaceSaving()
+	public boolean canCloseTab()
 	{
 		return this.checkAndSaveFile();
 	}

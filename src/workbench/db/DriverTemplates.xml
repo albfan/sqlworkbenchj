@@ -14,7 +14,7 @@
      <string>Apache Derby Embedded</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:derby:&lt;/path/to/database&gt;</string>
+     <string>jdbc:derby:/path/to/database</string>
     </void>
    </object>
   </void>
@@ -48,7 +48,7 @@
      <string>H2 Database Engine</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:h2:&lt;/path/to/database&gt;</string>
+     <string>jdbc:h2:/path/to/database</string>
     </void>
    </object>
   </void>
@@ -99,12 +99,11 @@
      <string>MaxDB</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:sapdb://&lt;database_computer&gt;[:&lt;port&gt;]/&lt;database_name&gt;[&lt;options&gt;]</string>
+     <string>jdbc:sapdb://hostname[:port]/database_name</string>
     </void>
    </object>
   </void>
 
-	
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -117,7 +116,7 @@
      <string>FirstSQL/J</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:dbcp://localhost:8000</string>
+     <string>jdbc:dbcp://hostname:8000</string>
     </void>
    </object>
   </void>
@@ -134,7 +133,7 @@
      <string>ThinkSQL</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:thinksql://localhost:9075</string>
+     <string>jdbc:thinksql://hostname:9075</string>
     </void>
    </object>
   </void>
@@ -168,28 +167,28 @@
      <string>jTDS</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:jtds:sqlserver://&lt;server&gt;[:&lt;port&gt;][/&lt;database&gt;]</string>
+     <string>jdbc:jtds:sqlserver://serverName[:port][/;databaseName]</string>
     </void>
    </object>
   </void>
 
-  <void method="add">
-   <object class="workbench.db.DbDriver">
-    <void property="driverClass">
-     <string>com.microsoft.jdbc.sqlserver.SQLServerDriver</string>
-    </void>
-    <void property="library">
-     <string>msbase.jar;mssqlserver.jar;msutil.jar</string>
-    </void>
-    <void property="name">
-     <string>Microsoft JDBC Driver</string>
-    </void>
-    <void property="sampleUrl">
-     <string>jdbc:microsoft:sqlserver://server:port;DatabaseName=name_of_database</string>
-    </void>
-   </object>
-  </void>
-  
+  <void method="add"> 
+   <object class="workbench.db.DbDriver"> 
+    <void property="driverClass"> 
+     <string>com.microsoft.sqlserver.jdbc.SQLServerDriver</string> 
+    </void> 
+    <void property="library"> 
+     <string>sqljdbc.jar</string> 
+    </void> 
+    <void property="name"> 
+     <string>SQL Server 2005</string> 
+    </void> 
+    <void property="sampleUrl"> 
+     <string>jdbc:sqlserver://serverName;instanceName:portNumber;property=value[;property=value]</string> 
+    </void> 
+   </object> 
+  </void> 
+
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -213,7 +212,7 @@
      <string>com.mysql.jdbc.Driver</string>
     </void>
     <void property="library">
-     <string>mysql-jdbc.jar</string>
+     <string>mysql-connector-java-5.0.6-bin.jar</string>
     </void>
     <void property="name">
      <string>MySQL</string>
@@ -230,7 +229,7 @@
      <string>oracle.jdbc.OracleDriver</string>
     </void>
     <void property="library">
-     <string>ojdbc14.jar</string>
+     <string>ojdbc15.jar</string>
     </void>
     <void property="name">
      <string>Oracle</string>
@@ -281,7 +280,7 @@
      <string>org.postgresql.Driver</string>
     </void>
     <void property="library">
-     <string>pg73jdbc3.jar</string>
+     <string>postgresql-8.2-504.jdbc3.jar</string>
     </void>
     <void property="name">
      <string>PostgreSQL</string>
@@ -428,6 +427,40 @@
     </void> 
    </object> 
   </void> 
-  
+
+  <void method="add"> 
+   <object class="workbench.db.DbDriver"> 
+    <void property="driverClass"> 
+     <string>in.co.daffodil.db.jdbc.DaffodilDBDriver</string> 
+    </void> 
+    <void property="library"> 
+     <string>DaffodilDB_Embedded.jar;DaffodilDB_Common.jar</string> 
+    </void> 
+    <void property="name"> 
+     <string>Daffodil DB Embedded Edition</string> 
+    </void> 
+    <void property="sampleUrl"> 
+     <string>jdbc:daffodilDB_embedded:Databasename;path=Daffodil_Databases_Directory</string> 
+    </void> 
+   </object> 
+  </void> 
+
+  <void method="add"> 
+   <object class="workbench.db.DbDriver"> 
+    <void property="driverClass"> 
+     <string>in.co.daffodil.db.rmi.RmiDaffodilDBDriver</string> 
+    </void> 
+    <void property="library"> 
+     <string>DaffodilDB_Client.jar</string> 
+    </void> 
+    <void property="name"> 
+     <string>Daffodil DB Server Edition</string> 
+    </void> 
+    <void property="sampleUrl"> 
+     <string>jdbc:daffodilDB://&lt;hostname&gt;:&lt;port&gt;/Databasename;create=true</string> 
+    </void> 
+   </object> 
+  </void> 
+
  </object>
 </java>

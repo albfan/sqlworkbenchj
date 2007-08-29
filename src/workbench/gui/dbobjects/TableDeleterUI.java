@@ -35,7 +35,8 @@ import workbench.util.WbThread;
  *
  * @author  support@sql-workbench.net
  */
-public class TableDeleterUI extends javax.swing.JPanel
+public class TableDeleterUI
+	extends javax.swing.JPanel
 {
 	private JDialog dialog;
 	private List<TableIdentifier> objectNames;
@@ -194,7 +195,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 		{
 			LogMgr.logWarning("TableDeleterUI.cancel()", "Error when trying to kill delete Thread", e);
 		}
-		this.dialog.setVisible(true);
+		this.dialog.setVisible(false);
 		this.dialog.dispose();
 		this.dialog = null;
 	}//GEN-LAST:event_cancelButtonActionPerformed
@@ -264,79 +265,96 @@ public class TableDeleterUI extends javax.swing.JPanel
 		List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 		int count = this.objectNames.size();
 		TableIdentifier table = null;
-		for (int i=0; i < count; i++)
+		try
 		{
-			if (this.cancelled) break;
-			table = this.objectNames.get(i);
-			this.statusLabel.setText(ResourceMgr.getString("TxtDeletingTable") + " " + table + " ...");
-			try
-			{
-				this.deleteTable(table, useTruncate, doCommitEach);
-				tables.add(table);
-			}
-			catch (Exception ex)
-			{
-				String error = ex.getMessage();
-				LogMgr.logError("TableDeleterUI.doDelete()", "Error deleting table " + table, ex);
-				
-				if (!ignoreAll)
-				{
-					String question = ResourceMgr.getString("ErrDeleteTableData");
-					question = question.replaceAll("%table%", table.toString());
-					question = question.replaceAll("%error%", error);
-					question = question + "\n" + ResourceMgr.getString("MsgContinueQ");
+			this.connection.setBusy(true);
 
-					int choice = WbSwingUtilities.getYesNoIgnoreAll(this.dialog,  question);
-					if (choice == JOptionPane.NO_OPTION)
+			for (int i = 0; i < count; i++)
+			{
+				if (this.cancelled)
+					break;
+				table = this.objectNames.get(i);
+				this.statusLabel.setText(ResourceMgr.getString("TxtDeletingTable") + " " + table + " ...");
+				try
+				{
+					this.deleteTable(table, useTruncate, doCommitEach);
+					tables.add(table);
+				}
+				catch (Exception ex)
+				{
+					String error = ex.getMessage();
+					LogMgr.logError("TableDeleterUI.doDelete()", "Error deleting table " + table, ex);
+
+					if (!ignoreAll)
 					{
-						// the hasError flag will cause a rollback at the end.
-						hasError = true;
-						break;
-					}
-					if (choice == WbSwingUtilities.IGNORE_ALL)
-					{
-						// if we ignore all errors we should do a commit at the
-						// end in order to ensure that the delete's which were
-						// successful are committed.
-						hasError = false;
-						ignoreAll = true;
+						String question = ResourceMgr.getString("ErrDeleteTableData");
+						question = question.replaceAll("%table%", table.toString());
+						question = question.replaceAll("%error%", error);
+						question = question + "\n" + ResourceMgr.getString("MsgContinueQ");
+
+						int choice = WbSwingUtilities.getYesNoIgnoreAll(this.dialog, question);
+						if (choice == JOptionPane.NO_OPTION)
+						{
+							// the hasError flag will cause a rollback at the end.
+							hasError = true;
+							break;
+						}
+						if (choice == WbSwingUtilities.IGNORE_ALL)
+						{
+							// if we ignore all errors we should do a commit at the
+							// end in order to ensure that the delete's which were
+							// successful are committed.
+							hasError = false;
+							ignoreAll = true;
+						}
 					}
 				}
 			}
-		}
 
-		this.fireTableDeleted(tables);
-		boolean doCommit = true;
-		try
-		{
-			if (!doCommitEach)
+			boolean doCommit = true;
+			try
 			{
-				if (hasError)
+				if (!doCommitEach)
 				{
-					doCommit = false;
-					this.connection.rollback();
+					if (hasError)
+					{
+						doCommit = false;
+						this.connection.rollback();
+					}
+					else
+					{
+						this.connection.commit();
+					}
+				}
+			}
+			catch (SQLException e)
+			{
+				LogMgr.logError("TableDeleterUI.doDelete()", "Error on commit/rollback", e);
+				String msg = null;
+
+				if (doCommit)
+				{
+					ResourceMgr.getString("ErrCommit");
 				}
 				else
 				{
-					this.connection.commit();
+					msg = ResourceMgr.getString("ErrRollbackTableData");
 				}
+				msg = msg.replaceAll("%error%", e.getMessage());
+
+				WbSwingUtilities.showErrorMessage(this.dialog, msg);
 			}
 		}
-		catch (SQLException e)
+		finally
 		{
-			LogMgr.logError("TableDeleterUI.doDelete()", "Error on commit/rollback", e);
-			String msg = null;
-
-			if (doCommit) ResourceMgr.getString("ErrCommit");
-			else msg = ResourceMgr.getString("ErrRollbackTableData");
-			msg = msg.replaceAll("%error%", e.getMessage());
-
-			WbSwingUtilities.showErrorMessage(this.dialog, msg);
+			this.connection.setBusy(false);
 		}
+		
+		this.fireTableDeleted(tables);
+
 		this.statusLabel.setText("");
-		if (!hasError)
-		{
-			this.dialog.setVisible(true);
+		if (!hasError)		{
+			this.dialog.setVisible(false);
 			this.dialog.dispose();
 			this.dialog = null;
 		}

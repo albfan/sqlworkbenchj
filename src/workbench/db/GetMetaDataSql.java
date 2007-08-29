@@ -17,7 +17,6 @@ package workbench.db;
  */
 public class GetMetaDataSql
 {
-	
 	private String baseSql;
 	private String schema;
 	private String schemaField;
@@ -26,26 +25,21 @@ public class GetMetaDataSql
 	private String objectName;
 	private String objectNameField;
 	private String orderBy;
-	
 	private boolean useUpperCase;
 	private boolean useLowerCase;
-	
 	private boolean isProcedureCall;
-	private boolean argumentsNeedParanthesis;
 	private int schemaArgumentPos;
 	private int catalogArgumentPos;
 	private int objectNameArgumentPos;
-	
+
 	public GetMetaDataSql()
 	{
 	}
-	
+
 	public String getSql()
 	{
-		if (this.isProcedureCall)
-			return this.getProcedureCallSql();
-		else
-			return this.getSelectSql();
+		if (this.isProcedureCall) return this.getProcedureCallSql();
+		else return this.getSelectSql();
 	}
 
 	private String getSelectSql()
@@ -61,39 +55,39 @@ public class GetMetaDataSql
 		{
 			needsAnd = true;
 		}
-		
+
 		if (schema != null && schemaField != null)
 		{
-			if (needsWhere) 
+			if (needsWhere)
 			{
 				sql.append(" WHERE ");
 				needsWhere = false;
 			}
-			
+
 			if (needsAnd) sql.append(" AND ");
-			sql.append(schemaField + " = '" + schema + "'");
+			sql.append(schemaField + " = '" + getNameValue(schema) + "'");
 			needsAnd = true;
 		}
 		if (catalog != null && catalogField != null)
 		{
-			if (needsWhere) 
+			if (needsWhere)
 			{
 				sql.append(" WHERE ");
 				needsWhere = false;
 			}
 			if (needsAnd) sql.append(" AND ");
-			sql.append(catalogField + " = '" + catalog + "'");
+			sql.append(catalogField + " = '" + getNameValue(catalog) + "'");
 			needsAnd = true;
 		}
 		if (objectName != null && objectNameField != null)
 		{
-			if (needsWhere) 
+			if (needsWhere)
 			{
 				sql.append(" WHERE ");
 				needsWhere = false;
 			}
 			if (needsAnd) sql.append(" AND ");
-			sql.append(objectNameField + " = '" + objectName + "'");
+			sql.append(objectNameField + " = '" + getNameValue(objectName) + "'");
 		}
 		if (this.orderBy != null)
 		{
@@ -102,15 +96,18 @@ public class GetMetaDataSql
 		return sql.toString();
 	}
 
+	private String getNameValue(String value)
+	{
+		if (value == null) return null;
+		if (useLowerCase) return value.toLowerCase();
+		if (useUpperCase) return value.toUpperCase();
+		return value;
+	}
+
 	private String getProcedureCallSql()
 	{
 		StringBuilder sql = new StringBuilder(this.baseSql);
-		if (this.argumentsNeedParanthesis)
-		{
-			sql.append(" (");
-		}
-		sql.append(' ');
-		for (int i=1; i < 4; i ++)
+		for (int i = 1; i < 4; i++)
 		{
 			if (schemaArgumentPos == i && this.schema != null)
 			{
@@ -127,284 +124,152 @@ public class GetMetaDataSql
 				if (i > 1) sql.append(',');
 				sql.append(this.objectName);
 			}
-		}		
-		if (this.argumentsNeedParanthesis)
-		{
-			sql.append(")");
 		}
 		return sql.toString();
 	}
-	/** Getter for property baseSql.
-	 * @return Value of property baseSql.
-	 *
-	 */
+
 	public String getBaseSql()
 	{
 		return baseSql;
 	}
-	
-	/** Setter for property baseSql.
-	 * @param baseSql New value of property baseSql.
-	 *
-	 */
-	public void setBaseSql(String baseSql)
+
+	public void setBaseSql(String sql)
 	{
-		this.baseSql = baseSql;
+		this.baseSql = sql;
 	}
-	
-	/** Getter for property schema.
-	 * @return Value of property schema.
-	 *
-	 */
+
 	public String getSchema()
 	{
 		return schema;
 	}
-	
-	/** Setter for property schema.
-	 * @param schem New value of property schema.
-	 *
-	 */
+
 	public void setSchema(String schem)
 	{
 		this.schema = schem;
 	}
-	
-	/** Getter for property catalog.
-	 * @return Value of property catalog.
-	 *
-	 */
+
 	public String getCatalog()
 	{
 		return catalog;
 	}
-	
-	/** Setter for property catalog.
-	 * @param cat New value of property catalog.
-	 *
-	 */
+
 	public void setCatalog(String cat)
 	{
 		this.catalog = cat;
 	}
-	
-	/** Getter for property objectName.
-	 * @return Value of property objectName.
-	 *
-	 */
+
 	public String getObjectName()
 	{
 		return objectName;
 	}
-	
-	/** Setter for property objectName.
-	 * @param objectName New value of property objectName.
-	 *
-	 */
-	public void setObjectName(String objectName)
+
+	public void setObjectName(String name)
 	{
-		this.objectName = objectName;
+		this.objectName = name;
 	}
-	
-	public String toString() { return getSql(); }
-	
-	/** Getter for property schemaField.
-	 * @return Value of property schemaField.
-	 *
-	 */
+
+	public String toString()
+	{
+		return getSql();
+	}
+
 	public String getSchemaField()
 	{
 		return schemaField;
 	}
-	
-	/** Setter for property schemaField.
-	 * @param schemaField New value of property schemaField.
-	 *
-	 */
-	public void setSchemaField(String schemaField)
+
+	public void setSchemaField(String field)
 	{
-		this.schemaField = schemaField;
+		this.schemaField = field;
 	}
-	
-	/** Getter for property catalogField.
-	 * @return Value of property catalogField.
-	 *
-	 */
+
 	public String getCatalogField()
 	{
 		return catalogField;
 	}
-	
-	/** Setter for property catalogField.
-	 * @param catalogField New value of property catalogField.
-	 *
-	 */
-	public void setCatalogField(String catalogField)
+
+	public void setCatalogField(String field)
 	{
-		this.catalogField = catalogField;
+		this.catalogField = field;
 	}
-	
-	/** Getter for property objectNameField.
-	 * @return Value of property objectNameField.
-	 *
-	 */
+
 	public String getObjectNameField()
 	{
 		return objectNameField;
 	}
-	
-	/** Setter for property objectNameField.
-	 * @param objectNameField New value of property objectNameField.
-	 *
-	 */
-	public void setObjectNameField(String objectNameField)
+
+	public void setObjectNameField(String field)
 	{
-		this.objectNameField = objectNameField;
+		this.objectNameField = field;
 	}
-	
-	/** Getter for property orderBy.
-	 * @return Value of property orderBy.
-	 *
-	 */
+
 	public String getOrderBy()
 	{
 		return orderBy;
 	}
-	
-	/** Setter for property orderBy.
-	 * @param orderBy New value of property orderBy.
-	 *
-	 */
-	public void setOrderBy(String orderBy)
-	{
-		this.orderBy = orderBy;
-	}
-	
 
-	/** Getter for property useUpperCase.
-	 * @return Value of property useUpperCase.
-	 *
-	 */
-	public boolean isUseUpperCase()
+	public void setOrderBy(String order)
+	{
+		this.orderBy = order;
+	}
+
+	public boolean getUseUpperCase()
 	{
 		return useUpperCase;
 	}
-	
-	/** Setter for property useUpperCase.
-	 * @param useUpperCase New value of property useUpperCase.
-	 *
-	 */
-	public void setUseUpperCase(boolean useUpperCase)
+
+	public void setUseUpperCase(boolean upperCase)
 	{
-		this.useUpperCase = useUpperCase;
+		this.useUpperCase = upperCase;
 	}
-	
-	/** Getter for property useLowerCase.
-	 * @return Value of property useLowerCase.
-	 *
-	 */
-	public boolean isUseLowerCase()
+
+	public boolean getUseLowerCase()
 	{
 		return useLowerCase;
 	}
-	
-	/** Setter for property useLowerCase.
-	 * @param useLowerCase New value of property useLowerCase.
-	 *
-	 */
-	public void setUseLowerCase(boolean useLowerCase)
+
+	public void setUseLowerCase(boolean lowerCase)
 	{
-		this.useLowerCase = useLowerCase;
+		this.useLowerCase = lowerCase;
 	}
-	/** Getter for property isProcedureCall.
-	 * @return Value of property isProcedureCall.
-	 *
-	 */
+
 	public boolean isIsProcedureCall()
 	{
 		return isProcedureCall;
 	}
-	
-	/** Setter for property isProcedureCall.
-	 * @param isProcedureCall New value of property isProcedureCall.
-	 *
-	 */
-	public void setIsProcedureCall(boolean isProcedureCall)
+
+	public void setIsProcedureCall(boolean isCall)
 	{
-		this.isProcedureCall = isProcedureCall;
+		this.isProcedureCall = isCall;
 	}
 
-	/** Getter for property schemaArgumentPos.
-	 * @return Value of property schemaArgumentPos.
-	 *
-	 */
 	public int getSchemaArgumentPos()
 	{
 		return schemaArgumentPos;
 	}
-	
-	/** Setter for property schemaArgumentPos.
-	 * @param schemaArgumentPos New value of property schemaArgumentPos.
-	 *
-	 */
-	public void setSchemaArgumentPos(int schemaArgumentPos)
+
+	public void setSchemaArgumentPos(int pos)
 	{
-		this.schemaArgumentPos = schemaArgumentPos;
+		this.schemaArgumentPos = pos;
 	}
-	
-	/** Getter for property catalogArgumentPos.
-	 * @return Value of property catalogArgumentPos.
-	 *
-	 */
+
 	public int getCatalogArgumentPos()
 	{
 		return catalogArgumentPos;
 	}
-	
-	/** Setter for property catalogArgumentPos.
-	 * @param catalogArgumentPos New value of property catalogArgumentPos.
-	 *
-	 */
-	public void setCatalogArgumentPos(int catalogArgumentPos)
+
+	public void setCatalogArgumentPos(int pos)
 	{
-		this.catalogArgumentPos = catalogArgumentPos;
+		this.catalogArgumentPos = pos;
 	}
-	
-	/** Getter for property objectNameArgumentPos.
-	 * @return Value of property objectNameArgumentPos.
-	 *
-	 */
+
 	public int getObjectNameArgumentPos()
 	{
 		return objectNameArgumentPos;
 	}
-	
-	/** Setter for property objectNameArgumentPos.
-	 * @param objectNameArgumentPos New value of property objectNameArgumentPos.
-	 *
-	 */
-	public void setObjectNameArgumentPos(int objectNameArgumentPos)
-	{
-		this.objectNameArgumentPos = objectNameArgumentPos;
-	}
-	
-	/** Getter for property argumentsNeedParanthesis.
-	 * @return Value of property argumentsNeedParanthesis.
-	 *
-	 */
-	public boolean isArgumentsNeedParanthesis()
-	{
-		return argumentsNeedParanthesis;
-	}
-	
-	/** Setter for property argumentsNeedParanthesis.
-	 * @param argumentsNeedParanthesis New value of property argumentsNeedParanthesis.
-	 *
-	 */
-	public void setArgumentsNeedParanthesis(boolean argumentsNeedParanthesis)
-	{
-		this.argumentsNeedParanthesis = argumentsNeedParanthesis;
-	}
 
-
+	public void setObjectNameArgumentPos(int pos)
+	{
+		this.objectNameArgumentPos = pos;
+	}
 }

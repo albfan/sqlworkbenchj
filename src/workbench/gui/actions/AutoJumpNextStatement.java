@@ -16,7 +16,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
-import javax.swing.border.Border;
 
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -31,15 +30,12 @@ public class AutoJumpNextStatement extends WbAction
 	private boolean switchedOn = false;
 	private JCheckBoxMenuItem toggleMenu;
 
-	//public static final AutoJumpNextStatement AUTO_JUMP_ACTION = new AutoJumpNextStatement();
-	
 	public AutoJumpNextStatement()
 	{
 		super();
 		this.initMenuDefinition("MnuTxtJumpToNext");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setCreateMenuSeparator(true);
-		//this.setIcon(null);
 		this.switchedOn = Settings.getInstance().getAutoJumpNextStatement();
 	}
 

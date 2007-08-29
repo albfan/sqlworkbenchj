@@ -163,7 +163,6 @@ public class ObjectDropperUI
 		{
 			this.running = true;
 			this.cancelled = false;
-			this.connection.setBusy(true);
 			this.dropper = new ObjectDropper(this.objectNames, this.objectTypes);
 			this.dropper.setIndexTable(this.indexTable);
 			dropper.setConnection(this.connection);
@@ -178,7 +177,6 @@ public class ObjectDropperUI
 		finally
 		{
 			this.running = false;
-			this.connection.setBusy(false);
 		}
 
 		EventQueue.invokeLater(new Runnable()
@@ -255,16 +253,27 @@ public class ObjectDropperUI
 	public void showDialog(Frame aParent)
 	{
 		this.dialog = new JDialog(aParent, ResourceMgr.getString("TxtDropObjectsTitle"), true);
-		this.dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		this.dialog.getContentPane().add(this);
-		this.dialog.pack();
-		if (this.dialog.getWidth() < 200)
+		try
 		{
-			this.dialog.setSize(200, this.dialog.getHeight());
+			this.dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+			this.dialog.getContentPane().add(this);
+			this.dialog.pack();
+			if (this.dialog.getWidth() < 200)
+			{
+				this.dialog.setSize(200, this.dialog.getHeight());
+			}
+			WbSwingUtilities.center(this.dialog, aParent);
+			this.cancelled = true;
+			this.dialog.setVisible(true);
 		}
-		WbSwingUtilities.center(this.dialog, aParent);
-		this.cancelled = true;
-		this.dialog.setVisible(true);
+		finally
+		{
+			if (this.dialog != null)
+			{
+				this.dialog.dispose();
+				this.dialog = null;
+			}
+		}
 	}
 
   // Variables declaration - do not modify//GEN-BEGIN:variables

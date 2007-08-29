@@ -36,9 +36,9 @@ public class H2SequenceReader
 	}
 	
 	/**
-	 *	Return the source SQL for a PostgreSQL sequence definition.
+	 *	Return the source SQL for a H2 sequence definition.
 	 *
-	 *	@return The SQL to recreate the sequence if the current DBMS is Postgres. An empty String otherwise
+	 *	@return The SQL to recreate the given sequence
 	 */
 	public String getSequenceSource(String owner, String aSequence)
 	{
@@ -57,7 +57,7 @@ public class H2SequenceReader
 		try
 		{
 			
-			String sql = "SELECT name,increment FROM information_schema.sequences WHERE name = '" + aSequence + "'";
+			String sql = "SELECT sequence_name, increment FROM information_schema.sequences WHERE sequence_name = '" + aSequence + "'";
 			stmt = this.dbConnection.createStatement();
 			rs = stmt.executeQuery(sql);
 			if (rs.next())
@@ -99,7 +99,7 @@ public class H2SequenceReader
 		try
 		{
 			stmt = this.dbConnection.createStatement();
-			rs = stmt.executeQuery("SELECT name FROM information_schema.sequences ORDER BY name");
+			rs = stmt.executeQuery("SELECT sequence_name FROM information_schema.sequences ORDER BY 1");
 			while (rs.next())
 			{
 				result.add(rs.getString(1));
@@ -124,7 +124,7 @@ public class H2SequenceReader
 		try
 		{
 			
-			String sql = "SELECT * FROM information_schema.sequences WHERE name = '" + sequence + "'";
+			String sql = "SELECT * FROM information_schema.sequences WHERE sequence_name = '" + sequence + "'";
 			stmt = this.dbConnection.createStatement();
 			rs = stmt.executeQuery(sql);
 			ds = new DataStore(rs, true);

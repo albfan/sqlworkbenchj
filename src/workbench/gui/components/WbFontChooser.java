@@ -108,6 +108,8 @@ public class WbFontChooser
 		JOptionPane option = new JOptionPane(chooser, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
 		//int answer = JOptionPane.showConfirmDialog(owner, chooser, ResourceMgr.getString("TxtWindowTitleChooseFont"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 		JDialog dialog = option.createDialog(owner, ResourceMgr.getString("TxtWindowTitleChooseFont"));
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
 		dialog.pack();//setSize(320,240);
 		WbSwingUtilities.center(dialog, SwingUtilities.getWindowAncestor(owner));
 		dialog.setVisible(true);

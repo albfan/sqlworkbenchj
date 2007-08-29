@@ -228,6 +228,7 @@ public class SettingsPanel
 		Settings.getInstance().setWindowSize(this.getClass().getName(), this.dialog.getWidth(), this.dialog.getHeight());
 		this.dialog.setVisible(false);
 		this.dialog.dispose();
+		this.dialog = null;
 	}
 
 	public void actionPerformed(java.awt.event.ActionEvent e)

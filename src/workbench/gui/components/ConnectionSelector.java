@@ -140,21 +140,15 @@ public class ConnectionSelector
 		if (this.connectingInfo != null)
 		{
 			WbSwingUtilities.showDefaultCursor(this.connectingInfo);
-			try
+			WbSwingUtilities.invoke(new Runnable()
 			{
-				WbSwingUtilities.invoke(new Runnable()
+				public void run()
 				{
-					public void run()
-					{
-						connectingInfo.setVisible(false);
-						connectingInfo.dispose();
-					}
-				});
-			}
-			catch (Throwable th)
-			{
-			}
-			this.connectingInfo = null;
+					connectingInfo.setVisible(false);
+					connectingInfo.dispose();
+					connectingInfo = null;
+				}
+			});
 			this.parent.repaint();
 		}
 	}
@@ -202,7 +196,7 @@ public class ConnectionSelector
 		
 		p.add(this.connectLabel, BorderLayout.CENTER);
 		this.connectingInfo = new JDialog(this.parent, false);
-		
+		this.connectingInfo.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.connectingInfo.getContentPane().setLayout(new BorderLayout());
 		this.connectingInfo.getContentPane().add(p, BorderLayout.CENTER);
 		this.connectingInfo.setUndecorated(true);

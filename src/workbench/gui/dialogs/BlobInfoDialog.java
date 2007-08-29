@@ -105,8 +105,7 @@ public class BlobInfoDialog
 	{
 		if (e.getSource() == escAction)
 		{
-			setVisible(false);
-			dispose();
+			closeWindow();
 		}
 	}
 
@@ -117,6 +116,7 @@ public class BlobInfoDialog
 			public void run()
 			{
 				setVisible(false);
+				dispose();
 			}
 		});
 	}
@@ -157,7 +157,7 @@ public class BlobInfoDialog
 		{
 			File f = File.createTempFile("wb$tmp_", ".data");
 			f.deleteOnExit();
-			handler.saveBlobToFile(this.blobValue, f.getAbsolutePath());
+			BlobHandler.saveBlobToFile(this.blobValue, f.getAbsolutePath());
 			ToolDefinition tool = (ToolDefinition)this.externalTools.getSelectedItem();
 			tool.runApplication(f.getAbsolutePath());
 			Settings.getInstance().setLastUsedBlobTool(tool.getName());
@@ -426,7 +426,7 @@ public class BlobInfoDialog
 			String file = FileDialogUtil.getBlobFile(this);
 			if (file == null) return;
 			
-			fileSize = handler.saveBlobToFile(blobValue, file);
+			fileSize = BlobHandler.saveBlobToFile(blobValue, file);
 			String msg = ResourceMgr.getString("MsgBlobSaved");
 			File f = new File(file);
 			msg = StringUtil.replace(msg, "%filename%", f.getAbsolutePath());
@@ -473,7 +473,7 @@ public class BlobInfoDialog
 
 	private void closeButtonMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_closeButtonMouseClicked
 	{//GEN-HEADEREND:event_closeButtonMouseClicked
-		this.setVisible(false);
+		closeWindow();
 	}//GEN-LAST:event_closeButtonMouseClicked
 
   // Variables declaration - do not modify//GEN-BEGIN:variables

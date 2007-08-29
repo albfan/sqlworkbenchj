@@ -12,7 +12,6 @@
 package workbench.gui.dbobjects;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import workbench.gui.components.WbSplitPane;
 import workbench.interfaces.Resettable;
@@ -24,7 +23,7 @@ public class ResettableSplitPane
 	extends WbSplitPane
 	implements Resettable
 {
-	private Set clients = new HashSet();
+	private Set<Resettable> clients = new HashSet<Resettable>();
 	
 	public ResettableSplitPane(int type)
 	{
@@ -38,10 +37,8 @@ public class ResettableSplitPane
 	
 	public void reset()
 	{
-		Iterator itr = clients.iterator();
-		while (itr.hasNext())
+		for (Resettable r : clients)
 		{
-			Resettable r = (Resettable)itr.next();
 			r.reset();
 		}
 	}

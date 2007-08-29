@@ -887,7 +887,7 @@ public class DbExplorerPanel
 		if (triggers != null) triggers.saveToWorkspace(w, index);
 	}
 
-	public boolean prepareWorkspaceSaving()
+	public boolean canCloseTab()
 	{
 		return true;
 	}

@@ -124,6 +124,7 @@ public class ProfileSelectionDialog
 		this.saveSize();
 		this.profiles.saveSettings();
 		this.setVisible(false);
+		dispose();
 	}
 
 	public ConnectionProfile getSelectedProfile()

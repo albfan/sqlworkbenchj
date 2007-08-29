@@ -174,5 +174,6 @@ public class DriverEditorDialog extends JDialog
 		Settings.getInstance().storeWindowSize(this);
 		driverListPanel.saveSettings();
 		setVisible(false);
+		dispose();
 	}
 }

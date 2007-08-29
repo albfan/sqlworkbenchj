@@ -21,7 +21,6 @@ import javax.swing.JComponent;
 
 import workbench.gui.actions.EscAction;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 import workbench.util.BrowserLauncher;
 
 /**

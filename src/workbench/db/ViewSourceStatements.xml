@@ -117,9 +117,6 @@
     <void property="schemaField"> 
      <string>owner</string> 
     </void> 
-    <void property="useUpperCase"> 
-     <boolean>true</boolean> 
-    </void> 
    </object> 
   </void> 
   
@@ -150,9 +147,6 @@ catalog_definition_schema.sysschema
     <void property="schemaField"> 
      <string>schema_name</string> 
     </void> 
-    <void property="useUpperCase"> 
-     <boolean>false</boolean> 
-    </void> 
    </object> 
   </void> 
 
@@ -164,9 +158,6 @@ catalog_definition_schema.sysschema
     </void> 
     <void property="objectNameField"> 
      <string>TABLE_NAME</string> 
-    </void> 
-    <void property="useUpperCase"> 
-      <boolean>false</boolean> 
     </void> 
    </object> 
   </void> 
@@ -180,9 +171,6 @@ catalog_definition_schema.sysschema
     <void property="objectNameField"> 
      <string>TABLE_NAME</string> 
     </void> 
-    <void property="useUpperCase"> 
-     <boolean>true</boolean> 
-    </void> 
    </object> 
   </void> 
   
@@ -194,9 +182,6 @@ catalog_definition_schema.sysschema
     </void> 
     <void property="objectNameField"> 
      <string>rdb$relation_name</string> 
-    </void> 
-    <void property="useUpperCase"> 
-     <boolean>true</boolean> 
     </void> 
     <void property="schemaField"> 
      <string>RDB$OWNER_NAME</string> 
@@ -212,9 +197,6 @@ catalog_definition_schema.sysschema
     </void> 
     <void property="objectNameField"> 
      <string>table_name</string> 
-    </void> 
-    <void property="useUpperCase"> 
-     <boolean>false</boolean> 
     </void> 
     <void property="schemaField"> 
      <string>table_owner</string> 
@@ -236,9 +218,6 @@ catalog_definition_schema.sysschema
     </void> 
     <void property="schemaField"> 
      <string>vcreator</string> 
-    </void> 
-    <void property="useUpperCase"> 
-     <boolean>true</boolean> 
     </void> 
    </object> 
   </void> 
@@ -272,11 +251,29 @@ catalog_definition_schema.sysschema
     <void property="schemaField"> 
      <string>T.owner</string> 
     </void> 
-     <void property="orderBy"> 
+    <void property="orderBy"> 
      <string>order by V.seqno</string> 
     </void> 
    </object> 
   </void> 
   
+  <void method="put">  
+   <string>SQLite</string>  
+   <object class="workbench.db.GetMetaDataSql">  
+    <void property="baseSql">  
+     <string>SELECT sql FROM sqlite_master</string>  
+    </void>  
+    <void property="objectNameField">  
+     <string>tbl_name</string>  
+    </void>  
+    <void property="orderBy"> 
+		 <!-- this is a hack to make string comparison case insensitive -->
+		 <!-- it is not really an order by statement by may be added at the same -->
+		 <!-- place as the order by keyword -->
+     <string>collate nocase</string> 
+    </void> 
+   </object>  
+  </void>  
+
  </object> 
 </java> 

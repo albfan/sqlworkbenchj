@@ -483,6 +483,8 @@ public class CompletionPopup
   public void keyPressed(KeyEvent evt)
   {
     int index = -1;
+		boolean syncEntry = false;
+		
     switch (evt.getKeyCode())
     {
       case KeyEvent.VK_TAB:
@@ -496,27 +498,47 @@ public class CompletionPopup
         closePopup(false);
         evt.consume();
         break;
-//			case KeyEvent.VK_HOME:
-//			case KeyEvent.VK_END:
-//      case KeyEvent.VK_RIGHT:
-//      case KeyEvent.VK_LEFT:
-//      case KeyEvent.VK_UP:
-//      case KeyEvent.VK_DOWN:
-//        forwardKeyToList(evt);
-//        break;
-      default:
-        forwardKeyToList(evt);
+				
+			case KeyEvent.VK_UP:
+				// When the searchfield is displayed the list
+				// does not have the focus, und therefor the up and down
+				// keys only scroll the list, but do not move the selection 
+				if (this.searchField != null)
+				{
+					index = elementList.getSelectedIndex();
+					if (index > 0)
+					{
+						elementList.setSelectedIndex(index - 1);
+						elementList.ensureIndexIsVisible(index - 1);
+						syncEntry = true;
+					}
+					evt.consume();
+				}
+				break;
+			case KeyEvent.VK_DOWN:
+				if (this.searchField != null)
+				{
+					index = elementList.getSelectedIndex();
+					if (index < data.getSize() - 1)
+					{
+						elementList.setSelectedIndex(index + 1);
+						elementList.ensureIndexIsVisible(index + 1);
+						syncEntry = true;
+					}
+					evt.consume();
+				}
+				break;
     }
-  }
-	
-	private void forwardKeyToList(KeyEvent evt)
-	{
-		KeyListener[] l = elementList.getKeyListeners();
-		for (int i=0; i < l.length; i++)
+		if (syncEntry)
 		{
-			if (l[i] != this) l[i].keyPressed(evt);
+			Object o = elementList.getSelectedValue();
+			if (o != null) 
+			{
+				this.searchField.setText(o.toString());
+				this.searchField.selectAll();
+			}
 		}
-	}
+  }
 	
 	public void keyTyped(KeyEvent evt)
 	{
@@ -593,6 +615,7 @@ public class CompletionPopup
 	class DummyPanel
 		extends JPanel
 	{
+		@SuppressWarnings("deprecation")
 		public boolean isManagingFocus() { return false; }
 		public boolean getFocusTraversalKeysEnabled() {	return false;	}
 	}

@@ -1305,6 +1305,7 @@ public class TableListPanel
 		p.add(this.infoLabel, BorderLayout.CENTER);
 		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
 		this.infoWindow = new JDialog(f, true);
+		this.infoWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.infoWindow.getContentPane().setLayout(new BorderLayout());
 		this.infoWindow.getContentPane().add(p, BorderLayout.CENTER);
 		this.infoWindow.setUndecorated(true);

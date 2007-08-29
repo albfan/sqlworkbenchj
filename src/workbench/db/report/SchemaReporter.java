@@ -41,7 +41,6 @@ import workbench.storage.RowActionMonitor;
 import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
-import workbench.util.WbThread;
 
 
 /**
@@ -357,28 +356,25 @@ public class SchemaReporter
 		this.progressPanel.setInfoText(ResourceMgr.getString("MsgProcessTable"));
 
 		this.progressWindow = new JDialog(this.parentWindow, true);
+		this.progressWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.progressWindow.getContentPane().add(progressPanel);
 		this.progressWindow.pack();
 		this.progressWindow.setSize(300,120);
-		WbSwingUtilities.center(progressWindow, parentWindow);
 		this.progressWindow.setTitle(ResourceMgr.getString("MsgReportWindowTitle"));
 		this.progressWindow.addWindowListener(new WindowAdapter()
 		{
 			public void windowClosing(WindowEvent e)
 			{
 				cancel = true;
+				if (progressWindow != null)
+				{
+					progressWindow.setVisible(false);
+					progressWindow.dispose();
+				}
 			}
 		});
-
-		WbSwingUtilities.center(this.progressWindow, null);
-		WbThread t = new WbThread("Reporter Progress")
-		{
-			public void run()
-			{
-				progressWindow.setVisible(true);
-			}
-		};
-		t.start();
+		WbSwingUtilities.center(progressWindow, parentWindow);
+		progressWindow.setVisible(true);
 	}
 
 	private void retrieveTables()

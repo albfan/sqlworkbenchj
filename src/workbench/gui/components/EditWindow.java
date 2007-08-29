@@ -95,9 +95,10 @@ public class EditWindow
 		this.textContainer.setEditable(false);
 	}
 	
-	private void init(String text, String settingsId, boolean createSqlEditor, boolean showCloseButtonOnly)
+	private void init(String text, String id, boolean createSqlEditor, boolean showCloseButtonOnly)
 	{
-		this.settingsId = settingsId;
+		this.settingsId = id;
+		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.getContentPane().setLayout(new BorderLayout());
 		if (createSqlEditor)
 		{
@@ -192,13 +193,18 @@ public class EditWindow
 		{
 			this.isCancelled = false;
 		}
-		else if ("edit-ok".equals(e.getActionCommand()))
+		else if (e.getSource() == this.cancelButton)
 		{
-			this.isCancelled = false;
+			this.isCancelled = true;
 		}
-		this.setVisible(false);
+		closeWindow();
 	}
 
+	private void closeWindow()
+	{
+		setVisible(false);
+		dispose();
+	}
 	public boolean isCancelled()
 	{
 		return this.isCancelled;
@@ -237,8 +243,8 @@ public class EditWindow
 	
 	public void windowOpened(java.awt.event.WindowEvent e)
 	{
-		editor.requestFocus();
-    WbSwingUtilities.repaintLater(editor);
+//		editor.requestFocus();
+//    WbSwingUtilities.repaintLater(editor);
 	}
 	
 }

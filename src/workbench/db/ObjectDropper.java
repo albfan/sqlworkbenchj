@@ -57,9 +57,12 @@ public class ObjectDropper
 		try
 		{
 			if (this.connection == null) throw new NullPointerException("No connection!");
+			if (this.connection.isBusy()) return;
 			if (this.objectNames == null || this.objectNames.size() == 0) return;
 			int count = this.objectNames.size();
-			currentStatement = this.connection.createStatement();
+			this.connection.setBusy(true);
+			
+    	currentStatement = this.connection.createStatement();
 			String cascade = null;
 
 			boolean needTableForIndexDrop = this.connection.getDbSettings().needsTableForDropIndex();
@@ -112,6 +115,7 @@ public class ObjectDropper
 		{
 			SqlUtil.closeStatement(currentStatement);
 			this.currentStatement = null;
+			this.connection.setBusy(false);
 		}
 	}
 

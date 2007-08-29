@@ -1993,7 +1993,7 @@ public class DbMetadata
 				rs = this.metaData.getColumns(aCatalog, aSchema, aTable, "%");
 			}
 
-			while (rs.next())
+			while (rs != null && rs.next())
 			{
 				int row = ds.addRow();
 

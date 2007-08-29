@@ -11,10 +11,8 @@
  */
 package workbench.gui.profiles;
 
-import java.awt.Frame;
 import java.io.File;
 
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 
@@ -29,7 +27,8 @@ import workbench.util.StringUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class DriverEditorPanel extends javax.swing.JPanel
+public class DriverEditorPanel
+	extends javax.swing.JPanel
 {
 	private DbDriver currentDriver;
 

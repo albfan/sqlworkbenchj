@@ -18,6 +18,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import javax.swing.JDialog;
 
 import workbench.resource.ResourceMgr;
 import workbench.util.BrowserLauncher;
@@ -30,7 +31,8 @@ import workbench.util.WbVersionReader;
  * 
  * @author  support@sql-workbench.net
  */
-public class VersionCheckDialog extends javax.swing.JDialog
+public class VersionCheckDialog 
+	extends JDialog
 	implements ActionListener, MouseListener
 {
 	private WbVersionReader versionReader;
@@ -40,6 +42,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
 	{
 		super(parent, true);
 		initComponents();
+		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.closeButton.addActionListener(this);
 		Font f = this.headingLabel.getFont().deriveFont(Font.BOLD);
 		this.headingLabel.setFont(f);

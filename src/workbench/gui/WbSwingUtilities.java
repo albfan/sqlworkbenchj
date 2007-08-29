@@ -308,6 +308,7 @@ public class WbSwingUtilities
 		String[] options = new String[] { ResourceMgr.getString("LblYes"), ResourceMgr.getString("LblNo"), ResourceMgr.getString("LblIgnoreAll")};
 		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
 		JDialog dialog = ignorePane.createDialog(SwingUtilities.getWindowAncestor(aCaller), ResourceMgr.TXT_PRODUCT_NAME);
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		int rvalue = -1;
 		try
 		{
@@ -324,6 +325,7 @@ public class WbSwingUtilities
 		finally
 		{
 			dialog.dispose();
+			dialog = null;
 		}
 		return rvalue;
 	}
@@ -388,9 +390,8 @@ public class WbSwingUtilities
 	public static boolean getOKCancel(String title, Component aCaller, Component message, final Runnable doLater)
 	{
 		JOptionPane pane = new JOptionPane(message, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
-		
-		
 		JDialog dialog = pane.createDialog(aCaller, title);
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		if (doLater != null)
 		{
 			WindowAdapter w = new WindowAdapter()
@@ -437,6 +438,7 @@ public class WbSwingUtilities
 			w = 300;
 		}
 		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		dialog.setSize(w + 130, dialog.getHeight());
 		dialog.setResizable(true);
 		dialog.setVisible(true);

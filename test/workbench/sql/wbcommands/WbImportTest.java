@@ -2625,6 +2625,32 @@ public class WbImportTest
 			}
 			SqlUtil.closeAll(rs, stmt);
 			assertEquals("Wrong number of rows", 3, count);
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
+	public void testEmptyFile()
+	{
+		try
+		{
+			File importFile  = new File(this.basedir, "bad_import.txt");
+			importFile.createNewFile();
+			
+			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -continueonerror=true -table=junit_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}
 		}
 		catch (Exception e)
 		{

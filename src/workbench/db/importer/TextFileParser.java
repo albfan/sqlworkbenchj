@@ -670,9 +670,9 @@ public class TextFileParser
 		try
 		{
 			currentLine = in.readLine();
-			if (currentLine == null) throw new IOException("Could not read header line!");
 			if (this.withHeader)
 			{
+				if (currentLine == null) throw new IOException("Could not read header line!");
 				if (this.columns == null) this.readColumns(currentLine);
 				currentLine = in.readLine();
 			}

@@ -46,7 +46,7 @@ public class TableDependencyTreeDisplay
 {
 	private WbConnection connection;
 	private DependencyTreeCellRenderer renderer;
-	private ArrayList nodesToExpand;
+	private ArrayList<TreeNode[]> nodesToExpand;
 	private boolean showExported;
 	
 	public TableDependencyTreeDisplay()
@@ -205,7 +205,7 @@ public class TableDependencyTreeDisplay
 			{
 				this.buildTree(child, treeNode);
 				TreeNode[] path = treeNode.getPath();
-				if (this.nodesToExpand == null) this.nodesToExpand = new ArrayList();
+				if (this.nodesToExpand == null) this.nodesToExpand = new ArrayList<TreeNode[]>();
 				this.nodesToExpand.add(path);
 			}
 		}	
@@ -214,9 +214,8 @@ public class TableDependencyTreeDisplay
 	private void expandNodes(JTree tree)
 	{
 		if (this.nodesToExpand == null) return;
-		for (int i=0; i < this.nodesToExpand.size(); i++)
+		for (TreeNode[] nodes : nodesToExpand)
 		{
-			TreeNode[] nodes = (TreeNode[])this.nodesToExpand.get(i);
 			TreePath path = new TreePath(nodes);
 			tree.expandPath(path);
 		}

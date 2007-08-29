@@ -1106,10 +1106,17 @@ public class MainWindow
 		String[] options = new String[] { ResourceMgr.getString("LblCreateWorkspace"), ResourceMgr.getString("LblLoadWorkspace"), ResourceMgr.getString("LblIgnore")};
 		JOptionPane ignorePane = new JOptionPane(ResourceMgr.getString("MsgProfileWorkspaceNotFound"), JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
 		JDialog dialog = ignorePane.createDialog(this, ResourceMgr.TXT_PRODUCT_NAME);
-		dialog.setResizable(true);
-		dialog.pack();
-		dialog.setVisible(true);
-		dialog.dispose();
+		try
+		{
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.setResizable(true);
+			dialog.pack();
+			dialog.setVisible(true);
+		}
+		finally
+		{
+			dialog.dispose();
+		}
 		Object result = ignorePane.getValue();
 		if (result == null) return CREATE_WORKSPACE;
 		else if (result.equals(options[0])) return CREATE_WORKSPACE;
@@ -1141,11 +1148,16 @@ public class MainWindow
 		if (!this.loadWorkspace(DEFAULT_WORKSPACE))
 		{
 			this.currentWorkspaceFile = DEFAULT_WORKSPACE;
-			this.adjustTabCount(1);
-			this.resetTabTitles();
+			resetWorkspace();
 		}
 	}
 
+	private void resetWorkspace()
+	{
+		this.closeWorkspace(false);
+		this.resetTabTitles();
+	}
+	
 	private boolean closeResult;
 	
 	public boolean loadWorkspace(String filename)
@@ -1159,12 +1171,11 @@ public class MainWindow
 			// if the file does not exist, set all variables as if it did
 			// thus the file will be created automatically.
 			this.currentWorkspaceFile = realFilename;
+			this.resetWorkspace();
 			this.updateWindowTitle();
 			this.checkWorkspaceActions();
 			return true;
 		}
-
-//		this.sqlTab.setSuspendRepaint(true);
 
 		this.currentWorkspaceFile = null;
 		this.closeResult = false;
@@ -1176,7 +1187,7 @@ public class MainWindow
 				WbWorkspace w  = null;
 				try
 				{
-					closeExplorerPanels();
+					removeAllPanels();
 					
 					w = new WbWorkspace(realFilename, false);
 					int entryCount = w.getEntryCount();
@@ -1207,7 +1218,6 @@ public class MainWindow
 						// the stateChanged event will be ignored as we
 						// have the repainting for the tab suspended
 						sqlTab.setSelectedIndex(newIndex);
-//						tabSelected(newIndex);
 					}
 					closeResult = true;
 				}
@@ -1219,14 +1229,8 @@ public class MainWindow
 				finally
 				{
 					try { w.close(); } catch (Throwable th) {}
-//					sqlTab.setSuspendRepaint(false);
 				}
 
-//				SqlPanel p = getCurrentSqlPanel();
-//				if (p != null)
-//				{
-//					p.getEditor().scrollToCaret();
-//				}
 				validate();
 				updateWindowTitle();
 				checkWorkspaceActions();
@@ -1260,6 +1264,11 @@ public class MainWindow
 				{
 					workspaceFilename = null;
 					aProfile.setWorkspaceFile(null);
+				}
+				else
+				{
+					// start with an empty workspace
+					resetWorkspace();
 				}
 			}
 
@@ -1366,7 +1375,7 @@ public class MainWindow
 	{
 		this.currentProfile = null;
 		this.currentConnection = null;
-
+    this.resetWorkspace();
 		this.setMacroMenuEnabled(false);
 		this.updateWindowTitle();
 		this.disconnectAction.setEnabled(false);
@@ -1744,12 +1753,27 @@ public class MainWindow
 		}
 	}
 
+	protected void removeAllPanels()
+	{
+		try
+		{
+			while (this.sqlTab.getTabCount() > 0)
+			{
+				removeTab(0);
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("MainWindow.removeAllPanels()", "Error when removing all panels", e);
+		}
+	}
+	
 	public void closeExplorerPanels()
 	{
 		final int index = this.findFirstExplorerTab();
 		if (index < 0) return;
 		final int count = this.sqlTab.getTabCount();
-		for (int i=index; i < count; i++)
+		for (int i=count - 1; i >= count; i--)
 		{
 			removeTab(i);
 		}
@@ -1788,11 +1812,9 @@ public class MainWindow
 		}
 	}
 
-	public ConnectionProfile getCurrentProfile() { return this.currentProfile; }
-	public String getCurrentProfileName()
-	{
-		if (this.currentProfile == null) return null;
-		return this.currentProfile.getName();
+	public ConnectionProfile getCurrentProfile() 
+	{ 
+		return this.currentProfile; 
 	}
 
 	public JMenu buildHelpMenu()
@@ -2011,8 +2033,6 @@ public class MainWindow
 		});
 	}
 	
-	private boolean shutdownWorkspace = false;
-	
 	/**
 	 *	Closes the current workspace.
 	 *  The tab count is reset to 1, the SQL history for the tab will be emptied
@@ -2022,26 +2042,25 @@ public class MainWindow
 	{
 		this.currentWorkspaceFile = null;
 		this.isProfileWorkspace = false;
+
+		if (checkUnsaved)
+		{
+			int count = this.sqlTab.getTabCount();
+			for (int i=0; i < count; i++)
+			{
+				MainPanel p = getSqlPanel(i);
+				if (p.canCloseTab()) return;
+			}
+		}
 		
 		try
 		{
-			if (!checkUnsaved) 
-			{
-				shutdownWorkspace = true;
-			}
-			this.closeExplorerPanels();
-			this.adjustTabCount(1);
-			this.resetTabTitles();
-			SqlPanel sql = (SqlPanel)this.getSqlPanel(0);
-			sql.clearSqlHistory(true);
+			this.removeAllPanels();
+			this.addTab(true, false);
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("MainWindow.closeWorkspace()", "Error when resetting workspace", e);
-		}
-		finally
-		{
-			shutdownWorkspace = false;
 		}
 		this.updateWindowTitle();
 		this.checkWorkspaceActions();
@@ -2124,7 +2143,7 @@ public class MainWindow
 				for (int i=0; i < count; i++)
 				{
 					MainPanel p = (MainPanel)this.sqlTab.getComponentAt(i);
-					if (!p.prepareWorkspaceSaving()) return false;
+					if (!p.canCloseTab()) return false;
 				}
 			}
 			w = new WbWorkspace(realFilename, true);
@@ -2193,18 +2212,6 @@ public class MainWindow
 	{
 		return this.addTab(true, true, true);
 	}
-//
-//	/**
-//	 *	Adds a new SQL tab to the main window. This will be inserted
-//	 *	before the DbExplorer (if that is displayed as a tab)
-//	 *
-//	 *  @param selectNew if true the new tab is automatically selected
-//	 *
-//	 */
-//	public MainPanel addTab(boolean selectNew)
-//	{
-//		return this.addTab(selectNew, true);
-//	}
 
 	/**
 	 *	Adds a new SQL tab to the main window. This will be inserted
@@ -2295,7 +2302,7 @@ public class MainWindow
 				index --;
 			}
 		}
-		this.removeTab(index);
+		this.closeTab(index);
 	}
 
 	public boolean canCloseTab()
@@ -2333,7 +2340,7 @@ public class MainWindow
 	{
 		if (!canCloseTab()) return;
 		int index = this.sqlTab.getSelectedIndex();
-		this.removeTab(index);
+		this.closeTab(index);
 	}
 
 	private void renumberTabs()
@@ -2415,16 +2422,22 @@ public class MainWindow
 	 * triggered as well. This disconnect will be started in a
 	 * background thread.
 	 */
-	public void removeTab(int index)
+	public void closeTab(int index)
+	{
+		MainPanel panel = this.getSqlPanel(index);
+		if (panel == null) return;
+		if (!panel.canCloseTab()) return;
+		removeTab(index);
+	}
+	
+	/**
+	 * Removes the indicated tab without checking for modified file etc.
+	 */
+	protected void removeTab(int index)
 	{
 		MainPanel panel = this.getSqlPanel(index);
 		if (panel == null) return;
 
-		if (panel instanceof SqlPanel && !shutdownWorkspace)
-		{
-			boolean ok = ((SqlPanel)panel).checkAndSaveFile();
-			if (!ok) return;
-		}
 		int newTab = -1;
 
 		boolean inProgress = this.isConnectInProgress();
@@ -2481,6 +2494,7 @@ public class MainWindow
 		{
 			this.tabSelected(newTab);
 		}
+		return;
 	}
 
 	public void mouseClicked(MouseEvent e)

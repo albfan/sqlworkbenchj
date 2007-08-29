@@ -139,7 +139,8 @@ public class WbManager
 			Constructor cons = cls.getConstructor(types);
 			Object[] args = new Object[] { owner };
 			dialog = (JDialog)cons.newInstance(args);
-			
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
 			Class[] noArgs = new Class[] {};
 			Method m = cls.getMethod("showProfileHelp", noArgs);
 			if (m != null)
@@ -151,6 +152,14 @@ public class WbManager
 		catch (Exception ex)
 		{
 			LogMgr.logError("WbManager.showDialog()", "Error when creating help viewer", ex);
+		}
+		finally
+		{
+			if (dialog != null)
+			{
+				dialog.dispose();
+				dialog = null;
+			}
 		}
 	}
 	
@@ -167,12 +176,21 @@ public class WbManager
 			Constructor cons = cls.getConstructor(types);
 			Object[] args = new Object[] { parent };
 			dialog = (JDialog)cons.newInstance(args);
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			WbSwingUtilities.center(dialog, parent);
 			dialog.setVisible(true);
 		}
 		catch (Exception ex)
 		{
 			LogMgr.logError("WbManager.showDialog()", "Error when creating dialog " + clazz, ex);
+		}
+		finally
+		{
+			if (dialog != null)
+			{
+				dialog.dispose();
+				dialog = null;
+			}
 		}
 	}
 
@@ -563,6 +581,8 @@ public class WbManager
 	{
 		if (parent == null) return;
 		this.closeMessage = new JDialog(parent, false);
+		this.closeMessage.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
 		JPanel p = new JPanel();
 		p.setBorder(WbSwingUtilities.BEVEL_BORDER_RAISED);
 		p.setLayout(new BorderLayout());
@@ -616,6 +636,7 @@ public class WbManager
 				{
 					closeMessage.setVisible(false);
 					closeMessage.dispose();
+					closeMessage = null;
 				}
 				closeAllWindows();
 			}
