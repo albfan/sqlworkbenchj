@@ -55,6 +55,7 @@ import workbench.storage.PkMapping;
 import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
 import workbench.util.ToolDefinition;
+import workbench.util.WbLocale;
 import workbench.util.WbProperties;
 
 
@@ -231,6 +232,25 @@ public class Settings
 	public void setLanguage(Locale locale)
 	{
 		setProperty("workbench.gui.language", locale.getLanguage());
+	}
+	
+	public List<WbLocale> getLanguages()
+	{
+		String prop = getProperty("workbench.gui.languages.available", "en,de");
+		List<String> codes = StringUtil.stringToList(prop, ",", true, true, false);
+		List<WbLocale> result = new ArrayList<WbLocale>(codes.size());
+		for (String c : codes)
+		{
+			try
+			{
+				result.add(new WbLocale(new Locale(c)));
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("Settings.getLanguages()", "Invalid locale specified: " + c, e);
+			}
+		}
+		return result;
 	}
 	
 	public Locale getLanguage()

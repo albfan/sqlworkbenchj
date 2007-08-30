@@ -13,6 +13,8 @@ package workbench.gui.tools;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +59,7 @@ public class ColumnMapper
 	private boolean allowTargetEditing = false;
 	protected boolean allowSourceEditing = false;
 
-	public static final SkipColumnIndicator SKIP_COLUMN = new SkipColumnIndicator();
+  static final SkipColumnIndicator SKIP_COLUMN = new SkipColumnIndicator();
 
 	public ColumnMapper()
 	{
@@ -71,23 +73,21 @@ public class ColumnMapper
 		this.adjustKeyColumn();
 	}
 
-//	public void setSourceColumnsWidth(int width)
-//	{
-//		TableColumnModel m = this.columnDisplay.getColumnModel();
-//		TableColumn c = m.getColumn(0);
-//		c.setWidth(width);
-//		c.setPreferredWidth(width);
-//	}
-	
 	private void adjustKeyColumn()
 	{
 		TableColumnModel colMod = this.columnDisplay.getColumnModel();
 		TableColumn col = colMod.getColumn(2);
-		int width = 30;
-		col.setMinWidth(width);
-		col.setMaxWidth(width);
-		col.setPreferredWidth(width);
+		Font f = this.columnDisplay.getTableHeader().getFont();
+		FontMetrics fm = this.columnDisplay.getTableHeader().getFontMetrics(f);
+		String label = colMod.getColumn(2).getHeaderValue().toString();
+		int width = fm.stringWidth(label);
+		int addWidth = fm.stringWidth("WWWW");
+		col.setMinWidth(width + addWidth);
+		col.setMaxWidth(width + addWidth);
+		//col.setPreferredWidth(width);
 	}
+	
+	
 	public void resetData()
 	{
 		if (this.columnDisplay.getModel() != EMPTY_DATA_MODEL)
@@ -182,10 +182,8 @@ public class ColumnMapper
 
 	public ColumnIdentifier findSourceColumnByName(String aName)
 	{
-		int count = this.sourceColumns.size();
-		for (int i=0; i < count; i++)
+		for (ColumnIdentifier col : this.sourceColumns)
 		{
-			ColumnIdentifier col = (ColumnIdentifier)this.sourceColumns.get(i);
 			if (col.getColumnName().equalsIgnoreCase(aName)) return col;
 		}
 		return null;
@@ -243,7 +241,7 @@ public class ColumnMapper
 	public List<ColumnIdentifier> getMappingForImport()
 	{
 		int count = this.sourceColumns.size();
-		ArrayList result = new ArrayList(count);
+		ArrayList<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(count);
 		ColumnIdentifier skipId = new ColumnIdentifier(RowDataProducer.SKIP_INDICATOR);
 		for (int i=0; i < count; i++)
 		{
@@ -263,7 +261,7 @@ public class ColumnMapper
 		return result;
 	}
 	
-	public MappingDefinition getMapping()
+	protected MappingDefinition getMapping()
 	{
 		int count = this.mapping.length;
 		int realCount = 0;
@@ -301,7 +299,7 @@ public class ColumnMapper
 		return def;
 	}
 
-	static class MappingDefinition
+	public static class MappingDefinition
 	{
 		public ColumnIdentifier[] sourceColumns;
 		public ColumnIdentifier[] targetColumns;

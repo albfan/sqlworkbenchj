@@ -587,7 +587,7 @@ public class DbExplorerPanel
 		return this.dbConnection;
 	}
 
-	private void reset()
+	public void reset()
 	{
 		this.tables.reset();
 		this.procs.reset();
@@ -897,6 +897,7 @@ public class DbExplorerPanel
 	{
 		this.schemaFromWorkspace = null;
 		this.catalogFromWorkspace = null;
+		this.reset();
 		try
 		{
 			WbProperties p = w.getSettings();
@@ -909,7 +910,7 @@ public class DbExplorerPanel
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("DbExplorerPanel.readFromWorkspace()", "Error loading workspace", e);
 		}
 	}
 

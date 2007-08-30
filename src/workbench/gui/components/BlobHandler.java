@@ -27,6 +27,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Blob;
 import java.sql.SQLException;
 import workbench.WbManager;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.dialogs.BlobInfoDialog;
 import workbench.gui.dialogs.ImageViewer;
 import workbench.log.LogMgr;
@@ -281,6 +282,7 @@ public class BlobHandler
 		v.setData(value);
 		v.setVisible(true);
 	}
+	
 	public void showBlobAsText(Object value)
 	{
 		showBlobAsText(null, value, Settings.getInstance().getDefaultBlobTextEncoding());
@@ -293,12 +295,12 @@ public class BlobHandler
 	 * return true. In this case the blob value will be updated with 
 	 * the binary representation of the text using the specified encoding
 	 */
-	public boolean showBlobAsText(Dialog parent, Object value, String encoding)
+	public boolean showBlobAsText(Dialog parent, Object value, final String encoding)
 	{
 		String data = getBlobAsString(value, encoding);
 		String title = ResourceMgr.getString("TxtBlobData");
 		this.newValue = null;
-		EditWindow w;
+		final EditWindow w;
 		boolean result = false;
 		
 		if (parent != null)
@@ -309,35 +311,36 @@ public class BlobHandler
 		{
 			w = new EditWindow(WbManager.getInstance().getCurrentWindow(), title, data, false, false);
 		}
-		//w.setReadOnly();
-		w.setInfoText(ResourceMgr.getString("LblFileEncoding") + ": " + encoding);
-		try
-		{
-			w.setVisible(true);
-			if (!w.isCancelled())
-			{
-				data = w.getText();
-				try
-				{
-					if (encoding != null)
-					{
-						this.newValue = data.getBytes(encoding);
-						this.uploadFile = null;
-						result = true;
-					}
-				}
-				catch (Exception e)
-				{
-					this.newValue = null;
-					result = false;
-					LogMgr.logError("BlobHandler.showBlobAsText", "Error converting text to blob", e);
-				}
-			}
-		}
-		finally
-		{
-			w.dispose();
-		}
+		
+    WbSwingUtilities.invoke(new Runnable()
+    {
+      public void run()
+      {
+        w.setInfoText(ResourceMgr.getString("LblFileEncoding") + ": " + encoding);
+        w.setVisible(true);
+      }
+    });
+
+    if (!w.isCancelled())
+    {
+      data = w.getText();
+      try
+      {
+        if (encoding != null)
+        {
+          this.newValue = data.getBytes(encoding);
+          this.uploadFile = null;
+          result = true;
+        }
+      }
+      catch (Exception e)
+      {
+        this.newValue = null;
+        result = false;
+        LogMgr.logError("BlobHandler.showBlobAsText", "Error converting text to blob", e);
+      }
+    }
+		
 		return result;
 	}
 
@@ -364,6 +367,5 @@ public class BlobHandler
 		this.uploadFile = d.getUploadedFile();
 		this.setToNull = d.setToNull();
 		this.newValue = d.getNewValue();
-		d.dispose();
 	}
 }

@@ -209,7 +209,7 @@ public class DataPumper
 		int loc = s.getIntProperty("workbench.datapumper.divider", -1);
 		if (loc == -1)
 		{
-			loc = (int)this.jSplitPane1.getHeight() / 2;
+			loc = this.jSplitPane1.getHeight() / 2;
 			if (loc < 10) loc = 100;
 		}
 		this.jSplitPane1.setDividerLocation(loc);
@@ -1405,12 +1405,12 @@ public class DataPumper
 			return (this.sourceTable.getSelectedTable() != null);
 		}
 	}
-	private List getResultSetColumns()
+	private List<ColumnIdentifier> getResultSetColumns()
 	{
 		if (this.sourceConnection == null) return null;
 		String sql = this.sqlEditor.getText();
 
-		List result = null;
+		List<ColumnIdentifier> result = null;
 
 		try
 		{
@@ -1432,7 +1432,7 @@ public class DataPumper
 	private List<ColumnIdentifier> getKeyColumns()
 	{
 		ColumnMapper.MappingDefinition colMapping = this.columnMapper.getMapping();
-		if (colMapping == null) return Collections.EMPTY_LIST;
+		if (colMapping == null) return Collections.emptyList();
 		int count = colMapping.targetColumns.length;
 		List<ColumnIdentifier> keys = new ArrayList<ColumnIdentifier>();
 
@@ -1611,14 +1611,14 @@ public class DataPumper
 		result.append("-" + CommonArgs.ARG_CONTINUE + "=");
 		result.append(Boolean.toString(this.continueOnErrorCbx.isSelected()));
 
-		int batchSize = getBatchSize();
-		if (batchSize > 0)
+		int size = getBatchSize();
+		if (size > 0)
 		{
 			result.append(indent);
 			result.append("-" + CommonArgs.ARG_BATCHSIZE + "=" + batchSize);
 		}
 
-		if (batchSize <= 0)
+		if (size <= 0)
 		{
 			int commit = StringUtil.getIntValue(this.commitEvery.getText(), -1);
 			if (commit > 0)
@@ -1788,7 +1788,7 @@ public class DataPumper
 				if (ttable.isNewTable())
 				{
 					boolean dropTable = this.dropTargetCbx.isSelected();
-					Map mapping = new HashMap();
+					Map<String, String> mapping = new HashMap<String, String>();
 					int count = colMapping.sourceColumns.length;
 					for (int i=0; i < count; i++)
 					{
@@ -1847,14 +1847,14 @@ public class DataPumper
 		}
 		
 		this.copier.setMode(mode);
-		int batchSize = getBatchSize();
+		int bSize = getBatchSize();
 		int commit = StringUtil.getIntValue(this.commitEvery.getText(), -1);
-		if (batchSize <= 0) this.copier.setCommitEvery(commit);
+		if (bSize <= 0) this.copier.setCommitEvery(commit);
 		
-		if (batchSize > 0)
+		if (bSize > 0)
 		{
 			this.copier.setUseBatch(true);
-			this.copier.setBatchSize(batchSize);
+			this.copier.setBatchSize(bSize);
 			if (commit > 0) this.copier.setCommitBatch(true);
 		}
 		

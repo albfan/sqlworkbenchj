@@ -794,6 +794,19 @@ public class SqlPanel
 			}
 		});
 	}
+	
+	public void selectEditor()
+	{
+		// make sure the panel and its window are really visible
+		// before putting the focus to the editor
+		Window w = SwingUtilities.getWindowAncestor(this);
+		if (w == null) return;
+
+		if (w.isActive() && w.isVisible() && w.isFocused() && this.isVisible() && this.isCurrentTab() && editor != null)
+		{
+			editor.requestFocus();
+		}
+	}
 
 	public void reformatSql()
 	{
@@ -813,19 +826,6 @@ public class SqlPanel
 		if (parentTab == null) return false;
 
 		return (parentTab.getSelectedComponent() == this);
-	}
-
-	public void selectEditor()
-	{
-		// make sure the panel and its window are really visible
-		// before putting the focus to the editor
-		Window w = SwingUtilities.getWindowAncestor(this);
-		if (w == null) return;
-
-		if (w.isActive() && w.isVisible() && w.isFocused() && this.isVisible() && this.isCurrentTab() && editor != null)
-		{
-			editor.requestFocusInWindow();
-		}
 	}
 
 	public void selectResult()
@@ -1012,6 +1012,7 @@ public class SqlPanel
 			this.editor.setText("");
 		}
 
+		//this.reset();
 
 		try
 		{
@@ -3110,13 +3111,25 @@ public class SqlPanel
 		}
 	}
 
+	public void reset()
+	{
+		this.editor.reset();
+		this.clearLog();
+		this.clearResultTabs();
+		if (this.currentData != null) this.currentData.clearContent();
+		this.currentData = null;
+		if (cancelIcon != null) cancelIcon.getImage().flush();
+		if (loadingIcon != null) loadingIcon.getImage().flush();
+		if (fileIcon != null) fileIcon.getImage().flush();
+		if (fileModifiedIcon != null) fileModifiedIcon.getImage().flush();
+		if (this.sqlHistory != null) this.sqlHistory.clear();
+	}
+	
 	public void dispose()
 	{
 		Settings.getInstance().removePropertyChangeLister(this);
-		if (this.currentData != null) this.currentData.clearContent();
-		this.currentData = null;
+		reset();
 		if (this.execListener != null) execListener.clear();
-		if (this.sqlHistory != null) this.sqlHistory.clear();
 		if (this.editor != null) this.editor.dispose();
 		this.editor = null;
 		if (this.actions != null) this.actions.clear();
@@ -3128,10 +3141,6 @@ public class SqlPanel
 		this.abortExecution();
 		this.executionThread = null;
 		this.connectionInfo = null;
-		if (cancelIcon != null) cancelIcon.getImage().flush();
-		if (loadingIcon != null) loadingIcon.getImage().flush();
-		if (fileIcon != null) fileIcon.getImage().flush();
-		if (fileModifiedIcon != null) fileModifiedIcon.getImage().flush();
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)

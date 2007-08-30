@@ -16,9 +16,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -283,63 +280,6 @@ public class ResourceMgr
 		return result;
 	}
 
-	public static Collection<WbLocale> getAvailableLocales()
-	{
-		synchronized (TXT_PRODUCT_NAME)
-		{
-			if (languages == null)
-			{
-				long start = System.currentTimeMillis();
-				List<WbLocale> result = new ArrayList<WbLocale>();
-				try
-				{
-					Locale[] locales = Locale.getAvailableLocales();
-					ClassLoader cl = ResourceMgr.class.getClassLoader();
-					for (Locale l : locales)
-					{
-						String code = l.getLanguage();
-						if (!StringUtil.isEmptyString(l.getCountry()))
-						{
-							code = code + "_" + l.getCountry();
-						}
-						URL res = null;
-						try 
-						{ 
-							res = cl.getResource ("language/wbstrings_" + code + ".properties");
-						}
-						catch (Exception e)
-						{
-							res = null;
-						}
-						
-						if (res != null)
-						{
-							WbLocale wl = new WbLocale(l);
-							if (!result.contains(wl))
-							{
-								result.add(wl);
-							}
-						}
-					}
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("ResourceMgr.getAvailableLocales()", "Error retrieving locales", e);
-				}
-
-				if (result.size() == 0)
-				{
-					result.add(new WbLocale(new Locale("en")));
-				}
-				Collections.sort(result);
-				long end = System.currentTimeMillis();
-				LogMgr.logDebug("ResourceMgr.getAvailableLocales()", "Retrieving localizations took: " + (end - start) + "ms");
-				languages = Collections.unmodifiableList(result);
-			}
-			return languages;
-		}
-	}
-	
   public static ResourceBundle getResources()
   {
 		synchronized (TXT_PRODUCT_NAME)

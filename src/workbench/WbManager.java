@@ -765,21 +765,6 @@ public class WbManager
 
 	}
 
-	private void startLocalizationRetrieval()
-	{
-		// This is to speed up the initial display of the Options dialog
-		WbThread t = new WbThread("LocaleHelper")
-		{
-			public void run()
-			{
-				try { Thread.sleep(250); } catch (Throwable th) {}
-				ResourceMgr.getAvailableLocales();
-			}
-		};
-		t.setPriority(Thread.MIN_PRIORITY);
-		t.start();
-	}
-	
 	private void openNewWindow(boolean checkCmdLine)
 	{
 		final MainWindow main = this.createWindow();
@@ -1053,7 +1038,7 @@ public class WbManager
 			}
 			else
 			{
-				startLocalizationRetrieval();
+//				startLocalizationRetrieval();
 				this.openNewWindow(true);
 			}
 		}

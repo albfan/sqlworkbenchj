@@ -61,8 +61,8 @@
 	</target>
 
 	<target name="replace-build-number">
-		<replace file="${build}/language/wbstrings.properties" token="@BUILD_NUMBER@" value="${build.number}"/>
-		<replace file="${build}/language/wbstrings.properties" token="@BUILD_DATE@" value="${build_date}"/>
+		<replace dir="${build}/language" token="@BUILD_NUMBER@" value="${build.number}"/>
+		<replace dir="${build}/language" token="@BUILD_DATE@" value="${build_date}"/>
 	</target>
 	
 	<target name="set-dev-build" depends="prepare">

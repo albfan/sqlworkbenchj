@@ -52,5 +52,5 @@ public interface MainPanel
 	void readFromWorkspace(WbWorkspace w, int index) throws IOException;
 	void saveToWorkspace(WbWorkspace w, int index) throws IOException;
 	boolean canCloseTab();
-	
+	void reset();
 }

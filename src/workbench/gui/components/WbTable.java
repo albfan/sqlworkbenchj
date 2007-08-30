@@ -344,6 +344,7 @@ public class WbTable
 		adjustRowHeight();
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void adjustRowHeight()
 	{
 		Graphics g = getGraphics();

@@ -16,7 +16,3 @@ Features
 - Close button for tabs
 - Shortcuts für Macros
 - Export for OpenOffice Calc
-
-
-JUnit
------

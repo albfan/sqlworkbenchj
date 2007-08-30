@@ -1187,7 +1187,7 @@ public class MainWindow
 				WbWorkspace w  = null;
 				try
 				{
-					removeAllPanels();
+					//removeAllPanels();
 					
 					w = new WbWorkspace(realFilename, false);
 					int entryCount = w.getEntryCount();
@@ -1375,7 +1375,7 @@ public class MainWindow
 	{
 		this.currentProfile = null;
 		this.currentConnection = null;
-    this.resetWorkspace();
+    this.closeWorkspace(false);
 		this.setMacroMenuEnabled(false);
 		this.updateWindowTitle();
 		this.disconnectAction.setEnabled(false);
@@ -1757,10 +1757,12 @@ public class MainWindow
 	{
 		try
 		{
-			while (this.sqlTab.getTabCount() > 0)
+			while (sqlTab.getTabCount() > 1)
 			{
-				removeTab(0);
+				removeTab(1);
 			}
+			MainPanel p = getSqlPanel(0);
+			p.reset();
 		}
 		catch (Exception e)
 		{
@@ -2024,13 +2026,7 @@ public class MainWindow
 
 	public void closeWorkspace()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			public void run()
-			{
-				closeWorkspace(true);
-			}
-		});
+		closeWorkspace(true);
 	}
 	
 	/**
@@ -2052,18 +2048,23 @@ public class MainWindow
 				if (p.canCloseTab()) return;
 			}
 		}
-		
-		try
+
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			this.removeAllPanels();
-			this.addTab(true, false);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("MainWindow.closeWorkspace()", "Error when resetting workspace", e);
-		}
-		this.updateWindowTitle();
-		this.checkWorkspaceActions();
+			public void run()
+			{
+        try
+        {
+					removeAllPanels();
+        }
+        catch (Exception e)
+        {
+          LogMgr.logError("MainWindow.closeWorkspace()", "Error when resetting workspace", e);
+        }
+        updateWindowTitle();
+        checkWorkspaceActions();
+			}
+		});
 	}
 
 	/**

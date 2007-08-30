@@ -1,6 +1,9 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
-Enh:  (96.1) WbImport can now also import files with fixed column widts 
+Enh:  (96.1) Added support for SQLite
+Enh:  (96.1) Code completion now recognizes an alias of the outer statement 
+      inside a sub-select.
+Enh:  (96.1) WbImport can now also import files with fixed columns 
       (no delimiter) using the -columnWidths parameter
 Enh:  (96.1) The code-completion dropdown now allows multi-selection
 Enh:  (96.1) WbExport can now also write a format file for SQL Server's 
@@ -15,10 +18,33 @@ Enh:  (96.1) For DDL Statements a Savepoint can now be enabled so that
       do not require a manual rollback (e.g. Postgres). This makes the 
       option "Ignore DROP Errors" work for Postgres when not running in 
       autocommit mode.
-Fix:  (96.1) Added some missing german localizations.
+      This is controlled with the property
+      workbench.db.[dbid].ddl.usesavepoint=true
+      Running imports using the update/insert (or insert/update) mode
+      will not work with Postgres as well. SQL Workbench/J can now use a savepoint
+      to guard the first of the two statements so that the transaction can 
+      continue. This is controlled using 
+      workbench.db.[dbid].import.usesavepoint=true
+Fix:  (96.2) The column label for the key column selection in the DataPumper was
+      not readable with certain look & feels
+Fix:  (96.2) When running WbImport -header=false on an empty file, SQL Workbench/J
+      reported an error because it could not read the header line.
+Fix:  (96.1) WbCopy when used with -createTable did no re-create NOT NULL
+      constraints on the columns.
+Fix:  (96.1) Added some missing german localizations. The Version number
+      was not displayed correctly as well, when German was selected as the 
+      UI language.
 Fix:  (96.1) Search did not work in the editor if no text was selected.
 Fix:  (96.1) The parameter -trimValues for WbImport was not documented
-
+Fix:  (96.1) Fixed some problems when printing tables that spread horizontally
+      over more than one page.
+Fix:  (96.1) Fixed a race condition upon startup when the automatic update 
+      check was enabled.
+Fix:  (96.1) Fixed a race condition when closing the application which sometimes
+      caused the application process to remain in memory.
+Fix:  (96.1) The {$clobfile} syntax could not be used with Apache Derby and 
+      source files with a multi-byte encoding (such as UTF-8)
+      
 Build 96, 05.08.2007
 --------------------
 Enh:  (95.5) A German localization for the GUI is now available. The GUI 

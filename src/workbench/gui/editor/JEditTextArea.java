@@ -102,7 +102,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.75 2007-08-23 23:15:42 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.76 2007-08-30 20:21:00 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -1246,6 +1246,8 @@ public class JEditTextArea
 	
 	public void reset()
 	{
+		setText("");
+		resetModified();
 	}
 	
 	/**

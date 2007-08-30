@@ -11,7 +11,6 @@
  */
 package workbench.gui.dialogs;
 
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -20,6 +19,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.SwingUtilities;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.BlobHandler;
@@ -111,14 +111,8 @@ public class BlobInfoDialog
 
 	private void closeWindow()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				setVisible(false);
-				dispose();
-			}
-		});
+		setVisible(false);
+		dispose();
 	}
 
 	public void setBlobValue(Object value)
@@ -398,7 +392,6 @@ public class BlobInfoDialog
 			HexViewer v = new HexViewer(this, ResourceMgr.getString("TxtBlobData"));
 			v.setData(data);
 			v.setVisible(true);
-			//closeWindow();				
 		}
 		catch (Exception e)
 		{
@@ -415,7 +408,6 @@ public class BlobInfoDialog
 			// there was one.
 			this.uploadFile = null;
 		}
-		closeWindow();
 	}//GEN-LAST:event_showAsTextButtonActionPerformed
 
 	private void saveAsButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_saveAsButtonActionPerformed
@@ -441,7 +433,6 @@ public class BlobInfoDialog
 			msg += "\n" + ExceptionUtil.getDisplay(ex);
 			WbSwingUtilities.showErrorMessage(this, msg);
 		}
-		
 	}//GEN-LAST:event_saveAsButtonActionPerformed
 
 	private void uploadButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_uploadButtonActionPerformed
@@ -451,13 +442,11 @@ public class BlobInfoDialog
 		{
 			this.uploadFile = new File(file);
 		}
-		closeWindow();
 	}//GEN-LAST:event_uploadButtonActionPerformed
 
 	private void showImageButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showImageButtonActionPerformed
 	{//GEN-HEADEREND:event_showImageButtonActionPerformed
 		this.handler.showBlobAsImage(this, this.blobValue);
-		closeWindow();
 	}//GEN-LAST:event_showImageButtonActionPerformed
 
 	private void externalViewerActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_externalViewerActionPerformed

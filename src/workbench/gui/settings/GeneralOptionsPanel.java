@@ -81,7 +81,7 @@ public class GeneralOptionsPanel
 		languageDropDown.removeAllItems();
 		String currentLang = Settings.getInstance().getLanguage().getLanguage();
 		
-		Collection<WbLocale> locales = ResourceMgr.getAvailableLocales();
+		Collection<WbLocale> locales = Settings.getInstance().getLanguages();
 		int index = 0;
 		int currentIndex = -1;
 		for (WbLocale l : locales)
