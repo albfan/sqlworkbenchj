@@ -13,7 +13,6 @@ package workbench.sql.preparedstatement;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Types;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 import workbench.util.ValueConverter;

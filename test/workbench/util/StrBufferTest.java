@@ -25,7 +25,7 @@ public class StrBufferTest
 	{
 	}
 
-	public void testBuffer()
+	public void testRemove()
 	{
 		StrBuffer buffer = new StrBuffer("0123456789");
 		buffer.remove(5);
@@ -42,6 +42,10 @@ public class StrBufferTest
 		
 		buffer.append(new StringBuilder("2"));
 		assertEquals("append not working", "012", buffer.toString());
+		
+		buffer.append(null);
+		assertEquals("append not working", "012", buffer.toString());
+		
 	}
 
 }

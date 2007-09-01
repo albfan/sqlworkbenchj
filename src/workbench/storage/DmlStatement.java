@@ -27,6 +27,8 @@ import java.util.List;
 import workbench.db.WbConnection;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringIntegerCache;
+import workbench.util.StringIntegerCache;
 
 /**
  * A class to execute a SQL Statement and to create the statement
@@ -247,7 +249,7 @@ public class DmlStatement
 					result.append(',');
 					result.append(this.chrFunc);
 					result.append('(');
-					result.append(Integer.toString((int)c));
+					result.append(StringIntegerCache.getNumberString(c));
 					result.append(')');
 					quotePending = true;
 				}
@@ -260,7 +262,7 @@ public class DmlStatement
 					}
 					result.append(this.chrFunc);
 					result.append('(');
-					result.append(Integer.toString((int)c));
+					result.append(StringIntegerCache.getNumberString(c));
 					result.append(')');
 					result.append(this.concatString);
 					quotePending = true;

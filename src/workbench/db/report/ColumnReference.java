@@ -12,6 +12,7 @@
 package workbench.db.report;
 
 import workbench.util.StrBuffer;
+import workbench.util.StringIntegerCache;
 
 /**
  *
@@ -77,9 +78,9 @@ public class ColumnReference
 		tagWriter.appendTag(result, indent, ReportColumn.TAG_COLUMN_NAME, this.foreignColumn);
 		tagWriter.appendTag(result, indent, TAG_CONSTRAINT_NAME, this.fkName);
 
-		tagWriter.appendTag(result, indent, TAG_DELETE_RULE, this.deleteRule, "jdbcValue", Integer.toString(this.deleteRuleValue));
-		tagWriter.appendTag(result, indent, TAG_UPDATE_RULE, this.updateRule, "jdbcValue", Integer.toString(this.updateRuleValue));
-		tagWriter.appendTag(result, indent, TAG_DEFER_RULE, this.deferRule, "jdbcValue", Integer.toString(this.deferrableRuleValue));
+		tagWriter.appendTag(result, indent, TAG_DELETE_RULE, this.deleteRule, "jdbcValue", StringIntegerCache.getNumberString(this.deleteRuleValue));
+		tagWriter.appendTag(result, indent, TAG_UPDATE_RULE, this.updateRule, "jdbcValue", StringIntegerCache.getNumberString(this.updateRuleValue));
+		tagWriter.appendTag(result, indent, TAG_DEFER_RULE, this.deferRule, "jdbcValue", StringIntegerCache.getNumberString(this.deferrableRuleValue));
 		return result;
 	}
 	

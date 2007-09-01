@@ -340,10 +340,6 @@ public class ReportTable
 		{
 			this.columns[i].appendXml(line, colindent);
 		}
-//		if (this.mviewSource != null)
-//		{
-//			ReportView.writeSourceTag(tagWriter, line, colindent, mviewSource);
-//		}
 		if (this.reporter != null) this.reporter.appendXml(line, colindent);
 		if (this.tableConstraints != null && this.tableConstraints.length() > 0)
 		{
@@ -369,6 +365,13 @@ public class ReportTable
 	{
 		this.columns = null;
 		this.reporter.done();
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int hash = 17 * 7 + (this.table != null ? this.table.hashCode() : 0);
+		return hash;
 	}
 
 	public boolean equals(Object other)

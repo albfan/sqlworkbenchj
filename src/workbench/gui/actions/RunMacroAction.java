@@ -12,7 +12,6 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 
 import javax.swing.Action;
 
@@ -20,6 +19,7 @@ import workbench.gui.MainWindow;
 import workbench.gui.sql.SqlPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.util.StringIntegerCache;
 import workbench.util.StringUtil;
 
 /**
@@ -39,7 +39,7 @@ public class RunMacroAction extends WbAction
 		
 		if (index < 10)
 		{
-			menuTitle = "&" + Integer.toString(index) + " - " + aName;
+			menuTitle = "&" + StringIntegerCache.getNumberString(index) + " - " + aName;
 		}
 		this.setMenuText(menuTitle);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);

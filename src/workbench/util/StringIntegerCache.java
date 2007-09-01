@@ -27,14 +27,35 @@ public class StringIntegerCache
 	// for most cases. Any editor text larger than that will fall back
 	// to the objects cached in overflowMap
 	private static final int CACHE_SIZE = 1500;
-	private static String[] cache = new String[CACHE_SIZE];
+	private static final String[] cache = new String[CACHE_SIZE];
 
+	// Do not cache more than this number
 	private static final int MAX_NUMBER_TO_CACHE = 10000;
+	
+	private static final String[] hexCache = new String[256];
 	
 	private StringIntegerCache()
 	{
 	}
 
+	public static synchronized String getHexString(int value)
+	{
+		if (value > 255 || value < 0) return Integer.toHexString(value);
+		if (hexCache[value] == null)
+		{
+			if (value < 16)
+			{
+				hexCache[value] = "0" + Integer.toHexString(value);
+			}
+			else
+			{
+				hexCache[value] = Integer.toHexString(value);
+			}
+			
+		}
+		return hexCache[value];
+	}
+	
 	public static synchronized String getNumberString(int value)
 	{
 		if (value > MAX_NUMBER_TO_CACHE) return Integer.toString(value);

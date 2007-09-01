@@ -25,6 +25,7 @@ import java.util.ResourceBundle;
 import javax.swing.ImageIcon;
 
 import workbench.log.LogMgr;
+import workbench.util.StringIntegerCache;
 import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
 import workbench.util.WbLocale;
@@ -116,24 +117,24 @@ public class ResourceMgr
 
 	public static String getFormattedString(String key, int value1)
 	{
-		return MessageFormat.format(getString(key), Integer.toString(value1));
+		return MessageFormat.format(getString(key), StringIntegerCache.getNumberString(value1));
 	}
 	
 	public static String getFormattedString(String key, int value1, int value2)
 	{
 		return MessageFormat.format(getString(key), 
-			Integer.toString(value1),
-			Integer.toString(value2)
+			StringIntegerCache.getNumberString(value1),
+			StringIntegerCache.getNumberString(value2)
 			);
 	}
 	
 	public static String getFormattedString(String key, int value1, int value2, int value3, int value4)
 	{
 		return MessageFormat.format(getString(key), 
-			Integer.toString(value1),
-			Integer.toString(value2),
-			Integer.toString(value3),
-			Integer.toString(value4)
+			StringIntegerCache.getNumberString(value1),
+			StringIntegerCache.getNumberString(value2),
+			StringIntegerCache.getNumberString(value3),
+			StringIntegerCache.getNumberString(value4)
 			);
 	}
 	

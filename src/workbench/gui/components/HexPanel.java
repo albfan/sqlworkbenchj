@@ -25,6 +25,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import workbench.gui.WbSwingUtilities;
+import workbench.util.StringIntegerCache;
 
 /**
  * @author support@sql-workbench.net
@@ -88,7 +89,7 @@ public class HexPanel
 		col.setMinWidth(width);
 		col.setMaxWidth(width);
 		
-		String rowCount = Integer.toString(model.getRowCount());
+		String rowCount = StringIntegerCache.getNumberString(model.getRowCount());
 		width = fm.stringWidth(rowCount);
 		lines.setPreferredScrollableViewportSize(new Dimension(width + 5,32768));
 	}
@@ -110,7 +111,7 @@ class ByteBufferTableModel
 		labels = new String[columns + 1];
 		for (int i=0; i < columns; i++)
 		{
-			labels[i] = "0" + Integer.toHexString(i);
+			labels[i] = StringIntegerCache.getHexString(i);
 		}
 		labels[columns] = "0123456789abcdef";
 	}
@@ -165,8 +166,10 @@ class ByteBufferTableModel
 		int offset = rowIndex * columns + columnIndex;
 		if (offset >= data.length) return "";
 		int c = (data[offset] < 0 ? 256 + data[offset] : data[offset]);
-		if (c < 16) return "0" + Integer.toHexString(c);
-		else return Integer.toHexString(c);
+		return StringIntegerCache.getHexString(c);
+		
+//		if (c < 16) return "0" + Integer.toHexString(c);
+//		else return Integer.toHexString(c);
 	}
 
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex)

@@ -529,7 +529,7 @@ public class SchemaDiff
 		}
 		catch (Exception e)
 		{
-			// cannot happen
+			LogMgr.logError("SchemaDiff.getMigrateTargetXml()", "Error getting XML", e);
 		}
 		return writer.toString();
 	}

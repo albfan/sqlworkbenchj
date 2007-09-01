@@ -53,6 +53,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.util.StringIntegerCache;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 import workbench.util.WbThread;
@@ -247,7 +248,7 @@ public class DbExplorerPanel
 
 	public String getId()
 	{
-		return "WbExp-" + Integer.toString(this.internalId);
+		return "WbExp-" + StringIntegerCache.getNumberString(this.internalId);
 	}
 
 	private void readSchemas()

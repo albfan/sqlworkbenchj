@@ -128,34 +128,10 @@ public class StrBuffer
 		}
 	}
 
-//	/**
-//	 * Appends the argument string to this string buffer.
-//	 *
-//	 * @param   str   a string.
-//	 * @return  this StrBuffer
-//	 */
-//	public StrBuffer append(String str)
-//	{
-//		if (str == null) return this;
-//		int oldlen = str.length();
-//		if (oldlen == 0) return this;
-//		if (oldlen == 1)
-//		{
-//			return this.append(str.charAt(0));
-//		}
-//		int newlen = this.numchar + oldlen;
-//		if (newlen > this.charData.length)
-//		{
-//			moreStorage(newlen);
-//		}
-//		str.getChars(0, oldlen, this.charData, this.numchar);
-//		this.numchar = newlen;
-//		return this;
-//	}
-
 	/**
-	 *	This is exposed, so that the StrBuffer
-	 *	can be used when writing to a Writer
+	 * This is exposed, so that the StrBuffer
+	 * can be used when writing to a Writer without
+	 * the need to copy the char[] array
 	 */
 	public char[] getBuffer()
 	{
@@ -169,7 +145,7 @@ public class StrBuffer
 
 	public StrBuffer append(int i)
 	{
-		return this.append(Integer.toString(i));
+		return this.append(StringIntegerCache.getNumberString(i));
 	}
 
 	public StrBuffer append(char[] buf, int start, int len)
@@ -264,19 +240,15 @@ public class StrBuffer
 		return this;
 	}
 
-//	public StrBuffer append(StringBuilder b)
-//	{
-//		int len = b.length();
-//		int newlen = this.numchar + len;
-//		if (newlen > this.charData.length) moreStorage(newlen);
-//		b.getChars(0, len, this.charData, numchar);
-//		this.numchar = newlen;
-//		return this;
-//	}
-
 	public StrBuffer append(CharSequence s)
 	{
+		if (s == null) return this;
 		int len = s.length();
+		if (len == 0) return this;
+		if (len == 1)
+		{
+			return this.append(s.charAt(0));
+		}		
 		int newlen = this.numchar + len;
 		if (newlen > this.charData.length) moreStorage(newlen);
 		for (int i=0; i < len; i++)
