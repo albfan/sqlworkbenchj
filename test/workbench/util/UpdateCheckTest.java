@@ -26,6 +26,7 @@ public class UpdateCheckTest extends TestCase
 		super(testName);
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void testNeedCheck()
 	{
 		try

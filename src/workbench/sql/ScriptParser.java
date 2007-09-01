@@ -449,7 +449,7 @@ public class ScriptParser
 	 */
 	private void parseCommands()
 	{
-		this.commands = new ArrayList();
+		this.commands = new ArrayList<ScriptCommandDefinition>();
 		IteratingScriptParser p = new IteratingScriptParser();
 		configureParserInstance(p);
 		p.setScript(this.originalScript);

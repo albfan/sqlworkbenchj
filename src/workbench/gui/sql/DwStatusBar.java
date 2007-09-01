@@ -258,7 +258,7 @@ public class DwStatusBar
 		if (millis < 1000)
 			return "0s";
 		else if (millis <= 60000)
-			return Long.toString((long)(millis / 1000)) + "s";
+			return Long.toString((millis / 1000)) + "s";
 		else
 			return timeFormatter.format(new java.util.Date(millis));
 	}
@@ -279,7 +279,7 @@ public class DwStatusBar
 		
 		if (millis < oneMinute)
 		{
-			double time = (double)(millis/1000.0);
+			double time = (millis / 1000.0);
 			synchronized (this.numberFormatter)
 			{
 				this.execTime.setText(numberFormatter.format(time));
@@ -303,13 +303,22 @@ public class DwStatusBar
 		}
 		this.execTime.repaint();
 	}
+
+//  protected String _countMsg;
+//	protected Runnable rowCountSetter = new Runnable()
+//	{
+//		public void run()
+//		{
+//			tfRowCount.setText(_countMsg);
+//		}
+//	};
 	
 	public void setRowcount(int start, int end, int count)
 	{
 		final StringBuilder s = new StringBuilder(20);
 		if (count > 0)
 		{
-			// for some reason the dynamic layout does not leave enough
+			// for some reason the layout manager does not leave enough
 			// space to the left of the text, so we'll add some space here
 			s.append(' ');
 			s.append(start);
@@ -319,37 +328,39 @@ public class DwStatusBar
 			s.append(count);
 		}
 		tfRowCount.setText(s.toString());
-		this.doRepaint();
+		tfRowCount.repaint();
+//		synchronized (rowCountSetter)
+//		{
+//      _countMsg = s.toString();
+//      //tfRowCount.setText(s.toString());
+//			WbSwingUtilities.invoke(rowCountSetter);
+//		}
 	}
 	
 	public void clearRowcount()
 	{
-		this.tfRowCount.setText("");
-		this.doRepaint();
+		tfRowCount.setText("");
+		tfRowCount.repaint();
+		
+//		synchronized (rowCountSetter)
+//		{
+//      _countMsg = "";
+//      //this.tfRowCount.setText("");
+//			WbSwingUtilities.invoke(rowCountSetter);
+//		}
 	}
 
-	protected void doRepaint()
-	{
-		this.invalidate();
-		this.validate();
-	}
+//	protected void doRepaint()
+//	{
+//		this.invalidate();
+//		this.validate();
+//	}
 	
 	public String getText() { return this.tfStatus.getText(); }
 
-	// As I need to ensure that tfStatus.setText() is executed
-	// on the AWT I'm pre-creating the necessary Runnable to avoid
-	// creating a new Object each time setStatusMessage() is called.
-	protected String _newMsg;
-	protected Runnable textSetter = new Runnable()
-	{
-		public void run()
-		{
-			tfStatus.setText(_newMsg);
-		}
-	};
-	
 	/**
 	 *	Show a message in the status panel.
+	 * 
 	 *	This method might be called from within a background thread, so we
 	 *  need to make sure the actual setText() stuff is called on the AWT
 	 *  thread in order to update the GUI correctly.
@@ -358,8 +369,7 @@ public class DwStatusBar
 	public void setStatusMessage(final String aMsg)
 	{
 		if (aMsg == null) return;
-		_newMsg = aMsg;
-		WbSwingUtilities.invoke(textSetter);
+		tfStatus.setText(aMsg);
 	}
 	
 	/**
@@ -434,7 +444,7 @@ public class DwStatusBar
 		if (e.getButton() == MouseEvent.BUTTON1)
 		{
 			ActionEvent evt = new ActionEvent(this, -1, "notifierClicked");
-			this.notificationHandler.actionPerformed(evt);;
+			this.notificationHandler.actionPerformed(evt);
 		}
 	}
 	

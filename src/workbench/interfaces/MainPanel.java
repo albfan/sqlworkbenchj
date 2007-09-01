@@ -14,7 +14,6 @@ package workbench.interfaces;
 import java.awt.Font;
 import java.io.IOException;
 import java.util.List;
-import java.util.Properties;
 import javax.swing.JTabbedPane;
 
 import workbench.db.WbConnection;

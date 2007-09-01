@@ -90,5 +90,31 @@ public class WbTabbedPane
 	{
 		super.fireStateChanged();
 	}
+
+//	@Override
+//	@SuppressWarnings("deprecation")
+//	public boolean isManagingFocus()
+//	{
+//		return false;
+//	}
+
+	@Override
+	public boolean isRequestFocusEnabled()
+	{
+		return false;
+	}
+
+	@Override
+	@SuppressWarnings("deprecation")
+	public boolean isFocusTraversable()
+	{
+		return false;
+	}
+
+	@Override
+	public boolean isFocusable()
+	{
+		return false;
+	}
 	
 }

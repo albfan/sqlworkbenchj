@@ -13,7 +13,6 @@ package workbench.sql.commands;
 
 import java.sql.SQLException;
 
-import workbench.db.WbConnection;
 import workbench.sql.formatter.SQLLexer;
 import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;

@@ -394,7 +394,7 @@ public class WbManager
 		// Disable bold fonts for the Default Metal Look & Feel
 		System.setProperty("swing.boldMetal", "false");
 		UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
-		
+
 		this.initializeLookAndFeel();
 		
 		Settings settings = Settings.getInstance();

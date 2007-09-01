@@ -233,8 +233,7 @@ public class TableListPanel
 				}
 				finally
 				{
-					dbConnection.setBusy(true);
-					
+					dbConnection.setBusy(false);
 				}
 			}
 		};

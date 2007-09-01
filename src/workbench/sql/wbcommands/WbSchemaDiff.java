@@ -241,7 +241,7 @@ public class WbSchemaDiff
 				}
 				if (excludeTables != null)
 				{
-					List l = StringUtil.stringToList(excludeTables, ",", true);
+					List<String> l = StringUtil.stringToList(excludeTables, ",", true);
 					diff.setExcludeTables(l);
 				}
 				diff.compareAll();
@@ -250,7 +250,7 @@ public class WbSchemaDiff
 			{
 				if (excludeTables != null)
 				{
-					List l = StringUtil.stringToList(excludeTables, ",", true);
+					List<String> l = StringUtil.stringToList(excludeTables, ",", true);
 					diff.setExcludeTables(l);
 				}
 				diff.setSchemas(refSchema, targetSchema);
@@ -259,7 +259,7 @@ public class WbSchemaDiff
 		else if (tarTables == null)
 		{
 			List<String> rl = StringUtil.stringToList(refTables, ",", true, true);
-			List<TableIdentifier> tables = new ArrayList(rl.size());
+			List<TableIdentifier> tables = new ArrayList<TableIdentifier>(rl.size());
 			String ttype = this.currentConnection.getMetadata().getTableTypeName();
 			for (String tname : rl)
 			{

@@ -53,6 +53,7 @@ public class OracleObjectCompiler
 		this.lastError = null;
 		try
 		{
+			this.dbConnection.setBusy(true);
 			this.stmt.executeUpdate(sql);
 			return true;
 		}

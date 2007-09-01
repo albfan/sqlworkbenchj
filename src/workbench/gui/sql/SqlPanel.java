@@ -784,28 +784,46 @@ public class SqlPanel
 		editor.getActionMap().setParent(am);
 	}
 
-	public void selectEditorLater()
-	{
-		EventQueue.invokeLater(new Runnable()
+	private Runnable selector = new Runnable()
 		{
 			public void run()
 			{
-				selectEditor();
+				_selectEditor();
 			}
-		});
+		};
+		
+	public void selectEditorLater()
+	{
+		EventQueue.invokeLater(selector);
 	}
 	
 	public void selectEditor()
 	{
+		WbSwingUtilities.invoke(selector);
+	}
+	
+	protected void _selectEditor()
+	{
 		// make sure the panel and its window are really visible
 		// before putting the focus to the editor
+		// otherwise requestFocusInWindow() would bring the window to
+		// front, which we do not want
 		Window w = SwingUtilities.getWindowAncestor(this);
 		if (w == null) return;
 
-		if (w.isActive() && w.isVisible() && w.isFocused() && this.isVisible() && this.isCurrentTab() && editor != null)
+		if (w.isActive() && w.isVisible() && w.isFocused() && this.isCurrentTab() && editor != null)
 		{
-			editor.requestFocus();
+			editor.requestFocusInWindow();
 		}
+//		else
+//		{
+//			System.out.println("editor not selected! " + this.getId());
+//			System.out.println("isActive=" + w.isActive());
+//			System.out.println("w.isVisible=" + w.isVisible());
+//			System.out.println("w.isFocused=" + w.isFocused());
+//			System.out.println("this.visible=" + this.isVisible());
+//			System.out.println("currentTabl=" + this.isCurrentTab());
+//		}
 	}
 
 	public void reformatSql()
@@ -1500,7 +1518,8 @@ public class SqlPanel
 
 	public void setCancelState(final boolean aFlag)
 	{
-		this.stopAction.setEnabled(aFlag);
+		//this.stopAction.setEnabled(aFlag);
+		setActionState(stopAction, aFlag);
 	}
 
 	/**
@@ -1508,15 +1527,21 @@ public class SqlPanel
 	 */
 	public void setActionState(final Action anAction, final boolean aFlag)
 	{
-		anAction.setEnabled(aFlag);
+		setActionState(new Action[] { anAction }, aFlag);
 	}
 
 	public void setActionState(final Action[] anActionList, final boolean aFlag)
 	{
-		for (int i=0; i < anActionList.length; i++)
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			anActionList[i].setEnabled(aFlag);
-		}
+			public void run()
+			{
+        for (int i=0; i < anActionList.length; i++)
+        {
+          anActionList[i].setEnabled(aFlag);
+        }
+			}
+		});
 	}
 
 	private String getStatementAtCursor()
@@ -2057,6 +2082,17 @@ public class SqlPanel
 	}
 
 	private void updateProxiedActions()
+	{
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				_updateProxiedActions();
+			}
+		});
+	}
+	
+	private void _updateProxiedActions()
 	{
 		if (this.currentData == null)
 		{

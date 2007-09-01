@@ -33,6 +33,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.storage.DmlStatement;
 import workbench.storage.RowData;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
@@ -119,11 +120,11 @@ public class VariablePool
 	
 	public String replacePrompts(String sql)
 	{
-		Set vars = this.getPromptVariables(sql, false);
+		Set<String> vars = this.getPromptVariables(sql, false);
 		return this.replaceParameters(vars, sql, true);
 	}
 	
-	public String replacePrompts(Set vars, String sql)
+	public String replacePrompts(Set<String> vars, String sql)
 	{
 		return this.replaceParameters(vars, sql, true);
 	}
@@ -149,12 +150,12 @@ public class VariablePool
 		return m.find();
 	}
 	
-	private Set getPromptVariables(String sql, boolean includeConditional)
+	private Set<String> getPromptVariables(String sql, boolean includeConditional)
 	{
-		if (sql == null) return Collections.EMPTY_SET;
+		if (sql == null) return Collections.emptySet();
 		Matcher m = this.promptPattern.matcher(sql);
-		if (m == null) return Collections.EMPTY_SET;
-		Set variables = new TreeSet();
+		if (m == null) return Collections.emptySet();
+		Set<String> variables = new TreeSet<String>();
 		synchronized (this.data)
 		{
 			while (m.find())
@@ -202,7 +203,7 @@ public class VariablePool
 			{
 				String key = (String)itr.next();
 				if (!this.data.containsKey(key)) continue;
-				String value = (String)this.data.get(key);
+				String value = this.data.get(key);
 				int row = vardata.addRow();
 				vardata.setValue(row, 0, key);
 				vardata.setValue(row, 1, value);
@@ -218,7 +219,7 @@ public class VariablePool
 		if (varName == null) return null;
 		synchronized (this.data)
 		{
-			return (String)this.data.get(varName);
+			return this.data.get(varName);
 		}
 	}
 
@@ -433,9 +434,9 @@ class VariableDataStore
 		this.setUpdateTable(TABLE_ID);
 	}
 	
-	public List getUpdateStatements(WbConnection aConn)
+	public List<DmlStatement> getUpdateStatements(WbConnection aConn)
 	{
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 	
 	public boolean hasPkColumns() { return true; }

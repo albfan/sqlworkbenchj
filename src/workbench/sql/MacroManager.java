@@ -241,6 +241,7 @@ public class MacroManager
 		return f;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void loadMacros()
 	{
 		try

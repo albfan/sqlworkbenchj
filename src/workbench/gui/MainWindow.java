@@ -40,6 +40,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
@@ -780,17 +781,17 @@ public class MainWindow
 			public void run()
 			{
 				updateGuiForTab(anIndex);
-				selectCurrentEditor();
+//				selectCurrentEditor();
 			}
 		});
 	}
 
-	private void updateGuiForTab(int anIndex)
+	protected void updateGuiForTab(int anIndex)
 	{
 		if (anIndex < 0) return;
 
 		Container content = this.getContentPane();
-		MainPanel current = this.getCurrentPanel();
+		final MainPanel current = this.getCurrentPanel();
 		if (current == null) return;
 
 		JMenuBar menu = this.panelMenus.get(anIndex);
@@ -801,9 +802,15 @@ public class MainWindow
 		if (this.currentToolbar != null) content.remove(this.currentToolbar);
 		this.currentToolbar = current.getToolbar();
 		content.add(this.currentToolbar, BorderLayout.NORTH);
-		current.panelSelected();
 		this.checkMacroMenuForPanel(anIndex);
 		this.checkViewMenu(anIndex);
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				current.panelSelected();
+			}
+		});
 	}
 
 	private void tabSelected(final int anIndex)
@@ -830,6 +837,7 @@ public class MainWindow
 			this.checkConnectionForPanel(current);
 		}
 	}
+	
 	protected void updateAddMacroAction()
 	{
 		MainPanel current = this.getCurrentPanel();
@@ -1051,7 +1059,6 @@ public class MainWindow
 		this.newDbExplorerWindow.setEnabled(true);
 
 		this.disconnectAction.setEnabled(true);
-		selectCurrentEditor();
 		this.getCurrentPanel().clearLog();
 		this.getCurrentPanel().showResultPanel();
 
@@ -1060,6 +1067,7 @@ public class MainWindow
 		{
 			this.getCurrentPanel().showLogMessage(warn);
 		}
+		selectCurrentEditor();
 	}
 
 	public void connectFailed(String error)
@@ -1408,14 +1416,6 @@ public class MainWindow
 			success = false;
 		}
 		return success;
-	}
-
-	public void selectCurrentEditorLater()
-	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run() { selectCurrentEditor(); }
-		});
 	}
 
 	public void selectCurrentEditor()
@@ -2334,7 +2334,7 @@ public class MainWindow
 		{
 			this.setTabTitle(index, newName);
 		}
-		this.selectCurrentEditorLater();
+//		this.selectCurrentEditorLater();
 	}
 
 	public void removeTab()

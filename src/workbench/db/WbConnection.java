@@ -35,6 +35,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
 import workbench.sql.preparedstatement.PreparedStatementPool;
+import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -466,23 +467,24 @@ public class WbConnection
 		try
 		{
 			if (this.metaData != null) this.metaData.close();
-			this.metaData = null;
 			if (this.sqlConnection != null) this.sqlConnection.close();
-			this.sqlConnection = null;
-			
-			if (Settings.getInstance().getProperty("workbench.db.driver.log", null) != null)
-			{
-				PrintWriter pw = DriverManager.getLogWriter();
-				if (pw != null) 
-				{
-					try { pw.close(); } catch (Throwable th) {}
-				}
-			}
 		}
 		catch (Throwable th)
 		{
 			LogMgr.logWarning("WbConnection.close()", "Error when closing connection", th);
 		}
+		finally
+		{
+  		this.metaData = null;
+			this.sqlConnection = null;
+		}
+		
+    if (Settings.getInstance().getProperty("workbench.db.driver.log", null) != null)
+    {
+      PrintWriter pw = DriverManager.getLogWriter();
+			FileUtil.closeQuitely(pw);
+    }
+		
 	}
 
 	public boolean isClosed()

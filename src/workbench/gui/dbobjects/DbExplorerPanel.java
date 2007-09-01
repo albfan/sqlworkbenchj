@@ -589,10 +589,10 @@ public class DbExplorerPanel
 
 	public void reset()
 	{
-		this.tables.reset();
-		this.procs.reset();
-		this.searchPanel.reset();
-		this.tabPane.setSelectedIndex(0);
+		if (this.tables != null) this.tables.reset();
+		if (this.procs != null) this.procs.reset();
+		if (this.searchPanel != null) this.searchPanel.reset();
+		if (this.tabPane != null && this.tabPane.getTabCount() > 0) this.tabPane.setSelectedIndex(0);
 	}
 
 	public void disconnect()
@@ -927,7 +927,7 @@ public class DbExplorerPanel
 		{
 			this.initConnection();
 		}
-		if (this.schemaRetrievePending)
+		if (this.isVisible() && this.schemaRetrievePending)
 		{
 			this.readSchemas();
 		}

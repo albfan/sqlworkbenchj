@@ -81,7 +81,7 @@ public class WbTextLabel
 			int w = fm.stringWidth(this.text);
 			textX = this.getWidth() - w - 4;
 		}
-		this.repaint();
+		repaint();
 	}
 	
 	public void paint(Graphics g)

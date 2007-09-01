@@ -236,7 +236,7 @@ public class SqlFormatter
 	private void appendNewline()
 	{
 		if (this.result.length() == 0) return;
-		this.result.append(this.NL);
+		this.result.append(SqlFormatter.NL);
 		if (this.indent != null) this.result.append(indent);
 	}
 
@@ -564,7 +564,7 @@ public class SqlFormatter
 		String s = f.getFormattedSql();
 		if (f.getRealLength() < this.maxSubselectLength)
 		{
-			s = s.replaceAll(" *" + this.NL + " *", " ");
+			s = s.replaceAll(" *" + SqlFormatter.NL + " *", " ");
 		}
 		this.appendText(s.trim());
 	}
@@ -877,7 +877,7 @@ public class SqlFormatter
 		if (len == 0) return true;
 		
 		// simulates endsWith() on a StringBuilder
-		int pos = result.lastIndexOf(this.NL);
+		int pos = result.lastIndexOf(SqlFormatter.NL);
 		if (pos == len - NL.length()) return true; 
 		
 		// Current text does not end with a newline, but

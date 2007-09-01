@@ -569,11 +569,10 @@ public class WbSwingUtilities
 		return "KeyCode: 0x" + Integer.toString(keyCode, 16);
 	}
 
-	protected static void callRepaint(final Component c, final boolean doLayout)
+	protected static void callRepaint(final Component c)
 	{
 		c.validate();
 		c.repaint();
-		if (doLayout) c.doLayout();
 	}
 	
 	public static void repaintNow(final Component c)
@@ -582,23 +581,18 @@ public class WbSwingUtilities
 		{
 			public void run()
 			{
-				callRepaint(c, false);
+				callRepaint(c);
 			}
 		});
 	}
 
 	public static void repaintLater(final Component c)
 	{
-		repaintLater(c, false);
-	}
-	
-	public static void repaintLater(final Component c, final boolean doLayout)
-	{
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
-				callRepaint(c, doLayout);
+				callRepaint(c);
 			}
 		});
 	}
