@@ -105,7 +105,7 @@ public class SqlUtil
 	/**
 	 * Returns the type that is beeing created e.g. TABLE, VIEW, PROCEDURE
 	 */
-	public static String getCreateType(String sql)
+	public static String getCreateType(CharSequence sql)
 	{
 		try
 		{
@@ -204,7 +204,7 @@ public class SqlUtil
 	/**
 	 *  Returns the SQL Verb for the given SQL string.
 	 */
-	public static String getSqlVerb(String sql)
+	public static String getSqlVerb(CharSequence sql)
 	{
 		if (StringUtil.isEmptyString(sql)) return "";
 		

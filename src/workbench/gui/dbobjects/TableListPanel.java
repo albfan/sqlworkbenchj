@@ -1152,7 +1152,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			String sql = "";
+			CharSequence sql = "";
 
 			DbMetadata meta = this.dbConnection.getMetadata();
 			DbSettings dbs = this.dbConnection.getDbSettings();
@@ -1194,7 +1194,7 @@ public class TableListPanel
 							sb.append(nl);
 							sb.append(nl);
 							sb.append(tableSql);
-							sql = sb.toString();
+							sql = sb;
 						}
 					}
 					catch (Exception e)
@@ -1220,7 +1220,7 @@ public class TableListPanel
 				if (this.shouldRetrieveImportedTree) this.retrieveImportedTables();
 				sql = meta.getTableSource(selectedTable, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore(), true, null);
 			}
-			final String s = sql;
+			final String s = (sql == null ? "" : sql.toString());
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()

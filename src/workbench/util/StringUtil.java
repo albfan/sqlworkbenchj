@@ -117,7 +117,7 @@ public class StringUtil
 		}
 		return true;
 	}
-
+	
 	public static String rtrim(String s)
 	{
 		if (s == null) return s;

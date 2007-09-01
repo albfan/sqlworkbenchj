@@ -12,11 +12,14 @@
 package workbench.gui.lnf;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  * Retrieve and store LnF definitions in the the Settings object
@@ -28,15 +31,8 @@ public class LnFManager
 	
 	public LnFManager()
 	{
-		LookAndFeelInfo[] info = UIManager.getInstalledLookAndFeels();
-
-		for (int i = 0; i < info.length; i++)
-		{
-			LnFDefinition lnf = new LnFDefinition(info[i].getName(), info[i].getClassName());
-			lnfList.add(lnf);
-		}
-
 		Settings set = Settings.getInstance();
+		
 		int count = set.getIntProperty("workbench.lnf.count", 0);
 		for (int i = 0; i < count; i++)
 		{
@@ -49,16 +45,39 @@ public class LnFManager
 				lnfList.add(lnf);
 			}
 		}
+
+		// The Liquid Look & Feel "installs" itself as a System L&F and if 
+		// activated is returned in getInstalledLookAndFeels(). To avoid 
+		// a duplicate entry we check this before adding a "system" look and feel
+		LookAndFeelInfo[] info = UIManager.getInstalledLookAndFeels();
+
+		for (int i = 0; i < info.length; i++)
+		{
+			LnFDefinition lnf = new LnFDefinition(info[i].getName(), info[i].getClassName());
+			if (!lnfList.contains(lnf))
+			{
+				lnfList.add(lnf);
+			}
+		}
+		Comparator<LnFDefinition> nameComp = new Comparator<LnFDefinition>()
+		{
+			public int compare(LnFDefinition first, LnFDefinition second)
+			{
+				return StringUtil.compareStrings(first.getName(), second.getName(), true);
+			}
+		};
+		Collections.sort(lnfList, nameComp);
 	}
 	
-	public void removeDefinition(int index)
+	public void removeDefinition(LnFDefinition lnf)
 	{
-		LnFDefinition def = lnfList.get(index);
-		if (!def.isBuiltInLnF())
+		if (lnf == null) return;
+		if (!lnf.isBuiltInLnF())
 		{
-			this.lnfList.remove(index);
+			this.lnfList.remove(lnf);
 		}
 	}
+	
 	public LnFDefinition getCurrentLnF()
 	{
 		LookAndFeel lnf = UIManager.getLookAndFeel();
@@ -103,19 +122,26 @@ public class LnFManager
 		}
 	}
 	
-	public List getAvailableLookAndFeels()
+
+	/**
+	 * returns all LnFs defined in the system. This is 
+	 * a combined list of built-in LnFs and user-defined
+	 * LnFs
+	 * 
+	 * @return all available Look and Feels
+	 * @see workbench.gui.lnf.LnFDefinition#isBuiltInLnF()
+	 */
+	public List<LnFDefinition> getAvailableLookAndFeels()
 	{
-		return lnfList;
+		return Collections.unmodifiableList(lnfList);
 	}
 	
 	public LnFDefinition findLookAndFeel(String className)
 	{
 		if (className == null) return null;
-		List allLnf = getAvailableLookAndFeels();
 		
-		for (int i = 0; i < allLnf.size(); i++)
+		for (LnFDefinition lnf : lnfList)
 		{
-			LnFDefinition lnf = (LnFDefinition)allLnf.get(i);
 			if (lnf.getClassName().equals(className))
 			{
 				return lnf;

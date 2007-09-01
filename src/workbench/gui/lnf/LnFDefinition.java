@@ -21,6 +21,7 @@ import workbench.util.StringUtil;
  * @author support@sql-workbench.net
  */
 public class LnFDefinition
+	implements Comparable<LnFDefinition>
 {
 	private String name;
 	private String className;
@@ -99,5 +100,34 @@ public class LnFDefinition
 	{
 		return new LnFDefinition(getName(), getClassName(), getLibrary());
 	}
+
+	public int compareTo(LnFDefinition o)
+	{
+		String cls = o.getClassName();
+		return this.className.compareTo(cls);
+	}
+	
+	@Override
+	public boolean equals(Object o)
+	{
+		if (o instanceof LnFDefinition)
+		{
+			LnFDefinition other = (LnFDefinition)o;
+			return this.className.equals(other.className);
+		}
+		if (o instanceof String)
+		{
+			return this.className.equals((String)o);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return this.className.hashCode();
+	}
+
+	
 	
 }

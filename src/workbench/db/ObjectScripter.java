@@ -149,7 +149,7 @@ public class ObjectScripter
 			Map.Entry entry = (Map.Entry)itr.next();
 			Object key = entry.getKey();
 			String type = (String)entry.getValue();
-			String source = null;
+			CharSequence source = null;
 			
 			if (!type.equalsIgnoreCase(typeFilter)) continue;
 			
@@ -173,7 +173,7 @@ public class ObjectScripter
 					{
 						source = meta.getTableSource(tbl, true, false);
 					}
-					else if (TYPE_VIEW.equalsIgnoreCase(type))
+					else if (TYPE_VIEW.equalsIgnoreCase(type) || TYPE_MVIEW.equalsIgnoreCase(type))
 					{
 						source = meta.getExtendedViewSource(tbl, false);
 					}
@@ -188,10 +188,6 @@ public class ObjectScripter
 					else if (TYPE_SELECT.equalsIgnoreCase(type))
 					{
 						source = this.getDefaultSelect(tbl);
-					}
-					else if (TYPE_MVIEW.equalsIgnoreCase(type))
-					{
-						source = meta.getExtendedViewSource(tbl, false);
 					}
 					else if (TYPE_SEQUENCE.equalsIgnoreCase(type))
 					{

@@ -56,10 +56,12 @@ public class ViewDiff
 		boolean indexDifferent = false;
 		boolean createView = (target == null);
 		
-		String tagToUse = TAG_CREATE_VIEW;
-
-		String refSource = reference.getViewSource();
-		String targetSource = (target == null ? null : target.getViewSource());
+		CharSequence s = null;
+		
+		s = reference.getViewSource();
+		String refSource = (s == null ? null : s.toString());
+		s = (target == null ? null : target.getViewSource());
+		String targetSource = (s == null ? null : s.toString());
 		
 		if (targetSource != null)
 		{

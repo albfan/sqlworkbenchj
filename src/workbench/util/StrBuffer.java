@@ -128,30 +128,30 @@ public class StrBuffer
 		}
 	}
 
-	/**
-	 * Appends the argument string to this string buffer.
-	 *
-	 * @param   str   a string.
-	 * @return  this StrBuffer
-	 */
-	public StrBuffer append(String str)
-	{
-		if (str == null) return this;
-		int oldlen = str.length();
-		if (oldlen == 0) return this;
-		if (oldlen == 1)
-		{
-			return this.append(str.charAt(0));
-		}
-		int newlen = this.numchar + oldlen;
-		if (newlen > this.charData.length)
-		{
-			moreStorage(newlen);
-		}
-		str.getChars(0, oldlen, this.charData, this.numchar);
-		this.numchar = newlen;
-		return this;
-	}
+//	/**
+//	 * Appends the argument string to this string buffer.
+//	 *
+//	 * @param   str   a string.
+//	 * @return  this StrBuffer
+//	 */
+//	public StrBuffer append(String str)
+//	{
+//		if (str == null) return this;
+//		int oldlen = str.length();
+//		if (oldlen == 0) return this;
+//		if (oldlen == 1)
+//		{
+//			return this.append(str.charAt(0));
+//		}
+//		int newlen = this.numchar + oldlen;
+//		if (newlen > this.charData.length)
+//		{
+//			moreStorage(newlen);
+//		}
+//		str.getChars(0, oldlen, this.charData, this.numchar);
+//		this.numchar = newlen;
+//		return this;
+//	}
 
 	/**
 	 *	This is exposed, so that the StrBuffer
@@ -264,16 +264,30 @@ public class StrBuffer
 		return this;
 	}
 
-	public StrBuffer append(StringBuilder b)
+//	public StrBuffer append(StringBuilder b)
+//	{
+//		int len = b.length();
+//		int newlen = this.numchar + len;
+//		if (newlen > this.charData.length) moreStorage(newlen);
+//		b.getChars(0, len, this.charData, numchar);
+//		this.numchar = newlen;
+//		return this;
+//	}
+
+	public StrBuffer append(CharSequence s)
 	{
-		int len = b.length();
+		int len = s.length();
 		int newlen = this.numchar + len;
 		if (newlen > this.charData.length) moreStorage(newlen);
-		b.getChars(0, len, this.charData, numchar);
+		for (int i=0; i < len; i++)
+		{
+			this.charData[i + numchar] = s.charAt(i);
+		}
+		//b.getChars(0, len, this.charData, numchar);
 		this.numchar = newlen;
 		return this;
 	}
-
+	
 	/**
 	 * Returns a new string based on the contents of this StrBuffer.
 	 *

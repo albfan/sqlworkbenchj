@@ -65,7 +65,6 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.db.hsqldb.HsqlConstraintReader;
 import workbench.db.firebird.FirebirdConstraintReader;
@@ -725,7 +724,7 @@ public class DbMetadata
 		return type;
 	}
 	
-	public String getExtendedViewSource(TableIdentifier tbl, boolean includeDrop)
+	public CharSequence getExtendedViewSource(TableIdentifier tbl, boolean includeDrop)
 		throws SQLException
 	{
 		return this.getExtendedViewSource(tbl, null, includeDrop);
@@ -734,7 +733,7 @@ public class DbMetadata
 	/**
 	 * Returns a complete SQL statement to (re)create the given view.
 	 */
-	public String getExtendedViewSource(TableIdentifier view, DataStore viewTableDefinition, boolean includeDrop)
+	public CharSequence getExtendedViewSource(TableIdentifier view, DataStore viewTableDefinition, boolean includeDrop)
 		throws SQLException
 	{
 		GetMetaDataSql sql = metaSqlMgr.getViewSourceSql();
@@ -748,7 +747,7 @@ public class DbMetadata
 		{
 			viewTableDefinition = this.getTableDefinition(view);
 		}
-		String source = this.getViewSource(view);
+		CharSequence source = this.getViewSource(view);
 		
 		if (StringUtil.isEmptyString(source)) return StringUtil.EMPTY_STRING;
 
@@ -821,7 +820,7 @@ public class DbMetadata
 		{
 			result.append("COMMIT;");
 		}
-		return result.toString();
+		return result;
 	}
 
 	/**
@@ -832,7 +831,7 @@ public class DbMetadata
 	 *
 	 *	@return the view source as stored in the database.
 	 */
-	public String getViewSource(TableIdentifier viewId)
+	public CharSequence getViewSource(TableIdentifier viewId)
 	{
 		if (viewId == null) return null;
 
@@ -841,7 +840,7 @@ public class DbMetadata
 			return oracleMetaData.getSnapshotSource(viewId);
 		}
 		
-		StrBuffer source = new StrBuffer(500);
+		StringBuilder source = new StringBuilder(500);
 		Statement stmt = null;
 		ResultSet rs = null;
 		try
@@ -868,20 +867,20 @@ public class DbMetadata
 					source.append(line.replaceAll("\r", StringUtil.EMPTY_STRING));
 				}
 			}
-			source.rtrim();
-			if (!source.endsWith(';')) source.append(';');
+			StringUtil.trimTrailingWhitespace(source);
+			if (!StringUtil.endsWith(source, ';')) source.append(';');
 		}
 		catch (Exception e)
 		{
 			LogMgr.logWarning("DbMetadata.getViewSource()", "Could not retrieve view definition for " + viewId.getTableExpression(), e);
-			source = new StrBuffer(ExceptionUtil.getDisplay(e));
+			source = new StringBuilder(ExceptionUtil.getDisplay(e));
 			if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
-		return source.toString();
+		return source;
 	}
 
 	private StringBuilder generateCreateObject(boolean includeDrop, String type, String name)
@@ -3070,7 +3069,12 @@ public class DbMetadata
 	public String getTableSource(TableIdentifier table, boolean includeDrop, boolean includeFk)
 		throws SQLException
 	{
-		if (getViewTypeName().equalsIgnoreCase(table.getType())) return getExtendedViewSource(table, includeDrop);
+		if (getViewTypeName().equalsIgnoreCase(table.getType())) 
+		{
+			CharSequence s = getExtendedViewSource(table, includeDrop);
+			if (s == null) return null;
+			return s.toString();
+		}
 		List<ColumnIdentifier> cols = getTableColumns(table);
 		DataStore index = this.getTableIndexInformation(table);
 		TableIdentifier tbl = table.createCopy();

@@ -73,7 +73,8 @@ import workbench.util.WbThread;
 
 
 /**
- * The main application "controller" for the jWorkbench
+ * The main application "controller" for the SQL Workbench/J
+ * 
  * @author  support@sql-workbench.net
  */
 public class WbManager
@@ -86,7 +87,7 @@ public class WbManager
 	private boolean batchMode = false;
 	private boolean writeSettings = true;
 	private boolean outOfMemoryOcurred = false;
-	private Thread shutdownHook = new Thread(this);
+	private WbThread shutdownHook = new WbThread(this, "ShutdownHook");
 
 	private WbManager()
 	{

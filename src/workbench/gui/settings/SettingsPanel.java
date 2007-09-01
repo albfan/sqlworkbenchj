@@ -74,10 +74,11 @@ public class SettingsPanel
 	{
 		pages = new ArrayList<OptionPanelPage>();
 		pages.add(new OptionPanelPage("GeneralOptionsPanel", "LblSettingsGeneral"));
-		pages.add(new OptionPanelPage("WindowTitleOptionsPanel", "LblSettingsWinTitle"));
 		pages.add(new OptionPanelPage("EditorOptionsPanel", "LblSettingsEditor"));
+		pages.add(new OptionPanelPage("DataFormattingOptionsPanel", "LblSettingsDataFormat"));
 		pages.add(new OptionPanelPage("DataEditOptionsPanel", "LblDataEdit"));
 		pages.add(new OptionPanelPage("DbExplorerOptionsPanel", "LblSettingsDbExplorer"));
+		pages.add(new OptionPanelPage("WindowTitleOptionsPanel", "LblSettingsWinTitle"));
 		pages.add(new OptionPanelPage("FormatterOptionsPanel", "LblSqlFormat"));
 		pages.add(new OptionPanelPage("SqlGenerationOptionsPanel", "LblSqlGeneration"));
 		pages.add(new OptionPanelPage("ExternalToolsPanel", "LblExternalTools"));

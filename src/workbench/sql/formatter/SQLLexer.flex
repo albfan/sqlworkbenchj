@@ -29,6 +29,7 @@
 package workbench.sql.formatter;
 
 import java.io.*;
+import workbench.util.CharSequenceReader;
 
 /**
  * SQLLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:
@@ -98,16 +99,22 @@ import java.io.*;
     public void reset(java.io.Reader reader, int yyline, int yychar, int yycolumn) 
       throws IOException
     {
-        yyreset(reader);
-        this.yyline = yyline;
-	this.yychar = yychar;
-	this.yycolumn = yycolumn;
+				yyreset(reader);
+				this.yyline = yyline;
+				this.yychar = yychar;
+				this.yycolumn = yycolumn;
     }
 
     public SQLLexer(String source)
     {
-	this(new StringReader(source));
+			this(new StringReader(source));
     }
+
+    public SQLLexer(CharSequence source)
+    {
+			this(new CharSequenceReader(source));
+    }
+
 %}
 
 %line

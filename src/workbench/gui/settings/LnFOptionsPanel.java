@@ -27,7 +27,6 @@ import javax.swing.event.ListSelectionListener;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.components.DividerBorder;
-import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.lnf.LnFDefinition;
 import workbench.gui.lnf.LnFManager;
@@ -35,7 +34,6 @@ import workbench.interfaces.FileActions;
 import workbench.interfaces.Restoreable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 /**
  *
@@ -50,7 +48,7 @@ public class LnFOptionsPanel
 	private LnFDefinitionPanel definitionPanel;
 	protected LnFManager manager = new LnFManager();
 	private WbToolbar toolbar;
-	
+	private DeleteListEntryAction deleteEntry = null;
 	public LnFOptionsPanel()
 	{
 		setLayout(new BorderLayout());
@@ -64,9 +62,10 @@ public class LnFOptionsPanel
 		
 		JScrollPane scroll = new JScrollPane(lnfList);
 
+		deleteEntry = new DeleteListEntryAction(this);
 		this.toolbar = new WbToolbar();
 		this.toolbar.add(new NewListEntryAction(this));
-		this.toolbar.add(new DeleteListEntryAction(this));
+		this.toolbar.add(deleteEntry);
 		toolbar.setBorder(DividerBorder.BOTTOM_DIVIDER);
 		
 		definitionPanel = new LnFDefinitionPanel();
@@ -100,9 +99,12 @@ public class LnFOptionsPanel
 	
 	public void valueChanged(ListSelectionEvent evt)
 	{
-		int index = lnfList.getSelectedIndex();
-		LnFDefinition def = (LnFDefinition)manager.getAvailableLookAndFeels().get(index);
+		LnFDefinition def = (LnFDefinition)lnfList.getSelectedValue();
 		definitionPanel.setDefinition(def);
+		if (def != null) 
+		{
+			this.deleteEntry.setEnabled(!def.isBuiltInLnF());
+		}
 	}
 
 	public void saveItem() throws Exception
@@ -111,10 +113,11 @@ public class LnFOptionsPanel
 
 	public void deleteItem() throws Exception
 	{
+		LnFDefinition def = (LnFDefinition)lnfList.getSelectedValue();
 		int index = lnfList.getSelectedIndex();
-		if (index > -1)
+		if (def != null)
 		{
-			manager.removeDefinition(index);
+			manager.removeDefinition(def);
 		}
 		if (lnfList.getModel().getSize() == 0)
 		{
@@ -137,7 +140,7 @@ public class LnFOptionsPanel
 			if (copyCurrent)
 			{
 				int index = lnfList.getSelectedIndex();
-				LnFDefinition current = (LnFDefinition)manager.getAvailableLookAndFeels().get(index);
+				LnFDefinition current = manager.getAvailableLookAndFeels().get(index);
 				def = current.createCopy();
 			}
 			else

@@ -53,7 +53,7 @@ public class ReportView
 	private String schemaNameToUse = null;
 	
 	private String namespace = null;
-	private String viewSource;
+	private CharSequence viewSource;
 	
 	public ReportView(TableIdentifier tbl)
 	{
@@ -157,7 +157,7 @@ public class ReportView
 	
 	public TableIdentifier getView() { return this.view; }
 	public String getViewComment() { return this.viewComment; }
-	public String getViewSource() { return this.viewSource; }
+	public CharSequence getViewSource() { return this.viewSource; }
 	
 	public void appendTableNameXml(StrBuffer toAppend, StrBuffer indent)
 	{
@@ -197,7 +197,7 @@ public class ReportView
 		return line;
 	}
 
-	public static final void writeSourceTag(TagWriter tagWriter, StrBuffer target, StrBuffer indent, String source)
+	public static final void writeSourceTag(TagWriter tagWriter, StrBuffer target, StrBuffer indent, CharSequence source)
 	{
 		if (source == null) return;
 		tagWriter.appendOpenTag(target, indent, TAG_VIEW_SOURCE);

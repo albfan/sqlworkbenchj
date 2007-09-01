@@ -21,7 +21,6 @@ public class StrBufferTest
 	extends TestCase
 {
 
-	/** Creates a new instance of StrBufferTest */
 	public StrBufferTest()
 	{
 	}
@@ -33,6 +32,16 @@ public class StrBufferTest
 		buffer.remove(5);
 		assertEquals("Remove not working", "01234789", buffer.toString());
 	}
+	
 
+	public void testAppend()
+	{
+		StrBuffer buffer = new StrBuffer("0");
+		buffer.append("1");
+		assertEquals("append not working", "01", buffer.toString());
+		
+		buffer.append(new StringBuilder("2"));
+		assertEquals("append not working", "012", buffer.toString());
+	}
 
 }
