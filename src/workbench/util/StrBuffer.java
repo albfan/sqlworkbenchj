@@ -145,7 +145,7 @@ public class StrBuffer
 
 	public StrBuffer append(int i)
 	{
-		return this.append(StringIntegerCache.getNumberString(i));
+		return this.append(NumberStringCache.getNumberString(i));
 	}
 
 	public StrBuffer append(char[] buf, int start, int len)

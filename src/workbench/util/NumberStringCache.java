@@ -11,34 +11,26 @@
  */
 package workbench.util;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  *
  * @author support@sql-workbench.net
  */
-public class StringIntegerCache
+public class NumberStringCache
 {
-	private static Map<Integer, String> overflowMap = new HashMap<Integer, String>(500, 0.5f);
-	
 	// As this is class is used to cache the String representation for 
-	// Line numbers in the editor, caching 1000 numbers should suffice
+	// Line numbers in the editor, caching 5000 numbers should suffice
 	// for most cases. Any editor text larger than that will fall back
 	// to the objects cached in overflowMap
-	private static final int CACHE_SIZE = 1500;
+	public static final int CACHE_SIZE = 5000;
 	private static final String[] cache = new String[CACHE_SIZE];
 
-	// Do not cache more than this number
-	private static final int MAX_NUMBER_TO_CACHE = 10000;
-	
 	private static final String[] hexCache = new String[256];
 	
-	private StringIntegerCache()
+	private NumberStringCache()
 	{
 	}
 
-	public static synchronized String getHexString(int value)
+	public static String getHexString(int value)
 	{
 		if (value > 255 || value < 0) return Integer.toHexString(value);
 		if (hexCache[value] == null)
@@ -56,29 +48,21 @@ public class StringIntegerCache
 		return hexCache[value];
 	}
 	
-	public static synchronized String getNumberString(int value)
+	public static String getNumberString(long lvalue)
 	{
-		if (value > MAX_NUMBER_TO_CACHE) return Integer.toString(value);
-		
-		String result = null;
-		if (value >= 0 && value < CACHE_SIZE)
+		if (lvalue < 0 || lvalue >= CACHE_SIZE) return Long.toString(lvalue);
+
+		int value = (int)lvalue;
+		// I'm not synchronizing this, because the worst that can 
+		// happen is, that the same number is created two or three times
+		// instead of exactly one time. 
+		// And as this is most of the time called from Swing Event Thread
+		// it is more or less a single-threaded access anyway.
+		if (cache[value] == null)
 		{
-			if (cache[value] == null)
-			{
-				cache[value] = Integer.toString(value);
-			}
-			result = cache[value];
+			cache[value] = Integer.toString(value);
 		}
-		else
-		{
-			Integer key = new Integer(value);
-			result = overflowMap.get(key);
-			if (result == null)
-			{
-				result = Integer.toString(value);
-				overflowMap.put(key, result);
-			}
-		}
-		return result;
+		return cache[value];
 	}
+	
 }

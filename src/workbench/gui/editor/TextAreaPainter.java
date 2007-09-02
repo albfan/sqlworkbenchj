@@ -25,14 +25,14 @@ import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
 import workbench.resource.Settings;
-import workbench.util.StringIntegerCache;
+import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 
 /**
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.32 2007-08-23 23:15:42 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.33 2007-09-02 09:03:57 thomas Exp $
  */
 public class TextAreaPainter 
 	extends JComponent 
@@ -116,6 +116,7 @@ public class TextAreaPainter
 	 * Returns if this component can be traversed by pressing the
 	 * Tab key. This returns false.
 	 */
+	@SuppressWarnings("deprecation")
 	public final boolean isManagingFocus()
 	{
 		return false;
@@ -343,7 +344,13 @@ public class TextAreaPainter
 				int y = textArea.lineToY(line);
 				if (this.showLineNumbers)
 				{
-					String s = StringIntegerCache.getNumberString(line);
+					// It seems that the Objects created by Integer.toString()
+					// that are passed to drawString() are nto collected
+					// correctly (as seen in the profiler). So each time
+					// the editor gets redrawn a small amount of memory is lost
+					// To workaround this, I'm caching some of the values 
+					// that are needed here.
+					String s = NumberStringCache.getNumberString(line);
 					int w = s.length() * this.gutterCharWidth;
 					gf2d.setColor(GUTTER_COLOR);
 					gf2d.drawString(s, gutterX - w, y);

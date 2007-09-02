@@ -246,7 +246,7 @@ public class SqlLiteralFormatter
 	 * @return the literal to be used in a SQL statement
 	 * @see #setProduct(String)
 	 */
-	public String getDefaultLiteral(ColumnData data)
+	public CharSequence getDefaultLiteral(ColumnData data)
 	{
 		if (data.isNull()) return "NULL";
 		

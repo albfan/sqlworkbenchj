@@ -24,7 +24,7 @@ public class PostgresBlobFormatter
 	{
 	}
 
-	public String getBlobLiteral(Object value)
+	public CharSequence getBlobLiteral(Object value)
 		throws SQLException
 	{
 		if (value == null) return null;
@@ -51,7 +51,7 @@ public class PostgresBlobFormatter
 				result.append(s);
 			}
 			result.append('\'');
-			return result.toString();
+			return result;
 		}
 		return value.toString();
 	}

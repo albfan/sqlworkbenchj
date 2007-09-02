@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.log.LogMgr;
-import workbench.util.StringIntegerCache;
 
 /**
  *
@@ -1170,7 +1169,7 @@ public class StringUtil
 	
 	public static String formatNumber(int value, int length, boolean fillRight)
 	{
-		String s = StringIntegerCache.getNumberString(value);
+		String s = NumberStringCache.getNumberString(value);
 		int l = s.length();
 		if (l >= length) return s;
 		StringBuilder result = new StringBuilder(length);

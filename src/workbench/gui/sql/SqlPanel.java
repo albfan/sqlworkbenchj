@@ -160,7 +160,7 @@ import workbench.sql.preparedstatement.StatementParameters;
 import workbench.storage.DataStore;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
-import workbench.util.StringIntegerCache;
+import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 import workbench.util.WbThread;
@@ -319,7 +319,7 @@ public class SqlPanel
 
 	public String getId()
 	{
-		return StringIntegerCache.getNumberString(this.internalId);
+		return NumberStringCache.getNumberString(this.internalId);
 	}
 
 	public void setId(int anId)
@@ -1818,14 +1818,14 @@ public class SqlPanel
 		if (errorColumn != null)
 		{
 			msg = ResourceMgr.getString("ErrColumnImportError");
-			msg = msg.replaceAll("%row%", StringIntegerCache.getNumberString(errorRow));
+			msg = msg.replaceAll("%row%", NumberStringCache.getNumberString(errorRow));
 			msg = msg.replaceAll("%column%", errorColumn);
 			msg = msg.replaceAll("%data%", dataLine);
 		}
 		else
 		{
 			msg = ResourceMgr.getString("ErrRowImportError");
-			msg = msg.replaceAll("%row%", StringIntegerCache.getNumberString(errorRow));
+			msg = msg.replaceAll("%row%", NumberStringCache.getNumberString(errorRow));
 			msg = msg.replaceAll("%data%", dataLine == null ? "(null)" : dataLine.substring(0,40) + " ...");
 		}
 
@@ -2342,7 +2342,7 @@ public class SqlPanel
 			StringBuilder finishedMsg2 = new StringBuilder(20);
 			finishedMsg2.append(' ');
 			String msg = ResourceMgr.getString("TxtScriptStatementFinished2");
-			msg = StringUtil.replace(msg, "%total%", StringIntegerCache.getNumberString(count));
+			msg = StringUtil.replace(msg, "%total%", NumberStringCache.getNumberString(count));
 			finishedMsg2.append(msg);
 
 			final int finishedSize = finishedMsg1.length() + finishedMsg2.length() + 5;
@@ -2407,7 +2407,7 @@ public class SqlPanel
 				if (statementResult.promptingWasCancelled())
 				{
 					String cancelMsg = ResourceMgr.getString("MsgSqlCancelledDuringPrompt");
-					cancelMsg = cancelMsg.replaceAll("%nr%", StringIntegerCache.getNumberString(i+1));
+					cancelMsg = cancelMsg.replaceAll("%nr%", NumberStringCache.getNumberString(i+1));
 					this.appendToLog(cancelMsg);
 					this.showLogPanel();
 					continue;
@@ -2422,7 +2422,7 @@ public class SqlPanel
 
 				StringBuilder finishedMsg = new StringBuilder(finishedSize);
 				finishedMsg.append(finishedMsg1);
-				finishedMsg.append(StringIntegerCache.getNumberString(i + 1));
+				finishedMsg.append(NumberStringCache.getNumberString(i + 1));
 				finishedMsg.append(finishedMsg2);
 				String currentMsg = finishedMsg.toString();
 

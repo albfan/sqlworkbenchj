@@ -1249,7 +1249,7 @@ public class DataStore
 		{
 			this.updateHadErrors = true;
 			
-			String esql = dml.getExecutableStatement(createLiteralFormatter(), false);
+			CharSequence esql = dml.getExecutableStatement(createLiteralFormatter(), false);
 			if (this.ignoreAllUpdateErrors)
 			{
 				LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + esql + " for row = " + row + ", error: " + e.getMessage(), null);
@@ -1260,7 +1260,7 @@ public class DataStore
 				int choice = JobErrorHandler.JOB_ABORT;
 				if (errorHandler != null)
 				{
-					choice = errorHandler.getActionOnError(rowNum, null, esql, e.getMessage());
+					choice = errorHandler.getActionOnError(rowNum, null, esql.toString(), e.getMessage());
 				}
 				if (choice == JobErrorHandler.JOB_CONTINUE)
 				{

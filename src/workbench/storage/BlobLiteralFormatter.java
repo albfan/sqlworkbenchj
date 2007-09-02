@@ -18,6 +18,6 @@ import java.sql.SQLException;
  */
 public interface BlobLiteralFormatter
 {
-	String getBlobLiteral(Object value)
+	CharSequence getBlobLiteral(Object value)
 		throws SQLException;
 }

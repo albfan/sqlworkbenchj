@@ -13,6 +13,7 @@ package workbench.storage;
 
 import java.sql.Blob;
 import java.sql.SQLException;
+import workbench.util.NumberStringCache;
 
 /**
  * @author support@sql-workbench.net
@@ -64,9 +65,10 @@ public class HexBlobFormatter
 		}
 		else
 		{
-			result = new StringBuilder(100+addSpace);
+			String s = value.toString();
+			result = new StringBuilder(s.length() + addSpace);
 			if (prefix != null) result.append(prefix);
-			result.append(value.toString());
+			result.append(s);
 		}
 		if (suffix != null) result.append(suffix);
 		return result.toString();
@@ -77,8 +79,8 @@ public class HexBlobFormatter
 		for (int i = 0; i < buffer.length; i++)
 		{
 			int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
-			String s = Integer.toHexString(c);
-			if (s.length() == 1) result.append('0');
+			String s = NumberStringCache.getHexString(c);
+
 			if (upperCase)
 				result.append(s.toUpperCase());
 			else

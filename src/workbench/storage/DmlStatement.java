@@ -27,8 +27,8 @@ import java.util.List;
 import workbench.db.WbConnection;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StringIntegerCache;
-import workbench.util.StringIntegerCache;
+import workbench.util.NumberStringCache;
+import workbench.util.NumberStringCache;
 
 /**
  * A class to execute a SQL Statement and to create the statement
@@ -175,7 +175,7 @@ public class DmlStatement
 	 * @param withSemicolon if true, a semicolon will be appended to the generated SQL
 	 * @return a SQL statement that can be executed
 	 */
-	public String getExecutableStatement(SqlLiteralFormatter literalFormatter, boolean withSemicolon)
+	public CharSequence getExecutableStatement(SqlLiteralFormatter literalFormatter, boolean withSemicolon)
 	{
 		if (this.values.size() > 0)
 		{
@@ -190,7 +190,7 @@ public class DmlStatement
 				if (c == '?' && !inQuotes && parmIndex < this.values.size())
 				{
 					ColumnData data = (ColumnData)this.values.get(parmIndex);
-					String literal = literalFormatter.getDefaultLiteral(data);
+					CharSequence literal = literalFormatter.getDefaultLiteral(data);
 					if (this.chrFunc != null && SqlUtil.isCharacterType(data.getIdentifier().getDataType()))
 					{
 						literal = this.createInsertString(literal);
@@ -204,7 +204,7 @@ public class DmlStatement
 				}
 			}
 			if (withSemicolon) result.append(';');
-			return result.toString();
+			return result;
 		}
 		else
 		{
@@ -212,7 +212,7 @@ public class DmlStatement
 		}
 	}
 
-	private String createInsertString(String aValue)
+	private CharSequence createInsertString(CharSequence aValue)
 	{
 		if (aValue == null) return null;
 		if (this.chrFunc == null) return aValue;
@@ -249,7 +249,7 @@ public class DmlStatement
 					result.append(',');
 					result.append(this.chrFunc);
 					result.append('(');
-					result.append(StringIntegerCache.getNumberString(c));
+					result.append(NumberStringCache.getNumberString(c));
 					result.append(')');
 					quotePending = true;
 				}
@@ -262,7 +262,7 @@ public class DmlStatement
 					}
 					result.append(this.chrFunc);
 					result.append('(');
-					result.append(StringIntegerCache.getNumberString(c));
+					result.append(NumberStringCache.getNumberString(c));
 					result.append(')');
 					result.append(this.concatString);
 					quotePending = true;
@@ -284,7 +284,7 @@ public class DmlStatement
 		{
 			result.append(')');
 		}
-		return result.toString();
+		return result;
 	}
 	
 	private int countParameters(String aSql)

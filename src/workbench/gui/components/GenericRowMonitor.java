@@ -17,6 +17,7 @@ import workbench.interfaces.StatusBar;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
+import workbench.util.NumberStringCache;
 
 /**
  *
@@ -30,7 +31,7 @@ public class GenericRowMonitor
 	private String currentMonitorObject;
 	private int monitorType;
 	private String objectMsg = ResourceMgr.getString("MsgProcessObject") + " ";
-	private Map typeStack = new HashMap();
+	private Map<String, TypeEntry> typeStack = new HashMap<String, TypeEntry>();
 
 	public GenericRowMonitor(StatusBar status)
 	{
@@ -64,6 +65,7 @@ public class GenericRowMonitor
 				break;
 			case RowActionMonitor.MONITOR_PROCESS:
 				this.updateMsg = ResourceMgr.getString("MsgProcessObject") + " ";
+				break;
 			case RowActionMonitor.MONITOR_PLAIN:
 				this.updateMsg = null;
 				break;
@@ -114,11 +116,11 @@ public class GenericRowMonitor
 		{
 			msg.append(this.updateMsg);
 		}
-		msg.append(currentRow);
+		msg.append(NumberStringCache.getNumberString(currentRow));
 		if (totalRows > 0)
 		{
 			msg.append('/');
-			msg.append(totalRows);
+			msg.append(NumberStringCache.getNumberString(totalRows));
 		}
 		if (this.updateMsg == null) msg.append(')');
 		statusBar.setStatusMessage(msg.toString());
@@ -140,7 +142,7 @@ public class GenericRowMonitor
 	
 	public void restoreType(String type) 
 	{
-		TypeEntry entry = (TypeEntry)typeStack.get(type);
+		TypeEntry entry = typeStack.get(type);
 		if (entry == null) return;
 		this.updateMsg = entry.msg;
 		this.currentMonitorObject = entry.obj;

@@ -70,7 +70,7 @@ import workbench.resource.Settings;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
-import workbench.util.StringIntegerCache;
+import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -956,7 +956,7 @@ public class DwPanel
 			String r = "";
 			if (errorRow > -1)
 			{
-				r = ResourceMgr.getString("TxtErrorRow").replaceAll("%row%", StringIntegerCache.getNumberString(errorRow));
+				r = ResourceMgr.getString("TxtErrorRow").replaceAll("%row%", NumberStringCache.getNumberString(errorRow));
 			}
 			msg = StringUtil.replace(msg, "%row%", r);
 		}
