@@ -88,8 +88,7 @@ public class IndexDefinition
 
   public int hashCode()
   {
-    int hash = 7;
-    hash = 71 * hash + (this.indexName != null ? this.indexName.hashCode() : 0);
+    int hash = 71 * 7 + (this.indexName != null ? this.indexName.hashCode() : 0);
     return hash;
   }
 	

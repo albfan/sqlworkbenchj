@@ -176,7 +176,7 @@ public class DataStoreTest
 			
 			DmlStatement dml = l.get(0);
 			SqlLiteralFormatter f = new SqlLiteralFormatter(con);
-			String insert = dml.getExecutableStatement(f, false);
+			CharSequence insert = dml.getExecutableStatement(f);
 			String verb = SqlUtil.getSqlVerb(insert);
 			assertEquals("Wrong statement generated", "INSERT", verb.toUpperCase());
 			String table = SqlUtil.getInsertTable(insert);
@@ -188,7 +188,7 @@ public class DataStoreTest
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
 			dml = l.get(0);
-			insert = dml.getExecutableStatement(f, false);
+			insert = dml.getExecutableStatement(f);
 			table = SqlUtil.getInsertTable(insert);
 			assertEquals("JUNIT_TEST", table);
 
@@ -198,7 +198,7 @@ public class DataStoreTest
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
 			dml = l.get(0);
-			insert = dml.getExecutableStatement(f, false);
+			insert = dml.getExecutableStatement(f);
 			table = SqlUtil.getInsertTable(insert);
 			assertEquals("junit_test", table);
 			
@@ -211,7 +211,7 @@ public class DataStoreTest
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
 			dml = l.get(0);
-			String update = dml.getExecutableStatement(f, false);
+			CharSequence update = dml.getExecutableStatement(f);
 			verb = SqlUtil.getSqlVerb(update);
 			table = SqlUtil.getUpdateTable(update);
 			assertEquals("UPDATE", verb);
@@ -223,7 +223,7 @@ public class DataStoreTest
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
 			dml = l.get(0);
-			update = dml.getExecutableStatement(f, false);
+			update = dml.getExecutableStatement(f);
 			table = SqlUtil.getUpdateTable(update);
 			assertEquals("junit_test", table);
 
@@ -233,7 +233,7 @@ public class DataStoreTest
 			assertEquals("Wrong number of update statements", 1, l.size());
 			
 			dml = l.get(0);
-			update = dml.getExecutableStatement(f, false);
+			update = dml.getExecutableStatement(f);
 			table = SqlUtil.getUpdateTable(update);
 			assertEquals("JUnit_Test", table);
 			

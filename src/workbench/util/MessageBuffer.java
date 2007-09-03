@@ -19,10 +19,11 @@ import workbench.resource.Settings;
 /**
  * A class to store messages efficiently.
  * The messages are internally stored in a LinkedList, but only up to 
- * a specified maximum number of entries (not total size!)
+ * a specified maximum number of entries (not total size in bytes)
  * 
- * If the maximum is reached {@link #getBuffer()} will add "(...)"
- * to the generated result to indicate that messages have been cut off.
+ * If the maximum is reached {@link #getBuffer()} will add "(...)" at the beginning
+ * of the generated result to indicate that messages have been cut off.
+ * 
  * This ensures that collecting warnings or errors during long running
  * jobs, does not cause an OutOfMemory error.
  * 

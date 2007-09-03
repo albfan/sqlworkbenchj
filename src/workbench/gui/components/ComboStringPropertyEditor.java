@@ -33,6 +33,7 @@ import workbench.log.LogMgr;
 /**
  *	A property editor for a String property, where the values
  *	for the field can also be selected by a dropdown
+ * 
  * @author  support@sql-workbench.net
  */
 public class ComboStringPropertyEditor 

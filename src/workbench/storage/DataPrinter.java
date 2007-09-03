@@ -23,6 +23,8 @@ import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
+ * A class to print the contents of a {@link DataStore} to a PrintStream
+ * 
  * @author support@sql-workbench.net
  */
 public class DataPrinter

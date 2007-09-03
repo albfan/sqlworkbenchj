@@ -168,7 +168,7 @@ private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 		{
 			Font df = UIManager.getDefaults().getFont("Label.font");
 			this.fontName.setFont(df);
-			this.fontName.setText(ResourceMgr.getString("LblDefaultFontIndicator"));
+			this.fontName.setText(ResourceMgr.getString("LblDefaultIndicator"));
 		}
 		else
 		{

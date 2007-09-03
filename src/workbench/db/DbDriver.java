@@ -437,22 +437,18 @@ public class DbDriver
 		};
 	}
 
-	public static Comparator getDriverClassComparator()
+	public static Comparator<DbDriver> getDriverClassComparator()
 	{
-		return new Comparator()
+		return new Comparator<DbDriver>()
 		{
-			public int compare(Object o1, Object o2)
+			public int compare(DbDriver drv1, DbDriver drv2)
 			{
-				if (o1 == null && o2 == null) return 0;
-				if (o1 == null) return -1;
-				if (o2 == null) return 1;
-				if (o1 instanceof DbDriver && o2 instanceof DbDriver)
-				{
-					String drv1 = ((DbDriver)o1).getIdentifier(); // returns driver class & name
-					String drv2 = ((DbDriver)o2).getIdentifier();
-					return drv1.compareTo(drv2);
-				}
-				return 0;
+				if (drv1 == null && drv2 == null) return 0;
+				if (drv1 == null) return -1;
+				if (drv2 == null) return 1;
+				String d1 = drv1.getIdentifier(); // returns driver class & name
+				String d2 = drv2.getIdentifier();
+				return d1.compareTo(d2);
 			}
 		};
 	}

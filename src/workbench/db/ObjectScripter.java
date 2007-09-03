@@ -259,7 +259,7 @@ public class ObjectScripter
 			}
 		}
 		DmlStatement stmt = factory.createInsertStatement(dummyData, true);
-		String sql = stmt.getExecutableStatement(f, true) + nl;
+		String sql = stmt.getExecutableStatement(f) + ";" + nl;
 		return sql;
 	}
 	

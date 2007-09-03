@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import java.awt.Color;
 import java.beans.PropertyChangeListener;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -65,6 +66,7 @@ public class ConnectionProfile
 	private String preDisconnectScript = null;
 	private String idleScript = null;
 	private long idleTime = 0;
+	private Color infoColor;
 	
 	private DelimiterDefinition alternateDelimiter;
 	
@@ -99,6 +101,25 @@ public class ConnectionProfile
 		return nextId++;
 	}
 
+	public Color getInfoDisplayColor()
+	{
+		return this.infoColor;
+	}
+	
+	public void setInfoDisplayColor(Color c)
+	{
+		if (this.infoColor == null && c == null) return;
+		if (this.infoColor != null && c != null)
+		{
+			this.changed = !this.infoColor.equals(c);
+		}
+		else
+		{
+			this.changed = true;
+		}
+		this.infoColor = c;
+	}
+	
 	public void setAlternateDelimiter(DelimiterDefinition def)
 	{
 		if (def == null && this.alternateDelimiter == null) return;

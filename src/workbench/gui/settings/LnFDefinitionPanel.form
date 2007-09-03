@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<Form version="1.0" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+<Form version="1.4" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
   <AuxValues>
     <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
@@ -30,7 +30,7 @@
         <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[50, 20]"/>
         </Property>
-        <Property name="name" type="java.lang.String" value="name"/>
+        <Property name="name" type="java.lang.String" value="name" noResource="true"/>
         <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -61,7 +61,7 @@
       <Properties>
         <Property name="columns" type="int" value="10"/>
         <Property name="horizontalAlignment" type="int" value="2"/>
-        <Property name="name" type="java.lang.String" value="className"/>
+        <Property name="name" type="java.lang.String" value="className" noResource="true"/>
       </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new StringPropertyEditor();"/>
@@ -89,7 +89,7 @@
       <Properties>
         <Property name="columns" type="int" value="10"/>
         <Property name="horizontalAlignment" type="int" value="2"/>
-        <Property name="name" type="java.lang.String" value="library"/>
+        <Property name="name" type="java.lang.String" value="library" noResource="true"/>
       </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new StringPropertyEditor();"/>

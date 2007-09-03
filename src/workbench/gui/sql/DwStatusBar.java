@@ -48,6 +48,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.EventNotifier;
 import workbench.util.NotifierEvent;
+import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 
 
@@ -277,41 +278,26 @@ public class DwStatusBar
 		
 		if (timerRunning) executionEnd();
 		
+		// Access to the formatters is not synchronized
+		// as they setExecutionTime() will not be called
+		// from multiple Threads
 		if (millis < oneMinute)
 		{
 			double time = (millis / 1000.0);
-			synchronized (this.numberFormatter)
-			{
-				this.execTime.setText(numberFormatter.format(time));
-			}
+			this.execTime.setText(numberFormatter.format(time));
 		}
 		else if (millis < oneHour)
 		{
-			synchronized (this.timeFormatter)
-			{
-				this.execTime.setText(timeFormatter.format(new java.util.Date(millis)));
-			}
+			this.execTime.setText(timeFormatter.format(new java.util.Date(millis)));
 		}
 		else
 		{
-			synchronized (this.timeFormatter)
-			{
-				long hours = (millis / oneHour);
-				long rest = millis - (hours * oneHour);
-				this.execTime.setText(Long.toString(hours) + "h " + timeFormatter.format(new java.util.Date(rest)));
-			}
+			long hours = (millis / oneHour);
+			long rest = millis - (hours * oneHour);
+			this.execTime.setText(Long.toString(hours) + "h " + timeFormatter.format(new java.util.Date(rest)));
 		}
 		this.execTime.repaint();
 	}
-
-//  protected String _countMsg;
-//	protected Runnable rowCountSetter = new Runnable()
-//	{
-//		public void run()
-//		{
-//			tfRowCount.setText(_countMsg);
-//		}
-//	};
 	
 	public void setRowcount(int start, int end, int count)
 	{
@@ -321,41 +307,22 @@ public class DwStatusBar
 			// for some reason the layout manager does not leave enough
 			// space to the left of the text, so we'll add some space here
 			s.append(' ');
-			s.append(start);
+			s.append(NumberStringCache.getNumberString(start));
 			s.append('-');
-			s.append(end);
+			s.append(NumberStringCache.getNumberString(end));
 			s.append('/');
-			s.append(count);
+			s.append(NumberStringCache.getNumberString(count));
 		}
 		tfRowCount.setText(s.toString());
 		tfRowCount.repaint();
-//		synchronized (rowCountSetter)
-//		{
-//      _countMsg = s.toString();
-//      //tfRowCount.setText(s.toString());
-//			WbSwingUtilities.invoke(rowCountSetter);
-//		}
 	}
 	
 	public void clearRowcount()
 	{
 		tfRowCount.setText("");
 		tfRowCount.repaint();
-		
-//		synchronized (rowCountSetter)
-//		{
-//      _countMsg = "";
-//      //this.tfRowCount.setText("");
-//			WbSwingUtilities.invoke(rowCountSetter);
-//		}
 	}
 
-//	protected void doRepaint()
-//	{
-//		this.invalidate();
-//		this.validate();
-//	}
-	
 	public String getText() { return this.tfStatus.getText(); }
 
 	/**

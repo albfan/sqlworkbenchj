@@ -303,11 +303,6 @@ public class DataStore
 		return this.resultInfo.getColumnClass(aColumn);
 	}
 
-//	public DecimalFormat getDefaultNumberFormatter()
-//	{
-//		return defaultNumberFormatter;
-//	}
-
 	/**
 	 * Applies a filter based on the given {@link workbench.storage.filter.FilterExpression}
 	 * to this datastore. Each row that does not satisfy the {@link workbench.storage.filter.FilterExpression#evaluate(Map)}
@@ -839,13 +834,6 @@ public class DataStore
 		this.resetStatus();
 	}
 
-	public boolean isRowNew(int aRow)
-		throws IndexOutOfBoundsException
-	{
-		RowData row = this.getRow(aRow);
-		return row.isNew();
-	}
-
 	/**
 	 *	Remove all data from the DataStore
 	 */
@@ -1189,7 +1177,7 @@ public class DataStore
 	 * @return a List of {@link workbench.storage.DmlStatement}s to be sent to the database
 	 * 
 	 * @see workbench.storage.StatementFactory
-	 * @see workbench.storage.DmlStatement#getExecutableStatement(SqlLiteralFormatter, boolean)
+	 * @see workbench.storage.DmlStatement#getExecutableStatement(SqlLiteralFormatter)
 	 */
 	public List<DmlStatement> getUpdateStatements(WbConnection aConnection)
 		throws SQLException
@@ -1249,7 +1237,7 @@ public class DataStore
 		{
 			this.updateHadErrors = true;
 			
-			CharSequence esql = dml.getExecutableStatement(createLiteralFormatter(), false);
+			CharSequence esql = dml.getExecutableStatement(createLiteralFormatter());
 			if (this.ignoreAllUpdateErrors)
 			{
 				LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + esql + " for row = " + row + ", error: " + e.getMessage(), null);
@@ -1293,7 +1281,7 @@ public class DataStore
 	 * @return the number of rows affected
 	 * 
 	 * @see workbench.storage.StatementFactory
-	 * @see workbench.storage.DmlStatement#getExecutableStatement(SqlLiteralFormatter, boolean)
+	 * @see workbench.storage.DmlStatement#getExecutableStatement(SqlLiteralFormatter)
 	 */
 	public synchronized int updateDb(WbConnection aConnection, JobErrorHandler errorHandler)
 		throws SQLException

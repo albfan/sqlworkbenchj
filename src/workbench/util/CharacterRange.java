@@ -87,7 +87,7 @@ public class CharacterRange
 		switch (typeIndex)
 		{
 			case 0:
-				return ResourceMgr.getString("LblExportRangeNone");
+				return ResourceMgr.getString("LblNone");
 			case 1:
 				return ResourceMgr.getString("LblExportRangeCtrl");
 			case 2:

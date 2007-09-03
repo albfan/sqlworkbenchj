@@ -13,6 +13,8 @@ package workbench.util;
 
 import junit.framework.*;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -33,25 +35,6 @@ public class SqlUtilTest
 
 	protected void tearDown() throws Exception
 	{
-	}
-
-	public void testTrimSemicolon()
-	{
-		String input = "hello, world";
-		String result = SqlUtil.removeTrailingSemicolon(input);
-		assertEquals(input, result);
-		
-		input = "select * from test;";
-		result = SqlUtil.removeTrailingSemicolon(input);
-		assertEquals("select * from test", result);
-
-		input = "select * from test;;;;;;";
-		result = SqlUtil.removeTrailingSemicolon(input);
-		assertEquals("select * from test", result);
-		
-		input = "delete from gaga; commit;";
-		result = SqlUtil.removeTrailingSemicolon(input);
-		assertEquals("delete from gaga; commit", result);
 	}
 	
 	public void testGetCreateType()
@@ -253,7 +236,7 @@ public class SqlUtilTest
 		
 		sql = "/* \n" + 
 					 "* $URL: some_script.sql $ \n" + 
-					 "* $Revision: 1.16 $ \n" + 
+					 "* $Revision: 1.17 $ \n" + 
 					 "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
 					 "*/ \n" + 
 					 "-- A quis Lorem consequat Aenean tellus risus convallis velit Maecenas arcu. \n" + 

@@ -11,7 +11,6 @@
  */
 package workbench.util;
 
-import java.lang.Boolean;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;

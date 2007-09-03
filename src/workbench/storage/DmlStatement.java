@@ -38,8 +38,8 @@ import workbench.util.NumberStringCache;
  */
 public class DmlStatement
 {
-	private String sql;
-	private List values;
+	private CharSequence sql;
+	private List<ColumnData> values;
 	private boolean usePrepared = true;
 	private String chrFunc;
 	private String concatString;
@@ -53,7 +53,7 @@ public class DmlStatement
 	 *	passed in aValueList. The SQL statement will be executed
 	 *	using a prepared statement.
 	 */
-	public DmlStatement(String aStatement, List aValueList)
+	public DmlStatement(CharSequence aStatement, List<ColumnData> aValueList)
 	{
 		if (aStatement == null) throw new NullPointerException();
 		int count = this.countParameters(aStatement);
@@ -66,7 +66,7 @@ public class DmlStatement
 
 		if (aValueList == null)
 		{
-			this.values = Collections.EMPTY_LIST;
+			this.values = Collections.emptyList();
 		}
 		else
 		{
@@ -89,10 +89,10 @@ public class DmlStatement
 		
 		try
 		{
-			stmt = aConnection.getSqlConnection().prepareStatement(this.sql);
+			stmt = aConnection.getSqlConnection().prepareStatement(this.sql.toString());
 			for (int i=0; i < this.values.size(); i++)
 			{
-				ColumnData data = (ColumnData)this.values.get(i);
+				ColumnData data = this.values.get(i);
 				int type = data.getIdentifier().getDataType();
 				Object value = data.getValue();
 				if (value == null || value instanceof NullValue)
@@ -172,10 +172,9 @@ public class DmlStatement
 	 *	as literals. No placeholders are used.
 	 *	This statement is executed after setUsePreparedStatement(false) is called
 	 * @param literalFormatter the Formatter for date and other literals
-	 * @param withSemicolon if true, a semicolon will be appended to the generated SQL
 	 * @return a SQL statement that can be executed
 	 */
-	public CharSequence getExecutableStatement(SqlLiteralFormatter literalFormatter, boolean withSemicolon)
+	public CharSequence getExecutableStatement(SqlLiteralFormatter literalFormatter)
 	{
 		if (this.values.size() > 0)
 		{
@@ -189,7 +188,7 @@ public class DmlStatement
 				if (c == '\'') inQuotes = !inQuotes;
 				if (c == '?' && !inQuotes && parmIndex < this.values.size())
 				{
-					ColumnData data = (ColumnData)this.values.get(parmIndex);
+					ColumnData data = this.values.get(parmIndex);
 					CharSequence literal = literalFormatter.getDefaultLiteral(data);
 					if (this.chrFunc != null && SqlUtil.isCharacterType(data.getIdentifier().getDataType()))
 					{
@@ -203,12 +202,11 @@ public class DmlStatement
 					result.append(c);
 				}
 			}
-			if (withSemicolon) result.append(';');
 			return result;
 		}
 		else
 		{
-			return (withSemicolon ? this.sql + ";" : this.sql);
+			return this.sql;
 		}
 	}
 
@@ -287,7 +285,7 @@ public class DmlStatement
 		return result;
 	}
 	
-	private int countParameters(String aSql)
+	private int countParameters(CharSequence aSql)
 	{
 		if (aSql == null) return -1;
 		boolean inQuotes = false;
@@ -307,6 +305,6 @@ public class DmlStatement
 
 	public String toString()
 	{
-		return sql;
+		return sql.toString();
 	}
 }

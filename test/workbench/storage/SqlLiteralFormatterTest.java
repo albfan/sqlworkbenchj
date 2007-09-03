@@ -14,7 +14,6 @@ package workbench.storage;
 import java.sql.Types;
 import java.util.Calendar;
 import workbench.db.ColumnIdentifier;
-import workbench.storage.ColumnData;
 
 /**
  *
@@ -47,7 +46,7 @@ public class SqlLiteralFormatterTest extends junit.framework.TestCase
 			java.sql.Time tm = new java.sql.Time(c.getTime().getTime());
 			ColumnIdentifier timecol = new ColumnIdentifier("TIME_COL", Types.TIME);
 			ColumnData data = new ColumnData(tm, timecol);
-			String literal = f.getDefaultLiteral(data);
+			CharSequence literal = f.getDefaultLiteral(data);
 			assertEquals("JDBC time incorrect", "{t '14:15:16'}", literal);
 			
 			java.sql.Date dt = new java.sql.Date(c.getTime().getTime());
@@ -88,7 +87,7 @@ public class SqlLiteralFormatterTest extends junit.framework.TestCase
 			java.sql.Time tm = new java.sql.Time(c.getTime().getTime());
 			ColumnIdentifier timecol = new ColumnIdentifier("TIME_COL", Types.TIME);
 			ColumnData data = new ColumnData(tm, timecol);
-			String literal = f.getDefaultLiteral(data);
+			CharSequence literal = f.getDefaultLiteral(data);
 			assertEquals("ANSI time incorrect", "TIME '14:15:16'", literal);
 			
 			java.sql.Date dt = new java.sql.Date(c.getTime().getTime());
@@ -129,7 +128,7 @@ public class SqlLiteralFormatterTest extends junit.framework.TestCase
 			java.sql.Date dt = new java.sql.Date(c.getTime().getTime());
 			ColumnIdentifier datecol = new ColumnIdentifier("DATE_COL", Types.DATE);
 			ColumnData data = new ColumnData(dt, datecol);
-			String literal = f.getDefaultLiteral(data);
+			CharSequence literal = f.getDefaultLiteral(data);
 			assertEquals("Oracle date incorrect", "to_date('2002-04-02', 'YYYY-MM-DD')", literal);
 
 			java.sql.Timestamp ts = new java.sql.Timestamp(c.getTime().getTime());

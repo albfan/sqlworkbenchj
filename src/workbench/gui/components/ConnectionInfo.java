@@ -17,7 +17,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
+import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -29,7 +31,8 @@ public class ConnectionInfo
 {
 	private JTextField display;
 	private WbConnection sourceConnection;
-
+	private Color defaultBackground;
+	
 	public ConnectionInfo(Color aBackground)
 	{
 		super();
@@ -39,6 +42,7 @@ public class ConnectionInfo
 		this.setLayout(new GridLayout(1,1,0,0));
 		this.add(this.display);
 
+		this.defaultBackground = aBackground;
 		this.display.setBackground(aBackground);
 		this.display.setEditable(false);
 		this.display.setBorder(null);
@@ -51,12 +55,31 @@ public class ConnectionInfo
 		{
 			this.sourceConnection.removeChangeListener(this);
 		}
+		
 		this.sourceConnection = aConnection;
+		
+		Color bkg = null;
+		
 		if (this.sourceConnection != null)
 		{
 			this.sourceConnection.addChangeListener(this);
+			ConnectionProfile p = aConnection.getProfile();
+			if (p != null)
+			{
+				bkg = p.getInfoDisplayColor();
+			}
 		}
-		this.updateDisplay();
+		
+		final Color newBackground = (bkg == null ? defaultBackground : bkg);
+		
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				display.setBackground(newBackground);
+				updateDisplay();
+			}
+		});
 	}
 
 	private void updateDisplay()

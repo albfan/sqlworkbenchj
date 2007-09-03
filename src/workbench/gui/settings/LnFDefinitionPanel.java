@@ -11,6 +11,7 @@
  */
 package workbench.gui.settings;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -356,6 +357,8 @@ public class LnFDefinitionPanel
 	{
 		public void setText(String name)
 		{
+			setBackground(Color.WHITE);
+			setForeground(Color.BLACK);
 			super.setText("<html>" + ResourceMgr.getString("LblCurrLnf") + " <b>" + name + "</b></html>");
 		}
 	}

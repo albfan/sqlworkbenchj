@@ -1,5 +1,3 @@
-package workbench.gui.editor;
-
 /*
  * SyntaxStyle.java - A simple text style class
  * Copyright (C) 1999 Slava Pestov
@@ -8,6 +6,7 @@ package workbench.gui.editor;
  * permitted, in both source and binary form, provided that this notice
  * remains intact in all source distributions of this package.
  */
+package workbench.gui.editor;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -19,7 +18,7 @@ import java.awt.Toolkit;
  * A simple text style class. It can specify the color, italic flag,
  * and bold flag of a run of text.
  * @author Slava Pestov
- * @version $Id: SyntaxStyle.java,v 1.4 2006-04-17 14:55:34 thomas Exp $
+ * @version $Id: SyntaxStyle.java,v 1.5 2007-09-03 17:13:27 thomas Exp $
  */
 public class SyntaxStyle
 {

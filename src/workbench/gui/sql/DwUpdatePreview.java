@@ -70,7 +70,8 @@ public class DwUpdatePreview
 
 			for (DmlStatement dml : stmts)
 			{
-				buffer.append(dml.getExecutableStatement(f, true));
+				buffer.append(dml.getExecutableStatement(f));
+				buffer.append(";");
 				buffer.appendNewLine();
 			}
 			

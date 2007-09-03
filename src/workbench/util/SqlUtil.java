@@ -48,7 +48,7 @@ public class SqlUtil
 	 * Removes the SQL verb of this command. The verb is defined
 	 * as the first "word" in the SQL string that is not a comment.
 	 * 
-	 * @see #getSqlVerb(String)
+	 * @see #getSqlVerb(CharSequence)
 	 */
 	public static String stripVerb(String sql)
 	{
@@ -67,13 +67,7 @@ public class SqlUtil
 		}
 		return result;
 	}
-	
-	public static String removeTrailingSemicolon(String input)
-	{
-		final Pattern p = Pattern.compile(";+$");
-		Matcher m = p.matcher(input);
-		return m.replaceAll("");
-	}
+
 	
 	public static String quoteObjectname(String object)
 	{
@@ -135,7 +129,7 @@ public class SqlUtil
 	 * If the given SQL is a DELETE [FROM] returns 
 	 * the table from which rows will be deleted
 	 */
-	public static String getDeleteTable(String sql)
+	public static String getDeleteTable(CharSequence sql)
 	{
 		try
 		{
@@ -161,7 +155,7 @@ public class SqlUtil
 	 * If the given SQL is an INSERT INTO... 
 	 * returns the target table, otherwise null
 	 */
-	public static String getInsertTable(String sql)
+	public static String getInsertTable(CharSequence sql)
 	{
 		try
 		{
@@ -184,7 +178,7 @@ public class SqlUtil
 	 * If the given SQL command is an UPDATE command, return 
 	 * the table that is updated, otherwise return null;
 	 */
-	public static String getUpdateTable(String sql)
+	public static String getUpdateTable(CharSequence sql)
 	{
 		try
 		{
@@ -240,9 +234,7 @@ public class SqlUtil
 
 		ResultInfo info = getResultInfoFromQuery(sql, conn);
 		if (info == null) return null;
-		
-		ResultSet rs = null;
-		Statement stmt = null;
+
 		int count = info.getColumnCount();
 		ArrayList<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(count);
 		for (int i = 0; i < count; i++)
@@ -397,31 +389,6 @@ public class SqlUtil
 			JOIN_KEYWORDS.add("CROSS JOIN");
 			JOIN_KEYWORDS.add("FULL JOIN");
 			JOIN_KEYWORDS.add("FULL OUTER JOIN");
-	}
-	
-	public static List<String> getReferencedTables(String sql, boolean includeAlias)
-	{
-		String verb = getSqlVerb(sql);
-		if ("SELECT".equalsIgnoreCase(verb)) 
-		{
-				return getTables(sql, includeAlias);
-		}
-		List<String> result = new ArrayList<String>(1);
-		String table = null;
-		if ("UPDATE".equalsIgnoreCase(verb))
-		{
-			table = getUpdateTable(sql);
-		}
-		else if ("UPDATE".equalsIgnoreCase(verb))
-		{
-			table = getDeleteTable(sql);
-		}
-		
-		if (table != null)
-		{
-			result.add(table);
-		}
-		return result;
 	}
 	
 	/**

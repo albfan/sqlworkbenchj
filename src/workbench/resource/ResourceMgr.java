@@ -125,19 +125,7 @@ public class ResourceMgr
 		return MessageFormat.format(getString(key), 
 			NumberStringCache.getNumberString(value1),
 			NumberStringCache.getNumberString(value2)
-			
-			);
-	}
-	
-	public static String getFormattedString(String key, int value1, int value2, int value3, int value4)
-	{
-		return MessageFormat.format(getString(key), 
-			NumberStringCache.getNumberString(value1),
-			NumberStringCache.getNumberString(value2),
-			NumberStringCache.getNumberString(value3),
-			NumberStringCache.getNumberString(value4)
-			
-			);
+		);
 	}
 	
 	public static String getFormattedString(String key, Object ... values)

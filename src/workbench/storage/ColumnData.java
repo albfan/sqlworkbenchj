@@ -16,10 +16,13 @@ import workbench.db.ColumnIdentifier;
 /**
  * A wrapper class do hold the current value of a column
  * and it's definition.
+ * 
  * The column definition is represented by a {@link workbench.db.ColumnIdentifier}
+ * 
  * The value can be any Java object
  * This is used by {@link workbench.storage.DmlStatement} to store the values
  * when creating PreparedStatements
+ * 
  * @author support@sql-workbench.net
  */
 public class ColumnData
@@ -29,6 +32,7 @@ public class ColumnData
 	
 	/**
 	 * Creates a new instance of ColumnData
+	 * 
 	 * @param value The current value of the column
 	 * @param colid The definition of the column
 	 */
