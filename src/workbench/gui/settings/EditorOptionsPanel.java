@@ -34,7 +34,6 @@ public class EditorOptionsPanel
 	{
 		initComponents();
 		editorFont.setListMonospacedOnly(true);
-		restoreSettings();
 	}
 
 	public void restoreSettings()

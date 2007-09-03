@@ -12,6 +12,7 @@
 package workbench.gui.components;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.Serializable;
@@ -43,7 +44,18 @@ public class WbColorPicker
 		this.resetButton.setEnabled(showReset);
 		this.resetButton.setVisible(showReset);
 		this.defaultLabel.setVisible(false);
-		this.samplePanel.setPreferredSize(this.selectColor.getPreferredSize());
+		Dimension d = null;
+		if (showReset)
+		{
+			d = resetButton.getPreferredSize();
+		}
+		else
+		{
+			d = selectColor.getPreferredSize();
+		}
+		d.height--;
+		d.width--;
+		this.samplePanel.setPreferredSize(d);
 		this.sampleBorder = this.samplePanel.getBorder();
 	}
 

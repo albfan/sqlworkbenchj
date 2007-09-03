@@ -78,23 +78,18 @@ public class LnFOptionsPanel
 		ListModel model = new LnfList();
 		lnfList.setModel(model);
 		lnfList.addListSelectionListener(this);
-		LnFDefinition clnf = manager.getCurrentLnF();
-		lnfList.setSelectedValue(clnf, true);
-		definitionPanel.setCurrentLookAndFeeld(clnf);
-		restoreSettings();
 	}
 	
 	public void saveSettings()
 	{
-//		int divider = splitPane.getDividerLocation();
-//		Settings.getInstance().setProperty(this.getClass().getName() + ".divider", divider);
 		manager.saveLookAndFeelDefinitions();
 	}
 	
 	public void restoreSettings()
 	{
-//		int divider = Settings.getInstance().getIntProperty(this.getClass().getName() + ".divider", 120);
-//		splitPane.setDividerLocation(divider);
+		LnFDefinition clnf = manager.getCurrentLnF();
+		lnfList.setSelectedValue(clnf, true);
+		definitionPanel.setCurrentLookAndFeeld(clnf);
 	}
 	
 	public void valueChanged(ListSelectionEvent evt)

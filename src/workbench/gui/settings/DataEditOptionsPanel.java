@@ -12,7 +12,6 @@
 package workbench.gui.settings;
 
 import javax.swing.JPanel;
-import workbench.gui.components.DividerBorder;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.WbCheckBoxLabel;
@@ -36,7 +35,6 @@ public class DataEditOptionsPanel
 	public DataEditOptionsPanel()
 	{
 		initComponents();
-		restoreSettings();
 	}
 
 	public void restoreSettings()

@@ -44,7 +44,6 @@ public class GeneralOptionsPanel
 			ResourceMgr.getString("LblUpdCheck30")
 		};
 		checkInterval.setModel(new DefaultComboBoxModel(updTypes));
-		restoreSettings();
 	}
 
 	public void restoreSettings()

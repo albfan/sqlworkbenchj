@@ -32,7 +32,6 @@ public class FormatterOptionsPanel
 	public FormatterOptionsPanel()
 	{
 		initComponents();
-		restoreSettings();
 	}
 	
 	public void restoreSettings()

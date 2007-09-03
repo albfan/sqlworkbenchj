@@ -31,7 +31,6 @@ public class DataFormattingOptionsPanel
 	public DataFormattingOptionsPanel()
 	{
 		initComponents();
-		restoreSettings();
 	}
 	
 	public void restoreSettings()

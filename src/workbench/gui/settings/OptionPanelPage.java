@@ -59,6 +59,7 @@ public class OptionPanelPage
 				Class clz = Class.forName(this.pageClass);
 				JPanel optionPanel = (JPanel)clz.newInstance();
 				this.options = (Restoreable)optionPanel;
+				this.options.restoreSettings();
 				
 				JLabel title = new JLabel(this.label);
 				title.setOpaque(true);

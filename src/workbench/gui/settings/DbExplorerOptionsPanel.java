@@ -30,7 +30,6 @@ public class DbExplorerOptionsPanel
 	public DbExplorerOptionsPanel()
 	{
 		initComponents();
-		restoreSettings();
 	}
 
 	public void saveSettings()
@@ -38,7 +37,6 @@ public class DbExplorerOptionsPanel
 		Settings set = Settings.getInstance();
 		set.setRetrieveDbExplorer(retrieveDbExplorer.isSelected());
 		set.setShowDbExplorerInMainWindow(this.showDbExplorer.isSelected());
-		//set.setStoreExplorerSchema(this.rememberSchema.isSelected());
 		set.setStoreExplorerObjectType(this.rememberObject.isSelected());
 		set.setProperty("workbench.dbexplorer.defTableType", this.defTableTypeField.getText());
 		set.setAutoGeneratePKName(autogeneratePK.isSelected());

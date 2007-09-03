@@ -41,8 +41,6 @@ public class SqlGenerationOptionsPanel
 		literalTypes.setModel(model1);
 		ComboBoxModel model2 = new DefaultComboBoxModel(types.toArray());
 		exportLiteralTypes.setModel(model2);
-		
-		restoreSettings();
 	}
 	
 	public void restoreSettings()

@@ -59,7 +59,6 @@ public class SettingsPanel
   private JPanel buttonPanel;
   private JButton cancelButton;
   private JButton helpButton;
-//  private WbSplitPane splitPane;
 	private JPanel content;
 	private JList pageList;
 	private JPanel currentPanel;
@@ -175,7 +174,6 @@ public class SettingsPanel
 
     add(content, BorderLayout.CENTER);
     add(buttonPanel, BorderLayout.SOUTH);
-
   }
 
 	private void saveSettings()

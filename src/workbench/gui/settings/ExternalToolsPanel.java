@@ -73,7 +73,21 @@ public class ExternalToolsPanel
 		add(toolbar, BorderLayout.NORTH);
 		add(scroll, BorderLayout.WEST);
 		add(definitionPanel, BorderLayout.CENTER);
-
+	}
+	
+	public void saveSettings()
+	{
+		List<ToolDefinition> l = new LinkedList<ToolDefinition>();
+		Enumeration e = this.tools.elements();
+		while (e.hasMoreElements())
+		{
+			l.add((ToolDefinition)e.nextElement());
+		}
+		Settings.getInstance().setExternalTool(l);
+	}
+	
+	public void restoreSettings()
+	{
 		tools = new DefaultListModel();
 		ToolDefinition[] t = Settings.getInstance().getAllExternalTools();
 		for (int i = 0; i < t.length; i++)
@@ -83,22 +97,6 @@ public class ExternalToolsPanel
 		toolList.setModel(tools);
 		toolList.addListSelectionListener(this);
 		toolList.setSelectedIndex(0);
-		restoreSettings();
-	}
-	
-	public void saveSettings()
-	{
-		List l = new LinkedList();
-		Enumeration e = this.tools.elements();
-		while (e.hasMoreElements())
-		{
-			l.add(e.nextElement());
-		}
-		Settings.getInstance().setExternalTool(l);
-	}
-	
-	public void restoreSettings()
-	{
 	}
 	
 	public void valueChanged(ListSelectionEvent evt)
