@@ -101,9 +101,7 @@ public class TagWriter
 	 */
 	public void appendEmptyTag(StrBuffer target, StrBuffer indent, String tag, String attribute, String attValue)
 	{
-		List<TagAttribute> att = new ArrayList<TagAttribute>(1);
-		att.add(new TagAttribute(attribute, attValue));
-		appendOpenTag(target, indent, tag, att, false);
+		appendOpenTag(target, indent, tag, false, new TagAttribute(attribute, attValue));
 		target.append("/>");
 	}
 	
@@ -114,9 +112,7 @@ public class TagWriter
 	
 	public  void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String attribute, String attValue)
 	{
-		List<TagAttribute> att = new ArrayList<TagAttribute>(1);
-		att.add(new TagAttribute(attribute, attValue));
-		appendOpenTag(target, indent, tag, att, true);
+		appendOpenTag(target, indent, tag, true, new TagAttribute(attribute, attValue));
 	}
 	
 	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String[] attributes, String[] values)
@@ -163,6 +159,24 @@ public class TagWriter
 		if (closeTag) target.append('>');
 	}
 
+	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, boolean closeTag, TagAttribute ... attributes)		
+	{
+		if (indent != null) target.append(indent);
+		target.append('<');
+		if (this.xmlNamespace != null)
+		{
+			target.append(xmlNamespace);
+			target.append(':');
+		}
+		target.append(tag);
+		for (TagAttribute att : attributes)
+		{
+			target.append(' ');
+			target.append(att.getTagText());
+		}
+		if (closeTag) target.append('>');
+	}
+	
 	public  void appendCloseTag(StrBuffer target, StrBuffer indent, String tag)
 	{
 		if (indent != null) target.append(indent);

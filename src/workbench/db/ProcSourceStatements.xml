@@ -24,7 +24,7 @@
 
 	<void method="put">  
    <string>DB2/NT</string>  
-   <object class="workbench.db.GetMetaDataSql">  
+   <object id="db2_proc_source" class="workbench.db.GetMetaDataSql">  
     <void property="baseSql">  
      <string>SELECT text FROM syscat.routines</string>  
     </void>  
@@ -36,7 +36,12 @@
     </void>  
    </object>  
   </void>  
-	 
+
+	<void method="put">  
+   <string>DB2/LINUX</string>  
+   <object idref="db2_proc_source"/>
+	</void>
+
   <void method="put"> 
    <string>Oracle</string> 
    <object id="ora_proc_source" class="workbench.db.GetMetaDataSql"> 

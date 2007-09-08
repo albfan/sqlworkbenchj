@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import java.sql.SQLException;
 import java.util.List;
 import workbench.storage.DataStore;
 
@@ -23,14 +24,18 @@ public interface SequenceReader
 	/**
 	 *	Return a SQL String to recreate the given sequence
 	 */
-	String getSequenceSource(String owner, String sequence);
-
+	CharSequence getSequenceSource(String owner, String sequence);
+	void readSequenceSource(SequenceDefinition def);
+	
 	/**
 	 * 	Get a list of sequences for the given owner. The 
 	 *  contains objects of type String.
 	 */
-	public List<String> getSequenceList(String owner);
+	List<String> getSequenceList(String owner);
 	
-	public DataStore getSequenceDefinition(String owner, String sequence);
+	List<SequenceDefinition> getSequences(String owner)
+		throws SQLException;
 	
+	SequenceDefinition getSequenceDefinition(String owner, String sequence);
+	DataStore getRawSequenceDefinition(String owner, String sequence);
 }

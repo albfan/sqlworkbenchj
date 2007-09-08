@@ -14,16 +14,19 @@ package workbench.db.ibm;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.WbConnection;
-import workbench.util.ExceptionUtil;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A class to read sequence definitions from a DB2 database.
@@ -40,12 +43,58 @@ public class Db2SequenceReader
 		this.connection = conn;
 	}
 	
-	public DataStore getSequenceDefinition(String schema, String sequence)
+	public List<SequenceDefinition> getSequences(String owner)
 	{
-		StringBuilder sql = new StringBuilder(100);
-		sql.append("SELECT * FROM syscat.sequences ");
-		sql.append(" WHERE seqschema  = ? ");
-		sql.append("  AND seqname  = ? ");
+		DataStore ds = getRawSequenceDefinition(owner, null);
+		if (ds == null || ds.getRowCount() != 1) return Collections.emptyList();
+		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>(ds.getRowCount());
+		for (int row = 0; row < ds.getRowCount(); row ++)
+		{
+			result.add(createSequenceDefinition(ds, row));
+		}
+		return result;
+	}
+	
+	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
+	{
+		DataStore ds = getRawSequenceDefinition(owner, sequence);
+		if (ds == null || ds.getRowCount() != 1) return null;
+		return createSequenceDefinition(ds, 0);
+	}
+	
+	private SequenceDefinition createSequenceDefinition(DataStore ds, int row)
+	{
+		String name = ds.getValueAsString(row, "SEQNAME");
+		SequenceDefinition result = new SequenceDefinition(null, name);
+		result.setSequenceProperty("START", ds.getValue(row, "START"));
+		result.setSequenceProperty("MINVALUE", ds.getValue(row, "MINVALUE"));
+		result.setSequenceProperty("MAXVALUE", ds.getValue(row, "MAXVALUE"));
+		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT"));
+		result.setSequenceProperty("CYCLE", ds.getValue(row, "CYCLE"));
+		result.setSequenceProperty("ORDER", ds.getValue(row, "ORDER"));
+		result.setSequenceProperty("CACHE", ds.getValue(row, "CACHE"));
+		result.setSequenceProperty("DATATYPEID", ds.getValue(row, "DATATYPEID"));
+		readSequenceSource(result);
+		return result;
+	}
+	
+	public DataStore getRawSequenceDefinition(String schema, String sequence)
+	{
+		String sql ="SELECT SEQNAME, \n" +
+			"       START, \n" +
+			"       MINVALUE, \n" +
+			"       MAXVALUE, \n" +
+			"       INCREMENT, \n" +
+			"       CYCLE, \n" +
+			"       ORDER, \n" +
+			"       CACHE, \n" +
+			"       DATATYPEID  \n" +
+			"FROM   syscat.sequences \n" +
+			"WHERE seqschema = ?";
+		if (!StringUtil.isEmptyString("sequence"))
+		{
+			sql += "  AND seqname  = ? ";
+		}
 		
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -59,7 +108,7 @@ public class Db2SequenceReader
 		{
 			stmt = this.connection.getSqlConnection().prepareStatement(sql.toString());
 			stmt.setString(1, schema);
-			stmt.setString(2, sequence);
+			if (!StringUtil.isEmptyString("sequence")) stmt.setString(2, sequence);
 			rs = stmt.executeQuery();
 			result = new DataStore(rs, this.connection, true);
 		}
@@ -80,166 +129,107 @@ public class Db2SequenceReader
 	 */
 	public List<String> getSequenceList(String schema)
 	{
-		ResultSet rs = null;
-		PreparedStatement stmt = null;
+		DataStore ds = getRawSequenceDefinition(schema, null);
+		if (ds == null || ds.getRowCount() == 0) return Collections.emptyList();
 		List<String> result = new LinkedList<String>();
-		
-		StringBuilder sql = new StringBuilder(200);
-		sql.append("SELECT seqname FROM syscat.sequences WHERE seqtype = 'S' ");
-		
-		if (schema != null)
+
+		for (int row=0; row < ds.getRowCount(); row ++)
 		{
-			sql.append(" AND seqschema = ?");
-		}
-		
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("Db2SequenceReader.getSequenceList()", "Using query=\n" + sql);
-		}
-		
-		try
-		{
-			stmt = this.connection.getSqlConnection().prepareStatement(sql.toString());
-			if (schema != null) stmt.setString(1, schema);
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String seq = rs.getString(1);
-				result.add(seq);
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("OracleMetaData.getSequenceList()", "Error when retrieving sequences",e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
+			result.add(ds.getValueAsString(row, "SEQNAME"));
 		}
 		return result;
 	}
 	
-	public String getSequenceSource(String schema, String sequence)
+	public CharSequence getSequenceSource(String schema, String sequence)
 	{
-		ResultSet rs = null;
-		PreparedStatement stmt = null;
+		SequenceDefinition def = getSequenceDefinition(schema, sequence);
+		if (def == null) return null;
+		return def.getSource();
+	}
+	
+	public void readSequenceSource(SequenceDefinition def)
+	{
 		StringBuilder result = new StringBuilder(100);
-		
-		String sql ="SELECT SEQNAME, \n" +
-			"       START, \n" +
-			"       MINVALUE, \n" +
-			"       MAXVALUE, \n" +
-			"       INCREMENT, \n" +
-			"       CYCLE, \n" +
-			"       ORDER, \n" +
-			"       CACHE, \n" +
-			"       DATATYPEID  \n" +
-			"FROM   syscat.sequences \n" +
-			"WHERE seqschema = ?" +
-			"  AND seqname = ?";
-		
-		try
-		{
-			stmt = this.connection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, schema);
-			stmt.setString(2, sequence);
-			
-			String nl = Settings.getInstance().getInternalEditorLineEnding();
-			
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logInfo("Db2SequenceReader.getSequenceSource()", "Using query=\n" + sql);
-			}
-			rs = stmt.executeQuery();
-			if (rs.next())
-			{
-				result.append("CREATE SEQUENCE ");
-				result.append(rs.getString("SEQNAME"));
-				
-				BigInteger start = rs.getBigDecimal("START").toBigInteger();
-				BigInteger minvalue = rs.getBigDecimal("MINVALUE").toBigInteger();
-				BigInteger maxvalue = rs.getBigDecimal("MAXVALUE").toBigInteger();
-				long increment = rs.getLong("INCREMENT");
-				String cycle = rs.getString("CYCLE");
-				String order = rs.getString("ORDER");
-				long cache = rs.getLong("CACHE");
-				int typeid = rs.getInt("DATATYPEID");
-				
-				result.append(" AS " + typeIdToName(typeid));
-				result.append(nl + "      INCREMENT BY ");
-				result.append(increment);
-				
-				BigInteger one = new BigInteger("1");
-				BigInteger max = new BigInteger(Integer.toString(Integer.MAX_VALUE));
 
-				if (start.compareTo(one) > 0)
-				{
-					result.append(nl + "      START WITH ");
-					result.append(start);
-				}
-				
-				if (minvalue.compareTo(one) == 0)
-				{
-					result.append(nl + "      NO MINVALUE");
-				}
-				else
-				{
-					result.append(nl + "      MINVALUE ");
-					result.append(minvalue);
-				}
-				
-				if (maxvalue.compareTo(max) == -1)
-				{
-					result.append(nl + "      MAXVALUE ");
-					result.append(maxvalue);
-				}
-				else
-				{
-					result.append(nl + "      NO MAXVALUE");
-				}
-				if (cache > 0)
-				{
-					result.append(nl + "      CACHE ");
-					result.append(cache);
-				}
-				else
-				{
-					result.append(nl + "      NO CACHE");
-				}
-				result.append(nl + "      ");
-				if (cycle.equals("Y"))
-				{
-					result.append("CYCLE");
-				}
-				else
-				{
-					result.append("NO CYCLE");
-				}
-				
-				result.append(nl + "      ");
-				if (order.equals("Y"))
-				{
-					result.append("ORDER");
-				}
-				else
-				{
-					result.append("NO ORDER");
-				}
-				
-				result.append(nl);
-				result.append(';');
-			}
-		}
-		catch (Exception e)
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
+
+		result.append("CREATE SEQUENCE ");
+		result.append(def.getSequenceName());
+
+		Number start = (Number) def.getSequenceProperty("START");
+		Number minvalue = (Number) def.getSequenceProperty("MINVALUE");
+		Number maxvalue = (Number) def.getSequenceProperty("MAXVALUE");
+		Number increment = (Number) def.getSequenceProperty("INCREMENT");
+		String cycle = (String) def.getSequenceProperty("CYCLE");
+		String order = (String) def.getSequenceProperty("ORDER");
+		Number cache = (Number) def.getSequenceProperty("CACHE");
+		Number typeid = (Number) def.getSequenceProperty("typeid");
+
+		result.append(" AS " + typeIdToName(typeid.intValue()));
+		result.append(nl + "      INCREMENT BY ");
+		result.append(increment);
+
+		BigInteger one = new BigInteger("1");
+		BigInteger max = new BigInteger(Integer.toString(Integer.MAX_VALUE));
+
+		if (start.longValue() > 0)
 		{
-			LogMgr.logError("OracleMetaData.getSequenceList()", "Error when retrieving sequences",e);
-			result = new StringBuilder(ExceptionUtil.getDisplay(e));
+			result.append(nl + "      START WITH ");
+			result.append(start);
 		}
-		finally
+
+		if (minvalue.longValue() == 0)
 		{
-			SqlUtil.closeAll(rs, stmt);
+			result.append(nl + "      NO MINVALUE");
 		}
-		return result.toString();
+		else
+		{
+			result.append(nl + "      MINVALUE ");
+			result.append(minvalue);
+		}
+
+		if (maxvalue.longValue() == -1)
+		{
+			result.append(nl + "      MAXVALUE ");
+			result.append(maxvalue);
+		}
+		else
+		{
+			result.append(nl + "      NO MAXVALUE");
+		}
+		if (cache.longValue() > 0)
+		{
+			result.append(nl + "      CACHE ");
+			result.append(cache);
+		}
+		else
+		{
+			result.append(nl + "      NO CACHE");
+		}
+		result.append(nl + "      ");
+		if (cycle.equals("Y"))
+		{
+			result.append("CYCLE");
+		}
+		else
+		{
+			result.append("NO CYCLE");
+		}
+
+		result.append(nl + "      ");
+		if (order.equals("Y"))
+		{
+			result.append("ORDER");
+		}
+		else
+		{
+			result.append("NO ORDER");
+		}
+
+		result.append(nl);
+		result.append(';');
+
+		def.setSource(result);
 	}
 
 	private String typeIdToName(int id)

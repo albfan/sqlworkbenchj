@@ -107,6 +107,7 @@ public class GetMetaDataSql
 	private String getProcedureCallSql()
 	{
 		StringBuilder sql = new StringBuilder(this.baseSql);
+		sql.append(' ');
 		for (int i = 1; i < 4; i++)
 		{
 			if (schemaArgumentPos == i && this.schema != null)

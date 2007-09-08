@@ -12,9 +12,11 @@
 package workbench.db.postgres;
 
 import java.sql.DatabaseMetaData;
+import java.sql.Savepoint;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
@@ -28,6 +30,7 @@ public class PostgresProcedureReader
 	public PostgresProcedureReader(WbConnection conn)
 	{
 		super(conn);
+		this.useSavepoint = true;
 	}
 	
 	public StringBuilder getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
@@ -35,9 +38,10 @@ public class PostgresProcedureReader
 		StringBuilder source = new StringBuilder();
 		
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		
+		Savepoint sp = null;
 		try
 		{
+			sp = this.connection.setSavepoint();
 			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname);
 			source.append("CREATE OR REPLACE ");
 			
@@ -68,9 +72,12 @@ public class PostgresProcedureReader
 			source.append(nl + "RETURNS ");
 			source.append(retType);
 			source.append(nl + "AS" + nl);
+			this.connection.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
+			this.connection.rollback(sp);
+			LogMgr.logError("PostgresProcedureReader.getProcedureHeader()", "Error retrieving header", e);
 			source = StringUtil.emptyBuffer();
 		}
 		return source;

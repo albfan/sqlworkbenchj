@@ -32,6 +32,8 @@ public interface ProcedureReader
 	public final static int COLUMN_IDX_PROC_COLUMNS_COL_NAME = 0;
 	public final static int COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE = 1;
 	public final static int COLUMN_IDX_PROC_COLUMNS_DATA_TYPE = 2;
+	public final static int COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE = 3;
+	public final static int COLUMN_IDX_PROC_COLUMNS_REMARKS = 4;
 	
 	public static final String PROC_RESULT_UNKNOWN = "";
 	public static final String PROC_RESULT_YES = "RESULT";

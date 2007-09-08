@@ -11,17 +11,21 @@
  */
 package workbench.db.hsqldb;
 
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import static workbench.util.StringUtil.isEmptyString;
+
 
 /**
  * @author  support@sql-workbench.net
@@ -38,13 +42,24 @@ public class HsqlSequenceReader
 		this.useInformationSchema = HsqlMetadata.supportsInformationSchema(conn);
 	}
 
-	public DataStore getSequenceDefinition(String owner, String sequence)
+	public void readSequenceSource(SequenceDefinition def)
+	{
+		if (def == null) return;
+		CharSequence s = getSequenceSource(def.getSequenceOwner(), def.getSequenceName());
+		def.setSource(s);
+	}
+	
+	public DataStore getRawSequenceDefinition(String owner, String sequence)
 	{
 		
 		StringBuilder query = new StringBuilder(100);
-		query.append("SELECT sequence_name, dtd_identifier, maximum_value, minimum_value, increment, start_with FROM ");
+		query.append("SELECT sequence_schema, sequence_name, dtd_identifier, maximum_value, minimum_value, increment, cycle_option, start_with FROM ");
 		if (useInformationSchema) query.append("information_schema.");
-		query.append("system_sequences WHERE sequence_name = ?");
+		query.append("system_sequences");
+		if (!isEmptyString(sequence))
+		{
+			query.append(" WHERE sequence_name = ?");
+		}
 		
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -52,7 +67,7 @@ public class HsqlSequenceReader
 		try
 		{
 			stmt = this.dbConn.prepareStatement(query.toString());
-			stmt.setString(1, sequence.trim());
+			if (!isEmptyString(sequence)) stmt.setString(1, sequence.trim());
 			rs = stmt.executeQuery();
 			result = new DataStore(rs, true);
 		}
@@ -68,108 +83,84 @@ public class HsqlSequenceReader
 		return result;	
 	}
 
+	
+	public List<SequenceDefinition> getSequences(String owner)
+	{
+		DataStore ds = getRawSequenceDefinition(owner, null);
+		if (ds == null) return Collections.emptyList();
+		
+		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
+
+		for (int row = 0; row < ds.getRowCount(); row++)
+		{
+			result.add(createSequenceDefinition(ds, row));
+		}
+		return result;	
+	}
+
+	private SequenceDefinition createSequenceDefinition(DataStore ds, int row)
+	{
+		SequenceDefinition result = null;
+		
+    if (ds == null || ds.getRowCount() == 0) return null;
+
+		String name = ds.getValueAsString(row, "SEQUENCE_NAME");
+		String schema = ds.getValueAsString(row, "SEQUENCE_SCHEMA");
+		result = new SequenceDefinition(schema, name);
+		
+		result.setSequenceProperty("START_WITH", ds.getValue(row, "START_WITH"));
+		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT"));
+		result.setSequenceProperty("DTD_IDENTIFIER", ds.getValue(row, "DTD_IDENTIFIER"));
+		
+		return result;		
+	}
+	
+	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
+	{
+		DataStore ds = getRawSequenceDefinition(owner, null);
+		if (ds == null) return null;
+		return createSequenceDefinition(ds, 0);
+	}
+	
 	public List<String> getSequenceList(String owner)
 	{
-		ResultSet rs = null;
-		PreparedStatement stmt = null;
+		DataStore ds = getRawSequenceDefinition(owner, null);
+		if (ds == null) return Collections.emptyList();
+		
 		List<String> result = new LinkedList<String>();
 
-		StringBuilder query = new StringBuilder(100);
-		query.append("SELECT sequence_name FROM ");
-		if (useInformationSchema) query.append("information_schema.");
-		query.append("system_sequences");
-
-		try
+		for (int row = 0; row < ds.getRowCount(); row++)
 		{
-			stmt = this.dbConn.prepareStatement(query.toString());
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String seq = rs.getString(1);
-				if (seq != null) result.add(seq.trim());
-			}
-		}
-		catch (Throwable e)
-		{
-			LogMgr.logError("HsqlSequenceReader.getSequenceList()", "Error when retrieving sequences",e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
+			result.add(ds.getValueAsString(row, "SEQUENCE_NAME"));
 		}
 		return result;
 	}
 
-	public String getSequenceSource(String owner, String sequence)
+	public CharSequence getSequenceSource(String owner, String sequence)
 	{
-		ResultSet rs = null;
-		PreparedStatement stmt = null;
-		StringBuilder query = new StringBuilder(100);
-		query.append("SELECT sequence_name, dtd_identifier, start_with, maximum_value, increment FROM ");
-		if (useInformationSchema)
-		{
-			query.append("information_schema.");
-		}
-		query.append("system_sequences WHERE sequence_name = ?");
+		SequenceDefinition def = getSequenceDefinition(owner, sequence);
+		
 		StringBuilder result = new StringBuilder(100);
 		result.append("CREATE SEQUENCE ");
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		try
+		result.append(def.getSequenceName());
+		String type = (String)def.getSequenceProperty("DTD_IDENTIFIER");
+		
+		if (!"INTEGER".equals(type))
 		{
-			stmt = this.dbConn.prepareStatement(query.toString());
-			stmt.setString(1, sequence);
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String seq = rs.getString(1);
-				result.append(seq);
-				String type = rs.getString(2);
-				if (!"INTEGER".equals(type))
-				{
-					result.append(" AS " + type);
-				}
-				long start = rs.getLong(3);
-				if (start > 0)
-				{
-					result.append(nl + "       START WITH ");
-					result.append(start);
-				}
-				String max = rs.getString(4);
-				final BigInteger bigMax = new BigInteger("9223372036854775807");
-				final BigInteger intMax = new BigInteger(Integer.toString(Integer.MAX_VALUE));
-				boolean isMax = false;
-				try
-				{
-					BigInteger maxValue = new BigInteger(max);
-					isMax = (maxValue.equals(intMax) || maxValue.equals(bigMax));
-				}
-				catch (Exception e)
-				{
-					isMax = false;
-				}
-				
-				if (!isMax)
-				{
-					result.append(nl + "       START WITH ");
-					result.append(start);
-				}
-				long inc = rs.getLong(5);
-				if (inc != 1)
-				{
-					result.append(nl + "       INCREMENT BY ");
-					result.append(inc);
-				}
-				result.append(';');
-			}
+			result.append(" AS " + type);
 		}
-		catch (Throwable e)
-		{
-			LogMgr.logError("HsqlSequenceReader.getSequenceSource()", "Error when retrieving sequence source",e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result.toString();
+		
+		// For some reason HSQLDB returns all properties as String objects, even the numeric ones!
+		String start = (String)def.getSequenceProperty("START_WITH");
+		result.append(nl + "       START WITH ");
+		result.append(start);
+		
+		String inc = (String)def.getSequenceProperty("INCREMENT"); 
+		result.append(nl + "       INCREMENT BY ");
+		result.append(inc);
+		result.append(';');
+		
+		return result;
 	}
 }

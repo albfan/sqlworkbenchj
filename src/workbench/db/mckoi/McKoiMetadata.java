@@ -15,13 +15,16 @@ import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
-import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 
 /**
@@ -46,11 +49,45 @@ public class McKoiMetadata
 		return s;
 	}
 	
-	public workbench.storage.DataStore getSequenceDefinition(String owner, String sequence)
+	public List<SequenceDefinition> getSequences(String owner)
 	{
-		StringBuilder sql = new StringBuilder(100);
-		sql.append("select sd.* from SYS_INFO.sUSRSequence sd, SYS_INFO.sUSRSequenceInfo si ");
-		sql.append(" where sd.seq_id = si.id AND \"si.schema\"='" + owner + "' and si.name = '" + sequence + "'");
+		DataStore ds = getRawSequenceDefinition(owner, null);
+		if (ds == null) return Collections.emptyList();
+		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
+		for (int row=0; row < ds.getRowCount(); row++)
+		{
+			SequenceDefinition def = createDefinition(ds, row);
+			result.add(def);
+		}
+		return result;
+	}
+	
+	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
+	{
+		DataStore ds = getRawSequenceDefinition(owner, sequence);
+		if (ds == null || ds.getRowCount() != 1) return null;
+		SequenceDefinition def = createDefinition(ds, 0);
+		return def;
+	}
+
+	public DataStore getRawSequenceDefinition(String owner, String sequence)
+	{
+		String sql = "SELECT si.name, \n" + 
+								 "       sd.minvalue, \n" + 
+								 "       sd.maxvalue, \n" + 
+								 "       sd.increment, \n" + 
+								 "       sd.cycle, \n" + 
+								 "       sd.start, \n" + 
+								 "       sd.cache \n" + 
+								 " FROM SYS_INFO.sUSRSequence sd, \n" + 
+								 "     SYS_INFO.sUSRSequenceInfo si \n" + 
+								 "WHERE sd.seq_id = si.id \n" + 
+								 "AND   si.schema = ? \n";
+		
+		if (!StringUtil.isEmptyString(sequence))
+		{
+			sql += "AND   si.name = ? ";	
+		}
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		DataStore result = null;
@@ -58,7 +95,7 @@ public class McKoiMetadata
 		{
 			stmt = this.connection.prepareStatement(sql.toString());
 			stmt.setString(1, owner);
-			stmt.setString(2, sequence);
+			if (!StringUtil.isEmptyString(sequence)) stmt.setString(2, sequence);
 			rs = stmt.executeQuery();
 			result = new DataStore(rs, true);
 		}
@@ -74,130 +111,91 @@ public class McKoiMetadata
 		return result;
 	}
 	
+	private SequenceDefinition createDefinition(DataStore ds, int row)
+	{
+		if (ds == null || row >= ds.getRowCount()) return null;
+		String name = ds.getValueAsString(row, "name");
+		SequenceDefinition result = new SequenceDefinition(null, name);
+		result.setSequenceProperty("minvalue", ds.getValue(row, "minvalue"));
+		result.setSequenceProperty("maxvalue", ds.getValue(row, "maxvalue"));
+		result.setSequenceProperty("increment", ds.getValue(row, "increment"));
+		result.setSequenceProperty("cycle", ds.getValue(row, "cycle"));
+		result.setSequenceProperty("cache", ds.getValue(row, "cache"));
+		result.setSequenceProperty("start", ds.getValue(row, "start"));
+		readSequenceSource(result);
+		return result;
+	}
+	
 	public List<String> getSequenceList(String owner)
 	{
-		ResultSet rs = null;
-		PreparedStatement stmt = null;
+		DataStore ds = getRawSequenceDefinition(owner, null);
+		if (ds == null) return Collections.emptyList();
 		List<String> result = new LinkedList<String>();
-
-		StringBuilder sql = new StringBuilder(200);
-		sql.append("select name from SYS_INFO.sUSRSequence ");
-		if (owner != null)
+		for (int row=0; row < ds.getRowCount(); row ++)
 		{
-			sql.append(" WHERE \"schema\" = ?");
-		}
-
-		try
-		{
-			stmt = this.connection.prepareStatement(sql.toString());
-			if (owner != null) stmt.setString(1, owner);
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String seq = rs.getString(1);
-				result.add(seq);
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("McKoiMetadata.getSequenceList()", "Error when retrieving sequences",e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
+			result.add(ds.getValueAsString(row, "NAME"));
 		}
 		return result;
 	}
 	
-	public String getSequenceSource(String owner, String sequence)
+	public CharSequence getSequenceSource(String owner, String sequence)
 	{
-		String sql = "SELECT si.name, \n" + 
-								 "       sd.MINVALUE, \n" + 
-								 "       sd.MAXVALUE, \n" + 
-								 "       sd.INCREMENT, \n" + 
-								 "       sd.CYCLE, \n" + 
-								 "       sd.START, \n" + 
-								 "       sd.CACHE \n" + 
-								 "FROM SYS_INFO.sUSRSequence sd, \n" + 
-								 "     SYS_INFO.sUSRSequenceInfo si \n" + 
-								 "WHERE sd.seq_id = si.id \n" + 
-								 "AND   \"si.schema\" = ? \n" + 
-								 "AND   si.name = ? ";		
-
-		ResultSet rs = null;
-		PreparedStatement stmt = null;
-		StringBuilder result = new StringBuilder(100);
+		SequenceDefinition def = getSequenceDefinition(owner, sequence);
+		if (def == null) return null;
+		return def.getSource();
+	}
+	
+	public void readSequenceSource(SequenceDefinition def)
+	{
+		StringBuilder result = new StringBuilder(200);
 		
-		try
+		result.append("CREATE SEQUENCE ");
+		result.append(def.getSequenceName());
+
+		Number minvalue = (Number) def.getSequenceProperty("minvalue");
+		Number maxvalue = (Number) def.getSequenceProperty("maxvalue");
+		Number increment = (Number) def.getSequenceProperty("increment");
+		Boolean cycle = (Boolean) def.getSequenceProperty("cycle");
+		Number start = (Number) def.getSequenceProperty("start");
+		Number cache = (Number) def.getSequenceProperty("cache");
+
+		if (start.longValue() > 0)
 		{
-			stmt = this.connection.prepareStatement(sql);
-			stmt.setString(1, owner);
-			stmt.setString(2, sequence);
-
-			rs = stmt.executeQuery();
-			if (rs.next())
-			{
-				result.append("CREATE SEQUENCE ");
-				result.append(rs.getString(1));
-
-				BigInteger minvalue = rs.getBigDecimal(2).toBigInteger();
-				BigInteger maxvalue = rs.getBigDecimal(3).toBigInteger();
-				long increment = rs.getLong(4);
-				boolean cycle = rs.getBoolean(5);
-				long start = rs.getLong(6);
-				long cache = rs.getLong(7);
-
-				if (start > 0)
-				{
-					result.append("\n      START ");
-					result.append(start);
-				}
-				
-				if (increment != 1)
-				{
-					result.append("\n      INCREMENT ");
-					result.append(increment);
-				}
-
-				BigInteger zero = new BigInteger("0");
-				BigInteger max = new BigInteger(Long.toString(Long.MAX_VALUE));
-
-				if (minvalue.compareTo(zero) == -1)
-				{
-					result.append("\n      MINVALUE ");
-					result.append(minvalue);
-				}
-
-				if (maxvalue.compareTo(max) == -1)
-				{
-					result.append("\n      MAXVALUE ");
-					result.append(maxvalue);
-				}
-				
-				if (cache > 0)
-				{
-					result.append("\n      CACHE ");
-					result.append(cache);
-				}
-				if (cycle)
-				{
-					result.append("\n      CYCLE");
-				}
-
-				result.append(';');
-			}
+			result.append("\n      START ");
+			result.append(start);
 		}
-		catch (Throwable e)
+
+		if (increment.longValue() != 1)
 		{
-			LogMgr.logError("OracleMetaData.getSequenceList()", "Error when retrieving sequences",e);
-			result = new StringBuilder(ExceptionUtil.getDisplay(e));
+			result.append("\n      INCREMENT ");
+			result.append(increment);
 		}
-		finally
+
+		BigInteger max = new BigInteger(Long.toString(Long.MAX_VALUE));
+
+		if (minvalue.longValue() != 0)
 		{
-			SqlUtil.closeAll(rs, stmt);
+			result.append("\n      MINVALUE ");
+			result.append(minvalue);
 		}
-		
-		return result.toString();
+
+		if (maxvalue.longValue() != Long.MAX_VALUE)
+		{
+			result.append("\n      MAXVALUE ");
+			result.append(maxvalue);
+		}
+
+		if (cache.longValue() > 0)
+		{
+			result.append("\n      CACHE ");
+			result.append(cache);
+		}
+		if (cycle)
+		{
+			result.append("\n      CYCLE");
+		}
+		result.append(';');
+		def.setSource(result);
 	}
 	
 }

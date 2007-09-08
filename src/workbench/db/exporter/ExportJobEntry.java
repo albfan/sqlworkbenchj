@@ -23,11 +23,9 @@ import workbench.storage.ResultInfo;
  */
 public class ExportJobEntry
 {
-	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	private ResultInfo resultInfo;
 	private String outputFileName;
 	private String query;
-	// </editor-fold>
 	
 	public ExportJobEntry(String outputfile, TableIdentifier table, WbConnection con)
 		throws SQLException

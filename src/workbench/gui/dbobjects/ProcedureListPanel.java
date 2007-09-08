@@ -58,6 +58,8 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import javax.swing.JLabel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import workbench.WbManager;
 import workbench.db.ObjectScripter;
 import workbench.db.ProcedureDefinition;
@@ -65,6 +67,7 @@ import workbench.gui.MainWindow;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.WbTabbedPane;
+import workbench.gui.renderer.RendererFactory;
 import workbench.interfaces.CriteriaPanel;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
@@ -443,6 +446,14 @@ public class ProcedureListPanel
 				procColumns.setVisible(false);
 				DataStoreTableModel model = new DataStoreTableModel(meta.getProcedureColumns(catalog, schema, proc));
 				procColumns.setModel(model, true);
+				
+				TableColumnModel colmod = procColumns.getColumnModel();
+				// Assign the correct renderer to display java.sql.Types values
+				TableColumn col = colmod.getColumn(ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE);
+				if (col != null)
+				{
+					col.setCellRenderer(RendererFactory.getSqlTypeRenderer());
+				}
 				procColumns.adjustOrOptimizeColumns();
 			}
 			catch (Exception ex)

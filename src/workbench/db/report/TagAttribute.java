@@ -17,7 +17,7 @@ package workbench.db.report;
  */
 public class TagAttribute
 {
-	private final String tagText; 
+	private final CharSequence tagText; 
 	
 	public TagAttribute(String name, String value)
 	{
@@ -26,10 +26,10 @@ public class TagAttribute
 		b.append("=\"");
 		b.append(value);
 		b.append('"');
-		tagText = b.toString();
+		tagText = b;
 	}
 	
-	public String getTagText()
+	public CharSequence getTagText()
 	{
 		return tagText;
 	}

@@ -14,13 +14,17 @@ package workbench.db.h2database;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * @author  support@sql-workbench.net
@@ -40,55 +44,11 @@ public class H2SequenceReader
 	 *
 	 *	@return The SQL to recreate the given sequence
 	 */
-	public String getSequenceSource(String owner, String aSequence)
+	public CharSequence getSequenceSource(String owner, String aSequence)
 	{
-		if (aSequence == null) return "";
-		
-		int pos = aSequence.indexOf('.');
-		if (pos > 0)
-		{
-			aSequence = aSequence.substring(pos);
-		}
-		
-		Statement stmt = null;
-		ResultSet rs = null;
-		String result = null;
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		try
-		{
-			
-			String sql = "SELECT sequence_name, increment FROM information_schema.sequences WHERE sequence_name = '" + aSequence + "'";
-			stmt = this.dbConnection.createStatement();
-			rs = stmt.executeQuery(sql);
-			if (rs.next())
-			{
-				String name = rs.getString(1);
-				long inc = rs.getLong(2);
-				
-				StringBuilder buf = new StringBuilder(250);
-				buf.append("DROP SEQUENCE " + name + " IF EXISTS;");
-				buf.append(nl);
-				buf.append("CREATE SEQUENCE ");
-				buf.append(name);
-				if (inc != 1)
-				{
-					buf.append(" INCREMENT BY ");
-					buf.append(inc);
-				}
-				buf.append(';');
-				result = buf.toString();
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("H2SequenceReader.getSequenceSource()", "Error reading sequence definition", e);
-			result = "";
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result;
+		SequenceDefinition def = getSequenceDefinition(owner, aSequence);
+		if (def == null) return "";
+		return def.getSource();
 	}
 	
 	public List<String> getSequenceList(String owner)
@@ -116,15 +76,120 @@ public class H2SequenceReader
 		return result;
 	}
 	
-	public DataStore getSequenceDefinition(String owner, String sequence)
+	
+	public List<SequenceDefinition> getSequences(String owner)
+	{
+		DataStore ds = getRawSequenceDefinition(owner, null);
+		if (ds == null) return Collections.emptyList();
+		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
+		
+		for (int row=0; row < ds.getRowCount(); row++)
+		{
+			result.add(createSequenceDefinition(ds, row));
+		}
+		return result;
+	}
+	
+	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
+	{
+    DataStore ds = getRawSequenceDefinition(owner, sequence);
+    if (ds == null || ds.getRowCount() == 0) return null;
+
+		return createSequenceDefinition(ds, 0);
+	}
+
+	private SequenceDefinition createSequenceDefinition(DataStore ds, int row)
+	{
+		SequenceDefinition result = null;
+		
+    if (ds == null || ds.getRowCount() == 0) return null;
+
+		String name = ds.getValueAsString(row, "SEQUENCE_NAME");
+		String schema = ds.getValueAsString(row, "SEQUENCE_SCHEMA");
+		result = new SequenceDefinition(schema, name);
+		
+		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT"));
+		
+		// All properties are used to compare Sequences for SchemaDiff, so 
+		// properties that have not equivalent for the CREATE SEQUENCE command
+		// should not be included here.
+		
+    //result.setSequenceProperty("CURRENT_VALUE", ds.getValue(row, "CURRENT_VALUE"));
+		//result.setSequenceProperty("REMARKS", ds.getValue(row, "REMARKS"));
+		//result.setSequenceProperty("IS_GENERATED", ds.getValue(row, "IS_GENERATED"));
+		readSequenceSource(result);
+		return result;		
+	}
+
+	public void readSequenceSource(SequenceDefinition def)
+	{
+		if (def == null) return;
+		
+		StringBuilder result = new StringBuilder(100);
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
+		
+//    result.append("DROP SEQUENCE " + def.getSequenceName() + " IF EXISTS;");
+//    result.append(nl);
+//    result.append(nl);
+    result.append("CREATE SEQUENCE ");
+    result.append(def.getSequenceName());
+		
+		Long inc = (Long)def.getSequenceProperty("INCREMENT");
+    if (inc != null && inc != 1)
+    {
+      result.append(" INCREMENT BY ");
+      result.append(inc);
+    }
+		result.append(';');
+		def.setSource(result);
+		return;
+	}
+	
+	public DataStore getRawSequenceDefinition(String owner, String sequence)
 	{
 		Statement stmt = null;
 		ResultSet rs = null;
 		DataStore ds = null;
 		try
 		{
+			String sql = "SELECT SEQUENCE_CATALOG, " +
+				"SEQUENCE_SCHEMA, SEQUENCE_NAME, " +
+				"CURRENT_VALUE, " +
+				"INCREMENT, " +
+				"IS_GENERATED, " +
+				"REMARKS, " +
+				"ID " +
+				"FROM information_schema.sequences ";
 			
-			String sql = "SELECT * FROM information_schema.sequences WHERE sequence_name = '" + sequence + "'";
+			boolean whereAdded = false;
+
+			if (!StringUtil.isEmptyString(owner)) 
+			{
+				if (!whereAdded)
+				{
+					sql += " WHERE ";
+					whereAdded = true;
+				}
+				else
+				{
+					sql += " AND ";
+				}
+				sql += " sequence_schema = '" + owner + "'";
+			}
+		
+			if (!StringUtil.isEmptyString(sequence))
+			{
+				if (!whereAdded)
+				{
+					sql += " WHERE ";
+					whereAdded = true;
+				}
+				else
+				{
+					sql += " AND ";
+				}
+				sql += " sequence_name = '" + sequence + "'";
+			}
 			stmt = this.dbConnection.createStatement();
 			rs = stmt.executeQuery(sql);
 			ds = new DataStore(rs, true);
@@ -140,5 +205,4 @@ public class H2SequenceReader
 		}
 		return ds;
 	}
-	
 }

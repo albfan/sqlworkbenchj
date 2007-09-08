@@ -880,19 +880,18 @@ public class StringUtil
 		return -1;
 	}
 	
-	public static int findFirstWhiteSpace(String data)
+	/**
+	 * Find the first non-quoted whitespace in the given String.
+	 * 
+	 * @param data the data in which to search 
+	 * @return the position of the first whitespace or -1 if no whitespace was found.
+	 */
+	public static int findFirstWhiteSpace(CharSequence data)
 	{
-		return findFirstWhiteSpace(data, 0);
-	}
-	
-	public static int findFirstWhiteSpace(String data, int start)
-	{
-		if (start < 0) return -1;
 		if (data == null) return -1;
 		int count = data.length();
-		if (start >= count) return -1;
 		boolean inQuotes = false;
-		for (int i=start; i < count; i++)
+		for (int i=0; i < count; i++)
 		{
 			char c = data.charAt(i);
 			if (c == '"') 

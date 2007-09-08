@@ -1497,6 +1497,11 @@ public class Settings
 		this.setProperty("workbench.sql.ignoreerror", ignore);
 	}
 
+	public boolean useOracleNVarcharFix()
+	{
+		return getBoolProperty("workbench.db.oracle.fixnvarchartype", true);
+	}
+	
 	public boolean useOracleCharSemanticsFix()
 	{
 		return getBoolProperty("workbench.db.oracle.fixcharsemantics", true);

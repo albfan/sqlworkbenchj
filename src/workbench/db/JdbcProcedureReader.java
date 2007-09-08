@@ -14,6 +14,7 @@ package workbench.db;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import workbench.log.LogMgr;
@@ -36,6 +37,7 @@ public class JdbcProcedureReader
 	implements ProcedureReader
 {
 	protected WbConnection connection;
+	protected boolean useSavepoint = false;
 	
 	public JdbcProcedureReader(WbConnection conn)
 	{
@@ -54,8 +56,13 @@ public class JdbcProcedureReader
 	{
 		boolean exists = false;
 		ResultSet rs = null;
+		Savepoint sp = null;
 		try
 		{
+			if (useSavepoint) 
+			{
+				sp = this.connection.setSavepoint();
+			}
 			rs = this.connection.getSqlConnection().getMetaData().getProcedures(catalog, schema, procName);
 			if (rs.next())
 			{
@@ -67,9 +74,11 @@ public class JdbcProcedureReader
 					exists = true;
 				}
 			}
+			if (sp != null) this.connection.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
+			if (sp != null) this.connection.rollback(sp);
 			LogMgr.logError("JdbcProcedureReader.procedureExists()", "Error checking procedure", e);
 		}
 		finally
@@ -87,8 +96,23 @@ public class JdbcProcedureReader
 			aSchema = null;
 		}
 		
-		ResultSet rs = this.connection.getSqlConnection().getMetaData().getProcedures(aCatalog, aSchema, "%");
-		return fillProcedureListDataStore(rs);
+		Savepoint sp = null;
+		try
+		{
+			if (useSavepoint) 
+			{
+				sp = this.connection.setSavepoint();
+			}
+			ResultSet rs = this.connection.getSqlConnection().getMetaData().getProcedures(aCatalog, aSchema, "%");
+			DataStore ds = fillProcedureListDataStore(rs);
+			if (sp != null) this.connection.releaseSavepoint(sp);
+			return ds;
+		}
+		catch (SQLException sql)
+		{
+			if (sp != null) this.connection.rollback(sp);
+			throw sql;
+		}
 	}
 
 	public DataStore buildProcedureListDataStore(DbMetadata meta)
@@ -169,20 +193,25 @@ public class JdbcProcedureReader
 	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
 		throws SQLException
 	{
-		final String cols[] = {"COLUMN_NAME", "TYPE", "TYPE_NAME", "REMARKS"};
-		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		final int sizes[] =   {20, 10, 18, 30};
+		final String cols[] = {"COLUMN_NAME", "TYPE", "TYPE_NAME", "java.sql.Types", "REMARKS"};
+		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR};
+		final int sizes[] =   {20, 10, 18, 5, 30};
 		DataStore ds = new DataStore(cols, types, sizes);
 
 		ResultSet rs = null;
+		Savepoint sp = null;
 		try
 		{
+			if (useSavepoint) 
+			{
+				sp = this.connection.setSavepoint();
+			}
 			rs = this.connection.getSqlConnection().getMetaData().getProcedureColumns(aCatalog, aSchema, aProcname, "%");
 			while (rs.next())
 			{
 				int row = ds.addRow();
 				String colName = rs.getString("COLUMN_NAME");
-				ds.setValue(row, 0, colName);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME, colName);
 				int colType = rs.getInt("COLUMN_TYPE");
 				String stype;
 
@@ -198,7 +227,7 @@ public class JdbcProcedureReader
 					stype = "RETURN";
 				else
 					stype = "";
-				ds.setValue(row, 1, stype);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, stype);
 
 				int sqlType = rs.getInt("DATA_TYPE");
 				String typeName = rs.getString("TYPE_NAME");
@@ -207,9 +236,16 @@ public class JdbcProcedureReader
 				String rem = rs.getString("REMARKS");
 
 				String display = SqlUtil.getSqlTypeDisplay(typeName, sqlType, size, digits);
-				ds.setValue(row, 2, display);
-				ds.setValue(row, 3, rem);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, display);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, sqlType);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_REMARKS, rem);
 			}
+			if (sp != null) this.connection.releaseSavepoint(sp);
+		}
+		catch (SQLException sql)
+		{
+			if (sp != null) this.connection.rollback(sp);
+			throw sql;
 		}
 		finally
 		{
@@ -247,10 +283,16 @@ public class JdbcProcedureReader
 
 		Statement stmt = null;
 		ResultSet rs = null;
+		Savepoint sp = null;
+		
     int linecount = 0;
 		
 		try
 		{
+			if (useSavepoint) 
+			{
+				sp = this.connection.setSavepoint();
+			}
 			sql.setSchema(def.getSchema());
 			sql.setObjectName(procName);
 			sql.setCatalog(def.getCatalog());
@@ -270,9 +312,11 @@ public class JdbcProcedureReader
 					source.append(line);
 				}
 			}
+			if (sp != null) this.connection.releaseSavepoint(sp);
 		}
 		catch (SQLException e)
 		{
+			if (sp != null) this.connection.rollback(sp);
 			LogMgr.logError("JdbcProcedureReader.getProcedureSource()", "Error retrieving procedure source", e);
 			source = new StringBuilder(ExceptionUtil.getDisplay(e));
 			if (this.connection.getMetadata().isPostgres())

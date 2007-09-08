@@ -14,9 +14,11 @@ package workbench.db.postgres;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Savepoint;
 import workbench.db.DbMetadata;
 import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
@@ -44,8 +46,10 @@ public class PostgresIndexReader
 		int count = indexDefinition.getRowCount();
 		if (count == 0) return StringUtil.emptyBuffer();
 		StringBuilder source = new StringBuilder(count * 50);
+		Savepoint sp = null;
 		try
 		{
+			sp = con.setSavepoint();
 			stmt = con.prepareStatement(sql);
 			for (int i = 0; i < count; i++)
 			{
@@ -61,11 +65,13 @@ public class PostgresIndexReader
 					source.append(nl);
 				}
 			}
-					source.append(nl);
+			source.append(nl);
+			con.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			try { con.rollback(sp); } catch (Throwable th) {}
+			LogMgr.logError("PostgresIndexReader.getIndexSource()", "Error retrieving source", e);
 			source = new StringBuilder(ExceptionUtil.getDisplay(e));
 		}
 		finally

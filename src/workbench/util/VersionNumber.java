@@ -66,7 +66,7 @@ public class VersionNumber
 	public boolean isNewerThan(VersionNumber other)
 	{
 		if (!this.isValid()) return false;
-		if (this.major > other.major) return true;
+		if (other.major > this.major) return false;
 		if (this.minor > other.minor) return true;
 		return false;
 	}

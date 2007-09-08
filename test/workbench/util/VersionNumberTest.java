@@ -39,6 +39,9 @@ public class VersionNumberTest extends TestCase
 		
 		VersionNumber na = new VersionNumber(null);
 		assertFalse(na.isNewerThan(two));
+		
+		VersionNumber dev = new VersionNumber("@BUILD_NUMBER@");
+		assertEquals(one.isNewerThan(dev), false);
 	}
 	
 }

@@ -1456,7 +1456,16 @@ public class DataImporter
 		StringBuilder text = new StringBuilder(this.targetColumns.length * 50);
 		StringBuilder parms = new StringBuilder(targetColumns.length * 20);
 
-		text.append("INSERT INTO ");
+		String sql = dbConn.getDbSettings().getInsertForImport();
+		if (!StringUtil.isEmptyString(sql))
+		{
+			text.append(sql);
+			text.append(' ');
+		}
+		else
+		{
+			text.append("INSERT INTO ");
+		}
 		text.append(targetTable.getTableExpression(this.dbConn));
 		text.append(" (");
 		for (int i=0; i < this.colCount; i++)

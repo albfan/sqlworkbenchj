@@ -70,6 +70,7 @@ import workbench.db.hsqldb.HsqlConstraintReader;
 import workbench.db.firebird.FirebirdConstraintReader;
 import workbench.db.h2database.H2ConstraintReader;
 import workbench.db.h2database.H2SequenceReader;
+import workbench.db.oracle.OracleSequenceReader;
 
 /**
  * Retrieve meta data information from the database.
@@ -195,7 +196,7 @@ public class DbMetadata
 			// changes to the "enable dbms output" property
 			settings.addPropertyChangeListener(this, "workbench.sql.enable_dbms_output");
 			
-			this.sequenceReader = this.oracleMetaData;
+			this.sequenceReader = new OracleSequenceReader(this.dbConnection);
 			this.procedureReader = new OracleProcedureReader(this.dbConnection);
 			this.errorInfoReader = this.oracleMetaData;
 			this.fixOracleDateBug = Settings.getInstance().getBoolProperty("workbench.db.oracle.date.usetimestamp", true);
@@ -206,7 +207,7 @@ public class DbMetadata
 			this.isPostgres = true;
 			this.selectIntoPattern = Pattern.compile(SELECT_INTO_PG);
 			this.constraintReader = new PostgresConstraintReader();
-			this.sequenceReader = new PostgresSequenceReader(this.dbConnection.getSqlConnection());
+			this.sequenceReader = new PostgresSequenceReader(this.dbConnection);
 			this.procedureReader = new PostgresProcedureReader(this.dbConnection);
 			this.indexReader = new PostgresIndexReader(this);
 			this.ddlFilter = new PostgresDDLFilter();
@@ -652,6 +653,12 @@ public class DbMetadata
 		}
 	}
 
+	public Set<String> getDbDataTypes()
+	{
+		SqlDataTypesHandler handler = new SqlDataTypesHandler(this.dbConnection.getSqlConnection(), this.getDbId());
+		return handler.getDataTypes();
+	}
+	
 	public Set<String> getDbFunctions()
 	{
 		Set<String> dbFunctions = new HashSet<String>();
@@ -1366,7 +1373,7 @@ public class DbMetadata
 		}
 
 		if (this.sequenceReader != null && typeIncluded("SEQUENCE", types) &&
-				"true".equals(Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", "true"))
+				Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", true)
 				&& !sequencesReturned)
 		{
 			List<String> seq = this.sequenceReader.getSequenceList(aSchema);
@@ -1593,6 +1600,9 @@ public class DbMetadata
 		}
 	}
 
+	/**
+	 * Returns the columns (==parameters) defined for the given procedure.
+	 */
 	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
 		throws SQLException
 	{
@@ -1935,7 +1945,7 @@ public class DbMetadata
 		
 		if (this.sequenceReader != null && "SEQUENCE".equalsIgnoreCase(aType))
 		{
-			DataStore seqDs = this.sequenceReader.getSequenceDefinition(aSchema, aTable);
+			DataStore seqDs = this.sequenceReader.getRawSequenceDefinition(aSchema, aTable);
 			if (seqDs != null) return seqDs;
 		}
 
@@ -2943,7 +2953,12 @@ public class DbMetadata
 		return name;
 	}
 
-	public String getSequenceSource(String fullName)
+	public SequenceReader getSequenceReader()
+	{
+		return this.sequenceReader;
+	}
+	
+	public CharSequence getSequenceSource(String fullName)
 	{
 		String sequenceName = fullName;
 		String schema = null;
@@ -2957,7 +2972,7 @@ public class DbMetadata
 		return this.getSequenceSource(null, schema, sequenceName);
 	}
 
-	public String getSequenceSource(String aCatalog, String aSchema, String aSequence)
+	public CharSequence getSequenceSource(String aCatalog, String aSchema, String aSequence)
 	{
 		if (this.sequenceReader != null)
 		{

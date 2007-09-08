@@ -22,6 +22,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -344,6 +345,39 @@ public class WbConnection
 		this.sqlConnection.commit();
 	}
 
+	public Savepoint setSavepoint()
+		throws SQLException
+	{
+		return this.sqlConnection.setSavepoint();
+	}
+	
+	/**
+	 * A non-exception throwing wrapper around Connection.rollback(Savepoint)
+	 */
+	public void rollback(Savepoint sp)
+	{
+		try
+		{
+			this.sqlConnection.rollback(sp);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("WbConnection.rollback(Savepoint)", "Error releasing savepoint", e);
+		}
+	}
+	
+	public void releaseSavepoint(Savepoint sp)
+	{
+		try
+		{
+			this.sqlConnection.releaseSavepoint(sp);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("WbConnection.releaseSavepoint", "Error releasing savepoint", e);
+		}
+	}
+	
 	/**
 	 * Execute a rollback on the connection.
 	 */

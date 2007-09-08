@@ -84,9 +84,10 @@ import workbench.util.CharSequenceReader;
 
     /**
      * Closes the current input stream, and resets the scanner to read from a new input stream.
-	 * All internal variables are reset, the old input stream  cannot be reused
-	 * (content of the internal buffer is discarded and lost).
-	 * The lexical state is set to the initial state.
+     * All internal variables are reset, the old input stream  cannot be reused
+     * (content of the internal buffer is discarded and lost).
+
+     * The lexical state is set to the initial state.
      * Subsequent tokens read from the lexer will start with the line, char, and column
      * values given here.
      *
@@ -312,7 +313,7 @@ keyword=("ABORT"|
 "FLOAT"|
 "FOR"|
 "FORCE"|
-"FOREIGN"|
+"FOREIGN[ \t\r\n]+KEY"|
 "FORTRAN"|
 "FORWARD"|
 "FOUND"|
@@ -479,7 +480,7 @@ keyword=("ABORT"|
 "PREORDER"|
 "PREPARE"|
 "PRESERVE"|
-"PRIMARY"|
+"PRIMARY[ \t\r\n]+KEY"|
 "PRIOR"|
 "PRIVILEGES"|
 "PROCEDURAL"|

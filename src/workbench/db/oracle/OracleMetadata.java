@@ -11,27 +11,22 @@
  */
 package workbench.db.oracle;
 
-import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import workbench.db.ConnectionProfile;
 import workbench.db.ErrorInformationReader;
-import workbench.db.JdbcProcedureReader;
-import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
-import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -40,7 +35,7 @@ import workbench.util.StringUtil;
  * @author  support@sql-workbench.net
  */
 public class OracleMetadata
-  implements SequenceReader, ErrorInformationReader
+  implements ErrorInformationReader
 {
 
   private WbConnection connection;
@@ -51,8 +46,7 @@ public class OracleMetadata
   private static final int CHAR_SEMANTICS = 0;
   private int defaultLengthSemantics = BYTE_SEMANTICS;
   private boolean alwaysShowCharSemantics = false;
-  private JdbcProcedureReader jdbcProcReader = null;
-
+	
   public OracleMetadata(WbConnection conn)
   {
     this.connection = conn;
@@ -124,160 +118,37 @@ public class OracleMetadata
     return this.version == 8;
   }
 
-  public DataStore getSequenceDefinition(String owner, String sequence)
-  {
-    StringBuilder sql = new StringBuilder(100);
-    sql.append("SELECT * FROM all_sequences ");
-    sql.append(" WHERE sequence_owner = ? ");
-    sql.append("  AND sequence_name = ? ");
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-    DataStore result = null;
-    try
-    {
-      stmt = this.connection.getSqlConnection().prepareStatement(sql.toString());
-      stmt.setString(1, owner);
-      stmt.setString(2, sequence);
-      rs = stmt.executeQuery();
-      result = new DataStore(rs, this.connection, true);
-    }
-    catch (Exception e)
-    {
-      LogMgr.logError("OracleMetaData.getSequenceDefinition()", "Error when retrieving sequence definition", e);
-    }
-    finally
-    {
-      SqlUtil.closeAll(rs, stmt);
-    }
-
-    return result;
-  }
-
-  /**
-   * 	Get a list of sequences for the given owner
-   */
-  public List<String> getSequenceList(String owner)
-  {
-    ResultSet rs = null;
-    PreparedStatement stmt = null;
-    List<String> result = new LinkedList<String>();
-
-    StringBuilder sql = new StringBuilder(200);
-    sql.append("SELECT sequence_name FROM all_sequences ");
-    if (owner != null)
-    {
-      sql.append(" WHERE sequence_owner = ?");
-    }
-
-    try
-    {
-      stmt = this.connection.getSqlConnection().prepareStatement(sql.toString());
-      if (owner != null)
-      {
-        stmt.setString(1, owner);
-      }
-      rs = stmt.executeQuery();
-      while (rs.next())
-      {
-        String seq = rs.getString(1);
-        result.add(seq);
-      }
-    }
-    catch (Exception e)
-    {
-      LogMgr.logError("OracleMetaData.getSequenceList()", "Error when retrieving sequences", e);
-    }
-    finally
-    {
-      SqlUtil.closeAll(rs, stmt);
-    }
-    return result;
-  }
-
-  public String getSequenceSource(String owner, String sequence)
-  {
-    ResultSet rs = null;
-    PreparedStatement stmt = null;
-    StringBuilder result = new StringBuilder(100);
-
-    String sql = "SELECT SEQUENCE_NAME, \n       MIN_VALUE, \n       MAX_VALUE, \n       INCREMENT_BY, \n       decode(CYCLE_FLAG,\'Y\',\'CYCLE\',\'NOCYCLE\'), \n       decode(ORDER_FLAG,\'Y\',\'ORDER\',\'NOORDER\'), \n       CACHE_SIZE \nFROM   ALL_SEQUENCES \nWHERE sequence_owner = ?  AND sequence_name = ?";
-
-    String nl = Settings.getInstance().getInternalEditorLineEnding();
-
-    try
-    {
-      stmt = this.connection.getSqlConnection().prepareStatement(sql);
-      stmt.setString(1, owner);
-      stmt.setString(2, sequence);
-
-      rs = stmt.executeQuery();
-      if (rs.next())
-      {
-        result.append("CREATE SEQUENCE ");
-        result.append(rs.getString(1));
-
-        BigInteger minvalue = rs.getBigDecimal(2).toBigInteger();
-        BigInteger maxvalue = rs.getBigDecimal(3).toBigInteger();
-        long increment = rs.getLong(4);
-        String cycle = rs.getString(5);
-        String order = rs.getString(6);
-        long cache = rs.getLong(7);
-
-        result.append(nl + "      INCREMENT BY ");
-        result.append(increment);
-
-        BigInteger one = new BigInteger("1");
-        BigInteger max = new BigInteger(Integer.toString(Integer.MAX_VALUE));
-
-        if (minvalue.compareTo(one) == 0)
-        {
-          result.append(nl + "      NOMINVALUE");
-        }
-        else
-        {
-          result.append(nl + "      MINVALUE ");
-          result.append(minvalue);
-        }
-
-        if (maxvalue.compareTo(max) == -1)
-        {
-          result.append(nl + "      MAXVALUE ");
-          result.append(maxvalue);
-        }
-        else
-        {
-          result.append(nl + "      NOMAXVALUE");
-        }
-        if (cache > 0)
-        {
-          result.append(nl + "      CACHE ");
-          result.append(cache);
-        }
-        else
-        {
-          result.append(nl + "      NOCACHE");
-        }
-        result.append(nl + "      ");
-        result.append(cycle);
-
-        result.append(nl + "      ");
-        result.append(order);
-
-        result.append(nl + ";");
-      }
-    }
-    catch (Exception e)
-    {
-      LogMgr.logError("OracleMetaData.getSequenceList()", "Error when retrieving sequences", e);
-      result = new StringBuilder(ExceptionUtil.getDisplay(e));
-    }
-    finally
-    {
-      SqlUtil.closeAll(rs, stmt);
-    }
-    return result.toString();
-  }
-
+	private boolean getRemarksReporting()
+	{
+		String value = getDriverProperty("remarksReporting", false);
+		if (value == null)
+		{
+			value = getDriverProperty("oracle.jdbc.remarksReporting", true);
+		}
+		return "true".equalsIgnoreCase(value);
+	}
+	
+	private boolean getMapDateToTimestamp()
+	{
+		String value = getDriverProperty("oracle.jdbc.mapDateToTimestamp", true);
+		return "true".equalsIgnoreCase(value);
+	}
+	
+	private String getDriverProperty(String property, boolean includeSystemProperty)
+	{
+		String value = null;
+		ConnectionProfile profile = this.connection.getProfile();
+		if (profile != null)
+		{
+			Properties props = profile.getConnectionProperties();
+			value = (props != null ? props.getProperty(property, null) : null);
+			if (value == null && includeSystemProperty)
+			{
+				value = System.getProperty("oracle.jdbc.mapDateToTimestamp", null);
+			}
+		}
+		return value;
+	}
 
   public String getVarcharType(String type, int size, int semantics)
   {
@@ -304,11 +175,59 @@ public class OracleMetadata
   public ResultSet getColumns(String catalog, String schema, String table, String cols)
     throws SQLException
   {
+		boolean fixNVARCHAR = Settings.getInstance().useOracleNVarcharFix();
+
     // Oracle 9 and above reports a wrong length if NLS_LENGTH_SEMANTICS is set to char
     // this statement fixes this problem and also removes the usage of LIKE
     // to speed up the retrieval.
-    final String sql1 = "SELECT NULL AS table_cat,  \n       t.owner AS table_schem,  \n       t.table_name AS table_name,  \n       t.column_name AS column_name,  \n       DECODE (t.data_type, \'CHAR\', 1, \'VARCHAR2\', 12, \'NUMBER\', 3, \'LONG\', -1, \'DATE\', 91, \'RAW\', -3, \'LONG RAW\', -4, \'BLOB\', 2004, \'CLOB\', 2005, \'BFILE\', -13, \'FLOAT\', 6, \'TIMESTAMP(6)\', 93, \'TIMESTAMP(6) WITH TIME ZONE\', -101, \'TIMESTAMP(6) WITH LOCAL TIME ZONE\', -102, \'INTERVAL YEAR(2) TO MONTH\', -103, \'INTERVAL DAY(2) TO SECOND(6)\', -104, \'BINARY_FLOAT\', 100, \'BINARY_DOUBLE\', 101, 1111) AS data_type,  \n        t.data_type AS type_name,  \n       DECODE (t.data_precision, null, decode(t.data_type, \'VARCHAR2\', t.char_length, \'NVARCHAR\', t.char_length, \'NVARCHAR2\', t.char_length, \'CHAR\', t.char_length, \'VARCHAR\', t.char_length, \'NCHAR\', t.char_length, t.data_length), t.data_precision) AS column_size,  \n       0 AS buffer_length,  \n       t.data_scale AS decimal_digits,  \n       10 AS num_prec_radix,  \n       DECODE (t.nullable, \'N\', 0, 1) AS nullable,  \n";
-    final String sql2 = "       t.data_default AS column_def,  \n" + "       decode(t.data_type, \'VARCHAR2\', decode(t.char_used, \'B\', " + BYTE_SEMANTICS + ", \'C\', " + CHAR_SEMANTICS + ", 0), 0) AS sql_data_type,  \n" + "       0 AS sql_datetime_sub,  \n" + "       t.data_length AS char_octet_length,  \n" + "       t.column_id AS ordinal_position,   \n" + "       DECODE (t.nullable, \'N\', \'NO\', \'YES\') AS is_nullable  \n" + "FROM all_tab_columns t";
+    final String sql1 = 
+						"SELECT NULL AS table_cat,  \n" +
+						"     t.owner AS table_schem,  \n" +
+						"     t.table_name AS table_name,  \n" +
+						"     t.column_name AS column_name,  \n   " +
+						"     DECODE(t.data_type, \'CHAR\', " + Types.CHAR + ", " + 
+						"                    \'VARCHAR2\', " + Types.VARCHAR + ", " + 
+						"                    \'NVARCHAR2\', " + (fixNVARCHAR ? Types.VARCHAR : Types.OTHER) + ", " + 
+						"                    \'NCHAR\', " + (fixNVARCHAR ? Types.VARCHAR : Types.OTHER) + ", " + 
+						"                    \'NUMBER\', " + Types.DECIMAL + ", " + 
+						"                    \'LONG\', " + Types.LONGVARCHAR + ", " + 
+						"                    \'DATE\', " + (getMapDateToTimestamp() ? Types.TIMESTAMP : Types.DATE) + ", " + 
+						"                    \'RAW\', -3, " + 
+						"                    \'LONG RAW\', -4, " + 
+						"                    \'BLOB\', " + Types.BLOB + ", " + 
+						"                    \'CLOB\', " + Types.CLOB + ", " + 
+						"                    \'BFILE\', -13, " + 
+						"                    \'FLOAT\', 6, " + 
+						"                    \'TIMESTAMP(6)\', " + Types.TIMESTAMP + ", " +
+						"                    \'TIMESTAMP(6) WITH TIME ZONE\', -101, " + 
+						"                    \'TIMESTAMP(6) WITH LOCAL TIME ZONE\', -102, " + 
+						"                    \'INTERVAL YEAR(2) TO MONTH\', -103, " + 
+						"                    \'INTERVAL DAY(2) TO SECOND(6)\', -104, " + 
+						"                    \'BINARY_FLOAT\', 100, " + 
+						"                    \'BINARY_DOUBLE\', 101, " +
+						"                    " + Types.OTHER + ") AS data_type,  \n" +
+						"     t.data_type AS type_name,  \n" + 
+						"     DECODE(t.data_precision, null, " +
+						"        decode(t.data_type, \'VARCHAR\', t.char_length, " +
+						"                            \'VARCHAR2\', t.char_length, " +
+						"                            \'NVARCHAR\', t.char_length, " +
+						"                            \'NVARCHAR2\', t.char_length, " +
+						"                            \'CHAR\', t.char_length, " +
+						"                            \'NCHAR\', t.char_length, t.data_length), " +
+						"               t.data_precision) AS column_size,  \n" +
+						"    0 AS buffer_length,  \n" +
+						"    t.data_scale AS decimal_digits,  \n" +
+						"    10 AS num_prec_radix,  \n" +
+						"    DECODE (t.nullable, \'N\', 0, 1) AS nullable,  \n";
+		
+    final String sql2 = "       t.data_default AS column_def,  \n" +
+			                  "       decode(t.data_type, \'VARCHAR2\', " +
+												"                 decode(t.char_used, \'B\', " + BYTE_SEMANTICS + ", \'C\', " + CHAR_SEMANTICS + ", 0), 0) AS sql_data_type,  \n " +
+												"       0 AS sql_datetime_sub,  \n" + 
+												"       t.data_length AS char_octet_length,  \n" + 
+												"       t.column_id AS ordinal_position,   \n" + 
+												"       DECODE (t.nullable, \'N\', \'NO\', \'YES\') AS is_nullable  \n" + 
+												" FROM all_tab_columns t";
 
     // not using LIKE for owner and table
     // because internally we never call this with wildcards
@@ -322,18 +241,7 @@ public class OracleMetadata
     final String sql_no_comment = sql1 + "       null AS remarks, \n" + sql2 + where + order;
     String sql;
 
-    boolean returnComments = false;
-    ConnectionProfile prof = this.connection.getProfile();
-    if (prof != null)
-    {
-      Properties prop = prof.getConnectionProperties();
-      if (prop != null)
-      {
-        returnComments = StringUtil.stringToBool(prop.getProperty("remarksReporting", "false"));
-      }
-    }
-
-    if (returnComments)
+    if (getRemarksReporting())
     {
       sql = sql_comment;
     }
@@ -363,7 +271,7 @@ public class OracleMetadata
     {
       // The above statement does not work with Oracle 8
       // so in that case we revert back to Oracle's implementation of getColumns()
-      if (version > 8 && Settings.getInstance().useOracleCharSemanticsFix())
+      if (version > 8 && Settings.getInstance().useOracleCharSemanticsFix() || fixNVARCHAR)
       {
         if (this.columnStatement != null)
         {

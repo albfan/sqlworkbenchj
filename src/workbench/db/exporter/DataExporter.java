@@ -60,6 +60,7 @@ import workbench.storage.SqlLiteralFormatter;
 import workbench.util.CharacterRange;
 import workbench.util.EncodingUtil;
 import workbench.util.MessageBuffer;
+import workbench.util.NumberStringCache;
 import workbench.util.QuoteEscapeType;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -811,7 +812,7 @@ public class DataExporter
 				StringBuilder msg = new StringBuilder(80);
 				msg.append(this.currentJob.getTableName());
 				msg.append(" [");
-				msg.append(i+1);
+				msg.append(NumberStringCache.getNumberString(i+1));
 				msg.append('/');
 				msg.append(count);
 				msg.append("] ");
@@ -942,6 +943,10 @@ public class DataExporter
 			ResultInfo info = null;
 			if (this.currentJob != null)
 			{
+				// Some JDBC drivers to not report the column's data types
+				// correctly through ResultSet.getMetaData(), so we are
+				// using the table information returned by DatabaseMetaData
+				// instead (if this is a table export)
 				info = currentJob.getResultInfo();
 				for (int i=0; i < info.getColumnCount(); i++)
 				{

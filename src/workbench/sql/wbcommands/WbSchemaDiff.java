@@ -83,6 +83,7 @@ public class WbSchemaDiff
 		cmdLine.addArgument(PARAM_TARGETSCHEMA);
 		cmdLine.addArgument(PARAM_NAMESPACE);
 		cmdLine.addArgument(PARAM_INCLUDE_FK, ArgumentType.BoolArgument);
+		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_SEQUENCES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_PK, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_INDEX, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_EXCLUDE_TABLES, ArgumentType.BoolArgument);
@@ -211,7 +212,7 @@ public class WbSchemaDiff
 		diff.setCompareJdbcTypes(cmdLine.getBoolean(PARAM_DIFF_JDBC_TYPES, false));
 		diff.setIncludeProcedures(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_PROCS, false));
 		diff.setIncludeTableGrants(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_GRANTS, false));
-		
+		diff.setIncludeSequences(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_SEQUENCES, false));
 		//diff.setIncludeComments(cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, false));
 
 		String refTables = cmdLine.getValue(PARAM_SOURCETABLES);

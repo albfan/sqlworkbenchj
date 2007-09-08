@@ -50,6 +50,7 @@ public class SchemaDiffTest
 			diff.setIncludeProcedures(false);
 			diff.setIncludeTableGrants(false);
 			diff.setIncludeTableConstraints(true);
+			diff.setIncludeSequences(true);
 			diff.setIncludeViews(true);
 			diff.compareAll();
 			String xml = diff.getMigrateTargetXml();
@@ -92,6 +93,15 @@ public class SchemaDiffTest
 			
 			value = TestUtil.getXPathValue(xml, "/schema-diff/drop-view/view-name[1]");
 			assertEquals("View not dropped ", "SOMETHING", value);
+
+			value = TestUtil.getXPathValue(xml, "/schema-diff/update-sequence[1]/sequence-def/sequence-name");
+			assertEquals("Sequence not updated", "SEQ_TWO", value);
+
+			value = TestUtil.getXPathValue(xml, "/schema-diff/create-sequence[1]/sequence-def/sequence-name");
+			assertEquals("Sequence not created", "SEQ_THREE", value);
+			
+			value = TestUtil.getXPathValue(xml, "/schema-diff/drop-sequence/sequence-name[1]");
+			assertEquals("Sequence not dropped", "SEQ_TO_BE_DELETED", value);
 		}
 		catch (Exception e)
 		{
@@ -254,6 +264,9 @@ public class SchemaDiffTest
       stmt.executeUpdate("alter table person_address add constraint fk_pa_address foreign key (address_id) references address(address_id)");
 
 			stmt.executeUpdate("CREATE VIEW v_person AS SELECT * FROM person");
+			stmt.executeUpdate("CREATE sequence seq_one");
+			stmt.executeUpdate("CREATE sequence seq_two  increment by 5");
+			stmt.executeUpdate("CREATE sequence seq_three");
 			
 			stmt = target.createStatement();
 			stmt.executeUpdate("create table person (person_id integer primary key, firstname varchar(50), lastname varchar(100))");
@@ -262,7 +275,10 @@ public class SchemaDiffTest
 			stmt.executeUpdate("alter table person_address add constraint fk_pa_person foreign key (person_id) references person(person_id)");
 			
 			stmt.executeUpdate("CREATE VIEW something AS SELECT * FROM address");
-			
+
+			stmt.executeUpdate("CREATE sequence seq_one");
+			stmt.executeUpdate("CREATE sequence seq_two");
+			stmt.executeUpdate("CREATE sequence seq_to_be_deleted");
 		}
 		finally
 		{

@@ -14,7 +14,6 @@ package workbench.sql.wbcommands;
 import java.io.File;
 import java.sql.SQLException;
 import workbench.WbManager;
-import workbench.db.WbConnection;
 import workbench.sql.DelimiterDefinition;
 import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;

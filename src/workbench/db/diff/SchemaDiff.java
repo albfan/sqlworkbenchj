@@ -21,9 +21,12 @@ import java.util.List;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.ProcedureDefinition;
+import workbench.db.SequenceDefinition;
+import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.report.ReportProcedure;
+import workbench.db.report.ReportSequence;
 import workbench.db.report.ReportTable;
 import workbench.db.report.ReportView;
 import workbench.db.report.TagWriter;
@@ -47,6 +50,7 @@ public class SchemaDiff
 	public static final String TAG_DROP_VIEW = "drop-view";
 	public static final String TAG_DROP_PROC = "drop-procedure";
 	public static final String TAG_ADD_PROC = "add-procedure";
+	public static final String TAG_DROP_SEQUENCE = "drop-sequence";
 	
 	public static final String TAG_REF_CONN = "reference-connection";
 	public static final String TAG_TARGET_CONN = "target-connection";
@@ -61,6 +65,7 @@ public class SchemaDiff
 	public static final String TAG_CONSTRAINT_INFO = "include-constraints";
 	public static final String TAG_VIEW_INFO = "include-views";
 	public static final String TAG_PROC_INFO = "include-procs";
+	public static final String TAG_SEQUENCE_INFO = "include-sequences";
 	
 	private WbConnection sourceDb;
 	private WbConnection targetDb;
@@ -68,6 +73,8 @@ public class SchemaDiff
 	private List<TableIdentifier> tablesToDelete;
 	private List<ProcedureDefinition> procsToDelete;
 	private List<TableIdentifier> viewsToDelete;
+	private List<SequenceDefinition> sequencesToDelete;
+	
 	private String namespace;
 	private String encoding = "UTF-8";
 	private boolean compareJdbcTypes = false;
@@ -78,6 +85,8 @@ public class SchemaDiff
 	private boolean diffGrants = false;
 	private boolean diffViews = true;
 	private boolean diffProcs = true;
+	private boolean diffSequences = true;
+	
 //	private boolean diffComments;
 	private RowActionMonitor monitor;
 	private boolean cancel = false;
@@ -111,6 +120,9 @@ public class SchemaDiff
 		targetDb = target;
 		this.namespace = xmlNameSpace;
 	}
+
+	public void setIncludeSequences(boolean flag) { this.diffSequences = flag; }
+	public boolean getIncludeSequences() { return this.diffSequences; }
 	
 	/**
 	 * Control whether foreign keys should be compared as well.
@@ -358,6 +370,15 @@ public class SchemaDiff
 			List<ProcedureDefinition> targetProcs = targetDb.getMetadata().getProcedureList(null, this.targetSchema);
 			processProcedureList(refProcs, targetProcs);
 		}
+		
+		if (diffSequences)
+		{
+			SequenceReader refReader = sourceDb.getMetadata().getSequenceReader();
+			List<SequenceDefinition> refSeqs = refReader.getSequences(this.referenceSchema);
+			SequenceReader tarReader = targetDb.getMetadata().getSequenceReader();
+			List<SequenceDefinition> tarSeqs = tarReader.getSequences(this.referenceSchema);
+			processSequenceList(refSeqs, tarSeqs);
+		}
 	}
 
 	private void processTableList(List<TableIdentifier> refTables, List<TableIdentifier> targetTables)
@@ -447,6 +468,55 @@ public class SchemaDiff
 		}
 	}
 	
+	private void processSequenceList(List<SequenceDefinition> refSeqs, List<SequenceDefinition> targetSeqs)
+	{
+		HashSet<String> refSeqNames = new HashSet<String>();
+		this.sequencesToDelete= new ArrayList<SequenceDefinition>();
+
+		if (this.monitor != null)
+		{
+			this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+		}
+		
+		SequenceReader refReader = this.sourceDb.getMetadata().getSequenceReader();
+		SequenceReader targetReader = this.targetDb.getMetadata().getSequenceReader();
+		
+		for (SequenceDefinition refSeq : refSeqs)
+		{
+			if (this.cancel) 
+			{
+				this.objectsToCompare = null;
+				break;
+			}
+			
+			if (this.monitor != null)
+			{
+				this.monitor.setCurrentObject(ResourceMgr.getFormattedString("MsgLoadSeqInfo", refSeq.getSequenceName()), -1, -1);
+			}
+			
+			SequenceDiffEntry entry = null;
+			SequenceDefinition def = targetReader.getSequenceDefinition(this.targetSchema, refSeq.getSequenceName());
+			entry = new SequenceDiffEntry(refSeq, def);
+			objectsToCompare.add(entry);
+			refSeqNames.add(refSeq.getSequenceName());
+		}
+
+		if (cancel) return;
+		
+		if (targetSeqs != null)
+		{
+			for (SequenceDefinition tSeq : targetSeqs)
+			{
+				String seqname = tSeq.getSequenceName();
+				if (!refSeqNames.contains(seqname))
+				{
+					this.sequencesToDelete.add(tSeq);
+				}
+			}	
+		}
+		
+	}
+	
 	private void processProcedureList(List<ProcedureDefinition> refProcs, List<ProcedureDefinition> targetProcs)
 	{
 		HashSet<String> refProcNames = new HashSet<String>();
@@ -497,6 +567,7 @@ public class SchemaDiff
 			}	
 		}
 	}
+	
 	/**
 	 * Define the reference tables to be compared with the matching 
 	 * tables (based on the name) in the target connection. The list 
@@ -585,6 +656,7 @@ public class SchemaDiff
 		{
 			Object o = objectsToCompare.get(i);
 			if (o instanceof ProcDiffEntry) continue;
+			if (o instanceof SequenceDiffEntry) continue;
 			
 			DiffEntry entry = (DiffEntry)o;
 			if (this.cancel) break;
@@ -648,12 +720,25 @@ public class SchemaDiff
 		
 		this.appendDropTables(out, indent);
 		out.write("\n");
+		
 		if (this.diffViews)
 		{
 			this.appendViewDiff(viewDiffs, out);
 			//out.write("\n");
 			this.appendDropViews(out, indent, tw);
 		}
+		if (this.diffSequences)
+		{
+			this.appendSequenceDiff(out, indent, tw);
+			out.write("\n");
+		}
+		
+		if (this.diffProcs)
+		{
+			this.appendProcDiff(out, indent, tw);
+			out.write("\n");
+		}
+		
 		if (this.cancel) return;
 		
 		if (this.diffProcs)
@@ -661,9 +746,48 @@ public class SchemaDiff
 			this.appendProcDiff(out, indent, tw);
 			out.write("\n");
 		}
+		
 		writeTag(out, null, "schema-diff", false);
 	}
 
+	private void appendSequenceDiff(Writer out, StrBuffer indent, TagWriter tw)
+		throws IOException
+	{
+		int count = this.objectsToCompare.size();
+		for (int i=0; i < count; i++)
+		{
+			Object o = objectsToCompare.get(i);
+			if (o instanceof DiffEntry) continue;
+			if (o instanceof ProcDiffEntry) continue;
+			
+			SequenceDiffEntry entry = (SequenceDiffEntry)o;
+			ReportSequence rp = new ReportSequence(entry.reference, this.namespace);
+			ReportSequence tp = (entry.target == null ? null : new ReportSequence(entry.target, this.namespace));
+			SequenceDiff diff = new SequenceDiff(rp, tp);
+			diff.setIndent(indent);
+			diff.setTagWriter(tw);
+			StrBuffer xml = diff.getMigrateTargetXml();
+			if (xml.length() > 0)
+			{
+				out.write("\n");
+				xml.writeTo(out);
+			}			
+		}
+
+		if (this.sequencesToDelete == null || sequencesToDelete.size() == 0) return;
+		
+		out.write('\n');
+		writeTag(out, indent, TAG_DROP_SEQUENCE, true);
+		StrBuffer myindent = new StrBuffer(indent);
+		myindent.append("  ");
+		Iterator itr = this.sequencesToDelete.iterator();
+		for (SequenceDefinition def : sequencesToDelete)
+		{
+			writeTagValue(out, myindent, ReportSequence.TAG_SEQ_NAME, def.getSequenceName());
+		}
+		writeTag(out, indent, TAG_DROP_SEQUENCE, false);
+	}
+	
 	private void appendProcDiff(Writer out, StrBuffer indent, TagWriter tw)
 		throws IOException
 	{
@@ -672,6 +796,7 @@ public class SchemaDiff
 		{
 			Object o = objectsToCompare.get(i);
 			if (o instanceof DiffEntry) continue;
+			if (o instanceof SequenceDiffEntry) continue;
 			
 			ProcDiffEntry entry = (ProcDiffEntry)o;
 			ReportProcedure rp = new ReportProcedure(entry.reference, this.sourceDb);
@@ -705,13 +830,11 @@ public class SchemaDiff
 		writeTag(out, indent, TAG_DROP_PROC, false);
 	}
 	
-	private void appendViewDiff(List diffs, Writer out)
+	private void appendViewDiff(List<ViewDiff> diffs, Writer out)
 		throws IOException
 	{
-		Iterator itr = diffs.iterator();
-		while (itr.hasNext())
+		for (ViewDiff d : diffs)
 		{
-			ViewDiff d = (ViewDiff)itr.next();
 			StrBuffer source = d.getMigrateTargetXml();
 			if (source.length() > 0)  
 			{
@@ -824,6 +947,13 @@ public class SchemaDiff
 
 				tw.appendOpenTag(info, indent2, TAG_PROC_PAIR, pattr, tbls, false);
 			}
+			else if (o instanceof SequenceDiffEntry)
+			{
+				SequenceDiffEntry pe = (SequenceDiffEntry)o;
+				tbls[0] = pe.reference.getSequenceName();
+				tbls[1] = (pe.target == null ? "" : pe.target.getSequenceName());
+				tw.appendOpenTag(info, indent2, TAG_PROC_PAIR, pattr, tbls, false);
+			}
 			info.append("/>\n");
 			
 		}
@@ -890,6 +1020,18 @@ public class SchemaDiff
 	}
 }
 
+class SequenceDiffEntry
+{
+	SequenceDefinition reference;
+	SequenceDefinition target;
+
+	public SequenceDiffEntry(SequenceDefinition ref, SequenceDefinition tar)
+	{
+		reference = ref;
+		target = tar;
+	}
+}
+
 class ProcDiffEntry
 {
 	ProcedureDefinition reference;
@@ -910,6 +1052,7 @@ class DiffEntry
 		reference = ref;
 		target = tar;
 	}
+	
 	public String toString()
 	{
 		if (target == null)

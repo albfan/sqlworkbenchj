@@ -12,9 +12,8 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import java.util.StringTokenizer;
+import workbench.log.LogMgr;
 
-import workbench.db.WbConnection;
 import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -22,41 +21,38 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.SqlUtil;
 
 /**
- *
+ * Orcle can only execute stored procedures if the SQL is converted to the 
+ * JDBC syntax: {call procname() }
+ * 
+ * WbOraExecute will simply remove the EXEC or EXECUTE verb from the given 
+ * SQL, and then add the necessary JDBC "syntax" to the resulting SQL statement,
+ * passing the original SQL "unchanged" to the JDBC driver.
+ * 
  * @author  support@sql-workbench.net
  */
 public class WbOraExecute extends SqlCommand
 {
-	public static final WbOraExecute EXEC = new WbOraExecute("EXEC");
-	public static final WbOraExecute EXECUTE = new WbOraExecute("EXECUTE");
+//	public static final WbOraExecute EXEC = new WbOraExecute("EXEC");
+//	public static final WbOraExecute EXECUTE = new WbOraExecute("EXECUTE");
 
-	private String sqlcommand;
+	private String verb;
 
-	private WbOraExecute(String aVerb)
+	private WbOraExecute(String command)
 	{
-		this.sqlcommand = aVerb;
+		verb = command;
 	}
 
-	public String getVerb() { return this.sqlcommand; }
+	public String getVerb() { return this.verb; }
 
+	/**
+	 * Converts the passed sql to an Oracle compliant JDBC call and 
+	 * runs the statement.
+	 */
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
-		String sql = SqlUtil.makeCleanSql(aSql, false, false, '\'');
-		StringTokenizer tok = new StringTokenizer(sql, " ");
-		String verb = null;
-		if (tok.hasMoreTokens()) verb = tok.nextToken();
-		if (!this.sqlcommand.equalsIgnoreCase(verb)) throw new Exception("Wrong syntax. " + sqlcommand + " expected!");
-
-		String upper = sql.toUpperCase();
-		int startpos = upper.indexOf(this.sqlcommand.toUpperCase());
-		String realSql = "";
-		if (startpos > 0)
-		{
-			realSql = sql.substring(0, startpos - 1);
-		}
-		realSql = realSql + "{call " + sql.substring(startpos + this.sqlcommand.length() + 1) + "}";
+		String realSql = "{call " + SqlUtil.stripVerb(aSql) + "}";
 
 		result.addMessage(ResourceMgr.getString("MsgProcCallConverted") + " " + realSql);
 
@@ -69,6 +65,7 @@ public class WbOraExecute extends SqlCommand
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("WbOraExcecute.execute()", "Error calling stored procedure", e);
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			result.setFailure();

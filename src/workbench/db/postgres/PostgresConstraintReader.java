@@ -15,6 +15,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import workbench.db.*;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
@@ -56,8 +57,10 @@ public class PostgresConstraintReader
 		
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
+		Savepoint sp = null;
 		try
 		{
+			sp = dbConnection.setSavepoint();
 			stmt = dbConnection.prepareStatement(sql);
 			stmt.setString(1, aTable.getTableName());
 			rs = stmt.executeQuery();
@@ -85,9 +88,11 @@ public class PostgresConstraintReader
 					count++;
 				}
 			}
+			dbConnection.releaseSavepoint(sp);
 		}
 		catch (SQLException e)
 		{
+			try { dbConnection.rollback(sp); } catch (Throwable th) {}
 			LogMgr.logError("AbstractConstraintReader", "Error when reading column constraints " + ExceptionUtil.getDisplay(e), null);
 			throw e;
 		}

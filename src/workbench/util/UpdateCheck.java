@@ -83,17 +83,16 @@ public class UpdateCheck
 
 	public void startRead()
 	{
-		try
-		{
+//		try
+//		{
 			LogMgr.logDebug("UpdateCheck.run()", "Checking versions...");
 			this.versionReader = new WbVersionReader("automatic ", this);
-			Thread.currentThread().sleep(350);
 			versionReader.startCheckThread();
-		}
-		catch (InterruptedException ex)
-		{
-			// ignore
-		}
+//		}
+//		catch (InterruptedException ex)
+//		{
+//			// ignore
+//		}
 	}
 
 	private void versionAvailable()

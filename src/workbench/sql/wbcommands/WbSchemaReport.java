@@ -44,6 +44,7 @@ public class WbSchemaReport
 	public static final String PARAM_INCLUDE_TABLES = "includeTables";
 	public static final String PARAM_INCLUDE_PROCS = "includeProcedures";
 	public static final String PARAM_INCLUDE_GRANTS = "includeTableGrants";
+	public static final String PARAM_INCLUDE_SEQUENCES = "includeSequences";
 	
 	public static final String VERB = "WBREPORT";
 	private SchemaReporter reporter;
@@ -62,6 +63,7 @@ public class WbSchemaReport
 		cmdLine.addArgument(PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_TABLES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_INCLUDE_SEQUENCES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 	}
@@ -121,7 +123,7 @@ public class WbSchemaReport
 		else
 		{
 			String arg = cmdLine.getValue("schemas");
-			List schemas = StringUtil.stringToList(arg, ",");
+			List<String> schemas = StringUtil.stringToList(arg, ",");
 			this.reporter.setSchemas(schemas);
 		}
 
@@ -137,6 +139,8 @@ public class WbSchemaReport
 		this.reporter.setIncludeTables(cmdLine.getBoolean(PARAM_INCLUDE_TABLES, true));
 		this.reporter.setIncludeProcedures(cmdLine.getBoolean(PARAM_INCLUDE_PROCS, false));
 		this.reporter.setIncludeGrants(cmdLine.getBoolean(PARAM_INCLUDE_GRANTS, false));
+		this.reporter.setIncludeSequences(cmdLine.getBoolean(PARAM_INCLUDE_SEQUENCES, false));
+		
 		if (currentConnection.getMetadata().isOracle())
 		{
 			// check if remarksReporting is turned on for Oracle, if not issue a warning.
@@ -153,6 +157,7 @@ public class WbSchemaReport
 				result.addMessage("");
 			}
 		}
+		
 		this.currentTable = 0;
 		String wbFile = file;
 		if (dbDesigner)

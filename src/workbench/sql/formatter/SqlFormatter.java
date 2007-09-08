@@ -118,6 +118,13 @@ public class SqlFormatter
 		SET_TERMINAL.add("WHERE");
 	}
 
+	private static final Set<String> TABLE_CONSTRAINTS_KEYWORDS = new HashSet<String>();
+	{
+		TABLE_CONSTRAINTS_KEYWORDS .add("FOREIGN KEY");
+		TABLE_CONSTRAINTS_KEYWORDS .add("PRIMARY KEY");
+		TABLE_CONSTRAINTS_KEYWORDS .add("CONSTRAINT");
+	}
+	
 	private String sql;
 	private SQLLexer lexer;
 	private StringBuilder result;
@@ -126,6 +133,7 @@ public class SqlFormatter
 	private int realLength = 0;
 	private int maxSubselectLength = 60;
 	private Set<String> dbFunctions = Collections.emptySet();
+	private Set<String> dataTypes = Collections.emptySet();
 	private int selectColumnsPerLine = 1;
 	private static final String NL = "\n";
 	
@@ -160,6 +168,11 @@ public class SqlFormatter
 		this.selectColumnsPerLine = cols;
 	}
 	
+	public void setDbDataTypes(Set<String> types)
+	{
+		this.dataTypes = types;
+	}
+	
 	public void setDBFunctions(Set<String> functionNames)
 	{
 		this.dbFunctions = new HashSet<String>();
@@ -181,6 +194,7 @@ public class SqlFormatter
 	
 	private void saveLeadingWhitespace()
 	{
+		if (this.sql.length() == 0) return;
 		char c = this.sql.charAt(0);
 		int pos = 0;
 		if (!Character.isWhitespace(c)) return;
@@ -310,6 +324,11 @@ public class SqlFormatter
 		return this.dbFunctions.contains(key.toUpperCase());
 	}
 	
+	private boolean isDatatype(String key)
+	{
+		return this.dataTypes.contains(key.toUpperCase());
+	}
+	
 	/**
 	 * 	Return true if a whitespace should be added before the current token.
 	 */
@@ -327,6 +346,7 @@ public class SqlFormatter
 		
 		if (isCurrentOpenBracket && last.isIdentifier()) return false;
 		if (isCurrentOpenBracket && isDbFunction(lastV)) return false;
+		if (isCurrentOpenBracket && isDatatype(lastV)) return false;
 		if (isCurrentOpenBracket && last.isReservedWord()) return true;
 		if (isLastCloseBracket && currChar == ',') return false;
 		if (isLastCloseBracket && (current.isIdentifier() || current.isReservedWord())) return true;
@@ -911,26 +931,28 @@ public class SqlFormatter
 				if (LINE_BREAK_BEFORE.contains(word))
 				{
 					if (!isStartOfLine()) this.appendNewline();
+					
+					// For UPDATE statements
 					if ("SET".equals(word)) 
 					{
 						this.indent("   ");
 					}
-					this.appendText(word);
 				}
 				else
 				{
 					//if (!lastToken.isSeparator() && lastToken != t && !isStartOfLine()) this.appendText(' ');
 					if (needsWhitespace(lastToken, t)) this.appendText(' ');
-					if (wbTester.isWbCommand(word))
-					{
-						this.appendText(wbTester.formatVerb(word));
-					}
-					else
-					{
-						this.appendText(word);
-					}
 				}
-
+				
+				if (wbTester.isWbCommand(word))
+				{
+					this.appendText(wbTester.formatVerb(word));
+				}
+				else 
+				{
+					this.appendText(word);
+				}
+				
 				if (LINE_BREAK_AFTER.contains(word))
 				{
 					this.appendNewline();
@@ -952,18 +974,18 @@ public class SqlFormatter
 					continue;
 				}
 				
-				if (word.equals("FROM"))
-				{
-					lastToken = t;
-					t = this.processFrom(t);
-					if (t == null) return;
-					continue;
-				}
-
 				if (word.equals("CREATE") || word.equals("CREATE OR REPLACE"))
 				{
 					lastToken = t;
 					t = this.processCreate(t);
+					if (t == null) return;
+					continue;
+				}				
+				
+				if (word.equals("FROM"))
+				{
+					lastToken = t;
+					t = this.processFrom(t);
 					if (t == null) return;
 					continue;
 				}
@@ -1229,6 +1251,8 @@ public class SqlFormatter
 	{
 		SQLToken t = this.lexer.getNextToken(true, false);
 		String verb = t.getContents();
+		int createStart = t.getCharBegin();
+		
 		if (verb.equals("TABLE"))
 		{
 			this.appendText(' ');
@@ -1271,144 +1295,171 @@ public class SqlFormatter
 		return t;
 	}
 
+	private boolean isTableConstraint(String keyword)
+	{
+		return TABLE_CONSTRAINTS_KEYWORDS.contains(keyword);
+	}
+	
+	private SQLToken processTableDefinition()
+	{
+		List<StringBuilder> cols = new ArrayList<StringBuilder>();
+		SQLToken t = lexer.getNextToken(true, false);
+		StringBuilder line = new StringBuilder(50);
+		int maxColLength = 0;
+
+		boolean isColname = true;
+		int bracketCount = 0;
+		
+		SQLToken last = null;
+		
+		while (t != null)
+		{
+			String w = t.getContents();
+			
+			if (isTableConstraint(w))
+			{
+				// end of column definitions reached
+				break;
+			}
+			
+			if ("(".equals(w)) bracketCount ++;
+			if (")".equals(w)) bracketCount --;
+
+			// Closing bracket reached --> end of 
+			if (bracketCount < 0)
+			{
+				cols.add(line);
+				break;
+			}
+
+			if (!isColname && last != null && needsWhitespace(last, t, true))
+			{
+				line.append(' ');
+			}
+			line.append(w);
+			
+			if (isColname && t.isIdentifier())
+			{
+				if (w.length() > maxColLength) maxColLength = w.length();
+				isColname = false;
+			}
+
+			if (w.equals(",") && bracketCount == 0)
+			{
+				cols.add(line);
+				line = new StringBuilder(50);
+				isColname = true;
+			}
+
+			last = t;
+			t = this.lexer.getNextToken(true, false);
+		}
+		
+		// Now process the collected column definitions
+		for (StringBuilder col : cols)
+		{
+			int pos = StringUtil.findFirstWhiteSpace(col);
+			String colname = col.substring(0, pos).trim();
+			String def = col.substring(pos + 1).trim();
+			appendText("  ");
+			appendText(colname);
+			while (pos < maxColLength)
+			{
+				this.appendText(' ');
+				pos ++;
+			}
+			this.appendText("   ");
+			appendText(def);
+			appendNewline();
+		}
+
+		if (t == null) return t;
+		
+		// now the definitions are added
+		// check if we need to process more
+		if (!t.getContents().equals(")"))
+		{
+			appendText("  ");
+			bracketCount = 0;
+			last = null;
+			
+			while (t != null)
+			{
+				String w = t.getContents();
+				if ("(".equals(w)) bracketCount ++;
+				
+				if (")".equals(w)) 
+				{
+					if (bracketCount == 0)
+					{
+						break;
+					}
+					else
+					{
+						bracketCount --;
+					}
+				}
+				
+				if (last != null && needsWhitespace(last, t, true))
+				{
+					appendText(' ');
+				}
+				appendText(w);
+				
+				if (",".equals(w) && bracketCount == 0)
+				{
+					this.appendNewline();
+					this.appendText("  ");
+				}
+				
+				last = t;
+				t = this.lexer.getNextToken(true, false);
+			}
+			appendNewline();
+		}
+		
+		appendText(')');
+		appendNewline();
+		t = this.lexer.getNextToken(false, false);
+
+		return t;
+	}
+	
+	/**
+	 * Process a CREATE TABLE statement. 
+	 * The CREATE TABLE has already been added!
+	 */
 	private SQLToken processCreateTable(SQLToken previous)
 		throws Exception
 	{
 		SQLToken t = this.lexer.getNextToken(false, false);
-		SQLToken last = previous;
-		int bracketCount = 0;
-		StringBuilder definition = new StringBuilder(200);
-
-		while (t != null)
-		{
-			if (t.getContents().equals("(") )
-			{
-				if (bracketCount == 0)
-				{
-					// start of table definition
-					this.appendNewline();
-					this.appendText('(');
-					this.appendNewline();
-				}
-				else
-				{
-					definition.append('(');
-				}
-				bracketCount ++;
-			}
-			else if (t.getContents().equals(")"))
-			{
-				if (bracketCount == 1)
-				{
-					// end of table definition
-					this.outputFormattedColumnDefs(definition);
-					this.appendNewline();
-					//this.appendText(')');
-					//this.appendNewline();
-					return t;
-				}
-				else
-				{
-					definition.append(')');
-				}
-				bracketCount--;
-			}
-			else if (bracketCount > 0)
-			{
-				// collect the table definition so that it's easier to format it
-				if (this.needsWhitespace(last, t, true))
-				{
-					definition.append(' ');
-				}
-				definition.append(t.getContents());
-			}
-			else
-			{
-				this.appendText(t.getContents());
-				if (this.needsWhitespace(last, t, true))
-				{
-					this.appendText(' ');
-				}
-			}
-			last = t;
-			t = this.lexer.getNextToken(false, false);
-		}
+		if (t == null) return t;
+		
+		// the next token has to be the table name, so 
+		// we can simply write it out
+		
+		this.appendText(t.getContents());
+		this.appendText(' ');
+	
+		t = this.lexer.getNextToken(false, false);
+		if (t == null) return t;
+		
+		// this has to be the opening bracket before the table definition
+		this.appendNewline();
+		this.appendText('(');
+		this.appendNewline();
+		
+		t = processTableDefinition();
+		
 		return t;
 	}
-
-	private void outputFormattedColumnDefs(StringBuilder source)
-	{
-		ArrayList<String> cols = new ArrayList<String>();
-		int size = source.length();
-		int bracketCount = 0;
-		int lastPos = 0;
-		for (int i=0; i < size; i++)
-		{
-			char c = source.charAt(i);
-			if (c == ',' && bracketCount == 0)
-			{
-				cols.add(source.substring(lastPos, i).trim());
-				lastPos = i + 1;
-			}
-			else if (c == '(')
-			{
-				bracketCount ++;
-			}
-			else if (c == ')')
-			{
-				bracketCount --;
-			}
-		}
-		cols.add(source.substring(lastPos, size).trim());
-
-		// second pass, find the longest column name
-		int count = cols.size();
-		int width = 0;
-
-		for (String def : cols)
-		{
-			int pos = def.indexOf(' ');
-			if (pos > width) width = pos;
-		}
-		width += 2;
-
-		// third pass, output the definitions aligned to the longest column name
-		for (int i=0; i < count; i++)
-		{
-			String def = cols.get(i);
-			int pos = def.indexOf(' ');
-
-			this.indent("   ");
-			if (pos == -1)
-			{
-				// no type present, simply append the whole column
-				this.appendText(def);
-			}
-			else
-			{
-				String col = def.substring(0, pos);
-				String type = def.substring(pos + 1);
-				this.appendText(col);
-				while (pos < width)
-				{
-					this.appendText(' ');
-					pos ++;
-				}
-				this.appendText(type);
-			}
-			if (i < count - 1)
-			{
-				this.appendText(',');
-				this.appendNewline();
-			}
-		}
-	}
-
+	
 	/**
 	 *	Process the elements in a () combination
 	 *	Any bracket inside the brackets are assumed to be "function calls"
 	 *  and just treated as further elements.
 	 *	It is assumed that the passed SQLToken is the opening bracket
+	 * 
 	 *  @return the token after the closing bracket
 	 */
 	private SQLToken processCommaList(SQLToken previous, int maxElements, int indentCount)
@@ -1533,44 +1584,13 @@ public class SqlFormatter
 			{
 				if (bracketCount == 0)
 				{
-					// start of column definition
-					this.appendNewline();
-					this.appendText('(');
-					this.appendNewline();
-				}
-				else
-				{
-					definition.append('(');
+					// start of column definitions...
+					t = this.processCommaList(t, 1, 0);
 				}
 				bracketCount ++;
 			}
-			else if (t.getContents().equals(")"))
-			{
-				if (bracketCount == 1)
-				{
-					// end of table definition
-					this.outputFormattedColumnDefs(definition);
-					this.appendNewline();
-					//this.appendText(')');
-					//this.appendNewline();
-					return t;
-				}
-				else
-				{
-					definition.append(')');
-				}
-				bracketCount--;
-			}
-			else if (bracketCount > 0)
-			{
-				// collect the table definition so that it's easier to format it
-				if (this.needsWhitespace(last, t, true))
-				{
-					definition.append(' ');
-				}
-				definition.append(t.getContents());
-			}
-			else if ("SELECT".equals(t.getContents()))
+			
+			if ("SELECT".equals(t.getContents()))
 			{
 				return t;
 			}

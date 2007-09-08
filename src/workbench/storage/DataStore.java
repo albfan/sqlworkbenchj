@@ -643,6 +643,40 @@ public class DataStore
 	}
 
 	/**
+	 * Returns the current value of the named column in the specified row.
+	 * This is equivalent to calling <tt>getRow(row, findColumn(columnName))</tt>
+	 * @param aRow the row to get the data from (starts at 0)
+	 * @param columnName the column to get the data for 
+	 * 
+	 * @return the current value of the column might be different to the value
+	 * retrieved from the database!
+	 * 
+	 * @see workbench.storage.RowData#getValue(int)
+	 * @see #getRow(int)
+	 * @see #getColumnIndex(String)
+	 * @see #getValue(int, int)
+	 */
+	public Object getValue(int aRow, String columnName)
+		throws IndexOutOfBoundsException
+	{
+		int index = findColumn(columnName);
+		RowData row = this.getRow(aRow);
+		return row.getValue(index);
+	}
+
+	
+	/**
+	 * Returns the value of the given row/column as a String.
+	 * The value's toString() method is used to convert the value to a String value.
+	 * @return Null if the column is null, or the column's value as a String
+	 */
+	public String getValueAsString(int aRow, String colName)
+		throws IndexOutOfBoundsException
+	{
+		return getValueAsString(aRow, findColumn(colName));
+	}
+	
+	/**
 	 * Returns the value of the given row/column as a String.
 	 * The value's toString() method is used to convert the value to a String value.
 	 * @return Null if the column is null, or the column's value as a String

@@ -53,7 +53,7 @@
   
   <void method="put"> 
    <string>DB2/NT</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
+   <object id="db2_view_source" class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
      <string>SELECT text from syscat.views</string> 
     </void> 
@@ -66,6 +66,11 @@
    </object> 
   </void> 
   
+	<void method="put">  
+   <string>DB2/LINUX</string>  
+   <object idref="db2_view_source"/>
+	</void>
+	
   <void method="put">    
     <string>DB2 UDB for AS/400</string>    
     <object class="workbench.db.GetMetaDataSql">     

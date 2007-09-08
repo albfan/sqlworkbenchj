@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
@@ -127,7 +128,18 @@ public class IngresMetadata
 		return result.toString();
 	}
 
-	public DataStore getSequenceDefinition(String owner, String sequence)
+	
+	public List<SequenceDefinition> getSequences(String owner)
+	{
+		return null;
+	}
+	
+	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
+	{
+		return null;
+	}
+		
+	public DataStore getRawSequenceDefinition(String owner, String sequence)
 	{
 		String sql = "SELECT * FROM iisequences WHERE seq_owner = ? AND seq_name = ? ";
 		PreparedStatement stmt = null;
@@ -188,6 +200,13 @@ public class IngresMetadata
 		return result;
 	}
 
+	public void readSequenceSource(SequenceDefinition def)
+	{
+		if (def == null) return;
+		CharSequence s = getSequenceSource(def.getSequenceOwner(), def.getSequenceName());
+		def.setSource(s);
+	}
+	
 	public String getSequenceSource(String owner, String sequence)
 	{
 		ResultSet rs = null;

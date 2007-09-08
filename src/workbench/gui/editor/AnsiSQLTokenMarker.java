@@ -1,6 +1,7 @@
 package workbench.gui.editor;
 
 import java.util.Collection;
+import workbench.sql.wbcommands.WbCall;
 import workbench.sql.wbcommands.WbConfirm;
 import workbench.sql.wbcommands.WbCopy;
 import workbench.sql.wbcommands.WbDefinePk;
@@ -204,6 +205,7 @@ public class AnsiSQLTokenMarker
 		keywords.add(WbListPkDef.VERB,Token.KEYWORD2);
 		keywords.add(WbSavePkMapping.VERB,Token.KEYWORD2);
 		keywords.add(WbLoadPkMapping.VERB,Token.KEYWORD2);
+		keywords.add(WbCall.VERB, Token.KEYWORD2);
 	}
 
 	private void addDataTypes()

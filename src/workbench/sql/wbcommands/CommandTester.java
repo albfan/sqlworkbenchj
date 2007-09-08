@@ -56,8 +56,9 @@ public class CommandTester
 		commands.add(WbStartBatch.VERB);
 		commands.add(WbXslt.VERB);
 		commands.add(WbConfirm.VERB);
+		commands.add(WbCall.VERB);
 		
-		formattedWords = new HashMap();
+		formattedWords = new HashMap<String, String>();
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);
 		formattedWords.put(WbLoadPkMapping.VERB, WbLoadPkMapping.FORMATTED_VERB);
 		formattedWords.put(WbDefineVar.DEFINE_LONG.getVerb(), "WbVarDefine");
@@ -76,7 +77,7 @@ public class CommandTester
 	
 	public String formatVerb(String verb)
 	{
-		String f = (String)formattedWords.get(verb.toUpperCase());
+		String f = formattedWords.get(verb.toUpperCase());
 		if (f != null)
 		{
 			return f;

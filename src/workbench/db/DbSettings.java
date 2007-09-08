@@ -97,6 +97,16 @@ public class DbSettings
 		return verb;
 	}
 	
+	public String getInsertForImport()
+	{
+		return Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".import.insert", null);
+	}
+	
+	public boolean useWbProcedureCall()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".procs.use.wbcall", false);
+	}
+	
 	public boolean needsTableForDropIndex()
 	{
 		boolean needsTable = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".dropindex.needstable", false);

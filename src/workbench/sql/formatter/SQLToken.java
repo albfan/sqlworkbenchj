@@ -102,7 +102,7 @@ public class SQLToken
 	 */
 	public final static int ERROR_BAD_BIT_STRING = 0xF05;
 
-	private int ID;
+	private final int ID;
 	private String contents;
 	private int lineNumber;
 	private int charBegin;
@@ -243,6 +243,16 @@ public class SQLToken
 		return((ID >> 8) == 0x1);
 	}
 
+	public boolean isIntegerLiteral()
+	{
+		return (ID == LITERAL_INTEGER);
+	}
+	
+	public boolean isNumberLiteral()
+	{
+		return (ID == LITERAL_INTEGER) || (ID == LITERAL_FLOAT);
+	}
+	
 	/**
 	 * Checks this token to see if it is an identifier.
 	 *

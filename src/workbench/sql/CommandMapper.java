@@ -27,6 +27,7 @@ import workbench.sql.commands.SetCommand;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.commands.UpdatingCommand;
 import workbench.sql.commands.UseCommand;
+import workbench.sql.wbcommands.WbCall;
 import workbench.sql.wbcommands.WbConfirm;
 import workbench.sql.wbcommands.WbCopy;
 import workbench.sql.wbcommands.WbDefinePk;
@@ -45,7 +46,6 @@ import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListTables;
 import workbench.sql.wbcommands.WbListVars;
 import workbench.sql.wbcommands.WbLoadPkMapping;
-import workbench.sql.wbcommands.WbOraExecute;
 import workbench.sql.wbcommands.WbRemoveVar;
 import workbench.sql.wbcommands.WbSavePkMapping;
 import workbench.sql.wbcommands.WbSchemaDiff;
@@ -145,6 +145,9 @@ public class CommandMapper
 		sql = new WbConfirm();
 		cmdDispatch.put(sql.getVerb(), sql);
 		
+		sql = new WbCall();
+		cmdDispatch.put(sql.getVerb(), sql);
+		
 		cmdDispatch.put(WbInclude.INCLUDE_LONG.getVerb(), WbInclude.INCLUDE_LONG);
 		cmdDispatch.put(WbInclude.INCLUDE_SHORT.getVerb(), WbInclude.INCLUDE_SHORT);
 
@@ -205,16 +208,18 @@ public class CommandMapper
 		if (metaData.isOracle())
 		{
 			AlterSessionCommand alter = new AlterSessionCommand();
-			this.cmdDispatch.put(WbOraExecute.EXEC.getVerb(), WbOraExecute.EXEC);
-			this.cmdDispatch.put(WbOraExecute.EXECUTE.getVerb(), WbOraExecute.EXECUTE);
+			SqlCommand wbcall = this.cmdDispatch.get(WbCall.VERB);
+			
+			this.cmdDispatch.put(WbCall.EXEC_VERB_LONG, wbcall);
+			this.cmdDispatch.put(WbCall.EXEC_VERB_SHORT, wbcall);
 			this.cmdDispatch.put(alter.getVerb(), alter);
 			
 			WbFeedback echo = new WbFeedback("ECHO");
 			this.cmdDispatch.put(echo.getVerb(), echo);
 
 			this.dbSpecificCommands.add(alter.getVerb());
-			this.dbSpecificCommands.add(WbOraExecute.EXEC.getVerb());
-			this.dbSpecificCommands.add(WbOraExecute.EXECUTE.getVerb());
+			this.dbSpecificCommands.add(WbCall.EXEC_VERB_LONG);
+			this.dbSpecificCommands.add(WbCall.EXEC_VERB_SHORT);
 			this.dbSpecificCommands.add(echo.getVerb());
 		}
 		else if (metaData.isSqlServer() || metaData.isMySql() || metaData.supportsCatalogs())
@@ -229,6 +234,13 @@ public class CommandMapper
 			this.cmdDispatch.put(WbInclude.INCLUDE_FB.getVerb(), WbInclude.INCLUDE_FB);
 			this.dbSpecificCommands.add(WbInclude.INCLUDE_FB.getVerb());
 			this.dbSpecificCommands.add(DdlCommand.RECREATE.getVerb());
+		}
+		
+		if (metaData.getDbSettings().useWbProcedureCall())
+		{
+			SqlCommand wbcall = this.cmdDispatch.get(WbCall.VERB);
+			this.cmdDispatch.put("CALL", wbcall);
+			this.dbSpecificCommands.add("CALL");
 		}
 
 		String verbs = Settings.getInstance().getProperty("workbench.db.ignore." + metaData.getDbId(), "");

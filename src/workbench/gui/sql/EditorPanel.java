@@ -126,6 +126,7 @@ public class EditorPanel
 	private File currentFile;
 	private String fileEncoding;
 	private Set<String> dbFunctions = null;
+	private Set<String> dbDatatypes = null;
 	private boolean isMySQL = false;
 	private DelimiterDefinition alternateDelimiter;
 	
@@ -216,6 +217,8 @@ public class EditorPanel
 		}
 		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
 		this.dbFunctions = aConnection.getMetadata().getDbFunctions();
+		this.dbDatatypes = aConnection.getMetadata().getDbDataTypes();
+		
 		if (token != null) 
 		{
 			token.initKeywordMap(); // reset keywords, to get rid of old DBMS specific ones
@@ -226,9 +229,7 @@ public class EditorPanel
 			
 			String key = "workbench.db." + aConnection.getMetadata().getDbId() + ".syntax.";
 
-			List<String> addKeys = StringUtil.stringToList(Settings.getInstance().getProperty(key  + "keywords", ""), ",", true, true);
-			token.setSqlKeyWords(addKeys);
-			addKeys = StringUtil.stringToList(Settings.getInstance().getProperty(key  + "functions", ""), ",", true, true);
+			List<String> addKeys = StringUtil.stringToList(Settings.getInstance().getProperty(key  + "functions", ""), ",", true, true);
 			token.setSqlFunctions(addKeys);			
 			this.isMySQL = aConnection.getMetadata().isMySql();
 			token.setIsMySQL(isMySQL);
@@ -345,14 +346,15 @@ public class EditorPanel
 			String command = parser.getCommand(i);
 
 			// no need to format "empty" strings
-			if (StringUtil.isWhitespace(command))
+			if (StringUtil.isEmptyString(command) || StringUtil.isWhitespace(command))
 			{
 				newSql.append(command);
 				continue;
 			}
 			
 			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getFormatterMaxSubselectLength());
-			f.setDBFunctions(this.dbFunctions);
+			f.setDBFunctions(dbFunctions);
+			f.setDbDataTypes(dbDatatypes);
 			int cols = Settings.getInstance().getFormatterMaxColumnsInSelect();
 			f.setMaxColumnsPerSelect(cols);
 			
