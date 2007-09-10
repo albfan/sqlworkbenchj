@@ -43,8 +43,8 @@ public class ProcDiff
 		boolean isDifferent = true;
 		String tagToUse = TAG_CREATE_PROC;
 
-		String refSource = reference.getSource();
-		String targetSource = target.getSource();
+		CharSequence refSource = reference.getSource();
+		CharSequence targetSource = target.getSource();
 		
 		if (targetSource != null)
 		{

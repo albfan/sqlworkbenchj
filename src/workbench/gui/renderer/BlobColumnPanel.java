@@ -23,7 +23,6 @@ import javax.swing.SwingConstants;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.FlatButton;
 import workbench.resource.ResourceMgr;
-import workbench.storage.NullValue;
 
 /**
  * Renderer for BLOB datatype...
@@ -79,7 +78,7 @@ public class BlobColumnPanel
 
 	public void setValue(Object value)
 	{
-		if (value == null || value instanceof NullValue)
+		if (value == null)
 		{
 			this.label.setText("");
 		}

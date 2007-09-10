@@ -255,7 +255,11 @@ public class SqlLiteralFormatter
 		
 		int type = data.getIdentifier().getDataType();
 		
-		if (value instanceof String)
+		if (value == null)
+		{
+			return "NULL";
+		}
+		else if (value instanceof String)
 		{
 			String t = (String)value;
 			if (this.treatClobAsFile && SqlUtil.isClobType(type) && clobWriter != null)
@@ -305,10 +309,6 @@ public class SqlLiteralFormatter
 				return "{$blobfile='" + path + "'}";
 			else if (SqlUtil.isClobType(type))
 				return "{$clobfile='" + path + "' encoding='" + this.clobEncoding + "'}";
-		}
-		else if (value instanceof NullValue)
-		{
-			return "NULL";
 		}
 		else if (type == java.sql.Types.BIT && "bit".equalsIgnoreCase(data.getIdentifier().getDbmsType()))
 		{

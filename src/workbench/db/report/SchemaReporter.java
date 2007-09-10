@@ -20,7 +20,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import javax.swing.JDialog;
 
@@ -520,12 +519,10 @@ public class SchemaReporter
 		try
 		{
 			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);
-			List procs = this.dbConn.getMetadata().getProcedureList(null, schema);
+			List<ProcedureDefinition> procs = this.dbConn.getMetadata().getProcedureList(null, schema);
 			
-			Iterator itr = procs.iterator();
-			while (itr.hasNext())
+			for (ProcedureDefinition def : procs)
 			{
-				ProcedureDefinition def = (ProcedureDefinition)itr.next();
 				ReportProcedure proc = new ReportProcedure(def, this.dbConn);
 				this.procedures.add(proc);
 				if (this.cancel) return;

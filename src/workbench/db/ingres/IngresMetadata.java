@@ -155,7 +155,7 @@ public class IngresMetadata
 		}
 		catch (Throwable e)
 		{
-			LogMgr.logError("IngresMetaData.getSequenceDefinition()", "Error when retrieving sequence definition", e);
+			LogMgr.logError("IngresMetaData.getRawSequenceDefinition()", "Error when retrieving sequence definition", e);
 		}
 		finally
 		{

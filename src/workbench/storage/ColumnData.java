@@ -47,6 +47,6 @@ public class ColumnData
 	
 	public boolean isNull()
 	{
-		return (data == null || data instanceof NullValue);
+		return (data == null);
 	}
 }

@@ -628,6 +628,7 @@ public class ConnectionMgr
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void readDrivers()
 	{
 		try
@@ -669,6 +670,7 @@ public class ConnectionMgr
 		this.readTemplates = aFlag;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void importTemplateDrivers()
 	{
 		if (this.templatesImported) return;

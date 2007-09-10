@@ -21,7 +21,6 @@ import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.Settings;
-import workbench.storage.NullValue;
 import workbench.util.StringUtil;
 
 /**
@@ -125,7 +124,7 @@ public class TextAreaRenderer
 			}
 		}
 		
-		boolean isNull = (value == null) || (value instanceof NullValue);
+		boolean isNull = (value == null);
 		
 		if (isNull)
 		{

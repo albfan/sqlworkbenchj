@@ -12,7 +12,6 @@
 package workbench.gui.filter;
 
 import workbench.gui.components.WbTable;
-import workbench.storage.NullValue;
 import workbench.storage.filter.*;
 import workbench.util.SqlUtil;
 
@@ -72,7 +71,7 @@ public class SelectionFilter
 				int type = client.getDataStore().getColumnType(columns[i]);
 				ColumnComparator comparator = null;
 
-				if (value == null || value instanceof NullValue)
+				if (value == null)
 				{
 					comparator = new IsNullComparator();
 				}

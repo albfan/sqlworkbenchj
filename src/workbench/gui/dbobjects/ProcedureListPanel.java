@@ -437,7 +437,7 @@ public class ProcedureListPanel
 		DbMetadata meta = dbConnection.getMetadata();
 		Container parent = this.getParent();
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		String sql = null;
+		CharSequence sql = null;
 		try
 		{
 			dbConnection.setBusy(true);
@@ -469,7 +469,7 @@ public class ProcedureListPanel
 			try
 			{
 				sql = meta.getProcedureSource(catalog, schema, proc, type);
-				source.setText(sql == null ? "" : sql);
+				source.setText(sql == null ? "" : sql.toString());
 			}
 			catch (Throwable ex)
 			{
@@ -495,7 +495,7 @@ public class ProcedureListPanel
 		});
 	}
 	
-	private int checkOraclePackage(String sql, String catalog, String object, int type)
+	private int checkOraclePackage(CharSequence sql, String catalog, String object, int type)
 	{
 		if (sql == null) return 0;
 		if (this.dbConnection == null) return 0;

@@ -19,7 +19,6 @@ import workbench.db.WbConnection;
 import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
 import workbench.db.report.TagWriter;
-import workbench.storage.NullValue;
 import workbench.storage.RowData;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
@@ -186,7 +185,7 @@ public class XmlRowDataConverter
 			if (!this.includeColumnInExport(c)) continue;
 			Object data = row.getValue(c);
 			int type = this.metaData.getColumnType(c);
-			boolean isNull = (data == null || data instanceof NullValue);
+			boolean isNull = (data == null);
 			boolean writeCloseTag = true;
 			
 			boolean externalFile = false;

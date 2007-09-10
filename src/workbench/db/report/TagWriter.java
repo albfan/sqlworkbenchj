@@ -63,7 +63,7 @@ public class TagWriter
 	 * Appends the tag and the value in one line. There will be a new line
 	 * after the closing tag.
 	 */
-	public void appendTag(StrBuffer target, StrBuffer indent, String tag, String value)
+	public void appendTag(StrBuffer target, StrBuffer indent, String tag, CharSequence value)
 	{
 		appendTag(target, indent, tag, value, false);
 	}
@@ -73,7 +73,7 @@ public class TagWriter
 		if (!StringUtil.isEmptyString(value)) appendTag(target, indent, tag, value, false);
 	}
 	
-	public void appendTag(StrBuffer target, StrBuffer indent, String tag, String value, String attr, String attValue)
+	public void appendTag(StrBuffer target, StrBuffer indent, String tag, CharSequence value, String attr, String attValue)
 	{
 		appendOpenTag(target, indent, tag, attr, attValue);
 		target.append(value);
@@ -85,13 +85,22 @@ public class TagWriter
 	 * after the closing tag. If checkCData is true, then the value 
 	 * is checked for characters which require a <![CDATA[ "quoting"
 	 */
-	public void appendTag(StrBuffer target, StrBuffer indent, String tag, String value, boolean checkCData)
+	public void appendTag(StrBuffer target, StrBuffer indent, String tag, CharSequence value, boolean checkCData)
 	{
 		appendOpenTag(target, indent, tag);
 		boolean useCData = checkCData && needsCData(value);
-		if (useCData) target.append(CDATA_START);
+		if (useCData) 
+		{
+			target.append(CDATA_START);
+			target.append('\n');
+		}
 		target.append(value);
-		if (useCData) target.append(CDATA_END);
+		if (useCData) 
+		{
+			target.append(CDATA_END);
+			target.append('\n');
+			target.append(indent);
+		}
 		appendCloseTag(target, null, tag);
 	}
 
@@ -210,12 +219,12 @@ public class TagWriter
 
 	private static final char[] SPECIAL_CHARS = new char[] {'<', '>', '&', '\'', '\n', '\r' };
 	
-	private boolean needsCData(String value)
+	private boolean needsCData(CharSequence value)
 	{
 		if (value == null) return false;
 		for (int i=0; i < SPECIAL_CHARS.length; i++)
 		{
-			if (value.indexOf(SPECIAL_CHARS[i]) > -1) return true;
+			if (StringUtil.indexOf(value, SPECIAL_CHARS[i]) > -1) return true;
 		}
 		return false;
 	}

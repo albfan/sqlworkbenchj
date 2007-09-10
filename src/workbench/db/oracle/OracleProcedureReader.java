@@ -20,7 +20,6 @@ import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 
 /**
  * A ProcedureReader to read the source of an Oracle procedure. 
@@ -50,7 +49,7 @@ public class OracleProcedureReader
 	}
 
 
-	public StrBuffer getPackageSource(String owner, String packageName)
+	public CharSequence getPackageSource(String owner, String packageName)
 	{
 		final String sql = "SELECT text \n" +
 			"FROM all_source \n" +
@@ -59,7 +58,7 @@ public class OracleProcedureReader
 			"AND   type = ? \n" +
 			"ORDER BY line";
 		
-		StrBuffer result = new StrBuffer(1000);
+		StringBuilder result = new StringBuilder(1000);
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
@@ -68,6 +67,8 @@ public class OracleProcedureReader
 		try
 		{
 			int lineCount = 0;
+			String lastline = null;
+			
 			synchronized (connection)
 			{
 				stmt = this.connection.getSqlConnection().prepareStatement(sql);
@@ -88,7 +89,8 @@ public class OracleProcedureReader
 						result.append(line);
 					}
 				}
-				if (!(result.endsWith('\n') || result.endsWith('\r'))) result.append(nl);
+				result.append(nl);
+				
 				result.append("/");
 				result.append(nl);
 				result.append(nl);
@@ -111,10 +113,9 @@ public class OracleProcedureReader
 						}
 						result.append(line);
 					}
+					lastline = line;
 				}
 			}
-			if (!(result.endsWith('\n') || result.endsWith('\r'))) result.append(nl);
-			if (lineCount > 0) result.append("/");
 			result.append(nl);
 		}
 		catch (Exception e)
@@ -135,9 +136,14 @@ public class OracleProcedureReader
 		
 		if (def.getCatalog() != null)
 		{
-			StrBuffer source = getPackageSource(def.getSchema(), def.getCatalog());
-			def.setSource(source.toString());
+			CharSequence source = getPackageSource(def.getSchema(), def.getCatalog());
+			def.setSource(source);
 			def.setOraclePackage(true);			
+		}
+		else if (def.isOraclePackage())
+		{
+			CharSequence source = getPackageSource(def.getSchema(), def.getProcedureName());
+			def.setSource(source);
 		}
 		else
 		{

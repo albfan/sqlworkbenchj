@@ -33,7 +33,6 @@ import workbench.gui.dialogs.ImageViewer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.storage.NullValue;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
@@ -91,7 +90,7 @@ public class BlobHandler
 	public byte[] getBlobAsArray(Object value)
 	{
 		if (value == null) return null;
-		if (value instanceof NullValue) return null;
+//		if (value instanceof NullValue) return null;
 		
 		if (value instanceof Blob)
 		{
@@ -138,11 +137,7 @@ public class BlobHandler
 	public long getBlobSize(Object value)
 	{
 		if (value == null) return 0;
-		if (value instanceof NullValue)
-		{
-			return 0;
-		}
-		else if (value instanceof Blob)
+		if (value instanceof Blob)
 		{
 			Blob blob = (Blob)value;
 			try
@@ -186,7 +181,6 @@ public class BlobHandler
 	public String getBlobAsString(Object value, String encoding)
 	{
 		if (value == null) return null;
-		if (value instanceof NullValue) return null;
 		if (getBlobSize(value) == 0) return StringUtil.EMPTY_STRING;
 		
 		if (encoding == null) encoding = Settings.getInstance().getDefaultBlobTextEncoding();

@@ -686,7 +686,7 @@ public class DataStore
 	{
 		RowData row = this.getRow(aRow);
 		Object value = row.getValue(aColumn);
-    if (value == null || value instanceof NullValue)
+    if (value == null)
 		{
       return null;
 		}
@@ -727,7 +727,7 @@ public class DataStore
 	{
 		RowData row = this.getRow(aRow);
 		Object value = row.getValue(aColumn);
-    if (value == null || value instanceof NullValue)
+    if (value == null)
 		{
       return aDefault;
 		}
@@ -755,7 +755,7 @@ public class DataStore
 	{
 		RowData row = this.getRow(aRow);
 		Object value = row.getValue(aColumn);
-    if (value == null || value instanceof NullValue)
+    if (value == null)
 		{
       return aDefault;
 		}
@@ -803,24 +803,24 @@ public class DataStore
 			return;
 		}
 		
-		if (aValue == null)
-			row.setNull(aColumn, this.resultInfo.getColumnType(aColumn));
-		else
+//		if (aValue == null)
+//			row.setNull(aColumn, this.resultInfo.getColumnType(aColumn));
+//		else
 			row.setValue(aColumn,aValue);
 		this.modified = row.isModified();
 	}
 
-	/**
-	 * Set the given column to null. This is the same as calling setValue(aRow, aColumn, null).
-	 * @param aRow
-	 * @param aColumn
-	 * @see #setValue(int, int, Object)
-	 */
-	public void setNull(int aRow, int aColumn)
-	{
-		NullValue nul = NullValue.getInstance(this.resultInfo.getColumnType(aColumn));
-		this.setValue(aRow, aColumn, nul);
-	}
+//	/**
+//	 * Set the given column to null. This is the same as calling setValue(aRow, aColumn, null).
+//	 * @param aRow
+//	 * @param aColumn
+//	 * @see #setValue(int, int, Object)
+//	 */
+//	public void setNull(int aRow, int aColumn)
+//	{
+//		NullValue nul = NullValue.getInstance(this.resultInfo.getColumnType(aColumn));
+//		this.setValue(aRow, aColumn, nul);
+//	}
 
 	/**
 	 * Returns the index of the column with the given name.
@@ -835,12 +835,13 @@ public class DataStore
 	/**
 	 * Returns true if the given row has been modified.
 	 * A new row is considered modified only if setValue() has been called at least once.
+	 * 
 	 * @param aRow The row to check
 	 */
 	public boolean isRowModified(int aRow)
 	{
 		RowData row = this.getRow(aRow);
-		return (row.isNew() && row.isModified() || row.isModified());
+		return row.isModified();
 	}
 
 	/**
@@ -997,6 +998,7 @@ public class DataStore
 				trimCharData = prof.getTrimCharData();
 			}
 		}
+		
 		this.cancelRetrieve = false;
 		final int reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
 		
@@ -1147,7 +1149,7 @@ public class DataStore
 	{
 		for (int i=0; i < this.resultInfo.getColumnCount(); i++)
 		{
-			this.setNull(aRow, i);
+			this.setValue(aRow, i, null);
 		}
 	}
 
@@ -1418,6 +1420,11 @@ public class DataStore
 			
 			if (!aConnection.getAutoCommit())
 			{
+				// in case of an exception we have to reset the dmlSent flag for 
+				// all modified rows otherwise the next attempt to save the changes
+				// will not re-send them (but as the transaction has been rolled back,
+				// they are not stored in the database)
+				resetDmlSentStatus();
 				try { aConnection.rollback(); } catch (Throwable th) {}
 			}
 			LogMgr.logError("DataStore.updateDb()", "Error when saving data for row=" + currentRow + ", error: " + e.getMessage(), null);
@@ -1452,7 +1459,7 @@ public class DataStore
 			for (int i=0; i < rows; i++)
 			{
 				RowData row = this.deletedRows.get(i);
-			row.setDmlSent(false);
+				row.setDmlSent(false);
 			}
 		}
 	}
@@ -1536,10 +1543,7 @@ public class DataStore
 		throws ConverterException
 	{
 		int type = this.getColumnType(aColumn);
-		if (aValue == null)
-		{
-			return NullValue.getInstance(type);
-		}
+		if (aValue == null) return null;
 
 		ValueConverter converter = new ValueConverter();
 		
@@ -1581,11 +1585,6 @@ public class DataStore
 		}
 	}
 
-	public List<ColumnData> getPkValues(int aRow)
-	{
-		return this.getPkValues(this.originalConnection, aRow);
-	}
-
 	/**
 	 * Returns a map with the value of all PK columns for the given 
 	 * row. The key to the map is the name of the column.
@@ -1593,9 +1592,10 @@ public class DataStore
 	 * @see workbench.storage.ResultInfo#isPkColumn(int)
 	 * @see #getValue(int, int)
 	 */
-	public List<ColumnData> getPkValues(WbConnection aConnection, int aRow)
+	public List<ColumnData> getPkValues(int aRow)
 	{
-		if (aConnection == null) return Collections.emptyList();
+		if (this.originalConnection == null) return Collections.emptyList();
+		
 		try
 		{
 			this.updatePkInformation(this.originalConnection);

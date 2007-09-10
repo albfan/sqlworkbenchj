@@ -28,7 +28,6 @@ import workbench.interfaces.ErrorReporter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.ColumnData;
-import workbench.storage.NullValue;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.DefaultOutputFactory;
@@ -268,7 +267,7 @@ public abstract class RowDataConverter
 	public void writeBlobFile(Object value, File f)
 		throws IOException
 	{
-		if (value == null || value instanceof NullValue) return;
+		if (value == null) return;
 		OutputStream out = this.createOutputStream(f);
 		try
 		{
@@ -442,7 +441,7 @@ public abstract class RowDataConverter
 		throws IndexOutOfBoundsException
 	{
 		Object value = row.getValue(col);
-		if (value == null || value instanceof NullValue)
+		if (value == null)
 		{
 			return null;
 		}

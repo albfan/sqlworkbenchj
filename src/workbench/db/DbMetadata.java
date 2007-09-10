@@ -401,10 +401,7 @@ public class DbMetadata
 	}
 
 	public String getTableTypeName() { return tableTypeName; }
-	public String getMViewTypeName() 
-	{
-		return MVIEW_NAME;
-	}
+	public String getMViewTypeName() { return MVIEW_NAME;	}
 	
 	public String getViewTypeName() 
 	{ 
@@ -479,14 +476,17 @@ public class DbMetadata
 	}
 
 	/**
-	 * 	Return a clean version of the productname.
-	 *  @see #getProductName()
+	 * Return a clean version of the productname that can be used
+	 * as the part of a properties key
+	 * @see #getProductName()
 	 */
 	public String getDbId()
 	{
 		if (this.dbId == null)
 		{
-			this.dbId = this.productName.replaceAll("[ \\(\\)\\[\\]\\/$,.]", "_").toLowerCase();
+			this.dbId = this.productName.replaceAll("[ \\(\\)\\[\\]\\/$,.'=\"]", "_").toLowerCase();
+			// Use the same dbid for DB2/LINUX, DB2/NT
+			if (dbId.startsWith("db2") && productName.indexOf("/") > -1) dbId = "db2";
 			LogMgr.logInfo("DbMetadata", "Using DBID=" + this.dbId);
 		}
 		return this.dbId;
@@ -950,7 +950,7 @@ public class DbMetadata
 		return result;
 	}
 
-	public String getProcedureSource(String aCatalog, String aSchema, String aProcname, int type)
+	public CharSequence getProcedureSource(String aCatalog, String aSchema, String aProcname, int type)
 	{
 		try
 		{
@@ -1645,8 +1645,8 @@ public class DbMetadata
 	
 	/**
 	 * Return a List of {@link workbench.db.ProcedureDefinition} objects
-	 * for Oracle only one object per definition is returned (although
-	 * the DbExplorer will list each function of the packages.
+	 * for Oracle packages only one ProcedureDefinition per package is returned (although
+	 * the DbExplorer will list each function of the packages).
 	 */
 	public List<ProcedureDefinition> getProcedureList(String aCatalog, String aSchema)
 		throws SQLException

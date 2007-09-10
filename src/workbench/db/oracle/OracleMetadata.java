@@ -37,7 +37,6 @@ import workbench.util.StringUtil;
 public class OracleMetadata
   implements ErrorInformationReader
 {
-
   private WbConnection connection;
   private PreparedStatement columnStatement;
   private int version;
@@ -86,7 +85,7 @@ public class OracleMetadata
       try
       {
         stmt = this.connection.createStatement();
-        String sql = "select value from v$nls_parameters where parameter = \'NLS_LENGTH_SEMANTICS\'";
+        String sql = "select value from v$nls_parameters where parameter = 'NLS_LENGTH_SEMANTICS'";
         rs = stmt.executeQuery(sql);
         if (rs.next())
         {
@@ -130,6 +129,9 @@ public class OracleMetadata
 	
 	private boolean getMapDateToTimestamp()
 	{
+		// Newer Oracle drivers support a connection property to automatically 
+		// return DATE columns as Types.TIMESTAMP. We have to mimic that 
+		// when using our own statement to retrieve column definitions
 		String value = getDriverProperty("oracle.jdbc.mapDateToTimestamp", true);
 		return "true".equalsIgnoreCase(value);
 	}
@@ -157,17 +159,23 @@ public class OracleMetadata
     result.append('(');
     result.append(size);
 
-    if (alwaysShowCharSemantics || semantics != this.defaultLengthSemantics)
-    {
-      if (semantics == BYTE_SEMANTICS)
-      {
-        result.append(" Byte");
-      }
-      else if (semantics == CHAR_SEMANTICS)
-      {
-        result.append(" Char");
-      }
-    }
+		// Only apply this logic vor VARCHAR columns
+		// NVARCHAR (which might have been reported as VARCHAR) does not 
+		// allow Byte/Char semantics
+		if (type.equals("VARCHAR2") || type.equals("VARCHAR"))
+		{
+			if (alwaysShowCharSemantics || semantics != this.defaultLengthSemantics)
+			{
+				if (semantics == BYTE_SEMANTICS)
+				{
+					result.append(" Byte");
+				}
+				else if (semantics == CHAR_SEMANTICS)
+				{
+					result.append(" Char");
+				}
+			}
+		}
     result.append(')');
     return result.toString();
   }
@@ -185,55 +193,56 @@ public class OracleMetadata
 						"     t.owner AS table_schem,  \n" +
 						"     t.table_name AS table_name,  \n" +
 						"     t.column_name AS column_name,  \n   " +
-						"     DECODE(t.data_type, \'CHAR\', " + Types.CHAR + ", " + 
-						"                    \'VARCHAR2\', " + Types.VARCHAR + ", " + 
-						"                    \'NVARCHAR2\', " + (fixNVARCHAR ? Types.VARCHAR : Types.OTHER) + ", " + 
-						"                    \'NCHAR\', " + (fixNVARCHAR ? Types.VARCHAR : Types.OTHER) + ", " + 
-						"                    \'NUMBER\', " + Types.DECIMAL + ", " + 
-						"                    \'LONG\', " + Types.LONGVARCHAR + ", " + 
-						"                    \'DATE\', " + (getMapDateToTimestamp() ? Types.TIMESTAMP : Types.DATE) + ", " + 
-						"                    \'RAW\', -3, " + 
-						"                    \'LONG RAW\', -4, " + 
-						"                    \'BLOB\', " + Types.BLOB + ", " + 
-						"                    \'CLOB\', " + Types.CLOB + ", " + 
-						"                    \'BFILE\', -13, " + 
-						"                    \'FLOAT\', 6, " + 
-						"                    \'TIMESTAMP(6)\', " + Types.TIMESTAMP + ", " +
-						"                    \'TIMESTAMP(6) WITH TIME ZONE\', -101, " + 
-						"                    \'TIMESTAMP(6) WITH LOCAL TIME ZONE\', -102, " + 
-						"                    \'INTERVAL YEAR(2) TO MONTH\', -103, " + 
-						"                    \'INTERVAL DAY(2) TO SECOND(6)\', -104, " + 
-						"                    \'BINARY_FLOAT\', 100, " + 
-						"                    \'BINARY_DOUBLE\', 101, " +
+						"     DECODE(t.data_type, 'CHAR', " + Types.CHAR + ", " + 
+						"                    'VARCHAR2', " + Types.VARCHAR + ", " + 
+						"                    'NVARCHAR2', " + (fixNVARCHAR ? Types.VARCHAR : Types.OTHER) + ", " + 
+						"                    'NCHAR', " + (fixNVARCHAR ? Types.VARCHAR : Types.OTHER) + ", " + 
+						"                    'NUMBER', " + Types.DECIMAL + ", " + 
+						"                    'LONG', " + Types.LONGVARCHAR + ", " + 
+						"                    'DATE', " + (getMapDateToTimestamp() ? Types.TIMESTAMP : Types.DATE) + ", " + 
+						"                    'RAW', " + Types.VARBINARY + ", " + 
+						"                    'LONG RAW', " + Types.LONGVARBINARY + ", " + 
+						"                    'BLOB', " + Types.BLOB + ", " + 
+						"                    'CLOB', " + Types.CLOB + ", " + 
+						"                    'NCLOB', " + (fixNVARCHAR ? Types.CLOB : Types.OTHER) + ", " + 
+						"                    'BFILE', -13, " + 
+						"                    'FLOAT', " + Types.FLOAT + ", " + 
+						"                    'TIMESTAMP(6)', " + Types.TIMESTAMP + ", " +
+						"                    'TIMESTAMP(6) WITH TIME ZONE', -101, " + 
+						"                    'TIMESTAMP(6) WITH LOCAL TIME ZONE', -102, " + 
+						"                    'INTERVAL YEAR(2) TO MONTH', -103, " + 
+						"                    'INTERVAL DAY(2) TO SECOND(6)', -104, " + 
+						"                    'BINARY_FLOAT', 100, " + 
+						"                    'BINARY_DOUBLE', 101, " +
 						"                    " + Types.OTHER + ") AS data_type,  \n" +
 						"     t.data_type AS type_name,  \n" + 
 						"     DECODE(t.data_precision, null, " +
-						"        decode(t.data_type, \'VARCHAR\', t.char_length, " +
-						"                            \'VARCHAR2\', t.char_length, " +
-						"                            \'NVARCHAR\', t.char_length, " +
-						"                            \'NVARCHAR2\', t.char_length, " +
-						"                            \'CHAR\', t.char_length, " +
-						"                            \'NCHAR\', t.char_length, t.data_length), " +
+						"        decode(t.data_type, 'VARCHAR', t.char_length, " +
+						"                            'VARCHAR2', t.char_length, " +
+						"                            'NVARCHAR', t.char_length, " +
+						"                            'NVARCHAR2', t.char_length, " +
+						"                            'CHAR', t.char_length, " +
+						"                            'NCHAR', t.char_length, t.data_length), " +
 						"               t.data_precision) AS column_size,  \n" +
 						"    0 AS buffer_length,  \n" +
 						"    t.data_scale AS decimal_digits,  \n" +
 						"    10 AS num_prec_radix,  \n" +
-						"    DECODE (t.nullable, \'N\', 0, 1) AS nullable,  \n";
+						"    DECODE (t.nullable, 'N', 0, 1) AS nullable,  \n";
 		
     final String sql2 = "       t.data_default AS column_def,  \n" +
-			                  "       decode(t.data_type, \'VARCHAR2\', " +
-												"                 decode(t.char_used, \'B\', " + BYTE_SEMANTICS + ", \'C\', " + CHAR_SEMANTICS + ", 0), 0) AS sql_data_type,  \n " +
+			                  "       decode(t.data_type, 'VARCHAR2', " +
+												"                 decode(t.char_used, 'B', " + BYTE_SEMANTICS + ", 'C', " + CHAR_SEMANTICS + ", 0), 0) AS sql_data_type,  \n " +
 												"       0 AS sql_datetime_sub,  \n" + 
 												"       t.data_length AS char_octet_length,  \n" + 
 												"       t.column_id AS ordinal_position,   \n" + 
-												"       DECODE (t.nullable, \'N\', \'NO\', \'YES\') AS is_nullable  \n" + 
+												"       DECODE (t.nullable, 'N', 'NO', 'YES') AS is_nullable  \n" + 
 												" FROM all_tab_columns t";
 
     // not using LIKE for owner and table
     // because internally we never call this with wildcards
     // and leaving out the like (which is used in the original statement from Oracle's driver)
     // speeds up the statement
-    final String where = " WHERE t.owner = ? AND t.table_name = ? AND t.column_name LIKE ? ESCAPE \'/\'  \n";
+	final String where = " WHERE t.owner = ? AND t.table_name = ? AND t.column_name LIKE ? ESCAPE '/'  \n";
 
     final String comment_join = "   AND t.owner = c.owner (+)  AND t.table_name = c.table_name (+)  AND t.column_name = c.column_name (+)  \n";
     final String order = "ORDER BY table_schem, table_name, ordinal_position";
@@ -308,7 +317,7 @@ public class OracleMetadata
     // If yes, use the link name directly
     if (dblink.indexOf('.') > 0)
     {
-      sql = "SELECT username FROM all_db_links WHERE db_link = ? AND (owner = ? or owner = \'PUBLIC\')";
+      sql = "SELECT username FROM all_db_links WHERE db_link = ? AND (owner = ? or owner = 'PUBLIC')";
     }
     else
     {
@@ -317,7 +326,7 @@ public class OracleMetadata
       // name, so I'm using a like to retrieve the definition
       // hoping that there won't be two dblinks with the same name
       // but different domains
-      sql = "SELECT username FROM all_db_links WHERE db_link like ? AND (owner = ? or owner = \'PUBLIC\')";
+      sql = "SELECT username FROM all_db_links WHERE db_link like ? AND (owner = ? or owner = 'PUBLIC')";
       dblink = dblink + ".%";
     }
 
@@ -432,7 +441,7 @@ public class OracleMetadata
       return Collections.emptySet();
     }
     Set<String> result = new HashSet<String>();
-    String sql = "SELECT owner||\'.\'||mview_name FROM all_mviews";
+    String sql = "SELECT owner||'.'||mview_name FROM all_mviews";
     if (schema != null)
     {
       sql += " WHERE owner = ?";

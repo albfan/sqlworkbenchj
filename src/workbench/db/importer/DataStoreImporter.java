@@ -128,14 +128,7 @@ public class DataStoreImporter
 		RowData data = new RowData(row.length);
 		for (int i = 0; i < row.length; i++)
 		{
-			if (row[i] == null)
-			{
-				data.setNull(i,this.target.getColumnType(i));
-			}
-			else
-			{
-				data.setValue(i, row[i]);
-			}
+			data.setValue(i, row[i]);
 		}
 		target.addRow(data);
 		currentRowNumber ++;

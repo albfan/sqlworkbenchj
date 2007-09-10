@@ -127,6 +127,21 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".ddl.usesavepoint", false);
 	}
+
+	public String getBlobLiteralPrefix()
+	{
+		return Settings.getInstance().getProperty("workbench.db." + getDbId() + ".blob.literal.prefix", null);
+	}
+	
+	public String getBlobLiteralSuffix()
+	{
+		return Settings.getInstance().getProperty("workbench.db." + getDbId() + ".blob.literal.suffix", null);
+	}
+
+	public boolean getBlobLiteralUpperCase()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".blob.literal.upcase", false);
+	}
 	
 	public boolean supportSingleLineCommands()
 	{

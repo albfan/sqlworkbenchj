@@ -104,7 +104,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
-import workbench.storage.NullValue;
 import workbench.storage.PkMapping;
 import workbench.storage.ResultInfo;
 import workbench.storage.filter.FilterExpression;
@@ -923,7 +922,7 @@ public class WbTable
 	{
 		Object value = this.getValueAt(row, column);
 		if (value == null) return null;
-		if (value instanceof NullValue) return null;
+//		if (value instanceof NullValue) return null;
 		return value.toString();
 	}
 

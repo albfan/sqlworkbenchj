@@ -131,6 +131,16 @@ public class StringUtil
 		return s.substring(0, pos);
 	}
 	
+	public static int indexOf(CharSequence value, char c)
+	{
+		if (value == null) return -1;
+		for (int i=0; i < value.length(); i++)
+		{
+			if (value.charAt(i) == c) return i;
+		}
+		return -1;
+	}
+					
 	public static void trimTrailingWhitespace(StringBuilder value)
 	{
 		if (value == null || value.length() == 0) return;

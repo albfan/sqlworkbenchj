@@ -29,6 +29,7 @@ import workbench.sql.formatter.SQLToken;
 import workbench.storage.DataStore;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * Support for running stored procedures that have out or in/out parameters
@@ -199,7 +200,7 @@ public class WbCall
 				{
 					int dataType = params.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, -1);
 					String resultType = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
-					if (resultType != null && resultType.endsWith("OUT"))
+					if (StringUtil.equalString(resultType, "OUT"))
 					{
 						parameterCount++;
 						cstmt.registerOutParameter(parameterCount, dataType);

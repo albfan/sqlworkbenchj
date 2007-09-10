@@ -146,7 +146,7 @@ public class StatementFactory
 			sql.append(colName);
 
 			Object value = aRow.getOriginalValue(j);
-			if (value instanceof NullValue)
+			if (value == null)
 			{
 				sql.append(" IS NULL");
 			}
@@ -463,7 +463,7 @@ public class StatementFactory
 	private boolean isNull(Object value)
 	{
 		if (value == null) return true;
-		if (value instanceof NullValue) return true;
+//		if (value instanceof NullValue) return true;
 		String s = value.toString();
 		if (emptyStringIsNull && s.length() == 0) return true;
 		return false;

@@ -95,9 +95,9 @@ public class DmlStatement
 				ColumnData data = this.values.get(i);
 				int type = data.getIdentifier().getDataType();
 				Object value = data.getValue();
-				if (value == null || value instanceof NullValue)
+				if (value == null)
 				{
-					stmt.setNull(i+1, type);
+					stmt.setObject(i+1, null);
 				}
 				else if (SqlUtil.isClobType(type) && value instanceof String)
 				{

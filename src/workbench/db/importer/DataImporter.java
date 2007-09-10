@@ -40,7 +40,6 @@ import workbench.storage.RowActionMonitor;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-import java.io.StringReader;
 import java.io.Reader;
 import java.sql.Clob;
 import java.sql.Savepoint;
@@ -48,7 +47,6 @@ import java.sql.Types;
 import java.util.LinkedList;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ImportFileParser;
-import workbench.storage.NullValue;
 import workbench.util.EncodingUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.WbThread;
@@ -149,6 +147,7 @@ public class DataImporter
 	private Savepoint updateSavepoint;
 
 	private boolean checkRealClobLength = false;
+	private boolean isOracle = false;
 	
 	public DataImporter()
 	{
@@ -169,6 +168,7 @@ public class DataImporter
 			this.useSavepoint = false;
 		}
 		this.checkRealClobLength = this.dbConn.getDbSettings().needsExactClobLength();
+		this.isOracle = this.dbConn.getMetadata().isOracle();
 	}
 
 	public void setRowActionMonitor(RowActionMonitor rowMonitor)
@@ -1044,9 +1044,9 @@ public class DataImporter
 			int targetSqlType = this.targetColumns[i].getDataType();
 			String targetDbmsType = this.targetColumns[i].getDbmsType(); 
 			
-			if (row[i] == null || row[i] instanceof NullValue)
+			if (row[i] == null)
 			{
-				pstmt.setNull(colIndex, targetSqlType);
+				pstmt.setObject(colIndex, null);
 			}
 			else if ( SqlUtil.isClobType(targetSqlType) || "LONG".equals(targetDbmsType) ||
 				       "CLOB".equals(targetDbmsType) )
@@ -1075,6 +1075,9 @@ public class DataImporter
 						if (handler != null)
 						{
 							in = EncodingUtil.createReader(handler.getAttachedFileStream(f), encoding);
+							
+							// Apache Derby needs the exact length in characters
+							// which might not be the file size if a multi-byte encoding is used
 							if (checkRealClobLength)
 							{
 								size = (int) handler.getCharacterLength(f);
@@ -1094,6 +1097,9 @@ public class DataImporter
 							}
 							in = EncodingUtil.createBufferedReader(f, encoding);
 							streams.add(in);
+							
+							// Apache Derby needs the exact length in characters
+							// which might not be the file size if a multi-byte encoding is used
 							if (checkRealClobLength)
 							{
 								size = (int) FileUtil.getCharacterLength(f, encoding);
@@ -1118,8 +1124,8 @@ public class DataImporter
 					// implement the toString() for whatever object 
 					// it created when reading that column!
 					String value = row[i].toString();
-					in = new StringReader(value);
-					size = value.length();
+					in = null; 
+					pstmt.setObject(colIndex, value);
 				}
 				
 				if (in != null)
@@ -1192,7 +1198,7 @@ public class DataImporter
 					this.messages.appendNewLine();
 				}
 			}
-			else if (SqlUtil.isStringType(targetSqlType)&& this.columnLimitMap != null)
+			else if (this.columnLimitMap != null && SqlUtil.isStringType(targetSqlType))
 			{
 				Integer size = this.columnLimitMap.get(this.targetColumns[i]);
 				int msize = (size == null ? -1 : size.intValue());
@@ -1201,14 +1207,14 @@ public class DataImporter
 			}
 			else
 			{
-				if (this.dbConn.getMetadata().isOracle() &&	targetSqlType == java.sql.Types.DATE && row[i] instanceof java.sql.Date)
+				if (isOracle &&	targetSqlType == java.sql.Types.DATE && row[i] instanceof java.sql.Date)
 				{
 					java.sql.Timestamp ts = new java.sql.Timestamp(((java.sql.Date)row[i]).getTime());
 					pstmt.setTimestamp(colIndex, ts);
 				}
 				else
 				{
-					pstmt.setObject(colIndex, row[i], targetSqlType);
+					pstmt.setObject(colIndex, row[i]);
 				}
 			}
 		}

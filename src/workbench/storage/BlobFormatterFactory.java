@@ -12,6 +12,8 @@
 package workbench.storage;
 
 import workbench.db.DbMetadata;
+import workbench.db.DbSettings;
+import workbench.util.StringUtil;
 
 /**
  * @author support@sql-workbench.net
@@ -46,7 +48,7 @@ public class BlobFormatterFactory
 			f.setSuffix("'))");
 			return f;
 		}
-		else if ("db2_nt".equalsIgnoreCase(meta.getDbId()) || "h2".equals(meta.getDbId()))
+		else if (meta.getDbId().startsWith("db2") || "h2".equals(meta.getDbId()))
 		{
 			// Although the DB2 Manuals says it supports
 			// binary string constants, it is very likely
@@ -66,6 +68,21 @@ public class BlobFormatterFactory
 			f.setSuffix("'");
 			return f;
 		}
+		
+		// No pre-defined DBMS found, check if anything is configured
+		// for the current DBMS
+		DbSettings s = meta.getDbSettings();
+		String prefix = s.getBlobLiteralPrefix();
+		String suffix = s.getBlobLiteralSuffix();
+		if (!StringUtil.isEmptyString(prefix) && !StringUtil.isEmptyString(suffix))
+		{
+			HexBlobFormatter f = new HexBlobFormatter();
+			f.setUseUpperCase(s.getBlobLiteralUpperCase());
+			f.setPrefix(prefix);
+			f.setSuffix(suffix);
+			return f;
+		}
+		// Still no luck, use the ANSI format.
 		return createAnsiFormatter();
 	}
 	

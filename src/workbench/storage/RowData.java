@@ -57,10 +57,10 @@ public class RowData
 	{
 		int colCount = info.getColumnCount();
 		this.colData = new Object[colCount];
-		for (int i = 0; i < colCount; i++)
-		{
-			this.setNull(i, info.getColumnType(i));
-		}
+//		for (int i = 0; i < colCount; i++)
+//		{
+//			this.setNull(i, info.getColumnType(i));
+//		}
 		this.setNew();
 	}
 	
@@ -155,7 +155,7 @@ public class RowData
 				else
 				{
 					value = rs.getObject(i + 1);
-					if (trimCharData && value != null && type == Types.CHAR)
+					if (type == Types.CHAR && trimCharData && value != null)
 					{
 						try
 						{
@@ -173,14 +173,7 @@ public class RowData
 				throw e;
 			}
 
-			if (value == null && useNullValueObject)
-			{
-				this.colData[i] = NullValue.getInstance(type);
-			}
-			else
-			{
-				this.colData[i] = value;
-			}
+			this.colData[i] = value;
 		}
 		this.resetStatus();
 	}
@@ -216,7 +209,7 @@ public class RowData
 	public synchronized void setValue(int aColIndex, Object aValue)
 		throws IndexOutOfBoundsException
 	{
-		if (aValue == null) throw new NullPointerException("No null values allowed. Use setNull() instead");
+//		if (aValue == null) throw new NullPointerException("No null values allowed. Use setNull() instead");
 		if (!this.isNew())
 		{
 			Object oldValue = this.colData[aColIndex];
@@ -292,11 +285,11 @@ public class RowData
 		}
 	}
 	
-	public synchronized void setNull(int aColumn, int aType)
-	{
-		NullValue nul = NullValue.getInstance(aType);
-		this.setValue(aColumn, nul);
-	}
+//	public synchronized void setNull(int aColumn, int aType)
+//	{
+//		NullValue nul = NullValue.getInstance(aType);
+//		this.setValue(aColumn, nul);
+//	}
 
 	/**
 	 *	Resets the internal status. After a call to resetStatus()

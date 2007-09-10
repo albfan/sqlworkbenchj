@@ -75,14 +75,7 @@ public class ParameterDefinition
 		throws IllegalStateException, SQLException
 	{
 		if (!this.valueValid) throw new IllegalStateException("No valid value defined for parameter " + this.index);
-		if (this.value == null)
-		{
-			stmt.setNull(this.index, this.type);
-		}
-		else
-		{
-			stmt.setObject(this.index, this.value);
-		}
+		stmt.setObject(this.index, this.value);
 	}
 		
 }

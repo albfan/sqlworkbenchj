@@ -1155,8 +1155,8 @@ public class MainWindow
 	{
 		if (!this.loadWorkspace(DEFAULT_WORKSPACE))
 		{
-			this.currentWorkspaceFile = DEFAULT_WORKSPACE;
 			resetWorkspace();
+			this.currentWorkspaceFile = DEFAULT_WORKSPACE;
 		}
 	}
 
@@ -1178,8 +1178,8 @@ public class MainWindow
 		{
 			// if the file does not exist, set all variables as if it did
 			// thus the file will be created automatically.
-			this.currentWorkspaceFile = realFilename;
 			this.resetWorkspace();
+			this.currentWorkspaceFile = realFilename;
 			this.updateWindowTitle();
 			this.checkWorkspaceActions();
 			return true;
@@ -1255,9 +1255,12 @@ public class MainWindow
 		try
 		{
 			String workspaceFilename = aProfile.getWorkspaceFile();
+			if (workspaceFilename != null && !workspaceFilename.endsWith(".wksp")) workspaceFilename += ".wksp";
+			
 			realFilename = FileDialogUtil.replaceConfigDir(workspaceFilename);
 			if (realFilename == null) realFilename = "";
-
+			
+			
 			File f = new File(realFilename);
 			if (realFilename.length() > 0 && !f.exists())
 			{
@@ -1276,6 +1279,12 @@ public class MainWindow
 				else
 				{
 					// start with an empty workspace
+					// and create a new workspace file.
+					if (!f.isAbsolute())
+					{
+						// if no directory was given, assume the configuration directory
+						workspaceFilename = FileDialogUtil.CONFIG_DIR_KEY + "/" + workspaceFilename;
+					}
 					resetWorkspace();
 				}
 			}
@@ -2068,7 +2077,7 @@ public class MainWindow
 	}
 
 	/**
-	 *	This will assigne the current workspace name to the current profile.
+	 *	This will assign the current workspace name to the current profile.
 	 */
 	public void assignWorkspace()
 	{

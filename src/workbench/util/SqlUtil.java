@@ -516,7 +516,7 @@ public class SqlUtil
 		return getKeywordPosition(s, sql);
 	}
 	
-	public static int getKeywordPosition(String keyword, String sql)
+	public static int getKeywordPosition(String keyword, CharSequence sql)
 	{
 		if (keyword == null) return -1;
 		Set<String> s = new HashSet<String>();
@@ -524,7 +524,7 @@ public class SqlUtil
 		return getKeywordPosition(s, sql);
 	}
 	
-	public static int getKeywordPosition(Set<String> keywords, String sql)
+	public static int getKeywordPosition(Set<String> keywords, CharSequence sql)
 	{
 		int pos = -1;
 		try

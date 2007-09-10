@@ -46,7 +46,7 @@ public class ReportProcedure
 		this.dbConn = conn;
 	}
 	
-	public String getSource()
+	public CharSequence getSource()
 	{
 		if (this.procDef == null) return null;
 		if (this.procDef.getSource() == null)
@@ -96,7 +96,7 @@ public class ReportProcedure
 		if (includeSource)
 		{
 			tagWriter.appendTag(result, indent2, TAG_PROC_SOURCE, getSource(), true);
-			result.append('\n');
+			//result.append('\n');
 		}
 		tagWriter.appendCloseTag(result, indent, TAG_PROC_DEF);
 		return result;

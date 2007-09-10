@@ -858,6 +858,7 @@ public class Settings
 		this.renameProperty("workbench.history.tablelist", "workbench.quickfilter.tablelist.history");
 		this.renameProperty("workbench.history.columnlist", "workbench.quickfilter.columnlist.history");
 		this.renameProperty("workbench.gui.dbobjects.ProcedureListPanel.lastsearch", "workbench.quickfilter.procedurelist.history");
+		this.renameProperty("workbench.blob.text.encoding", "workbench.gui.blob.text.encoding");
 	}
 
 	private void renameProperty(String oldKey, String newKey)
@@ -931,6 +932,13 @@ public class Settings
 
 			this.props.remove("workbench.dbexplorer.visible");
 			
+			// DbMetadata now uses db2 as the dbid for all DB2 versions (stripping the _linux or _nt suffix)
+      this.props.remove("workbench.db.db2_nt.currentschema.query");
+      this.props.remove("workbench.db.objecttype.selectable.db2_nt");
+      this.props.remove("workbench.db.db2_nt.synonymtypes");
+      this.props.remove("workbench.db.db2_nt.additional.viewtypes");
+      this.props.remove("workbench.db.db2_nt.retrieve_sequences");
+      this.props.remove("workbench.db.db2_nt.additional.tabletypes");
 		}
 		catch (Throwable e)
 		{

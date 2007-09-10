@@ -91,14 +91,15 @@ public class Db2SequenceReader
 			"       DATATYPEID  \n" +
 			"FROM   syscat.sequences \n" +
 			"WHERE seqschema = ?";
-		if (!StringUtil.isEmptyString("sequence"))
+		
+		if (!StringUtil.isEmptyString(sequence))
 		{
-			sql += "  AND seqname  = ? ";
+			sql += "  AND seqname = ? ";
 		}
 		
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("Db2SequenceReader.getSequenceDefinition()", "Using query=\n" + sql);
+			LogMgr.logInfo("Db2SequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
 		}
 		
 		PreparedStatement stmt = null;
@@ -106,9 +107,9 @@ public class Db2SequenceReader
 		DataStore result = null;
 		try
 		{
-			stmt = this.connection.getSqlConnection().prepareStatement(sql.toString());
+			stmt = this.connection.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, schema);
-			if (!StringUtil.isEmptyString("sequence")) stmt.setString(2, sequence);
+			if (!StringUtil.isEmptyString(sequence)) stmt.setString(2, sequence);
 			rs = stmt.executeQuery();
 			result = new DataStore(rs, this.connection, true);
 		}
@@ -165,12 +166,12 @@ public class Db2SequenceReader
 		Number cache = (Number) def.getSequenceProperty("CACHE");
 		Number typeid = (Number) def.getSequenceProperty("typeid");
 
-		result.append(" AS " + typeIdToName(typeid.intValue()));
+		if (typeid != null)
+		{
+      result.append(" AS " + typeIdToName(typeid.intValue()));
+		}
 		result.append(nl + "      INCREMENT BY ");
 		result.append(increment);
-
-		BigInteger one = new BigInteger("1");
-		BigInteger max = new BigInteger(Integer.toString(Integer.MAX_VALUE));
 
 		if (start.longValue() > 0)
 		{
@@ -178,7 +179,7 @@ public class Db2SequenceReader
 			result.append(start);
 		}
 
-		if (minvalue.longValue() == 0)
+		if (minvalue == null || minvalue.longValue() == 0)
 		{
 			result.append(nl + "      NO MINVALUE");
 		}
@@ -188,7 +189,7 @@ public class Db2SequenceReader
 			result.append(minvalue);
 		}
 
-		if (maxvalue.longValue() == -1)
+		if (maxvalue == null || maxvalue.longValue() == -1)
 		{
 			result.append(nl + "      MAXVALUE ");
 			result.append(maxvalue);
@@ -197,7 +198,7 @@ public class Db2SequenceReader
 		{
 			result.append(nl + "      NO MAXVALUE");
 		}
-		if (cache.longValue() > 0)
+		if (cache != null || cache.longValue() > 0)
 		{
 			result.append(nl + "      CACHE ");
 			result.append(cache);
@@ -206,8 +207,9 @@ public class Db2SequenceReader
 		{
 			result.append(nl + "      NO CACHE");
 		}
+		
 		result.append(nl + "      ");
-		if (cycle.equals("Y"))
+		if (cycle != null && cycle.equals("Y"))
 		{
 			result.append("CYCLE");
 		}
@@ -217,7 +219,7 @@ public class Db2SequenceReader
 		}
 
 		result.append(nl + "      ");
-		if (order.equals("Y"))
+		if (order != null && order.equals("Y"))
 		{
 			result.append("ORDER");
 		}
@@ -226,7 +228,6 @@ public class Db2SequenceReader
 			result.append("NO ORDER");
 		}
 
-		result.append(nl);
 		result.append(';');
 
 		def.setSource(result);

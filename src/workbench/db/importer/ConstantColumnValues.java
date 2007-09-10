@@ -13,6 +13,7 @@ package workbench.db.importer;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
@@ -35,7 +36,7 @@ public class ConstantColumnValues
 	// order of the columns is always maintained.
 	private List<ColumnIdentifier> columns;
 	private List<Object> data;
-	
+
 	/**
 	 * Parses a parameter value for column value definitions.
 	 * e.g. description=something,firstname=arthur
@@ -49,7 +50,6 @@ public class ConstantColumnValues
 	{
 		List<ColumnIdentifier> tableColumns = con.getMetadata().getTableColumns(new TableIdentifier(tablename));
 		if (tableColumns.size() == 0) throw new SQLException("Table '" + tablename + "' not found!");
-		
 		init(parameterValue, tableColumns, converter);
 	}
 	
@@ -181,6 +181,7 @@ public class ConstantColumnValues
 	{
 		ColumnIdentifier col = getColumn(columnIndex);
 		Object value = getValue(columnIndex);
+		int type = col.getDataType();
 		
 		// If the column value is a function call, this will not
 		// be used in a prepared statement. It is expected that the caller
@@ -188,14 +189,7 @@ public class ConstantColumnValues
 		// function call into the SQL instead of a ? placeholder
 		if (!isFunctionCall(columnIndex))
 		{
-			if (value == null)
-			{
-				pstmt.setNull(statementIndex, col.getDataType());
-			}
-			else
-			{
-				pstmt.setObject(statementIndex, value, col.getDataType());
-			}
+			pstmt.setObject(statementIndex, value);
 		}
 	}
 }

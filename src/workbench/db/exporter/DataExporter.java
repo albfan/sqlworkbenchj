@@ -77,12 +77,14 @@ public class DataExporter
 {
 	/**
 	 * Use a DBMS specific literals for BLOBs in SQL statements.
+	 * @see workbench.storage.BlobFormatterFactory#createInstance(workbench.db.DbMetadata meta)
 	 * @see #setBlobMode(String)
 	 */
 	public static final String BLOB_MODE_LITERAL = "dbms";
 	
 	/**
 	 * Use ANSI literals for BLOBs in SQL statements.
+	 * @see workbench.storage.BlobFormatterFactory#createAnsiFormatter()
 	 * @see #setBlobMode(String)
 	 */
 	public static final String BLOB_MODE_ANSI = "ansi";
@@ -267,10 +269,10 @@ public class DataExporter
 	 * @see workbench.storage.SqlLiteralFormatter
 	 */
 	public String getDateLiteralType()
-  {
-      return dateLiteralType;
-  }
-  
+	{
+		return dateLiteralType;
+	}
+
 	/**
 	 * Define how blobs should be handled during export.
 	 * Modes allowed are 

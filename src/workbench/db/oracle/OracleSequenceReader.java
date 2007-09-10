@@ -69,13 +69,19 @@ public class OracleSequenceReader
 			"decode(CYCLE_FLAG,'Y','CYCLE','NOCYCLE') AS CYCLE_FLAG, \n       " +
 			"decode(ORDER_FLAG,'Y','ORDER','NOORDER') AS ORDER_FLAG, \n       " +
 			"CACHE_SIZE \n" +
-			"FROM   ALL_SEQUENCES \n" +
+			"FROM ALL_SEQUENCES \n" +
 			"WHERE sequence_owner = ?";
 		
 		if (!StringUtil.isEmptyString(sequence))
 		{
 			sql += "  AND sequence_name = ? ";
 		}
+		
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("OracleSequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
+		}
+		
     PreparedStatement stmt = null;
     ResultSet rs = null;
     DataStore result = null;
@@ -163,7 +169,7 @@ public class OracleSequenceReader
 		result.append(nl + "      INCREMENT BY ");
 		result.append(increment);
 
-		if (minValue.intValue() != 0)
+		if (minValue != null && minValue.intValue() != 0)
 		{
 			result.append(nl + "      NOMINVALUE");
 		}
@@ -173,7 +179,7 @@ public class OracleSequenceReader
 			result.append(minValue);
 		}
 
-		if (!maxValue.toString().equals("999999999999999999999999999"))
+		if (maxValue != null && !maxValue.toString().equals("999999999999999999999999999"))
 		{
 			result.append(nl + "      MAXVALUE ");
 			result.append(maxValue);
@@ -183,7 +189,7 @@ public class OracleSequenceReader
 			result.append(nl + "      NOMAXVALUE");
 		}
 
-		if (cache.longValue() > 0)
+		if (cache != null && cache.longValue() > 0)
 		{
 			result.append(nl + "      CACHE ");
 			result.append(cache);

@@ -268,7 +268,6 @@ public class DataStoreReplacer
 		String value = this.client.getValueAsString(pos.getRow(), pos.getColumn());
 		if (!StringUtil.isEmptyString(value))
 		{
-			int type = this.client.getColumnType(pos.getColumn());
 			Matcher m = p.matcher(value);
 			String newValue = m.replaceAll(replacement);
 			try

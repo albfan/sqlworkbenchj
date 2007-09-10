@@ -11,8 +11,6 @@
  */
 package workbench.storage.filter;
 
-import workbench.storage.NullValue;
-
 /**
  * @author support@sql-workbench.net
  */
@@ -31,7 +29,7 @@ public class IsNullComparator
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
-		return (value == null || value instanceof NullValue);
+		return (value == null);
 	}
 	
 	public boolean supportsType(Class valueClass)

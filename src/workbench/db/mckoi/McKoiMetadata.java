@@ -22,6 +22,7 @@ import java.util.List;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -72,22 +73,28 @@ public class McKoiMetadata
 
 	public DataStore getRawSequenceDefinition(String owner, String sequence)
 	{
-		String sql = "SELECT si.name, \n" + 
-								 "       sd.minvalue, \n" + 
-								 "       sd.maxvalue, \n" + 
-								 "       sd.increment, \n" + 
-								 "       sd.cycle, \n" + 
-								 "       sd.start, \n" + 
-								 "       sd.cache \n" + 
-								 " FROM SYS_INFO.sUSRSequence sd, \n" + 
-								 "     SYS_INFO.sUSRSequenceInfo si \n" + 
-								 "WHERE sd.seq_id = si.id \n" + 
-								 "AND   si.schema = ? \n";
+		String sql = "SELECT si.name, " + 
+								 "       sd.minvalue, " + 
+								 "       sd.maxvalue, " + 
+								 "       sd.increment, " + 
+								 "       sd.cycle, " + 
+								 "       sd.start, " + 
+								 "       sd.cache " + 
+								 " FROM SYS_INFO.sUSRSequence sd, " + 
+								 "     SYS_INFO.sUSRSequenceInfo si " + 
+								 "WHERE sd.seq_id = si.id " + 
+								 "AND   si.schema = ? ";
 		
 		if (!StringUtil.isEmptyString(sequence))
 		{
 			sql += "AND   si.name = ? ";	
 		}
+		
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("McKoiMetadata.getRawSequenceDefinition()", "Using query=" + sql);
+		}
+		
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		DataStore result = null;

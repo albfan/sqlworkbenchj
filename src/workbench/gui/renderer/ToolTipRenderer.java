@@ -27,7 +27,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.Settings;
-import workbench.storage.NullValue;
 import workbench.util.StringUtil;
 
 /**
@@ -135,7 +134,7 @@ public class ToolTipRenderer
 		this.selected = isSelected;
 		this.isAlternatingRow = this.useAlternatingColors && ((row % 2) == 1);
 		
-		boolean isNull = (value == null) || (value instanceof NullValue);
+		boolean isNull = (value == null);
 		if (isNull)
 		{
 			displayValue = StringUtil.EMPTY_STRING;

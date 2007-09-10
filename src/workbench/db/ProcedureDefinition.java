@@ -29,11 +29,11 @@ public class ProcedureDefinition
 	private int resultType; 
 	
 	private boolean isOraclePackage = false;
-	private String source;
+	private CharSequence source;
 
 	public static ProcedureDefinition createOraclePackage(String schem, String name)
 	{
-		ProcedureDefinition def = new ProcedureDefinition(null, schem, name, DatabaseMetaData.procedureResultUnknown);
+		ProcedureDefinition def = new ProcedureDefinition(name, schem, null, DatabaseMetaData.procedureResultUnknown);
 		def.setOraclePackage(true);
 		return def;
 	}
@@ -52,15 +52,23 @@ public class ProcedureDefinition
 		resultType = type;
 	}
 	
-	public void setSource(String s) { this.source = s; }
-	public String getSource() { return this.source; }
+	public void setSource(CharSequence s) { this.source = s; }
+	public CharSequence getSource() { return this.source; }
 	
 	public void setOraclePackage(boolean flag) { this.isOraclePackage = true; }
 	public boolean isOraclePackage() { return this.isOraclePackage; }
 	
-	public String getCatalog() { return this.catalog; }
+	public String getCatalog() 
+	{
+		if (this.isOraclePackage) return null;
+		return this.catalog; 
+	}
 	public String getSchema() { return this.schema; }
-	public String getProcedureName() { return this.procName; }
+	public String getProcedureName() 
+	{
+		if (this.isOraclePackage) return catalog;
+		return this.procName; 
+	}
 	public int getResultType() { return this.resultType; }
 	
 	public String getResultTypeDisplay()

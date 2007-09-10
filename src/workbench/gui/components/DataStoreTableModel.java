@@ -163,7 +163,7 @@ public class DataStoreTableModel
 
 		if (isNull(aValue, column - this.columnStartIndex))
 		{
-			this.dataCache.setNull(row, column - this.columnStartIndex);
+			this.dataCache.setValue(row, column - this.columnStartIndex, null);
 		}
 		else
 		{

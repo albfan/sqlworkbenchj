@@ -34,12 +34,19 @@ public class HsqlSequenceReader
 	implements SequenceReader
 {
 	private Connection dbConn;
-	private boolean useInformationSchema;
+	private String sequenceTable;
 	
 	public HsqlSequenceReader(Connection conn)
 	{
 		this.dbConn = conn;
-		this.useInformationSchema = HsqlMetadata.supportsInformationSchema(conn);
+		if (HsqlMetadata.supportsInformationSchema(conn))
+		{
+			sequenceTable = "information_schema.system_sequences";
+		}
+		else
+		{
+			sequenceTable = "system_sequences";
+		}
 	}
 
 	public void readSequenceSource(SequenceDefinition def)
@@ -51,14 +58,24 @@ public class HsqlSequenceReader
 	
 	public DataStore getRawSequenceDefinition(String owner, String sequence)
 	{
+		String query = "SELECT sequence_schema, " +
+						"sequence_name, " +
+						"dtd_identifier, " +
+						"maximum_value, " +
+						"minimum_value, " +
+						"increment, " +
+						"cycle_option, " +
+						"start_with " +
+						"FROM " + sequenceTable;
 		
-		StringBuilder query = new StringBuilder(100);
-		query.append("SELECT sequence_schema, sequence_name, dtd_identifier, maximum_value, minimum_value, increment, cycle_option, start_with FROM ");
-		if (useInformationSchema) query.append("information_schema.");
-		query.append("system_sequences");
 		if (!isEmptyString(sequence))
 		{
-			query.append(" WHERE sequence_name = ?");
+			query += " WHERE sequence_name = ?";
+		}
+		
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("HsqlSequenceReader.getRawSequenceDefinition()", "Using query=" + query.toString());
 		}
 		
 		PreparedStatement stmt = null;

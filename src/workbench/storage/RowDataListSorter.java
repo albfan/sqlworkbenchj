@@ -14,6 +14,7 @@ package workbench.storage;
 import java.text.Collator;
 import java.util.Comparator;
 import java.util.Locale;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 /**
@@ -82,25 +83,21 @@ public class RowDataListSorter
 	/**
 	 * Compares the defined sort column 
 	 */
+	@SuppressWarnings("unchecked")
 	private int compareColumn(int column, RowData row1, RowData row2)
 	{
 		Object o1 = row1.getValue(column);
 		Object o2 = row2.getValue(column);
 
-		// Special handling for NULL values 
-		// Even though NullValue implements the Comparable
-		// interface String.compareTo(NullValue) does not 
-		// work correctly, so we'll handle the situation where
-		// one value is null before calling compareTo()
-		if ( (o1 == null && o2 == null) || (o1 instanceof NullValue && o2 instanceof NullValue) )
+		if  (o1 == null && o2 == null)
 		{
 			return 0;
 		}
-		else if (o1 == null || o1 instanceof NullValue)
+		else if (o1 == null)
 		{
 			return 1;
 		}
-		else if (o2 == null || o2 instanceof NullValue)
+		else if (o2 == null)
 		{
 			return -1;
 		}
@@ -148,7 +145,7 @@ public class RowDataListSorter
 		}
 		catch (Exception e)
 		{
-			// should not happen
+			LogMgr.logError("RowDataListSorter.compare()", "Error when comparing rows", e);
 		}
 		return 0;
 	}
