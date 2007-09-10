@@ -222,7 +222,7 @@ public class XmlDataFileParser
 		TableIdentifier tbl = new TableIdentifier(this.tableName == null ? this.tableNameFromFile : this.tableName);
 		List<ColumnIdentifier> tableCols = this.dbConn.getMetadata().getTableColumns(tbl);
 		List<ColumnIdentifier> validCols = new LinkedList<ColumnIdentifier>();
-		//for (ColumnIdentifier c : this.columns)
+
 		for (int colIndex=0; colIndex < this.columns.length; colIndex++)
 		{
 			int i = tableCols.indexOf(this.columns[colIndex]);
@@ -230,7 +230,7 @@ public class XmlDataFileParser
 			if (i != -1)
 			{
 				// Use the column definition retrieved from the database
-				// to make sure we are using the correct data types.
+				// to make sure we are using the correct data types when converting the input (String) values
 				// this is also important to get quoting of column names
 				// with special characters correctly (as this is handled by DbMetadata already
 				// but the columns retrieved from the XML file are not quoted correctly)

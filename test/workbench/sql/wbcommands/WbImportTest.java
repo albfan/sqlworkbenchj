@@ -16,7 +16,6 @@ import java.io.BufferedWriter;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import junit.framework.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -29,6 +28,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.WbConnection;
 import workbench.db.exporter.RowDataConverter;
@@ -252,8 +252,8 @@ public class WbImportTest
              "    <column-def index=\"2\"> \n" + 
              "      <column-name>FIRSTNAME</column-name> \n" + 
              "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <java-sql-type-name>OTHER</java-sql-type-name> \n" + 
+             "      <java-sql-type>1111</java-sql-type> \n" + 
              "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
              "    </column-def> \n" + 
              "  </table-def> \n" + 
@@ -1464,8 +1464,8 @@ public class WbImportTest
 		{
 			File importFile  = new File(this.basedir, "import_types.txt");
 			PrintWriter out = new PrintWriter(new FileWriter(importFile));
-			out.println("int_col\tdouble_col\tchar_col\tdate_col\ttime_col\tts_col");
-			out.println("42\t42.1234\tfortytwo\t2006-02-01\t22:30\t2006-04-01 22:34\t");
+			out.println("int_col\tdouble_col\tchar_col\tdate_col\ttime_col\tts_col\tnchar_col");
+			out.println("42\t42.1234\tfortytwo\t2006-02-01\t22:30\t2006-04-01 22:34\tnvarchar");
 			out.close();
 			
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=datatype_test -dateformat='yyyy-MM-dd' -timestampformat='yyyy-MM-dd HH:mm'");
@@ -2668,7 +2668,7 @@ public class WbImportTest
 		Statement stmt = wb.createStatement();
 		stmt.executeUpdate("CREATE TABLE junit_test (nr integer, firstname varchar(100), lastname varchar(100))");
 		stmt.executeUpdate("CREATE TABLE junit_test_pk (nr integer primary key, firstname varchar(100), lastname varchar(100))");
-		stmt.executeUpdate("CREATE TABLE datatype_test (int_col integer, double_col double, char_col varchar(50), date_col date, time_col time, ts_col timestamp)");
+		stmt.executeUpdate("CREATE TABLE datatype_test (int_col integer, double_col double, char_col varchar(50), date_col date, time_col time, ts_col timestamp, nchar_col nvarchar(10))");
 		stmt.executeUpdate("CREATE TABLE blob_test (nr integer, binary_data BINARY)");
 		stmt.executeUpdate("CREATE TABLE clob_test (nr integer, text_data CLOB)");
 		stmt.executeUpdate("CREATE TABLE bool_int_test (nr integer, int_flag INTEGER)");

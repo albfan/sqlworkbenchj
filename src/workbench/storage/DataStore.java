@@ -684,32 +684,28 @@ public class DataStore
 	public String getValueAsString(int aRow, int aColumn)
 		throws IndexOutOfBoundsException
 	{
-		RowData row = this.getRow(aRow);
-		Object value = row.getValue(aColumn);
-    if (value == null)
+		Object value = getValue(aRow, aColumn);
+    if (value == null) return null;
+		
+		if (value instanceof Clob)
 		{
-      return null;
-		}
-    else
-		{
-			if (value instanceof Clob)
+			try
 			{
-				try
-				{
-					Clob lob = (Clob)value;
-					long len = lob.length();
-					return lob.getSubString(1, (int)len);
-				}
-				catch (Exception e)
-				{
-					return null;
-				}
+				Clob lob = (Clob)value;
+				long len = lob.length();
+				return lob.getSubString(1, (int)len);
 			}
-			else
+			catch (Exception e)
 			{
-				return value.toString();
+				LogMgr.logError("DataStore.getValueAsString()", "Error converting BLOB to String", e);
+				return null;
 			}
 		}
+		else
+		{
+			return value.toString();
+		}
+
 	}
 
 
@@ -725,8 +721,7 @@ public class DataStore
 	 */
 	public int getValueAsInt(int aRow, int aColumn, int aDefault)
 	{
-		RowData row = this.getRow(aRow);
-		Object value = row.getValue(aColumn);
+		Object value = getValue(aRow, aColumn);
     if (value == null)
 		{
       return aDefault;
@@ -753,8 +748,7 @@ public class DataStore
 	 */
 	public long getValueAsLong(int aRow, int aColumn, long aDefault)
 	{
-		RowData row = this.getRow(aRow);
-		Object value = row.getValue(aColumn);
+		Object value = getValue(aRow, aColumn);
     if (value == null)
 		{
       return aDefault;
@@ -803,24 +797,9 @@ public class DataStore
 			return;
 		}
 		
-//		if (aValue == null)
-//			row.setNull(aColumn, this.resultInfo.getColumnType(aColumn));
-//		else
-			row.setValue(aColumn,aValue);
+		row.setValue(aColumn,aValue);
 		this.modified = row.isModified();
 	}
-
-//	/**
-//	 * Set the given column to null. This is the same as calling setValue(aRow, aColumn, null).
-//	 * @param aRow
-//	 * @param aColumn
-//	 * @see #setValue(int, int, Object)
-//	 */
-//	public void setNull(int aRow, int aColumn)
-//	{
-//		NullValue nul = NullValue.getInstance(this.resultInfo.getColumnType(aColumn));
-//		this.setValue(aRow, aColumn, nul);
-//	}
 
 	/**
 	 * Returns the index of the column with the given name.

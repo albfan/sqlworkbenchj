@@ -49,4 +49,27 @@ public class ColumnData
 	{
 		return (data == null);
 	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj == null) return false;
+		if (obj instanceof ColumnData) 
+		{
+			final ColumnData other = (ColumnData) obj;
+			return this.id.equals(other.id);
+		}
+		else if (obj instanceof ColumnIdentifier)
+		{
+			return this.id.equals((ColumnIdentifier)obj);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return id.hashCode();
+	}
+	
 }

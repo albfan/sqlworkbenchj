@@ -13,13 +13,13 @@ package workbench.db.importer;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.storage.ColumnData;
 import workbench.util.ConverterException;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -34,9 +34,8 @@ public class ConstantColumnValues
 {
 	// I'm using two arraylists to ensure that the
 	// order of the columns is always maintained.
-	private List<ColumnIdentifier> columns;
-	private List<Object> data;
-
+	private List<ColumnData> columnValues;
+	
 	/**
 	 * Parses a parameter value for column value definitions.
 	 * e.g. description=something,firstname=arthur
@@ -71,24 +70,31 @@ public class ConstantColumnValues
 		List<String> entries = StringUtil.stringToList(parameterValue, ",", true, true, false);
 		if (entries.size() == 0) return;
 		
-		this.columns = new ArrayList<ColumnIdentifier>(entries.size());
-		this.data = new ArrayList<Object>(entries.size());
+		this.columnValues = new ArrayList<ColumnData>(entries.size());
+
 		for (String entry : entries)
 		{
 			String[] parts = entry.split("=");
+
 			if (parts.length == 2 && parts[0] != null && parts[1] != null)
 			{
 				String colname = parts[0];
 				ColumnIdentifier col = findColumn(tableColumns, colname);
+
 				if (col != null)
 				{
 					String value = parts[1];
-					if (!StringUtil.isEmptyString(value))
+					Object data = null;
+					if (StringUtil.isEmptyString(value))
+					{
+						LogMgr.logWarning("ConstanColumnValues.init()", "Empty value for column '" + col + "' assumed as NULL");
+					}
+					else
 					{
 						if (value.startsWith("${"))
 						{
 							// DBMS Function call
-							data.add(value.trim());
+							data = value.trim();
 						}
 						else
 						{
@@ -99,15 +105,10 @@ public class ConstantColumnValues
 									value = value.substring(1, value.length() - 1);
 								}
 							}
-							data.add(converter.convertValue(value, col.getDataType()));
+							data = converter.convertValue(value, col.getDataType());
 						}
 					}
-					else
-					{
-						data.add(null);
-						LogMgr.logWarning("ConstanColumnValues.init()", "Empty value for column '" + col + "' assumed as NULL");
-					}
-					columns.add(col);
+					this.columnValues.add(new ColumnData(data, col));
 				}
 				else
 				{
@@ -150,28 +151,38 @@ public class ConstantColumnValues
 	
 	public int getColumnCount()
 	{
-		if (this.columns == null) return 0;
-		return this.columns.size();
+		if (this.columnValues == null) return 0;
+		return this.columnValues.size();
 	}
 	
 	public ColumnIdentifier getColumn(int index)
 	{
-		return this.columns.get(index);
+		return this.columnValues.get(index).getIdentifier();
 	}
 	
 	public Object getValue(int index)
 	{
-		return this.data.get(index);
+		return this.columnValues.get(index).getValue();
 	}
 	
 	public boolean removeColumn(ColumnIdentifier col)
 	{
-		if (this.columns == null) return false;
-		int index = this.columns.indexOf(col);
+		if (this.columnValues == null) return false;
+		if (col == null) return false;
+		
+		int index = -1;
+		for (int i=0; i < this.columnValues.size(); i++)
+		{
+			if (columnValues.get(i).getIdentifier().equals(col))
+			{
+				index = i;
+				break;
+			}
+		}
+		
 		if (index > -1)
 		{
-			this.columns.remove(index);
-			this.data.remove(index);
+			this.columnValues.remove(index);
 		}
 		return (index > -1);
 	}
@@ -193,3 +204,4 @@ public class ConstantColumnValues
 		}
 	}
 }
+

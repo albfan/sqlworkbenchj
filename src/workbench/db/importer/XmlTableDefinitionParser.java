@@ -10,6 +10,7 @@
  *
  */
 package workbench.db.importer;
+
 import java.io.IOException;
 import java.io.Reader;
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,7 +35,6 @@ public class XmlTableDefinitionParser
 	private int currentColIndex;
 	private ColumnIdentifier[] columnList;
 	private String tableName;
-	//private String filename;
 	private ImportFileHandler fileHandler;
 	private StringBuilder chars;
 	private String tagFormat;

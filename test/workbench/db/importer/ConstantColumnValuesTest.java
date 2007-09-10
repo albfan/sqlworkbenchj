@@ -54,6 +54,9 @@ public class ConstantColumnValuesTest extends TestCase
 			assertEquals("'bla'", values.getValue(4));
 			assertEquals("current_timestamp", values.getFunctionLiteral(5));
 			assertEquals("${ant.var}", values.getValue(6));
+			
+			assertEquals(true, values.removeColumn(new ColumnIdentifier("t2", java.sql.Types.VARCHAR)));
+			assertEquals(false, values.removeColumn(new ColumnIdentifier("kkk", java.sql.Types.VARCHAR)));
 		}
 		catch (Exception ex)
 		{
@@ -88,10 +91,8 @@ public class ConstantColumnValuesTest extends TestCase
 		finally
 		{
 			SqlUtil.closeStatement(stmt);
-			try
-			{ con.disconnect(); }
-			catch (Throwable th)
-			{}
+			try { con.disconnect(); } catch (Throwable th) {}
 		}
 	}
+	
 }
