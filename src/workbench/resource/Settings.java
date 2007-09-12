@@ -72,7 +72,11 @@ public class Settings
 	public static final String PROPERTY_DATETIME_FORMAT = "workbench.gui.display.datetimeformat";
 	public static final String PROPERTY_TIME_FORMAT = "workbench.gui.display.timeformat";
 	public static final String PROPERTY_PDF_READER_PATH = "workbench.gui.pdfreader.path";
-
+	public static final String PROPERTY_SHOW_TOOLBAR = "workbench.editor.showtoolbar";
+	public static final String PROPERTY_SHOW_LINE_NUMBERS = "workbench.editor.showlinenumber";
+	public static final String PROPERTY_HIGHLIGHT_CURRENT_STATEMENT = "workbench.editor.highlightcurrent";
+	public static final String PROPERTY_AUTO_JUMP_STATEMENT = "workbench.editor.autojumpnext";
+	
 	public static final String PROPERTY_EDITOR_FONT = "editor";
 	public static final String PROPERTY_STANDARD_FONT = "std";
 	public static final String PROPERTY_MSGLOG_FONT = "msglog";
@@ -1473,7 +1477,15 @@ public class Settings
 		return value;
 	}
 
-	public static final String PROPERTY_SHOW_LINE_NUMBERS = "workbench.editor.showlinenumber";
+	public boolean getShowToolbar()
+	{
+		return getBoolProperty(PROPERTY_SHOW_TOOLBAR, true);
+	}
+
+	public void setShowToolbar(final boolean show)
+	{
+		setProperty(PROPERTY_SHOW_TOOLBAR, show);
+	}
 
 	public boolean getShowLineNumbers()
 	{
@@ -1484,15 +1496,15 @@ public class Settings
 	{
 		setProperty(PROPERTY_SHOW_LINE_NUMBERS, show);
 	}
-
+	
 	public boolean getAutoJumpNextStatement()
 	{
-		return getBoolProperty("workbench.editor.autojumpnext", false);
+		return getBoolProperty(PROPERTY_AUTO_JUMP_STATEMENT , false);
 	}
 
-	public void setAutoJumpNextStatement(boolean show)
+	public void setAutoJumpNextStatement(boolean flag)
 	{
-		this.setProperty("workbench.editor.autojumpnext", show);
+		this.setProperty(PROPERTY_AUTO_JUMP_STATEMENT, flag);
 	}
 
 	public boolean getIgnoreErrors()
@@ -1527,12 +1539,7 @@ public class Settings
 
 	public boolean getHighlightCurrentStatement()
 	{
-		return getBoolProperty("workbench.editor.highlightcurrent", false);
-	}
-
-	public void setHighlightCurrentStatement(boolean show)
-	{
-		this.setProperty("workbench.editor.highlightcurrent", show);
+		return getBoolProperty(PROPERTY_HIGHLIGHT_CURRENT_STATEMENT, false);
 	}
 
 	public boolean getIncludeOwnerInSqlExport()

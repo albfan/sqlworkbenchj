@@ -1731,7 +1731,7 @@ public class SqlPanel
 						long start = System.currentTimeMillis();
 						long rowCount = exporter.startExport();
 						long execTime = (System.currentTimeMillis() - start);
-						StringBuilder errors = exporter.getErrors();
+						CharSequence errors = exporter.getErrors();
 						if (errors.length() > 0)
 						{
 							messages.append('\n');
@@ -1740,7 +1740,7 @@ public class SqlPanel
 							messages.append('\n');
 						}
 
-						StringBuilder warnings = exporter.getWarnings();
+						CharSequence warnings = exporter.getWarnings();
 						if (warnings.length() > 0)
 						{
 							if (!newLineAppended) messages.append('\n');
@@ -1935,13 +1935,13 @@ public class SqlPanel
 		this.selectEditor();
 	}
 
-	public void appendToLog(final String aString)
+	public void appendToLog(final String logMessage)
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
-				log.append(aString);
+				log.append(logMessage);
 				log.setCaretPosition(log.getDocument().getLength());
 			}
 		});
@@ -2628,7 +2628,7 @@ public class SqlPanel
 
 	private void showResultMessage(StatementRunnerResult result)
 	{
-		StringBuilder msg = result.getMessageBuffer();
+		CharSequence msg = result.getMessageBuffer();
 		if (msg == null) return;
 		try
 		{

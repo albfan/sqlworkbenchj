@@ -71,7 +71,6 @@ public class QueryCopySource
 			ResultInfo info = new ResultInfo(rs.getMetaData(), this.sourceConnection);
 			int colCount = info.getColumnCount();
 			currentRow = new RowData(colCount);
-			currentRow.setUseNullValueObject(false);
 			while (this.keepRunning && rs.next())
 			{
 				// RowData will make some transformation 

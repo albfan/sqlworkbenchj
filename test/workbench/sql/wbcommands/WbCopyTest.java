@@ -13,18 +13,20 @@ package workbench.sql.wbcommands;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
-import junit.framework.*;
+import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.sql.DefaultStatementRunner;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.SqlUtil;
 
 /**
  *
  * @author support@sql-workbench.net
  */
-public class WbCopyTest extends TestCase
+public class WbCopyTest 
+	extends TestCase
 {
 	
 	public WbCopyTest(String testName)
@@ -32,7 +34,7 @@ public class WbCopyTest extends TestCase
 		super(testName);
 	}
 
-	public void testExecute() throws Exception
+	public void testCopy() throws Exception
 	{
 		try
 		{
@@ -56,7 +58,7 @@ public class WbCopyTest extends TestCase
 			String sql = "--copy source_data and create target\nwbcopy -sourceTable=source_data -targettable=target_data -createTarget=true";
 			runner.runStatement(sql, -1, -1);
 			StatementRunnerResult result = runner.getResult();
-			assertEquals("Copy not successful", true, result.isSuccess());
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 
 			ResultSet rs = stmt.executeQuery("select count(*) from target_data");
 			if (rs.next())
@@ -125,5 +127,212 @@ public class WbCopyTest extends TestCase
 		}
 	}
 	
+	public void testWithColumnMap()
+	{
+		try
+		{
+			TestUtil util = new TestUtil("WbCopyTest_testExecute");
+			util.prepareEnvironment();
+			
+			WbConnection con = util.getConnection("mappedCopyTest");
+			
+			WbCopy copyCmd = new WbCopy();
+			copyCmd.setConnection(con);
+			
+			Statement stmt = con.createStatement();
+			
+			stmt.executeUpdate("create table source_data (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob)");
+			
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (1,'Dent', 'Arthur', '01')");
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (2,'Beeblebrox', 'Zaphod','0202')");
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (3,'Moviestar', 'Mary', '030303')");
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (4,'Perfect', 'Ford', '04040404')");
+
+			stmt.executeUpdate("create table target_data (tnr integer not null primary key, tlastname varchar(50), tfirstname varchar(50), tbinary_data blob)");
+			stmt.executeUpdate("insert into target_data (tnr, tlastname, tfirstname) values (42,'Gaga', 'Radio')");
+			
+			con.commit();
+			
+			String sql = "wbcopy -sourceTable=source_data " +
+				"-targetTable=target_data " +
+				"-deleteTarget=true " +
+				"-columns=nr/tnr, lastname/tlastname, firstname/tfirstname";
+			
+			StatementRunnerResult result = copyCmd.execute(sql);
+			assertEquals("Copy not successful", true, result.isSuccess());
+			
+			ResultSet rs = stmt.executeQuery("select count(*) from target_data where tbinary_data is null");
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Incorrect number of rows copied", 4, count);
+			}
+			SqlUtil.closeResult(rs);
+			
+			rs = stmt.executeQuery("select tfirstname, tlastname from target_data where tnr = 3");
+			if (rs.next())
+			{
+				String s = rs.getString(1);
+				assertEquals("Incorrect firstname", "Mary", s);
+				s = rs.getString(2);
+				assertEquals("Incorrect firstname", "Moviestar", s);
+			}
+			else
+			{
+				fail("Nothing copied");
+			}
+			SqlUtil.closeResult(rs);
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	public void testQueryCopy()
+	{
+		try
+		{
+			TestUtil util = new TestUtil("WbCopyTest_testExecute");
+			util.prepareEnvironment();
+			
+			WbConnection con = util.getConnection("mappedCopyTest");
+			
+			WbCopy copyCmd = new WbCopy();
+			copyCmd.setConnection(con);
+			
+			Statement stmt = con.createStatement();
+			
+			stmt.executeUpdate("create table source_data (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob)");
+			
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (1,'Dent', 'Arthur', '01')");
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (2,'Beeblebrox', 'Zaphod','0202')");
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (3,'Moviestar', 'Mary', '030303')");
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (4,'Perfect', 'Ford', '04040404')");
+
+			stmt.executeUpdate("create table target_data (tnr integer not null primary key, tlastname varchar(50), tfirstname varchar(50), tbinary_data blob)");
+			
+			con.commit();
+			
+			String sql = "wbcopy -sourceQuery='select firstname, nr, lastname from source_data where nr < 3' " +
+				"-targetTable=target_data " +
+				"-columns=tfirstname, tnr, tlastname";
+			
+			StatementRunnerResult result = copyCmd.execute(sql);
+			assertEquals("Copy not successful", true, result.isSuccess());
+			
+			ResultSet rs = stmt.executeQuery("select count(*) from target_data where tbinary_data is null");
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Incorrect number of rows copied", 2, count);
+			}
+			SqlUtil.closeResult(rs);
+			
+			rs = stmt.executeQuery("select tfirstname, tlastname from target_data where tnr = 1");
+			if (rs.next())
+			{
+				String s = rs.getString(1);
+				assertEquals("Incorrect firstname", "Arthur", s);
+				s = rs.getString(2);
+				assertEquals("Incorrect firstname", "Dent", s);
+			}
+			else
+			{
+				fail("Nothing copied");
+			}
+			SqlUtil.closeResult(rs);
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	public void testCopySchema()
+	{
+		try
+		{
+			TestUtil util = new TestUtil("WbCopyTest_testExecute");
+			util.prepareEnvironment();
+			
+			WbConnection con = util.getConnection("schemaCopySource");
+			WbConnection target = util.getConnection("schemaCopyTarget");
+			
+			WbCopy copyCmd = new WbCopy();
+			copyCmd.setConnection(con);
+			
+			Statement stmt = con.createStatement();
+			
+			stmt.executeUpdate("create table person (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob)");
+			stmt.executeUpdate("create table address (person_id integer, address_details varchar(100))");
+			
+			stmt.executeUpdate("insert into person (nr, lastname, firstname, binary_data) values (1,'Dent', 'Arthur', '01')");
+			stmt.executeUpdate("insert into person (nr, lastname, firstname, binary_data) values (2,'Beeblebrox', 'Zaphod','0202')");
+			stmt.executeUpdate("insert into person (nr, lastname, firstname, binary_data) values (3,'Moviestar', 'Mary', '030303')");
+			stmt.executeUpdate("insert into person (nr, lastname, firstname, binary_data) values (4,'Perfect', 'Ford', '04040404')");
+
+			stmt.executeUpdate("insert into address (person_id, address_details) values (1, 'Arlington'");
+			stmt.executeUpdate("insert into address (person_id, address_details) values (2, 'Heart of Gold'");
+			stmt.executeUpdate("insert into address (person_id, address_details) values (3, 'Sleepy by Lane'");
+			stmt.executeUpdate("insert into address (person_id, address_details) values (4, 'Betelgeuse'");
+			
+			con.commit();
+
+			Statement tstmt = target.createStatement();
+			tstmt.executeUpdate("create table person (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob)");
+			tstmt.executeUpdate("create table address (person_id integer, address_details varchar(100))");
+			target.commit();
+			
+			String sql = "wbcopy -sourceTable=person,address ";
+			
+			StatementRunnerResult result = copyCmd.execute(sql);
+			assertEquals("Copy not successful", true, result.isSuccess());
+			
+			ResultSet rs = stmt.executeQuery("select count(*) from target_data where tbinary_data is null");
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Incorrect number of rows copied", 4, count);
+			}
+			SqlUtil.closeResult(rs);
+			
+			rs = stmt.executeQuery("select tfirstname, tlastname from target_data where tnr = 3");
+			if (rs.next())
+			{
+				String s = rs.getString(1);
+				assertEquals("Incorrect firstname", "Mary", s);
+				s = rs.getString(2);
+				assertEquals("Incorrect firstname", "Moviestar", s);
+			}
+			else
+			{
+				fail("Nothing copied");
+			}
+			SqlUtil.closeResult(rs);
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
 	
 }

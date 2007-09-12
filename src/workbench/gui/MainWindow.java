@@ -25,6 +25,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -102,6 +104,7 @@ import workbench.gui.actions.FileSaveProfiles;
 import workbench.gui.actions.InsertTabAction;
 import workbench.gui.actions.OptionsDialogAction;
 import workbench.gui.actions.ShowHelpAction;
+import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
 import workbench.util.NumberStringCache;
 
@@ -117,7 +120,7 @@ import workbench.util.NumberStringCache;
 public class MainWindow
 	extends JFrame
 	implements MouseListener, WindowListener, ChangeListener, DropTargetListener,
-						MacroChangeListener, DbExecutionListener, Connectable
+						MacroChangeListener, DbExecutionListener, Connectable, PropertyChangeListener
 {
 	private static final String DEFAULT_WORKSPACE = "%ConfigDir%/Default.wksp";
 	private static int instanceCount;
@@ -196,6 +199,7 @@ public class MainWindow
 		MacroManager.getInstance().addChangeListener(this);
 		this.jobIndicator = new RunningJobIndicator(this);
 		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_SHOW_TOOLBAR);
 	}
 
 	public void display()
@@ -488,6 +492,9 @@ public class MainWindow
 		ViewLineNumbers v = new ViewLineNumbers();
 		v.addToMenu(menu);
 
+		WbAction vTb = new ViewToolbarAction();
+		vTb.addToMenu (menu);
+
 		menuBar.add(this.buildToolsMenu());
 		menuBar.add(this.buildHelpMenu());
 
@@ -495,6 +502,56 @@ public class MainWindow
 		return menuBar;
 	}
 
+	/**
+	 * Removes or makes the toolbar visible depending on
+	 * {@link Settings#getShowToolbar}. This method will
+	 * <i>validate</i> this' {@link #getContentPane content pane}
+	 * in case a change on the toolbar's visibility is performed.
+	 */
+	private void updateToolbarVisibility()
+	{
+		boolean needInvalidate = false;
+		final Container content = this.getContentPane();
+		if (this.currentToolbar != null)
+		{
+			content.remove(this.currentToolbar);
+			this.currentToolbar = null;
+			needInvalidate = true;
+		}
+		
+		if (Settings.getInstance().getShowToolbar())
+		{
+			final MainPanel curPanel = this.getCurrentPanel();
+			if (curPanel != null)
+			{
+				this.currentToolbar = curPanel.getToolbar();
+				content.add(this.currentToolbar, BorderLayout.NORTH);
+				needInvalidate = true;
+			}
+		}
+		if (needInvalidate)
+		{
+			content.validate();
+		}
+	}
+
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (Settings.PROPERTY_SHOW_TOOLBAR.equals(evt.getPropertyName()))
+		{
+			this.setShowToolbar(Settings.getInstance().getShowToolbar());
+		}
+	}
+	
+	private void setShowToolbar(final boolean show)
+	{
+		final MainPanel current = this.getCurrentPanel();
+		if (current != null)
+		{
+			this.updateToolbarVisibility();
+		}
+	}
+	
 	private void checkViewMenu(int index)
 	{
 		JMenu view = getViewMenu(index);
@@ -799,9 +856,8 @@ public class MainWindow
 
 		this.setJMenuBar(menu);
 
-		if (this.currentToolbar != null) content.remove(this.currentToolbar);
-		this.currentToolbar = current.getToolbar();
-		content.add(this.currentToolbar, BorderLayout.NORTH);
+		this.updateToolbarVisibility();
+		
 		this.checkMacroMenuForPanel(anIndex);
 		this.checkViewMenu(anIndex);
 		SwingUtilities.invokeLater(new Runnable()

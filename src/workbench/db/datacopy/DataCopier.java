@@ -17,7 +17,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import workbench.db.ColumnIdentifier;
+import workbench.db.DbMetadata;
+import workbench.db.TableCreator;
 import workbench.db.TableDropper;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.RowDataProducer;
 import workbench.interfaces.BatchCommitter;
@@ -29,7 +34,6 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 import workbench.util.MessageBuffer;
 import workbench.util.WbThread;
-import workbench.db.*;
 
 /**
  *
@@ -66,6 +70,24 @@ public class DataCopier
 		this.copyFromTable(source, target, aSourceTable, aTargetTable, (Map<String, String>)null, null, false, false);
 	}
 
+	public void reset()
+	{
+		sourceData = null;
+		sourceTable = null;
+		sourceConnection = null;
+		
+		targetTable = null;
+		targetColumnsForQuery = null;
+		targetTable = null;
+		targetConnection = null;
+		
+		columnMap = null;
+		
+		messages = new MessageBuffer();
+		importer = new DataImporter();
+		errors = new MessageBuffer();
+	}
+	
 	public void copyFromFile(RowDataProducer source, WbConnection target, TableIdentifier targetTbl)
 	{
 		this.sourceConnection = null;
@@ -96,7 +118,7 @@ public class DataCopier
 
 		if (!this.sourceConnection.getMetadata().objectExists(aSourceTable, (String)null))
 		{
-			this.addError(ResourceMgr.getString("ErrCopySourceTableNotFound").replaceAll("%name%", aSourceTable.getQualifiedName()));
+			this.addError(ResourceMgr.getFormattedString("ErrCopySourceTableNotFound", aSourceTable.getQualifiedName()));
 			throw new SQLException("Table " + aTargetTable.getTableName() + " not found in source connection");
 		}
 
@@ -202,17 +224,7 @@ public class DataCopier
 		if (tableExists && !drop)
 		{
 			LogMgr.logInfo("DataCopier.copyToNewTable()", "New table " + newTableName.getTableExpression() + " does already exist!");
-			List<ColumnIdentifier> requestedCols = null;
-			if (sourceColumns != null)
-			{
-				int count = sourceColumns.length;
-				requestedCols = new ArrayList<ColumnIdentifier>(count);
-				for (int i=0; i < count; i++)
-				{
-					requestedCols.add(sourceColumns[i]);
-				}
-			}
-			this.readColumnDefinition(requestedCols);
+			this.readColumnDefinition(sourceColumns);
 		}
 		else
 		{
@@ -238,18 +250,18 @@ public class DataCopier
 	private void initNewTable(ColumnIdentifier[] sourceColumns)
 		throws SQLException
 	{
-		List<ColumnIdentifier> sourceCols = null;
+		List<ColumnIdentifier> sourceTableCols = null;
+		
 		if (this.sourceTable != null)
 		{
-			sourceCols = this.sourceConnection.getMetadata().getTableColumns(this.sourceTable);
+			sourceTableCols = this.sourceConnection.getMetadata().getTableColumns(this.sourceTable);
 		}
 		else
 		{
-			int count = this.targetColumnsForQuery.length;
-			sourceCols = new ArrayList<ColumnIdentifier>(count);
-			for (int i=0; i < count; i++)
+			sourceTableCols = new ArrayList<ColumnIdentifier>(this.targetColumnsForQuery.length);
+			for (ColumnIdentifier col : targetColumnsForQuery)
 			{
-				sourceCols.add(this.targetColumnsForQuery[i]);
+				sourceTableCols.add(col);
 			}
 		}
 
@@ -260,26 +272,25 @@ public class DataCopier
 		List<ColumnIdentifier> targetCols = null;
 		if (sourceColumns == null || sourceColumns.length == 0)
 		{
-			int count = sourceCols.size();
-			targetCols = new ArrayList<ColumnIdentifier>(count);
+			int count = sourceTableCols.size();
+			targetCols = new ArrayList<ColumnIdentifier>(sourceTableCols);
 			this.columnMap = new HashMap<ColumnIdentifier, ColumnIdentifier>(count);
 			for (int i=0; i < count; i++)
+			for (ColumnIdentifier col : sourceTableCols)
 			{
-				this.columnMap.put(sourceCols.get(i), sourceCols.get(i));
-				targetCols.add(sourceCols.get(i));
+				this.columnMap.put(col, col);
 			}
 		}
 		else
 		{
-			int count = sourceColumns.length;
-			this.columnMap = new HashMap<ColumnIdentifier, ColumnIdentifier>(count);
-			targetCols = new ArrayList<ColumnIdentifier>(count);
-			for (int i=0; i < count; i++)
+			this.columnMap = new HashMap<ColumnIdentifier, ColumnIdentifier>(sourceColumns.length);
+			targetCols = new ArrayList<ColumnIdentifier>(sourceColumns.length);
+			for (ColumnIdentifier col : sourceColumns)
 			{
-				int index = sourceCols.indexOf(sourceColumns[i]);
+				int index = sourceTableCols.indexOf(col);
 				if (index > -1)
 				{
-					ColumnIdentifier col = sourceCols.get(i);
+					ColumnIdentifier tcol = sourceTableCols.get(index);
 					this.columnMap.put(col, col);
 					targetCols.add(col);
 				}
@@ -649,7 +660,7 @@ public class DataCopier
 	 *	If a list of requested columns is passed only, those columns
 	 *	from that list will be used from the source table
 	 */
-	private void readColumnDefinition(List requestedCols)
+	private void readColumnDefinition(ColumnIdentifier[] requestedCols)
 		throws SQLException
 	{
 		if (this.sourceConnection == null || this.targetConnection == null ||
@@ -659,11 +670,10 @@ public class DataCopier
 		List<ColumnIdentifier> sourceCols = null;
 		if (requestedCols != null)
 		{
-			int count = requestedCols.size();
-			sourceCols = new ArrayList<ColumnIdentifier>(count);
-			for (int i=0; i < count; i++)
+			sourceCols = new ArrayList<ColumnIdentifier>(requestedCols.length);
+			for (ColumnIdentifier rc : requestedCols)
 			{
-				int index = cols.indexOf(requestedCols.get(i));
+				int index = cols.indexOf(rc);
 				if (index > -1)
 				{
 					sourceCols.add(cols.get(index));
@@ -722,7 +732,16 @@ public class DataCopier
 		return this.importer.hasWarnings();
 	}
 
-	public String getAllMessages()
+	public MessageBuffer getMessageBuffer()
+	{
+		MessageBuffer buf = new MessageBuffer();
+		buf.append(this.messages);
+		buf.append(this.importer.getMessageBuffer());
+		buf.append(this.errors);
+		return buf;
+	}
+	
+	public CharSequence getAllMessages()
 	{
 		StringBuilder log = new StringBuilder(2000);
 
@@ -734,7 +753,7 @@ public class DataCopier
 		log.append(this.importer.getMessages());
 		if (this.errors != null) log.append(this.errors.getBuffer());
 
-		return log.toString();
+		return log;
 	}
 
 	public void setErrorHandler(JobErrorHandler handler)

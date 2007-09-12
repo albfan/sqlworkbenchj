@@ -220,6 +220,13 @@ public class XmlDataFileParser
 		if (this.dbConn == null) return;
 		if (this.columns == null) return;
 		TableIdentifier tbl = new TableIdentifier(this.tableName == null ? this.tableNameFromFile : this.tableName);
+		if (!this.dbConn.getMetadata().tableExists(tbl))
+		{
+			String msg = ResourceMgr.getFormattedString("ErrImportTableNotFound", tbl.getTableName());
+			this.messages.append(msg);
+			this.messages.appendNewLine();
+			throw new SQLException("Table '" + tbl.getTableName() + "' not found!");
+		}
 		List<ColumnIdentifier> tableCols = this.dbConn.getMetadata().getTableColumns(tbl);
 		List<ColumnIdentifier> validCols = new LinkedList<ColumnIdentifier>();
 

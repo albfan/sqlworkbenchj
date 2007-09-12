@@ -427,7 +427,7 @@ public class WbExport
 			tablesToExport = argParser.getTables();
 			if (tablesToExport.size() == 0 && argParser.wasWildCardArgument())
 			{
-				result.addMessage(ResourceMgr.getString("ErrExportNoTablesFound") + " " + tables);
+				result.addMessage(ResourceMgr.getFormattedString("ErrExportNoTablesFound", tables));
 				result.setFailure();
 				return result;
 			}

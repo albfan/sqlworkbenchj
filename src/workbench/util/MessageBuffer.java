@@ -77,7 +77,7 @@ public class MessageBuffer
 	 * This means the second call to this method returns an empty
 	 * buffer if no messages have been added between the calls.
 	 */
-	public synchronized StringBuilder getBuffer()
+	public synchronized CharSequence getBuffer()
 	{
 		StringBuilder result = new StringBuilder(this.length + 50);
 		if (trimmed) result.append("(...)\n");

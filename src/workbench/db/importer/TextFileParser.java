@@ -1045,9 +1045,9 @@ public class TextFileParser
 		
 		if (!this.connection.getMetadata().tableExists(tbl))
 		{
-			String msg = ResourceMgr.getString("ErrImportTableNotFound").replaceAll("%table%", tbl.getTableExpression());
-			msg = StringUtil.replace(msg, "%filename%", this.inputFile.getAbsolutePath());
-			this.messages.append(msg + "\n");
+			String msg = ResourceMgr.getFormattedString("ErrImportTableNotFound", tbl.getTableExpression());
+			this.messages.append(msg);
+			this.messages.appendNewLine();
 			this.columns = null;
 			this.hasErrors = true;
 			throw new SQLException("Table " + tbl.getTableExpression() + " not found!");

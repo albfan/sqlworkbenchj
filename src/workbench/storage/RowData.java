@@ -47,7 +47,6 @@ public class RowData
 	 */
 	private boolean dmlSent = false;
 	
-	private boolean useNullValueObject = true;
 	private boolean trimCharData = false;
 	
 	private Object[] colData;
@@ -57,10 +56,6 @@ public class RowData
 	{
 		int colCount = info.getColumnCount();
 		this.colData = new Object[colCount];
-//		for (int i = 0; i < colCount; i++)
-//		{
-//			this.setNull(i, info.getColumnType(i));
-//		}
 		this.setNew();
 	}
 	
@@ -70,7 +65,6 @@ public class RowData
 		this.setNew();
 	}
 
-	public void setUseNullValueObject(boolean flag) { this.useNullValueObject = flag; }
 	public void setTrimCharData(boolean flag) { this.trimCharData = flag; }
 	
 	public Object[] getData() { return this.colData; }

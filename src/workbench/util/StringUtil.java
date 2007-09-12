@@ -544,6 +544,7 @@ public class StringUtil
 	 * Returns all DB Object names from the comma separated list.
 	 * This is different to stringToList() as it keeps any quotes that 
 	 * are present in the list.
+	 * 
 	 * @param list a comma separated list of elements (optionally with quotes)
 	 * @return a List of Strings as defined by the input string
 	 */

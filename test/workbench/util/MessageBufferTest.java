@@ -71,7 +71,7 @@ public class MessageBufferTest
 			b.appendNewLine();
 			b.append("how are you?");
 			
-			StringBuilder s = b.getBuffer();
+			CharSequence s = b.getBuffer();
 			assertEquals("Hello, world\nhow are you?", s.toString());
 			
 		}

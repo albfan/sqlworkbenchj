@@ -1352,7 +1352,7 @@ public class DataImporter
 			}
 			catch (SQLException e)
 			{
-				String msg = ResourceMgr.getString("ErrImportTableNotFound").replaceAll("%table%", this.targetTable.getTableExpression(this.dbConn));
+				String msg = ResourceMgr.getFormattedString("ErrImportTableNotFound", this.targetTable.getTableExpression());
 				if (parser != null)
 				{
 					String s = ResourceMgr.getString("ErrImportFileNotProcessed");
@@ -1770,11 +1770,16 @@ public class DataImporter
 	 * @return the message buffer.
 	 * @see workbench.util.MessageBuffer#getBuffer()
 	 */
-	public StringBuilder getMessages()
+	public CharSequence getMessages()
 	{
 		return messages.getBuffer();
 	}
 
+	public MessageBuffer getMessageBuffer()
+	{
+		return messages;
+	}
+	
 	/**
 	 *	Callback from the RowDataProducer
 	 */

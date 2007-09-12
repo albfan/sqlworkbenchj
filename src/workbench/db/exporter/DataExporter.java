@@ -911,13 +911,13 @@ public class DataExporter
 	public boolean hasWarning() { return this.warnings.getLength() > 0; }
 	public boolean hasError() { return this.errors.getLength() > 0; }
 
-	public StringBuilder getErrors()
+	public CharSequence getErrors()
 	{
 		// this will clear the internal buffer of the errors!
 		return this.errors.getBuffer();
 	}
 
-	public StringBuilder getWarnings()
+	public CharSequence getWarnings()
 	{
 		// this will clear the internal buffer of the warnings!
 		return this.warnings.getBuffer();

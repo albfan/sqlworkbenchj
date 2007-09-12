@@ -157,7 +157,7 @@ public class StatementRunnerResult
 	 *
 	 * @see workbench.util.MessageBuffer#getBuffer()
 	 */
-	public StringBuilder getMessageBuffer()
+	public CharSequence getMessageBuffer()
 	{
 		if (this.messages == null) return null;
 		return messages.getBuffer();

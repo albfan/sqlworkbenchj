@@ -1244,17 +1244,17 @@ public class WbImportTest
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -filecolumns=nr,firstname,lastname -header=false -table=not_there");
 			String msg = result.getMessageBuffer().toString();
 			assertEquals("Export did not fail", false, result.isSuccess());
-			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE] not found") > -1);
+			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE not found") > -1);
 			
 			result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -table=not_there");
 			msg = result.getMessageBuffer().toString();
 			assertEquals("Export did not fail", false, result.isSuccess());
-			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE] not found") > -1);
+			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE not found") > -1);
 
 			result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -table=not_there");
 			msg = result.getMessageBuffer().toString();
 			assertEquals("Export did not fail", false, result.isSuccess());
-			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE] not found") > -1);
+			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE not found") > -1);
 			
 			importFile.delete();
 		}

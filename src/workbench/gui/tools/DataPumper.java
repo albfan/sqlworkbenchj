@@ -1959,7 +1959,7 @@ public class DataPumper
 			return;
 		}
 
-		String log = null;
+		CharSequence log = null;
 		try
 		{
 			log = this.copier.getAllMessages();
@@ -1970,7 +1970,12 @@ public class DataPumper
 			log = ExceptionUtil.getDisplay(e);
 		}
 
-		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPLog"), log, "workbench.datapumper.logwindow");
+		EditWindow w = new EditWindow(this.window, 
+					ResourceMgr.getString("MsgWindowTitleDPLog"), 
+					(log == null ? "" : log.toString()), 
+					"workbench.datapumper.logwindow"
+				);
+		
 		w.setVisible(true); // EditWindow is modal
 		w.dispose();
 	}

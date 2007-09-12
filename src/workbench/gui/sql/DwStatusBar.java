@@ -14,6 +14,7 @@ package workbench.gui.sql;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -84,7 +85,9 @@ public class DwStatusBar
 	private boolean timerRunning;
 	private ActionListener notificationHandler;
 	private JLabel notificationLabel;
-	
+	private String editorLinePrefix;
+  private String editorColPrefix;
+
 	public DwStatusBar()
 	{
 		this(false, false);
@@ -160,6 +163,8 @@ public class DwStatusBar
 			this.editorStatus.setBorder(new CompoundBorder(new DividerBorder(DividerBorder.LEFT), new EmptyBorder(0, 3, 0, 3)));
 			this.editorStatus.setToolTipText(ResourceMgr.getDescription("LblEditorStatus"));
 			p.add(editorStatus);
+			this.editorColPrefix = ResourceMgr.getString("LblEditorPosCol");
+			this.editorLinePrefix = ResourceMgr.getString("LblEditorPosLine");
 		}
 		
 		b = new CompoundBorder(new DividerBorder(DividerBorder.LEFT_RIGHT), new EmptyBorder(0, 3, 0, 3));
@@ -230,10 +235,11 @@ public class DwStatusBar
 	{
 		 if (this.editorStatus == null) return;
 		 StringBuilder text = new StringBuilder(20);
-		 text.append("L:");
-		 text.append(line);
-		 text.append(" C:");
-		 text.append(column);
+		 text.append(editorLinePrefix);
+		 text.append(NumberStringCache.getNumberString(line));
+		 text.append(' ');
+		 text.append(editorColPrefix);
+		 text.append(NumberStringCache.getNumberString(column));
 		 this.editorStatus.setText(text.toString());
 	}
 	
@@ -314,13 +320,27 @@ public class DwStatusBar
 			s.append(NumberStringCache.getNumberString(count));
 		}
 		tfRowCount.setText(s.toString());
-		tfRowCount.repaint();
+		refresh();
+	}
+	
+	private Runnable refresher = new Runnable()
+	{
+		public void run()
+		{
+			validate();
+			repaint();
+		}
+	};
+	
+	protected void refresh()
+	{
+		EventQueue.invokeLater(refresher);
 	}
 	
 	public void clearRowcount()
 	{
 		tfRowCount.setText("");
-		tfRowCount.repaint();
+		refresh();
 	}
 
 	public String getText() { return this.tfStatus.getText(); }
