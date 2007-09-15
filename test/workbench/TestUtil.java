@@ -112,6 +112,7 @@ public class TestUtil
 		parser.parse("-url='jdbc:hsqldb:mem:" + dbName + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 		prof.setName(dbName);
+		ConnectionMgr.getInstance().addProfile(prof);
 		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, dbName);
 		return con;
 	}
@@ -129,8 +130,8 @@ public class TestUtil
 		//parser.parse("-url='jdbc:hsqldb:mem:" + db + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver");
 		parser.parse("-url='jdbc:h2:mem:" + db + "' -user=sa -driver=org.h2.Driver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
-//		prof.setPreDisconnectScript("SHUTDOWN IMMEDIATELY");
 		prof.setName(db);
+		ConnectionMgr.getInstance().addProfile(prof);
 		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, db);
 		return con;
 	}

@@ -89,7 +89,6 @@ public class ConnectionMgr
 	public WbConnection getConnection(ConnectionProfile aProfile, String anId, boolean reUse)
 		throws ClassNotFoundException, SQLException
 	{
-		
 		if (reUse)
 		{
 			WbConnection old = this.activeConnections.get(anId);

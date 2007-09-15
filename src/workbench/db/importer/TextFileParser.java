@@ -17,9 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -62,6 +60,7 @@ public class TextFileParser
 	private String quoteChar = null;
 	private boolean decodeUnicode = false;
 	private boolean enableMultiLineMode = true;
+	private boolean checkDependencies = false;
 	
 	private int colCount = -1;
 	private int importColCount = -1;
@@ -169,6 +168,11 @@ public class TextFileParser
 	public void setQuoteEscaping(QuoteEscapeType type)
 	{
 		this.quoteEscape = type;
+	}
+
+	public void setCheckDependencies(boolean flag)
+	{
+		this.checkDependencies = flag;
 	}
 	
 	public QuoteEscapeType getQuoteEscaping()
@@ -518,6 +522,11 @@ public class TextFileParser
 		this.regularStop = true;
 	}
 	
+	public boolean isCancelled()
+	{
+		return this.cancelImport;
+	}
+	
 	public void cancel()
 	{
 		LogMgr.logDebug("TextFileParser.cancel()", "Cancelling import");
@@ -573,35 +582,36 @@ public class TextFileParser
 		throws Exception
 	{
 		File dir = new File(this.sourceDir);
-		File[] files = dir.listFiles();
-		Arrays.sort(files);
-		int count = files.length;
 		if (this.extensionToUse == null) this.extensionToUse = ".txt";
 
-		List<File> toProcess = new LinkedList<File>();
-		for (int i=0; i < count; i++)
+		FileNameSorter sorter = new FileNameSorter(this.connection, dir, extensionToUse);
+		List<WbFile> toProcess = null;
+		if (this.checkDependencies) 
 		{
-			if (files[i].getName().endsWith(this.extensionToUse) )
-			{
-				toProcess.add(files[i]);
-			}
+			toProcess = sorter.getSortedList();
 		}
-		count = toProcess.size();
+		else
+		{
+			toProcess = sorter.getFiles();
+		}
+		
+		int count = toProcess.size();
 		this.receiver.setTableCount(count);
 		int currentFile=0;
-		for (File f : toProcess)
+		
+		for (WbFile f : toProcess)
 		{
 			if (this.cancelImport)
 			{
 				break;
 			}
-			WbFile theFile = new WbFile(f);
+			
 			try
 			{
 				currentFile++;
 				this.receiver.setCurrentTable(currentFile);
-				this.inputFile = theFile;
-				this.tableName = theFile.getFileName();
+				this.inputFile = f;
+				this.tableName = f.getFileName();
 				this.columns = null;
 				this.colCount = 0;
 				this.columnMap = null;

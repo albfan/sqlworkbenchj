@@ -14,7 +14,6 @@ package workbench.db.datacopy;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import workbench.db.ColumnIdentifier;
@@ -25,6 +24,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.RowDataProducer;
+import workbench.db.importer.RowDataReceiver;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.ProgressReporter;
@@ -33,6 +33,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 import workbench.util.MessageBuffer;
+import workbench.util.SqlUtil;
 import workbench.util.WbThread;
 
 /**
@@ -58,7 +59,7 @@ public class DataCopier
 	private ColumnIdentifier[] targetColumnsForQuery;
 	private MessageBuffer messages = null;
 	private MessageBuffer errors = null;
-
+	
 	public DataCopier()
 	{
 		this.importer = new DataImporter();
@@ -82,9 +83,9 @@ public class DataCopier
 		targetConnection = null;
 		
 		columnMap = null;
-		
+	
+		this.importer.clearMessages();
 		messages = new MessageBuffer();
-		importer = new DataImporter();
 		errors = new MessageBuffer();
 	}
 	
@@ -139,24 +140,34 @@ public class DataCopier
 		}
 		else if (createTable)
 		{
-			List sourceCols = source.getMetadata().getTableColumns(aSourceTable);
+			List<ColumnIdentifier> sourceCols = source.getMetadata().getTableColumns(aSourceTable);
 
-			this.columnMap = new HashMap<ColumnIdentifier, ColumnIdentifier>(columnMapping.size());
-			Iterator itr = columnMapping.entrySet().iterator();
-			while (itr.hasNext())
+			this.columnMap = new HashMap<ColumnIdentifier, ColumnIdentifier>();
+			if (columnMapping != null)
 			{
-				Map.Entry entry = (Map.Entry)itr.next();
-				ColumnIdentifier scol = new ColumnIdentifier((String)entry.getKey());
-				int index = sourceCols.indexOf(scol);
-				if (index > -1)
+				for (Map.Entry entry : columnMapping.entrySet())
 				{
-					ColumnIdentifier sourceCol = (ColumnIdentifier)sourceCols.get(index);
+					ColumnIdentifier scol = new ColumnIdentifier((String)entry.getKey());
+					int index = sourceCols.indexOf(scol);
+					if (index > -1)
+					{
+						ColumnIdentifier sourceCol = sourceCols.get(index);
+						ColumnIdentifier targetCol = sourceCol.createCopy();
+						String tcol = (String)entry.getValue();
+						targetCol.setColumnName(tcol);
+						this.columnMap.put(sourceCol, targetCol);
+					}
+				}
+			}
+			else
+			{
+				for (ColumnIdentifier sourceCol : sourceCols)
+				{
 					ColumnIdentifier targetCol = sourceCol.createCopy();
-					String tcol = (String)entry.getValue();
-					targetCol.setColumnName(tcol);
 					this.columnMap.put(sourceCol, targetCol);
 				}
 			}
+			
 			try
 			{
 				TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, this.columnMap.values());
@@ -180,6 +191,26 @@ public class DataCopier
 		this.initImporterForTable(additionalWhere);
 	}
 
+	public void beginMultiTableCopy()
+	{
+		this.importer.beginMultiTable();
+	}
+	
+	public void endMultiTableCopy()
+	{
+		this.importer.endMultiTable();
+	}
+	
+	public RowDataProducer getSource()
+	{
+		return this.sourceData;
+	}
+	
+	public RowDataReceiver getReceiver()
+	{
+		return this.importer;
+	}
+	
 	public void setKeyColumns(List<ColumnIdentifier> keys)
 	{
 		this.importer.setKeyColumns(keys);
@@ -384,7 +415,7 @@ public class DataCopier
 		if (rowMonitor != null)
 		{
 			this.importer.setRowActionMonitor(rowMonitor);
-			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_COPY);
+			//rowMonitor.setMonitorType(RowActionMonitor.MONITOR_COPY);
 		}
 	}
 
@@ -531,34 +562,32 @@ public class DataCopier
 
 		int col = 0;
 
-		StringBuilder sql = new StringBuilder(count * 25 + 15 + (addWhere != null ? addWhere.length() : 0));
+		StringBuilder sql = new StringBuilder(count * 25 + 30);
 		sql.append("SELECT ");
 
-		//while (itr.hasNext())
 		for (Map.Entry<ColumnIdentifier, ColumnIdentifier> entry : this.columnMap.entrySet())
 		{
 			ColumnIdentifier sid = entry.getKey();
 			ColumnIdentifier tid = entry.getValue();
 			if (col > 0)
 			{
-				sql.append("\n       , ");
+				sql.append(", ");
 			}
 			sql.append(sid.getColumnName());
 			cols[col] = tid;
 			col ++;
 		}
-		sql.append(" \nFROM ");
+		
+		sql.append(" FROM ");
 		sql.append(this.sourceTable.getTableExpression(this.sourceConnection));
 
 		if (addWhere != null && addWhere.trim().length() > 0)
 		{
-			if (!addWhere.toUpperCase().startsWith("WHERE"))
+			sql.append(' ');
+			String first = SqlUtil.getSqlVerb(addWhere);
+			if (!first.equals("WHERE"))
 			{
-				sql.append(" \nWHERE ");
-			}
-			else
-			{
-				sql.append("\n ");
+				sql.append(" WHERE ");
 			}
 			sql.append(addWhere);
 		}
@@ -570,7 +599,7 @@ public class DataCopier
 		}
 		catch (SQLException e)
 		{
-			String msg = ResourceMgr.getString("ErrCopyTargetTableNotFound").replaceAll("%table%", this.targetTable.getTableExpression());
+			String msg = ResourceMgr.getFormattedString("ErrCopyTargetTableNotFound", this.targetTable.getTableExpression());
 			this.addMessage(msg);
 			throw e;
 		}
@@ -581,7 +610,6 @@ public class DataCopier
 		QueryCopySource source = new QueryCopySource(this.sourceConnection, sql);
 		this.sourceData = source;
 		this.importer.setProducer(source);
-		LogMgr.logDebug("DataCopier.initImporter()", "Using retrieve statement\n" + sql);
 	}
 	
 	/**
@@ -736,7 +764,7 @@ public class DataCopier
 	{
 		MessageBuffer buf = new MessageBuffer();
 		buf.append(this.messages);
-		buf.append(this.importer.getMessageBuffer());
+		importer.copyMessages(buf);
 		buf.append(this.errors);
 		return buf;
 	}

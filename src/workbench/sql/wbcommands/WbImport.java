@@ -45,6 +45,7 @@ public class WbImport
 	extends SqlCommand
 {
 	public static final String VERB = "WBIMPORT";
+	
 	public static final String ARG_TYPE = "type";
 	public static final String ARG_FILE = "file";
 	public static final String ARG_TARGETTABLE = "table";
@@ -91,6 +92,7 @@ public class WbImport
 		CommonArgs.addCommitAndBatchParams(cmdLine);
 		CommonArgs.addQuoteEscapting(cmdLine);
 		CommonArgs.addConverterOptions(cmdLine, true);
+		CommonArgs.addCheckDepsParameter(cmdLine);
 		
 		cmdLine.addArgument(ARG_TYPE, StringUtil.stringToList("text,xml"));
 		cmdLine.addArgument(ARG_UPDATE_WHERE);
@@ -496,7 +498,11 @@ public class WbImport
 		}
 		
 		RowDataProducer prod = imp.getProducer();
-		if (prod != null) prod.setValueConverter(converter);
+		if (prod != null) 
+		{
+			prod.setValueConverter(converter);
+			prod.setCheckDependencies(cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS));
+		}
 		
 		try
 		{

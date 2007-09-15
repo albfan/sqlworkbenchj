@@ -82,6 +82,7 @@ public class QueryCopySource
 				// to other systems
 				currentRow.read(rs, info);
 				if (!keepRunning) break;
+				
 				try
 				{
 					this.receiver.processRow(currentRow.getData());
@@ -97,6 +98,8 @@ public class QueryCopySource
 			// in order to do a rollback
 			if (this.keepRunning || regularStop) 
 			{
+				// When copying a schema, we should not send an importFinished()
+				// so that the DataImporter reports the table counts correctly
 				this.receiver.importFinished();
 			}
 			else
@@ -115,6 +118,7 @@ public class QueryCopySource
 		if (currentRow == null) return null;
 		return currentRow.toString();
 	}
+	
 	public void stop()
 	{
 		this.regularStop = true;
@@ -135,6 +139,11 @@ public class QueryCopySource
 		
 	}
 
+	public boolean isCancelled()
+	{
+		return !keepRunning && !regularStop;
+	}
+	
 	public MessageBuffer getMessages()
 	{
 		return null;
@@ -145,6 +154,11 @@ public class QueryCopySource
 		this.abortOnError = flag;
 	}
 
+	public void setCheckDependencies(boolean flag)
+	{
+		// not supported
+	}
+	
 	public void setErrorHandler(JobErrorHandler handler)
 	{
 	}

@@ -19,34 +19,33 @@ import java.util.Map;
 import workbench.util.StringUtil;
 
 /**
- *	A node in the dependency tree for a cascading delete script.
- *  Used in {@link workbench.db.DeleteScriptGenerator}
+ * A node in the dependency tree for a table
+ * 
+ * @see workbench.db.TableDependency
+ * @see workbench.db.DeleteScriptGenerator
+ * @see workbench.db.importer.TableDependencySorter
  */
 public class DependencyNode
 {
 	private DependencyNode parentNode;
 	private TableIdentifier table;
-
 	private String updateAction = "";
 	private String deleteAction = "";
+	private String fkName;
 	
-  private String fkName;
-
 	/**
 	 * Maps the columns of the base table to the matching column
 	 * of the parent table
 	 */
 	private HashMap<String, String> columns = new HashMap<String, String>();
-
 	private ArrayList<DependencyNode> childTables = new ArrayList<DependencyNode>();
-	
 
 	public DependencyNode(TableIdentifier aTable)
 	{
 		this.table = aTable.createCopy();
 		this.parentNode = null;
 	}
-	
+
 	public void addColumnDefinition(String aColumn, String aParentColumn)
 	{
 		Object currentParent = this.columns.get(aColumn);
@@ -55,58 +54,76 @@ public class DependencyNode
 			this.columns.put(aColumn, aParentColumn);
 		}
 	}
-	
+
+	/**
+	 * Returns the level of this node in the dependency hierarchy. 
+	 * @return 0 if no parent is available 
+	 *         -1 if this is a self referencing dependency
+	 */
+	public int getLevel()
+	{
+		if (parentNode == null) return 0;
+		if (parentNode == this) return -1;
+		return 1 + parentNode.getLevel();
+	}
+
 	public void setParent(DependencyNode aParent, String aFkName)
 	{
 		this.parentNode = aParent;
 		this.fkName = aFkName;
 	}
-	
-	public String toString() 
-	{ 
+
+	public String toString()
+	{
 		if (this.fkName == null)
 		{
 			return this.table.getTableName();
 		}
 		else
 		{
-			return this.table.getTableName() + " (" + this.fkName + ")"; 
+			return this.table.getTableName() + " (" + this.fkName + ")";
 		}
 	}
-  public String getFkName() 
-	{ 
-		return this.fkName; 
+
+	public void setFkName(String name)
+	{
+		this.fkName = name;
 	}
 	
-	public TableIdentifier getParentTable() 
-	{ 
+	public String getFkName()
+	{
+		return this.fkName;
+	}
+
+	public TableIdentifier getParentTable()
+	{
 		if (parentNode == null) return null;
 		return this.parentNode.getTable();
 	}
-	
+
 	public TableIdentifier getTable()
 	{
 		return this.table;
 	}
-	
+
 	/**
 	 * Returns a Map that maps the columns of the base table to the matching column
 	 * of the related (parent/child) table.
 	 * The keys to the map are columns from this node's table {@link #getTable()}
 	 * The values in this map are columns found in this node's "parent" table
-	 * 
+	 *
 	 * @see #getTable()
 	 * @see #getParentTable()
 	 */
-	public Map<String, String> getColumns() 
-	{ 
+	public Map<String, String> getColumns()
+	{
 		if (this.columns == null)
 		{
 			return Collections.emptyMap();
 		}
 		else
 		{
-			return this.columns; 
+			return this.columns;
 		}
 	}
 
@@ -117,81 +134,85 @@ public class DependencyNode
 	public boolean isDefinitionFor(TableIdentifier tbl, String aFkname)
 	{
 		if (aFkname == null) return false;
-		
-		return (this.table.equals(tbl) && aFkname.equals(this.fkName));
+		return this.table.equals(tbl) && aFkname.equals(this.fkName);
 	}
-	
+
 	public boolean equals(Object other)
 	{
 		if (other == null) return false;
 		if (other instanceof DependencyNode)
 		{
-			DependencyNode node = (DependencyNode)other;
+			DependencyNode node = (DependencyNode) other;
 			return this.isDefinitionFor(node.getTable(), node.getFkName());
 		}
 		return false;
 	}
-	
+
 	public int hashCode()
 	{
 		StringBuilder sb = new StringBuilder(60);
 		sb.append(this.table.getTableExpression() + "-" + this.fkName);
 		return StringUtil.hashCode(sb);
 	}
-	
-	public boolean isInParentTree(DependencyNode aNode)
-	{
-		if (aNode == null) return false;
-		DependencyNode currentParent = this;
-		while (currentParent != null)
-		{
-			if (currentParent.equals(aNode)) return true;
-			currentParent = currentParent.getParent();
-		}
-		return false;
-	}
-	
-	public boolean isRoot() { return this.parentNode == null; }
 
-	public DependencyNode getParent() 
-	{ 
-		return this.parentNode; 
+	public boolean isRoot()
+	{
+		return this.parentNode == null;
 	}
-	
+
+	public DependencyNode getParent()
+	{
+		return this.parentNode;
+	}
+
 	public List<DependencyNode> getChildren()
 	{
 		return this.childTables;
 	}
+
+	/**
+	 * Recursively finds a DependencyNode in the tree of nodes
+	 */
+	public DependencyNode findNode(DependencyNode toFind)
+	{
+		if (toFind == null) return null;
+		if (toFind.equals(this)) return this;
+		for (DependencyNode node : childTables)
+		{
+			if (toFind.equals(node))
+			{
+				return node;
+			}
+			else
+			{
+				DependencyNode n = node.findNode(toFind);
+				if (n != null) return n;
+			}
+		}
+		return null;
+	}
 	
 	public DependencyNode addChild(TableIdentifier table, String aFkname)
 	{
-		int count = this.childTables.size();
-		DependencyNode node = null;
-		for (int i=0; i < count; i++)
+		for (DependencyNode node : childTables)
 		{
-			node = this.getChild(i);
 			if (node.isDefinitionFor(table, aFkname))
 			{
 				return node;
 			}
 		}
-		node = new DependencyNode(table);
+		DependencyNode node = new DependencyNode(table);
 		node.setParent(this, aFkname);
 		this.childTables.add(node);
 		return node;
 	}
-	
-	private DependencyNode getChild(int i)
-	{
-		return this.childTables.get(i);
-	}
-	
+
 	public boolean containsChild(DependencyNode aNode)
 	{
 		if (aNode == null) return false;
 		return this.childTables.contains(aNode);
 	}
-	
+
 	public boolean addChild(DependencyNode aTable)
 	{
 		if (this.containsChild(aTable)) return false;
@@ -199,14 +220,36 @@ public class DependencyNode
 		return true;
 	}
 
-	public String getDeleteAction() { return this.deleteAction; }
+	public String getDeleteAction()
+	{
+		return this.deleteAction;
+	}
+
 	public void setDeleteAction(String anAction)
 	{
 		this.deleteAction = anAction;
 	}
-	public String getUpdateAction() { return this.updateAction; }
+
+	public String getUpdateAction()
+	{
+		return this.updateAction;
+	}
+
 	public void setUpdateAction(String anAction)
 	{
 		this.updateAction = anAction;
+	}
+
+	public void printAll()
+	{
+		int level = getLevel();
+		StringBuilder indent = new StringBuilder(level * 2);
+		for (int i=0; i < level; i++) indent.append("  ");
+		
+		System.out.println(indent + toString());
+		for (DependencyNode node : childTables)
+		{
+			node.printAll();
+		}
 	}
 }

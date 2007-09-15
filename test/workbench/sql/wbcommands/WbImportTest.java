@@ -36,6 +36,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 import workbench.util.ZipOutputFactory;
 
 /**
@@ -2659,6 +2660,94 @@ public class WbImportTest
 		}
 	}
 	
+	public void testDependencyImport()
+	{
+		try
+		{
+			File f1 = new File(basedir, "a_child1_child.txt");
+			File f2 = new File(this.basedir, "child1.txt");
+			File f3 = new File(this.basedir, "zzbase.txt");
+			FileWriter out = new FileWriter(f1);
+			out.write("id\tchild_id\tinfo\n");
+			out.write("1\t1\tinfo_1\n");
+			out.write("2\t2\tinfo_2\n");
+			out.write("3\t3\tinfo_3\n");
+			out.write("4\t4\tinfo_3\n");
+			out.close();
+			
+			out = new FileWriter(f2);
+			out.write("id\tbase_id\tinfo\n");
+			out.write("1\t1\tinfo\n");
+			out.write("2\t2\tinfo\n");
+			out.write("3\t1\tinfo\n");
+			out.write("4\t2\tinfo\n");
+			out.close();
+				
+			out = new FileWriter(f3);
+			out.write("id\tinfo\n");
+			out.write("1\tinfo\n");
+			out.write("2\tinfo\n");
+			out.close();
+			
+			WbFile f = new WbFile(basedir);
+			StatementRunnerResult result = importCmd.execute("wbimport -sourcedir='" + f.getFullPath() + "' -type=text -header=true -checkDependencies=true");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+			Statement stmt = this.connection.createStatement();
+			ResultSet rs = stmt.executeQuery("select count(*) from zzbase");
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Wrong row count for zzbase", 2, count);
+			}
+			else
+			{
+				fail("No rows in zzbase");
+			}
+
+			rs = stmt.executeQuery("select count(*) from child1");
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Wrong row count for child1", 4, count);
+			}
+			else
+			{
+				fail("No rows in zzbase");
+			}
+
+			rs = stmt.executeQuery("select count(*) from a_child1_child");
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Wrong row count for a_child1_child", 4, count);
+			}
+			else
+			{
+				fail("No rows in zzbase");
+			}
+			
+			if (!f1.delete())
+			{
+				fail("Could not delete input file: " + f1.getCanonicalPath());
+			}
+			if (!f2.delete())
+			{
+				fail("Could not delete input file: " + f2.getCanonicalPath());
+			}
+			if (!f3.delete())
+			{
+				fail("Could not delete input file: " + f3.getCanonicalPath());
+			}
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	private WbConnection prepareDatabase()
 		throws SQLException, ClassNotFoundException
 	{
@@ -2673,6 +2762,13 @@ public class WbImportTest
 		stmt.executeUpdate("CREATE TABLE clob_test (nr integer, text_data CLOB)");
 		stmt.executeUpdate("CREATE TABLE bool_int_test (nr integer, int_flag INTEGER)");
 		stmt.executeUpdate("CREATE TABLE bool_test (nr integer, flag BOOLEAN)");
+		
+		stmt.executeUpdate("CREATE TABLE zzbase (id integer primary key, info varchar(50))");
+		stmt.executeUpdate("CREATE TABLE child1 (id integer primary key, base_id integer not null, info varchar(50))");
+		stmt.executeUpdate("CREATE TABLE a_child1_child (id integer primary key, child_id integer not null, info varchar(50))");
+		stmt.executeUpdate("alter table child1 add foreign key (base_id) references zzbase(id)");
+		stmt.executeUpdate("alter table a_child1_child add foreign key (child_id) references child1(id)");
+		
 		wb.commit();
 		stmt.close();
 		

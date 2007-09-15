@@ -123,7 +123,11 @@ public class MessageBuffer
 			CharSequence s = messages.removeFirst();
 			if (s != null) this.length -= s.length();
 		}
-		this.messages.addAll(buff.messages);
+		for (CharSequence s : buff.messages)
+		{
+			this.messages.add(s);
+		}
+		//this.messages.addAll(buff.messages);
 	}
 	
 	public synchronized void append(CharSequence s)

@@ -78,16 +78,14 @@ public class TableDependencyTreeDisplay
     try
     {
 			WbSwingUtilities.showWaitCursor(this);
-      TableDependency dep = new TableDependency();
-      dep.setConnection(this.connection);
-      dep.setTable(aTable);
+      TableDependency dep = new TableDependency(this.connection, aTable);
 			if (exportedKeys)
 			{
-				dep.retrieveReferencingTables();
+				dep.readTreeForParents();
 			}
 			else
 			{
-				dep.retrieveReferencedTables();
+				dep.readTreeForChildren();
 			}
 
       DependencyNode root = dep.getRootNode();

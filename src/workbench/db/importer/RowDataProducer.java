@@ -34,10 +34,13 @@ public interface RowDataProducer
 	boolean hasErrors();
 	boolean hasWarnings();
 	void setValueConverter(ValueConverter converter);
+	void setCheckDependencies(boolean flag);
 	
 	/**
 	 * Return the last "raw" record that was sent to the RowDataReceiver.
 	 * This is used to log invalid records
 	 */
 	String getLastRecord();
+	
+	boolean isCancelled();
 }

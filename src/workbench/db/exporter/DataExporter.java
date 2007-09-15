@@ -809,6 +809,7 @@ public class DataExporter
 				this.progressPanel.setRowInfo(0);
 				this.progressWindow.pack();
 			}
+			
 			if (this.rowMonitor != null && this.currentJob.getTableName() != null)
 			{
 				StringBuilder msg = new StringBuilder(80);

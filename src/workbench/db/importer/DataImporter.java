@@ -148,6 +148,8 @@ public class DataImporter
 
 	private boolean checkRealClobLength = false;
 	private boolean isOracle = false;
+	private boolean multiTable = false;
+	private List<Closeable> batchStreams;
 	
 	public DataImporter()
 	{
@@ -189,6 +191,17 @@ public class DataImporter
 		{
 			this.parser = (ImportFileParser)producer;
 		}
+	}
+	
+	public void beginMultiTable()
+	{
+		this.multiTable = true;
+	}
+	
+	public void endMultiTable()
+	{
+		this.multiTable = false;
+		if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 	}
 	
 	public void setStartRow(long row) 
@@ -1237,6 +1250,15 @@ public class DataImporter
 		if (addBatch)
 		{
 			pstmt.addBatch();
+			if (this.batchStreams == null)
+			{
+				this.batchStreams = streams;
+			}
+			else
+			{
+				this.batchStreams.addAll(streams);
+			}
+			
 			// let's assume the batch statement affects at least one row
 			// if this is not done, the rowcount will never be increased
 			// in batchmode and thus each row will be committed even if 
@@ -1670,36 +1692,48 @@ public class DataImporter
 	{
 		if (!this.useBatch) return;
 
-		if (this.isModeInsert() && this.insertStatement != null)
+		try
 		{
-			int rows[] = this.insertStatement.executeBatch();
-			if (rows != null)
+			if (this.isModeInsert() && this.insertStatement != null)
 			{
-				for (int i=0; i < rows.length; i++)
+				int rows[] = this.insertStatement.executeBatch();
+				if (rows != null)
 				{
-					// Oracle does not seem to report the correct number
-					// so, if we get a SUCCESS_NO_INFO status, we'll simply
-					// assume that one row has been inserted
-					if (rows[i] == Statement.SUCCESS_NO_INFO)	this.insertedRows ++;
-					else if (rows[i] >= 0) this.insertedRows += rows[i];
+					for (int i=0; i < rows.length; i++)
+					{
+						// Oracle does not seem to report the correct number
+						// so, if we get a SUCCESS_NO_INFO status, we'll simply
+						// assume that one row has been inserted
+						if (rows[i] == Statement.SUCCESS_NO_INFO)	this.insertedRows ++;
+						else if (rows[i] >= 0) this.insertedRows += rows[i];
+					}
 				}
+				this.insertStatement.clearBatch();
 			}
-			this.insertStatement.clearBatch();
+			else if (this.isModeUpdate() && this.updateStatement != null)
+			{
+				int rows[] = this.updateStatement.executeBatch();
+				if (rows != null)
+				{
+					for (int i=0; i < rows.length; i++)
+					{
+						if (rows[i] == Statement.SUCCESS_NO_INFO) this.updatedRows ++;
+						else if (rows[i] >= 0) this.updatedRows += rows[i];
+					}
+				}
+				this.updateStatement.clearBatch();
+			}
 		}
-		else if (this.isModeUpdate() && this.updateStatement != null)
+		finally
 		{
-			int rows[] = this.updateStatement.executeBatch();
-			if (rows != null)
+			if (this.batchStreams != null)
 			{
-				for (int i=0; i < rows.length; i++)
-				{
-					if (rows[i] == Statement.SUCCESS_NO_INFO) this.updatedRows ++;
-					else if (rows[i] >= 0) this.updatedRows += rows[i];
-				}
+				FileUtil.closeStreams(batchStreams);
+				batchStreams.clear();
+				batchStreams = null;
 			}
-			this.updateStatement.clearBatch();
 		}
-			
+		
 		if (this.commitBatch && !this.dbConn.getAutoCommit())
 		{
 			this.dbConn.commit();
@@ -1775,9 +1809,15 @@ public class DataImporter
 		return messages.getBuffer();
 	}
 
-	public MessageBuffer getMessageBuffer()
+	public void copyMessages(MessageBuffer target)
 	{
-		return messages;
+		target.append(this.messages);
+		clearMessages();
+	}
+	
+	public void clearMessages()
+	{
+		this.messages.clear();
 	}
 	
 	/**
@@ -1804,8 +1844,12 @@ public class DataImporter
 		finally
 		{
 			this.isRunning = false;
-			if (this.progressMonitor != null) this.progressMonitor.jobFinished();
+			if (!multiTable)
+			{
+				if (this.progressMonitor != null) this.progressMonitor.jobFinished();
+			}
 		}
+		
 		this.hasErrors = this.hasErrors || this.source.hasErrors();
 		this.hasWarnings = this.hasWarnings || this.source.hasWarnings();
 	}

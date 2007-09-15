@@ -324,7 +324,8 @@ public class SearchAndReplace
 		this.lastSearchExpression = anExpression;
 		Matcher m = this.lastSearchPattern.matcher(this.getText());
 
-		if (m.find(this.getCaretPosition()))
+		int startPos = this.isTextSelected() ? this.editor.getSelectionStart() : this.getCaretPosition();
+		if (m.find(startPos))
 		{
 			this.lastSearchPos = m.start();
 			end = m.end();

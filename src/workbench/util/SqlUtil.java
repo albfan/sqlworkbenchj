@@ -206,6 +206,7 @@ public class SqlUtil
 		try
 		{
 			SQLToken t = l.getNextToken(false, false);
+			if (t == null) return "";
 			
 			// The SQLLexer does not recognize @ as a keyword (which is basically
 			// correct, but to support the Oracle style includes we'll treat it
@@ -776,6 +777,7 @@ public class SqlUtil
 	 */
 	public static void closeResult(ResultSet rs)
 	{
+		if (rs == null) return;
 		try { rs.close(); } catch (Throwable th) {}
 	}
 
@@ -785,6 +787,7 @@ public class SqlUtil
 	 */
 	public static void closeStatement(Statement stmt)
 	{
+		if (stmt == null) return;
 		try { stmt.close(); } catch (Throwable th) {}
 	}
 

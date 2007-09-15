@@ -12,7 +12,6 @@
 package workbench.db;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
@@ -30,25 +29,18 @@ public class TableDependency
 	private ArrayList<DependencyNode> leafs;
 	private int currentLevel = 0;
 	private int maxLevel = Integer.MAX_VALUE;
-
-	public TableDependency()
+	private boolean readAborted = false;
+	
+	public TableDependency(WbConnection con, TableIdentifier tbl)
 	{
+		this.connection = con;
+		this.wbMetadata = this.connection.getMetadata();
+		this.theTable = tbl;
 	}
 
 	public void setMaxLevel(int max)
 	{
 		this.maxLevel = max;
-	}
-
-	public void setConnection(WbConnection aConn)
-	{
-		this.connection = aConn;
-		this.wbMetadata = this.connection.getMetadata();
-	}
-
-	public void setTable(TableIdentifier aTable)
-	{
-		this.theTable = aTable;
 	}
 
 	public DependencyNode findLeafNodeForTable(TableIdentifier table)
@@ -62,24 +54,35 @@ public class TableDependency
 		return null;
 	}
 
-	public List<DependencyNode> retrieveReferencingTables()
+	public void readTreeForChildren()
 	{
-		this.readDependencyTree(false);
-		return Collections.unmodifiableList(leafs);
+		readDependencyTree(true);
 	}
-
-	public List<DependencyNode>  retrieveReferencedTables()
+	
+	public void readTreeForParents()
 	{
-		this.readDependencyTree(true);
-		return Collections.unmodifiableList(leafs);
+		readDependencyTree(false);
 	}
-
-	protected void readDependencyTree(boolean exportedKeys)
+	
+	public void readDependencyTree(boolean exportedKeys)
 	{
 		if (this.theTable == null) return;
 		if (this.connection == null) return;
+		this.readAborted = false;
 		this.leafs = new ArrayList<DependencyNode>();
-		this.tableRoot = new DependencyNode(this.theTable);
+		
+		// Make sure we are using the "correct" TableIdentifier
+		// if the TableIdentifier passed in the constructor was 
+		// created "on the commandline" e.g. by using a user-supplied
+		// table name, we might not correctly find or compare all nodes
+		// those identifiers will not have the flag "neverAdjustCase" set
+		TableIdentifier tableToUse = this.theTable;
+		if (!this.theTable.getNeverAdjustCase())
+		{
+			tableToUse = this.wbMetadata.findTable(theTable);
+		}
+		if (tableToUse == null) return;
+		this.tableRoot = new DependencyNode(tableToUse);
 		this.currentLevel = 0;
 		this.readTree(this.tableRoot, exportedKeys);
 	}
@@ -89,18 +92,6 @@ public class TableDependency
 	 */
 	private int readTree(DependencyNode parent, boolean exportedKeys)
 	{
-		/* for debugging !
-		int indent = 0;
-		DependencyNode n = parent.getParent();
-		while (n != null)
-		{
-			indent ++;
-			n = n.getParent();
-		}
-		StringBuilder indentString = new StringBuilder(indent * 2);
-		for (int i=0; i < indent; i++) indentString.append("  ");
-		*/
-
 		try
 		{
 			DataStore ds = null;
@@ -134,25 +125,19 @@ public class TableDependency
 				ds = this.wbMetadata.getImportedKeys(ptbl);
 			}
 
-			DependencyNode child = null;
-			String catalog = null;
-			String schema = null;
-			String table = null;
-			String fkname = null;
-
 			int count = ds.getRowCount();
 
 			for (int i=0; i<count; i++)
 			{
-				catalog = ds.getValueAsString(i, catalogcol);
-				schema = ds.getValueAsString(i, schemacol);
-				table = ds.getValueAsString(i, tablecol);
-        fkname = ds.getValueAsString(i, fknamecol);
+				String catalog = ds.getValueAsString(i, catalogcol);
+				String schema = ds.getValueAsString(i, schemacol);
+				String table = ds.getValueAsString(i, tablecol);
+        String fkname = ds.getValueAsString(i, fknamecol);
 
 				TableIdentifier tbl = new TableIdentifier(catalog, schema, table);
 
 				tbl.setNeverAdjustCase(true);
-				child = parent.addChild(tbl, fkname);
+				DependencyNode child = parent.addChild(tbl, fkname);
 				String tablecolumn = ds.getValueAsString(i, tablecolumncol); // the column in "table" referencing the other table
 				String parentcolumn = ds.getValueAsString(i, parentcolumncol); // the column in the parent table
 
@@ -164,15 +149,28 @@ public class TableDependency
 			}
 
 			this.currentLevel ++;
-
-			List<DependencyNode> children = parent.getChildren();
-			count = children.size();
-			for (int i=0; i < count; i++)
+			if (currentLevel > 10) 
 			{
-				child = children.get(i);
-				if (!child.isInParentTree(parent) && (currentLevel < this.maxLevel))
+				// this is a bit paranoid, as I am testing for cycles before recursing
+				// into the next child. This is a safetey net, just in case the cycle
+				// is not detected. Better display the user incorrect data, than 
+				// ending up in an endless loop.
+				// A circular dependency with more than 10 levels is an ugly design anyway :)
+				LogMgr.logWarning("TableDependency.readDependencyTree()", "Endless reference cycle detected for root=" + this.tableRoot, null);
+				this.readAborted = true;
+				return count;
+			}
+			
+			List<DependencyNode> children = parent.getChildren();
+			for (DependencyNode child : children)
+			{
+				if (!isCycle(child, parent))
 				{
 					this.readTree(child, exportedKeys);
+				}
+				else
+				{
+					child.setFkName(child.getFkName() + " [!]");
 				}
 				this.leafs.add(child);
 			}
@@ -185,6 +183,24 @@ public class TableDependency
     return 0;
 	}
 
+	private boolean isCycle(DependencyNode child, DependencyNode parent)
+	{
+		if (child.equals(parent)) return true;
+		
+		DependencyNode nextParent = parent.getParent();
+		while (nextParent != null)
+		{
+			if (child.equals(nextParent)) return true;		
+			nextParent = nextParent.getParent();
+		}
+		return false;
+	}
+	
+	boolean wasAborted()
+	{
+		return this.readAborted;
+	}
+	
 	public List<DependencyNode> getLeafs()
 	{
 		return this.leafs;

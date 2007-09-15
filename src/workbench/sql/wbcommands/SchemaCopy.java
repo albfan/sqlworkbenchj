@@ -16,6 +16,9 @@ import java.util.List;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
+import workbench.db.importer.RowDataReceiver;
+import workbench.db.importer.TableDependencySorter;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
@@ -36,13 +39,11 @@ public class SchemaCopy
 	private boolean success;
 	private boolean createTable = false;
 	private boolean dropTable = false;
-	private boolean continueOnError = false;
+	private boolean checkDependencies = false;
 
 	private List<TableIdentifier> sourceTables;
-	private int currentTable = 0;
 	private RowActionMonitor rowMonitor;
 	private boolean cancel = false;
-	private boolean deleteTarget = false;
 	private ArgumentParser arguments;
 	private String copyMode;
 	
@@ -54,54 +55,93 @@ public class SchemaCopy
 	public void copyData()
 		throws SQLException, Exception
 	{
-		//this.copier.setTableCount(count);
 		cancel = false;
-		currentTable = 0;
 
-		for (TableIdentifier table : sourceTables)
+		if (this.checkDependencies)
 		{
-			if (this.cancel)
-			{
-				break;
-			}
-
-			currentTable++;
-			copier.reset();
-			copier.setContinueOnError(continueOnError);
-			copier.setDeleteTarget(deleteTarget);
-			copier.setRowActionMonitor(rowMonitor);
-			this.copier.setMode(copyMode);
-			
-			CommonArgs.setProgressInterval(copier, arguments);
-			CommonArgs.setCommitAndBatchParams(copier, arguments);
-		
-			// By creating a new identifier, we are stripping of any schema information
-			// or other source connection specific stuff.
-			TableIdentifier targetTable = new TableIdentifier(table.getTableName());
-			if (!createTable)
-			{
-				// check if the target table exists. DataCopier will throw an exception if 
-				// it doesn't but in SchemaCopy we want to simply ignore non-existing tables
-				boolean exists = this.targetConnection.getMetadata().tableExists(targetTable);
-				if (!exists)
-				{
-					this.messages.append(ResourceMgr.getFormattedString("MsgCopyTableIgnored", targetTable.getTableName()));
-					this.messages.appendNewLine();
-					continue;
-				}
-			}
-			if (messages.getLength() > 0) messages.appendNewLine();
-			this.messages.append(ResourceMgr.getFormattedString("MsgCopyTable", table.getTableName()));
-			this.messages.appendNewLine();
-			
-			copier.copyFromTable(sourceConnection, targetConnection, table, targetTable, null, null, createTable, dropTable);
-			copier.startCopy();
-			this.messages.append(copier.getMessageBuffer());
-			this.messages.appendNewLine();
+			this.sortTables();
 		}
-		this.success = true;
+		
+		int currentTable = 0;
+		int count = sourceTables.size();
+		
+		RowDataReceiver receiver = this.copier.getReceiver();
+		receiver.setTableCount(count);
+		
+		try
+		{
+			copier.beginMultiTableCopy();
+
+			for (TableIdentifier table : sourceTables)
+			{
+				if (this.cancel)
+				{
+					break;
+				}
+
+				currentTable++;
+				copier.reset();
+				receiver.setCurrentTable(currentTable);
+
+				// By creating a new identifier, we are stripping of any schema information
+				// or other source connection specific stuff.
+				TableIdentifier targetTable = new TableIdentifier(table.getTableName());
+				if (!createTable)
+				{
+					// check if the target table exists. DataCopier will throw an exception if 
+					// it doesn't but in SchemaCopy we want to simply ignore non-existing tables
+					boolean exists = this.targetConnection.getMetadata().tableExists(targetTable);
+					if (!exists)
+					{
+						this.messages.append(ResourceMgr.getFormattedString("MsgCopyTableIgnored", targetTable.getTableName()));
+						this.messages.appendNewLine();
+						continue;
+					}
+				}
+				if (messages.getLength() > 0) messages.appendNewLine();
+				this.messages.append(ResourceMgr.getFormattedString("MsgCopyTable", table.getTableName()));
+				this.messages.appendNewLine();
+
+				copier.copyFromTable(sourceConnection, targetConnection, table, targetTable, null, null, createTable, dropTable);
+				copier.startCopy();
+
+				this.messages.append(copier.getMessageBuffer());
+				this.messages.appendNewLine();
+			}
+			this.success = true;
+		}
+		catch (Exception e)
+		{
+			this.success = false;
+			throw e;
+		}
+		finally
+		{
+			copier.endMultiTableCopy();
+		}
 	}
 
+	private void sortTables()
+	{
+		try
+		{
+			if (this.rowMonitor != null)
+			{
+				this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+				this.rowMonitor.setCurrentObject(ResourceMgr.getString("MsgFkDeps"), -1, -1);
+			}
+			TableDependencySorter sorter = new TableDependencySorter(targetConnection);
+			List<TableIdentifier> sorted = sorter.sortForInsert(sourceTables);
+			if (sorted != null)
+			{
+				this.sourceTables = sorted;
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("SchemaCopy.sortTables()", "Error when checking FK dependencies", e);
+		}
+	}
 	
 	public boolean init(WbConnection source, WbConnection target, StatementRunnerResult result, ArgumentParser cmdLine, RowActionMonitor monitor)
 		throws SQLException
@@ -111,8 +151,8 @@ public class SchemaCopy
 		
 		this.arguments = cmdLine;
 		
-		deleteTarget = cmdLine.getBoolean(WbCopy.PARAM_DELETETARGET);
-		continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE);
+		boolean deleteTarget = cmdLine.getBoolean(WbCopy.PARAM_DELETETARGET);
+		boolean continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE);
 		createTable = cmdLine.getBoolean(WbCopy.PARAM_CREATETARGET);
 		dropTable = cmdLine.getBoolean(WbCopy.PARAM_DROPTARGET);
 
@@ -132,6 +172,15 @@ public class SchemaCopy
 				this.copyMode = mode;
 			}
 		}
+
+		checkDependencies = cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS);
+		
+		CommonArgs.setProgressInterval(copier, arguments);
+		CommonArgs.setCommitAndBatchParams(copier, arguments);
+		copier.setContinueOnError(continueOnError);
+		copier.setDeleteTarget(deleteTarget);
+		copier.setRowActionMonitor(rowMonitor);
+		copier.setMode(copyMode);
 
 		return true;
 	}

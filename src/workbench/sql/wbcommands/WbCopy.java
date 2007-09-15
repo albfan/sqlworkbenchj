@@ -65,6 +65,7 @@ public class WbCopy
 		CommonArgs.addContinueParameter(cmdLine);
 		CommonArgs.addProgressParameter(cmdLine);
 		CommonArgs.addCommitAndBatchParams(cmdLine);
+		CommonArgs.addCheckDepsParameter(cmdLine);
 		
 		cmdLine.addArgument(PARAM_SOURCETABLE);
 		cmdLine.addArgument(PARAM_SOURCEQUERY);
@@ -123,7 +124,6 @@ public class WbCopy
 		String sourcetable = cmdLine.getValue(PARAM_SOURCETABLE);
 		String sourcequery = cmdLine.getValue(PARAM_SOURCEQUERY);
 
-		
 		if (sourcetable == null && sourcequery == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrCopyNoSourceSpecified"));

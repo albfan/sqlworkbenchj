@@ -42,6 +42,7 @@ import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
+import workbench.util.WbFile;
 import workbench.util.WbStringTokenizer;
 
 /**
@@ -69,6 +70,7 @@ public class XmlDataFileParser
 	private RowDataReceiver receiver;
 	private boolean ignoreCurrentRow = false;
 	private boolean abortOnError = false;
+	private boolean checkDependencies = false;
 	private boolean[] warningAdded;
 	private JobErrorHandler errorHandler;
 	private boolean verboseFormat = true;
@@ -130,6 +132,11 @@ public class XmlDataFileParser
 	public String getLastRecord()
 	{
 		return null;
+	}
+	
+	public void setCheckDependencies(boolean flag)
+	{
+		this.checkDependencies = flag;
 	}
 	
 	public boolean hasErrors() { return this.hasErrors; }
@@ -525,38 +532,44 @@ public class XmlDataFileParser
 		throws Exception
 	{
 		File dir = new File(this.sourceDirectory);
-		File[] files = dir.listFiles();
-		int count = files.length;
 		boolean verbose = this.verboseFormat;
 		if (this.extensionToUse == null) this.extensionToUse = ".xml";
 		
-		for (int i=0; i < count; i++)
+		FileNameSorter sorter = new FileNameSorter(this.dbConn, dir, extensionToUse);
+		List<WbFile> toProcess = null;
+		if (this.checkDependencies) 
+		{
+			toProcess = sorter.getSortedList();
+		}
+		else
+		{
+			toProcess = sorter.getFiles();
+		}
+		
+		for (WbFile sourceFile : toProcess)
 		{
 			if (!this.keepRunning) break;
-			if (files[i].getName().endsWith(this.extensionToUse))
+			try
 			{
-				try
-				{
-					this.inputFile = files[i];
-					this.reset();
+				this.inputFile = sourceFile;
+				this.reset();
 
-					// readTableDefinition() might reset the verbose 
-					// flag if a new XML structure is used
-					// this ensures, that the flag specified by the 
-					// user will be used for files that do not have the 
-					// flag in the meta-data tag
-					this.verboseFormat = verbose;
-					this.processOneFile();
-				}
-				catch (ParsingInterruptedException e)
-				{
-					// cancel the import
-					break;
-				}
-				catch (Exception e)
-				{
-					if (this.abortOnError) throw e;
-				}
+				// readTableDefinition() might reset the verbose 
+				// flag if a new XML structure is used
+				// this ensures, that the flag specified by the 
+				// user will be used for files that do not have the 
+				// flag in the meta-data tag
+				this.verboseFormat = verbose;
+				this.processOneFile();
+			}
+			catch (ParsingInterruptedException e)
+			{
+				// cancel the import
+				break;
+			}
+			catch (Exception e)
+			{
+				if (this.abortOnError) throw e;
 			}
 		}
 	}
@@ -591,6 +604,11 @@ public class XmlDataFileParser
 	{
 		this.keepRunning = false;
 		this.regularStop = true;
+	}
+	
+	public boolean isCancelled()
+	{
+		return !this.keepRunning && !regularStop;
 	}
 	
 	public void cancel()

@@ -52,10 +52,16 @@ public class CommonArgs
 	public static final String ARG_DECCHAR = "decimal";
 	public static final String ARG_FALSE_LITERALS = "literalsFalse";
 	public static final String ARG_TRUE_LITERALS = "literalsTrue";
+	public static final String ARG_CHECK_FK_DEPS = "checkDependencies";
 	
 	private static List<String> getDelimiterArguments()
 	{
 		return StringUtil.stringToList("'\\t',';',\"','\",'|',<char>");
+	}
+	
+	public static void addCheckDepsParameter(ArgumentParser cmdLine)
+	{
+		cmdLine.addArgument(ARG_CHECK_FK_DEPS, ArgumentType.BoolArgument);
 	}
 	
 	public static void addContinueParameter(ArgumentParser cmdLine)

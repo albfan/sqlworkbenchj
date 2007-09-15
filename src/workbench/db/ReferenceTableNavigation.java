@@ -49,6 +49,19 @@ public class ReferenceTableNavigation
 		readDependencyTree(false);
 	}
 	
+	protected void readDependencyTree(boolean forChildren)
+	{
+		dependencyTree = new TableDependency(this.dbConn, this.baseTable);
+		dependencyTree.setMaxLevel(1);
+		if (forChildren)
+		{
+			dependencyTree.readTreeForChildren();
+		}
+		else
+		{
+			dependencyTree.readTreeForParents();
+		}
+	}
 	public DependencyNode getNodeForTable(TableIdentifier tbl)
 	{
 		if (this.dependencyTree == null) return null;
@@ -69,15 +82,6 @@ public class ReferenceTableNavigation
 	public TableDependency getTree()
 	{
 		return this.dependencyTree;
-	}
-	
-	private void readDependencyTree(boolean forChildren)
-	{
-		dependencyTree = new TableDependency();
-		dependencyTree.setMaxLevel(1);
-		dependencyTree.setConnection(this.dbConn);
-		dependencyTree.setTable(this.baseTable);
-		dependencyTree.readDependencyTree(forChildren);
 	}
 	
 	public String getSelectForChild(TableIdentifier tbl, List<List<ColumnData>> values)

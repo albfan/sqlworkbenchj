@@ -64,6 +64,10 @@ public class OracleMetadata
       {
         this.version = 10;
       }
+      else if (versionInfo.toLowerCase().indexOf("release 11.") > -1)
+      {
+        this.version = 11;
+      }
     }
     catch (Throwable th)
     {
@@ -282,16 +286,7 @@ public class OracleMetadata
       // so in that case we revert back to Oracle's implementation of getColumns()
       if (version > 8 && Settings.getInstance().useOracleCharSemanticsFix() || fixNVARCHAR)
       {
-        if (this.columnStatement != null)
-        {
-          try
-          {
-            this.columnStatement.close();
-          }
-          catch (Throwable th)
-          {
-          }
-        }
+				SqlUtil.closeStatement(columnStatement);
         this.columnStatement = this.connection.getSqlConnection().prepareStatement(sql);
         this.columnStatement.setString(1, schema != null ? schema : "%");
         this.columnStatement.setString(2, table != null ? table : "%");

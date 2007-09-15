@@ -56,8 +56,6 @@ public class DeleteScriptGenerator
 	{
 		this.connection = aConnection;
 		this.meta = this.connection.getMetadata();
-		this.dependency = new TableDependency();
-		this.dependency.setConnection(this.connection);
 		this.formatter = new SqlLiteralFormatter(this.connection);
 	}
 
@@ -76,7 +74,7 @@ public class DeleteScriptGenerator
 		{
 			rootTable.setSchema(this.meta.getCurrentSchema());
 		}
-		this.dependency.setTable(this.rootTable);
+		this.dependency = new TableDependency(this.connection, this.rootTable);
 		this.tableDefinition = this.meta.getTableDefinition(this.rootTable);
 	}
 

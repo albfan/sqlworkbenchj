@@ -36,7 +36,7 @@ public class ExtensionFileFilter
 
 	private static FileFilter wkspFileFilter;
 
-	private List extensions;
+	private List<String> extensions;
 	private String desc;
 	public static final String SQL_EXT = "sql";
 	public static final String TXT_EXT = "txt";
@@ -45,12 +45,20 @@ public class ExtensionFileFilter
 
 	private boolean ignoreCase = true;
 
-	public ExtensionFileFilter(String aDescription, List anExtensionList)
+	public ExtensionFileFilter(String aDescription, String extension, boolean ignore)
+	{
+		this.desc = aDescription;
+		this.extensions = new ArrayList<String>();
+		this.extensions.add(extension);
+		this.ignoreCase = ignore;
+	}
+	
+	public ExtensionFileFilter(String aDescription, List<String> anExtensionList)
 	{
 		this(aDescription, anExtensionList, true);
 	}
 
-	public ExtensionFileFilter(String aDescription, List anExtensionList, boolean ignoreCase)
+	public ExtensionFileFilter(String aDescription, List<String> anExtensionList, boolean ignoreCase)
 	{
 		this.desc = aDescription;
 		this.extensions = anExtensionList;
@@ -59,7 +67,7 @@ public class ExtensionFileFilter
 
 	public String getDefaultExtension()
 	{
-		return (String)this.extensions.get(0);
+		return this.extensions.get(0);
 	}
 
 	public static String getExtension(File f)
@@ -127,7 +135,7 @@ public class ExtensionFileFilter
 	{
 		if (jarFileFilter == null)
 		{
-			ArrayList ext = new ArrayList();
+			ArrayList<String> ext = new ArrayList<String>();
 			ext.add("jar");
 			ext.add("zip");
 			String desc = ResourceMgr.getString("TxtArchivesFilterName");
@@ -140,10 +148,8 @@ public class ExtensionFileFilter
 	{
 		if (sqlFileFilter == null)
 		{
-			ArrayList ext = new ArrayList();
-			ext.add(SQL_EXT);
 			String desc = ResourceMgr.getString("TxtFileFilterSql");
-			sqlFileFilter = new ExtensionFileFilter(desc, ext, true);
+			sqlFileFilter = new ExtensionFileFilter(desc, SQL_EXT, true);
 		}
 		return sqlFileFilter;
 	}
@@ -152,10 +158,8 @@ public class ExtensionFileFilter
 	{
 		if (sqlUpdateFileFilter == null)
 		{
-			ArrayList ext = new ArrayList();
-			ext.add(SQL_EXT);
 			String desc = ResourceMgr.getString("TxtFileFilterSqlUpdate");
-			sqlUpdateFileFilter = new ExtensionFileFilter(desc, ext, true);
+			sqlUpdateFileFilter = new ExtensionFileFilter(desc, SQL_EXT, true);
 		}
 		return sqlUpdateFileFilter;
 	}
@@ -164,10 +168,8 @@ public class ExtensionFileFilter
 	{
 		if (textFileFilter == null)
 		{
-			ArrayList ext = new ArrayList();
-			ext.add(TXT_EXT);
 			String desc = ResourceMgr.getString("TxtFileFilterText");
-			textFileFilter = new ExtensionFileFilter(desc, ext, true);
+			textFileFilter = new ExtensionFileFilter(desc, TXT_EXT, true);
 		}
 		return textFileFilter;
 	}
@@ -176,10 +178,8 @@ public class ExtensionFileFilter
 	{
 		if (xmlFileFilter == null)
 		{
-			ArrayList ext = new ArrayList();
-			ext.add(XML_EXT);
 			String desc = ResourceMgr.getString("TxtFileFilterXml");
-			xmlFileFilter = new ExtensionFileFilter(desc, ext, true);
+			xmlFileFilter = new ExtensionFileFilter(desc, XML_EXT, true);
 		}
 		return xmlFileFilter;
 	}
@@ -188,10 +188,8 @@ public class ExtensionFileFilter
 	{
 		if (wkspFileFilter == null)
 		{
-			ArrayList ext = new ArrayList();
-			ext.add(WORKSPACE_EXT);
 			String desc = ResourceMgr.getString("TxtFileFilterWksp");
-			wkspFileFilter = new ExtensionFileFilter(desc, ext, true);
+			wkspFileFilter = new ExtensionFileFilter(desc, WORKSPACE_EXT, true);
 		}
 		return wkspFileFilter;
 	}
@@ -200,10 +198,8 @@ public class ExtensionFileFilter
 	{
 		if (htmlFileFilter == null)
 		{
-			ArrayList ext = new ArrayList();
-			ext.add("html");
 			String desc = ResourceMgr.getString("TxtFileFilterHtml");
-			htmlFileFilter = new ExtensionFileFilter(desc, ext, true);
+			htmlFileFilter = new ExtensionFileFilter(desc, "html", true);
 		}
 		return htmlFileFilter;
 	}

@@ -1439,6 +1439,33 @@ public class DbMetadata
 		return objectExists(aTable, types);
 	}
 	
+	public TableIdentifier findTable(TableIdentifier tbl)
+	{
+		if (tbl == null) return null;
+		
+		ResultSet rs = null;
+		TableIdentifier result = null;
+		TableIdentifier table = tbl.createCopy();
+		table.adjustCase(dbConnection);
+		try
+		{
+			rs = this.metaData.getTables(table.getRawCatalog(), table.getRawSchema(), table.getRawTableName(), tableTypesTable);
+			if (rs.next())
+			{
+				result = new TableIdentifier(rs.getString(1), rs.getString(2), rs.getString(3));
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DbMetadata.tableExists()", "Error checking table existence", e);
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
+		}
+		return result;
+	}
+	
 	public boolean objectExists(TableIdentifier aTable, String[] types)
 	{
 		if (aTable == null) return false;
@@ -3432,20 +3459,21 @@ public class DbMetadata
 		for (ColumnIdentifier col : columns)
 		{
 			String column = col.getColumnName();
-			String remark = col.getComment();
-			if (column == null || remark == null || remark.trim().length() == 0) continue;
-			try
+			String comment = col.getComment();
+			if (Settings.getInstance().getIncludeEmptyComments() || comment != null && comment.trim().length() > 0)
 			{
-				String commentSql = columnStatement.replaceAll(MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
-				commentSql = StringUtil.replace(commentSql, MetaDataSqlManager.COMMENT_COLUMN_PLACEHOLDER, column);//, comment)comment.replaceAll(MetaDataSqlManager.COMMENT_COLUMN_PLACEHOLDER, column);
-				remark = StringUtil.replace(remark, "'", "''");
-				commentSql = StringUtil.replace(commentSql, MetaDataSqlManager.COMMENT_PLACEHOLDER, remark);
-				result.append(commentSql);
-				result.append("\n");
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("DbMetadata.getTableColumnCommentsSql()", "Error creating comments SQL for remark=" + remark, e);
+				try
+				{
+					String commentSql = columnStatement.replaceAll(MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
+					commentSql = StringUtil.replace(commentSql, MetaDataSqlManager.COMMENT_COLUMN_PLACEHOLDER, column);
+					commentSql = StringUtil.replace(commentSql, MetaDataSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replaceAll("'" ,"''"));
+					result.append(commentSql);
+					result.append("\n");
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("DbMetadata.getTableColumnCommentsSql()", "Error creating comments SQL for remark=" + comment, e);
+				}
 			}
 		}
 		return result;
@@ -3462,10 +3490,10 @@ public class DbMetadata
 
 		String comment = this.getTableComment(table);
 		String result = null;
-		if (comment != null && comment.trim().length() > 0)
+		if (Settings.getInstance().getIncludeEmptyComments() || comment != null && comment.trim().length() > 0)
 		{
 			result = commentStatement.replaceAll(MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
-			result = result.replaceAll(MetaDataSqlManager.COMMENT_PLACEHOLDER, comment);
+			result = result.replaceAll(MetaDataSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replaceAll("'", "''"));
 		}
 		return result;
 	}

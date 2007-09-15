@@ -1,5 +1,3 @@
-package workbench.gui.editor;
-
 /*
  * JEditTextArea.java - jEdit's text component
  * Copyright (C) 1999 Slava Pestov
@@ -8,6 +6,7 @@ package workbench.gui.editor;
  * permitted, in both source and binary form, provided that this notice
  * remains intact in all source distributions of this package.
  */
+package workbench.gui.editor;
 
 import java.awt.AWTEvent;
 import java.awt.Color;
@@ -102,7 +101,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.77 2007-09-02 09:03:57 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.78 2007-09-15 16:23:25 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -464,6 +463,7 @@ public class JEditTextArea
 		this.getInputHandler().removeKeyBinding(key);
 	}
 	
+	@SuppressWarnings("deprecation")
 	public final boolean isManagingFocus()
 	{
 		return true;
