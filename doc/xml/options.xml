@@ -104,77 +104,6 @@
 			</para>
 		</section>
 		
-		<section id="options-date-format">
-			<title>Date, date/time and time formats</title>
-			<para>Define the format for displaying date, date/time (timestamp) and time columns in the result
-				set. For details on the format of this option, please refer to the 
-				documentation of the <ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/text/SimpleDateFormat.html"><literal>SimpleDateFormat</literal></ulink> class.
-				This format is also used when parsing input for date or timestamp fields, so if you 
-				enter a date while <link linkend="edit-data">editing</link> the data, 
-				make sure you enter it the same way as defined with this option.
-			</para>
-			<para>
-				Here is an overview of the letters and their meaning that can be used to format
-				the date and timestamp values. Be aware that case matters! 
-				<informaltable frame="all">
-					<tgroup cols="2" align="left">
-						<colspec colname="c1" colwidth="1cm" />
-						<colspec colname="c2" />				
-						<thead>
-							<row>
-								<entry>Letter</entry>
-								<entry>Description</entry>
-							</row>
-						</thead>
-						<tbody valign="top">
-							<row><entry>G</entry><entry>Era designator (Text, e.g. AD)</entry></row>
-							<row><entry>y</entry><entry>Year (Number)</entry></row>
-							<row><entry>M</entry><entry>Month in year (Number)</entry></row>
-							<row><entry>w</entry><entry>Week in year (Number)</entry></row>
-							<row><entry>W</entry><entry>Week in month (Number)</entry></row>
-							<row><entry>D</entry><entry>Day in year (Number)</entry></row>
-							<row><entry>d</entry><entry>Day in month (Number)</entry></row>
-							<row><entry>F</entry><entry>Day of week in month (Number)</entry></row>
-							<row><entry>E</entry><entry>Day in week (Text)</entry></row>
-							<row><entry>a</entry><entry>AM/PM marker</entry></row>
-							<row><entry>H</entry><entry>Hour in day (0-23)</entry></row>
-							<row><entry>k</entry><entry>Hour in day (1-24)</entry></row>
-							<row><entry>K</entry><entry>Hour in am/pm (0-11)</entry></row>
-							<row><entry>h</entry><entry>Hour in am/pm (1-12)</entry></row>
-							<row><entry>m</entry><entry>Minute in hour</entry></row>
-							<row><entry>s</entry><entry>Second in minute</entry></row>
-							<row><entry>S</entry><entry>Milliseconds</entry></row>
-							<row><entry>z</entry><entry>General time zone (e.g. Pacific Standard Time; PST; GMT-08:00)</entry></row>
-							<row><entry>Z</entry><entry>RFC 822 time zone (e.g. -0800)</entry></row>
-						</tbody>
-					</tgroup>
-				</informaltable>
-        <note><para>
-          A special format <literal>millis</literal> has been added to identify times represented in 
-          milliseconds (since January 1, 1970, 00:00:00 GMT).
-        </para></note>				
-			</para>
-		</section>
-
-		<section id="options-decimal-symbol">
-			<title>Decimal symbol</title>
-			<para>
-				The character which is used as the decimal separator when displaying numbers.
-			</para>
-		</section>
-
-		<section id="options-decimal-digits">
-			<title>Decimal digits</title>
-			<para>Define the maximum number of digits which will be displayed for
-				numeric columns. This only affects the display of the number internally
-				they are still stored as the DBMS returned them. To see the internal
-				value, leave the mouse cursor over the cell. The tooltip which is
-				displayed will contain the number as it was returned by the JDBC driver.
-				When exporting data or copying it to the clipboard, the real value will
-				be used.
-			</para>
-		</section>
-		
 		<section id="options-filed-delimiter">
 			<title>Field delimiter</title>
 			<para>The default delimiter used when exporting data to a text file.
@@ -355,10 +284,14 @@
 		
 		<section id="options-alternate-delimiter" xreflabel="alternate delimiter">
 			<title>Alternate Delimiter</title>
-			<para>When last characters of the text in the editor match the character
-				sequence in this input field, this character sequence is used to delimit
-				individual statements in the editor.
+			<para>
+				This options defines the default alternate delimiter. You can 
+				override this default in the connection profile, to used different
+				delimiters for different DBMS.
+				For details see <link linkend="understand-alternate-delim">Understanding the 
+				alternate delimiter</link>
 			</para>
+			<!--
 			<para>This is needed when creating stored procedures which themselves
 				have a semicolon in the source code. Normally the &wb-productname; would
 				stop parsing the command at the first semicolon and send that command to
@@ -381,7 +314,7 @@
 			and the script executes normally. It is recommended to always turn on the 
 			single line mode for the alternate delimiter.
 			</para>
-			
+			-->
 		</section>
 		
 		<section id="options-history-size">
@@ -414,7 +347,89 @@
 		</section>
 
 	</section>
+	
+	<section id="options-data-display">
+		<title>Options for displaying data</title>
+		
+		<section id="options-date-format">
+			<title>Date, timestamp and time formats</title>
+			<para>Define the format for displaying date, date/time (timestamp) and time columns in the result
+				set. For details on the format of this option, please refer to the 
+				documentation of the <ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/text/SimpleDateFormat.html"><literal>SimpleDateFormat</literal></ulink> class.
+				This format is also used when parsing input for date or timestamp fields, so if you 
+				enter a date while <link linkend="edit-data">editing</link> the data, 
+				make sure you enter it the same way as defined with this option.
+			</para>
+			<para>
+				Here is an overview of the letters and their meaning that can be used to format
+				the date and timestamp values. Be aware that case matters! 
+				<informaltable frame="all">
+					<tgroup cols="2" align="left">
+						<colspec colname="c1" colwidth="1cm" />
+						<colspec colname="c2" />				
+						<thead>
+							<row>
+								<entry>Letter</entry>
+								<entry>Description</entry>
+							</row>
+						</thead>
+						<tbody valign="top">
+							<row><entry>G</entry><entry>Era designator (Text, e.g. AD)</entry></row>
+							<row><entry>y</entry><entry>Year (Number)</entry></row>
+							<row><entry>M</entry><entry>Month in year (Number)</entry></row>
+							<row><entry>w</entry><entry>Week in year (Number)</entry></row>
+							<row><entry>W</entry><entry>Week in month (Number)</entry></row>
+							<row><entry>D</entry><entry>Day in year (Number)</entry></row>
+							<row><entry>d</entry><entry>Day in month (Number)</entry></row>
+							<row><entry>F</entry><entry>Day of week in month (Number)</entry></row>
+							<row><entry>E</entry><entry>Day in week (Text)</entry></row>
+							<row><entry>a</entry><entry>AM/PM marker</entry></row>
+							<row><entry>H</entry><entry>Hour in day (0-23)</entry></row>
+							<row><entry>k</entry><entry>Hour in day (1-24)</entry></row>
+							<row><entry>K</entry><entry>Hour in am/pm (0-11)</entry></row>
+							<row><entry>h</entry><entry>Hour in am/pm (1-12)</entry></row>
+							<row><entry>m</entry><entry>Minute in hour</entry></row>
+							<row><entry>s</entry><entry>Second in minute</entry></row>
+							<row><entry>S</entry><entry>Milliseconds</entry></row>
+							<row><entry>z</entry><entry>General time zone (e.g. Pacific Standard Time; PST; GMT-08:00)</entry></row>
+							<row><entry>Z</entry><entry>RFC 822 time zone (e.g. -0800)</entry></row>
+						</tbody>
+					</tgroup>
+				</informaltable>
+			</para>
+		</section>
 
+		<section id="options-decimal-symbol">
+			<title>Decimal symbol</title>
+			<para>
+				The character which is used as the decimal separator when displaying numbers.
+			</para>
+		</section>
+
+		<section id="options-decimal-digits">
+			<title>Decimal digits</title>
+			<para>Define the maximum number of digits which will be displayed for
+				numeric columns. This only affects the display of the number internally
+				they are still stored as the DBMS returned them. To see the internal
+				value, leave the mouse cursor over the cell. The tooltip which is
+				displayed will contain the number as it was returned by the JDBC driver.
+				When exporting data or copying it to the clipboard, the real value will
+				be used.
+			</para>
+		</section>
+
+		<section id="options-alternating-row-colors">
+			<title>Alternate row colors</title>
+			<para>
+				If this option is selected, the rows in the data table will be displayed
+				with alternating background color. You can choose the alternate color (the 
+				other color is defined by the used <link linkend="options-look-and-feeld">Look &amp; Feel</link>) 
+				with the font chooser next to the checkbox.
+			</para>
+		</section>
+		
+	</section>
+	
 	<section id="options-data-edit">
 		<title>Options for data editing</title>
 		
@@ -467,8 +482,8 @@
 		<section id="options-pkmapping">
 			<title>Default PK Map</title>
 			<para>
-				This property defines a mapping file for primary key columns that 
-				is read whenever the primary keys for the base table of a result
+				This property defines a mapping file for primary key columns. The information 
+				from that file is read whenever the primary keys for a table of 
 				cannot be obtained from the database. For a detailed
 				description on how to define extra primary key columns, please
 				refer to the <link linkend="command-define-pk"><literal>WbDefinePk</literal></link> command.

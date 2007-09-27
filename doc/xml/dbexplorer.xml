@@ -97,7 +97,7 @@
 		</simplesect>
 
 		<simplesect>
-			<title>Create empty INSERT</title>
+			<title id="dbexplorer-create-insert">Create empty INSERT</title>
         
 			<blockquote>
 				<para>This creates an empty <literal>INSERT</literal> statement for the 
@@ -108,7 +108,7 @@
 		</simplesect>
 
 		<simplesect>
-			<title>Create default SELECT</title>
+			<title id="dbexplorer-create-select">Create default SELECT</title>
         
 			<blockquote>
 				<para>This creates a <literal>SELECT</literal> for the 
@@ -120,7 +120,7 @@
 		</simplesect>
 
 		<simplesect>
-			<title>Create DDL Script</title>
+			<title id="dbexplorer-create-ddl">Create DDL Script</title>
 
 			<blockquote>
 				<para>With this command a script for multiple objects can be created. Select
@@ -169,15 +169,22 @@
 		</simplesect>
 
 		<simplesect>
-			<title>Delete data</title>
+			<title id="dbexplorer-delete-data">Delete data</title>
 
 			<blockquote>
-				<para>Deletes all rows from the selected table(s) by sending an
+				<para>
+					Deletes all rows from the selected table(s) by executing a
 					<literal>DELETE FROM table_name;</literal> to the server for each
 					selected table. If the DBMS supports <literal>TRUNCATE</literal>
 					then this can be done with <literal>TRUNCATE</literal> as well. Using
 					<literal>TRUNCATE</literal> is usually faster as no transation
 					state is maintained.
+				</para>
+				<para>
+					The list of tables is sorted according to the sort order
+					in the table list. If the tables have foreign key constraints, 
+					you can re-order them to be processed in the correct order by 
+					clicking on the <guibutton>Check foreign keys</guibutton> button.
 				</para>
 			</blockquote>
 		</simplesect>
@@ -188,14 +195,15 @@
 		<title>Table details</title>
 
 		<para>When a table is selected, the right part of the window will
-			display it&apos;s column definition, the SQL statement to create the
+			display its column definition, the SQL statement to create the
 			table, any index defined on that table (only if the JDBC driver
 			returns that information), other tables that are referenced by the
 			currently selected table, any table that references the currently
 			selected table and any trigger that is defined on that table.
 		</para>
 
-		<para>The column list will also display any comments defined for the column
+		<para>
+			The column list will also display any comments defined for the column
 			(if the JDBC driver returns the information).
 			Oracle's JDBC driver does not return those comments by default. To enable the
 			display of column comments (remarks) you have to supply an <link linkend="profile-extended-properties">extended property</link>

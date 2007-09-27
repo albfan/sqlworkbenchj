@@ -1,5 +1,5 @@
 <section id="command-copy">
-	<title>Copy one database to another - WbCopy</title>
+	<title>Copy one table to another - WbCopy</title>
 
 <para>
 	The <literal>WbCopy</literal> is essentially the command line version of the
@@ -173,7 +173,7 @@
 	</section>
 
 	<section id="wbcopy-single-table">
-		<title>Copying data from a single table.</title>
+		<title>Copying data from one or more tables</title>
 		<informaltable frame="all">
 			<tgroup cols="2"  align="left">
 				<colspec colname="c1" colwidth="4cm" />
@@ -187,16 +187,43 @@
 				<tbody valign="top">
 					<row>
 						<entry>-sourceTable</entry>
-						<entry>The name of the table to be copied.</entry>
+						<entry>
+							The name of the table(s) to be copied. You can either specifiy a 
+							list of tables: <literal>-sourceTable=table1,table2</literal>. Or select
+							the tables using a wildcard: <literal>-sourceTable=*</literal> will copy
+							all tables accessible to the user. If more than one table is specified 
+							using this parameter, the <literal>-targetTable</literal> parameter is 
+							ignored. 
+						</entry>
 					</row>
+					
+					<row>
+						<entry>-checkDependencies</entry>
+						<entry>
+							<para>
+								When copying more than one file into tables with foreign key constraints, 
+								this switch can be used to import the files in the correct order (child tables first). 
+								When <literal>-checkDependencies=true</literal> is passed, &wb-productname; will 
+								check the foreign key dependencies for the tables specified with <literal>-sourceTable</literal>
+							</para>
+						</entry>
+					</row>
+					
 					<row>
 						<entry>-sourceWhere</entry>
-						<entry>A <literal>WHERE</literal> condition that is applied to the source table.</entry>
+						<entry>
+							A <literal>WHERE</literal> condition that is applied to the source table.
+						</entry>
 					</row>
+					
 					<row>
 						<entry>-targetTable</entry>
-						<entry>The name of the table into which the data should be written.</entry>
+						<entry>
+							The name of the table into which the data should be written. 
+							This parameter is ignored if more than one table is copied.
+						</entry>
 					</row>
+					
 					<row>
 						<entry>-createTarget</entry>
 						<entry>If this parameter is set to <literal>true</literal> the target table
@@ -204,13 +231,16 @@
 						Valid values are <literal>true</literal> or <literal>false</literal>.
 						</entry>
 					</row>
+					
 					<row>
 						<entry>-dropTarget</entry>
-						<entry>If this parameter is set to <literal>true</literal> the target table
-						will be dropped before it is create. This parameter is ignored if <literal>-createtarget=true</literal>
-						is specified.
+						<entry>
+							If this parameter is set to <literal>true</literal> the target table
+							will be dropped before it is create. This parameter is ignored if 
+							<literal>-createtarget=true</literal>	is specified.
 						</entry>
 					</row>
+					
 					<row>
 						<entry>-columns</entry>
 						<entry>
@@ -235,6 +265,7 @@
 							<literal>firstname</literal> from the source table to a column named <literal>surname</literal>
 							in the target table, and so on.
 							</para>
+							<para>This parameter is ignored if more than one table is copied.</para>
 						</entry>
 					</row>
 				</tbody>

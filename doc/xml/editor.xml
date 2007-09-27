@@ -282,16 +282,15 @@ WHERE p.person_id = a.person_id;</programlisting>
 					information about the available parameters.
 				</para>
 			</note>
-			<para>The following
-				drivers have been tested succesfully with this feature:
+			<para>The following drivers have been found to support (at least partially) this feature:
 				<simplelist>
 					<member><ulink url="http://www.postgresql.org">PostgreSQL</ulink>, driver version 8.1-build 405</member>
-					<member><ulink url="http://www.h2database.com">H2 Database Engine</ulink>, Version 1.0</member>
+					<!-- <member><ulink url="http://www.h2database.com">H2 Database Engine</ulink>, Version 1.0</member> -->
 					<member><ulink url="http://db.apache.org/derby/">Apache Derby</ulink>, Version 10.2</member>
 					<member><ulink url="http://www.firebirdsql.org/">Firebird SQL</ulink>, Jaybird 2.0 driver</member>
 					<member><ulink url="http://hsqldb.sourceforge.net">HSQLDB</ulink>, version 1.8.0</member>
-					<member><ulink url="http://jtds.sourceforge.net">jTDS driver for MS SQL Server</ulink>, driver version 1.2</member>
-					<member><ulink url="http://www.mysql.com">MySQL</ulink>, driver version 5.0.13</member>
+					<!-- <member><ulink url="http://jtds.sourceforge.net">jTDS driver for MS SQL Server</ulink>, driver version 1.2</member> -->
+					<!-- <member><ulink url="http://www.mysql.com">MySQL</ulink>, driver version 5.0.13</member> -->
 				</simplelist>
 			</para>
 			<para>

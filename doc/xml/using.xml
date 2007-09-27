@@ -200,109 +200,115 @@ COMMIT;</programlisting>
 				<link linkend="options">system preferences</link>.
 			</para>
 		</section>
+		
+	</section>
 
-		<section id="understand-alternate-delim">
-			<title>Understanding the alternate delimiter</title>
+	<section id="understand-alternate-delim">
+		<title>Using the alternate delimiter to execute DDL statements</title>
 
-			<para>
-				&wb-productname; will send every statement to the backend DBMS, so
-				executing DDL statements (<literal>CREATE TABLE</literal>, ...) is not a problem.
-			</para>
+		<para>
+			&wb-productname; will send the contents of the editor unaltered to the DBMS, so
+			executing DDL statements (<literal>CREATE TABLE</literal>, ...) is possible.
+		</para>
 
-			<para>
-				However when executing statements such as <literal>CREATE PROCEDURE</literal> which
-				in turn contain valid SQL statement, delimited with a ; the &wb-productname;
-				will send everything up to the first semicolon to the
-				backend. In case of a <literal>CREATE PROCEDURE</literal> statement this will obviously
-				result in an error as the statement is not complete.
-			</para>
+		<para>
+			However when executing statements such as <literal>CREATE PROCEDURE</literal> which
+			in turn contain valid SQL statement, delimited with a ; the &wb-productname;
+			will send everything up to the first semicolon to the
+			backend. In case of a <literal>CREATE PROCEDURE</literal> statement this will obviously
+			result in an error as the statement is not complete.
+		</para>
 
-			<para>
-				This is an example of a <literal>CREATE PROCEDURE</literal> which will
-				<emphasis role="bold">not</emphasis> work due to the embedded semicolon in
-				the procedure source itself.
-			</para>
-			<programlisting>CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
+		<para>
+			This is an example of a <literal>CREATE PROCEDURE</literal> which will
+			<emphasis role="bold">not</emphasis> work due to the embedded semicolon in
+			the procedure source itself.
+		</para>
+		<programlisting>CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
 IS
-  result INTEGER;
+result INTEGER;
 BEGIN
-  SELECT max(col1) INTO result FROM sometable;
-  RETURN result;
+SELECT max(col1) INTO result FROM sometable;
+RETURN result;
 END;</programlisting>
 
-			<para>
-				When executing this script, Oracle would return an error because &wb-productname; will
-				send everything up to the keyword <literal>INTEGER</literal> to the database. Obviously this
-				fragment is not correct.
-			</para>
+		<para>
+			When executing this script, Oracle would return an error because &wb-productname; will
+			send everything up to the keyword <literal>INTEGER</literal> to the database. Obviously this
+			fragment is not correct.
+		</para>
 
-			<para>
-				The solution is to terminate the script with a character
-				sequence called the "<link linkend="options-alternate-delimiter">alternate delimiter</link>".
-				The value of this sequence can be configured in the <link linkend="options">options dialog</link>
-				as a global default, or per <link linkend="profile-alternate-delimiter">connection profile</link> 
-				(so you can use different alternate delimiters for different database systems).
-				The default is the forward slash <emphasis role="bold">/</emphasis> defined as a single
-				line delimiter.
-			</para>
+		<para>
+			The solution is to terminate the script with a character
+			sequence called the "<link linkend="options-alternate-delimiter">alternate delimiter</link>".
+			The value of this sequence can be configured in the <link linkend="options">options dialog</link>
+			as a global default, or per <link linkend="profile-alternate-delimiter">connection profile</link> 
+			(so you can use different alternate delimiters for different database systems).
+			The default is the forward slash <emphasis role="bold">/</emphasis> defined as a single
+			line delimiter.
+		</para>
 
-			<para>
-				If a SQL statement is terminated with the alternate delimiter,
-				that delimiter is used instead of a semicolon. This way the semicolons embedded in
-				<literal>CREATE PROCEDURE</literal> statements will be sent correctly to the backend
-				DBMS.
-			</para>
+		<para>
+			If a SQL statement is terminated with the alternate delimiter,
+			that delimiter is used instead of a semicolon. This way the semicolons embedded in
+			<literal>CREATE PROCEDURE</literal> statements will be sent correctly to the backend
+			DBMS.
+		</para>
 
-			<para>So the solution to the above problem is the following script:</para>
-			<programlisting>CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
+		<para>So the solution to the above problem is the following script:</para>
+		<programlisting>CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
 IS
-  result INTEGER;
+result INTEGER;
 BEGIN
-  SELECT max(col1) INTO result FROM sometable;
-  RETURN result;
+SELECT max(col1) INTO result FROM sometable;
+RETURN result;
 END;
 /</programlisting>
 
-			<para>
-				Note the trailing forward slash (<literal>/</literal>) at the end in order to "turn on" the
-				use of the alternate delimiter. If you run scripts with embedded semicolons and you get
-				an error, please verify the setting for your alternate delimiter.
-			</para>
+		<para>
+			Note the trailing forward slash (<literal>/</literal>) at the end in order to "turn on" the
+			use of the alternate delimiter. If you run scripts with embedded semicolons and you get
+			an error, please verify the setting for your alternate delimiter.
+		</para>
 
-			<para id="alternate-delimiter-usage"><emphasis role="bold">When is the alternate delimiter used?</emphasis></para>
-			<para>
-				As soon as the statement (or script) that you execute is terminated with the
-				alternate delimiter, the alternate delimiter is used to separate the individual
-				SQL statements. When you execute selected text from the editor, be sure to
-				select the alternate delimiter as well, otherwise it will not be
-				recognized (if the alternate delimiter is not selected, the statement to be executed
-				does not end with the alternate delimiter).
-			</para>
-			<para>
-				If you use the alternate delimiter (by terminating the whole script with it), then
-				<emphasis role="bold">all</emphasis> statements have to be delimited with it. You cannot mix the use
-				of the normal semicolon and the alternate delimiter for one execution. The following statement (when executed
-				as a whole) would produce an error message:
-			</para>
-			<programlisting>SELECT sysdate FROM DUAL;
+		<para id="alternate-delimiter-usage"><emphasis role="bold">When is the alternate delimiter used?</emphasis></para>
+		<para>
+			As soon as the statement (or script) that you execute is terminated with the
+			alternate delimiter, the alternate delimiter is used to separate the individual
+			SQL statements. When you execute selected text from the editor, be sure to
+			select the alternate delimiter as well, otherwise it will not be
+			recognized (if the alternate delimiter is not selected, the statement to be executed
+			does not end with the alternate delimiter).
+		</para>
+		<para><note>
+			This means that you cannot mix the standard semicolon and the alternate delimiter inside
+			one script.
+		</note></para>
+		
+		<para>
+			If you use the alternate delimiter (by terminating the whole script with it), then
+			<emphasis role="bold">all</emphasis> statements have to be delimited with it. 
+			You cannot mix the use	of the normal semicolon and the alternate delimiter for one execution. 
+			The following statement (when executed completely) would produce an error message:
+		</para>
+		<programlisting>SELECT sysdate FROM DUAL;
 
 CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
 IS
-  result INTEGER;
+result INTEGER;
 BEGIN
-  SELECT max(col1) INTO result FROM sometable;
-  RETURN result;
+SELECT max(col1) INTO result FROM sometable;
+RETURN result;
 END;
-./</programlisting>
+/</programlisting>
 
-			<para>
-				&wb-productname; will use the alternate delimiter because the whole script is terminated
-				with it. But as there is a semicolon between the <literal>SELECT</literal> and the <literal>CREATE</literal>
-				statement, the whole script will be seen as one statement and it will be sent to the database
-				as one statement (which of course will lead to an error).
-			</para>
-			
-		</section>
+		<para>
+			&wb-productname; will use the alternate delimiter present, the <literal>SELECT</literal> statement
+			at the beginning will also be sent to the database together with the <literal>CREATE</literal>
+			statement. This of course is an invalid statement. You will need to either select and run each statement
+			individually or change the delimiter after the <literal>SELECT</literal> to the alternate delimiter.
+		</para>
+		
 	</section>
     
 	<section id="blob-support" xreflabel="BLOB support">

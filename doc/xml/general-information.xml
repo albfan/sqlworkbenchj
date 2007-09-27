@@ -44,12 +44,16 @@
   </section>
   
   <section id="general-contact">
-    <title>Feedback</title>
+    <title>Feedback and support</title>
     <para>Feedback regarding this program is more then welcome. Please report
     any problems you find, or send your ideas to improve the usability to: <email>support@sql-workbench.net</email>
     </para>
     <para>&wb-productname; can be downloaded from <ulink url="http://www.sql-workbench.net">http://www.sql-workbench.net</ulink>
     </para>
+		<para>
+			If you want to contact other users of &wb-productname; you can do this using an online forum at Google Groups:
+			<ulink url="http://groups.google.com/group/sql-workbench">http://groups.google.com/group/sql-workbench</ulink>
+		</para>
   </section>
 	
 	<section id="credits">

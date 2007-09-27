@@ -18,7 +18,7 @@
     <title>Database Identifier</title>
 		
 		<para>
-			Some parameters define a list of "Database Identifiers".
+			Some parameters are used such that a list of "Database Identifiers" is expected. 
 			The identifier that needs to be put there can be obtained by hovering the mouse over the connection
 			URL information in the main window, or from the log file.
 			After a successful connect to a database, there will be an entry in the log file similar to this:
@@ -451,7 +451,7 @@
 		</section>
 
 		<section id="db-oracle-char-semantics-fix">
-		  <title>Fix type display for varchar columns in Oracle</title>
+		  <title>Fix type display for VARCHAR columns in Oracle</title>
 		  <para>Property: <literal>workbench.db.oracle.fixcharsemantics</literal></para>
 		  <para>
 			  The Oracle driver does not report the size of VARCHAR2 columns correctly
@@ -470,6 +470,17 @@
 		  <para>Default value: <literal>true</literal></para>
 		</section>
 
+		<section id="db-oracle-nvarchar-fix">
+		  <title>Fix type display for NVARCHAR2 columns in Oracle</title>
+		  <para>Property: <literal>workbench.db.oracle.fixnvarchartype</literal></para>
+		  <para>
+			  The Oracle driver does not report the type of NVARCHAR2 columns correctly. They
+				are returned as Types.OTHER. If this property is enabled, than &wb-productname; 
+				is also using it's own SELECT statement to retrieve the table definition.
+		  </para>
+		  <para>Default value: <literal>true</literal></para>
+		</section>
+		
 		<section id="settings-libdir">
 		  <title>Defining a base directory for JDBC libraries</title>
 		  <para>Property: <literal>workbench.libdir</literal></para>
@@ -501,9 +512,38 @@
 				The "literals" that are accepted for TIME columns to identify 
 				the current time. Default values are <literal>current_time, now</literal>
 			</para>
-			
 		</section>
           
+		<section id="db-ddl-savepoint">
+			<title>Use Savepoints to guard DDL statement execution</title>
+			<para>Property: <literal>workbench.db.[dbid].ddl.usesavepoint</literal></para>
+			<para>
+				Some DBMS (such as PostgreSQL) cannot continue inside a transaction
+				when an error occurs. A script with multiple DDL statements can therefor
+				not run completely if one statement fails, even if you choose to ignore
+				the error.
+				If this property is set to true, &wb-productname; will set a savepoint 
+				before executing a DDL statement. In case of an error the savepoint
+				will be rolledback and the transaction can continue.
+			</para>
+			<para>Default value: <literal>true</literal> for PostgreSQL, <literal>false</literal> for others</para>
+		</section>
+
+		<section id="db-import-savepoint">
+			<title>Use Savepoints to update/insert mode for WbImport</title>
+			<para>Property: <literal>workbench.db.[dbid].import.usesavepoint</literal></para>
+			<para>
+				Some DBMS (such as PostgreSQL) cannot continue inside a transaction
+				when an error occurs. When running WbImport in <literal>update,insert</literal>
+				or <literal>insert,update</literal> mode, the first of the two statements
+				needs to be rolled back in order to be able to continue the import. 
+				If this property is set to true, &wb-productname; will set a savepoint 
+				before executing the first (insert or update) statement. In case of an error the savepoint
+				will be rolledback and WbImport will try to execute the second statement.
+			</para>
+			<para>Default value: <literal>true</literal> for PostgreSQL, <literal>false</literal> for others</para>
+		</section>
+		
   </section>
 			
 			
@@ -577,7 +617,7 @@
 
 		<para>
 			For some switches of the WbExport and WbImport command, you can override
-			the default values used by &wb-productname; if the parameter is not supplied.
+			the default values used by &wb-productname; in case you do not provide  the parameter.
 			The default values mentioned in this chapter apply, if no property is defined
 			in the <literal>workbench.settings</literal> file. The current default for
 			these properties is displayed in the help message when you run the 
@@ -613,6 +653,16 @@
 				of the <link linkend="command-import">WbImport</link> command. 
 			</para>
 		</section>
+
+		<section id="import-header-default">
+			<title>Setting default for WbImport's -header parameter</title>
+			<para>Property: <literal>workbench.import.default.header</literal></para>
+			<para>
+				This property controls the default value for the parameter <literal>-header</literal>
+				of the <link linkend="command-import">WbImport</link> command. 
+			</para>
+			<para>Default: <literal>true</literal></para>
+		</section>
 		
 		<section id="import-text-multiline">
 			<title>Setting default for WbImport's -multiLine parameter</title>
@@ -621,6 +671,17 @@
 				This property controls the default value for the parameter <literal>-multiLine</literal>
 				of the <link linkend="command-import">WbImport</link> command. 
 			</para>
+			<para>Default: <literal>false</literal></para>
+		</section>
+
+		<section id="import-text-trimvalues">
+			<title>Setting default for WbImport's -trimValues parameter</title>
+			<para>Property: <literal>workbench.import.default.trimvalues</literal></para>
+			<para>
+				This property controls the default value for the parameter <literal>-trimValues</literal>
+				of the <link linkend="command-import">WbImport</link> command. 
+			</para>
+			<para>Default: <literal>false</literal></para>
 		</section>
 		
 	</section>

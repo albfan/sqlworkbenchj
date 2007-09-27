@@ -121,6 +121,12 @@ WHERE id=42;</programlisting>
                 </entry>
             </row>
             <row>
+                <entry>-includeSequences</entry>
+                <entry>Control the output of sequence information for the report. The default is
+                <literal>false</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
+                </entry>
+            </row>
+            <row>
                 <entry>-format</entry>
                 <entry>
 									The format of the outputfile. The default is the &wb-productname;
@@ -339,6 +345,14 @@ WHERE id=42;</programlisting>
 								Select whether indexes should be compared as well.  The default
 								is to not compare index definitions.
 								Valid values are <literal>true</literal> or <literal>false</literal>.
+							</entry>
+						</row>
+						
+						<row>
+							<entry>-includeSequences</entry>
+							<entry>
+								Select whether sequences should be compared as well. The default is 
+								to not compare sequences. Valid values are <literal>true</literal>, <literal>false</literal>.
 							</entry>
 						</row>
 						

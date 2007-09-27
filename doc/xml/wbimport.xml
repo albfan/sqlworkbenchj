@@ -74,6 +74,20 @@
 							</para>
 						</entry>
 					</row>
+					
+					<row>
+						<entry>-checkDependencies</entry>
+						<entry>
+							<para>
+								When importing more than one file (using the <literal>-sourcedir</literal> switch), 
+								into tables with foreign key constraints, this switch can be used to 
+								import the files in the correct order (child tables first). When 
+								<literal>-checkDependencies=true</literal> is passed, &wb-productname; will 
+								check the foreign key dependencies for all tables.
+							</para>
+						</entry>
+					</row>
+					
 					<row>
 						<entry>-extension</entry>
 						<entry>
@@ -86,6 +100,7 @@
 							</para>
 						</entry>
 					</row>
+					
 					<row>
 						<entry>-commitEvery</entry>
 						<entry>
@@ -359,21 +374,27 @@
 						<entry>
 							<para>
 								With this parameter you can supply constant values for one or more columns
-								that will be used when inserting new rows into the database. The parameter
-								has no effect when running WbImport in update mode. 
+								that will be used when inserting new rows into the database.
+							</para>
+							<para>
+								The constant values will not be used when updating columns!
 							</para>
 							<para>
 								The format of the values is <literal>-constantValues="column1=value1,column2=value2"</literal>.
-								The values will be converted by the same rules as the input values from the input	file. Note 
-								that you do not need to put literals in single quotes as the datatypes will be handled automatically.
-								If you do include single quotes in a column value, those quotes will be stored in the database!
+								The values will be converted by the same rules as the input values from the input	file. If 
+								the value for a character column is enclosed in single quotes, these will be removed from the 
+								value before sending it to the database. To include single quotes at the start or end of
+								the input value you need to use two single quotes, e.g.<literal>-constantValues="name=''Quoted'',title='with space'"</literal>
+								For the field <literal>name</literal> the value <literal>'Quoted'</literal> will be sent to the database.
+								for the field <literal>title</literal> the value <literal>with space</literal> will be sent to the database.
 							</para>
 							<para>
 								To specify a function call to be executed, enclose the function call in <literal>${...}</literal>, 
 								e.g. <literal>${mysequence.nextval}</literal> or <literal>${myfunc()}</literal>. The supplied
 								function will be put into the <literal>VALUES</literal> part of the INSERT statement without
 								further checking (after removing the ${ and } characters, of course). So make sure that the 
-								syntax is valid for your DBMS.
+								syntax is valid for your DBMS. If you do need to store a literal like <literal>${some.value}</literal>
+								into the database, you need to quote it: <literal>-constantValues="varname='${some.value}'"</literal>.
 							</para>
 						</entry>
 					</row>
@@ -454,6 +475,31 @@
 									single a LF character) unless <literal>-multiLine=true</literal> is specified
 								</para>
 								<para>Default value: \t (a tab character)</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-columnWidths</entry>
+							<entry>
+								<para>
+									To import files that do not have a delimiter but a fixed 
+									width for each column, this parameters defines the width of each
+									column in the input file. The value for this parameter is a 
+									comma separated list, where each element defines the width for 
+									a single column. If this parameter is given, the <literal>-delimiter</literal>
+									parameter is ignored.
+								</para>
+								<para>e.g.: -columnWidths='name=10,lastname=20,street=50,flag=1'</para>
+								<para>
+									Note that the whole list must be enclosed in quotes as the parameter
+									value contains the equal sign. 
+								</para>
+								<para>
+									If you want to import only certain columns you have to use 
+									<literal>-fileColumns</literal> and <literal>-importColumns</literal> 
+									to select the columns to import. You cannot use <literal>$wb_skip$</literal> 
+									in the -fileColumns parameter with a fixed column width import.
+								</para>
 							</entry>
 						</row>
 						
@@ -586,11 +632,9 @@
 								<para>
 									This defines a filter on column level that selects only certain rows
 									from the input file to be sent to the database. The filter has to be
-									define <literal>as column1="regex",column2="regex"</literal>
-								</para>
-								<para>If more then one column is listed, then all expressions must match
-									in order for the input row to be processed. The expressions to be applied to
-									the input value are regular expressions.
+									defined as <literal>column1="regex",column2="regex"</literal>. 
+                  Only Rows matching all of the supplied regular expressions will 
+                  be included by the import.
 								</para>
 								<para>
 									This parameter is ignored when the <literal>-sourcedir</literal>
@@ -603,12 +647,15 @@
 							<entry>-lineFilter</entry>
 							<entry>
 								<para>
-									To define a filter on the level of the input row (rather than
-									for each column individually) you can define a regular expression
-									that is applied to the whole input row. As the regular expressioin
-									will be applied to the row as it is retrieved from the input file, 
-									the column delimiter(s) have to be taken into account when defining 
-									the regular expression.
+									This defines a filter on the level of the whole input row (rather than
+									for each column individually). Only rows matching this regular expression will 
+                  be included in the import. 
+                </para>
+                <para>
+                  The complete content of the row from 
+                  the input file will be used to check the regular expression. 
+                  When defining the expression, remember that the (column) delimiter 
+                  will be part of the input string of the expression.
 								</para>
 							</entry>
 						</row>
@@ -628,6 +675,28 @@
 								<para>
 									Note that, input values for non character columns (such as numbers or date columns) that are 
 									empty or consist only of whitespace will always be treated as <literal>NULL</literal>.
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-trimValues</entry>
+							<entry>
+								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+									Controls whether leading and trailing whitespace are removed from the input values 
+									before they are stored in the database. When used in combination with 
+									<literal>-emptyStringIsNull=true</literal> this means that a column value that contains
+									only whitespace will be stored as <literal>NULL</literal> in the database.
+								</para>
+								<para>
+									The default value for this parameter can be controlled
+									in the <link linkend="import-text-trimvalues">settings file</link> 
+									and it will be displayed if you run <literal>WbImport</literal> without any parameters.
+								</para>								
+								<para>
+									Note that, input values for non character columns (such as numbers or date columns) are 
+									always trimmed before converting them to their target datatype.
 								</para>
 							</entry>
 						</row>
@@ -682,6 +751,12 @@
 			 is <literal>firstname</literal> and the third column is <literal>birhtday</literal>.
 			 Values in date columns are formated as yyyy-MM-dd
 		 </para>
+		 
+		<note><para>
+			A special timestamp format <literal>millis</literal> is availalbe to identify times represented in 
+			milliseconds (since January 1, 1970, 00:00:00 GMT).
+		</para></note>				
+		 
 
       <programlisting>WbImport -file=c:/temp/contacts.txt
          -table=person
@@ -754,12 +829,6 @@
 				be extended to <literal>WHERE id=? AND (source &lt;&gt; 'manual')</literal>. Thus skipping
 				records that are flagged as manual even if they are contained in the input file.
 			</para>
-			<note><para>
-				When importing data into integer columns, the values '<literal>false</literal>' and '<literal>true</literal>'
-				will silently be converted to 0 (numeric zero) and 1 (one) during an import. This is necessary
-				when importing files created from a database system that supports the boolean datatype (e.g. PostgreSQL) 
-				into a database system where you have to use a numeric datatype for these columns (e.g. Oracle).
-			</para></note>
 		</section>
 
 		<section id="import-xml-parameters">

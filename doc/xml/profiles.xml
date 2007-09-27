@@ -128,9 +128,10 @@
 				</row>
 				<row>
 					<entry><para>Fetch size</para></entry>
-					<entry><para>This setting controls the default fetch size 
+					<entry>
+						<para>This setting controls the default fetch size 
 							for data retrieval. This parameter will directly be passed to the
-							<ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink> 
+							<ulink url="http://java.sun.com/j2se/1.5.0/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink> 
 							method of the <literal>Statement</literal> object.
 							For some combinations of JDBC driver and DBMS, setting this parameter to a 
 							rather large number can improve retrieval performance because it saves network traffic.
@@ -208,7 +209,7 @@
 	</section>
 		
 	<section id="profile-separate-connection">
-		<title>One connection per tab</title>
+		<title>Separate connection per tab</title>
 
 		<para>
 			If this option is enabled, then each tab in the main window
@@ -240,6 +241,14 @@
 			but it is still possible to lock the GUI when running multiple statements on
 			the same connection
 		</para>
+		<para>
+			When you disable the use of separate connections per tab, you can still 
+			create new a (physical) connection for the current tab later, by selecting
+			<menuchoice><guimenu>File</guimenu><guimenuitem>New Connection</guimenuitem></menuchoice>.
+			That menu item will be disabled if <literal>Separate connection per tab</literal> is
+			disabled or you have already created a new connection for that tab.
+		</para>
+			
 	</section>
 		
 	<section id="profile-ignore-drop-error">
@@ -336,6 +345,19 @@
 			
 		</section>
 
+	<section id="profile-trim-char-data">
+		<title>Trim <literal>CHAR</literal> data</title>
+
+		<para>
+			For columns defined with the CHAR datatype, some DBMS pad the values
+			to the length defined in the column definition (e.g. a CHAR(80) column
+			will always contain 80 characters).
+			If this option is enabled, &wb-productname; will remove trailing 
+			spaces from the values retrieved from the database. When running &wb-productname;
+			in batch mode, this flag can be enabled using the <literal>-trimCharData</literal> switch.
+		</para>
+	</section>
+
 		<section id="profile-connect-scripts">
 			<title>Connect scripts</title>
 			
@@ -358,8 +380,54 @@
 				The error message will also be logged to the message panel. If the connection 
 				is made for a DbExplorer panel, the errors will only be visible in the log file.
 			</para>
+			
 		</section>
-	
+
+		<section id="profile-keep-alive">
+			<title>Keep alive script</title>
+			
+			<para>
+				Some DBMS are configured to disconnect an application that has been idle
+				for some time. You can define an idle time and a SQL statement that is executed
+				when the connection has been idle for the defined interval. This is also available 
+				when clicking on the <guibutton>Connect scripts</guibutton>.
+			</para>
+
+			<para>
+				The keep alive statement can not be a script, it can only be a single SQL 
+				statement (e.g. <literal>SELECT version()</literal> or <literal>SELECT 42 FROM dual</literal>.
+				You may not enter the trailing semicolon.
+			</para>
+
+			<para>
+				The idle time is defined im milliseconds, but you can also enter the 
+				interval in seconds or minutes by appending the letter 's' (for seconds)
+				or 'm' (for minutes) to the value. 
+				e.g.: <literal>30000</literal> (30 seconds), or <literal>45s</literal> (45 seconds), or 
+				<literal>10m</literal> (10 minutes).
+			</para>
+			<para>
+				When only one of the fields contains a value, You can disable the keep alive 
+				feature by deleting the entry for the interval but keeping the SQL statement. 
+				Thus you can quickly turn off the keep alive feature but keep the 
+				SQL statement for the next time.
+			</para>
+			
+		</section>
+		
+		<section id="profile-info-background">
+			<title>Info Background</title>
+			<para>
+				Once a connection has been established, information about the connection are display
+				in the toolbar of the main window. You can select a color for the background of this 
+				display to e.g. indicate "sensitive" connections. To use the default background, 
+				click on the <literal>Reset</literal> (<guiicon><inlinegraphic fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>)
+				button. If not color is selected this is indicated with the text <literal>(None)</literal>
+				next to the selection button. If you have selected a color, a preview of the color is 
+				displayed.
+			</para>
+		</section>
+
 		<section id="profile-alternate-delimiter">
 			<title>Alternate delimiter</title>
 			<para>
