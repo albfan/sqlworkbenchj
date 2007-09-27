@@ -106,7 +106,7 @@ public class WbFilePicker extends javax.swing.JPanel
 			StringBuilder path = new StringBuilder(this.selectedFiles.length * 100);
 			for (int i=0; i < this.selectedFiles.length; i++)
 			{
-				if (this.selectedFiles.length > 1 && i > 0) path.append(StringUtil.PATH_SEPARATOR);
+				if (this.selectedFiles.length > 1 && i > 0) path.append(StringUtil.getPathSeparator());
 				path.append(this.selectedFiles[i].getAbsolutePath().trim());
 			}
 			this.tfFilename.setText(path.toString());

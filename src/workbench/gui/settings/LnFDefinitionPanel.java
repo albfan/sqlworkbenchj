@@ -52,7 +52,7 @@ public class LnFDefinitionPanel
 	{
 		initComponents();
 		String text = ResourceMgr.getDescription("LblLnFLib");
-		text = text.replaceAll("%path_sep%", StringUtil.PATH_SEPARATOR);
+		text = text.replaceAll("%path_sep%", StringUtil.getPathSeparator());
 		lblLibrary.setToolTipText(text);
 		tfLibrary.setToolTipText(text);
 		text = ResourceMgr.getDescription("SelectLnfLib");
@@ -296,7 +296,7 @@ public class LnFDefinitionPanel
 			StringBuilder path = new StringBuilder(f.length * 100);
 			for (int i=0; i < f.length; i++)
 			{
-				if (i>0) path.append(StringUtil.PATH_SEPARATOR);
+				if (i>0) path.append(StringUtil.getPathSeparator());
 				path.append(f[i].getAbsolutePath().trim());
 			}
 			this.tfLibrary.setText(path.toString());

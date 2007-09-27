@@ -11,8 +11,6 @@
  */
 package workbench.interfaces;
 
-import java.awt.Window;
-
 /**
  *
  * @author  support@sql-workbench.net

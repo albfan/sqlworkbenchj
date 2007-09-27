@@ -18,6 +18,7 @@ import java.net.URLClassLoader;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import workbench.WbManager;
+import workbench.util.StringUtil;
 
 /**
  * A class to manage Look and feels that can be loaded at runtime.
@@ -37,7 +38,19 @@ public class LnFLoader
 			String libList = definition.getLibrary();
 			if (libList != null)
 			{
-				this.liblist = libList.split(System.getProperty("path.separator"));
+				if (libList.indexOf(StringUtil.getPathSeparator()) > -1)
+				{
+					this.liblist = libList.split(StringUtil.getPathSeparator());
+				}
+				else if (libList.indexOf(LnFDefinition.LNF_PATH_SEPARATOR) > -1)
+				{
+					this.liblist = libList.split(StringUtil.getPathSeparator());
+				}
+				else
+				{
+					// Assuming a single library
+					this.liblist = new String[] { libList };
+				}
 			}
 		}
 	}

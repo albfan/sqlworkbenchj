@@ -27,6 +27,7 @@ public class LnFDefinition
 	private String className;
 	private String library;
 	private boolean isBuiltIn;
+	public static final String LNF_PATH_SEPARATOR = "$|$";
 
 	public LnFDefinition(String desc)
 	{

@@ -1218,12 +1218,6 @@ public class DbMetadata
 		return this.getTables(null, user, (String[])null);
 	}
 
-	public DataStore getTables(String schema, String[] types)
-		throws SQLException
-	{
-		return this.getTables(null, schema, null, types);
-	}
-
 	public DataStore getTables(String aCatalog, String aSchema, String[] types)
 		throws SQLException
 	{
@@ -2778,8 +2772,6 @@ public class DbMetadata
 		TableIdentifier table = tbl.createCopy();
 		table.adjustCase(this.dbConnection);
 			
-		List<TableIdentifier> l = getTableList(table.getTableName(), table.getSchema());
-		
 		ResultSet rs;
 		if (exported)
 			rs = this.metaData.getExportedKeys(table.getCatalog(), table.getSchema(), table.getTableName());

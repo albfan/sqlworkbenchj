@@ -223,7 +223,7 @@ public class TableSelectorPanel
 		try
 		{
 			this.tableSelector.removeItemListener(this);
-			List tables = this.dbConnection.getMetadata().getSelectableObjectsList(this.currentSchema);
+			List<TableIdentifier> tables = this.dbConnection.getMetadata().getSelectableObjectsList(this.currentSchema);
 			Collections.sort(tables, new TableNameComparator());
 			this.tableSelector.removeAllItems();
 			if (this.allowNewTable)
@@ -231,11 +231,10 @@ public class TableSelectorPanel
 				this.tableSelector.addItem(this.newTableId);
 			}
 			int count = tables.size();
-			for (int i=0; i < count; i++)
+			for (TableIdentifier table : tables)
 			{
-				TableIdentifier t = (TableIdentifier)tables.get(i);
-				t.setShowTablenameOnly(true);
-				this.tableSelector.addItem(t);
+				table.setShowTablenameOnly(true);
+				this.tableSelector.addItem(table);
 			}
 			this.editNewTableNameButton.setEnabled(false);
 			tableSelector.setSelectedItem(null);
@@ -460,8 +459,6 @@ public class TableSelectorPanel
 	{//GEN-HEADEREND:event_refreshButtonActionPerformed
 		retrieveSchemas();
 	}//GEN-LAST:event_refreshButtonActionPerformed
-
-
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton editNewTableNameButton;

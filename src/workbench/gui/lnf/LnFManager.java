@@ -39,6 +39,7 @@ public class LnFManager
 			String clz = set.getProperty("workbench.lnf." + i + ".class", null);
 			String name = set.getProperty("workbench.lnf." + i + ".name", clz);
 			String libs = set.getProperty("workbench.lnf." + i + ".classpath", null);
+			libs = StringUtil.replace(libs, LnFDefinition.LNF_PATH_SEPARATOR, StringUtil.getPathSeparator());
 			if (clz != null && libs != null)
 			{
 				LnFDefinition lnf = new LnFDefinition(name, clz, libs);
@@ -101,7 +102,9 @@ public class LnFManager
 		{
 			if (!lnf.isBuiltInLnF())
 			{
-				set.setProperty("workbench.lnf." + lnfCount + ".classpath", lnf.getLibrary());
+				String libs = lnf.getLibrary();
+				libs = StringUtil.replace(libs, StringUtil.getPathSeparator(), LnFDefinition.LNF_PATH_SEPARATOR);
+				set.setProperty("workbench.lnf." + lnfCount + ".classpath", libs);
 				set.setProperty("workbench.lnf." + lnfCount + ".class", lnf.getClassName());
 				set.setProperty("workbench.lnf." + lnfCount + ".name", lnf.getName());
 				lnfCount++;

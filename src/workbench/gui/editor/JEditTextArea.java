@@ -101,11 +101,11 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.78 2007-09-15 16:23:25 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.79 2007-09-27 09:26:40 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
-	implements MouseWheelListener, Undoable, ClipboardSupport
+	implements MouseWheelListener, Undoable, ClipboardSupport, FocusListener
 {
 	protected boolean rightClickMovesCursor = false;
 	
@@ -201,15 +201,18 @@ public class JEditTextArea
 		painter.addMouseListener(new MouseHandler());
 		painter.addMouseMotionListener(new DragHandler());
 		this.addMouseWheelListener(this);
-		addFocusListener(new FocusHandler());
+		addFocusListener(this);
 
 		// Load the defaults
 		setInputHandler(new DefaultInputHandler());
 		this.inputHandler.addDefaultKeyBindings();
 		setDocument(new SyntaxDocument());
 		editable = true;
-		caretVisible = true;
+		
+		// Let the focusGained() event display the caret
+		caretVisible = false;
 		caretBlinks = true;
+		
 		electricScroll = Settings.getInstance().getElectricScroll();
 		autoIndent = true;
 		this.setTabSize(Settings.getInstance().getEditorTabWidth());
@@ -577,11 +580,23 @@ public class JEditTextArea
 		painter.invalidateSelectedLines();
 	}
 
+	public void focusGained(FocusEvent e)
+	{
+		setCaretVisible(true);
+	}
+
+	public void focusLost(FocusEvent e)
+	{
+		setCaretVisible(false);
+	}
+	
 	/**
 	 * Blinks the caret.
 	 */
 	public final void blinkCaret()
 	{
+		if (!caretVisible) return;
+		
 		if (caretBlinks)
 		{
 			blink = !blink;
@@ -620,9 +635,9 @@ public class JEditTextArea
 	 */
 	public void updateScrollBars()
 	{
-		if(vertical != null && visibleLines != 0)
+		if (vertical != null && visibleLines != 0)
 		{
-			vertical.setValues(firstLine,visibleLines,0,getLineCount());
+			vertical.setValues(firstLine, visibleLines, 0, getLineCount());
 			vertical.setUnitIncrement(2);
 			vertical.setBlockIncrement(visibleLines);
 			if (visibleLines > getLineCount())
@@ -637,7 +652,7 @@ public class JEditTextArea
 		int width = painter.getWidth();
 		if (horizontal != null && width != 0)
 		{
-			horizontal.setValues(-horizontalOffset,width,0,maxLineWidth);
+			horizontal.setValues(-horizontalOffset, width, 0, maxLineWidth);
 			horizontal.setUnitIncrement(charWidth);
 			horizontal.setBlockIncrement(width / 3);
 		}
@@ -657,11 +672,14 @@ public class JEditTextArea
 	 */
 	public void setFirstLine(int firstLine)
 	{
-		if(firstLine == this.firstLine)
-			return;
+		if (firstLine == this.firstLine) return;
 		this.firstLine = firstLine;
-		if(firstLine != vertical.getValue())
+		
+		if (firstLine != vertical.getValue())
+		{
 			updateScrollBars();
+		}
+		
 		painter.repaint();
 	}
 
@@ -679,8 +697,10 @@ public class JEditTextArea
 	 */
 	final void recalculateVisibleLines()
 	{
-		if(painter == null)
+		if (painter == null)
+		{
 			return;
+		}
 		int height = painter.getHeight();
 		int lineHeight = painter.getFontMetrics().getHeight();
 		visibleLines = height / lineHeight;
@@ -702,7 +722,7 @@ public class JEditTextArea
 	 */
 	public void setHorizontalOffset(int horizontalOffset)
 	{
-		if(horizontalOffset == this.horizontalOffset) return;
+		if (horizontalOffset == this.horizontalOffset) return;
 		this.horizontalOffset = horizontalOffset;
 		if (horizontal != null && horizontalOffset != horizontal.getValue())	updateScrollBars();
 		painter.repaint();
@@ -767,9 +787,8 @@ public class JEditTextArea
 	{
 		if (visibleLines == 0)
 		{
-		// visibleLines == 0 before the component is realized
-		// we can't do any proper scrolling, so we'll try again later
-//			setFirstLine(Math.max(0,line - electricScroll));
+			// visibleLines == 0 before the component is realized
+			// we can't do any proper scrolling, so we'll try again later
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
@@ -783,27 +802,32 @@ public class JEditTextArea
 		int newFirstLine = firstLine;
 		int newHorizontalOffset = horizontalOffset;
 		int lineCount = getLineCount();
+		
 		if (line < firstLine + electricScroll)
 		{
-			newFirstLine = Math.max(0,line - electricScroll);
+			newFirstLine = Math.max(0, line - electricScroll);
 		}
 		else if (line + electricScroll >= firstLine + visibleLines)
 		{
 			newFirstLine = (line - visibleLines) + electricScroll + 1;
-			
+
 			if (newFirstLine + visibleLines >= lineCount)
+			{
 				newFirstLine = lineCount - visibleLines;
-			
+			}
 			if (newFirstLine < 0)
+			{
 				newFirstLine = 0;
+			}
 		}
 		
-		int x = _offsetToX(line,offset);
+		int x = _offsetToX(line, offset);
 		int width = painter.getFontMetrics().charWidth('w');
 		int pwidth = painter.getWidth();
+		
 		if (x < 0)
 		{
-			newHorizontalOffset = Math.min(0,horizontalOffset - x + width + 5);
+			newHorizontalOffset = Math.min(0, horizontalOffset - x + width + 5);
 		}
 		else if (x + width >= pwidth)
 		{
@@ -813,7 +837,7 @@ public class JEditTextArea
 				newHorizontalOffset -= painter.getGutterWidth();
 			}
 		}
-		
+
 		return setOrigin(newFirstLine,newHorizontalOffset);
 	}
 
@@ -871,30 +895,30 @@ public class JEditTextArea
 		int x = horizontalOffset;
 
 		/* If syntax coloring is disabled, do simple translation */
-		if(tokenMarker == null)
+		if (tokenMarker == null)
 		{
 			lineSegment.count = offset;
-			return x + Utilities.getTabbedTextWidth(lineSegment,fm,x,painter,0);
+			return x + Utilities.getTabbedTextWidth(lineSegment, fm, x, painter, 0);
 		}
 		else
 		{
 			// If syntax coloring is enabled, we have to do this because
 			// tokens can vary in width
 			Token tokens;
-			if (painter.currentLineIndex == line	&& painter.currentLineTokens != null)
+			if (painter.currentLineIndex == line && painter.currentLineTokens != null)
 			{
 				tokens = painter.currentLineTokens;
 			}
 			else
 			{
 				painter.currentLineIndex = line;
-				tokens = painter.currentLineTokens = tokenMarker.markTokens(lineSegment,line);
+				tokens = painter.currentLineTokens = tokenMarker.markTokens(lineSegment, line);
 			}
 
 			Font defaultFont = painter.getFont();
 			SyntaxStyle[] styles = painter.getStyles();
 
-			for(;;)
+			for (;;)
 			{
 				byte id = tokens.id;
 				if (id == Token.END)
@@ -903,21 +927,24 @@ public class JEditTextArea
 				}
 
 				if (id == Token.NULL)
+				{
 					fm = painter.getFontMetrics();
+				}
 				else
+				{
 					fm = styles[id].getFontMetrics(defaultFont);
-
+				}
 				int length = tokens.length;
 
 				if (offset + segmentOffset < lineSegment.offset + length)
 				{
 					lineSegment.count = offset - (lineSegment.offset - segmentOffset);
-					return x + Utilities.getTabbedTextWidth(lineSegment,fm,x,painter,0);
+					return x + Utilities.getTabbedTextWidth(lineSegment, fm, x, painter, 0);
 				}
 				else
 				{
 					lineSegment.count = length;
-					x += Utilities.getTabbedTextWidth(lineSegment,fm,x,painter,0);
+					x += Utilities.getTabbedTextWidth(lineSegment, fm, x, painter, 0);
 					lineSegment.offset += length;
 				}
 				tokens = tokens.next;
@@ -947,18 +974,23 @@ public class JEditTextArea
 
 		if(tokenMarker == null)
 		{
-			for(int i = 0; i < segmentCount; i++)
+			for (int i = 0; i < segmentCount; i++)
 			{
 				char c = segmentArray[i + segmentOffset];
 				int charWidth;
-				
+
 				if (c == '\t')
-					charWidth = (int)painter.nextTabStop(width,i) - width;
+				{
+					charWidth = (int) painter.nextTabStop(width,i) - width;
+				}
 				else
+				{
 					charWidth = fm.charWidth(c);
-
-				if (x - charWidth / 2 <= width) return i;
-
+				}
+				if (x - charWidth / 2 <= width)
+				{
+					return i;
+				}
 				width += charWidth;
 			}
 
@@ -2620,19 +2652,6 @@ public class JEditTextArea
 		}
 
 		public void mouseMoved(MouseEvent evt) {}
-	}
-
-	class FocusHandler implements FocusListener
-	{
-		public void focusGained(FocusEvent evt)
-		{
-			setCaretVisible(true);
-		}
-
-		public void focusLost(FocusEvent evt)
-		{
-			setCaretVisible(false);
-		}
 	}
 
 	class MouseHandler extends MouseAdapter

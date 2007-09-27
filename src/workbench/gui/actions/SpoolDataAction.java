@@ -27,7 +27,8 @@ public class SpoolDataAction
 {
 	private Exporter client;
 	private EditorPanel editor;
-
+	private boolean canExport = false;
+	
 	public SpoolDataAction(Exporter aClient)
 	{
 		this(aClient, "MnuTxtSpoolData");
@@ -42,6 +43,12 @@ public class SpoolDataAction
 		this.setEnabled(false);
 	}
 
+	public void canExport(boolean flag)
+	{
+		this.canExport = flag;
+		checkEnabled();
+	}
+	
 	public void executeAction(ActionEvent e)
 	{
 		this.client.exportData();
@@ -51,11 +58,24 @@ public class SpoolDataAction
 	{
 		this.editor = ed;
 		this.editor.addSelectionListener(this);
+		checkEnabled();
 	}
 
+	private void checkEnabled()
+	{
+		if (this.editor != null)
+		{
+			this.setEnabled(editor.isTextSelected() && canExport);
+		}
+		else
+		{
+			this.setEnabled(false);
+		}
+	}
+	
 	public void selectionChanged(int newStart, int newEnd)
 	{
-		this.setEnabled(newEnd > newStart);
+		checkEnabled();
 	}
 
 }

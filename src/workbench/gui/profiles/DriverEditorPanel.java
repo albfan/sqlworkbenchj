@@ -37,7 +37,7 @@ public class DriverEditorPanel
 	{
 		initComponents();
 		String text = ResourceMgr.getDescription("LblDriverLibrary");
-		text = text.replaceAll("%path_sep%", StringUtil.PATH_SEPARATOR);
+		text = text.replaceAll("%path_sep%", StringUtil.getPathSeparator());
 		lblLibrary.setToolTipText(text);
 		tfLibrary.setToolTipText(text);
     text = ResourceMgr.getDescription("SelectDriverLibrary");
@@ -226,7 +226,7 @@ public class DriverEditorPanel
 			StringBuilder path = new StringBuilder(f.length * 100);
 			for (int i=0; i < f.length; i++)
 			{
-				if (i>0) path.append(StringUtil.PATH_SEPARATOR);
+				if (i>0) path.append(StringUtil.getPathSeparator());
 				path.append(f[i].getAbsolutePath().trim());
 			}
 			this.tfLibrary.setText(path.toString());
@@ -240,7 +240,7 @@ public class DriverEditorPanel
 		this.currentDriver = aDriver;
 		this.tfName.setText(aDriver.getName());
 		this.tfClassName.setText(aDriver.getDriverClass());
-		this.tfLibrary.setText(aDriver.getLibrary());
+		this.tfLibrary.setText(aDriver.getLibraryString());
 		this.tfSampleUrl.setText(aDriver.getSampleUrl());
 	}
 

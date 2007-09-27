@@ -42,12 +42,12 @@ public class TableDependencySorter
 
 	public List<TableIdentifier> sortForInsert(List<TableIdentifier> tables)
 	{
-		return getSortedTableList(tables, false);
+		return getSortedTableList(tables, false, false);
 	}
 	
-	public List<TableIdentifier> sortForDelete(List<TableIdentifier> tables)
+	public List<TableIdentifier> sortForDelete(List<TableIdentifier> tables, boolean addMissing)
 	{
-		return getSortedTableList(tables, true);
+		return getSortedTableList(tables, addMissing, true);
 	}
 	
 	/**
@@ -59,7 +59,7 @@ public class TableDependencySorter
 	 * @returns the tables sorted according to their FK dependencies
 	 * @throws DependencyCycleException if an endless loop in the dependencies was detected
 	 */
-	private List<TableIdentifier> getSortedTableList(List<TableIdentifier> tables, boolean bottomUp)
+	private List<TableIdentifier> getSortedTableList(List<TableIdentifier> tables, boolean addMissing, boolean bottomUp)
 	{
 		for (TableIdentifier tbl : tables)
 		{
@@ -106,6 +106,10 @@ public class TableDependencySorter
 			if (index > -1) 
 			{
 				result.add(tables.get(index));
+			}
+			else if (addMissing)
+			{
+				result.add(lvl.table);
 			}
 		}
 		return result;
@@ -174,36 +178,38 @@ public class TableDependencySorter
 		}
 		return result;
 	}
+
+	static class LevelNode
+	{
+		int level;
+		TableIdentifier table;
+
+		public LevelNode(TableIdentifier tbl, int lvl)
+		{
+			level = lvl;
+			table = tbl;
+		}
+
+		public boolean equals(Object other)
+		{
+			if (other instanceof LevelNode)
+			{
+				LevelNode n = (LevelNode) other;
+				return table.getTableName().equalsIgnoreCase(n.table.getTableName());
+			}
+			return false;
+		}
+
+		public int hashCode()
+		{
+			return table.getTableName().hashCode();
+		}
+
+		public String toString()
+		{
+			return table.getTableName() + ", Level=" + level;
+		}
+	}
 	
 }
 
-class LevelNode
-{
-	int level;
-	TableIdentifier table;
-	public LevelNode(TableIdentifier tbl, int lvl)
-	{
-		level = lvl;
-		table = tbl;
-	}
-	
-	public boolean equals(Object other)
-	{
-		if (other instanceof LevelNode)
-		{
-			LevelNode n = (LevelNode)other;
-			return table.getTableName().equalsIgnoreCase(n.table.getTableName());
-		}
-		return false;
-	}
-	
-	public int hashCode()
-	{
-		return table.getTableName().hashCode();
-	}
-	
-	public String toString()
-	{
-		return table.getTableName() + ", Level=" + level;
-	}
-}

@@ -31,12 +31,15 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import java.sql.DriverManager;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *	Represents a JDBC Driver definition.
  *	The definition includes a (logical) name, a driver class
  *	and (optional) a library from which the driver is to
  *	be loaded.
+ * 
  *	@author  support@sql-workbench.net
  */
 public class DbDriver
@@ -49,7 +52,7 @@ public class DbDriver
 	private String driverClass;
 
 	private String identifier;
-	private String library;
+	private List<String> libraryList;
 
 	private String sampleUrl;
 
@@ -70,7 +73,6 @@ public class DbDriver
 		this.setName(aDriverClassname);
 	}
 
-	/** Creates a new instance of DbDriver */
 	public DbDriver(String aName, String aClass, String aLibrary)
 	{
 		this.setName(aName);
@@ -78,14 +80,21 @@ public class DbDriver
 		this.setLibrary(aLibrary);
 	}
 
-	public String getName() { return this.name; }
+	public String getName() 
+	{
+		return this.name; 
+	}
+	
 	public void setName(String name)
 	{
 		this.name = name;
 		this.identifier = null;
 	}
 
-	public String getDriverClass() {  return this.driverClass; }
+	public String getDriverClass() 
+	{
+		return this.driverClass; 
+	}
 
 	public void setDriverClass(String aClass)
 	{
@@ -116,25 +125,53 @@ public class DbDriver
 		return this.identifier;
 	}
 
-	public String getLibrary() { return this.library; }
+	public void setLibraryList(List<String> libraries)
+	{
+		this.libraryList = libraries;
+	}
+	
+	public List<String> getLibraryList()
+	{
+		return this.libraryList;
+	}
+	
+	public String getLibraryString() 
+	{
+		StringBuilder result = new StringBuilder(this.libraryList.size() * 30);
+		for (int i=0; i < libraryList.size(); i++)
+		{
+			if (i > 0) result.append(StringUtil.getPathSeparator());
+			result.append(libraryList.get(i));
+		}
+		return result.toString(); 
+	}
+	
 	public void setLibrary(String libList)
 	{
-		this.library = libList; 
+		StringTokenizer tok = new StringTokenizer(libList, StringUtil.getPathSeparator());
+		this.libraryList = new ArrayList<String>(tok.countTokens());
+		while(tok.hasMoreTokens())
+		{
+			String lib = tok.nextToken().trim();
+			libraryList.add(lib);
+		}
 		this.driverClassInstance = null;
 		this.classLoader = null;
 	}
 
 	public boolean canReadLibrary()
 	{
-		StringTokenizer tok = new StringTokenizer(this.library, StringUtil.PATH_SEPARATOR);
-		while(tok.hasMoreTokens())
+		if (libraryList != null)
 		{
-			String lib = tok.nextToken().trim();
-			lib = replaceLibDirKey(lib);
-			File f = new File(lib);
-			if (!f.exists()) return false;
+			for (String lib : libraryList)
+			{
+				lib = replaceLibDirKey(lib);
+				File f = new File(lib);
+				if (!f.exists()) return false;
+			}
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	public String toString()
@@ -160,22 +197,22 @@ public class DbDriver
 		
 		try
 		{
-			if (this.classLoader == null && this.library != null)
+			if (this.classLoader == null)
 			{
-				StringTokenizer tok = new StringTokenizer(this.library, StringUtil.PATH_SEPARATOR);
-				URL[] url = new URL[tok.countTokens()];
-				for (int i=0; tok.hasMoreTokens(); i++)
+				URL[] url = new URL[libraryList.size()];
+				int index = 0;
+				for (String fname : libraryList)
 				{
-					String fname = tok.nextToken().trim();
 					String realFile = replaceLibDirKey(fname);
-					url[i] = new File(realFile).toURL();
-					LogMgr.logInfo("DbDriver.loadDriverClass()", "Adding ClassLoader URL=" + url[i].toString());
+					url[index] = new File(realFile).toURL();
+					LogMgr.logInfo("DbDriver.loadDriverClass()", "Adding ClassLoader URL=" + url[index].toString());
+					index ++;
 				}
 				this.classLoader = new URLClassLoader(url, ClassLoader.getSystemClassLoader());
 			}
 
 			Class drvClass = null;
-			if (this.classLoader != null && this.library != null)
+			if (this.classLoader != null)
 			{
 				// New Firebird 2.0 driver needs this, and it does not seem to do any harm
 				// for other drivers
@@ -235,7 +272,8 @@ public class DbDriver
 	{
 		DbDriver copy = new DbDriver();
 		copy.driverClass = this.driverClass;
-		copy.library = this.library;
+		copy.libraryList = new ArrayList<String>();
+		copy.libraryList.addAll(this.libraryList);
 		copy.sampleUrl = this.sampleUrl;
 		copy.name = this.name;
 		return copy;

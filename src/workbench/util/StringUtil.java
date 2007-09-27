@@ -35,7 +35,6 @@ public class StringUtil
 	public static final Pattern PATTERN_NON_LF = Pattern.compile("(\r\n|\n\r|\r)");
 
 	public static final String LINE_TERMINATOR = System.getProperty("line.separator");
-	public static final String PATH_SEPARATOR = System.getProperty("path.separator");
 	public static final String FILE_SEPARATOR = System.getProperty("file.separator");
 	public static final String EMPTY_STRING = "";
 
@@ -56,6 +55,11 @@ public class StringUtil
 	private static final java.util.Date now()
 	{
 		return new java.util.Date(System.currentTimeMillis());
+	}
+	
+	public static String getPathSeparator()
+	{
+		return System.getProperty("path.separator");
 	}
 	
 	public static int hashCode(CharSequence val)

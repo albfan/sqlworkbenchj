@@ -535,7 +535,7 @@ public class XmlDataFileParser
 		boolean verbose = this.verboseFormat;
 		if (this.extensionToUse == null) this.extensionToUse = ".xml";
 		
-		FileNameSorter sorter = new FileNameSorter(this.dbConn, dir, extensionToUse);
+		FileNameSorter sorter = new FileNameSorter(this.dbConn, dir, extensionToUse, new XmlTableNameResolver(encoding));
 		List<WbFile> toProcess = null;
 		if (this.checkDependencies) 
 		{
@@ -579,6 +579,7 @@ public class XmlDataFileParser
 	{
 		this.hasErrors = false;
 		this.hasWarnings = false;
+		this.keepRunning = true;
 		
 		this.receiver.setTableCount(-1); // clear multi-table flag in receiver
 		this.receiver.setCurrentTable(-1);		

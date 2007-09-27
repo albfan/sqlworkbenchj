@@ -83,6 +83,13 @@ public class EditWindow
 		WbSwingUtilities.center(this, owner);
 	}
 
+	public EditWindow(final Dialog owner, final String title, final String text, final String settingsId, final boolean createSqlEditor)
+	{
+		super(owner, title, true);
+		init(text, settingsId, createSqlEditor, false);
+		WbSwingUtilities.center(this, WbManager.getInstance().getCurrentWindow());
+	}
+	
 	public EditWindow(final Dialog owner, final String title, final String text, final boolean createSqlEditor, final boolean showCloseButtonOnly)
 	{
 		super(owner, title, true);
@@ -243,8 +250,8 @@ public class EditWindow
 	
 	public void windowOpened(java.awt.event.WindowEvent e)
 	{
-//		editor.requestFocus();
-//    WbSwingUtilities.repaintLater(editor);
+		editor.requestFocusInWindow();
+    WbSwingUtilities.repaintLater(editor);
 	}
 	
 }

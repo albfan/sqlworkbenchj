@@ -2660,7 +2660,205 @@ public class WbImportTest
 		}
 	}
 	
-	public void testDependencyImport()
+	public void testDependencyXmlImport()
+	{
+		try
+		{
+			File f1 = new File(basedir, "file1.xml");
+			File f2 = new File(this.basedir, "file2.xml");
+			File f3 = new File(this.basedir, "file3.xml");
+			
+			String f1_content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
+             "<wb-export> \n" + 
+             "  <meta-data> \n" + 
+             "    <wb-tag-format>short</wb-tag-format> \n" + 
+             "  </meta-data> \n" + 
+             " \n" + 
+             "  <table-def> \n" + 
+             "    <table-name>A_CHILD1_CHILD</table-name> \n" + 
+             "    <column-count>3</column-count> \n" + 
+             " \n" + 
+             "    <column-def index=\"0\"> \n" + 
+             "      <column-name>ID</column-name> \n" + 
+             "      <java-class>java.lang.Integer</java-class> \n" + 
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
+             "      <java-sql-type>4</java-sql-type> \n" + 
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"1\"> \n" + 
+             "      <column-name>CHILD_ID</column-name> \n" + 
+             "      <java-class>java.lang.Integer</java-class> \n" + 
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
+             "      <java-sql-type>4</java-sql-type> \n" + 
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"2\"> \n" + 
+             "      <column-name>INFO</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <dbms-data-type>VARCHAR(50)</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "  </table-def> \n" + 
+             " \n" + 
+             "<data> \n" + 
+             "<rd><cd>1</cd><cd>1</cd><cd>info_1</cd></rd> \n" + 
+             "<rd><cd>2</cd><cd>2</cd><cd>info_2</cd></rd> \n" + 
+             "<rd><cd>3</cd><cd>3</cd><cd>info_3</cd></rd> \n" + 
+             "<rd><cd>4</cd><cd>4</cd><cd>info_3</cd></rd> \n" + 
+             "</data> \n" + 
+             "</wb-export>";
+
+			String f2_content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
+             "<wb-export> \n" + 
+             "  <meta-data> \n" + 
+             "    <wb-tag-format>short</wb-tag-format> \n" + 
+             "  </meta-data> \n" + 
+             " \n" + 
+             "  <table-def> \n" + 
+             "    <table-name>CHILD1</table-name> \n" + 
+             "    <column-count>3</column-count> \n" + 
+             " \n" + 
+             "    <column-def index=\"0\"> \n" + 
+             "      <column-name>ID</column-name> \n" + 
+             "      <java-class>java.lang.Integer</java-class> \n" + 
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
+             "      <java-sql-type>4</java-sql-type> \n" + 
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"1\"> \n" + 
+             "      <column-name>BASE_ID</column-name> \n" + 
+             "      <java-class>java.lang.Integer</java-class> \n" + 
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
+             "      <java-sql-type>4</java-sql-type> \n" + 
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"2\"> \n" + 
+             "      <column-name>INFO</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <dbms-data-type>VARCHAR(50)</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "  </table-def> \n" + 
+             " \n" + 
+             "<data> \n" + 
+             "<rd><cd>1</cd><cd>1</cd><cd>info</cd></rd> \n" + 
+             "<rd><cd>2</cd><cd>2</cd><cd>info</cd></rd> \n" + 
+             "<rd><cd>3</cd><cd>1</cd><cd>info</cd></rd> \n" + 
+             "<rd><cd>4</cd><cd>2</cd><cd>info</cd></rd> \n" + 
+             "</data> \n" + 
+             "</wb-export>";			
+			
+			String f3_content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
+             "<wb-export> \n" + 
+             "  <meta-data> \n" + 
+             "    <created>2007-09-15 19:31:31.718 CEST</created> \n" + 
+             "    <jdbc-driver>H2 JDBC Driver</jdbc-driver> \n" + 
+             "    <jdbc-driver-version>1.0.57 (2007-08-25)</jdbc-driver-version> \n" + 
+             "    <connection>User=, Catalog=TESTDEPENDENCYTEXTIMPORT, URL=jdbc:h2:mem:testDependencyTextImport</connection> \n" + 
+             "    <database-product-name>H2</database-product-name> \n" + 
+             "    <database-product-version>1.0.57 (2007-08-25)</database-product-version> \n" + 
+             "    <wb-tag-format>short</wb-tag-format> \n" + 
+             "  </meta-data> \n" + 
+             " \n" + 
+             "  <table-def> \n" + 
+             "    <table-name>ZZBASE</table-name> \n" + 
+             "    <column-count>2</column-count> \n" + 
+             " \n" + 
+             "    <column-def index=\"0\"> \n" + 
+             "      <column-name>ID</column-name> \n" + 
+             "      <java-class>java.lang.Integer</java-class> \n" + 
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
+             "      <java-sql-type>4</java-sql-type> \n" + 
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"1\"> \n" + 
+             "      <column-name>INFO</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <dbms-data-type>VARCHAR(50)</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "  </table-def> \n" + 
+             " \n" + 
+             "<data> \n" + 
+             "<rd><cd>1</cd><cd>info</cd></rd> \n" + 
+             "<rd><cd>2</cd><cd>info</cd></rd> \n" + 
+             "</data> \n" + 
+             "</wb-export>";
+
+			FileWriter out = new FileWriter(f1);
+			out.write(f1_content);
+			out.close();
+			
+			out = new FileWriter(f2);
+			out.write(f2_content);
+			out.close();
+				
+			out = new FileWriter(f3);
+			out.write(f3_content);
+			out.close();
+			
+			WbFile f = new WbFile(basedir);
+			StatementRunnerResult result = importCmd.execute("wbimport -sourcedir='" + f.getFullPath() + "' -type=xml -checkDependencies=true");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+			Statement stmt = this.connection.createStatement();
+			ResultSet rs = stmt.executeQuery("select count(*) from zzbase");
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Wrong row count for zzbase", 2, count);
+			}
+			else
+			{
+				fail("No rows in zzbase");
+			}
+
+			rs = stmt.executeQuery("select count(*) from child1");
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Wrong row count for child1", 4, count);
+			}
+			else
+			{
+				fail("No rows in zzbase");
+			}
+
+			rs = stmt.executeQuery("select count(*) from a_child1_child");
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Wrong row count for a_child1_child", 4, count);
+			}
+			else
+			{
+				fail("No rows in zzbase");
+			}
+			
+			if (!f1.delete())
+			{
+				fail("Could not delete input file: " + f1.getCanonicalPath());
+			}
+			if (!f2.delete())
+			{
+				fail("Could not delete input file: " + f2.getCanonicalPath());
+			}
+			if (!f3.delete())
+			{
+				fail("Could not delete input file: " + f3.getCanonicalPath());
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testDependencyTextImport()
 	{
 		try
 		{
@@ -2739,7 +2937,6 @@ public class WbImportTest
 			{
 				fail("Could not delete input file: " + f3.getCanonicalPath());
 			}
-			
 		}
 		catch (Exception e)
 		{

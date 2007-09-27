@@ -2836,29 +2836,22 @@ public class SqlPanel
 
 	protected void checkResultSetActions()
 	{
+		final boolean hasResult = currentData != null ? currentData.hasResultSet() : false;
+		final boolean mayEdit = hasResult && currentData.hasUpdateableColumns();
+		final boolean findNext = hasResult && (currentData.getTable().canSearchAgain());
+		Action[] actionList = new Action[]
+						{ dataToClipboard,
+							exportDataAction,
+							optimizeAllCol,
+							printDataAction,
+							printPreviewAction
+						};
+		setActionState(actionList, hasResult);
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
-				public void run()
-				{
-				boolean hasResult = false;
-				boolean mayEdit = false;
-				boolean findNext = false;
-				if (currentData != null)
-				{
-					hasResult = currentData.hasResultSet();
-					mayEdit = hasResult && currentData.hasUpdateableColumns();
-					findNext = hasResult && (currentData.getTable().canSearchAgain());
-				}
-
-				Action[] actions = new Action[]
-								{ dataToClipboard,
-									exportDataAction,
-									optimizeAllCol,
-									printDataAction,
-									printPreviewAction
-								};
-				setActionState(actions, hasResult);
-
+			public void run()
+			{
 				importFileAction.setEnabled(mayEdit);
 				importClipAction.setEnabled(mayEdit);
 
@@ -2886,7 +2879,7 @@ public class SqlPanel
 					commitAction.setEnabled(aFlag);
 					rollbackAction.setEnabled(aFlag);
 				}
-				spoolData.setEnabled(aFlag);
+				spoolData.canExport(aFlag);
 				appendResultsAction.setEnabled(aFlag); 
 			}
 		});

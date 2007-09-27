@@ -14,8 +14,10 @@ package workbench.db.importer;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.util.WbFile;
@@ -28,10 +30,12 @@ public class FileNameSorter
 {
 	private List<WbFile> toProcess;
 	private WbConnection dbConn;
+	private TablenameResolver resolver;
 	
-	public FileNameSorter(WbConnection con, File sourceDir, final String extension)
+	public FileNameSorter(WbConnection con, File sourceDir, final String extension, TablenameResolver resolve)
 	{
 		toProcess = new ArrayList<WbFile>();
+		this.resolver = resolve;
 		dbConn = con;
 		FileFilter ff = new FileFilter()
 		{
@@ -59,10 +63,14 @@ public class FileNameSorter
 	
 	public List<WbFile> getSortedList()
 	{
-		List<TableIdentifier> tables = new ArrayList<TableIdentifier>(toProcess.size());
+		Map<String, WbFile> fileMapping = new HashMap<String, WbFile>(toProcess.size());
+		
+		List<TableIdentifier> tables = new LinkedList<TableIdentifier>();
 		for (WbFile f : toProcess)
 		{
-			tables.add(new TableIdentifier(f.getFileName()));
+			String tablename = this.resolver.getTableName(f);
+			tables.add(new TableIdentifier(tablename));
+			fileMapping.put(tablename.toLowerCase(), f);
 		}
 		
 		TableDependencySorter sorter = new TableDependencySorter(dbConn);
@@ -71,21 +79,13 @@ public class FileNameSorter
 		List<WbFile> result = new LinkedList<WbFile>();
 		for (TableIdentifier tbl : sorted)
 		{
-			File f = this.findFile(tbl.getTableName());
+			String t = tbl.getTableName().toLowerCase();
+			WbFile f = fileMapping.get(t);
 			if (f != null)
 			{
-				result.add(new WbFile(f));
+				result.add(f);
 			}
 		}
 		return result;
-	}
-	
-	private File findFile(String tablename)
-	{
-		for (WbFile f : toProcess)
-		{
-			if (f.getFileName().equalsIgnoreCase(tablename)) return f;
-		}
-		return null;
 	}
 }

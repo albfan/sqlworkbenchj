@@ -13,19 +13,20 @@ package workbench.gui.dbobjects;
 
 import java.awt.EventQueue;
 import java.awt.Frame;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;
 import workbench.db.TableIdentifier;
-
 import workbench.db.WbConnection;
 import workbench.db.importer.TableDependencySorter;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.EditWindow;
 import workbench.gui.components.NoSelectionModel;
 import workbench.gui.components.WbButton;
 import workbench.interfaces.TableDeleteListener;
@@ -40,12 +41,14 @@ import workbench.util.WbThread;
  */
 public class TableDeleterUI
 	extends javax.swing.JPanel
+	implements WindowListener
 {
 	private JDialog dialog;
 	private List<TableIdentifier> objectNames;
 	private boolean cancelled;
 	private WbConnection connection;
 	private Thread deleteThread;
+	private Thread checkThread;
 	private List<TableDeleteListener> deleteListener;
 
 	public TableDeleterUI()
@@ -72,11 +75,14 @@ public class TableDeleterUI
     optionPanel = new javax.swing.JPanel();
     statusLabel = new javax.swing.JLabel();
     jPanel1 = new javax.swing.JPanel();
-    useTruncateCheckBox = new javax.swing.JCheckBox();
     checkFKButton = new javax.swing.JButton();
     jPanel2 = new javax.swing.JPanel();
     commitEach = new javax.swing.JRadioButton();
     commitAtEnd = new javax.swing.JRadioButton();
+    useTruncateCheckBox = new javax.swing.JCheckBox();
+    jPanel3 = new javax.swing.JPanel();
+    showScript = new javax.swing.JButton();
+    addMissingTables = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.BorderLayout());
 
@@ -100,7 +106,7 @@ public class TableDeleterUI
 
     add(buttonPanel, java.awt.BorderLayout.SOUTH);
 
-    mainPanel.setLayout(new java.awt.BorderLayout());
+    mainPanel.setLayout(new java.awt.BorderLayout(0, 5));
 
     objectList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
     objectList.setSelectionModel(new NoSelectionModel());
@@ -108,7 +114,7 @@ public class TableDeleterUI
 
     mainPanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
-    optionPanel.setLayout(new java.awt.BorderLayout());
+    optionPanel.setLayout(new java.awt.BorderLayout(0, 5));
 
     statusLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
     statusLabel.setMaximumSize(new java.awt.Dimension(32768, 24));
@@ -117,21 +123,6 @@ public class TableDeleterUI
     optionPanel.add(statusLabel, java.awt.BorderLayout.SOUTH);
 
     jPanel1.setLayout(new java.awt.GridBagLayout());
-
-    useTruncateCheckBox.setText(ResourceMgr.getString("LblUseTruncate"));
-    useTruncateCheckBox.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(java.awt.event.ItemEvent evt) {
-        useTruncateCheckBoxItemStateChanged(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 6, 0, 0);
-    jPanel1.add(useTruncateCheckBox, gridBagConstraints);
 
     checkFKButton.setText(ResourceMgr.getString("LblCheckFKDeps"));
     checkFKButton.setToolTipText(ResourceMgr.getDescription("LblCheckFKDeps"));
@@ -143,8 +134,10 @@ public class TableDeleterUI
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(3, 5, 0, 0);
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 5);
     jPanel1.add(checkFKButton, gridBagConstraints);
 
     jPanel2.setLayout(new java.awt.GridBagLayout());
@@ -153,29 +146,85 @@ public class TableDeleterUI
     commitEach.setSelected(true);
     commitEach.setText(ResourceMgr.getString("LblCommitEachTableDelete")
     );
+    commitEach.setBorder(null);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 0);
     jPanel2.add(commitEach, gridBagConstraints);
 
     buttonGroup1.add(commitAtEnd);
     commitAtEnd.setText(ResourceMgr.getString("LblCommitTableDeleteAtEnd"));
+    commitAtEnd.setBorder(null);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(4, 6, 0, 0);
     jPanel2.add(commitAtEnd, gridBagConstraints);
 
+    useTruncateCheckBox.setText(ResourceMgr.getString("LblUseTruncate"));
+    useTruncateCheckBox.setBorder(null);
+    useTruncateCheckBox.addItemListener(new java.awt.event.ItemListener() {
+      public void itemStateChanged(java.awt.event.ItemEvent evt) {
+        useTruncateCheckBoxItemStateChanged(evt);
+      }
+    });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridheight = 2;
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 0);
+    jPanel2.add(useTruncateCheckBox, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanel2.add(jPanel3, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridheight = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(6, 4, 0, 15);
     jPanel1.add(jPanel2, gridBagConstraints);
+
+    showScript.setText(ResourceMgr.getString("LblShowScript"));
+    showScript.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        showScriptActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(9, 8, 0, 5);
+    jPanel1.add(showScript, gridBagConstraints);
+
+    addMissingTables.setSelected(true);
+    addMissingTables.setText(ResourceMgr.getString("LblIncFkTables"));
+    addMissingTables.setToolTipText(ResourceMgr.getDescription("LblIncFkTables"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
+    jPanel1.add(addMissingTables, gridBagConstraints);
 
     optionPanel.add(jPanel1, java.awt.BorderLayout.CENTER);
 
@@ -194,28 +243,12 @@ public class TableDeleterUI
 		{
 			this.enableCommitSettings();
 		}
-
 	}//GEN-LAST:event_useTruncateCheckBoxItemStateChanged
 
 	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_cancelButtonActionPerformed
 	{//GEN-HEADEREND:event_cancelButtonActionPerformed
 		this.cancelled = true;
-		try
-		{
-			if (this.deleteThread != null)
-			{
-				this.deleteThread.interrupt();
-				this.deleteThread.join(5000);
-				this.deleteThread = null;
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("TableDeleterUI.cancel()", "Error when trying to kill delete Thread", e);
-		}
-		this.dialog.setVisible(false);
-		this.dialog.dispose();
-		this.dialog = null;
+		closeWindow();
 	}//GEN-LAST:event_cancelButtonActionPerformed
 
 	private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_deleteButtonActionPerformed
@@ -225,12 +258,15 @@ public class TableDeleterUI
 
 	private void checkFKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkFKButtonActionPerformed
 
-
 		if (this.connection.isBusy()) return;
+
+		this.deleteButton.setEnabled(false);
+		this.showScript.setEnabled(false);
 		this.statusLabel.setText(ResourceMgr.getString("MsgFkDeps"));
 		
+		WbSwingUtilities.showWaitCursor(dialog);
 		
-		WbThread t = new WbThread("FKCheck")
+		this.checkThread = new WbThread("FKCheck")
 		{
 			public void run()
 			{
@@ -238,9 +274,8 @@ public class TableDeleterUI
 				try
 				{
 					connection.setBusy(true);
-					WbSwingUtilities.showWaitCursor(dialog);
 					TableDependencySorter sorter = new TableDependencySorter(connection);
-					sorted = sorter.sortForDelete(objectNames);
+					sorted = sorter.sortForDelete(objectNames, addMissingTables.isSelected());
 				}
 				catch (Exception e)
 				{
@@ -255,21 +290,67 @@ public class TableDeleterUI
 				}
 			}
 		};
-		t.start();
+		
+		checkThread.start();
 	}//GEN-LAST:event_checkFKButtonActionPerformed
+	
+	private void showScriptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showScriptActionPerformed
+		showScript();
+	}//GEN-LAST:event_showScriptActionPerformed
 
-	private void fkCheckFinished(final List<TableIdentifier> newlist)
+
+	protected void fkCheckFinished(final List<TableIdentifier> newlist)
 	{
+		this.checkThread = null;
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
-				WbSwingUtilities.showDefaultCursor(dialog);
 				statusLabel.setText("");
-				if (newlist != null) setObjects(newlist);
+				if (newlist != null)
+				{
+					setObjects(newlist);
+				}
+				deleteButton.setEnabled(true);
+				showScript.setEnabled(true);
+				WbSwingUtilities.showDefaultCursor(dialog);
 			}
 		});
 	}
+	
+	protected void closeWindow()
+	{
+		try
+		{
+			if (this.deleteThread != null)
+			{
+				this.deleteThread.interrupt();
+				this.deleteThread = null;
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("TableDeleterUI.cancel()", "Error when trying to kill delete Thread", e);
+		}
+
+		try
+		{
+			if (this.checkThread != null)
+			{
+				this.checkThread.interrupt();
+				this.checkThread = null;
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("TableDeleterUI.cancel()", "Error when trying to kill check thread", e);
+		}
+
+		this.dialog.setVisible(false);
+		this.dialog.dispose();
+		this.dialog = null;
+	}
+
 	public void setConnection(WbConnection aConn)
 	{
 		this.connection = aConn;
@@ -287,26 +368,21 @@ public class TableDeleterUI
 				this.enableCommitSettings();
 			}
 		}
-
 	}
 
-	private void disableCommitSettings()
+	protected void disableCommitSettings()
 	{
 		this.commitAtEnd.setEnabled(false);
 		this.commitEach.setEnabled(false);
-		this.commitAtEnd.setSelected(false);
-		this.commitEach.setSelected(false);
 	}
 
-	private void enableCommitSettings()
+	protected void enableCommitSettings()
 	{
 		this.commitAtEnd.setEnabled(true);
 		this.commitEach.setEnabled(true);
-		this.commitAtEnd.setSelected(false);
-		this.commitEach.setSelected(true);
 	}
 
-	private void startDelete()
+	protected void startDelete()
 	{
 		this.deleteThread = new WbThread("TableDeleteThread")
 		{
@@ -325,7 +401,10 @@ public class TableDeleterUI
 
 		boolean doCommitEach = this.commitEach.isSelected();
 		boolean useTruncate = this.useTruncateCheckBox.isSelected();
-		if (useTruncate) doCommitEach = false;
+		if (useTruncate)
+		{
+			doCommitEach = false;
+		}
 		boolean hasError = false;
 		List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 		int count = this.objectNames.size();
@@ -337,7 +416,9 @@ public class TableDeleterUI
 			for (int i = 0; i < count; i++)
 			{
 				if (this.cancelled)
+				{
 					break;
+				}
 				table = this.objectNames.get(i);
 				this.statusLabel.setText(ResourceMgr.getString("TxtDeletingTable") + " " + table + " ...");
 				try
@@ -347,7 +428,7 @@ public class TableDeleterUI
 				}
 				catch (Exception ex)
 				{
-					String error = ex.getMessage();
+					String error = ExceptionUtil.getDisplay(ex);
 					LogMgr.logError("TableDeleterUI.doDelete()", "Error deleting table " + table, ex);
 
 					if (!ignoreAll)
@@ -376,12 +457,12 @@ public class TableDeleterUI
 				}
 			}
 
-			boolean doCommit = true;
+			boolean doCommit = true && !cancelled;
 			try
 			{
 				if (!doCommitEach)
 				{
-					if (hasError)
+					if (hasError || cancelled)
 					{
 						doCommit = false;
 						this.connection.rollback();
@@ -414,33 +495,22 @@ public class TableDeleterUI
 		{
 			this.connection.setBusy(false);
 		}
-		
+
 		this.fireTableDeleted(tables);
 
 		this.statusLabel.setText("");
-		if (!hasError)		{
-			this.dialog.setVisible(false);
-			this.dialog.dispose();
-			this.dialog = null;
+		if (!hasError)
+		{
+			this.closeWindow();
 		}
-		this.cancelled = false;
 	}
 
-	private void deleteTable(final TableIdentifier table, final boolean useTruncate, final boolean doCommit)
+	protected void deleteTable(final TableIdentifier table, final boolean useTruncate, final boolean doCommit)
 		throws SQLException
 	{
 		try
 		{
-			String deleteSql = null;
-			String tableName = table.getTableExpression(this.connection);
-			if (useTruncate)
-			{
-				deleteSql = "TRUNCATE TABLE " + tableName;
-			}
-			else
-			{
-				deleteSql = "DELETE FROM " + tableName;
-			}
+			String deleteSql = getDeleteStatement(table, useTruncate);
 			Statement stmt = this.connection.createStatement();
 			LogMgr.logInfo("TableDeleterUI.deleteTable()", "Executing: [" + deleteSql + "] to delete target table...");
 			stmt.executeUpdate(deleteSql);
@@ -459,19 +529,64 @@ public class TableDeleterUI
 			throw e;
 		}
 	}
-	
+
+	protected String getDeleteStatement(final TableIdentifier table, final boolean useTruncate)
+	{
+		String deleteSql = null;
+		String tableName = table.getTableExpression(this.connection);
+		if (useTruncate)
+		{
+			deleteSql = "TRUNCATE TABLE " + tableName;
+		}
+		else
+		{
+			deleteSql = "DELETE FROM " + tableName;
+		}
+		return deleteSql;
+	}
+
+	protected void showScript()
+	{
+		boolean doCommitEach = this.commitEach.isSelected();
+		boolean useTruncate = this.useTruncateCheckBox.isSelected();
+		if (useTruncate)
+		{
+			doCommitEach = false;
+		}
+		StringBuilder script = new StringBuilder(objectNames.size() * 30);
+		for (TableIdentifier table : objectNames)
+		{
+			String sql = this.getDeleteStatement(table, useTruncate);
+			script.append(sql);
+			script.append(";\n");
+			if (doCommitEach)
+			{
+				script.append("COMMIT;\n\n");
+			}
+		}
+
+		if (!doCommitEach)
+		{
+			script.append("\nCOMMIT;\n");
+		}
+
+		final EditWindow w = new EditWindow(this.dialog, ResourceMgr.getString("TxtWindowTitleGeneratedScript"), script.toString(), "workbench.tabledeleter.scriptwindow", true);
+		w.setVisible(true);
+		w.dispose();
+	}
+
 	public boolean dialogWasCancelled()
 	{
 		return this.cancelled;
 	}
-	
+
 	public void setObjects(List<TableIdentifier> objects)
 	{
 		this.objectNames = objects;
 		int numNames = this.objectNames.size();
 
 		String[] display = new String[numNames];
-		for (int i=0; i < numNames; i ++)
+		for (int i = 0; i < numNames; i++)
 		{
 			display[i] = this.objectNames.get(i).toString();
 		}
@@ -495,26 +610,67 @@ public class TableDeleterUI
 
 	public void addDeleteListener(TableDeleteListener listener)
 	{
-		if (this.deleteListener == null) this.deleteListener = new ArrayList<TableDeleteListener>();
+		if (this.deleteListener == null)
+		{
+			this.deleteListener = new ArrayList<TableDeleteListener>();
+		}
 		this.deleteListener.add(listener);
 	}
-	
+
 	public void removeDeleteListener(TableDeleteListener listener)
 	{
-		if (this.deleteListener == null) return;
+		if (this.deleteListener == null)
+		{
+			return;
+		}
 		this.deleteListener.remove(listener);
 	}
-	
-	public void fireTableDeleted(List tables)
+
+	protected void fireTableDeleted(List tables)
 	{
-		if (this.deleteListener == null) return;
+		if (this.deleteListener == null)
+		{
+			return;
+		}
 		for (TableDeleteListener l : this.deleteListener)
 		{
 			l.tableDataDeleted(tables);
 		}
 	}
+
+	public void windowActivated(WindowEvent e)
+	{
+	}
+
+	public void windowClosed(WindowEvent e)
+	{
+	}
+
+	public void windowClosing(WindowEvent e)
+	{
+		this.cancelled = true;
+		closeWindow();
+	}
+
+	public void windowDeactivated(WindowEvent e)
+	{
+	}
+
+	public void windowDeiconified(WindowEvent e)
+	{
+	}
+
+	public void windowIconified(WindowEvent e)
+	{
+	}
+
+	public void windowOpened(WindowEvent e)
+	{
+	}
+	
 	
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  public javax.swing.JCheckBox addMissingTables;
   public javax.swing.ButtonGroup buttonGroup1;
   public javax.swing.JPanel buttonPanel;
   public javax.swing.JButton cancelButton;
@@ -524,12 +680,13 @@ public class TableDeleterUI
   public javax.swing.JButton deleteButton;
   public javax.swing.JPanel jPanel1;
   public javax.swing.JPanel jPanel2;
+  public javax.swing.JPanel jPanel3;
   public javax.swing.JScrollPane jScrollPane1;
   public javax.swing.JPanel mainPanel;
   public javax.swing.JList objectList;
   public javax.swing.JPanel optionPanel;
+  public javax.swing.JButton showScript;
   public javax.swing.JLabel statusLabel;
   public javax.swing.JCheckBox useTruncateCheckBox;
   // End of variables declaration//GEN-END:variables
-
 }

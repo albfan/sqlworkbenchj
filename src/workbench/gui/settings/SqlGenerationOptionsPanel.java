@@ -101,6 +101,7 @@ public class SqlGenerationOptionsPanel
     exportLiteralLabel = new javax.swing.JLabel();
     includeEmptyCommentsLabel = new WbCheckBoxLabel();
     includeEmptyComments = new javax.swing.JCheckBox();
+    jSeparator4 = new javax.swing.JSeparator();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -357,7 +358,7 @@ public class SqlGenerationOptionsPanel
     includeEmptyCommentsLabel.setToolTipText(ResourceMgr.getDescription("LblGenInclEmptyComments"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 14;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
@@ -373,12 +374,19 @@ public class SqlGenerationOptionsPanel
     includeEmptyComments.setIconTextGap(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 14;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(9, 8, 0, 11);
     add(includeEmptyComments, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(7, 0, 2, 0);
+    add(jSeparator4, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 	
 	
@@ -403,6 +411,7 @@ public class SqlGenerationOptionsPanel
   private javax.swing.JSeparator jSeparator1;
   private javax.swing.JSeparator jSeparator2;
   private javax.swing.JSeparator jSeparator3;
+  private javax.swing.JSeparator jSeparator4;
   private javax.swing.JComboBox literalTypes;
   private javax.swing.JComboBox tableNameCase;
   private javax.swing.JLabel tableNameCaseLabel;

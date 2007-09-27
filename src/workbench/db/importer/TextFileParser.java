@@ -584,7 +584,7 @@ public class TextFileParser
 		File dir = new File(this.sourceDir);
 		if (this.extensionToUse == null) this.extensionToUse = ".txt";
 
-		FileNameSorter sorter = new FileNameSorter(this.connection, dir, extensionToUse);
+		FileNameSorter sorter = new FileNameSorter(this.connection, dir, extensionToUse, new DefaultTablenameResolver());
 		List<WbFile> toProcess = null;
 		if (this.checkDependencies) 
 		{

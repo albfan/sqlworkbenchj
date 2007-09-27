@@ -168,10 +168,6 @@ public class TableDependency
 				{
 					this.readTree(child, exportedKeys);
 				}
-				else
-				{
-					child.setFkName(child.getFkName() + " [!]");
-				}
 				this.leafs.add(child);
 			}
       return count;
@@ -186,6 +182,7 @@ public class TableDependency
 	private boolean isCycle(DependencyNode child, DependencyNode parent)
 	{
 		if (child.equals(parent)) return true;
+		if (child.getTable().equals(parent.getTable())) return true;
 		
 		DependencyNode nextParent = parent.getParent();
 		while (nextParent != null)

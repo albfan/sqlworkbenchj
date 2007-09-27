@@ -148,14 +148,13 @@ public class TableDependencySorterTest
 		tbl.add(child2_detail);
 		tbl.add(child1_detail2);
 		TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
-		List<TableIdentifier> result = sorter.sortForDelete(tbl);
+		List<TableIdentifier> result = sorter.sortForDelete(tbl, false);
 //		for (TableIdentifier t : result)
 //		{
 //			System.out.println(t.toString());
 //		}
 //		System.out.println("--------------------");
 		assertEquals("Not enough entries", tbl.size(), result.size());
-		
 		assertEquals("Wrong first table", result.get(0), child1_detail2);
 		
 		// the second entry is either child1_detail or child2_detail
@@ -175,7 +174,29 @@ public class TableDependencySorterTest
 //		}
 		assertEquals("Not enough entries", tbl.size(), insertList.size());
 		assertEquals("Wrong first table for insert", base, insertList.get(0));
+	}
+
+	public void testCheckAddMissing()
+	{
+		TableIdentifier child1 = new TableIdentifier("child1");
+		ArrayList<TableIdentifier> tbl = new ArrayList<TableIdentifier>();
+		tbl.add(child1);
 		
+		TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
+		List<TableIdentifier> result = sorter.sortForDelete(tbl, true);
+//		for (TableIdentifier t : result)
+//		{
+//			System.out.println(t.toString());
+//		}
+//		System.out.println("--------------------");
+		
+		// Should have added child1_detail and child1_detail2
+		assertEquals("Not enough entries", 3, result.size());
+		String first = result.get(0).getTableName().toLowerCase();
+		String second = result.get(1).getTableName().toLowerCase();
+		assertEquals("Wrong first table", true, first.equals("child1_detail") || first.equals("child1_detail2"));
+		assertEquals("Wrong second table", true, second.equals("child1_detail") || second.equals("child1_detail2"));
+		assertEquals("Wrong third table", "child1", result.get(2).getTableName().toLowerCase());
 	}
 	
 }
