@@ -432,6 +432,12 @@ public class StringUtilTest
 		list = "1,\"2,5\",3";
 		l = StringUtil.stringToList(list, ",", true, true, true);
 		assertEquals("Quoted string not recognized","2,5", l.get(1));
+		
+		list = "library.jar";
+		l = StringUtil.stringToList(list, ";", true, true, false);
+		assertEquals("Single element list not correct", 1, l.size());
+		assertEquals("Single element list not correct", "library.jar", l.get(0));
+		
 	}
 	
 	public void testHasOpenQuotes()
