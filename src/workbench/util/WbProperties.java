@@ -281,8 +281,10 @@ public class WbProperties
 	}
 
 	/**
-	 *	Read the content of the file int this properties object.
-	 *  This method does not support line continuation!
+	 * Read the content of the file into this properties object.
+	 * This method does not support line continuation, but supports
+	 * an encoding (as opposed to the original properties class)
+	 * 
 	 */
 	public void loadTextFile(String filename, String encoding)
 		throws IOException

@@ -35,7 +35,6 @@ public class StringUtil
 	public static final Pattern PATTERN_NON_LF = Pattern.compile("(\r\n|\n\r|\r)");
 
 	public static final String LINE_TERMINATOR = System.getProperty("line.separator");
-	public static final String FILE_SEPARATOR = System.getProperty("file.separator");
 	public static final String EMPTY_STRING = "";
 
 	public static final String ISO_DATE_FORMAT = "yyyy-MM-dd";

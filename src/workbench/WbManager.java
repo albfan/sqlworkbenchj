@@ -925,6 +925,10 @@ public class WbManager
 				System.setProperty("workbench.log.filename", value);
 			}
 
+			// Make sure the Settings object is initialized now that 
+			// all relevant commandline arguments are parsed
+			Settings.getInstance();
+			
 			String scriptname = cmdLine.getValue(ARG_SCRIPT);
 
 			boolean readDriverTemplates = true;
@@ -946,13 +950,6 @@ public class WbManager
 				readDriverTemplates = false;
 			}
 			
-			if (cmdLine.isArgPresent("notemplates"))
-			{
-				readDriverTemplates = false;
-			}
-
-			ConnectionMgr.getInstance().setReadTemplates(readDriverTemplates);
-			
 			value = cmdLine.getValue(ARG_VARDEF);
 			if (!StringUtil.isEmptyString(value))
 			{
@@ -965,9 +962,15 @@ public class WbManager
 					LogMgr.logError("WbManager.initCmdLine()", "Error reading variable definition from file " + value, e);
 				}
 			}
+
+			if (cmdLine.isArgPresent("notemplates"))
+			{
+				readDriverTemplates = false;
+			}
+			ConnectionMgr.getInstance().setReadTemplates(readDriverTemplates);
 			
-			// Setting the profile storage should be done after initializing the configuration
-			// stuff correctly!
+			// Setting the profile storage should be done after initializing 
+			// the configuration stuff correctly!
 			value = cmdLine.getValue(ARG_PROFILE_STORAGE);
 			Settings.getInstance().setProfileStorage(value);
 			

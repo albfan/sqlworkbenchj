@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<Form version="1.4" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+<Form version="1.4" maxVersion="1.4" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
   <Properties>
     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
       <Dimension value="[220, 200]"/>
@@ -399,10 +399,10 @@
         <Component class="javax.swing.JCheckBox" name="cbSeparateConnections">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LblSeperateConnections&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;LblSeparateConnections&quot;)" type="code"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getDescription(&quot;LblSeperateConnections&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getDescription(&quot;LblSeparateConnections&quot;)" type="code"/>
             </Property>
             <Property name="name" type="java.lang.String" value="useSeparateConnectionPerTab" noResource="true"/>
           </Properties>
@@ -615,6 +615,9 @@
               <Dimension value="[26, 22]"/>
             </Property>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new FlatButton();"/>
+          </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
               <GridBagConstraints gridX="1" gridY="0" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="4" insetsBottom="0" insetsRight="0" anchor="13" weightX="0.0" weightY="0.0"/>

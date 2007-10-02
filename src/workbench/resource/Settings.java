@@ -86,6 +86,8 @@ public class Settings
 	public static final String PROPERTY_PROFILE_STORAGE = "workbench.settings.profilestorage";
 	public static final String PROPERTY_EDITOR_TAB_WIDTH = "workbench.editor.tabwidth";
 
+	private static final String LIB_DIR_KEY = "%LibDir%";
+	
 	private WbProperties props;
 	private String filename;
 	private ArrayList<FontChangedListener> fontChangeListeners = new ArrayList<FontChangedListener>();
@@ -93,15 +95,15 @@ public class Settings
 
 	private ShortcutManager keyManager;
 
-	private static Settings settings;
+	private static Settings instance;
 
 	public synchronized static final Settings getInstance()
 	{
-		if (settings == null)
+		if (instance == null)
 		{
-			settings = new Settings();
+			instance = new Settings();
 		}
-		return settings;
+		return instance;
 	}
 
 	private Settings()
@@ -285,6 +287,14 @@ public class Settings
 	public String getConfigDir() { return this.configDir; }
 	public void setConfigDir(String aDir) { this.configDir = aDir; }
 
+	public String replaceLibDirKey(String aPathname)
+	{
+		if (aPathname == null) return null;
+		String libDir = Settings.getInstance().getLibDir();
+		if (libDir == null) return aPathname;
+		return StringUtil.replace(aPathname, LIB_DIR_KEY, libDir);
+	}	
+	
 	public String getLibDir()
 	{
 		return System.getProperty("workbench.libdir", getProperty("workbench.libdir", null));

@@ -305,7 +305,7 @@ public class FileDialogUtil
 		File config = new File(Settings.getInstance().getConfigDir());
 		if (dir.equals(config))
 		{
-			return CONFIG_DIR_KEY + StringUtil.FILE_SEPARATOR + fname;
+			return CONFIG_DIR_KEY + "/" + fname;
 		}
 		else
 		{

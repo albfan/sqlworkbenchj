@@ -18,6 +18,7 @@ import java.net.URLClassLoader;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import workbench.WbManager;
+import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
@@ -79,11 +80,13 @@ public class LnFLoader
 			URL[] url = new URL[this.liblist.length];
 			for (int i=0; i < this.liblist.length; i++)
 			{
-				File f = new File(this.liblist[i]);
+				String fname = Settings.getInstance().replaceLibDirKey(liblist[i]);
+				File f = new File(fname);
 				if (!f.isAbsolute())
 				{
 					f = new File(WbManager.getInstance().getJarPath(), this.liblist[i]);
 				}
+				
 				url[i] = f.toURL();
 			}
 			ClassLoader loader = new URLClassLoader(url, this.getClass().getClassLoader());

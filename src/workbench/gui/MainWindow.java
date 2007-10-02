@@ -104,6 +104,7 @@ import workbench.gui.actions.FileSaveProfiles;
 import workbench.gui.actions.InsertTabAction;
 import workbench.gui.actions.OptionsDialogAction;
 import workbench.gui.actions.ShowHelpAction;
+import workbench.gui.actions.CreateNewConnection;
 import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
 import workbench.util.NumberStringCache;
@@ -131,6 +132,7 @@ public class MainWindow
 	protected ConnectionSelector connectionSelector;
 
 	private FileDisconnectAction disconnectAction;
+	private CreateNewConnection createNewConnection;
 	private ShowDbExplorerAction dbExplorerAction;
 	private NewDbExplorerPanelAction newDbExplorerPanel;
 	private NewDbExplorerWindowAction newDbExplorerWindow;
@@ -157,7 +159,7 @@ public class MainWindow
 
 	private AddMacroAction createMacro;
 	private ManageMacroAction manageMacros;
-	private List<DbExplorerPanel> explorerWindows = new ArrayList<DbExplorerPanel>();
+	private List<DbExplorerPanel> explorerPanels = new ArrayList<DbExplorerPanel>();
 	private RunningJobIndicator jobIndicator;
 	protected WbThread connectThread;
 		
@@ -311,6 +313,8 @@ public class MainWindow
 		this.closeWorkspaceAction = new CloseWorkspaceAction(this);
 		this.saveAsWorkspaceAction = new SaveAsNewWorkspaceAction(this);
 
+		this.createNewConnection = new CreateNewConnection(this);
+		
 		this.loadWorkspaceAction = new LoadWorkspaceAction(this);
 		this.saveWorkspaceAction = new SaveWorkspaceAction(this);
 		
@@ -356,6 +360,7 @@ public class MainWindow
 		action = new FileConnectAction(this);
 		action.addToMenu(menu);
 		this.disconnectAction.addToMenu(menu);
+		this.createNewConnection.addToMenu(menu);
 
 		action = new FileSaveProfiles();
 		action.addToMenu(menu);
@@ -765,14 +770,7 @@ public class MainWindow
 		{
 			if (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab())
 			{
-				this.connectThread = new WbThread("Panel Connect " + aPanel.getId())
-				{
-					public void run()
-					{
-						connectPanel(aPanel);
-					}
-				};
-				this.connectThread.start();
+				createNewConnectionForPanel(aPanel);
 			}
 			else if (this.currentConnection != null)
 			{
@@ -785,8 +783,28 @@ public class MainWindow
 		}
 	}
 
+	public void createNewConnectionForCurrentPanel()
+	{
+		MainPanel panel = getCurrentPanel();
+		createNewConnectionForPanel(panel);
+	}
+	
+	protected void createNewConnectionForPanel(final MainPanel aPanel)
+	{
+		if (this.isConnectInProgress()) return;
+		this.connectThread = new WbThread("Panel Connect " + aPanel.getId())
+		{
+			public void run()
+			{
+				connectPanel(aPanel);
+			}
+		};
+		this.connectThread.start();
+	}
+	
 	/**
-	 *	This method will be executed in a separate thread!
+	 * Connect the given panel to the database. This will always 
+	 * create a new physical connection to the database.
 	 */
 	private void connectPanel(final MainPanel aPanel)
 	{
@@ -794,14 +812,13 @@ public class MainWindow
 		this.showConnectingInfo();
 		try
 		{
-			final WbConnection conn = this.getConnectionForTab(aPanel);
+			final WbConnection conn = this.getConnectionForTab(aPanel, true);
 			final int index = this.getIndexForPanel(aPanel);
 			this.tabConnected(aPanel, conn, index);
 		}
 		catch (Throwable e)
 		{
 			LogMgr.logError("MainWindow.connectPanel()", "Error when connecting SQL panel " + aPanel.getId(), e);
-			closeConnectingInfo();
 			showStatusMessage("");
 			String error = ExceptionUtil.getDisplay(e);
 			String msg = ResourceMgr.getString("ErrConnectFailed").replaceAll("%msg%", error.trim());
@@ -809,6 +826,7 @@ public class MainWindow
 		}
 		finally
 		{
+			closeConnectingInfo();
 			this.connectThread = null;
 		}
 	}
@@ -838,7 +856,6 @@ public class MainWindow
 			public void run()
 			{
 				updateGuiForTab(anIndex);
-//				selectCurrentEditor();
 			}
 		});
 	}
@@ -857,6 +874,8 @@ public class MainWindow
 		this.setJMenuBar(menu);
 
 		this.updateToolbarVisibility();
+	
+		this.createNewConnection.setEnabled(currentConnection != null && current.getConnection() == this.currentConnection);
 		
 		this.checkMacroMenuForPanel(anIndex);
 		this.checkViewMenu(anIndex);
@@ -871,6 +890,7 @@ public class MainWindow
 
 	private void tabSelected(final int anIndex)
 	{
+		// Make sure this is executed on the EDT
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -1115,6 +1135,7 @@ public class MainWindow
 		this.newDbExplorerWindow.setEnabled(true);
 
 		this.disconnectAction.setEnabled(true);
+		this.createNewConnection.setEnabled(!this.currentProfile.getUseSeparateConnectionPerTab());
 		this.getCurrentPanel().clearLog();
 		this.getCurrentPanel().showResultPanel();
 
@@ -1134,6 +1155,8 @@ public class MainWindow
 		this.newDbExplorerPanel.setEnabled(false);
 		this.newDbExplorerWindow.setEnabled(false);
 		this.disconnectAction.setEnabled(false);
+		this.createNewConnection.setEnabled(false);
+		
 		try
 		{
 			String msg = ResourceMgr.getString("ErrConnectFailed");
@@ -1452,6 +1475,7 @@ public class MainWindow
 		this.setMacroMenuEnabled(false);
 		this.updateWindowTitle();
 		this.disconnectAction.setEnabled(false);
+		this.createNewConnection.setEnabled(false);
 		this.dbExplorerAction.setEnabled(false);
 		this.newDbExplorerPanel.setEnabled(false);
 		this.newDbExplorerWindow.setEnabled(false);
@@ -1706,7 +1730,13 @@ public class MainWindow
 	private WbConnection getConnectionForTab(MainPanel aPanel)
 		throws Exception
 	{
-		if (this.currentConnection != null) return this.currentConnection;
+		return getConnectionForTab(aPanel, false);
+	}
+	
+	private WbConnection getConnectionForTab(MainPanel aPanel, boolean returnNew)
+		throws Exception
+	{
+		if (this.currentConnection != null && !returnNew) return this.currentConnection;
 		String id = this.getConnectionIdForPanel(aPanel);
 		aPanel.showStatusMessage(ResourceMgr.getString("MsgConnectingTo") + " " + this.currentProfile.getName() + " ...");
 		ConnectionMgr mgr = ConnectionMgr.getInstance();
@@ -1759,9 +1789,9 @@ public class MainWindow
 		}
 		else
 		{
-			if (this.explorerWindows.size() > 0)
+			if (this.explorerPanels.size() > 0)
 			{
-				DbExplorerPanel p = this.explorerWindows.get(0);
+				DbExplorerPanel p = this.explorerPanels.get(0);
 				p.activateWindow();
 			}
 			else
@@ -1803,7 +1833,7 @@ public class MainWindow
 
 	public void closeExplorerWindows(boolean doDisconnect)
 	{
-		for (DbExplorerPanel panel : explorerWindows)
+		for (DbExplorerPanel panel : explorerPanels)
 		{
 			if (doDisconnect)
 			{
@@ -1859,12 +1889,12 @@ public class MainWindow
 		{
 			explorer.setConnection(this.currentConnection);
 		}
-		this.explorerWindows.add(explorer);
+		this.explorerPanels.add(explorer);
 	}
 
 	public void explorerWindowClosed(DbExplorerPanel p)
 	{
-		this.explorerWindows.remove(p);
+		this.explorerPanels.remove(p);
 	}
 
 	public void newDbExplorerPanel(boolean select)

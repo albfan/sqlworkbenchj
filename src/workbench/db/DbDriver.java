@@ -24,7 +24,6 @@ import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Properties;
-import java.util.StringTokenizer;
 
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -44,7 +43,6 @@ import java.util.List;
  */
 public class DbDriver
 {
-	private static final String LIB_DIR_KEY = "%LibDir%";
 	private Driver driverClassInstance;
 	private URLClassLoader classLoader;
 
@@ -124,36 +122,40 @@ public class DbDriver
 		}
 		return this.identifier;
 	}
-
-	public void setLibraryList(List<String> libraries)
-	{
-		this.libraryList = libraries;
-	}
-	
-	public List<String> getLibraryList()
-	{
-		return this.libraryList;
-	}
 	
 	public String getLibraryString() 
 	{
+		return createLibraryString(StringUtil.getPathSeparator());
+	}
+	
+	private String createLibraryString(String separator)
+	{
+		if (this.libraryList == null) return null;
 		StringBuilder result = new StringBuilder(this.libraryList.size() * 30);
 		for (int i=0; i < libraryList.size(); i++)
 		{
-			if (i > 0) result.append(StringUtil.getPathSeparator());
+			if (i > 0) result.append(separator);
 			result.append(libraryList.get(i));
 		}
 		return result.toString(); 
 	}
 	
+	public String getLibrary()
+	{
+		return createLibraryString("|");
+	}
+	
 	public void setLibrary(String libList)
 	{
-		StringTokenizer tok = new StringTokenizer(libList, StringUtil.getPathSeparator());
-		this.libraryList = new ArrayList<String>(tok.countTokens());
-		while(tok.hasMoreTokens())
+		this.libraryList = null;
+		
+		if (libList.indexOf("|") > -1)
 		{
-			String lib = tok.nextToken().trim();
-			libraryList.add(lib);
+			this.libraryList = StringUtil.stringToList(libList, "|", true, true, false);
+		}
+		else if (!StringUtil.isEmptyString(libList))
+		{
+			this.libraryList = StringUtil.stringToList(libList, StringUtil.getPathSeparator(), true, true, false);
 		}
 		this.driverClassInstance = null;
 		this.classLoader = null;
@@ -165,7 +167,7 @@ public class DbDriver
 		{
 			for (String lib : libraryList)
 			{
-				lib = replaceLibDirKey(lib);
+				lib = Settings.getInstance().replaceLibDirKey(lib);
 				File f = new File(lib);
 				if (!f.exists()) return false;
 			}
@@ -203,7 +205,7 @@ public class DbDriver
 				int index = 0;
 				for (String fname : libraryList)
 				{
-					String realFile = replaceLibDirKey(fname);
+					String realFile = Settings.getInstance().replaceLibDirKey(fname);
 					url[index] = new File(realFile).toURL();
 					LogMgr.logInfo("DbDriver.loadDriverClass()", "Adding ClassLoader URL=" + url[index].toString());
 					index ++;
@@ -491,11 +493,4 @@ public class DbDriver
 		};
 	}
 
-	private String replaceLibDirKey(String aPathname)
-	{
-		if (aPathname == null) return null;
-		String libDir = Settings.getInstance().getLibDir();
-		if (libDir == null) return aPathname;
-		return StringUtil.replace(aPathname, LIB_DIR_KEY, libDir);
-	}	
 }
