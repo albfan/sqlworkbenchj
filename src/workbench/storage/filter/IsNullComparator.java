@@ -42,4 +42,8 @@ public class IsNullComparator
 		return false;
 	}
 
+	public boolean equals(Object other)
+	{
+		return (other instanceof IsNullComparator);
+	}		
 }

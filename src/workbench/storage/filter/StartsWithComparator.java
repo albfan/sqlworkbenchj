@@ -31,9 +31,7 @@ public class StartsWithComparator
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
-		if (reference == null && value == null) return true;
-		if (reference == null && value != null) return false;
-		if (reference != null && value == null) return false;
+		if (reference == null || value == null) return false;
 		try
 		{
 			String v = (String)value;

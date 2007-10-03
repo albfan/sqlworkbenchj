@@ -11,8 +11,6 @@
  */
 package workbench.storage.filter;
 
-import workbench.util.StringUtil;
-
 /**
  * @author support@sql-workbench.net
  */
@@ -32,9 +30,7 @@ public class GreaterThanComparator
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
-		if (reference == null && value == null) return true;
-		if (reference == null && value != null) return false;
-		if (reference != null && value == null) return false;
+		if (reference == null || value == null) return false;
 		try
 		{
 			return ((Comparable)reference).compareTo((Comparable)value) < 0;

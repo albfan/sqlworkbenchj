@@ -29,7 +29,7 @@ public class ComparatorFactory
 			new StringEqualsComparator(),
 			new StringNotEqualsComparator(),
 			new NumberEqualsComparator(),
-			new DateEqualsComparator(0),
+			new DateEqualsComparator(),
 			new NumberNotEqualsComparator(),
 			new LessThanComparator(),
 			new LessOrEqualComparator(),

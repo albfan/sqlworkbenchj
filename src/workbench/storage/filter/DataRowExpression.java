@@ -11,10 +11,8 @@
  */
 package workbench.storage.filter;
 
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
-import workbench.util.StringUtil;
 
 /**
  * A class to define the filter criteria for all columns of a data row
@@ -83,7 +81,6 @@ public class DataRowExpression
 
 	public boolean evaluate(Map<String, Object> columnValues)
 	{
-		//Object value = columnValues.get(this.columnName);
 		Iterator itr = columnValues.values().iterator();
 		while (itr.hasNext())
 		{

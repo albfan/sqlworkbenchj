@@ -40,9 +40,7 @@ public class DateEqualsComparator
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
-		if (reference == null && value == null) return true;
-		if (reference == null && value != null) return false;
-		if (reference != null && value == null) return false;
+		if (reference == null || value == null) return false;
 		try
 		{
 			return reference.equals(value);
@@ -60,7 +58,7 @@ public class DateEqualsComparator
 
 	public boolean equals(Object other)
 	{
-		return (other instanceof NumberEqualsComparator);
+		return (other instanceof DateEqualsComparator);
 	}
 	
 	public boolean validateInput(Object value)
@@ -72,7 +70,7 @@ public class DateEqualsComparator
 		ValueConverter converter = new ValueConverter();
 		try
 		{
-			converter.convertValue(value.toString(), this.sqlType);
+			converter.convertValue(value, this.sqlType);
 			return true;
 		}
 		catch (Exception e)
