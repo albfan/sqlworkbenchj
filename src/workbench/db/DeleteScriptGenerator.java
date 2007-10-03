@@ -27,13 +27,15 @@ import workbench.resource.Settings;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
+import workbench.storage.DmlStatement;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- *	Generates a SQL script to delete a record from the given table and
- *	any dependent tables.
+ * Generates a SQL script to delete a record from the given table and
+ * any dependent tables.
+ * 
  * @author  support@sql-workbench.net
  */
 public class DeleteScriptGenerator
@@ -69,11 +71,9 @@ public class DeleteScriptGenerator
 	{
 		if (table == null) throw new IllegalArgumentException("The table name may not be empty");
 
-		this.rootTable = table.createCopy();
-		if (rootTable.getSchema() == null)
-		{
-			rootTable.setSchema(this.meta.getCurrentSchema());
-		}
+		// Make sure we are using a completely filled TableIdentifier
+		// otherwise comparisons won't work correctly
+		this.rootTable = this.meta.findTable(table);
 		this.dependency = new TableDependency(this.connection, this.rootTable);
 		this.tableDefinition = this.meta.getTableDefinition(this.rootTable);
 	}
@@ -136,7 +136,7 @@ public class DeleteScriptGenerator
 		{
 			int max = Settings.getInstance().getFormatterMaxSubselectLength();
 			SqlFormatter format = new SqlFormatter(sql.toString(), max);
-			return format.getFormattedSql().trim();
+			return format.getFormattedSql().toString();
 		}
 		catch (Exception e)
 		{
@@ -145,6 +145,19 @@ public class DeleteScriptGenerator
 		}
 	}
 
+	private DmlStatement createDeleteStatement(DependencyNode node)
+	{
+		if (node == null) return null;
+		StringBuilder sql = new StringBuilder(200);
+		sql.append("DELETE FROM ");
+		sql.append(node.getTable().getTableExpression(this.connection));
+		sql.append("\n WHERE ");
+
+		this.addParentWhere(sql, node);
+		DmlStatement result = new DmlStatement(sql, this.columnValues);
+		return result;
+	}
+	
 	private void addDeleteStatement(StringBuilder sql, DependencyNode node)
 	{
 		if (node == null) return;
@@ -223,8 +236,7 @@ public class DeleteScriptGenerator
 			}
 
 			sql.append(col.getIdentifier().getColumnName());
-			Object data = col.getValue();
-			if (data == null)
+			if (col.isNull())
 			{
 				sql.append(" IS NULL");
 			}
@@ -232,12 +244,6 @@ public class DeleteScriptGenerator
 			{
 				sql.append(" = ");
 				sql.append(formatter.getDefaultLiteral(col));
-//	      String value = data.toString();
-//				sql.append(" = ");
-//				boolean charType = (type == Types.VARCHAR || type == Types.CHAR);
-//				if (charType)	sql.append('\'');
-//				sql.append(value);
-//				if (charType)	sql.append('\'');
 			}
 		}
 	}
@@ -267,12 +273,6 @@ public class DeleteScriptGenerator
 		{
 			sql.append(" = ");
 			sql.append(formatter.getDefaultLiteral(data));
-//	    String value = data.toString();
-//			sql.append(" = ");
-//			boolean charType = (type == Types.VARCHAR || type == Types.CHAR);
-//			if (charType)	sql.append('\'');
-//			sql.append(value);
-//			if (charType)	sql.append('\'');
 		}
 	}
 
@@ -307,10 +307,18 @@ public class DeleteScriptGenerator
 		if (this.script == null) this.generateScript();
 		return this.script;
 	}
+
+	public CharSequence getScriptForValues(List<ColumnData> values)
+		throws SQLException
+	{
+		this.setValues(values);
+		return this.createScriptForCurrentObject();
+	}
 	
 	public void generateScript()
 	{
 		this.script = "";
+		
 		if (this.sourceTable == null) return;
 
 		DataStore ds = this.sourceTable.getDataStore();
@@ -324,6 +332,7 @@ public class DeleteScriptGenerator
 
 		ds.checkUpdateTable();
 		TableIdentifier tbl = ds.getUpdateTable();
+			
 		int numRows = rows.length;
 		StringBuilder result = new StringBuilder(numRows * 150);
 		int max = Settings.getInstance().getFormatterMaxSubselectLength();
@@ -334,12 +343,13 @@ public class DeleteScriptGenerator
 
 		try
 		{
+			this.setTable(tbl);
+			
 			for (int i=0; i < numRows; i++)
 			{
 				List<ColumnData> pkvalues = ds.getPkValues(rows[i]);
-				this.setTable(tbl);
 				this.setValues(pkvalues);
-				this.monitor.setCurrentObject(ResourceMgr.getString("MsgGeneratingScriptForRow") + " " + i);
+				if (monitor != null) this.monitor.setCurrentObject(ResourceMgr.getString("MsgGeneratingScriptForRow") + " " + i);
 				
 				String rowScript = this.createScriptForCurrentObject();
 				if (i > 0) result.append(sep);
@@ -352,4 +362,5 @@ public class DeleteScriptGenerator
 		}
 		this.script = result.toString();
 	}
+	
 }
