@@ -22,18 +22,13 @@ import workbench.db.WbConnection;
 
 /**
  * A class to sort tables according to their foreign key constraints,
- * so that data can be imported without disabling FK constraints.
+ * so that data can be imported or deleted without disabling FK constraints.
  * 
  * @author support@sql-workbench.net
  */
 public class TableDependencySorter 
 {
 	private WbConnection dbConn;
-	
-	// Stores a list of tables for each level 
-	private List<LevelNode> levelMapping = new ArrayList<LevelNode>();
-	
-	private List<TableIdentifier> tablesToCheck;
 	
 	public TableDependencySorter(WbConnection con)
 	{
@@ -51,6 +46,28 @@ public class TableDependencySorter
 	}
 	
 	/**
+	 * Return a sorted list of DependencyNodes that need to be taken care of 
+	 * when deleting a row from the passed table.
+	 * 
+	 * @param table
+	 * @return all DependencyNodes relevant for deleting 
+	 */
+	public List<DependencyNode> getSortedNodesForDelete(TableIdentifier table)
+	{
+		ArrayList<TableIdentifier> tables = new ArrayList<TableIdentifier>(1);
+		tables.add(table);
+		List<TableIdentifier> allTables = sortForDelete(tables, true);
+		List<LevelNode> levelMapping = createLevelMapping(allTables, true);
+		
+		ArrayList<DependencyNode> result = new ArrayList<DependencyNode>(levelMapping.size());
+		for (LevelNode lvl : levelMapping)
+		{
+			result.add(lvl.node);
+		}
+		return result;
+	}
+	
+	/**
 	 * Determines the FK dependencies for each table in the passed List, 
 	 * and sorts them so that data can be imported without violating 
 	 * foreign key constraints
@@ -61,6 +78,28 @@ public class TableDependencySorter
 	 */
 	private List<TableIdentifier> getSortedTableList(List<TableIdentifier> tables, boolean addMissing, boolean bottomUp)
 	{
+		List<LevelNode> levelMapping = createLevelMapping(tables, bottomUp);
+		
+		ArrayList<TableIdentifier> result = new ArrayList<TableIdentifier>();
+		for (LevelNode lvl : levelMapping)
+		{
+			int index = findTable(lvl.node.getTable(), tables);
+			if (index > -1) 
+			{
+				result.add(tables.get(index));
+			}
+			else if (addMissing)
+			{
+				result.add(lvl.node.getTable());
+			}
+		}
+		return result;
+	}
+
+	private List<LevelNode> createLevelMapping(List<TableIdentifier> tables, boolean bottomUp)
+	{
+		List<LevelNode> levelMapping = new ArrayList<LevelNode>(tables.size());
+		
 		for (TableIdentifier tbl : tables)
 		{
 			TableDependency deps = new TableDependency(dbConn, tbl);
@@ -70,7 +109,7 @@ public class TableDependencySorter
 			if (root != null)
 			{
 				List<DependencyNode> allChildren = getAllNodes(root);
-				putNodes(allChildren);
+				putNodes(levelMapping, allChildren);
 			}
 		}
 		
@@ -98,21 +137,7 @@ public class TableDependencySorter
 		}
 		
 		Collections.sort(levelMapping, comp);
-		
-		ArrayList<TableIdentifier> result = new ArrayList<TableIdentifier>();
-		for (LevelNode lvl : levelMapping)
-		{
-			int index = findTable(lvl.table, tables);
-			if (index > -1) 
-			{
-				result.add(tables.get(index));
-			}
-			else if (addMissing)
-			{
-				result.add(lvl.table);
-			}
-		}
-		return result;
+		return levelMapping;
 	}
 
 	private int findTable(TableIdentifier tofind, List<TableIdentifier> toSearch)
@@ -126,17 +151,17 @@ public class TableDependencySorter
 		return -1;
 	}
 	
-	public void putNodes(List<DependencyNode> nodes)
+	protected void putNodes(List<LevelNode> levelMapping, List<DependencyNode> nodes)
 	{
 		for (DependencyNode node : nodes)
 		{
 			TableIdentifier tbl = node.getTable();
 			int level = node.getLevel();
-			LevelNode lvl = findLevelNode(tbl);
+			LevelNode lvl = findLevelNode(levelMapping, tbl);
 			if (lvl == null)
 			{
-				lvl = new LevelNode(tbl, level);
-				this.levelMapping.add(lvl);
+				lvl = new LevelNode(node, level);
+				levelMapping.add(lvl);
 			}
 			else if (level > lvl.level)
 			{
@@ -145,11 +170,11 @@ public class TableDependencySorter
 		}
 	}
 	
-	private LevelNode findLevelNode(TableIdentifier tbl)
+	private LevelNode findLevelNode(List<LevelNode> levelMapping, TableIdentifier tbl)
 	{
 		for (LevelNode lvl : levelMapping)
 		{
-			if (lvl.table.getTableName().equalsIgnoreCase(tbl.getTableName())) return lvl;
+			if (lvl.node.getTable().getTableName().equalsIgnoreCase(tbl.getTableName())) return lvl;
 		}
 		return null;
 	}
@@ -182,12 +207,12 @@ public class TableDependencySorter
 	static class LevelNode
 	{
 		int level;
-		TableIdentifier table;
+		DependencyNode node;
 
-		public LevelNode(TableIdentifier tbl, int lvl)
+		public LevelNode(DependencyNode nd, int lvl)
 		{
 			level = lvl;
-			table = tbl;
+			node = nd;
 		}
 
 		public boolean equals(Object other)
@@ -195,19 +220,19 @@ public class TableDependencySorter
 			if (other instanceof LevelNode)
 			{
 				LevelNode n = (LevelNode) other;
-				return table.getTableName().equalsIgnoreCase(n.table.getTableName());
+				return node.getTable().getTableName().equalsIgnoreCase(n.node.getTable().getTableName());
 			}
 			return false;
 		}
 
 		public int hashCode()
 		{
-			return table.getTableName().hashCode();
+			return node.getTable().getTableName().hashCode();
 		}
 
 		public String toString()
 		{
-			return table.getTableName() + ", Level=" + level;
+			return node.getTable().getTableName() + ", Level=" + level;
 		}
 	}
 	

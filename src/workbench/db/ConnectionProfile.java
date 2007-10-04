@@ -67,6 +67,7 @@ public class ConnectionProfile
 	private String idleScript = null;
 	private long idleTime = 0;
 	private Color infoColor;
+	private boolean copyPropsToSystem = false;
 	
 	private DelimiterDefinition alternateDelimiter;
 	
@@ -134,6 +135,20 @@ public class ConnectionProfile
 			this.alternateDelimiter = def;
 			this.changed = true;
 		}
+	}
+	
+	public void setCopyExtendedPropsToSystem(boolean flag)
+	{
+		if (flag != this.copyPropsToSystem)
+		{
+			this.copyPropsToSystem = flag;
+			this.changed = true;
+		}
+	}
+	
+	public boolean getCopyExtendedPropsToSystem()
+	{
+		return this.copyPropsToSystem;
 	}
 	
 	public boolean getTrimCharData() { return trimCharData; }

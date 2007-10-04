@@ -17,7 +17,7 @@ package workbench.interfaces;
  */
 public interface Scripter
 {
-	String getScript();
+	CharSequence getScript();
 	void generateScript();
 	void setProgressMonitor(ScriptGenerationMonitor monitor);
 	void cancel();

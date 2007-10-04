@@ -810,6 +810,7 @@ public class ConnectionEditorPanel
 		if (this.currentProfile == null) return;
 		Properties p = this.currentProfile.getConnectionProperties();
 		ConnectionPropertiesEditor editor = new ConnectionPropertiesEditor(p);
+		editor.setCopyToSystem(currentProfile.getCopyExtendedPropsToSystem());
 		Dimension d = new Dimension(300,250);
 		editor.setMinimumSize(d);
 		editor.setPreferredSize(d);
@@ -818,6 +819,7 @@ public class ConnectionEditorPanel
 		if (choice == JOptionPane.OK_OPTION)
 		{
 			this.currentProfile.setConnectionProperties(editor.getProperties());
+			this.currentProfile.setCopyExtendedPropsToSystem(editor.getCopyToSystem());
 		}
 	}
 

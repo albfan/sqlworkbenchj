@@ -76,6 +76,7 @@ public class DmlStatement
 
 	/**
 	 * Execute the statement as a prepared statement
+	 * 
 	 * @param aConnection the Connection to be used
 	 * @return the number of rows affected
 	 */
@@ -167,10 +168,10 @@ public class DmlStatement
 	}
 	
 	/**
-	 *	Returns a "real" SQL Statement which can be executed
-	 *	directly. The statement contains the parameter values
-	 *	as literals. No placeholders are used.
-	 *	This statement is executed after setUsePreparedStatement(false) is called
+	 * Returns a "real" SQL Statement which can be executed
+	 * directly. The statement contains the parameter values
+	 * as literals. No placeholders are used.
+	 *	
 	 * @param literalFormatter the Formatter for date and other literals
 	 * @return a SQL statement that can be executed
 	 */
@@ -303,8 +304,13 @@ public class DmlStatement
 		return count;
 	}
 
-	public String toString()
+	public String getSql()
 	{
 		return sql.toString();
+	}
+	
+	public String toString()
+	{
+		return getSql();
 	}
 }

@@ -139,7 +139,6 @@ public class DependencyNode
 
 	public boolean equals(Object other)
 	{
-		if (other == null) return false;
 		if (other instanceof DependencyNode)
 		{
 			DependencyNode node = (DependencyNode) other;

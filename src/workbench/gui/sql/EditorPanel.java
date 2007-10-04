@@ -360,7 +360,7 @@ public class EditorPanel
 			
 			try
 			{
-				String formattedSql = f.getFormattedSql();
+				String formattedSql = f.getFormattedSql().toString();
 				newSql.append(formattedSql);
 				if (!command.trim().endsWith(delimit))
 				{

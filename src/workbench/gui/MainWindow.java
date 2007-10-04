@@ -359,14 +359,15 @@ public class MainWindow
 
 		action = new FileConnectAction(this);
 		action.addToMenu(menu);
-		this.disconnectAction.addToMenu(menu);
 		this.createNewConnection.addToMenu(menu);
-
+		menu.addSeparator();
+		this.disconnectAction.addToMenu(menu);
+		menu.addSeparator();
+		
 		action = new FileSaveProfiles();
 		action.addToMenu(menu);
 
 		action = new FileNewWindowAction();
-		menu.addSeparator();
 		action.addToMenu(menu);
 
 		// now create the menus for the current tab

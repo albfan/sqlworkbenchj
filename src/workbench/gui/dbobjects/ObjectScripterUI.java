@@ -90,7 +90,7 @@ public class ObjectScripterUI
 					scripter.generateScript();
 					if (!scripter.isCancelled())
 					{
-						editor.setText(scripter.getScript());
+						editor.setText(scripter.getScript().toString());
 						editor.setCaretPosition(0);
 					}
 				}

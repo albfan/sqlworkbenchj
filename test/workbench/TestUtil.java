@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.xpath.XPath;
@@ -30,7 +31,9 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.sql.BatchRunner;
 import workbench.sql.DefaultStatementRunner;
+import workbench.sql.ScriptParser;
 import workbench.util.ArgumentParser;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -225,4 +228,30 @@ public class TestUtil
 			return null;
 		}
 	}	
+	
+	public static void executeScript(WbConnection con, String script)
+		throws SQLException
+	{
+		ScriptParser parser = new ScriptParser(script);
+		int count = parser.getSize();
+		for (int i=0; i < count; i++)
+		{
+			String sql = parser.getCommand(i);
+			Statement stmt = null;
+			try
+			{
+				stmt = con.createStatement();
+				stmt.execute(sql);
+			}
+			catch (SQLException e)
+			{
+				System.out.println("**** Error executing statement at index= " + i + ", sql=" + sql);
+				throw e;
+			}
+			finally
+			{
+				SqlUtil.closeStatement(stmt);
+			}
+		}
+	}
 }

@@ -12,13 +12,13 @@
 package workbench.sql.formatter;
 
 import java.io.Reader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import workbench.sql.wbcommands.CommandTester;
+import workbench.util.CharSequenceReader;
 import workbench.util.StringUtil;
 
 /**
@@ -125,7 +125,7 @@ public class SqlFormatter
 		TABLE_CONSTRAINTS_KEYWORDS .add("CONSTRAINT");
 	}
 	
-	private String sql;
+	private CharSequence sql;
 	private SQLLexer lexer;
 	private StringBuilder result;
 	private StringBuilder indent = null;
@@ -137,15 +137,15 @@ public class SqlFormatter
 	private int selectColumnsPerLine = 1;
 	private static final String NL = "\n";
 	
-	public SqlFormatter(String aScript, int maxSubselectLength)
+	public SqlFormatter(CharSequence aScript, int maxSubselectLength)
 	{
 		this(aScript, 0, maxSubselectLength);
 	}
 
-	private SqlFormatter(String aScript, int indentCount, int maxSubselectLength)
+	private SqlFormatter(CharSequence aScript, int indentCount, int maxSubselectLength)
 	{
 		this.sql = aScript;
-		Reader in = new StringReader(this.sql);
+		Reader in = new CharSequenceReader(this.sql);
 		this.lexer = new SQLLexer(in);
 		this.result = new StringBuilder(this.sql.length() + 100);
 		if (indentCount > 0)
@@ -207,10 +207,10 @@ public class SqlFormatter
 			if (pos >= sql.length()) break;
 			c = this.sql.charAt(pos);
 		}
-		this.sql = this.sql.trim();
+		this.sql = this.sql.toString().trim();
 	}
 	
-	public String getFormattedSql()
+	public CharSequence getFormattedSql()
 		throws Exception
 	{
 		saveLeadingWhitespace();
@@ -581,7 +581,7 @@ public class SqlFormatter
 		throws Exception
 	{
 		SqlFormatter f = new SqlFormatter(subSql.toString(), lastIndent, this.maxSubselectLength);
-		String s = f.getFormattedSql();
+		String s = f.getFormattedSql().toString();
 		if (f.getRealLength() < this.maxSubselectLength)
 		{
 			s = s.replaceAll(" *" + SqlFormatter.NL + " *", " ");

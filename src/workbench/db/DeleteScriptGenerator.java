@@ -13,6 +13,7 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,6 @@ import workbench.storage.DataStore;
 import workbench.storage.DmlStatement;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 /**
  * Generates a SQL script to delete a record from the given table and
@@ -50,7 +50,7 @@ public class DeleteScriptGenerator
 	private WbTable sourceTable = null;
 	private ScriptGenerationMonitor monitor;
 	private List<DependencyNode> visitedTables = new ArrayList<DependencyNode>();
-	private String script;
+	private List<DmlStatement> statements;
 	private SqlLiteralFormatter formatter;
 	
 	public DeleteScriptGenerator(WbConnection aConnection)
@@ -94,17 +94,16 @@ public class DeleteScriptGenerator
 		// not implemented yet
 	}
 	
-	private String createScriptForCurrentObject()
+	private void createStatements()
 	{
 		ArrayList<DependencyNode> parents = new ArrayList<DependencyNode>();
 		this.dependency.readDependencyTree(true);
 		List<DependencyNode> leafs = this.dependency.getLeafs();
-		StringBuilder sql = new StringBuilder(2000);
 		
 		for (DependencyNode node : leafs)
 		{
 			if (this.visitedTables.contains(node)) continue;
-			this.addDeleteStatement(sql, node);
+			statements.add(createDeleteStatement(node));
 			this.visitedTables.add(node);
 			DependencyNode p = node.getParent();
 			while (p != null)
@@ -115,34 +114,23 @@ public class DeleteScriptGenerator
 				}
 				p = p.getParent();
 			}
-			sql.append("\n\n");
 		}
 
 		for (DependencyNode pnode : parents)
 		{
 			if (this.visitedTables.contains(pnode)) continue;
-			this.addDeleteStatement(sql, pnode);
+			statements.add(createDeleteStatement(pnode));
 			this.visitedTables.add(pnode);
-			sql.append("\n");
 		}
 
 		DependencyNode root = this.dependency.getRootNode();
-		sql.append("DELETE FROM ");
-		sql.append(root.getTable().getTableExpression(this.connection));
-		sql.append("\n WHERE ");
-		this.addRootTableWhere(sql);
-		sql.append(';');
-		try
-		{
-			int max = Settings.getInstance().getFormatterMaxSubselectLength();
-			SqlFormatter format = new SqlFormatter(sql.toString(), max);
-			return format.getFormattedSql().toString();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			return sql.toString();
-		}
+		StringBuilder rootSql = new StringBuilder(100);
+		rootSql.append("DELETE FROM ");
+		rootSql.append(root.getTable().getTableExpression(this.connection));
+		rootSql.append("\n WHERE ");
+		this.addRootTableWhere(rootSql);
+		DmlStatement dml = new DmlStatement(rootSql, this.columnValues);
+		statements.add(dml);
 	}
 
 	private DmlStatement createDeleteStatement(DependencyNode node)
@@ -158,17 +146,17 @@ public class DeleteScriptGenerator
 		return result;
 	}
 	
-	private void addDeleteStatement(StringBuilder sql, DependencyNode node)
-	{
-		if (node == null) return;
-
-		sql.append("DELETE FROM ");
-		sql.append(node.getTable().getTableExpression(this.connection));
-		sql.append("\n WHERE ");
-
-		this.addParentWhere(sql, node);
-		sql.append(';');
-	}
+//	private void addDeleteStatement(StringBuilder sql, DependencyNode node)
+//	{
+//		if (node == null) return;
+//
+//		sql.append("DELETE FROM ");
+//		sql.append(node.getTable().getTableExpression(this.connection));
+//		sql.append("\n WHERE ");
+//
+//		this.addParentWhere(sql, node);
+//		sql.append(';');
+//	}
 
 	private void addParentWhere(StringBuilder sql, DependencyNode node)
 	{
@@ -242,8 +230,7 @@ public class DeleteScriptGenerator
 			}
 			else
 			{
-				sql.append(" = ");
-				sql.append(formatter.getDefaultLiteral(col));
+				sql.append(" = ?");
 			}
 		}
 	}
@@ -263,7 +250,6 @@ public class DeleteScriptGenerator
 		
 		parentColumn = this.meta.adjustObjectnameCase(parentColumn);
 
-		int type = this.getColumnType(tableDefinition, parentColumn);
 		sql.append(SqlUtil.quoteObjectname(childColumn));
 		if (data.isNull())
 		{
@@ -271,24 +257,8 @@ public class DeleteScriptGenerator
 		}
 		else
 		{
-			sql.append(" = ");
-			sql.append(formatter.getDefaultLiteral(data));
+			sql.append(" = ?");
 		}
-	}
-
-	private int getColumnType(DataStore tableDef, String aColname)
-	{
-		for (int i=0; i < tableDef.getRowCount(); i ++)
-		{
-			String col = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			if (aColname.equals(col))
-			{
-				String t = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
-				int type = StringUtil.getIntValue(t, 0);
-				return type;
-			}
-		}
-		return -1;
 	}
 
 	public void startGenerate()
@@ -304,20 +274,51 @@ public class DeleteScriptGenerator
 
 	public String getScript()
 	{
-		if (this.script == null) this.generateScript();
-		return this.script;
+		if (this.statements == null)
+		{
+			this.generateScript();
+		}
+		StringBuilder script = new StringBuilder();
+		
+		for (DmlStatement dml : statements)
+		{
+			script.append(dml.getExecutableStatement(formatter));
+			script.append(";\n\n");
+		}
+		
+		try
+		{
+			int max = Settings.getInstance().getFormatterMaxSubselectLength();
+			SqlFormatter format = new SqlFormatter(script, max);
+			return format.getFormattedSql().toString();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return script.toString();
+		}
 	}
 
 	public CharSequence getScriptForValues(List<ColumnData> values)
 		throws SQLException
 	{
+		this.statements = new ArrayList<DmlStatement>(50);
 		this.setValues(values);
-		return this.createScriptForCurrentObject();
+		this.createStatements();
+		return getScript();
+	}
+	
+	public List<DmlStatement> getStatementsForValues(List<ColumnData> values)
+	{
+		this.statements = new ArrayList<DmlStatement>(50);
+		this.setValues(values);
+		this.createStatements();
+		return Collections.unmodifiableList(statements);
 	}
 	
 	public void generateScript()
 	{
-		this.script = "";
+		this.statements = new ArrayList<DmlStatement>(50);
 		
 		if (this.sourceTable == null) return;
 
@@ -334,13 +335,7 @@ public class DeleteScriptGenerator
 		TableIdentifier tbl = ds.getUpdateTable();
 			
 		int numRows = rows.length;
-		StringBuilder result = new StringBuilder(numRows * 150);
-		int max = Settings.getInstance().getFormatterMaxSubselectLength();
-		StringBuilder sep = new StringBuilder(max + 2);
-		sep.append('\n');
-		for (int i=0; i < max; i++) sep.append('=');
-		sep.append('\n');
-
+		
 		try
 		{
 			this.setTable(tbl);
@@ -349,18 +344,15 @@ public class DeleteScriptGenerator
 			{
 				List<ColumnData> pkvalues = ds.getPkValues(rows[i]);
 				this.setValues(pkvalues);
-				if (monitor != null) this.monitor.setCurrentObject(ResourceMgr.getString("MsgGeneratingScriptForRow") + " " + i);
+				if (monitor != null) this.monitor.setCurrentObject(ResourceMgr.getString("MsgGeneratingScriptForRow") + " " + (i + 1));
 				
-				String rowScript = this.createScriptForCurrentObject();
-				if (i > 0) result.append(sep);
-				result.append(rowScript);
+				this.createStatements();
 			}
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("SqlPanel.generateDeleteScript", "Error generating delete script", e);
 		}
-		this.script = result.toString();
 	}
 	
 }

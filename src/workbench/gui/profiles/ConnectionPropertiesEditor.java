@@ -15,6 +15,7 @@ import java.awt.BorderLayout;
 import java.sql.Types;
 import java.util.Enumeration;
 import java.util.Properties;
+import javax.swing.JCheckBox;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -43,7 +44,8 @@ public class ConnectionPropertiesEditor
 
 	private NewListEntryAction newItem;
 	private DeleteListEntryAction deleteItem;
-
+	private JCheckBox copyProps;
+	
 	public ConnectionPropertiesEditor(Properties source)
 	{
 		String[] cols = new String[] { ResourceMgr.getString("TxtConnDataPropName"), ResourceMgr.getString("TxtConnDataPropValue") };
@@ -82,8 +84,21 @@ public class ConnectionPropertiesEditor
 		toolbar.add(this.deleteItem);
 		this.add(toolbar, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
+		copyProps = new JCheckBox(ResourceMgr.getString("LblCpProps2System"));
+		copyProps.setToolTipText(ResourceMgr.getDescription("LblCpProps2System"));
+		this.add(copyProps, BorderLayout.SOUTH);
 	}
 
+	public boolean getCopyToSystem()
+	{
+		return this.copyProps.isSelected();
+	}
+	
+	public void setCopyToSystem(boolean flag)
+	{
+		this.copyProps.setSelected(flag);
+	}
+	
 	public Properties getProperties()
 	{
 		Properties props = new Properties();

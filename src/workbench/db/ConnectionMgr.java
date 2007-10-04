@@ -37,11 +37,13 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.FileUtil;
+import workbench.util.PropertiesCopier;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
 /**
  * A connection factory for the application.
+ * 
  * @author  support@sql-workbench.net
  */
 public class ConnectionMgr
@@ -167,6 +169,8 @@ public class ConnectionMgr
 			throw new SQLException("Driver class not registered");
 		}
 		
+		copyPropsToSystem(aProfile);
+		
 		Connection sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword(), anId, aProfile.getConnectionProperties());
 		try
 		{
@@ -183,6 +187,24 @@ public class ConnectionMgr
 		return conn;
 	}
 	
+	private void copyPropsToSystem(ConnectionProfile profile)
+	{
+		if (profile != null && profile.getCopyExtendedPropsToSystem())
+		{
+			PropertiesCopier copier = new PropertiesCopier();
+			copier.copyToSystem(profile.getConnectionProperties());
+		}		
+	}
+	
+	private void removePropsFromSystem(ConnectionProfile profile)
+	{
+		if (profile != null && profile.getCopyExtendedPropsToSystem())
+		{
+			PropertiesCopier copier = new PropertiesCopier();
+			copier.removeFromSystem(profile.getConnectionProperties());
+		}		
+	}
+					
 	public DbDriver findDriverByName(String drvClassName, String aName)
 	{
 		DbDriver firstMatch = null;
@@ -439,6 +461,8 @@ public class ConnectionMgr
 			}
 			
 			conn.runPreDisconnectScript();
+			
+			removePropsFromSystem(conn.getProfile());
 			
 			if (conn.getMetadata() == null)
 			{

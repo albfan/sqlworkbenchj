@@ -22,7 +22,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import workbench.db.ColumnIdentifier;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTraversalPolicy;
@@ -53,6 +52,7 @@ public class ColumnExpressionPanel
 	protected JTextField valueField;
 	private ValueConverter converter = new ValueConverter();
 	private Class lastColumnClass;
+	private boolean ignoreComparatorChange = false;
 
 	public ColumnExpressionPanel(ResultInfo info, ExpressionValue filter)
 	{
@@ -144,48 +144,62 @@ public class ColumnExpressionPanel
 	{
 		if (evt.getSource() == this.columnSelector)
 		{
-			int index = this.columnSelector.getSelectedIndex();
-			if (index == 0)
-			{
-				buildColumnComparatorDropDown(String.class);
-			}
-			else
-			{
-				ColumnIdentifier col = this.columnInfo.getColumn(index-1);
-				buildColumnComparatorDropDown(col);
-			}
-		}
-		else if (evt.getSource() == this.comparatorDropDown)
-		{
 			try
 			{
-				ComparatorListItem item = (ComparatorListItem)comparatorDropDown.getSelectedItem();
-				if (item != null)
+				ignoreComparatorChange = true;
+				int index = this.columnSelector.getSelectedIndex();
+				if (index == 0)
 				{
-					ignoreCase.setSelected(item.getComparator().supportsIgnoreCase());
-					ignoreCase.setEnabled(item.getComparator().supportsIgnoreCase());
-					boolean needsValue = item.getComparator().needsValue();
-					valueField.setEnabled(needsValue);
-					if (needsValue)
-					{
-						valueField.setBackground(Color.WHITE);
-					}
-					else
-					{
-						valueField.setBackground(this.getBackground());
-					}
+					buildColumnComparatorDropDown(String.class);
 				}
 				else
 				{
-					ignoreCase.setSelected(false);
-					ignoreCase.setEnabled(false);
+					ColumnIdentifier col = this.columnInfo.getColumn(index-1);
+					buildColumnComparatorDropDown(col);
 				}
-				
 			}
-			catch (Exception e)
+			finally
 			{
-				LogMgr.logError("ColumnExpressionPanel.actionPerformed()", "Error when updating comparator", e);
+				ignoreComparatorChange = false;
 			}
+			checkComparator();
+		}
+		else if (!ignoreComparatorChange && evt.getSource() == this.comparatorDropDown)
+		{
+			checkComparator();
+		}
+	}
+
+	private void checkComparator()
+	{
+		try
+		{
+			ColumnComparator comp = this.getComparator();
+			
+			if (comp != null)
+			{
+				ignoreCase.setSelected(comp.supportsIgnoreCase());
+				ignoreCase.setEnabled(comp.supportsIgnoreCase());
+				boolean needsValue = comp.needsValue();
+				valueField.setEnabled(needsValue);
+				if (needsValue)
+				{
+					valueField.setBackground(Color.WHITE);
+				}
+				else
+				{
+					valueField.setBackground(this.getBackground());
+				}
+			}
+			else
+			{
+				ignoreCase.setSelected(false);
+				ignoreCase.setEnabled(false);
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("ColumnExpressionPanel.actionPerformed()", "Error when updating comparator", e);
 		}
 	}
 
@@ -279,7 +293,7 @@ public class ColumnExpressionPanel
 		String value = valueField.getText();
 		String col = getColumnName();
 		int colIndex = this.columnInfo.findColumn(col);
-		// If the any column entry is selected ("*")
+		// If the any column ("*") entry is selected 
 		// colIndex will be -1, and we simply return the value entered
 		// because we tried everything as a String
 		if (colIndex > -1)
@@ -326,7 +340,7 @@ public class ColumnExpressionPanel
 			}
 			int count = comparatorItems.size();
 			int added = 0;
-			ArrayList l = new ArrayList(count);
+			final ArrayList<ComparatorListItem> l = new ArrayList<ComparatorListItem>(count);
 			for (int i=0; i < count; i++)
 			{
 				ComparatorListItem item = (ComparatorListItem)comparatorItems.get(i);
@@ -336,19 +350,14 @@ public class ColumnExpressionPanel
 					added++;
 				}
 			}
-			activeItems.setData(l);
 			
-			final boolean setIndex = (added > 0);
-			SwingUtilities.invokeLater(new Runnable()
+			activeItems.setData(l);
+			comparatorDropDown.setSelectedItem(null);
+			comparatorDropDown.setModel(activeItems);
+			if (added > 0) 
 			{
-				public void run()
-				{
-					comparatorDropDown.setModel(activeItems);
-					if (setIndex) comparatorDropDown.setSelectedIndex(0);
-					comparatorDropDown.validate();
-					comparatorDropDown.repaint();
-				}
-			});
+				comparatorDropDown.setSelectedIndex(0);
+			}
 		}
 		catch (Exception e)
 		{
@@ -370,6 +379,7 @@ class ComparatorListItem
 
 	public String toString() { return comparator.getOperator(); }
 	public ColumnComparator getComparator() { return comparator; }
+	
 	public boolean equals(Object other)
 	{
 		if (other instanceof ComparatorListItem)

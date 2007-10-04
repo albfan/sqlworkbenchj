@@ -1,5 +1,69 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  (96.6) The extended connection properties can now optionally be copied
+      into the system properties when the connection is created. This can 
+      be used for JDBC drivers that only support System properties 
+      (such as H2)
+Enh:  (96.6) When not using "Separate Connection per tab", a new physical 
+      connection for the current tab can now be created using 
+      "File -> New Connection"
+Enh:  (96.6) The definition for JDBC drivers are now stored without a path
+      separator in WbDrivers.xml in order to make the configuration file
+      work on different platforms. To save the driver definitions in the new
+      format, the "Manage Driver" dialog needs to be opened and closed once.
+Enh:  (96.6) The definition for Look And Feels (Tools -> Options) is now
+      stored with a platform independent path separator in workbench.settings 
+      to make it easier to share the .settings file between platforms.
+Enh:  (96.6) When using "Check foreign keys" in the "Delete data" dialog, any
+      dependent table that was not selected, can now optionally be added
+      to the list.
+Enh:  (96.5) WbCopy can now be used with multiple tables, e.g. 
+      -sourceTable=* to copy all tables, or -sourceTable=table1,table2.
+      Specific column or table mappings are not possible in that mode. 
+      All tables with from the the source are copied to all tables
+      with the same name in the target DB. If copying multiple tables, it the
+      responsibility of the user to specify them in the correct order (so 
+      that no foreign key constraint is violated)
+Enh:  (96.5) WbImport and WbCopy now support the -checkDependencies
+      parameter. If set to true, SQL Workbench/J will analyze the 
+      foreign key dependencies of the tables and will import/copy them
+      such that the parent tables are processed before and referencing
+      child tables. The parameter is only checked if a multi-table mode
+      is used in both commands ("WbCopy -sourceTable=*" or 
+      "WbImport -sourceDir=somedir".
+Enh:  (96.5) When using "Delete data" from within the DbExplorer, the 
+      list of tables can now be sorted according to their FK constraints.
+Enh:  (96.5) Empty column and table comments can now be included in the 
+      generated SQL source for a table. This can be configured in 
+      Tools -> Options -> SQL Generation
+Enh:  (96.5) The toolbar can now be hidden (View -> Toolbar). 
+      Thanks to Petr for the patch.
+Enh:  (96.4) Importing data into Oracle NCLOB columns is now possible. 
+Enh:  (96.3) WbSchemaReport and WbSchemaDif can now also include sequences. To 
+      include sequences, use the new parameter -includeSequences=true (the 
+      default is false)
+Enh:  (96.3) WbCopy (DataPumper) and WbExport into a XML file did not work with 
+      Oracle when a NVARCHAR2 column was involved. This was due to the fact that 
+      the Oracle driver does not report the correct datatype for. A workaround 
+      has been added so that NVARCHAR2 (and NCHAR) columns are treated as 
+      java.sql.Types.VARCHAR instead of java.sql.Types.OTHER.
+      This workaround is enabled by default and can be disabled by setting
+      workbench.db.oracle.fixnvarchartype=false
+      in workbench.settings
+Enh:  (96.3) Support for stored procedures with OUT parameters has been added 
+      for drivers that support the necessary calls. It has been tested with 
+      Oracle (11g driver), MySQL (5.0), SQL Server 2005 (Microsoft Driver) and 
+      IBM DB9 9 (Linux). 
+      The procedure needs to be called with the new keyword WbCall: 
+      WbCall myproc(?) 
+      All out parameters of the procedure will be displayed. 
+      Wehn setting the property:
+      workbench.db.[dbid].procs.use.wbcall=true
+      SQL Workbench/J will also apply the new logic when executing the CALL 
+      statement. As this might potentially lead to compatibility problems it is 
+      disabled by default.
+Enh:  (96.3) A background color for the connection info display can now be 
+      defined on a per profile basis (to e.g. identify "critical" connections)
 Enh:  (96.1) Added support for SQLite
 Enh:  (96.1) Code completion now recognizes an alias of the outer statement 
       inside a sub-select.
@@ -21,10 +85,23 @@ Enh:  (96.1) For DDL Statements a Savepoint can now be enabled so that
       This is controlled with the property
       workbench.db.[dbid].ddl.usesavepoint=true
       Running imports using the update/insert (or insert/update) mode
-      will not work with Postgres as well. SQL Workbench/J can now use a savepoint
-      to guard the first of the two statements so that the transaction can 
-      continue. This is controlled using 
+      will not work with Postgres as well. SQL Workbench/J can now use a 
+      savepoint to guard the first of the two statements so that the transaction 
+      can continue. This is controlled using 
       workbench.db.[dbid].import.usesavepoint=true
+Fix:  (96.5) Single quotes in comments were not escaped correctly in generated
+      table source
+Fix:  (96.4) When using workbench.db.oracle.fixcharsemantics=true, NVARCHAR2 
+      columns were also displayed with Byte/Char semantics.
+Fix:  (96.4) Retrieving sequences was broken for DB2
+Fix:  (96.3) Oracle packages were not correctly written into the output file of 
+      WbSchemaReport or WbSchemaDiff
+Fix:  (96.3) The display of the source of stored procedures was broken for SQL Server
+Fix:  (96.3) When reloading the list of indexes in the DbExplorer, all subsequent
+      retrieval operations were blocked.
+Fix:  (96.3) Removed the automatic detection of available translations (because
+      it slowed down startup too much). If a new  translation is added, this now 
+      needs to be defined in workbench.properties
 Fix:  (96.2) The column label for the key column selection in the DataPumper was
       not readable with certain look & feels
 Fix:  (96.2) When running WbImport -header=false on an empty file, SQL Workbench/J
@@ -494,7 +571,7 @@ Fix:  (91.1) Text values with embedded newlines were not displayed correctly
 Fix:  (91.1) When importing an XML file that contains a column that does
       exist in the target table, no error was reported (but the import
       failed nevertheless)
-Fix:  (91.1) When running on DML Statements (INSERT, DELETE, ...) with the
+Fix:  (91.1) When running DML Statements (INSERT, DELETE, ...) with the
       Informix JDBC driver, it would throw an exception when retrieving
       the update count.
       

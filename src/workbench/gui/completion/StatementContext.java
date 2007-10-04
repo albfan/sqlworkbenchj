@@ -78,7 +78,7 @@ public class StatementContext
 			this.analyzer = subSelectAnalyzer;
 			this.analyzer.setParent(verbAnalyzer);
 		}
-		else
+		else if (verbAnalyzer != null)
 		{
 			this.analyzer = verbAnalyzer;
 			this.analyzer.setParent(null);

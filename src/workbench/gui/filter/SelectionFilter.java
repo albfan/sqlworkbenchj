@@ -12,7 +12,15 @@
 package workbench.gui.filter;
 
 import workbench.gui.components.WbTable;
-import workbench.storage.filter.*;
+import workbench.storage.filter.AndExpression;
+import workbench.storage.filter.ColumnComparator;
+import workbench.storage.filter.ComparatorFactory;
+import workbench.storage.filter.ComplexExpression;
+import workbench.storage.filter.DateEqualsComparator;
+import workbench.storage.filter.IsNullComparator;
+import workbench.storage.filter.NumberEqualsComparator;
+import workbench.storage.filter.OrExpression;
+import workbench.storage.filter.StringEqualsComparator;
 import workbench.util.SqlUtil;
 
 /**
@@ -21,7 +29,7 @@ import workbench.util.SqlUtil;
 public class SelectionFilter
 {
 	private WbTable client;
-	
+
 	public SelectionFilter(WbTable tbl)
 	{
 		this.client = tbl;
@@ -32,10 +40,8 @@ public class SelectionFilter
 		if (client == null) return;
 		int rowCount = client.getSelectedRowCount();
 		int colCount = client.getSelectedColumnCount();
-		
+
 		if (rowCount < 1 || (rowCount > 1 && colCount != 1)) return;
-		
-		
 		int[] columns = null;
 		// if whole rows are selected, use the currently
 		// focused column for the filter
@@ -45,10 +51,9 @@ public class SelectionFilter
 		}
 		else
 		{
-			columns = new int[] { client.getSelectedColumn()};
+			columns = new int[]{client.getSelectedColumn()};
 		}
 		if (columns == null || columns.length == 0) return;
-
 		ComplexExpression expr = null;
 		if (rowCount == 1)
 		{
@@ -63,7 +68,7 @@ public class SelectionFilter
 		for (int ri = 0; ri < rows.length; ri++)
 		{
 			int row = rows[ri];
-			
+
 			for (int i = 0; i < columns.length; i++)
 			{
 				String name = client.getColumnName(columns[i]);
@@ -92,15 +97,13 @@ public class SelectionFilter
 					ComparatorFactory factory = new ComparatorFactory();
 					comparator = factory.findEqualityComparatorFor(value.getClass());
 				}
-				
+
 				if (comparator != null)
 				{
 					expr.addColumnExpression(name, comparator, value);
 				}
 			}
-
 		}
 		if (expr.hasFilter()) client.applyFilter(expr);
-	}	
-	
+	}
 }

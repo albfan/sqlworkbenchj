@@ -12,40 +12,38 @@
 package workbench.gui.filter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
-import javax.swing.event.ListDataListener;
 
 /**
- * A ComboBoxModel backed by a List 
- * 
+ * A ComboBoxModel backed by a List
+ *
  * @author support@sql-workbench.net
  */
 public class ListComboBoxModel
 	extends AbstractListModel
 	implements ComboBoxModel
 {
-	private List data = Collections.EMPTY_LIST;
+	private List data = new ArrayList();
 	private Object selectedItem;
-	
+
 	public ListComboBoxModel()
 	{
 		data = new ArrayList();
 	}
-	
-	public ListComboBoxModel(List l)
+
+	public ListComboBoxModel(List<ComparatorListItem> l)
 	{
 		data = l;
 	}
 
-	public void setData(List l)
+	public void setData(List<ComparatorListItem> l)
 	{
 		this.data = l;
 		fireContentsChanged(this, -1, -1);
 	}
-	
+
 	public Object getElementAt(int index)
 	{
 		if (data == null) return null;
@@ -67,7 +65,7 @@ public class ListComboBoxModel
 	{
 		if (item == null) return -1;
 		int size = data.size();
-		for (int i=0; i < size; i++)
+		for (int i = 0; i < size; i++)
 		{
 			Object o = data.get(i);
 			if (o == null) continue;
