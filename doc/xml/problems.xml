@@ -85,6 +85,29 @@
 		
 	</section>
 	
+	<section id="mssql-problems">
+		<title>SQL Server Problems</title>
+
+		<section id="mssql-cloned-connection">
+		  <title>Can't start a cloned connection while in manual transaction mode</title>
+		  <para>
+		    This error usually occurs in the DbExplorer if an older Microsoft JDBC Driver is used
+		    and the connection does not use autocommit mode. There are two ways to fix this problem:
+		    <itemizedlist>
+		      <listitem>Upgrade to a newer Microsoft driver (e.g. the one for SQL Server 2005)</listitem>
+		      <listitem>Enable autocommit in the connection profile</listitem>
+		      <listitem>Add the parameter <literal>;SelectMethod=Cursor</literal> to your JDBC URL</listitem>
+		    </itemizedlist>
+		    This <ulink url="http://support.microsoft.com/?scid=kb;en-us;313181&amp;x=9&amp;y=11">article</ulink>
+		    in Microsoft's Knowledgebase gives more information regarding this problem.
+		  </para>
+		  <para>
+		    The possible parameters for the SQL Server 2005 driver are listed 
+        <ulink url ="http://msdn2.microsoft.com/en-us/library/ms378988.aspx">here</ulink>
+		  </para>
+		</section>
+	</section>
+	
 	<section id="db2-problems">
 		<title>DB2 Problems</title>
 
