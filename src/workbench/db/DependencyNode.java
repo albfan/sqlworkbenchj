@@ -14,8 +14,10 @@ package workbench.db;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import workbench.util.StringUtil;
 
 /**
@@ -34,10 +36,11 @@ public class DependencyNode
 	private String fkName;
 	
 	/**
-	 * Maps the columns of the base table to the matching column
-	 * of the parent table
+	 * Maps the columns of the base table (this.table) to the matching column
+	 * of the parent table (parentNode.getTable())
 	 */
 	private HashMap<String, String> columns = new HashMap<String, String>();
+	
 	private ArrayList<DependencyNode> childTables = new ArrayList<DependencyNode>();
 
 	public DependencyNode(TableIdentifier aTable)
@@ -57,7 +60,7 @@ public class DependencyNode
 
 	/**
 	 * Returns the level of this node in the dependency hierarchy. 
-	 * @return 0 if no parent is available 
+	 * @return 0 if no parent is available (i.e. the root of the tree)
 	 *         -1 if this is a self referencing dependency
 	 */
 	public int getLevel()
@@ -69,6 +72,7 @@ public class DependencyNode
 
 	public void setParent(DependencyNode aParent, String aFkName)
 	{
+		if (aFkName == null) throw new NullPointerException("FK Name may not be null");
 		this.parentNode = aParent;
 		this.fkName = aFkName;
 	}
@@ -85,11 +89,6 @@ public class DependencyNode
 		}
 	}
 
-	public void setFkName(String name)
-	{
-		this.fkName = name;
-	}
-	
 	public String getFkName()
 	{
 		return this.fkName;
@@ -109,6 +108,7 @@ public class DependencyNode
 	/**
 	 * Returns a Map that maps the columns of the base table to the matching column
 	 * of the related (parent/child) table.
+	 * 
 	 * The keys to the map are columns from this node's table {@link #getTable()}
 	 * The values in this map are columns found in this node's "parent" table
 	 *
@@ -193,6 +193,7 @@ public class DependencyNode
 	
 	public DependencyNode addChild(TableIdentifier table, String aFkname)
 	{
+		if (aFkname == null) throw new NullPointerException("FK Name may not be null");
 		for (DependencyNode node : childTables)
 		{
 			if (node.isDefinitionFor(table, aFkname))

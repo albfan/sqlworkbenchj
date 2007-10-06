@@ -19,6 +19,7 @@ public interface DbData
 {
 	long addRow();
 	void deleteRow();
+	void deleteRowWithDependencies();
 	boolean startEdit();
 	int duplicateRow();
 	void endEdit();

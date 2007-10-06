@@ -529,15 +529,6 @@ public class OracleMetadata
    */
   public void columnsProcessed()
   {
-    if (this.columnStatement != null)
-    {
-      try
-      {
-        this.columnStatement.close();
-      }
-      catch (Throwable th)
-      {
-      }
-    }
+		SqlUtil.closeStatement(columnStatement);
   }
 }

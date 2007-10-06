@@ -11,6 +11,7 @@
  */
 package workbench.gui.components;
 import java.awt.Toolkit;
+import java.sql.SQLException;
 import java.sql.Types;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TableModelEvent;
@@ -295,9 +296,17 @@ public class DataStoreTableModel
 		return row;
 	}
 	
-	public void deleteRow(int aRow)
+	public void deleteRow(int aRow, boolean withDependencies)
+		throws SQLException
 	{
-		this.dataCache.deleteRow(aRow);
+		if (withDependencies)
+		{
+			this.dataCache.deleteRowWithDependencies(aRow);
+		}
+		else
+		{
+			this.dataCache.deleteRow(aRow);
+		}
 		this.fireTableRowsDeleted(aRow, aRow);
 	}
 

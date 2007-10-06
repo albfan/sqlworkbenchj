@@ -49,6 +49,7 @@ import workbench.gui.components.WbTextCellEditor;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyRowAction;
+import workbench.gui.actions.DeleteDependentRowsAction;
 import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.InsertRowAction;
 import workbench.gui.actions.SelectKeyColumnsAction;
@@ -106,12 +107,12 @@ public class DwPanel
 	protected InsertRowAction insertRow;
 	protected CopyRowAction duplicateRow;
 	protected DeleteRowAction deleteRow;
+	protected DeleteDependentRowsAction deleteDependentRow;
 	protected SelectKeyColumnsAction selectKeys;
 	
 	private boolean editingStarted;
 	private boolean batchUpdate;
 	private boolean manageUpdateAction;
-	private boolean showErrorMessages;
 	private boolean readOnly;
 	
 	private String[] lastResultMessages;
@@ -143,12 +144,14 @@ public class DwPanel
 		this.updateAction = new UpdateDatabaseAction(this);
 		this.insertRow = new InsertRowAction(this);
 		this.deleteRow = new DeleteRowAction(this);
+		this.deleteDependentRow = new DeleteDependentRowsAction(this);
 		this.duplicateRow = new CopyRowAction(this);
 		this.selectKeys = new SelectKeyColumnsAction(this);
 		
 		dataTable.addPopupAction(this.updateAction, true);
 		dataTable.addPopupAction(this.insertRow, true);
 		dataTable.addPopupAction(this.deleteRow, false);
+		dataTable.addPopupAction(this.deleteDependentRow, false);
 		
 		this.dataTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.dataTable.setRowSelectionAllowed(true);
@@ -213,23 +216,16 @@ public class DwPanel
 	}
 	
 	/**
-	 *	Enables or disables the display of error messages.
-	 */
-	public void setShowErrorMessages(boolean aFlag)
-	{
-		this.showErrorMessages = aFlag;
-	}
-	
-	/**
 	 *	Defines the connection for this DwPanel.
 	 */
 	public void setConnection(WbConnection aConn)
 	{
 		this.clearContent();
-		this.sql = null;
-		this.lastMessage = null;
 		this.dbConnection = aConn;
-		this.hasResultSet = false;
+		if (this.stmtRunner != null)
+		{
+			this.stmtRunner.done();
+		}
 		this.stmtRunner = null;
 		this.clearStatusMessage();
 	}
@@ -408,19 +404,11 @@ public class DwPanel
 			{
 				savingData = false;
 				this.clearStatusMessage();
-				if (this.manageUpdateAction) this.enableUpdateActions();
+				if (this.manageUpdateAction) this.checkResultSetActions();
 			}
 		}
 		
 		return rows;
-	}
-	
-	protected void enableUpdateActions()
-	{
-		int rows = this.dataTable.getSelectedRowCount();
-		this.insertRow.setEnabled(true);
-		this.duplicateRow.setEnabled(rows == 1);
-		this.deleteRow.setEnabled(rows > 0);
 	}
 	
 	protected void disableUpdateActions()
@@ -428,6 +416,7 @@ public class DwPanel
 		this.insertRow.setEnabled(false);
 		this.duplicateRow.setEnabled(false);
 		this.deleteRow.setEnabled(false);
+		this.deleteDependentRow.setEnabled(false);
 	}
 	
 	/**
@@ -489,9 +478,7 @@ public class DwPanel
 		if (this.readOnly && this.editingStarted)
 		{
 			this.endEdit();
-			this.insertRow.setEnabled(false);
-			this.deleteRow.setEnabled(false);
-			this.updateAction.setEnabled(false);
+			this.disableUpdateActions();
 			this.dataTable.restoreOriginalValues();
 		}
 		else
@@ -591,9 +578,6 @@ public class DwPanel
 	public boolean runQuery(String aSql, boolean respectMaxRows)
 		throws SQLException, Exception
 	{
-		this.lastMessage = null;
-		this.statusBar.clearExecutionTime();
-
 		if (this.stmtRunner == null) this.createStatementRunner();
 		
 		boolean success = false;
@@ -601,7 +585,6 @@ public class DwPanel
 		try
 		{
 			this.clearContent();
-			this.setBatchUpdate(true);
 			
 			this.sql = aSql;
 			int max = (respectMaxRows ? this.statusBar.getMaxRows() : 0);
@@ -615,26 +598,19 @@ public class DwPanel
 				if (result.isSuccess())
 				{
 					success = true;
-					this.hasResultSet = true;
 					this.showData(result);
-					this.lastExecutionTime = result.getExecutionTime();
 				}
 				else
 				{
-					this.hasResultSet = false;
 					String err = result.getMessageBuffer().toString();
 					showError(err);
-					if (this.showErrorMessages)
-					{
-						WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), err);
-					}
+					WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), err);
 				}
-				checkResultSetActions();
 			}
 		}
 		finally
 		{
-			this.setBatchUpdate(false);
+			this.stmtRunner.done();
 			this.clearStatusMessage();
 		}
 		return success;
@@ -649,14 +625,24 @@ public class DwPanel
 	public void showData(final StatementRunnerResult result)
 		throws SQLException
 	{
-		if (result.hasDataStores())
+		if (result == null || !result.isSuccess())
 		{
-			showData(result.getDataStores().get(0), result.getSourceCommand());
+			this.lastExecutionTime = 0;
+			this.hasResultSet = false;
 		}
-		else if (result.hasResultSets())
+		else
 		{
-			showData(result.getResultSets().get(0), result.getSourceCommand());
-		}			
+			this.lastExecutionTime = result.getExecutionTime();		
+
+			if (result.hasDataStores())
+			{
+				showData(result.getDataStores().get(0), result.getSourceCommand());
+			}
+			else if (result.hasResultSets())
+			{
+				showData(result.getResultSets().get(0), result.getSourceCommand());
+			}			
+		}
 	}
 	
 	public void showData(final ResultSet result, final String sql)
@@ -703,7 +689,6 @@ public class DwPanel
 					header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
 					header.append(sql);
 					setPrintHeader(header.toString());
-
 					dataTable.checkCopyActions();
 					checkResultSetActions();
 				}
@@ -720,12 +705,12 @@ public class DwPanel
 	{
 		boolean hasResult = this.hasResultSet();
 		int rows = this.getTable().getSelectedRowCount();
-
 		this.dataTable.getExportAction().setEnabled(hasResult);
-		this.updateAction.setEnabled(false);
-		this.insertRow.setEnabled(hasResult);
-		this.deleteRow.setEnabled(rows > 0);
+		this.updateAction.setEnabled(isModified());
 		this.duplicateRow.setEnabled(rows == 1);
+		this.deleteRow.setEnabled(rows > 0);
+		this.deleteDependentRow.setEnabled(rows > 0);
+		this.insertRow.setEnabled(hasResult);
 		this.selectKeys.setEnabled(hasResult);
 		this.dataTable.checkCopyActions();
 	}
@@ -781,10 +766,28 @@ public class DwPanel
 	
 	public void deleteRow()
 	{
+		deleteRow(false);
+	}
+
+	public void deleteRowWithDependencies()
+	{
+		deleteRow(true);
+	}
+	
+	private void deleteRow(boolean withDependencies)
+	{
 		if (this.readOnly) return;
 		if (!this.startEdit(true)) return;
-		this.dataTable.deleteRow();
-		this.rowCountChanged();
+		try
+		{
+			this.dataTable.deleteRow(withDependencies);
+			this.rowCountChanged();
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("DwPanel.deleteRow()", "Error deleting row from table", e);
+			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
+		}
 	}
 	
 	public long addRow()
@@ -933,7 +936,9 @@ public class DwPanel
 		this.lastMessage = null;
 		this.sql = null;
 		this.statusBar.clearRowcount();
+		this.statusBar.clearExecutionTime();
 		this.selectKeys.setEnabled(false);
+		checkResultSetActions();
 	}
 	
 	public int getActionOnError(int errorRow, String errorColumn, String data, String errorMessage)
@@ -1020,10 +1025,7 @@ public class DwPanel
 		this.dataTable.stopEditing();
 		this.dataTable.setShowStatusColumn(false);
 		this.updateAction.setEnabled(false);
-		int rows = this.dataTable.getSelectedRowCount();
-		this.insertRow.setEnabled(true);
-		this.deleteRow.setEnabled(rows > 0);
-		this.duplicateRow.setEnabled(rows == 1);
+		this.checkResultSetActions();
 		if (restoreData) this.dataTable.restoreOriginalValues();
 	}
 
@@ -1069,10 +1071,7 @@ public class DwPanel
 			// underlying DataStore
 			WbSwingUtilities.showErrorMessageKey(w, "MsgNoTables");
 			this.setUpdateTable((TableIdentifier)null);
-			this.updateAction.setEnabled(false);
-			this.insertRow.setEnabled(false);
-			this.deleteRow.setEnabled(false);
-			this.duplicateRow.setEnabled(false);
+			this.disableUpdateActions();
 			this.selectKeys.setEnabled(false);
 			return false;
 		}
@@ -1154,6 +1153,7 @@ public class DwPanel
 	public InsertRowAction getInsertRowAction() { return this.insertRow; }
 	public CopyRowAction getCopyRowAction() { return this.duplicateRow; }
 	public DeleteRowAction getDeleteRowAction() { return this.deleteRow; }
+	public DeleteDependentRowsAction getDeleteDependentRowsAction() { return this.deleteDependentRow; }
 	public UpdateDatabaseAction getUpdateDatabaseAction() { return this.updateAction; }
 	
 	/**
@@ -1201,9 +1201,7 @@ public class DwPanel
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (this.readOnly) return;
-		long rows = this.dataTable.getSelectedRowCount();
-		this.deleteRow.setEnabled(rows > 0);
-		this.duplicateRow.setEnabled(rows == 1);
+		checkResultSetActions();
 	}
 	
 	/**

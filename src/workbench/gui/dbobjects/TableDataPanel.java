@@ -126,7 +126,6 @@ public class TableDataPanel
 		this.dataDisplay.setManageUpdateAction(true);
 		this.dataDisplay.setShowLoadProcess(true);
 		this.dataDisplay.setDefaultStatusMessage("");
-		this.dataDisplay.setShowErrorMessages(true);
 
 		topPanel = new JPanel();
 		topPanel.setMaximumSize(new Dimension(32768, 32768));
@@ -292,23 +291,22 @@ public class TableDataPanel
 
 		this.reloadAction.setEnabled(false);
 		this.dataDisplay.setStatusMessage(ResourceMgr.getString("MsgCalculatingRowCount"));
-		//this.topPanel.doLayout();
-		this.topPanel.validate();
+		
 		String sql = this.buildSqlForTable(true);
 		if (sql == null) return -1;
 
 		long rowCount = 0;
-		Statement stmt = null;
 		ResultSet rs = null;
 
 		this.retrieveRunning = true;
+		boolean error = false;
 		
 		try
 		{
 			fireDbExecStart();
 			rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountCancel"));
 			
-			rowCountRetrieveStmt = this.dbConnection.createStatement();
+			rowCountRetrieveStmt = this.dbConnection.createStatementForQuery();
 			rs = rowCountRetrieveStmt.executeQuery(sql);
 			if (rs.next())
 			{
@@ -316,13 +314,12 @@ public class TableDataPanel
 			}
 			this.rowCountLabel.setText(Long.toString(rowCount));
 			this.rowCountLabel.setToolTipText(null);
-			commitRetrieveIfNeeded();
 		}
 		catch (Exception e)
 		{
 			rowCount = -1;
-			rollbackIfNeeded();
-			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression() + ": " + ExceptionUtil.getDisplay(e), null);
+			error = true;
+			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression() + ": " + ExceptionUtil.getDisplay(e), e);
 			if (rowCountCancel)
 			{
 				this.rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
@@ -338,15 +335,23 @@ public class TableDataPanel
 		}
 		finally
 		{
+			SqlUtil.closeAll(rs, rowCountRetrieveStmt);
 			this.rowCountCancel = false;
 			this.retrieveRunning = false;
 			this.dataDisplay.setStatusMessage("");
 			this.clearLoadingImage();
-			SqlUtil.closeAll(rs, rowCountRetrieveStmt);
-			rowCountRetrieveStmt = null;
 			this.reloadAction.setEnabled(true);
-			fireDbExecEnd();
 			rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountButton"));
+			if (error)
+			{
+				rollbackIfNeeded();
+			}
+			else
+			{
+				commitRetrieveIfNeeded();
+			}
+			fireDbExecEnd();
+			rowCountRetrieveStmt = null;		
 		}
 		return rowCount;
 	}
@@ -398,10 +403,6 @@ public class TableDataPanel
 
 		sql.append(this.table.getTableExpression(this.dbConnection));
 		String s = sql.toString();
-		if (LogMgr.isDebugEnabled())
-		{
-			LogMgr.logDebug("TableDataPanel.buildSqlForTable()", "Using SQL=" + s);
-		}
 		return s;
 	}
 
@@ -497,9 +498,14 @@ public class TableDataPanel
 		}
 	}
 
+	private boolean isOwnTransaction()
+	{
+		return (!this.dbConnection.getAutoCommit() && this.dbConnection.getProfile().getUseSeparateConnectionPerTab());
+	}
+	
 	private void rollbackIfNeeded()
 	{
-		if (!this.dbConnection.getAutoCommit() && this.dbConnection.getProfile().getUseSeparateConnectionPerTab())
+		if (isOwnTransaction())
 		{
 			try { this.dbConnection.rollback(); } catch (Throwable th) {}
 		}
@@ -507,7 +513,7 @@ public class TableDataPanel
 	
 	private void commitRetrieveIfNeeded()
 	{
-		if (!this.dbConnection.getAutoCommit() && this.dbConnection.getProfile().getUseSeparateConnectionPerTab())
+		if (isOwnTransaction())
 		{
 			if (this.dbConnection.selectStartsTransaction())
 			{
@@ -528,27 +534,24 @@ public class TableDataPanel
 		this.cancelRetrieve.setEnabled(true);
 		this.reloadAction.setEnabled(false);
 		boolean error = false;
-		
+
 		try
 		{
-			dataDisplay.setShowErrorMessages(true);
 			dataDisplay.setStatusMessage(ResourceMgr.getString("LblLoadingProgress"));
+			
 			error = !dataDisplay.runQuery(sql, respectMaxRows);
 			
-			dataDisplay.getTable().adjustOrOptimizeColumns();
 			DataStore ds = dataDisplay.getTable().getDataStore();
 			if (ds != null)
 			{
+				// By directly setting the update table, we avoid 
+				// another round-trip to the database to check the table from the
+				// passed SQL statement.
 				dataDisplay.setUpdateTableToBeUsed(this.table);
 				dataDisplay.getSelectKeysAction().setEnabled(true);
 				String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
 				dataDisplay.setPrintHeader(header);
 			}
-//			else
-//			{
-//				dataDisplay.showError(ResourceMgr.getString("ErroNoData"));
-//				WbSwingUtilities.showErrorMessageKey(SwingUtilities.getWindowAncestor(this), "ErroNoData");
-//			}
 			dataDisplay.showlastExecutionTime();
 		}
 		catch (Throwable e)
@@ -710,10 +713,12 @@ public class TableDataPanel
 
 		this.reset();
 		long rows = -1;
-		if (this.autoloadRowCount) rows = this.showRowCount();
-		
-		// -1 means an error occurred. No need to continue in that case.
-		if (rows == -1) return;
+		if (this.autoloadRowCount) 
+		{
+			rows = this.showRowCount();
+			// -1 means an error occurred. No need to continue in that case.
+			if (rows == -1) return;
+		}
 
 		if (this.autoRetrieve.isSelected() && includeData)
 		{

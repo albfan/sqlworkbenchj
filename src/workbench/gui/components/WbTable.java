@@ -36,6 +36,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.HashMap;
@@ -1859,6 +1860,20 @@ public class WbTable
 
 	public boolean deleteRow()
 	{
+		try
+		{
+			return deleteRow(false);
+		}
+		catch (SQLException e)
+		{
+			// cannot happen when not deleting dependencies
+			return false;
+		}
+	}
+	
+	public boolean deleteRow(boolean withDependencies)
+		throws SQLException
+	{
 		DataStoreTableModel ds = this.getDataStoreTableModel();
 		if (ds == null) return false;
 
@@ -1868,12 +1883,13 @@ public class WbTable
 		{
 			for (int i = numRows - 1; i >= 0; i--)
 			{
-				ds.deleteRow(selectedRows[i]);
+				ds.deleteRow(selectedRows[i], withDependencies);
 			}
 		}
 		return true;
 	}
 
+	
 	public boolean isHighlightRequiredFields()
 	{
 		return highlightRequiredFields;

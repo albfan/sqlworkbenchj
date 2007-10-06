@@ -86,6 +86,7 @@ import workbench.gui.actions.CopyRowAction;
 import workbench.gui.actions.CreateDeleteScriptAction;
 import workbench.gui.actions.CreateSnippetAction;
 import workbench.gui.actions.CopyAsTextAction;
+import workbench.gui.actions.DeleteDependentRowsAction;
 import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.ExecuteAllAction;
 import workbench.gui.actions.ExecuteCurrentAction;
@@ -219,6 +220,7 @@ public class SqlPanel
 	protected InsertRowAction insertRow;
 	protected CopyRowAction duplicateRow;
 	protected DeleteRowAction deleteRow;
+	protected DeleteDependentRowsAction deleteDependentRow;
 	protected SelectKeyColumnsAction selectKeys;
 	protected FilterDataAction filterAction;
 	protected SelectionFilterAction selectionFilterAction;
@@ -562,6 +564,7 @@ public class SqlPanel
 		this.updateAction = new UpdateDatabaseAction(null);
 		this.insertRow = new InsertRowAction(null);
 		this.deleteRow = new DeleteRowAction(null);
+		this.deleteDependentRow = new DeleteDependentRowsAction(null);
 		this.duplicateRow = new CopyRowAction(null);
 		this.selectKeys = new SelectKeyColumnsAction(null);
 
@@ -570,6 +573,7 @@ public class SqlPanel
 		this.actions.add(this.insertRow);
 		this.actions.add(this.duplicateRow);
 		this.actions.add(this.deleteRow);
+		this.actions.add(this.deleteDependentRow);
 
 		this.createDeleteScript = new CreateDeleteScriptAction(null);
 		this.actions.add(this.createDeleteScript);
@@ -2100,6 +2104,7 @@ public class SqlPanel
 			this.updateAction.setOriginal(null);
 			this.insertRow.setOriginal(null);
 			this.deleteRow.setOriginal(null);
+			this.deleteDependentRow.setOriginal(null);
 			this.duplicateRow.setOriginal(null);
 			this.selectKeys.setOriginal(null);
 			this.createDeleteScript.setClient(null);
@@ -2125,6 +2130,7 @@ public class SqlPanel
 			this.updateAction.setOriginal(this.currentData.getUpdateDatabaseAction());
 			this.insertRow.setOriginal(this.currentData.getInsertRowAction());
 			this.deleteRow.setOriginal(this.currentData.getDeleteRowAction());
+			this.deleteDependentRow.setOriginal(this.currentData.getDeleteDependentRowsAction());
 			this.duplicateRow.setOriginal(this.currentData.getCopyRowAction());
 			this.selectKeys.setOriginal(this.currentData.getSelectKeysAction());
 			this.createDeleteScript.setClient(this.currentData.getTable());

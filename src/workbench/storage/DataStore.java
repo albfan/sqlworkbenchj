@@ -15,9 +15,11 @@ import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,6 +27,7 @@ import java.util.Map;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
+import workbench.db.DeleteScriptGenerator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -382,6 +385,24 @@ public class DataStore
 		}
 	}
 
+	public void deleteRowWithDependencies(int aRow)
+		throws IndexOutOfBoundsException, SQLException
+	{
+		if (this.updateTable == null) this.checkUpdateTable(originalConnection);
+
+		RowData row = this.data.get(aRow);
+		if (!row.isNew())
+		{
+			List<ColumnData> pk = getPkValues(aRow, true);
+
+			DeleteScriptGenerator generator = new DeleteScriptGenerator(originalConnection);
+			generator.setTable(updateTable);
+			List<String> statements = generator.getStatementsForValues(pk, false);
+			row.setDependencyDeletes(statements);
+		}
+		this.deleteRow(aRow);
+	}
+	
 	/**
 	 *	Adds the next row from the result set
 	 *	to the DataStore. No check will be done
@@ -1202,6 +1223,7 @@ public class DataStore
 
 		List<DmlStatement> stmtList = new LinkedList<DmlStatement>();
 		this.resetUpdateRowCounters();
+		
 		DmlStatement dml = null;
 		RowData row = null;
 
@@ -1213,6 +1235,12 @@ public class DataStore
 		row = this.getNextDeletedRow();
 		while (row != null)
 		{
+			List<String> deletes = row.getDependencyDeletes();
+			for (String delete : deletes)
+			{
+				stmtList.add(new DmlStatement(delete, null));
+			}
+			
 			dml = factory.createDeleteStatement(row);
 			stmtList.add(dml);
 			row = this.getNextDeletedRow();
@@ -1243,8 +1271,29 @@ public class DataStore
 		throws SQLException
 	{
 		int rowsUpdated = 0;
+		Statement stmt = null;
+		String delete = null;
 		try
 		{
+			List<String> dependent = row.getDependencyDeletes();
+			if (dependent != null)
+			{
+				try
+				{
+					stmt = aConnection.createStatement();
+					Iterator<String> itr = dependent.iterator();
+					while (itr.hasNext())
+					{
+						delete = itr.next();
+						stmt.executeUpdate(delete);
+					}
+				}
+				finally
+				{
+					SqlUtil.closeStatement(stmt);
+				}
+			}
+			delete = null;
 			rowsUpdated = dml.execute(aConnection);
 			row.setDmlSent(true);
 		}
@@ -1252,7 +1301,7 @@ public class DataStore
 		{
 			this.updateHadErrors = true;
 			
-			CharSequence esql = dml.getExecutableStatement(createLiteralFormatter());
+			String esql = (delete == null ? dml.getExecutableStatement(createLiteralFormatter()).toString() : delete);
 			if (this.ignoreAllUpdateErrors)
 			{
 				LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + esql + " for row = " + row + ", error: " + e.getMessage(), null);
@@ -1263,7 +1312,7 @@ public class DataStore
 				int choice = JobErrorHandler.JOB_ABORT;
 				if (errorHandler != null)
 				{
-					choice = errorHandler.getActionOnError(rowNum, null, esql.toString(), e.getMessage());
+					choice = errorHandler.getActionOnError(rowNum, null, esql, e.getMessage());
 				}
 				if (choice == JobErrorHandler.JOB_CONTINUE)
 				{
@@ -1565,13 +1614,25 @@ public class DataStore
 	}
 
 	/**
-	 * Returns a map with the value of all PK columns for the given 
+	 * Returns a list with the value of all PK columns for the given 
 	 * row. The key to the map is the name of the column.
 	 * 
 	 * @see workbench.storage.ResultInfo#isPkColumn(int)
 	 * @see #getValue(int, int)
 	 */
 	public List<ColumnData> getPkValues(int aRow)
+	{
+		return getPkValues(aRow, false);
+	}
+	
+	/**
+	 * Returns a list with the value of all PK columns for the given 
+	 * row. The key to the map is the name of the column.
+	 * 
+	 * @see workbench.storage.ResultInfo#isPkColumn(int)
+	 * @see #getValue(int, int)
+	 */
+	public List<ColumnData> getPkValues(int aRow, boolean originalValues)
 	{
 		if (this.originalConnection == null) return Collections.emptyList();
 		
@@ -1596,7 +1657,7 @@ public class DataStore
 			if (this.resultInfo.isPkColumn(j))
 			{
 				ColumnIdentifier col = this.resultInfo.getColumn(j);
-				Object value = rowdata.getValue(j);
+				Object value = (originalValues ? rowdata.getOriginalValue(j) : rowdata.getValue(j));
 				result.add(new ColumnData(value, col));
 			}
 		}

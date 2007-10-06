@@ -11,6 +11,7 @@
 
 package workbench.db;
 
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -53,7 +54,7 @@ public class DeleteScriptGeneratorTest
 			assertEquals(2, parser.getSize());
 			String addressDelete = parser.getCommand(0);
 			String addressTable = SqlUtil.getDeleteTable(addressDelete);
-			Pattern p = Pattern.compile("\\(\\s*person_id\\s*=\\s*1\\)", Pattern.CASE_INSENSITIVE);
+			Pattern p = Pattern.compile("\\s*person_id\\s*=\\s*1", Pattern.CASE_INSENSITIVE);
 			Matcher m = p.matcher(addressDelete);
 			assertEquals("ADDRESS", addressTable);
 			assertTrue(m.find());
@@ -68,85 +69,114 @@ public class DeleteScriptGeneratorTest
 		}
 	}
 
-//	public void testGenerateStatements()
-//	{
-//		try
-//		{
-//			createTables();
-//			DeleteScriptGenerator generator = new DeleteScriptGenerator(dbConnection);
-//			TableIdentifier table = new TableIdentifier("PERSON");
-//			generator.setTable(table);
-//			List<ColumnData> pk = new ArrayList<ColumnData>();
-//			pk.add(new ColumnData(new Integer(1), new ColumnIdentifier("ID")));
-//			//pk.add(new ColumnData(new Integer(1), new ColumnIdentifier("ADDRESS_ID")));
-//			
-//			List<DmlStatement> statements = generator.getStatementsForValues(pk);
-//
-//			//assertEquals(8, statements.size());
-//			for (DmlStatement dml : statements)
+	public void testGenerateStatements()
+	{
+		try
+		{
+			createMultiColumnPkTables();
+			DeleteScriptGenerator generator = new DeleteScriptGenerator(dbConnection);
+			TableIdentifier table = new TableIdentifier("BASE");
+			generator.setTable(table);
+			List<ColumnData> pk = new ArrayList<ColumnData>();
+			pk.add(new ColumnData(new Integer(1), new ColumnIdentifier("BASE_ID1")));
+			pk.add(new ColumnData(new Integer(1), new ColumnIdentifier("BASE_ID2")));
+			
+			List<String> statements = generator.getStatementsForValues(pk, true);
+//			for (String s : statements)
 //			{
-//				System.out.println(dml);
+//				System.out.println(s + ";\n");
 //			}
-//			//String addressDelete = statements.get(0).toString();
-//		}
-//		catch (Exception e)
-//		{
-//			e.printStackTrace();
-//			fail(e.getMessage());
-//		}
-//	}
+			
+			assertEquals(4, statements.size());
+			String s = statements.get(0).toString();
+			assertTrue(s.indexOf("FROM CHILD2") > -1);
+
+			CharSequence sql = statements.get(3);
+			String t = SqlUtil.getDeleteTable(sql);
+			assertEquals("BASE", t);
+			
+			sql = statements.get(2);
+			t = SqlUtil.getDeleteTable(sql);
+			assertEquals("CHILD1", t);
+			
+			statements = generator.getStatementsForValues(pk, false);
+			assertEquals(3, statements.size());
+			s = statements.get(0).toString();
+			assertTrue(s.indexOf("FROM CHILD2") > -1);
+
+			sql = statements.get(2);
+			t = SqlUtil.getDeleteTable(sql);
+			assertEquals("CHILD1", t);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	
-	private void createTables()
+	private void createMultiColumnPkTables()
 		throws Exception
 	{
-		String sql = 
-					 "CREATE TABLE address \n" +
+		String sql = "CREATE TABLE base \n" + 
 					 "( \n" + 
-					 "   id        integer  NOT NULL, \n" + 
-					 "   address_data varchar(100) not null, \n" + 
-					 "   person_id integer, \n" + 
-					 "   country_code varchar(3) \n" + 
+					 "   base_id1  integer  NOT NULL, \n" + 
+					 "   base_id2  integer  NOT NULL \n" + 
 					 "); \n" + 
+					 "ALTER TABLE base \n" + 
+					 "   ADD CONSTRAINT base_pkey PRIMARY KEY (base_id1, base_id2); \n" + 
 					 
-					 "ALTER TABLE address \n" + 
-					 "   ADD CONSTRAINT address_pkey PRIMARY KEY (id); \n" +
+					 "CREATE TABLE child1 \n" + 
+					 "( \n" + 
+					 "   child1_id1  integer  NOT NULL, \n" + 
+					 "   child1_id2  integer  NOT NULL, \n" + 
+					 "   c1base_id1  integer  NOT NULL, \n" + 
+					 "   c1base_id2  integer  NOT NULL \n" + 
+					 "); \n" +
 
-					 "CREATE TABLE home_address \n" +
-					 "( \n" + 
-					 "   address_id integer NOT NULL, \n" + 
-					 "   person_id  integer not null \n" + 
-					 "); \n" + 
-
-					 "ALTER TABLE home_address \n" + 
-					 "   ADD CONSTRAINT home_adr_pkey PRIMARY KEY (address_id, person_id); \n" +
-					 
-					 "CREATE TABLE person \n" + 
-					 "( \n" + 
-					 "   id        integer         NOT NULL, \n" + 
-					 "   firstname varchar(50), \n" + 
-					 "   lastname  varchar(50) \n" + 
-					 "); \n" + 
-					 
-					 "ALTER TABLE person \n" + 
-					 "   ADD CONSTRAINT person_pkey PRIMARY KEY (id); \n" + 
+					 "ALTER TABLE child1 \n" + 
+					 "   ADD CONSTRAINT child1_pkey PRIMARY KEY (child1_id1, child1_id2); \n" + 
 					 " \n" + 
+					 "ALTER TABLE child1 \n" + 
+					 "  ADD CONSTRAINT fk_child1 FOREIGN KEY (c1base_id1, c1base_id2) \n" + 
+					 "  REFERENCES base (base_id1, base_id2); \n" +
 					 
-					 "ALTER TABLE address \n" + 
-					 "  ADD CONSTRAINT fk_pers FOREIGN KEY (person_id) \n" + 
-					 "  REFERENCES person (id); \n" + 
-		
-					 "ALTER TABLE home_address \n" + 
-					 "  ADD CONSTRAINT fk_had_pers FOREIGN KEY (person_id) \n" + 
-					 "  REFERENCES person (id); \n" + 
+					 "CREATE TABLE child2 \n" + 
+					 "( \n" + 
+					 "   child2_id1  integer  NOT NULL, \n" + 
+					 "   child2_id2  integer  NOT NULL, \n" + 
+					 "   c2c1_id1  integer  NOT NULL, \n" + 
+					 "   c2c1_id2  integer  NOT NULL \n" + 
+					 "); \n" +
 
-					 "ALTER TABLE home_address \n" + 
-					 "  ADD CONSTRAINT fk_had_addr FOREIGN KEY (address_id) \n" + 
-					 "  REFERENCES address (id); \n";
+					 "ALTER TABLE child2 \n" + 
+					 "   ADD CONSTRAINT child2_pkey PRIMARY KEY (child2_id1, child2_id2); \n" + 
+					 " \n" + 
+					 "ALTER TABLE child2 \n" + 
+					 "  ADD CONSTRAINT fk_child2 FOREIGN KEY (c2c1_id1, c2c1_id2) \n" + 
+					 "  REFERENCES child1 (child1_id1, child1_id2); \n" +
+
+					 "CREATE TABLE child22 \n" + 
+					 "( \n" + 
+					 "   child22_id1  integer  NOT NULL, \n" + 
+					 "   child22_id2  integer  NOT NULL, \n" + 
+					 "   c22c1_id1  integer  NOT NULL, \n" + 
+					 "   c22c1_id2  integer  NOT NULL \n" + 
+					 "); \n" +
+
+					 "ALTER TABLE child22 \n" + 
+					 "   ADD CONSTRAINT child22_pkey PRIMARY KEY (child22_id1, child22_id2); \n" + 
+					 " \n" + 
+					 "ALTER TABLE child22 \n" + 
+					 "  ADD CONSTRAINT fk_child22 FOREIGN KEY (c22c1_id1, c22c1_id2) \n" + 
+					 "  REFERENCES child1 (child1_id1, child1_id2); \n"
+					 ;
 		
-		TestUtil util = new TestUtil("DeleteScriptGenerator");
+		TestUtil util = new TestUtil("DependencyDeleter");
 		this.dbConnection = util.getConnection();
 		TestUtil.executeScript(dbConnection, sql);
 	}
+
 	
 	private void createSimpleTables()
 		throws Exception

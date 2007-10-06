@@ -215,7 +215,9 @@ public class StatementRunnerResult
 	{
 		// Do not call clearResultData() !!!
 		// otherwise the content of the retrieved DataStores will also 
-		// be removed and as they are re-used by 
+		// be removed and as they are re-used by DwPanel or TableDataPanel
+		// they might still be in use.
+		
 		// We only want to free the list itself.
 		if (this.datastores != null)
 		{

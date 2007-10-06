@@ -22,24 +22,22 @@ import workbench.resource.ResourceMgr;
  * @see workbench.gui.sql.DwPanel
  * @author  support@sql-workbench.net
  */
-public class DeleteRowAction 
-	extends WbAction
+public class DeleteDependentRowsAction extends WbAction
 {
 	private DbData client;
 
-	public DeleteRowAction(DbData aClient)
+	public DeleteDependentRowsAction(DbData aClient)
 	{
 		super();
 		this.client = aClient;
 		this.setEnabled(false);
-		this.initMenuDefinition("MnuTxtDeleteRow");
-		this.setIcon(ResourceMgr.getImage("Delete"));
+		this.initMenuDefinition("MnuTxtDelDependentRows");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.deleteRow();
+		this.client.deleteRowWithDependencies();
 	}
 	
 	public void setClient(DbData db)

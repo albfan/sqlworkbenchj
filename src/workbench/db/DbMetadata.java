@@ -2237,11 +2237,11 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
-			LogMgr.logWarning("DbMetadata.getTableIndexInformation()", "Could not retrieve indexes!", e);
+			LogMgr.logWarning("DbMetadata.getTableIndexInformation()", "Could not retrieve indexes", e);
 		}
 		finally
 		{
-			try { idxRs.close(); } catch (Throwable th) {}
+			SqlUtil.closeResult(idxRs);
 			this.indexReader.indexInfoProcessed();
 		}
 		return defs.values();

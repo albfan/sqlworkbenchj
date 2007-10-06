@@ -72,4 +72,9 @@ public class ColumnData
 		return id.hashCode();
 	}
 	
+	public String toString()
+	{
+		return id.getColumnName() + " = " + (data == null ? "NULL" : data.toString());
+	}
+	
 }

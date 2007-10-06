@@ -56,8 +56,7 @@ public class TableDependencySorter
 	{
 		ArrayList<TableIdentifier> tables = new ArrayList<TableIdentifier>(1);
 		tables.add(table);
-		List<TableIdentifier> allTables = sortForDelete(tables, true);
-		List<LevelNode> levelMapping = createLevelMapping(allTables, true);
+		List<LevelNode> levelMapping = createLevelMapping(tables, true);
 		
 		ArrayList<DependencyNode> result = new ArrayList<DependencyNode>(levelMapping.size());
 		for (LevelNode lvl : levelMapping)

@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import java.util.List;
 import workbench.log.LogMgr;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
@@ -51,7 +52,8 @@ public class RowData
 	
 	private Object[] colData;
 	private Object[] originalData;
-
+	private List<String> dependencyDeletes;
+	
 	public RowData(ResultInfo info)
 	{
 		int colCount = info.getColumnCount();
@@ -203,7 +205,6 @@ public class RowData
 	public synchronized void setValue(int aColIndex, Object aValue)
 		throws IndexOutOfBoundsException
 	{
-//		if (aValue == null) throw new NullPointerException("No null values allowed. Use setNull() instead");
 		if (!this.isNew())
 		{
 			Object oldValue = this.colData[aColIndex];
@@ -279,12 +280,6 @@ public class RowData
 		}
 	}
 	
-//	public synchronized void setNull(int aColumn, int aType)
-//	{
-//		NullValue nul = NullValue.getInstance(aType);
-//		this.setValue(aColumn, nul);
-//	}
-
 	/**
 	 *	Resets the internal status. After a call to resetStatus()
 	 *	isModified() will return false, and isOriginal() will return true.
@@ -362,6 +357,16 @@ public class RowData
 		return this.dmlSent; 
 	}
 
+	public List<String> getDependencyDeletes()
+	{
+		return this.dependencyDeletes;
+	}
+	
+	public void setDependencyDeletes(List<String> statements)
+	{
+		this.dependencyDeletes = statements;
+	}
+	
 	public String toString()
 	{
 		int count = this.colData.length;
