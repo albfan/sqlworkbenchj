@@ -57,7 +57,6 @@ public class ResourceMgr
 
 	private static ResourceBundle resources;
 	private static HashMap<String, ImageIcon> images = new HashMap<String, ImageIcon>();
-	private static List<WbLocale> languages;
 	
 	private ResourceMgr()
 	{
@@ -271,6 +270,14 @@ public class ResourceMgr
 		return result;
 	}
 
+	/**
+	 * For testing purposes
+	 */
+  static ResourceBundle getResourceBundle(Locale l)
+	{
+		return ResourceBundle.getBundle("language/wbstrings", l);
+	}
+
   public static ResourceBundle getResources()
   {
 		synchronized (TXT_PRODUCT_NAME)
@@ -278,7 +285,7 @@ public class ResourceMgr
 			if (resources == null)
 			{
 				Locale l = Settings.getInstance().getLanguage();
-				resources = ResourceBundle.getBundle("language/wbstrings", l);
+				resources = getResourceBundle(l);
 			}
 			return resources;
 		}
