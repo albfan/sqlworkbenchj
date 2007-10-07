@@ -12,6 +12,7 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.Window;
@@ -324,28 +325,24 @@ public class DwPanel
 
 		if (!this.prepareDatabaseUpdate()) return;
 
+		final JobErrorHandler handler = this;
 		WbThread t = new WbThread("DwPanel update")
 		{
 			public void run()
 			{
-				doSave();
+				try
+				{
+					saveChanges(dbConnection, handler);
+				}
+				catch (Exception e)
+				{
+					// Exception have already been displayed to the user --> Log only
+					LogMgr.logError("DwPanel.doSave()", "Error saving data", e);
+				}
 			}
 		};
 		t.start();
 
-	}
-	
-	protected void doSave()
-	{
-		try
-		{
-			this.saveChanges(dbConnection, this);
-		}
-		catch (Exception e)
-		{
-			// Exception have already been displayed to the user --> Log only
-			LogMgr.logError("DwPanel.doSave()", "Error saving data", e);
-		}
 	}
 	
 	public boolean shouldSaveChanges(WbConnection aConnection)
@@ -413,6 +410,7 @@ public class DwPanel
 	
 	protected void disableUpdateActions()
 	{
+		this.updateAction.setEnabled(false);
 		this.insertRow.setEnabled(false);
 		this.duplicateRow.setEnabled(false);
 		this.deleteRow.setEnabled(false);
@@ -492,7 +490,10 @@ public class DwPanel
 	public boolean checkUpdateTable()
 	{
 		if (this.readOnly) return false;
-		this.setStatusMessage(ResourceMgr.getString("MsgCheckingUpdateTable"));
+	
+		setStatusMessage(ResourceMgr.getString("MsgCheckingUpdateTable"));
+		statusBar.forcePaint();
+		
 		boolean result = false;
 		try
 		{
@@ -706,12 +707,12 @@ public class DwPanel
 		boolean hasResult = this.hasResultSet();
 		int rows = this.getTable().getSelectedRowCount();
 		this.dataTable.getExportAction().setEnabled(hasResult);
-		this.updateAction.setEnabled(isModified());
-		this.duplicateRow.setEnabled(rows == 1);
-		this.deleteRow.setEnabled(rows > 0);
-		this.deleteDependentRow.setEnabled(rows > 0);
-		this.insertRow.setEnabled(hasResult);
-		this.selectKeys.setEnabled(hasResult);
+		if (this.updateAction != null) this.updateAction.setEnabled(isModified());
+		if (this.duplicateRow != null) this.duplicateRow.setEnabled(rows == 1);
+		if (this.deleteRow != null) this.deleteRow.setEnabled(rows > 0);
+		if (this.deleteDependentRow != null) this.deleteDependentRow.setEnabled(rows > 0);
+		if (this.insertRow != null) this.insertRow.setEnabled(hasResult);
+		if (this.selectKeys != null) this.selectKeys.setEnabled(hasResult);
 		this.dataTable.checkCopyActions();
 	}
 	
@@ -764,23 +765,58 @@ public class DwPanel
 		return newRow;
 	}
 	
-	public void deleteRow()
-	{
-		deleteRow(false);
-	}
-
 	public void deleteRowWithDependencies()
 	{
-		deleteRow(true);
+		if (this.readOnly) return;
+		
+		if (!this.startEdit(true)) return;
+		
+		setStatusMessage(ResourceMgr.getString("MsgCalcDependencies"));
+		final Component c = this;
+		WbSwingUtilities.showWaitCursor(this);
+		
+		// As checking all dependent tables can potentially
+		// take some time (especially with Oracle...) 
+		// I'm starting a new thread to do the work
+		// And I cannot re-use the deleteRow() function as
+		// that wouldn't allow me to change the status message
+		// to indicate the dependency checking is running
+		// startEdit() is also changing the status message
+		// and would be executed after a local change here
+		// if I reused deleteRow()
+		Thread t = new WbThread("DeleteDependency")
+		{
+			public void run()
+			{
+				try
+				{
+					dbConnection.setBusy(true);
+					dataTable.deleteRow(true);
+					rowCountChanged();
+				}
+				catch (SQLException e)
+				{
+					LogMgr.logError("DwPanel.deleteRow()", "Error deleting row from table", e);
+					WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
+				}
+				finally
+				{
+					dbConnection.setBusy(false);
+					clearStatusMessage();
+					WbSwingUtilities.showDefaultCursor(c);
+				}
+			}
+		};
+		t.start();
 	}
-	
-	private void deleteRow(boolean withDependencies)
+
+	public void deleteRow()
 	{
 		if (this.readOnly) return;
 		if (!this.startEdit(true)) return;
 		try
 		{
-			this.dataTable.deleteRow(withDependencies);
+			this.dataTable.deleteRow(false);
 			this.rowCountChanged();
 		}
 		catch (SQLException e)
@@ -1024,8 +1060,8 @@ public class DwPanel
 		this.editingStarted = false;
 		this.dataTable.stopEditing();
 		this.dataTable.setShowStatusColumn(false);
-		this.updateAction.setEnabled(false);
 		this.checkResultSetActions();
+		this.updateAction.setEnabled(false);
 		if (restoreData) this.dataTable.restoreOriginalValues();
 	}
 
@@ -1057,12 +1093,15 @@ public class DwPanel
 		final int currentRow = this.dataTable.getEditingRow();
 		final int currentColumn = this.dataTable.getEditingColumn();
 		
+		Window w = SwingUtilities.getWindowAncestor(this);
+		
 		// if the result is not yet updateable (automagically)
 		// then try to find the table. If the table cannot be
 		// determined, then ask the user
-		Window w = SwingUtilities.getWindowAncestor(this);
+		boolean updateTablePresent = this.checkUpdateTable();
+		boolean updateable = this.isUpdateable();
 		
-		if (!this.isUpdateable() && !this.checkUpdateTable())
+		if (!updateable && !updateTablePresent)
 		{
 			// checkUpdateTable() will have taken every attempt to find an update table
 			// including asking the user to select a table from a multi-table result set
@@ -1070,66 +1109,54 @@ public class DwPanel
 			// So if we wind up here, there is no way to update the
 			// underlying DataStore
 			WbSwingUtilities.showErrorMessageKey(w, "MsgNoTables");
-			this.setUpdateTable((TableIdentifier)null);
+			this.setUpdateTable(null);
 			this.disableUpdateActions();
 			this.selectKeys.setEnabled(false);
 			return false;
 		}
 		
-		// Verify if the data is really updateable!
-		boolean update = this.isUpdateable();
-		
-		if (update)
+		if (updateable)
 		{
 			this.dataTable.setShowStatusColumn(true);
-			if (this.updateAction != null)
-			{
-				if (this.dataTable.getDataStore().isModified())
-				{
-					this.updateAction.setEnabled(true);
-				}
-			}
-			
 			this.editingStarted = true;
-			
 
 			// When changing the table model (which is happening
 			// when the status column is displayed) we need to restore
 			// the current editing column/row
 			if (restoreSelection)
 			{
-				WbSwingUtilities.invoke(new Runnable()
+				if (currentRow > -1 && currentColumn > -1)
 				{
-					public void run()
+					dataTable.selectCell(currentRow, currentColumn + 1);
+					dataTable.setColumnSelectionAllowed(false);
+				}
+				else if (currentRow > -1)
+				{
+					dataTable.scrollToRow(currentRow);		
+					dataTable.setRowSelectionInterval(currentRow, currentRow);
+				}
+				else if (selectedRows != null)
+				{
+					ListSelectionModel model = dataTable.getSelectionModel();
+					model.setValueIsAdjusting(true);
+					// make sure nothing is selected, then restore the old selection
+					model.clearSelection();
+					for (int i = 0; i < selectedRows.length; i++)
 					{
-						if (currentRow > -1 && currentColumn > -1)
-						{
-							dataTable.selectCell(currentRow, currentColumn + 1);
-							dataTable.setColumnSelectionAllowed(false);
-						}
-						else if (currentRow > -1)
-						{
-							dataTable.scrollToRow(currentRow);		
-							dataTable.setRowSelectionInterval(currentRow, currentRow);
-						}
-						else if (selectedRows != null)
-						{
-							ListSelectionModel model = dataTable.getSelectionModel();
-							model.setValueIsAdjusting(true);
-							// make sure nothing is selected, then restore the old selection
-							model.clearSelection();
-							for (int i = 0; i < selectedRows.length; i++)
-							{
-								model.addSelectionInterval(selectedRows[i], selectedRows[i]);
-							}
-							model.setValueIsAdjusting(false);
-						}
-						dataTable.requestFocusInWindow();
+						model.addSelectionInterval(selectedRows[i], selectedRows[i]);
 					}
-				});
+					model.setValueIsAdjusting(false);
+				}
+				dataTable.requestFocusInWindow();
 			}
 			
-			checkResultSetActions();
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					checkResultSetActions();
+				}
+			});
 		}
 		else
 		{
@@ -1147,7 +1174,7 @@ public class DwPanel
 			WbSwingUtilities.showErrorMessage(w, msg);
 		}
 
-		return update;
+		return updateable;
 	}
 	
 	public InsertRowAction getInsertRowAction() { return this.insertRow; }
@@ -1181,15 +1208,18 @@ public class DwPanel
 		if (this.batchUpdate) return;
 		if (this.readOnly) return;
 		
-		if (e.getFirstRow() != TableModelEvent.ALL_COLUMNS &&
-			e.getFirstRow() != TableModelEvent.HEADER_ROW &&
-			this.isModified() )
+		if (!editingStarted &&
+				e.getFirstRow() != TableModelEvent.ALL_COLUMNS &&
+				e.getFirstRow() != TableModelEvent.HEADER_ROW &&
+				this.isModified())
 		{
-			if (!this.editingStarted)
+			EventQueue.invokeLater(new Runnable()
 			{
-				this.startEdit();
-			}
-			if (this.updateAction != null) this.updateAction.setEnabled(true);
+				public void run()
+				{
+					startEdit();
+				}
+			});
 		}
 	}
 	

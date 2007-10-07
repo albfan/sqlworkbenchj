@@ -1428,7 +1428,8 @@ public class DataStore
 				inCommit = true;
 				aConnection.commit();
 			}
-			this.resetStatusForSentRows();
+			resetStatusForSentRows();
+			resetStatus();
 		}
 		catch (SQLException e)
 		{

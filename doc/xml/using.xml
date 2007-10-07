@@ -811,7 +811,7 @@ Done.</programlisting>
 
 		<para>
 			Once the data has been retrieved from the database, it can be
-			edited directly in the table. &wb-productname; assumes that enough
+			edited directly in the result set. &wb-productname; assumes that enough
 			columns have been retrieved from the table so that at a unique
 			identifier is available to identify the rows to be updated.
 		</para>
@@ -826,13 +826,16 @@ Done.</programlisting>
 		</para>
       
 		<para>
-			The changes will not be saved to the database until you choose
-			<menuchoice><guimenu>Data</guimenu><guimenuitem>Save</guimenuitem></menuchoice>.
+			The changes (modified rows, new rows or deleted rows) will not be saved to the database until 
+			you choose <menuchoice><guimenu>Data</guimenu><guimenuitem>Save</guimenuitem></menuchoice>.
 			If the update is successful (no database errors) a <literal>COMMIT</literal> will be
-			sent to the database automatically (if needed). If your <literal>SELECT</literal> was based 
+			sent to the database automatically (if needed). 
+		</para>
+		<para>
+			If your <literal>SELECT</literal> was based 
 			on more than one table, you will be prompted to specify which table should be 
-			updated. Only columns for that table will be included in the <literal>UPDATE</literal> or 
-			<literal>INSERT</literal> statements.
+			updated. Only columns for the chosen table will be included in the <literal>UPDATE</literal> or 
+			<literal>INSERT</literal> statements. 
 			If no primary key can be found for the update table, you will be prompted to select the 
 			columns that should be used to uniquel identify a row in the update table.
 		</para>
@@ -875,7 +878,30 @@ Done.</programlisting>
 		</para>
 		
 	</section>
-    
+
+	<section id="edit-data-delete">
+		<title>Deleting rows from the result</title>
+		<para>
+			To delete a row from the result, select  <menuchoice><guimenu>Data</guimenu><guimenuitem>Delete Row</guimenuitem></menuchoice>
+			from the menu. This will remove the currently selected row(s) from the result and will 
+			mark them for deletion once the changes are saved. No foreign key checks will be done
+			when using this option.
+		</para>
+		<para>
+			To delete rows including all dependent rows, choose 
+			<menuchoice><guimenu>Data</guimenu><guimenuitem>Delete With Dependencies</guimenuitem></menuchoice>.
+			In this case &wb-productname; will analyze all foreign keys referencing the update table, and will
+			generate the necessary <literal>DELETE</literal> statements to delete the dependent rows, before
+			sending the <literal>DELETE</literal> for the selected row(s). 
+		</para>
+		<para>
+			<guimenuitem>Delete With Dependencies</guimenuitem> might take some time to detect all 
+			foreign key dependencies for the current update table. During this time a message will 
+			be displayed in the status bar. The selected row(s) will not be removed from the result 
+			set until the dependency check has finished.
+		</para>
+	</section>
+	
 	<section id="fk-navigation">
 		<title>Navigating referenced rows</title>
 		<para>

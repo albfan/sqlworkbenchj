@@ -11,7 +11,8 @@
 
 package workbench.db;
 
-import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -20,7 +21,6 @@ import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.sql.ScriptParser;
 import workbench.storage.ColumnData;
-import workbench.storage.DmlStatement;
 import workbench.util.SqlUtil;
 
 /**
@@ -86,24 +86,42 @@ public class DeleteScriptGeneratorTest
 //			{
 //				System.out.println(s + ";\n");
 //			}
-			
-			assertEquals(4, statements.size());
-			String s = statements.get(0).toString();
-			assertTrue(s.indexOf("FROM CHILD2") > -1);
 
-			CharSequence sql = statements.get(3);
+			assertEquals(4, statements.size());
+			
+			Statement stmt = dbConnection.createStatement();
+			for (String sql : statements)
+			{
+				stmt.executeUpdate(sql);
+			}
+			dbConnection.commit();
+			
+			String[] tables = new String[] { "BASE", "CHILD1", "CHILD2", "CHILD22" };
+			
+			for (String st : tables)
+			{
+				ResultSet rs = stmt.executeQuery("select count(*) from " + st);
+				int count = -1;
+				if (rs.next())
+				{
+					count = rs.getInt(1);
+				}
+				assertEquals("Wrong count in table: " + st, 1, count);
+			}
+			
+			stmt.close();
+			
+			String sql = statements.get(3);
 			String t = SqlUtil.getDeleteTable(sql);
 			assertEquals("BASE", t);
 			
 			sql = statements.get(2);
 			t = SqlUtil.getDeleteTable(sql);
 			assertEquals("CHILD1", t);
-			
+
+			// Test when root table should not be included
 			statements = generator.getStatementsForValues(pk, false);
 			assertEquals(3, statements.size());
-			s = statements.get(0).toString();
-			assertTrue(s.indexOf("FROM CHILD2") > -1);
-
 			sql = statements.get(2);
 			t = SqlUtil.getDeleteTable(sql);
 			assertEquals("CHILD1", t);
@@ -175,6 +193,20 @@ public class DeleteScriptGeneratorTest
 		TestUtil util = new TestUtil("DependencyDeleter");
 		this.dbConnection = util.getConnection();
 		TestUtil.executeScript(dbConnection, sql);
+		Statement stmt = this.dbConnection.createStatement();
+		stmt.executeUpdate("insert into base (base_id1, base_id2) values (1,1)");
+		stmt.executeUpdate("insert into base (base_id1, base_id2) values (2,2)");
+		
+		stmt.executeUpdate("insert into child1 (child1_id1, child1_id2, c1base_id1, c1base_id2) values (11,11,1,1)");
+		stmt.executeUpdate("insert into child1 (child1_id1, child1_id2, c1base_id1, c1base_id2) values (12,12,2,2)");
+		
+		stmt.executeUpdate("insert into child2 (child2_id1, child2_id2, c2c1_id1, c2c1_id2) values (101,101,11,11)");
+		stmt.executeUpdate("insert into child2 (child2_id1, child2_id2, c2c1_id1, c2c1_id2) values (102,102,12,12)");
+
+		stmt.executeUpdate("insert into child22 (child22_id1, child22_id2, c22c1_id1, c22c1_id2) values (201,201,11,11)");
+		stmt.executeUpdate("insert into child22 (child22_id1, child22_id2, c22c1_id1, c22c1_id2) values (202,202,12,12)");
+		dbConnection.commit();
+		stmt.close();
 	}
 
 	

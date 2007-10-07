@@ -359,6 +359,11 @@ public class DwStatusBar
 		tfStatus.setText(aMsg);
 	}
 	
+	public void forcePaint()
+	{
+		tfStatus.forcePaint();
+	}
+	
 	/**
 	 * Clears the status bar by displaying the default message.
 	 */

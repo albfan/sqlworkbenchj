@@ -253,7 +253,7 @@ public class DbExplorerPanel
 
 	private void readSchemas()
 	{
-		if (this.isBusy() || isConnectionBusy() || this.dbConnection == null) 
+		if (this.isBusy() || isConnectionBusy() || this.dbConnection == null || this.dbConnection.getMetadata() == null) 
 		{
 			this.schemaRetrievePending = true;
 			return;

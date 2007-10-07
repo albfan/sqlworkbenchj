@@ -1443,15 +1443,18 @@ public class MainWindow
 					((SqlPanel)sql).abortExecution();
 				}
 				conn = sql.getConnection();
-				EventQueue.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
-					}
-				});
 				sql.disconnect();
-				if (conn != null) mgr.disconnect(conn);
+				if (conn != null && !conn.isClosed())
+				{
+					EventQueue.invokeLater(new Runnable()
+					{
+						public void run()
+						{
+							showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
+						}
+					});
+					mgr.disconnect(conn);
+				}
 			}
 			this.closeExplorerWindows(true);
 		}

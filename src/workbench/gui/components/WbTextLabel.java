@@ -84,6 +84,14 @@ public class WbTextLabel
 		repaint();
 	}
 	
+	public void forcePaint()
+	{
+		Graphics g = getGraphics();
+		g.setColor(getBackground());
+		g.clearRect(0, 0, this.getWidth() - 4, getHeight() - 1);
+		paint(g);
+	}
+	
 	public void paint(Graphics g)
 	{
 		if (g == null) return;

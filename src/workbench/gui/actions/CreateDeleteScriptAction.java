@@ -15,6 +15,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.event.ListSelectionListener;
 import workbench.db.DeleteScriptGenerator;
+import workbench.db.WbConnection;
 import workbench.gui.components.WbTable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -40,11 +41,14 @@ public class CreateDeleteScriptAction
 
 	public void executeAction(ActionEvent e)
 	{
+		WbConnection con = client.getDataStore().getOriginalConnection();
+		if (con.isBusy()) return;
+		
 		try
 		{
 			boolean hasPK = client.checkPkColumns(true);
 			if (!hasPK) return;
-			DeleteScriptGenerator gen = new DeleteScriptGenerator(client.getDataStore().getOriginalConnection());
+			DeleteScriptGenerator gen = new DeleteScriptGenerator(con);
 			gen.setSource(client);
 			gen.startGenerate();
 		}

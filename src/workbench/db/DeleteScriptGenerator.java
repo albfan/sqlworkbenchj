@@ -153,13 +153,14 @@ public class DeleteScriptGenerator
 			return sql.toString();
 		}
 	}
+	
 	private String createDeleteStatement(DependencyNode node)
 	{
 		if (node == null) return null;
 		StringBuilder sql = new StringBuilder(200);
 		sql.append("DELETE FROM ");
 		sql.append(node.getTable().getTableExpression(this.connection));
-		sql.append(" WHERE");
+		sql.append(" WHERE ");
 
 		this.addParentWhere(sql, node);
 		return formatSql(sql);
@@ -180,7 +181,7 @@ public class DeleteScriptGenerator
 				
 				boolean addRootWhere = this.rootTable.equals(parent.getTable());
 				
-				if (count > 0) sql.append(" AND");
+				if (count > 0) sql.append(" AND ");
 				
 				if (!addRootWhere)
 				{
@@ -190,7 +191,7 @@ public class DeleteScriptGenerator
 					sql.append(parentColumn);
 					sql.append(" FROM ");
 					sql.append(parent.getTable().getTableExpression(this.connection));
-					sql.append(" WHERE");
+					sql.append(" WHERE ");
 					this.addParentWhere(sql, parent);
 					sql.append("))");
 				}
@@ -317,6 +318,12 @@ public class DeleteScriptGenerator
 			return;
 		}
 
+		if (this.connection.isBusy())
+		{
+			Exception e = new Exception("Connection is busy");
+			LogMgr.logError("DeleteScriptGenerator.generateScript()", "Connection is busy!", e);
+		}
+		
 		ds.checkUpdateTable();
 		TableIdentifier tbl = ds.getUpdateTable();
 			
@@ -324,6 +331,7 @@ public class DeleteScriptGenerator
 		
 		try
 		{
+			connection.setBusy(true);
 			this.setTable(tbl);
 			
 			for (int i=0; i < numRows; i++)
@@ -337,6 +345,10 @@ public class DeleteScriptGenerator
 		catch (Exception e)
 		{
 			LogMgr.logError("SqlPanel.generateDeleteScript", "Error generating delete script", e);
+		}
+		finally
+		{
+			connection.setBusy(false);
 		}
 	}
 	

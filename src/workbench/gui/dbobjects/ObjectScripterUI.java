@@ -68,14 +68,19 @@ public class ObjectScripterUI
 
 	private void setRunning(boolean flag) 
 	{ 
-		synchronized (runMonitor) { this.isRunning = flag; }
+		synchronized (runMonitor) 
+		{
+			this.isRunning = flag; 
+		}
 	}
 	
-	private boolean isRunning() 
-	{ 
-		synchronized (runMonitor) { return this.isRunning; }
+	private boolean isRunning()
+	{
+		synchronized (runMonitor)
+		{
+			return this.isRunning;
+		}
 	}
-	
 	
 	private void startScripting()
 	{
