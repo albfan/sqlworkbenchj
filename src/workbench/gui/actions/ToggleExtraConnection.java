@@ -19,14 +19,14 @@ import workbench.resource.ResourceMgr;
  *
  * @author support@sql-workbench.net
  */
-public class CreateNewConnection 
-	extends WbAction
+public class ToggleExtraConnection 
+	extends CheckBoxAction
 {
 	private MainWindow window;
 	
-	public CreateNewConnection(MainWindow client)
+	public ToggleExtraConnection(MainWindow client)
 	{
-		this.initMenuDefinition("MnuTxtCreateNewConn");
+		super("MnuTxtUseExtraConn", null);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
 		this.setEnabled(false);
 		this.window = client;
@@ -37,19 +37,32 @@ public class CreateNewConnection
 	public void executeAction(ActionEvent e)
 	{
 		if (this.window == null) return;
-		if (!window.canUseSeparateConnection()) return;
-		this.window.createNewConnectionForCurrentPanel();
+		if (window.canUseSeparateConnection())
+		{
+			if (window.usesSeparateConnection())
+			{
+				this.window.disconnectCurrentPanel();
+				this.setSwitchedOn(false);
+			}
+			else
+			{
+				this.window.createNewConnectionForCurrentPanel();
+				this.setSwitchedOn(true);
+			}
+		}
 	}
-
+	
 	public void checkState()
 	{
 		if (this.window == null)
 		{
 			this.setEnabled(false);
+			this.setSwitchedOn(false);
 		}
 		else
 		{
-			this.setEnabled(window.canUseSeparateConnection() && !window.usesSeparateConnection());
+			this.setEnabled(window.canUseSeparateConnection());
+			this.setSwitchedOn(window.usesSeparateConnection());
 		}
 	}
 	

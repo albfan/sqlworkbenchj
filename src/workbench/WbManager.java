@@ -433,16 +433,16 @@ public class WbManager
 			def.put("ViewPort.font", stdFont);
 		}
 		
-		def.put("OptionPane.yesButtonText",ResourceMgr.getPlainString("LblYes"));
-		def.put("OptionPane.yesButtonMnemonic",ResourceMgr.getAcceleratorChar("LblYes"));
-		def.put("OptionPane.noButtonText",ResourceMgr.getPlainString("LblNo"));
-		def.put("OptionPane.noButtonMnemonic",ResourceMgr.getAcceleratorChar("LblNo"));
-		def.put("OptionPane.cancelButtonText",ResourceMgr.getPlainString("LblCancel"));
-		def.put("OptionPane.cancelButtonMnemonic",ResourceMgr.getAcceleratorChar("LblCancel"));
-		def.put("OptionPane.okButtonText",ResourceMgr.getPlainString("LblOK"));
-		def.put("OptionPane.okButtonMnemonic",ResourceMgr.getAcceleratorChar("LblOK"));
+//		def.put("OptionPane.yesButtonText",ResourceMgr.getPlainString("LblYes"));
+//		def.put("OptionPane.yesButtonMnemonic",ResourceMgr.getAcceleratorChar("LblYes"));
+//		def.put("OptionPane.noButtonText",ResourceMgr.getPlainString("LblNo"));
+//		def.put("OptionPane.noButtonMnemonic",ResourceMgr.getAcceleratorChar("LblNo"));
+//		def.put("OptionPane.cancelButtonText",ResourceMgr.getPlainString("LblCancel"));
+//		def.put("OptionPane.cancelButtonMnemonic",ResourceMgr.getAcceleratorChar("LblCancel"));
+//		def.put("OptionPane.okButtonText",ResourceMgr.getPlainString("LblOK"));
+//		def.put("OptionPane.okButtonMnemonic",ResourceMgr.getAcceleratorChar("LblOK"));
 
-		FileDialogUtil.initFileChooserLabels();
+//		FileDialogUtil.initFileChooserLabels();
 		
 		Font dataFont = settings.getDataFont(false);
 		if (dataFont != null)

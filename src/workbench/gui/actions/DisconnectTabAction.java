@@ -12,6 +12,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import workbench.db.ConnectionProfile;
 import workbench.gui.MainWindow;
 import workbench.resource.ResourceMgr;
 
@@ -19,14 +20,14 @@ import workbench.resource.ResourceMgr;
  *
  * @author support@sql-workbench.net
  */
-public class CreateNewConnection 
+public class DisconnectTabAction 
 	extends WbAction
 {
 	private MainWindow window;
 	
-	public CreateNewConnection(MainWindow client)
+	public DisconnectTabAction(MainWindow client)
 	{
-		this.initMenuDefinition("MnuTxtCreateNewConn");
+		this.initMenuDefinition("MnuTxtDisconnectTab");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
 		this.setEnabled(false);
 		this.window = client;
@@ -37,8 +38,9 @@ public class CreateNewConnection
 	public void executeAction(ActionEvent e)
 	{
 		if (this.window == null) return;
-		if (!window.canUseSeparateConnection()) return;
-		this.window.createNewConnectionForCurrentPanel();
+		ConnectionProfile prof = window.getCurrentProfile();
+		if (prof.getUseSeparateConnectionPerTab()) return;
+		this.window.disconnectCurrentPanel();
 	}
 
 	public void checkState()
@@ -49,8 +51,9 @@ public class CreateNewConnection
 		}
 		else
 		{
-			this.setEnabled(window.canUseSeparateConnection() && !window.usesSeparateConnection());
+			this.setEnabled(window.canUseSeparateConnection() && window.usesSeparateConnection());
 		}
 	}
+					
 	
 }

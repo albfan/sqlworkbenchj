@@ -65,66 +65,46 @@ public class FileDialogUtil
 		return this.getXmlReportFilename(caller, null);
 	}
 
-	public static void initFileChooserLabels()
-	{
-		// This is "borrowed" from com.sun.java.swing.plaf.windows.resources.windows
-		Object[] labels = new Object[] { 
-             "FileChooser.detailsViewActionLabelText", "Details" ,
-             "FileChooser.detailsViewButtonAccessibleName", "Details" ,
-             "FileChooser.detailsViewButtonToolTipText", "Details" ,
-             "FileChooser.fileAttrHeaderText", "Attributes" ,
-             "FileChooser.fileDateHeaderText", "Modified" ,
-             "FileChooser.fileNameHeaderText", "Name" ,
-             "FileChooser.fileNameLabelText", "File name:" ,
-             "FileChooser.fileSizeHeaderText", "Size" ,
-             "FileChooser.fileTypeHeaderText", "Type" ,
-             "FileChooser.filesOfTypeLabelText", "Files of type:" ,
-             "FileChooser.homeFolderAccessibleName", "Home" ,
-             "FileChooser.homeFolderToolTipText", "Home" ,
-             "FileChooser.listViewActionLabelText", "List" ,
-             "FileChooser.listViewButtonAccessibleName", "List" ,
-             "FileChooser.listViewButtonToolTipText", "List" ,
-             "FileChooser.lookInLabelText", "Look in:" ,
-             "FileChooser.newFolderAccessibleName", "New Folder" ,
-             "FileChooser.newFolderActionLabelText", "New Folder" ,
-             "FileChooser.newFolderToolTipText", "Create New Folder" ,
-             "FileChooser.refreshActionLabelText", "Refresh" ,
-             "FileChooser.saveInLabelText", "Save in:" ,
-             "FileChooser.upFolderAccessibleName", "Up" ,
-             "FileChooser.upFolderToolTipText", "Up One Level" ,
-             "FileChooser.viewMenuLabelText", "View" 
-        };
-		
-//		UIManager.put("FileChooser.newFolderErrorText",ResourceMgr.getPlainString(""));
-//		UIManager.put("FileChooser.newFolderErrorSeparator",ResourceMgr.getPlainString(""));
-//
-		UIManager.put("FileChooser.fileDescriptionText","FileDescription");
-//		UIManager.put("FileChooser.directoryDescriptionText",ResourceMgr.getPlainString(""));
-
-		UIManager.getDefaults().putDefaults(labels);
-		
-		UIManager.put("FileChooser.saveButtonText",ResourceMgr.getPlainString("LblSave"));
-		UIManager.put("FileChooser.openButtonText",ResourceMgr.getPlainString("LblOpen"));
-		UIManager.put("FileChooser.saveDialogTitleText",ResourceMgr.getPlainString("LblSave"));
-		UIManager.put("FileChooser.openDialogTitleText",ResourceMgr.getPlainString("LblOpen"));
-		UIManager.put("FileChooser.cancelButtonText",ResourceMgr.getPlainString("LblCancel"));
-		UIManager.put("FileChooser.helpButtonText",ResourceMgr.getPlainString("LblHelp"));
-		UIManager.put("FileChooser.directoryOpenButtonText",ResourceMgr.getPlainString("LblOpen"));
-
-//		UIManager.put("FileChooser.saveButtonMnemonic", "");
-//		UIManager.put("FileChooser.openButtonMnemonic", "");
-//		UIManager.put("FileChooser.cancelButtonMnemonic", "");
-//		UIManager.put("FileChooser.updateButtonMnemonic", "");
-//		UIManager.put("FileChooser.helpButtonMnemonic", "");
-//		UIManager.put("FileChooser.directoryOpenButtonMnemonic", "");
-
-//		UIManager.put("FileChooser.saveButtonToolTipText",ResourceMgr.getPlainString(""));
-//		UIManager.put("FileChooser.openButtonToolTipText",ResourceMgr.getPlainString(""));
-//		UIManager.put("FileChooser.cancelButtonToolTipText",ResourceMgr.getPlainString(""));
-//		UIManager.put("FileChooser.updateButtonToolTipText",ResourceMgr.getPlainString(""));
-//		UIManager.put("FileChooser.helpButtonToolTipText",ResourceMgr.getPlainString(""));
-//		UIManager.put("FileChooser.directoryOpenButtonToolTipText",ResourceMgr.getPlainString(""));
-	}
+//	public static void initFileChooserLabels()
+//	{
+//		// This is "borrowed" from com.sun.java.swing.plaf.windows.resources.windows
+//		Object[] labels = new Object[] { 
+//             "FileChooser.detailsViewActionLabelText", "Details" ,
+//             "FileChooser.detailsViewButtonAccessibleName", "Details" ,
+//             "FileChooser.detailsViewButtonToolTipText", "Details" ,
+//             "FileChooser.fileAttrHeaderText", "Attributes" ,
+//             "FileChooser.fileDateHeaderText", "Modified" ,
+//             "FileChooser.fileNameHeaderText", "Name" ,
+//             "FileChooser.fileNameLabelText", "File name:" ,
+//             "FileChooser.fileSizeHeaderText", "Size" ,
+//             "FileChooser.fileTypeHeaderText", "Type" ,
+//             "FileChooser.filesOfTypeLabelText", "Files of type:" ,
+//             "FileChooser.homeFolderAccessibleName", "Home" ,
+//             "FileChooser.homeFolderToolTipText", "Home" ,
+//             "FileChooser.listViewActionLabelText", "List" ,
+//             "FileChooser.listViewButtonAccessibleName", "List" ,
+//             "FileChooser.listViewButtonToolTipText", "List" ,
+//             "FileChooser.lookInLabelText", "Look in:" ,
+//             "FileChooser.newFolderAccessibleName", "New Folder" ,
+//             "FileChooser.newFolderActionLabelText", "New Folder" ,
+//             "FileChooser.newFolderToolTipText", "Create New Folder" ,
+//             "FileChooser.refreshActionLabelText", "Refresh" ,
+//             "FileChooser.saveInLabelText", "Save in:" ,
+//             "FileChooser.upFolderAccessibleName", "Up" ,
+//             "FileChooser.upFolderToolTipText", "Up One Level" ,
+//             "FileChooser.viewMenuLabelText", "View" 
+//        };
+//		
+//		UIManager.put("FileChooser.fileDescriptionText","FileDescription");
+//		UIManager.getDefaults().putDefaults(labels);
+//		UIManager.put("FileChooser.saveButtonText",ResourceMgr.getPlainString("LblSave"));
+//		UIManager.put("FileChooser.openButtonText",ResourceMgr.getPlainString("LblOpen"));
+//		UIManager.put("FileChooser.saveDialogTitleText",ResourceMgr.getPlainString("LblSave"));
+//		UIManager.put("FileChooser.openDialogTitleText",ResourceMgr.getPlainString("LblOpen"));
+//		UIManager.put("FileChooser.cancelButtonText",ResourceMgr.getPlainString("LblCancel"));
+//		UIManager.put("FileChooser.helpButtonText",ResourceMgr.getPlainString("LblHelp"));
+//		UIManager.put("FileChooser.directoryOpenButtonText",ResourceMgr.getPlainString("LblOpen"));
+//	}
 	
 	public String getXmlReportFilename(Component caller, JComponent accessory)
 	{

@@ -90,7 +90,7 @@ public class Settings
 	
 	private WbProperties props;
 	private String filename;
-	private ArrayList<FontChangedListener> fontChangeListeners = new ArrayList<FontChangedListener>();
+	private List<FontChangedListener> fontChangeListeners = new LinkedList<FontChangedListener>();
 	private String configDir;
 
 	private ShortcutManager keyManager;

@@ -900,6 +900,13 @@ Done.</programlisting>
 			be displayed in the status bar. The selected row(s) will not be removed from the result 
 			set until the dependency check has finished.
 		</para>
+    <note>
+      <para>
+        Note that the generated SQL statements to delete the dependent rows will only 
+        be shown if you have enabled the preview of generated DML statements 
+        in the <link linkend="options-confirm-update">options dialog</link>
+      </para>
+   </note>
 	</section>
 	
 	<section id="fk-navigation">

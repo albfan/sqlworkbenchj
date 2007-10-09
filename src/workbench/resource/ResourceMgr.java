@@ -16,8 +16,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -28,7 +26,6 @@ import workbench.log.LogMgr;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
-import workbench.util.WbLocale;
 
 /**
  * @author support@sql-workbench.net.kellerer
@@ -54,9 +51,7 @@ public class ResourceMgr
 	public static final String MNU_TXT_TOOLS = "MnuTxtTools";
 	public static final String MNU_TXT_HELP = "MnuTxtHelp";
 	public static final String MNU_TXT_OPTIONS = "MnuTxtOptions";
-
 	private static ResourceBundle resources;
-	private static HashMap<String, ImageIcon> images = new HashMap<String, ImageIcon>();
 	
 	private ResourceMgr()
 	{
@@ -67,13 +62,10 @@ public class ResourceMgr
 		return getString("TxtBuild") + " " + getBuildNumber().toString() + " (" + getString("TxtBuildDate") + ")";
 	}
 
-	private static final String shiftText = KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK);
-	private static final String ctrlText = KeyEvent.getKeyModifiersText(KeyEvent.CTRL_MASK);
-	
 	public static String replaceModifierText(String msg)
 	{
-		msg = StringUtil.replace(msg, "%shift%", shiftText);
-		msg = StringUtil.replace(msg, "%control%", ctrlText);
+		msg = StringUtil.replace(msg, "%shift%", KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK));
+		msg = StringUtil.replace(msg, "%control%", KeyEvent.getKeyModifiersText(KeyEvent.CTRL_MASK));
 		return msg;
 	}
 	
@@ -238,36 +230,20 @@ public class ResourceMgr
 
 	private static ImageIcon retrieveImage(String filename, String extension)
 	{
-		Object    value = images.get(filename.toUpperCase());
-		ImageIcon result = null;
-		if (value == null)
+		URL imageIconUrl = ResourceMgr.class.getClassLoader().getResource("workbench/resource/images/" + filename + extension);
+		if (imageIconUrl != null)
 		{
-			URL imageIconUrl = ResourceMgr.class.getClassLoader().getResource("workbench/resource/images/" + filename + extension);
-			if (imageIconUrl != null)
-			{
-				result = new ImageIcon(imageIconUrl);
-				images.put(filename.toUpperCase(), result);
-
-				return result;
-			}
-			else
-			{
-				imageIconUrl = ResourceMgr.class.getClassLoader().getResource(filename);
-				if (imageIconUrl != null)
-				{
-					result = new ImageIcon(imageIconUrl);
-					images.put(filename.toUpperCase(), result);
-
-					return result;
-				}
-			}
+			return new ImageIcon(imageIconUrl);
 		}
 		else
 		{
-			result = (ImageIcon)value;
+			imageIconUrl = ResourceMgr.class.getClassLoader().getResource(filename);
+			if (imageIconUrl != null)
+			{
+				return new ImageIcon(imageIconUrl);
+			}
 		}
-
-		return result;
+		return null;
 	}
 
 	/**
@@ -280,15 +256,17 @@ public class ResourceMgr
 
   public static ResourceBundle getResources()
   {
-		synchronized (TXT_PRODUCT_NAME)
+		if (resources == null)
 		{
-			if (resources == null)
+			Locale l = Settings.getInstance().getLanguage();
+			resources = getResourceBundle(l);
+			boolean setDefaultLocale = Settings.getInstance().getBoolProperty("workbench.gui.setdefaultlocale", true);
+			if (setDefaultLocale)
 			{
-				Locale l = Settings.getInstance().getLanguage();
-				resources = getResourceBundle(l);
+				Locale.setDefault(l);
 			}
-			return resources;
 		}
+		return resources;
   }
 
 }

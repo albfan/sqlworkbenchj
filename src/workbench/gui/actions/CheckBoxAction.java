@@ -15,6 +15,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -62,22 +63,36 @@ public class CheckBoxAction
 		}
 	}
 
+	public JMenuItem getMenuItem()
+	{
+		if (this.toggleMenu == null)
+		{
+			createMenuItem();
+		}
+		return toggleMenu;
+	}
+	
+	private void createMenuItem()
+	{
+		this.toggleMenu = new JCheckBoxMenuItem();
+		this.toggleMenu.setAction(this);
+		String text = this.getValue(Action.NAME).toString();
+		int pos = text.indexOf('&');
+		if (pos > -1)
+		{
+			char mnemonic = text.charAt(pos + 1);
+			text = text.substring(0, pos) + text.substring(pos + 1);
+			this.toggleMenu.setMnemonic((int) mnemonic);
+		}
+		this.toggleMenu.setText(text);
+		this.toggleMenu.setSelected(this.switchedOn);
+		
+	}
 	public void addToMenu(JMenu aMenu)
 	{
 		if (this.toggleMenu == null)
 		{
-			this.toggleMenu = new JCheckBoxMenuItem();
-			this.toggleMenu.setAction(this);
-			String text = this.getValue(Action.NAME).toString();
-			int pos = text.indexOf('&');
-			if (pos > -1)
-			{
-				char mnemonic = text.charAt(pos + 1);
-				text = text.substring(0, pos) + text.substring(pos + 1);
-				this.toggleMenu.setMnemonic((int) mnemonic);
-			}
-			this.toggleMenu.setText(text);
-			this.toggleMenu.setSelected(this.switchedOn);
+			createMenuItem();
 		}
 		aMenu.add(this.toggleMenu);
 	}

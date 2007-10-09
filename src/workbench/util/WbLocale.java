@@ -11,7 +11,6 @@
  */
 package workbench.util;
 
-import java.lang.Comparable;
 import java.util.Locale;
 
 /**

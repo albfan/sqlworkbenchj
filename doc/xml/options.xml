@@ -26,6 +26,15 @@
 				<menuchoice><guimenu>Help</guimenu><guimenuitem>Check for updates...</guimenuitem></menuchoice>.
 			</para>
 		</section>
+
+		<section id="options-gui-language">
+			<title>Language</title>
+			<para>
+				With this option you can select in which language the application 
+        is shown. The new value will only be in affect when you restart the 
+        application.
+			</para>
+		</section>
 		
 		<section id="options-encrypt-password">
 			<title>Encrypt passwords</title>
@@ -104,7 +113,7 @@
 			</para>
 		</section>
 		
-		<section id="options-filed-delimiter">
+		<section id="options-field-delimiter">
 			<title>Field delimiter</title>
 			<para>The default delimiter used when exporting data to a text file.
 				This can be overridden in the file selection dialog when actually
@@ -145,43 +154,6 @@
 		</section>		
 	</section>
 
-	<section id="options-window-title">
-		<title>Window Title</title>
-		<para>
-			The title bar of the main window displays displays information
-			about the current connection, workspace and editor file. Some 
-			of these elements can be enabled or disabled with the options 
-			on this page.
-		</para>
-		<section id="options-window-showgroupname">
-			<title>Show Profile Group</title>
-			<para>
-				If this option is enabled, the group of the current connection
-				profile will be displayed in the main window's title. The name 
-				of the current connection profile will always be shown.
-			</para>
-		</section>
-		
-		<section id="options-window-showworkspace">
-			<title>Show Workspace name</title>
-			<para>
-				If this option is enabled, the currently loaded workspace name 
-				will be displayed in the main window's title.
-			</para>
-		</section>
-		
-		<section id="options-editor-filename">
-			<title>Editor Filename</title>
-			<para>
-				If the current editor tab contains an external file, you 
-				can choose if and which information about the file should be displayed
-				in the window title. You can display nothing, only the filename or
-				the full path information about the current file. The information 
-				will be displayed behind the current profile and workspace name.
-			</para>
-		</section>
-	</section>
-		
 	<section id="options-editor">
 		<title>Editor options</title>
 
@@ -230,15 +202,16 @@
 				export/copy data as SQL statements)
 			</para>
 		</section>
-		
-		<section id="options-externally-lineending">
-			<title>File format</title>
+
+		<section id="options-sort-completion-by">
+			<title>Sort pasted columns by</title>
 			<para>
-				This property controls the line terminator used when a file is saved by the editor. 
-				Changing this property affects the next save operation.
+        When selecting to paste all (or several columns) from the popup window, 
+        you can select with this option, in which order the columns should be written
+        into the editor.
 			</para>
 		</section>
-
+		
 		<section id="options-internal-lineending">
 			<title>Line ending for DBMS</title>
 			<para>
@@ -253,6 +226,14 @@
 				the execution of statements, it is highly recommended to leave the default setting
 				of Unix line endings. You should only change this, if your DBMS does not understand
 				the single linefeed character (ASCII value 10) properly.
+			</para>
+		</section>
+
+		<section id="options-externally-lineending">
+			<title>File format</title>
+			<para>
+				This property controls the line terminator used when a file is saved by the editor. 
+				Changing this property affects the next save operation.
 			</para>
 		</section>
 		
@@ -286,35 +267,11 @@
 			<title>Alternate Delimiter</title>
 			<para>
 				This options defines the default alternate delimiter. You can 
-				override this default in the connection profile, to used different
+				override this default in the connection profile, to use different
 				delimiters for different DBMS.
 				For details see <link linkend="understand-alternate-delim">Understanding the 
 				alternate delimiter</link>
 			</para>
-			<!--
-			<para>This is needed when creating stored procedures which themselves
-				have a semicolon in the source code. Normally the &wb-productname; would
-				stop parsing the command at the first semicolon and send that command to
-				the database (which will produce an error message as the statement is
-				not complete).
-			</para>
-			<para>In the case of a <literal>CREATE PROCEDURE</literal> statement this should be
-				terminated with the character sequence entered in this input field. The
-				terminator can have more than one character e.g. <literal>GO</literal>, or <literal>!!</literal>
-			</para>
-			<para>It is recommended to always define the alternate delimiter as "Single line". This means
-				that the delimiter will only be recognized when put on a single line. If you
-				define the forward slash as the alternate delimiter, the following script
-				would be interpreted as two statements.
-			</para>
-			<para><programlisting>SELECT sum(field)/count(*) FROM table
-/</programlisting></para>
-			<para>To solve this problem, define the delimiter as "Single line".
-			Then the forward slash that divides the two values is not recognized as a delimiter
-			and the script executes normally. It is recommended to always turn on the 
-			single line mode for the alternate delimiter.
-			</para>
-			-->
 		</section>
 		
 		<section id="options-history-size">
@@ -324,6 +281,14 @@
 				(together with the selection and cursor information) is stored in the
 				history. If you have large amounts of text in the editor and set this
 				number quite high, be aware of the memory consumption this might create.
+			</para>
+		</section>
+
+		<section id="options-files-in-history">
+			<title>Files in history</title>
+			<para>
+        If this option is enabled, the content of external files is also
+        stored in the statement history. 
 			</para>
 		</section>
 		
@@ -351,6 +316,14 @@
 	<section id="options-data-display">
 		<title>Options for displaying data</title>
 		
+		<section id="options-data-font">
+			<title>Data font</title>
+			<para>
+				The font that is used to display result sets. This includes
+				the object list and results in the <link linkend="dbexplorer">DbExplorer</link>.
+			</para>
+		</section>
+
 		<section id="options-date-format">
 			<title>Date, timestamp and time formats</title>
 			<para>Define the format for displaying date, date/time (timestamp) and time columns in the result
@@ -428,24 +401,6 @@
 			</para>
 		</section>
 		
-	</section>
-	
-	<section id="options-data-edit">
-		<title>Options for data editing</title>
-		
-		<section id="options-confirm-update">
-			<title>Confirm result set updates</title>
-			<para>When this option is enabled, the statements which are sent to the
-				database when saving changes to result set table, are displayed before
-				execution. The update can be cancelled at that point if the statements
-				are not correct. The generated statements can also be saved to a file
-				from that window.
-			</para>
-			<note>
-				<para>The statement(s) that are displayed in the confirmation window can not be changed!</para>
-			</note>
-		</section>
-
 		<section id="options-row-resizing">
 			<title>Allow row height resizing</title>
 			<para>
@@ -453,58 +408,7 @@
 				individual rows in the result set.
 			</para>
 		</section>
-		
-		<section id="options-highlight-required">
-			<title>Highlight required fields</title>
-			<para>When editing data either in the result set or in the
-				data tab of the DbExplorer, fields that are set to <literal>NOT NULL</literal>
-				in the underlying table, will be displayed with a different background color
-				if this option is selected.
-			</para>
-		</section>
 
-		<section id="options-required-field-color">
-			<title>Color for required fields</title>
-			<para>
-				If required fields are highlighted during editing, this option
-				defines the background color that is used.
-			</para>
-		</section>
-
-		<section id="options-data-font">
-			<title>Data font</title>
-			<para>
-				The font that is used to display result sets. This includes
-				the object list and results in the <link linkend="dbexplorer">DbExplorer</link>.
-			</para>
-		</section>
-		
-		<section id="options-pkmapping">
-			<title>Default PK Map</title>
-			<para>
-				This property defines a mapping file for primary key columns. The information 
-				from that file is read whenever the primary keys for a table of 
-				cannot be obtained from the database. For a detailed
-				description on how to define extra primary key columns, please
-				refer to the <link linkend="command-define-pk"><literal>WbDefinePk</literal></link> command.
-			</para>
-		</section>
-		
-		<section id="options-max-column-width">
-			<title>Max. column width</title>
-			<para>When the initial display size of a column is calculated, or if 
-				you optimize the column widths to fit the actual data, columns will not exceed this 
-				width. This is useful when displaying large character columns.
-			</para>
-		</section>		
-		
-		<section id="options-min-column-width">
-			<title>Min. column width</title>
-			<para>When the initial display size of a column is calculated, or if 
-				you optimize the column widths to fit the actual data, columns will not exceed this 
-				width.
-			</para>
-		</section>		
 
 		<section id="options-auto-optimize-column-width">
 			<title>Auto adjust column widths</title>
@@ -525,6 +429,69 @@
 				column's label.
 			</para>
 		</section>		
+
+		
+		<section id="options-max-column-width">
+			<title>Max. column width</title>
+			<para>When the initial display size of a column is calculated, or if 
+				you optimize the column widths to fit the actual data, columns will not exceed this 
+				width. This is useful when displaying large character columns.
+			</para>
+		</section>		
+		
+		<section id="options-min-column-width">
+			<title>Min. column width</title>
+			<para>When the initial display size of a column is calculated, or if 
+				you optimize the column widths to fit the actual data, columns will not exceed this 
+				width.
+			</para>
+		</section>		
+
+	</section>
+	
+	<section id="options-data-edit">
+		<title>Options for data editing</title>
+		
+		<section id="options-confirm-update">
+			<title>Confirm result set updates</title>
+			<para>When this option is enabled, the statements which are sent to the
+				database when saving changes to result set table, are displayed before
+				execution. The update can be cancelled at that point if the statements
+				are not correct. The generated statements can also be saved to a file
+				from that window.
+			</para>
+			<note>
+				<para>The statement(s) that are displayed in the confirmation window can not be changed!</para>
+			</note>
+		</section>
+
+		<section id="options-highlight-required">
+			<title>Highlight required fields</title>
+			<para>When editing data either in the result set or in the
+				data tab of the DbExplorer, fields that are set to <literal>NOT NULL</literal>
+				in the underlying table, will be displayed with a different background color
+				if this option is selected.
+			</para>
+		</section>
+
+		<section id="options-required-field-color">
+			<title>Color for required fields</title>
+			<para>
+				If required fields are highlighted during editing, this option
+				defines the background color that is used.
+			</para>
+		</section>
+
+		<section id="options-pkmapping">
+			<title>Default PK Map</title>
+			<para>
+				This property defines a mapping file for primary key columns. The information 
+				from that file is read whenever the primary keys for a table of 
+				cannot be obtained from the database. For a detailed
+				description on how to define extra primary key columns, please
+				refer to the <link linkend="command-define-pk"><literal>WbDefinePk</literal></link> command.
+			</para>
+		</section>
 		
 	</section>
 	
@@ -570,9 +537,76 @@
 
 	</section>
 	
+	<section id="options-window-title">
+		<title>Window Title</title>
+
+		<para>
+			The title bar of the main window displays displays information
+			about the current connection, workspace and editor file. Some 
+			of these elements can be enabled or disabled with the options 
+			on this page.
+		</para>
+
+		<section id="options-window-title-appatend">
+			<title>Application name at end</title>
+			<para>
+        If this option is enabled, the Application name will be put at the end
+        of the window title.
+			</para>
+		</section>
+
+		<section id="options-window-showworkspace">
+			<title>Show Workspace name</title>
+			<para>
+				If this option is enabled, the currently loaded workspace name 
+				will be displayed in the main window's title.
+			</para>
+		</section>
+
+		<section id="options-window-showgroupname">
+			<title>Show Profile Group</title>
+			<para>
+				If this option is enabled, the group of the current connection
+				profile will be displayed in the main window's title. The name 
+				of the current connection profile will always be shown.
+			</para>
+		</section>
+		
+		<section id="options-enclose-group">
+			<title>Enclose Group With</title>
+			<para>
+        If you select to display the current profile's group, you can select a pair
+        of characters to put around the group name.
+			</para>
+		</section>
+
+		<section id="options-group-separator">
+			<title>Separator</title>
+			<para>
+        If you select to display the current profile's name and group, you can select the 
+        character that separates the two names.
+			</para>
+		</section>
+		
+		<section id="options-editor-filename">
+			<title>Editor Filename</title>
+			<para>
+				If the current editor tab contains an external file, you 
+				can choose if and which information about the file should be displayed
+				in the window title. You can display nothing, only the filename or
+				the full path information about the current file. The information 
+				will be displayed behind the current profile and workspace name.
+			</para>
+		</section>
+
+	</section>
+
 	<section id="options-sql-formatting">
 		<title>SQL Formatting</title>		
-		
+      <para>
+        These options influence the behaviour of the SQL Formatter when 
+        <link linkend="editor-reformat-sql">reformatting</link> a SQL statement in the editor.
+      </para>
 			<section>
 				<title>Max. length for sub-select</title>
 				<para>

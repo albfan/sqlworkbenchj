@@ -15,18 +15,16 @@ import javax.swing.JPopupMenu;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.AddTabAction;
 import workbench.gui.actions.FileDiscardAction;
-import workbench.gui.actions.FileOpenAction;
 import workbench.gui.actions.NewDbExplorerPanelAction;
 import workbench.gui.actions.RemoveTabAction;
 import workbench.gui.actions.RenameTabAction;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.MainPanel;
-import workbench.gui.actions.FileReloadAction;
-import workbench.gui.actions.FileSaveAction;
 import workbench.gui.actions.InsertTabAction;
 import workbench.gui.actions.MoveSqlTabLeft;
 import workbench.gui.actions.MoveSqlTabRight;
+import workbench.gui.actions.ToggleExtraConnection;
 
 /**
  * @author  support@sql-workbench.net
@@ -63,6 +61,12 @@ public class SqlTabPopup
 		this.newDbExp = new NewDbExplorerPanelAction(aClient, "MnuTxtAddExplorerPanel");
 		this.newDbExp.setIcon(null);
 		this.add(newDbExp);
+
+		if (aClient.canUseSeparateConnection())
+		{
+			ToggleExtraConnection toggle = new ToggleExtraConnection(aClient);
+			this.add(toggle.getMenuItem());
+		}
 		
 		MainPanel panel = aClient.getCurrentPanel();
 		if (panel instanceof SqlPanel)

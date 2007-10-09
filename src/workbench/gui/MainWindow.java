@@ -12,6 +12,7 @@
 package workbench.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
@@ -105,6 +106,7 @@ import workbench.gui.actions.InsertTabAction;
 import workbench.gui.actions.OptionsDialogAction;
 import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.actions.CreateNewConnection;
+import workbench.gui.actions.DisconnectTabAction;
 import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
 import workbench.util.NumberStringCache;
@@ -133,6 +135,7 @@ public class MainWindow
 
 	private FileDisconnectAction disconnectAction;
 	private CreateNewConnection createNewConnection;
+	private DisconnectTabAction disconnectTab;
 	private ShowDbExplorerAction dbExplorerAction;
 	private NewDbExplorerPanelAction newDbExplorerPanel;
 	private NewDbExplorerWindowAction newDbExplorerWindow;
@@ -314,6 +317,7 @@ public class MainWindow
 		this.saveAsWorkspaceAction = new SaveAsNewWorkspaceAction(this);
 
 		this.createNewConnection = new CreateNewConnection(this);
+		this.disconnectTab = new DisconnectTabAction(this);
 		
 		this.loadWorkspaceAction = new LoadWorkspaceAction(this);
 		this.saveWorkspaceAction = new SaveWorkspaceAction(this);
@@ -360,6 +364,7 @@ public class MainWindow
 		action = new FileConnectAction(this);
 		action.addToMenu(menu);
 		this.createNewConnection.addToMenu(menu);
+		this.disconnectTab.addToMenu(menu);
 		menu.addSeparator();
 		this.disconnectAction.addToMenu(menu);
 		menu.addSeparator();
@@ -784,6 +789,78 @@ public class MainWindow
 		}
 	}
 
+	public void disconnectCurrentPanel()
+	{
+		if (this.currentProfile == null) return;
+		if (this.currentProfile.getUseSeparateConnectionPerTab()) return;
+		
+		final MainPanel p = this.getCurrentPanel();
+		WbConnection con = p.getConnection();
+		if (con == this.currentConnection) return;
+		
+		Thread t = new WbThread("Disconnect panel " + p.getId())
+		{
+			public void run()
+			{
+				disconnectPanel(p);
+			}
+		};
+		t.start();
+	}
+	
+	private void disconnectPanel(final MainPanel panel)
+	{
+		if (this.isConnectInProgress()) return;
+		setConnectIsInProgress();
+		showDisconnectInfo();
+		showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
+		try
+		{
+			WbConnection old = panel.getConnection();
+			panel.disconnect();
+			ConnectionMgr.getInstance().disconnect(old);
+			panel.setConnection(currentConnection);
+			int index = this.getIndexForPanel(panel);
+			sqlTab.setForegroundAt(index, null);
+		}
+		catch (Throwable e)
+		{
+			LogMgr.logError("MainWindow.connectPanel()", "Error when disconnecting panel " + panel.getId(), e);
+			String error = ExceptionUtil.getDisplay(e);
+			WbSwingUtilities.showErrorMessage(this, error);
+		}
+		finally
+		{
+			showStatusMessage("");
+			closeConnectingInfo();
+			clearConnectIsInProgress();
+		}
+
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				createNewConnection.checkState();
+				disconnectTab.checkState();
+			}
+		});
+	}
+	
+	public boolean canUseSeparateConnection()
+	{
+		if (this.currentProfile == null) return false;
+		return !this.currentProfile.getUseSeparateConnectionPerTab();
+	}
+	
+	public boolean usesSeparateConnection()
+	{
+		if (!canUseSeparateConnection()) return false;
+		final MainPanel current = this.getCurrentPanel();
+		WbConnection conn = current.getConnection() ;
+		
+		return (currentConnection != null && conn != this.currentConnection);
+	}
+	
 	public void createNewConnectionForCurrentPanel()
 	{
 		MainPanel panel = getCurrentPanel();
@@ -798,6 +875,14 @@ public class MainWindow
 			public void run()
 			{
 				connectPanel(aPanel);
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						int index = getIndexForPanel(aPanel);
+						sqlTab.setForegroundAt(index, Color.BLUE);
+					}
+				});
 			}
 		};
 		this.connectThread.start();
@@ -811,15 +896,16 @@ public class MainWindow
 	{
 		if (this.isConnectInProgress()) return;
 		this.showConnectingInfo();
+		this.setConnectIsInProgress();
 		try
 		{
-			final WbConnection conn = this.getConnectionForTab(aPanel, true);
-			final int index = this.getIndexForPanel(aPanel);
+			WbConnection conn = this.getConnectionForTab(aPanel, true);
+			int index = this.getIndexForPanel(aPanel);
 			this.tabConnected(aPanel, conn, index);
 		}
 		catch (Throwable e)
 		{
-			LogMgr.logError("MainWindow.connectPanel()", "Error when connecting SQL panel " + aPanel.getId(), e);
+			LogMgr.logError("MainWindow.connectPanel()", "Error when connecting panel " + aPanel.getId(), e);
 			showStatusMessage("");
 			String error = ExceptionUtil.getDisplay(e);
 			String msg = ResourceMgr.getString("ErrConnectFailed").replaceAll("%msg%", error.trim());
@@ -828,6 +914,7 @@ public class MainWindow
 		finally
 		{
 			closeConnectingInfo();
+			clearConnectIsInProgress();
 			this.connectThread = null;
 		}
 	}
@@ -876,7 +963,8 @@ public class MainWindow
 
 		this.updateToolbarVisibility();
 	
-		this.createNewConnection.setEnabled(currentConnection != null && current.getConnection() == this.currentConnection);
+		this.createNewConnection.checkState();
+		this.disconnectTab.checkState();
 		
 		this.checkMacroMenuForPanel(anIndex);
 		this.checkViewMenu(anIndex);
@@ -1136,7 +1224,8 @@ public class MainWindow
 		this.newDbExplorerWindow.setEnabled(true);
 
 		this.disconnectAction.setEnabled(true);
-		this.createNewConnection.setEnabled(!this.currentProfile.getUseSeparateConnectionPerTab());
+		this.createNewConnection.checkState();
+		this.disconnectTab.checkState();
 		this.getCurrentPanel().clearLog();
 		this.getCurrentPanel().showResultPanel();
 
@@ -1150,13 +1239,8 @@ public class MainWindow
 
 	public void connectFailed(String error)
 	{
-		this.setMacroMenuEnabled(false);
+		disconnected();
 		this.updateWindowTitle();
-		this.dbExplorerAction.setEnabled(false);
-		this.newDbExplorerPanel.setEnabled(false);
-		this.newDbExplorerWindow.setEnabled(false);
-		this.disconnectAction.setEnabled(false);
-		this.createNewConnection.setEnabled(false);
 		
 		try
 		{
@@ -1424,11 +1508,8 @@ public class MainWindow
 
 	/**
 	 *	This does the real disconnect action.
-	 *  It needs to be public in order for the WbManager to be
-	 *  able to initiate a synchronous disconnect. In any other
-	 *  case disconnect() should be used!
 	 */
-	public void doDisconnect()
+	private void doDisconnect()
 	{
 		try
 		{
@@ -1446,13 +1527,7 @@ public class MainWindow
 				sql.disconnect();
 				if (conn != null && !conn.isClosed())
 				{
-					EventQueue.invokeLater(new Runnable()
-					{
-						public void run()
-						{
-							showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
-						}
-					});
+					showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
 					mgr.disconnect(conn);
 				}
 			}
@@ -1466,6 +1541,10 @@ public class MainWindow
 				public void run()
 				{
 					showStatusMessage("");
+					for (int i=0; i < sqlTab.getTabCount(); i++)
+					{
+						sqlTab.setForegroundAt(i, null);
+					}
 				}
 			});
 		}
@@ -1479,7 +1558,8 @@ public class MainWindow
 		this.setMacroMenuEnabled(false);
 		this.updateWindowTitle();
 		this.disconnectAction.setEnabled(false);
-		this.createNewConnection.setEnabled(false);
+		this.createNewConnection.checkState();
+		this.disconnectTab.checkState();
 		this.dbExplorerAction.setEnabled(false);
 		this.newDbExplorerPanel.setEnabled(false);
 		this.newDbExplorerWindow.setEnabled(false);

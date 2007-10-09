@@ -1007,6 +1007,7 @@ public class SqlPanel
 	public void showStatusMessage(String aMsg)
 	{
 		this.statusBar.setStatusMessage(aMsg);
+		this.statusBar.forcePaint();
 	}
 
 	/**
@@ -2461,7 +2462,7 @@ public class SqlPanel
 
 				if (count > 1)
 				{
-					this.showStatusMessage(currentMsg);
+					this.statusBar.setStatusMessage(currentMsg);
 				}
 
 				// this will be set by confirmExecution() if

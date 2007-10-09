@@ -310,6 +310,7 @@ public class WbAction
 		this.menuItem = new WbMenuItem();
 		this.menuItem.setAction(this);
 		this.menuItem.setAccelerator(this.getAccelerator());
+		//this.menuItem.setLocale(Settings.getInstance().getLanguage());
 		Integer index = (Integer)this.getValue(WbAction.MNEMONIC_INDEX);
 		if (index != null)
 		{
