@@ -56,9 +56,7 @@ public class RowData
 	
 	public RowData(ResultInfo info)
 	{
-		int colCount = info.getColumnCount();
-		this.colData = new Object[colCount];
-		this.setNew();
+		this(info.getColumnCount());
 	}
 	
 	public RowData(int aColCount)
@@ -208,8 +206,7 @@ public class RowData
 		if (!this.isNew())
 		{
 			Object oldValue = this.colData[aColIndex];
-			if (oldValue == null) return;
-			if (oldValue.equals(aValue)) return;
+			if (oldValue != null && oldValue.equals(aValue)) return;
 			if (this.originalData == null)
 			{
 				this.originalData = new Object[this.colData.length];

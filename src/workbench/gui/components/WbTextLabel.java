@@ -81,12 +81,14 @@ public class WbTextLabel
 			int w = fm.stringWidth(this.text);
 			textX = this.getWidth() - w - 4;
 		}
+		invalidate();
 		repaint();
 	}
 	
 	public void forcePaint()
 	{
 		Graphics g = getGraphics();
+		if (g == null) return;
 		g.setColor(getBackground());
 		g.clearRect(0, 0, this.getWidth() - 4, getHeight() - 1);
 		paint(g);

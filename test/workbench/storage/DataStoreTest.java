@@ -17,9 +17,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import junit.framework.*;
 import java.sql.Types;
 import java.util.List;
+import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
@@ -373,10 +373,10 @@ public class DataStoreTest
 			DataStore ds = new DataStore(rs, con);
 			SqlUtil.closeResult(rs);
 			
-			List tbl = SqlUtil.getTables(sql);
+			List<String> tbl = SqlUtil.getTables(sql);
 			assertEquals("Wrong number of tables retrieved from SQL", 1, tbl.size());
 			
-			String table = (String)tbl.get(0);
+			String table = tbl.get(0);
 			assertEquals("Wrong update table returned", "junit_test", table);
 			
 			TableIdentifier id = new TableIdentifier(table);
@@ -419,6 +419,24 @@ public class DataStoreTest
 			firstname = rs.getString(2);
 			assertEquals("Firstname not updated", "Zaphod", firstname);
 			assertEquals("Lastname not updated", "Beeblebrox", lastname);
+			SqlUtil.closeResult(rs);
+			
+			rs = stmt.executeQuery("select key, lastname, firstname from junit_test where key = 42");
+			ds = new DataStore(rs, con);
+			SqlUtil.closeResult(rs);
+			ds.setUpdateTable(id);
+			ds.deleteRow(0);
+			
+			List<DmlStatement> statements = ds.getUpdateStatements(con);
+			assertEquals(1, statements.size());
+			
+			ds.updateDb(con, null);
+
+			rs = stmt.executeQuery("select count(*) from junit_test where key = 42");
+			rs.next();
+			int count = rs.getInt(1);
+			assertEquals(0, count);
+			
 			SqlUtil.closeAll(rs, stmt);
 		}
 		catch (Exception e)

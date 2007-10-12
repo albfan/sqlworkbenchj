@@ -1236,11 +1236,13 @@ public class DataStore
 		while (row != null)
 		{
 			List<String> deletes = row.getDependencyDeletes();
-			for (String delete : deletes)
+			if (deletes != null)
 			{
-				stmtList.add(new DmlStatement(delete, null));
-			}
-			
+				for (String delete : deletes)
+				{
+					if (delete != null) stmtList.add(new DmlStatement(delete, null));
+				}
+			}			
 			dml = factory.createDeleteStatement(row);
 			stmtList.add(dml);
 			row = this.getNextDeletedRow();

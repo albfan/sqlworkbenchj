@@ -363,10 +363,10 @@ public class MainWindow
 
 		action = new FileConnectAction(this);
 		action.addToMenu(menu);
+		this.disconnectAction.addToMenu(menu);
+		menu.addSeparator();
 		this.createNewConnection.addToMenu(menu);
 		this.disconnectTab.addToMenu(menu);
-		menu.addSeparator();
-		this.disconnectAction.addToMenu(menu);
 		menu.addSeparator();
 		
 		action = new FileSaveProfiles();
@@ -863,8 +863,16 @@ public class MainWindow
 	
 	public void createNewConnectionForCurrentPanel()
 	{
-		MainPanel panel = getCurrentPanel();
+		final MainPanel panel = getCurrentPanel();
 		createNewConnectionForPanel(panel);
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				int index = getIndexForPanel(panel);
+				sqlTab.setForegroundAt(index, Color.BLUE);
+			}
+		});
 	}
 	
 	protected void createNewConnectionForPanel(final MainPanel aPanel)
@@ -875,14 +883,6 @@ public class MainWindow
 			public void run()
 			{
 				connectPanel(aPanel);
-				EventQueue.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						int index = getIndexForPanel(aPanel);
-						sqlTab.setForegroundAt(index, Color.BLUE);
-					}
-				});
 			}
 		};
 		this.connectThread.start();

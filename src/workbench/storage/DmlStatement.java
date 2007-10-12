@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.NumberStringCache;
@@ -129,6 +130,11 @@ public class DmlStatement
 				}
 			}
 			rows = stmt.executeUpdate();
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("DmlStatement.execute()", "Error executing statement " + sql.toString(), e);
+			throw e;
 		}
 		finally
 		{

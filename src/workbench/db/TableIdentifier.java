@@ -194,7 +194,7 @@ public class TableIdentifier
 				
 				if (catalogToUse != null && !meta.ignoreCatalog(catalogToUse))
 				{
-					result.append(SqlUtil.quoteObjectname(catalogToUse, preserveQuotes && catalogWasQuoted));
+					result.append(meta.quoteObjectname(catalogToUse, preserveQuotes && catalogWasQuoted));
 					result.append('.');
 				}
 			}

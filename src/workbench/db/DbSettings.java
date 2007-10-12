@@ -97,6 +97,11 @@ public class DbSettings
 		return verb;
 	}
 	
+	public boolean needsCatalogIfNoCurrent()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".catalog.neededwhenempty", false);
+	}
+	
 	public String getInsertForImport()
 	{
 		return Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".import.insert", null);

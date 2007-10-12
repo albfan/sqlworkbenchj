@@ -64,7 +64,6 @@ import workbench.gui.dialogs.WbSplash;
 import workbench.gui.filter.FilterDefinitionManager;
 import workbench.gui.lnf.LnFManager;
 import workbench.gui.profiles.ProfileKey;
-import workbench.util.FileDialogUtil;
 import workbench.util.UpdateCheck;
 import workbench.util.WbCipher;
 import workbench.util.WbFile;

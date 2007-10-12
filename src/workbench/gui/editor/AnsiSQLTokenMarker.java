@@ -223,6 +223,7 @@ public class AnsiSQLTokenMarker
 		keywords.add("int4",Token.KEYWORD1);
 		keywords.add("int8",Token.KEYWORD1);
 		keywords.add("integer",Token.KEYWORD1);
+		keywords.add("bigint",Token.KEYWORD1);
 		keywords.add("money",Token.KEYWORD1);
 		//keywords.add("name",Token.KEYWORD1);
 		keywords.add("number",Token.KEYWORD1);

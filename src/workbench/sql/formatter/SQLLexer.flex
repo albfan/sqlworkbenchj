@@ -163,6 +163,7 @@ keyword=("ABORT"|
 "BEFORE"|
 "BEGIN"|
 "BETWEEN"|
+"BIGINT"|
 "BINARY"|
 "BIT"|
 "BIT_LENGTH"|
@@ -358,6 +359,8 @@ keyword=("ABORT"|
 "INSTANTIABLE"|
 "INSTEAD"|
 "INT"|
+"INT4"|
+"INT8"|
 "INTEGER"|
 "INTERSECT"|
 "INTERSECT"|

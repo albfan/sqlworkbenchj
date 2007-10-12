@@ -840,6 +840,14 @@ public class Settings
 				setProperty("workbench.db.objecttype.selectable.default", StringUtil.listToString(types, ','));
 			}
 		}
+		
+		String synRegex = getProperty("workbench.db.oracle.exclude.synonyms", null);
+		if (synRegex != null && !synRegex.startsWith("^/.*"))
+		{
+			synRegex = "^/.*|" + synRegex;
+			setProperty("workbench.db.oracle.exclude.synonyms", synRegex);
+		}
+		
 		upgradeListProp("workbench.db.oracle.syntax.functions");
 	}
 

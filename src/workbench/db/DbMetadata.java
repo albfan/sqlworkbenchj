@@ -609,10 +609,12 @@ public class DbMetadata
 			File c1 = new File(cat);
 			File c2 = new File(currentCat);
 			if (c1.equals(c2)) return false;
+			return true;
 		}
-		else
+		
+		if (StringUtil.isEmptyString(currentCat))
 		{
-			if (StringUtil.isEmptyString(currentCat)) return false;
+			return this.dbSettings.needsCatalogIfNoCurrent();
 		}
 		return !cat.equalsIgnoreCase(currentCat);
 	}
@@ -1239,14 +1241,12 @@ public class DbMetadata
 		DataStore result = new DataStore(cols, coltypes, sizes);
 		
 		boolean sequencesReturned = false;
-		boolean checkOracleInternalSynonyms = (isOracle && typeIncluded("SYNONYM", types));
 		boolean checkOracleSnapshots = (isOracle && Settings.getInstance().getBoolProperty("workbench.db.oracle.detectsnapshots", true) && typeIncluded("TABLE", types));
-		boolean checkSyns = typeIncluded("SYNONYM", types);
 		boolean synRetrieved = false;
 		
-		String excludeSynsRegex = Settings.getInstance().getProperty("workbench.db.oracle.exclude.synonyms", null);
+		String excludeSynsRegex = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".exclude.synonyms", null);
 		Pattern synPattern = null;
-		if (checkOracleInternalSynonyms && excludeSynsRegex != null)
+		if (typeIncluded("SYNONYM", types) && excludeSynsRegex != null)
 		{
 			try
 			{
@@ -1312,21 +1312,18 @@ public class DbMetadata
 				if (name == null) continue;
 
 				// filter out "internal" synonyms for Oracle
-				if (checkOracleInternalSynonyms)
+				if (synPattern != null)
 				{
-					if (name.indexOf('/') > -1) continue;
-					if (synPattern != null)
-					{
-						Matcher m = synPattern.matcher(name);
-						if (m.matches()) continue;
-					}
+					//if (name.indexOf('/') > -1) continue;
+					Matcher m = synPattern.matcher(name);
+					if (m.matches()) continue;
 				}
 			
 				// prevent duplicate retrieval of SYNONYMS if the driver
 				// returns them already, but the Settings have enabled
 				// Synonym retrieval as well
 				// (e.g. because an upgraded Driver now returns the synonyms)
-				if (checkSyns && !synRetrieved && "SYNONYM".equals(ttype))
+				if (!synRetrieved && "SYNONYM".equals(ttype))
 				{
 					synRetrieved = true;
 				}
@@ -1384,7 +1381,7 @@ public class DbMetadata
 		}
 
 		boolean retrieveSyns = (this.synonymReader != null && Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_synonyms", false));
-		if (retrieveSyns && typeIncluded("SYNONYM", types) && !synRetrieved)
+		if (retrieveSyns && !synRetrieved && typeIncluded("SYNONYM", types) )
 		{
 			LogMgr.logDebug("DbMetadata.getTables()", "Retrieving synonyms...");
 			List<String> syns = this.synonymReader.getSynonymList(this.dbConnection.getSqlConnection(), aSchema);
@@ -2109,7 +2106,8 @@ public class DbMetadata
 
 		if (hasEnums)
 		{
-			EnumReader.updateEnumDefinition(aTable, ds, this.dbConnection);
+			TableIdentifier tbl = new TableIdentifier(aCatalog, aSchema, aTable);
+			EnumReader.updateEnumDefinition(tbl, ds, this.dbConnection);
 		}
 
 		return ds;

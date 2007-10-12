@@ -343,7 +343,10 @@ public class DwStatusBar
 		refresh();
 	}
 
-	public String getText() { return this.tfStatus.getText(); }
+	public String getText() 
+	{
+		return this.tfStatus.getText(); 
+	}
 
 	/**
 	 *	Show a message in the status panel.
