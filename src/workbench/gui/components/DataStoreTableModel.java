@@ -10,6 +10,7 @@
  *
  */
 package workbench.gui.components;
+
 import java.awt.Toolkit;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -32,7 +33,6 @@ import workbench.util.WbThread;
 /**
  * TableModel for displaying the contents of a {@link workbench.storage.DataStore }
  * @author support@sql-workbench.net
- *
  */
 public class DataStoreTableModel
 	extends AbstractTableModel
@@ -183,7 +183,13 @@ public class DataStoreTableModel
 				return;
 			}
 		}
-		fireTableDataChanged();
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				fireTableDataChanged();
+			}
+		});
 	}
 
 	/**

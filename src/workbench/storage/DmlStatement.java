@@ -139,7 +139,7 @@ public class DmlStatement
 		finally
 		{
 			FileUtil.closeStreams(streamsToClose);
-			stmt.close();
+			SqlUtil.closeStatement(stmt);
 		}
 		
 		return rows;

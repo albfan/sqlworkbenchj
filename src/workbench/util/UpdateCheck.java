@@ -13,7 +13,6 @@ package workbench.util;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import workbench.gui.WbSwingUtilities;
@@ -36,17 +35,13 @@ public class UpdateCheck
 	public void startUpdateCheck()
 	{
 		int interval = Settings.getInstance().getUpdateCheckInterval();
+		if (interval < 1) return;
+		
 		Date lastCheck = Settings.getInstance().getLastUpdateCheck();
 
 		if (needCheck(interval, new java.util.Date(), lastCheck))
 		{
 			startRead();
-		}
-		else
-		{
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			LogMgr.logInfo("UpdateCheck.startUpdateCheck()",
-										 "Check not necessary. Last check on: " + sdf.format(lastCheck) + ", interval=" + interval + " days");
 		}
 	}
 
@@ -83,16 +78,9 @@ public class UpdateCheck
 
 	public void startRead()
 	{
-//		try
-//		{
-			LogMgr.logDebug("UpdateCheck.run()", "Checking versions...");
-			this.versionReader = new WbVersionReader("automatic ", this);
-			versionReader.startCheckThread();
-//		}
-//		catch (InterruptedException ex)
-//		{
-//			// ignore
-//		}
+		LogMgr.logDebug("UpdateCheck.run()", "Checking versions...");
+		this.versionReader = new WbVersionReader("automatic ", this);
+		versionReader.startCheckThread();
 	}
 
 	private void versionAvailable()

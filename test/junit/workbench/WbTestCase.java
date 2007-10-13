@@ -12,7 +12,6 @@
 package workbench;
 
 import junit.framework.TestCase;
-import workbench.TestUtil;
 
 /**
  * @author support@sql-workbench.net

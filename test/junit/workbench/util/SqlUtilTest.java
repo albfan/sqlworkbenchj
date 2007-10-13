@@ -11,10 +11,8 @@
  */
 package workbench.util;
 
-import junit.framework.*;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import junit.framework.TestCase;
 
 /**
  *
@@ -236,7 +234,7 @@ public class SqlUtilTest
 		
 		sql = "/* \n" + 
 					 "* $URL: some_script.sql $ \n" + 
-					 "* $Revision: 1.1 $ \n" + 
+					 "* $Revision: 1.2 $ \n" + 
 					 "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
 					 "*/ \n" + 
 					 "-- A quis Lorem consequat Aenean tellus risus convallis velit Maecenas arcu. \n" + 

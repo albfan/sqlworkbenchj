@@ -30,6 +30,7 @@ import java.util.List;
 
 import workbench.db.report.TagWriter;
 import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.StatementRunner;
 import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
@@ -37,7 +38,6 @@ import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
 import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.util.FileUtil;
-import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -159,11 +159,7 @@ public class WbConnection
 			this.keepAlive.shutdown();
 		}
 		String sql = profile.getPreDisconnectScript();
-		if (!StringUtil.isEmptyString(sql))
-		{
-			LogMgr.logInfo("WbConnection.runPreDisconnectScript()", "Executing statement: " + sql);
-			runConnectScript(sql);
-		}
+		runConnectScript(sql, "disconnect");
 	}
 	
 	void runPostConnectScript()
@@ -171,48 +167,63 @@ public class WbConnection
 		if (this.profile == null) return;
 		if (this.sqlConnection == null) return;
 		String sql = profile.getPostConnectScript();
-		if (!StringUtil.isEmptyString(sql))
-		{
-			LogMgr.logInfo("WbConnection.runPostConnectScript()", "Executing statement: " + sql);
-			runConnectScript(sql);
-		}
+		runConnectScript(sql, "connect");
 	}	
 	
-	private void runConnectScript(String sql)
+	private void runConnectScript(String sql, String type)
 	{
-		if (StringUtil.isEmptyString(sql)) return;
+		if (StringUtil.isWhitespaceOrEmpty(sql)) return;
+		LogMgr.logInfo("WbConnection.runConnectScript()", "Executing " + type + " script...");
+		
+		StatementRunner runner = StatementRunner.Factory.createRunner();
+		runner.setConnection(this);
+		
 		ScriptParser p = new ScriptParser(sql);
 		Iterator itr = p.getIterator();
-		Statement stmt = null;
 		String command = null;
+
+		// The statemenRunner will call clearMessages() when statementDone() 
+		// is called which in turn will call clearWarnings() on this instances.
+		// This will also clear the scriptError and thus all messages
+		// that are collected here. So I have to store the messages locally in the loop
+		StringBuilder messages = new StringBuilder(150);
+		
 		try
 		{
-			stmt = this.sqlConnection.createStatement();
-			this.scriptError = new StringBuilder();
+			
 			while (itr.hasNext())
 			{
 				command = p.getNextCommand();
+				if (p == null) continue;
 				
-				stmt.execute(command);
-				this.scriptError.append(ResourceMgr.getString("MsgBatchExecutingStatement"));
-				this.scriptError.append(": ");
-				this.scriptError.append(StringUtil.getMaxSubstring(command,250));
-				this.scriptError.append("\n\n");
+				try
+				{
+					runner.runStatement(command, -1, 0);
+				}
+				finally
+				{
+					runner.statementDone();
+				}
+				messages.append(ResourceMgr.getString("MsgBatchExecutingStatement"));
+				messages.append(": ");
+				messages.append(StringUtil.getMaxSubstring(command,250));
+				messages.append("\n\n");
 			}
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
-			LogMgr.logError("WbConnection.runConnectScript()", "Error executing post-connect script", e);
-			this.scriptError = new StringBuilder();
-			this.scriptError.append(ResourceMgr.getString("MsgBatchStatementError"));
-			this.scriptError.append(": ");
-			this.scriptError.append(command + "\n");
-			this.scriptError.append(e.getMessage());
+			LogMgr.logError("WbConnection.runConnectScript()", "Error executing " + type + " script", e);
+			messages = new StringBuilder();
+			messages.append(ResourceMgr.getString("MsgBatchStatementError"));
+			messages.append(": ");
+			messages.append(command + "\n");
+			messages.append(e.getMessage());
 		}
 		finally
 		{
-			SqlUtil.closeStatement(stmt);
+			if (runner != null) runner.done();
 		}
+		this.scriptError = messages;
 	}
 	
 	void setSqlConnection(Connection aConn)
@@ -478,7 +489,7 @@ public class WbConnection
 	 *	This will actually close the connection to the DBMS.
 	 *	It will also free an resources from the DbMetadata object.
 	 */
-	void close()
+	public void close()
 	{
 		if (this.keepAlive != null) 
 		{

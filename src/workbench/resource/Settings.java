@@ -971,6 +971,10 @@ public class Settings
       this.props.remove("workbench.db.db2_nt.additional.viewtypes");
       this.props.remove("workbench.db.db2_nt.retrieve_sequences");
       this.props.remove("workbench.db.db2_nt.additional.tabletypes");
+			
+			this.props.remove("workbench.sql.dbms_output.defaultbuffer");
+			this.props.remove("workbench.sql.enable_dbms_output");
+			
 		}
 		catch (Throwable e)
 		{
@@ -1580,25 +1584,25 @@ public class Settings
 		setProperty("workbench.export.sql.includeowner", flag);
 	}
 
-	public boolean getEnableDbmsOutput()
-	{
-		return getBoolProperty("workbench.sql.enable_dbms_output", false);
-	}
-
-	public void setEnableDbmsOutput(boolean aFlag)
-	{
-		this.setProperty("workbench.sql.enable_dbms_output", aFlag);
-	}
-
-	public int getDbmsOutputDefaultBuffer()
-	{
-		return getIntProperty("workbench.sql.dbms_output.defaultbuffer", -1);
-	}
-
-	public void setDbmsOutputDefaultBuffer(int aSize)
-	{
-		this.setProperty("workbench.sql.dbms_output.defaultbuffer", aSize);
-	}
+//	public boolean getEnableDbmsOutput()
+//	{
+//		return getBoolProperty("workbench.sql.enable_dbms_output", false);
+//	}
+//
+//	public void setEnableDbmsOutput(boolean aFlag)
+//	{
+//		this.setProperty("workbench.sql.enable_dbms_output", aFlag);
+//	}
+//
+//	public int getDbmsOutputDefaultBuffer()
+//	{
+//		return getIntProperty("workbench.sql.dbms_output.defaultbuffer", -1);
+//	}
+//
+//	public void setDbmsOutputDefaultBuffer(int aSize)
+//	{
+//		this.setProperty("workbench.sql.dbms_output.defaultbuffer", aSize);
+//	}
 
 	public String getLastImportDateFormat()
 	{

@@ -940,7 +940,7 @@ public class SqlUtil
 		return display;
 	}
 	
-	public static CharSequence getWarnings(WbConnection con, Statement stmt, boolean retrieveOutputMsg)
+	public static CharSequence getWarnings(WbConnection con, Statement stmt)
 	{
 		try
 		{
@@ -973,17 +973,6 @@ public class SqlUtil
 				warn = warn.getNextWarning();
 			}
 			
-			if (retrieveOutputMsg)
-			{
-				s = con.getOutputMessages();
-				if (s != null && s.trim().length() > 0)
-				{
-					if (hasWarnings) msg.append('\n');
-					msg = append(msg, s);
-					if (!s.endsWith("\n")) msg.append("\n");
-					hasWarnings = true;
-				}
-			}
 			warn = (con == null ? null : con.getSqlConnection().getWarnings());
 			hasWarnings = hasWarnings || (warn != null);
 			count = 0;

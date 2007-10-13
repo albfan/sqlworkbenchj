@@ -47,10 +47,15 @@ public class TestUtil
 	
 	public TestUtil(String name)
 	{
+		this(name, true);
+	}
+	
+	public TestUtil(String name, boolean noTemplates)
+	{
 		try
 		{
 			testName = name;
-			prepareEnvironment();
+			prepareEnvironment(noTemplates);
 		}
 		catch (Exception e)
 		{
@@ -61,8 +66,29 @@ public class TestUtil
 	public void prepareEnvironment()
 		throws IOException
 	{
+		prepareEnvironment(true);
+	}
+	
+	public void prepareEnvironment(boolean noTemplates)
+		throws IOException
+	{
 		prepareBaseDir();
-		WbManager.prepareForTest(basedir);
+		WbManager.prepareForTest(getArgs(noTemplates));
+	}
+	
+	public String[] getArgs(boolean noTemplates)
+	{
+		
+		String args[] = null;
+		if (noTemplates)
+		{
+			args = new String[] { "-notemplates -nosettings -configdir=" + basedir };
+		}
+		else
+		{
+			args = new String[] { "-nosettings -configdir=" + basedir };
+		}
+		return args;
 	}
 	
 	public void prepareBaseDir()
@@ -78,6 +104,10 @@ public class TestUtil
 		pw.println("workbench.log.format={type} {timestamp} {source} {message} {error} {stacktrace}");
 		pw.println("workbench.log.level=DEBUG");
 		pw.println("workbench.log.maxfilesize=150000");
+		pw.println("workbench.gui.language=en");
+		pw.println("workbench.gui.autoconnect=false");
+		pw.println("workbench.gui.updatecheck.interval=0");
+		pw.println("workbench.db.previewsql=false");
 		pw.close();
 		emptyBaseDirectory();
 	}

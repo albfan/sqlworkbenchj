@@ -136,6 +136,7 @@ public class ReplacePanel
     add(criteriaLabel, gridBagConstraints);
 
     criteriaTextField.setColumns(30);
+    criteriaTextField.setName("searchtext"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -144,6 +145,7 @@ public class ReplacePanel
     add(criteriaTextField, gridBagConstraints);
 
     replaceValueTextField.setColumns(30);
+    replaceValueTextField.setName("replacetext"); // NOI18N
     replaceValueTextField.addFocusListener(new java.awt.event.FocusAdapter() {
       public void focusGained(java.awt.event.FocusEvent evt) {
         replaceValueTextFieldFocusGained(evt);
@@ -159,6 +161,7 @@ public class ReplacePanel
 
     ignoreCaseCheckBox.setText(ResourceMgr.getString("LblSearchIgnoreCase"));
     ignoreCaseCheckBox.setToolTipText(ResourceMgr.getDescription("LblSearchIgnoreCase"));
+    ignoreCaseCheckBox.setName("ignorecase"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -170,6 +173,7 @@ public class ReplacePanel
 
     wordsOnlyCheckBox.setText(ResourceMgr.getString("LblSearchWordsOnly"));
     wordsOnlyCheckBox.setToolTipText(ResourceMgr.getDescription("LblSearchWordsOnly"));
+    wordsOnlyCheckBox.setName("wordsonly"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -196,6 +200,7 @@ public class ReplacePanel
 
     findButton.setText(ResourceMgr.getString("LblFindNow"));
     findButton.setToolTipText(ResourceMgr.getDescription("LblFindNow"));
+    findButton.setName("findbutton"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
@@ -204,6 +209,7 @@ public class ReplacePanel
 
     replaceNextButton.setText(ResourceMgr.getString("LblReplaceNext"));
     replaceNextButton.setToolTipText(ResourceMgr.getDescription("LblReplaceNext"));
+    replaceNextButton.setName("replacenextbutton"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 2;
@@ -214,6 +220,7 @@ public class ReplacePanel
 
     replaceAllButton.setText(ResourceMgr.getString("LblReplaceAll"));
     replaceAllButton.setToolTipText(ResourceMgr.getDescription("LblReplaceAll"));
+    replaceAllButton.setName("replaceallbutton"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 3;
@@ -223,6 +230,7 @@ public class ReplacePanel
     add(replaceAllButton, gridBagConstraints);
 
     closeButton.setText(ResourceMgr.getString("LblClose"));
+    closeButton.setName("closebutton"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 5;
@@ -233,6 +241,7 @@ public class ReplacePanel
 
     selectedTextCheckBox.setText(ResourceMgr.getString("LblSelectedTextOnly"));
     selectedTextCheckBox.setToolTipText(ResourceMgr.getDescription("LblSelectedTextOnly"));
+    selectedTextCheckBox.setName("selectedtext"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
@@ -244,6 +253,7 @@ public class ReplacePanel
 
     useRegexCheckBox.setText(ResourceMgr.getString("LblSearchRegEx"));
     useRegexCheckBox.setToolTipText(ResourceMgr.getDescription("LblSearchRegEx"));
+    useRegexCheckBox.setName("regex"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -255,6 +265,7 @@ public class ReplacePanel
 
     findNextButton.setText(ResourceMgr.getString("LblFindNext"));
     findNextButton.setToolTipText(ResourceMgr.getDescription("LblFindNext"));
+    findNextButton.setName("findnextbutton"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;

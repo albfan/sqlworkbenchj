@@ -62,6 +62,7 @@ public class OptionPanelPage
 				this.options.restoreSettings();
 				
 				JLabel title = new JLabel(this.label);
+				title.setName("pagetitle");
 				title.setOpaque(true);
 				title.setBackground(Color.WHITE);
 				Font f = title.getFont();

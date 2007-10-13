@@ -48,7 +48,6 @@ public class ExternalToolsPanel
 	private JList toolList;
 	private ToolDefinitionPanel definitionPanel;
 	private WbToolbar toolbar;
-	private JComboBox lnfSelector;
 	private DefaultListModel tools;
 	
 	public ExternalToolsPanel()

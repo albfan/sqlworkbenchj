@@ -421,6 +421,20 @@ public class DataStoreTest
 			assertEquals("Lastname not updated", "Beeblebrox", lastname);
 			SqlUtil.closeResult(rs);
 			
+			stmt.executeUpdate("update junit_test set firstname = null where key = 42");
+			con.commit();
+			rs = stmt.executeQuery("select key, lastname, firstname from junit_test where key = 42");
+			ds = new DataStore(rs, con);
+			SqlUtil.closeResult(rs);
+			ds.setUpdateTable(id);
+			ds.setValue(0, 2, "Arthur");
+			ds.updateDb(con, null);
+			rs = stmt.executeQuery("select firstname from junit_test where key = 42");
+			hasNext = rs.next();
+			assertEquals("Updated row not found", true, hasNext);
+			firstname = rs.getString(1);
+			assertEquals("Arthur", firstname);
+			
 			rs = stmt.executeQuery("select key, lastname, firstname from junit_test where key = 42");
 			ds = new DataStore(rs, con);
 			SqlUtil.closeResult(rs);

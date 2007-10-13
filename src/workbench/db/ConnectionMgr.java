@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,6 +29,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import workbench.WbManager;
+import workbench.db.shutdown.DbShutdownFactory;
+import workbench.db.shutdown.DbShutdownHook;
 import workbench.gui.profiles.ProfileKey;
 
 import workbench.util.ExceptionUtil;
@@ -59,7 +60,6 @@ public class ConnectionMgr
 	private List<PropertyChangeListener> groupsChangeListener;
 	private static final ConnectionMgr mgrInstance = new ConnectionMgr();
 	
-	/** Creates new ConnectionMgr */
 	private ConnectionMgr()
 	{
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_PROFILE_STORAGE);
@@ -120,19 +120,6 @@ public class ConnectionMgr
 		}
 		
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" + conn.getMetadata().getProductName() + "], Database version: [" + conn.getMetadata().getDbVersion() + "], Driver version: [" + driverVersion + "]");
-		
-		try
-		{
-			if (Settings.getInstance().getEnableDbmsOutput())
-			{
-				int size = Settings.getInstance().getDbmsOutputDefaultBuffer();
-				conn.getMetadata().enableOutput(size);
-			}
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logWarning("ConnectionMgr.getConnection()", "Could not enable DBMS_OUTPUT package");
-		}
 		
 		this.activeConnections.put(anId, conn);
 		
@@ -464,23 +451,10 @@ public class ConnectionMgr
 			
 			removePropsFromSystem(conn.getProfile());
 			
-			if (conn.getMetadata() == null)
+			DbShutdownHook hook = DbShutdownFactory.getShutdownHook(conn);
+			if (hook != null)
 			{
-				conn.close();
-			}
-			else if (conn.getMetadata().isCloudscape() || conn.getMetadata().isApacheDerby())
-			{
-				boolean shutdown = this.canShutdownCloudscape(conn);
-				conn.close();
-				if (shutdown)
-				{
-					this.shutdownCloudscape(conn);
-				}
-			}
-			else if (conn.getMetadata().isHsql() && this.canCloseHsql(conn))
-			{
-				this.shutdownHsql(conn);
-				conn.close();
+				hook.shutdown(conn);
 			}
 			else
 			{
@@ -494,48 +468,10 @@ public class ConnectionMgr
 	}
 	
 	/**
-	 *	Disconnects a local HSQL connection. Beginning with 1.7.2 the local
-	 *  (=in process) engine should be closed down with SHUTDOWN when
-	 *  disconnecting. It shouldn't hurt for pre-1.7.2 either :-)
+	 * Check if there is another connection active with the same URL.
 	 */
-	private void shutdownHsql(WbConnection con)
+	public boolean isActive(WbConnection aConn)
 	{
-		if (con == null) return;
-		String url = con.getUrl();
-		if (url == null) return;
-		if (!url.startsWith("jdbc:hsqldb")) return;
-		
-		// this is a HSQL server connection. Do not shut down this!
-		if (url.startsWith("jdbc:hsqldb:hsql:")) return;
-		
-		try
-		{
-			Statement stmt = con.createStatement();
-			LogMgr.logInfo("ConnectionMgr.disconnect()", "Local HSQL connection detected. Sending SHUTDOWN to the engine before disconnecting");
-			stmt.executeUpdate("SHUTDOWN");
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("ConnectionMgr.disconnectLocalHsql()", "Error when executing SHUTDOWN", e);
-		}
-		
-	}
-	
-	/**
-	 *	Check if the given (HSQLDB) connection can be safely closed.
-	 *	A in-process HSQLDB engine allows the creation of several connections
-	 *	to the same database (from within the same JVM)
-	 *	But the connections may not be closed except for the last one, because
-	 *	they seem to "share" something in the driver and closing one
-	 *	will close the others as well.
-	 */
-	private boolean canCloseHsql(WbConnection aConn)
-	{
-		if (!aConn.getMetadata().isHsql()) return true;
-		
-		// a HSQLDB server connection can always be closed!
-		if (aConn.getUrl().startsWith("jdbc:hsqldb:hsql:")) return true;
-		
 		String url = aConn.getUrl();
 		String id = aConn.getId();
 		
@@ -549,87 +485,11 @@ public class ConnectionMgr
 			
 			String u = c.getUrl();
 			if (u == null) continue;
-			// we found one connection with the same URL --> do not shutdown this one!
-			if (u.equals(url)) return false;
+			// we found one connection with the same URL 
+			if (u.equals(url)) return true;
 		}
 		
-		return true;
-	}
-	
-	/**
-	 *	Shut down the connection to an internal Cloudscape/Derby database
-	 */
-	private void shutdownCloudscape(WbConnection conn)
-	{
-		ConnectionProfile prof = conn.getProfile();
-		
-		String drvClass = prof.getDriverclass();
-		String drvName = prof.getDriverName();
-
-		String url = prof.getUrl();
-		int pos = url.indexOf(";");
-		if (pos < 0) pos = url.length();
-		String command = url.substring(0, pos) + ";shutdown=true";
-		
-		try
-		{
-			DbDriver drv = this.findDriverByName(drvClass, drvName);
-			LogMgr.logInfo("ConnectionMgr.shutdownCloudscape()", "Local Cloudscape connection detected. Shutting down engine...");
-			drv.commandConnect(command);
-		}
-		catch (SQLException e)
-		{
-			// This exception is expected!
-			// Cloudscape/Derby reports the shutdown success through an exception
-			LogMgr.logInfo("ConnectionMgr.shutdownCloudscape()", ExceptionUtil.getDisplay(e));
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logError("ConnectionMgr.shutdownCloudscape()", "Error when shutting down Cloudscape/Derby", th);
-		}
-	}
-	
-	private boolean canShutdownCloudscape(WbConnection aConn)
-	{
-		if (!aConn.getMetadata().isCloudscape() && !aConn.getMetadata().isApacheDerby()) return true;
-		
-		String cls = aConn.getProfile().getDriverclass();
-		
-		// Derby server connections should not send a shutdown
-		if (!cls.equals("org.apache.derby.jdbc.EmbeddedDriver")) return false;
-		
-		String url = aConn.getUrl();
-		String prefix;
-		if (aConn.getMetadata().isCloudscape())
-			prefix = "jdbc:cloudscape:";
-		else
-			prefix = "jdbc:derby:";
-		
-		// check for cloudscape connection
-		if (!url.startsWith(prefix)) return true;
-		
-		// do not shutdown cloudscape server connections!
-		if (url.startsWith(prefix + "net:")) return false;
-		
-		// Derby network URL starts with a // 
-		if (url.startsWith(prefix + "//")) return false;
-		
-		String id = aConn.getId();
-		
-		Iterator itr = this.activeConnections.values().iterator();
-		while (itr.hasNext())
-		{
-			WbConnection c = (WbConnection)itr.next();
-			if (c == null) continue;
-			
-			if (c.getId().equals(id)) continue;
-			
-			String u = c.getUrl();
-			// we found one connection with the same URL --> do not shutdown this one!
-			if (u.equals(url)) return false;
-		}
-		
-		return true;
+		return false;
 	}
 	
 	public void writeSettings()
@@ -690,7 +550,12 @@ public class ConnectionMgr
 	
 	public void setReadTemplates(boolean aFlag)
 	{
+//		boolean old = this.readTemplates;
 		this.readTemplates = aFlag;
+//		if (old != readTemplates && readTemplates)
+//		{
+//			readDrivers();
+//		}
 	}
 	
 	@SuppressWarnings("unchecked")

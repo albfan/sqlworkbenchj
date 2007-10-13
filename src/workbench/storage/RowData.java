@@ -39,6 +39,8 @@ public class RowData
 	public static final int MODIFIED = 1;
 	public static final int NEW = 2;
 
+	private Object NO_CHANGE_MARKER = new Object();
+	
 	private int status = NOT_MODIFIED;
 
 	/**
@@ -192,6 +194,15 @@ public class RowData
 		return this.colData.length;
 	}
 
+	private void createOriginalData()
+	{
+		this.originalData = new Object[this.colData.length];
+		for (int i = 0; i < this.originalData.length; i++)
+		{
+			this.originalData[i] = NO_CHANGE_MARKER;
+		}
+	}
+	
 	/**
 	 *	Sets the new data for the given column.
 	 *	After a call isModified() will return true
@@ -209,10 +220,10 @@ public class RowData
 			if (oldValue != null && oldValue.equals(aValue)) return;
 			if (this.originalData == null)
 			{
-				this.originalData = new Object[this.colData.length];
+				createOriginalData();
 			}
 			
-			if (this.originalData[aColIndex] == null)
+			if (this.originalData[aColIndex] == NO_CHANGE_MARKER)
 			{
 				this.originalData[aColIndex] = this.colData[aColIndex];
 			}
@@ -239,9 +250,11 @@ public class RowData
 	public synchronized Object getOriginalValue(int aColumn)
 		throws IndexOutOfBoundsException
 	{
-		if (this.originalData == null) return this.getValue(aColumn);
-		if (this.originalData[aColumn] == null) return this.getValue(aColumn);
-		return this.originalData[aColumn];
+		if (this.isColumnModified(aColumn))
+		{
+			return this.originalData[aColumn];
+		}
+		return this.getValue(aColumn);
 	}
 
 	public synchronized void restoreOriginalValues()
@@ -273,7 +286,7 @@ public class RowData
 		else
 		{
 			if (this.originalData == null) return false;
-			return (this.originalData[aColumn] != null);
+			return (this.originalData[aColumn] != NO_CHANGE_MARKER);
 		}
 	}
 	

@@ -80,36 +80,41 @@ public class WbCall
 
 		try
 		{
-			CallableStatement cstmt = currentConnection.getSqlConnection().prepareCall(realSql);
-
 			ArrayList<String> parameterNames = null;
-			try
+			
+			CallableStatement cstmt = currentConnection.getSqlConnection().prepareCall(realSql);
+			this.currentStatement = cstmt;
+			
+			boolean hasParameters = (realSql.indexOf('?') > -1);
+			if (hasParameters)
 			{
-				parameterNames = checkParametersFromStatement(cstmt);
-				this.currentStatement = cstmt;
-			}
-			catch (Throwable e)
-			{
-				// Some drivers do not work properly if this happens, so 
-				// we have to close and re-open the statement
-				LogMgr.logWarning("WbCall.execute()", "Could not get parameters from statement!", e);
-				SqlUtil.closeStatement(cstmt);
-			}
-
-			if (parameterNames == null || parameterNames.size() == 0)
-			{
-				// checkParametersFromDatabase will re-create the callable statement
-				// and assign it to currentStatement
-				// This is necessary to avoid having two statements open on the same
-				// connection as some jdbc drivers do not like this
-				result.addMessage(ResourceMgr.getString("MsgProcCallNoStmtParms"));
-				parameterNames = checkParametersFromDatabase(cleanSql);
-				if (this.currentStatement != null)
+				try
 				{
-					cstmt = (CallableStatement)currentStatement;
+					parameterNames = checkParametersFromStatement(cstmt);
+				}
+				catch (Throwable e)
+				{
+					// Some drivers do not work properly if this happens, so 
+					// we have to close and re-open the statement
+					LogMgr.logWarning("WbCall.execute()", "Could not get parameters from statement!", e);
+					SqlUtil.closeStatement(cstmt);
+				}
+
+				if (parameterNames == null || parameterNames.size() == 0)
+				{
+					// checkParametersFromDatabase will re-create the callable statement
+					// and assign it to currentStatement
+					// This is necessary to avoid having two statements open on the same
+					// connection as some jdbc drivers do not like this
+					result.addMessage(ResourceMgr.getString("MsgProcCallNoStmtParms"));
+					parameterNames = checkParametersFromDatabase(cleanSql);
+					if (this.currentStatement != null)
+					{
+						cstmt = (CallableStatement)currentStatement;
+					}
 				}
 			}
-
+			
 			boolean hasResult = (cstmt != null ? cstmt.execute() : false);
 			result.setSuccess();
 			

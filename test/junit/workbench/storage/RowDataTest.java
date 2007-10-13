@@ -42,11 +42,14 @@ public class RowDataTest extends TestCase
 		row.setValue(0, null);
 		value = row.getValue(0);
 		assertNull(value);
+		assertEquals("123", row.getOriginalValue(0));
 		assertTrue(row.isModified());
 		
+		row.resetStatus();
 		row.setValue(0, "456");
 		value = row.getValue(0);
 		assertEquals(value, "456");
-		
+		assertNull(row.getOriginalValue(0));
+		assertTrue(row.isColumnModified(0));
 	}
 }

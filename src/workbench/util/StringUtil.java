@@ -136,10 +136,22 @@ public class StringUtil
 	
 	public static int indexOf(CharSequence value, char c)
 	{
+		return indexOf(value, c, 1);
+	}
+	
+	public static int indexOf(CharSequence value, char c, int occurance)
+	{
 		if (value == null) return -1;
+		if (occurance <= 0) occurance = 1;
+		int numFound = 0;
+		
 		for (int i=0; i < value.length(); i++)
 		{
-			if (value.charAt(i) == c) return i;
+			if (value.charAt(i) == c)
+			{
+				numFound++;
+				if (numFound == occurance) return i;
+			}
 		}
 		return -1;
 	}

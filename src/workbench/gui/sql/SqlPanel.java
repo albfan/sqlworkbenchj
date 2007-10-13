@@ -278,7 +278,9 @@ public class SqlPanel
 		statusBar.setBorder(statusBarBorder);
 		editor.setStatusBar(statusBar);
 		editor.setBorder(new EtchedBorderTop());
+		editor.setName("sqleditor" + anId);
 		log = new LogArea();
+		log.setName("msg" + anId);
 		
 		this.resultTab = new WbTabbedPane();
 		this.resultTab.setTabPlacement(JTabbedPane.TOP);
@@ -326,6 +328,7 @@ public class SqlPanel
 
 	public void setId(int anId)
 	{
+		this.setName("sqlpanel" + anId);
 		this.internalId = anId;
 	}
 
@@ -428,6 +431,11 @@ public class SqlPanel
 		return true;
 	}
 
+	public String getLogMessage()
+	{
+		return this.log.getText();
+	}
+	
 	public EditorPanel getEditor()
 	{
 		return this.editor;
@@ -885,7 +893,7 @@ public class SqlPanel
 		t.start();
 	}
 
-	protected void updateDb()
+	public void updateDb()
 	{
 		try
 		{
@@ -1304,15 +1312,7 @@ public class SqlPanel
 
 			if (this.stmtRunner == null && aConnection != null)
 			{
-				try
-				{
-					// Use reflection to create instance to avoid class loading upon startup
-					this.stmtRunner = (StatementRunner)Class.forName("workbench.sql.DefaultStatementRunner").newInstance();
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("SqlPanel.setConnection()", "Error creating batch runner", e);
-				}
+				this.stmtRunner = StatementRunner.Factory.createRunner();
 				this.stmtRunner.setRowMonitor(this.rowMonitor);
 			}
 			if (this.stmtRunner != null)
@@ -1611,17 +1611,19 @@ public class SqlPanel
 				runStatement(sql, offset, commandAtIndex, highlight, appendResult);
 			}
 		};
-		this.executionThread.setPriority(Thread.NORM_PRIORITY+2);
 		this.executionThread.start();
 	}
 
-	/*
-	 * 	Execute the given SQL string. This is invoked from the the run() and other
-	 *  methods in order to execute the SQL command. It takes care of updating the
-	 *  actions and the menu.
-	 *  The actual execution and display of the result is handled by displayResult()
+	/**
+	 * Execute the given SQL string. This is invoked from the the run() and other
+	 * methods in order to execute the SQL command. It takes care of updating the
+	 * actions and the menu.
+	 * The actual execution and display of the result is handled by displayResult()
+	 * 
+	 * This is only public to allow a direct call during 
+	 * GUI testing (to avoid multi-threading)
 	 */
-	private void runStatement(String sql, int selectionOffset, int commandAtIndex, boolean highlightOnError, boolean appendResult)
+	public void runStatement(String sql, int selectionOffset, int commandAtIndex, boolean highlightOnError, boolean appendResult)
 	{
 		this.showStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
 
@@ -1643,11 +1645,15 @@ public class SqlPanel
 		}
 		finally
 		{
-			this.setBusy(false);
 			clearStatusMessage();
 			setCancelState(false);
 			updateResultInfos();
 			this.fireDbExecEnd();
+			
+			// setBusy(false) should be called after dbExecEnd()
+			// otherwise the panel would indicate it's not busy, but 
+			// the connection would still be marked as busy
+			this.setBusy(false);
 			this.selectEditorLater();
 			this.executionThread = null;
 		}

@@ -89,6 +89,21 @@ public class SqlCommand
 		this.prompter = p;
 	}
 	
+	protected void appendOutput(StatementRunnerResult result)
+	{
+		String s = this.currentConnection.getOutputMessages();
+		if (!StringUtil.isWhitespaceOrEmpty(s))
+		{
+			if (result.hasMessages())
+			{
+				result.addMessageNewLine();
+			}
+			result.addMessage(ResourceMgr.getString("TxtServerOutput"));
+			result.addMessage(s);
+			result.addMessageNewLine();
+		}
+	}
+	
 	/**
 	 *	Append any warnings from the given Statement and Connection to the given
 	 *	StringBuilder. If the connection is a connection to Oracle
@@ -100,12 +115,12 @@ public class SqlCommand
 	 */
 	protected boolean appendWarnings(StatementRunnerResult result)
 	{
-		CharSequence warn = SqlUtil.getWarnings(this.currentConnection, this.currentStatement, !this.isCancelled);
+		CharSequence warn = SqlUtil.getWarnings(this.currentConnection, this.currentStatement);
 		boolean hasWarning = false;
 		if (warn != null && warn.length() > 0)
 		{
 			hasWarning = true;
-			result.addMessageNewLine();
+			if (result.hasMessages()) result.addMessageNewLine();
 			result.addMessage(ResourceMgr.getString("TxtWarnings"));
 			result.addMessageNewLine();
 			result.addMessage(warn);
@@ -263,6 +278,8 @@ public class SqlCommand
 		throws SQLException
 	{
 		if (result == null) return;
+		
+		appendOutput(result);
 		
 		// Postgres obviously clears the warnings if the getMoreResults() is called,
 		// so we add the warnings before calling getMoreResults(). This doesn't seem

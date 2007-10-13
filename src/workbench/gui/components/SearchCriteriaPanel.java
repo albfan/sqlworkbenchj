@@ -66,19 +66,24 @@ public class SearchCriteriaPanel
 		criteriaProperty = settingsKey + ".lastValue";
 		
 		this.ignoreCase = new JCheckBox(ResourceMgr.getString("LblSearchIgnoreCase"));
+		this.ignoreCase.setName("ignorecase");
 		this.ignoreCase.setToolTipText(ResourceMgr.getDescription("LblSearchIgnoreCase"));
 		this.ignoreCase.setSelected(Settings.getInstance().getBoolProperty(caseProperty, true));
 		
 		this.wholeWord = new JCheckBox(ResourceMgr.getString("LblSearchWordsOnly"));
 		this.wholeWord.setToolTipText(ResourceMgr.getDescription("LblSearchWordsOnly"));
 		this.wholeWord.setSelected(Settings.getInstance().getBoolProperty(wordProperty, false));
+		this.wholeWord.setName("wholeword");
 
 		this.useRegEx = new JCheckBox(ResourceMgr.getString("LblSearchRegEx"));
 		this.useRegEx.setToolTipText(ResourceMgr.getDescription("LblSearchRegEx"));
 		this.useRegEx.setSelected(Settings.getInstance().getBoolProperty(regexProperty, false));
+		this.useRegEx.setName("regex");
 		
 		this.label = new JLabel(ResourceMgr.getString("LblSearchCriteria"));
 		this.criteria = new JTextField();
+		this.criteria.setName("searchtext");
+		
 		this.criteria.setColumns(40);
 		if (initialValue != null)
 		{

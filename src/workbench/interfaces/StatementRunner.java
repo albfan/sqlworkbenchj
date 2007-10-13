@@ -21,22 +21,55 @@ import workbench.storage.RowActionMonitor;
  */
 public interface StatementRunner
 {
+
 	void setConnection(WbConnection aConn);
+
 	void setExecutionController(ExecutionController control);
+
 	StatementRunnerResult getResult();
+
 	void setResultLogger(ResultLogger logger);
+
 	void setParameterPrompter(ParameterPrompter filter);
+
 	void runStatement(String aSql, int maxRows, int queryTimeout)
 		throws SQLException, Exception;
+
 	void setVerboseLogging(boolean flag);
+
 	boolean getVerboseLogging();
+
 	void cancel();
+
 	void done();
+
 	void setRowMonitor(RowActionMonitor monitor);
+
 	void statementDone();
+
 	void setBaseDir(String dir);
+
 	String getBaseDir();
+
 	void setFullErrorReporting(boolean flag);
+
 	boolean getIgnoreDropErrors();
+
 	void setIgnoreDropErrors(boolean flag);
+
+	public class Factory
+	{
+		public static StatementRunner createRunner()
+		{
+			try
+			{
+				// Use reflection to create instance to avoid class loading upon startup
+				return (StatementRunner) Class.forName("workbench.sql.DefaultStatementRunner").newInstance();
+			}
+			catch (Exception e)
+			{
+				return null;
+			}
+		}
+	}
 }

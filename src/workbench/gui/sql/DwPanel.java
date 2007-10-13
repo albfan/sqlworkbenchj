@@ -235,16 +235,10 @@ public class DwPanel
 	{
 		if (this.stmtRunner == null)
 		{
-			try
-			{
-				// Use reflection to create instance to avoid class loading upon startup
-				this.stmtRunner = (StatementRunner)Class.forName("workbench.sql.DefaultStatementRunner").newInstance();
-			}
-			catch (Exception ignore)
-			{
-			}
+			this.stmtRunner = StatementRunner.Factory.createRunner();
 			this.stmtRunner.setRowMonitor(this.genericRowMonitor);
 		}
+		
 		if (this.stmtRunner != null)
 		{
 			this.stmtRunner.setConnection(this.dbConnection);

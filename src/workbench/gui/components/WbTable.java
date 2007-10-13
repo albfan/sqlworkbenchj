@@ -901,11 +901,16 @@ public class WbTable
 
 	public void restoreOriginalValues()
 	{
-		if (this.dwModel != null)
+		if (this.dwModel == null) return;
+		
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			this.dwModel.getDataStore().restoreOriginalValues();
-			this.dwModel.fireTableDataChanged();
-		}
+			public void run()
+			{
+				dwModel.getDataStore().restoreOriginalValues();
+				dwModel.fireTableDataChanged();
+			}
+		});
 	}
 
 	public PrintPreviewAction getPrintPreviewAction()
@@ -923,7 +928,6 @@ public class WbTable
 	{
 		Object value = this.getValueAt(row, column);
 		if (value == null) return null;
-//		if (value instanceof NullValue) return null;
 		return value.toString();
 	}
 

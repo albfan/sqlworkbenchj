@@ -432,17 +432,6 @@ public class WbManager
 			def.put("ViewPort.font", stdFont);
 		}
 		
-//		def.put("OptionPane.yesButtonText",ResourceMgr.getPlainString("LblYes"));
-//		def.put("OptionPane.yesButtonMnemonic",ResourceMgr.getAcceleratorChar("LblYes"));
-//		def.put("OptionPane.noButtonText",ResourceMgr.getPlainString("LblNo"));
-//		def.put("OptionPane.noButtonMnemonic",ResourceMgr.getAcceleratorChar("LblNo"));
-//		def.put("OptionPane.cancelButtonText",ResourceMgr.getPlainString("LblCancel"));
-//		def.put("OptionPane.cancelButtonMnemonic",ResourceMgr.getAcceleratorChar("LblCancel"));
-//		def.put("OptionPane.okButtonText",ResourceMgr.getPlainString("LblOK"));
-//		def.put("OptionPane.okButtonMnemonic",ResourceMgr.getAcceleratorChar("LblOK"));
-
-//		FileDialogUtil.initFileChooserLabels();
-		
 		Font dataFont = settings.getDataFont(false);
 		if (dataFont != null)
 		{
@@ -519,6 +508,11 @@ public class WbManager
 		return true;
 	}
 
+	public boolean isTestMode()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.testmode", false);
+	}
+	
 	public boolean isBatchMode()
 	{
 	  return this.batchMode;
@@ -1041,7 +1035,6 @@ public class WbManager
 			}
 			else
 			{
-//				startLocalizationRetrieval();
 				this.openNewWindow(true);
 			}
 		}
@@ -1117,21 +1110,19 @@ public class WbManager
 	/**
 	 * For testing purposes only!
 	 */
-	public static void prepareForTest(String configDir)
+	public static void prepareForTest(String[] args)
 	{
 		wb = new WbManager();
 		
 		// Avoid saving the settings
 		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
-		String args[] = { "-notemplates -nosettings -configdir=" + configDir };
-		System.setProperty("workbench.gui.language", "en");
-		
+		System.setProperty("workbench.gui.testmode", "true");
 		wb.initCmdLine(args);
 	}
 	
 	public static void main(String[] args)
 	{
-		wb = new WbManager();
+		if (wb == null) wb = new WbManager();
 		// the command line needs to be initialized before everything
 		// else, in order to set some of the system poperties correctly
 		// e.g. the configdir.

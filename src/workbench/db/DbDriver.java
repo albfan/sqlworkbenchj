@@ -32,6 +32,7 @@ import workbench.util.StringUtil;
 import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.List;
+import workbench.WbManager;
 
 /**
  *	Represents a JDBC Driver definition.
@@ -163,6 +164,7 @@ public class DbDriver
 
 	public boolean canReadLibrary()
 	{
+		if (WbManager.getInstance().isTestMode()) return true;
 		if (libraryList != null)
 		{
 			for (String lib : libraryList)
@@ -404,7 +406,7 @@ public class DbDriver
 	 *	This is a "simplified version of the connect() method
 	 *  for issuing a "shutdown command" to Cloudscape
 	 */
-	void commandConnect(String url)
+	public void commandConnect(String url)
 		throws SQLException, ClassNotFoundException, Exception
 	{
 		this.loadDriverClass();

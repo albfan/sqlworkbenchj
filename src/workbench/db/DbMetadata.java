@@ -11,7 +11,6 @@
  */
 package workbench.db;
 
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -79,7 +78,6 @@ import workbench.db.oracle.OracleSequenceReader;
  *  @author  support@sql-workbench.net
  */
 public class DbMetadata
-	implements PropertyChangeListener
 {
 	public static final String MVIEW_NAME = "MATERIALIZED VIEW";
 	private String schemaTerm;
@@ -111,7 +109,6 @@ public class DbMetadata
 	private boolean isFirebird;
 	private boolean isSqlServer;
 	private boolean isMySql;
-	private boolean isCloudscape;
 	private boolean isApacheDerby;
 	private boolean isExcel; 
 	private boolean isAccess;
@@ -191,11 +188,6 @@ public class DbMetadata
 			this.oracleMetaData = new OracleMetadata(this.dbConnection);
 			this.constraintReader = new OracleConstraintReader();
 			this.synonymReader = new OracleSynonymReader();
-
-			// register with the Settings Object to be notified for
-			// changes to the "enable dbms output" property
-			settings.addPropertyChangeListener(this, "workbench.sql.enable_dbms_output");
-			
 			this.sequenceReader = new OracleSequenceReader(this.dbConnection);
 			this.procedureReader = new OracleProcedureReader(this.dbConnection);
 			this.errorInfoReader = this.oracleMetaData;
@@ -273,7 +265,7 @@ public class DbMetadata
 		}
 		else if (productLower.indexOf("cloudscape") > -1)
 		{
-			this.isCloudscape = true;
+			this.isApacheDerby = true;
 			this.constraintReader = new DerbyConstraintReader();
 		}
 		else if (productLower.indexOf("derby") > -1)
@@ -526,7 +518,6 @@ public class DbMetadata
 	public boolean isHsql() { return this.isHsql; }
 	public boolean isFirebird() { return this.isFirebird; }
 	public boolean isSqlServer() { return this.isSqlServer; }
-	public boolean isCloudscape() { return this.isCloudscape; }
 	public boolean isApacheDerby() { return this.isApacheDerby; }
 
 	/**
@@ -1800,7 +1791,6 @@ public class DbMetadata
 	 */
 	public void close()
 	{
-		Settings.getInstance().removePropertyChangeLister(this);
 		if (this.oraOutput != null) this.oraOutput.close();
 		if (this.oracleMetaData != null) this.oracleMetaData.columnsProcessed();
 	}
@@ -2634,7 +2624,7 @@ public class DbMetadata
 					}
 				}
 			}
-			CharSequence warn = SqlUtil.getWarnings(this.dbConnection, stmt, true);
+			CharSequence warn = SqlUtil.getWarnings(this.dbConnection, stmt);
 			if (warn != null && result.length() > 0) result.append(nl + nl);
 			result.append(warn);
 		}
@@ -3843,23 +3833,6 @@ public class DbMetadata
 		Pattern p = Pattern.compile("\\sINFORMATION_SCHEMA\\.", Pattern.CASE_INSENSITIVE);
 		Matcher m = p.matcher(query);
 		return m.replaceAll(" ");
-	}
-
-	public void propertyChange(java.beans.PropertyChangeEvent evt)
-	{
-		String prop = evt.getPropertyName();
-		if ("workbench.sql.enable_dbms_output".equals(prop))
-		{
-			boolean enable = Settings.getInstance().getEnableDbmsOutput();
-			if (enable)
-			{
-				this.enableOutput();
-			}
-			else
-			{
-				this.disableOutput();
-			}
-		}
 	}
 
 }

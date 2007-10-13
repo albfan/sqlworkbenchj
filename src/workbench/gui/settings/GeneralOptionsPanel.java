@@ -27,7 +27,7 @@ import workbench.util.WbLocale;
  */
 public class GeneralOptionsPanel
 	extends JPanel
-	implements java.awt.event.MouseListener, java.awt.event.ActionListener, workbench.interfaces.Restoreable
+	implements workbench.interfaces.Restoreable
 {
 
 	/** Creates new form GeneralOptionsPanel */
@@ -48,9 +48,6 @@ public class GeneralOptionsPanel
 
 	public void restoreSettings()
 	{
-		this.enableDbmsOutput.addActionListener(this);
-		this.defaultBufferSize.setEnabled(this.enableDbmsOutput.isSelected());
-		setBufferSizeLabelColor();
 		msgLogFont.setSelectedFont(Settings.getInstance().getMsgLogFont());
 		standardFont.setSelectedFont(Settings.getInstance().getStandardFont());
 		pdfReaderPath.setFilename(Settings.getInstance().getPDFReaderPath());
@@ -107,9 +104,7 @@ public class GeneralOptionsPanel
 		set.setMsgLogFont(msgLogFont.getSelectedFont());
 		set.setUseAnimatedIcon(this.enableAnimatedIcon.isSelected());
 		set.setQuoteChar(this.quoteCharField.getText().trim());
-		set.setEnableDbmsOutput(this.enableDbmsOutput.isSelected());
 		set.setConsolidateLogMsg(this.consolidateLog.isSelected());
-    set.setDbmsOutputDefaultBuffer(StringUtil.getIntValue(this.defaultBufferSize.getText(), -1));
 		set.setDefaultTextDelimiter(this.textDelimiterField.getText());
 		set.setPDFReaderPath(pdfReaderPath.getFilename());
 		int index = checkInterval.getSelectedIndex();
@@ -141,14 +136,6 @@ public class GeneralOptionsPanel
 		set.setLanguage(wl.getLocale());
 	}
 
-	public void actionPerformed(java.awt.event.ActionEvent e)
-	{
-		if (e.getSource() == this.enableDbmsOutput)
-		{
-			this.defaultBufferSize.setEnabled(this.enableDbmsOutput.isSelected());
-		}
-	}
-
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -165,8 +152,6 @@ public class GeneralOptionsPanel
     quoteCharLabel = new javax.swing.JLabel();
     quoteCharField = new javax.swing.JTextField();
     jPanel1 = new javax.swing.JPanel();
-    enableDbmsOutputLabel = new WbCheckBoxLabel();
-    enableDbmsOutput = new javax.swing.JCheckBox();
     enableAnimatedIconLabel = new WbCheckBoxLabel();
     enableAnimatedIcon = new javax.swing.JCheckBox();
     consolidateLogLabel = new WbCheckBoxLabel();
@@ -183,8 +168,6 @@ public class GeneralOptionsPanel
     checkInterval = new javax.swing.JComboBox();
     langLabel = new javax.swing.JLabel();
     languageDropDown = new javax.swing.JComboBox();
-    bufferSizeLabel = new javax.swing.JLabel();
-    defaultBufferSize = new javax.swing.JTextField();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -258,31 +241,6 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridy = 17;
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
-
-    enableDbmsOutputLabel.setLabelFor(enableDbmsOutput);
-    enableDbmsOutputLabel.setText(ResourceMgr.getString("LblEnableDbmsOutput"));
-    enableDbmsOutputLabel.setToolTipText(ResourceMgr.getDescription("LblEnableDbmsOutput"));
-    enableDbmsOutputLabel.addMouseListener(this);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 12, 0, 0);
-    add(enableDbmsOutputLabel, gridBagConstraints);
-
-    enableDbmsOutput.setFont(null);
-    enableDbmsOutput.setSelected(Settings.getInstance().getEnableDbmsOutput());
-    enableDbmsOutput.setText("");
-    enableDbmsOutput.setBorder(null);
-    enableDbmsOutput.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    enableDbmsOutput.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-    enableDbmsOutput.setIconTextGap(5);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 10, 0, 3);
-    add(enableDbmsOutput, gridBagConstraints);
 
     enableAnimatedIconLabel.setLabelFor(enableAnimatedIcon);
     enableAnimatedIconLabel.setText(ResourceMgr.getString("LblEnableAnimatedIcon"));
@@ -441,80 +399,15 @@ public class GeneralOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
     add(languageDropDown, gridBagConstraints);
-
-    bufferSizeLabel.setText(ResourceMgr.getString("LblDefaultBufferSize"));
-    bufferSizeLabel.setToolTipText(ResourceMgr.getDescription("LblDefaultBufferSize"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 3, 0, 0);
-    add(bufferSizeLabel, gridBagConstraints);
-
-    defaultBufferSize.setColumns(8);
-    defaultBufferSize.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-    defaultBufferSize.setText(Integer.toString(Settings.getInstance().getDbmsOutputDefaultBuffer()));
-    defaultBufferSize.setMaximumSize(new java.awt.Dimension(2147483647, 21));
-    defaultBufferSize.setMinimumSize(new java.awt.Dimension(100, 21));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 3, 0, 15);
-    add(defaultBufferSize, gridBagConstraints);
-  }
-
-  // Code for dispatching events from components to event handlers.
-
-  public void mouseClicked(java.awt.event.MouseEvent evt) {
-    if (evt.getSource() == enableDbmsOutputLabel) {
-      GeneralOptionsPanel.this.enableDbmsOutputLabelMouseClicked(evt);
-    }
-  }
-
-  public void mouseEntered(java.awt.event.MouseEvent evt) {
-  }
-
-  public void mouseExited(java.awt.event.MouseEvent evt) {
-  }
-
-  public void mousePressed(java.awt.event.MouseEvent evt) {
-  }
-
-  public void mouseReleased(java.awt.event.MouseEvent evt) {
   }// </editor-fold>//GEN-END:initComponents
 
-	private void enableDbmsOutputLabelMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_enableDbmsOutputLabelMouseClicked
-	{//GEN-HEADEREND:event_enableDbmsOutputLabelMouseClicked
-		this.defaultBufferSize.setEnabled(this.enableDbmsOutput.isSelected());
-		setBufferSizeLabelColor();
-	}//GEN-LAST:event_enableDbmsOutputLabelMouseClicked
-
-
-	private void setBufferSizeLabelColor()
-	{
-		if (defaultBufferSize.isEnabled())
-		{
-			this.bufferSizeLabel.setForeground(this.defaultBufferSize.getForeground());
-		}
-		else
-		{
-			this.bufferSizeLabel.setForeground(this.defaultBufferSize.getDisabledTextColor());
-		}		
-	}
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JLabel bufferSizeLabel;
   private javax.swing.JComboBox checkInterval;
   private javax.swing.JLabel checkUpdatesLabel;
   private javax.swing.JCheckBox consolidateLog;
   private javax.swing.JLabel consolidateLogLabel;
-  private javax.swing.JTextField defaultBufferSize;
   private javax.swing.JCheckBox enableAnimatedIcon;
   private javax.swing.JLabel enableAnimatedIconLabel;
-  private javax.swing.JCheckBox enableDbmsOutput;
-  private javax.swing.JLabel enableDbmsOutputLabel;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JLabel langLabel;
   private javax.swing.JComboBox languageDropDown;

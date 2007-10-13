@@ -30,6 +30,7 @@
     <Component class="javax.swing.JTextField" name="criteriaTextField">
       <Properties>
         <Property name="columns" type="int" value="30"/>
+        <Property name="name" type="java.lang.String" value="searchtext" noResource="true"/>
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -40,6 +41,7 @@
     <Component class="javax.swing.JTextField" name="replaceValueTextField">
       <Properties>
         <Property name="columns" type="int" value="30"/>
+        <Property name="name" type="java.lang.String" value="replacetext" noResource="true"/>
       </Properties>
       <Events>
         <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="replaceValueTextFieldFocusGained"/>
@@ -58,6 +60,7 @@
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getDescription(&quot;LblSearchIgnoreCase&quot;)" type="code"/>
         </Property>
+        <Property name="name" type="java.lang.String" value="ignorecase" noResource="true"/>
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -73,6 +76,7 @@
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getDescription(&quot;LblSearchWordsOnly&quot;)" type="code"/>
         </Property>
+        <Property name="name" type="java.lang.String" value="wordsonly" noResource="true"/>
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -112,6 +116,7 @@
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getDescription(&quot;LblFindNow&quot;)" type="code"/>
         </Property>
+        <Property name="name" type="java.lang.String" value="findbutton" noResource="true"/>
       </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new WbButton();"/>
@@ -130,6 +135,7 @@
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getDescription(&quot;LblReplaceNext&quot;)" type="code"/>
         </Property>
+        <Property name="name" type="java.lang.String" value="replacenextbutton" noResource="true"/>
       </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new WbButton();"/>
@@ -148,6 +154,7 @@
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getDescription(&quot;LblReplaceAll&quot;)" type="code"/>
         </Property>
+        <Property name="name" type="java.lang.String" value="replaceallbutton" noResource="true"/>
       </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new WbButton();"/>
@@ -163,6 +170,7 @@
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getString(&quot;LblClose&quot;)" type="code"/>
         </Property>
+        <Property name="name" type="java.lang.String" value="closebutton" noResource="true"/>
       </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new WbButton();"/>
@@ -181,6 +189,7 @@
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getDescription(&quot;LblSelectedTextOnly&quot;)" type="code"/>
         </Property>
+        <Property name="name" type="java.lang.String" value="selectedtext" noResource="true"/>
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -196,6 +205,7 @@
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getDescription(&quot;LblSearchRegEx&quot;)" type="code"/>
         </Property>
+        <Property name="name" type="java.lang.String" value="regex" noResource="true"/>
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -211,6 +221,7 @@
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getDescription(&quot;LblFindNext&quot;)" type="code"/>
         </Property>
+        <Property name="name" type="java.lang.String" value="findnextbutton" noResource="true"/>
       </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new WbButton();"/>
