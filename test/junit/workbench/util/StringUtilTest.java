@@ -65,6 +65,31 @@ public class StringUtilTest
 			fail(e.getMessage());
 		}
 	}
+
+	public void testIndexOf()
+	{
+		try
+		{
+			String s = ".this. is a test";
+			int pos = StringUtil.indexOf(s, '.');
+			assertEquals(0, pos);
+			
+			s = "this. is. a. test.";
+			pos = StringUtil.indexOf(s, '.');
+			assertEquals(4, pos);
+			
+			s = "this. is. a test";
+			pos = StringUtil.indexOf(s, '.', 2);
+			assertEquals(8, pos);
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testLastIndexOf()
 	{
 		try
