@@ -10,10 +10,9 @@
  */
 package workbench.gui;
 
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import junit.framework.TestCase;
-import org.netbeans.jemmy.ClassReference;
-import org.netbeans.jemmy.JemmyProperties;
 import org.netbeans.jemmy.QueueTool;
 import org.netbeans.jemmy.operators.JButtonOperator;
 import org.netbeans.jemmy.operators.JComboBoxOperator;
@@ -29,8 +28,6 @@ import org.netbeans.jemmy.operators.JTableOperator;
 import org.netbeans.jemmy.operators.JTextFieldOperator;
 import org.netbeans.jemmy.operators.Operator.DefaultStringComparator;
 import org.netbeans.jemmy.operators.Operator.StringComparator;
-import workbench.TestUtil;
-import workbench.WbManager;
 import workbench.gui.sql.SqlPanel;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -41,24 +38,19 @@ import workbench.util.WbFile;
 public class MainWindowTest
 	extends TestCase
 {
-	private TestUtil testUtil;
+	private GuiTestUtil testUtil;
 
 	public MainWindowTest(String testName)
 	{
 		super(testName);
-		this.testUtil = new TestUtil("MainWindowTest", false);
+		this.testUtil = new GuiTestUtil("MainWindowTest");
 	}
 
 	private void startApplication()
 	{
 		try
 		{
-			new ClassReference("workbench.WbManager").startApplication(testUtil.getArgs(false));
-			System.setProperty("workbench.system.doexit", "false");
-
-			//increase timeouts values to see what's going on
-      //otherwise everything's happened very fast
-			JemmyProperties.getCurrentTimeouts().loadDebugTimeouts();
+			testUtil.startApplication();
 		}
 		catch (Exception e)
 		{
@@ -67,45 +59,38 @@ public class MainWindowTest
 		}
 	}
 
-	private void aboutTest()
-	{
-		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
-		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Help|About", "|");
-		JDialogOperator dialog = new JDialogOperator(mainWindow, "About");
-		new JButtonOperator(dialog, "Close").push();
-	}
-
 	private void settingsTest()
 	{
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
 		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Tools|Options", "|");
 		JDialogOperator dialog = new JDialogOperator(mainWindow, "Settings");
 		final JListOperator pages = new JListOperator(dialog);
-		
+
 		int count = pages.getModel().getSize();
 		assertEquals(10, count);
-		
+
 		NamedComponentChooser chooser = new NamedComponentChooser();
-		chooser.setName("pagetitle");		
-		
+		chooser.setName("pagetitle");
+
 		QueueTool tool = new QueueTool();
 		for (int i = 1; i < count; i++)
 		{
 			final int index = i;
-			tool.invokeAndWait(new Runnable() 
-			{
-				public void run()
+			tool.invokeAndWait(new Runnable()
 				{
-					pages.selectItem(index);
-				}
-			});
-			tool.waitEmpty();		
-			
+
+					public void run()
+					{
+						pages.selectItem(index);
+					}
+				});
+			tool.waitEmpty();
+
 			String pg = pages.getSelectedValue().toString();
 			JLabelOperator title = new JLabelOperator(dialog, chooser);
 			assertEquals(pg, title.getText());
 		}
-		
+
 		new JButtonOperator(dialog, "Cancel").push();
 	}
 
@@ -122,7 +107,11 @@ public class MainWindowTest
 	private void connect()
 	{
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
-		new JMenuBarOperator(mainWindow).pushMenuNoBlock("File|Connect", "|");
+		JMenuBar bar = mainWindow.getJMenuBar();
+		//		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
+		JMenuBarOperator menu = new JMenuBarOperator(bar);
+		menu.pushMenuNoBlock("File|Connect", "|");
+
 		JDialogOperator dialog = new JDialogOperator(mainWindow, "Select Connection Profile");
 		JTextFieldOperator profileName = new JTextFieldOperator(dialog, "New Profile");
 		profileName.setText("Test Connection");
@@ -159,7 +148,7 @@ public class MainWindowTest
 
 		chooser.setName("sqlpanel1");
 		JComponentOperator panel = new JComponentOperator(mainWindow, chooser);
-		final SqlPanel sqlPanel = (SqlPanel) panel.getSource();
+		final SqlPanel sqlPanel = (SqlPanel)panel.getSource();
 
 		String msg = runSql(sqlPanel, "create table person (nr integer primary key, firstname varchar(20), lastname varchar(20));");
 		System.out.println("Create message: " + msg);
@@ -179,7 +168,7 @@ public class MainWindowTest
 		assertEquals(nr, new Integer(42));
 
 		JMenuOperator dataMenu = new JMenuOperator(mainMenu.getMenu(3));
-		JMenuItem saveItem = (JMenuItem) dataMenu.getMenuComponent(1);
+		JMenuItem saveItem = (JMenuItem)dataMenu.getMenuComponent(1);
 		JMenuItemOperator save = new JMenuItemOperator(saveItem);
 		assertFalse(save.isEnabled());
 
@@ -208,7 +197,7 @@ public class MainWindowTest
 		assertEquals(1, result.getRowCount());
 		assertEquals(3, result.getColumnCount());
 
-		String firstname = (String) result.getValueAt(0, 1);
+		String firstname = (String)result.getValueAt(0, 1);
 		assertEquals("Arthur", firstname);
 
 		msg = runSql(sqlPanel, "update person set firstname = null where nr = 42;\ncommit;");
@@ -219,7 +208,7 @@ public class MainWindowTest
 		System.out.println("Message: " + msg);
 
 		result = new JTableOperator(mainWindow);
-		firstname = (String) result.getValueAt(0, 1);
+		firstname = (String)result.getValueAt(0, 1);
 		assertTrue(StringUtil.isWhitespaceOrEmpty(firstname));
 
 		result.setValueAt("Arthur", 0, 1);
@@ -273,12 +262,6 @@ public class MainWindowTest
 		{
 			Thread.yield();
 		}
-
-	//		WbConnection con = panel.getConnection();
-//		while (con != null && con.isBusy())
-//		{
-//			Thread.yield();
-//		}
 	}
 
 	public void testWindow()
@@ -289,16 +272,12 @@ public class MainWindowTest
 			connect();
 			settingsTest();
 			runSql();
+			testUtil.stopApplication();
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		finally
-		{
-			WbManager.getInstance().exitWorkbench();
-		}
-
 	}
 }

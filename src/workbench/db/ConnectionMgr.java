@@ -460,6 +460,11 @@ public class ConnectionMgr
 			{
 				conn.close();
 			}
+			if (conn.getProfile() != null)
+			{
+				LogMgr.logDebug("ConnectionMgr.disconnect()", "Disconnected [" + conn.getId() + "]");
+			}
+			
 		}
 		catch (Exception e)
 		{

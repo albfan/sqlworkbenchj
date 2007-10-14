@@ -11,8 +11,6 @@
 package workbench.gui;
 
 import junit.framework.TestCase;
-import org.netbeans.jemmy.ClassReference;
-import org.netbeans.jemmy.JemmyProperties;
 import org.netbeans.jemmy.QueueTool;
 import org.netbeans.jemmy.operators.JButtonOperator;
 import org.netbeans.jemmy.operators.JCheckBoxOperator;
@@ -21,8 +19,6 @@ import org.netbeans.jemmy.operators.JDialogOperator;
 import org.netbeans.jemmy.operators.JFrameOperator;
 import org.netbeans.jemmy.operators.JMenuBarOperator;
 import org.netbeans.jemmy.operators.JTextFieldOperator;
-import workbench.TestUtil;
-import workbench.WbManager;
 import workbench.gui.sql.EditorPanel;
 
 /**
@@ -31,24 +27,19 @@ import workbench.gui.sql.EditorPanel;
 public class EditorTest
 	extends TestCase
 {
-	private TestUtil testUtil;
+	private GuiTestUtil testUtil;
 
 	public EditorTest(String testName)
 	{
 		super(testName);
-		this.testUtil = new TestUtil("EditorTest");
+		this.testUtil = new GuiTestUtil("EditorTest");
 	}
 
 	private void startApplication()
 	{
 		try
 		{
-			new ClassReference("workbench.WbManager").startApplication(testUtil.getArgs(true));
-			System.setProperty("workbench.system.doexit", "false");
-
-			//increase timeouts values to see what's going on
-      //otherwise everything's happened very fast
-			JemmyProperties.getCurrentTimeouts().loadDebugTimeouts();
+			testUtil.startApplication();
 		}
 		catch (Exception e)
 		{
@@ -63,7 +54,7 @@ public class EditorTest
 		NamedComponentChooser chooser = new NamedComponentChooser();
 		chooser.setName("sqleditor1");
 		JComponentOperator editorComp = new JComponentOperator(mainWindow, chooser);
-		EditorPanel editor = (EditorPanel) editorComp.getSource();
+		EditorPanel editor = (EditorPanel)editorComp.getSource();
 
 		editor.setText("select * from person;");
 		editor.setCaretPosition(0);
@@ -90,7 +81,7 @@ public class EditorTest
 		NamedComponentChooser chooser = new NamedComponentChooser();
 		chooser.setName("sqleditor1");
 		JComponentOperator editorComp = new JComponentOperator(mainWindow, chooser);
-		EditorPanel editor = (EditorPanel) editorComp.getSource();
+		EditorPanel editor = (EditorPanel)editorComp.getSource();
 
 		editor.setText("select * from person;");
 		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
@@ -144,15 +135,12 @@ public class EditorTest
 			startApplication();
 			replaceText();
 			findText();
+			testUtil.stopApplication();
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			fail(e.getMessage());
-		}
-		finally
-		{
-			WbManager.getInstance().exitWorkbench();
 		}
 	}
 }

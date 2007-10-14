@@ -1076,29 +1076,41 @@ public class MainWindow
 
 	public void windowActivated(WindowEvent windowEvent)
 	{
-		JMenu m1 = null;
-		int index = this.getCurrentPanelIndex();
-		if (this.panelMenus != null && index > -1)
-		{
-			JMenuBar b = this.panelMenus.get(index);
-			if (b != null)
-			{
-				try
-				{
-					m1 = b.getMenu(0);
-				}
-				catch (Throwable th)
-				{
-					m1 = null;
-				}
-			}
-		}
-		final JMenu m = m1;
+		// When switching between Applications (using Alt-Tab in Windows)
+		// sometimes the main menu is selected (as if the Alt key was pressed
+		// once to activate the menu). This is trying to workaround this fix
+		// but does not really work in all cases. As this happens with other Java
+		// applications as well, I think this is a JDK bug.
+		
+		// If the "oppositeWindow is not null, then we have a focus switch inside
+		// our application, so we don't need to do anything
+		if (windowEvent.getOppositeWindow() != null) return;
+		
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
-				if (m != null) m.setSelected(false);
+				JMenu menu = null;
+				JMenuBar bar = null;
+		
+				int index = getCurrentPanelIndex();
+				if (panelMenus != null && index > -1)
+				{
+					bar = panelMenus.get(index);
+					if (bar != null)
+					{
+						try
+						{
+							menu = bar.getMenu(0);
+						}
+						catch (Throwable th)
+						{
+							menu = null;
+						}
+					}
+				}
+				try { if (menu != null) menu.setSelected(false); } catch (Throwable th) {}
+				try { if (bar != null) bar.setSelected(null); } catch (Throwable th) {}
 			}
 		});
 	}
@@ -1126,17 +1138,21 @@ public class MainWindow
 	/**
 	 *	Display a message in the status bar
 	 */
-	public void showStatusMessage(String aMsg)
+	public void showStatusMessage(final String aMsg)
 	{
-		if (aMsg == null) return;
-		MainPanel current = this.getCurrentPanel();
-		if (current != null) 
+		final MainPanel current = this.getCurrentPanel();
+		if (current == null) return;
+		
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			if (aMsg.length() == 0)
-				current.clearStatusMessage();
-			else
-				current.showStatusMessage(aMsg);
-		}
+			public void run()
+			{
+				if (StringUtil.isEmptyString(aMsg))
+					current.clearStatusMessage();
+				else
+					current.showStatusMessage(aMsg);
+			}
+		});
 	}
 
 	public void showLogMessage(String aMsg)
@@ -1153,8 +1169,6 @@ public class MainWindow
 		}
 		disconnect(false, false, false);
 
-		showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
-
 		// it is important to set this flag, otherwise
 		// loading the workspace will already trigger a
 		// panel switch which might cause a connect
@@ -1165,8 +1179,6 @@ public class MainWindow
 		this.setConnectIsInProgress();
 		this.currentProfile = aProfile;
 		Settings.getInstance().setLastConnection(this.currentProfile);
-
-		loadWorkspaceForProfile(aProfile);
 		showStatusMessage(ResourceMgr.getString("MsgConnecting"));
 	}
 
@@ -1206,8 +1218,11 @@ public class MainWindow
 	 */
 	public void connected(WbConnection conn)
 	{
-		this.showStatusMessage("");
+		//this.showStatusMessage("");
 		this.currentProfile = conn.getProfile();
+		showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
+		loadWorkspaceForProfile(this.currentProfile);
+		
 		if (this.currentProfile.getUseSeparateConnectionPerTab())
 		{
 			this.getCurrentPanel().setConnection(conn);
