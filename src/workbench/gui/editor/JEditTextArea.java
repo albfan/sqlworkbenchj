@@ -101,7 +101,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.79 2007-09-27 09:26:40 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.80 2007-10-14 13:01:36 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -281,6 +281,11 @@ public class JEditTextArea
 		this.select(start, end);
 	}
 
+	public String getCommentChar()
+	{
+		return this.commentChar;
+	}
+	
 	public void toLowerCase()
 	{
 		this.changeCase(true);
@@ -290,94 +295,7 @@ public class JEditTextArea
 	{
 		this.changeCase(false);
 	}
-
-	protected boolean isSelectionCommented()
-	{
-		int startline = this.getSelectionStartLine();
-		int realEndline = this.getSelectionEndLine();
-		int endline = realEndline;
-		if (this.commentChar == null) this.commentChar = "--";
-		int cLength = this.commentChar.length();
 		
-		int pos = this.getSelectionEnd(endline) - this.getLineStartOffset(endline);
-		if (pos == 0) endline --;
-		
-		for (int line = startline; line <= endline; line ++)
-		{
-			String text = this.getLineText(line);
-			if (text == null || text.trim().length() == 0) continue;
-			if (text.startsWith(this.commentChar)) return true;
-		}
-		return false;
-	}
-	
-	public void commentSelection()
-	{
-		boolean isCommented = this.isSelectionCommented();
-		// Comment Selection acts as a toggle.
-		// if the complete selection is already commented
-		// the comments will be removed.
-		doComment(!isCommented);
-	}
-	
-	public void unCommentSelection()
-	{
-		doComment(false);
-	}
-	
-	private void doComment(boolean comment)
-	{
-		int startline = this.getSelectionStartLine();
-		int realEndline = this.getSelectionEndLine();
-		int endline = realEndline;
-		if (this.commentChar == null) this.commentChar = "--";
-		int cLength = this.commentChar.length();
-		
-		int pos = this.getSelectionEnd(endline) - this.getLineStartOffset(endline);
-		if (pos == 0) endline --;
-
-		try
-		{
-			document.beginCompoundEdit();
-			for (int line = startline; line <= endline; line ++)
-			{
-				String text = this.getLineText(line);
-				if (text == null || text.trim().length() == 0) continue;
-				int lineStart = this.getLineStartOffset(line);
-				if (comment)
-				{
-					document.insertString(lineStart, this.commentChar, null);
-				}
-				else
-				{
-					pos = text.indexOf(commentChar);
-					if (pos > -1)
-					{
-						document.remove(lineStart, pos + cLength);
-					}
-				}
-			}
-		}
-		catch (BadLocationException e)
-		{
-			LogMgr.logError("JEditTextArea.doComment()", "Error when processing comment", e);
-		}
-		finally
-		{
-			document.endCompoundEdit();
-		}
-	}
-	
-	public void indentSelection()
-	{
-		this.shiftSelection(true);
-	}
-
-	public void unIndentSelection()
-	{
-		this.shiftSelection(false);
-	}
-
 	public void matchBracket()
 	{
 		try
@@ -393,57 +311,6 @@ public class JEditTextArea
 		catch (Exception e)
 		{
 			// ignore
-		}
-	}
-
-	private void shiftSelection(boolean indent)
-	{
-		int startline = this.getSelectionStartLine();
-		int realEndline = this.getSelectionEndLine();
-		int endline = realEndline;
-		int tabSize = this.getTabSize();
-		StringBuilder buff = new StringBuilder(tabSize);
-		for (int i=0; i < tabSize; i++) buff.append(' ');
-		String spacer = buff.toString();
-
-		int pos = this.getSelectionEnd(endline) - this.getLineStartOffset(endline);
-		if (pos == 0) endline --;
-
-		try
-		{
-			document.beginCompoundEdit();
-			for (int line = startline; line <= endline; line ++)
-			{
-				String text = this.getLineText(line);
-				if (text == null || text.trim().length() == 0) continue;
-				int lineStart = this.getLineStartOffset(line);
-				if (indent)
-				{
-					document.insertString(lineStart, spacer, null);
-				}
-				else
-				{
-					char c = text.charAt(0);
-					if (c == '\t')
-					{
-						document.remove(lineStart, 1);
-					}
-					else
-					{
-						int numChars = 0;
-						while (Character.isWhitespace(text.charAt(numChars)) && numChars < tabSize) numChars ++;
-						document.remove(lineStart, numChars);
-					}
-				}
-			}
-		}
-		catch (BadLocationException e)
-		{
-			LogMgr.logError("JEditTextArea.shiftSelection()", "Error when shifting selection", e);
-		}
-		finally
-		{
-			document.endCompoundEdit();
 		}
 	}
 
@@ -1896,7 +1763,7 @@ public class JEditTextArea
 		
 		updateScrollBars();
 		setCaretPosition(selectionEnd);
-		this.invalidate();
+//		this.invalidate();
 		this.repaint();
 	}
 
@@ -2352,14 +2219,6 @@ public class JEditTextArea
 		{
 			painter.invalidateLine(line);
 		}
-		/*
-		// do magic stuff
-		else if(line < firstLine && firstLine > -1)
-		{
-			setFirstLine(firstLine + count);
-		}
-		 */
-		// end of magic stuff
 		else
 		{
 			painter.invalidateLineRange(line,(firstLine < 0 ? 0 : firstLine) + visibleLines);
@@ -2408,8 +2267,6 @@ public class JEditTextArea
 				right = comp;
 			else if(name.equals(BOTTOM))
 				bottom = comp;
-//			else if(name.equals(LEFT_OF_SCROLLBAR))
-//				leftOfScrollBar.addElement(comp);
 		}
 
 		public void removeLayoutComponent(Component comp)
@@ -2512,18 +2369,6 @@ public class JEditTextArea
 		private Component bottom;
 		private Vector leftOfScrollBar = new Vector();
 	}
-
-	/*
-	static class CaretBlinker implements ActionListener
-	{
-		public void actionPerformed(ActionEvent evt)
-		{
-			if(focusedComponent != null
-				&& focusedComponent.hasFocus())
-				focusedComponent.blinkCaret();
-		}
-	}
-	*/
 		
 	class MutableCaretEvent extends CaretEvent
 	{
@@ -2778,16 +2623,6 @@ public class JEditTextArea
 
 			int lineStart = getLineStartOffset(line);
 			select(lineStart + wordStart,lineStart + wordEnd);
-
-			/*
-			String lineText = getLineText(line);
-			String noWordSep = (String)document.getProperty("noWordSep");
-			int wordStart = TextUtilities.findWordStart(lineText,offset,noWordSep);
-			int wordEnd = TextUtilities.findWordEnd(lineText,offset,noWordSep);
-
-			int lineStart = getLineStartOffset(line);
-			select(lineStart + wordStart,lineStart + wordEnd);
-			*/
 		}
 
 		protected void doTripleClick(MouseEvent evt, int line,int offset, int dot)

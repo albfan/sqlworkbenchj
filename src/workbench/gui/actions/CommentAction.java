@@ -16,9 +16,9 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
+import workbench.gui.editor.TextCommenter;
 import workbench.gui.sql.EditorPanel;
 
-import workbench.interfaces.Undoable;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -41,6 +41,7 @@ public class CommentAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.commentSelection();
+		TextCommenter commenter = new TextCommenter(client);
+		commenter.commentSelection();
 	}
 }

@@ -13,6 +13,7 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
+import workbench.gui.editor.CodeTools;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.TextSelectionListener;
 import workbench.resource.ResourceMgr;
@@ -40,7 +41,8 @@ public class MakeInListAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.makeInListForChar();
+		CodeTools tools = new CodeTools(client);
+		tools.makeInListForChar();
 	}
 
 	public void selectionChanged(int newStart, int newEnd)
