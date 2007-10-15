@@ -219,7 +219,8 @@ public class WbWorkspace
 	public void setTabTitle(int index, String name)
 	{
 		String key = "tab" + index + ".title";
-		this.tabInfo.setProperty(key, name);
+		String encoded = StringUtil.escapeUnicode(name, CharacterRange.RANGE_7BIT);
+		this.tabInfo.setProperty(key, encoded);
 	}
 
 	public String getTabTitle(int index)
@@ -227,7 +228,7 @@ public class WbWorkspace
 		if (this.tabInfo == null) return null;
 		String key = "tab" + index + ".title";
 		String value = (String)this.tabInfo.get(key);
-		return value;
+		return StringUtil.decodeUnicode(value);
 	}
 
 	public int getExternalFileCursorPos(int tabIndex)
@@ -302,8 +303,9 @@ public class WbWorkspace
 		if (this.tabInfo == null) return null;
 		String key = "tab" + tabIndex + ".filename";
 		String value = (String)this.tabInfo.get(key);
-		return value;
+		return StringUtil.decodeUnicode(value);
 	}
+	
 	public String getExternalFileEncoding(int tabIndex)
 	{
 		if (this.tabInfo == null) return null;
@@ -322,7 +324,8 @@ public class WbWorkspace
 	public void setExternalFileName(int tabIndex, String filename)
 	{
 		String key = "tab" + tabIndex + ".filename";
-		this.tabInfo.setProperty(key, filename);
+		String encoded = StringUtil.escapeUnicode(filename, CharacterRange.RANGE_7BIT);
+		this.tabInfo.setProperty(key, encoded);
 	}
 
 	public void setExternalFileEncoding(int tabIndex, String encoding)

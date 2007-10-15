@@ -17,7 +17,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Iterator;
-import junit.framework.*;
+import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -26,7 +26,8 @@ import workbench.util.StringUtil;
  *
  * @author support@sql-workbench.net
  */
-public class ScriptParserTest extends TestCase
+public class ScriptParserTest 
+	extends TestCase
 {
 	
 	public ScriptParserTest(String testName)
@@ -595,5 +596,19 @@ public class ScriptParserTest extends TestCase
 		}
 	}
 	
+	public void testUnicodeComments()
+	{
+		String sql = "/* \uD8D5\uD8D7\uD8D9 */\nINSERT INTO something;\n-- \u4E2D\u6587\u6CE8 \nSELECT * FROM test;";
+    ScriptParser parser = new ScriptParser(sql);
+
+		int count = parser.getSize();
+		assertEquals("Wrong statement count", count, 2);
+		int pos = sql.indexOf("SELECT") + "SELECT".length();
+		int index = parser.getCommandIndexAtCursorPos(pos);
+		assertEquals(1, index);
+		String cmd = parser.getCommand(index);
+		System.out.println("cmd=" + cmd);
+		
+	}
 	
 }

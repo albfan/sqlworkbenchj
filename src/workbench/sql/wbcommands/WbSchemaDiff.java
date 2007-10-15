@@ -136,7 +136,7 @@ public class WbSchemaDiff
 		WbConnection targetCon = null;
 		WbConnection sourceCon = null;
 
-		this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+		if (this.rowMonitor != null) this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 
 		if (targetProfile == null || (currentConnection != null && currentConnection.getProfile().isProfileForKey(targetKey)))
 		{
@@ -155,7 +155,7 @@ public class WbSchemaDiff
 			}
 			try
 			{
-				this.rowMonitor.setCurrentObject(ResourceMgr.getString("MsgDiffConnectingTarget"),-1,-1);
+				if (this.rowMonitor != null) this.rowMonitor.setCurrentObject(ResourceMgr.getString("MsgDiffConnectingTarget"),-1,-1);
 				targetCon = ConnectionMgr.getInstance().getConnection(targetKey, "Wb-Diff-Target");
 			}
 			catch (Exception e)
@@ -184,7 +184,7 @@ public class WbSchemaDiff
 			
 			try
 			{
-				this.rowMonitor.setCurrentObject(ResourceMgr.getString("MsgDiffConnectingSource"),-1,-1);
+				if (this.rowMonitor != null) this.rowMonitor.setCurrentObject(ResourceMgr.getString("MsgDiffConnectingSource"),-1,-1);
 				sourceCon = ConnectionMgr.getInstance().getConnection(sourceKey, "Wb-Diff-Source");
 			}
 			catch (Exception e)

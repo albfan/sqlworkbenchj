@@ -32,6 +32,7 @@ import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -130,9 +131,10 @@ public class WbSchemaReport
 		String alternateSchema = cmdLine.getValue("useschemaname");
 		this.reporter.setSchemaNameToUse(alternateSchema);
 
+		this.reporter.setProgressMonitor(this);
+		
 		if (this.rowMonitor != null)
 		{
-			this.reporter.setProgressMonitor(this);
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
 		}
 
@@ -141,7 +143,7 @@ public class WbSchemaReport
 		this.reporter.setIncludeGrants(cmdLine.getBoolean(PARAM_INCLUDE_GRANTS, false));
 		this.reporter.setIncludeSequences(cmdLine.getBoolean(PARAM_INCLUDE_SEQUENCES, false));
 		
-		if (currentConnection.getMetadata().isOracle())
+		if (currentConnection != null && currentConnection.getMetadata().isOracle())
 		{
 			// check if remarksReporting is turned on for Oracle, if not issue a warning.
 			ConnectionProfile prof = currentConnection.getProfile();
@@ -158,15 +160,18 @@ public class WbSchemaReport
 			}
 		}
 		
+		// currentTable will be incremented as we have registered
+		// this object as the RowActionMonitor of the SchemaReporter
+		// see setCurrentObject()
 		this.currentTable = 0;
 		String wbFile = file;
 		if (dbDesigner)
 		{
-			File f = new File(file);
+			WbFile f = new WbFile(file);
 			String dir = f.getParent();
 			String fname = f.getName();
-			File nf = new File(dir, "__wb_" + fname);
-			wbFile = nf.getAbsolutePath();
+			WbFile nf = new WbFile(dir, "__wb_" + fname);
+			wbFile = nf.getFullPath();
 		}
 
 		this.reporter.setOutputFilename(wbFile);
@@ -174,15 +179,6 @@ public class WbSchemaReport
 		try
 		{
 			this.reporter.writeXml();
-			String msg = ResourceMgr.getString("MsgSchemaReportTablesWritten");
-			msg = msg.replaceAll("%numtables%", Integer.toString(this.currentTable));
-			if (!dbDesigner)
-			{
-				File f = new File(file);
-				msg = StringUtil.replace(msg, "%filename%", f.getAbsolutePath());
-				result.addMessage(msg);
-			}
-			result.setSuccess();
 		}
 		catch (IOException e)
 		{
@@ -195,10 +191,7 @@ public class WbSchemaReport
 			File f = new File(wbFile);
 			try
 			{
-				if (this.rowMonitor != null)
-				{
-					this.setCurrentObject(ResourceMgr.getString("MsgConvertReport2Designer"), -1, -1);
-				}
+				this.setCurrentObject(ResourceMgr.getString("MsgConvertReport2Designer"), -1, -1);
 				Workbench2Designer converter = new Workbench2Designer(f);
 				converter.transformWorkbench2Designer();
 				File output = new File(file);
@@ -213,8 +206,14 @@ public class WbSchemaReport
 				msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));
 				result.addMessage(msg);
 			}
-
 		}
+		if (result.isSuccess())
+		{
+			String msg = ResourceMgr.getFormattedString("MsgSchemaReportTablesWritten", currentTable, file);
+			result.addMessage(msg);
+			result.setSuccess();
+		}
+		
 		return result;
 	}
 

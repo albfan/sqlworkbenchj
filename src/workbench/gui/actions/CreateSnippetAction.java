@@ -46,7 +46,7 @@ public class CreateSnippetAction extends WbAction
 	public void executeAction(ActionEvent e)
 	{
 		String sql = this.client.getSelectedText();
-		if (sql == null || sql.length() == 0)
+		if (sql == null)
 		{
 			sql = this.client.getText();
 		}

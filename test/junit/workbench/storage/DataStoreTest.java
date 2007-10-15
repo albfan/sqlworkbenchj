@@ -54,28 +54,6 @@ public class DataStoreTest
 		util.prepareEnvironment();
 	}
 
-	private WbConnection preparePkTestDb()
-		throws Exception
-	{
-		util.emptyBaseDirectory();
-		WbConnection wb = util.getConnection("pkTestDb");
-		Connection con = wb.getSqlConnection();
-		Statement stmt = con.createStatement();
-		try { stmt.executeUpdate("DROP TABLE junit_test"); } catch (Throwable th) {}
-		stmt.executeUpdate("CREATE TABLE junit_test (key integer primary key, firstname varchar(100), lastname varchar(100))");
-		stmt.close();
-		PreparedStatement pstmt = con.prepareStatement("insert into junit_test (key, firstname, lastname) values (?,?,?)");
-		for (int i=0; i < rowcount; i ++)
-		{
-			pstmt.setInt(1, i);
-			pstmt.setString(2, "FirstName" + i);
-			pstmt.setString(3, "LastName" + i);
-			pstmt.executeUpdate();
-		}
-		con.commit();
-		return wb;
-	}
-
 	public void testMissingPkColumns()
 	{
 		try
@@ -113,7 +91,7 @@ public class DataStoreTest
 		
 		try
 		{
-			WbConnection con = preparePkTestDb();
+			WbConnection con = prepareDatabase();
 			
 			String[] cols = new String[] {"\"KEY\"","LASTNAME", "FIRSTNAME", "LASTNAME" };
 			int[] types = new int[] {java.sql.Types.VARCHAR, java.sql.Types.VARCHAR,  java.sql.Types.VARCHAR, java.sql.Types.VARCHAR};
@@ -149,7 +127,7 @@ public class DataStoreTest
 		Statement stmt = null;
 		try
 		{
-			con = prepareRetrieveDatabase();
+			con = prepareDatabase();
 
 			stmt = con.createStatement();
 			stmt.executeUpdate("delete from junit_test");
@@ -253,7 +231,7 @@ public class DataStoreTest
 	{
 		try
 		{
-			WbConnection con = preparePkTestDb();
+			WbConnection con = prepareDatabase();
 			Statement stmt = con.createStatement();
 			final String sql = "select key, firstname, lastname from junit_test";
 			ResultSet rs = stmt.executeQuery(sql);
@@ -336,8 +314,7 @@ public class DataStoreTest
 		}
 	}
 	
-
-	private WbConnection prepareRetrieveDatabase()
+	private WbConnection prepareDatabase()
 		throws Exception
 	{
 		util.emptyBaseDirectory();
@@ -365,7 +342,7 @@ public class DataStoreTest
 		Statement stmt = null;
 		try
 		{
-			con = prepareRetrieveDatabase();
+			con = prepareDatabase();
 			
 			stmt = con.createStatement();
 			String sql = "select key, lastname, firstname from junit_test";
@@ -464,13 +441,65 @@ public class DataStoreTest
 		}
 	}
 	
+	public void testCascadingDelete()
+	{
+		WbConnection con = null;
+		try
+		{
+			con = util.getConnection();
+			Statement stmt = con.createStatement();
+			stmt.executeUpdate("CREATE TABLE person (id integer primary key, firstname varchar(20), lastname varchar(20))");
+			stmt.executeUpdate("insert into person (id, firstname, lastname) values (42, 'Zaphod', 'Beeblebrox')");
+			stmt.executeUpdate("insert into person (id, firstname, lastname) values (1, 'Mary', 'Moviestar')");
+			
+			stmt.executeUpdate("create table detail (did integer primary key, person_id integer, detail_info varchar(100))");
+			stmt.executeUpdate("alter table detail ADD CONSTRAINT fk_pers FOREIGN KEY (person_id) REFERENCES person (id)");
+			stmt.executeUpdate("insert into detail (did, person_id, detail_info) values (1, 42, 'some stuff')");
+			stmt.executeUpdate("insert into detail (did, person_id, detail_info) values (2, 42, 'more stuff')");
+			stmt.executeUpdate("insert into detail (did, person_id, detail_info) values (3, 1, 'mary1')");
+			stmt.executeUpdate("insert into detail (did, person_id, detail_info) values (4, 1, 'mary2')");
+			con.commit();
+			
+			ResultSet rs = stmt.executeQuery("select id, firstname, lastname from person order by id");
+			DataStore ds = new DataStore(rs, true);
+			rs.close();
+			assertEquals(2, ds.getRowCount());
+			
+			ds.setOriginalConnection(con);
+			ds.setGeneratingSql("select id, firstname, lastname from person order by id");
+			ds.deleteRowWithDependencies(0);
+			ds.updateDb(con, null);
+			rs = stmt.executeQuery("select count(*) from person");
+			rs.next();
+			int count = rs.getInt(1);
+			assertEquals(1, count);
+			rs.close();
+			
+			rs = stmt.executeQuery("select count(*) from detail");
+			rs.next();
+			count = rs.getInt(1);
+			assertEquals(2, count);
+			rs.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			con.close();
+		}
+	}
+	
+	
 	public void testFilter()
 	{
 		WbConnection con = null;
 		Statement stmt = null;
 		try
 		{
-			con = prepareRetrieveDatabase();
+			con = prepareDatabase();
 			
 			stmt = con.createStatement();
 			stmt.executeUpdate("insert into junit_test (key, firstname, lastname) values (42, 'Zaphod', 'Beeblebrox')");

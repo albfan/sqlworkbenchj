@@ -391,6 +391,8 @@ public class DataStore
 		if (this.updateTable == null) this.checkUpdateTable(originalConnection);
 
 		RowData row = this.data.get(aRow);
+		if (row == null) return;
+		
 		if (!row.isNew())
 		{
 			List<ColumnData> pk = getPkValues(aRow, true);
