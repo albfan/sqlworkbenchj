@@ -375,18 +375,6 @@
       </para>
       <para>No default</para>
     </section>
-
-		<!--
-    <section id="db-settings-cancel-reconnect">
-      <title>Controlling statement cancelling</title>
-      <para>Property: <literal>workbench.db.cancelneedsreconnect</literal></para>
-      <para>Some JDBC drivers (such as the MS SQL JDBC driver) cannot handle cancelling of 
-       statements properly. In order to reset the driver to a working state a reconnect to the
-       server is necessary after the cancel. This property is a list of JDBC driver classes 
-       that require a reconnect after cancelling a statement. </para>
-      <para>Default: <literal>com.microsoft.jdbc.sqlserver.SQLServerDriver</literal></para>
-    </section>
-		-->
 		
     <section id="db-settings-switch-catalog">
       <title>Database switch in DbExplorer</title>
@@ -421,17 +409,17 @@
 		</section>
 		
 		<section id="db-oracle-filter-syns">
-			<title>Filtering Oracle public synonyms</title>
-			<para>Property: <literal>workbench.db.oracle.exclude.synonyms</literal></para>
+			<title>Filtering synonyms</title>
+			<para>Property: <literal>workbench.db.[dbid].exclude.synonyms</literal></para>
 			<para>
 				The <link linkend="dbexplorer">database explorer</link> and the 
-				<link linkend="command-completion">auto completion</link> can display Oracle public synonyms. 
-				Some of these are usually not of interest when simply querying a database, so the
+				<link linkend="command-completion">auto completion</link> can display (Oracle public) synonyms. 
+				Some of these are usually not of interest to the end user. Therefor the
 				list of displayed synonyms can be controlled. This property defines
 				a regular expression. Each synonym that matches this regular expression, 
 				will be excluded from the list presented in the GUI.
 			</para>
-			<para>Default value: <literal>^AQ\\$.*|^MGMT\\$.*|^GV\\$.*|^EXF\\$.*|^KU\\$_.*|^WM\\$.*|^MRV_.*|^CWM_.*|^CWM2_.*|^WK\\$_.*|^CTX_.*</literal></para>
+			<para>Default value (for Oracle): <literal>^AQ\\$.*|^MGMT\\$.*|^GV\\$.*|^EXF\\$.*|^KU\\$_.*|^WM\\$.*|^MRV_.*|^CWM_.*|^CWM2_.*|^WK\\$_.*|^CTX_.*</literal></para>
 			<para>Note that you need to use two backslashes in the RegeEx.</para>
 		</section>
 
@@ -545,7 +533,6 @@
 		</section>
 		
   </section>
-			
 			
   <section id="sql-execution-settings">
     <title>SQL Execution related settings</title>

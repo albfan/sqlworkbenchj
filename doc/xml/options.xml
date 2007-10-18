@@ -63,6 +63,7 @@
 			</para>
 		</section>
 
+		<!--
 		<section id="options-enable-out" xreflabel="Enabling DBMS_OUTPUT">
 			<title>Enable DBMS_OUTPUT</title>
 			
@@ -86,7 +87,8 @@
 			</para></note>
 
 		</section>
-
+		-->
+		
 		<section id="option-animated-icon" xreflabel="Enable animated icons">
 			<title>Enable animated icons</title>
 			<para>Enable or disable the use of an animated icons in the SQL editor to

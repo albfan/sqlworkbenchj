@@ -10,11 +10,10 @@
 				Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with 
 				the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal> 
 				package is enabled. 
-				In order to be able to display these columns, the support for 
-				<literal>DBMS_OUTPUT</literal> has to be switched off either in the <link linkend="options-enable-out">options dialog</link>, 
-				or by using the <link linkend="command-disableout">DISABLEOUT</link> command
-				before runnnig a <literal>SELECT</literal> statement that returns 
-				<literal>LONG</literal> or <literal>LONG RAW</literal> columns.
+				In order to be able to display these columns, the support for <literal>DBMS_OUTPUT</literal> 
+				has to be switched off using the <link linkend="command-disableout">DISABLEOUT</link> command
+				before runnnig a <literal>SELECT</literal> statement that returns <literal>LONG</literal> 
+				or <literal>LONG RAW</literal> columns.
 			</para>
 		</section>
 		

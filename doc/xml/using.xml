@@ -133,7 +133,7 @@ COMMIT;</programlisting>
 					the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal> 
 					package is enabled. 
 					In order to be able to display these columns, the support for 
-					<link linkend="options-enable-out"><literal>DBMS_OUTPUT</literal></link> has to be switched off. 
+					<link linkend="oracle-long-problems"><literal>DBMS_OUTPUT</literal></link> has to be switched off. 
 				</para>
 			</note>
 		</section>
@@ -765,10 +765,14 @@ Done.</programlisting>
 			<title>Oracle</title>
 			<para>
 				For Oracle the <literal>DBMS_OUTPUT</literal> package is supported. Support for this
-				package can to be turned on manually with the <xref linkend="command-enableout"/> command
-				or by default in the <link linkend="options-enable-out">system preferences</link>. If
-				this support is not turned on, the messages will not be displayed. This is the same
-				as using the <literal>SET SERVEROUTPUT ON</literal> command in SQL*Plus
+				package can be turned on with the <xref linkend="command-enableout"/> command.
+				If this support is not turned on, the messages will not be displayed. This is the same
+				as using the <literal>SET SERVEROUTPUT ON</literal> command in SQL*Plus.
+			</para>
+			<para>
+				If you want to turn on support for <literal>DBMS_OUTPUT</literal> automatically when 
+				connecting to an Oracle database, you can put the <literal>ENABLEOUT</literal> command
+				into the <link linkend="profile-connect-scripts">pre-connect</link> script.
 			</para>
 			<para>
 				Any message "printed" with <literal>DBMS_OUTPUT.put_line()</literal> will

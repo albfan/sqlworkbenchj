@@ -667,15 +667,17 @@ v_data=id1,id2</programlisting>
 				an Oracle database. On other systems this command does nothing. After
 				the <literal>DBMS_OUTPUT</literal> package is enabled, any message written with
 				dbms_output.put_line() are displayed in the message pane after
-				executing a SQL statement. It is equivalent to calling the
-				dbms_output.enable() procedure.
-      </para>
-
-      <para>
-				The <literal>DBMS_OUTPUT</literal> package can be enabled automatically when a
-				connection is established. See <xref linkend="options-enable-out"/>
+				executing a SQL statement. It is equivalent to calling the dbms_output.enable() procedure.
       </para>
 			
+			<para>
+				You can control the buffer size of the <literal>DBMS_OUTPUT</literal> package by passing the 
+				desired buffer size as a parameter to the <literal>ENABLEOUT</literal> command:
+			</para>
+			
+			<programlisting>
+ENABLEOUT 32000;</programlisting>
+
 			<note><para>
 				Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with 
 				the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal> 
@@ -692,11 +694,6 @@ v_data=id1,id2</programlisting>
       <para>
 				This disables the <literal>DBMS_OUTPUT</literal> package for an Oracle database.
 				This is equivalent to calling dbms_output.disable() procedure.
-      </para>
-			
-      <para>
-				The <literal>DBMS_OUTPUT</literal> package can be disabled by default.
-				See <xref linkend="options-enable-out"/>
       </para>
 			
     </section>
