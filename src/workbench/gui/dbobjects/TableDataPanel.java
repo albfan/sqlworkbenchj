@@ -57,6 +57,7 @@ import workbench.util.WbThread;
 import workbench.interfaces.JobErrorHandler;
 import java.awt.Cursor;
 import java.awt.EventQueue;
+import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collections;
 import workbench.gui.MainWindow;
@@ -94,9 +95,10 @@ public class TableDataPanel
 	private TableIdentifier table;
 	private ImageIcon loadingIcon;
 	private Image loadingImage;
-	private Object retrieveLock = new Object();
 	protected StopAction cancelRetrieve;
 	private List<DbExecutionListener> execListener;
+	private Savepoint currentSavepoint;
+	private Statement rowCountRetrieveStmt = null;
 
 	public TableDataPanel() 
 		throws Exception
@@ -279,8 +281,20 @@ public class TableDataPanel
 		t.start();
 	}
 	
-	private Statement rowCountRetrieveStmt = null;
-	
+	private void setSavepoint()
+	{
+		if (dbConnection.getDbSettings().useSavePointForDML() && !this.isOwnTransaction())
+		{
+			try
+			{
+				this.currentSavepoint = this.dbConnection.setSavepoint();
+			}
+			catch (SQLException e)
+			{
+				this.currentSavepoint = null;
+			}
+		}
+	}
 	public long showRowCount()
 	{
 		if (this.dbConnection == null) return -1;
@@ -298,12 +312,12 @@ public class TableDataPanel
 		long rowCount = 0;
 		ResultSet rs = null;
 
-		this.retrieveRunning = true;
 		boolean error = false;
 		
 		try
 		{
-			fireDbExecStart();
+			setSavepoint();
+			retrieveStart();
 			rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountCancel"));
 			
 			rowCountRetrieveStmt = this.dbConnection.createStatementForQuery();
@@ -337,7 +351,6 @@ public class TableDataPanel
 		{
 			SqlUtil.closeAll(rs, rowCountRetrieveStmt);
 			this.rowCountCancel = false;
-			this.retrieveRunning = false;
 			this.dataDisplay.setStatusMessage("");
 			this.clearLoadingImage();
 			this.reloadAction.setEnabled(true);
@@ -350,7 +363,7 @@ public class TableDataPanel
 			{
 				commitRetrieveIfNeeded();
 			}
-			fireDbExecEnd();
+			retrieveEnd();
 			rowCountRetrieveStmt = null;		
 		}
 		return rowCount;
@@ -449,18 +462,12 @@ public class TableDataPanel
 	protected void retrieveStart()
 	{
 		fireDbExecStart();
-		synchronized (this.retrieveLock)
-		{
-			this.retrieveRunning = true;
-		}
+		this.retrieveRunning = true;
 	}
 
 	private void retrieveEnd()
 	{
-		synchronized (this.retrieveLock)
-		{
-			this.retrieveRunning = false;
-		}
+		this.retrieveRunning = false;
 		fireDbExecEnd();
 	}
 
@@ -468,10 +475,7 @@ public class TableDataPanel
 	{
 		this.reloadAction.setEnabled(false);
 		fireDbExecStart();
-		synchronized (this.retrieveLock)
-		{
-			this.updateRunning = true;
-		}
+		this.updateRunning = true;
 	}
 
 	protected void dbUpdateEnd()
@@ -482,20 +486,14 @@ public class TableDataPanel
 		}
 		finally
 		{
-			synchronized (this.retrieveLock)
-			{
-				this.updateRunning = false;
-			}
+			this.updateRunning = false;
 			fireDbExecEnd();
 		}
 	}
 
 	public boolean isRetrieving()
 	{
-		synchronized (this.retrieveLock)
-		{
-			return this.retrieveRunning || this.updateRunning;
-		}
+		return this.retrieveRunning || this.updateRunning;
 	}
 
 	private boolean isOwnTransaction()
@@ -509,6 +507,11 @@ public class TableDataPanel
 		{
 			try { this.dbConnection.rollback(); } catch (Throwable th) {}
 		}
+		else if (this.currentSavepoint != null)
+		{
+			this.dbConnection.rollback(this.currentSavepoint);
+			this.currentSavepoint = null;
+		}
 	}
 	
 	private void commitRetrieveIfNeeded()
@@ -519,6 +522,11 @@ public class TableDataPanel
 			{
 				try { this.dbConnection.commit(); } catch (Throwable th) {}
 			}
+		}
+		else if (this.currentSavepoint != null)
+		{
+			this.dbConnection.releaseSavepoint(this.currentSavepoint);
+			this.currentSavepoint = null;
 		}
 	}
 		
@@ -538,6 +546,8 @@ public class TableDataPanel
 		try
 		{
 			dataDisplay.setStatusMessage(ResourceMgr.getString("LblLoadingProgress"));
+			
+			setSavepoint();
 			
 			error = !dataDisplay.runQuery(sql, respectMaxRows);
 			
@@ -588,11 +598,11 @@ public class TableDataPanel
 			WbSwingUtilities.showDefaultCursor(this);
 			if (error) 
 			{
-				commitRetrieveIfNeeded();
+				rollbackIfNeeded();
 			}
 			else
 			{
-				rollbackIfNeeded();
+				commitRetrieveIfNeeded();
 			}
 		}
 		
@@ -793,13 +803,13 @@ public class TableDataPanel
 		}
 	}
 
-	public void addDbExecutionListener(DbExecutionListener l)
+	public synchronized void addDbExecutionListener(DbExecutionListener l)
 	{
 		if (this.execListener == null) this.execListener = Collections.synchronizedList(new ArrayList<DbExecutionListener>());
 		this.execListener.add(l);
 	}
 
-	public void removeDbExecutionListener(DbExecutionListener l)
+	public synchronized void removeDbExecutionListener(DbExecutionListener l)
 	{
 		if (this.execListener == null) return;
 		this.execListener.remove(l);

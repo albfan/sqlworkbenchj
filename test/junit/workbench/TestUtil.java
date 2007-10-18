@@ -147,6 +147,7 @@ public class TestUtil
 		prof.setName(dbName);
 		ConnectionMgr.getInstance().addProfile(prof);
 		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, dbName);
+		dropAll(con, false);
 		return con;
 	}
 	
@@ -160,23 +161,47 @@ public class TestUtil
 		throws SQLException, ClassNotFoundException
 	{
 		ArgumentParser parser = WbManager.createArgumentParser();
-		//parser.parse("-url='jdbc:hsqldb:mem:" + db + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver");
 		parser.parse("-url='jdbc:h2:mem:" + db + "' -user=sa -driver=org.h2.Driver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 		prof.setName(db);
 		ConnectionMgr.getInstance().addProfile(prof);
 		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, db);
+		dropAll(con, true);
 		return con;
 	}
 
+	private void dropAll(WbConnection con, boolean isH2)
+	{
+		Statement stmt = null;
+		try
+		{
+			stmt = con.createStatement();
+			if (isH2)
+			{
+				stmt.executeUpdate("DROP ALL OBJECTS");
+			}
+			else
+			{
+				stmt.executeUpdate("DROP SCHEMA PUBLIC CASCADE");
+			}
+			con.commit();
+		}
+		catch (Exception e)
+		{
+			System.out.println("Could not drop all objects");
+		}
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
+		}
+	}
+	
 	public WbConnection getConnection(File db)
 		throws SQLException, ClassNotFoundException
 	{
 		ArgumentParser parser = WbManager.createArgumentParser();
-		//parser.parse("-url='jdbc:hsqldb:" + db.getAbsolutePath() + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver");
 		parser.parse("-url='jdbc:h2:" + db.getAbsolutePath() + "' -user=sa -driver=org.h2.Driver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
-//		prof.setPreDisconnectScript("SHUTDOWN IMMEDIATELY");
 		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, "WbUnitTest");
 		return con;
 	}

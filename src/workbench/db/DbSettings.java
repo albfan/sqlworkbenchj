@@ -123,7 +123,7 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".import.usesavepoint", false);
 	}
 
-	public boolean useSavePointForAll()
+	public boolean useSavePointForDML()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".sql.usesavepoint", false);
 	}
@@ -414,6 +414,11 @@ public class DbSettings
 	
 	public boolean needsExactClobLength()
 	{
-			return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".exactcloblength", false);
+		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".exactcloblength", false);
+	}
+	
+	public boolean getFormatViewSource()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".source.view.doformat", false);
 	}
 }

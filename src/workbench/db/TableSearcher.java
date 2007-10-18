@@ -13,19 +13,20 @@ package workbench.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import workbench.WbManager;
 import workbench.interfaces.TableSearchDisplay;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
- *
- * @author  kellererth
+ * @author  support@sql-workbench.net
  */
 public class TableSearcher
 {
@@ -39,7 +40,7 @@ public class TableSearcher
 	private Statement query = null;
 	private Thread searchThread;
 	private int maxRows = 0;
-
+	
 	public TableSearcher()
 	{
 	}
@@ -120,15 +121,31 @@ public class TableSearcher
 	private void searchTable(TableIdentifier table)
 	{
 		ResultSet rs = null;
+		Savepoint sp = null;
+		boolean useSavepoint = connection.getDbSettings().useSavePointForDML();
+		
 		try
 		{
 			String sql = this.buildSqlForTable(table);
 			if (sql == null) return;
 			if (this.display != null) this.display.setCurrentTable(table.getTableExpression(), sql);
 
+			if (!connection.getAutoCommit() && useSavepoint)
+			{
+				try
+				{
+					sp = connection.setSavepoint();
+				}
+				catch (SQLException e)
+				{
+					LogMgr.logWarning("TableSearcher.searchTable()", "Could not create savepoint", e);
+					sp = null;
+					useSavepoint = false;
+				}
+			}
 			this.query = this.connection.createStatementForQuery();
 			this.query.setMaxRows(this.maxRows);
-			//LogMgr.logInfo("TableSearcher", "Using SQL:\n" + sql);
+
 			rs = this.query.executeQuery(sql);
 			while (rs != null && rs.next())
 			{
@@ -138,6 +155,11 @@ public class TableSearcher
 				}
 				if (this.display != null)this.display.addResultRow(table, rs);
 			}
+			if (sp != null)
+			{
+				connection.releaseSavepoint(sp);
+				sp = null;
+			}
 		}
 		catch (OutOfMemoryError mem)
 		{
@@ -146,11 +168,20 @@ public class TableSearcher
 		catch (Exception e)
 		{
 			LogMgr.logError("TableSearcher.searchTable()", "Error retrieving data for " + table.getTableExpression(), e);
+			if (this.display != null) this.display.error(ExceptionUtil.getDisplay(e));
+			if (sp != null)
+			{
+				connection.rollback(sp);
+			}
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, query);
 			this.query = null;
+			if (sp != null)
+			{
+				connection.releaseSavepoint(sp);
+			}			
 		}
 	}
 

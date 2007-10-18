@@ -21,6 +21,7 @@ import workbench.db.TableIdentifier;
 public interface TableSearchDisplay
 {
 	void setCurrentTable(String aTablename, String aStatement);
+	void error(String msg);
 	void addResultRow(TableIdentifier table, ResultSet aResult);
 	void setStatusText(String aStatustext);
 	void searchStarted();

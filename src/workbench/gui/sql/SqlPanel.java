@@ -2236,9 +2236,13 @@ public class SqlPanel
 		boolean shouldRestoreSelection = Settings.getInstance().getBoolProperty("workbench.gui.sql.restoreselection", true);
 		boolean macroRun = false;
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		boolean replaceNL = !nl.equals("\n");
 		Pattern fixNLPattern = null;
-		if (replaceNL) fixNLPattern = Pattern.compile("\n");
+		// do we need to convert the \n used in the editor
+		// before sending the SQL to the DBMS?
+		if (!nl.equals("\n")) 
+		{
+			fixNLPattern = Pattern.compile("\n");
+		}
 		
 		this.checkPrepared = Settings.getInstance().getCheckPreparedStatements();
 		this.executeAllStatements = false;
@@ -2388,7 +2392,7 @@ public class SqlPanel
 			for (int i=startIndex; i < endIndex; i++)
 			{
 				currentSql = scriptParser.getCommand(i);
-				if (replaceNL)
+				if (fixNLPattern != null)
 				{
 					currentSql = fixNLPattern.matcher(currentSql).replaceAll(nl);
 				}

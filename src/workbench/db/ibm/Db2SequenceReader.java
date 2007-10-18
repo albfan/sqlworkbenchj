@@ -11,7 +11,6 @@
  */
 package workbench.db.ibm;
 
-import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;

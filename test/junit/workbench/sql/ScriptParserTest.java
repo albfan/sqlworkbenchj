@@ -598,12 +598,16 @@ public class ScriptParserTest
 	
 	public void testUnicodeComments()
 	{
-		String sql = "/* \uD8D5\uD8D7\uD8D9 */\nINSERT INTO something;\n-- \u4E2D\u6587\u6CE8 \nSELECT * FROM test;";
+		String sql = "-- \u00e4\u00b8\u00ad\u00e6\u2013\u2021\u00e6\u00b3\u00a8\u00e9\u2021\u0160\n" +
+									"select * from test;\n"+
+									"-- \u00e4\u00b8\u00ad\u00e6\u2013\u2021\u00e6\u00b3\u00a8\u00e9\u2021\u0160\n"+
+									"select * from test2;\n";
+		//String sql = "/* \uD8D5\uD8D7\uD8D9 */\nINSERT INTO something;\n-- \u4E2D\u6587\u6CE8 \nSELECT * FROM test;";
     ScriptParser parser = new ScriptParser(sql);
 
 		int count = parser.getSize();
 		assertEquals("Wrong statement count", count, 2);
-		int pos = sql.indexOf("SELECT") + "SELECT".length();
+		int pos = sql.indexOf("from test2");
 		int index = parser.getCommandIndexAtCursorPos(pos);
 		assertEquals(1, index);
 		String cmd = parser.getCommand(index);

@@ -12,7 +12,7 @@
 package workbench.sql.preparedstatement;
 
 import java.sql.Statement;
-import junit.framework.*;
+import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
@@ -31,12 +31,13 @@ public class PreparedStatementPoolTest extends TestCase
 
 	public void testPool()
 	{
-		TestUtil util = new TestUtil(getClass().getName()+"_testPool");
+		TestUtil util = new TestUtil("PreparedStatementPoolTest");
 		try
 		{
 			util.prepareEnvironment();
 			// Still using HSQLDB as H2 does not implement getParameterMetaData() correctly
 			WbConnection con = util.getHSQLConnection("testPool");
+			//WbConnection con = util.getConnection("testPool");
 			Statement stmt = con.createStatement();
 			stmt.executeUpdate("CREATE TABLE prep_test (nr integer, name varchar(100))");
 			PreparedStatementPool pool = new PreparedStatementPool(con);

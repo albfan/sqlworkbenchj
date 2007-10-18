@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import workbench.resource.Settings;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.util.CharSequenceReader;
 import workbench.util.StringUtil;
@@ -136,6 +137,11 @@ public class SqlFormatter
 	private Set<String> dataTypes = Collections.emptySet();
 	private int selectColumnsPerLine = 1;
 	private static final String NL = "\n";
+
+	public SqlFormatter(CharSequence aScript)
+	{
+		this(aScript, 0, Settings.getInstance().getFormatterMaxSubselectLength());
+	}
 	
 	public SqlFormatter(CharSequence aScript, int maxSubselectLength)
 	{

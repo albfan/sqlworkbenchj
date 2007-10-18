@@ -10,6 +10,10 @@
  */
 package workbench.gui;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import javax.swing.JMenuItem;
 import junit.framework.TestCase;
 import org.netbeans.jemmy.QueueTool;
 import org.netbeans.jemmy.operators.JButtonOperator;
@@ -18,6 +22,8 @@ import org.netbeans.jemmy.operators.JComponentOperator;
 import org.netbeans.jemmy.operators.JDialogOperator;
 import org.netbeans.jemmy.operators.JFrameOperator;
 import org.netbeans.jemmy.operators.JMenuBarOperator;
+import org.netbeans.jemmy.operators.JMenuItemOperator;
+import org.netbeans.jemmy.operators.JMenuOperator;
 import org.netbeans.jemmy.operators.JTextFieldOperator;
 import workbench.gui.sql.EditorPanel;
 
@@ -48,6 +54,86 @@ public class EditorTest
 		}
 	}
 
+	private void commentText()
+	{
+		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
+		NamedComponentChooser chooser = new NamedComponentChooser();
+		chooser.setName("sqleditor1");
+		JComponentOperator editorComp = new JComponentOperator(mainWindow, chooser);
+		EditorPanel editor = (EditorPanel)editorComp.getSource();
+
+		editor.setText("select nr, firstname, lastname\nfrom person;");
+		editor.setCaretPosition(0);
+		editor.selectNone();
+		
+		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
+		JMenuOperator editMenu = new JMenuOperator(mainMenu.getMenu(1));
+		JMenuItem commentItem = (JMenuItem)editMenu.getMenuComponent(17);
+		JMenuItem uncommentItem = (JMenuItem)editMenu.getMenuComponent(18);
+		
+		JMenuItemOperator comment = new JMenuItemOperator(commentItem);
+		JMenuItemOperator unComment = new JMenuItemOperator(uncommentItem);
+		
+		assertFalse(commentItem.isEnabled());		
+		assertFalse(uncommentItem.isEnabled());		
+		
+		editor.select(0, 15);
+		assertTrue(comment.isEnabled());		
+		assertTrue(uncommentItem.isEnabled());
+		
+		comment.push();
+		String text = editor.getText();
+		assertTrue(text.startsWith("--"));
+		editor.select(0, 15);
+		unComment.push();
+		text = editor.getText();
+		assertFalse(text.startsWith("--"));
+	}	
+	
+	private void copySnippet()
+	{
+		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
+		NamedComponentChooser chooser = new NamedComponentChooser();
+		chooser.setName("sqleditor1");
+		JComponentOperator editorComp = new JComponentOperator(mainWindow, chooser);
+		final EditorPanel editor = (EditorPanel)editorComp.getSource();
+
+		editor.setText("select nr, firstname, lastname\nfrom person;");
+		editor.setCaretPosition(0);
+		
+		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
+		JMenuOperator sqlMenu = new JMenuOperator(mainMenu.getMenu(4));
+		
+		QueueTool tool = new QueueTool();
+		editor.selectAll();
+		tool.waitEmpty();
+		
+		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+		
+		try
+		{
+			mainMenu.pushMenu("SQL|Copy Code Snippet", "|");
+			tool.waitEmpty();
+			
+			final String text = (String)clp.getData(DataFlavor.stringFlavor);
+//			System.out.println("clipboard: " + text);
+			assertTrue(text.startsWith("String sql = \"select nr,"));
+			
+			editor.setText(text);
+			editor.selectAll();
+			mainMenu.pushMenu("SQL|Clean Java Code", "|");
+			tool.waitEmpty();
+			String newText = editor.getText();
+//			System.out.println("new text: " + newText);
+			assertTrue(newText.startsWith("select nr,"));
+			
+		}
+		catch(Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}
+	
 	private void findText()
 	{
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
@@ -135,6 +221,8 @@ public class EditorTest
 			startApplication();
 			replaceText();
 			findText();
+			commentText();
+			copySnippet();
 			testUtil.stopApplication();
 		}
 		catch (Exception e)

@@ -70,6 +70,7 @@ import workbench.db.firebird.FirebirdConstraintReader;
 import workbench.db.h2database.H2ConstraintReader;
 import workbench.db.h2database.H2SequenceReader;
 import workbench.db.oracle.OracleSequenceReader;
+import workbench.sql.formatter.SqlFormatter;
 
 /**
  * Retrieve meta data information from the database.
@@ -864,10 +865,16 @@ public class DbMetadata
 				String line = rs.getString(1);
 				if (line != null)
 				{
-					source.append(line.replaceAll("\r", StringUtil.EMPTY_STRING));
+					source.append(line);
 				}
 			}
 			StringUtil.trimTrailingWhitespace(source);
+			if (this.dbSettings.getFormatViewSource())
+			{
+				SqlFormatter f = new SqlFormatter(source);
+				source = new StringBuilder(f.getFormattedSql());
+				
+			}
 			if (!StringUtil.endsWith(source, ';')) source.append(';');
 		}
 		catch (Exception e)

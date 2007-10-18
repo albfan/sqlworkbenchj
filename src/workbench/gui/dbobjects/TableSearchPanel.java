@@ -57,7 +57,6 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
-import workbench.gui.components.WbToolbarButton;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.ShareableDisplay;
@@ -95,6 +94,7 @@ public class TableSearchPanel
 	private EditorPanel sqlDisplay;
 	private ResultHighlightingRenderer renderer;
 	private FlatButton startButton;
+	
 	public TableSearchPanel(ShareableDisplay aTableListSource)
 	{
 		this.tableListModel = EmptyTableModel.EMPTY_MODEL;
@@ -415,6 +415,12 @@ public class TableSearchPanel
 		}
 	}
 
+	public synchronized void error(String msg)
+	{
+		this.sqlDisplay.appendLine(msg);
+		this.sqlDisplay.appendLine("\n\n");
+	}
+	
 	/**
 	 *	Call back function from the table searcher...
 	 */

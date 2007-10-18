@@ -87,8 +87,8 @@ public class WbSchemaReportTest
 	private void setupDatabase()
 		throws SQLException, ClassNotFoundException
 	{
-		util = new TestUtil("schemaDiffTest");
-		this.source = util.getConnection("source");
+		util = new TestUtil("schemaReportTest");
+		this.source = util.getConnection();
 
 		Statement stmt = null;
 		
