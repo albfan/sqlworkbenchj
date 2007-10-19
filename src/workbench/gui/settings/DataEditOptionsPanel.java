@@ -30,7 +30,6 @@ public class DataEditOptionsPanel
 	implements java.awt.event.ActionListener, workbench.interfaces.Restoreable
 {
 
-	/** Creates new form DataEditOptionsPanel */
 	public DataEditOptionsPanel()
 	{
 		initComponents();

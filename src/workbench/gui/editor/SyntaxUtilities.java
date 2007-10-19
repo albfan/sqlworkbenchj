@@ -12,7 +12,6 @@ package workbench.gui.editor;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.util.Set;
 
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
@@ -24,7 +23,7 @@ import workbench.resource.Settings;
  * subsystem.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxUtilities.java,v 1.8 2007-05-04 17:50:05 thomas Exp $
+ * @version $Id: SyntaxUtilities.java,v 1.9 2007-10-19 18:06:49 thomas Exp $
  */
 public class SyntaxUtilities
 {

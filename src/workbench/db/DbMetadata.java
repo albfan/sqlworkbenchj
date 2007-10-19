@@ -1018,9 +1018,20 @@ public class DbMetadata
 
 		if (this.dbSettings.neverQuoteObjects()) return StringUtil.trimQuotes(aName);
 
+			boolean needQuote = quoteAlways;
+		
+		// Excel does not support the standard rules for SQL identifiers
+		// Basically anything that does not contain only characters needs to 
+		// be quoted.
+		if (this.isExcel)
+		{
+			Pattern chars = Pattern.compile("[A-Za-z0-9]*");
+			Matcher m = chars.matcher(aName);
+			needQuote = !m.matches();
+		}
+		
 		try
 		{
-			boolean needQuote = quoteAlways;
 
 			if (!needQuote && !this.storesMixedCaseIdentifiers())
 			{
@@ -3175,7 +3186,7 @@ public class DbMetadata
 			String colName = quoteObjectname(column.getColumnName());
 			String type = column.getDbmsType();
 			maxColLength = Math.max(maxColLength, colName.length());
-			maxTypeLength = Math.max(maxTypeLength, type.length());
+			maxTypeLength = Math.max(maxTypeLength, (type != null ? type.length() : 0));
 		}
 		maxColLength++;
 		maxTypeLength++;
@@ -3194,11 +3205,13 @@ public class DbMetadata
 			String colName = column.getColumnName();
 			String quotedColName = quoteObjectname(colName);
 			String type = column.getDbmsType();
+			if (type == null) type = "";
 			String def = column.getDefaultValue();
-
+			int typeLength = type.length();
 			result.append("   ");
 			result.append(quotedColName);
-			if (column.isPkColumn() && (!this.isFirstSql || this.isFirstSql && !type.equals("sequence")))
+			
+			if (column.isPkColumn() && (!this.isFirstSql || this.isFirstSql && !"sequence".equals(type)))
 			{
 				pkCols.add(colName.trim());
 			}
@@ -3214,7 +3227,7 @@ public class DbMetadata
 				   (column.isNullable() && this.useNullKeyword)
 					)
 			{
-				for (int k=0; k < maxTypeLength - type.length(); k++) result.append(' ');
+				for (int k=0; k < maxTypeLength - typeLength; k++) result.append(' ');
 			}
 			
 

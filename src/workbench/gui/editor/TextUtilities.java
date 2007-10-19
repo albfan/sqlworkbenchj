@@ -11,11 +11,12 @@ package workbench.gui.editor;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import workbench.resource.Settings;
 
 /**
  * Class with several utility functions used by the text area component.
  * @author Slava Pestov
- * @version $Id: TextUtilities.java,v 1.5 2006-11-09 23:05:25 thomas Exp $
+ * @version $Id: TextUtilities.java,v 1.6 2007-10-19 18:06:50 thomas Exp $
  */
 public class TextUtilities
 {
@@ -23,6 +24,7 @@ public class TextUtilities
 	 * Returns the offset of the bracket matching the one at the
 	 * specified offset of the document, or -1 if the bracket is
 	 * unmatched (or if the character is not a bracket).
+	 * 
 	 * @param doc The document
 	 * @param offset The offset
 	 * @exception BadLocationException If an out-of-bounds access
@@ -31,21 +33,40 @@ public class TextUtilities
 	public static int findMatchingBracket(Document doc, int offset)
 		throws BadLocationException
 	{
-		if(doc.getLength() == 0)
-			return -1;
+		if(doc.getLength() == 0) return -1;
+		
 		char c = doc.getText(offset,1).charAt(0);
-		char cprime; // c` - corresponding character
-		boolean direction; // true = back, false = forward
+		char cprime; // corresponding character
+		boolean backwards; // true = back, false = forward
 
-		switch(c)
+		switch (c)
 		{
-		case '(': cprime = ')'; direction = false; break;
-		case ')': cprime = '('; direction = true; break;
-		case '[': cprime = ']'; direction = false; break;
-		case ']': cprime = '['; direction = true; break;
-		case '{': cprime = '}'; direction = false; break;
-		case '}': cprime = '{'; direction = true; break;
-		default: return -1;
+			case '(':
+				cprime = ')';
+				backwards = false;
+				break;
+			case ')':
+				cprime = '(';
+				backwards = true;
+				break;
+			case '[':
+				cprime = ']';
+				backwards = false;
+				break;
+			case ']':
+				cprime = '[';
+				backwards = true;
+				break;
+			case '{':
+				cprime = '}';
+				backwards = false;
+				break;
+			case '}':
+				cprime = '{';
+				backwards = true;
+				break;
+			default:
+				return -1;
 		}
 
 		int count;
@@ -54,7 +75,7 @@ public class TextUtilities
 		// for the reader.
 
 		// Go back or forward
-		if(direction)
+		if (backwards)
 		{
 			// Count is 1 initially because we have already
 			// `found' one closing bracket
@@ -131,11 +152,11 @@ public class TextUtilities
 	 * @param line The text
 	 * @param pos The position
 	 */
-	public static int findWordStart(String line, int pos, String noWordSep)
+	public static int findWordStart(String line, int pos)
 	{
 		char ch = line.charAt(pos - 1);
 
-		if(noWordSep == null) noWordSep = SyntaxDocument.DEFAULT_NO_WORD_SEP;
+		String noWordSep = Settings.getInstance().getEditorNoWordSep();
 
 		boolean selectNoLetter = (!Character.isLetterOrDigit(ch) 	&& noWordSep.indexOf(ch) == -1);
 
@@ -158,11 +179,11 @@ public class TextUtilities
 	 * @param line The text
 	 * @param pos The position
 	 */
-	public static int findWordEnd(String line, int pos, String noWordSep)
+	public static int findWordEnd(String line, int pos)
 	{
 		char ch = line.charAt(pos);
 
-		if(noWordSep == null) noWordSep = SyntaxDocument.DEFAULT_NO_WORD_SEP;
+		String noWordSep = Settings.getInstance().getEditorNoWordSep();
 		boolean selectNoLetter = (!Character.isLetterOrDigit(ch) && noWordSep.indexOf(ch) == -1);
 
 		int wordEnd = line.length();

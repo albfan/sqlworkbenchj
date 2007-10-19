@@ -21,6 +21,7 @@ import java.util.Iterator;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.text.BadLocationException;
+import workbench.resource.Settings;
 
 /**
  * An input handler converts the user's key strokes into concrete actions.
@@ -31,7 +32,7 @@ import javax.swing.text.BadLocationException;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.25 2007-03-21 22:05:47 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.26 2007-10-19 18:06:50 thomas Exp $
  * @see DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -542,8 +543,7 @@ public abstract class InputHandler extends KeyAdapter
 			}
 			else
 			{
-				String noWordSep = (String)textArea.getDocument().getProperty("noWordSep");
-				caret = TextUtilities.findWordStart(lineText,caret,noWordSep);
+				caret = TextUtilities.findWordStart(lineText, caret);
 			}
 
 			try
@@ -621,8 +621,7 @@ public abstract class InputHandler extends KeyAdapter
 			}
 			else
 			{
-				String noWordSep = (String)textArea.getDocument().getProperty("noWordSep");
-				caret = TextUtilities.findWordEnd(lineText,caret,noWordSep);
+				caret = TextUtilities.findWordEnd(lineText, caret);
 			}
 
 			try
@@ -945,8 +944,7 @@ public abstract class InputHandler extends KeyAdapter
 			}
 			else
 			{
-				String noWordSep = (String)textArea.getDocument().getProperty("noWordSep");
-				caret = TextUtilities.findWordEnd(lineText,caret,noWordSep);
+				caret = TextUtilities.findWordEnd(lineText,caret);
 			}
 
 			if(select)
@@ -1090,8 +1088,7 @@ public abstract class InputHandler extends KeyAdapter
 			}
 			else
 			{
-				String noWordSep = (String)textArea.getDocument().getProperty("noWordSep");
-				caret = TextUtilities.findWordStart(lineText,caret,noWordSep);
+				caret = TextUtilities.findWordStart(lineText, caret);
 			}
 
 			if(select)

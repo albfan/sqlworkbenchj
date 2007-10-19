@@ -1923,6 +1923,16 @@ public class Settings
 		this.setProperty(PROPERTY_EDITOR_TAB_WIDTH, aWidth);
 	}
 
+	public String getEditorNoWordSep()
+	{
+		return getProperty("workbench.editor.nowordsep", "");
+	}
+	
+	public void setEditorNoWordSep(String noSep)
+	{
+		setProperty("workbench.editor.nowordsep", noSep);
+	}
+		
 	public ProfileKey getLastConnection(String key)
 	{
 		if (key == null)

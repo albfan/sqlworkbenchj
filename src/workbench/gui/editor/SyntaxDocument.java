@@ -53,11 +53,8 @@ public class SyntaxDocument
 		return evt;
 	}
 	
-	public static final String DEFAULT_NO_WORD_SEP = "";
-	
 	protected void initDefaultProperties()
 	{
-		this.putProperty("noWordSep", DEFAULT_NO_WORD_SEP);
 		this.putProperty("filterNewlines", Boolean.FALSE);
 		this.putProperty(PlainDocument.tabSizeAttribute,new Integer(Settings.getInstance().getEditorTabWidth()));
 	}

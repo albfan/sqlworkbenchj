@@ -13,6 +13,7 @@ package workbench.gui;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.event.KeyEvent;
 import javax.swing.JMenuItem;
 import junit.framework.TestCase;
 import org.netbeans.jemmy.QueueTool;
@@ -26,6 +27,7 @@ import org.netbeans.jemmy.operators.JMenuItemOperator;
 import org.netbeans.jemmy.operators.JMenuOperator;
 import org.netbeans.jemmy.operators.JTextFieldOperator;
 import workbench.gui.sql.EditorPanel;
+import workbench.resource.Settings;
 
 /**
  * @author support@sql-workbench.net
@@ -191,6 +193,36 @@ public class EditorTest
 		assertEquals("select nr, firstname, lastname from person;", editor.getText());
 	}
 
+	private void checkWordSep()
+	{
+		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
+		NamedComponentChooser chooser = new NamedComponentChooser();
+		chooser.setName("sqleditor1");
+		JComponentOperator editorComp = new JComponentOperator(mainWindow, chooser);
+		EditorPanel editor = (EditorPanel)editorComp.getSource();
+
+		Settings.getInstance().setEditorNoWordSep("");
+		editor.setText("my_person;");
+		editor.setCaretPosition(0);
+		
+		QueueTool tool = new QueueTool();
+		tool.waitEmpty();
+		
+		editorComp.pushKey(KeyEvent.VK_RIGHT, KeyEvent.CTRL_MASK);
+		tool.waitEmpty();
+		
+		int pos = editor.getCaretPosition();
+		assertEquals("Wrong word jump", 2, pos);
+
+		Settings.getInstance().setEditorNoWordSep("_");
+		editor.setCaretPosition(0);
+		editorComp.pushKey(KeyEvent.VK_RIGHT, KeyEvent.CTRL_MASK);
+		tool.waitEmpty();
+		
+		pos = editor.getCaretPosition();
+		assertEquals("Wrong word jump", 9, pos);
+	}
+	
 	private void setTextField(JDialogOperator dialog, String name, String newText)
 	{
 		NamedComponentChooser chooser = new NamedComponentChooser();
@@ -214,7 +246,7 @@ public class EditorTest
 		tool.waitEmpty();
 	}
 
-	public void testWindow()
+	public void testEditor()
 	{
 		try
 		{
@@ -223,6 +255,7 @@ public class EditorTest
 			findText();
 			commentText();
 			copySnippet();
+			checkWordSep();
 			testUtil.stopApplication();
 		}
 		catch (Exception e)

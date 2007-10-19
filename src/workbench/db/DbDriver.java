@@ -201,7 +201,7 @@ public class DbDriver
 		
 		try
 		{
-			if (this.classLoader == null)
+			if (this.classLoader == null && this.libraryList != null)
 			{
 				URL[] url = new URL[libraryList.size()];
 				int index = 0;

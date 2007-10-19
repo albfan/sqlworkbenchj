@@ -101,7 +101,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.80 2007-10-14 13:01:36 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.81 2007-10-19 18:06:50 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -2591,8 +2591,8 @@ public class JEditTextArea
 			String lineText = getLineText(line);
 			char ch = lineText.charAt(Math.max(0,offset - 1));
 
-			String noWordSep = (String)document.getProperty("noWordSep");
-			if(noWordSep == null)	noWordSep = "";
+			String noWordSep = Settings.getInstance().getEditorNoWordSep();
+			if (noWordSep == null)	noWordSep = "";
 
 			// If the user clicked on a non-letter char,
 			// we select the surrounding non-letters
