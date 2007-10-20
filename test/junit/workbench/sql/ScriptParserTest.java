@@ -595,6 +595,18 @@ public class ScriptParserTest
 			fail(e.getMessage());
 		}
 	}
+
+	public void testAlternateLineComment()
+	{
+		String sql = "# this is a non-standard comment;\n" +
+									"select * from test;\n"+
+									"# another non-standard comment;\n"+
+									"select * from test2;\n";
+    ScriptParser parser = new ScriptParser(sql);
+		parser.setLineComment("#");
+		int count = parser.getSize();
+		assertEquals("Wrong statement count", count, 2);
+	}
 	
 	public void testUnicodeComments()
 	{
@@ -611,8 +623,7 @@ public class ScriptParserTest
 		int index = parser.getCommandIndexAtCursorPos(pos);
 		assertEquals(1, index);
 		String cmd = parser.getCommand(index);
-		System.out.println("cmd=" + cmd);
-		
+//		System.out.println("cmd=" + cmd);
 	}
 	
 }

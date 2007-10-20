@@ -479,6 +479,7 @@ public class EditorOptionsPanel
 
     noWordSep.setHorizontalAlignment(javax.swing.JTextField.LEFT);
     noWordSep.setMinimumSize(new java.awt.Dimension(72, 20));
+    noWordSep.setName("nowordsep"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 16;

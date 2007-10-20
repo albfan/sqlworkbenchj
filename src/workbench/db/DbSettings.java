@@ -156,6 +156,11 @@ public class DbSettings
 		return dbs.contains(this.getDbId());
 	}
 
+	public String getLineComment()
+	{
+		return Settings.getInstance().getProperty("workbench.db." + getDbId() + ".linecomment", "--");
+	}
+	
 	public boolean supportsQueryTimeout()
 	{
 		boolean result = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".supportquerytimeout", true);

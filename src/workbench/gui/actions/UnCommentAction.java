@@ -19,7 +19,6 @@ import javax.swing.KeyStroke;
 import workbench.gui.editor.TextCommenter;
 import workbench.gui.sql.EditorPanel;
 
-import workbench.interfaces.TextSelectionListener;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -27,7 +26,6 @@ import workbench.resource.ResourceMgr;
  */
 public class UnCommentAction 
 	extends WbAction
-	implements TextSelectionListener
 {
 	private EditorPanel client;
 
@@ -37,15 +35,8 @@ public class UnCommentAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtUnCommentSelection",KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-		this.setEnabled(false);
-		this.client.addSelectionListener(this);
 	}
 
-	public void selectionChanged(int newStart, int newEnd)
-	{
-		this.setEnabled(newEnd > newStart);
-	}
-	
 	public void executeAction(ActionEvent e)
 	{
 		TextCommenter commenter = new TextCommenter(client);

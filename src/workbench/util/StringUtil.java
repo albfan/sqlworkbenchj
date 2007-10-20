@@ -87,6 +87,25 @@ public class StringUtil
 		return s.charAt(len - 1) == c;
 	}
 		
+	public static boolean lineStartsWith(CharSequence text, int lineStartPos, String compareTo)
+	{
+		if (compareTo == null) return false;
+		int textLength = text.length();
+		
+		int len = compareTo.length();
+		for (int i=0; i < len; i++)
+		{
+			char thisChar = 0;
+			char otherChar = compareTo.charAt(i);
+			if (lineStartPos + i < textLength)
+			{
+				thisChar = text.charAt(lineStartPos + i);
+			}
+			if (thisChar != otherChar) return false;
+		}
+		return true;
+	}
+	
 	/**
 	 * Returns the length of the line without any line ending characters
 	 */

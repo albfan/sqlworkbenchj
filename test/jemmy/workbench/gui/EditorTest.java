@@ -22,6 +22,7 @@ import org.netbeans.jemmy.operators.JCheckBoxOperator;
 import org.netbeans.jemmy.operators.JComponentOperator;
 import org.netbeans.jemmy.operators.JDialogOperator;
 import org.netbeans.jemmy.operators.JFrameOperator;
+import org.netbeans.jemmy.operators.JListOperator;
 import org.netbeans.jemmy.operators.JMenuBarOperator;
 import org.netbeans.jemmy.operators.JMenuItemOperator;
 import org.netbeans.jemmy.operators.JMenuOperator;
@@ -66,7 +67,7 @@ public class EditorTest
 
 		editor.setText("select nr, firstname, lastname\nfrom person;");
 		editor.setCaretPosition(0);
-		editor.selectNone();
+//		editor.selectNone();
 		
 		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
 		JMenuOperator editMenu = new JMenuOperator(mainMenu.getMenu(1));
@@ -76,20 +77,32 @@ public class EditorTest
 		JMenuItemOperator comment = new JMenuItemOperator(commentItem);
 		JMenuItemOperator unComment = new JMenuItemOperator(uncommentItem);
 		
-		assertFalse(commentItem.isEnabled());		
-		assertFalse(uncommentItem.isEnabled());		
+		QueueTool tool = new QueueTool();
 		
-		editor.select(0, 15);
-		assertTrue(comment.isEnabled());		
-		assertTrue(uncommentItem.isEnabled());
-		
+		//editor.select(0, 15);
 		comment.push();
+		tool.waitEmpty();		
+		
 		String text = editor.getText();
 		assertTrue(text.startsWith("--"));
-		editor.select(0, 15);
-		unComment.push();
+		
+		//editor.select(0, 15);
+		
+		// test toggle
+		comment.push();
+		tool.waitEmpty();		
+		
 		text = editor.getText();
 		assertFalse(text.startsWith("--"));
+		
+		editor.setText("-- first line\n-- second line\n");
+		editor.selectAll();
+		tool.waitEmpty();
+		unComment.push();
+		tool.waitEmpty();
+		text = editor.getText();
+		
+		assertEquals(" first line\n second line\n", text);
 	}	
 	
 	private void copySnippet()
@@ -193,6 +206,20 @@ public class EditorTest
 		assertEquals("select nr, firstname, lastname from person;", editor.getText());
 	}
 
+	private void changeWordSep(String newSep)
+	{
+		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
+		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Tools|Options", "|");
+		JDialogOperator dialog = new JDialogOperator(mainWindow, "Settings");
+		final JListOperator pages = new JListOperator(dialog);
+
+		pages.selectItem(1); // select the editor page
+		setTextField(dialog, "nowordsep", newSep);
+		new JButtonOperator(dialog, "OK").push();
+		QueueTool tool = new QueueTool();
+		tool.waitEmpty();
+	}
+	
 	private void checkWordSep()
 	{
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
@@ -201,11 +228,14 @@ public class EditorTest
 		JComponentOperator editorComp = new JComponentOperator(mainWindow, chooser);
 		EditorPanel editor = (EditorPanel)editorComp.getSource();
 
-		Settings.getInstance().setEditorNoWordSep("");
+		QueueTool tool = new QueueTool();
+		
+		changeWordSep("");
+		assertEquals("Wrong word separator", "", Settings.getInstance().getEditorNoWordSep());
+		
 		editor.setText("my_person;");
 		editor.setCaretPosition(0);
 		
-		QueueTool tool = new QueueTool();
 		tool.waitEmpty();
 		
 		editorComp.pushKey(KeyEvent.VK_RIGHT, KeyEvent.CTRL_MASK);
@@ -214,7 +244,9 @@ public class EditorTest
 		int pos = editor.getCaretPosition();
 		assertEquals("Wrong word jump", 2, pos);
 
-		Settings.getInstance().setEditorNoWordSep("_");
+		changeWordSep("_");
+		assertEquals("Wrong word separator", "_", Settings.getInstance().getEditorNoWordSep());
+		
 		editor.setCaretPosition(0);
 		editorComp.pushKey(KeyEvent.VK_RIGHT, KeyEvent.CTRL_MASK);
 		tool.waitEmpty();

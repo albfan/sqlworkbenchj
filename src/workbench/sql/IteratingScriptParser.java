@@ -20,6 +20,7 @@ import workbench.util.EncodingUtil;
 import workbench.util.FileMappedSequence;
 import workbench.util.SqlUtil;
 import workbench.util.StringSequence;
+import workbench.util.StringUtil;
 
 /**
  * A class to parse a script with SQL commands. Access to the commands
@@ -57,7 +58,8 @@ public class IteratingScriptParser
 	private boolean checkSingleLineCommands = true;
 	private boolean storeSqlInCommands = false;
 	private boolean returnStartingWhitespace = false;
-	private boolean checkHashComment = false;
+	//private boolean checkHashComment = false;
+	private String lineCommentString = "--";
 	
 	// These patterns cover the statements that
 	// can be used in a single line without a delimiter
@@ -135,9 +137,16 @@ public class IteratingScriptParser
 	/**
 	 * Should the parser check for MySQL hash comments? 
 	 */
-	public void setCheckForHashComments(boolean flag)
+	public void setLineCommentStart(String comment)
 	{
-		this.checkHashComment = flag;
+		if (comment == null) 
+		{
+			this.lineCommentString = "--";
+		}
+		else
+		{
+			this.lineCommentString = comment.trim();
+		}
 	}
 	
 	public void setCheckForSingleLineCommands(boolean flag)
@@ -261,7 +270,7 @@ public class IteratingScriptParser
 		
 		for (pos = this.lastPos; pos < this.scriptLength; pos++)
 		{
-			currChar = this.script.substring(pos, pos + 1).toUpperCase();
+			currChar = this.script.subSequence(pos, pos + 1).toString().toUpperCase();
 			char firstChar = currChar.charAt(0);
 			
 			// skip CR characters
@@ -310,7 +319,7 @@ public class IteratingScriptParser
 						commentOn = true;
 						//pos ++; // ignore the next character
 					}
-					else if ((startOfLine && firstChar == '#' && checkHashComment) || (firstChar == '-' && nextChar == '-'))
+					else if (startOfLine && StringUtil.lineStartsWith(this.script, pos, lineCommentString))
 					{
 						singleLineComment = true;
 						blockComment = false;
@@ -349,7 +358,7 @@ public class IteratingScriptParser
 			{
 				if (this.delimiterLength > 1 && pos + this.delimiterLength < scriptLength)
 				{
-					currChar = this.script.substring(pos, pos + this.delimiterLength).toUpperCase();
+					currChar = this.script.subSequence(pos, pos + this.delimiterLength).toString().toUpperCase();
 				}
 
 				if (!delimiterOnOwnLine && (currChar.equals(delim) || (pos == scriptLength)))
@@ -372,7 +381,7 @@ public class IteratingScriptParser
 				{
 					if (firstChar == '\n')
 					{
-						String line = this.script.substring(lastNewLineStart, pos).trim();
+						String line = this.script.subSequence(lastNewLineStart, pos).toString().trim();
 						String clean = SqlUtil.makeCleanSql(line, false, false, '\'');
 						
 						if ( (this.emptyLineIsSeparator && clean.length() == 0) ||
@@ -452,7 +461,7 @@ public class IteratingScriptParser
 		ScriptCommandDefinition c = null;
 		if (lastPos < pos && !blockComment && !quoteOn)
 		{
-			String value = this.script.substring(lastCommandEnd, scriptLength).trim();
+			String value = this.script.subSequence(lastCommandEnd, scriptLength).toString().trim();
 			if (!this.delimiter.equals(value.trim()))
 			{
 				int endpos = scriptLength;
@@ -492,7 +501,7 @@ public class IteratingScriptParser
 		if (startPos >= endPos) return null;
 		if (storeSqlInCommands)
 		{
-			value = this.script.substring(startPos, endPos);
+			value = this.script.subSequence(startPos, endPos).toString();
 		}
 		ScriptCommandDefinition c = new ScriptCommandDefinition(value, startPos, endPos);
 		

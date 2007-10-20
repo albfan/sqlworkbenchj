@@ -76,14 +76,7 @@ public class MainWindowTest
 		for (int i = 1; i < count; i++)
 		{
 			final int index = i;
-			tool.invokeAndWait(new Runnable()
-				{
-
-					public void run()
-					{
-						pages.selectItem(index);
-					}
-				});
+			pages.selectItem(index);
 			tool.waitEmpty();
 
 			String pg = pages.getSelectedValue().toString();

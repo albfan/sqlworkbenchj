@@ -51,6 +51,7 @@ import workbench.db.WbConnection;
 import workbench.gui.actions.FileSaveAction;
 import workbench.gui.editor.SearchAndReplace;
 import workbench.gui.editor.SyntaxUtilities;
+import workbench.gui.editor.TextFormatter;
 import workbench.interfaces.EncodingSelector;
 import workbench.sql.DelimiterDefinition;
 import workbench.util.EncodingUtil;
@@ -325,65 +326,8 @@ public class EditorPanel
 
 	public void reformatSql()
 	{
-		String sql = this.getSelectedStatement();
-		ScriptParser parser = new ScriptParser();
-		parser.setAlternateDelimiter(this.alternateDelimiter);
-		parser.setReturnStartingWhitespace(true);
-		parser.setCheckHashComments(this.isMySQL);
-		parser.setScript(sql);
-		
-		String delimit = parser.getDelimiterString();
-
-		int count = parser.getSize();
-		if (count < 1) return;
-
-		StringBuilder newSql = new StringBuilder(sql.length() + 100);
-
-		String end = Settings.getInstance().getInternalEditorLineEnding();
-		
-		for (int i=0; i < count; i++)
-		{
-			String command = parser.getCommand(i);
-
-			// no need to format "empty" strings
-			if (StringUtil.isEmptyString(command) || StringUtil.isWhitespace(command))
-			{
-				newSql.append(command);
-				continue;
-			}
-			
-			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getFormatterMaxSubselectLength());
-			f.setDBFunctions(dbFunctions);
-			f.setDbDataTypes(dbDatatypes);
-			int cols = Settings.getInstance().getFormatterMaxColumnsInSelect();
-			f.setMaxColumnsPerSelect(cols);
-			
-			try
-			{
-				String formattedSql = f.getFormattedSql().toString();
-				newSql.append(formattedSql);
-				if (!command.trim().endsWith(delimit))
-				{
-					newSql.append(delimit);
-				}
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("EditorPanel.reformatSql()", "Error when formatting SQL", e);
-			}
-		}
-
-		if (newSql.length() == 0) return;
-
-		if (this.isTextSelected())
-		{
-			this.setSelectedText(newSql.toString());
-		}
-		else
-		{
-			this.setText(newSql.toString());
-		}
-
+		TextFormatter f = new TextFormatter();
+		f.formatSql(this, alternateDelimiter, dbFunctions, dbDatatypes, isMySQL ? "#" : "--");
 	}
 
 	/**

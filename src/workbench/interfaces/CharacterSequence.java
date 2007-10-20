@@ -25,17 +25,9 @@ package workbench.interfaces;
  * @author support@sql-workbench.net
  */
 public interface CharacterSequence
+	extends CharSequence
 {
-	/**
-	 * return the substring define by start and end
-	 */
-	String substring(int start, int end);
-	
-	/**
-	 * return the character at the given position
-	 */
-	char charAt(int index);
-	
+
 	/**
 	 * Release any resources used by the CharacterSequence
 	 */

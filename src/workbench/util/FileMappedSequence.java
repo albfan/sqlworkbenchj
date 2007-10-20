@@ -68,6 +68,11 @@ public class FileMappedSequence
 		this.decoder = charset.newDecoder();
 	}
 
+	public int length()
+	{
+		return (int)this.fileSize;
+	}
+	
 	private void ensureWindow(int start, int end)
 	{
 		if (this.chunkStart <= start && this.chunkEnd > end) return;
@@ -132,7 +137,7 @@ public class FileMappedSequence
 		return this.chunk.charAt(indexInChunk);
 	}
 
-	public String substring(int start, int end)
+	public String subSequence(int start, int end)
 	{
 		this.ensureWindow(start, end);
 		int startInChunk = start - chunkStart; 

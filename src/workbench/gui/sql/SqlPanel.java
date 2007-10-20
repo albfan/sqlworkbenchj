@@ -2171,7 +2171,7 @@ public class SqlPanel
 		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
 		scriptParser.setSupportOracleInclude(this.dbConnection.getDbSettings().supportShortInclude());
 		scriptParser.setCheckForSingleLineCommands(this.dbConnection.getDbSettings().supportSingleLineCommands());
-		scriptParser.setCheckHashComments(this.dbConnection.getMetadata().isMySql());
+		scriptParser.setLineComment(this.dbConnection.getDbSettings().getLineComment());
 		return scriptParser;
 	}
 

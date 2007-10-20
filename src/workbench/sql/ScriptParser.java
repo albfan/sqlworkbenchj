@@ -46,7 +46,7 @@ public class ScriptParser
 	private boolean supportOracleInclude = true;
 	private boolean checkSingleLineCommands = true;
 	private boolean returnTrailingWhitesapce = false;
-	private boolean checkHashComments = false;
+	private String lineComment = "--";
 	private boolean useAlternateDelimiter = false;
 	
 	private int maxFileSize;
@@ -163,9 +163,9 @@ public class ScriptParser
 		this.emptyLineIsSeparator = flag;
 	}
 
-	public void setCheckHashComments(boolean flag)
+	public void setLineComment(String comment)
 	{
-		this.checkHashComments = flag;
+		this.lineComment = comment;
 	}
 	
 	public void setReturnStartingWhitespace(boolean flag)
@@ -431,7 +431,7 @@ public class ScriptParser
 		p.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		p.setDelimiter(useAlternateDelimiter ? this.alternateDelimiter : this.delimiter);
 		p.setReturnStartingWhitespace(this.returnTrailingWhitesapce);
-		p.setCheckForHashComments(this.checkHashComments);
+		p.setLineCommentStart(this.lineComment);
 		p.setDelimiter(useAlternateDelimiter ? this.alternateDelimiter : this.delimiter);
 
 		if (useAlternateDelimiter)
