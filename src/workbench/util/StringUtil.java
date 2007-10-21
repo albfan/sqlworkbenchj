@@ -89,7 +89,7 @@ public class StringUtil
 		
 	public static boolean lineStartsWith(CharSequence text, int lineStartPos, String compareTo)
 	{
-		if (compareTo == null) return false;
+		if (isWhitespaceOrEmpty(compareTo)) return false;
 		int textLength = text.length();
 		
 		int len = compareTo.length();

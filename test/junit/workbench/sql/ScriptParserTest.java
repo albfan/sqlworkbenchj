@@ -598,14 +598,16 @@ public class ScriptParserTest
 
 	public void testAlternateLineComment()
 	{
-		String sql = "# this is a non-standard comment;\n" +
-									"select * from test;\n"+
+		String sql =  "# this is a non-standard comment;\n" +
+									"select * from test1;\n"+
 									"# another non-standard comment;\n"+
-									"select * from test2;\n";
+									"select * from test2;\n" + 
+									"-- standard comment;\n"+
+									"select * from test3;\n";
     ScriptParser parser = new ScriptParser(sql);
-		parser.setLineComment("#");
+		parser.setAlternateLineComment("#");
 		int count = parser.getSize();
-		assertEquals("Wrong statement count", count, 2);
+		assertEquals("Wrong statement count", count, 3);
 	}
 	
 	public void testUnicodeComments()

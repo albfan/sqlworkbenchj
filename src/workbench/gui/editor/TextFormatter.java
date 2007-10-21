@@ -37,7 +37,7 @@ public class TextFormatter
 		ScriptParser parser = new ScriptParser();
 		parser.setAlternateDelimiter(alternateDelimiter);
 		parser.setReturnStartingWhitespace(true);
-		parser.setLineComment(lineComment);
+		parser.setAlternateLineComment(lineComment);
 		parser.setScript(sql);
 		
 		String delimit = parser.getDelimiterString();

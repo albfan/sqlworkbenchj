@@ -59,7 +59,7 @@ public class IteratingScriptParser
 	private boolean storeSqlInCommands = false;
 	private boolean returnStartingWhitespace = false;
 	//private boolean checkHashComment = false;
-	private String lineCommentString = "--";
+	private String alternateLineComment = "--";
 	
 	// These patterns cover the statements that
 	// can be used in a single line without a delimiter
@@ -137,16 +137,9 @@ public class IteratingScriptParser
 	/**
 	 * Should the parser check for MySQL hash comments? 
 	 */
-	public void setLineCommentStart(String comment)
+	public void setAlternateLineComment(String comment)
 	{
-		if (comment == null) 
-		{
-			this.lineCommentString = "--";
-		}
-		else
-		{
-			this.lineCommentString = comment.trim();
-		}
+		this.alternateLineComment = (comment == null ? null : comment.trim());
 	}
 	
 	public void setCheckForSingleLineCommands(boolean flag)
@@ -256,6 +249,11 @@ public class IteratingScriptParser
 		}
 		return start;
 	}
+
+	private boolean isLineComment(int pos)
+	{
+		return StringUtil.lineStartsWith(this.script, pos, "--") || StringUtil.lineStartsWith(this.script, pos, alternateLineComment);
+	}
 	
 	/**
 	 *	Parse the given SQL Script into a List of single SQL statements.
@@ -319,7 +317,7 @@ public class IteratingScriptParser
 						commentOn = true;
 						//pos ++; // ignore the next character
 					}
-					else if (startOfLine && StringUtil.lineStartsWith(this.script, pos, lineCommentString))
+					else if (startOfLine && isLineComment(pos))
 					{
 						singleLineComment = true;
 						blockComment = false;

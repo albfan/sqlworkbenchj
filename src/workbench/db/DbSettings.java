@@ -158,7 +158,7 @@ public class DbSettings
 
 	public String getLineComment()
 	{
-		return Settings.getInstance().getProperty("workbench.db." + getDbId() + ".linecomment", "--");
+		return Settings.getInstance().getProperty("workbench.db." + getDbId() + ".linecomment", null);
 	}
 	
 	public boolean supportsQueryTimeout()

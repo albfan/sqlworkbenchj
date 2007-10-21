@@ -313,6 +313,21 @@
 			</para>
 		</section>
 
+		<section id="options-tab-width">
+			<title>Additional word characters</title>
+			<para>
+				The editor recognizes character sequences that consist of letters
+				and characters only as "words". This influences the way word by word
+				jumping is done, or when selecting text using a doubleclick. 
+				Every character that is entered for this option is considered a "word" 
+				character and thus does not mark a word boundary. 
+			</para>
+			<para>
+				By putting e.g. an underscore into this field, the text <literal>MY_TABLE</literal> is 
+				recognized as a single word instead of two words (which is the default). 
+			</para>
+		</section>
+		
 	</section>
 	
 	<section id="options-data-display">
