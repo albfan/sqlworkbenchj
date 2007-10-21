@@ -313,7 +313,7 @@
 			</para>
 		</section>
 
-		<section id="options-tab-width">
+		<section id="options-noword-sep">
 			<title>Additional word characters</title>
 			<para>
 				The editor recognizes character sequences that consist of letters
