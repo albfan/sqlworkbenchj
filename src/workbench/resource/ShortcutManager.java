@@ -35,7 +35,6 @@ public class ShortcutManager
 	private String filename;
 
 	// key to the map is the action's class name,
-	// the actual object in it will be a ShortcutDefinition
 	private HashMap<String, ShortcutDefinition> keyMap;
 
 	private HashMap<String, String> actionNames;
@@ -112,7 +111,7 @@ public class ShortcutManager
 			{
 				if (this.keyDebugMap == null) this.keyDebugMap = new HashMap<KeyStroke, WbAction>(100);
 				WbAction a = this.keyDebugMap.get(key);
-				if (a != null)
+				if (a != null && !anAction.allowDuplicate())
 				{
 					LogMgr.logWarning("ShortcutManager.registerAction", "Duplicate key assignment for keyStroke " + key + " from " + clazz + ", already registered for "+ a.getClass().getName());
 				}
@@ -140,6 +139,15 @@ public class ShortcutManager
 				return action.getTooltipText();
 			}
 		}		
+		return null;
+	}
+	
+	public WbAction getActionForClass(String clazz)
+	{
+		for (WbAction a : allActions)
+		{
+			if (a.getClass().getName().equals(clazz)) return a;
+		}
 		return null;
 	}
 	

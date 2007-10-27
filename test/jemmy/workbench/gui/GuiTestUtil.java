@@ -12,9 +12,11 @@ package workbench.gui;
 
 import org.netbeans.jemmy.ClassReference;
 import org.netbeans.jemmy.JemmyProperties;
+import org.netbeans.jemmy.QueueTool;
 import org.netbeans.jemmy.TestOut;
 import workbench.TestUtil;
 import workbench.WbManager;
+import workbench.gui.sql.SqlPanel;
 
 /**
  *
@@ -23,6 +25,7 @@ import workbench.WbManager;
 public class GuiTestUtil
 	extends TestUtil
 {
+	private QueueTool tool = new QueueTool();
 
 	public GuiTestUtil(String name)
 	{
@@ -38,6 +41,38 @@ public class GuiTestUtil
 //		JemmyProperties.getCurrentTimeouts().loadDebugTimeouts();
 		TestOut out = JemmyProperties.getProperties().getOutput().createErrorOutput();
 		JemmyProperties.getProperties().setOutput(out);
+	}
+
+	public void execute(Runnable r)
+	{
+		tool.invokeAndWait(r);
+		tool.waitEmpty();
+	}
+
+
+	public void waitWhileBusy(SqlPanel panel)
+	{
+		int count = 0;
+		int sleepTime = 10;
+		while (panel.isBusy())
+		{
+			try { Thread.sleep(sleepTime); } catch (Throwable th) {}
+			count ++;
+			if (count * sleepTime > 30000) break;
+		}
+	}
+	
+	public void waitUntilConnected(SqlPanel panel)
+	{
+		int count = 0;
+		int sleepTime = 10;
+		while (!panel.isConnected())
+		{
+			//Thread.yield();
+			try { Thread.sleep(sleepTime); } catch (Throwable th) {}
+			count ++;
+			if (count * sleepTime > 5000) break;
+		}
 	}
 	
 	public void stopApplication()

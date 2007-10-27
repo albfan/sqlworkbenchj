@@ -107,6 +107,16 @@ public class DbSettings
 		return Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".import.insert", null);
 	}
 	
+	public String getRefCursorTypeName()
+	{
+		return Settings.getInstance().getProperty("workbench.db." + getDbId() + ".refcursor.typename", null);
+	}
+
+	public int getRefCursorDataType()
+	{
+		return Settings.getInstance().getIntProperty("workbench.db." + getDbId() + ".refcursor.typevalue", Integer.MIN_VALUE);
+	}
+	
 	public boolean useWbProcedureCall()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".procs.use.wbcall", false);

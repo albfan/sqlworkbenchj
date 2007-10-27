@@ -41,9 +41,8 @@ public class ConnectionInfo
 
 		this.setLayout(new GridLayout(1,1,0,0));
 		this.add(this.display);
-
+		super.setBackground(aBackground);
 		this.defaultBackground = aBackground;
-		this.display.setBackground(aBackground);
 		this.display.setEditable(false);
 		this.display.setBorder(null);
 		this.display.addMouseListener(new TextComponentMouseListener());
@@ -70,18 +69,38 @@ public class ConnectionInfo
 			}
 		}
 		
-		final Color newBackground = (bkg == null ? defaultBackground : bkg);
+		final Color newBackground = bkg;
 		
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
-				display.setBackground(newBackground);
+				setInfoColor(newBackground);
 				updateDisplay();
 			}
 		});
 	}
 
+	private void setInfoColor(Color c)
+	{
+		if (c == null)
+		{
+			this.setBackground(this.defaultBackground);
+		}
+		else
+		{
+			this.setBackground(c);
+		}
+	}
+	
+	public void setBackground(Color c)
+	{
+		super.setBackground(c);
+		if (this.display != null)
+		{
+			this.display.setBackground(c);
+		}
+	}
 	private void updateDisplay()
 	{
 		if (this.sourceConnection != null)

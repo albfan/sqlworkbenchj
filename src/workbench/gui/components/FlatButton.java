@@ -44,7 +44,7 @@ public class FlatButton
 	private void init()
 	{
 		if (WbManager.getInstance() == null) return;
-		if (WbManager.getInstance().isWindowsClassic() || !WbManager.getInstance().isWindowsLNF())
+		if (WbManager.getInstance().isWindowsClassic())
 		{
 			setFlatLook();
 		}

@@ -379,6 +379,7 @@ public class BatchRunner
 		}
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		parser.setFile(scriptFile, this.encoding);
+		parser.setAlternateLineComment(this.connection.getDbSettings().getLineComment());
 		String sql = null;
 		this.cancelExecution = false;
 

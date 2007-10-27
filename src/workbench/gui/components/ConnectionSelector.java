@@ -144,9 +144,12 @@ public class ConnectionSelector
 			{
 				public void run()
 				{
-					connectingInfo.setVisible(false);
-					connectingInfo.dispose();
-					connectingInfo = null;
+					if (connectingInfo != null)
+					{
+						connectingInfo.setVisible(false);
+						connectingInfo.dispose();
+						connectingInfo = null;
+					}
 				}
 			});
 			this.parent.repaint();

@@ -17,7 +17,6 @@ import java.io.File;
 
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 import workbench.gui.components.EncodingPanel;
 
@@ -27,6 +26,7 @@ import workbench.resource.Settings;
 import javax.swing.JComponent;
 import javax.swing.border.EmptyBorder;
 import workbench.gui.WbSwingUtilities;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -64,47 +64,6 @@ public class FileDialogUtil
 	{
 		return this.getXmlReportFilename(caller, null);
 	}
-
-//	public static void initFileChooserLabels()
-//	{
-//		// This is "borrowed" from com.sun.java.swing.plaf.windows.resources.windows
-//		Object[] labels = new Object[] { 
-//             "FileChooser.detailsViewActionLabelText", "Details" ,
-//             "FileChooser.detailsViewButtonAccessibleName", "Details" ,
-//             "FileChooser.detailsViewButtonToolTipText", "Details" ,
-//             "FileChooser.fileAttrHeaderText", "Attributes" ,
-//             "FileChooser.fileDateHeaderText", "Modified" ,
-//             "FileChooser.fileNameHeaderText", "Name" ,
-//             "FileChooser.fileNameLabelText", "File name:" ,
-//             "FileChooser.fileSizeHeaderText", "Size" ,
-//             "FileChooser.fileTypeHeaderText", "Type" ,
-//             "FileChooser.filesOfTypeLabelText", "Files of type:" ,
-//             "FileChooser.homeFolderAccessibleName", "Home" ,
-//             "FileChooser.homeFolderToolTipText", "Home" ,
-//             "FileChooser.listViewActionLabelText", "List" ,
-//             "FileChooser.listViewButtonAccessibleName", "List" ,
-//             "FileChooser.listViewButtonToolTipText", "List" ,
-//             "FileChooser.lookInLabelText", "Look in:" ,
-//             "FileChooser.newFolderAccessibleName", "New Folder" ,
-//             "FileChooser.newFolderActionLabelText", "New Folder" ,
-//             "FileChooser.newFolderToolTipText", "Create New Folder" ,
-//             "FileChooser.refreshActionLabelText", "Refresh" ,
-//             "FileChooser.saveInLabelText", "Save in:" ,
-//             "FileChooser.upFolderAccessibleName", "Up" ,
-//             "FileChooser.upFolderToolTipText", "Up One Level" ,
-//             "FileChooser.viewMenuLabelText", "View" 
-//        };
-//		
-//		UIManager.put("FileChooser.fileDescriptionText","FileDescription");
-//		UIManager.getDefaults().putDefaults(labels);
-//		UIManager.put("FileChooser.saveButtonText",ResourceMgr.getPlainString("LblSave"));
-//		UIManager.put("FileChooser.openButtonText",ResourceMgr.getPlainString("LblOpen"));
-//		UIManager.put("FileChooser.saveDialogTitleText",ResourceMgr.getPlainString("LblSave"));
-//		UIManager.put("FileChooser.openDialogTitleText",ResourceMgr.getPlainString("LblOpen"));
-//		UIManager.put("FileChooser.cancelButtonText",ResourceMgr.getPlainString("LblCancel"));
-//		UIManager.put("FileChooser.helpButtonText",ResourceMgr.getPlainString("LblHelp"));
-//		UIManager.put("FileChooser.directoryOpenButtonText",ResourceMgr.getPlainString("LblOpen"));
-//	}
 	
 	public String getXmlReportFilename(Component caller, JComponent accessory)
 	{
@@ -201,28 +160,38 @@ public class FileDialogUtil
 	{
 		return getBlobFile(caller, true);
 	}
+	
 	public static String getBlobFile(Component caller, boolean showSaveDialog)
 	{
-		Window parent = SwingUtilities.getWindowAncestor(caller);
-		String lastDir = Settings.getInstance().getLastBlobDir();
-		JFileChooser fc = new JFileChooser(lastDir);
-		int answer = JFileChooser.CANCEL_OPTION;
-		if (showSaveDialog)
+		try
 		{
-			answer = fc.showSaveDialog(parent);
+			Window parent = SwingUtilities.getWindowAncestor(caller);
+			String lastDir = Settings.getInstance().getLastBlobDir();
+			JFileChooser fc = new JFileChooser(lastDir);
+			int answer = JFileChooser.CANCEL_OPTION;
+			if (showSaveDialog)
+			{
+				answer = fc.showSaveDialog(parent);
+			}
+			else
+			{
+				answer = fc.showOpenDialog(parent);
+			}
+			String filename = null;
+			if (answer == JFileChooser.APPROVE_OPTION)
+			{
+				File fl = fc.getSelectedFile();
+				filename = fl.getAbsolutePath();
+				Settings.getInstance().setLastBlobDir(fl.getParentFile().getAbsolutePath());
+			}
+			return filename;
 		}
-		else
+		catch (Throwable e)
 		{
-			answer = fc.showOpenDialog(parent);
-		}
-		String filename = null;
-		if (answer == JFileChooser.APPROVE_OPTION)
-		{
-			File fl = fc.getSelectedFile();
-			filename = fl.getAbsolutePath();
-			Settings.getInstance().setLastBlobDir(fl.getParentFile().getAbsolutePath());
-		}
-		return filename;
+			LogMgr.logError("FileDialogUtil.getBlobFile()", "Error selecting file", e);
+			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
+			return null;
+		}			
 	}
 	
 	public String getWorkspaceFilename(Window parent, boolean toSave)
@@ -232,49 +201,58 @@ public class FileDialogUtil
 
 	public String getWorkspaceFilename(Window parent, boolean toSave, boolean replaceConfigDir)
 	{
-		String lastDir = Settings.getInstance().getLastWorkspaceDir();
-		JFileChooser fc = new JFileChooser(lastDir);
-		FileFilter wksp = ExtensionFileFilter.getWorkspaceFileFilter();
-		fc.addChoosableFileFilter(wksp);
-		String filename = null;
+		try
+		{
+			String lastDir = Settings.getInstance().getLastWorkspaceDir();
+			JFileChooser fc = new JFileChooser(lastDir);
+			FileFilter wksp = ExtensionFileFilter.getWorkspaceFileFilter();
+			fc.addChoosableFileFilter(wksp);
+			String filename = null;
 
-		int answer = JFileChooser.CANCEL_OPTION;
-		if (toSave)
-		{
-			answer = fc.showSaveDialog(parent);
-		}
-		else
-		{
-			answer = fc.showOpenDialog(parent);
-		}
-		if (answer == JFileChooser.APPROVE_OPTION)
-		{
-			File fl = fc.getSelectedFile();
-			FileFilter ff = fc.getFileFilter();
-			if (ff == wksp)
+			int answer = JFileChooser.CANCEL_OPTION;
+			if (toSave)
 			{
-				filename = fl.getAbsolutePath();
-
-				String ext = ExtensionFileFilter.getExtension(fl);
-				if (StringUtil.isEmptyString(ext))
-				{
-					if (!filename.endsWith(".")) filename = filename + ".";
-					filename = filename + ExtensionFileFilter.WORKSPACE_EXT;
-				}
+				answer = fc.showSaveDialog(parent);
 			}
 			else
 			{
-				filename = fl.getAbsolutePath();
+				answer = fc.showOpenDialog(parent);
 			}
+			if (answer == JFileChooser.APPROVE_OPTION)
+			{
+				File fl = fc.getSelectedFile();
+				FileFilter ff = fc.getFileFilter();
+				if (ff == wksp)
+				{
+					filename = fl.getAbsolutePath();
 
-			lastDir = fc.getCurrentDirectory().getAbsolutePath();
-			Settings.getInstance().setLastWorkspaceDir(lastDir);
+					String ext = ExtensionFileFilter.getExtension(fl);
+					if (StringUtil.isEmptyString(ext))
+					{
+						if (!filename.endsWith(".")) filename = filename + ".";
+						filename = filename + ExtensionFileFilter.WORKSPACE_EXT;
+					}
+				}
+				else
+				{
+					filename = fl.getAbsolutePath();
+				}
+
+				lastDir = fc.getCurrentDirectory().getAbsolutePath();
+				Settings.getInstance().setLastWorkspaceDir(lastDir);
+			}
+			if (replaceConfigDir && filename != null)
+			{
+				filename = this.putConfigDirKey(filename);
+			}
+			return filename;
 		}
-		if (replaceConfigDir && filename != null)
+		catch (Throwable e)
 		{
-			filename = this.putConfigDirKey(filename);
-		}
-		return filename;
+			LogMgr.logError("FileDialogUtil.getWorkspaceFilename()", "Error selecting file", e);
+			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
+			return null;
+		}			
 	}
 
 	public String putConfigDirKey(String aPathname)
@@ -330,19 +308,28 @@ public class FileDialogUtil
 			f = new File(fileName).getParentFile();
 		}
 				
-		JFileChooser dialog = new JFileChooser(f);
-		dialog.setApproveButtonText(ResourceMgr.getString("LblOK"));
-		if (fileName != null) 
+		try
 		{
-			dialog.setSelectedFile(new File(fileName));
+			JFileChooser dialog = new JFileChooser(f);
+			dialog.setApproveButtonText(ResourceMgr.getString("LblOK"));
+			if (fileName != null) 
+			{
+				dialog.setSelectedFile(new File(fileName));
+			}
+			String selectedFile = null;
+			int choice = dialog.showSaveDialog(parent);
+			if (choice == JFileChooser.APPROVE_OPTION)
+			{
+				File target = dialog.getSelectedFile();
+				selectedFile = target.getAbsolutePath();
+			}
+			return selectedFile;
 		}
-		String selectedFile = null;
-		int choice = dialog.showSaveDialog(parent);
-		if (choice == JFileChooser.APPROVE_OPTION)
+		catch (Throwable e)
 		{
-			File target = dialog.getSelectedFile();
-			selectedFile = target.getAbsolutePath();
-		}
-		return selectedFile;
+			LogMgr.logError("FileDialogUtil.selectPkMapFile()", "Error selecting file", e);
+			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
+			return null;
+		}			
 	}
 }

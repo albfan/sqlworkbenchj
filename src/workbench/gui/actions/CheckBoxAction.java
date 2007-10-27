@@ -16,6 +16,7 @@ import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -56,7 +57,16 @@ public class CheckBoxAction
 	public void setSwitchedOn(boolean aFlag)
 	{
 		this.switchedOn = aFlag;
-		if (this.toggleMenu != null) this.toggleMenu.setSelected(aFlag);
+		if (this.toggleMenu != null) 
+		{
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					toggleMenu.setSelected(switchedOn);
+				}
+			});
+		}
 		if (this.settingsProperty != null)
 		{
 			Settings.getInstance().setProperty(settingsProperty, this.switchedOn);

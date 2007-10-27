@@ -28,10 +28,11 @@ import javax.swing.border.Border;
 public class WbTextLabel
 	extends JComponent
 {
+	private final static int DEFAULT_TEXT_Y = 15;
 	private String text;
 	private final Color textColor;
 	private int textX = 2;
-	private int textY;
+	private int textY = DEFAULT_TEXT_Y;
 	private int alignment = SwingConstants.LEFT;
 	private FontMetrics fm;
 	private boolean hasBorder = false;
@@ -49,7 +50,7 @@ public class WbTextLabel
 		{
 			super.setFont(f);
 			this.fm = this.getFontMetrics(f);
-			textY = fm.getAscent() + 2;
+			textY = (fm != null ? fm.getAscent() + 2 : DEFAULT_TEXT_Y);
 		}
 	}
 	
@@ -68,7 +69,7 @@ public class WbTextLabel
 	{
 		super.setFont(f);
 		this.fm = this.getFontMetrics(f);
-		textY = fm.getAscent() + 2;
+		textY = (fm != null ? fm.getAscent() + 2 : DEFAULT_TEXT_Y);
 	}
 
 	public String getText() { return this.text; }
@@ -78,7 +79,7 @@ public class WbTextLabel
 		this.text = label;
 		if (alignment == SwingConstants.RIGHT)
 		{
-			int w = fm.stringWidth(this.text);
+			int w = (fm != null ? fm.stringWidth(this.text) : 15);
 			textX = this.getWidth() - w - 4;
 		}
 		invalidate();

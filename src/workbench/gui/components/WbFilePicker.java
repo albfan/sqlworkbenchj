@@ -15,23 +15,37 @@ import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
+import workbench.gui.WbSwingUtilities;
+import workbench.log.LogMgr;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 /**
  *
  * @author  support@sql-workbench.net
  */
-public class WbFilePicker extends javax.swing.JPanel
+public class WbFilePicker
+	extends javax.swing.JPanel
 {
-	private String defaultDir; 
+	private String defaultDir;
 	private FileFilter fileFilter;
 	private boolean allowMultiple;
 	private File[] selectedFiles;
-	
+
 	/** Creates new form WbFilePicker */
 	public WbFilePicker()
 	{
 		initComponents();
+	}
+
+	public void setTextfieldTooltip(String text)
+	{
+		tfFilename.setToolTipText(text);
+	}
+
+	public void setButtonTooltip(String text)
+	{
+		selectFileButton.setToolTipText(text);
 	}
 	
 	/** This method is called from within the constructor to
@@ -83,33 +97,49 @@ public class WbFilePicker extends javax.swing.JPanel
     add(selectFileButton, gridBagConstraints);
 
   }// </editor-fold>//GEN-END:initComponents
-
 	private void selectFileButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_selectFileButtonActionPerformed
 	{//GEN-HEADEREND:event_selectFileButtonActionPerformed
-		JFileChooser jf = new JFileChooser();
-		jf.setMultiSelectionEnabled(allowMultiple);
-		if (this.defaultDir != null) jf.setCurrentDirectory(new File(this.defaultDir));
-		if (this.fileFilter != null) jf.setFileFilter(this.fileFilter);
-		int answer = jf.showOpenDialog(SwingUtilities.getWindowAncestor(this));
-		if (answer == JFileChooser.APPROVE_OPTION)
+		try
 		{
-			if (this.allowMultiple)
+			JFileChooser jf = new JFileChooser();
+			jf.setMultiSelectionEnabled(allowMultiple);
+			if (this.defaultDir != null)
 			{
-				this.selectedFiles = jf.getSelectedFiles();
+				jf.setCurrentDirectory(new File(this.defaultDir));
 			}
-			else
+			if (this.fileFilter != null)
 			{
-				this.selectedFiles = new File[1];
-				this.selectedFiles[0] = jf.getSelectedFile();
+				jf.setFileFilter(this.fileFilter);
 			}
-			
-			StringBuilder path = new StringBuilder(this.selectedFiles.length * 100);
-			for (int i=0; i < this.selectedFiles.length; i++)
+			int answer = jf.showOpenDialog(SwingUtilities.getWindowAncestor(this));
+			if (answer == JFileChooser.APPROVE_OPTION)
 			{
-				if (this.selectedFiles.length > 1 && i > 0) path.append(StringUtil.getPathSeparator());
-				path.append(this.selectedFiles[i].getAbsolutePath().trim());
+				if (this.allowMultiple)
+				{
+					this.selectedFiles = jf.getSelectedFiles();
+				}
+				else
+				{
+					this.selectedFiles = new File[1];
+					this.selectedFiles[0] = jf.getSelectedFile();
+				}
+
+				StringBuilder path = new StringBuilder(this.selectedFiles.length * 100);
+				for (int i = 0; i < this.selectedFiles.length; i++)
+				{
+					if (this.selectedFiles.length > 1 && i > 0)
+					{
+						path.append(StringUtil.getPathSeparator());
+					}
+					path.append(this.selectedFiles[i].getAbsolutePath().trim());
+				}
+				this.tfFilename.setText(path.toString());
 			}
-			this.tfFilename.setText(path.toString());
+		}
+		catch (Throwable e)
+		{
+			LogMgr.logError("WbFilePicker.selectFileButtonActionPerformed()", "Error selecting file", e);
+			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
 		}
 	}//GEN-LAST:event_selectFileButtonActionPerformed
 
@@ -123,36 +153,41 @@ public class WbFilePicker extends javax.swing.JPanel
 		this.tfFilename.setText(name != null ? name : "");
 		this.tfFilename.setCaretPosition(0);
 	}
-	
+
 	public File getSelectedFile()
 	{
-		if (this.selectedFiles == null) return null;
+		if (this.selectedFiles == null)
+		{
+			return null;
+		}
 		return this.selectedFiles[0];
 	}
-	
+
 	public File[] getSelectedFiles()
 	{
-		if (!this.allowMultiple) return null;
+		if (!this.allowMultiple)
+		{
+			return null;
+		}
 		return this.selectedFiles;
 	}
-	
+
 	public void setAllowMultiple(boolean flag)
 	{
 		this.allowMultiple = flag;
 	}
-	
+
 	public void setDefaultDirectory(String dir)
 	{
 		this.defaultDir = dir;
 	}
+
 	public void setFileFilter(FileFilter f)
 	{
 		this.fileFilter = f;
 	}
-	
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton selectFileButton;
   private javax.swing.JTextField tfFilename;
   // End of variables declaration//GEN-END:variables
-	
 }

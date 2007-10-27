@@ -271,13 +271,6 @@ public class EditorTest
 		cbx.setSelected(selected);
 	}
 
-	private void execute(Runnable r)
-	{
-		QueueTool tool = new QueueTool();
-		tool.invokeAndWait(r);
-		tool.waitEmpty();
-	}
-
 	public void testEditor()
 	{
 		try

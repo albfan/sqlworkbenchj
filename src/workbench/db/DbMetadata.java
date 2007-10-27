@@ -116,15 +116,12 @@ public class DbMetadata
 	
 	private boolean createInlineConstraints;
 	private boolean useNullKeyword = true;
-	private boolean fixOracleDateBug = false;
 	private boolean columnsListInViewDefinitionAllowed = true;
 	
 	private String quoteCharacter;
 	private String dbVersion;
 	private SqlKeywordHandler keywordHandler;
 	
-	private static final String SELECT_INTO_PG = "(?i)(?s)SELECT.*INTO\\p{Print}*\\s*FROM.*";
-	private static final String SELECT_INTO_INFORMIX = "(?i)(?s)SELECT.*FROM.*INTO\\s*\\p{Print}*";
 	private Pattern selectIntoPattern = null;
 
 	private String tableTypeName;
@@ -192,13 +189,11 @@ public class DbMetadata
 			this.sequenceReader = new OracleSequenceReader(this.dbConnection);
 			this.procedureReader = new OracleProcedureReader(this.dbConnection);
 			this.errorInfoReader = this.oracleMetaData;
-			this.fixOracleDateBug = Settings.getInstance().getBoolProperty("workbench.db.oracle.date.usetimestamp", true);
 			this.indexReader = new OracleIndexReader(this);
 		}
 		else if (productLower.indexOf("postgres") > - 1)
 		{
 			this.isPostgres = true;
-			this.selectIntoPattern = Pattern.compile(SELECT_INTO_PG);
 			this.constraintReader = new PostgresConstraintReader();
 			this.sequenceReader = new PostgresSequenceReader(this.dbConnection);
 			this.procedureReader = new PostgresProcedureReader(this.dbConnection);
@@ -259,10 +254,6 @@ public class DbMetadata
 		{
 			this.procedureReader = new MySqlProcedureReader(this.dbConnection);
 			this.isMySql = true;
-		}
-		else if (productLower.indexOf("informix") > -1)
-		{
-			this.selectIntoPattern = Pattern.compile(SELECT_INTO_INFORMIX);
 		}
 		else if (productLower.indexOf("cloudscape") > -1)
 		{
@@ -390,6 +381,20 @@ public class DbMetadata
 		for (String s : realTypes)
 		{
 			tableTypesSelectable[i++] = s.toUpperCase();
+		}
+		
+		String pattern = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".selectinto.pattern", null);
+		if (pattern != null)
+		{
+			try
+			{
+				this.selectIntoPattern = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("DbMetadata.<init>", "Incorrect Pattern for detecting SELECT ... INTO <new table> specified", e);
+				this.selectIntoPattern = null;
+			}
 		}
 	}
 
@@ -1137,7 +1142,11 @@ public class DbMetadata
 		
 		try
 		{
-			if (this.storesUpperCaseIdentifiers())
+			if (this.storesMixedCaseIdentifiers())
+			{
+				return name;
+			}
+			else if (this.storesUpperCaseIdentifiers())
 			{
 				return name.toUpperCase();
 			}
@@ -1815,15 +1824,15 @@ public class DbMetadata
 
 	public int fixColumnType(int type)
 	{
-		if (this.fixOracleDateBug) 
+		if (this.isOracle) 
 		{
-			if (type == Types.DATE) return Types.TIMESTAMP;
+			if (type == Types.DATE && this.oracleMetaData.getMapDateToTimestamp()) return Types.TIMESTAMP;
+
+			// Oracle reports TIMESTAMP WITH TIMEZONE with the numeric 
+			// value -101 (which is not an official java.sql.Types value
+			// TIMESTAMP WITH LOCAL TIMEZONE is reported as -102
+			if (type == -101 || type == -102) return Types.TIMESTAMP;
 		}
-		
-		// Oracle reports TIMESTAMP WITH TIMEZONE with the numeric 
-		// value -101 (which is not an official java.sql.Types value
-		// TIMESTAMP WITH LOCAL TIMEZONE is reported as -102
-		if (this.isOracle && (type == -101 || type == -102)) return Types.TIMESTAMP;
 		
 		return type;
 	}

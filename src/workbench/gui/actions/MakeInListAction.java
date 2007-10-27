@@ -20,7 +20,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  * Make an "IN" List 
- * @see workbench.gui.sql.EditorPanel#makeInListForChar()
+ * @see workbench.gui.editor.CodeTools#makeInListForChar()
  * @author  support@sql-workbench.net
  */
 public class MakeInListAction

@@ -42,6 +42,8 @@ public class TextRowDataConverterTest extends junit.framework.TestCase
 			
 			ResultInfo info = new ResultInfo(cols, types, sizes);
 			TextRowDataConverter converter = new TextRowDataConverter();
+			converter.setDefaultTimestampFormat("yyyy-MM-dd HH:mm:ss");
+			converter.setDefaultDateFormat("yyyy-MM-dd");
 			converter.setWriteHeader(true);
 			converter.setResultInfo(info);
 			converter.setDelimiter(";");
@@ -60,11 +62,13 @@ public class TextRowDataConverterTest extends junit.framework.TestCase
 			data.setValue(2, c.getTime());
 			java.sql.Timestamp ts = new java.sql.Timestamp(d.getTime());
 			data.setValue(3, ts);
+			
+			StrBuffer line = converter.convertRowData(data, 0);
+			assertEquals("Wrong columns exporter", "data1;42;2006-10-26;2006-10-26 17:00:00", line.toString().trim());
+			
 			List columns = new ArrayList();
 			columns.add(info.getColumn(0));
 			columns.add(info.getColumn(1));
-			StrBuffer line = converter.convertRowData(data, 0);
-			assertEquals("Wrong columns exporter", "data1;42;2006-10-26;2006-10-26 17:00:00", line.toString().trim());
 			converter.setColumnsToExport(columns);
 			line = converter.convertRowData(data, 0);
 			assertNotNull("Data not converted", line);

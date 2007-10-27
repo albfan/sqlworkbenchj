@@ -242,9 +242,7 @@ public class ConnectionEditorPanel
 
     tfURL.setHorizontalAlignment(javax.swing.JTextField.LEFT);
     tfURL.setMaximumSize(new java.awt.Dimension(2147483647, 20));
-    tfURL.setMinimumSize(new java.awt.Dimension(40, 20));
     tfURL.setName("url"); // NOI18N
-    tfURL.setPreferredSize(new java.awt.Dimension(100, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
@@ -257,9 +255,7 @@ public class ConnectionEditorPanel
     tfUserName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
     tfUserName.setToolTipText("");
     tfUserName.setMaximumSize(new java.awt.Dimension(2147483647, 20));
-    tfUserName.setMinimumSize(new java.awt.Dimension(40, 20));
     tfUserName.setName("username"); // NOI18N
-    tfUserName.setPreferredSize(new java.awt.Dimension(100, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
@@ -573,9 +569,7 @@ public class ConnectionEditorPanel
     tfWorkspaceFile.setHorizontalAlignment(javax.swing.JTextField.LEFT);
     tfWorkspaceFile.setToolTipText("");
     tfWorkspaceFile.setMaximumSize(new java.awt.Dimension(2147483647, 20));
-    tfWorkspaceFile.setMinimumSize(new java.awt.Dimension(40, 20));
     tfWorkspaceFile.setName("workspaceFile"); // NOI18N
-    tfWorkspaceFile.setPreferredSize(new java.awt.Dimension(100, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;

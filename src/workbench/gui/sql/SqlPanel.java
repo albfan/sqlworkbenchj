@@ -286,6 +286,7 @@ public class SqlPanel
 		this.resultTab.setTabPlacement(JTabbedPane.TOP);
 		this.resultTab.setDoubleBuffered(true);
 		this.resultTab.setFocusable(false);
+		this.resultTab.setName("resultspane");
 
 		JScrollPane scroll = new WbScrollPane(log);
 		this.resultTab.addTab(ResourceMgr.getString("LblTabMessages"), scroll);
@@ -1282,7 +1283,10 @@ public class SqlPanel
 
 	public WbConnection getConnection()
 	{
-		return this.dbConnection;
+		synchronized (this)
+		{
+			return this.dbConnection;
+		}
 	}
 
 	public boolean isConnected()
@@ -1291,8 +1295,10 @@ public class SqlPanel
 		// MainWindow will make sure a valid connection is set
 		// for the panel. When using only one connection for all
 		// panels, isClosed() will block the entire AWT thread!
-
-		return (this.dbConnection != null);
+		synchronized (this)
+		{
+			return (this.dbConnection != null);
+		}
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -1597,13 +1603,23 @@ public class SqlPanel
 
 	private void startExecution(final String sql, final int offset, final int commandAtIndex, final boolean highlight, final boolean appendResult)
 	{
-		if (this.isBusy()) return;
-		if (!this.isConnected()) return;
+		if (this.isBusy()) 
+		{
+			return;
+		}
+		
+		if (!this.isConnected()) 
+		{
+			LogMgr.logError("SqlPanel.startExecution()", "startExecution() was called but no connection available!", null);
+			return;
+		}
+		
 		if (this.dbConnection.isBusy())
 		{
 			showLogMessage(ResourceMgr.getString("ErrConnectionBusy"));
 			return;
 		}
+		
 		this.executionThread = new WbThread("SQL Execution Thread " + this.getId())
 		{
 			public void run()
@@ -2742,6 +2758,7 @@ public class SqlPanel
 	{
 		int newIndex = this.resultTab.getTabCount() - 1;
 		this.resultTab.insertTab(ResourceMgr.getString("LblTabResult"), null, data, sql, newIndex);
+		data.setName("dwresult" + newIndex);
 		if (this.resultTab.getTabCount() == 2)
 		{
 			this.resultTab.setSelectedIndex(0);

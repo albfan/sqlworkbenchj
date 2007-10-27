@@ -32,7 +32,7 @@ public class AppendResultsAction
 	public AppendResultsAction(SqlPanel panel)
 	{
 		super("MnuTxtToggleAppendResults", null);
-		client = panel;
+		this.client = panel;
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setSwitchedOn(client.getAppendResults());
 	}
@@ -40,23 +40,29 @@ public class AppendResultsAction
 	public void setSwitchedOn(boolean aFlag)
 	{
 		super.setSwitchedOn(aFlag);
+		if (this.toggleButton != null)
+		{
+			this.toggleButton.setSelected(this.isSwitchedOn());
+		}
 		client.setAppendResults(this.isSwitchedOn());
 	}
 
-	public JToggleButton createButton()
+	public JToggleButton getButton()
 	{
-		this.toggleButton = new JToggleButton(this);
-		this.toggleButton.setText(null);
-		this.toggleButton.setMargin(WbToolbarButton.MARGIN);
-		this.toggleButton.setIcon(ResourceMgr.getImage("AppendResult"));
-		this.toggleButton.setSelected(this.isSwitchedOn());
+		if (this.toggleButton == null)
+		{
+			this.toggleButton = new JToggleButton(this);
+			this.toggleButton.setText(null);
+			this.toggleButton.setMargin(WbToolbarButton.MARGIN);
+			this.toggleButton.setIcon(ResourceMgr.getImage("AppendResult"));
+			this.toggleButton.setSelected(this.isSwitchedOn());
+		}
 		return this.toggleButton;
 	}
 	
 	public void addToToolbar(JToolBar aToolbar)
 	{
-		if (this.toggleButton == null) this.createButton();
-		aToolbar.add(this.toggleButton);
+		aToolbar.add(this.getButton());
 	}
 	
 }

@@ -163,7 +163,6 @@ public class DbObjectCache
 		
 		List<ColumnIdentifier> cols = this.objects.get(tbl);
 		
-		TableIdentifier tblToUse = null;
 		TableIdentifier t2 = null;
 		
 		// if we didn't find an entry with the schema in the table, try
@@ -188,6 +187,8 @@ public class DbObjectCache
 		
 		if (cols == null || cols == Collections.EMPTY_LIST)
 		{
+			TableIdentifier tblToUse = null; 
+			
 			// use the stored key because that might carry the correct type attribute
 			// TabelIdentifier.equals() doesn't compare the type, only the expression
 			// so we'll get a containsKey() == true even if the type is different
@@ -203,7 +204,7 @@ public class DbObjectCache
 			}
 			else
 			{
-				tblToUse = tbl;
+				tblToUse = this.dbConnection.getMetadata().findTable(tbl);
 			}
 			
 			try
@@ -213,10 +214,10 @@ public class DbObjectCache
 			}
 			catch (Throwable e)
 			{
-				LogMgr.logError("DbObjectCache.getColumns", "Error retrieving columns for " + tbl, e);
+				LogMgr.logError("DbObjectCache.getColumns", "Error retrieving columns for " + tblToUse, e);
 				cols = null;
 			}
-			this.objects.put(tbl, cols);
+			this.objects.put(tblToUse, cols);
 				
 		}
 		return Collections.unmodifiableList(cols);

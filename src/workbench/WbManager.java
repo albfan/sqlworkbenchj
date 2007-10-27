@@ -267,13 +267,13 @@ public class WbManager
 	public boolean isWindowsClassic() { return isWindowsClassic; }
 	
 	private boolean isWindowsClassic = false;
-	private boolean isWindowsLNF = false;
+//	private boolean isWindowsLAF = false;
 	
-	public boolean isWindowsLNF()
-	{
-		return isWindowsLNF;
-	}
-	
+//	public boolean isWindowsLAF()
+//	{
+//		return isWindowsLAF;
+//	}
+
 	private void initializeLookAndFeel()
 	{
 //		trace("WbManager.initializeLookAndFeel() - start");
@@ -312,7 +312,7 @@ public class WbManager
 				String clsname = lnf.getClass().getName();
 				if (clsname.indexOf("com.sun.java.swing.plaf.windows") > -1)
 				{
-					isWindowsLNF = true;
+//					isWindowsLAF = true;
 					String osVersion = System.getProperty("os.version", "1.0");
 					Float version = Float.valueOf(osVersion);
 					if (version.floatValue() <= 5.0)

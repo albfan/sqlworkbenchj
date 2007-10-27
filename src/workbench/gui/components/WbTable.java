@@ -608,7 +608,7 @@ public class WbTable
 	 * Set the header to be used for printing.
 	 * 
 	 * @param aHeader the print header
-	 * @see workbench.print#setHeaderText(String)
+	 * @see workbench.print.TablePrinter#setHeaderText(String)
 	 */
 	public void setPrintHeader(String aHeader)
 	{

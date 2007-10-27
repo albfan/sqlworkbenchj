@@ -98,6 +98,11 @@ public class WbAction
 		return ctrlPressed;
 	}
 	
+	public boolean allowDuplicate()
+	{
+		return false;
+	}
+	
 	public boolean hasShiftModifier() { return false; }
 	public boolean hasCtrlModifier() { return false; }
 	

@@ -90,7 +90,10 @@ import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.util.ExceptionUtil;
 import java.awt.Component;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.util.Iterator;
+import javax.swing.KeyStroke;
 import workbench.WbManager;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.sql.PanelContentSender;
@@ -321,6 +324,8 @@ public class TableListPanel
 
 		ReloadAction a = new ReloadAction(this);
 		a.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
+		a.addToInputMap(tableList);
+		
 		this.findPanel.addToToolbar(a, true, false);
 
 		JPanel selectPanel = new JPanel();

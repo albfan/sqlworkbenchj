@@ -18,6 +18,8 @@ import workbench.storage.DataStore;
 import workbench.util.StringUtil;
 
 /**
+ * An implementation of the ProcedureReader interface for the 
+ * <a href="http://www.firebirdsql.org">Firebird</a> database server
  * @author  support@sql-workbench.net
  */
 public class FirebirdProcedureReader

@@ -70,7 +70,10 @@ public class WbToolTipUI extends BasicToolTipUI
 		super.installUI(c);
 		tip = (JToolTip)c;
 		Font f = c.getFont();
-		smallFont = new Font( f.getName(), f.getStyle(), f.getSize() - 2 );
+		if (f != null)
+		{
+			smallFont = new Font( f.getName(), f.getStyle(), f.getSize() - 2 );
+		}
 		acceleratorDelimiter = UIManager.getString( "MenuItem.acceleratorDelimiter" );
 		if ( acceleratorDelimiter == null )
 		{ 
@@ -91,6 +94,10 @@ public class WbToolTipUI extends BasicToolTipUI
 		super.paint(g, c);
 		
 		Font font = c.getFont();
+		if (smallFont == null && font != null)
+		{
+			smallFont = new Font( font.getName(), font.getStyle(), font.getSize() - 2 );
+		}
 		FontMetrics metrics = g.getFontMetrics(font);
 		String keyText = getAcceleratorString(tp);
 		String tipText = tp.getTipText();
@@ -100,7 +107,7 @@ public class WbToolTipUI extends BasicToolTipUI
 		}
 		if (! (keyText.equals("")))
 		{  // only draw control key if there is one
-			g.setFont(smallFont);
+			g.setFont(smallFont == null ? font : smallFont);
 			g.setColor( MetalLookAndFeel.getPrimaryControlDarkShadow() );
 			g.drawString(keyText,metrics.stringWidth(tipText) + padSpaceBetweenStrings,2 + metrics.getAscent());
 		}

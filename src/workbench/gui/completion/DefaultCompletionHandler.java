@@ -66,6 +66,10 @@ public class DefaultCompletionHandler
 	public void setConnection(WbConnection conn)
 	{
 		this.dbConnection = conn;
+		if (this.window != null)
+		{
+			this.window.setDbStoresMixedCase(dbConnection != null ? dbConnection.getMetadata().storesMixedCaseIdentifiers() : false);
+		}
 	}
 	
 	protected void showPopup()
@@ -95,6 +99,7 @@ public class DefaultCompletionHandler
 		if (this.window == null)
 		{
 			this.window = new CompletionPopup(editor, header, this);
+			this.window.setDbStoresMixedCase(dbConnection != null ? dbConnection.getMetadata().storesMixedCaseIdentifiers() : false);
 		}
 		
 		// if this is not done in a separate thread
@@ -116,7 +121,7 @@ public class DefaultCompletionHandler
 		ScriptParser parser = new ScriptParser(script);
 		parser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
 		parser.allowEmptyLineAsSeparator(Settings.getInstance().getAutoCompletionEmptyLineIsSeparator());
-		
+		parser.setAlternateLineComment(dbConnection == null ? null : dbConnection.getDbSettings().getLineComment());
 		int cursorPos = this.editor.getCaretPosition();
 
 		int index = parser.getCommandIndexAtCursorPos(cursorPos);

@@ -24,7 +24,7 @@ import workbench.resource.ResourceMgr;
 /**
  * Action to "comment" the currently selected text in the SQL editor. 
  * This is done by addin single line comments to each line
- * @see workbench.gui.sql.EditorPanel#commentSelection()	
+ * @see workbench.gui.editor.TextCommenter#commentSelection()	
  * @author  support@sql-workbench.net
  */
 public class CommentAction 

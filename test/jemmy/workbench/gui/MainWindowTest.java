@@ -12,6 +12,7 @@ package workbench.gui;
 
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JTabbedPane;
 import junit.framework.TestCase;
 import org.netbeans.jemmy.QueueTool;
 import org.netbeans.jemmy.operators.JButtonOperator;
@@ -28,6 +29,7 @@ import org.netbeans.jemmy.operators.JTableOperator;
 import org.netbeans.jemmy.operators.JTextFieldOperator;
 import org.netbeans.jemmy.operators.Operator.DefaultStringComparator;
 import org.netbeans.jemmy.operators.Operator.StringComparator;
+import workbench.gui.actions.AppendResultsAction;
 import workbench.gui.sql.SqlPanel;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -129,6 +131,14 @@ public class MainWindowTest
 		JTextFieldOperator username = new JTextFieldOperator(dialog, chooser);
 		username.setText("sa");
 		new JButtonOperator(dialog, "OK").push();
+		
+		// Connecting can take some time...
+		QueueTool tool = new QueueTool();
+		tool.waitEmpty();
+		chooser.setName("sqlpanel1");
+		JComponentOperator panel = new JComponentOperator(mainWindow, chooser);
+		SqlPanel sqlPanel = (SqlPanel)panel.getSource();
+		testUtil.waitUntilConnected(sqlPanel);
 	}
 
 	public void runSql()
@@ -136,7 +146,6 @@ public class MainWindowTest
 		NamedComponentChooser chooser = new NamedComponentChooser();
 		chooser.setName("sqleditor1");
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
-		JComponentOperator editorComp = new JComponentOperator(mainWindow, chooser);
 		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
 
 		chooser.setName("sqlpanel1");
@@ -205,17 +214,54 @@ public class MainWindowTest
 		assertTrue(StringUtil.isWhitespaceOrEmpty(firstname));
 
 		result.setValueAt("Arthur", 0, 1);
-		new QueueTool().waitEmpty();
-
+		QueueTool tool = new QueueTool();
+		tool.waitEmpty();
 		msg = saveChanges(sqlPanel);
-		System.out.println("Message: " + msg);
+		tool.waitEmpty();
 	}
 
-	private void execute(Runnable r)
+	private void appendTest()
 	{
+		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
+		NamedComponentChooser chooser = new NamedComponentChooser();
+		chooser.setName("sqlpanel1");
+		JComponentOperator panel = new JComponentOperator(mainWindow, chooser);
+		final SqlPanel sqlPanel = (SqlPanel)panel.getSource();
+
+		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
+		JMenuOperator sqlMenu = new JMenuOperator(mainMenu.getMenu(4));
+
+		JMenuItem appendItem = sqlMenu.getItem(18);
+		JMenuItemOperator append = new JMenuItemOperator(appendItem);
+		AppendResultsAction action = (AppendResultsAction)appendItem.getAction();
+		assertFalse(appendItem.isSelected());
+		
+		runSql(sqlPanel, "select * from person");
+		
+		chooser.setName("resultspane");
+		JComponentOperator comp = new JComponentOperator(mainWindow, chooser);
+		JTabbedPane resultTab = (JTabbedPane)comp.getSource();
+		
+		assertEquals(2, resultTab.getTabCount());
+		
 		QueueTool tool = new QueueTool();
-		tool.invokeAndWait(r);
+		mainMenu.pushMenu("SQL|Append new results", "|");		
 		tool.waitEmpty();
+		assertTrue(sqlPanel.getAppendResults());
+		assertTrue(appendItem.isSelected());
+		assertTrue(action.getButton().isSelected());
+		
+		runSql(sqlPanel, "select * from person");
+		assertEquals(3, resultTab.getTabCount());
+		
+		mainMenu.pushMenu("SQL|Append new results", "|");		
+		tool.waitEmpty();
+		assertFalse(sqlPanel.getAppendResults());
+		assertFalse(appendItem.isSelected());
+		assertFalse(action.getButton().isSelected());
+		
+		runSql(sqlPanel, "select * from person");
+		assertEquals(2, resultTab.getTabCount());
 	}
 
 	private String saveChanges(final SqlPanel panel)
@@ -228,8 +274,8 @@ public class MainWindowTest
 					panel.updateDb();
 				}
 			};
-		execute(r);
-		waitFor(panel);
+		testUtil.execute(r);
+		testUtil.waitWhileBusy(panel);
 		return panel.getLogMessage();
 	}
 
@@ -244,17 +290,9 @@ public class MainWindowTest
 					panel.runAll();
 				}
 			};
-		execute(r);
-		waitFor(panel);
+		testUtil.execute(r);
+		testUtil.waitWhileBusy(panel);
 		return panel.getLogMessage();
-	}
-
-	private void waitFor(SqlPanel panel)
-	{
-		while (panel.isBusy())
-		{
-			Thread.yield();
-		}
 	}
 
 	public void testWindow()
@@ -265,6 +303,7 @@ public class MainWindowTest
 			connect();
 			settingsTest();
 			runSql();
+			appendTest();
 			testUtil.stopApplication();
 		}
 		catch (Exception e)

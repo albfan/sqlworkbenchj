@@ -84,8 +84,6 @@ import workbench.interfaces.TextFileContainer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.sql.ScriptParser;
-import workbench.sql.formatter.SqlFormatter;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 
@@ -427,29 +425,38 @@ public class EditorPanel
 			return false;
 		}
 
-		String lastDir = Settings.getInstance().getLastSqlDir();
-		JFileChooser fc = new JFileChooser(lastDir);
-		JComponent p = EncodingUtil.createEncodingPanel();
-		p.setBorder(new EmptyBorder(0, 5, 0, 0));
-		EncodingSelector selector = (EncodingSelector)p;
-		selector.setEncoding(Settings.getInstance().getDefaultFileEncoding());
-		fc.setAccessory(p);
-		
-		fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
-		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
-		if (answer == JFileChooser.APPROVE_OPTION)
+		try
 		{
-			String encoding = selector.getEncoding();
-			
-			result = readFile(fc.getSelectedFile(), encoding);
-			
-			WbSwingUtilities.repaintLater(this.getParent());
-			
-			lastDir = fc.getCurrentDirectory().getAbsolutePath();
-			Settings.getInstance().setLastSqlDir(lastDir);
-			Settings.getInstance().setDefaultFileEncoding(encoding);
+			String lastDir = Settings.getInstance().getLastSqlDir();
+			JFileChooser fc = new JFileChooser(lastDir);
+			JComponent p = EncodingUtil.createEncodingPanel();
+			p.setBorder(new EmptyBorder(0, 5, 0, 0));
+			EncodingSelector selector = (EncodingSelector)p;
+			selector.setEncoding(Settings.getInstance().getDefaultFileEncoding());
+			fc.setAccessory(p);
+
+			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
+			int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
+			if (answer == JFileChooser.APPROVE_OPTION)
+			{
+				String encoding = selector.getEncoding();
+
+				result = readFile(fc.getSelectedFile(), encoding);
+
+				WbSwingUtilities.repaintLater(this.getParent());
+
+				lastDir = fc.getCurrentDirectory().getAbsolutePath();
+				Settings.getInstance().setLastSqlDir(lastDir);
+				Settings.getInstance().setDefaultFileEncoding(encoding);
+			}
+			return result;
 		}
-		return result;
+		catch (Throwable e)
+		{
+			LogMgr.logError("EditorPanel.openFile()", "Error selecting file", e);
+			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
+			return false;
+		}			
 	}
 
 	public boolean reloadFile()

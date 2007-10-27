@@ -111,7 +111,7 @@ public class SqlCommand
 	 *  This behaviour is then similar to MS SQL Server where any messages
 	 *  displayed using the PRINT function are returned in the Warnings as well.
 	 * 
-	 *  @see workbench.util.SqlUtil#getWarnings(WbConnection, Statement, boolean)
+	 *  @see workbench.util.SqlUtil#getWarnings(WbConnection, Statement)
 	 */
 	protected boolean appendWarnings(StatementRunnerResult result)
 	{

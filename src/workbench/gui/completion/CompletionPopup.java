@@ -65,6 +65,7 @@ public class CompletionPopup
 	private StatementContext context;
 	private boolean selectCurrentWordInEditor;
 	protected CompletionSearchField searchField;
+	private boolean dbStoresMixedCase = false;
 	
 	public CompletionPopup(JEditTextArea ed, JComponent header, ListModel listData)
 	{
@@ -214,6 +215,11 @@ public class CompletionPopup
 		}
 	}
 	
+	public void setDbStoresMixedCase(boolean flag)
+	{
+		this.dbStoresMixedCase = flag;
+	}
+	
 	/**
 	 * Callback from the SearchField when enter has been pressed in the search field
 	 */
@@ -227,7 +233,7 @@ public class CompletionPopup
 		if (value == null) return value;
 		String result;
 		String pasteCase = Settings.getInstance().getAutoCompletionPasteCase();
-		if (value.trim().charAt(0) == '"' || StringUtil.isMixedCase(value))
+		if (value.trim().charAt(0) == '"' || StringUtil.isMixedCase(value) || dbStoresMixedCase)
 		{
 			result = value;
 		}

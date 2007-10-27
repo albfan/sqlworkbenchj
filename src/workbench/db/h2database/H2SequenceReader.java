@@ -27,6 +27,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * SequenceReqder for H2 Database engine
  * @author  support@sql-workbench.net
  */
 public class H2SequenceReader

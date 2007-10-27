@@ -102,7 +102,7 @@ public class DelimiterDefinitionPanel
 		
     setLayout(new java.awt.GridBagLayout());
 
-    delimitTextField.setMinimumSize(new java.awt.Dimension(72, 20));
+    //delimitTextField.setMinimumSize(new java.awt.Dimension(72, 20));
     delimitTextField.setName("delimiter");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;

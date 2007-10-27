@@ -215,18 +215,23 @@ public class JdbcProcedureReader
 				int colType = rs.getInt("COLUMN_TYPE");
 				String stype;
 
-				if (colType == DatabaseMetaData.procedureColumnIn)
-					stype = "IN";
-				else if (colType == DatabaseMetaData.procedureColumnInOut)
-					stype = "INOUT";
-				else if (colType == DatabaseMetaData.procedureColumnOut)
-					stype = "OUT";
-				else if (colType == DatabaseMetaData.procedureColumnResult)
-					stype = "RESULTSET";
-				else if (colType == DatabaseMetaData.procedureColumnReturn)
-					stype = "RETURN";
-				else
-					stype = "";
+				switch (colType)
+				{
+					case DatabaseMetaData.procedureColumnIn:
+						stype = "IN";
+						break;
+					case DatabaseMetaData.procedureColumnOut:
+						stype = "OUT";
+						break;
+					case DatabaseMetaData.procedureColumnResult:
+						stype = "RESULTSET";
+						break;
+					case DatabaseMetaData.procedureColumnReturn:
+						stype = "RETURN";
+						break;
+					default:
+						stype = "";
+				}
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, stype);
 
 				int sqlType = rs.getInt("DATA_TYPE");

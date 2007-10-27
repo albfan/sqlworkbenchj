@@ -43,10 +43,7 @@ public class PostgresProcedureReader
 		{
 			sp = this.connection.setSavepoint();
 			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname);
-			source.append("CREATE OR REPLACE ");
-			
-			if (procType == DatabaseMetaData.procedureReturnsResult) source.append("FUNCTION ");
-			else source.append("PROCEDURE ");
+			source.append("CREATE OR REPLACE FUNCTION ");
 			
 			source.append(aProcname);
 			source.append(" (");
@@ -55,6 +52,7 @@ public class PostgresProcedureReader
 			int added = 0;
 			for (int i=0; i < count; i++)
 			{
+				String varname = ds.getValueAsString(i,ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
 				String vartype = ds.getValueAsString(i,ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
 				String ret = ds.getValueAsString(i,ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
 				if ("RETURN".equals(ret))
@@ -64,6 +62,11 @@ public class PostgresProcedureReader
 				else
 				{
 					if (added > 0) source.append(',');
+					if (varname != null) 
+					{
+						source.append(varname);
+						source.append(' ');
+					}
 					source.append(vartype);
 					added ++;
 				}

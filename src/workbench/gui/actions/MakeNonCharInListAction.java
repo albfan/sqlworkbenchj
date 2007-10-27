@@ -19,8 +19,8 @@ import workbench.interfaces.TextSelectionListener;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Make an "IN" list
- * @see workbench.gui.sql.EditorPanel#makeInListForNonChar()
+ * Make an "IN" list
+ * @see workbench.gui.editor.CodeTools#makeInListForNonChar()
  *	@author  support@sql-workbench.net
  */
 public class MakeNonCharInListAction extends WbAction implements TextSelectionListener

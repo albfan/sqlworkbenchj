@@ -23,6 +23,8 @@ import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 
 /**
+ * Metadata support for <a href="http://www.firstsql.com/">FirstSQL</a>
+ * 
  * @author  support@sql-workbench.net
  */
 public class FirstSqlMetadata

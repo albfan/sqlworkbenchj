@@ -19,7 +19,8 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  support@sql-workbench.net
  */
-public class ReloadAction extends WbAction
+public class ReloadAction 
+	extends WbAction
 {
 	private Reloadable client;
 	private boolean ctrlPressed;
@@ -28,9 +29,8 @@ public class ReloadAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.setMenuTextByKey("TxtReload");
+		this.initMenuDefinition("TxtReload");
 		this.setIcon(ResourceMgr.getImage("Refresh"));
-		//this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 	}
 
 	public boolean ctrlPressed()
@@ -42,6 +42,11 @@ public class ReloadAction extends WbAction
 	{
 		this.ctrlPressed = isCtrlPressed(e);
 		this.client.reload();
+	}
+
+	public boolean allowDuplicate()
+	{
+		return false;
 	}
 	
 }

@@ -23,5 +23,6 @@ public class ActionRegistration
 		new ToggleTableSourceAction(null);
 		new MoveSqlTabLeft(null);
 		new MoveSqlTabRight(null);
+		new ReloadAction(null);
 	}
 }

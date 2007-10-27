@@ -59,7 +59,11 @@ public class DbObjectSourcePanel
 		this.setLayout(new BorderLayout());
 		WbToolbar toolbar = new WbToolbar();
 	
-		if (reloadSource != null) toolbar.add(reloadSource);
+		if (reloadSource != null) 
+		{
+			toolbar.add(reloadSource);
+			reloadSource.addToInputMap(sourceEditor);
+		}
 		
 		this.add(this.sourceEditor, BorderLayout.CENTER);
 		if (reloadSource != null)

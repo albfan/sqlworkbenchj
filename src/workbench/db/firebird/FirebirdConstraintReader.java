@@ -14,7 +14,8 @@ package workbench.db.firebird;
 import workbench.db.AbstractConstraintReader;
 
 /**
- * An implementation of {@link AbstractConstraintReader} for the Firebird database server
+ * An implementation of {@link AbstractConstraintReader} for the 
+ * <a href="http://www.firebirdsql.org">Firebird</a> database server
  * @author  support@sql-workbench.net
  */
 public class FirebirdConstraintReader 

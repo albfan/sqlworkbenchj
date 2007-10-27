@@ -136,6 +136,7 @@ public class TableDataPanel
 		
 		this.reloadAction = new ReloadAction(this);
 		this.reloadAction.setTooltip(ResourceMgr.getDescription("TxtLoadTableData", true));
+		this.reloadAction.addToInputMap(this.dataDisplay.getTable());
 		
 		WbToolbar mytoolbar = new WbToolbar();
 		mytoolbar.addDefaultBorder();

@@ -246,6 +246,12 @@ public class ConnectionMgr
 	
 	public DbDriver findDriver(String drvClassName)
 	{
+		if (drvClassName == null)
+		{
+			LogMgr.logError("ConnectionMgr.findDriver()", "Called with a null classname!", new NullPointerException());
+			return null;
+		}
+		
 		DbDriver db = this.findRegisteredDriver(drvClassName);
 		
 		//LogMgr.logDebug("ConnectionMgr.findDriverByName()", "Searching for DriverClass=" + drvClassName);

@@ -79,6 +79,7 @@ public class TableDefinitionPanel
 
 		this.reloadAction = new ReloadAction(this);
 		this.reloadAction.setEnabled(false);
+		this.reloadAction.addToInputMap(this.tableDefinition);
 
 		toolbar = new JPanel(new GridBagLayout());
 

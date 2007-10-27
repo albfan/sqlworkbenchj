@@ -346,6 +346,7 @@ public class ShortcutEditor
 				mapper.grabFocus();
 			}
 		});
+		
 		String[] options = new String[] { ResourceMgr.getString("LblOK").replaceAll("&", ""), ResourceMgr.getString("LblCancel").replaceAll("&", "")};
 		
 		JOptionPane overwritePane = new JOptionPane(mapper, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, options);
@@ -359,6 +360,9 @@ public class ShortcutEditor
 		if (options[0].equals(result))
 		{
 			KeyStroke key = mapper.getKeyStroke();
+			ShortcutDisplay d = (ShortcutDisplay)this.definitions.getValue(row, 1);
+			String cls = d.getShortcut().getActionClass();
+
 			int oldrow = this.findKey(key);
 			if (oldrow > -1)
 			{
@@ -370,7 +374,7 @@ public class ShortcutEditor
 				old.clearKey();
 				this.model.fireTableRowsUpdated(oldrow, oldrow);
 			}
-			ShortcutDisplay d = (ShortcutDisplay)this.definitions.getValue(row, 1);
+			
 			d.setNewKey(key);
 			this.model.fireTableRowsUpdated(row, row);
 		}

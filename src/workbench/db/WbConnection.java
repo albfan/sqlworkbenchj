@@ -73,7 +73,7 @@ public class WbConnection
 	private Object busyLock = new Object();
 	private KeepAliveDaemon keepAlive = null;
 	
-		public WbConnection(String anId)
+	public WbConnection(String anId)
 	{
 		this.id = anId;
 	}
@@ -130,7 +130,7 @@ public class WbConnection
 		{
 			return this.sqlConnection.getMetaData().getUserName();
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			return StringUtil.EMPTY_STRING;
 		}
@@ -179,13 +179,15 @@ public class WbConnection
 		runner.setConnection(this);
 		
 		ScriptParser p = new ScriptParser(sql);
+		p.setAlternateLineComment(this.getDbSettings().getLineComment());
 		Iterator itr = p.getIterator();
 		String command = null;
 
 		// The statemenRunner will call clearMessages() when statementDone() 
 		// is called which in turn will call clearWarnings() on this instances.
 		// This will also clear the scriptError and thus all messages
-		// that are collected here. So I have to store the messages locally in the loop
+		// that are collected here. So I have to store the messages locally 
+		// and cannot use the scriptError variable directly
 		StringBuilder messages = new StringBuilder(150);
 		
 		try
@@ -234,7 +236,7 @@ public class WbConnection
 			this.metaData = new DbMetadata(this);
 			this.doOracleClear = this.metaData.isOracle();
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			LogMgr.logError(this, "Error initializing DB Meta Data", e);
 		}
@@ -367,6 +369,7 @@ public class WbConnection
 	 */
 	public void rollback(Savepoint sp)
 	{
+		if (sp == null) return;
 		try
 		{
 			this.sqlConnection.rollback(sp);
@@ -379,6 +382,7 @@ public class WbConnection
 	
 	public void releaseSavepoint(Savepoint sp)
 	{
+		if (sp == null) return;
 		try
 		{
 			this.sqlConnection.releaseSavepoint(sp);
@@ -591,15 +595,17 @@ public class WbConnection
 	public boolean supportsSavepoints()
 	{
 		if (this.sqlConnection == null) return false;
+
 		try
 		{
 			return sqlConnection.getMetaData().supportsSavepoints();
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			return false;
 		}
 	}
+
 	public boolean useJdbcCommit()
 	{
 		return this.metaData.getDbSettings().useJdbcCommit();
@@ -627,7 +633,7 @@ public class WbConnection
 		{
 			return this.sqlConnection.getMetaData().getURL();
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			return null;
 		}
@@ -729,7 +735,7 @@ public class WbConnection
 			db = this.sqlConnection.getMetaData();
 			return db.getDriverVersion();
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			return null;
 		}
