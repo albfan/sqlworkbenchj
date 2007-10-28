@@ -45,7 +45,7 @@
           <Connection code="ResourceMgr.getImage(&quot;delete&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LblResetFont&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblResetColor&quot;)" type="code"/>
         </Property>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[22, 22]"/>

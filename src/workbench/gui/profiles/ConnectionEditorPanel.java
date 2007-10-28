@@ -567,7 +567,7 @@ public class ConnectionEditorPanel
     jPanel1.setLayout(new java.awt.GridBagLayout());
 
     tfWorkspaceFile.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-    tfWorkspaceFile.setToolTipText("");
+    tfWorkspaceFile.setToolTipText(ResourceMgr.getDescription("LblOpenWksp"));
     tfWorkspaceFile.setMaximumSize(new java.awt.Dimension(2147483647, 20));
     tfWorkspaceFile.setName("workspaceFile"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();

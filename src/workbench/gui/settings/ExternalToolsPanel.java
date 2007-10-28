@@ -19,7 +19,6 @@ import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.DefaultListModel;
-import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;

@@ -33,8 +33,7 @@ public class WbFilePicker
 	private boolean allowMultiple;
 	private File[] selectedFiles;
 	private String lastDirProperty = null;
-		
-	/** Creates new form WbFilePicker */
+	
 	public WbFilePicker()
 	{
 		initComponents();
@@ -54,6 +53,13 @@ public class WbFilePicker
 	{
 		this.lastDirProperty = prop;
 		this.lastDir = Settings.getInstance().getProperty(prop, null);
+	}
+	
+	public void setEnabled(boolean flag)
+	{
+		super.setEnabled(flag);
+		this.tfFilename.setEnabled(flag);
+		this.selectFileButton.setEnabled(flag);
 	}
 	
 	/** This method is called from within the constructor to
@@ -141,11 +147,14 @@ public class WbFilePicker
 					}
 					path.append(this.selectedFiles[i].getAbsolutePath().trim());
 				}
-				this.tfFilename.setText(path.toString());
+				String newValue = path.toString();
+				String oldValue = tfFilename.getText();
+				this.tfFilename.setText(newValue);
 				if (this.lastDirProperty != null)
 				{
 					Settings.getInstance().setProperty(lastDirProperty, selectedFiles[0].getParent());
 				}
+				this.firePropertyChange("filename", oldValue, newValue);
 			}
 		}
 		catch (Throwable e)

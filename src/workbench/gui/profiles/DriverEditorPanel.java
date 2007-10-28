@@ -12,6 +12,7 @@
 package workbench.gui.profiles;
 
 import workbench.db.DbDriver;
+import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
@@ -32,6 +33,7 @@ public class DriverEditorPanel
 		String text = ResourceMgr.getDescription("LblDriverLibrary");
 		text = text.replaceAll("%path_sep%", StringUtil.getPathSeparator());
 		lblLibrary.setToolTipText(text);
+		libraryPath.setFileFilter(ExtensionFileFilter.getJarFileFilter());
 		libraryPath.setLastDirProperty("workbench.drivers.lastlibdir");
 		libraryPath.setTextfieldTooltip(text);
 		libraryPath.setAllowMultiple(true);
