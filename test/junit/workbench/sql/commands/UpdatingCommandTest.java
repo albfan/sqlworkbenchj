@@ -17,7 +17,7 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import junit.framework.*;
+import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.WbConnection;
 import workbench.sql.DefaultStatementRunner;
@@ -166,6 +166,56 @@ public class UpdatingCommandTest
 			fail(e.getMessage());
 		}
 	}
+	
+	public void testUpdate()
+	{
+		try
+		{
+			Statement stmt = this.connection.createStatement();
+			stmt.executeUpdate("CREATE MEMORY TABLE update_test(nr integer primary key, some_data VARCHAR(10))");
+			stmt.executeUpdate("insert into update_test (nr, some_data) values (1, 'one')");
+			stmt.executeUpdate("insert into update_test (nr, some_data) values (2, 'two')");
+			stmt.executeUpdate("insert into update_test (nr, some_data) values (3, 'three')");
+			stmt.close();
+			
+			String sql = "-- udpate one row\nupdate update_test set some_data = 'THREE' where nr = 3";
+			runner.runStatement(sql, -1, -1);
+			StatementRunnerResult result = runner.getResult();
+			if (!result.isSuccess()) System.out.println(result.getMessageBuffer().toString());
+			assertEquals("Update not executed", true, result.isSuccess());
+			
+			stmt = this.connection.createStatement();
+			ResultSet rs = stmt.executeQuery("select some_data from update_test where nr = 3");
+			if (rs.next())
+			{
+				String value = rs.getString(1);
+				assertEquals("Wrong value updated", "THREE", value);
+			}
+			else
+			{
+				fail("No data in table");
+			}
+			rs.close();
+			rs = stmt.executeQuery("select count(*) from update_test where nr = 3");
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Wrong row count", 1, count);
+			}
+			else
+			{
+				fail("No data in table");
+			}
+			SqlUtil.closeAll(rs, stmt);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	
 	
 	
 }

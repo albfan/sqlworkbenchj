@@ -374,7 +374,7 @@ public class WbConnection
 		{
 			this.sqlConnection.rollback(sp);
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			LogMgr.logError("WbConnection.rollback(Savepoint)", "Error releasing savepoint", e);
 		}
@@ -387,7 +387,7 @@ public class WbConnection
 		{
 			this.sqlConnection.releaseSavepoint(sp);
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			LogMgr.logError("WbConnection.releaseSavepoint", "Error releasing savepoint", e);
 		}

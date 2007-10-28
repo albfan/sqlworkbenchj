@@ -17,6 +17,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
@@ -27,11 +28,12 @@ import workbench.util.StringUtil;
 public class WbFilePicker
 	extends javax.swing.JPanel
 {
-	private String defaultDir;
+	private String lastDir;
 	private FileFilter fileFilter;
 	private boolean allowMultiple;
 	private File[] selectedFiles;
-
+	private String lastDirProperty = null;
+		
 	/** Creates new form WbFilePicker */
 	public WbFilePicker()
 	{
@@ -46,6 +48,12 @@ public class WbFilePicker
 	public void setButtonTooltip(String text)
 	{
 		selectFileButton.setToolTipText(text);
+	}
+	
+	public void setLastDirProperty(String prop)
+	{
+		this.lastDirProperty = prop;
+		this.lastDir = Settings.getInstance().getProperty(prop, null);
 	}
 	
 	/** This method is called from within the constructor to
@@ -103,9 +111,9 @@ public class WbFilePicker
 		{
 			JFileChooser jf = new JFileChooser();
 			jf.setMultiSelectionEnabled(allowMultiple);
-			if (this.defaultDir != null)
+			if (this.lastDir != null)
 			{
-				jf.setCurrentDirectory(new File(this.defaultDir));
+				jf.setCurrentDirectory(new File(this.lastDir));
 			}
 			if (this.fileFilter != null)
 			{
@@ -134,6 +142,10 @@ public class WbFilePicker
 					path.append(this.selectedFiles[i].getAbsolutePath().trim());
 				}
 				this.tfFilename.setText(path.toString());
+				if (this.lastDirProperty != null)
+				{
+					Settings.getInstance().setProperty(lastDirProperty, selectedFiles[0].getParent());
+				}
 			}
 		}
 		catch (Throwable e)
@@ -175,11 +187,6 @@ public class WbFilePicker
 	public void setAllowMultiple(boolean flag)
 	{
 		this.allowMultiple = flag;
-	}
-
-	public void setDefaultDirectory(String dir)
-	{
-		this.defaultDir = dir;
 	}
 
 	public void setFileFilter(FileFilter f)

@@ -975,6 +975,7 @@ public class Settings
 			this.props.remove("workbench.sql.dbms_output.defaultbuffer");
 			this.props.remove("workbench.sql.enable_dbms_output");
 			
+			this.props.remove("workbench.db.stripprocversion");
 		}
 		catch (Throwable e)
 		{

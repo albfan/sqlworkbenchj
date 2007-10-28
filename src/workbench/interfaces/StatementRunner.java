@@ -57,6 +57,11 @@ public interface StatementRunner
 
 	void setIgnoreDropErrors(boolean flag);
 
+	void setSavepoint();
+	void rollbackSavepoint();
+	void releaseSavepoint();
+	void setUseSavepoint(boolean flag);
+	
 	public class Factory
 	{
 		public static StatementRunner createRunner()

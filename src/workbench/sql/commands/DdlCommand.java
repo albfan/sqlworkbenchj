@@ -93,7 +93,7 @@ public class DdlCommand extends SqlCommand
 			
 			if (useSavepoint)
 			{
-				setSavepoint();
+				this.ddlSavepoint = currentConnection.setSavepoint();
 			}
 			
 			if (isDropCommand(aSql) && this.runner.getIgnoreDropErrors())
@@ -102,17 +102,11 @@ public class DdlCommand extends SqlCommand
 				{
 					this.currentStatement.executeUpdate(aSql);
 					result.addMessage(ResourceMgr.getString("MsgDropSuccess"));
-					if (useSavepoint)
-					{
-						releaseSavepoint();
-					}
 				}
 				catch (Exception th)
 				{
-					if (useSavepoint)
-					{
-						rollbackSavepoint();
-					}
+					this.currentConnection.rollback(ddlSavepoint);					
+					this.ddlSavepoint = null;
 					result.addMessage(ResourceMgr.getString("MsgDropWarning"));
 					result.addMessage(ExceptionUtil.getDisplay(th));
 					result.setSuccess();
@@ -149,18 +143,12 @@ public class DdlCommand extends SqlCommand
 						result.setFailure();
 					}
 				}
-				if (useSavepoint)
-				{
-					releaseSavepoint();
-				}
 			}
+			this.currentConnection.releaseSavepoint(ddlSavepoint);
 		}
 		catch (Exception e)
 		{
-			if (useSavepoint)
-			{
-				rollbackSavepoint();
-			}
+			this.currentConnection.rollback(ddlSavepoint);
 			result.clear();
 
 			StringBuilder msg = new StringBuilder(150);
@@ -178,7 +166,7 @@ public class DdlCommand extends SqlCommand
 			result.addMessageNewLine();
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
 
-			this.addExtendErrorInfo(currentConnection, aSql, result);
+			addExtendErrorInfo(currentConnection, aSql, result);
 			result.setFailure();
 			LogMgr.logSqlError("DdlCommand.execute()", aSql, e);
 		}
@@ -186,65 +174,16 @@ public class DdlCommand extends SqlCommand
 		{
 			// we know that we don't need the statement any longer, so to make
 			// sure everything is cleaned up, we'll close it here
-			this.done();
+			done();
 		}
 
 		return result;
 	}
 
-	private void setSavepoint()
+	public void done()
 	{
-		try
-		{
-			this.ddlSavepoint = this.currentConnection.getSqlConnection().setSavepoint();
-			LogMgr.logDebug("DdlCommand.setSavepoint()", "DDL Savepoint created");
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DdlCommand.setSavepoint()", "Error setting savepoint", e);
-			this.ddlSavepoint = null;
-		}
-	}
-	
-	private void releaseSavepoint()
-	{
-		try
-		{
-			if (this.ddlSavepoint != null)
-			{
-				this.currentConnection.getSqlConnection().releaseSavepoint(this.ddlSavepoint);
-				LogMgr.logDebug("DdlCommand.releaseSavepoint()", "DDL Savepoint released.");
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DdlCommand.setSavepoint()", "Error releasing savepoint", e);
-		}
-		finally
-		{
-			this.ddlSavepoint = null;
-		}
-	}
-
-	private void rollbackSavepoint()
-	{
-		try
-		{
-			if (this.ddlSavepoint != null)
-			{
-				this.currentConnection.getSqlConnection().rollback(this.ddlSavepoint);
-				LogMgr.logDebug("DdlCommand.releaseSavepoint()", "Rollback to DDL savepoint successful");
-				this.ddlSavepoint = null;
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DdlCommand.rollbackSavepoint()", "Error rolling back savepoint", e);
-		}
-		finally
-		{
-			this.ddlSavepoint = null;
-		}
+		super.done();
+		this.ddlSavepoint = null;
 	}
 	
 	public boolean isDropCommand(String sql)

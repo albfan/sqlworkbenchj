@@ -12,20 +12,9 @@
 package workbench.sql.commands;
 
 import junit.framework.TestCase;
-import junit.framework.*;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import workbench.db.WbConnection;
-import workbench.util.ExceptionUtil;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.sql.SqlCommand;
+import workbench.TestUtil;
+import workbench.interfaces.StatementRunner;
 import workbench.sql.StatementRunnerResult;
-import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 /**
  *
@@ -70,6 +59,33 @@ public class DdlCommandTest
 		catch (Exception e)
 		{
 			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testIgnoreDropErrors()
+	{
+		try
+		{
+			TestUtil util = new TestUtil("ignoreDrop");
+			StatementRunner runner = util.createConnectedStatementRunner();
+			String sql = "drop table does_not_exist";
+			runner.setIgnoreDropErrors(true);
+			runner.runStatement(sql, 0, 0);
+			StatementRunnerResult result = runner.getResult();
+			assertTrue(result.isSuccess());
+			
+			runner.setIgnoreDropErrors(false);
+			runner.setUseSavepoint(true);
+			runner.runStatement(sql, 0, 0);
+			result = runner.getResult();
+			assertFalse(result.isSuccess());
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
 		}
 	}
 

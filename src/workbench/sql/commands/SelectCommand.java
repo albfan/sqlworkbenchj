@@ -57,6 +57,7 @@ public class SelectCommand extends SqlCommand
 		{
 			boolean isPrepared = false;
 
+			this.runner.setSavepoint();
 			if (Settings.getInstance().getCheckPreparedStatements()
 				  && currentConnection.getPreparedStatementPool().isRegistered(aSql))
 			{
@@ -105,23 +106,7 @@ public class SelectCommand extends SqlCommand
 
 			if (rs != null)
 			{
-				// if a ResultSetConsumer is waiting, we have to store the
-				// result set, so that not all the data is read into memory
-				// If the result set is not consumed, we can create the DataStore
-				// right away. This is necessary, because with Oracle, the stream to
-				// read LONG columns would be closed, if any other statement
-				// is executed before the result set is retrieved.
-				// (The result set itself can be retrieved but access to the LONG columns
-				// would cause an error)
-				if (this.isConsumerWaiting())
-				{
-					result.addResultSet(rs);
-					appendWarnings(result);
-				}
-				else
-				{
-					processResults(result, true, rs);
-				}
+				processResults(result, true, rs);
 
 				if (!isCancelled)
 				{
@@ -142,6 +127,7 @@ public class SelectCommand extends SqlCommand
 			{
 				throw new Exception(ResourceMgr.getString("MsgReceivedNullResultSet"));
 			}
+			this.runner.releaseSavepoint();
 		}
 		catch (Exception e)
 		{
@@ -151,6 +137,7 @@ public class SelectCommand extends SqlCommand
 			appendWarnings(result);
 			LogMgr.logSqlError("SelectCommand.execute()", aSql, e);
 			result.setFailure();
+			this.runner.rollbackSavepoint();
 		}
 
 		return result;

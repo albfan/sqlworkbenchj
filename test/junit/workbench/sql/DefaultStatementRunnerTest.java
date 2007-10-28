@@ -11,7 +11,7 @@
  */
 package workbench.sql;
 
-import junit.framework.*;
+import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
@@ -54,7 +54,6 @@ public class DefaultStatementRunnerTest
 
 			boolean verbose = runner.getVerboseLogging();
 			assertEquals("Feedback not executed", false, verbose);
-			
 		}
 		catch (Exception e)
 		{

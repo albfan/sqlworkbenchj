@@ -32,6 +32,7 @@ public class DriverEditorPanel
 		String text = ResourceMgr.getDescription("LblDriverLibrary");
 		text = text.replaceAll("%path_sep%", StringUtil.getPathSeparator());
 		lblLibrary.setToolTipText(text);
+		libraryPath.setLastDirProperty("workbench.drivers.lastlibdir");
 		libraryPath.setTextfieldTooltip(text);
 		libraryPath.setAllowMultiple(true);
     text = ResourceMgr.getDescription("SelectDriverLibrary");

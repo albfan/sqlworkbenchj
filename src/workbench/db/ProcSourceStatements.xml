@@ -120,7 +120,7 @@
    <string>PostgreSQL</string> 
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
-     <string>SELECT '$$ '|| p.prosrc|| ' $$ LANGUAGE '||l.lanname
+     <string>SELECT '$$ '|| trim(p.prosrc) || ' $$ LANGUAGE '||l.lanname
 FROM pg_proc p, pg_language l, pg_namespace n
 where p.prolang = l.oid
 and p.pronamespace = n.oid

@@ -12,8 +12,6 @@
 package workbench.sql.commands;
 
 import java.sql.SQLException;
-
-import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;

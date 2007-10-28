@@ -74,11 +74,11 @@ public class JdbcProcedureReader
 					exists = true;
 				}
 			}
-			if (sp != null) this.connection.releaseSavepoint(sp);
+			this.connection.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
-			if (sp != null) this.connection.rollback(sp);
+			this.connection.rollback(sp);
 			LogMgr.logError("JdbcProcedureReader.procedureExists()", "Error checking procedure", e);
 		}
 		finally
@@ -105,12 +105,12 @@ public class JdbcProcedureReader
 			}
 			ResultSet rs = this.connection.getSqlConnection().getMetaData().getProcedures(aCatalog, aSchema, "%");
 			DataStore ds = fillProcedureListDataStore(rs);
-			if (sp != null) this.connection.releaseSavepoint(sp);
+			this.connection.releaseSavepoint(sp);
 			return ds;
 		}
 		catch (SQLException sql)
 		{
-			if (sp != null) this.connection.rollback(sp);
+			this.connection.rollback(sp);
 			throw sql;
 		}
 	}
@@ -130,8 +130,6 @@ public class JdbcProcedureReader
 	{
 		DataStore ds = buildProcedureListDataStore(this.connection.getMetadata());
 		
-		String versionDelimiter = this.connection.getMetadata().getDbSettings().getProcVersionDelimiter();
-		boolean stripVersion = this.connection.getMetadata().getDbSettings().getStripProcedureVersion();
 		try
 		{
 			while (rs.next())
@@ -152,19 +150,11 @@ public class JdbcProcedureReader
 					iType = new Integer(type);
 				}
 				int row = ds.addRow();
+				
 
-
-				if (stripVersion)
-				{
-					int pos = name.lastIndexOf(versionDelimiter);
-					if (pos > 1)
-					{
-						name = name.substring(0,pos);
-					}
-				}
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, cat);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
-				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, name);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, stripVersionInfo(name));
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, iType);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
 			}
@@ -190,14 +180,29 @@ public class JdbcProcedureReader
 			return ProcedureReader.PROC_RESULT_UNKNOWN;
 	}
 	
-	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
-		throws SQLException
+	protected DataStore createProcColsDataStore()
 	{
 		final String cols[] = {"COLUMN_NAME", "TYPE", "TYPE_NAME", "java.sql.Types", "REMARKS"};
 		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR};
 		final int sizes[] =   {20, 10, 18, 5, 30};
 		DataStore ds = new DataStore(cols, types, sizes);
-
+		return ds;
+	}
+	
+	private String stripVersionInfo(String procname)
+	{
+		DbSettings dbS = this.connection.getMetadata().getDbSettings();
+		String versionDelimiter = dbS.getProcVersionDelimiter();
+		if (StringUtil.isEmptyString(versionDelimiter)) return procname;
+		int pos = procname.lastIndexOf(versionDelimiter);
+		if (pos < 0) return procname;
+		return procname.substring(0,pos);
+	}
+	
+	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
+		throws SQLException
+	{
+		DataStore ds = createProcColsDataStore();
 		ResultSet rs = null;
 		Savepoint sp = null;
 		try
@@ -245,11 +250,11 @@ public class JdbcProcedureReader
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, sqlType);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_REMARKS, rem);
 			}
-			if (sp != null) this.connection.releaseSavepoint(sp);
+			this.connection.releaseSavepoint(sp);
 		}
 		catch (SQLException sql)
 		{
-			if (sp != null) this.connection.rollback(sp);
+			this.connection.rollback(sp);
 			throw sql;
 		}
 		finally
@@ -271,16 +276,8 @@ public class JdbcProcedureReader
 			throw new NoConfigException();
 		}
 		
-		String procName = def.getProcedureName();
+		String procName = stripVersionInfo(def.getProcedureName());
 		
-		// MS SQL Server (sometimes?) appends a ;1 to
-		// the end of the procedure name
-		int i = procName.indexOf(';');
-		if (i > -1 && this.connection.getMetadata().isSqlServer())
-		{
-			procName = procName.substring(0, i);
-		}
-
 		StringBuilder source = new StringBuilder(500);
 
 		StringBuilder header = getProcedureHeader(def.getCatalog(), def.getSchema(), procName, def.getResultType());
@@ -317,17 +314,14 @@ public class JdbcProcedureReader
 					source.append(line);
 				}
 			}
-			if (sp != null) this.connection.releaseSavepoint(sp);
+			this.connection.releaseSavepoint(sp);
 		}
 		catch (SQLException e)
 		{
 			if (sp != null) this.connection.rollback(sp);
 			LogMgr.logError("JdbcProcedureReader.getProcedureSource()", "Error retrieving procedure source", e);
 			source = new StringBuilder(ExceptionUtil.getDisplay(e));
-			if (this.connection.getMetadata().isPostgres())
-			{
-				try { this.connection.rollback(); } catch (Throwable th) {}
-			}
+			this.connection.rollback(sp);
 		}
 		finally
 		{

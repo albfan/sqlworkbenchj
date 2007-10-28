@@ -50,6 +50,7 @@ public class UpdatingCommand extends SqlCommand
 		try
 		{
 			boolean isPrepared = false;
+			
 			if (checkLobParameter)
 			{
 				try
@@ -63,6 +64,8 @@ public class UpdatingCommand extends SqlCommand
 					return result;
 				}
 			}
+			
+			runner.setSavepoint();
 			
 			if (lob != null && lob.containsParameter())
 			{
@@ -91,9 +94,11 @@ public class UpdatingCommand extends SqlCommand
 			appendSuccessMessage(result);
 			result.setSuccess();
 			processResults(result, false);
+			runner.releaseSavepoint();
 		}
 		catch (Exception e)
 		{
+			runner.rollbackSavepoint();
 			addErrorInfo(result, sql, e);
 			LogMgr.logSqlError("UpdatingCommnad.execute()", sql, e);
 		}

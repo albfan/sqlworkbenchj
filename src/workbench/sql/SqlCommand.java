@@ -341,6 +341,15 @@ public class SqlCommand
 				{
 					rs = this.currentStatement.getResultSet();
 				}
+				
+				if (this.isConsumerWaiting() && rs != null)
+				{
+					result.addResultSet(rs);
+					// only one resultSet can be exported
+					// if we call getMoreResults() another time, the previous ResultSet will be closed!
+					break;
+				}
+				
 				if (rs != null) 
 				{
 					// we have to use an instance variable for the retrieval, otherwise the retrieval
@@ -518,7 +527,7 @@ public class SqlCommand
 	 * 
 	 * Returns true if the passed SQL string could be a "batched" 
 	 * statement that actually contains more than one statement.
-	 * SQL Server supports these kind of "batches". If this is 
+	 * SQL Server supports these kind of "batches". If this is the case
 	 * affected rows will always be shown, because we cannot know
 	 * if the statement did not update anything or if it actually
 	 * updated only 0 rows (for some reason SQL Server seems to 
@@ -533,11 +542,12 @@ public class SqlCommand
 	{
 		if (this.currentConnection == null) return false;
 		DbSettings settings = currentConnection.getDbSettings();
-		if(settings.supportsBatchedStatements())
+		if (settings.supportsBatchedStatements())
 		{
 			// TODO: analyze the statement properly to find out if it is really a batched statement.
 			return (sql.indexOf('\n') > -1);
 		}
 		return false;
 	}
+	
 }

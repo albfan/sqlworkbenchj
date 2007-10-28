@@ -191,16 +191,9 @@ public class DbSettings
 		return dbs.contains(this.getDbId());
 	}
 
-	public boolean getStripProcedureVersion()
-	{
-		String ids = Settings.getInstance().getProperty("workbench.db.stripprocversion", "");
-		List l = StringUtil.stringToList(ids, ",", true, true, false);
-		return l.contains(this.dbId);
-	}
-	
 	public String getProcVersionDelimiter()
 	{
-		return Settings.getInstance().getProperty("workbench.db.procversiondelimiter." + this.getDbId(), "");
+		return Settings.getInstance().getProperty("workbench.db.procversiondelimiter." + this.getDbId(), null);
 	}
 
 	public boolean supportsTruncate()
