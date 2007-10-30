@@ -209,6 +209,11 @@ public class TableDataPanel
 		this.add(dataDisplay, BorderLayout.CENTER);
 	}
 
+	public void showFocusBorder()
+	{
+		this.dataDisplay.getTable().showFocusBorder();
+	}
+
 	public void setResultContainer(MainWindow container)
 	{
 		if (this.dataDisplay != null && container != null)

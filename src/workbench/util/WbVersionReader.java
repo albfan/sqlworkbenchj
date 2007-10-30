@@ -41,6 +41,16 @@ public class WbVersionReader
   private ActionListener client;
 	private WbThread readThread;
 	
+	/**
+	 * Constructor only for unit testing
+	 */
+	WbVersionReader(VersionNumber dev, VersionNumber stable)
+	{
+		this.currentDevBuildNumber = dev;
+		this.currentStableBuildNumber = stable;
+		this.userAgent = "VersionTest";
+	}
+	
 	public WbVersionReader(ActionListener a)
 	{
 		this("", a);
@@ -122,7 +132,11 @@ public class WbVersionReader
 
 	public UpdateVersion getAvailableUpdate()
 	{
-		VersionNumber current = ResourceMgr.getBuildNumber();
+		return getAvailableUpdate(ResourceMgr.getBuildNumber());
+	}
+	
+	public UpdateVersion getAvailableUpdate(VersionNumber current)
+	{
 		if (currentDevBuildNumber != null && currentDevBuildNumber.isNewerThan(current)) return UpdateVersion.devBuild;
 		if (currentStableBuildNumber != null && currentStableBuildNumber.isNewerThan(current)) return UpdateVersion.stable;
 		return UpdateVersion.none;

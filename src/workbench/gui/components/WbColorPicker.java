@@ -43,6 +43,10 @@ public class WbColorPicker
 		initComponents();
 		this.resetButton.setEnabled(showReset);
 		this.resetButton.setVisible(showReset);
+		if (showReset)
+		{
+			this.resetButton.setIcon(ResourceMgr.getImage("Delete"));
+		}
 		this.defaultLabel.setVisible(false);
 		Dimension d = null;
 		if (showReset)
@@ -81,7 +85,6 @@ public class WbColorPicker
     samplePanel.setPreferredSize(new java.awt.Dimension(18, 18));
     add(samplePanel);
 
-    resetButton.setIcon(ResourceMgr.getImage("delete"));
     resetButton.setToolTipText(ResourceMgr.getDescription("LblResetColor"));
     resetButton.setMaximumSize(new java.awt.Dimension(22, 22));
     resetButton.setMinimumSize(new java.awt.Dimension(22, 22));

@@ -235,6 +235,11 @@ public class Settings
 		this.removeObsolete();
 	}
 
+	public boolean showFocusInDbExplorer()
+	{
+		return getBoolProperty("workbench.gui.dbobjects.showfocus", false);
+	}
+	
 	public void setLanguage(Locale locale)
 	{
 		setProperty("workbench.gui.language", locale.getLanguage());

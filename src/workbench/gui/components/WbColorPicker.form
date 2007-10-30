@@ -41,9 +41,6 @@
     </Container>
     <Component class="javax.swing.JButton" name="resetButton">
       <Properties>
-        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getImage(&quot;delete&quot;)" type="code"/>
-        </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getDescription(&quot;LblResetColor&quot;)" type="code"/>
         </Property>

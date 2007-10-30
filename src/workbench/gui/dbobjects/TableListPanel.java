@@ -90,10 +90,7 @@ import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.util.ExceptionUtil;
 import java.awt.Component;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.util.Iterator;
-import javax.swing.KeyStroke;
 import workbench.WbManager;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.sql.PanelContentSender;
@@ -390,6 +387,21 @@ public class TableListPanel
 		this.toggleTableSource = new ToggleTableSourceAction(this);
 		this.splitPane.setOneTouchTooltip(toggleTableSource.getTooltipTextWithKeys());
 		setupActionMap();
+
+		if (Settings.getInstance().showFocusInDbExplorer())
+		{
+			EventQueue.invokeLater(new Runnable() 
+			{
+				public void run()
+				{
+					tableDefinition.showFocusBorder();
+					indexes.showFocusBorder();
+					tableList.showFocusBorder();
+					tableData.showFocusBorder();
+				}
+			});
+		}
+		
 	}
 
 	private void extendPopupMenu()

@@ -137,6 +137,11 @@ public class TableDefinitionPanel
 		firePropertyChange(INDEX_PROP, null, indexName);
 	}
 
+	public void showFocusBorder()
+	{
+		this.tableDefinition.showFocusBorder();
+	}
+	
 	private final Object busyLock = new Object();
 	public boolean isBusy()
 	{

@@ -177,7 +177,7 @@ public class WbManager
 			Object[] args = new Object[] { parent };
 			dialog = (JDialog)cons.newInstance(args);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			WbSwingUtilities.center(dialog, parent);
+			if (dialog.isModal()) WbSwingUtilities.center(dialog, parent);
 			dialog.setVisible(true);
 		}
 		catch (Exception ex)
@@ -186,7 +186,7 @@ public class WbManager
 		}
 		finally
 		{
-			if (dialog != null)
+			if (dialog != null && dialog.isModal())
 			{
 				dialog.dispose();
 				dialog = null;

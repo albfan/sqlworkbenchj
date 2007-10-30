@@ -22,6 +22,7 @@ import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.DropDownButton;
+import workbench.gui.components.FocusIndicator;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.PanelContentSender;
@@ -29,6 +30,7 @@ import workbench.interfaces.Reloadable;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
@@ -76,6 +78,10 @@ public class DbObjectSourcePanel
 			selectTabMenu = new EditorTabSelectMenu(this, ResourceMgr.getString("LblEditScriptSource"), "LblEditInNewTab", "LblEditInTab", parent);
 			editButton.setDropDownMenu(selectTabMenu.getPopupMenu());
 			toolbar.add(editButton);
+		}
+		if (Settings.getInstance().showFocusInDbExplorer())
+		{
+			new FocusIndicator(sourceEditor, sourceEditor);
 		}
 	}
 
@@ -214,4 +220,5 @@ public class DbObjectSourcePanel
 	{
 		this.setText("");
 	}
+
 }

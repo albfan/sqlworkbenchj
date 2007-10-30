@@ -175,6 +175,10 @@ public class WbTable
 	private boolean highlightRequiredFields = false;
 	private boolean useMultilineTooltip = true;
 	private Color requiredColor;
+	
+	private boolean showFocusPending = false;
+	private FocusIndicator focusIndicator = null;
+	
 	// </editor-fold>
 	
 	public WbTable()
@@ -307,6 +311,25 @@ public class WbTable
 		this.getActionMap().put("wbtable-stop-editing", a);
 	}
 
+	public void showFocusBorder()
+	{
+		if (this.scrollPane == null)
+		{
+			this.showFocusPending = true;
+		}
+		else
+		{
+			if (this.focusIndicator != null)
+			{
+				this.focusIndicator.dispose();
+			}
+			else
+			{
+				this.focusIndicator = new FocusIndicator(this, scrollPane);
+			}
+		}
+	}
+	
 	public void setShowPopupMenu(boolean aFlag)
 	{
 		this.showPopup = aFlag;
@@ -584,6 +607,12 @@ public class WbTable
 					this.scrollPane = null;
 				}
 			}
+		}
+		
+		if (this.showFocusPending && this.scrollPane != null)
+		{
+			this.showFocusPending = false;
+			showFocusBorder();
 		}
 		this.checkMouseListener();
 	}
@@ -1805,7 +1834,7 @@ public class WbTable
 
 	public void focusLost(FocusEvent e)
 	{
-		this.stopEditing();
+		//this.stopEditing();
 	}
 
 	public long addRow()
