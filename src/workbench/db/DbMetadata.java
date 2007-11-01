@@ -119,7 +119,6 @@ public class DbMetadata
 	private boolean columnsListInViewDefinitionAllowed = true;
 	
 	private String quoteCharacter;
-	private String dbVersion;
 	private SqlKeywordHandler keywordHandler;
 	
 	private Pattern selectIntoPattern = null;
@@ -198,27 +197,19 @@ public class DbMetadata
 			this.sequenceReader = new PostgresSequenceReader(this.dbConnection);
 			this.procedureReader = new PostgresProcedureReader(this.dbConnection);
 			this.indexReader = new PostgresIndexReader(this);
-			this.ddlFilter = new PostgresDDLFilter();
+			// Starting with the version 8.2 the driver supports the dollar quoting
+			// out of the box, so there is no need to use our own workaround
+			if (!JdbcUtils.hasMiniumDriverVersion(dbConnection.getSqlConnection(), "8.2"))
+			{
+				this.ddlFilter = new PostgresDDLFilter();
+			}
 		}
 		else if (productLower.indexOf("hsql") > -1)
 		{
 			this.isHsql = true;
 			this.constraintReader = new HsqlConstraintReader(this.dbConnection.getSqlConnection());
 			this.sequenceReader = new HsqlSequenceReader(this.dbConnection.getSqlConnection());
-			try
-			{
-				int major = metaData.getDatabaseMajorVersion();
-				int minor = metaData.getDriverMinorVersion();
-				if (major == 1 && minor <= 7)
-				{
-					// HSQLDB 1.7.x does not support a column list in the view definition
-					this.columnsListInViewDefinitionAllowed = false;
-				}
-			}
-			catch (Exception e)
-			{
-				this.columnsListInViewDefinitionAllowed = false;
-			}
+			this.columnsListInViewDefinitionAllowed = JdbcUtils.hasMinimumServerVersion(dbConnection, "1.8");
 		}
 		else if (productLower.indexOf("firebird") > -1)
 		{
@@ -228,6 +219,8 @@ public class DbMetadata
 			// Jaybird 2.0 reports the Firebird version in the 
 			// productname. To ease the DBMS handling we'll use the same
 			// product name that is reported with the 1.5 driver. 
+			// Otherwise the DBID would look something like:
+			// firebird_2_0_wi-v2_0_1_12855_firebird_2_0_tcp__wallace__p10
 			this.productName = "Firebird";
 		}
 		else if (productLower.indexOf("sql server") > -1)
@@ -328,15 +321,6 @@ public class DbMetadata
 		}
 		if (StringUtil.isEmptyString(quoteCharacter)) this.quoteCharacter = "\"";
 
-		try
-		{
-			this.dbVersion = this.metaData.getDatabaseProductVersion();
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("DbMetadata.<init>", "errro calling getDatabaseProductVersion()", e);
-		}
-
 		this.dbSettings = new DbSettings(this.getDbId(), this.productName);
 		this.createInlineConstraints = settings.getServersWithInlineConstraints().contains(productName);
 		this.useNullKeyword = !settings.getServersWithNoNullKeywords().contains(this.getDbId());
@@ -350,7 +334,7 @@ public class DbMetadata
 			{
 				this.selectIntoPattern = Pattern.compile(regex);
 			}
-			catch (Exception e)
+			catch (Throwable e)
 			{
 				this.selectIntoPattern = null;
 				LogMgr.logError("DbMetadata.<init>", "Invalid pattern to identify a SELECT INTO a new table: " + regex, e);
@@ -490,13 +474,29 @@ public class DbMetadata
 		return this.dbId;
 	}
 
-	public String getDbVersion() { return this.dbVersion; }
+	public String getDbVersion() 
+	{ 
+		try
+		{
+			return this.dbConnection.getSqlConnection().getMetaData().getDatabaseProductVersion();
+		}
+		catch (Throwable ex)
+		{
+			LogMgr.logError("DbMetadata.getDbVersion()", "Error retrieving DB version", ex);
+			return "n/a";
+		}
+	}
 
 	public DbSettings getDbSettings() { return this.dbSettings; }
 	
 	/**
-	 *	Returns true if the current DBMS supports a SELECT syntax
-	 *	which creates a new table (e.g. SELECT .. INTO new_table FROM old_table)
+	 * Returns true if the current DBMS supports a SELECT syntax
+	 * which creates a new table (e.g. SELECT .. INTO new_table FROM old_table)
+	 * 
+	 * It simply checks if a regular expression to detect this kind of 
+	 * statements has been defined.
+	 * 
+	 * @see #isSelectIntoNewTable(boolean)
 	 */
 	public boolean supportsSelectIntoNewTable()
 	{
@@ -504,11 +504,15 @@ public class DbMetadata
 	}
 
 	/**
-	 *	Checks if the given SQL string is actually some kind of table
-	 *	creation "disguised" as a SELECT. This will always return false
-	 *	if supportsSelectIntoNewTable() returns false.
+	 * Checks if the given SQL string is actually some kind of table
+	 * creation "disguised" as a SELECT. 
+	 * Whether a statement is identified as a SELECT into a new table
+	 * is defined through the regular expression that can be set for
+	 * the DBMS using the property:
+	 * <tt>workbench.sql.selectnewtablepattern.[dbid]</tt>
 	 * 
-	 *	Otherwise it will check for the DB specific syntax.
+	 * This method returns true if a Regex has been defined and matches the given SQL
+	 * 
 	 */
 	public boolean isSelectIntoNewTable(String sql)
 	{
@@ -3857,7 +3861,7 @@ public class DbMetadata
 	private String adjustHsqlQuery(String query)
 	{
 		if (!this.isHsql) return query;
-		if (this.dbVersion.startsWith("1.8")) return query;
+		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.8")) return query;
 
 		Pattern p = Pattern.compile("\\sINFORMATION_SCHEMA\\.", Pattern.CASE_INSENSITIVE);
 		Matcher m = p.matcher(query);

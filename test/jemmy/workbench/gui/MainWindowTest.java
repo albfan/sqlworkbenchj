@@ -61,6 +61,32 @@ public class MainWindowTest
 		}
 	}
 
+	private void aboutTest()
+	{
+		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
+		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Help|About", "|");
+		
+		JDialogOperator dialog = new JDialogOperator(mainWindow, "About SQL Workbench/J");
+		dialog.setVisible(false);
+		
+		QueueTool tool = new QueueTool();
+		tool.waitEmpty();
+		dialog.dispose();
+		
+	}	
+	
+	private void whatsNewTest()
+	{
+		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
+		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Help|What's new", "|");
+		QueueTool tool = new QueueTool();
+		tool.waitEmpty();
+		
+		JDialogOperator dialog = new JDialogOperator(mainWindow, "What's new");
+		dialog.setVisible(false);
+		dialog.dispose();
+	}	
+	
 	private void settingsTest()
 	{
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
@@ -268,7 +294,6 @@ public class MainWindowTest
 	{
 		Runnable r = new Runnable()
 			{
-
 				public void run()
 				{
 					panel.updateDb();
@@ -283,7 +308,6 @@ public class MainWindowTest
 	{
 		Runnable r = new Runnable()
 			{
-
 				public void run()
 				{
 					panel.getEditor().setText(sql);
@@ -301,6 +325,8 @@ public class MainWindowTest
 		{
 			startApplication();
 			connect();
+			whatsNewTest();
+			aboutTest();
 			settingsTest();
 			runSql();
 			appendTest();

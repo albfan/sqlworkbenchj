@@ -11,8 +11,6 @@
  */
 package workbench.db.postgres;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import workbench.db.DDLFilter;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
@@ -23,7 +21,6 @@ import workbench.sql.formatter.SQLToken;
 public class PostgresDDLFilter
 	implements DDLFilter
 {
-	private Pattern createFunc = Pattern.compile("CREATE\\s*(OR\\s*REPLACE|)\\s*FUNCTION", Pattern.CASE_INSENSITIVE);
 	
 	public PostgresDDLFilter()
 	{
@@ -39,22 +36,27 @@ public class PostgresDDLFilter
 	 * 
 	 * So we'll replace the "dollar quotes" with regular single quotes
 	 * Every single quote inside the function body will be replaced with 
-	 * two single quotes to properly "escape" them
+	 * two single quotes to properly "escape" them.
+	 * 
+	 * This does not mimic psql's quoting completely as basically
+	 * you can also use some descriptive words between the dollar signs, such 
+	 * as $body$ which will not be detected by this method.
 	 */
 	public String adjustDDL(String sql)
 	{
 		int bodyStart = -1;
 		int bodyEnd = -1;
 		
-		// Only valid for CREATE ... FUNCTION or PROCEDURE statements
-		Matcher m = createFunc.matcher(sql);
-		if (!m.find()) return sql;
-		
 		SQLLexer lexer = new SQLLexer(sql);
 		
 		try
 		{
 			SQLToken t = lexer.getNextToken(false, false);
+			if (t != null)
+			{
+				String v = t.getContents();
+				if (!"CREATE".equals(v) && !"CREATE OR REPLACE".equals(v)) return sql;
+			}
 			
 			while (t != null)
 			{

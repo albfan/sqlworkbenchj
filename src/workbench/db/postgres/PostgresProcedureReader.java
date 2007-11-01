@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import workbench.db.JdbcProcedureReader;
+import workbench.db.JdbcUtils;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -210,24 +211,24 @@ public class PostgresProcedureReader
 	public DataStore getProcedureColumns(String catalog, String schema, String procname)
 		throws SQLException
 	{
-		String version = connection.getMetadata().getDbVersion();
-		int majorVersion = 0;
-		int minorVersion = 0;
-		
-		try
-		{
-			String[] parts = version.split("\\.");
-			majorVersion = (parts.length > 0 ? Integer.valueOf(parts[0]) : 0);
-			minorVersion = (parts.length > 1 ? Integer.valueOf(parts[1]) : 0);
-		}
-		catch (Throwable th)
-		{
-			majorVersion = 0;
-			minorVersion = 0;
-		}
-		
+//		String version = connection.getMetadata().getDbVersion();
+//		int majorVersion = 0;
+//		int minorVersion = 0;
+//		
+//		try
+//		{
+//			String[] parts = version.split("\\.");
+//			majorVersion = (parts.length > 0 ? Integer.valueOf(parts[0]) : 0);
+//			minorVersion = (parts.length > 1 ? Integer.valueOf(parts[1]) : 0);
+//		}
+//		catch (Throwable th)
+//		{
+//			majorVersion = 0;
+//			minorVersion = 0;
+//		}
+//		
 		if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.fixproctypes", true) 
-			  && majorVersion >= 8 && minorVersion >= 1)
+			  && JdbcUtils.hasMinimumServerVersion(connection, "8.1"))
 		{
 			return getColumns(catalog, schema, procname);
 		}

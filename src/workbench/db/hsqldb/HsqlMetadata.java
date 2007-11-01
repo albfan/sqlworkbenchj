@@ -12,7 +12,7 @@
 package workbench.db.hsqldb;
 
 import java.sql.Connection;
-import java.sql.SQLException;
+import workbench.db.JdbcUtils;
 
 /**
  *
@@ -22,27 +22,7 @@ public class HsqlMetadata
 {
 	public static boolean supportsInformationSchema(Connection con)
 	{
-		int major = 0;
-		int minor = 0;
-		try
-		{
-			major = con.getMetaData().getDatabaseMajorVersion();
-			minor = con.getMetaData().getDriverMinorVersion();
-		}
-		catch (SQLException e)
-		{
-			major = 1;
-			minor = 7;
-		}
-		
-		if (major >= 1 && minor >= 8)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		return JdbcUtils.hasMinimumServerVersion(con, "1.8");
 	}	
 	
 }

@@ -19,7 +19,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import workbench.log.LogMgr;
 
 /**
  * @author  support@sql-workbench.net
@@ -31,6 +35,7 @@ public class FileUtil
 	/*
 	 * Closes all streams in the list.
 	 * @param a list of streams to close
+	 * @see #closeQuitely(Closeable)
 	 */
 	public static void closeStreams(List<Closeable> streams)
 	{
@@ -43,8 +48,41 @@ public class FileUtil
 	}
 	
 	/**
+	 * Read the lines of the given Reader into a Collection.
+	 * The Reader will be closed after all lines have been read.
+	 * 
+	 * @param in the "file" to read
+	 * @return a Collection with all the lines in the file
+	 */
+	public static Collection<String> getLines(BufferedReader in)
+	{
+		Set result = new HashSet<String>();
+
+		try
+		{
+			String line; 
+			while ( (line = in.readLine()) != null)
+			{
+				if (!StringUtil.isEmptyString(line)) result.add(line);
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("FileUtil.getLines", "Error reading lines", e);
+		}
+		finally
+		{
+			closeQuitely(in);
+		}
+		return result;
+	}
+	
+	/**
 	 * Read the contents of the Reader into the provided StringBuilder.
 	 * Max. numLines lines are read.
+	 * 
+	 * The Reader will not be closed
+	 * 
 	 * @param in the Reader to be used 
 	 * @param buffer the StringBuilder to received the lines
 	 * @param numLines the max. number of lines to be read
@@ -73,6 +111,15 @@ public class FileUtil
 		return lines;
 	}
 	
+	/**
+	 * Try to detect the line ending used by the passed Reader.
+	 * This will advance the reader until a line ending is found.
+	 * The reader will not be closed
+	 * 
+	 * @param in the "file" to test
+	 * @return the sequence of characters used as the line ending (e.g. \n or \r\n)
+	 * @throws java.io.IOException
+	 */
 	public static final String getLineEnding(Reader in)
 		throws IOException
 	{
@@ -256,6 +303,11 @@ public class FileUtil
 		return result;
 	}
 	
+	/**
+	 * Closes a Closeable without throwing any errors
+	 * 
+	 * @param c the Closeable to close
+	 */
 	public static void closeQuitely(Closeable c)
 	{
 		if (c == null) return;

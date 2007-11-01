@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Collection;
 import junit.framework.*;
 import workbench.TestUtil;
 import workbench.WbTestCase;
@@ -42,6 +43,35 @@ public class FileUtilTest
 		testUtil = getTestUtil();
 	}
 
+	public void testGetLines()
+	{
+		try
+		{
+			File f = new File(testUtil.getBaseDir(), "somedata.txt");
+			String encoding = "ISO-8859-1";
+			Writer w = EncodingUtil.createWriter(new FileOutputStream(f), encoding);
+			for (int i=0; i < 100; i++)
+			{
+				w.write("line_" + i + "\n");
+			}
+			w.close();	
+			
+			BufferedReader in = new BufferedReader(new FileReader(f));
+			
+			Collection<String> lines = FileUtil.getLines(in);
+			assertEquals(100, lines.size());
+			for (int i=0; i < 100; i++)
+			{
+				assertTrue(lines.contains("line_" + i));
+			}
+		}
+		catch (Throwable th)
+		{
+			th.printStackTrace();
+			fail(th.getMessage());
+		}
+	}
+	
 	public void testReadLines()
 	{
 		try

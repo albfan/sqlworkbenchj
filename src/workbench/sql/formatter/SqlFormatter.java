@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import workbench.resource.Settings;
+import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.util.CharSequenceReader;
 import workbench.util.StringUtil;
@@ -327,11 +328,21 @@ public class SqlFormatter
 
 	private boolean isDbFunction(String key)
 	{
+		if (dbFunctions == null) 
+		{
+			SqlKeywordHelper helper = new SqlKeywordHelper();
+			dataTypes = helper.getSystemFunctions();
+		}
 		return this.dbFunctions.contains(key.toUpperCase());
 	}
 	
 	private boolean isDatatype(String key)
 	{
+		if (dataTypes == null) 
+		{
+			SqlKeywordHelper helper = new SqlKeywordHelper();
+			dataTypes = helper.getDataTypes();
+		}
 		return this.dataTypes.contains(key.toUpperCase());
 	}
 	

@@ -19,6 +19,12 @@ public class VersionNumber
 	private int major = -1;
 	private int minor = -1;
 	
+	public VersionNumber(int majorVersion, int minorVersion)
+	{
+		this.major = majorVersion;
+		this.minor = minorVersion;
+	}
+	
 	public VersionNumber(String number)
 	{
 		if (StringUtil.isEmptyString(number)) 
@@ -68,6 +74,13 @@ public class VersionNumber
 		if (!this.isValid()) return false;
 		if (this.major > other.major) return true;
 		if (this.minor > other.minor) return true;
+		return false;
+	}
+
+	public boolean isNewerOrEqual(VersionNumber other)
+	{
+		if (isNewerThan(other)) return true;
+		if (this.major == other.major && this.minor == other.minor) return true;
 		return false;
 	}
 	
