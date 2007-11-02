@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -38,7 +37,6 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import workbench.WbManager;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -55,6 +53,7 @@ import workbench.gui.components.WbButton;
 import workbench.gui.components.WbCheckBoxLabel;
 import workbench.gui.components.WbColorPicker;
 import workbench.gui.components.WbTraversalPolicy;
+import workbench.gui.help.HelpManager;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
@@ -645,9 +644,7 @@ public class ConnectionEditorPanel
 
 	private void helpButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_helpButtonActionPerformed
 	{//GEN-HEADEREND:event_helpButtonActionPerformed
-		//HtmlViewer viewer = new HtmlViewer((JDialog)SwingUtilities.getWindowAncestor(this));
-		//viewer.showProfileHelp();
-		WbManager.getInstance().showHelpForProfiles((JDialog)SwingUtilities.getWindowAncestor(this));
+		HelpManager.showProfileHelp();
 	}//GEN-LAST:event_helpButtonActionPerformed
 
 	private void extendedPropsMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_extendedPropsMouseClicked

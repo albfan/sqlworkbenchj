@@ -556,6 +556,7 @@ keyword=("ABORT"|
 "SQLSTATE"|
 "SQLWARNING"|
 "START"|
+"START[ \t\r\n]+WITH"|
 "STATEMENT"|
 "STATIC"|
 "STATISTICS"|

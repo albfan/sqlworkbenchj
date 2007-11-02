@@ -2017,8 +2017,8 @@ public class MainWindow
 	{
 		JMenu result = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_HELP));
 		result.setName(ResourceMgr.MNU_TXT_HELP);
-		new ShowHelpAction().addToMenu(result);
 		new ShowManualAction().addToMenu(result);
+		new ShowHelpAction().addToMenu(result);
 		result.addSeparator();
 
 		result.add(WhatsNewAction.getInstance());

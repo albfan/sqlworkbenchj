@@ -12,7 +12,6 @@
 package workbench.gui.help;
 
 import java.awt.BorderLayout;
-import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URL;
@@ -30,14 +29,12 @@ import workbench.resource.Settings;
 public class WhatsNewViewer 
 	extends JDialog 
 {
-	private JTextPane display;
-	
 	public WhatsNewViewer(java.awt.Frame owner)
 	{
 		super(owner, false);
 		setTitle(ResourceMgr.getFormattedString("TxtWhatsNewWindowTitle", ResourceMgr.getBuildNumber().toString()));
-		display = new JTextPane();
-		display.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		JTextPane display = new JTextPane();
+		display.setFont(Settings.getInstance().getEditorFont());
 		display.setEditable(false);
 		JScrollPane scroll = new JScrollPane(display);
 		
@@ -58,15 +55,15 @@ public class WhatsNewViewer
 		{
 
 			URL file = this.getClass().getClassLoader().getResource("help/history.txt");
-			if (file == null)
-			{
-				file = this.getClass().getClassLoader().getResource("workbench/gui/help/NotFound.html");
-			}
-			
 			if (file != null)
 			{
 				display.setPage(file);
 			}
+			else
+			{
+				display.setText("No history available!");
+			}
+			
 		}
 		catch (Exception e)
 		{

@@ -53,7 +53,7 @@ import workbench.gui.components.FlatButton;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.dialogs.dataimport.ImportFileDialog;
-import workbench.gui.help.HtmlViewer;
+import workbench.gui.help.HelpManager;
 import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.ToolWindow;
@@ -1131,10 +1131,9 @@ public class DataPumper
 	
 	private void showHelp()
 	{
-		HtmlViewer viewer = new HtmlViewer(this.window);
-		viewer.showDataPumperHelp();
-		viewer.setVisible(true);
+		HelpManager.showDataPumperHelp();
 	}
+	
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
 		if (e.getSource() == this.closeButton)

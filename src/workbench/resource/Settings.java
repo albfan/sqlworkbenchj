@@ -55,6 +55,7 @@ import workbench.storage.PkMapping;
 import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
 import workbench.util.ToolDefinition;
+import workbench.util.WbFile;
 import workbench.util.WbLocale;
 import workbench.util.WbProperties;
 
@@ -244,7 +245,74 @@ public class Settings
 	{
 		setProperty("workbench.gui.language", locale.getLanguage());
 	}
+
+	public String getPdfPath()
+	{
+		String pdfManual = getProperty("workbench.manual.pdf.file", "SQLWorkbench-Manual.pdf");
+		
+		File f = new File(pdfManual);
+		if (f.isDirectory())
+		{
+			f = new File(f, "SQLWorkbench-Manual.pdf");
+		}
+		
+		if (f.exists() && f.canRead())
+		{
+			return f.getAbsolutePath();
+		}
+		
+		String jarDir = WbManager.getInstance().getJarPath();
+		WbFile pdf = new WbFile(jarDir, pdfManual);
+		
+		if (!pdf.exists())
+		{
+			pdf = new WbFile(this.configDir, pdfManual);
+		}
+		
+		if (pdf.exists() && pdf.canRead())
+		{
+			return pdf.getFullPath();
+		}
+		else
+		{
+			return null;
+		}
+	}	
 	
+	/**
+	 * Returns the directory where the HTML manual is located.
+	 * 
+	 * @return the directory where the HTML manual is located or null if it cannot be found
+	 */
+	public File getHtmlManualDir()
+	{
+		// Allow overriding the default location of the HTML manual
+		String dir = getProperty("workbench.manual.html.dir", null);
+		File htmldir = null;
+		
+		if (dir == null)
+		{
+			// First look in the directory of the jar file.
+			File jardir = WbManager.getInstance().getJarFile().getParentFile();
+			htmldir = new File(jardir, "manual");
+		}
+		else
+		{
+			htmldir = new File(dir);
+		}
+		
+		if (!htmldir.exists())
+		{
+			htmldir = new File(this.configDir, "manual");
+		}
+		
+		if (htmldir.exists())
+		{
+			return htmldir;
+		}
+		
+		return null;
+	}
 	public List<WbLocale> getLanguages()
 	{
 		String prop = getProperty("workbench.gui.languages.available", "en,de");
@@ -490,27 +558,6 @@ public class Settings
 	public void setPDFReaderPath(String path)
 	{
 		setProperty(PROPERTY_PDF_READER_PATH, path);
-	}
-
-	public String getManualPath()
-	{
-		String pdfManual = getProperty("workbench.pdfmanual.filename", "SQLWorkbench-Manual.pdf");
-		File f = new File(pdfManual);
-		// This allows to overwrite the location of the manual completely...
-		if (f.isAbsolute() && f.exists() && f.canRead())
-		{
-			return f.getAbsolutePath();
-		}
-		String jarDir = WbManager.getInstance().getJarPath();
-		File pdf = new File(jarDir, pdfManual);
-		if (pdf.exists() && pdf.canRead())
-		{
-			return pdf.getAbsolutePath();
-		}
-		else
-		{
-			return null;
-		}
 	}
 
 	public static final String UNIX_LINE_TERMINATOR_PROP_VALUE = "lf";

@@ -13,10 +13,8 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.lang.reflect.Constructor;
-import javax.swing.JFrame;
 import javax.swing.KeyStroke;
-import workbench.log.LogMgr;
+import workbench.gui.help.HelpManager;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -25,7 +23,6 @@ import workbench.resource.ResourceMgr;
 public class ShowHelpAction
 	extends WbAction
 {
-	private static JFrame helpWindow;
 	public ShowHelpAction()
 	{
 		super();
@@ -35,42 +32,7 @@ public class ShowHelpAction
 	
 	public synchronized void executeAction(ActionEvent e)
 	{
-		if (helpWindow != null)
-		{
-			helpWindow.setVisible(true);
-			helpWindow.requestFocus();
-		}
-		else
-		{
-			showHelp();
-		}
+		HelpManager.showHelpIndex();
 	}
 	
-	public synchronized void closeHelp()
-	{
-		if (this.helpWindow != null)
-		{
-			this.helpWindow.setVisible(false);
-			this.helpWindow.dispose();
-			this.helpWindow = null;
-		}
-	}
-	
-	public synchronized void showHelp()
-	{
-		try
-		{
-			// Use reflection to load the dialog in order to
-			// avoid unnecessary class loading during startup
-			Class cls = Class.forName("workbench.gui.help.HelpViewerFrame");
-			Constructor cons = cls.getConstructor((Class[])null);
-			helpWindow = (JFrame)cons.newInstance((Object[])null);
-			helpWindow.setVisible(true);
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError("WbManager.showDialog()", "Error when loading HelpViewerFrame", ex);
-		}
-	}
-
 }

@@ -44,7 +44,7 @@ import javax.swing.event.ListSelectionListener;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
-import workbench.gui.help.HtmlViewer;
+import workbench.gui.help.HelpManager;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -247,9 +247,7 @@ public class SettingsPanel
 		}
 		else if (e.getSource() == helpButton)
 		{
-			HtmlViewer viewer = new HtmlViewer(this.dialog);
-			viewer.showOptionsHelp();
-			viewer.setVisible(true);
+			HelpManager.showOptionsHelp();
 		}
 	}
 

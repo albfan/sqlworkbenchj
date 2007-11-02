@@ -22,7 +22,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Collections;
@@ -81,7 +80,7 @@ public class WbManager
 {
 	private static WbManager wb;
 	private List<MainWindow> mainWindows = Collections.synchronizedList(new LinkedList<MainWindow>());
-	private List<ToolWindow> toolWindows = new LinkedList<ToolWindow>();
+	private List<ToolWindow> toolWindows = Collections.synchronizedList(new LinkedList<ToolWindow>());
 	private WbCipher desCipher = null;
 	private boolean batchMode = false;
 	private boolean writeSettings = true;
@@ -126,42 +125,6 @@ public class WbManager
 	}
 
 	public boolean writeSettings() { return this.writeSettings; }
-	
-	public void showHelpForProfiles(JDialog owner)
-	{
-		JDialog dialog = null;
-		try
-		{
-			// Use reflection to load the HtmlViewer in order to
-			// avoid unnecessary class loading during startup
-			Class cls = Class.forName("workbench.gui.help.HtmlViewer");
-			Class[] types = new Class[] { JDialog.class  };
-			Constructor cons = cls.getConstructor(types);
-			Object[] args = new Object[] { owner };
-			dialog = (JDialog)cons.newInstance(args);
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-
-			Class[] noArgs = new Class[] {};
-			Method m = cls.getMethod("showProfileHelp", noArgs);
-			if (m != null)
-			{
-				m.invoke(dialog, new Object[]{});
-			}
-			dialog.setVisible(true);
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError("WbManager.showDialog()", "Error when creating help viewer", ex);
-		}
-		finally
-		{
-			if (dialog != null)
-			{
-				dialog.dispose();
-				dialog = null;
-			}
-		}
-	}
 	
 	public void showDialog(String clazz)
 	{
@@ -267,12 +230,6 @@ public class WbManager
 	public boolean isWindowsClassic() { return isWindowsClassic; }
 	
 	private boolean isWindowsClassic = false;
-//	private boolean isWindowsLAF = false;
-	
-//	public boolean isWindowsLAF()
-//	{
-//		return isWindowsLAF;
-//	}
 
 	private void initializeLookAndFeel()
 	{
@@ -312,7 +269,6 @@ public class WbManager
 				String clsname = lnf.getClass().getName();
 				if (clsname.indexOf("com.sun.java.swing.plaf.windows") > -1)
 				{
-//					isWindowsLAF = true;
 					String osVersion = System.getProperty("os.version", "1.0");
 					Float version = Float.valueOf(osVersion);
 					if (version.floatValue() <= 5.0)
