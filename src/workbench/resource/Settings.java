@@ -90,9 +90,10 @@ public class Settings
 	private static final String LIB_DIR_KEY = "%LibDir%";
 	
 	private WbProperties props;
-	private String filename;
+	//private String filename;
+	private WbFile configfile;
+	
 	private List<FontChangedListener> fontChangeListeners = new LinkedList<FontChangedListener>();
-	private String configDir;
 
 	private ShortcutManager keyManager;
 
@@ -116,13 +117,9 @@ public class Settings
 		// this ensures that new defaults will be applied automatically.
 		fillDefaults();
 
-		this.configDir = getProperty("workbench.configdir", null);
-		if (configDir == null)
-		{
-			this.configDir = System.getProperty("workbench.configdir", "");
-		}
+		String configDir = getProperty("workbench.configdir", null);
 
-		File cfd = null;
+		WbFile cfd = null;
 		try
 		{
 			if (configDir == null || configDir.trim().length() == 0)
@@ -134,45 +131,44 @@ public class Settings
 				File f = new File(System.getProperty("user.dir"), configFile);
 				if (f.exists())
 				{
-					cfd = f.getParentFile();//new File(System.getProperty("user.dir"));
+					cfd = new WbFile(f.getParentFile());
 				}
 				else
 				{
-					cfd = new File(WbManager.getInstance().getJarPath());
+					cfd = new WbFile(WbManager.getInstance().getJarPath());
+					f = new File(cfd,configFile);
+					if (!f.exists())
+					{
+						// no config file in the jar directory --> create a config directory in user.home
+						cfd = new WbFile(System.getProperty("user.home"), ".sqlworkbench");
+					}
 				}
-				//cfd = new File(System.getProperty("user.dir"));
-				configDir = cfd.getAbsolutePath();
 			}
 			else
 			{
-				String userHome = System.getProperty("user.home");
 				if (configDir.indexOf("${user.home}") > -1)
 				{
-					configDir = StringUtil.replace(configDir, "${user.home}", userHome);
+					configDir = StringUtil.replace(configDir, "${user.home}", System.getProperty("user.home"));
 				}
-				cfd = new File(configDir);
+				cfd = new WbFile(configDir);
 			}
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("Settings.<init>", "Error when initializing configdir", e);
-			cfd = new File(System.getProperty("user.dir"));
+			cfd = new WbFile(System.getProperty("user.home"), ".sqlworkbench");
 		}
-
-		configDir = cfd.getAbsolutePath();
+		
 		if (!cfd.exists())
 		{
 			cfd.mkdirs();
 		}
 		
-		File cf = new File(this.configDir, configFile);
-		
-		this.filename = cf.getAbsolutePath();
+		this.configfile = new WbFile(cfd, configFile);
 
 		BufferedInputStream in = null;
 	  try
 		{
-			in = new BufferedInputStream(new FileInputStream(this.filename));
+			in = new BufferedInputStream(new FileInputStream(this.configfile));
 			this.props.load(in);
 		}
 		catch (IOException e)
@@ -266,7 +262,7 @@ public class Settings
 		
 		if (!pdf.exists())
 		{
-			pdf = new WbFile(this.configDir, pdfManual);
+			pdf = new WbFile(getConfigDir(), pdfManual);
 		}
 		
 		if (pdf.exists() && pdf.canRead())
@@ -303,7 +299,7 @@ public class Settings
 		
 		if (!htmldir.exists())
 		{
-			htmldir = new File(this.configDir, "manual");
+			htmldir = new File(getConfigDir(), "manual");
 		}
 		
 		if (htmldir.exists())
@@ -313,6 +309,7 @@ public class Settings
 		
 		return null;
 	}
+	
 	public List<WbLocale> getLanguages()
 	{
 		String prop = getProperty("workbench.gui.languages.available", "en,de");
@@ -357,8 +354,12 @@ public class Settings
 		return this.keyManager;
 	}
 
-	public String getConfigDir() { return this.configDir; }
-	public void setConfigDir(String aDir) { this.configDir = aDir; }
+	public File getConfigDir() 
+	{ 
+		return this.configfile.getParentFile(); 
+	}
+	
+	//public void setConfigDir(String aDir) { this.configDir = aDir; }
 
 	public String replaceLibDirKey(String aPathname)
 	{
@@ -446,8 +447,7 @@ public class Settings
 	{
 		String fName = System.getProperty(PK_MAPPING_FILENAME_PROPERTY, getProperty(PK_MAPPING_FILENAME_PROPERTY, null));
 		if (StringUtil.isEmptyString(fName)) return null;
-		String dir = getConfigDir();
-		return StringUtil.replace(fName, FileDialogUtil.CONFIG_DIR_KEY, dir);
+		return StringUtil.replace(fName, FileDialogUtil.CONFIG_DIR_KEY, getConfigDir().getAbsolutePath());
 	}
 
 	public Date getLastUpdateCheck()
@@ -491,7 +491,7 @@ public class Settings
 
 	private String getShortcutFilename()
 	{
-		return new File(this.configDir, "WbShortcuts.xml").getAbsolutePath();
+		return new File(getConfigDir(), "WbShortcuts.xml").getAbsolutePath();
 	}
 
 	public void setProfileStorage(String file)
@@ -794,19 +794,17 @@ public class Settings
 		String profiles = this.props.getProperty(PROPERTY_PROFILE_STORAGE);
 		if (profiles == null)
 		{
-			return new File(this.configDir, "WbProfiles.xml").getAbsolutePath();
+			return new File(getConfigDir(), "WbProfiles.xml").getAbsolutePath();
 		}
 		String realFilename = FileDialogUtil.replaceConfigDir(profiles);
 
-		// Check if filename contains a directory
-		File f = new File(realFilename);
-		if (f.getParent() == null)
+		WbFile f = new WbFile(realFilename);
+		if (!f.isAbsolute())
 		{
 			// no directory in filename -> use config directory
-			f = new File(this.configDir, realFilename);
+			f = new WbFile(getConfigDir(), realFilename);
 		}
-		LogMgr.logInfo("Settings.getProfileFilename()", "Using profiles from " + f.getAbsolutePath());
-		return f.getAbsolutePath();
+		return f.getFullPath();
 	}
 
 	public void removeProperty(String property)
@@ -826,7 +824,7 @@ public class Settings
 
 	public String getDriverConfigFilename()
 	{
-		return new File(this.configDir, "WbDrivers.xml").getAbsolutePath();
+		return new WbFile(getConfigDir(), "WbDrivers.xml").getFullPath();
 	}
 
 	public void addFontChangedListener(FontChangedListener aListener)
@@ -856,18 +854,15 @@ public class Settings
 		if (keyManager!= null) this.keyManager.saveSettings();
 		try
 		{
-			this.props.saveToFile(this.filename);
+			this.props.saveToFile(this.configfile);
 		}
 		catch (IOException e)
 		{
-			LogMgr.logError(this, "Error saving Settings file '" + filename + "'", e);
+			LogMgr.logError(this, "Error saving Settings file '" + configfile.getFullPath() + "'", e);
 		}
-		if (this.getPKMappingFilename() != null)
+		if (this.getPKMappingFilename() != null && PkMapping.isInitialized())
 		{
-			if (PkMapping.isInitialized())
-			{
-				PkMapping.getInstance().saveMapping(this.getPKMappingFilename());
-			}
+			PkMapping.getInstance().saveMapping(this.getPKMappingFilename());
 		}
 	}
 
@@ -958,10 +953,8 @@ public class Settings
 	{
 		try
 		{
-			// added for build 82
 			this.props.remove("workbench.db.fetchsize");
-			
-			// added for build 84
+			this.props.remove("workbench.editor.java.lastdir");
 			this.props.remove("workbench.sql.replace.ignorecase");
 			this.props.remove("workbench.sql.replace.selectedtext");
 			this.props.remove("workbench.sql.replace.useregex");
@@ -972,8 +965,6 @@ public class Settings
 			this.props.remove("workbench.sql.search.lastvalue");
 			this.props.remove("workbench.dbexplorer.rememberSchema");
 			this.props.remove("workbench.db.postgres.select.startstransaction");
-
-			// not needed any longer
 			this.props.remove("workbench.db.oracle.quotedigits");
 			this.props.remove("workbench.gui.macros.replaceonrun");
 			this.props.remove("workbench.db.cancelneedsreconnect");
@@ -1637,26 +1628,6 @@ public class Settings
 		setProperty("workbench.export.sql.includeowner", flag);
 	}
 
-//	public boolean getEnableDbmsOutput()
-//	{
-//		return getBoolProperty("workbench.sql.enable_dbms_output", false);
-//	}
-//
-//	public void setEnableDbmsOutput(boolean aFlag)
-//	{
-//		this.setProperty("workbench.sql.enable_dbms_output", aFlag);
-//	}
-//
-//	public int getDbmsOutputDefaultBuffer()
-//	{
-//		return getIntProperty("workbench.sql.dbms_output.defaultbuffer", -1);
-//	}
-//
-//	public void setDbmsOutputDefaultBuffer(int aSize)
-//	{
-//		this.setProperty("workbench.sql.dbms_output.defaultbuffer", aSize);
-//	}
-
 	public String getLastImportDateFormat()
 	{
 		return getProperty("workbench.import.dateformat", this.getDefaultDateFormat());
@@ -1725,7 +1696,7 @@ public class Settings
 
 	public String getLastWorkspaceDir()
 	{
-		return getProperty("workbench.workspace.lastdir", this.getConfigDir());
+		return getProperty("workbench.workspace.lastdir", this.getConfigDir().getAbsolutePath());
 	}
 
 	public void setLastWorkspaceDir(String aDir)
@@ -1761,16 +1732,6 @@ public class Settings
 	public void setLastSqlDir(String aDir)
 	{
 		this.props.setProperty("workbench.sql.lastscriptdir", aDir);
-	}
-
-	public String getLastJavaDir()
-	{
-		return getProperty("workbench.editor.java.lastdir","");
-	}
-
-	public void setLastJavaDir(String aDir)
-	{
-		this.props.setProperty("workbench.editor.java.lastdir", aDir);
 	}
 
 	public String getLastEditorDir()

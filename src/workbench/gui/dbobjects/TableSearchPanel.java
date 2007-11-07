@@ -728,6 +728,7 @@ public class TableSearchPanel
 					result.setBackground(background);
 					result.setForeground(foreground);
 				}
+				result.setToolTipText(displayValue);
 			}
 			catch (Exception e)
 			{

@@ -22,6 +22,7 @@ import workbench.util.ArgumentParser;
 import workbench.util.FileDialogUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -56,7 +57,8 @@ public class WbLoadPkMapping
 		}
 		else
 		{
-			file = StringUtil.replace(file, FileDialogUtil.CONFIG_DIR_KEY, Settings.getInstance().getConfigDir());
+			WbFile cd = new WbFile(Settings.getInstance().getConfigDir());
+			file = StringUtil.replace(file, FileDialogUtil.CONFIG_DIR_KEY, cd.getFullPath());
 		}
 		
 		if (file == null)

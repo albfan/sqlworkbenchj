@@ -35,7 +35,7 @@ public class MissingPkDialog
 	public boolean checkContinue(Component caller)
 	{
 		if (this.columns == null || this.columns.size() == 0) return true;
-		StringBuilder msg = new StringBuilder(50);
+		StringBuilder msg = new StringBuilder(100);
 
 		msg.append("<html>");
 		msg.append("<p style=\"padding:3px;background:white\">");

@@ -119,7 +119,11 @@ public class DataStore
 	}
 
 	/**
-	 *	Create a DataStore based on the contents of the given	ResultSet.
+	 * Create a DataStore based on the contents of the given ResultSet.
+	 * 
+	 * The ResultSet has to be closed by the caller.
+	 * 
+	 * @see #initData(ResultSet, int)
 	 */
   public DataStore(ResultSet aResultSet, WbConnection aConn)
 		throws SQLException
@@ -135,12 +139,35 @@ public class DataStore
 		this.data = createData();
 	}
 
+	/**
+	 * Initialize this DataStore based on the given ResultSet but without reading the data.
+	 * This is equivalent to calling new DataStore(result, false)
+	 * 
+	 * The ResultSet has to be closed by the caller.
+	 * 
+	 * @param aResult the ResultSet to process
+	 * @param readData if true, the ResultSet will be processed, otherwise only the MetaData will be read
+	 * @throws java.sql.SQLException
+	 * 
+	 * @see DataStore(ResultSet, boolean)
+	 */
 	public DataStore(ResultSet aResult)
 		throws SQLException
 	{
 		this(aResult, false);
 	}
 
+	/**
+	 * Initialize this DataStore based on the given ResultSet
+	 * 
+	 * The ResultSet has to be closed by the caller.
+	 * 
+	 * @param aResult the ResultSet to process
+	 * @param readData if true, the ResultSet will be processed, otherwise only the MetaData will be read
+	 * @throws java.sql.SQLException
+	 * 
+	 * @see #initData(ResultSet, int)
+	 */
 	public DataStore(ResultSet aResult, boolean readData)
 		throws SQLException
 	{
@@ -955,6 +982,15 @@ public class DataStore
 		this.resultInfo = new ResultInfo(metaData, this.originalConnection);
 	}
 
+	/**
+	 * Read the column definitions from the result set's meta data
+	 * and store the data from the ResultSet in this DataStore with no maximum
+	 *
+	 * The ResultSet must be closed by the caller.
+	 * 
+	 * @param aResultSet the ResultSet to read
+	 * @see #initData(ResultSet,int)
+	 */
 	public void initData(ResultSet aResultSet)
 		throws SQLException
 	{
@@ -965,8 +1001,11 @@ public class DataStore
 	 * Read the column definitions from the result set's meta data
 	 * and store the data from the ResultSet in this DataStore (up to maxRows)
 	 *
+	 * The ResultSet must be closed by the caller.
+	 * 
 	 * @param aResultSet the ResultSet to read
 	 * @param maxRows max. number of rows to read. Zero or lower to read all rows
+	 * @see #initData(ResultSet)
 	 */
 	public void initData(ResultSet aResultSet, int maxRows)
 		throws SQLException

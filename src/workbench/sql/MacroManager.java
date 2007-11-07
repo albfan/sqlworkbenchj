@@ -236,8 +236,7 @@ public class MacroManager
 
 	private File getMacroFile()
 	{
-		String configDir = Settings.getInstance().getConfigDir();
-		File f = new File(configDir, "WbMacros.xml");
+		File f = new File(Settings.getInstance().getConfigDir(), "WbMacros.xml");
 		return f;
 	}
 

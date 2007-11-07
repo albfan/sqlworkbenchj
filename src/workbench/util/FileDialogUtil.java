@@ -260,7 +260,7 @@ public class FileDialogUtil
 		File f = new File(aPathname);
 		String fname = f.getName();
 		File dir = f.getParentFile();
-		File config = new File(Settings.getInstance().getConfigDir());
+		File config = Settings.getInstance().getConfigDir();
 		if (dir.equals(config))
 		{
 			return CONFIG_DIR_KEY + "/" + fname;
@@ -274,8 +274,8 @@ public class FileDialogUtil
 	public static String replaceConfigDir(String aPathname)
 	{
 		if (aPathname == null) return null;
-		String dir = Settings.getInstance().getConfigDir();
-		return StringUtil.replace(aPathname, CONFIG_DIR_KEY, dir);
+		WbFile dir = new WbFile(Settings.getInstance().getConfigDir());
+		return StringUtil.replace(aPathname, CONFIG_DIR_KEY, dir.getFullPath());
 	}
 
 	public static void selectPkMapFileIfNecessary(Component parent)
@@ -301,7 +301,7 @@ public class FileDialogUtil
 		File f = null;
 		if (fileName == null)
 		{
-			f = new File(Settings.getInstance().getConfigDir());
+			f = Settings.getInstance().getConfigDir();
 		}
 		else
 		{

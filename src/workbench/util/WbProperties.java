@@ -58,7 +58,7 @@ public class WbProperties
 		this.distinctSections = num;
 	}
 
-	public synchronized void saveToFile(String filename)
+	public synchronized void saveToFile(File filename)
 		throws IOException
 	{
 		FileOutputStream out = null;

@@ -69,8 +69,7 @@ public class SqlKeywordHelper
 		if (!f.exists())
 		{
 			// nothing in the current directory, try the config dir
-			String dir = Settings.getInstance().getConfigDir();
-			f = new File(dir, filename);
+			f = new File(Settings.getInstance().getConfigDir(), filename);
 		}
 
 		if (f.exists())

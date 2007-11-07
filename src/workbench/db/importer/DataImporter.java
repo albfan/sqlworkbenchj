@@ -150,6 +150,7 @@ public class DataImporter
 	private boolean isOracle = false;
 	private boolean multiTable = false;
 	private List<Closeable> batchStreams;
+	private boolean batchRunning = false;
 	
 	public DataImporter()
 	{
@@ -525,6 +526,7 @@ public class DataImporter
 		if (this.source == null) return;
 		this.isRunning = true;
 		this.canCommitInBatch = true;
+		this.batchRunning = false;
 
 		// When using UPDATE/INSERT or INSERT/UPDATE
 		// we cannot use batch mode as we immediately need
@@ -556,6 +558,14 @@ public class DataImporter
 		if (this.targetTable == null) return;
 		String deleteSql = null;
 
+		if (!this.isModeInsert())
+		{
+			LogMgr.logWarning("DataImporter.deleteTarget()", "Target table will not be deleted because import mode is not set to 'insert'");
+			this.messages.append(ResourceMgr.getString("ErrImpNoDeleteUpd"));
+			this.messages.appendNewLine();
+			return;
+		}
+		
 		if (this.useTruncate)
 		{
 			deleteSql = "TRUNCATE TABLE " + this.targetTable.getTableExpression(this.dbConn);
@@ -594,6 +604,7 @@ public class DataImporter
 	{
 		this.useTruncate = flag;
 	}
+	
 	public boolean isRunning() { return this.isRunning; }
 	public boolean isSuccess() { return !hasErrors; }
 	public boolean hasWarnings() { return this.hasWarnings; }
@@ -614,6 +625,17 @@ public class DataImporter
 	public void cancelExecution()
 	{
 		this.isRunning = false;
+		if (this.batchRunning)
+		{
+			try
+			{
+				if (this.insertStatement != null) this.insertStatement.cancel();
+			}
+			catch (Throwable th)
+			{
+				
+			}
+		}
 		this.source.cancel();
 		this.messages.append(ResourceMgr.getString("MsgImportCancelled") + "\n");
 	}
@@ -1558,6 +1580,7 @@ public class DataImporter
 			if (!this.hasKeyColumns())
 			{
 				this.messages.append(ResourceMgr.getString("ErrImportNoKeyForUpdate"));
+				this.messages.appendNewLine();
 				throw new SQLException("No key columns defined for update mode");
 			}
 		}
@@ -1601,7 +1624,8 @@ public class DataImporter
 		if (!pkAdded)
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "No primary key columns defined! Update mode not available\n", null);
-			this.messages.append(ResourceMgr.getString("ErrImportNoKeyForUpdate") + "\n");
+			this.messages.append(ResourceMgr.getString("ErrImportNoKeyForUpdate"));
+			this.messages.appendNewLine();
 			this.updateSql = null;
 			this.updateStatement = null;
 			throw new SQLException("No key columns defined for update mode");
@@ -1694,6 +1718,7 @@ public class DataImporter
 
 		try
 		{
+			this.batchRunning = true;
 			if (this.isModeInsert() && this.insertStatement != null)
 			{
 				int rows[] = this.insertStatement.executeBatch();
@@ -1726,6 +1751,7 @@ public class DataImporter
 		}
 		finally
 		{
+			this.batchRunning = false;
 			if (this.batchStreams != null)
 			{
 				FileUtil.closeStreams(batchStreams);

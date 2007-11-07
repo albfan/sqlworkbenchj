@@ -134,7 +134,7 @@ public class HsqlSequenceReader
 	
 	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, null);
+		DataStore ds = getRawSequenceDefinition(owner, sequence);
 		if (ds == null) return null;
 		return createSequenceDefinition(ds, 0);
 	}

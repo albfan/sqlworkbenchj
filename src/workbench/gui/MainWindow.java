@@ -35,7 +35,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.Action;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -44,7 +43,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -1005,11 +1003,9 @@ public class MainWindow
 	
 	protected void updateAddMacroAction()
 	{
-		MainPanel current = this.getCurrentPanel();
-		if (current instanceof SqlPanel)
+		SqlPanel sql = this.getCurrentSqlPanel();
+		if (sql != null)
 		{
-			SqlPanel sql = (SqlPanel)current;
-			sql.selectEditorLater();
 			this.createMacro.setClient(sql.getEditor());
 		}
 	}
@@ -1825,12 +1821,6 @@ public class MainWindow
 			}
 		}
 	}
-
-	private WbConnection getConnectionForTab(MainPanel aPanel)
-		throws Exception
-	{
-		return getConnectionForTab(aPanel, false);
-	}
 	
 	private WbConnection getConnectionForTab(MainPanel aPanel, boolean returnNew)
 		throws Exception
@@ -1897,7 +1887,6 @@ public class MainWindow
 			{
 				this.newDbExplorerWindow();
 			}
-
 		}
 	}
 
@@ -1964,17 +1953,6 @@ public class MainWindow
 		}
 	}
 	
-	public void closeExplorerPanels()
-	{
-		final int index = this.findFirstExplorerTab();
-		if (index < 0) return;
-		final int count = this.sqlTab.getTabCount();
-		for (int i=count - 1; i >= count; i--)
-		{
-			removeTab(i);
-		}
-	}
-
 	public void newDbExplorerWindow()
 	{
 		DbExplorerPanel explorer = new DbExplorerPanel(this);
@@ -2017,8 +1995,8 @@ public class MainWindow
 	{
 		JMenu result = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_HELP));
 		result.setName(ResourceMgr.MNU_TXT_HELP);
-		new ShowManualAction().addToMenu(result);
 		new ShowHelpAction().addToMenu(result);
+		new ShowManualAction().addToMenu(result);
 		result.addSeparator();
 
 		result.add(WhatsNewAction.getInstance());
@@ -2052,47 +2030,6 @@ public class MainWindow
 		new ConfigureShortcutsAction().addToMenu(result);
 
 		return result;
-	}
-
-	public void updateToolsMenu()
-	{
-		int count = this.panelMenus.size();
-		for (int i=0; i < count; i++)
-		{
-			JMenu tools = this.getMenu(ResourceMgr.MNU_TXT_TOOLS, i);
-
-			int toolCount = tools.getItemCount();
-
-			for (int ti = 0; ti < toolCount; ti++)
-			{
-				JMenuItem titem = tools.getItem(ti);
-				if (titem == null) continue;
-				if (!"lnf".equals(titem.getName())) continue;
-				if (!(titem instanceof JMenu)) continue;
-
-				JMenu lnf = (JMenu)titem;
-
-				String current = UIManager.getLookAndFeel().getClass().getName();
-				int items = lnf.getItemCount();
-				for (int j=0; j < items; j++)
-				{
-					JMenuItem item = lnf.getItem(j);
-					if (item instanceof JCheckBoxMenuItem)
-					{
-						String lnfclass = (String)item.getClientProperty("class");
-
-						if (current.equals(lnfclass))
-						{
-							item.setSelected(true);
-						}
-						else
-						{
-							item.setSelected(false);
-						}
-					}
-				}
-			}
-		}
 	}
 
 	private boolean checkMakeProfileWorkspace()

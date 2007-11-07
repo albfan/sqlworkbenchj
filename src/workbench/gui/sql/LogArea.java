@@ -42,8 +42,6 @@ public class LogArea
 		// Now that the text area is set to readonly, re-apply the default background color
 		setBackground(bg);
 		addMouseListener(new TextComponentMouseListener());
-
 	}
-
 
 }

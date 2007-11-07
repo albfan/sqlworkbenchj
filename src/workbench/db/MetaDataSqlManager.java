@@ -251,8 +251,7 @@ public class MetaDataSqlManager
 		File f = new File(aFilename);
 		if (!f.exists())
 		{
-			String dir = Settings.getInstance().getConfigDir();
-			f = new File(dir, aFilename);
+			f = new File(Settings.getInstance().getConfigDir(), aFilename);
 		}
 		if (f.exists())
 		{

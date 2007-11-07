@@ -202,7 +202,7 @@ public class LogMgr
 				if (last.exists()) last.delete();
 				f.renameTo(last);
 			}
-			logOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(aFilename,true)));
+			logOut = new PrintStream(new FileOutputStream(aFilename,true));
 			logInfo(null, "=================== Log started ===================");
 		}
 		catch (Throwable th)
