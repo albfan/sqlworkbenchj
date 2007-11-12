@@ -539,7 +539,16 @@ public class XmlDataFileParser
 		List<WbFile> toProcess = null;
 		if (this.checkDependencies) 
 		{
-			toProcess = sorter.getSortedList();
+			try
+			{
+				toProcess = sorter.getSortedList();
+			}
+			catch (CycleErrorException e)
+			{
+				hasErrors = true;
+				LogMgr.logError("XmlDataFileParser.processDirectory()", "Error when checking dependencies", e);
+				throw e;
+			}
 		}
 		else
 		{

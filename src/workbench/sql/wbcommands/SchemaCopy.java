@@ -18,6 +18,7 @@ import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
 import workbench.db.importer.RowDataReceiver;
 import workbench.db.importer.TableDependencySorter;
+import workbench.db.importer.TableStatements;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
@@ -173,6 +174,8 @@ public class SchemaCopy
 			}
 		}
 
+		copier.setPerTableStatements(new TableStatements(cmdLine));
+		
 		checkDependencies = cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS);
 		
 		CommonArgs.setProgressInterval(copier, arguments);

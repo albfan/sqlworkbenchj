@@ -52,7 +52,7 @@ public class ReferenceTableNavigation
 	protected void readDependencyTree(boolean forChildren)
 	{
 		dependencyTree = new TableDependency(this.dbConn, this.baseTable);
-		dependencyTree.setMaxLevel(1);
+		dependencyTree.setRetrieveDirectChildrenOnly(true);
 		if (forChildren)
 		{
 			dependencyTree.readTreeForChildren();

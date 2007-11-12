@@ -164,6 +164,7 @@ public class Settings
 		}
 		
 		this.configfile = new WbFile(cfd, configFile);
+		configDir = cfd.getFullPath();
 
 		BufferedInputStream in = null;
 	  try
@@ -212,7 +213,7 @@ public class Settings
 			// Replace old System.out or System.err settings
 			if (logfile.equalsIgnoreCase("System.out") || logfile.equalsIgnoreCase("System.err"))
 			{
-				File f = new File(configDir, "workbench.log");
+				File f = new File(getConfigDir(), "workbench.log");
 				logfile = f.getAbsolutePath();
 				this.props.setProperty("workbench.log.filename", FileDialogUtil.CONFIG_DIR_KEY + "/workbench.log");
 			}

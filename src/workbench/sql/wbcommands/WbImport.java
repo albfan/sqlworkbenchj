@@ -19,9 +19,11 @@ import java.util.List;
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.importer.ConstantColumnValues;
+import workbench.db.importer.CycleErrorException;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.ParsingInterruptedException;
 import workbench.db.importer.RowDataProducer;
+import workbench.db.importer.TableStatements;
 import workbench.db.importer.TextFileParser;
 import workbench.db.importer.XmlDataFileParser;
 import workbench.util.ArgumentType;
@@ -93,6 +95,7 @@ public class WbImport
 		CommonArgs.addQuoteEscapting(cmdLine);
 		CommonArgs.addConverterOptions(cmdLine, true);
 		CommonArgs.addCheckDepsParameter(cmdLine);
+		CommonArgs.addTableStatements(cmdLine);
 		
 		cmdLine.addArgument(ARG_TYPE, StringUtil.stringToList("text,xml"));
 		cmdLine.addArgument(ARG_UPDATE_WHERE);
@@ -611,8 +614,9 @@ public class WbImport
 		int endRow = cmdLine.getIntValue(ARG_END_ROW, -1);
 		if (endRow > 0) imp.setEndRow(endRow);
 		
-		this.imp.setRowActionMonitor(this.rowMonitor);
-		
+		imp.setRowActionMonitor(this.rowMonitor);
+		imp.setPerTableStatements(new TableStatements(cmdLine));
+
 		try
 		{
 			imp.startImport();
@@ -625,6 +629,11 @@ public class WbImport
 				result.setFailure();
 			}
 			result.setWarning(imp.hasWarnings());
+		}
+		catch (CycleErrorException e)
+		{
+			// Logging already done.
+			result.setFailure();
 		}
 		catch (SQLException e)
 		{

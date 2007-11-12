@@ -79,6 +79,75 @@ public class WbImportTest
 		super.tearDown();
 	}
 	
+	public void testPreAndPostStatements()
+	{
+		ResultSet rs = null;
+		Statement stmt = null;
+		try
+		{
+			File importFile  = new File(this.basedir, "table_statements.txt");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("nr\tfirstname\tlastname");
+			out.println("1\tArthur\tDent");
+			out.println("2\tFord\tPrefect");
+			out.println("3\tZaphod\tBeeblebrox");
+			out.close();
+
+			stmt = this.connection.createStatement();
+			stmt.executeUpdate("insert into junit_test_pk (nr, firstname, lastname) values (1, 'Mary', 'Moviestar')");
+			stmt.executeUpdate("insert into junit_test_pk (nr, firstname, lastname) values (2, 'Harry', 'Handsome')");
+			this.connection.commit();
+			
+			StatementRunnerResult result = importCmd.execute("wbimport " +
+				"-encoding=utf8 " +
+				"-file='" + importFile.getAbsolutePath() + "' " +
+				"-preTableStatement='delete from ${table.name}' " +
+				"-postTableStatement='update ${table.name} set nr = nr * 10' " +
+				"-type=text " +
+				"-header=true " +
+				"-continueonerror=false " +
+				"-table=junit_test_pk");
+			
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			rs = stmt.executeQuery("select nr, firstname, lastname from junit_test_pk order by nr");
+			while (rs.next())
+			{
+				int nr = rs.getInt(1);
+				String fname = rs.getString(2);
+				String lname = rs.getString(3);
+				if (nr == 10)
+				{
+					assertEquals("Arthur", fname);
+					assertEquals("Dent", lname);
+				}
+				else if (nr == 20)
+				{
+					assertEquals("Ford", fname);
+					assertEquals("Prefect", lname);
+				}
+				else if (nr == 30)
+				{
+					assertEquals("Zaphod", fname);
+					assertEquals("Beeblebrox", lname);
+				}
+				else
+				{
+					fail("Wrong ID retrieved!");
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+	}
+	
 	public void testFunctionConstant()
 	{
 		try
@@ -143,6 +212,8 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
+	
+	
 	public void testConstantValues()
 	{
 		try

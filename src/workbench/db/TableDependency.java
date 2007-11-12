@@ -27,20 +27,19 @@ public class TableDependency
 	private DependencyNode tableRoot;
 	private DbMetadata wbMetadata;
 	private ArrayList<DependencyNode> leafs;
-	private int currentLevel = 0;
-	private int maxLevel = Integer.MAX_VALUE;
+	private boolean directChildren = false;
 	private boolean readAborted = false;
 	
 	public TableDependency(WbConnection con, TableIdentifier tbl)
 	{
 		this.connection = con;
 		this.wbMetadata = this.connection.getMetadata();
-		this.theTable = tbl;
+		this.theTable = this.wbMetadata.findTable(tbl);
 	}
 
-	public void setMaxLevel(int max)
+	public void setRetrieveDirectChildrenOnly(boolean flag)
 	{
-		this.maxLevel = max;
+		this.directChildren = flag;
 	}
 
 	public DependencyNode findLeafNodeForTable(TableIdentifier table)
@@ -83,14 +82,14 @@ public class TableDependency
 		}
 		if (tableToUse == null) return;
 		this.tableRoot = new DependencyNode(tableToUse);
-		this.currentLevel = 0;
-		this.readTree(this.tableRoot, exportedKeys);
+		//this.currentLevel = 0;
+		this.readTree(this.tableRoot, exportedKeys, 0);
 	}
 
 	/**
 	 *	Create the dependency tree.
 	 */
-	private int readTree(DependencyNode parent, boolean exportedKeys)
+	private int readTree(DependencyNode parent, boolean exportedKeys, int level)
 	{
 		try
 		{
@@ -148,25 +147,28 @@ public class TableDependency
 				child.addColumnDefinition(tablecolumn, parentcolumn);
 			}
 
-			this.currentLevel ++;
-			if (currentLevel > 10) 
+			//level ++;
+			if (level > 15) 
 			{
 				// this is a bit paranoid, as I am testing for cycles before recursing
 				// into the next child. This is a safetey net, just in case the cycle
 				// is not detected. Better display the user incorrect data, than 
 				// ending up in an endless loop.
 				// A circular dependency with more than 10 levels is an ugly design anyway :)
-				LogMgr.logWarning("TableDependency.readDependencyTree()", "Endless reference cycle detected for root=" + this.tableRoot, null);
+				LogMgr.logError("TableDependency.readDependencyTree()", "Endless reference cycle detected for root=" + this.tableRoot + ", parent=" + parent, null);
 				this.readAborted = true;
 				return count;
 			}
+
+			if (directChildren && level == 1) return count;
 			
 			List<DependencyNode> children = parent.getChildren();
 			for (DependencyNode child : children)
 			{
+				String s = child.getTable().getTableName();
 				if (!isCycle(child, parent))
 				{
-					this.readTree(child, exportedKeys);
+					this.readTree(child, exportedKeys, level + 1);
 				}
 				this.leafs.add(child);
 			}
@@ -193,7 +195,7 @@ public class TableDependency
 		return false;
 	}
 	
-	boolean wasAborted()
+	public boolean wasAborted()
 	{
 		return this.readAborted;
 	}

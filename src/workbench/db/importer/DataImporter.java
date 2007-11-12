@@ -151,6 +151,7 @@ public class DataImporter
 	private boolean multiTable = false;
 	private List<Closeable> batchStreams;
 	private boolean batchRunning = false;
+	private TableStatements tableStatements;
 	
 	public DataImporter()
 	{
@@ -191,6 +192,18 @@ public class DataImporter
 		if (producer instanceof ImportFileParser)
 		{
 			this.parser = (ImportFileParser)producer;
+		}
+	}
+	
+	public void setPerTableStatements(TableStatements stmt)
+	{
+		if (stmt != null && stmt.hasStatements())
+		{
+			this.tableStatements = stmt;
+		}
+		else
+		{
+			this.tableStatements = null;
 		}
 	}
 	
@@ -537,11 +550,20 @@ public class DataImporter
 			this.useBatch = false;
 			this.messages.append(ResourceMgr.getString("ErrImportNoBatchMode"));
 		}
+		
 		try
 		{
 			this.source.start();
 		}
-		catch (SQLException e)
+		catch (CycleErrorException e)
+		{
+			this.hasErrors = true;
+			messages.append(ResourceMgr.getString("ErrImpCycle"));
+			messages.append(" (" + e.getRootTable() + ")");
+			this.messages.append(this.source.getMessages());
+			throw e;
+		}
+		catch (Exception e)
 		{
 			this.hasErrors = true;
 			this.messages.append(this.source.getMessages());
@@ -1464,6 +1486,11 @@ public class DataImporter
 			{
 				this.badWriter = null;
 			}
+			
+			if (this.tableStatements != null)
+			{
+				this.tableStatements.runPreTableStatement(dbConn, targetTable);
+			}
 		}
 		catch (RuntimeException th)
 		{
@@ -1770,7 +1797,7 @@ public class DataImporter
 		throws SQLException
 	{
 		boolean commitNeeded = !dbConn.getAutoCommit() && (this.commitEvery != Committer.NO_COMMIT_FLAG);
-		
+	
 		try
 		{
 			if (this.useBatch)
@@ -1785,6 +1812,11 @@ public class DataImporter
 			
 			this.closeStatements();
 			
+			if (this.tableStatements != null)
+			{
+				this.tableStatements.runPostTableStatement(dbConn, targetTable);
+			}
+
 			if (commitNeeded)
 			{
 				LogMgr.logInfo("DataImporter.finishTable()", this.getAffectedRows() + " row(s) imported. Committing changes");

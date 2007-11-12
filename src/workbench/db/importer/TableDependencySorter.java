@@ -14,6 +14,7 @@ package workbench.db.importer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import workbench.db.DependencyNode;
 import workbench.db.TableDependency;
@@ -29,6 +30,7 @@ import workbench.db.WbConnection;
 public class TableDependencySorter 
 {
 	private WbConnection dbConn;
+	private List<TableIdentifier> cycleErrors;
 	
 	public TableDependencySorter(WbConnection con)
 	{
@@ -45,6 +47,16 @@ public class TableDependencySorter
 		return getSortedTableList(tables, addMissing, true);
 	}
 	
+	public boolean hasErrors()
+	{
+		return cycleErrors != null;
+	}
+	
+	public List<TableIdentifier> getErrorTables()
+	{
+		if (cycleErrors == null) return null;
+		return Collections.unmodifiableList(cycleErrors);
+	}
 	/**
 	 * Return a sorted list of DependencyNodes that need to be taken care of 
 	 * when deleting a row from the passed table.
@@ -103,6 +115,11 @@ public class TableDependencySorter
 		{
 			TableDependency deps = new TableDependency(dbConn, tbl);
 			deps.readTreeForChildren();
+			if (deps.wasAborted())
+			{
+				if (cycleErrors == null) cycleErrors = new LinkedList<TableIdentifier>();
+				cycleErrors.add(tbl);
+			}
 			
 			DependencyNode root = deps.getRootNode();
 			if (root != null)

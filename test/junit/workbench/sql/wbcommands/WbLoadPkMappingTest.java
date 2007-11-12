@@ -15,8 +15,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Map;
-import junit.framework.*;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.sql.DefaultStatementRunner;
 import workbench.sql.SqlCommand;
@@ -27,7 +27,8 @@ import workbench.storage.PkMapping;
  *
  * @author support@sql-workbench.net
  */
-public class WbLoadPkMappingTest extends TestCase
+public class WbLoadPkMappingTest 
+	extends WbTestCase
 {
 	
 	public WbLoadPkMappingTest(String testName)
@@ -37,12 +38,11 @@ public class WbLoadPkMappingTest extends TestCase
 
 	public void testExecute() throws Exception
 	{
-		TestUtil util;
+		TestUtil util = getTestUtil();
 		DefaultStatementRunner runner;
 		
 		try
 		{
-			util = new TestUtil(getClass().getName()+".testExecute");
 			util.prepareEnvironment();
 			runner = util.createConnectedStatementRunner();
 			

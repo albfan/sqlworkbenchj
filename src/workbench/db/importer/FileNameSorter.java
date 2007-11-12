@@ -62,6 +62,7 @@ public class FileNameSorter
 	}
 	
 	public List<WbFile> getSortedList()
+		throws CycleErrorException
 	{
 		Map<String, WbFile> fileMapping = new HashMap<String, WbFile>(toProcess.size());
 		
@@ -75,6 +76,10 @@ public class FileNameSorter
 		
 		TableDependencySorter sorter = new TableDependencySorter(dbConn);
 		List<TableIdentifier> sorted = sorter.sortForInsert(tables);
+		if (sorter.hasErrors())
+		{
+			throw new CycleErrorException(sorter.getErrorTables().get(0));
+		}
 		
 		List<WbFile> result = new LinkedList<WbFile>();
 		for (TableIdentifier tbl : sorted)

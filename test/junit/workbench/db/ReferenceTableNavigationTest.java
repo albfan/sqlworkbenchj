@@ -16,7 +16,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
-import junit.framework.*;
+import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.storage.ColumnData;
 

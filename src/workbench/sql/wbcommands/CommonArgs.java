@@ -53,10 +53,20 @@ public class CommonArgs
 	public static final String ARG_FALSE_LITERALS = "literalsFalse";
 	public static final String ARG_TRUE_LITERALS = "literalsTrue";
 	public static final String ARG_CHECK_FK_DEPS = "checkDependencies";
+	public static final String ARG_PRE_TABLE_STMT = "preTableStatement";
+	public static final String ARG_POST_TABLE_STMT = "postTableStatement";
+	public static final String ARG_IGNORE_TABLE_STMT_ERRORS = "ignorePrePostErrors";
 	
 	private static List<String> getDelimiterArguments()
 	{
 		return StringUtil.stringToList("'\\t',';',\"','\",'|',<char>");
+	}
+
+	public static void addTableStatements(ArgumentParser cmdLine)
+	{
+		cmdLine.addArgument(ARG_PRE_TABLE_STMT);
+		cmdLine.addArgument(ARG_POST_TABLE_STMT);
+		cmdLine.addArgument(ARG_IGNORE_TABLE_STMT_ERRORS, ArgumentType.BoolArgument);
 	}
 	
 	public static void addCheckDepsParameter(ArgumentParser cmdLine)

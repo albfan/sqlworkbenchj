@@ -84,6 +84,50 @@ public class DataStoreTest
 			fail(e.getMessage());
 		}
 	}
+
+	public void testDefinePK()
+	{
+		try
+		{
+			util.emptyBaseDirectory();
+			WbConnection con = util.getConnection("pkTestDb");
+			Statement stmt = con.createStatement();
+			stmt.executeUpdate("CREATE TABLE junit_test (id1 integer, some_data varchar(100))");
+			stmt.executeUpdate("insert into junit_test (id1, some_data) values (1,'General Failure')");
+			stmt.executeUpdate("insert into junit_test (id1, some_data) values (2,'Major Bug')");
+
+			String sql = "select id1, some_data from JUnit_Test";
+			
+			ResultSet rs = stmt.executeQuery(sql);
+			DataStore ds = new DataStore(rs, con);
+			SqlUtil.closeAll(rs, stmt);
+			
+			ds.setGeneratingSql(sql);
+			
+			PkMapping.getInstance().addMapping("JUNIT_TEST", "id1");
+			ds.updatePkInformation();
+			assertTrue(ds.hasPkColumns());
+			ds.setValue(0, 1, "Corporal Clegg");
+			ds.updateDb(con, null);
+			stmt = con.createStatement();
+			rs = stmt.executeQuery("select some_data from junit_test where id1 = 1");
+			if (rs.next())
+			{
+				String data = rs.getString(1);
+				assertEquals("Corporal Clegg", data);
+			}
+			else
+			{
+				fail("No rows selected");
+			}
+			SqlUtil.closeAll(rs, stmt);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	
 	
 	public void testQuotedKeyColumns()

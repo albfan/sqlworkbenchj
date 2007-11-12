@@ -588,7 +588,16 @@ public class TextFileParser
 		List<WbFile> toProcess = null;
 		if (this.checkDependencies) 
 		{
-			toProcess = sorter.getSortedList();
+			try
+			{
+				toProcess = sorter.getSortedList();
+			}
+			catch (CycleErrorException e)
+			{
+				cancelImport = true;
+				LogMgr.logError("TextFileParser.processDirectory()", "Error when checking dependencies", e);
+				throw e;
+			}
 		}
 		else
 		{

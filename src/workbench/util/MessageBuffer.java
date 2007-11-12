@@ -117,6 +117,7 @@ public class MessageBuffer
 	{
 		if (buff == null) return;
 		int count = buff.messages.size();
+		if (count == 0) return;
 		this.length += buff.length;
 		while (this.messages.size() + count > maxSize)
 		{
@@ -127,7 +128,6 @@ public class MessageBuffer
 		{
 			this.messages.add(s);
 		}
-		//this.messages.addAll(buff.messages);
 	}
 	
 	public synchronized void append(CharSequence s)

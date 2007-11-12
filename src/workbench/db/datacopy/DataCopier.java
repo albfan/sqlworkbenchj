@@ -25,6 +25,7 @@ import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.RowDataReceiver;
+import workbench.db.importer.TableStatements;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.ProgressReporter;
@@ -221,6 +222,11 @@ public class DataCopier
 		this.importer.setKeyColumns(keys);
 	}
 
+	public void setPerTableStatements(TableStatements stmt)
+	{
+		this.importer.setPerTableStatements(stmt);
+	}
+	
 	/**
 	 *	Forwards the setMode() call to the DataImporter.
 	 *	@see workbench.db.importer.DataImporter#setMode(String)
