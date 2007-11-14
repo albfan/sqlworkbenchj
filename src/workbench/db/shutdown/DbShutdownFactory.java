@@ -14,13 +14,21 @@ package workbench.db.shutdown;
 import workbench.db.WbConnection;
 
 /**
- *
+ * A factory to create instances of the DbShutdownHook interface.
+ * 
  * @author support@sql-workbench.net
  */
 public class DbShutdownFactory 
 {
+	/**
+	 * Create a DbShutdownHook for the given connection.
+	 * @param con the connection for which to create the shutdown hook
+	 * @return null if not shutdown processing is necessary, an approriate instance otherwise
+	 */
 	public static DbShutdownHook getShutdownHook(WbConnection con)
 	{
+		if (con == null) return null;
+		
 		if (con.getMetadata().isHsql())
 		{
 			return new HsqlShutdownHook();

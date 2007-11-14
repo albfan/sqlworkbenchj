@@ -21,7 +21,8 @@ import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 /**
- *
+ * A Shutdown hook for Apache Derby.
+ * 
  * @author support@sql-workbench.net
  */
 public class DerbyShutdownHook

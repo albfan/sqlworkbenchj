@@ -496,7 +496,7 @@ public class DbMetadata
 	 * It simply checks if a regular expression to detect this kind of 
 	 * statements has been defined.
 	 * 
-	 * @see #isSelectIntoNewTable(boolean)
+	 * @see #isSelectIntoNewTable(String)
 	 */
 	public boolean supportsSelectIntoNewTable()
 	{

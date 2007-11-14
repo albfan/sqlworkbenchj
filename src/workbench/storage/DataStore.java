@@ -146,10 +146,9 @@ public class DataStore
 	 * The ResultSet has to be closed by the caller.
 	 * 
 	 * @param aResult the ResultSet to process
-	 * @param readData if true, the ResultSet will be processed, otherwise only the MetaData will be read
 	 * @throws java.sql.SQLException
 	 * 
-	 * @see DataStore(ResultSet, boolean)
+	 * @see #DataStore(ResultSet, boolean)
 	 */
 	public DataStore(ResultSet aResult)
 		throws SQLException

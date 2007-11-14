@@ -21,13 +21,10 @@ import workbench.util.StringUtil;
  */
 public class SqlHistoryEntry
 {
-
 	private String text;
 	private int cursorPos;
 	private int selectionStart;
 	private int selectionEnd;
-
-	//private static final Pattern PATTERN_EMPTY_LINE = Pattern.compile("$(\r\n|\n\r|\r|\n)");
 
 	public SqlHistoryEntry(String sql, int pos, int selStart, int selEnd)
 	{
@@ -68,6 +65,7 @@ public class SqlHistoryEntry
 		try
 		{
 			editor.setText(this.text);
+			editor.setCaretPosition(0);
 			if (this.cursorPos > -1) 
 			{
 				editor.setCaretPosition(this.cursorPos);
@@ -104,21 +102,6 @@ public class SqlHistoryEntry
 		{
 			return false;
 		}
-	}
-
-	private String trimEmptyLines(String input)
-	{
-		if (input == null) return null;
-		int len = input.length() - 1;
-		if (len <= 0) return "";
-
-		char c = input.charAt(len);
-		while ( (c == '\r' || c == '\n') && len > 0)
-		{
-			len --;
-			c = input.charAt(len);
-		}
-		return input.substring(0, len + 1);
 	}
 
 	private void setText(String value)

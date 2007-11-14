@@ -195,6 +195,12 @@ public class DataImporter
 		}
 	}
 	
+	/**
+	 * Define statements that should be executed before an import
+	 * for a table starts and after the last record has been inserted.
+	 * 
+	 * @param stmt the statement definitions. May be null
+	 */
 	public void setPerTableStatements(TableStatements stmt)
 	{
 		if (stmt != null && stmt.hasStatements())

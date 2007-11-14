@@ -19,7 +19,8 @@ import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 
 /**
- *
+ * A Shutdown hook for H2 Database.
+ * 
  * @author support@sql-workbench.net
  */
 public class HsqlShutdownHook
