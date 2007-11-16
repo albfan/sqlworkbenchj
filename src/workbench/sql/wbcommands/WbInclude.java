@@ -11,7 +11,6 @@
  */
 package workbench.sql.wbcommands;
 
-import java.io.File;
 import java.sql.SQLException;
 import workbench.WbManager;
 import workbench.sql.DelimiterDefinition;
@@ -25,6 +24,7 @@ import workbench.util.ArgumentParser;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.resource.Settings;
+import workbench.util.WbFile;
 
 /**
  * @author  support@sql-workbench.net
@@ -97,8 +97,7 @@ public class WbInclude
 			return result;
 		}
 
-		file = evaluateFileArgument(file);
-		File f = new File(file);
+		WbFile f = evaluateFileArgument(file);
 
 		if (!f.exists())
 		{

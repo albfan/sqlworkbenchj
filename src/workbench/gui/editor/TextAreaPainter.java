@@ -32,7 +32,7 @@ import workbench.util.StringUtil;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.33 2007-09-02 09:03:57 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.34 2007-11-16 21:59:47 thomas Exp $
  */
 public class TextAreaPainter 
 	extends JComponent 
@@ -322,16 +322,14 @@ public class TextAreaPainter
 		int height = fm.getHeight();
 		
 		int firstInvalid = firstVisible + clipRect.y / height;
-		int lastInvalid = firstVisible + ((clipRect.y + clipRect.height) / height);
+		int lastInvalid = firstVisible + ((clipRect.y + clipRect.height) / height) + 1;
 		if (lastInvalid > lastLine) lastInvalid = lastLine;
 		
-		try
+		try 
 		{
 			TokenMarker tokenMarker = textArea.getDocument().getTokenMarker();
 			int x = textArea.getHorizontalOffset();
 
-			//Color f = this.getForeground();
-			
 			int endLine = firstVisible + visibleCount;
 			if (endLine > lastLine) endLine = lastLine;
 			
@@ -574,7 +572,7 @@ public class TextAreaPainter
 
 	protected void paintCaret(Graphics gfx, int line, int y)
 	{
-		if(textArea.isCaretVisible())
+		if (textArea.isCaretVisible())
 		{
 			int offset = textArea.getCaretPosition() - textArea.getLineStartOffset(line);
 			int caretX = textArea._offsetToX(line,offset);// + this.gutterWidth;

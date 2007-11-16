@@ -69,6 +69,10 @@ public abstract class RowDataConverter
 	protected boolean useRowNumForBlobFile = true;
 	protected int[] blobNameCols = null;
 	protected List<String> blobIdColumns = null;
+	
+	protected String filenameColumn = null;
+	protected int filenameColumnIndex = -1;
+	
 	protected long currentRow = -1;
 	protected RowData currentRowData;
 	
@@ -113,6 +117,24 @@ public abstract class RowDataConverter
 				this.useRowNumForBlobFile = false;
 			}
 		}
+		
+		if (this.filenameColumn != null)
+		{
+			this.filenameColumnIndex = meta.findColumn(filenameColumn);
+		}
+	}
+	
+	public void setFilenameColumn(String colname)
+	{
+		if (StringUtil.isWhitespaceOrEmpty(colname))
+		{
+			this.filenameColumn = null;
+		}
+		else
+		{
+			this.filenameColumn = colname.trim();
+		}
+		this.filenameColumnIndex = -1;
 	}
 	
 	public ResultInfo getResultInfo() { return this.metaData; }
@@ -192,58 +214,92 @@ public abstract class RowDataConverter
 				fname.append("row_");
 				fname.append(currentRow);
 			}
-			fname.append(".data");
+			fname.append(getFileExtension());
 			File f = new File(getBaseDir(), fname.toString());
 			return f;
 		}
 	}
 	
+	protected String getFileExtension()
+	{
+		return Settings.getInstance().getProperty("workbench.export.default.blob.extension", ".data");
+	}
+	
+	protected String createFilename(RowData row, int colIndex, long rowNum)
+	{
+		String filename = null;
+		if (this.filenameColumnIndex > -1)
+		{
+			Object value = row.getValue(filenameColumnIndex);
+			if (value != null)
+			{
+				filename = StringUtil.makeFilename(value.toString());
+			}
+		}
+		return filename;
+	}
+	
 	public File createBlobFile(RowData row, int colIndex, long rowNum)
 	{
-		StringBuilder fname = new StringBuilder(baseFilename.length() + 25);
-
-		if (this.factory == null) initOutputFactory();
-		
-		if (!this.factory.isArchive()) 
+		String name = createFilename(row, colIndex, rowNum);
+		File f = null;
+		if (name != null)
 		{
-			fname.append(baseFilename);
-			fname.append('_');
-		}
-		
-		if (this.useRowNumForBlobFile || this.blobNameCols == null)
-		{
-			fname.append("r");
-			fname.append(rowNum+1);
-			fname.append("_c");
-			fname.append(colIndex+1);
+			WbFile wf = new WbFile(name);
+			if (!wf.isAbsolute())
+			{
+				f = new WbFile(getBaseDir(), name);
+			}
 		}
 		else
 		{
-			String col = this.metaData.getColumnName(colIndex);
-			fname.append(StringUtil.makeFilename(col));
-			fname.append("_#");
-			for (int i = 0; i < blobNameCols.length; i++)
+			StringBuilder fname = new StringBuilder(baseFilename.length() + 25);
+
+			if (this.factory == null) initOutputFactory();
+
+			if (!this.factory.isArchive()) 
 			{
-				int c = blobNameCols[i];
-				if (c > -1)
+				fname.append(baseFilename);
+				fname.append('_');
+			}
+
+			if (this.useRowNumForBlobFile || this.blobNameCols == null)
+			{
+				fname.append("r");
+				fname.append(rowNum+1);
+				fname.append("_c");
+				fname.append(colIndex+1);
+			}
+			else
+			{
+				String col = this.metaData.getColumnName(colIndex);
+				fname.append(StringUtil.makeFilename(col));
+				fname.append("_#");
+				for (int i = 0; i < blobNameCols.length; i++)
 				{
-					Object o = row.getValue(c);
-					if (i > 0) fname.append('_');
-					if (o == null)
+					int c = blobNameCols[i];
+					if (c > -1)
 					{
-						fname.append("col#");
-						fname.append(i);
-						fname.append("NULL");
-					}
-					else
-					{
-						fname.append(StringUtil.makeFilename(o.toString()));
+						Object o = row.getValue(c);
+						if (i > 0) fname.append('_');
+						if (o == null)
+						{
+							fname.append("col#");
+							fname.append(i);
+							fname.append("NULL");
+						}
+						else
+						{
+							fname.append(StringUtil.makeFilename(o.toString()));
+						}
 					}
 				}
 			}
+
+			fname.append(getFileExtension());
+			f = new File(getBaseDir(), fname.toString());
 		}
-		fname.append(".data");
-		File f = new File(getBaseDir(), fname.toString());
+		
 		return f;
 	}
 

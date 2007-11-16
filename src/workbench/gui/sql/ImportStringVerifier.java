@@ -60,12 +60,6 @@ public class ImportStringVerifier
 		this.content = data;
 	}
 	
-	public boolean isMultiline()
-	{
-		if (this.content == null) return false;
-		return (this.content.indexOf('\n') > -1);
-	}
-	
 	/**
 	 * Check the contents of the data string if it matches
 	 * the structure of our target ResultInfo.
@@ -73,9 +67,8 @@ public class ImportStringVerifier
 	 * if possible.
 	 * The following things are checked:
 	 * <ul>
-	 * <li>At least one \n must be present in the input string</li>
 	 * <li>the input data has to have a header line which defines the columns</li>
-	 * <li>If there is no header line (i.e. no matching columns found, then 
+	 * <li>If there is no header line (i.e. no matching columns found) then 
 	 *     the import is OK, if the column count is the same</li>
 	 * <li>at least one column from the input data must occur in the ResultInfo</li>
 	 * </ul>

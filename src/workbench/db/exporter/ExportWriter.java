@@ -62,10 +62,10 @@ public abstract class ExportWriter
 		converter.setColumnsToExport(this.exporter.getColumnsToExport());
 		converter.setCompressExternalFiles(exporter.getCompressOutput());
 		converter.setBlobIdColumns(exporter.getBlobIdColumns());
+		converter.setFilenameColumn(exporter.getFilenameColumn());
 		
 		String file = this.exporter.getOutputFilename();
 		if (file != null) converter.setOutputFile(new File(file));
-		
 	}
 	
 	public abstract RowDataConverter createConverter();

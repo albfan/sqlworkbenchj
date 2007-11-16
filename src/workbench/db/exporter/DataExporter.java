@@ -76,26 +76,6 @@ public class DataExporter
 	implements Interruptable, ErrorReporter, ProgressReporter, Committer
 {
 	/**
-	 * Use a DBMS specific literals for BLOBs in SQL statements.
-	 * @see workbench.storage.BlobFormatterFactory#createInstance(workbench.db.DbMetadata meta)
-	 * @see #setBlobMode(String)
-	 */
-	public static final String BLOB_MODE_LITERAL = "dbms";
-	
-	/**
-	 * Use ANSI literals for BLOBs in SQL statements.
-	 * @see workbench.storage.BlobFormatterFactory#createAnsiFormatter()
-	 * @see #setBlobMode(String)
-	 */
-	public static final String BLOB_MODE_ANSI = "ansi";
-	
-	/**
-	 * Generate WB Specific {$blobfile=...} statements
-	 * @see #setBlobMode(String)
-	 */
-	public static final String BLOB_MODE_FILE = "file";
-	
-	/**
 	 * Export to SQL statements.
 	 */
 	public static final int EXPORT_SQL = 1;
@@ -109,7 +89,6 @@ public class DataExporter
 	 * Export to XML file (WB specific).
 	 */
 	public static final int EXPORT_XML = 3;
-	
 	
 	/**
 	 * Export to HTML.
@@ -150,6 +129,7 @@ public class DataExporter
 	private String chrFunc = null;
 	private String concatString = "||";
 	private String concatFunction = null;
+	private String filenameColumn = null;
 	private int commitEvery = 0;
 
 	private SimpleDateFormat dateFormatter = null;
@@ -194,11 +174,13 @@ public class DataExporter
 	private ZipOutputStream zipArchive;
 	private ZipEntry zipEntry;
 
-	private String blobMode = null;
+	private BlobMode blobMode = null;
 	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
 
 	/**
 	 * Create a DataExporter for the specified connection.
+	 * 
+	 * @param con The connection on which this Exporter should work on
 	 */
 	public DataExporter(WbConnection con)
 	{
@@ -261,6 +243,23 @@ public class DataExporter
 		}
 	}
   
+	public String getFilenameColumn()
+	{
+		return this.filenameColumn;
+	}
+	
+	public void setFilenameColumn(String colname)
+	{
+		if (StringUtil.isWhitespaceOrEmpty(colname))
+		{
+			this.filenameColumn  = null;
+		}
+		else
+		{
+			this.filenameColumn = colname.trim();
+		}		
+	}
+	
 	/**
 	 * Return the type of date literals to be created when generating
 	 * SQL statements. 
@@ -289,17 +288,8 @@ public class DataExporter
 	 */
 	public void setBlobMode(String type)
 	{
-		if (type == null || type.equalsIgnoreCase("none"))
-		{
-			this.blobMode = null;
-		}
-		else if (BLOB_MODE_LITERAL.equalsIgnoreCase(type) 
-			|| BLOB_MODE_ANSI.equalsIgnoreCase(type) 
-			|| BLOB_MODE_FILE.equalsIgnoreCase(type))
-		{
-			this.blobMode = type;
-		}
-		else
+		this.blobMode = BlobMode.getMode(type);
+		if (this.blobMode == null)
 		{
 			String msg = ResourceMgr.getString("ErrExpInvalidBlobType");
 			msg = StringUtil.replace(msg, "%paramvalue%", type);
@@ -311,7 +301,7 @@ public class DataExporter
 	 * Returns the currently selected mode for BLOB literals.
 	 * @return the current type or null, if nothing was selected
 	 */
-	public String getBlobMode()
+	public BlobMode getBlobMode()
 	{
 		return this.blobMode;
 	}
@@ -394,6 +384,8 @@ public class DataExporter
 	 * Define the columns whose values should be used
 	 * for creating the blob files during export
 	 * These columns must define a unique key!
+	 * 
+	 * @param columns the ID columns to be used for the filename generation
 	 */
 	public void setBlobIdColumns(List<String> columns)
 	{
@@ -501,6 +493,8 @@ public class DataExporter
 
 	/** Control the display of a progress window. This is used
 	 *  from within the DbExplorer
+	 * 
+	 * @param aFlag if true, the progress window is displayed
 	 */
 	public void setShowProgressWindow(boolean aFlag)
 	{
@@ -855,6 +849,11 @@ public class DataExporter
 	/**
 	 * Start the export. This will execute the defined query
 	 * and then write the result into the outputfile
+	 * 
+	 * @return the number of rows exported
+	 * @throws java.io.IOException if the output file could not be written
+	 * @throws java.sql.SQLException if an error occurred during DB access
+	 * 
 	 */
 	public long startExport()
 		throws IOException, SQLException

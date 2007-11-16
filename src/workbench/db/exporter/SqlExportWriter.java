@@ -23,7 +23,9 @@ public class SqlExportWriter
 	extends ExportWriter
 {
 	
-	/** Creates a new instance of SqlExportWriter */
+	/** Creates a new instance of SqlExportWriter
+	 * @param exp The exporter to convert the rows for
+	 */
 	public SqlExportWriter(DataExporter exp)
 	{
 		super(exp);
@@ -45,16 +47,16 @@ public class SqlExportWriter
 		conv.setConcatFunction(exporter.getConcatFunction());
 		conv.setSqlLiteralType(exporter.getDateLiteralType());
     
-		String type = exporter.getBlobMode();
-		if (type == null)
-		{
-			conv.setBlobTypeNone();
-		}
-		else if (type.equalsIgnoreCase(DataExporter.BLOB_MODE_LITERAL))
+		BlobMode type = exporter.getBlobMode();
+		if (type == BlobMode.DbmsLiteral)
 		{
 			conv.setBlobTypeDbmsLiteral();
 		}
-		else if (type.equalsIgnoreCase(DataExporter.BLOB_MODE_FILE))
+		else if (type == BlobMode.AnsiLiteral)
+		{
+			conv.setBlobTypeAnsiLiteral();
+		}
+		else if (type == BlobMode.SaveToFile)
 		{
 			conv.setBlobTypeFile();
 		}

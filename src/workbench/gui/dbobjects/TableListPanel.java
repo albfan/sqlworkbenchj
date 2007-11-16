@@ -915,6 +915,9 @@ public class TableListPanel
 
 	/**
 	 * Save settings to a workspace
+	 * 
+	 * @param w the Workspace into which the settings should be saved
+	 * @param index the index to be used in the Workspace
 	 */
 	public void saveToWorkspace(WbWorkspace w, int index)
 	{
@@ -934,6 +937,9 @@ public class TableListPanel
 	
 	/**
 	 *	Read settings from a workspace
+	 * 
+	 * @param w the Workspace from which to read the settings
+	 * @param index the index inside the workspace
 	 */
 	public void readFromWorkspace(WbWorkspace w, int index)
 	{
@@ -1727,6 +1733,8 @@ public class TableListPanel
 	/**
 	 * Invoked when the type dropdown changes or one of the additional actions
 	 * is invoked that are put into the context menu of the table list
+	 * 
+	 * @param e the Event that ocurred
 	 */
 	public void actionPerformed(ActionEvent e)
 	{

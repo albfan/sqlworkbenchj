@@ -101,7 +101,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.81 2007-10-19 18:06:50 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.82 2007-11-16 21:59:47 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -639,7 +639,7 @@ public class JEditTextArea
 		int lineStart = getLineStartOffset(line);
 		int offset = Math.max(0,Math.min(getLineLength(line) - 1, getCaretPosition() - lineStart));
 
-		return scrollTo(line,offset);
+		return scrollTo(line, offset);
 	}
 
 	/**
@@ -663,7 +663,7 @@ public class JEditTextArea
 					scrollTo(line, offset);
 				}
 			});
-			return true;
+			return false;
 		}
 		
 		int newFirstLine = firstLine;
@@ -705,7 +705,7 @@ public class JEditTextArea
 			}
 		}
 
-		return setOrigin(newFirstLine,newHorizontalOffset);
+		return setOrigin(newFirstLine, newHorizontalOffset);
 	}
 
 	/**

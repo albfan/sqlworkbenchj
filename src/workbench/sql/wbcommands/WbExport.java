@@ -32,6 +32,7 @@ import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.db.TableIdentifier;
+import workbench.db.exporter.BlobMode;
 import workbench.util.ExceptionUtil;
 import workbench.util.WbFile;
 
@@ -60,7 +61,7 @@ public class WbExport
 		CommonArgs.addProgressParameter(cmdLine);
 		CommonArgs.addCommitParameter(cmdLine);
 		CommonArgs.addVerboseXmlParameter(cmdLine);
-		CommonArgs.addQuoteEscapting(cmdLine);
+		CommonArgs.addQuoteEscaping(cmdLine);
 		
 		cmdLine.addArgument("type", StringUtil.stringToList("text,xml,sqlinsert,sqlupdate,sqldeleteinsert,html"));
 		cmdLine.addArgument("file");
@@ -93,7 +94,8 @@ public class WbExport
 		cmdLine.addArgument("compress", ArgumentType.BoolArgument);
 		cmdLine.addArgument("blobIdCols", ArgumentType.Deprecated);
 		cmdLine.addArgument("lobIdCols");
-		cmdLine.addArgument("blobType", StringUtil.stringToList(DataExporter.BLOB_MODE_FILE + "," + DataExporter.BLOB_MODE_LITERAL + "," + DataExporter.BLOB_MODE_ANSI));
+		cmdLine.addArgument("filenameColumn");
+		cmdLine.addArgument("blobType", BlobMode.getTypes());
 		cmdLine.addArgument("clobAsFile", ArgumentType.BoolArgument);
 		cmdLine.addArgument("continueOnError", ArgumentType.BoolArgument);
 		cmdLine.addArgument("sqlDateLiterals", Settings.getInstance().getLiteralTypeList());
@@ -177,7 +179,7 @@ public class WbExport
 
 		if (type == null)
 		{
-				type = findTypeFromFilename(file);
+			type = findTypeFromFilename(file);
 		}
 		
 		if (type == null)
@@ -408,12 +410,13 @@ public class WbExport
 				result.setWarning(true);
 			}
 		}
+		
 		List<String> columns = StringUtil.stringToList(cols, ",", true, true, false);
 		this.exporter.setBlobIdColumns(columns);
 		this.exporter.setCompressOutput(cmdLine.getBoolean("compress", false));
 		
-		file = evaluateFileArgument(file);
-		this.exporter.setOutputFilename(file);
+		WbFile outputFile = evaluateFileArgument(file);
+		this.exporter.setOutputFilename(outputFile != null ? outputFile.getFullPath() : null);
 
 		// Setting the output type should be the last step in the configuration
 		// of the exporter as this will trigger some initialization 
@@ -445,12 +448,15 @@ public class WbExport
 		CommonArgs.setProgressInterval(this, cmdLine);
 		this.showProgress = (this.progressInterval > 0);
 
-		if (file != null)
+		if (outputFile != null)
 		{
+			// For a single table export the definition of a 
+			String extCol = cmdLine.getValue("filenameColumn");
+			exporter.setFilenameColumn(extCol);
+			
 			// Check the outputfile right now, so the user does not have
 			// to wait for a possible error message until the ResultSet
 			// from the SELECT statement comes in...
-			WbFile f = new WbFile(file);
 			boolean canWrite = true;
 			String msg = null;
 			try
@@ -458,15 +464,15 @@ public class WbExport
 				// File.canWrite() does not work reliably. It will report
 				// an error if the file does not exist, but still could 
 				// be written. 
-				if (f.exists())
+				if (outputFile.exists())
 				{
 					msg = ResourceMgr.getString("ErrExportFileWrite");
-					canWrite = f.canWrite();
+					canWrite = outputFile.canWrite();
 				}
 				else
 				{
 					// try to create the file
-					f.tryCreate();
+					outputFile.tryCreate();
 				}
 			}
 			catch (IOException e)

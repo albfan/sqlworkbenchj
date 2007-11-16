@@ -104,7 +104,7 @@ public class CommonArgs
 	 * are none, duplicate, escape.
 	 * @see workbench.util.QuoteEscapeType
 	 */
-	public static void addQuoteEscapting(ArgumentParser cmdLine)
+	public static void addQuoteEscaping(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_QUOTE_ESCAPE, StringUtil.stringToList("none,duplicate,escape"));
 	}

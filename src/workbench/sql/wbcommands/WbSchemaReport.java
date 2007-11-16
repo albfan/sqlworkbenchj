@@ -87,16 +87,15 @@ public class WbSchemaReport
 			return result;
 		}
 
-		String file = evaluateFileArgument(cmdLine.getValue("file"));
+		WbFile output = evaluateFileArgument(cmdLine.getValue("file"));
 
-		if (file == null)
+		if (output == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrSchemaReportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
 
-		file = StringUtil.trimQuotes(file);
 		String format = cmdLine.getValue("format");
 		if (StringUtil.isEmptyString(format)) format = "xml";
 
@@ -164,17 +163,17 @@ public class WbSchemaReport
 		// this object as the RowActionMonitor of the SchemaReporter
 		// see setCurrentObject()
 		this.currentTable = 0;
-		String wbFile = file;
+		
+		String wbReportFilename = output.getFullPath();
 		if (dbDesigner)
 		{
-			WbFile f = new WbFile(file);
+			WbFile f = new WbFile(wbReportFilename);
 			String dir = f.getParent();
 			String fname = f.getName();
 			WbFile nf = new WbFile(dir, "__wb_" + fname);
-			wbFile = nf.getFullPath();
+			wbReportFilename = nf.getFullPath();
 		}
-
-		this.reporter.setOutputFilename(wbFile);
+		this.reporter.setOutputFilename(wbReportFilename);
 
 		try
 		{
@@ -188,13 +187,11 @@ public class WbSchemaReport
 
 		if (dbDesigner && result.isSuccess())
 		{
-			File f = new File(wbFile);
 			try
 			{
 				this.setCurrentObject(ResourceMgr.getString("MsgConvertReport2Designer"), -1, -1);
-				Workbench2Designer converter = new Workbench2Designer(f);
+				Workbench2Designer converter = new Workbench2Designer(new File(wbReportFilename));
 				converter.transformWorkbench2Designer();
-				File output = new File(file);
 				converter.writeOutputFile(output);
 			}
 			catch (Exception e)
@@ -202,14 +199,14 @@ public class WbSchemaReport
 				result.setFailure();
 				LogMgr.logError("WbSchemaReport.execute()", "Error generating DBDesigner file", e);
 				String msg = ResourceMgr.getString("ErrGeneratingDbDesigner");
-				msg = StringUtil.replace(msg, "%wbfile%", f.getAbsolutePath());
+				msg = StringUtil.replace(msg, "%wbfile%", output.getFullPath());
 				msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));
 				result.addMessage(msg);
 			}
 		}
 		if (result.isSuccess())
 		{
-			String msg = ResourceMgr.getFormattedString("MsgSchemaReportTablesWritten", currentTable, file);
+			String msg = ResourceMgr.getFormattedString("MsgSchemaReportTablesWritten", currentTable, output.getFullPath());
 			result.addMessage(msg);
 			result.setSuccess();
 		}

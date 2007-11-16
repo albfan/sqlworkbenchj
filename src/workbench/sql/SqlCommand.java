@@ -11,7 +11,6 @@
  */
 package workbench.sql;
 
-import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -29,6 +28,7 @@ import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  * A single SQL command. This class is used if no special class was found
@@ -369,7 +369,7 @@ public class SqlCommand
 					{
 						// Some JDBC driver throw an exception when a statement is 
 						// cancelled. But in this case, we do not want to throw away the 
-						// data retrieved until now. We only add a warning
+						// data that was retrieved until now. We only add a warning
 						if (this.currentRetrievalData != null && this.currentRetrievalData.isCancelled())
 						{
 							result.addMessage(ResourceMgr.getString("MsgErrorDuringRetrieve"));
@@ -473,13 +473,13 @@ public class SqlCommand
 	public boolean isResultSetConsumer() { return false; }
 	public void consumeResult(StatementRunnerResult aResult) {}
 
-	protected String evaluateFileArgument(String fileName)
+	protected WbFile evaluateFileArgument(String fileName)
 	{
-		if (StringUtil.isEmptyString(fileName)) return fileName;
+		if (StringUtil.isEmptyString(fileName)) return null;
 		
 		String fname = StringUtil.trimQuotes(fileName);
-		File f  = new File(fname);
-		if (f.isAbsolute()) return fname;
+		WbFile f  = new WbFile(fname);
+		if (f.isAbsolute()) return f;
 		
 		// Use the "current" directory of the StatementRunner
 		// for the path of the file, if no path is specified.
@@ -488,17 +488,10 @@ public class SqlCommand
 			String dir = this.runner.getBaseDir();
 			if (!StringUtil.isEmptyString(dir))
 			{
-				f = new File(dir, fname);
-				try
-				{
-					fname = f.getCanonicalPath();
-				}
-				catch (Exception e)
-				{
-				}
+				f = new WbFile(dir, fname);
 			}
 		}
-		return fname;
+		return f;
 	}
 	
 	protected void addErrorInfo(StatementRunnerResult result, String sql, Throwable e)

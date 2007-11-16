@@ -11,7 +11,6 @@
  */
 package workbench.sql.wbcommands;
 
-import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import workbench.db.WbConnection;
@@ -25,6 +24,7 @@ import workbench.sql.VariablePool;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 import workbench.util.WbStringTokenizer;
 
 /**
@@ -70,28 +70,27 @@ public class WbDefineVar
 			// if the file argument has been supplied, no variable definition
 			// can be present, but the encoding parameter might have been passed
 			String encoding = cmdLine.getValue("encoding");
-			String filename = this.evaluateFileArgument(file);
-			File f = new File(filename);
+			WbFile f = this.evaluateFileArgument(file);
 			try
 			{
 				if (f.exists())
 				{
-					VariablePool.getInstance().readFromFile(filename, encoding);
+					VariablePool.getInstance().readFromFile(f.getFullPath(), encoding);
 					String msg = ResourceMgr.getString("MsgVarDefFileLoaded");
-					msg = StringUtil.replace(msg, "%file%", filename);
+					msg = StringUtil.replace(msg, "%file%", f.getFullPath());
 					result.addMessage(msg);
 					result.setSuccess();
 				}
 				else
 				{
-					String msg = ResourceMgr.getFormattedString("ErrFileNotFound", f.getAbsolutePath());
+					String msg = ResourceMgr.getFormattedString("ErrFileNotFound", f.getFullPath());
 					result.addMessage(msg);
 					result.setFailure();
 				}
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("WbDefineVar.execute()", "Error reading definition file: " + f.getAbsolutePath(), e);
+				LogMgr.logError("WbDefineVar.execute()", "Error reading definition file: " + f.getFullPath(), e);
 				String msg = ResourceMgr.getString("ErrReadingVarDefFile");
 				msg = StringUtil.replace(msg, "%file%", f.getAbsolutePath());
 				msg = msg + " " + ExceptionUtil.getDisplay(e);

@@ -1895,6 +1895,7 @@ public class SqlPanel
 	public void importString(String content, boolean showOptions)
 	{
 		if (this.currentData == null) return;
+		if (!this.currentData.startEdit()) return;
 
 		DataStore ds = currentData.getTable().getDataStore();
 
@@ -1922,7 +1923,7 @@ public class SqlPanel
 		runImporter(importer);
 	}
 
-	protected synchronized void runImporter(final DataStoreImporter importer)
+	public synchronized void runImporter(final DataStoreImporter importer)
 	{
 		this.setActionState(this.importFileAction, false);
 		this.setBusy(true);

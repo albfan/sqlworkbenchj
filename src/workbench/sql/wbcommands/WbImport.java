@@ -38,6 +38,7 @@ import workbench.util.ConverterException;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
+import workbench.util.WbFile;
 
 /**
  *
@@ -92,7 +93,7 @@ public class WbImport
 		CommonArgs.addCommitParameter(cmdLine);
 		CommonArgs.addContinueParameter(cmdLine);
 		CommonArgs.addCommitAndBatchParams(cmdLine);
-		CommonArgs.addQuoteEscapting(cmdLine);
+		CommonArgs.addQuoteEscaping(cmdLine);
 		CommonArgs.addConverterOptions(cmdLine, true);
 		CommonArgs.addCheckDepsParameter(cmdLine);
 		CommonArgs.addTableStatements(cmdLine);
@@ -225,8 +226,7 @@ public class WbImport
 			return result;
 		}
 		
-		filename = evaluateFileArgument(filename);
-		File inputFile = (filename != null ? new File(filename) : null);
+		WbFile inputFile = evaluateFileArgument(filename);
 
 		String badFile = cmdLine.getValue(ARG_BADFILE);
 		if (badFile != null)

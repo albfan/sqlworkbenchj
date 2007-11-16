@@ -78,22 +78,21 @@ public class WbSelectBlob
 		}
 		sql = StringUtil.replace(sql, filename, "");
 		sql = sql.replaceFirst("(?i)\\sINTO\\s", " ");
-		filename = evaluateFileArgument(filename);
-		File f = new File(filename);
-		if (f.isDirectory())
+		WbFile outputFile = evaluateFileArgument(filename);
+		if (outputFile.isDirectory())
 		{
 			String msg = ResourceMgr.getFormattedString("ErrFileNotFound", filename);
 			result.addMessage(msg);
 			result.setFailure();
 			return result;
 		}
+		
 		LogMgr.logDebug("WbSelectBlob.execute()", "Using SQL=" + sql + " for file: " + filename);
 		ResultSet rs = null;
 		OutputStream out = null;
 		InputStream in = null;
 		long filesize = 0;
 		
-		WbFile outputFile = new WbFile(filename);
 		File outputDir = outputFile.getParentFile();
 		String baseFilename = outputFile.getFileName();
 		String extension = outputFile.getExtension();
@@ -107,6 +106,8 @@ public class WbSelectBlob
 			int row = 0;
 			while (rs.next())
 			{
+				WbFile currentFile = null;
+				
 				in = rs.getBinaryStream(1);
 				if (in == null)
 				{
@@ -119,16 +120,17 @@ public class WbSelectBlob
 				
 				if (row == 0)
 				{
-					f = new File(filename);
+					currentFile = outputFile;
 				}
 				else
 				{
-					f = new File(outputDir, baseFilename + "_" + Integer.toString(row) + extension);
+					currentFile = new WbFile(outputDir, baseFilename + "_" + Integer.toString(row) + extension);
 				}
-				out = new FileOutputStream(f);
+				
+				out = new FileOutputStream(currentFile);
 				filesize = FileUtil.copy(in, out);
 				String msg = ResourceMgr.getString("MsgBlobSaved");
-				msg = StringUtil.replace(msg, "%filename%", f.getAbsolutePath());
+				msg = StringUtil.replace(msg, "%filename%", currentFile.getFullPath());
 				msg = msg.replaceAll("%filesize%", Long.toString(filesize));
 				result.addMessage(msg);
 				result.setSuccess();

@@ -12,7 +12,6 @@
 package workbench.sql.wbcommands;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -34,6 +33,7 @@ import workbench.util.ArgumentType;
 import workbench.util.SqlUtil;
 import workbench.util.StrWriter;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  * @author  support@sql-workbench.net
@@ -118,8 +118,6 @@ public class WbSchemaDiff
 			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrDiffWrongParameters"));
 			return result;
 		}
-
-		String filename = evaluateFileArgument(cmdLine.getValue(PARAM_FILENAME));
 
 		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
 		if (sourceProfile == null) sourceProfile = cmdLine.getValue("sourceprofile"); // support old name
@@ -285,9 +283,11 @@ public class WbSchemaDiff
 		
 		Writer out = null;
 		boolean outputToConsole = false;
+		WbFile output = evaluateFileArgument(cmdLine.getValue(PARAM_FILENAME));
+		
 		try
 		{
-			if (filename == null || filename.trim().length() == 0)
+			if (output == null)
 			{
 				out = new StrWriter(5000);
 				outputToConsole = true;
@@ -303,7 +303,7 @@ public class WbSchemaDiff
 				{
 					diff.setEncoding(encoding);
 				}
-				out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), encoding), 256*1024);
+				out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), encoding), 256*1024);
 			}
 			
 			// this will start the actual diff process
@@ -333,8 +333,7 @@ public class WbSchemaDiff
 			}
 			else
 			{
-				File f = new File(filename);
-				String msg = ResourceMgr.getString("MsgDiffFileWritten") + " " + f.getAbsolutePath();
+				String msg = ResourceMgr.getString("MsgDiffFileWritten") + " " + output.getFullPath();
 				result.addMessage(msg);
 			}
 		}
