@@ -116,7 +116,6 @@ public class DataPumper
 		this.checkQueryButton.addActionListener(this);
 		this.showWbCommand.addActionListener(this);
 		this.useQueryCbx.addActionListener(this);
-		this.modeComboBox.addActionListener(this);
 		this.sqlEditor = EditorPanel.createSqlEditor();
 		this.sqlEditor.showFormatSql();
 		this.completionAction = new AutoCompletionAction(this.sqlEditor, this);
@@ -126,7 +125,6 @@ public class DataPumper
 		if (!this.allowCreateTable)
 		{
 			this.dropTargetCbx.setVisible(this.allowCreateTable);
-			//this.remove(this.dropTargetCbx);
 			GridBagLayout grid = (GridBagLayout)this.optionsPanel.getLayout();
 			grid.removeLayoutComponent(this.dropTargetCbx);
 			this.optionsPanel.remove(this.dropTargetCbx);
@@ -756,6 +754,11 @@ public class DataPumper
     updateOptionPanel.add(dropTargetCbx, gridBagConstraints);
 
     modeComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "insert", "update", "insert,update", "update,insert" }));
+    modeComboBox.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        modeComboBoxActionPerformed(evt);
+      }
+    });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 6;
@@ -915,6 +918,22 @@ public class DataPumper
     gridBagConstraints.insets = new java.awt.Insets(9, 0, 8, 0);
     add(buttonPanel, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
+
+	private void modeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modeComboBoxActionPerformed
+		String mode = (String)modeComboBox.getSelectedItem();
+		if (mode == null) return;
+		int modevalue = DataImporter.getModeValue(mode);
+		if (DataImporter.isDeleteTableAllowed(modevalue))
+		{
+			this.deleteTargetCbx.setEnabled(true);
+		}
+		else
+		{
+			this.deleteTargetCbx.setSelected(false);
+			this.deleteTargetCbx.setEnabled(false);
+		}
+		checkUseBatch();
+	}//GEN-LAST:event_modeComboBoxActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1115,18 +1134,11 @@ public class DataPumper
 			if ("insert".equals(mode) || "update".equals(mode))
 			{
 				this.batchSize.setEnabled(this.supportsBatch);
-			}
-			else
-			{
-				this.batchSize.setEnabled(false);
-				this.batchSize.setText("");
+				return;
 			}
 		}
-		else
-		{
-			this.batchSize.setEnabled(false);
-			this.batchSize.setText("");
-		}
+		this.batchSize.setEnabled(false);
+		this.batchSize.setText("");
 	}
 	
 	private void showHelp()

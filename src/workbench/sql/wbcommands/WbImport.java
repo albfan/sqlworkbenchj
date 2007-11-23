@@ -196,11 +196,11 @@ public class WbImport
 			return result;
 		}
 
-		String filename = cmdLine.getValue(ARG_FILE);
+		WbFile inputFile = evaluateFileArgument(cmdLine.getValue(ARG_FILE));
 		String type = cmdLine.getValue(ARG_TYPE);
 		String dir = cmdLine.getValue(ARG_DIRECTORY);
 
-		if (filename == null && dir == null)
+		if (inputFile == null && dir == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrImportFileMissing"));
 			addWrongParamsMessage(result);
@@ -209,7 +209,7 @@ public class WbImport
 
 		if (type == null)
 		{
-			type = findTypeFromFilename(filename);
+			type = findTypeFromFilename(inputFile.getFullPath());
 		}
 		
 		if (type == null)
@@ -226,12 +226,12 @@ public class WbImport
 			return result;
 		}
 		
-		WbFile inputFile = evaluateFileArgument(filename);
+		
 
 		String badFile = cmdLine.getValue(ARG_BADFILE);
 		if (badFile != null)
 		{
-			boolean multiFileImport = (dir != null && filename == null);		
+			boolean multiFileImport = (dir != null && inputFile == null);		
 			File bf = new File(badFile);
 			if (multiFileImport && !bf.isDirectory())
 			{
@@ -248,13 +248,12 @@ public class WbImport
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
 		String schema = cmdLine.getValue(ARG_TARGET_SCHEMA);
 
-		if (filename != null)
+		if (inputFile != null)
 		{
-			File f = new File(filename);
-			if (!f.exists())
+			if (!inputFile.exists())
 			{
 				String msg = ResourceMgr.getString("ErrImportFileNotFound");
-				msg = StringUtil.replace(msg, "%filename%", filename);
+				msg = StringUtil.replace(msg, "%filename%", inputFile.getFullPath());
 				LogMgr.logError("WbImport.execute()", msg, null);
 				result.addMessage(msg);
 				result.setFailure();
@@ -528,7 +527,7 @@ public class WbImport
 		if (badFile != null) imp.setBadfileName(badFile);
 
 		String value = cmdLine.getValue(CommonArgs.ARG_PROGRESS);
-		if (value == null && filename != null)
+		if (value == null && inputFile != null)
 		{
 			int interval = DataImporter.estimateReportIntervalFromFileSize(inputFile);
 			imp.setReportInterval(interval);
@@ -637,12 +636,12 @@ public class WbImport
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("WbImport.execute()", "Error importing '" + filename, e);
+			LogMgr.logError("WbImport.execute()", "Error importing '" + inputFile, e);
 			result.setFailure();
 		}
 		catch (ConverterException e)
 		{
-			LogMgr.logError("WbImport.execute()", "Error importing '" + filename, e);
+			LogMgr.logError("WbImport.execute()", "Error importing '" + inputFile, e);
 			result.setFailure();
 		}
 		catch (ParsingInterruptedException e)
@@ -652,7 +651,7 @@ public class WbImport
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("WbImport.execute()", "Error importing '" + filename +"': " + e.getMessage(), e);
+			LogMgr.logError("WbImport.execute()", "Error importing '" + inputFile +"': " + e.getMessage(), e);
 			result.setFailure();
 			addErrorInfo(result, sqlCommand, e);
 		}

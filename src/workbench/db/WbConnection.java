@@ -73,22 +73,24 @@ public class WbConnection
 	private Object busyLock = new Object();
 	private KeepAliveDaemon keepAlive = null;
 	
-	public WbConnection(String anId)
-	{
-		this.id = anId;
-	}
-
-	public String getId()
-	{
-		return this.id;
-	}
-
 	/**
 	 * Create a new connection
 	 */
-	public WbConnection(Connection aConn)
+	public WbConnection(String anId, Connection aConn, ConnectionProfile aProfile)
 	{
+		this.id = anId;
 		this.setSqlConnection(aConn);
+		setProfile(aProfile);
+	}
+
+	/**
+	 * Returns the internal ID of this connection.
+	 * 
+	 * @return the internal id of this connection.
+	 */
+	public String getId()
+	{
+		return this.id;
 	}
 
 	public void setProfile(ConnectionProfile aProfile)
@@ -423,7 +425,7 @@ public class WbConnection
 		}
 		catch (Exception e)
 		{
-			// ignore it
+			LogMgr.logWarning("WbConnection.toggleAutoCommit()", "Error when switching autocommit to " + !flag, e);
 		}
 	}
 	
@@ -527,6 +529,8 @@ public class WbConnection
   		this.metaData = null;
 			this.sqlConnection = null;
 		}
+		
+		LogMgr.logDebug("WbConnection.close()", "Connection " + this.getId() + " closed.");
 		
     if (Settings.getInstance().getProperty("workbench.db.driver.log", null) != null)
     {
@@ -698,6 +702,22 @@ public class WbConnection
 		return displayString;
 	}
 
+	public String getDatabaseVersion()
+	{
+		try
+		{
+			DatabaseMetaData jdbcmeta = metaData.getJdbcMetadata();
+			int major = jdbcmeta.getDatabaseMajorVersion();
+			int minor = jdbcmeta.getDatabaseMinorVersion();
+			return major + "." + minor;
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("WbConnection.getDatabaseVersion()", "Error retrieving DB version", e);
+			return "n/a";
+		}
+	}
+	
 	public String getDatabaseProductName()
 	{
 		return this.metaData.getProductName();

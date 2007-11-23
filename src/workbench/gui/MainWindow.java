@@ -125,7 +125,7 @@ public class MainWindow
 {
 	private static final String DEFAULT_WORKSPACE = "%ConfigDir%/Default.wksp";
 	private static int instanceCount;
-	private String windowId;
+	private int windowId;
 
 	private WbConnection currentConnection;
 	private ConnectionProfile currentProfile;
@@ -167,7 +167,7 @@ public class MainWindow
 	public MainWindow()
 	{
 		super(ResourceMgr.TXT_PRODUCT_NAME);
-		instanceCount ++;
+		this.windowId = ++instanceCount;
 		
 		sqlTab = new WbTabbedPane();
 		sqlTab.setFocusable(false);
@@ -182,8 +182,6 @@ public class MainWindow
 			sqlTab.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		}
 		
-		this.connectionSelector = new ConnectionSelector(this, this);
-		this.windowId = new StringBuilder("WbWin-").append(instanceCount).toString();
 		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
 		initMenu();
@@ -214,13 +212,6 @@ public class MainWindow
 		this.updateWindowTitle();
 	}
 	
-	/**
-	 * Return the internal ID of this window. This ID will be used
-	 * to generate the ID for each connection done from within this
-	 * window.
-	 */
-	public String getWindowId() { return this.windowId; }
-
 	/**
 	 * The listener will be notified when the name of a tab changes.
 	 * This is used in the {@link workbench.gui.dbobjects.TableListPanel}
@@ -1170,42 +1161,54 @@ public class MainWindow
 		// panel switch which might cause a connect
 		// to the current profile before the ConnectionSelector
 		// has actually finished.
-		// this has to be set AFTER the disconnect, because
+		// this has to be set AFTER calling disconnect(), because
 		// disconnect respects this flag and does nothing...
 		this.setConnectIsInProgress();
+		
 		this.currentProfile = aProfile;
+		
+		showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
+		loadWorkspaceForProfile(this.currentProfile);
+		
 		Settings.getInstance().setLastConnection(this.currentProfile);
 		showStatusMessage(ResourceMgr.getString("MsgConnecting"));
 	}
 
 	private String getConnectionIdForPanel(MainPanel p)
 	{
-		return "Wb" + MainWindow.instanceCount + "-" + p.getId();
+		return "Wb" + NumberStringCache.getNumberString(windowId) + "-" + p.getId();
 	}
 
 	/**
 	 * Return the internal ID that should be used when connecting 
 	 * to the given connection profile
+	 * @return an id specific for the current tab or a "global" id the connection
+	 *         is shared between all tabs of this window
 	 */
 	public String getConnectionId(ConnectionProfile aProfile)
 	{
-		String id;
-
-		if (aProfile.getUseSeparateConnectionPerTab())
+		if (aProfile != null && aProfile.getUseSeparateConnectionPerTab())
 		{
-			MainPanel p = this.getCurrentPanel();
-			id = this.getConnectionIdForPanel(p);
+			return getConnectionIdForPanel(this.getCurrentPanel());
 		}
 		else
 		{
-			id = this.getWindowId();
+			return "WbWin-" + NumberStringCache.getNumberString(windowId);
 		}
-		return id;
 	}
 
+	private ConnectionSelector getSelector()
+	{
+		if (this.connectionSelector == null)
+		{
+			this.connectionSelector = new ConnectionSelector(this, this);
+		}
+		return this.connectionSelector;
+	}
+	
 	public void connectTo(ConnectionProfile profile, boolean showDialog)
 	{
-		this.connectionSelector.connectTo(profile, showDialog);
+		getSelector().connectTo(profile, showDialog);
 	}
 
 	/**
@@ -1214,11 +1217,6 @@ public class MainWindow
 	 */
 	public void connected(WbConnection conn)
 	{
-		//this.showStatusMessage("");
-		this.currentProfile = conn.getProfile();
-		showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
-		loadWorkspaceForProfile(this.currentProfile);
-		
 		if (this.currentProfile.getUseSeparateConnectionPerTab())
 		{
 			this.getCurrentPanel().setConnection(conn);
@@ -1341,7 +1339,28 @@ public class MainWindow
 		this.resetTabTitles();
 	}
 	
-	private boolean closeResult;
+//	protected WbWorkspace getWorkspace(ConnectionProfile profile)
+//	{
+//		return getWorkspace(profile.getWorkspaceFile());
+//	}
+//	
+//	protected WbWorkspace getWorkspace(String filename)
+//	{
+//		try
+//		{
+//			if (filename == null) return null;
+//			final String realFilename = FileDialogUtil.replaceConfigDir(filename);
+//			WbWorkspace space = new WbWorkspace(realFilename, false);
+//			return space;
+//		}
+//		catch (IOException ex)
+//		{
+//			LogMgr.logError("MainWindow.getWorkspace()", "Error reading workspace", ex);
+//			return null;
+//		}
+//	}
+	
+	private boolean resultForWorkspaceClose;
 	
 	public boolean loadWorkspace(String filename)
 	{
@@ -1361,7 +1380,7 @@ public class MainWindow
 		}
 
 		this.currentWorkspaceFile = null;
-		this.closeResult = false;
+		this.resultForWorkspaceClose = false;
 		
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -1402,7 +1421,7 @@ public class MainWindow
 						// have the repainting for the tab suspended
 						sqlTab.setSelectedIndex(newIndex);
 					}
-					closeResult = true;
+					resultForWorkspaceClose = true;
 				}
 				catch (Throwable e)
 				{
@@ -1421,7 +1440,7 @@ public class MainWindow
 			}
 		});
 		
-		return closeResult;
+		return resultForWorkspaceClose;
 	}
 
 	private void loadWorkspaceForProfile(ConnectionProfile aProfile)
@@ -1434,7 +1453,6 @@ public class MainWindow
 			
 			realFilename = FileDialogUtil.replaceConfigDir(workspaceFilename);
 			if (realFilename == null) realFilename = "";
-			
 			
 			File f = new File(realFilename);
 			if (realFilename.length() > 0 && !f.exists())
@@ -1641,12 +1659,12 @@ public class MainWindow
 
 	protected void closeConnectingInfo()
 	{
-		this.connectionSelector.closeConnectingInfo();
+		getSelector().closeConnectingInfo();
 	}
 
 	protected void showDisconnectInfo()
 	{
-		this.connectionSelector.showDisconnectInfo();
+		getSelector().showDisconnectInfo();
 	}
 
 	/** Display a little PopupWindow to tell the user that the
@@ -1654,7 +1672,7 @@ public class MainWindow
 	 */
 	protected void showConnectingInfo()
 	{
-		this.connectionSelector.showConnectingInfo();
+		getSelector().showConnectingInfo();
 	}
 
 	private void setConnection(WbConnection con)
@@ -1684,7 +1702,7 @@ public class MainWindow
 		{
 			public void run()
 			{
-				connectionSelector.selectConnection();
+				getSelector().selectConnection();
 			}
 		});
 	}
@@ -1827,6 +1845,7 @@ public class MainWindow
 	{
 		if (this.currentConnection != null && !returnNew) return this.currentConnection;
 		String id = this.getConnectionIdForPanel(aPanel);
+		
 		aPanel.showStatusMessage(ResourceMgr.getString("MsgConnectingTo") + " " + this.currentProfile.getName() + " ...");
 		ConnectionMgr mgr = ConnectionMgr.getInstance();
 		WbConnection conn = null;

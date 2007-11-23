@@ -159,8 +159,7 @@ public class WbExport
 		}
 		
 		String type = null;
-		String file = null;
-
+		//String file = null;
 
 		type = cmdLine.getValue("type");
 		if (!isTypeValid(type))
@@ -172,14 +171,15 @@ public class WbExport
 		}
 		
 		this.exporter = new DataExporter(this.currentConnection);
-		file = cmdLine.getValue("file");
+		WbFile outputFile = evaluateFileArgument(cmdLine.getValue("file"));
+		
 		String tables = cmdLine.getValue("sourcetable");
 
 		String outputdir = cmdLine.getValue("outputdir");
 
 		if (type == null)
 		{
-			type = findTypeFromFilename(file);
+			type = findTypeFromFilename(outputFile.getFullPath());
 		}
 		
 		if (type == null)
@@ -190,7 +190,7 @@ public class WbExport
 			return result;
 		}
 
-		if (file == null && outputdir == null)
+		if (outputFile == null && outputdir == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrExportFileRequired"));
 			addWrongArgumentsMessage(result);
@@ -415,7 +415,6 @@ public class WbExport
 		this.exporter.setBlobIdColumns(columns);
 		this.exporter.setCompressOutput(cmdLine.getBoolean("compress", false));
 		
-		WbFile outputFile = evaluateFileArgument(file);
 		this.exporter.setOutputFilename(outputFile != null ? outputFile.getFullPath() : null);
 
 		// Setting the output type should be the last step in the configuration
@@ -496,7 +495,7 @@ public class WbExport
 
 			String msg = ResourceMgr.getString("MsgSpoolInit");
 			msg = StringUtil.replace(msg, "%type%", exporter.getTypeDisplay());
-			msg = StringUtil.replace(msg, "%file%", file);
+			msg = StringUtil.replace(msg, "%file%", outputFile.getFullPath());
 			//msg = msg + " quote=" + exporter.getTextQuoteChar();
 			result.addMessage(msg);
 			if (this.maxRows > 0)

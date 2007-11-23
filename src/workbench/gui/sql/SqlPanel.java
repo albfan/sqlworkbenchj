@@ -50,6 +50,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import workbench.WbManager;
+import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.db.importer.DataStoreImporter;
@@ -319,7 +320,6 @@ public class SqlPanel
 		// that everything is created properly in case an event is fired
 		this.resultTab.addChangeListener(this);
 		this.editor.addFilenameChangeListener(this);
-		
 	}
 
 	public String getId()
@@ -1327,14 +1327,10 @@ public class SqlPanel
 				this.stmtRunner.setResultLogger(this);
 			}
 
-			boolean enable = (aConnection != null);
 			if (this.connectionInfo != null) this.connectionInfo.setConnection(aConnection);
-			this.setExecuteActionStates(enable);
+			this.setExecuteActionStates(aConnection != null);
 
-			if (aConnection != null)
-			{
-				if (this.editor != null) this.editor.setDatabaseConnection(aConnection);
-			}
+			if (this.editor != null) this.editor.setDatabaseConnection(this.dbConnection);
 
 			if (this.dbConnection != null)
 			{
@@ -1343,7 +1339,7 @@ public class SqlPanel
 		}
 
 		this.checkResultSetActions();
-		this.checkAutocommit();
+		this.checkCommitAction();
 	}
 
 	/**
@@ -1351,7 +1347,7 @@ public class SqlPanel
 	 * and enable/disable the rollback and commit actions
 	 * accordingly
 	 */
-	protected void checkAutocommit()
+	protected void checkCommitAction()
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -2186,9 +2182,15 @@ public class SqlPanel
 
 		scriptParser.setAlternateDelimiter(altDelim);
 		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
-		scriptParser.setSupportOracleInclude(this.dbConnection.getDbSettings().supportShortInclude());
-		scriptParser.setCheckForSingleLineCommands(this.dbConnection.getDbSettings().supportSingleLineCommands());
-		scriptParser.setAlternateLineComment(this.dbConnection.getDbSettings().getLineComment());
+		DbSettings db = this.dbConnection.getDbSettings();
+		if (db == null)
+		{
+			LogMgr.logError("SqlPanel.createScriptParser()", "No db settings available!", null);
+			return scriptParser;
+		}
+		scriptParser.setSupportOracleInclude(db.supportShortInclude());
+		scriptParser.setCheckForSingleLineCommands(db.supportSingleLineCommands());
+		scriptParser.setAlternateLineComment(db.getLineComment());
 		return scriptParser;
 	}
 
@@ -2907,7 +2909,7 @@ public class SqlPanel
 				executeCurrent.setEnabled(aFlag);
 				if (aFlag)
 				{
-					checkAutocommit();
+					checkCommitAction();
 				}
 				else
 				{
@@ -3227,7 +3229,7 @@ public class SqlPanel
 		}
 		else if (evt.getSource() == this.dbConnection && WbConnection.PROP_AUTOCOMMIT.equals(prop))
 		{
-			this.checkAutocommit();
+			this.checkCommitAction();
 		}
 		else if (evt.getSource() == this.currentData && prop.equals("updateTable"))
 		{

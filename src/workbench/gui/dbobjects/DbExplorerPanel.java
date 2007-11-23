@@ -113,12 +113,7 @@ public class DbExplorerPanel
 
 	public DbExplorerPanel(MainWindow aParent)
 	{
-		synchronized (DbExplorerPanel.class)
-		{
-			instanceCount++;
-			this.internalId = instanceCount;
-		}
-		
+		this.internalId = ++instanceCount;
 		this.mainWindow = aParent;
 		try
 		{
@@ -346,13 +341,12 @@ public class DbExplorerPanel
 
 	private void doConnect(ConnectionProfile profile)
 	{
-		String id = this.getId();
 		ConnectionMgr mgr = ConnectionMgr.getInstance();
 		WbConnection conn = null;
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			conn = mgr.getConnection(profile, id, true);
+			conn = mgr.getConnection(profile, this.getId());
 			this.setConnection(conn);
 			if (Settings.getInstance().getRetrieveDbExplorer())
 			{
@@ -392,7 +386,6 @@ public class DbExplorerPanel
 	private boolean isConnectionBusy()
 	{
 		if (this.dbConnection == null) return false;
-		//if (!this.mainWindow.isBusy()) return false;
 		if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab()) return this.isBusy();
 		return dbConnection.isBusy();
 	}
@@ -844,11 +837,6 @@ public class DbExplorerPanel
 		if (mainWindow != null)
 		{
 			mainWindow.removeExecutionListener(this);
-		}
-		
-		synchronized (DbExplorerPanel.class)
-		{
-			instanceCount--;
 		}
 	}
 

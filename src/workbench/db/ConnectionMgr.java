@@ -82,44 +82,13 @@ public class ConnectionMgr
 	public WbConnection getConnection(ConnectionProfile aProfile, String anId)
 		throws ClassNotFoundException, SQLException
 	{
-		return getConnection(aProfile, anId, false);
-	}
-	
-	/**
-	 *	Return a new connection specified by the profile
-	 */
-	public WbConnection getConnection(ConnectionProfile aProfile, String anId, boolean reUse)
-		throws ClassNotFoundException, SQLException
-	{
-		if (reUse)
-		{
-			WbConnection old = this.activeConnections.get(anId);
-			
-			if (old != null)
-			{
-				LogMgr.logInfo("ConnectionMgr.getConnection()", "Re-using connection ID=" + anId);
-				return old;
-			}
-		}
-		
 		this.disconnect(anId);
-		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getKey() + "] with ID=" + anId + " for driver=" + aProfile.getDriverclass());
+		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getKey() + "] for driver=" + aProfile.getDriverclass());
 		WbConnection conn = this.connect(aProfile, anId);
 		conn.runPostConnectScript();
-		String driverVersion = null;
+		String driverVersion = conn.getDatabaseVersion();
 		
-		try
-		{
-			int minor = conn.getSqlConnection().getMetaData().getDriverMinorVersion();
-			int major = conn.getSqlConnection().getMetaData().getDriverMajorVersion();
-			driverVersion = major + "." + minor;
-		}
-		catch (Throwable th)
-		{
-			driverVersion = "n/a";
-		}
-		
-		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" + conn.getMetadata().getProductName() + "], Database version: [" + conn.getMetadata().getDbVersion() + "], Driver version: [" + driverVersion + "]");
+		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" + conn.getMetadata().getProductName() + "], Database version: [" + conn.getMetadata().getDbVersion() + "], Driver version: [" + driverVersion + "], ID: ["  + anId + "]");
 		
 		this.activeConnections.put(anId, conn);
 		
@@ -139,10 +108,6 @@ public class ConnectionMgr
 	WbConnection connect(ConnectionProfile aProfile, String anId)
 		throws ClassNotFoundException, SQLException
 	{
-		// The DriverManager refuses to use a driver which was not loaded
-		// from the system classloader, so the connection has to be
-		// established directly from the driver.
-		WbConnection conn = new WbConnection(anId);
 		
 		String drvClass = aProfile.getDriverclass();
 		String drvName = aProfile.getDriverName();
@@ -169,8 +134,7 @@ public class ConnectionMgr
 			// we just ignore the error :-)
 			LogMgr.logInfo("ConnectionMgr.connect()", "Driver (" + drv.getDriverClass() + ") does not support the autocommit property: " + ExceptionUtil.getDisplay(th));
 		}
-		conn.setSqlConnection(sql);
-		conn.setProfile(aProfile);
+		WbConnection conn = new WbConnection(anId, sql, aProfile);
 		return conn;
 	}
 	
@@ -466,11 +430,6 @@ public class ConnectionMgr
 			{
 				conn.close();
 			}
-			if (conn.getProfile() != null)
-			{
-				LogMgr.logDebug("ConnectionMgr.disconnect()", "Disconnected [" + conn.getId() + "]");
-			}
-			
 		}
 		catch (Exception e)
 		{

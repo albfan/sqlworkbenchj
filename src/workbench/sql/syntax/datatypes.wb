@@ -1,5 +1,7 @@
 binary
 bit
+boolean
+bool
 char
 character
 datetime

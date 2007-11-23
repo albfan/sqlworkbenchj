@@ -63,36 +63,35 @@ public class WbDefineVar
 		String sql = SqlUtil.stripVerb(aSql);
 
 		cmdLine.parse(sql);
-		String file = cmdLine.getValue("file");
+		WbFile file = this.evaluateFileArgument(cmdLine.getValue("file"));
 		
 		if (file != null)
 		{
 			// if the file argument has been supplied, no variable definition
 			// can be present, but the encoding parameter might have been passed
 			String encoding = cmdLine.getValue("encoding");
-			WbFile f = this.evaluateFileArgument(file);
 			try
 			{
-				if (f.exists())
+				if (file.exists())
 				{
-					VariablePool.getInstance().readFromFile(f.getFullPath(), encoding);
+					VariablePool.getInstance().readFromFile(file.getFullPath(), encoding);
 					String msg = ResourceMgr.getString("MsgVarDefFileLoaded");
-					msg = StringUtil.replace(msg, "%file%", f.getFullPath());
+					msg = StringUtil.replace(msg, "%file%", file.getFullPath());
 					result.addMessage(msg);
 					result.setSuccess();
 				}
 				else
 				{
-					String msg = ResourceMgr.getFormattedString("ErrFileNotFound", f.getFullPath());
+					String msg = ResourceMgr.getFormattedString("ErrFileNotFound", file.getFullPath());
 					result.addMessage(msg);
 					result.setFailure();
 				}
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("WbDefineVar.execute()", "Error reading definition file: " + f.getFullPath(), e);
+				LogMgr.logError("WbDefineVar.execute()", "Error reading definition file: " + file.getFullPath(), e);
 				String msg = ResourceMgr.getString("ErrReadingVarDefFile");
-				msg = StringUtil.replace(msg, "%file%", f.getAbsolutePath());
+				msg = StringUtil.replace(msg, "%file%", file.getAbsolutePath());
 				msg = msg + " " + ExceptionUtil.getDisplay(e);
 				result.addMessage(msg);
 				result.setFailure();

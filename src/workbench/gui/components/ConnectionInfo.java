@@ -101,16 +101,20 @@ public class ConnectionInfo
 			this.display.setBackground(c);
 		}
 	}
+	
 	private void updateDisplay()
 	{
 		if (this.sourceConnection != null)
 		{
 			this.display.setText(" " + this.sourceConnection.getDisplayString());
 			StringBuilder tip = new StringBuilder(30);
+			tip.append("<html>");
 			tip.append(this.sourceConnection.getDatabaseProductName());
-			tip.append(" (");
-			tip.append(this.sourceConnection.getDriverVersion());
-			tip.append(')');
+			tip.append(" ");
+			tip.append(this.sourceConnection.getDatabaseVersion());
+			tip.append("<br>");
+			tip.append(ResourceMgr.getFormattedString("TxtDrvVersion", this.sourceConnection.getDriverVersion()));
+			tip.append("</html>");
 			this.display.setToolTipText(tip.toString());
 		}
 		else

@@ -77,16 +77,16 @@ public class WbInclude
 			clean = SqlUtil.stripVerb(clean);
 		}
 		
-		String file = null;
+		WbFile file = null;
 
 		if (isShortInclude)
 		{
-			file = clean;
+			file = evaluateFileArgument(clean);
 		}
 		else
 		{
 			cmdLine.parse(clean);
-			file = cmdLine.getValue("file");
+			file = evaluateFileArgument(cmdLine.getValue("file"));
 		}
 
 		if (file == null || file.length() == 0)
@@ -97,13 +97,11 @@ public class WbInclude
 			return result;
 		}
 
-		WbFile f = evaluateFileArgument(file);
-
-		if (!f.exists())
+		if (!file.exists())
 		{
 			result.setFailure();
 			String msg = ResourceMgr.getString("ErrIncludeFileNotFound");
-			msg = StringUtil.replace(msg, "%filename%", file);
+			msg = StringUtil.replace(msg, "%filename%", file.getFullPath());
 			result.addMessage(msg);
 			return result;
 		}
@@ -118,8 +116,8 @@ public class WbInclude
 		String delim = cmdLine.getValue("delimiter");
 		try
 		{
-			batchRunner = new BatchRunner(f.getCanonicalPath());
-			String dir = f.getCanonicalFile().getParent();
+			batchRunner = new BatchRunner(file.getCanonicalPath());
+			String dir = file.getCanonicalFile().getParent();
 			batchRunner.setBaseDir(dir);
 			batchRunner.setConnection(currentConnection);
 			if (delim != null) batchRunner.setDelimiter(DelimiterDefinition.parseCmdLineArgument(delim));

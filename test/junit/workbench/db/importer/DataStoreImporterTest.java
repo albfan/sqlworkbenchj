@@ -14,7 +14,7 @@ package workbench.db.importer;
 import java.io.File;
 import java.io.FileWriter;
 import java.sql.Types;
-import junit.framework.*;
+import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.gui.dialogs.dataimport.ImportOptions;
 import workbench.gui.dialogs.dataimport.TextImportOptions;
@@ -24,9 +24,9 @@ import workbench.storage.DataStore;
  *
  * @author support@sql-workbench.net
  */
-public class DataStoreImporterTest extends TestCase
+public class DataStoreImporterTest 
+	extends TestCase
 {
-
 	private TestUtil util;
 	
 	public DataStoreImporterTest(String testName)

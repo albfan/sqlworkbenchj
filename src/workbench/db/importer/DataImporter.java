@@ -413,9 +413,8 @@ public class DataImporter
 	}
 
 	/**
-	 *	Define the mode by supplying keywords.
-	 *	The following combinations are valid:
-	 *	If a valid mode definition is passed, true is returned.
+	 *	Return the numer mode value based on keywords.
+	 * 
 	 *	Valid mode definitions are:
 	 *	<ul>
 	 *	<li>insert</li>
@@ -423,27 +422,33 @@ public class DataImporter
 	 *	<li>insert,update</li>
 	 *	<li>update,insert</li>
 	 *  </ul>
-	 *	The mode string is not case sensitive (INSERT is the same as insert)
-	 *	@return true if the passed string is valid, false otherwise
+	 * The mode string is not case sensitive (INSERT is the same as insert)
+	 * @return -1 if the value is not valid
+	 * 
+	 * @see #getModeValue(String)
+	 * @see #MODE_INSERT
+	 * @see #MODE_UPDATE
+	 * @see #MODE_INSERT_UPDATE
+	 * @see #MODE_UPDATE_INSERT
 	 */
-	public boolean setMode(String mode)
+	public static int getModeValue(String mode)
 	{
-		if (mode == null) return true;
+		if (mode == null) return -1;
 		mode = mode.trim().toLowerCase();
 		if (mode.indexOf(',') == -1)
 		{
 			// only one keyword supplied
 			if ("insert".equals(mode))
 			{
-				this.setModeInsert();
+				return MODE_INSERT;
 			}
 			else if ("update".equals(mode))
 			{
-				this.setModeUpdate();
+				return MODE_UPDATE;
 			}
 			else
 			{
-				return false;
+				return -1;
 			}
 		}
 		else
@@ -453,17 +458,30 @@ public class DataImporter
 			String second = (String)l.get(1);
 			if ("insert".equals(first) && "update".equals(second))
 			{
-				this.setModeInsertUpdate();
+				return MODE_INSERT_UPDATE;
 			}
 			else if ("update".equals(first) && "insert".equals(second))
 			{
-				this.setModeUpdateInsert();
+				return MODE_UPDATE_INSERT;
 			}
 			else
 			{
-				return false;
+				return -1;
 			}
 		}
+		
+	}
+	
+	/**
+	 * Define the mode by supplying keywords.
+	 * @return true if the passed string is valid, false otherwise
+	 * @see #getModeValue(String)
+	 */
+	public boolean setMode(String mode)
+	{
+		int modevalue = getModeValue(mode);
+		if (modevalue == -1) return false;
+		setMode(modevalue);
 		return true;
 	}
 
@@ -577,6 +595,11 @@ public class DataImporter
 		}
 	}
 
+	public static boolean isDeleteTableAllowed(int mode)
+	{
+		return mode == MODE_INSERT;
+	}
+	
 	/**
 	 *	Deletes the target table by issuing a DELETE FROM ...
 	 */

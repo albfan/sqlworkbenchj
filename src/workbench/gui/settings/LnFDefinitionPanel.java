@@ -12,7 +12,6 @@
 package workbench.gui.settings;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -28,7 +27,6 @@ import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbButton;
 import workbench.gui.lnf.LnFDefinition;
 import workbench.gui.lnf.LnFLoader;
-import workbench.interfaces.SimplePropertyEditor;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
@@ -39,7 +37,7 @@ import workbench.util.StringUtil;
  */
 public class LnFDefinitionPanel
 	extends JPanel
-	implements ActionListener, PropertyChangeListener
+	implements ActionListener
 {
 	private LnFDefinition currentLnF;
 	private PropertyChangeListener changeListener;
@@ -50,13 +48,13 @@ public class LnFDefinitionPanel
 		String text = ResourceMgr.getDescription("LblLnFLib");
 		text = text.replaceAll("%path_sep%", StringUtil.getPathSeparator());
 		lblLibrary.setToolTipText(text);
+		libraryPath.setTextFieldPropertyName("library");
 		libraryPath.setTextfieldTooltip(text);
 		text = ResourceMgr.getDescription("SelectLnfLib");
 		libraryPath.setButtonTooltip(text);
 		libraryPath.setFileFilter(ExtensionFileFilter.getJarFileFilter());
 		libraryPath.setAllowMultiple(true);
 		libraryPath.setLastDirProperty("workbench.lnf.lastdir");
-		libraryPath.addPropertyChangeListener("filename", this);
 		tfName.addFocusListener(new FocusAdapter()
 		{
 			public void focusLost(FocusEvent evt)
@@ -256,24 +254,6 @@ public class LnFDefinitionPanel
 		}
 	}//GEN-LAST:event_changeLnfButtonActionPerformed
 
-	private void initPropertyEditors()
-	{
-		for (int i=0; i < this.getComponentCount(); i++)
-		{
-			Component c = this.getComponent(i);
-			if (c instanceof SimplePropertyEditor)
-			{
-				SimplePropertyEditor editor = (SimplePropertyEditor)c;
-				String property = c.getName();
-				if (!StringUtil.isEmptyString(property))
-				{
-					editor.setSourceObject(this.currentLnF, property);
-					editor.setImmediateUpdate(true);
-				}
-			}
-		}
-	}
-
 	public void setCurrentLookAndFeeld(LnFDefinition lnf)
 	{
 		if (lnf != null) currentLabel.setText(lnf.getName());
@@ -282,7 +262,7 @@ public class LnFDefinitionPanel
 	public void setDefinition(LnFDefinition lnf)
 	{
 		this.currentLnF = lnf;
-		initPropertyEditors();
+		WbSwingUtilities.initPropertyEditors(this.currentLnF, this);
 		libraryPath.setFilename(lnf.getLibrary());
 		this.setEnabled(!lnf.isBuiltInLnF());
 	}
@@ -316,11 +296,4 @@ public class LnFDefinitionPanel
 		}
 	}
 
-	public void propertyChange(PropertyChangeEvent evt)
-	{
-		if (evt.getSource() == this.libraryPath && "filename".equals(evt.getPropertyName()))
-		{
-			this.currentLnF.setLibrary(evt.getNewValue().toString());
-		}
-	}
 }

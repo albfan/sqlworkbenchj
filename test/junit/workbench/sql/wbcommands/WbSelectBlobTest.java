@@ -16,7 +16,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import junit.framework.*;
+import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.sql.DefaultStatementRunner;
@@ -62,7 +62,7 @@ public class WbSelectBlobTest
 			assertEquals("Wrong file size", blob_1_size, output.length());
 
 			output = new File(util.getBaseDir(), "blob2.data");
-			sql = "-- write blobs to disk\n\n   wbselectblob data into '" + output.getAbsolutePath() + "' from blob_test where id = 2";
+			sql = "-- write blobs to disk\n\n   wbselectblob data\n\n into '" + output.getAbsolutePath() + "'\n from blob_test where id = 2";
 			runner.runStatement(sql, -1, -1);
 			result = runner.getResult();
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());

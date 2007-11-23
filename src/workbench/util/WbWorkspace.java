@@ -216,6 +216,13 @@ public class WbWorkspace
 		return StringUtil.getIntValue(this.tabInfo.getProperty("tab.selected", "0"));
 	}
 
+	public boolean isSelectedTabExplorer()
+	{
+		int index = getSelectedTab();
+		String key = "dbexplorer" + index + ".currentschema";
+		return this.tabInfo.containsKey(key);
+	}
+	
 	public void setTabTitle(int index, String name)
 	{
 		String key = "tab" + index + ".title";

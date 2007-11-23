@@ -17,18 +17,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
-import workbench.util.WbStringTokenizer;
 
 /**
  *
@@ -50,44 +49,47 @@ public class WbSelectBlob
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		Pattern expr = Pattern.compile("WBSELECTBLOB.*\\sINTO\\s*.*\\s*FROM.*", Pattern.CASE_INSENSITIVE);
-		Matcher m = expr.matcher(aSql);
-		if (!m.find())
+		SQLLexer lexer = new SQLLexer(aSql);
+		
+		StringBuilder sql = new StringBuilder(aSql.length());
+		
+		WbFile outputFile = null;
+		
+		SQLToken token  = lexer.getNextToken(false, false);
+		if (!token.getContents().equals("WBSELECTBLOB"))
 		{
 			result.addMessage(ResourceMgr.getString("ErrSelectBlobSyntax"));
 			result.setFailure();
 			return result;
 		}
-		Pattern p = Pattern.compile(VERB, Pattern.CASE_INSENSITIVE);
-		m = p.matcher(aSql);
-		String sql = m.replaceAll("SELECT");
-		p = Pattern.compile("\\sINTO\\s", Pattern.CASE_INSENSITIVE);
-		m = p.matcher(sql);
-		if (!m.find())
+		sql.append("SELECT ");
+		while (token != null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrSelectBlobParseError"));
+			token = lexer.getNextToken(false, true);
+			if (token.getContents().equals("INTO"))
+			{
+				break;
+			}
+			sql.append(token.getContents());
+		}
+
+		if (token != null && !token.getContents().equals("INTO"))
+		{
+			result.addMessage(ResourceMgr.getString("ErrSelectBlobSyntax"));
 			result.setFailure();
 			return result;
 		}
-		int pos = m.start() + 5;// sql.toUpperCase().indexOf("INTO") + 4;
-		WbStringTokenizer tok = new WbStringTokenizer(sql.substring(pos), "\t \r\n", false, "\"'", true);
-		String filename = null;
-		if (tok.hasMoreTokens())
+		else
 		{
-			filename = tok.nextToken();
-		}
-		sql = StringUtil.replace(sql, filename, "");
-		sql = sql.replaceFirst("(?i)\\sINTO\\s", " ");
-		WbFile outputFile = evaluateFileArgument(filename);
-		if (outputFile.isDirectory())
-		{
-			String msg = ResourceMgr.getFormattedString("ErrFileNotFound", filename);
-			result.addMessage(msg);
-			result.setFailure();
-			return result;
+			// Next token must be the filename
+			token = lexer.getNextToken(false, false);
+			String filename = token.getContents();
+			outputFile = new WbFile(StringUtil.trimQuotes(filename));
+			sql.append(' ');
+			sql.append(aSql.substring(token.getCharEnd() + 1));
 		}
 		
-		LogMgr.logDebug("WbSelectBlob.execute()", "Using SQL=" + sql + " for file: " + filename);
+		LogMgr.logDebug("WbSelectBlob.execute()", "Using SQL=" + sql + " for file: " + outputFile.getFullPath());
 		ResultSet rs = null;
 		OutputStream out = null;
 		InputStream in = null;
@@ -102,7 +104,7 @@ public class WbSelectBlob
 		try
 		{
 			currentStatement = currentConnection.createStatementForQuery();
-			rs = currentStatement.executeQuery(sql);
+			rs = currentStatement.executeQuery(sql.toString());
 			int row = 0;
 			while (rs.next())
 			{
@@ -140,14 +142,14 @@ public class WbSelectBlob
 		}
 		catch (IOException e)
 		{
-			String msg = ResourceMgr.getString("ErrSelectBlobFileError").replaceAll("%filename%", filename);
+			String msg = StringUtil.replace(ResourceMgr.getString("ErrSelectBlobFileError"), "%filename%", outputFile.getFullPath());
 			result.addMessage(msg);
 			result.setFailure();
 			return result;
 		}
 		catch (SQLException e)
 		{
-			String msg = ResourceMgr.getString("ErrSelectBlobSqlError").replaceAll("%filename%", filename);
+			String msg = StringUtil.replace(ResourceMgr.getString("ErrSelectBlobSqlError"), "%filename%", outputFile.getFullPath());
 			result.addMessage(msg);
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			result.setFailure();

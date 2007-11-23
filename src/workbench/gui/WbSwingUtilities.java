@@ -42,8 +42,10 @@ import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.ValidatingDialog;
+import workbench.interfaces.SimplePropertyEditor;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.util.StringUtil;
 
 /**
  * Some helper functions to deal with Swing stuff
@@ -615,6 +617,28 @@ public class WbSwingUtilities
 		});
 	} 
 
+	public static void initPropertyEditors(Object bean, JComponent root)
+	{
+		for (int i=0; i < root.getComponentCount(); i++)
+		{
+			Component c = root.getComponent(i);
+			if (c instanceof SimplePropertyEditor)
+			{
+				SimplePropertyEditor editor = (SimplePropertyEditor)c;
+				String property = c.getName();
+				if (!StringUtil.isEmptyString(property))
+				{
+					editor.setSourceObject(bean, property);
+					editor.setImmediateUpdate(true);
+				}
+			}
+			else if (c instanceof JComponent)
+			{
+				initPropertyEditors(bean, (JComponent)c);
+			}
+		}
+	}
+	
 	public static boolean checkConnection(Component parent, WbConnection dbConnection)
 	{
 		if (dbConnection.isBusy())

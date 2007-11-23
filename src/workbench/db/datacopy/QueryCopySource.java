@@ -61,6 +61,8 @@ public class QueryCopySource
 	public void start()
 		throws Exception
 	{
+		LogMgr.logDebug("QueryCopySource.start()", "Using SQL: "+ this.retrieveSql);
+		
 		ResultSet rs = null;
 		this.keepRunning = true;
 		this.regularStop = false;

@@ -13,7 +13,6 @@ package workbench.sql.wbcommands;
 
 import java.io.FileReader;
 import java.io.PrintWriter;
-import junit.framework.*;
 import java.io.File;
 import java.io.Reader;
 import java.sql.Connection;
@@ -21,9 +20,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+import workbench.interfaces.StatementRunner;
 import workbench.sql.BatchRunner;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunnerResult;
@@ -38,7 +39,8 @@ import workbench.util.SqlUtil;
  *
  * @author support@sql-workbench.net
  */
-public class WbExportTest extends TestCase
+public class WbExportTest 
+	extends TestCase
 {
 	private String basedir;
 	private final int rowcount = 10;
@@ -375,6 +377,43 @@ public class WbExportTest extends TestCase
 			bfile = new File(this.basedir, "blob_export_data_#2.data");
 			assertEquals("Blob data not exported", true, bfile.exists());
 			assertEquals("Wrong file size", 7218, bfile.length());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testBlobExtensionCol()
+	{
+		try
+		{
+			File exportFile = new File(this.basedir, "blob_ext.txt");
+			
+			StatementRunner runner = util.createConnectedStatementRunner(connection);
+			runner.runStatement("wbexport -filenameColumn=fname -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true;", -1, -1);
+			StatementRunnerResult result = runner.getResult();
+			System.out.println("**************");
+			System.out.println(result.getMessageBuffer().toString());
+			System.out.println("**************");
+			runner.runStatement("select  \n" + 
+             "   case \n" + 
+             "     when nr = 1 then 'first.jpg' \n" + 
+             "     when nr = 2 then 'second.gif' \n" + 
+             "     else nr||'.data' \n" + 
+             "   end as fname,  \n" + 
+             "   data \n" + 
+             "from blob_test ", -1, -1);
+			result = runner.getResult();
+			assertEquals("No export file created", true, exportFile.exists());
+			
+			File bfile = new File(this.basedir, "first.jpg");
+			assertEquals("jpeg file not found", true, bfile.exists());
+			
+			bfile = new File(this.basedir, "second.gif");
+			assertEquals("gif file not found", true, bfile.exists());
+			runner.done();
 		}
 		catch (Exception e)
 		{
