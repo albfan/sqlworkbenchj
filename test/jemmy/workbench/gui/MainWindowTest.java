@@ -29,6 +29,7 @@ import org.netbeans.jemmy.operators.JTableOperator;
 import org.netbeans.jemmy.operators.JTextFieldOperator;
 import org.netbeans.jemmy.operators.Operator.DefaultStringComparator;
 import org.netbeans.jemmy.operators.Operator.StringComparator;
+import workbench.db.ConnectionMgr;
 import workbench.gui.actions.AppendResultsAction;
 import workbench.gui.sql.SqlPanel;
 import workbench.util.StringUtil;
@@ -115,18 +116,120 @@ public class MainWindowTest
 		new JButtonOperator(dialog, "Cancel").push();
 	}
 
-	private void createDriver()
-	{
-		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
-		new JMenuBarOperator(mainWindow).pushMenuNoBlock("File|Manage Drivers", "|");
-		JDialogOperator dialog = new JDialogOperator(mainWindow, "Manage drivers");
-		JListOperator list = new JListOperator(dialog);
-		list.selectItem("H2 Database Engine");
-		new JButtonOperator(dialog, "Cancel").push();
-	}
+//	private void createDriver()
+//	{
+//		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
+//		new JMenuBarOperator(mainWindow).pushMenuNoBlock("File|Manage Drivers", "|");
+//		JDialogOperator dialog = new JDialogOperator(mainWindow, "Manage drivers");
+//		JListOperator list = new JListOperator(dialog);
+//		list.selectItem("H2 Database Engine");
+//		new JButtonOperator(dialog, "Cancel").push();
+//	}
 
+	private void definePKTest()
+	{
+		NamedComponentChooser chooser = new NamedComponentChooser();
+		chooser.setName("sqleditor1");
+		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
+		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
+
+		QueueTool tool = new QueueTool();
+		
+		chooser.setName("sqlpanel1");
+		JComponentOperator panel = new JComponentOperator(mainWindow, chooser);
+		final SqlPanel sqlPanel = (SqlPanel)panel.getSource();
+
+		JMenuOperator dataMenu = new JMenuOperator(mainMenu.getMenu(3));
+		JMenuItem saveItem = (JMenuItem)dataMenu.getMenuComponent(1);
+		final JMenuItemOperator save = new JMenuItemOperator(saveItem);
+//		assertFalse(save.isEnabled());
+		
+		runSql(sqlPanel, "create table nopk (id1 integer, data varchar(20));\n" +
+			"commit;\n" +
+			"insert into nopk (id1, data) values (1,'Ford');\n" +
+			"insert into nopk (id1, data) values (2,'Zaphod');\n" +
+			"commit;\n");
+		runSql(sqlPanel, "select id1, data from nopk;");
+
+		JTableOperator result = new JTableOperator(mainWindow);
+		int rows = result.getRowCount();
+		assertEquals(2, rows);
+		assertEquals(2, result.getColumnCount());
+		result.setValueAt("Arthur", 0, 1);
+		
+		tool.waitEmpty();
+		assertEquals(3, result.getColumnCount());
+		assertTrue(save.isEnabled());
+		
+		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Data|Define key columns", "|");		
+		JDialogOperator definePK = new JDialogOperator("Select Key Columns");
+
+		JTableOperator cols = new JTableOperator(definePK);
+		cols.setValueAt(Boolean.TRUE, 0, 1);
+		JButtonOperator ok = new JButtonOperator(definePK, "OK");
+		ok.push();
+		tool.waitEmpty();
+		
+		saveChanges(sqlPanel);
+		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Data|Save changes to database", "|");		
+		testUtil.waitWhileBusy(sqlPanel);
+		tool.waitEmpty();
+		
+		assertEquals(2, result.getColumnCount());
+		runSql(sqlPanel, "select id1, data from nopk where data = 'Arthur';");
+		
+		result = new JTableOperator(mainWindow);
+		rows = result.getRowCount();
+		assertEquals(1, rows);
+	}	
+	
+	private void pkWarningsTest()
+	{
+		NamedComponentChooser chooser = new NamedComponentChooser();
+		chooser.setName("sqleditor1");
+		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
+		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
+
+		QueueTool tool = new QueueTool();
+		
+		chooser.setName("sqlpanel1");
+		JComponentOperator panel = new JComponentOperator(mainWindow, chooser);
+		final SqlPanel sqlPanel = (SqlPanel)panel.getSource();
+
+		JMenuOperator dataMenu = new JMenuOperator(mainMenu.getMenu(3));
+		JMenuItem saveItem = (JMenuItem)dataMenu.getMenuComponent(1);
+		final JMenuItemOperator save = new JMenuItemOperator(saveItem);
+		assertFalse(save.isEnabled());
+		
+		runSql(sqlPanel, "create table jtest (id1 integer, id2 integer, data varchar(20), primary key (id1, id2));\n" +
+			"commit;\n" +
+			"insert into jtest (id1, id2, data) values (1,1,'Ford');\n" +
+			"commit;\n");
+		runSql(sqlPanel, "select id1, data from jtest;");
+
+		JTableOperator result = new JTableOperator(mainWindow);
+		int rows = result.getRowCount();
+		assertEquals(1, rows);
+		assertEquals(2, result.getColumnCount());
+		result.setValueAt("Arthur", 0, 1);
+		
+		tool.waitEmpty();
+		assertEquals(3, result.getColumnCount());
+		assertTrue(save.isEnabled());
+		
+		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Data|Save changes to database", "|");		
+		JDialogOperator warning = new JDialogOperator("Missing key columns");
+		JButtonOperator cancel = new JButtonOperator(warning, "Cancel");
+		cancel.push();
+		tool.waitEmpty();
+		assertEquals(3, result.getColumnCount());
+	}
+	
 	private void connect()
 	{
+		// Make sure not profiles exist
+		ConnectionMgr.getInstance().clearProfiles();
+		
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
 		JMenuBar bar = mainWindow.getJMenuBar();
 		//		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
@@ -167,7 +270,7 @@ public class MainWindowTest
 		testUtil.waitUntilConnected(sqlPanel);
 	}
 
-	public void runSql()
+	private void runSql()
 	{
 		NamedComponentChooser chooser = new NamedComponentChooser();
 		chooser.setName("sqleditor1");
@@ -330,6 +433,8 @@ public class MainWindowTest
 			settingsTest();
 			runSql();
 			appendTest();
+			pkWarningsTest();
+			definePKTest();
 			testUtil.stopApplication();
 		}
 		catch (Exception e)

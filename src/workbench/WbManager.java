@@ -185,37 +185,46 @@ public class WbManager
 
 	public void registerToolWindow(ToolWindow aWindow)
 	{
-		this.toolWindows.add(aWindow);
+		synchronized (toolWindows)
+		{
+			this.toolWindows.add(aWindow);
+		}
 	}
 
 	public void unregisterToolWindow(ToolWindow aWindow)
 	{
 		if (aWindow == null) return;
-		int index = this.toolWindows.indexOf(aWindow);
-		if (index > -1)
+		synchronized (toolWindows)
 		{
-			this.toolWindows.remove(index);
-		}
-		if (this.toolWindows.size() == 0 && this.mainWindows.size() == 0)
-		{
-			if (aWindow instanceof JFrame)
+			int index = this.toolWindows.indexOf(aWindow);
+			if (index > -1)
 			{
-				this.exitWorkbench((JFrame)aWindow);
+				this.toolWindows.remove(index);
 			}
-			else
+			if (this.toolWindows.size() == 0 && this.mainWindows.size() == 0)
 			{
-				this.exitWorkbench();
+				if (aWindow instanceof JFrame)
+				{
+					this.exitWorkbench((JFrame)aWindow);
+				}
+				else
+				{
+					this.exitWorkbench();
+				}
 			}
 		}
 	}
 
 	private void closeToolWindows()
 	{
-		for (ToolWindow w : toolWindows)
+		synchronized (toolWindows)
 		{
-			w.closeWindow();
+			for (ToolWindow w : toolWindows)
+			{
+				w.closeWindow();
+			}
+			this.toolWindows.clear();
 		}
-		this.toolWindows.clear();
 	}
 
 	public void fontChanged(String aFontKey, Font newFont)

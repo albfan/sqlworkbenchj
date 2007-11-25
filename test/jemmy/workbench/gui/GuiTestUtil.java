@@ -42,7 +42,7 @@ public class GuiTestUtil
 		TestOut out = JemmyProperties.getProperties().getOutput().createErrorOutput();
 		JemmyProperties.getProperties().setOutput(out);
 	}
-
+	
 	public void execute(Runnable r)
 	{
 		tool.invokeAndWait(r);

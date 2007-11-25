@@ -93,7 +93,10 @@ public class DataPumper
 	private EditorPanel sqlEditor;
 	private boolean supportsBatch = false;
 	boolean allowCreateTable = true; 
-
+	
+	// used in the Jemmy Unit Test to wait for the connection thread
+	boolean isConnecting = false;
+	
 	public DataPumper(ConnectionProfile source, ConnectionProfile target)
 	{
 		this.sourceProfile = source;
@@ -146,6 +149,8 @@ public class DataPumper
 			cons.gridy--;
 			grid.setConstraints(this.modeComboBox, cons);
 		}
+		this.sourceTable.setTableDropDownName("sourceTable");
+		this.targetTable.setTableDropDownName("targetTable");
 	}
 
 	public void saveSettings()
@@ -343,7 +348,10 @@ public class DataPumper
 	private void doConnectSource(ConnectionProfile profile)
 	{
 		this.disconnectSource();
+		
 		this.sourceProfile = profile;
+		this.isConnecting = true;
+		
 		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.sourceProfile.getName() + " ...";
 		this.sourceProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
 		this.sourceProfileLabel.setText(label);
@@ -355,7 +363,7 @@ public class DataPumper
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("DataPumper.doConnectSource()", "Error when connecting to profile: " + this.sourceProfile.getName(), e);
+			LogMgr.logError("DataPumper.doConnectSource()", "Error when connecting to profile: " + (sourceProfile == null ? "n/a" : this.sourceProfile.getName()), e);
 			String msg = ResourceMgr.getString("ErrConnectionError") + "\n" + e.getMessage();
 			this.sourceProfile = null;
 			WbSwingUtilities.showErrorMessage(this, msg);
@@ -380,9 +388,14 @@ public class DataPumper
 			  {
 				  sourceTable.setConnection(sourceConnection);
 					completionAction.setConnection(sourceConnection);
+					isConnecting = false;
 			  }
 		  };
 		  t.start();
+		}
+		else
+		{
+			isConnecting = false;
 		}
 	}
 
@@ -402,8 +415,11 @@ public class DataPumper
 
 	private void doConnectTarget(ConnectionProfile profile)
 	{
+		this.isConnecting = true;
+		
 		this.disconnectTarget();
 		this.targetProfile = profile;
+		
 		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.targetProfile.getName() + " ...";
 		this.targetProfileLabel.setText(label);
 		this.targetProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
@@ -437,9 +453,14 @@ public class DataPumper
 			  public void run()
 			  {
 				  targetTable.setConnection(targetConnection);
+					isConnecting = false;
 			  }
 		  };
 		  t.start();
+		}
+		else
+		{
+			isConnecting = false;
 		}
 	}
 
@@ -514,6 +535,7 @@ public class DataPumper
     selectSourceButton.setText("...");
     selectSourceButton.setMaximumSize(new java.awt.Dimension(22, 22));
     selectSourceButton.setMinimumSize(new java.awt.Dimension(22, 22));
+    selectSourceButton.setName("selectSource"); // NOI18N
     selectSourceButton.setPreferredSize(new java.awt.Dimension(22, 22));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -561,6 +583,7 @@ public class DataPumper
     selectTargetButton.setText("...");
     selectTargetButton.setMaximumSize(new java.awt.Dimension(22, 22));
     selectTargetButton.setMinimumSize(new java.awt.Dimension(22, 22));
+    selectTargetButton.setName("selectTarget"); // NOI18N
     selectTargetButton.setPreferredSize(new java.awt.Dimension(22, 22));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -733,6 +756,7 @@ public class DataPumper
     deleteTargetCbx.setText(ResourceMgr.getString("LblDeleteTargetTable"));
     deleteTargetCbx.setToolTipText(ResourceMgr.getDescription("LblDeleteTargetTable"));
     deleteTargetCbx.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    deleteTargetCbx.setName("deleteTargetCbx"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -754,6 +778,7 @@ public class DataPumper
     updateOptionPanel.add(dropTargetCbx, gridBagConstraints);
 
     modeComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "insert", "update", "insert,update", "update,insert" }));
+    modeComboBox.setName("modeSelector"); // NOI18N
     modeComboBox.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         modeComboBoxActionPerformed(evt);
@@ -856,6 +881,7 @@ public class DataPumper
 
     startButton.setText(ResourceMgr.getString("LblStartDataPumper"));
     startButton.setEnabled(false);
+    startButton.setName("startButton"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
     jPanel3.add(startButton, gridBagConstraints);
@@ -1831,6 +1857,11 @@ public class DataPumper
 		}
 	}
 
+	public boolean isRunning()
+	{
+		return this.copyRunning;
+	}
+	
 	private boolean createCopier()
 	{
 		ColumnMapper.MappingDefinition colMapping = this.columnMapper.getMapping();

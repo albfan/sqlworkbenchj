@@ -199,10 +199,16 @@ public class TestUtil
 	public WbConnection getConnection(File db)
 		throws SQLException, ClassNotFoundException
 	{
+		return getConnection(db, "WbUnitTest");
+	}
+	
+	public WbConnection getConnection(File db, String id)
+		throws SQLException, ClassNotFoundException
+	{
 		ArgumentParser parser = WbManager.createArgumentParser();
 		parser.parse("-url='jdbc:h2:" + db.getAbsolutePath() + "' -user=sa -driver=org.h2.Driver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
-		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, "WbUnitTest");
+		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, id);
 		return con;
 	}
 	

@@ -53,6 +53,7 @@
             <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[22, 22]"/>
             </Property>
+            <Property name="name" type="java.lang.String" value="selectSource" noResource="true"/>
             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[22, 22]"/>
             </Property>
@@ -138,6 +139,7 @@
             <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[22, 22]"/>
             </Property>
+            <Property name="name" type="java.lang.String" value="selectTarget" noResource="true"/>
             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[22, 22]"/>
             </Property>
@@ -428,6 +430,7 @@
                           <Connection code="ResourceMgr.getDescription(&quot;LblDeleteTargetTable&quot;)" type="code"/>
                         </Property>
                         <Property name="horizontalTextPosition" type="int" value="4"/>
+                        <Property name="name" type="java.lang.String" value="deleteTargetCbx" noResource="true"/>
                       </Properties>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -462,6 +465,7 @@
                             <StringItem index="3" value="update,insert"/>
                           </StringArray>
                         </Property>
+                        <Property name="name" type="java.lang.String" value="modeSelector" noResource="true"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="modeComboBoxActionPerformed"/>
@@ -587,6 +591,7 @@
                   <Connection code="ResourceMgr.getString(&quot;LblStartDataPumper&quot;)" type="code"/>
                 </Property>
                 <Property name="enabled" type="boolean" value="false"/>
+                <Property name="name" type="java.lang.String" value="startButton" noResource="true"/>
               </Properties>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new WbButton();"/>

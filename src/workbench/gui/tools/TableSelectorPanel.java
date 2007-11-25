@@ -145,6 +145,17 @@ public class TableSelectorPanel
 		}
 	}
 
+	/**
+	 * Sets the name of the JComboBox component
+	 * that contains the table list.
+	 * Needed for automated GUI testing.
+	 * @param name
+	 */
+	public void setTableDropDownName(String name)
+	{
+		this.tableSelector.setName(name);
+	}
+	
 	public void retrieveSchemas()
 	{
 		try

@@ -79,6 +79,11 @@ public class ConnectionMgr
 		return this.getConnection(prof, anId);
 	}
 	
+	public WbConnection findConnection(String id)
+	{
+		return this.activeConnections.get(id);
+	}
+	
 	public WbConnection getConnection(ConnectionProfile aProfile, String anId)
 		throws ClassNotFoundException, SQLException
 	{
@@ -520,12 +525,7 @@ public class ConnectionMgr
 	
 	public void setReadTemplates(boolean aFlag)
 	{
-//		boolean old = this.readTemplates;
 		this.readTemplates = aFlag;
-//		if (old != readTemplates && readTemplates)
-//		{
-//			readDrivers();
-//		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -564,7 +564,13 @@ public class ConnectionMgr
 		this.templatesImported = true;
 	}
 	
-	public void readProfiles()
+	public synchronized void clearProfiles()
+	{
+		if (this.profiles == null) return;
+		this.profiles.clear();
+	}
+	
+	public synchronized void readProfiles()
 	{
 		Object result = null;
 		try
@@ -616,7 +622,7 @@ public class ConnectionMgr
 	 *	Reset the changed status on the profiles.
 	 *	Called after saving the profiles.
 	 */
-	private void resetProfiles()
+	private  synchronized void resetProfiles()
 	{
 		if (this.profiles != null)
 		{
@@ -633,7 +639,7 @@ public class ConnectionMgr
 	 *	This will also reset the changed flag for any modified or new
 	 *	profiles.
 	 */
-	public void saveProfiles()
+	public synchronized void saveProfiles()
 	{
 		if (this.profiles != null)
 		{
