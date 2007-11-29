@@ -13,6 +13,8 @@ package workbench.gui.components;
 
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
@@ -20,6 +22,8 @@ import javax.swing.JTextField;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.WbAction;
+import workbench.gui.tools.ConnectionInfoPanel;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -27,7 +31,7 @@ import workbench.resource.ResourceMgr;
  */
 public class ConnectionInfo
 	extends JComponent
-	implements PropertyChangeListener
+	implements PropertyChangeListener, ActionListener
 {
 	private JTextField display;
 	private WbConnection sourceConnection;
@@ -45,7 +49,11 @@ public class ConnectionInfo
 		this.defaultBackground = aBackground;
 		this.display.setEditable(false);
 		this.display.setBorder(null);
-		this.display.addMouseListener(new TextComponentMouseListener());
+		TextComponentMouseListener l =	new TextComponentMouseListener();
+		WbAction a = new WbAction(this, "show-info");
+		a.setMenuTextByKey("MnuTxtConnInfo");
+		l.addAction(a);
+		this.display.addMouseListener(l);
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -132,6 +140,11 @@ public class ConnectionInfo
 		{
 			this.updateDisplay();
 		}
+	}
+
+	public void actionPerformed(ActionEvent e)
+	{
+		ConnectionInfoPanel.showConnectionInfo(sourceConnection);
 	}
 
 }

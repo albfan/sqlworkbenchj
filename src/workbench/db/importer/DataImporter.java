@@ -24,7 +24,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableCreator;
@@ -120,10 +119,6 @@ public class DataImporter
 	private ColumnIdentifier[] targetColumns;
 	private List<ColumnIdentifier> keyColumns;
 	
-	// A mapping that stores the max. length for specific columns
-	// The index maps to the index in targetColumns
-	private Map<ColumnIdentifier, Integer> columnLimitMap;
-
 	// A map that stores constant values for the import. 
 	// e.g. for columns not part of the input file.
 	private ConstantColumnValues columnConstants;
@@ -194,7 +189,7 @@ public class DataImporter
 			this.parser = (ImportFileParser)producer;
 		}
 	}
-	
+
 	/**
 	 * Define statements that should be executed before an import
 	 * for a table starts and after the last record has been inserted.
@@ -499,16 +494,6 @@ public class DataImporter
 		}
 	}
 	
-	/**
-	 * Set a max. length for specific columns. This limit will only 
-	 * be checked for VARCHAR columns. Setting a limit for other columns
-	 * will be ignored during import
-	 */
-	public void setColumnLimits(Map<ColumnIdentifier, Integer> limits)
-	{
-		this.columnLimitMap = limits;
-	}
-
 	/**
 	 *	Define the key columns by supplying a comma separated
 	 *	list of column names
@@ -1284,13 +1269,6 @@ public class DataImporter
 					this.messages.appendNewLine();
 				}
 			}
-			else if (this.columnLimitMap != null && SqlUtil.isStringType(targetSqlType))
-			{
-				Integer size = this.columnLimitMap.get(this.targetColumns[i]);
-				int msize = (size == null ? -1 : size.intValue());
-				String newValue = StringUtil.getMaxSubstring((String)row[i], msize, null);
-				pstmt.setString(colIndex, newValue);
-			}
 			else
 			{
 				if (isOracle &&	targetSqlType == java.sql.Types.DATE && row[i] instanceof java.sql.Date)
@@ -1961,7 +1939,7 @@ public class DataImporter
 			this.hasErrors = true;
 		}
 		this.isRunning = false;
-		this.messages.append(this.source.getMessages());
+		//this.messages.append(this.source.getMessages());
 		if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 	}
 	

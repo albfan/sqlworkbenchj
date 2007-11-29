@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.importer.ImportFileHandler;
+import workbench.db.importer.modifier.ImportValueModifier;
 
 /**
  * @author support@sql-workbench.net
@@ -52,4 +53,13 @@ public interface ImportFileParser
 	String getColumns();
 	
 	ImportFileHandler getFileHandler();
+	
+	/**
+	 * Define a modifier to change the values received
+	 * from the text file before they are converted to 
+	 * the correct datatype.
+	 * 
+	 * @param modifier the ImportValueModifier to apply to the values in the import file
+	 */
+	void setValueModifier(ImportValueModifier modifier);
 }

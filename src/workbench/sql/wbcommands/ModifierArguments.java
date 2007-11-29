@@ -1,0 +1,134 @@
+/*
+ * SubstringArgument.java
+ * 
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ * 
+ * Copyright 2002-2007, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author.
+ * 
+ * To contact the author please send an email to: support@sql-workbench.net
+ */
+
+package workbench.sql.wbcommands;
+
+import java.util.List;
+import workbench.db.ColumnIdentifier;
+import workbench.db.importer.modifier.ImportValueModifier;
+import workbench.db.importer.modifier.RegexModifier;
+import workbench.db.importer.modifier.SubstringModifier;
+import workbench.db.importer.modifier.ValueFilter;
+import workbench.util.ArgumentParser;
+import workbench.util.StringUtil;
+
+/**
+ *
+ * @author support@sql-workbench.net
+ */
+public class ModifierArguments 
+{
+	public static final String ARG_SUBSTRING = "colSubstring";
+	public static final String ARG_REGEX = "colReplacement";
+	public static final String ARG_MAXLENGTH = "maxLength";
+	
+	private SubstringModifier substring = new SubstringModifier();
+	private RegexModifier regex = new RegexModifier();
+	
+	public static final void addArguments(ArgumentParser cmdLine)
+	{
+		cmdLine.addArgument(ARG_REGEX);
+		cmdLine.addArgument(ARG_SUBSTRING);
+		cmdLine.addArgument(ARG_MAXLENGTH);
+	}
+	
+	public ModifierArguments(ArgumentParser cmdLine)
+		throws NumberFormatException
+	{
+		String value = cmdLine.getValue(ARG_MAXLENGTH);
+		parseSubstring(value);
+		value = cmdLine.getValue(ARG_SUBSTRING);
+		parseSubstring(value);
+		value = cmdLine.getValue(ARG_REGEX);
+		parseRegex(value);
+	}
+	
+	private void parseRegex(String arg)
+	{
+		
+	}
+	
+	/**
+	 * Parses a parameter value for column substring definitions.
+	 * e.g. description=0:5,firstname=5:10
+	 * the two values define the parameters for String.substring(int, int)
+	 * 
+	 * If only one value is supplied, it is assumed to be a maxlength, 
+	 * so description=5 is equivalent to description=0:5
+	 */	
+	private void parseSubstring(String parameterValue)
+		throws NumberFormatException
+	{
+		if (parameterValue == null) return;
+		
+		List<String> entries = StringUtil.stringToList(parameterValue, ",", true, true, false);
+		if (entries.size() == 0) return;
+
+		for (String entry : entries)
+		{
+			String[] parts = entry.split("=");
+			if (parts.length == 2 && parts[0] != null && parts[1] != null)
+			{
+				ColumnIdentifier col = new ColumnIdentifier(parts[0]);
+				String[] limits = parts[1].split(":");
+				int start = 0;
+				int end = 0;
+				
+				if (limits.length == 1)
+				{
+					end = Integer.valueOf(limits[0].trim()).intValue();
+				}
+				else if (limits.length == 2)
+				{
+					start = Integer.valueOf(limits[0].trim()).intValue();
+					end = Integer.valueOf(limits[1].trim()).intValue();
+				}
+				substring.addDefinition(col, start, end);
+			}
+		}
+	}
+	
+	/**
+	 * For testing purposes to access the initialized modifier
+	 */
+	SubstringModifier getSubstringModifier()
+	{
+		return substring;
+	}
+	
+	/**
+	 * For testing purposes to access the initialized modifier
+	 */
+	RegexModifier getRegexModifier()
+	{
+		return regex;
+	}
+	
+	/**
+	 * Returns a combined modifier with substring and regex modifications.
+	 * the substring modifier will be applied before the regex modifier
+	 * during import.
+	 * 
+	 * @return an ImportValueModifier that applies substring and regex modifications.
+	 */
+	public ImportValueModifier getModifier()
+	{
+		ValueFilter filter = new ValueFilter();
+		if (substring.getSize() > 0) filter.addColumnModifier(substring);
+		if (regex.getSize() > 0) filter.addColumnModifier(regex);
+		if (filter.getSize() > 0)
+		{
+			return filter;
+		}
+		return null;
+	}
+	
+}

@@ -13,8 +13,7 @@ package workbench.util;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
+
 import java.sql.Types;
 import java.util.Calendar;
 import junit.framework.TestCase;
@@ -89,6 +88,49 @@ public class ValueConverterTest
 		catch (Exception e)
 		{
 			e.printStackTrace();
+		}
+	}
+
+	public void testIntegerConvert()
+		throws Exception
+	{
+		ValueConverter converter = new ValueConverter();
+		converter.setAutoConvertBooleanNumbers(false);
+		converter.setDecimalCharacter('.');
+		try
+		{
+			Object i = converter.convertValue("42", Types.INTEGER);
+			assertEquals("Wrong value returned", new Integer(42), i);
+			
+			i = converter.convertValue("32168", Types.BIGINT);
+			assertEquals("Wrong value returned", new Long(32168), i);
+			
+			i = converter.convertValue("4.2E+1", Types.INTEGER);
+			assertEquals("Wrong value returned", new Integer(42), i);
+
+			converter.setDecimalCharacter(',');
+			i = converter.convertValue("4,2E+1", Types.INTEGER);
+			assertEquals("Wrong value returned", new Integer(42), i);
+			
+			converter.setDecimalCharacter('.');
+			i = converter.convertValue("3.2168E+4", Types.BIGINT);
+			assertEquals("Wrong value returned", new Long(32168), i);
+
+			boolean exceptionThrown = false;
+			try
+			{
+				i = converter.convertValue("3.2168E+2", Types.BIGINT);
+			}
+			catch (ConverterException e)
+			{
+				exceptionThrown = true;
+			}
+			assertTrue(exceptionThrown);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
 		}
 	}
 	

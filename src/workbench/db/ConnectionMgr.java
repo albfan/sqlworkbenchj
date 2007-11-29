@@ -70,6 +70,17 @@ public class ConnectionMgr
 		return mgrInstance;
 	}
 	
+	/**
+	 * Create a new connection. The profile to be used
+	 * is searched by the given profile key
+	 * @param def the profile to be used
+	 * @param anId the id to be assigned to the connection
+	 * @return a new Connection
+	 * 
+	 * @throws java.lang.ClassNotFoundException
+	 * @throws java.sql.SQLException
+	 * @throws java.lang.Exception
+	 */
 	public WbConnection getConnection(ProfileKey def, String anId)
 		throws ClassNotFoundException, SQLException, Exception
 	{
@@ -281,37 +292,23 @@ public class ConnectionMgr
 		return this.drivers;
 	}
 	
-	/**
-	 *	Return a list of driverclasses
-	 */
-	public List<String> getDriverClasses()
-	{
-		if (this.drivers == null) this.readDrivers();
-		List<String> result = new ArrayList<String>(this.drivers.size());
-		String drvClass;
-		
-		for (int i=0; i < this.drivers.size(); i++)
-		{
-			drvClass = this.drivers.get(i).getDriverClass();
-			if (!result.contains(drvClass))
-			{
-				result.add(drvClass);
-			}
-		}
-		return result;
-	}
-	
 	public void setDrivers(List<DbDriver> aDriverList)
 	{
 		this.drivers = aDriverList;
 	}
 	
-	public ConnectionProfile getProfile(ProfileKey def)
+	/**
+	 * Find a connection profile identified by the given key.
+	 * 
+	 * @param key the key of the profile
+	 * @return a connection profile with that name or null if none was found.
+	 */
+	public ConnectionProfile getProfile(ProfileKey key)
 	{
 		this.getProfiles();
-		if (def == null) return null;
-		String name = def.getName();
-		String group = def.getGroup();
+		if (key == null) return null;
+		String name = key.getName();
+		String group = key.getGroup();
 		if (this.profiles == null) return null;
 		ConnectionProfile firstMatch = null;
 		for (ConnectionProfile prof : this.profiles)
@@ -408,7 +405,8 @@ public class ConnectionMgr
 	}
 	
 	/**
-	 *	Disconnect the given connection
+	 * Disconnect the given connection.
+	 * @param conn the connection to disconnect.
 	 */
 	private synchronized void closeConnection(WbConnection conn)
 	{
@@ -444,6 +442,10 @@ public class ConnectionMgr
 	
 	/**
 	 * Check if there is another connection active with the same URL.
+	 * This is used when the connection to an embedded database that 
+	 * needs a {@link workbench.db.shutdown.DbShutdownHook} is called.
+	 * 
+	 * @return true if there is another active connection. 
 	 */
 	public boolean isActive(WbConnection aConn)
 	{
@@ -467,12 +469,26 @@ public class ConnectionMgr
 		return false;
 	}
 	
+	/**
+	 * Save profile and driver definitions to external files.
+	 * This merely calls {@link #saveProfiles()} and {@link #saveDrivers()}
+	 * @see #saveProfiles()
+	 * @see #saveDrivers()
+	 */
 	public void writeSettings()
 	{
 		this.saveProfiles();
 		this.saveDrivers();
 	}
 	
+	/**
+	 * Saves the driver definitions to an external file. 
+	 * 
+	 * The name of the file defaults to <tt>WbDrivers.xml</tt>. The exact location
+	 * can be set in the configuration file.
+	 * @see workbench.resource.Settings#getDriverConfigFilename()
+	 * @see WbPersistence#writeObject(Object)
+	 */
 	public void saveDrivers()
 	{
 		WbPersistence writer = new WbPersistence(Settings.getInstance().getDriverConfigFilename());
@@ -564,12 +580,23 @@ public class ConnectionMgr
 		this.templatesImported = true;
 	}
 	
+	/**
+	 * Remove all defined connection profiles. 
+	 * This does not make sure that all connections are closed!
+	 * This method is used in Unit tests to setup a new set of profiles.
+	 */
 	public synchronized void clearProfiles()
 	{
 		if (this.profiles == null) return;
 		this.profiles.clear();
 	}
 	
+	/**
+	 * Retrieves the connection profiles from an XML file.
+	 * 
+	 * @see WbPersistence#readObject()
+	 * @see workbench.resource.Settings#getProfileStorage()
+	 */
 	public synchronized void readProfiles()
 	{
 		Object result = null;
@@ -619,8 +646,9 @@ public class ConnectionMgr
 	
 	
 	/**
-	 *	Reset the changed status on the profiles.
-	 *	Called after saving the profiles.
+	 * Reset the changed status on the profiles.
+	 * 
+	 * Called after saving the profiles. 
 	 */
 	private  synchronized void resetProfiles()
 	{
@@ -635,9 +663,14 @@ public class ConnectionMgr
 	}
 	
 	/**
-	 *	Make the profile list persistent.
-	 *	This will also reset the changed flag for any modified or new
-	 *	profiles.
+	 * Save the connectioin profiles to an external file.
+	 * 
+	 * This will also reset the changed flag for any modified or new
+	 * profiles. The name of the file defaults to <tt>WbProfiles.xml</tt>, but
+	 * can be defined in the configuration properties.
+	 * 
+	 * @see workbench.resource.Settings#getProfileStorage()
+	 * @see WbPersistence#writeObject(Object)
 	 */
 	public synchronized void saveProfiles()
 	{
@@ -704,11 +737,18 @@ public class ConnectionMgr
 		}
 	}
 	
+	/**
+	 * When the property {@link Settings#PROPERTY_PROFILE_STORAGE} is changed
+	 * the current list of profiles is cleared.
+	 * 
+	 * @param evt
+	 * @see #clearProfiles()
+	 */
 	public void propertyChange(java.beans.PropertyChangeEvent evt)
 	{
 		if (evt.getPropertyName().equals(Settings.PROPERTY_PROFILE_STORAGE))
 		{
-			this.profiles = null;
+			this.clearProfiles();
 		}
 	}
 	

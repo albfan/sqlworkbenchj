@@ -258,7 +258,6 @@ public class FileUtil
 		try
 		{
 			int bytesRead = in.read(buff);
-
 			while (bytesRead > -1)
 			{
 				result.append(buff, 0, bytesRead);

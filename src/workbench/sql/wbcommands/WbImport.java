@@ -26,6 +26,7 @@ import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.TableStatements;
 import workbench.db.importer.TextFileParser;
 import workbench.db.importer.XmlDataFileParser;
+import workbench.interfaces.ImportFileParser;
 import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
@@ -77,7 +78,6 @@ public class WbImport
 	public static final String ARG_START_ROW = "startRow";
 	public static final String ARG_END_ROW = "endRow";
 	public static final String ARG_BADFILE = "badFile";
-	public static final String ARG_SIZELIMIT = "maxLength";
 	public static final String ARG_CONSTANTS = "constantValues";
 	public static final String ARG_COL_WIDTHS = "columnWidths";
 	
@@ -126,9 +126,9 @@ public class WbImport
 		cmdLine.addArgument(ARG_START_ROW, ArgumentType.IntegerArgument);
 		cmdLine.addArgument(ARG_END_ROW, ArgumentType.IntegerArgument);
 		cmdLine.addArgument(ARG_BADFILE);
-		cmdLine.addArgument(ARG_SIZELIMIT);
 		cmdLine.addArgument(ARG_CONSTANTS);
 		cmdLine.addArgument(ARG_COL_WIDTHS);
+		ModifierArguments.addArguments(cmdLine);
 	}
 	
 	public String getVerb() { return VERB; }
@@ -284,6 +284,7 @@ public class WbImport
 		}
 
 		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
+		ImportFileParser parser = null;
 		
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
@@ -297,6 +298,8 @@ public class WbImport
 			}
 
 			TextFileParser textParser = new TextFileParser();
+			parser = textParser;
+			
 			textParser.setTableName(table);
 			if (inputFile != null)
 			{
@@ -448,6 +451,7 @@ public class WbImport
 			XmlDataFileParser xmlParser = new XmlDataFileParser();
 			xmlParser.setConnection(currentConnection);
 			xmlParser.setAbortOnError(!continueOnError);
+			parser = xmlParser;
 			
 			// The encoding must be set as early as possible
 			// as the XmlDataFileParser might need it to read
@@ -505,16 +509,15 @@ public class WbImport
 			prod.setValueConverter(converter);
 			prod.setCheckDependencies(cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS));
 		}
-		
+
 		try
 		{
-			// The maxLength parameter should only be evaluated for 
+			// Column Modifiers will only be evaluated for
 			// single file imports to avoid confusion of columns
 			if (dir == null)
 			{
-				String lvalue = cmdLine.getValue(ARG_SIZELIMIT);
-				ColumnLimits cl = new ColumnLimits(lvalue);
-				imp.setColumnLimits(cl.getLimits());
+				ModifierArguments args = new ModifierArguments(cmdLine);
+				parser.setValueModifier(args.getModifier());
 			}
 		}
 		catch (NumberFormatException e)
@@ -523,6 +526,25 @@ public class WbImport
 			result.setFailure();
 			return result;
 		}
+		
+		
+//		try
+//		{
+//			// The maxLength parameter will only be evaluated for 
+//			// single file imports to avoid confusion of columns
+//			if (dir == null)
+//			{
+//				String lvalue = cmdLine.getValue(ARG_SIZELIMIT);
+//				ColumnLimits cl = new ColumnLimits(lvalue);
+//				imp.setColumnLimits(cl.getLimits());
+//			}
+//		}
+//		catch (NumberFormatException e)
+//		{
+//			result.addMessage(ResourceMgr.getString("ErrImportWrongLimit"));
+//			result.setFailure();
+//			return result;
+//		}
 			
 		if (badFile != null) imp.setBadfileName(badFile);
 

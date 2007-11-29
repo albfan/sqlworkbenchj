@@ -188,6 +188,115 @@ public class ValueConverter
 	private final BigDecimal BIG_TRUE = BigDecimal.valueOf(1);
 	private final BigDecimal BIG_FALSE = BigDecimal.valueOf(0);
 	
+	private Number getNumberFromString(String value, boolean useInt)
+	{
+		if (value == null) return null;
+		try
+		{
+			BigDecimal d = new BigDecimal(this.adjustDecimalString(value));
+			if (useInt)
+			{
+				return new Integer(d.intValueExact());
+			}
+			else
+			{
+				return new Long(d.longValueExact());
+			}
+		}
+		catch (Exception e)
+		{
+			// Ignore
+		}
+		return null;
+	}
+	
+	private Number getLong(String value)
+		throws ConverterException
+	{
+		if (value.length() == 0) return null;
+		try
+		{
+			return new Long(value);
+		}
+		catch (NumberFormatException e)
+		{
+			// Maybe the long value is disguised as a decimal
+			Number n = getNumberFromString(value, false);
+			if (n != null) return n;
+			
+			// When exporting from a database that supports the boolean datatype
+			// into a database that maps this to an integer, we assume that
+			// true/false should be 1/0
+			if (autoConvertBooleanNumbers)
+			{
+				Boolean b = getBoolean(value); 
+				if (b != null)
+				{
+					if (b.booleanValue()) return LONG_TRUE;
+					else return LONG_FALSE;
+				}
+			}
+
+			throw new ConverterException(value, Types.BIGINT, e);
+		}
+	}
+	
+	private Number getInt(String value, int type)
+		throws ConverterException
+	{
+		if (value.length() == 0) return null;
+		try
+		{
+			return new Integer(value);
+		}
+		catch (NumberFormatException e)
+		{
+			// Maybe the integer value is disguised as a decimal
+			Number n = getNumberFromString(value, true);
+			if (n != null) return n;
+			
+			// When exporting from a database that supports the boolean datatype
+			// into a database that maps this to an integer, we assume that
+			// true/false should be 1/0
+			if (autoConvertBooleanNumbers)
+			{
+				Boolean b = getBoolean(value); 
+				if (b != null)
+				{
+					if (b.booleanValue()) return INT_TRUE;
+					else return INT_FALSE;
+				}
+			}
+
+			throw new ConverterException(value, type, e);
+		}
+	}
+
+	private Number getBigDecimal(String value, int type)
+		throws ConverterException
+	{
+		if (value.length() == 0) return null;
+		try
+		{
+			return new BigDecimal(this.adjustDecimalString(value));
+		}
+		catch (NumberFormatException e)
+		{
+			// When exporting from a database that supports the boolean datatype
+			// into a database that maps this to an integer, we assume that
+			// true/false should be 1/0
+			if (autoConvertBooleanNumbers)
+			{
+				Boolean b = getBoolean(value); 
+				if (b != null)
+				{
+					if (b.booleanValue()) return BIG_TRUE;
+					else return BIG_FALSE;
+				}
+			}
+			throw new ConverterException(value, type, e);
+		}		
+	}
 	/**
 	 * Convert the given input value to a class instance
 	 * according to the given type (from java.sql.Types)
@@ -205,79 +314,19 @@ public class ValueConverter
 		switch (type)
 		{
 			case Types.BIGINT:
-				if (v.length() == 0) return null;
-				try
-				{
-					return new Long(v);
-				}
-				catch (NumberFormatException e)
-				{
-					// When exporting from a database that supports the boolean datatype
-					// into a database that maps this to an integer, we assume that
-					// true/false should be 1/0
-					if (autoConvertBooleanNumbers)
-					{
-						Boolean b = getBoolean(v); 
-						if (b != null) 
-						{
-							if (b.booleanValue()) return LONG_TRUE;
-							else return LONG_FALSE;
-						}
-					}
-					throw new ConverterException(aValue, type, e);
-				}
+				return getLong(v);
 				
 			case Types.INTEGER:
 			case Types.SMALLINT:
 			case Types.TINYINT:
-				if (v.length() == 0) return null;
-				try
-				{
-					return new Integer(v);
-				}
-				catch (NumberFormatException e)
-				{
-					// When exporting from a database that supports the boolean datatype
-					// into a database that maps this to an integer, we assume that
-					// true/false should be 1/0
-					if (autoConvertBooleanNumbers)
-					{
-						Boolean b = getBoolean(v); 
-						if (b != null) 
-						{
-							if (b.booleanValue()) return INT_TRUE;
-							else return INT_FALSE;
-						}
-					}
-					throw new ConverterException(aValue, type, e);
-				}
+				return getInt(v, type);
 				
 			case Types.NUMERIC:
 			case Types.DECIMAL:
 			case Types.DOUBLE:
 			case Types.REAL:
 			case Types.FLOAT:
-				if (v.length() == 0) return null;
-				try
-				{
-					return new BigDecimal(this.adjustDecimalString(aValue.toString()));
-				}
-				catch (NumberFormatException e)
-				{
-					// When exporting from a database that supports the boolean datatype
-					// into a database that maps this to an integer, we assume that
-					// true/false should be 1/0
-					if (autoConvertBooleanNumbers)
-					{
-						Boolean b = getBoolean(v); 
-						if (b != null) 
-						{
-							if (b.booleanValue()) return BIG_TRUE;
-							else return BIG_FALSE;
-						}
-					}
-					throw new ConverterException(aValue, type, e);
-				}
+				return getBigDecimal(v, type);
 				
 			case Types.CHAR:
 			case Types.VARCHAR:
@@ -596,15 +645,6 @@ public class ValueConverter
 		return keywords.contains(arg.toLowerCase());
 	}
 	
-//	private Collection<String> getCurrentKeywords()
-//	{
-//		Set<String> allKeywords = new HashSet<String>(7);
-//		allKeywords.addAll(Settings.getInstance().getListProperty("workbench.db.keyword.current_time", true));
-//		allKeywords.addAll(Settings.getInstance().getListProperty("workbench.db.keyword.current_date", true));
-//		allKeywords.addAll(Settings.getInstance().getListProperty("workbench.db.keyword.current_timestamp", true));
-//		return allKeywords;
-//	}
-		
 	private String adjustDecimalString(String input)
 	{
 		if (input == null)  return input;
@@ -632,7 +672,7 @@ public class ValueConverter
 		return result.toString();
 	}
 	
-	private Boolean getBoolean(Object value)
+	private Boolean getBoolean(String value)
 		throws ConverterException
 	{
 		if (this.booleanFalseValues != null && this.booleanTrueValues != null)
@@ -641,15 +681,15 @@ public class ValueConverter
 			if (booleanTrueValues.contains(value)) return Boolean.TRUE;
 			throw new ConverterException("Input value [" + value + "] not in the list of defined true or false literals");
 		}
-		else if (value instanceof String)
+		else
 		{
-			if ("false".equalsIgnoreCase((String)value)) return Boolean.FALSE;
-			if ("true".equalsIgnoreCase((String)value)) return Boolean.TRUE;
+			if ("false".equalsIgnoreCase(value)) return Boolean.FALSE;
+			if ("true".equalsIgnoreCase(value)) return Boolean.TRUE;
 		}
 		return null;
 	}
 	
-	private Boolean convertBool(Object value, int type)
+	private Boolean convertBool(String value, int type)
 		throws ConverterException
 	{
 		Boolean b = getBoolean(value);

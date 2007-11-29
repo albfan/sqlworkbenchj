@@ -929,11 +929,11 @@ public class WbImportTest
 			File importFile  = new File(this.basedir, "col_limit.txt");
 			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
 			out.println("nr\tfirstname\tlastname");
-			out.println("1\tArthur\tDent");
-			out.println("2\tZaphod\tBeeblebrox");
+			out.println("x1\tArthur\tDent");
+			out.println("x2\tZaphod\tBeeblebrox");
 			out.close();
 			
-			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -maxLength='firstname=50,lastname=4' -type=text -header=true -continueonerror=false -table=junit_test");
+			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -colSubstring=nr=1:5 -maxLength='firstname=50,lastname=4' -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			Statement stmt = this.connection.createStatementForQuery();

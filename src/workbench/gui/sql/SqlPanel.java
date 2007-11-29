@@ -2772,7 +2772,8 @@ public class SqlPanel
 	 * Display the data contained in the StatementRunnerResult.
 	 * For each DataStore or ResultSet in the result, an additional
 	 * result {@link workbench.gui.sql.DwPanel} will be added.
-	 * @param result the result to be displayed (obtained from a {@link workbench.interfaces.StatementRunner}
+	 * 
+	 * @param result the result to be displayed (obtained from a {@link workbench.interfaces.StatementRunner})
 	 * @see workbench.gui.sql.DwPanel
 	 */
 	public int addResult(StatementRunnerResult result)

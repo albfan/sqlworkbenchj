@@ -32,6 +32,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.XmlRowDataConverter;
+import workbench.db.importer.modifier.ImportValueModifier;
 import workbench.interfaces.JobErrorHandler;
 import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
@@ -98,6 +99,7 @@ public class XmlDataFileParser
 	private WbConnection dbConn;
 	
 	private ValueConverter converter = new ValueConverter();
+	private ImportValueModifier valueModifier;
 	
 	public XmlDataFileParser()
 	{
@@ -119,6 +121,11 @@ public class XmlDataFileParser
 		this.inputFile = inputFile;
 	}
 
+	public void setValueModifier(ImportValueModifier mod)
+	{
+		this.valueModifier = mod;
+	}
+	
 	public ImportFileHandler getFileHandler()
 	{
 		return this.fileHandler;
@@ -808,6 +815,11 @@ public class XmlDataFileParser
 		}
 
 		String value = this.chars.toString();
+		if (this.valueModifier != null)
+		{
+			value = this.valueModifier.modifyValue(this.columns[this.realColIndex], value);
+		}
+		
 		int type = this.columns[this.realColIndex].getDataType();
 		try
 		{

@@ -63,8 +63,13 @@ public class ValidatingDialog
 	
 	public ValidatingDialog(Frame owner, String title, JComponent editor)
 	{
+		this(owner, title, editor, true);
+	}
+	
+	public ValidatingDialog(Frame owner, String title, JComponent editor, boolean addCancelButton)
+	{
 		super(owner, title, true);
-		init(owner, editor, new String[] { ResourceMgr.getString("LblOK") }, true);
+		init(owner, editor, new String[] { ResourceMgr.getString("LblOK") }, addCancelButton);
 	}
 
 	public ValidatingDialog(Dialog owner, String title, JComponent editor, String[] options)

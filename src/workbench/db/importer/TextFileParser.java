@@ -40,6 +40,7 @@ import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import workbench.db.importer.modifier.ImportValueModifier;
 import workbench.util.FixedLengthLineParser;
 import workbench.util.LineParser;
 import workbench.util.QuoteEscapeType;
@@ -111,6 +112,7 @@ public class TextFileParser
 	private ImportFileHandler fileHandler = new ImportFileHandler();
 	private String currentLine;
 	private QuoteEscapeType quoteEscape;
+	private ImportValueModifier valueModifier;
 	
 	public TextFileParser()
 	{
@@ -127,6 +129,11 @@ public class TextFileParser
 		return this.fileHandler;
 	}
 
+	public void setValueModifier(ImportValueModifier mod)
+	{
+		this.valueModifier = mod;
+	}
+	
 	public void setEnableMultilineRecords(boolean flag)
 	{
 		this.enableMultiLineMode = flag;
@@ -730,7 +737,6 @@ public class TextFileParser
 			throw e;
 		}
 
-		String value = null;
 		this.rowData = new Object[this.importColCount];
 		int importRow = 0;
 
@@ -834,9 +840,9 @@ public class TextFileParser
 				includeLine = true;
 				int targetIndex = -1;
 				
-				// Build row data
 				for (int i=0; i < this.colCount; i++)
 				{
+					String value = null;
 					try
 					{
 						if (tok.hasNext())
@@ -863,6 +869,11 @@ public class TextFileParser
 								}
 							}
 
+							if (this.valueModifier != null)
+							{
+								value = valueModifier.modifyValue(columns[i], value);
+							}
+							
 							if (SqlUtil.isCharacterType(colType))
 							{
 								if (clobsAreFilenames && value != null && SqlUtil.isClobType(colType))

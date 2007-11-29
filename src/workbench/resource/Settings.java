@@ -84,13 +84,15 @@ public class Settings
 	public static final String PROPERTY_DATA_FONT = "data";
 	public static final String PROPERTY_PRINTER_FONT = "printer";
 
+	/**
+	 * The property that identifies the name of the file containing the connection profiles.
+	 */
 	public static final String PROPERTY_PROFILE_STORAGE = "workbench.settings.profilestorage";
 	public static final String PROPERTY_EDITOR_TAB_WIDTH = "workbench.editor.tabwidth";
 
 	private static final String LIB_DIR_KEY = "%LibDir%";
 	
 	private WbProperties props;
-	//private String filename;
 	private WbFile configfile;
 	
 	private List<FontChangedListener> fontChangeListeners = new LinkedList<FontChangedListener>();
@@ -99,7 +101,7 @@ public class Settings
 
 	private static Settings instance;
 
-	public synchronized static final Settings getInstance()
+	public static final Settings getInstance()
 	{
 		if (instance == null)
 		{
