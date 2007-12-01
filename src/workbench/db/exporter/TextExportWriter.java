@@ -11,22 +11,6 @@
  */
 package workbench.db.exporter;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-import workbench.storage.ResultInfo;
-import workbench.util.CharacterRange;
-import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
-import workbench.util.WbFile;
-
 /**
  *
  * @author  support@sql-workbench.net

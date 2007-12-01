@@ -67,6 +67,7 @@ public class WbCopy
 		CommonArgs.addCommitAndBatchParams(cmdLine);
 		CommonArgs.addCheckDepsParameter(cmdLine);
 		CommonArgs.addTableStatements(cmdLine);
+		CommonArgs.addTransactionControL(cmdLine);
 		
 		cmdLine.addArgument(PARAM_SOURCETABLE);
 		cmdLine.addArgument(PARAM_SOURCEQUERY);

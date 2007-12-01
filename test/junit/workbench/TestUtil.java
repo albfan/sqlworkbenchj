@@ -290,6 +290,14 @@ public class TestUtil
 		}
 	}	
 	
+	public static void writeFile(File f, String content)
+		throws IOException
+	{
+		FileWriter w = new FileWriter(f);
+		w.write(content);
+		w.close();
+	}
+	
 	public static void executeScript(WbConnection con, String script)
 		throws SQLException
 	{

@@ -99,6 +99,8 @@ public class DataPumperTest
 
 		DataPumper pumper = (DataPumper)mainWindow.getContentPane().getComponent(0);
 		waitUntilConnected(pumper);
+		QueueTool tool = new QueueTool();
+		tool.waitEmpty();
 	}
 
 	public void copyData()
@@ -119,6 +121,15 @@ public class DataPumperTest
 		});
 		
 		tool.waitEmpty();
+		try
+		{
+			// wait a bit to make sure the target dropdown is populated
+			Thread.sleep(250);
+		}
+		catch (Exception e)
+		{
+			// ignore
+		}
 
 		chooser.setName("targetTable");
 		final JComboBoxOperator targettbl = new JComboBoxOperator(mainWindow, chooser);
@@ -133,48 +144,58 @@ public class DataPumperTest
 		});
 		
 		tool.waitEmpty();
-		
 
 		chooser.setName("modeSelector");
-		JComboBoxOperator mode = new JComboBoxOperator(mainWindow, chooser);
+		final JComboBoxOperator mode = new JComboBoxOperator(mainWindow, chooser);
 
 		chooser.setName("deleteTargetCbx");
-		JCheckBoxOperator deleteTarget = new JCheckBoxOperator(mainWindow, chooser);
+		final JCheckBoxOperator deleteTarget = new JCheckBoxOperator(mainWindow, chooser);
 		assertTrue(deleteTarget.isEnabled());
 
-		mode.setSelectedIndex(1); // Update mode
-		tool.waitEmpty();
-		assertFalse(deleteTarget.isEnabled());
+		tool.invokeAndWait(new Runnable()
+		{
+			public void run()
+			{
+				mode.setSelectedIndex(1); // Update mode
+				assertFalse(deleteTarget.isEnabled());
 
-		mode.setSelectedItem("update,insert");
-		tool.waitEmpty();
-		assertFalse(deleteTarget.isEnabled());
+				mode.setSelectedItem("update,insert");
+				assertFalse(deleteTarget.isEnabled());
 
-		mode.setSelectedItem("insert,update");
-		tool.waitEmpty();
-		assertFalse(deleteTarget.isEnabled());
+				mode.setSelectedItem("insert,update");
+				assertFalse(deleteTarget.isEnabled());
 
-		mode.setSelectedItem("insert");
-		tool.waitEmpty();
-		assertTrue(deleteTarget.isEnabled());
-
-		chooser.setName("startButton");
-		JButtonOperator start = new JButtonOperator(mainWindow, chooser);
-		start.pushNoBlock();
+				mode.setSelectedItem("insert");
+				assertTrue(deleteTarget.isEnabled());
+			}
+		});
 
 		DataPumper pumper = (DataPumper)mainWindow.getContentPane().getComponent(0);
 
+		chooser.setName("startButton");
+		JButtonOperator start = new JButtonOperator(mainWindow, chooser);
+		start.push();
+		tool.waitEmpty();
+		
 		// Wait until copy has finished
 		int count = 0;
 		int sleepTime = 50;
-		while (!pumper.isRunning())
+		while (pumper.isRunning())
 		{
-			//Thread.yield();
+			Thread.yield();
 			try { Thread.sleep(sleepTime); } catch (Throwable th) {}
 			count ++;
-			if (count * sleepTime > 5000) break;
+			if (count * sleepTime > 5000) 
+			{
+				System.out.println("*** Cancelling wait !!!!!");
+				break;
+			}
 		}
-
+		tool.waitEmpty();
+	}
+	
+	public void checkData()
+	{
 		WbConnection target = ConnectionMgr.getInstance().findConnection("Dp-Target");
 		assertNotNull(target);
 		
@@ -202,16 +223,16 @@ public class DataPumperTest
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
-		}
+		}		
 	}
 
 	public void waitUntilConnected(DataPumper pumper)
 	{
 		int count = 0;
 		int sleepTime = 50;
-		while (!pumper.isConnecting)
+		while (pumper.isConnecting)
 		{
-			//Thread.yield();
+			Thread.yield();
 			try { Thread.sleep(sleepTime); } catch (Throwable th) {}
 			count ++;
 			if (count * sleepTime > 5000) break;
@@ -317,10 +338,11 @@ public class DataPumperTest
 
 	public void closeWindow()
 	{
-		QueueTool tool = new QueueTool();
 		JFrameOperator mainWindow = new JFrameOperator("Data Pumper");
-		JButtonOperator close = new JButtonOperator(mainWindow);
-		close.pushNoBlock();
+		NamedComponentChooser chooser = new NamedComponentChooser();
+		chooser.setName("closeButton");
+		JButtonOperator close = new JButtonOperator(mainWindow, chooser);
+		close.push();
 	}
 	
 	public void testDataPumper()
@@ -333,7 +355,10 @@ public class DataPumperTest
 			connect("selectSource", 1);
 			connect("selectTarget", 2);
 			copyData();
+			checkData();
 			closeWindow();
+			Thread.sleep(500);
+			util.stopApplication();
 		}
 		catch (Exception e)
 		{

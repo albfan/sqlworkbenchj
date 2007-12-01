@@ -106,6 +106,7 @@ public class DataImporter
 	private boolean useTruncate = false;
 	private int totalTables = -1;
 	private int currentTable = -1;
+	private boolean transactionControl = true;
 
 	// this array will map the columns for updating the target table
 	// the index into this array will be the index
@@ -170,6 +171,11 @@ public class DataImporter
 		this.isOracle = this.dbConn.getMetadata().isOracle();
 	}
 
+	public void setTransactionControl(boolean flag)
+	{
+		this.transactionControl = flag;
+	}
+	
 	public void setRowActionMonitor(RowActionMonitor rowMonitor)
 	{
 		this.progressMonitor = rowMonitor;
@@ -1803,7 +1809,7 @@ public class DataImporter
 	private void finishTable()
 		throws SQLException
 	{
-		boolean commitNeeded = !dbConn.getAutoCommit() && (this.commitEvery != Committer.NO_COMMIT_FLAG);
+		boolean commitNeeded = this.transactionControl && !dbConn.getAutoCommit() && (this.commitEvery != Committer.NO_COMMIT_FLAG);
 	
 		try
 		{
@@ -1828,6 +1834,10 @@ public class DataImporter
 			{
 				LogMgr.logInfo("DataImporter.finishTable()", this.getAffectedRows() + " row(s) imported. Committing changes");
 				this.dbConn.commit();
+			}
+			else if (!transactionControl)
+			{
+				LogMgr.logInfo("DataImporter.finishTable()", this.getAffectedRows() + " row(s) imported. Transaction control disabled. No commit sent to server");
 			}
 			
 			this.messages.append(this.source.getMessages());
@@ -1924,7 +1934,7 @@ public class DataImporter
 		try
 		{
 			this.closeStatements();
-			if (!this.dbConn.getAutoCommit())
+			if (this.transactionControl && !this.dbConn.getAutoCommit())
 			{
 				LogMgr.logInfo("DataImporter.cleanupRollback()", "Rollback changes");
 				this.dbConn.rollback();

@@ -192,6 +192,11 @@ public class DataCopier
 		this.initImporterForTable(additionalWhere);
 	}
 
+	public void setTransactionControl(boolean flag)
+	{
+		this.importer.setTransactionControl(flag);
+	}
+	
 	public void beginMultiTableCopy()
 	{
 		this.importer.beginMultiTable();

@@ -56,12 +56,18 @@ public class CommonArgs
 	public static final String ARG_PRE_TABLE_STMT = "preTableStatement";
 	public static final String ARG_POST_TABLE_STMT = "postTableStatement";
 	public static final String ARG_IGNORE_TABLE_STMT_ERRORS = "ignorePrePostErrors";
+	public static final String ARG_TRANS_CONTROL = "transactionControl";
 	
 	private static List<String> getDelimiterArguments()
 	{
 		return StringUtil.stringToList("'\\t',';',\"','\",'|',<char>");
 	}
 
+	public static void addTransactionControL(ArgumentParser cmdLine)
+	{
+		cmdLine.addArgument(ARG_TRANS_CONTROL, ArgumentType.BoolArgument);
+	}
+	
 	public static void addTableStatements(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_PRE_TABLE_STMT);

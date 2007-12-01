@@ -175,6 +175,7 @@ public class SchemaCopy
 		}
 
 		copier.setPerTableStatements(new TableStatements(cmdLine));
+		copier.setTransactionControl(cmdLine.getBoolean(CommonArgs.ARG_TRANS_CONTROL, true));
 		
 		checkDependencies = cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS);
 		

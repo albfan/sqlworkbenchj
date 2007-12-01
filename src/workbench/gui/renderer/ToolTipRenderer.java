@@ -48,6 +48,7 @@ public class ToolTipRenderer
 	
 	private Color alternateBackground = Settings.getInstance().getAlternateRowColor();
 	private boolean useAlternatingColors = Settings.getInstance().getUseAlternateRowColor();
+	private Color nullColor = Settings.getInstance().getNullColor();
 
 	protected int maxTooltipSize = Settings.getInstance().getIntProperty("workbench.gui.renderer.maxtooltipsize", 1000);
 	protected int editingRow = -1;
@@ -88,7 +89,6 @@ public class ToolTipRenderer
 	
 	public void setHighlightColumns(boolean[] cols) 
 	{ 
-		//if (cols == null) this.isEditing = false;
 		this.highlightCols = cols; 
 	}
 	
@@ -134,10 +134,9 @@ public class ToolTipRenderer
 		this.selected = isSelected;
 		this.isAlternatingRow = this.useAlternatingColors && ((row % 2) == 1);
 		
-		boolean isNull = (value == null);
-		if (isNull)
+		if (value == null)
 		{
-			displayValue = StringUtil.EMPTY_STRING;
+			displayValue = null;
 			tooltip = null;
 		}
 		else
@@ -182,42 +181,32 @@ public class ToolTipRenderer
 		paintIconR.x = paintIconR.y = paintIconR.width = paintIconR.height = 0;
 		paintTextR.x = paintTextR.y = paintTextR.width = paintTextR.height = 0;
 		
-		String clippedText = 
+		boolean isNull = (displayValue == null);
+		
+		String clippedText = StringUtil.EMPTY_STRING;
+		if (displayValue != null)
+		{
+			clippedText = 
         SwingUtilities.layoutCompoundLabel(this,fm,this.displayValue,(Icon)null
 						,this.valign
 						,this.halign
 						,SwingConstants.TOP
 						,SwingConstants.RIGHT
 						,paintViewR, paintIconR, paintTextR, 0);
-		
+		}
+	
 		int textX = paintTextR.x;
 		if (textX < 0) textX = 0;
 		int textY = paintTextR.y + fm.getAscent();
 		if (textY < 0) textY = 0;
 
-		if (!this.isEditing)
+		if (this.isPrinting)
 		{
-			if (this.selected && !isPrinting)
-			{
-				g.setColor(selectedBackground);
-				g.fillRect(0,0,w,h);
-				g.setColor(selectedForeground);
-			}
-			else 
-			{
-				if (isAlternatingRow && !isPrinting)
-				{
-					g.setColor(alternateBackground);
-				}
-				else
-				{
-					g.setColor(unselectedBackground);
-				}
-				g.fillRect(0,0,w,h);
-				g.setColor(unselectedForeground);
-			}
+			g.setColor(unselectedBackground);
+			g.fillRect(0,0,w,h);
+			g.setColor(unselectedForeground);
 		}
-		else
+		else if (isEditing)
 		{
 			try
 			{
@@ -236,6 +225,36 @@ public class ToolTipRenderer
 			}
 			g.fillRect(0,0,w,h);
 			g.setColor(unselectedForeground);
+		}
+		else
+		{
+			if (this.selected)
+			{
+				g.setColor(selectedBackground);
+				g.fillRect(0,0,w,h);
+				g.setColor(selectedForeground);
+			}
+			else 
+			{
+				if (isNull && nullColor != null)
+				{
+					g.setColor(nullColor);
+					g.fillRect(0,0,w,h);
+				}
+				else
+				{
+					if (isAlternatingRow)
+					{
+						g.setColor(alternateBackground);
+					}
+					else
+					{
+						g.setColor(unselectedBackground);
+					}
+				}
+				g.fillRect(0,0,w,h);
+				g.setColor(unselectedForeground);
+			}
 		}
 		
 		g.drawString(clippedText, textX, textY);

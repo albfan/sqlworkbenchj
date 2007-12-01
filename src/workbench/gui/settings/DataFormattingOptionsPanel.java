@@ -14,6 +14,7 @@ package workbench.gui.settings;
 import javax.swing.JPanel;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.WbCheckBoxLabel;
+import workbench.gui.components.WbColorPicker;
 import workbench.interfaces.Restoreable;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -41,6 +42,7 @@ public class DataFormattingOptionsPanel
 		includeHeaderWidth.setSelected(Settings.getInstance().getIncludeHeaderInOptimalWidth());
 		minColSizeField.setText(Integer.toString(Settings.getInstance().getMinColumnWidth()));
 		maxColSizeField.setText(Integer.toString(Settings.getInstance().getMaxColumnWidth()));
+		nullColor.setSelectedColor(Settings.getInstance().getNullColor());
 	}
 
 	public void saveSettings()
@@ -59,6 +61,7 @@ public class DataFormattingOptionsPanel
 		set.setMinColumnWidth(((NumberField)this.minColSizeField).getValue());
 		set.setAutomaticOptimalWidth(autoColWidth.isSelected());
 		set.setIncludeHeaderInOptimalWidth(includeHeaderWidth.isSelected());
+		set.setNullColor(nullColor.getSelectedColor());
 	}
 
 	/** This method is called from within the constructor to
@@ -97,6 +100,8 @@ public class DataFormattingOptionsPanel
     useAlternateRowColors = new javax.swing.JCheckBox();
     alternateColorLabel = new javax.swing.JLabel();
     alternateColor = new workbench.gui.components.WbColorPicker();
+    nullColor = new WbColorPicker(true);
+    nullColorLabel = new javax.swing.JLabel();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -158,8 +163,8 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
     add(maxDigitsField, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 14;
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 15;
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
 
@@ -354,6 +359,23 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(6, 4, 0, 25);
     add(alternateColor, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(3, 3, 0, 0);
+    add(nullColor, gridBagConstraints);
+
+    nullColorLabel.setText(ResourceMgr.getString("LblNullValueColor"));
+    nullColorLabel.setToolTipText(ResourceMgr.getDescription("LblNullValueColor"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(4, 12, 0, 0);
+    add(nullColorLabel, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -379,6 +401,8 @@ public class DataFormattingOptionsPanel
   private javax.swing.JLabel maxDigitsLabel;
   private javax.swing.JTextField minColSizeField;
   private javax.swing.JLabel minColSizeLabel;
+  private workbench.gui.components.WbColorPicker nullColor;
+  private javax.swing.JLabel nullColorLabel;
   private javax.swing.JCheckBox rowHeightResize;
   private javax.swing.JTextField timeFormat;
   private javax.swing.JLabel timeFormatLabel;

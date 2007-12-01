@@ -89,6 +89,7 @@ public class Settings
 	 */
 	public static final String PROPERTY_PROFILE_STORAGE = "workbench.settings.profilestorage";
 	public static final String PROPERTY_EDITOR_TAB_WIDTH = "workbench.editor.tabwidth";
+	public static final String PROPERTY_EDITOR_CURRENT_LINE_COLOR = "workbench.editor.currentline.color";
 
 	private static final String LIB_DIR_KEY = "%LibDir%";
 	
@@ -1224,6 +1225,16 @@ public class Settings
 		setProperty("workbench.gui.table.alternate.use", flag);
 	}
 
+	public void setNullColor(Color c)
+	{
+		setColor("workbench.gui.table.null.color", c);
+	}
+	
+	public Color getNullColor()
+	{
+		return getColor("workbench.gui.table.null.color", null);
+	}
+	
 	public Color getAlternateRowColor()
 	{
 		return getColor("workbench.gui.table.alternate.color", new Color(252,252,252));
@@ -1873,10 +1884,14 @@ public class Settings
 
 	private void setColor(String key, Color c)
 	{
-		int r = c.getRed();
-		int g = c.getGreen();
-		int b = c.getBlue();
-		String value = Integer.toString(r) + "," + Integer.toString(g) + "," + Integer.toString(b);
+		String value = null;
+		if (c != null)
+		{
+			int r = c.getRed();
+			int g = c.getGreen();
+			int b = c.getBlue();
+			value = Integer.toString(r) + "," + Integer.toString(g) + "," + Integer.toString(b);
+		}
 		this.setProperty(key, value);
 	}
 
@@ -1900,6 +1915,16 @@ public class Settings
 		return getColor("workbench.editor.color.error", Color.RED.brighter());
 	}
 
+	public Color getEditorCurrentLineColor()
+	{
+		return getColor(PROPERTY_EDITOR_CURRENT_LINE_COLOR, null);
+	}
+
+	public void setEditorCurrentLineColor(Color c)
+	{
+		setColor(PROPERTY_EDITOR_CURRENT_LINE_COLOR, c);
+	}
+	
 	public int getElectricScroll()
 	{
 		return this.getIntProperty("workbench.editor.electricscroll", 3);

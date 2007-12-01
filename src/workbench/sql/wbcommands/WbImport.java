@@ -97,6 +97,7 @@ public class WbImport
 		CommonArgs.addConverterOptions(cmdLine, true);
 		CommonArgs.addCheckDepsParameter(cmdLine);
 		CommonArgs.addTableStatements(cmdLine);
+		CommonArgs.addTransactionControL(cmdLine);
 		
 		cmdLine.addArgument(ARG_TYPE, StringUtil.stringToList("text,xml"));
 		cmdLine.addArgument(ARG_UPDATE_WHERE);
@@ -503,6 +504,8 @@ public class WbImport
 			return result;
 		}
 		
+		imp.setTransactionControl(cmdLine.getBoolean(CommonArgs.ARG_TRANS_CONTROL, true));
+		
 		RowDataProducer prod = imp.getProducer();
 		if (prod != null) 
 		{
@@ -526,25 +529,6 @@ public class WbImport
 			result.setFailure();
 			return result;
 		}
-		
-		
-//		try
-//		{
-//			// The maxLength parameter will only be evaluated for 
-//			// single file imports to avoid confusion of columns
-//			if (dir == null)
-//			{
-//				String lvalue = cmdLine.getValue(ARG_SIZELIMIT);
-//				ColumnLimits cl = new ColumnLimits(lvalue);
-//				imp.setColumnLimits(cl.getLimits());
-//			}
-//		}
-//		catch (NumberFormatException e)
-//		{
-//			result.addMessage(ResourceMgr.getString("ErrImportWrongLimit"));
-//			result.setFailure();
-//			return result;
-//		}
 			
 		if (badFile != null) imp.setBadfileName(badFile);
 

@@ -127,8 +127,17 @@ public class BlobInfoDialog
 		{
 			lbl = ResourceMgr.getString("LblBlobSize");
 		}
-		long len = handler.getBlobSize(blobValue);
-		lbl = lbl + ": " + Long.toString(len) + " Byte";
+		long len = 0;
+		
+		if (value == null)
+		{
+			lbl = lbl + ": (null)";
+		}
+		else
+		{
+			len = handler.getBlobSize(blobValue);
+			lbl = lbl + ": " + Long.toString(len) + " Byte";
+		}
 		infoLabel.setText(lbl);
 		if (value instanceof File)
 		{
@@ -138,8 +147,10 @@ public class BlobInfoDialog
 		{
 			infoLabel.setToolTipText(handler.getByteDisplay(len).toString());
 		}
+		// Show as text is always enabled to allow text editing 
+		// for null BLOBs as well.
+		
 		saveAsButton.setEnabled(len > 0);
-		//showAsTextButton.setEnabled(len > 0);
 		showImageButton.setEnabled(len > 0);
 		showHexButton.setEnabled(len > 0);
 		externalViewer.setEnabled(len > 0 && hasTools);

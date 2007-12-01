@@ -35,6 +35,7 @@ public class TextAreaRenderer
 	protected Color unselectedForeground;
 	protected Color unselectedBackground;
 	protected Color highlightBackground;
+	protected Color nullColor = Settings.getInstance().getNullColor();
 	
 	private Color alternateBackground = Settings.getInstance().getAlternateRowColor();
 	private boolean useAlternatingColors = Settings.getInstance().getUseAlternateRowColor();
@@ -50,6 +51,7 @@ public class TextAreaRenderer
 	
 	public TextAreaRenderer()
 	{
+		
 	}
 	
 	public int getHorizontalAlignment()
@@ -85,27 +87,13 @@ public class TextAreaRenderer
 		}
 		
 		this.isAlternatingRow = this.useAlternatingColors && ((row % 2) == 1);
-		if (!this.isEditing)
+		
+		if (this.isPrinting)
 		{
-			if (isSelected && !isPrinting)
-			{
-				setBackground(selectedBackground);
-				setForeground(selectedForeground);
-			}
-			else 
-			{
-				setForeground(unselectedForeground);
-				if (isAlternatingRow && !isPrinting)
-				{
-					setBackground(alternateBackground);
-				}
-				else
-				{
-					setBackground(unselectedBackground);
-				}		
-			}
+			setForeground(unselectedForeground);
+			setBackground(unselectedBackground);
 		}
-		else
+		else if (this.isEditing)
 		{
 			try
 			{
@@ -123,17 +111,42 @@ public class TextAreaRenderer
 				setBackground(unselectedBackground);
 			}
 		}
+		else 
+		{
+			if (isSelected)
+			{
+				setBackground(selectedBackground);
+				setForeground(selectedForeground);
+			}
+			else 
+			{
+				setForeground(unselectedForeground);
+				if (value == null && nullColor != null)
+				{
+					setBackground(nullColor);
+				}
+				else 
+				{
+					if (isAlternatingRow)
+					{
+						setBackground(alternateBackground);
+					}
+					else
+					{
+						setBackground(unselectedBackground);
+					}		
+				}
+			}
+		}
 		
-		boolean isNull = (value == null);
-		
-		if (isNull)
+		if (value == null)
 		{
 			this.setText("");
 			this.setToolTipText(null);
 		}
 		else
 		{
-			String s = (String)value;
+			String s = value.toString();
 			this.setText(s);
 			this.setToolTipText(StringUtil.getMaxSubstring(s, maxTooltipSize));
 		}

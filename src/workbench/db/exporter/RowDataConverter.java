@@ -233,7 +233,8 @@ public abstract class RowDataConverter
 			Object value = row.getValue(filenameColumnIndex);
 			if (value != null)
 			{
-				filename = StringUtil.makeFilename(value.toString());
+				//filename = StringUtil.makeFilename(value.toString());
+				filename = value.toString();
 			}
 		}
 		return filename;

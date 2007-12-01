@@ -68,6 +68,7 @@ public class TableCopy
 		String keys = cmdLine.getValue(WbCopy.PARAM_KEYS);
 
 		this.copier = new DataCopier();
+		copier.setTransactionControl(cmdLine.getBoolean(CommonArgs.ARG_TRANS_CONTROL, true));
 		copier.setKeyColumns(keys);
 
 		String mode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);

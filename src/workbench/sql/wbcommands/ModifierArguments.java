@@ -51,9 +51,35 @@ public class ModifierArguments
 		parseRegex(value);
 	}
 	
-	private void parseRegex(String arg)
+	private void parseRegex(String parameterValue)
 	{
+		if (parameterValue == null) return;
 		
+		List<String> entries = StringUtil.stringToList(parameterValue, ",", true, true, false);
+		if (entries.size() == 0) return;
+
+		for (String entry : entries)
+		{
+			String[] parts = entry.split("=");
+			if (parts.length == 2 && parts[0] != null && parts[1] != null)
+			{
+				ColumnIdentifier col = new ColumnIdentifier(parts[0]);
+				String[] limits = parts[1].split(":");
+				String expression = null;
+				String replacement = "";
+				
+				if (limits.length == 1)
+				{
+					expression = limits[0].trim();
+				}
+				else if (limits.length == 2)
+				{
+					expression = limits[0].trim();
+					replacement = limits[1].trim();
+				}
+				regex.addDefinition(col, expression, replacement);
+			}
+		}		
 	}
 	
 	/**

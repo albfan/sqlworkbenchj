@@ -923,6 +923,7 @@ public class DataPumper
     jPanel5.add(helpButton, gridBagConstraints);
 
     closeButton.setText(ResourceMgr.getString("LblClose"));
+    closeButton.setName("closeButton"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
@@ -1797,7 +1798,8 @@ public class DataPumper
 
 		try
 		{
-
+			this.copyRunning = true;
+	
 			if (this.fileImporter != null)
 			{
 				this.initImporter();
@@ -1839,7 +1841,6 @@ public class DataPumper
 				}
 			}
 			this.copier.startBackgroundCopy();
-			this.copyRunning = true;
 			this.showLogButton.setEnabled(false);
 			this.startButton.setEnabled(false);
 			this.cancelButton.setEnabled(true);

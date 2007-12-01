@@ -32,7 +32,7 @@ import workbench.util.StringUtil;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.34 2007-11-16 21:59:47 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.35 2007-12-01 13:30:31 thomas Exp $
  */
 public class TextAreaPainter 
 	extends JComponent 
@@ -49,6 +49,7 @@ public class TextAreaPainter
 	protected Color selectionColor;
 	protected Color bracketHighlightColor;
 	protected Color errorColor;
+	protected Color currentLineColor;
 
 	protected boolean bracketHighlight;
 
@@ -82,9 +83,10 @@ public class TextAreaPainter
 		caretColor = Color.BLACK;
 		errorColor = Settings.getInstance().getEditorErrorColor();
 		selectionColor = Settings.getInstance().getEditorSelectionColor();
+		currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
 		bracketHighlightColor = Color.BLACK;
 		bracketHighlight = true;
-		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_TAB_WIDTH);
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_TAB_WIDTH, Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR);
 	}
 
 
@@ -93,6 +95,11 @@ public class TextAreaPainter
 		if (Settings.PROPERTY_EDITOR_TAB_WIDTH.equals(evt.getPropertyName()))
 		{
 			this.calculateTabSize();
+		}
+		else if (Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR.equals(evt.getPropertyName()))
+		{
+			this.currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
+			invalidate();
 		}
 	}
 	 
@@ -260,8 +267,6 @@ public class TextAreaPainter
 		if (this.showLineNumbers)
 		{
 			int lastLine = textArea.getLineCount();
-//			String s = Integer.toString(lastLine);
-//			int	chars = s.length();
 			int chars = StringUtil.numDigits(lastLine);
 			this.gutterWidth = (chars * gutterCharWidth) + (GUTTER_MARGIN * 2);
 		}
@@ -337,6 +342,8 @@ public class TextAreaPainter
 			int ch = getHeight();
 			int gutterX = this.gutterWidth - GUTTER_MARGIN;
 
+			int caretLine = textArea.getCaretLine();
+			
 			for (int line = firstVisible; line <= endLine; line++)
 			{
 				int y = textArea.lineToY(line);
@@ -361,6 +368,15 @@ public class TextAreaPainter
 						gfx.setClip(this.gutterWidth, 0, cw, ch);
 						gfx.translate(this.gutterWidth,0);		
 					}		
+					
+					if (this.currentLineColor != null && line == caretLine)
+					{
+						gfx.setColor(currentLineColor);
+						//int height = fm.getHeight();
+						//y += fm.getLeading() + fm.getMaxDescent();
+						gfx.fillRect(0,y + fm.getLeading() + fm.getMaxDescent(),getWidth(),height);
+						gfx.setColor(getBackground());
+					}
 					
 					paintLine(gfx,tokenMarker,line,y,x);
 					
@@ -522,27 +538,27 @@ public class TextAreaPainter
 		int lineStart = textArea.getLineStartOffset(line);
 
 		int x1, x2;
-		if(textArea.isSelectionRectangular())
+		if (textArea.isSelectionRectangular())
 		{
 			int lineLen = textArea.getLineLength(line);
 			x1 = textArea._offsetToX(line,Math.min(lineLen,selectionStart - textArea.getLineStartOffset(selectionStartLine)));// + this.gutterWidth;
 			x2 = textArea._offsetToX(line,Math.min(lineLen,selectionEnd - textArea.getLineStartOffset(selectionEndLine)));// + this.gutterWidth;
 			if(x1 == x2) x2++;
 		}
-		else if(selectionStartLine == selectionEndLine)
+		else if (selectionStartLine == selectionEndLine)
 		{
-			x1 = textArea._offsetToX(line,selectionStart - lineStart);// + this.gutterWidth;
-			x2 = textArea._offsetToX(line,selectionEnd - lineStart);// + this.gutterWidth;
+			x1 = textArea._offsetToX(line,selectionStart - lineStart);
+			x2 = textArea._offsetToX(line,selectionEnd - lineStart);
 		}
-		else if(line == selectionStartLine)
+		else if (line == selectionStartLine)
 		{
-			x1 = textArea._offsetToX(line,selectionStart - lineStart);// + this.gutterWidth;
+			x1 = textArea._offsetToX(line,selectionStart - lineStart);
 			x2 = getWidth();
 		}
-		else if(line == selectionEndLine)
+		else if (line == selectionEndLine)
 		{
-			x1 = 0; //gutterWidth;
-			x2 = textArea._offsetToX(line,selectionEnd - lineStart);// + this.gutterWidth;
+			x1 = 0;
+			x2 = textArea._offsetToX(line,selectionEnd - lineStart);
 		}
 		else
 		{

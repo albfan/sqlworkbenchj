@@ -15,6 +15,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.WbCheckBoxLabel;
+import workbench.gui.components.WbColorPicker;
 import workbench.resource.ColumnSortType;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -41,7 +42,8 @@ public class EditorOptionsPanel
 		errorColor.setSelectedColor(Settings.getInstance().getEditorErrorColor());
 		selectionColor.setSelectedColor(Settings.getInstance().getEditorSelectionColor());
 		editorFont.setSelectedFont(Settings.getInstance().getEditorFont());
-
+		currLineColor.setSelectedColor(Settings.getInstance().getEditorCurrentLineColor());
+		
 		String[] items = new String[] {
 			ResourceMgr.getString("LblLTDefault"),
 			ResourceMgr.getString("LblLTDos"),
@@ -129,6 +131,7 @@ public class EditorOptionsPanel
 		
 		set.setCloseAutoCompletionWithSearch(closePopup.isSelected());
 		set.setEditorErrorColor(errorColor.getSelectedColor());
+		set.setEditorCurrentLineColor(currLineColor.getSelectedColor());
 		set.setEditorFont(editorFont.getSelectedFont());
 		set.setAlternateDelimiter(alternateDelim.getDelimiter());
 		set.setRightClickMovesCursor(rightClickMovesCursor.isSelected());
@@ -193,7 +196,8 @@ public class EditorOptionsPanel
     errorColor = new workbench.gui.components.WbColorPicker();
     selectionColorLabel = new javax.swing.JLabel();
     selectionColor = new workbench.gui.components.WbColorPicker();
-    jPanel2 = new javax.swing.JPanel();
+    currLineLabel = new javax.swing.JLabel();
+    currLineColor = new WbColorPicker(true);
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -492,17 +496,20 @@ public class EditorOptionsPanel
     jPanel1.add(selectionColorLabel);
     jPanel1.add(selectionColor);
 
+    currLineLabel.setText(ResourceMgr.getString("LblCurrLineColor"));
+    currLineLabel.setToolTipText(ResourceMgr.getDescription("LblCurrLineColor"));
+    jPanel1.add(currLineLabel);
+    jPanel1.add(currLineColor);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 17;
     gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 13);
     add(jPanel1, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    add(jPanel2, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -514,6 +521,8 @@ public class EditorOptionsPanel
   private javax.swing.JCheckBox closePopup;
   private javax.swing.JComboBox completionColumnSort;
   private javax.swing.JComboBox completionPasteCase;
+  private workbench.gui.components.WbColorPicker currLineColor;
+  private javax.swing.JLabel currLineLabel;
   private workbench.gui.components.WbFontPicker editorFont;
   private javax.swing.JLabel editorFontLabel;
   private javax.swing.JLabel editorTabSizeLabel;
@@ -530,7 +539,6 @@ public class EditorOptionsPanel
   private javax.swing.JComboBox internalLineEnding;
   private javax.swing.JLabel internalLineEndingLabel;
   private javax.swing.JPanel jPanel1;
-  private javax.swing.JPanel jPanel2;
   private javax.swing.JLabel labelCloseSearch;
   private javax.swing.JTextField noWordSep;
   private javax.swing.JLabel noWordSepLabel;

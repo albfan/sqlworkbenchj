@@ -46,6 +46,8 @@ public class BlobColumnRenderer
 	private int currentRow;
 	private int currentColumn;
 	private Color alternateColor = Settings.getInstance().getAlternateRowColor();
+	private Color nullColor = Settings.getInstance().getNullColor();
+	
 	private boolean useAlternatingColors = Settings.getInstance().getUseAlternateRowColor();
 	
 	public BlobColumnRenderer()
@@ -88,13 +90,20 @@ public class BlobColumnRenderer
 		else
 		{
 			this.displayPanel.setForeground(table.getForeground());
-			if (useAlternatingColors && ((row % 2) == 1))
+			if (value == null && nullColor != null)
 			{
-				this.displayPanel.setBackground(this.alternateColor);
+				this.displayPanel.setBackground(nullColor);
 			}
 			else
 			{
-				this.displayPanel.setBackground(table.getBackground());
+				if (useAlternatingColors && ((row % 2) == 1))
+				{
+					this.displayPanel.setBackground(this.alternateColor);
+				}
+				else
+				{
+					this.displayPanel.setBackground(table.getBackground());
+				}
 			}
 		}
 		if (hasFocus)

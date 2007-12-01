@@ -15,12 +15,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import junit.framework.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
@@ -54,6 +54,148 @@ public class BatchRunnerTest
 		}
 	}
 
+	public void testTransactionControlError()
+	{
+		WbConnection con = null;
+		try
+		{
+			util.emptyBaseDirectory();
+			WbFile errorFile = new WbFile(util.getBaseDir(), "error.sql");
+			TestUtil.writeFile(errorFile, "rollback;\n");
+			WbFile successFile = new WbFile(util.getBaseDir(), "success.sql");
+			TestUtil.writeFile(successFile, "commit;\n");
+
+			WbFile importFile = new WbFile(util.getBaseDir(), "data.txt");
+			String data = "nr\tfirstname\tlastname\n" +
+				"1\tArthur\tDent\n";
+			TestUtil.writeFile(importFile, data);
+			WbFile scriptFile = new WbFile(util.getBaseDir(), "myscript.sql");
+			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
+			writer.println("-- test script");
+			writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100));");
+			writer.println("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent');");
+			writer.println("commit;");
+			writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect');");
+			writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox');");
+			writer.println("-- import data. should fail!");
+			writer.println("WbImport -file='" + importFile.getName() + "' -type=text -header=true -table=person -continueOnError=false -transactionControl=false");
+			writer.close();
+			
+			ArgumentParser parser = WbManager.createArgumentParser();
+			WbFile dbFile = new WbFile(util.getBaseDir(), "errtest");
+			parser.parse("-url='jdbc:h2:'" + dbFile.getFullPath() + 
+				" -user=sa -driver=org.h2.Driver "  + 
+				" -script='" + scriptFile.getFullPath() + "' " +
+				" -abortOnError=true -cleanupError='" + errorFile.getFullPath() + "' " +
+				" -autocommit=false " +
+				" -cleanupSuccess='" + successFile.getFullPath() + "' "
+			);
+			
+			BatchRunner runner = BatchRunner.createBatchRunner(parser);
+			assertNotNull(runner);
+			
+			runner.connect();
+			runner.execute();
+			
+			con = util.getConnection(dbFile);
+			Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery("select count(*) from person");
+			if (rs.next())
+			{
+				int nr = rs.getInt(1);
+				assertEquals("Not enough rows!", 1, nr);
+			}
+			else
+			{
+				fail("No data");
+			}
+			SqlUtil.closeAll(rs, stmt);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			con.close();
+		}
+	}
+
+	public void testTransactionControlSuccess()
+	{
+		WbConnection con = null;
+		try
+		{
+			util.emptyBaseDirectory();
+			WbFile errorFile = new WbFile(util.getBaseDir(), "error.sql");
+			TestUtil.writeFile(errorFile, "rollback;\n");
+			WbFile successFile = new WbFile(util.getBaseDir(), "success.sql");
+			TestUtil.writeFile(successFile, "commit;\n");
+
+			WbFile importFile = new WbFile(util.getBaseDir(), "data_success.txt");
+			String data = "nr\tfirstname\tlastname\n" +
+				"5\tMary\tMoviestar\n" + 
+				"6\tMajor\tBug\n" + 
+				"7\tGeneral\tFailure\n";
+			TestUtil.writeFile(importFile, data);
+			WbFile scriptFile = new WbFile(util.getBaseDir(), "myscript.sql");
+			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
+			writer.println("-- test script");
+			writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100));");
+			writer.println("commit;");
+			writer.println("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent');");
+			writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect');");
+			writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox');");
+			writer.println("-- import data. should fail!");
+			writer.println("WbImport -file='" + importFile.getName() + "' -type=text -header=true -table=person -continueOnError=false -transactionControl=false");
+			writer.println("insert into person (nr, firstname, lastname) values (8,'Tricia', 'McMillian');");
+			writer.close();
+			
+			ArgumentParser parser = WbManager.createArgumentParser();
+			WbFile dbFile = new WbFile(util.getBaseDir(), "successtest");
+			parser.parse("-url='jdbc:h2:'" + dbFile.getFullPath() + 
+				" -user=sa -driver=org.h2.Driver "  + 
+				" -script='" + scriptFile.getFullPath() + "' " +
+				" -abortOnError=true -cleanupError='" + errorFile.getFullPath() + "' " +
+				" -cleanupSuccess='" + successFile.getFullPath() + "' " +
+				" -autocommit=false " +
+				" -rollbackOnDisconnect=true "
+				);
+			
+			BatchRunner runner = BatchRunner.createBatchRunner(parser);
+			assertNotNull(runner);
+			
+			runner.connect();
+			assertTrue(runner.isConnected());
+			runner.execute();
+			assertTrue(runner.isSuccess());
+			
+			con = util.getConnection(dbFile);
+			Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery("select count(*) from person");
+			if (rs.next())
+			{
+				int nr = rs.getInt(1);
+				assertEquals("Not enough rows!", 6, nr);
+			}
+			else
+			{
+				fail("No data");
+			}
+			SqlUtil.closeAll(rs, stmt);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			con.close();
+		}
+	}
+	
 	public void testEmptyStatement()
 	{
 		try

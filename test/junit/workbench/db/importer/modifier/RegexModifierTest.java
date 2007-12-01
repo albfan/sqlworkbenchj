@@ -32,12 +32,16 @@ public class RegexModifierTest
 		ColumnIdentifier fname = new ColumnIdentifier("fname");
 		ColumnIdentifier lname = new ColumnIdentifier("lname");
 		modifier.addDefinition(fname, "bronx", "brox");
+		modifier.addDefinition(lname, "\\\"", "\\'");
 		
 		String modified = modifier.modifyValue(fname, "Zaphod Beeblebronx");
 		assertEquals("Zaphod Beeblebrox", modified);
 		
 		modified = modifier.modifyValue(lname, "Zaphod Beeblebronx");
 		assertEquals("Zaphod Beeblebronx", modified);
+
+		modified = modifier.modifyValue(lname, "Test\" value");
+		System.out.println(modified);
 		
 	}
 }

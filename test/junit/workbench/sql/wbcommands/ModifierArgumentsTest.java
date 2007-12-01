@@ -14,6 +14,7 @@ import junit.framework.TestCase;
 import workbench.db.ColumnIdentifier;
 import workbench.db.importer.modifier.ColumnValueSubstring;
 import workbench.db.importer.modifier.ImportValueModifier;
+import workbench.db.importer.modifier.RegexModifier;
 import workbench.db.importer.modifier.SubstringModifier;
 import workbench.util.ArgumentParser;
 
@@ -29,6 +30,34 @@ public class ModifierArgumentsTest
 		super(testName);
 	}
 
+	public void testRegex()
+	{
+		try
+		{
+			ArgumentParser cmdLine = new ArgumentParser();
+			ModifierArguments.addArguments(cmdLine);
+			
+			// -colSubstring should overwrite whatever was specified with -maxLength
+			cmdLine.parse("-colReplacement=firstname=bla:blub");
+			ModifierArguments args = new ModifierArguments(cmdLine);
+			
+			ImportValueModifier mod = args.getModifier();
+			assertNotNull(mod);
+			assertEquals(1, mod.getSize());
+			
+			RegexModifier regex = args.getRegexModifier();
+			assertNotNull(regex);
+			
+			String modified = regex.modifyValue(new ColumnIdentifier("firstname"), "blast");
+			assertEquals("blubst", modified);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testSubstring()
 	{
 		try
