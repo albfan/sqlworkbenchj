@@ -14,7 +14,7 @@ package workbench.storage.filter;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
-import junit.framework.*;
+import junit.framework.TestCase;
 
 /**
  * @author support@sql-workbench.net
@@ -36,19 +36,19 @@ public class ComplexExpressionTest
 			expr.addColumnExpression("lastname", new StartsWithComparator(), "Bee");
 			expr.addColumnExpression("age", new GreaterOrEqualComparator(), new Integer(42));
 			
-			Map values = new HashMap();
+			Map<String, Object> values = new HashMap<String, Object>();
 			values.put("firstname", "zaphod");
 			values.put("lastname", "Beeblebrox");
 			values.put("age", new Integer(43));
 			assertEquals(true, expr.evaluate(values));
 
-			values = new HashMap();
+			values = new HashMap<String, Object>();
 			values.put("firstname", "zaphod");
 			values.put("lastname", "Beeblebrox");
 			values.put("age", new Integer(40));			
 			assertEquals(false, expr.evaluate(values));
 			
-			values = new HashMap();
+			values = new HashMap<String, Object>();
 			values.put("firstname", "zaphod");
 			values.put("lastname", null);
 			values.put("age", new Integer(40));			
@@ -56,11 +56,11 @@ public class ComplexExpressionTest
 			expr = new AndExpression();
 			expr.addColumnExpression("lastname", new IsNullComparator(), null);
 			assertEquals(true, expr.evaluate(values));
-			
 		}
-		catch (Throwable th)
+		catch (Exception th)
 		{
-			fail();
+			th.printStackTrace();
+			fail(th.getMessage());
 		}
 	}
 	
@@ -72,7 +72,7 @@ public class ComplexExpressionTest
 			ComplexExpression expr = new AndExpression();
 			expr.addColumnExpression("changed_on", new GreaterThanComparator(), f.parse("2006-10-01"));
 			
-			Map values = new HashMap();
+			Map<String, Object> values = new HashMap<String, Object>();
 			values.put("changed_on", f.parse("2006-11-01"));
 			assertEquals(true, expr.evaluate(values));
 		}

@@ -731,29 +731,19 @@ public class MainWindow
 		this.sqlTab.setSelectedIndex(anIndex);
 	}
 
-	private Object connectProgressLock = new Object();
-	
 	private boolean isConnectInProgress()
 	{
-		synchronized (connectProgressLock)
-		{
-			return this.connectInProgress;
-		}
+		return this.connectInProgress;
 	}
+	
 	private void clearConnectIsInProgress()
 	{
-		synchronized (connectProgressLock)
-		{
-			this.connectInProgress = false;
-		}
+		this.connectInProgress = false;
 	}
 
 	private void setConnectIsInProgress() 
 	{ 
-		synchronized (connectProgressLock)
-		{
-			this.connectInProgress = true; 
-		}
+		this.connectInProgress = true; 
 	}
 
 	private void checkConnectionForPanel(final MainPanel aPanel)
@@ -867,6 +857,8 @@ public class MainWindow
 	protected void createNewConnectionForPanel(final MainPanel aPanel)
 	{
 		if (this.isConnectInProgress()) return;
+		if (this.connectThread != null) return;
+		
 		this.connectThread = new WbThread("Panel Connect " + aPanel.getId())
 		{
 			public void run()
@@ -884,8 +876,8 @@ public class MainWindow
 	private void connectPanel(final MainPanel aPanel)
 	{
 		if (this.isConnectInProgress()) return;
-		this.showConnectingInfo();
 		this.setConnectIsInProgress();
+		this.showConnectingInfo();
 		try
 		{
 			WbConnection conn = this.getConnectionForTab(aPanel, true);
@@ -928,6 +920,7 @@ public class MainWindow
 		this.closeConnectingInfo();
 		panel.setConnection(conn);
 		
+		WbSwingUtilities.waitForEmptyQueue();
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -942,7 +935,8 @@ public class MainWindow
 		if (anIndex < 0) return;
 
 		Container content = this.getContentPane();
-		final MainPanel current = this.getCurrentPanel();
+		//final MainPanel current = this.getCurrentPanel();
+		final MainPanel current = this.getSqlPanel(anIndex);
 		if (current == null) return;
 
 		JMenuBar menu = this.panelMenus.get(anIndex);
@@ -966,30 +960,28 @@ public class MainWindow
 		});
 	}
 
-	private void tabSelected(final int anIndex)
+	private void tabSelected(final int index)
 	{
 		// Make sure this is executed on the EDT
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
-				updateCurrentTab();
+				updateCurrentTab(index);
 			}
 		});
 	}
 
-	private void updateCurrentTab()
+	private void updateCurrentTab(int index)
 	{
-		MainPanel current = this.getCurrentPanel();
-		int index = this.sqlTab.getSelectedIndex();
+		//MainPanel current = this.getCurrentPanel();
+		//int index = this.sqlTab.getSelectedIndex();
+		MainPanel current = getSqlPanel(index);
 		if (current == null) return;
 		this.updateGuiForTab(index);
 		this.updateAddMacroAction();
 		this.updateWindowTitle();
-		if (!this.isConnectInProgress()) 
-		{
-			this.checkConnectionForPanel(current);
-		}
+		this.checkConnectionForPanel(current);
 	}
 	
 	protected void updateAddMacroAction()
@@ -1851,12 +1843,10 @@ public class MainWindow
 		WbConnection conn = null;
 		try
 		{
-			WbSwingUtilities.showWaitCursor(this);
 			conn = mgr.getConnection(this.currentProfile, id);
 		}
 		finally
 		{
-			WbSwingUtilities.showDefaultCursor(this);
 			aPanel.clearStatusMessage();
 		}
 		return conn;
@@ -2412,6 +2402,8 @@ public class MainWindow
 		
 		if (selectNew) 	
 		{
+			// if no connection was created initially the switcht to a new 
+			// panel will initiate the connection.
 			this.sqlTab.setSelectedIndex(index);
 		}
 

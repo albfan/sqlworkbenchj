@@ -13,11 +13,15 @@ package workbench;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -34,6 +38,8 @@ import workbench.sql.DefaultStatementRunner;
 import workbench.sql.ScriptParser;
 import workbench.util.ArgumentParser;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -324,4 +330,102 @@ public class TestUtil
 		}
 	}
 
+	public void prepareSource(WbFile sourceDb)
+		throws SQLException, ClassNotFoundException
+	{
+		Connection con = null;
+		Statement stmt = null;
+
+		try
+		{
+			Class.forName("org.h2.Driver");
+			con = DriverManager.getConnection("jdbc:h2:" + sourceDb.getFullPath(), "sa", "");
+			stmt = con.createStatement();
+			stmt.executeUpdate("CREATE TABLE person (id integer primary key, firstname varchar(50), lastname varchar(50))");
+			stmt.executeUpdate("insert into person (id, firstname, lastname) values (1, 'Arthur', 'Dent')");
+			stmt.executeUpdate("insert into person (id, firstname, lastname) values (2, 'Mary', 'Moviestar')");
+			stmt.executeUpdate("insert into person (id, firstname, lastname) values (3, 'Major', 'Bug')");
+			stmt.executeUpdate("insert into person (id, firstname, lastname) values (4, 'General', 'Failure')");
+			con.commit();
+			stmt.close();
+			con.close();
+		}
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
+			try { con.close(); } catch (Throwable th) {}
+		}
+	}
+
+	public void prepareTarget(WbFile targetDb)
+		throws SQLException, ClassNotFoundException
+	{
+		Connection con = DriverManager.getConnection("jdbc:h2:" + targetDb.getFullPath(), "sa", "");
+		Statement stmt = null;
+		try
+		{
+			Class.forName("org.h2.Driver");
+			stmt = con.createStatement();
+			stmt.executeUpdate("CREATE TABLE person (id integer primary key, firstname varchar(50), lastname varchar(50))");
+			con.commit();
+			stmt.close();
+			con.close();
+		}
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
+			try { con.close(); } catch (Throwable th) {}
+		}
+	}
+
+	public void createProfiles(WbFile sourceDb, WbFile targetDb)
+		throws FileNotFoundException
+	{
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>  \n" +
+             "<java version=\"1.5.0_08\" class=\"java.beans.XMLDecoder\">  \n" +
+             "	 \n" +
+             " <object class=\"java.util.ArrayList\">  \n" +
+             "  <void method=\"add\">  \n" +
+             "   <object class=\"workbench.db.ConnectionProfile\">  \n" +
+             "    <void property=\"driverclass\">  \n" +
+             "     <string>org.h2.Driver</string>  \n" +
+             "    </void>  \n" +
+             "    <void property=\"name\">  \n" +
+             "     <string>SourceConnection</string>  \n" +
+             "    </void>  \n" +
+             "    <void property=\"url\">  \n" +
+             "     <string>" + "jdbc:h2:" + StringUtil.replace(sourceDb.getFullPath(), "\\", "/") + "</string>  \n" +
+             "    </void>  \n" +
+             "    <void property=\"username\">  \n" +
+             "     <string>sa</string>  \n" +
+             "    </void>  \n" +
+             "   </object>  \n" +
+             "  </void>  \n" +
+             "	 \n" +
+             "  <void method=\"add\">  \n" +
+             "   <object class=\"workbench.db.ConnectionProfile\">  \n" +
+             "    <void property=\"driverclass\">  \n" +
+             "     <string>org.h2.Driver</string>  \n" +
+             "    </void>  \n" +
+             "    <void property=\"name\">  \n" +
+             "     <string>TargetConnection</string>  \n" +
+             "    </void>  \n" +
+             "    <void property=\"url\">  \n" +
+             "     <string>" + "jdbc:h2:" + StringUtil.replace(targetDb.getFullPath(), "\\", "/") + "</string>  \n" +
+             "    </void>  \n" +
+             "    <void property=\"username\">  \n" +
+             "     <string>sa</string>  \n" +
+             "    </void>  \n" +
+             "   </object>  \n" +
+             "  </void>  \n" +
+             "	 \n" +
+             " </object>  \n" +
+             "</java> ";
+		PrintWriter writer = new PrintWriter(new FileOutputStream(new File(getBaseDir(), "WbProfiles.xml")));
+		writer.println(xml);
+		writer.close();
+		// Make sure the new profiles are read
+		ConnectionMgr.getInstance().readProfiles();
+	}
+	
 }

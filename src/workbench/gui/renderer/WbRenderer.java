@@ -11,6 +11,8 @@
  */
 package workbench.gui.renderer;
 
+import workbench.storage.filter.FilterExpression;
+
 /**
  *
  * @author support@sql-workbench.net

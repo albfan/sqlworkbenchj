@@ -1,5 +1,5 @@
 /*
- * FilterDataAction.java
+ * ResetFilterAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -15,40 +15,38 @@ import java.awt.event.ActionEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.gui.components.WbTable;
-import workbench.gui.filter.DefineFilterExpressionPanel;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Filter data from a WbTable 
+ *	Reset the filter defined on a WbTable
  *	@author  support@sql-workbench.net
  */
-public class FilterDataAction 
-		extends WbAction
-		implements TableModelListener
+public class ResetHighlightAction 
+	extends WbAction
+	implements TableModelListener
 {
 	private WbTable client;
 
-	public FilterDataAction(WbTable aClient)
+	public ResetHighlightAction(WbTable aClient)
 	{
 		super();
+		this.initMenuDefinition("MnuTxtResetHighlight");
 		this.setClient(aClient);
-		this.initMenuDefinition("MnuTxtFilter");
-		this.setIcon(ResourceMgr.getImage("filter"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
-		this.setEnabled(false);		
+		this.setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		DefineFilterExpressionPanel.showDialog(this.client);
+		this.client.clearHighlightFilter();
 	}
 
 	public void tableChanged(TableModelEvent tableModelEvent)
 	{
-		this.setEnabled(this.client.getLastFilter() != null || this.client.getRowCount() > 0);
+		this.setEnabled(this.client.isHighlightEnabled());
 	}
-
+	
 	public void setClient(WbTable c)
 	{
 		if (this.client != null)
@@ -61,5 +59,5 @@ public class FilterDataAction
 			this.client.addTableModelListener(this);
 		}
 	}
-
+	
 }

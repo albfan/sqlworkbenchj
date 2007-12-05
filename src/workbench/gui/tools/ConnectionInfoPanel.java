@@ -5,15 +5,23 @@
  */
 package workbench.gui.tools;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.io.StringWriter;
 import java.sql.DatabaseMetaData;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
+import javax.swing.text.Document;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.ValidatingDialog;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
@@ -27,36 +35,31 @@ public class ConnectionInfoPanel
 	public ConnectionInfoPanel(WbConnection conn)
 	{
 		initComponents();
-		productNameLabel.setText(ResourceMgr.getString("LblDbProductName"));
-		versionInfoLabel.setText(ResourceMgr.getString("LblDbProductInfo"));
-		versionLabel.setText(ResourceMgr.getString("LblDbProductVersion"));
-		driverNameLabel.setText(ResourceMgr.getString("LblDriverInfoName"));
-		driverVersionLabel.setText(ResourceMgr.getString("LblDriverInfoVersion"));
-		urlLabel.setText(ResourceMgr.getString("LblDbURL"));
-		userLabel.setText(ResourceMgr.getString("LblUsername"));
 		
 		try
 		{
+			StringBuilder content = new StringBuilder();
+			content.append("<html>");
+			
 			DatabaseMetaData meta = conn.getSqlConnection().getMetaData();
 			DbMetadata wbmeta = conn.getMetadata();
-			
-			schemaLabel.setText(StringUtil.capitalize(wbmeta.getSchemaTerm()));
-			catalogLabel.setText(StringUtil.capitalize(wbmeta.getCatalogTerm()));
-			
-			String schema = conn.getCurrentSchema();
-			schemaName.setText(schema == null ? "" : " " + schema);
-			
-			catalog.setText(" " + wbmeta.getCurrentCatalog());
-			url.setText(" " + conn.getUrl());
-			url.setCaretPosition(0);
-			username.setText(" " + conn.getCurrentUser());
-			productName.setText(" " + meta.getDatabaseProductName());
-			versionInfo.setText(" " + meta.getDatabaseProductVersion());
-			versionInfo.setCaretPosition(0);
-			dbVersion.setText(" " + conn.getDatabaseVersion());
-			driverName.setText(" " + meta.getDriverName());
-			driverVersion.setText(" " + meta.getDriverVersion());
-			
+
+			content.append("<b>" + ResourceMgr.getString("LblDbProductName") + ":</b> " + meta.getDatabaseProductName() + "<br>\r\n");
+			content.append("<b>" + ResourceMgr.getString("LblDbProductInfo") + ":</b> " + meta.getDatabaseProductVersion() + "<br>\r\n");
+			content.append("<b>" + ResourceMgr.getString("LblDbProductVersion") + ":</b> " + conn.getDatabaseVersion() + "<br>\r\n");
+			content.append("<b>" + ResourceMgr.getString("LblDriverInfoName") + ":</b> " + meta.getDriverName() + "<br>\r\n");
+			content.append("<b>" + ResourceMgr.getString("LblDriverInfoVersion") + ":</b> " + meta.getDriverVersion() + "<br>\r\n");
+			content.append("<b>" + ResourceMgr.getString("LblDbURL") + ":</b> " + conn.getUrl() + "<br>\r\n");
+			content.append("<b>" + ResourceMgr.getString("LblUsername") + ":</b> " + conn.getCurrentUser() + "<br>\r\n");
+			content.append("<b>" + StringUtil.capitalize(wbmeta.getSchemaTerm()) + ":</b> " + getDisplayValue(conn.getCurrentSchema()) + "<br>\r\n");
+			content.append("<b>" + StringUtil.capitalize(wbmeta.getCatalogTerm()) + ":</b> " + getDisplayValue(wbmeta.getCurrentCatalog()) + "<br>\r\n");
+			content.append("</html>");
+			infotext.setContentType("text/html");
+			infotext.setFont(Settings.getInstance().getEditorFont());
+			infotext.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+			infotext.setText(content.toString());
+			infotext.setCaretPosition(0);
+			new TextComponentMouseListener(infotext);
 		}
 		catch (Exception e)
 		{
@@ -64,13 +67,17 @@ public class ConnectionInfoPanel
 		}
 	}
 
+	private String getDisplayValue(String value)
+	{
+		if (value == null) return "";
+		return value;
+	}
 	public static void showConnectionInfo(WbConnection con)
 	{
 		ConnectionInfoPanel p = new ConnectionInfoPanel(con);
 		JFrame f = WbManager.getInstance().getCurrentWindow();
 		ValidatingDialog d = new ValidatingDialog(f, ResourceMgr.getString("LblConnInfo"), p, false);
-		d.pack();
-		d.setSize(420,d.getHeight());
+		d.setSize(450,350);
 		WbSwingUtilities.center(d, f);
 		d.setVisible(true);
 		d.dispose();
@@ -85,225 +92,93 @@ public class ConnectionInfoPanel
   private void initComponents() {
     java.awt.GridBagConstraints gridBagConstraints;
 
-    productNameLabel = new javax.swing.JLabel();
-    productName = new javax.swing.JTextField();
-    versionInfoLabel = new javax.swing.JLabel();
-    versionLabel = new javax.swing.JLabel();
-    dbVersion = new javax.swing.JTextField();
-    driverNameLabel = new javax.swing.JLabel();
-    driverName = new javax.swing.JTextField();
-    driverVersionLabel = new javax.swing.JLabel();
-    driverVersion = new javax.swing.JTextField();
-    versionInfo = new javax.swing.JTextField();
-    jLabel1 = new javax.swing.JLabel();
-    urlLabel = new javax.swing.JLabel();
-    url = new javax.swing.JTextField();
-    userLabel = new javax.swing.JLabel();
-    username = new javax.swing.JTextField();
-    schemaLabel = new javax.swing.JLabel();
-    schemaName = new javax.swing.JTextField();
-    catalog = new javax.swing.JTextField();
-    catalogLabel = new javax.swing.JLabel();
+    jScrollPane1 = new javax.swing.JScrollPane();
+    infotext = new InfoEditorPane();
+    copyButton = new javax.swing.JButton();
 
     setLayout(new java.awt.GridBagLayout());
 
-    productNameLabel.setText("jLabel1");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    add(productNameLabel, gridBagConstraints);
+    infotext.setContentType("text/html");
+    infotext.setEditable(false);
+    infotext.setFont(new java.awt.Font("Dialog", 0, 11));
+    jScrollPane1.setViewportView(infotext);
 
-    productName.setEditable(false);
-    productName.setText("jTextField1");
-    productName.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    productName.setMaximumSize(new java.awt.Dimension(350, 28));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 0);
-    add(productName, gridBagConstraints);
-
-    versionInfoLabel.setText("jLabel2");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    add(versionInfoLabel, gridBagConstraints);
-
-    versionLabel.setText("jLabel3");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    add(versionLabel, gridBagConstraints);
-
-    dbVersion.setEditable(false);
-    dbVersion.setText("jTextField2");
-    dbVersion.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    dbVersion.setMaximumSize(new java.awt.Dimension(350, 28));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 0);
-    add(dbVersion, gridBagConstraints);
-
-    driverNameLabel.setText("jLabel1");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    add(driverNameLabel, gridBagConstraints);
-
-    driverName.setEditable(false);
-    driverName.setText("jTextField1");
-    driverName.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    driverName.setMaximumSize(new java.awt.Dimension(350, 28));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 0);
-    add(driverName, gridBagConstraints);
-
-    driverVersionLabel.setText("jLabel2");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    add(driverVersionLabel, gridBagConstraints);
-
-    driverVersion.setEditable(false);
-    driverVersion.setText("jTextField2");
-    driverVersion.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    driverVersion.setMaximumSize(new java.awt.Dimension(350, 28));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 0);
-    add(driverVersion, gridBagConstraints);
-
-    versionInfo.setEditable(false);
-    versionInfo.setText("jTextField1");
-    versionInfo.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    versionInfo.setMaximumSize(new java.awt.Dimension(250, 28));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 0);
-    add(versionInfo, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
     gridBagConstraints.weighty = 1.0;
-    add(jLabel1, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
+    add(jScrollPane1, gridBagConstraints);
 
-    urlLabel.setText("jLabel2");
+    copyButton.setText(ResourceMgr.getString("LblCopyInfo"));
+    copyButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        copyButtonActionPerformed(evt);
+      }
+    });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    add(urlLabel, gridBagConstraints);
-
-    url.setEditable(false);
-    url.setText("jTextField1");
-    url.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 0);
-    add(url, gridBagConstraints);
-
-    userLabel.setText("jLabel2");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    add(userLabel, gridBagConstraints);
-
-    username.setEditable(false);
-    username.setText("jTextField1");
-    username.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 0);
-    add(username, gridBagConstraints);
-
-    schemaLabel.setText("jLabel2");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    add(schemaLabel, gridBagConstraints);
-
-    schemaName.setEditable(false);
-    schemaName.setText("jTextField1");
-    schemaName.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 7;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 0);
-    add(schemaName, gridBagConstraints);
-
-    catalog.setEditable(false);
-    catalog.setText("jTextField1");
-    catalog.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 8;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 10, 0);
-    add(catalog, gridBagConstraints);
-
-    catalogLabel.setText("jLabel2");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
-    add(catalogLabel, gridBagConstraints);
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    add(copyButton, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
+
+	private void copyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyButtonActionPerformed
+		String content = infotext.getText();
+		copyText(content);
+	}//GEN-LAST:event_copyButtonActionPerformed
+
+	public void copyText(String content)
+	{
+		String clean = content.replaceAll(StringUtil.REGEX_CRLF, " ");
+		clean = clean.replaceAll(" {2,}", " ");
+		clean = clean.replaceAll("\\<br\\>", "\r\n");
+		clean = clean.replaceAll("\\<[/a-z]*\\>", "").trim();
+		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+		StringSelection sel = new StringSelection(clean);
+		clp.setContents(sel, sel);
+	}
+	
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JTextField catalog;
-  private javax.swing.JLabel catalogLabel;
-  private javax.swing.JTextField dbVersion;
-  private javax.swing.JTextField driverName;
-  private javax.swing.JLabel driverNameLabel;
-  private javax.swing.JTextField driverVersion;
-  private javax.swing.JLabel driverVersionLabel;
-  private javax.swing.JLabel jLabel1;
-  private javax.swing.JTextField productName;
-  private javax.swing.JLabel productNameLabel;
-  private javax.swing.JLabel schemaLabel;
-  private javax.swing.JTextField schemaName;
-  private javax.swing.JTextField url;
-  private javax.swing.JLabel urlLabel;
-  private javax.swing.JLabel userLabel;
-  private javax.swing.JTextField username;
-  private javax.swing.JTextField versionInfo;
-  private javax.swing.JLabel versionInfoLabel;
-  private javax.swing.JLabel versionLabel;
+  private javax.swing.JButton copyButton;
+  private javax.swing.JEditorPane infotext;
+  private javax.swing.JScrollPane jScrollPane1;
   // End of variables declaration//GEN-END:variables
+
+	private class InfoEditorPane
+		extends JEditorPane
+	{
+		public InfoEditorPane()
+		{
+			super();
+		}
+		
+		public String getSelection()
+		{
+			Document doc = getDocument();
+			int start = Math.min(getCaret().getDot(), getCaret().getMark());
+			int end = Math.max(getCaret().getDot(), getCaret().getMark());
+			if (start == end) return null; 
+			StringWriter out = new StringWriter();
+			try
+			{
+				int len = getSelectionEnd() - getSelectionStart();
+				getUI().getEditorKit(this).write(out, doc, start, end - start);
+			}
+			catch (Exception e)
+			{
+				return null;
+			}
+			return out.toString();
+		}
+		
+		public void copy()
+		{
+			String content = getSelection();
+			if (content == null) content = getText();
+			copyText(content);
+		}
+	}	
 }

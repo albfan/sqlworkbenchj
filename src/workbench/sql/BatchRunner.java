@@ -372,14 +372,20 @@ public class BatchRunner
 			parser.setDelimiters(this.delimiter, null);
 		}
 		
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
+		// The connection might not be initialized e.g. when running 
+		// a single WbCopy command it is not necessary to define a 
+		// connection on the commandline
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		if (this.connection != null)
 		{
 			parser.setSupportOracleInclude(this.connection.getDbSettings().supportSingleLineCommands());
 			parser.setCheckForSingleLineCommands(this.connection.getDbSettings().supportShortInclude());
+			parser.setAlternateLineComment(this.connection.getDbSettings().getLineComment());
 		}
+		
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		parser.setFile(scriptFile, this.encoding);
-		parser.setAlternateLineComment(this.connection.getDbSettings().getLineComment());
 		String sql = null;
 		this.cancelExecution = false;
 

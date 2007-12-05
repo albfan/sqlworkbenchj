@@ -1269,6 +1269,7 @@ public class DataExporter
 		this.setTextQuoteChar(text.getTextQuoteChar());
 		this.setQuoteAlways(text.getQuoteAlways());
 		this.setEscapeRange(text.getEscapeRange());
+		this.setDecimalSymbol(text.getDecimalSymbol());
 		this.setLineEnding(text.getLineEnding());
 		this.exportWriter.configureConverter();
 	}

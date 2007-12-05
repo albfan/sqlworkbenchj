@@ -536,7 +536,7 @@ public class Settings
 	
 	public boolean getIncludeHeaderInOptimalWidth()
 	{
-		return getBoolProperty("workbench.gui.optimalwidth.includeheader", false);
+		return getBoolProperty("workbench.gui.optimalwidth.includeheader", true);
 	}
 
 	public void setIncludeHeaderInOptimalWidth(boolean flag)
@@ -546,7 +546,7 @@ public class Settings
 
 	public boolean getAutomaticOptimalWidth()
 	{
-		return getBoolProperty("workbench.gui.optimalwidth.automatic", false);
+		return getBoolProperty("workbench.gui.optimalwidth.automatic", true);
 	}
 
 	public void setAutomaticOptimalWidth(boolean flag)

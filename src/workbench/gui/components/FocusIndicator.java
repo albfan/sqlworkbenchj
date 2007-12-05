@@ -17,6 +17,7 @@ import java.awt.event.FocusListener;
 import javax.swing.JComponent;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import workbench.resource.Settings;
 
@@ -28,20 +29,32 @@ public class FocusIndicator
 	implements FocusListener
 {
 	private Border focusBorder = null;
+	private Border noFocusBorder = null;
 	private Border originalBorder = null;
 	private JComponent focusClient;
 	private JComponent borderClient;
-	private boolean borderInitialized = false;
 	private Color borderColor = null;
 	
-	public FocusIndicator(JComponent checkFocus, JComponent border)
+	public FocusIndicator(JComponent focusToCheck, JComponent border)
 	{
-		focusClient = checkFocus;
-		checkFocus.addFocusListener(this);
+		focusClient = focusToCheck;
+		focusClient.addFocusListener(this);
 		borderClient = border;
 		borderColor = Settings.getInstance().getColor("workbench.gui.focusindicator.bordercolor", Color.YELLOW.brighter());
+		initBorder();
 	}
 
+	private void initBorder()
+	{
+		if (noFocusBorder == null && focusBorder == null && originalBorder == null)
+		{
+			originalBorder = borderClient.getBorder();
+			noFocusBorder = new CompoundBorder(new EmptyBorder(1,1,1,1), originalBorder);
+			borderClient.setBorder(noFocusBorder);
+			focusBorder = new CompoundBorder(new LineBorder(borderColor, 1), originalBorder);
+		}
+	}
+	
 	public void dispose()
 	{
 		if (this.focusClient != null)
@@ -49,7 +62,7 @@ public class FocusIndicator
 			focusClient.removeFocusListener(this);
 		}
 		
-		if (this.borderClient != null && borderInitialized)
+		if (this.borderClient != null && originalBorder != null)
 		{
 			this.borderClient.setBorder(originalBorder);
 		}
@@ -59,22 +72,17 @@ public class FocusIndicator
 	{
 		if (this.borderClient != null)
 		{
-			if (originalBorder == null) 
-			{
-				originalBorder = borderClient.getBorder();
-				focusBorder = new CompoundBorder(new LineBorder(borderColor, 1), originalBorder);
-				borderInitialized = true;
-			}
+			initBorder();
 			this.borderClient.setBorder(focusBorder);
 		}
-		
 	}
 
 	public void focusLost(FocusEvent e)
 	{
 		if (this.borderClient != null)
 		{
-			this.borderClient.setBorder(originalBorder);
+			initBorder();
+			this.borderClient.setBorder(noFocusBorder);
 		}
 	}
 

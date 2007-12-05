@@ -27,6 +27,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.Settings;
+import workbench.storage.filter.ColumnExpression;
 import workbench.util.StringUtil;
 
 /**
@@ -35,7 +36,7 @@ import workbench.util.StringUtil;
  */
 public class ToolTipRenderer
 	extends JComponent
-	implements TableCellRenderer, WbRenderer, RequiredFieldHighlighter
+	implements TableCellRenderer, WbRenderer, RequiredFieldHighlighter, FilterHighlighter
 {
 	protected String displayValue = StringUtil.EMPTY_STRING;
 	protected String tooltip = null;
@@ -45,6 +46,7 @@ public class ToolTipRenderer
 	protected Color unselectedForeground;
 	protected Color unselectedBackground;
 	protected Color highlightBackground;
+	protected Color filterHighlightColor = Color.YELLOW;
 	
 	private Color alternateBackground = Settings.getInstance().getAlternateRowColor();
 	private boolean useAlternatingColors = Settings.getInstance().getUseAlternateRowColor();
@@ -64,8 +66,12 @@ public class ToolTipRenderer
 	
 	private Insets focusedInsets;
 
-	protected boolean selected;
-	protected boolean focus;
+	protected boolean isSelected;
+	protected boolean hasFocus;
+	
+	protected boolean filterMatches;
+	protected ColumnExpression filter;
+	
 	private int valign = SwingConstants.TOP; 
 	private int halign = SwingConstants.LEFT;
 	
@@ -112,9 +118,9 @@ public class ToolTipRenderer
 		this.highlightBackground = c;
 	}
 	
-	public Component getTableCellRendererComponent(JTable table, Object value,	boolean isSelected,	boolean hasFocus, int row, int col)
+	public Component getTableCellRendererComponent(JTable table, Object value,	boolean selected,	boolean focus, int row, int col)
 	{
-		this.focus = hasFocus;
+		this.hasFocus = focus;
 		this.isEditing = (row == this.editingRow) && (this.highlightBackground != null);
 		this.currentColumn = col;
 		this.setFont(table.getFont());
@@ -131,8 +137,10 @@ public class ToolTipRenderer
 			unselectedBackground = table.getBackground();
 		}
 
-		this.selected = isSelected;
+		this.isSelected = selected;
 		this.isAlternatingRow = this.useAlternatingColors && ((row % 2) == 1);
+		
+		filterMatches = false;
 		
 		if (value == null)
 		{
@@ -142,7 +150,12 @@ public class ToolTipRenderer
 		else
 		{
 			this.prepareDisplay(value);
+			if (this.filter != null)
+			{
+				filterMatches = filter.evaluate(displayValue != null ? displayValue : value.toString());
+			}
 		}
+		
 		return this;
 	}
 
@@ -155,6 +168,69 @@ public class ToolTipRenderer
 		return d;
 	}
 	
+	protected Color getForegroundColor()
+	{
+		if (isSelected) 
+		{
+			return selectedForeground;
+		}
+		
+		return unselectedForeground;
+	}
+	
+	private boolean isHighlightColumn(int col)
+	{
+		if (this.highlightCols == null) return false;
+		if (col < 0 || col > this.highlightCols.length) return false;
+		return this.highlightCols[col];
+	}
+	
+	protected Color getBackgroundColor(boolean isNull)
+	{
+		if (isPrinting)
+		{
+			return unselectedBackground;
+		}
+		
+		if (isEditing)
+		{
+			if (isHighlightColumn(currentColumn))
+			{
+				return this.highlightBackground;
+			}
+			else
+			{
+				return unselectedBackground;
+			}
+		}
+		
+		if (isSelected)
+		{
+			return selectedBackground;
+		}
+
+		if (filterMatches && filterHighlightColor != null)
+		{
+			return filterHighlightColor;
+		}
+		
+		if (isNull && nullColor != null)
+		{
+			return nullColor;
+		}
+		else
+		{
+			if (isAlternatingRow)
+			{
+				return alternateBackground;
+			}
+			else
+			{
+				return unselectedBackground;
+			}
+		}
+	}
+	
 	public void paint(Graphics g)
 	{
 		int w = this.getWidth();
@@ -164,7 +240,7 @@ public class ToolTipRenderer
 
 		Insets insets;
 		
-		if (focus)
+		if (hasFocus)
 		{
 			insets = focusedInsets;
 		}
@@ -184,7 +260,7 @@ public class ToolTipRenderer
 		boolean isNull = (displayValue == null);
 		
 		String clippedText = StringUtil.EMPTY_STRING;
-		if (displayValue != null)
+		if (!isNull)
 		{
 			clippedText = 
         SwingUtilities.layoutCompoundLabel(this,fm,this.displayValue,(Icon)null
@@ -200,66 +276,12 @@ public class ToolTipRenderer
 		int textY = paintTextR.y + fm.getAscent();
 		if (textY < 0) textY = 0;
 
-		if (this.isPrinting)
-		{
-			g.setColor(unselectedBackground);
-			g.fillRect(0,0,w,h);
-			g.setColor(unselectedForeground);
-		}
-		else if (isEditing)
-		{
-			try
-			{
-				if (this.highlightCols[this.currentColumn])
-				{
-					g.setColor(this.highlightBackground);
-				}
-				else
-				{
-					g.setColor(unselectedBackground);
-				}
-			}
-			catch (Throwable th)
-			{
-				g.setColor(unselectedBackground);
-			}
-			g.fillRect(0,0,w,h);
-			g.setColor(unselectedForeground);
-		}
-		else
-		{
-			if (this.selected)
-			{
-				g.setColor(selectedBackground);
-				g.fillRect(0,0,w,h);
-				g.setColor(selectedForeground);
-			}
-			else 
-			{
-				if (isNull && nullColor != null)
-				{
-					g.setColor(nullColor);
-					g.fillRect(0,0,w,h);
-				}
-				else
-				{
-					if (isAlternatingRow)
-					{
-						g.setColor(alternateBackground);
-					}
-					else
-					{
-						g.setColor(unselectedBackground);
-					}
-				}
-				g.fillRect(0,0,w,h);
-				g.setColor(unselectedForeground);
-			}
-		}
-		
+		g.setColor(getBackgroundColor(isNull));
+		g.fillRect(0,0,w,h);
+		g.setColor(getForegroundColor());
 		g.drawString(clippedText, textX, textY);
 
-		if (focus) 
+		if (hasFocus) 
 		{
 			WbSwingUtilities.FOCUSED_CELL_BORDER.paintBorder(this, g, 0, 0, w, h);
 		}
@@ -297,5 +319,20 @@ public class ToolTipRenderer
 	public String getDisplayValue() 
 	{ 
 		return displayValue; 
+	}
+	
+	public void setFilterHighlightColor(Color highlight)
+	{
+		this.filterHighlightColor = highlight;
+	}
+	
+	public void setFilterHighlighter(ColumnExpression columnFilter)
+	{
+		this.filter = columnFilter;
+	}
+	
+	public void clearFilterHighligher()
+	{
+		this.filter = null;
 	}
 }

@@ -38,20 +38,36 @@ public class ResourceMgrTest extends TestCase
 		
 		ResourceBundle enBundle = ResourceMgr.getResourceBundle(en);
 		ResourceBundle deBundle = ResourceMgr.getResourceBundle(de);
+		assertNotNull(enBundle);
+		assertNotNull(deBundle);
 		
-		HashSet<String> ignoreKeys = new HashSet<String>();
-		ignoreKeys.add("TxtBuildDate");
-		ignoreKeys.add("TxtBuildNumber");
-		
-		Enumeration<String> enKeys = enBundle.getKeys();
-		while (enKeys.hasMoreElements())
-		{
-			String key = enKeys.nextElement();
-			if (ignoreKeys.contains(key)) continue;
-			String enValue = enBundle.getString(key);
-			String deValue = deBundle.getString(key);
-			assertNotSame("Key " + key + " not translated!", enValue, deValue);
-		}
+//		HashSet<String> wrongKeys = new HashSet<String>();
+//		HashSet<String> ignoreKeys = new HashSet<String>();
+//		ignoreKeys.add("TxtBuildDate");
+//		ignoreKeys.add("TxtBuildNumber");
+//		ignoreKeys.add("TxtCopyright");
+//		
+//		Enumeration<String> enKeys = enBundle.getKeys();
+//		while (enKeys.hasMoreElements())
+//		{
+//			String key = enKeys.nextElement();
+//			if (ignoreKeys.contains(key)) continue;
+//			String enValue = enBundle.getString(key);
+//			String deValue = deBundle.getString(key);
+//			if (enValue.equals(deValue))
+//			{
+//				wrongKeys.add(key + ", en=" + enValue + ", de=" + deValue);
+//			}
+//		}
+//		if (wrongKeys.size() > 0)
+//		{
+//			System.out.println("Keys not translated!");
+//			for (String key : wrongKeys)
+//			{
+//				System.out.println(key);
+//			}
+//			fail("Not all translation keys translated!");
+//		}
 	}
 	
 }

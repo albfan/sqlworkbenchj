@@ -82,13 +82,29 @@ public class WbSwingUtilities
 	public static final KeyStroke CTRL_ENTER = KeyStroke.getKeyStroke("control ENTER");
 	public static final KeyStroke ALT_ENTER = KeyStroke.getKeyStroke("alt ENTER");
 	
+	public static final void waitForEmptyQueue()
+	{
+		if (EventQueue.isDispatchThread()) return;
+		
+		EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
+		int counter = 0;
+		while (queue.peekEvent() != null)
+		{
+			try { Thread.sleep(25); } catch (Throwable th) {}
+			counter ++;
+			if (counter > 20) 
+			{
+				break;
+			}
+		}
+	}
+	
 	/**
 	 * Synchronously execute code on the EDT.
-	 * If the current thread is the EDT, this merely
-	 * calls r.run()
-	 * Else EventQueue.invokeAndWait() is called
-	 * with the passed runnable. Exceptions
-	 * that can be thrown by EventQueue.invokeAndWait() are
+	 * If the current thread is the EDT, this merely calls r.run()
+	 * otherwise EventQueue.invokeAndWait() is called with the passed runnable.
+	 * 
+	 * Exceptions that can be thrown by EventQueue.invokeAndWait() are
 	 * caught and logged. 
 	 */
 	public static final void invoke(Runnable r)

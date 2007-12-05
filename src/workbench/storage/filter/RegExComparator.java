@@ -42,16 +42,17 @@ public class RegExComparator
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		if (reference == null || value == null) return false;
+		
 		Pattern p = null;
 		if (ignoreCase)
 		{
-			p = Pattern.compile((String)reference, Pattern.CASE_INSENSITIVE);
+			p = Pattern.compile(reference.toString(), Pattern.CASE_INSENSITIVE);
 		}
 		else
 		{
-			p = Pattern.compile((String)reference);
+			p = Pattern.compile(reference.toString());
 		}
-		Matcher m = p.matcher((String)value);
+		Matcher m = p.matcher(value.toString());
 
 		return m.find();
 	}

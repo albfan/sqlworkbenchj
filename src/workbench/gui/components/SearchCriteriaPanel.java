@@ -40,10 +40,12 @@ public class SearchCriteriaPanel
 	private String wordProperty;
 	private String regexProperty;
 	private String criteriaProperty;
+	private String highlightProperty;
 	
 	private JCheckBox ignoreCase;
 	private JCheckBox wholeWord;
 	private JCheckBox useRegEx;
+	private JCheckBox highlightAll;
 	
 	protected JTextField criteria;
 	protected JLabel label;
@@ -55,15 +57,19 @@ public class SearchCriteriaPanel
 	
 	public SearchCriteriaPanel(String initialValue)
 	{
-		this(initialValue, "workbench.sql.search");
+		this(initialValue, "workbench.sql.search", false);
 	}
 	
-	public SearchCriteriaPanel(String initialValue, String settingsKey)
+	public SearchCriteriaPanel(String initialValue, String settingsKey, boolean showHighlight)
 	{
 		caseProperty = settingsKey + ".ignoreCase";
 		wordProperty = settingsKey + ".wholeWord";
 		regexProperty = settingsKey + ".useRegEx";
 		criteriaProperty = settingsKey + ".lastValue";
+		if (showHighlight)
+		{
+			highlightProperty = settingsKey + ".highlight";
+		}
 		
 		this.ignoreCase = new JCheckBox(ResourceMgr.getString("LblSearchIgnoreCase"));
 		this.ignoreCase.setName("ignorecase");
@@ -80,6 +86,13 @@ public class SearchCriteriaPanel
 		this.useRegEx.setSelected(Settings.getInstance().getBoolProperty(regexProperty, false));
 		this.useRegEx.setName("regex");
 		
+		if (showHighlight)
+		{
+			this.highlightAll = new JCheckBox(ResourceMgr.getString("LblHighlightAll"));
+			this.highlightAll.setToolTipText(ResourceMgr.getDescription("LblHighlightAll"));
+			this.highlightAll.setSelected(Settings.getInstance().getBoolProperty(highlightProperty, false));
+		}
+		
 		this.label = new JLabel(ResourceMgr.getString("LblSearchCriteria"));
 		this.criteria = new JTextField();
 		this.criteria.setName("searchtext");
@@ -90,20 +103,37 @@ public class SearchCriteriaPanel
 			this.criteria.setText(initialValue);
 			this.criteria.selectAll();
 		}
+		else
+		{
+			this.criteria.setText(Settings.getInstance().getProperty(criteriaProperty, null));
+			this.criteria.selectAll();
+		}
 		
 		this.criteria.addMouseListener(new TextComponentMouseListener());
 		
 		this.setLayout(new BorderLayout());
 		JPanel p = new JPanel();
-		p.setLayout(new BorderLayout(5,0));
+		p.setLayout(new BorderLayout(5,5));
 		p.add(this.label, BorderLayout.WEST);
 		p.add(this.criteria, BorderLayout.CENTER);
 		this.add(p,BorderLayout.CENTER);
 		p = new JPanel();
-		p.setLayout(new GridLayout(3,1));
-		p.add(this.ignoreCase);
-		p.add(this.wholeWord);
-		p.add(this.useRegEx);
+		if (showHighlight)
+		{
+			p.setLayout(new GridLayout(3,2));
+			p.add(this.ignoreCase);
+			p.add(this.highlightAll);
+			p.add(this.wholeWord);
+			p.add(new JPanel());
+			p.add(this.useRegEx);
+		}
+		else
+		{
+			p.setLayout(new GridLayout(3,1));
+			p.add(this.ignoreCase);
+			p.add(this.wholeWord);
+			p.add(this.useRegEx);
+		}
 		
 		this.add(p, BorderLayout.SOUTH);
 	}
@@ -126,6 +156,12 @@ public class SearchCriteriaPanel
 	public boolean getUseRegex()
 	{
 		return this.useRegEx.isSelected();
+	}
+
+	public boolean getHighlightAll()
+	{
+		if (this.highlightAll == null) return false;
+		return this.highlightAll.isSelected();
 	}
 	
 	public void setSearchCriteria(String aValue)
@@ -151,6 +187,10 @@ public class SearchCriteriaPanel
 		Settings.getInstance().setProperty(criteriaProperty, this.getCriteria());
 		Settings.getInstance().setProperty(wordProperty, this.getWholeWordOnly());
 		Settings.getInstance().setProperty(regexProperty, this.getUseRegex());
+		if (this.highlightProperty != null)
+		{
+			Settings.getInstance().setProperty(highlightProperty, getHighlightAll());
+		}
 		return result;
 	}
 

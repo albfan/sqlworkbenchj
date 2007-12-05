@@ -31,8 +31,8 @@ public class ContainsComparator
 		if (reference == null || value == null) return false;
 		try
 		{
-			String v = (String)value;
-			String ref = (String)reference;
+			String v = value.toString();
+			String ref = reference.toString();
 			if (ignoreCase)
 				return (v.toLowerCase().indexOf(ref.toLowerCase()) > -1);
 			else

@@ -20,6 +20,7 @@ import java.sql.Types;
 
 import java.util.List;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -142,9 +143,7 @@ public class RowData
 					}
 					catch (IOException e)
 					{
-						LogMgr.logError("RowData.read()", "Error retrieving data for column '" + info.getColumnName(i) + "'", e);
-						// fallback to getObject()
-						
+						LogMgr.logWarning("RowData.read()", "Error retrieving data for column '" + info.getColumnName(i) + "'", e);
 						value = rs.getObject(i+1);
 					}
 				}
@@ -166,7 +165,15 @@ public class RowData
 			}
 			catch (SQLException e)
 			{
-				throw e;
+				if (Settings.getInstance().getBoolProperty("workbench.db.ignore.readerror", false))
+				{
+					value = null;
+					LogMgr.logError("RowData.read()", "Error retrieving data for column '" + info.getColumnName(i) + "'. Using NULL!!", e);
+				}
+				else
+				{
+					throw e;
+				}
 			}
 
 			this.colData[i] = value;

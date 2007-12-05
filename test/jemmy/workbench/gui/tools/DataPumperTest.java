@@ -10,12 +10,6 @@
  */
 package workbench.gui.tools;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import javax.swing.tree.TreeModel;
@@ -35,7 +29,6 @@ import workbench.db.WbConnection;
 import workbench.gui.GuiTestUtil;
 import workbench.gui.NamedComponentChooser;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
@@ -54,11 +47,9 @@ public class DataPumperTest
 		util = new GuiTestUtil(testName);
 		targetDb  = new WbFile(util.getBaseDir(), "targetdb");
 		sourceDb  = new WbFile(util.getBaseDir(), "sourcedb");
-//		System.setProperty("h2.logAllErrors", "true");
-//		System.setProperty("h2.logAllErrorsFile", "c:/temp/jemmy_h2.log");
 		try
 		{
-			createProfiles();
+			util.createProfiles(sourceDb, targetDb);
 		}
 		catch (Exception e)
 		{
@@ -239,103 +230,6 @@ public class DataPumperTest
 		}
 	}
 
-	private void prepareSource()
-	{
-		Connection con;
-		Statement stmt;
-
-		try
-		{
-			Class.forName("org.h2.Driver");
-			con = DriverManager.getConnection("jdbc:h2:" + sourceDb.getFullPath(), "sa", "");
-			stmt = con.createStatement();
-			stmt.executeUpdate("CREATE TABLE person (id integer primary key, firstname varchar(50), lastname varchar(50))");
-			stmt.executeUpdate("insert into person (id, firstname, lastname) values (1, 'Arthur', 'Dent')");
-			stmt.executeUpdate("insert into person (id, firstname, lastname) values (2, 'Mary', 'Moviestar')");
-			stmt.executeUpdate("insert into person (id, firstname, lastname) values (3, 'Major', 'Bug')");
-			stmt.executeUpdate("insert into person (id, firstname, lastname) values (4, 'General', 'Failure')");
-			con.commit();
-			stmt.close();
-			con.close();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
-
-	private void prepareTarget()
-	{
-		Connection con;
-		Statement stmt;
-
-		try
-		{
-			con = DriverManager.getConnection("jdbc:h2:" + targetDb.getFullPath(), "sa", "");
-			stmt = con.createStatement();
-			stmt.executeUpdate("CREATE TABLE person (id integer primary key, firstname varchar(50), lastname varchar(50))");
-			con.commit();
-			stmt.close();
-			con.close();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
-
-	private void createProfiles()
-		throws FileNotFoundException
-	{
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>  \n" +
-             "<java version=\"1.5.0_08\" class=\"java.beans.XMLDecoder\">  \n" +
-             "	 \n" +
-             " <object class=\"java.util.ArrayList\">  \n" +
-             "  <void method=\"add\">  \n" +
-             "   <object class=\"workbench.db.ConnectionProfile\">  \n" +
-             "    <void property=\"driverclass\">  \n" +
-             "     <string>org.h2.Driver</string>  \n" +
-             "    </void>  \n" +
-             "    <void property=\"name\">  \n" +
-             "     <string>SourceConnection</string>  \n" +
-             "    </void>  \n" +
-             "    <void property=\"url\">  \n" +
-             "     <string>" + "jdbc:h2:" + StringUtil.replace(sourceDb.getFullPath(), "\\", "/") + "</string>  \n" +
-             "    </void>  \n" +
-             "    <void property=\"username\">  \n" +
-             "     <string>sa</string>  \n" +
-             "    </void>  \n" +
-             "   </object>  \n" +
-             "  </void>  \n" +
-             "	 \n" +
-             "  <void method=\"add\">  \n" +
-             "   <object class=\"workbench.db.ConnectionProfile\">  \n" +
-             "    <void property=\"driverclass\">  \n" +
-             "     <string>org.h2.Driver</string>  \n" +
-             "    </void>  \n" +
-             "    <void property=\"name\">  \n" +
-             "     <string>TargetConnection</string>  \n" +
-             "    </void>  \n" +
-             "    <void property=\"url\">  \n" +
-             "     <string>" + "jdbc:h2:" + StringUtil.replace(targetDb.getFullPath(), "\\", "/") + "</string>  \n" +
-             "    </void>  \n" +
-             "    <void property=\"username\">  \n" +
-             "     <string>sa</string>  \n" +
-             "    </void>  \n" +
-             "   </object>  \n" +
-             "  </void>  \n" +
-             "	 \n" +
-             " </object>  \n" +
-             "</java> ";
-		PrintWriter writer = new PrintWriter(new FileOutputStream(new File(util.getBaseDir(), "WbProfiles.xml")));
-		writer.println(xml);
-		writer.close();
-		// Make sure the new profiles are read
-		ConnectionMgr.getInstance().readProfiles();
-	}
-
 	public void closeWindow()
 	{
 		JFrameOperator mainWindow = new JFrameOperator("Data Pumper");
@@ -349,8 +243,8 @@ public class DataPumperTest
 	{
 		try
 		{
-			prepareSource();
-			prepareTarget();
+			util.prepareSource(sourceDb);
+			util.prepareTarget(targetDb);
 			startDataPumper();
 			connect("selectSource", 1);
 			connect("selectTarget", 2);
@@ -359,6 +253,7 @@ public class DataPumperTest
 			closeWindow();
 			Thread.sleep(500);
 			util.stopApplication();
+			util.emptyBaseDirectory();
 		}
 		catch (Exception e)
 		{

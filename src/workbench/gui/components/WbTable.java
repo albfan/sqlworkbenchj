@@ -40,6 +40,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
@@ -90,11 +91,14 @@ import workbench.gui.actions.OptimizeAllColumnsAction;
 import workbench.gui.actions.OptimizeColumnWidthAction;
 import workbench.gui.actions.PrintAction;
 import workbench.gui.actions.PrintPreviewAction;
+import workbench.gui.actions.ResetHighlightAction;
 import workbench.gui.actions.SaveDataAsAction;
+import workbench.gui.actions.ScrollToColumnAction;
 import workbench.gui.actions.SetColumnWidthAction;
 import workbench.gui.actions.SortAscendingAction;
 import workbench.gui.actions.SortDescendingAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.renderer.FilterHighlighter;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RequiredFieldHighlighter;
 import workbench.gui.renderer.RowStatusRenderer;
@@ -107,6 +111,7 @@ import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.PkMapping;
 import workbench.storage.ResultInfo;
+import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.FileDialogUtil;
 import workbench.util.SqlUtil;
@@ -119,10 +124,7 @@ public class WbTable
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected JPopupMenu popup;
 
-	private JPopupMenu headerPopup;
-
 	private DataStoreTableModel dwModel;
-	private String lastSearchCriteria;
 	private int lastFoundRow = -1;
 
 	private WbTextCellEditor defaultEditor;
@@ -150,6 +152,9 @@ public class WbTable
 	private CopySelectedAsSqlInsertAction copySelectedAsInsertAction;
 	private CopySelectedAsSqlDeleteInsertAction copySelectedAsDeleteInsertAction;
 	private CopySelectedAsSqlUpdateAction copySelectedAsUpdateAction;
+	
+	private ResetHighlightAction resetHighlightAction;
+	private boolean highlightEnabled;
 	
 	private FilterDataAction filterAction;
 	private ResetFilterAction resetFilterAction;
@@ -204,14 +209,6 @@ public class WbTable
 		this.optimizeAllCol.setEnabled(true);
 		this.setColWidth = new SetColumnWidthAction(this);
 		this.setAutoCreateColumnsFromModel(true);
-
-		this.headerPopup = new JPopupMenu();
-		this.headerPopup.add(this.sortAscending.getMenuItem());
-		this.headerPopup.add(this.sortDescending.getMenuItem());
-		this.headerPopup.addSeparator();
-		this.headerPopup.add(this.optimizeCol.getMenuItem());
-		this.headerPopup.add(this.optimizeAllCol.getMenuItem());
-		this.headerPopup.add(this.setColWidth.getMenuItem());
 
 		Font dataFont = Settings.getInstance().getDataFont(true);
 		if (dataFont == null) dataFont = (Font)UIManager.get("Table.font");
@@ -268,11 +265,15 @@ public class WbTable
 
 		this.addPopupAction(this.replacer.getFindAction(), true);
 		this.addPopupAction(this.replacer.getFindAgainAction(), false);
+		this.resetHighlightAction = new ResetHighlightAction(this);
+		
 		if (replaceAllowed) 
 		{
 			this.addPopupAction(this.replacer.getReplaceAction(), false);
 		}
 
+		this.addPopupAction(resetHighlightAction, false);
+		
 		if (printEnabled)
 		{
 			this.printDataAction = new PrintAction(this);
@@ -534,7 +535,7 @@ public class WbTable
 		}
 		this.popup.add(submenu);
 	}
-
+	
 	public void addPopupAction(WbAction anAction, boolean withSep)
 	{
 		this.addPopupMenu(anAction.getMenuItem(), withSep);
@@ -1239,6 +1240,38 @@ public class WbTable
 		}
 	}
 
+	public ResetHighlightAction getResetHighlightAction()
+	{
+		return this.resetHighlightAction;
+	}
+	
+	public boolean isHighlightEnabled()
+	{
+		return highlightEnabled;
+	}
+	
+	public void clearHighlightFilter()
+	{
+		applyHighlightFilter(null);
+	}
+	
+	public void applyHighlightFilter(ColumnExpression filter)
+	{
+		this.highlightEnabled = (filter != null);
+		this.resetHighlightAction.setEnabled(highlightEnabled );
+		Iterator itr = defaultRenderersByColumnClass.values().iterator();
+		while (itr.hasNext())
+		{
+			TableCellRenderer rend = (TableCellRenderer)itr.next();
+			if (rend instanceof FilterHighlighter)
+			{
+				FilterHighlighter hl = (FilterHighlighter)rend;
+				hl.setFilterHighlighter(filter);
+			}
+		}
+		WbSwingUtilities.repaintLater(this);
+	}
+	
 	private void initMultiLineRenderer()
 	{
 		if (!this.useDefaultStringRenderer) return;
@@ -1475,6 +1508,7 @@ public class WbTable
 		return first + lastRow;
 	}
 
+
 	/** 
 	 * Scroll the given row into view.
 	 */
@@ -1488,15 +1522,29 @@ public class WbTable
 	 * Start sorting if the column header has been clicked.
 	 * @param e the MouseEvent triggering the click
 	 */
-	public void mouseClicked(MouseEvent e)
+	public void mouseClicked(final MouseEvent e)
 	{
-	
 		if (e.getButton() == MouseEvent.BUTTON3)
 		{
 			if (e.getSource() instanceof JTableHeader)
 			{
 				this.headerPopupX = e.getX();
-				this.headerPopup.show(this.getTableHeader(), e.getX(), e.getY());
+				EventQueue.invokeLater(new Runnable() {
+
+					public void run()
+					{
+						JPopupMenu headerPopup = new JPopupMenu();
+						headerPopup.add(sortAscending.getMenuItem());
+						headerPopup.add(sortDescending.getMenuItem());
+						headerPopup.addSeparator();
+						headerPopup.add(optimizeCol.getMenuItem());
+						headerPopup.add(optimizeAllCol.getMenuItem());
+						headerPopup.add(setColWidth.getMenuItem());
+						headerPopup.addSeparator();
+						headerPopup.add(new ScrollToColumnAction(WbTable.this));
+						headerPopup.show(getTableHeader(), e.getX(), e.getY());
+					}
+				});
 			}
 			else if (this.showPopup && this.popup != null)
 			{

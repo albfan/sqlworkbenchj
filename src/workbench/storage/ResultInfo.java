@@ -121,6 +121,15 @@ public class ResultInfo
 			ColumnIdentifier col = new ColumnIdentifier(name);
 			col.setDataType(type);
 			col.setUpdateable(realColumn);
+			try
+			{
+				int nullInfo = metaData.isNullable(i + 1);
+				col.setIsNullable(nullInfo != ResultSetMetaData.columnNoNulls);
+			}
+			catch (Throwable th)
+			{
+				LogMgr.logWarning("ResultInfo.initMetadata()", "Error when checking nullable for column : " + name, th);
+			}
 
 			String typename = null;
 			try

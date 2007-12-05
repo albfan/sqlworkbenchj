@@ -26,6 +26,10 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.DataStoreReplacer;
 import workbench.storage.Position;
 import workbench.storage.Position;
+import workbench.storage.filter.ColumnComparator;
+import workbench.storage.filter.ColumnExpression;
+import workbench.storage.filter.ContainsComparator;
+import workbench.storage.filter.RegExComparator;
 import workbench.util.ConverterException;
 import workbench.util.ExceptionUtil;
 
@@ -65,7 +69,7 @@ public class TableReplacer
 	{
 		boolean showDialog = true;
 		String crit = this.replacer.getLastCriteria();
-		SearchCriteriaPanel p = new SearchCriteriaPanel(crit, "workbench.data.search");
+		SearchCriteriaPanel p = new SearchCriteriaPanel(crit, "workbench.data.search", true);
 
 		Component parent = SwingUtilities.getWindowAncestor(this.client);
 		Position pos = Position.NO_POSITION;
@@ -80,10 +84,17 @@ public class TableReplacer
 			try
 			{
 				this.findAgainAction.setEnabled(false);
-				pos = this.replacer.find(criteria, ignoreCase, wholeWord, useRegex);
+				if (p.getHighlightAll())
+				{
+					initTableHighlighter(criteria, ignoreCase, useRegex);
+				}
+				else
+				{
+					client.clearHighlightFilter();
+					pos = this.replacer.find(criteria, ignoreCase, wholeWord, useRegex);
+				}
 				showDialog = false;
 				this.findAgainAction.setEnabled(pos.isValid());
-				
 			}
 			catch (Exception e)
 			{
@@ -96,6 +107,22 @@ public class TableReplacer
 		highlightPosition(pos);
 		
 		return pos.getRow();
+	}
+	
+	protected void initTableHighlighter(String criteria, boolean ignoreCase, boolean useRegex)
+	{
+		ColumnComparator comp = null;
+		if (useRegex)
+		{
+			comp = new RegExComparator();
+		}
+		else
+		{
+			comp = new ContainsComparator();
+		}
+		ColumnExpression filter = new ColumnExpression(comp, criteria);
+		filter.setIgnoreCase(ignoreCase);
+		client.applyHighlightFilter(filter);
 	}
 	
 	protected void highlightPosition(final Position pos)

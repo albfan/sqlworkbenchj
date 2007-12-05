@@ -26,6 +26,7 @@ import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+import workbench.gui.profiles.ProfileKey;
 import workbench.util.ArgumentParser;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
@@ -288,6 +289,54 @@ public class BatchRunnerTest
 		}
 	}
 	
+	public void testNoConnection()
+	{
+		Statement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+			ConnectionMgr.getInstance().clearProfiles();
+			WbFile targetDb  = new WbFile(util.getBaseDir(), "brTargetdb");
+			WbFile sourceDb  = new WbFile(util.getBaseDir(), "brSourcedb");
+			util.createProfiles(sourceDb, targetDb);
+			util.prepareSource(sourceDb);
+			util.prepareTarget(targetDb);
+			WbFile script = new WbFile(util.getBaseDir(), "copydata.sql");
+			String command = "WbCopy -sourceProfile='SourceConnection' -targetProfile='TargetConnection' -sourceTable=person -targetTable=person;";
+			TestUtil.writeFile(script, command);
+			ArgumentParser parser = WbManager.createArgumentParser();
+
+			parser.parse("-script='" + script.getFullPath() + "'");
+			BatchRunner runner = BatchRunner.createBatchRunner(parser);
+			assertNotNull(runner);
+			runner.connect();
+			runner.execute();
+			assertTrue(runner.isSuccess());
+			WbConnection target = ConnectionMgr.getInstance().getConnection(new ProfileKey("TargetConnection"), "CopyCheck");
+			stmt = target.createStatement();
+			rs = stmt.executeQuery("select count(*) from person");
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals(4, count);
+			}
+			else
+			{
+				fail("No rows copied");
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+		
 	public void testAltDelimiter()
 	{
 		try

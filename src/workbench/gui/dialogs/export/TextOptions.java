@@ -31,4 +31,6 @@ public interface TextOptions
 	CharacterRange getEscapeRange();
 	void setLineEnding(String ending);
 	String getLineEnding();
+	void setDecimalSymbol(String decimal);
+	String getDecimalSymbol();
 }

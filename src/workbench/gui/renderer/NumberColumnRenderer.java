@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.swing.SwingConstants;
 import workbench.resource.Settings;
-import workbench.util.StringUtil;
 
 /**
  * @author  support@sql-workbench.net

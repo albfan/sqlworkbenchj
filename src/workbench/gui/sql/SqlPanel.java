@@ -111,6 +111,7 @@ import workbench.gui.actions.OptimizeAllColumnsAction;
 import workbench.gui.actions.PrintAction;
 import workbench.gui.actions.PrintPreviewAction;
 import workbench.gui.actions.RedoAction;
+import workbench.gui.actions.ResetHighlightAction;
 import workbench.gui.actions.RollbackAction;
 import workbench.gui.actions.SaveDataAsAction;
 import workbench.gui.actions.SelectEditorAction;
@@ -246,10 +247,14 @@ public class SqlPanel
 	protected FindDataAction findDataAction;
 	protected FindDataAgainAction findDataAgainAction;
 	protected ReplaceDataAction replaceDataAction;
+	protected ResetHighlightAction resetHighlightAction;
+	
 	protected WbToolbar toolbar;
 	protected ConnectionInfo connectionInfo;
 
 	protected WbConnection dbConnection;
+	private Object connectionLock = new Object();
+	
 	protected boolean importRunning;
 	protected boolean updateRunning;
 	protected boolean textModified;
@@ -751,9 +756,12 @@ public class SqlPanel
 		this.actions.add(new MakeNonCharInListAction(this.editor));
 
 		this.findDataAction.setCreateMenuSeparator(true);
+		this.resetHighlightAction = new ResetHighlightAction(null);
+		
 		this.actions.add(this.findDataAction);
 		this.actions.add(this.findDataAgainAction);
 		this.actions.add(this.replaceDataAction);
+		this.actions.add(this.resetHighlightAction);
 		this.actions.add(filterAction);
 		this.actions.add(selectionFilterAction);
 		this.actions.add(this.resetFilterAction );
@@ -829,15 +837,6 @@ public class SqlPanel
 		{
 			editor.requestFocusInWindow();
 		}
-//		else
-//		{
-//			System.out.println("editor not selected! " + this.getId());
-//			System.out.println("isActive=" + w.isActive());
-//			System.out.println("w.isVisible=" + w.isVisible());
-//			System.out.println("w.isFocused=" + w.isFocused());
-//			System.out.println("this.visible=" + this.isVisible());
-//			System.out.println("currentTabl=" + this.isCurrentTab());
-//		}
 	}
 
 	public void reformatSql()
@@ -1283,7 +1282,7 @@ public class SqlPanel
 
 	public WbConnection getConnection()
 	{
-		synchronized (this)
+		synchronized (this.connectionLock)
 		{
 			return this.dbConnection;
 		}
@@ -1295,7 +1294,7 @@ public class SqlPanel
 		// MainWindow will make sure a valid connection is set
 		// for the panel. When using only one connection for all
 		// panels, isClosed() will block the entire AWT thread!
-		synchronized (this)
+		synchronized (this.connectionLock)
 		{
 			return (this.dbConnection != null);
 		}
@@ -1303,7 +1302,7 @@ public class SqlPanel
 
 	public void setConnection(WbConnection aConnection)
 	{
-		synchronized (this)
+		synchronized (this.connectionLock)
 		{
 			if (this.dbConnection != null)
 			{
@@ -1311,6 +1310,8 @@ public class SqlPanel
 			}
 
 			this.dbConnection = aConnection;
+		}
+		
 			this.toggleAutoCommit.setConnection(this.dbConnection);
 
 			if (this.clearCompletionCache != null) this.clearCompletionCache.setConnection(this.dbConnection);
@@ -1336,8 +1337,8 @@ public class SqlPanel
 			{
 				this.dbConnection.addChangeListener(this);
 			}
-		}
-
+		
+		
 		this.checkResultSetActions();
 		this.checkCommitAction();
 	}
@@ -2144,6 +2145,7 @@ public class SqlPanel
 			this.filterPicker.setClient(null);
 			this.resetFilterAction.setOriginal(null);
 			this.selectionFilterAction.setClient(null);
+			this.resetHighlightAction.setOriginal(null);
 		}
 		else
 		{
@@ -2172,6 +2174,7 @@ public class SqlPanel
 			this.filterPicker.setClient(this.currentData.getTable());
 			this.resetFilterAction.setOriginal(this.currentData.getTable().getResetFilterAction());
 			this.selectionFilterAction.setClient(this.currentData.getTable());
+			this.resetHighlightAction.setOriginal(this.currentData.getTable().getResetHighlightAction());
 		}
 	}
 
