@@ -75,34 +75,17 @@
       <para>Default: <literal>false</literal></para>
     </section>
         
-    <section id="settings-workspace-backup">
-      <title>Controlling workspace backups</title>
-      <para>Property: <literal>workbench.workspace.createbackup</literal></para>
-      <para>If this is enabled, a backup file will be created
-          before saving the workspace. This is done by renaming the current
-          file (overwriting any existing backup) and then saving the workspace.</para>
-      <para>Default: <literal>false</literal></para>
-    </section>
-
-    <section id="selectable-objects-setting">
-      <title>Controlling data display in the DbExplorer</title>
-      <para>Property: <literal>workbench.db.objecttype.selectable.<link linkend="dbid">[dbid]</link>=value1,value2,...</literal></para>
-      <para>
-				The DbExplorer makes the "data" tab available based on the type of the selected object
-				in the object list (second column). If the type returned by the JDBC driver
-				is one of the types listed in this property, &wb-productname; assumes that
-				it can issue a <literal>SELECT * FROM</literal> to retrieve data from that object.
-      </para>
-      <para>Default values:
-        <simplelist columns="1">
-          <member><literal>.defaultt=view,table,system view,system table</literal></member>
-          <member><literal>.postgres=view,table,system view,system table,sequence</literal></member>
-          <member><literal>.rdb=view,table,system,system view</literal></member>
-        </simplelist>
-				The values in this property are not case-sensitiv (TABLE is the same as table)
-      </para>
-    </section>
-
+		<section id="settings-workspace-backup">
+			<title>Controlling workspace backups</title>
+			<para>Property: <literal>workbench.workspace.createbackup</literal></para>
+			<para>
+				If this is enabled, a backup file will be created
+				before saving the workspace. This is done by renaming the current
+				file (overwriting any existing backup) and then saving the workspace.
+			</para>
+			<para>Default: <literal>false</literal></para>
+		</section>
+		
     <section id="macro-menu-setting">
       <title>Controlling the number of macros in the main menu</title>
       <para>Property: <literal>workbench.gui.macro.maxmenuitems</literal></para>
@@ -130,6 +113,35 @@
 	<section id="editor-settings">
 		<title>Editor related settings</title>
 
+		<section id="auto-completion-public-syn">
+				<title>Include Oracle public synonyms in auto-completion of tables</title>
+				<para>Property: <literal>workbench.editor.autocompletion.oracle.public_synonyms</literal></para>
+				<para>
+					When using auto completion for table columns and table names, Oracle's public synonyms 
+					are not included by default. This has two reasons: first, the author believes that public
+					synonyms shouldn't be used (it's just as bad as global variables in programming) and
+					second, Oracle defines a huge number of public synonyms that would make the 
+					popup with all available tables very long and hard to use. Setting this property
+					to <literal>true</literal>, will include public synonyms in the popup. Please
+					refer to <link linkend="db-oracle-filter-syns">filtering synonyms</link> for 
+					details on how to filter out unwanted synonyms from this list.
+				</para>
+				<para>Default value: <literal>false</literal></para>
+		</section>
+		
+		<section id="auto-completion-empty-line">
+			<title>Empty line to terminate SQL statements</title>
+			<para>Property: <literal>workbench.editor.autocompletion.sql.emptylineseparator</literal></para>
+			<para>
+				When analysing statements in the editor, it is assumed that individual statements
+				separated with a semicolon. When using auto completion, &wb-productname; can be configured
+				to accept an empty line as the separator between two statements. This does 
+				not influence the behaviour when running scripts or for the "execute current" 
+				command.
+			</para>
+			<para>Default value: <literal>false</literal></para>
+		</section>
+		
     <section id="editor-color-setting">
       <title>Customizing the colors used for syntax highlighting</title>
       <para>Property: <literal>workbench.editor.color.[type]</literal></para>
@@ -191,44 +203,44 @@
 			</para>
 			<para>Default value: 10485760 (10MB)</para>
 		</section>
-	</section>
-	
-	<section id="auto-completion">
-		<title>Controlling auto completion of table and column names</title>
-		<para>
-			The behaviour of the <link linkend="command-completion">auto completion</link> 
-			can be controlled to a certain extent with the following parameters.
-		</para>
-
-		<section id="auto-completion-public-syn">
-				<title>Include Oracle public synonyms in auto-completion of tables</title>
-				<para>Property: <literal>workbench.editor.autocompletion.oracle.public_synonyms</literal></para>
-				<para>
-					When using auto completion for table columns and table names, Oracle's public synonyms 
-					are not included by default. This has two reasons: first, the author believes that public
-					synonyms shouldn't be used (it's just as bad as global variables in programming) and
-					second, Oracle defines a huge number of public synonyms that would make the 
-					popup with all available tables very long and hard to use. Setting this property
-					to <literal>true</literal>, will include public synonyms in the popup. Please
-					refer to <link linkend="db-oracle-filter-syns">filtering synonyms</link> for 
-					details on how to filter out unwanted synonyms from this list.
-				</para>
-				<para>Default value: <literal>false</literal></para>
-		</section>
 		
-		<section id="auto-completion-empty-line">
-			<title>Empty line to terminate SQL statements</title>
-			<para>Property: <literal>workbench.editor.autocompletion.sql.emptylineseparator</literal></para>
+		
+	</section>
+
+	<section id="db-explorer-settings">
+		<title>DbExplorer Settings</title>
+    <section id="selectable-objects-setting">
+      <title>Controlling data display in the DbExplorer</title>
+      <para>Property: <literal>workbench.db.objecttype.selectable.<link linkend="dbid">[dbid]</link>=value1,value2,...</literal></para>
+      <para>
+				The DbExplorer makes the "data" tab available based on the type of the selected object
+				in the object list (second column). If the type returned by the JDBC driver
+				is one of the types listed in this property, &wb-productname; assumes that
+				it can issue a <literal>SELECT * FROM</literal> to retrieve data from that object.
+      </para>
+      <para>Default values:
+        <simplelist columns="1">
+          <member><literal>.defaultt=view,table,system view,system table</literal></member>
+          <member><literal>.postgres=view,table,system view,system table,sequence</literal></member>
+          <member><literal>.rdb=view,table,system,system view</literal></member>
+        </simplelist>
+				The values in this property are not case-sensitiv (TABLE is the same as table)
+      </para>
+    </section>
+
+		<section id="dbexplorer-focus">
+			<title>Showing the currently focused control in the DbExplorer</title>
+			<para>Property: <literal>workbench.gui.dbobjects.showfocus</literal></para>
 			<para>
-				When analysing statements in the editor, it is assumed that individual statements
-				separated with a semicolon. When using auto completion, &wb-productname; can be configured
-				to accept an empty line as the separator between two statements. This does 
-				not influence the behaviour when running scripts or for the "execute current" 
-				command.
+				To indicate the table that has currently the focus in the DbExplorer, set
+				this property to <literal>true</literal>. The currently focused table
+				(or editor) will be enclosed with a yellow border to indicate this. 
+				To change the color of the border, define the color using the property
+				<literal>workbench.gui.focusindicator.bordercolor</literal>. The value of 
+				that property are the three RGB values for the color.
 			</para>
 			<para>Default value: <literal>false</literal></para>
 		</section>
-		
 	</section>
 	
   <section id="settings-sorting">
@@ -530,6 +542,23 @@
 				will be rolledback and WbImport will try to execute the second statement.
 			</para>
 			<para>Default value: <literal>true</literal> for PostgreSQL, <literal>false</literal> for others</para>
+		</section>
+
+		<section id="db-ignore-read-errors">
+			<title>Ignore errors during data retrieval</title>
+			<para>Property: <literal>workbench.db.ignore.readerror</literal></para>
+			<para>
+				When retrieving data (e.g. using a <literal>SELECT</literal> statement) 
+				errors that are reported by the driver will be displayed to the user. 
+				The retrieval will be terminated. If you want to ignore errors and replace
+				the data that could not be retrieved with a <literal>NULL</literal> value,
+				set this property to <literal>true</literal>.
+			</para>
+			<para>
+				Using this parameter is not recommended as it might produce results
+				that do not reflect the data as it is stored in the database.
+			</para>
+			<para>Default value: <literal>false</literal></para>
 		</section>
 		
   </section>

@@ -175,7 +175,6 @@ public class ConnectionEditorPanel
     jSeparator2 = new javax.swing.JSeparator();
     jSeparator1 = new javax.swing.JSeparator();
     manageDriversButton = new WbButton();
-    extendedProps = new FlatButton();
     helpButton = new WbButton();
     tfFetchSize = new IntegerPropertyEditor();
     fetchSizeLabel = new javax.swing.JLabel();
@@ -202,6 +201,10 @@ public class ConnectionEditorPanel
     autoCommitLabel = new WbCheckBoxLabel();
     altDelimiter = new workbench.gui.components.DelimiterDefinitionPanel();
     altDelimLabel = new javax.swing.JLabel();
+    jPanel2 = new javax.swing.JPanel();
+    extendedProps = new FlatButton();
+    jPanel3 = new javax.swing.JPanel();
+    propLabel = new javax.swing.JLabel();
 
     setMinimumSize(new java.awt.Dimension(220, 200));
     setLayout(new java.awt.GridBagLayout());
@@ -354,21 +357,6 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 5, 6, 0);
     add(manageDriversButton, gridBagConstraints);
 
-    extendedProps.setText(ResourceMgr.getString("LblConnExtendedProps"));
-    extendedProps.setToolTipText(ResourceMgr.getDescription("LblConnExtendedProps"));
-    extendedProps.addMouseListener(new java.awt.event.MouseAdapter() {
-      public void mouseClicked(java.awt.event.MouseEvent evt) {
-        extendedPropsMouseClicked(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 2, 5, 6);
-    add(extendedProps, gridBagConstraints);
-
     helpButton.setText(ResourceMgr.getString("LblHelp"));
     helpButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -406,7 +394,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 2, 2, 6);
     add(showPassword, gridBagConstraints);
 
@@ -634,6 +622,39 @@ public class ConnectionEditorPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(2, 5, 0, 0);
     add(altDelimLabel, gridBagConstraints);
+
+    jPanel2.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 0));
+
+    extendedProps.setText(ResourceMgr.getString("LblConnExtendedProps"));
+    extendedProps.setToolTipText(ResourceMgr.getDescription("LblConnExtendedProps"));
+    extendedProps.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+    extendedProps.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+    extendedProps.setIconTextGap(1);
+    extendedProps.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mouseClicked(java.awt.event.MouseEvent evt) {
+        extendedPropsMouseClicked(evt);
+      }
+    });
+    jPanel2.add(extendedProps);
+
+    jPanel3.setMaximumSize(new java.awt.Dimension(2, 10));
+    jPanel3.setMinimumSize(new java.awt.Dimension(2, 10));
+    jPanel3.setPreferredSize(new java.awt.Dimension(2, 10));
+    jPanel2.add(jPanel3);
+
+    propLabel.setIconTextGap(0);
+    propLabel.setMaximumSize(new java.awt.Dimension(16, 16));
+    propLabel.setMinimumSize(new java.awt.Dimension(16, 16));
+    propLabel.setPreferredSize(new java.awt.Dimension(16, 16));
+    jPanel2.add(propLabel);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
+    add(jPanel2, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 	private void editConnectionScriptsButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_editConnectionScriptsButtonActionPerformed
@@ -747,6 +768,8 @@ public class ConnectionEditorPanel
   protected workbench.gui.components.WbColorPicker infoColor;
   protected javax.swing.JLabel infoColorLabel;
   protected javax.swing.JPanel jPanel1;
+  protected javax.swing.JPanel jPanel2;
+  protected javax.swing.JPanel jPanel3;
   protected javax.swing.JSeparator jSeparator1;
   protected javax.swing.JSeparator jSeparator2;
   protected javax.swing.JLabel lblDriver;
@@ -754,6 +777,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JLabel lblUrl;
   protected javax.swing.JLabel lblUsername;
   protected javax.swing.JButton manageDriversButton;
+  protected javax.swing.JLabel propLabel;
   protected javax.swing.JCheckBox rememberExplorerSchema;
   protected javax.swing.JCheckBox removeComments;
   protected javax.swing.JCheckBox rollbackBeforeDisconnect;
@@ -812,6 +836,7 @@ public class ConnectionEditorPanel
 			this.currentProfile.setConnectionProperties(editor.getProperties());
 			this.currentProfile.setCopyExtendedPropsToSystem(editor.getCopyToSystem());
 		}
+		checkExtendedProps();
 	}
 
 	public void selectWorkspace()
@@ -878,6 +903,18 @@ public class ConnectionEditorPanel
 		}
 	}
 
+	private void checkExtendedProps()
+	{
+		Properties props = (currentProfile == null ? null : currentProfile.getConnectionProperties());
+		if (props != null && props.size() > 0)
+		{
+			propLabel.setIcon(ResourceMgr.getPicture("tick"));
+		}
+		else
+		{
+			propLabel.setIcon(null);
+		}	
+	}
 	public void setProfile(ConnectionProfile aProfile)
 	{
 		if (aProfile == null) return;
@@ -903,6 +940,7 @@ public class ConnectionEditorPanel
 			
 			Color c = this.currentProfile.getInfoDisplayColor();
 			this.infoColor.setSelectedColor(c);
+			checkExtendedProps();
 		}
 		catch (Exception e)
 		{

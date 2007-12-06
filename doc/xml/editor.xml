@@ -39,15 +39,15 @@
 		statement ( the <literal>|</literal> indicating the position of the caret):</para>
 		<programlisting>SELECT p.|, p.firstname, a.zip, a.city
 FROM person p, address a;</programlisting>
-		<para>then pressing the <keycap>Ctrl-Q</keycap> key will show a list of columns available
+		<para>then pressing the <keycap>Ctrl-Space</keycap> key will show a list of columns available
 			in the <literal>PERSON</literal> table (because the cursor is located after the <literal>p.</literal>
 			alias). If you put the cursor after the <literal>a.city</literal> column and press the
-			<keycap>Ctrl-Q</keycap> the popup window will list the two tables that are referenced
+			<keycap>Ctrl-Space</keycap> the popup window will list the two tables that are referenced
 			in the <literal>FROM</literal> part of the statement. The behaviour when editing the
 			<literal>WHERE</literal> part of an statement is similar.
 		</para>
 		<para>When editing the list of tables in the <literal>FROM</literal> part of the statement,
-			pressing the <keycap>Ctrl-Q</keycap> will pop up a list of available tables.
+			pressing the <keycap>Ctrl-Space</keycap> will pop up a list of available tables.
 		</para>
 			
 		<para>Usually a semicolon is used to separate statements in the editor. However 
@@ -232,7 +232,7 @@ WHERE p.person_id = a.person_id;</programlisting>
 			<title>Support for prepared statements</title>
 			<para>
 				For better performance Java applications usually make use of
-				<ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/PreparedStatement.html">prepared statements</ulink>.
+				<ulink url="http://java.sun.com/j2se/1.5.0/docs/api/java/sql/PreparedStatement.html">prepared statements</ulink>.
 				The SQL for a prepared statement does not contain the actual values that should be used e.g.
 				in the WHERE clause, but uses quotation marks instead. Let's assume the above example should be
 				enhanced to retrieve the person information for a specific ID. The code could look like
@@ -276,8 +276,8 @@ WHERE p.person_id = a.person_id;</programlisting>
 			</para>
 			<note>
 				<para>
-					This feature requires that the <ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/ParameterMetaData.html#getParameterCount()">getParameterCount()</ulink> and
-					<ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/ParameterMetaData.html#getParameterType(int)">getParameterType()</ulink>
+					This feature requires that the <ulink url="http://java.sun.com/j2se/1.5.0/docs/api/java/sql/ParameterMetaData.html#getParameterCount()">getParameterCount()</ulink> and
+					<ulink url="http://java.sun.com/j2se/1.5.0/docs/api/java/sql/ParameterMetaData.html#getParameterType(int)">getParameterType()</ulink>
 					methods of the <literal>ParameterMetaData</literal> class are implemented by the JDBC driver and return the correct
 					information about the available parameters.
 				</para>

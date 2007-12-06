@@ -245,6 +245,35 @@
 							</para>
 						</entry>
 					</row>
+					<row>
+						<entry>-extensionColumn</entry>
+						<entry>
+							<para>
+								When exporting CLOB or BLOB columns as external files, the extension of the generated 
+								filenames can be defined based on a column of the result set. If the exported
+								table contains more than one type of BLOBs (e.g. JPEG, GIF, PDF) and your table
+								stores the information to define the extension based on the contents, this can be 
+								used to re-generate proper filenames. 
+							</para>
+							<para>
+								This parameter only makes sense if exactly one BLOB column is exported.
+							</para>
+						</entry>
+					</row>
+					<row>
+						<entry>-filenameColumn</entry>
+						<entry>
+							<para>
+								When exporting CLOB or BLOB columns as external files, the complete filename
+								can be taken from a column of the result set (instead of dynamically creating
+								a new file based on the row and column numbers). 
+							</para>
+							<para>
+								This parameter only makes sense if exactly one BLOB column is exported.
+							</para>
+						</entry>
+					</row>
+					
         </tbody>
       </tgroup>
     </informaltable>
@@ -774,7 +803,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
       <title>Specifying date formats</title>
       <para>The date/time format that can be specified with the <literal>-dateformat</literal>
       or <literal>-timestampformat</literal> accepts fhe following format codes. These
-      are the format codes for Java's <ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/text/SimpleDateFormat.html">SimpleDateFormat</ulink>
+      are the format codes for Java's <ulink url="http://java.sun.com/j2se/1.5.0/docs/api/java/text/SimpleDateFormat.html">SimpleDateFormat</ulink>
       class.
       </para>
     </section>

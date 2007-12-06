@@ -90,7 +90,7 @@ public class TableReplacer
 				}
 				else
 				{
-					client.clearHighlightFilter();
+					client.clearHighlightExpression();
 					pos = this.replacer.find(criteria, ignoreCase, wholeWord, useRegex);
 				}
 				showDialog = false;
@@ -122,7 +122,7 @@ public class TableReplacer
 		}
 		ColumnExpression filter = new ColumnExpression(comp, criteria);
 		filter.setIgnoreCase(ignoreCase);
-		client.applyHighlightFilter(filter);
+		client.applyHighlightExpression(filter);
 	}
 	
 	protected void highlightPosition(final Position pos)

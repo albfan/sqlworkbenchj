@@ -185,6 +185,8 @@
 							<para>
 								If this parameter is set to true, data from the target table will
 								be deleted (using <literal>DELETE FROM ...</literal>) before the import is started.
+								This parameter will only be used if <literal>-mode=insert</literal>
+								is specified.
 							</para>
 						</entry>
 					</row>
@@ -198,7 +200,9 @@
 								use the command <literal>TRUNCATE</literal> to delete the contents of the 
 								table. For those DBMS that support this command, deleting rows 
 								is usually faster compared to the <literal>DELETE</literal> command, but
-								it cannot be rolled back.
+								it cannot be rolled back. 
+								This parameter will only be used if <literal>-mode=insert</literal>
+								is specified.
 							</para>
 						</entry>
 					</row>
@@ -237,6 +241,22 @@
 								When you specify <literal>-commitBatch</literal> the parameter 
 								<literal>-commitEvery</literal> will be ignored. If no batch size 
 								is given, then <literal>-commitBatch</literal> will be ignored.
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-transactionControl</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+								Controls whether &wb-productname; handles the transaction for the import, 
+								or if the import must be committed (or rolled back) manually. 
+								If <literal>-transactionControl=false</literal> is specified, the &wb-productname;
+								will neither send a <literal>COMMIT</literal> nor a <literal>ROLLBACK</literal> at
+								the end. This can be used when multiple files need to be imported in a single
+								transaction. This can be combined with the <link linkend="script-success">cleanup</link> 
+								and <link linkend="script-failure">error</link> scripts in batch mode.
 							</para>
 						</entry>
 					</row>
@@ -396,6 +416,32 @@
 								syntax is valid for your DBMS. If you do need to store a literal like <literal>${some.value}</literal>
 								into the database, you need to quote it: <literal>-constantValues="varname='${some.value}'"</literal>.
 							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-preTableStatement</entry>
+						<entry>
+							<para>
+								This parameter defines a SQL statement that should be executed before the import
+								process starts inserting data into the target table. The name of the current
+								table (when e.g. importing a whole directory) can be referenced using 
+								<literal>${table.name}</literal>.
+							</para>
+							<para>
+								To define a statement that should be executed after all rows have been 
+								inserted but before the data is committed, you can use the 
+								<literal>-postTabelStatement</literal> parameter. 
+							</para>
+							<para>
+								These parameters can e.g. be used to enable identity insert for MS SQL Server:
+								<programlisting>-preTableStatement="set identity_insert ${table.name} on"
+-postTableStatement="set identity_insert ${table.name} off"</programlisting>
+								Errors resulting from executing these statements will be ignored. If you want 
+								to abort the import in that case you can specify <literal>-ignorePrePostErrors=false</literal>
+								and <literal>-continueOnError=false</literal>. 
+							</para>
+							
 						</entry>
 					</row>
 					
@@ -758,7 +804,7 @@
 		</para></note>				
 		 
 
-      <programlisting>WbImport -file=c:/temp/contacts.txt
+		<programlisting>WbImport -file=c:/temp/contacts.txt
          -table=person
          -filecolumns=lastname,firstname,$wb_skip$,birthday
          -dateformat="yyyy-MM-dd";</programlisting>

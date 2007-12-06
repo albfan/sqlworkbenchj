@@ -37,9 +37,8 @@ public class StringColumnRenderer
 		}
 		catch (Throwable e)
 		{
-			displayValue = aValue.toString();
+			displayValue = (aValue == null ? null : aValue.toString());
 		}
-
 		setTooltip(displayValue);
 	}
 

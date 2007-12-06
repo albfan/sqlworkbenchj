@@ -68,7 +68,7 @@ public class DateColumnRenderer
 		catch (Throwable cc)
 		{
 			this.displayValue = value.toString();
-			tooltip = value.toString();
+			setTooltip(displayValue);
 		}
   }
 	

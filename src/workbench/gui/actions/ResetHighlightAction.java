@@ -39,7 +39,7 @@ public class ResetHighlightAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.clearHighlightFilter();
+		this.client.clearHighlightExpression();
 	}
 
 	public void tableChanged(TableModelEvent tableModelEvent)

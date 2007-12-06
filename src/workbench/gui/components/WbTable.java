@@ -40,7 +40,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
@@ -98,7 +97,6 @@ import workbench.gui.actions.SetColumnWidthAction;
 import workbench.gui.actions.SortAscendingAction;
 import workbench.gui.actions.SortDescendingAction;
 import workbench.gui.actions.WbAction;
-import workbench.gui.renderer.FilterHighlighter;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RequiredFieldHighlighter;
 import workbench.gui.renderer.RowStatusRenderer;
@@ -154,7 +152,7 @@ public class WbTable
 	private CopySelectedAsSqlUpdateAction copySelectedAsUpdateAction;
 	
 	private ResetHighlightAction resetHighlightAction;
-	private boolean highlightEnabled;
+	private ColumnExpression highlightExpression;
 	
 	private FilterDataAction filterAction;
 	private ResetFilterAction resetFilterAction;
@@ -1247,28 +1245,23 @@ public class WbTable
 	
 	public boolean isHighlightEnabled()
 	{
-		return highlightEnabled;
+		return (highlightExpression != null);
 	}
 	
-	public void clearHighlightFilter()
+	public void clearHighlightExpression()
 	{
-		applyHighlightFilter(null);
+		applyHighlightExpression(null);
+	}
+
+	public ColumnExpression getHighlightExpression()
+	{
+		return highlightExpression;
 	}
 	
-	public void applyHighlightFilter(ColumnExpression filter)
+	public void applyHighlightExpression(ColumnExpression filter)
 	{
-		this.highlightEnabled = (filter != null);
-		this.resetHighlightAction.setEnabled(highlightEnabled );
-		Iterator itr = defaultRenderersByColumnClass.values().iterator();
-		while (itr.hasNext())
-		{
-			TableCellRenderer rend = (TableCellRenderer)itr.next();
-			if (rend instanceof FilterHighlighter)
-			{
-				FilterHighlighter hl = (FilterHighlighter)rend;
-				hl.setFilterHighlighter(filter);
-			}
-		}
+		this.highlightExpression = filter;
+		this.resetHighlightAction.setEnabled(filter != null);
 		WbSwingUtilities.repaintLater(this);
 	}
 	

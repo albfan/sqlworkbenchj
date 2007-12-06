@@ -1234,6 +1234,16 @@ public class Settings
 	{
 		return getColor("workbench.gui.table.null.color", null);
 	}
+
+	public Color getExpressionHighlightColor()
+	{
+		return getColor("workbench.gui.table.searchhighlite.color", Color.YELLOW);
+	}
+
+	public void setExpressionHighlightColor(Color c)
+	{
+		setColor("workbench.gui.table.searchhighlite.color", c);
+	}
 	
 	public Color getAlternateRowColor()
 	{

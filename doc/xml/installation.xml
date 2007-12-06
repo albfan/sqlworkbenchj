@@ -29,15 +29,18 @@
 			<title>Specifying the location of configuration files</title>
 
 			<para>If no configuration directory has been specified on the commandline,
-				&wb-productname; will check the current directory for a workbench.settings
+				&wb-productname; will check the current directory for a <literal>workbench.settings</literal>
 				file. If no file is present in the current directory, &wb-productname; 
-				will use the directory where <literal>workbench.jar</literal> is located
-				as the configuration directory.
+				will check the directory where <literal>workbench.jar</literal> is located. 
+				If no <literal>workbench.settings</literal> is found in that directory, 
+				&wb-productname; creates a sub-directory called <literal>.sqlworkbench</literal>
+				in the user's home folder (This is <literal>$HOME</literal> on a Linux or Unix
+				based system, or <literal>%HOMEPATH%</literal> on a Windows system.
 			</para>
 
 			<para><note>
-				It is recommended to store the configuration outside the program's directory
-        using the <link linkend="cmdline-parameter-configdir">-configDir</link> parameter.
+				Before Build98 the default configuration directory was the program's directory 
+				and not a directory in the user's home directory.
 			</note></para>
 
 			<para>The configuration files are:
@@ -57,13 +60,13 @@
 				Thus you can create different shortcuts on your desktop pointing to different sets of profiles.
 				The different shortcuts can still use the same main configuration file.
 			</para>
-			<para>If you want to put all configuration files into a directory different
-				from the current (or jar file's) directory, start &wb-productname;
-				with the parameter -configdir to specify an alternate directory:</para>
+			<para>If you want to control the location where &bw-productname; stores the configuration 
+			  files, you have to start the application with the parameter -configdir to specify an 
+				alternate directory:</para>
 			<para>
-				<programlisting>java -jar Workbench.jar -configdir=c:\ConfigData</programlisting>
+				<programlisting>java -jar Workbench.jar -configdir=/export/configs/sqlwb</programlisting>
 				or if you are using the Windows&reg; launcher:
-				<programlisting>JWorkbench -configdir=c:\ConfigData</programlisting>
+				<programlisting>JWorkbench -configdir=c:\ConfigData\SQLWorkbench</programlisting>
 
 				The placeholder <literal>${user.home}</literal> will be 
 				replaced with the current user's home directory (as returned by the Operating System), e.g.:
@@ -259,7 +262,7 @@ java -jar Workbench.jar -configDir=${user.home}/.sqlworkbench
 					<tbody valign="top">
 						<row>
 							<entry>-jdk</entry>
-							<entry>Specify the installation directory of the JDK e.g.: -jdk=c:\jdk1.4.1.
+							<entry>Specify the installation directory of the JDK e.g.: -jdk=c:\jdk1.5
 								When this parameter is specified the launcher will not look for a JDK
 								installation as described <link linkend="launcher-jdk-search">here</link>
 							</entry>
@@ -565,9 +568,9 @@ another_variable=24</programlisting>
 								The <link linkend="understand-alternate-delim">alternate delimiter</link> to be used for this connection. 
 								To define a single line delimiter append the characters ;nl to the parameter value:
 								e.g. <literal>-altDelimiter=GO;nl</literal> to define a SQL Server like GO as the 
-								alternate delimiter. Note that when running in batchmode you can override 
-								the delimiter completely by specifying the <literal>-delimiter</literal>
-								switch. 
+								alternate delimiter. Note that when running in batchmode you can also override 
+								the default delimiter by specifying the 
+								<link linkend="scripting-delimiter"><literal>-delimiter</literal></link> parameter. 
 							</entry>
 						</row>
 

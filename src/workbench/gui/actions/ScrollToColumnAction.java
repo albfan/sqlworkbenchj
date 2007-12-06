@@ -17,6 +17,8 @@ import java.awt.event.ActionEvent;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbTable;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
@@ -36,21 +38,23 @@ public class ScrollToColumnAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		String col = WbSwingUtilities.getUserInput(client, "Find column", null);
+		String lastValue = Settings.getInstance().getProperty("workbench.gui.findcolumn.lastvalue", null);
+		String col = WbSwingUtilities.getUserInput(client, ResourceMgr.getPlainString("MnuTxtFindColumn"), lastValue);
 		if (col != null)
 		{
-			scrollToColumn(col);
+			Settings.getInstance().setProperty("workbench.gui.findcolumn.lastvalue", col);
+			scrollToColumn(col.toLowerCase());
 		}
 	}
 	
-	protected void scrollToColumn(String colname)
+	protected void scrollToColumn(String toFind)
 	{
-		if (StringUtil.isWhitespaceOrEmpty(colname)) return;
+		if (StringUtil.isWhitespaceOrEmpty(toFind)) return;
 
 		for (int idx = 0; idx < client.getModel().getColumnCount(); idx++)
 		{
 			String name = client.getModel().getColumnName(idx);
-			if (name.toLowerCase().startsWith(colname.toLowerCase()))
+			if (name.toLowerCase().indexOf(toFind) > -1)
 			{
 				int row = client.getSelectedRow();
 				if (row < 0) 
@@ -63,6 +67,8 @@ public class ScrollToColumnAction extends WbAction
 					public void run()
 					{
 						client.scrollRectToVisible(rect);
+						client.getTableHeader().repaint();
+						client.repaint();
 					}
 				});
 			}

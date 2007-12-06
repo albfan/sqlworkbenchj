@@ -1,5 +1,115 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  (97.7) The "Extended Properties" button in the connection dialog 
+      will now display a little checkmark if properties are defined for
+      the currently selected profile
+Enh:  (97.7) Errors during retrieval of the data can now be ignored. The 
+      application will use NULL for these columns instead. This can be 
+      enabled by setting the property:
+      workbench.db.ignore.readerror=true 
+      in workbench.settings.
+Enh:  (97.7) Columns can now be searched for from the table header popup
+      If the column is found, the display is scrolled to display 
+      that column. The search is done on partial matches. The first 
+      column where the entered value is found somewhere in the column 
+      name is displayed.
+Enh:  (97.7) When searching in table data, all found values can now be 
+      highlighted. 
+Enh:  (97.7) When saving a result set to a text file, the decimal character
+      could not be defined (the default from the options panel was used)
+Enh:  (97.6) The current line in the editor can how be highlighted
+Enh:  (97.6) A background color to indicate null values in the 
+      result set can now be defined
+Enh:  (97.6) a new parameter for WbCopy and WbImport has been added:
+      -transactionControl. It defaults to true. If set to false
+      no commit or rollback will be sent to the DBMS after the import
+      has finished. If savepoints are enabled they are still used
+      during the import (or copy) process
+Enh:  (97.6) More detailed information about the DBMS and the driver
+      is now available from the context menu of the connection information
+      in the toolbar.
+Enh:  (97.4) When exporting a table with BLOB columns the filename to 
+      be used for the BLOB files can now be defined through a column
+      of the result set using -filenameColumn=col_name.
+      This will only make sense when exporting a table with exactly 
+      one BLOB column.
+Enh:  (97.4) WbImport and WbCopy now support the -preTableStatement and 
+      the -postTableStatement to define (a single) SQL statement to 
+      be execute before an import into a table starts and after inserting
+      into that table is finished. 
+Enh:  (97.3) WbImport (an WbCopy) will now ignore the -deleteTarget or
+      -truncateTarget option if the selected mode is not INSERT (to 
+      prevent accidental deletion of records if e.g. update mode 
+      is selected)
+Enh:  (97.3) If no config directory is supplied and no settings file
+      is found in either the current directory or the directory where
+      the jar file is located, the settings are now written to the 
+      user's home directory (in the sub-directory .sqlworkbench). 
+      For a new installation this means that the configuration settings
+      are no longer stored in the program's directory.
+Enh:  (97.3) The HTML version of the manual is now displayed using 
+      an external browser rather than using the built-in HTML display. 
+Enh:  (97.2) Highlighting the control that has the focus in the DbExplorer
+      can now be enabled by setting the property:
+      workbench.gui.dbobjects.showfocus=true
+      This is disabled by default.
+      The default color for the focus border is yellow, the color can be 
+      configured using the property:
+      workbench.gui.focusindicator.bordercolor
+      with the RGB value (e.g. 128,128,128) for the desired color.
+Enh:  (97.1) For Oracle, REF CURSORS as out parameters in Procedures are now
+      supported through WbCall, e.g: WbCall ref_cursor_example(42, ?);
+Enh:  (97.1) You can now assign a shortcut to the reload buttons in the 
+      DbExplorer. The shortcut will only work if the component does have
+      the focus.
+Fix:  (97.7) When opening several new panels very quickly the application 
+      could lock.
+Fix:  (97.7) The application could not be started in batch mode without
+      supplying a connection (either through the commandline or using
+      a profile).
+Fix:  (97.6) When importing integer numbers using WbImport numbers with 
+      scientific notation could not be imported even if they were "real"
+      integer values (e.g. 4.2E+1).
+Fix:  (97.5) Referencing the input file for WbImport using relative files
+      paths was broken.
+Fix:  (97.5) When opening and closing multiple windows (File -> Open New Window)
+      and using separate connections per tab, sometimes the wrong connections 
+      were closed.
+Fix:  (97.4) The path for a Look & Feel library was not saved, when it 
+      was edited manually (instead of using the file-open dialog)
+Fix:  (97.4) The new parameter -checkDependencies was not working correctly
+      for large schemas with deeply nested foreign keys.
+Fix:  (97.4) Sequence definitions were not retrieved correctly for HSQLDB
+Fix:  (97.2) The "What's New" dialog was no longer displayed.
+Fix:  (97.2) The update check did not always find a new version
+Fix:  (97.1) When using an old JDBC driver that did not implement savepoints
+      WbImport was not working even if the usage of savepoints was turned off
+Fix:  (97.1) Scripts for MySQL using non-standard line comments (with #) were 
+      not executed correctly.
+Fix:  (97.1) The toolbar button for "Append results" did not reflect the current
+      setting of this option. Only the menu item in the SQL menu did.
+
+Build 97, 21.10.2007
+--------------------
+Enh:  (96.9) A new option has been added to define additional characters
+      that are recognized as word characters e.g. when jumping word by word
+      (using ctrl-left, ctrl-right) or selecting words in the editor using
+      a doubleclick (Available under Tools -> Options -> Editor options)
+Enh:  (96.9) Added an option to reformat the view sourced when it's retrieved
+      from the database. This is not enabled by default. To turn it on
+      set the property:
+			workbench.db.[dbid].source.view.doformat=true
+      in workbench.settings.
+Enh:  (96.8) The global option "Enable dbms_output" has been removed. If you 
+      want to enable support for the DBMS_OUTPUT package, please use a
+      pre-connect script in the connection profile.
+Enh:  (96.7) When creating a new physical connection for a tab using the new
+      "Connect tab" feature, this connection can now be reset to the global
+      connection. The tab's title is also displayed in a different color.
+      The extra connection can now also be controlled through the popup 
+      menu for a tab
+Enh:  (96.7) When deleting rows from a result, the rows can now be deleted
+      including all dependent rows using "Delete With Dependencies"
 Enh:  (96.6) The extended connection properties can now optionally be copied
       into the system properties when the connection is created. This can 
       be used for JDBC drivers that only support System properties 
@@ -89,6 +199,19 @@ Enh:  (96.1) For DDL Statements a Savepoint can now be enabled so that
       savepoint to guard the first of the two statements so that the transaction 
       can continue. This is controlled using 
       workbench.db.[dbid].import.usesavepoint=true
+Fix:  (96.9) The JDBC/ODBC bridge could no longer be loaded
+Fix:  (96.9) Tab names with non-ISO characters were not stored correctly in 
+      the workspace.
+Fix:  (96.8) WbSchemaDiff could not be run in batch mode.
+Fix:  (96.8) When changing a value in the result set from null to something else
+      the column was not included in the generated update statements.
+Fix:  (96.7) It was not possible to edit a value in the result set that was null 
+      (e.g. setting a non-null value)
+Fix:  (96.7) When not specifying a database with the connection URL for MySQL and 
+      not using separate connections per tab, displaying data in the DbExplorer
+      did not work (nor did the display of Enums)
+Fix:  (96.7) Displaying the table's rowcount in the DbExplorer did not work with 
+      old MS SQL drivers when autocommit was turned off
 Fix:  (96.5) Single quotes in comments were not escaped correctly in generated
       table source
 Fix:  (96.4) When using workbench.db.oracle.fixcharsemantics=true, NVARCHAR2 
@@ -96,7 +219,8 @@ Fix:  (96.4) When using workbench.db.oracle.fixcharsemantics=true, NVARCHAR2
 Fix:  (96.4) Retrieving sequences was broken for DB2
 Fix:  (96.3) Oracle packages were not correctly written into the output file of 
       WbSchemaReport or WbSchemaDiff
-Fix:  (96.3) The display of the source of stored procedures was broken for SQL Server
+Fix:  (96.3) The display of the source of stored procedures was broken for 
+      SQL Server
 Fix:  (96.3) When reloading the list of indexes in the DbExplorer, all subsequent
       retrieval operations were blocked.
 Fix:  (96.3) Removed the automatic detection of available translations (because

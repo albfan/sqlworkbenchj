@@ -109,7 +109,7 @@ public class ConnectionPropertiesEditor
 			String key = this.propData.getValueAsString(row, 0);
 			if (StringUtil.isEmptyString(key)) continue;
 			String value = this.propData.getValueAsString(row, 1);
-			props.setProperty(key.trim(), value.trim());
+			props.setProperty(key.trim(), (value == null ? "" : value.trim()));
 		}
 		return props;
 	}

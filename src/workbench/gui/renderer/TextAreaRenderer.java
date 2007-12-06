@@ -11,47 +11,34 @@
  */
 package workbench.gui.renderer;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Graphics;
 import java.awt.Insets;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 import workbench.gui.WbSwingUtilities;
-import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
  * @author support@sql-workbench.net
  */
 public class TextAreaRenderer
-	extends JTextArea
+	extends ToolTipRenderer
 	implements TableCellRenderer, WbRenderer
 {
-	protected Color selectedForeground;
-	protected Color selectedBackground;
-	protected Color unselectedForeground;
-	protected Color unselectedBackground;
-	protected Color highlightBackground;
-	protected Color nullColor = Settings.getInstance().getNullColor();
-	
-	private Color alternateBackground = Settings.getInstance().getAlternateRowColor();
-	private boolean useAlternatingColors = Settings.getInstance().getUseAlternateRowColor();
-	protected int maxTooltipSize = Settings.getInstance().getIntProperty("workbench.gui.renderer.maxtooltipsize", 1000);
-
-	protected int editingRow = -1;
-	private boolean isEditing = false;
-	private boolean[] highlightCols;
-
-	private boolean isPrinting = false;
-	
-	private boolean isAlternatingRow = false;
+	protected JTextArea textDisplay;
 	
 	public TextAreaRenderer()
 	{
-		
+		super();
+		textDisplay = new JTextArea()
+		{
+			public Insets getInsets()
+			{
+				return WbSwingUtilities.EMPTY_INSETS;
+			}
+		};
 	}
 	
 	public int getHorizontalAlignment()
@@ -61,123 +48,46 @@ public class TextAreaRenderer
 	
 	public Component getTableCellRendererComponent(JTable table, Object value,	boolean isSelected,	boolean hasFocus, int row, int col)
 	{
-		this.isEditing = (row == this.editingRow) && (this.highlightBackground != null);
+		initDisplay(table, value, isSelected, hasFocus, row, col);
 		
-		this.setFont(table.getFont());
+		this.textDisplay.setFont(table.getFont());
 		
 		if (hasFocus)
 		{
-			this.setBorder(WbSwingUtilities.FOCUSED_CELL_BORDER);
+			this.textDisplay.setBorder(WbSwingUtilities.FOCUSED_CELL_BORDER);
 		}
 		else
 		{
-			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
+			this.textDisplay.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		}
+
+		prepareDisplay(value);
 		
-		if (selectedForeground == null)
-		{
-			selectedForeground = table.getSelectionForeground();
-			selectedBackground = table.getSelectionBackground();
-		}
+		this.textDisplay.setBackground(getBackgroundColor());
+		this.textDisplay.setForeground(getForegroundColor());
 		
-		if (unselectedForeground == null)
-		{
-			unselectedForeground = table.getForeground();
-			unselectedBackground = table.getBackground();
-		}
-		
-		this.isAlternatingRow = this.useAlternatingColors && ((row % 2) == 1);
-		
-		if (this.isPrinting)
-		{
-			setForeground(unselectedForeground);
-			setBackground(unselectedBackground);
-		}
-		else if (this.isEditing)
-		{
-			try
-			{
-				if (this.highlightCols[col])
-				{
-					setBackground(this.highlightBackground);
-				}
-				else
-				{
-					setBackground(unselectedBackground);
-				}
-			}
-			catch (Throwable th)
-			{
-				setBackground(unselectedBackground);
-			}
-		}
-		else 
-		{
-			if (isSelected)
-			{
-				setBackground(selectedBackground);
-				setForeground(selectedForeground);
-			}
-			else 
-			{
-				setForeground(unselectedForeground);
-				if (value == null && nullColor != null)
-				{
-					setBackground(nullColor);
-				}
-				else 
-				{
-					if (isAlternatingRow)
-					{
-						setBackground(alternateBackground);
-					}
-					else
-					{
-						setBackground(unselectedBackground);
-					}		
-				}
-			}
-		}
-		
-		if (value == null)
-		{
-			this.setText("");
-			this.setToolTipText(null);
-		}
-		else
-		{
-			String s = value.toString();
-			this.setText(s);
-			this.setToolTipText(StringUtil.getMaxSubstring(s, maxTooltipSize));
-		}
-		return this;
+		return textDisplay;
 	}
 
 	public Insets getInsets()
 	{
 		return WbSwingUtilities.EMPTY_INSETS;
 	}
-	
-	public void setHighlightColumns(boolean[] cols) 
-	{ 
-		this.highlightCols = cols; 
-	}	
-	
-	public void setHighlightBackground(Color c)
+
+	public void prepareDisplay(Object value)
 	{
-		this.highlightBackground = c;
-	}
-	
-	public void print(Graphics g)
-	{
-		this.isPrinting = true;
-		super.print(g);
-		this.isPrinting = false;
-	}
-	
-	public void setEditingRow(int row) 
-	{ 
-		this.editingRow = row; 
+		if (value == null)
+		{
+			this.displayValue = null;
+			this.textDisplay.setText("");
+			this.textDisplay.setToolTipText(null);
+		}
+		else
+		{
+			this.displayValue = value.toString();
+			this.textDisplay.setText(this.displayValue);
+			this.textDisplay.setToolTipText(StringUtil.getMaxSubstring(this.displayValue, maxTooltipSize));
+		}
 	}
 
 	/**
@@ -187,19 +97,13 @@ public class TextAreaRenderer
 	 */ 
 	public String getDisplayValue()
 	{
-		String s = getText();
-		if (s == null) return s;
-		int pos = s.indexOf('\n');
+		if (displayValue == null) return null;
+		int pos = displayValue.indexOf('\n');
 		if (pos > 0)
 		{
-			return s.substring(0, pos);
+			return displayValue.substring(0, pos);
 		}
-		return s;
-	}
-	
-	public void setUseAlternatingColors(boolean flag)
-	{
-		this.useAlternatingColors = flag;
+		return displayValue;
 	}
 	
 }
