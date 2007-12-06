@@ -38,12 +38,8 @@ public class WbCheckBox
 			char mnemonic = newText.charAt(pos + 1);
 			newText = newText.substring(0, pos) + newText.substring(pos + 1);
 			this.setMnemonic((int)mnemonic);
-			super.setText(newText);
 		}
-		else
-		{
-			super.setText(newText);
-		}
+		super.setText(newText);
 	}
 	
 }

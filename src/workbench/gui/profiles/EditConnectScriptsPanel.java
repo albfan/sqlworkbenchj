@@ -109,6 +109,7 @@ public class EditConnectScriptsPanel
 		pol.addComponent(this.keepAliveInterval);
 		pol.setDefaultComponent(this.postConnectEditor);
 		this.setFocusTraversalPolicy(pol);
+		this.setFocusCycleRoot(false);
 	}
 	
 	public String getKeepAliveScript()

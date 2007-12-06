@@ -2901,10 +2901,10 @@ public class DbMetadata
 			int fkNameCol;
 			int colCol;
 			int fkColCol;
-			int deleteActionCol;
-			int updateActionCol;
+			int deleteActionCol = 11;
+			int updateActionCol = 10;
 			int schemaCol;
-
+			
 			if (getOwnFk)
 			{
 				rs = this.metaData.getImportedKeys(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
@@ -2913,8 +2913,6 @@ public class DbMetadata
 				fkNameCol = 12;
 				colCol = 8;
 				fkColCol = 4;
-				updateActionCol = 10;
-				deleteActionCol = 11;
 			}
 			else
 			{
@@ -2924,9 +2922,8 @@ public class DbMetadata
 				fkNameCol = 12;
 				colCol = 4;
 				fkColCol = 8;
-				updateActionCol = 10;
-				deleteActionCol = 11;
 			}
+			
 			while (rs.next())
 			{
 				String table = rs.getString(tableCol);
@@ -3721,14 +3718,14 @@ public class DbMetadata
 			{
 				fk.append("   ,");
 				fk.append((String)values.next());
-				fk.append(nl);
 			}
 			else
 			{
 				fk.append((String)values.next());
 				fk.append(';');
-				fk.append(nl);fk.append(nl);
+				fk.append(nl);
 			}
+			fk.append(nl);
 		}
 		return fk;
 	}

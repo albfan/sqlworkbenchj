@@ -162,6 +162,7 @@ public class EditWindow
 		pol.addComponent(this.okButton);
 		pol.addComponent(this.cancelButton);
 		this.setFocusTraversalPolicy(pol);
+		this.setFocusCycleRoot(false);
 
 		InputMap im = new ComponentInputMap(this.getRootPane());
 		ActionMap am = new ActionMap();

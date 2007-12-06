@@ -60,7 +60,6 @@ import workbench.gui.components.OneLineTableModel;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
-import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.DbData;
 import workbench.interfaces.DbUpdater;
 import workbench.interfaces.Interruptable;
@@ -159,11 +158,6 @@ public class DwPanel
 		this.dataTable.getSelectionModel().addListSelectionListener(this);
 		this.dataTable.setHighlightRequiredFields(Settings.getInstance().getHighlightRequiredFields());
 		this.dataTable.setStatusBar(this.statusBar);
-		
-		WbTraversalPolicy pol = new WbTraversalPolicy();
-		pol.setDefaultComponent(dataTable);
-		pol.addComponent(dataTable);
-		this.setFocusTraversalPolicy(pol);
 		this.genericRowMonitor = new GenericRowMonitor(this.statusBar);
 	}
 

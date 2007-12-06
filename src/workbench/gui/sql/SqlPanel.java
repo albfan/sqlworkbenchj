@@ -2743,14 +2743,16 @@ public class SqlPanel
 				this.editor.setText("");
 				pos = 0;
 			}
-			else if (comment != null)
-			{
-				this.editor.appendLine("\n" + comment + "\n");
-				pos = this.editor.getDocumentLength();
-			}
 			else
 			{
-				this.editor.appendLine("\n\n");
+				if (comment != null)
+				{
+					this.editor.appendLine("\n" + comment + "\n");
+				}
+				else
+				{
+					this.editor.appendLine("\n\n");
+				}
 				pos = this.editor.getDocumentLength();
 			}
 			this.editor.appendLine(sql + ";\n");

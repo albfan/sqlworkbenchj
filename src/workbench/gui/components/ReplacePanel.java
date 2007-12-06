@@ -79,7 +79,6 @@ public class ReplacePanel
 		policy.addComponent(this.replaceAllButton);
 		policy.addComponent(this.closeButton);
 		policy.setDefaultComponent(criteriaTextField);
-		this.setFocusCycleRoot(true);
 		this.setFocusTraversalPolicy(policy);
 
 		this.findButton.addActionListener(this);

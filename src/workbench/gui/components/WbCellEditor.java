@@ -204,7 +204,7 @@ public class WbCellEditor
 			super(content);
 			this.setFocusCycleRoot(false);
 			this.setFocusTraversalKeys(WHEN_FOCUSED, Collections.EMPTY_SET);
-			editor = (TextAreaEditor)content;
+			editor = content;
 		}
 
 		public boolean isManagingFocus() { return false; }

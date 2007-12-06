@@ -173,6 +173,7 @@ public class QuickFilterPanel
 		pol.addComponent(filterAction.getToolbarButton());
 		pol.addComponent(resetFilterAction.getToolbarButton());
 		this.setFocusTraversalPolicy(pol);
+		this.setFocusCycleRoot(false);
 		this.filterValue.addActionListener(this);
 	}
 

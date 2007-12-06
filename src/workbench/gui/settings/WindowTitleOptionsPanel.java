@@ -44,8 +44,8 @@ public class WindowTitleOptionsPanel
 		policy.setDefaultComponent(productAtEnd);
 
 		this.encloseChar.insertItemAt(ResourceMgr.getString("TxtNothingItem"), 0);
-		this.setFocusCycleRoot(true);
 		this.setFocusTraversalPolicy(policy);	
+		this.setFocusCycleRoot(false);
 		this.restoreSettings();
 	}
 

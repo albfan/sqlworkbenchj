@@ -374,7 +374,7 @@ public class TableListPanel
 		pol.addComponent(tableList);
 		pol.addComponent(tableDefinition);
 		this.setFocusTraversalPolicy(pol);
-		//this.reset();
+		this.setFocusCycleRoot(false);
 		this.displayTab.addMouseListener(this);
 		this.tableList.addMouseListener(this);
 

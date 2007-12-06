@@ -87,6 +87,7 @@ public class ConnectionEditorPanel
 		policy.addComponent(showPassword);
 		policy.addComponent(tfFetchSize);
 		policy.addComponent(cbAutocommit);
+		policy.addComponent(extendedProps);
 		policy.addComponent(cbStorePassword);
 		policy.addComponent(cbSeparateConnections);
 		policy.addComponent(cbIgnoreDropErrors);
@@ -96,6 +97,7 @@ public class ConnectionEditorPanel
 		policy.addComponent(confirmUpdates);
 		policy.addComponent(includeNull);
 		policy.addComponent(rememberExplorerSchema);
+		policy.addComponent(trimCharData);
 		policy.addComponent(confirmUpdates);
 		policy.addComponent(editConnectionScriptsButton);
 		policy.addComponent(altDelimiter.getTextField());
@@ -103,7 +105,7 @@ public class ConnectionEditorPanel
 		policy.addComponent(tfWorkspaceFile);
 		policy.setDefaultComponent(tfProfileName);
 
-		this.setFocusCycleRoot(true);
+		this.setFocusCycleRoot(false);
 		this.setFocusTraversalPolicy(policy);
 
 		this.initEditorList();
@@ -221,7 +223,6 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
     add(tfProfileName, gridBagConstraints);
 
-    cbDrivers.setFocusCycleRoot(true);
     cbDrivers.setMaximumSize(new java.awt.Dimension(32767, 20));
     cbDrivers.setMinimumSize(new java.awt.Dimension(40, 20));
     cbDrivers.setName("driverclass"); // NOI18N

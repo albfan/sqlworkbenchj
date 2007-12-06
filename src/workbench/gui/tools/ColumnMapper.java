@@ -425,12 +425,8 @@ class MapDataModel
 						if (col == null)
 						{
 							col = new ColumnIdentifier();
-							col.setExpression(s);
 						}
-						else
-						{
-							col.setExpression(s);
-						}
+						col.setExpression(s);
 					}
 				}
 				else if (aValue instanceof SkipColumnIndicator)

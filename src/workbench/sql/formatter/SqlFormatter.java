@@ -1211,12 +1211,8 @@ public class SqlFormatter
 				this.appendNewline();
 				return this.processBracketList(2);
 			}
-			return t;
 		}
-		else
-		{
-			return t;
-		}
+		return t;
 	}
 
 	private SQLToken processFunctionCall(SQLToken last)

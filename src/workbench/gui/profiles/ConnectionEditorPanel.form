@@ -34,7 +34,6 @@
     </Component>
     <Component class="javax.swing.JComboBox" name="cbDrivers">
       <Properties>
-        <Property name="focusCycleRoot" type="boolean" value="true"/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[32767, 20]"/>
         </Property>

@@ -128,7 +128,6 @@ public class MacroManagerGui
 		policy.addComponent(macroEditor);
 		policy.setDefaultComponent(macroList);
 		this.setFocusTraversalPolicy(policy);
-		this.setFocusCycleRoot(true);
 	}
 
 	public JList getMacroList() { return this.macroList; }

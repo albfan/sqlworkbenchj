@@ -450,17 +450,15 @@ public class XmlRowDataConverter
 					result.append(indent);
 					result.append("    <data-format>");
 					result.append(defaultTimestampFormatter.toPattern());
-					result.append("</data-format>");
-					result.append(this.lineEnding);
 				}
 				else
 				{
 					result.append(indent);
 					result.append("    <data-format>");
 					result.append(defaultDateFormatter.toPattern());
-					result.append("</data-format>");
-					result.append(this.lineEnding);
 				}
+				result.append("</data-format>");
+				result.append(this.lineEnding);
 			}
 			result.append(indent);
 			result.append("  </");

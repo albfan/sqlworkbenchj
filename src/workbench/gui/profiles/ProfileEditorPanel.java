@@ -63,7 +63,6 @@ public class ProfileEditorPanel
 	private NewListEntryAction newItem;
 	private CopyProfileAction copyItem;
 	private DeleteListEntryAction deleteItem;
-	private NewGroupAction newGroup;
 	protected boolean dummyAdded;
 	
 	/** Creates new form ProfileEditor */
@@ -324,10 +323,10 @@ public class ProfileEditorPanel
 		if (result == 0) 
 		{
 			// move profiles
-			String newGroup = (String)groupBox.getSelectedItem();
-			if (newGroup == null) return false;
+			String group = (String)groupBox.getSelectedItem();
+			if (group == null) return false;
 			
-			model.moveProfilesToGroup(groupNode, newGroup);
+			model.moveProfilesToGroup(groupNode, group);
 			return true;
 		}
 		else if (result == 1) 
