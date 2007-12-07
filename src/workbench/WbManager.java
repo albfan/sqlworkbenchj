@@ -968,7 +968,7 @@ public class WbManager
 		}
 	}
 
-	protected void runGui()
+	public void runGui()
 	{
 		WbSplash splash = null;
 		if (Settings.getInstance().getShowSplash())
@@ -977,18 +977,17 @@ public class WbManager
 			splash.setVisible(true);
 		}
 
-		MacOSHelper m = new MacOSHelper();
 		// This will install the application listener if running under MacOS
+		MacOSHelper m = new MacOSHelper();
 		m.installApplicationHandler();
-		
-		UpdateCheck upd = new UpdateCheck();
-		upd.startUpdateCheck();		
 		
 		try
 		{
 			this.initUI();
+			
 			boolean pumper = cmdLine.isArgPresent(ARG_SHOW_PUMPER);
 			boolean explorer = cmdLine.isArgPresent(ARG_SHOW_DBEXP);
+			
 			if (pumper)
 			{
 				DataPumper p = new DataPumper(null, null);
@@ -1002,6 +1001,9 @@ public class WbManager
 			{
 				this.openNewWindow(true);
 			}
+			
+			UpdateCheck upd = new UpdateCheck();
+			upd.startUpdateCheck();		
 		}
 		finally
 		{

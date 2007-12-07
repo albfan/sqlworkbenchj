@@ -203,11 +203,6 @@ public class ResourceMgr
 		return in;
 	}
 
-	public static ImageIcon getLargeImage(String aKey)
-	{
-		return retrieveImage(aKey + "24", ".gif");
-	}
-
 	public static ImageIcon getBlankImage()
 	{
 		return retrieveImage("blank16", ".gif");

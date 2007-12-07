@@ -56,12 +56,12 @@ public class SqlKeywordHelper
 	
 	private Set<String> loadKeywordsFromFile(String filename)
 	{
-
+		// First read the built-in functions
 		InputStream s = SqlKeywordHelper.class.getResourceAsStream(filename);
 		BufferedReader in = new BufferedReader(new InputStreamReader(s));
+		
 		Collection<String> builtin = FileUtil.getLines(in);
-
-		Set result = new HashSet<String>(builtin.size());
+		Set<String> result = new HashSet<String>(builtin.size());
 		result.addAll(builtin);
 		
 		// Try to read the file in the current directory.

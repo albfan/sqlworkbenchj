@@ -185,42 +185,38 @@ public class Settings
 		}
 		
 		boolean logSysErr = getBoolProperty("workbench.log.console", false);
-		String sysLog = System.getProperty("workbench.log.console", null);
-		if (sysLog != null)
-		{
-			logSysErr = "true".equals(sysLog);
-		}
-
 		LogMgr.logToSystemError(logSysErr);
 
 		String format = getProperty("workbench.log.format", "{type} {timestamp} {message} {error}");
 		LogMgr.setMessageFormat(format);
 
-		String level = getProperty("workbench.log.level", "info");
+		String level = getProperty("workbench.log.level", "INFO");
 		LogMgr.setLevel(level);
 
-		String logfile = null;
     try
     {
-			logfile = getProperty("workbench.log.filename", FileDialogUtil.CONFIG_DIR_KEY + "/workbench.log");
-			int maxSize = this.getMaxLogfileSize();
-			if (logfile.indexOf("%configdir%") > -1)
-			{
-				logfile = StringUtil.replace(logfile, "%configdir%", configDir);
-			}
-			else
-			{
-				logfile = StringUtil.replace(logfile, FileDialogUtil.CONFIG_DIR_KEY, configDir);
-			}
-
+			String logfilename = getProperty("workbench.log.filename", "workbench.log");
+			
 			// Replace old System.out or System.err settings
-			if (logfile.equalsIgnoreCase("System.out") || logfile.equalsIgnoreCase("System.err"))
+			if (logfilename.equalsIgnoreCase("System.out") || logfilename.equalsIgnoreCase("System.err"))
 			{
-				File f = new File(getConfigDir(), "workbench.log");
-				logfile = f.getAbsolutePath();
-				this.props.setProperty("workbench.log.filename", FileDialogUtil.CONFIG_DIR_KEY + "/workbench.log");
+				logfilename = "workbench.log";
+				this.props.setProperty("workbench.log.filename", "workbench.log");
+			}
+			
+			File logfile = new File(logfilename);
+			if (!logfile.isAbsolute())
+			{
+				logfile = new File(getConfigDir(), logfilename);
 			}
 
+			if (!logfile.canWrite())
+			{
+				logfile = new File(getConfigDir(), "workbench.log");
+				this.props.setProperty("workbench.log.filename", "workbench.log");
+			}
+			
+			int maxSize = this.getMaxLogfileSize();
 			LogMgr.setOutputFile(logfile, maxSize);
     }
     catch (Throwable e)
@@ -2080,6 +2076,16 @@ public class Settings
 		setProperty("workbench.sql.formatter.select.columnsperline", value);
 	}
 
+	public boolean getFormatterLowercaseFunctions()
+	{
+		return getBoolProperty("workbench.sql.formatter.functions.lowercase", false);
+	}
+
+	public void setFormatterLowercaseFunctions(boolean flag)
+	{
+		setProperty("workbench.sql.formatter.functions.lowercase", flag);
+	}
+	
 	public int getFormatterMaxSubselectLength()
 	{
 		return getIntProperty("workbench.sql.formatter.subselect.maxlength", 60);

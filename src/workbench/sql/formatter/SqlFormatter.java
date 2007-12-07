@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
+import workbench.util.CaseInsensitiveComparator;
 import workbench.resource.Settings;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.sql.wbcommands.CommandTester;
@@ -138,6 +140,7 @@ public class SqlFormatter
 	private Set<String> dataTypes = Collections.emptySet();
 	private int selectColumnsPerLine = 1;
 	private static final String NL = "\n";
+	private boolean lowerCaseFunctions;
 
 	public SqlFormatter(CharSequence aScript)
 	{
@@ -161,10 +164,16 @@ public class SqlFormatter
 			for (int i=0; i < indentCount; i++) this.indent.append(' ');
 		}
 		this.maxSubselectLength = maxSubselectLength;
-		this.dbFunctions = new HashSet<String>();
+		this.dbFunctions = new TreeSet<String>(new CaseInsensitiveComparator());
+		this.lowerCaseFunctions = Settings.getInstance().getFormatterLowercaseFunctions();
 		addStandardFunctions(dbFunctions);
 	}
 
+	public void setUseLowerCaseFunctions(boolean flag)
+	{
+		this.lowerCaseFunctions = flag;
+	}
+	
 	public String getLineEnding()
 	{
 		return NL;
@@ -192,11 +201,8 @@ public class SqlFormatter
 	
 	private void addStandardFunctions(Set<String> functions)
 	{
-		functions.add("MIN");
-		functions.add("MAX");
-		functions.add("AVG");
-		functions.add("SUM");
-		functions.add("COUNT");
+		SqlKeywordHelper keyWords = new SqlKeywordHelper();		
+		functions.addAll(keyWords.getSystemFunctions());
 	}
 	
 	private void saveLeadingWhitespace()
@@ -276,6 +282,15 @@ public class SqlFormatter
 		this.result.append(c);
 	}
 
+	private void appendTokenText(Token t)
+	{
+		String text = t.getContents();
+		if (this.lowerCaseFunctions && this.dbFunctions.contains(text))
+		{
+			text = text.toLowerCase();
+		}
+		appendText(text);
+	}
 	
 	private void appendComment(String text)
 	{
@@ -328,10 +343,10 @@ public class SqlFormatter
 
 	private boolean isDbFunction(String key)
 	{
-		if (dbFunctions == null) 
+		if (dbFunctions == null)
 		{
-			SqlKeywordHelper helper = new SqlKeywordHelper();
-			dataTypes = helper.getSystemFunctions();
+			SqlKeywordHelper keyWords = new SqlKeywordHelper();
+			dbFunctions = keyWords.getSystemFunctions();
 		}
 		return this.dbFunctions.contains(key.toUpperCase());
 	}
@@ -340,8 +355,8 @@ public class SqlFormatter
 	{
 		if (dataTypes == null) 
 		{
-			SqlKeywordHelper helper = new SqlKeywordHelper();
-			dataTypes = helper.getDataTypes();
+			SqlKeywordHelper keyWords = new SqlKeywordHelper();
+			dataTypes = keyWords.getDataTypes();
 		}
 		return this.dataTypes.contains(key.toUpperCase());
 	}
@@ -466,7 +481,7 @@ public class SqlFormatter
 		
 		while (t != null)
 		{
-			String text = t.getContents();
+			final String text = t.getContents();
 			if (t.isComment())
 			{
 				this.appendComment(text);
@@ -505,7 +520,7 @@ public class SqlFormatter
 				if ("=".equals(lastToken.getContents()))
 				{
 					t = this.processSubSelect(false);
-					this.appendText(t.getContents());
+					this.appendTokenText(t);
 				}
 				else
 				{
@@ -514,7 +529,7 @@ public class SqlFormatter
 					if (t.isIdentifier())
 					{
 						this.appendText(' ');
-						this.appendText(t.getContents());
+						this.appendTokenText(t);
 					}
 				}
 			}
@@ -540,7 +555,7 @@ public class SqlFormatter
 			else
 			{
 				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
-				this.appendText(text);
+				this.appendTokenText(t);
 			}
 			lastToken = t;
 			t = this.lexer.getNextToken(true, false);
@@ -620,14 +635,13 @@ public class SqlFormatter
 		boolean newLinePending = false;
 		
 		SQLToken t = this.lexer.getNextToken(true,true);
-		String text = null;
 		int commaCount = 0;
 		int bracketCount = 0;
 		
 		boolean inQuotes = false;
 		while (t != null)
 		{
-			text = t.getContents();
+			final String text = t.getContents();
 			if ("'".equals(text))
 			{
 				inQuotes = !inQuotes;
@@ -662,7 +676,7 @@ public class SqlFormatter
 			}
 			else if (text.indexOf("\n") == -1 &&  text.indexOf("\r") == -1)
 			{
-				this.appendText(text);
+				this.appendTokenText(t);
 			}
 			t = this.lexer.getNextToken(true,true);
 		}
@@ -682,10 +696,9 @@ public class SqlFormatter
 		
 		SQLToken last = null;
 		SQLToken t = this.lexer.getNextToken(true,false);
-		String text = null;
 		while (t != null)
 		{
-			text = t.getContents();
+			final String text = t.getContents();
 			
 			if ("SELECT".equals(text) && last.getContents().equals("("))
 			{
@@ -736,8 +749,7 @@ public class SqlFormatter
 			}
 			else if (!t.isWhiteSpace())
 			{
-//				if (this.needsWhitespace(last, t)) this.appendText(' ');
-				this.appendText(text);
+				this.appendTokenText(t);
 			}
 			last = t;
 			t = this.lexer.getNextToken(true,false);
@@ -792,7 +804,7 @@ public class SqlFormatter
 
 		while (t != null)
 		{
-			String text = t.getContents();
+			final String text = t.getContents();
 			if (text.equals(")"))
 			{
 				this.appendNewline();
@@ -814,7 +826,7 @@ public class SqlFormatter
 			}
 			else if (!t.isWhiteSpace())
 			{
-				this.appendText(text);
+				this.appendTokenText(t);
 				if (t.isComment()) this.appendText(' ');
 			}
 			t = this.lexer.getNextToken(true, false);
@@ -932,10 +944,10 @@ public class SqlFormatter
 		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = t;
 		CommandTester wbTester = new CommandTester();
-		//if (this.indent != null) this.appendText(this.indent);
+		
 		while (t != null)
 		{
-			String word = t.getContents().toUpperCase();
+			final String word = t.getContents().toUpperCase();
 			if (t.isComment())
 			{
 				String text = t.getContents();
@@ -967,7 +979,7 @@ public class SqlFormatter
 				}
 				else 
 				{
-					this.appendText(word);
+					this.appendTokenText(t);
 				}
 				
 				if (LINE_BREAK_AFTER.contains(word))

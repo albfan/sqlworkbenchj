@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import workbench.util.CaseInsensitiveComparator;
 import workbench.log.LogMgr;
 
 /**
@@ -35,7 +36,7 @@ public class ArgumentParser
 
 	public ArgumentParser()
 	{
-		Comparator<String> c = StringUtil.getCaseInsensitiveComparator();
+		Comparator<String> c = new CaseInsensitiveComparator();
 		arguments = new TreeMap<String, String>(c);
 		argTypes = new TreeMap<String, ArgumentType>(c);
 		allowedValues = new TreeMap<String, List<String>>(c);

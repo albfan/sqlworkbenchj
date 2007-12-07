@@ -26,6 +26,7 @@ import javax.swing.tree.TreePath;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.util.CaseInsensitiveComparator;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 
@@ -278,7 +279,7 @@ class ProfileListModel
 		// Make sure the default group is added as the first item!
 		List<String> groups = new ArrayList<String>();
 		groups.addAll(groupMap.keySet());
-		Collections.sort(groups, StringUtil.getCaseInsensitiveComparator());
+		Collections.sort(groups, new CaseInsensitiveComparator());
 		
 		for (String group : groups)
 		{

@@ -12,7 +12,7 @@
 package workbench.db;
 
 import java.util.Comparator;
-import workbench.util.StringUtil;
+import workbench.util.CaseInsensitiveComparator;
 
 /**
  *
@@ -21,7 +21,7 @@ import workbench.util.StringUtil;
 public class TableNameComparator
 	implements Comparator<TableIdentifier>
 {
-	private Comparator<String> stringComparator = StringUtil.getCaseInsensitiveComparator();
+	private Comparator<String> stringComparator = new CaseInsensitiveComparator();
 	
 	public TableNameComparator()
 	{

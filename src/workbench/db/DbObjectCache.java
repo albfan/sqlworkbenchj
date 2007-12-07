@@ -111,7 +111,7 @@ public class DbObjectCache
 	{
 		this.getTables(schema);
 		String schemaToUse = getSchemaToUse(schema);
-		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>();
+		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameComparator());
 		for (TableIdentifier tbl : objects.keySet())
 		{
 			String ttype = tbl.getType();
@@ -130,7 +130,7 @@ public class DbObjectCache
 	
 	private Set<TableIdentifier> filterTablesBySchema(String schema)
 	{
-		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>();
+		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameComparator());
 		DbMetadata meta = this.dbConnection.getMetadata();
 		String schemaToUse = getSchemaToUse(schema);
 		for (TableIdentifier tbl : objects.keySet())

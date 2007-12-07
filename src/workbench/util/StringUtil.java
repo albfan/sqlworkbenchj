@@ -16,7 +16,6 @@ import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -220,20 +219,6 @@ public class StringUtil
 		return true;
 	}
 	
-	public static Comparator<String> getCaseInsensitiveComparator()
-	{
-		return new Comparator<String>()
-		{
-			public int compare(String value1, String value2)
-			{
-				if (value1 == null && value2 == null) return 0;
-				if (value1 == null) return -1;
-				if (value2 == null) return 1;
-				return value1.compareToIgnoreCase(value2);
-			}
-		};
-	}
-
 	public static final boolean arraysEqual(String[] one, String[] other)
 	{
 		if (one == null && other != null) return false;
@@ -366,6 +351,7 @@ public class StringUtil
 
 	/**
 	 * Returns the number of Digits of the value
+	 * 
 	 * @param x the value to check
 	 * @return the number of digits that x consists of
 	 */
@@ -510,6 +496,11 @@ public class StringUtil
 		return compareStrings(one, other, false) == 0;
 	}
 
+	/**
+	 * @param value1 the first String, maybe null
+	 * @param value2 the second String, maybe null
+	 * @return 0 if both are null 
+	 */
 	public static int compareStrings(String value1, String value2, boolean ignoreCase)
 	{
 		if (value1 == null && value2 == null) return 0;

@@ -11,7 +11,6 @@
  */
 package workbench.log;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
@@ -151,9 +150,9 @@ public class LogMgr
 	
 	public static void setLevel(String aType)
 	{
-		if (aType == null) return;
+		if (aType == null) aType = "INFO";
 		if ("warning".equalsIgnoreCase(aType)) aType = "WARN";
-		aType = aType.toUpperCase();
+		else aType = aType.toUpperCase();
 
 		levelDebug = LEVELS.indexOf(DEBUG);
 		levelWarning = LEVELS.indexOf(WARNING);
@@ -183,10 +182,9 @@ public class LogMgr
 		}
 	}
 
-	public static void setOutputFile(String aFilename, int maxFilesize)
+	public static void setOutputFile(File logfile, int maxFilesize)
 	{
-		if (aFilename == null || aFilename.length() == 0) return;
-		if (aFilename.startsWith("System")) return;
+		if (logfile == null) return;
 		try
 		{
 			if (logOut != null)
@@ -194,21 +192,21 @@ public class LogMgr
 				logOut.close();
 				logOut = null;
 			}
-			File f = new File(aFilename);
 
-			if (f.exists() && f.length() > maxFilesize)
+			if (logfile.exists() && logfile.length() > maxFilesize)
 			{
-				File last = new File(aFilename + ".last");
+				File last = new File(logfile.getAbsolutePath() + ".last");
 				if (last.exists()) last.delete();
-				f.renameTo(last);
+				logfile.renameTo(last);
 			}
-			logOut = new PrintStream(new FileOutputStream(aFilename,true));
+			logOut = new PrintStream(new FileOutputStream(logfile,true));
 			logInfo(null, "=================== Log started ===================");
 		}
 		catch (Throwable th)
 		{
 			logOut = null;
-			logError("LogMgr.checkOutput()", "Error when opening logfile=" + aFilename, th);
+			logSystemErr = true;
+			logError("LogMgr.checkOutput()", "Error when opening logfile=" + logfile.getAbsolutePath(), th);
 		}
 	}
 
