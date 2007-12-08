@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.sql.Types;
 import workbench.WbManager;
 import workbench.interfaces.TableSearchDisplay;
 import workbench.log.LogMgr;
@@ -40,6 +41,8 @@ public class TableSearcher
 	private Statement query = null;
 	private Thread searchThread;
 	private int maxRows = 0;
+	private boolean excludeLobColumns = true;
+	private DataStore result = null;
 	
 	public TableSearcher()
 	{
@@ -67,6 +70,10 @@ public class TableSearcher
 			if (this.query != null)
 			{
 				this.query.cancel();
+			}
+			if (this.result != null)
+			{
+				result.cancelRetrieve();
 			}
 		}
 		catch (Throwable e)
@@ -118,6 +125,11 @@ public class TableSearcher
 		}
 	}
 
+	public void setExcludeLobColumns(boolean flag)
+	{
+		this.excludeLobColumns = flag;
+	}
+	
 	private void searchTable(TableIdentifier table)
 	{
 		ResultSet rs = null;
@@ -127,8 +139,8 @@ public class TableSearcher
 		try
 		{
 			String sql = this.buildSqlForTable(table);
-			if (sql == null) return;
 			if (this.display != null) this.display.setCurrentTable(table.getTableExpression(), sql);
+			if (sql == null) return;
 
 			if (!connection.getAutoCommit() && useSavepoint)
 			{
@@ -147,14 +159,14 @@ public class TableSearcher
 			this.query.setMaxRows(this.maxRows);
 
 			rs = this.query.executeQuery(sql);
-			while (rs != null && rs.next())
-			{
-				if (this.cancelSearch)
-				{
-					break;
-				}
-				if (this.display != null)this.display.addResultRow(table, rs);
-			}
+			result = new DataStore(rs,true);
+			result.setGeneratingSql(sql);
+			result.setOriginalConnection(connection);
+			result.setUpdateTableToBeUsed(table);
+			
+			if (this.display != null) this.display.tableSearched(table, result);
+			result = null;
+			
 			if (sp != null)
 			{
 				connection.releaseSavepoint(sp);
@@ -193,23 +205,46 @@ public class TableSearcher
 		DataStore def = meta.getTableDefinition(tbl);
 		int cols = def.getRowCount();
 		StringBuilder sql = new StringBuilder(cols * 120);
-		sql.append("SELECT * FROM ");
+		sql.append("SELECT ");
+		
+		if (this.excludeLobColumns)
+		{
+			int added = 0;
+			for (int i=0; i < cols; i++)
+			{
+				String column = def.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+				int type  = def.getValueAsInt(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, Types.OTHER);
+				if (!SqlUtil.isClobType(type) && !SqlUtil.isBlobType(type))
+				{
+					if (added > 0) sql.append(", ");
+					sql.append(this.connection.getMetadata().quoteObjectname(column));
+					added ++;
+				}
+			}			
+		}
+		else
+		{
+			sql.append("*");
+		}
+		sql.append(" FROM ");
 		sql.append(tbl.getTableExpression(this.connection));
 		sql.append("\n WHERE ");
 		boolean first = true;
 		int colcount = 0;
 		for (int i=0; i < cols; i++)
 		{
-			String column = (String)def.getValue(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			Integer type = (Integer)def.getValue(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
-			int sqlType = type.intValue();
-			if (SqlUtil.isCharacterType(sqlType))
+			String column = def.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+			int sqlType  = def.getValueAsInt(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, Types.OTHER);
+			if (sqlType == Types.VARCHAR || sqlType == Types.CHAR)
 			{
+				column = this.connection.getMetadata().quoteObjectname(column);
+				
 				colcount ++;
 				if (!first)
 				{
 					sql.append(" OR ");
 				}
+				
 				if (this.columnFunction != null)
 				{
 					sql.append(StringUtil.replace(this.columnFunction, "$col$", column));
@@ -222,13 +257,19 @@ public class TableSearcher
 				sql.append(this.criteria);
 				sql.append('\'');
 				if (i < cols - 1) sql.append('\n');
+				
 				first = false;
 			}
 		}
 		if (colcount == 0)
+		{
+			LogMgr.logWarning("TableSearcher.buildSqlForTable()", "Table " + tbl.getTableExpression() + " not beeing searched because no character columns were found");
 			return null;
+		}
 		else
+		{
 			return sql.toString();
+		}
 	}
 
 	public boolean getCriteriaMightBeCaseInsensitive()

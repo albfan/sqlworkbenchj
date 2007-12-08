@@ -11,7 +11,6 @@
  */
 package workbench.gui.dbobjects;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -21,24 +20,17 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.sql.Clob;
-import java.sql.ResultSet;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import workbench.db.DbMetadata;
@@ -61,18 +53,19 @@ import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.ShareableDisplay;
 import workbench.interfaces.TableSearchDisplay;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
-import workbench.storage.ResultInfo;
-import workbench.util.Like;
-import workbench.util.SqlUtil;
+import workbench.storage.filter.ColumnExpression;
+import workbench.storage.filter.ContainsComparator;
 import workbench.util.StringUtil;
 import workbench.util.WbWorkspace;
 
 
 /**
- *
+ * A display for the results of a {@link workbench.db.TableSearcher}
+ * 
  * @author  support@sql-workbench.net
  */
 public class TableSearchPanel
@@ -85,21 +78,20 @@ public class TableSearchPanel
 	private boolean tableLogged;
 	private String fixedStatusText;
 	private ShareableDisplay tableListSource;
-	private DataStore currentResult;
-	private WbTable currentDisplayTable;
-	private JScrollPane currentScrollPane;
-	private TitledBorder currentBorder;
-	private Like searchPattern;
-	private WbTable firstTable;
+	private ColumnExpression searchPattern;
 	private EditorPanel sqlDisplay;
-	private ResultHighlightingRenderer renderer;
 	private FlatButton startButton;
-	
+
 	public TableSearchPanel(ShareableDisplay aTableListSource)
 	{
 		this.tableListModel = EmptyTableModel.EMPTY_MODEL;
 		this.tableListSource = aTableListSource;
 		initComponents();
+
+		JScrollBar sb = this.resultScrollPane.getVerticalScrollBar();
+		sb.setUnitIncrement(25); // approx. one line
+		sb.setBlockIncrement(25 * 5); // approx. 5 lines
+
 		this.columnFunction.addMouseListener(new TextComponentMouseListener());
 		this.searchText.addMouseListener(new TextComponentMouseListener());
 
@@ -114,7 +106,7 @@ public class TableSearchPanel
 		reload.setTooltip(ResourceMgr.getString("TxtRefreshTableList"));
 		toolbar.add(reload);
 		buttonPanel.add(toolbar);
-		
+
 		startButton = new FlatButton();
     startButton.setText(ResourceMgr.getString("LblStartSearch"));
     startButton.addActionListener(new java.awt.event.ActionListener()
@@ -123,11 +115,11 @@ public class TableSearchPanel
       {
         startSearch();
       }
-    });		
+    });
 		buttonPanel.add(startButton);
 		this.searcher = new TableSearcher();
 		this.searcher.setDisplay(this);
-		
+
 		this.tableNames.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.fixedStatusText = ResourceMgr.getString("TxtSearchingTable") + " ";
 		tables.getSelectionModel().addListSelectionListener(this);
@@ -138,19 +130,307 @@ public class TableSearchPanel
 		this.statusInfo.setBorder(b2);
 	}
 
-	private void startSearch()                                            
-	{                                                
+	private void startSearch()
+	{
 		if (this.searcher.isRunning())
 		{
 			setStartButtonEnabled(false);
 			this.searcher.cancelSearch();
-			//setStartButtonEnabled(true);
 		}
 		else
 		{
 			this.searchData();
 		}
-	} 	
+	}
+
+	private void setStartButtonEnabled(final boolean flag)
+	{
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				startButton.setEnabled(flag);
+			}
+		});
+	}
+
+	public synchronized void tableSearched(TableIdentifier table, DataStore result)
+	{
+		try
+		{
+			if (result.getRowCount() == 0) return;
+
+			WbTable display = new WbTable(true, true, false);
+			display.getCopyAsInsertAction().setEnabled(true);
+			display.getCopyAsUpdateAction().setEnabled(true);
+			display.getCopyAsDeleteInsertAction().setEnabled(true);
+
+			DataStoreTableModel model = new DataStoreTableModel(result);
+			display.setModel(model, true);
+			display.applyHighlightExpression(searchPattern);
+			display.adjustOrOptimizeColumns();
+
+			JScrollPane pane = new ParentWidthScrollPane(display);
+
+			int rows = display.getRowCount();
+
+			String label = table.getTableExpression()  + " (" + rows + " " + (rows == 1 ? ResourceMgr.getString("TxtFoundRow") : ResourceMgr.getString("TxtFoundRows")) + ")";
+			TitledBorder b = new TitledBorder(" " + label);
+			Font f = b.getTitleFont().deriveFont(Font.BOLD);
+			b.setTitleFont(f);
+			pane.setBorder(b);
+
+			GridBagConstraints constraints = new GridBagConstraints();
+			constraints.gridx = 0;
+			constraints.fill = GridBagConstraints.HORIZONTAL;
+			constraints.weightx = 1.0;
+			constraints.anchor = GridBagConstraints.WEST;
+			this.resultPanel.add(pane, constraints);
+
+			int height = display.getRowHeight();
+			int width = pane.getWidth();
+
+			Dimension size = pane.getPreferredSize();
+			if (rows > 25) rows = 25;
+			size.setSize(width - 20, (rows + 4) * height );
+			pane.setPreferredSize(size);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("TableSearchPanel.tableSearched()", "Error adding result.", e);
+		}
+	}
+
+	public synchronized void error(String msg)
+	{
+		this.sqlDisplay.appendLine(msg);
+		this.sqlDisplay.appendLine("\n\n");
+	}
+
+	/**
+	 *	Call back function from the table searcher...
+	 */
+	public synchronized void setCurrentTable(String table, String sql)
+	{
+		this.tableLogged = false;
+		if (sql == null)
+		{
+			String msg = ResourceMgr.getFormattedString("MsgNoCharCols", table);
+			this.sqlDisplay.appendLine("-- " + msg);
+		}
+		else
+		{
+			this.statusInfo.setText(this.fixedStatusText + table);
+			this.sqlDisplay.appendLine(sql + ";");
+		}
+		this.sqlDisplay.appendLine("\n\n");
+	}
+
+	public void setStatusText(String aStatustext)
+	{
+		this.statusInfo.setText(aStatustext);
+	}
+
+	public void setConnection(WbConnection connection)
+	{
+		this.connection = connection;
+		this.searcher.setConnection(connection);
+		this.tableListSource.addTableListDisplayClient(this.tableNames);
+	}
+
+	public void disconnect()
+	{
+		this.reset();
+		this.tableListSource.removeTableListDisplayClient(this.tableNames);
+	}
+
+	public void reset()
+	{
+    // resultPanel.removeAll() does not work properly for some reason
+    // the old tables just stay in there
+    // so I re-create the actual result panel
+		this.resultPanel = new JPanel(new GridBagLayout());
+    this.resultScrollPane.setViewportView(resultPanel);
+		this.sqlDisplay.setText("");
+	}
+
+	public void searchData()
+	{
+		if (!searcher.setColumnFunction(this.columnFunction.getText()))
+		{
+			WbSwingUtilities.showErrorMessageKey(this, "MsgErrorColFunction");
+			return;
+		}
+
+		if (this.tableNames.getSelectedRowCount() == 0) return;
+		if (this.connection.isBusy())
+		{
+			WbSwingUtilities.showMessageKey(this, "ErrConnectionBusy");
+			return;
+		}
+
+		this.reset();
+
+		int[] selectedTables = this.tableNames.getSelectedRows();
+
+		TableIdentifier[] searchTables = new TableIdentifier[this.tableNames.getSelectedRowCount()];
+		DataStore tables = ((WbTable)(this.tableNames)).getDataStore();
+		for (int i=0; i < selectedTables.length; i++)
+		{
+			String catalog = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
+			String schema = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+			String tablename = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+			String type = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+
+			searchTables[i] = new TableIdentifier(catalog, schema, tablename);
+			searchTables[i].setNeverAdjustCase(true);
+			searchTables[i].setType(type);
+		}
+
+		int maxRows = StringUtil.getIntValue(this.rowCount.getText(), 0);
+
+		String text = this.searchText.getText();
+		searcher.setMaxRows(maxRows);
+		searcher.setCriteria(text);
+		searcher.setExcludeLobColumns(excludeLobs.isSelected());
+		boolean sensitive= this.connection.getDbSettings().isStringComparisonCaseSensitive();
+		boolean ignoreCase = !sensitive;
+		if (sensitive)
+		{
+			ignoreCase = searcher.getCriteriaMightBeCaseInsensitive();
+		}
+		// Remove SQL "syntax" from the criteria
+		String expressionPattern = StringUtil.trimQuotes(text.replaceAll("[%_]", ""));
+		searchPattern = new ColumnExpression("*", new ContainsComparator(), expressionPattern);
+		searchPattern.setIgnoreCase(ignoreCase);
+
+		searcher.setTableNames(searchTables);
+		searcher.search(); // starts the background thread
+	}
+
+	private String getWorkspacePrefix(int index)
+	{
+		return "dbexplorer" + index + ".tablesearcher";
+	}
+
+	public void saveToWorkspace(WbWorkspace wb, int index)
+	{
+		saveSettings(getWorkspacePrefix(index), wb.getSettings());
+	}
+
+	public void readFromWorkspace(WbWorkspace wb, int index)
+	{
+		restoreSettings(getWorkspacePrefix(index), wb.getSettings());
+	}
+
+	public void saveSettings()
+	{
+		saveSettings(this.getClass().getName(), Settings.getInstance());
+	}
+
+	private void saveSettings(String prefix, PropertyStorage props)
+	{
+		props.setProperty(prefix + ".divider", this.jSplitPane1.getDividerLocation());
+		props.setProperty(prefix + ".criteria", this.searchText.getText());
+		props.setProperty(prefix + ".maxrows", this.rowCount.getText());
+		props.setProperty(prefix + ".column-function", this.columnFunction.getText());
+		props.setProperty(prefix + ".excludelobs", excludeLobs.isSelected());
+	}
+
+	public void restoreSettings()
+	{
+		restoreSettings(this.getClass().getName(), Settings.getInstance());
+	}
+
+	private void restoreSettings(String prefix, PropertyStorage props)
+	{
+		int loc = props.getIntProperty(prefix + ".divider",200);
+		this.jSplitPane1.setDividerLocation(loc);
+		this.searchText.setText(props.getProperty(prefix + ".criteria", ""));
+		this.rowCount.setText(props.getProperty(prefix + ".maxrows", "0"));
+		this.columnFunction.setText(props.getProperty(prefix + ".column-function", "$col$"));
+		this.excludeLobs.setSelected(props.getBoolProperty(prefix + ".excludelobs", true));
+	}
+
+	public void searchEnded()
+	{
+		// insert a dummy panel at the end which will move
+		// all tables in the pane to the upper border
+		// e.g. when there is only one table
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				GridBagConstraints constraints = new GridBagConstraints();
+				constraints.gridx = 0;
+				constraints.weighty = 1.0;
+				constraints.anchor = GridBagConstraints.NORTHWEST;
+				resultPanel.add(new JPanel(), constraints);
+
+				resultPanel.doLayout();
+				searchText.setEnabled(true);
+				columnFunction.setEnabled(true);
+				startButton.setText(ResourceMgr.getString("LblStartSearch"));
+				statusInfo.setText("");
+				startButton.setEnabled(tableNames.getSelectedRowCount() > 0);
+			}
+		});
+	}
+
+	public void searchStarted()
+	{
+		this.searchText.setEnabled(false);
+		this.columnFunction.setEnabled(false);
+		startButton.setText(ResourceMgr.getString("LblCancelSearch"));
+	}
+
+	public void valueChanged(ListSelectionEvent e)
+	{
+		this.startButton.setEnabled(this.tableNames.getSelectedRowCount() > 0);
+	}
+
+	public void keyPressed(java.awt.event.KeyEvent e)
+	{
+		if (e.getKeyCode() == KeyEvent.VK_ENTER)
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					searchData();
+				}
+			}
+			);
+		}
+	}
+
+	public void keyReleased(java.awt.event.KeyEvent e)
+	{
+	}
+
+	public void keyTyped(java.awt.event.KeyEvent e)
+	{
+	}
+
+	static class ParentWidthScrollPane
+		extends JScrollPane
+	{
+		private Dimension preferredSize = new Dimension(0,0);
+
+		public ParentWidthScrollPane(Component view)
+		{
+			super(view);
+		}
+
+		public Dimension getPreferredSize()
+		{
+			Dimension d = super.getPreferredSize();
+			Container parent = this.getParent();
+			this.preferredSize.setSize( (double)parent.getWidth() - 5, d.getHeight());
+			return this.preferredSize;
+		}
+	}
+	
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -180,6 +460,7 @@ public class TableSearchPanel
     labelRowCount = new javax.swing.JLabel();
     rowCount = new javax.swing.JTextField();
     buttonPanel = new javax.swing.JPanel();
+    excludeLobs = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.BorderLayout());
 
@@ -297,6 +578,12 @@ public class TableSearchPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     entryPanel.add(buttonPanel, gridBagConstraints);
 
+    excludeLobs.setText(ResourceMgr.getString("LblExclLobs"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 7;
+    gridBagConstraints.gridy = 0;
+    entryPanel.add(excludeLobs, gridBagConstraints);
+
     add(entryPanel, java.awt.BorderLayout.NORTH);
   }// </editor-fold>//GEN-END:initComponents
 
@@ -310,331 +597,12 @@ public class TableSearchPanel
 		this.tableNames.getSelectionModel().setSelectionInterval(0, this.tableNames.getRowCount() - 1);
 	}//GEN-LAST:event_selectAllButtonActionPerformed
 
-	private void setStartButtonEnabled(final boolean flag)
-	{
-		try
-		{
-			EventQueue.invokeAndWait(new Runnable()
-			{
-				public void run()
-				{
-					startButton.setEnabled(flag);
-				}
-			});
-		}
-		catch (Throwable th)
-		{
-			startButton.setEnabled(flag);
-		}
-	}
-	private void adjustDataTable()
-	{
-		if (this.currentDisplayTable != null)
-		{
-			int rows = this.currentDisplayTable.getRowCount();
-			int height = this.currentDisplayTable.getRowHeight();
-			int width = this.resultScrollPane.getWidth();
-			String label = this.currentBorder.getTitle();
-			label = label + " (" + rows + " " + (rows == 1 ? ResourceMgr.getString("TxtFoundRow") : ResourceMgr.getString("TxtFoundRows")) + ")";
-			this.currentBorder.setTitle(label);
-			Dimension size = this.currentScrollPane.getPreferredSize();
-			if (rows > 25) rows = 25;
-			size.setSize(width - 20, (rows + 4) * height );
-			this.currentScrollPane.setPreferredSize(size);
-		}
-	}
-
-	private void initRenderer(WbTable table, ResultInfo info)
-	{
-		TableColumnModel model = table.getColumnModel();
-		
-		for (int i=0; i < info.getColumnCount(); i++)
-		{
-			int type = info.getColumnType(i);
-			if (SqlUtil.isCharacterType(type))
-			{
-				model.getColumn(i).setCellRenderer(renderer);
-			}
-		}
-	}
-	
-	public synchronized void addResultRow(TableIdentifier table, ResultSet aResult)
-	{
-		try
-		{
-			if (!this.tableLogged)
-			{
-				// Adjust the last table (which is now completed), before creating the new one
-				// Note: this will not adjust the table if only one database table was searched
-				// (or only results from one database table where returned)
-				// therefor it's important to call this in searchEnded() as well
-				this.adjustDataTable();
-				
-				this.currentDisplayTable = new WbTable(true, true, false);
-				this.currentDisplayTable.getCopyAsInsertAction().setEnabled(true);
-				this.currentDisplayTable.getCopyAsUpdateAction().setEnabled(true);
-				this.currentDisplayTable.getCopyAsDeleteInsertAction().setEnabled(true);
-				
-				this.currentDisplayTable.setUseDefaultStringRenderer(false);
-				//this.currentDisplayTable.setDefaultRenderer(String.class, renderer);
-				if (this.firstTable == null)
-				{
-					this.firstTable = this.currentDisplayTable;
-				}
-				//this.currentDisplayTable.setDefaultRenderer(Object.class, rend);
-				this.currentResult = new DataStore(aResult);
-				this.currentResult.setOriginalConnection(this.connection);
-				this.currentResult.setUpdateTableToBeUsed(table);
-				DataStoreTableModel model = new DataStoreTableModel(this.currentResult);
-				this.currentDisplayTable.setModel(model, true);
-				
-				initRenderer(currentDisplayTable, currentResult.getResultInfo());
-				this.currentDisplayTable.adjustOrOptimizeColumns();
-
-				this.currentScrollPane  = new ParentWidthScrollPane(this.currentDisplayTable);
-				TitledBorder b = new TitledBorder(table.getTableExpression());
-				this.currentBorder = b;
-				Font f = b.getTitleFont();
-				f = f.deriveFont(Font.BOLD);
-				b.setTitleFont(f);
-				b.setBorder(new EtchedBorder());
-				this.currentScrollPane.setBorder(b);
-				GridBagConstraints constraints = new GridBagConstraints();
-				constraints.gridx = 0;
-				constraints.fill = GridBagConstraints.HORIZONTAL;
-				constraints.weightx = 1.0;
-				constraints.anchor = GridBagConstraints.WEST;
-				this.resultPanel.add(this.currentScrollPane, constraints);
-				this.tableLogged = true;
-			}
-			this.currentResult.addRow(aResult);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	public synchronized void error(String msg)
-	{
-		this.sqlDisplay.appendLine(msg);
-		this.sqlDisplay.appendLine("\n\n");
-	}
-	
-	/**
-	 *	Call back function from the table searcher...
-	 */
-	public synchronized void setCurrentTable(String aTablename, String aSql)
-	{
-		this.tableLogged = false;
-		this.currentResult = null;
-		this.statusInfo.setText(this.fixedStatusText + aTablename);
-		this.sqlDisplay.appendLine(aSql);
-		this.sqlDisplay.appendLine(";\n\n");
-	}
-
-	public void setStatusText(String aStatustext)
-	{
-		this.statusInfo.setText(aStatustext);
-	}
-	/** Getter for property connection.
-	 * @return Value of property connection.
-	 *
-	 */
-	public WbConnection getConnection()
-	{
-		return connection;
-	}
-
-	/** Setter for property connection.
-	 * @param connection New value of property connection.
-	 *
-	 */
-	public void setConnection(WbConnection connection)
-	{
-		this.connection = connection;
-		this.searcher.setConnection(connection);
-		this.tableListSource.addTableListDisplayClient(this.tableNames);
-	}
-
-	public void disconnect()
-	{
-		this.reset();
-		this.tableListSource.removeTableListDisplayClient(this.tableNames);
-	}
-
-	public void reset()
-	{
-    // resultPanel.removeAll() does not work
-    // the old tables just stay in there
-    // so I re-create the actual result panel
-		this.resultPanel = new JPanel();
-    this.resultPanel.setLayout(new GridBagLayout());
-    this.resultScrollPane.setViewportView(resultPanel);
-		this.sqlDisplay.setText("");
-		this.firstTable = null;
-	}
-
-	public void searchData()
-	{
-		if (!searcher.setColumnFunction(this.columnFunction.getText()))
-		{
-			WbSwingUtilities.showErrorMessageKey(this, "MsgErrorColFunction");
-			return;
-		}
-
-		if (this.tableNames.getSelectedRowCount() == 0) return;
-		if (this.connection.isBusy())
-		{
-			WbSwingUtilities.showMessageKey(this, "ErrConnectionBusy");
-			return;
-		}
-
-		this.reset();
-
-		int[] selectedTables = this.tableNames.getSelectedRows();
-
-		TableIdentifier[] searchTables = new TableIdentifier[this.tableNames.getSelectedRowCount()];
-		DataStore tables = ((WbTable)(this.tableNames)).getDataStore();
-		for (int i=0; i < selectedTables.length; i++)
-		{
-			String catalog = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
-			String schema = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-			String tablename = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-			String type = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-
-			searchTables[i] = new TableIdentifier(catalog, schema, tablename);
-			searchTables[i].setNeverAdjustCase(true);
-			searchTables[i].setType(type);
-		}
-		
-		int maxRows = StringUtil.getIntValue(this.rowCount.getText(), 0);
-		
-		String text = this.searchText.getText();
-		searcher.setMaxRows(maxRows);
-		searcher.setCriteria(text);
-		boolean sensitive= this.connection.getDbSettings().isStringComparisonCaseSensitive();
-		boolean ignoreCase = !sensitive;
-		if (sensitive)
-		{
-			ignoreCase = searcher.getCriteriaMightBeCaseInsensitive();
-		}
-		this.searchPattern = new Like(searcher.getCriteria(), ignoreCase);
-		this.renderer = new ResultHighlightingRenderer(this.searchPattern);
-
-		searcher.setTableNames(searchTables);
-		searcher.search(); // starts the background thread
-	}
-
-	private String getWorkspacePrefix(int index)
-	{
-		return "dbexplorer" + index + ".tablesearcher";
-	}
-
-	public void saveToWorkspace(WbWorkspace wb, int index)
-	{
-		saveSettings(getWorkspacePrefix(index), wb.getSettings());
-	}
-
-	public void readFromWorkspace(WbWorkspace wb, int index)
-	{
-		restoreSettings(getWorkspacePrefix(index), wb.getSettings());
-	}
-
-	public void saveSettings()
-	{
-		saveSettings(this.getClass().getName(), Settings.getInstance());
-	}
-
-	private void saveSettings(String prefix, PropertyStorage props)
-	{
-		props.setProperty(prefix + ".divider", this.jSplitPane1.getDividerLocation());
-		props.setProperty(prefix + ".criteria", this.searchText.getText());
-		props.setProperty(prefix + ".maxrows", this.rowCount.getText());
-		props.setProperty(prefix + ".column-function", this.columnFunction.getText());
-	}
-
-	public void restoreSettings()
-	{
-		restoreSettings(this.getClass().getName(), Settings.getInstance());
-	}
-
-	private void restoreSettings(String prefix, PropertyStorage props)
-	{
-		int loc = props.getIntProperty(prefix + ".divider",200);
-		this.jSplitPane1.setDividerLocation(loc);
-		this.searchText.setText(props.getProperty(prefix + ".criteria", ""));
-		this.rowCount.setText(props.getProperty(prefix + ".maxrows", "0"));
-		this.columnFunction.setText(props.getProperty(prefix + ".column-function", "$col$"));
-	}
-
-	public void searchEnded()
-	{
-		this.adjustDataTable();
-		if (this.firstTable != null)
-		{
-			int height = this.firstTable.getRowHeight();
-			JScrollBar sb = this.resultScrollPane.getVerticalScrollBar();
-			sb.setUnitIncrement(height);
-			sb.setBlockIncrement(height * 5);
-		}
-		// insert a dummy panel at the end which will move
-		// all tables in the pane to the upper border
-		// e.g. when there is only one table
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.gridx = 0;
-		constraints.weighty = 1.0;
-		constraints.anchor = GridBagConstraints.WEST;
-		this.resultPanel.add(new JPanel(), constraints);
-
-		this.resultPanel.doLayout();
-		this.searchText.setEnabled(true);
-		this.columnFunction.setEnabled(true);
-		startButton.setText(ResourceMgr.getString("LblStartSearch"));
-		this.statusInfo.setText("");
-		this.startButton.setEnabled(this.tableNames.getSelectedRowCount() > 0);
-	}
-
-	public void searchStarted()
-	{
-		this.searchText.setEnabled(false);
-		this.columnFunction.setEnabled(false);
-		startButton.setText(ResourceMgr.getString("LblCancelSearch"));
-	}
-
-	public void valueChanged(javax.swing.event.ListSelectionEvent e)
-	{
-		this.startButton.setEnabled(this.tableNames.getSelectedRowCount() > 0);
-	}
-
-	public void keyPressed(java.awt.event.KeyEvent e)
-	{
-		if (e.getKeyCode() == KeyEvent.VK_ENTER)
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					searchData();
-				}
-			}
-			);
-		}
-	}
-
-	public void keyReleased(java.awt.event.KeyEvent e)
-	{
-	}
-
-	public void keyTyped(java.awt.event.KeyEvent e)
-	{
-	}
-
   // Variables declaration - do not modify//GEN-BEGIN:variables
   protected javax.swing.ButtonGroup buttonGroup1;
   protected javax.swing.JPanel buttonPanel;
   protected javax.swing.JTextField columnFunction;
   protected javax.swing.JPanel entryPanel;
+  protected javax.swing.JCheckBox excludeLobs;
   protected javax.swing.JPanel jPanel2;
   protected javax.swing.JSplitPane jSplitPane1;
   protected javax.swing.JLabel labelRowCount;
@@ -652,93 +620,5 @@ public class TableSearchPanel
   protected javax.swing.JTable tableNames;
   protected javax.swing.JPanel tablePane;
   // End of variables declaration//GEN-END:variables
-
-	static class ParentWidthScrollPane
-		extends JScrollPane
-	{
-		private Dimension preferredSize = new Dimension(0,0);
-
-		public ParentWidthScrollPane(Component view)
-		{
-			super(view);
-		}
-		
-		public Dimension getPreferredSize()
-		{
-			Dimension d = super.getPreferredSize();
-			Container parent = this.getParent();
-			this.preferredSize.setSize( (double)parent.getWidth() - 5, d.getHeight());
-			return this.preferredSize;
-		}
-	}
-
-	static class ResultHighlightingRenderer
-		extends DefaultTableCellRenderer
-	{
-		private Like pattern;
-		private Color background = UIManager.getColor("Table.background");
-		private Color foreground = UIManager.getColor("Table.foreground");
-		private Color selectBack = UIManager.getColor("Table.selectionBackground");
-		private Color selectText = UIManager.getColor("Table.selectionForeground");
-
-		public ResultHighlightingRenderer(Like aPattern)
-		{
-			this.pattern = aPattern;
-		}
-
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
-		{
-			String displayValue = null;
-			if (value != null)
-			{
-				if (value instanceof Clob)
-				{
-					Clob clob = (Clob)value;
-					try
-					{
-						long len = clob.length();
-						displayValue = clob.getSubString(1, (int)len);
-					}
-					catch (Throwable th)
-					{
-						displayValue = null;
-					}
-				}
-				else
-				{
-					displayValue = value.toString();
-				}
-			}
-			JLabel result = (JLabel)super.getTableCellRendererComponent(table, displayValue, isSelected, hasFocus, row, column);
-
-			try
-			{
-				if (!isSelected && displayValue != null && this.pattern.like(displayValue))
-				{
-					result.setBackground(Color.YELLOW);
-					result.setForeground(Color.BLACK);
-				}
-				else if (isSelected)
-				{
-					result.setBackground(selectBack);
-					result.setForeground(selectText);
-				}
-				else
-				{
-					result.setBackground(background);
-					result.setForeground(foreground);
-				}
-				result.setToolTipText(displayValue);
-			}
-			catch (Exception e)
-			{
-				result.setBackground(background);
-				result.setForeground(foreground);
-			}
-			return result;
-		}
-
-
-	}
 
 }

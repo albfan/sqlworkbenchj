@@ -390,6 +390,7 @@ public class MainWindowTest
 		assertFalse(action.getButton().isSelected());
 		
 		runSql(sqlPanel, "select * from person");
+		tool.waitEmpty();
 		assertEquals(2, resultTab.getTabCount());
 	}
 

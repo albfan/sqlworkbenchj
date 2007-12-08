@@ -20,7 +20,6 @@ import workbench.sql.StatementRunnerResult;
 import workbench.storage.PkMapping;
 import workbench.util.ArgumentParser;
 import workbench.util.FileDialogUtil;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -43,12 +42,11 @@ public class WbSavePkMapping
 	public String getVerb() { return VERB; }
 	protected boolean isConnectionRequired() { return false; }
 	
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(final String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String sql = SqlUtil.stripVerb(aSql);
-		cmdLine.parse(sql);
+		cmdLine.parse(getCommandLine(sql));
 		String file = cmdLine.getValue("file");
 		if (file == null)
 		{

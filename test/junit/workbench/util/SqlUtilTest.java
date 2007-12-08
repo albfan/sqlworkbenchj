@@ -135,6 +135,18 @@ public class SqlUtilTest
 		String sql = "select \r\n from project";
 		String clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
 		assertEquals("Not correctly cleaned", clean, "select   from project");
+
+		sql = "select \r\n from project;";
+		clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
+		assertEquals("Not correctly cleaned", clean, "select   from project");
+
+		sql = "select *\r\n from project ; ";
+		clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
+		assertEquals("Not correctly cleaned", clean, "select *  from project");
+
+		sql = "select * from project\n;\n";
+		clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
+		assertEquals("Not correctly cleaned", clean, "select * from project");
 		
 		sql = "select 'some\nvalue' from project";
 		clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
@@ -234,7 +246,7 @@ public class SqlUtilTest
 		
 		sql = "/* \n" + 
 					 "* $URL: some_script.sql $ \n" + 
-					 "* $Revision: 1.2 $ \n" + 
+					 "* $Revision: 1.3 $ \n" + 
 					 "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
 					 "*/ \n" + 
 					 "-- A quis Lorem consequat Aenean tellus risus convallis velit Maecenas arcu. \n" + 

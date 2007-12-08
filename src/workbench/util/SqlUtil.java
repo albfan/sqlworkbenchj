@@ -596,8 +596,6 @@ public class SqlUtil
 
 		StringBuilder newSql = new StringBuilder(count);
 
-		// remove trailing semicolon
-		if (aSql.charAt(count - 1) == ';') count --;
 		char last = ' ';
 
 		for (int i=0; i < count; i++)
@@ -670,7 +668,7 @@ public class SqlUtil
 			last = c;
 		}
 		String s = newSql.toString().trim();
-		if (s.endsWith(";")) s = s.substring(0, s.length() - 1);
+		if (s.endsWith(";")) s = s.substring(0, s.length() - 1).trim();
 		return s;
 	}
 

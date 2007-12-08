@@ -24,7 +24,7 @@ import workbench.resource.Settings;
 import workbench.util.FileUtil;
 
 /**
- *
+ * Manage 
  * @author support@sql-workbench.net
  */
 public class SqlKeywordHelper 

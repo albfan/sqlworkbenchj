@@ -11,8 +11,8 @@
  */
 package workbench.interfaces;
 
-import java.sql.ResultSet;
 import workbench.db.TableIdentifier;
+import workbench.storage.DataStore;
 
 /**
  *
@@ -22,7 +22,8 @@ public interface TableSearchDisplay
 {
 	void setCurrentTable(String aTablename, String aStatement);
 	void error(String msg);
-	void addResultRow(TableIdentifier table, ResultSet aResult);
+	//void addResultRow(TableIdentifier table, ResultSet aResult);
+	void tableSearched(TableIdentifier table, DataStore result);
 	void setStatusText(String aStatustext);
 	void searchStarted();
 	void searchEnded();

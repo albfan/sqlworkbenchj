@@ -48,11 +48,11 @@ public class WbOraExecute extends SqlCommand
 	 * Converts the passed sql to an Oracle compliant JDBC call and 
 	 * runs the statement.
 	 */
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(final String sql)
 		throws SQLException, Exception
 	{
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
-		String realSql = "{call " + SqlUtil.stripVerb(aSql) + "}";
+		StatementRunnerResult result = new StatementRunnerResult(sql);
+		String realSql = "{call " + SqlUtil.stripVerb(sql) + "}";
 
 		result.addMessage(ResourceMgr.getString("MsgProcCallConverted") + " " + realSql);
 

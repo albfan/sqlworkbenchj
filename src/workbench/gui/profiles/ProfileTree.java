@@ -109,7 +109,7 @@ public class ProfileTree
     ds = new ProfileTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
 		setAutoscrolls(true);
 	}
-
+	
 	public void setDeleteAction(DeleteListEntryAction delete)
 	{
 		this.popup.addSeparator();

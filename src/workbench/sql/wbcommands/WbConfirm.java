@@ -13,12 +13,10 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 import workbench.WbManager;
-import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -49,7 +47,7 @@ public class WbConfirm
 
 		if (WbManager.getInstance().isBatchMode()) return result;
 		
-		String msg = SqlUtil.stripVerb(sql);
+		String msg = getCommandLine(sql);
 		
 		if (StringUtil.isEmptyString(msg))
 		{

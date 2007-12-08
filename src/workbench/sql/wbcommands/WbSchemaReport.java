@@ -29,7 +29,6 @@ import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -71,15 +70,13 @@ public class WbSchemaReport
 
 	public String getVerb() { return VERB; }
 
-	public StatementRunnerResult execute(String sql)
+	public StatementRunnerResult execute(final String sql)
 		throws SQLException
 	{
 		boolean dbDesigner = false;
 		StatementRunnerResult result = new StatementRunnerResult();
-		
-		sql = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
 
-		cmdLine.parse(sql);
+		cmdLine.parse(getCommandLine(sql));
 
 		if (cmdLine.hasUnknownArguments())
 		{

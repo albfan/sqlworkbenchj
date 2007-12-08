@@ -28,6 +28,7 @@ public class NewDbExplorerPanelAction
 	{
 		this(aWindow, "MnuTxtNewExplorerPanel");
 	}
+	
 	public NewDbExplorerPanelAction(MainWindow aWindow, String key)
 	{
 		super();

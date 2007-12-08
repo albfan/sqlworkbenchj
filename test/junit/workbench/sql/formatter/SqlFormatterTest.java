@@ -95,6 +95,11 @@ public class SqlFormatterTest
 			String expected = "INSERT INTO tble\n" + "(\n" + "  a,\n" + "  b\n" + ")  \n" + "VALUES\n" + "(\n" + "   (SELECT MAX(x) FROM y),\n" + "  'bla'\n" + ")";
 			SqlFormatter f = new SqlFormatter(sql, 100);
 			CharSequence formatted = f.getFormattedSql();
+//			System.out.println("*** got ***");
+//			System.out.println(formatted);
+//			System.out.println("*** expected ***");
+//			System.out.println(expected);
+//			System.out.println("**************");
 			assertEquals("SELECT in VALUES not formatted", expected, formatted);
 		}
 		catch (Exception e)
@@ -103,6 +108,28 @@ public class SqlFormatterTest
 		}
 	}
 
+	public void testLowerCaseFunctions()
+	{
+		try
+		{
+			String sql = "select col1, MAX(col2) from theTable group by col1;";
+			String expected = "SELECT col1,\n       max(col2)\nFROM theTable\nGROUP BY col1;";
+			SqlFormatter f = new SqlFormatter(sql, 100);
+			f.setUseLowerCaseFunctions(true);
+			CharSequence formatted = f.getFormattedSql();
+//			System.out.println("*** got ***");
+//			System.out.println(formatted);
+//			System.out.println("*** expected ***");
+//			System.out.println(expected);
+//			System.out.println("**************");
+			assertEquals("SELECT in VALUES not formatted", expected, formatted);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	public void testCase()
 	{
 		try

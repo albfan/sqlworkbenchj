@@ -205,22 +205,6 @@ public class StringUtilTest
 		
 	}
 	
-	public void testComparator()
-	{
-		Comparator<String> c = StringUtil.getCaseInsensitiveComparator();
-		int i = c.compare("Test", "TEST");
-		assertEquals(0, i);
-		
-		i = c.compare("TEST", "test");
-		assertEquals(0, i);
-		
-		i = c.compare("test", "test");
-		assertEquals(0, i);
-		
-		i = c.compare("test", "tesd");
-		assertEquals(false, (i == 0));
-	}
-	
 	public void testMakePlainLF()
 	{
 		String line = "line1\r\nline2";

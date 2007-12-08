@@ -473,6 +473,21 @@ public class SqlCommand
 	public boolean isResultSetConsumer() { return false; }
 	public void consumeResult(StatementRunnerResult aResult) {}
 
+	/**
+	 * Get a "clean" version of the sql with the verb stripped off
+	 * and all comments and newlines removed for processing the
+	 * parameters to a Workbench command
+	 * 
+	 * @param sql the sql to "clean"
+	 * @return the sql with the verb, comments and newlines removed
+	 * @see workbench.util.Sqlutil#makeCleanSql(String, boolean, boolean, char)
+	 * @see workbench.util.Sqlutil#getVerb(String)
+	 */
+	protected String getCommandLine(String sql)
+	{
+		return SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
+	}
+	
 	protected WbFile evaluateFileArgument(String fileName)
 	{
 		if (StringUtil.isEmptyString(fileName)) return null;

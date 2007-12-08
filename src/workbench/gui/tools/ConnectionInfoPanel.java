@@ -113,6 +113,7 @@ public class ConnectionInfoPanel
     add(jScrollPane1, gridBagConstraints);
 
     copyButton.setText(ResourceMgr.getString("LblCopyInfo"));
+    copyButton.setToolTipText(ResourceMgr.getDescription("LblCopyInfo"));
     copyButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         copyButtonActionPerformed(evt);

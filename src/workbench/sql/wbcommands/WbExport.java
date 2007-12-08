@@ -29,7 +29,6 @@ import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CharacterRange;
 import workbench.util.EncodingUtil;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
@@ -37,7 +36,9 @@ import workbench.util.ExceptionUtil;
 import workbench.util.WbFile;
 
 /**
- *
+ * SQL Command for running an export.
+ * @see workbench.db.exporter.DataExporter
+ * 
  * @author  support@sql-workbench.net
  */
 public class WbExport
@@ -136,9 +137,7 @@ public class WbExport
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		
-		sql = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
-
-		cmdLine.parse(sql);
+		cmdLine.parse(getCommandLine(sql));
 		
 		if (cmdLine.isArgPresent("showencodings"))
 		{

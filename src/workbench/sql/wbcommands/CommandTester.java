@@ -21,8 +21,7 @@ import java.util.Set;
  * Workbench command. This is used by the SqlFormatter, because
  * the verbs for WbXXXX commands are not formatted in uppercase.
  * 
- * This is also used by the code completion to test if a command is 
- * a Workbench internal command.
+ * This is also used by the code completion to check for WB specific commands.
  * 
  * @see workbench.sql.formatter.SqlFormatter
  * @see workbench.gui.completion.StatementContext
@@ -37,6 +36,8 @@ public class CommandTester
 	public CommandTester()
 	{
 		commands = new HashSet<String>();
+		commands.add(WbCall.VERB);
+		commands.add(WbConfirm.VERB);
 		commands.add(WbCopy.VERB);
 		commands.add(WbDefinePk.VERB);
 		commands.add(WbDefineVar.VERB_DEFINE_LONG);
@@ -55,8 +56,6 @@ public class CommandTester
 		commands.add(WbSelectBlob.VERB);
 		commands.add(WbStartBatch.VERB);
 		commands.add(WbXslt.VERB);
-		commands.add(WbConfirm.VERB);
-		commands.add(WbCall.VERB);
 		
 		formattedWords = new HashMap<String, String>();
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);

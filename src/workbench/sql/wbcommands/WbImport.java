@@ -36,7 +36,6 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ConverterException;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
 import workbench.util.WbFile;
@@ -174,14 +173,14 @@ public class WbImport
 		return Settings.getInstance().getBoolProperty("workbench.import.default.trimvalues", false);
 	}
 	
-	public StatementRunnerResult execute(String sqlCommand)
+	public StatementRunnerResult execute(final String sqlCommand)
 		throws SQLException
 	{
 		imp = new DataImporter();
 		this.imp.setConnection(currentConnection);
 
 		StatementRunnerResult result = new StatementRunnerResult(sqlCommand);
-		String options = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sqlCommand,false, false, '\''));
+		String options = getCommandLine(sqlCommand);
 		
 		cmdLine.parse(options);
 

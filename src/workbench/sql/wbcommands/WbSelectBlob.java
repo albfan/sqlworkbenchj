@@ -45,13 +45,13 @@ public class WbSelectBlob
 	
 	public String getVerb() { return VERB; }
 	
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(final String sqlCommand)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		SQLLexer lexer = new SQLLexer(aSql);
+		SQLLexer lexer = new SQLLexer(sqlCommand);
 		
-		StringBuilder sql = new StringBuilder(aSql.length());
+		StringBuilder sql = new StringBuilder(sqlCommand.length());
 		
 		WbFile outputFile = null;
 		
@@ -86,7 +86,7 @@ public class WbSelectBlob
 			String filename = token.getContents();
 			outputFile = new WbFile(StringUtil.trimQuotes(filename));
 			sql.append(' ');
-			sql.append(aSql.substring(token.getCharEnd() + 1));
+			sql.append(sqlCommand.substring(token.getCharEnd() + 1));
 		}
 		
 		LogMgr.logDebug("WbSelectBlob.execute()", "Using SQL=" + sql + " for file: " + outputFile.getFullPath());

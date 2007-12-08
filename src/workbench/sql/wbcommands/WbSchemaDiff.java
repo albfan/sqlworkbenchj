@@ -30,7 +30,6 @@ import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
-import workbench.util.SqlUtil;
 import workbench.util.StrWriter;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -97,14 +96,12 @@ public class WbSchemaDiff
 	public String getVerb() { return VERB; }
 	protected boolean isConnectionRequired() { return false; }
 
-	public StatementRunnerResult execute(String sql)
+	public StatementRunnerResult execute(final String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		sql = SqlUtil.stripVerb(sql);
-		
-		cmdLine.parse(sql);
+		cmdLine.parse(getCommandLine(sql));
 		
 		if (cmdLine.getArgumentCount() == 0)
 		{

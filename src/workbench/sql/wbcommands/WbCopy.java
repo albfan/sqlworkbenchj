@@ -27,7 +27,6 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.SqlUtil;
-import workbench.util.SqlUtil;
 
 /**
  * A command to copy data from one DBMS to another. This is the commandline
@@ -98,14 +97,12 @@ public class WbCopy
 			result.setFailure();
 		}
 	}
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(final String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		
-		aSql = SqlUtil.stripVerb(aSql);
-
-		cmdLine.parse(aSql);
+		cmdLine.parse(getCommandLine(sql));
 		
 		if (cmdLine.hasUnknownArguments())
 		{
@@ -209,7 +206,7 @@ public class WbCopy
 		{
 			LogMgr.logError("WbCopy.execute()", "Error when copying data", e);
 			result.setFailure();
-			addErrorInfo(result, aSql, e);
+			addErrorInfo(result, sql, e);
 			result.addMessage(copier.getMessages());
 		}
 		finally

@@ -305,6 +305,7 @@ public class GeneralOptionsPanel
     add(msgFontLabel, gridBagConstraints);
 
     standardFontLabel.setText(ResourceMgr.getString("LblStandardFont"));
+    standardFontLabel.setToolTipText(ResourceMgr.getDescription("LblStandardFont"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
