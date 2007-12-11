@@ -21,7 +21,6 @@ import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
-import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -43,14 +42,13 @@ import workbench.WbManager;
  *	@author  support@sql-workbench.net
  */
 public class DbDriver
+	implements Comparable<DbDriver>
 {
 	private Driver driverClassInstance;
 	private URLClassLoader classLoader;
 
 	protected String name;
 	private String driverClass;
-
-	private String identifier;
 	private List<String> libraryList;
 
 	private String sampleUrl;
@@ -87,7 +85,6 @@ public class DbDriver
 	public void setName(String name)
 	{
 		this.name = name;
-		this.identifier = null;
 	}
 
 	public String getDriverClass() 
@@ -98,30 +95,25 @@ public class DbDriver
 	public void setDriverClass(String aClass)
 	{
 		this.driverClass = aClass.trim();
-		this.identifier = null;
 		this.driverClassInstance = null;
 		this.classLoader = null;
 	}
 
-	public String getIdentifier()
+	public String getDescription()
 	{
-		if (this.identifier == null)
+		StringBuilder b = new StringBuilder(100);
+		if (this.name != null)
 		{
-			StringBuilder b = new StringBuilder(100);
-			if (this.name != null)
-			{
-				b.append(this.name);
-				b.append(" (");
-				b.append(this.driverClass);
-				b.append(')');
-			}
-			else
-			{
-				b.append(this.driverClass);
-			}
-			this.identifier = b.toString();
+			b.append(this.name);
+			b.append(" (");
+			b.append(this.driverClass);
+			b.append(')');
 		}
-		return this.identifier;
+		else
+		{
+			b.append(this.driverClass);
+		}
+		return b.toString();
 	}
 	
 	public String getLibraryString() 
@@ -180,7 +172,7 @@ public class DbDriver
 
 	public String toString()
 	{
-		return this.getIdentifier();
+		return this.getDescription();
 	}
 
 	public void setSampleUrl(String anUrl) { this.sampleUrl = anUrl; }
@@ -449,50 +441,24 @@ public class DbDriver
 			Thread.currentThread().setContextClassLoader(this.classLoader);
 		}
 	}
-	
-	public int hashCode() 
-	{ 
+
+	protected String getId()
+	{
 		StringBuilder b = new StringBuilder(60);
 		b.append(driverClass == null ? "" : driverClass);
 		b.append('$');
 		b.append(name);
-		return b.toString().hashCode();
-	} 
-
-	public static Comparator getNameComparator()
-	{
-		return new Comparator()
-		{
-			public int compare(Object o1, Object o2)
-			{
-				if (o1 == null && o2 == null) return 0;
-				if (o1 == null) return -1;
-				if (o2 == null) return 1;
-				if (o1 instanceof DbDriver && o2 instanceof DbDriver)
-				{
-					String name1 = ((DbDriver)o1).name;
-					String name2 = ((DbDriver)o2).name;
-					return name1.compareTo(name2);
-				}
-				return 0;
-			}
-		};
+		return b.toString();
+	}
+	
+	public int hashCode() 
+	{ 
+		return getId().hashCode();
 	}
 
-	public static Comparator<DbDriver> getDriverClassComparator()
+	public int compareTo(DbDriver o)
 	{
-		return new Comparator<DbDriver>()
-		{
-			public int compare(DbDriver drv1, DbDriver drv2)
-			{
-				if (drv1 == null && drv2 == null) return 0;
-				if (drv1 == null) return -1;
-				if (drv2 == null) return 1;
-				String d1 = drv1.getIdentifier(); // returns driver class & name
-				String d2 = drv2.getIdentifier();
-				return d1.compareTo(d2);
-			}
-		};
+		return getDescription().compareTo(o.getDescription());
 	}
 
 }

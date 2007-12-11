@@ -1,5 +1,5 @@
 /*
- * ToolWindow.java
+ * TableList.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -9,24 +9,18 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.interfaces;
+package workbench.gui.dbobjects;
+import java.awt.Component;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 /**
  * @author support@sql-workbench.net
  */
-public interface ToolWindow
+
+public interface TableList 
 {
-	/**
-	 * Disconnect and close the tool window
-	 */
-	void closeWindow();
-
-	/**
-	 * Disconnect the tool window
-	 */
-	void disconnect();
-
-	void activate();
-	
+	TableIdentifier[] getSelectedObjects();
 	WbConnection getConnection();
+	Component getComponent();
 }

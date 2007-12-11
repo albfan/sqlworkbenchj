@@ -13,7 +13,6 @@ package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,7 +30,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
@@ -73,19 +71,13 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.WbWorkspace;
 
-
 /**
- *
  * @author  support@sql-workbench.net
- *
  */
 public class ProcedureListPanel
 	extends JPanel
 	implements ListSelectionListener, Reloadable, ActionListener
 {
-	private static final String DROP_CMD = "drop-object";
-	private static final String COMPILE_CMD = "compile-procedure";
-	
 	private WbConnection dbConnection;
 	private JPanel listPanel;
 	private CriteriaPanel findPanel;
@@ -110,12 +102,7 @@ public class ProcedureListPanel
 		this.displayTab = new WbTabbedPane();
 		this.displayTab.setTabPlacement(JTabbedPane.BOTTOM);
 
-		this.procColumns = new WbTable();
-		this.procColumns.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		this.procColumns.setCellSelectionEnabled(false);
-		this.procColumns.setColumnSelectionAllowed(false);
-		this.procColumns.setRowSelectionAllowed(true);
-		this.procColumns.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		this.procColumns = new DbObjectTable();
 		
 		JScrollPane scroll = new WbScrollPane(this.procColumns);
 
@@ -142,7 +129,7 @@ public class ProcedureListPanel
 
 		this.listPanel = new JPanel();
 		this.statusRenderer = new ProcStatusRenderer();
-		this.procList = new WbTable(true, false, false)
+		this.procList = new DbObjectTable()
 		{
 			public TableCellRenderer getCellRenderer(int row, int column) 
 			{
@@ -151,10 +138,6 @@ public class ProcedureListPanel
 			}
 		};
 		
-		this.procList.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		this.procList.setCellSelectionEnabled(false);
-		this.procList.setColumnSelectionAllowed(false);
-		this.procList.setRowSelectionAllowed(true);
 		this.procList.getSelectionModel().addListSelectionListener(this);
 		this.procList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
@@ -204,10 +187,7 @@ public class ProcedureListPanel
 		this.createScriptItem.addActionListener(this);
 		popup.add(this.createScriptItem);
 		popup.addSeparator();
-		this.dropTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDropDbObject"));
-		this.dropTableItem.setActionCommand(DROP_CMD);
-		this.dropTableItem.addActionListener(this);
-		this.dropTableItem.setEnabled(false);
+		this.dropTableItem = new DropDbItem(this.procList, this);
 		popup.add(this.dropTableItem);
 	}
 
@@ -238,8 +218,8 @@ public class ProcedureListPanel
 		JPopupMenu popup = this.procList.getPopupMenu();
 		if (this.dbConnection.getMetadata().isOracle())
 		{
-			this.recompileItem = new WbMenuItem(ResourceMgr.getString("MnuTxtRecompile"));
-			this.recompileItem.setActionCommand(COMPILE_CMD);
+			this.recompileItem = new WbMenuItem();
+			this.recompileItem.setMenuTextByKey("MnuTxtRecompile");
 			this.recompileItem.addActionListener(this);
 			this.recompileItem.setEnabled(false);
 			popup.add(this.recompileItem);
@@ -293,13 +273,18 @@ public class ProcedureListPanel
 			DbMetadata meta = dbConnection.getMetadata();
 			WbSwingUtilities.showWaitCursorOnWindow(this);
 			DataStore ds = meta.getProcedures(currentCatalog, currentSchema);
-			DataStoreTableModel model = new DataStoreTableModel(ds);
+			final DataStoreTableModel model = new DataStoreTableModel(ds);
 			
-			int rows = model.getRowCount();
-			String info = rows + " " + ResourceMgr.getString("TxtTableListObjects");
-			this.infoLabel.setText(info);
-			procList.setModel(model, true);
-			procList.adjustOrOptimizeColumns();
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					int rows = model.getRowCount();
+					infoLabel.setText(rows + " " + ResourceMgr.getString("TxtTableListObjects"));
+					procList.setModel(model, true);
+					procList.adjustOrOptimizeColumns();
+				}
+			});
 			shouldRetrieve = false;
 		}
 		catch (OutOfMemoryError mem)
@@ -410,7 +395,7 @@ public class ProcedureListPanel
 		int row = this.procList.getSelectedRow();
 
 		if (row < 0) return;
-		this.dropTableItem.setEnabled(this.procList.getSelectedRowCount() > 0);
+
 		if (this.recompileItem != null)
 		{
 			this.recompileItem.setEnabled(this.procList.getSelectedRowCount() > 0);
@@ -436,14 +421,13 @@ public class ProcedureListPanel
 		
 		DbMetadata meta = dbConnection.getMetadata();
 		Container parent = this.getParent();
-		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		WbSwingUtilities.showWaitCursor(parent);
 		CharSequence sql = null;
 		try
 		{
 			dbConnection.setBusy(true);
 			try
 			{
-				procColumns.setVisible(false);
 				DataStoreTableModel model = new DataStoreTableModel(meta.getProcedureColumns(catalog, schema, proc));
 				procColumns.setModel(model, true);
 				
@@ -461,10 +445,6 @@ public class ProcedureListPanel
 				LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure definition", ex);
 				procColumns.reset();
 			}
-			finally
-			{
-				procColumns.setVisible(true);
-			}
 
 			try
 			{
@@ -480,7 +460,7 @@ public class ProcedureListPanel
 		}
 		finally
 		{
-			parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			WbSwingUtilities.showDefaultCursor(parent);
 			dbConnection.setBusy(false);
 		}
 		final int pos = checkOraclePackage(sql, catalog, proc, type);
@@ -563,7 +543,7 @@ public class ProcedureListPanel
 			}
 
 			String schema = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
-      if (schema != null && schema.length() > 0)
+      if (!dbConnection.getMetadata().ignoreSchema(schema))
       {
   			name = dbConnection.getMetadata().quoteObjectname(schema) + "." + dbConnection.getMetadata().quoteObjectname(name);
       }
@@ -635,12 +615,11 @@ public class ProcedureListPanel
 	
 	public void actionPerformed(ActionEvent e)
 	{
-		String command = e.getActionCommand();
-		if (DROP_CMD.equals(command))
+		if (e.getSource() == this.dropTableItem)
 		{
 			this.dropObjects();
 		}
-		else if (COMPILE_CMD.equals(command))
+		else if (e.getSource() == this.recompileItem)
 		{
 			this.compileObjects();
 		}

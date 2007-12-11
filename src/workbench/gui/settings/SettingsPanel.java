@@ -20,10 +20,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractListModel;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -66,7 +63,7 @@ public class SettingsPanel
   private JButton okButton;
 
 	private JDialog dialog;
-	private String escActionCommand;
+	private EscAction escAction;
 	private List<OptionPanelPage> pages;
 
 	public SettingsPanel()
@@ -204,12 +201,8 @@ public class SettingsPanel
 		this.dialog.getRootPane().setDefaultButton(this.okButton);
 
 		JRootPane root = dialog.getRootPane();
-		InputMap im = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-		ActionMap am = root.getActionMap();
-		EscAction esc = new EscAction(this);
-		escActionCommand = esc.getActionName();
-		im.put(esc.getAccelerator(), esc.getActionName());
-		am.put(esc.getActionName(), esc);
+		escAction = new EscAction(this);
+		escAction.addToInputMap(root);
 
 		WbSwingUtilities.center(this.dialog, aReference);
 		EventQueue.invokeLater(new Runnable()
@@ -232,17 +225,13 @@ public class SettingsPanel
 
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
-		if (e.getActionCommand().equals(escActionCommand))
+		if (e.getSource() == escAction || e.getSource() == cancelButton)
 		{
 			this.closeWindow();
 		}
 		else if (e.getSource() == okButton)
 		{
 			this.saveSettings();
-			this.closeWindow();
-		}
-		else if (e.getSource() == cancelButton)
-		{
 			this.closeWindow();
 		}
 		else if (e.getSource() == helpButton)

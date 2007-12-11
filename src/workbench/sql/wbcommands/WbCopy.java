@@ -26,7 +26,6 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
-import workbench.util.SqlUtil;
 
 /**
  * A command to copy data from one DBMS to another. This is the commandline
@@ -198,8 +197,15 @@ public class WbCopy
 		catch (SQLException e)
 		{
 			LogMgr.logError("WbCopy.execute()", "SQL Error when copying data", e);
-			result.addMessage(ResourceMgr.getString("ErrOnCopy"));
-			result.addMessage(copier.getMessages());
+			CharSequence msg = copier.getMessages();
+			if (msg.length() == 0)
+			{
+				result.addMessage(ResourceMgr.getString("ErrOnCopy"));
+			}
+			else
+			{
+				result.addMessage(msg);
+			}
 			result.setFailure();
 		}
 		catch (Exception e)

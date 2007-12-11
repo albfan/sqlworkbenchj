@@ -40,7 +40,6 @@ public class DbExplorerWindow
 	implements WindowListener, Connectable, ToolWindow, DbExecutionListener
 {
 	private DbExplorerPanel panel;
-	private static int instanceCount = 0;
 	private boolean standalone;
 	protected ConnectionSelector connectionSelector;
 	protected RunningJobIndicator jobIndicator;
@@ -62,9 +61,14 @@ public class DbExplorerWindow
 		this.restorePosition();
 		this.jobIndicator = new RunningJobIndicator(this);
 		aPanel.setDbExecutionListener(this);
-		instanceCount ++;
 	}
 
+	public void activate()
+	{
+		setVisible(true);
+		toFront();
+	}
+	
 	public void setProfileName(String aProfileName)
 	{
 		if (aProfileName != null)
@@ -91,13 +95,7 @@ public class DbExplorerWindow
 	
 	public void selectConnection()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				connectionSelector.selectConnection();
-			}
-		});
+		connectionSelector.selectConnection();
 	}
 	
 	public void executionEnd(WbConnection conn, Object source)
@@ -108,6 +106,11 @@ public class DbExplorerWindow
 	public void executionStart(WbConnection conn, Object source)
 	{
 		jobIndicator.jobStarted();
+	}
+	
+	public WbConnection getConnection()
+	{
+		return panel.getConnection();
 	}
 	
 	public void closeWindow()

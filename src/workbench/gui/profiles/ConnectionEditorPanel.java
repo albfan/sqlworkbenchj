@@ -126,7 +126,7 @@ public class ConnectionEditorPanel
 			}
 		});
 	}
-	
+
 	private void initEditorList()
 	{
 		this.editors = new LinkedList<SimplePropertyEditor>();
@@ -137,7 +137,7 @@ public class ConnectionEditorPanel
 
 	private void initEditorList(Container parent)
 	{
-		for (int i=0; i < parent.getComponentCount(); i++)
+		for (int i = 0; i < parent.getComponentCount(); i++)
 		{
 			Component c = parent.getComponent(i);
 			if (c instanceof SimplePropertyEditor)
@@ -146,7 +146,7 @@ public class ConnectionEditorPanel
 				this.editors.add(ed);
 				String name = c.getName();
 				c.addPropertyChangeListener(name, this);
-        ed.setImmediateUpdate(true);
+				ed.setImmediateUpdate(true);
 			}
 			else if (c instanceof JPanel && !(c instanceof DelimiterDefinitionPanel))
 			{
@@ -208,6 +208,8 @@ public class ConnectionEditorPanel
     jPanel3 = new javax.swing.JPanel();
     propLabel = new javax.swing.JLabel();
 
+    FormListener formListener = new FormListener();
+
     setMinimumSize(new java.awt.Dimension(220, 200));
     setLayout(new java.awt.GridBagLayout());
 
@@ -228,11 +230,7 @@ public class ConnectionEditorPanel
     cbDrivers.setName("driverclass"); // NOI18N
     cbDrivers.setPreferredSize(new java.awt.Dimension(120, 20));
     cbDrivers.setVerifyInputWhenFocusTarget(false);
-    cbDrivers.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(java.awt.event.ItemEvent evt) {
-        cbDriversItemStateChanged(evt);
-      }
-    });
+    cbDrivers.addItemListener(formListener);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
@@ -344,11 +342,7 @@ public class ConnectionEditorPanel
 
     manageDriversButton.setText(ResourceMgr.getString("LblEditDrivers"));
     manageDriversButton.setToolTipText(ResourceMgr.getDescription("LblEditDrivers"));
-    manageDriversButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        showDriverEditorDialog(evt);
-      }
-    });
+    manageDriversButton.addActionListener(formListener);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 17;
@@ -359,11 +353,7 @@ public class ConnectionEditorPanel
     add(manageDriversButton, gridBagConstraints);
 
     helpButton.setText(ResourceMgr.getString("LblHelp"));
-    helpButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        helpButtonActionPerformed(evt);
-      }
-    });
+    helpButton.addActionListener(formListener);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 17;
@@ -499,11 +489,7 @@ public class ConnectionEditorPanel
 
     editConnectionScriptsButton.setText(ResourceMgr.getString("LblConnScripts"));
     editConnectionScriptsButton.setToolTipText(ResourceMgr.getDescription("LblConnScripts"));
-    editConnectionScriptsButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        editConnectionScriptsButtonActionPerformed(evt);
-      }
-    });
+    editConnectionScriptsButton.addActionListener(formListener);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
@@ -631,11 +617,7 @@ public class ConnectionEditorPanel
     extendedProps.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
     extendedProps.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
     extendedProps.setIconTextGap(1);
-    extendedProps.addMouseListener(new java.awt.event.MouseAdapter() {
-      public void mouseClicked(java.awt.event.MouseEvent evt) {
-        extendedPropsMouseClicked(evt);
-      }
-    });
+    extendedProps.addMouseListener(formListener);
     jPanel2.add(extendedProps);
 
     jPanel3.setMaximumSize(new java.awt.Dimension(2, 10));
@@ -656,14 +638,48 @@ public class ConnectionEditorPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
     add(jPanel2, gridBagConstraints);
+  }
+
+  // Code for dispatching events from components to event handlers.
+
+  private class FormListener implements java.awt.event.ActionListener, java.awt.event.ItemListener, java.awt.event.MouseListener {
+    FormListener() {}
+    public void actionPerformed(java.awt.event.ActionEvent evt) {
+      if (evt.getSource() == manageDriversButton) {
+        ConnectionEditorPanel.this.showDriverEditorDialog(evt);
+      }
+      else if (evt.getSource() == helpButton) {
+        ConnectionEditorPanel.this.helpButtonActionPerformed(evt);
+      }
+      else if (evt.getSource() == editConnectionScriptsButton) {
+        ConnectionEditorPanel.this.editConnectionScriptsButtonActionPerformed(evt);
+      }
+    }
+
+    public void itemStateChanged(java.awt.event.ItemEvent evt) {
+      if (evt.getSource() == cbDrivers) {
+        ConnectionEditorPanel.this.cbDriversItemStateChanged(evt);
+      }
+    }
+
+    public void mouseClicked(java.awt.event.MouseEvent evt) {
+      if (evt.getSource() == extendedProps) {
+        ConnectionEditorPanel.this.extendedPropsMouseClicked(evt);
+      }
+    }
+
+    public void mouseEntered(java.awt.event.MouseEvent evt) {
+    }
+
+    public void mouseExited(java.awt.event.MouseEvent evt) {
+    }
+
+    public void mousePressed(java.awt.event.MouseEvent evt) {
+    }
+
+    public void mouseReleased(java.awt.event.MouseEvent evt) {
+    }
   }// </editor-fold>//GEN-END:initComponents
-
-	private void editConnectionScriptsButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_editConnectionScriptsButtonActionPerformed
-	{//GEN-HEADEREND:event_editConnectionScriptsButtonActionPerformed
-		Dialog d = (Dialog)SwingUtilities.getWindowAncestor(this);
-		EditConnectScriptsPanel.editScripts(d, this.getProfile());
-	}//GEN-LAST:event_editConnectionScriptsButtonActionPerformed
-
 	private void helpButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_helpButtonActionPerformed
 	{//GEN-HEADEREND:event_helpButtonActionPerformed
 		HelpManager.showProfileHelp();
@@ -676,7 +692,10 @@ public class ConnectionEditorPanel
 
 	private void cbDriversItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_cbDriversItemStateChanged
 	{//GEN-HEADEREND:event_cbDriversItemStateChanged
-		if (this.init) return;
+		if (this.init)
+		{
+			return;
+		}
 		if (evt.getStateChange() == ItemEvent.SELECTED)
 		{
 			String oldDriver = null;
@@ -685,7 +704,7 @@ public class ConnectionEditorPanel
 			{
 				oldDriver = this.currentProfile.getDriverclass();
 				newDriver = (DbDriver)this.cbDrivers.getSelectedItem();
-				if(this.currentProfile != null)
+				if (this.currentProfile != null)
 				{
 					this.currentProfile.setDriverclass(newDriver.getDriverClass());
 					this.currentProfile.setDriverName(newDriver.getName());
@@ -702,17 +721,10 @@ public class ConnectionEditorPanel
 
 			if (!newDriver.canReadLibrary())
 			{
-				EventQueue.invokeLater(
-					new Runnable()
-					{
-						public void run()
-						{
-							if (WbSwingUtilities.getYesNo(ConnectionEditorPanel.this, ResourceMgr.getString("MsgDriverLibraryNotReadable")))
-							{
-								showDriverEditorDialog(null);
-							}
-						}
-					});
+				if (WbSwingUtilities.getYesNo(ConnectionEditorPanel.this, ResourceMgr.getString("MsgDriverLibraryNotReadable")))
+				{
+					showDriverEditorDialog(null);
+				}
 			}
 		}
 	}//GEN-LAST:event_cbDriversItemStateChanged
@@ -720,23 +732,15 @@ public class ConnectionEditorPanel
 	private void showDriverEditorDialog(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showDriverEditorDialog
 	{//GEN-HEADEREND:event_showDriverEditorDialog
 		final Frame parent = (Frame)(SwingUtilities.getWindowAncestor(this)).getParent();
-		DbDriver drv = (DbDriver)cbDrivers.getSelectedItem();
-		final String drvName;
-		if (drv != null)
-		{
-			drvName = drv.getName();
-		}
-		else
-		{
-			drvName = null;
-		}
+		final DbDriver drv = (DbDriver)cbDrivers.getSelectedItem();
+		
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
 				DriverEditorDialog d = new DriverEditorDialog(parent);
-				d.setDriverName(drvName);
-				WbSwingUtilities.center(d,parent);
+				d.setDriverName(drv != null ? drv.getName() : null);
+				WbSwingUtilities.center(d, parent);
 				d.setVisible(true);
 				if (!d.isCancelled())
 				{
@@ -746,8 +750,12 @@ public class ConnectionEditorPanel
 				d.dispose();
 			}
 		});
-
 	}//GEN-LAST:event_showDriverEditorDialog
+
+	private void editConnectionScriptsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editConnectionScriptsButtonActionPerformed
+		Dialog d = (Dialog)SwingUtilities.getWindowAncestor(this);
+		EditConnectScriptsPanel.editScripts(d, this.getProfile());
+	}//GEN-LAST:event_editConnectionScriptsButtonActionPerformed
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   protected javax.swing.JLabel altDelimLabel;
@@ -794,7 +802,6 @@ public class ConnectionEditorPanel
   protected javax.swing.JPanel wbOptionsPanel;
   protected javax.swing.JLabel workspaceFileLabel;
   // End of variables declaration//GEN-END:variables
-
 	public void setDrivers(List<DbDriver> aDriverList)
 	{
 		if (aDriverList != null)
@@ -803,7 +810,7 @@ public class ConnectionEditorPanel
 			Object currentDriver = this.cbDrivers.getSelectedItem();
 			try
 			{
-				Collections.sort(aDriverList, DbDriver.getDriverClassComparator());
+				Collections.sort(aDriverList);
 				this.cbDrivers.setModel(new DefaultComboBoxModel(aDriverList.toArray()));
 				if (currentDriver != null)
 				{
@@ -823,11 +830,14 @@ public class ConnectionEditorPanel
 
 	public void editExtendedProperties()
 	{
-		if (this.currentProfile == null) return;
+		if (this.currentProfile == null)
+		{
+			return;
+		}
 		Properties p = this.currentProfile.getConnectionProperties();
 		ConnectionPropertiesEditor editor = new ConnectionPropertiesEditor(p);
 		editor.setCopyToSystem(currentProfile.getCopyExtendedPropsToSystem());
-		Dimension d = new Dimension(300,250);
+		Dimension d = new Dimension(300, 250);
 		editor.setMinimumSize(d);
 		editor.setPreferredSize(d);
 
@@ -844,7 +854,10 @@ public class ConnectionEditorPanel
 	{
 		FileDialogUtil util = new FileDialogUtil();
 		String filename = util.getWorkspaceFilename(SwingUtilities.getWindowAncestor(this), false, true);
-		if (filename == null) return;
+		if (filename == null)
+		{
+			return;
+		}
 		this.tfWorkspaceFile.setText(filename);
 	}
 
@@ -855,9 +868,18 @@ public class ConnectionEditorPanel
 
 	public void updateProfile()
 	{
-		if (this.init) return;
-		if (this.currentProfile == null) return;
-		if (this.editors == null) return;
+		if (this.init)
+		{
+			return;
+		}
+		if (this.currentProfile == null)
+		{
+			return;
+		}
+		if (this.editors == null)
+		{
+			return;
+		}
 		boolean changed = false;
 
 		Iterator<SimplePropertyEditor> itr = this.editors.iterator();
@@ -867,13 +889,13 @@ public class ConnectionEditorPanel
 			changed = changed || editor.isChanged();
 			editor.applyChanges();
 		}
-		
+
 		if (altDelimiter.getDelimiter().isChanged())
 		{
 			changed = true;
 			currentProfile.setAlternateDelimiter(altDelimiter.getDelimiter());
 		}
-		
+
 		if (changed)
 		{
 			this.sourceModel.profileChanged(this.currentProfile);
@@ -888,8 +910,14 @@ public class ConnectionEditorPanel
 
 	private void initPropertyEditors()
 	{
-		if (this.editors == null) return;
-		if (this.currentProfile == null) return;
+		if (this.editors == null)
+		{
+			return;
+		}
+		if (this.currentProfile == null)
+		{
+			return;
+		}
 
 		Iterator<SimplePropertyEditor> itr = this.editors.iterator();
 		while (itr.hasNext())
@@ -914,14 +942,18 @@ public class ConnectionEditorPanel
 		else
 		{
 			propLabel.setIcon(null);
-		}	
+		}
 	}
+
 	public void setProfile(ConnectionProfile aProfile)
 	{
-		if (aProfile == null) return;
+		if (aProfile == null)
+		{
+			return;
+		}
 
 		this.currentProfile = aProfile;
-		
+
 		try
 		{
 			this.init = true;
@@ -938,7 +970,7 @@ public class ConnectionEditorPanel
 
 			this.altDelimiter.setDelimiter(this.currentProfile.getAlternateDelimiter());
 			cbDrivers.setSelectedItem(drv);
-			
+
 			Color c = this.currentProfile.getInfoDisplayColor();
 			this.infoColor.setSelectedColor(c);
 			checkExtendedProps();
@@ -960,7 +992,7 @@ public class ConnectionEditorPanel
 	 */
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (!this.init)	
+		if (!this.init)
 		{
 			if (evt.getSource() == this.altDelimiter)
 			{
@@ -970,13 +1002,10 @@ public class ConnectionEditorPanel
 
 				this.currentProfile.setAlternateDelimiter(altDelimiter.getDelimiter());
 			}
-//			System.out.println("**** changed!");
-//			Exception e = new Exception();
-//			e.printStackTrace();			
 			this.sourceModel.profileChanged(this.currentProfile);
 		}
 	}
-	
+
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
 		if (e.getSource() == this.selectWkspButton)
@@ -992,7 +1021,7 @@ public class ConnectionEditorPanel
 			f.setDisabledTextColor(Color.BLACK);
 			f.setEditable(false);
 			f.setText(pwd);
-			Border b = new CompoundBorder(new LineBorder(Color.LIGHT_GRAY), new EmptyBorder(2,2,2,2));
+			Border b = new CompoundBorder(new LineBorder(Color.LIGHT_GRAY), new EmptyBorder(2, 2, 2, 2));
 			f.setBorder(b);
 			TextComponentMouseListener l = new TextComponentMouseListener();
 			f.addMouseListener(l);
@@ -1004,7 +1033,7 @@ public class ConnectionEditorPanel
 			this.currentProfile.setInfoDisplayColor(this.infoColor.getSelectedColor());
 		}
 	}
-	
+
 	public boolean validateInput()
 	{
 		DelimiterDefinition delim = getProfile().getAlternateDelimiter();
@@ -1015,10 +1044,9 @@ public class ConnectionEditorPanel
 		}
 		return true;
 	}
-	
+
 	public void componentDisplayed()
 	{
-		// nothing to do
+	// nothing to do
 	}
-
 }

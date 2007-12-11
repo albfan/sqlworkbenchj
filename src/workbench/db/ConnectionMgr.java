@@ -175,14 +175,13 @@ public class ConnectionMgr
 	public DbDriver findDriverByName(String drvClassName, String aName)
 	{
 		DbDriver firstMatch = null;
-		DbDriver db = null;
 		
-		if (aName == null || aName.length() == 0) return this.findDriver(drvClassName);
 		if (this.drivers == null) this.readDrivers();
 		
-		for (int i=0; i < this.drivers.size(); i ++)
+		if (aName == null || aName.length() == 0) return this.findDriver(drvClassName);
+		
+		for (DbDriver db : drivers)
 		{
-			db = this.drivers.get(i);
 			if (db.getDriverClass().equals(drvClassName))
 			{
 				// if the classname and the driver name are the same return the driver immediately
@@ -196,8 +195,7 @@ public class ConnectionMgr
 			}
 		}
 		
-		// In datch mode the default drivers (DriverTemplates.xml) are not loaded.
-		
+		// In batch mode the default drivers (DriverTemplates.xml) are not loaded.
 		if (firstMatch == null && WbManager.getInstance().isBatchMode())
 		{
 			// We simple pretend there is one available, this will e.g. make
@@ -233,8 +231,6 @@ public class ConnectionMgr
 		}
 		
 		DbDriver db = this.findRegisteredDriver(drvClassName);
-		
-		//LogMgr.logDebug("ConnectionMgr.findDriverByName()", "Searching for DriverClass=" + drvClassName);
 		
 		if (db == null)
 		{

@@ -19,6 +19,7 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 
+import javax.swing.JDialog;
 import workbench.gui.actions.EscAction;
 import workbench.resource.ResourceMgr;
 import workbench.util.BrowserLauncher;
@@ -28,7 +29,7 @@ import workbench.util.BrowserLauncher;
  * @author  support@sql-workbench.net
  */
 public class WbAboutDialog 
-	extends javax.swing.JDialog
+	extends JDialog
 	implements ActionListener
 {
 	private EscAction escAction;
@@ -45,8 +46,7 @@ public class WbAboutDialog
 		InputMap im = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 		ActionMap am = this.getRootPane().getActionMap();
 		escAction = new EscAction(this);
-		im.put(escAction.getAccelerator(), escAction.getActionName());
-		am.put(escAction.getActionName(), escAction);
+		escAction.addToInputMap(im, am);
 	}
 
 	/** This method is called from within the constructor to
@@ -267,7 +267,6 @@ public class WbAboutDialog
 		this.closeDialog(null);
 	}//GEN-LAST:event_closeButtonActionPerformed
 
-	/** Closes the dialog */
 	private void closeDialog(java.awt.event.WindowEvent evt)
 	{//GEN-FIRST:event_closeDialog
 		setVisible(false);
@@ -276,7 +275,7 @@ public class WbAboutDialog
 
 	public void actionPerformed(ActionEvent e)
 	{
-		if (e.getActionCommand().equals(escAction.getActionName()))
+		if (e.getSource() == escAction)
 		{
 			closeDialog(null);
 		}

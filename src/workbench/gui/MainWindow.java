@@ -107,6 +107,7 @@ import workbench.gui.actions.CreateNewConnection;
 import workbench.gui.actions.DisconnectTabAction;
 import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
+import workbench.interfaces.ToolWindow;
 import workbench.util.NumberStringCache;
 
 /**
@@ -160,7 +161,9 @@ public class MainWindow
 
 	private AddMacroAction createMacro;
 	private ManageMacroAction manageMacros;
-	private List<DbExplorerPanel> explorerPanels = new ArrayList<DbExplorerPanel>();
+	
+	private List<ToolWindow> explorerWindows = new ArrayList<ToolWindow>();
+	
 	private RunningJobIndicator jobIndicator;
 	protected WbThread connectThread;
 		
@@ -609,11 +612,6 @@ public class MainWindow
 	
 	public void macroListChanged()
 	{
-		this.updateMacroMenus();
-	}
-
-	private void updateMacroMenus()
-	{
 		int count = this.sqlTab.getTabCount();
 		for (int i=0; i < count; i++)
 		{
@@ -787,7 +785,7 @@ public class MainWindow
 		t.start();
 	}
 	
-	private void disconnectPanel(final MainPanel panel)
+	protected void disconnectPanel(final MainPanel panel)
 	{
 		if (this.isConnectInProgress()) return;
 		setConnectIsInProgress();
@@ -873,7 +871,7 @@ public class MainWindow
 	 * Connect the given panel to the database. This will always 
 	 * create a new physical connection to the database.
 	 */
-	private void connectPanel(final MainPanel aPanel)
+	protected void connectPanel(final MainPanel aPanel)
 	{
 		if (this.isConnectInProgress()) return;
 		this.setConnectIsInProgress();
@@ -935,7 +933,6 @@ public class MainWindow
 		if (anIndex < 0) return;
 
 		Container content = this.getContentPane();
-		//final MainPanel current = this.getCurrentPanel();
 		final MainPanel current = this.getSqlPanel(anIndex);
 		if (current == null) return;
 
@@ -960,7 +957,7 @@ public class MainWindow
 		});
 	}
 
-	private void tabSelected(final int index)
+	protected void tabSelected(final int index)
 	{
 		// Make sure this is executed on the EDT
 		WbSwingUtilities.invoke(new Runnable()
@@ -972,7 +969,7 @@ public class MainWindow
 		});
 	}
 
-	private void updateCurrentTab(int index)
+	protected void updateCurrentTab(int index)
 	{
 		//MainPanel current = this.getCurrentPanel();
 		//int index = this.sqlTab.getSelectedIndex();
@@ -1057,63 +1054,47 @@ public class MainWindow
 	{
 		// When switching between Applications (using Alt-Tab in Windows)
 		// sometimes the main menu is selected (as if the Alt key was pressed
-		// once to activate the menu). This is trying to workaround this fix
+		// once to activate the menu). This is trying to workaround this bug
 		// but does not really work in all cases. As this happens with other Java
 		// applications as well, I think this is a JDK bug.
 		
 		// If the "oppositeWindow is not null, then we have a focus switch inside
 		// our application, so we don't need to do anything
-		if (windowEvent.getOppositeWindow() != null) return;
-		
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				JMenu menu = null;
-				JMenuBar bar = null;
-		
-				int index = getCurrentPanelIndex();
-				if (panelMenus != null && index > -1)
-				{
-					bar = panelMenus.get(index);
-					if (bar != null)
-					{
-						try
-						{
-							menu = bar.getMenu(0);
-						}
-						catch (Throwable th)
-						{
-							menu = null;
-						}
-					}
-				}
-				try { if (menu != null) menu.setSelected(false); } catch (Throwable th) {}
-				try { if (bar != null) bar.setSelected(null); } catch (Throwable th) {}
-			}
-		});
+//		if (windowEvent.getOppositeWindow() != null) return;
+//		
+//		EventQueue.invokeLater(new Runnable()
+//		{
+//			public void run()
+//			{
+//				JMenu menu = null;
+//				JMenuBar bar = null;
+//		
+//				int index = getCurrentPanelIndex();
+//				if (panelMenus != null && index > -1)
+//				{
+//					bar = panelMenus.get(index);
+//					if (bar != null)
+//					{
+//						try
+//						{
+//							menu = bar.getMenu(0);
+//						}
+//						catch (Throwable th)
+//						{
+//							menu = null;
+//						}
+//					}
+//				}
+//				try { if (menu != null) menu.setSelected(false); } catch (Throwable th) {}
+//				try { if (bar != null) bar.setSelected(null); } catch (Throwable th) {}
+//			}
+//		});
 	}
 
 	public void windowIconified(WindowEvent windowEvent)
 	{
 	}
 
-	private void clearMessageForAllPanels()
-	{
-		final JTabbedPane tab = this.sqlTab;
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				for (int i=0; i < tab.getTabCount(); i++)
-				{
-					MainPanel sql = getSqlPanel(i);
-					sql.clearStatusMessage();
-				}
-			}
-		});
-	}
-	
 	/**
 	 *	Display a message in the status bar
 	 */
@@ -1266,7 +1247,11 @@ public class MainWindow
 
 	public void connectEnded()
 	{
-		clearMessageForAllPanels();
+		for (int i=0; i < sqlTab.getTabCount(); i++)
+		{
+			MainPanel sql = getSqlPanel(i);
+			sql.clearStatusMessage();
+		}
 		this.clearConnectIsInProgress();
 	}
 
@@ -1330,27 +1315,6 @@ public class MainWindow
 		this.closeWorkspace(false);
 		this.resetTabTitles();
 	}
-	
-//	protected WbWorkspace getWorkspace(ConnectionProfile profile)
-//	{
-//		return getWorkspace(profile.getWorkspaceFile());
-//	}
-//	
-//	protected WbWorkspace getWorkspace(String filename)
-//	{
-//		try
-//		{
-//			if (filename == null) return null;
-//			final String realFilename = FileDialogUtil.replaceConfigDir(filename);
-//			WbWorkspace space = new WbWorkspace(realFilename, false);
-//			return space;
-//		}
-//		catch (IOException ex)
-//		{
-//			LogMgr.logError("MainWindow.getWorkspace()", "Error reading workspace", ex);
-//			return null;
-//		}
-//	}
 	
 	private boolean resultForWorkspaceClose;
 	
@@ -1493,37 +1457,31 @@ public class MainWindow
 		}
 	}
 
-	public void disconnect(boolean background, final boolean closeWorkspace, final boolean saveWorkspace)
+	public void disconnect(final boolean background, final boolean closeWorkspace, final boolean saveWorkspace)
 	{
 		if (this.isConnectInProgress()) return;
 		this.setConnectIsInProgress();
 
+		Runnable run = new Runnable()
+		{
+			public void run()
+			{
+				if (saveWorkspace) saveWorkspace(false);
+				if (background) showDisconnectInfo();
+				doDisconnect();
+				if (closeWorkspace) closeWorkspace(background);
+				if (background) closeConnectingInfo();
+			}
+		};
+		
 		if (background)
 		{
-			Thread t = new WbThread("MainWindow Disconnect")
-			{
-				public void run()
-				{
-					if (closeWorkspace) saveWorkspace(false);
-					showDisconnectInfo();
-					doDisconnect();
-					if (closeWorkspace) closeWorkspace();
-					closeConnectingInfo();
-				}
-			};
+			Thread t = new WbThread(run, "MainWindow Disconnect");
 			t.start();
 		}
 		else
 		{
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				public void run()
-				{
-					if (saveWorkspace) saveWorkspace(false);
-					doDisconnect();
-					if (closeWorkspace) closeWorkspace(false);
-				}
-			});
+			WbSwingUtilities.invoke(run);
 		}
 	}
 
@@ -1556,16 +1514,13 @@ public class MainWindow
 		}
 		finally
 		{
-			this.disconnected();
-			EventQueue.invokeLater(new Runnable()
+			// this must be called on the AWT thread
+			// and it must be called synchronously!
+			WbSwingUtilities.invoke(new Runnable()
 			{
 				public void run()
 				{
-					showStatusMessage("");
-					for (int i=0; i < sqlTab.getTabCount(); i++)
-					{
-						sqlTab.setForegroundAt(i, null);
-					}
+					disconnected();
 				}
 			});
 		}
@@ -1584,8 +1539,12 @@ public class MainWindow
 		this.dbExplorerAction.setEnabled(false);
 		this.newDbExplorerPanel.setEnabled(false);
 		this.newDbExplorerWindow.setEnabled(false);
-		this.clearConnectIsInProgress();
 		this.showStatusMessage("");
+		for (int i=0; i < sqlTab.getTabCount(); i++)
+		{
+			sqlTab.setForegroundAt(i, null);
+		}
+		this.clearConnectIsInProgress();
 	}
 
 
@@ -1689,14 +1648,7 @@ public class MainWindow
 	public void selectConnection(boolean exit)
 	{
 		this.exitOnCancel = exit;
-		
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				getSelector().selectConnection();
-			}
-		});
+		getSelector().selectConnection();
 	}
 
 	public JMenu getMacroMenu(int panelIndex)
@@ -1887,10 +1839,10 @@ public class MainWindow
 		}
 		else
 		{
-			if (this.explorerPanels.size() > 0)
+			if (this.explorerWindows.size() > 0)
 			{
-				DbExplorerPanel p = this.explorerPanels.get(0);
-				p.activateWindow();
+				ToolWindow w = this.explorerWindows.get(0);
+				w.activate();
 			}
 			else
 			{
@@ -1930,18 +1882,17 @@ public class MainWindow
 
 	public void closeExplorerWindows(boolean doDisconnect)
 	{
-		for (DbExplorerPanel panel : explorerPanels)
+		for (ToolWindow w : explorerWindows)
 		{
 			if (doDisconnect)
 			{
-				WbConnection conn = panel.getConnection();
+				WbConnection conn = w.getConnection();
 				if (conn != this.currentConnection)
 				{
 					ConnectionMgr.getInstance().disconnect(conn);
 				}
+				w.closeWindow();
 			}
-			panel.disconnect();
-			panel.closeWindow();
 		}
 	}
 
@@ -1975,12 +1926,12 @@ public class MainWindow
 		{
 			explorer.setConnection(this.currentConnection);
 		}
-		this.explorerPanels.add(explorer);
+		this.explorerWindows.add(explorer.getWindow());
 	}
 
 	public void explorerWindowClosed(DbExplorerPanel p)
 	{
-		this.explorerPanels.remove(p);
+		this.explorerWindows.remove(p.getWindow());
 	}
 
 	public void newDbExplorerPanel(boolean select)
@@ -2161,7 +2112,6 @@ public class MainWindow
 		{
 			this.isProfileWorkspace = false;
 		}
-		//this.updateWindowTitle();
 	}
 
 	public void closeWorkspace()
@@ -2418,8 +2368,9 @@ public class MainWindow
 		String title = this.sqlTab.getTitleAt(index);
 		int pos = title.lastIndexOf(' ');
 		if (pos > -1)
+		{
 			title = title.substring(0, pos);
-
+		}
 		return title;
 	}
 
@@ -2476,7 +2427,6 @@ public class MainWindow
 		{
 			this.setTabTitle(index, newName);
 		}
-//		this.selectCurrentEditorLater();
 	}
 
 	public void removeTab()
@@ -2594,7 +2544,7 @@ public class MainWindow
 			// it simply tells the panel that it should
 			// release anything attached to the connection!
 			// the actual disconnect from the DB is done afterwards
-			// through the ConnectionMgr
+			// through the ConnectionMgr in a separate thread
 			panel.disconnect();
 			try
 			{
@@ -2720,12 +2670,12 @@ public class MainWindow
 		}
 		catch (IOException io)
 		{
-			io.printStackTrace();
+			LogMgr.logError("MainWindow.drop()", "Error processing drop event", io);
 			dropTargetDropEvent.rejectDrop();
 		}
 		catch (UnsupportedFlavorException ufe)
 		{
-			ufe.printStackTrace();
+			LogMgr.logError("MainWindow.drop()", "Error processing drop event", ufe);
 			dropTargetDropEvent.rejectDrop();
 		}
 	}

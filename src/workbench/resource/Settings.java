@@ -868,14 +868,6 @@ public class Settings
 
 	private void migrateProps()
 	{
-		List<String> servers = getServersWhereDDLNeedsCommit();
-		if (!servers.contains("Microsoft SQL Server"))
-		{
-			servers.add("Microsoft SQL Server");
-		}
-		String val = 	StringUtil.listToString(servers, ',');
-		setProperty("workbench.db.ddlneedscommit", val);
-		
 		// Fix incorrectly distributed defaults
 		String defaultSelectable = getProperty("workbench.db.objecttype.selectable.default", null);
 		if (defaultSelectable != null)
@@ -1019,6 +1011,7 @@ public class Settings
 			this.props.remove("workbench.sql.enable_dbms_output");
 			
 			this.props.remove("workbench.db.stripprocversion");
+			this.props.remove("workbench.dbexplorer.cleardata");
 		}
 		catch (Throwable e)
 		{

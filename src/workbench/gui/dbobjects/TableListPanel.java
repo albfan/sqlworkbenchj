@@ -12,6 +12,7 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -61,7 +62,6 @@ import workbench.db.ObjectScripter;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
-import workbench.db.report.SchemaReporter;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
@@ -85,13 +85,12 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
-import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.util.ExceptionUtil;
-import java.awt.Component;
 import java.util.Iterator;
 import workbench.WbManager;
+import workbench.gui.actions.SchemaReportAction;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.sql.PanelContentSender;
 import workbench.interfaces.CriteriaPanel;
@@ -108,7 +107,7 @@ public class TableListPanel
 	extends JPanel
 	implements ActionListener, ChangeListener, ListSelectionListener, MouseListener,
 						 ShareableDisplay, Exporter, PropertyChangeListener,
-						 TableModelListener
+						 TableModelListener, TableList
 {
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected WbConnection dbConnection;
@@ -165,11 +164,6 @@ public class TableListPanel
 
 	protected boolean busy;
 	protected boolean ignoreStateChanged = false;
-
-	private static final String SCHEMA_REPORT_CMD = "create-schema-report";
-	private static final String DROP_CMD = "drop-table";
-	private static final String DELETE_TABLE_CMD = "delete-table-data";
-	private static final String COMPILE_CMD = "compile-procedure";
 
 	private EditorTabSelectMenu showDataMenu;
 	private WbAction dropIndexAction;
@@ -292,12 +286,8 @@ public class TableListPanel
 		this.triggers = new TriggerDisplayPanel();
 
 		this.listPanel = new JPanel();
-		this.tableList = new WbTable(true, false, false);
+		this.tableList = new DbObjectTable();
 		this.tableList.setSelectOnRightButtonClick(true);
-		this.tableList.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		this.tableList.setCellSelectionEnabled(false);
-		this.tableList.setColumnSelectionAllowed(false);
-		this.tableList.setRowSelectionAllowed(true);
 		this.tableList.getSelectionModel().addListSelectionListener(this);
 		this.tableList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.tableList.setAdjustToColumnLabel(true);
@@ -420,23 +410,14 @@ public class TableListPanel
 		this.scriptTablesItem.addActionListener(this);
 		this.tableList.addPopupMenu(this.scriptTablesItem, false);
 
-		WbMenuItem item = new WbMenuItem(ResourceMgr.getString("MnuTxtSchemaReport"));
-		item.setToolTipText(ResourceMgr.getDescription("MnuTxtSchemaReport"));
-		item.setActionCommand(SCHEMA_REPORT_CMD);
-		item.addActionListener(this);
-		item.setEnabled(true);
-		tableList.addPopupMenu(item, false);
+		SchemaReportAction action = new SchemaReportAction(this);
+		tableList.addPopupMenu(action.getMenuItem(), false);
 
-		this.dropTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDropDbObject"));
-		this.dropTableItem.setToolTipText(ResourceMgr.getDescription("MnuTxtDropDbObject"));
-		this.dropTableItem.setActionCommand(DROP_CMD);
-		this.dropTableItem.addActionListener(this);
-		this.dropTableItem.setEnabled(false);
+		this.dropTableItem = new DropDbItem(this.tableList, this);
 		tableList.addPopupMenu(this.dropTableItem, true);
 
-		this.deleteTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDeleteTableData"));
-		this.deleteTableItem.setToolTipText(ResourceMgr.getDescription("MnuTxtDeleteTableData"));
-		this.deleteTableItem.setActionCommand(DELETE_TABLE_CMD);
+		this.deleteTableItem = new WbMenuItem();
+		this.deleteTableItem.setMenuTextByKey("MnuTxtDeleteTableData");
 		this.deleteTableItem.addActionListener(this);
 		this.deleteTableItem.setEnabled(true);
 		tableList.addPopupMenu(this.deleteTableItem, false);
@@ -696,7 +677,6 @@ public class TableListPanel
 		{
 			this.recompileItem = new WbMenuItem(ResourceMgr.getString("MnuTxtRecompile"));
 			this.recompileItem.setToolTipText(ResourceMgr.getDescription("MnuTxtRecompile"));
-			this.recompileItem.setActionCommand(COMPILE_CMD);
 			this.recompileItem.addActionListener(this);
 			this.recompileItem.setEnabled(false);
 			JPopupMenu popup = this.tableList.getPopupMenu();
@@ -1320,7 +1300,7 @@ public class TableListPanel
 			return;
 		}
 		JPanel p = new JPanel();
-		p.setBorder(WbSwingUtilities.BEVEL_BORDER_RAISED);
+		p.setBorder(WbSwingUtilities.getBevelBorderRaised());
 		p.setLayout(new BorderLayout());
 		this.infoLabel = new JLabel(aMsg);
 		this.infoLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -1776,19 +1756,15 @@ public class TableListPanel
 					LogMgr.logError("TableListPanel().actionPerformed()", "Error when accessing editor tab", ex);
 				}
 			}
-			else if (command.equals(COMPILE_CMD))
+			else if (e.getSource() == this.recompileItem)
 			{
 				compileObjects();
 			}
-			else if (command.equals(SCHEMA_REPORT_CMD))
-			{
-				saveReport();
-			}
-			else if (command.equals(DELETE_TABLE_CMD))
+			else if (e.getSource() == this.deleteTableItem)
 			{
 				this.deleteTables();
 			}
-			else if (command.equals(DROP_CMD))
+			else if (e.getSource() == this.dropTableItem)
 			{
 				this.dropTables();
 			}
@@ -2052,7 +2028,17 @@ public class TableListPanel
 		}
 	}
 
-	private TableIdentifier[] getSelectedObjects()
+	public WbConnection getConnection()
+	{
+		return this.dbConnection;
+	}
+	
+	public Component getComponent()
+	{
+		return this;
+	}
+	
+	public TableIdentifier[] getSelectedObjects()
 	{
 		int[] rows = this.tableList.getSelectedRows();
 		int count = rows.length;
@@ -2065,54 +2051,6 @@ public class TableListPanel
 			result[i] = createTableIdentifier(rows[i]);
 		}
 		return result;
-	}
-
-
-	public void saveReport()
-	{
-		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
-		TableIdentifier[] tables = getSelectedObjects();
-		if (tables == null) return;
-
-		FileDialogUtil dialog = new FileDialogUtil();
-
-		String filename = dialog.getXmlReportFilename(this);
-		if (filename == null) return;
-
-		final SchemaReporter reporter = new SchemaReporter(this.dbConnection);
-		final Component caller = this;
-		reporter.setShowProgress(true, (JFrame)SwingUtilities.getWindowAncestor(this));
-		reporter.setTableList(tables);
-		reporter.setOutputFilename(filename);
-
-		Thread t = new WbThread("Schema Report")
-		{
-			public void run()
-			{
-				try
-				{
-					dbConnection.setBusy(true);
-					reporter.writeXml();
-				}
-				catch (Throwable e)
-				{
-					LogMgr.logError("TableListPanel.saveReport()", "Error writing schema report", e);
-					final String msg = ExceptionUtil.getDisplay(e);
-					EventQueue.invokeLater(new Runnable()
-					{
-						public void run()
-						{
-							WbSwingUtilities.showErrorMessage(caller, msg);
-						}
-					});
-				}
-				finally
-				{
-					dbConnection.setBusy(false);
-				}
-			}
-		};
-		t.start();
 	}
 
 	public void exportData()

@@ -102,6 +102,7 @@ public class DataPumper
 		this.sourceProfile = source;
 		this.targetProfile = target;
 		initComponents();
+		
 		this.selectSourceButton.addActionListener(this);
 		this.selectTargetButton.addActionListener(this);
 		this.openFileButton.addActionListener(this);
@@ -185,6 +186,17 @@ public class DataPumper
 		s.setProperty("workbench.datapumper.batchsize", getBatchSize());
 	}
 
+	public void activate()
+	{
+		this.window.setVisible(true);
+		this.window.toFront();
+	}
+	
+	public WbConnection getConnection()
+	{
+		return null;
+	}
+	
 	public void restoreSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -378,10 +390,15 @@ public class DataPumper
 		this.fileImporter = null;
 		this.checkType();
 
+		if (this.useQueryCbx.isSelected())
+		{
+			initColumnMapper();
+		}
+		
 		if (this.sourceConnection != null)
 		{
 			this.sourceTable.setChangeListener(this, "source-table");
-
+			
 		  Thread t = new WbThread("Retrieve source tables")
 		  {
 			  public void run()
@@ -521,7 +538,7 @@ public class DataPumper
 
     sourceProfilePanel.setLayout(new java.awt.GridBagLayout());
 
-    sourceProfileLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+    sourceProfileLabel.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(0, 2, 0, 0)));
     sourceProfileLabel.setMaximumSize(new java.awt.Dimension(32768, 24));
     sourceProfileLabel.setMinimumSize(new java.awt.Dimension(25, 24));
     sourceProfileLabel.setPreferredSize(new java.awt.Dimension(50, 24));
@@ -569,7 +586,7 @@ public class DataPumper
     targetProfilePanel.setLayout(new java.awt.GridBagLayout());
 
     targetProfileLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    targetProfileLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+    targetProfileLabel.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(0, 2, 0, 0)));
     targetProfileLabel.setMaximumSize(new java.awt.Dimension(32768, 24));
     targetProfileLabel.setMinimumSize(new java.awt.Dimension(25, 24));
     targetProfileLabel.setPreferredSize(new java.awt.Dimension(0, 24));
@@ -862,7 +879,7 @@ public class DataPumper
     gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
     add(jSplitPane1, gridBagConstraints);
 
-    statusLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+    statusLabel.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(0, 2, 0, 0)));
     statusLabel.setMaximumSize(new java.awt.Dimension(32768, 24));
     statusLabel.setMinimumSize(new java.awt.Dimension(4, 24));
     statusLabel.setPreferredSize(new java.awt.Dimension(4, 24));
@@ -1809,7 +1826,7 @@ public class DataPumper
 			}
 			else if (this.useQueryCbx.isSelected())
 			{
-				this.copier.copyFromQuery(this.sourceConnection, this.targetConnection, this.sqlEditor.getText(), ttable, colMapping.targetColumns);
+				this.copier.copyFromQuery(this.sourceConnection, this.targetConnection, this.sqlEditor.getText(), ttable, colMapping.targetColumns, ttable.isNewTable(), dropTargetCbx.isSelected());
 			}
 			else
 			{
@@ -1823,23 +1840,17 @@ public class DataPumper
 				}
 				if (!ignoreSelect) where = this.sqlEditor.getText();
 
-				if (ttable.isNewTable())
+				boolean createTable = ttable.isNewTable();
+				boolean dropTable = this.dropTargetCbx.isSelected();
+				Map<String, String> mapping = new HashMap<String, String>();
+				int count = colMapping.sourceColumns.length;
+				for (int i=0; i < count; i++)
 				{
-					boolean dropTable = this.dropTargetCbx.isSelected();
-					Map<String, String> mapping = new HashMap<String, String>();
-					int count = colMapping.sourceColumns.length;
-					for (int i=0; i < count; i++)
-					{
-						mapping.put(colMapping.sourceColumns[i].getColumnName(), colMapping.targetColumns[i].getColumnName());
-					}
-
-					this.copier.copyFromTable(this.sourceConnection, this.targetConnection, stable, ttable, mapping, where, true, dropTable);
+					mapping.put(colMapping.sourceColumns[i].getColumnName(), colMapping.targetColumns[i].getColumnName());
 				}
-				else
-				{
-					this.copier.copyFromTable(this.sourceConnection, this.targetConnection, stable, ttable, colMapping.sourceColumns, colMapping.targetColumns, where);
-				}
+				this.copier.copyFromTable(this.sourceConnection, this.targetConnection, stable, ttable, mapping, where, createTable, dropTable);
 			}
+			
 			this.copier.startBackgroundCopy();
 			this.showLogButton.setEnabled(false);
 			this.startButton.setEnabled(false);
@@ -1915,11 +1926,17 @@ public class DataPumper
 		updateMonitor(currentRow);
 	}
 
-	private void updateMonitor(long currentRow)
+	private void updateMonitor(final long currentRow)
 	{
-		if (currentRow == 1) this.updateWindowTitle();
-		this.statusLabel.setText(this.copyMsg + " " + currentRow);
-		this.statusLabel.repaint();
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				if (currentRow == 1) updateWindowTitle();
+				statusLabel.setText(copyMsg + " " + currentRow);
+				statusLabel.repaint();
+			}
+		});
 	}
 
 	public void saveCurrentType(String type) {}

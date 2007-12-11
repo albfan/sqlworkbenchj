@@ -13,6 +13,7 @@ package workbench.gui.components;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Frame;
 import java.sql.SQLException;
 
@@ -49,7 +50,6 @@ public class ConnectionSelector
 	protected JLabel connectLabel;
 	private String propertyKey;
 
-	/** Creates a new instance of ConnectionSelector */
 	public ConnectionSelector(Frame parent, Connectable conn)
 	{
 		this.client = conn;
@@ -63,40 +63,33 @@ public class ConnectionSelector
 
 	public boolean isConnectInProgress()
 	{
-		synchronized (this)
-		{
-			return this.connectInProgress;
-		}
+		return this.connectInProgress;
 	}
 
 	public void selectConnection()
 	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				_selectConnection();
+			}
+		});
+	}
+	
+	protected void _selectConnection()
+	{
 		if (this.isConnectInProgress()) return;
+		ProfileSelectionDialog dialog = null;
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this.parent);
-			final ProfileSelectionDialog dialog = new ProfileSelectionDialog(this.parent, true, this.propertyKey);
+			dialog = new ProfileSelectionDialog(this.parent, true, this.propertyKey);
 			WbSwingUtilities.center(dialog, this.parent);
 			WbSwingUtilities.showDefaultCursor(this.parent);
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				public void run()
-				{
-					dialog.setVisible(true);
-				}
-			});
+			dialog.setVisible(true);
 			ConnectionProfile prof = dialog.getSelectedProfile();
 			boolean cancelled = dialog.isCancelled();
-			
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				public void run()
-				{
-					dialog.setVisible(false);
-					parent.repaint();
-				}
-			});
-			dialog.dispose();
 			
 			if (cancelled || prof == null)
 			{
@@ -104,29 +97,28 @@ public class ConnectionSelector
 			}
 			else
 			{
-				this.connectTo(prof);
+				this.connectTo(prof, false);
 			}
 		}
 		catch (Throwable th)
 		{
 			LogMgr.logError("ConnectionSelector.selectConnection()", "Error during connect", th);
 		}
-	}
-
-	public void connectTo(final ConnectionProfile aProfile)
-	{
-		this.connectTo(aProfile, false);
+		finally
+		{
+			if (dialog != null) dialog.dispose();
+		}
 	}
 
 	public void connectTo(final ConnectionProfile aProfile, final boolean showDialogOnError)
 	{
 		if (this.isConnectInProgress()) return;
-		this.showConnectingInfo();
 
 		Thread t = new WbThread("Connection thread")
 		{
 			public void run()
 			{
+				showConnectingInfo();
 				doConnect(aProfile, showDialogOnError);
 			}
 		};
@@ -136,91 +128,77 @@ public class ConnectionSelector
 
 	public void closeConnectingInfo()
 	{
-		WbSwingUtilities.showDefaultCursor(this.parent);
-		if (this.connectingInfo != null)
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			WbSwingUtilities.showDefaultCursor(this.connectingInfo);
-			WbSwingUtilities.invoke(new Runnable()
+			public void run()
 			{
-				public void run()
+				if (connectingInfo != null)
 				{
-					if (connectingInfo != null)
-					{
-						connectingInfo.setVisible(false);
-						connectingInfo.dispose();
-						connectingInfo = null;
-					}
+					connectingInfo.setVisible(false);
+					connectingInfo.dispose();
+					connectingInfo = null;
+					WbSwingUtilities.repaintLater(parent);
 				}
-			});
-			this.parent.repaint();
-		}
+			}
+		});
 	}
 
 	public void showDisconnectInfo()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			public void run()
-			{
-				showPopupMessagePanel(ResourceMgr.getString("MsgDisconnecting"));
-			}
-		});
+		showPopupMessagePanel(ResourceMgr.getString("MsgDisconnecting"));
 	}
 
 	public void showConnectingInfo()
 	{
+		showPopupMessagePanel(ResourceMgr.getString("MsgConnecting"));
+	}
+
+	protected void showPopupMessagePanel(final String msg)
+	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
-				showPopupMessagePanel(ResourceMgr.getString("MsgConnecting"));
+				if (connectingInfo != null)
+				{
+					connectLabel.setText(msg);
+					connectingInfo.pack();
+					WbSwingUtilities.callRepaint(connectingInfo);
+				}
+				else
+				{
+					JPanel p = new JPanel();
+					p.setBorder(new CompoundBorder(WbSwingUtilities.getBevelBorderRaised(), new EmptyBorder(15, 20, 15, 20)));
+					p.setLayout(new BorderLayout(0, 0));
+					p.setMinimumSize(new Dimension(250, 50));
+					connectLabel = new JLabel(msg);
+					connectLabel.setMinimumSize(new Dimension(200, 50));
+					connectLabel.setHorizontalAlignment(SwingConstants.CENTER);
+					p.add(connectLabel, BorderLayout.CENTER);
+					connectingInfo = new JDialog(parent, false);
+					connectingInfo.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+					connectingInfo.getContentPane().setLayout(new BorderLayout());
+					connectingInfo.getContentPane().add(p, BorderLayout.CENTER);
+					connectingInfo.setUndecorated(true);
+					connectingInfo.pack();
+					WbSwingUtilities.center(connectingInfo, parent);
+					connectingInfo.setVisible(true);
+				}
 			}
 		});
-	}
-
-	private void showPopupMessagePanel(String aMsg)
-	{
-		if (this.connectingInfo != null)
-		{
-			this.connectLabel.setText(aMsg);
-			this.connectingInfo.pack();
-			this.connectingInfo.doLayout();
-			this.connectingInfo.repaint();
-			Thread.yield();
-			return;
-		}
-		JPanel p = new JPanel();
-		p.setBorder(new CompoundBorder(WbSwingUtilities.BEVEL_BORDER_RAISED, new EmptyBorder(15,20,15,20)));
-		p.setLayout(new BorderLayout(0,0));
-		p.setMinimumSize(new Dimension(250,50));
-		this.connectLabel = new JLabel(aMsg);
-		this.connectLabel.setMinimumSize(new Dimension(200,50));
-		this.connectLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		
-		p.add(this.connectLabel, BorderLayout.CENTER);
-		this.connectingInfo = new JDialog(this.parent, false);
-		this.connectingInfo.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		this.connectingInfo.getContentPane().setLayout(new BorderLayout());
-		this.connectingInfo.getContentPane().add(p, BorderLayout.CENTER);
-		this.connectingInfo.setUndecorated(true);
-		this.connectingInfo.pack();
-		WbSwingUtilities.center(this.connectingInfo, this.parent);
-		this.connectingInfo.setVisible(true);
-		WbSwingUtilities.showWaitCursor(this.parent);
-		WbSwingUtilities.showWaitCursor(this.connectingInfo);
-		Thread.yield();
 	}
 
 	private void doConnect(final ConnectionProfile aProfile, final boolean showSelectDialogOnError)
 	{
 		if (isConnectInProgress()) return;
 		
-		boolean connected = false;
 		WbConnection conn = null;
 		String error = null;
+		
 		this.setConnectIsInProgress();
 		
 		this.client.connectBegin(aProfile);
+		
 		String id = this.client.getConnectionId(aProfile);
 		try
 		{
@@ -228,7 +206,6 @@ public class ConnectionSelector
 
 			WbSwingUtilities.showWaitCursor(this.parent);
 			conn = mgr.getConnection(aProfile, id);
-			connected = true;
 			if (this.propertyKey != null)
 			{
 				Settings.getInstance().setProperty(this.propertyKey, aProfile.getName());
@@ -236,11 +213,13 @@ public class ConnectionSelector
 		}
 		catch (ClassNotFoundException cnf)
 		{
+			conn = null;
 			error = ResourceMgr.getString("ErrDriverNotFound");
 			error = StringUtil.replace(error, "%class%", aProfile.getDriverclass());
 		}
 		catch (SQLException se)
 		{
+			conn = null;
 			StringBuilder logmsg = new StringBuilder(200);
 			logmsg.append(ExceptionUtil.getDisplay(se));
 			SQLException next = se.getNextException();
@@ -256,6 +235,7 @@ public class ConnectionSelector
 		}
 		catch (Throwable e)
 		{
+			conn = null;
 			error = ExceptionUtil.getDisplay(e);
 		}
 		finally
@@ -266,32 +246,30 @@ public class ConnectionSelector
 		try
 		{
 			this.closeConnectingInfo();
-			if (connected)
+
+			final WbConnection theConnection = conn;
+			final String theError = error;
+			
+			WbSwingUtilities.invoke(new Runnable()
 			{
-				final WbConnection theConnection = conn;
-				WbSwingUtilities.invoke(new Runnable()
+				public void run()
 				{
-					public void run()
+					if (theConnection != null)
 					{
 						client.connected(theConnection);
 					}
-				});
-			}
-			else
-			{
-				final String theError = error;
-				WbSwingUtilities.invoke(new Runnable()
-				{
-					public void run()
+					else
 					{
 						client.connectFailed(theError);
 					}
-				});
-				if (showSelectDialogOnError)
-				{
-					selectConnection();
 				}
+			});
+				
+			if (conn == null && showSelectDialogOnError)
+			{
+				selectConnection();
 			}
+			
 		}
 		catch (Throwable th)
 		{
@@ -306,18 +284,12 @@ public class ConnectionSelector
 
 	private void setConnectIsInProgress()
 	{
-		synchronized (this)
-		{
-			this.connectInProgress = true;
-		}
+		this.connectInProgress = true;
 	}
 	
 	private void clearConnectIsInProgress()
 	{
-		synchronized (this)
-		{
-			this.connectInProgress = false;
-		}
+		this.connectInProgress = false;
 	}
 
 }

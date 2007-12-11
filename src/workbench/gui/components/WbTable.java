@@ -190,9 +190,9 @@ public class WbTable
 	}
 
 	public WbTable(boolean printEnabled)
-  {
-      this(printEnabled, true, false);
-  }
+	{
+		this(printEnabled, true, false);
+	}
 
 	public WbTable(boolean printEnabled, boolean sqlCopyAllowed, boolean replaceAllowed)
 	{

@@ -242,7 +242,6 @@ public class WbManager
 
 	private void initializeLookAndFeel()
 	{
-//		trace("WbManager.initializeLookAndFeel() - start");
 		String className = Settings.getInstance().getLookAndFeelClass();
 		try
 		{
@@ -271,7 +270,7 @@ public class WbManager
 			
 			LnFLoader loader = new LnFLoader(def);
 			LookAndFeel lnf = loader.getLookAndFeel();
-//			trace("WbManager.initializeLookAndFeel() - calling UIManager.setLookAndFeel()");
+
 			UIManager.setLookAndFeel(lnf);
 			try
 			{
@@ -323,7 +322,6 @@ public class WbManager
 		{
 			LogMgr.logError("WbManager.initializeLookAndFeel()", "Error setting dynamic layout property", e);
 		}
-//		trace("WbManager.initializeLookAndFeel() - done");
 	}
 
 	public File getJarFile()
@@ -424,15 +422,12 @@ public class WbManager
 		}
 		
 		settings.addFontChangedListener(this);
-//		trace("WbManager.initUI() - done");
 	}
 
 	public MainWindow createWindow()
 	{
-//		trace("WbManager.createWindow() - start");
 		MainWindow win = new MainWindow();
 		this.mainWindows.add(win);
-//		trace("WbManager.createWindow() - done");
 		return win;
 	}
 
@@ -543,7 +538,7 @@ public class WbManager
 		this.closeMessage.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
 		JPanel p = new JPanel();
-		p.setBorder(WbSwingUtilities.BEVEL_BORDER_RAISED);
+		p.setBorder(WbSwingUtilities.getBevelBorderRaised());
 		p.setLayout(new BorderLayout());
 		JLabel l = new JLabel(ResourceMgr.getString("MsgClosingConnections"));
 		l.setFont(l.getFont().deriveFont(Font.BOLD));
@@ -724,7 +719,7 @@ public class WbManager
 
 	}
 
-	private void openNewWindow(boolean checkCmdLine)
+	protected void openNewWindow(boolean checkCmdLine)
 	{
 		final MainWindow main = this.createWindow();
 		main.display();
@@ -999,7 +994,7 @@ public class WbManager
 			}
 			else
 			{
-				this.openNewWindow(true);
+				openNewWindow(true);
 			}
 			
 			UpdateCheck upd = new UpdateCheck();

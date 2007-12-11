@@ -12,13 +12,12 @@
 package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
@@ -47,7 +46,7 @@ import workbench.util.StringUtil;
  */
 public class ProfileSelectionDialog
 	extends JDialog 
-	implements ActionListener, WindowListener, TreeSelectionListener
+	implements ActionListener, WindowListener, TreeSelectionListener, MouseListener
 {
   private JPanel buttonPanel;
   private JButton okButton;
@@ -57,7 +56,6 @@ public class ProfileSelectionDialog
 	private boolean cancelled = false;
 	private String escActionCommand;
 
-	/** Creates new form ProfileSelectionDialog */
 	public ProfileSelectionDialog(Frame parent, boolean modal)
 	{
 		this(parent, modal, null);
@@ -73,10 +71,8 @@ public class ProfileSelectionDialog
 		InputMap im = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 		ActionMap am = root.getActionMap();
 		EscAction esc = new EscAction(this);
+		esc.addToInputMap(im, am);
 		escActionCommand = esc.getActionName();
-		im.put(esc.getAccelerator(), esc.getActionName());
-		am.put(esc.getActionName(), esc);
-
 	}
 
   private void initComponents(String lastProfileKey)
@@ -98,13 +94,7 @@ public class ProfileSelectionDialog
     buttonPanel.add(cancelButton);
 		cancelButton.addActionListener(this);
 
-		profiles.addListMouseListener(new MouseAdapter()
-		{
-			public void mouseClicked(MouseEvent evt)
-			{
-				profileListClicked(evt);
-			}
-		});
+		profiles.addListMouseListener(this);
 		profiles.addSelectionListener(this);
 
 		BorderLayout bl = new BorderLayout();
@@ -113,11 +103,9 @@ public class ProfileSelectionDialog
     getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
 		setTitle(ResourceMgr.getString("LblSelectProfile"));
-//		this.setFocusTraversalPolicy(null);
 		this.restoreSize();
   }
 
-	/** Closes the dialog */
 	private void closeDialog()
 	{
 		this.saveSize();
@@ -173,13 +161,7 @@ public class ProfileSelectionDialog
 	{
 		if (evt.getButton() == MouseEvent.BUTTON1 && evt.getClickCount() == 2)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					selectProfile();
-				}
-			});
+			selectProfile();
 		}
 	}
 	
@@ -188,19 +170,11 @@ public class ProfileSelectionDialog
 		profiles.setInitialFocus();
 	}
 
-	/** Invoked when an action occurs.
-	 */
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.okButton)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					selectProfile();
-				}
-			});
+			selectProfile();
 		}
 		else if (e.getSource() == this.cancelButton ||
 						e.getActionCommand().equals(escActionCommand))
@@ -259,6 +233,27 @@ public class ProfileSelectionDialog
 	public void valueChanged(TreeSelectionEvent e)
 	{
 		this.okButton.setEnabled(profiles.getSelectedProfile() != null);
+	}
+
+	public void mouseClicked(MouseEvent evt)
+	{
+		profileListClicked(evt);
+	}
+
+	public void mousePressed(MouseEvent e)
+	{
+	}
+
+	public void mouseReleased(MouseEvent e)
+	{
+	}
+
+	public void mouseEntered(MouseEvent e)
+	{
+	}
+
+	public void mouseExited(MouseEvent e)
+	{
 	}
 
 }

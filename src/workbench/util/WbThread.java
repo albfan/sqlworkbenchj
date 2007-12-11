@@ -22,26 +22,23 @@ public class WbThread
 	implements Thread.UncaughtExceptionHandler 	
 {
 
-	/** Creates a new instance of WbThread */
 	public WbThread(String name)
 	{
-		super();
-		this.setName(name);
+		super(name);
 		this.setDaemon(true);
 		this.setUncaughtExceptionHandler(this);
 	}
 
 	public WbThread(Runnable run, String name)
 	{
-		super(run);
-		this.setName(name);
+		super(run, name);
 		this.setDaemon(true);
 		this.setUncaughtExceptionHandler(this);
 	}
 
   public void uncaughtException(Thread thread, Throwable error)
   {
-    LogMgr.logError("WbThread.uncaughtException", "Thread + " + thread.getName() + " caused an exception", error);
+    LogMgr.logError("WbThread.uncaughtException()", "Thread + " + thread.getName() + " caused an exception", error);
   }
 
 }

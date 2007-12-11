@@ -19,9 +19,6 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
-import javax.swing.ActionMap;
-import javax.swing.ComponentInputMap;
-import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -164,14 +161,8 @@ public class EditWindow
 		this.setFocusTraversalPolicy(pol);
 		this.setFocusCycleRoot(false);
 
-		InputMap im = new ComponentInputMap(this.getRootPane());
-		ActionMap am = new ActionMap();
 		EscAction escAction = new EscAction(this);
-		im.put(escAction.getAccelerator(), escAction.getActionName());
-		am.put(escAction.getActionName(), escAction);
-		
-		this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
-		this.getRootPane().setActionMap(am);
+		escAction.addToInputMap(getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW), getRootPane().getActionMap());
 		
 		if (!Settings.getInstance().restoreWindowSize(this, settingsId))
 		{

@@ -391,6 +391,7 @@ public class MainWindowTest
 		
 		runSql(sqlPanel, "select * from person");
 		tool.waitEmpty();
+		try { Thread.sleep(500); } catch (Throwable th) {}
 		assertEquals(2, resultTab.getTabCount());
 	}
 

@@ -13,6 +13,7 @@ package workbench.gui.profiles;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.ListModel;
@@ -28,14 +29,23 @@ import workbench.db.DbDriver;
 class DriverListModel 
 	implements ListModel
 {
-
-	ArrayList<DbDriver> drivers;
-	/** Creates a new instance of ProfileListModel */
+	private ArrayList<DbDriver> drivers;
+	
 	public DriverListModel(List<DbDriver> aDriverList)
 	{
 		this.drivers = new ArrayList<DbDriver>(aDriverList.size());
 		this.drivers.addAll(0, aDriverList);
-		Collections.sort(this.drivers, DbDriver.getNameComparator());
+		Comparator<DbDriver> comp = new Comparator<DbDriver>()
+		{
+			public int compare(DbDriver o1, DbDriver o2)
+			{
+				if (o1 == null && o2 == null) return 0;
+				if (o1 == null) return -1;
+				if (o2 == null) return 1;
+				return o1.getName().compareTo(o2.getName());
+			}
+		};		
+		Collections.sort(this.drivers, comp);
 	}
 
 	/** Adds a listener to the list that's notified each time a change

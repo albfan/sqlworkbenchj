@@ -12,6 +12,7 @@
 package workbench.resource;
 
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.MessageFormat;

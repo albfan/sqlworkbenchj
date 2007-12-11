@@ -47,9 +47,9 @@ public class DbSettings
 	{
 		this.dbId = id;
 		Settings settings = Settings.getInstance();
-		this.caseSensitive = settings.getCaseSensitivServers().contains(productName);
-		this.useJdbcCommit = settings.getServersWhichNeedJdbcCommit().contains(productName);
-		this.ddlNeedsCommit = settings.getServersWhereDDLNeedsCommit().contains(productName);
+		this.caseSensitive = settings.getBoolProperty("workbench.db." + getDbId() + ".casesensitive", false) || settings.getCaseSensitivServers().contains(productName);
+		this.useJdbcCommit = settings.getBoolProperty("workbench.db." + getDbId() + ".usejdbccommit", false) || settings.getServersWhichNeedJdbcCommit().contains(productName);
+		this.ddlNeedsCommit = settings.getBoolProperty("workbench.db." + getDbId() + ".ddlneedscommit", false) || settings.getServersWhereDDLNeedsCommit().contains(productName);
 		
 		String quote = settings.getProperty("workbench.db.neverquote","");
 		this.neverQuoteObjects = quote.indexOf(this.getDbId()) > -1;

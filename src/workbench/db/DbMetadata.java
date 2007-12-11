@@ -548,7 +548,7 @@ public class DbMetadata
 	
 	public boolean ignoreSchema(String schema)
 	{
-		if (schema == null) return true;
+		if (StringUtil.isEmptyString(schema)) return true;
 		if (schemasToIgnore == null)
 		{
 			String ids = Settings.getInstance().getProperty("workbench.sql.ignoreschema." + this.getDbId(), null);

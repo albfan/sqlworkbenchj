@@ -81,8 +81,7 @@ public class ImageViewer
 		InputMap im = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 		ActionMap am = this.getRootPane().getActionMap();
 		escAction = new EscAction(this);
-		im.put(escAction.getAccelerator(), escAction.getActionName());
-		am.put(escAction.getActionName(), escAction);
+		escAction.addToInputMap(im, am);
 	}
 
 	public void setData(Object data)

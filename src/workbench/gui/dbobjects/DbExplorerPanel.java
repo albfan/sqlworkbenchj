@@ -778,15 +778,6 @@ public class DbExplorerPanel
 	public void addToToolbar(WbAction anAction, boolean aFlag)
 	{
 	}
-
-	public void activateWindow()
-	{
-		if (this.window != null)
-		{
-			this.window.setVisible(true);
-			this.window.toFront();
-		}
-	}
 	
 	public void explorerWindowClosed()
 	{

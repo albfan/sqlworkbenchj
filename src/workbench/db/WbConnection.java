@@ -643,6 +643,11 @@ public class WbConnection
 		}
 	}
 
+	public String toString()
+	{
+		return getId() + ", " + getCurrentUser() + "@" + getUrl();
+	}
+	
 	/**
 	 * Return a readable display of a connection. 
 	 * This might actually send a SELECT to the database to 
@@ -697,7 +702,7 @@ public class WbConnection
 		catch (Exception e)
 		{
 			LogMgr.logError("ConnectionMgr.getDisplayString()", "Could not retrieve connection information", e);
-			displayString = "n/a";
+			displayString = getCurrentUser() + "@" + getUrl();
 		}
 		return displayString;
 	}
@@ -713,7 +718,7 @@ public class WbConnection
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("WbConnection.getDatabaseVersion()", "Error retrieving DB version", e);
+			LogMgr.logError("WbConnection.getDatabaseVersion()", "Error retrieving DB version: " + e.getMessage(), null);
 			return "n/a";
 		}
 	}

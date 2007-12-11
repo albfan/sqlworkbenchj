@@ -15,13 +15,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 
 /**
  *	An action mapped to the ESC key
  *	@author  support@sql-workbench.net
  */
-public class EscAction extends WbAction
+public class EscAction 
+	extends WbAction
 {
 	private ActionListener client;
 
@@ -37,4 +41,5 @@ public class EscAction extends WbAction
 		e.setSource(this);
 		this.client.actionPerformed(e);
 	}
+	
 }

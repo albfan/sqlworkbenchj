@@ -13,9 +13,12 @@ package workbench.sql.wbcommands;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.List;
 import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.sql.DefaultStatementRunner;
 import workbench.sql.StatementRunnerResult;
@@ -55,7 +58,11 @@ public class WbCopyTest
 
 			con.commit();
 			
-			String sql = "--copy source_data and create target\nwbcopy -sourceTable=source_data -targettable=target_data -createTarget=true";
+			String sql = "--copy source_data and create target\n" +
+				"wbcopy -sourceTable=source_data " +
+				"-targettable=target_data " +
+				"-createTarget=true";
+			
 			runner.runStatement(sql, -1, -1);
 			StatementRunnerResult result = runner.getResult();
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
@@ -95,10 +102,6 @@ public class WbCopyTest
 			stmt.executeUpdate("update source_data set lastname = 'Prefect' where nr = 4");
 			con.commit();
 			
-			// Allow WbCopy to find the PK columns automatically.
-			//stmt.executeUpdate("alter table target_data add primary key (nr)");
-			//con.commit();
-
 			sql = "--update target table\nwbcopy -sourceTable=source_data -targettable=target_data -mode=update";
 			runner.runStatement(sql, -1, -1);
 			result = runner.getResult();
@@ -114,7 +117,79 @@ public class WbCopyTest
 			{
 				fail("Record with nr = 4 not copied");
 			}
+			ConnectionMgr.getInstance().removeProfile(con.getProfile());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	public void testCreateWithMap() throws Exception
+	{
+		try
+		{
+			TestUtil util = new TestUtil("CreateOrderedTest");
+			util.prepareEnvironment();
 			
+			DefaultStatementRunner runner = util.createConnectedStatementRunner();
+			WbConnection con = runner.getConnection();
+			
+			Statement stmt = con.createStatement();
+			
+			stmt.executeUpdate("create table source_data (nr integer not null primary key, lastname varchar(50), firstname varchar(50))");
+			
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname) values (1,'Dent', 'Arthur')");
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname) values (2,'Beeblebrox', 'Zaphod')");
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname) values (3,'Moviestar', 'Mary')");
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname) values (4,'Perfect', 'Ford')");
+
+			con.commit();
+			
+			String sql = "wbcopy -sourceTable=source_data " +
+									"-targetTable=target_data " +
+									"-columns=lastname/nachname, firstname/vorname, nr/id "+
+									"-createTarget=true";
+			
+			runner.runStatement(sql, -1, -1);
+			StatementRunnerResult result = runner.getResult();
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+
+			ResultSet rs = stmt.executeQuery("select count(*) from target_data");
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Incorrect number of rows copied", 4, count);
+			}
+			rs.close();
+			
+			// Make sure the order in the column mapping is preserved when creating the table
+			List<ColumnIdentifier> columns = con.getMetadata().getTableColumns(new TableIdentifier("TARGET_DATA"));
+			for (ColumnIdentifier col : columns)
+			{
+				if (col.getColumnName().equalsIgnoreCase("NACHNAME"))
+				{
+					assertEquals(1, col.getPosition());
+				}
+				else if (col.getColumnName().equalsIgnoreCase("VORNAME"))
+				{
+					assertEquals(2, col.getPosition());
+				}
+				else if (col.getColumnName().equalsIgnoreCase("ID"))
+				{
+					assertEquals(3, col.getPosition());
+				}
+				else
+				{
+					fail("Wrong column " + col.getColumnName() + " created");
+				}
+			}
+			ConnectionMgr.getInstance().removeProfile(con.getProfile());
 		}
 		catch (Exception e)
 		{
@@ -131,7 +206,7 @@ public class WbCopyTest
 	{
 		try
 		{
-			TestUtil util = new TestUtil("WbCopyTest_testExecute");
+			TestUtil util = new TestUtil("CopyWithMapTest");
 			util.prepareEnvironment();
 			
 			WbConnection con = util.getConnection("mappedCopyTest");
@@ -156,7 +231,7 @@ public class WbCopyTest
 			String sql = "wbcopy -sourceTable=source_data " +
 				"-targetTable=target_data " +
 				"-deleteTarget=true " +
-				"-columns=nr/tnr, lastname/tlastname, firstname/tfirstname";
+				"-columns=lastname/tlastname, firstname/tfirstname, nr/tnr";
 			
 			StatementRunnerResult result = copyCmd.execute(sql);
 			assertEquals("Copy not successful", true, result.isSuccess());
@@ -182,7 +257,7 @@ public class WbCopyTest
 				fail("Nothing copied");
 			}
 			SqlUtil.closeResult(rs);
-			
+			ConnectionMgr.getInstance().removeProfile(con.getProfile());
 		}
 		catch (Exception e)
 		{
@@ -202,7 +277,7 @@ public class WbCopyTest
 			TestUtil util = new TestUtil("WbCopyTest_testExecute");
 			util.prepareEnvironment();
 			
-			WbConnection con = util.getConnection("mappedCopyTest");
+			WbConnection con = util.getConnection("queryCopyTest");
 			
 			WbCopy copyCmd = new WbCopy();
 			copyCmd.setConnection(con);
@@ -248,7 +323,7 @@ public class WbCopyTest
 				fail("Nothing copied");
 			}
 			SqlUtil.closeResult(rs);
-			
+			ConnectionMgr.getInstance().removeProfile(con.getProfile());
 		}
 		catch (Exception e)
 		{
@@ -344,6 +419,104 @@ public class WbCopyTest
 		}
 	}
 
+	public void testCreateTarget()
+	{
+		try
+		{
+			TestUtil util = new TestUtil("WbCopyCreateTest");
+			util.prepareEnvironment();
+			
+			WbConnection source = util.getConnection("copyCreateTestSource");
+			WbConnection target = util.getHSQLConnection("copyCreateTestTarget");
+			
+			Statement stmt = source.createStatement();
+			
+			stmt.executeUpdate("create table person (nr integer not null primary key, lastname varchar(50), firstname varchar(50))");
+			stmt.executeUpdate("insert into person (nr, lastname, firstname) values (1,'Dent', 'Arthur')");
+			stmt.executeUpdate("insert into person (nr, lastname, firstname) values (2,'Beeblebrox', 'Zaphod')");
+			stmt.executeUpdate("insert into person (nr, lastname, firstname) values (3,'Moviestar', 'Mary')");
+			stmt.executeUpdate("insert into person (nr, lastname, firstname) values (4,'Perfect', 'Ford')");
+			source.commit();
+
+			// First test a copy with a fully specified column mapping
+			String sql = "wbcopy -createTarget=true " +
+				"-sourceTable=person " +
+				"-targetTable=participants " +
+				"-columns=nr/person_id, firstname/firstname, lastname/lastname " + 
+				"-sourceProfile='copyCreateTestSource' " +
+				"-targetProfile='copyCreateTestTarget' ";
+			
+			WbCopy copyCmd = new WbCopy();
+			StatementRunnerResult result = copyCmd.execute(sql);
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			
+			Statement tstmt = target.createStatement();
+			ResultSet rs = tstmt.executeQuery("select person_id, lastname, firstname from participants");
+			while (rs.next())
+			{
+				int nr = rs.getInt(1);
+				String ln = rs.getString(2);
+				String fn = rs.getString(3);
+				if (nr == 1)
+				{
+					assertEquals("Incorrect data copied", "Dent", ln);
+					assertEquals("Incorrect data copied", "Arthur", fn);
+				}
+				else if (nr == 2)
+				{
+					assertEquals("Incorrect data copied", "Beeblebrox", ln);
+					assertEquals("Incorrect data copied", "Zaphod", fn);
+				}
+			}
+			SqlUtil.closeResult(rs);
+			
+
+			// Now test the table creation without columns
+			sql = "wbcopy -createTarget=true " +
+				"-dropTarget=true " +
+				"-sourceTable=person " +
+				"-targetTable=participants " +
+				"-sourceProfile='copyCreateTestSource' " +
+				"-targetProfile='copyCreateTestTarget' ";
+			
+			result = copyCmd.execute(sql);
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			
+			rs = tstmt.executeQuery("select nr, lastname, firstname from participants");
+			while (rs.next())
+			{
+				int nr = rs.getInt(1);
+				String ln = rs.getString(2);
+				String fn = rs.getString(3);
+				if (nr == 1)
+				{
+					assertEquals("Incorrect data copied", "Dent", ln);
+					assertEquals("Incorrect data copied", "Arthur", fn);
+				}
+				else if (nr == 2)
+				{
+					assertEquals("Incorrect data copied", "Beeblebrox", ln);
+					assertEquals("Incorrect data copied", "Zaphod", fn);
+				}
+			}
+			SqlUtil.closeResult(rs);
+			
+			ConnectionMgr.getInstance().removeProfile(source.getProfile());
+			ConnectionMgr.getInstance().removeProfile(target.getProfile());
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}		
+	}
+	
+	
 	public void testCopySchemaCreateTable()
 	{
 		try
@@ -352,7 +525,7 @@ public class WbCopyTest
 			util.prepareEnvironment();
 			
 			WbConnection con = util.getConnection("schemaCopyCreateSource");
-			WbConnection target = util.getConnection("schemaCopyCreateTarget");
+			WbConnection target = util.getHSQLConnection("schemaCopyCreateTarget");
 
 			WbCopy copyCmd = new WbCopy();
 			copyCmd.setConnection(con);

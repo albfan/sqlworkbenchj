@@ -118,6 +118,11 @@ public class WbDefineVarTest extends TestCase
 			result = runner.getResult();
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 			assertEquals("Quoted spaces trimmed", " a ", varValue);
+			
+			sql = "WbVardef var5=";
+			runner.runStatement(sql, -1, -1);
+			varValue = VariablePool.getInstance().getParameterValue("var5");
+			assertNull("Variable not deleted", varValue);
 		}
 		catch (Exception e)
 		{
@@ -129,5 +134,6 @@ public class WbDefineVarTest extends TestCase
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
+
 	
 }

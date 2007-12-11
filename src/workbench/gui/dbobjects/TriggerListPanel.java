@@ -68,8 +68,6 @@ public class TriggerListPanel
 	extends JPanel
 	implements ListSelectionListener, Reloadable, ActionListener
 {
-	private static final String DROP_CMD = "drop-object";
-	
 	private WbConnection dbConnection;
 	private JPanel listPanel;
 	private CriteriaPanel findPanel;
@@ -166,10 +164,7 @@ public class TriggerListPanel
 	{
 		JPopupMenu popup = this.triggerList.getPopupMenu();
 		popup.addSeparator();
-		this.dropTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDropDbObject"));
-		this.dropTableItem.setActionCommand(DROP_CMD);
-		this.dropTableItem.addActionListener(this);
-		this.dropTableItem.setEnabled(false);
+		this.dropTableItem = new DropDbItem(this.triggerList, this);
 		popup.add(this.dropTableItem);
 	}
 
@@ -210,11 +205,6 @@ public class TriggerListPanel
 
 	public void panelSelected()
 	{
-		retrieveIfNeeded();
-	}
-	
-	public void retrieveIfNeeded()
-	{
 		if (this.shouldRetrieve) this.retrieve();
 	}
 
@@ -230,14 +220,20 @@ public class TriggerListPanel
 			this.isRetrieving = true;
 			DbMetadata meta = dbConnection.getMetadata();
 			WbSwingUtilities.showWaitCursorOnWindow(this);
-			DataStore ds = meta.getTriggers(currentCatalog, currentSchema);
-			DataStoreTableModel model = new DataStoreTableModel(ds);
 			
-			int rows = model.getRowCount();
-			String info = rows + " " + ResourceMgr.getString("TxtTableListObjects");
-			this.infoLabel.setText(info);
-			triggerList.setModel(model,true);
-			triggerList.adjustOrOptimizeColumns();
+			DataStore ds = meta.getTriggers(currentCatalog, currentSchema);
+			final DataStoreTableModel model = new DataStoreTableModel(ds);
+			
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					int rows = model.getRowCount();
+					infoLabel.setText(rows + " " + ResourceMgr.getString("TxtTableListObjects"));
+					triggerList.setModel(model, true);
+					triggerList.adjustOrOptimizeColumns();
+				}
+			});
 			shouldRetrieve = false;
 		}
 		catch (OutOfMemoryError mem)
@@ -248,7 +244,6 @@ public class TriggerListPanel
 		{
 			LogMgr.logError("ProcedureListPanel.retrieve() thread", "Could not retrieve trigger list", e);
 		}
-		
 		finally
 		{
 			this.isRetrieving = false;
@@ -431,7 +426,6 @@ public class TriggerListPanel
 		}
 	}
 
-
 	public void reload()
 	{
 		this.reset();
@@ -440,8 +434,7 @@ public class TriggerListPanel
 	
 	public void actionPerformed(ActionEvent e)
 	{
-		String command = e.getActionCommand();
-		if (DROP_CMD.equals(command))
+		if (e.getSource() == this.dropTableItem)
 		{
 			this.dropObjects();
 		}

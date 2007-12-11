@@ -26,7 +26,7 @@ import workbench.gui.WbSwingUtilities;
  */
 public class WbScrollPane extends JScrollPane
 {
-  private static final Border MY_BORDER = new CompoundBorder(WbSwingUtilities.BEVEL_BORDER, new EmptyBorder(0,1,0,0));
+  private static final Border MY_BORDER = new CompoundBorder(WbSwingUtilities.getBevelBorder(), new EmptyBorder(0,1,0,0));
 
 	public WbScrollPane()
 	{

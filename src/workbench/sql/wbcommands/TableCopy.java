@@ -12,7 +12,7 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import workbench.db.ColumnIdentifier;
@@ -96,31 +96,13 @@ public class TableCopy
 		{
 			TableIdentifier srcTable = new TableIdentifier(sourcetable);
 			String where = cmdLine.getValue(WbCopy.PARAM_SOURCEWHERE);
-			String columns = cmdLine.getValue(WbCopy.PARAM_COLUMNS);
-			boolean hasColumns = columns != null;
-			boolean containsMapping = hasColumns && (columns.indexOf('/') > -1);
-
-			if ((containsMapping || !hasColumns) && !createTable)
-			{
-				Map<String, String> mapping = this.parseMapping(cmdLine);
-				copier.copyFromTable(sourceConnection, targetConnection, srcTable, targetId, mapping, where, createTable, dropTable);
-			}
-			else if (createTable)
-			{
-				ColumnIdentifier[] cols = this.parseColumns(cmdLine);
-				copier.copyToNewTable(sourceConnection, targetConnection, srcTable, targetId, cols, where, dropTable);
-			}
-			else
-			{
-				result.addMessage(ResourceMgr.getString("ErrCopyWrongParameters"));
-				result.setFailure();
-				return false;
-			}
+			Map<String, String> mapping = this.parseMapping(cmdLine);
+			copier.copyFromTable(sourceConnection, targetConnection, srcTable, targetId, mapping, where, createTable, dropTable);
 		}
 		else
 		{
 			ColumnIdentifier[] cols = this.parseColumns(cmdLine, sourcequery, sourceConnection);
-			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, cols);
+			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, cols, createTable, dropTable);
 		}
 
 		return true;
@@ -182,19 +164,6 @@ public class TableCopy
 		return result;
 	}
 
-	private ColumnIdentifier[] parseColumns(ArgumentParser cmdLine)
-	{
-		String cols = cmdLine.getValue(WbCopy.PARAM_COLUMNS);
-		if (cols == null) return null;
-		List<String> l = StringUtil.stringToList(cols, ",");
-		ColumnIdentifier[] result = new ColumnIdentifier[l.size()];
-		for (int i=0; i < l.size(); i++)
-		{
-			result[i] = new ColumnIdentifier(l.get(i));
-		}
-		return result;
-	}
-
 	private Map<String, String> parseMapping(ArgumentParser cmdLine)
 	{
 		String cols = cmdLine.getValue(WbCopy.PARAM_COLUMNS);
@@ -202,14 +171,25 @@ public class TableCopy
 
 		List l = StringUtil.stringToList(cols, ",");
 		int count = l.size();
-		HashMap<String, String> mapping = new HashMap<String, String>(count);
+		
+		// Use a LinkedHashMap to make sure the order of the columns
+		// are preserved (in case -createTable) was also specified
+		Map<String, String> mapping = new LinkedHashMap<String, String>();
 		for (int i=0; i < count; i++)
 		{
 			String s = (String)l.get(i);
 			int pos = s.indexOf('/');
-			String scol = s.substring(0, pos).trim();
-			String tcol = s.substring(pos + 1).trim();
-			mapping.put(scol, tcol);
+			if (pos == -1)
+			{
+				// No mapping just a list of columns
+				mapping.put(s, null);
+			}
+			else
+			{
+				String scol = s.substring(0, pos).trim();
+				String tcol = s.substring(pos + 1).trim();
+				mapping.put(scol, tcol);
+			}
 		}
 		return mapping;
 	}

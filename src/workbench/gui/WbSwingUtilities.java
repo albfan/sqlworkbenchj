@@ -52,25 +52,6 @@ import workbench.util.StringUtil;
  */
 public class WbSwingUtilities
 {
-	public static final Border BEVEL_BORDER;
-	public static final Border BEVEL_BORDER_RAISED;
-	static
-	{
-		BevelBorder b = new BevelBorder(BevelBorder.LOWERED);
-		Color c = Color.LIGHT_GRAY;
-		BEVEL_BORDER = new BevelBorder(BevelBorder.LOWERED,
-					b.getHighlightOuterColor(),
-					c,
-					b.getHighlightInnerColor(),
-					b.getShadowInnerColor());
-		
-		BEVEL_BORDER_RAISED = new BevelBorder(BevelBorder.RAISED,
-					b.getHighlightOuterColor(),
-					c,
-					b.getHighlightInnerColor(),
-					b.getShadowInnerColor());
-	}
-
 	public static final Insets EMPTY_INSETS = new Insets(0, 0, 0, 0);
 	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.YELLOW);
 	public static final Border EMPTY_BORDER = new EmptyBorder(0,0,0,0);
@@ -81,6 +62,29 @@ public class WbSwingUtilities
 	public static final KeyStroke ENTER = KeyStroke.getKeyStroke("ENTER");
 	public static final KeyStroke CTRL_ENTER = KeyStroke.getKeyStroke("control ENTER");
 	public static final KeyStroke ALT_ENTER = KeyStroke.getKeyStroke("alt ENTER");
+	
+	public static Border getBevelBorder()
+	{
+		BevelBorder b = new BevelBorder(BevelBorder.LOWERED);
+		Color c = Color.LIGHT_GRAY;
+		return new BevelBorder(BevelBorder.LOWERED,
+					b.getHighlightOuterColor(),
+					c,
+					b.getHighlightInnerColor(),
+					b.getShadowInnerColor());
+					
+	}
+	
+	public static Border getBevelBorderRaised()
+	{
+		BevelBorder b = new BevelBorder(BevelBorder.LOWERED);
+		Color c = Color.LIGHT_GRAY;
+		return new BevelBorder(BevelBorder.RAISED,
+					b.getHighlightOuterColor(),
+					c,
+					b.getHighlightInnerColor(),
+					b.getShadowInnerColor());
+	}
 	
 	public static final void waitForEmptyQueue()
 	{
@@ -98,7 +102,7 @@ public class WbSwingUtilities
 			}
 		}
 	}
-	
+
 	/**
 	 * Synchronously execute code on the EDT.
 	 * If the current thread is the EDT, this merely calls r.run()
@@ -587,7 +591,7 @@ public class WbSwingUtilities
 		return "KeyCode: 0x" + Integer.toString(keyCode, 16);
 	}
 
-	protected static void callRepaint(final Component c)
+	public static void callRepaint(final Component c)
 	{
 		c.validate();
 		c.repaint();

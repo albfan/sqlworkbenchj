@@ -42,6 +42,7 @@ import workbench.storage.RowActionMonitor;
 import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
+import workbench.util.WbThread;
 
 
 /**
@@ -171,7 +172,17 @@ public class SchemaReporter
 
 		if (this.showProgress)
 		{
-			this.openProgressMonitor();
+			// This is the only way I can figure out to show
+			// the progress as as modal window, but let the 
+			// calling thread proceed with the work.
+			Thread t = new WbThread("ShowProgress")
+			{
+				public void run()
+				{
+					openProgressMonitor();
+				}
+			};
+			t.start();
 		}
 
 		BufferedWriter bw = null;
@@ -384,9 +395,8 @@ public class SchemaReporter
 		this.progressWindow = new JDialog(this.parentWindow, true);
 		this.progressWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.progressWindow.getContentPane().add(progressPanel);
-		this.progressWindow.pack();
-		this.progressWindow.setSize(300,120);
 		this.progressWindow.setTitle(ResourceMgr.getString("MsgReportWindowTitle"));
+		
 		this.progressWindow.addWindowListener(new WindowAdapter()
 		{
 			public void windowClosing(WindowEvent e)
@@ -399,8 +409,17 @@ public class SchemaReporter
 				}
 			}
 		});
-		WbSwingUtilities.center(progressWindow, parentWindow);
-		progressWindow.setVisible(true);
+		
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				progressWindow.pack();
+				progressWindow.setSize(300,120);
+				WbSwingUtilities.center(progressWindow, parentWindow);
+				progressWindow.setVisible(true);
+			}
+		});
 	}
 
 	private void retrieveTables()

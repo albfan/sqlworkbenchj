@@ -14,6 +14,7 @@ package workbench.util;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -549,7 +550,7 @@ public class StringUtil
 	 */
 	public static final List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets)
 	{
-		if (isEmptyString(aString)) return Collections.emptyList();
+		if (isEmptyString(aString)) return new ArrayList<String>();
 		WbStringTokenizer tok = new WbStringTokenizer(aString, aDelimiter);
 		tok.setDelimiterNeedsWhitspace(false);
 		tok.setCheckBrackets(checkBrackets);
