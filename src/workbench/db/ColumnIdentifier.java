@@ -27,19 +27,19 @@ import workbench.util.StringUtil;
 public class ColumnIdentifier
 	implements Comparable<ColumnIdentifier>
 {
-	public static final int NO_TYPE = Integer.MIN_VALUE;
+	private static final int NO_TYPE = Integer.MIN_VALUE;
 	private String name;
 	private int type = NO_TYPE;
-	private boolean isPk = false;
-	private boolean isExpression = false;
+	private boolean isPk;
+	private boolean isExpression;
 	private boolean isNullable = true;
 	private boolean isUpdateable = true;
-	private String dbmsType = null;
-	private String comment = null;
-	private String defaultValue = null;
-	private String columnClassName = null;
+	private String dbmsType;
+	private String comment;
+	private String defaultValue;
+	private String columnClassName;
 	private Class columnClass;
-	private String columnTypeName = null;
+	private String columnTypeName;
 
 	private int position;
 
@@ -51,26 +51,17 @@ public class ColumnIdentifier
 	{
 	}
 
-	/**
-	 *	Create a ColummIdentifier where the type is ignored.
-	 */
 	public ColumnIdentifier(String aName)
 	{
 		this(aName, NO_TYPE, false);
 	}
 
-	/**
-	 *	Create a ColumnIdentifier with a given data type (from java.sql.Types)
-	 */
 	public ColumnIdentifier(String aName, int aType)
 	{
 		this(aName, aType, false);
 	}
 
 
-	/**
-	 *	Create a ColumnIdentifier for a primary key column with a given data type (from java.sql.Types)
-	 */
 	public ColumnIdentifier(String aName, int aType, boolean isPkColumn)
 	{
 		if (aName == null) throw new IllegalArgumentException("Column name may not be null!");
@@ -108,6 +99,7 @@ public class ColumnIdentifier
 
 	/**
 	 *	Define this column to be an expression.
+	 * 
 	 *	The major difference to setColumnName() is, that the name will internally
 	 *  not be stored in lowercase
 	 *  (But can be used in a SELECT anyway)
@@ -145,10 +137,6 @@ public class ColumnIdentifier
 		return result;
 	}
 
-	/**
-	 * Get the column's name
-	 * @return the name of this column
-	 */
 	public String getColumnName()
 	{
 		return this.name;
@@ -156,6 +144,7 @@ public class ColumnIdentifier
 
 	/**
 	 * Define the name of this column. 
+	 * 
 	 * This will also reset the PK and Nullable attributes. isPkColumn() 
 	 * and isNullable() will return false after setting the name.
 	 * 
@@ -167,7 +156,7 @@ public class ColumnIdentifier
 		this.isExpression = false;
 		this.isPk = false;
 		this.isNullable = true;
-		this.hashCode = (name == null ? -1 : StringUtil.trimQuotes(name).toUpperCase().hashCode());
+		this.hashCode = (name == null ? -1 : StringUtil.trimQuotes(name).toLowerCase().hashCode());
 	}
 
 	/**
@@ -212,7 +201,7 @@ public class ColumnIdentifier
 		try
 		{
 			ColumnIdentifier col = (ColumnIdentifier)other;
-			return StringUtil.trimQuotes(this.name).equalsIgnoreCase(StringUtil.trimQuotes(col.name));
+			return StringUtil.equalStringIgnoreCase(StringUtil.trimQuotes(this.name), StringUtil.trimQuotes(col.name));
 		}
 		catch (Exception e)
 		{
@@ -225,75 +214,41 @@ public class ColumnIdentifier
 		return hashCode;
 	}
 	
-	/**
-	 * Getter for property comment.
-	 * @return Value of property comment.
-	 */
 	public String getComment()
 	{
 		return comment;
 	}
 
-	/**
-	 * Setter for property comment.
-	 * @param comment New value of property comment.
-	 */
 	public void setComment(String comment)
 	{
 		this.comment = comment;
 	}
 
-	/**
-	 * Getter for property defaultValue.
-	 * @return Value of property defaultValue.
-	 */
 	public String getDefaultValue()
 	{
 		return defaultValue;
 	}
 
-	/**
-	 * Setter for property defaultValue.
-	 * @param defaultValue New value of property defaultValue.
-	 */
 	public void setDefaultValue(String defaultValue)
 	{
 		this.defaultValue = defaultValue;
 	}
 
-	/**
-	 * Getter for property position.
-	 * @return Value of property position.
-	 */
 	public int getPosition()
 	{
 		return position;
 	}
 
-	/**
-	 * Setter for property position.
-	 * @param pos New value of property position.
-	 */
 	public void setPosition(int pos)
 	{
 		this.position = pos;
 	}
 
-	/**
-	 * Getter for property columnClassName.
-	 * 
-	 * @return Value of property columnClassName.
-	 */
 	public String getColumnClassName()
 	{
 		return columnClassName;
 	}
 
-	/**
-	 * Setter for property columnClassName.
-	 * 
-	 * @param columnClass New value of property columnClassName.
-	 */
 	public void setColumnClassName(String columnClass)
 	{
 		if (columnClass != null && columnClass.endsWith("[]"))
@@ -368,10 +323,6 @@ public class ColumnIdentifier
 
 	}
 
-	/**
-	 * Getter for property columnTypeName.
-	 * @return Value of property columnTypeName.
-	 */
 	public String getColumnTypeName()
 	{
 		if (this.columnTypeName == null)
@@ -381,28 +332,16 @@ public class ColumnIdentifier
 		return this.columnTypeName;
 	}
 
-	/**
-	 * Setter for property columnTypeName.
-	 * @param columnTypeName New value of property columnTypeName.
-	 */
 	public void setColumnTypeName(String columnTypeName)
 	{
 		this.columnTypeName = columnTypeName;
 	}
 
-	/**
-	 * Getter for property isUpdateable.
-	 * @return Value of property isUpdateable.
-	 */
 	public boolean isUpdateable()
 	{
 		return isUpdateable;
 	}
 
-	/**
-	 * Setter for property isUpdateable.
-	 * @param isUpdateable New value of property isUpdateable.
-	 */
 	public void setUpdateable(boolean isUpdateable)
 	{
 		this.isUpdateable = isUpdateable;
@@ -423,10 +362,7 @@ public class ColumnIdentifier
 			{
 				int pos1 = o1.getPosition();
 				int pos2 = o2.getPosition();
-				
-				if (pos1 < pos2) return -1;
-				else if (pos1 > pos2) return 1;
-				return 0;
+				return pos1 - pos2;
 			}
 		};
 		Collections.sort(columnList, c);

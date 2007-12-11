@@ -127,7 +127,6 @@ public class DbMetadata
 
 	private String[] tableTypesTable; 
 	private String[] tableTypesSelectable;
-	private Set<String> objectsWithData = null;
 	private List schemasToIgnore;
 	private List catalogsToIgnore;
 	
@@ -409,43 +408,40 @@ public class DbMetadata
 	public boolean objectTypeCanContainData(String type)
 	{
 		if (type == null) return false;
-		return objectsWithData.contains(type.toLowerCase());
+		return getObjectsWithData().contains(type.toLowerCase());
 	}
 
 	private Set<String> getObjectsWithData()
 	{
-		if (this.objectsWithData == null)
+		Set<String> objectsWithData = new HashSet<String>(7);
+		String keyPrefix = "workbench.db.objecttype.selectable.";
+		String defValue = Settings.getInstance().getProperty(keyPrefix + "default", null);
+		String types = Settings.getInstance().getProperty(keyPrefix + getDbId(), defValue);
+
+		if (types == null)
 		{
-			String keyPrefix = "workbench.db.objecttype.selectable.";
-			String defValue = Settings.getInstance().getProperty(keyPrefix + "default", null);
-			String types = Settings.getInstance().getProperty(keyPrefix + getDbId(), defValue);
-			
-			objectsWithData = new HashSet<String>(7);
-			
-			if (types == null)
-			{
-				objectsWithData.add("table");
-				objectsWithData.add("view");
-				objectsWithData.add("synonym");
-				objectsWithData.add("system view");
-				objectsWithData.add("system table");
-			}
-			else
-			{
-				List<String> l = StringUtil.stringToList(types.toLowerCase(), ",", true, true);
-				objectsWithData.addAll(l);
-			}
-			
-			if (this.isPostgres) 
-			{
-				objectsWithData.add("sequence");
-			}
-			
-			if (this.isOracle) 
-			{
-				objectsWithData.add(MVIEW_NAME.toLowerCase());
-			}
+			objectsWithData.add("table");
+			objectsWithData.add("view");
+			objectsWithData.add("synonym");
+			objectsWithData.add("system view");
+			objectsWithData.add("system table");
 		}
+		else
+		{
+			List<String> l = StringUtil.stringToList(types.toLowerCase(), ",", true, true);
+			objectsWithData.addAll(l);
+		}
+
+		if (this.isPostgres)
+		{
+			objectsWithData.add("sequence");
+		}
+
+		if (this.isOracle)
+		{
+			objectsWithData.add(MVIEW_NAME.toLowerCase());
+		}
+		
 		return objectsWithData;
 	}
 	
@@ -467,7 +463,7 @@ public class DbMetadata
 		if (this.dbId == null)
 		{
 			this.dbId = this.productName.replaceAll("[ \\(\\)\\[\\]\\/$,.'=\"]", "_").toLowerCase();
-			// Use the same dbid for DB2/LINUX, DB2/NT
+			// Use the same dbid for DB2/LINUX, DB2/NT, ...
 			if (dbId.startsWith("db2") && productName.indexOf("/") > -1) dbId = "db2";
 			LogMgr.logInfo("DbMetadata", "Using DBID=" + this.dbId);
 		}
@@ -3296,7 +3292,6 @@ public class DbMetadata
 			result.append(cons);
 			result.append(lineEnding);
 		}
-		String realTable = (tableNameToUse == null ? table.getTableName() : tableNameToUse);
 
 		if (this.createInlineConstraints && pkCols.size() > 0)
 		{
@@ -3306,7 +3301,7 @@ public class DbMetadata
 
 			if (includeFk)
 			{
-				StringBuilder fk = this.getFkSource(table.getTableName(), aFkDef, tableNameToUse);
+				StringBuilder fk = this.getFkSource(table, aFkDef, tableNameToUse);
 				if (fk.length() > 0)
 				{
 					result.append(fk);
@@ -3319,14 +3314,14 @@ public class DbMetadata
 		if (!this.createInlineConstraints && pkCols.size() > 0)
 		{
 			String name = this.getPkIndexName(aIndexDef);
-			StringBuilder pkSource = getPkSource(realTable, pkCols, name);
+			StringBuilder pkSource = getPkSource( (tableNameToUse == null ? table : new TableIdentifier(tableNameToUse)), pkCols, name);
 			result.append(pkSource);
 			result.append(lineEnding);
 			result.append(lineEnding);
 		}
 		StringBuilder indexSource = this.indexReader.getIndexSource(table, aIndexDef, tableNameToUse);
 		result.append(indexSource);
-		if (!this.createInlineConstraints && includeFk) result.append(this.getFkSource(table.getTableName(), aFkDef, tableNameToUse));
+		if (!this.createInlineConstraints && includeFk) result.append(this.getFkSource(table, aFkDef, tableNameToUse));
 
 		String tableComment = this.getTableCommentSql(table);
 		if (!StringUtil.isEmptyString(tableComment))
@@ -3378,11 +3373,21 @@ public class DbMetadata
 		return false;
 	}
 	
-	public StringBuilder getPkSource(String tablename, List pkCols, String pkName)
+	/**
+	 * Builds an ALTER TABLE to add a primary key definition for the given 
+	 * tablename.
+	 * 
+	 * @param table 
+	 * @param pkCols
+	 * @param pkName
+	 * @return
+	 */
+	public StringBuilder getPkSource(TableIdentifier table, List pkCols, String pkName)
 	{
 		String template = metaSqlMgr.getPrimaryKeyTemplate();
 		StringBuilder result = new StringBuilder();
 		if (StringUtil.isEmptyString(template)) return result;
+		String tablename = table.getTableExpression(this.dbConnection);
 		
 		template = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tablename);
 		template = StringUtil.replace(template, MetaDataSqlManager.COLUMNLIST_PLACEHOLDER, StringUtil.listToString(pkCols, ','));
@@ -3538,7 +3543,7 @@ public class DbMetadata
 	public StringBuilder getFkSource(TableIdentifier table)
 	{
 		DataStore fkDef = this.getForeignKeys(table, false);
-		return getFkSource(table.getTableName(), fkDef, null);
+		return getFkSource(table, fkDef, null);
 	}
 	
 	/**
@@ -3549,7 +3554,7 @@ public class DbMetadata
 	 *
 	 *	@return a SQL statement to add the foreign key definitions to the given table
 	 */
-	public StringBuilder getFkSource(String aTable, DataStore aFkDef, String tableNameToUse)
+	public StringBuilder getFkSource(TableIdentifier table, DataStore aFkDef, String tableNameToUse)
 	{
 		if (aFkDef == null) return StringUtil.emptyBuffer();
 		int count = aFkDef.getRowCount();
@@ -3625,7 +3630,7 @@ public class DbMetadata
 				stmt = template;
 			}
 			String entry = null;
-			stmt = StringUtil.replace(stmt, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? aTable : tableNameToUse));
+			stmt = StringUtil.replace(stmt, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? table.getTableName() : tableNameToUse));
 			
 			if (this.isSystemConstraintName(fkname))
 			{
@@ -3673,7 +3678,7 @@ public class DbMetadata
 			colList = fkTarget.get(fkname);
 			if (colList == null)
 			{
-				LogMgr.logError("DbMetadata.getFkSource()", "Retrieved a null list for constraing [" + fkname + "] but should contain a list for table [" + aTable + "]",null);
+				LogMgr.logError("DbMetadata.getFkSource()", "Retrieved a null list for constraing [" + fkname + "] but should contain a list for table [" + table.getTableName() + "]",null);
 				continue;
 			}
 			

@@ -181,9 +181,7 @@ public class DataCopier
 			
 		if (createTable) 
 		{
-			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(this.columnMap.values());
-			ColumnIdentifier.sortByPosition(cols);
-			createTable(cols, dropTable);
+			createTable(this.columnMap.values(), dropTable);
 		}
 		
 		this.initImporterForTable(additionalWhere);

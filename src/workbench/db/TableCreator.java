@@ -40,8 +40,7 @@ public class TableCreator
 		
 		// As we are sorting the columns we have to create a copy of the array
 		// to ensure that the caller does not see a different ordering
-		this.columnDefinition = new ArrayList<ColumnIdentifier>(columns.size());
-		this.columnDefinition.addAll(columns);
+		this.columnDefinition = new ArrayList<ColumnIdentifier>(columns);
 		
 		// Now sort the columns according to their DBMS position
 		ColumnIdentifier.sortByPosition(columnDefinition);
@@ -57,11 +56,9 @@ public class TableCreator
 	{
 		StringBuilder sql = new StringBuilder(100);
 		sql.append("CREATE TABLE ");
-		//String name = this.tablename.isNewTable() ? this.tablename.getTableName() : this.tablename.getTableExpression();
 		String name = this.tablename.getTableExpression(this.connection);
 		sql.append(name);
 		sql.append(" (");
-		int count = this.columnDefinition.size();
 		int numCols = 0;
 		List<String> pkCols = new ArrayList<String>();
 		
@@ -84,7 +81,7 @@ public class TableCreator
 			
 			if (pkCols.size() > 0)
 			{
-				StringBuilder pkSql = this.connection.getMetadata().getPkSource(this.tablename.getTableName(), pkCols, null);
+				StringBuilder pkSql = this.connection.getMetadata().getPkSource(this.tablename, pkCols, null);
 				if (pkSql.length() > 0)
 				{
 					LogMgr.logInfo("TableCreator.createTable()", "Adding primary key using: " + pkSql.toString());
@@ -114,7 +111,6 @@ public class TableCreator
 		if (col == null) return null;
 
 		int type = col.getDataType();
-		//Integer typeKey = new Integer(type);
 		int size = col.getColumnSize();
 		int digits = col.getDecimalDigits();
 		String def = col.getDefaultValue();
