@@ -19,11 +19,9 @@ public class NumberStringCache
 {
 	// As this is class is used to cache the String representation for 
 	// Line numbers in the editor, caching 5000 numbers should suffice
-	// for most cases. Any editor text larger than that will fall back
-	// to the objects cached in overflowMap
+	// for most cases. 
 	public static final int CACHE_SIZE = 5000;
 	private static final String[] cache = new String[CACHE_SIZE];
-
 	private static final String[] hexCache = new String[256];
 	
 	private NumberStringCache()

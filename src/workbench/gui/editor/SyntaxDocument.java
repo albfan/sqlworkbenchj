@@ -141,20 +141,20 @@ public class SyntaxDocument
 	 */
 	public void tokenizeLines()
 	{
-		tokenizeLines(0,getDefaultRootElement().getElementCount());
+		tokenizeLines(0, getDefaultRootElement().getElementCount());
 	}
 
 	/**
 	 * Reparses the document, by passing the specified lines to the
 	 * token marker. This should be called after a large quantity of
 	 * text is first inserted.
+	 * 
 	 * @param start The first line to parse
 	 * @param len The number of lines, after the first one to parse
 	 */
 	public void tokenizeLines(int start, int len)
 	{
-		if(tokenMarker == null || !tokenMarker.supportsMultilineTokens())
-			return;
+		if (tokenMarker == null) return;
 
 		Segment lineSegment = new Segment();
 		Element map = getDefaultRootElement();
@@ -166,12 +166,13 @@ public class SyntaxDocument
 			for (int i = start; i < len; i++)
 			{
 				Element lineElement = map.getElement(i);
+				if (lineElement == null) break;
 				int lineStart = lineElement.getStartOffset();
-				getText(lineStart,lineElement.getEndOffset() - lineStart - 1,lineSegment);
-				tokenMarker.markTokens(lineSegment,i);
+				getText(lineStart, lineElement.getEndOffset() - lineStart - 1, lineSegment);
+				tokenMarker.markTokens(lineSegment, i);
 			}
 		}
-		catch(BadLocationException bl)
+		catch (BadLocationException bl)
 		{
 			bl.printStackTrace();
 		}
@@ -192,11 +193,11 @@ public class SyntaxDocument
 			{
 				Element lineElement = map.getElement(i);
 				int lineStart = lineElement.getStartOffset();
-				getText(lineStart,lineElement.getEndOffset() - lineStart - 1,lineSegment);
+				getText(lineStart, lineElement.getEndOffset() - lineStart - 1, lineSegment);
 				if (lineSegment.count > this.maxLineLength) this.maxLineLength = lineSegment.count;
 			}
 		}
-		catch(BadLocationException bl)
+		catch (BadLocationException bl)
 		{
 			// Ignore
 		}
@@ -294,7 +295,9 @@ public class SyntaxDocument
 			DocumentEvent.ElementChange ch = evt.getChange(getDefaultRootElement());
 			if(ch != null)
 			{
-				tokenMarker.insertLines(ch.getIndex() + 1,ch.getChildrenAdded().length - ch.getChildrenRemoved().length);
+				int index = ch.getIndex() + 1;
+				int lines = ch.getChildrenAdded().length - ch.getChildrenRemoved().length;
+				tokenMarker.insertLines(index, lines);
 			}
 		}
 		lastChangePosition = evt.getOffset();
@@ -313,10 +316,9 @@ public class SyntaxDocument
 			DocumentEvent.ElementChange ch = evt.getChange(getDefaultRootElement());
 			if(ch != null)
 			{
-				tokenMarker.deleteLines(ch.getIndex() + 1,ch.getChildrenRemoved().length - ch.getChildrenAdded().length);
+				tokenMarker.deleteLines(ch.getIndex() + 1, ch.getChildrenRemoved().length - ch.getChildrenAdded().length);
 			}
 		}
-
 		lastChangePosition = evt.getOffset();
 		super.fireRemoveUpdate(evt);
 	}

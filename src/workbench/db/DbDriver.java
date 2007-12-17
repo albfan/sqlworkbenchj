@@ -282,22 +282,7 @@ public class DbDriver
 		try
 		{
 			this.loadDriverClass();
-			boolean verify = Settings.getInstance().getVerifyDriverUrl();
-			if (!this.driverClassInstance.acceptsURL(url))
-			{
-				String msg = ResourceMgr.getString("ErrInvalidUrl");
-				msg = msg.replaceAll("%driver%", this.driverClass);
-				msg = msg + " " + url;
-				if (verify)
-				{
-					throw new SQLException(msg);
-				}
-				else
-				{
-					LogMgr.logWarning("DbDriver.connect()", "The driver class " + this.driverClass  + " reports that it does not accept the given URL!");
-				}
-			}
-
+			
 			// as we are not using the DriverManager, we need to supply username
 			// and password in the connection properties!
 			Properties props = new Properties();

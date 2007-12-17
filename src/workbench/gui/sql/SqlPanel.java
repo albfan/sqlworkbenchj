@@ -3200,8 +3200,12 @@ public class SqlPanel
 	
 	public void dispose()
 	{
-		Settings.getInstance().removePropertyChangeLister(this);
+		Settings.getInstance().removePropertyChangeListener(this);
+		Settings.getInstance().removeFontChangedListener(this);
+		
 		reset();
+		
+		if (this.stmtRunner != null) this.stmtRunner.dispose();
 		if (this.execListener != null) execListener.clear();
 		if (this.editor != null) this.editor.dispose();
 		this.editor = null;

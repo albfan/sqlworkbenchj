@@ -485,6 +485,8 @@ public class IteratingScriptParser
 			endPos = scriptLength;
 		}
 		
+		int realStart = startPos;
+		
 		// remove whitespaces at the start
 		if (!returnStartingWhitespace)
 		{
@@ -502,6 +504,7 @@ public class IteratingScriptParser
 			value = this.script.subSequence(startPos, endPos).toString();
 		}
 		ScriptCommandDefinition c = new ScriptCommandDefinition(value, startPos, endPos);
+		c.setWhitespaceStart(realStart);
 		
 		return c;
 	}

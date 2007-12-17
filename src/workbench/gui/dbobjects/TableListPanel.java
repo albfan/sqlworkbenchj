@@ -394,6 +394,13 @@ public class TableListPanel
 		
 	}
 
+	public void dispose()
+	{
+		this.reset();
+		this.tableDefinition.removePropertyChangeListener(this);		
+		this.tableData.dispose();
+	}
+	
 	private void extendPopupMenu()
 	{
 		if (this.parentWindow != null)

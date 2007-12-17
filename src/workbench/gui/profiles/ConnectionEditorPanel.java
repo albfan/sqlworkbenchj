@@ -49,6 +49,7 @@ import workbench.gui.components.IntegerPropertyEditor;
 import workbench.gui.components.PasswordPropertyEditor;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbCheckBoxLabel;
 import workbench.gui.components.WbColorPicker;
@@ -841,8 +842,8 @@ public class ConnectionEditorPanel
 		editor.setMinimumSize(d);
 		editor.setPreferredSize(d);
 
-		int choice = JOptionPane.showConfirmDialog(this, editor, ResourceMgr.getString("TxtEditConnPropsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-		if (choice == JOptionPane.OK_OPTION)
+		boolean ok = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(this), editor, ResourceMgr.getString("TxtEditConnPropsWindowTitle"));
+		if (ok)
 		{
 			this.currentProfile.setConnectionProperties(editor.getProperties());
 			this.currentProfile.setCopyExtendedPropsToSystem(editor.getCopyToSystem());

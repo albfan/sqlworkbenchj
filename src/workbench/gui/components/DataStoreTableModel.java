@@ -11,6 +11,7 @@
  */
 package workbench.gui.components;
 
+import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -23,7 +24,9 @@ import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.storage.NamedSortDefinition;
 import workbench.storage.ResultInfo;
+import workbench.storage.SortDefinition;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.ConverterException;
 import workbench.util.SqlUtil;
@@ -32,6 +35,7 @@ import workbench.util.WbThread;
 
 /**
  * TableModel for displaying the contents of a {@link workbench.storage.DataStore }
+ * 
  * @author support@sql-workbench.net
  */
 public class DataStoreTableModel
@@ -39,14 +43,11 @@ public class DataStoreTableModel
 {
 	private DataStore dataCache;
 	private boolean showStatusColumn = false;
-	
 	private int columnStartIndex = 0;
-	public static final String NOT_AVAILABLE = "(n/a)";
+	
 	private int lockColumn = -1;
 
-	// used for sorting the model
-	private boolean[] sortAscending;
-	private int[] sortColumns;
+	private SortDefinition sortColumns = new SortDefinition();
 	
 	private boolean allowEditing = true;
 	private final Object model_change_lock = new Object();
@@ -69,8 +70,6 @@ public class DataStoreTableModel
 		this.dataCache = newData;
 		this.showStatusColumn = false;
 		this.columnStartIndex = 0;
-		this.sortColumns = null;
-		this.sortAscending = null;
 		this.fireTableStructureChanged();
 	}
 
@@ -95,6 +94,7 @@ public class DataStoreTableModel
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("DataStoreTableModel.getValue()", "Error retrieving value at: " + row + "/" + col, e);
 			return "Error";
 		}
 	}
@@ -119,12 +119,10 @@ public class DataStoreTableModel
 			if (aFlag)
 			{
 				this.columnStartIndex = 1;
-				//if (this.sortColumn != -1) this.sortColumn++;
 			}
 			else
 			{
 				this.columnStartIndex = 0;
-				//if (this.sortColumn != -1) this.sortColumn--;
 			}
 			this.showStatusColumn = aFlag;
 		}
@@ -355,7 +353,7 @@ public class DataStoreTableModel
 		}
 		catch (Exception e)
 		{
-			return NOT_AVAILABLE;
+			return "(n/a)";
 		}
 	}
 
@@ -449,32 +447,19 @@ public class DataStoreTableModel
 	}
 
 
-	private int findSortColumnIndex(int column)
-	{
-		if (this.sortColumns == null) return -1;
-		int realCol = column - columnStartIndex;
-		for (int i = 0; i < this.sortColumns.length; i++)
-		{
-			if (sortColumns[i] == realCol) return i;
-		}
-		return -1;
-	}
 	/** 
 	 * Return true if the data is sorted in ascending order.
 	 * @return True if sorted in ascending order
 	 */
 	public boolean isSortAscending(int col)
 	{
-		int index = findSortColumnIndex(col);
-		if (index < 0) return false;
-		return sortAscending[index];
+		return this.sortColumns.isSortAscending(col - columnStartIndex);
 	}
 
 	
 	public boolean isPrimarySortColumn(int col)
 	{
-		int index = findSortColumnIndex(col);
-		return (index == 0);
+		return this.sortColumns.isPrimarySortColumn(col - columnStartIndex);
 	}
 	
 	/**
@@ -484,10 +469,31 @@ public class DataStoreTableModel
 	 */
 	public boolean isSortColumn(int col)
 	{
-		int index = findSortColumnIndex(col);
-		return (index > -1);
+		return this.sortColumns.isSortColumn(col - columnStartIndex);
 	}
 
+	/**
+	 * Returns a snapshot of the current sort columns identified
+	 * by their names instead of their column index (as done by SortDefinition)
+	 * 
+	 * @return the current sort definition with named columns
+	 */
+	public NamedSortDefinition getSortDefinition()
+	{
+		return new NamedSortDefinition(this.dataCache, this.sortColumns);
+	}
+	
+	public void setSortDefinition(NamedSortDefinition definition)
+	{
+		if (definition == null) return;
+		SortDefinition newSort = definition.getSortDefinition(dataCache);
+		if (!newSort.equals(this.sortColumns))
+		{
+			this.sortColumns = newSort;
+			applySortColumns();
+		}
+	}
+	
 	/**
 	 * Sort the data by the given column. If the data is already
 	 * sorted by this column, then the sort order will be reversed
@@ -498,7 +504,6 @@ public class DataStoreTableModel
 		// thus negating ascending will sort ascending for non-sorted
 		// columns and will toggle the sort direction for an existing sort column
 		boolean ascending = !isSortAscending(column);
-		
 		sortByColumn(column, ascending, false);
 	}
 	
@@ -515,31 +520,12 @@ public class DataStoreTableModel
 
 	public void removeSortColumn(int column)
 	{
-		int index = findSortColumnIndex(column);
-		if (index < 0) return;
-
-		if (this.sortColumns.length == 1)
-		{
-			this.sortColumns = null;
-			this.sortAscending = null;
-			return;
-		}
-		
-		int[] newColumns = new int[sortColumns.length-1];
-		boolean[] newDir = new boolean[sortColumns.length-1];
-		
-		System.arraycopy(sortColumns, 0, newColumns, 0, index);
-		System.arraycopy(sortAscending, 0, newDir, 0, index);
-		
-		System.arraycopy(sortColumns, index + 1, newColumns, index, sortColumns.length - index - 1);
-		System.arraycopy(sortAscending, 0, newDir, index, sortColumns.length - index - 1);
-
-		this.sortColumns = newColumns;
-		this.sortAscending = newDir;
+		boolean isPrimaryColumn = this.sortColumns.isPrimarySortColumn(column);
+		this.sortColumns.removeSortColumn(column);
 		
 		// if the primary (== first) column was removed
 		// we have to re-apply the sort definition
-		if (index == 0)
+		if (isPrimaryColumn)
 		{
 			applySortColumns();
 		}
@@ -550,34 +536,13 @@ public class DataStoreTableModel
 	 */
 	public void sortByColumn(int column, boolean ascending, boolean addSortColumn)
 	{
-		if (!addSortColumn || sortColumns == null)
+		if (addSortColumn)
 		{
-			this.sortColumns = new int[1];
-			this.sortColumns[0] = column - columnStartIndex;
-			this.sortAscending = new boolean[1];
-			this.sortAscending[0] = ascending;
+			sortColumns.addSortColumn(column - columnStartIndex, ascending);
 		}
 		else
 		{
-			int index = findSortColumnIndex(column);
-			if (index < 0)
-			{
-				int[] newColumns = new int[sortColumns.length + 1];
-				boolean[] newDir = new boolean[sortColumns.length + 1];
-				
-				System.arraycopy(sortColumns, 0, newColumns, 0, sortColumns.length);
-				System.arraycopy(sortAscending, 0, newDir, 0, sortColumns.length);
-				
-				newColumns[sortColumns.length] = column - columnStartIndex;
-				newDir[sortColumns.length] = ascending;
-				
-				this.sortColumns = newColumns;
-				this.sortAscending = newDir;
-			}
-			else
-			{
-				this.sortAscending[index] = ascending;
-			}
+			sortColumns.setSortColumn(column - columnStartIndex, ascending);
 		}
 		applySortColumns();
 	}
@@ -592,7 +557,7 @@ public class DataStoreTableModel
 			try
 			{
 				setSortInProgress(true);
-				this.dataCache.sortByColumns(this.sortColumns, this.sortAscending);
+				this.dataCache.sort(this.sortColumns);
 			}
 			catch (Throwable th)
 			{
@@ -603,7 +568,14 @@ public class DataStoreTableModel
 				setSortInProgress(false);
 			}
 		}
-		fireTableChanged(new TableModelEvent(this));
+		final TableModelEvent event = new TableModelEvent(this);
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				fireTableChanged(event);
+			}
+		});
 	}
 
 	private boolean sortingInProgress = false;
@@ -617,7 +589,6 @@ public class DataStoreTableModel
 			LogMgr.logWarning("DataStoreTableModel", "Wrong column index for sorting specified!");
 			return;
 		}
-
 		boolean ascending = !this.isSortAscending(aColumn);
 		sortInBackground(table, aColumn, ascending, addSortColumn);
 	}

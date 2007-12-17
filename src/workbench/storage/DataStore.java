@@ -57,7 +57,6 @@ import workbench.util.ValueConverter;
  */
 public class DataStore
 {
-
 	// Needed for the status display in the table model
 	// as RowData is only package visible. Thus we need to provide the objects here
 	public static final Integer ROW_MODIFIED = new Integer(RowData.MODIFIED);
@@ -1583,11 +1582,11 @@ public class DataStore
 		this.resetUpdateRowCounters();
 	}
 
-	public void sortByColumns(int[] cols, boolean[] ascending)
+	public void sort(SortDefinition sortDef)
 	{
 		synchronized (this.data)
 		{
-			RowDataListSorter sorter = new RowDataListSorter(cols, ascending);
+			RowDataListSorter sorter = new RowDataListSorter(sortDef);
 			sorter.sort(this.data);
 		}
 	}
@@ -1596,7 +1595,8 @@ public class DataStore
 	{
 		synchronized (this.data)
 		{
-			RowDataListSorter sorter = new RowDataListSorter(col, ascending);
+			SortDefinition sort = new SortDefinition(col, ascending);
+			RowDataListSorter sorter = new RowDataListSorter(sort);
 			sorter.sort(this.data);
 		}
 	}

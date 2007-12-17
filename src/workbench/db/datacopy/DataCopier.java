@@ -136,7 +136,7 @@ public class DataCopier
 		this.importer.setReportInterval(value);
 	}
 
-	public void copyFromFile(RowDataProducer source, WbConnection target, TableIdentifier targetTbl)
+	public void setProducer(RowDataProducer source, WbConnection target, TableIdentifier targetTbl)
 	{
 		this.sourceConnection = null;
 		this.targetConnection = target;

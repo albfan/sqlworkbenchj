@@ -292,12 +292,12 @@ public class ScriptParser
 		{
 			ScriptCommandDefinition b = this.commands.get(i);
 			ScriptCommandDefinition next = this.commands.get(i + 1);
-			if (b.getStartPositionInScript() <= cursorPos && b.getEndPositionInScript() >= cursorPos) return i;
+			if (b.getWhitespaceStart() <= cursorPos && b.getEndPositionInScript() >= cursorPos) return i;
 			if (cursorPos > b.getEndPositionInScript() && cursorPos < next.getEndPositionInScript()) return i + 1;
-			if (b.getEndPositionInScript() > cursorPos && next.getStartPositionInScript() <= cursorPos) return i+1;
+			if (b.getEndPositionInScript() > cursorPos && next.getWhitespaceStart() <= cursorPos) return i+1;
 		}
 		ScriptCommandDefinition b = this.commands.get(count - 1);
-		if (b.getStartPositionInScript() <= cursorPos && b.getEndPositionInScript() >= cursorPos) return count - 1;
+		if (b.getWhitespaceStart() <= cursorPos && b.getEndPositionInScript() >= cursorPos) return count - 1;
 		return -1;
 	}
 

@@ -18,6 +18,7 @@ import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -38,7 +39,6 @@ import workbench.gui.actions.SelectionFilterAction;
 import workbench.gui.components.FlatButton;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Resettable;
-import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
@@ -57,6 +57,7 @@ import workbench.util.WbThread;
 import workbench.interfaces.JobErrorHandler;
 import java.awt.Cursor;
 import java.awt.EventQueue;
+import java.beans.PropertyChangeListener;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,8 +65,8 @@ import workbench.gui.MainWindow;
 import workbench.gui.actions.FilterPickerAction;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.DbExecutionNotifier;
+import workbench.storage.NamedSortDefinition;
 import workbench.util.WbWorkspace;
-
 
 /**
  *
@@ -74,7 +75,8 @@ import workbench.util.WbWorkspace;
  */
 public class TableDataPanel
   extends JPanel
-	implements Reloadable, ActionListener, Interruptable, TableDeleteListener, Resettable, DbExecutionNotifier
+	implements Reloadable, ActionListener, Interruptable, TableDeleteListener, Resettable, DbExecutionNotifier,
+		PropertyChangeListener
 {
 	private WbConnection dbConnection;
 	protected DwPanel dataDisplay;
@@ -99,6 +101,8 @@ public class TableDataPanel
 	private List<DbExecutionListener> execListener;
 	private Savepoint currentSavepoint;
 	private Statement rowCountRetrieveStmt = null;
+	private boolean rememberSort;
+	private NamedSortDefinition lastSort;
 
 	public TableDataPanel() 
 		throws Exception
@@ -207,8 +211,15 @@ public class TableDataPanel
 		mytoolbar.add(this.dataDisplay.getTable().getResetFilterAction());
 
 		this.add(dataDisplay, BorderLayout.CENTER);
+		this.rememberSort = Settings.getInstance().getRememberSortInDbExplorer();
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_DBEXP_REMEMBER_SORT);
 	}
 
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		this.rememberSort = Settings.getInstance().getRememberSortInDbExplorer();
+	}
+	
 	public void showFocusBorder()
 	{
 		this.dataDisplay.getTable().showFocusBorder();
@@ -232,6 +243,12 @@ public class TableDataPanel
 		return this.loadingIcon;
 	}
 
+	public void dispose()
+	{
+		this.reset();
+		Settings.getInstance().removePropertyChangeListener(this);
+	}
+	
 	public void disconnect()
 	{
 		this.dbConnection = null;
@@ -241,6 +258,17 @@ public class TableDataPanel
 	public void reset()
 	{
 		if (this.isRetrieving()) return;
+		if (this.rememberSort)
+		{
+			// getCurrentSort() must be called before calling
+			// clearContent() as the sort definition is maintained
+			// in the TableModel and that is deleted when the data is cleared
+			this.lastSort = dataDisplay.getCurrentSort();
+		}
+		else
+		{
+			this.lastSort = null;
+		}
 		this.dataDisplay.clearContent();
 		this.rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
 		this.clearLoadingImage();
@@ -399,6 +427,7 @@ public class TableDataPanel
 	{
 		if (!this.isRetrieving()) reset();
 		this.table = aTable;
+		this.lastSort = null;
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -557,18 +586,19 @@ public class TableDataPanel
 			
 			error = !dataDisplay.runQuery(sql, respectMaxRows);
 			
-			DataStore ds = dataDisplay.getTable().getDataStore();
-			if (ds != null)
-			{
-				// By directly setting the update table, we avoid 
-				// another round-trip to the database to check the table from the
-				// passed SQL statement.
-				dataDisplay.setUpdateTableToBeUsed(this.table);
-				dataDisplay.getSelectKeysAction().setEnabled(true);
-				String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
-				dataDisplay.setPrintHeader(header);
-			}
+			// By directly setting the update table, we avoid 
+			// another round-trip to the database to check the table from the
+			// passed SQL statement.
+			dataDisplay.setUpdateTableToBeUsed(this.table);
+			dataDisplay.getSelectKeysAction().setEnabled(true);
+			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
+			dataDisplay.setPrintHeader(header);
 			dataDisplay.showlastExecutionTime();
+			
+			if (this.lastSort != null)
+			{
+				dataDisplay.setSortDefinition(lastSort);
+			}
 		}
 		catch (Throwable e)
 		{

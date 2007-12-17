@@ -11,6 +11,7 @@
  */
 package workbench.gui.help;
 
+import workbench.gui.components.SearchableTextPane;
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -18,7 +19,6 @@ import java.net.URL;
 
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
@@ -33,7 +33,7 @@ public class WhatsNewViewer
 	{
 		super(owner, false);
 		setTitle(ResourceMgr.getFormattedString("TxtWhatsNewWindowTitle", ResourceMgr.getBuildNumber().toString()));
-		JTextPane display = new JTextPane();
+		SearchableTextPane display = new SearchableTextPane(this);
 		display.setFont(Settings.getInstance().getEditorFont());
 		display.setEditable(false);
 		JScrollPane scroll = new JScrollPane(display);
@@ -45,7 +45,7 @@ public class WhatsNewViewer
 		{
 			setSize(800,600);
 		}
-		
+
 		if (!Settings.getInstance().restoreWindowPosition(this))
 		{
 			WbSwingUtilities.center(this, owner);
@@ -61,7 +61,7 @@ public class WhatsNewViewer
 			}
 			else
 			{
-				display.setText("No history available!");
+				display.setText("No history available! Please report this to support@sql-workbench.net");
 			}
 			
 		}
@@ -69,7 +69,7 @@ public class WhatsNewViewer
 		{
 			LogMgr.logError("WhatsNewViewer.<init>", "Error creating dialog", e);
 		}
-		
+
 		addWindowListener(new WindowAdapter()
 		{
 			public void windowClosing(WindowEvent evt)

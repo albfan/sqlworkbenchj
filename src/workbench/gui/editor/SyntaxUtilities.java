@@ -23,7 +23,7 @@ import workbench.resource.Settings;
  * subsystem.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxUtilities.java,v 1.9 2007-10-19 18:06:49 thomas Exp $
+ * @version $Id: SyntaxUtilities.java,v 1.10 2007-12-17 20:41:20 thomas Exp $
  */
 public class SyntaxUtilities
 {
@@ -35,24 +35,27 @@ public class SyntaxUtilities
 	 * @param offset The offset into the segment
 	 * @param match The string to match
 	 */
-	public static boolean regionMatches(boolean ignoreCase, Segment text,
-					    int offset, String match)
+	public static boolean regionMatches(boolean ignoreCase, Segment text, int offset, String match)
 	{
 		int length = offset + match.length();
 		char[] textArray = text.array;
-		if(length > text.offset + text.count)
+		if (length > text.offset + text.count)
+		{
 			return false;
-		for(int i = offset, j = 0; i < length; i++, j++)
+		}
+		for (int i = offset,  j = 0; i < length; i++, j++)
 		{
 			char c1 = textArray[i];
 			char c2 = match.charAt(j);
-			if(ignoreCase)
+			if (ignoreCase)
 			{
 				c1 = Character.toUpperCase(c1);
 				c2 = Character.toUpperCase(c2);
 			}
-			if(c1 != c2)
+			if (c1 != c2)
+			{
 				return false;
+			}
 		}
 		return true;
 	}
@@ -65,24 +68,27 @@ public class SyntaxUtilities
 	 * @param offset The offset into the segment
 	 * @param match The character array to match
 	 */
-	public static boolean regionMatches(boolean ignoreCase, Segment text,
-					    int offset, char[] match)
+	public static boolean regionMatches(boolean ignoreCase, Segment text, int offset, char[] match)
 	{
 		int length = offset + match.length;
 		char[] textArray = text.array;
-		if(length > text.offset + text.count)
+		if (length > text.offset + text.count)
+		{
 			return false;
-		for(int i = offset, j = 0; i < length; i++, j++)
+		}
+		for (int i = offset,  j = 0; i < length; i++, j++)
 		{
 			char c1 = textArray[i];
 			char c2 = match[j];
-			if(ignoreCase)
+			if (ignoreCase)
 			{
 				c1 = Character.toUpperCase(c1);
 				c2 = Character.toUpperCase(c2);
 			}
-			if(c1 != c2)
+			if (c1 != c2)
+			{
 				return false;
+			}
 		}
 		return true;
 	}
@@ -104,7 +110,7 @@ public class SyntaxUtilities
 		styles[Token.KEYWORD2] = new SyntaxStyle(sett.getColor("workbench.editor.color.keyword2", Color.MAGENTA),false,false);
 		styles[Token.KEYWORD3] = new SyntaxStyle(sett.getColor("workbench.editor.color.keyword3", new Color(0x009600)),false,false);
 		styles[Token.LITERAL1] = new SyntaxStyle(sett.getColor("workbench.editor.color.literal1", new Color(0x650099)),false,false);
-		styles[Token.LITERAL2] = new SyntaxStyle(sett.getColor("workbench.editor.color.literal2", new Color(0x650099)),false,true);
+		styles[Token.LITERAL2] = new SyntaxStyle(sett.getColor("workbench.editor.color.literal2", new Color(0x650099)),false,false);
 		styles[Token.LABEL] = new SyntaxStyle(sett.getColor("workbench.editor.color.label", new Color(0x990033)),false,true);
 		styles[Token.OPERATOR] = new SyntaxStyle(sett.getColor("workbench.editor.color.operator", Color.BLACK),false,false);
 		styles[Token.INVALID] = new SyntaxStyle(sett.getColor("workbench.editor.color.invalid", Color.RED),false,true);
@@ -131,32 +137,33 @@ public class SyntaxUtilities
 		SyntaxStyle[] styles, TabExpander expander, Graphics gfx,
 		int x, int y, int addwidth)
 	{
+		if (tokens == null) return x;
+		
 		Font defaultFont = gfx.getFont();
 		Color defaultColor = gfx.getColor();
 
-		int offset = 0;
 		while (true)
 		{
-			byte id = tokens.id;
-			if(id == Token.END)
+			if (tokens == null) 
+			{
+				gfx.setColor(defaultColor);
+				gfx.setFont(defaultFont);
 				break;
+			}
 
 			int length = tokens.length;
-			if(id == Token.NULL)
+			if (tokens.id == Token.NULL)
 			{
-//				if(!defaultColor.equals(gfx.getColor()))
-					gfx.setColor(defaultColor);
-//				if(!defaultFont.equals(gfx.getFont()))
-					gfx.setFont(defaultFont);
+				gfx.setColor(defaultColor);
+				gfx.setFont(defaultFont);
 			}
 			else
 			{
-				styles[id].setGraphicsFlags(gfx,defaultFont);
+				styles[tokens.id].setGraphicsFlags(gfx, defaultFont);
 			}
 			line.count = length;
-			x = Utilities.drawTabbedText(line,x,y,gfx,expander,addwidth);
+			x = Utilities.drawTabbedText(line, x, y, gfx, expander, addwidth);
 			line.offset += length;
-			offset += length;
 
 			tokens = tokens.next;
 		}

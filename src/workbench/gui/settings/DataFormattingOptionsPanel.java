@@ -244,8 +244,8 @@ public class DataFormattingOptionsPanel
     includeHeaderWidth.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
     includeHeaderWidth.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(11, 8, 0, 0);
     add(includeHeaderWidth, gridBagConstraints);
@@ -254,8 +254,8 @@ public class DataFormattingOptionsPanel
     includeHeaderWidthLabel.setText(ResourceMgr.getString("LblIncludeHeaderColWidth"));
     includeHeaderWidthLabel.setToolTipText(ResourceMgr.getDescription("LblIncludeHeaderColWidth"));
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
     add(includeHeaderWidthLabel, gridBagConstraints);

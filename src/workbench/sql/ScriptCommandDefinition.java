@@ -19,8 +19,11 @@ import workbench.util.StringUtil;
 public class ScriptCommandDefinition
 {
 	private final String command;
-	private final int startPosInScript;
-	private final int endPosInScript;
+	private final int textStartPosInScript;
+	private final int textEndPosInScript;
+	
+	private int whiteSpaceStart = -1;
+	
 	private int indexInScript;
 	
 	public ScriptCommandDefinition(String c, int start, int end)
@@ -31,14 +34,44 @@ public class ScriptCommandDefinition
 	public ScriptCommandDefinition(String c, int start, int end, int index)
 	{
 		this.command = StringUtil.rtrim(c);
-		this.startPosInScript = start;
-		this.endPosInScript = end;
+		this.textStartPosInScript = start;
+		this.textEndPosInScript = end;
 		this.indexInScript = index;
 	}
 	
+	public void setWhitespaceStart(int start)
+	{
+		if (start != this.textStartPosInScript)
+		{
+			this.whiteSpaceStart = start;
+		}
+	}
+	
 	public String getSQL() { return this.command; }
-	public int getStartPositionInScript() { return this.startPosInScript; }
-	public int getEndPositionInScript() { return this.endPosInScript; }
+
+	/**
+	 * Returns the start of this command in the source script
+	 * including potential whitespace characters before the 
+	 * real command. If setWhitespaceStart() has not been 
+	 * called, this is identical to getStartPositionInScript()
+	 * @return
+	 */
+	public int getWhitespaceStart() 
+	{ 
+		if (whiteSpaceStart != -1) return whiteSpaceStart;
+		return this.textStartPosInScript; 
+	}
+	
+	public int getStartPositionInScript() 
+	{ 
+		return this.textStartPosInScript; 
+	}
+	
+	public int getEndPositionInScript() 
+	{ 
+		return this.textEndPosInScript; 
+	}
+	
 	public int getIndexInScript() { return this.indexInScript; }
 	public void setIndexInScript(int index) { this.indexInScript = index; }
 	

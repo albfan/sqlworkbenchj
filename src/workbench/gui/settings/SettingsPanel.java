@@ -210,6 +210,7 @@ public class SettingsPanel
 			public void run()
 			{
 				pageList.setSelectedIndex(0);
+				pageList.requestFocusInWindow();
 			}
 		});		
 		this.dialog.setVisible(true);

@@ -61,6 +61,8 @@ public interface StatementRunner
 	void rollbackSavepoint();
 	void releaseSavepoint();
 	void setUseSavepoint(boolean flag);
+
+	void dispose();
 	
 	public class Factory
 	{

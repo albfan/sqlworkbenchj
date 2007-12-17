@@ -53,11 +53,29 @@ public class ScriptParserTest
 		}
 	}
 	
+	public void testCursorInEmptyLine()
+	{
+		try
+		{
+			String sql = "\nselect 42\nfrom dual;\nselect * \nfrom table\n;";	
+			ScriptParser p = new ScriptParser();
+			p.allowEmptyLineAsSeparator(false);
+			p.setScript(sql);
+			int index = p.getCommandIndexAtCursorPos(0);
+			assertEquals("Wrong statement index", 0, index);
+			assertEquals(2, p.getSize());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testEndPosition()
 	{
 		try
 		{
-			// Check if a cursorposition at the far end of the statement is detected properly
 			String sql = "select 42 from dual;\n\nselect * \nfrom table\n;";	
 			ScriptParser p = new ScriptParser();
 			p.allowEmptyLineAsSeparator(false);

@@ -61,11 +61,11 @@ public class AnsiSQLTokenMarker
 	private void addKeywordList(Collection<String> words, byte anId)
 	{
 		if (words == null) return;
+		
 		for (String keyword : words)
 		{
 			if (!keywords.containsKey(keyword))
 			{
-				//System.out.println("adding key=" + keyword);
 				keywords.add(keyword.toUpperCase().trim(),anId);
 			}
 		}

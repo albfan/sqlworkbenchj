@@ -70,6 +70,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
+import workbench.storage.NamedSortDefinition;
 import workbench.storage.RowActionMonitor;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
@@ -208,6 +209,16 @@ public class DwPanel
 	public void setPrintHeader(String header)
 	{
 		this.dataTable.setPrintHeader(header);
+	}
+	
+	public void dispose()
+	{
+		this.clearContent();
+		if (this.stmtRunner != null)
+		{
+			this.stmtRunner.dispose();
+		}
+		this.stmtRunner = null;
 	}
 	
 	/**
@@ -560,6 +571,26 @@ public class DwPanel
 	{
 		statusBar.setExecutionTime(lastExecutionTime);
 	}
+
+	public void setSortDefinition(NamedSortDefinition sort)
+	{
+		DataStoreTableModel model = this.dataTable.getDataStoreTableModel();
+		if (model != null)
+		{
+			model.setSortDefinition(sort);
+		}
+	}
+	
+	public NamedSortDefinition getCurrentSort()
+	{
+		NamedSortDefinition currentSort = null;
+		DataStoreTableModel model = this.dataTable.getDataStoreTableModel();
+		if (model != null)
+		{
+			currentSort = model.getSortDefinition();
+		}
+		return currentSort;
+	}
 	
 	/**
 	 *	Execute the given SQL statement and display the result. 
@@ -570,7 +601,7 @@ public class DwPanel
 		if (this.stmtRunner == null) this.createStatementRunner();
 		
 		boolean success = false;
-		
+
 		try
 		{
 			this.clearContent();

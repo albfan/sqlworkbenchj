@@ -1820,7 +1820,7 @@ public class DataPumper
 			if (this.fileImporter != null)
 			{
 				this.initImporter();
-				this.copier.copyFromFile(this.fileImporter.getProducer(), this.targetConnection, this.targetTable.getSelectedTable());
+				this.copier.setProducer(this.fileImporter.getProducer(), this.targetConnection, this.targetTable.getSelectedTable());
 				int interval = DataImporter.estimateReportIntervalFromFileSize(this.fileImporter.getSourceFile());
 				this.copier.setReportInterval(interval);
 			}

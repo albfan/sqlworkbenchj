@@ -67,6 +67,11 @@ public class DefaultStatementRunner
 		this.cmdMapper = new CommandMapper();
 	}
 
+	public void dispose()
+	{
+		Settings.getInstance().removePropertyChangeListener(this);
+	}
+	
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if ("workbench.gui.log.consolidate".equals(evt.getPropertyName()))

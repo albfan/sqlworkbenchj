@@ -12,6 +12,7 @@
 package workbench.gui.settings;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -20,6 +21,7 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.StringPropertyEditor;
@@ -63,6 +65,9 @@ public class LnFDefinitionPanel
 			}
 		});
 
+		Font f = UIManager.getDefaults().getFont("Label.font");
+		f = f.deriveFont((float)(f.getSize() * 1.1));
+		infoText.setFont(f);
 		String button = changeLnfButton.getText();
 		String info = ResourceMgr.getString("TxtChangeLnFInfo").replaceAll("%button%", button);
 		infoText.setText(info);

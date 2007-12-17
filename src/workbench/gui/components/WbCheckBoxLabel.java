@@ -12,6 +12,8 @@
 package workbench.gui.components;
 
 import java.awt.Component;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.JCheckBox;
@@ -22,10 +24,11 @@ import javax.swing.JLabel;
  */
 public class WbCheckBoxLabel
 	extends JLabel
-	implements MouseListener
+	implements MouseListener, FocusListener
 {
+//	private Border oldBorder = new EmptyBorder(1,1,1,1);
+//	private Border focusBorder = new LineBorder(Color.GRAY, 1);
 	
-	/** Creates a new instance of WbCheckBoxLabel */
 	public WbCheckBoxLabel()
 	{
 		super();
@@ -38,6 +41,17 @@ public class WbCheckBoxLabel
 		this.addMouseListener(this);
 	}
 
+	@Override
+	public void setLabelFor(Component c)
+	{
+		super.setLabelFor(c);
+//		if (c instanceof JCheckBox)
+//		{
+//			JCheckBox check = (JCheckBox)c;
+//			check.addFocusListener(this);
+//		}
+	}
+	
 	public void mouseClicked(MouseEvent e)
 	{
 		Component c = this.getLabelFor();
@@ -62,6 +76,17 @@ public class WbCheckBoxLabel
 
 	public void mouseExited(MouseEvent e)
 	{
+	}
+
+	public void focusGained(FocusEvent e)
+	{
+		// the checkbox gained focus, create an indicator around the label
+//		this.setBorder(focusBorder);
+	}
+
+	public void focusLost(FocusEvent e)
+	{
+//		this.setBorder(oldBorder);
 	}
 	
 }

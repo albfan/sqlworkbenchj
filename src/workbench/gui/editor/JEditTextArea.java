@@ -101,7 +101,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.82 2007-11-16 21:59:47 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.83 2007-12-17 20:41:20 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -170,6 +170,9 @@ public class JEditTextArea
 	protected boolean rectSelect;
 	protected boolean modified;
 	
+	private int invalidationInterval = 10;
+	
+	
 	/**
 	 * Creates a new JEditTextArea with the default settings.
 	 */
@@ -228,6 +231,7 @@ public class JEditTextArea
 		this.addKeyBinding("SHIFT+DELETE", this.popup.getCutAction());
 
 		this.addKeyBinding("C+a", this.popup.getSelectAllAction());
+		this.invalidationInterval = Settings.getInstance().getIntProperty("workbench.editor.update.lineinterval", 10);
 	}
 	
 	public int getHScrollBarHeight()
@@ -530,7 +534,7 @@ public class JEditTextArea
 	 */
 	public final int getFirstLine()
 	{
-		return firstLine;
+		return (firstLine < 0 ? 0 : firstLine);
 	}
 
 	/**
@@ -771,27 +775,14 @@ public class JEditTextArea
 		{
 			// If syntax coloring is enabled, we have to do this because
 			// tokens can vary in width
-			Token tokens;
-			if (painter.currentLineIndex == line && painter.currentLineTokens != null)
-			{
-				tokens = painter.currentLineTokens;
-			}
-			else
-			{
-				painter.currentLineIndex = line;
-				tokens = painter.currentLineTokens = tokenMarker.markTokens(lineSegment, line);
-			}
-
+			Token tokens = tokenMarker.markTokens(lineSegment, line);
+			
 			Font defaultFont = painter.getFont();
 			SyntaxStyle[] styles = painter.getStyles();
 
-			for (;;)
+			while (tokens != null)
 			{
 				byte id = tokens.id;
-				if (id == Token.END)
-				{
-					return x;
-				}
 
 				if (id == Token.NULL)
 				{
@@ -817,6 +808,7 @@ public class JEditTextArea
 				tokens = tokens.next;
 			}
 		}
+		return x;
 	}
 
 	/**
@@ -865,43 +857,36 @@ public class JEditTextArea
 		}
 		else
 		{
-			Token tokens;
-			if(painter.currentLineIndex == line && painter.currentLineTokens != null)
-			{
-				tokens = painter.currentLineTokens;
-			}
-			else
-			{
-				painter.currentLineIndex = line;
-				tokens = painter.currentLineTokens = tokenMarker.markTokens(lineSegment,line);
-			}
-
+			Token tokens = tokenMarker.markTokens(lineSegment, line);
+			
 			int offset = 0;
 			Font defaultFont = painter.getFont();
 			SyntaxStyle[] styles = painter.getStyles();
 
-			for(;;)
+			while (tokens != null)
 			{
 				byte id = tokens.id;
-				if(id == Token.END)
-					return offset;
-
+				
 				if (id == Token.NULL)
+				{
 					fm = painter.getFontMetrics();
+				}
 				else
+				{
 					fm = styles[id].getFontMetrics(defaultFont);
+				}
 
 				int length = tokens.length;
 
 				for (int i = 0; i < length; i++)
 				{
 					char c = segmentArray[segmentOffset + offset + i];
-					int charWidth;
+					int charWidth = fm.charWidth(c);
 					
 					if (c == '\t')
-						charWidth = (int)painter.nextTabStop(width,offset + i) - width;
-					else
-						charWidth = fm.charWidth(c);
+					{
+						charWidth = (int)painter.nextTabStop(width, offset + i) - width;
+					}
 
 					if (x - charWidth / 2 <= width) return offset + i;
 
@@ -911,7 +896,9 @@ public class JEditTextArea
 				offset += length;
 				tokens = tokens.next;
 			}
+			return offset;
 		}
+		
 	}
 
 	/**
@@ -1046,7 +1033,7 @@ public class JEditTextArea
 	public int getLineStartOffset(int line)
 	{
 		Element lineElement = document.getDefaultRootElement().getElement(line);
-		if(lineElement == null)
+		if (lineElement == null)
 			return -1;
 		else
 			return lineElement.getStartOffset();
@@ -1061,7 +1048,7 @@ public class JEditTextArea
 	public int getLineEndOffset(int line)
 	{
 		Element lineElement = document.getDefaultRootElement().getElement(line);
-		if(lineElement == null)
+		if (lineElement == null)
 			return -1;
 		else
 			return lineElement.getEndOffset();
@@ -1220,7 +1207,7 @@ public class JEditTextArea
 		if (len < 0) return;
 		try
 		{
-			document.getText(start,len,segment);
+			document.getText(start, len ,segment);
 		}
 		catch(BadLocationException bl)
 		{
@@ -1266,8 +1253,10 @@ public class JEditTextArea
 	 */
 	public final String getLineText(int lineIndex)
 	{
-		int start = getLineStartOffset(lineIndex);
-		return getText(start,getLineEndOffset(lineIndex) - start - 1);
+		Element lineElement = document.getDefaultRootElement().getElement(lineIndex);
+		int start = (lineElement != null ? lineElement.getStartOffset() : -1);
+		int end = (lineElement != null ? lineElement.getEndOffset() : -1);
+		return getText(start, end - start - 1);
 	}
 
 	/**
@@ -1277,8 +1266,10 @@ public class JEditTextArea
 	 */
 	public final void getLineText(int lineIndex, Segment segment)
 	{
-		int start = getLineStartOffset(lineIndex);
-		getText(start,getLineEndOffset(lineIndex) - start - 1,segment);
+		Element lineElement = document.getDefaultRootElement().getElement(lineIndex);
+		int start = (lineElement != null ? lineElement.getStartOffset() : -1);
+		int end = (lineElement != null ? lineElement.getEndOffset() : -1);
+		getText(start, end - start - 1,segment);
 	}
 
 	/**
@@ -1602,7 +1593,7 @@ public class JEditTextArea
 		// When the user is typing, etc, we don't want the caret
 		// to blink
 		blink = true;
-		caretTimer.restart();
+		if (caretTimer != null) caretTimer.restart();
 
 		// Disable rectangle select if selection start = selection end
 		if(selectionStart == selectionEnd) rectSelect = false;
@@ -2209,13 +2200,19 @@ public class JEditTextArea
 		DocumentEvent.ElementChange ch = evt.getChange(document.getDefaultRootElement());
 
 		int count;
-		if(ch == null)
+		if (ch == null)
+		{
 			count = 0;
+		}
 		else
+		{
 			count = ch.getChildrenAdded().length - ch.getChildrenRemoved().length;
-
+		}
+		
 		int line = getLineOfOffset(evt.getOffset());
-		if(count == 0)
+		invalidateLines(line);
+		
+		if (count == 0)
 		{
 			painter.invalidateLine(line);
 		}
@@ -2223,8 +2220,10 @@ public class JEditTextArea
 		{
 			painter.invalidateLineRange(line,(firstLine < 0 ? 0 : firstLine) + visibleLines);
 		}
+		
 		boolean wasModified = this.modified;
 		this.modified = true;
+		
 		// only fire event if modified status is changed
 		if (!wasModified)
 		{
@@ -2232,7 +2231,38 @@ public class JEditTextArea
 		}
 		updateScrollBars();
 	}
+	
+	private void invalidateLines(int changedLine)
+	{
+		TokenMarker marker = getTokenMarker();
+		if (marker == null) return;
+		
+		// In order to display multi-line literals correctly
+		// I simply invalidate some line above and below the
+		// currently changed line. This still can leave
+		// incorrect tokens with regards to multiline literals
+		// but my assumptioin is, that literals spanning more than 
+		// 'delta' number lines are used very rarely in SQL scripts. 
+		
+		// Testing for possible literals in those lines and then only 
+		// invalidating the lines that need it, is probably 
+		// not much faster then simply invalidating a constant range of lines
+		int startInvalid = changedLine - this.invalidationInterval;
+		int endInvalid = changedLine + this.invalidationInterval;
+		
+		if (startInvalid < 0) startInvalid = 0;
+		if (endInvalid > marker.getLineCount()) endInvalid = marker.getLineCount() - 1;
 
+		// re-tokenize all lines
+		document.tokenizeLines(startInvalid, endInvalid);
+			
+		// re-paint the lines that need it
+		int repaintStart = (startInvalid < getFirstLine() ? getFirstLine() : startInvalid);
+		int repaintEnd = (endInvalid > (repaintStart + getVisibleLines()) ? repaintStart + getVisibleLines() : endInvalid);
+		painter.invalidateLineRange(repaintStart, repaintEnd);
+	}
+	
+	
 	public boolean isModified() { return this.modified; }
 	public void resetModified()
 	{

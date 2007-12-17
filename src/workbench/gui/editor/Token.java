@@ -17,7 +17,7 @@ package workbench.gui.editor;
  * token in the text, and a pointer to the next token in the list.
  *
  * @author Slava Pestov
- * @version $Id: Token.java,v 1.1 2001-12-11 19:07:23 thomas Exp $
+ * @version $Id: Token.java,v 1.2 2007-12-17 20:41:20 thomas Exp $
  */
 public class Token
 {
@@ -111,8 +111,10 @@ public class Token
 	 * The token type, that along with a length of 0
 	 * marks the end of the token list.
 	 */
-	public static final byte END = 127;
+	//public static final byte END = 127;
 
+	private char pendingChar = 0;
+	
 	/**
 	 * The length of this token.
 	 */
@@ -139,11 +141,83 @@ public class Token
 		this.id = id;
 	}
 
+	public boolean isLiteral()
+	{
+		return isLiteral(this.id);
+	}
+	
+	public boolean isMultiline()
+	{
+		return this.pendingChar != 0;
+	}
+	
+	public void setPendingLiteralChar(char c)
+	{
+		this.pendingChar = c;
+	}
+	
+	public char getPendingLiteralChar()
+	{
+		return this.pendingChar;
+	}
+
+	public static boolean isLiteral(int tokenId)
+	{
+		return (tokenId == LITERAL1 || tokenId == LITERAL2);
+	}
+	
+	public String typeString()
+	{
+		return typeString(this.id);
+	}
+	
+	public static String typeString(int id)
+	{
+		String type = "NULL";
+		switch (id)
+		{
+			case COMMENT1:
+				type = "C1";
+				break;
+			case COMMENT2:
+				type = "C2";
+				break;
+			case LITERAL1:
+				type = "L1";
+				break;
+			case LITERAL2:
+				type = "L2";
+				break;
+			case KEYWORD1:
+				type = "K1";
+				break;
+			case KEYWORD2:
+				type = "K2";
+				break;
+			case KEYWORD3:
+				type = "K3";
+				break;
+			case OPERATOR:
+				type = "OP";
+				break;
+			case NULL:
+				type = "NL";
+				break;
+//			case END:
+//				type = "EN";
+//				break;
+			default:
+				type = "OT";
+				break;
+		}
+		return type;
+	}
+	
 	/**
 	 * Returns a string representation of this token.
 	 */
 	public String toString()
 	{
-		return "[id=" + id + ",length=" + length + "]";
+		return "[type=" + typeString() + ",length=" + length + "]";
 	}
 }

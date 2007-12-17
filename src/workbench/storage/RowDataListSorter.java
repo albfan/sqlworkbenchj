@@ -24,25 +24,24 @@ import workbench.resource.Settings;
 public class RowDataListSorter
 	implements Comparator<RowData>
 {
-	private int[] sortColumns;
-	private boolean[] sortAscending;
+	private SortDefinition definition;
 	private Collator defaultCollator;
+	
+	public RowDataListSorter(SortDefinition sortDef)
+	{
+		this.definition = sortDef.createCopy();
+	}
 	
 	public RowDataListSorter(int column, boolean ascending)
 	{
-		this.sortColumns = new int[] { column };
-		this.sortAscending = new boolean[] { ascending };
+		this.definition = new SortDefinition(column, ascending);
 		initCollator();
 	}
 	
 	public RowDataListSorter(int[] columns, boolean[] order)
 	{
 		if (columns.length != order.length) throw new IllegalArgumentException("Size of arrays must match");
-		this.sortColumns = new int[columns.length];
-		System.arraycopy(columns, 0, sortColumns, 0, columns.length);
-		
-		this.sortAscending = new boolean[columns.length];
-		System.arraycopy(order, 0, sortAscending, 0, columns.length);
+		this.definition = new SortDefinition(columns, order);
 		initCollator();
 	}
 	
@@ -130,16 +129,20 @@ public class RowDataListSorter
 
 	public int compare(RowData row1, RowData row2)
 	{
+		if (this.definition == null) return 0;
+		
 		try
 		{
 			int colIndex = 0;
-			int result = compareColumn(sortColumns[colIndex], row1, row2);
-			result = this.sortAscending[colIndex] ? result : -result;
-			while (result == 0 && colIndex < this.sortColumns.length - 1)
+			int result = 0;
+			int numCols = this.definition.getColumnCount();
+			while (result == 0 && colIndex < numCols)
 			{
+				int column = definition.getSortColumnByIndex(colIndex);
+				result = compareColumn(column, row1, row2);
+				boolean ascending = definition.isSortAscending(column) ;
+				result = ascending ? result : -result;
 				colIndex ++;
-				result = compareColumn(sortColumns[colIndex], row1, row2);
-				result = this.sortAscending[colIndex] ? result : -result;
 			}
 			return result;
 		}

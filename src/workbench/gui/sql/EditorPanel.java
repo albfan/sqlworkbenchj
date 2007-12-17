@@ -185,7 +185,6 @@ public class EditorPanel
 		this.addKeyBinding(this.commentAction);
 		this.addKeyBinding(this.unCommentAction);
 
-		//this.setSelectionRectangular(true);
 		Settings.getInstance().addFontChangedListener(this);
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_SHOW_LINE_NUMBERS, Settings.PROPERTY_EDITOR_TAB_WIDTH);
 		this.setRightClickMovesCursor(Settings.getInstance().getRightClickMovesCursor());
@@ -348,10 +347,13 @@ public class EditorPanel
 
 	public void dispose()
 	{
+		Settings.getInstance().removeFontChangedListener(this);
+		Settings.getInstance().removePropertyChangeListener(this);
 		this.clearUndoBuffer();
 		this.popup.removeAll();
 		this.popup = null;
 		this.stopBlinkTimer();
+		this.painter.dispose();
 		this.setDocument(new SyntaxDocument());
 	}
 	/**
@@ -592,8 +594,7 @@ public class EditorPanel
 			// Inserting the text in chunks is much faster than 
 			// inserting it line by line. Optimal speed would probably
 			// when reading everything into a buffer, and then call insertString()
-			// only once, but that will cost too much memory (the memory footprint
-			// of the editor is already too high...)
+			// only once, but that will double the memory usage during loading 
 			int lines = FileUtil.readLines(reader, lineBuffer, numLines, "\n");
 			while (lines > 0)
 			{
