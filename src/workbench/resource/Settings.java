@@ -89,6 +89,7 @@ public class Settings
 	public static final String PROPERTY_PROFILE_STORAGE = "workbench.settings.profilestorage";
 	public static final String PROPERTY_EDITOR_TAB_WIDTH = "workbench.editor.tabwidth";
 	public static final String PROPERTY_EDITOR_CURRENT_LINE_COLOR = "workbench.editor.currentline.color";
+	public static final String PROPERTY_EDITOR_ELECTRIC_SCROLL = "workbench.editor.electricscroll";
 	// </editor-fold>
 	
 	public static final String PK_MAPPING_FILENAME_PROPERTY = "workbench.pkmapping.file";
@@ -1396,6 +1397,31 @@ public class Settings
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Editor">
+	public boolean getConsolidateLogMsg()
+	{
+		return getBoolProperty("workbench.gui.log.consolidate", false);
+	}
+
+	public void setConsolidateLogMsg(boolean aFlag)
+	{
+		this.setProperty("workbench.gui.log.consolidate", aFlag);
+	}
+
+	public boolean getPlainEditorWordWrap()
+	{
+		return getBoolProperty("workbench.editor.plain.wordwrap", true);
+	}
+
+	public void setPlainEditorWordWrap(boolean flag)
+	{
+		setProperty("workbench.editor.plain.wordwrap", flag);
+	}
+
+	public boolean getUsePlainEditorForData()
+	{
+		return getBoolProperty("workbench.gui.editor.data.plain", true);
+	}
+	
 	/**
 	 *  Returns the modifier key for rectangular selections in the editor
 	 */
@@ -1626,12 +1652,12 @@ public class Settings
 	
 	public int getElectricScroll()
 	{
-		return this.getIntProperty("workbench.editor.electricscroll", 3);
+		return this.getIntProperty(PROPERTY_EDITOR_ELECTRIC_SCROLL, 0);
 	}
 
 	public void setElectricScroll(int value)
 	{
-		setProperty("workbench.editor.electricscroll", (value < 0 ? 3 : value));
+		setProperty(PROPERTY_EDITOR_ELECTRIC_SCROLL, (value < 0 ? 0 : value));
 	}
 	
 	public int getEditorTabWidth()
@@ -2258,31 +2284,6 @@ public class Settings
 		setProperty("workbench.sql.script.inmemory.maxsize", size);
 	}
 
-	public boolean getConsolidateLogMsg()
-	{
-		return getBoolProperty("workbench.gui.log.consolidate", false);
-	}
-
-	public void setConsolidateLogMsg(boolean aFlag)
-	{
-		this.setProperty("workbench.gui.log.consolidate", aFlag);
-	}
-
-	public boolean getPlainEditorWordWrap()
-	{
-		return getBoolProperty("workbench.editor.plain.wordwrap", true);
-	}
-
-	public void setPlainEditorWordWrap(boolean flag)
-	{
-		setProperty("workbench.editor.plain.wordwrap", flag);
-	}
-
-	public boolean getUsePlainEditorForData()
-	{
-		return getBoolProperty("workbench.gui.editor.data.plain", true);
-	}
-
 	public boolean getUseCollator()
 	{
 		return getBoolProperty("workbench.sort.usecollator", false);
@@ -2718,7 +2719,6 @@ public class Settings
 			PkMapping.getInstance().saveMapping(this.getPKMappingFilename());
 		}
 	}
-
 	
 	public String toString()
 	{

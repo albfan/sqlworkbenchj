@@ -29,12 +29,13 @@ public class MetaDataSqlManager
 	public static final String INDEX_NAME_PLACEHOLDER = "%indexname%";
 	public static final String PK_NAME_PLACEHOLDER = "%pk_name%";
 	public static final String UNIQUE_PLACEHOLDER = "%unique_key% ";
-	public static final String COLUMNLIST_PLACEHOLDER = "%columnlist%";
+	public static final String COLUMN_NAME_PLACEHOLDER = "%column%";
+	public static final String COLUMN_LIST_PLACEHOLDER = "%columnlist%";
 	public static final String FK_NAME_PLACEHOLDER = "%constraintname%";
 	public static final String FK_TARGET_TABLE_PLACEHOLDER = "%targettable%";
 	public static final String FK_TARGET_COLUMNS_PLACEHOLDER = "%targetcolumnlist%";
 	public static final String COMMENT_TABLE_PLACEHOLDER = "%table%";
-	public static final String COMMENT_COLUMN_PLACEHOLDER = "%column%";
+	public static final String COMMENT_COLUMN_PLACEHOLDER = COLUMN_NAME_PLACEHOLDER;
 	public static final String COMMENT_PLACEHOLDER = "%comment%";
 	public static final String FK_UPDATE_RULE = "%fk_update_rule%";
 	public static final String FK_DELETE_RULE = "%fk_delete_rule%";

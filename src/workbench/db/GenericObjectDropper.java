@@ -1,5 +1,5 @@
 /*
- * ObjectDropper.java
+ * DbObjectDropper.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -15,35 +15,60 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import workbench.interfaces.ObjectDropper;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A helper class to drop different types of objects
+ * 
  * @author  support@sql-workbench.net
  */
-public class ObjectDropper
+public class GenericObjectDropper
+	implements ObjectDropper
 {
-	private List objectNames;
-	private List objectTypes;
+	private List<DbObject> objects;
 	private WbConnection connection;
 	private Statement currentStatement;
 	private boolean cascadeConstraints;
-	private TableIdentifier indexTable;
+	private TableIdentifier objectTable;
 	
-	public ObjectDropper(List names, List types)
-		throws IllegalArgumentException
+	public GenericObjectDropper()
 	{
-		if (names == null || types == null) throw new IllegalArgumentException();
-		if (names.size() == 0 || types.size() == 0) throw new IllegalArgumentException();
-		if (names.size() != types.size()) throw new IllegalArgumentException();
-		this.objectNames = names;
-		this.objectTypes = types;
 	}
 
-	public void setIndexTable(TableIdentifier tbl)
+	public boolean supportsCascade()
 	{
-		this.indexTable = tbl;
+		boolean canCascade = false;
+
+		if (objects != null && this.connection != null)
+		{
+			int numTypes = this.objects.size();
+			for (int i=0; i < numTypes; i++)
+			{
+				String type = this.objects.get(i).getObjectType();
+				String verb = this.connection.getDbSettings().getCascadeConstraintsVerb(type);
+
+				// if at least one type can be dropped with CASCADE, enable the checkbox
+				if (!StringUtil.isEmptyString(verb))
+				{
+					canCascade = true;
+					break;
+				}
+			}
+		}
+		return canCascade;
+	}
+
+	public void setObjects(List<DbObject> toDrop)
+	{
+		this.objects = toDrop;
+	}
+	
+	public void setObjectTable(TableIdentifier tbl)
+	{
+		this.objectTable = tbl;
 	}
 	
 	public void setConnection(WbConnection aConn)
@@ -51,15 +76,15 @@ public class ObjectDropper
 		this.connection = aConn;
 	}
 
-	public void execute()
+	public void dropObjects()
 		throws SQLException
 	{
 		try
 		{
 			if (this.connection == null) throw new NullPointerException("No connection!");
 			if (this.connection.isBusy()) return;
-			if (this.objectNames == null || this.objectNames.size() == 0) return;
-			int count = this.objectNames.size();
+			if (this.objects == null || this.objects.size() == 0) return;
+			int count = this.objects.size();
 			this.connection.setBusy(true);
 			
     	currentStatement = this.connection.createStatement();
@@ -69,20 +94,19 @@ public class ObjectDropper
 			
 			for (int i=0; i < count; i++)
 			{
-				String name = (String)this.objectNames.get(i);
-				String type = (String)this.objectTypes.get(i);
-				// we assume that names with special characters are already quoted!
-
+				String name = this.objects.get(i).getDisplayName();
+				String type = this.objects.get(i).getObjectType();
+				
 				StringBuilder sql = new StringBuilder(120);
 				sql.append("DROP ");
 				sql.append(type);
 				sql.append(' ');
 				sql.append(name);
 				
-				if (needTableForIndexDrop && "INDEX".equals(type) && indexTable != null)
+				if (needTableForIndexDrop && "INDEX".equals(type) && objectTable != null)
 				{
 					sql.append(" ON ");
-					sql.append(indexTable.getTableExpression(this.connection));
+					sql.append(objectTable.getTableExpression(this.connection));
 				}
 
 				if (this.cascadeConstraints)
@@ -130,7 +154,7 @@ public class ObjectDropper
 		}
 	}
 	
-	public void setCascadeConstraints(boolean flag)
+	public void setCascade(boolean flag)
 	{
 		this.cascadeConstraints = flag;
 	}

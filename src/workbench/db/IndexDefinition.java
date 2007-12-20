@@ -14,24 +14,34 @@ package workbench.db;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import workbench.util.SqlUtil;
 
 /**
  * A class to store the defintion of a database index.
  * @author  support@sql-workbench.net
  */
 public class IndexDefinition
+	implements DbObject
 {
 	private String expression;
 	private boolean isPK = false;
 	private boolean isUnique = false;
 	private String indexName;
 	private String indexType;
+	private String indexSchema;
+	
 	private List<IndexColumn> columns = new ArrayList<IndexColumn>();
+	
+	public IndexDefinition(String schema, String name, String exp)
+	{
+		this.indexSchema = schema;
+		this.indexName = name;
+		this.expression = exp;
+	}
 	
 	public IndexDefinition(String name, String exp)
 	{
-		this.indexName = name;
-		this.expression = exp;
+		this(null, name, exp);
 	}
 
 	public void addColumn(String column, String direction)
@@ -51,6 +61,27 @@ public class IndexDefinition
 		}
 	}
 
+	public String getObjectExpression(WbConnection conn)
+	{
+		return SqlUtil.buildExpression(conn, null, indexSchema, indexName);
+	}
+
+	public String getObjectName(WbConnection conn)
+	{
+		return conn.getMetadata().quoteObjectname(indexName);
+	}
+
+	
+	public String getObjectType()
+	{
+		return "INDEX";
+	}
+	
+	public String getDisplayName()
+	{
+		return getName();
+	}
+	
 	public List<IndexColumn> getColumns()
 	{
 		return Collections.unmodifiableList(columns);

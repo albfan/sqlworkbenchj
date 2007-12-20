@@ -429,4 +429,24 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".source.view.doformat", false);
 	}
+	
+	public String getDropSingleColumnSql()
+	{
+		return Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".drop.column", null);
+	}
+
+	public String getDropMultipleColumnSql()
+	{
+		return Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".drop.column.multi", null);
+	}
+
+	public boolean canDropType(String type)
+	{
+		if (StringUtil.isEmptyString(type)) return false;
+		if (type.equalsIgnoreCase("column"))
+		{
+			return getDropSingleColumnSql() != null;
+		}
+		return true;
+	}
 }

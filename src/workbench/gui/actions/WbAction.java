@@ -52,7 +52,7 @@ public class WbAction
 	private static final String MNEMONIC_INDEX = "MnemonicIndex";
 	
 	private String actionName;
-	protected JMenuItem menuItem;
+//	protected JMenuItem menuItem;
 	protected JButton toolbarButton;
 	private ActionListener delegate = null;
 	protected WbAction proxy;
@@ -262,13 +262,13 @@ public class WbAction
 			isNew = (old != null || key != null);
 		}
   
-		if (isNew && this.menuItem != null)
-		{
-			// to force a re-initialization of the menu item
-			// we need to first clear the action and then re-assign it
-			this.menuItem.setAction(null);
-			this.menuItem.setAction(this);
-		}
+//		if (isNew && this.menuItem != null)
+//		{
+//			// to force a re-initialization of the menu item
+//			// we need to first clear the action and then re-assign it
+//			this.menuItem.setAction(null);
+//			this.menuItem.setAction(this);
+//		}
 	}
 	
 	public KeyStroke getAccelerator()
@@ -312,22 +312,23 @@ public class WbAction
 
 	public JMenuItem getMenuItem()
 	{
-		this.menuItem = new WbMenuItem();
-		this.menuItem.setAction(this);
-		this.menuItem.setAccelerator(this.getAccelerator());
-		//this.menuItem.setLocale(Settings.getInstance().getLanguage());
+		JMenuItem item = new WbMenuItem();
+		item.setAction(this);
+		item.setAccelerator(this.getAccelerator());
 		Integer index = (Integer)this.getValue(WbAction.MNEMONIC_INDEX);
 		if (index != null)
 		{
 			try
 			{
-				this.menuItem.setDisplayedMnemonicIndex(index.intValue());
+				item.setDisplayedMnemonicIndex(index.intValue());
 			}
 			catch (Exception e)
 			{
 			}
 		}
-		return this.menuItem;
+//		if (this.menuItem == null) this.menuItem = item;
+		
+		return item;
 	}
 
 	public String getMenuItemName()

@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.ColumnIdentifier;
+import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -1007,7 +1008,24 @@ public class SqlUtil
 		msg.append(s);
 		return msg;
 	}
-	
+
+	public static String buildExpression(WbConnection conn, String catalog, String schema, String name)
+	{
+		StringBuilder result = new StringBuilder(30);
+		DbMetadata meta = conn.getMetadata();
+		if (!StringUtil.isEmptyString(catalog))
+		{
+			result.append(meta.quoteObjectname(catalog));
+			result.append('.');
+		}
+		if (!StringUtil.isEmptyString(schema))
+		{
+			result.append(meta.quoteObjectname(schema));
+			result.append('.');
+		}
+		result.append(meta.quoteObjectname(name));
+		return result.toString();
+	}
 	
 	public static void main(String args[])
 	{

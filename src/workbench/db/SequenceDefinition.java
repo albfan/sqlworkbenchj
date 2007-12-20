@@ -21,6 +21,7 @@ import java.util.Map;
  * @author support@sql-workbench.net
  */
 public class SequenceDefinition
+	implements DbObject
 {
 	private String sequenceName;
 	private String sequenceOwner;
@@ -34,6 +35,33 @@ public class SequenceDefinition
 		sequenceOwner = owner;
 	}
 
+	public String getObjectName(WbConnection conn)
+	{
+		return conn.getMetadata().quoteObjectname(this.sequenceName);
+	}
+	
+	public String getObjectExpression(WbConnection conn)
+	{
+		StringBuilder expr = new StringBuilder(30);
+		if (sequenceOwner != null)
+		{
+			expr.append(conn.getMetadata().quoteObjectname(sequenceOwner));
+			expr.append('.');
+		}
+		expr.append(conn.getMetadata().quoteObjectname(sequenceName));
+		return expr.toString();
+	}
+	
+	public String getObjectType()
+	{
+		return "SEQUENCE";
+	}
+	
+	public String getDisplayName()
+	{
+		return getSequenceName();
+	}
+	
 	public String getSequenceName() 
 	{
 		return this.sequenceName;

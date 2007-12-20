@@ -3155,7 +3155,9 @@ public class DbMetadata
 			result.append(ExceptionUtil.getDisplay(e));
 		}
 		result.append("\n\n");
+		
 		StringBuilder indexSource = this.indexReader.getIndexSource(table, aIndexDef, table.getTableName());
+		
 		result.append(indexSource);
 		if (this.dbSettings.ddlNeedsCommit())
 		{
@@ -3390,7 +3392,7 @@ public class DbMetadata
 		String tablename = table.getTableExpression(this.dbConnection);
 		
 		template = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tablename);
-		template = StringUtil.replace(template, MetaDataSqlManager.COLUMNLIST_PLACEHOLDER, StringUtil.listToString(pkCols, ','));
+		template = StringUtil.replace(template, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, StringUtil.listToString(pkCols, ','));
 		
 		if (pkName == null)
 		{
@@ -3643,7 +3645,7 @@ public class DbMetadata
 			}
 			
 			entry = StringUtil.listToString(colList, ',');
-			stmt = StringUtil.replace(stmt, MetaDataSqlManager.COLUMNLIST_PLACEHOLDER, entry);
+			stmt = StringUtil.replace(stmt, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, entry);
 			String rule = updateRules.get(fkname);
 			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_UPDATE_RULE, " ON UPDATE " + rule);
 			rule = deleteRules.get(fkname);

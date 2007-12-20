@@ -11,6 +11,8 @@
  */
 package workbench.gui.dbobjects;
 import java.awt.Component;
+import java.util.List;
+import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -18,9 +20,10 @@ import workbench.db.WbConnection;
  * @author support@sql-workbench.net
  */
 
-public interface TableList 
+public interface DbObjectList 
 {
-	TableIdentifier[] getSelectedObjects();
+	TableIdentifier getObjectTable();
+	List<DbObject> getSelectedObjects();
 	WbConnection getConnection();
 	Component getComponent();
 }

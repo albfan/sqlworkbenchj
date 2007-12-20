@@ -13,13 +13,14 @@ package workbench.gui.actions;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import workbench.db.TableIdentifier;
+import workbench.db.DbObject;
 import workbench.db.WbConnection;
 import workbench.db.report.SchemaReporter;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.dbobjects.TableList;
+import workbench.gui.dbobjects.DbObjectList;
 import workbench.log.LogMgr;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
@@ -30,9 +31,9 @@ import workbench.util.WbThread;
 public class SchemaReportAction 
 	extends WbAction
 {
-	private TableList client;
+	private DbObjectList client;
 	
-	public SchemaReportAction(TableList list)
+	public SchemaReportAction(DbObjectList list)
 	{
 		initMenuDefinition("MnuTxtSchemaReport");
 		client = list;
@@ -52,8 +53,8 @@ public class SchemaReportAction
 		final Component caller = client.getComponent();
 		
 		if (!WbSwingUtilities.checkConnection(caller, dbConnection)) return;
-		TableIdentifier[] tables = client.getSelectedObjects();
-		if (tables == null) return;
+		List<DbObject> objects = client.getSelectedObjects();
+		if (objects == null) return;
 
 		FileDialogUtil dialog = new FileDialogUtil();
 
@@ -62,7 +63,7 @@ public class SchemaReportAction
 
 		final SchemaReporter reporter = new SchemaReporter(client.getConnection());
 		reporter.setShowProgress(true, (JFrame)SwingUtilities.getWindowAncestor(caller));
-		reporter.setTableList(tables);
+		reporter.setObjectList(objects);
 		reporter.setOutputFilename(filename);
 
 		Thread t = new WbThread("Schema Report")

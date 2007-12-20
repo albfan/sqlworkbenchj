@@ -539,13 +539,18 @@ public class WbTable
 		this.addPopupMenu(anAction.getMenuItem(), withSep);
 	}
 
+	public void removePopupItem(JMenuItem item)
+	{
+		if (this.popup == null) return;
+		this.popup.remove(item);
+	}
+	
 	public void addPopupMenu(JMenuItem item, boolean withSep)
 	{
 		if (this.popup == null) this.popup = new JPopupMenu();
 
 		if (this.printDataAction != null)
 		{
-
 			if (withSep)
 			{
 				this.popup.add(new Separator(), this.popup.getComponentCount() - 3);

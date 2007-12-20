@@ -12,21 +12,19 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -59,9 +57,13 @@ import javax.swing.JLabel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import workbench.WbManager;
+import workbench.db.DbObject;
 import workbench.db.ObjectScripter;
 import workbench.db.ProcedureDefinition;
+import workbench.db.TableIdentifier;
 import workbench.gui.MainWindow;
+import workbench.gui.actions.CompileDbObjectAction;
+import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.WbTabbedPane;
@@ -76,7 +78,7 @@ import workbench.util.WbWorkspace;
  */
 public class ProcedureListPanel
 	extends JPanel
-	implements ListSelectionListener, Reloadable, ActionListener
+	implements ListSelectionListener, Reloadable, ActionListener, DbObjectList
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
@@ -89,8 +91,8 @@ public class ProcedureListPanel
 	private String currentSchema;
 	private String currentCatalog;
 	private boolean shouldRetrieve;
-	private WbMenuItem dropTableItem;
-	private WbMenuItem recompileItem;
+	private DropDbObjectAction dropAction;
+	private CompileDbObjectAction compileAction;
 	private WbMenuItem createScriptItem;
 	private JLabel infoLabel;
 	private boolean isRetrieving;
@@ -181,14 +183,15 @@ public class ProcedureListPanel
 
 	private void extendPopupMenu()
 	{
-		JPopupMenu popup = this.procList.getPopupMenu();
-		popup.addSeparator();
 		this.createScriptItem = new GenerateScriptMenuItem();
 		this.createScriptItem.addActionListener(this);
-		popup.add(this.createScriptItem);
-		popup.addSeparator();
-		this.dropTableItem = new DropDbItem(this.procList, this);
-		popup.add(this.dropTableItem);
+		procList.addPopupMenu(this.createScriptItem, true);
+		
+		this.compileAction = new CompileDbObjectAction(this, this.procList.getSelectionModel());
+		procList.addPopupAction(compileAction, false);
+		
+		this.dropAction = new DropDbObjectAction(this, procList.getSelectionModel(), this);
+		procList.addPopupAction(this.dropAction, false);
 	}
 
 	public void disconnect()
@@ -209,29 +212,7 @@ public class ProcedureListPanel
 		this.dbConnection = aConnection;
 		this.source.setDatabaseConnection(aConnection);
 		this.reset();
-
-		if (this.recompileItem != null)
-		{
-			this.recompileItem.removeActionListener(this);
-		}
-		
-		JPopupMenu popup = this.procList.getPopupMenu();
-		if (this.dbConnection.getMetadata().isOracle())
-		{
-			this.recompileItem = new WbMenuItem();
-			this.recompileItem.setMenuTextByKey("MnuTxtRecompile");
-			this.recompileItem.addActionListener(this);
-			this.recompileItem.setEnabled(false);
-			popup.add(this.recompileItem);
-		}
-		else
-		{
-			if (this.recompileItem != null)
-			{
-				popup.remove(this.recompileItem);
-			}
-			this.recompileItem = null;
-		}
+		this.compileAction.setConnection(aConnection);
 	}
 
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
@@ -304,36 +285,6 @@ public class ProcedureListPanel
 
 	}
 
-	private void dropObjects()
-	{
-		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
-		if (this.procList.getSelectedRowCount() == 0) return;
-		int rows[] = this.procList.getSelectedRows();
-		int count = rows.length;
-		if (count == 0) return;
-
-		ArrayList<String> names = new ArrayList<String>(count);
-		ArrayList<String> types = new ArrayList<String>(count);
-
-		this.readSelectedItems(names, types);
-
-		ObjectDropperUI dropperUI = new ObjectDropperUI();
-		dropperUI.setObjects(names, types);
-		dropperUI.setConnection(this.dbConnection);
-		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
-		dropperUI.showDialog(f);
-		if (!dropperUI.dialogWasCancelled())
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					reload();
-				}
-			});
-		}
-	}
-
 	public void setVisible(boolean aFlag)
 	{
 		super.setVisible(aFlag);
@@ -395,11 +346,6 @@ public class ProcedureListPanel
 		int row = this.procList.getSelectedRow();
 
 		if (row < 0) return;
-
-		if (this.recompileItem != null)
-		{
-			this.recompileItem.setEnabled(this.procList.getSelectedRowCount() > 0);
-		}
 
 		final String proc = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
 		final String schema = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
@@ -510,27 +456,45 @@ public class ProcedureListPanel
 		int rows[] = this.procList.getSelectedRows();
 		int count = rows.length;
 		HashMap<ProcedureDefinition, String> procs = new HashMap<ProcedureDefinition, String>(count);
-		for (int i = 0; i < count; i++)
+		List<ProcedureDefinition> defs = getSelectedItems();
+		for (ProcedureDefinition def : defs)
 		{
-			String proc = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
-			String schema = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
-			String catalog = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
-			int type = this.procList.getDataStore().getValueAsInt(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
-			ProcedureDefinition def = new ProcedureDefinition(catalog, schema, proc, type);
-			procs.put(def, "PROCEDURE");
+			procs.put(def, def.getObjectType());
 		}
 		ObjectScripter s = new ObjectScripter(procs, this.dbConnection);
 		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
 		scripterUI.show(SwingUtilities.getWindowAncestor(this));
-		
+	}
+
+	public TableIdentifier getObjectTable()
+	{
+		return null;
 	}
 	
-	private void readSelectedItems(List<String> names, List<String> types)
+	public Component getComponent()
 	{
-		if (this.procList.getSelectedRowCount() == 0) return;
+		return this;
+	}
+
+	public WbConnection getConnection()
+	{
+		return this.dbConnection;
+	}
+
+	public List<DbObject> getSelectedObjects()
+	{
+		List<ProcedureDefinition> procs = getSelectedItems();
+		if (procs == null) return null;
+		return new ArrayList<DbObject>(procs);
+	}
+	
+	private List<ProcedureDefinition> getSelectedItems()
+	{
+		if (this.procList.getSelectedRowCount() == 0) return null;
 		int rows[] = this.procList.getSelectedRows();
 		int count = rows.length;
-		if (count == 0) return;
+		List<ProcedureDefinition> result = new ArrayList<ProcedureDefinition>(count);
+		if (count == 0) return result;
 
 		for (int i=0; i < count; i ++)
 		{
@@ -542,71 +506,16 @@ public class ProcedureListPanel
 				name = name.substring(0, name.indexOf(';'));
 			}
 
+			String proc = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
 			String schema = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
-      if (!dbConnection.getMetadata().ignoreSchema(schema))
-      {
-  			name = dbConnection.getMetadata().quoteObjectname(schema) + "." + dbConnection.getMetadata().quoteObjectname(name);
-      }
-      else
-      {
-        name = dbConnection.getMetadata().quoteObjectname(name);
-      }
-
-			int procType = this.procList.getDataStore().getValueAsInt(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
-			String type = StringUtil.EMPTY_STRING;
-			if (procType == DatabaseMetaData.procedureReturnsResult)
-			{
-				type = "FUNCTION";
-			}
-			else if (procType == DatabaseMetaData.procedureNoResult)
-			{
-				type = "PROCEDURE";
-			}
-			
-			if (this.dbConnection.getMetadata().isOracle())
-			{
-				// Oracle reports the type of the procedure in a rather strange way.
-				// the only way to tell if it's a package, is to look at the CATALOG column
-				// if that contains an entry, it's a packaged procedure
-				String catalog = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
-				if (catalog != null && catalog.length() > 0)
-				{
-					type = "PACKAGE";
-
-					// the procedure itself can neither be dropped
-					// nor recompiled. So we use the name of the package
-					// as the object name
-					name = catalog;
-				}
-			}
-			names.add(name);
-			types.add(type);
+			String catalog = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
+			int type = this.procList.getDataStore().getValueAsInt(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
+			ProcedureDefinition def = new ProcedureDefinition(catalog, schema, proc, type, this.dbConnection.getMetadata().isOracle());
+			result.add(def);
 		}
+		return result;
 	}
 
-	private void compileObjects()
-	{
-		if (this.procList.getSelectedRowCount() == 0) return;
-		int rows[] = this.procList.getSelectedRows();
-		int count = rows.length;
-		if (count == 0) return;
-
-		List<String> names = new ArrayList<String>(count);
-		List<String> types = new ArrayList<String>(count);
-
-		this.readSelectedItems(names, types);
-
-		try
-		{
-			ObjectCompilerUI compilerUI = new ObjectCompilerUI(names, types, this.dbConnection);
-			compilerUI.show(SwingUtilities.getWindowAncestor(this));
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("ProcedureListPanel.compileObjects()", "Error initializing ObjectCompilerUI", e);
-		}
-	}
-	
 	public void reload()
 	{
 		this.reset();
@@ -615,15 +524,7 @@ public class ProcedureListPanel
 	
 	public void actionPerformed(ActionEvent e)
 	{
-		if (e.getSource() == this.dropTableItem)
-		{
-			this.dropObjects();
-		}
-		else if (e.getSource() == this.recompileItem)
-		{
-			this.compileObjects();
-		}
-		else if (e.getSource() == this.createScriptItem)
+		if (e.getSource() == this.createScriptItem)
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -633,6 +534,5 @@ public class ProcedureListPanel
 				}
 			});
 		}
-		
 	}
 }

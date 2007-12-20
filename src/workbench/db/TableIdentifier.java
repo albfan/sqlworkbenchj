@@ -23,7 +23,7 @@ import workbench.util.WbStringTokenizer;
  * @author  support@sql-workbench.net
  */
 public class TableIdentifier
-	implements Comparable<TableIdentifier>
+	implements DbObject, Comparable<TableIdentifier>
 {
 	private String tablename;
 	private String schema;
@@ -82,6 +82,27 @@ public class TableIdentifier
 		this.setSchema(aSchema);
 	}
 
+	public String getObjectName(WbConnection conn)
+	{
+		return conn.getMetadata().quoteObjectname(this.tablename);
+	}
+	
+	public String getObjectExpression(WbConnection conn)
+	{
+		return getTableExpression(conn);
+	}
+	
+	public String getObjectType()
+	{
+		if (type == null) return "TABLE";
+		return type.toUpperCase();
+	}
+	
+	public String getDisplayName()
+	{
+		return getTableName();
+	}
+	
 	public void setPreserveQuotes(boolean flag)
 	{
 		this.preserveQuotes = flag;

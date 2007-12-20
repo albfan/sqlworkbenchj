@@ -12,16 +12,15 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -33,11 +32,9 @@ import javax.swing.table.TableCellRenderer;
 
 import workbench.db.DbMetadata;
 import workbench.db.ProcedureReader;
-import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
-import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
@@ -50,14 +47,18 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import javax.swing.JLabel;
 import workbench.WbManager;
+import workbench.db.DbObject;
+import workbench.db.TableIdentifier;
+import workbench.db.TriggerDefinition;
 import workbench.gui.MainWindow;
+import workbench.gui.actions.CompileDbObjectAction;
+import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.interfaces.CriteriaPanel;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
 import workbench.util.WbWorkspace;
-
 
 /**
  *
@@ -66,7 +67,7 @@ import workbench.util.WbWorkspace;
  */
 public class TriggerListPanel
 	extends JPanel
-	implements ListSelectionListener, Reloadable, ActionListener
+	implements ListSelectionListener, Reloadable, DbObjectList
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
@@ -78,11 +79,13 @@ public class TriggerListPanel
 	private String currentSchema;
 	private String currentCatalog;
 	private boolean shouldRetrieve;
-	private WbMenuItem dropTableItem;
 	private JLabel infoLabel;
 	private boolean isRetrieving;
 	protected ProcStatusRenderer statusRenderer;
-
+	
+	private CompileDbObjectAction compileAction;
+	private DropDbObjectAction dropAction;
+	
 	public TriggerListPanel(MainWindow parent) 
 		throws Exception
 	{
@@ -157,15 +160,11 @@ public class TriggerListPanel
 		pol.addComponent(this.triggerList);
 		this.setFocusTraversalPolicy(pol);
 		this.reset();
-		this.extendPopupMenu();
-	}
-
-	private void extendPopupMenu()
-	{
-		JPopupMenu popup = this.triggerList.getPopupMenu();
-		popup.addSeparator();
-		this.dropTableItem = new DropDbItem(this.triggerList, this);
-		popup.add(this.dropTableItem);
+		
+		this.dropAction = new DropDbObjectAction(this, triggerList.getSelectionModel(), this);
+		triggerList.addPopupAction(dropAction, true);
+		this.compileAction = new CompileDbObjectAction(this, this.triggerList.getSelectionModel());
+		triggerList.addPopupAction(compileAction, false);
 	}
 
 	public void disconnect()
@@ -184,6 +183,7 @@ public class TriggerListPanel
 	{
 		this.dbConnection = aConnection;
 		this.source.setDatabaseConnection(aConnection);
+		this.compileAction.setConnection(aConnection);
 		this.reset();
 	}
 
@@ -314,7 +314,6 @@ public class TriggerListPanel
 		int row = this.triggerList.getSelectedRow();
 
 		if (row < 0) return;
-		this.dropTableItem.setEnabled(this.triggerList.getSelectedRowCount() > 0);
 
 		final String trigger = this.triggerList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
 		EventQueue.invokeLater(new Runnable()
@@ -374,13 +373,10 @@ public class TriggerListPanel
 		int count = rows.length;
 		if (count == 0) return;
 
-		ArrayList names = new ArrayList(count);
-		ArrayList types = new ArrayList(count);
-
-		this.readSelectedItems(names, types);
+		List<DbObject> objects = this.getSelectedObjects();
 
 		ObjectDropperUI dropperUI = new ObjectDropperUI();
-		dropperUI.setObjects(names, types);
+		dropperUI.setObjects(objects);
 		dropperUI.setConnection(this.dbConnection);
 		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
 		dropperUI.showDialog(f);
@@ -395,14 +391,30 @@ public class TriggerListPanel
 			});
 		}
 	}
-	
-	private void readSelectedItems(ArrayList names, ArrayList types)
+
+	public TableIdentifier getObjectTable()
 	{
-		if (this.triggerList.getSelectedRowCount() == 0) return;
+		return null;
+	}
+	
+	public Component getComponent()
+	{
+		return this;
+	}
+
+	public WbConnection getConnection()
+	{
+		return this.dbConnection;
+	}
+	
+	public List<DbObject> getSelectedObjects()
+	{
+		if (this.triggerList.getSelectedRowCount() == 0) return null;
 		int rows[] = this.triggerList.getSelectedRows();
 		int count = rows.length;
-		if (count == 0) return;
-
+		List<DbObject> objects = new ArrayList<DbObject>(count);
+		if (count == 0) return objects;
+		
 		for (int i=0; i < count; i ++)
 		{
 			String name = this.triggerList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
@@ -419,11 +431,10 @@ public class TriggerListPanel
 			// The name of a trigger should follow the same rules as a table
 			// name. So it should be save to apply the same algorithm to 
 			// build a correctly qualified name
-			TableIdentifier trg = new TableIdentifier(currentCatalog, currentSchema, name);
-			
-			names.add(trg.getTableExpression(dbConnection));
-			types.add("TRIGGER");
+			TriggerDefinition trg = new TriggerDefinition(currentCatalog, currentSchema, name);
+			objects.add(trg);
 		}
+		return objects;
 	}
 
 	public void reload()
@@ -432,11 +443,4 @@ public class TriggerListPanel
 		this.retrieve();
 	}
 	
-	public void actionPerformed(ActionEvent e)
-	{
-		if (e.getSource() == this.dropTableItem)
-		{
-			this.dropObjects();
-		}
-	}
 }

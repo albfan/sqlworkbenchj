@@ -25,7 +25,7 @@ import workbench.util.StringUtil;
  * @author  support@sql-workbench.net
  */
 public class ColumnIdentifier
-	implements Comparable<ColumnIdentifier>
+	implements DbObject, Comparable<ColumnIdentifier>
 {
 	private static final int NO_TYPE = Integer.MIN_VALUE;
 	private String name;
@@ -70,6 +70,26 @@ public class ColumnIdentifier
 		this.isPk = isPkColumn;
 	}
 
+	public String getObjectName(WbConnection conn)
+	{
+		return conn.getMetadata().quoteObjectname(this.name);
+	}
+	
+	public String getObjectExpression(WbConnection conn)
+	{
+		return getObjectName(conn);
+	}
+	
+	public String getObjectType()
+	{
+		return "COLUMN";
+	}
+	
+	public String getDisplayName()
+	{
+		return getColumnName();
+	}
+	
 	/**
 	 *	Define the size for this column (e.g. for VARCHAR columns)
 	 */
@@ -137,6 +157,12 @@ public class ColumnIdentifier
 		return result;
 	}
 
+	public String getColumnName(WbConnection con)
+	{
+		if (con == null) return getColumnName();
+		return con.getMetadata().quoteObjectname(name);
+	}
+	
 	public String getColumnName()
 	{
 		return this.name;

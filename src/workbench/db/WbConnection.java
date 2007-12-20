@@ -365,7 +365,7 @@ public class WbConnection
 	{
 		return this.sqlConnection.setSavepoint();
 	}
-	
+
 	/**
 	 * A non-exception throwing wrapper around Connection.rollback(Savepoint)
 	 */
@@ -387,7 +387,10 @@ public class WbConnection
 		if (sp == null) return;
 		try
 		{
-			this.sqlConnection.releaseSavepoint(sp);
+			if (!this.getAutoCommit())
+			{
+				this.sqlConnection.releaseSavepoint(sp);
+			}
 		}
 		catch (Throwable e)
 		{

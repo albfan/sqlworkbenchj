@@ -26,6 +26,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import workbench.db.DbMetadata;
 import workbench.db.DbMetadata;
+import workbench.db.DbObject;
 import workbench.db.DbSettings;
 
 import workbench.db.ProcedureDefinition;
@@ -93,12 +94,32 @@ public class SchemaReporter
 		this.monitor = mon;
 	}
 
+	public void setObjectList(List<DbObject> objectList)
+	{
+		if (this.tables == null) this.tables = new ArrayList<TableIdentifier>();
+		
+		for (DbObject dbo : objectList)
+		{
+			if (dbo instanceof TableIdentifier)
+			{
+				for (String type : this.types)
+				{
+					if (dbo.getObjectType().equalsIgnoreCase(type))
+					{
+						this.tables.add((TableIdentifier)dbo);
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 *	Define the list of tables to run the report on
 	 */
 	public void setTableList(TableIdentifier[] tableList)
 	{
-		this.tables = new ArrayList<TableIdentifier>();
+		if (this.tables == null) this.tables = new ArrayList<TableIdentifier>();
 		for (int i=0; i < tableList.length; i++)
 		{
 			if (tableList[i].getTableName().indexOf('%') > -1)

@@ -41,7 +41,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
@@ -90,6 +89,10 @@ import workbench.util.WbThread;
 import workbench.util.ExceptionUtil;
 import java.util.Iterator;
 import workbench.WbManager;
+import workbench.db.DbObject;
+import workbench.db.IndexDefinition;
+import workbench.gui.actions.CompileDbObjectAction;
+import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.SchemaReportAction;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.sql.PanelContentSender;
@@ -107,7 +110,7 @@ public class TableListPanel
 	extends JPanel
 	implements ActionListener, ChangeListener, ListSelectionListener, MouseListener,
 						 ShareableDisplay, Exporter, PropertyChangeListener,
-						 TableModelListener, TableList
+						 TableModelListener, DbObjectList
 {
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected WbConnection dbConnection;
@@ -138,7 +141,10 @@ public class TableListPanel
 	private String currentCatalog;
 	private SpoolDataAction spoolData;
 
-	private WbMenuItem dropTableItem;
+	private CompileDbObjectAction compileAction;
+	private DropDbObjectAction dropAction;
+	private DropDbObjectAction dropIndexAction;
+	
 	private WbMenuItem scriptTablesItem;
 	private WbMenuItem deleteTableItem;
 
@@ -166,11 +172,8 @@ public class TableListPanel
 	protected boolean ignoreStateChanged = false;
 
 	private EditorTabSelectMenu showDataMenu;
-	private WbAction dropIndexAction;
 	private WbAction createDummyInsertAction;
 	private WbAction createDefaultSelect;
-
-	private WbMenuItem recompileItem;
 
 	private ToggleTableSourceAction toggleTableSource;
 
@@ -234,10 +237,9 @@ public class TableListPanel
 		
 		this.indexes = new WbTable();
 		this.indexes.setAdjustToColumnLabel(false);
+		this.indexes.setSelectOnRightButtonClick(true);
 		this.indexPanel = new TableIndexPanel(this.indexes, indexReload);
 			
-		this.indexes.getSelectionModel().addListSelectionListener(this);
-
 		Reloadable sourceReload = new Reloadable()
 		{
 			public void reload()
@@ -368,12 +370,8 @@ public class TableListPanel
 		this.displayTab.addMouseListener(this);
 		this.tableList.addMouseListener(this);
 
-		this.dropIndexAction = new WbAction(this,"drop-index");
-		this.dropIndexAction.setEnabled(false);
-		this.indexes.setSelectOnRightButtonClick(true);
-		this.dropIndexAction.initMenuDefinition("MnuTxtDropIndex");
-		this.indexes.addPopupAction(this.dropIndexAction, true);
-
+		initIndexDropper(indexReload);
+		
 		this.toggleTableSource = new ToggleTableSourceAction(this);
 		this.splitPane.setOneTouchTooltip(toggleTableSource.getTooltipTextWithKeys());
 		setupActionMap();
@@ -391,9 +389,51 @@ public class TableListPanel
 				}
 			});
 		}
-		
 	}
 
+	private void initIndexDropper(Reloadable indexReload)
+	{
+		DbObjectList indexList = new DbObjectList()
+		{
+			public Component getComponent()
+			{
+				return TableListPanel.this;
+			}
+
+			public WbConnection getConnection()
+			{
+				return dbConnection;
+			}
+
+			public TableIdentifier getObjectTable()
+			{
+				return TableListPanel.this.getObjectTable();
+			}
+
+			public List<DbObject> getSelectedObjects()
+			{
+				int[] rows = indexes.getSelectedRows();
+				if (rows == null) return null;
+				
+				ArrayList<DbObject> objects = new ArrayList<DbObject>(rows.length);
+
+				TableIdentifier tbl = getObjectTable();
+				String schema = (tbl == null ? null : tbl.getSchema());
+
+				for (int i = 0; i < rows.length; i++)
+				{
+					String name = indexes.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
+					IndexDefinition index = new IndexDefinition(schema, name, null);
+					objects.add(index);
+				}
+				return objects;
+			}
+		};
+		
+		this.dropIndexAction = new DropDbObjectAction("MnuTxtDropIndex", indexList, indexes.getSelectionModel(), indexReload);
+		this.indexes.addPopupAction(this.dropIndexAction, true);
+	}
+	
 	public void dispose()
 	{
 		this.reset();
@@ -420,14 +460,18 @@ public class TableListPanel
 		SchemaReportAction action = new SchemaReportAction(this);
 		tableList.addPopupMenu(action.getMenuItem(), false);
 
-		this.dropTableItem = new DropDbItem(this.tableList, this);
-		tableList.addPopupMenu(this.dropTableItem, true);
+		compileAction = new CompileDbObjectAction(this, tableList.getSelectionModel());
+		tableList.addPopupAction(compileAction, false);
+		
+		this.dropAction = new DropDbObjectAction(this, this.tableList.getSelectionModel(), this);
+		tableList.addPopupAction(dropAction, true);
 
 		this.deleteTableItem = new WbMenuItem();
 		this.deleteTableItem.setMenuTextByKey("MnuTxtDeleteTableData");
 		this.deleteTableItem.addActionListener(this);
 		this.deleteTableItem.setEnabled(true);
 		tableList.addPopupMenu(this.deleteTableItem, false);
+		
 	}
 
 	public void setDbExecutionListener(DbExecutionListener l)
@@ -670,34 +714,7 @@ public class TableListPanel
 
 		this.tableTypes.addActionListener(this);
 		this.displayTab.addChangeListener(this);
-		this.updateCompileMenu();
-	}
-
-	private void updateCompileMenu()
-	{
-		if (this.recompileItem != null)
-		{
-			this.recompileItem.removeActionListener(this);
-		}
-
-		if (this.dbConnection.getMetadata().isOracle())
-		{
-			this.recompileItem = new WbMenuItem(ResourceMgr.getString("MnuTxtRecompile"));
-			this.recompileItem.setToolTipText(ResourceMgr.getDescription("MnuTxtRecompile"));
-			this.recompileItem.addActionListener(this);
-			this.recompileItem.setEnabled(false);
-			JPopupMenu popup = this.tableList.getPopupMenu();
-			popup.add(this.recompileItem);
-		}
-		else
-		{
-			if (this.recompileItem != null)
-			{
-				JPopupMenu popup = this.tableList.getPopupMenu();
-				popup.remove(this.recompileItem);
-			}
-			this.recompileItem = null;
-		}
+		this.compileAction.setConnection(aConnection);
 	}
 
 	public boolean isReallyVisible()
@@ -1004,30 +1021,6 @@ public class TableListPanel
 		}
 	}
 
-	private void checkCompileMenu()
-	{
-		if (this.recompileItem == null) return;
-		int[] rows = this.tableList.getSelectedRows();
-		int count = rows.length;
-		if (count == 0)
-		{
-			this.recompileItem.setEnabled(false);
-			return;
-		}
-		boolean enabled = true;
-		for (int i=0;i<count; i++)
-		{
-			int row = rows[i];
-			String type = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-			if (!"VIEW".equals(type))
-			{
-				enabled = false;
-				break;
-			}
-		}
-		this.recompileItem.setEnabled(enabled);
-	}
-
 	/**
 	 * Invoked when the selection in the table list
 	 * has changed
@@ -1037,16 +1030,11 @@ public class TableListPanel
 		if (e.getValueIsAdjusting()) return;
 		if (e.getSource() == this.tableList.getSelectionModel() && !this.suspendTableSelection)
 		{
-			checkCompileMenu();
 			if (this.showDataMenu != null)
 			{
 				this.showDataMenu.setEnabled(this.tableList.getSelectedRowCount() == 1);
 			}
 			this.updateDisplay();
-		}
-		else if (e.getSource() == this.indexes.getSelectionModel())
-		{
-			this.dropIndexAction.setEnabled(this.indexes.getSelectedRowCount() > 0);
 		}
 	}
 
@@ -1054,7 +1042,6 @@ public class TableListPanel
 	{
 		int count = this.tableList.getSelectedRowCount();
 
-		this.dropTableItem.setEnabled(count > 0);
 		this.spoolData.setEnabled(count > 0);
 
 		if (count > 1) return;
@@ -1133,7 +1120,7 @@ public class TableListPanel
 		if (isTableType(type)) return true;
 		if (meta.supportsSynonyms() && dbs.isSynonymType(type))
 		{
-			TableIdentifier rt = getRealTable();
+			TableIdentifier rt = getObjectTable();
 			if (rt == null) return false;
 			return isTableType(realTable.getType());
 		}
@@ -1148,7 +1135,7 @@ public class TableListPanel
 		DbSettings dbs = this.dbConnection.getDbSettings();
 		if (meta.supportsSynonyms() && dbs.isSynonymType(type))
 		{
-			TableIdentifier rt = getRealTable();
+			TableIdentifier rt = getObjectTable();
 			if (rt == null) return false;
 			type = rt.getType();
 		}
@@ -1498,7 +1485,7 @@ public class TableListPanel
 		}
 	}
 
-	protected TableIdentifier getRealTable()
+	public TableIdentifier getObjectTable()
 	{
 		if (this.selectedTable == null) return null;
 		if (!isSynonym(selectedTable)) return selectedTable;
@@ -1521,7 +1508,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showDefaultCursor(this);
-			triggers.readTriggers(getRealTable());
+			triggers.readTriggers(getObjectTable());
 			this.shouldRetrieveTriggers = false;
 		}
 		catch (Throwable th)
@@ -1543,7 +1530,7 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStore ds = meta.getTableIndexInformation(getRealTable());
+			DataStore ds = meta.getTableIndexInformation(getObjectTable());
 			DataStoreTableModel model = new DataStoreTableModel(ds);
 			indexes.setModel(model, true);
 			indexes.adjustOrOptimizeColumns();
@@ -1568,7 +1555,7 @@ public class TableListPanel
 		try
 		{
 			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(getRealTable()));
+			DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(getObjectTable()));
 			exportedKeys.setModel(model, true);
 			exportedKeys.adjustOrOptimizeColumns();
 			this.shouldRetrieveExportedKeys = false;
@@ -1588,7 +1575,7 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(getRealTable(), false));
+			DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(getObjectTable(), false));
 			importedKeys.setModel(model, true);
 			importedKeys.adjustOrOptimizeColumns();
 			this.shouldRetrieveImportedKeys = false;
@@ -1610,7 +1597,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			importedTableTree.readReferencedTables(getRealTable());
+			importedTableTree.readReferencedTables(getObjectTable());
 			this.shouldRetrieveImportedTree = false;
 		}
 		catch (Throwable th)
@@ -1630,7 +1617,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			exportedTableTree.readReferencingTables(getRealTable());
+			exportedTableTree.readReferencingTables(getObjectTable());
 			this.shouldRetrieveExportedTree = false;
 		}
 		catch (Throwable th)
@@ -1684,39 +1671,6 @@ public class TableListPanel
 		return sql;
 	}
 
-	private void compileObjects()
-	{
-		if (this.tableList.getSelectedRowCount() == 0) return;
-		int rows[] = this.tableList.getSelectedRows();
-		int count = rows.length;
-		if (count == 0) return;
-
-		ArrayList<String> names = new ArrayList<String>(count);
-		ArrayList<String> types = new ArrayList<String>(count);
-
-		for (int i=0; i < count; i++)
-		{
-			int row = rows[i];
-			
-			TableIdentifier tbl = createTableIdentifier(row);
-
-			if (!"VIEW".equalsIgnoreCase(tbl.getType())) continue;
-
-			names.add(tbl.getTableExpression());
-			types.add(tbl.getType());
-		}
-
-		try
-		{
-			ObjectCompilerUI compilerUI = new ObjectCompilerUI(names, types, this.dbConnection);
-			compilerUI.show(SwingUtilities.getWindowAncestor(this));
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("ProcedureListPanel.compileObjects()", "Error initializing ObjectCompilerUI", e);
-		}
-	}
-
 	/**
 	 * Invoked when the type dropdown changes or one of the additional actions
 	 * is invoked that are put into the context menu of the table list
@@ -1763,17 +1717,9 @@ public class TableListPanel
 					LogMgr.logError("TableListPanel().actionPerformed()", "Error when accessing editor tab", ex);
 				}
 			}
-			else if (e.getSource() == this.recompileItem)
-			{
-				compileObjects();
-			}
 			else if (e.getSource() == this.deleteTableItem)
 			{
 				this.deleteTables();
-			}
-			else if (e.getSource() == this.dropTableItem)
-			{
-				this.dropTables();
 			}
 			else if (e.getSource() == scriptTablesItem)
 			{
@@ -1782,16 +1728,6 @@ public class TableListPanel
 					public void run()
 					{
 						createScript();
-					}
-				});
-			}
-			else if (e.getSource() == this.dropIndexAction)
-			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						dropIndexes();
 					}
 				});
 			}
@@ -1815,52 +1751,6 @@ public class TableListPanel
 					}
 				});
 			}
-		}
-	}
-
-	protected void dropIndexes()
-	{
-		if (this.indexes.getSelectedRowCount() == 0) return;
-		int rows[] = this.indexes.getSelectedRows();
-		int count = rows.length;
-		if (count == 0) return;
-
-		ArrayList<String> names = new ArrayList<String>(count);
-		ArrayList<String> types = new ArrayList<String>(count);
-
-		TableIdentifier tbl = getRealTable();
-		String schema = (tbl == null ? null : tbl.getSchema());
-		
-		for (int i=0; i < count; i ++)
-		{
-			String name = this.indexes.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
-			
-			names.add((schema == null ? name : schema + "." + name));
-			types.add("INDEX");
-		}
-		
-		ObjectDropperUI dropperUI = new ObjectDropperUI();
-		dropperUI.setObjects(names, types);
-		dropperUI.setIndexTable(tbl);
-		dropperUI.setConnection(this.dbConnection);
-		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
-		dropperUI.showDialog(f);
-		if (!dropperUI.dialogWasCancelled())
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					try
-					{
-						retrieveIndexes();
-					}
-					catch (Exception e)
-					{
-						LogMgr.logError("TableListPanel.dropIndex()", "Error re-retrieving indexes", e);
-					}
-				}
-			});
 		}
 	}
 
@@ -1930,7 +1820,7 @@ public class TableListPanel
 		int count = rows.length;
 		if (count == 0) return;
 
-		ArrayList<TableIdentifier> names = new ArrayList<TableIdentifier>(count);
+		List<TableIdentifier> names = new ArrayList<TableIdentifier>(count);
 
 		for (int i=0; i < count; i ++)
 		{
@@ -1952,6 +1842,7 @@ public class TableListPanel
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		int[] rows = this.tableList.getSelectedRows();
 		int count = rows.length;
+		
 		HashMap<TableIdentifier, String> tables = new HashMap<TableIdentifier, String>(count);
 		for (int i=0; i < count; i++)
 		{
@@ -1998,43 +1889,6 @@ public class TableListPanel
 		scripterUI.show(SwingUtilities.getWindowAncestor(this));
 	}
 
-	private void dropTables()
-	{
-		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
-		if (this.tableList.getSelectedRowCount() == 0) return;
-		int rows[] = this.tableList.getSelectedRows();
-		int count = rows.length;
-		if (count == 0) return;
-
-		ArrayList<String> names = new ArrayList<String>(count);
-		ArrayList<String> types = new ArrayList<String>(count);
-
-		for (int i=0; i < count; i ++)
-		{
-			TableIdentifier id = createTableIdentifier(rows[i]);
-			id.setNeverAdjustCase(true);
-			String table = id.getTableExpression(this.dbConnection);
-			names.add(table);
-			types.add(id.getType());
-		}
-
-		ObjectDropperUI dropperUI = new ObjectDropperUI();
-		dropperUI.setObjects(names, types);
-		dropperUI.setConnection(this.dbConnection);
-		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
-		dropperUI.showDialog(f);
-		if (!dropperUI.dialogWasCancelled())
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					reload();
-				}
-			});
-		}
-	}
-
 	public WbConnection getConnection()
 	{
 		return this.dbConnection;
@@ -2045,17 +1899,17 @@ public class TableListPanel
 		return this;
 	}
 	
-	public TableIdentifier[] getSelectedObjects()
+	public List<DbObject> getSelectedObjects()
 	{
 		int[] rows = this.tableList.getSelectedRows();
 		int count = rows.length;
 		if (count == 0) return null;
 
-		TableIdentifier[] result = new TableIdentifier[count];
+		List<DbObject> result = new ArrayList<DbObject>(count);
 		for (int i=0; i < count; i++)
 		{
 			int row = rows[i];
-			result[i] = createTableIdentifier(rows[i]);
+			result.add(createTableIdentifier(rows[i]));
 		}
 		return result;
 	}

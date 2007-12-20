@@ -18,12 +18,15 @@ import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.WindowConstants;
 
-import workbench.db.ObjectDropper;
+import workbench.db.DbObject;
+import workbench.db.GenericObjectDropper;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.NoSelectionModel;
 import workbench.gui.components.WbButton;
+import workbench.interfaces.ObjectDropper;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -36,19 +39,32 @@ public class ObjectDropperUI
 	extends javax.swing.JPanel
 {
 	protected JDialog dialog;
-	private List<String> objectNames;
-	private List<String> objectTypes;
+	private List<DbObject> objects;
 	private WbConnection connection;
 	protected boolean cancelled;
 	protected boolean running;
 	protected ObjectDropper dropper;
 	private Thread dropThread;
-	private TableIdentifier indexTable;
+	private TableIdentifier objectTable;
 	
 	public ObjectDropperUI()
 	{
-		initComponents();
+		this(null);
 	}
+	
+	public ObjectDropperUI(ObjectDropper drop)
+	{
+		initComponents();
+		if (drop != null)
+		{
+			dropper = drop;
+		}
+		else
+		{
+			dropper = new GenericObjectDropper();
+		}
+	}
+	
 
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -126,7 +142,7 @@ public class ObjectDropperUI
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
+				LogMgr.logError("ObjectDropperUI", "Error when cancelling drop", e);
 			}
 			dropButton.setEnabled(true);
 		}
@@ -140,7 +156,14 @@ public class ObjectDropperUI
 
 	private void dropButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_dropButtonActionPerformed
 	{//GEN-HEADEREND:event_dropButtonActionPerformed
+		if (this.running) return;
+		
 		this.dropButton.setEnabled(false);
+		this.dropper.setCascade(checkBoxCascadeConstraints.isSelected());
+		this.dropper.setObjects(objects);
+		this.dropper.setObjectTable(objectTable);
+		this.dropper.setConnection(connection);
+		
 		dropThread = new WbThread("DropThread")
 		{
 			public void run()
@@ -151,9 +174,9 @@ public class ObjectDropperUI
 		dropThread.start();
 	}//GEN-LAST:event_dropButtonActionPerformed
 
-	public void setIndexTable(TableIdentifier tbl)
+	public void setObjectTable(TableIdentifier tbl)
 	{
-		this.indexTable = tbl;
+		this.objectTable = tbl;
 	}
 	
 	protected void doDrop()
@@ -163,11 +186,7 @@ public class ObjectDropperUI
 		{
 			this.running = true;
 			this.cancelled = false;
-			this.dropper = new ObjectDropper(this.objectNames, this.objectTypes);
-			this.dropper.setIndexTable(this.indexTable);
-			dropper.setConnection(this.connection);
-			dropper.setCascadeConstraints(this.checkBoxCascadeConstraints.isSelected());
-			dropper.execute();
+			this.dropper.dropObjects();
 		}
 		catch (Exception ex)
 		{
@@ -201,7 +220,7 @@ public class ObjectDropperUI
 	public void setConnection(WbConnection aConn)
 	{
 		this.connection = aConn;
-		if (this.objectTypes != null) this.checkCascade();
+		this.checkCascade();
 	}
 
 	public boolean dialogWasCancelled()
@@ -209,40 +228,53 @@ public class ObjectDropperUI
 		return this.cancelled;
 	}
 
-	public void setObjects(List<String> objects, List<String> types)
+	public void setObjects(List<DbObject> objectList)
 	{
-		this.objectNames = objects;
-		this.objectTypes = types;
-		int numNames = this.objectNames.size();
-		int numTypes = this.objectTypes.size();
+		if (this.dropper != null)
+		{
+			this.dropper.setObjects(objectList);
+			this.objects = null;
+		}
+		else
+		{
+			this.objects = objectList;
+		}
+		int numNames = objectList.size();
 
 		String[] display = new String[numNames];
 		for (int i=0; i < numNames; i ++)
 		{
-			if (i >= numTypes) continue;
-			display[i] = this.objectTypes.get(i) + " " + this.objectNames.get(i);
+			display[i] = objectList.get(i).getObjectType() + " " + objectList.get(i).getDisplayName();
 		}
 		this.objectList.setListData(display);
-		if (this.connection != null) this.checkCascade();
+		this.checkCascade();
 	}
 
 	private void checkCascade()
 	{
 		boolean canCascade = false;
 
-		int numTypes = this.objectTypes.size();
-		for (int i=0; i < numTypes; i++)
+		if (objects != null && this.connection != null)
 		{
-			String type = this.objectTypes.get(i);
-			String verb = this.connection.getDbSettings().getCascadeConstraintsVerb(type);
-
-			// if at least one type can be dropped with CASCADE, enable the checkbox
-			if (!StringUtil.isEmptyString(verb))
+			int numTypes = this.objects.size();
+			for (int i=0; i < numTypes; i++)
 			{
-				canCascade = true;
-				break;
+				String type = this.objects.get(i).getObjectType();
+				String verb = this.connection.getDbSettings().getCascadeConstraintsVerb(type);
+
+				// if at least one type can be dropped with CASCADE, enable the checkbox
+				if (!StringUtil.isEmptyString(verb))
+				{
+					canCascade = true;
+					break;
+				}
 			}
 		}
+		else if (dropper != null)
+		{
+			canCascade = dropper.supportsCascade();
+		}
+		
 		if (!canCascade)
 		{
 			this.mainPanel.remove(this.optionPanel);
@@ -250,6 +282,11 @@ public class ObjectDropperUI
 		}
 	}
 
+	public void setDropper(ObjectDropper drop)
+	{
+		this.dropper = drop;
+	}
+	
 	public void showDialog(Frame aParent)
 	{
 		this.dialog = new JDialog(aParent, ResourceMgr.getString("TxtDropObjectsTitle"), true);

@@ -12,7 +12,7 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
+import java.awt.Component;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -21,6 +21,8 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -28,10 +30,14 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import workbench.db.ColumnDropper;
+import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
+import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
@@ -57,7 +63,7 @@ import workbench.util.WbThread;
  */
 public class TableDefinitionPanel
 	extends JPanel
-	implements Reloadable, ActionListener, ListSelectionListener, Resettable
+	implements Reloadable, ActionListener, ListSelectionListener, Resettable, DbObjectList
 {
 	public static final String INDEX_PROP = "index";
 	private WbTable tableDefinition;
@@ -67,6 +73,7 @@ public class TableDefinitionPanel
 	private TableIdentifier currentTable;
 	private WbConnection dbConnection;
 	private WbAction reloadAction;
+	private DropDbObjectAction dropColumnsAction;
 	private JPanel toolbar;
 	private boolean busy;
 
@@ -257,11 +264,31 @@ public class TableDefinitionPanel
 		reloadAction.setEnabled(false);
 	}
 
+	private DropDbObjectAction getDropColumnAction()
+	{
+		if (this.dropColumnsAction == null)
+		{
+			dropColumnsAction = new DropDbObjectAction("MnuTxtDropColumn", this, tableDefinition.getSelectionModel(), this);
+			dropColumnsAction.setDropper(new ColumnDropper());
+		}
+		return dropColumnsAction;
+	}
+	
 	public void setConnection(WbConnection conn)
 	{
 		this.dbConnection = conn;
 		this.createIndexAction.setEnabled(this.dbConnection != null);
 		this.reloadAction.setEnabled(this.dbConnection != null);
+		if (dbConnection != null && dbConnection.getDbSettings().canDropType("column"))
+		{
+			DropDbObjectAction action = getDropColumnAction();
+			action.setAvailable(true);
+			this.tableDefinition.addPopupAction(action, false);
+		}
+		else if (this.dropColumnsAction != null)
+		{
+			dropColumnsAction.setAvailable(false);
+		}
 	}
 
 	public void reload()
@@ -292,16 +319,40 @@ public class TableDefinitionPanel
 	{
 		if (e.getSource() == this.createIndexAction)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					createIndex();
-				}
-			});
+			createIndex();
 		}
 	}
 
+	public List<DbObject> getSelectedObjects()
+	{
+		if (this.tableDefinition.getSelectedRowCount() <= 0) return null;
+		int rows[] = this.tableDefinition.getSelectedRows();
+		
+		List<DbObject> columns = new ArrayList<DbObject>(rows.length);
+		
+		for (int i=0; i < rows.length; i++)
+		{
+			String column = this.tableDefinition.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+			columns.add(new ColumnIdentifier(column));
+		}
+		return columns;
+	}
+
+	public Component getComponent()
+	{
+		return this;
+	}
+
+	public WbConnection getConnection()
+	{
+		return this.dbConnection;
+	}
+
+	public TableIdentifier getObjectTable()
+	{
+		return this.currentTable;
+	}
+	
 	protected void createIndex()
 	{
 		if (this.tableDefinition.getSelectedRowCount() <= 0) return;

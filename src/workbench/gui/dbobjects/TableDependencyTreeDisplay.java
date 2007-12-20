@@ -170,28 +170,28 @@ public class TableDependencyTreeDisplay
 				coldef.append("<html><b>");
 				if (this.showExported)
 				{
-					coldef.append(table);
-					coldef.append('.');
-					coldef.append(entry.getKey());
-				}
-				else
-				{
 					coldef.append(parenttable);
 					coldef.append('.');
 					coldef.append(entry.getValue());
+				}
+				else
+				{
+					coldef.append(table);
+					coldef.append('.');
+					coldef.append(entry.getKey());
 				}
 				coldef.append("</b> REFERENCES <b>");
 				if (this.showExported)
 				{
-					coldef.append(parenttable);
-					coldef.append('.');
-					coldef.append(entry.getValue());
-				}
-				else
-				{
 					coldef.append(table);
 					coldef.append('.');
 					coldef.append(entry.getKey());
+				}
+				else
+				{
+					coldef.append(parenttable);
+					coldef.append('.');
+					coldef.append(entry.getValue());
 				}
 				coldef.append("</b></html>");
 				DefaultMutableTreeNode colnode = new DefaultMutableTreeNode(coldef.toString());

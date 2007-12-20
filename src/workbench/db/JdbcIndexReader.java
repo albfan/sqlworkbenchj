@@ -14,7 +14,6 @@ package workbench.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.StringTokenizer;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
 
@@ -34,6 +33,7 @@ public class JdbcIndexReader
 
 	public void indexInfoProcessed()
 	{
+		// nothing to do, as we are using the driver's call
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class JdbcIndexReader
 		if (count == 0) return StringUtil.emptyBuffer();
 		StringBuilder idx = new StringBuilder();
 		String template = this.metaData.metaSqlMgr.getIndexTemplate();
-		String sql;
+		
 		int idxCount = 0;
 		for (int i = 0; i < count; i++)
 		{
@@ -71,33 +71,38 @@ public class JdbcIndexReader
 			String is_pk  = indexDefinition.getValue(i, 2).toString();
 			String definition = indexDefinition.getValue(i, 3).toString();
 			String type = indexDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_TYPE);
-			if (type == null || type.startsWith("NORMAL")) type = null;
+			if (type == null || type.startsWith("NORMAL")) type = "";
 			
-			StringBuilder columns = new StringBuilder();
-			StringTokenizer tok = new StringTokenizer(definition, ",");
-			String col;
-			int pos;
-			while (tok.hasMoreTokens())
-			{
-				col = tok.nextToken().trim();
-				if (col.length() == 0) continue;
-				if (columns.length() > 0) columns.append(',');
-				pos = col.indexOf(' ');
-				if (pos > -1)
-				{
-					columns.append(col.substring(0, pos));
-				}
-				else
-				{
-					columns.append(col);
-				}
-			}
+			// TODO: some DBMS return a column list with ascending/descending (e.g. LASTNAME A, FIRSTNAME A)
+			// but the returned expression is not understand by the DBMS using it without modifications
+			// in SQL. But the definition returned by the DBMS cannot easily be parsed for this situation 
+			// because it might also be a function or complex expression (e.g. CASE ...)
+			
+//			StringBuilder columns = new StringBuilder();
+//			StringTokenizer tok = new StringTokenizer(definition, ",");
+//			
+//			while (tok.hasMoreTokens())
+//			{
+//				String col = tok.nextToken().trim();
+//				if (col.length() == 0) continue;
+//				if (columns.length() > 0) columns.append(',');
+//				int pos = col.indexOf(' ');
+//				if (pos > -1)
+//				{
+//					columns.append(col.substring(0, pos));
+//				}
+//				else
+//				{
+//					columns.append(col);
+//				}
+//			}
+			
 			// The PK's have been created with the table source, so
 			// we do not need to add the corresponding index here.
 			if ("NO".equalsIgnoreCase(is_pk))
 			{
 				idxCount ++;
-				sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? table.getTableName() : tableNameToUse));
+				String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? table.getTableName() : tableNameToUse));
 				if ("YES".equalsIgnoreCase(unique))
 				{
 					sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "UNIQUE ");
@@ -106,8 +111,8 @@ public class JdbcIndexReader
 				{
 					sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "");
 				}
-				sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, (type == null ? "" : type + " "));
-				sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMNLIST_PLACEHOLDER, columns.toString());
+				sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, type);
+				sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, definition);
 				sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, idx_name);
 				idx.append(sql);
 				idx.append(";\n");
@@ -152,7 +157,7 @@ public class JdbcIndexReader
 		{
 			sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "");
 		}
-		sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMNLIST_PLACEHOLDER, cols.toString());
+		sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, cols.toString());
 		sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, indexName);
 		return sql;
 	}

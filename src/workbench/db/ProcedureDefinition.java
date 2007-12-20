@@ -12,12 +12,15 @@
 package workbench.db;
 
 import java.sql.DatabaseMetaData;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
  * @author support@sql-workbench.net
  */
 public class ProcedureDefinition
+	implements DbObject
 {
 	private String schema;
 	private String catalog;
@@ -51,6 +54,32 @@ public class ProcedureDefinition
 		procName = name;
 		resultType = type;
 	}
+	public ProcedureDefinition(String cat, String schem, String name, int type, boolean isOracle)
+	{
+		schema = schem;
+		catalog = cat;
+		procName = name;
+		resultType = type;
+		if (isOracle)
+		{
+			this.isOraclePackage = !StringUtil.isEmptyString(catalog);
+		}
+	}
+	
+	public String getObjectName(WbConnection conn)
+	{
+		return conn.getMetadata().quoteObjectname(this.procName);
+	}
+	
+	public String getObjectExpression(WbConnection conn)
+	{
+		return SqlUtil.buildExpression(conn, catalog, schema, procName);
+	}
+	
+	public String getDisplayName()
+	{
+		return getProcedureName();
+	}
 	
 	public void setSource(CharSequence s) { this.source = s; }
 	public CharSequence getSource() { return this.source; }
@@ -71,7 +100,7 @@ public class ProcedureDefinition
 	}
 	public int getResultType() { return this.resultType; }
 	
-	public String getResultTypeDisplay()
+	public String getObjectType()
 	{
 		if (this.isOraclePackage)
 		{

@@ -21,6 +21,7 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import workbench.db.DbObject;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleObjectCompiler;
 import workbench.gui.WbSwingUtilities;
@@ -40,18 +41,16 @@ public class ObjectCompilerUI
 	private Thread worker;
 	protected EditorPanel log;
 	private JFrame window;
-	private List<String> types;
-	private List<String> names;
+	private List<DbObject> objects;
 	private OracleObjectCompiler compiler;
 	private WbConnection dbConnection;
 	
-	public ObjectCompilerUI(List<String> names, List<String> types, WbConnection conn)
+	public ObjectCompilerUI(List<DbObject> objectList, WbConnection conn)
 		throws SQLException
 	{
 		super();
-		this.names = names;
+		this.objects = objectList;
 		this.dbConnection = conn;
-		this.types = types;
 		this.compiler = new OracleObjectCompiler(conn);
 		this.setLayout(new BorderLayout());
 		this.log = EditorPanel.createTextEditor();
@@ -68,23 +67,23 @@ public class ObjectCompilerUI
 	{
 		String msg = ResourceMgr.getString("TxtCompilingObject");
 		this.log.setText("");
-		int count = this.names.size();
+		int count = this.objects.size();
 		try
 		{
 			this.dbConnection.setBusy(true);
 			for (int i=0; i < count; i++)
 			{
-				String name = this.names.get(i);
-				String type = this.types.get(i);
+				DbObject o = this.objects.get(i);
 				if (i > 0) appendLog("\n");
-				appendLog(msg + " " + name + " ... ");
-				if (this.compiler.compileObject(name, type))
+				appendLog(msg + " " + o.getDisplayName() + "... ");
+				String error = this.compiler.compileObject(o);
+				if (error == null)
 				{
 					appendLog(ResourceMgr.getString("TxtOK"));
 				}
 				else
 				{
-					appendLog("\n" + ResourceMgr.getString("TxtError") + "\n" + this.compiler.getLastError());
+					appendLog(ResourceMgr.getString("TxtError") + "\n  " + error);
 				}
 			}
 		}

@@ -88,10 +88,7 @@ public abstract class TokenMarker
 	 */
 	public synchronized Token markTokens(Segment line, int lineIndex)
 	{
-		if (lineIndex >= length)
-		{
-			throw new IllegalArgumentException("Tokenizing invalid line: " + lineIndex);
-		}
+		if (lineIndex >= length) return null;
 
 		Token prev = getLastTokenInLine(lineIndex - 1);
 		

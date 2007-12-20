@@ -345,7 +345,7 @@ public class StringUtil
 		return temp.toString();
 	}
 
-	static final int[] limits =
+	private static final int[] limits =
 	{
 		9,99,999,9999,99999,999999,9999999,99999999,999999999,Integer.MAX_VALUE
 	};

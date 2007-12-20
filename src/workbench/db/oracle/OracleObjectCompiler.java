@@ -14,6 +14,7 @@ package workbench.db.oracle;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import workbench.db.DbObject;
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
 
@@ -47,25 +48,36 @@ public class OracleObjectCompiler
 		return this.lastError;
 	}
 	
-	public boolean compileObject(String name, String type)
+	public String compileObject(DbObject object)
 	{
-		String sql = "ALTER " + type + " " + name + " COMPILE";
+		String sql = "ALTER " + object.getObjectType() + " " + object.getObjectExpression(dbConnection) + " COMPILE";
 		this.lastError = null;
 		try
 		{
 			this.dbConnection.setBusy(true);
 			this.stmt.executeUpdate(sql);
-			return true;
+			return null;
 		}
 		catch (SQLException e)
 		{
-			this.lastError = e.getMessage();
-			return false;
+			return e.getMessage();
 		}
 		finally
 		{
 			this.dbConnection.setBusy(false);
 		}
+	}
+	
+	public static boolean canCompile(DbObject object)
+	{
+		if (object == null) return false;
+		String type = object.getObjectType();
+		return (type.equalsIgnoreCase("VIEW") || 
+			type.equalsIgnoreCase("PROCEDURE") || 
+			type.equalsIgnoreCase("MATERIALIZED VIEW") || 
+			type.equalsIgnoreCase("FUNCTION") || 
+			type.equalsIgnoreCase("PACKAGE") ||
+			type.equalsIgnoreCase("TRIGGER"));
 	}
 	
 }

@@ -92,7 +92,7 @@ public class ReportProcedure
 		tagWriter.appendTag(result, indent2, TAG_PROC_CATALOG, procDef.getCatalog());
 		tagWriter.appendTag(result, indent2, TAG_PROC_SCHEMA, procDef.getSchema());
 		tagWriter.appendTag(result, indent2, TAG_PROC_NAME, procDef.getProcedureName());
-		tagWriter.appendTag(result, indent2, TAG_PROC_TYPE, procDef.getResultTypeDisplay(), "jdbcResultType", Integer.toString(procDef.getResultType()));
+		tagWriter.appendTag(result, indent2, TAG_PROC_TYPE, procDef.getObjectType(), "jdbcResultType", Integer.toString(procDef.getResultType()));
 		if (includeSource)
 		{
 			tagWriter.appendTag(result, indent2, TAG_PROC_SOURCE, getSource(), true);

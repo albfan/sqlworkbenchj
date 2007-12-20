@@ -45,13 +45,15 @@ public interface IndexReader
 
 	/**
 	 * Get the SQL source for all indexes defined in indexDefinition.
+	 * 
 	 * If tableNameToUse is non-null then that name will be used instead
 	 * of the name of the TableIdentifier
 	 */
 	StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse);
 	
 	/**
-	 * 	Build the SQL statement to create an Index on the given table.
+	 * 	Build a SQL statement (from scratch) to create a new index on the given table.
+	 * 
 	 * 	@param table - The table for which the index should be constructed
 	 * 	@param indexName - The name of the Index
 	 * 	@param unique - Should the index be unique

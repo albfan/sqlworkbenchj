@@ -162,7 +162,7 @@ public class ObjectScripter
 				if (key instanceof ProcedureDefinition)
 				{
 					ProcedureDefinition procDef = (ProcedureDefinition)key;
-					type = procDef.getResultTypeDisplay();
+					type = procDef.getObjectType();
 					source = meta.getProcedureSource(procDef.getCatalog(), procDef.getSchema(), procDef.getProcedureName(), procDef.getResultType());
 				}
 				else if (key instanceof TableIdentifier)
