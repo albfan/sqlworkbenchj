@@ -78,6 +78,17 @@ public class StringUtil
 		Matcher m = PATTERN_NON_LF.matcher(input);
 		return m.replaceAll("\n");
 	}
+
+	public static boolean endsWith(CharSequence s, String end)
+	{
+		if (s == null) return false;
+		if (isEmptyString(end)) return false;
+		int len = s.length();
+		if (len == 0) return false;
+		if (len < end.length()) return false;
+		String last = s.subSequence(len - end.length(), len).toString();
+		return end.equals(last);
+	}
 	
 	public static boolean endsWith(CharSequence s, char c)
 	{

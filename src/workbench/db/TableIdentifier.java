@@ -98,7 +98,7 @@ public class TableIdentifier
 		return type.toUpperCase();
 	}
 	
-	public String getDisplayName()
+	public String getObjectName()
 	{
 		return getTableName();
 	}

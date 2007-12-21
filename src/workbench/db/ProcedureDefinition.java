@@ -76,7 +76,7 @@ public class ProcedureDefinition
 		return SqlUtil.buildExpression(conn, catalog, schema, procName);
 	}
 	
-	public String getDisplayName()
+	public String getObjectName()
 	{
 		return getProcedureName();
 	}

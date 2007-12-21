@@ -98,7 +98,7 @@ public class CompileDbObjectAction
 
 	private List<DbObject> getSelectedObjects()
 	{
-		List<DbObject> selected = this.source.getSelectedObjects();
+		List<? extends DbObject> selected = this.source.getSelectedObjects();
 		if (selected == null || selected.size() == 0) return null;
 		
 		List<DbObject> objects = new ArrayList<DbObject>(selected.size());

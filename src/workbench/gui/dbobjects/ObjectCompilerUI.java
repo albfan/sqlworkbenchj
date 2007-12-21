@@ -75,7 +75,7 @@ public class ObjectCompilerUI
 			{
 				DbObject o = this.objects.get(i);
 				if (i > 0) appendLog("\n");
-				appendLog(msg + " " + o.getDisplayName() + "... ");
+				appendLog(msg + " " + o.getObjectName() + "... ");
 				String error = this.compiler.compileObject(o);
 				if (error == null)
 				{

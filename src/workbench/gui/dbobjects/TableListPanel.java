@@ -31,7 +31,6 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import javax.swing.ActionMap;
 import javax.swing.ComponentInputMap;
@@ -57,7 +56,6 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
-import workbench.db.ObjectScripter;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
@@ -69,13 +67,11 @@ import workbench.gui.actions.ToggleTableSourceAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
-import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.dialogs.export.ExportFileDialog;
-import workbench.gui.menu.GenerateScriptMenuItem;
 import workbench.interfaces.ProgressReporter;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.ShareableDisplay;
@@ -92,8 +88,11 @@ import workbench.WbManager;
 import workbench.db.DbObject;
 import workbench.db.IndexDefinition;
 import workbench.gui.actions.CompileDbObjectAction;
+import workbench.gui.actions.CreateDummySqlAction;
+import workbench.gui.actions.DeleteTablesAction;
 import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.SchemaReportAction;
+import workbench.gui.actions.ScriptDbObjectAction;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.sql.PanelContentSender;
 import workbench.interfaces.CriteriaPanel;
@@ -142,12 +141,7 @@ public class TableListPanel
 	private SpoolDataAction spoolData;
 
 	private CompileDbObjectAction compileAction;
-	private DropDbObjectAction dropAction;
-	private DropDbObjectAction dropIndexAction;
 	
-	private WbMenuItem scriptTablesItem;
-	private WbMenuItem deleteTableItem;
-
 	private MainWindow parentWindow;
 
 	private TableIdentifier selectedTable;
@@ -172,8 +166,6 @@ public class TableListPanel
 	protected boolean ignoreStateChanged = false;
 
 	private EditorTabSelectMenu showDataMenu;
-	private WbAction createDummyInsertAction;
-	private WbAction createDefaultSelect;
 
 	private ToggleTableSourceAction toggleTableSource;
 
@@ -297,14 +289,6 @@ public class TableListPanel
 
 		this.spoolData = new SpoolDataAction(this);
 		this.tableList.addPopupAction(spoolData, true);
-
-		this.createDummyInsertAction = new WbAction(this, "create-dummy-insert");
-		this.createDummyInsertAction.setEnabled(true);
-		this.createDummyInsertAction.initMenuDefinition("MnuTxtCreateDummyInsert");
-
-		this.createDefaultSelect = new WbAction(this, "create-default-select");
-		this.createDefaultSelect.setEnabled(true);
-		this.createDefaultSelect.initMenuDefinition("MnuTxtCreateDefaultSelect");
 
 		this.extendPopupMenu();
 
@@ -430,8 +414,8 @@ public class TableListPanel
 			}
 		};
 		
-		this.dropIndexAction = new DropDbObjectAction("MnuTxtDropIndex", indexList, indexes.getSelectionModel(), indexReload);
-		this.indexes.addPopupAction(this.dropIndexAction, true);
+		DropDbObjectAction dropAction = new DropDbObjectAction("MnuTxtDropIndex", indexList, indexes.getSelectionModel(), indexReload);
+		this.indexes.addPopupAction(dropAction, true);
 	}
 	
 	public void dispose()
@@ -450,12 +434,11 @@ public class TableListPanel
 			this.tableList.addPopupMenu(this.showDataMenu, false);
 		}
 
-		this.tableList.addPopupAction(this.createDummyInsertAction, true);
-		this.tableList.addPopupAction(this.createDefaultSelect, false);
+		this.tableList.addPopupAction(CreateDummySqlAction.createDummyInsertAction(this, tableList.getSelectionModel()), true);
+		this.tableList.addPopupAction(CreateDummySqlAction.createDummySelectAction(this, tableList.getSelectionModel()), false);
 
-		this.scriptTablesItem = new GenerateScriptMenuItem();
-		this.scriptTablesItem.addActionListener(this);
-		this.tableList.addPopupMenu(this.scriptTablesItem, false);
+		ScriptDbObjectAction createScript = new ScriptDbObjectAction(this, tableList.getSelectionModel());
+		this.tableList.addPopupAction(createScript, false);
 
 		SchemaReportAction action = new SchemaReportAction(this);
 		tableList.addPopupMenu(action.getMenuItem(), false);
@@ -463,15 +446,10 @@ public class TableListPanel
 		compileAction = new CompileDbObjectAction(this, tableList.getSelectionModel());
 		tableList.addPopupAction(compileAction, false);
 		
-		this.dropAction = new DropDbObjectAction(this, this.tableList.getSelectionModel(), this);
+		DropDbObjectAction dropAction = new DropDbObjectAction(this, this.tableList.getSelectionModel(), this);
 		tableList.addPopupAction(dropAction, true);
 
-		this.deleteTableItem = new WbMenuItem();
-		this.deleteTableItem.setMenuTextByKey("MnuTxtDeleteTableData");
-		this.deleteTableItem.addActionListener(this);
-		this.deleteTableItem.setEnabled(true);
-		tableList.addPopupMenu(this.deleteTableItem, false);
-		
+		tableList.addPopupAction(new DeleteTablesAction(this, tableList.getSelectionModel(), this.tableData), false);
 	}
 
 	public void setDbExecutionListener(DbExecutionListener l)
@@ -1022,8 +1000,7 @@ public class TableListPanel
 	}
 
 	/**
-	 * Invoked when the selection in the table list
-	 * has changed
+	 * Invoked when the selection in the table list has changed
 	 */
 	public void valueChanged(ListSelectionEvent e)
 	{
@@ -1717,40 +1694,6 @@ public class TableListPanel
 					LogMgr.logError("TableListPanel().actionPerformed()", "Error when accessing editor tab", ex);
 				}
 			}
-			else if (e.getSource() == this.deleteTableItem)
-			{
-				this.deleteTables();
-			}
-			else if (e.getSource() == scriptTablesItem)
-			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						createScript();
-					}
-				});
-			}
-			else if (e.getSource() == this.createDummyInsertAction)
-			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						createDummyInserts();
-					}
-				});
-			}
-			else if (e.getSource() == this.createDefaultSelect)
-			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						createDefaultSelects();
-					}
-				});
-			}
 		}
 	}
 
@@ -1811,83 +1754,6 @@ public class TableListPanel
 		tbl.setNeverAdjustCase(true);
 		return tbl;
 	}
-	
-	private void deleteTables()
-	{
-		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
-		if (this.tableList.getSelectedRowCount() == 0) return;
-		int rows[] = this.tableList.getSelectedRows();
-		int count = rows.length;
-		if (count == 0) return;
-
-		List<TableIdentifier> names = new ArrayList<TableIdentifier>(count);
-
-		for (int i=0; i < count; i ++)
-		{
-			String type = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-			if (!"table".equalsIgnoreCase(type) && !"view".equalsIgnoreCase(type)) continue;
-			TableIdentifier tbl = createTableIdentifier(rows[i]);
-			names.add(tbl);
-		}
-		TableDeleterUI deleter = new TableDeleterUI();
-		deleter.addDeleteListener(this.tableData);
-		deleter.setObjects(names);
-		deleter.setConnection(this.dbConnection);
-		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
-		deleter.showDialog(f);
-	}
-
-	protected void createScript()
-	{
-		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
-		int[] rows = this.tableList.getSelectedRows();
-		int count = rows.length;
-		
-		HashMap<TableIdentifier, String> tables = new HashMap<TableIdentifier, String>(count);
-		for (int i=0; i < count; i++)
-		{
-			int row = rows[i];
-			
-			TableIdentifier tbl = createTableIdentifier(row);
-			tbl.setCatalog(null);
-			tables.put(tbl, tbl.getType());
-		}
-		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
-		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
-		scripterUI.show(SwingUtilities.getWindowAncestor(this));
-	}
-
-	protected void createDummyInserts()
-	{
-		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
-		int[] rows = this.tableList.getSelectedRows();
-		int count = rows.length;
-		HashMap<TableIdentifier, String> tables = new HashMap<TableIdentifier, String>(count);
-		for (int i=0; i < count; i++)
-		{
-			TableIdentifier tbl = createTableIdentifier(rows[i]);
-			tables.put(tbl, ObjectScripter.TYPE_INSERT);
-		}
-		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
-		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
-		scripterUI.show(SwingUtilities.getWindowAncestor(this));
-	}
-
-	protected void createDefaultSelects()
-	{
-		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
-		int[] rows = this.tableList.getSelectedRows();
-		int count = rows.length;
-		HashMap<TableIdentifier, String> tables = new HashMap<TableIdentifier, String>(count);
-		for (int i=0; i < count; i++)
-		{
-			TableIdentifier tbl = createTableIdentifier(rows[i]);
-			tables.put(tbl, ObjectScripter.TYPE_SELECT);
-		}
-		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
-		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
-		scripterUI.show(SwingUtilities.getWindowAncestor(this));
-	}
 
 	public WbConnection getConnection()
 	{
@@ -1908,7 +1774,6 @@ public class TableListPanel
 		List<DbObject> result = new ArrayList<DbObject>(count);
 		for (int i=0; i < count; i++)
 		{
-			int row = rows[i];
 			result.add(createTableIdentifier(rows[i]));
 		}
 		return result;

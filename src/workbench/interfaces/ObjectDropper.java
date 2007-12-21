@@ -27,7 +27,9 @@ public interface ObjectDropper
 	void setCascade(boolean flag);
 	void setConnection(WbConnection con);
 	void setObjectTable(TableIdentifier tbl);
-	void setObjects(List<DbObject> objects);
+	
+	void setObjects(List<? extends DbObject> objects);
+	List<? extends DbObject> getObjects();
 	
 	void dropObjects()
 		throws SQLException;

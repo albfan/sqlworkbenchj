@@ -39,6 +39,16 @@ public class IndexDefinition
 		this.expression = exp;
 	}
 	
+	public String getSchema()
+	{
+		return indexSchema;
+	}
+	
+	public String getCatalog()
+	{
+		return null;
+	}
+	
 	public IndexDefinition(String name, String exp)
 	{
 		this(null, name, exp);
@@ -77,7 +87,7 @@ public class IndexDefinition
 		return "INDEX";
 	}
 	
-	public String getDisplayName()
+	public String getObjectName()
 	{
 		return getName();
 	}

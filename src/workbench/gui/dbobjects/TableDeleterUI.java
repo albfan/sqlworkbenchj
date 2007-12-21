@@ -33,6 +33,7 @@ import workbench.interfaces.TableDeleteListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.WbThread;
 
 /**
@@ -50,7 +51,8 @@ public class TableDeleterUI
 	private Thread deleteThread;
 	private Thread checkThread;
 	private List<TableDeleteListener> deleteListener;
-
+	private Statement currentStatement;
+	
 	public TableDeleterUI()
 	{
 		initComponents();
@@ -409,6 +411,18 @@ public class TableDeleterUI
 		List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 		int count = this.objectNames.size();
 		TableIdentifier table = null;
+
+		try
+		{
+			this.currentStatement = this.connection.createStatement();
+		}
+		catch (SQLException e)
+		{
+			WbSwingUtilities.showErrorMessage(e.getMessage());
+			LogMgr.logError("TableDeleterUI.doDelete()", "Error creating statement", e);
+			return;
+		}
+		
 		try
 		{
 			this.connection.setBusy(true);
@@ -493,6 +507,7 @@ public class TableDeleterUI
 		}
 		finally
 		{
+			SqlUtil.closeStatement(currentStatement);
 			this.connection.setBusy(false);
 		}
 
@@ -511,9 +526,8 @@ public class TableDeleterUI
 		try
 		{
 			String deleteSql = getDeleteStatement(table, useTruncate);
-			Statement stmt = this.connection.createStatement();
 			LogMgr.logInfo("TableDeleterUI.deleteTable()", "Executing: [" + deleteSql + "] to delete target table...");
-			stmt.executeUpdate(deleteSql);
+			currentStatement.executeUpdate(deleteSql);
 			if (doCommit && !this.connection.getAutoCommit())
 			{
 				this.connection.commit();

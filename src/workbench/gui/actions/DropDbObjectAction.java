@@ -1,5 +1,5 @@
 /*
- * CompileDbObjectAction.java
+ * DropDbObjectAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -10,6 +10,7 @@
  *
  */
 package workbench.gui.actions;
+
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.util.List;
@@ -19,11 +20,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import workbench.db.DbObject;
+import workbench.db.GenericObjectDropper;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.ObjectDropperUI;
 import workbench.interfaces.ObjectDropper;
 import workbench.interfaces.Reloadable;
+
 /**
  * @author support@sql-workbench.net
  */
@@ -64,22 +67,24 @@ public class DropDbObjectAction
 		if (!available) this.setEnabled(false);
 	}
 	
-	public void setDropper(ObjectDropper drop)
+	public void setDropper(ObjectDropper dropperToUse)
 	{
-		this.dropper = drop;
+		this.dropper = dropperToUse;
 	}
 	
 	private void dropObjects()
 	{
 		if (!WbSwingUtilities.checkConnection(source.getComponent(), source.getConnection())) return;
 		
-		List<DbObject> objects = source.getSelectedObjects();
+		List<? extends DbObject> objects = source.getSelectedObjects();
 		if (objects == null || objects.size() == 0) return;
 
+		ObjectDropper dropperToUse = (this.dropper != null ? this.dropper : new GenericObjectDropper());
+		dropperToUse.setObjects(objects);
+		dropperToUse.setConnection(source.getConnection());
+		dropperToUse.setObjectTable(source.getObjectTable());
+		
 		ObjectDropperUI dropperUI = new ObjectDropperUI(dropper);
-		dropperUI.setObjects(objects);
-		dropperUI.setObjectTable(source.getObjectTable());
-		dropperUI.setConnection(source.getConnection());
 		
 		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(source.getComponent());
 		dropperUI.showDialog(f);

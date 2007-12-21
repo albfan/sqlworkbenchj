@@ -28,7 +28,6 @@ import workbench.gui.components.WbButton;
 import workbench.interfaces.ObjectDropper;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -39,32 +38,106 @@ public class ObjectDropperUI
 	extends javax.swing.JPanel
 {
 	protected JDialog dialog;
-	private List<DbObject> objects;
-	private WbConnection connection;
 	protected boolean cancelled;
 	protected boolean running;
 	protected ObjectDropper dropper;
 	private Thread dropThread;
-	private TableIdentifier objectTable;
-	
-	public ObjectDropperUI()
-	{
-		this(null);
-	}
 	
 	public ObjectDropperUI(ObjectDropper drop)
 	{
+		dropper = drop;
 		initComponents();
-		if (drop != null)
-		{
-			dropper = drop;
-		}
-		else
-		{
-			dropper = new GenericObjectDropper();
-		}
 	}
 	
+	protected void doDrop()
+	{
+		if (this.running) return;
+		try
+		{
+			this.running = true;
+			this.cancelled = false;
+			this.dropper.dropObjects();
+		}
+		catch (Throwable ex)
+		{
+			String msg = ex.getMessage();
+			WbSwingUtilities.showErrorMessage(this.dialog, msg);
+		}
+		finally
+		{
+			this.running = false;
+		}
+
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				if (cancelled)
+				{
+					dropButton.setEnabled(true);
+				}
+				else
+				{
+					dialog.setVisible(false);
+					dialog.dispose();
+					dialog = null;
+				}
+			}
+		});
+
+	}
+
+	public boolean dialogWasCancelled()
+	{
+		return this.cancelled;
+	}
+
+	protected void initDisplay()
+	{
+		List<? extends DbObject> objects = this.dropper.getObjects();
+		int numNames = objects.size();
+
+		String[] display = new String[numNames];
+		for (int i=0; i < numNames; i ++)
+		{
+			display[i] = objects.get(i).getObjectType() + " " + objects.get(i).getObjectName();
+		}
+		this.objectList.setListData(display);
+		
+		if (!dropper.supportsCascade())
+		{
+			this.mainPanel.remove(this.optionPanel);
+			this.checkBoxCascadeConstraints.setSelected(false);
+		}
+	}
+
+	public void showDialog(Frame aParent)
+	{
+		initDisplay();
+		
+		this.dialog = new JDialog(aParent, ResourceMgr.getString("TxtDropObjectsTitle"), true);
+		try
+		{
+			this.dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+			this.dialog.getContentPane().add(this);
+			this.dialog.pack();
+			if (this.dialog.getWidth() < 200)
+			{
+				this.dialog.setSize(200, this.dialog.getHeight());
+			}
+			WbSwingUtilities.center(this.dialog, aParent);
+			this.cancelled = true;
+			this.dialog.setVisible(true);
+		}
+		finally
+		{
+			if (this.dialog != null)
+			{
+				this.dialog.dispose();
+				this.dialog = null;
+			}
+		}
+	}
 
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -160,9 +233,6 @@ public class ObjectDropperUI
 		
 		this.dropButton.setEnabled(false);
 		this.dropper.setCascade(checkBoxCascadeConstraints.isSelected());
-		this.dropper.setObjects(objects);
-		this.dropper.setObjectTable(objectTable);
-		this.dropper.setConnection(connection);
 		
 		dropThread = new WbThread("DropThread")
 		{
@@ -173,145 +243,6 @@ public class ObjectDropperUI
 		};
 		dropThread.start();
 	}//GEN-LAST:event_dropButtonActionPerformed
-
-	public void setObjectTable(TableIdentifier tbl)
-	{
-		this.objectTable = tbl;
-	}
-	
-	protected void doDrop()
-	{
-		if (this.running) return;
-		try
-		{
-			this.running = true;
-			this.cancelled = false;
-			this.dropper.dropObjects();
-		}
-		catch (Exception ex)
-		{
-			String msg = ex.getMessage();
-			WbSwingUtilities.showErrorMessage(this.dialog, msg);
-		}
-		finally
-		{
-			this.running = false;
-		}
-
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				if (cancelled)
-				{
-					dropButton.setEnabled(true);
-				}
-				else
-				{
-					dialog.setVisible(false);
-					dialog.dispose();
-					dialog = null;
-				}
-			}
-		});
-
-	}
-
-	public void setConnection(WbConnection aConn)
-	{
-		this.connection = aConn;
-		this.checkCascade();
-	}
-
-	public boolean dialogWasCancelled()
-	{
-		return this.cancelled;
-	}
-
-	public void setObjects(List<DbObject> objectList)
-	{
-		if (this.dropper != null)
-		{
-			this.dropper.setObjects(objectList);
-			this.objects = null;
-		}
-		else
-		{
-			this.objects = objectList;
-		}
-		int numNames = objectList.size();
-
-		String[] display = new String[numNames];
-		for (int i=0; i < numNames; i ++)
-		{
-			display[i] = objectList.get(i).getObjectType() + " " + objectList.get(i).getDisplayName();
-		}
-		this.objectList.setListData(display);
-		this.checkCascade();
-	}
-
-	private void checkCascade()
-	{
-		boolean canCascade = false;
-
-		if (objects != null && this.connection != null)
-		{
-			int numTypes = this.objects.size();
-			for (int i=0; i < numTypes; i++)
-			{
-				String type = this.objects.get(i).getObjectType();
-				String verb = this.connection.getDbSettings().getCascadeConstraintsVerb(type);
-
-				// if at least one type can be dropped with CASCADE, enable the checkbox
-				if (!StringUtil.isEmptyString(verb))
-				{
-					canCascade = true;
-					break;
-				}
-			}
-		}
-		else if (dropper != null)
-		{
-			canCascade = dropper.supportsCascade();
-		}
-		
-		if (!canCascade)
-		{
-			this.mainPanel.remove(this.optionPanel);
-			this.checkBoxCascadeConstraints.setSelected(canCascade);
-		}
-	}
-
-	public void setDropper(ObjectDropper drop)
-	{
-		this.dropper = drop;
-	}
-	
-	public void showDialog(Frame aParent)
-	{
-		this.dialog = new JDialog(aParent, ResourceMgr.getString("TxtDropObjectsTitle"), true);
-		try
-		{
-			this.dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-			this.dialog.getContentPane().add(this);
-			this.dialog.pack();
-			if (this.dialog.getWidth() < 200)
-			{
-				this.dialog.setSize(200, this.dialog.getHeight());
-			}
-			WbSwingUtilities.center(this.dialog, aParent);
-			this.cancelled = true;
-			this.dialog.setVisible(true);
-		}
-		finally
-		{
-			if (this.dialog != null)
-			{
-				this.dialog.dispose();
-				this.dialog = null;
-			}
-		}
-	}
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   protected javax.swing.JPanel buttonPanel;

@@ -32,6 +32,16 @@ public class TriggerDefinition
 		catalog = cat;
 		triggerName = name;
 	}
+
+	public String getSchema() 
+	{
+		return schema;
+	}
+	
+	public String getCatalog()
+	{
+		return catalog;
+	}
 	
 	public String getObjectName(WbConnection conn)
 	{
@@ -43,7 +53,7 @@ public class TriggerDefinition
 		return SqlUtil.buildExpression(conn, catalog, schema, triggerName);
 	}
 	
-	public String getDisplayName()
+	public String getObjectName()
 	{
 		return triggerName;
 	}

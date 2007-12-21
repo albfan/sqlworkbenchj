@@ -35,6 +35,16 @@ public class SequenceDefinition
 		sequenceOwner = owner;
 	}
 
+	public String getSchema()
+	{
+		return sequenceOwner;
+	}
+	
+	public String getCatalog()
+	{
+		return null;
+	}
+	
 	public String getObjectName(WbConnection conn)
 	{
 		return conn.getMetadata().quoteObjectname(this.sequenceName);
@@ -57,7 +67,7 @@ public class SequenceDefinition
 		return "SEQUENCE";
 	}
 	
-	public String getDisplayName()
+	public String getObjectName()
 	{
 		return getSequenceName();
 	}

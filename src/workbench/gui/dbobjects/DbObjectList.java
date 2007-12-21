@@ -23,7 +23,7 @@ import workbench.db.WbConnection;
 public interface DbObjectList 
 {
 	TableIdentifier getObjectTable();
-	List<DbObject> getSelectedObjects();
+	List<? extends DbObject> getSelectedObjects();
 	WbConnection getConnection();
 	Component getComponent();
 }

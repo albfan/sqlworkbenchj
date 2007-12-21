@@ -3321,8 +3321,10 @@ public class DbMetadata
 			result.append(lineEnding);
 			result.append(lineEnding);
 		}
+		
 		StringBuilder indexSource = this.indexReader.getIndexSource(table, aIndexDef, tableNameToUse);
 		result.append(indexSource);
+		
 		if (!this.createInlineConstraints && includeFk) result.append(this.getFkSource(table, aFkDef, tableNameToUse));
 
 		String tableComment = this.getTableCommentSql(table);

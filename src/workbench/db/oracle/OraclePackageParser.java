@@ -147,4 +147,44 @@ public class OraclePackageParser
 		return null;
 	}
 	
+	public static int findProcedurePosition(CharSequence source, String procName)
+	{
+		int procPos = -1;
+		
+		SQLLexer lexer = new SQLLexer(source);
+		SQLToken t = lexer.getNextToken(false, false);
+
+		// Find the start of the package body
+		while (t != null)
+		{
+			if (t.getContents().equals("PACKAGE BODY")) break;
+			t = lexer.getNextToken(false, false);
+		}
+		
+		if (t == null) return -1;
+		
+		// Now we have reached the package body, let's find the the actual procedure or function
+		int lastKeywordPos = -1;
+		
+		while (t != null)
+		{
+			String text = t.getContents();
+			if (lastKeywordPos > -1 && text.equalsIgnoreCase(procName))
+			{
+				procPos = lastKeywordPos;
+				break;
+			}
+			if (text.equals("PROCEDURE") || text.equals("FUNCTION"))
+			{
+				lastKeywordPos = t.getCharBegin();
+			}
+			else
+			{
+				lastKeywordPos = -1;
+			}
+			t = lexer.getNextToken(false, false);
+		}
+		return procPos;
+	}
+		
 }

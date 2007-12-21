@@ -15,21 +15,15 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -40,12 +34,10 @@ import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
-import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
-import workbench.gui.menu.GenerateScriptMenuItem;
 import workbench.gui.renderer.ProcStatusRenderer;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
@@ -58,19 +50,19 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import workbench.WbManager;
 import workbench.db.DbObject;
-import workbench.db.ObjectScripter;
 import workbench.db.ProcedureDefinition;
 import workbench.db.TableIdentifier;
+import workbench.db.oracle.OraclePackageParser;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.DropDbObjectAction;
+import workbench.gui.actions.ScriptDbObjectAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.renderer.RendererFactory;
 import workbench.interfaces.CriteriaPanel;
 import workbench.storage.DataStore;
-import workbench.util.SqlUtil;
 import workbench.util.WbWorkspace;
 
 /**
@@ -78,7 +70,7 @@ import workbench.util.WbWorkspace;
  */
 public class ProcedureListPanel
 	extends JPanel
-	implements ListSelectionListener, Reloadable, ActionListener, DbObjectList
+	implements ListSelectionListener, Reloadable, DbObjectList
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
@@ -91,9 +83,8 @@ public class ProcedureListPanel
 	private String currentSchema;
 	private String currentCatalog;
 	private boolean shouldRetrieve;
-	private DropDbObjectAction dropAction;
 	private CompileDbObjectAction compileAction;
-	private WbMenuItem createScriptItem;
+	
 	private JLabel infoLabel;
 	private boolean isRetrieving;
 	protected ProcStatusRenderer statusRenderer;
@@ -183,15 +174,14 @@ public class ProcedureListPanel
 
 	private void extendPopupMenu()
 	{
-		this.createScriptItem = new GenerateScriptMenuItem();
-		this.createScriptItem.addActionListener(this);
-		procList.addPopupMenu(this.createScriptItem, true);
+		ScriptDbObjectAction createScript = new ScriptDbObjectAction(this, procList.getSelectionModel());
+		procList.addPopupAction(createScript, true);
 		
 		this.compileAction = new CompileDbObjectAction(this, this.procList.getSelectionModel());
 		procList.addPopupAction(compileAction, false);
 		
-		this.dropAction = new DropDbObjectAction(this, procList.getSelectionModel(), this);
-		procList.addPopupAction(this.dropAction, false);
+		DropDbObjectAction dropAction = new DropDbObjectAction(this, procList.getSelectionModel(), this);
+		procList.addPopupAction(dropAction, false);
 	}
 
 	public void disconnect()
@@ -409,7 +399,8 @@ public class ProcedureListPanel
 			WbSwingUtilities.showDefaultCursor(parent);
 			dbConnection.setBusy(false);
 		}
-		final int pos = checkOraclePackage(sql, catalog, proc, type);
+		// The package name is stored in the catalog field if this is an Oracle database
+		final int pos = findOracleProcedureInPackage(sql, catalog, proc);
 		
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -421,51 +412,18 @@ public class ProcedureListPanel
 		});
 	}
 	
-	private int checkOraclePackage(CharSequence sql, String catalog, String object, int type)
+	private int findOracleProcedureInPackage(CharSequence sql, String packageName, String procName)
 	{
 		if (sql == null) return 0;
 		if (this.dbConnection == null) return 0;
 		if (!this.dbConnection.getMetadata().isOracle()) return 0;
 		
-		// The package name is stored in the catalog field
-		// if that is empty, it's not a packaged function
+		if (StringUtil.isEmptyString(packageName)) return 0;
+		int pos = OraclePackageParser.findProcedurePosition(sql, procName);
 		
-		if (StringUtil.isEmptyString(catalog)) return 0;
-		
-		int bodyPos = SqlUtil.getKeywordPosition("PACKAGE BODY", sql);
-		
-		// If no package body was found, start at the beginning
-		// so the function declaration is selected
-		if (bodyPos == -1) bodyPos = 0;
-		
-		String regex = "(PROCEDURE|FUNCTION)\\s+" + object;
-
-		Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE + Pattern.DOTALL);
-		
-		Matcher m = p.matcher(sql);
-		if (m.find(bodyPos))
-		{
-			return m.start();
-		}
-		return 0;
+		return (pos < 0 ? 0 : pos);
 	}
 	
-	protected void createScript()
-	{
-		if (this.procList.getSelectedRowCount() == 0) return;
-		int rows[] = this.procList.getSelectedRows();
-		int count = rows.length;
-		HashMap<ProcedureDefinition, String> procs = new HashMap<ProcedureDefinition, String>(count);
-		List<ProcedureDefinition> defs = getSelectedItems();
-		for (ProcedureDefinition def : defs)
-		{
-			procs.put(def, def.getObjectType());
-		}
-		ObjectScripter s = new ObjectScripter(procs, this.dbConnection);
-		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
-		scripterUI.show(SwingUtilities.getWindowAncestor(this));
-	}
-
 	public TableIdentifier getObjectTable()
 	{
 		return null;
@@ -481,14 +439,7 @@ public class ProcedureListPanel
 		return this.dbConnection;
 	}
 
-	public List<DbObject> getSelectedObjects()
-	{
-		List<ProcedureDefinition> procs = getSelectedItems();
-		if (procs == null) return null;
-		return new ArrayList<DbObject>(procs);
-	}
-	
-	private List<ProcedureDefinition> getSelectedItems()
+	public List<? extends DbObject> getSelectedObjects()
 	{
 		if (this.procList.getSelectedRowCount() == 0) return null;
 		int rows[] = this.procList.getSelectedRows();
@@ -522,17 +473,4 @@ public class ProcedureListPanel
 		this.retrieve();
 	}
 	
-	public void actionPerformed(ActionEvent e)
-	{
-		if (e.getSource() == this.createScriptItem)
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					createScript();
-				}
-			});
-		}
-	}
 }

@@ -17,6 +17,10 @@ package workbench.db;
  */
 public interface DbObject 
 {
+	String getCatalog();
+	
+	String getSchema();
+	
 	/**
 	 * Returns the name of the object (e.g. TABLE, PROCEDURE, ...)
 	 * 
@@ -30,7 +34,7 @@ public interface DbObject
 	 * 
 	 * @return the object's name
 	 */
-	String getDisplayName();
+	String getObjectName();
 	
 	/**
 	 * Return the name of the version to be used in SQL Statements.

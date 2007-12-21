@@ -19,12 +19,10 @@ import java.awt.EventQueue;
 import java.util.ArrayList;
 
 import java.util.List;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -363,33 +361,6 @@ public class TriggerListPanel
 				source.requestFocusInWindow();
 			}
 		});
-	}
-
-	private void dropObjects()
-	{
-		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
-		if (this.triggerList.getSelectedRowCount() == 0) return;
-		int rows[] = this.triggerList.getSelectedRows();
-		int count = rows.length;
-		if (count == 0) return;
-
-		List<DbObject> objects = this.getSelectedObjects();
-
-		ObjectDropperUI dropperUI = new ObjectDropperUI();
-		dropperUI.setObjects(objects);
-		dropperUI.setConnection(this.dbConnection);
-		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
-		dropperUI.showDialog(f);
-		if (!dropperUI.dialogWasCancelled())
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					reload();
-				}
-			});
-		}
 	}
 
 	public TableIdentifier getObjectTable()

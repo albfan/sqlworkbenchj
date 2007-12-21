@@ -19,6 +19,7 @@ import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
+import workbench.sql.DelimiterDefinition;
 import workbench.util.SqlUtil;
 
 /**
@@ -63,6 +64,7 @@ public class OracleProcedureReader
 		ResultSet rs = null;
 		
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
+		DelimiterDefinition delimiter = Settings.getInstance().getAlternateDelimiter(connection);
 		
 		try
 		{
@@ -90,8 +92,7 @@ public class OracleProcedureReader
 					}
 				}
 				result.append(nl);
-				
-				result.append("/");
+				result.append(delimiter.getDelimiter());
 				result.append(nl);
 				result.append(nl);
 				lineCount = 0;

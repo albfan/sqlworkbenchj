@@ -19,6 +19,7 @@ import java.sql.Statement;
 import java.sql.Types;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.sql.DelimiterDefinition;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
@@ -329,10 +330,12 @@ public class JdbcProcedureReader
 		}
 
 		boolean needsTerminator = this.connection.getDbSettings().proceduresNeedTerminator();
-
-		if (!StringUtil.endsWith(source, ';') && needsTerminator)
+		DelimiterDefinition delimiter = Settings.getInstance().getAlternateDelimiter(connection);
+		if (!StringUtil.endsWith(source, delimiter.getDelimiter()) && needsTerminator)
 		{
-			source.append(';');
+			if (delimiter.isSingleLine()) source.append('\n');
+			source.append(delimiter.getDelimiter());
+			if (delimiter.isSingleLine()) source.append('\n');
 		}
 		
 		String result = source.toString();

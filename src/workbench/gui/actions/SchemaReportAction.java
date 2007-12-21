@@ -53,7 +53,7 @@ public class SchemaReportAction
 		final Component caller = client.getComponent();
 		
 		if (!WbSwingUtilities.checkConnection(caller, dbConnection)) return;
-		List<DbObject> objects = client.getSelectedObjects();
+		List<? extends DbObject> objects = client.getSelectedObjects();
 		if (objects == null) return;
 
 		FileDialogUtil dialog = new FileDialogUtil();

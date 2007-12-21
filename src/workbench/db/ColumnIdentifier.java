@@ -70,6 +70,16 @@ public class ColumnIdentifier
 		this.isPk = isPkColumn;
 	}
 
+	public String getSchema()
+	{
+		return null;
+	}
+	
+	public String getCatalog()
+	{
+		return null;
+	}
+	
 	public String getObjectName(WbConnection conn)
 	{
 		return conn.getMetadata().quoteObjectname(this.name);
@@ -85,7 +95,7 @@ public class ColumnIdentifier
 		return "COLUMN";
 	}
 	
-	public String getDisplayName()
+	public String getObjectName()
 	{
 		return getColumnName();
 	}

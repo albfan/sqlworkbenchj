@@ -12,8 +12,7 @@
 package workbench.db;
 
 import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
 
@@ -43,9 +42,12 @@ public class ObjectScripter
 	public static final String TYPE_INSERT = "insert";
 	public static final String TYPE_SELECT = "select";
 	public static final String TYPE_PROC = "procedure";
+	public static final String TYPE_PKG = "package";
+	public static final String TYPE_FUNC = "function";
+	public static final String TYPE_TRG = "trigger";
 	public static final String TYPE_MVIEW = DbMetadata.MVIEW_NAME.toLowerCase();
 
-	private Map objectList;
+	private List<? extends DbObject> objectList;
 	private DbMetadata meta;
 	private StringBuilder script;
 	private ScriptGenerationMonitor progressMonitor;
@@ -53,7 +55,7 @@ public class ObjectScripter
 	private boolean cancel;
 	private String nl = Settings.getInstance().getInternalEditorLineEnding();
 	
-	public ObjectScripter(Map objectList, WbConnection aConnection)
+	public ObjectScripter(List<? extends DbObject> objectList, WbConnection aConnection)
 	{
 		this.objectList = objectList;
 		this.dbConnection = aConnection;
@@ -91,7 +93,10 @@ public class ObjectScripter
 			if (!cancel) this.appendObjectType(TYPE_MVIEW);
 			if (!cancel) this.appendObjectType(TYPE_INSERT);
 			if (!cancel) this.appendObjectType(TYPE_SELECT);
+			if (!cancel) this.appendObjectType(TYPE_FUNC);
 			if (!cancel) this.appendObjectType(TYPE_PROC);
+			if (!cancel) this.appendObjectType(TYPE_PKG);
+			if (!cancel) this.appendObjectType(TYPE_TRG);
 		}
 		finally 
 		{
@@ -106,21 +111,18 @@ public class ObjectScripter
 	
 	private void appendForeignKeys()
 	{
-		Iterator itr = this.objectList.entrySet().iterator();
-		boolean first = true;
 		if (this.progressMonitor != null)
 		{
 			this.progressMonitor.setCurrentObject(ResourceMgr.getString("TxtScriptProcessFk"));
 		}
-		while (itr.hasNext())
+		boolean first = true;
+		for (DbObject dbo : objectList)
 		{
 			if (cancel) break;
-			Map.Entry entry = (Map.Entry)itr.next();
-			Object key = entry.getKey();
-			String type = (String)entry.getValue();
+			String type = dbo.getObjectType();
 			if (!type.equalsIgnoreCase(TYPE_TABLE)) continue;
-
-			TableIdentifier tbl = (TableIdentifier)key;
+			
+			TableIdentifier tbl = (TableIdentifier)dbo;
 			tbl.adjustCase(this.dbConnection);
 			StringBuilder source = meta.getFkSource(tbl);
 			if (source != null && source.length() > 0)
@@ -142,32 +144,35 @@ public class ObjectScripter
 	
 	private void appendObjectType(String typeFilter)
 	{
-		Iterator itr = this.objectList.entrySet().iterator();
-		while (itr.hasNext())
+		for (DbObject dbo : objectList)
 		{
 			if (cancel) break;
-			Map.Entry entry = (Map.Entry)itr.next();
-			Object key = entry.getKey();
-			String type = (String)entry.getValue();
-			CharSequence source = null;
+			String type = dbo.getObjectType();
 			
 			if (!type.equalsIgnoreCase(typeFilter)) continue;
 			
+			CharSequence source = null;
+			
 			if (this.progressMonitor != null)
 			{
-				this.progressMonitor.setCurrentObject(key.toString());
+				this.progressMonitor.setCurrentObject(dbo.getObjectName());
 			}
 			try
 			{
-				if (key instanceof ProcedureDefinition)
+				if (dbo instanceof ProcedureDefinition)
 				{
-					ProcedureDefinition procDef = (ProcedureDefinition)key;
-					type = procDef.getObjectType();
-					source = meta.getProcedureSource(procDef.getCatalog(), procDef.getSchema(), procDef.getProcedureName(), procDef.getResultType());
+					ProcedureDefinition procDef = (ProcedureDefinition)dbo;
+					meta.readProcedureSource(procDef);
+					source = procDef.getSource();
 				}
-				else if (key instanceof TableIdentifier)
+				else if (dbo instanceof TriggerDefinition)
 				{
-					TableIdentifier tbl = (TableIdentifier)key;
+					TriggerDefinition trg = (TriggerDefinition)dbo;
+					source = meta.getTriggerSource(trg.getCatalog(), trg.getSchema(), trg.getObjectName());
+				}
+				else if (dbo instanceof TableIdentifier)
+				{
+					TableIdentifier tbl = (TableIdentifier)dbo;
 					
 					if (TYPE_TABLE.equalsIgnoreCase(type))
 					{
@@ -195,26 +200,22 @@ public class ObjectScripter
 						source = this.meta.getSequenceSource(object);
 					}
 				}
-				else
+				else if (dbo instanceof SequenceDefinition)
 				{
-					String object = (String)key;
-					if (TYPE_SEQUENCE.equalsIgnoreCase(type))
-					{
-						source = this.meta.getSequenceSource(object);
-					}
+					source = this.meta.getSequenceSource(dbo.getObjectExpression(dbConnection));
 				}
 			}
 			catch (Exception e)
 			{
-				this.script.append("\nError creating script for " + key.toString() + " " + ExceptionUtil.getDisplay(e));
+				this.script.append("\nError creating script for " + dbo.getObjectName() + " " + ExceptionUtil.getDisplay(e));
 			}
 
 			if (source != null && source.length() > 0)
 			{
 				boolean useSeparator = !type.equalsIgnoreCase("insert") && !type.equalsIgnoreCase("select");
-				if (useSeparator) this.script.append("-- BEGIN " + type + " " + key.toString() + nl);
+				if (useSeparator) this.script.append("-- BEGIN " + type + " " + dbo.getObjectName() + nl);
 				this.script.append(source);
-				if (useSeparator) this.script.append(nl + "-- END " + type + " " + key.toString() + nl);
+				if (useSeparator) this.script.append(nl + "-- END " + type + " " + dbo.getObjectName() + nl);
 				this.script.append(nl);
 			}
 		}

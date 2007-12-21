@@ -94,7 +94,7 @@ public class SchemaReporter
 		this.monitor = mon;
 	}
 
-	public void setObjectList(List<DbObject> objectList)
+	public void setObjectList(List<? extends DbObject> objectList)
 	{
 		if (this.tables == null) this.tables = new ArrayList<TableIdentifier>();
 		

@@ -28,7 +28,7 @@ import workbench.util.StringUtil;
 public class GenericObjectDropper
 	implements ObjectDropper
 {
-	private List<DbObject> objects;
+	private List<? extends DbObject> objects;
 	private WbConnection connection;
 	private Statement currentStatement;
 	private boolean cascadeConstraints;
@@ -38,6 +38,11 @@ public class GenericObjectDropper
 	{
 	}
 
+	public List<? extends DbObject> getObjects()
+	{
+		return objects;
+	}
+	
 	public boolean supportsCascade()
 	{
 		boolean canCascade = false;
@@ -61,7 +66,7 @@ public class GenericObjectDropper
 		return canCascade;
 	}
 
-	public void setObjects(List<DbObject> toDrop)
+	public void setObjects(List<? extends DbObject> toDrop)
 	{
 		this.objects = toDrop;
 	}
@@ -94,7 +99,7 @@ public class GenericObjectDropper
 			
 			for (int i=0; i < count; i++)
 			{
-				String name = this.objects.get(i).getDisplayName();
+				String name = this.objects.get(i).getObjectName();
 				String type = this.objects.get(i).getObjectType();
 				
 				StringBuilder sql = new StringBuilder(120);

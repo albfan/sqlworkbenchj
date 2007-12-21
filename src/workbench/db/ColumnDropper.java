@@ -66,7 +66,12 @@ public class ColumnDropper
 		this.table = tbl;
 	}
 	
-	public void setObjects(List<DbObject> toDrop)
+	public List<? extends DbObject> getObjects()
+	{
+		return columns;
+	}
+	
+	public void setObjects(List<? extends DbObject> toDrop)
 	{
 		this.columns = new ArrayList<ColumnIdentifier>();
 		if (toDrop == null) return;
