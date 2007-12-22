@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2007, Thomas Kellerer
+ * Copyright 2002-2008, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -11,10 +11,9 @@
  */
 package workbench.util;
 
-import java.util.Comparator;
 import java.util.LinkedList;
-import junit.framework.*;
 import java.util.List;
+import junit.framework.TestCase;
 
 /**
  *
@@ -66,6 +65,27 @@ public class StringUtilTest
 		}
 	}
 
+	public void testEndsWith()
+	{
+		try
+		{
+			String s = "this is a test";
+			assertTrue(StringUtil.endsWith(s, "test"));
+			assertFalse(StringUtil.endsWith(s, "testing"));
+			
+			assertFalse(StringUtil.endsWith("bla", "blabla"));
+			assertTrue(StringUtil.endsWith("bla", "bla"));
+
+			assertFalse(StringUtil.endsWith("est", "test"));
+			assertFalse(StringUtil.endsWith("no est", "test"));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testIndexOf()
 	{
 		try

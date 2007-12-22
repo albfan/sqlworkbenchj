@@ -1,12 +1,14 @@
 /*
  * MissingWidthDefinition.java
  *
- * Created on 10.08.2007, 21:47:37
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2002-2008, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
-
 package workbench.sql.wbcommands;
 
 /**
