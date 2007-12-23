@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -24,20 +25,27 @@ public class SequenceDefinition
 	implements DbObject
 {
 	private String sequenceName;
-	private String sequenceOwner;
+	private String schema;
 	private CharSequence source;
 	
 	private Map<String, Object> properties = new LinkedHashMap<String, Object>();
 	
-	public SequenceDefinition(String owner, String name)
+	public SequenceDefinition(String seqSchema, String seqName)
 	{
-		sequenceName = name;
-		sequenceOwner = owner;
+		sequenceName = seqName;
+		schema = seqSchema;
 	}
 
+	public CharSequence getSource(WbConnection con)
+		throws SQLException
+	{
+		if (con == null) return null;
+		return con.getMetadata().getSequenceSource(null, schema, sequenceName);
+	}
+	
 	public String getSchema()
 	{
-		return sequenceOwner;
+		return schema;
 	}
 	
 	public String getCatalog()
@@ -53,9 +61,9 @@ public class SequenceDefinition
 	public String getObjectExpression(WbConnection conn)
 	{
 		StringBuilder expr = new StringBuilder(30);
-		if (sequenceOwner != null)
+		if (schema != null)
 		{
-			expr.append(conn.getMetadata().quoteObjectname(sequenceOwner));
+			expr.append(conn.getMetadata().quoteObjectname(schema));
 			expr.append('.');
 		}
 		expr.append(conn.getMetadata().quoteObjectname(sequenceName));
@@ -79,7 +87,7 @@ public class SequenceDefinition
 	
 	public String getSequenceOwner()
 	{
-		return this.sequenceOwner;
+		return this.schema;
 	}
 	
 	/**

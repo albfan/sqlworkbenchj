@@ -84,7 +84,7 @@ public class DropDbObjectAction
 		dropperToUse.setConnection(source.getConnection());
 		dropperToUse.setObjectTable(source.getObjectTable());
 		
-		ObjectDropperUI dropperUI = new ObjectDropperUI(dropper);
+		ObjectDropperUI dropperUI = new ObjectDropperUI(dropperToUse);
 		
 		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(source.getComponent());
 		dropperUI.showDialog(f);

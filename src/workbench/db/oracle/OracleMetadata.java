@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import workbench.db.ConnectionProfile;
+import workbench.db.DataTypeResolver;
 import workbench.db.ErrorInformationReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -35,54 +36,44 @@ import workbench.util.StringUtil;
  * @author  support@sql-workbench.net
  */
 public class OracleMetadata
-	implements ErrorInformationReader
+	implements ErrorInformationReader, DataTypeResolver
 {
 	private WbConnection connection;
 	private PreparedStatement columnStatement;
 	private int version;
 	private boolean retrieveSnapshots = true;
-	private static final int BYTE_SEMANTICS = 0;
-	private static final int CHAR_SEMANTICS = 0;
-	private int defaultLengthSemantics = BYTE_SEMANTICS;
+	static final int BYTE_SEMANTICS = 0;
+	static final int CHAR_SEMANTICS = 1;
+	private int defaultLengthSemantics = -1;
 	private boolean alwaysShowCharSemantics = false;
-
+	private boolean useOwnSql = true;
+	
+	/**
+	 * Only for testing purposes
+	 */
+	OracleMetadata(int defaultSemantics, boolean alwaysShowSemantics)
+	{
+		defaultLengthSemantics = defaultSemantics;
+		alwaysShowCharSemantics = alwaysShowSemantics;
+	}
+	
 	public OracleMetadata(WbConnection conn)
 	{
 		this.connection = conn;
 		try
 		{
-			String versionInfo = this.connection.getSqlConnection().getMetaData().getDatabaseProductVersion();
-			if (versionInfo == null)
-			{
-				this.version = 8;
-			}
-			if (versionInfo.toLowerCase().indexOf("release 9.") > -1)
-			{
-				this.version = 9;
-			}
-			else if (versionInfo.toLowerCase().indexOf("release 10.") > -1)
-			{
-				this.version = 10;
-			}
-			else if (versionInfo.toLowerCase().indexOf("release 11.") > -1)
-			{
-				this.version = 11;
-			}
+			this.version = this.connection.getSqlConnection().getMetaData().getDatabaseMajorVersion();
 		}
 		catch (Throwable th)
 		{
-			// The Oracle 8 driver (classes12.jar) does not implement getDatabaseMajorVersion()
+			// The old Oracle 8 driver (classes12.jar) does not implement getDatabaseMajorVersion()
       // and throws an AbstractMethodError
 			this.version = 8;
 		}
 
 		alwaysShowCharSemantics = Settings.getInstance().getBoolProperty("workbench.db.oracle.charsemantics.displayalways", true);
-
-		if (alwaysShowCharSemantics)
-		{
-			defaultLengthSemantics = -1;
-		}
-		else
+		
+		if (!alwaysShowCharSemantics)
 		{
 			Statement stmt = null;
 			ResultSet rs = null;
@@ -94,11 +85,11 @@ public class OracleMetadata
 				if (rs.next())
 				{
 					String v = rs.getString(1);
-					if ("BYTE".equals(v))
+					if ("BYTE".equalsIgnoreCase(v))
 					{
 						defaultLengthSemantics = BYTE_SEMANTICS;
 					}
-					else if ("CHAR".equals(v))
+					else if ("CHAR".equalsIgnoreCase(v))
 					{
 						defaultLengthSemantics = CHAR_SEMANTICS;
 					}
@@ -107,13 +98,18 @@ public class OracleMetadata
 			catch (Exception e)
 			{
 				defaultLengthSemantics = BYTE_SEMANTICS;
-				LogMgr.logWarning("OracleMetadata.<init>", "Could not retrieve LENGTH_SEMANTICS", e);
+				LogMgr.logWarning("OracleMetadata.<init>", "Could not retrieve NLS_LENGTH_SEMANTICS from v$nls_parameters. Assuming byte semantics", e);
 			}
 			finally
 			{
 				SqlUtil.closeAll(rs, stmt);
 			}
 		}
+		
+		boolean fixNVARCHAR = Settings.getInstance().useOracleNVarcharFix();
+		boolean checkCharSemantics = Settings.getInstance().useOracleCharSemanticsFix();		
+		
+		useOwnSql = (version > 8 && (checkCharSemantics || fixNVARCHAR));
 	}
 
 	public boolean isOracle8()
@@ -130,7 +126,7 @@ public class OracleMetadata
 		{
 			value = getDriverProperty("oracle.jdbc.remarksReporting", true);
 		}
-		return "true".equalsIgnoreCase(value);
+		return "true".equalsIgnoreCase(value == null ? "false" : value.trim());
 	}
 
 	public boolean getMapDateToTimestamp()
@@ -158,37 +154,18 @@ public class OracleMetadata
 		return value;
 	}
 
-	public String getVarcharType(String type, int size, int semantics)
-	{
-		StringBuilder result = new StringBuilder();
-		result.append(type);
-		result.append('(');
-		result.append(size);
-
-		// Only apply this logic vor VARCHAR columns
-		// NVARCHAR (which might have been reported as VARCHAR) does not 
-		// allow Byte/Char semantics
-		if (type.equals("VARCHAR2") || type.equals("VARCHAR"))
-		{
-			if (alwaysShowCharSemantics || semantics != this.defaultLengthSemantics)
-			{
-				if (semantics == BYTE_SEMANTICS)
-				{
-					result.append(" Byte");
-				}
-				else if (semantics == CHAR_SEMANTICS)
-				{
-					result.append(" Char");
-				}
-			}
-		}
-		result.append(')');
-		return result.toString();
-	}
-
 	public ResultSet getColumns(String catalog, String schema, String table, String cols)
 		throws SQLException
 	{
+		// make sure the statement object is closed properly 
+		columnsProcessed();
+		
+		if (!useOwnSql)
+		{
+			this.columnStatement = null;
+			return this.connection.getSqlConnection().getMetaData().getColumns(catalog, schema, table, cols);
+		}
+		
 		boolean fixNVARCHAR = Settings.getInstance().useOracleNVarcharFix();
 
 		// Oracle 9 and above reports a wrong length if NLS_LENGTH_SEMANTICS is set to char
@@ -230,31 +207,34 @@ public class OracleMetadata
 			"                            'CHAR', t.char_length, " +
 			"                            'NCHAR', t.char_length, t.data_length), " +
 			"               t.data_precision) AS column_size,  \n" +
-			"    0 AS buffer_length,  \n" +
-			"    t.data_scale AS decimal_digits,  \n" +
-			"    10 AS num_prec_radix,  \n" +
-			"    DECODE (t.nullable, 'N', 0, 1) AS nullable,  \n";
+			"     0 AS buffer_length,  \n" +
+			"     t.data_scale AS decimal_digits,  \n" +
+			"     10 AS num_prec_radix,  \n" +
+			"     DECODE (t.nullable, 'N', 0, 1) AS nullable,  \n";
 
-		final String sql2 = "       t.data_default AS column_def,  \n" +
-			"       decode(t.data_type, 'VARCHAR2', " +
-			"                 decode(t.char_used, 'B', " + BYTE_SEMANTICS + ", 'C', " + CHAR_SEMANTICS + ", 0), 0) AS sql_data_type,  \n " +
+		final String sql2 = 
+			"     t.data_default AS column_def,  \n" +
+			"     decode(t.data_type, 'VARCHAR2', " +
+			"            decode(t.char_used, 'B', " + BYTE_SEMANTICS + ", 'C', " + CHAR_SEMANTICS + ", 0), " +
+			"            0) AS sql_data_type,  \n " +
 			"       0 AS sql_datetime_sub,  \n" +
 			"       t.data_length AS char_octet_length,  \n" +
 			"       t.column_id AS ordinal_position,   \n" +
 			"       DECODE (t.nullable, 'N', 'NO', 'YES') AS is_nullable  \n" +
 			" FROM all_tab_columns t";
 
-		// not using LIKE for owner and table
-    // because internally we never call this with wildcards
-    // and leaving out the like (which is used in the original statement from Oracle's driver)
+		// I'm not using LIKE for the condition to select owner/table
+    // because internally we never call this with wildcards and leaving out the 
+		// like (which is used in the original statement from Oracle's driver)
     // speeds up the statement
 		final String where = " WHERE t.owner = ? AND t.table_name = ? AND t.column_name LIKE ? ESCAPE '/'  \n";
-
 		final String comment_join = "   AND t.owner = c.owner (+)  AND t.table_name = c.table_name (+)  AND t.column_name = c.column_name (+)  \n";
 		final String order = "ORDER BY table_schem, table_name, ordinal_position";
+		
 		final String sql_comment = sql1 + "       c.comments AS remarks, \n" + sql2 + ", all_col_comments c  \n" + where + comment_join + order;
 		final String sql_no_comment = sql1 + "       null AS remarks, \n" + sql2 + where + order;
-		String sql;
+		
+		String sql = null;
 
 		if (getRemarksReporting())
 		{
@@ -282,24 +262,12 @@ public class OracleMetadata
 			}
 		}
 
-		synchronized (connection)
-		{
-			// The above statement does not work with Oracle 8
-      // so in that case we revert back to Oracle's implementation of getColumns()
-			if (version > 8 && Settings.getInstance().useOracleCharSemanticsFix() || fixNVARCHAR)
-			{
-				SqlUtil.closeStatement(columnStatement);
-				this.columnStatement = this.connection.getSqlConnection().prepareStatement(sql);
-				this.columnStatement.setString(1, schema != null ? schema : "%");
-				this.columnStatement.setString(2, table != null ? table : "%");
-				this.columnStatement.setString(3, cols != null ? cols : "%");
-				rs = this.columnStatement.executeQuery();
-			}
-			else
-			{
-				rs = this.connection.getSqlConnection().getMetaData().getColumns(catalog, schema, table, cols);
-			}
-		}
+		this.columnStatement = this.connection.getSqlConnection().prepareStatement(sql);
+		this.columnStatement.setString(1, schema);
+		this.columnStatement.setString(2, table);
+		this.columnStatement.setString(3, cols != null ? cols : "%");
+		rs = this.columnStatement.executeQuery();
+		
 		return rs;
 	}
 
@@ -352,17 +320,23 @@ public class OracleMetadata
 
 		return linkOwner;
 	}
-	private String ERROR_QUERY = "SELECT line, position, text   FROM all_errors   WHERE owner = ?     AND type = ?    AND name = ? ";
-
+	
 	/**
 	 *	Return the errors reported in the all_errors table for Oracle.
 	 *	This method can be used to obtain error information after a CREATE PROCEDURE
 	 *	or CREATE TRIGGER statement has been executed.
 	 *
-	 *	@return extended error information if the current DBMS is Oracle. An empty string otherwise.
+	 *	@return extended error information if available
 	 */
 	public String getErrorInfo(String schema, String objectName, String objectType)
 	{
+		final String ERROR_QUERY = 
+			"SELECT line, position, text " + 
+			" FROM all_errors   " + 
+			"WHERE owner = ? " + 
+			"  AND type = ? " + 
+			"  AND name = ? ";
+
 		if (objectType == null || objectName == null)
 		{
 			return "";
@@ -382,16 +356,9 @@ public class OracleMetadata
 				schema = this.connection.getCurrentSchema();
 			}
 			stmt = this.connection.getSqlConnection().prepareStatement(ERROR_QUERY);
-			stmt.setString(1, schema.toUpperCase());
-			stmt.setString(2, objectType.toUpperCase());
-			if (objectName.startsWith("\""))
-			{
-				stmt.setString(3, StringUtil.trimQuotes(objectName));
-			}
-			else
-			{
-				stmt.setString(3, objectName.toUpperCase());
-			}
+			stmt.setString(1, schema.toUpperCase().trim());
+			stmt.setString(2, objectType.toUpperCase().trim());
+			stmt.setString(3, StringUtil.trimQuotes(objectName));
 
 			rs = stmt.executeQuery();
 			int count = 0;
@@ -531,5 +498,54 @@ public class OracleMetadata
 	public void columnsProcessed()
 	{
 		SqlUtil.closeStatement(columnStatement);
+		columnStatement = null;
 	}
+
+	private String getVarcharType(String type, int size, int semantics)
+	{
+		StringBuilder result = new StringBuilder(25);
+		result.append(type);
+		result.append('(');
+		result.append(size);
+
+		// Only apply this logic vor VARCHAR columns
+		// NVARCHAR (which might have been reported as type == VARCHAR) does not 
+		// allow Byte/Char semantics
+		if (type.startsWith("VARCHAR"))
+		{
+			if (alwaysShowCharSemantics || semantics != this.defaultLengthSemantics)
+			{
+				if (semantics == BYTE_SEMANTICS)
+				{
+					result.append(" Byte");
+				}
+				else if (semantics == CHAR_SEMANTICS)
+				{
+					result.append(" Char");
+				}
+			}
+		}
+		result.append(')');
+		return result.toString();
+	}
+	
+	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, int byteOrChar)
+	{
+		String display = null;
+		if (sqlType == Types.VARCHAR) 
+		{
+			// Hack to get Oracle's VARCHAR2(xx Byte) or VARCHAR2(xxx Char) display correct
+			// Our own statement to retrieve column information in OracleMetaData
+			// will return the byte/char semantics in the field WB_SQL_DATA_TYPE
+			// Oracle's JDBC driver does not supply this information (because
+			// the JDBC standard does not define a column for this)
+			display = getVarcharType(dbmsName, size, byteOrChar);
+		}
+		else 
+		{
+			display = SqlUtil.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
+		}
+		return display;
+	}
+	
 }

@@ -11,7 +11,6 @@
  */
 package workbench.util;
 
-import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -42,7 +41,6 @@ import workbench.storage.ResultInfo;
  */
 public class SqlUtil
 {
-	//private static final Pattern SPECIAL_CHAR_PATTERN = Pattern.compile("[$:\\\\/ \\.;,]");
 	private static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_][\\w\\$#@]*");
 	
 	/**
@@ -862,6 +860,21 @@ public class SqlUtil
 			return "VARBINARY";
 		else if (aSqlType == Types.VARCHAR)
 			return "VARCHAR";
+		// The following values are JDBC 4.0 /Java6 constants
+		// but as I want to be able to compile with Java 5, I cannot
+		// reference the constant declarations from java.sql.Types 
+		else if (aSqlType == 2011) 
+			return "NCLOB";
+		else if (aSqlType == 2009) 
+			return "SQLXML";
+		else if (aSqlType == -15) 
+			return "NCHAR";
+		else if (aSqlType == -9) 
+			return "NVARCHAR";
+		else if (aSqlType == -16)
+			return "LONGNVARCHAR";
+		else if (aSqlType == -8) 
+			return "ROWID";
 		else
 			return "UNKNOWN";
 	}
@@ -878,7 +891,7 @@ public class SqlUtil
 		{
 			case Types.VARCHAR:
 			case Types.CHAR:
-				if ("text".equals(aTypeName) && size == Integer.MAX_VALUE) return aTypeName;
+				if ("text".equalsIgnoreCase(aTypeName) && size == Integer.MAX_VALUE) return aTypeName;
 				if (size > 0) 
 				{
 					display = aTypeName + "(" + size + ")";
@@ -915,7 +928,7 @@ public class SqlUtil
 
 			case Types.OTHER:
 				// Oracle specific datatypes
-				if ("NVARCHAR2".equalsIgnoreCase(aTypeName))
+				if (aTypeName.toUpperCase().startsWith("NVARCHAR"))
 				{
 					display = aTypeName + "(" + size + ")";
 				}
@@ -1027,26 +1040,4 @@ public class SqlUtil
 		return result.toString();
 	}
 	
-	public static void main(String args[])
-	{
-		try
-		{
-			System.out.println("Checking if all types defined by java.sql.Types are covered by getTypeName()...");
-			System.out.println(System.getProperty("java.version"));
-			Field fields[] = java.sql.Types.class.getDeclaredFields();
-			for (int i=0; i < fields.length; i++)
-			{
-				int type = fields[i].getInt(null);
-				if (getTypeName(type).equals("UNKNOWN"))
-				{
-					System.out.println("Type " + fields[i].getName() + " not included in getTypeName()!");
-				}
-			}
-		}
-		catch (Throwable th)
-		{
-			th.printStackTrace();
-		}
-		System.out.println("Done.");
-	}
 }

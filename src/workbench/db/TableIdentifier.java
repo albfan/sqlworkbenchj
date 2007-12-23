@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.resource.ResourceMgr;
@@ -506,4 +507,32 @@ public class TableIdentifier
 		this.type = type;
 	}
 
+	public CharSequence getSource(WbConnection con)
+		throws SQLException
+	{
+		CharSequence source = null;
+		DbMetadata meta = con.getMetadata();
+		if (DbMetadata.MVIEW_NAME.equalsIgnoreCase(type))
+		{
+			source = meta.getExtendedViewSource(this, false);
+		}
+		else if ("SYNONYM".equalsIgnoreCase(type))
+		{
+			source = meta.getSynonymSource(this);
+		}
+		else if ("VIEW".equalsIgnoreCase(type))
+		{
+			source = meta.getViewSource(this);
+		}
+		else if ("SEQUENCE".equalsIgnoreCase(type))
+		{
+			source = meta.getSequenceSource(getTableExpression(con));
+		}
+		else
+		{
+			source = meta.getTableSource(this, false, false);
+		}
+		return source;
+	}
+	
 }

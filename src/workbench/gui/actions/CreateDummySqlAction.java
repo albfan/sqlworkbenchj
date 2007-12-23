@@ -12,12 +12,15 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import workbench.db.DbObject;
+import workbench.db.DummyInsert;
+import workbench.db.DummySelect;
 import workbench.db.ObjectScripter;
 import workbench.db.TableIdentifier;
 import workbench.gui.dbobjects.DbObjectList;
@@ -58,15 +61,23 @@ public class CreateDummySqlAction
 	public void executeAction(ActionEvent e)
 	{
 		List<? extends DbObject> objects = source.getSelectedObjects();
+		List<DbObject> dummy = new ArrayList<DbObject>(objects.size());
 		for (DbObject dbo : objects)
 		{
 			if (dbo instanceof TableIdentifier)
 			{
 				TableIdentifier tbl = (TableIdentifier)dbo;
-				tbl.setType(scriptType);
+				if (scriptType.equalsIgnoreCase("select"))
+				{
+					dummy.add(new DummySelect(tbl));
+				}
+				else
+				{
+					dummy.add(new DummyInsert(tbl));
+				}
 			}
 		}
-		ObjectScripter s = new ObjectScripter(objects, source.getConnection());
+		ObjectScripter s = new ObjectScripter(dummy, source.getConnection());
 		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
 		scripterUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));
 	}

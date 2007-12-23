@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import java.sql.SQLException;
 import workbench.util.SqlUtil;
 
 /**
@@ -24,8 +25,6 @@ public class TriggerDefinition
 	private String catalog;
 	private String triggerName;
 	
-	private CharSequence source;
-
 	public TriggerDefinition(String cat, String schem, String name)
 	{
 		schema = schem;
@@ -33,6 +32,13 @@ public class TriggerDefinition
 		triggerName = name;
 	}
 
+	public CharSequence getSource(WbConnection con)
+		throws SQLException
+	{
+		if (con == null) return null;
+		return con.getMetadata().getTriggerSource(catalog, schema, triggerName);
+	}
+	
 	public String getSchema() 
 	{
 		return schema;
@@ -67,8 +73,5 @@ public class TriggerDefinition
 	{
 		return triggerName;
 	}
-
-	public void setSource(CharSequence s) { this.source = s; }
-	public CharSequence getSource() { return this.source; }
 	
 }

@@ -87,6 +87,7 @@ import java.util.Iterator;
 import workbench.WbManager;
 import workbench.db.DbObject;
 import workbench.db.IndexDefinition;
+import workbench.db.SequenceDefinition;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.CreateDummySqlAction;
 import workbench.gui.actions.DeleteTablesAction;
@@ -407,7 +408,7 @@ public class TableListPanel
 				for (int i = 0; i < rows.length; i++)
 				{
 					String name = indexes.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
-					IndexDefinition index = new IndexDefinition(schema, name, null);
+					IndexDefinition index = new IndexDefinition(tbl, schema, name, null);
 					objects.add(index);
 				}
 				return objects;
@@ -1774,7 +1775,15 @@ public class TableListPanel
 		List<DbObject> result = new ArrayList<DbObject>(count);
 		for (int i=0; i < count; i++)
 		{
-			result.add(createTableIdentifier(rows[i]));
+			TableIdentifier table = createTableIdentifier(rows[i]);
+			if (table.getType().equalsIgnoreCase("SEQUENCE"))
+			{
+				result.add(new SequenceDefinition(table.getSchema(), table.getTableName()));
+			}
+			else
+			{
+				result.add(table);
+			}
 		}
 		return result;
 	}

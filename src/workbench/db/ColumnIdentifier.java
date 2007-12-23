@@ -100,6 +100,11 @@ public class ColumnIdentifier
 		return getColumnName();
 	}
 	
+	public CharSequence getSource(WbConnection con)
+	{
+		return this.name + " " + this.dbmsType;
+	}
+	
 	/**
 	 *	Define the size for this column (e.g. for VARCHAR columns)
 	 */

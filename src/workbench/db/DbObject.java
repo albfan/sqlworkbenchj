@@ -10,7 +10,7 @@
  *
  */
 package workbench.db;
-
+import java.sql.SQLException;
 /**
  *
  * @author support@sql-workbench.net
@@ -52,4 +52,15 @@ public interface DbObject
 	 * @return the qualified name including catalog and schema if applicable
 	 */
 	String getObjectExpression(WbConnection conn);
+	
+	/**
+	 * Return the SQL source for this object. This is not necessariyl
+	 * a valid SQL Statement that can be run (e.g. for a column definition)
+	 * @param con the connection for which to create the source
+	 * @return the course to re-create this object
+	 * @throws java.sql.SQLException
+	 */
+	CharSequence getSource(WbConnection con)
+		throws SQLException;
+	
 }

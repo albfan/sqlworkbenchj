@@ -70,6 +70,7 @@ import workbench.db.firebird.FirebirdConstraintReader;
 import workbench.db.h2database.H2ConstraintReader;
 import workbench.db.h2database.H2SequenceReader;
 import workbench.db.oracle.OracleSequenceReader;
+import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.sql.formatter.SqlFormatter;
 
 /**
@@ -93,6 +94,7 @@ public class DbMetadata
 	private OracleMetadata oracleMetaData;
 
 	private ConstraintReader constraintReader;
+	private DataTypeResolver dataTypeResolver;
 	private SynonymReader synonymReader;
 	private SequenceReader sequenceReader;
 	private ProcedureReader procedureReader;
@@ -187,6 +189,7 @@ public class DbMetadata
 			this.sequenceReader = new OracleSequenceReader(this.dbConnection);
 			this.procedureReader = new OracleProcedureReader(this.dbConnection);
 			this.errorInfoReader = this.oracleMetaData;
+			this.dataTypeResolver = this.oracleMetaData;
 			this.indexReader = new OracleIndexReader(this);
 		}
 		else if (productLower.indexOf("postgres") > - 1)
@@ -196,6 +199,8 @@ public class DbMetadata
 			this.sequenceReader = new PostgresSequenceReader(this.dbConnection);
 			this.procedureReader = new PostgresProcedureReader(this.dbConnection);
 			this.indexReader = new PostgresIndexReader(this);
+			this.dataTypeResolver = new PostgresDataTypeResolver();
+			
 			// Starting with the version 8.2 the driver supports the dollar quoting
 			// out of the box, so there is no need to use our own workaround
 			if (!JdbcUtils.hasMiniumDriverVersion(dbConnection.getSqlConnection(), "8.2"))
@@ -293,8 +298,7 @@ public class DbMetadata
 			this.constraintReader = new H2ConstraintReader();
 		}
 
-		// if the DBMS does not need a specific ProcedureReader
-		// we use the default implementation
+		// Use default implementations for non-JDBC supplied information
 		if (this.procedureReader == null)
 		{
 			this.procedureReader = new JdbcProcedureReader(this.dbConnection);
@@ -309,6 +313,11 @@ public class DbMetadata
 		{
 			this.schemaInfoReader = new GenericSchemaInfoReader(this.getDbId());
 		}
+		
+		if (this.dataTypeResolver == null)
+		{
+			this.dataTypeResolver = new DefaultDataTypeResolver();
+		}		
 		
 		try
 		{
@@ -1919,8 +1928,23 @@ public class DbMetadata
 	 *  the integer value of the java datatype from {@link java.sql.Types}
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE = 6;
+	
+	/** The column index for a {@link workbench.storage.DataStore} returned
+	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
+	 *  the integer value of siez of the column 
+	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_SIZE = 7;
+	
+	/** The column index for a {@link workbench.storage.DataStore} returned
+	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
+	 *  the number of digits for the column
+	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_DIGITS = 8;
+	
+	/** The column index for a {@link workbench.storage.DataStore} returned
+	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
+	 *  the ordinal position of the column 
+	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_POSITION = 9;
 
 	/**
@@ -1953,6 +1977,7 @@ public class DbMetadata
 	}
 	
 	/** Return a DataStore containing the definition of the given table.
+	 * 
 	 * @param aCatalog The catalog in which the table is defined. This should be null if the DBMS does not support catalogs
 	 * @param aSchema The schema in which the table is defined. This should be null if the DBMS does not support schemas
 	 * @param aTable The name of the table
@@ -2021,13 +2046,8 @@ public class DbMetadata
 
 		ResultSet rs = null;
 		
-		boolean checkOracleCharSemantics = this.isOracle && Settings.getInstance().useOracleCharSemanticsFix();
-		
 		try
 		{
-			// Oracle's JDBC driver does not return varchar lengths
-			// correctly if the NLS_LENGTH_SEMANTICS is set to CHARACTER (and not byte)
-			// so we'll need to use our own statement
 			if (this.oracleMetaData != null)
 			{
 				rs = this.oracleMetaData.getColumns(aCatalog, aSchema, aTable, "%");
@@ -2051,17 +2071,27 @@ public class DbMetadata
 
 				int size = rs.getInt("COLUMN_SIZE");
 				int digits = rs.getInt("DECIMAL_DIGITS");
-				if (this.isPostgres && (sqlType == java.sql.Types.NUMERIC || sqlType == java.sql.Types.DECIMAL))
+
+				int sqlDataType = -1;
+				try
 				{
-					if (size == 65535) size = 0;
-					if (digits == 65531) digits = 0;
+					// This column is used by our own OracleMetaData to 
+					// return information about char/byte semantics
+					sqlDataType = rs.getInt("SQL_DATA_TYPE");
 				}
-				String rem = rs.getString("REMARKS");
-				String def = rs.getString("COLUMN_DEF");
-				if (def != null && this.dbSettings.trimDefaults())
+				catch (Throwable th)
 				{
-					def = def.trim();
+					// The specs says "unused" for this column, so maybe 
+					// there are drivers that do not return this column at all.
+					sqlDataType = -1;
 				}
+				
+				String defaultValue = rs.getString("COLUMN_DEF");
+				if (defaultValue != null && this.dbSettings.trimDefaults())
+				{
+					defaultValue = defaultValue.trim();
+				}
+				
 				int position = -1;
 				try
 				{
@@ -2072,40 +2102,20 @@ public class DbMetadata
 					LogMgr.logError("DbMetadata", "JDBC driver does not suport ORDINAL_POSITION column for getColumns()", e);
 					position = -1;
 				}
-				
-				String nul = rs.getString("IS_NULLABLE");
 
-				String display = null;
+				String display = this.dataTypeResolver.getSqlTypeDisplay(typeName, sqlType, size, digits, sqlDataType);
 				
-				// Hack to get Oracle's VARCHAR2(xx Byte) or VARCHAR2(xxx Char) display correct
-				// Our own statement to retrieve column information in OracleMetaData
-				// will return the byte/char semantics in the field SQL_DATA_TYPE
-				// Oracle's JDBC driver does not supply this information (because
-				// the JDBC standard does not define a column for this)
-				if (checkOracleCharSemantics && sqlType == Types.VARCHAR && this.oracleMetaData != null)
-				{
-					int byteOrChar = rs.getInt("SQL_DATA_TYPE");
-					display = this.oracleMetaData.getVarcharType(typeName, size, byteOrChar);
-					if (display == null)
-					{
-						display = SqlUtil.getSqlTypeDisplay(typeName, sqlType, size, digits);
-					}
-				}
-				else
-				{
-					display = SqlUtil.getSqlTypeDisplay(typeName, sqlType, size, digits);
-				}
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_COL_NAME, colName);
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE, display);
+				
 				if (keys.contains(colName.toLowerCase()))
 					ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG, "YES");
 				else
 					ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG, "NO");
 
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_NULLABLE, nul);
-
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DEFAULT, def);
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_REMARKS, rem);
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_NULLABLE, rs.getString("IS_NULLABLE"));
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DEFAULT, defaultValue);
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_REMARKS, rs.getString("REMARKS"));
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, new Integer(sqlType));
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_SIZE, new Integer(size));
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DIGITS, new Integer(digits));
@@ -2237,7 +2247,7 @@ public class DbMetadata
 				IndexDefinition def = defs.get(indexName);
 				if (def == null)
 				{
-					def = new IndexDefinition(indexName, null);
+					def = new IndexDefinition(tbl, indexName, null);
 					def.setUnique(!unique);
 					def.setPrimaryKeyIndex(pkName.equals(indexName));
 					defs.put(indexName, def);

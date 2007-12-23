@@ -29,14 +29,16 @@ public class IndexDefinition
 	private String indexName;
 	private String indexType;
 	private String indexSchema;
+	private TableIdentifier baseTable;
 	
 	private List<IndexColumn> columns = new ArrayList<IndexColumn>();
 	
-	public IndexDefinition(String schema, String name, String exp)
+	public IndexDefinition(TableIdentifier table, String schema, String name, String exp)
 	{
 		this.indexSchema = schema;
 		this.indexName = name;
 		this.expression = exp;
+		this.baseTable = table;
 	}
 	
 	public String getSchema()
@@ -49,9 +51,9 @@ public class IndexDefinition
 		return null;
 	}
 	
-	public IndexDefinition(String name, String exp)
+	public IndexDefinition(TableIdentifier table, String name, String exp)
 	{
-		this(null, name, exp);
+		this(table, null, name, exp);
 	}
 
 	public void addColumn(String column, String direction)
@@ -71,6 +73,10 @@ public class IndexDefinition
 		}
 	}
 
+	public void setBaseTable(TableIdentifier table)
+	{
+		this.baseTable = table;
+	}
 	public String getObjectExpression(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(conn, null, indexSchema, indexName);
@@ -81,7 +87,6 @@ public class IndexDefinition
 		return conn.getMetadata().quoteObjectname(indexName);
 	}
 
-	
 	public String getObjectType()
 	{
 		return "INDEX";
@@ -150,5 +155,18 @@ public class IndexDefinition
 			return this.getExpression().equals((String)o);
 		}
 		return false;
+	}
+	
+	public CharSequence getSource(WbConnection con)
+	{
+		if (con == null) return null;
+		String[] cols = new String[this.columns.size()];
+		
+		for (int i=0; i < columns.size(); i++)
+		{
+			cols[i] = columns.get(i).getColumn();
+		}
+		
+		return con.getMetadata().buildIndexSource(baseTable, indexName, isUnique, cols);
 	}
 }

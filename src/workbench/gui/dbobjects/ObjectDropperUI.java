@@ -19,9 +19,6 @@ import javax.swing.JDialog;
 import javax.swing.WindowConstants;
 
 import workbench.db.DbObject;
-import workbench.db.GenericObjectDropper;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.NoSelectionModel;
 import workbench.gui.components.WbButton;

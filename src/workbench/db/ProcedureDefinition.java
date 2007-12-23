@@ -12,6 +12,7 @@
 package workbench.db;
 
 import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -54,6 +55,7 @@ public class ProcedureDefinition
 		procName = name;
 		resultType = type;
 	}
+	
 	public ProcedureDefinition(String cat, String schem, String name, int type, boolean isOracle)
 	{
 		schema = schem;
@@ -64,6 +66,24 @@ public class ProcedureDefinition
 		{
 			this.isOraclePackage = !StringUtil.isEmptyString(catalog);
 		}
+	}
+
+	public CharSequence getSource(WbConnection con)
+		throws SQLException
+	{
+		if (con == null) return null;
+		if (this.source == null)
+		{
+			try
+			{
+				con.getMetadata().readProcedureSource(this);
+			}
+			catch (NoConfigException e)
+			{
+				this.source = "N/A";
+			}
+		}
+		return this.source;
 	}
 	
 	public String getObjectName(WbConnection conn)
@@ -81,8 +101,15 @@ public class ProcedureDefinition
 		return getProcedureName();
 	}
 	
-	public void setSource(CharSequence s) { this.source = s; }
-	public CharSequence getSource() { return this.source; }
+	public void setSource(CharSequence s) 
+	{ 
+		this.source = s; 
+	}
+	
+	public CharSequence getSource() 
+	{ 
+		return this.source; 
+	}
 	
 	public void setOraclePackage(boolean flag) { this.isOraclePackage = true; }
 	public boolean isOraclePackage() { return this.isOraclePackage; }
@@ -92,13 +119,22 @@ public class ProcedureDefinition
 		if (this.isOraclePackage) return null;
 		return this.catalog; 
 	}
-	public String getSchema() { return this.schema; }
+	
+	public String getSchema() 
+	{ 
+		return this.schema; 
+	}
+	
 	public String getProcedureName() 
 	{
 		if (this.isOraclePackage) return catalog;
 		return this.procName; 
 	}
-	public int getResultType() { return this.resultType; }
+	
+	public int getResultType() 
+	{ 
+		return this.resultType; 
+	}
 	
 	public String getObjectType()
 	{
