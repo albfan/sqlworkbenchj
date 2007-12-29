@@ -282,7 +282,7 @@ public class IngresMetadata
 				result.append("\n      ");
 				result.append(order);
 
-				result.append("\n;");
+				result.append(";\n");
 			}
 		}
 		catch (Throwable e)

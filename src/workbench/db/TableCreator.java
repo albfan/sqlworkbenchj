@@ -81,7 +81,7 @@ public class TableCreator
 			
 			if (pkCols.size() > 0)
 			{
-				StringBuilder pkSql = this.connection.getMetadata().getPkSource(this.tablename, pkCols, null);
+				CharSequence pkSql = this.connection.getMetadata().getPkSource(this.tablename, pkCols, null);
 				if (pkSql.length() > 0)
 				{
 					LogMgr.logInfo("TableCreator.createTable()", "Adding primary key using: " + pkSql.toString());

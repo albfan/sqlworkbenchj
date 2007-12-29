@@ -204,7 +204,8 @@ public class OracleSequenceReader
 		result.append(nl + "      ");
 		result.append(order);
 
-		result.append(";");
+		result.append(';');
+		result.append(nl);
 
 		def.setSource(result);
 	}

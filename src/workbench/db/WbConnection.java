@@ -63,23 +63,23 @@ public class WbConnection
 	private PreparedStatementPool preparedStatementPool;
 	private List<PropertyChangeListener> listeners;
 	private DbObjectCache objectCache;
-	private DbDriver driver;
 	
 	private Method clearSettings = null;
 	private Object dbAccess = null;
 	private boolean doOracleClear = true;
 
 	private boolean busy; 
-	private Object busyLock = new Object();
 	private KeepAliveDaemon keepAlive = null;
 	
 	/**
-	 * Create a new connection
+	 * Create a new wrapper connection around the original SQL connection.
+	 * This will also initialize a {@link #DbMetadata} instance.
 	 */
 	public WbConnection(String anId, Connection aConn, ConnectionProfile aProfile)
+		throws SQLException
 	{
 		this.id = anId;
-		this.setSqlConnection(aConn);
+		setSqlConnection(aConn);
 		setProfile(aProfile);
 	}
 
@@ -93,7 +93,7 @@ public class WbConnection
 		return this.id;
 	}
 
-	public void setProfile(ConnectionProfile aProfile)
+	private void setProfile(ConnectionProfile aProfile)
 	{
 		this.profile = aProfile;
 		initKeepAlive();
@@ -231,25 +231,17 @@ public class WbConnection
 	}
 	
 	void setSqlConnection(Connection aConn)
+		throws SQLException
 	{
 		this.sqlConnection = aConn;
-		try
-		{
-			this.metaData = new DbMetadata(this);
-			this.doOracleClear = this.metaData.isOracle();
-		}
-		catch (Throwable e)
-		{
-			LogMgr.logError(this, "Error initializing DB Meta Data", e);
-		}
+		this.metaData = new DbMetadata(this);
+		this.doOracleClear = this.metaData.isOracle();
 	}
 
+	/**
+	 * Return any warnings that are stored in the underlying SQL Connection.
+	 */
 	public String getWarnings()
-	{
-		return this.getWarnings(true);
-	}
-
-	public String getWarnings(boolean clearWarnings)
 	{
 		try
 		{
@@ -260,14 +252,14 @@ public class WbConnection
 				if (this.scriptError != null)
 				{
 					String error = this.scriptError.toString();
-					if (clearWarnings) this.scriptError = null;
+					this.scriptError = null;
 					return error;
 				}
 				return null;
 			}
 			
 			StringBuilder msg = new StringBuilder(200);
-			if (this.scriptError != null) msg.append(this.scriptError);
+			if (!StringUtil.isEmptyString(this.scriptError)) msg.append(this.scriptError);
 
 			String s = null;
 			while (warn != null)
@@ -277,7 +269,7 @@ public class WbConnection
 				msg.append(s);
 				warn = warn.getNextWarning();
 			}
-			if (clearWarnings) this.clearWarnings();
+			this.clearWarnings();
 			return msg.toString();
 		}
 		catch (SQLException e)
@@ -303,17 +295,17 @@ public class WbConnection
 		{
 			this.sqlConnection.clearWarnings();
 
-			if (doOracleClear && this.metaData != null && this.metaData.isOracle())
+			if (doOracleClear)
 			{
 				// obviously the Oracle driver does NOT clear the warnings
 				// (as discovered when looking at the source code)
-				// luckily the instance on the driver which holds the
+				// luckily the instance variable on the driver which holds the
 				// warnings is defined as public and thus we can
-				// reset the warnings there
-				// this is done via reflection so that the Oracle driver
+				// reset the warnings "manually"
+				// This is done via reflection so that the Oracle driver
 				// does not need to be present when compiling
-				
 				// this is not true for newer drivers (10.x) 
+				
 				if (this.clearSettings == null || dbAccess == null)
 				{
 					Class ora = this.sqlConnection.getClass();
@@ -327,14 +319,13 @@ public class WbConnection
 						{
 							clearSettings = dbAccessClass.getMethod("setWarnings", new Class[] {SQLWarning.class} );
 						}
-						catch (NoSuchMethodException e)
+						catch (Throwable e)
 						{
 							// newer drivers do not seem to support this any more,
 							// so after the first error, we'll skip this for the rest of the session
 							doOracleClear = false;
 							clearSettings = null;
 						}
-						
 					}
 				}
 				// the following line is equivalent to:
@@ -363,6 +354,7 @@ public class WbConnection
 	public Savepoint setSavepoint()
 		throws SQLException
 	{
+		if (this.getAutoCommit()) return null;
 		return this.sqlConnection.setSavepoint();
 	}
 
@@ -382,6 +374,9 @@ public class WbConnection
 		}
 	}
 	
+	/**
+	 * A non-exception throwing wrapper around Connection.releaseSavepoint(Savepoint)
+	 */
 	public void releaseSavepoint(Savepoint sp)
 	{
 		if (sp == null) return;
@@ -495,8 +490,9 @@ public class WbConnection
 	}
 
 	/**
-	 *	This will actually close the connection to the DBMS.
-	 *	It will also free an resources from the DbMetadata object.
+	 * This will actually close the connection to the DBMS.
+	 * It will also free an resources from the DbMetadata object and
+	 * shutdown the keep alive thread.
 	 */
 	public void close()
 	{
@@ -569,7 +565,7 @@ public class WbConnection
 		throws SQLException
 	{
 		Statement stmt = null;
-		if (this.metaData.getDbSettings().allowsExtendedCreateStatement())
+		if (getDbSettings().allowsExtendedCreateStatement())
 		{
 			stmt = this.sqlConnection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 		}
@@ -618,12 +614,6 @@ public class WbConnection
 		return this.metaData.getDbSettings().useJdbcCommit();
 	}
 
-	public boolean shouldCommitDDL()
-	{
-		if (this.getAutoCommit()) return false;
-		return this.getDbSettings().ddlNeedsCommit();
-	}
-	
 	public DbSettings getDbSettings()
 	{
 		return this.metaData.getDbSettings();
@@ -838,11 +828,24 @@ public class WbConnection
 	 *	If the current connection needs a commit for a DDL, this will return true.
 	 *	The metadata class reads the names of those DBMS from the Settings object!
 	 */
-	public boolean getDdlNeedsCommit()
+	protected boolean getDDLNeedsCommit()
 	{
 		return this.metaData.getDbSettings().ddlNeedsCommit();
 	}
 
+	/**
+	 * Checks if DDL statement need a commit for this connection. 
+	 * 
+	 * @return false if autocommit is on or the DBMS does not support DDL transactions
+	 * @see #getDdlNeedsCommit()
+	 */
+	public boolean shouldCommitDDL()
+	{
+		if (this.getAutoCommit()) return false;
+		return this.getDDLNeedsCommit();
+	}
+	
+	
 	public synchronized void addChangeListener(PropertyChangeListener l)
 	{
 		if (this.listeners == null) this.listeners = new ArrayList<PropertyChangeListener>();
@@ -898,21 +901,15 @@ public class WbConnection
 	
 	public boolean isBusy()
 	{
-		synchronized (busyLock)
-		{
-			return this.busy;
-		}
+		return this.busy;
 	}
 	
 	public void setBusy(boolean flag)
 	{
-		synchronized (busyLock)
+		this.busy = flag;
+		if (flag && this.keepAlive != null)
 		{
-			this.busy = flag;
-			if (flag && this.keepAlive != null)
-			{
-				this.keepAlive.setLastDbAction(System.currentTimeMillis());
-			}
+			this.keepAlive.setLastDbAction(System.currentTimeMillis());
 		}
 	}
 	

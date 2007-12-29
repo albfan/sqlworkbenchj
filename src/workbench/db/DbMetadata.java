@@ -16,6 +16,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -774,20 +775,23 @@ public class DbMetadata
 		// ThinkSQL and DB2 return the full CREATE VIEW statement
 		if (verb.equalsIgnoreCase("CREATE"))
 		{
-			String type = SqlUtil.getCreateType(source);
-			result.append("DROP ");
-			result.append(type);
-			result.append(' ');
-			result.append(view.getTableName());
-			result.append(';');
-			result.append(lineEnding);
-			result.append(lineEnding);
+			if (includeDrop)
+			{
+				String type = SqlUtil.getCreateType(source);
+				result.append("DROP ");
+				result.append(type);
+				result.append(' ');
+				result.append(view.getTableName());
+				result.append(';');
+				result.append(lineEnding);
+				result.append(lineEnding);
+			}
 			result.append(source);
 			if (this.dbSettings.ddlNeedsCommit())
 			{
 				result.append(lineEnding);
-				result.append(lineEnding);
 				result.append("COMMIT;");
+				result.append(lineEnding);
 			}
 			return result.toString();
 		}
@@ -887,9 +891,9 @@ public class DbMetadata
 			{
 				SqlFormatter f = new SqlFormatter(source);
 				source = new StringBuilder(f.getFormattedSql());
-				
 			}
 			if (!StringUtil.endsWith(source, ';')) source.append(';');
+			source.append(Settings.getInstance().getInternalEditorLineEnding());
 		}
 		catch (Exception e)
 		{
@@ -3313,7 +3317,7 @@ public class DbMetadata
 
 			if (includeFk)
 			{
-				StringBuilder fk = this.getFkSource(table, aFkDef, tableNameToUse);
+				StringBuilder fk = this.getFkSource(table, aFkDef, tableNameToUse, createInlineConstraints);
 				if (fk.length() > 0)
 				{
 					result.append(fk);
@@ -3321,41 +3325,51 @@ public class DbMetadata
 			}
 		}
 
-		result.append(");" + lineEnding); // end of CREATE TABLE
+		result.append(");" + lineEnding); 
+		// end of CREATE TABLE
 		
 		if (!this.createInlineConstraints && pkCols.size() > 0)
 		{
 			String name = this.getPkIndexName(aIndexDef);
-			StringBuilder pkSource = getPkSource( (tableNameToUse == null ? table : new TableIdentifier(tableNameToUse)), pkCols, name);
+			CharSequence pkSource = getPkSource( (tableNameToUse == null ? table : new TableIdentifier(tableNameToUse)), pkCols, name);
 			result.append(pkSource);
-			result.append(lineEnding);
-			result.append(lineEnding);
 		}
 		
 		StringBuilder indexSource = this.indexReader.getIndexSource(table, aIndexDef, tableNameToUse);
-		result.append(indexSource);
+		if (!StringUtil.isEmptyString(indexSource))
+		{
+			result.append(lineEnding);
+			result.append(indexSource);
+		}
 		
-		if (!this.createInlineConstraints && includeFk) result.append(this.getFkSource(table, aFkDef, tableNameToUse));
+		if (!this.createInlineConstraints && includeFk) 
+		{
+			CharSequence fk = this.getFkSource(table, aFkDef, tableNameToUse, createInlineConstraints);
+			if (!StringUtil.isEmptyString(fk))
+			{
+				result.append(lineEnding);
+				result.append(fk);
+			}
+		}
 
 		String tableComment = this.getTableCommentSql(table);
 		if (!StringUtil.isEmptyString(tableComment))
 		{
 			result.append(lineEnding);
 			result.append(tableComment);
-			result.append(lineEnding);
 		}
-
+		
 		StringBuilder colComments = this.getTableColumnCommentsSql(table, columns);
-		if (colComments != null && colComments.length() > 0)
+		if (!StringUtil.isEmptyString(colComments))
 		{
 			result.append(lineEnding);
 			result.append(colComments);
-			result.append(lineEnding);
 		}
 
 		StringBuilder grants = this.getTableGrantSource(table);
 		if (grants.length() > 0)
 		{
+			result.append(lineEnding);
 			result.append(grants);
 		}
 		
@@ -3363,8 +3377,9 @@ public class DbMetadata
 		{
 			result.append(lineEnding);
 			result.append("COMMIT;");
-			result.append(lineEnding);
 		}
+		
+		result.append(lineEnding);
 
 		return result.toString();
 	}
@@ -3374,6 +3389,7 @@ public class DbMetadata
 		if (name == null) return false;
 		String regex = Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".constraints.systemname", null);
 		if (StringUtil.isEmptyString(regex)) return false;
+		
 		try
 		{
 			Pattern p = Pattern.compile(regex);
@@ -3388,43 +3404,47 @@ public class DbMetadata
 	}
 	
 	/**
-	 * Builds an ALTER TABLE to add a primary key definition for the given 
-	 * tablename.
+	 * Builds an ALTER TABLE to add a primary key definition for the given tablename.
 	 * 
 	 * @param table 
 	 * @param pkCols
 	 * @param pkName
 	 * @return
 	 */
-	public StringBuilder getPkSource(TableIdentifier table, List pkCols, String pkName)
+	public CharSequence getPkSource(TableIdentifier table, List pkCols, String pkName)
 	{
 		String template = metaSqlMgr.getPrimaryKeyTemplate();
-		StringBuilder result = new StringBuilder();
-		if (StringUtil.isEmptyString(template)) return result;
+		
+		if (StringUtil.isEmptyString(template)) return "";
+		
+		StringBuilder result = new StringBuilder(100);
 		String tablename = table.getTableExpression(this.dbConnection);
 		
 		template = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tablename);
 		template = StringUtil.replace(template, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, StringUtil.listToString(pkCols, ','));
-		
-		if (pkName == null)
-		{
-			if (Settings.getInstance().getAutoGeneratePKName()) pkName = "pk_" + tablename.toLowerCase();
-		}
-		else if (isSystemConstraintName(pkName))
+
+		if (isSystemConstraintName(pkName))
 		{
 			pkName = null;
 		}
 		
+		if (pkName == null && Settings.getInstance().getAutoGeneratePKName())
+		{
+			pkName = "pk_" + tablename.toLowerCase();
+		}
+		
 		if (isKeyword(pkName)) pkName = "\"" + pkName + "\"";
+		
 		if (StringUtil.isEmptyString(pkName)) 
 		{
 			pkName = ""; // remove placeholder if no name is available
-			template = StringUtil.replace(template, " CONSTRAINT ", ""); // remove CONSTRAINT KEYWORD if not name is available
+			template = StringUtil.replace(template, " CONSTRAINT ", ""); // remove CONSTRAINT KEYWORD if no name is available
 		}
 
 		template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, pkName);
 		result.append(template);
-		result.append(';');
+		result.append(";\n");
+		
 		return result;
 	}
 	
@@ -3464,13 +3484,21 @@ public class DbMetadata
 	{
 		if (this.constraintReader == null) return null;
 		String cons = null;
+		Savepoint sp = null;
 		try
 		{
+			if (dbSettings.useSavePointForDML())
+			{
+				sp = this.dbConnection.setSavepoint();
+			}
 			cons = this.constraintReader.getTableConstraints(dbConnection.getSqlConnection(), tbl, indent);
+			dbConnection.releaseSavepoint(sp);
 		}
 		catch (SQLException e)
 		{
-			if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
+			LogMgr.logError("DbMetadata.getTableConstraints()", "Error retrieving table constraints", e);
+			dbConnection.rollback(sp);
+			sp = null;
 			cons = null;
 		}
 		return cons;
@@ -3533,16 +3561,23 @@ public class DbMetadata
 		table.adjustCase(this.dbConnection);
 		ResultSet rs = null;
 		String result = null;
+		Savepoint sp = null;
 		try
 		{
+			if (dbSettings.useSavePointForDML())
+			{
+				sp = dbConnection.setSavepoint();
+			}
 			rs = this.metaData.getTables(table.getCatalog(), table.getSchema(), table.getTableName(), null);
 			if (rs.next())
 			{
 				result = rs.getString("REMARKS");
 			}
+			dbConnection.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
+			dbConnection.rollback(sp);
 			LogMgr.logError("DbMetadata.getTableComment()", "Error retrieving comment for table " + table.getTableExpression(), e);
 			result = null;
 		}
@@ -3557,7 +3592,7 @@ public class DbMetadata
 	public StringBuilder getFkSource(TableIdentifier table)
 	{
 		DataStore fkDef = this.getForeignKeys(table, false);
-		return getFkSource(table, fkDef, null);
+		return getFkSource(table, fkDef, null, createInlineConstraints);
 	}
 	
 	/**
@@ -3568,13 +3603,13 @@ public class DbMetadata
 	 *
 	 *	@return a SQL statement to add the foreign key definitions to the given table
 	 */
-	public StringBuilder getFkSource(TableIdentifier table, DataStore aFkDef, String tableNameToUse)
+	public StringBuilder getFkSource(TableIdentifier table, DataStore aFkDef, String tableNameToUse, boolean forInlineUse)
 	{
 		if (aFkDef == null) return StringUtil.emptyBuffer();
 		int count = aFkDef.getRowCount();
 		if (count == 0) return StringUtil.emptyBuffer();
 
-		String template = metaSqlMgr.getForeignKeyTemplate(this.createInlineConstraints);
+		String template = metaSqlMgr.getForeignKeyTemplate(forInlineUse);
 
 		// collects all columns from the base table mapped to the
 		// defining foreign key constraing.
@@ -3643,7 +3678,6 @@ public class DbMetadata
 				// first time we hit this FK definition in this loop
 				stmt = template;
 			}
-			String entry = null;
 			stmt = StringUtil.replace(stmt, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? table.getTableName() : tableNameToUse));
 			
 			if (this.isSystemConstraintName(fkname))
@@ -3656,7 +3690,7 @@ public class DbMetadata
 				stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_NAME_PLACEHOLDER, fkname);
 			}
 			
-			entry = StringUtil.listToString(colList, ',');
+			String entry = StringUtil.listToString(colList, ',');
 			stmt = StringUtil.replace(stmt, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, entry);
 			String rule = updateRules.get(fkname);
 			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_UPDATE_RULE, " ON UPDATE " + rule);
@@ -3700,7 +3734,7 @@ public class DbMetadata
 			StringBuilder colListBuffer = new StringBuilder(30);
 			String targetTable = null;
 			boolean first = true;
-			//while (tok.hasMoreTokens())
+			
 			while (itr.hasNext())
 			{
 				col = (String)itr.next();//tok.nextToken();
@@ -3730,22 +3764,23 @@ public class DbMetadata
 
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		
-		Iterator values = fks.values().iterator();
+		Iterator<String> values = fks.values().iterator();
 		while (values.hasNext())
 		{
-			if (this.createInlineConstraints)
+			if (forInlineUse)
 			{
 				fk.append("   ,");
-				fk.append((String)values.next());
+				fk.append(values.next());
 			}
 			else
 			{
-				fk.append((String)values.next());
+				fk.append(values.next());
 				fk.append(';');
 				fk.append(nl);
 			}
 			fk.append(nl);
 		}
+
 		return fk;
 	}
 

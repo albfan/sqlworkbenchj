@@ -84,6 +84,8 @@ public class GenericObjectDropper
 	public void dropObjects()
 		throws SQLException
 	{
+		boolean needCommit = this.connection.shouldCommitDDL();
+		
 		try
 		{
 			if (this.connection == null) throw new NullPointerException("No connection!");
@@ -92,7 +94,9 @@ public class GenericObjectDropper
 			int count = this.objects.size();
 			this.connection.setBusy(true);
 			
+			
     	currentStatement = this.connection.createStatement();
+			
 			String cascade = null;
 
 			boolean needTableForIndexDrop = this.connection.getDbSettings().needsTableForDropIndex();
@@ -127,14 +131,14 @@ public class GenericObjectDropper
 				currentStatement.execute(sql.toString());
 			}
 
-			if (this.connection.shouldCommitDDL())
+			if (needCommit)
 			{
 				this.connection.commit(); 
 			}
 		}
 		catch (SQLException e)
 		{
-			if (this.connection.shouldCommitDDL())
+			if (needCommit)
 			{
 				try { this.connection.rollback(); } catch (Throwable th) {}
 			}
@@ -153,7 +157,7 @@ public class GenericObjectDropper
 	{
 		if (this.currentStatement == null) return;
 		this.currentStatement.cancel();
-		if (!this.connection.getAutoCommit() && this.connection.getDdlNeedsCommit())
+		if (this.connection.shouldCommitDDL())
 		{
 			try { this.connection.rollback(); } catch (Throwable th) {}
 		}

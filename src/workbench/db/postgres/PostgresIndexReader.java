@@ -11,13 +11,13 @@
  */
 package workbench.db.postgres;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Savepoint;
+import java.sql.Statement;
 import workbench.db.DbMetadata;
 import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -38,39 +38,54 @@ public class PostgresIndexReader
 	
 	public StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
 	{
-		Connection con = this.metaData.getSqlConnection();
-		PreparedStatement stmt = null;
+		WbConnection con = this.metaData.getWbConnection();
+		Statement stmt = null;
 		ResultSet rs = null;
-		String sql = "SELECT indexdef FROM pg_indexes WHERE indexname = ? ";
+		
+		// The full CREATE INDEX Statement is stored in pg_indexes for each 
+		// index. So all we need to do, is retrieve the indexdef value
+		// from that table for all indexes defined for this table.
+		
+		StringBuilder sql = new StringBuilder(50 + indexDefinition.getRowCount() * 20); 
+		sql.append("SELECT indexdef FROM pg_indexes WHERE indexname in (");
+			
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		int count = indexDefinition.getRowCount();
 		if (count == 0) return StringUtil.emptyBuffer();
+		
 		StringBuilder source = new StringBuilder(count * 50);
 		Savepoint sp = null;
 		try
 		{
 			sp = con.setSavepoint();
-			stmt = con.prepareStatement(sql);
+			stmt = con.createStatement();
+			
 			for (int i = 0; i < count; i++)
 			{
 				String idxName = indexDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
 				String pk = indexDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG);
 				if ("YES".equalsIgnoreCase(pk)) continue;
-				stmt.setString(1, idxName);
-				rs = stmt.executeQuery();
-				if (rs.next())
-				{
-					source.append(rs.getString(1));
-					source.append(';');
-					source.append(nl);
-				}
+				if (i > 0) sql.append(',');
+				sql.append('\'');
+				sql.append(idxName);
+				sql.append('\'');
 			}
-			source.append(nl);
+			sql.append(')');
+			
+			rs = stmt.executeQuery(sql.toString());
+			while (rs.next())
+			{
+				source.append(rs.getString(1));
+				source.append(';');
+				source.append(nl);
+			}
+			SqlUtil.closeResult(rs);
+			
 			con.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
-			try { con.rollback(sp); } catch (Throwable th) {}
+			con.rollback(sp);
 			LogMgr.logError("PostgresIndexReader.getIndexSource()", "Error retrieving source", e);
 			source = new StringBuilder(ExceptionUtil.getDisplay(e));
 		}
@@ -78,6 +93,9 @@ public class PostgresIndexReader
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+		
+		if (source.length() > 0) source.append(nl);
+		
 		return source;
 	}
 

@@ -84,7 +84,7 @@ public class PostgresSequenceReader
 			{
 				buf.append(nl + "        CYCLE");
 			}
-			buf.append(';');
+			buf.append(";\n");
 		}
 		catch (Exception e)
 		{

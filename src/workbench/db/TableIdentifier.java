@@ -522,7 +522,7 @@ public class TableIdentifier
 		}
 		else if ("VIEW".equalsIgnoreCase(type))
 		{
-			source = meta.getViewSource(this);
+			source = meta.getExtendedViewSource(this, false);
 		}
 		else if ("SEQUENCE".equalsIgnoreCase(type))
 		{

@@ -73,32 +73,17 @@ public class JdbcIndexReader
 			String type = indexDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_TYPE);
 			if (type == null || type.startsWith("NORMAL")) type = "";
 			
-			// TODO: some DBMS return a column list with ascending/descending (e.g. LASTNAME A, FIRSTNAME A)
-			// but the returned expression is not understand by the DBMS using it without modifications
-			// in SQL. But the definition returned by the DBMS cannot easily be parsed for this situation 
-			// because it might also be a function or complex expression (e.g. CASE ...)
+			// TODO: some DBMS return a column list with ascending/descending information (e.g. LASTNAME A, FIRSTNAME A)
+			// but for some DBMS this is not valid SQL 
 			
-//			StringBuilder columns = new StringBuilder();
-//			StringTokenizer tok = new StringTokenizer(definition, ",");
-//			
-//			while (tok.hasMoreTokens())
-//			{
-//				String col = tok.nextToken().trim();
-//				if (col.length() == 0) continue;
-//				if (columns.length() > 0) columns.append(',');
-//				int pos = col.indexOf(' ');
-//				if (pos > -1)
-//				{
-//					columns.append(col.substring(0, pos));
-//				}
-//				else
-//				{
-//					columns.append(col);
-//				}
-//			}
-			
-			// The PK's have been created with the table source, so
-			// we do not need to add the corresponding index here.
+			// But the returned definition cannot easily be parsed for this situation 
+			// because it might also be a function (that contains a comma in the value list)
+			// or complex expression (e.g. CASE ...) which would even be harder to analyze
+			// So I'll leave the expression as it is...
+
+			// Only add non-PK Indexes here. The indexes related to the PK constraints
+			// are usually auto-created when the PK is defined, so there is no need
+			// to re-create a CREATE INDEX statement for them.
 			if ("NO".equalsIgnoreCase(is_pk))
 			{
 				idxCount ++;

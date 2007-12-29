@@ -110,15 +110,8 @@ public class H2SequenceReader
 		result = new SequenceDefinition(schema, name);
 		
 		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT"));
-		
-		// All properties are used to compare Sequences for SchemaDiff, so 
-		// properties that have not equivalent for the CREATE SEQUENCE command
-		// should not be included here.
-		
-    //result.setSequenceProperty("CURRENT_VALUE", ds.getValue(row, "CURRENT_VALUE"));
-		//result.setSequenceProperty("REMARKS", ds.getValue(row, "REMARKS"));
-		//result.setSequenceProperty("IS_GENERATED", ds.getValue(row, "IS_GENERATED"));
 		readSequenceSource(result);
+		
 		return result;		
 	}
 
@@ -129,9 +122,6 @@ public class H2SequenceReader
 		StringBuilder result = new StringBuilder(100);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		
-//    result.append("DROP SEQUENCE " + def.getSequenceName() + " IF EXISTS;");
-//    result.append(nl);
-//    result.append(nl);
     result.append("CREATE SEQUENCE ");
     result.append(def.getSequenceName());
 		
@@ -142,6 +132,8 @@ public class H2SequenceReader
       result.append(inc);
     }
 		result.append(';');
+		result.append(nl);
+		
 		def.setSource(result);
 		return;
 	}

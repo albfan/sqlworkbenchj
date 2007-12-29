@@ -228,6 +228,7 @@ public class Db2SequenceReader
 		}
 
 		result.append(';');
+		result.append(nl);
 
 		def.setSource(result);
 	}

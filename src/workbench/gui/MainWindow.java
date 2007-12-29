@@ -1211,7 +1211,7 @@ public class MainWindow
 		this.getCurrentPanel().clearLog();
 		this.getCurrentPanel().showResultPanel();
 
-		String warn = conn.getWarnings(true);
+		String warn = conn.getWarnings();
 		if (warn != null)
 		{
 			this.getCurrentPanel().showLogMessage(warn);

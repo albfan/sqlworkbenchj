@@ -501,7 +501,7 @@ public class JEditTextArea
 	/**
 	 * Updates the state of the scroll bars. This should be called
 	 * if the number of lines in the document changes, or when the
-	 * size of the text are changes.
+	 * size of the text area changes.
 	 */
 	public void updateScrollBars()
 	{
@@ -518,7 +518,7 @@ public class JEditTextArea
 
 		int charWidth = painter.getFontMetrics().charWidth('w');
 		int maxLineLength = getDocument().getMaxLineLength();
-		int maxLineWidth = charWidth * (maxLineLength + 2);
+		int maxLineWidth = (charWidth * maxLineLength) + this.painter.getGutterWidth() + 10;
 		int width = painter.getWidth();
 		if (horizontal != null && width != 0)
 		{

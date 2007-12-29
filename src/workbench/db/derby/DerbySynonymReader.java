@@ -124,6 +124,8 @@ public class DerbySynonymReader
 		result.append(nl + "       FOR ");
 		result.append(id.getTableExpression());
 		result.append(';');
+		result.append(nl);
+		
 		return result.toString();
 	}
 

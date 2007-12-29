@@ -118,7 +118,7 @@ public class ObjectScripter
 			{
 				if (first)
 				{
-					this.script.append("-- BEGIN FOREIGN KEYS --" + nl + nl);
+					this.script.append("-- BEGIN FOREIGN KEYS --" + nl);
 					first = false;
 				}
 				script.append(source);
@@ -127,7 +127,7 @@ public class ObjectScripter
 		if (!first)
 		{
 			// no table was found, so no FK was added --> do not add separator
-			this.script.append("-- END FOREIGN KEYS --" + nl);
+			this.script.append("-- END FOREIGN KEYS --" + nl + nl);
 		}
 	}
 	
@@ -161,7 +161,7 @@ public class ObjectScripter
 				boolean useSeparator = !type.equalsIgnoreCase("insert") && !type.equalsIgnoreCase("select");
 				if (useSeparator) this.script.append("-- BEGIN " + type + " " + dbo.getObjectName() + nl);
 				this.script.append(source);
-				if (useSeparator) this.script.append(nl + "-- END " + type + " " + dbo.getObjectName() + nl);
+				if (useSeparator) this.script.append("-- END " + type + " " + dbo.getObjectName() + nl);
 				this.script.append(nl);
 			}
 		}
