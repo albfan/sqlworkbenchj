@@ -905,7 +905,7 @@ public class DataImporter
 		{
 			try
 			{
-				// Oracle seems to have a problem with adding another SQL statement
+				// Oracle seems to have a problem with adding a different SQL statement
 				// to the batch of a prepared Statement (works fine with PostgreSQL)
 				if (this.useBatch)
 				{
@@ -943,7 +943,8 @@ public class DataImporter
 			catch (SQLException e)
 			{
 				String error = ExceptionUtil.getDisplay(e);
-				this.messages.append(error + "\n");
+				this.messages.append(error);
+				this.messages.appendNewLine();
 				this.hasErrors = true;
 				if (!continueOnError) throw e;
 			}
@@ -1316,8 +1317,8 @@ public class DataImporter
 				this.batchStreams.addAll(streams);
 			}
 			
-			// let's assume the batch statement affects at least one row
-			// if this is not done, the rowcount will never be increased
+			// let's assume the batch statement affects at least one row.
+			// If this is not done, the rowcount will never be increased
 			// in batchmode and thus each row will be committed even if 
 			// a different commit frequency is selected.
 			// Thanks to Pascal for pointing this out!

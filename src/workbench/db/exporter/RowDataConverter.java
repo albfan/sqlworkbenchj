@@ -76,6 +76,8 @@ public abstract class RowDataConverter
 	protected long currentRow = -1;
 	protected RowData currentRowData;
 	
+	protected boolean convertDateToTimestamp = false;
+	
 	/**
 	 *	The metadata for the result set that should be exported
 	 */
@@ -362,6 +364,10 @@ public abstract class RowDataConverter
 	public void setOriginalConnection(WbConnection conn)
 	{
 		this.originalConnection = conn;
+		if (originalConnection != null)
+		{
+			this.convertDateToTimestamp = this.originalConnection.getDbSettings().getConvertDateInExport();
+		}
 	}
 	
 	/**
@@ -509,11 +515,14 @@ public abstract class RowDataConverter
 			{
 				result = this.defaultTimestampFormatter.format(value);
 			}
-			else if (value instanceof java.util.Date && this.originalConnection != null && this.originalConnection.getMetadata().isOracle())
+			else if (convertDateToTimestamp && value instanceof java.util.Date)
 			{
 				// sometimes the Oracle driver create a java.util.Date object, but
 				// DATE columns in Oracle do contain a time part and thus we need to
 				// format it correctly.
+				// Newer Oracle drivers (>= 10) support a property to treat 
+				// DATE columns as Timestamp but for backward compatibility I'll leave
+				// this fix in here. 
 				if (this.defaultTimestampFormatter == null)
 				{
 					result = StringUtil.ISO_TIMESTAMP_FORMATTER.format(value);

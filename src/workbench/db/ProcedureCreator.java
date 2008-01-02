@@ -29,20 +29,16 @@ public class ProcedureCreator
 {
 	private String sourceSql;
 	private WbConnection dbConnection;
-//	private String catalog; 
-	private String schema;
+	private String procedureSchema;
 	private String procedureName;
-	private String objectType;
 	private boolean isReplaceScript;
 	
-	public ProcedureCreator(WbConnection con, String cat, String schem, String name, String source)
+	public ProcedureCreator(WbConnection con, String procSchema, String procName, String procSource)
 	{
-		this.sourceSql = source;
+		this.sourceSql = procSource;
 		this.dbConnection = con;
-//		this.catalog = cat;
-		this.schema = schem;
-		this.procedureName = name;
-		this.objectType = findType();
+		this.procedureSchema = procSchema;
+		this.procedureName = procName;
 	}
 	
 	private void dropIfNecessary()
@@ -52,20 +48,12 @@ public class ProcedureCreator
 		
 		StringBuilder sql = new StringBuilder(50);
 		sql.append("DROP ");
-		sql.append(this.objectType);
+		sql.append(getType());
 		sql.append(' ');
 		
-		// SQL Server doesn not accept a database name in the DROP PROCEDURE clause
-		// and this seems to be the only DBMS that actually uses the concept of catalogs
-//		if (catalog != null) 
-//		{
-//			sql.append(catalog);
-//			sql.append('.');
-//		}
-		
-		if (schema != null)
+		if (procedureSchema != null)
 		{
-			sql.append(schema);
+			sql.append(procedureSchema);
 			sql.append('.');
 		}
 		
@@ -82,12 +70,7 @@ public class ProcedureCreator
 		}
 	}
 	
-	public String getType()
-	{
-		return this.objectType;
-	}
-	
-	private String findType()
+	private String getType()
 	{
 		String type = null;
 		try
@@ -130,42 +113,41 @@ public class ProcedureCreator
 	public void recreate()
 		throws SQLException
 	{
-		synchronized (this.dbConnection)
+		if (this.dbConnection.isBusy()) return;
+		
+		Statement stmt = null;
+		try
 		{
-			Statement stmt = null;
-			try
+			this.dbConnection.setBusy(true);
+			dropIfNecessary();
+			stmt = this.dbConnection.createStatement();
+
+			List<String> sqls = this.parseScript();
+			Iterator itr = sqls.iterator();
+			while (itr.hasNext())
 			{
-				this.dbConnection.setBusy(true);
-				dropIfNecessary();
-				stmt = this.dbConnection.createStatement();
-				
-				List<String> sqls = this.parseScript();
-				Iterator itr = sqls.iterator();
-				while (itr.hasNext())
-				{
-					String sql = this.dbConnection.getMetadata().filterDDL((String)itr.next());
-					stmt.executeUpdate(sql);
-				}
-				
-				if (dbConnection.shouldCommitDDL())
-				{
-					this.dbConnection.commit();
-				}
+				String sql = this.dbConnection.getMetadata().filterDDL((String)itr.next());
+				stmt.executeUpdate(sql);
 			}
-			catch (SQLException e)
+
+			if (dbConnection.shouldCommitDDL())
 			{
-				LogMgr.logError("ProcedureCreator.recreate()", "Error when recreating procedure", e);
-				if (dbConnection.shouldCommitDDL())
-				{
-					try { this.dbConnection.rollback(); } catch (Throwable th) {}
-				}
-				throw e;
+				this.dbConnection.commit();
 			}
-			finally
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("ProcedureCreator.recreate()", "Error when recreating procedure", e);
+			if (dbConnection.shouldCommitDDL())
 			{
-				SqlUtil.closeStatement(stmt);
-				this.dbConnection.setBusy(false);
+				try { this.dbConnection.rollback(); } catch (Throwable th) {}
 			}
+			throw e;
+		}
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
+			this.dbConnection.setBusy(false);
 		}
 	}
 	

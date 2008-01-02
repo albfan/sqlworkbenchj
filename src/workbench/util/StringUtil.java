@@ -1145,13 +1145,13 @@ public class StringUtil
 		int len = value.length();
 		StringBuilder outBuffer = new StringBuilder(len*2);
 
-		for(int x=0; x<len; x++)
+		for (int x = 0; x < len; x++)
 		{
 			char aChar = value.charAt(x);
 			boolean replaced = false;
 			if (!alwaysUnicode)
 			{
-				switch(aChar)
+				switch (aChar)
 				{
 					case '\\':
 						outBuffer.append('\\');
@@ -1178,29 +1178,47 @@ public class StringUtil
 						outBuffer.append('f');
 						replaced = true;
 						break;
-				default:
+					default:
 						replaced = false;
 				}
 			}
-			
+
 			if (!replaced)
 			{
-					if ( (range != null && range.isOutsideRange(aChar)) ||
-						   (specialSaveChars != null && specialSaveChars.indexOf(aChar) > -1))
-					{
-						outBuffer.append('\\');
-						outBuffer.append('u');
-						appendUnicode(outBuffer, aChar);
-					}
-					else
-					{
-						outBuffer.append(aChar);
-					}
+				if ((range != null && range.isOutsideRange(aChar)) ||
+					(specialSaveChars != null && specialSaveChars.indexOf(aChar) > -1))
+				{
+					outBuffer.append('\\');
+					outBuffer.append('u');
+					appendUnicode(outBuffer, aChar);
+				}
+				else
+				{
+					outBuffer.append(aChar);
+				}
 			}
 		}
 		return outBuffer.toString();
 	}
 
+	public static CharSequence getOctalString(int input)
+	{
+		StringBuilder result = new StringBuilder(3);
+		String s = Integer.toOctalString(input);
+
+		if (s.length() == 1) 
+		{
+			result.append('0');
+			result.append('0');
+		}
+		else if (s.length() == 2)
+		{
+			result.append('0');
+		}
+		result.append(s);
+		return result;
+	}
+		
 	public static String padRight(String input, int length)
 	{
 		if (input == null) return null;

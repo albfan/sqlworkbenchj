@@ -38,7 +38,6 @@ public class DbSettings
 	
 	private boolean allowsMultipleGetUpdateCounts = true;
 	private boolean supportsBatchedStatements = false;
-	private boolean longVarcharIsClob = false;
 	
 	private Map<Integer, String> indexTypeMapping;
 	public static final String IDX_TYPE_NORMAL = "NORMAL";
@@ -51,30 +50,69 @@ public class DbSettings
 		this.useJdbcCommit = settings.getBoolProperty("workbench.db." + getDbId() + ".usejdbccommit", false) || settings.getServersWhichNeedJdbcCommit().contains(productName);
 		this.ddlNeedsCommit = settings.getBoolProperty("workbench.db." + getDbId() + ".ddlneedscommit", false) || settings.getServersWhereDDLNeedsCommit().contains(productName);
 		
-		String quote = settings.getProperty("workbench.db.neverquote","");
-		this.neverQuoteObjects = quote.indexOf(this.getDbId()) > -1;
+		List<String> quote = StringUtil.stringToList(settings.getProperty("workbench.db.neverquote",""));
+		this.neverQuoteObjects = quote.contains(this.getDbId());
 		this.trimDefaults = settings.getBoolProperty("workbench.db." + getDbId() + ".trimdefaults", true);
 		this.allowsMultipleGetUpdateCounts = settings.getBoolProperty("workbench.db." + getDbId() + ".multipleupdatecounts", true);
 		this.reportsRealSizeAsDisplaySize = settings.getBoolProperty("workbench.db." + getDbId() + ".charsize.usedisplaysize", false);
 		this.allowExtendedCreateStatement = settings.getBoolProperty("workbench.db." + getDbId() + ".extended.createstmt", true);
 		this.supportsBatchedStatements = settings.getBoolProperty("workbench.db." + getDbId() + ".batchedstatements", false);
-		this.longVarcharIsClob = settings.getBoolProperty("workbench.db." + getDbId() + ".clob.longvarchar", false);
 	}
 	
-	String getDbId() { return this.dbId; }
+	String getDbId() 
+	{ 
+		return this.dbId; 
+	}
 
-	public boolean longVarcharIsClob() { return this.longVarcharIsClob; }
-	public boolean supportsBatchedStatements() { return this.supportsBatchedStatements; }
-	public boolean allowsExtendedCreateStatement() { return allowExtendedCreateStatement; }
-	public boolean allowsMultipleGetUpdateCounts() { return this.allowsMultipleGetUpdateCounts; }
-	public boolean reportsRealSizeAsDisplaySize() { return this.reportsRealSizeAsDisplaySize; }
+	public boolean longVarcharIsClob()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".clob.longvarchar", false);
+	}
 
-	public boolean ddlNeedsCommit() { return ddlNeedsCommit; }
-	public boolean neverQuoteObjects() { return neverQuoteObjects; }
-	
-	public boolean trimDefaults() { return trimDefaults; }
-	public boolean useJdbcCommit() { return useJdbcCommit; }
-	public boolean isStringComparisonCaseSensitive() { return this.caseSensitive; }
+	public boolean supportsBatchedStatements()
+	{
+		return this.supportsBatchedStatements;
+	}
+
+	public boolean allowsExtendedCreateStatement()
+	{
+		return allowExtendedCreateStatement;
+	}
+
+	public boolean allowsMultipleGetUpdateCounts()
+	{
+		return this.allowsMultipleGetUpdateCounts;
+	}
+
+	public boolean reportsRealSizeAsDisplaySize()
+	{
+		return this.reportsRealSizeAsDisplaySize;
+	}
+
+	public boolean ddlNeedsCommit()
+	{
+		return ddlNeedsCommit;
+	}
+
+	public boolean neverQuoteObjects()
+	{
+		return neverQuoteObjects;
+	}
+
+	public boolean trimDefaults()
+	{
+		return trimDefaults;
+	}
+
+	public boolean useJdbcCommit()
+	{
+		return useJdbcCommit;
+	}
+
+	public boolean isStringComparisonCaseSensitive()
+	{
+		return this.caseSensitive;
+	}
 
 	public boolean getDefaultBeforeNull()
 	{
@@ -143,6 +181,15 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".ddl.usesavepoint", false);
 	}
 
+	/**
+	 * Returns the type for the formatter 
+	 * @return hex, octal, char
+	 */
+	public String getBlobLiteralType()
+	{
+		return Settings.getInstance().getProperty("workbench.db." + getDbId() + ".blob.literal.type", "hex");
+	}
+	
 	public String getBlobLiteralPrefix()
 	{
 		return Settings.getInstance().getProperty("workbench.db." + getDbId() + ".blob.literal.prefix", null);
@@ -418,6 +465,11 @@ public class DbSettings
 	{
 		String query = Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".currentcatalog.query", null);
 		return query;
+	}
+
+	public boolean getConvertDateInExport()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".export.convert.date2ts", false);
 	}
 	
 	public boolean needsExactClobLength()

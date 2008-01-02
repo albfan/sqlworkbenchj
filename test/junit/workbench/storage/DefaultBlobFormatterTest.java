@@ -12,22 +12,21 @@
 package workbench.storage;
 
 import java.io.ByteArrayOutputStream;
-import junit.framework.*;
-import java.sql.Blob;
-import java.sql.SQLException;
+import junit.framework.TestCase;
 
 /**
  * @author support@sql-workbench.net
  */
-public class DefaultBlobFormatterTest extends TestCase
+public class DefaultBlobFormatterTest
+	extends TestCase
 {
-	
 	public DefaultBlobFormatterTest(String testName)
 	{
 		super(testName);
 	}
 
-	public void testGetBlobLiteral() throws Exception
+	public void testGetBlobLiteral()
+		throws Exception
 	{
 		DefaultBlobFormatter formatter = new DefaultBlobFormatter();
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
@@ -35,32 +34,31 @@ public class DefaultBlobFormatterTest extends TestCase
 		b.write(0);
 		b.write(16);
 		b.write(15);
-		byte[] blob = b.toByteArray(); 
+		byte[] blob = b.toByteArray();
 		String literal = formatter.getBlobLiteral(blob);
-		
+
 		assertEquals("Wrong literal created", "ff00100f", literal);
 
 		formatter.setPrefix("0x");
 		formatter.setSuffix(null);
 		literal = formatter.getBlobLiteral(blob);
-		assertEquals("Wrong literal created", "0xff00100f", literal);		
-		
+		assertEquals("Wrong literal created", "0xff00100f", literal);
+
 		formatter.setPrefix("'");
 		formatter.setSuffix("'");
 		literal = formatter.getBlobLiteral(blob);
-		assertEquals("Wrong literal created", "'ff00100f'", literal);		
-		
+		assertEquals("Wrong literal created", "'ff00100f'", literal);
+
 		formatter.setPrefix("X'");
 		formatter.setSuffix("'");
 		formatter.setUseUpperCase(true);
 		literal = formatter.getBlobLiteral(blob);
-		assertEquals("Wrong literal created", "X'FF00100F'", literal);		
-	
+		assertEquals("Wrong literal created", "X'FF00100F'", literal);
+
 		formatter.setUseUpperCase(true);
 		formatter.setPrefix("to_lob(utl_raw.cast_to_raw('0x");
-		formatter.setSuffix("'))");		
+		formatter.setSuffix("'))");
 		literal = formatter.getBlobLiteral(blob);
 		assertEquals("Wrong literal created", "to_lob(utl_raw.cast_to_raw('0xFF00100F'))", literal);
 	}
-	
 }
