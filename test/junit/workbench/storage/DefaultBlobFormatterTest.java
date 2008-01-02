@@ -19,17 +19,17 @@ import java.sql.SQLException;
 /**
  * @author support@sql-workbench.net
  */
-public class HexBlobFormatterTest extends TestCase
+public class DefaultBlobFormatterTest extends TestCase
 {
 	
-	public HexBlobFormatterTest(String testName)
+	public DefaultBlobFormatterTest(String testName)
 	{
 		super(testName);
 	}
 
 	public void testGetBlobLiteral() throws Exception
 	{
-		HexBlobFormatter formatter = new HexBlobFormatter();
+		DefaultBlobFormatter formatter = new DefaultBlobFormatter();
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
 		b.write(255);
 		b.write(0);

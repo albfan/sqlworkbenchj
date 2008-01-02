@@ -14,25 +14,42 @@ package workbench.storage;
 import java.sql.Blob;
 import java.sql.SQLException;
 import workbench.util.NumberStringCache;
+import workbench.util.StringUtil;
 
 /**
  * @author support@sql-workbench.net
  */
-public class HexBlobFormatter
+public class DefaultBlobFormatter
 	implements BlobLiteralFormatter
 {
-	
 	private String prefix;
 	private String suffix;
 	private boolean upperCase = false;
+	private BlobLiteralType literalType = BlobLiteralType.hex;
 	
-	public HexBlobFormatter()
+	public DefaultBlobFormatter()
 	{
 	}
 
-	public void setUseUpperCase(boolean flag) { this.upperCase = flag; }
-	public void setPrefix(String p) { this.prefix = p; }
-	public void setSuffix(String s) { this.suffix = s; }
+	public void setLiteralType(BlobLiteralType type)
+	{
+		this.literalType = (type == null ? BlobLiteralType.hex : type);
+	}
+	
+	public void setUseUpperCase(boolean flag)
+	{
+		this.upperCase = flag;
+	}
+
+	public void setPrefix(String p)
+	{
+		this.prefix = p;
+	}
+
+	public void setSuffix(String s)
+	{
+		this.suffix = s;
+	}
 	
 	public String getBlobLiteral(Object value)
 		throws SQLException
@@ -55,7 +72,7 @@ public class HexBlobFormatter
 		{
 			Blob b = (Blob)value;
 			int len = (int)b.length();
-			result = new StringBuilder(len*2 + addSpace);
+			result = new StringBuilder(len * 2 + addSpace);
 			if (prefix != null) result.append(prefix);
 			for (int i = 0; i < len; i++)
 			{
@@ -79,12 +96,26 @@ public class HexBlobFormatter
 		for (int i = 0; i < buffer.length; i++)
 		{
 			int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
-			String s = NumberStringCache.getHexString(c);
+			CharSequence s = null;
+			if (literalType == BlobLiteralType.octal)
+			{
+				result.append("\\");
+				s = StringUtil.getOctalString(c);
+			}
+			else
+			{
+				s = NumberStringCache.getHexString(c);
+			}
 
 			if (upperCase)
-				result.append(s.toUpperCase());
+			{
+				result.append(s.toString().toUpperCase());
+			}
 			else
+			{
 				result.append(s);
+			}
 		}
-	}	
+	}
+	
 }

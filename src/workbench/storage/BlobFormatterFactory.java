@@ -26,7 +26,7 @@ public class BlobFormatterFactory
 		// SQL Server, MySQL support the ANSI Syntax
 		// using 0xABCDEF...
 		// we use that for all others as well.
-		HexBlobFormatter f = new HexBlobFormatter();
+		DefaultBlobFormatter f = new DefaultBlobFormatter();
 		f.setPrefix("0x");
 		
 		return f;
@@ -34,6 +34,35 @@ public class BlobFormatterFactory
 	
 	public static BlobLiteralFormatter createInstance(DbMetadata meta)
 	{
+		// Check for a user-defined formatter definition
+		// for the current DBMS
+		DbSettings s = meta.getDbSettings();
+		String prefix = s.getBlobLiteralPrefix();
+		String suffix = s.getBlobLiteralSuffix();
+		if (!StringUtil.isEmptyString(prefix) && !StringUtil.isEmptyString(suffix))
+		{
+			DefaultBlobFormatter f = new DefaultBlobFormatter();
+			String type = s.getBlobLiteralType();
+			
+			BlobLiteralType literalType = null;
+			try
+			{
+				literalType = BlobLiteralType.valueOf(type);
+			}
+			catch (Throwable e)
+			{
+				literalType = BlobLiteralType.hex;
+			}
+			
+			BlobLiteralType.valueOf(type);
+			f.setUseUpperCase(s.getBlobLiteralUpperCase());
+			f.setLiteralType(literalType);
+			f.setPrefix(prefix);
+			f.setSuffix(suffix);
+			return f;
+		}		
+		
+		// No user-defined formatter definition found, use the built-in settings
 		if (meta.isPostgres())
 		{
 			return new PostgresBlobFormatter();
@@ -42,7 +71,7 @@ public class BlobFormatterFactory
 		{
 			// this might only work with Oracle 10g...
 			// and will probably fail on BLOBs > 4KB
-			HexBlobFormatter f = new HexBlobFormatter();
+			DefaultBlobFormatter f = new DefaultBlobFormatter();
 			f.setUseUpperCase(true);
 			f.setPrefix("to_blob(utl_raw.cast_to_raw('0x");
 			f.setSuffix("'))");
@@ -54,7 +83,7 @@ public class BlobFormatterFactory
 			// binary string constants, it is very likely
 			// that this will be rejected by DB2 due to the 
 			// max.length of 32K for binary strings.
-			HexBlobFormatter f = new HexBlobFormatter();
+			DefaultBlobFormatter f = new DefaultBlobFormatter();
 			f.setUseUpperCase(true);
 			f.setPrefix("X'");
 			f.setSuffix("'");
@@ -62,26 +91,13 @@ public class BlobFormatterFactory
 		}
 		else if (meta.isHsql())
 		{
-			HexBlobFormatter f = new HexBlobFormatter();
+			DefaultBlobFormatter f = new DefaultBlobFormatter();
 			f.setUseUpperCase(false);
 			f.setPrefix("'");
 			f.setSuffix("'");
 			return f;
 		}
-		
-		// No pre-defined DBMS found, check if anything is configured
-		// for the current DBMS
-		DbSettings s = meta.getDbSettings();
-		String prefix = s.getBlobLiteralPrefix();
-		String suffix = s.getBlobLiteralSuffix();
-		if (!StringUtil.isEmptyString(prefix) && !StringUtil.isEmptyString(suffix))
-		{
-			HexBlobFormatter f = new HexBlobFormatter();
-			f.setUseUpperCase(s.getBlobLiteralUpperCase());
-			f.setPrefix(prefix);
-			f.setSuffix(suffix);
-			return f;
-		}
+
 		// Still no luck, use the ANSI format.
 		return createAnsiFormatter();
 	}

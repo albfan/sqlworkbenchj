@@ -15,7 +15,7 @@ import java.sql.SQLException;
 
 /**
  * A class to format a byte[] array to be used as a literal in a SQL 
- * Statement for Postgres. 
+ * statement for Postgres. 
  * 
  * PG accepts binary contents as octal Strings, e.g. 
  * \001\002\004
@@ -39,7 +39,7 @@ public class PostgresBlobFormatter
 		if (value instanceof byte[])
 		{
 			byte[] buffer = (byte[])value;
-			StringBuilder result = new StringBuilder(buffer.length * 5 + 2);
+			StringBuilder result = new StringBuilder(buffer.length * 4 + 2);
 			result.append('\'');
 			for (int i = 0; i < buffer.length; i++)
 			{
