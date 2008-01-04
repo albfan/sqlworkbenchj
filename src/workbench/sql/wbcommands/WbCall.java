@@ -36,7 +36,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * Support for running stored procedures that have out parameters. For this 
+ * Support for running stored procedures that have OUT parameters. For this 
  * command to work properly the JDBC driver needs to either implement 
  * CallableStatement.getParameterMetaData() correctly, or return proper information
  * about the columns of a procedure using DatabaseMetaData.getProcedureColumns()
@@ -49,22 +49,15 @@ public class WbCall
 	public static final String EXEC_VERB_SHORT = "EXEC";
 	public static final String EXEC_VERB_LONG = "EXECUTE";
 	public static final String VERB = "WBCALL";
-	private String realVerb = null;
 	private List<Integer> refCursorIndex = null;
 	
 	public WbCall()
 	{
-		this(VERB);
-	}
-
-	protected WbCall(String v)
-	{
-		this.realVerb = v;
 	}
 
 	public String getVerb()
 	{
-		return realVerb;
+		return VERB;
 	}
 
 	private String getSqlToPrepare(String cleanSql, boolean funcCall)
@@ -207,7 +200,6 @@ public class WbCall
 				}
 				result.addDataStore(resultData);
 			}
-			
 		}
 		catch (Exception e)
 		{
@@ -218,12 +210,19 @@ public class WbCall
 		}
 		finally
 		{
-			this.done();
+			done();
 		}
 
 		return result;
 	}
 
+	public void done()
+	{
+		super.done();
+		if (this.refCursorIndex != null) this.refCursorIndex.clear();
+		this.refCursorIndex = null;
+	}
+	
 	private ArrayList<String> checkParametersFromStatement(CallableStatement cstmt)
 		throws SQLException
 	{

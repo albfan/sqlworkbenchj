@@ -2532,10 +2532,27 @@ public class Settings
 			setProperty("workbench.db.oracle.exclude.synonyms", synRegex);
 		}
 		
-		upgradeListProp("workbench.db.oracle.syntax.functions");
+		WbProperties def = getDefaultProperties();
+		upgradeListProp(def, "workbench.db.oracle.syntax.functions");
+		
+		// Adjust the patterns for SELECT ... INTO
+		upgradeProp(def, "workbench.db.postgresql.selectinto.pattern", "(?s)^SELECT\\s+.*INTO\\s+\\p{Print}*\\s*FROM.*");
+		upgradeProp(def, "workbench.db.informix_dynamic_server.selectinto.pattern", "(?s)^SELECT.*FROM.*INTO\\s*\\p{Print}*");
 	}
 
-	private void upgradeListProp(String key)
+	private void upgradeProp(WbProperties defProps, String property, String originalvalue)
+	{
+		String p = getProperty(property, "");
+		
+		// Make sure it has not been modified
+		if (originalvalue.equals(p))
+		{
+			String newprop = defProps.getProperty("workbench.db.postgresql.selectinto.pattern", null);
+			setProperty("workbench.db.postgresql.selectinto.pattern", newprop);
+		}
+	}
+	
+	private void upgradeListProp(WbProperties defProps, String key)
 	{
 		String currentValue = getProperty(key, "");
 		List<String> currentList = StringUtil.stringToList(currentValue, ",", true, true, false);
@@ -2544,7 +2561,6 @@ public class Settings
 		Set<String> currentProps = new HashSet<String>();
 		currentProps.addAll(currentList);
 		
-		WbProperties defProps = getDefaultProperties();
 		String defValue = defProps.getProperty(key, "");
 		List<String> defList = StringUtil.stringToList(defValue, ",", true, true, false);
 		currentProps.addAll(defList);

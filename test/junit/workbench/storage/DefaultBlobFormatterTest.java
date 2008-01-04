@@ -60,5 +60,12 @@ public class DefaultBlobFormatterTest
 		formatter.setSuffix("'))");
 		literal = formatter.getBlobLiteral(blob);
 		assertEquals("Wrong literal created", "to_lob(utl_raw.cast_to_raw('0xFF00100F'))", literal);
+		
+		formatter.setUseUpperCase(false);
+		formatter.setPrefix(null);
+		formatter.setSuffix(null);
+		formatter.setLiteralType(BlobLiteralType.octal);
+		literal = formatter.getBlobLiteral(blob);
+		assertEquals("Wrong literal created", "\\377\\000\\020\\017", literal);
 	}
 }

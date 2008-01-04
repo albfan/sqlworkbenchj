@@ -411,7 +411,7 @@ public class SqlCommand
 				}
 				catch (Exception e)
 				{
-					LogMgr.logWarning("SqlCommand.processResult()", "Error when calling getUpdateCount() " + ExceptionUtil.getDisplay(e));
+					LogMgr.logWarning("SqlCommand.processResult()", "Error when calling getUpdateCount(): " + ExceptionUtil.getDisplay(e));
 					updateCount = -1;
 					multipleUpdateCounts = false;
 				}

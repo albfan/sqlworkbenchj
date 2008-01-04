@@ -336,20 +336,6 @@ public class DbMetadata
 		
 		this.metaSqlMgr = new MetaDataSqlManager(this.getProductName());
 
-		String regex = settings.getProperty("workbench.sql.selectnewtablepattern." + this.getDbId(), null);
-		if (regex != null)
-		{
-			try
-			{
-				this.selectIntoPattern = Pattern.compile(regex);
-			}
-			catch (Throwable e)
-			{
-				this.selectIntoPattern = null;
-				LogMgr.logError("DbMetadata.<init>", "Invalid pattern to identify a SELECT INTO a new table: " + regex, e);
-			}
-		}
-
 		tableTypeName = settings.getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
 		tableTypesTable = new String[] {tableTypeName};
 		
@@ -499,8 +485,8 @@ public class DbMetadata
 	 * Returns true if the current DBMS supports a SELECT syntax
 	 * which creates a new table (e.g. SELECT .. INTO new_table FROM old_table)
 	 * 
-	 * It simply checks if a regular expression to detect this kind of 
-	 * statements has been defined.
+	 * It simply checks if a regular expression has been defined to 
+	 * detect this kind of statements
 	 * 
 	 * @see #isSelectIntoNewTable(String)
 	 */
@@ -515,15 +501,14 @@ public class DbMetadata
 	 * Whether a statement is identified as a SELECT into a new table
 	 * is defined through the regular expression that can be set for
 	 * the DBMS using the property:
-	 * <tt>workbench.sql.selectnewtablepattern.[dbid]</tt>
+	 * <tt>workbench.sql.[dbid].selectinto.pattern</tt>
 	 * 
 	 * This method returns true if a Regex has been defined and matches the given SQL
-	 * 
 	 */
 	public boolean isSelectIntoNewTable(String sql)
 	{
-		if (sql == null || sql.length() == 0) return false;
 		if (this.selectIntoPattern == null) return false;
+		if (sql == null || sql.length() == 0) return false;
 		Matcher m = this.selectIntoPattern.matcher(sql);
 		return m.find();
 	}

@@ -1949,8 +1949,10 @@ public class SqlPanel
 					currentData.rowCountChanged();
 					currentData.clearStatusMessage();
 					MessageBuffer buff = importer.getMessage();
-					String msg = (buff != null ? buff.getBuffer().toString() : "");
-					if (!StringUtil.isEmptyString(msg)) appendToLog(msg);
+					if (buff != null && buff.getLength() > 0)
+					{
+						appendToLog(buff.getBuffer().toString());
+					}
 					setCancelState(false);
 					checkResultSetActions();
 				}
@@ -2432,7 +2434,6 @@ public class SqlPanel
 
 				this.stmtRunner.runStatement(currentSql, maxRows, timeout);
 				statementResult = this.stmtRunner.getResult();
-				if (statementResult == null) continue;
 				
 				if (statementResult.stopScript())
 				{
@@ -2452,6 +2453,8 @@ public class SqlPanel
 					continue;
 				}
 
+				if (statementResult == null) continue;
+				
 				resultSets += this.addResult(statementResult);
 				stmtTotal += statementResult.getExecutionTime();
 
@@ -2487,6 +2490,7 @@ public class SqlPanel
 				}
 				else if (statementResult.hasWarning())
 				{
+					// Warnings should always be shown, even if the log output is "compressed"
 					String verb = SqlUtil.getSqlVerb(currentSql);
 					String warn = StringUtil.replace(ResourceMgr.getString("MsgStmtCompletedWarn"), "%verb%", verb);
 					this.appendToLog(warn + "\n");

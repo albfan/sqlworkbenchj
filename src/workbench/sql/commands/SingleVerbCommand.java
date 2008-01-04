@@ -68,7 +68,7 @@ public class SingleVerbCommand extends SqlCommand
 		}
 		finally
 		{
-			this.done();
+			done();
 		}
 
 		return result;

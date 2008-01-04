@@ -207,11 +207,12 @@ public class CommandMapper
 		
 		if (metaData.isOracle())
 		{
-			AlterSessionCommand alter = new AlterSessionCommand();
 			SqlCommand wbcall = this.cmdDispatch.get(WbCall.VERB);
 			
 			this.cmdDispatch.put(WbCall.EXEC_VERB_LONG, wbcall);
 			this.cmdDispatch.put(WbCall.EXEC_VERB_SHORT, wbcall);
+			
+			AlterSessionCommand alter = new AlterSessionCommand();
 			this.cmdDispatch.put(alter.getVerb(), alter);
 			
 			WbFeedback echo = new WbFeedback("ECHO");
@@ -277,12 +278,11 @@ public class CommandMapper
 	 */
 	public SqlCommand getCommandToUse(String sql)
 	{
+		SqlCommand cmd = null;
 		String verb = SqlUtil.getSqlVerb(sql);
 		if (StringUtil.isEmptyString(verb)) return null;
 		
-		SqlCommand cmd = null;
-		
-		if (this.supportsSelectInto && !verb.equalsIgnoreCase(WbSelectBlob.VERB) && this.metaData != null && this.metaData.isSelectIntoNewTable(sql))
+		if (this.supportsSelectInto && this.metaData != null && this.metaData.isSelectIntoNewTable(sql))
 		{
 			LogMgr.logDebug("CommandMapper.getCommandToUse()", "Found 'SELECT ... INTO new_table'");
 			// use the generic SqlCommand implementation for this and not the SelectCommand

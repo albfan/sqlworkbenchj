@@ -33,7 +33,6 @@ import workbench.util.SqlUtil;
 import workbench.util.WbFile;
 
 /**
- *
  * @author support@sql-workbench.net
  */
 public class BatchRunnerTest

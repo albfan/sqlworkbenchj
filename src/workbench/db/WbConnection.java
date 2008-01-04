@@ -194,7 +194,6 @@ public class WbConnection
 		
 		try
 		{
-			
 			while (itr.hasNext())
 			{
 				command = p.getNextCommand();
@@ -240,6 +239,10 @@ public class WbConnection
 
 	/**
 	 * Return any warnings that are stored in the underlying SQL Connection.
+	 * The warnings are then cleared from the connection object.
+	 * 
+	 * @see #clearWarnings()
+	 * @return any warnings reported from the server, null if no warnings are available.
 	 */
 	public String getWarnings()
 	{
