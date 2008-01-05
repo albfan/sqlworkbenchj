@@ -12,7 +12,7 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import workbench.WbManager;
+import workbench.AppArguments;
 import workbench.sql.DelimiterDefinition;
 import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
@@ -49,7 +49,7 @@ public class WbInclude
 		cmdLine.addArgument("checkEscapedQuotes", ArgumentType.BoolArgument);
 		cmdLine.addArgument("delimiter",StringUtil.stringToList("';','/',<char>"));
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
-		cmdLine.addArgument(WbManager.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
+		cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
 		CommonArgs.addEncodingParameter(cmdLine);
 		this.isUpdatingCommand = true;
 	}
@@ -110,7 +110,7 @@ public class WbInclude
 		boolean checkEscape = cmdLine.getBoolean("checkescapedquotes", Settings.getInstance().getCheckEscapedQuotes());
 		boolean verbose = cmdLine.getBoolean("verbose", false);
 		boolean defaultIgnore = currentConnection.getProfile().getIgnoreDropErrors();
-		boolean ignoreDrop = cmdLine.getBoolean(WbManager.ARG_IGNORE_DROP, defaultIgnore);
+		boolean ignoreDrop = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, defaultIgnore);
 		String encoding = cmdLine.getValue("encoding");
 
 		String delim = cmdLine.getValue("delimiter");

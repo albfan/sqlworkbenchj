@@ -21,6 +21,7 @@ import java.io.FileWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import junit.framework.TestCase;
+import workbench.AppArguments;
 import workbench.TestUtil;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
@@ -81,7 +82,7 @@ public class BatchRunnerTest
 			writer.println("WbImport -file='" + importFile.getName() + "' -type=text -header=true -table=person -continueOnError=false -transactionControl=false");
 			writer.close();
 			
-			ArgumentParser parser = WbManager.createArgumentParser();
+			ArgumentParser parser = new AppArguments();
 			WbFile dbFile = new WbFile(util.getBaseDir(), "errtest");
 			parser.parse("-url='jdbc:h2:'" + dbFile.getFullPath() + 
 				" -user=sa -driver=org.h2.Driver "  + 
@@ -152,7 +153,7 @@ public class BatchRunnerTest
 			writer.println("insert into person (nr, firstname, lastname) values (8,'Tricia', 'McMillian');");
 			writer.close();
 			
-			ArgumentParser parser = WbManager.createArgumentParser();
+			ArgumentParser parser = new AppArguments();
 			WbFile dbFile = new WbFile(util.getBaseDir(), "successtest");
 			parser.parse("-url='jdbc:h2:'" + dbFile.getFullPath() + 
 				" -user=sa -driver=org.h2.Driver "  + 
@@ -208,7 +209,7 @@ public class BatchRunnerTest
 			writer.write(sql);
 			writer.close();
 
-			ArgumentParser parser = WbManager.createArgumentParser();
+			ArgumentParser parser = new AppArguments();
 			String script = "-script='" + scriptFile.getAbsolutePath() + "'";
 			parser.parse("-url='jdbc:h2:mem:testEmptyStmt' -user=sa -driver=org.h2.Driver "  + script  + " -displayresult=true -ignoredroperrors=true -showprogress=true -showtiming=false");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
@@ -250,7 +251,7 @@ public class BatchRunnerTest
 			writer.println("commit;");
 			writer.close();
 
-			ArgumentParser parser = WbManager.createArgumentParser();
+			ArgumentParser parser = new AppArguments();
 			String script = "-script='" + scriptFile.getFullPath() + "'";
 			parser.parse("-url='jdbc:h2:mem:testBatchRunner' -user=sa -driver=org.h2.Driver "  + script + " -rollbackOnDisconnect=true");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
@@ -304,7 +305,7 @@ public class BatchRunnerTest
 			WbFile script = new WbFile(util.getBaseDir(), "copydata.sql");
 			String command = "WbCopy -sourceProfile='SourceConnection' -targetProfile='TargetConnection' -sourceTable=person -targetTable=person;";
 			TestUtil.writeFile(script, command);
-			ArgumentParser parser = WbManager.createArgumentParser();
+			ArgumentParser parser = new AppArguments();
 
 			parser.parse("-script='" + script.getFullPath() + "'");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
@@ -342,7 +343,7 @@ public class BatchRunnerTest
 		{
 			util.emptyBaseDirectory();
 			
-			ArgumentParser parser = WbManager.createArgumentParser();
+			ArgumentParser parser = new AppArguments();
 			File scriptFile = new File(util.getBaseDir(), "preparedata.sql");
 			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
 			writer.println("-- test script");
@@ -425,7 +426,7 @@ public class BatchRunnerTest
 			writer.println("select * from person;");
 			writer.close();			
 
-			ArgumentParser parser = WbManager.createArgumentParser();
+			ArgumentParser parser = new AppArguments();
 			parser.parse("-displayresult=true -altdelimiter='/;nl' -script=" + scriptFile.getAbsolutePath());
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
 			runner.setConnection(con);

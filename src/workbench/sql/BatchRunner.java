@@ -18,7 +18,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.List;
-import workbench.WbManager;
+import workbench.AppArguments;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
@@ -76,15 +76,19 @@ public class BatchRunner
 	public BatchRunner(String aFilelist)
 	{
 		this.filenames = StringUtil.stringToList(aFilelist, ",", true);
-		this.stmtRunner = new DefaultStatementRunner();
+		this.stmtRunner = StatementRunner.Factory.createRunner();
 		this.stmtRunner.setFullErrorReporting(true);
 	}
 
 	/**
-	 * The baseDir is used when including other scripts using WbInclude
+	 * The baseDir is used when including other scripts using WbInclude.
+	 * 
 	 * If the filename of the included script is a relative filename
-	 * then the scriptrunner will assume the script is located in the
-	 * baseDir
+	 * then the StatementRunner will assume the script is located relative
+	 * to the baseDir. This call is delegated to 
+	 * {@link StatementRunner#setBaseDir(String)}
+	 * 
+	 * @param dir the base directory to be used
 	 * @see StatementRunner#setBaseDir(String)
 	 */
 	public void setBaseDir(String dir)
@@ -127,19 +131,6 @@ public class BatchRunner
 		this.stmtRunner.setIgnoreDropErrors(flag);
 	}
 
-	public void setProfile(ProfileKey def)
-	{
-		LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnecting") + " [" + def.getName() + "]");
-		ConnectionMgr mgr = ConnectionMgr.getInstance();
-		ConnectionProfile prof = mgr.getProfile(def);
-		if (prof == null)
-		{
-			LogMgr.logError("BatchRunner", ResourceMgr.getString("ErrConnectionError"),null);
-			throw new IllegalArgumentException("Could not find profile " + def.getName());
-		}
-		this.setProfile(prof);
-	}
-
 	public void setProfile(ConnectionProfile aProfile)
 	{
 		this.profile = aProfile;
@@ -173,7 +164,7 @@ public class BatchRunner
 
 		if (this.profile == null)
 		{
-			// Allow batch run without a profile for e.g. running a single WbCopy
+			// Allow batch runs without a profile for e.g. running a single WbCopy
 			LogMgr.logWarning("BatchRunner.connect()", "No profile defined, proceeding without a connection.");
 			success = true;
 			return;
@@ -190,7 +181,7 @@ public class BatchRunner
 			if (!quiet) this.printMessage(ResourceMgr.getFormattedString("MsgBatchConnectOk", info));
 			success = true;
 			String warn = c.getWarnings();
-			if (warn != null)
+			if (!StringUtil.isEmptyString(warn))
 			{
 				printMessage(warn);
 				LogMgr.logWarning("BatchRunner.connect()", "Connection returned warnings: " + warn);
@@ -225,9 +216,13 @@ public class BatchRunner
 		if (aFilename == null) return;
 		File f = new File(aFilename);
 		if (f.exists() && !f.isDirectory())
+		{
 			this.successScript = aFilename;
+		}
 		else
+		{
 			this.successScript = null;
+		}
 	}
 
 	public void setErrorScript(String aFilename)
@@ -235,9 +230,13 @@ public class BatchRunner
 		if (aFilename == null) return;
 		File f = new File(aFilename);
 		if (f.exists() && !f.isDirectory())
+		{
 			this.errorScript = aFilename;
+		}
 		else
+		{
 			this.errorScript = null;
+		}
 	}
 
 	public void setRowMonitor(RowActionMonitor mon)
@@ -352,7 +351,7 @@ public class BatchRunner
 		}
 	}
 
-	private boolean executeScript(File scriptFile)
+	private boolean executeScript(WbFile scriptFile)
 		throws IOException
 	{
 		boolean error = false;
@@ -391,7 +390,7 @@ public class BatchRunner
 		int executedCount = 0;
 		long start, end;
 
-		int interval;
+		final int interval;
 		if (scriptFile.length() < 50000)
 		{
 			interval = 1;
@@ -486,8 +485,8 @@ public class BatchRunner
 
 		end = System.currentTimeMillis();
 
-		StringBuilder msg = new StringBuilder();
-		msg.append(scriptFile.getCanonicalPath());
+		StringBuilder msg = new StringBuilder(50);
+		msg.append(scriptFile.getFullPath());
 		msg.append(": ");
 		msg.append(executedCount);
 		msg.append(' ');
@@ -524,8 +523,8 @@ public class BatchRunner
 			printer.printTo(console);
 		}
 		console.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + "   ----------------------------");
-
 	}
+	
 	public void setEncoding(String enc)
 		throws UnsupportedEncodingException
 	{
@@ -581,30 +580,30 @@ public class BatchRunner
 	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine)
 	{
 		ConnectionProfile result = null;
-		if (!cmdLine.isArgPresent(WbManager.ARG_CONN_URL)) return null;
+		if (!cmdLine.isArgPresent(AppArguments.ARG_CONN_URL)) return null;
 		try
 		{
-			String url = cmdLine.getValue(WbManager.ARG_CONN_URL);
+			String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
 			if (url == null)
 			{
 				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Cannot connect with command line settings without a connection URL!", null);
 				return null;
 			}
-			String driverclass = cmdLine.getValue(WbManager.ARG_CONN_DRIVER);
+			String driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER);
 			if (driverclass == null)
 			{
 				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Cannot connect with command line settings without a driver class!", null);
 				return null;
 			}
-			String user = cmdLine.getValue(WbManager.ARG_CONN_USER);
-			String pwd = cmdLine.getValue(WbManager.ARG_CONN_PWD);
-			String jar = cmdLine.getValue(WbManager.ARG_CONN_JAR);
-			String commit =  cmdLine.getValue(WbManager.ARG_CONN_AUTOCOMMIT);
-			String wksp = cmdLine.getValue(WbManager.ARG_WORKSPACE);
-			String delimDef = cmdLine.getValue(WbManager.ARG_ALT_DELIMITER);
+			String user = cmdLine.getValue(AppArguments.ARG_CONN_USER);
+			String pwd = cmdLine.getValue(AppArguments.ARG_CONN_PWD);
+			String jar = cmdLine.getValue(AppArguments.ARG_CONN_JAR);
+			String commit =  cmdLine.getValue(AppArguments.ARG_CONN_AUTOCOMMIT);
+			String wksp = cmdLine.getValue(AppArguments.ARG_WORKSPACE);
+			String delimDef = cmdLine.getValue(AppArguments.ARG_ALT_DELIMITER);
 			DelimiterDefinition delim = DelimiterDefinition.parseCmdLineArgument(delimDef);
-			boolean trimCharData = cmdLine.getBoolean(WbManager.ARG_TRIM_CHAR, false);
-			boolean rollback = cmdLine.getBoolean(WbManager.ARG_CONN_ROLLBACK, false);
+			boolean trimCharData = cmdLine.getBoolean(AppArguments.ARG_TRIM_CHAR, false);
+			boolean rollback = cmdLine.getBoolean(AppArguments.ARG_CONN_ROLLBACK, false);
 
 			if (jar != null)
 			{
@@ -643,16 +642,16 @@ public class BatchRunner
 
 	public static BatchRunner createBatchRunner(ArgumentParser cmdLine)
 	{
-		String scripts = cmdLine.getValue(WbManager.ARG_SCRIPT);
+		String scripts = cmdLine.getValue(AppArguments.ARG_SCRIPT);
 		if (scripts == null || scripts.trim().length() == 0) return null;
 
-		String profilename = cmdLine.getValue(WbManager.ARG_PROFILE);
+		String profilename = cmdLine.getValue(AppArguments.ARG_PROFILE);
 
-		boolean abort = cmdLine.getBoolean(WbManager.ARG_ABORT, true);
-		boolean showResult = cmdLine.getBoolean(WbManager.ARG_DISPLAY_RESULT);
-		boolean showProgress = cmdLine.getBoolean(WbManager.ARG_SHOWPROGRESS, false);
+		boolean abort = cmdLine.getBoolean(AppArguments.ARG_ABORT, true);
+		boolean showResult = cmdLine.getBoolean(AppArguments.ARG_DISPLAY_RESULT);
+		boolean showProgress = cmdLine.getBoolean(AppArguments.ARG_SHOWPROGRESS, false);
 
-		String encoding = cmdLine.getValue(WbManager.ARG_SCRIPT_ENCODING);
+		String encoding = cmdLine.getValue(AppArguments.ARG_SCRIPT_ENCODING);
 
 		ConnectionProfile profile = null;
 		if (profilename == null)
@@ -661,7 +660,7 @@ public class BatchRunner
 		}
 		else
 		{
-			String group = cmdLine.getValue(WbManager.ARG_PROFILE_GROUP);
+			String group = cmdLine.getValue(AppArguments.ARG_PROFILE_GROUP);
 			ProfileKey def = new ProfileKey(StringUtil.trimQuotes(profilename), StringUtil.trimQuotes(group));
 
 			profile = ConnectionMgr.getInstance().getProfile(def);
@@ -677,14 +676,14 @@ public class BatchRunner
 
 		if (profile != null)
 		{
-			boolean ignoreDrop = cmdLine.getBoolean(WbManager.ARG_IGNORE_DROP, true);
+			boolean ignoreDrop = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, true);
 			profile.setIgnoreDropErrors(ignoreDrop);
 		}
 
-		String success = cmdLine.getValue(WbManager.ARG_SUCCESS_SCRIPT);
-		String error = cmdLine.getValue(WbManager.ARG_ERROR_SCRIPT);
-		String feed = cmdLine.getValue(WbManager.ARG_FEEDBACK);
-		boolean feedback = cmdLine.getBoolean(WbManager.ARG_FEEDBACK, true);
+		String success = cmdLine.getValue(AppArguments.ARG_SUCCESS_SCRIPT);
+		String error = cmdLine.getValue(AppArguments.ARG_ERROR_SCRIPT);
+		String feed = cmdLine.getValue(AppArguments.ARG_FEEDBACK);
+		boolean feedback = cmdLine.getBoolean(AppArguments.ARG_FEEDBACK, true);
 
 		BatchRunner runner = new BatchRunner(scripts);
 		runner.showResultSets(showResult);
@@ -702,18 +701,18 @@ public class BatchRunner
 		runner.setSuccessScript(success);
 		runner.setProfile(profile);
 		runner.setVerboseLogging(feedback);
-		runner.quiet = cmdLine.isArgPresent(WbManager.ARG_QUIET);
+		runner.quiet = cmdLine.isArgPresent(AppArguments.ARG_QUIET);
 
 		// if no showTiming argument was provided but feedback was disabled
 		// disable the display of the timing information as well.
-		String tim = cmdLine.getValue(WbManager.ARG_SHOW_TIMING);
+		String tim = cmdLine.getValue(AppArguments.ARG_SHOW_TIMING);
 		if (tim == null && feed != null && !feedback)
 		{
 			runner.showTiming = false;
 		}
 		else
 		{
-			runner.showTiming = cmdLine.getBoolean(WbManager.ARG_SHOW_TIMING, true);
+			runner.showTiming = cmdLine.getBoolean(AppArguments.ARG_SHOW_TIMING, true);
 		}
 		runner.showProgress = showProgress;
 		if (showProgress)
@@ -721,7 +720,7 @@ public class BatchRunner
 			runner.setRowMonitor(new GenericRowMonitor(new ConsoleStatusBar()));
 		}
 
-		DelimiterDefinition delim = DelimiterDefinition.parseCmdLineArgument(cmdLine.getValue(WbManager.ARG_DELIMITER));
+		DelimiterDefinition delim = DelimiterDefinition.parseCmdLineArgument(cmdLine.getValue(AppArguments.ARG_DELIMITER));
 
 		if (delim != null)
 		{

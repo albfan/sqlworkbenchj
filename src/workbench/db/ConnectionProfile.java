@@ -24,6 +24,7 @@ import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
 import workbench.util.StringUtil;
 import workbench.util.WbCipher;
+import workbench.util.WbDesCipher;
 import workbench.util.WbPersistence;
 
 /**
@@ -404,7 +405,7 @@ public class ConnectionProfile
 		}
 		else
 		{
-			WbCipher des = WbManager.getInstance().getDesCipher();
+			WbCipher des = WbDesCipher.getInstance();
 			return des.decryptString(aPwd.substring(CRYPT_PREFIX.length()));
 		}
 	}
@@ -438,7 +439,7 @@ public class ConnectionProfile
 		{
 			if (!this.isEncrypted(aPwd))
 			{
-				WbCipher des = WbManager.getInstance().getDesCipher();
+				WbCipher des = WbDesCipher.getInstance();
 				aPwd = CRYPT_PREFIX + des.encryptString(aPwd);
 			}
 		}

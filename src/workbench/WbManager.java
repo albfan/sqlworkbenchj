@@ -56,7 +56,6 @@ import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
 import workbench.sql.MacroManager;
 import workbench.sql.VariablePool;
-import workbench.util.ArgumentParser;
 import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
 import workbench.gui.dialogs.WbSplash;
@@ -64,9 +63,7 @@ import workbench.gui.filter.FilterDefinitionManager;
 import workbench.gui.lnf.LnFManager;
 import workbench.gui.profiles.ProfileKey;
 import workbench.util.UpdateCheck;
-import workbench.util.WbCipher;
 import workbench.util.WbFile;
-import workbench.util.WbNullCipher;
 import workbench.util.WbThread;
 
 
@@ -81,42 +78,15 @@ public class WbManager
 	private static WbManager wb;
 	private List<MainWindow> mainWindows = Collections.synchronizedList(new LinkedList<MainWindow>());
 	private List<ToolWindow> toolWindows = Collections.synchronizedList(new LinkedList<ToolWindow>());
-	private WbCipher desCipher = null;
 	private boolean batchMode = false;
 	private boolean writeSettings = true;
 	private boolean outOfMemoryOcurred = false;
 	private WbThread shutdownHook = new WbThread(this, "ShutdownHook");
+	private AppArguments cmdLine = new AppArguments();
 
 	private WbManager()
 	{
 		Runtime.getRuntime().addShutdownHook(this.shutdownHook);
-	}
-
-	/**
-	 *	return an instance of the WbDesCipher.
-	 *
-	 *	this method uses class.forName() to create a new
-	 *	instance of WbDesCipher() so that WbManager itself
-	 *	does not reference the javax.crypto classes and
-	 *	it can at least be loaded in JDK prior 1.4 to give
-	 *	out an error message.
-	 */
-	public WbCipher getDesCipher()
-	{
-		if (desCipher == null)
-		{
-			try
-			{
-				Class des = Class.forName("workbench.util.WbDesCipher");
-				this.desCipher = (WbCipher)des.newInstance();
-			}
-			catch (Exception e)
-			{
-				LogMgr.logWarning("WbManager.getDesCipher)", "Could not create WbDesCipher", e);
-				this.desCipher = new WbNullCipher();
-			}
-		}
-		return desCipher;
 	}
 
 	public static WbManager getInstance()
@@ -251,6 +221,7 @@ public class WbManager
 			}
 			LnFManager mgr = new LnFManager();
 			LnFDefinition def = mgr.findLookAndFeel(className);
+			
 			if (def == null) 
 			{
 				LogMgr.logError("WbManager.initializeLookAndFeel()", "Specified Look & Feel " + className + " not available!", null);
@@ -405,21 +376,14 @@ public class WbManager
 		// Polish up the standard look & feel settings
 		Color c = settings.getColor("workbench.table.gridcolor", new Color(215,215,215));
 		def.put("Table.gridColor", c);
+		def.put("Button.showMnemonics", Boolean.valueOf(settings.getShowMnemonics()));
 
 		// use our own classes for some GUI elements
 		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
 		def.put("SplitPaneUI", "workbench.gui.components.WbSplitPaneUI");
+		
 		String cls = TabbedPaneUIFactory.getTabbedPaneUIClass();
 		if (cls != null) def.put("TabbedPaneUI", cls);
-		
-		if (settings.getShowMnemonics())
-		{
-			def.put("Button.showMnemonics", Boolean.TRUE);
-		}
-		else
-		{
-			def.put("Button.showMnemonics", Boolean.FALSE);
-		}
 		
 		settings.addFontChangedListener(this);
 	}
@@ -728,8 +692,8 @@ public class WbManager
 		if (checkCmdLine)
 		{
 			// get profile name from commandline
-			String profilename = cmdLine.getValue(ARG_PROFILE);
-			String group = cmdLine.getValue(ARG_PROFILE_GROUP);
+			String profilename = cmdLine.getValue(AppArguments.ARG_PROFILE);
+			String group = cmdLine.getValue(AppArguments.ARG_PROFILE_GROUP);
 			ConnectionProfile prof  = null;
 			if (!StringUtil.isEmptyString(profilename))
 			{
@@ -766,91 +730,8 @@ public class WbManager
 		}
 	}
 
-	private ArgumentParser cmdLine;
-
-	// Parameters for batch execution used by BatchRunner
-	public static final String ARG_SCRIPT = "script";
-	public static final String ARG_SCRIPT_ENCODING = "encoding";
-	public static final String ARG_ABORT = "abortonerror";
-
-	public static final String ARG_CONN_URL = "url";
-	public static final String ARG_CONN_DRIVER = "driver";
-	public static final String ARG_CONN_JAR = "driverjar";
-	public static final String ARG_CONN_USER = "username";
-	public static final String ARG_CONN_PWD = "password";
-	public static final String ARG_CONN_AUTOCOMMIT = "autocommit";
-	public static final String ARG_CONN_ROLLBACK = "rollbackondisconnect";
-	public static final String ARG_IGNORE_DROP = "ignoreDropErrors";
-	public static final String ARG_DISPLAY_RESULT = "displayResult";
-	public static final String ARG_SUCCESS_SCRIPT = "cleanupSuccess";
-	public static final String ARG_ERROR_SCRIPT = "cleanupError";
-	public static final String ARG_SHOW_TIMING = "showTiming";
-	public static final String ARG_FEEDBACK = "feedback";
-	public static final String ARG_WORKSPACE = "workspace";
-	public static final String ARG_ALT_DELIMITER = "altDelimiter";
-	public static final String ARG_DELIMITER = "delimiter";
-
-	// Other parameters
-	public static final String ARG_PROFILE = "profile";
-	public static final String ARG_PROFILE_GROUP = "profilegroup";
-	public static final String ARG_SHOWPROGRESS = "showprogress";
-	public static final String ARG_QUIET = "quiet";
-	public static final String ARG_TRIM_CHAR = "trimCharData";
-
-	private static final String ARG_PROFILE_STORAGE = "profilestorage";
-
-	private static final String ARG_CONFIGDIR = "configdir";
-	private static final String ARG_LIBDIR = "libdir";
-	private static final String ARG_LOGFILE = "logfile";
-	public static final String ARG_VARDEF = "vardef";
-
-	private static final String ARG_SHOW_PUMPER = "datapumper";
-	private static final String ARG_SHOW_DBEXP = "dbexplorer";
-
-	public static ArgumentParser createArgumentParser()
-	{
-		ArgumentParser parser = new ArgumentParser();
-		parser.addArgument(ARG_PROFILE);
-		parser.addArgument(ARG_FEEDBACK);
-		parser.addArgument(ARG_PROFILE_GROUP);
-		parser.addArgument(ARG_PROFILE_STORAGE);
-		parser.addArgument(ARG_CONFIGDIR);
-		parser.addArgument(ARG_LIBDIR);
-		parser.addArgument(ARG_SCRIPT);
-		parser.addArgument(ARG_SCRIPT_ENCODING);
-		parser.addArgument(ARG_LOGFILE);
-		parser.addArgument(ARG_ABORT);
-		parser.addArgument(ARG_SUCCESS_SCRIPT);
-		parser.addArgument(ARG_ERROR_SCRIPT);
-		parser.addArgument(ARG_VARDEF);
-		parser.addArgument(ARG_CONN_URL);
-		parser.addArgument(ARG_CONN_DRIVER);
-		parser.addArgument(ARG_CONN_JAR);
-		parser.addArgument(ARG_CONN_USER);
-		parser.addArgument(ARG_CONN_PWD);
-		parser.addArgument(ARG_CONN_AUTOCOMMIT);
-		parser.addArgument(ARG_CONN_ROLLBACK);
-		parser.addArgument(ARG_SHOW_PUMPER);
-		parser.addArgument(ARG_IGNORE_DROP);
-		parser.addArgument(ARG_DISPLAY_RESULT);
-		parser.addArgument(ARG_SHOW_DBEXP);
-		parser.addArgument(ARG_SHOW_TIMING);
-		parser.addArgument(ARG_SHOWPROGRESS);
-		parser.addArgument(ARG_WORKSPACE);
-		parser.addArgument("nosettings");
-		parser.addArgument("notemplates");
-		parser.addArgument(ARG_ALT_DELIMITER);
-		parser.addArgument(ARG_DELIMITER);
-		parser.addArgument(ARG_QUIET);
-		parser.addArgument(ARG_TRIM_CHAR);
-		parser.addArgument("language");
-		return parser;
-	}
-	
 	private void initCmdLine(String[] args)
 	{
-		cmdLine = createArgumentParser();
-		
 		try
 		{
 			cmdLine.parse(args);
@@ -861,18 +742,18 @@ public class WbManager
 				System.setProperty("workbench.gui.language", lang);
 			}
 			
-			String value = cmdLine.getValue(ARG_CONFIGDIR);
+			String value = cmdLine.getValue(AppArguments.ARG_CONFIGDIR);
 			if (!StringUtil.isEmptyString(value))
 			{
 				System.setProperty("workbench.configdir", value);
 			}
-			value = cmdLine.getValue(ARG_LIBDIR);
+			value = cmdLine.getValue(AppArguments.ARG_LIBDIR);
 			if (!StringUtil.isEmptyString(value))
 			{
 				System.setProperty("workbench.libdir", value);
 			}
 
-			value = cmdLine.getValue(ARG_LOGFILE);
+			value = cmdLine.getValue(AppArguments.ARG_LOGFILE);
 			if (!StringUtil.isEmptyString(value))
 			{
 				System.setProperty("workbench.log.filename", value);
@@ -882,15 +763,15 @@ public class WbManager
 			// all relevant commandline arguments are parsed
 			Settings.getInstance();
 			
-			String scriptname = cmdLine.getValue(ARG_SCRIPT);
+			String scriptname = cmdLine.getValue(AppArguments.ARG_SCRIPT);
 
 			boolean readDriverTemplates = true;
 			
 			if (StringUtil.isEmptyString(scriptname))
 			{
 				this.batchMode = false;
-				String url = cmdLine.getValue(ARG_CONN_URL);
-				String jar = cmdLine.getValue(ARG_CONN_JAR);
+				String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
+				String jar = cmdLine.getValue(AppArguments.ARG_CONN_JAR);
 				if (!StringUtil.isEmptyString(url) && !StringUtil.isEmptyString(jar))
 				{
 					// Do not read the driver templates if a connection is specified directly
@@ -903,7 +784,7 @@ public class WbManager
 				readDriverTemplates = false;
 			}
 			
-			value = cmdLine.getValue(ARG_VARDEF);
+			value = cmdLine.getValue(AppArguments.ARG_VARDEF);
 			if (!StringUtil.isEmptyString(value))
 			{
 				try
@@ -916,7 +797,7 @@ public class WbManager
 				}
 			}
 
-			if (cmdLine.isArgPresent("notemplates"))
+			if (cmdLine.isArgPresent(AppArguments.ARG_NOTEMPLATES))
 			{
 				readDriverTemplates = false;
 			}
@@ -924,10 +805,10 @@ public class WbManager
 			
 			// Setting the profile storage should be done after initializing 
 			// the configuration stuff correctly!
-			value = cmdLine.getValue(ARG_PROFILE_STORAGE);
+			value = cmdLine.getValue(AppArguments.ARG_PROFILE_STORAGE);
 			Settings.getInstance().setProfileStorage(value);
 			
-			if (cmdLine.isArgPresent("nosettings"))
+			if (cmdLine.isArgPresent(AppArguments.ARG_NOSETTNGS))
 			{
 				this.writeSettings = false;
 			}
@@ -980,8 +861,8 @@ public class WbManager
 		{
 			this.initUI();
 			
-			boolean pumper = cmdLine.isArgPresent(ARG_SHOW_PUMPER);
-			boolean explorer = cmdLine.isArgPresent(ARG_SHOW_DBEXP);
+			boolean pumper = cmdLine.isArgPresent(AppArguments.ARG_SHOW_PUMPER);
+			boolean explorer = cmdLine.isArgPresent(AppArguments.ARG_SHOW_DBEXP);
 			
 			if (pumper)
 			{
@@ -1029,6 +910,7 @@ public class WbManager
 			{
 				exitCode = 1;
 				// no need to log connect errors, already done by BatchRunner and ConnectionMgr
+				// runner.isSuccess() will also be false for the next step
 			}
 			
 			try

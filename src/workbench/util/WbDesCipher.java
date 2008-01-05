@@ -14,8 +14,6 @@ package workbench.util;
 import java.util.StringTokenizer;
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import workbench.log.LogMgr;
@@ -28,19 +26,42 @@ public class WbDesCipher
 {
 	private static final byte[] KEY_DATA = {-108,-50,-5,-75,-98,28,-116,107};
 	private static final SecretKeySpec KEY = new SecretKeySpec(KEY_DATA, "DES");
-	private Cipher DesCipher; 
+	private Cipher cipher; 
 	
-	/** Creates a new instance of WbCipher */
-	public WbDesCipher()
+	private static WbCipher instance;
+	
+	public static WbCipher getInstance()
+	{
+		synchronized (KEY_DATA)
+		{
+			if (instance == null)
+			{
+				WbDesCipher wb = new WbDesCipher();
+				if (wb.cipher == null)
+				{
+					LogMgr.logWarning("WbDesCipher.getInstance()", "Could not create cipher. Using NullCipher!");
+					instance = new WbNullCipher();
+				}
+				else
+				{
+					LogMgr.logDebug("WbDesCipher.getInstance()", "WbDesCipher created");
+					instance = wb;
+				}
+			}
+			return instance;
+		}
+	}
+	
+	private WbDesCipher()
 	{
 		try
 		{
-			DesCipher = Cipher.getInstance("DES");
+			cipher = Cipher.getInstance("DES");
 		}
 		catch (Exception e)
 		{
 			LogMgr.logWarning("WbDesCipher.init()", "No encryption available!");
-			DesCipher = null;
+			cipher = null;
 		}
 	}
 
@@ -49,10 +70,10 @@ public class WbDesCipher
 		if (aValue == null) return aValue;
 		try
 		{
-			DesCipher.init(Cipher.DECRYPT_MODE, KEY);
+			cipher.init(Cipher.DECRYPT_MODE, KEY);
 
 			byte[] encrypted = this.makeArray(aValue);
-			byte[] decrypted = DesCipher.doFinal(encrypted);
+			byte[] decrypted = cipher.doFinal(encrypted);
 			String result = new String(decrypted);
 			return result;
 		}
@@ -66,12 +87,12 @@ public class WbDesCipher
 	public String encryptString(String aValue)
 	{
 		if (aValue == null) return null;
-		if (DesCipher == null) return aValue;
+		if (cipher == null) return aValue;
 		try
 		{
-			DesCipher.init(Cipher.ENCRYPT_MODE, KEY);
+			cipher.init(Cipher.ENCRYPT_MODE, KEY);
 			byte[] values = aValue.getBytes();
-			byte[] encrypted = DesCipher.doFinal(values);
+			byte[] encrypted = cipher.doFinal(values);
 			return this.makeString(encrypted);
 		}
 		catch (Exception e)

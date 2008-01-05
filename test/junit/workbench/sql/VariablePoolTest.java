@@ -14,11 +14,11 @@ package workbench.sql;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import junit.framework.*;
 import java.util.Set;
+import junit.framework.TestCase;
+import workbench.AppArguments;
 import workbench.TestUtil;
 import workbench.TestUtil;
-import workbench.WbManager;
 import workbench.util.ArgumentParser;
 
 /**
@@ -41,10 +41,10 @@ public class VariablePoolTest extends TestCase
 			TestUtil util = new TestUtil(this.getName());
 			
 			ArgumentParser p = new ArgumentParser();
-			p.addArgument(WbManager.ARG_VARDEF);
-			p.parse("-" + WbManager.ARG_VARDEF + "='#exportfile=/user/home/test.txt'");
+			p.addArgument(AppArguments.ARG_VARDEF);
+			p.parse("-" + AppArguments.ARG_VARDEF + "='#exportfile=/user/home/test.txt'");
 			VariablePool pool = VariablePool.getInstance();
-			pool.readDefinition(p.getValue(WbManager.ARG_VARDEF));
+			pool.readDefinition(p.getValue(AppArguments.ARG_VARDEF));
 			assertEquals("Wrong parameter retrieved from commandline", "/user/home/test.txt", pool.getParameterValue("exportfile"));
 			
 			File f = new File(util.getBaseDir(), "vars.properties");
@@ -55,8 +55,8 @@ public class VariablePoolTest extends TestCase
 			out.close();
 
 			pool.clear();
-			p.parse("-" + WbManager.ARG_VARDEF + "='" + f.getAbsolutePath() + "'");
-			pool.readDefinition(p.getValue(WbManager.ARG_VARDEF));
+			p.parse("-" + AppArguments.ARG_VARDEF + "='" + f.getAbsolutePath() + "'");
+			pool.readDefinition(p.getValue(AppArguments.ARG_VARDEF));
 			assertEquals("Wrong parameter retrieved from file", "/user/home/export.txt", pool.getParameterValue("exportfile"));
 			assertEquals("Wrong parameter retrieved from file", "person", pool.getParameterValue("exporttable"));
 		}

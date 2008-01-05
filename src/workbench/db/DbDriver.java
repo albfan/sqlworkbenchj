@@ -212,7 +212,7 @@ public class DbDriver
 			{
 				// New Firebird 2.0 driver needs this, and it does not seem to do any harm
 				// for other drivers
-				setContextClassLoader();//Thread.currentThread().setContextClassLoader(classLoader);
+				setContextClassLoader();
 				drvClass = this.classLoader.loadClass(this.driverClass);
 			}
 			else
@@ -225,6 +225,7 @@ public class DbDriver
 			this.driverClassInstance = (Driver)drvClass.newInstance();
 			if (Settings.getInstance().getBoolProperty("workbench.db.registerdriver", false))
 			{
+				// Some drivers expect to be registered with the DriverManager...
 				try
 				{
 					LogMgr.logDebug("DbDriver.loadDriverClass()", "Registering new driver instance for " + this.driverClass + " with DriverManager");
