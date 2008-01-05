@@ -11,7 +11,6 @@
  */
 package workbench;
 
-import java.awt.Toolkit;
 import java.lang.reflect.Method;
 
 import javax.swing.JOptionPane;
@@ -67,17 +66,15 @@ public class WbStarter
 		if (!versionIsOk)
 		{
 			String error = "A JVM version 1." + minMinorVersion + " or higher is needed to run SQL Workbench/J (Found: " + version + ")";
+			System.err.println("*** Cannot run this application ***");
 			System.err.println(error);
 			try
 			{
-				Toolkit.getDefaultToolkit().beep();
-				Toolkit.getDefaultToolkit().beep();
-				Toolkit.getDefaultToolkit().beep();
 				JOptionPane.showMessageDialog(null, error);
 			}
 			catch (Throwable e)
 			{
-				e.printStackTrace(System.err);
+				// Ignore
 			}
 			System.exit(1);
 		}
@@ -91,7 +88,7 @@ public class WbStarter
 			Method main = mgr.getDeclaredMethod("main", new Class[] { String[].class });
 			main.invoke(null, new Object[] { args });
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			e.printStackTrace();
 		}
