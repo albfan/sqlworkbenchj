@@ -354,8 +354,8 @@ public class DataCopier
 		catch (Exception e)
 		{
 			LogMgr.logError("DataCopier.start()", "Error when copying data", e);
-			String msg = ResourceMgr.getString("ErrCopy");
-			this.addError(msg + ": " + ExceptionUtil.getDisplay(e, false));
+			String msg = ResourceMgr.getFormattedString("ErrCopy", ExceptionUtil.getDisplay(e, false));
+			this.addError(msg);
 			this.importer.tableImportError();
 			throw e;
 		}

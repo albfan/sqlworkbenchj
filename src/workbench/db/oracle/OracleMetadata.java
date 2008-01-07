@@ -266,8 +266,11 @@ public class OracleMetadata
 		this.columnStatement.setString(1, schema);
 		this.columnStatement.setString(2, table);
 		this.columnStatement.setString(3, cols != null ? cols : "%");
+//		if (Settings.getInstance().getDebugMetadataSql())
+//		{
+//			LogMgr.logDebug("OracleMetadata.getColumns()", "Using: " + sql);
+//		}
 		rs = this.columnStatement.executeQuery();
-		
 		return rs;
 	}
 

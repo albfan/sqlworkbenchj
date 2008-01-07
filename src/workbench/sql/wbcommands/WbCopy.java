@@ -136,7 +136,7 @@ public class WbCopy
 		}
 		
 		WbConnection sourceCon = getConnection(result, sourceKey, ID_PREFIX + "-Source$");
-		if (targetCon == null || !result.isSuccess())
+		if (sourceCon == null || !result.isSuccess())
 		{
 			return result;
 		}
@@ -200,7 +200,8 @@ public class WbCopy
 			CharSequence msg = copier.getMessages();
 			if (msg.length() == 0)
 			{
-				result.addMessage(ResourceMgr.getString("ErrOnCopy"));
+				String err = ResourceMgr.getFormattedString("ErrCopy", ExceptionUtil.getDisplay(e, false));
+				result.addMessage(err);
 			}
 			else
 			{

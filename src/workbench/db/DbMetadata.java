@@ -2050,23 +2050,33 @@ public class DbMetadata
 			{
 				int row = ds.addRow();
 
-				String colName = rs.getString("COLUMN_NAME");
-				int sqlType = rs.getInt("DATA_TYPE");
+				// The columns should be retrieved (getXxx()) in the order
+				// as they appear in the result set as some drivers 
+				// do not like an out-of-order processing of the columns
+				
+				String colName = rs.getString("COLUMN_NAME"); // index 4
+				int sqlType = rs.getInt("DATA_TYPE"); // index 5
 				String typeName = rs.getString("TYPE_NAME");
 				if (this.isMySql && !hasEnums)
 				{
 					hasEnums = typeName.startsWith("enum") || typeName.startsWith("set");
 				}
 
-				int size = rs.getInt("COLUMN_SIZE");
-				int digits = rs.getInt("DECIMAL_DIGITS");
-
+				int size = rs.getInt("COLUMN_SIZE"); // index 7
+				int digits = rs.getInt("DECIMAL_DIGITS"); // index 9
+				String remarks = rs.getString("REMARKS"); // index 12
+				String defaultValue = rs.getString("COLUMN_DEF"); // index 13
+				if (defaultValue != null && this.dbSettings.trimDefaults())
+				{
+					defaultValue = defaultValue.trim();
+				}
+				
 				int sqlDataType = -1;
 				try
 				{
 					// This column is used by our own OracleMetaData to 
 					// return information about char/byte semantics
-					sqlDataType = rs.getInt("SQL_DATA_TYPE");
+					sqlDataType = rs.getInt("SQL_DATA_TYPE");  // index 14
 				}
 				catch (Throwable th)
 				{
@@ -2075,23 +2085,19 @@ public class DbMetadata
 					sqlDataType = -1;
 				}
 				
-				String defaultValue = rs.getString("COLUMN_DEF");
-				if (defaultValue != null && this.dbSettings.trimDefaults())
-				{
-					defaultValue = defaultValue.trim();
-				}
-				
 				int position = -1;
 				try
 				{
-					position = rs.getInt("ORDINAL_POSITION");
+					position = rs.getInt("ORDINAL_POSITION"); // index 17
 				}
 				catch (SQLException e)
 				{
-					LogMgr.logError("DbMetadata", "JDBC driver does not suport ORDINAL_POSITION column for getColumns()", e);
+					LogMgr.logWarning("DbMetadata", "JDBC driver does not suport ORDINAL_POSITION column for getColumns()", e);
 					position = -1;
 				}
 
+				String nullable = rs.getString("IS_NULLABLE"); // index 18
+				
 				String display = this.dataTypeResolver.getSqlTypeDisplay(typeName, sqlType, size, digits, sqlDataType);
 				
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_COL_NAME, colName);
@@ -2102,9 +2108,9 @@ public class DbMetadata
 				else
 					ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG, "NO");
 
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_NULLABLE, rs.getString("IS_NULLABLE"));
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_NULLABLE, nullable);
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DEFAULT, defaultValue);
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_REMARKS, rs.getString("REMARKS"));
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_REMARKS, remarks);
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, new Integer(sqlType));
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_SIZE, new Integer(size));
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DIGITS, new Integer(digits));

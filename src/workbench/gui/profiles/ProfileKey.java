@@ -25,7 +25,9 @@ public class ProfileKey
 	 * Create a new ProfileKey.
 	 * The passed name can consist of the profile group and the profile name
 	 * the group needs to be enclosed in curly brackets, e.g: 
-	 * <tt>{MainGroup}/HR Database</tt>
+	 * <tt>{MainGroup}/HR Database</tt><br/>
+	 * The divividing slash is optional.
+	 * 
 	 * @param pname the name (can include the profile group) of the profile
 	 */
 	public ProfileKey(String pname)
@@ -52,7 +54,10 @@ public class ProfileKey
 		if (tname.charAt(0) == '{')
 		{
 			int pos = tname.indexOf('}');
-			this.name = tname.substring(pos + 2).trim();
+			if (pos < 0) throw new IllegalArgumentException("Missing closing } to define group name");
+			int slashPos = tname.indexOf("/", pos + 1);
+			if (slashPos < 0) slashPos = pos;
+			this.name = tname.substring(slashPos + 1).trim();
 			this.group = tname.substring(1,pos).trim();
 		}
 		else
@@ -69,4 +74,28 @@ public class ProfileKey
 		if (group == null) return name;
 		return "{" + group + "}/" + name;
 	}
+
+	@Override
+	public int hashCode()
+	{
+		return toString().hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object other)
+	{
+		if (other == null) return false;
+		if (other instanceof ProfileKey)
+		{
+			ProfileKey key = (ProfileKey)other;
+			if (key.getName() == null) return false;
+			if (this.name.equals(key.getName()))
+			{
+				if (key.getGroup() == null || this.group == null) return true;
+				return this.getGroup().equals(key.getGroup());
+			}
+		}
+		return false;
+	}	
+	
 }

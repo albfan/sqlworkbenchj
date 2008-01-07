@@ -17,7 +17,6 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import workbench.WbManager;
 import workbench.gui.profiles.ProfileKey;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -37,7 +36,7 @@ public class ConnectionProfile
 {
 	public static final String PROPERTY_PROFILE_GROUP = "profileGroup";
 	private static final String CRYPT_PREFIX = "@*@";
-	protected String name;
+	private String name;
 	private String url;
 	private String driverclass;
 	private String username;
@@ -46,8 +45,6 @@ public class ConnectionProfile
 	private String group;
 	private boolean autocommit;
 	private boolean rollbackBeforeDisconnect;
-	private int id;
-	private static int nextId = 1;
 	private boolean changed;
 	private boolean isNew;
 	private boolean storePassword = true;
@@ -63,9 +60,9 @@ public class ConnectionProfile
 	private boolean includeNullInInsert = true;
 	private boolean removeComments = false;
 	private boolean rememberExplorerSchema = false;
-	private String postConnectScript = null;
-	private String preDisconnectScript = null;
-	private String idleScript = null;
+	private String postConnectScript;
+	private String preDisconnectScript;
+	private String idleScript;
 	private long idleTime = 0;
 	private Color infoColor;
 	private boolean copyPropsToSystem = false;
@@ -81,7 +78,6 @@ public class ConnectionProfile
 
 	public ConnectionProfile()
 	{
-		this.id = getNextId();
     this.isNew = true;
     this.changed = true;
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_ENCRYPT_PWD);
@@ -96,11 +92,6 @@ public class ConnectionProfile
 		this.setPassword(pwd);
 		this.setName(aName);
 		this.reset();
-	}
-
-	private static synchronized int getNextId()
-	{
-		return nextId++;
 	}
 
 	public Color getInfoDisplayColor()
@@ -152,7 +143,11 @@ public class ConnectionProfile
 		return this.copyPropsToSystem;
 	}
 	
-	public boolean getTrimCharData() { return trimCharData; }
+	public boolean getTrimCharData() 
+	{ 
+		return trimCharData; 
+	}
+	
 	public void setTrimCharData(boolean flag) 
 	{ 
 		changed = (flag != trimCharData);
@@ -193,28 +188,24 @@ public class ConnectionProfile
 		this.changed = true;
 	}
 
-  public String getIdentifier()
-  {
-    return Integer.toString(this.id);
-  }
-
 	public boolean isProfileForKey(ProfileKey key)
 	{
-		if (key == null) return false;
-		if (key.getName() == null) return false;
-		if (this.name.equals(key.getName()))
-		{
-			if (key.getGroup() != null) return true;
-			return this.getGroup().equals(key.getGroup());
-		}
-		return false;
+		ProfileKey myKey = getKey();
+		return myKey.equals(key);
 	}
 
 	public ProfileKey getKey()
 	{
-		return new ProfileKey(this.name, this.getGroup());
+		return new ProfileKey(this.getName(), this.getGroup());
 	}
 
+	/**
+	 * This method is used for backward compatibility. Old profiles 
+	 * had this property and to be able to load XML files with 
+	 * old profiles the setter must still be there.
+	 * 
+	 * @param flag
+	 */
 	public void setDisableUpdateTableCheck(boolean flag) { }
 	
 	/**
@@ -238,6 +229,7 @@ public class ConnectionProfile
 		if (this.includeNullInInsert != flag) this.changed = true;
 		this.includeNullInInsert = flag;
 	}
+	
 	/**
 	 * Define how columns with a NULL value are treated when creating INSERT statements.
 	 * If this is set to false, then any column with an a NULL value
@@ -313,8 +305,11 @@ public class ConnectionProfile
 	{
 		if (aPwd == null)
 		{
-			this.password = null;
-			this.changed = true;
+			if (this.password != null)
+			{
+				this.password = null;
+				this.changed = true;
+			}
 			return;
 		}
 
@@ -390,6 +385,7 @@ public class ConnectionProfile
 	 *	password. This is not put into the getPassword()
 	 *	method because the XMLEncode would write the
 	 *	password in plain text into the XML file.
+	 * 
 	 *	A method beginning with decrypt is not
 	 *	regarded as a property and thus not written
 	 *	to the XML file.
@@ -399,7 +395,7 @@ public class ConnectionProfile
 	public String decryptPassword(String aPwd)
 	{
 		if (aPwd == null) return null;
-		if (!aPwd.startsWith(CRYPT_PREFIX))
+		if (!isEncrypted(aPwd))
 		{
 			return aPwd;
 		}
@@ -410,7 +406,7 @@ public class ConnectionProfile
 		}
 	}
 
-	public boolean isEncrypted(String aPwd)
+	private boolean isEncrypted(String aPwd)
 	{
 		return aPwd.startsWith(CRYPT_PREFIX);
 	}
@@ -420,12 +416,22 @@ public class ConnectionProfile
 		this.changed = true;
 		this.isNew = true;
 	}
-	public boolean isNew() { return this.isNew; }
-  public boolean isChanged()
+	
+	public boolean isNew() 
+	{ 
+		return this.isNew; 
+	}
+  
+	public boolean isChanged()
 	{
 		return this.changed || this.isNew;
 	}
 
+	/**
+	 * Reset the changed and new flags.
+	 * @see #isNew()
+	 * @see #isChanged()
+	 */
   public void reset()
 	{
 		this.changed = false;
@@ -449,11 +455,21 @@ public class ConnectionProfile
 	/**
 	 *	Returns the name of the Profile
 	 */
-	public String toString() { return this.name; }
+	public String toString() 
+	{ 
+		return this.name; 
+	}
 
+	/**
+	 * The hashCode is based on the profile key's hash code.
+	 * 
+	 * @see #getKey()
+	 * @see ProfileKey#hashCode()
+	 * @return the hashcode for the profile key
+	 */
 	public int hashCode()
 	{
-		return id;
+		return getKey().hashCode();
 	}
 
 	public boolean equals(Object other)
@@ -461,7 +477,7 @@ public class ConnectionProfile
 		try
 		{
 			ConnectionProfile prof = (ConnectionProfile)other;
-			return this.id == prof.id;
+			return this.getKey().equals(prof.getKey());
 		}
 		catch (ClassCastException e)
 		{
@@ -503,47 +519,70 @@ public class ConnectionProfile
 		}
 	}
 
-	public String getName() { return this.name; }
-	public void setName(String aName)
+	public String getName()
 	{
-		this.name = aName;
-		this.changed = true;
+		return this.name;
 	}
 
-	public boolean getStorePassword() { return this.storePassword; }
-	public void setStorePassword(boolean aFlag) { this.storePassword = aFlag; }
+	public void setName(String aName)
+	{
+		this.changed = !StringUtil.equalString(name, aName);
+		this.name = aName;
+	}
+
+	public boolean getStorePassword()
+	{
+		return this.storePassword;
+	}
+
+	public void setStorePassword(boolean aFlag)
+	{
+		this.storePassword = aFlag;
+	}
 
 	public ConnectionProfile createCopy()
 	{
 		ConnectionProfile result = new ConnectionProfile();
-		result.setAutocommit(this.autocommit);
-		result.setDriverclass(this.driverclass);
-		result.setDriverName(this.driverName);
-		result.setName(this.name);
-		result.setPassword(this.getPassword());
-		result.setUrl(this.url);
-		result.setUsername(this.username);
-		result.setWorkspaceFile(this.workspaceFile);
-		result.setIgnoreDropErrors(this.ignoreDropErrors);
-		result.setUseSeparateConnectionPerTab(this.separateConnection);
-		result.setRollbackBeforeDisconnect(this.rollbackBeforeDisconnect);
-		result.setConfirmUpdates(this.confirmUpdates);
-		result.setStorePassword(this.storePassword);
-		result.setStoreExplorerSchema(this.rememberExplorerSchema);
-		result.setGroup(this.group);
-		if (this.connectionProperties != null)
+		result.setAutocommit(autocommit);
+		result.setDriverclass(driverclass);
+		result.setDriverName(driverName);
+		result.setName(name);
+		result.setGroup(group);
+		result.setPassword(getPassword());
+		result.setUrl(url);
+		result.setUsername(username);
+		result.setWorkspaceFile(workspaceFile);
+		result.setIgnoreDropErrors(ignoreDropErrors);
+		result.setUseSeparateConnectionPerTab(separateConnection);
+		result.setTrimCharData(trimCharData);
+		result.setIncludeNullInInsert(includeNullInInsert);
+		result.setEmptyStringIsNull(emptyStringIsNull);
+		result.setRollbackBeforeDisconnect(rollbackBeforeDisconnect);
+		result.setConfirmUpdates(confirmUpdates);
+		result.setStorePassword(storePassword);
+		result.setDefaultFetchSize(defaultFetchSize);
+		result.setStoreExplorerSchema(rememberExplorerSchema);
+		result.setIdleScript(idleScript);
+		result.setIdleTime(idleTime);
+		result.setPreDisconnectScript(preDisconnectScript);
+		result.setPostConnectScript(postConnectScript);
+		result.setInfoDisplayColor(infoColor);
+		result.setAlternateDelimiter(alternateDelimiter);
+		
+		result.setCopyExtendedPropsToSystem(copyPropsToSystem);
+		if (connectionProperties != null)
 		{
-			Enumeration keys = this.connectionProperties.propertyNames();
+			Enumeration keys = connectionProperties.propertyNames();
 			result.connectionProperties = new Properties();
 
 			while (keys.hasMoreElements())
 			{
 				String key = (String)keys.nextElement();
-				String value = this.connectionProperties.getProperty(key);
+				String value = connectionProperties.getProperty(key);
 				result.connectionProperties.put(key, value);
 			}
 		}
-		result.setEmptyStringIsNull(this.emptyStringIsNull);
+		
 		return result;
 	}
 

@@ -435,6 +435,7 @@ public class DataExporter
 	{
 		this.commitEvery = Committer.NO_COMMIT_FLAG;
 	}
+	
 	/**
 	 * Set the number of statements after which to add a commit to
 	 * generated SQL scripts. 
@@ -488,12 +489,13 @@ public class DataExporter
 		else
 			this.progressInterval = interval;
 	}
-	public int getProgressInterval() { return this.progressInterval; }
-
-
-	/** Control the display of a progress window. This is used
-	 *  from within the DbExplorer
+	
+	/** 
+	 * Control the display of a progress window. This is used
+	 * from within the DbExplorer.
 	 * 
+	 * If the application is running in batch mode, this call is ignored.
+	 * @see WbManager#isBatchMode()
 	 * @param aFlag if true, the progress window is displayed
 	 */
 	public void setShowProgressWindow(boolean aFlag)
@@ -503,25 +505,36 @@ public class DataExporter
 	    this.showProgressWindow = aFlag;
 	  }
 	}
-	public boolean getShowProgressWindow() { return this.showProgressWindow; }
-
+	
 	public void setXsltTransformation(String xsltFileName)
 	{
 		this.xsltFile = xsltFileName;
 	}
-	public String getXsltTransformation() { return this.xsltFile; }
+	
+	public String getXsltTransformation() 
+	{ 
+		return this.xsltFile; 
+	}
 
 	public void setXsltTransformationOutput(String aFilename)
 	{
 		this.transformOutputFile = aFilename;
 	}
-	public String getXsltTransformationOutput() { return this.transformOutputFile; }
+	
+	public String getXsltTransformationOutput()
+	{
+		return this.transformOutputFile;
+	}
 
 	public void setExportHeaders(boolean aFlag) 
 	{ 
 		this.exportHeaders = aFlag; 
 	}
-	public boolean getExportHeaders() { return this.exportHeaders; }
+
+	public boolean getExportHeaders()
+	{
+		return this.exportHeaders;
+	}
 
 	public void setCreateFullHtmlPage(boolean aFlag) { this.createFullHtmlPage = aFlag; }
 	public boolean getCreateFullHtmlPage() { return this.createFullHtmlPage; }
@@ -592,7 +605,11 @@ public class DataExporter
 		}
 	}
 
-	public String getTimestampFormat() { return this.dateTimeFormat; }
+	public String getTimestampFormat()
+	{
+		return this.dateTimeFormat;
+	}
+
 	public SimpleDateFormat getTimestampFormatter()
 	{
 		return this.dateTimeFormatter;
@@ -616,8 +633,15 @@ public class DataExporter
 		}
 	}
 	
-	public void setHtmlTitle(String aTitle) { this.htmlTitle = aTitle; }
-	public String getHtmlTitle() { return this.htmlTitle; }
+	public void setHtmlTitle(String aTitle)
+	{
+		this.htmlTitle = aTitle;
+	}
+
+	public String getHtmlTitle()
+	{
+		return this.htmlTitle;
+	}
 
 	public void setOutputTypeHtml() 
 	{ 
@@ -672,22 +696,40 @@ public class DataExporter
 		if (this.outputfile == null) return;
 	}
 
-	public String getOutputFilename() { return this.outputfile; }
-	public String getFullOutputFilename() 
-	{ 
-		return this.realOutputfile; 
+	public String getOutputFilename()
+	{
+		return this.outputfile;
+	}
+
+	public String getFullOutputFilename()
+	{
+		return this.realOutputfile;
 	}
 
 	public void setConcatString(String aConcatString)
 	{
-		if (aConcatString == null) return;
+		if (aConcatString == null)
+		{
+			return;
+		}
 		this.concatString = aConcatString;
 		this.concatFunction = null;
 	}
-	public String getConcatString() { return this.concatString; }
 
-	public void setChrFunction(String aFunc) { this.chrFunc = aFunc; }
-	public String getChrFunction() { return this.chrFunc; }
+	public String getConcatString()
+	{
+		return this.concatString;
+	}
+
+	public void setChrFunction(String aFunc)
+	{
+		this.chrFunc = aFunc;
+	}
+
+	public String getChrFunction()
+	{
+		return this.chrFunc;
+	}
 
 	public void setDecimalSymbol(char aSymbol)
 	{
@@ -706,8 +748,10 @@ public class DataExporter
 		}
 	}
 	
-	public DecimalFormat getDecimalFormatter() { return this.numberFormatter; }
-
+	public DecimalFormat getDecimalFormatter()
+	{
+		return this.numberFormatter;
+	}
 
 	public void setDecimalSymbol(String aSymbol)
 	{
@@ -733,9 +777,16 @@ public class DataExporter
 		}
 	}
 
-	public String getSql() { return this.sql; }
-	public int getNumberExportedTables() { return this.tablesExported; }
-	
+	public String getSql()
+	{
+		return this.sql;
+	}
+
+	public int getNumberExportedTables()
+	{
+		return this.tablesExported;
+	}
+
 	private void startBackgroundThread()
 	{
 		Thread t = new WbThread("Export")
@@ -836,7 +887,10 @@ public class DataExporter
 		this.closeProgress();
 	}
 
-	public long getTotalRows() { return this.totalRows; }
+	public long getTotalRows()
+	{
+		return this.totalRows;
+	}
 	
 	public void setCurrentRow(int currentRow)
 	{
@@ -1181,6 +1235,7 @@ public class DataExporter
 				{
 					parent = (Frame)aParent;
 				}
+				
 				// In order to initialize the resultInfo as accurate as 
 				// possible, we use a table export when all columns are
 				// selected. This way the column information will be retrieved
@@ -1188,9 +1243,7 @@ public class DataExporter
 				// ResultSetMetadata object which might not return 
 				// the correct column types (e.g. in Postgres)
 				// but for an XML export we want to have the types as 
-				// exact as possible to enable creating the target table
-				// later
-				
+				// exact as possible to enable creating the target table later
 				if (tableExport)
 				{
 					this.setShowProgressWindow(true);

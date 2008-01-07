@@ -55,6 +55,7 @@ import workbench.gui.actions.ConfigureShortcutsAction;
 import workbench.gui.actions.ShowManualAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.RunningJobIndicator;
+import workbench.interfaces.Moveable;
 import workbench.util.ExceptionUtil;
 import workbench.gui.actions.AddMacroAction;
 import workbench.gui.actions.AddTabAction;
@@ -113,16 +114,15 @@ import workbench.util.NumberStringCache;
 /**
  * The main window for the Workbench.
  * It will display several {@link workbench.gui.sql.SqlPanel}s in
- * a tabbed pane. Additionally one or more
- * {@link workbench.gui.dbobjects.DbExplorerPanel} might also be displayed
- * inside the JTabbedPane
+ * a tabbed pane. Additionally one or more {@link workbench.gui.dbobjects.DbExplorerPanel} 
+ * might also be displayed inside the JTabbedPane
  *
  * @author  support@sql-workbench.net
  */
 public class MainWindow
 	extends JFrame
 	implements MouseListener, WindowListener, ChangeListener, DropTargetListener,
-						MacroChangeListener, DbExecutionListener, Connectable, PropertyChangeListener
+						MacroChangeListener, DbExecutionListener, Connectable, PropertyChangeListener, Moveable
 {
 	private static final String DEFAULT_WORKSPACE = "%ConfigDir%/Default.wksp";
 	private static int instanceCount;
@@ -155,7 +155,7 @@ public class MainWindow
 	private boolean tabRemovalInProgress;
 
 	// will indicate a connect or disconnect in progress
-	// connecting and disconnecting is done a separate thread
+	// connecting and disconnecting is done in a separate thread
 	// so that slow connections do not block the GUI
 	private boolean connectInProgress;
 
@@ -202,7 +202,9 @@ public class MainWindow
 		this.addWindowListener(this);
 		MacroManager.getInstance().addChangeListener(this);
 		this.jobIndicator = new RunningJobIndicator(this);
+		
 		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
+		sqlTab.enableDragDropReordering(this);
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_SHOW_TOOLBAR);
 	}
 
@@ -971,8 +973,6 @@ public class MainWindow
 
 	protected void updateCurrentTab(int index)
 	{
-		//MainPanel current = this.getCurrentPanel();
-		//int index = this.sqlTab.getSelectedIndex();
 		MainPanel current = getSqlPanel(index);
 		if (current == null) return;
 		this.updateGuiForTab(index);
@@ -2499,16 +2499,22 @@ public class MainWindow
 		moveTab(index, index + 1);
 	}
 
-	private void moveTab(int oldIndex, int newIndex)
+	public void moveTab(int oldIndex, int newIndex)
 	{
 		SqlPanel p = (SqlPanel) this.getSqlPanel(oldIndex);
+		JMenuBar oldMenu = this.panelMenus.get(oldIndex);
 		this.sqlTab.remove(oldIndex);
+		this.panelMenus.remove(oldIndex);
+		this.panelMenus.add(newIndex, oldMenu);
+		
 		this.sqlTab.add(p, newIndex);
 		this.sqlTab.setSelectedIndex(newIndex);
+		
 		renumberTabs();
 		this.tabSelected(newIndex);
 		this.validate();
 	}
+	
 	/**
 	 * Removes the tab at the give location. If the current profile
 	 * uses a separate connection per tab, then a disconnect will be
@@ -2631,7 +2637,7 @@ public class MainWindow
 
 	public void dragEnter(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
 	{
-		dropTargetDragEvent.acceptDrag (DnDConstants.ACTION_COPY);
+		dropTargetDragEvent.acceptDrag(DnDConstants.ACTION_COPY);
 	}
 
 	public void dragExit(java.awt.dnd.DropTargetEvent dropTargetEvent)
@@ -2650,7 +2656,7 @@ public class MainWindow
 			if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
 			{
 				dropTargetDropEvent.acceptDrop(DnDConstants.ACTION_COPY);
-				java.util.List fileList = (java.util.List)tr.getTransferData(DataFlavor.javaFileListFlavor);
+				List fileList = (List)tr.getTransferData(DataFlavor.javaFileListFlavor);
 				if (fileList != null)
 				{
 					int files = fileList.size();
