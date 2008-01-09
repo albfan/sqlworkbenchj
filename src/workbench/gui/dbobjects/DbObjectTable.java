@@ -12,6 +12,7 @@
 package workbench.gui.dbobjects;
 import javax.swing.ListSelectionModel;
 import workbench.gui.components.WbTable;
+
 /**
  * @author support@sql-workbench.net
  */
@@ -20,6 +21,7 @@ public class DbObjectTable
 {
 	public DbObjectTable()
 	{
+		super(true, false, false);
 		setAutoResizeMode(AUTO_RESIZE_OFF);
 		setCellSelectionEnabled(false);
 		setColumnSelectionAllowed(false);

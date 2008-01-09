@@ -106,15 +106,14 @@ public class Settings
 
 	private ShortcutManager keyManager;
 
-	private static Settings instance;
-
+	private static class LazyInstanceHolder
+	{
+		private static Settings instance = new Settings();
+	}
+	
 	public static final Settings getInstance()
 	{
-		if (instance == null)
-		{
-			instance = new Settings();
-		}
-		return instance;
+		return LazyInstanceHolder.instance;
 	}
 
 	private Settings()

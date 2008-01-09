@@ -21,17 +21,21 @@ import workbench.interfaces.EventDisplay;
  */
 public class EventNotifier 
 {
-	private static final EventNotifier instance = new EventNotifier();
 	private List<EventDisplay> displayClients = new LinkedList<EventDisplay>();
 	private NotifierEvent lastEvent = null;
 	
+	private static class LazyInstanceHolder
+	{
+		private static EventNotifier instance = new EventNotifier();
+	}
+
   private EventNotifier() 
   {
   }
 
 	public static EventNotifier getInstance() 
 	{
-		return instance;
+		return LazyInstanceHolder.instance;
 	}
 	
 	public synchronized void addEventDisplay(EventDisplay d)

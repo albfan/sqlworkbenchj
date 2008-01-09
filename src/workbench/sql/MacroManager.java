@@ -39,7 +39,6 @@ import workbench.util.WbPersistence;
  */
 public class MacroManager
 {
-	private static MacroManager instance = new MacroManager();
 	private HashMap<String, String> macros;
 	private boolean modified = false;
 	private List<MacroChangeListener> changeListeners = null;
@@ -49,9 +48,14 @@ public class MacroManager
 	private String currentStatementKey = Settings.getInstance().getProperty("workbench.macro.key.currentstatement", "${current_statement}$");
 	private String editorTextKey = Settings.getInstance().getProperty("workbench.macro.key.editortext", "${text}$");
 	
+	private static class LazyInstanceHolder
+	{
+		private static MacroManager instance = new MacroManager();
+	}
+	
 	public static MacroManager getInstance()
 	{
-		return instance;
+		return LazyInstanceHolder.instance;
 	}
 
 	public boolean hadLoadErrors()

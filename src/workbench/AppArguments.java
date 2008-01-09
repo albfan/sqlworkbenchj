@@ -10,18 +10,19 @@
  *
  */
 package workbench;
+
 import workbench.util.ArgumentParser;
+
 /**
  * @author support@sql-workbench.net
  */
-public class AppArguments 
+public class AppArguments
 	extends ArgumentParser
 {
 	// Parameters for batch execution used by BatchRunner
 	public static final String ARG_SCRIPT = "script";
 	public static final String ARG_SCRIPT_ENCODING = "encoding";
 	public static final String ARG_ABORT = "abortonerror";
-
 	public static final String ARG_CONN_URL = "url";
 	public static final String ARG_CONN_DRIVER = "driver";
 	public static final String ARG_CONN_JAR = "driverjar";
@@ -45,20 +46,17 @@ public class AppArguments
 	public static final String ARG_SHOWPROGRESS = "showprogress";
 	public static final String ARG_QUIET = "quiet";
 	public static final String ARG_TRIM_CHAR = "trimCharData";
-
 	public static final String ARG_PROFILE_STORAGE = "profilestorage";
-
 	public static final String ARG_CONFIGDIR = "configdir";
 	public static final String ARG_LIBDIR = "libdir";
 	public static final String ARG_LOGFILE = "logfile";
 	public static final String ARG_VARDEF = "vardef";
-
 	public static final String ARG_SHOW_PUMPER = "datapumper";
 	public static final String ARG_SHOW_DBEXP = "dbexplorer";
 	public static final String ARG_LANG = "languaqe";
 	public static final String ARG_NOSETTNGS = "nosettings";
 	public static final String ARG_NOTEMPLATES = "notemplates";
-	
+
 	public AppArguments()
 	{
 		addArgument(ARG_PROFILE);
@@ -96,5 +94,4 @@ public class AppArguments
 		addArgument(ARG_TRIM_CHAR);
 		addArgument(ARG_LANG);
 	}
-
 }

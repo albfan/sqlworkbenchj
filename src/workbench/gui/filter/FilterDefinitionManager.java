@@ -32,16 +32,16 @@ public class FilterDefinitionManager
 {
 	private LinkedList<PropertyChangeListener> listeners;
 	private FixedSizeList<WbFile> filterFiles;
-	private static FilterDefinitionManager instance;
 	private static final int DEFAULT_MAX_SIZE = 15;
 	
-	public static synchronized FilterDefinitionManager getInstance() 
+	private static final class LazyInstanceHolder
 	{
-		if (instance == null)
-		{
-			instance = new FilterDefinitionManager();
-		}
-		return instance;
+		private static FilterDefinitionManager instance = new FilterDefinitionManager();	
+	}
+
+	public static FilterDefinitionManager getInstance() 
+	{
+		return LazyInstanceHolder.instance;
 	}
 	
 	private FilterDefinitionManager()

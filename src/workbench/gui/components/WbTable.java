@@ -230,13 +230,8 @@ public class WbTable
 		this.replacer = new TableReplacer(this);
 
 		this.copyAsTextAction = new CopyAsTextAction(this);
-		if (sqlCopyAllowed)
-		{
-			this.copyInsertAction = new CopyAsSqlInsertAction(this);
-			this.copyDeleteInsertAction = new CopyAsSqlDeleteInsertAction(this);
-			this.copyUpdateAction = new CopyAsSqlUpdateAction(this);
-		}
 		this.saveDataAsAction = new SaveDataAsAction(this);
+		
 		this.saveDataAsAction.setEnabled(true);
 
 		this.filterAction = new FilterDataAction(this);
@@ -246,18 +241,23 @@ public class WbTable
 		this.addPopupAction(this.saveDataAsAction, false);
 		this.addPopupAction(this.copyAsTextAction, true);
 		
-		if (copyUpdateAction != null) this.addPopupAction(this.copyUpdateAction, false);
-		if (copyInsertAction != null) this.addPopupAction(this.copyInsertAction, false);
-		if (copyDeleteInsertAction != null) this.addPopupAction(this.copyDeleteInsertAction, false);
 
 		if (sqlCopyAllowed)
 		{
+			this.copyInsertAction = new CopyAsSqlInsertAction(this);
+			this.copyDeleteInsertAction = new CopyAsSqlDeleteInsertAction(this);
+			this.copyUpdateAction = new CopyAsSqlUpdateAction(this);
+
+			this.addPopupAction(this.copyUpdateAction, false);
+			this.addPopupAction(this.copyInsertAction, false);
+			this.addPopupAction(this.copyDeleteInsertAction, false);
+			
 			WbMenu copy = this.getCopySelectedMenu();
 			this.addPopupSubMenu(copy, true);
 		}
 		else
 		{
-			this.copySelectedAsTextAction = new CopySelectedAsTextAction(this);
+			this.copySelectedAsTextAction = new CopySelectedAsTextAction(this, "MnuTxtCopySelectedAsTextSingle");
 			this.addPopupAction(this.copySelectedAsTextAction, false);
 		}
 

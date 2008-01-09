@@ -22,17 +22,17 @@ import workbench.resource.ResourceMgr;
  * @see workbench.gui.components.ClipBoardCopier
  * @author  support@sql-workbench.net
  */
-public class CopySelectedAsTextAction extends WbAction
+public class CopySelectedAsTextAction
+	extends WbAction
 {
 	private WbTable client;
 
+	public CopySelectedAsTextAction(WbTable aClient)
+	{
+		this(aClient, "MnuTxtCopySelectedAsText");
+	}
 
-  public CopySelectedAsTextAction(WbTable aClient)
-  {
-      this(aClient, "MnuTxtCopySelectedAsText");
-  }
-  
-  public CopySelectedAsTextAction(WbTable aClient, String labelKey)
+	public CopySelectedAsTextAction(WbTable aClient, String labelKey)
 	{
 		super();
 		this.client = aClient;
@@ -41,9 +41,16 @@ public class CopySelectedAsTextAction extends WbAction
 		this.setEnabled(false);
 	}
 
-	public boolean hasCtrlModifier() { return true; }
-	public boolean hasShiftModifier() { return true; }
-	
+	public boolean hasCtrlModifier()
+	{
+		return true;
+	}
+
+	public boolean hasShiftModifier()
+	{
+		return true;
+	}
+
 	public void executeAction(ActionEvent e)
 	{
 		ClipBoardCopier copier = new ClipBoardCopier(this.client);

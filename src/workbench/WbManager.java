@@ -736,8 +736,8 @@ public class WbManager
 		{
 			cmdLine.parse(args);
 			
-			String lang = cmdLine.getValue("language");
-			if (lang != null)
+			String lang = cmdLine.getValue(AppArguments.ARG_LANG);
+			if (!StringUtil.isEmptyString(lang))
 			{
 				System.setProperty("workbench.gui.language", lang);
 			}
@@ -747,6 +747,7 @@ public class WbManager
 			{
 				System.setProperty("workbench.configdir", value);
 			}
+			
 			value = cmdLine.getValue(AppArguments.ARG_LIBDIR);
 			if (!StringUtil.isEmptyString(value))
 			{
@@ -815,7 +816,8 @@ public class WbManager
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			e.printStackTrace(System.err);
+			LogMgr.logError("WbManager.initCdmLine()", "Error initializing command line arguments!", e);
 		}
 	}
 
@@ -824,8 +826,6 @@ public class WbManager
 		LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
 		LogMgr.logInfo("WbManager.init()", "Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
 		LogMgr.logInfo("WbManager.init()", "Operating System=" + System.getProperty("os.name")  + ", version=" + System.getProperty("os.version") + ", platform=" + System.getProperty("os.arch"));
-
-    if (this.cmdLine == null) this.initCmdLine(null);
 
 		// batchMode flag is set by initCmdLine()
 		if (this.batchMode)
