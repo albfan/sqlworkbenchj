@@ -35,6 +35,7 @@ import workbench.util.WbPersistence;
 
 /**
  * A class to manage, store and apply SQL macros (alias) 
+ * 
  * @author support@sql-workbench.net
  */
 public class MacroManager
@@ -47,15 +48,15 @@ public class MacroManager
 	private String selectedStatementKey = Settings.getInstance().getProperty("workbench.macro.key.selectedstmt", "${selected_statement}$");
 	private String currentStatementKey = Settings.getInstance().getProperty("workbench.macro.key.currentstatement", "${current_statement}$");
 	private String editorTextKey = Settings.getInstance().getProperty("workbench.macro.key.editortext", "${text}$");
+	private static MacroManager instance = new MacroManager();
 	
-	private static class LazyInstanceHolder
+	private MacroManager()
 	{
-		private static MacroManager instance = new MacroManager();
 	}
-	
+
 	public static MacroManager getInstance()
 	{
-		return LazyInstanceHolder.instance;
+		return instance;
 	}
 
 	public boolean hadLoadErrors()
@@ -232,10 +233,6 @@ public class MacroManager
 	private void loadIfNecessary()
 	{
 		if (this.macros == null) this.loadMacros();
-	}
-
-	private MacroManager()
-	{
 	}
 
 	private File getMacroFile()

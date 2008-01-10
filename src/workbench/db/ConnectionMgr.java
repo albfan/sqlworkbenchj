@@ -58,20 +58,16 @@ public class ConnectionMgr
 	private boolean readTemplates = true;
 	private boolean templatesImported;
 	private List<PropertyChangeListener> groupsChangeListener;
+	private static ConnectionMgr instance = new ConnectionMgr();
 	
 	private ConnectionMgr()
 	{
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_PROFILE_STORAGE);
 	}
 	
-	private static class LazyInstanceHolder
-	{
-		private static ConnectionMgr instance = new ConnectionMgr();
-	}
-	
 	public static ConnectionMgr getInstance()
 	{
-		return LazyInstanceHolder.instance;
+		return instance;
 	}
 	
 	/**

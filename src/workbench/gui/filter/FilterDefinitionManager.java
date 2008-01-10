@@ -34,14 +34,15 @@ public class FilterDefinitionManager
 	private FixedSizeList<WbFile> filterFiles;
 	private static final int DEFAULT_MAX_SIZE = 15;
 	
-	private static final class LazyInstanceHolder
-	{
-		private static FilterDefinitionManager instance = new FilterDefinitionManager();	
-	}
+	private static FilterDefinitionManager instance;	
 
-	public static FilterDefinitionManager getInstance() 
+	public synchronized static FilterDefinitionManager getInstance() 
 	{
-		return LazyInstanceHolder.instance;
+		if (instance == null)
+		{
+			instance = new FilterDefinitionManager();
+		}
+		return instance;
 	}
 	
 	private FilterDefinitionManager()

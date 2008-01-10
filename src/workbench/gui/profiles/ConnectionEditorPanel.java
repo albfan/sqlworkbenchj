@@ -15,7 +15,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.event.ActionListener;
@@ -49,7 +48,6 @@ import workbench.gui.components.IntegerPropertyEditor;
 import workbench.gui.components.PasswordPropertyEditor;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
-import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbCheckBoxLabel;
 import workbench.gui.components.WbColorPicker;
@@ -734,7 +732,7 @@ public class ConnectionEditorPanel
 	{//GEN-HEADEREND:event_showDriverEditorDialog
 		final Frame parent = (Frame)(SwingUtilities.getWindowAncestor(this)).getParent();
 		final DbDriver drv = (DbDriver)cbDrivers.getSelectedItem();
-		
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
@@ -831,24 +829,14 @@ public class ConnectionEditorPanel
 
 	public void editExtendedProperties()
 	{
-		if (this.currentProfile == null)
+		EventQueue.invokeLater(new Runnable()
 		{
-			return;
-		}
-		Properties p = this.currentProfile.getConnectionProperties();
-		ConnectionPropertiesEditor editor = new ConnectionPropertiesEditor(p);
-		editor.setCopyToSystem(currentProfile.getCopyExtendedPropsToSystem());
-		Dimension d = new Dimension(300, 250);
-		editor.setMinimumSize(d);
-		editor.setPreferredSize(d);
-
-		boolean ok = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(this), editor, ResourceMgr.getString("TxtEditConnPropsWindowTitle"));
-		if (ok)
-		{
-			this.currentProfile.setConnectionProperties(editor.getProperties());
-			this.currentProfile.setCopyExtendedPropsToSystem(editor.getCopyToSystem());
-		}
-		checkExtendedProps();
+			public void run()
+			{
+				ConnectionPropertiesEditor.editProperties(SwingUtilities.getWindowAncestor(ConnectionEditorPanel.this), currentProfile);
+				checkExtendedProps();
+			}
+		});
 	}
 
 	public void selectWorkspace()
@@ -998,7 +986,7 @@ public class ConnectionEditorPanel
 			if (evt.getSource() == this.altDelimiter)
 			{
 				DelimiterDefinition del = altDelimiter.getDelimiter();
-				// As the alternateDelimiter is a not attached to the profile itself, 
+				// As the alternateDelimiter is a not attached to the profile itself,
 				// we have to propagate any updated delimiter object to the profile
 
 				this.currentProfile.setAlternateDelimiter(altDelimiter.getDelimiter());

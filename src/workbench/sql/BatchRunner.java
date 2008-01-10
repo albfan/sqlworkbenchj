@@ -43,9 +43,9 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
- * A class to run several statements from a script file. This is used
- * when running SQL Workbench in batch mode and for the {@link workbench.sql.wbcommands.WbInclude}
- * command.
+ * A class to run several statements from a script file. 
+ * This is used when running SQL Workbench in batch mode and 
+ * for the {@link workbench.sql.wbcommands.WbInclude} command.
  *
  * @author  support@sql-workbench.net
  */

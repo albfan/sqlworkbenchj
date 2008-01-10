@@ -12,6 +12,8 @@
 package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Window;
 import java.sql.Types;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -20,10 +22,12 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import workbench.db.ConnectionProfile;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.TableColumnOptimizer;
+import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.interfaces.FileActions;
@@ -46,7 +50,7 @@ public class ConnectionPropertiesEditor
 	private DeleteListEntryAction deleteItem;
 	private JCheckBox copyProps;
 	
-	public ConnectionPropertiesEditor(Properties source)
+	public ConnectionPropertiesEditor(ConnectionProfile profile)
 	{
 		String[] cols = new String[] { ResourceMgr.getString("TxtConnDataPropName"), ResourceMgr.getString("TxtConnDataPropValue") };
 		int[] types = new int[] { Types.VARCHAR, Types.VARCHAR };
@@ -54,6 +58,8 @@ public class ConnectionPropertiesEditor
 
 		this.propData = new DataStore(cols, types, sizes);
 		this.propData.setAllowUpdates(true);
+		Properties source = profile.getConnectionProperties();
+		
 		if (source != null)
 		{
 			Enumeration keys = source.propertyNames();
@@ -87,16 +93,12 @@ public class ConnectionPropertiesEditor
 		copyProps = new JCheckBox(ResourceMgr.getString("LblCpProps2System"));
 		copyProps.setToolTipText(ResourceMgr.getDescription("LblCpProps2System"));
 		this.add(copyProps, BorderLayout.SOUTH);
+		this.copyProps.setSelected(profile.getCopyExtendedPropsToSystem());
 	}
 
 	public boolean getCopyToSystem()
 	{
 		return this.copyProps.isSelected();
-	}
-	
-	public void setCopyToSystem(boolean flag)
-	{
-		this.copyProps.setSelected(flag);
 	}
 	
 	public Properties getProperties()
@@ -132,4 +134,18 @@ public class ConnectionPropertiesEditor
 	{
 	}
 
+	public static void editProperties(Window parent, ConnectionProfile profile)
+	{
+		ConnectionPropertiesEditor editor = new ConnectionPropertiesEditor(profile);
+		Dimension d = new Dimension(300, 250);
+		editor.setMinimumSize(d);
+		editor.setPreferredSize(d);
+
+		boolean ok = ValidatingDialog.showConfirmDialog(parent, editor, ResourceMgr.getString("TxtEditConnPropsWindowTitle"));
+		if (ok)
+		{
+			profile.setConnectionProperties(editor.getProperties());
+			profile.setCopyExtendedPropsToSystem(editor.getCopyToSystem());
+		}
+	}
 }

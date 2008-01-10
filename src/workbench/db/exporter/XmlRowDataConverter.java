@@ -19,13 +19,15 @@ import workbench.db.WbConnection;
 import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
 import workbench.db.report.TagWriter;
+import workbench.resource.Settings;
 import workbench.storage.RowData;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
- *
+ * Convert row data to our own XML format.
+ * 
  * @author  support@sql-workbench.net
  */
 public class XmlRowDataConverter
@@ -63,10 +65,12 @@ public class XmlRowDataConverter
 	private String tableToUse = null;
 	private StrBuffer dbInfo;
 	private boolean writeClobFiles = false;
+	private boolean addColName = false;
 	
 	public XmlRowDataConverter()
 	{
 		super();
+		this.addColName = Settings.getInstance().getBoolProperty("workbench.export.xml.verbose.includecolname", false);
 	}
 
 	public void setTableNameToUse(String name)
@@ -83,16 +87,14 @@ public class XmlRowDataConverter
 	{
 		super.setOriginalConnection(con);
 		// This should be done before running the actual export
-		// in order to avoid concurrent statement execution during export
+		// in order to avoid concurrent statement execution during export.
+		
 		// getDatabaseInfoAsXml() indirectly runs some statements because
 		// it retrieves user and schema information from the database
-		// DataExporter will call this immediately after creating the 
-		// ExportWriter, which in turn will call this method
-		if (this.dbInfo == null)
-		{
-			StrBuffer indent = new StrBuffer("    ");
-			this.dbInfo = con.getDatabaseInfoAsXml(indent);
-		}
+		// This method is called during initialization of the DataExporter
+		// and before the actual export is started.
+		StrBuffer indent = new StrBuffer("    ");
+		this.dbInfo = con.getDatabaseInfoAsXml(indent);
 	}
 	
 	public void setUseVerboseFormat(boolean flag)
@@ -180,6 +182,7 @@ public class XmlRowDataConverter
 		}
 
 		if (verboseFormat) xml.append(this.lineEnding);
+		
 		for (int c=0; c < colCount; c ++)
 		{
 			if (!this.includeColumnInExport(c)) continue;
@@ -196,6 +199,10 @@ public class XmlRowDataConverter
 			{
 				xml.append(c);
 				xml.append('"');
+				if (addColName) 
+				{
+					xml.append(" name=\"" + metaData.getColumnName(c) + "\"");
+				}
 			}
 			
 			if (isNull)
