@@ -107,6 +107,7 @@ public class DataImporter
 	private int totalTables = -1;
 	private int currentTable = -1;
 	private boolean transactionControl = true;
+	private boolean useSetNull = false;
 
 	// this array will map the columns for updating the target table
 	// the index into this array will be the index
@@ -169,6 +170,7 @@ public class DataImporter
 		}
 		this.checkRealClobLength = this.dbConn.getDbSettings().needsExactClobLength();
 		this.isOracle = this.dbConn.getMetadata().isOracle();
+		this.useSetNull = this.dbConn.getDbSettings().useSetNull();
 	}
 
 	public void setTransactionControl(boolean flag)
@@ -1124,7 +1126,14 @@ public class DataImporter
 			
 			if (row[i] == null)
 			{
-				pstmt.setObject(colIndex, null);
+				if (useSetNull)
+				{
+					pstmt.setNull(colIndex, targetSqlType);
+				}
+				else
+				{
+					pstmt.setObject(colIndex, null);
+				}
 			}
 			else if ( SqlUtil.isClobType(targetSqlType) || "LONG".equals(targetDbmsType) ||
 				       "CLOB".equals(targetDbmsType) )

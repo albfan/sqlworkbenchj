@@ -52,7 +52,11 @@ public class AutoCompletionAction
 	
 	public void setConnection(WbConnection conn)
 	{
-		if (conn != null && this.handler == null)
+		if (conn == null)
+		{
+			this.handler = null;
+		}
+		else if (this.handler == null)
 		{
 			try
 			{
@@ -65,12 +69,14 @@ public class AutoCompletionAction
 				e.printStackTrace();
 			}
 		}
+		
 		if (conn != null)
 		{
 			this.handler.setStatusBar(status);
 			this.handler.setEditor(editor);
 			this.handler.setConnection(conn);
 		}
+		
 		this.setEnabled(conn != null);
 	}
 	

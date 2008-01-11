@@ -46,9 +46,29 @@ public class DbSettings
 	{
 		this.dbId = id;
 		Settings settings = Settings.getInstance();
+		
 		this.caseSensitive = settings.getBoolProperty("workbench.db." + getDbId() + ".casesensitive", false) || settings.getCaseSensitivServers().contains(productName);
 		this.useJdbcCommit = settings.getBoolProperty("workbench.db." + getDbId() + ".usejdbccommit", false) || settings.getServersWhichNeedJdbcCommit().contains(productName);
 		this.ddlNeedsCommit = settings.getBoolProperty("workbench.db." + getDbId() + ".ddlneedscommit", false) || settings.getServersWhereDDLNeedsCommit().contains(productName);
+		
+		// Migrate old list-based properties to new dbid based properties
+		// If the flags were already set with the new format, re-applying the 
+		// value won't change anything
+		if (caseSensitive )
+		{
+			settings.removeCaseSensitivServer(productName);
+			settings.setProperty("workbench.db." + getDbId() + ".casesensitive", true);
+		}
+		if (ddlNeedsCommit)
+		{
+			settings.removeDDLCommitServer(productName);
+			settings.setProperty("workbench.db." + getDbId() + ".ddlneedscommit", true);
+		}
+		if (useJdbcCommit)
+		{
+			settings.removeJdbcCommitServer(productName);
+			settings.setProperty("workbench.db." + getDbId() + ".usejdbccommit", true);
+		}
 		
 		List<String> quote = StringUtil.stringToList(settings.getProperty("workbench.db.neverquote",""));
 		this.neverQuoteObjects = quote.contains(this.getDbId());
@@ -104,6 +124,11 @@ public class DbSettings
 		return trimDefaults;
 	}
 
+	public boolean useSetNull()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".import.use.setnull", false);
+	}
+	
 	public boolean useJdbcCommit()
 	{
 		return useJdbcCommit;

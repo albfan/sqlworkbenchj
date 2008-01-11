@@ -1089,35 +1089,28 @@ public class Settings
 	// <editor-fold defaultstate="collapsed" desc="Printing">
 	public PageFormat getPageFormat()
 	{
-		double leftmargin = this.getPrintMarginLeft();
-		double rightmargin = this.getPrintMarginRight();
-
-		double topmargin = this.getPrintMarginTop();
-		double bottommargin = this.getPrintMarginBottom();
-
 		PageFormat page = new PageFormat();
-		page.setOrientation(this.getPrintOrientation());
-
-		Paper paper = null;
-		double width = this.getPrintPaperWidth();
-		double height = this.getPrintPaperHeight();
-
-		if (width > 0 && height > 0)
-		{
-			paper = new Paper();
-			paper.setSize(width, height);
-		}
-		else
-		{
-			paper = page.getPaper();
-			width = paper.getWidth();
-			height = paper.getHeight();
-		}
-		paper.setImageableArea(leftmargin, topmargin, width - leftmargin - rightmargin, height - topmargin - bottommargin);
+		double iw = getDoubleProperty("workbench.print.paper.iwidth", 538.5826771653543);
+		double ih = getDoubleProperty("workbench.print.paper.iheight", 785.1968503937007);
+		double top = getDoubleProperty("workbench.print.paper.top", 28.346456692913385);
+		double left = getDoubleProperty("workbench.print.paper.left", 28.346456692913385);
+		double width = getDoubleProperty("workbench.print.paper.width", 595.275590551181);
+		double height = getDoubleProperty("workbench.print.paper.height", 841.8897637795276);
+		
+		Paper paper = new Paper();
+		paper.setSize(width, height);
+		paper.setImageableArea(left, top, iw, ih);
 		page.setPaper(paper);
+		page.setOrientation(this.getPrintOrientation());
 		return page;
 	}
 
+	private double getDoubleProperty(String prop, double defValue)
+	{
+		String v = getProperty(prop, null);
+		return StringUtil.getDoubleValue(v, defValue);
+	}
+	
 	public boolean getShowNativePageDialog()
 	{
 		return getBoolProperty("workbench.print.nativepagedialog", true);
@@ -1128,80 +1121,26 @@ public class Settings
 		return getIntProperty("workbench.print.orientation", PageFormat.PORTRAIT);
 	}
 
-	private double getPrintPaperWidth()
-	{
-		return StringUtil.getDoubleValue(this.props.getProperty("workbench.print.paper.width"), -1);
-	}
-
-	private double getPrintPaperHeight()
-	{
-		return StringUtil.getDoubleValue(this.props.getProperty("workbench.print.paper.height"), -1);
-	}
-
 	public void setPageFormat(PageFormat aFormat)
 	{
 		Paper p = aFormat.getPaper();
-		double width = p.getWidth();
-		double height = p.getHeight();
+		
+		double width = aFormat.getWidth();
+		double height = aFormat.getHeight();
+		
+		double iw = aFormat.getImageableWidth();
+		double ih = aFormat.getImageableHeight();
+		
+		double left = aFormat.getImageableX();
+		double top = aFormat.getImageableY();
 
-		double leftmargin = aFormat.getImageableX();
-		double rightmargin = width - leftmargin - aFormat.getImageableWidth();
-
-		double topmargin = aFormat.getImageableY();
-		double bottommargin = height - topmargin - aFormat.getImageableHeight();
-
-		this.setPrintMarginLeft(leftmargin);
-		this.setPrintMarginRight(rightmargin);
-		this.setPrintMarginTop(topmargin);
-		this.setPrintMarginBottom(bottommargin);
-
+		this.props.setProperty("workbench.print.paper.iwidth", Double.toString(iw));
+		this.props.setProperty("workbench.print.paper.iheight", Double.toString(ih));
+		this.props.setProperty("workbench.print.paper.top", Double.toString(top));
+		this.props.setProperty("workbench.print.paper.left", Double.toString(left));
 		this.props.setProperty("workbench.print.paper.width", Double.toString(width));
 		this.props.setProperty("workbench.print.paper.height", Double.toString(height));
 		this.props.setProperty("workbench.print.orientation", Integer.toString(aFormat.getOrientation()));
-	}
-
-	public void setPrintMarginLeft(double aValue)
-	{
-		this.setPrintMargin("left", aValue);
-	}
-	public void setPrintMarginRight(double aValue)
-	{
-		this.setPrintMargin("right", aValue);
-	}
-	public void setPrintMarginTop(double aValue)
-	{
-		this.setPrintMargin("top", aValue);
-	}
-	public void setPrintMarginBottom(double aValue)
-	{
-		this.setPrintMargin("bottom", aValue);
-	}
-
-	public double getPrintMarginLeft()
-	{
-		return this.getPrintMargin("left");
-	}
-	public double getPrintMarginRight()
-	{
-		return this.getPrintMargin("right");
-	}
-	public double getPrintMarginTop()
-	{
-		return this.getPrintMargin("top");
-	}
-	public double getPrintMarginBottom()
-	{
-		return this.getPrintMargin("bottom");
-	}
-
-	private void setPrintMargin(String aKey, double aValue)
-	{
-		this.props.setProperty("workbench.print.margin." + aKey, Double.toString(aValue));
-	}
-
-	private double getPrintMargin(String aKey)
-	{
-		return StringUtil.getDoubleValue(this.props.getProperty("workbench.print.margin." + aKey, "72"),72);
 	}
 
 	// </editor-fold>
@@ -1792,16 +1731,27 @@ public class Settings
 		String list = getProperty("workbench.db.ddlneedscommit", "");
     return StringUtil.stringToList(list, ",");
 	}
+	
+	public void removeDDLCommitServer(String product)
+	{
+		removeListEntry("workbench.db.ddlneedscommit", product);
+	}
 
 	public List<String> getServersWithInlineConstraints()
 	{
 		String list = getProperty("workbench.db.inlineconstraints", "");
 		return StringUtil.stringToList(list, ",");
 	}
+	
 	public List<String> getServersWhichNeedJdbcCommit()
 	{
 		String list = getProperty("workbench.db.usejdbccommit", "");
     return StringUtil.stringToList(list, ",");
+	}
+	
+	public void removeJdbcCommitServer(String product)
+	{
+		removeListEntry("workbench.db.usejdbccommit", product);
 	}
 
 	public List<String> getServersWithNoNullKeywords()
@@ -1814,6 +1764,22 @@ public class Settings
 	{
 		String list = getProperty("workbench.db.casesensitive", "");
 		return StringUtil.stringToList(list, ",");
+	}
+
+	public void removeCaseSensitivServer(String product)
+	{
+		removeListEntry("workbench.db.casesensitive", product);
+	}
+	
+	private void removeListEntry(String listProperty, String value)
+	{
+		String list = getProperty(listProperty, "");
+		if (!StringUtil.isEmptyString(list))
+		{
+			List<String> servers = StringUtil.stringToList(list, ",");
+			servers.remove(value);
+			setProperty(listProperty, StringUtil.listToString(servers, ',', false));
+		}
 	}
 	
 	public boolean useOracleNVarcharFix()
@@ -2673,6 +2639,11 @@ public class Settings
 			this.props.remove("workbench.db.stripprocversion");
 			this.props.remove("workbench.dbexplorer.cleardata");
 			this.props.remove("workbench.db.verifydriverurl");
+			this.props.remove("workbench.db.retrievepklist");
+			this.props.remove("workbench.print.margin.bottom");
+			this.props.remove("workbench.print.margin.left");
+			this.props.remove("workbench.print.margin.right");
+			this.props.remove("workbench.print.margin.top");
 		}
 		catch (Throwable e)
 		{

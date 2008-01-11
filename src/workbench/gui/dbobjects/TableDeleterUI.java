@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-import javax.swing.WindowConstants;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.TableDependencySorter;
@@ -347,9 +346,9 @@ public class TableDeleterUI
 		{
 			LogMgr.logWarning("TableDeleterUI.cancel()", "Error when trying to kill check thread", e);
 		}
-
+		
 		this.dialog.setVisible(false);
-		this.dialog.dispose();
+//		this.dialog.dispose();
 		this.dialog = null;
 	}
 
@@ -610,7 +609,6 @@ public class TableDeleterUI
 	public void showDialog(Frame aParent)
 	{
 		this.dialog = new JDialog(aParent, ResourceMgr.getString("TxtDeleteTableData"), false);
-		this.dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.dialog.getContentPane().add(this);
 		this.dialog.pack();
 		if (this.dialog.getWidth() < 200)

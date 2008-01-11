@@ -62,6 +62,7 @@ public class TablePrintPage
 	{
 		this(source, startRow, endRow, startColumn, endColumn, null);
 	}
+	
 	public TablePrintPage(JTable source, int startRow, int endRow, int startColumn, int endColumn, int[] width)
 	{
 		this.table = source;
@@ -130,7 +131,7 @@ public class TablePrintPage
 		FontMetrics fm = pg.getFontMetrics(headerFont);
     int lineHeight = fm.getHeight();
 		
-		AffineTransform oldTransform= pg.getTransform();
+		AffineTransform oldTransform = pg.getTransform();
 		
 		pg.setFont(headerFont);
     pg.setColor(Color.BLACK);
@@ -173,9 +174,9 @@ public class TablePrintPage
 				if (value == null) continue;
 				TableCellRenderer rend = table.getCellRenderer(row, col);
 				Component c = rend.getTableCellRendererComponent(table, value, false, false, row, col);
-				if (c instanceof WbRenderer)
+				if (rend instanceof WbRenderer)
 				{
-					WbRenderer wb = (WbRenderer) c;
+					WbRenderer wb = (WbRenderer) rend;
 
 					// Clip the value returned by the renderer
 					// according to the current column's width
@@ -195,6 +196,7 @@ public class TablePrintPage
 						SwingConstants.TOP, 
 						SwingConstants.RIGHT, 
 						paintViewR, paintIconR, paintTextR, 0);
+					
 					pg.drawString(display, cx + paintTextR.x, lineHeight);
 					
 					cx += this.colWidth[col] + colSpacing;

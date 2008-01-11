@@ -13,8 +13,6 @@ package workbench.gui.tools;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
 import java.beans.PropertyChangeListener;
@@ -67,7 +65,8 @@ import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
- * A GUI frontend to the {@link workbench.db.datacopy.DataCopier} tool.
+ * A GUI frontend to the {@link workbench.db.datacopy.DataCopier} 
+ * and {@link workbench.db.importer.DataImporter} tools.
  * 
  * @author  support@sql-workbench.net
  */
@@ -76,12 +75,15 @@ public class DataPumper
 	implements ActionListener, WindowListener, PropertyChangeListener, RowActionMonitor,
 	           ToolWindow, StatusBar
 {
-	private ConnectionProfile sourceProfile;
 	private File sourceFile;
 	private ProducerFactory fileImporter;
+	private DataCopier copier;
+	
+	private ConnectionProfile sourceProfile;
 	private ConnectionProfile targetProfile;
 	protected WbConnection sourceConnection;
 	protected WbConnection targetConnection;
+	
 	protected AutoCompletionAction completionAction;
 
 	private JFrame window;
@@ -89,10 +91,8 @@ public class DataPumper
 	private ColumnMapper columnMapper;
 	private final String copyMsg = ResourceMgr.getString("MsgCopyingRow");
 	protected boolean copyRunning = false;
-	private DataCopier copier;
 	private EditorPanel sqlEditor;
 	private boolean supportsBatch = false;
-	boolean allowCreateTable = true; 
 	
 	// used in the Jemmy Unit Test to wait for the connection thread
 	boolean isConnecting = false;
@@ -126,30 +126,7 @@ public class DataPumper
 		this.wherePanel.add(this.sqlEditor);
 		this.showWbCommand.setEnabled(false);
 		this.batchSize.setEnabled(false);
-		if (!this.allowCreateTable)
-		{
-			this.dropTargetCbx.setVisible(this.allowCreateTable);
-			GridBagLayout grid = (GridBagLayout)this.optionsPanel.getLayout();
-			grid.removeLayoutComponent(this.dropTargetCbx);
-			this.optionsPanel.remove(this.dropTargetCbx);
-
-			GridBagConstraints cons = grid.getConstraints(this.commitEvery);
-			cons.gridy --;
-			grid.setConstraints(this.commitEvery, cons);
-
-			cons = grid.getConstraints(this.commitLabel);
-			cons.gridy--;
-			grid.setConstraints(this.commitLabel, cons);
-			//grid.layoutContainer(this);
-
-			cons = grid.getConstraints(this.modeLabel);
-			cons.gridy--;
-			grid.setConstraints(this.modeLabel, cons);
-
-			cons = grid.getConstraints(this.modeComboBox);
-			cons.gridy--;
-			grid.setConstraints(this.modeComboBox, cons);
-		}
+		
 		this.sourceTable.setTableDropDownName("sourceTable");
 		this.targetTable.setTableDropDownName("targetTable");
 	}
@@ -268,7 +245,6 @@ public class DataPumper
 		this.fileImporter.setGeneralOptions(dialog.getGeneralOptions());
 		this.fileImporter.setXmlOptions(dialog.getXmlOptions());
 		this.fileImporter.setType(dialog.getImportType());
-		this.targetTable.allowNewTable(false);
 
 		this.checkType();
 
@@ -464,7 +440,8 @@ public class DataPumper
 			this.targetTable.setChangeListener(this, "target-table");
 			this.supportsBatch = this.targetConnection.getMetadata().supportsBatchUpdates();
 			this.checkUseBatch();
-
+			checkType();
+				
 		  Thread t = new WbThread("Retrieve target tables")
 		  {
 			  public void run()
@@ -1108,7 +1085,7 @@ public class DataPumper
 			this.sourceTable.removeChangeListener();
 			this.sourceConnection.disconnect();
 			this.sourceTable.setConnection(null);
-			this.completionAction.setConnection(sourceConnection);
+			this.completionAction.setConnection(null);
 		}
 		catch (Exception e)
 		{
@@ -1255,21 +1232,19 @@ public class DataPumper
 		boolean allowSource = (!useQuery && this.fileImporter == null);
 
 		this.sourceTable.setEnabled(allowSource);
-		//this.checkQueryButton.setEnabled(useQuery);
 
 		boolean isCopy = (this.fileImporter == null);
 		this.sqlEditor.setEnabled(isCopy);
 		this.checkQueryButton.setEnabled(isCopy && useQuery);
+		this.targetTable.allowNewTable(isCopy);
 
 		this.useQueryCbx.setVisible(isCopy);
 		this.useQueryCbx.setEnabled(isCopy);
 		this.sqlEditor.setVisible(isCopy);
 		this.checkQueryButton.setVisible(isCopy);
 		this.sqlEditorLabel.setVisible(isCopy);
-		//this.sqlPanel.setVisible(isCopy);
-
-		//this.targetTable.allowNewTable(!useQuery && allowCreateTable);
-		this.targetTable.allowNewTable(allowCreateTable);
+		
+		
 		if (useQuery)
 		{
 			this.sqlEditorLabel.setText(ResourceMgr.getString("LblDPQueryText"));

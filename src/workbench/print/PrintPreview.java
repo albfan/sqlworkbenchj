@@ -54,7 +54,6 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.WbThread;
 
-
 public class PrintPreview
 	extends JDialog
 	implements ActionListener, WindowListener
@@ -62,22 +61,17 @@ public class PrintPreview
 	protected int pageWidth;
 	protected int pageHeight;
 	private int scale = 100;
-
 	protected TablePrinter printTarget;
-
 	protected JComboBox cbZoom;
 	private JButton pageSetupButton;
 	private JButton printButton;
 	private JButton chooseFontButton;
 	private JButton closeButton;
-
 	private JButton pageRight;
 	private JButton pageLeft;
-
 	private JButton pageDown;
 	private JButton pageUp;
 	private boolean hasHorizontalPages;
-
 	private JScrollPane scroll;
 	protected PreviewContainer preview;
 	private PagePreview pageDisplay;
@@ -146,9 +140,15 @@ public class PrintPreview
 
 		tb.addSeparator();
 
-		String[] scales = { "10%", "25%", "50%", "100%", "150%"};
+		String[] scales = {"10%", "25%", "50%", "100%", "150%"};
 		this.cbZoom = new JComboBox(scales);
-		this.cbZoom.setMaximumSize(this.cbZoom.getPreferredSize());
+
+		// for some reason the dropdown is extended
+		// to fill all available space in the toolbar
+		// so I'm restricting the max. size to a sensible value
+		Dimension pref = cbZoom.getPreferredSize();
+		Dimension d = new Dimension((int) pref.getWidth() + 10, (int) pref.getHeight());
+		this.cbZoom.setMaximumSize(d);
 		this.cbZoom.setEditable(true);
 		this.cbZoom.setSelectedItem("100%");
 		this.cbZoom.addActionListener(this);
@@ -182,8 +182,8 @@ public class PrintPreview
 		if (f != null)
 		{
 			Settings.getInstance().setPrintFont(f);
-      printTarget.setFont(f);
-      currentPage = 0;
+			printTarget.setFont(f);
+			currentPage = 0;
 			Thread t = new WbThread("PrintPreview update font")
 			{
 				public void run()
@@ -196,9 +196,10 @@ public class PrintPreview
 			t.start();
 		}
 	}
+
 	private void adjustScrollbar()
 	{
-		this.scroll.getVerticalScrollBar().setBlockIncrement((int)printTarget.getPageFormat().getImageableHeight());
+		this.scroll.getVerticalScrollBar().setBlockIncrement((int) printTarget.getPageFormat().getImageableHeight());
 		Font f = this.printTarget.getFont();
 		FontMetrics fm = this.getFontMetrics(f);
 		this.scroll.getVerticalScrollBar().setUnitIncrement(fm.getHeight());
@@ -210,8 +211,9 @@ public class PrintPreview
 		try
 		{
 			PageFormat pageFormat = this.printTarget.getPageFormat();
-			this.pageWidth = (int)(pageFormat.getWidth());
-			this.pageHeight = (int)(pageFormat.getHeight());
+
+			this.pageWidth = (int)pageFormat.getWidth();
+			this.pageHeight = (int)pageFormat.getHeight();
 
 			int w = (this.pageWidth * this.scale / 100);
 			int h = (this.pageHeight * this.scale / 100);
@@ -225,11 +227,11 @@ public class PrintPreview
 				g.setColor(Color.LIGHT_GRAY);
 				Stroke s = g.getStroke();
 				g.setStroke(new BasicStroke(0.2f));
-				g.drawRect((int)pageFormat.getImageableX() - 1, (int)pageFormat.getImageableY() - 1, (int)pageFormat.getImageableWidth() + 1, (int)pageFormat.getImageableHeight() + 1);
+				g.drawRect((int) pageFormat.getImageableX() - 1, (int) pageFormat.getImageableY() - 1, (int) pageFormat.getImageableWidth() + 1, (int) pageFormat.getImageableHeight() + 1);
 				g.setStroke(s);
 				if (this.printTarget.print(g, pageFormat, this.currentPage) == Printable.PAGE_EXISTS)
 				{
-					this.pageDisplay.setImage(w,h,img);
+					this.pageDisplay.setImage(w, h, img);
 				}
 			}
 			catch (PrinterException e)
@@ -241,7 +243,7 @@ public class PrintPreview
 		catch (OutOfMemoryError e)
 		{
 			WbManager.getInstance().showOutOfMemoryError();
-			this.pageDisplay.setImage(0,0,null);
+			this.pageDisplay.setImage(0, 0, null);
 		}
 		finally
 		{
@@ -268,54 +270,73 @@ public class PrintPreview
 			prnJob.setPageable(this.printTarget);
 
 			if (!prnJob.printDialog())
+			{
 				return;
-			this.setCursor( Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			}
+			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			prnJob.print();
-			this.setCursor( Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 			this.dispose();
 		}
 		catch (PrinterException ex)
 		{
 			ex.printStackTrace();
-			System.err.println("Printing error: "+ex.toString());
+			System.err.println("Printing error: " + ex.toString());
 		}
 	}
 
+	private boolean pageDialogShowing = false;
+
 	protected void showCrossPlatformPageSetup()
 	{
-		if (pageDialogShowing) return;
+		if (pageDialogShowing)
+		{
+			return;
+		}
+		
 		pageDialogShowing = true;
-
 		PrinterJob prnJob = PrinterJob.getPrinterJob();
 		PageFormat oldFormat = this.printTarget.getPageFormat();
 		PrintRequestAttributeSet attr = PrintUtil.getPrintAttributes(oldFormat);
 		PageFormat newFormat = prnJob.pageDialog(attr);
 		pageDialogShowing = false;
-
-		if (newFormat == null) return;
+		applyNewPage(newFormat, oldFormat);
 	}
-
-	private boolean pageDialogShowing = false;
-
+	
 	protected void showNativePageSetup()
 	{
-		if (pageDialogShowing) return;
+		if (pageDialogShowing)
+		{
+			return;
+		}
 		pageDialogShowing = true;
 
 		PrinterJob prnJob = PrinterJob.getPrinterJob();
 		PageFormat oldFormat = this.printTarget.getPageFormat();
-
 		PageFormat newFormat = prnJob.pageDialog(oldFormat);
 		pageDialogShowing = false;
-
+		applyNewPage(newFormat, oldFormat);
+	}
+	
+	protected void applyNewPage(final PageFormat newFormat, final PageFormat oldFormat)
+	{
 		if (newFormat == null) return;
-
+		
 		if (!PrintUtil.pageFormatEquals(newFormat, oldFormat))
 		{
 			Settings.getInstance().setPageFormat(newFormat);
-			this.printTarget.setPageFormat(newFormat);
-			showCurrentPage();
-			this.doLayout();
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					printTarget.setPageFormat(newFormat);
+					showCurrentPage();
+					invalidate();
+					preview.validate();
+					preview.doLayout();
+				}
+			});
+			
 		}
 	}
 
@@ -353,7 +374,10 @@ public class PrintPreview
 		try
 		{
 			String str = cbZoom.getSelectedItem().toString();
-			if (str.endsWith("%")) str = str.substring(0, str.length()-1);
+			if (str.endsWith("%"))
+			{
+				str = str.substring(0, str.length() - 1);
+			}
 			str = str.trim();
 			try
 			{
@@ -363,15 +387,17 @@ public class PrintPreview
 			{
 				return;
 			}
-			int w = (int)(pageWidth*scale/100);
-			int h = (int)(pageHeight*scale/100);
+			int w = (pageWidth * scale / 100);
+			int h = (pageHeight * scale / 100);
 
 			Component[] comps = this.preview.getComponents();
-			for (int k=0; k<comps.length; k++)
+			for (int k = 0; k < comps.length; k++)
 			{
 				if (!(comps[k] instanceof PagePreview))
+				{
 					continue;
-				PagePreview pp = (PagePreview)comps[k];
+				}
+				PagePreview pp = (PagePreview) comps[k];
 				pp.setScaledSize(w, h);
 			}
 		}
@@ -403,27 +429,31 @@ public class PrintPreview
 		}
 		else if (e.getSource() == this.cbZoom)
 		{
-			Thread runner = new Thread()
+			Thread runner = new WbThread("PrintPreview Zoom thread")
 			{
 				public void run()
 				{
 					changeZoom();
 				}
 			};
-			runner.setName("PrintPreview Zoom thread");
-			runner.setDaemon(true);
 			runner.start();
 		}
 		else if (e.getSource() == this.pageRight)
 		{
 			int newIndex = this.printTarget.getNextHorizontalPage(this.currentPage);
-			if (newIndex != -1)	this.currentPage = newIndex;
+			if (newIndex != -1)
+			{
+				this.currentPage = newIndex;
+			}
 			this.showCurrentPage();
 		}
 		else if (e.getSource() == this.pageLeft)
 		{
 			int newIndex = this.printTarget.getPreviousHorizontalPage(this.currentPage);
-			if (newIndex != -1)	this.currentPage = newIndex;
+			if (newIndex != -1)
+			{
+				this.currentPage = newIndex;
+			}
 			this.showCurrentPage();
 		}
 		else if (e.getSource() == this.pageUp)
@@ -496,22 +526,26 @@ public class PrintPreview
 		{
 			int n = getComponentCount();
 			if (n == 0)
+			{
 				return new Dimension(H_GAP, V_GAP);
+			}
 			Component comp = getComponent(0);
 			Dimension dc = comp.getPreferredSize();
 			int w = dc.width;
 			int h = dc.height;
 
 			Dimension dp = getParent().getSize();
-			int nCol = Math.max((dp.width-H_GAP)/(w+H_GAP), 1);
-			int nRow = n/nCol;
-			if (nRow*nCol < n)
+			int nCol = Math.max((dp.width - H_GAP) / (w + H_GAP), 1);
+			int nRow = n / nCol;
+			if (nRow * nCol < n)
+			{
 				nRow++;
+			}
 
-			int ww = nCol*(w+H_GAP) + H_GAP;
-			int hh = nRow*(h+V_GAP) + V_GAP;
+			int ww = nCol * (w + H_GAP) + H_GAP;
+			int hh = nRow * (h + V_GAP) + V_GAP;
 			Insets ins = getInsets();
-			return new Dimension(ww+ins.left+ins.right, hh+ins.top+ins.bottom);
+			return new Dimension(ww + ins.left + ins.right, hh + ins.top + ins.bottom);
 		}
 
 		public Dimension getMaximumSize()
@@ -532,30 +566,36 @@ public class PrintPreview
 
 			int n = getComponentCount();
 			if (n == 0)
+			{
 				return;
+			}
 			Component comp = getComponent(0);
 			Dimension dc = comp.getPreferredSize();
 			int w = dc.width;
 			int h = dc.height;
 
 			Dimension dp = getParent().getSize();
-			int nCol = Math.max((dp.width-H_GAP)/(w+H_GAP), 1);
-			int nRow = n/nCol;
-			if (nRow*nCol < n)
+			int nCol = Math.max((dp.width - H_GAP) / (w + H_GAP), 1);
+			int nRow = n / nCol;
+			if (nRow * nCol < n)
+			{
 				nRow++;
+			}
 
 			int index = 0;
-			for (int k = 0; k<nRow; k++)
+			for (int k = 0; k < nRow; k++)
 			{
-				for (int m = 0; m<nCol; m++)
+				for (int m = 0; m < nCol; m++)
 				{
 					if (index >= n)
+					{
 						return;
+					}
 					comp = getComponent(index++);
 					comp.setBounds(x, y, w, h);
-					x += w+H_GAP;
+					x += w + H_GAP;
 				}
-				y += h+V_GAP;
+				y += h + V_GAP;
 				x = ins.left + H_GAP;
 			}
 		}
@@ -575,14 +615,14 @@ public class PrintPreview
 
 		public PagePreview(int w, int h, Image source)
 		{
-			this.setImage(w,h,source);
+			this.setImage(w, h, source);
 		}
 
 		public void setImage(int w, int h, Image source)
 		{
 			m_w = w;
 			m_h = h;
-			m_source= source;
+			m_source = source;
 			m_img = m_source.getScaledInstance(m_w, m_h, Image.SCALE_SMOOTH);
 			m_img.flush();
 			setBackground(Color.WHITE);
@@ -594,13 +634,14 @@ public class PrintPreview
 			m_w = w;
 			m_h = h;
 			m_img = m_source.getScaledInstance(m_w, m_h, Image.SCALE_SMOOTH);
+			m_img.flush();
 			repaint();
 		}
 
 		public Dimension getPreferredSize()
 		{
 			Insets ins = getInsets();
-			return new Dimension(m_w+ins.left+ins.right, m_h+ins.top+ins.bottom);
+			return new Dimension(m_w + ins.left + ins.right, m_h + ins.top + ins.bottom);
 		}
 
 		public Dimension getMaximumSize()
@@ -619,11 +660,9 @@ public class PrintPreview
 			{
 				g.setColor(getBackground());
 				g.fillRect(0, 0, getWidth(), getHeight());
-				//g.setColor(Color.LIGHT_GRAY);
 				g.drawImage(m_img, 0, 0, this);
 				paintBorder(g);
 			}
 		}
 	}
-
 }

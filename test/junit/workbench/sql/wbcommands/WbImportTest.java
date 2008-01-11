@@ -1297,6 +1297,50 @@ public class WbImportTest
 		}
 	}
 
+	public void testNullNumeric()
+		throws Exception
+	{
+		try
+		{
+			File importFile  = new File(this.basedir, "import_null_numeric.txt");
+			PrintWriter out = new PrintWriter(new FileWriter(importFile));
+			out.println("nr\tamount\tprod_name");
+			out.println("1\t1.1\tfirst");
+			out.println("2\t\tsecond");
+			out.println("3\t3.3\tthird");
+			out.close();
+			
+			StatementRunnerResult result = importCmd.execute("wbimport -decimal=. -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -table=numeric_test");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr, amount, prod_name from numeric_test order by nr");
+			while (rs.next())
+			{
+				int nr = rs.getInt(1);
+				double amount = rs.getDouble(2);
+				if (rs.wasNull()) amount = -1;
+			
+				switch (nr)
+				{
+					case 1:
+						assertEquals(1.1, amount, 0.1);
+						break;
+					case 2:
+						assertEquals(-1, amount, 0.1);
+						break;
+					case 3:
+						assertEquals(3.3, amount, 0.1);
+				}
+			}
+			SqlUtil.closeAll(rs, stmt);
+		}
+		catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testMissingTarget()
 		throws Exception
 	{
@@ -3025,6 +3069,7 @@ public class WbImportTest
 		Statement stmt = wb.createStatement();
 		stmt.executeUpdate("CREATE TABLE junit_test (nr integer, firstname varchar(100), lastname varchar(100))");
 		stmt.executeUpdate("CREATE TABLE junit_test_pk (nr integer primary key, firstname varchar(100), lastname varchar(100))");
+		stmt.executeUpdate("CREATE TABLE numeric_test (nr integer primary key, amount double, prod_name varchar(50))");
 		stmt.executeUpdate("CREATE TABLE datatype_test (int_col integer, double_col double, char_col varchar(50), date_col date, time_col time, ts_col timestamp, nchar_col nvarchar(10))");
 		stmt.executeUpdate("CREATE TABLE blob_test (nr integer, binary_data BINARY)");
 		stmt.executeUpdate("CREATE TABLE clob_test (nr integer, text_data CLOB)");

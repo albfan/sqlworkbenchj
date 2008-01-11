@@ -361,9 +361,7 @@ public class TablePrinter
 		}
 		else
 		{
-			footer.append(ResourceMgr.getFormattedString("TxtPageFooterNormal", 
-        currentPage.getPageIndex(),this.pageCount)
-			);
+			footer.append(ResourceMgr.getFormattedString("TxtPageFooterNormal",currentPage.getPageIndex(),this.pageCount));
 		}
 
 		FontMetrics fm = pg.getFontMetrics(this.printFont);

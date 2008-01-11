@@ -44,6 +44,7 @@ public class SqlKeywordHelperTest
 		assertTrue(result.contains("DELETE"));
 		assertTrue(result.contains("UPDATE"));
 		assertTrue(result.contains("INSERT"));
+		assertTrue(result.contains("CREATE"));
 	}
 
 	public void testGetDataTypes()

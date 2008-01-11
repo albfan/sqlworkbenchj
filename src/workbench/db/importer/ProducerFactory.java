@@ -10,6 +10,7 @@
  *
  */
 package workbench.db.importer;
+
 import java.io.File;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
@@ -226,6 +227,9 @@ public class ProducerFactory
 		appendArgument(command, WbImport.ARG_DECODE, textOptions.getDecode(), indent);
 		String delim = textOptions.getTextDelimiter();
 		if ("\t".equals(delim)) delim = "\\t";
+
+		appendArgument(command, CommonArgs.ARG_DATE_FORMAT, generalOptions.getDateFormat(), indent);
+		appendArgument(command, CommonArgs.ARG_TIMESTAMP_FORMAT, generalOptions.getTimestampFormat(), indent);
 		appendArgument(command, CommonArgs.ARG_DELIM, "'" + delim + "'", indent);
 		appendArgument(command, WbImport.ARG_QUOTE, textOptions.getTextQuoteChar(), indent);
 		appendArgument(command, CommonArgs.ARG_DECCHAR, textOptions.getDecimalChar(), indent);
@@ -239,17 +243,20 @@ public class ProducerFactory
 	
 	private void appendArgument(StringBuilder result, String arg, String value, StringBuilder indent)
 	{
-		if (value != null)
+		if (!StringUtil.isEmptyString(value))
 		{
 			result.append(indent);
 			result.append('-');
 			result.append(arg);
 			result.append('=');
-			if (value.indexOf('-') > -1) result.append('"');
+			
+			if (value.indexOf('-') > -1 || value.indexOf(";") > -1) result.append('"');
 			else if ("\"".equals(value)) result.append('\'');
 			else if ("\'".equals(value)) result.append('\"');
+			
 			result.append(value);
-			if (value.indexOf('-') > -1) result.append('"');
+			
+			if (value.indexOf('-') > -1 || value.indexOf(";") > -1) result.append('"');
 			else if ("\"".equals(value)) result.append('\'');
 			else if ("\'".equals(value)) result.append('\"');
 		}
@@ -293,8 +300,8 @@ public class ProducerFactory
 		{
 			appendArgument(result, CommonArgs.ARG_BATCHSIZE, Integer.toString(this.batchSize), indent);
 		}
-		
 		appendTextOptions(result, indent);
+		
 		
 		result.append("\n;");
 		
