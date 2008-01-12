@@ -96,7 +96,7 @@
 						<entry>PostgreSQL</entry>
 						<entry>org.postgresql.Driver</entry>
 						<entry> <simplelist columns="1">
-							<member>postgresql-8.1-404.jdbc3.jar (exact name depends on PostgreSQL version)</member>
+							<member>postgresql-8.2-506.jdbc3.jar (exact name depends on PostgreSQL version)</member>
 							<member><ulink url="http://jdbc.postgresql.org"/></member>
 						</simplelist>
 						</entry>
@@ -146,7 +146,7 @@
 						<entry>com.mysql.jdbc.Driver</entry>
 						<entry>
 							<simplelist columns="1">
-								<member>mysql-connector-java-3.1.7-bin.jar (exact name depends on version)</member>
+								<member>mysql-connector-java-5.1.5-bin.jar (exact name depends on version)</member>
 								<member><ulink url="http://www.mysql.com"/></member>
 							</simplelist>
 						</entry>
@@ -156,7 +156,7 @@
 						<entry>oracle.jdbc.OracleDriver</entry>
 						<entry>
 							<simplelist columns="1">
-								<member>ojdbc4.jar (JDBC 2.x, for JDK 1.4)</member>
+								<member>ojdbc5.jar</member>
 								<member><ulink url="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html"/></member>
 							</simplelist>
 						</entry>
@@ -182,6 +182,15 @@
 						</entry>
 					</row>
 					<row>
+						<entry>ODBC Bridge</entry>
+						<entry>sun.jdbc.odbc.JdbcOdbcDriver</entry>
+						<entry><simplelist columns="1">
+							<member>Included in the JDK</member>
+						</simplelist>
+						</entry>
+					</row>
+					<!--
+					<row>
 						<entry>MaxDB</entry>
 						<entry>com.sap.dbtech.jdbc.DriverSapDB</entry>
 						<entry>
@@ -191,15 +200,6 @@
 							</simplelist>
 						</entry>
 					</row>
-					<row>
-						<entry>ODBC Bridge</entry>
-						<entry>sun.jdbc.odbc.JdbcOdbcDriver</entry>
-						<entry><simplelist columns="1">
-							<member>Included in the JDK</member>
-						</simplelist>
-						</entry>
-					</row>
-					<!--
 					<row>
 						<entry>FirstSQL/J</entry>
 						<entry>COM.FirstSQL.Dbcp.DbcpDriver</entry>

@@ -39,7 +39,7 @@
 			</para>
 
 			<para><note>
-				Before Build98 the default configuration directory was the program's directory 
+				Before Build 98 the default configuration directory was the program's directory 
 				and not a directory in the user's home directory.
 			</note></para>
 
@@ -337,7 +337,7 @@ java -jar Workbench.jar -configDir=${user.home}/.sqlworkbench
 
 			<para>The following call to the launcher:</para>
 
-			<programlisting>jworkbench -configdir=c:\MyConf -J-Dsun.java2d.noddraw=true</programlisting>
+			<programlisting>jworkbench -noddraw -configdir=c:\MyConf</programlisting>
 
 			<para>is the same as directly starting Workbench.jar with these
 			parameters:</para>

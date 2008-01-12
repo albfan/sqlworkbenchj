@@ -1,5 +1,7 @@
 Features
 --------
+- Single record dialog/form
+- ${...} syntax als Funktionsaufruf bei Dateneingabe (analog zu -constantValues für WbImport)
 - Re-retrieve selected rows
 - Checkbox dropdown für die Objekttypen im DbExplorer
 - Show table data aus "Search table data" heraus
@@ -16,3 +18,13 @@ Features
 - Close button for tabs
 - Shortcuts für Macros
 - Export for OpenOffice Calc
+
+Bugs
+----
+
+Tests
+-----
+
+- Wb-Kommandos im batch mode
+- Copy to clipboard
+- Import into result set (aus Datei und clipboard)

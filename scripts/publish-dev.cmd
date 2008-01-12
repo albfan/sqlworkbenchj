@@ -1,3 +1,3 @@
-rem set java_home=c:\jdk14
-rem set java_home=d:\Programme\jdk15
+title Generating manual...
 call ant publish-dev
+title Commandline

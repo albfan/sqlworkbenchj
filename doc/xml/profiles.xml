@@ -340,7 +340,7 @@
 				If this option is enabled, the currently selected schema in the 
 				DbExplorer will be stored in the workspace associated with the current
 				connection profile. If this option is not enabled, the DbExplorer 
-				tries to pre-select the current schema when its opened
+				tries to pre-select the current schema when it's opened.
 			</para>
 			
 		</section>
@@ -437,7 +437,7 @@
 				define the <literal>GO</literal> keyword for SQL Server connections, and use
 				the forward slash in Oracle connections. The delimiter can be defined as a "single line delimiter", 
 				which means that it will only be recognized if put on a single line. 
-				Please refer to <link linkend="understand-alternate-delim">understanding the alternate delimiter</link>
+				Please refer to <link linkend="understand-alternate-delim">using the alternate delimiter</link>
 				for details on this property.
 			</para>
 		</section>

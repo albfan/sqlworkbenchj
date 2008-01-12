@@ -34,420 +34,436 @@
 			and importing compressed exports, please refer to <link linkend="export-compress">compressing export files</link>
 		</para>
 		
-		<para>The WbImport command has the following syntax</para>
-		<informaltable frame="all">
-			<tgroup cols="2" align="left">
-				<colspec colname="c1" colwidth="4cm" />
-				<colspec colname="c2"/>
-				<thead>
-					<row>
-						<entry>Parameter</entry>
-						<entry>Description</entry>
-					</row>
-				</thead>
-				<tbody valign="top">
-					<row>
-						<entry>-type</entry>
-						<entry>
-							<para>Possible values: <literal>xml</literal>, <literal>text</literal></para>
-							<para>Defines the type of the input file</para>
-						</entry>
-					</row>
-					<row>
-						<entry>-file</entry>
-						<entry>
-							<para>
-								Defines the full name of the input file. Alternatively
-								you can also specify a directory (using <literal>-sourcedir</literal>)
-								from which all files are imported.
-							</para>
-						</entry>
-					</row>
-					<row>
-						<entry>-sourcedir</entry>
-						<entry>
-							<para>
-								Defines a directory which contains import files. All
-								files from that directory will be imported. If this switch is used
-								with text files, then it is assumed that each filename (without the extension)
-								defines the target table.
-							</para>
-						</entry>
-					</row>
-					
-					<row>
-						<entry>-checkDependencies</entry>
-						<entry>
-							<para>
-								When importing more than one file (using the <literal>-sourcedir</literal> switch), 
-								into tables with foreign key constraints, this switch can be used to 
-								import the files in the correct order (child tables first). When 
-								<literal>-checkDependencies=true</literal> is passed, &wb-productname; will 
-								check the foreign key dependencies for all tables.
-							</para>
-						</entry>
-					</row>
-					
-					<row>
-						<entry>-extension</entry>
-						<entry>
-							<para>
-								When using the <literal>-sourcedir</literal> switch, the
-								extension for the files can be defined. All files ending with the supplied
-								value will be processed. (e.g. <literal>-extension=csv</literal>).
-								The extension given is case-sensitiv (i.e. <literal>TXT</literal> is something
-								different than <literal>txt</literal>
-							</para>
-						</entry>
-					</row>
-					
-					<row>
-						<entry>-commitEvery</entry>
-						<entry>
-							<para>
-                A numeric value that defines the number of rows after which a <literal>COMMIT</literal>
-								is sent to the DBMS. If this parameter is not passed (or a value of zero or lower), 
-								then &wb-productname; will commit when all rows have been imported. When using batch execution 
-								it is recommended to commit the batch using the <literal>-commitBatch</literal> parameter.
-							</para>
-						</entry>
-					</row>
-					<row>
-						<entry>-mode</entry>
-						<entry>
-								<para>Defines how the data should be sent to the database. Possible
-								values are '<literal>INSERT</literal>', '<literal>UPDATE</literal>',
-								'<literal>INSERT,UPDATE</literal>' and '<literal>UPDATE,INSERT</literal>'
-								For details please refer to the <link linkend="import-update-mode">update mode</link>
-								explanation.
-							</para>
-						</entry>
-					</row>
-					<row>
-						<entry>-continueOnError</entry>
-						<entry>
-							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-							<para>This parameter controls the behaviour when errors occur during
-								the import. The default is <literal>true</literal>, meaning that the import
-								will continue even if an error occurs during file parsing or updating the database.
-								Set this parameter to <literal>false</literal> if you want to stop the import as soon as an error occurs.
-						</para>
-						<para>
-							The default value for this parameter can be controlled in the <link linkend="import-continue-default">settings file</link>
-							and it will be displayed if you run <literal>WbImport</literal> without any parameters.
-						</para>
-						</entry>
-					</row>
+		<section id="import-general-parameters">
+      <title>General parameters</title>
+			
+			<para>The WbImport command has the following syntax</para>
+			<informaltable frame="all">
+				<tgroup cols="2" align="left">
+					<colspec colname="c1" colwidth="4cm" />
+					<colspec colname="c2"/>
+					<thead>
+						<row>
+							<entry>Parameter</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody valign="top">
+						<row>
+							<entry>-type</entry>
+							<entry>
+								<para>Possible values: <literal>xml</literal>, <literal>text</literal></para>
+								<para>Defines the type of the input file</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-file</entry>
+							<entry>
+								<para>
+									Defines the full name of the input file. Alternatively
+									you can also specify a directory (using <literal>-sourcedir</literal>)
+									from which all files are imported.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-sourcedir</entry>
+							<entry>
+								<para>
+									Defines a directory which contains import files. All
+									files from that directory will be imported. If this switch is used
+									with text files, then it is assumed that each filename (without the extension)
+									defines the target table.
+								</para>
+							</entry>
+						</row>
 
-					<row>
-						<entry>-keyColumns</entry>
-						<entry>
-							<para>
-								Defines the key columns for the target table. This parameter
-								is only necessary if import is running in <literal>UPDATE</literal> mode.
-							</para>
-							<para>
-								This parameter is ignored if files are imported using the <literal>-sourcedir</literal>
-								parameter
-							</para>
-						</entry>
-					</row>
-					
-					<row>
-						<entry>-table</entry>
-						<entry>
-							<para>Defines the table into which the data should be imported</para>
-							<para>
-								This parameter is ignored, if the files are imported using the
-								<literal>-sourcedir</literal> parameter
-							</para>
-						</entry>
-					</row>
-					
-					<row>
-						<entry>-schema</entry>
-						<entry>
-							Defines the schema into which the data should be imported. This
-							is necessary for DBMS that support schemas, and you want to import
-							the data into a different schema, then the current one.
-						</entry>
-					</row>
-					
-					<row>
-						<entry>-encoding</entry>
-						<entry>Defines the encoding of the input file (and possible CLOB files)</entry>
-					</row>
-					
-					<row>
-						<entry>-deleteTarget</entry>
-						<entry>
-							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-							<para>
-								If this parameter is set to true, data from the target table will
-								be deleted (using <literal>DELETE FROM ...</literal>) before the import is started.
-								This parameter will only be used if <literal>-mode=insert</literal>
-								is specified.
-							</para>
-						</entry>
-					</row>
+						<row>
+							<entry>-checkDependencies</entry>
+							<entry>
+								<para>
+									When importing more than one file (using the <literal>-sourcedir</literal> switch), 
+									into tables with foreign key constraints, this switch can be used to 
+									import the files in the correct order (child tables first). When 
+									<literal>-checkDependencies=true</literal> is passed, &wb-productname; will 
+									check the foreign key dependencies for all tables.
+								</para>
+							</entry>
+						</row>
 
-					<row>
-						<entry>-truncateTable</entry>
-						<entry>
-							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-							<para>
-								This is essentially the same as <literal>-deleteTarget</literal>, but will 
-								use the command <literal>TRUNCATE</literal> to delete the contents of the 
-								table. For those DBMS that support this command, deleting rows 
-								is usually faster compared to the <literal>DELETE</literal> command, but
-								it cannot be rolled back. 
-								This parameter will only be used if <literal>-mode=insert</literal>
-								is specified.
-							</para>
-						</entry>
-					</row>
-					
-					<row>
-						<entry>-batchSize</entry>
-						<entry>
-							<para>
-								A numeric value that defines the size of the batch queue. 
-								Any value greater than 1 will enable batch mode. If the
-								JDBC driver supports this, the INSERT (or UPDATE) performance can be increased
-								drastically.
-							</para>
-							<para>
-								This parameter will be ignored if the driver does not support batch updates or if
-								the mode is not <literal>UPDATE</literal> or <literal>INSERT</literal> 
-								(i.e. if <literal>-mode=update,insert</literal> or <literal>-mode=insert,update</literal> is used).
-							</para>
-						</entry>
-					</row>
-					
-					<row>
-						<entry>-commitBatch</entry>
-						<entry>
-							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-							<para>
-								If using batch execution (by specifying a batch size using the <literal>-batchSize</literal>
-								parameter) each batch will be committed when this parameter is set to <literal>true</literal>.
-								This is slightly different to using <literal>-commitEvery</literal> with the value of the 
-								<literal>-batchSize</literal> parameter. The latter one will add a COMMIT statement to 
-								the batch queue, rather than calling the JDBC commit() method. Some drivers 
-								do not allow to add different statements in a batch queue. So, if a frequent 
-								<literal>COMMIT</literal> is needed, this parameter should be used.
-							</para>
-							<para>
-								When you specify <literal>-commitBatch</literal> the parameter 
-								<literal>-commitEvery</literal> will be ignored. If no batch size 
-								is given, then <literal>-commitBatch</literal> will be ignored.
-							</para>
-						</entry>
-					</row>
+						<row>
+							<entry>-extension</entry>
+							<entry>
+								<para>
+									When using the <literal>-sourcedir</literal> switch, the
+									extension for the files can be defined. All files ending with the supplied
+									value will be processed. (e.g. <literal>-extension=csv</literal>).
+									The extension given is case-sensitiv (i.e. <literal>TXT</literal> is something
+									different than <literal>txt</literal>
+								</para>
+							</entry>
+						</row>
 
-					<row>
-						<entry>-transactionControl</entry>
-						<entry>
-							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-							<para>
-								Controls whether &wb-productname; handles the transaction for the import, 
-								or if the import must be committed (or rolled back) manually. 
-								If <literal>-transactionControl=false</literal> is specified, the &wb-productname;
-								will neither send a <literal>COMMIT</literal> nor a <literal>ROLLBACK</literal> at
-								the end. This can be used when multiple files need to be imported in a single
-								transaction. This can be combined with the <link linkend="script-success">cleanup</link> 
-								and <link linkend="script-failure">error</link> scripts in batch mode.
+						<row>
+							<entry>-commitEvery</entry>
+							<entry>
+								<para>
+									A numeric value that defines the number of rows after which a <literal>COMMIT</literal>
+									is sent to the DBMS. If this parameter is not passed (or a value of zero or lower), 
+									then &wb-productname; will commit when all rows have been imported. When using batch execution 
+									it is recommended to commit the batch using the <literal>-commitBatch</literal> parameter.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-mode</entry>
+							<entry>
+									<para>Defines how the data should be sent to the database. Possible
+									values are '<literal>INSERT</literal>', '<literal>UPDATE</literal>',
+									'<literal>INSERT,UPDATE</literal>' and '<literal>UPDATE,INSERT</literal>'
+									For details please refer to the <link linkend="import-update-mode">update mode</link>
+									explanation.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-continueOnError</entry>
+							<entry>
+								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+								<para>This parameter controls the behaviour when errors occur during
+									the import. The default is <literal>true</literal>, meaning that the import
+									will continue even if an error occurs during file parsing or updating the database.
+									Set this parameter to <literal>false</literal> if you want to stop the import as soon as an error occurs.
 							</para>
-						</entry>
-					</row>
-					
-					<row>
-						<entry>-updateWhere</entry>
-						<entry>
 							<para>
-								When using <link linkend="import-update-mode">update mode</link>
-								an additional <literal>WHERE</literal> clause can be specified to limit
-								the rows that are updated. The value of the <literal>-updatewhere</literal>
-								parameter will be added to the generated <literal>UPDATE</literal> statement.
-								If the value starts with the keyword <literal>AND</literal> or <literal>OR</literal>
-								the value will be added without further changes, otherwise the value
-								will be added as an <literal>AND</literal> clause enclosed in brackets.
-								This parameter will be ignored if update mode is not active.
+								The default value for this parameter can be controlled in the <link linkend="import-continue-default">settings file</link>
+								and it will be displayed if you run <literal>WbImport</literal> without any parameters.
 							</para>
-						</entry>
-					</row>
-					
-					<row>
-						<entry>-startRow</entry>
-						<entry>
-							A numeric value to define the first row to be imported. Any row before the
-							specified row will be ignored. The header row is not counted 
-							to determine the row number. For a text file with a header 
-							row, the pysical line 2 is row 1 (one) for this parameter.
-						</entry>
-					</row>
-					
-					<row>
-						<entry>-endRow</entry>
-						<entry>
-							A numeric value to define the last row to be imported. The import
-							will be stopped after this row has been imported. When you 
-							specify <literal>-startRow=10</literal> and <literal>-endRow=20</literal>
-							11 rows will be imported (i.e. rows 10 to 20). If this is a text file
-							import with a header row, this would correspond to the physical lines
-							11 to 21 in the input file as the header row is not counted.
-						</entry>
-					</row>
+							</entry>
+						</row>
 
-					<row>
-						<entry>-badFile</entry>
-						<entry>
-							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-							<para>If <literal>-continueOnError=true</literal> is used, you can specify a file
-								to which rejected rows are written. If the provided filename denotes a directory
-								a file with the name of the import table will be created in that directory. 
-								When doing multi-table inserts you <emphasis role="bold">have</emphasis> to
-								specify a directory name.
-							</para>
-							<para>
-								If a file with that name exists it will be deleted when the import
-								for the table is started. The fill will not be created unless at least 
-								one record is rejected during the import. The file will be created with 
-								the same encoding as indicated for the input file(s).
-							</para>
-						</entry>
-					</row>
+						<row>
+							<entry>-keyColumns</entry>
+							<entry>
+								<para>
+									Defines the key columns for the target table. This parameter
+									is only necessary if import is running in <literal>UPDATE</literal> mode.
+								</para>
+								<para>
+									This parameter is ignored if files are imported using the <literal>-sourcedir</literal>
+									parameter
+								</para>
+							</entry>
+						</row>
 
-					<row>
-						<entry>-maxLength</entry>
-						<entry>
-							<para>
-								With the parameter <literal>-maxLength</literal> you can truncate
-								data for character (VARCHAR, CAHR) columns during import. This can be used to 
-								import  data into columns that are not big enough (e.g. VARCHAR columns) to hold 
-								all values from the input file and to ensure the import can finish
-								without errors.
-							</para>
-							<para>
-								The parameter defines the maximum length for certain columns as 
-								using the following format: <literal>-maxLength='firstname=30,lastname=20'</literal>
-								Where firstname and lastname are columns from the target table. The above
-								example will limit the values for the column firstname to 30 characters
-								and the values for the column lastname to 20 characters. If a non-character
-								column is specified this is ignored. Note that you <emphasis role="bold">have</emphasis>
-								quote the parameter's value in order to be able to use the "embedded" equals sign.
-							</para>
-						</entry>
-					</row>
+						<row>
+							<entry>-table</entry>
+							<entry>
+								<para>Defines the table into which the data should be imported</para>
+								<para>
+									This parameter is ignored, if the files are imported using the
+									<literal>-sourcedir</literal> parameter
+								</para>
+							</entry>
+						</row>
 
-					<row>
-						<entry>-booleanToNumber</entry>
-						<entry>
-							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-							<para>
-								When exporting data from a DBMS that supports the BOOLEAN
-								datatype, the export file will contain the literals "true" or 
-								"false" for the value of the boolean columns. When importing
-								this file into a DBMS that does not support the BOOLEAN
-								datatype, the import would fail. 
-							</para>
-							<para>
-								In case you are importing the boolean column into a numeric
-								column in the target DBMS, &wb-productname; will automatically
-								convert the literal <literal>true</literal> to the numeric value 1 (one)
-								and the literal <literal>false</literal> to the numeric value 0 (zero).
-								If you do not want this automatic conversion, you have to 
-								specify <literal>-booleanToNumber=false</literal> for the import. 
-								The default values for the true/false literals can be overwritten 
-								with the -literalsFalse and -literalsTrue switches.
-							</para>
-						</entry>
-					</row>
+						<row>
+							<entry>-schema</entry>
+							<entry>
+								Defines the schema into which the data should be imported. This
+								is necessary for DBMS that support schemas, and you want to import
+								the data into a different schema, then the current one.
+							</entry>
+						</row>
 
-					<row>
-						<entry>-literalsFalse -literalsTrue</entry>
-						<entry>
-							<para>
-								When dealing with boolean values in the input file, these two switches define
-								the literals that represent the value <literal>false</literal> and the 
-								value <literal>true</literal> when parsing the input data. 
-							</para>
-							<para>
-								The value to these switches is a comma separated list of literals
-								that should be treated as the specified value, e.g.:
-								<literal>-literalsFalse='false,0' -literalsTrue='true,1'</literal>
-								will define the most commonly used values for true/false. 
-							</para>
-							<para>
-								Please note:
-								<itemizedlist>
-									<listitem>The definition of the literals is case sensitive!</listitem>
-									<listitem>You always have to specify both switches, otherwise the definition will 
-									be ignored</listitem>
-								</itemizedlist>
-							</para>
-						</entry>
-					</row>
+						<row>
+							<entry>-encoding</entry>
+							<entry>Defines the encoding of the input file (and possible CLOB files)</entry>
+						</row>
 
-					<row>
-						<entry>-constantValues</entry>
-						<entry>
-							<para>
-								With this parameter you can supply constant values for one or more columns
-								that will be used when inserting new rows into the database.
-							</para>
-							<para>
-								The constant values will not be used when updating columns!
-							</para>
-							<para>
-								The format of the values is <literal>-constantValues="column1=value1,column2=value2"</literal>.
-								The values will be converted by the same rules as the input values from the input	file. If 
-								the value for a character column is enclosed in single quotes, these will be removed from the 
-								value before sending it to the database. To include single quotes at the start or end of
-								the input value you need to use two single quotes, e.g.<literal>-constantValues="name=''Quoted'',title='with space'"</literal>
-								For the field <literal>name</literal> the value <literal>'Quoted'</literal> will be sent to the database.
-								for the field <literal>title</literal> the value <literal>with space</literal> will be sent to the database.
-							</para>
-							<para>
-								To specify a function call to be executed, enclose the function call in <literal>${...}</literal>, 
-								e.g. <literal>${mysequence.nextval}</literal> or <literal>${myfunc()}</literal>. The supplied
-								function will be put into the <literal>VALUES</literal> part of the INSERT statement without
-								further checking (after removing the ${ and } characters, of course). So make sure that the 
-								syntax is valid for your DBMS. If you do need to store a literal like <literal>${some.value}</literal>
-								into the database, you need to quote it: <literal>-constantValues="varname='${some.value}'"</literal>.
-							</para>
-						</entry>
-					</row>
+						<row>
+							<entry>-deleteTarget</entry>
+							<entry>
+								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+									If this parameter is set to true, data from the target table will
+									be deleted (using <literal>DELETE FROM ...</literal>) before the import is started.
+									This parameter will only be used if <literal>-mode=insert</literal>
+									is specified.
+								</para>
+							</entry>
+						</row>
 
-					<row>
-						<entry>-preTableStatement</entry>
-						<entry>
-							<para>
-								This parameter defines a SQL statement that should be executed before the import
-								process starts inserting data into the target table. The name of the current
-								table (when e.g. importing a whole directory) can be referenced using 
-								<literal>${table.name}</literal>.
-							</para>
-							<para>
-								To define a statement that should be executed after all rows have been 
-								inserted but before the data is committed, you can use the 
-								<literal>-postTabelStatement</literal> parameter. 
-							</para>
-							<para>
-								These parameters can e.g. be used to enable identity insert for MS SQL Server:
-								<programlisting>-preTableStatement="set identity_insert ${table.name} on"
+						<row>
+							<entry>-truncateTable</entry>
+							<entry>
+								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+									This is essentially the same as <literal>-deleteTarget</literal>, but will 
+									use the command <literal>TRUNCATE</literal> to delete the contents of the 
+									table. For those DBMS that support this command, deleting rows 
+									is usually faster compared to the <literal>DELETE</literal> command, but
+									it cannot be rolled back. 
+									This parameter will only be used if <literal>-mode=insert</literal>
+									is specified.
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-batchSize</entry>
+							<entry>
+								<para>
+									A numeric value that defines the size of the batch queue. 
+									Any value greater than 1 will enable batch mode. If the
+									JDBC driver supports this, the INSERT (or UPDATE) performance can be increased
+									drastically.
+								</para>
+								<para>
+									This parameter will be ignored if the driver does not support batch updates or if
+									the mode is not <literal>UPDATE</literal> or <literal>INSERT</literal> 
+									(i.e. if <literal>-mode=update,insert</literal> or <literal>-mode=insert,update</literal> is used).
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-commitBatch</entry>
+							<entry>
+								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+									If using batch execution (by specifying a batch size using the <literal>-batchSize</literal>
+									parameter) each batch will be committed when this parameter is set to <literal>true</literal>.
+									This is slightly different to using <literal>-commitEvery</literal> with the value of the 
+									<literal>-batchSize</literal> parameter. The latter one will add a COMMIT statement to 
+									the batch queue, rather than calling the JDBC commit() method. Some drivers 
+									do not allow to add different statements in a batch queue. So, if a frequent 
+									<literal>COMMIT</literal> is needed, this parameter should be used.
+								</para>
+								<para>
+									When you specify <literal>-commitBatch</literal> the parameter 
+									<literal>-commitEvery</literal> will be ignored. If no batch size 
+									is given, then <literal>-commitBatch</literal> will be ignored.
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-transactionControl</entry>
+							<entry>
+								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+									Controls whether &wb-productname; handles the transaction for the import, 
+									or if the import must be committed (or rolled back) manually. 
+									If <literal>-transactionControl=false</literal> is specified, the &wb-productname;
+									will neither send a <literal>COMMIT</literal> nor a <literal>ROLLBACK</literal> at
+									the end. This can be used when multiple files need to be imported in a single
+									transaction. This can be combined with the <link linkend="script-success">cleanup</link> 
+									and <link linkend="script-failure">error</link> scripts in batch mode.
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-updateWhere</entry>
+							<entry>
+								<para>
+									When using <link linkend="import-update-mode">update mode</link>
+									an additional <literal>WHERE</literal> clause can be specified to limit
+									the rows that are updated. The value of the <literal>-updatewhere</literal>
+									parameter will be added to the generated <literal>UPDATE</literal> statement.
+									If the value starts with the keyword <literal>AND</literal> or <literal>OR</literal>
+									the value will be added without further changes, otherwise the value
+									will be added as an <literal>AND</literal> clause enclosed in brackets.
+									This parameter will be ignored if update mode is not active.
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-startRow</entry>
+							<entry>
+								A numeric value to define the first row to be imported. Any row before the
+								specified row will be ignored. The header row is not counted 
+								to determine the row number. For a text file with a header 
+								row, the pysical line 2 is row 1 (one) for this parameter.
+							</entry>
+						</row>
+
+						<row>
+							<entry>-endRow</entry>
+							<entry>
+								A numeric value to define the last row to be imported. The import
+								will be stopped after this row has been imported. When you 
+								specify <literal>-startRow=10</literal> and <literal>-endRow=20</literal>
+								11 rows will be imported (i.e. rows 10 to 20). If this is a text file
+								import with a header row, this would correspond to the physical lines
+								11 to 21 in the input file as the header row is not counted.
+							</entry>
+						</row>
+
+						<row>
+							<entry>-badFile</entry>
+							<entry>
+								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+								<para>If <literal>-continueOnError=true</literal> is used, you can specify a file
+									to which rejected rows are written. If the provided filename denotes a directory
+									a file with the name of the import table will be created in that directory. 
+									When doing multi-table inserts you <emphasis role="bold">have</emphasis> to
+									specify a directory name.
+								</para>
+								<para>
+									If a file with that name exists it will be deleted when the import
+									for the table is started. The fill will not be created unless at least 
+									one record is rejected during the import. The file will be created with 
+									the same encoding as indicated for the input file(s).
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-maxLength</entry>
+							<entry>
+								<para>
+									With the parameter <literal>-maxLength</literal> you can truncate
+									data for character (VARCHAR, CAHR) columns during import. This can be used to 
+									import  data into columns that are not big enough (e.g. VARCHAR columns) to hold 
+									all values from the input file and to ensure the import can finish
+									without errors.
+								</para>
+								<para>
+									The parameter defines the maximum length for certain columns as 
+									using the following format: <literal>-maxLength='firstname=30,lastname=20'</literal>
+									Where firstname and lastname are columns from the target table. The above
+									example will limit the values for the column firstname to 30 characters
+									and the values for the column lastname to 20 characters. If a non-character
+									column is specified this is ignored. Note that you <emphasis role="bold">have</emphasis>
+									quote the parameter's value in order to be able to use the "embedded" equals sign.
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-booleanToNumber</entry>
+							<entry>
+								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+									When exporting data from a DBMS that supports the BOOLEAN
+									datatype, the export file will contain the literals "true" or 
+									"false" for the value of the boolean columns. When importing
+									this file into a DBMS that does not support the BOOLEAN
+									datatype, the import would fail. 
+								</para>
+								<para>
+									In case you are importing the boolean column into a numeric
+									column in the target DBMS, &wb-productname; will automatically
+									convert the literal <literal>true</literal> to the numeric value 1 (one)
+									and the literal <literal>false</literal> to the numeric value 0 (zero).
+									If you do not want this automatic conversion, you have to 
+									specify <literal>-booleanToNumber=false</literal> for the import. 
+									The default values for the true/false literals can be overwritten 
+									with the -literalsFalse and -literalsTrue switches.
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-literalsFalse -literalsTrue</entry>
+							<entry>
+								<para>
+									When dealing with boolean values in the input file, these two switches define
+									the literals that represent the value <literal>false</literal> and the 
+									value <literal>true</literal> when parsing the input data. 
+								</para>
+								<para>
+									The value to these switches is a comma separated list of literals
+									that should be treated as the specified value, e.g.:
+									<literal>-literalsFalse='false,0' -literalsTrue='true,1'</literal>
+									will define the most commonly used values for true/false. 
+								</para>
+								<para>
+									Please note:
+									<itemizedlist>
+										<listitem>The definition of the literals is case sensitive!</listitem>
+										<listitem>You always have to specify both switches, otherwise the definition will 
+										be ignored</listitem>
+									</itemizedlist>
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-constantValues</entry>
+							<entry>
+								<para>
+									With this parameter you can supply constant values for one or more columns
+									that will be used when inserting new rows into the database.
+								</para>
+								<para>
+									The constant values will not be used when updating columns!
+								</para>
+								<para>
+									The format of the values is <literal>-constantValues="column1=value1,column2=value2"</literal>.
+									The values will be converted by the same rules as the input values from the input	file. If 
+									the value for a character column is enclosed in single quotes, these will be removed from the 
+									value before sending it to the database. To include single quotes at the start or end of
+									the input value you need to use two single quotes, e.g.<literal>-constantValues="name=''Quoted'',title='with space'"</literal>
+									For the field <literal>name</literal> the value <literal>'Quoted'</literal> will be sent to the database.
+									for the field <literal>title</literal> the value <literal>with space</literal> will be sent to the database.
+								</para>
+								<para>
+									To specify a function call to be executed, enclose the function call in <literal>${...}</literal>, 
+									e.g. <literal>${mysequence.nextval}</literal> or <literal>${myfunc()}</literal>. The supplied
+									function will be put into the <literal>VALUES</literal> part of the INSERT statement without
+									further checking (after removing the ${ and } characters, of course). So make sure that the 
+									syntax is valid for your DBMS. If you do need to store a literal like <literal>${some.value}</literal>
+									into the database, you need to quote it: <literal>-constantValues="varname='${some.value}'"</literal>.
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry><para>-preTableStatement -postTableStatement</para></entry>
+							<entry>
+								<para>
+									This parameter defines a SQL statement that should be executed before the import
+									process starts inserting data into the target table. The name of the current
+									table (when e.g. importing a whole directory) can be referenced using 
+									<literal>${table.name}</literal>.
+								</para>
+								<para>
+									To define a statement that should be executed after all rows have been 
+									inserted but before the data is committed, you can use the 
+									<literal>-postTableStatement</literal> parameter. 
+								</para>
+								<para>
+									These parameters can e.g. be used to enable identity insert for MS SQL Server:
+									<programlisting>-preTableStatement="set identity_insert ${table.name} on"
 -postTableStatement="set identity_insert ${table.name} off"</programlisting>
-								Errors resulting from executing these statements will be ignored. If you want 
-								to abort the import in that case you can specify <literal>-ignorePrePostErrors=false</literal>
-								and <literal>-continueOnError=false</literal>. 
-							</para>
-							
-						</entry>
-					</row>
-					
-				</tbody>
-			</tgroup>
-		</informaltable>
+									Errors resulting from executing these statements will be ignored. If you want 
+									to abort the import in that case you can specify <literal>-ignorePrePostErrors=false</literal>
+									and <literal>-continueOnError=false</literal>. 
+								</para>
+
+							</entry>
+						</row>
+						<row>
+							<entry>-ignorePrePostErrors=false</entry>
+							<entry>
+								<para>
+									Controls handling of errors for the -preTableStatement and -postTableStatement
+									parameters. If this is set to false, errors resulting from executing the 
+									supplied parameters are ignored. If set to true (default) then error handling
+									depends on the parameter <literal>-continueOnError</literal>.
+								</para>
+							</entry>
+						</row>
+
+					</tbody>
+				</tgroup>
+			</informaltable>
+			
+		</section>
 		
 		<section id="import-text-parameters">
       <title>Parameters for the type TEXT</title>

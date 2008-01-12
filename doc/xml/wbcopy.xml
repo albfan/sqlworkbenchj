@@ -281,7 +281,7 @@
 							<para>
 								To define a statement that should be executed after all rows have been 
 								inserted but before the data is committed, you can use the 
-								<literal>-postTabelStatement</literal> parameter. 
+								<literal>-postTableStatement</literal> parameter. 
 							</para>
 							<para>
 								These parameters can e.g. be used to enable identity insert for MS SQL Server:

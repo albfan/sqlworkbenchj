@@ -226,10 +226,10 @@ COMMIT;</programlisting>
 		</para>
 		<programlisting>CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
 IS
-result INTEGER;
+  result INTEGER;
 BEGIN
-SELECT max(col1) INTO result FROM sometable;
-RETURN result;
+  SELECT max(col1) INTO result FROM sometable;
+  RETURN result;
 END;</programlisting>
 
 		<para>
@@ -258,10 +258,10 @@ END;</programlisting>
 		<para>So the solution to the above problem is the following script:</para>
 		<programlisting>CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
 IS
-result INTEGER;
+  result INTEGER;
 BEGIN
-SELECT max(col1) INTO result FROM sometable;
-RETURN result;
+  SELECT max(col1) INTO result FROM sometable;
+  RETURN result;
 END;
 /</programlisting>
 
@@ -295,10 +295,10 @@ END;
 
 CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
 IS
-result INTEGER;
+  result INTEGER;
 BEGIN
-SELECT max(col1) INTO result FROM sometable;
-RETURN result;
+  SELECT max(col1) INTO result FROM sometable;
+  RETURN result;
 END;
 /</programlisting>
 
@@ -645,7 +645,7 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</programlisting>
 			</para>
 				<programlisting>SELECT count(*) FROM 
 (
-${current_statement}$
+  ${current_statement}$
 )</programlisting>
 
 		</section>

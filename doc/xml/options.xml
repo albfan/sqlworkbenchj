@@ -271,8 +271,7 @@
 				This options defines the default alternate delimiter. You can 
 				override this default in the connection profile, to use different
 				delimiters for different DBMS.
-				For details see <link linkend="understand-alternate-delim">Understanding the 
-				alternate delimiter</link>
+				For details see <link linkend="understand-alternate-delim">using the alternate delimiter</link>
 			</para>
 		</section>
 		
@@ -413,7 +412,7 @@
 			<para>
 				If this option is selected, the rows in the data table will be displayed
 				with alternating background color. You can choose the alternate color (the 
-				other color is defined by the used <link linkend="options-look-and-feeld">Look &amp; Feel</link>) 
+				other color is defined by the used <link linkend="options-look-and-feel">Look &amp; Feel</link>) 
 				with the font chooser next to the checkbox.
 			</para>
 		</section>

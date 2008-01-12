@@ -1,5 +1,15 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  (97.10) Editor tabs can now be re-order using Drag & Drop.
+Enh:  (97.9) In batch mode warnings reported when connecting to the DBMS
+      are now retrieved (and logged) immediately.
+Enh:  (97.9) Columns can now be dropped from within the DbExplorer's 
+      table definition.
+Enh:  (97.8) The text in the "What's new" window content can now be searched
+Enh:  (97.8) The data display in the DbExplorer now remembers the 
+      sort column when the data for a table is reloaded (but not 
+      when a different table is selected). This can be controlled through
+      the options dialog
 Enh:  (97.7) The "Extended Properties" button in the connection dialog 
       will now display a little checkmark if properties are defined for
       the currently selected profile
@@ -62,6 +72,21 @@ Enh:  (97.1) For Oracle, REF CURSORS as out parameters in Procedures are now
 Enh:  (97.1) You can now assign a shortcut to the reload buttons in the 
       DbExplorer. The shortcut will only work if the component does have
       the focus.
+Fix:  (97.10) Null values for numeric columns could not be imported into an
+      Access database.
+Fix:  (97.10) After moving editor-tabs the menus were no longer working correctly.
+Fix:  (97.10) Table definitions could not always retrieved when using Oracle 
+      (e.g. in the DbExplorer)
+Fix:  (97.9) Indexes with complex expressions (e.g. CASE ...) where not
+      displayed correctly in the generated SQL for a table
+Fix:  (97.9) The "REFERENCES" label in the DbExplorer panels "REFERENCES"
+      and "REFERENCED BY" were the wrong way round.
+Fix:  (97.8) Character literals spanning multiple lines were not colored
+      correctly (especially if the start was not visible)
+Fix:  (97.8) Using WbVardef without a value did not delete the variable.
+Fix:  (97.8) When using WbCopy with a column mapping and the -createTarget
+      parameter the target table could not be created due to an error
+      in the generated SQL.
 Fix:  (97.7) When opening several new panels very quickly the application 
       could lock.
 Fix:  (97.7) The application could not be started in batch mode without

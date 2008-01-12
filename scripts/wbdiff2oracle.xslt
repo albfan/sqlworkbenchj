@@ -12,6 +12,13 @@
   omit-xml-declaration="yes"
   doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
 />
+<!-- 
+
+Convert the output of SQL Workbench's WbSchemaDiff command to SQL
+Author: support@sql-workbench.net 
+
+Thanks to Etienne for his addition and bugfixes 
+-->
 
 <xsl:strip-space elements="*"/>
 
@@ -55,8 +62,22 @@
 		<xsl:for-each select="/schema-diff/update-view">
 			<xsl:apply-templates select="view-def"/>
 		</xsl:for-each>
+
+		<xsl:for-each select="/schema-diff/create-proc">
+			<xsl:apply-templates select="proc-def"/>
+		</xsl:for-each>
   
 </xsl:template>
+
+<!-- Update procedures, functions and packages -->
+<xsl:template match="proc-def">
+
+<xsl:value-of select="proc-source"/>
+
+/
+
+</xsl:template>
+
 
 <xsl:template match="rename">
 <!-- Ignore table rename -->
@@ -75,31 +96,33 @@
 </xsl:template>
 
 <xsl:template match="add-column">
-<xsl:param name="table"/> 
-<xsl:variable name="column" select="column-def/column-name"/>
-<xsl:variable name="nullable" select="column-def/nullable"/>
-ALTER TABLE <xsl:value-of select="$table"/> ADD <xsl:value-of select="$column"/><xsl:text> </xsl:text><xsl:value-of select="column-def/dbms-data-type"/><xsl:if test="$nullable = 'false'">  NOT NULL</xsl:if>;
+   <xsl:param name="table"/>
+   <xsl:for-each select="column-def"> 
+      <xsl:variable name="column" select="column-name"/>
+      <xsl:variable name="nullable" select="nullable"/>
+ALTER TABLE <xsl:value-of select="$table"/> ADD <xsl:value-of select="$column"/><xsl:text> </xsl:text><xsl:value-of select="dbms-data-type"/><xsl:if test="$nullable = 'false'">  NOT NULL</xsl:if>;
+   </xsl:for-each>
 </xsl:template>
 
 <!-- Process the modify-column part -->
 <xsl:template match="modify-column">
-<xsl:param name="table"/> 
-<xsl:variable name="column" select="@name"/>
-<xsl:if test="string-length(dbms-data-type) &gt; 0">
+   <xsl:param name="table"/>  
+   <xsl:variable name="column" select="@name"/>
+   <xsl:if test="string-length(dbms-data-type) &gt; 0">
 ALTER TABLE <xsl:value-of select="$table"/> MODIFY <xsl:value-of select="$column"/><xsl:text> </xsl:text><xsl:value-of select="dbms-data-type"/>;
-</xsl:if>
-<xsl:if test="nullable = 'true'">
+   </xsl:if>
+   <xsl:if test="nullable = 'true'">
 ALTER TABLE <xsl:value-of select="$table"/> MODIFY <xsl:value-of select="$column"/> NULL;
-</xsl:if>
-<xsl:if test="nullable = 'false'">
+   </xsl:if>
+   <xsl:if test="nullable = 'false'">
 ALTER TABLE <xsl:value-of select="$table"/> MODIFY <xsl:value-of select="$column"/> NOT NULL;
-</xsl:if>
-<xsl:if test="string-length(default-value) &gt; 0">
+   </xsl:if>
+   <xsl:if test="string-length(default-value) &gt; 0">
 ALTER TABLE <xsl:value-of select="$table"/> MODIFY <xsl:value-of select="$column"/> DEFAULT <xsl:value-of select="default-value"/>;  
-</xsl:if>
-<xsl:if test="string-length(comment) &gt; 0">
+   </xsl:if>
+   <xsl:if test="string-length(comment) &gt; 0">
 COMMENT ON COLUMN <xsl:value-of select="$table"/>.<xsl:value-of select="$column"/> IS '<xsl:value-of select="comment"/>';  
-</xsl:if>
+   </xsl:if>
 </xsl:template>
 
 <!-- Add primary keys -->
