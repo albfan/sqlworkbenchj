@@ -2059,7 +2059,7 @@ public class DbMetadata
 				String typeName = rs.getString("TYPE_NAME");
 				if (this.isMySql && !hasEnums)
 				{
-					hasEnums = typeName.startsWith("enum") || typeName.startsWith("set");
+					hasEnums = typeName.toLowerCase().startsWith("enum") || typeName.toLowerCase().startsWith("set");
 				}
 
 				int size = rs.getInt("COLUMN_SIZE"); // index 7

@@ -42,12 +42,11 @@ public class EnumReader
 			while (rs.next())
 			{
 				String column = rs.getString(1);
-				if (column == null)
-					continue;
+				if (column == null)	continue;
 
 				String type = rs.getString(2);
-				if (type == null)
-					continue;
+				if (type == null)	continue;
+				
 				String ltype = type.toLowerCase();
 				if (ltype.startsWith("enum") || ltype.startsWith("set"))
 				{
