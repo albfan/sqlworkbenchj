@@ -706,36 +706,12 @@ public class ConnectionProfile
 
 	public void setDefaultFetchSize(Integer fetchSize)
 	{
-		if (fetchSize != null && this.defaultFetchSize == null)
+		int currentValue = (defaultFetchSize == null ? Integer.MIN_VALUE : defaultFetchSize.intValue());
+		int newValue = (fetchSize == null ? Integer.MIN_VALUE : fetchSize.intValue());
+		
+		if (currentValue != newValue && newValue > -1)
 		{
-			if (fetchSize.intValue() < 0)
-			{
-				this.defaultFetchSize = null;
-			}
-			else
-			{
-				this.defaultFetchSize = fetchSize;
-			}
-			this.changed = true;
-			return;
-		}
-		if (fetchSize == null && this.defaultFetchSize != null)
-		{
-			this.defaultFetchSize = null;
-			this.changed = true;
-			return;
-		}
-
-		if (fetchSize.intValue() != this.defaultFetchSize.intValue())
-		{
-			if (fetchSize.intValue() < 0)
-			{
-				this.defaultFetchSize = null;
-			}
-			else
-			{
-				this.defaultFetchSize = fetchSize;
-			}
+			this.defaultFetchSize = fetchSize;
 			this.changed = true;
 		}
 	}
