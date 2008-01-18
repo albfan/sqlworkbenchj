@@ -13,7 +13,12 @@ package workbench.util;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
@@ -60,4 +65,32 @@ public class ZipUtil
 		return isZip;
 	}
 	
+	/**
+	 * Get the directory listing of a zip archive. 
+	 * Sub-Directories are not scanned.
+	 * 
+	 * @param archive
+	 * @return a list of filenames contained in the archive
+	 */
+	public static List<String> getFiles(File archive)
+		throws IOException
+	{
+		ZipFile zip = new ZipFile(archive);
+		List<String> result = new ArrayList<String>(zip.size());
+		
+		try
+		{
+			Enumeration<? extends ZipEntry> entries = zip.entries();
+			while (entries.hasMoreElements())
+			{
+				ZipEntry entry = entries.nextElement();
+				result.add(entry.getName());
+			}
+		}
+		finally
+		{
+			zip.close();
+		}
+		return result;
+	}
 }

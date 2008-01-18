@@ -294,7 +294,7 @@ public class WbSchemaDiff
 				String encoding = cmdLine.getValue(PARAM_ENCODING);
 				if (encoding == null)
 				{
-					encoding =  diff.getEncoding();
+					encoding = diff.getEncoding();
 				}
 				else
 				{

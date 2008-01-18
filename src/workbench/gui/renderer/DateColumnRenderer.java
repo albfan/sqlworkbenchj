@@ -70,6 +70,6 @@ public class DateColumnRenderer
 			this.displayValue = value.toString();
 			setTooltip(displayValue);
 		}
-  }
+	}
 	
 }

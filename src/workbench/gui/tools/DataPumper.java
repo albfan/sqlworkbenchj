@@ -375,16 +375,16 @@ public class DataPumper
 		{
 			this.sourceTable.setChangeListener(this, "source-table");
 			
-		  Thread t = new WbThread("Retrieve source tables")
-		  {
-			  public void run()
-			  {
-				  sourceTable.setConnection(sourceConnection);
+			Thread t = new WbThread("Retrieve source tables")
+			{
+				public void run()
+				{
+					sourceTable.setConnection(sourceConnection);
 					completionAction.setConnection(sourceConnection);
 					isConnecting = false;
-			  }
-		  };
-		  t.start();
+				}
+			};
+			t.start();
 		}
 		else
 		{

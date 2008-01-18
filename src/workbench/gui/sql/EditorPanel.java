@@ -371,7 +371,7 @@ public class EditorPanel
 
 	public boolean closeFile(boolean clearText)
 	{
-    if (this.currentFile == null) return false;
+		if (this.currentFile == null) return false;
 		this.currentFile = null;
 		if (clearText)
 		{
@@ -381,7 +381,7 @@ public class EditorPanel
 		}
 		fireFilenameChanged(null);
 		this.resetModified();
-    return true;
+		return true;
 	}
 
 	protected void checkFileActions()

@@ -269,7 +269,7 @@ public class ToolTipRenderer
 		if (displayValue != null)
 		{
 			clippedText = 
-        SwingUtilities.layoutCompoundLabel(this,fm,this.displayValue,(Icon)null
+				SwingUtilities.layoutCompoundLabel(this,fm,this.displayValue,(Icon)null
 						,this.valign
 						,this.halign
 						,SwingConstants.TOP

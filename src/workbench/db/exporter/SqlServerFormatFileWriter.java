@@ -27,53 +27,55 @@ import workbench.util.WbFile;
  * @author support@sql-workbench.net
  */
 public class SqlServerFormatFileWriter
-  implements FormatFileWriter
+	implements FormatFileWriter
 {
-	
-  public SqlServerFormatFileWriter()
-  {
-  }
+	public SqlServerFormatFileWriter()
+	{
+	}
 
-  public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
-  {
-    if (!exporter.getWriteBcpFormatFile()) return;
-    ResultInfo resultInfo = converter.getResultInfo();
-    WbFile baseFile = new WbFile(exporter.getFullOutputFilename());
-    String dir = baseFile.getParent();
-    String baseName = baseFile.getFileName();
-    File ctl = new File(dir, baseName + ".fmt");
-    PrintWriter out = null;
-    try
-    {
-      int count = resultInfo.getColumnCount();
-      out = new PrintWriter(new BufferedWriter(new FileWriter(ctl)));
+	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
+	{
+		if (!exporter.getWriteBcpFormatFile())
+		{
+			return;
+		}
+		ResultInfo resultInfo = converter.getResultInfo();
+		WbFile baseFile = new WbFile(exporter.getFullOutputFilename());
+		String dir = baseFile.getParent();
+		String baseName = baseFile.getFileName();
+		File ctl = new File(dir, baseName + ".fmt");
+		PrintWriter out = null;
+		try
+		{
+			int count = resultInfo.getColumnCount();
+			out = new PrintWriter(new BufferedWriter(new FileWriter(ctl)));
 			out.println("7.0"); // Write bcp version string
 			out.println(Integer.toString(count));
 
-      int max = 0;
-      // calculate max. column name length for proper formatting
-      for (int i = 0; i < count; i++)
-      {
-        int l = resultInfo.getColumnName(i).length();
-        if (l > max)
-        {
-          max = l;
-        }
-      }
-      max++;
+			int max = 0;
+			// calculate max. column name length for proper formatting
+			for (int i = 0; i < count; i++)
+			{
+				int l = resultInfo.getColumnName(i).length();
+				if (l > max)
+				{
+					max = l;
+				}
+			}
+			max++;
 
 			String delim = StringUtil.escapeUnicode(exporter.getTextDelimiter(), CharacterRange.RANGE_CONTROL);
 			String nl = StringUtil.escapeUnicode(exporter.getLineEnding(), CharacterRange.RANGE_CONTROL);
-			
-      for (int i = 0; i < count; i++)
-      {
+
+			for (int i = 0; i < count; i++)
+			{
 				String name = resultInfo.getColumnName(i);
-        String col = StringUtil.padRight(name, max);
+				String col = StringUtil.padRight(name, max);
 				if (name.indexOf(' ') > -1)
 				{
 					col = "\"" + col + "\"";
 				}
-				String pos = StringUtil.formatNumber(i+1, 4, true);
+				String pos = StringUtil.formatNumber(i + 1, 4, true);
 				String term = null;
 				if (i < count - 1)
 				{
@@ -83,17 +85,16 @@ public class SqlServerFormatFileWriter
 				{
 					term = nl;
 				}
-        out.println(pos + " SQLCHAR 0  0 \"" + term + "\"   " + pos + " " + col);
-      }
-    }
-    catch (IOException io)
-    {
-      LogMgr.logError("SqlServerFormatFileWriter.writeFormatFile()", "Error opening outputfile", io);
-    }
-    finally
-    {
+				out.println(pos + " SQLCHAR 0  0 \"" + term + "\"   " + pos + " " + col);
+			}
+		}
+		catch (IOException io)
+		{
+			LogMgr.logError("SqlServerFormatFileWriter.writeFormatFile()", "Error opening outputfile", io);
+		}
+		finally
+		{
 			FileUtil.closeQuitely(out);
-    }
-  }
-
+		}
+	}
 }

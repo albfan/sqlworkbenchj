@@ -49,8 +49,8 @@ public class WindowTitleOptionsPanel
 		this.restoreSettings();
 	}
 
-  public void restoreSettings()
-  {
+	public void restoreSettings()
+	{
 		int type = Settings.getInstance().getShowFilenameInWindowTitle();
 		if (type >= Settings.SHOW_NO_FILENAME && type <= Settings.SHOW_FULL_PATH)
 		{
@@ -81,8 +81,8 @@ public class WindowTitleOptionsPanel
 		this.titleGroupSep.setText(Settings.getInstance().getTitleGroupSeparator());
   }
 
-  public void saveSettings()
-  {
+	public void saveSettings()
+	{
 		Settings set = Settings.getInstance();
 		set.setShowFilenameInWindowTitle(this.windowTitleComboBox.getSelectedIndex());
 		set.setShowProfileGroupInWindowTitle(showProfileGroup.isSelected());

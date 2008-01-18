@@ -59,7 +59,7 @@ public class ColumnMapper
 	private boolean allowTargetEditing = false;
 	protected boolean allowSourceEditing = false;
 
-  static final SkipColumnIndicator SKIP_COLUMN = new SkipColumnIndicator();
+	static final SkipColumnIndicator SKIP_COLUMN = new SkipColumnIndicator();
 
 	public ColumnMapper()
 	{

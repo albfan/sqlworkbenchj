@@ -100,6 +100,7 @@ public class WbExport
 		cmdLine.addArgument("clobAsFile", ArgumentType.BoolArgument);
 		cmdLine.addArgument("continueOnError", ArgumentType.BoolArgument);
 		cmdLine.addArgument("sqlDateLiterals", Settings.getInstance().getLiteralTypeList());
+		cmdLine.addArgument("createDir", ArgumentType.BoolArgument);
 	}
 	
 	public String getVerb() { return VERB; }
@@ -446,6 +447,35 @@ public class WbExport
 		CommonArgs.setProgressInterval(this, cmdLine);
 		this.showProgress = (this.progressInterval > 0);
 
+		boolean create = cmdLine.getBoolean("createdir", false);
+		
+		if (create)
+		{
+			WbFile dir = null;
+			if (outputFile != null)
+			{
+				dir = new WbFile(outputFile.getParentFile());
+			}
+			else if (!StringUtil.isEmptyString(outputdir))
+			{
+				dir = new WbFile(outputdir);
+			}
+			
+			if (!dir.exists())
+			{
+				if (!dir.mkdirs())
+				{
+					result.addMessage(ResourceMgr.getFormattedString("ErrCreateDir", dir.getFullPath()));
+					result.setFailure();
+					return result;
+				}
+				else
+				{
+					result.addMessage(ResourceMgr.getFormattedString("MsgDirCreated", dir.getFullPath()));
+				}
+			}
+		}
+		
 		if (outputFile != null)
 		{
 			// For a single table export the definition of a 
@@ -478,6 +508,7 @@ public class WbExport
 				canWrite = false;
 				msg = ResourceMgr.getString("ErrExportFileCreate") + " " + e.getMessage();
 			}
+			
 			if (!canWrite)
 			{
 				result.addMessage(msg);
@@ -485,7 +516,7 @@ public class WbExport
 				return result;
 			}
 		}
-		
+
 		if (!this.directExport)
 		{
 			// Waiting for the next SQL Statement...

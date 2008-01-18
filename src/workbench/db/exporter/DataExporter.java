@@ -500,10 +500,10 @@ public class DataExporter
 	 */
 	public void setShowProgressWindow(boolean aFlag)
 	{
-	  if (!WbManager.getInstance().isBatchMode())
-	  {
-	    this.showProgressWindow = aFlag;
-	  }
+		if (!WbManager.getInstance().isBatchMode())
+		{
+			this.showProgressWindow = aFlag;
+		}
 	}
 	
 	public void setXsltTransformation(String xsltFileName)
@@ -693,7 +693,6 @@ public class DataExporter
 	public void setOutputFilename(String aFilename)
 	{ 
 		this.outputfile = aFilename; 
-		if (this.outputfile == null) return;
 	}
 
 	public String getOutputFilename()
@@ -924,6 +923,7 @@ public class DataExporter
 				this.dbConn.setBusy(true);
 				busyControl = true;
 			}
+			
 			if (this.currentJob != null)
 			{
 				stmt.execute(this.currentJob.getQuerySql());

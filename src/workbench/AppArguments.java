@@ -23,14 +23,20 @@ public class AppArguments
 	public static final String ARG_SCRIPT = "script";
 	public static final String ARG_SCRIPT_ENCODING = "encoding";
 	public static final String ARG_ABORT = "abortonerror";
+	
+	// Connection related parameters
+	public static final String ARG_PROFILE = "profile";
+	public static final String ARG_PROFILE_GROUP = "profilegroup";
 	public static final String ARG_CONN_URL = "url";
 	public static final String ARG_CONN_DRIVER = "driver";
 	public static final String ARG_CONN_JAR = "driverjar";
 	public static final String ARG_CONN_USER = "username";
 	public static final String ARG_CONN_PWD = "password";
 	public static final String ARG_CONN_AUTOCOMMIT = "autocommit";
-	public static final String ARG_CONN_ROLLBACK = "rollbackondisconnect";
+	public static final String ARG_CONN_ROLLBACK = "rollbackOnDisconnect";
+	public static final String ARG_CONN_TRIM_CHAR = "trimCharData";
 	public static final String ARG_IGNORE_DROP = "ignoreDropErrors";
+	
 	public static final String ARG_DISPLAY_RESULT = "displayResult";
 	public static final String ARG_SUCCESS_SCRIPT = "cleanupSuccess";
 	public static final String ARG_ERROR_SCRIPT = "cleanupError";
@@ -41,12 +47,9 @@ public class AppArguments
 	public static final String ARG_DELIMITER = "delimiter";
 
 	// Other parameters
-	public static final String ARG_PROFILE = "profile";
-	public static final String ARG_PROFILE_GROUP = "profilegroup";
-	public static final String ARG_SHOWPROGRESS = "showprogress";
+	public static final String ARG_SHOWPROGRESS = "showProgress";
 	public static final String ARG_QUIET = "quiet";
-	public static final String ARG_TRIM_CHAR = "trimCharData";
-	public static final String ARG_PROFILE_STORAGE = "profilestorage";
+	public static final String ARG_PROFILE_STORAGE = "profileStorage";
 	public static final String ARG_CONFIGDIR = "configdir";
 	public static final String ARG_LIBDIR = "libdir";
 	public static final String ARG_LOGFILE = "logfile";
@@ -91,7 +94,7 @@ public class AppArguments
 		addArgument(ARG_ALT_DELIMITER);
 		addArgument(ARG_DELIMITER);
 		addArgument(ARG_QUIET);
-		addArgument(ARG_TRIM_CHAR);
+		addArgument(ARG_CONN_TRIM_CHAR);
 		addArgument(ARG_LANG);
 	}
 }

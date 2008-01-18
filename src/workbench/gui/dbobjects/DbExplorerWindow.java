@@ -115,7 +115,7 @@ public class DbExplorerWindow
 	
 	public void closeWindow()
 	{
-    this.saveSettings();
+		this.saveSettings();
 		this.disconnect();
 		this.panel.explorerWindowClosed();
 		this.setVisible(false);
@@ -127,12 +127,12 @@ public class DbExplorerWindow
 		this.panel.disconnect();
 	}
 	
-  public void saveSettings()
-  {
+	public void saveSettings()
+	{
 		Settings.getInstance().storeWindowPosition(this);
 		Settings.getInstance().storeWindowSize(this);
 		this.panel.saveSettings();
-  }
+	}
 
 	public void restorePosition()
 	{
@@ -215,8 +215,7 @@ public class DbExplorerWindow
 	{
 		this.setProfileName(null);
 		this.panel.setConnection(null);
-		String msg = ResourceMgr.getString("ErrConnectFailed");
-		msg = StringUtil.replace(msg, "%msg%", error.trim());
+		String msg = ResourceMgr.getFormattedString("ErrConnectFailed", error.trim());
 		WbSwingUtilities.showErrorMessage(this, msg);
 	}
 	

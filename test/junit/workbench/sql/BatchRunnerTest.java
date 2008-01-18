@@ -23,7 +23,6 @@ import java.sql.Statement;
 import junit.framework.TestCase;
 import workbench.AppArguments;
 import workbench.TestUtil;
-import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
@@ -71,6 +70,8 @@ public class BatchRunnerTest
 				"1\tArthur\tDent\n";
 			TestUtil.writeFile(importFile, data);
 			WbFile scriptFile = new WbFile(util.getBaseDir(), "myscript.sql");
+			WbFile logfile = new WbFile(util.getBaseDir(), "junit_transaction_test.txt");
+			
 			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
 			writer.println("-- test script");
 			writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100));");
@@ -86,6 +87,7 @@ public class BatchRunnerTest
 			WbFile dbFile = new WbFile(util.getBaseDir(), "errtest");
 			parser.parse("-url='jdbc:h2:'" + dbFile.getFullPath() + 
 				" -user=sa -driver=org.h2.Driver "  + 
+				" -logfile='" + logfile.getFullPath() + "' " + 
 				" -script='" + scriptFile.getFullPath() + "' " +
 				" -abortOnError=true -cleanupError='" + errorFile.getFullPath() + "' " +
 				" -autocommit=false " +
@@ -236,6 +238,7 @@ public class BatchRunnerTest
 		try
 		{
 			util.emptyBaseDirectory();
+			util.prepareEnvironment(true);
 			
 			WbFile scriptFile = new WbFile(util.getBaseDir(), "preparedata.sql");
 			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
@@ -250,10 +253,12 @@ public class BatchRunnerTest
 			writer.println("/* make everything permanent\nmore comments */");
 			writer.println("commit;");
 			writer.close();
-
+			
 			ArgumentParser parser = new AppArguments();
 			String script = "-script='" + scriptFile.getFullPath() + "'";
-			parser.parse("-url='jdbc:h2:mem:testBatchRunner' -user=sa -driver=org.h2.Driver "  + script + " -rollbackOnDisconnect=true");
+			parser.parse("-url='jdbc:h2:mem:testBatchRunner' " + 
+				"-user=sa " + 
+				"-driver=org.h2.Driver "  + script + " -rollbackOnDisconnect=true");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
 	
 			assertNotNull(runner);
@@ -278,7 +283,7 @@ public class BatchRunnerTest
 			}
 			SqlUtil.closeAll(rs, stmt);
 		}
-		catch (Throwable e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 			fail(e.getMessage());

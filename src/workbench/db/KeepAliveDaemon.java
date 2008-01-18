@@ -23,7 +23,7 @@ import workbench.util.WbThread;
  * @author support@sql-workbench.net
  */
 public class KeepAliveDaemon
-  implements Runnable
+	implements Runnable
 {
 	private long idleTime;
 	private WbThread idleThread;
@@ -31,13 +31,13 @@ public class KeepAliveDaemon
 	private WbConnection dbConnection;
 	private String sqlScript;
 	private long lastAction;
-	
-  public KeepAliveDaemon(long idle, WbConnection con, String sql)
-  {
+
+	public KeepAliveDaemon(long idle, WbConnection con, String sql)
+	{
 		this.idleTime = idle;
 		this.dbConnection = con;
 		this.sqlScript = sql;
-  }
+	}
 
 	public void startThread()
 	{
@@ -48,7 +48,7 @@ public class KeepAliveDaemon
 		this.stopThread = false;
 		this.idleThread.start();
 	}
-	
+
 	public void shutdown()
 	{
 		if (this.idleThread != null)
@@ -65,28 +65,31 @@ public class KeepAliveDaemon
 			}
 		}
 	}
-		
+
 	public synchronized void setLastDbAction(long millis)
 	{
 		this.lastAction = millis;
 	}
-	
-  public void run()
-  {
-    while (!stopThread)
+
+	public void run()
+	{
+		while (!stopThread)
 		{
-			if (this.dbConnection == null) 
+			if (this.dbConnection == null)
 			{
 				stopThread = true;
 				break;
 			}
-			
+
 			long now = System.currentTimeMillis();
-			
+
 			try
 			{
 				long newSleep = idleTime - (now - lastAction);
-				if (newSleep <= 0) newSleep = idleTime;
+				if (newSleep <= 0)
+				{
+					newSleep = idleTime;
+				}
 				LogMgr.logDebug("KeepAliveDaemon.run()", Thread.currentThread().getName() + ": sleeping for " + newSleep + "ms");
 				Thread.sleep(idleTime);
 			}
@@ -97,12 +100,12 @@ public class KeepAliveDaemon
 					LogMgr.logError("KeepAliveThread.run()", Thread.currentThread().getName() + ": Thread was interrupted!", e);
 				}
 			}
-			
+
 			now = System.currentTimeMillis();
-			
+
 			synchronized (this)
 			{
-				if ( ((now - lastAction) > idleTime))
+				if (((now - lastAction) > idleTime))
 				{
 					runSqlScript();
 					this.lastAction = now;
@@ -110,25 +113,25 @@ public class KeepAliveDaemon
 			}
 		}
   }
-	
+
 	public static String getTimeDisplay(long millis)
 	{
 		if (millis == 0) return "";
-		
-		if (millis <  60*1000)
+
+		if (millis < 60 * 1000)
 		{
 			return Long.toString((millis / 1000)) + "s";
 		}
 		return Long.toString((millis / (60 * 1000))) + "m";
 	}
-	
-	
+
+
 	private void runSqlScript()
 	{
 		if (this.dbConnection == null) return;
 		if (this.dbConnection.isBusy()) return;
 		if (this.dbConnection.isClosed()) return;
-		
+
 		Statement stmt = null;
 		synchronized (this.dbConnection)
 		{

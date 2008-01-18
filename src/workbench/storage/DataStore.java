@@ -46,13 +46,13 @@ import workbench.util.ValueConverter;
  * A class to cache the result of a database query.
  * If the underlying SELECT used only one table, then the
  * DataStore can be updated and the changes can be saved back
- * to the database. 
- * 
+ * to the database.
+ *
  * For updating or deleting rows, key columns are required
  * For inserting new rows, no keys are required.
- * 
+ *
  * @see workbench.storage.ResultInfo
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class DataStore
@@ -70,7 +70,7 @@ public class DataStore
 	private RowDataList data;
 	private RowDataList deletedRows;
 	private RowDataList filteredRows;
-	
+
 	// The SQL statement that was used to generate this DataStore
 	private String sql;
 
@@ -85,9 +85,9 @@ public class DataStore
 
 	private boolean cancelRetrieve = false;
 	private boolean cancelUpdate = false;
-	
+
 	private List<ColumnIdentifier> missingPkcolumns;
-	
+
 	/**
 	 *	Create a DataStore which is not based on a result set
 	 *	and contains the columns defined in the given array
@@ -99,7 +99,7 @@ public class DataStore
 	{
 		this(aColNames, colTypes, null);
 	}
-	
+
 	/**
 	 *	Create a DataStore which is not based on a result set
 	 *	and contains the columns defined in the given array
@@ -107,7 +107,7 @@ public class DataStore
 	 *  @param colNames the column names
 	 *  @param colTypes data types for each column (matching java.sql.Types.XXXX)
 	 *  @param colSizes display size for each column
-	 * 
+	 *
 	 * @see #getColumnDisplaySize(int)
 	 * @see workbench.gui.components.DataStoreTableModel#getColumnWidth(int)
 	 */
@@ -119,9 +119,9 @@ public class DataStore
 
 	/**
 	 * Create a DataStore based on the contents of the given ResultSet.
-	 * 
+	 *
 	 * The ResultSet has to be closed by the caller.
-	 * 
+	 *
 	 * @see #initData(ResultSet, int)
 	 */
   public DataStore(ResultSet aResultSet, WbConnection aConn)
@@ -141,12 +141,12 @@ public class DataStore
 	/**
 	 * Initialize this DataStore based on the given ResultSet but without reading the data.
 	 * This is equivalent to calling new DataStore(result, false)
-	 * 
+	 *
 	 * The ResultSet has to be closed by the caller.
-	 * 
+	 *
 	 * @param aResult the ResultSet to process
 	 * @throws java.sql.SQLException
-	 * 
+	 *
 	 * @see #DataStore(ResultSet, boolean)
 	 */
 	public DataStore(ResultSet aResult)
@@ -157,13 +157,13 @@ public class DataStore
 
 	/**
 	 * Initialize this DataStore based on the given ResultSet
-	 * 
+	 *
 	 * The ResultSet has to be closed by the caller.
-	 * 
+	 *
 	 * @param aResult the ResultSet to process
 	 * @param readData if true, the ResultSet will be processed, otherwise only the MetaData will be read
 	 * @throws java.sql.SQLException
-	 * 
+	 *
 	 * @see #initData(ResultSet, int)
 	 */
 	public DataStore(ResultSet aResult, boolean readData)
@@ -417,7 +417,7 @@ public class DataStore
 
 		RowData row = this.data.get(aRow);
 		if (row == null) return;
-		
+
 		if (!row.isNew())
 		{
 			List<ColumnData> pk = getPkValues(aRow, true);
@@ -429,7 +429,7 @@ public class DataStore
 		}
 		this.deleteRow(aRow);
 	}
-	
+
 	/**
 	 *	Adds the next row from the result set
 	 *	to the DataStore. No check will be done
@@ -496,11 +496,11 @@ public class DataStore
 	}
 
 	/**
-	 * Prepare the information which table should be updated. This 
-	 * will not trigger the retrieval of the columns. 
-	 * 
-	 * This table will be used the next time checkUpdateTable() will 
-	 * be called. checkUpdateTable() will not retrieve the 
+	 * Prepare the information which table should be updated. This
+	 * will not trigger the retrieval of the columns.
+	 *
+	 * This table will be used the next time checkUpdateTable() will
+	 * be called. checkUpdateTable() will not retrieve the
 	 * table name from the original SQL then.
 	 * @see #setUpdateTable(TableIdentifier)
 	 */
@@ -508,7 +508,7 @@ public class DataStore
 	{
 		this.updateTableToBeUsed = (tbl == null ? null : tbl.createCopy());
 	}
-	
+
 	public void setUpdateTable(String aTablename, WbConnection aConn)
 	{
 		if (StringUtil.isEmptyString(aTablename))
@@ -522,7 +522,7 @@ public class DataStore
 			setUpdateTable(tbl, aConn);
 		}
 	}
-	
+
 	public List<ColumnIdentifier> getMissingPkColumns()
 	{
 		return this.missingPkcolumns;
@@ -532,7 +532,7 @@ public class DataStore
 	{
 		return (this.missingPkcolumns == null || this.missingPkcolumns.size() == 0);
 	}
-	
+
 	public void setUpdateTable(TableIdentifier tbl)
 	{
 		setUpdateTable(tbl, this.originalConnection);
@@ -542,17 +542,17 @@ public class DataStore
 	 * Sets the table to be updated for this DataStore.
 	 * Upon setting the table, the column definition for the table
 	 * will be retrieved using {@link workbench.db.DbMetadata}
-	 * 
+	 *
 	 * To define the table that should be used for updates, but without
 	 * retrieving its definition (for performance reasons) use
 	 * {@link #setUpdateTableToBeUsed(TableIdentifier)}
-	 * 
+	 *
 	 * any PK column that is not found in the current ResultInfo
 	 * will be stored and can be retrieved using getMissingPkColumns()
-	 * 
+	 *
 	 * @param tbl the table to be used as the update table
 	 * @param conn the connection where this table exists
-	 * 
+	 *
 	 * @see #setUpdateTableToBeUsed(TableIdentifier)
 	 * @see #getMissingPkColumns()
 	 */
@@ -564,13 +564,13 @@ public class DataStore
 			this.resultInfo.setUpdateTable(null);
 			return;
 		}
-		
+
 		if (tbl.equals(this.updateTable) || conn == null) return;
-		
+
 		this.updateTable = null;
 		this.resultInfo.setUpdateTable(null);
 		this.missingPkcolumns = null;
-		
+
 		// check the columns which are in that table
 		// so that we can refuse any changes to columns
 		// which do not derive from that table
@@ -583,17 +583,17 @@ public class DataStore
 			if (meta == null) return;
 
 			this.updateTable = tbl.createCopy();
-			
+
 			TableIdentifier synCheck = tbl.createCopy();
 			synCheck.setSchema(meta.getSchemaToUse());
 			TableIdentifier toCheck = meta.resolveSynonym(synCheck);
 			List<ColumnIdentifier> columns = meta.getTableColumns(toCheck);
 			int realColumns = 0;
-			
+
 			if (columns != null)
 			{
 				this.missingPkcolumns = new ArrayList<ColumnIdentifier>(columns.size());
-				
+
 				for (ColumnIdentifier column : columns)
 				{
 					int index = this.findColumn(column.getColumnName());
@@ -627,9 +627,9 @@ public class DataStore
 	/**
 	 * Returns the current table to be updated if this DataStore is
 	 * based on a SELECT query
-	 * 
+	 *
 	 * @return The current update table
-	 * 
+	 *
 	 * @see #setGeneratingSql(String)
 	 */
 	public TableIdentifier getUpdateTable()
@@ -650,13 +650,13 @@ public class DataStore
 	}
 
 	/**
-	 * Return the suggested display size of the column. This is 
+	 * Return the suggested display size of the column. This is
 	 * delegated to the instance of the {@link workbench.storage.ResultInfo} class
 	 * that is used to store the column meta data
-	 * 
+	 *
 	 * @param aColumn the column index
 	 * @return the suggested display size
-	 * 
+	 *
 	 * @see workbench.storage.ResultInfo#getColumnSize(int)
 	 * @see workbench.gui.components.DataStoreTableModel#getColumnWidth(int)
 	 */
@@ -676,10 +676,10 @@ public class DataStore
 	 * Returns the current value of the specified column in the specified row.
 	 * @param aRow the row to get the data from (starts at 0)
 	 * @param aColumn the column to get the data for (starts at 0)
-	 * 
+	 *
 	 * @return the current value of the column might be different to the value
 	 * retrieved from the database!
-	 * 
+	 *
 	 * @see workbench.storage.RowData#getValue(int)
 	 * @see #getRow(int)
 	 */
@@ -694,11 +694,11 @@ public class DataStore
 	 * Returns the current value of the named column in the specified row.
 	 * This is equivalent to calling <tt>getRow(row, findColumn(columnName))</tt>
 	 * @param aRow the row to get the data from (starts at 0)
-	 * @param columnName the column to get the data for 
-	 * 
+	 * @param columnName the column to get the data for
+	 *
 	 * @return the current value of the column might be different to the value
 	 * retrieved from the database!
-	 * 
+	 *
 	 * @see workbench.storage.RowData#getValue(int)
 	 * @see #getRow(int)
 	 * @see #getColumnIndex(String)
@@ -712,7 +712,7 @@ public class DataStore
 		return row.getValue(index);
 	}
 
-	
+
 	/**
 	 * Returns the value of the given row/column as a String.
 	 * The value's toString() method is used to convert the value to a String value.
@@ -723,7 +723,7 @@ public class DataStore
 	{
 		return getValueAsString(aRow, findColumn(colName));
 	}
-	
+
 	/**
 	 * Returns the value of the given row/column as a String.
 	 * The value's toString() method is used to convert the value to a String value.
@@ -734,7 +734,7 @@ public class DataStore
 	{
 		Object value = getValue(aRow, aColumn);
     if (value == null) return null;
-		
+
 		if (value instanceof Clob)
 		{
 			try
@@ -770,11 +770,11 @@ public class DataStore
 	public int getValueAsInt(int aRow, int aColumn, int aDefault)
 	{
 		Object value = getValue(aRow, aColumn);
-    if (value == null)
+		if (value == null)
 		{
-      return aDefault;
+			return aDefault;
 		}
-    else if (value instanceof Number)
+		else if (value instanceof Number)
 		{
 			return ((Number)value).intValue();
 		}
@@ -844,7 +844,7 @@ public class DataStore
 			LogMgr.logError("DataStore.setValue()", "Could not find specified row!", null);
 			return;
 		}
-		
+
 		row.setValue(aColumn,aValue);
 		this.modified = row.isModified();
 	}
@@ -862,7 +862,7 @@ public class DataStore
 	/**
 	 * Returns true if the given row has been modified.
 	 * A new row is considered modified only if setValue() has been called at least once.
-	 * 
+	 *
 	 * @param aRow The row to check
 	 */
 	public boolean isRowModified(int aRow)
@@ -985,7 +985,7 @@ public class DataStore
 	 * and store the data from the ResultSet in this DataStore with no maximum
 	 *
 	 * The ResultSet must be closed by the caller.
-	 * 
+	 *
 	 * @param aResultSet the ResultSet to read
 	 * @see #initData(ResultSet,int)
 	 */
@@ -1000,7 +1000,7 @@ public class DataStore
 	 * and store the data from the ResultSet in this DataStore (up to maxRows)
 	 *
 	 * The ResultSet must be closed by the caller.
-	 * 
+	 *
 	 * @param aResultSet the ResultSet to read
 	 * @param maxRows max. number of rows to read. Zero or lower to read all rows
 	 * @see #initData(ResultSet)
@@ -1026,8 +1026,8 @@ public class DataStore
 		{
 			this.rowActionMonitor.setMonitorType(RowActionMonitor.MONITOR_LOAD);
 		}
-		
-		
+
+
 		boolean trimCharData = false;
 		if (this.originalConnection != null)
 		{
@@ -1037,10 +1037,10 @@ public class DataStore
 				trimCharData = prof.getTrimCharData();
 			}
 		}
-		
+
 		this.cancelRetrieve = false;
 		final int reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
-		
+
 		try
 		{
 			int rowCount = 0;
@@ -1103,7 +1103,7 @@ public class DataStore
 	}
 
 	public String getGeneratingSql() { return this.sql; }
-	
+
 	public boolean checkUpdateTable()
 	{
 		return this.checkUpdateTable(this.originalConnection);
@@ -1112,7 +1112,7 @@ public class DataStore
 	public boolean checkUpdateTable(WbConnection aConn)
 	{
 		if (aConn == null) return false;
-		
+
 		if (this.updateTableToBeUsed != null)
 		{
 			TableIdentifier ut = this.updateTableToBeUsed;
@@ -1166,11 +1166,11 @@ public class DataStore
 	{
 		return new SqlLiteralFormatter(this.originalConnection);
 	}
-	
+
 	/**
 	 * Checks if the underlying SQL statement references only one table.
 	 * @return true if only one table is found in the SELECT statement
-	 * 
+	 *
 	 * @see workbench.util.SqlUtil#getTables(String)
 	 */
 	public boolean sqlHasUpdateTable()
@@ -1196,7 +1196,7 @@ public class DataStore
 	 * Cancels a currently running update. This has to be called
 	 * from a different thread than the one from which updatedb() was
 	 * called
-	 * 
+	 *
 	 * @see #updateDb(workbench.db.WbConnection, workbench.interfaces.JobErrorHandler)
 	 */
 	public void cancelUpdate()
@@ -1205,9 +1205,9 @@ public class DataStore
 	}
 
 	/**
-	 * If the DataStore is beeing initialized with a ResultSet, this 
+	 * If the DataStore is beeing initialized with a ResultSet, this
 	 * cancels the processing of the ResultSet.
-	 * 
+	 *
 	 * @see #DataStore(java.sql.ResultSet)
 	 * @see #initData(ResultSet)
 	 */
@@ -1217,24 +1217,24 @@ public class DataStore
 	}
 
 	/**
-	 * Checks if the last ResultSet processing was cancelled. 
+	 * Checks if the last ResultSet processing was cancelled.
 	 * This will only be correct if initData() was called previously
-	 * 
-	 * @return true if retrieval was cancelled. 
-	 * 
+	 *
+	 * @return true if retrieval was cancelled.
+	 *
 	 * @see #DataStore(java.sql.ResultSet)
 	 * @see #initData(ResultSet)
 	 */
-	public boolean isCancelled() 
+	public boolean isCancelled()
 	{
 		return this.cancelRetrieve;
 	}
-	
+
 	public void resetCancelStatus()
 	{
 		this.cancelRetrieve = false;
 	}
-	
+
 	private void updateProgressMonitor(int currentRow, int totalRows)
 	{
 		if (this.rowActionMonitor != null)
@@ -1248,9 +1248,9 @@ public class DataStore
 	 * would be executed in order to store the current content
 	 * of the DataStore.
 	 * The returned list will be empty if no changes were made to the datastore
-	 * 
+	 *
 	 * @return a List of {@link workbench.storage.DmlStatement}s to be sent to the database
-	 * 
+	 *
 	 * @see workbench.storage.StatementFactory
 	 * @see workbench.storage.DmlStatement#getExecutableStatement(SqlLiteralFormatter)
 	 */
@@ -1262,13 +1262,13 @@ public class DataStore
 
 		List<DmlStatement> stmtList = new LinkedList<DmlStatement>();
 		this.resetUpdateRowCounters();
-		
+
 		DmlStatement dml = null;
 		RowData row = null;
 
 		StatementFactory factory = new StatementFactory(this.resultInfo, this.originalConnection);
 		factory.setIncludeTableOwner(aConnection.getMetadata().needSchemaInDML(resultInfo.getUpdateTable()));
-		
+
 		String le = Settings.getInstance().getInternalEditorLineEnding();
 
 		row = this.getNextDeletedRow();
@@ -1281,7 +1281,7 @@ public class DataStore
 				{
 					if (delete != null) stmtList.add(new DmlStatement(delete, null));
 				}
-			}			
+			}
 			dml = factory.createDeleteStatement(row);
 			stmtList.add(dml);
 			row = this.getNextDeletedRow();
@@ -1341,7 +1341,7 @@ public class DataStore
 		catch (SQLException e)
 		{
 			this.updateHadErrors = true;
-			
+
 			String esql = (delete == null ? dml.getExecutableStatement(createLiteralFormatter()).toString() : delete);
 			if (this.ignoreAllUpdateErrors)
 			{
@@ -1380,11 +1380,11 @@ public class DataStore
 	 * </ul>
 	 * If everything was successful, the changes will be committed automatically
 	 * If an error occurs a rollback will be sent to the database
-	 * 
+	 *
 	 * @param aConnection the connection where the database should be updated
 	 * @param errorHandler callback for error handling
 	 * @return the number of rows affected
-	 * 
+	 *
 	 * @see workbench.storage.StatementFactory
 	 * @see workbench.storage.DmlStatement#getExecutableStatement(SqlLiteralFormatter)
 	 */
@@ -1409,7 +1409,7 @@ public class DataStore
 		factory.setIncludeTableOwner(aConnection.getMetadata().needSchemaInDML(resultInfo.getUpdateTable()));
 		String le = Settings.getInstance().getInternalEditorLineEnding();
 		boolean inCommit = false;
-		
+
 		try
 		{
 			this.resetUpdateRowCounters();
@@ -1464,7 +1464,7 @@ public class DataStore
 			// we are sending a commit() to make sure the transaction
 			// is ended. This is especially important for Postgres
 			// in case an error occured during update (and the user chose to proceed)
-			if (!aConnection.getAutoCommit()) 
+			if (!aConnection.getAutoCommit())
 			{
 				inCommit = true;
 				aConnection.commit();
@@ -1487,10 +1487,10 @@ public class DataStore
 					WbSwingUtilities.showErrorMessage(null, msg);
 				}
 			}
-			
+
 			if (!aConnection.getAutoCommit())
 			{
-				// in case of an exception we have to reset the dmlSent flag for 
+				// in case of an exception we have to reset the dmlSent flag for
 				// all modified rows otherwise the next attempt to save the changes
 				// will not re-send them (but as the transaction has been rolled back,
 				// they are not stored in the database)
@@ -1512,7 +1512,7 @@ public class DataStore
 	/**
 	 * Clears the flag for all modified rows that indicates any pending update
 	 * has already been sent to the database.
-	 * This is necessary if an error occurs during update, to ensure the 
+	 * This is necessary if an error occurs during update, to ensure the
 	 * rows are re-send the next time.
 	 */
 	public void resetDmlSentStatus()
@@ -1590,7 +1590,7 @@ public class DataStore
 			sorter.sort(this.data);
 		}
 	}
-	
+
 	public void sortByColumn(int col, boolean ascending)
 	{
 		synchronized (this.data)
@@ -1617,7 +1617,7 @@ public class DataStore
 		if (aValue == null) return null;
 
 		ValueConverter converter = new ValueConverter();
-		
+
 		return converter.convertValue(aValue, type);
 	}
 
@@ -1657,9 +1657,9 @@ public class DataStore
 	}
 
 	/**
-	 * Returns a list with the value of all PK columns for the given 
+	 * Returns a list with the value of all PK columns for the given
 	 * row. The key to the map is the name of the column.
-	 * 
+	 *
 	 * @see workbench.storage.ResultInfo#isPkColumn(int)
 	 * @see #getValue(int, int)
 	 */
@@ -1667,18 +1667,18 @@ public class DataStore
 	{
 		return getPkValues(aRow, false);
 	}
-	
+
 	/**
-	 * Returns a list with the value of all PK columns for the given 
+	 * Returns a list with the value of all PK columns for the given
 	 * row. The key to the map is the name of the column.
-	 * 
+	 *
 	 * @see workbench.storage.ResultInfo#isPkColumn(int)
 	 * @see #getValue(int, int)
 	 */
 	public List<ColumnData> getPkValues(int aRow, boolean originalValues)
 	{
 		if (this.originalConnection == null) return Collections.emptyList();
-		
+
 		try
 		{
 			this.updatePkInformation(this.originalConnection);
@@ -1813,16 +1813,16 @@ public class DataStore
 		{
 			this.checkUpdateTable();
 		}
-		
+
 		if (this.updateTable == null)
 		{
 			LogMgr.logDebug("Datastore.updatePkInformation()", "No update table found, PK information not available");
 		}
-		
+
 		// If we have found a single update table, but no Primary Keys
-		// we try to find a user-defined PK mapping. 
-		// there is no need to call readPkDefinition() as that 
-		// will only try to find the PK columns of the update table 
+		// we try to find a user-defined PK mapping.
+		// there is no need to call readPkDefinition() as that
+		// will only try to find the PK columns of the update table
 		// first, which we have already tried in checkUpdateTable()
 		if (this.updateTable != null && !this.hasPkColumns())
 		{

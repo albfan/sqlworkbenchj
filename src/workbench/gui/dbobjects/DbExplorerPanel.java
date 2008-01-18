@@ -48,6 +48,7 @@ import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.ConnectionSelector;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbToolbar;
+import workbench.interfaces.Connectable;
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -198,6 +199,11 @@ public class DbExplorerPanel
 		}
 	}
 
+	public void setConnectionClient(Connectable client)
+	{
+		// not used
+	}
+	
 	public void setDbExecutionListener(DbExecutionListener l)
 	{
 		if (this.tables != null)
@@ -320,7 +326,7 @@ public class DbExplorerPanel
 			readCatalogs();
 			
 			tables.setCatalogAndSchema(getSelectedCatalog(), currentSchema, false);
-      procs.setCatalogAndSchema(getSelectedCatalog(), currentSchema, false);
+			procs.setCatalogAndSchema(getSelectedCatalog(), currentSchema, false);
 		}
 		catch (Throwable e)
 		{

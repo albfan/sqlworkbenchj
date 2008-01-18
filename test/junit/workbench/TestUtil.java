@@ -84,17 +84,14 @@ public class TestUtil
 	
 	public String[] getArgs(boolean noTemplates)
 	{
+		String cmdline = "-nosettings -configdir='" + basedir + "' ";
 		
-		String args[] = null;
 		if (noTemplates)
 		{
-			args = new String[] { "-notemplates -nosettings -configdir=" + basedir };
+			cmdline +=  " -notemplates";
 		}
-		else
-		{
-			args = new String[] { "-nosettings -configdir=" + basedir };
-		}
-		return args;
+
+		return new String[] { cmdline };
 	}
 	
 	public void prepareBaseDir()

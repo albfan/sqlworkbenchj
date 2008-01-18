@@ -75,10 +75,10 @@ public class TableDependencyTreeDisplay
 	{
 		this.renderer = new DependencyTreeCellRenderer();
 		this.showExported = exportedKeys;
-    try
-    {
+		try
+		{
 			WbSwingUtilities.showWaitCursor(this);
-      TableDependency dep = new TableDependency(this.connection, aTable);
+			TableDependency dep = new TableDependency(this.connection, aTable);
 			if (exportedKeys)
 			{
 				dep.readTreeForParents();
@@ -88,17 +88,17 @@ public class TableDependencyTreeDisplay
 				dep.readTreeForChildren();
 			}
 
-      DependencyNode root = dep.getRootNode();
-      this.readTreeNodes(root);
-    }
+			DependencyNode root = dep.getRootNode();
+			this.readTreeNodes(root);
+		}
 		catch (OutOfMemoryError mem)
 		{
 			WbManager.getInstance().showOutOfMemoryError();
 		}
-    catch (Exception e)
-    {
-      LogMgr.logError("TableDependencyTreeDisplay.readTree()", "Error reading three", e);
-    }
+		catch (Exception e)
+		{
+			LogMgr.logError("TableDependencyTreeDisplay.readTree()", "Error reading three", e);
+		}
 		WbSwingUtilities.showDefaultCursor(this);
 	}
 

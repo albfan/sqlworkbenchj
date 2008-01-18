@@ -48,14 +48,14 @@ public class ProfileSelectionDialog
 	extends JDialog 
 	implements ActionListener, WindowListener, TreeSelectionListener, MouseListener
 {
-  private JPanel buttonPanel;
-  private JButton okButton;
-  private JButton cancelButton;
+	private JPanel buttonPanel;
+	private JButton okButton;
+	private JButton cancelButton;
 	private ProfileEditorPanel profiles;
 	private ConnectionProfile selectedProfile;
 	private boolean cancelled = false;
 	private String escActionCommand;
-
+	
 	public ProfileSelectionDialog(Frame parent, boolean modal)
 	{
 		this(parent, modal, null);
@@ -75,23 +75,23 @@ public class ProfileSelectionDialog
 		escActionCommand = esc.getActionName();
 	}
 
-  private void initComponents(String lastProfileKey)
-  {
+	private void initComponents(String lastProfileKey)
+	{
 		profiles = new ProfileEditorPanel(lastProfileKey);
 
-    buttonPanel = new JPanel();
-    okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
+		buttonPanel = new JPanel();
+		okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
 		okButton.setEnabled(profiles.getSelectedProfile() != null);
 		
-    cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
+		cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
 
 		addWindowListener(this);
-    buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-    buttonPanel.add(okButton);
+		buttonPanel.add(okButton);
 		okButton.addActionListener(this);
 
-    buttonPanel.add(cancelButton);
+		buttonPanel.add(cancelButton);
 		cancelButton.addActionListener(this);
 
 		profiles.addListMouseListener(this);
@@ -100,11 +100,11 @@ public class ProfileSelectionDialog
 		BorderLayout bl = new BorderLayout();
 		this.getContentPane().setLayout(bl);
 		getContentPane().add(profiles, BorderLayout.CENTER);
-    getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
 		setTitle(ResourceMgr.getString("LblSelectProfile"));
 		this.restoreSize();
-  }
+	}
 
 	private void closeDialog()
 	{

@@ -14,6 +14,7 @@ package workbench.sql;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
@@ -29,6 +30,7 @@ import workbench.sql.commands.UpdatingCommand;
 import workbench.sql.commands.UseCommand;
 import workbench.sql.wbcommands.WbCall;
 import workbench.sql.wbcommands.WbConfirm;
+import workbench.sql.wbcommands.WbConnect;
 import workbench.sql.wbcommands.WbCopy;
 import workbench.sql.wbcommands.WbDefinePk;
 import workbench.sql.wbcommands.WbDefineVar;
@@ -148,6 +150,12 @@ public class CommandMapper
 		sql = new WbCall();
 		cmdDispatch.put(sql.getVerb(), sql);
 		
+		if (WbManager.getInstance().isBatchMode())
+		{
+			sql = new WbConnect();
+			cmdDispatch.put(sql.getVerb(), sql);
+		}
+		
 		cmdDispatch.put(WbInclude.INCLUDE_LONG.getVerb(), WbInclude.INCLUDE_LONG);
 		cmdDispatch.put(WbInclude.INCLUDE_SHORT.getVerb(), WbInclude.INCLUDE_SHORT);
 
@@ -200,9 +208,11 @@ public class CommandMapper
 		if (aConn == null) return;
 		
 		this.metaData = aConn.getMetadata();
+		
 		if (metaData == null)
 		{
 			LogMgr.logError("CommandMapper.setConnection()","Received connection without metaData!", null);
+			return;
 		}
 		
 		if (metaData.isOracle())

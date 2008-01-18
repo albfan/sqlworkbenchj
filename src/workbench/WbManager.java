@@ -439,7 +439,7 @@ public class WbManager
 	
 	public boolean isBatchMode()
 	{
-	  return this.batchMode;
+		return this.batchMode;
 	}
 
 	public boolean canExit()
@@ -757,12 +757,16 @@ public class WbManager
 			value = cmdLine.getValue(AppArguments.ARG_LOGFILE);
 			if (!StringUtil.isEmptyString(value))
 			{
-				System.setProperty("workbench.log.filename", value);
+				WbFile file = new WbFile(value);
+				System.setProperty("workbench.log.filename", file.getFullPath());
 			}
 
-			// Make sure the Settings object is initialized now that 
-			// all relevant commandline arguments are parsed
-			Settings.getInstance();
+			// Make sure the Settings object is (re)initialized properly now that 
+			// some system properties have been read from the commandline
+			// this is especially necessary during Junit tests to make 
+			// sure a newly passed commandline overrules the previously initialized
+			// Settings instance
+			Settings.getInstance().initialize();
 			
 			String scriptname = cmdLine.getValue(AppArguments.ARG_SCRIPT);
 

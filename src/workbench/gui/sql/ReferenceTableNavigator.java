@@ -16,6 +16,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeListener;
+import java.util.Collection;
 import java.util.EventObject;
 import java.util.LinkedList;
 import java.util.List;
@@ -285,7 +286,19 @@ public class ReferenceTableNavigator
 				for (DependencyNode node : tables)
 				{
 					JMenuItem item = null;
-					item = new EditorTabSelectMenu(this, node.getTable().getTableExpression(con), "LblShowDataInNewTab", "MsgRelatedTabHint", container);
+					Collection<String> cols = node.getColumns().keySet();
+					StringBuilder display = new StringBuilder(cols.size() * 10);
+					display.append(node.getTable().getTableExpression(con));
+					display.append(" (");
+					int index = 0;
+					for (String col : cols)
+					{
+						if (index > 0) display.append(',');
+						display.append(col);
+						index++;
+					}
+					display.append(')');
+					item = new EditorTabSelectMenu(this, display.toString(), "LblShowDataInNewTab", "MsgRelatedTabHint", container);
 					item.setVisible(true);
 					boolean hasColumns = hasColumns(node);
 					item.setEnabled(hasColumns);

@@ -36,9 +36,8 @@ public class WbThread
 		this.setUncaughtExceptionHandler(this);
 	}
 
-  public void uncaughtException(Thread thread, Throwable error)
-  {
-    LogMgr.logError("WbThread.uncaughtException()", "Thread + " + thread.getName() + " caused an exception", error);
-  }
-
+	public void uncaughtException(Thread thread, Throwable error)
+	{
+		LogMgr.logError("WbThread.uncaughtException()", "Thread + " + thread.getName() + " caused an exception", error);
+	}
 }

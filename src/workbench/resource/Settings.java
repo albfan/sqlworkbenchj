@@ -105,7 +105,7 @@ public class Settings
 	private List<FontChangedListener> fontChangeListeners = new LinkedList<FontChangedListener>();
 
 	private ShortcutManager keyManager;
-
+	
 	private static class LazyInstanceHolder
 	{
 		private static Settings instance = new Settings();
@@ -117,6 +117,17 @@ public class Settings
 	}
 
 	private Settings()
+	{
+		initialize();
+		this.renameOldProps();
+		this.migrateProps();
+		this.removeObsolete();
+	}
+	
+	/**
+	 * Only to be used in JUnit tests!
+	 */
+	public final void initialize()
 	{
 		this.props = new WbProperties(this);
 		String configFile = System.getProperty("workbench.settings.file", "workbench.settings");
@@ -130,7 +141,7 @@ public class Settings
 		WbFile cfd = null;
 		try
 		{
-			if (configDir == null || configDir.trim().length() == 0)
+			if (StringUtil.isWhitespaceOrEmpty(configDir))
 			{
 				// check the current directory for a configuration file
 				// if it is not present, then use the directory of the jar file
@@ -154,10 +165,7 @@ public class Settings
 			}
 			else
 			{
-				if (configDir.indexOf("${user.home}") > -1)
-				{
-					configDir = StringUtil.replace(configDir, "${user.home}", System.getProperty("user.home"));
-				}
+				configDir = StringUtil.replace(configDir, "${user.home}", System.getProperty("user.home"));
 				cfd = new WbFile(configDir);
 			}
 		}
@@ -175,7 +183,7 @@ public class Settings
 		configDir = cfd.getFullPath();
 
 		BufferedInputStream in = null;
-	  try
+		try
 		{
 			in = new BufferedInputStream(new FileInputStream(this.configfile));
 			this.props.load(in);
@@ -198,43 +206,45 @@ public class Settings
 		String level = getProperty("workbench.log.level", "INFO");
 		LogMgr.setLevel(level);
 
-    try
-    {
+		try
+		{
 			String logfilename = getProperty("workbench.log.filename", "workbench.log");
 			
 			// Replace old System.out or System.err settings
 			if (logfilename.equalsIgnoreCase("System.out") || logfilename.equalsIgnoreCase("System.err"))
 			{
 				logfilename = "workbench.log";
-				this.props.setProperty("workbench.log.filename", "workbench.log");
+				setProperty("workbench.log.filename", "workbench.log");
 			}
 			
-			File logfile = new File(logfilename);
+			WbFile logfile = new WbFile(logfilename);
 			if (!logfile.isAbsolute())
 			{
-				logfile = new File(getConfigDir(), logfilename);
+				logfile = new WbFile(getConfigDir(), logfilename);
 			}
 
-			if (!logfile.canWrite())
+			String old = null;
+			if (!logfile.isWriteable())
 			{
-				logfile = new File(getConfigDir(), "workbench.log");
-				this.props.setProperty("workbench.log.filename", "workbench.log");
+				old = logfile.getFullPath();
+				logfile = new WbFile(getConfigDir(), "workbench.log");
+				setProperty("workbench.log.filename", "workbench.log");
 			}
 			
 			int maxSize = this.getMaxLogfileSize();
 			LogMgr.setOutputFile(logfile, maxSize);
-    }
-    catch (Throwable e)
-    {
-      System.err.println("Error initializing Log system!");
-      e.printStackTrace(System.err);
-    }
+			if (old != null)
+			{
+				LogMgr.logWarning("Settings.<init>", "Could not write requested logfile '" + old + "'");
+			}
+		}
+		catch (Throwable e)
+		{
+			System.err.println("Error initializing Log system!");
+			e.printStackTrace(System.err);
+		}
 
 		LogMgr.logInfo("Settings.<init>", "Using configdir: " + configDir);
-
-		this.renameOldProps();
-		this.migrateProps();
-		this.removeObsolete();
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="Manual">
@@ -732,11 +742,6 @@ public class Settings
 		return getBoolProperty(PROPERTY_DBEXP_REMEMBER_SORT, false);
 	}
 	
-	public String getDefaultObjectType()
-	{
-		return getProperty("workbench.dbexplorer.defTableType", null);
-	}
-
 	public void setStoreExplorerObjectType(boolean flag)
 	{
 		setProperty("workbench.dbexplorer.rememberObjectType", flag);
@@ -2626,12 +2631,12 @@ public class Settings
 			this.props.remove("workbench.dbexplorer.visible");
 			
 			// DbMetadata now uses db2 as the dbid for all DB2 versions (stripping the _linux or _nt suffix)
-      this.props.remove("workbench.db.db2_nt.currentschema.query");
-      this.props.remove("workbench.db.objecttype.selectable.db2_nt");
-      this.props.remove("workbench.db.db2_nt.synonymtypes");
-      this.props.remove("workbench.db.db2_nt.additional.viewtypes");
-      this.props.remove("workbench.db.db2_nt.retrieve_sequences");
-      this.props.remove("workbench.db.db2_nt.additional.tabletypes");
+			this.props.remove("workbench.db.db2_nt.currentschema.query");
+			this.props.remove("workbench.db.objecttype.selectable.db2_nt");
+			this.props.remove("workbench.db.db2_nt.synonymtypes");
+			this.props.remove("workbench.db.db2_nt.additional.viewtypes");
+			this.props.remove("workbench.db.db2_nt.retrieve_sequences");
+			this.props.remove("workbench.db.db2_nt.additional.tabletypes");
 			
 			this.props.remove("workbench.sql.dbms_output.defaultbuffer");
 			this.props.remove("workbench.sql.enable_dbms_output");
@@ -2644,6 +2649,8 @@ public class Settings
 			this.props.remove("workbench.print.margin.left");
 			this.props.remove("workbench.print.margin.right");
 			this.props.remove("workbench.print.margin.top");
+			this.props.remove("workbench.dbexplorer.defTableType");
+			this.props.remove("workbench.dbexplorer.deftabletype");
 		}
 		catch (Throwable e)
 		{

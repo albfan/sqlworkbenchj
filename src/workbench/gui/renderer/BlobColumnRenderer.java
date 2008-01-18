@@ -121,7 +121,7 @@ public class BlobColumnRenderer
 		currentTable = (WbTable)table;
 		displayPanel.setValue(value);
 		return displayPanel;
-  }
+	}
 	
 	public boolean isCellEditable(EventObject e)
 	{

@@ -139,6 +139,7 @@ import workbench.gui.dialogs.dataimport.TextImportOptions;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
 import workbench.interfaces.Commitable;
+import workbench.interfaces.Connectable;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.DbUpdater;
 import workbench.interfaces.ExecutionController;
@@ -253,6 +254,8 @@ public class SqlPanel
 	protected ConnectionInfo connectionInfo;
 
 	protected WbConnection dbConnection;
+	private Connectable connectionClient;
+	
 	private Object connectionLock = new Object();
 	
 	protected boolean importRunning;
@@ -336,6 +339,11 @@ public class SqlPanel
 	{
 		this.setName("sqlpanel" + anId);
 		this.internalId = anId;
+	}
+
+	public void setConnectionClient(Connectable client)
+	{
+		this.connectionClient = client;
 	}
 
 	public boolean getAppendResults() 
@@ -1312,33 +1320,34 @@ public class SqlPanel
 			this.dbConnection = aConnection;
 		}
 		
-			this.toggleAutoCommit.setConnection(this.dbConnection);
+		this.toggleAutoCommit.setConnection(this.dbConnection);
 
-			if (this.clearCompletionCache != null) this.clearCompletionCache.setConnection(this.dbConnection);
-			if (this.autoCompletion != null) this.autoCompletion.setConnection(this.dbConnection);
+		if (this.clearCompletionCache != null) this.clearCompletionCache.setConnection(this.dbConnection);
+		if (this.autoCompletion != null) this.autoCompletion.setConnection(this.dbConnection);
 
-			if (this.stmtRunner == null && aConnection != null)
-			{
-				this.stmtRunner = StatementRunner.Factory.createRunner();
-				this.stmtRunner.setRowMonitor(this.rowMonitor);
-			}
-			if (this.stmtRunner != null)
-			{
-				this.stmtRunner.setConnection(aConnection);
-				this.stmtRunner.setResultLogger(this);
-			}
+		if (this.stmtRunner == null)
+		{
+			this.stmtRunner = StatementRunner.Factory.createRunner();
+			this.stmtRunner.setRowMonitor(this.rowMonitor);
+		}
 
-			if (this.connectionInfo != null) this.connectionInfo.setConnection(aConnection);
-			this.setExecuteActionStates(aConnection != null);
+		if (this.stmtRunner != null)
+		{
+			this.stmtRunner.setConnection(aConnection);
+			this.stmtRunner.setConnectionClient(connectionClient);
+			this.stmtRunner.setResultLogger(this);
+		}
 
-			if (this.editor != null) this.editor.setDatabaseConnection(this.dbConnection);
+		if (this.connectionInfo != null) this.connectionInfo.setConnection(aConnection);
+		this.setExecuteActionStates(aConnection != null);
 
-			if (this.dbConnection != null)
-			{
-				this.dbConnection.addChangeListener(this);
-			}
-		
-		
+		if (this.editor != null) this.editor.setDatabaseConnection(this.dbConnection);
+
+		if (this.dbConnection != null)
+		{
+			this.dbConnection.addChangeListener(this);
+		}
+
 		this.checkResultSetActions();
 		this.checkCommitAction();
 	}
@@ -1545,10 +1554,10 @@ public class SqlPanel
 		{
 			public void run()
 			{
-        for (int i=0; i < anActionList.length; i++)
-        {
-          anActionList[i].setEnabled(aFlag);
-        }
+				for (int i=0; i < anActionList.length; i++)
+				{
+					anActionList[i].setEnabled(aFlag);
+				}
 			}
 		});
 	}

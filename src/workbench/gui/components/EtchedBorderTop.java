@@ -33,9 +33,9 @@ public class EtchedBorderTop
 	{
 		Color oldColor = g.getColor();
 
-    Color bg = c.getBackground();
-    Color light = bg.brighter();
-    Color shade = bg.darker();
+		Color bg = c.getBackground();
+		Color light = bg.brighter();
+		Color shade = bg.darker();
 		
 		int w = width;
 

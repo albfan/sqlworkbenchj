@@ -42,7 +42,7 @@ public class DriverEditorDialog extends JDialog
 	private JButton okButton;
 	private DriverlistEditorPanel driverListPanel;
 	private JButton cancelButton;
-  private boolean cancelled = true;
+	private boolean cancelled = true;
 	private EscAction escAction;
 
 	public DriverEditorDialog(Frame parent)
@@ -129,7 +129,7 @@ public class DriverEditorDialog extends JDialog
 	}
 	private void cancelButtonActionPerformed(ActionEvent evt)
 	{
-    this.cancelled = true;
+		this.cancelled = true;
 		this.closeDialog();
 	}
 
@@ -149,7 +149,7 @@ public class DriverEditorDialog extends JDialog
 		try
 		{
 			this.driverListPanel.saveItem();
-      this.cancelled = false;
+			this.cancelled = false;
 			this.closeDialog();
 		}
 		catch (Exception e)

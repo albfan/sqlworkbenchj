@@ -223,15 +223,15 @@ public class DdlCommand extends SqlCommand
 	 * @see #getObjectName(String)
 	 * @see #getObjectType(String)
 	 */
-  private boolean addExtendErrorInfo(WbConnection aConnection, String sql, StatementRunnerResult result)
-  {
-    String type = SqlUtil.getCreateType(sql);
+	private boolean addExtendErrorInfo(WbConnection aConnection, String sql, StatementRunnerResult result)
+	{
+		String type = SqlUtil.getCreateType(sql);
 		if (type == null) return false;
 		
-    String name = getObjectName(sql);
+		String name = getObjectName(sql);
 		if (name == null) return false;
 
-    String msg = aConnection.getMetadata().getExtendedErrorInfo(null, name, type);
+		String msg = aConnection.getMetadata().getExtendedErrorInfo(null, name, type);
 		if (msg != null && msg.length() > 0)
 		{
 			result.addMessage(msg);

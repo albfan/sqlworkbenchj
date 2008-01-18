@@ -53,14 +53,14 @@ public class SettingsPanel
 	extends JPanel
 	implements ActionListener, ListSelectionListener
 {
-  private JPanel buttonPanel;
-  private JButton cancelButton;
-  private JButton helpButton;
+	private JPanel buttonPanel;
+	private JButton cancelButton;
+	private JButton helpButton;
 	private JPanel content;
 	private JList pageList;
 	private JPanel currentPanel;
 	
-  private JButton okButton;
+	private JButton okButton;
 
 	private JDialog dialog;
 	private EscAction escAction;
@@ -110,8 +110,8 @@ public class SettingsPanel
 	}
 
 
-  private void initComponents()
-  {
+	private void initComponents()
+	{
 		ListModel model = new AbstractListModel()
 		{
 			public Object getElementAt(int index)
@@ -129,48 +129,48 @@ public class SettingsPanel
 		pageList.setBorder(new CompoundBorder(new EtchedBorder(), new EmptyBorder(2, 2, 2, 2)));
 		pageList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		pageList.addListSelectionListener(this);
-		
+
 		content = new JPanel(new BorderLayout());
 		content.setBorder(new EmptyBorder(2,2,2,2));
 		content.add(pageList, BorderLayout.WEST);
-		
-    okButton = new WbButton(ResourceMgr.getString("LblOK"));
-    cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
-    helpButton = new JButton(ResourceMgr.getString("LblHelp"));
 
-    okButton.addActionListener(this);
-    cancelButton.addActionListener(this);
-    helpButton.addActionListener(this);
-		
-    setLayout(new BorderLayout());
+		okButton = new WbButton(ResourceMgr.getString("LblOK"));
+		cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
+		helpButton = new JButton(ResourceMgr.getString("LblHelp"));
 
-    buttonPanel = new JPanel(new GridBagLayout());
+		okButton.addActionListener(this);
+		cancelButton.addActionListener(this);
+		helpButton.addActionListener(this);
 
-    GridBagConstraints constraints;
-    constraints = new GridBagConstraints();
-    constraints.gridx = 0;
-    constraints.gridy = 0;
-    constraints.anchor = GridBagConstraints.WEST;
-    constraints.insets = new Insets(0, 5, 0, 0);
-    buttonPanel.add(helpButton, constraints);
+		setLayout(new BorderLayout());
 
-    constraints = new GridBagConstraints();
-    constraints.gridx = 1;
-    constraints.gridy = 0;
-    constraints.anchor = GridBagConstraints.EAST;
-    constraints.weightx = 1.0;
-    constraints.insets = new Insets(7, 0, 7, 10);
-    buttonPanel.add(okButton, constraints);
+		buttonPanel = new JPanel(new GridBagLayout());
 
-    constraints = new GridBagConstraints();
-    constraints.gridx = 2;
-    constraints.gridy = 0;
-    constraints.anchor = GridBagConstraints.EAST;
-    constraints.insets = new Insets(7, 0, 7, 4);
-    buttonPanel.add(cancelButton, constraints);
+		GridBagConstraints constraints;
+		constraints = new GridBagConstraints();
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.anchor = GridBagConstraints.WEST;
+		constraints.insets = new Insets(0, 5, 0, 0);
+		buttonPanel.add(helpButton, constraints);
 
-    add(content, BorderLayout.CENTER);
-    add(buttonPanel, BorderLayout.SOUTH);
+		constraints = new GridBagConstraints();
+		constraints.gridx = 1;
+		constraints.gridy = 0;
+		constraints.anchor = GridBagConstraints.EAST;
+		constraints.weightx = 1.0;
+		constraints.insets = new Insets(7, 0, 7, 10);
+		buttonPanel.add(okButton, constraints);
+
+		constraints = new GridBagConstraints();
+		constraints.gridx = 2;
+		constraints.gridy = 0;
+		constraints.anchor = GridBagConstraints.EAST;
+		constraints.insets = new Insets(7, 0, 7, 4);
+		buttonPanel.add(cancelButton, constraints);
+
+		add(content, BorderLayout.CENTER);
+		add(buttonPanel, BorderLayout.SOUTH);
   }
 
 	private void saveSettings()

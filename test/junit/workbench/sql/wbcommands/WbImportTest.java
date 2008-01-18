@@ -1481,6 +1481,8 @@ public class WbImportTest
 		int rowCount = 10;
 		try
 		{
+			util.emptyBaseDirectory();
+			
 			File importFile  = new File(this.basedir, "junit_test.txt");
 			PrintWriter out = new PrintWriter(new FileWriter(importFile));
 			//out.println("nr\tfirstname\tlastname");

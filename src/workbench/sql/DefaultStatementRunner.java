@@ -18,6 +18,7 @@ import java.sql.Savepoint;
 
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
+import workbench.interfaces.Connectable;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.StatementRunner;
@@ -38,6 +39,7 @@ public class DefaultStatementRunner
 	implements PropertyChangeListener, StatementRunner
 {
 	private WbConnection dbConnection;
+	private Connectable connectionClient;
 	private StatementRunnerResult result;
 	private VariablePool parameterPool;
 
@@ -106,6 +108,17 @@ public class DefaultStatementRunner
 		cmdMapper.addCommand(command);
 	}
 	
+	public Connectable getConnectionClient()
+	{
+		return this.connectionClient;
+	}
+	
+	public void setConnectionClient(Connectable client)
+	{
+		this.connectionClient = client;
+	}
+	
+	
 	public void setParameterPrompter(ParameterPrompter filter) { this.prompter = filter; }
 	public void setBaseDir(String dir) { this.baseDir = dir; }
 	public String getBaseDir() { return this.baseDir; }
@@ -122,9 +135,11 @@ public class DefaultStatementRunner
 		this.dbConnection = aConn;
 		
 		if (aConn == null) return;
-		this.ignoreDropErrors = aConn.getProfile().getIgnoreDropErrors();
+		this.ignoreDropErrors = dbConnection.getProfile().getIgnoreDropErrors();
+		this.removeComments = dbConnection.getProfile().getRemoveComments();
 		
 		DbMetadata meta = this.dbConnection.getMetadata();
+		if (meta == null) return;
 		
 		// this is stored in an instance variables for performance
 		// reasons, so we can skip the call to isSelectIntoNewTable() in 
@@ -132,7 +147,6 @@ public class DefaultStatementRunner
 		// For a single call this doesn't matter, but when executing 
 		// huge scripts the repeated call to getCommandToUse should
 		// be as quick as possible
-		this.removeComments = dbConnection.getProfile().getRemoveComments();
 		this.removeNewLines = Settings.getInstance().getBoolProperty("workbench.db." + meta.getDbId() + ".removenewlines", false);
 		this.useSavepoint = dbConnection.getDbSettings().useSavePointForDML();
 	}
@@ -334,7 +348,7 @@ public class DefaultStatementRunner
 	
 	public void releaseSavepoint()
 	{
-		if (this.savepoint == null) return;
+		if (this.savepoint == null || this.dbConnection == null) return;
 		try
 		{
 			this.dbConnection.releaseSavepoint(savepoint);

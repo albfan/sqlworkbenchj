@@ -40,7 +40,7 @@ public class WbProperties
 	private int distinctSections;
 
 	private Map<String, List<PropertyChangeListener>> changeListeners = new HashMap<String, List<PropertyChangeListener>>();
-  private Object changeNotificationSource = null;
+	private Object changeNotificationSource = null;
 
 	protected WbProperties()
 	{

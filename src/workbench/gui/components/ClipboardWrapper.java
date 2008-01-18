@@ -41,7 +41,7 @@ public class ClipboardWrapper
 	}
 	
 	public void cut() 
-	{  
+	{
 		this.client.cut(); 
 	}
 	

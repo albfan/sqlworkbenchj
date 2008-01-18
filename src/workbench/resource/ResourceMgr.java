@@ -245,13 +245,13 @@ public class ResourceMgr
 	/**
 	 * For testing purposes
 	 */
-  static ResourceBundle getResourceBundle(Locale l)
+	static ResourceBundle getResourceBundle(Locale l)
 	{
 		return ResourceBundle.getBundle("language/wbstrings", l);
 	}
 
-  public static ResourceBundle getResources()
-  {
+	public static ResourceBundle getResources()
+	{
 		if (resources == null)
 		{
 			Locale l = Settings.getInstance().getLanguage();

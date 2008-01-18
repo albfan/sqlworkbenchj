@@ -182,6 +182,10 @@ public abstract class RowDataConverter
 		if (this.factory != null)
 		{
 			this.factory.done();
+			// Make sure this instance of the factory it no re-used
+			// otherwise writting multiple blob archives does not work
+			// when exporting more than one table
+			this.factory = null;
 		}
 	}
 	
@@ -327,13 +331,20 @@ public abstract class RowDataConverter
 		throws IOException
 	{
 		if (value == null) return;
-		OutputStream out = this.createOutputStream(f);
+		
 		try
 		{
+			OutputStream out = this.createOutputStream(f);
 			BlobHandler.saveBlobToFile(value, out);
+		}
+		catch (IOException io)
+		{
+			LogMgr.logError("TextRowDataConverter.convertRowData", "Error writing BLOB file: " + f.getName(), io);
+			throw io;
 		}
 		catch (SQLException e)
 		{
+			LogMgr.logError("TextRowDataConverter.convertRowData", "Error writing BLOB file", e);
 			throw new IOException(ExceptionUtil.getDisplay(e));
 		}
 	}

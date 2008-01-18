@@ -30,9 +30,8 @@ public class IndexDefinition
 	private String indexType;
 	private String indexSchema;
 	private TableIdentifier baseTable;
-	
 	private List<IndexColumn> columns = new ArrayList<IndexColumn>();
-	
+
 	public IndexDefinition(TableIdentifier table, String schema, String name, String exp)
 	{
 		this.indexSchema = schema;
@@ -40,17 +39,17 @@ public class IndexDefinition
 		this.expression = exp;
 		this.baseTable = table;
 	}
-	
+
 	public String getSchema()
 	{
 		return indexSchema;
 	}
-	
+
 	public String getCatalog()
 	{
 		return null;
 	}
-	
+
 	public IndexDefinition(TableIdentifier table, String name, String exp)
 	{
 		this(table, null, name, exp);
@@ -60,16 +59,16 @@ public class IndexDefinition
 	{
 		this.columns.add(new IndexColumn(column, direction));
 	}
-	
-	public void setIndexType(String type) 
-	{ 
+
+	public void setIndexType(String type)
+	{
 		if (type == null)
 		{
 			this.indexType = "NORMAL";
 		}
 		else
 		{
-			this.indexType = type; 
+			this.indexType = type;
 		}
 	}
 
@@ -77,6 +76,7 @@ public class IndexDefinition
 	{
 		this.baseTable = table;
 	}
+	
 	public String getObjectExpression(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(conn, null, indexSchema, indexName);

@@ -56,7 +56,7 @@ public class ProfileTree
 	           MouseListener, 
 	           ClipboardSupport, 
 	           ActionListener, 
-						 TreeSelectionListener
+	           TreeSelectionListener
 {
 	private ProfileListModel profileModel;
 	private DefaultMutableTreeNode[] clipboardNodes;

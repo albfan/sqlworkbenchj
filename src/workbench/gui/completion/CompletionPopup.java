@@ -486,25 +486,25 @@ public class CompletionPopup
 	public void mousePressed(MouseEvent mouseEvent)	{}
 	public void mouseReleased(MouseEvent mouseEvent) {}
 	
-  public void keyPressed(KeyEvent evt)
-  {
-    int index = -1;
+	public void keyPressed(KeyEvent evt)
+	{
+		int index = -1;
 		boolean syncEntry = false;
-		
-    switch (evt.getKeyCode())
-    {
-      case KeyEvent.VK_TAB:
-        evt.consume();
-        break;
-      case KeyEvent.VK_ENTER:
-        closePopup(true);
-        evt.consume();
-        break;
-      case KeyEvent.VK_ESCAPE:
-        closePopup(false);
-        evt.consume();
-        break;
-				
+
+		switch (evt.getKeyCode())
+		{
+			case KeyEvent.VK_TAB:
+				evt.consume();
+				break;
+			case KeyEvent.VK_ENTER:
+				closePopup(true);
+				evt.consume();
+				break;
+			case KeyEvent.VK_ESCAPE:
+				closePopup(false);
+				evt.consume();
+				break;
+
 			case KeyEvent.VK_UP:
 				// When the searchfield is displayed the list
 				// does not have the focus, und therefor the up and down
@@ -534,17 +534,17 @@ public class CompletionPopup
 					evt.consume();
 				}
 				break;
-    }
+		}
 		if (syncEntry)
 		{
 			Object o = elementList.getSelectedValue();
-			if (o != null) 
+			if (o != null)
 			{
 				this.searchField.setText(o.toString());
 				this.searchField.selectAll();
 			}
 		}
-  }
+	}
 	
 	public void keyTyped(KeyEvent evt)
 	{

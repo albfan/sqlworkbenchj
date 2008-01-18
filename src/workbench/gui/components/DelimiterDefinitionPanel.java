@@ -29,8 +29,8 @@ public class DelimiterDefinitionPanel
 	implements PropertyChangeListener
 {
 	private DelimiterDefinition delimiter;
-  private StringPropertyEditor delimitTextField;
-  private BooleanPropertyEditor singleLineCheckBox;
+	private StringPropertyEditor delimitTextField;
+	private BooleanPropertyEditor singleLineCheckBox;
 	public static final String PROP_DELIM = "delimiter";
 	public static final String PROP_SLD = "singleLine";
 	private boolean updating = false;
@@ -95,36 +95,36 @@ public class DelimiterDefinitionPanel
 	
   private void initComponents()
   {
-    java.awt.GridBagConstraints gridBagConstraints;
+		java.awt.GridBagConstraints gridBagConstraints;
 
-    delimitTextField = new StringPropertyEditor();
-    singleLineCheckBox = new BooleanPropertyEditor();
+		delimitTextField = new StringPropertyEditor();
+		singleLineCheckBox = new BooleanPropertyEditor();
 		
-    setLayout(new java.awt.GridBagLayout());
+		setLayout(new java.awt.GridBagLayout());
 
     //delimitTextField.setMinimumSize(new java.awt.Dimension(72, 20));
-    delimitTextField.setName("delimiter");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 0.5;
-    add(delimitTextField, gridBagConstraints);
+		delimitTextField.setName("delimiter");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.weightx = 0.5;
+		add(delimitTextField, gridBagConstraints);
 
-    singleLineCheckBox.setText(ResourceMgr.getString("LblDelimSingleLine"));
-    singleLineCheckBox.setToolTipText(ResourceMgr.getDescription("LblDelimSingleLine"));
-    singleLineCheckBox.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-    singleLineCheckBox.setMargin(new java.awt.Insets(0, 0, 0, 0));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 0.5;
-    gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 0);
-    add(singleLineCheckBox, gridBagConstraints);
-  }
+		singleLineCheckBox.setText(ResourceMgr.getString("LblDelimSingleLine"));
+		singleLineCheckBox.setToolTipText(ResourceMgr.getDescription("LblDelimSingleLine"));
+		singleLineCheckBox.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+		singleLineCheckBox.setMargin(new java.awt.Insets(0, 0, 0, 0));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.weightx = 0.5;
+		gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 0);
+		add(singleLineCheckBox, gridBagConstraints);
+	}
 
 	public void propertyChange(PropertyChangeEvent evt)
 	{

@@ -28,9 +28,9 @@ public class SourceTableArgument
 	private List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 	private boolean wildcardsPresent = false;
 	
-  public SourceTableArgument(String argument, WbConnection dbConn)
+	public SourceTableArgument(String argument, WbConnection dbConn)
 		throws SQLException
-  {
+	{
 		if (StringUtil.isEmptyString(argument)) return;
 		if (dbConn == null) return;
 		

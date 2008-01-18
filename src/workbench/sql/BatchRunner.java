@@ -602,7 +602,7 @@ public class BatchRunner
 			String wksp = cmdLine.getValue(AppArguments.ARG_WORKSPACE);
 			String delimDef = cmdLine.getValue(AppArguments.ARG_ALT_DELIMITER);
 			DelimiterDefinition delim = DelimiterDefinition.parseCmdLineArgument(delimDef);
-			boolean trimCharData = cmdLine.getBoolean(AppArguments.ARG_TRIM_CHAR, false);
+			boolean trimCharData = cmdLine.getBoolean(AppArguments.ARG_CONN_TRIM_CHAR, false);
 			boolean rollback = cmdLine.getBoolean(AppArguments.ARG_CONN_ROLLBACK, false);
 
 			if (jar != null)

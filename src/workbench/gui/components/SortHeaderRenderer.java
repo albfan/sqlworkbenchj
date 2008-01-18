@@ -13,42 +13,37 @@ package workbench.gui.components;
 
 import java.awt.Component;
 
-import javax.swing.Icon;
 import javax.swing.JTable;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
-import workbench.resource.Settings;
-import workbench.storage.DataStore;
-import workbench.storage.ResultInfo;
 
-
-public class SortHeaderRenderer 
+public class SortHeaderRenderer
 	extends DefaultTableCellRenderer
 {
 	private static Border DEFAULT_HEADER_BORDER = new CompoundBorder(UIManager.getBorder("TableHeader.cellBorder"), new EmptyBorder(0, 1, 0, 1));
-	
-  public SortHeaderRenderer()
-  {
-    setHorizontalTextPosition(LEFT);
-    setHorizontalAlignment(LEFT);
-    setBorder(DEFAULT_HEADER_BORDER);
-  }
-  
-  public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col)
-  {
-    boolean sorted = false;
+
+	public SortHeaderRenderer()
+	{
+		setHorizontalTextPosition(LEFT);
+		setHorizontalAlignment(LEFT);
+		setBorder(DEFAULT_HEADER_BORDER);
+	}
+
+	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col)
+	{
+		boolean sorted = false;
 		boolean ascending = false;
 		boolean primary = false;
-		
+
 		String type = null;
-		
-    if (table instanceof WbTable)
-    {
-      WbTable sortTable = (WbTable)table;
-			
+
+		if (table instanceof WbTable)
+		{
+			WbTable sortTable = (WbTable)table;
+
 			sorted = sortTable.isViewColumnSorted(col);
 			if (sorted)
 			{
@@ -56,9 +51,12 @@ public class SortHeaderRenderer
 				primary = sortTable.isPrimarySortColumn(col);
 			}
 			DataStoreTableModel model = sortTable.getDataStoreTableModel();
-			if (model != null) type = model.getDbmsType(col);
-    }
-		
+			if (model != null)
+			{
+				type = model.getDbmsType(col);
+			}
+		}
+
 		if (sorted)
 		{
 			if (primary)
@@ -76,7 +74,7 @@ public class SortHeaderRenderer
 		}
 		String text = (value == null) ? "" : value.toString();
 		setText(text);
-		
+
 		if (type == null)
 		{
 			setToolTipText(text);
@@ -91,7 +89,7 @@ public class SortHeaderRenderer
 			tip.append("</code>&nbsp;</html>");
 			setToolTipText(tip.toString());
 		}
-    return this;
-  }
+		return this;
+	}
 }
 

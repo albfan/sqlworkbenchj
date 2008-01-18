@@ -18,7 +18,7 @@ import javax.swing.text.Segment;
 public class SQLTokenMarker
 	extends TokenMarker
 {
-	private int offset,  lastOffset,  lastKeyword;
+	private int offset, lastOffset, lastKeyword;
 	protected boolean isMySql = false;
 	protected KeywordMap keywords;
 	private char literalChar = 0;

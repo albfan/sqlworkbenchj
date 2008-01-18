@@ -78,8 +78,8 @@ public class ConnectionProfile
 
 	public ConnectionProfile()
 	{
-    this.isNew = true;
-    this.changed = true;
+		this.isNew = true;
+		this.changed = true;
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_ENCRYPT_PWD);
 	}
 
@@ -204,6 +204,7 @@ public class ConnectionProfile
 	 * had this property and to be able to load XML files with 
 	 * old profiles the setter must still be there.
 	 * 
+	 * @deprecated
 	 * @param flag
 	 */
 	public void setDisableUpdateTableCheck(boolean flag) { }
@@ -432,7 +433,7 @@ public class ConnectionProfile
 	 * @see #isNew()
 	 * @see #isChanged()
 	 */
-  public void reset()
+	public void reset()
 	{
 		this.changed = false;
 		this.isNew = false;
@@ -567,7 +568,7 @@ public class ConnectionProfile
 		result.setPreDisconnectScript(preDisconnectScript);
 		result.setPostConnectScript(postConnectScript);
 		result.setInfoDisplayColor(infoColor);
-		result.setAlternateDelimiter(alternateDelimiter);
+		result.setAlternateDelimiter(alternateDelimiter == null ? null : alternateDelimiter.createCopy());
 		
 		result.setCopyExtendedPropsToSystem(copyPropsToSystem);
 		if (connectionProperties != null)
@@ -619,7 +620,7 @@ public class ConnectionProfile
 	public void setWorkspaceFile(String aWorkspaceFile)
 	{
 		this.workspaceFile = aWorkspaceFile;
-    this.changed = true;
+		this.changed = true;
 	}
 
 	public void addConnectionProperty(String aKey, String aValue)

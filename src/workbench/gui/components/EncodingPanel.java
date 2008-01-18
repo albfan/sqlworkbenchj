@@ -74,13 +74,13 @@ public class EncodingPanel
 			this.add(label, c);
 		}
 		c = new GridBagConstraints();
-    c.gridx = 0;
-    c.gridy = 1;
+		c.gridx = 0;
+		c.gridy = 1;
 		c.insets = new java.awt.Insets(5, 0, 0, 0);
-    c.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    c.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    c.weightx = 1.0;
-    c.weighty = 1.0;
+		c.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		c.anchor = java.awt.GridBagConstraints.NORTHWEST;
+		c.weightx = 1.0;
+		c.weighty = 1.0;
 
 		this.add(encodings, c);
 	}

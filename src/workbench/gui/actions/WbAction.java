@@ -102,15 +102,22 @@ public class WbAction
 	{
 		return false;
 	}
-	
-	public boolean hasShiftModifier() { return false; }
-	public boolean hasCtrlModifier() { return false; }
-	
+
+	public boolean hasShiftModifier()
+	{
+		return false;
+	}
+
+	public boolean hasCtrlModifier()
+	{
+		return false;
+	}
+
 	public void setTooltip(String aText)
 	{
 		this.putValue(Action.SHORT_DESCRIPTION, aText);
 	}
-	
+
 	public String getTooltipText()
 	{
 		return (String)getValue(Action.SHORT_DESCRIPTION);
@@ -120,7 +127,7 @@ public class WbAction
 	{
 		return getTooltipText() + " (" + this.getAcceleratorDisplay() + ")";
 	}
-	
+
 	public void clearAccelerator()
 	{
 		this.putValue(Action.ACCELERATOR_KEY, null);
@@ -235,7 +242,7 @@ public class WbAction
 			this.putValue(WbAction.MNEMONIC_INDEX, index);
 		}
 		putValue(Action.NAME, text);
-	}	
+	}
 	
 	public void setAlternateAccelerator(KeyStroke key)
 	{
@@ -253,22 +260,14 @@ public class WbAction
 		this.putValue(Action.ACCELERATOR_KEY, key);
 
 		boolean isNew = false;
-		if (old != null && key != null) 
-		{	
+		if (old != null && key != null)
+		{
 			isNew = !key.equals(old);
 		}
 		else
 		{
 			isNew = (old != null || key != null);
 		}
-  
-//		if (isNew && this.menuItem != null)
-//		{
-//			// to force a re-initialization of the menu item
-//			// we need to first clear the action and then re-assign it
-//			this.menuItem.setAction(null);
-//			this.menuItem.setAction(this);
-//		}
 	}
 	
 	public KeyStroke getAccelerator()
@@ -277,26 +276,29 @@ public class WbAction
 	}
 
 	public JButton getToolbarButton()
-  {
-    return this.getToolbarButton(false);
-  }
-	
-	public JButton getToolbarButton(boolean createNew )
 	{
-    JButton result;
+		return this.getToolbarButton(false);
+	}
+
+	public JButton getToolbarButton(boolean createNew)
+	{
+		JButton result;
 		if (this.toolbarButton == null || createNew)
 		{
-      WbToolbarButton b = new WbToolbarButton();
+			WbToolbarButton b = new WbToolbarButton();
 			b.setAction(this);
 			b.setMnemonic(0);
-      if (this.toolbarButton == null) this.toolbarButton = b;
-      result = b;
+			if (this.toolbarButton == null)
+			{
+				this.toolbarButton = b;
+			}
+			result = b;
 		}
-    else
-    {
-      result = this.toolbarButton;
-    }
-    
+		else
+		{
+			result = this.toolbarButton;
+		}
+
 		return result;
 	}
 
@@ -326,8 +328,7 @@ public class WbAction
 			{
 			}
 		}
-//		if (this.menuItem == null) this.menuItem = item;
-		
+
 		return item;
 	}
 

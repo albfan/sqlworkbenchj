@@ -53,6 +53,13 @@ public class DelimiterDefinition
 		this.changed = false;
 	}
 
+	public DelimiterDefinition createCopy()
+	{
+		DelimiterDefinition copy = new DelimiterDefinition(this.delimiter, singleLineDelimiter);
+		copy.changed = false;
+		return copy;
+	}
+	
 	public boolean isEmpty()
 	{
 		return (this.delimiter == null || this.delimiter.trim().length() == 0);

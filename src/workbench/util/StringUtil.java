@@ -277,7 +277,7 @@ public class StringUtil
 	 */
 	public static final String makeFilename(String input)
 	{
-		return input.replaceAll("[\t\\:\\\\/\\?\\*\\|<>\"'\\{\\}$%�\\[\\]\\^|\\&]", "");
+		return input.replaceAll("[\t\\:\\\\/\\?\\*\\|<>\"'\\{\\}%\u00A7\\[\\]\\^\\&]", "");
 	}
 
 	/**
@@ -405,15 +405,22 @@ public class StringUtil
 	}
 	
 	/**
-	 * Checks if the given parameter is "empty", i.e: either null, length == 0 or 
-	 * only whitespace
+	 * Checks if the given parameter is "empty", 
+	 * i.e: either null, length == 0 or contains only whitespace
 	 */
 	public static final boolean isWhitespaceOrEmpty(CharSequence value)
 	{
 		if (isEmptyString(value)) return true;
 		return isWhitespace(value);
 	}
-	
+
+	/**
+	 * Checks if the given String is null or has a zero length.
+	 * A String containing only whitespaces is not considered empty.
+	 * 
+	 * @param value the String to test
+	 * @return
+	 */
 	public static final boolean isEmptyString(CharSequence value)
 	{
 		if (value == null) return true;

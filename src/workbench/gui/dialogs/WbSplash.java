@@ -71,11 +71,11 @@ public class WbSplash
 		int loadStatus = tracker.statusID(1, false);
 		tracker.removeImage(splashImage, 1);
 		*/
+
+		setBackground(Color.LIGHT_GRAY);
 		
-    setBackground(Color.LIGHT_GRAY);
-		
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    setBounds((screenSize.width-windowWidth)/2, (screenSize.height-windowHeight)/2, windowWidth, windowHeight);
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		setBounds((screenSize.width-windowWidth)/2, (screenSize.height-windowHeight)/2, windowWidth, windowHeight);
 		imageX = (int)((windowWidth - imageWidth) / 2);
 		
 		panicFont = new Font("Serif", Font.PLAIN, 36);
@@ -85,8 +85,8 @@ public class WbSplash
 		panicX = (int)((windowWidth - w) / 2);
 		fm = getFontMetrics(loadingFont);
 		w = fm.stringWidth(loading);
-		loadingX = (int)((windowWidth - w) / 2);
-  }
+		loadingX = (int)((windowWidth - w) / 2);	
+	}
 
 	public void paint(Graphics g)
 	{

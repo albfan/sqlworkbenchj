@@ -45,13 +45,13 @@ public class BlobHandler
 {
 	private File uploadFile;
 	private byte[] newValue;
-	
+
 	private boolean setToNull = false;
-	
+
 	public BlobHandler()
 	{
 	}
-	
+
 	public StringBuilder getByteDisplay(Object value)
 	{
 		long l = getBlobSize(value);
@@ -59,16 +59,16 @@ public class BlobHandler
 	}
 
 	public boolean setToNull() { return this.setToNull; }
-	public File getUploadFile() 
+	public File getUploadFile()
 	{
 		return uploadFile;
 	}
-	
+
 	public StringBuilder getByteDisplay(long l)
 	{
 		StringBuilder result = new StringBuilder(32);
-		
-		if (l < 1024) 
+
+		if (l < 1024)
 		{
 			result.append(Long.toString(l));
 			result.append(' ');
@@ -78,7 +78,7 @@ public class BlobHandler
 			result.append(Long.toString(l/1024));
 			result.append(" K");
 		}
-		else 
+		else
 		{
 			result.append(Long.toString(l/(1024*1024)));
 			result.append(" M");
@@ -86,12 +86,14 @@ public class BlobHandler
 		result.append('B');
 		return result;
 	}
-	
+
 	public byte[] getBlobAsArray(Object value)
 	{
-		if (value == null) return null;
-//		if (value instanceof NullValue) return null;
-		
+		if (value == null)
+		{
+			return null;
+		}
+
 		if (value instanceof Blob)
 		{
 			Blob blob = (Blob)value;
@@ -129,11 +131,11 @@ public class BlobHandler
 			{
 				FileUtil.closeQuitely(in);
 			}
-			
+
 		}
 		return null;
 	}
-	
+
 	public long getBlobSize(Object value)
 	{
 		if (value == null) return 0;
@@ -177,14 +179,14 @@ public class BlobHandler
 		}
 		return data;
 	}
-	
+
 	public String getBlobAsString(Object value, String encoding)
 	{
 		if (value == null) return null;
 		if (getBlobSize(value) == 0) return StringUtil.EMPTY_STRING;
-		
+
 		if (encoding == null) encoding = Settings.getInstance().getDefaultBlobTextEncoding();
-		
+
 		if (value instanceof Blob)
 		{
 			Blob blob = (Blob)value;
@@ -221,14 +223,14 @@ public class BlobHandler
 		}
 		return value.toString();
 	}
-	
+
 	public static long saveBlobToFile(Object data, String file)
 		throws IOException, SQLException
 	{
 		OutputStream out = new FileOutputStream(file);
 		return saveBlobToFile(data, out);
 	}
-	
+
 	public static long saveBlobToFile(Object data, OutputStream out)
 		throws IOException, SQLException
 	{
@@ -246,12 +248,11 @@ public class BlobHandler
 		{
 			in = new FileInputStream((File)data);
 		}
-		
-		if (in == null) 
+
+		if (in == null)
 		{
 			LogMgr.logError("WbTable.saveBlobContent", "No valid BLOB data found, got " + data.getClass().getName() + " instead", null);
-			//WbSwingUtilities.showMessageKey(caller, "ErrBlobNoAvail");
-			throw new IOException("No BLOB data object found");
+			throw new IOException("No LOB data found");
 		}
 		return FileUtil.copy(in, out);
 	}
@@ -272,21 +273,21 @@ public class BlobHandler
 		{
 			v = new ImageViewer(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("TxtBlobData"));
 		}
-		
+
 		v.setData(value);
 		v.setVisible(true);
 	}
-	
+
 	public void showBlobAsText(Object value)
 	{
 		showBlobAsText(null, value, Settings.getInstance().getDefaultBlobTextEncoding());
 	}
-	
+
 	/**
 	 * Display the blob content as a text with the specified encoding.
-	 * The window will allow editing of the data, if the user changed the 
+	 * The window will allow editing of the data, if the user changed the
 	 * data and closed the window using the OK button, this method will
-	 * return true. In this case the blob value will be updated with 
+	 * return true. In this case the blob value will be updated with
 	 * the binary representation of the text using the specified encoding
 	 */
 	public boolean showBlobAsText(Dialog parent, Object value, final String encoding)
@@ -296,7 +297,7 @@ public class BlobHandler
 		this.newValue = null;
 		final EditWindow w;
 		boolean result = false;
-		
+
 		if (parent != null)
 		{
 			w = new EditWindow(parent, title, data, false, false);
@@ -305,36 +306,36 @@ public class BlobHandler
 		{
 			w = new EditWindow(WbManager.getInstance().getCurrentWindow(), title, data, false, false);
 		}
-		
-    WbSwingUtilities.invoke(new Runnable()
-    {
-      public void run()
-      {
-        w.setInfoText(ResourceMgr.getString("LblFileEncoding") + ": " + encoding);
-        w.setVisible(true);
-      }
-    });
 
-    if (!w.isCancelled())
-    {
-      data = w.getText();
-      try
-      {
-        if (encoding != null)
-        {
-          this.newValue = data.getBytes(encoding);
-          this.uploadFile = null;
-          result = true;
-        }
-      }
-      catch (Exception e)
-      {
-        this.newValue = null;
-        result = false;
-        LogMgr.logError("BlobHandler.showBlobAsText", "Error converting text to blob", e);
-      }
-    }
-		
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				w.setInfoText(ResourceMgr.getString("LblFileEncoding") + ": " + encoding);
+				w.setVisible(true);
+			}
+		});
+
+		if (!w.isCancelled())
+		{
+			data = w.getText();
+			try
+			{
+				if (encoding != null)
+				{
+					this.newValue = data.getBytes(encoding);
+					this.uploadFile = null;
+					result = true;
+				}
+			}
+			catch (Exception e)
+			{
+				this.newValue = null;
+				result = false;
+				LogMgr.logError("BlobHandler.showBlobAsText", "Error converting text to blob", e);
+			}
+		}
+
 		return result;
 	}
 
@@ -342,7 +343,7 @@ public class BlobHandler
 	{
 		return this.newValue != null;
 	}
-	
+
 	/**
 	 * Returns thenew value after the user changed the data in the text window.
 	 * Returns null if the user did not change the data.
@@ -352,7 +353,7 @@ public class BlobHandler
 	{
 		return this.newValue;
 	}
-	
+
 	public void showBlobInfoDialog(Frame parent, Object blobValue)
 	{
 		BlobInfoDialog d = new BlobInfoDialog(parent, true);

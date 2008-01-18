@@ -215,27 +215,34 @@ public class TablePrinter
 	private void calculatePages()
 	{
 		if (this.format == null) return;
-    int pageWidth = (int)format.getImageableWidth();
-    int pageHeight = (int)format.getImageableHeight();
+		
+		int pageWidth = (int)format.getImageableWidth();
+		int pageHeight = (int)format.getImageableHeight();
 
-		if (this.printFont == null)	this.printFont = table.getFont();
+		if (this.printFont == null)
+		{
+			this.printFont = table.getFont();
+		}
 
 		FontMetrics fm = this.table.getFontMetrics(this.printFont);
 
-    int lineHeight = fm.getHeight() + this.lineSpacing;
-		
-    pageHeight -= (lineHeight + 10); // reserve one row for the column headers
+		int lineHeight = fm.getHeight() + this.lineSpacing;
 
-    int rowsPerPage = (pageHeight / lineHeight);
-		
-		if (this.headerText != null) rowsPerPage--;
+		pageHeight -= (lineHeight + 10); // reserve one row for the column headers
+
+		int rowsPerPage = (pageHeight / lineHeight);
+
+		if (this.headerText != null)
+		{
+			rowsPerPage--;
+		}
 		rowsPerPage--; // one line for the page information
-		
-    TableColumnModel colModel = table.getColumnModel();
+
+		TableColumnModel colModel = table.getColumnModel();
 		int colCount = colModel.getColumnCount();
 
 		int rowCount = table.getRowCount();
-		pagesDown = (int)Math.ceil((double)rowCount/(double)rowsPerPage);
+		pagesDown = (int)Math.ceil((double)rowCount / (double)rowsPerPage);
 
 		int currentPageWidth = 0;
 		int[] width = new int[colCount]; // stores the width for each column
@@ -243,10 +250,10 @@ public class TablePrinter
 		// the key to the map is the horizontal page number
 		// the value will be the column were that page starts
 		Map<Integer, Integer> horizontalBrakeColumns = new HashMap<Integer, Integer>();
-		
+
 		// First page always starts at column 0 
 		horizontalBrakeColumns.put(new Integer(0), new Integer(0));
-		
+
 		this.colHeaders = new String[colCount];
 		this.pagesAcross = 1;
 
@@ -255,10 +262,10 @@ public class TablePrinter
 		Rectangle paintViewR = new Rectangle();
 
 		// TODO: horizontal pages do not work when a column exceeds the horizontal space
-		for (int col=0; col < colCount; col++)
+		for (int col = 0; col < colCount; col++)
 		{
 			TableColumn column = colModel.getColumn(col);
-      String title = (String)column.getIdentifier();
+			String title = (String)column.getIdentifier();
 
 			width[col] = column.getWidth();
 
@@ -382,7 +389,7 @@ public class TablePrinter
 		pg.setTransform(oldTransform);
 		pg.setClip(null);
 
-    return PAGE_EXISTS;
+		return PAGE_EXISTS;
   }
 
 	public int getNumberOfPages()

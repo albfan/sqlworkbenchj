@@ -80,11 +80,11 @@ public class ClipBoardCopier
 		if (showSelectColumns)
 		{
 			// Display column selection dialog
-      ColumnSelectionResult result = this.selectColumns(includeHeaders, selectedOnly, true, client.getSelectedRowCount() > 0);
+			ColumnSelectionResult result = this.selectColumns(includeHeaders, selectedOnly, true, client.getSelectedRowCount() > 0);
 			if (result == null) return;
 			columnsToCopy = result.columns;
-      includeHeaders = result.includeHeaders;
-      selectedOnly = result.selectedOnly;
+			includeHeaders = result.includeHeaders;
+			selectedOnly = result.selectedOnly;
 		}
 
 		try
@@ -305,9 +305,9 @@ public class ClipBoardCopier
 	{
 		if (this.data == null) return null;
 
-    ColumnSelectionResult result = new ColumnSelectionResult();
-    result.includeHeaders = includeHeader;
-    result.selectedOnly = selectedOnly;
+		ColumnSelectionResult result = new ColumnSelectionResult();
+		result.includeHeaders = includeHeader;
+		result.selectedOnly = selectedOnly;
 
 		ColumnIdentifier[] originalCols = this.data.getColumns();
 		ColumnSelectorPanel panel = new ColumnSelectorPanel(originalCols, includeHeader, selectedOnly, showHeaderSelection, showSelectedRowsSelection);
@@ -317,13 +317,13 @@ public class ClipBoardCopier
 		if (choice == JOptionPane.OK_OPTION)
 		{
 			result.columns = panel.getSelectedColumns();
-      result.includeHeaders = panel.includeHeader();
-      result.selectedOnly = panel.selectedOnly();
+			result.includeHeaders = panel.includeHeader();
+			result.selectedOnly = panel.selectedOnly();
 		}
-    else
-    {
-        result = null;
-    }
+		else
+		{
+			result = null;
+		}
 		return result;
 	}
 
@@ -343,7 +343,7 @@ public class ClipBoardCopier
 
 class ColumnSelectionResult
 {
-    public boolean includeHeaders;
-    public boolean selectedOnly;
-    public List<ColumnIdentifier> columns;
+		public boolean includeHeaders;
+		public boolean selectedOnly;
+		public List<ColumnIdentifier> columns;
 }

@@ -61,6 +61,25 @@ public class WbFile
 		return name.substring(pos + 1);
 	}
 	
+	public boolean isWriteable()
+	{
+		if (exists()) return canWrite();
+		return canCreate();
+	}
+	
+	public boolean canCreate()
+	{
+		try
+		{
+			tryCreate();
+			return true;
+		}
+		catch (IOException e)
+		{
+			return false;
+		}
+	}
+	
 	public void tryCreate()
 		throws IOException
 	{

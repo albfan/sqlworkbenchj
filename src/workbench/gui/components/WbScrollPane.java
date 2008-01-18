@@ -24,9 +24,10 @@ import workbench.gui.WbSwingUtilities;
  *
  * @author  support@sql-workbench.net
  */
-public class WbScrollPane extends JScrollPane
+public class WbScrollPane 
+	extends JScrollPane
 {
-  private static final Border MY_BORDER = new CompoundBorder(WbSwingUtilities.getBevelBorder(), new EmptyBorder(0,1,0,0));
+	private static final Border MY_BORDER = new CompoundBorder(WbSwingUtilities.getBevelBorder(), new EmptyBorder(0,1,0,0));
 
 	public WbScrollPane()
 	{
@@ -54,7 +55,7 @@ public class WbScrollPane extends JScrollPane
 
 	private void initDefaults()
 	{
-    this.setBorder(MY_BORDER);
+		this.setBorder(MY_BORDER);
 	}
 	
 }

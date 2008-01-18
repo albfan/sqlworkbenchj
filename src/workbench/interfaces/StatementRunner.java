@@ -21,7 +21,12 @@ import workbench.storage.RowActionMonitor;
  */
 public interface StatementRunner
 {
-
+	
+	Connectable getConnectionClient();
+	void setConnectionClient(Connectable client);
+	
+	WbConnection getConnection();
+	
 	void setConnection(WbConnection aConn);
 
 	void setExecutionController(ExecutionController control);

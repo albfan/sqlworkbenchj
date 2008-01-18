@@ -51,7 +51,7 @@ public class OptimizeAllColumnsAction
 			public void run()	
 			{ 
 				optimizer.optimizeAllColWidth(shiftPressed || Settings.getInstance().getIncludeHeaderInOptimalWidth()); 
-			}  
+			}
 		};
 		t.start();
 	}

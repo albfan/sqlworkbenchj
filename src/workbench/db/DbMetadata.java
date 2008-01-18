@@ -1481,7 +1481,7 @@ public class DbMetadata
 		TableIdentifier tbl = aTable.createCopy();
 		try
 		{
-      tbl.adjustCase(this.dbConnection);
+			tbl.adjustCase(this.dbConnection);
 			String c = tbl.getRawCatalog();
 			String s = tbl.getRawSchema();
 			String t = tbl.getRawTableName();
@@ -1543,7 +1543,7 @@ public class DbMetadata
 			boolean lower = this.metaData.storesLowerCaseIdentifiers();
 			boolean mixed = this.metaData.storesMixedCaseIdentifiers();
 			
-			return  mixed || (upper && lower);
+			return mixed || (upper && lower);
 		}
 		catch (SQLException e)
 		{
@@ -1573,18 +1573,18 @@ public class DbMetadata
 
 	public boolean isCaseSensitive()
 	{
-    try
-    {
+		try
+		{
 			// According to the JDBC docs, supportsMixedCaseIdentifiers()
 			// should only return true if the server is case sensitive...
 			return this.metaData.supportsMixedCaseIdentifiers();
-    }
-    catch (SQLException ex)
-    {
+		}
+		catch (SQLException ex)
+		{
 			LogMgr.logWarning("DbMetadata.isCaseSensitive()", "Error when calling supportsMixedCaseIdentifiers()", ex);
 			// Standard SQL identifiers are not case sensitive.
-      return false;
-    }
+			return false;
+		}
 	}
 	
 	/**
@@ -1736,23 +1736,26 @@ public class DbMetadata
 	 */
 	public void enableOutput(long aLimit)
 	{
-    if (!this.isOracle)	return;
+		if (!this.isOracle)
+		{
+			return;
+		}
 
 		if (this.oraOutput == null)
 		{
-      try
-      {
-  			this.oraOutput = new DbmsOutput(this.dbConnection.getSqlConnection());
-      }
-      catch (Exception e)
-      {
-        LogMgr.logError("DbMetadata.enableOutput()", "Could not create DbmsOutput", e);
-        this.oraOutput = null;
-      }
-    }
+			try
+			{
+				this.oraOutput = new DbmsOutput(this.dbConnection.getSqlConnection());
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("DbMetadata.enableOutput()", "Could not create DbmsOutput", e);
+				this.oraOutput = null;
+			}
+		}
 
-    if (this.oraOutput != null)
-    {
+		if (this.oraOutput != null)
+		{
 			try
 			{
 				this.oraOutput.enable(aLimit);
@@ -3888,11 +3891,11 @@ public class DbMetadata
 	 * @return extended error information if the current DBMS is Oracle. An empty string otherwise.
 	 * @see ErrorInformationReader
 	 */
-  public String getExtendedErrorInfo(String schema, String objectName, String objectType)
-  {
-    if (this.errorInfoReader == null) return StringUtil.EMPTY_STRING;
+	public String getExtendedErrorInfo(String schema, String objectName, String objectType)
+	{
+		if (this.errorInfoReader == null) return StringUtil.EMPTY_STRING;
 		return this.errorInfoReader.getErrorInfo(schema, objectName, objectType);
-  }
+	}
 
 	/**
 	 * With v1.8 of HSQLDB the tables that list table and view

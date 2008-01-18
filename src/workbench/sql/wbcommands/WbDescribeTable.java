@@ -39,22 +39,22 @@ public class WbDescribeTable extends SqlCommand
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		String table = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false, '\''));
-		
+
 		TableIdentifier tbl = new TableIdentifier(table);
-		
+
 		DataStore ds = currentConnection.getMetadata().getTableDefinition(tbl);
-    if (ds == null || ds.getRowCount() == 0)
-    {
-      result.setFailure();
-      String msg = ResourceMgr.getString("ErrTableOrViewNotFound");
-      msg = msg.replaceAll("%name%", table);
-      result.addMessage(msg);
-    }
-    else
-    {
-      result.setSuccess();
-  		result.addDataStore(ds);
-    }
+		if (ds == null || ds.getRowCount() == 0)
+		{
+			result.setFailure();
+			String msg = ResourceMgr.getString("ErrTableOrViewNotFound");
+			msg = msg.replaceAll("%name%", table);
+			result.addMessage(msg);
+		}
+		else
+		{
+			result.setSuccess();
+			result.addDataStore(ds);
+		}
 		return result;
 	}
 

@@ -243,7 +243,7 @@ public class EditWindow
 	public void windowOpened(java.awt.event.WindowEvent e)
 	{
 		editor.requestFocusInWindow();
-    WbSwingUtilities.repaintLater(editor);
+		WbSwingUtilities.repaintLater(editor);
 	}
 	
 }

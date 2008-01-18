@@ -129,12 +129,12 @@ public class TablePrintPage
 		
 		Font headerFont = dataFont.deriveFont(Font.BOLD);
 		FontMetrics fm = pg.getFontMetrics(headerFont);
-    int lineHeight = fm.getHeight();
+		int lineHeight = fm.getHeight();
 		
 		AffineTransform oldTransform = pg.getTransform();
 		
 		pg.setFont(headerFont);
-    pg.setColor(Color.BLACK);
+		pg.setColor(Color.BLACK);
 
 		int x = 0;
 		int y = 0;

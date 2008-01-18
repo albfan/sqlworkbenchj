@@ -106,7 +106,7 @@ public class ImportOptionsPanel
 	
 	/**
 	 *	Sets the displayed options according to 
-	 *  DataExporter.EXPRT_XXXX types
+	 *  DataExporter.EXPORT_XXXX types
 	 */
 	public void setImportType(int type)
 	{

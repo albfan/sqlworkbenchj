@@ -108,14 +108,14 @@ public class TableSearchPanel
 		buttonPanel.add(toolbar);
 
 		startButton = new FlatButton();
-    startButton.setText(ResourceMgr.getString("LblStartSearch"));
-    startButton.addActionListener(new java.awt.event.ActionListener()
-    {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
-      {
-        startSearch();
-      }
-    });
+		startButton.setText(ResourceMgr.getString("LblStartSearch"));
+		startButton.addActionListener(new java.awt.event.ActionListener()
+		{
+			public void actionPerformed(java.awt.event.ActionEvent evt)
+			{
+				startSearch();
+			}
+		});
 		buttonPanel.add(startButton);
 		this.searcher = new TableSearcher();
 		this.searcher.setDisplay(this);

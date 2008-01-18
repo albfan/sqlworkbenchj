@@ -48,7 +48,7 @@ public class ValueConverter
 														"MM/dd/yy HH:mm:ss",
 														"MM/dd/yyyy HH:mm:ss"
 													};
-													
+
 	private final String[] timestampFormats = new String[] {
 														"yyyy-MM-dd HH:mm:ss.SS",
 														"yyyy-MM-dd HH:mm:ss",
@@ -68,7 +68,7 @@ public class ValueConverter
 													};
 
 	private final String[] timeFormats = new String[] { "HH:mm:ss.SS", "HH:mm:ss", "HH:mm" };
-	
+
 	private String defaultDateFormat;
 	private String defaultTimestampFormat;
 	private char decimalCharacter = '.';
@@ -79,8 +79,15 @@ public class ValueConverter
 	private Collection<String> booleanTrueValues = null;
 	private Collection<String> booleanFalseValues = null;
 
-	private static final String FORMAT_MILLIS = "millis";
+	private final Integer INT_TRUE = Integer.valueOf(1);
+	private final Integer INT_FALSE = Integer.valueOf(0);
+	private final Long LONG_TRUE = Long.valueOf(1);
+	private final Long LONG_FALSE = Long.valueOf(0);
+	private final BigDecimal BIG_TRUE = BigDecimal.valueOf(1);
+	private final BigDecimal BIG_FALSE = BigDecimal.valueOf(0);
 	
+	private static final String FORMAT_MILLIS = "millis";
+
 	public ValueConverter()
 	{
 		Settings sett = Settings.getInstance();
@@ -114,9 +121,9 @@ public class ValueConverter
 	{
 		if (!StringUtil.isEmptyString(aFormat))
 		{
-      if (aFormat.equalsIgnoreCase(FORMAT_MILLIS))
+			if (aFormat.equalsIgnoreCase(FORMAT_MILLIS))
 			{
-        this.defaultTimestampFormat = FORMAT_MILLIS;
+				this.defaultTimestampFormat = FORMAT_MILLIS;
 				this.dateFormatter = null;
 			}
 			else
@@ -132,16 +139,16 @@ public class ValueConverter
 	{
 		if (!StringUtil.isEmptyString(aFormat))
 		{
-      if (aFormat.equalsIgnoreCase(FORMAT_MILLIS))
-      {
-        this.defaultTimestampFormat = FORMAT_MILLIS;
+			if (aFormat.equalsIgnoreCase(FORMAT_MILLIS))
+			{
+				this.defaultTimestampFormat = FORMAT_MILLIS;
 				this.dateFormatter = null;
-      }
-      else
-      {
-        this.defaultTimestampFormat = aFormat;
-        this.timestampFormatter = new SimpleDateFormat(aFormat);
-      }
+			}
+			else
+			{
+				this.defaultTimestampFormat = aFormat;
+				this.timestampFormatter = new SimpleDateFormat(aFormat);
+			}
 		}
 	}
 
@@ -149,7 +156,7 @@ public class ValueConverter
 	{
 		this.decimalCharacter = aChar;
 	}
-	
+
 	public void setAutoConvertBooleanNumbers(boolean flag)
 	{
 		this.autoConvertBooleanNumbers = flag;
@@ -160,7 +167,7 @@ public class ValueConverter
 	 * false when converting input values.
 	 * If either collection is null, both are considered null
 	 * If these values are not defined, the default boolean conversion implemented
-	 * in {@link workbench.util.StringUtil#stringToBool(String)} is used (this is the 
+	 * in {@link workbench.util.StringUtil#stringToBool(String)} is used (this is the
 	 * default)
 	 * @param trueValues String literals to be considered as <tt>true</tt>
 	 * @param falseValues String literals to be considered as <tt>false</tt>
@@ -179,18 +186,10 @@ public class ValueConverter
 		}
 	}
 	
-	private final Integer INT_TRUE = Integer.valueOf(1);
-	private final Integer INT_FALSE = Integer.valueOf(0);
-	
-	private final Long LONG_TRUE = Long.valueOf(1);
-	private final Long LONG_FALSE = Long.valueOf(0);
-
-	private final BigDecimal BIG_TRUE = BigDecimal.valueOf(1);
-	private final BigDecimal BIG_FALSE = BigDecimal.valueOf(0);
-	
 	private Number getNumberFromString(String value, boolean useInt)
 	{
 		if (value == null) return null;
+
 		try
 		{
 			BigDecimal d = new BigDecimal(this.adjustDecimalString(value));
@@ -205,15 +204,16 @@ public class ValueConverter
 		}
 		catch (Exception e)
 		{
-			// Ignore
+		// Ignore
 		}
 		return null;
 	}
-	
+
 	private Number getLong(String value)
 		throws ConverterException
 	{
 		if (value.length() == 0) return null;
+
 		try
 		{
 			return new Long(value);
@@ -222,29 +222,39 @@ public class ValueConverter
 		{
 			// Maybe the long value is disguised as a decimal
 			Number n = getNumberFromString(value, false);
-			if (n != null) return n;
-			
+			if (n != null)
+			{
+				return n;
+			}
+
 			// When exporting from a database that supports the boolean datatype
 			// into a database that maps this to an integer, we assume that
 			// true/false should be 1/0
 			if (autoConvertBooleanNumbers)
 			{
-				Boolean b = getBoolean(value); 
+				Boolean b = getBoolean(value);
 				if (b != null)
 				{
-					if (b.booleanValue()) return LONG_TRUE;
-					else return LONG_FALSE;
+					if (b.booleanValue())
+					{
+						return LONG_TRUE;
+					}
+					else
+					{
+						return LONG_FALSE;
+					}
 				}
 			}
 
 			throw new ConverterException(value, Types.BIGINT, e);
 		}
 	}
-	
+
 	private Number getInt(String value, int type)
 		throws ConverterException
 	{
 		if (value.length() == 0) return null;
+
 		try
 		{
 			return new Integer(value);
@@ -254,17 +264,23 @@ public class ValueConverter
 			// Maybe the integer value is disguised as a decimal
 			Number n = getNumberFromString(value, true);
 			if (n != null) return n;
-			
+
 			// When exporting from a database that supports the boolean datatype
 			// into a database that maps this to an integer, we assume that
 			// true/false should be 1/0
 			if (autoConvertBooleanNumbers)
 			{
-				Boolean b = getBoolean(value); 
+				Boolean b = getBoolean(value);
 				if (b != null)
 				{
-					if (b.booleanValue()) return INT_TRUE;
-					else return INT_FALSE;
+					if (b.booleanValue())
+					{
+						return INT_TRUE;
+					}
+					else
+					{
+						return INT_FALSE;
+					}
 				}
 			}
 
@@ -276,6 +292,7 @@ public class ValueConverter
 		throws ConverterException
 	{
 		if (value.length() == 0) return null;
+
 		try
 		{
 			return new BigDecimal(this.adjustDecimalString(value));
@@ -287,16 +304,23 @@ public class ValueConverter
 			// true/false should be 1/0
 			if (autoConvertBooleanNumbers)
 			{
-				Boolean b = getBoolean(value); 
+				Boolean b = getBoolean(value);
 				if (b != null)
 				{
-					if (b.booleanValue()) return BIG_TRUE;
-					else return BIG_FALSE;
+					if (b.booleanValue())
+					{
+						return BIG_TRUE;
+					}
+					else
+					{
+						return BIG_FALSE;
+					}
 				}
 			}
 			throw new ConverterException(value, type, e);
-		}		
+		}
 	}
+
 	/**
 	 * Convert the given input value to a class instance
 	 * according to the given type (from java.sql.Types)
@@ -308,33 +332,38 @@ public class ValueConverter
 	public Object convertValue(Object aValue, int type)
 		throws ConverterException
 	{
-		if (aValue == null) return null;
+		if (aValue == null)
+		{
+			return null;
+		}
+
 		String v = aValue.toString().trim();
 
 		switch (type)
 		{
 			case Types.BIGINT:
 				return getLong(v);
-				
+
 			case Types.INTEGER:
 			case Types.SMALLINT:
 			case Types.TINYINT:
 				return getInt(v, type);
-				
+
 			case Types.NUMERIC:
 			case Types.DECIMAL:
 			case Types.DOUBLE:
 			case Types.REAL:
 			case Types.FLOAT:
 				return getBigDecimal(v, type);
-				
+
 			case Types.CHAR:
 			case Types.VARCHAR:
 			case Types.LONGVARCHAR:
-					return aValue.toString();
-					
+				return aValue.toString();
+
 			case Types.DATE:
 				if (v.length() == 0) return null;
+
 				try
 				{
 					return this.parseDate((String)aValue);
@@ -343,7 +372,7 @@ public class ValueConverter
 				{
 					throw new ConverterException(aValue, type, e);
 				}
-				
+
 			case Types.TIMESTAMP:
 				if (v.length() == 0) return null;
 				try
@@ -354,9 +383,10 @@ public class ValueConverter
 				{
 					throw new ConverterException(aValue, type, e);
 				}
-				
+
 			case Types.TIME:
 				if (v.length() == 0) return null;
+
 				try
 				{
 					return this.parseTime((String)aValue);
@@ -365,7 +395,7 @@ public class ValueConverter
 				{
 					throw new ConverterException(aValue, type, e);
 				}
-				
+
 			case Types.BLOB:
 			case Types.BINARY:
 			case Types.LONGVARBINARY:
@@ -396,7 +426,7 @@ public class ValueConverter
 					return aValue;
 				}
 				return null;
-				
+
 			case Types.BIT:
 			case Types.BOOLEAN:
 				return convertBool(v, type);
@@ -416,7 +446,7 @@ public class ValueConverter
 		return this.defaultTimestampFormat;
 	}
 
-  public java.sql.Time parseTime(String time)
+	public java.sql.Time parseTime(String time)
 		throws ParseException
 	{
 		if (isCurrentTime(time))
@@ -428,12 +458,12 @@ public class ValueConverter
 			java.util.Date now = c.getTime();
 			return new java.sql.Time(now.getTime());
 		}
-		
+
 		java.util.Date parsed = null;
-		
+
 		synchronized (this.formatter)
 		{
-			for (int i=0; i < timeFormats.length; i++)
+			for (int i = 0; i < timeFormats.length; i++)
 			{
 				try
 				{
@@ -448,14 +478,14 @@ public class ValueConverter
 				}
 			}
 		}
-		
-		if (parsed != null) 
+
+		if (parsed != null)
 		{
 			return new java.sql.Time(parsed.getTime());
 		}
 		throw new ParseException("Could not parse [" + time + "] as a time value!", 0);
 	}
-	
+
 	private java.sql.Date getToday()
 	{
 		Calendar c = Calendar.getInstance();
@@ -467,23 +497,23 @@ public class ValueConverter
 		java.util.Date now = c.getTime();
 		return new java.sql.Date(now.getTime());
 	}
-	
-  public java.sql.Timestamp parseTimestamp(String aDate)
+
+	public java.sql.Timestamp parseTimestamp(String aDate)
 		throws ParseException, NumberFormatException
-  {
+	{
 		if (isCurrentTimestamp(aDate))
 		{
 			java.sql.Timestamp ts = new java.sql.Timestamp(System.currentTimeMillis());
 			return ts;
 		}
-		
+
 		if (isCurrentDate(aDate))
 		{
 			return new java.sql.Timestamp(getToday().getTime());
 		}
-		
+
 		java.util.Date result = null;
-		
+
 		if (this.defaultTimestampFormat != null)
 		{
 			try
@@ -491,7 +521,7 @@ public class ValueConverter
 				if (FORMAT_MILLIS.equalsIgnoreCase(defaultTimestampFormat))
 				{
 					long value = Long.parseLong(aDate);
-          result = new java.util.Date(value);
+					result = new java.util.Date(value);
 				}
 				else
 				{
@@ -507,13 +537,13 @@ public class ValueConverter
 				result = null;
 			}
 		}
-		
+
 		if (result == null)
 		{
 			int usedPattern = -1;
 			synchronized (this.formatter)
 			{
-				for (int i=0; i < dateFormats.length; i++)
+				for (int i = 0; i < dateFormats.length; i++)
 				{
 					try
 					{
@@ -533,29 +563,29 @@ public class ValueConverter
 				LogMgr.logInfo("ValueConverter.parseTimestamp()", "Succeeded parsing '" + aDate + "' using the format: " + timestampFormats[usedPattern]);
 			}
 		}
-		
+
 		if (result != null)
 		{
 			return new java.sql.Timestamp(result.getTime());
 		}
-		throw new ParseException("Could not convert [" + aDate + "] to a timestamp value!",0);
+		throw new ParseException("Could not convert [" + aDate + "] to a timestamp value!", 0);
 	}
 
-  public java.sql.Date parseDate(String aDate)
+	public java.sql.Date parseDate(String aDate)
 		throws ParseException
-  {
+	{
 		if (isCurrentDate(aDate))
 		{
 			return getToday();
 		}
-		
+
 		if (isCurrentTimestamp(aDate))
 		{
 			return new java.sql.Date(System.currentTimeMillis());
 		}
-		
+
 		java.util.Date result = null;
-		
+
 		if (this.defaultDateFormat != null)
 		{
 			try
@@ -563,7 +593,7 @@ public class ValueConverter
 				if (FORMAT_MILLIS.equalsIgnoreCase(defaultTimestampFormat))
 				{
 					long value = Long.parseLong(aDate);
-          result = new java.util.Date(value);
+					result = new java.util.Date(value);
 				}
 				else
 				{
@@ -597,7 +627,7 @@ public class ValueConverter
 		{
 			synchronized (this.formatter)
 			{
-				for (int i=0; i < dateFormats.length; i++)
+				for (int i = 0; i < dateFormats.length; i++)
 				{
 					try
 					{
@@ -618,20 +648,20 @@ public class ValueConverter
 		{
 			return new java.sql.Date(result.getTime());
 		}
-		
+
 		throw new ParseException("Could not convert [" + aDate + "] to a date", 0);
-  }
+	}
 
 	private boolean isCurrentTime(String arg)
 	{
 		return isKeyword("current_time", arg);
 	}
-	
+
 	private boolean isCurrentDate(String arg)
 	{
 		return isKeyword("current_date", arg);
 	}
-	
+
 	private boolean isCurrentTimestamp(String arg)
 	{
 		return isKeyword("current_timestamp", arg);
@@ -639,21 +669,30 @@ public class ValueConverter
 
 	private boolean isKeyword(String type, String arg)
 	{
-		if (StringUtil.isEmptyString(arg)) return false;
-		
+		if (StringUtil.isEmptyString(arg))
+		{
+			return false;
+		}
+
 		List<String> keywords = Settings.getInstance().getListProperty("workbench.db.keyword." + type, true);
 		return keywords.contains(arg.toLowerCase());
 	}
-	
+
 	private String adjustDecimalString(String input)
 	{
-		if (input == null)  return input;
+		if (input == null)
+		{
+			return input;
+		}
 		String value = input.trim();
 		int len = value.length();
-		if (len == 0) return value;
+		if (len == 0)
+		{
+			return value;
+		}
 		StringBuilder result = new StringBuilder(len);
 		int pos = value.lastIndexOf(this.decimalCharacter);
-		for (int i=0; i < len; i++)
+		for (int i = 0; i < len; i++)
 		{
 			char c = value.charAt(i);
 			if (i == pos)
@@ -671,29 +710,44 @@ public class ValueConverter
 
 		return result.toString();
 	}
-	
+
 	private Boolean getBoolean(String value)
 		throws ConverterException
 	{
 		if (this.booleanFalseValues != null && this.booleanTrueValues != null)
 		{
-			if (booleanFalseValues.contains(value)) return Boolean.FALSE;
-			if (booleanTrueValues.contains(value)) return Boolean.TRUE;
+			if (booleanFalseValues.contains(value))
+			{
+				return Boolean.FALSE;
+			}
+			if (booleanTrueValues.contains(value))
+			{
+				return Boolean.TRUE;
+			}
 			throw new ConverterException("Input value [" + value + "] not in the list of defined true or false literals");
 		}
 		else
 		{
-			if ("false".equalsIgnoreCase(value)) return Boolean.FALSE;
-			if ("true".equalsIgnoreCase(value)) return Boolean.TRUE;
+			if ("false".equalsIgnoreCase(value))
+			{
+				return Boolean.FALSE;
+			}
+			if ("true".equalsIgnoreCase(value))
+			{
+				return Boolean.TRUE;
+			}
 		}
 		return null;
 	}
-	
+
 	private Boolean convertBool(String value, int type)
 		throws ConverterException
 	{
 		Boolean b = getBoolean(value);
-		if (b != null) return b;
+		if (b != null)
+		{
+			return b;
+		}
 
 		throw new ConverterException(value, type, null);
 	}

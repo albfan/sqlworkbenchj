@@ -646,7 +646,7 @@ public class ConnectionMgr
 	 * 
 	 * Called after saving the profiles. 
 	 */
-	private  synchronized void resetProfiles()
+	private synchronized void resetProfiles()
 	{
 		if (this.profiles != null)
 		{

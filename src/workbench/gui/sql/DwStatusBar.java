@@ -400,11 +400,11 @@ public class DwStatusBar
 		return StringUtil.getIntValue(this.tfMaxRows.getText(), 0);
 	}
 
-  public void selectMaxRowsField()
-  {
+	public void selectMaxRowsField()
+	{
 		this.tfMaxRows.selectAll();
-    this.tfMaxRows.requestFocusInWindow();
-  }
+		this.tfMaxRows.requestFocusInWindow();
+	}
 
 	public void showAlert(NotifierEvent evt)
 	{

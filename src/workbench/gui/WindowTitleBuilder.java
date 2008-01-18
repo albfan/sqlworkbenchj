@@ -24,9 +24,9 @@ import workbench.util.StringUtil;
 public class WindowTitleBuilder 
 {
 
-  public WindowTitleBuilder() 
-  {
-  }
+	public WindowTitleBuilder() 
+	{
+	}
 
 	public String getWindowTitle(ConnectionProfile profile, String workspaceFile, String editorFile)
 	{

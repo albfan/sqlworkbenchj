@@ -12,6 +12,7 @@
 package workbench.db.exporter;
 
 import java.io.File;
+import workbench.log.LogMgr;
 import workbench.storage.RowData;
 import workbench.util.CharacterRange;
 import workbench.util.QuoteEscapeType;
@@ -103,6 +104,7 @@ public class TextRowDataConverter
 				}
 				catch (Exception e)
 				{
+					LogMgr.logError("TextRowDataConverter.convertRowData", "Error writing BLOB file", e);
 					throw new RuntimeException("Error writing BLOB file", e);
 				}
 				

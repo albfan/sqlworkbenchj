@@ -499,12 +499,12 @@ public class WbConnection
 	 */
 	public void close()
 	{
-		if (this.keepAlive != null) 
+		if (this.keepAlive != null)
 		{
 			this.keepAlive.shutdown();
 			this.keepAlive = null;
 		}
-			
+
 		if (this.profile != null && this.profile.getRollbackBeforeDisconnect() && this.sqlConnection != null)
 		{
 			try
@@ -528,23 +528,24 @@ public class WbConnection
 		}
 		finally
 		{
-  		this.metaData = null;
+			this.metaData = null;
 			this.sqlConnection = null;
 		}
-		
+
 		LogMgr.logDebug("WbConnection.close()", "Connection " + this.getId() + " closed.");
-		
-    if (Settings.getInstance().getProperty("workbench.db.driver.log", null) != null)
-    {
-      PrintWriter pw = DriverManager.getLogWriter();
+
+		if (Settings.getInstance().getProperty("workbench.db.driver.log", null) != null)
+		{
+			PrintWriter pw = DriverManager.getLogWriter();
 			FileUtil.closeQuitely(pw);
-    }
-		
+		}
+
 	}
 
 	public boolean isClosed()
 	{
 		if (this.sqlConnection == null) return true;
+
 		try
 		{
 			return this.sqlConnection.isClosed();

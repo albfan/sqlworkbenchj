@@ -679,6 +679,17 @@ public class TableListPanel
 					typeToSelect = type;
 				}
 			}
+			
+			String table = this.dbConnection.getMetadata().getTableTypeName();
+			String view = this.dbConnection.getMetadata().getViewTypeName();
+			String both = table + "," + view;
+			String addTypes = Settings.getInstance().getProperty("workbench.dbexplorer.typefilter.additional", both);
+			List<String> allTypes = StringUtil.stringToList(addTypes, ";", true, true);
+			for (String t : allTypes)
+			{
+				this.tableTypes.addItem(t);
+			}
+			
 			if (typeToSelect == null)
 				this.tableTypes.setSelectedIndex(0);
 			else
@@ -781,10 +792,17 @@ public class TableListPanel
 			
 			String[] types = null;
 			String type = (String)tableTypes.getSelectedItem();
+			
 			if (!"*".equals(type))
 			{
-				types = new String[] { type };
+				List<String> typeList = StringUtil.stringToList(type);
+				types = new String[typeList.size()];
+				for (int i=0; i < typeList.size(); i++)
+				{
+					types[i] = typeList.get(i);
+				}
 			}
+			
 			DataStore ds = dbConnection.getMetadata().getTables(currentCatalog, currentSchema, types);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
 			
@@ -980,11 +998,11 @@ public class TableListPanel
 		
 		if (Settings.getInstance().getStoreExplorerObjectType())
 		{
-			this.tableTypeToSelect = props.getProperty(prefix + "objecttype", Settings.getInstance().getDefaultObjectType());
+			this.tableTypeToSelect = props.getProperty(prefix + "objecttype", null);
 		}
 		else
 		{
-			this.tableTypeToSelect = Settings.getInstance().getDefaultObjectType();
+			this.tableTypeToSelect = null;
 		}
 	}
 
@@ -1883,17 +1901,17 @@ public class TableListPanel
 	public void stateChanged(ChangeEvent e)
 	{
 		if (this.ignoreStateChanged) return;
-    if (e.getSource() == this.displayTab)
-    {
-	    EventQueue.invokeLater(new Runnable()
-	    {
+		if (e.getSource() == this.displayTab)
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
 				public void run()
 				{
 					startRetrieveCurrentPanel();
 				}
 
 			});
-    }
+		}
 	}
 
 	/**

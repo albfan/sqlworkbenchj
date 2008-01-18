@@ -18,7 +18,9 @@ import java.sql.Statement;
 import junit.framework.TestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.util.EncodingUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -56,18 +58,21 @@ public class WbManagerTest extends TestCase
 	
 	public void testBatchMode()
 	{
+		TestUtil util = new TestUtil(getName());
+		WbFile logfile = new WbFile(util.getBaseDir(), "junit_wb_test.log");
 		try
 		{
-			TestUtil util = new TestUtil(getName());
 			System.setProperty("workbench.system.doexit", "false");
+			
 			File db = new File(util.getBaseDir(), getName());
 			String script = createScript(util.getBaseDir());
-			String args[] = { "-embedded", 
-												"-nosettings",
+			String args[] = { "-embedded ", 
+												"-nosettings ",
 												"-configdir=" + util.getBaseDir(),
 												"-url='jdbc:h2:" + db.getAbsolutePath() + "'",
 												"-user=sa",
-												"-driver=org.h2.Driver",
+												"-logfile='" + logfile.getFullPath() + "'",
+												"-driver=org.h2.Driver ",
 												"-script='" + script + "'",
 												"-encoding=UTF8"
 												};
@@ -84,6 +89,7 @@ public class WbManagerTest extends TestCase
 			}
 			rs.close();
 			stmt.close();
+			assertTrue(logfile.exists());
 		}
 		catch (Exception e)
 		{
@@ -93,6 +99,8 @@ public class WbManagerTest extends TestCase
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
+			LogMgr.shutdown();
+			logfile.delete();
 		}
 	}
 

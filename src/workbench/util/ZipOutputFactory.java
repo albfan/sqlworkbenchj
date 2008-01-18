@@ -46,7 +46,8 @@ public class ZipOutputFactory
 
 	public boolean isArchive() { return true; }
 	
-	public OutputStream createOutputStream(File output) throws IOException
+	public OutputStream createOutputStream(File output) 
+		throws IOException
 	{
 		if (this.zout == null) initArchive();
 		String filename = output.getName();

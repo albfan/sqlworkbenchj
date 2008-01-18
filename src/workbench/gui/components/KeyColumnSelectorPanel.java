@@ -32,7 +32,7 @@ public class KeyColumnSelectorPanel
 	private ColumnIdentifier[] columns;
 	private String tableName;
 	private JCheckBox saveCheckBox;
-	
+
 	public KeyColumnSelectorPanel(ColumnIdentifier[] cols, TableIdentifier table)
 	{
 		super(cols);
@@ -50,46 +50,47 @@ public class KeyColumnSelectorPanel
 
 	protected void configureInfoPanel()
 	{
-		if (this.tableName == null) return;
-		
+		if (this.tableName == null)
+		{
+			return;
+		}
+
 		String msg = ResourceMgr.getString("MsgSelectKeyColumns").replaceAll("%tablename%", tableName);
 		JLabel infoLabel = new JLabel(msg);
 		this.infoPanel.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
-    c.gridx = 0;
-    c.gridy = 0;
-    c.fill = GridBagConstraints.BOTH;
-    c.anchor = GridBagConstraints .NORTHWEST;
-    c.weightx = 1.0;
-		
-		this.infoPanel.add(infoLabel,c);
-		
+		c.gridx = 0;
+		c.gridy = 0;
+		c.fill = GridBagConstraints.BOTH;
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.weightx = 1.0;
+
+		this.infoPanel.add(infoLabel, c);
+
 		this.saveCheckBox = new JCheckBox(ResourceMgr.getString("LblRememberPKMapping"));
 		this.saveCheckBox.setToolTipText(ResourceMgr.getDescription("LblRememberPKMapping"));
-    c.gridx = 0;
-    c.gridy = 1;
+		c.gridx = 0;
+		c.gridy = 1;
 		c.fill = GridBagConstraints.NONE;
-    c.anchor = GridBagConstraints.NORTHWEST;
-    c.weighty = 1.0;
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.weighty = 1.0;
 		c.weightx = 0.0;
-    c.insets = new Insets(5, 0, 5, 0);
+		c.insets = new Insets(5, 0, 5, 0);
 		this.infoPanel.add(saveCheckBox, c);
 	}
-	
+
 	public boolean getSaveToGlobalPKMap()
 	{
 		return this.saveCheckBox.isSelected();
 	}
-	
+
 	public ColumnIdentifier[] getColumns()
 	{
-		for (int i=0; i < this.columns.length; i++)
+		for (int i = 0; i < this.columns.length; i++)
 		{
 			columns[i].setIsPkColumn(this.isColumnSelected(i));
 		}
 		return this.columns;
 	}
-
-
 }
 

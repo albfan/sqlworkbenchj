@@ -43,13 +43,13 @@ public class FixedSizeList<T>
 	 */
 	public synchronized void append(T entry)
 	{
-    if (entry == null) return;
+		if (entry == null) return;
 		entries.add(entry);
 	}
 	
 	public synchronized int addEntry(T entry)
 	{
-    if (entry == null) return -1;
+		if (entry == null) return -1;
 		
 		// Don't allow duplicates
 		if (entries.contains(entry))

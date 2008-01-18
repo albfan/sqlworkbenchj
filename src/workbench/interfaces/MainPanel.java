@@ -35,6 +35,7 @@ public interface MainPanel
 	void clearLog();
 	void showLogPanel();
 	void showResultPanel();
+	void setConnectionClient(Connectable client);
 	void setConnection(WbConnection aConnection);
 	WbConnection getConnection();
 	void addToToolbar(WbAction anAction, boolean aFlag);

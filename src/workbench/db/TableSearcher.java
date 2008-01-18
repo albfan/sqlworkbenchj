@@ -338,9 +338,9 @@ public class TableSearcher
 
 	public void setCriteria(String aText)
 	{
-    if (aText == null) return;
-    this.criteria = StringUtil.trimQuotes(aText);
-    return;
+		if (aText == null) return;
+		this.criteria = StringUtil.trimQuotes(aText);
+		return;
 	}
 
 	public void setConnection(WbConnection conn)

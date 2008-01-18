@@ -75,8 +75,8 @@ import workbench.util.WbWorkspace;
  */
 public class TableDataPanel
   extends JPanel
-	implements Reloadable, ActionListener, Interruptable, TableDeleteListener, Resettable, DbExecutionNotifier,
-		PropertyChangeListener
+	implements ActionListener, PropertyChangeListener, Reloadable, Interruptable, 
+		TableDeleteListener, Resettable, DbExecutionNotifier
 {
 	private WbConnection dbConnection;
 	protected DwPanel dataDisplay;
@@ -569,8 +569,8 @@ public class TableDataPanel
 	{
 		if (this.isRetrieving()) return;
 
-    String sql = this.buildSqlForTable(false);
-    if (sql == null) return;
+		String sql = this.buildSqlForTable(false);
+		if (sql == null) return;
 
 		this.retrieveStart();
 
@@ -660,6 +660,10 @@ public class TableDataPanel
 		this.dataDisplay.setCursor(null);
 	}
 
+	/**
+	 * Start a new thread to retrieve the table data.
+	 * @param respectMaxRows
+	 */
 	public void retrieve(final boolean respectMaxRows)
 	{
 		if (this.isRetrieving()) return;
@@ -685,7 +689,7 @@ public class TableDataPanel
 	public void saveToWorkspace(WbWorkspace wb, int index)
 	{
 		String prefix = getWorkspacePrefix(index);
-		saveSettings(prefix, wb.getSettings(), false);
+		saveSettings(prefix, wb.getSettings());
 	}
 
 	/**
@@ -695,7 +699,7 @@ public class TableDataPanel
 	{
 		this.restoreSettings(); // load "global" settings first;
 		String prefix = getWorkspacePrefix(index);
-		this.readSettings(prefix, wb.getSettings(), false);
+		this.readSettings(prefix, wb.getSettings());
 	}
 
 	/**
@@ -704,18 +708,15 @@ public class TableDataPanel
 	public void saveSettings()
 	{
 		String prefix = TableDataPanel.class.getName() + ".";
-		saveSettings(prefix, Settings.getInstance(), true);
+		saveSettings(prefix, Settings.getInstance());
 	}
 
-	private void saveSettings(String prefix, PropertyStorage props, boolean includeGlobal)
+	private void saveSettings(String prefix, PropertyStorage props)
 	{
 		props.setProperty(prefix + "maxrows", this.dataDisplay.getMaxRows());
 		props.setProperty(prefix + "autoretrieve", this.autoRetrieve.isSelected());
 		props.setProperty(prefix + "autoloadrowcount", this.autoloadRowCount);
-		if (includeGlobal)
-		{
-			props.setProperty(prefix + "warningthreshold", this.warningThreshold);
-		}
+		props.setProperty(prefix + "warningthreshold", this.warningThreshold);
 	}
 	/**
 	 *	Restore global settings for this DbExplorer
@@ -723,29 +724,17 @@ public class TableDataPanel
 	public void restoreSettings()
 	{
 		String prefix = TableDataPanel.class.getName() + ".";
-		readSettings(prefix, Settings.getInstance(), true);
+		readSettings(prefix, Settings.getInstance());
 	}
 
-	private void readSettings(String prefix, PropertyStorage props, boolean includeGlobal)
+	private void readSettings(String prefix, PropertyStorage props)
 	{
-		int max = props.getIntProperty(prefix + "maxrows", -1);
-		if (max == -1 && includeGlobal)
-		{
-			max = 500;
-		}
+		int max = props.getIntProperty(prefix + "maxrows", 500);
 		if (max != -1) this.dataDisplay.setMaxRows(max);
-		String v = props.getProperty(prefix + "autoretrieve", null);
-		if (v == null && includeGlobal)
-		{
-			v = "true";
-		}
-		boolean auto = "true".equals(v);
+		boolean auto = props.getBoolProperty(prefix + "autoretrieve", true);
 		this.autoRetrieve.setSelected(auto);
 		this.autoloadRowCount = props.getBoolProperty(prefix + "autoloadrowcount", true);
-		if (includeGlobal)
-		{
-			this.warningThreshold = props.getIntProperty(prefix + "warningthreshold", 1500);
-		}
+		this.warningThreshold = props.getIntProperty(prefix + "warningthreshold", 1500);
 	}
 
 	public void showData()
@@ -786,13 +775,14 @@ public class TableDataPanel
 	{
 		this.reset();
 		long rows = -1;
+		boolean ctrlPressed = this.reloadAction.ctrlPressed();
+		
 		if (this.autoloadRowCount) 
 		{
 			rows = this.showRowCount();
+			// An error occurred --> no need to continue
+			if (rows == -1) return;
 		}
-		// An error occurred --> no need to continue
-		if (rows == -1) return;
-		boolean ctrlPressed = this.reloadAction.ctrlPressed();
 		this.retrieve(!ctrlPressed);
 	}
 

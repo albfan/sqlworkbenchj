@@ -37,8 +37,8 @@ public class WbVersionReader
 	private final String userAgent;
 	private boolean success = false;
 	private Timer timeout;
-	private boolean timedOut = false;
-  private ActionListener client;
+	private boolean timedOut = false;	
+	private ActionListener client;
 	private WbThread readThread;
 	
 	/**

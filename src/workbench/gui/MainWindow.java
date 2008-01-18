@@ -259,15 +259,15 @@ public class MainWindow
 	 * to highlight the current tab the context menu
 	 * @see workbench.gui.dbobjects.TableListPanel#stateChanged(ChangeEvent)
 	 */
-  public void addIndexChangeListener(ChangeListener aListener)
-  {
-    this.sqlTab.addChangeListener(aListener);
-  }
+	public void addIndexChangeListener(ChangeListener aListener)
+	{
+		this.sqlTab.addChangeListener(aListener);
+	}
 
-  public void removeIndexChangeListener(ChangeListener aListener)
-  {
-    this.sqlTab.removeChangeListener(aListener);
-  }
+	public void removeIndexChangeListener(ChangeListener aListener)
+	{
+		this.sqlTab.removeChangeListener(aListener);
+	}
 
 	public void addExecutionListener(DbExecutionListener l)
 	{
@@ -889,7 +889,7 @@ public class MainWindow
 			LogMgr.logError("MainWindow.connectPanel()", "Error when connecting panel " + aPanel.getId(), e);
 			showStatusMessage("");
 			String error = ExceptionUtil.getDisplay(e);
-			String msg = ResourceMgr.getString("ErrConnectFailed").replaceAll("%msg%", error.trim());
+			String msg = ResourceMgr.getFormattedString("ErrConnectFailed", error.trim());
 			WbSwingUtilities.showErrorMessage(this, msg);
 		}
 		finally
@@ -1018,7 +1018,7 @@ public class MainWindow
 
 	public void saveSettings()
 	{
-    Settings sett = Settings.getInstance();
+		Settings sett = Settings.getInstance();
 		int state = this.getExtendedState();
 		sett.setProperty(this.getClass().getName() + ".state", state);
 
@@ -1226,8 +1226,7 @@ public class MainWindow
 		
 		try
 		{
-			String msg = ResourceMgr.getString("ErrConnectFailed");
-			msg = StringUtil.replace(msg, "%msg%", error.trim());
+			String msg = ResourceMgr.getFormattedString("ErrConnectFailed", error);
 			WbSwingUtilities.showErrorMessage(this, msg);
 		}
 		catch (Throwable th)
@@ -1530,7 +1529,7 @@ public class MainWindow
 	{
 		this.currentProfile = null;
 		this.currentConnection = null;
-    this.closeWorkspace(false);
+		this.closeWorkspace(false);
 		this.setMacroMenuEnabled(false);
 		this.updateWindowTitle();
 		this.disconnectAction.setEnabled(false);
@@ -1688,15 +1687,14 @@ public class MainWindow
 			int count = view.getItemCount();
 			for (int k=0; k < count; k++)
 			{
-        JMenuItem item = view.getItem(k);
-        if (item == null) continue;
-        Action ac = item.getAction();
-        if (ac == null) continue;
+				JMenuItem item = view.getItem(k);
+				if (item == null) continue;
+				Action ac = item.getAction();
+				if (ac == null) continue;
 
-        if (ac instanceof SelectTabAction)
+				if (ac instanceof SelectTabAction)
 				{
-	        SelectTabAction a = (SelectTabAction)ac;
-
+					SelectTabAction a = (SelectTabAction)ac;
 					if (a.getIndex() == sqlTabIndex)
 					{
 						a.setMenuText(aName);
@@ -1724,21 +1722,21 @@ public class MainWindow
 			JMenu view = this.getViewMenu(i);
 
 			// insert the item at the correct index
-      // (if it is a SelectTabAction)
-      // otherwise insert it after the last SelectTabAction
+			// (if it is a SelectTabAction)
+			// otherwise insert it after the last SelectTabAction
 			int count = view.getItemCount();
 			int inserted = -1;
 			for (int k=0; k < count; k++)
 			{
-        JMenuItem item = view.getItem(k);
-        if (item == null) continue;
-        Action ac = item.getAction();
-        if (ac == null) continue;
-        if (!(ac instanceof SelectTabAction))
+				JMenuItem item = view.getItem(k);
+				if (item == null) continue;
+				Action ac = item.getAction();
+				if (ac == null) continue;
+				if (!(ac instanceof SelectTabAction))
 				{
 					break;
 				}
-        SelectTabAction a = (SelectTabAction)ac;
+				SelectTabAction a = (SelectTabAction)ac;
 				lastAction = a;
 				lastActionIndex = k;
 
@@ -2332,6 +2330,7 @@ public class MainWindow
 		
 		if (index == -1) index = sqlTab.getTabCount();
 		final SqlPanel sql = new SqlPanel(index+1);
+		sql.setConnectionClient(this);
 		sql.addDbExecutionListener(this);
 
 		if (checkConnection) this.checkConnectionForPanel(sql);

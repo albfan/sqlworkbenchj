@@ -89,17 +89,17 @@ public class WbTextCellEditor
 	
 	public void selectAll()
 	{
-  	this.textField.selectAll();
+		this.textField.selectAll();
 	}
 	
 	public Component getTableCellEditorComponent(JTable table, Object value,
 							boolean isSelected,int row, int column)
 	{
-  	Component result = super.getTableCellEditorComponent(table, value, isSelected, row, column);
+		Component result = super.getTableCellEditorComponent(table, value, isSelected, row, column);
 		textField.selectAll();
 		this.changed = false;
 		return result;
-  }
+	}
 
 	public void setBackground(Color c)
 	{

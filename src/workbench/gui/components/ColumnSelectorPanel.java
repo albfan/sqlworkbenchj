@@ -47,17 +47,17 @@ public class ColumnSelectorPanel
 	private ColumnSelectTableModel model;
 	private JButton selectAll;
 	private JButton selectNone;
-  private JCheckBox selectedOnlyCheckBox;
-  private JCheckBox includeHeaderCheckBox;
-  
+	private JCheckBox selectedOnlyCheckBox;
+	private JCheckBox includeHeaderCheckBox;
+
 	public ColumnSelectorPanel(ColumnIdentifier[] columns)
-  {
-      this(columns,false,false,false,false);
-  }
-  
-	public ColumnSelectorPanel(ColumnIdentifier[] columns, 
-          boolean includeHeader, 
-          boolean selectedOnly, 
+	{
+		this(columns,false,false,false,false);
+	}
+
+	public ColumnSelectorPanel(ColumnIdentifier[] columns,
+          boolean includeHeader,
+          boolean selectedOnly,
           boolean showHeaderSelection,
           boolean showSelectedCheckBox)
 	{
@@ -68,7 +68,7 @@ public class ColumnSelectorPanel
 		this.selectTable.setColumnSelectionAllowed(false);
 		this.model = new ColumnSelectTableModel(columns);
 		this.selectTable.setModel(this.model);
-		
+
 		TableColumnModel colMod = this.selectTable.getColumnModel();
 		TableColumn col = colMod.getColumn(0);
 		col.setPreferredWidth(150);
@@ -82,66 +82,66 @@ public class ColumnSelectorPanel
 		configureInfoPanel();
 		this.add(this.infoPanel, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
-		
+
 		selectAll = new FlatButton(ResourceMgr.getString("LblSelectAll"));
 		selectNone = new FlatButton(ResourceMgr.getString("LblSelectNone"));
 		selectAll.addActionListener(this);
 		selectNone.addActionListener(this);
-    
+
 		if (showSelectedCheckBox)
 		{
 			this.selectedOnlyCheckBox = new JCheckBox(ResourceMgr.getString("LblSelectedRowsOnly"));
 			this.selectedOnlyCheckBox.setSelected(selectedOnly);
 			this.selectedOnlyCheckBox.setEnabled(true);
 		}
-		
+
 		if (showHeaderSelection)
 		{
 			this.includeHeaderCheckBox = new JCheckBox(ResourceMgr.getString("LblExportIncludeHeaders"));
 			this.includeHeaderCheckBox.setSelected(includeHeader);
 		}
-    
-    JPanel optionPanel = new JPanel();
-    optionPanel.setLayout(new GridBagLayout());
-    GridBagConstraints c = new GridBagConstraints();
-    c.gridx = 0;
-    c.gridy = 0;
-    c.weightx = 0.5;
-    c.anchor = java.awt.GridBagConstraints.EAST;    
-		c.insets = new Insets(0,0,0,5);
-    optionPanel.add(selectAll, c);
-    
-    c.gridx = 1;
-    c.gridy = 0;
-    c.anchor = java.awt.GridBagConstraints.WEST;    
-    c.weightx = 0.5;
-		c.insets = new Insets(0,5,0,0);
-    optionPanel.add(selectNone, c);
 
-    if (showSelectedCheckBox)
-    {
-        c.gridx = 0;
-        c.gridy = 1;
-        c.insets = new Insets(3,0,0,0);
-        c.anchor = (showHeaderSelection ? java.awt.GridBagConstraints.EAST : java.awt.GridBagConstraints.CENTER);    
-        c.gridwidth = (showHeaderSelection ? 1 : 2);   
-        c.weightx = (showHeaderSelection ? 0.5 : 1.0);   
-        optionPanel.add(selectedOnlyCheckBox, c);
-    }
+		JPanel optionPanel = new JPanel();
+		optionPanel.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.weightx = 0.5;
+		c.anchor = java.awt.GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, 0, 5);
+		optionPanel.add(selectAll, c);
 
-    if (showHeaderSelection)
-    {
-        c.gridx = (showSelectedCheckBox ? 1 : 0);   
-        c.gridy = 1;
-        c.gridwidth = (showSelectedCheckBox ? java.awt.GridBagConstraints.EAST : java.awt.GridBagConstraints.CENTER);    
-        c.gridwidth = (showSelectedCheckBox ? 1 : 2);   
-        c.weightx = (showSelectedCheckBox ? 0.5 : 1.0);   
-        c.anchor = java.awt.GridBagConstraints.WEST;    
-        optionPanel.add(includeHeaderCheckBox, c);
-    }    
+		c.gridx = 1;
+		c.gridy = 0;
+		c.anchor = java.awt.GridBagConstraints.WEST;
+		c.weightx = 0.5;
+		c.insets = new Insets(0, 5, 0, 0);
+		optionPanel.add(selectNone, c);
 
-    optionPanel.setBorder(new EmptyBorder(5,0,10,0));
-    this.add(optionPanel, BorderLayout.SOUTH);
+		if (showSelectedCheckBox)
+		{
+			c.gridx = 0;
+			c.gridy = 1;
+			c.insets = new Insets(3, 0, 0, 0);
+			c.anchor = (showHeaderSelection ? java.awt.GridBagConstraints.EAST : java.awt.GridBagConstraints.CENTER);
+			c.gridwidth = (showHeaderSelection ? 1 : 2);
+			c.weightx = (showHeaderSelection ? 0.5 : 1.0);
+			optionPanel.add(selectedOnlyCheckBox, c);
+		}
+
+		if (showHeaderSelection)
+		{
+			c.gridx = (showSelectedCheckBox ? 1 : 0);
+			c.gridy = 1;
+			c.gridwidth = (showSelectedCheckBox ? java.awt.GridBagConstraints.EAST : java.awt.GridBagConstraints.CENTER);
+			c.gridwidth = (showSelectedCheckBox ? 1 : 2);
+			c.weightx = (showSelectedCheckBox ? 0.5 : 1.0);
+			c.anchor = java.awt.GridBagConstraints.WEST;
+			optionPanel.add(includeHeaderCheckBox, c);
+		}
+
+		optionPanel.setBorder(new EmptyBorder(5, 0, 10, 0));
+		this.add(optionPanel, BorderLayout.SOUTH);
 		Dimension d = new Dimension(300, 250);
 		this.setPreferredSize(d);
 	}
@@ -152,7 +152,7 @@ public class ColumnSelectorPanel
 		JLabel infoLabel = new JLabel(msg);
 		this.infoPanel.add(infoLabel);
 	}
-	
+
 	public void setSelectionLabel(String label)
 	{
 		this.model.selectLabel = label;
@@ -160,25 +160,25 @@ public class ColumnSelectorPanel
 		TableColumn col = colMod.getColumn(1);
 		col.setHeaderValue(label);
 	}
-	
-  public boolean selectedOnly() 
-  { 
+
+  public boolean selectedOnly()
+  {
       if (this.selectedOnlyCheckBox == null) return false;
-      return selectedOnlyCheckBox.isSelected(); 
+      return selectedOnlyCheckBox.isSelected();
   }
-  
-  public boolean includeHeader() 
-  { 
+
+  public boolean includeHeader()
+  {
       if (this.includeHeaderCheckBox == null) return false;
-      return includeHeaderCheckBox.isSelected(); 
+      return includeHeaderCheckBox.isSelected();
   }
-  
+
 	/**
 	 * Check if the column with the specified index is selected.
 	 * @param index the index to be checked
 	 * @return true if selected, false otherwise
 	 */
-	public boolean isColumnSelected(int index) 
+	public boolean isColumnSelected(int index)
 	{
 		return this.model.selected[index];
 	}
@@ -196,7 +196,7 @@ public class ColumnSelectorPanel
 		}
 		return selected;
 	}
-	
+
 	/**
 	 * Return the columns that have been selected.
 	 * @return the selected columns
@@ -214,25 +214,25 @@ public class ColumnSelectorPanel
 		}
 		return result;
 	}
-	
+
 	public void selectAll()
 	{
 		this.model.selectAll();
 	}
-	
+
 	public void selectNone()
 	{
 		this.model.selectNone();
 	}
-	
+
 	public void setColumnSelected(int i, boolean flag)
 	{
 		this.model.selected[i] = flag;
 	}
-	
+
 	public void selectColumns(List columns)
 	{
-		if (columns == null) 
+		if (columns == null)
 		{
 			this.selectAll();
 		}
@@ -260,7 +260,7 @@ public class ColumnSelectorPanel
 		TableModelEvent evt = new TableModelEvent(model);
 		this.selectTable.tableChanged(evt);
 	}
-	
+
 }
 
 class ColumnSelectTableModel
@@ -270,21 +270,21 @@ class ColumnSelectTableModel
 	boolean[] selected;
 	String colLabel = ResourceMgr.getString("LblHeaderKeyColumnColName");
 	String selectLabel = ResourceMgr.getString("LblHeaderUseColumn");
-	
+
 	private int rows;
-	
+
 	public ColumnSelectTableModel(ColumnIdentifier[] cols)
 	{
 		this.rows = cols.length;
 		this.columns = cols;
 		this.selected = new boolean[this.rows];
 	}
-	
+
 	public int getColumnCount()
 	{
 		return 2;
 	}
-	
+
 	public Object getValueAt(int row, int column)
 	{
 		if (column == 0)
@@ -307,7 +307,7 @@ class ColumnSelectTableModel
 	{
 		this.setFlagForAll(false);
 	}
-	
+
 	private void setFlagForAll(boolean flag)
 	{
 		for (int i=0; i < this.rows; i++)
@@ -315,38 +315,38 @@ class ColumnSelectTableModel
 			this.selected[i] = flag;
 		}
 	}
-	
-	
+
+
 	public int getRowCount()
 	{
 		return this.rows;
 	}
-	
+
 	public void addTableModelListener(javax.swing.event.TableModelListener l)
 	{
 	}
-	
+
 	public Class getColumnClass(int columnIndex)
 	{
 		if (columnIndex == 0) return String.class;
 		else return Boolean.class;
 	}
-	
+
 	public String getColumnName(int columnIndex)
 	{
 		if (columnIndex == 0) return this.colLabel;
 		return this.selectLabel;
 	}
-	
+
 	public boolean isCellEditable(int rowIndex, int columnIndex)
 	{
 		return (columnIndex == 1);
 	}
-	
+
 	public void removeTableModelListener(javax.swing.event.TableModelListener l)
 	{
 	}
-	
+
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex)
 	{
 		if (columnIndex == 1 && aValue instanceof Boolean)
@@ -355,5 +355,5 @@ class ColumnSelectTableModel
 			this.selected[rowIndex] = b.booleanValue();
 		}
 	}
-	
+
 }

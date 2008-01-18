@@ -59,7 +59,7 @@ public class MacroManagerDialog
 	private JButton runButton;
 	private MacroManagerGui macroPanel;
 	private JButton cancelButton;
-  private boolean cancelled = true;
+	private boolean cancelled = true;
 	private EscAction escAction;
 	private SqlPanel client;
 	private JCheckBox replaceEditorText;
@@ -187,7 +187,7 @@ public class MacroManagerDialog
 	}
 	private void cancelButtonActionPerformed(ActionEvent evt)
 	{
-    this.cancelled = true;
+		this.cancelled = true;
 		this.closeDialog();
 	}
 
@@ -229,7 +229,7 @@ public class MacroManagerDialog
 		}
 	}
 
-  public boolean isCancelled() { return this.cancelled; }
+	public boolean isCancelled() { return this.cancelled; }
 
 	/** Closes the dialog */
 	private void closeDialog(WindowEvent evt)

@@ -22,10 +22,10 @@ public class WbLocale
 {
 	private final Locale locale;
 	
-  public WbLocale(Locale l)
-  {
+	public WbLocale(Locale l)
+	{
 		this.locale = l;
-  }
+	}
 	
 	public Locale getLocale() 
 	{

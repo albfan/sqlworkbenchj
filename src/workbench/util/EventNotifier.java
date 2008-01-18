@@ -25,9 +25,9 @@ public class EventNotifier
 	private NotifierEvent lastEvent = null;
 	private static EventNotifier instance = new EventNotifier();
 	
-  private EventNotifier() 
-  {
-  }
+	private EventNotifier()
+	{
+	}
 
 	public static EventNotifier getInstance() 
 	{
