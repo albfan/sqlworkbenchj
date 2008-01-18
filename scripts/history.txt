@@ -1,5 +1,23 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  (98.1) WbExport can now optionally create the necessary output directory 
+      when using the new option -createDir=true 
+Enh:  (98.1) When running in batch mode the current connection can be changed
+      using the new command WbConnect. It accepts the same parameters to
+      define a connection as the commandline.
+Fix:  (98.1) The reload button did not work in the DbExplorer data panel, 
+      if "Autoload table row count" was disabled.
+Fix:  (98.1) Exporting LOBs into external ZIP files did not work if more than
+      one table contained blob columns with a multi-table export.
+Fix:  (98.1) The parameter -logfile was no longer working if the specified
+      logfile did not already exist.
+
+
+Build 98, 13.01.2008
+--------------------
+Enh:  (97.10) The Mac Bundle now comes with a universal binary (launcher) 
+      so it should run on PowerPC and Intel Macs. Thanks to Matt for
+      providing me with the new binary
 Enh:  (97.10) Editor tabs can now be re-order using Drag & Drop.
 Enh:  (97.9) In batch mode warnings reported when connecting to the DBMS
       are now retrieved (and logged) immediately.
