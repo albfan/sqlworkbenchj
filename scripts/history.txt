@@ -1,5 +1,7 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  (98.1) The launcher executable has been renamed to SQLWorkbench.exe
+      and the shell script has been renamed to sqlworkbench.sh
 Enh:  (98.1) WbExport can now optionally create the necessary output directory 
       when using the new option -createDir=true 
 Enh:  (98.1) When running in batch mode the current connection can be changed
