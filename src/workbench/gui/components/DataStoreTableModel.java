@@ -11,7 +11,6 @@
  */
 package workbench.gui.components;
 
-import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.sql.SQLException;
 import java.sql.Types;

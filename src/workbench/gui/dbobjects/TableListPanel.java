@@ -83,7 +83,6 @@ import workbench.storage.DataStore;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.util.ExceptionUtil;
-import java.util.Iterator;
 import workbench.WbManager;
 import workbench.db.DbObject;
 import workbench.db.IndexDefinition;
@@ -593,15 +592,21 @@ public class TableListPanel
 			return;
 		}
 		
-		this.tableDefinition.reset();
-		this.importedKeys.reset();
-		this.exportedKeys.reset();
-		this.indexes.reset();
-		this.triggers.reset();
-		this.tableSource.setText("");
-		this.importedTableTree.reset();
-		this.exportedTableTree.reset();
-		this.tableData.reset();
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				tableDefinition.reset();
+				importedKeys.reset();
+				exportedKeys.reset();
+				indexes.reset();
+				triggers.reset();
+				tableSource.setText("");
+				importedTableTree.reset();
+				exportedTableTree.reset();
+				tableData.reset();
+			}
+		});
 	}
 
 	private void resetCurrentPanel()
@@ -663,39 +668,29 @@ public class TableListPanel
 		this.reset();
 		try
 		{
-			Collection types = this.dbConnection.getMetadata().getTableTypes();
+			Collection<String> types = this.dbConnection.getMetadata().getTableTypes();
 			this.tableTypes.removeAllItems();
 			this.tableTypes.addItem("*");
 
-			Iterator itr = types.iterator();
-			String typeToSelect = null;
-			
-			while (itr.hasNext())
+			for (String type : types)
 			{
-				String type = (String)itr.next();
 				this.tableTypes.addItem(type);
-				if (type.equalsIgnoreCase(this.tableTypeToSelect))
-				{
-					typeToSelect = type;
-				}
 			}
 			
-			String table = this.dbConnection.getMetadata().getTableTypeName();
-			String view = this.dbConnection.getMetadata().getViewTypeName();
-			String both = table + "," + view;
-			String addTypes = Settings.getInstance().getProperty("workbench.dbexplorer.typefilter.additional", both);
-			List<String> allTypes = StringUtil.stringToList(addTypes, ";", true, true);
-			for (String t : allTypes)
+			String tableView = this.dbConnection.getMetadata().getTableTypeName() + "," + this.dbConnection.getMetadata().getViewTypeName();
+			String add = Settings.getInstance().getProperty("workbench.dbexplorer.typefilter.additional", tableView);
+			List<String> userFilter = StringUtil.stringToList(add, ";", true, true);
+			
+			for (String t : userFilter)
 			{
 				this.tableTypes.addItem(t);
 			}
-			
-			if (typeToSelect == null)
-				this.tableTypes.setSelectedIndex(0);
-			else
-				this.tableTypes.setSelectedItem(typeToSelect);
-			
-			//this.tableTypeToSelect = null;
+
+			this.tableTypes.setSelectedIndex(0);
+			if (tableTypeToSelect != null)
+			{
+				this.tableTypes.setSelectedItem(this.tableTypeToSelect);
+			}
 		}
 		catch (Exception e)
 		{
@@ -786,6 +781,7 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			reset();
+			
 			// do not call setBusy() before reset() because
 			// reset will do nothing if the panel is busy
 			setBusy(true);
@@ -805,6 +801,7 @@ public class TableListPanel
 			
 			DataStore ds = dbConnection.getMetadata().getTables(currentCatalog, currentSchema, types);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
+			model.sortByColumn(0);
 			
 			WbSwingUtilities.invoke(new Runnable()
 			{
@@ -812,26 +809,18 @@ public class TableListPanel
 				{
 					tableList.setModel(model, true);
 					tableList.getExportAction().setEnabled(true);
-					model.sortByColumn(0);
-				}
-			});
-			
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
 					tableList.adjustOrOptimizeColumns();
 					updateDisplayClients();
 				}
 			});
+			
 			shouldRetrieve = false;
 		}
 		catch (OutOfMemoryError mem)
 		{
-			tableList.reset();
-			WbManager.getInstance().showOutOfMemoryError();
-			invalidateData();
+			reset();
 			this.shouldRetrieve = true;
+			WbManager.getInstance().showOutOfMemoryError();
 		}
 		catch (Throwable e)
 		{
@@ -927,13 +916,6 @@ public class TableListPanel
 		String prefix = getWorkspacePrefix(index);
 		storeSettings(props, prefix);
 		this.findPanel.saveSettings(props, "workbench.quickfilter.");
-		if (Settings.getInstance().getStoreExplorerObjectType())
-		{
-			String type = (String)tableTypes.getSelectedItem();
-			if (type != null) props.setProperty(prefix + "objecttype", type);
-			else if (tableTypeToSelect != null) props.setProperty(prefix + "objecttype", tableTypeToSelect);
-		}
-		
 	}
 	
 	/**

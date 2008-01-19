@@ -64,17 +64,17 @@ public class SqlKeywordHandler
 				String keys = con.getMetaData().getSQLKeywords();
 				List<String> keyList = StringUtil.stringToList(keys, ",");
 				this.keywords.addAll(keyList);
-
-				keys = Settings.getInstance().getProperty("workbench.db. + " + dbId + ".syntax.keywords", null);
-				if (keys != null)
-				{
-					List<String> l = StringUtil.stringToList(keys.toUpperCase(), ",");
-					this.keywords.addAll(l);
-				}
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("SqlKeywordHandler.readKeywords", "Error reading SQL keywords", e);
+				LogMgr.logWarning("SqlKeywordHandler.readKeywords", "Error reading SQL keywords: " + e.getMessage());
+			}
+			
+			String userKeys = Settings.getInstance().getProperty("workbench.db. + " + dbId + ".syntax.keywords", null);
+			if (userKeys != null)
+			{
+				List<String> l = StringUtil.stringToList(userKeys.toUpperCase(), ",");
+				this.keywords.addAll(l);
 			}
 		}
 

@@ -148,7 +148,7 @@ public class DbMetadata
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logWarning("DbMetadata.<init>", "Could not retrieve Schema term", e);
+			LogMgr.logWarning("DbMetadata.<init>", "Could not retrieve Schema term: " + e.getMessage());
 			this.schemaTerm = "Schema";
 		}
 
@@ -158,7 +158,7 @@ public class DbMetadata
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logWarning("DbMetadata.<init>", "Could not retrieve Catalog term", e);
+			LogMgr.logWarning("DbMetadata.<init>", "Could not retrieve Catalog term: " + e.getMessage());
 			this.catalogTerm = "Catalog";
 		}
 
@@ -678,7 +678,7 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("DbMetadata.getDbFunctions()", "Error retrieving function list from DB", e);
+			LogMgr.logWarning("DbMetadata.getDbFunctions()", "Error retrieving function list from DB: " + e.getMessage());
 		}
 		return dbFunctions;
 	}
@@ -2026,7 +2026,7 @@ public class DbMetadata
 			}
 			catch (Throwable e)
 			{
-				LogMgr.logWarning("DbMetaData.getTableDefinition()", "Error retrieving key columns", e);
+				LogMgr.logWarning("DbMetaData.getTableDefinition()", "Error retrieving key columns: " + e.getMessage());
 			}
 			finally
 			{
