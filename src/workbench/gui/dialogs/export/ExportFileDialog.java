@@ -23,6 +23,7 @@ import javax.swing.filechooser.FileFilter;
 import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
+import workbench.db.exporter.PoiHelper;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -80,6 +81,16 @@ public class ExportFileDialog
 	public void restoreSettings()
 	{
 		exportOptions.restoreSettings();
+	}
+
+	public SpreadSheetOptions getOdsOptions()
+	{
+		return exportOptions.getOdsOptions();
+	}
+	
+	public SpreadSheetOptions getXlsOptions()
+	{
+		return exportOptions.getXlsOptions();
 	}
 	
 	public SqlOptions getSqlOptions()
@@ -159,6 +170,11 @@ public class ExportFileDialog
 			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlUpdateFileFilter());
 		}
 		fc.addChoosableFileFilter(ExtensionFileFilter.getXmlFileFilter());
+		fc.addChoosableFileFilter(ExtensionFileFilter.getOdsFileFilter());
+		if (PoiHelper.isPoiAvailable())
+		{
+			fc.addChoosableFileFilter(ExtensionFileFilter.getXlsFileFilter());
+		}
 	}
 
 	public void setSelectDirectoryOnly(boolean flag)
@@ -193,8 +209,6 @@ public class ExportFileDialog
 		}
 		this.exportOptions.addPropertyChangeListener("exportType", this);
 		this.restoreSettings();
-		//this.exportOptions.setIncludeSqlUpdate(includeSqlUpdate);
-		//this.exportOptions.setIncludeSqlDeleteInsert(includeSqlDeleteInsert);
 			
 		chooser.setAccessory(this.exportOptions);
 		
@@ -227,7 +241,7 @@ public class ExportFileDialog
 						if (!filename.endsWith(".")) filename = filename + ".";
 						filename = filename + eff.getDefaultExtension();
 					}
-					this.exportType = this.getExportType(ff);
+					this.exportType = this.getExportType(eff);
 				}
 				else
 				{
@@ -268,6 +282,12 @@ public class ExportFileDialog
 			case DataExporter.EXPORT_XML:
 				exporter.setXmlOptions(this.getXmlOptions());
 				break;
+			case DataExporter.EXPORT_ODS:
+				exporter.setOdsOptions(getOdsOptions());
+				break;
+			case DataExporter.EXPORT_XLS:
+				exporter.setXlsOptions(getXlsOptions());
+				break;
 			default:
 				exporter.setTextOptions(this.getTextOptions());
 				LogMgr.logWarning("ExportFileDialog.setExporterOptions()", "Unknown file type selected", null);
@@ -275,23 +295,31 @@ public class ExportFileDialog
 		}
 	}
 	
-	private int getExportType(FileFilter ff)
+	private int getExportType(ExtensionFileFilter ff)
 	{
-		if (ff == ExtensionFileFilter.getSqlFileFilter())
+		if (ff.hasFilter(ExtensionFileFilter.SQL_EXT))
 		{
 			return DataExporter.EXPORT_SQL;
 		}
-		else if (ff == ExtensionFileFilter.getXmlFileFilter())
+		else if (ff.hasFilter(ExtensionFileFilter.XML_EXT))
 		{
 			return DataExporter.EXPORT_XML;
 		}
-		else if (ff == ExtensionFileFilter.getTextFileFilter())
+		else if (ff.hasFilter(ExtensionFileFilter.TXT_EXT))
 		{
 			return DataExporter.EXPORT_TXT;
 		}
-		else if (ff == ExtensionFileFilter.getHtmlFileFilter())
+		else if (ff.hasFilter(ExtensionFileFilter.HTML_EXT))
 		{
 			return DataExporter.EXPORT_HTML;
+		}
+		else if (ff.hasFilter(ExtensionFileFilter.XLS_EXT))
+		{
+			return DataExporter.EXPORT_XLS;
+		}
+		else if (ff.hasFilter(ExtensionFileFilter.ODS_EXT))
+		{
+			return DataExporter.EXPORT_ODS;
 		}
 		return -1;
 	}
@@ -337,6 +365,12 @@ public class ExportFileDialog
 						break;
 					case DataExporter.EXPORT_TXT:
 						this.chooser.setFileFilter(ExtensionFileFilter.getTextFileFilter());
+						break;
+					case DataExporter.EXPORT_XLS:
+						this.chooser.setFileFilter(ExtensionFileFilter.getXlsFileFilter());
+						break;
+					case DataExporter.EXPORT_ODS:
+						this.chooser.setFileFilter(ExtensionFileFilter.getOdsFileFilter());
 						break;
 				}
 			}

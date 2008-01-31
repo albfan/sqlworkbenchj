@@ -148,16 +148,6 @@ public class SqlRowDataConverter
 			throw new IllegalArgumentException("Invalid type specified");
 	}
 	
-	public String getFormatName()
-	{
-		if (isCreateInsert())
-			return "SQL INSERT";
-		else if (sqlType == SQL_UPDATE)
-			return "SQL UPDATE";
-		else
-			return "SQL DELETE/INSERT";
-	}
-
 	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
 		StrBuffer result = new StrBuffer();

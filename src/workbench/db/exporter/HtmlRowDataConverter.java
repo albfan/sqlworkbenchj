@@ -43,6 +43,7 @@ public class HtmlRowDataConverter
 	{
 		this.createFullPage = flag;
 	}
+	
 	public void setPageTitle(String title)
 	{
 		this.pageTitle = title;
@@ -51,11 +52,6 @@ public class HtmlRowDataConverter
 	public void setEscapeHtml(boolean flag)
 	{
 		this.escapeHtml = flag;
-	}
-	
-	public String getFormatName()
-	{
-		return "HTML";
 	}
 
 	public StrBuffer convertRowData(RowData row, long rowIndex)

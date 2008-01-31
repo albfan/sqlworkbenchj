@@ -55,6 +55,26 @@ public class ColumnReference
 	public void setDeleteRule(String rule) { this.deleteRule = rule; }
 	public void setDeferRule(String rule) { this.deferRule= rule; }
 	
+	public ReportTable getForeignTable()
+	{
+		return this.foreignTable;
+	}
+	
+	public String getFkName()
+	{
+		return fkName;
+	}
+	
+	public String getForeignColumn()
+	{
+		return foreignColumn;
+	}
+	
+	public String toString()
+	{
+		return this.getFkName();
+	}
+	
 	public StrBuffer getXml(StrBuffer indent)
 	{
 		StrBuffer result = new StrBuffer(250);

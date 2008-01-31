@@ -35,6 +35,7 @@ public class VersionNumber
 		if ("@BUILD_NUMBER@".equals(number))
 		{
 			major = 999;
+			minor = 999;
 		}
 		else
 		{
@@ -73,7 +74,10 @@ public class VersionNumber
 	{
 		if (!this.isValid()) return false;
 		if (this.major > other.major) return true;
-		if (this.minor > other.minor) return true;
+		if (this.major == other.major) 
+		{
+			if (this.minor > other.minor) return true;
+		}
 		return false;
 	}
 

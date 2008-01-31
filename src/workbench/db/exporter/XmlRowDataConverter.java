@@ -150,16 +150,6 @@ public class XmlRowDataConverter
 		this.useCData = flag;
 	}
 
-	public boolean getUseCDATA()
-	{
-		return this.useCData;
-	}
-
-	public String getFormatName()
-	{
-		return "XML";
-	}
-
 	public void setLineEnding(String ending)
 	{
 		if (ending != null) this.lineEnding = ending;

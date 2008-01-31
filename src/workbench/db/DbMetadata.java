@@ -138,7 +138,6 @@ public class DbMetadata
 	public DbMetadata(WbConnection aConnection)
 		throws SQLException
 	{
-		Settings settings = Settings.getInstance();
 		this.dbConnection = aConnection;
 		this.metaData = aConnection.getSqlConnection().getMetaData();
 
@@ -331,6 +330,7 @@ public class DbMetadata
 		if (StringUtil.isEmptyString(quoteCharacter)) this.quoteCharacter = "\"";
 
 		this.dbSettings = new DbSettings(this.getDbId(), this.productName);
+		Settings settings = Settings.getInstance();
 		this.createInlineConstraints = settings.getServersWithInlineConstraints().contains(productName);
 		this.useNullKeyword = !settings.getServersWithNoNullKeywords().contains(this.getDbId());
 		
@@ -466,20 +466,10 @@ public class DbMetadata
 		return this.dbId;
 	}
 
-	public String getDbVersion() 
+	public DbSettings getDbSettings() 
 	{ 
-		try
-		{
-			return this.dbConnection.getSqlConnection().getMetaData().getDatabaseProductVersion();
-		}
-		catch (Throwable ex)
-		{
-			LogMgr.logError("DbMetadata.getDbVersion()", "Error retrieving DB version", ex);
-			return "n/a";
-		}
+		return this.dbSettings; 
 	}
-
-	public DbSettings getDbSettings() { return this.dbSettings; }
 	
 	/**
 	 * Returns true if the current DBMS supports a SELECT syntax

@@ -12,7 +12,6 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -28,7 +27,6 @@ import workbench.util.XsltTransformer;
 public class WbXslt
 	extends SqlCommand
 {
-	private ArgumentParser cmdLine;
 	public static final String VERB = "WBXSLT";
 	public static final String ARG_STYLESHEET = "stylesheet";
 	public static final String ARG_OUTPUT = "xsltOutput";
@@ -81,12 +79,14 @@ public class WbXslt
 			result.setFailure();
 			return result;
 		}
+		
 		if (outputFile == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrXsltMissingOutputFile"));
 			result.setFailure();
 			return result;
 		}
+		
 		if (xsltFile == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrXsltMissingStylesheet"));
@@ -97,7 +97,7 @@ public class WbXslt
 		try
 		{
 			XsltTransformer.transformFile(inputFile, outputFile, xsltFile);
-			result.addMessage(ResourceMgr.getString("MsgXsltSuccessful"));
+			result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", outputFile));
 			result.setSuccess();
 		}
 		catch (Exception e)

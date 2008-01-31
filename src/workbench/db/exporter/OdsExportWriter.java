@@ -1,5 +1,5 @@
 /*
- * HtmlExportWriter.java
+ * XmlExportWriter.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -15,25 +15,22 @@ package workbench.db.exporter;
  *
  * @author  support@sql-workbench.net
  */
-public class HtmlExportWriter
+public class OdsExportWriter
 	extends ExportWriter
 {
-	
-	public HtmlExportWriter(DataExporter exp)
+	public OdsExportWriter(DataExporter exp)
 	{
 		super(exp);
 	}
 
 	public RowDataConverter createConverter()
 	{
-		return new HtmlRowDataConverter();
+		return new OdsRowDataConverter();
+	}
+	
+	public boolean managesOutput()
+	{
+		return true;
 	}
 
-	public void configureConverter()
-	{
-		HtmlRowDataConverter conv = (HtmlRowDataConverter)this.converter;
-		conv.setPageTitle(this.exporter.getPageTitle());
-		conv.setCreateFullPage(exporter.getCreateFullHtmlPage());
-		conv.setEscapeHtml(exporter.getEscapeHtml());
-	}
 }

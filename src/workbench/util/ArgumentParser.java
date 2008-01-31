@@ -12,11 +12,13 @@
 package workbench.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import workbench.log.LogMgr;
 
 /**
@@ -29,7 +31,7 @@ public class ArgumentParser
 	private Map<String, String> arguments;
 	private Map<String, ArgumentType> argTypes;
 	private List<String> unknownParameters = new ArrayList<String>();
-	private Map<String, List<String>> allowedValues;
+	private Map<String, Collection<String>> allowedValues;
 	private int argCount = 0;
 	private boolean needSwitch = true;
 
@@ -38,8 +40,7 @@ public class ArgumentParser
 		Comparator<String> c = new CaseInsensitiveComparator();
 		arguments = new TreeMap<String, String>(c);
 		argTypes = new TreeMap<String, ArgumentType>(c);
-		allowedValues = new TreeMap<String, List<String>>(c);
-		
+		allowedValues = new TreeMap<String, Collection<String>>(c);
 	}
 	
 	public ArgumentParser(boolean parameterSwitchNeeded)
@@ -53,7 +54,7 @@ public class ArgumentParser
 		return needSwitch;
 	}
 	
-	public List<String> getAllowedValues(String key)
+	public Collection<String> getAllowedValues(String key)
 	{
 		return allowedValues.get(key);
 	}
@@ -61,7 +62,10 @@ public class ArgumentParser
 	public void addArgument(String key, List<String> values)
 	{
 		addArgument(key, ArgumentType.ListArgument);
-		allowedValues.put(key, values);
+		if (values == null) return;
+		Collection<String> v = new TreeSet<String>(new CaseInsensitiveComparator());
+		v.addAll(values);
+		allowedValues.put(key, v);
 	}
 	
 	public void addArgument(String key)

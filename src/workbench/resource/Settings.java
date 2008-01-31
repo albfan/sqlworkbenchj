@@ -129,41 +129,34 @@ public class Settings
 	 */
 	public final void initialize()
 	{
-		this.props = new WbProperties(this);
-		String configFile = System.getProperty("workbench.settings.file", "workbench.settings");
-
-		// first read the built-in defaults
-		// this ensures that new defaults will be applied automatically.
-		fillDefaults();
-
-		String configDir = getProperty("workbench.configdir", null);
+		final String configFilename = "workbench.settings";
 
 		WbFile cfd = null;
 		try
 		{
+			String configDir = System.getProperty("workbench.configdir", null);
 			if (StringUtil.isWhitespaceOrEmpty(configDir))
 			{
 				// check the current directory for a configuration file
 				// if it is not present, then use the directory of the jar file
 				// this means that upon first startup, the settings file
 				// will be created in the directory of the jar file
-				File f = new File(System.getProperty("user.dir"), configFile);
+				File f = new File(System.getProperty("user.dir"), configFilename);
 				if (f.exists())
 				{
 					cfd = new WbFile(f.getParentFile());
 				}
-				else
+				else if (WbManager.getInstance() != null)
 				{
 					cfd = new WbFile(WbManager.getInstance().getJarPath());
-					f = new File(cfd,configFile);
+					f = new File(cfd,configFilename);
 					if (!f.exists())
 					{
-						// no config file in the jar directory --> create a config directory in user.home
-						cfd = new WbFile(System.getProperty("user.home"), ".sqlworkbench");
+						cfd = null; 
 					}
 				}
 			}
-			else
+			else 
 			{
 				configDir = StringUtil.replace(configDir, "${user.home}", System.getProperty("user.home"));
 				cfd = new WbFile(configDir);
@@ -173,29 +166,21 @@ public class Settings
 		{
 			cfd = new WbFile(System.getProperty("user.home"), ".sqlworkbench");
 		}
+
+		if (cfd == null)
+		{
+			// no config file in the jar directory --> create a config directory in user.home
+			cfd = new WbFile(System.getProperty("user.home"), ".sqlworkbench");
+		}
 		
 		if (!cfd.exists())
 		{
 			cfd.mkdirs();
 		}
 		
-		this.configfile = new WbFile(cfd, configFile);
-		configDir = cfd.getFullPath();
+		WbFile settings = new WbFile(cfd, configFilename);
 
-		BufferedInputStream in = null;
-		try
-		{
-			in = new BufferedInputStream(new FileInputStream(this.configfile));
-			this.props.load(in);
-		}
-		catch (IOException e)
-		{
-			fillDefaults();
-		}
-		finally
-		{
-			try { in.close(); } catch (Throwable th) {}
-		}
+		boolean configLoaded = loadConfig(settings);
 		
 		boolean logSysErr = getBoolProperty("workbench.log.console", false);
 		LogMgr.logToSystemError(logSysErr);
@@ -240,13 +225,47 @@ public class Settings
 		}
 		catch (Throwable e)
 		{
-			System.err.println("Error initializing Log system!");
+			System.err.println("Error initializing log system!");
 			e.printStackTrace(System.err);
 		}
 
-		LogMgr.logInfo("Settings.<init>", "Using configdir: " + configDir);
+		if (configLoaded)
+		{
+			// This message should not be logged before LogMgr.setOutputFile() has 
+			// been called with the correct value
+			LogMgr.logInfo("Settings.<init>", "Using configdir: " + configfile.getParentFile().getAbsolutePath());
+		}
+		
 	}
 
+	private boolean loadConfig(WbFile cfile)
+	{
+		if (cfile == null) return false;
+		if (cfile.equals(this.configfile)) return false;
+
+		this.configfile = cfile;
+		this.props = new WbProperties(this);
+		// first read the built-in defaults
+		// this ensures that new defaults will be applied automatically.
+		fillDefaults();
+
+		BufferedInputStream in = null;
+		try
+		{
+			in = new BufferedInputStream(new FileInputStream(this.configfile));
+			this.props.load(in);
+		}
+		catch (IOException e)
+		{
+			fillDefaults();
+		}
+		finally
+		{
+			try { in.close(); } catch (Throwable th) {}
+		}
+		return true;
+	}
+	
 	// <editor-fold defaultstate="collapsed" desc="Manual">
 	public String getPdfPath()
 	{

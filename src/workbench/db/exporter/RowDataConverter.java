@@ -56,6 +56,7 @@ public abstract class RowDataConverter
 	protected ResultInfo metaData;
 	private File outputFile;
 	private String baseFilename;
+	private String pageTitle;
 	private boolean[] columnsToExport = null;
 	protected List exportColumns = null;
 	protected ErrorReporter errorReporter;
@@ -64,7 +65,7 @@ public abstract class RowDataConverter
 	protected DecimalFormat defaultNumberFormatter;
 	protected SimpleDateFormat defaultTimestampFormatter;
 	protected boolean needsUpdateTable = false;
-	private OutputFactory factory;
+	protected OutputFactory factory;
 	private boolean compressExternalFiles;
 	protected boolean useRowNumForBlobFile = true;
 	protected int[] blobNameCols = null;
@@ -88,6 +89,28 @@ public abstract class RowDataConverter
 		this.defaultNumberFormatter = Settings.getInstance().getDefaultDecimalFormatter();
 	}
 
+	public void setPageTitle(String title)
+	{
+		this.pageTitle = title;
+	}
+	
+	public String getPageTitle()
+	{
+		return getPageTitle(null);
+	}
+	
+	public String getPageTitle(String defaultTitle)
+	{
+		if (StringUtil.isEmptyString(pageTitle))
+		{
+			return defaultTitle;
+		}
+		else
+		{
+			return pageTitle;
+		}
+	}
+	
 	/**
 	 * Define the structure of the result to be exported.
 	 */
@@ -356,7 +379,10 @@ public abstract class RowDataConverter
 		return new File(".");
 	}
 	
-	protected File getOutputFile() { return this.outputFile; }
+	protected File getOutputFile() 
+	{ 
+		return this.outputFile; 
+	}
 	
 	public void setErrorReporter(ErrorReporter reporter)
 	{
@@ -402,12 +428,7 @@ public abstract class RowDataConverter
 	{
 		return this.encoding;
 	}
-	
-	/**
-	 *	Returns a display name for this exporter
-	 */
-	public abstract String getFormatName();
-	
+
 	/**
 	 *	Returns the data for one specific row as a String in the 
 	 *  correct format

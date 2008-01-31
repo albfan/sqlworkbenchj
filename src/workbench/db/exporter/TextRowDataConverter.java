@@ -59,11 +59,6 @@ public class TextRowDataConverter
 		return null;
 	}
 
-	public String getFormatName()
-	{
-		return "Text";
-	}
-
 	public void setQuoteEscaping(QuoteEscapeType type)
 	{
 		this.quoteEscape = type;

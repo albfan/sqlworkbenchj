@@ -459,7 +459,9 @@ public class TableIdentifier
 
 	/**
 	 * Compare this TableIdentifier to another. The schema and catalog fields
-	 * are only compared if bothe identifiers have them
+	 * are only compared if bothe identifiers have them. This is different
+	 * to the equals() method, which returns false if one TableIdentifier has
+	 * a schema and/or catalog and the other doesn't
 	 */
 	public boolean compareNames(TableIdentifier other)
 	{

@@ -12,7 +12,6 @@
 package workbench.db.exporter;
 
 import workbench.log.LogMgr;
-import workbench.storage.ResultInfo;
 import workbench.util.XsltTransformer;
 
 /**

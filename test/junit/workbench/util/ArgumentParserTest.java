@@ -11,6 +11,7 @@
  */
 package workbench.util;
 
+import java.util.Collection;
 import junit.framework.*;
 
 
@@ -24,6 +25,16 @@ public class ArgumentParserTest
 	public ArgumentParserTest(String testname)
 	{
 		super(testname);
+	}
+	
+	public void testAllowedValues()
+	{
+		ArgumentParser arg = new ArgumentParser();
+		arg.addArgument("type", StringUtil.stringToList("text,xml,sql"));
+		Collection c = arg.getAllowedValues("type");
+		assertTrue(c.contains("text"));
+		assertTrue(c.contains("TEXT"));
+		assertTrue(c.contains("Text"));
 	}
 	
 	public void testParser()

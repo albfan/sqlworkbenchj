@@ -20,7 +20,6 @@ public class RunningJobIndicator
 {
 	private JFrame clientWindow;
 	private int runningJobs = 0;
-	private String lastTitle = null;
 	public static final String TITLE_PREFIX = "\u00bb ";
 	
 	public RunningJobIndicator(JFrame client)
@@ -30,23 +29,24 @@ public class RunningJobIndicator
 	
 	public synchronized void baseTitleChanged()
 	{
-		this.lastTitle = this.clientWindow.getTitle();
-		if (lastTitle.startsWith(TITLE_PREFIX))
-		{
-			lastTitle = lastTitle.substring(TITLE_PREFIX.length());
-		}
 		updateTitle();
 	}
 	
 	private synchronized void updateTitle()
 	{
+		String title = this.clientWindow.getTitle();
 		if (runningJobs > 0)
 		{
-			
-			String title = this.clientWindow.getTitle();
 			if (!title.startsWith(TITLE_PREFIX))
 			{
-				clientWindow.setTitle(TITLE_PREFIX + lastTitle);
+				clientWindow.setTitle(TITLE_PREFIX + title);
+			}
+		}
+		else
+		{
+			if (title.startsWith(TITLE_PREFIX))
+			{
+				clientWindow.setTitle(title.substring(TITLE_PREFIX.length()));
 			}
 		}
 	}
@@ -54,20 +54,13 @@ public class RunningJobIndicator
 	public synchronized void jobStarted()
 	{
 		runningJobs ++;
-		if (runningJobs > 0)
-		{
-			this.lastTitle = this.clientWindow.getTitle();
-		}
 		updateTitle();
 	}
 	
 	public synchronized void jobEnded()
 	{
-		runningJobs --;
-		if (runningJobs == 0)
-		{
-			clientWindow.setTitle(lastTitle);
-		}
+		if (runningJobs > 0) runningJobs --;
+		updateTitle();
 	}
 
 }

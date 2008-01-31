@@ -12,14 +12,12 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.util.ArgumentParser;
-import workbench.util.SqlUtil;
 
 /**
  *
@@ -35,6 +33,7 @@ public class WbFeedback
 	{
 		this(VERB);
 	}
+	
 	public WbFeedback(String verb)
 	{
 		this.command = verb;

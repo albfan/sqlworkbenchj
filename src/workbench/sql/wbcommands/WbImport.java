@@ -44,11 +44,11 @@ import workbench.util.WbFile;
  *
  * @author  support@sql-workbench.net
  */
-public class WbImport 
+public class WbImport
 	extends SqlCommand
 {
 	public static final String VERB = "WBIMPORT";
-	
+
 	public static final String ARG_TYPE = "type";
 	public static final String ARG_FILE = "file";
 	public static final String ARG_TARGETTABLE = "table";
@@ -79,7 +79,7 @@ public class WbImport
 	public static final String ARG_BADFILE = "badFile";
 	public static final String ARG_CONSTANTS = "constantValues";
 	public static final String ARG_COL_WIDTHS = "columnWidths";
-	
+
 	private DataImporter imp;
 
 	public WbImport()
@@ -97,7 +97,7 @@ public class WbImport
 		CommonArgs.addCheckDepsParameter(cmdLine);
 		CommonArgs.addTableStatements(cmdLine);
 		CommonArgs.addTransactionControL(cmdLine);
-		
+
 		cmdLine.addArgument(ARG_TYPE, StringUtil.stringToList("text,xml"));
 		cmdLine.addArgument(ARG_UPDATE_WHERE);
 		cmdLine.addArgument(ARG_FILE);
@@ -130,7 +130,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_COL_WIDTHS);
 		ModifierArguments.addArguments(cmdLine);
 	}
-	
+
 	public String getVerb() { return VERB; }
 
 	private void addWrongParamsMessage(StatementRunnerResult result)
@@ -141,7 +141,7 @@ public class WbImport
 		result.addMessage(msg);
 		result.setFailure();
 	}
-	
+
 	private String getWrongParamsMessage()
 	{
 		String result = ResourceMgr.getString("ErrImportWrongParameters");
@@ -172,7 +172,7 @@ public class WbImport
 	{
 		return Settings.getInstance().getBoolProperty("workbench.import.default.trimvalues", false);
 	}
-	
+
 	public StatementRunnerResult execute(final String sqlCommand)
 		throws SQLException
 	{
@@ -181,7 +181,7 @@ public class WbImport
 
 		StatementRunnerResult result = new StatementRunnerResult(sqlCommand);
 		String options = getCommandLine(sqlCommand);
-		
+
 		cmdLine.parse(options);
 
 		if (cmdLine.hasUnknownArguments())
@@ -189,7 +189,7 @@ public class WbImport
 			setUnknownMessage(result, cmdLine, getWrongParamsMessage());
 			return result;
 		}
-		
+
 		if (!cmdLine.hasArguments())
 		{
 			addWrongParamsMessage(result);
@@ -211,7 +211,7 @@ public class WbImport
 		{
 			type = findTypeFromFilename(inputFile.getFullPath());
 		}
-		
+
 		if (type == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrImportTypeMissing"));
@@ -225,13 +225,13 @@ public class WbImport
 			result.setFailure();
 			return result;
 		}
-		
-		
+
+
 
 		String badFile = cmdLine.getValue(ARG_BADFILE);
 		if (badFile != null)
 		{
-			boolean multiFileImport = (dir != null && inputFile == null);		
+			boolean multiFileImport = (dir != null && inputFile == null);
 			File bf = new File(badFile);
 			if (multiFileImport && !bf.isDirectory())
 			{
@@ -239,7 +239,7 @@ public class WbImport
 				result.setFailure();
 				return result;
 			}
-		}		
+		}
 		CommonArgs.setCommitAndBatchParams(imp, cmdLine);
 
 		boolean continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, getContinueDefault());
@@ -285,7 +285,7 @@ public class WbImport
 
 		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
 		ImportFileParser parser = null;
-		
+
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
 			if (table == null && dir == null)
@@ -299,7 +299,7 @@ public class WbImport
 
 			TextFileParser textParser = new TextFileParser();
 			parser = textParser;
-			
+
 			textParser.setTableName(table);
 			if (inputFile != null)
 			{
@@ -311,14 +311,14 @@ public class WbImport
 				String ext = cmdLine.getValue(ARG_FILE_EXT);
 				if (ext != null) textParser.setSourceExtension(ext);
 			}
-			
+
 			boolean multi = cmdLine.getBoolean(ARG_MULTI_LINE, getMultiDefault());
 			textParser.setEnableMultilineRecords(multi);
 			textParser.setTargetSchema(schema);
 			textParser.setConnection(currentConnection);
 			textParser.setAbortOnError(!continueOnError);
 			textParser.setTreatClobAsFilenames(cmdLine.getBoolean(ARG_CLOB_ISFILENAME, false));
-			
+
 			String delimiter = StringUtil.trimQuotes(cmdLine.getValue(CommonArgs.ARG_DELIM));
 			if (delimiter != null) textParser.setDelimiter(delimiter);
 
@@ -342,7 +342,7 @@ public class WbImport
 				if (importcolumns != null)
 				{
 					try
-					{	
+					{
 						List<String> cols = StringUtil.stringToList(importcolumns, ",", true, true);
 						textParser.setImportColumnNames(cols);
 					}
@@ -388,7 +388,7 @@ public class WbImport
 				{
 					// read column definition from header line
 					// if no header was specified, the text parser
-					// will assume the columns in the text file 
+					// will assume the columns in the text file
 					// map to the column in the target table
 					try
 					{
@@ -419,14 +419,14 @@ public class WbImport
 			}
 
 			textParser.setTreatBlobsAsFilenames(cmdLine.getBoolean(ARG_BLOB_ISFILENAME, true));
-			
+
 			String filter = cmdLine.getValue(ARG_LINE_FILTER);
 			if (filter != null)
 			{
 				textParser.setLineFilter(StringUtil.trimQuotes(filter));
 			}
 			textParser.setQuoteEscaping(CommonArgs.getQuoteEscaping(cmdLine));
-			
+
 			// when all columns are defined we can check for a fixed-width import
 			String width = cmdLine.getValue(ARG_COL_WIDTHS);
 			if (!StringUtil.isEmptyString(width))
@@ -443,7 +443,7 @@ public class WbImport
 					return result;
 				}
 			}
-			
+
 			imp.setProducer(textParser);
 		}
 		else if ("xml".equalsIgnoreCase(type))
@@ -452,7 +452,7 @@ public class WbImport
 			xmlParser.setConnection(currentConnection);
 			xmlParser.setAbortOnError(!continueOnError);
 			parser = xmlParser;
-			
+
 			// The encoding must be set as early as possible
 			// as the XmlDataFileParser might need it to read
 			// the table structure!
@@ -502,11 +502,11 @@ public class WbImport
 			result.addMessage(e.getMessage());
 			return result;
 		}
-		
+
 		imp.setTransactionControl(cmdLine.getBoolean(CommonArgs.ARG_TRANS_CONTROL, true));
-		
+
 		RowDataProducer prod = imp.getProducer();
-		if (prod != null) 
+		if (prod != null)
 		{
 			prod.setValueConverter(converter);
 			prod.setCheckDependencies(cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS));
@@ -528,7 +528,7 @@ public class WbImport
 			result.setFailure();
 			return result;
 		}
-			
+
 		if (badFile != null) imp.setBadfileName(badFile);
 
 		String value = cmdLine.getValue(CommonArgs.ARG_PROGRESS);
@@ -571,7 +571,7 @@ public class WbImport
 				return result;
 			}
 		}
-		
+
 		String mode = cmdLine.getValue(ARG_MODE);
 		if (mode != null)
 		{
@@ -605,7 +605,7 @@ public class WbImport
 			delete = cmdLine.getBoolean(ARG_DELETE_TARGET);
 			useTruncate = cmdLine.getBoolean(ARG_USE_TRUNCATE, false);
 		}
-		
+
 		imp.setDeleteTarget(delete);
 		if (delete)
 		{
@@ -614,10 +614,10 @@ public class WbImport
 
 		int startRow = cmdLine.getIntValue(ARG_START_ROW, -1);
 		if (startRow > 0) imp.setStartRow(startRow);
-		
+
 		int endRow = cmdLine.getIntValue(ARG_END_ROW, -1);
 		if (endRow > 0) imp.setEndRow(endRow);
-		
+
 		imp.setRowActionMonitor(this.rowMonitor);
 		imp.setPerTableStatements(new TableStatements(cmdLine));
 
@@ -668,16 +668,16 @@ public class WbImport
 	private void addColumnFilter(String filters, TextFileParser textParser)
 	{
 		if (filters == null || filters.trim().length() == 0) return;
-		
+
 		List<String> filterList = StringUtil.stringToList(filters, ",", false);
-		
+
 		if (filterList.size() < 1) return;
-		
+
 		for (String filterDef : filterList)
 		{
 			List<String> l = StringUtil.stringToList(filterDef, "=", true);
 			if (l.size() != 2) continue;
-			
+
 			String col = l.get(0);
 			String regex = l.get(1);
 			textParser.addColumnFilter(col, StringUtil.trimQuotes(regex));
@@ -699,7 +699,7 @@ public class WbImport
 			this.imp.cancelExecution();
 		}
 	}
-	
+
 	protected String findTypeFromFilename(String fname)
 	{
 		if (fname == null) return null;

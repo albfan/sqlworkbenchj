@@ -736,22 +736,27 @@ public class WbManager
 		{
 			cmdLine.parse(args);
 			
+			boolean needInitialize = false;
+			
 			String lang = cmdLine.getValue(AppArguments.ARG_LANG);
 			if (!StringUtil.isEmptyString(lang))
 			{
 				System.setProperty("workbench.gui.language", lang);
+				needInitialize = true;
 			}
 			
 			String value = cmdLine.getValue(AppArguments.ARG_CONFIGDIR);
 			if (!StringUtil.isEmptyString(value))
 			{
 				System.setProperty("workbench.configdir", value);
+				needInitialize = true;
 			}
 			
 			value = cmdLine.getValue(AppArguments.ARG_LIBDIR);
 			if (!StringUtil.isEmptyString(value))
 			{
 				System.setProperty("workbench.libdir", value);
+				needInitialize = true;
 			}
 
 			value = cmdLine.getValue(AppArguments.ARG_LOGFILE);
@@ -759,6 +764,7 @@ public class WbManager
 			{
 				WbFile file = new WbFile(value);
 				System.setProperty("workbench.log.filename", file.getFullPath());
+				needInitialize = true;
 			}
 
 			// Make sure the Settings object is (re)initialized properly now that 
@@ -766,7 +772,16 @@ public class WbManager
 			// this is especially necessary during Junit tests to make 
 			// sure a newly passed commandline overrules the previously initialized
 			// Settings instance
-			Settings.getInstance().initialize();
+//			if (Settings.isInitialized())
+//			{
+				Settings.getInstance().initialize();
+//			}
+//			else
+//			{
+//				// Implies initialize, but if initialize is always called
+//				// this will call it twice if the instance is already created
+//				Settings.getInstance();
+//			}
 			
 			String scriptname = cmdLine.getValue(AppArguments.ARG_SCRIPT);
 

@@ -27,13 +27,17 @@ import workbench.util.WbFile;
 public class ExtensionFileFilter
 	extends FileFilter
 {
+	// The created FileFilters are stored in variables
+	// as in some cases it is necessary to access the 
+	// instance (e.g. for JFileChooser.setFileFilter()
 	private static FileFilter textFileFilter;
 	private static FileFilter sqlFileFilter;
 	private static FileFilter sqlUpdateFileFilter;
 	private static FileFilter jarFileFilter;
 	private static FileFilter htmlFileFilter;
 	private static FileFilter xmlFileFilter;
-
+	private static FileFilter xlsFileFilter;
+	private static FileFilter odsFileFilter;
 	private static FileFilter wkspFileFilter;
 
 	private List<String> extensions;
@@ -42,6 +46,9 @@ public class ExtensionFileFilter
 	public static final String TXT_EXT = "txt";
 	public static final String WORKSPACE_EXT = "wksp";
 	public static final String XML_EXT = "xml";
+	public static final String HTML_EXT = "html";
+	public static final String XLS_EXT = "xls";
+	public static final String ODS_EXT = "ods";
 
 	private boolean ignoreCase = true;
 
@@ -65,6 +72,11 @@ public class ExtensionFileFilter
 		this.ignoreCase = ignoreCase;
 	}
 
+	public boolean hasFilter(String extension)
+	{
+		return this.extensions.contains(extension);
+	}
+	
 	public String getDefaultExtension()
 	{
 		return this.extensions.get(0);
@@ -199,11 +211,31 @@ public class ExtensionFileFilter
 		if (htmlFileFilter == null)
 		{
 			String desc = ResourceMgr.getString("TxtFileFilterHtml");
-			htmlFileFilter = new ExtensionFileFilter(desc, "html", true);
+			htmlFileFilter = new ExtensionFileFilter(desc, HTML_EXT, true);
 		}
 		return htmlFileFilter;
 	}
 
+	public static FileFilter getXlsFileFilter()
+	{
+		if (xlsFileFilter == null)
+		{
+			String desc = ResourceMgr.getString("TxtFileFilterXls");
+			xlsFileFilter = new ExtensionFileFilter(desc, XLS_EXT, true);
+		}
+		return xlsFileFilter;
+	}
+
+	public static FileFilter getOdsFileFilter()
+	{
+		if (odsFileFilter == null)
+		{
+			String desc = ResourceMgr.getString("TxtFileFilterOds");
+			odsFileFilter = new ExtensionFileFilter(desc, ODS_EXT, true);
+		}
+		return odsFileFilter;
+	}
+	
 	// The description of this filter
 	public String getDescription()
 	{

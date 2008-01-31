@@ -102,9 +102,10 @@ public class ConnectionMgr
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getKey() + "] for driver=" + aProfile.getDriverclass());
 		WbConnection conn = this.connect(aProfile, anId);
 		conn.runPostConnectScript();
-		String driverVersion = conn.getDatabaseVersion();
+		String driverVersion = conn.getDriverVersion();
+		String dbVersion = conn.getDatabaseVersion();
 		
-		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" + conn.getMetadata().getProductName() + "], Database version: [" + conn.getMetadata().getDbVersion() + "], Driver version: [" + driverVersion + "], ID: ["  + anId + "]");
+		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" + conn.getMetadata().getProductName() + "], Database version: [" + dbVersion + "], Driver version: [" + driverVersion + "], ID: ["  + anId + "]");
 		
 		this.activeConnections.put(anId, conn);
 		

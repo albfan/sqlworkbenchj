@@ -53,12 +53,15 @@ public class WbVersionReader
 	
 	public WbVersionReader(ActionListener a)
 	{
-		this("", a);
+		this("manual", a);
 	}
 
 	public WbVersionReader(String type, ActionListener a)
 	{
-		this.userAgent = "SQL Workbench/J " + type + "update check (" + ResourceMgr.getBuildNumber().toString() + ") " + Settings.getInstance().getLanguage().getLanguage();
+		this.userAgent = "WbUpdateCheck, " + 
+			ResourceMgr.getBuildNumber().toString() + ", " + type + ", " +
+			Settings.getInstance().getLanguage().getLanguage() + ", " +
+			System.getProperty("os.name");
 		this.client = a;
 	}
 

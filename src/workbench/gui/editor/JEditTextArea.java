@@ -303,11 +303,12 @@ public class JEditTextArea
 	{
 		try
 		{
-			int bracket = getBracketPosition();
+			int bracket = getBracketPosition() + 1;
 			int line = getBracketLine();
 			int caret = getLineStartOffset(line) + bracket;
 			if (caret > -1)
 			{
+				scrollTo(line, caret);
 				setCaretPosition(caret);
 			}
 		}

@@ -46,6 +46,7 @@ import workbench.gui.dbobjects.ProgressPanel;
 import workbench.gui.dialogs.export.ExportFileDialog;
 import workbench.gui.dialogs.export.ExportOptions;
 import workbench.gui.dialogs.export.HtmlOptions;
+import workbench.gui.dialogs.export.SpreadSheetOptions;
 import workbench.gui.dialogs.export.SqlOptions;
 import workbench.gui.dialogs.export.TextOptions;
 import workbench.gui.dialogs.export.XmlOptions;
@@ -94,10 +95,19 @@ public class DataExporter
 	 * Export to HTML.
 	 */
 	public static final int EXPORT_HTML = 4;
-
+	/**
+	 * Export XLS
+	 */
+	public static final int EXPORT_XLS = 5;
+	
+	/**
+	 * OpenDocument Spreadsheet
+	 */
+	public static final int EXPORT_ODS = 6;
+	
 	private WbConnection dbConn;
 	private String sql;
-	private String htmlTitle = null;
+	private String pageTitle = null;
 	
 	// When compressing the output this holds the name of the archive.
 	private String realOutputfile;
@@ -454,7 +464,6 @@ public class DataExporter
 		{
 			case EXPORT_HTML:
 				return "HTML";
-
 			case EXPORT_SQL:
 				if (this.getSqlType() == SqlRowDataConverter.SQL_DELETE_INSERT)
 					return "SQL DELETE/INSERT";
@@ -464,12 +473,14 @@ public class DataExporter
 					return "SQL UPDATE";
 				else 
 					return "SQL";
-				
 			case EXPORT_TXT:
 				return "Text";
-
 			case EXPORT_XML:
 				return "XML";
+			case EXPORT_XLS:
+				return "XLS";
+			case EXPORT_ODS:
+				return "OpenDocument Spreadsheet";
 		}
 		return "";
 	}
@@ -500,10 +511,10 @@ public class DataExporter
 	 */
 	public void setShowProgressWindow(boolean aFlag)
 	{
-		if (!WbManager.getInstance().isBatchMode())
-		{
-			this.showProgressWindow = aFlag;
-		}
+	  if (!WbManager.getInstance().isBatchMode())
+	  {
+	    this.showProgressWindow = aFlag;
+	  }
 	}
 	
 	public void setXsltTransformation(String xsltFileName)
@@ -630,17 +641,23 @@ public class DataExporter
 				break;
 			case EXPORT_XML:
 				this.exportWriter = new XmlExportWriter(this);
+				break;
+			case EXPORT_XLS:
+				this.exportWriter = new XlsExportWriter(this);
+				break;
+			case EXPORT_ODS:
+				this.exportWriter = new OdsExportWriter(this);
 		}
 	}
 	
-	public void setHtmlTitle(String aTitle)
+	public void setPageTitle(String aTitle)
 	{
-		this.htmlTitle = aTitle;
+		this.pageTitle = aTitle;
 	}
 
-	public String getHtmlTitle()
+	public String getPageTitle()
 	{
-		return this.htmlTitle;
+		return this.pageTitle;
 	}
 
 	public void setOutputTypeHtml() 
@@ -655,12 +672,24 @@ public class DataExporter
 		createExportWriter();
 	}
 	
+	public void setOutputTypeXls() 
+	{ 
+		this.exportType = EXPORT_XLS; 
+		createExportWriter();
+	}
+	
 	public void setOutputTypeText() 
 	{ 
 		this.exportType = EXPORT_TXT; 
 		createExportWriter();
 	}
 
+	public void setOutputTypeOds() 
+	{ 
+		this.exportType = EXPORT_ODS; 
+		createExportWriter();
+	}
+	
 	public void setOutputTypeSqlInsert()
 	{
 		this.exportType = EXPORT_SQL;
@@ -693,6 +722,7 @@ public class DataExporter
 	public void setOutputFilename(String aFilename)
 	{ 
 		this.outputfile = aFilename; 
+		if (this.outputfile == null) return;
 	}
 
 	public String getOutputFilename()
@@ -923,7 +953,6 @@ public class DataExporter
 				this.dbConn.setBusy(true);
 				busyControl = true;
 			}
-			
 			if (this.currentJob != null)
 			{
 				stmt.execute(this.currentJob.getQuerySql());
@@ -1018,6 +1047,7 @@ public class DataExporter
 				info = rsInfo;
 			}
 			configureExportWriter(info);
+			this.exportWriter.exportStarting();
 			this.exportWriter.writeExport(rs, info);
 		}
 		catch (SQLException e)
@@ -1044,6 +1074,7 @@ public class DataExporter
 		{
 			ResultInfo info = ds.getResultInfo();
 			configureExportWriter(info);
+			this.exportWriter.exportStarting();
 			this.exportWriter.writeExport(ds);
 		}
 		catch (SQLException e)
@@ -1101,29 +1132,37 @@ public class DataExporter
 		{
 			WbFile f = new WbFile(this.outputfile);
 			
-			OutputStream out = null;
-			if (this.getCompressOutput())
+			if (exportWriter.managesOutput())
 			{
-				WbFile wf = new WbFile(f);
-				String baseName = wf.getFileName();
-				String dir = wf.getParent();
-				File zipfile = new File(dir, baseName + ".zip");
-				OutputStream zout = new FileOutputStream(zipfile);
-				this.zipArchive = new ZipOutputStream(zout);
-				this.zipArchive.setLevel(9);
-				this.zipEntry = new ZipEntry(wf.getName());
-				this.zipArchive.putNextEntry(zipEntry);
-				out = this.zipArchive;
-				this.realOutputfile = zipfile.getCanonicalPath();
+				exportWriter.setOutputFile(f);
+				realOutputfile = f.getFullPath();
 			}
 			else
 			{
-				out = new FileOutputStream(f, append);
-				this.realOutputfile = f.getCanonicalPath();
+				OutputStream out = null;
+				if (this.getCompressOutput())
+				{
+					WbFile wf = new WbFile(f);
+					String baseName = wf.getFileName();
+					String dir = wf.getParent();
+					File zipfile = new File(dir, baseName + ".zip");
+					OutputStream zout = new FileOutputStream(zipfile);
+					this.zipArchive = new ZipOutputStream(zout);
+					this.zipArchive.setLevel(9);
+					this.zipEntry = new ZipEntry(wf.getName());
+					this.zipArchive.putNextEntry(zipEntry);
+					out = this.zipArchive;
+					this.realOutputfile = zipfile.getCanonicalPath();
+				}
+				else
+				{
+					out = new FileOutputStream(f, append);
+					this.realOutputfile = f.getFullPath();
+				}
+				Writer w = EncodingUtil.createWriter(out, this.encoding);
+
+				this.exportWriter.setOutputWriter(w);
 			}
-			Writer w = EncodingUtil.createWriter(out, this.encoding);
-			
-			this.exportWriter.setOutput(w);
 			this.exportWriter.configureConverter();
 		}
 		catch (IOException e)
@@ -1309,7 +1348,7 @@ public class DataExporter
 	{
 		this.setOutputTypeHtml();
 		this.setCreateFullHtmlPage(html.getCreateFullPage());
-		this.setHtmlTitle(html.getPageTitle());
+		this.setPageTitle(html.getPageTitle());
 		this.setEscapeHtml(html.getEscapeHtml());
 		this.exportWriter.configureConverter();
 	}
@@ -1327,6 +1366,23 @@ public class DataExporter
 		this.exportWriter.configureConverter();
 	}
 
+	public void setXlsOptions(SpreadSheetOptions xlsOptions)
+	{
+		if (xlsOptions != null)
+		{
+			this.setOutputTypeXls();
+			this.setPageTitle(xlsOptions.getPageTitle());
+			this.exportWriter.configureConverter();
+		}
+	}
+
+	public void setOdsOptions(SpreadSheetOptions odsOptions)
+	{
+		this.setOutputTypeOds();
+		this.setPageTitle(odsOptions.getPageTitle());
+		this.exportWriter.configureConverter();
+	}
+	
 	public boolean isIncludeCreateTable()
 	{
 		return includeCreateTable;

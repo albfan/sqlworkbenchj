@@ -73,7 +73,6 @@ public class SqlKeywordHelperTest
 		PrintWriter out = null;
 		try
 		{
-			
 			File custom = new File(util.getBaseDir(), "keywords.wb");
 			out = new PrintWriter(new FileWriter(custom));
 			out.println("ARTHUR");

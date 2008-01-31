@@ -44,6 +44,12 @@ public class DefaultOutputFactory
 		return EncodingUtil.createWriter(out, encoding);
 	}
 	
+	public Writer createWriter(String filename, String encoding)
+		throws IOException
+	{
+		return createWriter(new File(filename), encoding);
+	}
+	
 	public void done() 
 		throws IOException
 	{

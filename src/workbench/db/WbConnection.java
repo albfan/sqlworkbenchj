@@ -713,9 +713,9 @@ public class WbConnection
 			int minor = jdbcmeta.getDatabaseMinorVersion();
 			return major + "." + minor;
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
-			LogMgr.logError("WbConnection.getDatabaseVersion()", "Error retrieving DB version: " + e.getMessage(), null);
+			LogMgr.logError("WbConnection.getDatabaseVersion()", "Error retrieving DB version", e);
 			return "n/a";
 		}
 	}
@@ -759,7 +759,8 @@ public class WbConnection
 		}
 		catch (Throwable e)
 		{
-			return null;
+			LogMgr.logError("WbConnection.getDriverVersion()", "Error retrieving driver version", e);
+			return "n/a";
 		}
 	}
 	

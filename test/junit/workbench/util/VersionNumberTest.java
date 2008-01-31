@@ -36,16 +36,23 @@ public class VersionNumberTest extends TestCase
 		assertEquals(two.getMinorVersion(), 2);
 		
 		assertTrue(two.isNewerThan(one));
+		assertFalse(one.isNewerThan(two));
 		
 		VersionNumber na = new VersionNumber(null);
 		assertFalse(na.isNewerThan(two));
+		assertTrue(two.isNewerThan(na));
 		
 		VersionNumber dev = new VersionNumber("@BUILD_NUMBER@");
-		assertEquals(one.isNewerThan(dev), false);
+		assertFalse(one.isNewerThan(dev));
+		assertTrue(dev.isNewerThan(one));
+		
+		assertTrue(dev.isNewerThan(two));
+		assertFalse(two.isNewerThan(dev));
 		
 		VersionNumber current = new VersionNumber("96.8");
 		VersionNumber stable = new VersionNumber("97");
 		assertTrue(stable.isNewerThan(current));
+		assertFalse(current.isNewerThan(stable));
 		
 	}
 	

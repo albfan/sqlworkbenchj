@@ -110,7 +110,9 @@ public class StatementContext
 			List<Integer> unionStarts = new ArrayList<Integer>();
 			int bracketCount = 0;
 			boolean inSubselect = false;
-			boolean checkForInsertSelect = verb.equals("INSERT") || verb.equals("CREATE");
+			boolean checkForInsertSelect = verb.equals("INSERT") 
+				|| verb.equals("CREATE")
+				|| verb.equals("CREATE OR REPLACE");
 			
 			Set<String> unionKeywords = new HashSet<String>();
 			unionKeywords.add("UNION");

@@ -38,6 +38,17 @@ public class WbConnect
 	
 	public WbConnect()
 	{
+		cmdLine = new ArgumentParser();
+		cmdLine.addArgument(AppArguments.ARG_PROFILE, ArgumentType.ProfileArgument);
+		cmdLine.addArgument(AppArguments.ARG_PROFILE_GROUP);
+		cmdLine.addArgument(AppArguments.ARG_CONN_URL);
+		cmdLine.addArgument(AppArguments.ARG_CONN_DRIVER);
+		cmdLine.addArgument(AppArguments.ARG_CONN_JAR);
+		cmdLine.addArgument(AppArguments.ARG_CONN_USER);
+		cmdLine.addArgument(AppArguments.ARG_CONN_PWD);
+		cmdLine.addArgument(AppArguments.ARG_CONN_AUTOCOMMIT, ArgumentType.BoolArgument);
+		cmdLine.addArgument(AppArguments.ARG_CONN_ROLLBACK, ArgumentType.BoolArgument);
+		cmdLine.addArgument(AppArguments.ARG_CONN_TRIM_CHAR, ArgumentType.BoolArgument);
 	}
 
 	public String getVerb()
@@ -59,17 +70,17 @@ public class WbConnect
 		}
 		
 		String args = getCommandLine(aSql);
-		ArgumentParser cmdline = getArgumentParser(args);
+		cmdLine.parse(args);
 		
 		ConnectionProfile profile = null;
-		String profName = cmdline.getValue(AppArguments.ARG_PROFILE);
+		String profName = cmdLine.getValue(AppArguments.ARG_PROFILE);
 		if (StringUtil.isEmptyString(profName))
 		{
 			profile = BatchRunner.createCmdLineProfile(cmdLine);
 		}
 		else
 		{
-			String group = cmdline.getValue(AppArguments.ARG_PROFILE_GROUP);
+			String group = cmdLine.getValue(AppArguments.ARG_PROFILE_GROUP);
 			profile = ConnectionMgr.getInstance().getProfile(new ProfileKey(profName, group));
 		}
 		
@@ -141,21 +152,4 @@ public class WbConnect
 		return result;
 	}
 	
-	private ArgumentParser getArgumentParser(String args)
-	{
-		ArgumentParser cmdline = new ArgumentParser();
-		cmdline.addArgument(AppArguments.ARG_PROFILE, ArgumentType.ProfileArgument);
-		cmdline.addArgument(AppArguments.ARG_PROFILE_GROUP);
-		
-		cmdline.addArgument(AppArguments.ARG_CONN_URL);
-		cmdline.addArgument(AppArguments.ARG_CONN_DRIVER);
-		cmdline.addArgument(AppArguments.ARG_CONN_JAR);
-		cmdline.addArgument(AppArguments.ARG_CONN_USER);
-		cmdline.addArgument(AppArguments.ARG_CONN_PWD);
-		cmdline.addArgument(AppArguments.ARG_CONN_AUTOCOMMIT, ArgumentType.BoolArgument);
-		cmdline.addArgument(AppArguments.ARG_CONN_ROLLBACK, ArgumentType.BoolArgument);
-		cmdline.addArgument(AppArguments.ARG_CONN_TRIM_CHAR, ArgumentType.BoolArgument);
-		cmdline.parse(args);
-		return cmdline;
-	}
 }

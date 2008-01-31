@@ -12,9 +12,6 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.Map;
-import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;

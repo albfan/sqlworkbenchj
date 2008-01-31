@@ -89,7 +89,7 @@ public class WbCommandAnalyzer
 			}
 			else if (type == ArgumentType.ListArgument)
 			{
-				this.elements = p.getAllowedValues(parameter);
+				this.elements = new ArrayList(p.getAllowedValues(parameter));
 			}
 			else if (type == ArgumentType.ProfileArgument)
 			{

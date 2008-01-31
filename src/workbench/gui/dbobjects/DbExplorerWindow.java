@@ -11,7 +11,6 @@
  */
 package workbench.gui.dbobjects;
 
-import java.awt.EventQueue;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
@@ -29,7 +28,6 @@ import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.ToolWindow;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.util.StringUtil;
 
 /**
  *
@@ -60,7 +58,7 @@ public class DbExplorerWindow
 		this.setProfileName(aProfileName);
 		this.restorePosition();
 		this.jobIndicator = new RunningJobIndicator(this);
-		aPanel.setDbExecutionListener(this);
+		this.panel.setDbExecutionListener(this);
 	}
 
 	public void activate()

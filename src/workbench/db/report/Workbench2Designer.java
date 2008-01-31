@@ -12,7 +12,7 @@
 package workbench.db.report;
 
 /**
- * @author tstill
+ * @author Tobias Still
  */
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -802,16 +802,16 @@ public class Workbench2Designer
 			while(iit.hasNext())
 			{
 				Relation relation = (Relation)Workbench2Designer.relations.get(iit.next());
-				String id=(String)Workbench2Designer.dbdIDReference.getRelationDBDID(relation.getID());
+				String id = Workbench2Designer.dbdIDReference.getRelationDBDID(relation.getID());
 				if(table.getName().equals(relation.getDestTable()))
 				{
-					dbdRelationEnd=destination.createElement("RELATION_END");
+					dbdRelationEnd = destination.createElement("RELATION_END");
 					dbdRelationEnd.setAttribute("ID", id);
 					dbdRelationsEnd.appendChild(dbdRelationEnd);
 				}
 				if(table.getName().equals(relation.getSrcTable()))
 				{
-					dbdRelationStart=destination.createElement("RELATION_START");
+					dbdRelationStart = destination.createElement("RELATION_START");
 					dbdRelationStart.setAttribute("ID", id);
 					dbdRelationsStart.appendChild(dbdRelationStart);
 				}
@@ -858,12 +858,11 @@ public class Workbench2Designer
 					dbdIndexCols.appendChild(dbdIndexCol);
 
 					String colName=(String)iit.next();
-					String idColumn=Workbench2Designer.dbdIDReference.getColumnDBDID(table.getName(),colName);
+					String idColumn = Workbench2Designer.dbdIDReference.getColumnDBDID(table.getName(),colName);
 					attributes = new TreeMap();
 					attributes.put("LengthParam", "0");
 					attributes.put("idColumn", idColumn);
 					this.setAttributes(attributes,dbdIndexCol);
-
 				}
 				dbdIndices.appendChild(dbdIndex);
 				dbdIndex.appendChild(dbdIndexCols);
@@ -880,7 +879,7 @@ public class Workbench2Designer
 		String databaseType =  this.getTextByTagName("database-product-name",source);
 		String comments = "created: "+ this.getTextByTagName("created",source);
 		String modelName="";
-		Workbench2Designer.globalSettings= new GlobalSettings(comments,databaseType,modelName);
+		Workbench2Designer.globalSettings = new GlobalSettings(comments,databaseType,modelName);
 	}
 
 	public void wbReadTables()

@@ -32,6 +32,7 @@ import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+import workbench.util.XsltTransformer;
 
 /**
  *
@@ -111,6 +112,7 @@ public class WbSchemaReport
 		String namespace = cmdLine.getValue("namespace");
 		this.reporter = new SchemaReporter(currentConnection);
 		this.reporter.setNamespace(namespace);
+		this.reporter.setDbDesigner(dbDesigner);
 
 		TableIdentifier[] tables = this.parseTables();
 		if (tables != null)
@@ -161,16 +163,16 @@ public class WbSchemaReport
 		// see setCurrentObject()
 		this.currentTable = 0;
 		
-		String wbReportFilename = output.getFullPath();
-		if (dbDesigner)
-		{
-			WbFile f = new WbFile(wbReportFilename);
-			String dir = f.getParent();
-			String fname = f.getName();
-			WbFile nf = new WbFile(dir, "__wb_" + fname);
-			wbReportFilename = nf.getFullPath();
-		}
-		this.reporter.setOutputFilename(wbReportFilename);
+//		String wbReportFilename = output.getFullPath();
+//		if (dbDesigner)
+//		{
+//			WbFile f = new WbFile(wbReportFilename);
+//			String dir = f.getParent();
+//			String fname = f.getName();
+//			WbFile nf = new WbFile(dir, "__wb_" + fname);
+//			wbReportFilename = nf.getFullPath();
+//		}
+		this.reporter.setOutputFilename(output.getFullPath());
 
 		try
 		{
@@ -182,31 +184,50 @@ public class WbSchemaReport
 			result.addMessage(e.getMessage());
 		}
 
-		if (dbDesigner && result.isSuccess())
-		{
-			try
-			{
-				this.setCurrentObject(ResourceMgr.getString("MsgConvertReport2Designer"), -1, -1);
-				Workbench2Designer converter = new Workbench2Designer(new File(wbReportFilename));
-				converter.transformWorkbench2Designer();
-				converter.writeOutputFile(output);
-			}
-			catch (Exception e)
-			{
-				result.setFailure();
-				LogMgr.logError("WbSchemaReport.execute()", "Error generating DBDesigner file", e);
-				String msg = ResourceMgr.getString("ErrGeneratingDbDesigner");
-				msg = StringUtil.replace(msg, "%wbfile%", output.getFullPath());
-				msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));
-				result.addMessage(msg);
-			}
-		}
+		String xslt = cmdLine.getValue(WbXslt.ARG_STYLESHEET);
+		String xsltOutput = cmdLine.getValue(WbXslt.ARG_OUTPUT);
+		
+//		if (dbDesigner && result.isSuccess())
+//		{
+//			try
+//			{
+//				this.setCurrentObject(ResourceMgr.getString("MsgConvertReport2Designer"), -1, -1);
+//				Workbench2Designer converter = new Workbench2Designer(new File(wbReportFilename));
+//				converter.transformWorkbench2Designer();
+//				converter.writeOutputFile(output);
+//			}
+//			catch (Exception e)
+//			{
+//				result.setFailure();
+//				LogMgr.logError("WbSchemaReport.execute()", "Error generating DBDesigner file", e);
+//				String msg = ResourceMgr.getString("ErrGeneratingDbDesigner");
+//				msg = StringUtil.replace(msg, "%wbfile%", output.getFullPath());
+//				msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));
+//				result.addMessage(msg);
+//			}
+//		}
 		if (result.isSuccess())
 		{
 			String msg = ResourceMgr.getFormattedString("MsgSchemaReportTablesWritten", currentTable, output.getFullPath());
 			result.addMessage(msg);
 			result.setSuccess();
 		}
+
+		if (!StringUtil.isEmptyString(xslt) && !StringUtil.isEmptyString(xsltOutput))
+		{
+			try
+			{
+				XsltTransformer.transformFile(output.getFullPath(), xsltOutput, xslt);
+				result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", xsltOutput));
+				result.setSuccess();
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("WbSchemaReport.execute()", "Error when transforming '" + output.getFullPath() + "' to '" + xsltOutput + "' using " + xslt, e);
+				result.addMessage(e.getMessage());
+			}			
+		}
+			
 		
 		return result;
 	}

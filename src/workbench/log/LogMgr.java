@@ -76,6 +76,7 @@ public class LogMgr
 	private static int levelError;
 	private static boolean debugEnabled;
 	private static boolean infoEnabled;
+	private static File currentFile;
 
 	public static void setMessageFormat(String aFormat)
 	{
@@ -185,6 +186,8 @@ public class LogMgr
 	public static void setOutputFile(File logfile, int maxFilesize)
 	{
 		if (logfile == null) return;
+		if (logfile.equals(currentFile)) return;
+		
 		try
 		{
 			if (logOut != null)
@@ -200,6 +203,7 @@ public class LogMgr
 				logfile.renameTo(last);
 			}
 			logOut = new PrintStream(new FileOutputStream(logfile,true));
+			currentFile = logfile;
 			logInfo(null, "=================== Log started ===================");
 		}
 		catch (Throwable th)

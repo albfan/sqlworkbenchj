@@ -24,6 +24,7 @@ import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
 import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
+import workbench.util.WbFile;
 
 /**
  *
@@ -37,7 +38,8 @@ public abstract class ExportWriter
 	protected String tableToUse;
 	protected RowActionMonitor rowMonitor;
 	protected RowDataConverter converter;
-	private Writer output;
+	protected Writer outputWriter;
+	protected WbFile outputFile;
 	private int progressInterval = 10;
 
 	public ExportWriter(DataExporter exp)
@@ -63,6 +65,7 @@ public abstract class ExportWriter
 		converter.setCompressExternalFiles(exporter.getCompressOutput());
 		converter.setBlobIdColumns(exporter.getBlobIdColumns());
 		converter.setFilenameColumn(exporter.getFilenameColumn());
+		converter.setPageTitle(exporter.getPageTitle());
 		
 		String file = this.exporter.getOutputFilename();
 		if (file != null) converter.setOutputFile(new File(file));
@@ -107,9 +110,10 @@ public abstract class ExportWriter
 		{
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
 		}
+		
 		writeStart();
+		
 		int rowCount = ds.getRowCount();
-		StrBuffer data = null;
 		for (int i=0; i < rowCount; i++)
 		{
 			if (this.cancel) break;
@@ -120,16 +124,26 @@ public abstract class ExportWriter
 				this.rowMonitor.setCurrentRow((int)this.rows, -1);
 			}
 			RowData row = ds.getRow(i);
-			data = converter.convertRowData(row, rows);
-			data.writeTo(this.output);
+			writeRow(row, rows);
 			rows ++;
 		}
 		writeEnd(rows);
 	}
 
-	public void setOutput(Writer out)
+	public boolean managesOutput()
 	{
-		this.output = out;
+		return false;
+	}
+	
+	public void setOutputFile(WbFile out)
+	{
+		this.outputWriter = null;
+		this.outputFile = out;
+	}
+	public void setOutputWriter(Writer out)
+	{
+		this.outputWriter = out;
+		this.outputFile = null;
 	}
 
 	public void writeExport(ResultSet rs, ResultInfo info)
@@ -146,8 +160,8 @@ public abstract class ExportWriter
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
 		}
 		int colCount = info.getColumnCount();
+		
 		if (!this.exporter.getAppendToFile()) writeStart();
-		StrBuffer data = null;
 		while (rs.next())
 		{
 			if (this.cancel) break;
@@ -159,21 +173,30 @@ public abstract class ExportWriter
 			}
 			RowData row = new RowData(colCount);
 			row.read(rs, info);
-			data = converter.convertRowData(row, rows);
-			data.writeTo(this.output);
+			writeRow(row, rows);
 			rows ++;
 		}
 		writeEnd(rows);
 	}
 
+	protected void writeRow(RowData row, long numRows)
+		throws IOException
+	{
+		StrBuffer data = converter.convertRowData(row, numRows);
+		if (data != null && outputWriter != null)
+		{
+			data.writeTo(this.outputWriter);
+		}
+	}
+	
 	protected void writeStart()
 		throws IOException
 	{
 		writeFormatFile();
 		StrBuffer data = converter.getStart();
-		if (data != null)
+		if (data != null && outputWriter != null)
 		{
-			data.writeTo(this.output);
+			data.writeTo(this.outputWriter);
 		}
 	}
 
@@ -181,15 +204,21 @@ public abstract class ExportWriter
 		throws IOException
 	{
 		StrBuffer data = converter.getEnd(totalRows);
-		if (data != null)
+		if (data != null && outputWriter != null)
 		{
-			data.writeTo(this.output);
+			data.writeTo(this.outputWriter);
 		}
 	}
 
+	public void exportStarting()
+		throws IOException
+	{
+		
+	}
+	
 	public void exportFinished()
 	{
-		FileUtil.closeQuitely(output);
+		FileUtil.closeQuitely(outputWriter);
 		try
 		{
 			if (this.converter != null) this.converter.exportFinished();
@@ -224,7 +253,7 @@ public abstract class ExportWriter
 		this.tableToUse = tableToUse;
 	}
 
-	private void writeFormatFile()
+	protected void writeFormatFile()
 	{
 		if (exporter.getWriteOracleControlFile())
 		{

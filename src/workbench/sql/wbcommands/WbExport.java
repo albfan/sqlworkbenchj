@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 import workbench.WbManager;
 import workbench.db.exporter.DataExporter;
@@ -32,13 +33,14 @@ import workbench.util.EncodingUtil;
 import workbench.util.StringUtil;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
+import workbench.db.exporter.PoiHelper;
 import workbench.util.ExceptionUtil;
 import workbench.util.WbFile;
 
 /**
  * SQL Command for running an export.
  * @see workbench.db.exporter.DataExporter
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class WbExport
@@ -63,8 +65,8 @@ public class WbExport
 		CommonArgs.addCommitParameter(cmdLine);
 		CommonArgs.addVerboseXmlParameter(cmdLine);
 		CommonArgs.addQuoteEscaping(cmdLine);
-		
-		cmdLine.addArgument("type", StringUtil.stringToList("text,xml,sqlinsert,sqlupdate,sqldeleteinsert,html"));
+
+		cmdLine.addArgument("type", StringUtil.stringToList("text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,html,xls"));
 		cmdLine.addArgument("file");
 		cmdLine.addArgument("title");
 		cmdLine.addArgument("table");
@@ -102,7 +104,7 @@ public class WbExport
 		cmdLine.addArgument("sqlDateLiterals", Settings.getInstance().getLiteralTypeList());
 		cmdLine.addArgument("createDir", ArgumentType.BoolArgument);
 	}
-	
+
 	public String getVerb() { return VERB; }
 
 	private void addWrongArgumentsMessage(StatementRunnerResult result)
@@ -122,24 +124,24 @@ public class WbExport
 		msg = StringUtil.replace(msg, "%default_encoding%", Settings.getInstance().getDefaultDataEncoding());
 		return msg;
 	}
-	
+
 	private boolean getVerboseXmlDefault()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.export.xml.default.verbose", true);
 	}
-	
+
 	private boolean getTextHeaderDefault()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false);
 	}
-	
+
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		
+
 		cmdLine.parse(getCommandLine(sql));
-		
+
 		if (cmdLine.isArgPresent("showencodings"))
 		{
 			result.addMessage(ResourceMgr.getString("MsgAvailableEncodings"));
@@ -157,26 +159,10 @@ public class WbExport
 			setUnknownMessage(result, cmdLine, getWrongArgumentsMessage());
 			return result;
 		}
-		
-		String type = null;
-		//String file = null;
 
-		type = cmdLine.getValue("type");
-		if (!isTypeValid(type))
-		{
-			result.addMessage(ResourceMgr.getString("ErrExportWrongType"));
-			addWrongArgumentsMessage(result);
-			result.setFailure();
-			return result;
-		}
-		
-		this.exporter = new DataExporter(this.currentConnection);
 		WbFile outputFile = evaluateFileArgument(cmdLine.getValue("file"));
+		String type = cmdLine.getValue("type");
 		
-		String tables = cmdLine.getValue("sourcetable");
-
-		String outputdir = cmdLine.getValue("outputdir");
-
 		if (type == null)
 		{
 			type = findTypeFromFilename(outputFile.getFullPath());
@@ -190,6 +176,20 @@ public class WbExport
 			return result;
 		}
 
+		if (!isTypeValid(type))
+		{
+			result.addMessage(ResourceMgr.getString("ErrExportWrongType"));
+			addWrongArgumentsMessage(result);
+			result.setFailure();
+			return result;
+		}
+
+		this.exporter = new DataExporter(this.currentConnection);
+
+		String tables = cmdLine.getValue("sourcetable");
+
+		String outputdir = cmdLine.getValue("outputdir");
+
 		if (outputFile == null && outputdir == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrExportFileRequired"));
@@ -202,14 +202,26 @@ public class WbExport
 		type = type.trim().toLowerCase();
 
 		String encoding = cmdLine.getValue("encoding");
-		if (encoding != null) 
+		if (encoding != null)
 		{
 			exporter.setEncoding(encoding);
 		}
 		exporter.setAppendToFile(cmdLine.getBoolean("append"));
 		exporter.setWriteClobAsFile(cmdLine.getBoolean("clobasfile", false));
-		
+
 		this.continueOnError = cmdLine.getBoolean("continueonerror", false);
+
+		// Some properties used by more than one export type
+		String format = cmdLine.getValue("dateformat");
+		if (format != null) exporter.setDateFormat(format);
+
+		format = cmdLine.getValue("timestampformat");
+		if (format != null) exporter.setTimestampFormat(format);
+		
+		format = cmdLine.getValue("decimal");
+		if (format != null) exporter.setDecimalSymbol(format);
+		
+		exporter.setPageTitle(cmdLine.getValue("title"));
 		
 		if ("text".equals(type) || "txt".equals(type))
 		{
@@ -227,21 +239,12 @@ public class WbExport
 					exporter.setWriteBcpFormatFile(true);
 				}
 			}
-			
+
 			String delimiter = cmdLine.getValue("delimiter");
 			if (delimiter != null) exporter.setTextDelimiter(delimiter);
 
 			String quote = cmdLine.getValue("quotechar");
 			if (quote != null) exporter.setTextQuoteChar(quote);
-
-			String format = cmdLine.getValue("dateformat");
-			if (format != null) exporter.setDateFormat(format);
-
-			format = cmdLine.getValue("timestampformat");
-			if (format != null) exporter.setTimestampFormat(format);
-
-			format = cmdLine.getValue("decimal");
-			if (format != null) exporter.setDecimalSymbol(format);
 
 			exporter.setExportHeaders(cmdLine.getBoolean("header", getTextHeaderDefault()));
 
@@ -277,7 +280,7 @@ public class WbExport
 			}
 			exporter.setQuoteAlways(cmdLine.getBoolean("quotealways"));
 			exporter.setQuoteEscaping(CommonArgs.getQuoteEscaping(cmdLine));
-			
+
 			this.defaultExtension = ".txt";
 		}
 		else if (type.startsWith("sql"))
@@ -286,9 +289,9 @@ public class WbExport
 			exporter.setChrFunction(cmdLine.getValue("charfunc"));
 			exporter.setConcatFunction(cmdLine.getValue("concatfunc"));
 			exporter.setConcatString(cmdLine.getValue("concat"));
-			
+
 			CommonArgs.setCommitEvery(exporter, cmdLine);
-			
+
 			exporter.setAppendToFile(cmdLine.getBoolean("append"));
 			if (updateTable != null) exporter.setTableName(updateTable);
 			String c = cmdLine.getValue("keycolumns");
@@ -308,19 +311,10 @@ public class WbExport
 		}
 		else if ("xml".equals(type))
 		{
-			String format = cmdLine.getValue("dateformat");
-			if (format != null) exporter.setDateFormat(format);
-
-			format = cmdLine.getValue("timestampformat");
-			if (format != null) exporter.setTimestampFormat(format);
-
-			format = cmdLine.getValue("decimal");
-			if (format != null) exporter.setDecimalSymbol(format);
-
 			String xsl = cmdLine.getValue(WbXslt.ARG_STYLESHEET);
 			String output = cmdLine.getValue(WbXslt.ARG_OUTPUT);
 
-			boolean verboseDefault = getVerboseXmlDefault(); 
+			boolean verboseDefault = getVerboseXmlDefault();
 			boolean verbose = cmdLine.getBoolean(CommonArgs.ARG_VERBOSE_XML, verboseDefault);
 			exporter.setUseVerboseFormat(verbose);
 
@@ -350,18 +344,6 @@ public class WbExport
 		}
 		else if ("html".equals(type))
 		{
-			// change the contents of type in order to display it properly
-			String format = cmdLine.getValue("dateformat");
-			if (format != null) exporter.setDateFormat(format);
-
-			format = cmdLine.getValue("timestampformat");
-			if (format != null) exporter.setTimestampFormat(format);
-
-			format = cmdLine.getValue("decimal");
-			if (format != null) exporter.setDecimalSymbol(format);
-
-			exporter.setHtmlTitle(cmdLine.getValue("title"));
-
 			String value = cmdLine.getValue("escapehtml");
 			if (value != null)
 			{
@@ -375,12 +357,16 @@ public class WbExport
 			if (updateTable != null) exporter.setTableName(updateTable);
 			this.defaultExtension = ".html";
 		}
-		else
+		else if (type.equalsIgnoreCase("xls"))
 		{
-			result.addMessage(ResourceMgr.getString("ErrExportWrongParameters"));
-			result.setFailure();
-			return result;
+			if (!PoiHelper.isPoiAvailable())
+			{
+				result.setFailure();
+				result.addMessage(ResourceMgr.getString("ErrExportNoPoi"));
+				return result;
+			}
 		}
+		
 		String ending = cmdLine.getValue("lineending");
 		if (ending != null)
 		{
@@ -401,27 +387,27 @@ public class WbExport
 		}
 
 		String cols = cmdLine.getValue("lobidcols");
-		if (cols == null) 
+		if (cols == null)
 		{
 			cols = cmdLine.getValue("blobidcols");
-			if (cols != null) 
+			if (cols != null)
 			{
 				result.addMessage("The blobIdCols parameter is deprecated, please use lobIdCols");
 				result.setWarning(true);
 			}
 		}
-		
+
 		List<String> columns = StringUtil.stringToList(cols, ",", true, true, false);
 		this.exporter.setBlobIdColumns(columns);
 		this.exporter.setCompressOutput(cmdLine.getBoolean("compress", false));
-		
+
 		this.exporter.setOutputFilename(outputFile != null ? outputFile.getFullPath() : null);
 
 		// Setting the output type should be the last step in the configuration
-		// of the exporter as this will trigger some initialization 
+		// of the exporter as this will trigger some initialization
 		// that depends on the other properties
 		setExportType(exporter, type);
-		
+
 		List<TableIdentifier> tablesToExport = null;
 		try
 		{
@@ -441,14 +427,14 @@ public class WbExport
 			result.setFailure();
 			return result;
 		}
-		
+
 		this.directExport = (tablesToExport.size() > 0);
 
 		CommonArgs.setProgressInterval(this, cmdLine);
 		this.showProgress = (this.progressInterval > 0);
 
 		boolean create = cmdLine.getBoolean("createdir", false);
-		
+
 		if (create)
 		{
 			WbFile dir = null;
@@ -460,7 +446,7 @@ public class WbExport
 			{
 				dir = new WbFile(outputdir);
 			}
-			
+
 			if (!dir.exists())
 			{
 				if (!dir.mkdirs())
@@ -475,13 +461,13 @@ public class WbExport
 				}
 			}
 		}
-		
+
 		if (outputFile != null)
 		{
-			// For a single table export the definition of a 
+			// For a single table export the definition of a
 			String extCol = cmdLine.getValue("filenameColumn");
 			exporter.setFilenameColumn(extCol);
-			
+
 			// Check the outputfile right now, so the user does not have
 			// to wait for a possible error message until the ResultSet
 			// from the SELECT statement comes in...
@@ -490,8 +476,8 @@ public class WbExport
 			try
 			{
 				// File.canWrite() does not work reliably. It will report
-				// an error if the file does not exist, but still could 
-				// be written. 
+				// an error if the file does not exist, but still could
+				// be written.
 				if (outputFile.exists())
 				{
 					msg = ResourceMgr.getString("ErrExportFileWrite");
@@ -508,7 +494,7 @@ public class WbExport
 				canWrite = false;
 				msg = ResourceMgr.getString("ErrExportFileCreate") + " " + e.getMessage();
 			}
-			
+
 			if (!canWrite)
 			{
 				result.addMessage(msg);
@@ -555,36 +541,13 @@ public class WbExport
 		return result;
 	}
 
-	private boolean isTypeValid(String type)
+	boolean isTypeValid(String type)
 	{
 		if (type == null) return false;
-		if (type.equals("sql") || type.equals("sqlinsert"))
-		{
-			return true;
-		}
-		else if (type.equals("sqlupdate"))
-		{
-			return true;
-		}
-		else if (type.equals("sqldeleteinsert"))
-		{
-			return true;
-		}
-		else if (type.equals("xml"))
-		{
-			return true;
-		}
-		else if (type.equals("text") || type.equals("txt"))
-		{
-			return true;
-		}
-		else if (type.equals("html"))
-		{
-			return true;
-		}
-		return false;
+		Collection<String> types = cmdLine.getAllowedValues("type");
+		return types.contains(type);
 	}
-	
+
 	private void setExportType(DataExporter exporter, String type)
 	{
 		if (type.equals("sql") || type.equals("sqlinsert"))
@@ -601,7 +564,7 @@ public class WbExport
 		}
 		else if (type.equals("xml"))
 		{
-			exporter.setOutputTypeXml();	
+			exporter.setOutputTypeXml();
 		}
 		else if (type.equals("text") || type.equals("txt"))
 		{
@@ -610,6 +573,14 @@ public class WbExport
 		else if (type.equals("html"))
 		{
 			exporter.setOutputTypeHtml();
+		}
+		else if (type.equals("xls"))
+		{
+			exporter.setOutputTypeXls();
+		}
+		else if (type.equals("ods"))
+		{
+			exporter.setOutputTypeOds();
 		}
 	}
 
@@ -624,13 +595,13 @@ public class WbExport
 		{
 			exportSingleTable(tableList.get(0), result, outdir);
 		}
-	}	
-	
+	}
+
 	private void exportSingleTable(TableIdentifier table, StatementRunnerResult result, File outdir)
 		throws SQLException
 	{
 		String outfile = this.exporter.getOutputFilename();
-		
+
 		if (StringUtil.isEmptyString(outfile))
 		{
 			outfile = StringUtil.makeFilename(table.getTableName());
@@ -648,12 +619,12 @@ public class WbExport
 			msg = StringUtil.replace(msg, "%rows%", Long.toString(rows));
 			result.addMessage(msg);
 		}
-		else 
+		else
 		{
 			result.setFailure();
 		}
 	}
-	
+
 	private void exportTableList(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir)
 		throws SQLException
 	{
@@ -699,7 +670,7 @@ public class WbExport
 			}
 			catch (SQLException e)
 			{
-				if (continueOnError) 
+				if (continueOnError)
 				{
 					result.addMessage(ResourceMgr.getString("TxtWarning") + ": " + e.getMessage());
 					result.setWarning(true);
@@ -710,9 +681,9 @@ public class WbExport
 				}
 			}
 		}
-		
+
 		exporter.runJobs();
-			
+
 		if (exporter.isSuccess())
 		{
 			tableCount = exporter.getNumberExportedTables();
@@ -722,7 +693,7 @@ public class WbExport
 			result.addMessage(msg);
 			result.setSuccess();
 		}
-		else 
+		else
 		{
 			result.setFailure();
 		}
@@ -766,7 +737,7 @@ public class WbExport
 				// ResultSet
 				aResult.getResultSets().remove(0);
 				long rowCount = this.exporter.startExport(toExport);
-				
+
 				String msg = null;
 
 				if (exporter.isSuccess())
@@ -778,7 +749,7 @@ public class WbExport
 					aResult.addMessage(msg);
 				}
 				addMessages(aResult);
-				
+
 				if (exporter.isSuccess())
 				{
 					aResult.setSuccess();
@@ -847,7 +818,7 @@ public class WbExport
 	{
 		this.progressInterval = interval;
 	}
-	
+
 	public int getMonitorType() { return RowActionMonitor.MONITOR_PLAIN; }
 	public void setMonitorType(int aType) {}
 	public void saveCurrentType(String type) {}
@@ -863,6 +834,8 @@ public class WbExport
 		if (fname.toLowerCase().endsWith(".htm")) return "html";
 		if (fname.toLowerCase().endsWith(".html")) return "html";
 		if (fname.toLowerCase().endsWith(".sql")) return "sqlinsert";
+		if (fname.toLowerCase().endsWith(".xls")) return "xls";
+		if (fname.toLowerCase().endsWith(".ods")) return "ods";
 		return null;
 	}
 

@@ -49,8 +49,15 @@ public class ZipOutputFactory
 	public OutputStream createOutputStream(File output) 
 		throws IOException
 	{
-		if (this.zout == null) initArchive();
 		String filename = output.getName();
+		return createOutputStream(filename);
+	}
+	
+	public OutputStream createOutputStream(String filename) 
+		throws IOException
+	{
+		if (this.zout == null) initArchive();
+		
 		this.currentEntry = new ZipEntry(filename);
 		this.zout.putNextEntry(currentEntry);
 		OutputStream out = new OutputStream()
@@ -84,6 +91,13 @@ public class ZipOutputFactory
 		return out;
 	}
 
+	public Writer createWriter(String output, String encoding)
+		throws IOException
+	{
+		OutputStream out = createOutputStream(output);
+		return EncodingUtil.createWriter(out, encoding);
+	}
+	
 	public Writer createWriter(File output, String encoding)
 		throws IOException
 	{

@@ -56,6 +56,7 @@ public class ReportColumn
 	{
 		return this.fk;
 	}
+	
 	public void setForeignKeyReference(ColumnReference ref)
 	{
 		this.fk = ref;

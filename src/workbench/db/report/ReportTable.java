@@ -17,6 +17,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
@@ -58,10 +59,8 @@ public class ReportTable
 	private String schemaNameToUse = null;
 	private String namespace = null;
 	private boolean includePrimaryKey = true;
-	private boolean includeGrants = false;
 	private String tableConstraints;
 	private ReportTableGrants grants;
-//	private String mviewSource;
 	
 	public ReportTable(TableIdentifier tbl)
 	{
@@ -95,13 +94,6 @@ public class ReportTable
 		
 		this.table.checkQuotesNeeded(conn);
 		
-		if (tbl.getSchema() == null)
-		{
-			// This is important for e.g. Oracle. Otherwise the table definition 
-			// will contain multiple columns if a table exists more then once in 
-			// different schemas with the same name
-			tbl.setSchema(conn.getMetadata().getSchemaToUse());
-		}
 		List<ColumnIdentifier> cols = conn.getMetadata().getTableColumns(tbl);
 		Collections.sort(cols);
 
@@ -109,6 +101,9 @@ public class ReportTable
 		String schema = this.table.getSchema();
 		if (schema == null || schema.length() == 0)
 		{
+			// This is important for e.g. Oracle. Otherwise the table definition 
+			// will contain multiple columns if a table exists more then once in 
+			// different schemas with the same name
 			schema = conn.getMetadata().getSchemaToUse();
 			if (schema != null) this.table.setSchema(schema);
 		}
@@ -247,7 +242,11 @@ public class ReportTable
 	public ReportColumn findColumn(String col)
 	{
 		if (col == null) return null;
-
+		if (columns == null)
+		{
+			System.out.println("ReportTable " + getTable().getTableName() +  " has no columns!");
+			return null;
+		}
 		ReportColumn result = null;
 		int numCols = this.columns.length;
 		for (int i=0; i < numCols; i++)
@@ -265,6 +264,26 @@ public class ReportTable
 	{
 		if (this.reporter == null) return null;
 		return this.reporter.getIndexList();
+	}
+	
+	public List<ReportColumn> getColumnsSorted()
+	{
+		Comparator<ReportColumn> comp = new Comparator<ReportColumn>()
+		{
+			public int compare(ReportColumn o1, ReportColumn o2)
+			{
+				int pos1 = o1.getColumn().getPosition();
+				int pos2 = o2.getColumn().getPosition();
+				return pos1 - pos2;
+			}
+		};
+		List<ReportColumn> result = new ArrayList<ReportColumn>(columns.length);
+		for (ReportColumn col : columns)
+		{
+			result.add(col);
+		}
+		Collections.sort(result, comp);
+		return result;
 	}
 	
 	public ReportColumn[] getColumns()
@@ -292,6 +311,11 @@ public class ReportTable
 	public StrBuffer getXml()
 	{
 		return getXml(new StrBuffer("  "));
+	}
+	
+	public String toString()
+	{
+		return this.table.toString();
 	}
 	
 	public String getTableComment() { return this.tableComment; }

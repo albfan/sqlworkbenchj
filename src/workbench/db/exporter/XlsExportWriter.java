@@ -10,30 +10,24 @@
  *
  */
 package workbench.db.exporter;
+import workbench.util.StringUtil;
 
 /**
  *
- * @author  support@sql-workbench.net
+ * @author Alessandro Palumbo
  */
-public class HtmlExportWriter
+public class XlsExportWriter
 	extends ExportWriter
 {
 	
-	public HtmlExportWriter(DataExporter exp)
+	public XlsExportWriter(DataExporter exp)
 	{
 		super(exp);
 	}
 
 	public RowDataConverter createConverter()
 	{
-		return new HtmlRowDataConverter();
+		return new XlsRowDataConverter();
 	}
 
-	public void configureConverter()
-	{
-		HtmlRowDataConverter conv = (HtmlRowDataConverter)this.converter;
-		conv.setPageTitle(this.exporter.getPageTitle());
-		conv.setCreateFullPage(exporter.getCreateFullHtmlPage());
-		conv.setEscapeHtml(exporter.getEscapeHtml());
-	}
 }

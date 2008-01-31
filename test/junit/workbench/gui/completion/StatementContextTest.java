@@ -211,6 +211,38 @@ public class StatementContextTest extends TestCase
 		}
   }
 
+  public void createView()
+  {
+		try
+		{
+			StatementContext context = new StatementContext(con, "create view v_test as select * from  ", 36);
+			BaseAnalyzer analyzer = context.getAnalyzer();
+			assertTrue(analyzer instanceof SelectAnalyzer);
+			List objects = analyzer.getData();
+			assertNotNull(objects);
+			assertEquals(3, objects.size());
+			Object o = objects.get(0);
+			assertTrue(o instanceof TableIdentifier);
+			TableIdentifier t = (TableIdentifier)o;
+			assertEquals("one", t.getTableName().toLowerCase());
+			
+			context = new StatementContext(con, "reate or replace view v_test as select * from  ", 48);
+			analyzer = context.getAnalyzer();
+			assertTrue(analyzer instanceof SelectAnalyzer);
+			objects = analyzer.getData();
+			assertNotNull(objects);
+			assertEquals(3, objects.size());
+			o = objects.get(0);
+			assertTrue(o instanceof TableIdentifier);
+			t = (TableIdentifier)o;
+			assertEquals("one", t.getTableName().toLowerCase());			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+  }	
   public void testDeleteColumnList()
   {
 		try

@@ -43,6 +43,7 @@ import workbench.storage.RowActionMonitor;
 import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
+import workbench.util.WbFile;
 import workbench.util.WbThread;
 
 
@@ -75,6 +76,7 @@ public class SchemaReporter
 	private boolean showProgress = false;
 	private String schemaNameToUse = null;
 	private JFrame parentWindow;
+	private boolean dbDesignerFormat = false;
 
 	/**
 	 * Creates a new SchemaReporter for the supplied connection
@@ -174,13 +176,18 @@ public class SchemaReporter
 		{
 			this.writeXml(out);
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			// Cannot happen with StrWriter
 		}
 		return out.toString();
 	}
 
+	public void setDbDesigner(boolean flag)
+	{
+		this.dbDesignerFormat = flag;
+	}
+	
 	public void setShowProgress(boolean flag, JFrame parent)
 	{
 		this.showProgress = flag;
@@ -188,7 +195,7 @@ public class SchemaReporter
 	}
 
 	public void writeXml()
-		throws IOException
+		throws IOException, SQLException
 	{
 
 		if (this.showProgress)
@@ -229,18 +236,27 @@ public class SchemaReporter
 	 *	Write the XML into the supplied output
 	 */
 	public void writeXml(Writer out)
-		throws IOException
+		throws IOException, SQLException
 	{
 		this.cancel = false;
 
 		if (this.includeTables && this.tables.size() == 0) this.retrieveTables();
 		if (this.cancel) return;
+
+		if (this.dbDesignerFormat)
+		{
+			WbFile f = new WbFile(this.outputfile);
+			DbDesignerWriter writer = new DbDesignerWriter(this.dbConn, this.tables, f.getFileName());
+			writer.writeXml(out);
+			return;
+		}
 		
 		if (this.includeProcedures && this.procedures.size() == 0) this.retrieveProcedures();
 		if (this.cancel) return;
 
 		if (this.includeSequences && this.sequences.size() == 0) this.retrieveSequences();
 		if (this.cancel) return;
+
 		
 		out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		out.write("<");

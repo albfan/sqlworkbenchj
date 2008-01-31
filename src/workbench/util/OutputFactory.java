@@ -22,8 +22,15 @@ import java.io.Writer;
  */
 public interface OutputFactory
 {
-	OutputStream createOutputStream(File output) throws IOException;
-	Writer createWriter(File output, String encoding) throws IOException;
+	OutputStream createOutputStream(File output) 
+		throws IOException;
+	
+	Writer createWriter(File output, String encoding) 
+		throws IOException;
+	
+	Writer createWriter(String filename, String encoding) 
+		throws IOException;
+	
 	void done() throws IOException;
 	boolean isArchive();
 }

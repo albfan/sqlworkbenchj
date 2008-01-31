@@ -27,6 +27,7 @@ import javax.swing.border.EmptyBorder;
 import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
+import workbench.db.exporter.PoiHelper;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ColumnSelectorPanel;
 import workbench.gui.components.DividerBorder;
@@ -54,6 +55,8 @@ public class ExportOptionsPanel
 	private SqlOptionsPanel sqlOptions;
 	private HtmlOptionsPanel htmlOptions;
 	private XmlOptionsPanel xmlOptions;
+	private SpreadSheetOptionsPanel odsOptions;
+	private SpreadSheetOptionsPanel xlsOptions;
 	private int currentType = -1;
 	private List<ColumnIdentifier> selectedColumns;
 	private Object columnSelectEventSource;
@@ -61,6 +64,10 @@ public class ExportOptionsPanel
 	private ResultInfo dataStoreColumns;
 	private String query;
 	private WbConnection dbConnection;
+	private boolean poiAvailable = false;
+	
+	private final String ODS_ITEM = ResourceMgr.getString("TxtOdsName");
+	private final String XLS_ITEM = ResourceMgr.getString("TxtXlsName");
 	
 	public ExportOptionsPanel()
 	{
@@ -87,11 +94,20 @@ public class ExportOptionsPanel
 		JPanel s = new JPanel(new BorderLayout(2, 2));
 		Border b = new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(0, 0, 5, 0));
 		s.setBorder(b);
+		
+		poiAvailable = PoiHelper.isPoiAvailable();
+		
 		typeSelector = new JComboBox();
 		typeSelector.addItem("Text");
 		typeSelector.addItem("SQL");
 		typeSelector.addItem("XML");
+		typeSelector.addItem(ODS_ITEM);
 		typeSelector.addItem("HTML");
+		if (poiAvailable)
+		{
+			typeSelector.addItem(XLS_ITEM);
+		}
+		
 		JLabel type = new JLabel("Type");
 		s.add(type, BorderLayout.WEST);
 		s.add(typeSelector, BorderLayout.CENTER);
@@ -110,9 +126,19 @@ public class ExportOptionsPanel
 		
 		xmlOptions = new XmlOptionsPanel();
 		this.typePanel.add(xmlOptions, "xml");
+
+		odsOptions = new SpreadSheetOptionsPanel("ods");
+		this.typePanel.add(odsOptions, "ods");
 		
 		htmlOptions = new HtmlOptionsPanel();
 		this.typePanel.add(htmlOptions, "html"); 
+		
+		
+		if (poiAvailable)
+		{
+			xlsOptions = new SpreadSheetOptionsPanel("xls");
+			this.typePanel.add(xlsOptions, "xls");
+		}
 		
 		this.add(typePanel, BorderLayout.CENTER);
 		typeSelector.addActionListener(this);
@@ -153,6 +179,11 @@ public class ExportOptionsPanel
 		this.textOptions.saveSettings();
 		this.htmlOptions.saveSettings();
 		this.xmlOptions.saveSettings();
+		this.odsOptions.saveSettings();
+		if (this.xlsOptions != null)
+		{
+			this.xlsOptions.saveSettings();
+		}
 		Settings.getInstance().setProperty("workbench.export.type", Integer.toString(this.currentType));
 	}
 	
@@ -163,6 +194,11 @@ public class ExportOptionsPanel
 		this.textOptions.restoreSettings();
 		this.htmlOptions.restoreSettings();
 		this.xmlOptions.restoreSettings();
+		this.odsOptions.restoreSettings();
+		if (this.xlsOptions != null)
+		{
+			this.xlsOptions.restoreSettings();
+		}
 		int type = Settings.getInstance().getIntProperty("workbench.export.type", -1);
 		this.setExportType(type);
 	}
@@ -187,6 +223,12 @@ public class ExportOptionsPanel
 			case DataExporter.EXPORT_XML:
 				setTypeXml();
 				break;
+			case DataExporter.EXPORT_ODS:
+				setTypeOds();
+				break;
+			case DataExporter.EXPORT_XLS:
+				if (poiAvailable) setTypeXls();
+				break;
 		}
 	}
 
@@ -194,33 +236,87 @@ public class ExportOptionsPanel
 	{
 		return this.currentType;
 	}
+
+	private void showTextOptions()
+	{
+		this.card.show(this.typePanel, "text");
+	}
 	
 	public void setTypeText()
 	{
-		this.card.show(this.typePanel, "text");
+		showTextOptions();
 		this.currentType = DataExporter.EXPORT_TXT;
-		typeSelector.setSelectedIndex(0);
+		typeSelector.setSelectedItem("Text");
+	}
+
+	private void showSqlOptions()
+	{
+		this.card.show(this.typePanel, "sql");
 	}
 	
 	public void setTypeSql()
 	{
-		this.card.show(this.typePanel, "sql");
+		showSqlOptions();
 		this.currentType = DataExporter.EXPORT_SQL;
-		typeSelector.setSelectedIndex(1);
+		typeSelector.setSelectedItem("SQL");
+	}
+
+	private void showXmlOptions()
+	{
+		this.card.show(this.typePanel, "xml");
 	}
 	
 	public void setTypeXml()
 	{
-		this.card.show(this.typePanel, "xml");
+		showXmlOptions();
 		this.currentType = DataExporter.EXPORT_XML;
-		typeSelector.setSelectedIndex(2);
+		typeSelector.setSelectedItem("XML");
+	}
+
+	private void showHtmlOptions()
+	{
+		this.card.show(this.typePanel, "html");
 	}
 	
 	public void setTypeHtml()
 	{
-		this.card.show(this.typePanel, "html");
+		showHtmlOptions();
 		this.currentType = DataExporter.EXPORT_HTML;
-		typeSelector.setSelectedIndex(3);
+		typeSelector.setSelectedItem("HTML");
+	}
+
+	private void showOdsOptions()
+	{
+		this.card.show(this.typePanel, "ods");
+	}
+	
+	public void setTypeOds()
+	{
+		showOdsOptions();
+		this.currentType = DataExporter.EXPORT_ODS;
+		typeSelector.setSelectedItem(ODS_ITEM);
+	}
+	
+	private void showXlsOptions()
+	{
+		this.card.show(this.typePanel, "xls");
+	}
+	
+	public void setTypeXls()
+	{
+		showXlsOptions();
+		this.currentType = DataExporter.EXPORT_XLS;
+		typeSelector.setSelectedItem(XLS_ITEM);
+	}
+
+	public SpreadSheetOptions getXlsOptions()
+	{
+		return xlsOptions;
+	}
+	
+	public SpreadSheetOptions getOdsOptions()
+	{
+		return odsOptions;
 	}
 	
 	public XmlOptions getXmlOptions()
@@ -262,19 +358,43 @@ public class ExportOptionsPanel
 	{
 		if (event.getSource() == this.typeSelector)
 		{
-			String item = typeSelector.getSelectedItem().toString().toLowerCase();
+			Object item = typeSelector.getSelectedItem();
+			String itemValue = item.toString();
 			int type = -1;
 
-			this.card.show(this.typePanel, item);
+			this.card.show(this.typePanel, itemValue);
 
-			if ("text".equals(item))
+			if ("text".equalsIgnoreCase(itemValue))
+			{
 				type = DataExporter.EXPORT_TXT;
-			else if ("sql".equals(item))
+				showTextOptions();
+			}
+			else if ("sql".equalsIgnoreCase(itemValue))
+			{
 				type = DataExporter.EXPORT_SQL;
-			else if ("xml".equals(item))
+				showSqlOptions();
+			}
+			else if ("xml".equalsIgnoreCase(itemValue))
+			{
 				type = DataExporter.EXPORT_XML;
-			else 
+				showXmlOptions();
+			}
+			else if (item == ODS_ITEM)
+			{
+				type = DataExporter.EXPORT_ODS;
+				showOdsOptions();
+			}
+			else if (item == XLS_ITEM && poiAvailable)
+			{
+				type = DataExporter.EXPORT_XLS;
+				showXlsOptions();
+			}
+			else if ("html".equalsIgnoreCase(itemValue))
+			{
 				type = DataExporter.EXPORT_HTML;
+				showHtmlOptions();
+			}
+			
 			this.currentType = type;
 			firePropertyChange("exportType", -1, type);
 		}

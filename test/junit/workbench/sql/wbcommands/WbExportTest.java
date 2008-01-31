@@ -79,6 +79,28 @@ public class WbExportTest
 		super.tearDown();
 	}
 
+	public void testIsTypeValid()
+	{
+		try
+		{
+			WbExport exp = new WbExport();
+			assertTrue(exp.isTypeValid("text"));
+			assertTrue(exp.isTypeValid("TEXT"));
+			assertTrue(exp.isTypeValid("xml"));
+			assertTrue(exp.isTypeValid("sql"));
+			assertTrue(exp.isTypeValid("HTML"));
+			assertTrue(exp.isTypeValid("sqlUpdate"));
+			assertTrue(exp.isTypeValid("sqlInsert"));
+			assertTrue(exp.isTypeValid("SQLDeleteInsert"));
+			assertTrue(exp.isTypeValid("xls"));
+			//assertTrue(exp.isTypeValid("odt"));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	public void testQuoteEscaping()
 	{
 		try

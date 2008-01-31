@@ -44,6 +44,7 @@ public class WbDefineVar
 	public static final WbDefineVar DEFINE_SHORT = new WbDefineVar(VERB_DEFINE_SHORT);
 
 	private String verb = null;
+	
 	private WbDefineVar(String aVerb)
 	{
 		this.verb = aVerb;

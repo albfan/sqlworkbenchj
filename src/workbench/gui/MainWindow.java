@@ -108,6 +108,7 @@ import workbench.gui.actions.CreateNewConnection;
 import workbench.gui.actions.DisconnectTabAction;
 import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
+import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.interfaces.ToolWindow;
 import workbench.util.NumberStringCache;
 
@@ -1817,7 +1818,7 @@ public class MainWindow
 
 	/**
 	 * Displays the DbExplorer. Either in a separate tab,
-	 * or as a new window. If an explorer is already open,
+	 * or as a new window. If an explorer window is already open
 	 * that instance will be re-used
 	 */
 	public void showDbExplorer()
@@ -1915,7 +1916,7 @@ public class MainWindow
 	{
 		DbExplorerPanel explorer = new DbExplorerPanel(this);
 		explorer.restoreSettings();
-		explorer.openWindow(this.currentProfile.getName());
+		DbExplorerWindow w = explorer.openWindow(this.currentProfile.getName());
 		if (this.currentProfile.getUseSeparateConnectionPerTab() || this.currentConnection == null)
 		{
 			explorer.connect(this.currentProfile);
@@ -1924,12 +1925,12 @@ public class MainWindow
 		{
 			explorer.setConnection(this.currentConnection);
 		}
-		this.explorerWindows.add(explorer.getWindow());
+		this.explorerWindows.add(w);
 	}
 
-	public void explorerWindowClosed(DbExplorerPanel p)
+	public void explorerWindowClosed(DbExplorerWindow w)
 	{
-		this.explorerWindows.remove(p.getWindow());
+		this.explorerWindows.remove(w);
 	}
 
 	public void newDbExplorerPanel(boolean select)

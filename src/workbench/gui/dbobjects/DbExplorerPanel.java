@@ -734,33 +734,14 @@ public class DbExplorerPanel
 		}
 	}
 
-	public void closeWindow()
-	{
-		if (this.window != null)
-		{
-			this.window.setVisible(false);
-			this.window.dispose();
-			this.window = null;
-		}
-
-	}
-
-	public void openWindow(String aProfileName)
+	public DbExplorerWindow openWindow(String aProfileName)
 	{
 		if (this.window == null)
 		{
 			this.window = new DbExplorerWindow(this, aProfileName);
 		}
 		this.window.setVisible(true);
-	}
-
-	public DbExplorerWindow getWindow()
-	{
 		return this.window;
-	}
-
-	public void addToActionMap(WbAction anAction)
-	{
 	}
 
 	public List getActions()
@@ -785,10 +766,8 @@ public class DbExplorerPanel
 	{
 	}
 	
-	public void explorerWindowClosed()
+	void explorerWindowClosed()
 	{
-		this.window = null;
-		
 		if (this.dbConnection != null)
 		{
 			if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab())
@@ -799,7 +778,8 @@ public class DbExplorerPanel
 		this.dispose();
 		this.disconnect();
 		
-		this.mainWindow.explorerWindowClosed(this);
+		this.mainWindow.explorerWindowClosed(this.window);
+		this.window = null;
 	}
 
 	public void updateUI()
