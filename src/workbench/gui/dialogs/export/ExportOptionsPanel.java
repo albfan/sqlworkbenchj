@@ -57,6 +57,7 @@ public class ExportOptionsPanel
 	private XmlOptionsPanel xmlOptions;
 	private SpreadSheetOptionsPanel odsOptions;
 	private SpreadSheetOptionsPanel xlsOptions;
+	private SpreadSheetOptionsPanel xlsxOptions;
 	private int currentType = -1;
 	private List<ColumnIdentifier> selectedColumns;
 	private Object columnSelectEventSource;
@@ -68,6 +69,7 @@ public class ExportOptionsPanel
 	
 	private final String ODS_ITEM = ResourceMgr.getString("TxtOdsName");
 	private final String XLS_ITEM = ResourceMgr.getString("TxtXlsName");
+	private final String XLSX_ITEM = "XLS (XML)";
 	
 	public ExportOptionsPanel()
 	{
@@ -103,6 +105,7 @@ public class ExportOptionsPanel
 		typeSelector.addItem("XML");
 		typeSelector.addItem(ODS_ITEM);
 		typeSelector.addItem("HTML");
+		typeSelector.addItem(XLSX_ITEM);
 		if (poiAvailable)
 		{
 			typeSelector.addItem(XLS_ITEM);
@@ -133,6 +136,8 @@ public class ExportOptionsPanel
 		htmlOptions = new HtmlOptionsPanel();
 		this.typePanel.add(htmlOptions, "html"); 
 		
+		xlsxOptions = new SpreadSheetOptionsPanel("xlsx");
+		this.typePanel.add(xlsxOptions, "xlsx"); 
 		
 		if (poiAvailable)
 		{
@@ -180,6 +185,7 @@ public class ExportOptionsPanel
 		this.htmlOptions.saveSettings();
 		this.xmlOptions.saveSettings();
 		this.odsOptions.saveSettings();
+		this.xlsxOptions.saveSettings();
 		if (this.xlsOptions != null)
 		{
 			this.xlsOptions.saveSettings();
@@ -195,6 +201,7 @@ public class ExportOptionsPanel
 		this.htmlOptions.restoreSettings();
 		this.xmlOptions.restoreSettings();
 		this.odsOptions.restoreSettings();
+		this.xlsxOptions.restoreSettings();
 		if (this.xlsOptions != null)
 		{
 			this.xlsOptions.restoreSettings();
@@ -225,6 +232,9 @@ public class ExportOptionsPanel
 				break;
 			case DataExporter.EXPORT_ODS:
 				setTypeOds();
+				break;
+			case DataExporter.EXPORT_XLSX:
+				setTypeXlsX();
 				break;
 			case DataExporter.EXPORT_XLS:
 				if (poiAvailable) setTypeXls();
@@ -301,6 +311,11 @@ public class ExportOptionsPanel
 	{
 		this.card.show(this.typePanel, "xls");
 	}
+
+	private void showXlsXOptions()
+	{
+		this.card.show(this.typePanel, "xlsx");
+	}
 	
 	public void setTypeXls()
 	{
@@ -309,9 +324,21 @@ public class ExportOptionsPanel
 		typeSelector.setSelectedItem(XLS_ITEM);
 	}
 
+	public void setTypeXlsX()
+	{
+		showXlsXOptions();
+		this.currentType = DataExporter.EXPORT_XLSX;
+		typeSelector.setSelectedItem(XLSX_ITEM);
+	}
+	
 	public SpreadSheetOptions getXlsOptions()
 	{
 		return xlsOptions;
+	}
+
+	public SpreadSheetOptions getXlsXOptions()
+	{
+		return xlsxOptions;
 	}
 	
 	public SpreadSheetOptions getOdsOptions()
@@ -383,6 +410,11 @@ public class ExportOptionsPanel
 			{
 				type = DataExporter.EXPORT_ODS;
 				showOdsOptions();
+			}
+			else if (item == XLSX_ITEM)
+			{
+				type = DataExporter.EXPORT_XLSX;
+				showXlsXOptions();
 			}
 			else if (item == XLS_ITEM && poiAvailable)
 			{

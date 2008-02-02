@@ -92,6 +92,11 @@ public class ExportFileDialog
 	{
 		return exportOptions.getXlsOptions();
 	}
+
+	public SpreadSheetOptions getXlsXOptions()
+	{
+		return exportOptions.getXlsXOptions();
+	}
 	
 	public SqlOptions getSqlOptions()
 	{
@@ -285,6 +290,9 @@ public class ExportFileDialog
 			case DataExporter.EXPORT_ODS:
 				exporter.setOdsOptions(getOdsOptions());
 				break;
+			case DataExporter.EXPORT_XLSX:
+				exporter.setXlsXOptions(getXlsXOptions());
+				break;
 			case DataExporter.EXPORT_XLS:
 				exporter.setXlsOptions(getXlsOptions());
 				break;
@@ -316,6 +324,10 @@ public class ExportFileDialog
 		else if (ff.hasFilter(ExtensionFileFilter.XLS_EXT))
 		{
 			return DataExporter.EXPORT_XLS;
+		}
+		else if (ff.hasFilter(ExtensionFileFilter.XLSX_EXT))
+		{
+			return DataExporter.EXPORT_XLSX;
 		}
 		else if (ff.hasFilter(ExtensionFileFilter.ODS_EXT))
 		{
@@ -368,6 +380,9 @@ public class ExportFileDialog
 						break;
 					case DataExporter.EXPORT_XLS:
 						this.chooser.setFileFilter(ExtensionFileFilter.getXlsFileFilter());
+						break;
+					case DataExporter.EXPORT_XLSX:
+						this.chooser.setFileFilter(ExtensionFileFilter.getXlsXFileFilter());
 						break;
 					case DataExporter.EXPORT_ODS:
 						this.chooser.setFileFilter(ExtensionFileFilter.getOdsFileFilter());

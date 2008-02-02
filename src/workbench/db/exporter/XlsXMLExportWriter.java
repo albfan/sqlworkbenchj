@@ -1,5 +1,5 @@
 /*
- * HtmlExportWriter.java
+ * XmlExportWriter.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -12,26 +12,20 @@
 package workbench.db.exporter;
 
 /**
- *
- * @author Alessandro Palumbo
+ * Export writer for the new MS XML Spreadsheet format
+ * @author  support@sql-workbench.net
  */
-public class XlsExportWriter
+public class XlsXMLExportWriter
 	extends ExportWriter
 {
-	
-	public XlsExportWriter(DataExporter exp)
+	public XlsXMLExportWriter(DataExporter exp)
 	{
 		super(exp);
 	}
 
 	public RowDataConverter createConverter()
 	{
-		return new XlsRowDataConverter();
+		return new XlsXMLRowDataConverter();
 	}
 
-	public boolean managesOutput()
-	{
-		return true;
-	}
-	
 }

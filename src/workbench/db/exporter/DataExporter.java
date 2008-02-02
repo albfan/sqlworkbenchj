@@ -95,16 +95,22 @@ public class DataExporter
 	 * Export to HTML.
 	 */
 	public static final int EXPORT_HTML = 4;
-	/**
-	 * Export XLS
-	 */
-	public static final int EXPORT_XLS = 5;
 	
 	/**
 	 * OpenDocument Spreadsheet
 	 */
-	public static final int EXPORT_ODS = 6;
+	public static final int EXPORT_ODS = 5;
 	
+	/**
+	 * Export XLS XML 
+	 */
+	public static final int EXPORT_XLSX = 6;
+	
+	/**
+	 * Export XLS
+	 */
+	public static final int EXPORT_XLS = 7;
+
 	private WbConnection dbConn;
 	private String sql;
 	private String pageTitle = null;
@@ -159,7 +165,6 @@ public class DataExporter
 	private JDialog progressWindow;
 	private ExportJobEntry currentJob;
 	private boolean cancelJobs = false;
-	//private int pendingJobs = 0;
 	private boolean jobsRunning = false;
 	private RowActionMonitor rowMonitor;
 
@@ -645,6 +650,9 @@ public class DataExporter
 			case EXPORT_XLS:
 				this.exportWriter = new XlsExportWriter(this);
 				break;
+			case EXPORT_XLSX:
+				this.exportWriter = new XlsXMLExportWriter(this);
+				break;
 			case EXPORT_ODS:
 				this.exportWriter = new OdsExportWriter(this);
 		}
@@ -675,6 +683,12 @@ public class DataExporter
 	public void setOutputTypeXls() 
 	{ 
 		this.exportType = EXPORT_XLS; 
+		createExportWriter();
+	}
+
+	public void setOutputTypeXlsXML() 
+	{ 
+		this.exportType = EXPORT_XLSX; 
 		createExportWriter();
 	}
 	
@@ -1366,6 +1380,13 @@ public class DataExporter
 		this.exportWriter.configureConverter();
 	}
 
+	public void setXlsXOptions(SpreadSheetOptions xlsOptions)
+	{
+		this.setOutputTypeXlsXML();
+		this.setPageTitle(xlsOptions.getPageTitle());
+		this.exportWriter.configureConverter();
+	}
+	
 	public void setXlsOptions(SpreadSheetOptions xlsOptions)
 	{
 		if (xlsOptions != null)

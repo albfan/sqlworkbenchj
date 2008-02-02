@@ -1007,7 +1007,7 @@ public class DbMetadata
 		if (aName.length() == 0) return aName;
 		
 		// already quoted?
-		if (aName.startsWith("\"")) return aName;
+		if (aName.startsWith(this.quoteCharacter)) return aName;
 
 		if (this.dbSettings.neverQuoteObjects()) return StringUtil.trimQuotes(aName);
 
@@ -3417,7 +3417,7 @@ public class DbMetadata
 			pkName = "pk_" + tablename.toLowerCase();
 		}
 		
-		if (isKeyword(pkName)) pkName = "\"" + pkName + "\"";
+		if (isKeyword(pkName)) pkName = this.quoteCharacter + pkName + this.quoteCharacter;
 		
 		if (StringUtil.isEmptyString(pkName)) 
 		{

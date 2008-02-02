@@ -13,8 +13,10 @@ package workbench.gui.components;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import java.util.Map;
 import javax.swing.filechooser.FileFilter;
 
 import workbench.resource.ResourceMgr;
@@ -30,16 +32,10 @@ public class ExtensionFileFilter
 	// The created FileFilters are stored in variables
 	// as in some cases it is necessary to access the 
 	// instance (e.g. for JFileChooser.setFileFilter()
-	private static FileFilter textFileFilter;
-	private static FileFilter sqlFileFilter;
-	private static FileFilter sqlUpdateFileFilter;
+	private static Map<String, FileFilter> filters = new HashMap<String, FileFilter>();
 	private static FileFilter jarFileFilter;
-	private static FileFilter htmlFileFilter;
-	private static FileFilter xmlFileFilter;
-	private static FileFilter xlsFileFilter;
-	private static FileFilter odsFileFilter;
-	private static FileFilter wkspFileFilter;
-
+	private static FileFilter sqlUpdateFileFilter;
+	
 	private List<String> extensions;
 	private String desc;
 	public static final String SQL_EXT = "sql";
@@ -48,6 +44,7 @@ public class ExtensionFileFilter
 	public static final String XML_EXT = "xml";
 	public static final String HTML_EXT = "html";
 	public static final String XLS_EXT = "xls";
+	public static final String XLSX_EXT = "xlsx";
 	public static final String ODS_EXT = "ods";
 
 	private boolean ignoreCase = true;
@@ -158,12 +155,7 @@ public class ExtensionFileFilter
 
 	public static FileFilter getSqlFileFilter()
 	{
-		if (sqlFileFilter == null)
-		{
-			String desc = ResourceMgr.getString("TxtFileFilterSql");
-			sqlFileFilter = new ExtensionFileFilter(desc, SQL_EXT, true);
-		}
-		return sqlFileFilter;
+		return getFileFilter(SQL_EXT, "TxtFileFilterSql");
 	}
 
 	public static FileFilter getSqlUpdateFileFilter()
@@ -178,64 +170,50 @@ public class ExtensionFileFilter
 
 	public static FileFilter getTextFileFilter()
 	{
-		if (textFileFilter == null)
-		{
-			String desc = ResourceMgr.getString("TxtFileFilterText");
-			textFileFilter = new ExtensionFileFilter(desc, TXT_EXT, true);
-		}
-		return textFileFilter;
+		return getFileFilter(TXT_EXT, "TxtFileFilterText");
 	}
 
 	public static FileFilter getXmlFileFilter()
 	{
-		if (xmlFileFilter == null)
-		{
-			String desc = ResourceMgr.getString("TxtFileFilterXml");
-			xmlFileFilter = new ExtensionFileFilter(desc, XML_EXT, true);
-		}
-		return xmlFileFilter;
+		return getFileFilter(XML_EXT, "TxtFileFilterXml");
 	}
 
 	public static FileFilter getWorkspaceFileFilter()
 	{
-		if (wkspFileFilter == null)
-		{
-			String desc = ResourceMgr.getString("TxtFileFilterWksp");
-			wkspFileFilter = new ExtensionFileFilter(desc, WORKSPACE_EXT, true);
-		}
-		return wkspFileFilter;
+		return getFileFilter(WORKSPACE_EXT, "TxtFileFilterWksp");
 	}
 
 	public static FileFilter getHtmlFileFilter()
 	{
-		if (htmlFileFilter == null)
-		{
-			String desc = ResourceMgr.getString("TxtFileFilterHtml");
-			htmlFileFilter = new ExtensionFileFilter(desc, HTML_EXT, true);
-		}
-		return htmlFileFilter;
+		return getFileFilter(HTML_EXT, "TxtFileFilterHtml");
 	}
 
 	public static FileFilter getXlsFileFilter()
 	{
-		if (xlsFileFilter == null)
-		{
-			String desc = ResourceMgr.getString("TxtFileFilterXls");
-			xlsFileFilter = new ExtensionFileFilter(desc, XLS_EXT, true);
-		}
-		return xlsFileFilter;
+		return getFileFilter(XLS_EXT, "TxtFileFilterXls");
 	}
 
-	public static FileFilter getOdsFileFilter()
+	public static FileFilter getXlsXFileFilter()
 	{
-		if (odsFileFilter == null)
-		{
-			String desc = ResourceMgr.getString("TxtFileFilterOds");
-			odsFileFilter = new ExtensionFileFilter(desc, ODS_EXT, true);
-		}
-		return odsFileFilter;
+		return getFileFilter(XLSX_EXT, "TxtFileFilterXls");
 	}
 	
+	public static FileFilter getOdsFileFilter()
+	{
+		return getFileFilter(ODS_EXT, "TxtFileFilterOds");
+	}
+	
+	private static FileFilter getFileFilter(String ext, String key)
+	{
+		FileFilter ff = filters.get(ext);
+		if (ff == null)
+		{
+			String desc = ResourceMgr.getString(key);
+			ff = new ExtensionFileFilter(desc, ext, true);
+			filters.put(ext, ff);
+		}
+		return ff;
+	}
 	// The description of this filter
 	public String getDescription()
 	{

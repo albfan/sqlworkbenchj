@@ -13,15 +13,20 @@ package workbench.db.exporter;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Matcher;
 import workbench.log.LogMgr;
 import workbench.storage.RowData;
+import workbench.util.FileUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 import workbench.util.ZipOutputFactory;
 
 /**
- * Convert row data to our own XML format.
+ * Convert row data to OpenDocument Spreadsheet format (OpenOffice).
  * 
  * @author  support@sql-workbench.net
  */
@@ -29,6 +34,8 @@ public class OdsRowDataConverter
 	extends RowDataConverter
 {
 	private Writer content;
+	private SimpleDateFormat tFormat = new SimpleDateFormat("HH:mm:ss");
+	private SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private SimpleDateFormat tsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	private int[] maxColSizes;
 	
@@ -53,9 +60,12 @@ public class OdsRowDataConverter
 			out.write("<manifest:manifest xmlns:manifest=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\">\n");
 			out.write(" <manifest:file-entry manifest:media-type=\"application/vnd.oasis.opendocument.spreadsheet\" manifest:full-path=\"/\"/>\n");
 			out.write(" <manifest:file-entry manifest:media-type=\"text/xml\" manifest:full-path=\"content.xml\"/>\n");
+			out.write(" <manifest:file-entry manifest:media-type=\"text/xml\" manifest:full-path=\"meta.xml\"/>\n");
 			out.write("</manifest:manifest>\n");
 			out.close();
-
+			
+			writeMeta();
+			
 			out = factory.createWriter("mimetype", "UTF-8");
 			out.write("application/vnd.oasis.opendocument.spreadsheet");
 			out.close();
@@ -63,13 +73,14 @@ public class OdsRowDataConverter
 
 			content.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n");
 			content.write("<office:document-content xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" xmlns:style=\"urn:oasis:names:tc:opendocument:xmlns:style:1.0\" xmlns:text=\"urn:oasis:names:tc:opendocument:xmlns:text:1.0\" xmlns:table=\"urn:oasis:names:tc:opendocument:xmlns:table:1.0\" xmlns:draw=\"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0\" xmlns:fo=\"urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\" xmlns:number=\"urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0\" xmlns:presentation=\"urn:oasis:names:tc:opendocument:xmlns:presentation:1.0\" xmlns:svg=\"urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0\" xmlns:chart=\"urn:oasis:names:tc:opendocument:xmlns:chart:1.0\" xmlns:dr3d=\"urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0\" xmlns:math=\"http://www.w3.org/1998/Math/MathML\" xmlns:form=\"urn:oasis:names:tc:opendocument:xmlns:form:1.0\" xmlns:script=\"urn:oasis:names:tc:opendocument:xmlns:script:1.0\" xmlns:ooo=\"http://openoffice.org/2004/office\" xmlns:ooow=\"http://openoffice.org/2004/writer\" xmlns:oooc=\"http://openoffice.org/2004/calc\" xmlns:dom=\"http://www.w3.org/2001/xml-events\" xmlns:xforms=\"http://www.w3.org/2002/xforms\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" office:version=\"1.0\"> \n");
-			int colCount = this.metaData.getColumnCount();
-			writeStyles(colCount);
+			
+			writeInlineStyles();
 			
 			content.write("<office:body>\n");
 			content.write("<office:spreadsheet> \n");
 			content.write("<table:table table:name=\"" + getPageTitle("Export") + "\"  table:style-name=\"ta1\">\n\n");
 
+			int colCount = this.metaData.getColumnCount();
 			for (int i=0; i < colCount; i++)
 			{
 				content.write("<table:table-column table:style-name=\"co" + (i+1) + "\" table:default-cell-style-name=\"Default\"/>\n");
@@ -104,16 +115,75 @@ public class OdsRowDataConverter
 		return null;
 	}
 
-	private void writeStyles(int cols)
+	private void writeMeta()
+	{
+		Writer out = null;
+		try
+		{
+			out = factory.createWriter("meta.xml", "UTF-8");
+			out.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+			out.write("<office:document-meta xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\" xmlns:ooo=\"http://openoffice.org/2004/office\" office:version=\"1.0\">\n");
+			out.write("<office:meta>\n");
+			out.write("<meta:generator>SQL Workbench/J</meta:generator>\n");
+			out.write("<dc:title>SQL Workbench/J Export</dc:title>\n");
+			String s = null;
+			if (this.generatingSql != null)
+			{
+				Matcher m = StringUtil.PATTERN_CRLF.matcher(generatingSql);
+				s = m.replaceAll(" ");
+			}
+			else
+			{
+				s = "SELECT * FROM " + metaData.getUpdateTable().getTableExpression(originalConnection);
+			}
+			out.write("<dc:description>");
+			out.write(s);
+			out.write("</dc:description>");
+			out.write("<meta:initial-creator>SQL Workbench/J</meta:initial-creator>\n");
+			out.write("<meta:creation-date>");
+			out.write(tsFormat.format(new Date()));
+			out.write("</meta:creation-date>\n");
+			out.write("</office:meta>\n");
+			out.write("</office:document-meta>\n");
+		}
+		catch (Exception e)
+		{
+			
+		}
+		finally
+		{
+			FileUtil.closeQuitely(out);
+		}
+	}
+
+	private void writeStyles()
+	{
+		Writer out = null;
+		try
+		{
+			out = factory.createWriter("styles.xml", "UTF-8");
+			out.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+		}
+		catch (Exception e)
+		{
+			
+		}
+		finally
+		{
+			FileUtil.closeQuitely(out);
+		}
+	}
+	
+	private void writeInlineStyles()
 		throws IOException
 	{
 		content.write("<office:automatic-styles> \n");
-		for (int i=0; i < cols; i++)
+		for (int i=0; i < metaData.getColumnCount(); i++)
 		{
-			int size = metaData.getColumnSize(i) * 10;
-			
+			//int size = metaData.getColumnSize(i) * 2;
+			//style:column-width=\"" + (size)+  "pt\"
 			content.write("<style:style style:name=\"co" + (i+1) + "\" style:family=\"table-column\"> \n");
-			content.write("  <style:table-column-properties style:use-optimal-column-width=\"true\" fo:break-before=\"auto\"/> \n");
+			content.write("  <style:table-column-properties style:use-optimal-column-width=\"true\"/> \n");
 			content.write("</style:style> \n");
 		}
 		String styles = 
@@ -156,22 +226,22 @@ public class OdsRowDataConverter
 		xml.append("<table:table-row>\n");
 		for (int i = 0; i < colCount; i++)
 		{
-			if (!this.includeColumnInExport(i))
+			if (!this.includeColumnInExport(i)) continue;
+			Object o = row.getValue(i);
+			if (o == null)
 			{
+				xml.append("<table:table-cell />");
 				continue;
 			}
 			xml.append("<table:table-cell ");
-			xml.append(getCellAttribs(row.getValue(i)));
+			xml.append(getCellAttribs(o, i));
 			xml.append(">\n");
 			xml.append("<text:p>");
 			String value = getValueAsFormattedString(row, i);
-			if (value != null)
+			xml.append(value);
+			if (value.length() > maxColSizes[i])
 			{
-				xml.append(value);
-				if (value.length() > maxColSizes[i])
-				{
-					maxColSizes[i] = value.length();
-				}
+				maxColSizes[i] = value.length();
 			}
 			xml.append("</text:p>\n");
 			xml.append("</table:table-cell>\n");
@@ -189,24 +259,48 @@ public class OdsRowDataConverter
 		return null;
 	}
 
-	private StringBuilder getCellAttribs(Object data)
+	private StringBuilder getCellAttribs(Object data, int column)
 	{
-
 		StringBuilder attr = new StringBuilder("office:value-type=");
-		if (data instanceof Number)
+		int type = metaData.getColumnType(column);
+		
+		if (SqlUtil.isNumberType(type))
 		{
 			attr.append("\"float\" ");
 			attr.append(" office:value=\"" + data.toString() + "\"");
-			attr.append(" table:style-name=\"Number\"");
 		}
-		else if (data instanceof java.util.Date)
+		else if (type == Types.DATE)
 		{
 			attr.append("\"date\" ");
-			Date d = (Date)data;
 			attr.append(" office:date-value=\"");
-			attr.append(tsFormat.format(d));
+			if (data != null && data instanceof Date)
+			{
+				Date d = (Date)data;
+				attr.append(dtFormat.format(d));
+			}
 			attr.append("\"");
-			attr.append(" table:style-name=\"DateAndTime\"");
+		}
+		else if (type == Types.TIMESTAMP)
+		{
+			attr.append("\"date\" ");
+			attr.append(" office:date-value=\"");
+			if (data != null && data instanceof Date)
+			{
+				Date d = (Date)data;
+				attr.append(tsFormat.format(d));
+			}
+			attr.append("\"");
+		}
+		else if (type == Types.TIME)
+		{
+			attr.append("\"date\" ");
+			attr.append(" office:time-value=\"");
+			if (data != null && data instanceof Date)
+			{
+				Date d = (Date)data;
+				attr.append(tFormat.format(d));
+			}
+			attr.append("\"");
 		}
 		else
 		{
@@ -214,4 +308,5 @@ public class OdsRowDataConverter
 		}
 		return attr;
 	}
+	
 }

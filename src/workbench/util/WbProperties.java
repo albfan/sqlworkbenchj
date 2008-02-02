@@ -97,15 +97,12 @@ public class WbProperties
 					bw.newLine();
 				}
 			}
+			
 			Object v = this.get(key);
 			if (v != null)
 			{
 				value = v.toString();
-				value = StringUtil.replace(value, "\\", "\\\\");
-				if (value.indexOf('\n') > -1)
-				{
-					value = value.replaceAll("\n", "\\\\n");
-				}
+				value = StringUtil.escapeUnicode(value, CharacterRange.RANGE_7BIT); 
 				if (value.length() > 0)
 				{
 					bw.write(key + "=" + value);

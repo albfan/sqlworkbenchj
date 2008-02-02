@@ -54,9 +54,29 @@ public class XlsRowDataConverter
 		excelFormat = new ExcelDataFormat(numFormat, dateFormat, "0", tsFormat);
 	}
 
+	public StrBuffer getStart()
+	{
+		createFormatters();
+		
+		wb = new HSSFWorkbook();
+		
+		excelFormat.setupWithWorkbook(wb);
+		sheet = wb.createSheet(getPageTitle("SQLExport"));
+
+		// table header with column names
+		HSSFRow headRow = sheet.createRow(0);
+		maxLengths = new int[this.metaData.getColumnCount()];
+		for (int c = 0; c < this.metaData.getColumnCount(); c++)
+		{
+			HSSFCell cell = headRow.createCell((short)c);
+			maxLengths[c] = setCellValueAndStyle(wb, cell, this.metaData.getColumnName(c), true, excelFormat);
+		}
+
+		return null;
+	}
+	
 	public StrBuffer getEnd(long totalRows)
 	{
-		// Best Fit
 		if (maxLengths != null)
 		{
 			for (short i = 0; i < maxLengths.length; i++)
@@ -118,27 +138,6 @@ public class XlsRowDataConverter
 		}
 
 		return ret;
-	}
-
-	public StrBuffer getStart()
-	{
-		createFormatters();
-		
-		wb = new HSSFWorkbook();
-		
-		excelFormat.setupWithWorkbook(wb);
-		sheet = wb.createSheet(getPageTitle("SQLExport"));
-
-		// table header with column names
-		HSSFRow headRow = sheet.createRow(0);
-		maxLengths = new int[this.metaData.getColumnCount()];
-		for (int c = 0; c < this.metaData.getColumnCount(); c++)
-		{
-			HSSFCell cell = headRow.createCell((short)c);
-			maxLengths[c] = setCellValueAndStyle(wb, cell, this.metaData.getColumnName(c), true, excelFormat);
-		}
-
-		return null;
 	}
 
 	private static int setCellValueAndStyle(HSSFWorkbook wb, HSSFCell cell,

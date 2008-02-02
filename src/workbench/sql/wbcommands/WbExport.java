@@ -66,7 +66,7 @@ public class WbExport
 		CommonArgs.addVerboseXmlParameter(cmdLine);
 		CommonArgs.addQuoteEscaping(cmdLine);
 
-		cmdLine.addArgument("type", StringUtil.stringToList("text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,html,xls"));
+		cmdLine.addArgument("type", StringUtil.stringToList("text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,html,xlsx,xls"));
 		cmdLine.addArgument("file");
 		cmdLine.addArgument("title");
 		cmdLine.addArgument("table");
@@ -574,13 +574,17 @@ public class WbExport
 		{
 			exporter.setOutputTypeHtml();
 		}
+		else if (type.equals("ods"))
+		{
+			exporter.setOutputTypeOds();
+		}
 		else if (type.equals("xls"))
 		{
 			exporter.setOutputTypeXls();
 		}
-		else if (type.equals("ods"))
+		else if (type.equals("xlsx"))
 		{
-			exporter.setOutputTypeOds();
+			exporter.setOutputTypeXlsXML();
 		}
 	}
 

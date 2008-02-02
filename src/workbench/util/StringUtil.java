@@ -1121,11 +1121,6 @@ public class StringUtil
 		System.out.println("");
 	}
 	
-	public static String escapeUnicode(String value)
-	{
-		return escapeUnicode(value, null, null, false);
-	}
-	
 	public static String escapeUnicode(String value, CharacterRange range)
 	{
 		return escapeUnicode(value, null, range, false);
@@ -1147,7 +1142,7 @@ public class StringUtil
 	public static String escapeUnicode(String value, String specialSaveChars, CharacterRange range, boolean alwaysUnicode)
 	{
 		if (value == null) return null;
-		if (range == null || range == CharacterRange.RANGE_NONE) return value;
+//		if (range == null || range == CharacterRange.RANGE_NONE) return value;
 		
 		int len = value.length();
 		StringBuilder outBuffer = new StringBuilder(len*2);

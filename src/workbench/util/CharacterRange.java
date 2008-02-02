@@ -18,10 +18,30 @@ import workbench.resource.ResourceMgr;
  */
 public class CharacterRange
 {
+	/**
+	 * Includes all characters
+	 */
 	public static final CharacterRange RANGE_NONE = new CharacterRange(0);
+	
+	/**
+	 * Excludes all control characters (&lt; 32)
+	 */
 	public static final CharacterRange RANGE_CONTROL = new CharacterRange(1);
+	
+	/**
+	 * Excludes everyting &lt; 32 and &gt; 126
+	 */
 	public static final CharacterRange RANGE_7BIT = new CharacterRange(2);
+	
+	/**
+	 * Excludes everyting &lt; 32 and &gt; 255
+	 */
 	public static final CharacterRange RANGE_8BIT = new CharacterRange(3);
+	
+	/**
+	 * Excludes everyting &lt; 32 and &gt; 255
+	 * and anything &gt; 126 and &lt; 161
+	 */
 	public static final CharacterRange RANGE_8BIT_EXTENDED = new CharacterRange(4);
 	
 	private int typeIndex = 0;
