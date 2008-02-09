@@ -35,10 +35,6 @@ public class SqlServerFormatFileWriter
 
 	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
 	{
-		if (!exporter.getWriteBcpFormatFile())
-		{
-			return;
-		}
 		ResultInfo resultInfo = converter.getResultInfo();
 		WbFile baseFile = new WbFile(exporter.getFullOutputFilename());
 		String dir = baseFile.getParent();

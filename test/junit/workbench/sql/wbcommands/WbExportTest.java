@@ -631,9 +631,9 @@ public class WbExportTest
 			FileReader fr = new FileReader(ctl);
 			String ctlfile = FileUtil.readCharacters(fr);
 			
-			int pos = ctlfile.indexOf("lob_file_1 FILLER");
+			int pos = ctlfile.indexOf("lob_file_clob_data FILLER");
 			assertEquals("FILLER not found", true, pos > -1);
-			pos = ctlfile.indexOf("CLOB_DATA LOBFILE(lob_file_1)");
+			pos = ctlfile.indexOf("CLOB_DATA LOBFILE(lob_file_clob_data)");
 			assertEquals("File statement not found", true, pos > -1);
 		}
 		catch (Exception e)

@@ -77,4 +77,22 @@ public class SourceTableArgumentTest
       ConnectionMgr.getInstance().disconnectAll();
     }
   }
+	
+	public void testGetObjectNames()
+	{
+		try
+		{
+			String s = "\"MIND\",\"test\"";
+      SourceTableArgument parser = new SourceTableArgument(null, null);			
+			List<String> tables = parser.getObjectNames(s);
+			assertEquals(2, tables.size());
+			assertEquals("\"MIND\"", tables.get(0));
+			assertEquals("\"test\"", tables.get(1));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}	
 }

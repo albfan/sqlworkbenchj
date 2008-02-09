@@ -27,8 +27,11 @@ import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.swing.JDialog;
@@ -152,7 +155,6 @@ public class DataExporter
 	private	SimpleDateFormat dateTimeFormatter = null;
 	private DecimalFormat numberFormatter = null;
 
-	private boolean cleancr = false;
 	private boolean append = false;
 	private boolean escapeHtml = true;
 	private boolean createFullHtmlPage = true;
@@ -182,8 +184,7 @@ public class DataExporter
 	private int tablesExported;
 	private long totalRows;
 	
-	private boolean writeOracleControlFile = false;
-	private boolean writeBcpFormatFile = false;
+	private Set<ControlFileFormat> controlFiles = new HashSet<ControlFileFormat>();
 	private boolean compressOutput = false;
 
 	private ZipOutputStream zipArchive;
@@ -1491,24 +1492,20 @@ public class DataExporter
 		this.verboseFormat = flag;
 	}
 
-	public boolean getWriteOracleControlFile()
+	public Set<ControlFileFormat> getControlFileFormats()
 	{
-		return writeOracleControlFile;
+		return Collections.unmodifiableSet(controlFiles);
 	}
 	
-	public void setWriteOracleControlFile(boolean flag)
+	public void addControlFileFormat(ControlFileFormat format)
 	{
-		this.writeOracleControlFile = flag;
+		this.controlFiles.add(format);
 	}
 
-	public boolean getWriteBcpFormatFile()
+	public void addControlFileFormats(Set<ControlFileFormat> formats)
 	{
-		return writeBcpFormatFile;
-	}
-	
-	public void setWriteBcpFormatFile(boolean flag)
-	{
-		this.writeBcpFormatFile = flag;
+		if (formats == null) return;
+		this.controlFiles.addAll(formats);
 	}
 	
 }

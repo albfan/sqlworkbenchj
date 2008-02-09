@@ -40,10 +40,6 @@ public class OracleControlFileWriter
 
 	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
 	{
-		if (!exporter.getWriteOracleControlFile())
-		{
-			return;
-		}
 		ResultInfo resultInfo = converter.getResultInfo();
 		WbFile baseFile = new WbFile(exporter.getFullOutputFilename());
 		String dir = baseFile.getParent();
@@ -111,10 +107,10 @@ public class OracleControlFileWriter
 				String col = resultInfo.getColumnName(i);
 				int type = resultInfo.getColumnType(i);
 				out.print("  ");
-				if (SqlUtil.isBlobType(type) || (clobAsFile && SqlUtil.isClobType(type)))
+				if (SqlUtil.isBlobType(type) || (clobAsFile && SqlUtil.isClobType(type, exporter.getConnection().getDbSettings())))
 				{
 					blobColumns.add(col);
-					out.print("lob_file_" + blobColumns.size() + " FILLER");
+					out.print("lob_file_" + col.toLowerCase() + " FILLER");
 				}
 				else
 				{
@@ -135,27 +131,22 @@ public class OracleControlFileWriter
 						out.print("\"");
 					}
 				}
-//				else if (SqlUtil.isCharacterType(type))
-//				{
-//					for (int k=col.length(); k < max; k++) out.print(" ");
-//					out.print("\"trim(:" + col + ")\"");
-//				}
 				if (i < count - 1 || blobColumns.size() > 0)
 				{
 					out.print(",");
 				}
 				out.println();
 			}
+			
 			if (blobColumns.size() > 0)
 			{
-				Iterator itr = blobColumns.iterator();
-				int i = 1;
+				Iterator<String> itr = blobColumns.iterator();
 				while (itr.hasNext())
 				{
-					String col = (String)itr.next();
+					String col = itr.next();
 					out.print("  ");
 					out.print(col);
-					out.print(" LOBFILE(lob_file_" + i + ") TERMINATED BY EOF");
+					out.print(" LOBFILE(lob_file_" + col.toLowerCase() + ") TERMINATED BY EOF");
 					if (itr.hasNext())
 					{
 						out.print(",");

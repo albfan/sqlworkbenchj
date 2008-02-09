@@ -16,6 +16,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 import workbench.interfaces.DataFileWriter;
 import workbench.log.LogMgr;
@@ -59,6 +60,7 @@ public class SqlLiteralFormatter
 	private boolean treatClobAsFile = false;
 	private String clobEncoding = Settings.getInstance().getDefaultFileEncoding();
 	private boolean isDbId;
+	private DbSettings dbSettings;
 	
 	/**
 	 * Create a new formatter with default formatting. 
@@ -103,6 +105,7 @@ public class SqlLiteralFormatter
 			String product = con.getMetadata().getDbId();
 			isDbId = true;
 			this.setProduct(product);
+			this.dbSettings = con.getDbSettings();
 		}
 	}
 	
@@ -262,7 +265,7 @@ public class SqlLiteralFormatter
 		else if (value instanceof String)
 		{
 			String t = (String)value;
-			if (this.treatClobAsFile && SqlUtil.isClobType(type) && clobWriter != null)
+			if (this.treatClobAsFile  && clobWriter != null && SqlUtil.isClobType(type, dbSettings))
 			{
 				File f = clobWriter.generateDataFileName(data);
 				try

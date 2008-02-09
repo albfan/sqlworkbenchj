@@ -12,6 +12,7 @@
 package workbench.db.report;
 import java.util.ArrayList;
 import java.util.List;
+import workbench.db.ColumnIdentifier;
 /**
  * @author support@sql-workbench.net
  */
@@ -21,9 +22,11 @@ public class TableRelation
 	private int targetTableId;
 	
 	private String fkName;
-	private List<String> sourceColumns = new ArrayList<String>();
-	private List<String> targetColumns = new ArrayList<String>();
+	private List<ColumnIdentifier> sourceColumns = new ArrayList<ColumnIdentifier>();
+	private List<ColumnIdentifier> targetColumns = new ArrayList<ColumnIdentifier>();
 	private int relationId; 
+	private String deleteAction;
+	private String updateAction;
 	
 	public TableRelation(int id, int sourceId, int destId, String fk)
 	{
@@ -32,11 +35,46 @@ public class TableRelation
 		targetTableId = destId;
 		fkName = fk;
 	}
+
+	public int getColCount()
+	{
+		return sourceColumns.size();
+	}
 	
-	public void addColumnReference(String sourceCol, String targetCol)
+	public void addColumnReference(ColumnIdentifier sourceCol, ColumnIdentifier targetCol)
 	{
 		sourceColumns.add(sourceCol);
 		targetColumns.add(targetCol);
+	}
+	
+	private String wbAction2Designer(String action)
+	{
+		if (action.equalsIgnoreCase("RESTRICT")) return "0";
+		if (action.equalsIgnoreCase("CASCADE")) return "1";
+		if (action.equalsIgnoreCase("SET NULL")) return "2";
+		if (action.equalsIgnoreCase("NO ACTION")) return "3";
+		if (action.equalsIgnoreCase("SET DEFAULT")) return "4";
+		return "0";
+	}
+	
+	public void setDeleteAction(String wbAction)
+	{
+		deleteAction = wbAction2Designer(wbAction);
+	}
+	
+	public void setUpdateAction(String wbAction)
+	{
+		updateAction = wbAction2Designer(wbAction);
+	}
+	
+	public String getDeleteAction()
+	{
+		return deleteAction;
+	}
+
+	public String getUpdateAction()
+	{
+		return updateAction;
 	}
 	
 	public int getRelationId()
@@ -53,6 +91,26 @@ public class TableRelation
 	{
 		return sourceTableId;
 	}
+	
+	/**
+	 * 1 = 1:n (identifying)
+	 * 2 = 1:n (non-identifying)
+	 * @return
+	 */
+	public String getRelationKind()
+	{
+		boolean isPK = true;
+		for (ColumnIdentifier col : targetColumns)
+		{
+			if (!col.isPkColumn()) 
+			{
+				isPK = false;
+				break;
+			}
+		}
+		return isPK ? "1" : "2";
+	}
+	
 	/**
 	 * Returns the fk columns as a string suitable to be put 
 	 * into a <tt>relation</tt> tag.
@@ -63,10 +121,10 @@ public class TableRelation
 		StringBuilder result = new StringBuilder();
 		for (int i=0; i < sourceColumns.size(); i++)
 		{
-			result.append(sourceColumns.get(0));
+			result.append(targetColumns.get(0).getColumnName());
 			result.append('=');
-			result.append(targetColumns.get(0));
-			result.append('\n');
+			result.append(sourceColumns.get(0).getColumnName());
+			result.append("\\n");
 		}
 		return result.toString();
 	}

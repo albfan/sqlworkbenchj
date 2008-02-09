@@ -90,8 +90,8 @@ public class WbProperties
 			{
 				String k1 = null;
 				String k2 = null;
-				k1 = getSections(lastKey, this.distinctSections); //getFirstTwoSections(lastKey);
-				k2 = getSections(key, this.distinctSections); //getFirstTwoSections(key);
+				k1 = getSections(lastKey, this.distinctSections);
+				k2 = getSections(key, this.distinctSections);
 				if (!k1.equals(k2))
 				{
 					bw.newLine();

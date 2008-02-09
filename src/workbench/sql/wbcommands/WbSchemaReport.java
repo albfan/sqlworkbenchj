@@ -46,6 +46,7 @@ public class WbSchemaReport
 	public static final String PARAM_INCLUDE_PROCS = "includeProcedures";
 	public static final String PARAM_INCLUDE_GRANTS = "includeTableGrants";
 	public static final String PARAM_INCLUDE_SEQUENCES = "includeSequences";
+	public static final String PARAM_INCLUDE_VIEWS = "includeViews";
 	
 	public static final String VERB = "WBREPORT";
 	private SchemaReporter reporter;
@@ -61,6 +62,7 @@ public class WbSchemaReport
 		cmdLine.addArgument("schemas");
 		cmdLine.addArgument("format", StringUtil.stringToList("wb,dbdesigner"));
 		cmdLine.addArgument("useSchemaName", ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_INCLUDE_VIEWS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_TABLES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
@@ -113,7 +115,7 @@ public class WbSchemaReport
 		this.reporter = new SchemaReporter(currentConnection);
 		this.reporter.setNamespace(namespace);
 		this.reporter.setDbDesigner(dbDesigner);
-
+		this.reporter.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
 		TableIdentifier[] tables = this.parseTables();
 		if (tables != null)
 		{

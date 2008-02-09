@@ -14,10 +14,12 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.util.StringUtil;
+import workbench.util.WbStringTokenizer;
 
 /**
  *
@@ -34,7 +36,7 @@ public class SourceTableArgument
 		if (StringUtil.isEmptyString(argument)) return;
 		if (dbConn == null) return;
 		
-		List<String> args = StringUtil.getObjectNames(argument);
+		List<String> args = getObjectNames(argument);
 		int argCount = args.size();
 
 		if (argCount <= 0) return;
@@ -64,6 +66,36 @@ public class SourceTableArgument
 		}
 	}
 
+
+	/**
+	 * Returns all DB Object names from the comma separated list.
+	 * This is different to stringToList() as it keeps any quotes that 
+	 * are present in the list.
+	 * 
+	 * @param list a comma separated list of elements (optionally with quotes)
+	 * @return a List of Strings as defined by the input string
+	 */
+	public List<String> getObjectNames(String list)
+	{
+		if (StringUtil.isEmptyString(list)) return Collections.emptyList();
+		WbStringTokenizer tok = new WbStringTokenizer(list, ",");
+		tok.setDelimiterNeedsWhitspace(false);
+		tok.setCheckBrackets(false);
+		tok.setKeepQuotes(true);
+		List<String> result = new LinkedList<String>();
+		while (tok.hasMoreTokens())
+		{
+			String element = tok.nextToken();
+			if (element == null) continue;
+			element = element.trim();
+			if (element.length() > 0)
+			{
+				result.add(element);
+			}
+		}
+		return result;
+	}
+	
 	public List<TableIdentifier> getTables()
 	{
 		return Collections.unmodifiableList(this.tables);

@@ -33,6 +33,7 @@ import workbench.util.EncodingUtil;
 import workbench.util.StringUtil;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
+import workbench.db.exporter.ControlFileFormat;
 import workbench.db.exporter.PoiHelper;
 import workbench.util.ExceptionUtil;
 import workbench.util.WbFile;
@@ -92,7 +93,7 @@ public class WbExport
 		cmdLine.addArgument("quoteAlways", ArgumentType.BoolArgument);
 		cmdLine.addArgument("lineEnding", StringUtil.stringToList("crlf,lf"));
 		cmdLine.addArgument("showEncodings");
-		cmdLine.addArgument("writeOracleLoader", ArgumentType.BoolArgument);
+		cmdLine.addArgument("writeOracleLoader", ArgumentType.Deprecated);
 		cmdLine.addArgument("formatFile", StringUtil.stringToList("oracle,sqlserver"));
 		cmdLine.addArgument("compress", ArgumentType.BoolArgument);
 		cmdLine.addArgument("blobIdCols", ArgumentType.Deprecated);
@@ -225,20 +226,13 @@ public class WbExport
 		
 		if ("text".equals(type) || "txt".equals(type))
 		{
-			exporter.setWriteOracleControlFile(cmdLine.getBoolean("writeoracleloader", false));
-			String v = cmdLine.getValue("formatFile");
-			if (!StringUtil.isEmptyString(v))
+			// Support old parameter Syntax
+			if (cmdLine.getBoolean("writeoracleloader", false))
 			{
-				List<String> formats = StringUtil.stringToList(v.toLowerCase());
-				if (formats.contains("oracle"))
-				{
-					exporter.setWriteOracleControlFile(true);
-				}
-				if (formats.contains("sqlserver"))
-				{
-					exporter.setWriteBcpFormatFile(true);
-				}
+				exporter.addControlFileFormat(ControlFileFormat.oracle);
 			}
+			
+			exporter.addControlFileFormats(ControlFileFormat.parseCommandLine(cmdLine.getValue("formatfile")));
 
 			String delimiter = cmdLine.getValue("delimiter");
 			if (delimiter != null) exporter.setTextDelimiter(delimiter);

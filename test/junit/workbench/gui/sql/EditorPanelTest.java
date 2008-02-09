@@ -20,7 +20,9 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import workbench.TestUtil;
+import workbench.gui.editor.InputHandler;
 import workbench.resource.Settings;
+import workbench.util.CharacterRange;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
@@ -109,14 +111,14 @@ public class EditorPanelTest extends TestCase
 			evt = new ActionEvent(p,1,"break");
 			p.setAutoIndent(false);
 			p.appendLine("Line1");
-			p.getInputHandler().INSERT_BREAK.actionPerformed(evt);
+			InputHandler.INSERT_BREAK.actionPerformed(evt);
 			p.appendLine("Line2");
-			p.getInputHandler().INSERT_BREAK.actionPerformed(evt);
+			InputHandler.INSERT_BREAK.actionPerformed(evt);
 			p.appendLine("Line3");
-			p.getInputHandler().INSERT_BREAK.actionPerformed(evt);
+			InputHandler.INSERT_BREAK.actionPerformed(evt);
 
 			content = p.getText();
-			System.out.println(StringUtil.escapeUnicode(content));
+			System.out.println(StringUtil.escapeUnicode(content, CharacterRange.RANGE_8BIT));
 			pos = content.indexOf("Line2\n");
 			assertEquals("Wrong internal line ending (Unix) used", 6, pos);			
 			

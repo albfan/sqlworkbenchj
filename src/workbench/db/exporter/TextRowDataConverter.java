@@ -104,7 +104,7 @@ public class TextRowDataConverter
 				}
 				
 			}
-			else if (writeClobFiles && SqlUtil.isClobType(colType))
+			else if (writeClobFiles && SqlUtil.isClobType(colType, this.originalConnection.getDbSettings()))
 			{
 				Object clobData = row.getValue(c);
 				if (clobData != null)

@@ -58,7 +58,7 @@ public class SqlRowDataConverter
 	private String concatString;
 	private String chrFunction;
 	private String concatFunction;
-	private StatementFactory factory;
+	private StatementFactory statementFactory;
 	private List keyColumnsToUse;
 	private String lineTerminator = "\n";
 	private String doubleLineTerminator = "\n\n";
@@ -81,10 +81,10 @@ public class SqlRowDataConverter
 	public void setResultInfo(ResultInfo meta)
 	{
 		super.setResultInfo(meta);
-		this.factory = new StatementFactory(meta, this.originalConnection);
+		this.statementFactory = new StatementFactory(meta, this.originalConnection);
 		this.needsUpdateTable = meta.getUpdateTable() == null;
-		this.factory.setIncludeTableOwner(this.includeOwner);
-		this.factory.setTableToUse(this.alternateUpdateTable);
+		this.statementFactory.setIncludeTableOwner(this.includeOwner);
+		this.statementFactory.setTableToUse(this.alternateUpdateTable);
 		
 		boolean keysPresent = this.checkKeyColumns();
 		this.sqlTypeToUse = this.sqlType;
@@ -157,22 +157,22 @@ public class SqlRowDataConverter
 		{
 			db = this.originalConnection.getDatabaseProductName();
 		}
-		this.factory.setIncludeTableOwner(this.includeOwner);
+		this.statementFactory.setIncludeTableOwner(this.includeOwner);
 		
 		if (this.sqlTypeToUse == SQL_DELETE_INSERT)
 		{
-			dml = this.factory.createDeleteStatement(row, true);
+			dml = this.statementFactory.createDeleteStatement(row, true);
 			result.append(dml.getExecutableStatement(this.literalFormatter));
 			result.append(';');
 			result.append(lineTerminator);
 		}
 		if (this.sqlTypeToUse == SQL_DELETE_INSERT || this.sqlType == SQL_INSERT)
 		{
-			dml = this.factory.createInsertStatement(row, true, "\n", this.exportColumns);
+			dml = this.statementFactory.createInsertStatement(row, true, "\n", this.exportColumns);
 		}
 		else // implies sqlType == SQL_UPDATE
 		{
-			dml = this.factory.createUpdateStatement(row, true, "\n", this.exportColumns);
+			dml = this.statementFactory.createUpdateStatement(row, true, "\n", this.exportColumns);
 		}
 		dml.setChrFunction(this.chrFunction);
 		dml.setConcatString(this.concatString);
@@ -343,7 +343,7 @@ public class SqlRowDataConverter
 		{
 			this.alternateUpdateTable = table;
 			this.needsUpdateTable = false;
-			if (this.factory != null) this.factory.setTableToUse(this.alternateUpdateTable);
+			if (this.statementFactory != null) this.statementFactory.setTableToUse(this.alternateUpdateTable);
 		}
 		else
 		{
@@ -379,7 +379,7 @@ public class SqlRowDataConverter
 	public void setIncludeTableOwner(boolean flag)
 	{
 		this.includeOwner = flag;
-		if (this.factory != null) this.factory.setIncludeTableOwner(flag);
+		if (this.statementFactory != null) this.statementFactory.setIncludeTableOwner(flag);
 	}
 
 	public void setBlobTypeNone()

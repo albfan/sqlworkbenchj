@@ -18,11 +18,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
+import java.io.BufferedReader;
+import java.io.StringReader;
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.TextContainer;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -50,11 +54,73 @@ public class CreateSnippetAction extends WbAction
 		{
 			sql = this.client.getText();
 		}
-		boolean includeNewLine = Settings.getInstance().getIncludeNewLineInCodeSnippet();
-		String prefix = Settings.getInstance().getCodeSnippetPrefix();
-		String code = StringUtil.makeJavaString(sql, prefix, includeNewLine);
+		String code = makeJavaString(sql);
 		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection sel = new StringSelection(code);
 		clp.setContents(sel, sel);
 	}
+	
+	public String makeJavaString(String sql)
+	{
+		if (sql == null) return "";
+		
+		String prefix = Settings.getInstance().getProperty("workbench.clipcreate.codeprefix", "String sql = ");
+		String concat = Settings.getInstance().getProperty("workbench.clipcreate.concat", "+");
+		boolean includeNewLine = Settings.getInstance().getBoolProperty("workbench.clipcreate.includenewline", true);
+		
+		StringBuilder result = new StringBuilder(sql.length() + prefix.length() + 10);
+		result.append(prefix);
+		if (prefix.endsWith("=")) result.append(" ");
+		int k = result.length();
+		StringBuilder indent = new StringBuilder(k);
+		for (int i=0; i < k; i++) indent.append(' ');
+		BufferedReader reader = new BufferedReader(new StringReader(sql));
+		boolean first = true;
+		try
+		{
+			String line = reader.readLine();
+			while (line != null)
+			{
+				line = StringUtil.replace(line, "\"", "\\\"");
+				if (first) first = false;
+				else result.append(indent);
+				result.append('"');
+				if (line.endsWith(";"))
+				{
+					line = line.substring(0, line.length() - 1);
+				}
+				result.append(line);
+
+				line = reader.readLine();
+				if (line != null)
+				{
+					if (includeNewLine)
+					{
+						result.append(" \\n\"");
+					}
+					else
+					{
+						result.append(" \"");
+					}
+					result.append(" " + concat + "\n");
+				}
+				else
+				{
+					result.append("\"");
+				}
+			}
+			result.append(';');
+		}
+		catch (Exception e)
+		{
+			result.append("(Error when creating Java code, see logfile for details)");
+			LogMgr.logError("CreateSnippetActions.makeJavaString()", "Error creating Java String", e);
+		}
+		finally
+		{
+			FileUtil.closeQuitely(reader);
+		}
+		return result.toString();
+	}
+	
 }

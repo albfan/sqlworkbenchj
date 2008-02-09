@@ -14,6 +14,7 @@ package workbench.db.report;
 import workbench.db.ColumnIdentifier;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -40,8 +41,8 @@ public class ReportColumn
 	private ColumnIdentifier column;
 	private TagWriter tagWriter = new TagWriter();
 	private boolean isRealColumn = true;
-
-	/** Creates a new instance of ReportColumn */
+	private boolean isReferenced = false;
+	
 	public ReportColumn(ColumnIdentifier col)
 	{
 		this.column = col;
@@ -55,6 +56,15 @@ public class ReportColumn
 	public ColumnReference getForeignKey()
 	{
 		return this.fk;
+	}
+
+	public void setIsReferenced(boolean flag)
+	{
+		isReferenced = flag;
+	}
+	public boolean isReferenced()
+	{
+		return isReferenced;
 	}
 	
 	public void setForeignKeyReference(ColumnReference ref)
@@ -76,7 +86,7 @@ public class ReportColumn
 		StrBuffer myindent = new StrBuffer(indent);
 
 		myindent.append("  ");
-		tagWriter.appendOpenTag(result, indent, TAG_COLUMN_DEFINITION, "name", this.column.getColumnName());
+		tagWriter.appendOpenTag(result, indent, TAG_COLUMN_DEFINITION, "name", StringUtil.trimQuotes(this.column.getColumnName()));
 		result.append('\n');
 
 		if (includePosition) tagWriter.appendTag(result, myindent, TAG_COLUMN_POSITION, this.column.getPosition());
@@ -84,7 +94,7 @@ public class ReportColumn
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_DBMS_TYPE, this.column.getDbmsType());
 		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_PK, this.column.isPkColumn());
 		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_NULLABLE, this.column.isNullable());
-		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_DEFAULT, this.column.getDefaultValue());
+		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_DEFAULT, this.column.getDefaultValue(), true);
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_SIZE, this.column.getColumnSize());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_DIGITS, this.column.getDecimalDigits());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE, this.column.getDataType());
@@ -108,5 +118,13 @@ public class ReportColumn
 		}
 	}
 
-	public void setRealColumn(boolean flag) { this.isRealColumn = flag; }
+	public void setRealColumn(boolean flag) 
+	{ 
+		this.isRealColumn = flag; 
+	}
+	
+	public String toString()
+	{
+		return column.toString();
+	}
 }

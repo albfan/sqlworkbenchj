@@ -209,7 +209,7 @@ public class XmlRowDataConverter
 					xml.append(Long.toString(d.getTime()));
 					xml.append('"');
 				}
-				else if (writeClobFiles && SqlUtil.isClobType(type))
+				else if (writeClobFiles && SqlUtil.isClobType(type, originalConnection.getDbSettings()))
 				{
 					externalFile = true;
 					File clobFile = createBlobFile(row, c, rowIndex);

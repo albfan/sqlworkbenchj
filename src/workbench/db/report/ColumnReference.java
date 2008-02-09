@@ -52,7 +52,9 @@ public class ColumnReference
 	public void setForeignColumn(String col) { this.foreignColumn = col; }
 	public void setForeignTable(ReportTable tbl) { this.foreignTable = tbl; }
 	public void setUpdateRule(String rule) { this.updateRule = rule; }
+	public String getUpdateRule() { return this.updateRule; }
 	public void setDeleteRule(String rule) { this.deleteRule = rule; }
+	public String getDeleteRule() { return deleteRule; }
 	public void setDeferRule(String rule) { this.deferRule= rule; }
 	
 	public ReportTable getForeignTable()

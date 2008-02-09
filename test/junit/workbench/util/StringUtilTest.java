@@ -28,23 +28,6 @@ public class StringUtilTest
 		super(testName);
 	}
 
-	public void testGetObjectNames()
-	{
-		try
-		{
-			String s = "\"MIND\",\"test\"";
-			List<String> tables = StringUtil.getObjectNames(s);
-			assertEquals(2, tables.size());
-			assertEquals("\"MIND\"", tables.get(0));
-			assertEquals("\"test\"", tables.get(1));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
-	
 	public void testReplace()
 	{
 		try

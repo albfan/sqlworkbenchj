@@ -85,10 +85,8 @@ public class SchemaReporter
 	public SchemaReporter(WbConnection conn)
 	{
 		this.dbConn = conn;
-		types = new String[3];
-		types[0] = conn.getMetadata().getTableTypeName();
-		types[1] = conn.getMetadata().getViewTypeName();
-		types[2] = DbMetadata.MVIEW_NAME;
+		// Initialize the types to retrieve
+		setIncludeViews(true);
 	}
 
 	public void setProgressMonitor(RowActionMonitor mon)
@@ -154,6 +152,22 @@ public class SchemaReporter
 		}
 	}
 
+	public void setIncludeViews(boolean flag) 
+	{ 
+		if (flag)
+		{
+			types = new String[3];
+			types[0] = this.dbConn.getMetadata().getTableTypeName();
+			types[1] = this.dbConn.getMetadata().getViewTypeName();
+			types[2] = DbMetadata.MVIEW_NAME;
+		}
+		else
+		{
+			types = new String[3];
+			types[0] = this.dbConn.getMetadata().getTableTypeName();
+		}
+	}
+	
 	public void setIncludeSequences(boolean flag) { this.includeSequences = flag; }
 	public void setIncludeTables(boolean flag) { this.includeTables = flag; }
 	public void setIncludeProcedures(boolean flag) { this.includeProcedures = flag; }
@@ -247,6 +261,8 @@ public class SchemaReporter
 		{
 			WbFile f = new WbFile(this.outputfile);
 			DbDesignerWriter writer = new DbDesignerWriter(this.dbConn, this.tables, f.getFileName());
+			writer.setMonitor(monitor);
+			writer.setProgressPanel(progressPanel);
 			writer.writeXml(out);
 			return;
 		}

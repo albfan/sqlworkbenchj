@@ -1475,12 +1475,6 @@ public class Settings
 		setProperty(key, value.toLowerCase());
 	}
 	
-	public String getCodeSnippetPrefix()
-	{
-		String value = getProperty("workbench.editor.codeprefix", "String sql = ");
-		return value;
-	}
-	
 	public boolean getStoreFilesInHistory()
 	{
 		return getBoolProperty("workbench.sql.history.includefiles", true);
@@ -1572,16 +1566,6 @@ public class Settings
 		return getBoolProperty(PROPERTY_HIGHLIGHT_CURRENT_STATEMENT, false);
 	}
 
-	public boolean getIncludeNewLineInCodeSnippet()
-	{
-		return getBoolProperty("workbench.javacode.includenewline", true);
-	}
-
-	public void setIncludeNewLineInCodeSnippet(boolean useEncryption)
-	{
-		this.setProperty("workbench.javacode.includenewline", useEncryption);
-	}
-	
 	public void setEditorSelectionColor(Color c)
 	{
 		setColor("workbench.editor.color.selection", c);
@@ -2580,6 +2564,8 @@ public class Settings
 		this.renameProperty("workbench.history.columnlist", "workbench.quickfilter.columnlist.history");
 		this.renameProperty("workbench.gui.dbobjects.ProcedureListPanel.lastsearch", "workbench.quickfilter.procedurelist.history");
 		this.renameProperty("workbench.blob.text.encoding", "workbench.gui.blob.text.encoding");
+		this.renameProperty("workbench.javacode.includenewline", "workbench.clipcreate.includenewline");
+		this.renameProperty("workbench.javacode.codeprefix", "workbench.clipcreate.codeprefix");
 	}
 
 	private void renameProperty(String oldKey, String newKey)

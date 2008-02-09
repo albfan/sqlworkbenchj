@@ -768,11 +768,16 @@ public class SqlFormatter
 		SQLToken t = this.lexer.getNextToken(true,false);
 		boolean first = true;
 		boolean isParm = false;
+		boolean inQuotes = false;
 		while (t != null)
 		{
 			String text = t.getContents();
+			if (text.equals("'") || text.equals("\""))
+			{
+				inQuotes = !inQuotes;
+			}
 			if (isParm) text = text.toLowerCase();
-			if (text.equals("-"))
+			if (text.equals("-") && !inQuotes)
 			{
 				if (!first) 
 				{

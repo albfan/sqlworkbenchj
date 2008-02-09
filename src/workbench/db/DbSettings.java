@@ -86,7 +86,7 @@ public class DbSettings
 
 	public boolean longVarcharIsClob()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".clob.longvarchar", false);
+		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".clob.longvarchar", true);
 	}
 
 	public boolean supportsBatchedStatements()

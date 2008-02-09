@@ -73,7 +73,7 @@ import workbench.util.WbThread;
  * @author  support@sql-workbench.net
  */
 public class WbManager
-	implements FontChangedListener, Runnable
+	implements FontChangedListener, Runnable, Thread.UncaughtExceptionHandler
 {
 	private static WbManager wb;
 	private List<MainWindow> mainWindows = Collections.synchronizedList(new LinkedList<MainWindow>());
@@ -87,6 +87,7 @@ public class WbManager
 	private WbManager()
 	{
 		Runtime.getRuntime().addShutdownHook(this.shutdownHook);
+		Thread.setDefaultUncaughtExceptionHandler(this);
 	}
 
 	public static WbManager getInstance()
@@ -94,7 +95,15 @@ public class WbManager
 		return wb;
 	}
 
-	public boolean writeSettings() { return this.writeSettings; }
+	public void uncaughtException(Thread thread, Throwable error)
+	{
+		LogMgr.logError("WbManager.uncaughtException()", "Thread + " + thread.getName() + " caused an exception!", error);
+	}
+	
+	public boolean writeSettings() 
+	{ 
+		return this.writeSettings; 
+	}
 	
 	public void showDialog(String clazz)
 	{
@@ -388,13 +397,6 @@ public class WbManager
 		settings.addFontChangedListener(this);
 	}
 
-	public MainWindow createWindow()
-	{
-		MainWindow win = new MainWindow();
-		this.mainWindows.add(win);
-		return win;
-	}
-
 	private JDialog closeMessage;
 
 	private boolean saveWindowSettings()
@@ -572,8 +574,7 @@ public class WbManager
 				try { w.dispose(); } catch (Throwable th) {}
 			}
 		}
-		this.mainWindows.clear();
-		this.closeToolWindows();
+		closeToolWindows();
 	}
 
 	protected void saveSettings()
@@ -642,9 +643,15 @@ public class WbManager
 			// current thread as we are already in a background thread
 			// second parameter tells the window not to close the workspace
 			// third parameter tells the window not to save the workspace
-			win.disconnect(false, false, false);
-			win.setVisible(false);
-			win.dispose();
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					win.disconnect(false, false, false);
+					win.setVisible(false);
+					win.dispose();
+				}
+			});
 		}
 	}
 	
@@ -685,7 +692,8 @@ public class WbManager
 
 	protected void openNewWindow(boolean checkCmdLine)
 	{
-		final MainWindow main = this.createWindow();
+		final MainWindow main = new MainWindow();
+		this.mainWindows.add(main);
 		main.display();
 		boolean connected = false;
 
@@ -717,7 +725,6 @@ public class WbManager
 				// if the connection to the requested profile fails.
 				connected = true;
 			}
-
 		}
 
 		boolean autoSelect = Settings.getInstance().getBoolProperty("workbench.gui.autoconnect", true);
@@ -772,16 +779,7 @@ public class WbManager
 			// this is especially necessary during Junit tests to make 
 			// sure a newly passed commandline overrules the previously initialized
 			// Settings instance
-//			if (Settings.isInitialized())
-//			{
-				Settings.getInstance().initialize();
-//			}
-//			else
-//			{
-//				// Implies initialize, but if initialize is always called
-//				// this will call it twice if the instance is already created
-//				Settings.getInstance();
-//			}
+			Settings.getInstance().initialize();
 			
 			String scriptname = cmdLine.getValue(AppArguments.ARG_SCRIPT);
 

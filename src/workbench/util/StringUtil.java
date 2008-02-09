@@ -11,18 +11,14 @@
  */
 package workbench.util;
 
-import java.io.BufferedReader;
-import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import workbench.log.LogMgr;
 
 /**
  *
@@ -73,6 +69,13 @@ public class StringUtil
 		return hash;
 	}
 	
+	/**
+	 * Replace various combinations of linefeeds in the input string with \n.
+	 * 
+	 * @param input
+	 * @return input string with only \n linefeeds
+	 * @see #PATTERN_NON_LF
+	 */
 	public static String makePlainLinefeed(String input)
 	{
 		Matcher m = PATTERN_NON_LF.matcher(input);
@@ -499,8 +502,8 @@ public class StringUtil
 	}
 
 	/**
-	 * Checks if both Strings are equals considering null values. 
-	 * a null String and an empty String (length==0 or all whitespace) are
+	 * Checks if both Strings are equal considering null values. 
+	 * A null String and an empty String (length==0 or all whitespace) are
 	 * considered equal as well (because both are "empty")
 	 * @see #isWhitespaceOrEmpty(CharSequence)
 	 */
@@ -583,36 +586,6 @@ public class StringUtil
 		}
 		return result;
 	}
-
-	/**
-	 * Returns all DB Object names from the comma separated list.
-	 * This is different to stringToList() as it keeps any quotes that 
-	 * are present in the list.
-	 * 
-	 * @param list a comma separated list of elements (optionally with quotes)
-	 * @return a List of Strings as defined by the input string
-	 */
-	public static final List<String> getObjectNames(String list)
-	{
-		if (isEmptyString(list)) return Collections.emptyList();
-		WbStringTokenizer tok = new WbStringTokenizer(list, ",");
-		tok.setDelimiterNeedsWhitspace(false);
-		tok.setCheckBrackets(false);
-		tok.setKeepQuotes(true);
-		List<String> result = new LinkedList<String>();
-		while (tok.hasMoreTokens())
-		{
-			String element = tok.nextToken();
-			if (element == null) continue;
-			element = element.trim();
-			if (element.length() > 0)
-			{
-				result.add(element);
-			}
-		}
-		return result;
-	}
-
 	
 	public static final String[] toArray(Collection<String> strings)
 	{
@@ -667,107 +640,6 @@ public class StringUtil
 			result.append(o.toString());
 			if (quoteEntries) result.append('"');
 			numElements ++;
-		}
-		return result.toString();
-	}
-
-
-	public static final String makeJavaString(String sql, String prefix, boolean includeNewLines)
-	{
-		if (sql == null) return "";
-		if (prefix == null) prefix = "";
-		StringBuilder result = new StringBuilder(sql.length() + prefix.length() + 10);
-		result.append(prefix);
-		if (prefix.endsWith("=")) result.append(" ");
-		int k = result.length();
-		StringBuilder indent = new StringBuilder(k);
-		for (int i=0; i < k; i++) indent.append(' ');
-		BufferedReader reader = new BufferedReader(new StringReader(sql));
-		boolean first = true;
-		try
-		{
-			String line = reader.readLine();
-			while (line != null)
-			{
-				line = replace(line, "\"", "\\\"");
-				if (first) first = false;
-				else result.append(indent);
-				result.append('"');
-				if (line.endsWith(";"))
-				{
-					line = line.substring(0, line.length() - 1);
-				}
-				result.append(line);
-
-				line = reader.readLine();
-				if (line != null)
-				{
-					if (includeNewLines)
-					{
-						result.append(" \\n\"");
-					}
-					else
-					{
-						result.append(" \"");
-					}
-					result.append(" + \n");
-				}
-				else
-				{
-					result.append("\"");
-				}
-			}
-			result.append(';');
-		}
-		catch (Exception e)
-		{
-			result.append("(Error when creating Java code, see logfile for details)");
-			LogMgr.logError("StringUtil.makeJavaString()", "Error creating Java String", e);
-		}
-		finally
-		{
-			FileUtil.closeQuitely(reader);
-		}
-		return result.toString();
-	}
-
-	
-	public static final String cleanJavaString(String aString)
-	{
-		if (isEmptyString(aString)) return "";
-		// a regex to find escaped newlines in the literal
-		Pattern newline = Pattern.compile("\\\\n|\\\\r");
-		String lines[] = PATTERN_CRLF.split(aString);
-		StringBuilder result = new StringBuilder(aString.length());
-		int count = lines.length;
-		for (int i=0; i < count; i ++)
-		{
-			//String l = (String)lines.get(i);
-			String l = lines[i];
-			if (l == null) continue;
-			if (l.trim().startsWith("//"))
-			{
-				l = l.replaceFirst("//", "--");
-			}
-			else
-			{
-				l = l.trim();
-				//if (l.startsWith("\"")) start = 1;
-				int start = l.indexOf("\"");
-				int end = l.lastIndexOf("\"");
-				if (end == start) start = 1;
-				if (end == 0) end = l.length() - 1;
-				if (start > -1) start ++;
-				if (start > -1 && end > -1)
-				{
-					l = l.substring(start, end);
-				}
-			}
-			Matcher m = newline.matcher(l);
-			l = m.replaceAll("");
-			l = replace(l,"\\\"", "\"");
-			result.append(l);
-			if (i < count - 1) result.append('\n');
 		}
 		return result.toString();
 	}
@@ -837,29 +709,6 @@ public class StringUtil
 	{
 		if (aString == null) return false;
 		return ("true".equalsIgnoreCase(aString) || "1".equals(aString) || "y".equalsIgnoreCase(aString) || "yes".equalsIgnoreCase(aString) );
-	}
-
-	public static final StringBuilder getLines(String s, int lineCount)
-	{
-		StringBuilder result = new StringBuilder(lineCount * 100);
-		try
-		{
-			BufferedReader r = new BufferedReader(new StringReader(s));
-			int lines = 0;
-			String line = r.readLine();
-			while (line != null && lines < lineCount)
-			{
-				result.append(line);
-				result.append('\n');
-				lines ++;
-				line = r.readLine();
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		return result;
 	}
 
 	public static final String getMaxSubstring(String s, int maxLen, String add)

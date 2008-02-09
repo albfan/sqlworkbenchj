@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Set;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 
@@ -255,14 +256,10 @@ public abstract class ExportWriter
 
 	protected void writeFormatFile()
 	{
-		if (exporter.getWriteOracleControlFile())
+		Set<ControlFileFormat> formats = exporter.getControlFileFormats();
+		for (ControlFileFormat format : formats)
 		{
-			FormatFileWriter writer = new OracleControlFileWriter();
-			writer.writeFormatFile(exporter, converter);
-		}
-		if (exporter.getWriteBcpFormatFile())
-		{
-			FormatFileWriter writer = new SqlServerFormatFileWriter();
+			FormatFileWriter writer = ControlFileFormat.createFormatWriter(format);
 			writer.writeFormatFile(exporter, converter);
 		}
 	}

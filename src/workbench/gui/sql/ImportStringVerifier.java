@@ -15,6 +15,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.io.BufferedReader;
+import java.io.StringReader;
 import java.util.Iterator;
 import java.util.List;
 import javax.swing.JPanel;
@@ -139,7 +141,7 @@ public class ImportStringVerifier
 		JPanel p = new JPanel(new BorderLayout(0,5));
 		
 		JTextArea preview = new JTextArea();
-		StringBuilder s = StringUtil.getLines(content, 15);
+		StringBuilder s = getLines(content, 15);
 		int l = s.length();
 		for (int i = 0; i < l; i++)
 		{
@@ -188,4 +190,28 @@ public class ImportStringVerifier
 		return textOptions;
 	}
 
+
+	public final StringBuilder getLines(String s, int lineCount)
+	{
+		StringBuilder result = new StringBuilder(lineCount * 100);
+		try
+		{
+			BufferedReader r = new BufferedReader(new StringReader(s));
+			int lines = 0;
+			String line = r.readLine();
+			while (line != null && lines < lineCount)
+			{
+				result.append(line);
+				result.append('\n');
+				lines ++;
+				line = r.readLine();
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 }
