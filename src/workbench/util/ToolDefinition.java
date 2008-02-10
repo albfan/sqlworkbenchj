@@ -14,7 +14,6 @@ package workbench.util;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import workbench.util.WbStringTokenizer;
 
 /**
  * @author support@sql-workbench.net

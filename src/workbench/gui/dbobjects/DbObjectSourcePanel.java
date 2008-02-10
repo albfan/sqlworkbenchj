@@ -89,11 +89,11 @@ public class DbObjectSourcePanel
 	{
 		String command = e.getActionCommand();
 
-		if (command.startsWith("panel-") && this.parentWindow != null)
+		if (command.startsWith(EditorTabSelectMenu.PANEL_CMD_PREFIX) && this.parentWindow != null)
 		{
 			try
 			{
-				final int panelIndex = Integer.parseInt(command.substring(6));
+				final int panelIndex = Integer.parseInt(command.substring(EditorTabSelectMenu.PANEL_CMD_PREFIX.length()));
 				
 				// Allow the selection change to finish so that
 				// we have the correct table name in the instance variables

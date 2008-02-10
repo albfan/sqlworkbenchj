@@ -238,7 +238,7 @@ public class DataStore
 	{
 		this.originalConnection = aConn;
 		this.initMetaData(metaData);
-		this.reset();
+		this.data = createData();
 	}
 
 	/**
@@ -382,7 +382,7 @@ public class DataStore
 			RowData row = this.filteredRows.get(i);
 			this.data.add(row);
 		}
-		this.filteredRows.reset();
+		this.filteredRows.clear();
 		this.filteredRows = null;
 	}
 
@@ -878,7 +878,7 @@ public class DataStore
 	 */
 	public void restoreOriginalValues()
 	{
-		RowData row;
+		RowData row = null;
 		if (this.deletedRows != null)
 		{
 			for (int i=0; i < this.deletedRows.size(); i++)
@@ -904,12 +904,12 @@ public class DataStore
 		this.data.reset();
 		if (this.deletedRows != null)
 		{
-			this.deletedRows.reset();
+			this.deletedRows.clear();
 			this.deletedRows = null;
 		}
 		if (this.filteredRows != null)
 		{
-			this.filteredRows.reset();
+			this.filteredRows.clear();
 			this.filteredRows = null;
 		}
 		this.modified = false;
@@ -1561,7 +1561,7 @@ public class DataStore
 					newDeleted.add(row);
 				}
 			}
-			this.deletedRows.reset();
+			this.deletedRows.clear();
 			this.deletedRows = newDeleted;
 		}
 	}

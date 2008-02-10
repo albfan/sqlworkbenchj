@@ -23,7 +23,7 @@ import workbench.gui.components.WbMenuItem;
 import workbench.interfaces.FilenameChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+import workbench.util.NumberStringCache;
 
 /**
  * @author support@sql-workbench.net
@@ -36,6 +36,7 @@ public class EditorTabSelectMenu
 	private ActionListener target;
 	private String regularTooltip;
 	private String newTabTooltip;
+	public static final String PANEL_CMD_PREFIX = "panel_";
 	
 	public EditorTabSelectMenu(ActionListener l, String label, String tooltipKeyNewTab, String tooltipKeyTab, MainWindow parent)
 	{
@@ -69,27 +70,26 @@ public class EditorTabSelectMenu
 				item.removeActionListener(target);
 			}
 		}
+		
 		this.removeAll();
 
 		int current = this.parentWindow.getCurrentPanelIndex();
 
-		JMenuItem item = null;
+		JMenuItem show = new WbMenuItem(ResourceMgr.getString("LblShowDataInNewTab"));
+		show.setActionCommand(PANEL_CMD_PREFIX + "-1");
+		show.setToolTipText(newTabTooltip);
+		show.addActionListener(target);
+		this.add(show);
 		
-		item = new WbMenuItem(ResourceMgr.getString("LblShowDataInNewTab"));
-		item.setActionCommand("panel--1");
-		item.setToolTipText(newTabTooltip);
-		item.addActionListener(target);
-		this.add(item);
-		
-		Font boldFont = item.getFont();
+		Font boldFont = show.getFont();
 		if (boldFont != null) boldFont = boldFont.deriveFont(Font.BOLD);
 
 		addSeparator();
 
 		for (int i=0; i < panels.length; i++)
 		{
-			item = new WbMenuItem(panels[i]);
-			item.setActionCommand("panel-" + i);
+			JMenuItem item = new WbMenuItem(panels[i]);
+			item.setActionCommand(EditorTabSelectMenu.PANEL_CMD_PREFIX + NumberStringCache.getNumberString(i));
 			if (i == current && boldFont != null)
 			{
 				item.setFont(boldFont);

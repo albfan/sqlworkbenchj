@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -102,7 +101,7 @@ public class Settings
 	private WbProperties props;
 	private WbFile configfile;
 	
-	private List<FontChangedListener> fontChangeListeners = new LinkedList<FontChangedListener>();
+	private List<FontChangedListener> fontChangeListeners = new ArrayList<FontChangedListener>(5);
 
 	private ShortcutManager keyManager;
 	
@@ -442,20 +441,20 @@ public class Settings
 
 	// <editor-fold defaultstate="collapsed" desc="External Tools">
 
-	public ToolDefinition[] getExternalTools()
+	public List<ToolDefinition> getExternalTools()
 	{
 		return getExternalTools(true);
 	}
 
-	public ToolDefinition[] getAllExternalTools()
+	public List<ToolDefinition> getAllExternalTools()
 	{
 		return getExternalTools(false);
 	}
 
-	private ToolDefinition[] getExternalTools(boolean check)
+	private List<ToolDefinition> getExternalTools(boolean check)
 	{
 		int numTools = getIntProperty("workbench.tools.count", 0);
-		LinkedList<ToolDefinition> l = new LinkedList<ToolDefinition>();
+		List<ToolDefinition> result = new ArrayList<ToolDefinition>(numTools);
 		int count = 0;
 		for (int i = 0; i < numTools; i++)
 		{
@@ -466,33 +465,34 @@ public class Settings
 			
 			if (check && tool.executableExists())
 			{
-				l.add(tool);
+				result.add(tool);
 				count++;
 			}
 			else
 			{
-				l.add(tool);
+				result.add(tool);
 				count ++;
 			}
-		}
-		ToolDefinition[] result = new ToolDefinition[count];
-		Iterator<ToolDefinition> itr = l.iterator();
-		int i=0;
-		while (itr.hasNext())
-		{
-			result[i] = itr.next();
-			i++;
 		}
 		return result;
 	}
 
-	public void setExternalTool(Collection tools)
+	private void clearTools()
 	{
-		int count = 0;
-		Iterator itr = tools.iterator();
-		while (itr.hasNext())
+		int numTools = getIntProperty("workbench.tools.count", 0);
+		for (int i=0; i < numTools; i++)
 		{
-			ToolDefinition tool = (ToolDefinition)itr.next();
+			removeProperty("workbench.tools." + i + ".executable");
+			removeProperty("workbench.tools." + i + ".name");
+		}
+	}
+	
+	public void setExternalTools(Collection<ToolDefinition> tools)
+	{
+		clearTools();
+		int count = 0;
+		for (ToolDefinition tool : tools)
+		{
 			setProperty("workbench.tools." + count + ".executable", tool.getApplicationPath());
 			setProperty("workbench.tools." + count + ".name", tool.getName());
 			count ++;

@@ -81,16 +81,16 @@ public class ExternalToolsPanel
 		{
 			l.add((ToolDefinition)e.nextElement());
 		}
-		Settings.getInstance().setExternalTool(l);
+		Settings.getInstance().setExternalTools(l);
 	}
 	
 	public void restoreSettings()
 	{
 		tools = new DefaultListModel();
-		ToolDefinition[] t = Settings.getInstance().getAllExternalTools();
-		for (int i = 0; i < t.length; i++)
+		List<ToolDefinition> t = Settings.getInstance().getAllExternalTools();
+		for (ToolDefinition tool : t)
 		{
-			tools.addElement(t[i]);
+			tools.addElement(tool);
 		}
 		toolList.setModel(tools);
 		toolList.addListSelectionListener(this);

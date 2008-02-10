@@ -13,6 +13,7 @@ package workbench.sql;
 
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import workbench.gui.sql.DwStatusBar;
@@ -83,7 +84,7 @@ public class StatementRunnerResult
 
 	public int addDataStore(DataStore ds)
 	{
-		if (this.datastores == null) this.datastores = new LinkedList<DataStore>();
+		if (this.datastores == null) this.datastores = new ArrayList<DataStore>(5);
 		ds.resetCancelStatus();
 		this.datastores.add(ds);
 		return this.datastores.size();

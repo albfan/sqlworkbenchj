@@ -70,7 +70,10 @@ public class RowData
 
 	public void setTrimCharData(boolean flag) { this.trimCharData = flag; }
 	
-	public Object[] getData() { return this.colData; }
+	public Object[] getData() 
+	{ 
+		return this.colData; 
+	}
 	
 	/**
 	 *	Read the row data from the supplied ResultSet
@@ -313,7 +316,10 @@ public class RowData
 	 */
 	public synchronized void reset()
 	{
-		this.colData = null;
+		for (int i=0; i < this.colData.length; i++)
+		{
+			colData[i] = null;
+		}
 		this.resetStatus();
 	}
 	/**

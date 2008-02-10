@@ -512,6 +512,21 @@ public class WbTable
 	public void setSelectOnRightButtonClick(boolean flag) { this.selectOnRightButtonClick = flag; }
 	public boolean getSelectOnRightButtonClick() { return this.selectOnRightButtonClick; }
 
+	public void dispose()
+	{
+		reset();
+		if (this.rowResizer != null)
+		{
+			this.rowResizer.done();
+		}
+		this.rowResizer = null;
+		if (this.popup != null)
+		{
+			this.popup.removeAll();
+			this.popup = null;
+		}
+	}
+	
 	public void reset()
 	{
 		this.stopEditing();

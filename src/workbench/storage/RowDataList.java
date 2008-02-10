@@ -39,12 +39,15 @@ public class RowDataList
 
 	private void grow(int minStorage)
 	{
-		int newStorage = (int)(this.data.length * grow) + 1;
-
-		if (newStorage < minStorage) newStorage = minStorage;
-
-		if (this.data != null)
+		if (this.data == null)
 		{
+			data = new RowData[(int)(minStorage * grow)];
+		}
+		else 
+		{
+			int newStorage = (int)(this.data.length * grow) + 1;
+			if (newStorage < minStorage) newStorage = minStorage;
+
 			synchronized (this.data)
 			{
 				RowData newBuf[] = new RowData[newStorage];
@@ -60,12 +63,36 @@ public class RowDataList
 	}
 
 	/**
-	 * Free all objects stored in the internal array. 
+	 * Free all objects stored in the internal array. This will
+	 * also call reset on all RowData objects, so if rows are shared
+	 * between to RowDataList instances (moved back and forth, e.g. 
+	 * when filtering) this will also remove the data from the original 
+	 * source.
+	 * @see #clear()
+	 * @see RowData#reset()
 	 */
 	public void reset()
 	{
+		synchronized (this.data)
+		{
+			for (RowData row : data)
+			{
+				if (row != null) row.reset();
+			}
+		}
+		clear();
+	}
+	
+	/**
+	 * set the number of rows to zero. 
+	 * The RowData instances currently stored in this list 
+	 * are not freed by calling RowData.reset()
+	 * @see #reset()
+	 */
+	public void clear()
+	{
 		this.size = 0;
-		this.data = new RowData[DEFAULT_SIZE];
+		this.data = null;
 	}
 
 	/**
@@ -81,6 +108,7 @@ public class RowDataList
 	 */
 	public RowData get(int index)
 	{
+		if (data == null) throw new ArrayIndexOutOfBoundsException(index);
 		synchronized (this.data)
 		{
 			return this.data[index];
@@ -92,6 +120,7 @@ public class RowDataList
 	 */
 	public void remove(int index)
 	{
+		if (data == null) throw new ArrayIndexOutOfBoundsException(index);
 		int count = size - index - 1;
 
 		synchronized (this.data)
@@ -111,6 +140,11 @@ public class RowDataList
 	 */
 	public int add(RowData row)
 	{
+		if (data == null)
+		{
+			grow(DEFAULT_SIZE);
+		}
+		
 		int newlen = this.size + 1;
 		
 		synchronized (this.data)
@@ -130,7 +164,11 @@ public class RowDataList
 		int newlen = this.size + 1;
 		synchronized (this.data)
 		{
-			if (newlen > this.data.length)
+			if (data == null)
+			{
+				grow(DEFAULT_SIZE);
+			}
+			else if (newlen > this.data.length)
 			{
 				// we are not using ensureCapacity here to optimize
 				// the calls to System.arraycopy
@@ -151,6 +189,7 @@ public class RowDataList
 
 	public void sort(Comparator<RowData> comp)
 	{
+		if (size == 0 || data == null) return;
 		synchronized (this.data)
 		{
 			Arrays.sort(this.data, 0, this.size, comp);

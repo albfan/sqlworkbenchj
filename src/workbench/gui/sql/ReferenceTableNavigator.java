@@ -401,9 +401,9 @@ public class ReferenceTableNavigator
 		String cmd = item.getActionCommand();
 		int containerIndex = -42;
 		
-		if (cmd.startsWith("panel-"))
+		if (cmd.startsWith(EditorTabSelectMenu.PANEL_CMD_PREFIX))
 		{
-			containerIndex = StringUtil.getIntValue(cmd.substring(6), -1);
+			containerIndex = StringUtil.getIntValue(cmd.substring(EditorTabSelectMenu.PANEL_CMD_PREFIX.length()), -1);
 			JPopupMenu popup = (JPopupMenu)item.getParent();
 			item = (JMenuItem)popup.getInvoker();
 			cmd = item.getActionCommand();

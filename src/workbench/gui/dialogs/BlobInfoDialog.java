@@ -14,12 +14,12 @@ package workbench.gui.dialogs;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.List;
 import javax.swing.ActionMap;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.SwingUtilities;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.BlobHandler;
@@ -63,24 +63,29 @@ public class BlobInfoDialog
 
 		String encoding = Settings.getInstance().getDefaultBlobTextEncoding();
 		encodingPanel.setEncoding(encoding);
-		ToolDefinition[] tools = Settings.getInstance().getExternalTools();
-		this.hasTools = (tools != null && tools.length > 0);
+		List<ToolDefinition> tools = Settings.getInstance().getExternalTools();
+		this.hasTools = (tools != null && tools.size() > 0);
 		this.externalViewer.setEnabled(hasTools);
 		this.externalTools.setEnabled(hasTools);
 		if (hasTools)
 		{
-			this.externalTools.setModel(new DefaultComboBoxModel(tools));
+			DefaultComboBoxModel model = new DefaultComboBoxModel();
 			String name = Settings.getInstance().getLastUsedBlobTool();
-			if (name != null)
+			int toSelect = -1;
+			
+			for (int i = 0; i < tools.size(); i++)
 			{
-				for (int i = 0; i < tools.length; i++)
+				model.addElement(tools.get(i));
+				if (StringUtil.equalString(name, tools.get(i).getName()))
 				{
-					if (name.equals(tools[i].getName()))
-					{
-						this.externalTools.setSelectedIndex(i);
-						break;
-					}
+					toSelect = i;
 				}
+			}
+			
+			this.externalTools.setModel(model);
+			if (toSelect != -1)
+			{
+				this.externalTools.setSelectedIndex(toSelect);
 			}
 		}
 		WbSwingUtilities.center(this, parent);

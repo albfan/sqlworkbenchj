@@ -24,8 +24,8 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -76,8 +76,8 @@ public class WbManager
 	implements FontChangedListener, Runnable, Thread.UncaughtExceptionHandler
 {
 	private static WbManager wb;
-	private List<MainWindow> mainWindows = Collections.synchronizedList(new LinkedList<MainWindow>());
-	private List<ToolWindow> toolWindows = Collections.synchronizedList(new LinkedList<ToolWindow>());
+	private List<MainWindow> mainWindows = Collections.synchronizedList(new ArrayList<MainWindow>(5));
+	private List<ToolWindow> toolWindows = Collections.synchronizedList(new ArrayList<ToolWindow>(5));
 	private boolean batchMode = false;
 	private boolean writeSettings = true;
 	private boolean outOfMemoryOcurred = false;
