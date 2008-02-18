@@ -27,5 +27,4 @@ public class XlsXMLExportWriter
 	{
 		return new XlsXMLRowDataConverter();
 	}
-
 }

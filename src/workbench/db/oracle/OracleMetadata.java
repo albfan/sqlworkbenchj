@@ -33,7 +33,7 @@ import workbench.util.StringUtil;
 
 /**
  *
- * @author  support@sql-workbench.net
+ * @author support@sql-workbench.net
  */
 public class OracleMetadata
 	implements ErrorInformationReader, DataTypeResolver

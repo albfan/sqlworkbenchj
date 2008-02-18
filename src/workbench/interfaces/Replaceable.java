@@ -40,7 +40,7 @@ public interface Replaceable
 	/**
 	 *	Replace the currently highlighted (=found) text with the given value
 	 */
-	boolean replaceCurrent(String aReplacement);
+	boolean replaceCurrent(String aReplacement, boolean useRegex);
 	
 	
 	/**
@@ -48,7 +48,7 @@ public interface Replaceable
 	 *  Only valid if findFirst() was called.
 	 *	@return true if an occurance was found
 	 */
-	boolean replaceNext(String aReplacement);
+	boolean replaceNext(String aReplacement, boolean useRegex);
 	
 	/**
 	 *	Find and replace all occurances of the given value 

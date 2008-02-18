@@ -771,7 +771,7 @@ public class SqlFormatter
 		boolean inQuotes = false;
 		while (t != null)
 		{
-			String text = t.getContents();
+			String text = inQuotes ? t.getText() : t.getContents();
 			if (text.equals("'") || text.equals("\""))
 			{
 				inQuotes = !inQuotes;
@@ -791,7 +791,7 @@ public class SqlFormatter
 				isParm = false;
 			}
 			this.appendText(text);
-			t = this.lexer.getNextToken(true,false);
+			t = this.lexer.getNextToken(true,inQuotes);
 			first = false;
 		}
 		return null;

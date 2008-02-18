@@ -34,6 +34,22 @@ public class SqlFormatterTest
 		util.prepareEnvironment();
 	}
 
+	public void testFileParam()
+	{
+		try
+		{
+			String sql = "wbexport -file=\"c:\\Documents and Settings\\test.txt\" -type=text";
+			SqlFormatter f = new SqlFormatter(sql, 100);
+			String formatted = f.getFormattedSql().toString();
+			assertTrue(formatted.indexOf("\"c:\\Documents and Settings\\test.txt\"") > 0);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testWbConfirm()
 	{
 		try

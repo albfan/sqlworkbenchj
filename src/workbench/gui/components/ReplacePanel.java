@@ -418,7 +418,7 @@ public class ReplacePanel
 	{
 		if (this.lastPos < 0) this.findFirst();
 
-		if (this.client.replaceCurrent(this.replaceValueTextField.getText()))
+		if (this.client.replaceCurrent(this.replaceValueTextField.getText(), this.useRegexCheckBox.isSelected()))
 		{
 			this.findNext();
 		}

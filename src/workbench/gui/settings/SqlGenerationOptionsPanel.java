@@ -66,6 +66,7 @@ public class SqlGenerationOptionsPanel
 		set.setDefaultCopyDateLiteralType((String)literalTypes.getSelectedItem());
 		set.setDefaultExportDateLiteralType((String)exportLiteralTypes.getSelectedItem());
 		set.setIncludeEmptyComments(includeEmptyComments.isSelected());
+		set.setFormatInsertIgnoreIdentity(ignoreIdentity.isSelected());
 	}
 	/** This method is called from within the constructor to
 	 * initialize the form.

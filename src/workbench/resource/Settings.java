@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -399,15 +398,17 @@ public class Settings
 	public String replaceLibDirKey(String aPathname)
 	{
 		if (aPathname == null) return null;
-		String libDir = Settings.getInstance().getLibDir();
-		if (libDir == null) return aPathname;
-		return StringUtil.replace(aPathname, LIB_DIR_KEY, libDir);
+		WbFile libDir = getLibDir();
+		return StringUtil.replace(aPathname, LIB_DIR_KEY, libDir.getFullPath());
 	}	
 	
-	public String getLibDir()
+	public WbFile getLibDir()
 	{
-		return System.getProperty("workbench.libdir", getProperty("workbench.libdir", null));
+		String dir = System.getProperty("workbench.libdir", getProperty("workbench.libdir", null));
+		if (dir == null) return new WbFile(getConfigDir());
+		return new WbFile(dir);
 	}
+	
 	private String getShortcutFilename()
 	{
 		return new File(getConfigDir(), "WbShortcuts.xml").getAbsolutePath();

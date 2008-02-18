@@ -24,6 +24,7 @@ import workbench.gui.components.SearchCriteriaPanel;
 import workbench.interfaces.Replaceable;
 import workbench.interfaces.Searchable;
 import workbench.interfaces.TextContainer;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
@@ -159,18 +160,27 @@ public class SearchAndReplace
 	/**
 	 *	Find and replace the next occurance of the current search string
 	 */
-	public boolean replaceNext(String aReplacement)
+	public boolean replaceNext(String aReplacement, boolean useRegex)
 	{
-		int pos = this.findNext();
-		if (pos > -1)
+		try
 		{
-			String text = this.getSelectedText();
-			Matcher m = this.lastSearchPattern.matcher(text);
-			String newText = m.replaceAll(fixSpecialReplacementChars(aReplacement));
-			this.editor.setSelectedText(newText);
+			int pos = this.findNext();
+			if (pos > -1)
+			{
+				String text = this.getSelectedText();
+				Matcher m = this.lastSearchPattern.matcher(text);
+				String newText = m.replaceAll(fixSpecialReplacementChars(aReplacement, useRegex));
+				this.editor.setSelectedText(newText);
+			}
+
+			return (pos > -1);
 		}
-		
-		return (pos > -1);
+		catch (Exception e)
+		{
+			LogMgr.logError("SearchAndReplace.replaceNext()", "Error replacing value", e);
+			WbSwingUtilities.showErrorMessage(e.getMessage());
+			return false;
+		}
 	}
 
 	public boolean isTextSelected()
@@ -184,11 +194,17 @@ public class SearchAndReplace
 	 * Replace special characters in the input string so that it can be used
 	 * as a replacement using regular expressions.
 	 */
-	public static final String fixSpecialReplacementChars(String input)
+	public static final String fixSpecialReplacementChars(String input, boolean useRegex)
 	{
+		if (!useRegex)
+		{
+			return StringUtil.quoteRegexMeta(input);
+		}
+		
 		String fixed = input.replaceAll("\\\\n", "\n");
 		fixed = fixed.replaceAll("\\\\r", "\r");
 		fixed = fixed.replaceAll("\\\\t", "\t");
+		fixed = StringUtil.quoteRegexMeta(fixed);
 		return fixed;
 	}
 	
@@ -208,14 +224,7 @@ public class SearchAndReplace
 		int selEnd = this.editor.getSelectionEnd();
 		int newLen = -1;
 		String regex = getSearchExpression(value, ignoreCase, wholeWord, useRegex);
-		if (!useRegex)
-		{
-			replacement = StringUtil.quoteRegexMeta(replacement);
-		}
-		else
-		{
-			replacement = fixSpecialReplacementChars(replacement);
-		}
+		replacement = fixSpecialReplacementChars(replacement, useRegex);
 		
 		Pattern p = Pattern.compile(regex);
 		Matcher m = p.matcher(old);
@@ -244,18 +253,27 @@ public class SearchAndReplace
 		return 0;
 	}
 
-	public boolean replaceCurrent(String aReplacement)
+	public boolean replaceCurrent(String replacement, boolean useRegex)
 	{
 		if (this.searchPatternMatchesSelectedText())
 		{
-			Matcher m = this.lastSearchPattern.matcher(this.getSelectedText());
-			String newText = m.replaceAll(fixSpecialReplacementChars(aReplacement));
-			this.editor.setSelectedText(newText);
-			return true;
+			try
+			{
+				Matcher m = this.lastSearchPattern.matcher(this.getSelectedText());
+				String newText = m.replaceAll(fixSpecialReplacementChars(replacement, useRegex));
+				this.editor.setSelectedText(newText);
+				return true;
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("SearchAndReplace.replaceCurrent()", "Error replacing value", e);
+				WbSwingUtilities.showErrorMessage(e.getMessage());
+				return false;
+			}
 		}
 		else
 		{
-			return replaceNext(aReplacement);
+			return replaceNext(replacement, useRegex);
 		}
 	}
 

@@ -485,6 +485,8 @@ public class DataExporter
 				return "XML";
 			case EXPORT_XLS:
 				return "XLS";
+			case EXPORT_XLSX:
+				return "XLS";
 			case EXPORT_ODS:
 				return "OpenDocument Spreadsheet";
 		}

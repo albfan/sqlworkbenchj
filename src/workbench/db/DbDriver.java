@@ -163,6 +163,10 @@ public class DbDriver
 			{
 				lib = Settings.getInstance().replaceLibDirKey(lib);
 				File f = new File(lib);
+				if (f.getParentFile() == null)
+				{
+					f = new File(Settings.getInstance().getLibDir(), lib);
+				}
 				if (!f.exists()) return false;
 			}
 			return true;
@@ -200,7 +204,12 @@ public class DbDriver
 				for (String fname : libraryList)
 				{
 					String realFile = Settings.getInstance().replaceLibDirKey(fname);
-					url[index] = new File(realFile).toURL();
+					File f = new File(realFile);
+					if (f.getParentFile() == null)
+					{
+						f = new File(Settings.getInstance().getLibDir(), realFile);
+					}
+					url[index] = f.toURL();
 					LogMgr.logInfo("DbDriver.loadDriverClass()", "Adding ClassLoader URL=" + url[index].toString());
 					index ++;
 				}

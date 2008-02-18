@@ -13,7 +13,7 @@ package workbench.sql.formatter;
 
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.*;
+import junit.framework.TestCase;
 
 /**
  *
@@ -39,6 +39,39 @@ public class SQLLexerTest extends TestCase
 			t = l.getNextToken(false, false);
 		}
 		return result;
+	}
+
+	public void testQuotedIdentifier()
+	{
+		try
+		{
+			String sql = "Select \"one AND two\" from thetable;";
+			SQLLexer l = new SQLLexer(sql);
+			SQLToken select = l.getNextToken(false, false);
+			
+			assertEquals(select.getContents(), "SELECT");
+			SQLToken col = l.getNextToken(false, false);
+			assertEquals("\"one AND two\"", col.getContents());
+			
+			
+			sql = "WbExport -file=\"c:\\Documents and Settings\\test.txt\" -type=text";
+			l = new SQLLexer(sql);
+			SQLToken t = l.getNextToken(false, false);
+			assertEquals("WBEXPORT", t.getText().toUpperCase());
+			t = l.getNextToken(false, false);
+			assertEquals("-", t.getText());
+			t = l.getNextToken(false, false);
+			assertEquals("file", t.getText());
+			t = l.getNextToken(false, false);
+			assertEquals("=", t.getText());
+			t = l.getNextToken(false, false);
+			assertEquals("\"c:\\Documents and Settings\\test.txt\"", t.getContents());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 	}
 	
 	public void testLexer()

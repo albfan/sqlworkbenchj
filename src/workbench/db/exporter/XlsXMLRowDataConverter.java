@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  * Convert row data to our own XML format.
@@ -24,7 +25,7 @@ import workbench.util.StrBuffer;
 public class XlsXMLRowDataConverter
 	extends RowDataConverter
 {
-	private SimpleDateFormat tsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+	private SimpleDateFormat tsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	private int[] maxColSizes;
 	
 	public XlsXMLRowDataConverter()
@@ -46,10 +47,7 @@ public class XlsXMLRowDataConverter
 		out.append("</DocumentProperties>\n");
 
 		out.append("<Styles>\n");
-		for (int i = 0; i < metaData.getColumnCount(); i++)
-		{
-			int size = metaData.getColumnSize(i) * 10;
-		}
+		out.append("  <Style ss:ID=\"wbTS\"><NumberFormat ss:Format=\""  + getDateFormat() + "\"/></Style>");
 		out.append("</Styles>\n");
 
 		int colCount = metaData.getColumnCount();
@@ -87,12 +85,31 @@ public class XlsXMLRowDataConverter
 			{
 				continue;
 			}
-			xml.append("<Cell>\n");
+			boolean isDate = (row.getValue(i) instanceof Date);
 			
-			xml.append("<Data ss:Type=\"");
+			if (isDate)
+			{
+				xml.append("  <Cell ss:StyleID=\"wbTS\">\n");
+			}
+			else
+			{
+				xml.append("  <Cell>\n");
+			}
+			xml.append("    <Data ss:Type=\"");
 			xml.append(getDataType(row.getValue(i)));
 			xml.append("\">");
-			String value = getValueAsFormattedString(row, i);
+			String value = null;
+			
+			if (isDate)
+			{
+				Date d = (Date)row.getValue(i);
+				value = tsFormat.format(d);
+			}
+			else
+			{
+				value = getValueAsFormattedString(row, i);
+			}
+			
 			if (value != null)
 			{
 				xml.append(value);
@@ -102,13 +119,22 @@ public class XlsXMLRowDataConverter
 				}
 			}
 			xml.append("</Data>\n");
-			xml.append("</Cell>\n");
+			xml.append("  </Cell>\n");
 		}
 		xml.append("</Row>\n\n");
 		
 		return xml;
 	}
 
+	private String getDateFormat()
+	{
+		String javaFormat = this.defaultTimestampFormatter != null ? this.defaultTimestampFormatter.toPattern() : "yyyy\\-mm\\-dd\\ hh:mm:ss";
+		String excelFormat = StringUtil.replace(javaFormat, "-", "\\-");
+		excelFormat = StringUtil.replace(excelFormat, " ", "\\ ");
+		excelFormat = StringUtil.replace(excelFormat, "/", "\\/");
+		return excelFormat.toLowerCase();
+	}
+	
 	private String getDataType(Object data)
 	{
 		if (data instanceof Number)
@@ -117,7 +143,7 @@ public class XlsXMLRowDataConverter
 		}
 		else if (data instanceof java.util.Date)
 		{
-			return "Date";
+			return "DateTime";
 		}
 		return "String";
 	}

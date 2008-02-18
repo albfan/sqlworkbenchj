@@ -174,7 +174,7 @@ public class TableReplacer
 		return pos.getRow();
 	}
 	
-	public boolean replaceCurrent(String aReplacement)
+	public boolean replaceCurrent(String aReplacement, boolean useRegex)
 	{
 		boolean replaced = false;
 		try
@@ -194,10 +194,10 @@ public class TableReplacer
 		return replaced;
 	}
 	
-	public boolean replaceNext(String aReplacement)
+	public boolean replaceNext(String aReplacement, boolean useRegex)
 	{
 		boolean replaced = false;
-		replaced = replaceCurrent(aReplacement);
+		replaced = replaceCurrent(aReplacement, useRegex);
 		if (replaced) 
 		{
 			Position pos = this.replacer.findNext();

@@ -216,14 +216,7 @@ public class DataStoreReplacer
 		
 		this.isRegexSearch = useRegex;
 		
-		if (isRegexSearch)
-		{
-			currentReplacementValue = SearchAndReplace.fixSpecialReplacementChars(replacement);
-		}
-		else
-		{
-			currentReplacementValue = StringUtil.quoteRegexMeta(replacement);
-		}
+		currentReplacementValue = SearchAndReplace.fixSpecialReplacementChars(replacement, isRegexSearch);
 
 		int replaced = 0;
 		Pattern p = Pattern.compile(expression);
@@ -248,14 +241,7 @@ public class DataStoreReplacer
 		
 		if (this.lastFoundPosition.isValid())
 		{
-			if (isRegexSearch)
-			{
-				currentReplacementValue = SearchAndReplace.fixSpecialReplacementChars(replacement);
-			}
-			else
-			{
-				currentReplacementValue = StringUtil.quoteRegexMeta(replacement);
-			}
+			currentReplacementValue = SearchAndReplace.fixSpecialReplacementChars(replacement, isRegexSearch);
 			replaceValueAt(lastFoundPosition, this.currentReplacementValue, this.lastPattern);
 			return true;
 		}
