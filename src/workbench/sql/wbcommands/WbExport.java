@@ -223,6 +223,8 @@ public class WbExport
 		if (format != null) exporter.setDecimalSymbol(format);
 		
 		exporter.setPageTitle(cmdLine.getValue("title"));
+
+		exporter.setExportHeaders(cmdLine.getBoolean("header", getTextHeaderDefault()));		
 		
 		if ("text".equals(type) || "txt".equals(type))
 		{
@@ -239,8 +241,6 @@ public class WbExport
 
 			String quote = cmdLine.getValue("quotechar");
 			if (quote != null) exporter.setTextQuoteChar(quote);
-
-			exporter.setExportHeaders(cmdLine.getBoolean("header", getTextHeaderDefault()));
 
 			String escape = cmdLine.getValue("escapetext");
 			if (escape != null)
@@ -761,7 +761,7 @@ public class WbExport
 		catch (Exception e)
 		{
 			aResult.setFailure();
-			aResult.addMessage(ResourceMgr.getString("MsgSpoolError"));
+			aResult.addMessage(ResourceMgr.getString("ErrExportExecute"));
 			aResult.addMessage(ExceptionUtil.getAllExceptions(e));
 			LogMgr.logError("WbExportCommand.consumeResult()", "Error spooling data", e);
 		}

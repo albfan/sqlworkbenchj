@@ -67,6 +67,7 @@ public abstract class ExportWriter
 		converter.setBlobIdColumns(exporter.getBlobIdColumns());
 		converter.setFilenameColumn(exporter.getFilenameColumn());
 		converter.setPageTitle(exporter.getPageTitle());
+		converter.setWriteHeader(exporter.getExportHeaders());
 		
 		String file = this.exporter.getOutputFilename();
 		if (file != null) converter.setOutputFile(new File(file));

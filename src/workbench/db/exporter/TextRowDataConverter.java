@@ -29,7 +29,6 @@ public class TextRowDataConverter
 {
 	private String delimiter = "\t";
 	private String quoteCharacter = null;
-	private boolean writeHeader = true;
 	private boolean quoteAlways = false;
 	private CharacterRange escapeRange = null;
 	private String additionalEncodeCharacters = null;
@@ -240,11 +239,6 @@ public class TextRowDataConverter
 			this.quoteCharacter = quote;
 			setAdditionalEncodeCharacters();
 		}
-	}
-
-	public void setWriteHeader(boolean writeHeader)
-	{
-		this.writeHeader = writeHeader;
 	}
 
 	public void setQuoteAlways(boolean flag)

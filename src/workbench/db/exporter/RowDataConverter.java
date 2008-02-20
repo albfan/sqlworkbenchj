@@ -54,6 +54,7 @@ public abstract class RowDataConverter
 	protected WbConnection originalConnection;
 	protected String generatingSql;
 	protected ResultInfo metaData;
+	protected boolean writeHeader = true;
 	private File outputFile;
 	private String baseFilename;
 	private String pageTitle;
@@ -89,6 +90,12 @@ public abstract class RowDataConverter
 		this.defaultNumberFormatter = Settings.getInstance().getDefaultDecimalFormatter();
 	}
 
+
+	public void setWriteHeader(boolean writeHeader)
+	{
+		this.writeHeader = writeHeader;
+	}
+	
 	public void setPageTitle(String title)
 	{
 		this.pageTitle = title;
@@ -592,5 +599,37 @@ public abstract class RowDataConverter
 			return result;
 		}
 	}
-	
+
+	protected void writeEscapedXML(StrBuffer out, String s, boolean keepCR)
+	{
+		if (s == null) return;
+		for (int i = 0; i < s.length(); i++)
+		{
+			char c = s.charAt(i);
+
+			switch (c)
+			{
+				case '&':
+					out.append("&amp;");
+					break;
+				case '<':
+					out.append("&lt;");
+					break;
+				case '>':
+					out.append("&gt;");
+					break;
+				case '\r':
+					if (keepCR) out.append("&#13;");
+					break;
+				case '\n':
+					out.append("&#10;");
+					break;
+				case (char)0:
+					// ignore zero-byte
+					break;
+				default:
+					out.append(c);
+			}
+		}
+	}	
 }

@@ -14,6 +14,7 @@ package workbench.db.exporter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import workbench.storage.RowData;
+import workbench.util.EncodingUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -26,7 +27,6 @@ public class XlsXMLRowDataConverter
 	extends RowDataConverter
 {
 	private SimpleDateFormat tsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-	private int[] maxColSizes;
 	
 	public XlsXMLRowDataConverter()
 	{
@@ -36,7 +36,7 @@ public class XlsXMLRowDataConverter
 	public StrBuffer getStart()
 	{
 		StrBuffer out = new StrBuffer(5000);
-		out.append("<?xml version=\"1.0\"?>\n");
+		out.append("<?xml version=\"1.0\" encoding=\"" + EncodingUtil.cleanupEncoding(getEncoding()) + "\"?>\n");
 		out.append("<?mso-application progid=\"Excel.Sheet\"?>\n");
 		out.append("<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:x=\"urn:schemas-microsoft-com:office:excel\" xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:html=\"http://www.w3.org/TR/REC-html40\">\n");
 		out.append("<DocumentProperties xmlns=\"urn:schemas-microsoft-com:office:office\">\n");
@@ -47,7 +47,12 @@ public class XlsXMLRowDataConverter
 		out.append("</DocumentProperties>\n");
 
 		out.append("<Styles>\n");
-		out.append("  <Style ss:ID=\"wbTS\"><NumberFormat ss:Format=\""  + getDateFormat() + "\"/></Style>");
+		if (writeHeader)
+		{
+			out.append("  <Style ss:ID=\"wbHeader\"><Font ss:Bold=\"1\"/></Style>\n");
+		}
+		out.append("  <Style ss:ID=\"wbTS\"><NumberFormat ss:Format=\""  + getDateFormat() + "\"/></Style>\n");
+		out.append("  <Style ss:ID=\"wbML\"><Alignment ss:Vertical=\"Top\" ss:WrapText=\"1\"/></Style>\n");
 		out.append("</Styles>\n");
 
 		int colCount = metaData.getColumnCount();
@@ -58,9 +63,22 @@ public class XlsXMLRowDataConverter
 		for (int i = 0; i < colCount; i++)
 		{
 			if (!this.includeColumnInExport(i)) continue;
-			out.append("<Column ss:AutoFitWidth=\"1\" ss:Width=\"" + (metaData.getColumnSize(i) * 10) + "\"/>\n");
+			out.append("<Column ss:AutoFitWidth=\"1\"/>\n");
 		}
-		maxColSizes = new int[colCount];
+		
+		if (writeHeader)
+		{
+			out.append("<Row>\n");
+			for (int i = 0; i < colCount; i++)
+			{
+				if (!this.includeColumnInExport(i)) continue;
+				out.append("  <Cell ss:StyleID=\"wbHeader\"><Data ss:Type=\"String\">");
+				out.append(metaData.getColumnName(i));
+				out.append("</Data></Cell>\n");
+			}
+			out.append("</Row>");
+		}
+		
 		out.append('\n');
 		return out;
 	}
@@ -86,18 +104,6 @@ public class XlsXMLRowDataConverter
 				continue;
 			}
 			boolean isDate = (row.getValue(i) instanceof Date);
-			
-			if (isDate)
-			{
-				xml.append("  <Cell ss:StyleID=\"wbTS\">\n");
-			}
-			else
-			{
-				xml.append("  <Cell>\n");
-			}
-			xml.append("    <Data ss:Type=\"");
-			xml.append(getDataType(row.getValue(i)));
-			xml.append("\">");
 			String value = null;
 			
 			if (isDate)
@@ -109,17 +115,27 @@ public class XlsXMLRowDataConverter
 			{
 				value = getValueAsFormattedString(row, i);
 			}
+			boolean isMultiline = (value == null ? false : value.indexOf('\n') > 0);
 			
-			if (value != null)
+			if (isDate)
 			{
-				xml.append(value);
-				if (value.length() > maxColSizes[i])
-				{
-					maxColSizes[i] = value.length();
-				}
+				xml.append("  <Cell ss:StyleID=\"wbTS\">");
 			}
-			xml.append("</Data>\n");
-			xml.append("  </Cell>\n");
+			else if (isMultiline)
+			{
+				xml.append("  <Cell ss:StyleID=\"wbML\">");
+			}
+			else 
+			{
+				xml.append("  <Cell>");
+			}
+			xml.append("<Data ss:Type=\"");
+			xml.append(getDataType(row.getValue(i)));
+			xml.append("\">");
+			
+			writeEscapedXML(xml, value, false);
+			
+			xml.append("</Data></Cell>\n");
 		}
 		xml.append("</Row>\n\n");
 		

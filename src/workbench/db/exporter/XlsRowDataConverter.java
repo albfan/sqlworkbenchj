@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -37,7 +38,6 @@ public class XlsRowDataConverter
 	private HSSFWorkbook wb = null;
 	private HSSFSheet sheet = null;
 	private ExcelDataFormat excelFormat = null;
-	private int[] maxLengths = null;
 
 	public XlsRowDataConverter()
 	{
@@ -63,28 +63,26 @@ public class XlsRowDataConverter
 		excelFormat.setupWithWorkbook(wb);
 		sheet = wb.createSheet(getPageTitle("SQLExport"));
 
-		// table header with column names
-		HSSFRow headRow = sheet.createRow(0);
-		maxLengths = new int[this.metaData.getColumnCount()];
-		for (int c = 0; c < this.metaData.getColumnCount(); c++)
+		if (writeHeader)
 		{
-			HSSFCell cell = headRow.createCell((short)c);
-			maxLengths[c] = setCellValueAndStyle(wb, cell, this.metaData.getColumnName(c), true, excelFormat);
+			// table header with column names
+			HSSFRow headRow = sheet.createRow(0);
+			for (int c = 0; c < this.metaData.getColumnCount(); c++)
+			{
+				HSSFCell cell = headRow.createCell((short)c);
+				setCellValueAndStyle(wb, cell, this.metaData.getColumnName(c), true);
+			}
 		}
-
 		return null;
 	}
 	
 	public StrBuffer getEnd(long totalRows)
 	{
-		if (maxLengths != null)
+		for (short i = 0; i <this.metaData.getColumnCount(); i++)
 		{
-			for (short i = 0; i < maxLengths.length; i++)
-			{
-				sheet.setColumnWidth(i, (short)(maxLengths[i] * 256));
-			}
+			sheet.autoSizeColumn(i);
 		}
-
+		
 		FileOutputStream fileOut = null;
 		try
 		{
@@ -130,61 +128,45 @@ public class XlsRowDataConverter
 
 			Object value = row.getValue(c);
 
-			int valLen = setCellValueAndStyle(wb, cell, value, false,	excelFormat);
-			if (valLen > maxLengths[c])
-			{
-				maxLengths[c] = valLen;
-			}
+			setCellValueAndStyle(wb, cell, value, false);
 		}
 
 		return ret;
 	}
 
-	private static int setCellValueAndStyle(HSSFWorkbook wb, HSSFCell cell,
-		Object value, boolean isHead, ExcelDataFormat excelFormat)
+	private void setCellValueAndStyle(HSSFWorkbook wb, HSSFCell cell, Object value, boolean isHead)
 	{
 		HSSFCellStyle cellStyle = null;
 
-		int length = 0;
 		if (value instanceof BigDecimal && value != null)
 		{
 			cellStyle = excelFormat.decimalCellStyle;
 			cell.setCellValue(((BigDecimal)value).doubleValue());
-			length = value.toString().length() + 3;
 		}
 		else if (value instanceof Double && value != null)
 		{
 			cellStyle = excelFormat.decimalCellStyle;
 			cell.setCellValue(((Double)value).doubleValue());
-			length = value.toString().length() + 3;
 		}
 		else if (value instanceof Number && value != null)
 		{
 			cellStyle = excelFormat.integerCellStyle;
 			cell.setCellValue(((Number)value).doubleValue());
-			length = value.toString().length() + 3;
 		}
 		else if (value instanceof java.sql.Timestamp)
 		{
 			cellStyle = excelFormat.tsCellStyle;
 			cell.setCellValue((java.util.Date)value);
-			length = excelFormat.tsFormat.length() + 3;
 		}
 		else if (value instanceof java.util.Date)
 		{
 			cellStyle = excelFormat.dateCellStyle;
 			cell.setCellValue((java.util.Date)value);
-			length = excelFormat.dateFormat.length() + 3;
 		}
 		else
 		{
-			cell.setCellValue(value != null ? value.toString() : "");
-			length = cell.getStringCellValue().length();
-			length = length + 3;
-			if (length > 50)
-			{
-				length = 50;
-			}
+			HSSFRichTextString s = new HSSFRichTextString(value != null ? value.toString() : "");
+			cell.setCellValue(s);
 			cellStyle = excelFormat.textCellStyle;
 		}
 
@@ -194,7 +176,5 @@ public class XlsRowDataConverter
 		}
 
 		cell.setCellStyle(cellStyle);
-
-		return length;
 	}
 }

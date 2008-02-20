@@ -115,6 +115,7 @@ public class EncodingUtil
 		if (input == null) return null;
 		if ("utf".equalsIgnoreCase(input)) return "UTF-8";
 		if ("utf8".equalsIgnoreCase(input)) return "UTF-8";
+		if ("utf-8".equalsIgnoreCase(input)) return "UTF-8";
 		return input;
 	}
 

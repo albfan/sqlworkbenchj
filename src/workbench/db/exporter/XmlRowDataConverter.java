@@ -267,7 +267,7 @@ public class XmlRowDataConverter
 					}
 					else
 					{
-						xml.append(StringUtil.escapeXML(this.getValueAsFormattedString(row, c)));
+						writeEscapedXML(xml, this.getValueAsFormattedString(row, c), true);
 					}
 				}
 				else

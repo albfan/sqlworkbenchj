@@ -219,7 +219,7 @@ public class TagWriter
 
 	private static final char[] SPECIAL_CHARS = new char[] {'<', '>', '&', '\'', '\n', '\r' };
 	
-	private boolean needsCData(CharSequence value)
+	public static boolean needsCData(CharSequence value)
 	{
 		if (value == null) return false;
 		for (int i=0; i < SPECIAL_CHARS.length; i++)

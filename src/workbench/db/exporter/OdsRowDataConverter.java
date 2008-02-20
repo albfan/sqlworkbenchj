@@ -37,7 +37,6 @@ public class OdsRowDataConverter
 	private SimpleDateFormat tFormat = new SimpleDateFormat("HH:mm:ss");
 	private SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private SimpleDateFormat tsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-	private int[] maxColSizes;
 	
 	public OdsRowDataConverter()
 	{
@@ -85,27 +84,27 @@ public class OdsRowDataConverter
 			{
 				content.write("<table:table-column table:style-name=\"co" + (i+1) + "\" table:default-cell-style-name=\"Default\"/>\n");
 			}
-			maxColSizes = new int[colCount];
 
-			// Write header row
-			content.write("<table:table-header-rows>\n");
-			content.write("  <table:table-row table:style-name=\"ro1\">\n");
-
-			for (int i = 0; i < colCount; i++)
+			if (writeHeader)
 			{
-				if (!this.includeColumnInExport(i))	continue;
-				
-				String colname = this.metaData.getColumnName(i);
-				maxColSizes[i] = colname.length();
-				
-				content.write("  <table:table-cell table:style-name=\"ce1\" office:value-type=\"string\">\n");
-				content.write("    <text:p>");
-				content.write(colname);
-				content.write("</text:p>\n");
-				content.write("  </table:table-cell>\n");
+				content.write("<table:table-header-rows>\n");
+				content.write("  <table:table-row table:style-name=\"ro1\">\n");
+
+				for (int i = 0; i < colCount; i++)
+				{
+					if (!this.includeColumnInExport(i))	continue;
+
+					String colname = this.metaData.getColumnName(i);
+
+					content.write("  <table:table-cell table:style-name=\"ce1\" office:value-type=\"string\">\n");
+					content.write("    <text:p>");
+					content.write(colname);
+					content.write("</text:p>\n");
+					content.write("  </table:table-cell>\n");
+				}
+				content.write("  </table:table-row>\n");
+				content.write("</table:table-header-rows>\n\n");
 			}
-			content.write("  </table:table-row>\n");
-			content.write("</table:table-header-rows>\n\n");
 		}
 		catch (IOException ex)
 		{
@@ -222,7 +221,7 @@ public class OdsRowDataConverter
 	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
 		int colCount = row.getColumnCount();
-		StringBuilder xml = new StringBuilder(colCount * 50);
+		StrBuffer xml = new StrBuffer(colCount * 50);
 		xml.append("<table:table-row>\n");
 		for (int i = 0; i < colCount; i++)
 		{
@@ -236,21 +235,30 @@ public class OdsRowDataConverter
 			xml.append("<table:table-cell ");
 			xml.append(getCellAttribs(o, i));
 			xml.append(">\n");
-			xml.append("<text:p>");
+			
 			String value = getValueAsFormattedString(row, i);
-			xml.append(value);
-			if (value.length() > maxColSizes[i])
+			if (SqlUtil.isCharacterType(metaData.getColumnType(i)))
 			{
-				maxColSizes[i] = value.length();
+				String[] lines = value.split(StringUtil.REGEX_CRLF);
+				for (String line : lines)
+				{
+					xml.append("<text:p>");
+					writeEscapedXML(xml, line, true);
+					xml.append("</text:p>\n");
+				}
 			}
-			xml.append("</text:p>\n");
+			else
+			{
+				xml.append("<text:p>");
+				xml.append(value);
+				xml.append("</text:p>\n");
+			}
 			xml.append("</table:table-cell>\n");
 		}
 		xml.append("</table:table-row>\n\n");
 		try
 		{
-			content.write(xml.toString());
-		//content.flush();
+			xml.writeTo(content);
 		}
 		catch (IOException e)
 		{

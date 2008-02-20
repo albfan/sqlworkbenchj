@@ -33,7 +33,6 @@ public class TextExportWriter
 		super.configureConverter();
 		TextRowDataConverter conv = (TextRowDataConverter)this.converter;
 		conv.setDelimiter(exporter.getTextDelimiter());
-		conv.setWriteHeader(exporter.getExportHeaders());
 		conv.setQuoteCharacter(exporter.getTextQuoteChar());
 		conv.setQuoteAlways(exporter.getQuoteAlways());
 		conv.setEscapeRange(exporter.getEscapeRange());

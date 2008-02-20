@@ -60,6 +60,7 @@ class ExcelDataFormat
 	{
 		textCellStyle = wb.createCellStyle();
 		textCellStyle.setAlignment(HSSFCellStyle.ALIGN_LEFT);
+		textCellStyle.setWrapText(true);
 	}
 
 	protected void setUpDate(HSSFWorkbook wb)

@@ -36,12 +36,12 @@ public class StringUtil
 	public static final String ISO_DATE_FORMAT = "yyyy-MM-dd";
 	public static final String ISO_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 	public static final String ISO_TZ_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS z";
-	
+
 	public static final SimpleDateFormat ISO_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TIMESTAMP_FORMAT);
 	public static final SimpleDateFormat ISO_TZ_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TZ_TIMESTAMP_FORMAT);
 
 	public static final StringBuilder emptyBuffer() { return new StringBuilder(0); }
-	
+
 	public static final String getCurrentTimestampWithTZString()
 	{
 		return ISO_TZ_TIMESTAMP_FORMATTER.format(now());
@@ -51,27 +51,27 @@ public class StringUtil
 	{
 		return new java.util.Date(System.currentTimeMillis());
 	}
-	
+
 	public static String getPathSeparator()
 	{
 		return System.getProperty("path.separator");
 	}
-	
+
 	public static int hashCode(CharSequence val)
 	{
 		int len = val.length();
 		int hash = 0;
-		
+
 		for (int i = 0; i < len; i++)
 		{
 			hash = 31*hash + val.charAt(i);
 		}
 		return hash;
 	}
-	
+
 	/**
 	 * Replace various combinations of linefeeds in the input string with \n.
-	 * 
+	 *
 	 * @param input
 	 * @return input string with only \n linefeeds
 	 * @see #PATTERN_NON_LF
@@ -92,7 +92,7 @@ public class StringUtil
 		String last = s.subSequence(len - end.length(), len).toString();
 		return end.equals(last);
 	}
-	
+
 	public static boolean endsWith(CharSequence s, char c)
 	{
 		if (s == null) return false;
@@ -100,12 +100,12 @@ public class StringUtil
 		if (len == 0) return false;
 		return s.charAt(len - 1) == c;
 	}
-		
+
 	public static boolean lineStartsWith(CharSequence text, int lineStartPos, String compareTo)
 	{
 		if (isWhitespaceOrEmpty(compareTo)) return false;
 		int textLength = text.length();
-		
+
 		int len = compareTo.length();
 		for (int i=0; i < len; i++)
 		{
@@ -119,7 +119,7 @@ public class StringUtil
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Returns the length of the line without any line ending characters
 	 */
@@ -127,17 +127,17 @@ public class StringUtil
 	{
 		int len = line.length();
 		if (len == 0) return 0;
-		
+
 		char c = line.charAt(len - 1);
 
-		while ((len > 0) && (c == '\r' || c == '\n')) 
+		while ((len > 0) && (c == '\r' || c == '\n'))
 		{
 			len--;
 			if (len > 0) c = line.charAt(len - 1);
 		}
 		return len;
 	}
-	
+
 	public static boolean isWhitespace(CharSequence s)
 	{
 		if (s == null) return false;
@@ -152,32 +152,32 @@ public class StringUtil
 		}
 		return true;
 	}
-	
+
 	public static String rtrim(String s)
 	{
 		if (s == null) return s;
 		int pos = s.length();
 		if (pos == 0) return s;
-		
+
 		while (pos > 0 && Character.isWhitespace(s.charAt(pos - 1)))
 		{
 			pos --;
 		}
-		
+
 		return s.substring(0, pos);
 	}
-	
+
 	public static int indexOf(CharSequence value, char c)
 	{
 		return indexOf(value, c, 1);
 	}
-	
+
 	public static int indexOf(CharSequence value, char c, int occurance)
 	{
 		if (value == null) return -1;
 		if (occurance <= 0) occurance = 1;
 		int numFound = 0;
-		
+
 		for (int i=0; i < value.length(); i++)
 		{
 			if (value.charAt(i) == c)
@@ -188,15 +188,15 @@ public class StringUtil
 		}
 		return -1;
 	}
-					
+
 	public static void trimTrailingWhitespace(StringBuilder value)
 	{
 		if (value == null || value.length() == 0) return;
-		int len = value.length(); 
+		int len = value.length();
 		int pos = len - 1;
 		char c = value.charAt(pos);
 		if (!Character.isWhitespace(c)) return;
-		
+
 		while (Character.isWhitespace(c))
 		{
 			pos --;
@@ -204,7 +204,7 @@ public class StringUtil
 		}
 		value.delete(pos + 1, len);
 	}
-	
+
 	public static boolean isMixedCase(String s)
 	{
 		return !isUpperCase(s) && !isLowerCase(s);
@@ -221,7 +221,7 @@ public class StringUtil
 		}
 		return true;
 	}
-	
+
 	public static boolean isUpperCase(String s)
 	{
 		if (s == null) return false;
@@ -233,7 +233,7 @@ public class StringUtil
 		}
 		return true;
 	}
-	
+
 	public static final boolean arraysEqual(String[] one, String[] other)
 	{
 		if (one == null && other != null) return false;
@@ -245,7 +245,7 @@ public class StringUtil
 		}
 		return true;
 	}
-	
+
 	public static final boolean hasOpenQuotes(String data, char quoteChar)
 	{
 		if (isEmptyString(data)) return false;
@@ -257,7 +257,7 @@ public class StringUtil
 		}
 		return inQuotes;
 	}
-	
+
 	/**
 	 * Capitalize a single word.
 	 * (write the first character in uppercase, the rest in lower case)
@@ -272,7 +272,7 @@ public class StringUtil
 		s.setCharAt(0, Character.toUpperCase(c));
 		return s.toString();
 	}
-	
+
 	/**
 	 * Remove all characters that might not be allowed in a filename from the input string.
 	 * @param input the value to be used as a filename
@@ -328,29 +328,29 @@ public class StringUtil
 	 * This implementation should be a lot faster for StringBuilder
 	 * and StringBuffer, and will basically be the same for String
 	 * objects.
-	 * 
-	 * @param s the string to search in 
-	 * @param c the character to look for 
+	 *
+	 * @param s the string to search in
+	 * @param c the character to look for
 	 * @return -1 if c was not found, the position of c in s otherwise
 	 */
 	public static final int lastIndexOf(CharSequence s, char c)
 	{
 		int len = s.length();
 		if (s == null || len == 0) return -1;
-		
+
 		for (int i=(len - 1); i > 0; i--)
 		{
 			if (s.charAt(i) == c) return i;
 		}
 		return -1;
 	}
-	
+
 	public static final String replace(String haystack, String needle, String replacement)
 	{
 		if (replacement == null) return haystack;
 		if (needle == null) return haystack;
 		if (haystack == null) return null;
-		
+
 		int pos = haystack.indexOf(needle);
 		if (pos == -1) return haystack;
 
@@ -366,7 +366,7 @@ public class StringUtil
 
 	/**
 	 * Returns the number of Digits of the value
-	 * 
+	 *
 	 * @param x the value to check
 	 * @return the number of digits that x consists of
 	 */
@@ -381,7 +381,7 @@ public class StringUtil
 		}
 		return limits.length + 1;
 	}
-	
+
 	public static boolean isInteger(String value)
 	{
 		if (isEmptyString(value)) return false;
@@ -393,7 +393,7 @@ public class StringUtil
 		}
 		return true;
 	}
-	
+
 	public static boolean isNumber(String value)
 	{
 		try
@@ -406,9 +406,9 @@ public class StringUtil
 			return false;
 		}
 	}
-	
+
 	/**
-	 * Checks if the given parameter is "empty", 
+	 * Checks if the given parameter is "empty",
 	 * i.e: either null, length == 0 or contains only whitespace
 	 */
 	public static final boolean isWhitespaceOrEmpty(CharSequence value)
@@ -420,7 +420,7 @@ public class StringUtil
 	/**
 	 * Checks if the given String is null or has a zero length.
 	 * A String containing only whitespaces is not considered empty.
-	 * 
+	 *
 	 * @param value the String to test
 	 * @return
 	 */
@@ -430,7 +430,7 @@ public class StringUtil
 		if (value.length() == 0) return true;
 		return false;
 	}
-	
+
 	public static final String getStartingWhiteSpace(final String aLine)
 	{
 		if (aLine == null) return null;
@@ -502,7 +502,7 @@ public class StringUtil
 	}
 
 	/**
-	 * Checks if both Strings are equal considering null values. 
+	 * Checks if both Strings are equal considering null values.
 	 * A null String and an empty String (length==0 or all whitespace) are
 	 * considered equal as well (because both are "empty")
 	 * @see #isWhitespaceOrEmpty(CharSequence)
@@ -512,7 +512,7 @@ public class StringUtil
 		if (isWhitespaceOrEmpty(one) && isWhitespaceOrEmpty(other)) return true;
 		return equalString(one, other);
 	}
-	
+
 	public static final boolean equalString(String one, String other)
 	{
 		return compareStrings(one, other, false) == 0;
@@ -521,7 +521,7 @@ public class StringUtil
 	/**
 	 * @param value1 the first String, maybe null
 	 * @param value2 the second String, maybe null
-	 * @return 0 if both are null 
+	 * @return 0 if both are null
 	 */
 	public static int compareStrings(String value1, String value2, boolean ignoreCase)
 	{
@@ -531,7 +531,7 @@ public class StringUtil
 		if (ignoreCase) return value1.compareToIgnoreCase(value2);
 		return value1.compareTo(value2);
 	}
-	
+
 	public static final boolean equalStringIgnoreCase(String one, String other)
 	{
 		if (one == null && other == null) return true;
@@ -543,7 +543,7 @@ public class StringUtil
 	{
 		return stringToList(aString, ",");
 	}
-	
+
 	public static final List<String> stringToList(String aString, String aDelimiter)
 	{
 		return stringToList(aString, aDelimiter, false, false);
@@ -553,7 +553,7 @@ public class StringUtil
 	{
 		return stringToList(aString, aDelimiter, removeEmpty, false);
 	}
-	
+
 	public static final List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries)
 	{
 		return stringToList(aString, aDelimiter, removeEmpty, trimEntries, false);
@@ -586,7 +586,7 @@ public class StringUtil
 		}
 		return result;
 	}
-	
+
 	public static final String[] toArray(Collection<String> strings)
 	{
 		if (strings == null) return null;
@@ -600,11 +600,11 @@ public class StringUtil
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Create a String from the given Collection, where the elements are delimited
 	 * with the supplied delimiter
-	 * 
+	 *
 	 * @return The elements of the Collection as a String
 	 * @param aList The list to process
 	 * @param aDelimiter The delimiter to use
@@ -613,11 +613,11 @@ public class StringUtil
 	{
 		return listToString(aList, aDelimiter, false);
 	}
-	
+
 	/**
 	 * Create a String from the given list, where the elements are delimited
 	 * with the supplied delimiter
-	 * 
+	 *
 	 * @return The elements of the Collection as a String
 	 * @param aList The list to process
 	 * @param aDelimiter The delimiter to use
@@ -666,45 +666,6 @@ public class StringUtil
 		return input;
 	}
 
-	public static final String escapeXML(String s)
-	{
-		StringBuilder result = null;
-
-		for(int i = 0, max = s.length(), delta = 0; i < max; i++)
-		{
-			char c = s.charAt(i);
-			String replacement = null;
-
-			switch (c)
-			{
-				case '&': replacement = "&amp;"; break;
-				case '<': replacement = "&lt;"; break;
-				case '\r': replacement = "&#13;"; break;
-				case '\n': replacement = "&#10;"; break;
-				case '>': replacement = "&gt;"; break;
-				case '"': replacement = "&quot;"; break;
-				case '\'': replacement = "&apos;"; break;
-				case (char)0: replacement = ""; break;
-			}
-
-			if (replacement != null)
-			{
-				if (result == null)
-				{
-					result = new StringBuilder(s);
-				}
-				result.replace(i + delta, i + delta + 1, replacement);
-				delta += (replacement.length() - 1);
-			}
-		}
-		if (result == null)
-		{
-			return s;
-		}
-		return result.toString();
-
-	}
-
 	public static boolean stringToBool(String aString)
 	{
 		if (aString == null) return false;
@@ -725,7 +686,7 @@ public class StringUtil
 			return s.substring(0, maxLen) + add;
 		}
 	}
-	
+
 	public static final String getMaxSubstring(String s, int maxLen)
 	{
 		return getMaxSubstring(s, maxLen, "...");
@@ -783,11 +744,11 @@ public class StringUtil
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * Find the first non-quoted whitespace in the given String.
-	 * 
-	 * @param data the data in which to search 
+	 *
+	 * @param data the data in which to search
 	 * @return the position of the first whitespace or -1 if no whitespace was found.
 	 */
 	public static int findFirstWhiteSpace(CharSequence data)
@@ -798,7 +759,7 @@ public class StringUtil
 		for (int i=0; i < count; i++)
 		{
 			char c = data.charAt(i);
-			if (c == '"') 
+			if (c == '"')
 			{
 				inQuotes = !inQuotes;
 			}
@@ -817,7 +778,7 @@ public class StringUtil
 			if (pos < 0) return null;
 			int len = text.length();
 			int testPos = -1;
-			if (pos >= len) 
+			if (pos >= len)
 			{
 				testPos = len - 1;
 			}
@@ -842,14 +803,14 @@ public class StringUtil
 			e.printStackTrace();
 			return null;
 		}
-	}	
-	
+	}
+
 	public static int findPattern(String regex, String data, int startAt)
 	{
 		Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 		return findPattern(p, data, startAt);
 	}
-	
+
 	public static int findPattern(Pattern p, String data, int startAt)
 	{
 		if (startAt < 0) return -1;
@@ -862,7 +823,7 @@ public class StringUtil
 	public static String decodeUnicode(String theString)
 	{
 		if (theString == null) return null;
-		
+
 		char aChar;
 		int len = theString.length();
 		if (len == 0) return theString;
@@ -874,7 +835,7 @@ public class StringUtil
 			if (aChar == '\\' && x < len)
 			{
 				aChar = theString.charAt(x++);
-				
+
 				if (aChar == 'u')
 				{
 					// Read the xxxx
@@ -882,12 +843,12 @@ public class StringUtil
 					int i=0;
 					for (i=0; i<4; i++)
 					{
-						if ( x + i >= len) 
+						if ( x + i >= len)
 						{
 							value = -1;
 							break;
 						}
-						
+
 						aChar = theString.charAt(x + i);
 						switch (aChar)
 						{
@@ -910,7 +871,7 @@ public class StringUtil
 						}
 						if (value == -1) break;
 					}
-					
+
 					if ( value != -1)
 					{
 						outBuffer.append((char)value);
@@ -918,10 +879,10 @@ public class StringUtil
 					else
 					{
 						// Invalid encoded unicode character
-						// do not convert the stuff, but copy the 
+						// do not convert the stuff, but copy the
 						// characters into the result buffer
 						outBuffer.append("\\u");
-						if (i == 0 && x < len) 
+						if (i == 0 && x < len)
 						{
 							outBuffer.append(aChar);
 						}
@@ -943,8 +904,8 @@ public class StringUtil
 					else if (aChar == 'n') aChar = '\n';
 					else if (aChar == 'f') aChar = '\f';
 					else if (aChar == '\\') aChar = '\\';
-					else outBuffer.append('\\'); 
-					outBuffer.append(aChar); 
+					else outBuffer.append('\\');
+					outBuffer.append(aChar);
 				}
 			}
 			else
@@ -969,12 +930,12 @@ public class StringUtil
 		}
 		System.out.println("");
 	}
-	
+
 	public static String escapeUnicode(String value, CharacterRange range)
 	{
 		return escapeUnicode(value, null, range, false);
 	}
-	
+
 	/*
 	 * Converts unicodes to encoded &#92;uxxxx
 	 * and writes out any of the characters in specialSaveChars
@@ -987,12 +948,12 @@ public class StringUtil
 	{
 		return escapeUnicode(value, specialSaveChars, range, false);
 	}
-	
+
 	public static String escapeUnicode(String value, String specialSaveChars, CharacterRange range, boolean alwaysUnicode)
 	{
 		if (value == null) return null;
 //		if (range == null || range == CharacterRange.RANGE_NONE) return value;
-		
+
 		int len = value.length();
 		StringBuilder outBuffer = new StringBuilder(len*2);
 
@@ -1057,7 +1018,7 @@ public class StringUtil
 		StringBuilder result = new StringBuilder(3);
 		String s = Integer.toOctalString(input);
 
-		if (s.length() == 1) 
+		if (s.length() == 1)
 		{
 			result.append('0');
 			result.append('0');
@@ -1069,20 +1030,20 @@ public class StringUtil
 		result.append(s);
 		return result;
 	}
-		
+
 	public static String padRight(String input, int length)
 	{
 		if (input == null) return null;
 		if (input.length() >= length) return input;
 		StringBuilder result = new StringBuilder(length);
 		result.append(input);
-		while (result.length() < length) 
+		while (result.length() < length)
 		{
 			result.append(' ');
 		}
 		return result.toString();
 	}
-	
+
 	public static String formatNumber(int value, int length, boolean fillRight)
 	{
 		String s = NumberStringCache.getNumberString(value);
@@ -1103,7 +1064,7 @@ public class StringUtil
 		}
 		return result.toString();
 	}
-	
+
 	private static void appendUnicode(StringBuilder buffer, char c)
 	{
 		buffer.append(hexDigit(c >> 12));
@@ -1111,7 +1072,7 @@ public class StringUtil
 		buffer.append(hexDigit(c >>  4));
 		buffer.append(hexDigit(c));
 	}
-	
+
 	private static char hexDigit(int nibble)
 	{
 		return hexDigit[(nibble & 0xF)];
