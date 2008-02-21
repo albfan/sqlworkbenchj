@@ -135,13 +135,20 @@ public class ResultInfo
 			try
 			{
 				typename = metaData.getColumnTypeName(i + 1);
-				col.setColumnTypeName(typename);
 			}
 			catch (Exception e)
 			{
-				col.setColumnTypeName(SqlUtil.getTypeName(col.getDataType()));
+				typename = null; 
 			}
 
+			if (StringUtil.isEmptyString(typename))
+			{
+				// use the Java name if the driver did not return a type name for this column
+				typename = SqlUtil.getTypeName(col.getDataType());
+			}
+			
+			col.setColumnTypeName(typename);
+			
 			int scale = 0;
 			int prec = 0;
 			

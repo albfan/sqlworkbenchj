@@ -905,7 +905,7 @@ public class SqlUtil
 			case Types.DOUBLE:
 			case Types.NUMERIC:
 			case Types.FLOAT:
-				if (aTypeName.equalsIgnoreCase("money")) // SQL Server
+				if ("money".equalsIgnoreCase(aTypeName)) // SQL Server
 				{
 					display = aTypeName;
 				}

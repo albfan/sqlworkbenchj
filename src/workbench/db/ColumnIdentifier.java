@@ -27,9 +27,8 @@ import workbench.util.StringUtil;
 public class ColumnIdentifier
 	implements DbObject, Comparable<ColumnIdentifier>
 {
-	private static final int NO_TYPE = Integer.MIN_VALUE;
 	private String name;
-	private int type = NO_TYPE;
+	private int type = Types.OTHER;
 	private boolean isPk;
 	private boolean isExpression;
 	private boolean isNullable = true;
@@ -53,7 +52,7 @@ public class ColumnIdentifier
 
 	public ColumnIdentifier(String aName)
 	{
-		this(aName, NO_TYPE, false);
+		this(aName, Types.OTHER, false);
 	}
 
 	public ColumnIdentifier(String aName, int aType)
@@ -144,7 +143,7 @@ public class ColumnIdentifier
 		this.name = anExpression;
 		this.isExpression = true;
 		this.isPk = false;
-		this.type = NO_TYPE;
+		this.type = Types.OTHER;
 	}
 
 	/**
@@ -219,7 +218,6 @@ public class ColumnIdentifier
 	 */
 	public int getDataType()
 	{
-		if (type == NO_TYPE) return Types.OTHER;
 		return this.type;
 	}
 
