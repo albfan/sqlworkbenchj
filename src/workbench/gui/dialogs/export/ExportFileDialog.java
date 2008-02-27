@@ -87,7 +87,7 @@ public class ExportFileDialog
 	{
 		return exportOptions.getOdsOptions();
 	}
-	
+
 	public SpreadSheetOptions getXlsOptions()
 	{
 		return exportOptions.getXlsOptions();

@@ -121,7 +121,9 @@ public class XlsRowDataConverter
 	{
 		StrBuffer ret = new StrBuffer();
 		int count = this.metaData.getColumnCount();
-		HSSFRow myRow = sheet.createRow(sheet.getLastRowNum() + 1);
+		int rowNum = (int)rowIndex;
+		if (writeHeader) rowNum ++;
+		HSSFRow myRow = sheet.createRow(rowNum);
 		for (int c = 0; c < count; c++)
 		{
 			HSSFCell cell = myRow.createCell((short)c);
@@ -130,7 +132,6 @@ public class XlsRowDataConverter
 
 			setCellValueAndStyle(wb, cell, value, false);
 		}
-
 		return ret;
 	}
 

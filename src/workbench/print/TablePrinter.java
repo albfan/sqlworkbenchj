@@ -381,8 +381,8 @@ public class TablePrinter
 		{
 			bounds = fm.getStringBounds(this.headerText, pg);
 			len = bounds.getWidth();
-			pg.drawString(this.headerText, (int)((wPage - len)/2), fm.getAscent());
-			pg.translate(0, lineSpacing + fm.getAscent());
+			pg.drawString(this.headerText, 0, fm.getAscent());
+			pg.translate(0, lineSpacing + fm.getAscent() + 5);
 		}
 		currentPage.print(pg);
 

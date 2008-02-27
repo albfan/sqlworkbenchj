@@ -67,7 +67,7 @@ public class WbExport
 		CommonArgs.addVerboseXmlParameter(cmdLine);
 		CommonArgs.addQuoteEscaping(cmdLine);
 
-		cmdLine.addArgument("type", StringUtil.stringToList("text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,html,xlsx,xls"));
+		cmdLine.addArgument("type", StringUtil.stringToList("text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsx,xls,html"));
 		cmdLine.addArgument("file");
 		cmdLine.addArgument("title");
 		cmdLine.addArgument("table");
@@ -119,7 +119,12 @@ public class WbExport
 	private String getWrongArgumentsMessage()
 	{
 		String msg = ResourceMgr.getString("ErrExportWrongParameters");
-		msg = StringUtil.replace(msg, "%header_flag_default%", Boolean.toString(getTextHeaderDefault()));
+		String header = "text=" + Boolean.toString(getHeaderDefault("text"));
+		header += ", ods="  + Boolean.toString(getHeaderDefault("ods"));
+		header += ", xls="  + Boolean.toString(getHeaderDefault("xls"));
+		header += ", xlsx="  + Boolean.toString(getHeaderDefault("xlsx"));
+		
+		msg = StringUtil.replace(msg, "%header_flag_default%", header);
 		msg = StringUtil.replace(msg, "%verbose_default%", Boolean.toString(getVerboseXmlDefault()));
 		msg = StringUtil.replace(msg, "%date_literal_default%", Settings.getInstance().getDefaultExportDateLiteralType());
 		msg = StringUtil.replace(msg, "%default_encoding%", Settings.getInstance().getDefaultDataEncoding());
@@ -131,11 +136,11 @@ public class WbExport
 		return Settings.getInstance().getBoolProperty("workbench.export.xml.default.verbose", true);
 	}
 
-	private boolean getTextHeaderDefault()
+	private boolean getHeaderDefault(String type)
 	{
-		return Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false);
+		return Settings.getInstance().getBoolProperty("workbench.export." + type + ".default.header", false);
 	}
-
+	
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
@@ -166,7 +171,7 @@ public class WbExport
 		
 		if (type == null)
 		{
-			type = findTypeFromFilename(outputFile.getFullPath());
+			type = findTypeFromFilename(outputFile);
 		}
 		
 		if (type == null)
@@ -188,7 +193,6 @@ public class WbExport
 		this.exporter = new DataExporter(this.currentConnection);
 
 		String tables = cmdLine.getValue("sourcetable");
-
 		String outputdir = cmdLine.getValue("outputdir");
 
 		if (outputFile == null && outputdir == null)
@@ -201,6 +205,7 @@ public class WbExport
 
 		String updateTable = cmdLine.getValue("table");
 		type = type.trim().toLowerCase();
+		if ("txt".equals(type)) type = "text";
 
 		String encoding = cmdLine.getValue("encoding");
 		if (encoding != null)
@@ -224,9 +229,9 @@ public class WbExport
 		
 		exporter.setPageTitle(cmdLine.getValue("title"));
 
-		exporter.setExportHeaders(cmdLine.getBoolean("header", getTextHeaderDefault()));		
+		exporter.setExportHeaders(cmdLine.getBoolean("header", getHeaderDefault(type)));		
 		
-		if ("text".equals(type) || "txt".equals(type))
+		if ("text".equals(type))
 		{
 			// Support old parameter Syntax
 			if (cmdLine.getBoolean("writeoracleloader", false))
@@ -822,8 +827,10 @@ public class WbExport
 	public void saveCurrentType(String type) {}
 	public void restoreType(String type) {}
 
-	protected String findTypeFromFilename(String fname)
+	protected String findTypeFromFilename(WbFile f)
 	{
+		if (f == null) return null;
+		String fname = f.getFullPath();
 		if (fname == null) return null;
 		if (fname.toLowerCase().endsWith(".txt")) return "text";
 		if (fname.toLowerCase().endsWith(".xml")) return "xml";

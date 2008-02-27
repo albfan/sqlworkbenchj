@@ -705,10 +705,10 @@ public class DwPanel
 					dataTable.setAutoCreateColumnsFromModel(true);
 					dataTable.setModel(new DataStoreTableModel(newData), true);
 					dataTable.adjustOrOptimizeColumns();
-					StringBuilder header = new StringBuilder(80);
-					header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
-					header.append(sql);
-					setPrintHeader(header.toString());
+					//StringBuilder header = new StringBuilder(80);
+					//header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
+					//header.append(sql);
+					setPrintHeader(sql);
 					dataTable.checkCopyActions();
 					checkResultSetActions();
 				}

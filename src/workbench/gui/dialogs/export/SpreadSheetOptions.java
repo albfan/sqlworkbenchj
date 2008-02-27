@@ -19,4 +19,7 @@ public interface SpreadSheetOptions
 {
 	String getPageTitle();
 	void setPageTitle(String title);
+	boolean getExportHeaders();
+	void setExportHeaders(boolean flag);
+	
 }

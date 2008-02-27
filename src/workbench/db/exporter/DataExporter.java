@@ -1386,8 +1386,7 @@ public class DataExporter
 	public void setXlsXOptions(SpreadSheetOptions xlsOptions)
 	{
 		this.setOutputTypeXlsXML();
-		this.setPageTitle(xlsOptions.getPageTitle());
-		this.exportWriter.configureConverter();
+		setSpreadsheetOptions(xlsOptions);
 	}
 	
 	public void setXlsOptions(SpreadSheetOptions xlsOptions)
@@ -1395,15 +1394,20 @@ public class DataExporter
 		if (xlsOptions != null)
 		{
 			this.setOutputTypeXls();
-			this.setPageTitle(xlsOptions.getPageTitle());
-			this.exportWriter.configureConverter();
+			setSpreadsheetOptions(xlsOptions);
 		}
 	}
 
 	public void setOdsOptions(SpreadSheetOptions odsOptions)
 	{
 		this.setOutputTypeOds();
+		setSpreadsheetOptions(odsOptions);
+	}
+	
+	public void setSpreadsheetOptions(SpreadSheetOptions odsOptions)
+	{
 		this.setPageTitle(odsOptions.getPageTitle());
+		this.setExportHeaders(odsOptions.getExportHeaders());
 		this.exportWriter.configureConverter();
 	}
 	
