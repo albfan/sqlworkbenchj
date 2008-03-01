@@ -43,120 +43,144 @@
 			approriate definitions to read the BLOB data from the external file.
 		</para>
 		
+		<para>
+			To be able to generate the binary Microsoft Excel format, you need to download
+			the POI library from the Apache project's website: <ulink url="http://poi.apache.org/"/>.
+			Any version greater than 2.5 is fine. The distribution contains a jar file named 
+			e.g. <literal>poi-3.0.1-FINAL-20070705.jar</literal> (exact name depends on the version).
+			This jar file needs to be copied into the same directory as <literal>sqlworkbench.jar</literal> under
+			the name <literal>poi.jar</literal>.
+		</para>
+		
+		<para>
+			If an export to an Excel spreadsheet is needed, it is recommended to use the Excel XML format, 
+			as that doesn't need an external library (just like exporting to the OpenDocument format). 
+		</para>
+			
     <para>The command supports the following parameters:</para>
 
-    <informaltable frame="all">
-      <tgroup cols="2" align="left">
-        <colspec colname="c1" colwidth="4cm" />
-        <colspec colname="c2" />
-          <thead>
-            <row>
-              <entry>Parameter</entry>
-              <entry>Description</entry>
-            </row>
-          </thead>
-
-          <tbody valign="top">
-              <row>
-              <entry>-type</entry>
-
-              <entry>
-								<para>
-									Possible values: <literal>text, sqlinsert, sqlupdate, sqldeleteinsert, xml, html</literal>
-								</para>
-                <para>
-                  Defines the type of the output file. <literal>sqlinsert</literal>
-                  will create the necessary <literal>INSERT</literal> statements to put
-                  the data into a table. If the records may already exist in the target table
-                  but you don't want to (or cannot) delete the content of the table
-                  before running the generated script, &wb-productname; can create a DELETE
-                  statement for every <literal>INSERT</literal> statement. To create this
-                  kind of script, use the <literal>sqldeleteinsert</literal> type.
-                </para>
-                <para>
-                  In order for this to work properly the table needs to have keycolumns defined,
-                  or you have to define the keycolumns manually using the <literal>-keycolumns</literal>
-                  switch.
-                </para>
-                <para>
-                  <literal>sqlupdate</literal> will generate UPDATE
-                  statements that update all non-key columns of the table. This will only
-                  generate valid <literal>UPDATE</literal> statements if at least one key
-                  column is present. If the table does not have key columns defined, or you
-                  want to use different columns, they can be specified using the <literal>-keycolumns</literal>
-                  switch.
-                </para>
-              </entry>
-          </row>
-
-          <row>
-              <entry>-file</entry>
-              <entry>
-									Defines the name of the output file. If the file name 
-									contains spaces, a dash or other special characters it has to 
-									put in single quotes: <literal>-file='c:\my files\test-data.txt'</literal>
-              </entry>
-          </row>
-
-          <row>
-              <entry>-sourcetable</entry>
-              <entry>
-							<para>Defines a list of tables to be exported. If this
-              switch is used, <literal>-outputdir</literal> is also required
-              unless exactly one table is specified. If one table is
-              specified, the -file parameter is used to generate the file
-              for the table. If more then one table is specified, the
-              <literal>-outputdir</literal> parameter is used to defined
-              the directory where the generated files should be stored.
-              Each file will be named as the exported table with the approriate
-              extension (.xml, .sql, etc). You can specify * as the table
-              name which will then export all tables accessible by the
-              current user.
-              </para>
-              <para>If you want to export tables from a different user
-              or schema you can use a schema name combined with a wildcard
-              e.g. <literal> -sourcetable=otheruser.*</literal>. In this case
-              the generated output files will contain the schema name as part of the
-              filename (e.g. <literal>otheruser.person.txt</literal>).
-              When <link linkend="command-import">importing</link> these files,
-              &wb-productname; will try to import the tables into the schema/user
-              specified in the filename. If you want to import them into
-              a different user/schema, then you have to use the <literal>-schema</literal>
-              switch for the <link linkend="command-import">import</link> command.
-              </para>
-              </entry>
-          </row>
-          <row>
-              <entry>-outputDir</entry>
-              <entry>When using the <literal>-sourcetable</literal> switch
-              with multiple tables, this parameter is mandatory and defines
-              the directory where the generated files should be stored.
-              </entry>
-          </row>
-          <row>
-              <entry>-continueOnError</entry>
-              <entry>When exporting more than one table, this parameter controls
-							whether the whole export will be terminated if an error occurs during 
-							export of one of the tables.
-              </entry>
-          </row>
-          <row>
-              <entry>-encoding</entry>
-              <entry>Defines the encoding in which the file should be
-              written. Common encodings are ISO-8859-1, ISO-8859-15, UTF-8 (or UTF8).
-              To get a list of available encodings, execut <literal>WbExport</literal>
-              with the parameter <literal>-showencoding</literal>
-              </entry>
-          </row>
+		<informaltable frame="all">
+			<tgroup cols="2" align="left">
+				<colspec colname="c1" colwidth="4cm" />
+				<colspec colname="c2" />
+				<thead>
 					<row>
-						<entry>-showEncodings</entry>
-						<entry>Displays the encodings supported by your Java version and
-								operating system. If this parameter is present, all other parameters are ignored.
+						<entry>Parameter</entry>
+						<entry>Description</entry>
+					</row>
+				</thead>
+				
+				<tbody valign="top">
+					<row>
+						<entry>-type</entry>
+						<entry>
+							<para>
+								Possible values: <literal>text, sqlinsert, sqlupdate, sqldeleteinsert, xml, ods, xsl, xslt, html</literal>
+							</para>
+							<para>
+								Defines the type of the output file. <literal>sqlinsert</literal>
+								will create the necessary <literal>INSERT</literal> statements to put
+								the data into a table. If the records may already exist in the target table
+								but you don't want to (or cannot) delete the content of the table
+								before running the generated script, &wb-productname; can create a DELETE
+								statement for every <literal>INSERT</literal> statement. To create this
+								kind of script, use the <literal>sqldeleteinsert</literal> type.
+							</para>
+							<para>
+								In order for this to work properly the table needs to have keycolumns defined,
+								or you have to define the keycolumns manually using the <literal>-keycolumns</literal>
+								switch.
+							</para>
+							<para>
+								<literal>sqlupdate</literal> will generate UPDATE
+								statements that update all non-key columns of the table. This will only
+								generate valid <literal>UPDATE</literal> statements if at least one key
+								column is present. If the table does not have key columns defined, or you
+								want to use different columns, they can be specified using the <literal>-keycolumns</literal>
+								switch.
+							</para>
+							<para>
+								<literal>ods</literal> will generate a spreadsheet file in the OpenDocument
+								format that can e.g. be opened with OpenOffice.org.
+							</para>
+							<para>
+								<literal>xlsx</literal> will generate a spreadsheet file in the Microsoft Excel XML format and
+								is the recommended format for creating Excel spreadsheets.
+							</para>
+							<para>
+								<literal>xls</literal> will generate a spreadsheet file in the propriatary (binary) format
+								for Microsoft Excel. 
+							</para>
+						</entry>
+					</row>
+					
+					<row>
+						<entry>-createDir</entry>
+						<entry>
+							If this parameter is set to true, &wb-productname; will create any 
+							needed directories when creating the output file. 
+						</entry>
+					</row>
+					
+					<row>
+						<entry>-sourcetable</entry>
+						<entry>
+							<para>Defines a list of tables to be exported. If this
+								switch is used, <literal>-outputdir</literal> is also required
+								unless exactly one table is specified. If one table is
+								specified, the -file parameter is used to generate the file
+								for the table. If more then one table is specified, the
+								<literal>-outputdir</literal> parameter is used to defined
+								the directory where the generated files should be stored.
+								Each file will be named as the exported table with the approriate
+								extension (.xml, .sql, etc). You can specify * as the table
+								name which will then export all tables accessible by the
+								current user.
+							</para>
+							<para>If you want to export tables from a different user
+								or schema you can use a schema name combined with a wildcard
+								e.g. <literal> -sourcetable=otheruser.*</literal>. In this case
+								the generated output files will contain the schema name as part of the
+								filename (e.g. <literal>otheruser.person.txt</literal>).
+								When <link linkend="command-import">importing</link> these files,
+								&wb-productname; will try to import the tables into the schema/user
+								specified in the filename. If you want to import them into
+								a different user/schema, then you have to use the <literal>-schema</literal>
+								switch for the <link linkend="command-import">import</link> command.
+							</para>
 						</entry>
 					</row>
 					<row>
-            <entry>-lineEnding</entry>
-            <entry>
+						<entry>-outputDir</entry>
+						<entry>When using the <literal>-sourcetable</literal> switch
+							with multiple tables, this parameter is mandatory and defines
+							the directory where the generated files should be stored.
+						</entry>
+					</row>
+					<row>
+						<entry>-continueOnError</entry>
+						<entry>When exporting more than one table, this parameter controls
+							whether the whole export will be terminated if an error occurs during 
+							export of one of the tables.
+						</entry>
+					</row>
+					<row>
+						<entry>-encoding</entry>
+						<entry>Defines the encoding in which the file should be
+							written. Common encodings are ISO-8859-1, ISO-8859-15, UTF-8 (or UTF8).
+							To get a list of available encodings, execut <literal>WbExport</literal>
+							with the parameter <literal>-showencoding</literal>
+						</entry>
+					</row>
+					<row>
+						<entry>-showEncodings</entry>
+						<entry>Displays the encodings supported by your Java version and
+							operating system. If this parameter is present, all other parameters are ignored.
+						</entry>
+					</row>
+					<row>
+						<entry>-lineEnding</entry>
+						<entry>
 							<para>Possible values are: <literal>crlf</literal>, <literal>lf</literal></para>
 							<para>
 								Defines the line ending to be used for XML or text files. 
@@ -173,11 +197,26 @@
 							<para>
 								The default line ending used depends on the platform where &wb-productname; is running.
 							</para>
-            </entry>
-          </row>
-          <row>
-            <entry>-compress</entry>
-            <entry>
+						</entry>
+					</row>
+					
+					<row>
+						<entry>-header</entry>
+						
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+								If this parameter is set to true, the header (i.e. the column names) are placed into the
+								first line of output file. The default is to not create a header line. You can define the default value 
+								for this parameter in the file <link linkend="export-text-header-default">workbench.settings</link>.
+								This parameter is valid for text and spreadsheet (OpenDocument, Excel) exports.
+							</para>
+						</entry>
+					</row>
+					
+					<row>
+						<entry>-compress</entry>
+						<entry>
 							<para>
 								Selects whether the output file should be compressed 
 								and put into a ZIP archive. An archive will be created with the name of the specified outputfile
@@ -193,8 +232,8 @@
 								directory with the filename <literal>"tablename".zip</literal>. For any table containing 
 								BLOB data, one additional ZIP archive is created.
 							</para>
-            </entry>
-          </row>
+						</entry>
+					</row>
 					<row>
 						<entry>-clobAsFile</entry>
 						<entry>
@@ -218,7 +257,7 @@
 								automatically recognize the external files.
 							</para>
 							<note><para>
-								SQL scripts (<literal>-type=sqlinsert</literal>) generated with <literal>-clobAsFile=true</literal> can only be run with &wb-productname;!
+									SQL scripts (<literal>-type=sqlinsert</literal>) generated with <literal>-clobAsFile=true</literal> can only be run with &wb-productname;!
 							</para></note>
 							<para>
 								All CLOB files that are written using the encoding specified with the 
@@ -273,11 +312,10 @@
 							</para>
 						</entry>
 					</row>
-					
-        </tbody>
-      </tgroup>
-    </informaltable>
-
+				</tbody>
+			</tgroup>
+		</informaltable>
+		
     <section id="spool-sql-parameters">
       <title>Parameters for type SQLUPDATE, SQLINSERT or SQLDELETEINSERT</title>
 
@@ -519,7 +557,6 @@
 
             <row>
               <entry>-timestampFormat</entry>
-
               <entry>The <link linkend="options-date-format">format</link> to be used when writing
               datetime (or timestamp) columns into the output file.
               </entry>
@@ -616,19 +653,6 @@
 									
 							</entry>
 						</row>
-						
-            <row>
-              <entry>-header</entry>
-
-              <entry>
-								<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-								<para>
-									If this parameter is set to true, the header (i.e. the column names) are placed into the
-									output file. The default is to not create a header line. You can define the default value 
-									for this parameter in the file <link linkend="export-text-header-default">workbench.settings</link>.
-								</para>
-              </entry>
-            </row>
 						
 						<row>
 							<entry>-writeOracleLoader</entry>
@@ -747,12 +771,34 @@
 								</para>
               </entry>
             </row>
-
           </tbody>
         </tgroup>
       </informaltable>
+		</section>
+		
+    <section id="spool-ods-parameters">
+      <title>Parameters for Spreadsheet types (ods, xslx, xls)</title>
 
+      <informaltable frame="all">
+        <tgroup cols="2" align="left">
+          <colspec colname="c1" colwidth="4cm" />
+          <colspec colname="c2" />
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody valign="top">
+            <row>
+              <entry>-pageTitle</entry>
+              <entry>The name to be used for the worksheet</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
     </section>
+		
     <section id="export-examples">
       <title>Examples</title>
 

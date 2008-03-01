@@ -21,9 +21,9 @@
 		<title>Specifying the connection</title>
 		
 		<para>
-			When running &wb-productname; in batch mode, the same 
-			<link linkend="commandline-connect-noprofile">connection parameters</link> 
-			can be specified that are available in GUI mode.
+			When running &wb-productname; in batch mode, you can define the connection 
+			using a <link linkend="commandline-connect-profile">profile name</link> or specifying the connection 
+			properties <link linkend="commandline-connect-noprofile">directly </link>.
 		</para>
 		
 	</section>
@@ -162,6 +162,19 @@
 			<link linkend="profile-ignore-drop-error">Ignore DROP errors</link> property is enabled.
 		</para>
 	</section>
+
+	<section id="script-change-connection">
+		<title>Changing the connection</title>
+		
+		<para>
+			You can change the current connection inside a script using the command <literal>WbConnect</literal>.
+			You can either specify a <link linkend="commandline-connect-profile">profile name</link> or specifying 
+			the connection properties <link linkend="commandline-connect-noprofile">directly</link>.
+		</para>
+		<para>	
+			The command accepts the same parameters as the commandline.
+		</para>
+	</section>
 	
 	<section id="script-display">
 		<title>Controlling console output during batch execution</title>
@@ -201,6 +214,13 @@
 				using <literal>WbFeedback off</literal> or <literal>-feedback=false</literal>
 			</para>
 
+			<para>
+				To you only log a summary of the script execution (per script file), specify 
+				the parameter <literal>consolidateMessages=true</literal>. This will then display
+				the number of statements executed, the number of failed statements and the total 
+				number of rows affected (updated, deleted or inserted).
+			</para>
+			
 		</section>
 
 		<section id="cmdline-parameter-progress">
