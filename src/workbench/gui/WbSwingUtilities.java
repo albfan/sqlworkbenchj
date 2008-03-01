@@ -637,6 +637,17 @@ public class WbSwingUtilities
 		});
 	} 
 
+	public static void requestFocus(final JComponent comp)
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				comp.requestFocus();
+			}
+		});
+	} 
+	
 	public static void initPropertyEditors(Object bean, JComponent root)
 	{
 		for (int i=0; i < root.getComponentCount(); i++)

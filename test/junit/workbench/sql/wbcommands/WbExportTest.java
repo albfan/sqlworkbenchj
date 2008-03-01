@@ -887,23 +887,7 @@ public class WbExportTest
 		}
 		finally
 		{
-			File f = new File(basedir, "blob_test.xml");
-			f.delete();
-
-			f = new File(basedir, "blob_test2.xml");
-			f.delete();
-			
-			f = new File(basedir, "junit_test.xml");
-			f.delete();
-
-			f = new File(basedir, "person.xml");
-			f.delete();
-			
-			f = new File(basedir, "blob_test_r1_c2.data");
-			f.delete();
-			
-			f = new File(basedir, "blob_test_r2_c2.data");
-			f.delete();
+			util.emptyBaseDirectory();
 		}
 	}
 

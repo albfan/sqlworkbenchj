@@ -135,8 +135,7 @@ WHERE id=42;</programlisting>
 	    <entry>
 	      The format of the outputfile. The default is the &wb-productname;
 	      specific XML format. Using <literal>-format=dbdesigner</literal> you can generate
-	      an XML file suitable to be opened with DbDesigner4. MySQL Workbench is the successor
-	      of DbDesigner4 and can import DbDesigner4 files.
+	      an XML file suitable to be opened with <ulink url="https://sourceforge.net/projects/dbdesigner-fork/">DbDesigner4</ulink>
 	    </entry>
 	  </row>
 	</tbody>

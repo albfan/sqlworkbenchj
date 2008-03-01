@@ -72,6 +72,7 @@ public class BatchRunner
 	private boolean showProgress = false;
 	private PrintStream console = System.out;
 	private boolean quiet = false;
+	private boolean consolidateMessages = false;
 
 	public BatchRunner(String aFilelist)
 	{
@@ -126,6 +127,11 @@ public class BatchRunner
 		this.showTiming = this.verboseLogging;
 	}
 
+	public void setConsolidateLog(boolean flag)
+	{
+		this.consolidateMessages = flag;
+	}
+	
 	public void setIgnoreDropErrors(boolean flag)
 	{
 		this.stmtRunner.setIgnoreDropErrors(flag);
@@ -407,12 +413,15 @@ public class BatchRunner
 		start = System.currentTimeMillis();
 
 		parser.startIterator();
-
+		long totalRows = 0;
+		long successCount = 0;
+		long errorCount = 0;
+		
 		while (parser.hasNext())
 		{
 			sql = parser.getNextCommand();
 			if (sql == null) continue;
-
+			
 			try
 			{
 				if (this.resultDisplay == null)
@@ -438,12 +447,24 @@ public class BatchRunner
 					boolean hasMessage = result.hasMessages();
 					String feedback = result.getMessageBuffer().toString();
 
-					if (error) LogMgr.logError("BatchRunner.execute()", feedback, null);
-					else if (result.hasWarning()) LogMgr.logWarning("BatchRunner.execute()", feedback);
+					if (error) 
+					{
+						LogMgr.logError("BatchRunner.execute()", feedback, null);
+						errorCount ++;
+					}
+					else 
+					{
+						if (result.hasWarning()) LogMgr.logWarning("BatchRunner.execute()", feedback);
+						successCount ++;
+						totalRows += result.getTotalUpdateCount();
+					}
 
 					if (hasMessage && (this.stmtRunner.getVerboseLogging() || error))
 					{
-						this.printMessage("\n" + feedback);
+						if (!this.consolidateMessages)
+						{
+							this.printMessage("\n" + feedback);
+						}
 					}
 					else if (result.hasWarning())
 					{
@@ -454,7 +475,7 @@ public class BatchRunner
 					executedCount ++;
 				}
 
-				if (this.showTiming)
+				if (this.showTiming && !consolidateMessages)
 				{
 					this.printMessage(ResourceMgr.getString("MsgSqlVerbTime") + " " + (((double)(verbend - verbstart)) / 1000.0) + "s");
 				}
@@ -494,6 +515,15 @@ public class BatchRunner
 		if (resultDisplay == null) msg.insert(0, '\n'); // force newline on console
 		this.printMessage(msg.toString());
 
+		if (consolidateMessages)
+		{
+			if (errorCount > 0)
+			{
+				printMessage((resultDisplay == null ? "\n" : "") + errorCount + " " + ResourceMgr.getString("MsgTotalStatementsFailed"));
+			}
+			this.printMessage(totalRows + " " + ResourceMgr.getString("MsgTotalRowsAffected"));
+		}
+		
 		parser.done();
 
 		if (this.showTiming)
@@ -650,7 +680,7 @@ public class BatchRunner
 		boolean abort = cmdLine.getBoolean(AppArguments.ARG_ABORT, true);
 		boolean showResult = cmdLine.getBoolean(AppArguments.ARG_DISPLAY_RESULT);
 		boolean showProgress = cmdLine.getBoolean(AppArguments.ARG_SHOWPROGRESS, false);
-
+		boolean consolidateLog = cmdLine.getBoolean(AppArguments.ARG_CONSOLIDATE_LOG, false);
 		String encoding = cmdLine.getValue(AppArguments.ARG_SCRIPT_ENCODING);
 
 		ConnectionProfile profile = null;
@@ -701,6 +731,7 @@ public class BatchRunner
 		runner.setSuccessScript(success);
 		runner.setProfile(profile);
 		runner.setVerboseLogging(feedback);
+		runner.setConsolidateLog(consolidateLog);
 		runner.quiet = cmdLine.isArgPresent(AppArguments.ARG_QUIET);
 
 		// if no showTiming argument was provided but feedback was disabled

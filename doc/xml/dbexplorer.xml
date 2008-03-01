@@ -7,8 +7,8 @@
 	<para>There are three ways to start the DbExplorer
 		<simplelist columns="1">
 			<member>Using <menuchoice><guimenu>Tools</guimenu><guimenuitem>Database Explorer</guimenuitem></menuchoice>. </member>
-			<member>Passing the paramter <literal>-dbexplorer</literal> to the main program (jworkbench or JWorkbench.exe)</member>
-			<member>When using Windows with the <literal>DbExplorer.exe</literal> executable or in Linux/Unix using shell script <literal>jworkbench</literal></member>
+			<member>Passing the paramter <literal>-dbexplorer</literal> to the main program (sqlworkbench.sh or SQLWorkbench.exe)</member>
+			<member>When using Windows with the <literal>DbExplorer.exe</literal> executable or in Linux/Unix using shell script <literal>dbexplorer.sh</literal></member>
 		</simplelist>
 	</para>
 

@@ -62,32 +62,6 @@
 				the <link linkend="command-wbfeedback">WBFEEDBACK</link> command.
 			</para>
 		</section>
-
-		<!--
-		<section id="options-enable-out" xreflabel="Enabling DBMS_OUTPUT">
-			<title>Enable DBMS_OUTPUT</title>
-			
-			<para>
-				If this option is enabled, the <literal>DBMS_OUTPUT</literal> package is
-				automatically enabled when connecting to an Oracle database. This option
-				has no effect on other DBMS. If it is disabled, the <literal>DBMS_OUTPUT</literal> package
-				can be enabled using the <xref linkend="command-enableout"/> command.
-			</para>
-			<para>
-				If this option is not checked, you need to manually enable the <literal>DBMS_OUTPUT</literal>
-				with <xref linkend="command-enableout"/>.
-			</para>
-			
-			<note><para>
-				Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with 
-				the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal> 
-				package is enabled. 
-				In order to be able to display these columns support for <literal>DBMS_OUTPUT</literal> has
-				to be switched off. 
-			</para></note>
-
-		</section>
-		-->
 		
 		<section id="option-animated-icon" xreflabel="Enable animated icons">
 			<title>Enable animated icons</title>
@@ -139,7 +113,7 @@
 				If you want to display the PDF manual from inside the application, you need to 
 				specify the full path to your PDF reader application. If this is defined
 				and the file <literal>SQLWorkbench-Manual.pdf</literal> is available in the 
-				directory where <literal>Workbench.jar</literal> is located, you will be 
+				directory where <literal>sqlworkbench.jar</literal> is located, you will be 
 				able to display the PDF manual by selecting
 				<menuchoice><guimenu>Help</guimenu><guimenuitem>Manual</guimenuitem></menuchoice>.
 			</para>
@@ -524,8 +498,18 @@
 			</para>
 		</section>
 
+		<section id="dbexp-options-show-trigger">
+			<title>Show trigger panel</title>
+			<para>
+				By default triggers are shown only in the details of a table. If the 
+				option "Show trigger panel" is selected, an additional panel will 
+				be displayed in the DbExplorer that displays all triggers in the 
+				database independently of their table.
+			</para>
+		</section>
+		
 		<section id="options-retrieve-explorer" xreflabel="Retrieve DB Explorer">
-			<title>Retrieve DB Explorer</title>
+			<title>Automatically retrieve objects</title>
 			<para>If this option is enabled, the contents of the database schema is
 				retrieved when the DB Explorer is displayed. If this option is not
 				checked, either the <guibutton>Refresh</guibutton> button or selecting a schema or
@@ -533,6 +517,58 @@
 			</para>
 		</section>
 
+		<section id="dbexp-options-remember-type">
+			<title>Remember object type</title>
+			<para>
+				The list of objects can be filtered with the dropdown. If the 
+				option "Remember object type" is selected, the current object type
+				will be stored in the workspace of the current connection, and will
+				be restored the next time.
+			</para>
+		</section>
+
+		<section id="dbexp-options-remember-sort">
+			<title>Remember sort column</title>
+			<para>
+				When this option is selected, the sort column in the data display
+				of the DbExplorer will be restored after reloading the table data.
+			</para>
+		</section>
+
+		<section id="dbexp-options-focus-data">
+			<title>Focus to data panel</title>
+			<para>
+				When this option is selected, the focus inside the DbExplorer will
+				be set to the data panel, after an object in the list has been selected
+				(and the data panel is visible).
+			</para>
+		</section>
+
+		<section id="dbexp-options-show-focus">
+			<title>Show focus</title>
+			<para>
+				When this option is selected, a rectangle indicating the currently
+				focused panel will be displayed, to indicate the component that 
+				will received keystrokes e.g. shortcuts such as <literal>Ctrl-R</literal>.
+			</para>
+		</section>
+
+		<section id="dbexp-options-gen-pk">
+			<title>Generate PK constraint name</title>
+			<para>
+				When displaying the SQL source for a table, a name will be generated
+				for primary key constraint if the current constraint has no name or 
+				a system generated name. 
+				<note>
+					If this option is selected, the generated SQL does not reflect
+					the real statement that was used to create the table!
+				</note>
+				System generated names are identified using a regular expression
+				that can be <link linkend="manual-setting-system-names">configured</link>.
+			</para>
+		</section>
+		
+		<!--
 		<section id="options-deftabletype">
 			<title>Default Object Type</title>
 			<para>This setting allows you to control the initial display of objects in the
@@ -550,7 +586,8 @@
 				type, when you open it.
 			</para></note>
 		</section>
-
+		-->
+		
 	</section>
 	
 	<section id="options-window-title">

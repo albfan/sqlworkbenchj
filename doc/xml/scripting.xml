@@ -223,7 +223,7 @@
 			when starting the JVM. To change the loglevel to <literal>DEBUG</literal> you need
 			to pass <literal>-Dworkbench.log.level=DEBUG</literal> when starting the application:
 		</para>
-		<programlisting>java -Dworkbench.log.level=DEBUG -jar Workbench.jar </programlisting>
+		<programlisting>java -Dworkbench.log.level=DEBUG -jar sqlworkbench.jar </programlisting>
 	</section>
 	
 	<section id="scripting-examples">
@@ -236,7 +236,7 @@
 		</para>
 
 		<para><emphasis role="bold">Connect to the database without specifying a connection profile:</emphasis></para>
-		<programlisting>java -jar Workbench.jar -url=jdbc:postgresql:/dbserver/mydb
+		<programlisting>java -jar sqlworkbench.jar -url=jdbc:postgresql:/dbserver/mydb
      -driver=org.postgresql.Driver
      -username=zaphod
      -password=vogsphere
@@ -254,7 +254,7 @@
 		</para>
 
 		<para><emphasis role="bold">Executing several scripts with a cleanup and failure script:</emphasis></para>
-		<programlisting>java -jar Workbench.jar
+		<programlisting>java -jar sqlworkbench.jar
      -script='c:/scripts/script-1.sql','c:/scripts/script-2.sql',c:/scripts/script3.sql
      -profile=Firebird
      -abortOnError=false

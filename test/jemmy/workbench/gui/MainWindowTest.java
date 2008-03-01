@@ -287,6 +287,7 @@ public class MainWindowTest
 		assertTrue(msg.indexOf("Object created") > -1);
 
 		msg = runSql(sqlPanel, "insert into person (nr, firstname, lastname) values (42, 'Ford', 'Prefect');\ncommit;");
+		assertNotNull(msg);
 		assertTrue(msg.indexOf("1 row(s) affected") > -1);
 
 		runSql(sqlPanel, "select nr, firstname, lastname from person");

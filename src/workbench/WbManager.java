@@ -69,7 +69,7 @@ import workbench.util.WbThread;
 
 /**
  * The main application "controller" for the SQL Workbench/J
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class WbManager
@@ -99,12 +99,12 @@ public class WbManager
 	{
 		LogMgr.logError("WbManager.uncaughtException()", "Thread + " + thread.getName() + " caused an exception!", error);
 	}
-	
-	public boolean writeSettings() 
-	{ 
-		return this.writeSettings; 
+
+	public boolean writeSettings()
+	{
+		return this.writeSettings;
 	}
-	
+
 	public void showDialog(String clazz)
 	{
 		JFrame parent = WbManager.getInstance().getCurrentWindow();
@@ -140,14 +140,14 @@ public class WbManager
 	{
 		return this.outOfMemoryOcurred;
 	}
-	
+
 	public void showOutOfMemoryError()
 	{
 		System.gc();
 		outOfMemoryOcurred = true;
 		WbSwingUtilities.showErrorMessageKey(getCurrentWindow(), "MsgOutOfMemoryError");
 	}
-	
+
 	public MainWindow getCurrentWindow()
 	{
 		if (this.mainWindows == null) return null;
@@ -216,7 +216,7 @@ public class WbManager
 	}
 
 	public boolean isWindowsClassic() { return isWindowsClassic; }
-	
+
 	private boolean isWindowsClassic = false;
 
 	private void initializeLookAndFeel()
@@ -230,24 +230,24 @@ public class WbManager
 			}
 			LnFManager mgr = new LnFManager();
 			LnFDefinition def = mgr.findLookAndFeel(className);
-			
-			if (def == null) 
+
+			if (def == null)
 			{
 				LogMgr.logError("WbManager.initializeLookAndFeel()", "Specified Look & Feel " + className + " not available!", null);
 				return;
 			}
-			
+
 			// JGoodies Looks settings
 			UIManager.put("jgoodies.useNarrowButtons", Boolean.FALSE);
 			UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
-			
+
 			// Remove Synthetica's own window decorations
 			UIManager.put("Synthetica.window.decoration", Boolean.FALSE);
-			
-			// Remove the extra icons for read only text fields and 
+
+			// Remove the extra icons for read only text fields and
 			// the "search bar" in the main menu for the Substance Look & Feel
 			System.setProperty("substancelaf.noExtraElements", "");
-			
+
 			LnFLoader loader = new LnFLoader(def);
 			LookAndFeel lnf = loader.getLookAndFeel();
 
@@ -311,7 +311,7 @@ public class WbManager
 		try
 		{
 			// Sending the path through the URLDecoder is important
-			// because otherwise a path with %20 will be created 
+			// because otherwise a path with %20 will be created
 			// if the directory contains spaces!
 			String p = URLDecoder.decode(url.getFile(), "UTF-8");
 			f = new File(p);
@@ -325,13 +325,13 @@ public class WbManager
 		}
 		return f;
 	}
-	
+
 	public String getJarPath()
 	{
 		WbFile parent = new WbFile(getJarFile().getParentFile());
 		return parent.getFullPath();
 	}
-	
+
 	private void initUI()
 	{
 		// Disable bold fonts for the Default Metal Look & Feel
@@ -339,10 +339,10 @@ public class WbManager
 		UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
 
 		this.initializeLookAndFeel();
-		
+
 		Settings settings = Settings.getInstance();
 		UIDefaults def = UIManager.getDefaults();
-		
+
 		Font stdFont = settings.getStandardFont();
 		if (stdFont != null)
 		{
@@ -374,14 +374,14 @@ public class WbManager
 			def.put("Tree.font", stdFont);
 			def.put("ViewPort.font", stdFont);
 		}
-		
+
 		Font dataFont = settings.getDataFont(false);
 		if (dataFont != null)
 		{
 			def.put("Table.font", dataFont);
 			def.put("TableHeader.font", dataFont);
 		}
-		
+
 		// Polish up the standard look & feel settings
 		Color c = settings.getColor("workbench.table.gridcolor", new Color(215,215,215));
 		def.put("Table.gridColor", c);
@@ -390,10 +390,10 @@ public class WbManager
 		// use our own classes for some GUI elements
 		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
 		def.put("SplitPaneUI", "workbench.gui.components.WbSplitPaneUI");
-		
+
 		String cls = TabbedPaneUIFactory.getTabbedPaneUIClass();
 		if (cls != null) def.put("TabbedPaneUI", cls);
-		
+
 		settings.addFontChangedListener(this);
 	}
 
@@ -438,7 +438,7 @@ public class WbManager
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.testmode", false);
 	}
-	
+
 	public boolean isBatchMode()
 	{
 		return this.batchMode;
@@ -448,7 +448,7 @@ public class WbManager
 	{
 		return this.saveWindowSettings();
 	}
-	
+
 	public void exitWorkbench()
 	{
 		MainWindow w = this.getCurrentWindow();
@@ -460,12 +460,12 @@ public class WbManager
 		// saveSettings() will also prompt if any modified
 		// files should be changed
 		boolean canExit = this.saveWindowSettings();
-		if (!canExit) 
+		if (!canExit)
 		{
 			LogMgr.logInfo("WbManaer.exitWorkbench()", "Exiting application was cancelled during saveWindowSettings()");
 			return false;
 		}
-		
+
 		if (window == null)
 		{
 			ConnectionMgr.getInstance().disconnectAll();
@@ -547,7 +547,7 @@ public class WbManager
 	 */
 	protected void disconnected()
 	{
-		
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -579,14 +579,14 @@ public class WbManager
 
 	protected void saveSettings()
 	{
-		if (this.writeSettings && !this.isBatchMode()) 
+		if (this.writeSettings && !this.isBatchMode())
 		{
 			Settings s = Settings.getInstance();
 			FilterDefinitionManager.getInstance().saveMRUList();
 			if (s != null) s.saveSettings();
 		}
 	}
-	
+
 	protected void doShutdown(int errorCode)
 	{
 		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
@@ -636,7 +636,7 @@ public class WbManager
 			super(name);
 			win = w;
 		}
-		
+
 		public void run()
 		{
 			// First parameter tells the window to disconnect in the
@@ -654,7 +654,7 @@ public class WbManager
 			});
 		}
 	}
-	
+
 	public void windowClosing(final MainWindow win)
 	{
 		if (this.mainWindows.size() == 1)
@@ -669,12 +669,12 @@ public class WbManager
 			CloseThread t = new CloseThread("WindowDisconnect", win);
 			t.start();
 		}
-		
+
 	}
 
-	/** 
-	 * Open a new main window, but do not check any command line parameters. 
-	 * 
+	/**
+	 * Open a new main window, but do not check any command line parameters.
+	 *
 	 * This method will be called from the GUI
 	 * when the user requests a new window
 	 */
@@ -708,11 +708,11 @@ public class WbManager
 				ProfileKey def = new ProfileKey(profilename, group);
 				prof = ConnectionMgr.getInstance().getProfile(def);
 			}
-			else 
+			else
 			{
 				prof = BatchRunner.createCmdLineProfile(this.cmdLine);
 			}
-			
+
 			if (prof != null)
 			{
 				LogMgr.logDebug("WbManager.openNewWindow()", "Connecting to " + prof.getName());
@@ -729,7 +729,7 @@ public class WbManager
 
 		boolean autoSelect = Settings.getInstance().getBoolProperty("workbench.gui.autoconnect", true);
 		boolean exitOnCancel = Settings.getInstance().getExitOnFirstConnectCancel();
-		
+
 		// no connection? then display the connection dialog
 		if (!connected && autoSelect)
 		{
@@ -737,28 +737,27 @@ public class WbManager
 		}
 	}
 
-	private void initCmdLine(String[] args)
+	private void readParameters(String[] args)
 	{
 		try
 		{
 			cmdLine.parse(args);
-			
 			boolean needInitialize = false;
-			
+
 			String lang = cmdLine.getValue(AppArguments.ARG_LANG);
 			if (!StringUtil.isEmptyString(lang))
 			{
 				System.setProperty("workbench.gui.language", lang);
 				needInitialize = true;
 			}
-			
+
 			String value = cmdLine.getValue(AppArguments.ARG_CONFIGDIR);
 			if (!StringUtil.isEmptyString(value))
 			{
 				System.setProperty("workbench.configdir", value);
 				needInitialize = true;
 			}
-			
+
 			value = cmdLine.getValue(AppArguments.ARG_LIBDIR);
 			if (!StringUtil.isEmptyString(value))
 			{
@@ -774,18 +773,19 @@ public class WbManager
 				needInitialize = true;
 			}
 
-			// Make sure the Settings object is (re)initialized properly now that 
+			// Make sure the Settings object is (re)initialized properly now that
 			// some system properties have been read from the commandline
-			// this is especially necessary during Junit tests to make 
+			// this is especially necessary during Junit tests to make
 			// sure a newly passed commandline overrules the previously initialized
 			// Settings instance
 			Settings.getInstance().initialize();
-			
+
 			String scriptname = cmdLine.getValue(AppArguments.ARG_SCRIPT);
 
 			boolean readDriverTemplates = true;
-			
-			if (StringUtil.isEmptyString(scriptname))
+			boolean showHelp = cmdLine.isArgPresent("help");
+
+			if (StringUtil.isEmptyString(scriptname) && !showHelp)
 			{
 				this.batchMode = false;
 				String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
@@ -801,7 +801,7 @@ public class WbManager
 				this.batchMode = true;
 				readDriverTemplates = false;
 			}
-			
+
 			value = cmdLine.getValue(AppArguments.ARG_VARDEF);
 			if (!StringUtil.isEmptyString(value))
 			{
@@ -820,12 +820,12 @@ public class WbManager
 				readDriverTemplates = false;
 			}
 			ConnectionMgr.getInstance().setReadTemplates(readDriverTemplates);
-			
-			// Setting the profile storage should be done after initializing 
+
+			// Setting the profile storage should be done after initializing
 			// the configuration stuff correctly!
 			value = cmdLine.getValue(AppArguments.ARG_PROFILE_STORAGE);
 			Settings.getInstance().setProfileStorage(value);
-			
+
 			if (cmdLine.isArgPresent(AppArguments.ARG_NOSETTNGS))
 			{
 				this.writeSettings = false;
@@ -838,7 +838,7 @@ public class WbManager
 		}
 	}
 
-	public void init()
+	public void startApplication()
 	{
 		LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
 		LogMgr.logInfo("WbManager.init()", "Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
@@ -873,14 +873,14 @@ public class WbManager
 		// This will install the application listener if running under MacOS
 		MacOSHelper m = new MacOSHelper();
 		m.installApplicationHandler();
-		
+
 		try
 		{
 			this.initUI();
-			
+
 			boolean pumper = cmdLine.isArgPresent(AppArguments.ARG_SHOW_PUMPER);
 			boolean explorer = cmdLine.isArgPresent(AppArguments.ARG_SHOW_DBEXP);
-			
+
 			if (pumper)
 			{
 				DataPumper p = new DataPumper(null, null);
@@ -894,9 +894,9 @@ public class WbManager
 			{
 				openNewWindow(true);
 			}
-			
+
 			UpdateCheck upd = new UpdateCheck();
-			upd.startUpdateCheck();		
+			upd.startUpdateCheck();
 		}
 		finally
 		{
@@ -911,10 +911,10 @@ public class WbManager
 	private void runBatch()
 	{
 		int exitCode = 0;
-		
-		// Make sure batch mode is always using English 
-		System.setProperty("workbench.gui.language", "en");
-		
+
+		// Make sure batch mode is always using English
+		// System.setProperty("workbench.gui.language", "en");
+
 		BatchRunner runner = BatchRunner.createBatchRunner(cmdLine);
 
 		if (runner != null)
@@ -929,20 +929,20 @@ public class WbManager
 				// no need to log connect errors, already done by BatchRunner and ConnectionMgr
 				// runner.isSuccess() will also be false for the next step
 			}
-			
+
 			try
 			{
 				// Do not check for runner.isConnected() as the in batch mode
-				// the application might be started without a profile 
+				// the application might be started without a profile
 				// (e.g. for a single WbCopy command)
 				if (runner.isSuccess())
 				{
 					runner.execute();
 				}
-				
+
 				// Not all exceptions will be re-thrown by the batch runner
 				// in order to be able to run the error script, so it is important
-				// to check isSuccess() in order to return the correct status 
+				// to check isSuccess() in order to return the correct status
 				if (!runner.isSuccess()) exitCode = 2;
 			}
 			catch (OutOfMemoryError e)
@@ -974,21 +974,29 @@ public class WbManager
 	public static void prepareForTest(String[] args)
 	{
 		wb = new WbManager();
-		
 		// Avoid saving the settings
 		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
 		System.setProperty("workbench.gui.testmode", "true");
-		wb.initCmdLine(args);
+		wb.readParameters(args);
 	}
-	
+
 	public static void main(String[] args)
 	{
 		if (wb == null) wb = new WbManager();
-		// the command line needs to be initialized before everything
-		// else, in order to set some of the system poperties correctly
-		// e.g. the configdir.
-		wb.initCmdLine(args);
-		wb.init();
+
+		wb.cmdLine.parse(args);
+		boolean showHelp = wb.cmdLine.isArgPresent("help");
+		if (showHelp)
+		{
+			System.out.println(wb.cmdLine.getHelp());
+			Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
+			System.exit(0);
+		}
+		else
+		{
+			wb.readParameters(args);
+			wb.startApplication();
+		}
 	}
 
 	/**

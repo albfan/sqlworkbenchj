@@ -1,29 +1,35 @@
 <section id="install">
 	<title>Installing and starting &wb-productname;</title>
 
+	<para><note>
+		Starting with build 99 the jar file has been renamed to <literal>sqlworkbench.jar</literal>. 
+		Please delete the old file <literal>Workbench.jar</literal>. Windows user should also 
+		delete the old <literal>JWorkbench.exe</literal> and use the most recent <literal>SQLWorkbench.exe</literal>
+	</note></para>
+	
 	<para>To run &wb-productname; a <ulink url="http://java.sun.com/j2se/">Java runtime environment</ulink> 
 		version 1.5 (or above) is required. You can either use a JRE ("Runtime") or a JDK ("Development Kit") to
 		run &wb-productname;. Once you have downloaded the application, unzip the &wb-productname; archive into 
 		a directory of your choice. Apart from that, no special installation procedure is needed. 
 		When upgrading to a newer version of &wb-productname; simply overwrite the old 
-		<literal>Workbench.jar</literal> and the exe launcher and shell scripts that  
+		<literal>sqlworkbench.jar</literal> and the exe launcher and shell scripts that  
     start the application.
 	</para>
 
 	<section id="starting">
 		<title>Starting the program</title>
 
-		<para>Workbench.jar is a self executing JAR file. This means, that if
+		<para>sqlworkbench.jar is a self executing JAR file. This means, that if
 		your JDK is installed properly, a double click (on the Windows&reg; platform)
-		on Workbench.jar will execute the application. To run the application
+		on sqlworkbench.jar will execute the application. To run the application
 		manually use the command:</para>
 
-		<programlisting>java -jar Workbench.jar</programlisting>
+		<programlisting>java -jar sqlsqlworkbench.jar</programlisting>
 
 		<para>If you want to create a shortcut on your desktop use the above
 		line. On Windows&reg; systems - if you don&apos;t use the <link linkend="launcher-using">native launcher</link>- it
 		is recommended to use javaw instead of java, so that the console window is not displayed.</para>
-		<programlisting>javaw -jar Workbench.jar</programlisting>
+		<programlisting>javaw -jar sqlorkbench.jar</programlisting>
 
 		<section id="config-dir" xreflabel="Configuration directory">
 			<title>Specifying the location of configuration files</title>
@@ -31,7 +37,7 @@
 			<para>If no configuration directory has been specified on the commandline,
 				&wb-productname; will check the current directory for a <literal>workbench.settings</literal>
 				file. If no file is present in the current directory, &wb-productname; 
-				will check the directory where <literal>workbench.jar</literal> is located. 
+				will check the directory where <literal>sqlworkbench.jar</literal> is located. 
 				If no <literal>workbench.settings</literal> is found in that directory, 
 				&wb-productname; creates a sub-directory called <literal>.sqlworkbench</literal>
 				in the user's home folder (This is <literal>$HOME</literal> on a Linux or Unix
@@ -64,14 +70,14 @@
 			  files, you have to start the application with the parameter -configdir to specify an 
 				alternate directory:</para>
 			<para>
-				<programlisting>java -jar Workbench.jar -configdir=/export/configs/sqlwb</programlisting>
+				<programlisting>java -jar sqlworkbench.jar -configdir=/export/configs/SQLWorkbench</programlisting>
 				or if you are using the Windows&reg; launcher:
-				<programlisting>JWorkbench -configdir=c:\ConfigData\SQLWorkbench</programlisting>
+				<programlisting>SQLWorkbench -configdir=c:\ConfigData\SQLWorkbench</programlisting>
 
 				The placeholder <literal>${user.home}</literal> will be 
 				replaced with the current user's home directory (as returned by the Operating System), e.g.:
 <programlisting>
-java -jar Workbench.jar -configDir=${user.home}/.sqlworkbench
+java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench
 </programlisting>
 				If the specified directory does not exist, it will be created.
 			</para>
@@ -101,7 +107,7 @@ java -jar Workbench.jar -configDir=${user.home}/.sqlworkbench
 			In order to be able to display the PDF manual, you need to define the path to the executable for the PDF 
 			reader in the <link linkend="options-general">General options</link>
 			and the file <literal>SQLWorkbench-Manual.pdf</literal> must be available in the 
-			directory where <literal>Workbench.jar</literal> is located.
+			directory where <literal>sqlworkbench.jar</literal> is located.
 		</para>
 	</section>
 	
@@ -123,7 +129,7 @@ java -jar Workbench.jar -configDir=${user.home}/.sqlworkbench
 		<para>
 			When you use the Windows&reg; <link linkend="launcher-using">Launcher</link> to start &wb-productname;
 			you need to pass the parameter -J-Xmx512m to the executable:
-			<programlisting>JWorkbench.exe -J-Xmx512m</programlisting>This example
+			<programlisting>SQLWorkbench.exe -J-Xmx512m</programlisting>This example
 			will increase the maximum memory to 512MB. The recommended way
 			is to create Windows&reg; shortcut (e.g. on the desktop) and add the above parameter
 			to the shortcut definition. The launcher sets the available heap size
@@ -133,7 +139,7 @@ java -jar Workbench.jar -configDir=${user.home}/.sqlworkbench
 			If you are running &wb-productname; on a non-Windows&reg; operating system or do not
 			want to use the launcher, then you need to pass this parameter directly to the JVM
 		</para>
-		<para><programlisting>java -Xmx512m -jar Workbench.jar</programlisting></para>
+		<para><programlisting>java -Xmx512m -jar sqlworkbench.jar</programlisting></para>
 		<para>
 			The default heap size for your Java environment depends on your operating
 			system and your JDK implementation. Most JDKs use a default of 96MB as the
@@ -158,12 +164,12 @@ java -jar Workbench.jar -configDir=${user.home}/.sqlworkbench
 		turned off:</para>
 
 
-		<programlisting>java -Dsun.java2d.noddraw=true -jar Workbench.jar</programlisting>
+		<programlisting>java -Dsun.java2d.noddraw=true -jar sqlworkbench.jar</programlisting>
 
 		<para>When using the exe launcher, you can use the following
 		syntax:</para>
 
-		<programlisting>jworkbench -noddraw</programlisting>
+		<programlisting>SQLWorkbench -noddraw</programlisting>
 
 		<para>
 			If you run &wb-productname; through a program that enables remote 
@@ -175,6 +181,7 @@ java -jar Workbench.jar -configDir=${user.home}/.sqlworkbench
 
 	<section id="hi-cpu-usage">
 		<title>High CPU usage when executing statements</title>
+		
 		<para>If you experience a high CPU usage when running a SQL statement,
 			this might be caused by a combination of the graphics driver, the JDK and
 			the Windows&reg; version you are using. This is usually caused by the animated
@@ -189,11 +196,11 @@ java -jar Workbench.jar -configDir=${user.home}/.sqlworkbench
 		<title>Using the Windows launcher</title>
 
 		<para>
-			On the Windows&reg; platform the supplied JWorkbench.exe can be used to
+			On the Windows&reg; platform the supplied SQLWorkbench.exe can be used to
 			start the program when using a Sun JDK. The native launcher searches for an installed
 			JDK (querying the registry) and then starts the &wb-productname;. The file
-			workbench.jar has to be located in the same directory as the
-			JWorkbench.exe, otherwise it doesn&#39;t work.
+			sqlworkbench.jar has to be located in the same directory as the
+			SQLWorkbench.exe, otherwise it doesn&#39;t work.
 		</para>
 
 		<note><para>
@@ -215,7 +222,7 @@ java -jar Workbench.jar -configDir=${user.home}/.sqlworkbench
 			If that is defined, the JDK specified by that directory is used. If
 			<literal>WORKBENCH_JDK</literal> is not found, <literal>JAVA_HOME</literal> is used.
 			If <literal>JAVA_HOME</literal> is not defined, then the launcher checks if
-			a sub-directory JRE exists in the folder where JWorkbench.exe is located. If
+			a sub-directory JRE exists in the folder where SQLWorkbench.exe is located. If
 			that sub-directory exists, it is assumed that it contains a valid JRE. If the
 			sub-directory does not exist, or if it is not a JRE installation, then the registry key
 			<literal>HKLM\Software\JavaSoft\Java Runtime Environment</literal> is queried.
@@ -337,12 +344,12 @@ java -jar Workbench.jar -configDir=${user.home}/.sqlworkbench
 
 			<para>The following call to the launcher:</para>
 
-			<programlisting>jworkbench -noddraw -configdir=c:\MyConf</programlisting>
+			<programlisting>SQLWorkbench -noddraw -configdir=c:\MyConf</programlisting>
 
-			<para>is the same as directly starting Workbench.jar with these
+			<para>is the same as directly starting sqlworkbench.jar with these
 			parameters:</para>
 
-			<programlisting>java -Dsun.java2d.noddraw=true -jar Workbench.jar -configdir=c:\MyConf</programlisting>
+			<programlisting>java -Dsun.java2d.noddraw=true -jar sqlworkbench.jar -configdir=c:\MyConf</programlisting>
 		</section>
 
 		<section id="launcher-vista">
@@ -352,7 +359,7 @@ java -jar Workbench.jar -configDir=${user.home}/.sqlworkbench
 				is loaded. This affects the &wb-productname; launcher as described in 
 				<ulink url="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_CRT_C_Run.2d.Time_Libraries.asp">Microsoft C runtime distribution model</ulink>
 				If you want to run &wb-productname; under Windows Vista, please copy the file <literal>msvcr71.dll</literal>
-				into the directory where <literal>JWorkbench.exe</literal> is located. This file can be found
+				into the directory where <literal>SQLWorkbench.exe</literal> is located. This file can be found
 				under <literal>%SystemRoot%\System32\msvcr71.dll</literal> (usually this is 
 				<literal>c:\Windows\System32\msvcr71.dll</literal>)
 			</para>
@@ -376,15 +383,15 @@ java -jar Workbench.jar -configDir=${user.home}/.sqlworkbench
 			<para>
 				The parameter <literal>-configDir</literal> specifies the directory where
 				&wb-productname; will store all its settings. If this parameter is not supplied, 
-				the directory where the <literal>Workbench.jar</literal>
+				the directory where the <literal>sqlworkbench.jar</literal>
 				is located is used. 
 				The placeholder <literal>${user.home}</literal> will be 
 				replaced with the current user's home directory (as returned by the Operating System).
 				If the specified directory does not exist, it will be created. 
 			</para>
 			
-			<programlisting>java -jar Workbench.jar -configdir=${user.home}/wbconfig
-jworkbench -configdir='c:\Configurations\JWorkbench'</programlisting>
+			<programlisting>java -jar sqlworkbench.jar -configdir=${user.home}/wbconfig
+SQLWorkbench -configdir='c:\Configurations\SQLWorkbench'</programlisting>
 			<para>
 				Note that even on the Windows platform you can use a forward slash to separate 
 				directory names in the parameter.
@@ -438,7 +445,7 @@ another_variable=24</programlisting>
 			<para>
 				You can also define a list of variables with this parameter. In this case, the first
 				character after the = sign, has to be # (hash sign) to flag the value as a variable list:
-				<programlisting>java -jar Workbench.jar -vardef=#var_id=42,person_name=Dent</programlisting>
+				<programlisting>java -jar sqlworkbench.jar -vardef=#var_id=42,person_name=Dent</programlisting>
 			</para>
 			
 		</section>
@@ -469,7 +476,7 @@ another_variable=24</programlisting>
 			
 			<para>Example (on one line):</para>
 
-			<programlisting>java -jar Workbench.jar 
+			<programlisting>java -jar sqlworkbench.jar 
      -profile='Oracle - Test' 
      -script='test.sql'</programlisting>
 			<para>
@@ -482,7 +489,7 @@ another_variable=24</programlisting>
 				If you have two profiles with the names <literal>&quot;Oracle - Test&quot;</literal> you will 
 				need to specify the profile group as well (in one line):
 			</para>
-			<programlisting>java -jar Workbench.jar 
+			<programlisting>java -jar sqlworkbench.jar 
      -profile='Oracle - Test' 
      -profilegroup='Local' 
      -script='test.sql'</programlisting>

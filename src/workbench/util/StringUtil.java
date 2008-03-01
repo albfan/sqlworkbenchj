@@ -259,7 +259,7 @@ public class StringUtil
 	}
 
 	/**
-	 * Capitalize a single word.
+	 * Capitalize the first word of the passed String.
 	 * (write the first character in uppercase, the rest in lower case)
 	 * This does not loop through the entire string to capitalize every word.
 	 */
@@ -276,15 +276,18 @@ public class StringUtil
 	/**
 	 * Remove all characters that might not be allowed in a filename from the input string.
 	 * @param input the value to be used as a filename
-	 * @return input value without any characters that might not be allowed for a filename
+	 * @return input value without any characters that might not be allowed for a filename converted to lowercase
 	 */
 	public static final String makeFilename(String input)
 	{
-		return input.replaceAll("[\t\\:\\\\/\\?\\*\\|<>\"'\\{\\}%\u00A7\\[\\]\\^\\&]", "");
+		if (input == null) return null;
+		if (input.equals("..")) return "__";
+		if (input.equals(".")) return "_";
+		return input.replaceAll("[\t\\:\\\\/\\?\\*\\|<>\"'%\u00A7\\^\\&\u0000]", "").toLowerCase();
 	}
 
 	/**
-	 * Replaces all occurances of aValue in aString with aReplacement and appends the resulting
+	 * Replaces all occurances of needle in haystack with replacement and appends the resulting
 	 * String to the passed target.
 	 * @param target the buffer to append the result to. If target is null a new StringBuilder will be created
 	 * @param haystack the String in which to search the value

@@ -16,7 +16,7 @@
   <property name="build" value="../build/classes"/>
 	<property name="build.test" value="../build/test"/>
   <property name="distdir" value="../dist"/>
-  <property name="jarfile" value="Workbench.jar"/>
+  <property name="jarfile" value="sqlworkbench.jar"/>
   <property name="javadocdir" value="../javadoc"/>
   <property name="srczipname" value="WorkbenchSrc.zip"/>
   <property name="srczip" value="${root}/${srczipname}"/>
@@ -96,11 +96,6 @@
 		<delete file="${scriptsrc}/history.new" failonerror="false" />
 		<delete dir="${build.test}"/>
 		<delete dir="${pdfwork}" failonerror="false"/>
-		<mkdir dir="${pdfwork}"/>
-		<mkdir dir="${build.test}"/>
-		<mkdir dir="${build}"/>
-		<mkdir dir="${build}/help"/>
-		<mkdir dir="${distdir}"/>
 		<delete failonerror="false">
 			<fileset dir="${distdir}">
 				<include name="WorkbenchSrc*.zip"/>
@@ -111,7 +106,11 @@
 	</target>
 
 	<target name="prepare" depends="init">
-		<mkdir dir="${pdfwork}"/>		
+		<mkdir dir="${pdfwork}"/>
+		<mkdir dir="${build.test}"/>
+		<mkdir dir="${build}"/>
+		<mkdir dir="${build}/help"/>
+		<mkdir dir="${distdir}"/>
 		<copy overwrite="true"  todir="${build}">
 			<fileset defaultexcludes="true" dir="${src}">
 				<include name="**/*.*"/>
@@ -148,6 +147,9 @@
 					 source="1.5" 
 					 encoding="ISO-8859-1">
 			<exclude name="workbench/WbStarter.java"/>
+			<classpath>
+					<fileset dir="../etc/poi" includes="poi*.jar"/>
+			</classpath>
 		</javac>
 		
 	</target>
@@ -329,7 +331,7 @@
 		<jar compress="true" level="9" jarfile="${distdir}/${jarfile}">
 			<manifest>
 				<attribute name="Main-Class" value="workbench.WbStarter"/>
-				<attribute name="Class-Path" value="."/>
+				<attribute name="Class-Path" value=". poi.jar"/>
 				<attribute name="Created-By" value="Thomas Kellerer (support@sql-workbench.net)"/>
 				<attribute name="WbBuild-Number" value="${build.number}"/>
 				<attribute name="WbBuild-Date" value="${build_date}"/>
@@ -504,35 +506,48 @@
       <tarfileset dir="${distdir}/manual" prefix="manual">
         <include name="**/*.*"/>
       </tarfileset>
-      <tarfileset dir="${scriptsrc}" prefix="xslt">
-        <include name="**/*.xslt"/>
-        <exclude name="**/*test*"/>
-      </tarfileset>
+      <zipfileset dir="${scriptsrc}" prefix="xslt">
+        <include name="wbdiff2oracle.xslt"/>
+        <include name="wbdiff2pg.xslt"/>
+        <include name="wbexport2text.xslt"/>
+        <include name="wbreport2ctl.xslt"/>
+        <include name="wbreport2html.xslt"/>
+        <include name="wbreport2oracle.xslt"/>
+        <include name="wbreport2proc.xslt"/>
+        <include name="wbreport2wiki.xslt"/>
+      </zipfileset>
     </tar>
 	</target>
-	
 	
   <target name="release-package" depends="fixshellscripts">
     <zip zipfile="${distdir}/Workbench-Build${build.number}.zip">
       <zipfileset dir="${distdir}">
-        <include name="Workbench.jar"/>
+        <include name="${jarfile}"/>
         <include name="history.txt"/>
 				<include name="SQLWorkbench-Manual.pdf"/>
-        <include name="JWorkbench.exe"/>
+        <include name="SQLWorkbench.exe"/>
         <include name="DataPumper.exe"/>
         <include name="DbExplorer.exe"/>
       </zipfileset>
       <zipfileset dir="${scriptsrc}">
-        <include name="jworkbench.sh"/>
+        <include name="sqlworkbench.sh"/>
         <include name="datapumper.sh"/>
         <include name="dbexplorer.sh"/>
+        <include name="SQLWorkbench.desktop"/>
+				<include name="!! NEW FILE NAMES !!.txt"/>
       </zipfileset>
       <zipfileset dir="${distdir}/manual" prefix="manual">
         <include name="**/*.*"/>
       </zipfileset>
       <zipfileset dir="${scriptsrc}" prefix="xslt">
-        <include name="**/*.xslt"/>
-        <exclude name="**/*test*"/>
+        <include name="wbdiff2oracle.xslt"/>
+        <include name="wbdiff2pg.xslt"/>
+        <include name="wbexport2text.xslt"/>
+        <include name="wbreport2ctl.xslt"/>
+        <include name="wbreport2html.xslt"/>
+        <include name="wbreport2oracle.xslt"/>
+        <include name="wbreport2proc.xslt"/>
+        <include name="wbreport2wiki.xslt"/>
       </zipfileset>
     </zip>
   </target>
@@ -543,7 +558,6 @@
 			<zipfileset dir="${src}" prefix="src">
 				<include name="**/*.*"/>
 				<exclude name="**/workbench.settings"/>
-				<exclude name="**/test/*"/>
 				<exclude name="**/CVS/*"/>
 				<exclude name="**/.cvsignore"/>
 				<exclude name="**/.nb*"/>
@@ -564,7 +578,7 @@
 				<include name="build.number"/>
 				<include name="release.property"/>
 				<include name="history.header"/>
-				<include name="jworkbench.sh"/>
+				<include name="sqlworkbench.sh"/>
 				<include name="datapumper.sh"/>
 				<include name="dbexplorer.sh"/>
 				<include name="*.xslt"/>

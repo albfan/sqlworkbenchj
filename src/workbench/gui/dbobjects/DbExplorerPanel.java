@@ -16,8 +16,11 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -26,6 +29,7 @@ import java.util.List;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -76,7 +80,7 @@ import workbench.util.WbWorkspace;
  */
 public class DbExplorerPanel
 	extends JPanel
-	implements ActionListener, MainPanel, ChangeListener, DbExecutionListener
+	implements ActionListener, MainPanel, ChangeListener, DbExecutionListener, PropertyChangeListener
 {
 	private JTabbedPane tabPane;
 	protected TableListPanel tables;
@@ -106,6 +110,7 @@ public class DbExplorerPanel
 	private String schemaFromWorkspace;
 	private String catalogFromWorkspace;
 	private boolean switchCatalog = false;
+	private JComponent currentFocus = null;
 	
 	public DbExplorerPanel()
 	{
@@ -192,6 +197,9 @@ public class DbExplorerPanel
 			this.connectionInfo.setMinimumSize(d);
 			this.toolbar.add(this.connectionInfo);
 			if (mainWindow != null) mainWindow.addExecutionListener(this);
+			
+			KeyboardFocusManager focusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+			focusManager.addPropertyChangeListener("focusOwner", this);
 		}
 		catch (Throwable e)
 		{
@@ -199,6 +207,18 @@ public class DbExplorerPanel
 		}
 	}
 
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (!this.isVisible()) return;
+		String prop = evt.getPropertyName();
+
+		Object o = evt.getNewValue();
+		if (o instanceof JComponent && "focusOwner".equals(prop)) 
+		{
+			currentFocus = (JComponent)evt.getNewValue();
+		}		
+	}
+	
 	public void setConnectionClient(Connectable client)
 	{
 		// not used
@@ -560,6 +580,10 @@ public class DbExplorerPanel
 						retrieve();
 					}
 				});
+			}
+			if (currentFocus != null)
+			{
+				WbSwingUtilities.requestFocus(currentFocus);
 			}
 		}
 	}

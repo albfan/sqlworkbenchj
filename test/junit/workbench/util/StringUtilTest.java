@@ -28,6 +28,26 @@ public class StringUtilTest
 		super(testName);
 	}
 
+	public void testMakeFilename()
+	{
+		try
+		{
+			String fname = StringUtil.makeFilename("TABLE_NAME");
+			assertEquals("table_name", fname);
+			
+			fname = StringUtil.makeFilename("TABLE_\\NAME");
+			assertEquals("table_name", fname);
+			
+			fname = StringUtil.makeFilename("TABLE_<>NAME");
+			assertEquals("table_name", fname);
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	public void testReplace()
 	{
 		try

@@ -1130,13 +1130,13 @@ public class WbImportTest
 		try
 		{
 			File importFile  = new File(this.basedir, "multi.txt");
-			PrintWriter out = new PrintWriter(new FileWriter(importFile));
-			out.println("firstname\tlastname\tnr");
-			out.println("First\t\"Last\r\nname\"\t1");
-			out.println("first2\tlast2\t2");
-			out.println("first3\t\"last3\r\nlast3last3\"\t3");
-			out.println("first4\t\"last4\tlast4\"\t4");
-			out.close();
+			String content = "firstname\tlastname\tnr\n" + 
+				"First\t\"Last\nname\"\t1\n" + 
+				"first2\tlast2\t2\n" + 
+				"first3\t\"last3\nlast3last3\"\t3\n" + 
+				"first4\t\"last4\tlast4\"\t4\n";
+			
+			TestUtil.writeFile(importFile, content);
 			
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
@@ -1154,7 +1154,7 @@ public class WbImportTest
 				if (count == 1)
 				{
 					assertEquals("Wrong firstname imported", "First", first);
-					assertEquals("Wrong firstname imported", "Last\r\nname", last);
+					assertEquals("Wrong firstname imported", "Last\nname", last);
 				}
 				else if (count == 2)
 				{
@@ -1164,7 +1164,7 @@ public class WbImportTest
 				else if (count == 3)
 				{
 					assertEquals("Wrong firstname imported", "first3", first);
-					assertEquals("Wrong firstname imported", "last3\r\nlast3last3", last);
+					assertEquals("Wrong firstname imported", "last3\nlast3last3", last);
 				}
 				else if (count == 4)
 				{

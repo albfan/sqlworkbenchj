@@ -2422,6 +2422,8 @@ public class SqlPanel
 			this.ignoreStateChange = false;
 			this.macroExecution = false;
 
+			long totalRows = 0;
+			
 			for (int i=startIndex; i < endIndex; i++)
 			{
 				currentSql = scriptParser.getCommand(i);
@@ -2514,7 +2516,11 @@ public class SqlPanel
 				// Cancel was selected
 				if (this.cancelAll) break;
 
-				if (!statementResult.isSuccess())
+				if (statementResult.isSuccess())
+				{
+					totalRows += statementResult.getTotalUpdateCount();
+				}
+				else
 				{
 					commandWithError = i;
 
@@ -2589,8 +2595,7 @@ public class SqlPanel
 			{
 				msg = executedCount + " " + ResourceMgr.getString("MsgTotalStatementsExecuted") + "\n";
 				this.appendToLog(msg);
-				long rows = statementResult.getTotalUpdateCount();
-				msg = rows + " " + ResourceMgr.getString("MsgTotalRowsAffected") + "\n\n";
+				msg = totalRows + " " + ResourceMgr.getString("MsgTotalRowsAffected") + "\n\n";
 				this.appendToLog(msg);
 			}
 
