@@ -2445,6 +2445,8 @@ public class SqlPanel
 
 				this.stmtRunner.runStatement(currentSql, maxRows, timeout);
 				statementResult = this.stmtRunner.getResult();
+
+				if (statementResult == null) continue;
 				
 				if (statementResult.stopScript())
 				{
@@ -2464,8 +2466,6 @@ public class SqlPanel
 					continue;
 				}
 
-				if (statementResult == null) continue;
-				
 				resultSets += this.addResult(statementResult);
 				stmtTotal += statementResult.getExecutionTime();
 

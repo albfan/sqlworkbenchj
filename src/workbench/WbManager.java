@@ -583,7 +583,7 @@ public class WbManager
 		{
 			Settings s = Settings.getInstance();
 			FilterDefinitionManager.getInstance().saveMRUList();
-			if (s != null) s.saveSettings();
+			if (s != null) s.saveSettings(outOfMemoryOcurred);
 		}
 	}
 

@@ -366,6 +366,7 @@ public class SqlFormatter
 	 */
 	private boolean needsWhitespace(SQLToken last, SQLToken current, boolean ignoreStartOfline)
 	{
+		if (last == null) return false;
 		String lastV = last.getContents();
 		String currentV = current.getContents();
 		char lastChar = lastV.charAt(0);
@@ -1325,11 +1326,6 @@ public class SqlFormatter
 		return t;
 	}
 
-	private boolean isTableConstraint(String keyword)
-	{
-		return TABLE_CONSTRAINTS_KEYWORDS.contains(keyword);
-	}
-	
 	private SQLToken processTableDefinition()
 	{
 		List<StringBuilder> cols = new ArrayList<StringBuilder>();
@@ -1337,7 +1333,8 @@ public class SqlFormatter
 		StringBuilder line = new StringBuilder(50);
 		int maxColLength = 0;
 
-		boolean isColname = true;
+		boolean isColstart = true;
+		
 		int bracketCount = 0;
 		
 		SQLToken last = null;
@@ -1346,41 +1343,45 @@ public class SqlFormatter
 		{
 			String w = t.getContents();
 			
-			if (isTableConstraint(w))
+			if ("(".equals(w)) 
 			{
-				// end of column definitions reached
-				break;
+				bracketCount ++;
 			}
-			
-			if ("(".equals(w)) bracketCount ++;
-			if (")".equals(w)) bracketCount --;
+			else if (")".equals(w)) 
+			{
+				bracketCount --;
+			}
 
-			// Closing bracket reached --> end of 
+			// Closing bracket reached --> end of create table statement
 			if (bracketCount < 0)
 			{
 				cols.add(line);
 				break;
 			}
 
-			if (!isColname && last != null && needsWhitespace(last, t, true))
+			if (isColstart || 
+				  (last != null && last.isIdentifier() && "(".equals(w)) ||
+				  (needsWhitespace(last, t, true) && bracketCount == 0)
+				)
 			{
 				line.append(' ');
 			}
+
 			line.append(w);
-			
-			if (isColname && t.isIdentifier())
+
+			if (isColstart && bracketCount == 0)
 			{
 				if (w.length() > maxColLength) maxColLength = w.length();
-				isColname = false;
+				isColstart = false;
 			}
 
 			if (w.equals(",") && bracketCount == 0)
 			{
 				cols.add(line);
 				line = new StringBuilder(50);
-				isColname = true;
+				isColstart = true;
 			}
-
+			
 			last = t;
 			t = this.lexer.getNextToken(true, false);
 		}
@@ -1388,17 +1389,28 @@ public class SqlFormatter
 		// Now process the collected column definitions
 		for (StringBuilder col : cols)
 		{
-			int pos = StringUtil.findFirstWhiteSpace(col);
-			String colname = col.substring(0, pos).trim();
-			String def = col.substring(pos + 1).trim();
+			SQLLexer lex = new SQLLexer(col.toString());
+			SQLToken column = lex.getNextToken(false, false);
+			String colname = column.getContents();
+
+			int len = colname.length();
+			String def = col.substring(column.getCharEnd()).trim();
+			
 			appendText("  ");
 			appendText(colname);
-			while (pos < maxColLength)
+			if (column.isReservedWord())
 			{
-				this.appendText(' ');
-				pos ++;
+				appendText(" ");
 			}
-			this.appendText("   ");
+			else
+			{
+				while (len < maxColLength)
+				{
+					this.appendText(' ');
+					len ++;
+				}
+				this.appendText("   ");
+			}
 			appendText(def);
 			appendNewline();
 		}

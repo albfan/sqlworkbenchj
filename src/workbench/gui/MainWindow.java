@@ -53,7 +53,6 @@ import workbench.db.WbConnection;
 import workbench.gui.actions.AboutAction;
 import workbench.gui.actions.ConfigureShortcutsAction;
 import workbench.gui.actions.ShowManualAction;
-import workbench.gui.actions.WbAction;
 import workbench.gui.components.RunningJobIndicator;
 import workbench.interfaces.Moveable;
 import workbench.util.ExceptionUtil;
@@ -111,6 +110,7 @@ import workbench.gui.actions.WhatsNewAction;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.interfaces.ToolWindow;
 import workbench.util.NumberStringCache;
+import workbench.util.WbFile;
 
 /**
  * The main window for the Workbench.
@@ -2211,8 +2211,8 @@ public class MainWindow
 		// if saving of the workspace fails, the backup
 		// will be renamed back to the original name
 		// otherwise it will be deleted if no backups should be made
-		File f = new File(realFilename);
-		File bck = new File(realFilename + ".bck");
+		WbFile f = new WbFile(realFilename);
+		WbFile bck = new WbFile(realFilename + ".bck");
 		try
 		{
 			bck.delete();
@@ -2249,7 +2249,7 @@ public class MainWindow
 				// sometimes when an OoM occurred, saving of the workspace
 				// succeeds but the ZIP file is not written correctly. 
 				// This tries to prevent the old file from beeing overwritten, just in case...
-				bck.renameTo(new File(realFilename + ".saved"));
+				f.makeBackup();
 			}
 			else if (!Settings.getInstance().getCreateWorkspaceBackup())
 			{

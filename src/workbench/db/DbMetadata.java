@@ -24,13 +24,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.TreeSet;
@@ -684,7 +681,7 @@ public class DbMetadata
 			target.add(keyword.toUpperCase().trim());
 		}
 	}
-
+	
 	/**
 	 * Returns the type of the passed TableIdentifier. This could 
 	 * be VIEW, TABLE, SYNONYM, ...
@@ -702,7 +699,7 @@ public class DbMetadata
 		{
 			TableIdentifier tbl = table.createCopy();
 			tbl.adjustCase(this.dbConnection);
-			DataStore ds = getTables(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), null);
+			DataStore ds = getTables(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName(), null);
 			if (ds.getRowCount() > 0)
 			{
 				type = ds.getValueAsString(0, COLUMN_IDX_TABLE_LIST_TYPE);
@@ -1208,17 +1205,6 @@ public class DbMetadata
 	 */
 	public final static int COLUMN_IDX_TABLE_LIST_REMARKS = 4;
 
-	public String getTableType(TableIdentifier table)
-		throws SQLException
-	{
-		TableIdentifier tbl = table.createCopy();
-		tbl.adjustCase(this.dbConnection);
-		DataStore ds = getTables(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), null);
-		if (ds == null) return this.tableTypeName;
-		if (ds.getRowCount() != 1) return null;
-		return ds.getValueAsString(0, COLUMN_IDX_TABLE_LIST_TYPE);
-	}
-	
 	public DataStore getTables()
 		throws SQLException
 	{
@@ -1412,6 +1398,7 @@ public class DbMetadata
 		int l = types.length;
 		for (int i=0; i < l; i++)
 		{
+			if (types[i] == null) continue;
 			if (types[i].equals("*")) return true;
 			if (type.equalsIgnoreCase(types[i])) return true;
 		}
@@ -1436,7 +1423,17 @@ public class DbMetadata
 		return objectExists(aTable, types);
 	}
 	
+	public TableIdentifier findSelectableObject(TableIdentifier tbl)
+	{
+		return findTable(tbl, tableTypesSelectable);
+	}
+	
 	public TableIdentifier findTable(TableIdentifier tbl)
+	{
+		return findTable(tbl, tableTypesTable);
+	}
+	
+	private TableIdentifier findTable(TableIdentifier tbl, String[] types)
 	{
 		if (tbl == null) return null;
 		
@@ -1446,7 +1443,7 @@ public class DbMetadata
 		table.adjustCase(dbConnection);
 		try
 		{
-			rs = this.metaData.getTables(table.getRawCatalog(), table.getRawSchema(), table.getRawTableName(), tableTypesTable);
+			rs = this.metaData.getTables(table.getRawCatalog(), table.getRawSchema(), table.getRawTableName(), types);
 			if (rs.next())
 			{
 				result = new TableIdentifier(rs.getString(1), rs.getString(2), rs.getString(3));
@@ -1837,6 +1834,7 @@ public class DbMetadata
 		throws SQLException
 	{
 		DataStore ds = this.getTableDefinition(table);
+		if (ds == null) return Collections.emptyList();
 		return createColumnIdentifiers(ds);
 	}
 	
@@ -2901,7 +2899,7 @@ public class DbMetadata
 			
 			if (getOwnFk)
 			{
-				rs = this.metaData.getImportedKeys(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
+				rs = this.metaData.getImportedKeys(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
 				tableCol = 3;
 				schemaCol = 2;
 				fkNameCol = 12;
@@ -2910,7 +2908,7 @@ public class DbMetadata
 			}
 			else
 			{
-				rs = this.metaData.getExportedKeys(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
+				rs = this.metaData.getExportedKeys(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
 				tableCol = 7;
 				schemaCol = 6;
 				fkNameCol = 12;
@@ -3067,7 +3065,7 @@ public class DbMetadata
 			id = this.synonymReader.getSynonymTable(this.dbConnection.getSqlConnection(), schema, synonym);
 			if (id != null && id.getType() == null)
 			{
-				String type = getTableType(id);
+				String type = getObjectType(id);
 				id.setType(type);
 			}
 		}
@@ -3802,7 +3800,7 @@ public class DbMetadata
 		{
 			TableIdentifier tbl = table.createCopy();
 			tbl.adjustCase(this.dbConnection);
-			rs = this.metaData.getTablePrivileges(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
+			rs = this.metaData.getTablePrivileges(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
 			while (rs.next())
 			{
 				String from = rs.getString(4);

@@ -247,7 +247,7 @@ public class SqlUtilTest
 		
 		sql = "/* \n" + 
 					 "* $URL: some_script.sql $ \n" + 
-					 "* $Revision: 1.5 $ \n" + 
+					 "* $Revision: 1.6 $ \n" + 
 					 "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
 					 "*/ \n" + 
 					 "-- A quis Lorem consequat Aenean tellus risus convallis velit Maecenas arcu. \n" + 
@@ -275,19 +275,19 @@ public class SqlUtilTest
 	public void testGetTables()
 	{
 		String sql = "select *\nfrom\n-- list the tables here\ntable1 t1, table2 t2, table3 t3";
-		List l = SqlUtil.getTables(sql, false);
+		List<String> l = SqlUtil.getTables(sql, false);
 		assertEquals(3, l.size());
 		
-		assertEquals("table1", (String)l.get(0));
-		assertEquals("table2", (String)l.get(1));
-		assertEquals("table3", (String)l.get(2));
+		assertEquals("table1",l.get(0));
+		assertEquals("table2",l.get(1));
+		assertEquals("table3",l.get(2));
 		
 		l = SqlUtil.getTables(sql, true);
 		assertEquals(3, l.size());
 		
-		assertEquals("table1 t1", (String)l.get(0));
-		assertEquals("table2 t2", (String)l.get(1));
-		assertEquals("table3 t3", (String)l.get(2));		
+		assertEquals("table1 t1", l.get(0));
+		assertEquals("table2 t2", l.get(1));
+		assertEquals("table3 t3", l.get(2));		
 		
 		sql = "SELECT cr.dealid, \n" + 
 					 "       cs.state, \n" + 
@@ -302,19 +302,19 @@ public class SqlUtilTest
 		
 		l = SqlUtil.getTables(sql, true);
 		assertEquals(5, l.size());
-		assertEquals("dbo.tblcreditrow cr", (String)l.get(0));
-		assertEquals("bdb_ie.dbo.tblbdbproduct p", (String)l.get(1));
-		assertEquals("tblbidquantity bq", (String)l.get(2));
-		assertEquals("tblcredit c", (String)l.get(3));
-		assertEquals("tblcreditstate cs", (String)l.get(4));
+		assertEquals("dbo.tblcreditrow cr", l.get(0));
+		assertEquals("bdb_ie.dbo.tblbdbproduct p", l.get(1));
+		assertEquals("tblbidquantity bq", l.get(2));
+		assertEquals("tblcredit c", l.get(3));
+		assertEquals("tblcreditstate cs", l.get(4));
 		
 		l = SqlUtil.getTables(sql, false);
 		assertEquals(5, l.size());
-		assertEquals("dbo.tblcreditrow", (String)l.get(0));
-		assertEquals("bdb_ie.dbo.tblbdbproduct", (String)l.get(1));
-		assertEquals("tblbidquantity", (String)l.get(2));
-		assertEquals("tblcredit", (String)l.get(3));
-		assertEquals("tblcreditstate", (String)l.get(4));
+		assertEquals("dbo.tblcreditrow", l.get(0));
+		assertEquals("bdb_ie.dbo.tblbdbproduct", l.get(1));
+		assertEquals("tblbidquantity", l.get(2));
+		assertEquals("tblcredit", l.get(3));
+		assertEquals("tblcreditstate", l.get(4));
 		
 		sql = "SELECT c.cntry_name as country,  \n" + 
              "case  \n" + 
@@ -425,6 +425,17 @@ public class SqlUtilTest
 		assertEquals(2, l.size());
 		assertEquals("table1 AS t1", l.get(0));
 		assertEquals("table2", l.get(1));
+		
+		sql = "select r.id, r.name + ', ' + r.first_name, ara.* \n" +
+             "from project_resource pr left join assigned_resource_activity ara ON (pr.resource_id = ara.id) \n" +
+             "                         join resource r on (pr.resource_id = r.id) \n" +
+             "where pr.project_id = 42 \n" +
+             "and ara.id is null";		
+		l = SqlUtil.getTables(sql, true);
+		assertEquals(3, l.size());
+		assertEquals("project_resource pr", l.get(0));
+		assertEquals("assigned_resource_activity ara", l.get(1));
+		assertEquals("resource r", l.get(2));
 	}
 	
 	public static void testDataTypeNames()

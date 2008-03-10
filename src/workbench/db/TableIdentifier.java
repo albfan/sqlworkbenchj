@@ -127,10 +127,10 @@ public class TableIdentifier
 		this.catalogWasQuoted = !meta.isDefaultCase(this.catalog);
 		this.tableWasQuoted = !meta.isDefaultCase(this.tablename);
 		this.preserveQuotes = (this.schemaWasQuoted || this.catalogWasQuoted || this.tableWasQuoted );
-		if (!preserveQuotes)
-		{
-			this.setNeverAdjustCase(false);
-		}
+//		if (!preserveQuotes)
+//		{
+//			this.setNeverAdjustCase(false);
+//		}
 	}
 	
 	public TableIdentifier createCopy()

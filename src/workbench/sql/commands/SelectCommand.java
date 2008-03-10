@@ -45,12 +45,12 @@ public class SelectCommand extends SqlCommand
 	/**
 	 * Runs the passed SQL statement using Statement.executeQuery()
 	 */
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
 		this.isCancelled = false;
 
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		StatementRunnerResult result = new StatementRunnerResult(sql);
 		result.setWarning(false);
 
 		try
@@ -59,9 +59,9 @@ public class SelectCommand extends SqlCommand
 
 			this.runner.setSavepoint();
 			if (Settings.getInstance().getCheckPreparedStatements()
-				  && currentConnection.getPreparedStatementPool().isRegistered(aSql))
+				  && currentConnection.getPreparedStatementPool().isRegistered(sql))
 			{
-				this.currentStatement = currentConnection.getPreparedStatementPool().prepareStatement(aSql);
+				this.currentStatement = currentConnection.getPreparedStatementPool().prepareStatement(sql);
 				if (this.currentStatement != null)
 				{
 					isPrepared = true;
@@ -101,7 +101,7 @@ public class SelectCommand extends SqlCommand
 			}
 			else
 			{
-				rs = this.currentStatement.executeQuery(aSql);
+				rs = this.currentStatement.executeQuery(sql);
 			}
 
 			if (rs != null)
@@ -132,10 +132,11 @@ public class SelectCommand extends SqlCommand
 		catch (Exception e)
 		{
 			result.clear();
-			result.addMessage(ResourceMgr.getString("MsgExecuteError") + " " + StringUtil.getMaxSubstring(aSql, 80));
+			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
+			result.addMessage(StringUtil.getMaxSubstring(sql, 120));
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
 			appendWarnings(result);
-			LogMgr.logSqlError("SelectCommand.execute()", aSql, e);
+			LogMgr.logSqlError("SelectCommand.execute()", sql, e);
 			result.setFailure();
 			this.runner.rollbackSavepoint();
 		}

@@ -17,6 +17,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JMenuItem;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import workbench.db.TableIdentifier;
 import workbench.gui.MainWindow;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
@@ -37,6 +38,7 @@ public class EditorTabSelectMenu
 	private String regularTooltip;
 	private String newTabTooltip;
 	public static final String PANEL_CMD_PREFIX = "panel_";
+	private TableIdentifier table;
 	
 	public EditorTabSelectMenu(ActionListener l, String label, String tooltipKeyNewTab, String tooltipKeyTab, MainWindow parent)
 	{
@@ -51,6 +53,16 @@ public class EditorTabSelectMenu
 			parentWindow.addFilenameChangeListener(this);
 			parentWindow.addIndexChangeListener(this);
 		}
+	}
+	
+	public void setTable(TableIdentifier tbl)
+	{
+		this.table = tbl;
+	}
+	
+	public TableIdentifier getTable()
+	{
+		return table;
 	}
 	
 	protected synchronized void updateMenu()

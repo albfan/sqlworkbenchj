@@ -11,6 +11,7 @@
  */
 package workbench.sql.formatter;
 
+import java.util.List;
 import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.resource.Settings;
@@ -34,6 +35,45 @@ public class SqlFormatterTest
 		util.prepareEnvironment();
 	}
 
+	
+	public void testCreateTable()
+	{
+		try
+		{
+			String sql = null;
+			SqlFormatter f = null;
+			String formatted = null;
+			List<String> lines = null;
+			
+			sql = "create table person (id1 integer not null, id2 integer not null, id3 integer not null, firstname varchar(50), lastname varchar(50), primary key (id1, id2), foreign key (id3) references othertable(id));";
+			f = new SqlFormatter(sql, 100);
+			formatted = f.getFormattedSql().toString();
+			lines = TestUtil.getLines(formatted);
+			assertEquals("  id1           INTEGER NOT NULL,", lines.get(2));
+			assertEquals("  PRIMARY KEY (id1,id2),", lines.get(7));
+			assertEquals("  FOREIGN KEY (id3) REFERENCES othertable (id)", lines.get(8));
+			
+			sql = "create table person (somecol integer primary key, firstname varchar(50), lastname varchar(50));";
+			f = new SqlFormatter(sql, 100);
+			formatted = f.getFormattedSql().toString();
+			lines = TestUtil.getLines(formatted);
+			assertEquals("  somecol     INTEGER PRIMARY KEY,", lines.get(2));
+			
+			sql = "create table person (id1 integer not null, id2 integer not null, firstname varchar(50), lastname varchar(50), primary key (id1, id2));";
+			f = new SqlFormatter(sql, 100);
+			formatted = f.getFormattedSql().toString();
+			lines = TestUtil.getLines(formatted);
+			assertEquals("  id1           INTEGER NOT NULL,", lines.get(2));
+			assertEquals("  PRIMARY KEY (id1,id2)", lines.get(6));
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testFileParam()
 	{
 		try

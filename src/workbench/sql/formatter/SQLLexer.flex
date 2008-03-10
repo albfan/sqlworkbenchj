@@ -115,7 +115,6 @@ import workbench.util.CharSequenceReader;
     {
 			this(new CharSequenceReader(source));
     }
-
 %}
 
 %line
@@ -418,7 +417,6 @@ keyword=("ABORT"|
 "MOVE"|
 "NAMES"|
 "NATIONAL"|
-"NATURAL"|
 "NCHAR"|
 "NCLOB"|
 "NEW"|
@@ -662,7 +660,8 @@ INNER[ \t\r\n]+JOIN|
 LEFT[ \t\r\n]+JOIN|
 LEFT[ \t\r\n]+OUTER[ \t\r\n]+JOIN|
 RIGHT[ \t\r\n]+JOIN|
-RIGHT[ \t\r\n]+OUTER[ \t\r\n]+JOIN
+RIGHT[ \t\r\n]+OUTER[ \t\r\n]+JOIN|
+"NATURAL[ \t\r\n]+JOIN"
 )
 
 whitespace=([ \r\n\t\f])

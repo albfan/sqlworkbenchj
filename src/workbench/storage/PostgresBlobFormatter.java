@@ -47,12 +47,12 @@ public class PostgresBlobFormatter
 				result.append('\\');
 				int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
 				String s = Integer.toOctalString(c);
-				if (s.length() == 1) 
+				int l = s.length();
+				if (l == 1) 
 				{
-					result.append('0');
-					result.append('0');
+					result.append("00");
 				}
-				else if (s.length() == 2)
+				else if (l == 2)
 				{
 					result.append('0');
 				}

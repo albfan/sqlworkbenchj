@@ -27,6 +27,19 @@ public class SQLLexerTest extends TestCase
 		super(testName);
 	}
 	
+//	public void testPeek()
+//	{
+//		String sql = "select * from test where x = 5";
+//		SQLLexer l = new SQLLexer(sql);
+//		SQLToken select = l.getNextToken(false, false);
+//		SQLToken next = l.peek(false, false);
+//		assertEquals("*", next.getContents());
+//		SQLToken t = l.getNextToken(true, true);
+//		assertTrue(t.isWhiteSpace());
+//		t = t = l.getNextToken(true, true);
+//		assertEquals("*", t.getContents());
+//	}
+	
 	private List getTokenList(String sql)
 	{
 		ArrayList result = new ArrayList();

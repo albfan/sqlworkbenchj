@@ -1776,6 +1776,7 @@ public class TableListPanel
 		for (int i=0; i < count; i++)
 		{
 			TableIdentifier table = createTableIdentifier(rows[i]);
+			table.checkQuotesNeeded(dbConnection);
 			if (table.getType().equalsIgnoreCase("SEQUENCE"))
 			{
 				result.add(new SequenceDefinition(table.getSchema(), table.getTableName()));

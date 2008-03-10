@@ -15,7 +15,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
@@ -161,27 +160,23 @@ public class DbObjectCache
 			this.getTables(schema);
 		}
 		
-		List<ColumnIdentifier> cols = this.objects.get(tbl);
+		TableIdentifier toSearch = tbl.createCopy();
+		toSearch.adjustCase(dbConnection);
 		
-		TableIdentifier t2 = null;
+		List<ColumnIdentifier> cols = this.objects.get(toSearch);
 		
-		// if we didn't find an entry with the schema in the table, try
-		// to find a table with that name but without the schema
-		// (this is to support oracle public synonyms/objects)
-		if (tbl.getSchema() != null && cols == null)
+		// To support Oracle public synonyms, try to find a table with that name 
+		// but without a schema
+		if (retrieveOraclePublicSynonyms && toSearch.getSchema() != null && cols == null)
 		{
-			if (!this.objects.containsKey(tbl))
+			toSearch.setSchema(null);
+			toSearch.setType(null);
+			cols = this.objects.get(toSearch);
+			if (cols == null)
 			{
-				t2 = tbl.createCopy();
-				t2.setSchema(null);
-				t2.setType(null);
-				cols = this.objects.get(t2);
-				if (cols == null && retrieveOraclePublicSynonyms)
-				{
-					// retrieve Oracle PUBLIC synonyms
-					this.getTables("PUBLIC");
-					cols = this.objects.get(t2);
-				}
+				// retrieve Oracle PUBLIC synonyms
+				this.getTables("PUBLIC");
+				cols = this.objects.get(toSearch);
 			}
 		}
 		
@@ -194,17 +189,17 @@ public class DbObjectCache
 			// so we'll get a containsKey() == true even if the type is different
 			// (which is necessary because the TableIdentifier passed to this 
 			// method will never contain a type!)
-			if (objects.containsKey(tbl))
+			if (objects.containsKey(toSearch))
 			{
-				tblToUse = findKey(tbl);
-			}
-			else if (t2 != null && objects.containsKey(t2))
-			{
-				tblToUse = findKey(t2);
+				// we have already retrieved the list of tables, but not the columns for this table
+				// the stored key contains precise type and schema information, so we need
+				// to use that
+				tblToUse = findKey(toSearch);
 			}
 			else
 			{
-				tblToUse = this.dbConnection.getMetadata().findTable(tbl);
+				// retrieve the real table identifier based on the table name
+				tblToUse = this.dbConnection.getMetadata().findSelectableObject(toSearch);
 			}
 			
 			try
@@ -232,10 +227,8 @@ public class DbObjectCache
 	private TableIdentifier findKey(TableIdentifier key)
 	{
 		if (key == null) return null;
-		Iterator itr = this.objects.keySet().iterator();
-		while (itr.hasNext())
+		for (TableIdentifier tbl : objects.keySet())
 		{
-			TableIdentifier tbl = (TableIdentifier)itr.next();
 			if (key.equals(tbl)) return tbl;
 		}
 		return null;

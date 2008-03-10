@@ -2701,10 +2701,16 @@ public class Settings
 	}
 	// </editor-fold>
 
-	public void saveSettings()
+	public void saveSettings(boolean makeBackup)
 	{
 		if (this.props == null) return;
 		if (keyManager!= null) this.keyManager.saveSettings();
+		
+		if (makeBackup)
+		{
+			this.configfile.makeBackup();
+		}
+		
 		try
 		{
 			this.props.saveToFile(this.configfile);

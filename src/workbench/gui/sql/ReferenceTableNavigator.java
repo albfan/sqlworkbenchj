@@ -15,7 +15,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.EventObject;
 import java.util.LinkedList;
@@ -25,12 +24,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
-import javax.swing.event.MenuListener;
 import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 import javax.swing.event.PopupMenuListener;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DependencyNode;
@@ -285,7 +281,6 @@ public class ReferenceTableNavigator
 			{
 				for (DependencyNode node : tables)
 				{
-					JMenuItem item = null;
 					Collection<String> cols = node.getColumns().keySet();
 					StringBuilder display = new StringBuilder(cols.size() * 10);
 					display.append(node.getTable().getTableExpression(con));
@@ -298,7 +293,8 @@ public class ReferenceTableNavigator
 						index++;
 					}
 					display.append(')');
-					item = new EditorTabSelectMenu(this, display.toString(), "LblShowDataInNewTab", "MsgRelatedTabHint", container);
+					EditorTabSelectMenu item = new EditorTabSelectMenu(this, display.toString(), "LblShowDataInNewTab", "MsgRelatedTabHint", container);
+					item.setTable(node.getTable());
 					item.setVisible(true);
 					boolean hasColumns = hasColumns(node);
 					item.setEnabled(hasColumns);
@@ -410,9 +406,25 @@ public class ReferenceTableNavigator
 		}
 		
 		WbConnection con = getConnection();
-		TableIdentifier tbl = new TableIdentifier(item.getText());
+		TableIdentifier tbl = null;
+		if (item instanceof EditorTabSelectMenu)
+		{
+			tbl = ((EditorTabSelectMenu)item).getTable();
+		}
+		else
+		{
+			String t = item.getText();
+			int pos = t.indexOf(" (");
+			if (pos > -1)
+			{
+				tbl = new TableIdentifier(t.substring(0, pos));
+			}
+			else
+			{
+				tbl = new TableIdentifier(t);
+			}
+		}
 		
-		ReferenceTableNavigation navi = null;
 		String sql = null;
 		String error = null;
 		List<List<ColumnData>> rowData = null;

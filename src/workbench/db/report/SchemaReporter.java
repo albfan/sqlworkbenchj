@@ -25,7 +25,6 @@ import javax.swing.JDialog;
 
 import javax.swing.JFrame;
 import workbench.db.DbMetadata;
-import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DbSettings;
 
@@ -156,15 +155,14 @@ public class SchemaReporter
 	{ 
 		if (flag)
 		{
-			types = new String[3];
-			types[0] = this.dbConn.getMetadata().getTableTypeName();
-			types[1] = this.dbConn.getMetadata().getViewTypeName();
-			types[2] = DbMetadata.MVIEW_NAME;
+			types = new String[] { 
+				this.dbConn.getMetadata().getTableTypeName(), 
+				this.dbConn.getMetadata().getViewTypeName(),
+				DbMetadata.MVIEW_NAME};
 		}
 		else
 		{
-			types = new String[3];
-			types[0] = this.dbConn.getMetadata().getTableTypeName();
+			types = new String[] { this.dbConn.getMetadata().getTableTypeName() };
 		}
 	}
 	

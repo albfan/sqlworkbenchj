@@ -14,6 +14,7 @@ package workbench.util;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 
 /**
  * @author support@sql-workbench.net
@@ -40,6 +41,17 @@ public class WbFile
 	public WbFile(String filename)
 	{
 		super(filename);
+	}
+	
+	/**
+	 * Renames this file by adding the current timestamp to the filename.
+	 */
+	public void makeBackup()
+	{
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+		String newname = this.getName() + "." + sdf.format(new java.util.Date());
+		WbFile newfile = new WbFile(this.getParent(), newname);
+		this.renameTo(newfile);
 	}
 	
 	/**

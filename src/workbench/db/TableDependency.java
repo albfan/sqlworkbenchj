@@ -44,10 +44,11 @@ public class TableDependency
 
 	public DependencyNode findLeafNodeForTable(TableIdentifier table)
 	{
-		String findExpr = table.getTableExpression(connection);
+		String findExpr = table.getRawTableName();//table.getTableExpression(connection);
 		for (DependencyNode node : leafs)
 		{
-			String expr = node.getTable().getTableExpression(connection);
+			TableIdentifier nodeTable = node.getTable();
+			String expr = nodeTable.getRawTableName();//getTableExpression(connection);
 			if (expr.equalsIgnoreCase(findExpr)) return node;
 		}
 		return null;

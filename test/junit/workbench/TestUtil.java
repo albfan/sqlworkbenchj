@@ -19,6 +19,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -232,7 +233,19 @@ public class TestUtil
 
 	public String getBaseDir() { return this.basedir; }
 
+	public static List<String> getLines(String s)
+		throws IOException
+	{
+		return readLines(new StringReader(s));
+	}
+	
 	public static List<String> readLines(File f)
+		throws IOException
+	{
+		return readLines(new FileReader(f));
+	}
+	
+	public static List<String> readLines(Reader source)
 		throws IOException
 	{
 		ArrayList<String> result = new ArrayList<String>();
@@ -240,7 +253,7 @@ public class TestUtil
 		int lines = 0;
 		try
 		{
-			in = new BufferedReader(new FileReader(f));
+			in = new BufferedReader(source);
 			String s = in.readLine();
 			while (s != null)
 			{

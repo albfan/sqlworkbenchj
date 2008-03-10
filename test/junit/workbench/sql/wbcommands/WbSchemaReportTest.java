@@ -39,6 +39,46 @@ public class WbSchemaReportTest
 		super(testName);
 	}
 
+	public void testExcludeViews()
+		throws Exception
+	{
+		try
+		{
+			setupDatabase();
+			WbSchemaReport report = new WbSchemaReport();
+			report.setConnection(source);
+			
+			File output = new File(util.getBaseDir(), "report.xml");
+			output.delete();
+			StatementRunnerResult result = report.execute("WbReport -file='" + output.getAbsolutePath() + "' -includeSequences=false -includeTableGrants=false -includeViews=false");
+			assertTrue(result.isSuccess());
+			assertTrue("File not created", output.exists());
+			
+			InputStreamReader r = new InputStreamReader(new FileInputStream(output), "UTF-8");
+			String xml = FileUtil.readCharacters(r);
+			r.close();
+			
+			String count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
+			assertEquals("Incorrect table count", "3", count);
+			
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def[@name='V_PERSON'])");
+			assertEquals("Incorrect view count", "0", count);
+
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/sequence-def)");
+			assertEquals("Incorrect sequence count", "0", count);
+			
+			if (!output.delete())
+			{
+				fail("could not delete output file");
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testExecute()
 		throws Exception
 	{
@@ -67,12 +107,15 @@ public class WbSchemaReportTest
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/sequence-def)");
 			assertEquals("Incorrect sequence count", "3", count);
 			
-			String value = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON']/grant/privilege");
+			String value = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='Person']/grant/privilege");
 			assertEquals("Wrong privilege", "SELECT", value);
 			 
-			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='ADDRESS']/grant)");
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='Address']/grant)");
 			assertEquals("Incorrect grant count", "4", count);
 
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON_ADDRESS']/column-def/references)");
+			assertEquals("Incorrect references count", "2", count);
+			
 			if (!output.delete())
 			{
 				fail("could not delete output file");
@@ -96,20 +139,20 @@ public class WbSchemaReportTest
 		try
 		{
 			stmt = source.createStatement();
-			stmt.executeUpdate("create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100))");
-			stmt.executeUpdate("create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50))");
+			stmt.executeUpdate("create table \"Person\" (person_id integer primary key, firstname varchar(100), lastname varchar(100))");
+			stmt.executeUpdate("create table \"Address\" (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50))");
 			stmt.executeUpdate("create table person_address (person_id integer, address_id integer, primary key (person_id, address_id))");
-			stmt.executeUpdate("alter table person_address add constraint fk_pa_person foreign key (person_id) references person(person_id)");
-      stmt.executeUpdate("alter table person_address add constraint fk_pa_address foreign key (address_id) references address(address_id)");
+			stmt.executeUpdate("alter table person_address add constraint fk_pa_person foreign key (person_id) references \"Person\"(person_id)");
+      stmt.executeUpdate("alter table person_address add constraint fk_pa_address foreign key (address_id) references \"Address\"(address_id)");
 
-			stmt.executeUpdate("CREATE VIEW v_person AS SELECT * FROM person");
+			stmt.executeUpdate("CREATE VIEW v_person AS SELECT * FROM \"Person\"");
 			stmt.executeUpdate("CREATE sequence seq_one");
 			stmt.executeUpdate("CREATE sequence seq_two  increment by 5");
 			stmt.executeUpdate("CREATE sequence seq_three");
 			
 			stmt.executeUpdate("create user arthur password '42'");
-			stmt.executeUpdate("GRANT SELECT ON person TO arthur");
-			stmt.executeUpdate("GRANT SELECT,INSERT,UPDATE,DELETE ON address TO arthur");
+			stmt.executeUpdate("GRANT SELECT ON \"Person\" TO arthur");
+			stmt.executeUpdate("GRANT SELECT,INSERT,UPDATE,DELETE ON \"Address\" TO arthur");
 		}
 		finally
 		{
