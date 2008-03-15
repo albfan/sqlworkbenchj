@@ -246,8 +246,6 @@ public class DbExplorerPanel
 		this.selectConnectionButton.addActionListener(this);
 		this.selectorPanel.add(Box.createHorizontalStrut(15));
 		this.selectorPanel.add(this.selectConnectionButton);
-		
-		
 	}
 
 	private final Object busyLock = new Object();

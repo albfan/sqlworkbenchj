@@ -113,10 +113,12 @@ public class TableCreator
 		int type = col.getDataType();
 		int size = col.getColumnSize();
 		int digits = col.getDecimalDigits();
-		String def = col.getDefaultValue();
+		String name = col.getColumnName();
 
 		StringBuilder result = new StringBuilder(30);
-		result.append(col.getColumnName());
+		boolean isKeyword = connection.getMetadata().isKeyword(name);
+		name = SqlUtil.quoteObjectname(name, isKeyword);
+		result.append(name);
 		result.append(' ');
 
 		String typeName = null;

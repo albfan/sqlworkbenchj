@@ -69,7 +69,10 @@ public class ParameterDefinition
 		return this.valueValid;
 	}
 	
-	public Object getValue() { return this.value; }
+	public Object getValue() 
+	{ 
+		return this.value; 
+	}
 	
 	public void setStatementValue(PreparedStatement stmt)
 		throws IllegalStateException, SQLException

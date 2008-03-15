@@ -94,6 +94,15 @@ public class ConnectionProfile
 		this.reset();
 	}
 
+	public static ConnectionProfile createEmptyProfile()
+	{
+		ConnectionProfile cp = new ConnectionProfile();
+		cp.setUseSeparateConnectionPerTab(true);
+		cp.setStoreExplorerSchema(true);
+		cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
+		return cp;
+	}
+	
 	public Color getInfoDisplayColor()
 	{
 		return this.infoColor;

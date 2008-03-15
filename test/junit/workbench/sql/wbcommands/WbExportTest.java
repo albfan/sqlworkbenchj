@@ -30,10 +30,10 @@ import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
-import workbench.util.FileUtil;
 import workbench.util.LobFileParameter;
 import workbench.util.LobFileStatement;
 import workbench.util.SqlUtil;
+import workbench.util.WbFile;
 import workbench.util.ZipUtil;
 
 /**
@@ -58,7 +58,6 @@ public class WbExportTest
 			util = new TestUtil(testName);
 			util.prepareEnvironment();
 			this.basedir = util.getBaseDir();
-			
 		}
 		catch (Exception e)
 		{
@@ -101,6 +100,37 @@ public class WbExportTest
 			fail(e.getMessage());
 		}
 	}
+	
+	public void testCreateDir()
+	{
+		try
+		{
+			String outputDir = util.getBaseDir() + "/nonexisting";
+			File exportDir = new WbFile(outputDir);
+			exportDir.delete();
+			StatementRunnerResult result = exportCmd.execute("wbexport -outputDir='" + exportDir.getAbsolutePath() + "' -type=text -sourceTable=*");
+			String msg = result.getMessageBuffer().toString();
+			assertTrue(msg.indexOf("not found!") > -1);
+			assertFalse("Export did not fail", result.isSuccess());
+			assertFalse("Export directory created", exportDir.exists());
+			
+			result = exportCmd.execute("wbexport -outputDir='" + exportDir.getAbsolutePath() + "' -type=text -createDir=true -sourceTable=*");
+			assertTrue("Export failed", result.isSuccess());
+			assertTrue("Export directory not created", exportDir.exists());
+			WbFile f = new WbFile(exportDir, "junit_test.txt");
+			assertTrue(f.exists());
+			f = new WbFile(exportDir, "person.txt");
+			assertTrue(f.exists());
+			f = new WbFile(exportDir, "blob_test.txt");
+			assertTrue(f.exists());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testQuoteEscaping()
 	{
 		try

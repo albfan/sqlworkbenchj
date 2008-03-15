@@ -1008,7 +1008,7 @@ public class DbMetadata
 
 		if (this.dbSettings.neverQuoteObjects()) return StringUtil.trimQuotes(aName);
 
-			boolean needQuote = quoteAlways;
+		boolean needQuote = quoteAlways;
 		
 		// Excel does not support the standard rules for SQL identifiers
 		// Basically anything that does not contain only characters needs to 
@@ -1022,7 +1022,6 @@ public class DbMetadata
 		
 		try
 		{
-
 			if (!needQuote && !this.storesMixedCaseIdentifiers())
 			{
 				if (this.storesUpperCaseIdentifiers() && !StringUtil.isUpperCase(aName))
@@ -2422,7 +2421,8 @@ public class DbMetadata
 			try 
 			{
 				stmt = this.dbConnection.createStatement();
-				stmt.execute("USE " + newCatalog);
+				String cat = quoteObjectname(newCatalog);
+				stmt.execute("USE " + cat);
 				if (clearWarnings) stmt.clearWarnings();
 			}
 			finally

@@ -538,19 +538,24 @@ public class BatchRunner
 
 	private void printResults(String sql, StatementRunnerResult result)
 	{
+		if (!this.showResultSets) return;
 		if (console == null) return;
 		if (result == null) return;
-		if (!this.showResultSets) return;
 		if (!result.isSuccess()) return;
+		if (!result.hasDataStores()) return;
 
+		List<DataStore> data = result.getDataStores();
+		
 		console.println();
 		console.println(sql);
 		console.println("---------------- " + ResourceMgr.getString("MsgResultLogStart") + " ----------------------------");
-		List<DataStore> data = result.getDataStores();
 		for (DataStore ds : data)
 		{
-			DataPrinter printer = new DataPrinter(ds);
-			printer.printTo(console);
+			if (ds != null)
+			{
+				DataPrinter printer = new DataPrinter(ds);
+				printer.printTo(console);
+			}
 		}
 		console.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + "   ----------------------------");
 	}
@@ -634,16 +639,25 @@ public class BatchRunner
 			DelimiterDefinition delim = DelimiterDefinition.parseCmdLineArgument(delimDef);
 			boolean trimCharData = cmdLine.getBoolean(AppArguments.ARG_CONN_TRIM_CHAR, false);
 			boolean rollback = cmdLine.getBoolean(AppArguments.ARG_CONN_ROLLBACK, false);
+			boolean separate = cmdLine.getBoolean(AppArguments.ARG_CONN_SEPARATE, true);
 
 			if (jar != null)
 			{
 				ConnectionMgr.getInstance().registerDriver(driverclass, jar);
 			}
 
-			result = new ConnectionProfile(CMD_LINE_PROFILE_NAME, driverclass, url, user, pwd);
+			result = ConnectionProfile.createEmptyProfile();
+			result.setName(CMD_LINE_PROFILE_NAME);
+			result.setDriverclass(driverclass);
+			result.setUrl(url);
+			result.setUsername(user);
+			result.setPassword(pwd);
 			result.setRollbackBeforeDisconnect(rollback);
 			result.setAlternateDelimiter(delim);
 			result.setTrimCharData(trimCharData);
+			result.setUseSeparateConnectionPerTab(separate);
+			result.setEmptyStringIsNull(cmdLine.getBoolean(AppArguments.ARG_CONN_EMPTYNULL, false));
+			result.setRemoveComments(cmdLine.getBoolean(AppArguments.ARG_CONN_REMOVE_COMMENTS, false));
 			if (!StringUtil.isEmptyString(wksp))
 			{
 				wksp = FileDialogUtil.replaceConfigDir(wksp);

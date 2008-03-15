@@ -47,6 +47,7 @@ public class SqlFormatter
 		LINE_BREAK_BEFORE.add("REFRESH");
 		LINE_BREAK_BEFORE.add("AS");
 		LINE_BREAK_BEFORE.add("FOR");
+		LINE_BREAK_BEFORE.add("JOIN");
 		LINE_BREAK_BEFORE.add("INNER JOIN");
 		LINE_BREAK_BEFORE.add("RIGHT OUTER JOIN");
 		LINE_BREAK_BEFORE.add("LEFT OUTER JOIN");
@@ -395,6 +396,8 @@ public class SqlFormatter
 		if (lastV.equals("=")) return true;
 		
 		if (lastChar == '.' && current.isIdentifier()) return false;
+		if (lastChar == '.' && currChar == '*') return true; // e.g. person.*
+		if (lastChar == '.' && currChar == '[') return true; // e.g. p.[id] for the dreaded SQL Server "quotes"
 		if (isLastOpenBracket && current.isReservedWord()) return false;
 		if (isLastCloseBracket && !current.isSeparator() ) return true;
 		if ((last.isIdentifier() || last.isLiteral()) && current.isOperator()) return true;

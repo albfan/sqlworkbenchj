@@ -574,6 +574,7 @@ public class JEditTextArea
 		}
 		int height = painter.getHeight();
 		int lineHeight = painter.getFontMetrics().getHeight();
+		if (lineHeight == 0) return;
 		visibleLines = height / lineHeight;
 		updateScrollBars();
 	}
@@ -1237,7 +1238,7 @@ public class JEditTextArea
 		int caret = this.getCaretPosition();
 		int lineStart = this.getLineStartOffset(currentLine);
 		int pos = (caret - lineStart);
-		//this.getCaretPositionInLine(currentLine);
+
 		if (pos <= 0) return;
 		if (Character.isWhitespace(line.charAt(pos - 1))) return;
 		int start = StringUtil.findWordBoundary(line, pos - 1, wordBoundaries);

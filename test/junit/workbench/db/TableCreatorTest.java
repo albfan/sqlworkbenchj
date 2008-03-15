@@ -54,12 +54,12 @@ public class TableCreatorTest extends TestCase
 		{
 			WbConnection con = util.getConnection();
 			Statement stmt = con.createStatement();
-			stmt.executeUpdate("CREATE TABLE create_test (zzz integer, bbb integer, aaa integer, ccc integer)");
+			// Include a keyword as a column name to make sure TableCreator is properly quoting those names
+			stmt.executeUpdate("CREATE TABLE create_test (zzz integer, bbb integer, aaa integer, \"PRIMARY\" integer)");
 			TableIdentifier oldTable = new TableIdentifier("create_test");
 			TableIdentifier newTable = new TableIdentifier("new_table");
 			
 			List<ColumnIdentifier> clist = con.getMetadata().getTableColumns(oldTable);
-			
 			
 			// Make sure the table is created with the same column 
 			// ordering as the original table.

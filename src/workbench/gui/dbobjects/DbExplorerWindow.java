@@ -11,6 +11,7 @@
  */
 package workbench.gui.dbobjects;
 
+import java.awt.EventQueue;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
@@ -187,18 +188,23 @@ public class DbExplorerWindow
 	{
 	}
 
-	public static DbExplorerWindow showWindow()
+	public static void showWindow()
 	{
-		DbExplorerPanel panel = new DbExplorerPanel();
-		DbExplorerWindow window = new DbExplorerWindow(panel);
-		window.setStandalone(true);
-		
-		window.restorePosition();
-		panel.restoreSettings();
-		
-		window.setVisible(true);
-		window.selectConnection();
-		return window;
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				DbExplorerPanel panel = new DbExplorerPanel();
+				DbExplorerWindow window = new DbExplorerWindow(panel);
+				window.setStandalone(true);
+
+				window.restorePosition();
+				panel.restoreSettings();
+
+				window.setVisible(true);
+				window.selectConnection();
+			}
+		});
 	}
 	
 	public void connectBegin(ConnectionProfile profile)

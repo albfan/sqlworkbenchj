@@ -2606,7 +2606,7 @@ public class Settings
 			this.props.remove("workbench.gui.settings.ExternalToolsPanel.divider");
 			this.props.remove("workbench.gui.settings.LnFOptionsPanel.divider");
 			this.props.remove("workbench.gui.profiles.DriverlistEditorPanel.divider");
-			
+			this.props.remove("workbench.db.cancelwithreconnect");
 			this.props.remove("workbench.gui.dbobjects.TableListPanel.quickfilter.history");
 			this.props.remove("workbench.gui.dbobjects.TableListPanel.quickfilter.lastvalue");
 

@@ -27,8 +27,8 @@ import workbench.gui.WbSwingUtilities;
 public class WbScrollPane 
 	extends JScrollPane
 {
-	private static final Border MY_BORDER = new CompoundBorder(WbSwingUtilities.getBevelBorder(), new EmptyBorder(0,1,0,0));
-
+	private static boolean useCustomizedBorder = true;
+	
 	public WbScrollPane()
 	{
 		super();
@@ -55,7 +55,28 @@ public class WbScrollPane
 
 	private void initDefaults()
 	{
-		this.setBorder(MY_BORDER);
+		if (useCustomizedBorder)
+		{
+			try
+			{
+				// With some Linux distributions (Debian) creating this border during
+				// initialization fails. So if we can't create our own border
+				// we simply skip this for the future
+				Border myBorder = new CompoundBorder(WbSwingUtilities.getBevelBorder(), new EmptyBorder(0,1,0,0));
+				if (myBorder == null) 
+				{
+					useCustomizedBorder = false;
+				}		
+				else
+				{
+					this.setBorder(myBorder);
+				}
+			}
+			catch (Throwable e)
+			{
+				useCustomizedBorder = false;
+			}
+		}
 	}
 	
 }

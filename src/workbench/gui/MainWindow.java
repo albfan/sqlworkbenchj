@@ -1124,7 +1124,7 @@ public class MainWindow
 
 	public void connectBegin(final ConnectionProfile aProfile)
 	{
-		if (this.currentWorkspaceFile != null)
+		if (this.currentWorkspaceFile != null && WbManager.getInstance().writeSettings())
 		{
 			this.saveWorkspace(this.currentWorkspaceFile, true);
 		}
@@ -2194,6 +2194,7 @@ public class MainWindow
 	 */
 	public boolean saveWorkspace(String filename, boolean checkUnsaved)
 	{
+		if (!WbManager.getInstance().writeSettings()) return true;
 		WbWorkspace w = null;
 		boolean interactive = false;
 

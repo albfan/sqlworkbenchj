@@ -35,9 +35,12 @@ public class AppArguments
 	public static final String ARG_CONN_USER = "username";
 	public static final String ARG_CONN_PWD = "password";
 	public static final String ARG_CONN_AUTOCOMMIT = "autocommit";
+	public static final String ARG_CONN_SEPARATE = "separateConnection";
+	public static final String ARG_CONN_EMPTYNULL = "emptyStringIsNull";
 	public static final String ARG_CONN_ROLLBACK = "rollbackOnDisconnect";
 	public static final String ARG_CONN_TRIM_CHAR = "trimCharData";
 	public static final String ARG_IGNORE_DROP = "ignoreDropErrors";
+	public static final String ARG_CONN_REMOVE_COMMENTS = "removeComments";
 	
 	public static final String ARG_DISPLAY_RESULT = "displayResult";
 	public static final String ARG_SUCCESS_SCRIPT = "cleanupSuccess";
@@ -83,7 +86,10 @@ public class AppArguments
 		addArgument(ARG_CONN_JAR);
 		addArgument(ARG_CONN_USER);
 		addArgument(ARG_CONN_PWD);
+		addArgument(ARG_CONN_SEPARATE, ArgumentType.BoolArgument);
+		addArgument(ARG_CONN_EMPTYNULL, ArgumentType.BoolArgument);
 		addArgument(ARG_CONN_AUTOCOMMIT, ArgumentType.BoolArgument);
+		addArgument(ARG_CONN_REMOVE_COMMENTS, ArgumentType.BoolArgument);
 		addArgument(ARG_CONN_ROLLBACK, ArgumentType.BoolArgument);
 		addArgument(ARG_SHOW_PUMPER, ArgumentType.BoolArgument);
 		addArgument(ARG_IGNORE_DROP, ArgumentType.BoolArgument);

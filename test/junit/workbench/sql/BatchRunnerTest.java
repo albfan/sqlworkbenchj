@@ -24,7 +24,8 @@ import junit.framework.TestCase;
 import workbench.AppArguments;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
-import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
+import workbench.db.DbDriver;
 import workbench.db.WbConnection;
 import workbench.gui.profiles.ProfileKey;
 import workbench.util.ArgumentParser;
@@ -199,6 +200,25 @@ public class BatchRunnerTest
 		}
 	}
 	
+	public void testCreateCommandLineProfile()
+	{
+		AppArguments cmdline = new AppArguments();
+		cmdline.parse("-removeComments=true -emptyStringIsNull=true -autoCommit=true -separateConnection=true -url=jdbc:postgres://localhost/test -username=test -password=topsecret -configdir=. -driver=org.postgresql.Driver -driverjar=postgresql-8.3-603.jdbc3.jar");
+		ConnectionProfile p = BatchRunner.createCmdLineProfile(cmdline);
+		assertTrue(p.getAutocommit());
+		assertTrue(p.getUseSeparateConnectionPerTab());
+		assertTrue(p.getRemoveComments());
+		assertTrue(p.getEmptyStringIsNull());
+		assertEquals("org.postgresql.Driver", p.getDriverclass());
+		assertEquals("topsecret", p.getPassword());
+		assertEquals("test", p.getUsername());
+		assertEquals("jdbc:postgres://localhost/test", p.getUrl());
+		DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver("org.postgresql.Driver");
+		assertNotNull(drv);
+		String dir = cmdline.getValue("configdir");
+		assertEquals(".", dir);
+	}
+	
 	public void testEmptyStatement()
 	{
 		try
@@ -255,10 +275,13 @@ public class BatchRunnerTest
 			writer.close();
 			
 			ArgumentParser parser = new AppArguments();
-			String script = "-script='" + scriptFile.getFullPath() + "'";
 			parser.parse("-url='jdbc:h2:mem:testBatchRunner' " + 
-				"-user=sa " + 
-				"-driver=org.h2.Driver "  + script + " -rollbackOnDisconnect=true");
+				" -user=sa " + 
+				" -driver=org.h2.Driver "  + 
+				" -script='" + scriptFile.getFullPath() + "' " +
+				" -rollbackOnDisconnect=true " +
+				" -showProgress=true " + 
+				" -displayResult=true ");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
 	
 			assertNotNull(runner);

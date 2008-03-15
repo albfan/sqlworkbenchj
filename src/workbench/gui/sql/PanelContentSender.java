@@ -36,7 +36,12 @@ public class PanelContentSender
 	public void showResult(final String sql, final String comment, final int panelIndex, final boolean logText)
 	{
 		if (sql == null) return;
-		
+
+		// This should not be done in the background thread
+		// to make sure it's running on the EDT (otherwise the new panel
+		// will not be initialized correctly
+		final SqlPanel panel = selectPanel(panelIndex);
+
 		// When adding a new panel, a new connection 
 		// might be initiated automatically. As that is done in a separate
 		// thread, the call to showResult() might occur
@@ -51,8 +56,6 @@ public class PanelContentSender
 		{
 			public void run()
 			{
-				final boolean isCurrent = (target.getCurrentPanelIndex() == panelIndex);
-				final SqlPanel panel = selectPanel(panelIndex);
 				target.waitForConnection();
 				
 				EventQueue.invokeLater(new Runnable()

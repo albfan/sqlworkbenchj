@@ -314,9 +314,7 @@ public class ProfileEditorPanel
 
 		if (cp == null)
 		{
-			cp = new ConnectionProfile();
-			cp.setUseSeparateConnectionPerTab(true);
-			cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
+			cp = ConnectionProfile.createEmptyProfile();
 			cp.setGroup(getCurrentGroup());
 		}
 		cp.setNew();

@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
@@ -2208,14 +2207,14 @@ public class SqlPanel
 		return scriptParser;
 	}
 
-	private VariablePrompter prompter;
 	private boolean checkPrepared;
 
 	public boolean processParameterPrompts(String sql)
 	{
 		boolean goOn = true;
 
-		if (prompter == null) prompter = new VariablePrompter();
+		VariablePrompter prompter = new VariablePrompter();
+		
 		prompter.setSql(sql);
 		if (prompter.needsInput())
 		{
@@ -2241,17 +2240,17 @@ public class SqlPanel
 			}
 			catch (SQLException e)
 			{
-					this.showBusyIcon(false);
-					String msg = ResourceMgr.getString("ErrCheckPreparedStatement");
-					msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));
-					WbSwingUtilities.showErrorMessage(this, msg);
-					this.showBusyIcon(true);
+				this.showBusyIcon(false);
+				String msg = ResourceMgr.getString("ErrCheckPreparedStatement");
+				msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));
+				WbSwingUtilities.showErrorMessage(this, msg);
+				this.showBusyIcon(true);
 
-					// Ignore errors in prepared statements...
-					goOn = true;
+				// Ignore errors in prepared statements...
+				goOn = true;
 
-					// Disable checking as the current driver does not seem to support it
-					Settings.getInstance().setCheckPreparedStatements(false);
+				// Disable checking as the current driver does not seem to support it
+				Settings.getInstance().setCheckPreparedStatements(false);
 			}
 		}
 		return goOn;

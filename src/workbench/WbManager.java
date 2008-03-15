@@ -669,7 +669,6 @@ public class WbManager
 			CloseThread t = new CloseThread("WindowDisconnect", win);
 			t.start();
 		}
-
 	}
 
 	/**
@@ -721,7 +720,7 @@ public class WbManager
 				// dialog will be show to the user
 				main.connectTo(prof, true);
 
-				// the main window will take of displaying the connection dialog
+				// the main window will take care of displaying the connection dialog
 				// if the connection to the requested profile fails.
 				connected = true;
 			}
@@ -869,7 +868,7 @@ public class WbManager
 			splash = new WbSplash();
 			splash.setVisible(true);
 		}
-
+		
 		// This will install the application listener if running under MacOS
 		MacOSHelper m = new MacOSHelper();
 		m.installApplicationHandler();
@@ -894,7 +893,7 @@ public class WbManager
 			{
 				openNewWindow(true);
 			}
-
+			
 			UpdateCheck upd = new UpdateCheck();
 			upd.startUpdateCheck();
 		}

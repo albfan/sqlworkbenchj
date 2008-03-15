@@ -133,7 +133,7 @@ public class EditorTabSelectMenu
 
 	public void stateChanged(ChangeEvent e)
 	{
-		// Updating the menu needs to be posted because
+		// Updating the menu needs to be done "later" because
 		// the ChangeEvent is also triggered when a tab has been
 		// removed (thus implicitely changing the index)
 		// but the changeEvent occurs before the actual

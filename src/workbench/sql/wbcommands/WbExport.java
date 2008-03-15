@@ -193,7 +193,8 @@ public class WbExport
 		this.exporter = new DataExporter(this.currentConnection);
 
 		String tables = cmdLine.getValue("sourcetable");
-		String outputdir = cmdLine.getValue("outputdir");
+		String od = cmdLine.getValue("outputdir");
+		WbFile outputdir = (od == null ? null : new WbFile(od));
 
 		if (outputFile == null && outputdir == null)
 		{
@@ -203,6 +204,13 @@ public class WbExport
 			return result;
 		}
 
+		if (outputFile == null && outputdir != null && tables == null)
+		{
+			result.addMessage(ResourceMgr.getString("ErrExportNoTablesDef"));
+			result.setFailure();
+			return result;
+		}
+		
 		String updateTable = cmdLine.getValue("table");
 		type = type.trim().toLowerCase();
 		if ("txt".equals(type)) type = "text";
@@ -441,9 +449,9 @@ public class WbExport
 			{
 				dir = new WbFile(outputFile.getParentFile());
 			}
-			else if (!StringUtil.isEmptyString(outputdir))
+			else if (outputdir != null)
 			{
-				dir = new WbFile(outputdir);
+				dir = outputdir;
 			}
 
 			if (!dir.exists())
@@ -458,6 +466,15 @@ public class WbExport
 				{
 					result.addMessage(ResourceMgr.getFormattedString("MsgDirCreated", dir.getFullPath()));
 				}
+			}
+		}
+		else if (outputdir != null)
+		{
+			if (!outputdir.exists())
+			{
+				result.addMessage(ResourceMgr.getFormattedString("ErrExportOutputDirNotFound", outputdir.getFullPath()));
+				result.setFailure();
+				return result;
 			}
 		}
 
@@ -510,7 +527,16 @@ public class WbExport
 
 			String msg = ResourceMgr.getString("MsgSpoolInit");
 			msg = StringUtil.replace(msg, "%type%", exporter.getTypeDisplay());
-			msg = StringUtil.replace(msg, "%file%", outputFile.getFullPath());
+			String out = null;
+			if (outputFile != null)
+			{
+				out = outputFile.getFullPath();
+			}
+			else if (outputdir != null)
+			{
+				out = outputdir.getFullPath();
+			}
+			msg = StringUtil.replace(msg, "%file%", out);
 			//msg = msg + " quote=" + exporter.getTextQuoteChar();
 			result.addMessage(msg);
 			if (this.maxRows > 0)
@@ -523,11 +549,10 @@ public class WbExport
 		{
 			try
 			{
-				File outdir = (StringUtil.isEmptyString(outputdir) ? null : new File(outputdir));
 				exporter.setRowMonitor(this);
 				exporter.setReportInterval(this.progressInterval);
 				exporter.setContinueOnError(this.continueOnError);
-				runDirectExport(tablesToExport, result, outdir);
+				runDirectExport(tablesToExport, result, outputdir);
 				addMessages(result);
 			}
 			catch (Exception e)
@@ -646,8 +671,7 @@ public class WbExport
 
 		if (outdir == null || !outdir.exists())
 		{
-			String msg = ResourceMgr.getString("ErrExportOutputDirNotFound");
-			msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
+			String msg = ResourceMgr.getFormattedString("ErrExportOutputDirNotFound", outdir.getAbsolutePath());
 			result.addMessage(msg);
 			result.setFailure();
 			return;

@@ -27,7 +27,6 @@ import javax.swing.tree.TreePath;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.util.CaseInsensitiveComparator;
-import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 
 /**
@@ -239,8 +238,7 @@ class ProfileListModel
 
 	public void addEmptyProfile()
 	{
-		ConnectionProfile dummy = new ConnectionProfile();
-		dummy.setName(ResourceMgr.getString("TxtEmptyProfileName"));
+		ConnectionProfile dummy = ConnectionProfile.createEmptyProfile();
 		dummy.setUrl("jdbc:");
 		ConnectionMgr.getInstance().addProfile(dummy);
 		this.size ++;

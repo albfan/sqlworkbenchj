@@ -35,6 +35,9 @@ public class ConnectionProfileTest
 			old.setConfirmUpdates(true);
 			old.setDriverName("Postgres");
 			old.setEmptyStringIsNull(true);
+			old.setUseSeparateConnectionPerTab(true);
+			old.setIgnoreDropErrors(true);
+			old.setStoreExplorerSchema(true);
 			old.setName("First");
 			old.setStorePassword(true);
 			old.setUrl("jdbc:some:database");
@@ -45,6 +48,9 @@ public class ConnectionProfileTest
 			assertEquals("Postgres", copy.getDriverName());
 			assertEquals("First", copy.getName());
 			assertTrue(copy.getStorePassword());
+			assertTrue(copy.getUseSeparateConnectionPerTab());
+			assertTrue(copy.getStoreExplorerSchema());
+			assertTrue(copy.getIgnoreDropErrors());
 			assertEquals("jdbc:some:database", copy.getUrl());
 			DelimiterDefinition delim = copy.getAlternateDelimiter();
 			assertNotNull(delim);

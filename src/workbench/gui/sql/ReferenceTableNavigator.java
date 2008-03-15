@@ -473,20 +473,7 @@ public class ReferenceTableNavigator
 		String comment = comment = ResourceMgr.getString("MsgLoadRelatedComment") + " " + getUpdateTable().getTableExpression(con);
 
 		boolean logText = WbAction.isCtrlPressed(evt);
-//		boolean shiftPressed = WbAction.isShiftPressed(evt);
-//		if (receiver != null) 
-//		{
-//			if (this.container != null && ctrlPressed)
-//			{
-//				PanelContentSender sender = new PanelContentSender(container);
-//				sender.showResult(sql, comment, PanelContentSender.NEW_PANEL);
-//			}
-//			else
-//			{
-//				ResultReceiver.ShowType how = (shiftPressed ? ResultReceiver.ShowType.appendText : ResultReceiver.ShowType.logText); 
-//				receiver.showResult(sql, comment, how);
-//			}
-//		}
+		
 		if (this.container != null) 
 		{
 			PanelContentSender sender = new PanelContentSender(container);

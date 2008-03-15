@@ -940,8 +940,22 @@ public class TableListPanel
 	{
 		try
 		{
-			String type = (String)tableTypes.getSelectedItem();
+			String type = null;
+			if (tableTypes != null && tableTypes.getModel().getSize() > 0)
+			{
+				type = (String)tableTypes.getSelectedItem();
+			}
+			else
+			{
+				// if tableTypes does not contain any items, this panel was never
+				// displayed and we should use the value of the tableTypeToSelect
+				// variable that was retrieved when the settings were read from 
+				// the workspace.
+				type = tableTypeToSelect;
+			}
+			LogMgr.logDebug("TableListPanel.storeSettings()", "Saved object type: '" + type + "' (workspace prefix " + prefix + ")");
 			if (type != null) props.setProperty(prefix + "objecttype", type);
+			
 			props.setProperty(prefix + "divider", Integer.toString(this.splitPane.getDividerLocation()));
 			props.setProperty(prefix + "exportedtreedivider", Integer.toString(this.exportedPanel.getDividerLocation()));
 			props.setProperty(prefix + "importedtreedivider", Integer.toString(this.exportedPanel.getDividerLocation()));
@@ -981,6 +995,7 @@ public class TableListPanel
 		if (Settings.getInstance().getStoreExplorerObjectType())
 		{
 			this.tableTypeToSelect = props.getProperty(prefix + "objecttype", null);
+			LogMgr.logDebug("TableListPanel.readSettings()", "Retrieved objecttype: '" + tableTypeToSelect + "' (workspace prefix: " + prefix + ")");
 		}
 		else
 		{

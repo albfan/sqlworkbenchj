@@ -61,7 +61,7 @@ public class WbCopyTest
 			String sql = "--copy source_data and create target\n" +
 				"wbcopy -sourceTable=source_data " +
 				"-targettable=target_data " +
-				"-createTarget=true";
+				"-createTarget=true ";
 			
 			runner.runStatement(sql, -1, -1);
 			StatementRunnerResult result = runner.getResult();
