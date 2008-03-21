@@ -27,22 +27,9 @@ public class SQLLexerTest extends TestCase
 		super(testName);
 	}
 	
-//	public void testPeek()
-//	{
-//		String sql = "select * from test where x = 5";
-//		SQLLexer l = new SQLLexer(sql);
-//		SQLToken select = l.getNextToken(false, false);
-//		SQLToken next = l.peek(false, false);
-//		assertEquals("*", next.getContents());
-//		SQLToken t = l.getNextToken(true, true);
-//		assertTrue(t.isWhiteSpace());
-//		t = t = l.getNextToken(true, true);
-//		assertEquals("*", t.getContents());
-//	}
-	
-	private List getTokenList(String sql)
+	private List<SQLToken> getTokenList(String sql)
 	{
-		ArrayList result = new ArrayList();
+		ArrayList<SQLToken> result = new ArrayList<SQLToken>();
 		
 		SQLLexer l = new SQLLexer(sql);
 		SQLToken t = l.getNextToken(false, false);
@@ -54,6 +41,24 @@ public class SQLLexerTest extends TestCase
 		return result;
 	}
 
+	public void testUnicode()
+	{
+		try
+		{
+			String sql = "insert into mytable (col1, col2, col3) values ('\u32A5\u0416','col2_value', 1234)";
+			List<SQLToken> l = getTokenList(sql);
+			assertEquals(18, l.size());
+			assertEquals("'\u32A5\u0416'", l.get(12).getText());
+			assertEquals("'col2_value'", l.get(14).getText());
+			assertEquals("1234", l.get(16).getText());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}	
+	}
+	
 	public void testQuotedIdentifier()
 	{
 		try
@@ -93,9 +98,9 @@ public class SQLLexerTest extends TestCase
 		
 		String sql = "-- create a view\nCREATE\nOR\nREPLACE view my_view as (SELECT * FROM bal);";
 		
-		List tokens = getTokenList(sql);
+		List<SQLToken> tokens = getTokenList(sql);
 		
-		SQLToken t = (SQLToken)tokens.get(0);
+		SQLToken t = tokens.get(0);
 		
 		assertEquals("CREATE OR REPLACE", t.getContents());
 		assertEquals(true, t.isReservedWord());
@@ -103,24 +108,24 @@ public class SQLLexerTest extends TestCase
 		sql = "SELECT * FROM bla INNER JOIN blub ON (x = y)";
 		
 		tokens = getTokenList(sql);
-		t = (SQLToken)tokens.get(0);
+		t = tokens.get(0);
 		assertEquals("SELECT", t.getContents());
 		
-		t = (SQLToken)tokens.get(4);
+		t = tokens.get(4);
 		assertEquals("INNER JOIN", t.getContents());
 		assertEquals(true, t.isReservedWord());
 	
 		sql = "SELECT * FROM bla INNER JOIN blub ON (x = y)\nOUTER JOIN blub2 on (y = y)";
 		
 		tokens = getTokenList(sql);
-		t = (SQLToken)tokens.get(0);
+		t = tokens.get(0);
 		assertEquals("SELECT", t.getContents());
 		
-		t = (SQLToken)tokens.get(4);
+		t = tokens.get(4);
 		assertEquals("INNER JOIN", t.getContents());
 		assertEquals(true, t.isReservedWord());
 		
-		t = (SQLToken)tokens.get(12);
+		t = tokens.get(12);
 		assertEquals("OUTER JOIN", t.getContents());
 		assertEquals(true, t.isReservedWord());
 
@@ -141,7 +146,7 @@ public class SQLLexerTest extends TestCase
 		tokens = getTokenList(sql);
 		for (int i = 0; i < tokens.size(); i++)
 		{
-			t = (SQLToken)tokens.get(i);
+			t = tokens.get(i);
 			String v = t.getContents();
 			//System.out.println(i  + ": " + v);
 			switch (i)
@@ -207,9 +212,7 @@ public class SQLLexerTest extends TestCase
 					assertEquals("IS NOT NULL",v);
 					break;
 			}
-			
 		}
 	}
-	
 	
 }

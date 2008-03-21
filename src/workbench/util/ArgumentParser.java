@@ -59,6 +59,15 @@ public class ArgumentParser
 		return allowedValues.get(key);
 	}
 	
+	public boolean hasValidValue(String parameter)
+	{
+		String value = getValue(parameter);
+		if (value == null) return true;
+		Collection<String> allowed = this.getAllowedValues(parameter);
+		if (allowed == null || allowed.size() == 0) return true;
+		return allowed.contains(value);
+	}
+	
 	public void addArgument(String key, List<String> values)
 	{
 		addArgument(key, ArgumentType.ListArgument);

@@ -12,7 +12,6 @@
 package workbench.gui.editor;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
@@ -24,42 +23,41 @@ import javax.swing.undo.UndoableEdit;
 public class WbCompoundEdit
 	implements UndoableEdit
 {
-	private ArrayList edits;
+	private ArrayList<UndoableEdit> edits = new ArrayList<UndoableEdit>();
 	private boolean acceptNew = true;
-	
+
 	public WbCompoundEdit()
 	{
-		edits = new ArrayList();
 	}
 
 	public int getSize()
 	{
 		return edits.size();
 	}
-	
+
 	public void clear()
 	{
 		this.edits.clear();
 	}
-	
+
 	public void finished()
 	{
 		acceptNew = false;
 	}
-	
+
 	public UndoableEdit getLast()
 	{
 		if (edits.size() == 0) return null;
-		return (UndoableEdit)edits.get(edits.size() - 1);
+		return edits.get(edits.size() - 1);
 	}
 
-	public void undo() 
+	public void undo()
 		throws CannotUndoException
 	{
 		if (edits.size() == 0) return;
 		for (int i=edits.size() - 1; i > -1; i--)
 		{
-			UndoableEdit edit = (UndoableEdit)edits.get(i);
+			UndoableEdit edit = edits.get(i);
 			if (edit.canUndo() && edit.isSignificant()) edit.undo();
 		}
 	}
@@ -69,20 +67,20 @@ public class WbCompoundEdit
 		if (edits.size() == 0) return false;
 		for (int i=0; i < edits.size(); i++)
 		{
-			UndoableEdit edit = (UndoableEdit)edits.get(i);
+			UndoableEdit edit = edits.get(i);
 			if (!edit.canUndo()) return false;
 		}
 		return true;
 	}
 
-	public void redo() 
+	public void redo()
 		throws CannotRedoException
 	{
 		if (edits.size() == 0) return;
-		
+
 		for (int i=0; i < edits.size(); i++)
 		{
-			UndoableEdit edit = (UndoableEdit)edits.get(i);
+			UndoableEdit edit = edits.get(i);
 			edit.redo();
 		}
 	}
@@ -90,9 +88,8 @@ public class WbCompoundEdit
 	public boolean canRedo()
 	{
 		if (edits.size() == 0) return false;
-		for (int i=0; i < edits.size(); i++)
+		for (UndoableEdit edit : edits)
 		{
-			UndoableEdit edit = (UndoableEdit)edits.get(i);
 			if (!edit.canRedo()) return false;
 		}
 		return true;
@@ -100,10 +97,8 @@ public class WbCompoundEdit
 
 	public void die()
 	{
-		Iterator itr = edits.iterator();
-		while (itr.hasNext())
+		for (UndoableEdit edit : edits)
 		{
-			UndoableEdit edit = (UndoableEdit)itr.next();
 			edit.die();
 		}
 	}
@@ -121,11 +116,9 @@ public class WbCompoundEdit
 
 	public boolean isSignificant()
 	{
-		Iterator itr = edits.iterator();
-		while (itr.hasNext())
+		for (UndoableEdit edit : edits)
 		{
-			UndoableEdit edit = (UndoableEdit)itr.next();
-			if (edit.isSignificant()) return true;;
+			if (edit.isSignificant()) return true;
 		}
 		return false;
 	}
@@ -151,6 +144,4 @@ public class WbCompoundEdit
 		return edit.getRedoPresentationName();
 	}
 
-	
 }
-

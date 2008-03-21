@@ -182,7 +182,11 @@ public class WbCopy
 
 		try
 		{
-			copier.init(sourceCon, targetCon, result, cmdLine, rowMonitor);
+			if (!copier.init(sourceCon, targetCon, result, cmdLine, rowMonitor))
+			{
+				return result;
+			}
+			
 			copier.copyData();
 			if (copier.isSuccess()) 
 			{

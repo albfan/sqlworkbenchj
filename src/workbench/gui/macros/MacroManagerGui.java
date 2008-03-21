@@ -298,23 +298,23 @@ public class MacroManagerGui
 class MacroListModel
 	extends AbstractListModel
 {
-	ArrayList macros;
+	ArrayList<MacroEntry> macros;
 
 	public MacroListModel()
 	{
-		List keys = MacroManager.getInstance().getMacroList();
+		List<String> keys = MacroManager.getInstance().getMacroList();
 		Collections.sort(keys);
 		int size = keys.size();
 		if (size == 0)
 		{
-			macros = new ArrayList(10);
+			macros = new ArrayList<MacroEntry>(10);
 			return;
 		}
-		macros = new ArrayList(size);
+		macros = new ArrayList<MacroEntry>(size);
 
 		for (int i=0; i < size; i++)
 		{
-			String key = (String)keys.get(i);
+			String key = keys.get(i);
 			String text = MacroManager.getInstance().getMacroText(key);
 			macros.add(new MacroEntry(key, text));
 		}
@@ -344,7 +344,7 @@ class MacroListModel
 	public void setMacroAt(int index, String aName, String aText)
 	{
 		if (index < 0 || index >= this.macros.size()) return;
-		MacroEntry entry = (MacroEntry)this.macros.get(index);
+		MacroEntry entry = this.macros.get(index);
 		entry.setName(aName);
 		entry.setText(aText);
 		this.fireContentsChanged(this, index, index);
@@ -370,7 +370,7 @@ class MacroListModel
 		String name = null;
 		if (index > -1 && index < this.macros.size())
 		{
-			MacroEntry entry = (MacroEntry)this.macros.get(index);
+			MacroEntry entry = this.macros.get(index);
 			name = entry.getName();
 		}
 		return name;

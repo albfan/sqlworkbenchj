@@ -28,6 +28,7 @@ public class GreaterThanComparator
 	public boolean needsValue() { return true; }	
 	public boolean comparesEquality() { return false; }
 	
+	@SuppressWarnings("unchecked")
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		if (reference == null || value == null) return false;

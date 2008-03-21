@@ -267,7 +267,7 @@ public class ScriptParserTest
 								 " \n" + 
 								 "select * \n" + 
 								 "from country \n" + 
-								 "  GO \n\n ";		
+								 "  GO";		
 		try
 		{
 			ScriptParser p = new ScriptParser(sql);
@@ -277,17 +277,20 @@ public class ScriptParserTest
 			assertEquals("Wrong number of statements", 2, size);
 			//System.out.println("sql=" + p.getCommand(0));
 			assertEquals("Wrong statement returned", "SELECT id \nFROM person GO", p.getCommand(0));
+			assertEquals("Wrong statement returned", "select * \nfrom country", p.getCommand(1));
+			
 			sql = "SELECT id \r\n" + 
 						 "FROM person GO\r\n" + 
 						 "  GO  \r\n" + 
 						 " \r\n" + 
 						 "select * \r\n" + 
 						 "from country \r\n" + 
-						 "  GO \r\n";		
+						 "  GO";		
 			p.setScript(sql);
 			size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);
 			assertEquals("Wrong statement returned", "SELECT id \r\nFROM person GO", p.getCommand(0));
+			assertEquals("Wrong statement returned", "select * \r\nfrom country", p.getCommand(1));
 		}
 		catch (Exception e)
 		{
@@ -630,9 +633,9 @@ public class ScriptParserTest
 	
 	public void testUnicodeComments()
 	{
-		String sql = "-- \u00e4\u00b8\u00ad\u00e6\u2013\u2021\u00e6\u00b3\u00a8\u00e9\u2021\u0160\n" +
+		String sql = "-- \u32A5\u0416\u32A5\u0416\u2013\u2021\u00e6\u00b3\u00a8\u00e9\u2021\u0160\n" +
 									"select * from test;\n"+
-									"-- \u00e4\u00b8\u00ad\u00e6\u2013\u2021\u00e6\u00b3\u00a8\u00e9\u2021\u0160\n"+
+									"-- \u32A5\u0416\u32A5\u0416\u2013\u2021\u00e6\u00b3\u00a8\u00e9\u2021\u0160\n"+
 									"select * from test2;\n";
 		//String sql = "/* \uD8D5\uD8D7\uD8D9 */\nINSERT INTO something;\n-- \u4E2D\u6587\u6CE8 \nSELECT * FROM test;";
     ScriptParser parser = new ScriptParser(sql);

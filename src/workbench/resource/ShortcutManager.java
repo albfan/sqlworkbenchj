@@ -45,13 +45,14 @@ public class ShortcutManager
 	
 	private HashMap<KeyStroke, WbAction> keyDebugMap;
 	
+	@SuppressWarnings("unchecked")
 	ShortcutManager(String aFilename)
 	{
 		this.filename = aFilename;
 		try
 		{
 			WbPersistence reader = new WbPersistence(this.filename);
-			this.keyMap = (HashMap)reader.readObject();
+			this.keyMap = (HashMap<String, ShortcutDefinition>)reader.readObject();
 		}
 		catch (Exception e)
 		{

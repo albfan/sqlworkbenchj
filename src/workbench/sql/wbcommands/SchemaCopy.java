@@ -46,7 +46,6 @@ public class SchemaCopy
 	private RowActionMonitor rowMonitor;
 	private boolean cancel = false;
 	private ArgumentParser arguments;
-	private String copyMode;
 	
 	public SchemaCopy(List<TableIdentifier> tables)
 	{
@@ -107,13 +106,14 @@ public class SchemaCopy
 				copier.startCopy();
 
 				this.messages.append(copier.getMessageBuffer());
-				this.messages.appendNewLine();
+				//this.messages.appendNewLine();
 			}
 			this.success = true;
 		}
 		catch (Exception e)
 		{
 			this.success = false;
+			this.messages.append(copier.getMessageBuffer());
 			throw e;
 		}
 		finally
@@ -161,17 +161,11 @@ public class SchemaCopy
 		this.rowMonitor = monitor;
 		
 		String mode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
-		if (mode != null)
+		if (!this.copier.setMode(mode))
 		{
-			if (!this.copier.setMode(mode))
-			{
-				result.addMessage(ResourceMgr.getString("ErrInvalidModeIgnored").replaceAll("%mode%", mode));
-				result.setWarning(true);
-			}
-			else
-			{
-				this.copyMode = mode;
-			}
+			result.addMessage(ResourceMgr.getFormattedString("ErrImpInvalidMode", mode));
+			result.setFailure();
+			return false;
 		}
 
 		copier.setPerTableStatements(new TableStatements(cmdLine));
@@ -184,7 +178,6 @@ public class SchemaCopy
 		copier.setContinueOnError(continueOnError);
 		copier.setDeleteTarget(deleteTarget);
 		copier.setRowActionMonitor(rowMonitor);
-		copier.setMode(copyMode);
 
 		return true;
 	}

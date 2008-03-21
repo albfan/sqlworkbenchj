@@ -52,77 +52,78 @@ import workbench.util.CharSequenceReader;
 %class SQLLexer
 %function getNextToken
 %type SQLToken
+%line
+%column
+%char
+%unicode
+%ignorecase
+%state COMMENT
 
 %{
-    private int lastToken;
-    private int nextState=YYINITIAL;
-    private StringBuilder commentBuffer = new StringBuilder();
-    private int commentNestCount = 0;
-    private int commentStartLine = 0;
-    private int commentStartChar = 0;
+	private int lastToken;
+	private int nextState=YYINITIAL;
+	private StringBuilder commentBuffer = new StringBuilder();
+	private int commentNestCount = 0;
+	private int commentStartLine = 0;
+	private int commentStartChar = 0;
 
-    /**
-     * next Token method that allows you to control if whitespace and comments are
-     * returned as tokens.
-     */
-    public SQLToken getNextToken(boolean returnComments, boolean returnWhiteSpace) 
-    {
-      try 
-      {
-        SQLToken t = getNextToken();
-        while (t != null && ((!returnWhiteSpace && t.isWhiteSpace()) || (!returnComments && t.isComment())))
-        {
-          t = getNextToken();
-        }
-        return (t);
-      }
-      catch (Exception e)
-      {
-        return null;
-      }
-    }
+	/**
+	 * next Token method that allows you to control if whitespace and comments are
+	 * returned as tokens.
+	 */
+	public SQLToken getNextToken(boolean returnComments, boolean returnWhiteSpace) 
+	{
+		try 
+		{
+			SQLToken t = getNextToken();
+			while (t != null && ((!returnWhiteSpace && t.isWhiteSpace()) || (!returnComments && t.isComment())))
+			{
+				t = getNextToken();
+			}
+			return (t);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
 
-    /**
-     * Closes the current input stream, and resets the scanner to read from a new input stream.
-     * All internal variables are reset, the old input stream  cannot be reused
-     * (content of the internal buffer is discarded and lost).
+	/**
+	 * Closes the current input stream, and resets the scanner to read from a new input stream.
+	 * All internal variables are reset, the old input stream  cannot be reused
+	 * (content of the internal buffer is discarded and lost).
 
-     * The lexical state is set to the initial state.
-     * Subsequent tokens read from the lexer will start with the line, char, and column
-     * values given here.
-     *
-     * @param reader The new input.
-     * @param yyline The line number of the first token.
-     * @param yychar The position (relative to the start of the stream) of the first token.
-     * @param yycolumn The position (relative to the line) of the first token.
-     * @throws IOException if an IOExecption occurs while switching readers.
-     */
-    public void reset(java.io.Reader reader, int yyline, int yychar, int yycolumn) 
-      throws IOException
-    {
-				yyreset(reader);
-				this.yyline = yyline;
-				this.yychar = yychar;
-				this.yycolumn = yycolumn;
-    }
+	 * The lexical state is set to the initial state.
+	 * Subsequent tokens read from the lexer will start with the line, char, and column
+	 * values given here.
+	 *
+	 * @param reader The new input.
+	 * @param yyline The line number of the first token.
+	 * @param yychar The position (relative to the start of the stream) of the first token.
+	 * @param yycolumn The position (relative to the line) of the first token.
+	 * @throws IOException if an IOExecption occurs while switching readers.
+	 */
+	public void reset(java.io.Reader reader, int yyline, int yychar, int yycolumn) 
+		throws IOException
+	{
+		yyreset(reader);
+		this.yyline = yyline;
+		this.yychar = yychar;
+		this.yycolumn = yycolumn;
+	}
 
-    public SQLLexer(String source)
-    {
-			this(new StringReader(source));
-    }
+	public SQLLexer(String source)
+	{
+	this(new StringReader(source));
+	}
 
-    public SQLLexer(CharSequence source)
-    {
-			this(new CharSequenceReader(source));
-    }
+	public SQLLexer(CharSequence source)
+	{
+	this(new CharSequenceReader(source));
+	}
 %}
 
-%line
-%char
-%full
-%ignorecase
-
-%state COMMENT
 
 /*
 LineTerminator = \r|\n|\r\n

@@ -14,6 +14,7 @@ package workbench.db.report;
 import java.util.Collection;
 import java.util.Collections;
 import workbench.db.TableGrant;
+import workbench.db.TableGrantReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.util.StrBuffer;
@@ -35,7 +36,8 @@ public class ReportTableGrants
 	
 	public ReportTableGrants(WbConnection con, TableIdentifier tbl)
 	{
-		grants = con.getMetadata().getTableGrants(tbl);
+		TableGrantReader reader = new TableGrantReader();
+		grants = reader.getTableGrants(con, tbl);
 	}
 	
 	public ReportTableGrants(Collection<TableGrant> tableGrants)

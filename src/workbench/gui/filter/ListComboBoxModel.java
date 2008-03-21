@@ -25,20 +25,20 @@ public class ListComboBoxModel
 	extends AbstractListModel
 	implements ComboBoxModel
 {
-	private List data = new ArrayList();
+	private List<? extends Object> data = new ArrayList<Object>();
 	private Object selectedItem;
 
 	public ListComboBoxModel()
 	{
-		data = new ArrayList();
+		data = new ArrayList<Object>();
 	}
 
-	public ListComboBoxModel(List<ComparatorListItem> l)
+	public ListComboBoxModel(List<? extends Object> l)
 	{
 		data = l;
 	}
 
-	public void setData(List<ComparatorListItem> l)
+	public void setData(List<? extends Object> l)
 	{
 		this.data = l;
 		fireContentsChanged(this, -1, -1);

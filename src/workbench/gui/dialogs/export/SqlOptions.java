@@ -11,6 +11,8 @@
  */
 package workbench.gui.dialogs.export;
 
+import java.util.List;
+
 /**
  *
  * @author support@sql-workbench.net
@@ -29,7 +31,7 @@ public interface SqlOptions
 	void setCreateDeleteInsert();
 	String getAlternateUpdateTable();
 	void setAlternateUpdateTable(String table);
-	java.util.List getKeyColumns();
+	List<String> getKeyColumns();
 	String getDateLiteralType();
 	
 }

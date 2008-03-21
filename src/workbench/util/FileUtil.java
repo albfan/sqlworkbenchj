@@ -56,7 +56,7 @@ public class FileUtil
 	 */
 	public static Collection<String> getLines(BufferedReader in)
 	{
-		Set result = new HashSet<String>();
+		Set<String> result = new HashSet<String>();
 
 		try
 		{

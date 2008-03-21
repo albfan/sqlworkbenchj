@@ -31,7 +31,7 @@ public class TextFormatter
 	{
 	}
 	
-	public void formatSql(EditorPanel editor, DelimiterDefinition alternateDelimiter, Set dbFunctions, Set dbDatatypes, String lineComment)
+	public void formatSql(EditorPanel editor, DelimiterDefinition alternateDelimiter, Set<String> dbFunctions, Set<String> dbDatatypes, String lineComment)
 	{
 		String sql = editor.getSelectedStatement();
 		ScriptParser parser = new ScriptParser();

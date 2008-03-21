@@ -18,7 +18,6 @@ import workbench.util.StringUtil;
  */
 public class TableGrant
 {
-	private TableIdentifier table;
 	private String grantee;
 	private String privilege;
 	private boolean grantable;

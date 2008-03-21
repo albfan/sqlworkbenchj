@@ -11,7 +11,6 @@
  */
 package workbench.sql.wbcommands;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -19,7 +18,6 @@ import java.util.Properties;
 import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
 import workbench.db.report.SchemaReporter;
-import workbench.db.report.Workbench2Designer;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -28,8 +26,6 @@ import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
-import workbench.util.ExceptionUtil;
-import workbench.util.StringUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.XsltTransformer;

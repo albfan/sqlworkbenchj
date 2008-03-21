@@ -37,7 +37,6 @@ public class TableCopy
 {
 	private WbConnection sourceConnection;
 	private WbConnection targetConnection;
-	private MessageBuffer messages;
 	private DataCopier copier;
 	
 	public TableCopy()
@@ -72,13 +71,11 @@ public class TableCopy
 		copier.setKeyColumns(keys);
 
 		String mode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
-		if (mode != null)
+		if (!this.copier.setMode(mode))
 		{
-			if (!this.copier.setMode(mode))
-			{
-				result.addMessage(ResourceMgr.getString("ErrInvalidModeIgnored").replaceAll("%mode%", mode));
-				result.setWarning(true);
-			}
+			result.addMessage(ResourceMgr.getFormattedString("ErrImpInvalidMode", mode));
+			result.setFailure();
+			return false;
 		}
 
 		CommonArgs.setProgressInterval(copier, cmdLine);

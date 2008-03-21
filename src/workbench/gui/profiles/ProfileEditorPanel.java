@@ -28,6 +28,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.DbDriver;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CollapseTreeAction;
 import workbench.gui.actions.CopyProfileAction;
@@ -146,7 +147,7 @@ public class ProfileEditorPanel
 
 	private void fillDrivers()
 	{
-		List drivers = ConnectionMgr.getInstance().getDrivers();
+		List<DbDriver> drivers = ConnectionMgr.getInstance().getDrivers();
 		this.connectionEditor.setDrivers(drivers);
 	}
 
@@ -159,14 +160,14 @@ public class ProfileEditorPanel
 		} 
 		this.jSplitPane.setDividerLocation(pos);
 		String groups = Settings.getInstance().getProperty("workbench.profiles.expandedgroups", null);
-		List l = StringUtil.stringToList(groups, ",", true, true);
+		List<String> l = StringUtil.stringToList(groups, ",", true, true);
 		((ProfileTree)profileTree).expandGroups(l);
 	}
 
 	public void saveSettings()
 	{
 		Settings.getInstance().setProfileDividerLocation(this.jSplitPane.getDividerLocation());
-		List expandedGroups = ((ProfileTree)profileTree).getExpandedGroupNames();
+		List<String> expandedGroups = ((ProfileTree)profileTree).getExpandedGroupNames();
 		Settings.getInstance().setProperty("workbench.profiles.expandedgroups", StringUtil.listToString(expandedGroups, ',', true));
 	}
 
@@ -195,7 +196,7 @@ public class ProfileEditorPanel
 	
 	private boolean checkGroupWithProfiles(DefaultMutableTreeNode groupNode)
 	{
-		List groups = model.getGroups();
+		List<String> groups = model.getGroups();
 		JPanel p = new JPanel();
 		DefaultComboBoxModel m = new DefaultComboBoxModel(groups.toArray());
 		JComboBox groupBox = new JComboBox(m);

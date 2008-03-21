@@ -145,7 +145,7 @@ public class MessageBuffer
 
 	public String toString()
 	{
-		return getBuffer().toString();
+		return "[" + getLength() + " messages]";
 	}
 	
 }

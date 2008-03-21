@@ -172,7 +172,9 @@ public class SQLToken
 
 	/**
 	 * Returned an uparsed version of the contents of this 
-	 * token. To get a 
+	 * token. To get a "parsed" version (i.e. with keywords
+	 * capitalized) use getContents()
+	 * @see #getContents() 
 	 */
 	public String getText()
 	{

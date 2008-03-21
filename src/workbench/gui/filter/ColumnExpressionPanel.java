@@ -46,7 +46,7 @@ public class ColumnExpressionPanel
 	private JComboBox comparatorDropDown;
 	private JCheckBox ignoreCase;
 	protected JComboBox columnSelector;
-	private ArrayList comparatorItems;
+	private ArrayList<ComparatorListItem> comparatorItems;
 	private ListComboBoxModel activeItems;
 	private ResultInfo columnInfo;
 	protected JTextField valueField;
@@ -61,7 +61,7 @@ public class ColumnExpressionPanel
 		activeItems = new ListComboBoxModel();
 
 		ColumnComparator[] comps = factory.getAvailableComparators();
-		comparatorItems = new ArrayList(comps.length);
+		comparatorItems = new ArrayList<ComparatorListItem>(comps.length);
 		for (int i=0; i < comps.length; i++)
 		{
 			comparatorItems.add(new ComparatorListItem(comps[i]));
@@ -77,7 +77,7 @@ public class ColumnExpressionPanel
 
 		columnSelector = new JComboBox();
 		int count = info.getColumnCount();
-		ArrayList l = new ArrayList(count);
+		ArrayList<String> l = new ArrayList<String>(count);
 		l.add("*");
 		for (int i=0; i < count; i++)
 		{
@@ -343,7 +343,7 @@ public class ColumnExpressionPanel
 			final ArrayList<ComparatorListItem> l = new ArrayList<ComparatorListItem>(count);
 			for (int i=0; i < count; i++)
 			{
-				ComparatorListItem item = (ComparatorListItem)comparatorItems.get(i);
+				ComparatorListItem item = comparatorItems.get(i);
 				if (item.getComparator().supportsType(columnClass))
 				{
 					l.add(item);

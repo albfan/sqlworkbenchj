@@ -56,7 +56,7 @@ public class WbWorkspace
 			this.zout = null;
 			this.archive = new ZipFile(archiveName);
 			Enumeration e = this.archive.entries();
-			ArrayList tempEntries = new ArrayList(10);
+			ArrayList<ZipEntry> tempEntries = new ArrayList<ZipEntry>(10);
 			while (e.hasMoreElements())
 			{
 				ZipEntry entry = (ZipEntry)e.nextElement();
@@ -81,7 +81,7 @@ public class WbWorkspace
 				int realIndex = -1;
 				try
 				{
-					ZipEntry entry = (ZipEntry)tempEntries.get(i);
+					ZipEntry entry = tempEntries.get(i);
 					String filename = entry.getName().toLowerCase();
 					int pos = filename.indexOf('.');
 					ind = StringUtil.getIntValue(filename.substring(12,pos), -1);

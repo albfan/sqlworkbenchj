@@ -203,9 +203,9 @@ public class ProfileTree
 	/**
 	 * Return the names of the expaned groups.
 	 */
-	public List getExpandedGroupNames()
+	public List<String> getExpandedGroupNames()
 	{
-		LinkedList result = new LinkedList();
+		LinkedList<String> result = new LinkedList<String>();
 		TreePath[] groupNodes = this.profileModel.getGroupNodes();
 		for (int i = 0; i < groupNodes.length; i++)
 		{

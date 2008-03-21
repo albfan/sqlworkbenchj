@@ -348,14 +348,11 @@ public class DataCopier
 			// depending on which source we set for the importer
 			this.sourceData.setAbortOnError(!this.importer.getContinueOnError());
 			this.importer.startImport();
-			
-			LogMgr.logInfo("DataCopier.start()", "Copying of data finished. " + this.importer.getInsertedRows() + " row(s) inserted. " + this.importer.getUpdatedRows() + " row(s) updated.");
+			//LogMgr.logDebug("DataCopier.startCopy()", "Copying of data finished. " + this.importer.getInsertedRows() + " total row(s) inserted. " + this.importer.getUpdatedRows() + " total row(s) updated.");
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("DataCopier.start()", "Error when copying data", e);
-			String msg = ResourceMgr.getFormattedString("ErrCopy", ExceptionUtil.getDisplay(e, false));
-			this.addError(msg);
 			this.importer.tableImportError();
 			throw e;
 		}
@@ -583,6 +580,7 @@ public class DataCopier
 	{
 		MessageBuffer buf = new MessageBuffer();
 		buf.append(this.messages);
+		this.messages.clear();
 		importer.copyMessages(buf);
 		buf.append(this.errors);
 		return buf;

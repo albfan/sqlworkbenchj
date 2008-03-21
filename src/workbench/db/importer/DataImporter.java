@@ -477,11 +477,13 @@ public class DataImporter
 	
 	/**
 	 * Define the mode by supplying keywords.
+	 * A null value means "keep the current (default)" and is a valid mode
 	 * @return true if the passed string is valid, false otherwise
 	 * @see #getModeValue(String)
 	 */
 	public boolean setMode(String mode)
 	{
+		if (mode == null) return true;
 		int modevalue = getModeValue(mode);
 		if (modevalue == -1) return false;
 		setMode(modevalue);
@@ -1375,23 +1377,22 @@ public class DataImporter
 	public void setTargetTable(TableIdentifier table, ColumnIdentifier[] columns)
 		throws SQLException
 	{
+		this.currentImportRow = 0;
+		this.updatedRows = 0;
+		this.insertedRows = 0;
+
+		this.errorCount = 0;
+		this.errorLimitAdded = false;
+		
 		// be prepared to import more then one table...
 		if (this.isRunning && this.targetTable != null)
 		{
 			try
 			{
 				this.finishTable();
-				this.totalRows = 0;
-				this.currentImportRow = 0;
-				this.updatedRows = 0;
-				this.insertedRows = 0;
 			}
 			catch (SQLException e)
 			{
-				this.totalRows = -1;
-				this.currentImportRow = -1;
-				this.updatedRows = -1;
-				this.insertedRows = -1;
 				if (!this.continueOnError) 
 				{
 					this.hasErrors = true;
@@ -1400,13 +1401,12 @@ public class DataImporter
 			}
 		}
 
-		this.errorCount = 0;
-		this.errorLimitAdded = false;
 		
 		try
 		{
 			this.targetTable = table.createCopy();
 			this.targetColumns = columns;
+			this.keyColumns = null;
 			this.colCount = this.targetColumns.length;
 
 			if (this.parser != null)
@@ -1671,6 +1671,7 @@ public class DataImporter
 				colIndex ++;
 			}
 		}
+		
 		if (!pkAdded)
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "No primary key columns defined! Update mode not available\n", null);
@@ -1678,14 +1679,17 @@ public class DataImporter
 			this.messages.appendNewLine();
 			this.updateSql = null;
 			this.updateStatement = null;
+			this.hasErrors = true;
 			throw new SQLException("No key columns defined for update mode");
 		}
+		
 		if (pkCount != this.keyColumns.size())
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "At least one of the supplied primary key columns was not found in the target table!\n", null);
 			this.messages.append(ResourceMgr.getString("ErrImportUpdateKeyColumnNotFound") + "\n");
 			this.updateSql = null;
 			this.updateStatement = null;
+			this.hasErrors = true;
 			throw new SQLException("Not enough key columns defined for update mode");
 		}
 		
@@ -1695,6 +1699,7 @@ public class DataImporter
 			this.messages.append(ResourceMgr.getString("ErrImportOnlyKeyColumnsForUpdate"));
 			this.updateSql = null;
 			this.updateStatement = null;
+			this.hasErrors = true;
 			throw new SQLException("Only key columns defined for update mode");
 		}
 		
@@ -1840,14 +1845,15 @@ public class DataImporter
 				this.tableStatements.runPostTableStatement(dbConn, targetTable);
 			}
 
+			String msg = this.targetTable.getTableName() + ": " + this.getInsertedRows() + " row(s) inserted. " + this.getUpdatedRows() + " row(s) updated.";
 			if (commitNeeded)
 			{
-				LogMgr.logInfo("DataImporter.finishTable()", this.getAffectedRows() + " row(s) imported. Committing changes");
+				LogMgr.logInfo("DataImporter.finishTable()", msg + " Committing changes");
 				this.dbConn.commit();
 			}
 			else if (!transactionControl)
 			{
-				LogMgr.logInfo("DataImporter.finishTable()", this.getAffectedRows() + " row(s) imported. Transaction control disabled. No commit sent to server");
+				LogMgr.logInfo("DataImporter.finishTable()", msg + " Transaction control disabled. No commit sent to server");
 			}
 			
 			this.messages.append(this.source.getMessages());

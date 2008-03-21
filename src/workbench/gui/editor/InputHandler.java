@@ -21,7 +21,6 @@ import java.util.Iterator;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.text.BadLocationException;
-import workbench.resource.Settings;
 
 /**
  * An input handler converts the user's key strokes into concrete actions.
@@ -32,7 +31,7 @@ import workbench.resource.Settings;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.26 2007-10-19 18:06:50 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.27 2008-03-21 09:55:25 thomas Exp $
  * @see DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -88,11 +87,11 @@ public abstract class InputHandler extends KeyAdapter
 	// Default action
 	public static final ActionListener INSERT_CHAR = new insert_char();
 
-	private static HashMap actions;
+	private static HashMap<String, ActionListener> actions;
 
 	static
 	{
-		actions = new HashMap();
+		actions = new HashMap<String, ActionListener>();
 		actions.put("backspace",BACKSPACE);
 		actions.put("backspace-word",BACKSPACE_WORD);
 		actions.put("delete",DELETE);
@@ -135,7 +134,7 @@ public abstract class InputHandler extends KeyAdapter
 	 */
 	public static ActionListener getAction(String name)
 	{
-		return (ActionListener)actions.get(name);
+		return actions.get(name);
 	}
 
 	/**

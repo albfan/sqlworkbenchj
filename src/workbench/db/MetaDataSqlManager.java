@@ -226,6 +226,7 @@ public class MetaDataSqlManager
 		return sql.replaceAll(s, StringUtil.EMPTY_STRING);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private HashMap readStatementTemplates(String aFilename)
 	{
 		HashMap result = null;

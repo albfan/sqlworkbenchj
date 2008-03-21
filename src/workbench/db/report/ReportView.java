@@ -23,6 +23,7 @@ import workbench.db.WbConnection;
 import workbench.util.StrBuffer;
 import java.util.Collections;
 import workbench.db.IndexDefinition;
+import workbench.db.TableCommentReader;
 import workbench.util.StringUtil;
 
 /**
@@ -92,7 +93,8 @@ public class ReportView
 		List<ColumnIdentifier> cols = conn.getMetadata().getTableColumns(tbl);
 		Collections.sort(cols);
 
-		this.viewComment = conn.getMetadata().getTableComment(this.view);
+		TableCommentReader reader = new TableCommentReader();
+		this.viewComment = reader.getTableComment(conn, this.view);
 		String schema = this.view.getSchema();
 		if (schema == null || schema.length() == 0)
 		{

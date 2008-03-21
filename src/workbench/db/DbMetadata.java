@@ -29,7 +29,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -3334,21 +3333,23 @@ public class DbMetadata
 			}
 		}
 
-		String tableComment = this.getTableCommentSql(table);
+		TableCommentReader commentReader = new TableCommentReader();
+		String tableComment = commentReader.getTableCommentSql(dbConnection, table);
 		if (!StringUtil.isEmptyString(tableComment))
 		{
 			result.append(lineEnding);
 			result.append(tableComment);
 		}
 		
-		StringBuilder colComments = this.getTableColumnCommentsSql(table, columns);
+		StringBuilder colComments = commentReader.getTableColumnCommentsSql(this.dbConnection, table, columns);
 		if (!StringUtil.isEmptyString(colComments))
 		{
 			result.append(lineEnding);
 			result.append(colComments);
 		}
 
-		StringBuilder grants = this.getTableGrantSource(table);
+		TableGrantReader grantReader = new TableGrantReader();
+		StringBuilder grants = grantReader.getTableGrantSource(this.dbConnection, table);
 		if (grants.length() > 0)
 		{
 			result.append(lineEnding);
@@ -3484,91 +3485,6 @@ public class DbMetadata
 			cons = null;
 		}
 		return cons;
-	}
-
-	/**
-	 * Return the SQL that is needed to re-create the comment on the given columns.
-	 * The syntax to be used, can be configured in the ColumnCommentStatements.xml file.
-	 */
-	public StringBuilder getTableColumnCommentsSql(TableIdentifier table, List<ColumnIdentifier> columns)
-	{
-		String columnStatement = metaSqlMgr.getColumnCommentSql();
-		if (columnStatement == null || columnStatement.trim().length() == 0) return null;
-		StringBuilder result = new StringBuilder(columns.size() * 25);
-		for (ColumnIdentifier col : columns)
-		{
-			String column = col.getColumnName();
-			String comment = col.getComment();
-			if (Settings.getInstance().getIncludeEmptyComments() || comment != null && comment.trim().length() > 0)
-			{
-				try
-				{
-					String commentSql = columnStatement.replaceAll(MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
-					commentSql = StringUtil.replace(commentSql, MetaDataSqlManager.COMMENT_COLUMN_PLACEHOLDER, column);
-					commentSql = StringUtil.replace(commentSql, MetaDataSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replaceAll("'" ,"''"));
-					result.append(commentSql);
-					result.append("\n");
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("DbMetadata.getTableColumnCommentsSql()", "Error creating comments SQL for remark=" + comment, e);
-				}
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Return the SQL that is needed to re-create the comment on the given table.
-	 * The syntax to be used, can be configured in the TableCommentStatements.xml file.
-	 */
-	public String getTableCommentSql(TableIdentifier table)
-	{
-		String commentStatement = metaSqlMgr.getTableCommentSql();
-		if (commentStatement == null || commentStatement.trim().length() == 0) return null;
-
-		String comment = this.getTableComment(table);
-		String result = null;
-		if (Settings.getInstance().getIncludeEmptyComments() || comment != null && comment.trim().length() > 0)
-		{
-			result = commentStatement.replaceAll(MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
-			result = result.replaceAll(MetaDataSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replaceAll("'", "''"));
-		}
-		return result;
-	}
-
-	public String getTableComment(TableIdentifier tbl)
-	{
-		TableIdentifier table = tbl.createCopy();
-		table.adjustCase(this.dbConnection);
-		ResultSet rs = null;
-		String result = null;
-		Savepoint sp = null;
-		try
-		{
-			if (dbSettings.useSavePointForDML())
-			{
-				sp = dbConnection.setSavepoint();
-			}
-			rs = this.metaData.getTables(table.getCatalog(), table.getSchema(), table.getTableName(), null);
-			if (rs.next())
-			{
-				result = rs.getString("REMARKS");
-			}
-			dbConnection.releaseSavepoint(sp);
-		}
-		catch (Exception e)
-		{
-			dbConnection.rollback(sp);
-			LogMgr.logError("DbMetadata.getTableComment()", "Error retrieving comment for table " + table.getTableExpression(), e);
-			result = null;
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
-		}
-
-		return result;
 	}
 
 	public StringBuilder getFkSource(TableIdentifier table)
@@ -3784,94 +3700,6 @@ public class DbMetadata
 		return this.indexReader.buildCreateIndexSql(aTable, indexName, unique, columnList);
 	}
 
-	/**
-	 *	Return the GRANTs for the given table
-	 *
-	 *	Some JDBC drivers return all GRANT privileges separately even if the original
-	 *  GRANT was a GRANT ALL ON object TO user.
-	 *
-	 *	@return a List with TableGrant objects.
-	 */
-	public Collection<TableGrant> getTableGrants(TableIdentifier table)
-	{
-		Collection<TableGrant> result = new HashSet<TableGrant>();
-		ResultSet rs = null;
-		try
-		{
-			TableIdentifier tbl = table.createCopy();
-			tbl.adjustCase(this.dbConnection);
-			rs = this.metaData.getTablePrivileges(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
-			while (rs.next())
-			{
-				String from = rs.getString(4);
-				String to = rs.getString(5);
-				String what = rs.getString(6);
-				boolean grantable = StringUtil.stringToBool(rs.getString(7));
-				TableGrant grant = new TableGrant(to, what, grantable);
-				result.add(grant);
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DbMetadata.getTableGrants()", "Error when retrieving table privileges",e);
-		}
-		finally
-		{
-			try { rs.close(); } catch (Throwable th) {}
-		}
-		return result;
-	}
-
-	/**
-	 *	Creates an SQL Statement which can be used to re-create the GRANTs on the
-	 *  given table.
-	 *
-	 *	@return SQL script to GRANT access to the table.
-	 */
-	public StringBuilder getTableGrantSource(TableIdentifier table)
-	{
-		Collection<TableGrant> grantList = this.getTableGrants(table);
-		StringBuilder result = new StringBuilder(200);
-		int count = grantList.size();
-
-		// as several grants to several users can be made, we need to collect them
-		// first, in order to be able to build the complete statements
-		Map<String, List<String>> grants = new HashMap<String, List<String>>(count);
-
-		for (TableGrant grant : grantList)
-		{
-			String grantee = grant.getGrantee();
-			String priv = grant.getPrivilege();
-			if (priv == null) continue;
-			List<String> privs = grants.get(grantee);
-			if (privs == null)
-			{
-				privs = new LinkedList<String>();
-				grants.put(grantee, privs);
-			}
-			privs.add(priv.trim());
-		}
-		Iterator<Entry<String, List<String>>> itr = grants.entrySet().iterator();
-
-		String user = dbConnection.getCurrentUser();
-		while (itr.hasNext())
-		{
-			Entry<String, List<String>> entry = itr.next();
-			String grantee = entry.getKey();
-			// Ignore grants to ourself
-			if (user.equalsIgnoreCase(grantee)) continue;
-			
-			List<String> privs = entry.getValue();
-			result.append("GRANT ");
-			result.append(StringUtil.listToString(privs, ','));
-			result.append(" ON ");
-			result.append(table.getTableExpression(this.dbConnection));
-			result.append(" TO ");
-			result.append(grantee);
-			result.append(";\n");
-		}
-		return result;
-	}
 
 	/**
 	 * Returns the errors available for the given object and type. This call

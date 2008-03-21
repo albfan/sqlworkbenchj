@@ -21,6 +21,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Collections;
 import java.util.EventObject;
+import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.InputMap;
@@ -30,7 +31,6 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.table.TableCellEditor;
-import workbench.gui.WbSwingUtilities;
 import workbench.gui.WbSwingUtilities;
 
 public class WbCellEditor
@@ -161,7 +161,8 @@ public class WbCellEditor
 		{
 			super();
 			this.setFocusCycleRoot(false);
-			this.setFocusTraversalKeys(WHEN_FOCUSED, Collections.EMPTY_SET);
+			Set<? extends java.awt.AWTKeyStroke> empty = Collections.emptySet();
+			this.setFocusTraversalKeys(WHEN_FOCUSED, empty);
 
 			Object tabAction = this.getInputMap().get(WbSwingUtilities.TAB);
 
@@ -203,7 +204,8 @@ public class WbCellEditor
 		{
 			super(content);
 			this.setFocusCycleRoot(false);
-			this.setFocusTraversalKeys(WHEN_FOCUSED, Collections.EMPTY_SET);
+			Set<? extends java.awt.AWTKeyStroke> empty = Collections.emptySet();
+			this.setFocusTraversalKeys(WHEN_FOCUSED, empty);
 			editor = content;
 		}
 

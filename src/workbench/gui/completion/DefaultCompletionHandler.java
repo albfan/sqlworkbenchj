@@ -41,7 +41,7 @@ public class DefaultCompletionHandler
 	protected List elements = Collections.EMPTY_LIST;
 	protected WbConnection dbConnection;
 	private JLabel header;
-	private List listeners;
+	private List<ListDataListener> listeners;
 	private CompletionPopup window;
 	protected StatusBar statusBar;
 	private String currentWord;
@@ -245,7 +245,7 @@ public class DefaultCompletionHandler
 	 */
 	public void addListDataListener(ListDataListener listDataListener)
 	{
-		if (this.listeners == null) this.listeners = new ArrayList();
+		if (this.listeners == null) this.listeners = new ArrayList<ListDataListener>();
 		this.listeners.add(listDataListener);
 	}
 	

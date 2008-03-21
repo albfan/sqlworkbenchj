@@ -35,6 +35,23 @@ public class SqlFormatterTest
 		util.prepareEnvironment();
 	}
 
+
+	public void testFormatUnicode()
+	{
+		try
+		{
+			String sql = "insert into x(ss2,ss3,ss2) values('\u32A5\u0416','dsaffds',234)";
+			String expected = "INSERT INTO x\n(\n  ss2,\n  ss3,\n  ss2\n)  \nVALUES\n(\n  '\u32A5\u0416',\n  'dsaffds',\n  234\n)";
+			SqlFormatter f = new SqlFormatter(sql, 100);
+			String formatted = (String) f.getFormattedSql();
+			assertEquals(expected, formatted);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	
 	public void testCreateTable()
 	{

@@ -59,7 +59,7 @@ public enum BlobMode
 
 	public static List<String> getTypes()
 	{
-		ArrayList<String> l = new ArrayList(3);
+		ArrayList<String> l = new ArrayList<String>(3);
 		l.add("file");
 		l.add("ansi");
 		l.add("dbms");

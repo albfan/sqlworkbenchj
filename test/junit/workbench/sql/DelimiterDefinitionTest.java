@@ -24,6 +24,21 @@ public class DelimiterDefinitionTest
 		super(testName);
 	}
 
+	public void testTerminatesScript()
+	{
+		try
+		{
+			String sql = "delete from thetable\nGO\n";
+			assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql));
+			sql = "delete from thetable\nGO";
+			assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	public void testDelimiter()
 	{
 		try
