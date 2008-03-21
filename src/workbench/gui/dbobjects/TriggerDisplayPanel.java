@@ -20,8 +20,8 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
+import workbench.db.TriggerReader;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DataStoreTableModel;
@@ -41,7 +41,7 @@ public class TriggerDisplayPanel
 	extends JPanel
 	implements ListSelectionListener, Resettable
 {
-	private WbConnection dbConnection;
+	private TriggerReader reader;
 	private WbTable triggers;
 	private EditorPanel source;
 	private WbSplitPane splitPane;
@@ -80,7 +80,7 @@ public class TriggerDisplayPanel
 	
 	public void setConnection(WbConnection aConnection)
 	{
-		this.dbConnection = aConnection;
+		this.reader = new TriggerReader(aConnection);
 		this.source.setDatabaseConnection(aConnection);
 		this.reset();
 	}
@@ -98,8 +98,7 @@ public class TriggerDisplayPanel
 		try
 		{
 			if (table == null) return;
-			DbMetadata metaData = this.dbConnection.getMetadata();
-			DataStore trg = metaData.getTableTriggers(table);
+			DataStore trg = reader.getTableTriggers(table);
 			DataStoreTableModel rs = new DataStoreTableModel(trg);
 			triggers.setModel(rs, true);
 			triggers.adjustOrOptimizeColumns();
@@ -128,9 +127,8 @@ public class TriggerDisplayPanel
 		
 		try
 		{
-			DbMetadata metaData = this.dbConnection.getMetadata();
-			String triggerName = this.triggers.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
-			String sql = metaData.getTriggerSource(this.triggerCatalog, this.triggerSchema, triggerName);
+			String triggerName = this.triggers.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
+			String sql = reader.getTriggerSource(this.triggerCatalog, this.triggerSchema, triggerName);
 			this.source.setText(sql);
 			this.source.setCaretPosition(0);
 		}

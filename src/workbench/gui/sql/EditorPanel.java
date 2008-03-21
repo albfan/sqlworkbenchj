@@ -47,6 +47,8 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.GapContent;
 import workbench.WbManager;
+import workbench.db.DbFunctions;
+import workbench.db.SqlDataTypesHandler;
 import workbench.db.WbConnection;
 import workbench.gui.actions.FileSaveAction;
 import workbench.gui.editor.SearchAndReplace;
@@ -214,8 +216,11 @@ public class EditorPanel
 			return;
 		}
 		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
-		this.dbFunctions = aConnection.getMetadata().getDbFunctions();
-		this.dbDatatypes = aConnection.getMetadata().getDbDataTypes();
+		DbFunctions func = new DbFunctions();
+		this.dbFunctions = func.getDbFunctions(aConnection.getMetadata());
+		
+		SqlDataTypesHandler handler = new SqlDataTypesHandler(aConnection.getMetadata().getDbId());
+		this.dbDatatypes = handler.getDataTypes();
 		
 		if (token != null) 
 		{

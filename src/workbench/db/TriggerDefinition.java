@@ -36,7 +36,8 @@ public class TriggerDefinition
 		throws SQLException
 	{
 		if (con == null) return null;
-		return con.getMetadata().getTriggerSource(catalog, schema, triggerName);
+		TriggerReader reader = new TriggerReader(con);
+		return reader.getTriggerSource(catalog, schema, triggerName);
 	}
 	
 	public String getSchema() 

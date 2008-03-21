@@ -48,6 +48,7 @@ import workbench.WbManager;
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
+import workbench.db.TriggerReader;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.DropDbObjectAction;
@@ -68,6 +69,7 @@ public class TriggerListPanel
 	implements ListSelectionListener, Reloadable, DbObjectList
 {
 	private WbConnection dbConnection;
+	private TriggerReader reader;
 	private JPanel listPanel;
 	private CriteriaPanel findPanel;
 	private WbTable triggerList;
@@ -91,6 +93,7 @@ public class TriggerListPanel
 		{
 			public void reload()
 			{
+				if (dbConnection == null) return;
 				if (dbConnection.isBusy()) return;
 				try
 				{
@@ -167,6 +170,7 @@ public class TriggerListPanel
 
 	public void disconnect()
 	{
+		this.reader = null;
 		this.dbConnection = null;
 		this.reset();
 	}
@@ -180,6 +184,7 @@ public class TriggerListPanel
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
+		this.reader = new TriggerReader(dbConnection);
 		this.source.setDatabaseConnection(aConnection);
 		this.compileAction.setConnection(aConnection);
 		this.reset();
@@ -208,6 +213,8 @@ public class TriggerListPanel
 
 	public void retrieve()
 	{
+		if (this.dbConnection == null) return;
+		if (this.reader == null) return;
 		if (this.isRetrieving) return;
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		
@@ -216,10 +223,9 @@ public class TriggerListPanel
 			this.reset();
 			this.dbConnection.setBusy(true);
 			this.isRetrieving = true;
-			DbMetadata meta = dbConnection.getMetadata();
 			WbSwingUtilities.showWaitCursorOnWindow(this);
 			
-			DataStore ds = meta.getTriggers(currentCatalog, currentSchema);
+			DataStore ds = reader.getTriggers(currentCatalog, currentSchema);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
 			
 			WbSwingUtilities.invoke(new Runnable()
@@ -313,7 +319,7 @@ public class TriggerListPanel
 
 		if (row < 0) return;
 
-		final String trigger = this.triggerList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
+		final String trigger = this.triggerList.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
@@ -325,7 +331,7 @@ public class TriggerListPanel
 
 	protected void retrieveTriggerSource(String triggerName)
 	{
-		if (this.dbConnection == null) return;
+		if (this.dbConnection == null || this.reader == null) return;
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		
 		DbMetadata meta = dbConnection.getMetadata();
@@ -338,7 +344,7 @@ public class TriggerListPanel
 
 			try
 			{
-				String sql = meta.getTriggerSource(currentCatalog, currentSchema, triggerName);
+				String sql = reader.getTriggerSource(currentCatalog, currentSchema, triggerName);
 				source.setText(sql == null ? "" : sql);
 			}
 			catch (Throwable ex)
@@ -388,7 +394,7 @@ public class TriggerListPanel
 		
 		for (int i=0; i < count; i ++)
 		{
-			String name = this.triggerList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
+			String name = this.triggerList.getValueAsString(rows[i], TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
 
 			// MS SQL Server appends a semicolon at the end of the name...
 			int pos = name.indexOf(';');

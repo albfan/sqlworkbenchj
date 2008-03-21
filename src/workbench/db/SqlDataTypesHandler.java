@@ -28,16 +28,11 @@ public class SqlDataTypesHandler
 {
 	private Set<String> dataTypes;
 	
-	public SqlDataTypesHandler(Connection con)
+	public SqlDataTypesHandler(String dbId)
 	{
-		readTypes(con, null);
+		readTypes(dbId);
 	}
 	
-	public SqlDataTypesHandler(Connection con, String dbid)
-	{
-		readTypes(con, dbid);
-	}
-
 	public Set<String> getDataTypes()
 	{
 		return Collections.unmodifiableSet(this.dataTypes);
@@ -49,7 +44,7 @@ public class SqlDataTypesHandler
 	 * extended by defining the property workbench.db.<dbid>.syntax.keywords
 	 * with a comma separated list of additional keywords
 	 */
-	private void readTypes(Connection con, String dbId)
+	private void readTypes(String dbId)
 	{
 		this.dataTypes = new TreeSet<String>();
 		if (dbId != null)

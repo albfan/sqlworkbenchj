@@ -708,7 +708,7 @@ public class WbConnection
 	{
 		try
 		{
-			DatabaseMetaData jdbcmeta = metaData.getJdbcMetadata();
+			DatabaseMetaData jdbcmeta = getSqlConnection().getMetaData();
 			int major = jdbcmeta.getDatabaseMajorVersion();
 			int minor = jdbcmeta.getDatabaseMinorVersion();
 			return major + "." + minor;

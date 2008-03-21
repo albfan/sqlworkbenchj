@@ -381,12 +381,15 @@ public class DbMetadata
 		return "VIEW"; 
 	}
 
-	public DatabaseMetaData getJdbcMetadata()
+	public DatabaseMetaData getJdbcMetaData()
 	{
 		return this.metaData;
 	}
-
-	public WbConnection getWbConnection() { return this.dbConnection; }
+	
+	public WbConnection getWbConnection() 
+	{ 
+		return this.dbConnection; 
+	}
 	
 	public Connection getSqlConnection()
 	{
@@ -597,6 +600,13 @@ public class DbMetadata
 		return !cat.equalsIgnoreCase(currentCat);
 	}
 	
+	/**
+	 * Checks if the given catalog name should be ignored 
+	 * in SQL statements.
+	 * 
+	 * @param catalog the catalog name to check
+	 * @return true if the catalog is not needed in SQL statements
+	 */
 	public boolean ignoreCatalog(String catalog)
 	{
 		if (catalog == null) return true;
@@ -633,54 +643,6 @@ public class DbMetadata
 		}
 	}
 
-	public Set<String> getDbDataTypes()
-	{
-		SqlDataTypesHandler handler = new SqlDataTypesHandler(this.dbConnection.getSqlConnection(), this.getDbId());
-		return handler.getDataTypes();
-	}
-	
-	public Set<String> getDbFunctions()
-	{
-		Set<String> dbFunctions = new HashSet<String>();
-		try
-		{
-			String funcs = this.metaData.getSystemFunctions();
-			this.addStringList(dbFunctions, funcs);
-
-			funcs = this.metaData.getStringFunctions();
-			this.addStringList(dbFunctions, funcs);
-
-			funcs = this.metaData.getNumericFunctions();
-			this.addStringList(dbFunctions, funcs);
-
-			funcs = this.metaData.getTimeDateFunctions();
-			this.addStringList(dbFunctions, funcs);
-			
-			// Add Standard ANSI SQL Functions
-			this.addStringList(dbFunctions, Settings.getInstance().getProperty("workbench.db.syntax.functions", "COUNT,AVG,SUM,MAX,MIN"));
-			
-			// Add additional DB specific functions
-			this.addStringList(dbFunctions, Settings.getInstance().getProperty("workbench.db." + getDbId() + ".syntax.functions", null));
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("DbMetadata.getDbFunctions()", "Error retrieving function list from DB: " + e.getMessage());
-		}
-		return dbFunctions;
-	}
-
-	private void addStringList(Set<String> target, String list)
-	{
-		if (list == null) return;
-		List<String> tokens = StringUtil.stringToList(list, ",", true, true, false);
-		Iterator itr = tokens.iterator();
-		while (itr.hasNext())
-		{
-			String keyword = (String)itr.next();
-			target.add(keyword.toUpperCase().trim());
-		}
-	}
-	
 	/**
 	 * Returns the type of the passed TableIdentifier. This could 
 	 * be VIEW, TABLE, SYNONYM, ...
@@ -984,6 +946,7 @@ public class DbMetadata
 	{
 		return quoteObjectname(aName, false);
 	}
+	
 	/**
 	 *	Encloses the given object name in double quotes if necessary.
 	 *	Quoting of names is necessary if the name is a reserved word in the
@@ -1421,6 +1384,11 @@ public class DbMetadata
 		return objectExists(aTable, types);
 	}
 	
+	public boolean objectExists(TableIdentifier aTable, String[] types)
+	{
+		return findTable(aTable, types) != null;
+	}
+	
 	public TableIdentifier findSelectableObject(TableIdentifier tbl)
 	{
 		return findTable(tbl, tableTypesSelectable);
@@ -1456,32 +1424,6 @@ public class DbMetadata
 			SqlUtil.closeResult(rs);
 		}
 		return result;
-	}
-	
-	public boolean objectExists(TableIdentifier aTable, String[] types)
-	{
-		if (aTable == null) return false;
-		boolean exists = false;
-		ResultSet rs = null;
-		TableIdentifier tbl = aTable.createCopy();
-		try
-		{
-			tbl.adjustCase(this.dbConnection);
-			String c = tbl.getRawCatalog();
-			String s = tbl.getRawSchema();
-			String t = tbl.getRawTableName();
-			rs = this.metaData.getTables(c, s, t, types);
-			exists = rs.next();
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DbMetadata.tableExists()", "Error checking table existence", e);
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
-		}
-		return exists;
 	}
 
 	protected boolean supportsMixedCaseIdentifiers()
@@ -1658,8 +1600,7 @@ public class DbMetadata
 	public DataStore getProceduresAndTriggers(String aCatalog, String aSchema)
 		throws SQLException
 	{
-		DataStore ds = this.procedureReader.getProcedures(aCatalog, aSchema);
-		return ds;
+		return this.procedureReader.getProcedures(aCatalog, aSchema);
 	}	
 	
 	/**
@@ -2489,6 +2430,7 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("DbMetadata.getCatalogInformat()", "Error retrieving catalog information", e);
 		}
 		finally
 		{
@@ -2507,174 +2449,9 @@ public class DbMetadata
 		return result;
 	}
 
-	/**
-	 *	The column index in the DataStore returned by getTableTriggers which identifies
-	 *  the name of the trigger.
-	 */
-	public static final int COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME = 0;
-	/**
-	 *	The column index in the DataStore returned by getTableTriggers which identifies
-	 *  the type (INSERT, UPDATE etc) of the trigger.
-	 */
-	public static final int COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE = 1;
-	/**
-	 *	The column index in the DataStore returned by getTableTriggers which identifies
-	 *  the event (before, after) of the trigger.
-	 */
-	public static final int COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT = 2;
-
-	/**
-	 * Return a list of triggers available in the given schema.
-	 */
-	public DataStore getTriggers(String catalog, String schema)
-		throws SQLException
-	{
-		return getTriggers(catalog, schema, null);
-	}
-	
-	/**
-	 *	Return the list of defined triggers for the given table.
-	 */
-	public DataStore getTableTriggers(TableIdentifier table)
-		throws SQLException
-	{
-		TableIdentifier tbl = table.createCopy();
-		tbl.adjustCase(this.dbConnection);
-		return getTriggers(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
-	}
-	
-	protected DataStore getTriggers(String catalog, String schema, String tableName)
-		throws SQLException
-	{
-		final String[] cols = {"NAME", "TYPE", "EVENT"};
-		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		final int sizes[] =   {30, 30, 20};
-
-		DataStore result = new DataStore(cols, types, sizes);
-		
-		GetMetaDataSql sql = metaSqlMgr.getListTriggerSql();
-		if (sql == null)
-		{
-			return result;
-		}
-
-		sql.setSchema(schema);
-		sql.setCatalog(catalog);
-		sql.setObjectName(tableName);
-
-		Statement stmt = this.dbConnection.createStatementForQuery();
-		String query = this.adjustHsqlQuery(sql.getSql());
-
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("DbMetadata.getTableTriggers()", "Using query=\n" + query);
-		}
-		ResultSet rs = stmt.executeQuery(query);
-		try
-		{
-			while (rs.next())
-			{
-				int row = result.addRow();
-				String value = rs.getString(1);
-				if (!rs.wasNull() && value != null) value = value.trim();
-				result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME, value);
-
-				value = rs.getString(2);
-				result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE, value);
-
-				value = rs.getString(3);
-				result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT, value);
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result;
-	}
-
-	/**
-	 * Retrieve the SQL Source of the given trigger.
-	 * 
-	 * @param aCatalog The catalog in which the trigger is defined. This should be null if the DBMS does not support catalogs
-	 * @param aSchema The schema in which the trigger is defined. This should be null if the DBMS does not support schemas
-	 * @param aTriggername
-	 * @throws SQLException
-	 * @return the trigger source
-	 */
-	public String getTriggerSource(String aCatalog, String aSchema, String aTriggername)
-		throws SQLException
-	{
-		StringBuilder result = new StringBuilder(500);
-
-		if ("*".equals(aCatalog)) aCatalog = null;
-		if ("*".equals(aSchema)) aSchema = null;
-
-		GetMetaDataSql sql = metaSqlMgr.getTriggerSourceSql();
-		if (sql == null) return StringUtil.EMPTY_STRING;
-
-		sql.setSchema(aSchema);
-		sql.setCatalog(aCatalog);
-		sql.setObjectName(aTriggername);
-		Statement stmt = this.dbConnection.createStatementForQuery();
-		String query = this.adjustHsqlQuery(sql.getSql());
-
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("DbMetadata.getTriggerSource()", "Using query=\n" + query);
-		}
-		
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		
-		ResultSet rs = null;
-		try
-		{
-			// for some DBMS (e.g. SQL Server)
-			// we need to run a exec which might not work 
-			// when using executeQuery() (depending on the JDBC driver)
-			stmt.execute(query);
-			rs = stmt.getResultSet();
-			
-			if (rs != null)
-			{
-				int colCount = rs.getMetaData().getColumnCount();
-				while (rs.next())
-				{
-					for (int i=1; i <= colCount; i++)
-					{
-						result.append(rs.getString(i));
-					}
-				}
-			}
-			CharSequence warn = SqlUtil.getWarnings(this.dbConnection, stmt);
-			if (warn != null && result.length() > 0) result.append(nl + nl);
-			result.append(warn);
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("DbMetadata.getTriggerSource()", "Error reading trigger source", e);
-			if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
-			result.append(ExceptionUtil.getDisplay(e));
-			SqlUtil.closeAll(rs, stmt);
-			return result.toString();
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		
-		boolean replaceNL = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".replacenl.triggersource", false);
-
-		String source = result.toString();
-		if (replaceNL)
-		{
-			source = StringUtil.replace(source, "\\n", nl);
-		}
-		return source;
-	}
-
-	/** Returns the list of schemas as returned by DatabaseMetadata.getSchemas()
-	 * @return List
+	/** 
+	 * Returns the list of schemas as returned by DatabaseMetadata.getSchemas()
+	 * @return a list of schema names
 	 */
 	public List<String> getSchemas()
 	{
@@ -3719,7 +3496,7 @@ public class DbMetadata
 	 * Although the table names are the same, prior to 1.8 you
 	 * cannot use the schema, so it needs to be removed
 	 */
-	private String adjustHsqlQuery(String query)
+	String adjustHsqlQuery(String query)
 	{
 		if (!this.isHsql) return query;
 		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.8")) return query;
