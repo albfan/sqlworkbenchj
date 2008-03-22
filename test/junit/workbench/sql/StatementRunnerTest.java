@@ -1,5 +1,5 @@
 /*
- * DefaultStatementRunnerTest.java
+ * StatementRunnerTest.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -26,11 +26,11 @@ import workbench.sql.wbcommands.WbInclude;
  *
  * @author support@sql-workbench.net
  */
-public class DefaultStatementRunnerTest 
+public class StatementRunnerTest 
 	extends TestCase
 {
 	private TestUtil util;
-	public DefaultStatementRunnerTest(String testName)
+	public StatementRunnerTest(String testName)
 	{
 		super(testName);
 		util = new TestUtil(testName);
@@ -42,7 +42,7 @@ public class DefaultStatementRunnerTest
 		try
 		{
 			util.prepareEnvironment();
-			DefaultStatementRunner runner = util.createConnectedStatementRunner();
+			StatementRunner runner = util.createConnectedStatementRunner();
 			WbConnection con = runner.getConnection();
 
 			runner.setVerboseLogging(true);
@@ -66,12 +66,12 @@ public class DefaultStatementRunnerTest
 	}
 	
 	/**
-	 * Test of getCommandToUse method, of class workbench.sql.DefaultStatementRunner.
+	 * Test of getCommandToUse method, of class workbench.sql.StatementRunner.
 	 */
 	public void testCommands() throws Exception
 	{
 		String sql = "\n\ninsert into bla (col) values (1)";
-		DefaultStatementRunner runner = new DefaultStatementRunner();
+		StatementRunner runner = new StatementRunner();
 		SqlCommand command = runner.cmdMapper.getCommandToUse(sql);
 		assertSame(command, UpdatingCommand.INSERT);
 		

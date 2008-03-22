@@ -20,7 +20,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.sql.DefaultStatementRunner;
+import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.SqlUtil;
 
@@ -44,7 +44,7 @@ public class WbCopyTest
 			TestUtil util = new TestUtil("WbCopyTest_testExecute");
 			util.prepareEnvironment();
 			
-			DefaultStatementRunner runner = util.createConnectedStatementRunner();
+			StatementRunner runner = util.createConnectedStatementRunner();
 			WbConnection con = runner.getConnection();
 			
 			Statement stmt = con.createStatement();
@@ -137,7 +137,7 @@ public class WbCopyTest
 			TestUtil util = new TestUtil("CreateOrderedTest");
 			util.prepareEnvironment();
 			
-			DefaultStatementRunner runner = util.createConnectedStatementRunner();
+			StatementRunner runner = util.createConnectedStatementRunner();
 			WbConnection con = runner.getConnection();
 			
 			Statement stmt = con.createStatement();

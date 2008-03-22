@@ -19,7 +19,7 @@ import java.sql.Statement;
 import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
-import workbench.sql.DefaultStatementRunner;
+import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.SqlUtil;
 
@@ -43,7 +43,7 @@ public class WbSelectBlobTest
 			TestUtil util = new TestUtil(getClass().getName()+"_testExecute");
 			util.prepareEnvironment();
 			
-			DefaultStatementRunner runner = util.createConnectedStatementRunner();
+			StatementRunner runner = util.createConnectedStatementRunner();
 			
 			final long blob_1_size = 21378;
 			final long blob_2_size = 7218;

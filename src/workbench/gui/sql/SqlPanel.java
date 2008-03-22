@@ -69,7 +69,6 @@ import workbench.gui.dialogs.dataimport.ImportFileDialog;
 import workbench.interfaces.DbExecutionNotifier;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultReceiver;
-import workbench.interfaces.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
@@ -157,6 +156,7 @@ import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.MacroManager;
 import workbench.sql.ScriptParser;
+import workbench.sql.StatementRunner;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.sql.preparedstatement.StatementParameters;
@@ -1326,7 +1326,7 @@ public class SqlPanel
 
 		if (this.stmtRunner == null)
 		{
-			this.stmtRunner = StatementRunner.Factory.createRunner();
+			this.stmtRunner = new StatementRunner();
 			this.stmtRunner.setRowMonitor(this.rowMonitor);
 		}
 
@@ -2293,6 +2293,7 @@ public class SqlPanel
 		{
 			this.stmtRunner.setExecutionController(null);
 		}
+		
 		this.stmtRunner.setParameterPrompter(this);
 
 		// If a file is loaded in the editor, make sure the StatementRunner

@@ -96,6 +96,25 @@ public class WbCopy
 			result.setFailure();
 		}
 	}
+
+	private ProfileKey getTargetProfile(ArgumentParser cmd)
+	{
+		String targetProfile = cmdLine.getValue(PARAM_TARGETPROFILE);
+		String targetGroup = cmdLine.getValue(PARAM_TARGETPROFILE_GROUP);
+		ProfileKey targetKey = null;
+		if (targetProfile != null) targetKey = new ProfileKey(targetProfile, targetGroup);
+		return targetKey;
+	}
+	
+	private ProfileKey getSourceProfile(ArgumentParser cmd)
+	{
+		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
+		String sourceGroup = cmdLine.getValue(PARAM_SOURCEPROFILE_GROUP);
+		ProfileKey sourceKey = null;
+		if (sourceProfile != null) sourceKey = new ProfileKey(sourceProfile, sourceGroup);
+		return sourceKey;
+	}
+	
 	public StatementRunnerResult execute(final String sql)
 		throws SQLException
 	{
@@ -109,15 +128,8 @@ public class WbCopy
 			return result;
 		}
 		
-		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
-		String sourceGroup = cmdLine.getValue(PARAM_SOURCEPROFILE_GROUP);
-		ProfileKey sourceKey = null;
-		if (sourceProfile != null) sourceKey = new ProfileKey(sourceProfile, sourceGroup);
-		
-		String targetProfile = cmdLine.getValue(PARAM_TARGETPROFILE);
-		String targetGroup = cmdLine.getValue(PARAM_TARGETPROFILE_GROUP);
-		ProfileKey targetKey = null;
-		if (targetProfile != null) targetKey = new ProfileKey(targetProfile, targetGroup);
+		ProfileKey sourceKey = getSourceProfile(cmdLine);
+		ProfileKey targetKey = getTargetProfile(cmdLine);
 		
 		String sourcetable = cmdLine.getValue(PARAM_SOURCETABLE);
 		String sourcequery = cmdLine.getValue(PARAM_SOURCEQUERY);
@@ -301,6 +313,33 @@ public class WbCopy
 				return null;
 			}
 		}
-		
 	}
+
+	public ConnectionProfile getModificationTarget(WbConnection con, String sql)
+	{
+		cmdLine.parse(getCommandLine(sql));
+		ProfileKey target = getTargetProfile(cmdLine);
+		ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(target);
+		return prof;
+	}
+	
+	
+	/**
+	 * This will check if the target profile is set to read only.
+	 * If that is the case true will be returned, preventing a WbCopy
+	 * command to run on a target profile that is marked as read-only
+	 */
+	public boolean isModificationAllowed(WbConnection con, String sql)
+	{
+		cmdLine.parse(getCommandLine(sql));
+		ProfileKey target = getTargetProfile(cmdLine);
+		ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(target);
+		if (prof != null)
+		{
+			if (prof.getReadOnly()) return false;
+		}
+		return true;
+	}
+	
+	
 }

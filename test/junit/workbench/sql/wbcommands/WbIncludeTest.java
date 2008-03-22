@@ -17,12 +17,11 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.*;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
-import workbench.sql.DefaultStatementRunner;
+import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.EncodingUtil;
 
@@ -34,7 +33,7 @@ public class WbIncludeTest
 	extends WbTestCase
 {
 	private TestUtil util;
-	private DefaultStatementRunner runner;
+	private StatementRunner runner;
 	
 	public WbIncludeTest(String testName)
 	{

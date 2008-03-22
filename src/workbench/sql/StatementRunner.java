@@ -16,12 +16,12 @@ import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 
+import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.interfaces.Connectable;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
-import workbench.interfaces.StatementRunner;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -35,13 +35,12 @@ import workbench.interfaces.ExecutionController;
  *
  * @author  support@sql-workbench.net
  */
-public class DefaultStatementRunner
-	implements PropertyChangeListener, StatementRunner
+public class StatementRunner
+	implements PropertyChangeListener
 {
 	private WbConnection dbConnection;
 	private Connectable connectionClient;
 	private StatementRunnerResult result;
-	private VariablePool parameterPool;
 
 	private SqlCommand currentCommand;
 	private SqlCommand currentConsumer;
@@ -61,11 +60,10 @@ public class DefaultStatementRunner
 	private boolean useSavepoint;
 	private Savepoint savepoint;
 	
-	public DefaultStatementRunner()
+	public StatementRunner()
 	{
 		this.verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
 		Settings.getInstance().addPropertyChangeListener(this, "workbench.gui.log.consolidate");
-		this.parameterPool = VariablePool.getInstance();
 		this.cmdMapper = new CommandMapper();
 	}
 
@@ -83,6 +81,11 @@ public class DefaultStatementRunner
 	}
 
 	public void setFullErrorReporting(boolean flag) { this.fullErrorReporting = flag; }
+
+	public ExecutionController getExecutionController()
+	{
+		return this.controller;
+	}
 	
 	public void setExecutionController(ExecutionController control)
 	{
@@ -171,6 +174,11 @@ public class DefaultStatementRunner
 		return this.cmdMapper.getCommandToUse(sql);
 	}
 	
+	public ExecutionController getController()
+	{
+		return this.controller;
+	}
+	
 	public void runStatement(String aSql, int maxRows, int queryTimeout)
 		throws SQLException, Exception
 	{
@@ -218,12 +226,26 @@ public class DefaultStatementRunner
 		this.currentCommand.setParameterPrompter(this.prompter);
 
 		String realSql = aSql;
-		if (parameterPool.getParameterCount() > 0)
+		if (VariablePool.getInstance().getParameterCount() > 0)
 		{
-			 realSql = parameterPool.replaceAllParameters(aSql);
+			realSql = VariablePool.getInstance().replaceAllParameters(aSql);
 		}
 
-		if (this.controller != null && this.currentCommand.isUpdatingCommand())
+		if (!currentCommand.isModificationAllowed(dbConnection, realSql))
+		{
+			ConnectionProfile target = currentCommand.getModificationTarget(dbConnection, aSql);
+			String profileName = (target == null ? "" : target.getName());
+			this.result = new StatementRunnerResult();
+			String verb = SqlUtil.getSqlVerb(aSql);
+			String msg = ResourceMgr.getFormattedString("MsgReadOnlyMode", profileName, verb);
+			LogMgr.logWarning("DefaultStatementRunner.runStatement()", "Statement " + verb + " ignored because connection is set to read only!");
+			this.result.addMessage(msg);
+			this.result.setWarning(true);
+			this.result.setSuccess();
+			return;
+		}
+		
+		if (this.controller != null && currentCommand.isUpdatingCommand(dbConnection, realSql))
 		{
 			boolean doExecute = this.controller.confirmExecution(realSql);
 			if (!doExecute)

@@ -11,11 +11,10 @@
  */
 package workbench.sql.wbcommands;
 
-import workbench.sql.commands.*;
 import junit.framework.*;
 import workbench.TestUtil;
 import workbench.resource.ResourceMgr;
-import workbench.sql.DefaultStatementRunner;
+import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 
 /**
@@ -36,7 +35,7 @@ public class WbFeedbackTest extends TestCase
 		{
 			TestUtil util = new TestUtil("testEchoExec");
 			util.prepareEnvironment();
-			DefaultStatementRunner runner = new DefaultStatementRunner();
+			StatementRunner runner = new StatementRunner();
 			WbFeedback echo = new WbFeedback("ECHO");
 			runner.addCommand(echo);
 			String sql = "--this is a test\n\techo\t    off";

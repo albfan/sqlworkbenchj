@@ -13,7 +13,7 @@ package workbench.sql.commands;
 
 import junit.framework.TestCase;
 import workbench.TestUtil;
-import workbench.interfaces.StatementRunner;
+import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 
 /**

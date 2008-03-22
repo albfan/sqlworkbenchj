@@ -51,7 +51,6 @@ public class WbInclude
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
 		CommonArgs.addEncodingParameter(cmdLine);
-		this.isUpdatingCommand = true;
 	}
 
 	public String getVerb() { return verb; }
@@ -129,6 +128,7 @@ public class WbInclude
 			batchRunner.setShowTiming(false);
 			batchRunner.setEncoding(encoding);
 			batchRunner.setParameterPrompter(this.prompter);
+			batchRunner.setExecutionController(runner.getExecutionController());
 			batchRunner.setIgnoreDropErrors(ignoreDrop);
 			batchRunner.execute();
 			if (batchRunner.isSuccess())

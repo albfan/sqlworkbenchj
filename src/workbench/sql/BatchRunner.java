@@ -25,9 +25,9 @@ import workbench.db.WbConnection;
 import workbench.gui.components.ConsoleStatusBar;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.profiles.ProfileKey;
+import workbench.interfaces.ExecutionController;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
-import workbench.interfaces.StatementRunner;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -77,7 +77,7 @@ public class BatchRunner
 	public BatchRunner(String aFilelist)
 	{
 		this.filenames = StringUtil.stringToList(aFilelist, ",", true);
-		this.stmtRunner = StatementRunner.Factory.createRunner();
+		this.stmtRunner = new StatementRunner();
 		this.stmtRunner.setFullErrorReporting(true);
 	}
 
@@ -102,6 +102,11 @@ public class BatchRunner
 		return this.connection;
 	}
 
+	public void setExecutionController(ExecutionController controller)
+	{
+		this.stmtRunner.setExecutionController(controller);
+	}
+	
 	public void setParameterPrompter(ParameterPrompter p)
 	{
 		this.stmtRunner.setParameterPrompter(p);
@@ -658,6 +663,8 @@ public class BatchRunner
 			result.setUseSeparateConnectionPerTab(separate);
 			result.setEmptyStringIsNull(cmdLine.getBoolean(AppArguments.ARG_CONN_EMPTYNULL, false));
 			result.setRemoveComments(cmdLine.getBoolean(AppArguments.ARG_CONN_REMOVE_COMMENTS, false));
+			result.setReadOnly(cmdLine.getBoolean(AppArguments.ARG_READ_ONLY, false));
+			
 			if (!StringUtil.isEmptyString(wksp))
 			{
 				wksp = FileDialogUtil.replaceConfigDir(wksp);

@@ -18,8 +18,8 @@ import java.util.Map;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
-import workbench.sql.DefaultStatementRunner;
 import workbench.sql.SqlCommand;
+import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.PkMapping;
 
@@ -39,7 +39,7 @@ public class WbLoadPkMappingTest
 	public void testExecute() throws Exception
 	{
 		TestUtil util = getTestUtil();
-		DefaultStatementRunner runner;
+		StatementRunner runner;
 		
 		try
 		{

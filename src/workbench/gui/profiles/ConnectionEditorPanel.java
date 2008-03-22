@@ -112,6 +112,8 @@ public class ConnectionEditorPanel
 		this.selectWkspButton.addActionListener(this);
 		this.showPassword.addActionListener(this);
 		this.infoColor.setActionListener(this);
+		this.confirmUpdates.addActionListener(this);
+		this.readOnly.addActionListener(this);
 	}
 
 	public void setFocusToTitle()
@@ -183,7 +185,6 @@ public class ConnectionEditorPanel
     wbOptionsPanel = new javax.swing.JPanel();
     cbStorePassword = new BooleanPropertyEditor();
     rollbackBeforeDisconnect = new BooleanPropertyEditor();
-    confirmUpdates = new BooleanPropertyEditor();
     cbIgnoreDropErrors = new BooleanPropertyEditor();
     cbSeparateConnections = new BooleanPropertyEditor();
     emptyStringIsNull = new BooleanPropertyEditor();
@@ -195,6 +196,9 @@ public class ConnectionEditorPanel
     colorPanel = new javax.swing.JPanel();
     infoColorLabel = new javax.swing.JLabel();
     infoColor = new WbColorPicker(true);
+    controlUpdates = new javax.swing.JPanel();
+    confirmUpdates = new BooleanPropertyEditor();
+    readOnly = new BooleanPropertyEditor();
     jPanel1 = new javax.swing.JPanel();
     tfWorkspaceFile = new StringPropertyEditor();
     selectWkspButton = new FlatButton();
@@ -412,16 +416,6 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 3, 0);
     wbOptionsPanel.add(rollbackBeforeDisconnect, gridBagConstraints);
 
-    confirmUpdates.setText(ResourceMgr.getString("LblConfirmDbUpdates"));
-    confirmUpdates.setToolTipText(ResourceMgr.getDescription("LblConfirmDbUpdates"));
-    confirmUpdates.setName("confirmUpdates"); // NOI18N
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 3, 0);
-    wbOptionsPanel.add(confirmUpdates, gridBagConstraints);
-
     cbIgnoreDropErrors.setSelected(true);
     cbIgnoreDropErrors.setText(ResourceMgr.getString("LblIgnoreDropErrors"));
     cbIgnoreDropErrors.setToolTipText(ResourceMgr.getDescription("LblIgnoreDropErrors"));
@@ -523,8 +517,30 @@ public class ConnectionEditorPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(3, 4, 0, 0);
     wbOptionsPanel.add(colorPanel, gridBagConstraints);
+
+    controlUpdates.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 0));
+
+    confirmUpdates.setText(ResourceMgr.getString("LblConfirmDbUpdates"));
+    confirmUpdates.setToolTipText(ResourceMgr.getDescription("LblConfirmDbUpdates"));
+    confirmUpdates.setMargin(new java.awt.Insets(2, 2, 2, 5));
+    confirmUpdates.setName("confirmUpdates"); // NOI18N
+    controlUpdates.add(confirmUpdates);
+
+    readOnly.setText(ResourceMgr.getString("LblConnReadOnly"));
+    readOnly.setToolTipText(ResourceMgr.getDescription("LblConnReadOnly"));
+    readOnly.setName("readOnly"); // NOI18N
+    controlUpdates.add(readOnly);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 3, 0);
+    wbOptionsPanel.add(controlUpdates, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -767,6 +783,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JCheckBox cbStorePassword;
   protected javax.swing.JPanel colorPanel;
   protected javax.swing.JCheckBox confirmUpdates;
+  protected javax.swing.JPanel controlUpdates;
   protected javax.swing.JButton editConnectionScriptsButton;
   protected javax.swing.JCheckBox emptyStringIsNull;
   protected javax.swing.JButton extendedProps;
@@ -786,6 +803,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JLabel lblUsername;
   protected javax.swing.JButton manageDriversButton;
   protected javax.swing.JLabel propLabel;
+  protected javax.swing.JCheckBox readOnly;
   protected javax.swing.JCheckBox rememberExplorerSchema;
   protected javax.swing.JCheckBox removeComments;
   protected javax.swing.JCheckBox rollbackBeforeDisconnect;
@@ -997,7 +1015,21 @@ public class ConnectionEditorPanel
 
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
-		if (e.getSource() == this.selectWkspButton)
+		if (e.getSource() == this.readOnly)
+		{
+			if (readOnly.isSelected())
+			{
+				confirmUpdates.setSelected(false);
+			}
+		}
+		else if (e.getSource() == this.confirmUpdates)
+		{
+			if (confirmUpdates.isSelected())
+			{
+				this.readOnly.setSelected(false);
+			}
+		}
+		else if (e.getSource() == this.selectWkspButton)
 		{
 			this.selectWorkspace();
 		}

@@ -15,10 +15,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import workbench.WbManager;
+import workbench.db.ConnectionProfile;
 import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 import workbench.interfaces.ParameterPrompter;
-import workbench.interfaces.StatementRunner;
 import workbench.util.ArgumentParser;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.ResultLogger;
@@ -462,6 +462,32 @@ public class SqlCommand
 	public boolean isUpdatingCommand()
 	{
 		return this.isUpdatingCommand;
+	}
+	
+	public boolean isUpdatingCommand(WbConnection con, String sql)
+	{
+		if (con == null) return this.isUpdatingCommand;
+		if (this.isUpdatingCommand) return true;
+		String verb = SqlUtil.getSqlVerb(sql);
+		return con.getDbSettings().isUpdatingCommand(verb);
+	}
+	
+	public ConnectionProfile getModificationTarget(WbConnection con, String sql)
+	{
+		if (con == null) return null;
+		return con.getProfile();
+	}
+	
+	public boolean isModificationAllowed(WbConnection con, String sql)
+	{
+		if (con == null) return true;
+		if (isUpdatingCommand(con, sql))
+		{
+			ConnectionProfile prof = con.getProfile();
+			if (prof == null) return true;
+			if (prof.getReadOnly()) return false;
+		}
+		return true;
 	}
 
 	public void setQueryTimeout(int timeout)

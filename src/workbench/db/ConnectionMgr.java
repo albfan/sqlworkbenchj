@@ -302,8 +302,8 @@ public class ConnectionMgr
 	 */
 	public ConnectionProfile getProfile(ProfileKey key)
 	{
-		this.getProfiles();
 		if (key == null) return null;
+		this.getProfiles();
 		String name = key.getName();
 		String group = key.getGroup();
 		if (this.profiles == null) return null;

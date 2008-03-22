@@ -54,6 +54,7 @@ public class ConnectionProfile
 	private boolean ignoreDropErrors;
 	private boolean confirmUpdates;
 	private boolean trimCharData;
+	private boolean readOnly;
 	private Integer defaultFetchSize;
 	
 	private boolean emptyStringIsNull = false;
@@ -138,18 +139,26 @@ public class ConnectionProfile
 		}
 	}
 	
-	public void setCopyExtendedPropsToSystem(boolean flag)
-	{
-		if (flag != this.copyPropsToSystem)
-		{
-			this.copyPropsToSystem = flag;
-			this.changed = true;
-		}
-	}
-	
 	public boolean getCopyExtendedPropsToSystem()
 	{
 		return this.copyPropsToSystem;
+	}
+	
+	public void setCopyExtendedPropsToSystem(boolean flag)
+	{
+		this.changed = (flag != this.copyPropsToSystem);
+		this.copyPropsToSystem = flag;
+	}
+
+	public boolean getReadOnly()
+	{
+		return readOnly;
+	}
+
+	public void setReadOnly(boolean flag)
+	{
+		this.changed = (this.readOnly != flag);
+		this.readOnly = flag;
 	}
 	
 	public boolean getTrimCharData() 
@@ -177,11 +186,8 @@ public class ConnectionProfile
 
 	public void setStoreExplorerSchema(boolean value)
 	{
-		if (value != rememberExplorerSchema )
-		{
-			rememberExplorerSchema = value;
-			changed = true;
-		}
+		changed = value != rememberExplorerSchema;
+		rememberExplorerSchema = value;
 	}
 
 	public String getGroup()
@@ -577,6 +583,7 @@ public class ConnectionProfile
 		result.setPreDisconnectScript(preDisconnectScript);
 		result.setPostConnectScript(postConnectScript);
 		result.setInfoDisplayColor(infoColor);
+		result.setReadOnly(readOnly);
 		result.setAlternateDelimiter(alternateDelimiter == null ? null : alternateDelimiter.createCopy());
 		
 		result.setCopyExtendedPropsToSystem(copyPropsToSystem);

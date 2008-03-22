@@ -20,7 +20,7 @@ import java.sql.Statement;
 import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.WbConnection;
-import workbench.sql.DefaultStatementRunner;
+import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
@@ -35,7 +35,7 @@ public class UpdatingCommandTest
 {
 	private TestUtil util;
 	private WbConnection connection;
-	private DefaultStatementRunner runner;
+	private StatementRunner runner;
 	
 	public UpdatingCommandTest(String testName)
 	{

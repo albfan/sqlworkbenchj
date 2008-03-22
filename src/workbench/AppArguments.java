@@ -40,6 +40,7 @@ public class AppArguments
 	public static final String ARG_CONN_ROLLBACK = "rollbackOnDisconnect";
 	public static final String ARG_CONN_TRIM_CHAR = "trimCharData";
 	public static final String ARG_IGNORE_DROP = "ignoreDropErrors";
+	public static final String ARG_READ_ONLY = "readOnly";
 	public static final String ARG_CONN_REMOVE_COMMENTS = "removeComments";
 	
 	public static final String ARG_DISPLAY_RESULT = "displayResult";
@@ -103,6 +104,7 @@ public class AppArguments
 		addArgument(ARG_ALT_DELIMITER);
 		addArgument(ARG_DELIMITER);
 		addArgument(ARG_QUIET, ArgumentType.BoolArgument);
+		addArgument(ARG_READ_ONLY, ArgumentType.BoolArgument);
 		addArgument(ARG_CONN_TRIM_CHAR, ArgumentType.BoolArgument);
 		addArgument(ARG_LANG);
 		addArgument(ARG_CONSOLIDATE_LOG, ArgumentType.BoolArgument);

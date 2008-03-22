@@ -30,12 +30,12 @@ import java.util.List;
 
 import workbench.db.report.TagWriter;
 import workbench.interfaces.DbExecutionListener;
-import workbench.interfaces.StatementRunner;
 import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
+import workbench.sql.StatementRunner;
 import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
@@ -177,7 +177,7 @@ public class WbConnection
 		if (StringUtil.isWhitespaceOrEmpty(sql)) return;
 		LogMgr.logInfo("WbConnection.runConnectScript()", "Executing " + type + " script...");
 		
-		StatementRunner runner = StatementRunner.Factory.createRunner();
+		StatementRunner runner = new StatementRunner();
 		runner.setConnection(this);
 		
 		ScriptParser p = new ScriptParser(sql);

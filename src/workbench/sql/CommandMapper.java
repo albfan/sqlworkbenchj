@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
-import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;

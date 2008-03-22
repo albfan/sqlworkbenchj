@@ -14,7 +14,7 @@ package workbench.sql.wbcommands;
 import java.util.Map;
 import junit.framework.*;
 import workbench.TestUtil;
-import workbench.sql.DefaultStatementRunner;
+import workbench.sql.StatementRunner;
 import workbench.sql.SqlCommand;
 import workbench.storage.PkMapping;
 
@@ -32,7 +32,7 @@ public class WbDefinePkTest extends TestCase
 
 	public void testExecute() throws Exception
 	{
-		DefaultStatementRunner runner;
+		StatementRunner runner;
 		
 		try
 		{

@@ -15,7 +15,7 @@ import java.util.List;
 import junit.framework.*;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
-import workbench.sql.DefaultStatementRunner;
+import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 
@@ -44,7 +44,7 @@ public class WbDescribeTableTest extends TestCase
 	public void testExecute() throws Exception
 	{
 		TestUtil util;
-		DefaultStatementRunner runner;
+		StatementRunner runner;
 		
 		try
 		{

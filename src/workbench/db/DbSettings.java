@@ -13,8 +13,10 @@ package workbench.db;
 
 import java.sql.DatabaseMetaData;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
@@ -41,7 +43,8 @@ public class DbSettings
 	
 	private Map<Integer, String> indexTypeMapping;
 	public static final String IDX_TYPE_NORMAL = "NORMAL";
-
+	private Set<String> updatingCommands;
+	
 	public DbSettings(String id, String productName)
 	{
 		this.dbId = id;
@@ -84,6 +87,26 @@ public class DbSettings
 		return this.dbId; 
 	}
 
+	public boolean isUpdatingCommand(String verb)
+	{
+		if (StringUtil.isEmptyString(verb)) return false;
+		if (this.updatingCommands == null)
+		{
+			this.updatingCommands = new HashSet<String>();
+			
+			String l = Settings.getInstance().getProperty("workbench.db.updatingcommands", null);
+			if (l != null) l = l.toLowerCase();
+			List<String> commands = StringUtil.stringToList(l, ",", true, true);
+			updatingCommands.addAll(commands);
+			
+			l = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".updatingcommands", null);
+			if (l != null) l = l.toLowerCase();
+			commands = StringUtil.stringToList(l, ",", true, true);
+			updatingCommands.addAll(commands);
+		}
+		return updatingCommands.contains(verb.toLowerCase());
+	}
+	
 	public boolean longVarcharIsClob()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".clob.longvarchar", true);

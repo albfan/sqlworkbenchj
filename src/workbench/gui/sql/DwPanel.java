@@ -22,8 +22,6 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.CellEditor;
 import javax.swing.JOptionPane;
-import javax.swing.JOptionPane;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -64,10 +62,10 @@ import workbench.interfaces.DbData;
 import workbench.interfaces.DbUpdater;
 import workbench.interfaces.Interruptable;
 import workbench.interfaces.JobErrorHandler;
-import workbench.interfaces.StatementRunner;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
@@ -240,7 +238,7 @@ public class DwPanel
 	{
 		if (this.stmtRunner == null)
 		{
-			this.stmtRunner = StatementRunner.Factory.createRunner();
+			this.stmtRunner = new StatementRunner();
 			this.stmtRunner.setRowMonitor(this.genericRowMonitor);
 		}
 		

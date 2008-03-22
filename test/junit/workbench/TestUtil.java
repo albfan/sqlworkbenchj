@@ -35,8 +35,8 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.sql.BatchRunner;
-import workbench.sql.DefaultStatementRunner;
 import workbench.sql.ScriptParser;
+import workbench.sql.StatementRunner;
 import workbench.util.ArgumentParser;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -216,16 +216,16 @@ public class TestUtil
 		return con;
 	}
 	
-	public DefaultStatementRunner createConnectedStatementRunner()
+	public StatementRunner createConnectedStatementRunner()
 		throws Exception
 	{
 		return createConnectedStatementRunner(getConnection());
 	}
 	
-	public DefaultStatementRunner createConnectedStatementRunner(WbConnection con)
+	public StatementRunner createConnectedStatementRunner(WbConnection con)
 		throws Exception
 	{
-		DefaultStatementRunner runner = new DefaultStatementRunner();
+		StatementRunner runner = new StatementRunner();
 		runner.setBaseDir(getBaseDir());
 		runner.setConnection(con);
 		return runner;

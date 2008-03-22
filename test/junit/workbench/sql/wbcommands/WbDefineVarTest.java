@@ -18,7 +18,7 @@ import junit.framework.*;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
-import workbench.sql.DefaultStatementRunner;
+import workbench.sql.StatementRunner;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.VariablePool;
@@ -42,7 +42,7 @@ public class WbDefineVarTest extends TestCase
 		{
 			TestUtil util = new TestUtil(getClass().getName()+"_testExecute");
 			util.prepareEnvironment();
-			DefaultStatementRunner runner = util.createConnectedStatementRunner();
+			StatementRunner runner = util.createConnectedStatementRunner();
 			WbConnection con = runner.getConnection();
 			
 			String sql = "--define some vars\nwbvardef theanswer = 42";
