@@ -13,6 +13,7 @@ package workbench.gui.components;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.Serializable;
@@ -72,18 +73,22 @@ public class WbColorPicker
   private void initComponents() {
 
     samplePanel = new javax.swing.JPanel();
+    infoPanel = new javax.swing.JPanel();
     resetButton = new FlatButton();
     selectColor = new FlatButton();
     defaultLabel = new javax.swing.JLabel();
 
-    setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
+    setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 0));
 
     samplePanel.setBackground(new java.awt.Color(255, 255, 255));
     samplePanel.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
     samplePanel.setMaximumSize(new java.awt.Dimension(18, 18));
     samplePanel.setMinimumSize(new java.awt.Dimension(18, 18));
     samplePanel.setPreferredSize(new java.awt.Dimension(18, 18));
+    samplePanel.setLayout(null);
     add(samplePanel);
+
+    infoPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 0));
 
     resetButton.setToolTipText(ResourceMgr.getDescription("LblResetColor"));
     resetButton.setMaximumSize(new java.awt.Dimension(22, 22));
@@ -94,7 +99,7 @@ public class WbColorPicker
         resetButtonActionPerformed(evt);
       }
     });
-    add(resetButton);
+    infoPanel.add(resetButton);
 
     selectColor.setText("...");
     selectColor.setMargin(new java.awt.Insets(0, 0, 0, 0));
@@ -106,10 +111,12 @@ public class WbColorPicker
         selectColorMouseClicked(evt);
       }
     });
-    add(selectColor);
+    infoPanel.add(selectColor);
 
     defaultLabel.setText(ResourceMgr.getString("LblNone"));
-    add(defaultLabel);
+    infoPanel.add(defaultLabel);
+
+    add(infoPanel);
   }// </editor-fold>//GEN-END:initComponents
 
 	private void selectColorMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_selectColorMouseClicked
@@ -177,6 +184,7 @@ public class WbColorPicker
 	}
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JLabel defaultLabel;
+  private javax.swing.JPanel infoPanel;
   private javax.swing.JButton resetButton;
   private javax.swing.JPanel samplePanel;
   private javax.swing.JButton selectColor;

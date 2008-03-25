@@ -150,7 +150,7 @@ public class ConnectionProfile
 		this.copyPropsToSystem = flag;
 	}
 
-	public boolean getReadOnly()
+	public boolean isReadOnly()
 	{
 		return readOnly;
 	}
@@ -688,7 +688,7 @@ public class ConnectionProfile
 		this.driverName = driverName;
 	}
 
-	public boolean isConfirmUpdates()
+	public boolean getConfirmUpdates()
 	{
 		return confirmUpdates;
 	}

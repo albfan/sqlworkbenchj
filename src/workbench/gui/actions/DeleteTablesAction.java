@@ -21,6 +21,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.TableDeleterUI;
@@ -83,7 +84,15 @@ public class DeleteTablesAction
 	
 	public void valueChanged(ListSelectionEvent e)
 	{
-		setEnabled(this.selection.getMinSelectionIndex() >= 0);
+		WbConnection conn = this.source.getConnection();
+		if (conn == null || conn.getProfile().isReadOnly())
+		{
+			setEnabled(false);
+		}
+		else
+		{
+			setEnabled(this.selection.getMinSelectionIndex() >= 0);
+		}		
 	}
 	
 }

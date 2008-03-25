@@ -203,12 +203,13 @@ public class BatchRunnerTest
 	public void testCreateCommandLineProfile()
 	{
 		AppArguments cmdline = new AppArguments();
-		cmdline.parse("-removeComments=true -emptyStringIsNull=true -autoCommit=true -separateConnection=true -url=jdbc:postgres://localhost/test -username=test -password=topsecret -configdir=. -driver=org.postgresql.Driver -driverjar=postgresql-8.3-603.jdbc3.jar");
+		cmdline.parse("-readOnly=true -removeComments=true -emptyStringIsNull=true -autoCommit=true -separateConnection=true -url=jdbc:postgres://localhost/test -username=test -password=topsecret -configdir=. -driver=org.postgresql.Driver -driverjar=postgresql-8.3-603.jdbc3.jar");
 		ConnectionProfile p = BatchRunner.createCmdLineProfile(cmdline);
 		assertTrue(p.getAutocommit());
 		assertTrue(p.getUseSeparateConnectionPerTab());
 		assertTrue(p.getRemoveComments());
 		assertTrue(p.getEmptyStringIsNull());
+		assertTrue(p.isReadOnly());
 		assertEquals("org.postgresql.Driver", p.getDriverclass());
 		assertEquals("topsecret", p.getPassword());
 		assertEquals("test", p.getUsername());

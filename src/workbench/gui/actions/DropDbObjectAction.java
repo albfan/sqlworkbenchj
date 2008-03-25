@@ -21,6 +21,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import workbench.db.DbObject;
 import workbench.db.GenericObjectDropper;
+import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.ObjectDropperUI;
@@ -103,7 +104,15 @@ public class DropDbObjectAction
 	
 	public void valueChanged(ListSelectionEvent e)
 	{
-		setEnabled(this.available && this.selection.getMinSelectionIndex() >= 0);
+		WbConnection conn = this.source.getConnection();
+		if (conn == null || conn.getProfile().isReadOnly())
+		{
+			setEnabled(false);
+		}
+		else
+		{
+			setEnabled(this.available && this.selection.getMinSelectionIndex() >= 0);
+		}
 	}
 	
 }

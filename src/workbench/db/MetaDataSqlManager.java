@@ -35,6 +35,7 @@ public class MetaDataSqlManager
 	public static final String FK_TARGET_TABLE_PLACEHOLDER = "%targettable%";
 	public static final String FK_TARGET_COLUMNS_PLACEHOLDER = "%targetcolumnlist%";
 	public static final String COMMENT_TABLE_PLACEHOLDER = "%table%";
+	public static final String COMMENT_SCHEMA_PLACEHOLDER = "%schema%";
 	public static final String COMMENT_COLUMN_PLACEHOLDER = COLUMN_NAME_PLACEHOLDER;
 	public static final String COMMENT_PLACEHOLDER = "%comment%";
 	public static final String FK_UPDATE_RULE = "%fk_update_rule%";
@@ -198,6 +199,7 @@ public class MetaDataSqlManager
 			synchronized (NO_STRING)
 			{
 				HashMap sql = this.readStatementTemplates("TableCommentStatements.xml");
+				if (sql == null) return null;
 				this.tableCommentTemplate = (String)sql.get(this.productName);
 				if (tableCommentTemplate == null)
 				{

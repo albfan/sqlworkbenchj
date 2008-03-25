@@ -57,6 +57,7 @@ public class WbCopy
 
 	public WbCopy()
 	{
+		this.isUpdatingCommand = true;
 		cmdLine = new ArgumentParser();
 		CommonArgs.addCommitParameter(cmdLine);
 		CommonArgs.addImportModeParameter(cmdLine);
@@ -315,6 +316,9 @@ public class WbCopy
 		}
 	}
 
+	/**
+	 * Extracts the target profile from the passed SQL statement.
+	 */
 	public ConnectionProfile getModificationTarget(WbConnection con, String sql)
 	{
 		cmdLine.parse(getCommandLine(sql));
@@ -322,24 +326,5 @@ public class WbCopy
 		ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(target);
 		return prof;
 	}
-	
-	
-	/**
-	 * This will check if the target profile is set to read only.
-	 * If that is the case true will be returned, preventing a WbCopy
-	 * command to run on a target profile that is marked as read-only
-	 */
-	public boolean isModificationAllowed(WbConnection con, String sql)
-	{
-		cmdLine.parse(getCommandLine(sql));
-		ProfileKey target = getTargetProfile(cmdLine);
-		ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(target);
-		if (prof != null)
-		{
-			if (prof.getReadOnly()) return false;
-		}
-		return true;
-	}
-	
-	
+
 }

@@ -59,7 +59,7 @@ public class StatementRunner
 	protected CommandMapper cmdMapper;
 	private boolean useSavepoint;
 	private Savepoint savepoint;
-	
+	private boolean confirmUpdates = false;
 	public StatementRunner()
 	{
 		this.verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
@@ -140,6 +140,7 @@ public class StatementRunner
 		if (aConn == null) return;
 		this.ignoreDropErrors = dbConnection.getProfile().getIgnoreDropErrors();
 		this.removeComments = dbConnection.getProfile().getRemoveComments();
+		this.confirmUpdates = dbConnection.getProfile().getConfirmUpdates();
 		
 		DbMetadata meta = this.dbConnection.getMetadata();
 		if (meta == null) return;
@@ -245,7 +246,7 @@ public class StatementRunner
 			return;
 		}
 		
-		if (this.controller != null && currentCommand.isUpdatingCommand(dbConnection, realSql))
+		if (currentCommand.needConfirmation(dbConnection, realSql))
 		{
 			boolean doExecute = this.controller.confirmExecution(realSql);
 			if (!doExecute)

@@ -459,33 +459,86 @@ public class SqlCommand
 		return this.consumerWaiting;
 	}
 
+	/**
+	 * Check if this verb for this statement is considered an updating command in 
+	 * all circumstances.
+	 */
 	public boolean isUpdatingCommand()
 	{
 		return this.isUpdatingCommand;
 	}
 	
-	public boolean isUpdatingCommand(WbConnection con, String sql)
+	public boolean needConfirmation(WbConnection con, String sql)
 	{
-		if (con == null) return this.isUpdatingCommand;
-		if (this.isUpdatingCommand) return true;
-		String verb = SqlUtil.getSqlVerb(sql);
-		return con.getDbSettings().isUpdatingCommand(verb);
+		ConnectionProfile prof = getModificationTarget(con, sql);
+		if (prof == null) return false;
+		if (isUpdatingCommand(con, sql)) 
+		{
+			return prof.getConfirmUpdates();
+		}
+		return false;
 	}
 	
+	/**
+	 * Check if the given SQL statement may update the database.
+	 * This method will also consider additional keywords
+	 * added by the user (globally or DBMS specific) and check if
+	 * the SELECT statement is a disguised CREATE TABLE.
+	 * 
+	 * @param con the database connection to check against
+	 * @param sql the SQL statement to check
+	 * @return true if the SQL might update the database
+	 * 
+	 * @see workbench.db.DbSettings#isUpdatingCommand(java.lang.String)
+	 * @see workbench.db.DbMetadata#isSelectIntoNewTable(java.lang.String) 
+	 */
+	public boolean isUpdatingCommand(WbConnection con, String sql)
+	{
+		if (con == null) return isUpdatingCommand;
+		if (this.isUpdatingCommand) return true;
+		String verb = SqlUtil.getSqlVerb(sql);
+		boolean updating = con.getDbSettings().isUpdatingCommand(verb);
+		if (updating) return true;
+		return con.getMetadata().isSelectIntoNewTable(sql);
+	}
+	
+	/**
+	 * Returns the profile that is attached to the connection where the 
+	 * data would be modified. 
+	 * The default implementation returns the profile attached to the 
+	 * passed connection. WbCopy will check the commandline and will 
+	 * return the profile specified in the -targetProfile parameter
+	 * 
+	 * @param con the connection to check
+	 * @param sql the SQL statement to check (ignored)
+	 * @return the profile attached to the connection
+	 * 
+	 * @see workbench.sql.wbcommands.WbCopy#getModificationTarget(workbench.db.WbConnection, java.lang.String) 
+	 */
 	public ConnectionProfile getModificationTarget(WbConnection con, String sql)
 	{
 		if (con == null) return null;
 		return con.getProfile();
 	}
 	
+	/**
+	 * Check if the current profile allows running of the given SQL. This 
+	 * will check for the read-only option and will disallowe statements 
+	 * where {@link #isUpdatingCommand(workbench.db.WbConnection, java.lang.String)}
+	 * returns true.
+	 * 
+	 * @param con
+	 * @param sql
+	 * @return true if the profile is not read-only, or if the statement does not update anything
+	 * @see #isUpdatingCommand(workbench.db.WbConnection, java.lang.String) 
+	 */
 	public boolean isModificationAllowed(WbConnection con, String sql)
 	{
-		if (con == null) return true;
+		ConnectionProfile prof = getModificationTarget(con, sql);
+		if (prof == null) return true;
 		if (isUpdatingCommand(con, sql))
 		{
-			ConnectionProfile prof = con.getProfile();
-			if (prof == null) return true;
-			if (prof.getReadOnly()) return false;
+			if (prof.isReadOnly()) return false;
 		}
 		return true;
 	}

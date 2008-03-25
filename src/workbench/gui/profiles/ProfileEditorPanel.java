@@ -154,9 +154,9 @@ public class ProfileEditorPanel
 	public void restoreSettings()
 	{
 		int pos = Settings.getInstance().getProfileDividerLocation();
-		if (pos < 210)
+		if (pos < 200)
 		{
-			pos = 210; // make sure the whole toolbar for the tree is visible!
+			pos = 200; // make sure the whole toolbar for the tree is visible!
 		} 
 		this.jSplitPane.setDividerLocation(pos);
 		String groups = Settings.getInstance().getProperty("workbench.profiles.expandedgroups", null);

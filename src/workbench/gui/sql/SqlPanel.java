@@ -2285,15 +2285,7 @@ public class SqlPanel
 		int oldSelectionStart = -1;
 		int oldSelectionEnd = -1;
 
-		if (this.dbConnection.getProfile().isConfirmUpdates())
-		{
-			this.stmtRunner.setExecutionController(this);
-		}
-		else
-		{
-			this.stmtRunner.setExecutionController(null);
-		}
-		
+		this.stmtRunner.setExecutionController(this);
 		this.stmtRunner.setParameterPrompter(this);
 
 		// If a file is loaded in the editor, make sure the StatementRunner
@@ -2897,8 +2889,9 @@ public class SqlPanel
 
 	protected void checkResultSetActions()
 	{
+		final boolean readOnly = (dbConnection == null ? false : dbConnection.getProfile().isReadOnly());
 		final boolean hasResult = currentData != null ? currentData.hasResultSet() : false;
-		final boolean mayEdit = hasResult && currentData.hasUpdateableColumns();
+		final boolean mayEdit = !readOnly && hasResult && currentData.hasUpdateableColumns();
 		final boolean findNext = hasResult && (currentData.getTable().canSearchAgain());
 		Action[] actionList = new Action[]
 						{ dataToClipboard,

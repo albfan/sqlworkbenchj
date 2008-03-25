@@ -232,6 +232,11 @@ public class DwPanel
 		}
 		this.stmtRunner = null;
 		this.clearStatusMessage();
+		
+		if (dbConnection != null)
+		{
+			setReadOnly(dbConnection.getProfile().isReadOnly());
+		}
 	}
 
 	private void createStatementRunner()
@@ -344,7 +349,7 @@ public class DwPanel
 	
 	public boolean shouldSaveChanges(WbConnection aConnection)
 	{
-		if (!Settings.getInstance().getPreviewDml() && !this.dbConnection.getProfile().isConfirmUpdates()) return true;
+		if (!Settings.getInstance().getPreviewDml() && !this.dbConnection.getProfile().getConfirmUpdates()) return true;
 		
 		this.dataTable.stopEditing();
 		DataStore ds = this.dataTable.getDataStore();
@@ -469,12 +474,16 @@ public class DwPanel
 	
 	public void setReadOnly(boolean aFlag)
 	{
-		this.readOnly = aFlag;
-		if (this.readOnly && this.editingStarted)
+		if (this.dbConnection != null)
 		{
-			this.endEdit();
+			aFlag = this.dbConnection.getProfile().isReadOnly();
+		}
+		
+		this.readOnly = aFlag;
+		if (this.readOnly)
+		{
+			this.endEdit(true);
 			this.disableUpdateActions();
-			this.dataTable.restoreOriginalValues();
 		}
 		else
 		{
@@ -482,7 +491,10 @@ public class DwPanel
 		}
 	}
 	
-	public boolean isReadOnly() { return this.readOnly; }
+	public boolean isReadOnly() 
+	{ 
+		return this.readOnly; 
+	}
 	
 	public boolean checkUpdateTable()
 	{
@@ -723,12 +735,21 @@ public class DwPanel
 	{
 		boolean hasResult = this.hasResultSet();
 		int rows = this.getTable().getSelectedRowCount();
+		
 		this.dataTable.getExportAction().setEnabled(hasResult);
-		if (this.updateAction != null) this.updateAction.setEnabled(isModified());
-		if (this.duplicateRow != null) this.duplicateRow.setEnabled(rows == 1);
-		if (this.deleteRow != null) this.deleteRow.setEnabled(rows > 0);
-		if (this.deleteDependentRow != null) this.deleteDependentRow.setEnabled(rows > 0);
-		if (this.insertRow != null) this.insertRow.setEnabled(hasResult);
+		
+		if (this.readOnly)
+		{
+			this.disableUpdateActions();
+		}
+		else
+		{
+			if (this.updateAction != null) this.updateAction.setEnabled(isModified());
+			if (this.duplicateRow != null) this.duplicateRow.setEnabled(rows == 1);
+			if (this.deleteRow != null) this.deleteRow.setEnabled(rows > 0);
+			if (this.insertRow != null) this.insertRow.setEnabled(hasResult);
+			if (this.deleteDependentRow != null) this.deleteDependentRow.setEnabled(rows > 0);
+		}
 		if (this.selectKeys != null) this.selectKeys.setEnabled(hasResult);
 		this.dataTable.checkCopyActions();
 	}
@@ -1247,8 +1268,14 @@ public class DwPanel
 	 */
 	public void valueChanged(ListSelectionEvent e)
 	{
-		if (this.readOnly) return;
-		checkResultSetActions();
+		if (this.readOnly) 
+		{
+			disableUpdateActions();
+		}
+		else
+		{
+			checkResultSetActions();
+		}
 	}
 	
 	/**

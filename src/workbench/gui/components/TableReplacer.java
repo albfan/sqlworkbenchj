@@ -16,6 +16,7 @@ import java.awt.EventQueue;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FindDataAction;
 import workbench.gui.actions.FindDataAgainAction;
@@ -24,7 +25,6 @@ import workbench.interfaces.Replaceable;
 import workbench.interfaces.Searchable;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStoreReplacer;
-import workbench.storage.Position;
 import workbench.storage.Position;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
@@ -45,7 +45,7 @@ public class TableReplacer
 	private ReplaceDataAction replaceAction;
 	private DataStoreReplacer replacer;
 	private boolean tableChanging = false;
-	private boolean oldColumnSelection = false;
+	
 	public TableReplacer(WbTable table)
 	{
 		this.client = table;
@@ -58,7 +58,6 @@ public class TableReplacer
 		this.findAgainAction.setEnabled(false);
 		this.replaceAction = new ReplaceDataAction(this);
 		this.replaceAction.setEnabled(false);
-		oldColumnSelection = client.getColumnSelectionAllowed();
 	}
 	
 	public FindDataAction getFindAction() { return this.findAction; }
@@ -267,13 +266,16 @@ public class TableReplacer
 		if (tableChanging) return;
 		
 		this.replacer.setDataStore(this.client.getDataStore());
-		final boolean hasData = client.getRowCount() > 0;
+		
+		WbConnection con = client.getDataStore().getOriginalConnection();
+		final boolean readOnly = (con == null ? false : con.getProfile().isReadOnly());
+		final boolean hasData = (client.getRowCount() > 0);
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
 				findAction.setEnabled(hasData);
-				replaceAction.setEnabled(hasData);
+				replaceAction.setEnabled(hasData && !readOnly);
 			}
 		});
 		

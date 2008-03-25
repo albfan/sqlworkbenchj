@@ -35,7 +35,6 @@ public class AlterSessionCommand
 	public AlterSessionCommand()
 	{
 		super();
-		this.isUpdatingCommand = true;
 	}
 
 	public String getVerb() { return VERB; }

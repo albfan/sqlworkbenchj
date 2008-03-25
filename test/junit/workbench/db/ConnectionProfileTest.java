@@ -44,7 +44,7 @@ public class ConnectionProfileTest
 
 			ConnectionProfile copy = old.createCopy();
 			assertFalse(copy.getAutocommit());
-			assertTrue(copy.isConfirmUpdates());
+			assertTrue(copy.getConfirmUpdates());
 			assertEquals("Postgres", copy.getDriverName());
 			assertEquals("First", copy.getName());
 			assertTrue(copy.getStorePassword());

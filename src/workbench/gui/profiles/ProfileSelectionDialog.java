@@ -123,7 +123,7 @@ public class ProfileSelectionDialog
 	{
 		if (!Settings.getInstance().restoreWindowSize(this))
 		{
-			this.setSize(700,550);
+			this.setSize(700,540);
 		}
 	}
 
