@@ -784,6 +784,7 @@ public class WbConnection
 		TagWriter tagWriter = new TagWriter(namespace);
 		String value = null;
 
+
 		tagWriter.appendTag(dbInfo, indent, "created", StringUtil.getCurrentTimestampWithTZString());
 
 		try { value = db.getDriverName(); } catch (Throwable th) { value = "n/a"; }
@@ -793,7 +794,9 @@ public class WbConnection
 		tagWriter.appendTag(dbInfo, indent, "jdbc-driver-version", cleanValue(value));
 
 		tagWriter.appendTag(dbInfo, indent, "connection", this.getDisplayString());
-
+		tagWriter.appendTag(dbInfo, indent, "schema", getCurrentSchema());
+		tagWriter.appendTag(dbInfo, indent, "catalog", metaData.getCurrentCatalog());
+		
 		try { value = db.getDatabaseProductName(); } catch (Throwable th) { value = "n/a"; }
 		tagWriter.appendTag(dbInfo, indent, "database-product-name", cleanValue(value));
 

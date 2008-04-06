@@ -246,7 +246,7 @@ public class StatementRunner
 			return;
 		}
 		
-		if (currentCommand.needConfirmation(dbConnection, realSql))
+		if (controller != null && currentCommand.needConfirmation(dbConnection, realSql))
 		{
 			boolean doExecute = this.controller.confirmExecution(realSql);
 			if (!doExecute)

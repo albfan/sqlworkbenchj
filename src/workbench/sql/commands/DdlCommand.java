@@ -46,9 +46,9 @@ public class DdlCommand extends SqlCommand
 	public static final SqlCommand RECREATE = new DdlCommand("RECREATE");
 
 	public static final List<DdlCommand> DDL_COMMANDS;
-	
+
 	private Savepoint ddlSavepoint;
-	
+
 	static
 	{
 		List<DdlCommand> l = new ArrayList<DdlCommand>(5);
@@ -72,7 +72,7 @@ public class DdlCommand extends SqlCommand
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		
+
 		DbSettings dbset = this.currentConnection.getMetadata().getDbSettings();
 		boolean useSavepoint = dbset.useSavePointForDDL() && !this.currentConnection.getAutoCommit();
 
@@ -81,21 +81,20 @@ public class DdlCommand extends SqlCommand
 			useSavepoint = false;
 			LogMgr.logWarning("DdlCommand.execute()", "A savepoint should be used for this DDL command, but the driver does not support savepoints!");
 		}
-		
+
 		try
 		{
 			this.currentStatement = currentConnection.createStatement();
 
 			aSql = currentConnection.getMetadata().filterDDL(aSql);
 
-			String msg = null;
 			result.setSuccess();
-			
+
 			if (useSavepoint)
 			{
 				this.ddlSavepoint = currentConnection.setSavepoint();
 			}
-			
+
 			if (isDropCommand(aSql) && this.runner.getIgnoreDropErrors())
 			{
 				try
@@ -105,7 +104,7 @@ public class DdlCommand extends SqlCommand
 				}
 				catch (Exception th)
 				{
-					this.currentConnection.rollback(ddlSavepoint);					
+					this.currentConnection.rollback(ddlSavepoint);
 					this.ddlSavepoint = null;
 					result.addMessage(ResourceMgr.getString("MsgDropWarning"));
 					result.addMessage(ExceptionUtil.getDisplay(th));
@@ -116,25 +115,11 @@ public class DdlCommand extends SqlCommand
 			{
 				boolean hasResult = this.currentStatement.execute(aSql);
 
-				if ("DROP".equals(verb))
-				{
-					msg = ResourceMgr.getString("MsgDropSuccess");
-				}
-				else if ("CREATE".equals(verb) || "RECREATE".equals(verb))
-				{
-					msg = ResourceMgr.getString("MsgCreateSuccess");
-				}
-				else
-				{
-					msg = this.verb + " " + ResourceMgr.getString("MsgKnownStatementOK");
-				}
-				result.addMessage(msg);
-				
-				// Using a generic execute and result processing ensures that DBMS that 
-				// can process more than one statement with a single SQL are treated correctly. 
+				// Using a generic execute and result processing ensures that DBMS that
+				// can process more than one statement with a single SQL are treated correctly.
 				// e.g. when sending a SELECT and other statements as a "batch" with SQL Server
 				processMoreResults(aSql, result, hasResult);
-				
+
 				// Process result will have added any warnings and set the warning flag
 				if (result.hasWarning())
 				{
@@ -143,6 +128,23 @@ public class DdlCommand extends SqlCommand
 						result.setFailure();
 					}
 				}
+
+				if (result.isSuccess())
+				{
+					if ("DROP".equals(verb))
+					{
+						result.addMessage(ResourceMgr.getString("MsgDropSuccess"));
+					}
+					else if ("CREATE".equals(verb) || "RECREATE".equals(verb))
+					{
+						result.addMessage(ResourceMgr.getString("MsgCreateSuccess"));
+					}
+					else
+					{
+						result.addMessage(this.verb + " " + ResourceMgr.getString("MsgKnownStatementOK"));
+					}
+				}
+
 			}
 			this.currentConnection.releaseSavepoint(ddlSavepoint);
 		}
@@ -185,10 +187,13 @@ public class DdlCommand extends SqlCommand
 		super.done();
 		this.ddlSavepoint = null;
 	}
-	
+
 	public boolean isDropCommand(String sql)
 	{
 		if ("DROP".equals(this.verb)) return true;
+		if (!"ALTER".equals(this.verb)) return false;
+		// If this is an ALTER ... command it might also be a DROP 
+		// e.g. ALTER TABLE someTable DROP PRIMARY KEY
 		Pattern p = Pattern.compile("DROP\\s+(PRIMARY\\s+KEY|CONSTRAINT)\\s+", Pattern.CASE_INSENSITIVE);
 		Matcher m = p.matcher(sql);
 		return m.find();
@@ -205,14 +210,14 @@ public class DdlCommand extends SqlCommand
 		if (t == null) return null;
 		String v = t.getContents();
 		if (!v.equals("CREATE") && !v.equals("CREATE OR REPLACE")) return null;
-		
+
 		// next token must be the type
 		t = l.getNextToken(false, false);
 		if (t == null) return null;
-		
+
 		// the token after the type must be the object's name
 		t = l.getNextToken(false, false);
-		return t.getContents();		
+		return t.getContents();
 	}
 
 	/**
@@ -227,13 +232,14 @@ public class DdlCommand extends SqlCommand
 	{
 		String type = SqlUtil.getCreateType(sql);
 		if (type == null) return false;
-		
+
 		String name = getObjectName(sql);
 		if (name == null) return false;
 
 		String msg = aConnection.getMetadata().getExtendedErrorInfo(null, name, type);
 		if (msg != null && msg.length() > 0)
 		{
+			result.addMessageNewLine();
 			result.addMessage(msg);
 			return true;
 		}

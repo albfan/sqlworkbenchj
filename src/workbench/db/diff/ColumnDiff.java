@@ -104,7 +104,7 @@ public class ColumnDiff
 			else if (SqlUtil.isNumberType(sourceType))
 			{
 				int sourceDigits = sId.getDecimalDigits();
-				int targetDigits = sId.getDecimalDigits();
+				int targetDigits = tId.getDecimalDigits();
 				return sourceDigits == targetDigits;
 			}
 			return true;
@@ -174,7 +174,7 @@ public class ColumnDiff
 			{
 				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_DBMS_TYPE, sId.getDbmsType());
 				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_SIZE, sId.getColumnSize());
-				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_DIGITS, sId.getDecimalDigits());
+				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_DIGITS, sId.getDigitsDisplay());
 				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_JAVA_TYPE_NAME, sId.getColumnTypeName());
 			}
 			if (nullableDifferent)

@@ -28,6 +28,53 @@ public class StringUtilTest
 		super(testName);
 	}
 
+	public void testLineStartsWith()
+	{
+		String s = "some stuff     -- this is a comment";
+		boolean isComment = StringUtil.lineStartsWith(s, 0, "--");
+		assertFalse(isComment);
+
+		s = "some stuff     -- this is a comment";
+		isComment = StringUtil.lineStartsWith(s, 10, "--");
+		assertTrue(isComment);
+		
+		s = "-- comment'\nselect 'b' from dual;";
+		isComment = StringUtil.lineStartsWith(s, 0, "--");
+		assertTrue(isComment);
+
+		isComment = StringUtil.lineStartsWith(s, 12, "--");
+		assertFalse(isComment);
+	}
+	
+	public void testFindFirstNonWhitespace()
+	{
+		String s = "   Hello, world";
+		int pos = StringUtil.findFirstNonWhitespace(s);
+		assertEquals(3, pos);
+
+		s = "some stuff     -- this is a comment";
+		pos = StringUtil.findFirstNonWhitespace(s, 10);
+		assertEquals(15, pos);
+		
+		pos = StringUtil.findFirstNonWhitespace(s, 12);
+		assertEquals(15, pos);
+	}
+	
+	public void testGetStartingWhitespace()
+	{
+		String s = "   Hello, world";
+		String p = StringUtil.getStartingWhiteSpace(s);
+		assertEquals("   ", p);
+		
+		s = "Hello, world";
+		p = StringUtil.getStartingWhiteSpace(s);
+		assertNull(p);
+		
+		s = "\t\nHello, world";
+		p = StringUtil.getStartingWhiteSpace(s);
+		assertEquals("\t\n", p);
+	}
+	
 	public void testMakeFilename()
 	{
 		try

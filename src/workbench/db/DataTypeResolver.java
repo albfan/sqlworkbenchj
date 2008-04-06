@@ -16,5 +16,14 @@ package workbench.db;
  */
 public interface DataTypeResolver 
 {
+	/**
+	 * Return a SQL for the indicated data type
+	 * @param dbmsName the name of the type 
+	 * @param sqlType the numeric value from java.sql.Types
+	 * @param size the size of the column
+	 * @param digits the digits, &lt; 0 if not applicable
+	 * @param additonalWbType for mapping Oracle's char/byte semantics. Use -1 if not needed
+	 * @return
+	 */
 	String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, int additonalWbType);
 }

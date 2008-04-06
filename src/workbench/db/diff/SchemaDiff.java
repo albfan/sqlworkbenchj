@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.ProcedureDefinition;
@@ -33,6 +35,7 @@ import workbench.db.report.TagWriter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
 import workbench.util.StringUtil;
@@ -92,7 +95,7 @@ public class SchemaDiff
 	private boolean cancel = false;
 	private String referenceSchema;
 	private String targetSchema;
-	private List<String> tablesToIgnore;
+	private Set<String> tablesToIgnore = new TreeSet<String>(new CaseInsensitiveComparator());
 	
 	public SchemaDiff()
 	{
@@ -294,14 +297,31 @@ public class SchemaDiff
 	{
 		if (tables == null || tables.size() == 0)
 		{
-			this.tablesToIgnore = null;
+			this.tablesToIgnore.clear();
 			return;
 		}
-		int count = tables.size();
-		this.tablesToIgnore = new ArrayList<String>(count);
 		for (String tname : tables)
 		{
-			this.tablesToIgnore.add(this.sourceDb.getMetadata().adjustObjectnameCase(tname));
+			if (tname.indexOf("%") > -1)
+			{
+				try
+				{
+					List<TableIdentifier> tlist = this.sourceDb.getMetadata().getTableList(tname.trim(), (String)null);
+					for (TableIdentifier t : tlist)
+					{
+						tablesToIgnore.add(t.getTableName());
+					}
+				}
+				catch (SQLException e)
+				{
+					LogMgr.logError("SchemaDiff.setExcludeTables()","Could not retrieve excluded tables", e);
+				}
+				
+			}
+			else
+			{
+				this.tablesToIgnore.add(tname);
+			}
 		}
 	}
 	
@@ -405,12 +425,9 @@ public class SchemaDiff
 			
 			TableIdentifier rid = refTables.get(i);
 			
-			// The table names to be excluded have been put into 
-			// the list after calling adjustObjectnameCase() on the input values
-			// so we have to apply the same logic here.
 			String tname = StringUtil.trimQuotes(rid.getTableName());
-			tname = this.sourceDb.getMetadata().adjustObjectnameCase(tname);
-			if (this.tablesToIgnore != null && this.tablesToIgnore.contains(tname)) continue;
+			
+			if (this.tablesToIgnore.contains(tname)) continue;
 			
 			if (this.monitor != null)
 			{
@@ -447,7 +464,7 @@ public class SchemaDiff
 			{
 				TableIdentifier t = targetTables.get(i);
 				String tbl = StringUtil.trimQuotes(t.getTableName());
-				if (this.tablesToIgnore != null && this.tablesToIgnore.contains(tbl)) continue;
+				if (this.tablesToIgnore.contains(tbl)) continue;
 				
 				if (targetDb.getMetadata().isDefaultCase(tbl))
 				{
@@ -478,7 +495,6 @@ public class SchemaDiff
 			this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 		}
 		
-		SequenceReader refReader = this.sourceDb.getMetadata().getSequenceReader();
 		SequenceReader targetReader = this.targetDb.getMetadata().getSequenceReader();
 		
 		for (SequenceDefinition refSeq : refSeqs)
@@ -927,6 +943,7 @@ public class SchemaDiff
 			if (o instanceof DiffEntry)
 			{
 				DiffEntry de = (DiffEntry)o;
+				String tbl = de.reference.getTableName();
 				tbls[0] = de.reference.getType();
 				tbls[1] = (de.target == null ? "" : StringUtil.trimQuotes(de.target.getTableName()));
 				tbls[2] = StringUtil.trimQuotes(de.reference.getTableName());

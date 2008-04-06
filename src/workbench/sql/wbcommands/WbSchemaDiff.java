@@ -218,6 +218,11 @@ public class WbSchemaDiff
 			String refSchema = cmdLine.getValue(PARAM_SOURCESCHEMA);
 			String targetSchema = cmdLine.getValue(PARAM_TARGETSCHEMA);
 			String excludeTables = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
+			if (excludeTables != null)
+			{
+				List<String> l = StringUtil.stringToList(excludeTables, ",", true, true);
+				diff.setExcludeTables(l);
+			}
 
 			if (refSchema == null && targetSchema == null)
 			{
@@ -235,20 +240,10 @@ public class WbSchemaDiff
 					}
 					return result;
 				}
-				if (excludeTables != null)
-				{
-					List<String> l = StringUtil.stringToList(excludeTables, ",", true);
-					diff.setExcludeTables(l);
-				}
 				diff.compareAll();
 			}
 			else
 			{
-				if (excludeTables != null)
-				{
-					List<String> l = StringUtil.stringToList(excludeTables, ",", true);
-					diff.setExcludeTables(l);
-				}
 				diff.setSchemas(refSchema, targetSchema);
 			}
 		}

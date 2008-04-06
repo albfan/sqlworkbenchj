@@ -13,12 +13,13 @@ package workbench.db;
 
 import java.sql.DatabaseMetaData;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.StringUtil;
 
 /**
@@ -92,19 +93,16 @@ public class DbSettings
 		if (StringUtil.isEmptyString(verb)) return false;
 		if (this.updatingCommands == null)
 		{
-			this.updatingCommands = new HashSet<String>();
+			this.updatingCommands = new TreeSet<String>(new CaseInsensitiveComparator());
 			
 			String l = Settings.getInstance().getProperty("workbench.db.updatingcommands", null);
-			if (l != null) l = l.toLowerCase();
 			List<String> commands = StringUtil.stringToList(l, ",", true, true);
 			updatingCommands.addAll(commands);
-			
 			l = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".updatingcommands", null);
-			if (l != null) l = l.toLowerCase();
 			commands = StringUtil.stringToList(l, ",", true, true);
 			updatingCommands.addAll(commands);
 		}
-		return updatingCommands.contains(verb.toLowerCase());
+		return updatingCommands.contains(verb);
 	}
 	
 	public boolean longVarcharIsClob()

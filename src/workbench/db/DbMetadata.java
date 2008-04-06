@@ -381,6 +381,11 @@ public class DbMetadata
 		return "VIEW"; 
 	}
 
+	public DataTypeResolver getDataTypeResolver()
+	{
+		return this.dataTypeResolver;
+	}
+	
 	public DatabaseMetaData getJdbcMetaData()
 	{
 		return this.metaData;
@@ -1788,7 +1793,7 @@ public class DbMetadata
 			boolean pk = "YES".equals(ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG));
 			ColumnIdentifier ci = new ColumnIdentifier(SqlUtil.quoteObjectname(col), fixColumnType(type), pk);
 			int size = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_SIZE, 0);
-			int digits = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_DIGITS, 0);
+			int digits = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_DIGITS, -1);
 			String nullable = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
 			int position = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_POSITION, 0);
 			String dbmstype = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
@@ -1994,6 +1999,8 @@ public class DbMetadata
 
 				int size = rs.getInt("COLUMN_SIZE"); // index 7
 				int digits = rs.getInt("DECIMAL_DIGITS"); // index 9
+				if (rs.wasNull()) digits = -1;
+				
 				String remarks = rs.getString("REMARKS"); // index 12
 				String defaultValue = rs.getString("COLUMN_DEF"); // index 13
 				if (defaultValue != null && this.dbSettings.trimDefaults())
@@ -2007,6 +2014,7 @@ public class DbMetadata
 					// This column is used by our own OracleMetaData to 
 					// return information about char/byte semantics
 					sqlDataType = rs.getInt("SQL_DATA_TYPE");  // index 14
+					if (rs.wasNull()) sqlDataType = -1;
 				}
 				catch (Throwable th)
 				{
@@ -2043,7 +2051,7 @@ public class DbMetadata
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_REMARKS, remarks);
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, new Integer(sqlType));
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_SIZE, new Integer(size));
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DIGITS, new Integer(digits));
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DIGITS, digits >= 0 ? new Integer(digits) : null);
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_POSITION, new Integer(position));
 			}
 		}

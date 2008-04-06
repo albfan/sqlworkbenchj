@@ -56,6 +56,7 @@ public class WbSchemaReport
 		cmdLine.addArgument("namespace");
 		cmdLine.addArgument("tables", ArgumentType.TableArgument);
 		cmdLine.addArgument("schemas");
+		cmdLine.addArgument("reportTitle");
 		cmdLine.addArgument("format", StringUtil.stringToList("wb,dbdesigner"));
 		cmdLine.addArgument("useSchemaName", ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_VIEWS, ArgumentType.BoolArgument);
@@ -109,6 +110,8 @@ public class WbSchemaReport
 		}
 		String namespace = cmdLine.getValue("namespace");
 		this.reporter = new SchemaReporter(currentConnection);
+		String title = cmdLine.getValue("reportTitle");
+		this.reporter.setReportTitle(title);
 		this.reporter.setNamespace(namespace);
 		this.reporter.setDbDesigner(dbDesigner);
 		this.reporter.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));

@@ -12,7 +12,6 @@
 package workbench.util;
 
 import java.util.Comparator;
-import workbench.util.StringUtil;
 
 /**
  * A case-insensitive Comparator for String which 

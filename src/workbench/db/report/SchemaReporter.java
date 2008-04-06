@@ -42,6 +42,7 @@ import workbench.storage.RowActionMonitor;
 import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
+import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
 
@@ -74,6 +75,7 @@ public class SchemaReporter
 	protected JDialog progressWindow;
 	private boolean showProgress = false;
 	private String schemaNameToUse = null;
+	private String reportTitle = null;
 	private JFrame parentWindow;
 	private boolean dbDesignerFormat = false;
 
@@ -93,6 +95,11 @@ public class SchemaReporter
 		this.monitor = mon;
 	}
 
+	public void setReportTitle(String title)
+	{
+		this.reportTitle = title;
+	}
+	
 	public void setObjectList(List<? extends DbObject> objectList)
 	{
 		if (this.tables == null) this.tables = new ArrayList<TableIdentifier>();
@@ -388,6 +395,10 @@ public class SchemaReporter
 	{
 		StrBuffer info = new StrBuffer();
 		StrBuffer indent = new StrBuffer("  ");
+		if (!StringUtil.isEmptyString(this.reportTitle))
+		{
+			this.tagWriter.appendTag(info, indent, "report-title", this.reportTitle);
+		}
 		info.append(this.dbConn.getDatabaseInfoAsXml(indent, this.xmlNamespace));
 		info.writeTo(out);
 	}

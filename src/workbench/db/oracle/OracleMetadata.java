@@ -22,12 +22,14 @@ import java.util.Properties;
 import java.util.Set;
 import workbench.db.ConnectionProfile;
 import workbench.db.DataTypeResolver;
+import workbench.db.DbMetadata;
 import workbench.db.ErrorInformationReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -42,8 +44,8 @@ public class OracleMetadata
 	private PreparedStatement columnStatement;
 	private int version;
 	private boolean retrieveSnapshots = true;
-	static final int BYTE_SEMANTICS = 0;
-	static final int CHAR_SEMANTICS = 1;
+	static final int BYTE_SEMANTICS = 1;
+	static final int CHAR_SEMANTICS = 2;
 	private int defaultLengthSemantics = -1;
 	private boolean alwaysShowCharSemantics = false;
 	private boolean useOwnSql = true;
@@ -338,7 +340,8 @@ public class OracleMetadata
 			" FROM all_errors   " + 
 			"WHERE owner = ? " + 
 			"  AND type = ? " + 
-			"  AND name = ? ";
+			"  AND name = ? " + 
+			" ORDER BY LINE ";
 
 		if (objectType == null || objectName == null)
 		{
@@ -358,10 +361,12 @@ public class OracleMetadata
 			{
 				schema = this.connection.getCurrentSchema();
 			}
+			DbMetadata meta = this.connection.getMetadata();
+			
 			stmt = this.connection.getSqlConnection().prepareStatement(ERROR_QUERY);
-			stmt.setString(1, schema.toUpperCase().trim());
+			stmt.setString(1, meta.adjustSchemaNameCase(StringUtil.trimQuotes(schema)));
 			stmt.setString(2, objectType.toUpperCase().trim());
-			stmt.setString(3, StringUtil.trimQuotes(objectName));
+			stmt.setString(3, meta.adjustObjectnameCase(StringUtil.trimQuotes(objectName)));
 
 			rs = stmt.executeQuery();
 			int count = 0;
@@ -369,16 +374,13 @@ public class OracleMetadata
 			{
 				if (count > 0)
 				{
-					result.append("\r\n");
+					result.append("\n");
 				}
 				int line = rs.getInt(1);
 				int pos = rs.getInt(2);
 				String msg = rs.getString(3);
-				result.append("Error at line ");
-				result.append(line);
-				result.append(", position ");
-				result.append(pos);
-				result.append(": ");
+				result.append(ResourceMgr.getFormattedString("ErrAtLinePos", line, pos));
+				result.append("\n");
 				result.append(msg);
 				count++;
 			}
@@ -516,8 +518,9 @@ public class OracleMetadata
 		// allow Byte/Char semantics
 		if (type.startsWith("VARCHAR"))
 		{
-			if (alwaysShowCharSemantics || semantics != this.defaultLengthSemantics)
+			if (alwaysShowCharSemantics || semantics != defaultLengthSemantics)
 			{
+				if (semantics < 0) semantics = defaultLengthSemantics;
 				if (semantics == BYTE_SEMANTICS)
 				{
 					result.append(" Byte");
@@ -535,6 +538,7 @@ public class OracleMetadata
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, int byteOrChar)
 	{
 		String display = null;
+		
 		if (sqlType == Types.VARCHAR) 
 		{
 			// Hack to get Oracle's VARCHAR2(xx Byte) or VARCHAR2(xxx Char) display correct
@@ -543,6 +547,17 @@ public class OracleMetadata
 			// Oracle's JDBC driver does not supply this information (because
 			// the JDBC standard does not define a column for this)
 			display = getVarcharType(dbmsName, size, byteOrChar);
+		}
+		else if ("NUMBER".equalsIgnoreCase(dbmsName))
+		{
+			if (digits < 0)
+			{
+				return "NUMBER";
+			}
+			else
+			{
+				return "NUMBER(" + size + "," + digits + ")";
+			}
 		}
 		else 
 		{

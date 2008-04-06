@@ -106,6 +106,13 @@ public class StringUtil
 		if (isWhitespaceOrEmpty(compareTo)) return false;
 		int textLength = text.length();
 
+		// skip whitespace at the beginning
+		int pos = findFirstNonWhitespace(text, lineStartPos);
+		if (pos > lineStartPos)
+		{
+			lineStartPos = pos;
+		}
+		
 		int len = compareTo.length();
 		for (int i=0; i < len; i++)
 		{
@@ -434,20 +441,33 @@ public class StringUtil
 		return false;
 	}
 
-	public static final String getStartingWhiteSpace(final String aLine)
+	public static final int findFirstNonWhitespace(final CharSequence line)
 	{
-		if (aLine == null) return null;
-		int pos = 0;
-		int len = aLine.length();
-		if (len == 0) return "";
+		return findFirstNonWhitespace(line, 0);
+	}
+	
+	public static final int findFirstNonWhitespace(final CharSequence line, int startPos)
+	{
+		if (line == null) return -1;
+		int pos = startPos;
+		int len = line.length();
+		if (len == 0) return -1;
 
-		char c = aLine.charAt(pos);
+		char c = line.charAt(pos);
 		while (c <= ' ' && pos < len - 1)
 		{
 			pos ++;
-			c = aLine.charAt(pos);
+			c = line.charAt(pos);
 		}
-		String result = aLine.substring(0, pos);
+		return pos;
+	}
+	
+	public static final String getStartingWhiteSpace(final String line)
+	{
+		if (line == null) return null;
+		int pos = findFirstNonWhitespace(line);
+		if (pos <= 0) return null;
+		String result = line.substring(0, pos);
 		return result;
 	}
 

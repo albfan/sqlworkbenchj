@@ -82,10 +82,6 @@ public class DeleteScriptGeneratorTest
 			pk.add(new ColumnData(new Integer(1), new ColumnIdentifier("BASE_ID2")));
 			
 			List<String> statements = generator.getStatementsForValues(pk, true);
-//			for (String s : statements)
-//			{
-//				System.out.println(s + ";\n");
-//			}
 
 			assertEquals(4, statements.size());
 			

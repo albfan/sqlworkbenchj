@@ -121,8 +121,14 @@ public class SqlCommand
 		{
 			hasWarning = true;
 			if (result.hasMessages()) result.addMessageNewLine();
-			result.addMessage(ResourceMgr.getString("TxtWarnings"));
-			result.addMessageNewLine();
+			
+			// Only add the "Warnings:" text if the message returned from the 
+			// server does not already start with "Warning"
+			if (warn.length() > 7 && !warn.subSequence(0, 7).toString().equalsIgnoreCase("Warning"))
+			{
+				result.addMessage(ResourceMgr.getString("TxtWarnings"));
+				result.addMessageNewLine();
+			}
 			result.addMessage(warn);
 			result.setWarning(true);
 		}

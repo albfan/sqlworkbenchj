@@ -28,14 +28,18 @@ import workbench.util.SqlUtil;
  */
 public class TypeMapper
 {
-	private WbConnection dbConn;
+	private WbConnection targetDb;
 	private HashMap<Integer, String> typeInfo;
 	private List<String> ignoreTypes;
 
-	public TypeMapper(WbConnection aConnection)
+	/**
+	 * Create a TypeMapper for the DBMS specified through the target connection.
+	 * @param targetConnection
+	 */
+	public TypeMapper(WbConnection targetConnection)
 	{
-		this.dbConn = aConnection;
-		this.ignoreTypes = aConnection.getDbSettings().getDataTypesToIgnore();
+		this.targetDb = targetConnection;
+		this.ignoreTypes = targetConnection.getDbSettings().getDataTypesToIgnore();
 		this.createTypeMap();
 	}
 
@@ -105,41 +109,7 @@ public class TypeMapper
 			if (!this.typeInfo.containsKey(key)) return SqlUtil.getTypeName(type);
 		}
 
-		StringBuilder result = new StringBuilder(30);
-		result.append(name);
-
-		// Now we need to check if the data type needs an argument.
-		// I could use the "parameter" column from the driver's type info
-		// result set, but it seems that not every DBMS returns the correct
-		// information there, so I'm using my "own" logic to determine
-		// if the data type needs an argument.
-		if (type == Types.VARCHAR || type == Types.CHAR)
-		{
-			if (size == 0) return null;
-			result.append('(');
-			result.append(size);
-			result.append(')');
-		}
-		// INTEGER's normally don't need a size argument
-		else if (SqlUtil.isNumberType(type) && !SqlUtil.isIntegerType(type))
-		{
-			if (SqlUtil.isDecimalType(type, size, digits))
-			{
-				result.append('(');
-				result.append(size);
-				result.append(',');
-				result.append(digits);
-				result.append(')');
-			}
-			else if (type != Types.INTEGER)
-			{
-				result.append('(');
-				result.append(size);
-				result.append(')');
-			}
-		}
-
-		return result.toString();
+		return this.targetDb.getMetadata().getDataTypeResolver().getSqlTypeDisplay(name, type, size, digits, -1);
 	}
 
 
@@ -149,7 +119,7 @@ public class TypeMapper
 		this.typeInfo = new HashMap<Integer, String>(27);
 		try
 		{
-			rs = this.dbConn.getSqlConnection().getMetaData().getTypeInfo();
+			rs = this.targetDb.getSqlConnection().getMetaData().getTypeInfo();
 			while (rs.next())
 			{
 				String name = rs.getString(1);

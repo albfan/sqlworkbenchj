@@ -66,6 +66,8 @@ public class TableDefinitionPanel
 	implements Reloadable, ActionListener, ListSelectionListener, Resettable, DbObjectList
 {
 	public static final String INDEX_PROP = "index";
+	public static final String DEFINITION_PROP = "tableDefinition";
+	
 	private WbTable tableDefinition;
 	private JLabel tableNameLabel;
 	private QuickFilterPanel columnFilter;
@@ -111,10 +113,7 @@ public class TableDefinitionPanel
 		cc.insets = new Insets(0, 5, 0, 5);
 		toolbar.add(l, cc);
 
-		//Font std = Settings.getInstance().getStandardLabelFont();
-		//Font bold = std.deriveFont(Font.BOLD);
 		tableNameLabel = new JLabel();
-		//tableNameLabel.setFont(bold);
 		cc.gridx ++;
 		cc.weightx = 0.0;
 		cc.fill = GridBagConstraints.NONE;
@@ -139,6 +138,11 @@ public class TableDefinitionPanel
 		this.tableDefinition.addPopupAction(this.createIndexAction, true);
 	}
 
+	protected void fireTableDefinitionChanged()
+	{
+		firePropertyChange(DEFINITION_PROP, null, this.currentTable.getTableName());
+	}
+	
 	protected void fireIndexChanged(String indexName)
 	{
 		firePropertyChange(INDEX_PROP, null, indexName);
@@ -291,6 +295,11 @@ public class TableDefinitionPanel
 		}
 	}
 
+	/**
+	 * Implement the Reloadable interface for the reload action.
+	 * This method should not be called directly, use {@link #retrieve(workbench.db.TableIdentifier) }
+	 * instead.
+	 */
 	public void reload()
 	{
 		if (this.currentTable == null) return;
@@ -305,6 +314,7 @@ public class TableDefinitionPanel
 				try
 				{
 					retrieveTableDefinition();
+					fireTableDefinitionChanged();
 				}
 				catch (SQLException ex)
 				{

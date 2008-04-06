@@ -829,6 +829,16 @@ public class WbManager
 			{
 				this.writeSettings = false;
 			}
+			
+			if (cmdLine.hasUnknownArguments())
+			{
+				String unknown = cmdLine.getUnknownArguments();
+				LogMgr.logError("WbManager.readParameters()", "The following parameters are invalid: " + unknown, null);
+				if (batchMode)
+				{
+					System.err.println("Invalid parameter(s): " + unknown);
+				}
+			}
 		}
 		catch (Exception e)
 		{

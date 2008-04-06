@@ -158,11 +158,12 @@ public class ResultInfo
 			try
 			{
 				if (SqlUtil.isNumberType(type)) scale = metaData.getScale(i + 1);
+				if (scale == 0) scale = -1;
 			}
 			catch (Throwable th)
 			{
 				//LogMgr.logError("ResultInfo.<init>", "Error when obtaining scale for column " + name, th);
-				scale = 0;
+				scale = -1;
 			}
 			
 			try

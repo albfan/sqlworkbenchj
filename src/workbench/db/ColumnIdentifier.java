@@ -113,9 +113,22 @@ public class ColumnIdentifier
 	/**
 	 *	Define the decimal digits for this column (e.g. for DECIMAL columns)
 	 */
-	public void setDecimalDigits(int numDigits) { this.digits = numDigits; }
-	public int getDecimalDigits() { return this.digits; }
+	public void setDecimalDigits(int numDigits) 
+	{ 
+		this.digits = numDigits < 0 ? -1 : numDigits; 
+	}
+	
+	public int getDecimalDigits() 
+	{ 
+		return this.digits; 
+	}
 
+	public String getDigitsDisplay()
+	{
+		if (digits < 0) return "";
+		return Integer.toString(digits);
+	}
+	
 	public void setIsPkColumn(boolean flag) { this.isPk = flag; }
 	public boolean isPkColumn() { return this.isPk; }
 

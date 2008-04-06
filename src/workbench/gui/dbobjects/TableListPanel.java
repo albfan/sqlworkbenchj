@@ -203,6 +203,7 @@ public class TableListPanel
 
 		this.tableDefinition = new TableDefinitionPanel();
 		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.INDEX_PROP, this);
+		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.DEFINITION_PROP, this);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), tableDefinition);
 
 		Reloadable indexReload = new Reloadable()
@@ -459,6 +460,11 @@ public class TableListPanel
 			tableData.addDbExecutionListener(l);
 		}		
 	}
+
+	private void setDirty(boolean flag)
+	{
+		this.shouldRetrieve = flag;
+	}
 	
 	private void setupActionMap()
 	{
@@ -650,7 +656,6 @@ public class TableListPanel
 		this.shouldRetrieveImportedKeys = true;
 		this.shouldRetrieveExportedTree = true;
 		this.shouldRetrieveImportedTree = true;
-		this.shouldRetrieveTableDataCount = true;
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -725,7 +730,7 @@ public class TableListPanel
 
 		if (this.isBusy())
 		{
-			this.shouldRetrieve = retrieve;
+			setDirty(retrieve);
 			return;
 		}
 		
@@ -741,7 +746,7 @@ public class TableListPanel
 		}
 		else
 		{
-			this.shouldRetrieve = true;
+			setDirty(true);
 		}
 	}
 	
@@ -773,6 +778,7 @@ public class TableListPanel
 
 		if (dbConnection == null || dbConnection.isClosed())
 		{
+			LogMgr.logDebug("TableListPanel.retrieve()", "Connection object not accessible", new Exception());
 			WbSwingUtilities.showErrorMessageKey(this, "ErrConnectionGone");
 			return;
 		}
@@ -814,12 +820,12 @@ public class TableListPanel
 				}
 			});
 			
-			shouldRetrieve = false;
+			setDirty(false);
 		}
 		catch (OutOfMemoryError mem)
 		{
 			reset();
-			this.shouldRetrieve = true;
+			setDirty(true);
 			WbManager.getInstance().showOutOfMemoryError();
 		}
 		catch (Throwable e)
@@ -827,7 +833,7 @@ public class TableListPanel
 			LogMgr.logError("TableListPanel.retrieve()", "Error retrieving table list", e);
 			final String msg = ExceptionUtil.getDisplay(e);
 			invalidateData();
-			this.shouldRetrieve = true;
+			setDirty(true);
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
@@ -846,8 +852,14 @@ public class TableListPanel
 	/**
 	 *	Starts the retrieval of the tables in a background thread
 	 */
-	public void startRetrieve()
+	private void startRetrieve()
 	{
+		if (dbConnection == null || dbConnection.isClosed()) 
+		{
+			LogMgr.logDebug("TableListPanel.startRetrieve()", "startRetrieve() called, but no connection available", new Exception());
+			return;
+		}
+		
 		Thread t = new WbThread("TableListPanel retrieve() thread")
 		{
 			public void run()
@@ -995,7 +1007,7 @@ public class TableListPanel
 		if (Settings.getInstance().getStoreExplorerObjectType())
 		{
 			this.tableTypeToSelect = props.getProperty(prefix + "objecttype", null);
-			LogMgr.logDebug("TableListPanel.readSettings()", "Retrieved objecttype: '" + tableTypeToSelect + "' (workspace prefix: " + prefix + ")");
+			//LogMgr.logDebug("TableListPanel.readSettings()", "Retrieved objecttype: '" + tableTypeToSelect + "' (workspace prefix: " + prefix + ")");
 		}
 		else
 		{
@@ -1922,6 +1934,11 @@ public class TableListPanel
 		if (TableDefinitionPanel.INDEX_PROP.equals(evt.getPropertyName()))
 		{
 			this.shouldRetrieveIndexes = true;
+		}
+		else if (TableDefinitionPanel.DEFINITION_PROP.equals(evt.getPropertyName()))
+		{
+			invalidateData();
+			this.shouldRetrieveTable = false;
 		}
 	}
 

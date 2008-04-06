@@ -315,9 +315,8 @@ public class IteratingScriptParser
 						blockComment = true;
 						singleLineComment = false;
 						commentOn = true;
-						//pos ++; // ignore the next character
 					}
-					else if (startOfLine && isLineComment(pos))
+					else if (/*startOfLine &&*/ isLineComment(pos))
 					{
 						singleLineComment = true;
 						blockComment = false;
