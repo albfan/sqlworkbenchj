@@ -886,11 +886,20 @@ Done.</programlisting>
 	<section id="edit-data-delete">
 		<title>Deleting rows from the result</title>
 		<para>
-			To delete a row from the result, select  <menuchoice><guimenu>Data</guimenu><guimenuitem>Delete Row</guimenuitem></menuchoice>
+			To delete a row from the result, select <menuchoice><guimenu>Data</guimenu><guimenuitem>Delete Row</guimenuitem></menuchoice>
 			from the menu. This will remove the currently selected row(s) from the result and will 
 			mark them for deletion once the changes are saved. No foreign key checks will be done
-			when using this option.
+			when using this option. 
 		</para>
+		<para>
+			The generated <literal>DELETE</literal> statements will fail if the deleted row(s) are still 
+			referenced by another table. In that case, you can use <guimenuitem>Delete With Dependencies</guimenuitem>.
+		</para>
+	</section>
+	
+	<section id="edit-data-delete-referenced">
+		<title>Deleting rows with foreign keys</title>
+	
 		<para>
 			To delete rows including all dependent rows, choose 
 			<menuchoice><guimenu>Data</guimenu><guimenuitem>Delete With Dependencies</guimenuitem></menuchoice>.
@@ -911,6 +920,12 @@ Done.</programlisting>
         in the <link linkend="options-confirm-update">options dialog</link>
       </para>
    </note>
+	 <para>
+		 You can also generate a script to delete the selected and all depending rows through
+		 <menuchoice><guimenu>Data</guimenu><guimenuitem>Generate delete script</guimenuitem></menuchoice>.
+		 This will not remove any rows from the current result set, but instead create and display
+		 a script that you can run at a later time.
+	 </para>
 	</section>
 	
 	<section id="fk-navigation">

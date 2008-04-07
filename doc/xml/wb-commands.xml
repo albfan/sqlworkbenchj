@@ -67,78 +67,94 @@ WHERE id=42;</programlisting>
     
     <informaltable frame="all">
       <tgroup cols="2" align="left">
-	<colspec colname="c1" colwidth="4cm" />
-	<colspec colname="c2" />
-	<thead>
-	  <row>
-	    <entry>Parameter</entry>
-	    <entry>Description</entry>
-	  </row>
-	</thead>
+			<colspec colname="c1" colwidth="4cm" />
+			<colspec colname="c2" />
+			<thead>
+				<row>
+					<entry>Parameter</entry>
+					<entry>Description</entry>
+				</row>
+			</thead>
 	
-	<tbody valign="top">
-	  <row>
-	    <entry>-file</entry>
-	    <entry>The filename of the output file.</entry>
-	  </row>
-	  <row>
-	    <entry>-tables</entry>
-	    <entry>A (comma separated) list of tables to report. Default is
-	      all tables. If this parameter is specified <literal>-schemas</literal> is ignored.
-	      If you want to generate the report on tables from different users/schemas you have
-	      to use fully qualified names in the list (e.g. <literal>-tables=MY_USER.TABLE1,OTHER_USER.TABLE2</literal>)
-	      You can also specify wildcards in the table name: <literal>-table=CONTRACT_%</literal> will create
-	      an XML report for all tables that start with <literal>CONTRACT_</literal>
-	    </entry>
-	  </row>
-	  <row>
-	    <entry>-schemas</entry>
-	    <entry>A (comma separated) list of schemas to generate the report from.
-	      For each user/schema all tables are included in the report. e.g.
-	      <literal>-schemas=MY_USER,OTHER_USER</literal> would generate a report
-	      for all tables in the schemas <literal>MY_USER</literal> and <literal>OTHER_USER</literal>.
-	    </entry>
-	  </row>
-	  <row>
-	    <entry>-namespace</entry>
-	    <entry>The namespace to be used for the XML tags. By default no
-	      namespace is used. If you supply a value for this e.g. <literal>wb</literal> the tag <literal>&lt;schema-report&gt;
-	      </literal> would be written as <literal>&lt;wb:schema-report&gt;</literal>
-	    </entry>
-	  </row>
-	  <row>
-	    <entry>-includeTables</entry>
-	    <entry>Control the output of table information for the report. The default is
-	      <literal>true</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
-	    </entry>
-	  </row>
-	  <row>
-	    <entry>-includeTableGrants</entry>
-	    <entry>If tables are included in the output, the grants for each table can also be included with 
-	      this parameter. The default value is <literal>false</literal>.
-	    </entry>
-	  </row>
-	  <row>
-	    <entry>-includeProcedures</entry>
-	    <entry>Control the output of stored procedure information for the report. The default is
-	      <literal>false</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
-	    </entry>
-	  </row>
-	  <row>
-	    <entry>-includeSequences</entry>
-	    <entry>Control the output of sequence information for the report. The default is
-	      <literal>false</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
-	    </entry>
-	  </row>
-	  <row>
-	    <entry>-format</entry>
-	    <entry>
-	      The format of the outputfile. The default is the &wb-productname;
-	      specific XML format. Using <literal>-format=dbdesigner</literal> you can generate
-	      an XML file suitable to be opened with <ulink url="https://sourceforge.net/projects/dbdesigner-fork/">DbDesigner4</ulink>
-	    </entry>
-	  </row>
-	</tbody>
+			<tbody valign="top">
+				<row>
+					<entry>-file</entry>
+					<entry>The filename of the output file.</entry>
+				</row>
+				<row>
+					<entry>-tables</entry>
+					<entry>A (comma separated) list of tables to report. Default is
+						all tables. If this parameter is specified <literal>-schemas</literal> is ignored.
+						If you want to generate the report on tables from different users/schemas you have
+						to use fully qualified names in the list (e.g. <literal>-tables=MY_USER.TABLE1,OTHER_USER.TABLE2</literal>)
+						You can also specify wildcards in the table name: <literal>-table=CONTRACT_%</literal> will create
+						an XML report for all tables that start with <literal>CONTRACT_</literal>
+					</entry>
+				</row>
+				<row>
+					<entry>-schemas</entry>
+					<entry>A (comma separated) list of schemas to generate the report from.
+						For each user/schema all tables are included in the report. e.g.
+						<literal>-schemas=MY_USER,OTHER_USER</literal> would generate a report
+						for all tables in the schemas <literal>MY_USER</literal> and <literal>OTHER_USER</literal>.
+					</entry>
+				</row>
+				<row>
+					<entry>-namespace</entry>
+					<entry>The namespace to be used for the XML tags. By default no
+						namespace is used. If you supply a value for this e.g. <literal>wb</literal> the tag <literal>&lt;schema-report&gt;
+						</literal> would be written as <literal>&lt;wb:schema-report&gt;</literal>
+					</entry>
+				</row>
+				<row>
+					<entry>-includeTables</entry>
+					<entry>Control the output of table information for the report. The default is
+						<literal>true</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
+					</entry>
+				</row>
+				<row>
+					<entry>-includeTableGrants</entry>
+					<entry>If tables are included in the output, the grants for each table can also be included with 
+						this parameter. The default value is <literal>false</literal>.
+					</entry>
+				</row>
+				<row>
+					<entry>-includeProcedures</entry>
+					<entry>Control the output of stored procedure information for the report. The default is
+						<literal>false</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
+					</entry>
+				</row>
+				<row>
+					<entry>-includeSequences</entry>
+					<entry>Control the output of sequence information for the report. The default is
+						<literal>false</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
+					</entry>
+				</row>
+				<row>
+					<entry>-format</entry>
+					<entry>
+						The format of the outputfile. The default is the &wb-productname;
+						specific XML format. Using <literal>-format=dbdesigner</literal> you can generate
+						an XML file suitable to be opened with <ulink url="https://sourceforge.net/projects/dbdesigner-fork/">DbDesigner4</ulink>
+					</entry>
+				</row>
+				<row>
+					<entry>-format</entry>
+					<entry>
+						The format of the outputfile. The default is the &wb-productname;
+						specific XML format. Using <literal>-format=dbdesigner</literal> you can generate
+						an XML file suitable to be opened with <ulink url="https://sourceforge.net/projects/dbdesigner-fork/">DbDesigner4</ulink>
+					</entry>
+				</row>
+				<row>
+					<entry>-reportTitle</entry>
+					<entry>
+						Defines the title for the generated XML file. The specified title is written 
+						into the tag <literal>&lt;report-title&gt;</literal> and can be used when 
+						transforming the XML e.g. into a HTML file.
+					</entry>
+				</row>
+			</tbody>
       </tgroup>
     </informaltable>
   </section>

@@ -285,13 +285,52 @@
 
 	<section id="profile-confirm-updates">
 		<title>Confirm updates</title>
-
 		<para>
 			If this option is enabled, then &wb-productname; will ask you to confirm
 			the execution of any SQL statement that is updating or changing the database in
-			any way (e.g. UPDATE, DELETE, INSERT, DROP, CREATE, COMMIT, ...). If you save changes
-			from within the result list, you will be prompted even if <link linkend="options-confirm-update">Confirm result set updates</link>
-			is disabled.
+			any way (e.g. UPDATE, DELETE, INSERT, DROP, CREATE, COMMIT, ...). 
+		</para>
+		<para>
+			If you save changes from within the result list, you will be prompted even 
+			if <link linkend="options-confirm-update">Confirm result set updates</link> is disabled.
+		</para>
+		<para>
+			This option cannot be selected together with the "Read only" option.
+		</para>
+	</section>
+
+	<section id="profile-readonly">
+		<title>Read only</title>
+		<para>
+			If this option is enabled, then &wb-productname; will never run any statements
+			that might change the database. Changing of retrieved data is also disabled in this
+			case. This option can be used to prevent accidental changes to important 
+			data (e.g. a production database)
+		</para>
+		<para>
+			&wb-productname; cannot detect all possible statements that may change the
+			database. Especially when calling stored procedures &wb-productname; cannot
+			know if they will change the database. But they might be needed to retrieve data, 
+			this cannot be disabled alltogether.
+		</para>
+		<para>
+			You can extend the list of keywords known to update the data in the 
+			<link linkend="db-settings-updatingcommands"><literal>workbench.settings</literal></link>
+			file.
+		</para>
+		<note>
+			<para>
+				&wb-productname; will not guarantee that there is no way (accidentally or intended) 
+				to change data when this option is enabled. Please do not rely on this option
+				when dealing with important data that must not be changed. 
+			</para>
+			<para>
+				If you really need to guarantee that no data is changed, you have to do this
+				with the security mechanism of your DBMS, e.g. by creating a read-only user. 
+			</para>
+		</note>
+		<para>
+			This option cannot be selected together with the "Confirm updates" option.
 		</para>
 	</section>
 

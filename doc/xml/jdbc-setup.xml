@@ -96,7 +96,7 @@
 						<entry>PostgreSQL</entry>
 						<entry>org.postgresql.Driver</entry>
 						<entry> <simplelist columns="1">
-							<member>postgresql-8.2-506.jdbc3.jar (exact name depends on PostgreSQL version)</member>
+							<member>postgresql-8.3-603.jdbc3.jar (exact name depends on PostgreSQL version)</member>
 							<member><ulink url="http://jdbc.postgresql.org"/></member>
 						</simplelist>
 						</entry>

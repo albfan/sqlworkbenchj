@@ -13,10 +13,20 @@
 		When using &wb-productname; from a batch file (or the commandline) you should 
 		<emphasis role="bold">not</emphasis> use the <link linkend="launcher-using">Windows launcher</link>, 
 		as it will immediately return to the commandline while starting the JVM (and thus &wb-productname;) 
-		in the background. Please refer to <link linkend="starting">Starting &wb-productname;</link> for details
+		in the background. 
+	</para>
+	<para>
+		Please refer to <link linkend="starting">Starting &wb-productname;</link> for details
 		on how to start &wb-productname; with the <literal>java</literal> command.
 	</para>
 
+	<note><para>
+		When you need to quote parameters inside batch or shell scripts, you have to use single quotes 
+		(<literal>&apos;test-script.sql&apos;</literal>) to quote these values. Most command line shells 
+		(including Windows&reg;) do not pass double quotes to the application and thus the parameters would not 
+		be evaluated correctly ba &wb-productname;
+	</para></note>
+		
 	<section id="scripting-connecting">
 		<title>Specifying the connection</title>
 		
@@ -35,8 +45,8 @@
 			With the parameter <literal>-script=&#60;filename&#62;</literal> the script
 			file to be executed can be passed to the application. Multiple scripts can be specified by
 			separating them with a comma. The scripts will be executed in the
-			order in which they appear in the commandline. Again, if the filenames contain spaces
-			or dashes (i.e. <literal>test-1.sql</literal>) the names have to be quoted.
+			order in which they appear in the commandline. If the filenames contain spaces
+			or dashes (i.e. <literal>test-1.sql</literal>) the names have to be quoted. 
 		</para>
 		<para>
 			You can also execute several scripts by using the <link linkend="command-wbinclude"><literal>WbInclude</literal></link>
@@ -260,17 +270,14 @@
      -driver=org.postgresql.Driver
      -username=zaphod
      -password=vogsphere
-     -driverjar=C:/Programme/pgsql/pg73jdbc3.jar 
+     -driverjar=C:/etc/drivers/postgres/postgresql-8.3-603.jdbc3.jar
      -script='test-script.sql'</programlisting>
 
-		<para>
+		<para id="batch-quote">
 			This will start &wb-productname;, connect to the database server
 			as specified in the connection parameters and execute the script
 			<filename>test-script.sql</filename>. As the script&apos;s filename contains
 			a dash, it has to be quoted. This is also necessary when the filename contains spaces.
-			You should use single quotes (<literal>&apos;test-script.sql&apos;</literal>) to quote
-			these values because most command line shells (including Windows&reg;) do not pass
-			double quotes to the application.
 		</para>
 
 		<para><emphasis role="bold">Executing several scripts with a cleanup and failure script:</emphasis></para>

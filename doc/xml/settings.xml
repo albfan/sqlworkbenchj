@@ -423,7 +423,23 @@
       <para>No default</para>
     </section>
 		
-    <section id="db-settings-switch-catalog">
+    <section id="db-settings-updatingcommands">
+      <title>Definining SQL commands that may change the database</title>
+      <para>Property: <literal>workbench.db.updatingcommands</literal> for general SQL statements
+			</para>
+      <para>Property: <literal>workbench.db.[dbid].updatingcommands</literal> for DBMS specific update statements
+			</para>
+      <para>
+				When enabling the <link linkend="profile-readonly">read only</link> or <link linkend="profile-confirm-updates">confirm update</link>
+				option in a connection profile, &wb-productname; assumes a default set of SQL commands that 
+				will change the database. With this property you can add additional keywords that 
+				should be considered as "updating commands". This is a comma separated list of keywords. The keywords
+				may not contain whitespace.
+      </para>
+      <para>No default</para>
+    </section>
+
+		<section id="db-settings-switch-catalog">
       <title>Database switch in DbExplorer</title>
       <para>Property: <literal>workbench.dbexplorer.switchcatalog</literal></para>
       <para>

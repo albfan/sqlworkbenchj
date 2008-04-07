@@ -24,12 +24,12 @@
 		on sqlworkbench.jar will execute the application. To run the application
 		manually use the command:</para>
 
-		<programlisting>java -jar sqlsqlworkbench.jar</programlisting>
+		<programlisting>java -jar sqlworkbench.jar</programlisting>
 
 		<para>If you want to create a shortcut on your desktop use the above
 		line. On Windows&reg; systems - if you don&apos;t use the <link linkend="launcher-using">native launcher</link>- it
 		is recommended to use javaw instead of java, so that the console window is not displayed.</para>
-		<programlisting>javaw -jar sqlorkbench.jar</programlisting>
+		<programlisting>javaw -jar sqlworkbench.jar</programlisting>
 
 		<section id="config-dir" xreflabel="Configuration directory">
 			<title>Specifying the location of configuration files</title>
@@ -67,19 +67,20 @@
 				The different shortcuts can still use the same main configuration file.
 			</para>
 			<para>If you want to control the location where &bw-productname; stores the configuration 
-			  files, you have to start the application with the parameter -configdir to specify an 
+			  files, you have to start the application with the parameter -configDir to specify an 
 				alternate directory:</para>
 			<para>
-				<programlisting>java -jar sqlworkbench.jar -configdir=/export/configs/SQLWorkbench</programlisting>
+				<programlisting>java -jar sqlworkbench.jar -configDir=/export/configs/SQLWorkbench</programlisting>
 				or if you are using the Windows&reg; launcher:
-				<programlisting>SQLWorkbench -configdir=c:\ConfigData\SQLWorkbench</programlisting>
+				<programlisting>SQLWorkbench -configDir=c:\ConfigData\SQLWorkbench</programlisting>
 
 				The placeholder <literal>${user.home}</literal> will be 
 				replaced with the current user's home directory (as returned by the Operating System), e.g.:
 <programlisting>
 java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench
 </programlisting>
-				If the specified directory does not exist, it will be created.
+				If the specified directory does not exist, it will be created. Note that the above example will work 
+				under Linux and Windows equally.
 			</para>
 
 			<para>
@@ -87,7 +88,7 @@ java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench
 				files to the other computer (the log file does not need to be copied).
 				When a profile is connected to a workspace, the filename
 				of the workspace file is usually stored with a placeholder for the configuration directory
-				(%ConfigDir%) so that the profiles don't need to be adjusted.
+				(%configDir%) so that the profiles don't need to be adjusted.
 			</para>
 			<para>
 				You will need to edit the driver definitions (stored in <filename>WbDrivers.xml</filename>)
@@ -155,13 +156,15 @@ java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench
 	<section id="no-ddraw">
 		<title>Display Problems, Crashes, Bluescreens when running under Windows&reg;</title>
 
-		<para>If you experience problems when running &wb-productname; (or
+		<para>
+			If you experience problems when running &wb-productname; (or
 		other Java/Swing based applications) on the Windows&reg; platform, this
 		might be due to problems with the graphics driver and/or the
 		DirectDraw installation. If upgrading the graphics driver or the
 		DirectDraw/DirectX version is not an option (or does not solve the
 		problem), try to run SQL Workbench with the direct draw feature
-		turned off:</para>
+		turned off:
+		</para>
 
 
 		<programlisting>java -Dsun.java2d.noddraw=true -jar sqlworkbench.jar</programlisting>
@@ -344,12 +347,12 @@ java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench
 
 			<para>The following call to the launcher:</para>
 
-			<programlisting>SQLWorkbench -noddraw -configdir=c:\MyConf</programlisting>
+			<programlisting>SQLWorkbench -noddraw -configDir=c:\MyConf</programlisting>
 
 			<para>is the same as directly starting sqlworkbench.jar with these
 			parameters:</para>
 
-			<programlisting>java -Dsun.java2d.noddraw=true -jar sqlworkbench.jar -configdir=c:\MyConf</programlisting>
+			<programlisting>java -Dsun.java2d.noddraw=true -jar sqlworkbench.jar -configDir=c:\MyConf</programlisting>
 		</section>
 
 		<section id="launcher-vista">
@@ -377,21 +380,27 @@ java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench
 			the launcher or starting &wb-productname; using the <literal>java</literal> command itself.
 		</para>
 		
-		<section id="cmdline-parameter-configdir">
+		<note>
+			<para>
+				When quoting parameters on the commandline (especially in a Windows environment) you have 
+				to use single quotes, as the double quotes won't be passed to the application. 
+			</para>
+		</note>
+			
+		<section id="cmdline-parameter-configDir">
 			<title>Specify the directory for configuration settings</title>
 
 			<para>
 				The parameter <literal>-configDir</literal> specifies the directory where
 				&wb-productname; will store all its settings. If this parameter is not supplied, 
-				the directory where the <literal>sqlworkbench.jar</literal>
-				is located is used. 
+				the directory where the <link linkend="config-dir">default location</link> is used. 
 				The placeholder <literal>${user.home}</literal> will be 
 				replaced with the current user's home directory (as returned by the Operating System).
 				If the specified directory does not exist, it will be created. 
 			</para>
 			
-			<programlisting>java -jar sqlworkbench.jar -configdir=${user.home}/wbconfig
-SQLWorkbench -configdir='c:\Configurations\SQLWorkbench'</programlisting>
+			<programlisting>java -jar sqlworkbench.jar -configDir=${user.home}/wbconfig
+SQLWorkbench -configDir='c:\Configurations\SQLWorkbench'</programlisting>
 			<para>
 				Note that even on the Windows platform you can use a forward slash to separate 
 				directory names in the parameter.
@@ -483,7 +492,7 @@ another_variable=24</programlisting>
 				In this case the file <literal>WbProfiles.xml</literal> must be in the current
 				(working) directory of the application. If this is not the case, please specify the 
 				location of the profile using either the <link linkend="cmdline-parameter-profilestorage"><literal>-profilestorage</literal></link> or 
-				<link linkend="cmdline-parameter-configdir"><literal>-configdir</literal></link> parameter.
+				<link linkend="cmdline-parameter-configDir"><literal>-configDir</literal></link> parameter.
 			</para>
 			<para>
 				If you have two profiles with the names <literal>&quot;Oracle - Test&quot;</literal> you will 
@@ -540,7 +549,7 @@ another_variable=24</programlisting>
 						</row>
 
 						<row>
-							<entry>-driverjar</entry>
+							<entry>-driverJar</entry>
 							<entry>Specify the full pathname to the .jar file containing the JDBC driver</entry>
 						</row>
 
@@ -559,12 +568,37 @@ another_variable=24</programlisting>
 							also available in the <link linkend="profile-rollback-before-disconnect">connection profile</link>.
 							</entry>
 						</row>
+
+						<row>
+							<entry>-separateConnection</entry>
+							<entry>If this parameter is set to true, and &wb-productname; is run in GUI mode, 
+							each SQL tab will use it's own connection to the database server. This setting is 
+							also available in the <link linkend="profile-separate-connection">connection profile</link>.
+							The default is <literal>true</literal>.
+							</entry>
+						</row>
+
+						<row>
+							<entry>-emptyStringIsNull</entry>
+							<entry>This parameter corresponds to the 
+							<link linkend="profile-empty-string-is-null">Empty String is NULL</link>
+							setting of the connection profile. This will only be used in GUI mode.
+							</entry>
+						</row>
+
+						<row>
+							<entry>-removeComments</entry>
+							<entry>This parameter corresponds to the 
+							<link linkend="profile-remove-comments">Remove comments</link>
+							setting of the connection profile.
+							</entry>
+						</row>
 						
 						<row>
 							<entry>-workspace</entry>
 							<entry>The workspace file to be loaded. If the file specification does not 
 							include a directory, the workspace will be loaded from the 
-							<link linkend="cmdline-parameter-configdir">configuration directory</link>. If this parameter
+							<link linkend="cmdline-parameter-configDir">configuration directory</link>. If this parameter
 							is not specified, the default workspace (<literal>Default.wksp</literal>) will be loaded.
 							</entry>
 						</row>
@@ -587,6 +621,13 @@ another_variable=24</programlisting>
 								Turns on right-trimming of values retrieved from <literal>CHAR</literal>
 								columns. See the <link linkend="profile-trim-char-data">description</link> of the 
 								profile properties for details.
+							</entry>
+						</row>
+
+						<row>
+							<entry>-readOnly</entry>
+							<entry>
+								Puts the connection into <link linkend="profile-readonly">read-only mode</link>.
 							</entry>
 						</row>
 						
