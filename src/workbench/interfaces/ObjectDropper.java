@@ -16,6 +16,7 @@ import java.util.List;
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.storage.RowActionMonitor;
 
 /**
  *
@@ -24,8 +25,10 @@ import workbench.db.WbConnection;
 public interface ObjectDropper
 {
 	boolean supportsCascade();
+	boolean supportsFKSorting();
 	void setCascade(boolean flag);
 	void setConnection(WbConnection con);
+	WbConnection getConnection();
 	void setObjectTable(TableIdentifier tbl);
 	
 	void setObjects(List<? extends DbObject> objects);
@@ -36,4 +39,8 @@ public interface ObjectDropper
 	
 	void cancel()
 		throws SQLException;
+	
+	void setRowActionMonitor(RowActionMonitor monitor);
+	
+	CharSequence getScript();
 }

@@ -1595,20 +1595,6 @@ public class DbMetadata
 	}
 
 	/**
-	 * Return a list of stored procedures that are available
-	 * in the database. This call is delegated to the
-	 * currently defined {@link workbench.db.ProcedureReader}
-	 * If no DBMS specific reader is used, this is the {@link workbench.db.JdbcProcedureReader}
-	 * 
-	 * @return a DataStore with the list of procedures.
-	 */
-	public DataStore getProceduresAndTriggers(String aCatalog, String aSchema)
-		throws SQLException
-	{
-		return this.procedureReader.getProcedures(aCatalog, aSchema);
-	}	
-	
-	/**
 	 * Return a List of {@link workbench.db.ProcedureDefinition} objects
 	 * for Oracle packages only one ProcedureDefinition per package is returned (although
 	 * the DbExplorer will list each function of the packages).

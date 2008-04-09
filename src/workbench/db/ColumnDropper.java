@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import workbench.interfaces.ObjectDropper;
 import workbench.log.LogMgr;
+import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -32,6 +33,7 @@ public class ColumnDropper
 	private TableIdentifier table;
 	private boolean cancelDrop = false;
 	private Statement currentStatement;
+	private RowActionMonitor monitor;
 	
 	public ColumnDropper()
 	{
@@ -44,6 +46,11 @@ public class ColumnDropper
 		this.table = tbl;
 	}
 
+	public void setRowActionMonitor(RowActionMonitor mon)
+	{
+		this.monitor = mon;
+	}
+	
 	public boolean supportsCascade()
 	{
 		return false;
@@ -51,6 +58,11 @@ public class ColumnDropper
 
 	public void setCascade(boolean flag)
 	{
+	}
+	
+	public boolean supportsFKSorting()
+	{
+		return false;
 	}
 	
 	public void cancel()
@@ -63,6 +75,11 @@ public class ColumnDropper
 		}
 	}
 
+	public WbConnection getConnection()
+	{
+		return this.conn;
+	}
+	
 	public void setConnection(WbConnection con)
 	{
 		this.conn = con;
@@ -89,6 +106,22 @@ public class ColumnDropper
 				columns.add((ColumnIdentifier)dbo);
 			}
 		}
+	}
+
+	public CharSequence getScript()
+	{
+		List<String> statements = getSql();
+		StringBuffer result = new StringBuffer(statements.size() * 40);
+		boolean needCommit = (conn != null ? conn.shouldCommitDDL() : false);
+		
+		for (String sql : statements)
+		{
+			result.append(sql);
+			result.append(";\n");
+			if (needCommit) result.append("COMMIT;\n");
+			result.append("\n");
+		}
+		return result;
 	}
 	
 	public void dropObjects()

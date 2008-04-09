@@ -116,11 +116,24 @@ public class JdbcProcedureReader
 		}
 	}
 
-	public DataStore buildProcedureListDataStore(DbMetadata meta)
+	public DataStore buildProcedureListDataStore(DbMetadata meta, boolean addSpecificName)
 	{
-		String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", meta.getCatalogTerm().toUpperCase(), meta.getSchemaTerm().toUpperCase(), "REMARKS"};
-		final int types[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		final int sizes[] = {30,12,10,10,20};
+		String[] cols  = null;
+		int types[] = null;
+		int sizes[] = null;
+		
+		if (addSpecificName)
+		{
+			cols = new String[] {"PROCEDURE_NAME", "TYPE", meta.getCatalogTerm().toUpperCase(), meta.getSchemaTerm().toUpperCase(), "REMARKS", "SPECIFIC_NAME"};
+			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+			sizes = new int[] {30,12,10,10,20,50};
+		}
+		else
+		{
+			cols = new String[] {"PROCEDURE_NAME", "TYPE", meta.getCatalogTerm().toUpperCase(), meta.getSchemaTerm().toUpperCase(), "REMARKS"};
+			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+			sizes = new int[] {30,12,10,10,20};
+		}
 
 		DataStore ds = new DataStore(cols, types, sizes);
 		return ds;
@@ -129,7 +142,11 @@ public class JdbcProcedureReader
 	public DataStore fillProcedureListDataStore(ResultSet rs)
 		throws SQLException
 	{
-		DataStore ds = buildProcedureListDataStore(this.connection.getMetadata());
+
+		int specIndex = JdbcUtils.getColumnIndex(rs, "SPECIFIC_NAME");
+		boolean useSpecificName = specIndex > -1;
+		
+		DataStore ds = buildProcedureListDataStore(this.connection.getMetadata(), useSpecificName);
 		
 		try
 		{
@@ -151,7 +168,11 @@ public class JdbcProcedureReader
 					iType = new Integer(type);
 				}
 				int row = ds.addRow();
-				
+				if (useSpecificName)
+				{
+					String specname = rs.getString("SPECIFIC_NAME");
+					ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SPECIFIC_NAME, specname);
+				}
 
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, cat);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);

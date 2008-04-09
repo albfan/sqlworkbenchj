@@ -83,7 +83,7 @@ public class EditWindow
 	public EditWindow(final Dialog owner, final String title, final String text, final String settingsId, final boolean createSqlEditor)
 	{
 		super(owner, title, true);
-		init(text, settingsId, createSqlEditor, false);
+		init(text, settingsId, createSqlEditor, true);
 		WbSwingUtilities.center(this, WbManager.getInstance().getCurrentWindow());
 	}
 	

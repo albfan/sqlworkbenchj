@@ -50,7 +50,6 @@ public class SqlServerProcedureReader
 	public DataStore getProcedures(String catalog, String owner)
 		throws SQLException
 	{
-		//PreparedStatement stmt = this.dbConn.prepareStatement(GET_PROC_SQL);
 		CallableStatement cstmt = this.connection.getSqlConnection().prepareCall(GET_PROC_SQL);
 		
 		DataStore ds = null;
@@ -66,7 +65,7 @@ public class SqlServerProcedureReader
 				cstmt.setString(1, owner);
 			}
 			rs = cstmt.executeQuery();
-			ds = buildProcedureListDataStore(this.connection.getMetadata());
+			ds = buildProcedureListDataStore(this.connection.getMetadata(), false);
 			while (rs.next())
 			{
 				String dbname = rs.getString("PROCEDURE_QUALIFIER");

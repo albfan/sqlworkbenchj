@@ -138,7 +138,7 @@ public class TableDeleterUI
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 5);
+    gridBagConstraints.insets = new java.awt.Insets(3, 3, 0, 5);
     jPanel1.add(checkFKButton, gridBagConstraints);
 
     jPanel2.setLayout(new java.awt.GridBagLayout());
@@ -196,7 +196,7 @@ public class TableDeleterUI
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(6, 4, 0, 15);
+    gridBagConstraints.insets = new java.awt.Insets(3, 4, 0, 9);
     jPanel1.add(jPanel2, gridBagConstraints);
 
     showScript.setText(ResourceMgr.getString("LblShowScript"));
@@ -211,7 +211,7 @@ public class TableDeleterUI
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(9, 8, 0, 5);
+    gridBagConstraints.insets = new java.awt.Insets(9, 3, 0, 5);
     jPanel1.add(showScript, gridBagConstraints);
 
     addMissingTables.setSelected(true);
@@ -224,7 +224,7 @@ public class TableDeleterUI
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
     jPanel1.add(addMissingTables, gridBagConstraints);
 
     optionPanel.add(jPanel1, java.awt.BorderLayout.CENTER);

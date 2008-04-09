@@ -27,6 +27,7 @@ public interface ProcedureReader
 	public static final int COLUMN_IDX_PROC_LIST_CATALOG = 2;
 	public static final int COLUMN_IDX_PROC_LIST_SCHEMA = 3;
 	public static final int COLUMN_IDX_PROC_LIST_REMARKS = 4;
+	public static final int COLUMN_IDX_PROC_LIST_SPECIFIC_NAME = 5;
 	
 	// column index definitions for the list of procedure columns
 	public final static int COLUMN_IDX_PROC_COLUMNS_COL_NAME = 0;

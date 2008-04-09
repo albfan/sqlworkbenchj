@@ -12,7 +12,10 @@
 package workbench.db;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import workbench.util.VersionNumber;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -58,5 +61,25 @@ public class JdbcUtils
 		}
 	}
 	
+	public static int getColumnIndex(ResultSet rs, String colname)
+	{
+		try
+		{
+			if (rs == null) return -1;
+			if (StringUtil.isEmptyString(colname)) return -1;
+			ResultSetMetaData meta = rs.getMetaData();
+			int colcount = meta.getColumnCount();
+			for (int i=1; i <= colcount; i++)
+			{
+				String name = meta.getColumnName(i);
+				if (name.equalsIgnoreCase(colname)) return i;
+			}
+		}
+		catch (Exception e)
+		{
+			// ignore
+		}
+		return -1;
+	}
 	
 }
