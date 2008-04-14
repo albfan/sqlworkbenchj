@@ -176,7 +176,7 @@ public class WbAboutDialog
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 4);
     contentPanel.add(jeditLabel, gridBagConstraints);
 
-    jdkVersion.setText(ResourceMgr.getString("TxtJavaVersion") + " " + System.getProperty("java.version"));
+    jdkVersion.setText(ResourceMgr.getString("TxtJavaVersion") + " " + System.getProperty("java.runtime.version"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;

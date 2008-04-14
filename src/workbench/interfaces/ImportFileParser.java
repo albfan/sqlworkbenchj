@@ -22,7 +22,6 @@ import workbench.db.importer.modifier.ImportValueModifier;
  */
 public interface ImportFileParser
 {
-	
 	/**
 	 *  Return the encoding used to read input files
 	 */
@@ -62,4 +61,8 @@ public interface ImportFileParser
 	 * @param modifier the ImportValueModifier to apply to the values in the import file
 	 */
 	void setValueModifier(ImportValueModifier modifier);
+
+	void setMultiFileImport(boolean flag);
+	boolean isMultiFileImport();
+	
 }

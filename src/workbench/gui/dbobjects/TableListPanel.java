@@ -965,7 +965,6 @@ public class TableListPanel
 				// the workspace.
 				type = tableTypeToSelect;
 			}
-			LogMgr.logDebug("TableListPanel.storeSettings()", "Saved object type: '" + type + "' (workspace prefix " + prefix + ")");
 			if (type != null) props.setProperty(prefix + "objecttype", type);
 			
 			props.setProperty(prefix + "divider", Integer.toString(this.splitPane.getDividerLocation()));

@@ -17,6 +17,7 @@ import java.sql.Statement;
 import java.sql.Types;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.sql.DelimiterDefinition;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
@@ -176,8 +177,18 @@ public class TriggerReader
 				}
 			}
 			CharSequence warn = SqlUtil.getWarnings(this.dbConnection, stmt);
-			if (warn != null && result.length() > 0) result.append(nl + nl);
-			result.append(warn);
+			if (warn != null)
+			{
+				if (result.length() > 0) result.append(nl + nl);
+				result.append(warn);
+			}
+			
+			DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(dbConnection);
+			if (delim != null && !delim.isStandard())
+			{
+				result.append(nl);
+				result.append(delim.getDelimiter());
+			}
 		}
 		catch (SQLException e)
 		{

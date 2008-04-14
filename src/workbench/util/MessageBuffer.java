@@ -44,7 +44,7 @@ public class MessageBuffer
 	 */
 	public MessageBuffer()
 	{
-		this(Settings.getInstance().getIntProperty("workbench.messagebuffer.maxentries", 1000));
+		this(Settings.getInstance().getIntProperty("workbench.messagebuffer.maxentries", 2500));
 	}
 	
 	/**

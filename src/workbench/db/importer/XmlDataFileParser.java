@@ -94,6 +94,8 @@ public class XmlDataFileParser
 	private boolean hasErrors = false;
 	private boolean hasWarnings = false;
 	
+	private boolean multiFileImport = false;
+	
 	private SAXParser saxParser;
 	private ImportFileHandler fileHandler = new ImportFileHandler();
 	private WbConnection dbConn;
@@ -121,6 +123,23 @@ public class XmlDataFileParser
 		this.inputFile = inputFile;
 	}
 
+	/**
+	 * Enables or disables multi-file import. If multi file
+	 * import is enabled, all file from the source directory ({@link #setSourceDirectory(java.lang.String)}
+	 * are imported into the same table defined by {@link #setTableName(java.lang.String) }
+	 *
+	 * @param flag
+	 */
+	public void setMultiFileImport(boolean flag)
+	{
+		this.multiFileImport = flag;
+	}
+
+	public boolean isMultiFileImport() 
+	{
+		return this.multiFileImport;
+	}
+		
 	public void setValueModifier(ImportValueModifier mod)
 	{
 		this.valueModifier = mod;
@@ -522,7 +541,7 @@ public class XmlDataFileParser
 	private void reset()
 	{
 		messages = new MessageBuffer();
-		tableName = null;
+		if (!multiFileImport) tableName = null;
 		tableNameFromFile = null;
 		ignoreCurrentRow = false;
 		currentColIndex = 0;

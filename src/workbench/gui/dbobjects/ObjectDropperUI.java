@@ -329,6 +329,7 @@ public class ObjectDropperUI
 		}
 		this.dropButton.setEnabled(false);
 		this.dropper.setCascade(checkBoxCascadeConstraints.isSelected());
+		this.dropper.setRowActionMonitor(this);
 
 		dropThread = new WbThread("DropThread")
 		{
@@ -357,6 +358,7 @@ private void showScriptButtonActionPerformed(java.awt.event.ActionEvent evt) {//
 				initDisplay();
 				dropButton.setEnabled(true);
 				showScriptButton.setEnabled(true);
+				cancelButton.setEnabled(true);
 				WbSwingUtilities.showDefaultCursor(dialog);
 			}
 		});
@@ -368,6 +370,7 @@ private void checkFKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN
 	if (conn == null || conn.isBusy()) return;
 	
 	this.dropButton.setEnabled(false);
+	this.cancelButton.setEnabled(false);
 	showScriptButton.setEnabled(false);
 	this.statusLabel.setText(ResourceMgr.getString("MsgFkDeps"));
 

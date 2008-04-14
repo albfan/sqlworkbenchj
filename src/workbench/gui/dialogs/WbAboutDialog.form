@@ -16,6 +16,7 @@
   </Events>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
@@ -165,7 +166,7 @@
         <Component class="javax.swing.JLabel" name="jdkVersion">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;TxtJavaVersion&quot;) + &quot; &quot; + System.getProperty(&quot;java.version&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;TxtJavaVersion&quot;) + &quot; &quot; + System.getProperty(&quot;java.runtime.version&quot;)" type="code"/>
             </Property>
           </Properties>
           <Constraints>

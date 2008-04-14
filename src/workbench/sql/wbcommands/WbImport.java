@@ -11,7 +11,6 @@
  */
 package workbench.sql.wbcommands;
 
-import workbench.db.importer.ConstantColumnValues;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -225,8 +224,6 @@ public class WbImport
 			result.setFailure();
 			return result;
 		}
-
-
 
 		String badFile = cmdLine.getValue(ARG_BADFILE);
 		if (badFile != null)
@@ -457,6 +454,7 @@ public class WbImport
 			// as the XmlDataFileParser might need it to read
 			// the table structure!
 			if (encoding != null) xmlParser.setEncoding(encoding);
+			if (table != null) xmlParser.setTableName(table);
 
 			if (dir != null)
 			{
@@ -467,7 +465,6 @@ public class WbImport
 			else
 			{
 				xmlParser.setSourceFile(inputFile);
-				if (table != null) xmlParser.setTableName(table);
 				String cols = cmdLine.getValue(ARG_IMPORTCOLUMNS);
 				if (cols != null)
 				{
@@ -529,6 +526,11 @@ public class WbImport
 			return result;
 		}
 
+		if (!StringUtil.isEmptyString(table) && !StringUtil.isEmptyString(dir))
+		{
+			parser.setMultiFileImport(true);
+		}
+		
 		if (badFile != null) imp.setBadfileName(badFile);
 
 		String value = cmdLine.getValue(CommonArgs.ARG_PROGRESS);
@@ -592,26 +594,29 @@ public class WbImport
 		String keyColumns = cmdLine.getValue(ARG_KEYCOLUMNS);
 		imp.setKeyColumns(keyColumns);
 
-		boolean delete = false;
-		boolean useTruncate = false;
-
-		if (cmdLine.isArgPresent(ARG_TRUNCATE_TABLE))
+		if (!parser.isMultiFileImport())
 		{
-			delete = cmdLine.getBoolean(ARG_TRUNCATE_TABLE);
-			if (delete) useTruncate = true;
-		}
-		else
-		{
-			delete = cmdLine.getBoolean(ARG_DELETE_TARGET);
-			useTruncate = cmdLine.getBoolean(ARG_USE_TRUNCATE, false);
-		}
+			boolean delete = false;
+			boolean useTruncate = false;
 
-		imp.setDeleteTarget(delete);
-		if (delete)
-		{
-			imp.setUseTruncate(useTruncate);
-		}
+			if (cmdLine.isArgPresent(ARG_TRUNCATE_TABLE))
+			{
+				delete = cmdLine.getBoolean(ARG_TRUNCATE_TABLE);
+				if (delete) useTruncate = true;
+			}
+			else
+			{
+				delete = cmdLine.getBoolean(ARG_DELETE_TARGET);
+				useTruncate = cmdLine.getBoolean(ARG_USE_TRUNCATE, false);
+			}
 
+			imp.setDeleteTarget(delete);
+			if (delete)
+			{
+				imp.setUseTruncate(useTruncate);
+			}
+		}
+		
 		int startRow = cmdLine.getIntValue(ARG_START_ROW, -1);
 		if (startRow > 0) imp.setStartRow(startRow);
 
@@ -641,12 +646,12 @@ public class WbImport
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("WbImport.execute()", "Error importing '" + inputFile, e);
+			LogMgr.logError("WbImport.execute()", "Error importing " + (inputFile == null ? dir : inputFile), e);
 			result.setFailure();
 		}
 		catch (ConverterException e)
 		{
-			LogMgr.logError("WbImport.execute()", "Error importing '" + inputFile, e);
+			LogMgr.logError("WbImport.execute()", "Error importing " + (inputFile == null ? dir : inputFile), e);
 			result.setFailure();
 		}
 		catch (ParsingInterruptedException e)

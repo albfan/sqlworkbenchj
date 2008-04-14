@@ -54,7 +54,8 @@ public class ConnectionInfoPanel
 			content.append("<b>" + ResourceMgr.getString("LblDbProductInfo") + ":</b> " + meta.getDatabaseProductVersion() + "<br>\r\n");
 			content.append("<b>" + ResourceMgr.getString("LblDbProductVersion") + ":</b> " + conn.getDatabaseVersion() + "<br>\r\n");
 			content.append("<b>" + ResourceMgr.getString("LblDriverInfoName") + ":</b> " + meta.getDriverName() + "<br>\r\n");
-			content.append("<b>" + ResourceMgr.getString("LblDriverInfoVersion") + ":</b> " + meta.getDriverVersion() + "<br>\r\n");
+			content.append("<b>" + ResourceMgr.getString("LblDriverInfoClass") + ":</b> " + conn.getProfile().getDriverclass() + "<br>\r\n");
+			content.append("<b>" + ResourceMgr.getString("LblDriverInfoName") + ":</b> " + meta.getDriverName() + "<br>\r\n");
 			content.append("<b>" + ResourceMgr.getString("LblDbURL") + ":</b> " + conn.getUrl() + "<br>\r\n");
 			content.append("<b>" + ResourceMgr.getString("LblUsername") + ":</b> " + conn.getCurrentUser() + "<br>\r\n");
 			content.append("<b>" + StringUtil.capitalize(wbmeta.getSchemaTerm()) + ":</b> " + getDisplayValue(conn.getCurrentSchema()) + "<br>\r\n");

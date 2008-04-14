@@ -1532,6 +1532,72 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}	
+
+	public void testMultiFileImport()
+		throws Exception
+	{
+		int rowCount = 10;
+		try
+		{
+			util.emptyBaseDirectory();
+			
+			File importFile  = new File(this.basedir, "multi_test1.mtxt");
+			PrintWriter out = new PrintWriter(new FileWriter(importFile));
+			for (int i = 0; i < 5; i++)
+			{
+				out.print(Integer.toString(i));
+				out.print('\t');
+				out.println("First" + i + "\tLastname" + i);
+			}
+			out.close();
+
+			importFile  = new File(this.basedir, "multi_test2.mtxt");
+			out = new PrintWriter(new FileWriter(importFile));
+			for (int i = 5; i < rowCount; i++)
+			{
+				out.print(Integer.toString(i));
+				out.print('\t');
+				out.println("First" + i + "\tLastname" + i);
+			}
+			out.close();
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			stmt.executeUpdate("DELETE FROM junit_test");
+			this.connection.commit();
+
+			StatementRunnerResult result = importCmd.execute("wbimport -header=false -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=gaga -table=junit_test");
+			String msg = result.getMessageBuffer().toString();
+			assertFalse(result.isSuccess());
+			assertTrue(msg.indexOf("No files with extension gaga found in directory") > -1);
+			
+			result = importCmd.execute("wbimport -header=false -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=mtxt -table=junit_test");
+			assertTrue("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess());
+			
+			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
+			int count = -1;
+			if (rs.next())
+			{
+				count = rs.getInt(1);
+			}
+			assertEquals("Not enough values in table junit_test", rowCount, count);
+			
+			importFile  = new File(this.basedir, "multi_test1.mtxt");
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
+
+			importFile  = new File(this.basedir, "multi_test2.mtxt");
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
+		}
+		catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}	
 	
 	public void testMappedImport()
 		throws Exception

@@ -1371,19 +1371,13 @@ public class DataImporter
 			}
 		}
 	}
+	
 	/**
 	 *	Callback function from the RowDataProducer
 	 */
 	public void setTargetTable(TableIdentifier table, ColumnIdentifier[] columns)
 		throws SQLException
 	{
-		this.currentImportRow = 0;
-		this.updatedRows = 0;
-		this.insertedRows = 0;
-
-		this.errorCount = 0;
-		this.errorLimitAdded = false;
-		
 		// be prepared to import more then one table...
 		if (this.isRunning && this.targetTable != null)
 		{
@@ -1400,7 +1394,14 @@ public class DataImporter
 				}
 			}
 		}
+		
+		this.currentImportRow = 0;
+		this.updatedRows = 0;
+		this.insertedRows = 0;
 
+		this.errorCount = 0;
+		this.errorLimitAdded = false;
+		
 		
 		try
 		{
@@ -1824,6 +1825,8 @@ public class DataImporter
 	private void finishTable()
 		throws SQLException
 	{
+		if (this.targetTable == null) return;
+		
 		boolean commitNeeded = this.transactionControl && !dbConn.getAutoCommit() && (this.commitEvery != Committer.NO_COMMIT_FLAG);
 	
 		try
