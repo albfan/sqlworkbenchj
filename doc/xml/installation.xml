@@ -79,8 +79,7 @@
 <programlisting>
 java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench
 </programlisting>
-				If the specified directory does not exist, it will be created. Note that the above example will work 
-				under Linux and Windows equally.
+				If the specified directory does not exist, it will be created.
 			</para>
 
 			<para>
