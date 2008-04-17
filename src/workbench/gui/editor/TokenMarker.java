@@ -80,6 +80,14 @@ public abstract class TokenMarker
 		return token;
 	}
 	
+	protected Token getPreviousLineToken(int lineIndex)
+	{
+		if (lineIndex <= 0) return null;
+		lineIndex --;
+		Token prev = getLastTokenInLine(lineIndex);
+		if (prev == null) return getPreviousLineToken(lineIndex);
+		else return prev;
+	}
 	/**
 	 * A wrapper for the lower-level <code>markTokensImpl</code> method
 	 * that is called to split a line up into tokens.
@@ -90,7 +98,7 @@ public abstract class TokenMarker
 	{
 		if (lineIndex >= length) return null;
 
-		Token prev = getLastTokenInLine(lineIndex - 1);
+		Token prev = getPreviousLineToken(lineIndex);
 		
 		lineStartTokens.set(lineIndex, null);
 		markTokensImpl(prev, line, lineIndex);

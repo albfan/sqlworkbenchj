@@ -55,6 +55,12 @@ public class SQLTokenMarker
 		{
 			token = getLiteralId(literalChar);
 		}
+	
+		// Check for multi line comments.
+		if (lastToken != null && lastToken.id == Token.COMMENT1)
+		{
+			token = Token.COMMENT1;
+		}
 		
 		char[] array = line.array;
 		offset = lastOffset = lastKeyword = line.offset;
@@ -72,6 +78,17 @@ public class SQLTokenMarker
 						token = Token.NULL;
 						i++;
 						addToken(lineIndex, (i + 1) - lastOffset, Token.COMMENT1);
+						
+						// if the comment ends at the end of the current line
+						// add a NULL token in order to mark the end of the block comment 
+						// if there is at least another character on the line, that will 
+						// "reset" the comment token.
+						if (i + 1 >= currentLength)
+						{
+							Token last = getLastTokenInLine(lineIndex);
+							Token dummy = new Token(0, Token.NULL);
+							last.next = dummy;
+						}
 						lastOffset = i + 1;
 					}
 					else if (token == Token.NULL)
