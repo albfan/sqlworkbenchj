@@ -59,7 +59,7 @@ public class WbSchemaReportTest
 			r.close();
 			
 			String count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
-			assertEquals("Incorrect table count", "3", count);
+			assertEquals("Incorrect table count", "4", count);
 			
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def[@name='V_PERSON'])");
 			assertEquals("Incorrect view count", "0", count);
@@ -99,7 +99,7 @@ public class WbSchemaReportTest
 			r.close();
 			
 			String count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
-			assertEquals("Incorrect table count", "3", count);
+			assertEquals("Incorrect table count", "4", count);
 			
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def[@name='V_PERSON'])");
 			assertEquals("Incorrect view count", "1", count);
@@ -142,8 +142,11 @@ public class WbSchemaReportTest
 			stmt.executeUpdate("create table \"Person\" (person_id integer primary key, firstname varchar(100), lastname varchar(100))");
 			stmt.executeUpdate("create table \"Address\" (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50))");
 			stmt.executeUpdate("create table person_address (person_id integer, address_id integer, primary key (person_id, address_id))");
+			stmt.executeUpdate("create table person_address_status (person_id integer, address_id integer, status_name varchar(10), primary key (person_id, address_id))");
+			
 			stmt.executeUpdate("alter table person_address add constraint fk_pa_person foreign key (person_id) references \"Person\"(person_id)");
       stmt.executeUpdate("alter table person_address add constraint fk_pa_address foreign key (address_id) references \"Address\"(address_id)");
+      stmt.executeUpdate("alter table person_address_status add constraint fk_pas_pa foreign key (person_id, address_id) references person_address(person_id, address_id)");
 
 			stmt.executeUpdate("CREATE VIEW v_person AS SELECT * FROM \"Person\"");
 			stmt.executeUpdate("CREATE sequence seq_one");

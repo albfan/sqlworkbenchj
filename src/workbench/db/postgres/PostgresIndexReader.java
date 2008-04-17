@@ -38,6 +38,8 @@ public class PostgresIndexReader
 	
 	public StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
 	{
+		if (indexDefinition == null) return null;
+		
 		WbConnection con = this.metaData.getWbConnection();
 		Statement stmt = null;
 		ResultSet rs = null;

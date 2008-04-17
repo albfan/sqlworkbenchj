@@ -206,7 +206,7 @@ public class WbImport
 			return result;
 		}
 
-		if (type == null)
+		if (type == null && inputFile != null)
 		{
 			type = findTypeFromFilename(inputFile.getFullPath());
 		}
@@ -440,7 +440,6 @@ public class WbImport
 					return result;
 				}
 			}
-
 			imp.setProducer(textParser);
 		}
 		else if ("xml".equalsIgnoreCase(type))
@@ -483,7 +482,6 @@ public class WbImport
 					}
 				}
 			}
-
 			imp.setCreateTarget(cmdLine.getBoolean(ARG_CREATE_TABLE, false));
 			imp.setProducer(xmlParser);
 		}

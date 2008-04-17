@@ -168,6 +168,16 @@ public class ConnectionMgr
 	{
 		if (profile != null && profile.getCopyExtendedPropsToSystem())
 		{
+			// Check if there is another connection open which uses
+			// the same profile. If that is the case the 
+			// properties should not be removed from the system properties
+			for (WbConnection con : activeConnections.values())
+			{
+				if (con.getProfile().equals(profile))
+				{
+					return;
+				}
+			}
 			PropertiesCopier copier = new PropertiesCopier();
 			copier.removeFromSystem(profile.getConnectionProperties());
 		}		

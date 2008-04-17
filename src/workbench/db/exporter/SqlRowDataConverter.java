@@ -119,14 +119,13 @@ public class SqlRowDataConverter
 	public StrBuffer getEnd(long totalRows)
 	{
 		boolean writeCommit = true;
-		if ( (commitEvery == Committer.NO_COMMIT_FLAG) 
-			   || (commitEvery > 0 && (totalRows % commitEvery == 0)))
+		if ( (commitEvery == Committer.NO_COMMIT_FLAG) || (commitEvery > 0 && (totalRows % commitEvery == 0)))
 		{
 			writeCommit = false;
 		}
 
 		StrBuffer end = null;
-		if (writeCommit)
+		if (writeCommit && totalRows > 0)
 		{
 			end = new StrBuffer();
 			end.append(lineTerminator);

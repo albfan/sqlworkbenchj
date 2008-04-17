@@ -36,8 +36,10 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
+import workbench.sql.StatementRunnerResult;
 import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.util.FileUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -179,6 +181,7 @@ public class WbConnection
 		
 		StatementRunner runner = new StatementRunner();
 		runner.setConnection(this);
+		runner.setReturnOnlyErrorMessages(true);
 		
 		ScriptParser p = new ScriptParser(sql);
 		p.setAlternateLineComment(this.getDbSettings().getLineComment());
@@ -191,6 +194,7 @@ public class WbConnection
 		// that are collected here. So I have to store the messages locally 
 		// and cannot use the scriptError variable directly
 		StringBuilder messages = new StringBuilder(150);
+		String resKey = "MsgConnScript" + type;
 		
 		try
 		{
@@ -198,20 +202,27 @@ public class WbConnection
 			{
 				command = p.getNextCommand();
 				if (p == null) continue;
+				String stmtSql = StringUtil.getMaxSubstring(SqlUtil.makeCleanSql(command, false),250);
 				
 				try
 				{
 					runner.runStatement(command, -1, 0);
+					StatementRunnerResult result = runner.getResult();
+					String msg = ResourceMgr.getString(resKey) + " " + stmtSql;
+					messages.append(msg);
+					LogMgr.logDebug("WbConnection.runConnectScript()", "  Executed statement: " + stmtSql);
+					if (!result.isSuccess())
+					{
+						messages.append("\n  " + ResourceMgr.getString("TxtError") + ": "+ result.getMessageBuffer().toString());
+					}
+					messages.append("\n");
 				}
 				finally
 				{
 					runner.statementDone();
 				}
-				messages.append(ResourceMgr.getString("MsgBatchExecutingStatement"));
-				messages.append(": ");
-				messages.append(StringUtil.getMaxSubstring(command,250));
-				messages.append("\n\n");
 			}
+			messages.append("\n");
 		}
 		catch (Throwable e)
 		{
@@ -494,6 +505,7 @@ public class WbConnection
 
 	/**
 	 * This will actually close the connection to the DBMS.
+	 * 
 	 * It will also free an resources from the DbMetadata object and
 	 * shutdown the keep alive thread.
 	 */
@@ -539,7 +551,6 @@ public class WbConnection
 			PrintWriter pw = DriverManager.getLogWriter();
 			FileUtil.closeQuitely(pw);
 		}
-
 	}
 
 	public boolean isClosed()
@@ -715,7 +726,7 @@ public class WbConnection
 		}
 		catch (Throwable e)
 		{
-			LogMgr.logError("WbConnection.getDatabaseVersion()", "Error retrieving DB version", e);
+			LogMgr.logWarning("WbConnection.getDatabaseVersion()", "Error retrieving DB version (" + ExceptionUtil.getDisplay(e) + ")");
 			return "n/a";
 		}
 	}

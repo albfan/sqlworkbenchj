@@ -60,6 +60,8 @@ public class StatementRunner
 	private boolean useSavepoint;
 	private Savepoint savepoint;
 	private boolean confirmUpdates = false;
+	private boolean returnOnlyErrorMessages = false;
+	
 	public StatementRunner()
 	{
 		this.verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
@@ -120,7 +122,19 @@ public class StatementRunner
 	{
 		this.connectionClient = client;
 	}
-	
+
+	/**
+	 * Controls the type of error reporting. 
+	 * If this is set to true, no additional messages will be reported, only
+	 * the errors returned by the server. 
+	 * 
+	 * @param flag
+	 * @see SqlCommand#setReturnOnlyErrorMessages(boolean) 
+	 */
+	public void setReturnOnlyErrorMessages(boolean flag)
+	{
+		returnOnlyErrorMessages = flag;
+	}
 	
 	public void setParameterPrompter(ParameterPrompter filter) { this.prompter = filter; }
 	public void setBaseDir(String dir) { this.baseDir = dir; }
@@ -225,6 +239,7 @@ public class StatementRunner
 		this.currentCommand.setQueryTimeout(queryTimeout);
 		this.currentCommand.setConnection(this.dbConnection);
 		this.currentCommand.setParameterPrompter(this.prompter);
+		this.currentCommand.setReturnOnlyErrorMessages(this.returnOnlyErrorMessages);
 
 		String realSql = aSql;
 		if (VariablePool.getInstance().getParameterCount() > 0)

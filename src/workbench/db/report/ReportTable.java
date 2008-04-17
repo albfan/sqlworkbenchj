@@ -26,6 +26,8 @@ import workbench.db.WbConnection;
 import workbench.storage.DataStore;
 import workbench.util.StrBuffer;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import workbench.db.IndexDefinition;
 import workbench.db.TableCommentReader;
 import workbench.util.StringUtil;
@@ -53,6 +55,7 @@ public class ReportTable
 	public static final String TAG_TABLE_CONSTRAINT = "table-constraint";
 
 	private TableIdentifier table;
+	private Map<String, ForeignKeyDefinition> foreignKeys = new HashMap<String, ForeignKeyDefinition>();
 	private ReportColumn[] columns;
 	private IndexReporter reporter;
 	private String tableComment;
@@ -214,26 +217,34 @@ public class ReportTable
 			ReportColumn rcol = this.findColumn(col);
 			if (rcol != null)
 			{
-				ColumnReference ref = new ColumnReference();
-				ref.setConstraintName(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_FK_NAME));
-				ref.setDeleteRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, DatabaseMetaData.importedKeyNoAction));
-				ref.setUpdateRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, DatabaseMetaData.importedKeyNoAction));
-				ref.setDeleteRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_DELETE_RULE));
-				ref.setUpdateRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_UPDATE_RULE));
-				ref.setDeferrableRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE, DatabaseMetaData.importedKeyNotDeferrable));
-				ref.setDeferRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_DEFERRABLE));
+				String fkname = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_FK_NAME);
+				ForeignKeyDefinition def = this.foreignKeys.get(fkname);
+				if (def == null)
+				{
+					def = new ForeignKeyDefinition(fkname);
+					def.setDeleteRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, DatabaseMetaData.importedKeyNoAction));
+					def.setUpdateRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, DatabaseMetaData.importedKeyNoAction));
+					def.setDeleteRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_DELETE_RULE));
+					def.setUpdateRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_UPDATE_RULE));
+					def.setDeferrableRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE, DatabaseMetaData.importedKeyNotDeferrable));
+					def.setDeferRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_DEFERRABLE));
+					foreignKeys.put(fkname, def);
+				}
 				String colExpr = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
 				String reftable = null;
-				String column = null;
+				String refcolumn = null;
 				int pos = colExpr.lastIndexOf(".");
 				if (pos  > -1)
 				{
 					reftable = colExpr.substring(0, pos);
-					column = colExpr.substring(pos + 1);
+					refcolumn = colExpr.substring(pos + 1);
 				}
-				ref.setForeignTable(new ReportTable(new TableIdentifier(reftable)));
-				ref.setForeignColumn(column);
-				rcol.setForeignKeyReference(ref);
+				if (def.getForeignTable() == null)
+				{
+					def.setForeignTable(new ReportTable(new TableIdentifier(reftable)));
+				}
+				def.addReferenceColumn(col, refcolumn);
+				rcol.setForeignKeyReference(def.getColumnReference(col));
 			}
 		}
 	}
@@ -370,6 +381,18 @@ public class ReportTable
 		if (this.tableConstraints != null && this.tableConstraints.length() > 0)
 		{
 			tagWriter.appendTag(line, colindent, TAG_TABLE_CONSTRAINT, this.tableConstraints, true);
+		}
+		if (this.foreignKeys.size() > 0)
+		{
+			tagWriter.appendOpenTag(line, colindent, "foreign-keys");
+			line.append('\n');
+			StrBuffer fkindent = new StrBuffer(colindent);
+			fkindent.append("  ");
+			for (ForeignKeyDefinition def : foreignKeys.values())
+			{
+				line.append(def.getXml(fkindent));
+			}
+			tagWriter.appendCloseTag(line, colindent, "foreign-keys");
 		}
 		if (this.grants != null)
 		{

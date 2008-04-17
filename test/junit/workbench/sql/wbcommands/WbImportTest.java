@@ -1950,6 +1950,89 @@ public class WbImportTest
 		}
 	}
 
+	public void testXmlImportCreateTable()
+	{
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
+             "<wb-export> \n" + 
+             "  <meta-data> \n" + 
+             " \n" + 
+             "    <generating-sql> \n" + 
+             "    <![CDATA[ \n" + 
+             "    select id, lastname, firstname from person \n" + 
+             "    ]]> \n" + 
+             "    </generating-sql> \n" + 
+             " \n" + 
+             "    <wb-tag-format>short</wb-tag-format> \n" + 
+             "  </meta-data> \n" + 
+             " \n" + 
+             "  <table-def> \n" + 
+             "    <table-name>not_there_table</table-name> \n" + 
+             "    <column-count>3</column-count> \n" + 
+             " \n" + 
+             "    <column-def index=\"0\"> \n" + 
+             "      <column-name>NR</column-name> \n" + 
+             "      <java-class>java.lang.Integer</java-class> \n" + 
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
+             "      <java-sql-type>4</java-sql-type> \n" + 
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"1\"> \n" + 
+             "      <column-name>LASTNAME</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "    <column-def index=\"2\"> \n" + 
+             "      <column-name>FIRSTNAME</column-name> \n" + 
+             "      <java-class>java.lang.String</java-class> \n" + 
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
+             "      <java-sql-type>12</java-sql-type> \n" + 
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
+             "    </column-def> \n" + 
+             "  </table-def> \n" + 
+             " \n" + 
+             "<data> \n" + 
+             "<rd><cd>1</cd><cd>Dent</cd><cd>Arthur</cd></rd> \n" + 
+             "<rd><cd>2</cd><cd>Beeblebrox</cd><cd>Zaphod</cd></rd> \n" + 
+             "</data> \n" + 
+             "</wb-export>";
+		try
+		{
+			File xmlFile = new File(this.basedir, "xml_import.xml");
+			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
+			out.write(xml);
+			out.close();
+			
+			String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -createTarget=true";
+			//System.out.println("cmd=" + cmd);
+			StatementRunnerResult result = importCmd.execute(cmd);
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from not_there_table");
+			int rowCount = 0;
+			
+			while (rs.next())
+			{
+				rowCount ++;
+				int nr = rs.getInt(1);
+				assertEquals("Wrong data imported", rowCount, nr);
+			}
+			assertEquals("Wrong number of rows", rowCount, 2);
+			rs.close();
+			stmt.close();
+			if (!xmlFile.delete())
+			{
+				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
+			}			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 
 	public void testPartialXmlImport()
 	{

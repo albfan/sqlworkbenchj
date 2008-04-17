@@ -57,7 +57,7 @@ public class JdbcIndexReader
 	 */
 	public StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
 	{
-		if (indexDefinition == null) return new StringBuilder(0);
+		if (indexDefinition == null) return null;
 		int count = indexDefinition.getRowCount();
 		if (count == 0) return StringUtil.emptyBuffer();
 		StringBuilder idx = new StringBuilder();
@@ -91,6 +91,7 @@ public class JdbcIndexReader
 				if ("YES".equalsIgnoreCase(unique))
 				{
 					sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "UNIQUE ");
+					if ("unique".equalsIgnoreCase(type)) type = "";
 				}
 				else
 				{

@@ -26,13 +26,12 @@ import workbench.util.WbWorkspace;
  * @author  support@sql-workbench.net
  */
 public interface MainPanel
+	extends ResultLogger
 {
 	List getActions();
 	WbToolbar getToolbar();
 	void showStatusMessage(String aMsg);
 	void clearStatusMessage();
-	void showLogMessage(String aMsg);
-	void clearLog();
 	void showLogPanel();
 	void showResultPanel();
 	void setConnectionClient(Connectable client);

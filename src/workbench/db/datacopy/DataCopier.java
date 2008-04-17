@@ -481,6 +481,35 @@ public class DataCopier
 		return sourceCols;
 	}
 	
+	private ColumnIdentifier findColumn(List<ColumnIdentifier> columns, String colname)
+	{
+		if (columns == null) return null;
+		if (colname == null) return null;
+		
+		for (ColumnIdentifier col : columns)
+		{
+			String name = col.getColumnName();
+			if (name.equalsIgnoreCase(colname)) return col;
+		}
+		return null;
+	}
+	
+	private void addTargetColumn(ColumnIdentifier sourceCol, String targetName, List<ColumnIdentifier> targetCols)
+	{
+		if (sourceCol == null) return;
+		ColumnIdentifier targetCol = findColumn(targetCols, (targetName == null ? sourceCol.getColumnName() : targetName));
+		if (targetCol != null)
+		{
+			this.columnMap.put(sourceCol, targetCol);
+		}
+		else
+		{
+			LogMgr.logWarning("DataCopier.initColumnMapping()", "Column " + sourceCol.toString() + " not found in target table " + this.targetTable + ". Ignoring mapping!");
+			String msg = ResourceMgr.getFormattedString("ErrCopyTargetColumnNotFound", sourceCol.toString());
+			this.addMessage(msg);
+		}
+	}
+	
 	/**
 	 *	Initialize the column mapping between source and target table.
 	 *	If a mapping is provided, it is used (after checking that the columns
@@ -491,7 +520,8 @@ public class DataCopier
 		throws SQLException
 	{
 		List<ColumnIdentifier> sourceCols = getSourceColumns();
-		List<ColumnIdentifier> targetCols = (createNew ? null : this.targetConnection.getMetadata().getTableColumns(this.targetTable));
+		List<ColumnIdentifier> targetCols = null;
+		if (!createNew) targetCols = this.targetConnection.getMetadata().getTableColumns(this.targetTable);
 
 		this.columnMap = new HashMap<ColumnIdentifier, ColumnIdentifier>(sourceCols.size());
 		
@@ -500,48 +530,36 @@ public class DataCopier
 			int colPos = 0;
 			for (Map.Entry<String, String> entry : columnMapping.entrySet())
 			{
-				ColumnIdentifier scol = new ColumnIdentifier(entry.getKey());
-				int index = sourceCols.indexOf(scol);
-				if (index > -1)
+				ColumnIdentifier sourceCol = findColumn(sourceCols, entry.getKey());
+				if (sourceCol != null)
 				{
-					ColumnIdentifier sourceCol = sourceCols.get(index);
-					ColumnIdentifier targetCol = null;
-					
 					if (createNew)
 					{
 						// If no target column specified (e.g. using -columns=col1,col2,col3)
 						// then simply use the name from the source table
-						targetCol = sourceCol.createCopy();
+						ColumnIdentifier targetCol = sourceCol.createCopy();
 						if (entry.getValue() != null)
 						{
 							// Mapping specified, change the name of the column to the specified value
 							targetCol.setColumnName(entry.getValue());
 						}
 						
-						// Make sure the order of the tables is preserved
+						// Make sure the order of the columns is preserved
 						// when creating the table later, the columns will 
 						// be sorted by the position before generating the SQL
 						targetCol.setPosition(colPos);
 						colPos++;
+						this.columnMap.put(sourceCol, targetCol);
 					}
 					else
 					{
-						// Find the mapped column name in the columns of the target table
-						targetCol = new ColumnIdentifier(entry.getValue());
-						if (targetCols.indexOf(targetCol) == -1)
-						{
-							targetCol = null;
-							LogMgr.logWarning("DataCopier.initColumnMapping()", "Column " + targetCol + " not found in table " + this.targetTable + ". Ignoring mapping!");
-							String msg = ResourceMgr.getFormattedString("ErrCopyTargetColumnNotFound", targetCol.getColumnName());
-							this.addMessage(msg);
-						}
+						addTargetColumn(sourceCol, entry.getValue(), targetCols);
 					}
-					if (targetCol != null) this.columnMap.put(sourceCol, targetCol);
 				}
 				else
 				{
-					LogMgr.logWarning("DataCopier.initColumnMapping()", "Column " + scol + " not found in table " + this.sourceTable + ". Ignoring mapping!");
-					String msg = ResourceMgr.getFormattedString("ErrCopySourceColumnNotFound", scol.getColumnName());
+					LogMgr.logWarning("DataCopier.initColumnMapping()", "Column " + entry.getKey() + " not found in source table " + this.sourceTable + ". Ignoring mapping!");
+					String msg = ResourceMgr.getFormattedString("ErrCopySourceColumnNotFound", entry.getKey());
 					this.addMessage(msg);
 				}
 			}
@@ -551,7 +569,15 @@ public class DataCopier
 			// Use all columns from the source table
 			for (ColumnIdentifier scol : sourceCols)
 			{
-				columnMap.put(scol, scol.createCopy());
+				if (createNew)
+				{
+					columnMap.put(scol, scol.createCopy());
+				}
+				else
+				{
+					addTargetColumn(scol, null, targetCols);
+				}
+				
 			}
 		}
 	}

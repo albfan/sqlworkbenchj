@@ -347,7 +347,7 @@ public class TextAreaPainter
 				if (this.showLineNumbers)
 				{
 					// It seems that the Objects created by Integer.toString()
-					// that are passed to drawString() are not collected
+					// that are passed to drawString() are not garbage collected
 					// correctly (as seen in the profiler). So each time
 					// the editor gets redrawn a small amount of memory is lost
 					// To workaround this, I'm caching (some of) the values 

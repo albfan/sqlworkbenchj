@@ -50,6 +50,7 @@ public class WbCopyTest
 			Statement stmt = con.createStatement();
 			
 			stmt.executeUpdate("create table source_data (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob)");
+			stmt.executeUpdate("create table target_data (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob)");
 			
 			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (1,'Dent', 'Arthur', '01')");
 			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (2,'Beeblebrox', 'Zaphod','0202')");
@@ -60,8 +61,7 @@ public class WbCopyTest
 			
 			String sql = "--copy source_data and create target\n" +
 				"wbcopy -sourceTable=source_data " +
-				"-targettable=target_data " +
-				"-createTarget=true ";
+				"-targettable=target_data -createTarget=false";
 			
 			runner.runStatement(sql, -1, -1);
 			StatementRunnerResult result = runner.getResult();

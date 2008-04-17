@@ -255,10 +255,19 @@ public class XmlDataFileParser
 		TableIdentifier tbl = new TableIdentifier(this.tableName == null ? this.tableNameFromFile : this.tableName);
 		if (!this.dbConn.getMetadata().tableExists(tbl))
 		{
-			String msg = ResourceMgr.getFormattedString("ErrImportTableNotFound", tbl.getTableName());
-			this.messages.append(msg);
-			this.messages.appendNewLine();
-			throw new SQLException("Table '" + tbl.getTableName() + "' not found!");
+			if (this.receiver.getCreateTarget())
+			{
+				LogMgr.logDebug("XmlDataFileParser.checkTargetColumns()", "Table " + tbl.getTableName() + " not found, but receiver will create it. Skipping column check...");
+//				columnsToImport = getColumnsFromFile();
+				return;
+			}
+			else
+			{
+				String msg = ResourceMgr.getFormattedString("ErrImportTableNotFound", tbl.getTableName());
+				this.messages.append(msg);
+				this.messages.appendNewLine();
+				throw new SQLException("Table '" + tbl.getTableName() + "' not found!");
+			}
 		}
 		List<ColumnIdentifier> tableCols = this.dbConn.getMetadata().getTableColumns(tbl);
 		List<ColumnIdentifier> validCols = new LinkedList<ColumnIdentifier>();

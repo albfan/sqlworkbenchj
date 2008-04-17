@@ -146,10 +146,6 @@ public class ColumnIdentifier
 
 	/**
 	 *	Define this column to be an expression.
-	 * 
-	 *	The major difference to setColumnName() is, that the name will internally
-	 *  not be stored in lowercase
-	 *  (But can be used in a SELECT anyway)
 	 */
 	public void setExpression(String anExpression)
 	{

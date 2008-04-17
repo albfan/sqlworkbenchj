@@ -1046,12 +1046,7 @@ public class SqlPanel
 		{
 			this.closeFile(true, false);
 		}
-		else
-		{
-			this.editor.setText("");
-		}
-
-		//this.reset();
+		this.reset();
 
 		try
 		{

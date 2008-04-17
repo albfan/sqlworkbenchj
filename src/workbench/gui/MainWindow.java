@@ -791,7 +791,9 @@ public class MainWindow
 	protected void disconnectPanel(final MainPanel panel)
 	{
 		if (this.isConnectInProgress()) return;
-		setConnectIsInProgress();
+		boolean inProgress = isConnectInProgress();
+		if (!inProgress) setConnectIsInProgress();
+		
 		showDisconnectInfo();
 		showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
 		try
@@ -813,7 +815,7 @@ public class MainWindow
 		{
 			showStatusMessage("");
 			closeConnectingInfo();
-			clearConnectIsInProgress();
+			if (!inProgress) clearConnectIsInProgress();
 		}
 
 		EventQueue.invokeLater(new Runnable()
@@ -1053,43 +1055,6 @@ public class MainWindow
 
 	public void windowActivated(WindowEvent windowEvent)
 	{
-		// When switching between Applications (using Alt-Tab in Windows)
-		// sometimes the main menu is selected (as if the Alt key was pressed
-		// once to activate the menu). This is trying to workaround this bug
-		// but does not really work in all cases. As this happens with other Java
-		// applications as well, I think this is a JDK bug.
-		
-		// If the "oppositeWindow is not null, then we have a focus switch inside
-		// our application, so we don't need to do anything
-//		if (windowEvent.getOppositeWindow() != null) return;
-//		
-//		EventQueue.invokeLater(new Runnable()
-//		{
-//			public void run()
-//			{
-//				JMenu menu = null;
-//				JMenuBar bar = null;
-//		
-//				int index = getCurrentPanelIndex();
-//				if (panelMenus != null && index > -1)
-//				{
-//					bar = panelMenus.get(index);
-//					if (bar != null)
-//					{
-//						try
-//						{
-//							menu = bar.getMenu(0);
-//						}
-//						catch (Throwable th)
-//						{
-//							menu = null;
-//						}
-//					}
-//				}
-//				try { if (menu != null) menu.setSelected(false); } catch (Throwable th) {}
-//				try { if (bar != null) bar.setSelected(null); } catch (Throwable th) {}
-//			}
-//		});
 	}
 
 	public void windowIconified(WindowEvent windowEvent)
@@ -1212,11 +1177,7 @@ public class MainWindow
 		this.getCurrentPanel().clearLog();
 		this.getCurrentPanel().showResultPanel();
 
-		String warn = conn.getWarnings();
-		if (warn != null)
-		{
-			this.getCurrentPanel().showLogMessage(warn);
-		}
+		showConnectionWarnings(conn, this.getCurrentPanel());
 		selectCurrentEditor();
 	}
 
@@ -1800,9 +1761,20 @@ public class MainWindow
 		{
 			aPanel.clearStatusMessage();
 		}
+		showConnectionWarnings(conn, aPanel);
 		return conn;
 	}
 
+	private void showConnectionWarnings(WbConnection conn, MainPanel aPanel)
+	{
+		String warn = (conn != null ? conn.getWarnings() : null);
+		if (warn != null)
+		{
+			aPanel.showResultPanel();
+			aPanel.showLogMessage(ResourceMgr.getString("MsgConnectMsg") + "\n");
+			aPanel.appendToLog(warn);
+		}
+	}
 	public void addDbExplorerTab(DbExplorerPanel explorer)
 	{
 		JMenuBar dbmenu = this.createMenuForPanel(explorer);
@@ -2542,16 +2514,16 @@ public class MainWindow
 
 		boolean inProgress = this.isConnectInProgress();
 		if (!inProgress) this.setConnectIsInProgress();
+		
 		try
 		{
 			this.tabRemovalInProgress = true;
-			WbConnection conn = panel.getConnection();
 
 			// this does not really close the connection
 			// it simply tells the panel that it should
 			// release anything attached to the connection!
 			// the actual disconnect from the DB is done afterwards
-			// through the ConnectionMgr in a separate thread
+			// through the ConnectionMgr
 			panel.disconnect();
 			try
 			{
@@ -2562,18 +2534,14 @@ public class MainWindow
 				LogMgr.logError("MainWindow.removeTab()", "Error when removing tab", th);
 			}
 
-			if (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab()
-			   && conn != null)
+			WbConnection conn = panel.getConnection();
+			boolean doDisconnect = conn != null && this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab();
+			
+			if (doDisconnect)
 			{
-				final String id = conn.getId();
-				Thread t = new WbThread("Panel " + panel.getId() + " disconnect thread")
-				{
-					public void run()
-					{
-						ConnectionMgr.getInstance().disconnect(id);
-					}
-				};
-				t.start();
+				showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
+				ConnectionMgr.getInstance().disconnect(conn);
+				showStatusMessage("");
 			}
 
 			this.panelMenus.remove(index);

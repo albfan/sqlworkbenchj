@@ -314,6 +314,7 @@ public class DataImporter
 	 * @see #setTargetTable(workbench.db.TableIdentifier, workbench.db.ColumnIdentifier[])
 	 */
 	public void setCreateTarget(boolean flag) { this.createTarget = flag; }
+	public boolean getCreateTarget() { return createTarget; }
 	
 	/**
 	 *	Controls deletion of the target table.
@@ -644,6 +645,7 @@ public class DataImporter
 		String table = creator.getTable().getTableName();
 		String msg = StringUtil.replace(ResourceMgr.getString("MsgImporterTableCreated"), "%table%", table);
 		this.messages.append(msg);
+		this.messages.appendNewLine();
 	}
 
 	public void setUseTruncate(boolean flag)

@@ -56,6 +56,7 @@ public class SqlCommand
 	protected DataStore currentRetrievalData;
 	protected ParameterPrompter prompter;
 	protected ArgumentParser cmdLine;
+	protected boolean errorMessagesOnly = false;
 
 	public SqlCommand()
 	{
@@ -78,6 +79,7 @@ public class SqlCommand
 	
 	public boolean getFullErrorReporting() { return reportFullStatementOnError; }
 	public void setFullErrorReporting(boolean flag) { reportFullStatementOnError = flag; }
+	public void setReturnOnlyErrorMessages(boolean flag) { this.errorMessagesOnly = flag; }
 	
 	protected void appendSuccessMessage(StatementRunnerResult result)
 	{
@@ -599,19 +601,21 @@ public class SqlCommand
 		result.clear();
 
 		StringBuilder msg = new StringBuilder(150);
-		msg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
-		if (reportFullStatementOnError)
+		if (!errorMessagesOnly)
 		{
-			msg.append(sql);
+			msg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
+			if (reportFullStatementOnError)
+			{
+				msg.append(sql);
+			}
+			else
+			{
+				msg.append(StringUtil.getMaxSubstring(sql.trim(), 150));
+			}
+			result.addMessage(msg);
+			result.addMessageNewLine();
 		}
-		else
-		{
-			msg.append(StringUtil.getMaxSubstring(sql.trim(), 150));
-		}
-		result.addMessage(msg);
-		result.addMessageNewLine();
 		result.addMessage(ExceptionUtil.getAllExceptions(e));
-
 		result.setFailure();
 	}
 	

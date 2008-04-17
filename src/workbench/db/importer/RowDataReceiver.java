@@ -21,6 +21,11 @@ import workbench.db.TableIdentifier;
  */
 public interface RowDataReceiver
 {
+	/**
+	 * Returns true if the receiver will create the target table "on the fly"
+	 * @return
+	 */
+	boolean getCreateTarget();
 	boolean shouldProcessNextRow(); 
 	void nextRowSkipped();
 	

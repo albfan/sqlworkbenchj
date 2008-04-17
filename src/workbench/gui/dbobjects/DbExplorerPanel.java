@@ -780,6 +780,7 @@ public class DbExplorerPanel
 	public void clearStatusMessage() {} 
 	public void showStatusMessage(String aMsg) {}
 	public void clearLog() {}
+	public void appendToLog(String msg) { }
 
 	public void showLogPanel() {}
 	public void showResultPanel() {}

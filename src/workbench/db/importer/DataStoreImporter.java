@@ -69,6 +69,7 @@ public class DataStoreImporter
 		}
 	}
 	
+	public boolean getCreateTarget() { return false; }
 	public boolean shouldProcessNextRow() { return true; }
 	public void nextRowSkipped() {}
 	

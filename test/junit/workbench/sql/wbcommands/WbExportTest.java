@@ -857,6 +857,7 @@ public class WbExportTest
 			fail(e.getMessage());
 		}
 	}	
+	
 	public void testSqlInsertExport()
 	{
 		try
@@ -885,6 +886,51 @@ public class WbExportTest
 		}
 	}
 
+	public void testSqlInsertCreateTableExport()
+	{
+		try
+		{
+			File exportFile = new File(this.basedir, "insert_export.sql");
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test -createTable=true -table=OTHER_TABLE");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
+			assertEquals("Export file not created", true, exportFile.exists());
+			
+			ScriptParser p = new ScriptParser(1024*1024);
+			p.setFile(exportFile);
+			
+			assertEquals("Wrong number of statements", rowcount + 4, p.getSize());
+			String sql = p.getCommand(0);
+			String verb = SqlUtil.getSqlVerb(sql);
+			
+			// first verb must be the CREATE TABLE statement
+			assertEquals("Not a CREATE TABLE statement", "CREATE", verb);
+			
+			sql = p.getCommand(1);
+			verb = SqlUtil.getSqlVerb(sql);
+			// then we expect the ALTER TABLE statement to define the primary key
+			assertEquals("Not an ALTER TABLE statement", "ALTER", verb);
+			
+			sql = p.getCommand(2);
+			verb = SqlUtil.getSqlVerb(sql);
+			// then we expect a COMMIT
+			assertEquals("COMMIT", verb);
+			
+			sql = p.getCommand(3);
+			verb = SqlUtil.getSqlVerb(sql);
+			assertEquals("Not an insert file", "INSERT", verb);
+			
+			String table = SqlUtil.getInsertTable(sql);
+			assertNotNull("No insert table found", table);
+			assertEquals("Wrong target table", "OTHER_TABLE", table.toUpperCase());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testXmlExport()
 	{
 		try

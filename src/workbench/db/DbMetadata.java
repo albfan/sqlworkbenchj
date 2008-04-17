@@ -764,7 +764,7 @@ public class DbMetadata
 		if (indexInfo.getRowCount() > 0)
 		{
 			StringBuilder idx = this.indexReader.getIndexSource(view, indexInfo, null);
-			if (idx.length() > 0)
+			if (idx != null && idx.length() > 0)
 			{
 				result.append(lineEnding);
 				result.append(lineEnding);
@@ -2899,7 +2899,8 @@ public class DbMetadata
 
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, String tableNameToUse)
 	{
-		return getTableSource(table, columns, null, null, false, tableNameToUse, true);
+		DataStore indexInfo = getTableIndexInformation(table);
+		return getTableSource(table, columns, indexInfo, null, false, tableNameToUse, true);
 	}
 
 	public String getTableSource(TableIdentifier table, DataStore columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse)
@@ -2924,7 +2925,7 @@ public class DbMetadata
 		
 		StringBuilder indexSource = this.indexReader.getIndexSource(table, aIndexDef, table.getTableName());
 		
-		result.append(indexSource);
+		if (indexSource != null) result.append(indexSource);
 		if (this.dbSettings.ddlNeedsCommit())
 		{
 			result.append('\n');
@@ -2938,7 +2939,7 @@ public class DbMetadata
 	{
 		if (columns == null || columns.size() == 0) return StringUtil.EMPTY_STRING;
 
-		if (table.getType().equals(MVIEW_NAME))
+		if ("MVIEW_NAME".equals(table.getType()))
 		{
 			return getMViewSource(table, columns, aIndexDef, includeDrop);
 		}
@@ -3079,7 +3080,7 @@ public class DbMetadata
 
 		result.append(");" + lineEnding); 
 		// end of CREATE TABLE
-		
+
 		if (!this.createInlineConstraints && pkCols.size() > 0)
 		{
 			String name = this.getPkIndexName(aIndexDef);
