@@ -27,7 +27,64 @@ public class SQLTokenMarkerTest
 		super(testName);
 	}
 
-	public void testMarkTokensImpl()
+	public void testMultiLineComment()
+	{
+		try
+		{
+			SyntaxDocument doc = new SyntaxDocument();
+			
+			SQLTokenMarker marker = new AnsiSQLTokenMarker();
+			doc.setTokenMarker(marker);
+			
+			String sql = "/* first line comment \n" +
+				"second line */\n" +
+				"SELECT x FROM thetable;\n" +
+				"-- line comment\n" +
+				"SELECT x from y;\n" +
+				"/* \n" +
+				" block comment \n\n" +
+				"*/\n" +
+				"select x from y;";			
+			
+			doc.insertString(0, sql, null);
+	
+			Segment lineContent = new Segment();
+			int lineCount = doc.getDefaultRootElement().getElementCount();
+//			assertEquals(9, lineCount);
+//			assertEquals(9, marker.getLineCount());
+
+			// Expected token IDs 
+			int[][] expectedTokens = new int[][]
+			{
+				{Token.COMMENT1 }, // First line opens the block comment
+				{Token.COMMENT1, Token.NULL }, // Second line continues the block comment and closes it
+				{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL }, 
+				{Token.COMMENT2 }, // Line comment
+				{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL },
+				{Token.COMMENT1 }, // Second block comment
+				{Token.COMMENT1 },
+				{Token.NULL },
+				{Token.COMMENT1, Token.NULL }, 
+				{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL }
+			};
+			
+			for (int lineIndex = 0; lineIndex < lineCount; lineIndex ++)
+			{
+				getLineText(doc, lineIndex, lineContent);
+				Token token = marker.markTokens(lineContent, lineIndex);
+//				printTokenLine(lineContent, token);
+				verifyLine(expectedTokens, token, lineIndex);
+			}
+
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+			fail(ex.getMessage());
+		}
+	}
+
+	public void testMultiLineLiteral()
 	{
 		try
 		{
@@ -70,7 +127,7 @@ public class SQLTokenMarkerTest
 			{
 				getLineText(doc, lineIndex, lineContent);
 				Token token = marker.markTokens(lineContent, lineIndex);
-				printTokenLine(lineContent, token);
+//				printTokenLine(lineContent, token);
 				verifyLine(expectedTokens, token, lineIndex);
 			}
 
