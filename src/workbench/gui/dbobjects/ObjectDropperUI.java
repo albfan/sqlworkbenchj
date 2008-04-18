@@ -57,7 +57,9 @@ public class ObjectDropperUI
 		if (!dropper.supportsFKSorting())
 		{
 			checkFKButton.setEnabled(false);
-			this.remove(checkPanel);
+			addMissingTables.setEnabled(false);
+			addMissingTables.setSelected(false);
+			optionPanel.remove(checkPanel);
 			this.remove(statusLabel);
 		}
 	}

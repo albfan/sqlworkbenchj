@@ -280,7 +280,8 @@ public class ColumnMapper
 		MappingDefinition def = new MappingDefinition();
 		def.sourceColumns = new ColumnIdentifier[realCount];
 		def.targetColumns = new ColumnIdentifier[realCount];
-
+		def.hasSkippedColumns = (realCount != count);
+		
 		int index = 0;
 		for (int i=0; i < count; i++)
 		{
@@ -303,6 +304,7 @@ public class ColumnMapper
 	{
 		public ColumnIdentifier[] sourceColumns;
 		public ColumnIdentifier[] targetColumns;
+		public boolean hasSkippedColumns;
 	}
 
 }

@@ -1600,17 +1600,29 @@ public class DataPumper
 				result.append('"');
 			}
 
+//			StringBuffer mapping = new StringBuffer();
+//			boolean allEqual = true;
+		
 			result.append(indent);
 			result.append("-" + WbCopy.PARAM_COLUMNS + "=\"");
 			for (int i=0; i < count; i++)
 			{
 				if (i > 0) result.append(", ");
-				result.append(colMapping.sourceColumns[i].getColumnName());
+				String sourceCol = colMapping.sourceColumns[i].getColumnName();
+				String targetCol = colMapping.targetColumns[i].getColumnName();
+				result.append(sourceCol);
 				result.append('/');
-				ColumnIdentifier col = colMapping.targetColumns[i];
-				result.append(col.getColumnName());
+				result.append(targetCol);
+//				if (!sourceCol.equalsIgnoreCase(targetCol))
+//				{
+//					allEqual = false;
+//				}
 			}
 			result.append('"');
+//			if (!allEqual || colMapping.hasSkippedColumns)
+//			{
+//				result.append(mapping);
+//			}
 		}
 
 		String mode = (String)this.modeComboBox.getSelectedItem();
