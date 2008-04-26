@@ -78,7 +78,7 @@ public class RowData
 	/**
 	 *	Read the row data from the supplied ResultSet
 	 */
-	public synchronized void read(ResultSet rs, ResultInfo info)
+	public void read(ResultSet rs, ResultInfo info)
 		throws SQLException
 	{
 		int colCount = this.colData.length;
@@ -221,7 +221,7 @@ public class RowData
 	 *
 	 *	@throws IndexOutOfBoundsException
 	 */
-	public synchronized void setValue(int aColIndex, Object aValue)
+	public void setValue(int aColIndex, Object aValue)
 		throws IndexOutOfBoundsException
 	{
 		if (!this.isNew())
@@ -247,7 +247,7 @@ public class RowData
 	 *
 	 *	@throws IndexOutOfBoundsException
 	 */
-	public synchronized Object getValue(int aColumn)
+	public Object getValue(int aColumn)
 		throws IndexOutOfBoundsException
 	{
 		return this.colData[aColumn];
@@ -267,7 +267,7 @@ public class RowData
 		return this.getValue(aColumn);
 	}
 
-	public synchronized void restoreOriginalValues()
+	public void restoreOriginalValues()
 	{
 		if (this.originalData == null) return;
 		for (int i=0; i < this.originalData.length; i++)
@@ -286,7 +286,7 @@ public class RowData
 	 * initial retrieve (i.e. since the last time resetStatus() was called
 	 * 
 	 */
-	public synchronized boolean isColumnModified(int aColumn)
+	public boolean isColumnModified(int aColumn)
 	{
 		if (this.isOriginal()) return false;
 		if (this.isNew())
@@ -304,7 +304,7 @@ public class RowData
 	 *	Resets the internal status. After a call to resetStatus()
 	 *	isModified() will return false, and isOriginal() will return true.
 	 */
-	public synchronized void resetStatus()
+	public void resetStatus()
 	{
 		this.status = NOT_MODIFIED;
 		this.dmlSent = false;
@@ -314,7 +314,7 @@ public class RowData
 	/**
 	 * Resets data and status
 	 */
-	public synchronized void reset()
+	public void reset()
 	{
 		for (int i=0; i < this.colData.length; i++)
 		{
@@ -325,7 +325,7 @@ public class RowData
 	/**
 	 *	Sets the status of this row to new.
 	 */
-	public synchronized void setNew()
+	public void setNew()
 	{
 		this.status = NEW;
 	}
@@ -335,7 +335,7 @@ public class RowData
 	 *
 	 *	@return true if the row has not been altered since retrieval
 	 */
-	public synchronized boolean isOriginal()
+	public boolean isOriginal()
 	{
 		return this.status == NOT_MODIFIED;
 	}
@@ -346,7 +346,7 @@ public class RowData
 	 *	@return true if the row has been modified since retrieval
 	 *
 	 */
-	public synchronized boolean isModified()
+	public boolean isModified()
 	{
 		return (this.status & MODIFIED) ==  MODIFIED;
 	}
@@ -357,7 +357,7 @@ public class RowData
 	 *
 	 *	@return true if it's a new row
 	 */
-	public synchronized boolean isNew()
+	public boolean isNew()
 	{
 		return (this.status & NEW) == NEW;
 	}
@@ -365,17 +365,17 @@ public class RowData
 	/**
 	 *	Set the status to modified.
 	 */
-	public synchronized void setModified()
+	public void setModified()
 	{
 		this.status = this.status | MODIFIED;
 	}
 
-	synchronized void setDmlSent(boolean aFlag)
+	void setDmlSent(boolean aFlag)
 	{
 		this.dmlSent = aFlag;
 	}
 
-	public synchronized boolean isDmlSent() 
+	public boolean isDmlSent() 
 	{ 
 		return this.dmlSent; 
 	}
@@ -401,8 +401,39 @@ public class RowData
 			result.append('[');
 			result.append(this.getValue(c));
 			result.append(']');
+			if (c > 0) result.append(',');
 		}
 		result.append('}');
 		return result.toString();
 	}
+
+	@Override
+	public int hashCode()
+	{
+		int hash = 7;
+		hash = 59 * hash + (this.colData != null ? this.colData.hashCode() : 0);
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (!(obj instanceof RowData)) return false;
+		RowData other = (RowData)obj;
+		if (other.colData.length != this.colData.length) return false;
+		for (int i=0; i < colData.length; i++)
+		{
+			if (!objectsAreEqual(colData[i], other.colData[i])) return false;
+		}
+		return true;
+	}
+
+	private boolean objectsAreEqual(Object one, Object other)
+	{
+		if (one == null && other == null) return true;
+		if (one == null || other == null) return false;
+		return one.equals(other);
+	}
+	
+
 }

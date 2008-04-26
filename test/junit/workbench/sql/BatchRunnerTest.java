@@ -39,7 +39,7 @@ import workbench.util.WbFile;
 public class BatchRunnerTest
 	extends TestCase
 {
-	private TestUtil util;
+	private TestUtil	util;
 	
 	public BatchRunnerTest(String testName)
 	{

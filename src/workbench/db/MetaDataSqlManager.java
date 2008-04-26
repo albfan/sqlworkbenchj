@@ -25,7 +25,7 @@ import workbench.util.WbPersistence;
 public class MetaDataSqlManager
 {
 	public static final String TABLE_NAME_PLACEHOLDER = "%tablename%";
-	public static final String INDEX_TYPE_PLACEHOLDER = "%indextype% ";
+	public static final String INDEX_TYPE_PLACEHOLDER = "%indextype%";
 	public static final String INDEX_NAME_PLACEHOLDER = "%indexname%";
 	public static final String PK_NAME_PLACEHOLDER = "%pk_name%";
 	public static final String UNIQUE_PLACEHOLDER = "%unique_key% ";

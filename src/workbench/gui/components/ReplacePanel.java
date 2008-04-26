@@ -69,10 +69,11 @@ public class ReplacePanel
 		replacementProperty = settingsKey + ".replacement";
 		
 		WbTraversalPolicy policy = new WbTraversalPolicy();
-		policy.addComponent(criteriaTextField);
+		policy.addComponent(this.criteriaTextField);
 		policy.addComponent(this.replaceValueTextField);
 		policy.addComponent(this.ignoreCaseCheckBox);
 		policy.addComponent(this.wordsOnlyCheckBox);
+		policy.addComponent(this.useRegexCheckBox);
 		policy.addComponent(this.selectedTextCheckBox);
 		policy.addComponent(this.findButton);
 		policy.addComponent(this.replaceNextButton);
@@ -117,13 +118,14 @@ public class ReplacePanel
     replaceLabel = new javax.swing.JLabel();
     spacerPanel = new javax.swing.JPanel();
     findButton = new WbButton();
+    findNextButton = new WbButton();
     replaceNextButton = new WbButton();
     replaceAllButton = new WbButton();
     closeButton = new WbButton();
     selectedTextCheckBox = new javax.swing.JCheckBox();
     useRegexCheckBox = new javax.swing.JCheckBox();
-    findNextButton = new WbButton();
 
+    setFocusCycleRoot(true);
     setLayout(new java.awt.GridBagLayout());
 
     criteriaLabel.setLabelFor(criteriaTextField);
@@ -206,6 +208,17 @@ public class ReplacePanel
     gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 5);
     add(findButton, gridBagConstraints);
 
+    findNextButton.setText(ResourceMgr.getString("LblFindNext"));
+    findNextButton.setToolTipText(ResourceMgr.getDescription("LblFindNext"));
+    findNextButton.setName("findnextbutton"); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 5);
+    add(findNextButton, gridBagConstraints);
+
     replaceNextButton.setText(ResourceMgr.getString("LblReplaceNext"));
     replaceNextButton.setToolTipText(ResourceMgr.getDescription("LblReplaceNext"));
     replaceNextButton.setName("replacenextbutton"); // NOI18N
@@ -261,17 +274,6 @@ public class ReplacePanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
     add(useRegexCheckBox, gridBagConstraints);
-
-    findNextButton.setText(ResourceMgr.getString("LblFindNext"));
-    findNextButton.setToolTipText(ResourceMgr.getDescription("LblFindNext"));
-    findNextButton.setName("findnextbutton"); // NOI18N
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 5);
-    add(findNextButton, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 	private void replaceValueTextFieldFocusGained(java.awt.event.FocusEvent evt)//GEN-FIRST:event_replaceValueTextFieldFocusGained

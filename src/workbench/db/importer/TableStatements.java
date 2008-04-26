@@ -136,7 +136,6 @@ public class TableStatements
 		finally
 		{
 			SqlUtil.closeStatement(stmt);
-			con.releaseSavepoint(sp);
 		}
 	}
 

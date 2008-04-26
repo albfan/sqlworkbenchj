@@ -68,6 +68,23 @@ public class DataStoreImporter
 			LogMgr.logError("DataStoreImporter.startImport()", "Error ocurred during import", e);
 		}
 	}
+
+	public void setTableList(List<TableIdentifier> targetTables)
+	{
+		// Nothing to do as only one table can be imported
+	}
+
+	public void deleteTargetTables()
+		throws SQLException
+	{
+		// Nothing to do as only one table can be imported
+	}
+
+	public void beginMultiTable()
+		throws SQLException
+	{
+	}
+	public void endMultiTable() {}
 	
 	public boolean getCreateTarget() { return false; }
 	public boolean shouldProcessNextRow() { return true; }

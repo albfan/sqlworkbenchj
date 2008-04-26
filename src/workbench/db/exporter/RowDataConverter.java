@@ -607,28 +607,28 @@ public abstract class RowDataConverter
 		{
 			char c = s.charAt(i);
 
-			switch (c)
+			if (c < 32)
 			{
-				case '&':
-					out.append("&amp;");
-					break;
-				case '<':
-					out.append("&lt;");
-					break;
-				case '>':
-					out.append("&gt;");
-					break;
-				case '\r':
-					if (keepCR) out.append("&#13;");
-					break;
-				case '\n':
-					out.append("&#10;");
-					break;
-				case (char)0:
-					// ignore zero-byte
-					break;
-				default:
-					out.append(c);
+				out.append("&#");
+				out.append(Integer.toString(c));
+				out.append(';');
+			}
+			else 
+			{
+				switch (c)
+				{
+					case '&':
+						out.append("&amp;");
+						break;
+					case '<':
+						out.append("&lt;");
+						break;
+					case '>':
+						out.append("&gt;");
+						break;
+					default:
+						out.append(c);
+				}
 			}
 		}
 	}	

@@ -314,13 +314,15 @@ public class DbDriver
 				}
 			}
 
+			String userPrgName = Settings.getInstance().getProperty("workbench.db.connection.programname", null);
+			
 			// identify the program name when connecting
 			// this is different for each DBMS.
 			String propName = null;
 			if (url.startsWith("jdbc:oracle"))
 			{
 				propName = "v$session.program";
-				if (id != null) props.put("v$session.terminal", id);
+				if (id != null && userPrgName == null) props.put("v$session.terminal", id);
 				
 				// it seems that the Oracle 10 driver does not 
 				// add this to the properties automatically
@@ -355,10 +357,17 @@ public class DbDriver
 					}
 				}
 			}
+			
 			if (propName != null && !props.containsKey(propName))
 			{
-				String appName = ResourceMgr.TXT_PRODUCT_NAME + " (" + ResourceMgr.getBuildNumber() +")";
-				props.put(propName, appName);
+				if (userPrgName == null)
+				{
+					props.put(propName, ResourceMgr.TXT_PRODUCT_NAME + " (" + ResourceMgr.getBuildNumber() +")");
+				}
+				else if (!userPrgName.equals("<none>"))
+				{
+					props.put(propName, userPrgName);
+				}
 			}
 
 			c = this.driverClassInstance.connect(url, props);

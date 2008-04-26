@@ -58,6 +58,7 @@ public class SelectCommand extends SqlCommand
 			boolean isPrepared = false;
 
 			this.runner.setSavepoint();
+			
 			if (Settings.getInstance().getCheckPreparedStatements()
 				  && currentConnection.getPreparedStatementPool().isRegistered(sql))
 			{

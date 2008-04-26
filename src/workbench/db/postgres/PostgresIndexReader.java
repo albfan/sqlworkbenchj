@@ -39,6 +39,7 @@ public class PostgresIndexReader
 	public StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
 	{
 		if (indexDefinition == null) return null;
+		if (indexDefinition.getRowCount() == 0) return null;
 		
 		WbConnection con = this.metaData.getWbConnection();
 		Statement stmt = null;
@@ -57,10 +58,9 @@ public class PostgresIndexReader
 		
 		StringBuilder source = new StringBuilder(count * 50);
 		Savepoint sp = null;
+		int indexCount = 0;
 		try
 		{
-			sp = con.setSavepoint();
-			stmt = con.createStatement();
 			
 			for (int i = 0; i < count; i++)
 			{
@@ -71,19 +71,23 @@ public class PostgresIndexReader
 				sql.append('\'');
 				sql.append(idxName);
 				sql.append('\'');
+				indexCount ++;
 			}
 			sql.append(')');
-			
-			rs = stmt.executeQuery(sql.toString());
-			while (rs.next())
+			if (indexCount > 0)
 			{
-				source.append(rs.getString(1));
-				source.append(';');
-				source.append(nl);
+				sp = con.setSavepoint();
+				stmt = con.createStatement();
+
+				rs = stmt.executeQuery(sql.toString());
+				while (rs.next())
+				{
+					source.append(rs.getString(1));
+					source.append(';');
+					source.append(nl);
+				}
+				con.releaseSavepoint(sp);
 			}
-			SqlUtil.closeResult(rs);
-			
-			con.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{

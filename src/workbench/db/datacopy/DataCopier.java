@@ -23,6 +23,7 @@ import workbench.db.TableCreator;
 import workbench.db.TableDropper;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.compare.TableSync;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.RowDataReceiver;
@@ -61,6 +62,7 @@ public class DataCopier
 	private ColumnIdentifier[] targetColumnsForQuery;
 	private MessageBuffer messages = null;
 	private MessageBuffer errors = null;
+	private boolean doSyncDelete = false;
 	
 	public DataCopier()
 	{
@@ -88,6 +90,7 @@ public class DataCopier
 	}
 	
 	public void beginMultiTableCopy()
+		throws SQLException
 	{
 		this.importer.beginMultiTable();
 	}
@@ -270,6 +273,11 @@ public class DataCopier
 		}
 	}
 
+	public void setTableList(List<TableIdentifier> tables)
+	{
+		this.importer.setTableList(tables);
+	}
+	
 	public void setDeleteTarget(boolean delete)
 	{
 		this.importer.setDeleteTarget(delete);
@@ -290,6 +298,11 @@ public class DataCopier
 		this.importer.setCommitBatch(flag);
 	}
 	
+	public int getBatchSize()
+	{
+		return this.importer.getBatchSize();
+	}
+	
 	public void setBatchSize(int size) 
 	{
 		this.importer.setBatchSize(size);
@@ -305,6 +318,11 @@ public class DataCopier
 		this.importer.setCommitEvery(interval);
 	}
 
+	public void setDoDeleteSync(boolean flag)
+	{
+		this.doSyncDelete = flag;
+	}
+	
 	public void startBackgroundCopy()
 	{
 		Thread t = new WbThread("DataCopier Thread")
@@ -348,7 +366,18 @@ public class DataCopier
 			// depending on which source we set for the importer
 			this.sourceData.setAbortOnError(!this.importer.getContinueOnError());
 			this.importer.startImport();
-			//LogMgr.logDebug("DataCopier.startCopy()", "Copying of data finished. " + this.importer.getInsertedRows() + " total row(s) inserted. " + this.importer.getUpdatedRows() + " total row(s) updated.");
+			
+			if (this.doSyncDelete)
+			{
+				TableSync sync = new TableSync(this.targetConnection, this.sourceConnection);
+				sync.setTableName(this.sourceTable, this.targetTable);
+				sync.setRowMonitor(this.importer.getRowActionMonitor());
+				sync.setBatchSize(this.getBatchSize());
+				sync.deleteTarget();
+				long rows = sync.getDeletedRows();
+				String msg = rows + " " + ResourceMgr.getString("MsgCopyNumRowsDeleted");
+				this.addMessage(msg);
+			}
 		}
 		catch (Exception e)
 		{

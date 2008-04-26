@@ -66,6 +66,9 @@ public class GenericRowMonitor
 			case RowActionMonitor.MONITOR_PROCESS:
 				this.updateMsg = ResourceMgr.getString("MsgProcessObject") + " ";
 				break;
+			case RowActionMonitor.MONITOR_DELETE:
+				this.updateMsg = ResourceMgr.getString("MsgProcessingDeletes") + " ";
+				break;
 			case RowActionMonitor.MONITOR_PLAIN:
 				this.updateMsg = null;
 				break;

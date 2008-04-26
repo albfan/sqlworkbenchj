@@ -3,15 +3,10 @@
  <object class="java.util.HashMap">
  
   <void method="put">
-   <string>Oracle</string>
+   <string>All</string>
    <string>COMMENT ON TABLE %table% IS '%comment%';</string>
   </void>
-
-  <void method="put">
-   <string>PostgreSQL</string>
-   <string>COMMENT ON TABLE %table% IS '%comment%';</string>
-  </void>
-  
+	
   <void method="put">
     <string>MySQL</string>
     <string>ALTER TABLE %table% COMMENT '%comment%';</string>

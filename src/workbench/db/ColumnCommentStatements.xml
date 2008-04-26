@@ -3,14 +3,9 @@
  <object class="java.util.HashMap">
  
   <void method="put">
-   <string>Oracle</string>
+   <string>All</string>
    <string>COMMENT ON COLUMN %table%.%column% IS '%comment%';</string>
   </void>
-
-  <void method="put">
-   <string>PostgreSQL</string>
-   <string>COMMENT ON COLUMN %table%.%column% IS '%comment%';</string>
-  </void>
-  
+	
  </object>
 </java>

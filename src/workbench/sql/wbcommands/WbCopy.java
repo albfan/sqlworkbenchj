@@ -50,6 +50,7 @@ public class WbCopy
 	public static final String PARAM_KEYS = "keyColumns";
 	public static final String PARAM_DROPTARGET = "dropTarget";
 	public static final String PARAM_CREATETARGET = "createTarget";
+	public static final String PARAM_DELETE_SYNC = "syncDelete";
 
 	private static final String ID_PREFIX = "$Wb-Copy$";
 	
@@ -81,7 +82,7 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_KEYS);
 		cmdLine.addArgument(PARAM_DROPTARGET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_CREATETARGET, ArgumentType.BoolArgument);
-		cmdLine.addArgument(CommonArgs.ARG_BATCHSIZE);
+		cmdLine.addArgument(PARAM_DELETE_SYNC, ArgumentType.BoolArgument);
 	}
 
 	public String getVerb() { return VERB; }
@@ -155,11 +156,12 @@ public class WbCopy
 		}
 
 		List<TableIdentifier> tablesToExport = null;
+		SourceTableArgument sourceTables = null;
 		try
 		{
-			SourceTableArgument argParser = new SourceTableArgument(sourcetable, sourceCon);
-			tablesToExport = argParser.getTables();
-			if (tablesToExport.size() == 0 && argParser.wasWildCardArgument())
+			sourceTables = new SourceTableArgument(sourcetable, sourceCon);
+			tablesToExport = sourceTables.getTables();
+			if (tablesToExport.size() == 0 && sourceTables.wasWildCardArgument())
 			{
 				result.addMessage(ResourceMgr.getFormattedString("ErrExportNoTablesFound", sourcetable));
 				result.setFailure();
@@ -193,6 +195,7 @@ public class WbCopy
 			this.copier = new TableCopy();
 		}
 
+		
 		try
 		{
 			if (!copier.init(sourceCon, targetCon, result, cmdLine, rowMonitor))

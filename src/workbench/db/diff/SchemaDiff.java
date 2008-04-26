@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -393,10 +394,18 @@ public class SchemaDiff
 		
 		if (diffSequences)
 		{
+			List<SequenceDefinition> refSeqs = Collections.emptyList();
+			List<SequenceDefinition> tarSeqs = Collections.emptyList();
 			SequenceReader refReader = sourceDb.getMetadata().getSequenceReader();
-			List<SequenceDefinition> refSeqs = refReader.getSequences(this.referenceSchema);
 			SequenceReader tarReader = targetDb.getMetadata().getSequenceReader();
-			List<SequenceDefinition> tarSeqs = tarReader.getSequences(this.referenceSchema);
+			if (refReader != null)
+			{
+				refSeqs = refReader.getSequences(this.referenceSchema);
+			}
+			if (tarReader != null)
+			{
+				tarSeqs = tarReader.getSequences(this.referenceSchema);
+			}
 			processSequenceList(refSeqs, tarSeqs);
 		}
 	}
@@ -504,33 +513,32 @@ public class SchemaDiff
 				this.objectsToCompare = null;
 				break;
 			}
-			
+
 			if (this.monitor != null)
 			{
 				this.monitor.setCurrentObject(ResourceMgr.getFormattedString("MsgLoadSeqInfo", refSeq.getSequenceName()), -1, -1);
 			}
-			
-			SequenceDiffEntry entry = null;
-			SequenceDefinition def = targetReader.getSequenceDefinition(this.targetSchema, refSeq.getSequenceName());
-			entry = new SequenceDiffEntry(refSeq, def);
-			objectsToCompare.add(entry);
-			refSeqNames.add(refSeq.getSequenceName());
-		}
 
+			SequenceDiffEntry entry = null;
+			if (targetReader != null)
+			{
+				SequenceDefinition def = targetReader.getSequenceDefinition(this.targetSchema, refSeq.getSequenceName());
+				entry = new SequenceDiffEntry(refSeq, def);
+				objectsToCompare.add(entry);
+				refSeqNames.add(refSeq.getSequenceName());
+			}
+		}
+		
 		if (cancel) return;
 		
-		if (targetSeqs != null)
+		for (SequenceDefinition tSeq : targetSeqs)
 		{
-			for (SequenceDefinition tSeq : targetSeqs)
+			String seqname = tSeq.getSequenceName();
+			if (!refSeqNames.contains(seqname))
 			{
-				String seqname = tSeq.getSequenceName();
-				if (!refSeqNames.contains(seqname))
-				{
-					this.sequencesToDelete.add(tSeq);
-				}
-			}	
-		}
-		
+				this.sequencesToDelete.add(tSeq);
+			}
+		}	
 	}
 	
 	private void processProcedureList(List<ProcedureDefinition> refProcs, List<ProcedureDefinition> targetProcs)
@@ -542,6 +550,9 @@ public class SchemaDiff
 		
 		this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 		
+		if (refProcs == null) refProcs = Collections.emptyList();
+		if (targetProcs == null) targetProcs = Collections.emptyList();
+		
 		for (ProcedureDefinition refProc : refProcs)
 		{
 			if (this.cancel) 
@@ -549,12 +560,12 @@ public class SchemaDiff
 				this.objectsToCompare = null;
 				break;
 			}
-			
+
 			if (this.monitor != null)
 			{
 				this.monitor.setCurrentObject(ResourceMgr.getFormattedString("MsgLoadProcInfo", refProc.getProcedureName()), -1, -1);
 			}
-			
+
 			ProcDiffEntry entry = null;
 			ProcedureDefinition tp = new ProcedureDefinition(null, this.targetSchema, refProc.getProcedureName(), refProc.getResultType());
 			if (targetMeta.procedureExists(tp))
@@ -568,20 +579,17 @@ public class SchemaDiff
 			objectsToCompare.add(entry);
 			refProcNames.add(refProc.getProcedureName());
 		}
-
+		
 		if (cancel) return;
 		
-		if (targetProcs != null)
+		for (ProcedureDefinition tProc : targetProcs)
 		{
-			for (ProcedureDefinition tProc : targetProcs)
+			String procname = tProc.getProcedureName();
+			if (!refProcNames.contains(procname))
 			{
-				String procname = tProc.getProcedureName();
-				if (!refProcNames.contains(procname))
-				{
-					this.procsToDelete.add(tProc);
-				}
-			}	
-		}
+				this.procsToDelete.add(tProc);
+			}
+		}	
 	}
 	
 	/**

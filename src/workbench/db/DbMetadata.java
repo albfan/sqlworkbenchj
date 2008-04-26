@@ -2755,33 +2755,6 @@ public class DbMetadata
 		return this.sequenceReader;
 	}
 	
-	public CharSequence getSequenceSource(String fullName)
-	{
-		String sequenceName = fullName;
-		String schema = null;
-
-		int pos = fullName.indexOf('.');
-		if (pos > 0)
-		{
-			sequenceName = fullName.substring(pos);
-			schema = fullName.substring(0, pos - 1);
-		}
-		return this.getSequenceSource(null, schema, sequenceName);
-	}
-
-	public CharSequence getSequenceSource(String aCatalog, String aSchema, String aSequence)
-	{
-		if (this.sequenceReader != null)
-		{
-			if (aSchema == null)
-			{
-				aSchema = this.getCurrentSchema();
-			}
-			return this.sequenceReader.getSequenceSource(aSchema, aSequence);
-		}
-		return StringUtil.EMPTY_STRING;
-	}
-
 	public boolean isTableType(String type)
 	{
 		for (String t : tableTypesTable)

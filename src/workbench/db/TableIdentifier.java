@@ -528,7 +528,9 @@ public class TableIdentifier
 		}
 		else if ("SEQUENCE".equalsIgnoreCase(type))
 		{
-			source = meta.getSequenceSource(getTableExpression(con));
+			SequenceReader reader = meta.getSequenceReader();
+			
+			source = (reader != null ? reader.getSequenceSource(getSchema(), getTableName()) : null);
 		}
 		else
 		{

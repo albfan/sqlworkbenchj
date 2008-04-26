@@ -21,9 +21,7 @@ import javax.swing.filechooser.FileFilter;
 import workbench.gui.components.EncodingPanel;
 
 import workbench.gui.components.ExtensionFileFilter;
-import workbench.interfaces.EncodingSelector;
 import workbench.resource.Settings;
-import javax.swing.JComponent;
 import javax.swing.border.EmptyBorder;
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
@@ -62,11 +60,6 @@ public class FileDialogUtil
 
 	public String getXmlReportFilename(Component caller)
 	{
-		return this.getXmlReportFilename(caller, null);
-	}
-	
-	public String getXmlReportFilename(Component caller, JComponent accessory)
-	{
 		String lastDir = Settings.getInstance().getProperty("workbench.xmlreport.lastdir", null);
 		JFileChooser fc = new JFileChooser(lastDir);
 		fc.addChoosableFileFilter(ExtensionFileFilter.getXmlFileFilter());
@@ -77,23 +70,9 @@ public class FileDialogUtil
 			this.encoding = Settings.getInstance().getDefaultDataEncoding();
 		}
 
-		EncodingSelector selector = null;
-		if (accessory != null)
-		{
-			fc.setAccessory(accessory);
-			if (accessory instanceof EncodingSelector)
-			{
-				selector = (EncodingSelector)accessory;
-			}
-			selector.setEncoding(this.encoding);
-		}
-		else
-		{
-			EncodingPanel p = new EncodingPanel(this.encoding);
-			p.setBorder(new EmptyBorder(0,5,0,0));
-			selector = p;
-			fc.setAccessory(p);
-		}
+		EncodingPanel encodingPanel = new EncodingPanel(this.encoding);
+		encodingPanel.setBorder(new EmptyBorder(0,5,0,0));
+		fc.setAccessory(encodingPanel);
 
 		String filename = null;
 
@@ -102,7 +81,7 @@ public class FileDialogUtil
 		int answer = fc.showSaveDialog(parent);
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
-			this.encoding = selector.getEncoding();
+			this.encoding = encodingPanel.getEncoding();
 
 			File fl = fc.getSelectedFile();
 			FileFilter ff = fc.getFileFilter();
@@ -205,6 +184,7 @@ public class FileDialogUtil
 		{
 			String lastDir = Settings.getInstance().getLastWorkspaceDir();
 			JFileChooser fc = new JFileChooser(lastDir);
+			
 			FileFilter wksp = ExtensionFileFilter.getWorkspaceFileFilter();
 			fc.addChoosableFileFilter(wksp);
 			String filename = null;
@@ -212,12 +192,15 @@ public class FileDialogUtil
 			int answer = JFileChooser.CANCEL_OPTION;
 			if (toSave)
 			{
+				fc.setDialogTitle(ResourceMgr.getString("TxtSaveWksp"));
 				answer = fc.showSaveDialog(parent);
 			}
 			else
 			{
+				fc.setDialogTitle(ResourceMgr.getString("TxtLoadWksp"));
 				answer = fc.showOpenDialog(parent);
 			}
+			
 			if (answer == JFileChooser.APPROVE_OPTION)
 			{
 				File fl = fc.getSelectedFile();

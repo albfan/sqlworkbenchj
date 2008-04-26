@@ -163,6 +163,7 @@ public class WbAboutDialog
     contentPanel.add(builtWithNbLabel, gridBagConstraints);
 
     jeditLabel.setText("<html>The editor is based on jEdit's 2.2.1 <u>syntax highlighting package</u></html>");
+    jeditLabel.setToolTipText("http://syntax.jedit.org/");
     jeditLabel.addMouseListener(new java.awt.event.MouseAdapter() {
       public void mouseClicked(java.awt.event.MouseEvent evt) {
         jeditLabelMouseClicked(evt);

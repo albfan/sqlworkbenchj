@@ -163,16 +163,6 @@ public class WbSchemaReport
 		// this object as the RowActionMonitor of the SchemaReporter
 		// see setCurrentObject()
 		this.currentTable = 0;
-		
-//		String wbReportFilename = output.getFullPath();
-//		if (dbDesigner)
-//		{
-//			WbFile f = new WbFile(wbReportFilename);
-//			String dir = f.getParent();
-//			String fname = f.getName();
-//			WbFile nf = new WbFile(dir, "__wb_" + fname);
-//			wbReportFilename = nf.getFullPath();
-//		}
 		this.reporter.setOutputFilename(output.getFullPath());
 
 		try
@@ -187,26 +177,7 @@ public class WbSchemaReport
 
 		String xslt = cmdLine.getValue(WbXslt.ARG_STYLESHEET);
 		String xsltOutput = cmdLine.getValue(WbXslt.ARG_OUTPUT);
-		
-//		if (dbDesigner && result.isSuccess())
-//		{
-//			try
-//			{
-//				this.setCurrentObject(ResourceMgr.getString("MsgConvertReport2Designer"), -1, -1);
-//				Workbench2Designer converter = new Workbench2Designer(new File(wbReportFilename));
-//				converter.transformWorkbench2Designer();
-//				converter.writeOutputFile(output);
-//			}
-//			catch (Exception e)
-//			{
-//				result.setFailure();
-//				LogMgr.logError("WbSchemaReport.execute()", "Error generating DBDesigner file", e);
-//				String msg = ResourceMgr.getString("ErrGeneratingDbDesigner");
-//				msg = StringUtil.replace(msg, "%wbfile%", output.getFullPath());
-//				msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));
-//				result.addMessage(msg);
-//			}
-//		}
+
 		if (result.isSuccess())
 		{
 			String msg = ResourceMgr.getFormattedString("MsgSchemaReportTablesWritten", currentTable, output.getFullPath());

@@ -108,6 +108,9 @@ public class DataImporter
 	private int currentTable = -1;
 	private boolean transactionControl = true;
 	private boolean useSetNull = false;
+	
+	private List<TableIdentifier> tableToBeProcessed;
+	private TableDeleter tableDeleter;
 
 	// this array will map the columns for updating the target table
 	// the index into this array will be the index
@@ -178,6 +181,11 @@ public class DataImporter
 		this.transactionControl = flag;
 	}
 	
+	public RowActionMonitor getRowActionMonitor()
+	{
+		return this.progressMonitor;
+	}
+	
 	public void setRowActionMonitor(RowActionMonitor rowMonitor)
 	{
 		this.progressMonitor = rowMonitor;
@@ -217,8 +225,16 @@ public class DataImporter
 	}
 	
 	public void beginMultiTable()
+		throws SQLException
 	{
 		this.multiTable = true;
+		// If more than one table is imported and those tables need to 
+		// be deleted before the import starts (due to FK constraints) the producer
+		// has sent a list of tables that need to be deleted.
+		if (this.deleteTarget && this.tableToBeProcessed != null)
+		{
+			this.deleteTargetTables();
+		}
 	}
 	
 	public void endMultiTable()
@@ -286,7 +302,16 @@ public class DataImporter
 	}
 
 	public boolean getDeleteTarget() { return deleteTarget; }
-	public void setBatchSize(int size) { this.batchSize = size; }
+	
+	public int getBatchSize()
+	{
+		return batchSize;
+	}
+	
+	public void setBatchSize(int size) 
+	{ 
+		this.batchSize = size; 
+	}
 
 	public void setBadfileName(String fname)
 	{
@@ -305,6 +330,38 @@ public class DataImporter
 		}
 	}
 
+	public void setTableList(List<TableIdentifier> targetTables)
+	{
+		this.tableToBeProcessed = targetTables;
+	}
+	
+	public void deleteTargetTables()
+		throws SQLException
+	{
+		if (!this.isModeInsert())
+		{
+			LogMgr.logWarning("DataImporter.deleteTargetTables()", "Target tables will not be deleted because import mode is not set to 'insert'");
+			this.messages.append(ResourceMgr.getString("ErrImpNoDeleteUpd"));
+			this.messages.appendNewLine();
+			return;
+		}
+		
+		try
+		{
+			// The instance of the tableDeleter is stored in an instance
+			// variable in order to allow for cancel() during the initial 
+			// delete as well
+			tableDeleter = new TableDeleter(this.dbConn, true);
+			tableDeleter.setRowMonitor(this.progressMonitor);
+			tableDeleter.deleteRows(this.tableToBeProcessed, true);
+			this.messages.append(tableDeleter.getMessages());
+		}
+		finally
+		{
+			this.tableDeleter = null;
+		}
+	}
+	
 	/**
 	 * Controls creation of target table for imports where the 
 	 * producer can retrieve a full table definition (i.e. XML files
@@ -355,8 +412,15 @@ public class DataImporter
 		 return this.useBatch;
 	}
 	
-	public void setModeInsert() { this.mode = MODE_INSERT; }
-	public void setModeUpdate() { this.mode = MODE_UPDATE; }
+	public void setModeInsert() 
+	{ 
+		this.mode = MODE_INSERT; 
+	}
+	
+	public void setModeUpdate() 
+	{ 
+		this.mode = MODE_UPDATE; 
+	}
 
 	public void setModeInsertUpdate()
 	{
@@ -673,6 +737,11 @@ public class DataImporter
 	public void cancelExecution()
 	{
 		this.isRunning = false;
+		if (this.tableDeleter != null)
+		{
+			this.tableDeleter.cancel();
+		}
+		
 		if (this.batchRunning)
 		{
 			try
@@ -813,7 +882,11 @@ public class DataImporter
 						inserted = false;
 					}
 					
-					if (!inserted)
+					// The update statement might have been set to null
+					// because an update is not possible (when only key columns
+					// are present in the table). In this case we silently skip 
+					// the failed insert
+					if (!inserted && this.updateStatement != null)
 					{
 						rows = this.updateRow(row, useSavepoint && continueOnError);
 					}
@@ -825,9 +898,28 @@ public class DataImporter
 					// zero. If the update violates any constraints, then the
 					// INSERT will fail as well, so any exception thrown, indicates
 					// an error with this row, so we will not proceed with the insert
-					rows = this.updateRow(row, useSavepoint && continueOnError);
-					if (rows <= 0)
-						rows = this.insertRow(row, useSavepoint && continueOnError);
+					
+					if (this.updateStatement == null)
+					{
+						try
+						{
+							rows = this.insertRow(row, useSavepoint && continueOnError);
+						}
+						catch (SQLException ignore)
+						{
+							// if UPDATE/INSERT was requested but the update statement
+							// has been set to null, an update is not possible
+							// so a failed insert should not be considered an error
+						}
+					}
+					else
+					{
+						rows = this.updateRow(row, useSavepoint && continueOnError);
+						if (rows <= 0)
+						{
+							rows = this.insertRow(row, useSavepoint && continueOnError);
+						}
+					}
 					break;
 
 				case MODE_UPDATE:
@@ -1463,12 +1555,13 @@ public class DataImporter
 			{
 				this.prepareInsertStatement();
 			}
+			
 			if (this.mode != MODE_INSERT)
 			{
 				this.prepareUpdateStatement();
 			}
 			
-			if (this.deleteTarget)
+			if (this.deleteTarget && this.tableToBeProcessed == null)
 			{
 				try
 				{
@@ -1625,7 +1718,7 @@ public class DataImporter
 	 * 	targetTable and targetColumns have to be initialized before calling this!
 	 */
 	private void prepareUpdateStatement()
-		throws SQLException
+		throws SQLException, ModeNotPossibleException
 	{
 		if (!this.hasKeyColumns())
 		{
@@ -1688,7 +1781,7 @@ public class DataImporter
 		
 		if (pkCount != this.keyColumns.size())
 		{
-			LogMgr.logError("DataImporter.prepareUpdateStatement()", "At least one of the supplied primary key columns was not found in the target table!\n", null);
+			LogMgr.logError("DataImporter.prepareUpdateStatement()", "At least one of the supplied primary key columns was not found in the target table!", null);
 			this.messages.append(ResourceMgr.getString("ErrImportUpdateKeyColumnNotFound") + "\n");
 			this.updateSql = null;
 			this.updateStatement = null;
@@ -1700,10 +1793,20 @@ public class DataImporter
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "Only PK columns defined! Update mode is not available!", null);
 			this.messages.append(ResourceMgr.getString("ErrImportOnlyKeyColumnsForUpdate"));
+			this.messages.appendNewLine();
 			this.updateSql = null;
 			this.updateStatement = null;
-			this.hasErrors = true;
-			throw new SQLException("Only key columns defined for update mode");
+			if (this.isModeUpdate())
+			{
+				// if only update mode was specified this is an error!
+				this.hasErrors = true;
+				throw new ModeNotPossibleException("Only key columns available. No update mode possible");
+			}
+			else
+			{
+				this.hasWarnings = true;
+			}
+			return;
 		}
 		
 		sql.append(where);
@@ -1844,12 +1947,12 @@ public class DataImporter
 			}
 			
 			this.closeStatements();
-			
+
 			if (this.tableStatements != null)
 			{
 				this.tableStatements.runPostTableStatement(dbConn, targetTable);
 			}
-
+			
 			String msg = this.targetTable.getTableName() + ": " + this.getInsertedRows() + " row(s) inserted. " + this.getUpdatedRows() + " row(s) updated.";
 			if (commitNeeded)
 			{

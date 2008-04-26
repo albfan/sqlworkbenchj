@@ -14,7 +14,6 @@ package workbench.db.importer;
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -595,6 +594,11 @@ public class TextFileParser
 		}
 		finally
 		{
+			if (this.sourceDir != null)
+			{
+				this.receiver.endMultiTable();
+			}
+			
 			if (this.cancelImport && !regularStop)
 			{
 				this.receiver.importCancelled();
@@ -627,6 +631,11 @@ public class TextFileParser
 				LogMgr.logError("TextFileParser.processDirectory()", "Error when checking dependencies", e);
 				throw e;
 			}
+			
+			// The receiver only needs to pre-process the full table list
+			// if checkDependencies is turned on, otherwise a possible
+			// table delete can be done during the single table import
+			this.receiver.setTableList(sorter.getTableList());
 		}
 		else
 		{
@@ -643,6 +652,8 @@ public class TextFileParser
 		}
 		
 		this.receiver.setTableCount(count);
+		this.receiver.beginMultiTable();
+
 		int currentFile = 0;
 
 		for (WbFile f : toProcess)
@@ -673,6 +684,7 @@ public class TextFileParser
 				if (this.abortOnError) throw e;
 			}
 		}
+		
 	}
 
 	private void setupFileHandler()

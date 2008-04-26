@@ -98,7 +98,7 @@ public class SourceTableArgument
 	
 	public List<TableIdentifier> getTables()
 	{
-		return Collections.unmodifiableList(this.tables);
+		return this.tables;
 	}
 
 	public boolean wasWildCardArgument() 

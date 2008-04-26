@@ -3131,6 +3131,7 @@ public class WbImportTest
 			File f1 = new File(basedir, "a_child1_child.txt");
 			File f2 = new File(this.basedir, "child1.txt");
 			File f3 = new File(this.basedir, "zzbase.txt");
+			
 			FileWriter out = new FileWriter(f1);
 			out.write("id\tchild_id\tinfo\n");
 			out.write("1\t1\tinfo_1\n");
@@ -3153,11 +3154,31 @@ public class WbImportTest
 			out.write("2\tinfo\n");
 			out.close();
 			
-			WbFile f = new WbFile(basedir);
-			StatementRunnerResult result = importCmd.execute("wbimport -sourcedir='" + f.getFullPath() + "' -type=text -header=true -checkDependencies=true");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-
+			// Fill the tables with some data
+			// to be able to test the -deleteTarget option
 			Statement stmt = this.connection.createStatement();
+			for (int i=100; i < 120; i++)
+			{
+				stmt.executeUpdate("insert into zzbase (id, info) values (" + i + ", 'info" + i + "')");
+			}
+			for (int i=100; i < 120; i++)
+			{
+				stmt.executeUpdate("insert into child1 (id, base_id, info) values (" + i + ", " + i+ ", 'info" + i + "')");
+			}
+			for (int i=100; i < 120; i++)
+			{
+				stmt.executeUpdate("insert into a_child1_child (id, child_id, info) values (" + (i - 99) + ", " + i+ ", 'info" + i + "')");
+			}
+			this.connection.commit();
+			
+			WbFile f = new WbFile(basedir);
+			StatementRunnerResult result = importCmd.execute("wbimport -sourcedir='" + f.getFullPath() + "' " +
+				"-type=text " +
+				"-header=true " +
+				"-deleteTarget=true " +
+				"-checkDependencies=true");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			
 			ResultSet rs = stmt.executeQuery("select count(*) from zzbase");
 			if (rs.next())
 			{

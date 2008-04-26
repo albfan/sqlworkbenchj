@@ -29,7 +29,6 @@ import workbench.log.LogMgr;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.NumberStringCache;
-import workbench.util.NumberStringCache;
 
 /**
  * A class to execute a SQL Statement and to create the statement
@@ -99,7 +98,14 @@ public class DmlStatement
 				Object value = data.getValue();
 				if (value == null)
 				{
-					stmt.setObject(i+1, null);
+					if (aConnection.getDbSettings().useSetNull())
+					{
+						stmt.setNull(i+1, type);
+					}
+					else
+					{
+						stmt.setObject(i+1, null);
+					}
 				}
 				else if (SqlUtil.isClobType(type) && value instanceof String)
 				{
@@ -121,7 +127,7 @@ public class DmlStatement
 					}
 					catch (IOException e)
 					{
-						throw new SQLException("Input file (" + f.getAbsolutePath() + ") for BLOB not found!");
+						throw new SQLException("Input file (" + f.getAbsolutePath() + ") for LOB not found!");
 					}
 				}
 				else

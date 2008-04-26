@@ -44,9 +44,9 @@ public class TableCommentReader
 		String result = null;
 		if (Settings.getInstance().getIncludeEmptyComments() || comment != null && comment.trim().length() > 0)
 		{
-			result = commentStatement.replaceAll(MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
-			result = commentStatement.replaceAll(MetaDataSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
-			result = result.replaceAll(MetaDataSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replaceAll("'", "''"));
+			result = StringUtil.replace(commentStatement, MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
+			result = StringUtil.replace(result, MetaDataSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
+			result = StringUtil.replace(result, MetaDataSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replaceAll("'", "''"));
 		}
 		return result;
 	}
@@ -102,8 +102,8 @@ public class TableCommentReader
 			{
 				try
 				{
-					String commentSql = columnStatement.replaceAll(MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
-					commentSql = columnStatement.replaceAll(MetaDataSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
+					String commentSql = StringUtil.replace(columnStatement, MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
+					commentSql = StringUtil.replace(commentSql, MetaDataSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
 					commentSql = StringUtil.replace(commentSql, MetaDataSqlManager.COMMENT_COLUMN_PLACEHOLDER, column);
 					commentSql = StringUtil.replace(commentSql, MetaDataSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replaceAll("'" ,"''"));
 					result.append(commentSql);

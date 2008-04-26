@@ -24,7 +24,6 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
-import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -101,6 +100,9 @@ public class TableCopy
 			ColumnIdentifier[] cols = this.parseColumns(cmdLine, sourcequery, sourceConnection);
 			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, cols, createTable, dropTable);
 		}
+		
+		boolean doSyncDelete = cmdLine.getBoolean(WbCopy.PARAM_DELETE_SYNC, false) && !createTable;
+		copier.setDoDeleteSync(doSyncDelete);
 
 		return true;
 	}

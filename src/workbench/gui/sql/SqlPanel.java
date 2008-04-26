@@ -1504,7 +1504,7 @@ public class SqlPanel
 			}
 			else
 			{
-				WbThread t = new WbThread("Cancel Thread")
+				WbThread t = new WbThread("SqlPanel " + this.getId() + " Cancel Thread")
 				{
 					public void run()
 					{
@@ -3100,6 +3100,7 @@ public class SqlPanel
 				{
 					LogMgr.logWarning("SqlPanel.setBusy()", "Error when setting busy icon!", th);
 				}
+				tab.invalidate();
 				WbSwingUtilities.repaintLater(tab);
 			}
 		}

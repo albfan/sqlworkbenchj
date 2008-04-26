@@ -14,6 +14,7 @@ package workbench.db.importer;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +30,7 @@ import workbench.util.WbFile;
 public class FileNameSorter 
 {
 	private List<WbFile> toProcess;
+	private List<TableIdentifier> tables;
 	private WbConnection dbConn;
 	private TablenameResolver resolver;
 	
@@ -56,6 +58,11 @@ public class FileNameSorter
 		}
 	}
 	
+	public List<TableIdentifier> getTableList()
+	{
+		return Collections.unmodifiableList(tables);
+	}
+	
 	public List<WbFile> getFiles()
 	{
 		return toProcess;
@@ -66,7 +73,7 @@ public class FileNameSorter
 	{
 		Map<String, WbFile> fileMapping = new HashMap<String, WbFile>(toProcess.size());
 		
-		List<TableIdentifier> tables = new LinkedList<TableIdentifier>();
+		tables = new LinkedList<TableIdentifier>();
 		for (WbFile f : toProcess)
 		{
 			String tablename = this.resolver.getTableName(f);

@@ -20,7 +20,6 @@ import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 import workbench.interfaces.DataFileWriter;
 import workbench.log.LogMgr;
-import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;

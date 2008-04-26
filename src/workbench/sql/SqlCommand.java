@@ -230,14 +230,17 @@ public class SqlCommand
 		this.currentStatement = this.currentConnection.createStatement();
 		this.isCancelled = false;
 
+		runner.setSavepoint();
 		try
 		{
 			boolean hasResult = this.currentStatement.execute(aSql);
 			result.setSuccess();
 			processResults(result, hasResult);
+			runner.releaseSavepoint();
 		}
 		catch (Exception e)
 		{
+			runner.rollbackSavepoint();
 			addErrorInfo(result, aSql, e);
 			LogMgr.logDebug("SqlCommand.execute()", "Error executing sql statement: " + aSql + "\nError:" + ExceptionUtil.getDisplay(e), null);
 		}

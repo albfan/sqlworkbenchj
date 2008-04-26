@@ -212,7 +212,10 @@ public class DbObjectCache
 				LogMgr.logError("DbObjectCache.getColumns", "Error retrieving columns for " + tblToUse, e);
 				cols = null;
 			}
-			this.objects.put(tblToUse, cols);
+			if (tblToUse != null && cols != null && cols.size() > 0)
+			{
+				this.objects.put(tblToUse, cols);
+			}
 				
 		}
 		return Collections.unmodifiableList(cols);

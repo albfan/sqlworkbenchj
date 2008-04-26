@@ -96,7 +96,7 @@ public class XmlRowDataConverter
 		StrBuffer indent = new StrBuffer("    ");
 		this.dbInfo = con.getDatabaseInfoAsXml(indent);
 	}
-	
+
 	public void setUseVerboseFormat(boolean flag)
 	{
 		this.verboseFormat = flag;
@@ -120,7 +120,7 @@ public class XmlRowDataConverter
 	{
 		StrBuffer xml = new StrBuffer(250);
 		String enc = this.getEncoding();
-		xml.append("<?xml version=\"1.0\"");
+		xml.append("<?xml version=\"1.1\""); 
 		if (enc != null) xml.append(" encoding=\"" + enc + "\"");
 		xml.append("?>");
 		xml.append(this.lineEnding);

@@ -87,6 +87,7 @@ import workbench.WbManager;
 import workbench.db.DbObject;
 import workbench.db.IndexDefinition;
 import workbench.db.SequenceDefinition;
+import workbench.db.SequenceReader;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.CreateDummySqlAction;
 import workbench.gui.actions.DeleteTablesAction;
@@ -1206,10 +1207,18 @@ public class TableListPanel
 			}
 			else if ("sequence".equalsIgnoreCase(type))
 			{
-				sql = meta.getSequenceSource(this.selectedTable.getCatalog(), this.selectedTable.getSchema(), this.selectedTable.getTableName());
-				if (sql.length() == 0)
+				SequenceReader reader = meta.getSequenceReader();
+				if (reader != null)
 				{
-					sql = ResourceMgr.getString("MsgSequenceSourceNotImplemented") + " " + meta.getProductName();
+					CharSequence seqSql = reader.getSequenceSource(this.selectedTable.getSchema(), this.selectedTable.getTableName());
+					if (!StringUtil.isEmptyString(seqSql))
+					{
+						sql = ResourceMgr.getString("MsgSequenceSourceNotImplemented") + " " + meta.getProductName();
+					}
+					else
+					{
+						sql = seqSql.toString();
+					}
 				}
 			}
 			else if (isTableType(type))

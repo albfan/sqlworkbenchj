@@ -25,6 +25,7 @@ public interface RowActionMonitor
 	final int MONITOR_PROCESS_TABLE = 5;
 	final int MONITOR_PROCESS = 6;
 	final int MONITOR_PLAIN = 7;
+	final int MONITOR_DELETE = 8;
 
 	void setMonitorType(int aType);
 	int getMonitorType();

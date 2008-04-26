@@ -584,11 +584,17 @@ public class XmlDataFileParser
 				LogMgr.logError("XmlDataFileParser.processDirectory()", "Error when checking dependencies", e);
 				throw e;
 			}
+			// The receiver only needs to pre-process the full table list
+			// if checkDependencies is turned on, otherwise a possible
+			// table delete can be done during the single table import
+			this.receiver.setTableList(sorter.getTableList());
 		}
 		else
 		{
 			toProcess = sorter.getFiles();
 		}
+		
+		this.receiver.setTableCount(toProcess.size());
 		
 		for (WbFile sourceFile : toProcess)
 		{

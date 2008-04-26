@@ -35,7 +35,6 @@ public class OracleIndexReader
 {
 	private PreparedStatement indexStatement;
 	
-	/** Creates a new instance of OracleMetaData */
 	public OracleIndexReader(DbMetadata meta)
 	{
 		super(meta);

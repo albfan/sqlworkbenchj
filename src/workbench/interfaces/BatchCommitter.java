@@ -21,6 +21,7 @@ public interface BatchCommitter
 	void setUseBatch(boolean useBatch);
 	
 	void setBatchSize(int size);
+	int getBatchSize();
 	
 	void setCommitBatch(boolean commitBatch);
 	

@@ -24,6 +24,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import static workbench.util.StringUtil.isEmptyString;
 
 
@@ -156,6 +157,7 @@ public class HsqlSequenceReader
 	public CharSequence getSequenceSource(String owner, String sequence)
 	{
 		SequenceDefinition def = getSequenceDefinition(owner, sequence);
+		if (def == null) return StringUtil.EMPTY_STRING;
 		
 		StringBuilder result = new StringBuilder(100);
 		result.append("CREATE SEQUENCE ");

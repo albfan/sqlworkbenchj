@@ -23,9 +23,8 @@ public class BlobFormatterFactory
 
 	public static BlobLiteralFormatter createAnsiFormatter()
 	{
-		// SQL Server, MySQL support the ANSI Syntax
-		// using 0xABCDEF...
-		// we use that for all others as well.
+		// ANSI Syntax is 0xABCDEF...
+		// which is e.g. used by SQL Server
 		DefaultBlobFormatter f = new DefaultBlobFormatter();
 		f.setPrefix("0x");
 		

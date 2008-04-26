@@ -12,6 +12,7 @@
 package workbench.db.importer;
 
 import java.sql.SQLException;
+import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 
@@ -28,6 +29,22 @@ public interface RowDataReceiver
 	boolean getCreateTarget();
 	boolean shouldProcessNextRow(); 
 	void nextRowSkipped();
+	
+	/**
+	 * Set the list of tables that will be processed by the 
+	 * row data producer
+	 * 
+	 * @param targetTables
+	 */
+	void setTableList(List<TableIdentifier> targetTables);
+	
+	void deleteTargetTables()
+		throws SQLException;
+	
+	void beginMultiTable()
+		throws SQLException;
+		
+	void endMultiTable();
 	
 	void processRow(Object[] row) throws SQLException;
 	void setTableCount(int total);

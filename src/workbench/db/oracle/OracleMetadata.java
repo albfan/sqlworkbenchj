@@ -49,7 +49,7 @@ public class OracleMetadata
 	private int defaultLengthSemantics = -1;
 	private boolean alwaysShowCharSemantics = false;
 	private boolean useOwnSql = true;
-	
+	private boolean globalMapDateToTimestamp = false;
 	/**
 	 * Only for testing purposes
 	 */
@@ -112,6 +112,7 @@ public class OracleMetadata
 		boolean checkCharSemantics = Settings.getInstance().useOracleCharSemanticsFix();		
 		
 		useOwnSql = (version > 8 && (checkCharSemantics || fixNVARCHAR));
+		globalMapDateToTimestamp = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixdatetype", false);
 	}
 
 	public boolean isOracle8()
@@ -133,6 +134,9 @@ public class OracleMetadata
 
 	public boolean getMapDateToTimestamp()
 	{
+		if (globalMapDateToTimestamp) return true;
+		// if the mapping hasn't been enabled globally, then check the driver property
+		
 		// Newer Oracle drivers support a connection property to automatically 
 		// return DATE columns as Types.TIMESTAMP. We have to mimic that 
 		// when using our own statement to retrieve column definitions

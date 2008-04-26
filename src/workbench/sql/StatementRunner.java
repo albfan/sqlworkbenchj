@@ -159,14 +159,8 @@ public class StatementRunner
 		DbMetadata meta = this.dbConnection.getMetadata();
 		if (meta == null) return;
 		
-		// this is stored in an instance variables for performance
-		// reasons, so we can skip the call to isSelectIntoNewTable() in 
-		// getCommandToUse()
-		// For a single call this doesn't matter, but when executing 
-		// huge scripts the repeated call to getCommandToUse should
-		// be as quick as possible
 		this.removeNewLines = Settings.getInstance().getBoolProperty("workbench.db." + meta.getDbId() + ".removenewlines", false);
-		this.useSavepoint = dbConnection.getDbSettings().useSavePointForDML();
+		setUseSavepoint(dbConnection.getDbSettings().useSavePointForDML());
 	}
 
 	public StatementRunnerResult getResult()

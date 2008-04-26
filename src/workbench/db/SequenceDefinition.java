@@ -40,7 +40,9 @@ public class SequenceDefinition
 		throws SQLException
 	{
 		if (con == null) return null;
-		return con.getMetadata().getSequenceSource(null, schema, sequenceName);
+		SequenceReader reader = con.getMetadata().getSequenceReader();
+		if (reader == null) return null;
+		return reader.getSequenceSource(schema, sequenceName);
 	}
 	
 	public String getSchema()

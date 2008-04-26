@@ -21,6 +21,7 @@ import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -99,7 +100,7 @@ public class WbCommandAnalyzer
 				{
 					this.elements.add(profile.getKey().toString());
 				}
-				Collections.sort(this.elements);
+				Collections.sort(this.elements, new CaseInsensitiveComparator());
 			}
 			else
 			{
@@ -114,7 +115,7 @@ public class WbCommandAnalyzer
 			p.parse(params);
 			List argsPresent = p.getArgumentsOnCommandLine();
 			this.elements.removeAll(argsPresent);
-			Collections.sort(this.elements);
+			Collections.sort(this.elements, new CaseInsensitiveComparator());
 			isParameter = p.needsSwitch();
 		}
 	}
