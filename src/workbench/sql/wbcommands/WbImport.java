@@ -329,11 +329,42 @@ public class WbImport
 
 			textParser.setEmptyStringIsNull(cmdLine.getBoolean(ARG_EMPTY_STRING_IS_NULL, true));
 
+			String filecolumns = cmdLine.getValue(ARG_FILECOLUMNS);
+			if (filecolumns != null && table != null)
+			{
+				List<String> cols = StringUtil.stringToList(filecolumns, ",", true, true);
+				try
+				{
+					List<ColumnIdentifier> colIds = new ArrayList<ColumnIdentifier>(cols.size());
+					for (String colname : cols)
+					{
+						ColumnIdentifier col = new ColumnIdentifier(colname);
+						if (!colname.equals(RowDataProducer.SKIP_INDICATOR) && colIds.contains(col))
+						{
+							String msg = ResourceMgr.getFormattedString("ErrImpDupColumn", colname);
+							LogMgr.logError("WbImport.execute()", msg, null);
+							result.addMessage(msg);
+							result.setFailure();
+							return result;
+						}
+						colIds.add(col);
+					}
+					textParser.setColumns(colIds, true);
+				}
+				catch (Exception e)
+				{
+					result.addMessage(textParser.getMessages());
+					result.setFailure();
+					return result;
+				}
+			}
+
+			boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
+			boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER, headerDefault);
+			textParser.setContainsHeader(header);
+			
 			if (dir == null)
 			{
-				boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
-				boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER, headerDefault);
-				textParser.setContainsHeader(header);
 
 				String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
 				if (importcolumns != null)
@@ -344,36 +375,6 @@ public class WbImport
 						textParser.setImportColumnNames(cols);
 					}
 					catch (IllegalArgumentException e)
-					{
-						result.addMessage(textParser.getMessages());
-						result.setFailure();
-						return result;
-					}
-				}
-
-				String filecolumns = cmdLine.getValue(ARG_FILECOLUMNS);
-				if (filecolumns != null)
-				{
-					List<String> cols = StringUtil.stringToList(filecolumns, ",", true, true);
-					try
-					{
-						List<ColumnIdentifier> colIds = new ArrayList<ColumnIdentifier>(cols.size());
-						for (String colname : cols)
-						{
-							ColumnIdentifier col = new ColumnIdentifier(colname);
-							if (!colname.equals(RowDataProducer.SKIP_INDICATOR) && colIds.contains(col))
-							{
-								String msg = ResourceMgr.getFormattedString("ErrImpDupColumn", colname);
-								LogMgr.logError("WbImport.execute()", msg, null);
-								result.addMessage(msg);
-								result.setFailure();
-								return result;
-							}
-							colIds.add(col);
-						}
-						textParser.setColumns(colIds, true);
-					}
-					catch (Exception e)
 					{
 						result.addMessage(textParser.getMessages());
 						result.setFailure();
@@ -400,21 +401,16 @@ public class WbImport
 					}
 				}
 
-				// The column filter has to bee applied after the
-				// columns are defined!
-				String filter = cmdLine.getValue(ARG_COL_FILTER);
-				if (filter != null)
-				{
-					addColumnFilter(filter, textParser);
-				}
-
 			}
-			else
+
+			// The column filter has to bee applied after the
+			// columns are defined!
+			String colFilter = cmdLine.getValue(ARG_COL_FILTER);
+			if (colFilter != null)
 			{
-				// source directory specified --> Assume files contain headers
-				textParser.setContainsHeader(cmdLine.getBoolean(ARG_CONTAINSHEADER, true));
+				addColumnFilter(colFilter, textParser);
 			}
-
+			
 			textParser.setTreatBlobsAsFilenames(cmdLine.getBoolean(ARG_BLOB_ISFILENAME, true));
 
 			String filter = cmdLine.getValue(ARG_LINE_FILTER);

@@ -24,7 +24,17 @@ import workbench.resource.Settings;
 import workbench.util.FileUtil;
 
 /**
- * Manage 
+ * Manage SQL keywords to support built-in keywords and user-defined keywords.
+ * By default the files 
+ * <ul>
+ *   <li>keywords.wb (general SQL keywords)</li>
+ *   <li>datatypes.wb (SQL datatypes)</li>
+ *   <li>functions.wb (SQL functions)</li>
+ *   <li>operators.wb (SQL operators)</li>
+ * </ul>
+ * are read from this package. 
+ * If any of those files exist in the config directory, their contents
+ * is read as well and merged with the predefined keywords.
  * @author support@sql-workbench.net
  */
 public class SqlKeywordHelper 

@@ -93,9 +93,9 @@ public class TableRelation
 	}
 	
 	/**
-	 * 1 = 1:n (identifying)
-	 * 2 = 1:n (non-identifying)
-	 * @return
+	 * Returns the type of this relation.
+	 * 
+	 * @return 1 = 1:n (identifying), 2 = 1:n (non-identifying)
 	 */
 	public String getRelationKind()
 	{
@@ -114,7 +114,6 @@ public class TableRelation
 	/**
 	 * Returns the fk columns as a string suitable to be put 
 	 * into a <tt>relation</tt> tag.
-	 * @return
 	 */
 	public String getColumns()
 	{

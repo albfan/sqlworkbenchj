@@ -70,7 +70,7 @@ public class BatchedStatement
 	 * Adds the current set of value to the JDBC batch.
 	 * If the batch is full, the batch is executed.
 	 *
-	 * @returns the update counts for the batch or null if the batch was not yet full
+	 * @return the update counts for the batch or null if the batch was not yet full
 	 * @throws java.sql.SQLException
 	 */
 	protected long addBatch()

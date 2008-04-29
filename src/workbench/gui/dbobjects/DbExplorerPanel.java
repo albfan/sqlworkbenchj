@@ -740,14 +740,18 @@ public class DbExplorerPanel
 	
 	public void setTabTitle(JTabbedPane tab, int index)
 	{
-		String title = (this.tabTitle == null ? getTabTitle() : this.tabTitle);
+		String plainTitle = (this.tabTitle == null ? getTabTitle() : this.tabTitle);
 		
-		String realTitle = title + " " + Integer.toString(index+1);
+		String realTitle = plainTitle;
+		if (Settings.getInstance().getShowTabIndex())
+		{
+			realTitle += " " + Integer.toString(index+1);
+		}
 		tab.setTitleAt(index, realTitle);
-		if (index < 9)
+		if (index < 9 && Settings.getInstance().getShowTabIndex())
 		{
 			char c = Integer.toString(index+1).charAt(0);
-			int pos = title.length() + 1;
+			int pos = plainTitle.length() + 1;
 			tab.setMnemonicAt(index, c);
 			// The Mnemonic index has to be set explicitely otherwise
 			// the display would be wrong if the tab title contains

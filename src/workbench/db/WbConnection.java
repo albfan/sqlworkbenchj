@@ -75,7 +75,7 @@ public class WbConnection
 	
 	/**
 	 * Create a new wrapper connection around the original SQL connection.
-	 * This will also initialize a {@link #DbMetadata} instance.
+	 * This will also initialize a {@link DbMetadata} instance.
 	 */
 	public WbConnection(String anId, Connection aConn, ConnectionProfile aProfile)
 		throws SQLException
@@ -856,7 +856,7 @@ public class WbConnection
 	 * Checks if DDL statement need a commit for this connection. 
 	 * 
 	 * @return false if autocommit is on or the DBMS does not support DDL transactions
-	 * @see #getDdlNeedsCommit()
+	 * @see #getDDLNeedsCommit()
 	 */
 	public boolean shouldCommitDDL()
 	{

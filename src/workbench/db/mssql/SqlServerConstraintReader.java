@@ -14,7 +14,8 @@ package workbench.db.mssql;
 import workbench.db.AbstractConstraintReader;
 
 /**
- *
+ * A ConstraintReader for Microsoft SQL Server.
+ * 
  * @author  support@sql-workbench.net
  */
 public class SqlServerConstraintReader extends AbstractConstraintReader

@@ -34,7 +34,26 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- *
+ * A class to retrieve meta-information from an Oracle database. 
+ * 
+ * {@link #getColumns(java.lang.String, java.lang.String, java.lang.String, java.lang.String) }
+ * is a drop-in replacement for the JDBC getColumns() method that works around the problem 
+ * that the Oracle driver runs an "ANALYZE TABLE" before returning index information.
+ * 
+ * It also fixes some problems with incorrectly returned data types.
+ * 
+ * We will use our own statement only if the Oracle version is 9i or later and 
+ * if at least one of the following configuration properties are set:
+ * <ul>
+ *	<li>{@link workbench.resource.Settings#useOracleNVarcharFix()}</li>
+ *	<li>{@link workbench.resource.Settings#useOracleCharSemanticsFix()}</li>
+ * </ul>
+ * 
+ * Additionally if the config property <tt>workbench.db.oracle.fixdatetype</tt> is
+ * set to true, DATE columns will always be mapped to Timestamp objects when 
+ * retrieving data (see {@link #getMapDateToTimestamp()} and 
+ * {@link workbench.db.DbMetadata#fixColumnType(int)}
+ * 
  * @author support@sql-workbench.net
  */
 public class OracleMetadata

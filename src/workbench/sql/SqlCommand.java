@@ -144,7 +144,7 @@ public class SqlCommand
 		result.addMessage(msg.toString());
 		if (!WbManager.getInstance().isBatchMode()) 
 		{
-			result.addMessage(""); // add empty line
+			result.addMessageNewLine();
 			result.addMessage(help);
 		}
 		result.setFailure();
@@ -211,12 +211,29 @@ public class SqlCommand
 		this.isCancelled = false;
 	}
 
+	/**
+	 * Define the StatementRunner that runs this statement.
+	 * This is needed e.g. to determine the base directory for
+	 * relative file paths (WbInclude, WbImport, etc)
+	 * 
+	 * @param r The runner running this statement.
+	 */
 	public void setStatementRunner(StatementRunner r)
 	{
 		this.runner = r;
 	}
 
-	protected boolean isConnectionRequired() { return true; }
+	/**
+	 * Checks if this statement needs a connection to a database to run.
+	 * This should be overridden by an ancestor not requiring a connection.
+	 * 
+	 * @return true 
+	 * @see workbench.sql.wbcommands.WbCopy#isConnectionRequired() 
+	 */
+	protected boolean isConnectionRequired() 
+	{ 
+		return true; 
+	}
 	
 	/**
 	 *	Should be overridden by a specialised SqlCommand. 
@@ -459,12 +476,17 @@ public class SqlCommand
 	 * 	The commands producing a result set need this flag.
 	 * 	If no consumer is waiting, the can directly produce a DataStore
 	 * 	for the result.
+	 * @see #isConsumerWaiting() 
 	 */
 	public void setConsumerWaiting(boolean flag)
 	{
 		this.consumerWaiting = flag;
 	}
 
+	/**
+	 * Checks if a consumer is waiting for the result of this command.
+	 * @see #setConsumerWaiting(boolean) 
+	 */
 	public boolean isConsumerWaiting()
 	{
 		return this.consumerWaiting;
@@ -479,6 +501,16 @@ public class SqlCommand
 		return this.isUpdatingCommand;
 	}
 	
+	/**
+	 * Check if this statement needs a confirmation by the user
+	 * to be run. 
+	 * 
+	 * @param con the current connection
+	 * @param sql the statement to be executed
+	 * @return true if the user should confirm to run this statement
+	 * @see #getModificationTarget(workbench.db.WbConnection, java.lang.String) 
+	 * @see workbench.db.ConnectionProfile#getConfirmUpdates() 
+	 */
 	public boolean needConfirmation(WbConnection con, String sql)
 	{
 		ConnectionProfile prof = getModificationTarget(con, sql);
@@ -570,14 +602,23 @@ public class SqlCommand
 	 * 
 	 * @param sql the sql to "clean"
 	 * @return the sql with the verb, comments and newlines removed
-	 * @see workbench.util.Sqlutil#makeCleanSql(String, boolean, boolean, char)
-	 * @see workbench.util.Sqlutil#getVerb(String)
+	 * @see workbench.util.SqlUtil#makeCleanSql(String, boolean, boolean, char)
+	 * @see workbench.util.SqlUtil#getSqlVerb(java.lang.CharSequence) 
 	 */
 	protected String getCommandLine(String sql)
 	{
 		return SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
 	}
 	
+	/**
+	 * Assumes the given parameter is a filename supplied by the end user.
+	 * If the filename is absolute, a file object with that path is returned.
+	 * If the filename does not contain a full path, the current baseDir of the
+	 * StatementRunner is added to the returned file. 
+	 * @param fileName
+	 * @return a File object pointing to the file indicated by the user.
+	 * @see workbench.sql.StatementRunner#getBaseDir() 
+	 */
 	protected WbFile evaluateFileArgument(String fileName)
 	{
 		if (StringUtil.isEmptyString(fileName)) return null;

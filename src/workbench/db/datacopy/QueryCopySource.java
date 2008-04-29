@@ -26,6 +26,13 @@ import workbench.util.SqlUtil;
 import workbench.util.ValueConverter;
 
 /**
+ * Acts as a row data producer to copy the data from a SQL query
+ * to another table (and database).
+ * 
+ * When copying a single table, {@link DataCopier} will create the approriate
+ * <tt>SELECT</tt> statement to retrieve all rows (and columns) from the source
+ * table. 
+ * 
  * @author  support@sql-workbench.net
  */
 public class QueryCopySource

@@ -40,7 +40,16 @@ import workbench.util.SqlUtil;
 import workbench.util.WbThread;
 
 /**
- *
+ * A class to copy data from one database to another.
+ * DataCopier supports copying multiple tables or just a single table. When
+ * copying multiple tables (using {@link #setTableList(java.util.List)} the 
+ * tables between source and destination are matched by name. 
+ * 
+ * When copying a single table, source and target table need not have the same
+ * name. 
+ * 
+ * The source data is always retrieved using a {@link QueryCopySource} 
+ * 
  * @author  support@sql-workbench.net
  */
 public class DataCopier

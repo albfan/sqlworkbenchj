@@ -14,7 +14,7 @@ package workbench.db.derby;
 import workbench.db.AbstractConstraintReader;
 
 /**
- * Constraint reader for Cloudscape database
+ * Constraint reader for the Derby database
  * @author  support@sql-workbench.net
  */
 public class DerbyConstraintReader 

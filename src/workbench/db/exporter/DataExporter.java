@@ -42,7 +42,6 @@ import workbench.db.WbConnection;
 import workbench.interfaces.Committer;
 import workbench.interfaces.ErrorReporter;
 import workbench.interfaces.ProgressReporter;
-import workbench.storage.SqlLiteralFormatter;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.ProgressPanel;
@@ -290,17 +289,10 @@ public class DataExporter
 
 	/**
 	 * Define how blobs should be handled during export.
-	 * Modes allowed are 
-	 * <ul>
-	 *	<li>BLOB_MODE_LITERAL</li>
-	 *  <li>BLOB_MODE_ANSI</li>
-	 *  <li>BLOB_MODE_FILE</li>
-	 * </ul>
+	 * 
 	 * @param type the blob mode to be used. 
 	 *        null means no special treatment (toString() will be called)
-	 * @see #BLOB_MODE_LITERAL
-	 * @see #BLOB_MODE_ANSI
-	 * @see #BLOB_MODE_FILE
+	 * @see workbench.db.exporter.BlobMode#getMode(java.lang.String)
 	 */
 	public void setBlobMode(String type)
 	{

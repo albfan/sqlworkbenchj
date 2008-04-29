@@ -652,7 +652,10 @@ public class TextFileParser
 		}
 		
 		this.receiver.setTableCount(count);
-		this.receiver.beginMultiTable();
+		if (!multiFileImport)
+		{
+			this.receiver.beginMultiTable();
+		}
 
 		int currentFile = 0;
 
@@ -670,11 +673,14 @@ public class TextFileParser
 				if (!multiFileImport)
 				{
 					this.tableName = f.getFileName();
+					
+					// Do not reset the import columns if multiple files
+					// are imported into a single table.
+					this.columns = null;
+					this.colCount = 0;
+					this.columnMap = null;
 				}
 				this.inputFile = f;
-				this.columns = null;
-				this.colCount = 0;
-				this.columnMap = null;
 				this.processOneFile();
 			}
 			catch (Exception e)
@@ -707,7 +713,10 @@ public class TextFileParser
 
 		setupFileHandler();
 
-		if (!this.withHeader && this.sourceDir != null)
+		// If no header is available in the file and no columns have been
+		// specified by the user (i.e. columns is not yet set up)
+		// then we assume all columns from the table are present in the input file
+		if (!this.withHeader && columns == null)
 		{
 			this.setColumns(this.getColumnsFromTargetTable(), true);
 		}

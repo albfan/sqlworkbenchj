@@ -22,7 +22,7 @@ import workbench.util.StrBuffer;
 /**
  * Generate XML report information about table grants.
  * 
- * @see workbench.db.DbMetadata#getTableGrants(workbench.db.TableIdentifier)
+ * @see workbench.db.TableGrantReader#getTableGrants(workbench.db.WbConnection, workbench.db.TableIdentifier) 
  * @author support@sql-workbench.net
  */
 public class ReportTableGrants

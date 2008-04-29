@@ -21,7 +21,10 @@ import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+
 /**
+ * A ProcedureReader for MySQL
+ * 
  * @author  support@sql-workbench.net
  */
 public class MySqlProcedureReader

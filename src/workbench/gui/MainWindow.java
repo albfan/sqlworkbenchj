@@ -1089,7 +1089,7 @@ public class MainWindow
 
 	public void connectBegin(final ConnectionProfile aProfile)
 	{
-		if (this.currentWorkspaceFile != null && WbManager.getInstance().writeSettings())
+		if (this.currentWorkspaceFile != null && WbManager.getInstance().getSettingsShouldBeSaved())
 		{
 			this.saveWorkspace(this.currentWorkspaceFile, true);
 		}
@@ -2072,6 +2072,7 @@ public class MainWindow
 
 	public void loadWorkspace()
 	{
+		this.saveWorkspace();
 		FileDialogUtil dialog = new FileDialogUtil();
 		String filename = dialog.getWorkspaceFilename(this, false, true);
 		if (filename == null) return;
@@ -2166,7 +2167,7 @@ public class MainWindow
 	 */
 	public boolean saveWorkspace(String filename, boolean checkUnsaved)
 	{
-		if (!WbManager.getInstance().writeSettings()) return true;
+		if (!WbManager.getInstance().getSettingsShouldBeSaved()) return true;
 		WbWorkspace w = null;
 		boolean interactive = false;
 
@@ -2339,10 +2340,13 @@ public class MainWindow
 	private String getPlainTabTitle(int index)
 	{
 		String title = this.sqlTab.getTitleAt(index);
-		int pos = title.lastIndexOf(' ');
-		if (pos > -1)
+		if (Settings.getInstance().getShowTabIndex())
 		{
-			title = title.substring(0, pos);
+			int pos = title.lastIndexOf(' ');
+			if (pos > -1)
+			{
+				title = title.substring(0, pos);
+			}
 		}
 		return title;
 	}

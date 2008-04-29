@@ -27,7 +27,6 @@ import workbench.util.StringUtil;
 /**
  * Action to convert Java code into a SQL statement
  * 
- * @see workbench.util.StringUtil#cleanJavaString(String)
  * @author support@sql-workbench.net
  */
 public class CleanJavaCodeAction extends WbAction

@@ -54,7 +54,6 @@ public class ScriptCommandDefinition
 	 * including potential whitespace characters before the 
 	 * real command. If setWhitespaceStart() has not been 
 	 * called, this is identical to getStartPositionInScript()
-	 * @return
 	 */
 	public int getWhitespaceStart() 
 	{ 

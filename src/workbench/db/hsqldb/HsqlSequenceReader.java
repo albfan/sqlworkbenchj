@@ -29,6 +29,8 @@ import static workbench.util.StringUtil.isEmptyString;
 
 
 /**
+ * SequenceReader for <a href="http://www.hsqldb.org">HSQLDB</a>
+ * 
  * @author  support@sql-workbench.net
  */
 public class HsqlSequenceReader

@@ -18,7 +18,6 @@ import workbench.gui.components.WbCheckBoxLabel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.util.StringUtil;
 import workbench.util.WbLocale;
 
 /**
@@ -100,6 +99,7 @@ public class GeneralOptionsPanel
 
 		// General settings
 		set.setStandardFont(standardFont.getSelectedFont());
+		set.setShowTabIndex(showTabIndex.isSelected());
 		set.setUseEncryption(this.useEncryption.isSelected());
 		set.setMsgLogFont(msgLogFont.getSelectedFont());
 		set.setUseAnimatedIcon(this.enableAnimatedIcon.isSelected());
@@ -168,6 +168,8 @@ public class GeneralOptionsPanel
     checkInterval = new javax.swing.JComboBox();
     langLabel = new javax.swing.JLabel();
     languageDropDown = new javax.swing.JComboBox();
+    showTabIndexLabel = new WbCheckBoxLabel();
+    showTabIndex = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -191,7 +193,6 @@ public class GeneralOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(7, 10, 0, 11);
@@ -211,7 +212,6 @@ public class GeneralOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 13;
-    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 15);
@@ -231,7 +231,6 @@ public class GeneralOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 14;
-    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 15);
@@ -262,7 +261,6 @@ public class GeneralOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 5;
-    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(4, 10, 1, 25);
@@ -288,7 +286,6 @@ public class GeneralOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(8, 10, 1, 11);
@@ -298,7 +295,7 @@ public class GeneralOptionsPanel
     msgFontLabel.setToolTipText(ResourceMgr.getDescription("LblMsgLogFont"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 12, 0, 0);
@@ -308,15 +305,14 @@ public class GeneralOptionsPanel
     standardFontLabel.setToolTipText(ResourceMgr.getDescription("LblStandardFont"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
     add(standardFontLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 7;
-    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
@@ -325,8 +321,7 @@ public class GeneralOptionsPanel
     standardFont.setFont(standardFont.getFont());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 10, 0, 15);
@@ -343,7 +338,6 @@ public class GeneralOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 15;
-    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 15);
     add(pdfReaderPath, gridBagConstraints);
@@ -361,7 +355,6 @@ public class GeneralOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 16;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 10, 0, 0);
     add(logLevel, gridBagConstraints);
@@ -400,6 +393,31 @@ public class GeneralOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
     add(languageDropDown, gridBagConstraints);
+
+    showTabIndexLabel.setLabelFor(showTabIndex);
+    showTabIndexLabel.setText(ResourceMgr.getString("LblShowTabIndex"));
+    showTabIndexLabel.setToolTipText(ResourceMgr.getDescription("LblShowTabIndex"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 12, 1, 0);
+    add(showTabIndexLabel, gridBagConstraints);
+
+    showTabIndex.setFont(null);
+    showTabIndex.setSelected(Settings.getInstance().getShowTabIndex());
+    showTabIndex.setText("");
+    showTabIndex.setBorder(null);
+    showTabIndex.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    showTabIndex.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    showTabIndex.setIconTextGap(5);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(4, 10, 1, 25);
+    add(showTabIndex, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -420,6 +438,8 @@ public class GeneralOptionsPanel
   private javax.swing.JLabel pdfReaderPathLabel;
   private javax.swing.JTextField quoteCharField;
   private javax.swing.JLabel quoteCharLabel;
+  private javax.swing.JCheckBox showTabIndex;
+  private javax.swing.JLabel showTabIndexLabel;
   private workbench.gui.components.WbFontPicker standardFont;
   private javax.swing.JLabel standardFontLabel;
   private javax.swing.JTextField textDelimiterField;

@@ -35,12 +35,12 @@ import java.util.regex.Pattern;
 import workbench.db.derby.DerbyConstraintReader;
 import workbench.db.derby.DerbySynonymReader;
 import workbench.db.firebird.FirebirdProcedureReader;
-import workbench.db.firstsql.FirstSqlMetadata;
+import workbench.db.firstsql.FirstSqlConstraintReader;
 import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ibm.Db2SequenceReader;
 import workbench.db.ibm.Db2SynonymReader;
 import workbench.db.ingres.IngresMetadata;
-import workbench.db.mckoi.McKoiMetadata;
+import workbench.db.mckoi.McKoiSequenceReader;
 import workbench.db.mssql.SqlServerConstraintReader;
 import workbench.db.mssql.SqlServerProcedureReader;
 import workbench.db.mysql.EnumReader;
@@ -273,11 +273,11 @@ public class DbMetadata
 			int pos = this.productName.indexOf('(');
 			if (pos == -1) pos = this.productName.length() - 1;
 			this.productName = this.productName.substring(0, pos).trim();
-			this.sequenceReader = new McKoiMetadata(this.dbConnection.getSqlConnection());
+			this.sequenceReader = new McKoiSequenceReader(this.dbConnection.getSqlConnection());
 		}
 		else if (productLower.indexOf("firstsql") > -1)
 		{
-			this.constraintReader = new FirstSqlMetadata();
+			this.constraintReader = new FirstSqlConstraintReader();
 			this.isFirstSql = true;
 		}
 		else if (productLower.indexOf("excel") > -1)
@@ -3137,7 +3137,7 @@ public class DbMetadata
 	 * @param table 
 	 * @param pkCols
 	 * @param pkName
-	 * @return
+	 * @return an SQL statement to add a PK constraint on the given table.
 	 */
 	public CharSequence getPkSource(TableIdentifier table, List pkCols, String pkName)
 	{
@@ -3241,7 +3241,7 @@ public class DbMetadata
 	/**
 	 *	Return a SQL script to re-create the Foreign key definition for the given table.
 	 *
-	 *	@param aTable the tablename for which the foreign keys should be created
+	 *	@param table the tablename for which the foreign keys should be created
 	 *  @param aFkDef a DataStore with the FK definition as returned by #getForeignKeys()
 	 *
 	 *	@return a SQL statement to add the foreign key definitions to the given table

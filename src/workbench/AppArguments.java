@@ -16,6 +16,9 @@ import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 
 /**
+ * A class to define and parse the arguments that are available when 
+ * the application is started. 
+ * 
  * @author support@sql-workbench.net
  */
 public class AppArguments

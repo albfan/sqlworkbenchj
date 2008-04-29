@@ -83,7 +83,7 @@ public class ReportTable
 	 * This will read the following information for the table: 
 	 * <ul>
 	 *	<li>columns for the table using {@link workbench.db.DbMetadata#getTableColumns(TableIdentifier)}</li>
-	 *  <li>the comments for the table using {@link workbench.db.DbMetadata#getTableComment(TableIdentifier)}</li>
+	 *  <li>the comments for the table using {@link workbench.db.TableCommentReader#getTableComment(WbConnection, TableIdentifier)}</li>
 	 *  <li>The defined indexes for the table if includeIndex == true using an {@link IndexReporter}</li>
 	 *  <li>The defined foreign keys if includeFK == true</li>
 	 *  <li>Table constraints if includeConstraints == true {@link workbench.db.DbMetadata#getTableConstraints(workbench.db.TableIdentifier, String)}</li>

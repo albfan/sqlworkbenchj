@@ -648,9 +648,9 @@ public class DwPanel
 	
 	/**
 	 * Display any result set that is contained in the StatementRunnerResult. 
-	 * @param result the result from the {@link workbench.interfaces.StatementRunner} to be displayed
+	 * @param result the result from the {@link workbench.sql.StatementRunner} to be displayed
 	 *
-	 * @see workbench.sql.DefaultStatementRunner
+	 * @see workbench.sql.StatementRunner
 	 */
 	public void showData(final StatementRunnerResult result)
 		throws SQLException

@@ -23,7 +23,7 @@ public interface DataTypeResolver
 	 * @param size the size of the column
 	 * @param digits the digits, &lt; 0 if not applicable
 	 * @param additonalWbType for mapping Oracle's char/byte semantics. Use -1 if not needed
-	 * @return
+	 * @return the SQL "display" for the given datatype
 	 */
 	String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, int additonalWbType);
 }

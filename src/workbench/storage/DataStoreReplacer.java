@@ -206,7 +206,7 @@ public class DataStoreReplacer
 	 * 
 	 * @return the number of occurances replaced
 	 * @see workbench.gui.editor.SearchAndReplace#getSearchExpression(String, boolean, boolean, boolean)
-	 * @see workbench.gui.editor.SearchAndReplace#fixSpecialReplacementChars(String)
+	 * @see workbench.gui.editor.SearchAndReplace#fixSpecialReplacementChars(String, boolean)
 	 */
 	public int replaceAll(String text, String replacement, int[] rows, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 		throws ConverterException, PatternSyntaxException

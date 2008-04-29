@@ -32,7 +32,6 @@ import workbench.util.StringUtil;
 /**
  * Action to create a piece of Java code that declares the currently
  * selected SQL statement as a variable.
- * @see workbench.util.StringUtil#makeJavaString(String, String, boolean)
  * @author support@sql-workbench.net
  */
 public class CreateSnippetAction extends WbAction

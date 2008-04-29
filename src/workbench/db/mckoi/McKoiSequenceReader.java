@@ -1,5 +1,5 @@
 /*
- * McKoiMetadata.java
+ * McKoiSequenceReader.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -31,12 +31,12 @@ import workbench.util.StringUtil;
 /**
  * @author  support@sql-workbench.net
  */
-public class McKoiMetadata
+public class McKoiSequenceReader
 	implements SequenceReader
 {
 	private Connection connection;
 	
-	public McKoiMetadata(Connection con)
+	public McKoiSequenceReader(Connection con)
 	{
 		this.connection = con;
 	}

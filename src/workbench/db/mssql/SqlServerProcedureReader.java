@@ -23,7 +23,8 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- *
+ * A ProcedureReader for Microsoft SQL Server.
+ * 
  * @author  support@sql-workbench.net
  */
 public class SqlServerProcedureReader

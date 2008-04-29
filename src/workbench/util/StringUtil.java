@@ -432,7 +432,7 @@ public class StringUtil
 	 * A String containing only whitespaces is not considered empty.
 	 *
 	 * @param value the String to test
-	 * @return
+	 * @return true if the String is empty (or null)
 	 */
 	public static final boolean isEmptyString(CharSequence value)
 	{

@@ -40,6 +40,7 @@ public class WbStarter
 		System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
 		System.setProperty("apple.awt.showGrowBox", "true");
 		System.setProperty("apple.awt.rendering", "speed");
+		System.setProperty("swing.boldMetal", "false");
 		
 		String version = System.getProperty("java.version", null);
 		if (version == null)

@@ -44,6 +44,13 @@ public enum BlobMode
 
 	/**
 	 * Convert a user-supplied mode keyword to the matching BlobMode
+	 * Valid input strings are:
+	 * <ul>
+	 * <li><tt>none</tt> - maps to {@link #None}</li>
+	 * <li><tt>ansi</tt> - maps to {@link #AnsiLiteral}</li>
+	 * <li><tt>dbms</tt> - maps to {@link #DbmsLiteral}</li>
+	 * <li><tt>file</tt> - maps to {@link #SaveToFile}</li>
+	 * </ul>
 	 * @param type the type as entered by the user
 	 * @return null if the type was invalid, the corresponding BlobMode otherwise
 	 */

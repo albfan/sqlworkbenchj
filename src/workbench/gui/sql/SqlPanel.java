@@ -1215,13 +1215,17 @@ public class SqlPanel
 			this.removeIconFromTab();
 		}
 
-		String tabTitle = getTabTitle();
-		String title = tabTitle + " " + Integer.toString(index+1);
+		String plainTitle = getTabTitle();
+		String title = plainTitle;
+		if (Settings.getInstance().getShowTabIndex())
+		{
+			 title += " " + Integer.toString(index+1);
+		}
 		tab.setTitleAt(index, title);
-		if (index < 9)
+		if (index < 9 && Settings.getInstance().getShowTabIndex())
 		{
 			char c = Integer.toString(index+1).charAt(0);
-			int pos = tabTitle.length() + 1;
+			int pos = plainTitle.length() + 1;
 			tab.setMnemonicAt(index, c);
 			// The Mnemonic index has to be set explicitely otherwise
 			// the display would be wrong if the tab title contains
@@ -2783,7 +2787,7 @@ public class SqlPanel
 	 * For each DataStore or ResultSet in the result, an additional
 	 * result {@link workbench.gui.sql.DwPanel} will be added.
 	 * 
-	 * @param result the result to be displayed (obtained from a {@link workbench.interfaces.StatementRunner})
+	 * @param result the result to be displayed (obtained from a {@link workbench.sql.StatementRunner})
 	 * @see workbench.gui.sql.DwPanel
 	 */
 	public int addResult(StatementRunnerResult result)

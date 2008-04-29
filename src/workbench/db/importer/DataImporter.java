@@ -148,7 +148,13 @@ public class DataImporter
 
 	private boolean checkRealClobLength = false;
 	private boolean isOracle = false;
+	
+	/**
+	 * Indicates multiple imports run with this instance oft DataImporter.
+	 * Set via {@link #beginMultiTable() }
+	 */ 
 	private boolean multiTable = false;
+	
 	private List<Closeable> batchStreams;
 	private boolean batchRunning = false;
 	private TableStatements tableStatements;
@@ -1501,7 +1507,16 @@ public class DataImporter
 		{
 			this.targetTable = table.createCopy();
 			this.targetColumns = columns;
-			this.keyColumns = null;
+			
+			// Key columns might have been externally defined if
+			// a single table import is run which is not possible
+			// when using a multi-table import. So the keyColumns 
+			// should only be reset if a multi-table import is running!
+			if (this.multiTable) 
+			{
+				this.keyColumns = null;
+			}
+			
 			this.colCount = this.targetColumns.length;
 
 			if (this.parser != null)

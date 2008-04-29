@@ -281,7 +281,7 @@ public class ConnectionProfile
 	 * or multi-line comments using /* are removed from the statement
 	 * before sending it to the database.
 	 *
-	 * @see workbench.sql.DefaultStatementRunner#runStatement(String, int, int)
+	 * @see workbench.sql.StatementRunner#runStatement(String, int, int)
 	 */
 	public void setRemoveComments(boolean flag)
 	{

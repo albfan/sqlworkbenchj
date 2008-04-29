@@ -1171,6 +1171,16 @@ public class Settings
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="GUI Stuff">
+	public boolean getShowTabIndex()
+	{
+		return getBoolProperty("workbench.gui.tabs.showindex", true);
+	}
+
+	public void setShowTabIndex(boolean flag)
+	{
+		setProperty("workbench.gui.tabs.showindex", flag);
+	}
+	
 	public boolean getIncludeHeaderInOptimalWidth()
 	{
 		return getBoolProperty("workbench.gui.optimalwidth.includeheader", true);

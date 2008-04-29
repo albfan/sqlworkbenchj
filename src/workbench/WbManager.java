@@ -100,7 +100,7 @@ public class WbManager
 		LogMgr.logError("WbManager.uncaughtException()", "Thread + " + thread.getName() + " caused an exception!", error);
 	}
 
-	public boolean writeSettings()
+	public boolean getSettingsShouldBeSaved()
 	{
 		return this.writeSettings;
 	}
@@ -334,8 +334,6 @@ public class WbManager
 
 	private void initUI()
 	{
-		// Disable bold fonts for the Default Metal Look & Feel
-		System.setProperty("swing.boldMetal", "false");
 		UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
 
 		this.initializeLookAndFeel();

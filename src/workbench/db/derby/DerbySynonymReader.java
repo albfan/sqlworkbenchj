@@ -24,6 +24,8 @@ import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
 /**
+ * Retrieve synonyms and their definition from a Derby database.
+ * 
  * @author support@sql-workbench.net
  */
 public class DerbySynonymReader

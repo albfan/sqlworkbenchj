@@ -110,7 +110,8 @@ public class TableSync
 	/**
 	 * Define the table to be checked. 
 	 * 
-	 * @param checkTable
+	 * @param tableToCheck the table with the "reference" data
+	 * @param tableToDelete the table from which obsolete rows should be deleted
 	 * @throws java.sql.SQLException
 	 */
 	public void setTableName(TableIdentifier tableToCheck, TableIdentifier tableToDelete)

@@ -121,13 +121,11 @@ public abstract class TokenMarker
 	 * should return the comment token type so that it continues on
 	 * the next line.
 	 *
-	 * @param token The initial token type for this line
+	 * @param lastToken The initial token type for this line
 	 * @param line The line to be tokenized
-	 * @param lineIndex The index of the line in the document,
-	 * starting at 0
-	 * @return The initial token type for the next line
+	 * @param lineIndex The index of the line in the document, starting at 0
 	 */
-	protected abstract void markTokensImpl(Token lastToken, Segment line,int lineIndex);
+	protected abstract void markTokensImpl(Token lastToken, Segment line, int lineIndex);
 
 	public abstract char getPendingLiteralChar();
 	

@@ -23,11 +23,11 @@ import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 
 /**
- * Metadata support for <a href="http://www.firstsql.com/">FirstSQL</a>
+ * Constraint reader for <a href="http://www.firstsql.com/">FirstSQL</a>
  * 
  * @author  support@sql-workbench.net
  */
-public class FirstSqlMetadata
+public class FirstSqlConstraintReader
 	implements ConstraintReader
 {
 	private static final String SQL = "select ch.check_clause, ch.constraint_name \n" + 
@@ -37,7 +37,7 @@ public class FirstSqlMetadata
              "  and cons.constraint_name = ch.constraint_name" + 
              "  and cons.table_schema = ? \n" + 
              "  and cons.table_name = ? ";
-	public FirstSqlMetadata()
+	public FirstSqlConstraintReader()
 	{
 	}
 

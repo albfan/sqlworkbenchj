@@ -31,7 +31,7 @@ public class CaseInsensitiveComparator
 	 * @param value1 the first String, maybe null
 	 * @param value2 the second String, maybe null
 	 * @return 0 if both are null or compareToIgnoreCase() returns 0
-	 * @see workbench.util.StringUtil#compareStrings(String, String, boolean);
+	 * @see workbench.util.StringUtil#compareStrings(String, String, boolean)
 	 */
 	public int compare(String value1, String value2)
 	{
