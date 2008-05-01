@@ -22,7 +22,7 @@ import workbench.resource.ResourceMgr;
  * @see workbench.gui.dialogs.export.DataStoreExporter
  *	@author  support@sql-workbench.net
  */
-public class SaveDataAsAction 
+public class SaveDataAsAction
 	extends WbAction
 {
 	private WbTable client;
@@ -32,7 +32,7 @@ public class SaveDataAsAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtSaveDataAs");
-		this.setIcon(ResourceMgr.getImage("SaveAs"));
+		this.setIcon("SaveAs");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setEnabled(false);
 	}

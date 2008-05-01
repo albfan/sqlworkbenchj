@@ -12,7 +12,6 @@
 package workbench.db;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import workbench.util.SqlUtil;
 
@@ -23,36 +22,27 @@ import workbench.util.SqlUtil;
 public class IndexDefinition
 	implements DbObject
 {
-	private String expression;
 	private boolean isPK = false;
 	private boolean isUnique = false;
 	private String indexName;
 	private String indexType;
-	private String indexSchema;
 	private TableIdentifier baseTable;
 	private List<IndexColumn> columns = new ArrayList<IndexColumn>();
 
-	public IndexDefinition(TableIdentifier table, String schema, String name, String exp)
+	public IndexDefinition(TableIdentifier table, String name)
 	{
-		this.indexSchema = schema;
 		this.indexName = name;
-		this.expression = exp;
 		this.baseTable = table;
 	}
 
 	public String getSchema()
 	{
-		return indexSchema;
+		return baseTable.getSchema();
 	}
 
 	public String getCatalog()
 	{
 		return null;
-	}
-
-	public IndexDefinition(TableIdentifier table, String name, String exp)
-	{
-		this(table, null, name, exp);
 	}
 
 	public void addColumn(String column, String direction)
@@ -79,7 +69,7 @@ public class IndexDefinition
 	
 	public String getObjectExpression(WbConnection conn)
 	{
-		return SqlUtil.buildExpression(conn, null, indexSchema, indexName);
+		return SqlUtil.buildExpression(conn, null, getSchema(), indexName);
 	}
 
 	public String getObjectName(WbConnection conn)
@@ -99,22 +89,17 @@ public class IndexDefinition
 	
 	public List<IndexColumn> getColumns()
 	{
-		return Collections.unmodifiableList(columns);
+		return columns;
 	}
 	
 	public String getIndexType() { return this.indexType; }
 
-	public void setExpression(String exp) { this.expression = exp; }
-	public String getExpression() 
-	{ 
-		if (this.expression == null)
-		{
-			return buildExpression();
-		}
-		return this.expression; 
+	public String toString()
+	{
+		return getExpression();
 	}
 	
-	private String buildExpression()
+	public String getExpression()
 	{
 		StringBuilder result = new StringBuilder(this.columns.size() * 10);
 		for (int i=0; i < this.columns.size(); i++)
@@ -160,13 +145,6 @@ public class IndexDefinition
 	public CharSequence getSource(WbConnection con)
 	{
 		if (con == null) return null;
-		String[] cols = new String[this.columns.size()];
-		
-		for (int i=0; i < columns.size(); i++)
-		{
-			cols[i] = columns.get(i).getColumn();
-		}
-		
-		return con.getMetadata().buildIndexSource(baseTable, indexName, isUnique, cols);
+		return con.getMetadata().buildIndexSource(baseTable, indexName, isUnique, this.columns);
 	}
 }

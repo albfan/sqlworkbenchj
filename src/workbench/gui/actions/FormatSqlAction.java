@@ -22,7 +22,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *	Reformat the currently selected SQL statement
- * 
+ *
  *	@author  support@sql-workbench.net
  */
 public class FormatSqlAction extends WbAction
@@ -34,7 +34,7 @@ public class FormatSqlAction extends WbAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtReformatSql",KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK));
-		this.setIcon(ResourceMgr.getImage("format"));
+		this.setIcon("format");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setCreateToolbarSeparator(true);
 	}

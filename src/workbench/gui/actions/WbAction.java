@@ -19,7 +19,6 @@ import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
-import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -38,10 +37,10 @@ import workbench.resource.ShortcutManager;
  * Base class for Actions in SQL Workbench/J
  * the actual work should be implemented in executeAction()
  * which is guaranteed to be called on the EDT.
- * 
+ *
  * @author  support@sql-workbench.net
  */
-public class WbAction 
+public class WbAction
 	extends AbstractAction
 {
 	private static final String MAIN_MENU_ITEM = "MainMenuItem";
@@ -50,14 +49,15 @@ public class WbAction
 	private static final String ALTERNATE_ACCELERATOR = "AltAcc";
 	private static final String DEFAULT_ACCELERATOR = "DefaultAcc";
 	private static final String MNEMONIC_INDEX = "MnemonicIndex";
-	
+
 	private String actionName;
-//	protected JMenuItem menuItem;
 	protected JButton toolbarButton;
 	private ActionListener delegate = null;
 	protected WbAction proxy;
 	private WbAction original;
-	
+
+	private String iconKey;
+
 	public WbAction()
 	{
 		String c = this.getClass().getName();
@@ -66,9 +66,9 @@ public class WbAction
 	}
 
 	/**
-	 * Creates a WbAction which dispatches its {@link #executeAction(ActionEvent)} 
+	 * Creates a WbAction which dispatches its {@link #executeAction(ActionEvent)}
 	 * event to the passed ActionListener, instead of executing it itself.
-	 * This is intended for situations where an Action is needed, but not 
+	 * This is intended for situations where an Action is needed, but not
 	 * implemented with a subclass of WbAction, but with an ActionListener
 	 * instead.
 	 */
@@ -82,22 +82,22 @@ public class WbAction
 
 	public static boolean isAltPressed(ActionEvent e)
 	{
-		boolean altPressed = ((e.getModifiers() & ActionEvent.ALT_MASK) == ActionEvent.ALT_MASK);		
+		boolean altPressed = ((e.getModifiers() & ActionEvent.ALT_MASK) == ActionEvent.ALT_MASK);
 		return altPressed;
 	}
 
 	public static boolean isShiftPressed(ActionEvent e)
 	{
-		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);		
+		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
 		return shiftPressed;
 	}
-	
+
 	public static boolean isCtrlPressed(ActionEvent e)
 	{
 		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
 		return ctrlPressed;
 	}
-	
+
 	public boolean allowDuplicate()
 	{
 		return false;
@@ -137,7 +137,7 @@ public class WbAction
 	{
 		return (String)getValue(ACTION_COMMAND_KEY);
 	}
-	
+
 	protected void setActionName(String aName)
 	{
 		this.actionName = aName;
@@ -147,14 +147,14 @@ public class WbAction
 	{
 		return (String)this.getValue(Action.NAME);
 	}
-	
+
 	/**
-	 * Initialize the menu definition for this action. The passed key will 
+	 * Initialize the menu definition for this action. The passed key will
 	 * be used to initialize the menu label and tooltip.
 	 * This method will register the action with the ShortcutManager even though
 	 * no shortcut is defined.
 	 * @param aKey Translation key for ResourceMgr
-	 * @see #setMenuTextByKey(String) 
+	 * @see #setMenuTextByKey(String)
 	 * @see workbench.resource.ShortcutManager#registerAction(WbAction)
 	 */
 	public void initMenuDefinition(String aKey)
@@ -163,7 +163,7 @@ public class WbAction
 	}
 
 	/**
-	 * Initialize the menu definition for this action. The passed key will 
+	 * Initialize the menu definition for this action. The passed key will
 	 * be used to initialize the menu label and tooltip.
 	 * This method will register the action with the ShortcutManager.
 	 * @param aKey         Translation key for ResourceMgr
@@ -180,14 +180,14 @@ public class WbAction
 
 	protected void initializeShortcut()
 	{
-		ShortcutManager mgr = Settings.getInstance().getShortcutManager(); 
+		ShortcutManager mgr = Settings.getInstance().getShortcutManager();
 		mgr.registerAction(this);
 		KeyStroke key = mgr.getCustomizedKeyStroke(this);
 		this.setAccelerator(key);
 	}
 	/**
 	 * Initialize the menu definition for this action. The menu text and tooltip
-	 * will be used directly without retrieving it from the ResourceMgr.  
+	 * will be used directly without retrieving it from the ResourceMgr.
 	 * This method will register the action with the ShortcutManager.
 	 * @param aMenuText    The text to be displayed in the menu item
 	 * @param aTooltip     The tooltip for the menu item
@@ -201,11 +201,11 @@ public class WbAction
 		this.setDefaultAccelerator(defaultKey);
 		initializeShortcut();
 	}
-	
+
 	/**
 	 * Define the displayed menu text and tooltip. The passed key
 	 * will be used to retrieve the real text from the ResourceManager.
-	 * This will not register the Action with the ShortcutManager. 
+	 * This will not register the Action with the ShortcutManager.
 	 * @param aKey  The key for the ResourceManager
 	 * @see workbench.resource.ResourceMgr#getString(String)
 	 * @see workbench.resource.ResourceMgr#getDescription(String)
@@ -216,16 +216,16 @@ public class WbAction
 		this.setMenuText(ResourceMgr.getString(aKey));
 		this.setTooltip(ResourceMgr.getDescription(aKey, true));
 	}
-	
+
 	/**
 	 * Define the displayed text for the associcated menu item
-	 * If the text contains a & sign, the character after the 
+	 * If the text contains a & sign, the character after the
 	 * & sign will be used as the Mnemonic for the menu item.
 	 * Once the mnemonic is identified the passed text (after
 	 * removing the & sign) will be set using
 	 * putValue(Actin.NAME, Object)
 	 *
-	 * @param text the text for the menu item 
+	 * @param text the text for the menu item
 	 * @see #setMenuTextByKey(String)
 	 */
 	public void setMenuText(String text)
@@ -243,33 +243,32 @@ public class WbAction
 		}
 		putValue(Action.NAME, text);
 	}
-	
+
 	public void setAlternateAccelerator(KeyStroke key)
 	{
 		this.putValue(ALTERNATE_ACCELERATOR, key);
 	}
-	
+
 	public KeyStroke getAlternateAccelerator()
 	{
 		return (KeyStroke)this.getValue(ALTERNATE_ACCELERATOR);
 	}
-	
+
 	public void setAccelerator(KeyStroke key)
 	{
 		KeyStroke old = this.getAccelerator();
 		this.putValue(Action.ACCELERATOR_KEY, key);
-
-		boolean isNew = false;
-		if (old != null && key != null)
-		{
-			isNew = !key.equals(old);
-		}
-		else
-		{
-			isNew = (old != null || key != null);
-		}
+//		boolean isNew = false;
+//		if (old != null && key != null)
+//		{
+//			isNew = !key.equals(old);
+//		}
+//		else
+//		{
+//			isNew = (old != null || key != null);
+//		}
 	}
-	
+
 	public KeyStroke getAccelerator()
 	{
 		return (KeyStroke)this.getValue(Action.ACCELERATOR_KEY);
@@ -336,19 +335,19 @@ public class WbAction
 	{
 		return (String)this.getValue(WbAction.MAIN_MENU_ITEM);
 	}
-	
+
 	public void setMenuItemName(String aKey)
 	{
 		this.putValue(WbAction.MAIN_MENU_ITEM, aKey);
 	}
-	
+
 	public boolean getCreateToolbarSeparator()
 	{
 		Boolean flag = (Boolean)getValue(WbAction.TBAR_SEPARATOR);
 		if (flag == null) return false;
 		return flag.booleanValue();
 	}
-	
+
 	public void setCreateToolbarSeparator(boolean flag)
 	{
 		putValue(WbAction.TBAR_SEPARATOR, (flag ? Boolean.TRUE : Boolean.FALSE));
@@ -360,7 +359,7 @@ public class WbAction
 		if (flag == null) return false;
 		return flag.booleanValue();
 	}
-	
+
 	public void setCreateMenuSeparator(boolean flag)
 	{
 		this.putValue(WbAction.MENU_SEPARATOR, (flag ? Boolean.TRUE : Boolean.FALSE));
@@ -375,28 +374,28 @@ public class WbAction
 	{
 		addToInputMap(c.getInputMap(), c.getActionMap());
 	}
-	
+
 	public void addToInputMap(InputMap im, ActionMap am)
 	{
 		if (this.getAccelerator() == null) return;
-		
+
 		im.put(this.getAccelerator(), this.getActionName());
 		am.put(this.getActionName(), this);
-		
+
 		KeyStroke alternate = getAlternateAccelerator();
 		if (alternate != null)
 		{
 			im.put(alternate, getActionName());
 		}
-		
+
 		int key = this.getAccelerator().getKeyCode();
 		int modifiers = this.getAccelerator().getModifiers();
-		
+
 		if (this.hasShiftModifier())
 		{
 			im.put(KeyStroke.getKeyStroke(key, modifiers | InputEvent.SHIFT_MASK), this.getActionName());
 		}
-		
+
 		if (this.hasCtrlModifier())
 		{
 			im.put(KeyStroke.getKeyStroke(key, modifiers | InputEvent.CTRL_MASK), this.getActionName());
@@ -412,10 +411,10 @@ public class WbAction
 		{
 			im.remove(alternate);
 		}
-		
+
 		int key = this.getAccelerator().getKeyCode();
 		int modifiers = this.getAccelerator().getModifiers();
-		
+
 		if (this.hasShiftModifier())
 		{
 			im.remove(KeyStroke.getKeyStroke(key, modifiers | InputEvent.SHIFT_MASK));
@@ -425,36 +424,63 @@ public class WbAction
 			im.remove(KeyStroke.getKeyStroke(key, modifiers | InputEvent.CTRL_MASK));
 		}
 	}
-	
+
 	public void setDefaultAccelerator(KeyStroke key)
 	{
 		this.putValue(DEFAULT_ACCELERATOR, key);
 	}
-	
+
 	public KeyStroke getDefaultAccelerator()
 	{
 		return (KeyStroke)this.getValue(DEFAULT_ACCELERATOR);
 	}
-	
-	public void setIcon(ImageIcon icon)
+
+	public void setIcon(String key)
 	{
-		this.putValue(Action.SMALL_ICON, icon);
+		// Just store the key for the resource manager
+		// the actual item will be retrieved when it's really
+		// needed in getValue()
+		this.iconKey = key;
+		if (key == null)
+		{
+			this.removeIcon();
+		}
 	}
-	
+
+	public Object getValue(String key)
+	{
+		if (key.equals(Action.SMALL_ICON))
+		{
+			// No resource key assigned --> no icon
+			if (this.iconKey == null) return null;
+
+			Object icon = super.getValue(key);
+			if (icon == null)
+			{
+				// now retrieve the icon and store it
+				icon = ResourceMgr.getImage(this.iconKey);
+				this.putValue(key, icon);
+			}
+			return icon;
+		}
+		return super.getValue(key);
+	}
+
 	public void removeIcon()
 	{
 		this.putValue(Action.SMALL_ICON, null);
+		this.iconKey = null;
 	}
-	
+
 	public void actionPerformed(final ActionEvent e)
 	{
-		if (this.isEnabled()) 
+		if (this.isEnabled())
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
-					if (original != null) 
+					if (original != null)
 					{
 						original.executeAction(e);
 					}
@@ -466,7 +492,7 @@ public class WbAction
 			});
 		}
 	}
-	
+
 	public void executeAction(ActionEvent e)
 	{
 		if (this.isEnabled() && this.delegate != null)
@@ -475,20 +501,20 @@ public class WbAction
 			this.delegate.actionPerformed(e);
 		}
 	}
-	
+
 	private String getAcceleratorDisplay()
 	{
 		String acceleratorDelimiter = UIManager.getString( "MenuItem.acceleratorDelimiter" );
 		if ( acceleratorDelimiter == null )
-		{ 
-			acceleratorDelimiter = "-"; 
+		{
+			acceleratorDelimiter = "-";
 		}
 		KeyStroke key = getDefaultAccelerator();
 		int mod = key.getModifiers();
 		int keycode = key.getKeyCode();
-			
+
 		String display = KeyEvent.getKeyModifiersText(mod) +
-										acceleratorDelimiter + 
+										acceleratorDelimiter +
 										KeyEvent.getKeyText(keycode);
     return display;
 	}
@@ -498,7 +524,7 @@ public class WbAction
 		super.setEnabled(flag);
 		if (this.proxy != null) this.proxy.setEnabled(flag);
 	}
-	
+
 	public void setOriginal(WbAction org)
 	{
 		if (this.original != null)
@@ -514,7 +540,7 @@ public class WbAction
 			this.original.setProxy(this);
 		}
 	}
-	
+
 	protected void setProxy(WbAction p)
 	{
 		this.proxy = p;

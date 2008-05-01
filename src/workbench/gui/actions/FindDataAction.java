@@ -22,7 +22,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *	Search inside the result set
- * 
+ *
  *	@author  support@sql-workbench.net
  */
 public class FindDataAction extends WbAction
@@ -34,7 +34,7 @@ public class FindDataAction extends WbAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtFindInTableData", KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-		this.setIcon(ResourceMgr.getImage("Find"));
+		this.setIcon("Find");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(true);
 	}

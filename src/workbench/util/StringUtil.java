@@ -956,81 +956,66 @@ public class StringUtil
 
 	public static String escapeUnicode(String value, CharacterRange range)
 	{
-		return escapeUnicode(value, null, range, false);
+		return escapeUnicode(value, range, null);
 	}
 
-	/*
-	 * Converts unicodes to encoded &#92;uxxxx
-	 * and writes out any of the characters in specialSaveChars
-	 * with a preceding slash.
+	/**
+	 * Encodes characters to Unicode &#92;uxxxx (or simple escape like \r)
+	 * 
 	 * This has partially been "borrowed" from the Properties class, because the code
 	 * there is not usable from the outside.
+	 * 
 	 * Backslash, CR, LF, Tab and FormFeed (\f) will always be replaced.
+	 * 
+	 * @param value the string to be encoded
+	 * @param range the CharacterRange which defines the characters to be encoded. If isOutsideRange() 
+	 *        returns true, the character will be encoded.
+	 * @param additionalCharsToEncode additional characters not covered by the range may be null
 	 */
-	public static String escapeUnicode(String value, String specialSaveChars, CharacterRange range)
-	{
-		return escapeUnicode(value, specialSaveChars, range, false);
-	}
-
-	public static String escapeUnicode(String value, String specialSaveChars, CharacterRange range, boolean alwaysUnicode)
+	public static String escapeUnicode(String value, CharacterRange range, String additionalCharsToEncode)
 	{
 		if (value == null) return null;
-//		if (range == null || range == CharacterRange.RANGE_NONE) return value;
-
+		
 		int len = value.length();
-		StringBuilder outBuffer = new StringBuilder(len*2);
+		StringBuilder outBuffer = new StringBuilder((int)(len*1.5));
 
 		for (int x = 0; x < len; x++)
 		{
 			char aChar = value.charAt(x);
 			boolean replaced = false;
-			if (!alwaysUnicode)
+			switch (aChar)
 			{
-				switch (aChar)
-				{
-					case '\\':
-						outBuffer.append('\\');
-						outBuffer.append('\\');
-						replaced = true;
-						break;
-					case '\t':
-						outBuffer.append('\\');
-						outBuffer.append('t');
-						replaced = true;
-						break;
-					case '\n':
-						outBuffer.append('\\');
-						outBuffer.append('n');
-						replaced = true;
-						break;
-					case '\r':
-						outBuffer.append('\\');
-						outBuffer.append('r');
-						replaced = true;
-						break;
-					case '\f':
-						outBuffer.append('\\');
-						outBuffer.append('f');
-						replaced = true;
-						break;
-					default:
-						replaced = false;
-				}
-			}
-
-			if (!replaced)
-			{
-				if ((range != null && range.isOutsideRange(aChar)) ||
-					(specialSaveChars != null && specialSaveChars.indexOf(aChar) > -1))
-				{
-					outBuffer.append('\\');
-					outBuffer.append('u');
-					appendUnicode(outBuffer, aChar);
-				}
-				else
-				{
-					outBuffer.append(aChar);
-				}
+				case '\\':
+					outBuffer.append("\\\\");
+					replaced = true;
+					break;
+				case '\t':
+					outBuffer.append("\\t");
+					replaced = true;
+					break;
+				case '\n':
+					outBuffer.append("\\n");
+					replaced = true;
+					break;
+				case '\r':
+					outBuffer.append("\\r");
+					replaced = true;
+					break;
+				case '\f':
+					outBuffer.append("\\f");
+					replaced = true;
+					break;
+				default:
+					if ((range != null && range.isOutsideRange(aChar)) ||
+						(additionalCharsToEncode != null && additionalCharsToEncode.indexOf(aChar) > -1))
+					{
+						outBuffer.append("\\u");
+						appendUnicode(outBuffer, aChar);
+					}
+					else
+					{
+						outBuffer.append(aChar);
+					}
 			}
 		}
 		return outBuffer.toString();
@@ -1040,13 +1025,12 @@ public class StringUtil
 	{
 		StringBuilder result = new StringBuilder(3);
 		String s = Integer.toOctalString(input);
-
-		if (s.length() == 1)
+		int len = s.length();
+		if (len == 1)
 		{
-			result.append('0');
-			result.append('0');
+			result.append("00");
 		}
-		else if (s.length() == 2)
+		else if (len == 2)
 		{
 			result.append('0');
 		}

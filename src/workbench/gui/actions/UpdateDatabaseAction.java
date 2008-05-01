@@ -28,7 +28,7 @@ public class UpdateDatabaseAction extends WbAction
 		super();
 		this.panel = aPanel;
 		this.initMenuDefinition("MnuTxtUpdateDatabase");
-		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_SAVE));
+		this.setIcon(ResourceMgr.IMG_SAVE);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(true);
 		this.setEnabled(false);

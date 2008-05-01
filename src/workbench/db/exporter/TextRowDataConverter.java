@@ -137,11 +137,11 @@ public class TextRowDataConverter
 				{
 					if (addQuote)
 					{
-						value = StringUtil.escapeUnicode(value, this.quoteCharacter, this.escapeRange);
+						value = StringUtil.escapeUnicode(value, this.escapeRange, this.quoteCharacter);
 					}
 					else
 					{
-						value = StringUtil.escapeUnicode(value, this.delimiterAndQuote, this.escapeRange);
+						value = StringUtil.escapeUnicode(value, this.escapeRange, this.delimiterAndQuote);
 					}
 				}
 				if (this.quoteCharacter != null && this.quoteEscape != QuoteEscapeType.none && value.indexOf(this.quoteCharacter) > -1)

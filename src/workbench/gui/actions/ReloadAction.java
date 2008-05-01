@@ -14,30 +14,29 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 
 import workbench.interfaces.Reloadable;
-import workbench.resource.ResourceMgr;
 
 /**
  *	@author  support@sql-workbench.net
  */
-public class ReloadAction 
+public class ReloadAction
 	extends WbAction
 {
 	private Reloadable client;
 	private boolean ctrlPressed;
-	
+
 	public ReloadAction(Reloadable aClient)
 	{
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("TxtReload");
-		this.setIcon(ResourceMgr.getImage("Refresh"));
+		this.setIcon("Refresh");
 	}
 
 	public boolean ctrlPressed()
 	{
 		return ctrlPressed;
 	}
-	
+
 	public void executeAction(ActionEvent e)
 	{
 		this.ctrlPressed = isCtrlPressed(e);
@@ -48,5 +47,5 @@ public class ReloadAction
 	{
 		return false;
 	}
-	
+
 }

@@ -19,7 +19,7 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  support@sql-workbench.net
  */
-public class SelectKeyColumnsAction 
+public class SelectKeyColumnsAction
 	extends WbAction
 {
 	private DwPanel client;
@@ -30,13 +30,13 @@ public class SelectKeyColumnsAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtSelectKeyColumns");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setIcon(ResourceMgr.getImage("key"));
+		this.setIcon("key");
 		this.setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		if (this.client != null) 
+		if (this.client != null)
 		{
 			this.client.checkAndSelectKeyColumns();
 		}

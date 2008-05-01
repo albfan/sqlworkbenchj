@@ -12,10 +12,6 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import workbench.gui.components.WbTable;
-import workbench.gui.filter.DefineFilterExpressionPanel;
 import workbench.interfaces.QuickFilter;
 import workbench.resource.ResourceMgr;
 
@@ -33,7 +29,7 @@ public class QuickFilterAction
 		super();
 		this.client = filterGui;
 		this.initMenuDefinition("MnuTxtQuickFilter");
-		this.setIcon(ResourceMgr.getImage("filter"));
+		this.setIcon("filter");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
 	}

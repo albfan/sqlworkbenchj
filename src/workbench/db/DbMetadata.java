@@ -2094,7 +2094,7 @@ public class DbMetadata
 	public DataStore getTableIndexInformation(TableIdentifier table)
 	{
 		String[] cols = {"INDEX_NAME", "UNIQUE", "PK", "DEFINITION", "TYPE"};
-		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.OTHER, Types.VARCHAR};
 		final int sizes[] =   {30, 7, 6, 40, 10};
 		DataStore idxData = new DataStore(cols, types, sizes);
 		if (table == null) return idxData;
@@ -2105,7 +2105,7 @@ public class DbMetadata
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME, idx.getName());
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG, (idx.isUnique() ? "YES" : "NO"));
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG, (idx.isPrimaryKeyIndex() ? "YES" : "NO"));
-			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_COL_DEF, idx.getExpression());
+			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_COL_DEF, idx);
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_TYPE, idx.getIndexType());
 		}
 		idxData.sortByColumn(0, true);
@@ -2153,6 +2153,7 @@ public class DbMetadata
 			}
 			
 			idxRs = this.indexReader.getIndexInfo(tbl, false);
+			boolean supportsDirection = getDbSettings().supportsSortedIndex();
 			
 			while (idxRs.next())
 			{
@@ -2161,19 +2162,18 @@ public class DbMetadata
 				if (idxRs.wasNull()) continue;
 				if (indexName == null) continue;
 				String colName = idxRs.getString("COLUMN_NAME");
-				String dir = idxRs.getString("ASC_OR_DESC");
+				String dir = (supportsDirection ? idxRs.getString("ASC_OR_DESC") : null);
 				
 				IndexDefinition def = defs.get(indexName);
 				if (def == null)
 				{
-					def = new IndexDefinition(tbl, indexName, null);
+					def = new IndexDefinition(tbl, indexName);
 					def.setUnique(!unique);
 					def.setPrimaryKeyIndex(pkName.equals(indexName));
 					defs.put(indexName, def);
 					Object type = idxRs.getObject("TYPE");
 					def.setIndexType(dbSettings.mapIndexType(type));
 				}
-
 				def.addColumn(colName, dir);
 			}
 			
@@ -3440,7 +3440,7 @@ public class DbMetadata
 	 * 	@param unique - Should the index be unique
 	 *  @param columnList - The columns that should build the index
 	 */
-	public String buildIndexSource(TableIdentifier aTable, String indexName, boolean unique, String[] columnList)
+	public String buildIndexSource(TableIdentifier aTable, String indexName, boolean unique, List<IndexColumn> columnList)
 	{
 		return this.indexReader.buildCreateIndexSql(aTable, indexName, unique, columnList);
 	}

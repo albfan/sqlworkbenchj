@@ -17,7 +17,6 @@ import javax.swing.KeyStroke;
 
 import workbench.interfaces.FileActions;
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 
 /**
  *	Delete an etry from a List
@@ -37,7 +36,7 @@ public class DeleteListEntryAction extends WbAction
 		this.client = aClient;
 		this.setMenuTextByKey(aKey);
 		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));
-		this.setIcon(ResourceMgr.getImage("Delete"));
+		this.setIcon("Delete");
 	}
 
 	public void executeAction(ActionEvent e)

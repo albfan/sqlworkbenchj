@@ -538,6 +538,11 @@ public class DbSettings
 		return Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".drop.column.multi", null);
 	}
 
+	public boolean supportsSortedIndex()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".index.sorted", true);
+	}
+	
 	public boolean canDropType(String type)
 	{
 		if (StringUtil.isEmptyString(type)) return false;

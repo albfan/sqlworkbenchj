@@ -28,19 +28,20 @@ import workbench.resource.ResourceMgr;
 public class ExecuteCurrentAction extends WbAction
 {
 	private SqlPanel target;
-	
+
 	public ExecuteCurrentAction(SqlPanel aPanel)
 	{
 		super();
 		this.target = aPanel;
 		this.initMenuDefinition("MnuTxtExecuteCurrent", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK));
-		this.setIcon(ResourceMgr.getImage("ExecuteCurrent"));
+		this.setIcon("ExecuteCurrent");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+		this.setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
 		this.target.runCurrentStatement();
 	}
-	
+
 }

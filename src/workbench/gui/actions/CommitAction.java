@@ -28,7 +28,7 @@ import workbench.resource.ResourceMgr;
 public class CommitAction extends WbAction
 {
 	private Commitable client;
-	
+
 	public CommitAction(Commitable aClient)
 	{
 		super();
@@ -36,12 +36,13 @@ public class CommitAction extends WbAction
 		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.ALT_MASK);
 		this.initMenuDefinition("MnuTxtCommit",key);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setIcon(ResourceMgr.getImage("Commit"));
+		this.setIcon("Commit");
+		this.setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
 		if (this.client != null) this.client.commit();
 	}
-	
+
 }

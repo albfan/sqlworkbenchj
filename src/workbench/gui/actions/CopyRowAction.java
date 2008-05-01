@@ -30,7 +30,7 @@ public class CopyRowAction extends WbAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtCopyRow");
-		this.setIcon(ResourceMgr.getImage("CopyRow"));
+		this.setIcon("CopyRow");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setEnabled(false);
 	}

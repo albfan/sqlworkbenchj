@@ -22,33 +22,32 @@ import workbench.db.ObjectScripter;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.ObjectScripterUI;
-import workbench.resource.ResourceMgr;
 
 /**
  * @author support@sql-workbench.net
  */
-public class ScriptDbObjectAction 
+public class ScriptDbObjectAction
 	extends WbAction
 	implements ListSelectionListener
 {
 	private DbObjectList source;
 	private ListSelectionModel selection;
-	
+
 	public ScriptDbObjectAction(DbObjectList client, ListSelectionModel list)
 	{
 		this.initMenuDefinition("MnuTxtCreateScript");
 		this.source = client;
 		this.selection = list;
 		setEnabled(false);
-		setIcon(ResourceMgr.getImage("script"));
+		setIcon("script");
 		list.addListSelectionListener(this);
 	}
-	
+
 	@Override
 	public void executeAction(ActionEvent e)
 	{
 		if (!WbSwingUtilities.checkConnection(source.getComponent(), source.getConnection())) return;
-		
+
 		List<? extends DbObject> objects = source.getSelectedObjects();
 		if (objects == null || objects.size() == 0) return;
 
@@ -56,10 +55,10 @@ public class ScriptDbObjectAction
 		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
 		scripterUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));
 	}
-	
+
 	public void valueChanged(ListSelectionEvent e)
 	{
 		setEnabled(this.selection.getMinSelectionIndex() >= 0);
 	}
-	
+
 }

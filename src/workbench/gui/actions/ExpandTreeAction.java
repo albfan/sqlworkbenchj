@@ -13,7 +13,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import workbench.gui.profiles.ProfileTree;
-import workbench.resource.ResourceMgr;
 
 /**
  * Expand all items in the ProfileTree
@@ -24,17 +23,17 @@ public class ExpandTreeAction
 	extends WbAction
 {
 	private ProfileTree client;
-	
+
 	public ExpandTreeAction(ProfileTree tree)
 	{
 		super();
 		this.client = tree;
 		this.initMenuDefinition("LblExpandAll");
-		this.setIcon(ResourceMgr.getImage("expand"));	
+		this.setIcon("expand");
 	}
 
 	public void executeAction(ActionEvent e)
 	{
 		this.client.expandAll();
-	}	
+	}
 }

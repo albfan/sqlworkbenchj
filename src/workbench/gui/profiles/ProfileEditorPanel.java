@@ -79,7 +79,7 @@ public class ProfileEditorPanel
 		p.setLayout(new BorderLayout());
 		this.toolbar = new WbToolbar();
 		newItem = new NewListEntryAction(this, "LblNewProfile");
-		newItem.setIcon(ResourceMgr.getImage("NewProfile"));
+		newItem.setIcon("NewProfile");
 		this.toolbar.add(newItem);
 
 		copyItem = new CopyProfileAction(this);

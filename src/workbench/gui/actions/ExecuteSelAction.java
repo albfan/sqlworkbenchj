@@ -25,24 +25,25 @@ import workbench.resource.ResourceMgr;
  * @see workbench.gui.sql.SqlPanel#runSelectedStatement()
  *	@author  support@sql-workbench.net
  */
-public class ExecuteSelAction 
+public class ExecuteSelAction
 	extends WbAction
 {
 	private SqlPanel target;
-	
+
 	public ExecuteSelAction(SqlPanel aPanel)
 	{
 		super();
 		this.target = aPanel;
 		this.initMenuDefinition("MnuTxtExecuteSel", KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
-		this.setIcon(ResourceMgr.getImage("ExecuteSel"));
+		this.setIcon("ExecuteSel");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setAlternateAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0));
+		this.setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
 		this.target.runSelectedStatement();
 	}
-	
+
 }

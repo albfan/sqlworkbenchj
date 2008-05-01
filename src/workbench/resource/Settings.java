@@ -51,6 +51,7 @@ import workbench.sql.DelimiterDefinition;
 import workbench.sql.BatchRunner;
 import workbench.storage.PkMapping;
 import workbench.util.FileDialogUtil;
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.ToolDefinition;
 import workbench.util.WbFile;
@@ -75,6 +76,7 @@ public class Settings
 	public static final String PROPERTY_HIGHLIGHT_CURRENT_STATEMENT = "workbench.editor.highlightcurrent";
 	public static final String PROPERTY_AUTO_JUMP_STATEMENT = "workbench.editor.autojumpnext";
 	public static final String PROPERTY_DBEXP_REMEMBER_SORT = "workbench.dbexplorer.remembersort";
+	public static final String PROPERTY_SHOW_TAB_INDEX = "workbench.gui.tabs.showindex";
 
 	public static final String PROPERTY_EDITOR_FONT = "editor";
 	public static final String PROPERTY_STANDARD_FONT = "std";
@@ -1173,12 +1175,12 @@ public class Settings
 	// <editor-fold defaultstate="collapsed" desc="GUI Stuff">
 	public boolean getShowTabIndex()
 	{
-		return getBoolProperty("workbench.gui.tabs.showindex", true);
+		return getBoolProperty(PROPERTY_SHOW_TAB_INDEX, true);
 	}
 
 	public void setShowTabIndex(boolean flag)
 	{
-		setProperty("workbench.gui.tabs.showindex", flag);
+		setProperty(PROPERTY_SHOW_TAB_INDEX, flag);
 	}
 	
 	public boolean getIncludeHeaderInOptimalWidth()
@@ -2256,6 +2258,25 @@ public class Settings
 	}
 	// </editor-fold>
 
+	public void setGeneratedSqlTableCase(String value)
+	{
+		if (value != null)
+		{
+			if (value.toLowerCase().startsWith("lower")) setProperty("workbench.sql.generate.table.case", "lower");
+			else if (value.toLowerCase().startsWith("upper")) setProperty("workbench.sql.generate.table.case", "upper");
+			else setProperty("workbench.sql.generate.table.case", "original");
+		}
+		else
+		{
+			setProperty("workbench.sql.generate.table.case", "original");
+		}
+	}
+
+	public String getGeneratedSqlTableCase()
+	{
+		return getProperty("workbench.sql.generate.table.case", getAutoCompletionPasteCase());
+	}
+	
 	public int getInMemoryScriptSizeThreshold()
 	{
 		// Process scripts up to 1 MB in memory
@@ -2281,25 +2302,6 @@ public class Settings
 	public String getSortCountry()
 	{
 		return getProperty("workbench.sort.country", System.getProperty("user.country"));
-	}
-
-	public void setGeneratedSqlTableCase(String value)
-	{
-		if (value != null)
-		{
-			if (value.toLowerCase().startsWith("lower")) setProperty("workbench.sql.generate.table.case", "lower");
-			else if (value.toLowerCase().startsWith("upper")) setProperty("workbench.sql.generate.table.case", "upper");
-			else setProperty("workbench.sql.generate.table.case", "original");
-		}
-		else
-		{
-			setProperty("workbench.sql.generate.table.case", "original");
-		}
-	}
-
-	public String getGeneratedSqlTableCase()
-	{
-		return getProperty("workbench.sql.generate.table.case", getAutoCompletionPasteCase());
 	}
 
 	public boolean getUseEncryption()
@@ -2688,7 +2690,7 @@ public class Settings
 		}
 		finally
 		{
-			try { in.close(); } catch (Throwable th) {}
+			FileUtil.closeQuitely(in);
 		}
 		return defProps;
 	}
@@ -2706,7 +2708,7 @@ public class Settings
 		}
 		finally
 		{
-			try { in.close(); } catch (Throwable th) {}
+			FileUtil.closeQuitely(in);
 		}
 	}
 	// </editor-fold>

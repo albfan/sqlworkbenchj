@@ -34,7 +34,7 @@ public class PasteAction extends WbAction
 		super();
 		this.client = aClient;
 		this.setMenuTextByKey("MnuTxtPaste");
-		this.setIcon(ResourceMgr.getImage("Paste"));
+		this.setIcon("Paste");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
 	}

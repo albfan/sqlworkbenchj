@@ -33,7 +33,7 @@ public class SelectionFilterAction
 	{
 		super();
 		this.initMenuDefinition("MnuTxtColFilter");
-		this.setIcon(ResourceMgr.getImage("colfilter"));
+		this.setIcon("colfilter");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
 		this.setEnabled(false);
@@ -78,14 +78,14 @@ public class SelectionFilterAction
 		{
 			int rows = client.getSelectedRowCount();
 			int cols = client.getSelectedColumnCount();
-			
+
 			this.setEnabled(rows == 1 || (rows > 1 && cols == 1));
 		}
 	}
-	
+
 	public void valueChanged(ListSelectionEvent e)
 	{
 		checkEnabled();
 	}
-	
+
 }

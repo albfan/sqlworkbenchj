@@ -13,7 +13,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import workbench.gui.help.HelpManager;
-import workbench.resource.ResourceMgr;
 
 /**
  * @author support@sql-workbench.net
@@ -25,7 +24,7 @@ public class ShowManualAction
 	{
 		super();
 		initMenuDefinition("MnuTxtHelpManual");
-		setIcon(ResourceMgr.getImage("pdf"));
+		setIcon("pdf");
 	}
 	
 	public void executeAction(ActionEvent e)

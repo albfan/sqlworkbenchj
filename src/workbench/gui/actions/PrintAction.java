@@ -33,7 +33,7 @@ public class PrintAction
 		this.setClient(aClient);
 		this.initMenuDefinition("MnuTxtPrint");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
-		this.setIcon(ResourceMgr.getImage("Print"));
+		this.setIcon("Print");
 	}
 
 	public void executeAction(ActionEvent e)

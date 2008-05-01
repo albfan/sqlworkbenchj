@@ -780,7 +780,7 @@ public class SqlPanel
 		this.actions.add(this.printDataAction);
 		this.actions.add(this.printPreviewAction);
 
-		this.setExecuteActionStates(false);
+		//this.setExecuteActionStates(false);
 	}
 
 	public void setVisible(boolean flag)

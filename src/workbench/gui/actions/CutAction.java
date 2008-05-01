@@ -33,7 +33,7 @@ public class CutAction extends WbAction
 		super();
 		this.client = aClient;
 		this.setMenuTextByKey("MnuTxtCut");
-		this.setIcon(ResourceMgr.getImage("Cut"));
+		this.setIcon("Cut");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_MASK));
 	}

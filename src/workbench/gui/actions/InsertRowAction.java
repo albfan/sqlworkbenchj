@@ -17,7 +17,7 @@ import workbench.interfaces.DbData;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Insert a new row 
+ *	Insert a new row
  *	@author  support@sql-workbench.net
  */
 public class InsertRowAction extends WbAction
@@ -29,7 +29,7 @@ public class InsertRowAction extends WbAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtInsertRow");
-		this.setIcon(ResourceMgr.getImage("RowInsertAfter"));
+		this.setIcon("RowInsertAfter");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setEnabled(false);
 	}
@@ -38,7 +38,7 @@ public class InsertRowAction extends WbAction
 	{
 		this.client.addRow();
 	}
-	
+
 	public void setClient(DbData db)
 	{
 		this.client = db;

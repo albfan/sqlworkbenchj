@@ -18,7 +18,6 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 import workbench.gui.sql.SqlHistory;
 
-import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -33,7 +32,7 @@ public class PrevStatementAction extends WbAction
 		super();
 		this.history = aHistory;
 		this.initMenuDefinition("MnuTxtPrevStatement", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.ALT_MASK));
-		this.setIcon(ResourceMgr.getImage("Back"));
+		this.setIcon("Back");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setCreateMenuSeparator(false);
 		this.setCreateToolbarSeparator(false);

@@ -15,7 +15,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 import workbench.gui.help.HelpManager;
-import workbench.resource.ResourceMgr;
 
 /**
  * @author support@sql-workbench.net
@@ -27,7 +26,7 @@ public class ShowHelpAction
 	{
 		super();
 		initMenuDefinition("MnuTxtHelpContents",KeyStroke.getKeyStroke(KeyEvent.VK_F1,0));
-		setIcon(ResourceMgr.getImage("help"));
+		setIcon("help");
 	}
 	
 	public synchronized void executeAction(ActionEvent e)

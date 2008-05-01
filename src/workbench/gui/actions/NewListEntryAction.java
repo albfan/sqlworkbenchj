@@ -12,33 +12,31 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 
 import workbench.interfaces.FileActions;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.util.StringUtil;
 
 /**
  *	@author  support@sql-workbench.net
  */
-public class NewListEntryAction 
+public class NewListEntryAction
 	extends WbAction
 {
 	private FileActions client;
 	private boolean checkShift = true;
-	
+
 	public NewListEntryAction(FileActions aClient, String aKey)
 	{
 		this.client = aClient;
 		this.initMenuDefinition(aKey);
-		this.setIcon(ResourceMgr.getImage("New"));
+		this.setIcon("New");
 	}
-	
+
 	public NewListEntryAction(FileActions aClient)
 	{
 		this.client = aClient;
-		this.setIcon(ResourceMgr.getImage("New"));
+		this.setIcon("New");
 		this.checkShift = true;
 		String tip = ResourceMgr.getDescription("LblNewListEntry", true);
 		this.initMenuDefinition(ResourceMgr.getString("LblNewListEntry"), tip, null);
@@ -54,6 +52,6 @@ public class NewListEntryAction
 		{
 			LogMgr.logError("NewListEntryAction.executeAction()", "Error creating new list entry", ex);
 		}
-		
+
 	}
 }

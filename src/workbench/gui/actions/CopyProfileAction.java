@@ -15,14 +15,13 @@ import java.awt.event.ActionEvent;
 
 import workbench.interfaces.FileActions;
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 
 /**
  * Action to copy a connection profile in the connect dialog.
- * 
+ *
  * @author  support@sql-workbench.net
  */
-public class CopyProfileAction 
+public class CopyProfileAction
 	extends WbAction
 {
 	private FileActions client;
@@ -30,7 +29,7 @@ public class CopyProfileAction
 	public CopyProfileAction(FileActions aClient)
 	{
 		this.client = aClient;
-		this.setIcon(ResourceMgr.getImage("CopyProfile"));
+		this.setIcon("CopyProfile");
 		this.initMenuDefinition("LblCopyProfile");
 	}
 
@@ -44,6 +43,6 @@ public class CopyProfileAction
 		{
 			LogMgr.logError("NewListEntryAction.executeAction()", "Error copying profile", ex);
 		}
-		
+
 	}
 }

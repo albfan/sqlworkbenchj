@@ -31,7 +31,7 @@ public class NextStatementAction extends WbAction
 		super();
 		this.history = aHistory;
 		this.initMenuDefinition("MnuTxtNextStatement", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.ALT_MASK));
-		this.setIcon(ResourceMgr.getImage("Forward"));
+		this.setIcon("Forward");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setCreateMenuSeparator(false);
 		this.setCreateToolbarSeparator(false);

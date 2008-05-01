@@ -28,7 +28,7 @@ public class SpoolDataAction
 	private Exporter client;
 	private EditorPanel editor;
 	private boolean canExport = false;
-	
+
 	public SpoolDataAction(Exporter aClient)
 	{
 		this(aClient, "MnuTxtSpoolData");
@@ -38,7 +38,7 @@ public class SpoolDataAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition(msgKey);
-		this.setIcon(ResourceMgr.getImage("SpoolData"));
+		this.setIcon("SpoolData");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setEnabled(false);
 	}
@@ -48,7 +48,7 @@ public class SpoolDataAction
 		this.canExport = flag;
 		checkEnabled();
 	}
-	
+
 	public void executeAction(ActionEvent e)
 	{
 		this.client.exportData();
@@ -72,7 +72,7 @@ public class SpoolDataAction
 			this.setEnabled(false);
 		}
 	}
-	
+
 	public void selectionChanged(int newStart, int newEnd)
 	{
 		checkEnabled();

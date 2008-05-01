@@ -545,7 +545,6 @@ public class WbManager
 	 */
 	protected void disconnected()
 	{
-
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -637,14 +636,14 @@ public class WbManager
 
 		public void run()
 		{
-			// First parameter tells the window to disconnect in the
-			// current thread as we are already in a background thread
-			// second parameter tells the window not to close the workspace
-			// third parameter tells the window not to save the workspace
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				public void run()
 				{
+					// First parameter tells the window to disconnect in the
+					// current thread as we are already in a background thread
+					// second parameter tells the window not to close the workspace
+					// third parameter tells the window not to save the workspace
 					win.disconnect(false, false, false);
 					win.setVisible(false);
 					win.dispose();

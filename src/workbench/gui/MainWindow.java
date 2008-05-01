@@ -206,7 +206,7 @@ public class MainWindow
 		
 		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
 		sqlTab.enableDragDropReordering(this);
-		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_SHOW_TOOLBAR);
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_SHOW_TOOLBAR, Settings.PROPERTY_SHOW_TAB_INDEX);
 	}
 
 	public void display()
@@ -546,6 +546,10 @@ public class MainWindow
 		if (Settings.PROPERTY_SHOW_TOOLBAR.equals(evt.getPropertyName()))
 		{
 			this.setShowToolbar(Settings.getInstance().getShowToolbar());
+		}
+		else if (Settings.PROPERTY_SHOW_TAB_INDEX.equals(evt.getPropertyName()))
+		{
+			this.renumberTabs();
 		}
 	}
 	

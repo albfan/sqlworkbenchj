@@ -29,18 +29,18 @@ public class CharacterRange
 	public static final CharacterRange RANGE_CONTROL = new CharacterRange(1);
 	
 	/**
-	 * Excludes everyting &lt; 32 and &gt; 126
+	 * Excludes everything &lt; 32 and &gt; 126
 	 */
 	public static final CharacterRange RANGE_7BIT = new CharacterRange(2);
 	
 	/**
-	 * Excludes everyting &lt; 32 and &gt; 255
+	 * Excludes everything &lt; 32 and &gt; 255
 	 */
 	public static final CharacterRange RANGE_8BIT = new CharacterRange(3);
 	
 	/**
-	 * Excludes everyting &lt; 32 and &gt; 255
-	 * and anything &gt; 126 and &lt; 161
+	 * Excludes everything &lt; 32 and &gt; 255
+	 * and everything &gt; 126 and &lt; 161
 	 */
 	public static final CharacterRange RANGE_8BIT_EXTENDED = new CharacterRange(4);
 	
@@ -49,11 +49,6 @@ public class CharacterRange
 	private CharacterRange(int index)
 	{
 		typeIndex = index;
-	}
-	
-	public static boolean isValidId(int id)
-	{
-		return id >= 0 && id <= 4;
 	}
 	
 	public static CharacterRange[] getRanges()

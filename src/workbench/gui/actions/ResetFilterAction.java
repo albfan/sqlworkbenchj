@@ -21,7 +21,7 @@ import workbench.resource.ResourceMgr;
  *	Reset the filter defined on a WbTable
  *	@author  support@sql-workbench.net
  */
-public class ResetFilterAction 
+public class ResetFilterAction
 	extends WbAction
 	implements TableModelListener
 {
@@ -32,7 +32,7 @@ public class ResetFilterAction
 		super();
 		this.initMenuDefinition("MnuTxtResetFilter");
 		this.setClient(aClient);
-		this.setIcon(ResourceMgr.getImage("resetFilter"));
+		this.setIcon("resetFilter");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
 		this.setEnabled(false);
@@ -47,7 +47,7 @@ public class ResetFilterAction
 	{
 		this.setEnabled(this.client.isFiltered());
 	}
-	
+
 	public void setClient(WbTable c)
 	{
 		if (this.client != null)
@@ -60,5 +60,5 @@ public class ResetFilterAction
 			this.client.addTableModelListener(this);
 		}
 	}
-	
+
 }

@@ -28,8 +28,26 @@ public class IndexColumn
 		this.direction = dir;
   }
 
-	public String getColumn() { return this.column; }
-	public String getDirection() { return this.direction; }
+	public void setColumn(String newName)
+	{
+		this.column = newName;
+	}
+	
+	public String getColumn() 
+	{ 
+		return this.column; 
+	}
+	
+	public String getDirection() 
+	{ 
+		if (this.direction == null) return null;
+		
+		// Map JDBC direction info to SQL standard
+		if (direction.equalsIgnoreCase("a")) return "ASC";
+		if (direction.equalsIgnoreCase("d")) return "DESC";
+		
+		return this.direction; 
+	}
 	
 	public String getExpression()
 	{
@@ -39,7 +57,7 @@ public class IndexColumn
 		}
 		else
 		{
-			return this.column + " " + this.direction;
+			return this.column + " " + getDirection();
 		}
 	}
 }

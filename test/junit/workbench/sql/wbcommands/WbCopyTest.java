@@ -403,6 +403,95 @@ public class WbCopyTest
 		}
 	}
 
+	public void testQueryCopyNoPK()
+	{
+		try
+		{
+			TestUtil util = new TestUtil("WbCopyTest_testExecute");
+			util.prepareEnvironment();
+
+			WbConnection con = util.getConnection("queryCopyTest");
+
+			WbCopy copyCmd = new WbCopy();
+			copyCmd.setConnection(con);
+
+			Statement stmt = con.createStatement();
+
+			stmt.executeUpdate("create table source_data (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob)");
+
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (1,'Dent', 'Arthur', '01')");
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (2,'Beeblebrox', 'Zaphod','0202')");
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (3,'Moviestar', 'Mary', '030303')");
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (4,'Prefect', 'Ford', '04040404')");
+
+			stmt.executeUpdate("create table target_data (tnr integer, tlastname varchar(50), tfirstname varchar(50), tbinary_data blob)");
+			stmt.executeUpdate("insert into target_data (tnr, tlastname, tfirstname) values (1, 'Dend', 'Artur')");
+			stmt.executeUpdate("insert into target_data (tnr, tlastname, tfirstname) values (2, 'Biblebrox', 'Zaphod')");
+
+			con.commit();
+
+			String sql = "wbcopy -sourceQuery='select firstname, nr, lastname from source_data' " +
+				"-targetTable=target_data " +
+				"-mode=update,insert " +
+				"-keyColumns=tnr " +
+				"-columns=tfirstname, tnr, tlastname";
+
+			StatementRunnerResult result = copyCmd.execute(sql);
+			if (!result.isSuccess())
+			{
+				String msg = result.getMessageBuffer().toString();
+				System.out.println("***********");
+				System.out.println(msg);
+				System.out.println("***********");
+			}
+			
+			assertEquals("Copy not successful", true, result.isSuccess());
+
+			ResultSet rs = stmt.executeQuery("select tnr, tfirstname, tlastname from target_data");
+			int count = 0;
+			while (rs.next())
+			{
+				count ++;
+				int id = rs.getInt(1);
+				String fname = rs.getString(2);
+				String lname = rs.getString(3);
+				
+				if (id == 1)
+				{
+					assertEquals("Incorrect firstname", "Arthur", fname);
+					assertEquals("Incorrect firstname", "Dent", lname);
+				}
+				else if (id == 2)
+				{
+					assertEquals("Incorrect firstname", "Zaphod", fname);
+					assertEquals("Incorrect firstname", "Beeblebrox", lname);
+				}
+				else if (id == 3)
+				{
+					assertEquals("Incorrect firstname", "Mary", fname);
+					assertEquals("Incorrect firstname", "Moviestar", lname);
+				}
+				else if (id == 4)
+				{
+					assertEquals("Incorrect firstname", "Ford", fname);
+					assertEquals("Incorrect firstname", "Prefect", lname);
+				}
+			}
+			assertEquals(4, count);
+			SqlUtil.closeResult(rs);
+			ConnectionMgr.getInstance().removeProfile(con.getProfile());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+	
 	public void testCopySchema()
 	{
 		try

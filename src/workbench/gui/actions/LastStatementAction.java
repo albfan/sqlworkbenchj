@@ -33,7 +33,7 @@ public class LastStatementAction extends WbAction
 		super();
 		this.history = aHistory;
 		this.initMenuDefinition("MnuTxtLastStatement", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK ));
-		this.setIcon(ResourceMgr.getImage("Last"));
+		this.setIcon("Last");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setCreateMenuSeparator(false);
 		this.setCreateToolbarSeparator(false);

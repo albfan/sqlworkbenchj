@@ -18,7 +18,6 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import workbench.gui.MainWindow;
-import workbench.resource.ResourceMgr;
 
 /**
  *	@author  support@sql-workbench.net
@@ -32,7 +31,7 @@ public class ShowDbExplorerAction
 		super();
 		mainWin = aWindow;
 		this.initMenuDefinition("MnuTxtShowDbExplorer",KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_MASK));
-		this.setIcon(ResourceMgr.getImage("Database"));
+		this.setIcon("Database");
 	}
 
 	public void executeAction(ActionEvent e)

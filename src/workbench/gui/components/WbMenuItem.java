@@ -48,6 +48,7 @@ public class WbMenuItem
 	{
 		super(icon);
 	}
+	
 	public WbMenuItem(String text, Icon icon) 
 	{
 		super(text, icon);

@@ -16,15 +16,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
+import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -53,11 +55,14 @@ public class OracleIndexReader
 	}
 	
 	/**
-	 * 	Replacement for the DatabaseMetaData.getIndexInfo() method.
-	 * 	Oracle's JDBC driver does an ANALYZE INDEX each time an indexInfo is
-	 * 	requested which slows down the retrieval of index information.
-	 *  (and is not necessary at all for the Workbench, as we don't use the
-	 *  cardinality field anyway)
+	 * Replacement for the DatabaseMetaData.getIndexInfo() method.
+	 * Oracle's JDBC driver does an ANALYZE INDEX each time an indexInfo is
+	 * requested which slows down the retrieval of index information.
+	 * (and is not necessary at all for the Workbench, as we don't use the
+	 * cardinality field anyway)
+	 * 
+	 * Additionally function based indexes are not returned correctly by the
+	 * Oracle driver.
 	 */
 	public ResultSet getIndexInfo(TableIdentifier table, boolean unique)
 		throws SQLException
@@ -72,21 +77,21 @@ public class OracleIndexReader
 		tbl.adjustCase(this.metaData.getWbConnection());
 		
 		StringBuilder sql = new StringBuilder(200);
-		sql.append("SELECT null as table_cat, " +
-			"       i.owner as table_schem, " +
-			"       i.table_name, "+
-			"       decode (i.uniqueness, 'UNIQUE', 0, 1) as non_unique, " +
-			"       null as index_qualifier, " +
-			"       i.index_name, "+
-			"       i.index_type as type, " +
-			"       c.column_position as ordinal_position, " +
-			"       c.column_name, " +
-			"       null as asc_or_desc, " +
-			"       i.distinct_keys as cardinality, " +
-			"       i.leaf_blocks as pages, " +
-			"       null as filter_condition, " +
-			"       i.index_type " +
-			"FROM all_indexes i, all_ind_columns c " +
+		sql.append("SELECT null as table_cat, \n" +
+			"       i.owner as table_schem, \n" +
+			"       i.table_name, \n" +
+			"       decode (i.uniqueness, 'UNIQUE', 0, 1) as non_unique, \n" +
+			"       null as index_qualifier, \n" +
+			"       i.index_name, \n"+
+			"       i.index_type as type, \n" +
+			"       c.column_position as ordinal_position, \n" +
+			"       c.column_name, \n" +
+			"       decode(c.descend, 'ASC', 'A', 'DESC', 'D', null) as asc_or_desc, \n" +
+			"       i.distinct_keys as cardinality, \n" +
+			"       i.leaf_blocks as pages, \n" +
+			"       null as filter_condition, \n" +
+			"       i.index_type \n" +
+			"FROM all_indexes i, all_ind_columns c \n" +
 			"WHERE i.table_name = ? \n");
 		
 		if (tbl.getSchema() != null)
@@ -97,12 +102,16 @@ public class OracleIndexReader
 		{
 			sql.append("  and i.uniqueness = 'UNIQUE'\n");
 		}
-		sql.append("  and i.index_name = c.index_name " +
-			"  and i.table_owner = c.table_owner " +
-			"  and i.table_name = c.table_name " +
-			"  and i.owner = c.index_owner ");
+		sql.append("  and i.index_name = c.index_name \n" +
+			"  and i.table_owner = c.table_owner \n" +
+			"  and i.table_name = c.table_name \n" +
+			"  and i.owner = c.index_owner \n");
 		sql.append("ORDER BY non_unique, type, index_name, ordinal_position ");
 		
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("OracleIndexReader.getIndexInfo()", "Using SQL to retrieve index info for " + table.getTableExpression() + ":\n" + sql.toString());
+		}
 		this.indexStatement = this.metaData.getWbConnection().getSqlConnection().prepareStatement(sql.toString());
 		this.indexStatement.setString(1,table.getTableName());
 		if (table.getSchema() != null) this.indexStatement.setString(2, table.getSchema());
@@ -119,8 +128,6 @@ public class OracleIndexReader
 	public void processIndexList(TableIdentifier tbl, Collection<IndexDefinition> indexDefs)
 	{
 		if (indexDefs.size() == 0) return;
-		
-		Map<String, String> result = new HashMap<String, String>();
 		
 		String base="SELECT i.index_name, e.column_expression, e.column_position \n" +
 			"FROM all_indexes i, all_ind_expressions e  \n" +
@@ -153,10 +160,16 @@ public class OracleIndexReader
 				sql.append('\'');
 			}
 		}
-		sql.append(") ");
+		sql.append(") \n");
+		sql.append(" ORDER BY 1,3");
 		
 		if (!found) return;
 		
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("OracleIndexReader.processIndexList()", "Using SQL to enhance index info for " + tbl.getTableExpression() + ":\n" + sql.toString());
+		}
+
 		ResultSet rs = null;
 		Statement stmt = null;
 		try
@@ -167,16 +180,19 @@ public class OracleIndexReader
 			{
 				String name = rs.getString(1);
 				String exp = rs.getString(2);
-				result.put(name, exp);
-			}
-			
-			for (IndexDefinition def : indexDefs)
-			{
-				String exp = result.get(def.getName());
-				if (exp != null)
+				int position = rs.getInt(3);
+				
+				IndexDefinition def = findIndex(indexDefs, name);
+				if (def == null) continue;
+				
+				List<IndexColumn> indexCols = def.getColumns();
+				if (position >= 0 && position <= indexCols.size())
 				{
-					def.setExpression(exp);
+					// List is zero-based, the column positions are 1-based
+					IndexColumn col = indexCols.get(position - 1);
+					col.setColumn(StringUtil.trimQuotes(exp));
 				}
+				
 				String type = def.getIndexType();
 				if (type.startsWith("FUNCTION-BASED"))
 				{
@@ -186,7 +202,6 @@ public class OracleIndexReader
 				{
 					def.setIndexType(DbSettings.IDX_TYPE_NORMAL);
 				}
-					
 			}
 		}
 		catch (Exception e)
@@ -201,4 +216,12 @@ public class OracleIndexReader
 		return;
 	}
 
+	private IndexDefinition findIndex(Collection<IndexDefinition> indexes, String indexName)
+	{
+		for (IndexDefinition def : indexes)
+		{
+			if (def.getName().equals(indexName)) return def;
+		}
+		return null;
+	}
 }

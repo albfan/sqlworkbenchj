@@ -30,7 +30,7 @@ public class CollapseTreeAction
 		super();
 		this.client = tree;
 		this.initMenuDefinition("LblCollapseAll");
-		this.setIcon(ResourceMgr.getImage("collapse"));	
+		this.setIcon("collapse");
 	}
 
 	public void executeAction(ActionEvent e)

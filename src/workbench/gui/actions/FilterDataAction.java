@@ -33,7 +33,7 @@ public class FilterDataAction
 		super();
 		this.setClient(aClient);
 		this.initMenuDefinition("MnuTxtFilter");
-		this.setIcon(ResourceMgr.getImage("filter"));
+		this.setIcon("filter");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
 		this.setEnabled(false);		

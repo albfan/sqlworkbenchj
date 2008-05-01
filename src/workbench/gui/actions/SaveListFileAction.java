@@ -28,7 +28,7 @@ public class SaveListFileAction extends WbAction
 	{
 		this.client = aClient;
 		this.setMenuTextByKey("LblSaveProfiles");
-		this.setIcon(	ResourceMgr.getImage(ResourceMgr.IMG_SAVE));
+		this.setIcon(ResourceMgr.IMG_SAVE);
 	}
 
 	public void executeAction(ActionEvent e)

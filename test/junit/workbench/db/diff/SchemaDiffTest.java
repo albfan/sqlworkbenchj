@@ -21,24 +21,24 @@ import workbench.util.SqlUtil;
  *
  * @author support@sql-workbench.net
  */
-public class SchemaDiffTest 
+public class SchemaDiffTest
 	extends junit.framework.TestCase
 {
-	
+
 	private WbConnection source;
 	private WbConnection target;
-	
+
 	public SchemaDiffTest(String testName)
 	{
 		super(testName);
 	}
-	
+
 	public void tearDown()
 	{
 		try { source.disconnect(); } catch (Throwable th) {}
 		try { target.disconnect(); } catch (Throwable th) {}
 	}
-	
+
 	public void testBaseDiff()
 	{
 		try
@@ -54,6 +54,7 @@ public class SchemaDiffTest
 			diff.setIncludeViews(true);
 			diff.compareAll();
 			String xml = diff.getMigrateTargetXml();
+//			TestUtil.writeFile(new File("c:/temp/basediff.xml"), xml);
 //			Thread.yield();
 //			System.out.println("---------------");
 //			System.out.println(xml);
@@ -64,18 +65,18 @@ public class SchemaDiffTest
 
 			count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/view-info[@compareTo='V_PERSON'])");
 			assertEquals("Incorrect number of views listed", "1", count);
-			
-			// Check if email column 
+
+			// Check if email column
 			String col = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='ADDRESS']/add-column/column-def[@name='EMAIL']/column-name");
 			assertNotNull("Table ADDRESS not changed", col);
 			assertEquals("Table ADDRESS not changed", "EMAIL", col);
 
 			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='ADDRESS']/add-column)");
 			assertEquals("Incorrect number of columns to add to ADDRESS", "1", count);
-			
+
 			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='ADDRESS']/remove-column[@name='REMARK'])");
 			assertEquals("Remark column not removed", "1", count);
-			
+
 			String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='ADDRESS']/modify-column[@name='STREET']/dbms-data-type");
 			assertEquals("Street column not changed", "VARCHAR(50)", value);
 
@@ -86,11 +87,11 @@ public class SchemaDiffTest
 			assertEquals("FK to address not added", "ADDRESS", value);
 
 			value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON_ADDRESS']/add-index/index-def/index-expression");
-			assertEquals("Index for address_id not added", "ADDRESS_ID A", value);
-			
+			assertEquals("Index for address_id not added", "ADDRESS_ID ASC", value);
+
 			value = TestUtil.getXPathValue(xml, "/schema-diff/create-view/view-def[@name='V_PERSON']/view-name");
 			assertEquals("View not created ", "V_PERSON", value);
-			
+
 			value = TestUtil.getXPathValue(xml, "/schema-diff/drop-view/view-name[1]");
 			assertEquals("View not dropped ", "SOMETHING", value);
 
@@ -99,7 +100,7 @@ public class SchemaDiffTest
 
 			value = TestUtil.getXPathValue(xml, "/schema-diff/create-sequence[1]/sequence-def/sequence-name");
 			assertEquals("Sequence not created", "SEQ_THREE", value);
-			
+
 			value = TestUtil.getXPathValue(xml, "/schema-diff/drop-sequence/sequence-name[1]");
 			assertEquals("Sequence not dropped", "SEQ_TO_BE_DELETED", value);
 		}
@@ -108,7 +109,7 @@ public class SchemaDiffTest
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		
+
 	}
 
 	public void testGrantDiff()
@@ -129,13 +130,13 @@ public class SchemaDiffTest
 
 			String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/add-grants/grant[1]/grantee");
 			assertEquals("Grantee not correct", "UNIT_TEST", value);
-			
+
 			value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/add-grants/grant[1]/privilege");
 			assertEquals("Privilege not correct", "SELECT", value);
-			
+
 			value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/revoke-grants/grant[1]/privilege");
 			assertEquals("DELETE not revoked", "DELETE", value);
-			
+
 		}
 		catch (Exception e)
 		{
@@ -161,21 +162,21 @@ public class SchemaDiffTest
 			diff.setIncludeViews(false);
 			diff.compareAll();
 			String xml = diff.getMigrateTargetXml();
-			
+//			TestUtil.writeFile(new File("c:/temp/indexdiff.xml"), xml);
 			String count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
 			assertEquals("Incorrect number of tables listed", "3", count);
-			
+
 			String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/add-index/index-def/index-expression");
-			assertEquals("Index for address_id not added", "LASTNAME A", value);
-			
+			assertEquals("Index for address_id not added", "LASTNAME ASC", value);
+
 			diff.setIncludeIndex(false);
 			xml = diff.getMigrateTargetXml();
-			
+
 			count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
 			assertEquals("Incorrect number of tables listed", "3", count);
-			
+
 			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table/add-index)");
-			assertEquals("Add index present", "0", count);			
+			assertEquals("Add index present", "0", count);
 		}
 		catch (Exception e)
 		{
@@ -192,14 +193,14 @@ public class SchemaDiffTest
 		this.source = util.getConnection("source");
 		this.target = util.getConnection("target");
 		Statement stmt = null;
-		
+
 		try
 		{
 			stmt = source.createStatement();
 			stmt.executeUpdate("create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100))");
 			stmt.executeUpdate("CREATE USER unit_test PASSWORD 'secret'");
 			stmt.executeUpdate("GRANT SELECT ON PERSON to unit_test");
-			
+
 			stmt = target.createStatement();
 			stmt.executeUpdate("create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100))");
 			stmt.executeUpdate("CREATE USER unit_test PASSWORD 'secret'");
@@ -210,7 +211,7 @@ public class SchemaDiffTest
 			SqlUtil.closeStatement(stmt);
 		}
 	}
-	
+
 	private void setupIndexDiffTestDb()
 		throws SQLException, ClassNotFoundException
 	{
@@ -219,7 +220,7 @@ public class SchemaDiffTest
 		this.source = util.getConnection("source");
 		this.target = util.getConnection("target");
 		Statement stmt = null;
-		
+
 		try
 		{
 			stmt = source.createStatement();
@@ -228,23 +229,23 @@ public class SchemaDiffTest
 			stmt.executeUpdate("create table person_address (person_id integer, address_id integer, primary key (person_id, address_id))");
 			stmt.executeUpdate("alter table person_address add constraint fk_pa_person foreign key (person_id) references person(person_id)");
       stmt.executeUpdate("alter table person_address add constraint fk_pa_address foreign key (address_id) references address(address_id)");
-			
+
 			stmt.executeUpdate("create index test_index on person (lastname)");
-			
+
 			stmt = target.createStatement();
 			stmt.executeUpdate("create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100))");
 			stmt.executeUpdate("create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50))");
 			stmt.executeUpdate("create table person_address (person_id integer, address_id integer, primary key (person_id, address_id))");
 			stmt.executeUpdate("alter table person_address add constraint fk_pa_person foreign key (person_id) references person(person_id)");
       stmt.executeUpdate("alter table person_address add constraint fk_pa_address foreign key (address_id) references address(address_id)");
-			
+
 		}
 		finally
 		{
 			SqlUtil.closeStatement(stmt);
 		}
 	}
-	
+
 	private void setupBaseDatabase()
 		throws SQLException, ClassNotFoundException
 	{
@@ -253,7 +254,7 @@ public class SchemaDiffTest
 		this.source = util.getConnection("source");
 		this.target = util.getConnection("target");
 		Statement stmt = null;
-		
+
 		try
 		{
 			stmt = source.createStatement();
@@ -267,13 +268,13 @@ public class SchemaDiffTest
 			stmt.executeUpdate("CREATE sequence seq_one");
 			stmt.executeUpdate("CREATE sequence seq_two  increment by 5");
 			stmt.executeUpdate("CREATE sequence seq_three");
-			
+
 			stmt = target.createStatement();
 			stmt.executeUpdate("create table person (person_id integer primary key, firstname varchar(50), lastname varchar(100))");
 			stmt.executeUpdate("create table address (address_id integer primary key, street varchar(10), city varchar(100), pone varchar(50), remark varchar(500))");
 			stmt.executeUpdate("create table person_address (person_id integer, address_id integer, primary key (person_id, address_id))");
 			stmt.executeUpdate("alter table person_address add constraint fk_pa_person foreign key (person_id) references person(person_id)");
-			
+
 			stmt.executeUpdate("CREATE VIEW something AS SELECT * FROM address");
 
 			stmt.executeUpdate("CREATE sequence seq_one");
@@ -284,6 +285,6 @@ public class SchemaDiffTest
 		{
 			SqlUtil.closeStatement(stmt);
 		}
-		
+
 	}
 }

@@ -22,7 +22,7 @@ import workbench.resource.ResourceMgr;
  * @see workbench.gui.sql.DwPanel
  * @author  support@sql-workbench.net
  */
-public class DeleteRowAction 
+public class DeleteRowAction
 	extends WbAction
 {
 	private DbData client;
@@ -33,7 +33,7 @@ public class DeleteRowAction
 		this.client = aClient;
 		this.setEnabled(false);
 		this.initMenuDefinition("MnuTxtDeleteRow");
-		this.setIcon(ResourceMgr.getImage("Delete"));
+		this.setIcon("Delete");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 	}
 
@@ -41,9 +41,9 @@ public class DeleteRowAction
 	{
 		this.client.deleteRow();
 	}
-	
+
 	public void setClient(DbData db)
 	{
 		this.client = db;
-	}	
+	}
 }

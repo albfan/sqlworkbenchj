@@ -14,6 +14,7 @@ package workbench.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 import workbench.storage.DataStore;
 
 /**
@@ -59,7 +60,7 @@ public interface IndexReader
 	 * 	@param unique - Should the index be unique
 	 *  @param columnList - The columns that should build the index
 	 */
-	String buildCreateIndexSql(TableIdentifier table, String indexName, boolean unique, String[] columnList);
+	String buildCreateIndexSql(TableIdentifier table, String indexName, boolean unique, List<IndexColumn> columnList);
 	
 	/**
 	 * Post-Process the index definitions contained in the List

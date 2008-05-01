@@ -35,7 +35,7 @@ public class FindDataAgainAction extends WbAction
 		this.client = aClient;
 		
 		this.initMenuDefinition("MnuTxtFindInTableDataAgain", KeyStroke.getKeyStroke(KeyEvent.VK_F3, InputEvent.SHIFT_MASK));
-		this.setIcon(ResourceMgr.getImage("FindAgain"));
+		this.setIcon("FindAgain");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 	}
 

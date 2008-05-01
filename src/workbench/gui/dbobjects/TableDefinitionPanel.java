@@ -34,6 +34,7 @@ import workbench.db.ColumnDropper;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
+import workbench.db.IndexColumn;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -368,14 +369,16 @@ public class TableDefinitionPanel
 		if (this.tableDefinition.getSelectedRowCount() <= 0) return;
 		int rows[] = this.tableDefinition.getSelectedRows();
 		int count = rows.length;
-		String[] columns = new String[count];
+		List<IndexColumn> columns = new ArrayList<IndexColumn>(count);
 		String indexName = ResourceMgr.getString("TxtNewIndexName");
 		//String indexName = WbSwingUtilities.getUserInput(this, msg, defaultName);
 		if (indexName == null || indexName.trim().length() == 0) return;
 
 		for (int i=0; i < count; i++)
 		{
-			columns[i] = this.tableDefinition.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME).toLowerCase();
+			String colName = this.tableDefinition.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME).toLowerCase();
+			IndexColumn col = new IndexColumn(colName, null);
+			columns.add(col);
 		}
 		String sql = this.dbConnection.getMetadata().buildIndexSource(this.currentTable, indexName, false, columns);
 		String title = ResourceMgr.getString("TxtWindowTitleCreateIndex");

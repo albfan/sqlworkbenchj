@@ -36,19 +36,19 @@ import workbench.util.WbFile;
  *	Select a different filter for a table.
  *	@author  support@sql-workbench.net
  */
-public class FilterPickerAction 
+public class FilterPickerAction
 		extends WbAction
 		implements PropertyChangeListener, ActionListener
 {
 	private WbTable client;
 	private DropDownButton dropDownButton;
-	
+
 	public FilterPickerAction(WbTable aClient)
 	{
 		super();
 		this.setClient(aClient);
 		this.initMenuDefinition("MnuTxtPickFilter");
-		this.setIcon(ResourceMgr.getImage("dropdown"));
+		this.setIcon("dropdown");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		FilterDefinitionManager mgr = FilterDefinitionManager.getInstance();
 		mgr.addPropertyChangeListener(this);
@@ -59,7 +59,7 @@ public class FilterPickerAction
 	public void actionPerformed(ActionEvent e)
 	{
 		if (this.client == null) return;
-		
+
 		if (e.getSource() instanceof JMenuItem)
 		{
 			String file = e.getActionCommand();
@@ -74,7 +74,7 @@ public class FilterPickerAction
 				Window w = SwingUtilities.getWindowAncestor(this.client);
 				WbSwingUtilities.showErrorMessage(w, "Could not load filter: " + ex.getMessage());
 			}
-			
+
 		}
 	}
 
@@ -87,11 +87,11 @@ public class FilterPickerAction
 		else
 		{
 			int availableFilters = FilterDefinitionManager.getInstance().getEntries().size();
-			this.setEnabled(availableFilters > 0);		
+			this.setEnabled(availableFilters > 0);
 		}
 	}
 
-	
+
 	public void setClient(WbTable c)
 	{
 		this.client = c;
@@ -118,21 +118,21 @@ public class FilterPickerAction
     {
       result = this.dropDownButton;
     }
-		return result;	
+		return result;
 	}
-	
+
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		int availableFilters = FilterDefinitionManager.getInstance().getEntries().size();
 		this.setEnabled(availableFilters > 0);
 		buildPopup();
 	}
-	
+
 	private void buildPopup()
 	{
 		List<WbFile> entries = FilterDefinitionManager.getInstance().getEntries();
 		if (entries == null || entries.size() == 0) return;
-		
+
 		JMenu menu = new JMenu("filters");
 		for (WbFile f : entries)
 		{

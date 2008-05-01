@@ -32,7 +32,7 @@ public class FirstStatementAction extends WbAction
 		super();
 		this.history = aHistory;
 		this.initMenuDefinition("MnuTxtFirstStatement", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK ));
-		this.setIcon(ResourceMgr.getImage("First"));
+		this.setIcon("First");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setCreateMenuSeparator(true);
 		this.setCreateToolbarSeparator(true);

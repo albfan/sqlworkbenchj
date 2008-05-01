@@ -32,7 +32,7 @@ public class RedoAction extends WbAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtRedo", KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
-		this.setIcon(ResourceMgr.getImage("Redo"));
+		this.setIcon("Redo");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 

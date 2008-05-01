@@ -14,7 +14,6 @@ package workbench.gui.profiles;
 import java.awt.event.ActionEvent;
 import workbench.gui.actions.WbAction;
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 
 /**
  * @author support@sql-workbench.net
@@ -26,10 +25,10 @@ public class NewGroupAction
 	public NewGroupAction(ProfileTree panel)
 	{
 		this.client = panel;
-		this.setIcon(ResourceMgr.getImage("NewFolder"));
+		this.setIcon("NewFolder");
 		this.initMenuDefinition("LblNewProfileGroup");
 	}
-	
+
 	public void executeAction(ActionEvent e)
 	{
 		try
@@ -41,5 +40,5 @@ public class NewGroupAction
 			LogMgr.logError("NewListEntryAction.executeAction()", "Error copying profile", ex);
 		}
 	}
-	
+
 }

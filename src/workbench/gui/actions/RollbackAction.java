@@ -33,12 +33,13 @@ public class RollbackAction extends WbAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtRollback", KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setIcon(ResourceMgr.getImage("Rollback"));
+		this.setIcon("Rollback");
+		this.setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
 		if (this.client != null) this.client.rollback();
 	}
-	
+
 }

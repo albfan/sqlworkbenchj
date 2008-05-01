@@ -73,6 +73,7 @@ public class RowDataList
 	 */
 	public void reset()
 	{
+		if (data == null) return;
 		synchronized (this.data)
 		{
 			for (RowData row : data)

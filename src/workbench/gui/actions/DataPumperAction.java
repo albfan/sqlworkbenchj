@@ -26,23 +26,23 @@ import workbench.resource.Settings;
  * @see workbench.gui.tools.DataPumper
  * @author  support@sql-workbench.net
  */
-public class DataPumperAction 
+public class DataPumperAction
 	extends WbAction
 {
 	private MainWindow parent;
-	
+
 	public DataPumperAction(MainWindow win)
 	{
 		super();
 		this.initMenuDefinition("MnuTxtDataPumper");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_TOOLS);
-		this.setIcon(ResourceMgr.getImage("DataPumper"));
+		this.setIcon("DataPumper");
 		this.parent = win;
 	}
-	
+
 	public void executeAction(ActionEvent e)
 	{
-		if (parent != null) 
+		if (parent != null)
 		{
 			WbSwingUtilities.showWaitCursor(parent);
 		}
@@ -61,5 +61,5 @@ public class DataPumperAction
 			if (parent != null) WbSwingUtilities.showDefaultCursor(parent);
 		}
 	}
-	
+
 }

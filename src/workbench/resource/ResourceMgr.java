@@ -12,7 +12,6 @@
 package workbench.resource;
 
 import java.awt.event.KeyEvent;
-import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.MessageFormat;
@@ -226,20 +225,21 @@ public class ResourceMgr
 
 	private static ImageIcon retrieveImage(String filename, String extension)
 	{
+		ImageIcon result = null;
 		URL imageIconUrl = ResourceMgr.class.getClassLoader().getResource("workbench/resource/images/" + filename + extension);
 		if (imageIconUrl != null)
 		{
-			return new ImageIcon(imageIconUrl);
+			result = new ImageIcon(imageIconUrl);
 		}
 		else
 		{
 			imageIconUrl = ResourceMgr.class.getClassLoader().getResource(filename);
 			if (imageIconUrl != null)
 			{
-				return new ImageIcon(imageIconUrl);
+				result = new ImageIcon(imageIconUrl);
 			}
 		}
-		return null;
+		return result;
 	}
 
 	/**

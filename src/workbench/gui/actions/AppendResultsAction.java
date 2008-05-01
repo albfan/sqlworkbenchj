@@ -35,6 +35,7 @@ public class AppendResultsAction
 		this.client = panel;
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setSwitchedOn(client.getAppendResults());
+		this.setEnabled(false);
 	}
 
 	public void setSwitchedOn(boolean aFlag)

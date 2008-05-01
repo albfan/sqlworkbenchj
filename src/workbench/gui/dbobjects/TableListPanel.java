@@ -404,12 +404,11 @@ public class TableListPanel
 				ArrayList<DbObject> objects = new ArrayList<DbObject>(rows.length);
 
 				TableIdentifier tbl = getObjectTable();
-				String schema = (tbl == null ? null : tbl.getSchema());
 
 				for (int i = 0; i < rows.length; i++)
 				{
 					String name = indexes.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
-					IndexDefinition index = new IndexDefinition(tbl, schema, name, null);
+					IndexDefinition index = new IndexDefinition(tbl, name);
 					objects.add(index);
 				}
 				return objects;

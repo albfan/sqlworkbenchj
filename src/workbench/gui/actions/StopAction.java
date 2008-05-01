@@ -28,7 +28,7 @@ public class StopAction extends WbAction
 		super();
 		this.panel = aPanel;
 		this.initMenuDefinition("MnuTxtStopStmt");
-		this.setIcon(ResourceMgr.getImage("Stop"));
+		this.setIcon("Stop");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setCreateMenuSeparator(true);
 	}

@@ -1533,7 +1533,7 @@ public class WbImportTest
 		}
 	}	
 
-	public void testMultiFileImport()
+	public void testMultiFileSingleTableImport()
 		throws Exception
 	{
 		int rowCount = 10;
@@ -1541,20 +1541,22 @@ public class WbImportTest
 		{
 			util.emptyBaseDirectory();
 			
-			File importFile  = new File(this.basedir, "multi_test1.mtxt");
+			File importFile  = new File(this.basedir, "multi_test1_nohead.mtxt");
 			PrintWriter out = new PrintWriter(new FileWriter(importFile));
 			for (int i = 0; i < 5; i++)
 			{
+				out.print("to-ignore\t");
 				out.print(Integer.toString(i));
 				out.print('\t');
 				out.println("First" + i + "\tLastname" + i);
 			}
 			out.close();
 
-			importFile  = new File(this.basedir, "multi_test2.mtxt");
+			importFile  = new File(this.basedir, "multi_test2_nohead.mtxt");
 			out = new PrintWriter(new FileWriter(importFile));
 			for (int i = 5; i < rowCount; i++)
 			{
+				out.print("to-ignore\t");
 				out.print(Integer.toString(i));
 				out.print('\t');
 				out.println("First" + i + "\tLastname" + i);
@@ -1570,7 +1572,7 @@ public class WbImportTest
 			assertFalse(result.isSuccess());
 			assertTrue(msg.indexOf("No files with extension gaga found in directory") > -1);
 			
-			result = importCmd.execute("wbimport -header=false -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=mtxt -table=junit_test");
+			result = importCmd.execute("wbimport -header=false -fileColumns=$wb_skip$,nr,firstname,lastname -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=mtxt -table=junit_test");
 			assertTrue("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess());
 			
 			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
@@ -1581,13 +1583,78 @@ public class WbImportTest
 			}
 			assertEquals("Not enough values in table junit_test", rowCount, count);
 			
-			importFile  = new File(this.basedir, "multi_test1.mtxt");
+			importFile  = new File(this.basedir, "multi_test1_nohead.mtxt");
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
 			}					
 
-			importFile  = new File(this.basedir, "multi_test2.mtxt");
+			importFile  = new File(this.basedir, "multi_test2_nohead.mtxt");
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
+		}
+		catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}	
+	
+	public void testMultiFileSingleTableImportWithHeader()
+		throws Exception
+	{
+		int rowCount = 10;
+		try
+		{
+			util.emptyBaseDirectory();
+			
+			File importFile  = new File(this.basedir, "multi_test1_head.mtxt");
+			PrintWriter out = new PrintWriter(new FileWriter(importFile));
+			out.println("gaga\tnr\tfirst_name\tlast_name");
+			for (int i = 0; i < 5; i++)
+			{
+				out.print("to-ignore\t");
+				out.print(Integer.toString(i));
+				out.print('\t');
+				out.println("First" + i + "\tLastname" + i);
+			}
+			out.close();
+
+			importFile  = new File(this.basedir, "multi_test2_head.mtxt");
+			out = new PrintWriter(new FileWriter(importFile));
+			out.println("gaga\tnr\tvorname\tnachname");
+			for (int i = 5; i < rowCount; i++)
+			{
+				out.print("to-ignore\t");
+				out.print(Integer.toString(i));
+				out.print('\t');
+				out.println("First" + i + "\tLastname" + i);
+			}
+			out.close();
+			
+			Statement stmt = this.connection.createStatementForQuery();
+			stmt.executeUpdate("DELETE FROM junit_test");
+			this.connection.commit();
+
+			StatementRunnerResult result = importCmd.execute("wbimport -header=true -fileColumns=$wb_skip$,nr,firstname,lastname -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=mtxt -table=junit_test");
+			assertTrue("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess());
+			
+			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
+			int count = -1;
+			if (rs.next())
+			{
+				count = rs.getInt(1);
+			}
+			assertEquals("Not enough values in table junit_test", rowCount, count);
+			
+			importFile  = new File(this.basedir, "multi_test1_head.mtxt");
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}					
+
+			importFile  = new File(this.basedir, "multi_test2_head.mtxt");
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
