@@ -37,6 +37,7 @@ public class PrintPreviewAction
 		this.setClient(aClient);
 		this.initMenuDefinition("MnuTxtPrintPreview");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+		this.setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)

@@ -72,8 +72,7 @@ public class TextAreaPainter
 		currentLineIndex = -1;
 
 		setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-
-		setFont(new Font("Monospaced",Font.PLAIN,12));
+		setFont(Settings.getInstance().getEditorFont());
 		setForeground(Color.BLACK);
 		setBackground(Color.WHITE);
 
@@ -83,7 +82,11 @@ public class TextAreaPainter
 		currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
 		bracketHighlightColor = Color.BLACK;
 		bracketHighlight = true;
-		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_TAB_WIDTH, Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR);
+		showLineNumbers = Settings.getInstance().getShowLineNumbers();
+		Settings.getInstance().addPropertyChangeListener(this, 
+			Settings.PROPERTY_EDITOR_TAB_WIDTH, 
+			Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
+			Settings.PROPERTY_SHOW_LINE_NUMBERS);
 	}
 
 	public void dispose()
@@ -102,23 +105,17 @@ public class TextAreaPainter
 			this.currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
 			invalidate();
 		}
+		else if (Settings.PROPERTY_SHOW_LINE_NUMBERS.equals(evt.getPropertyName()))
+		{
+			this.showLineNumbers = Settings.getInstance().getShowLineNumbers();
+			invalidate();
+		}
 	}
 	 
-	/**
-	 * Switches display of line numbers in the left gutter area.
-	 *
-	 * @param aFlag
-	 */
-	public final void setShowLineNumbers(boolean aFlag)
-	{
-		this.showLineNumbers = aFlag;
-		this.invalidate();
-	}
-
-	public final boolean getShowLineNumbers() 
-	{ 
-		return this.showLineNumbers; 
-	}
+//	public final boolean getShowLineNumbers() 
+//	{ 
+//		return this.showLineNumbers; 
+//	}
 
 	/**
 	 * Returns if this component can be traversed by pressing the
@@ -300,11 +297,13 @@ public class TextAreaPainter
 	
 	public void paint(Graphics gfx)
 	{
-
 		calculateGutterWidth();
 
 		Rectangle clipRect = gfx.getClipBounds();
 
+		int cw = getWidth() - gutterWidth;
+		int ch = getHeight();
+		
 		if (clipRect != null)
 		{
 			gfx.setColor(this.getBackground());
@@ -316,6 +315,7 @@ public class TextAreaPainter
 				gfx.fillRect(clipRect.x, clipRect.y, gutterWidth - clipRect.x, clipRect.height);
 			}
 		}
+
 		
 		final int lastLine = textArea.getLineCount();
 		final int visibleCount = textArea.getVisibleLines();
@@ -323,7 +323,7 @@ public class TextAreaPainter
 		
 		int fheight = fm.getHeight();
 		int firstInvalid = firstVisible + clipRect.y / fheight;
-		int lastInvalid = firstVisible + ((clipRect.y + clipRect.height) / fheight) + 1;
+		int lastInvalid = firstVisible + ((clipRect.y + clipRect.height) / fheight);
 		if (lastInvalid > lastLine) lastInvalid = lastLine;
 		
 		try 
@@ -331,14 +331,13 @@ public class TextAreaPainter
 			TokenMarker tokenMarker = textArea.getDocument().getTokenMarker();
 			int x = textArea.getHorizontalOffset();
 
-			int endLine = firstVisible + visibleCount;
+			int endLine = firstVisible + visibleCount + 1;
 			if (endLine > lastLine) endLine = lastLine;
 			
-			int cw = this.getWidth() - gutterWidth;
-			int ch = getHeight();
 			int gutterX = this.gutterWidth - GUTTER_MARGIN;
 
 			final int caretLine = textArea.getCaretLine();
+			final int fmHeight = fm.getLeading() + fm.getMaxDescent();
 			
 			for (int line = firstVisible; line <= endLine; line++)
 			{
@@ -352,9 +351,15 @@ public class TextAreaPainter
 					// the editor gets redrawn a small amount of memory is lost
 					// To workaround this, I'm caching (some of) the values 
 					// that are needed here.
-					
 					String s = NumberStringCache.getNumberString(line);
+					
+					// As we are only allowing fixed-width fonts, this should be ok
+					// otherwise fm.stringWidth(str) needs to be used
 					int w = s.length() * this.gutterCharWidth;
+					
+					// make sure the line numbers do not show up outside the gutter
+					gfx.setClip(0, 0, gutterWidth, ch); 
+					
 					gfx.setColor(GUTTER_COLOR);
 					gfx.drawString(s, gutterX - w, y);
 				}
@@ -370,7 +375,7 @@ public class TextAreaPainter
 					if (line == caretLine && this.currentLineColor != null)
 					{
 						gfx.setColor(currentLineColor);
-						gfx.fillRect(0, y + fm.getLeading() + fm.getMaxDescent(), getWidth(), fheight);
+						gfx.fillRect(0, y + fmHeight, cw - gutterWidth, fheight);
 						gfx.setColor(getBackground());
 					}
 					
@@ -387,7 +392,6 @@ public class TextAreaPainter
 		catch (Exception e)
 		{
 			System.err.println("Error repainting line range {" + firstInvalid + "," + lastInvalid + "}:" + e.getMessage());
-			//e.printStackTrace();
 		}
 	}
 
@@ -402,8 +406,9 @@ public class TextAreaPainter
 
 	public int getGutterWidth()
 	{
-		return this.gutterWidth; // + GUTTER_MARGIN;
+		return this.gutterWidth; 
 	}
+	
 	/**
 	 * Marks a range of lines as needing a repaint.
 	 * @param firstLine The first line to invalidate

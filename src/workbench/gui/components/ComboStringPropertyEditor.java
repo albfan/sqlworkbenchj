@@ -65,7 +65,7 @@ public class ComboStringPropertyEditor
 			this.getter = cls.getMethod(name, (Class[])null);
 
 			name = "set" + propertyName;
-			Class[] parms = {String.class};
+			Class[] parms = { String.class };
 
 			this.setter = cls.getMethod(name, parms);
 			//this.setEditable(true);

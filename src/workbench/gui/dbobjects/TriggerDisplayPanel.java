@@ -30,6 +30,7 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.Resettable;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 
@@ -111,6 +112,7 @@ public class TriggerDisplayPanel
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("TriggerDisplayPanel.readTriggers()", "Error retrieving triggers", e);
 			this.reset();
 		}
 	}

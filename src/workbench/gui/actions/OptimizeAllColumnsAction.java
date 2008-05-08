@@ -35,6 +35,7 @@ public class OptimizeAllColumnsAction
 		super();
 		this.setClient(client);
 		this.initMenuDefinition("MnuTxtOptimizeAllCol",KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK));
+		this.setEnabled(false);
 	}
 
 	public void disableShortcut()

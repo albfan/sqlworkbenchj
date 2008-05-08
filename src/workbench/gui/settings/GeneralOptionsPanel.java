@@ -11,6 +11,7 @@
  */
 package workbench.gui.settings;
 
+import java.awt.event.ActionListener;
 import java.util.Collection;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
@@ -26,7 +27,7 @@ import workbench.util.WbLocale;
  */
 public class GeneralOptionsPanel
 	extends JPanel
-	implements workbench.interfaces.Restoreable
+	implements workbench.interfaces.Restoreable, ActionListener
 {
 
 	/** Creates new form GeneralOptionsPanel */
@@ -107,6 +108,9 @@ public class GeneralOptionsPanel
 		set.setConsolidateLogMsg(this.consolidateLog.isSelected());
 		set.setDefaultTextDelimiter(this.textDelimiterField.getText());
 		set.setPDFReaderPath(pdfReaderPath.getFilename());
+		set.setExitOnFirstConnectCancel(exitOnConnectCancel.isSelected());
+		set.setShowConnectDialogOnStartup(autoConnect.isSelected());
+		
 		int index = checkInterval.getSelectedIndex();
 		switch (index)
 		{
@@ -145,17 +149,10 @@ public class GeneralOptionsPanel
   private void initComponents() {
     java.awt.GridBagConstraints gridBagConstraints;
 
-    useEncryptionLabel = new WbCheckBoxLabel();
-    useEncryption = new javax.swing.JCheckBox();
     textDelimiterLabel = new javax.swing.JLabel();
     textDelimiterField = new javax.swing.JTextField();
     quoteCharLabel = new javax.swing.JLabel();
     quoteCharField = new javax.swing.JTextField();
-    jPanel1 = new javax.swing.JPanel();
-    enableAnimatedIconLabel = new WbCheckBoxLabel();
-    enableAnimatedIcon = new javax.swing.JCheckBox();
-    consolidateLogLabel = new WbCheckBoxLabel();
-    consolidateLog = new javax.swing.JCheckBox();
     msgFontLabel = new javax.swing.JLabel();
     standardFontLabel = new javax.swing.JLabel();
     msgLogFont = new workbench.gui.components.WbFontPicker();
@@ -168,134 +165,59 @@ public class GeneralOptionsPanel
     checkInterval = new javax.swing.JComboBox();
     langLabel = new javax.swing.JLabel();
     languageDropDown = new javax.swing.JComboBox();
-    showTabIndexLabel = new WbCheckBoxLabel();
+    jPanel2 = new javax.swing.JPanel();
+    useEncryption = new javax.swing.JCheckBox();
+    consolidateLog = new javax.swing.JCheckBox();
     showTabIndex = new javax.swing.JCheckBox();
+    enableAnimatedIcon = new javax.swing.JCheckBox();
+    exitOnConnectCancel = new javax.swing.JCheckBox();
+    autoConnect = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
-
-    useEncryptionLabel.setLabelFor(useEncryption);
-    useEncryptionLabel.setText(ResourceMgr.getString("LblUseEncryption"));
-    useEncryptionLabel.setToolTipText(ResourceMgr.getDescription("LblUseEncryption"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
-    add(useEncryptionLabel, gridBagConstraints);
-
-    useEncryption.setFont(null);
-    useEncryption.setSelected(Settings.getInstance().getUseEncryption());
-    useEncryption.setText("");
-    useEncryption.setBorder(null);
-    useEncryption.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    useEncryption.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-    useEncryption.setIconTextGap(5);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(7, 10, 0, 11);
-    add(useEncryption, gridBagConstraints);
 
     textDelimiterLabel.setText(ResourceMgr.getString("LblFieldDelimiter"));
     textDelimiterLabel.setToolTipText(ResourceMgr.getDescription("LblFieldDelimiter"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
     add(textDelimiterLabel, gridBagConstraints);
 
     textDelimiterField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
     textDelimiterField.setText(Settings.getInstance().getDefaultTextDelimiter(true));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 15);
+    gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
     add(textDelimiterField, gridBagConstraints);
 
     quoteCharLabel.setText(ResourceMgr.getString("LblQuoteChar"));
     quoteCharLabel.setToolTipText(ResourceMgr.getDescription("LblQuoteChar"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 14;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
     add(quoteCharLabel, gridBagConstraints);
 
     quoteCharField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
     quoteCharField.setText(Settings.getInstance().getQuoteChar());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 14;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 15);
+    gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
     add(quoteCharField, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 17;
-    gridBagConstraints.weighty = 1.0;
-    add(jPanel1, gridBagConstraints);
-
-    enableAnimatedIconLabel.setLabelFor(enableAnimatedIcon);
-    enableAnimatedIconLabel.setText(ResourceMgr.getString("LblEnableAnimatedIcon"));
-    enableAnimatedIconLabel.setToolTipText(ResourceMgr.getDescription("LblEnableAnimatedIcon"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 12, 1, 0);
-    add(enableAnimatedIconLabel, gridBagConstraints);
-
-    enableAnimatedIcon.setFont(null);
-    enableAnimatedIcon.setSelected(Settings.getInstance().getUseAnimatedIcon());
-    enableAnimatedIcon.setText("");
-    enableAnimatedIcon.setBorder(null);
-    enableAnimatedIcon.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    enableAnimatedIcon.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-    enableAnimatedIcon.setIconTextGap(5);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(4, 10, 1, 25);
-    add(enableAnimatedIcon, gridBagConstraints);
-
-    consolidateLogLabel.setLabelFor(consolidateLog);
-    consolidateLogLabel.setText(ResourceMgr.getString("LblConsolidateLog"));
-    consolidateLogLabel.setToolTipText(ResourceMgr.getDescription("LblConsolidateLog"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 12, 1, 0);
-    add(consolidateLogLabel, gridBagConstraints);
-
-    consolidateLog.setFont(null);
-    consolidateLog.setSelected(Settings.getInstance().getConsolidateLogMsg());
-    consolidateLog.setText("");
-    consolidateLog.setBorder(null);
-    consolidateLog.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    consolidateLog.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-    consolidateLog.setIconTextGap(5);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(8, 10, 1, 11);
-    add(consolidateLog, gridBagConstraints);
 
     msgFontLabel.setText(ResourceMgr.getString("LblMsgLogFont"));
     msgFontLabel.setToolTipText(ResourceMgr.getDescription("LblMsgLogFont"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 12, 0, 0);
@@ -305,14 +227,14 @@ public class GeneralOptionsPanel
     standardFontLabel.setToolTipText(ResourceMgr.getDescription("LblStandardFont"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
     add(standardFontLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
@@ -321,7 +243,7 @@ public class GeneralOptionsPanel
     standardFont.setFont(standardFont.getFont());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 10, 0, 15);
@@ -331,22 +253,22 @@ public class GeneralOptionsPanel
     pdfReaderPathLabel.setToolTipText(ResourceMgr.getDescription("LblReaderPath"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 15;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
     add(pdfReaderPathLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 15;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 15);
+    gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
     add(pdfReaderPath, gridBagConstraints);
 
     logLevelLabel.setText(ResourceMgr.getString("LblLogLevel"));
     logLevelLabel.setToolTipText(ResourceMgr.getDescription("LblLogLevel"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 16;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
     add(logLevelLabel, gridBagConstraints);
@@ -354,9 +276,9 @@ public class GeneralOptionsPanel
     logLevel.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "ERROR", "WARNING", "INFO", "DEBUG" }));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 16;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 10, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 0);
     add(logLevel, gridBagConstraints);
 
     checkUpdatesLabel.setText(ResourceMgr.getString("LblCheckForUpdate"));
@@ -394,40 +316,134 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
     add(languageDropDown, gridBagConstraints);
 
-    showTabIndexLabel.setLabelFor(showTabIndex);
-    showTabIndexLabel.setText(ResourceMgr.getString("LblShowTabIndex"));
-    showTabIndexLabel.setToolTipText(ResourceMgr.getDescription("LblShowTabIndex"));
+    jPanel2.setLayout(new java.awt.GridBagLayout());
+
+    useEncryption.setSelected(Settings.getInstance().getUseEncryption());
+    useEncryption.setText(ResourceMgr.getString("LblUseEncryption"));
+    useEncryption.setToolTipText(ResourceMgr.getDescription("LblUseEncryption"));
+    useEncryption.setBorder(null);
+    useEncryption.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    useEncryption.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    useEncryption.setIconTextGap(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 12, 1, 0);
-    add(showTabIndexLabel, gridBagConstraints);
+    jPanel2.add(useEncryption, gridBagConstraints);
 
-    showTabIndex.setFont(null);
+    consolidateLog.setSelected(Settings.getInstance().getConsolidateLogMsg());
+    consolidateLog.setText(ResourceMgr.getString("LblConsolidateLog"));
+    consolidateLog.setToolTipText(ResourceMgr.getDescription("LblConsolidateLog"));
+    consolidateLog.setBorder(null);
+    consolidateLog.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    consolidateLog.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    consolidateLog.setIconTextGap(5);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 1, 0);
+    jPanel2.add(consolidateLog, gridBagConstraints);
+
     showTabIndex.setSelected(Settings.getInstance().getShowTabIndex());
-    showTabIndex.setText("");
+    showTabIndex.setText(ResourceMgr.getString("LblShowTabIndex"));
+    showTabIndex.setToolTipText(ResourceMgr.getDescription("LblShowTabIndex"));
     showTabIndex.setBorder(null);
     showTabIndex.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     showTabIndex.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     showTabIndex.setIconTextGap(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(4, 10, 1, 25);
-    add(showTabIndex, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(6, 25, 1, 0);
+    jPanel2.add(showTabIndex, gridBagConstraints);
+
+    enableAnimatedIcon.setSelected(Settings.getInstance().getUseAnimatedIcon());
+    enableAnimatedIcon.setText(ResourceMgr.getString("LblEnableAnimatedIcon"));
+    enableAnimatedIcon.setToolTipText(ResourceMgr.getDescription("LblEnableAnimatedIcon"));
+    enableAnimatedIcon.setBorder(null);
+    enableAnimatedIcon.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    enableAnimatedIcon.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    enableAnimatedIcon.setIconTextGap(5);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 25, 1, 0);
+    jPanel2.add(enableAnimatedIcon, gridBagConstraints);
+
+    exitOnConnectCancel.setSelected(Settings.getInstance().getExitOnFirstConnectCancel());
+    exitOnConnectCancel.setText(ResourceMgr.getString("LblExitOnConnectCancel"));
+    exitOnConnectCancel.setToolTipText(ResourceMgr.getDescription("LblExitOnConnectCancel"));
+    exitOnConnectCancel.setBorder(null);
+    exitOnConnectCancel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    exitOnConnectCancel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    exitOnConnectCancel.setIconTextGap(5);
+    exitOnConnectCancel.addActionListener(this);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 25, 1, 0);
+    jPanel2.add(exitOnConnectCancel, gridBagConstraints);
+
+    autoConnect.setSelected(Settings.getInstance().getShowConnectDialogOnStartup());
+    autoConnect.setText(ResourceMgr.getString("LblShowConnect"));
+    autoConnect.setToolTipText(ResourceMgr.getDescription("LblShowConnect"));
+    autoConnect.setBorder(null);
+    autoConnect.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    autoConnect.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    autoConnect.setIconTextGap(5);
+    autoConnect.addActionListener(this);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 1, 0);
+    jPanel2.add(autoConnect, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(13, 12, 0, 10);
+    add(jPanel2, gridBagConstraints);
+  }
+
+  // Code for dispatching events from components to event handlers.
+
+  public void actionPerformed(java.awt.event.ActionEvent evt) {
+    if (evt.getSource() == exitOnConnectCancel) {
+      GeneralOptionsPanel.this.exitOnConnectCancelActionPerformed(evt);
+    }
+    else if (evt.getSource() == autoConnect) {
+      GeneralOptionsPanel.this.autoConnectActionPerformed(evt);
+    }
   }// </editor-fold>//GEN-END:initComponents
 
+private void exitOnConnectCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitOnConnectCancelActionPerformed
+// TODO add your handling code here:
+}//GEN-LAST:event_exitOnConnectCancelActionPerformed
+
+private void autoConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_autoConnectActionPerformed
+// TODO add your handling code here:
+}//GEN-LAST:event_autoConnectActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JCheckBox autoConnect;
   private javax.swing.JComboBox checkInterval;
   private javax.swing.JLabel checkUpdatesLabel;
   private javax.swing.JCheckBox consolidateLog;
-  private javax.swing.JLabel consolidateLogLabel;
   private javax.swing.JCheckBox enableAnimatedIcon;
-  private javax.swing.JLabel enableAnimatedIconLabel;
-  private javax.swing.JPanel jPanel1;
+  private javax.swing.JCheckBox exitOnConnectCancel;
+  private javax.swing.JPanel jPanel2;
   private javax.swing.JLabel langLabel;
   private javax.swing.JComboBox languageDropDown;
   private javax.swing.JComboBox logLevel;
@@ -439,13 +455,11 @@ public class GeneralOptionsPanel
   private javax.swing.JTextField quoteCharField;
   private javax.swing.JLabel quoteCharLabel;
   private javax.swing.JCheckBox showTabIndex;
-  private javax.swing.JLabel showTabIndexLabel;
   private workbench.gui.components.WbFontPicker standardFont;
   private javax.swing.JLabel standardFontLabel;
   private javax.swing.JTextField textDelimiterField;
   private javax.swing.JLabel textDelimiterLabel;
   private javax.swing.JCheckBox useEncryption;
-  private javax.swing.JLabel useEncryptionLabel;
   // End of variables declaration//GEN-END:variables
 
 }

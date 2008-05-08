@@ -41,9 +41,8 @@ import workbench.util.SqlUtil;
  * the reference database and it is expected that both tables have the same primary 
  * key definition.
  * 
- * The primary keys of the source table are not actually checked. The column names
- * of the PK of the target table are used to retrieve the data from the source
- * table.
+ * The presence of the primary keys in the source table are not checked. The column names
+ * of the PK of the target table are used to retrieve the data from the source table.
  * 
  * @author support@sql-workbench.net
  */

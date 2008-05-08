@@ -277,23 +277,26 @@ public class SqlPanel
 
 	public SqlPanel(int anId)
 	{
+		super(new BorderLayout());
 		this.setId(anId);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.setLayout(new BorderLayout());
 
 		editor = EditorPanel.createSqlEditor();
 		statusBar = new DwStatusBar(true, true);
 		statusBar.setBorder(statusBarBorder);
 		editor.setStatusBar(statusBar);
 		editor.setBorder(new EtchedBorderTop());
+		// The name of the component is used for the Jemmy GUI Tests
 		editor.setName("sqleditor" + anId);
+		
 		log = new LogArea();
+		// The name of the component is used for the Jemmy GUI Tests
 		log.setName("msg" + anId);
 		
 		this.resultTab = new WbTabbedPane();
 		this.resultTab.setTabPlacement(JTabbedPane.TOP);
-		this.resultTab.setDoubleBuffered(true);
 		this.resultTab.setFocusable(false);
+		// The name of the component is used for the Jemmy GUI Tests
 		this.resultTab.setName("resultspane");
 
 		JScrollPane scroll = new WbScrollPane(log);
@@ -317,14 +320,11 @@ public class SqlPanel
 		s.addFontChangedListener(this);
 		s.addPropertyChangeListener(this, Settings.PROPERTY_ANIMATED_ICONS);
 
-		this.makeReadOnly();
-		this.checkResultSetActions();
-
-		this.editor.addTextChangeListener(this);
 		this.rowMonitor = new GenericRowMonitor(this.statusBar);
 
 		// The listeners have to be added as late as possible to ensure
 		// that everything is created properly in case an event is fired
+		this.editor.addTextChangeListener(this);
 		this.resultTab.addChangeListener(this);
 		this.editor.addFilenameChangeListener(this);
 	}
@@ -1272,6 +1272,11 @@ public class SqlPanel
 		this.editor.setText(aStatement);
 	}
 
+	public String toString()
+	{
+		return this.getTabTitle();
+	}
+	
 	public void disconnect()
 	{
 		synchronized (this)
@@ -2116,7 +2121,7 @@ public class SqlPanel
 		}
 	}
 
-	private void updateProxiedActions()
+	protected void updateProxiedActions()
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -2127,7 +2132,7 @@ public class SqlPanel
 		});
 	}
 	
-	private void _updateProxiedActions()
+	protected void _updateProxiedActions()
 	{
 		if (this.currentData == null)
 		{
@@ -2686,6 +2691,7 @@ public class SqlPanel
 		{
 			result.clearMessageBuffer();
 			System.gc();
+			WbManager.getInstance().outOfMemoryOcurred();
 			final boolean success = result.isSuccess();
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -3018,7 +3024,7 @@ public class SqlPanel
 		this.showIconForTab(this.getFileIcon());
 	}
 
-	private void showIconForTab(ImageIcon icon)
+	protected void showIconForTab(ImageIcon icon)
 	{
 		Container parent = this.getParent();
 		if (parent instanceof JTabbedPane)
@@ -3104,8 +3110,8 @@ public class SqlPanel
 				{
 					LogMgr.logWarning("SqlPanel.setBusy()", "Error when setting busy icon!", th);
 				}
-				tab.invalidate();
-				WbSwingUtilities.repaintLater(tab);
+				tab.validate();
+				tab.repaint();
 			}
 		}
 	}

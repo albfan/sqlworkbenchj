@@ -15,7 +15,7 @@ import workbench.resource.Settings;
 
 /**
  * Toggle the display of line numbers in the editor
- *	@author  support@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class ViewLineNumbers 
 	extends CheckBoxAction
@@ -24,6 +24,5 @@ public class ViewLineNumbers
 	{
 		super("MnuTxtShowLineNumbers", Settings.PROPERTY_SHOW_LINE_NUMBERS);
 	}
-
 
 }

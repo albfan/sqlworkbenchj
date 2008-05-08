@@ -44,6 +44,7 @@ public class KeepAliveDaemon
 		this.shutdown();
 		LogMgr.logInfo("KeepAliveDaemon.startThread()", "Initializing keep alive every " + getTimeDisplay(idleTime) + " with sql: " + this.sqlScript);
 		this.idleThread = new WbThread(this, "KeepAlive/" + this.dbConnection.getId());
+		this.idleThread.setPriority(Thread.MIN_PRIORITY);
 		this.lastAction = 0;
 		this.stopThread = false;
 		this.idleThread.start();

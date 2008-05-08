@@ -29,6 +29,7 @@ public class FileDisconnectAction
 		super();
 		this.window = aWindow;
 		this.initMenuDefinition("MnuTxtDisconnect");
+		setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)

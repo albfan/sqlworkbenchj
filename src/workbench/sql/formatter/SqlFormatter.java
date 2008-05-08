@@ -505,7 +505,6 @@ public class SqlFormatter
 				if (!isSelect) 
 				{
 					caseIndent = this.getCurrentLineLength() - 4;
-					this.appendText(' ');
 				}
 				t = processCase(caseIndent);
 				continue;
@@ -715,13 +714,11 @@ public class SqlFormatter
 				this.appendNewline();
 				this.indent(b);
 				this.appendText(text);
-				appendText(' ');
 			}
 			else if ("THEN".equals(text))
 			{
 				if (last != null && this.needsWhitespace(last, t)) appendText(' ');
 				this.appendText(text);
-				appendText(' ');
 			}
 			else if ("END".equals(text) || "END CASE".equals(text))
 			{
@@ -751,8 +748,12 @@ public class SqlFormatter
 			{
 				this.appendComment(text);
 			}
-			else if (!t.isWhiteSpace())
+			else
 			{
+				if (last == null || this.needsWhitespace(last, t))
+				{
+					this.appendText(' ');
+				}
 				this.appendTokenText(t);
 			}
 			last = t;

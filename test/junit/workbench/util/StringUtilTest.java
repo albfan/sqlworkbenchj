@@ -254,14 +254,14 @@ public class StringUtilTest
 	public void testEncodeUnicode()
 	{
 		String value = "\u00E4";
-		String enc = StringUtil.escapeUnicode(value, null, CharacterRange.RANGE_7BIT);
+		String enc = StringUtil.escapeUnicode(value, CharacterRange.RANGE_7BIT, null);
 		assertEquals("Umlaut not replaced", "\\u00E4", enc);
 		
 		value = "\n";
 //		enc = StringUtil.escapeUnicode(value, null, CharacterRange.RANGE_7BIT, true);
 //		assertEquals("NL not replaced" , "\\u000A", enc);
 		
-		enc = StringUtil.escapeUnicode(value, null, CharacterRange.RANGE_7BIT);
+		enc = StringUtil.escapeUnicode(value, CharacterRange.RANGE_7BIT, null);
 		assertEquals("NL not replaced" , "\\n", enc);
 		
 //		value = "abcdefghijk";

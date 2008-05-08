@@ -10,5 +10,7 @@ package workbench.interfaces;
  */
 public interface Moveable
 {
+	void startMove();
+	void endMove(int finalIndex);
 	void moveTab(int oldIndex, int newIndex);
 }

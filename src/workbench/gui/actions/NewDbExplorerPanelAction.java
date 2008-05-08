@@ -27,6 +27,7 @@ public class NewDbExplorerPanelAction
 	public NewDbExplorerPanelAction(MainWindow aWindow)
 	{
 		this(aWindow, "MnuTxtNewExplorerPanel");
+		setEnabled(false);
 	}
 	
 	public NewDbExplorerPanelAction(MainWindow aWindow, String key)

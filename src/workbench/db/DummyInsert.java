@@ -96,7 +96,8 @@ public class DummyInsert
 				dummyData.setValue(i, dummy);
 			}
 		}
-		DmlStatement stmt = factory.createInsertStatement(dummyData, true);
+		String le = Settings.getInstance().getInternalEditorLineEnding();
+		DmlStatement stmt = factory.createInsertStatement(dummyData, true, le);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		String sql = stmt.getExecutableStatement(f) + ";" + nl;
 		return sql;

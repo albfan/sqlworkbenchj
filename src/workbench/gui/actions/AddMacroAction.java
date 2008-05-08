@@ -36,6 +36,7 @@ public class AddMacroAction extends WbAction
 		this.setIcon(null);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
 		this.initMenuDefinition("MnuTxtAddMacro", null);
+		setEnabled(false);
 	}
 
 	public void setClient(EditorPanel panel)

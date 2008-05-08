@@ -11,6 +11,7 @@
  */
 package workbench.util;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,6 +31,7 @@ import workbench.log.LogMgr;
  * @author  support@sql-workbench.net
  */
 public class WbWorkspace
+	implements Closeable
 {
 	private ZipOutputStream zout;
 	private ZipFile archive;

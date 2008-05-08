@@ -47,7 +47,6 @@ import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.lnf.LnFDefinition;
 import workbench.gui.lnf.LnFLoader;
-import workbench.gui.tools.DataPumper;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
@@ -62,6 +61,7 @@ import workbench.gui.dialogs.WbSplash;
 import workbench.gui.filter.FilterDefinitionManager;
 import workbench.gui.lnf.LnFManager;
 import workbench.gui.profiles.ProfileKey;
+import workbench.gui.tools.DataPumper;
 import workbench.util.UpdateCheck;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
@@ -80,6 +80,7 @@ public class WbManager
 	private List<ToolWindow> toolWindows = Collections.synchronizedList(new ArrayList<ToolWindow>(5));
 	private boolean batchMode = false;
 	private boolean writeSettings = true;
+	private boolean overWriteGlobalSettingsFile = true;
 	private boolean outOfMemoryOcurred = false;
 	private WbThread shutdownHook = new WbThread(this, "ShutdownHook");
 	private AppArguments cmdLine = new AppArguments();
@@ -242,7 +243,7 @@ public class WbManager
 			UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
 
 			// Remove Synthetica's own window decorations
-			UIManager.put("Synthetica.window.decoration", Boolean.FALSE);
+			//UIManager.put("Synthetica.window.decoration", Boolean.FALSE);
 
 			// Remove the extra icons for read only text fields and
 			// the "search bar" in the main menu for the Substance Look & Feel
@@ -335,7 +336,8 @@ public class WbManager
 	private void initUI()
 	{
 		UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
-
+		UIManager.put("swing.boldMetal", Boolean.FALSE); 
+		
 		this.initializeLookAndFeel();
 
 		Settings settings = Settings.getInstance();
@@ -395,7 +397,7 @@ public class WbManager
 		settings.addFontChangedListener(this);
 	}
 
-	private JDialog closeMessage;
+	protected JDialog closeMessage;
 
 	private boolean saveWindowSettings()
 	{
@@ -444,7 +446,21 @@ public class WbManager
 
 	public boolean canExit()
 	{
-		return this.saveWindowSettings();
+		if (this.saveWindowSettings())
+		{
+			if (Settings.getInstance().wasExternallyModified())
+			{
+				String msg = ResourceMgr.getFormattedString("MsgSettingsChanged", Settings.getInstance().getConfigFile().getFullPath());
+				int result = WbSwingUtilities.getYesNoCancel(getCurrentWindow(), msg);
+				this.overWriteGlobalSettingsFile = (result == JOptionPane.OK_OPTION);
+				return result != JOptionPane.CANCEL_OPTION;
+			}
+			return true;
+		}
+		else 
+		{
+			return false;
+		}
 	}
 
 	public void exitWorkbench()
@@ -457,8 +473,7 @@ public class WbManager
 	{
 		// saveSettings() will also prompt if any modified
 		// files should be changed
-		boolean canExit = this.saveWindowSettings();
-		if (!canExit)
+		if (!canExit())
 		{
 			LogMgr.logInfo("WbManaer.exitWorkbench()", "Exiting application was cancelled during saveWindowSettings()");
 			return false;
@@ -580,7 +595,7 @@ public class WbManager
 		{
 			Settings s = Settings.getInstance();
 			FilterDefinitionManager.getInstance().saveMRUList();
-			if (s != null) s.saveSettings(outOfMemoryOcurred);
+			if (s != null && overWriteGlobalSettingsFile) s.saveSettings(outOfMemoryOcurred);
 		}
 	}
 
@@ -652,6 +667,12 @@ public class WbManager
 		}
 	}
 
+	/**
+	 * Called whenever a MainWindow is closed.
+	 * 
+	 * @see workbench.gui.MainWindow#windowClosing(java.awt.event.WindowEvent) 
+	 * @see workbench.gui.MainWindow#connectCancelled() 
+	 */
 	public void windowClosing(final MainWindow win)
 	{
 		if (this.mainWindows.size() == 1)
@@ -659,7 +680,7 @@ public class WbManager
 			// If only one window is present, shut down the application
 			this.exitWorkbench(win);
 		}
-		else
+		else if (win != null)
 		{
 			if (!win.saveWorkspace()) return;
 			this.mainWindows.remove(win);
@@ -673,6 +694,8 @@ public class WbManager
 	 *
 	 * This method will be called from the GUI
 	 * when the user requests a new window
+	 * 
+	 * @see workbench.gui.actions.FileNewWindowAction
 	 */
 	public void openNewWindow()
 	{
@@ -723,7 +746,7 @@ public class WbManager
 			}
 		}
 
-		boolean autoSelect = Settings.getInstance().getBoolProperty("workbench.gui.autoconnect", true);
+		boolean autoSelect = Settings.getInstance().getShowConnectDialogOnStartup();
 		boolean exitOnCancel = Settings.getInstance().getExitOnFirstConnectCancel();
 
 		// no connection? then display the connection dialog
@@ -771,7 +794,7 @@ public class WbManager
 
 			// Make sure the Settings object is (re)initialized properly now that
 			// some system properties have been read from the commandline
-			// this is especially necessary during Junit tests to make
+			// this is especially necessary during JUnit tests to make
 			// sure a newly passed commandline overrules the previously initialized
 			// Settings instance
 			Settings.getInstance().initialize();
@@ -826,7 +849,7 @@ public class WbManager
 			{
 				this.writeSettings = false;
 			}
-			
+
 			if (cmdLine.hasUnknownArguments())
 			{
 				String unknown = cmdLine.getUnknownArguments();
@@ -857,6 +880,22 @@ public class WbManager
 		}
 		else
 		{
+			// Start a background thread to read the XML files
+			// for profiles and drivers. I think this improves
+			// startup performance because this can be done in 
+			// parallel while the MainWindow is initializing
+			// especially on a multi-core computer this should
+			// show some improvement - I hope :) 
+			WbThread init = new WbThread("Background Init") 
+			{
+				public void run()
+				{
+					ConnectionMgr.getInstance().getDrivers();
+					ConnectionMgr.getInstance().getProfiles();
+				}
+			};
+			init.start();
+			
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
@@ -875,7 +914,7 @@ public class WbManager
 			splash = new WbSplash();
 			splash.setVisible(true);
 		}
-		
+
 		// This will install the application listener if running under MacOS
 		MacOSHelper m = new MacOSHelper();
 		m.installApplicationHandler();
@@ -883,14 +922,13 @@ public class WbManager
 		try
 		{
 			this.initUI();
-
+			
 			boolean pumper = cmdLine.isArgPresent(AppArguments.ARG_SHOW_PUMPER);
 			boolean explorer = cmdLine.isArgPresent(AppArguments.ARG_SHOW_DBEXP);
 
 			if (pumper)
 			{
-				DataPumper p = new DataPumper(null, null);
-				p.showWindow(null);
+				new DataPumper().showWindow();
 			}
 			else if (explorer)
 			{
@@ -900,7 +938,7 @@ public class WbManager
 			{
 				openNewWindow(true);
 			}
-			
+
 			UpdateCheck upd = new UpdateCheck();
 			upd.startUpdateCheck();
 		}

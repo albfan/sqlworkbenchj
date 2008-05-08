@@ -215,7 +215,7 @@ keyword=("ABORT"|
 "COMMITTED"|
 "COMPLETION"|
 "CONDITION_NUMBER"|
-"CONNECT BY"|
+"CONNECT[ \t\r\n]+BY"|
 "CONNECT"|
 "CONNECTION"|
 "CONNECTION_NAME"|
@@ -266,6 +266,7 @@ keyword=("ABORT"|
 "DELIMITERS"|
 "DEPTH"|
 "DEREF"|
+"DENSE_RANK"|
 "DESC"|
 "DESCRIBE"|
 "DESCRIPTOR"|
@@ -457,6 +458,7 @@ keyword=("ABORT"|
 "ORGANIZATION"|
 "OUT"|
 "OUTPUT"|
+"OVER"|
 "OVERLAPS"|
 "OVERLAY"|
 "OVERRIDING"|
@@ -644,6 +646,7 @@ IS[ \t\r\n]+NULL|
 NOT[ \t\r\n]+NULL|
 IS[ \t\r\n]+NOT[ \t\r\n]+NULL|
 UNION[ \t\r\n]+ALL|
+PARTITION[ \t\r\n]+BY|
 GROUP[ \t\r\n]+BY|
 ORDER[ \t\r\n]+BY|
 NOT[ \t\r\n]+DEFERRABLE|

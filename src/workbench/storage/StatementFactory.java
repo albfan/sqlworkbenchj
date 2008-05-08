@@ -161,11 +161,6 @@ public class StatementFactory
 		return dml;
 	}
 
-	public DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus)
-	{
-		return this.createInsertStatement(aRow, ignoreStatus, "\n", null);
-	}
-
 	public DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
 	{
 		return this.createInsertStatement(aRow, ignoreStatus, lineEnd, null);
@@ -375,9 +370,21 @@ public class StatementFactory
 		this.tableToUse = tableToUse;
 	}
 
-	public void setIncludeTableOwner(boolean flag) { this.includeTableOwner = flag; }
-	public boolean getIncludeTableOwner() { return this.includeTableOwner; }
-
+	public void setIncludeTableOwner(boolean flag) 
+	{ 
+		this.includeTableOwner = flag; 
+	}
+	
+	public void setEmptyStringIsNull(boolean flag)
+	{
+		this.emptyStringIsNull = flag;
+	}
+	
+	public void setIncludeNullInInsert(boolean flag)
+	{
+		this.includeNullInInsert = flag;
+	}
+	
 	public void setCurrentConnection(WbConnection conn)
 	{
 		this.dbConnection = conn;

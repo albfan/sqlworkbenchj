@@ -290,7 +290,7 @@ public class ConnectionMgr
 	 *	Returns a List of registered drivers.
 	 *	This list is read from WbDrivers.xml
 	 */
-	public List<DbDriver> getDrivers()
+	public synchronized List<DbDriver> getDrivers()
 	{
 		if (this.drivers == null)
 		{

@@ -54,6 +54,10 @@ public class VersionNumberTest extends TestCase
 		assertTrue(stable.isNewerThan(current));
 		assertFalse(current.isNewerThan(stable));
 		
+		VersionNumber v2 = new VersionNumber("96.9");
+		assertTrue(v2.isNewerOrEqual(current));
+		VersionNumber v3 = new VersionNumber("96.8");
+		assertTrue(v3.isNewerOrEqual(current));
 	}
 	
 }

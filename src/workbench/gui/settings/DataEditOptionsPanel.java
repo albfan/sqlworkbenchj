@@ -145,7 +145,7 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 4, 0, 25);
+    gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 25);
     add(requiredFieldColor, gridBagConstraints);
 
     highlightRequiredLabel.setLabelFor(highlightRequired);

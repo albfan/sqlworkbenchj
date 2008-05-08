@@ -38,9 +38,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.util.Enumeration;
-import java.util.Vector;
 
+import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
@@ -135,8 +134,8 @@ public class JEditTextArea
 	protected boolean caretVisible;
 	protected boolean blink;
 
-	protected boolean editable;
-	protected boolean autoIndent;
+	protected boolean editable = true;
+	protected boolean autoIndent = true;
 
 	protected int firstLine;
 	protected int visibleLines;
@@ -192,9 +191,11 @@ public class JEditTextArea
 
 		// Initialize the GUI
 		setLayout(new ScrollLayout());
-		add(CENTER,painter);
-		add(RIGHT,vertical = new JScrollBar(JScrollBar.VERTICAL));
-		add(BOTTOM,horizontal = new JScrollBar(JScrollBar.HORIZONTAL));
+		add(CENTER, painter);
+		vertical = new JScrollBar(JScrollBar.VERTICAL);
+		horizontal = new JScrollBar(JScrollBar.HORIZONTAL);
+//		add(RIGHT, vertical);
+//		add(BOTTOM, horizontal);
 
 		// Add some event listeners
 		vertical.addAdjustmentListener(new AdjustHandler());
@@ -209,14 +210,12 @@ public class JEditTextArea
 		setInputHandler(new DefaultInputHandler());
 		this.inputHandler.addDefaultKeyBindings();
 		setDocument(new SyntaxDocument());
-		editable = true;
 		
 		// Let the focusGained() event display the caret
 		caretVisible = false;
 		caretBlinks = true;
 		
 		electricScroll = Settings.getInstance().getElectricScroll();
-		autoIndent = true;
 		this.setTabSize(Settings.getInstance().getEditorTabWidth());
 		this.popup = new TextPopup(this);
 
@@ -255,15 +254,15 @@ public class JEditTextArea
 		return new Point(x,y);
 	}
 	
-	public void setShowLineNumbers(boolean aFlag)
-	{
-		this.painter.setShowLineNumbers(aFlag);
-	}
-
-	public boolean getShowLineNumbers()
-	{
-		return this.painter.getShowLineNumbers();
-	}
+//	public void setShowLineNumbers(boolean aFlag)
+//	{
+//		this.painter.setShowLineNumbers(aFlag);
+//	}
+//
+//	public boolean getShowLineNumbers()
+//	{
+//		return this.painter.getShowLineNumbers();
+//	}
 
 	private String fixLinefeed(String input)
 	{
@@ -514,10 +513,15 @@ public class JEditTextArea
 			if (visibleLines > getLineCount())
 			{
 				setFirstLine(0);
+				remove(vertical);
+			}
+			else
+			{
+				add(RIGHT, vertical);
 			}
 		}
-
-		int charWidth = painter.getFontMetrics().charWidth('w');
+		
+		int charWidth = painter.getFontMetrics().charWidth('M');
 		int maxLineLength = getDocument().getMaxLineLength();
 		int maxLineWidth = (charWidth * maxLineLength) + this.painter.getGutterWidth() + 10;
 		int width = painter.getWidth();
@@ -526,6 +530,14 @@ public class JEditTextArea
 			horizontal.setValues(-horizontalOffset, width, 0, maxLineWidth);
 			horizontal.setUnitIncrement(charWidth);
 			horizontal.setBlockIncrement(width / 3);
+			if (maxLineWidth < width)
+			{
+				remove(horizontal);
+			}
+			else
+			{
+				add(BOTTOM, horizontal);
+			}
 		}
 	}
 
@@ -704,10 +716,7 @@ public class JEditTextArea
 		else if (x + width >= pwidth)
 		{
 			newHorizontalOffset = horizontalOffset + (pwidth - x) - width - 5;
-			if (this.painter.getShowLineNumbers())
-			{
-				newHorizontalOffset -= painter.getGutterWidth();
-			}
+			newHorizontalOffset -= painter.getGutterWidth();
 		}
 
 		return setOrigin(newFirstLine, newHorizontalOffset);
@@ -2292,24 +2301,38 @@ public class JEditTextArea
 	{
 		public void addLayoutComponent(String name, Component comp)
 		{
-			if(name.equals(CENTER))
+			if (name.equals(CENTER))
+			{
 				center = comp;
-			else if(name.equals(RIGHT))
+			}
+			else if (name.equals(RIGHT))
+			{
 				right = comp;
-			else if(name.equals(BOTTOM))
+			}
+			else if (name.equals(BOTTOM))
+			{
 				bottom = comp;
+			}
 		}
 
 		public void removeLayoutComponent(Component comp)
 		{
-			if(center == comp)
+			if (center == comp)
+			{
 				center = null;
-			if(right == comp)
+			}
+			if (right == comp)
+			{
 				right = null;
-			if(bottom == comp)
+			}
+			if (bottom == comp)
+			{
 				bottom = null;
+			}
 			else
-				leftOfScrollBar.removeElement(comp);
+			{
+				leftOfScrollBar.remove(comp);
+			}
 		}
 
 		public Dimension preferredLayoutSize(Container parent)
@@ -2322,11 +2345,16 @@ public class JEditTextArea
 			Dimension centerPref = center.getPreferredSize();
 			dim.width += centerPref.width;
 			dim.height += centerPref.height;
-			Dimension rightPref = right.getPreferredSize();
-			dim.width += rightPref.width;
-			Dimension bottomPref = bottom.getPreferredSize();
-			dim.height += bottomPref.height;
-
+			if (right != null)
+			{
+				Dimension rightPref = right.getPreferredSize();
+				dim.width += rightPref.width;
+			}
+			if (bottom != null)
+			{
+				Dimension bottomPref = bottom.getPreferredSize();
+				dim.height += bottomPref.height;
+			}
 			return dim;
 		}
 
@@ -2340,11 +2368,17 @@ public class JEditTextArea
 			Dimension centerPref = center.getMinimumSize();
 			dim.width += centerPref.width;
 			dim.height += centerPref.height;
-			Dimension rightPref = right.getMinimumSize();
-			dim.width += rightPref.width;
-			Dimension bottomPref = bottom.getMinimumSize();
-			dim.height += bottomPref.height;
-
+			if (right != null)
+			{
+				Dimension rightPref = right.getMinimumSize();
+				dim.width += rightPref.width;
+			}
+			
+			if (bottom != null)
+			{
+				Dimension bottomPref = bottom.getMinimumSize();
+				dim.height += bottomPref.height;
+			}
 			return dim;
 		}
 
@@ -2357,48 +2391,37 @@ public class JEditTextArea
 			int ibottom = insets.bottom;
 			int iright = insets.right;
 
-			int rightWidth = right.getPreferredSize().width;
-			int bottomHeight = bottom.getPreferredSize().height;
+			int rightWidth = right != null ? right.getPreferredSize().width : 0;
+			int bottomHeight = bottom != null ? bottom.getPreferredSize().height : 0;
 			int centerWidth = size.width - rightWidth - ileft - iright;
 			int centerHeight = size.height - bottomHeight - itop - ibottom;
 
-			center.setBounds(
-				ileft,
-				itop,
-				centerWidth,
-				centerHeight);
+			center.setBounds(ileft, itop, centerWidth, centerHeight);
 
-			right.setBounds(
-				ileft + centerWidth,
-				itop,
-				rightWidth,
-				centerHeight);
+			if (right != null)
+			{
+				right.setBounds(ileft + centerWidth, itop, rightWidth, centerHeight);
+			}
 
 			// Lay out all status components, in order
-			Enumeration status = leftOfScrollBar.elements();
-			while(status.hasMoreElements())
+			for (Component comp : leftOfScrollBar)
 			{
-				Component comp = (Component)status.nextElement();
 				Dimension dim = comp.getPreferredSize();
-				comp.setBounds(ileft,
-					itop + centerHeight,
-					dim.width,
-					bottomHeight);
+				comp.setBounds(ileft, itop + centerHeight, dim.width, bottomHeight);
 				ileft += dim.width;
 			}
 
-			bottom.setBounds(
-				ileft,
-				itop + centerHeight,
-				size.width - rightWidth - ileft - iright,
-				bottomHeight);
+			if (bottom != null)
+			{
+				bottom.setBounds(ileft, itop + centerHeight, size.width - rightWidth - ileft - iright, bottomHeight);
+			}
 		}
 
 		// private members
 		private Component center;
 		private Component right;
 		private Component bottom;
-		private Vector leftOfScrollBar = new Vector();
+		private ArrayList<Component> leftOfScrollBar = new ArrayList<Component>();
 	}
 		
 	class MutableCaretEvent extends CaretEvent

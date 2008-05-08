@@ -67,14 +67,18 @@ public class FilterPickerAction
 			{
 				FilterExpression f = FilterDefinitionManager.getInstance().loadFilter(file);
 				this.client.applyFilter(f);
+				
+				String tooltip = "<html>" + ResourceMgr.getDescription("MnuTxtPickFilter");
+				tooltip += "<br>(" + file + ")</html>";
+				dropDownButton.setToolTipText(tooltip);
 			}
 			catch (Exception ex)
 			{
 				LogMgr.logError("FilterPickerAction.actionPerformed()", "Error loading filter", ex);
 				Window w = SwingUtilities.getWindowAncestor(this.client);
 				WbSwingUtilities.showErrorMessage(w, "Could not load filter: " + ex.getMessage());
+				dropDownButton.setToolTipText(ResourceMgr.getDescription("MnuTxtPickFilter"));
 			}
-
 		}
 	}
 

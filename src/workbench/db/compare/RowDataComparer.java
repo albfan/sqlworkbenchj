@@ -11,6 +11,7 @@
  */
 package workbench.db.compare;
 
+import workbench.resource.Settings;
 import workbench.storage.DmlStatement;
 import workbench.storage.RowData;
 import workbench.storage.StatementFactory;
@@ -26,11 +27,6 @@ public class RowDataComparer
 {
 	private RowData migrationData;
 	private boolean targetWasNull;
-	private boolean createDeleteForMissing = false;
-	public RowDataComparer(RowData referenceRow, RowData targetRow)
-	{
-		this(referenceRow, targetRow, false);
-	}
 	
 	/**
 	 * Compares two database rows.
@@ -38,14 +34,12 @@ public class RowDataComparer
 	 * 
 	 * @param referenceRow
 	 * @param targetRow
-	 * @param deleteMissing
 	 */
-	public RowDataComparer(RowData referenceRow, RowData targetRow, boolean deleteMissing)
+	public RowDataComparer(RowData referenceRow, RowData targetRow)
 	{
 		int cols = referenceRow.getColumnCount();
-		if (migrationData == null)
+		if (targetRow == null)
 		{
-			createDeleteForMissing = deleteMissing;
 			targetWasNull = true;
 			migrationData = referenceRow.createCopy();
 			migrationData.resetStatus();
@@ -71,21 +65,16 @@ public class RowDataComparer
 	
 	public DmlStatement getMigrationSql(StatementFactory factory)
 	{
+		String le = Settings.getInstance().getInternalEditorLineEnding();
+
 		DmlStatement result = null;
 		if (targetWasNull)
 		{
-			if (createDeleteForMissing)
-			{
-				result = factory.createDeleteStatement(migrationData, true);
-			}
-			else
-			{
-				result = factory.createInsertStatement(migrationData, true);
-			}
+			result = factory.createInsertStatement(migrationData, true, le);
 		}
 		else
 		{
-			result = factory.createUpdateStatement(migrationData, false, "\n");
+			result = factory.createUpdateStatement(migrationData, false, le);
 		}
 		return result;
 	}

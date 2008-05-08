@@ -15,7 +15,6 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Insets;
-import java.awt.Insets;
 import java.awt.dnd.DragSource;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -148,10 +147,18 @@ public class WbTabbedPane
 	public void mousePressed(MouseEvent e)
 	{
 		draggedTabIndex = getUI().tabForCoordinate(this, e.getX(), e.getY());
+		if (this.tabMover != null)
+		{
+			this.tabMover.startMove();
+		}
 	}
 
 	public void mouseReleased(MouseEvent e)
 	{
+		if (this.tabMover != null)
+		{
+			this.tabMover.endMove(draggedTabIndex);
+		}
 		draggedTabIndex = -1;
 		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	}

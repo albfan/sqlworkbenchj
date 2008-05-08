@@ -163,7 +163,6 @@ public class ConnectionSelector
 				{
 					connectLabel.setText(msg);
 					connectingInfo.pack();
-					WbSwingUtilities.callRepaint(connectingInfo);
 				}
 				else
 				{
@@ -184,11 +183,12 @@ public class ConnectionSelector
 					WbSwingUtilities.center(connectingInfo, parent);
 					connectingInfo.setVisible(true);
 				}
+				WbSwingUtilities.callRepaint(connectingInfo);
 			}
 		});
 	}
 
-	private void doConnect(final ConnectionProfile aProfile, final boolean showSelectDialogOnError)
+	protected void doConnect(final ConnectionProfile aProfile, final boolean showSelectDialogOnError)
 	{
 		if (isConnectInProgress()) return;
 		
@@ -196,8 +196,13 @@ public class ConnectionSelector
 		String error = null;
 		
 		this.setConnectIsInProgress();
-		
-		this.client.connectBegin(aProfile);
+//		WbSwingUtilities.invoke(new Runnable()
+//		{
+//			public void run()
+//			{
+				client.connectBegin(aProfile);
+//			}
+//		});
 		
 		String id = this.client.getConnectionId(aProfile);
 		try

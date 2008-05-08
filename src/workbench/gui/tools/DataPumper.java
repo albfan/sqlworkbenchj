@@ -97,6 +97,11 @@ public class DataPumper
 	// used in the Jemmy Unit Test to wait for the connection thread
 	boolean isConnecting = false;
 	
+	public DataPumper()
+	{
+		this(null, null);
+	}
+	
 	public DataPumper(ConnectionProfile source, ConnectionProfile target)
 	{
 		this.sourceProfile = source;
@@ -1003,6 +1008,11 @@ public class DataPumper
   protected javax.swing.JPanel wherePanel;
   // End of variables declaration//GEN-END:variables
 
+	public void showWindow()
+	{
+		showWindow(null);
+	}
+	
 	public void showWindow(MainWindow aParent)
 	{
 //		this.mainWindow = aParent;

@@ -28,6 +28,7 @@ public class NewDbExplorerWindowAction
 		super();
 		mainWin = aWindow;
 		this.initMenuDefinition("MnuTxtNewExplorerWindow");
+		setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)

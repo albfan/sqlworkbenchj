@@ -151,7 +151,6 @@ public class EditorPanel
 	{
 		super();
 		this.setDoubleBuffered(true);
-		this.setFont(Settings.getInstance().getEditorFont());
 		this.setBorder(DEFAULT_BORDER);
 
 		this.getPainter().setStyles(SyntaxUtilities.getDefaultSyntaxStyles());
@@ -176,7 +175,6 @@ public class EditorPanel
 
 		this.setMaximumSize(null);
 		this.setPreferredSize(null);
-		this.setShowLineNumbers(Settings.getInstance().getShowLineNumbers());
 
 		this.columnSelection = new ColumnSelectionAction(this);
 		this.matchBracket = new MatchBracketAction(this);
@@ -188,14 +186,13 @@ public class EditorPanel
 		this.addKeyBinding(this.unCommentAction);
 
 		Settings.getInstance().addFontChangedListener(this);
-		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_SHOW_LINE_NUMBERS, Settings.PROPERTY_EDITOR_TAB_WIDTH, Settings.PROPERTY_EDITOR_ELECTRIC_SCROLL);
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_TAB_WIDTH, Settings.PROPERTY_EDITOR_ELECTRIC_SCROLL);
 		this.setRightClickMovesCursor(Settings.getInstance().getRightClickMovesCursor());
 		new DropTarget(this, DnDConstants.ACTION_COPY, this);
 	}
 
 	public void disableSqlHighlight()
 	{
-//		this.sqlTokenMarker = null;
 		this.setTokenMarker(null);
 	}
 	
@@ -788,11 +785,7 @@ public class EditorPanel
 	 */
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (Settings.PROPERTY_SHOW_LINE_NUMBERS.equals(evt.getPropertyName()))
-		{
-			this.setShowLineNumbers(Settings.getInstance().getShowLineNumbers());
-		}
-		else if (Settings.PROPERTY_EDITOR_TAB_WIDTH.equals(evt.getPropertyName()))
+		if (Settings.PROPERTY_EDITOR_TAB_WIDTH.equals(evt.getPropertyName()))
 		{
 			this.setTabSize(Settings.getInstance().getEditorTabWidth());
 		}

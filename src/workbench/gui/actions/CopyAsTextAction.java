@@ -39,6 +39,7 @@ public class CopyAsTextAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.initMenuDefinition("MnuTxtDataToClipboard", KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
 		copySelected = false;
+		this.setEnabled(false);
 	}
 
 	public boolean hasCtrlModifier() { return true; }

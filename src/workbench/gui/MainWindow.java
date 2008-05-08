@@ -16,6 +16,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
+import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -109,6 +110,7 @@ import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.interfaces.ToolWindow;
+import workbench.util.FileUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.WbFile;
 
@@ -194,14 +196,12 @@ public class MainWindow
 		this.getContentPane().add(this.sqlTab, BorderLayout.CENTER);
 
 		this.restoreSettings();
-		
-		this.checkWorkspaceActions();
 
 		this.sqlTab.addChangeListener(this);
 		this.sqlTab.addMouseListener(this);
-
 		this.addWindowListener(this);
 		MacroManager.getInstance().addChangeListener(this);
+		
 		this.jobIndicator = new RunningJobIndicator(this);
 		
 		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
@@ -306,7 +306,6 @@ public class MainWindow
 	private void initMenu()
 	{
 		this.disconnectAction = new FileDisconnectAction(this);
-		this.disconnectAction.setEnabled(false);
 		this.assignWorkspaceAction = new AssignWorkspaceAction(this);
 		this.closeWorkspaceAction = new CloseWorkspaceAction(this);
 		this.saveAsWorkspaceAction = new SaveAsNewWorkspaceAction(this);
@@ -318,18 +317,11 @@ public class MainWindow
 		this.saveWorkspaceAction = new SaveWorkspaceAction(this);
 		
 		this.createMacro = new AddMacroAction();
-		
-		this.createMacro.setEnabled(false);
 		this.manageMacros = new ManageMacroAction(this);
 
 		this.dbExplorerAction = new ShowDbExplorerAction(this);
-		this.dbExplorerAction.setEnabled(false);
-
 		this.newDbExplorerPanel = new NewDbExplorerPanelAction(this);
-		this.newDbExplorerPanel.setEnabled(false);
-
 		this.newDbExplorerWindow = new NewDbExplorerWindowAction(this);
-		this.newDbExplorerWindow.setEnabled(false);
 
 		int tabCount = this.sqlTab.getTabCount();
 		for (int tab=0; tab < tabCount; tab ++)
@@ -1111,9 +1103,8 @@ public class MainWindow
 		this.currentProfile = aProfile;
 		
 		showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
-		loadWorkspaceForProfile(this.currentProfile);
-		
-		Settings.getInstance().setLastConnection(this.currentProfile);
+		loadWorkspaceForProfile(currentProfile);
+		Settings.getInstance().setLastConnection(currentProfile);
 		showStatusMessage(ResourceMgr.getString("MsgConnecting"));
 	}
 
@@ -1168,6 +1159,7 @@ public class MainWindow
 		{
 			this.setConnection(conn);
 		}
+		
 		this.setMacroMenuEnabled(true);
 		this.updateWindowTitle();
 
@@ -1283,6 +1275,7 @@ public class MainWindow
 	
 	private boolean resultForWorkspaceClose;
 	
+	
 	public boolean loadWorkspace(String filename)
 	{
 		if (filename == null) return false;
@@ -1302,34 +1295,35 @@ public class MainWindow
 
 		this.currentWorkspaceFile = null;
 		this.resultForWorkspaceClose = false;
+		this.closeWorkspace(false);
 		
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
-				WbWorkspace w  = null;
+				WbWorkspace w = null;
 				try
 				{
-					//removeAllPanels();
-					
 					w = new WbWorkspace(realFilename, false);
 					int entryCount = w.getEntryCount();
-					if (entryCount == 0) entryCount = 1;
-					
+					if (entryCount == 0)
+					{
+						entryCount = 1;
+					}
 					adjustTabCount(entryCount);
 
 					int explorerCount = w.getDbExplorerVisibleCount();
-					
+
 					adjustDbExplorerCount(explorerCount);
 
 					int count = sqlTab.getTabCount();
-					for (int i=0; i < count; i++)
+					for (int i = 0; i < count; i++)
 					{
 						MainPanel p = getSqlPanel(i);
-						p.readFromWorkspace(w,i);
+						p.readFromWorkspace(w, i);
 						if (p instanceof SqlPanel)
 						{
-							SqlPanel sql = (SqlPanel)p;
+							SqlPanel sql = (SqlPanel) p;
 							updateViewMenu(i, getPlainTabTitle(i));
 						}
 					}
@@ -1343,6 +1337,13 @@ public class MainWindow
 						sqlTab.setSelectedIndex(newIndex);
 					}
 					resultForWorkspaceClose = true;
+					
+					updateWindowTitle();
+					checkWorkspaceActions();
+					updateAddMacroAction();
+					MainPanel p = getCurrentPanel();
+					checkConnectionForPanel(p);
+					updateGuiForTab(sqlTab.getSelectedIndex());
 				}
 				catch (Throwable e)
 				{
@@ -1351,15 +1352,12 @@ public class MainWindow
 				}
 				finally
 				{
-					try { w.close(); } catch (Throwable th) {}
+					FileUtil.closeQuitely(w);
 				}
-
-				validate();
-				updateWindowTitle();
-				checkWorkspaceActions();
-				updateAddMacroAction();
 			}
 		});
+		
+		WbSwingUtilities.repaintLater(this);
 		
 		return resultForWorkspaceClose;
 	}
@@ -1453,7 +1451,7 @@ public class MainWindow
 	/**
 	 *	This does the real disconnect action.
 	 */
-	private void doDisconnect()
+	protected void doDisconnect()
 	{
 		try
 		{
@@ -1491,7 +1489,7 @@ public class MainWindow
 		}
 	}
 
-	private void disconnected()
+	protected void disconnected()
 	{
 		this.currentProfile = null;
 		this.currentConnection = null;
@@ -1642,7 +1640,7 @@ public class MainWindow
 		return null;
 	}
 
-	private void updateViewMenu(int sqlTabIndex, String aName)
+	protected void updateViewMenu(int sqlTabIndex, String aName)
 	{
 		int panelCount = this.panelMenus.size();
 		if (aName == null) aName = ResourceMgr.getDefaultTabLabel();
@@ -1875,16 +1873,27 @@ public class MainWindow
 	{
 		try
 		{
+			this.setConnectIsInProgress();
+			this.tabRemovalInProgress = true;
 			while (sqlTab.getTabCount() > 1)
 			{
-				removeTab(1);
+				// I'm not using removeTab() as that will also 
+				// update the GUI and immediately check for a new
+				// connection which is not necessary when removing all tabs.
+				removeTab(1, false);
 			}
+			// Reset the first panel, now we have a "clean" workspace
 			MainPanel p = getSqlPanel(0);
 			p.reset();
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("MainWindow.removeAllPanels()", "Error when removing all panels", e);
+		}
+		finally
+		{
+			tabRemovalInProgress = false;
+			clearConnectIsInProgress();
 		}
 	}
 	
@@ -2364,7 +2373,7 @@ public class MainWindow
 		MainPanel p = this.getSqlPanel(anIndex);
 		p.setTabName(aName);
 		p.setTabTitle(this.sqlTab, anIndex);
-		this.updateViewMenu(anIndex, p.getTabTitle());
+		updateViewMenu(anIndex, p.getTabTitle());
 	}
 
 	public void removeLastTab(boolean includeExplorer)
@@ -2480,6 +2489,17 @@ public class MainWindow
 		moveTab(index, index + 1);
 	}
 
+	public void endMove(int finalIndex)
+	{
+		this.tabRemovalInProgress = false;
+		this.tabSelected(finalIndex);
+	}
+	
+	public void startMove()
+	{
+		this.tabRemovalInProgress = true;
+	}
+	
 	public void moveTab(int oldIndex, int newIndex)
 	{
 		SqlPanel p = (SqlPanel) this.getSqlPanel(oldIndex);
@@ -2492,7 +2512,6 @@ public class MainWindow
 		this.sqlTab.setSelectedIndex(newIndex);
 		
 		renumberTabs();
-		this.tabSelected(newIndex);
 		this.validate();
 	}
 	
@@ -2507,13 +2526,16 @@ public class MainWindow
 		MainPanel panel = this.getSqlPanel(index);
 		if (panel == null) return;
 		if (!panel.canCloseTab()) return;
-		removeTab(index);
+		removeTab(index, true);
 	}
 	
 	/**
 	 * Removes the indicated tab without checking for modified file etc.
+	 * If the tab has a separate connection, the connection is closed (disconnected)
+	 * as well. 
+	 * If a single connection for all tabs is used, the connection is <b>not</b> closed.
 	 */
-	protected void removeTab(int index)
+	protected void removeTab(int index, boolean updateGUI)
 	{
 		MainPanel panel = this.getSqlPanel(index);
 		if (panel == null) return;
@@ -2554,8 +2576,12 @@ public class MainWindow
 
 			this.panelMenus.remove(index);
 			this.sqlTab.remove(index);
-			this.renumberTabs();
-			newTab = this.sqlTab.getSelectedIndex();
+			
+			if (updateGUI) 
+			{
+				this.renumberTabs();
+				newTab = this.sqlTab.getSelectedIndex();
+			}
 		}
 		catch (Throwable e)
 		{
@@ -2566,7 +2592,7 @@ public class MainWindow
 			this.tabRemovalInProgress = false;
 			if (!inProgress) this.clearConnectIsInProgress();
 		}
-		if (newTab >= 0) 
+		if (newTab >= 0 && updateGUI) 
 		{
 			this.tabSelected(newTab);
 		}
@@ -2575,10 +2601,19 @@ public class MainWindow
 
 	public void mouseClicked(MouseEvent e)
 	{
-		if (e.getSource() == this.sqlTab && e.getButton() == MouseEvent.BUTTON3)
+		if (e.getSource() == this.sqlTab)
 		{
-			SqlTabPopup pop = new SqlTabPopup(this);
-			pop.show(this.sqlTab,e.getX(),e.getY());
+			Rectangle r = sqlTab.getBoundsAt(sqlTab.getTabCount() - 1);
+			boolean overTab = r.getX() + r.getWidth() > e.getPoint().getX();
+			if (e.getButton() == MouseEvent.BUTTON3 && overTab)
+			{
+				SqlTabPopup pop = new SqlTabPopup(this);
+				pop.show(this.sqlTab,e.getX(),e.getY());
+			}
+			else if (!overTab && e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2)
+			{
+				this.addTab();
+			}
 		}
 	}
 

@@ -105,10 +105,11 @@ public class Settings
 	private List<FontChangedListener> fontChangeListeners = new ArrayList<FontChangedListener>(5);
 
 	private ShortcutManager keyManager;
+	private long fileTime;
 	
-	private static class LazyInstanceHolder
+	protected static class LazyInstanceHolder
 	{
-		private static Settings instance = new Settings();
+		protected static Settings instance = new Settings();
 	}
 	
 	public static final Settings getInstance()
@@ -179,7 +180,8 @@ public class Settings
 		}
 		
 		WbFile settings = new WbFile(cfd, configFilename);
-
+		fileTime = settings.lastModified();
+		
 		boolean configLoaded = loadConfig(settings);
 		
 		boolean logSysErr = getBoolProperty("workbench.log.console", false);
@@ -563,6 +565,16 @@ public class Settings
 	public void setExitOnFirstConnectCancel(boolean flag)
 	{
 		setProperty("workbench.gui.cancel.firstconnect.exit", flag);
+	}
+
+	public boolean getShowConnectDialogOnStartup()
+	{
+		return getBoolProperty("workbench.gui.autoconnect", true);
+	}
+
+	public void setShowConnectDialogOnStartup(boolean flag)
+	{
+		setProperty("workbench.gui.autoconnect", flag);
 	}
 	
 	public String getPDFReaderPath()
@@ -1058,7 +1070,8 @@ public class Settings
 	
 	public Color getAlternateRowColor()
 	{
-		return getColor("workbench.gui.table.alternate.color", new Color(252,252,252));
+		Color defColor = (getUseAlternateRowColor() ? new Color(252,252,252) : null);
+		return getColor("workbench.gui.table.alternate.color", defColor);
 	}
 
 	public void setAlternateRowColor(Color c)
@@ -2713,6 +2726,17 @@ public class Settings
 	}
 	// </editor-fold>
 
+	public boolean wasExternallyModified()
+	{
+		long time = this.configfile.lastModified();
+		return time > this.fileTime;
+	}
+	
+	public WbFile getConfigFile()
+	{
+		return this.configfile;
+	}
+	
 	public void saveSettings(boolean makeBackup)
 	{
 		if (this.props == null) return;

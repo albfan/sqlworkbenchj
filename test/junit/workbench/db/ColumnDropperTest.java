@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.sql.ScriptParser;
 
 /**
  *
@@ -46,10 +47,24 @@ public class ColumnDropperTest
 			cols.add(new ColumnIdentifier("DUMMY2"));
 			
 			ColumnDropper dropper = new ColumnDropper(con, table, cols);
+			String sql = dropper.getScript().toString();
+			
+			assertNotNull(sql);
+			ScriptParser p = new ScriptParser(sql);
+			assertEquals(4, p.getSize());
+			
+			assertEquals("ALTER TABLE PERSON DROP COLUMN DUMMY1", p.getCommand(0));
+			assertEquals("COMMIT", p.getCommand(1));
+			assertEquals("ALTER TABLE PERSON DROP COLUMN DUMMY2", p.getCommand(2));
+			assertEquals("COMMIT", p.getCommand(3));
+			
 			dropper.dropObjects();
 			
 			List<ColumnIdentifier> tableCols = con.getMetadata().getTableColumns(table);
 			assertEquals(3, tableCols.size());
+			assertEquals("NR", tableCols.get(0).getColumnName());
+			assertEquals("FIRSTNAME", tableCols.get(1).getColumnName());
+			assertEquals("LASTNAME", tableCols.get(2).getColumnName());
 		}
 		catch (Exception e)
 		{

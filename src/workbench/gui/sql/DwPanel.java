@@ -209,16 +209,6 @@ public class DwPanel
 		this.dataTable.setPrintHeader(header);
 	}
 	
-	public void dispose()
-	{
-		this.clearContent();
-		if (this.stmtRunner != null)
-		{
-			this.stmtRunner.dispose();
-		}
-		this.stmtRunner = null;
-	}
-	
 	/**
 	 *	Defines the connection for this DwPanel.
 	 */
