@@ -89,11 +89,14 @@ java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench
 				of the workspace file is usually stored with a placeholder for the configuration directory
 				(%configDir%) so that the profiles don't need to be adjusted.
 			</para>
+			
 			<para>
 				You will need to edit the driver definitions (stored in <filename>WbDrivers.xml</filename>)
 				as the full path to the driver's jar file(s) is stored in the file (unless you 
 				define the location of the drivers using the <link linkend="settings-libdir">libdir variable</link>.
 			</para>
+			
+			
 		</section>
 	</section>
 
@@ -157,19 +160,19 @@ java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench
 
 		<para>
 			If you experience problems when running &wb-productname; (or
-		other Java/Swing based applications) on the Windows&reg; platform, this
-		might be due to problems with the graphics driver and/or the
-		DirectDraw installation. If upgrading the graphics driver or the
-		DirectDraw/DirectX version is not an option (or does not solve the
-		problem), try to run SQL Workbench with the direct draw feature
-		turned off:
+			other Java/Swing based applications) on the Windows&reg; platform, this
+			might be due to problems with the graphics driver and/or the
+			DirectDraw installation. If upgrading the graphics driver or the
+			DirectDraw/DirectX version is not an option (or does not solve the
+			problem), try to run SQL Workbench with the direct draw feature
+			turned off:
 		</para>
-
 
 		<programlisting>java -Dsun.java2d.noddraw=true -jar sqlworkbench.jar</programlisting>
 
-		<para>When using the exe launcher, you can use the following
-		syntax:</para>
+		<para>
+			When using the exe launcher, you can use the following syntax:
+		</para>
 
 		<programlisting>SQLWorkbench -noddraw</programlisting>
 
@@ -386,7 +389,7 @@ java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench
 			</para>
 		</note>
 			
-		<section id="cmdline-parameter-configDir">
+		<section id="cmdline-parameter-configdir">
 			<title>Specify the directory for configuration settings</title>
 
 			<para>
@@ -491,7 +494,7 @@ another_variable=24</programlisting>
 				In this case the file <literal>WbProfiles.xml</literal> must be in the current
 				(working) directory of the application. If this is not the case, please specify the 
 				location of the profile using either the <link linkend="cmdline-parameter-profilestorage"><literal>-profilestorage</literal></link> or 
-				<link linkend="cmdline-parameter-configDir"><literal>-configDir</literal></link> parameter.
+				<link linkend="cmdline-parameter-configdir"><literal>-configDir</literal></link> parameter.
 			</para>
 			<para>
 				If you have two profiles with the names <literal>&quot;Oracle - Test&quot;</literal> you will 
@@ -597,7 +600,7 @@ another_variable=24</programlisting>
 							<entry>-workspace</entry>
 							<entry>The workspace file to be loaded. If the file specification does not 
 							include a directory, the workspace will be loaded from the 
-							<link linkend="cmdline-parameter-configDir">configuration directory</link>. If this parameter
+							<link linkend="cmdline-parameter-configdir">configuration directory</link>. If this parameter
 							is not specified, the default workspace (<literal>Default.wksp</literal>) will be loaded.
 							</entry>
 						</row>

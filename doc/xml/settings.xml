@@ -755,7 +755,7 @@
 	
   <section id="log-setting">
     <title>Controlling the log file</title>
-    <section>
+    <section id="settings-log-level">
       <title>Log level</title>
       <para>Property: <literal>workbench.log.level</literal></para>
       <para>Set the log level for the log file. Valid values are
@@ -769,7 +769,7 @@
       <para>Default: <literal>INFO</literal></para>
     </section>
 
-    <section>
+    <section id="settings-log-format">
       <title>Log format</title>
       <para>Property: <literal>workbench.log.format</literal></para>
       <para>Define the format of the log messages. The following placeholders are supported:
@@ -797,7 +797,7 @@
       <para>Default: <literal>false</literal></para>
     </section>
 					
-    <section>
+    <section id="settings-log-metadata">
 			<title>Logging SQL used for retrieving metadata</title>
 			<para>Property: <literal>workbench.dbmetadata.logsql</literal></para>
 			<para>

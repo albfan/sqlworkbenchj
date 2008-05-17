@@ -1,14 +1,14 @@
 <section id="command-copy">
-	<title>Copy one table to another - WbCopy</title>
+	<title>Copy data across databases</title>
 
-<para>
-	The <literal>WbCopy</literal> is essentially the command line version of the
-	the <link linkend="data-pumper">DataPumper</link>. For a more detailed explanation
-	of the copy process, please refer to that section. It bascially chains a WbExport and a
-	<literal>WbImport</literal> statement without the need of an intermediate data file.
-	The <literal>WbCopy</literal> command requires that a connection to the source and target
-	database can be made at the same time.
-</para>
+	<para>
+		The <literal>WbCopy</literal> is essentially the command line version of the
+		the <link linkend="data-pumper">DataPumper</link>. For a more detailed explanation
+		of the copy process, please refer to that section. It bascially chains a WbExport and a
+		<literal>WbImport</literal> statement without the need of an intermediate data file.
+		The <literal>WbCopy</literal> command requires that a connection to the source and target
+		database can be made at the same time.
+	</para>
 
 	<section id="wbcopy-general-parameters">
 
@@ -112,11 +112,37 @@
 					</row>
 
 					<row>
+						<entry>-syncDelete</entry>
+						<entry>
+							<para>
+								If this option is enabled <literal>-syncDelete=true</literal>, &wb-productname; will
+								check each row from the target table if it's present in the source table. Rows in 
+								the target table that are not present in the source will be deleted. As this is implemented
+								by checking each row individually in the source table, this can take some time for 
+								large tables. This option requires that each table in question has a primary key 
+								defined.
+							</para>
+							<para>
+								Combined with an <literal>UPDATE,INSERT</literal> or <literal>UPDATE,INSERT</literal> mode
+								this creates an exact copy of the source table.
+							</para>
+							<para>
+								If more than one table is copied, the delete process is started after 
+								all inserts and updates have been processed. It is recommended to use the 
+								<literal>-checkDependencies</literal> parameter to make sure the deletes are processed
+								in the correct order (which is most probably already needed to process inserts correctly).
+							</para>
+						</entry>
+					</row>
+
+					<row>
 						<entry>-keyColumns</entry>
 						<entry>
 							<para>
 								Defines the key columns for the target table. This parameter
 								is only necessary if import is running in <literal>UPDATE</literal> mode.
+								It is ignored when specifying more than one table with the <literal>-sourceTable</literal>
+								argument. In that case each table must have a primary key.
 							</para>
 						</entry>
 					</row>
@@ -334,56 +360,121 @@
 		command.</para>
 	</section>
 
+	<section id="copy-sync">
+		<title>Synchronizing tables</title>
+		
+		<para>
+			Using <literal>-mode=update,insert</literal> ensures that all rows that are present in 
+			the source table do exist in the target table and that all values for non-key columns
+			are identical.
+		</para>
+		
+		<para>
+			When you need to keep two tables completely in sync, rows that are present in the 
+			target table that do not exist in the source table need to be deleted. This is what the
+			parameter <literal>-syncDelete</literal> is for. If this is enabled (<literal>-syncDelete=true</literal>)
+			then &wb-productname; will check every row from the target table if it is present in the 
+			source table. This check is based on the primary keys of the target table and 
+			assumes that the source table as the same primary key. 
+		</para>
+		
+		<para>
+			Testing if each row in the target table exists in the source table is a substantial overhead,
+			so you should enable this option only when really needed. <literal>DELETE</literal>s in the 
+			target table are batched according to the <literal>-batchSize</literal> setting of the 
+			<literal>WbCopy</literal> command. To increase performance, you should enable batching 
+			for the whole process.
+		</para>
+
+		<para>
+			Internally the rows from the source table are checked in chunks, which means that 
+			&wb-productname; will generate a <literal>SELECT</literal> statement that contains 
+			a <literal>WHERE</literal> condition for each row retrieved from the target table. 
+			The default chunk size is relatively small to avoid problems with large SQL statements. 
+			This approach was taken to minimize the number of statements sent to the server.
+		</para>
+		
+		<para>
+			The <link linkend="import-mode-downgrade">automatic fallback</link> from <literal>update,insert</literal> or <literal>insert,update</literal>
+			mode to <literal>insert</literal> mode applies for synchronizing tables using <literal>WbCopy</literal>
+			as well. 
+		</para>
+	</section>
+	
 	<section id="copy-examples">
-		<title>Examples:</title>
-		<para>Copy all columns from one table to another table with the same columns:</para>
-		<programlisting>WbCopy -sourceprofile=ProfileA
-	 -targerprofile=ProfileB
-	 -sourcetable=the_table
-	 -targettable=the_other_table;</programlisting>
+		<title>Examples</title>
+		
+		<section id="example-copy-single-table">
+			<title>Copy one table to another</title>
+			
+			<programlisting>WbCopy -sourceProfile=ProfileA
+       -targetProfile=ProfileB
+       -sourceTable=the_table
+       -targetTable=the_other_table;</programlisting>
+	 </section>
 
-		<para>Copy all columns from one table to another table with the same columns, but
-					only certain rows.</para>
-		<programlisting>WbCopy -sourceprofile=ProfileA
-	 -targerprofile=ProfileB
-	 -sourcetable=the_table
-	 -sourcewhere="lastname LIKE 'D%'
-	 -targettable=the_other_table;</programlisting>
+		<section id="example-copy-sync">
+			<title>Synchronize the tables between two databases</title>
+			<para>
+				This example will copy the data from the tables in the source
+				database to the corresponding tables in the target database. Rows that
+				are not available in the source tables are deleted from the target tables.
+			</para>
+			<programlisting>WbCopy -sourceProfile=ProfileA
+       -targetProfile=ProfileB
+       -sourceTable=*
+       -mode=update,insert
+       -syncDelete=true;</programlisting>
+		</section>
 
-		<para>
-			Copy only selected columns to a table with different column names. Before the
-			copy is started all rows are deleted from the target table:
-		</para>
-		<programlisting>WbCopy -sourceprofile=ProfileA
-	 -targerprofile=ProfileB
-	 -sourcetable=person
-	 -targettable=contact
-	 -deletetarget=true
-	 -columns=firstname/surname, lastname/name, birthday/bday;</programlisting>
+		<section id="example-copy-where">
+			<title>Copy only selected rows</title>
+		
+			<programlisting>WbCopy -sourceProfile=ProfileA
+       -targetProfile=ProfileB
+       -sourceTable=the_table
+       -sourceWhere="lastname LIKE 'D%'
+       -targetTable=the_other_table;</programlisting>
+		</section>
 
-	 <para>
-		 If you use this way to map columns, please make sure that you
-		 don't use the forward slash as the <link linkend="options-alternate-delimiter">alternate delimiter</link>.
-		 This can be achieved by either specifying a different character sequence or making sure
-		 that - if you use the forward slash - the current script does not end with it, as
-		 this turns on the usage of the alternate delimiter. The above example would work even if
-		 the forward slash was used as the alternate delimiter, because the whole command is
-		 terminated with a semicolon, which disables the usage of the alternate delimiter.
-	 </para>
+		<section id="example-copy-column-map">
+			<title>Copy data between tables with different columns</title>
 
-		<para>
-			Copy data based on a SQL query, matching the columns
-			from the query to the corresponding columns from the target table:
-		</para>
+			<para>
+				This example copies only selected columns from the source table. The column names
+				in the tables do not match and a column mapping is defined. Before the
+				copy is started all rows are deleted from the target table.
+			</para>
 
-		<programlisting>WbCopy -sourceprofile=ProfileA
-	 -targerprofile=ProfileB
-	 -sourcequery="SELECT firstname, lastname, birthday FROM person"
-	 -targettable=contact
-	 -deletetarget=true
-	 -columns=surname, name, bday;</programlisting>
-	 <para>The order in the <literal>-columns</literal> parameter <emphasis role="bold">must</emphasis>
-	 match the order in the <literal>SELECT</literal> statement!</para>
- </section>
+			<programlisting>WbCopy -sourceProfile=ProfileA
+       -targetProfile=ProfileB
+       -sourceTable=person
+       -targetTable=contact
+       -deleteTarget=true
+       -columns=firstname/surname, lastname/name, birthday/bday;</programlisting>
+		</section>
+	 
+		<section id="example-copy-query">
+			<title>Copy data based on a SQL query</title>
+
+			<para>
+				When using a query as the source for the <literal>WbCopy</literal> command, the columns
+				from the query need to be matched to the columns of the target table. 
+			</para>
+
+			<programlisting>WbCopy -sourceProfile=ProfileA
+       -targetProfile=ProfileB
+       -sourceQuery="SELECT firstname, lastname, birthday FROM person"
+       -targetTable=contact
+       -deleteTarget=true
+       -columns=surname, name, bday;</programlisting>
+
+			<para>
+				The order in the <literal>-columns</literal> parameter <emphasis role="bold">must</emphasis>
+				match the order in the <literal>SELECT</literal> statement!
+			</para>
+		</section>
+		
+	</section>
 
 </section>

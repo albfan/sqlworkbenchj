@@ -28,6 +28,7 @@
 		menu item of the popup menu. The same filter can be applied on the <literal>Procedures</literal>
 		tab.
 	</para>
+	
 	<para>
 		The list of tables can be pre-filtered to remove unwanted entries such as tables 
 		that have been deleted and now reside in Oracle's "Recycle Bin". The filtering
@@ -37,20 +38,18 @@
 	</para>
 	
 	<para>
-		For Oracle, synonyms are displayed as well. You can filter out unwanted synonyms 
-		by <link linkend="db-oracle-filter-syns">specifying a regular expression</link> 
-		in your <literal>workbench.settings</literal> file. This filter will also 
-		be applied when displaying the list of available tables when opening
+		For Oracle (and other DBMS that support them), synonyms are displayed as well. 
+		You can filter out unwanted synonyms by <link linkend="db-oracle-filter-syns">specifying a 
+		regular expression</link> in your <literal>workbench.settings</literal> file. 
+		This filter will also be applied when displaying the list of available tables when opening
 		the <link linkend="command-completion">command completion</link> popup.
 	</para>
   
-	<para>The first tab displays the structure of tables and views. The type
-  of object displayed can be chosen from the drop down right above the table
-  list. This list will be returned by the JDBC driver, so the available
-  "Table types" can vary from DBMS to DBMS. You can specify a default 
-  type to be selected in the <link linkend="options-deftabletype">System options</link>.
-  There you can also choose to automatically retrieve the objects in that list when 
-  the DbExplorer is opened.
+	<para>
+		The first tab displays the structure of tables and views. The type
+		of object displayed can be chosen from the drop down right above the table
+		list. This list will be returned by the JDBC driver, so the available
+		"Table types" can vary from DBMS to DBMS.
 	</para>
 
 	<para>The menu item <guimenuitem>Database Explorer</guimenuitem> will either display the explorer

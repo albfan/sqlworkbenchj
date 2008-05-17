@@ -146,22 +146,22 @@ Marvin
 	</section>
 
 	<section id="editor-java-tools">
-		<title>Java related editor functions</title>
+		<title>Programming related editor functions</title>
 
 		<para>
 			The editor of the &wb-productname; offers two functions to aid in developing
-			SQL statements which should be used inside a Java class (e.g. with JDBC access).
+			SQL statements which should be used inside your programming language (e.g. for SQL statements inside a Java program).
 		</para>
 
 		<section id="editor-copy-java-code-snippet" xreflabel="Copy Code Snippet">
 			<title>Copy Code Snippet</title>
 			<para>
 				Suppose you have created the SQL statement that you wish to use inside
-				a Java class to access your DBMS. The menu item <menuchoice><guimenu>SQL</guimenu><guimenuitem>Copy Code Snippet</guimenuitem></menuchoice>
+				your application to access your DBMS. The menu item <menuchoice><guimenu>SQL</guimenu><guimenuitem>Copy Code Snippet</guimenuitem></menuchoice>
 				will create a piece of code that defines a String variable which contains the current SQL statement (or
 				the currently selected statement if any text is selected).
 			</para>
-			<para>Suppose you have the following SQL statement:</para>
+			<para>If you have the following SQL statement in your editor:</para>
 			<programlisting>SELECT p.name,
        p.firstname,
        a.street,
@@ -181,13 +181,15 @@ String sql="SELECT p.name, \n" +
 "     address a \n" +
 "WHERE p.person_id = a.person_id; \n";</programlisting>
 
-			<para>You can now paste this code into your Java class.</para>
+			<para>You can now paste this code into your application.</para>
 			<para>
 				If you don't like the <literal>\n</literal> character in
 				your code, you can disable the generation of the newline characters
 				in you <literal>workbench.settings</literal> file.
 				See <link linkend="manual-setting-snippet-no-newline">Manual settings</link>
-				for details.
+				for details. You can also customize the <link linkend="manual-setting-snippet-prefix">prefix</link> (<literal>String sql =</literal>) and
+				the <link linkend="manual-setting-snippet-concat">concatenation character</link> that is used, 
+				in order to support the programming language that you use.
 			</para>
 		</section>
 

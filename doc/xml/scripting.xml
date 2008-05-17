@@ -15,6 +15,7 @@
 		as it will immediately return to the commandline while starting the JVM (and thus &wb-productname;) 
 		in the background. 
 	</para>
+	
 	<para>
 		Please refer to <link linkend="starting">Starting &wb-productname;</link> for details
 		on how to start &wb-productname; with the <literal>java</literal> command.
@@ -26,7 +27,28 @@
 		(including Windows&reg;) do not pass double quotes to the application and thus the parameters would not 
 		be evaluated correctly ba &wb-productname;
 	</para></note>
-		
+
+	<para>
+		If you want to start the application from within another program (e.g. an 
+		<literal><ulink url="http://ant.apache.org">Ant</ulink></literal> script or your own program), 
+		you will need to start &wb-productname;'s main class directly.
+	</para>
+	
+	<programlisting>java -cp sqlworkbench.jar workbench.WbStarter</programlisting>
+	<para>
+		Inside an Ant build script this would need to be done like this:
+	</para>
+	<programlisting>
+&lt;java classname="workbench.WbStarter" classpath="sqlworkbench.jar" fork="true"&gt;
+  &lt;arg value="-profile='my profile'"/&gt;
+  &lt;arg value="-script=load_data.sql"/&gt;
+&lt;/java&gt;</programlisting>
+
+	<para>
+		The parameters to specifiy the connection and the SQL script to be executed have
+		to be passed just like normally on the commandline.
+	</para>
+	
 	<section id="scripting-connecting">
 		<title>Specifying the connection</title>
 		

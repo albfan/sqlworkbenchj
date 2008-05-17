@@ -35,8 +35,10 @@
 &using;
 &variables;
 &scripting;
+&wbexport;
+&wbimport;
+&wbcopy;
 &wb-commands;
-&export-import;
 &data-pumper;
 &dbexplorer;
 &shortcuts;

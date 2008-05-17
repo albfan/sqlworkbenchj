@@ -1,269 +1,203 @@
-<section id="export-import">
-    <title>Exporting and importing data</title>
-    <section id="export">
-        <title>Export data</title>
-        
-        <para>You can export the data of the <emphasis role="strong">result set</emphasis> 
-            into local files of the following formats:
-        </para>
-        
-        <itemizedlist>
-        <listitem><para>HTML</para></listitem>
-        <listitem><para>SQL statements (INSERT, UPDATE or DELETE &amp; INSERT)</para></listitem>
-        <listitem><para>XML format</para></listitem>
-        <listitem><para>Tab separated text file. Columns are separated with a tab, rows are separated with a newline character</para></listitem>
-        </itemizedlist>
+<section id="export">
+	<title>Export result data</title>
 
-				<para>To save the data from the current result set into an external file, 
-					choose <menuchoice><guimenu>Data</guimenu><guimenuitem>Save Data as</guimenuitem></menuchoice>
-					You will be prompted for the filename. On the right side of the file dialog
-					you will have the possibility to define the type of the export. 
-					The export parameters on the right side of the dialog are split into two parts. 
-					The upper part defines parameters that are available for all export types. 
-					These are the encoding for the file, the format for date and date/time data 
-					and the columns that should be exported.
-				</para>
-				<para>
-            All format specific options that are available in the lower part, are also 
-            available when using the <link linkend="command-export">WbExport</link> command. 
-            For a detailed discussion of the individual options please refer to that section. 
-        </para>
-        <para>The options <literal>SQL UPDATE</literal> and <literal>SQL DELETE/INSERT</literal>
-            are only available when the current result has a single table that can
-            be updated, and the primary key columns for that table could be retrieved.
-            If the current result does not have key columns defined, you can select
-            the key columns that should be used when creating the file. If the current
-            result is retrieved from multiple tables, you have to supply a table name
-            to be used for the SQL statements.
-        </para>
-        <para>Please keep in mind that exporting the data from the result set
-            requires you to load everything into memory. If you need to export
-            data sets which are too big to fit into memory, you should use the 
-            <link linkend="command-export">WbExport</link> command to either
-            create SQL scripts or to save the data as text or XML files that
-            can be imported into the database using the <link linkend="command-import">WbImport</link>
-            command. You can also use  <menuchoice><guimenu>SQL</guimenu><guimenuitem>Export query result</guimenuitem></menuchoice>
-            to export the result of the currently selected SQL statement.            
-        </para>
-    </section>
-    
-    <section id="export-clipboard">
-        <title>Copy data to the clipboard</title>
-        <para>
-            You can also copy the data from the result into the system clipboard
-            in four different formats. In any case default settings are used
-            for the various options of the respective format.
-            <itemizedlist>
-                <listitem><para>Text (tab separated)</para><para>This will 
-                    use a tab as the column separator, and will not quote any values.
-                    The end-of-line sequence will be a newline (Unix style) and 
-                    the column headers will be part of the copied data. Special
-                    characters (e.g. newlines) in the actual data will not
-                    be replaced (as it is possible with the 
-										<link linkend="text-escape-switch">WbExport</link> command).
-										</para>
-                    <para>When you hold down the <keycap>Shift</keycap> key when you 
-                    select the menu item, the column headers will not be copied
-                    to the clipboard.
-                    When you hold down the <keycap>Ctrl</keycap> key when selecting
-                    the menu item, you can choose which columns should be copied
-                    to the clipboard. Pressing <keycap>Shift</keycap> and 
-                    <keycap>Ctrl</keycap> together is also supported.
-                    </para>
-                </listitem>
-                <listitem><para>SQL (INSERT, UPDATE, or DELETE &amp; INSERT)</para>
-                    <para>The end-of-line sequence will be a newline (Unix style). 
-                    No cleanup of data will be done as it is possible with the 
-										<link linkend="export-sql-cleanup">WbExport</link> command, apart from 
-										correctly quoting single quotes inside the values (which is required to 
-										generate valid SQL)</para>
-                </listitem>
-            </itemizedlist>
-        </para>
-        <para>As with the <literal>Save Data as</literal> command, the options 
-            <literal>SQL UPDATE</literal> and <literal>SQL DELETE/INSERT</literal>
-            are only available when the current result set is updateable. If no 
-            key columns could be retrieved for the current result, you can manually
-            define the key columns to be used, using <menuchoice><guimenu>Data</guimenu>
-            <guimenuitem>Define key columns</guimenuitem></menuchoice>
-        </para>
-				<note><para>
-					If you do not want to copy all columns to the clipboard, hold down the 
-					the <keycap>CTRL</keycap> key while selecting one of the
-					menu items related to the clipboard. A dialog will then let you select the 
-					columns that you want to copy.
-				</para></note>
-				<para>
-					Alternatively you can hold down the <keycap>Alt</keycap> key while 
-					selecting rows/columns in the result set. This will allow you to 
-					select only the columns and rows that you want to copy. If you then use 
-					one of the formats available in the <guimenu>Copy selected</guimenu>
-					submenu, only the selected cells will be copied. If you choose to 
-					copy the data as <literal>UPDATE</literal> or <literal>DELETE/INSERT</literal>
-					statements, the generated SQL statements will not be correct if you did not
-					select the primary key of the underlying update table.
-				</para>
-    </section>
-    
-    <section id="import-resultset">
-			<title>Import data</title>
-        
-			<section id="import-resultset-file">
-				<title>Import a file into the current result set</title>
-				<para>
-					&wb-productname; can import tab separated text files into the current
-					result set. This means, that you need to issue the approriate <literal>SELECT</literal>
-					statement first. The structure of the file has to match the structure of the result set,
-					otherwise an error will occur. To initiate the import select
-					<menuchoice><guimenu>Data</guimenu><guimenuitem>Import file</guimenuitem></menuchoice>
-				</para>
+	<para>You can export the data of the <emphasis role="strong">result set</emphasis> 
+			into local files of the following formats:
+	</para>
 
-				<para>When selecting the file, you can change some parameters for the
-				import:</para>
+	<itemizedlist>
+	<listitem><para>HTML</para></listitem>
+	<listitem><para>SQL statements (INSERT, UPDATE or DELETE &amp; INSERT)</para></listitem>
+	<listitem><para>XML format</para></listitem>
+	<listitem><para>Tab separated text file. Columns are separated with a tab, rows are separated with a newline character</para></listitem>
+	</itemizedlist>
 
-				<informaltable frame="all">
-					<tgroup cols="2" align="left">
-						<colspec colname="c1" colwidth="5cm" />
-						<colspec colname="c2" colwidth="10cm" />
-						<thead valign="top">
-							<row>
-								<entry>Option</entry>
-								<entry>Description</entry>
-							</row>
-						</thead>
-						<tbody valign="top">
-							<row>
-								<entry>Header</entry>
-								<entry>if this option this is checked, the first line of the import file will be ignored</entry>
-							</row>
-							<row>
-								<entry>Delimiter</entry>
-								<entry>the delimiter used to separate column values. Enter \t for the tab character</entry>
-							</row>
-							<row>
-								<entry>Date Format</entry>
-								<entry>
-									The <link linkend="options-date-format">format</link> in which date fields are specified. 
-								</entry>
-							</row>
-							<row>
-								<entry>Decimal char</entry>
-								<entry>
-									The character that is used to indicate the decimals
-									in numeric values (typically a dot or a comma)
-								</entry>
-							</row>
-							<row>
-								<entry>Quote char</entry>
-								<entry>The character used to quote values with special
-									characters. Make sure that each opening quote is followed by a
-									closing quote in your text file.
-								</entry>
-							</row>
-						</tbody>
-					</tgroup>
-				</informaltable>
-				<para>
-					You can also import text and XML files using the <link linkend="command-import">WbImport</link> 
-					command. Using the <literal>WbImport</literal> command is the recommended way to import
-					data, as it is much more flexible, and - more important - it does not read the 
-					data into memory.
-				</para>
-			</section>
-			
-			<section>
-				<title>Import the clipboard into the current result</title>
-				<para>
-					You can import the contents of the clipboard into the current result, if the 
-					format matches the result set. When you select 
-					<menuchoice><guimenu>Data</guimenu><guimenuitem>Import from Clipboar</guimenuitem></menuchoice>
-					&wb-productname; will check if the current clipboard contents can be imported into the current
-					result. The data can automatically be imported if the first row of the data contains
-					the column names. One of the following two conditions must be true in order for the import to succeed
-				</para>
-				<para>
-					<itemizedlist>
-						<listitem><para>
-							The columns are delimited with a tab character and the first row contains column names. All
-							matching columns will then be imported
-						</para></listitem>
-						<listitem><para>
-							If no column name matches (i.e. no header row is present) but the number of columns (identified
-							by the number of tab characters in the first row) is identical to the number of columns
-							in the current result.
-						</para></listitem>
-					</itemizedlist>
-					If &wb-productname; cannot identify the format of the clipboard a dialog will be opened
-					where you can specify the format of the clipboard contents. This is maily necessary
-					if the delimiter is not the tab character.
-				</para>
-			</section>
-			
-    </section>
-    
-    <section id="xml-export-import" xreflabel="File based export and import">
-        <title>File based export and import</title>
-      
-        <para>You can use &wb-productname;'s WbExport command to copy data from
-					one system to another by exporting data into flat files or an XML file
-        </para>
-        <para>Using the <literal>WbExport</literal> command you can extract the data from 
-					using a SQL command from the source system. Suppose your data
-					is stored in the table <literal>PERSON</literal> on your source system
-					and you want to only select the columns <literal>lastname, firstname, birthday</literal>
-					to be transferred to your target system.
-        </para>
-       
-       <para>To create a flat file the following command should be used:</para>
-       
-       <programlisting>WbExport -type=text -header=true -file=&quot;c:/data/person.xml&quot;;
-SELECT lastname, firstname, birthday FROM person;</programlisting>
-			<para>
-				Assuming the target table <literal>CONTACT</literal> has the same column 
-				as the source table, the generated file can now be imported into the target system using:
-<programlisting>WbImport -type=text -header=true -file=&quot;c:/data/person.xml&quot; -table=contact;</programlisting>
-				For more examples, please see the corresponding chapters for <link linkend="command-export">WbExport</link>
-				and <link linkend="command-import">WbImport</link>. Using WbExport and WbImport you can also 
-				transfer BLOB or CLOB columns from one system to another. Each BLOB is automatically 
-				stored in its own file (in the same directory as the export file itself). The XML and text export
-				both support LOB columns. When exporting tables with LOB columns it is highly recommended to 
-				use the <literal>-compress=true</literal> option to generate ZIP archives containing the files.
-			</para>
-        
-			<para>
-				If you want to copy data from one database to another, you can also use the 
-				<link linkend="command-copy">WbCopy</link> command, or the <link linkend="data-pumper">
-				DataPumper tool</link>
-			</para>
-        
-    </section>
-		
-		<section id="export-compress">
-			<title>Compressing export files</title>
-			<para>
-				The <link linkend="command-export"><literal>WbExport</literal></link> command supports compressing
-				of the generated output files. This includes the actually export file and any associated BLOB
-				files.
-			</para>
-			<para>
-				When using <link linkend="command-import"><literal>WbImport</literal></link> you can import
-				the data stored in the archives without unpacking them. Simply specify the archive name
-				with the <literal>-file</literal> parameter. &wb-productname; will detect that the input file
-				is an archive and will extract the information "on the fly". Assume the following export 
-				command:
-			</para>
-			<programlisting>WbExport -type=text -file=/home/data/person.txt -compress=true -sourcetable=person;</programlisting>
-			<para>
-				This command will create the file <literal>/home/data/person.zip</literal> that will contain the
-				specified <literal>person.txt</literal>. To import this export into the table employee, you can
-				use the following command:
-			</para>
-			<programlisting>WbImport -type=text -file=/home/data/person.zip -table=employee;</programlisting>
-			<para>
-				Assuming the <literal>PERSON</literal> table had a BLOB colum (e.g. a picture of the person),
-				the <literal>WbExport</literal> command would have created an additional file called 
-				<literal>person_blobs.zip</literal> that would contain all BLOB data. The <literal>WbImport</literal>
-				command will automatically read the BLOB data from that archive.
-			</para>
-		</section>
+	<para>
+		To save the data from the current result set into an external file, 
+		choose <menuchoice><guimenu>Data</guimenu><guimenuitem>Save Data as</guimenuitem></menuchoice>
+		You will be prompted for the filename. On the right side of the file dialog
+		you will have the possibility to define the type of the export. 
+		The export parameters on the right side of the dialog are split into two parts. 
+		The upper part defines parameters that are available for all export types. 
+		These are the encoding for the file, the format for date and date/time data 
+		and the columns that should be exported.
+	</para>
+	<para>
+			All format specific options that are available in the lower part, are also 
+			available when using the <link linkend="command-export">WbExport</link> command. 
+			For a detailed discussion of the individual options please refer to that section. 
+	</para>
+	<para>
+		The options <literal>SQL UPDATE</literal> and <literal>SQL DELETE/INSERT</literal>
+		are only available when the current result has a single table that can
+		be updated, and the primary key columns for that table could be retrieved.
+		If the current result does not have key columns defined, you can select
+		the key columns that should be used when creating the file. If the current
+		result is retrieved from multiple tables, you have to supply a table name
+		to be used for the SQL statements.
+	</para>
+	<para>
+		Please keep in mind that exporting the data from the result set
+		requires you to load everything into memory. If you need to export
+		data sets which are too big to fit into memory, you should use the 
+		<link linkend="command-export">WbExport</link> command to either
+		create SQL scripts or to save the data as text or XML files that
+		can be imported into the database using the <link linkend="command-import">WbImport</link>
+		command. You can also use  <menuchoice><guimenu>SQL</guimenu><guimenuitem>Export query result</guimenuitem></menuchoice>
+		to export the result of the currently selected SQL statement.            
+	</para>
+</section>
+
+<section id="export-clipboard">
+		<title>Copy data to the clipboard</title>
+		<para>
+				You can also copy the data from the result into the system clipboard
+				in four different formats. In any case default settings are used
+				for the various options of the respective format.
+				<itemizedlist>
+						<listitem><para>Text (tab separated)</para><para>This will 
+								use a tab as the column separator, and will not quote any values.
+								The end-of-line sequence will be a newline (Unix style) and 
+								the column headers will be part of the copied data. Special
+								characters (e.g. newlines) in the actual data will not
+								be replaced (as it is possible with the 
+								<link linkend="text-escape-switch">WbExport</link> command).
+								</para>
+								<para>When you hold down the <keycap>Shift</keycap> key when you 
+								select the menu item, the column headers will not be copied
+								to the clipboard.
+								When you hold down the <keycap>Ctrl</keycap> key when selecting
+								the menu item, you can choose which columns should be copied
+								to the clipboard. Pressing <keycap>Shift</keycap> and 
+								<keycap>Ctrl</keycap> together is also supported.
+								</para>
+						</listitem>
+						<listitem><para>SQL (INSERT, UPDATE, or DELETE &amp; INSERT)</para>
+								<para>The end-of-line sequence will be a newline (Unix style). 
+								No cleanup of data will be done as it is possible with the 
+								<link linkend="export-sql-cleanup">WbExport</link> command, apart from 
+								correctly quoting single quotes inside the values (which is required to 
+								generate valid SQL)</para>
+						</listitem>
+				</itemizedlist>
+		</para>
+		<para>As with the <literal>Save Data as</literal> command, the options 
+				<literal>SQL UPDATE</literal> and <literal>SQL DELETE/INSERT</literal>
+				are only available when the current result set is updateable. If no 
+				key columns could be retrieved for the current result, you can manually
+				define the key columns to be used, using <menuchoice><guimenu>Data</guimenu>
+				<guimenuitem>Define key columns</guimenuitem></menuchoice>
+		</para>
+		<note><para>
+			If you do not want to copy all columns to the clipboard, hold down the 
+			the <keycap>CTRL</keycap> key while selecting one of the
+			menu items related to the clipboard. A dialog will then let you select the 
+			columns that you want to copy.
+		</para></note>
+		<para>
+			Alternatively you can hold down the <keycap>Alt</keycap> key while 
+			selecting rows/columns in the result set. This will allow you to 
+			select only the columns and rows that you want to copy. If you then use 
+			one of the formats available in the <guimenu>Copy selected</guimenu>
+			submenu, only the selected cells will be copied. If you choose to 
+			copy the data as <literal>UPDATE</literal> or <literal>DELETE/INSERT</literal>
+			statements, the generated SQL statements will not be correct if you did not
+			select the primary key of the underlying update table.
+		</para>
+</section>
+
+<section id="import-resultset">
+	<title>Import data into the result set</title>
+
+	<section id="import-resultset-file">
+		<title>Import a file into the current result set</title>
+		<para>
+			&wb-productname; can import tab separated text files into the current
+			result set. This means, that you need to issue the approriate <literal>SELECT</literal>
+			statement first. The structure of the file has to match the structure of the result set,
+			otherwise an error will occur. To initiate the import select
+			<menuchoice><guimenu>Data</guimenu><guimenuitem>Import file</guimenuitem></menuchoice>
+		</para>
+
+		<para>When selecting the file, you can change some parameters for the
+		import:</para>
+
+		<informaltable frame="all">
+			<tgroup cols="2" align="left">
+				<colspec colname="c1" colwidth="5cm" />
+				<colspec colname="c2" colwidth="10cm" />
+				<thead valign="top">
+					<row>
+						<entry>Option</entry>
+						<entry>Description</entry>
+					</row>
+				</thead>
+				<tbody valign="top">
+					<row>
+						<entry>Header</entry>
+						<entry>if this option this is checked, the first line of the import file will be ignored</entry>
+					</row>
+					<row>
+						<entry>Delimiter</entry>
+						<entry>the delimiter used to separate column values. Enter \t for the tab character</entry>
+					</row>
+					<row>
+						<entry>Date Format</entry>
+						<entry>
+							The <link linkend="options-date-format">format</link> in which date fields are specified. 
+						</entry>
+					</row>
+					<row>
+						<entry>Decimal char</entry>
+						<entry>
+							The character that is used to indicate the decimals
+							in numeric values (typically a dot or a comma)
+						</entry>
+					</row>
+					<row>
+						<entry>Quote char</entry>
+						<entry>The character used to quote values with special
+							characters. Make sure that each opening quote is followed by a
+							closing quote in your text file.
+						</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</informaltable>
+		<para>
+			You can also import text and XML files using the <link linkend="command-import">WbImport</link> 
+			command. Using the <literal>WbImport</literal> command is the recommended way to import
+			data, as it is much more flexible, and - more important - it does not read the 
+			data into memory.
+		</para>
+	</section>
+
+	<section id="import-clipboard">
+		<title>Import the clipboard into the current result</title>
+		<para>
+			You can import the contents of the clipboard into the current result, if the 
+			format matches the result set. When you select 
+			<menuchoice><guimenu>Data</guimenu><guimenuitem>Import from Clipboar</guimenuitem></menuchoice>
+			&wb-productname; will check if the current clipboard contents can be imported into the current
+			result. The data can automatically be imported if the first row of the data contains
+			the column names. One of the following two conditions must be true in order for the import to succeed
+		</para>
+		<para>
+			<itemizedlist>
+				<listitem><para>
+					The columns are delimited with a tab character and the first row contains column names. All
+					matching columns will then be imported
+				</para></listitem>
+				<listitem><para>
+					If no column name matches (i.e. no header row is present) but the number of columns (identified
+					by the number of tab characters in the first row) is identical to the number of columns
+					in the current result.
+				</para></listitem>
+			</itemizedlist>
+			If &wb-productname; cannot identify the format of the clipboard a dialog will be opened
+			where you can specify the format of the clipboard contents. This is maily necessary
+			if the delimiter is not the tab character.
+		</para>
+	</section>
+
 </section>

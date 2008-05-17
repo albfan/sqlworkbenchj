@@ -10,6 +10,16 @@
     <xsl:attribute name="break-before">page</xsl:attribute>
   </xsl:attribute-set>
   
+	<xsl:attribute-set name="xref.properties">
+	  <xsl:attribute name="color">
+	    <xsl:choose>
+	      <xsl:when test="self::link">blue</xsl:when>
+	      <xsl:when test="self::ulink">blue</xsl:when>
+	      <xsl:otherwise>inherit</xsl:otherwise>
+	    </xsl:choose>
+	  </xsl:attribute>
+	</xsl:attribute-set>
+  
 </xsl:stylesheet>
 
 

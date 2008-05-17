@@ -337,7 +337,7 @@ END;
 			to read and write the LOB data. Earlier drivers will not work as described in this chapter. 
 		</para></note>
 
-		<section>
+		<section id="using-update-blob">
 			<title>Updating binary data through SQL</title>
 			
 			<para>
@@ -373,7 +373,7 @@ VALUES
 				
 		</section>
 			
-		<section>
+		<section id="using-update-clob">
 			<title>Updating character data through SQL</title>
 			<para>
 				The process of updating or inserting <literal>CLOB</literal> data is identical to the 
@@ -737,7 +737,7 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</programlisting>
 	<section id="server-messages">
 		<title>Viewing server messages</title>
 
-		<section>
+		<section id="server-msg-mssql">
 			<title>MS SQL Server</title>
 			<para>
 				For MS SQL Server, any message written with the <literal>PRINT</literal>
@@ -761,7 +761,7 @@ Done.</programlisting>
 
 		</section>
 
-		<section>
+		<section id="server-msg-ora">
 			<title>Oracle</title>
 			<para>
 				For Oracle the <literal>DBMS_OUTPUT</literal> package is supported. Support for this
@@ -791,7 +791,7 @@ Done.</programlisting>
 			
 		</section>
 
-		<section>
+		<section id="server-msg-pg">
 			<title>PostgreSQL</title>
 			<para>
 				Postgres supports a similar mechanism. Any text returned by a function or
@@ -799,7 +799,7 @@ Done.</programlisting>
 			</para>
 		</section>
 
-		<section>
+		<section id="server-msg-other">
 			<title>Other database systems</title>
 			<para>
 				If your DBMS supports something similar, please let me know. I will try 
@@ -987,23 +987,6 @@ WHERE base_id = 1;</programlisting>
 		</para>
 	</section>
 	
-	<section id="using-copy-clipboard">
-		<title>Copying result data to the clipboard</title>
-		
-		<para>
-			Once you have retrieved data and it is displayed in the result set table,
-			you can copy the data to the clipboard in various formats. These are the same
-			formats available when exporting data using the <link linkend="command-export">WbExport</link>
-			command.
-		</para>
-		
-		<para>
-			You can either copy all the data, or only selected rows to the clipboard. 
-			When you select the menu item while holding down the <keycap>Ctrl</keycap> key
-			you will be able to select the columns that should be part of the data to be copied.
-		</para>
-	</section>
-
 	<section id="sorting-data">
 		<title>Sorting the result</title>
 		<para>
@@ -1135,5 +1118,7 @@ WHERE base_id = 1;</programlisting>
 		</section>
 		
 	</section>
-    
+	
+  &export-import;
+	
 </section>

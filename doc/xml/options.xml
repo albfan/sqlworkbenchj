@@ -568,26 +568,6 @@
 			</para>
 		</section>
 		
-		<!--
-		<section id="options-deftabletype">
-			<title>Default Object Type</title>
-			<para>This setting allows you to control the initial display of objects in the
-				<link linkend="dbexplorer">DbExplorer's</link> table panel. The value entered here
-				will be used to set the default selection in the type drop down.
-			</para>
-			<para>The list in that dropdown is retrieved from the underlying DBMS through
-				a JDBC function call. So the value entered here should be something that is
-				available on all used DBMS. If the value entered in this property is not found
-				in the list, the selection defaults to "*" which means all object types.
-			</para>
-			<note><para>
-				Don't forget to enable <xref linkend="options-retrieve-explorer"/> so
-				that the table list in the DbExplorer will be retrieved automatically with the desired object
-				type, when you open it.
-			</para></note>
-		</section>
-		-->
-		
 	</section>
 	
 	<section id="options-window-title">
@@ -660,7 +640,7 @@
         These options influence the behaviour of the SQL Formatter when 
         <link linkend="editor-reformat-sql">reformatting</link> a SQL statement in the editor.
       </para>
-			<section>
+			<section id="opt-sql-formatting-maxlength">
 				<title>Max. length for sub-select</title>
 				<para>
 					When the SQL formatter hits a sub-SELECT while
@@ -672,7 +652,7 @@
 				</para>
 			</section>
 			
-			<section>
+			<section id="opt-sql-formatting-selectcols">
 				<title>Columns in SELECT</title>
 				<para>
 					This property defines the number of columns the formatter puts in on line 
@@ -680,7 +660,7 @@
 				</para>
 			</section>
 
-			<section>
+			<section id="opt-sql-formatting-quoted-elements">
 				<title>Quoted elements per line</title>
 				<para>
 					When using the editor to <link linkend="editor-make-in-list">transform</link>
@@ -690,7 +670,7 @@
 				</para>
 			</section>
 
-			<section>
+			<section id="opt-sql-formatting-other-elements">
 				<title>Other elements per line</title>
 				<para>
 					This option defines how many values will be put into a single 
@@ -721,7 +701,7 @@
 				If formatting of <literal>INSERT</literal> is enabled, the way they
 				are formatted can be controlled with several values.
 			</para>
-			<section>
+			<section id="opt-sql-generate-column-threshold">
 				<title>Column threshold</title>
 				<para>
 					If the number of columns in the statement exceeds this value, the columns 
@@ -730,7 +710,7 @@
 				</para>
 			</section>
 			
-			<section>
+			<section id="opt-sql-generate-columns-perline">
 				<title>Columns per line</title>
 				<para>
 					If the number of columns in the option "Column threshold" is exceeded,
@@ -739,7 +719,7 @@
 			</section>
 		</section>
 		
-		<section>
+		<section id="opt-sql-export-include-owner">
 			<title>Include owner in export</title>
 			<para>
 				This setting controls whether &wb-productname; uses the onwer (schema)

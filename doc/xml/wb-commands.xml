@@ -1,12 +1,6 @@
 
 <section id="wb-commands">
-  <title>Special &wb-productname; commands</title>
-  
-  &wbexport;
-  
-  &wbimport;
-  
-  &wbcopy;
+  <title>Other &wb-productname; specific commands</title>
   
   <section id="command-selectblob">
     <title>Extracting BLOB content - WbSelectBlob</title>
@@ -575,7 +569,10 @@ WHERE id=42;</programlisting>
 	  
 	  <row>
 	    <entry>-encoding</entry>
-	    <entry>Specify the encoding of the input file.</entry>
+	    <entry>
+				Specify the encoding of the input file. If no encoding is specified, 
+				the default encoding for the current platform (operating system) is used.
+			</entry>
 	  </row>
 	  
 	  <row>
