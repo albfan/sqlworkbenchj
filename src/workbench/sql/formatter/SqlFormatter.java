@@ -1286,7 +1286,6 @@ public class SqlFormatter
 	{
 		SQLToken t = this.lexer.getNextToken(true, false);
 		String verb = t.getContents();
-		int createStart = t.getCharBegin();
 		
 		if (verb.equals("TABLE"))
 		{
@@ -1487,15 +1486,36 @@ public class SqlFormatter
 		this.appendText(t.getContents());
 		this.appendText(' ');
 	
-		t = this.lexer.getNextToken(false, false);
+		t = this.skipComments();
+		
 		if (t == null) return t;
 		
 		// this has to be the opening bracket before the table definition
-		this.appendNewline();
-		this.appendText('(');
-		this.appendNewline();
-		
-		t = processTableDefinition();
+		if (t.getContents().equals("AS"))
+		{
+			this.appendNewline();
+			this.appendText("AS");
+			this.appendNewline();
+			// this must be followed by a SELECT query
+			t = skipComments();
+			if (t == null) return t;
+			if (t.getContents().equals("SELECT"))
+			{
+				CharSequence select = this.sql.subSequence(t.getCharBegin(), sql.length());
+				SqlFormatter f = new SqlFormatter(select);
+				CharSequence formattedSelect = f.getFormattedSql();
+				appendText(formattedSelect.toString());
+				return null;
+			}
+		}
+		else if (t.getContents().equals("("))
+		{
+			this.appendNewline();
+			this.appendText('(');
+			this.appendNewline();
+
+			t = processTableDefinition();
+		}
 		
 		return t;
 	}

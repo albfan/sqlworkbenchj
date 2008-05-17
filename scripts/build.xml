@@ -50,7 +50,7 @@
     </fileset>
     <pathelement location="${fop.root}/build/fop.jar"/>
   </path>
-
+	
 	<target name="set-build-number" depends="prepare">
 		<buildnumber file="build.number"/>
 		<echo message="Build number is ${build.number}"/>
@@ -202,13 +202,11 @@
       <param name="use.extensions" expression="0"/>
       <param name="menuchoice.separator" expression=" &#187; "/>
       <param name="menuchoice.menu.separator" expression=" &#187; "/>
+      <param name="ulink.show" expression="0"/>
+      <param name="ulink.footnotes" expression="0"/>
+      <param name="insert.link.page.number" expression="no"/>
+			<param name="insert.olink.page.number" expression="no"/>
     </xslt>
-
-    <delete>
-      <fileset dir="${pdfwork}">
-        <include name="*.xml"/>
-      </fileset>
-    </delete>
 
   </target>
 
@@ -220,7 +218,7 @@
     <java failonerror="true" fork="true" dir="${fop.root}" classname="org.apache.fop.cli.Main" classpathref="fop.path">
 			<arg line="-fo ${inputFile} -pdf ${outputFile}"/>
     </java>
-    <delete dir="${pdfwork}" failonerror="false"/>
+    <!-- <delete dir="${pdfwork}" failonerror="false"/>-->
   </target>
 
 	<target name="publish" depends="copy-history,build-html"/>
@@ -286,15 +284,18 @@
 			<param name="admon.textlabel" expression="0"/>
 			<param name="generate.index" expression="0"/>
 			<param name="index.method" expression="'default'"/>
+			<param name="chunk.tocs.and.lots" expression="0"/>
+			<param name="chunk.tocs.and.lots.has.title" expression="1"/>
+			<param name="generate.id.attributes" expression="1"/>
 			<param name="chunk.quietly" expression="1"/>
 			<param name="chunk.fast" expression="1"/>
-			<param name="chunk.first.sections" expression="0"/>
-			<param name="chunker.output.indent" expression="yes"/>
+			<param name="chunk.first.sections" expression="1"/>
+			<param name="chunker.output.indent" expression="no"/>
 			<param name="use.id.as.filename" expression="1"/>
 			<param name="section.autolabel" expression="1"/>
 
-      <param name="generate.section.toc.level" expression="3"/>
-      <param name="toc.max.depth" expression="2"/>
+      <param name="generate.section.toc.level" expression="2"/>
+      <param name="toc.max.depth" expression="3"/>
       <param name="toc.section.depth" expression="2"/>
 			
 			<param name="table.borders.with.css" expression="1"/>
@@ -324,7 +325,7 @@
 		
 	</target>
 
-	<target name="make-jar" depends="prepare">
+	<target name="make-jar" depends="prepare,compile">
 		<copy failonerror="false" overwrite="true" file="${scriptsrc}/history.new" tofile="${build}/help/history.txt" />
 		<copy failonerror="false" overwrite="true" file="${scriptsrc}/history.new" tofile="${distdir}/history.txt" />
 		
@@ -398,7 +399,7 @@
   </target>
 
   <!-- build a full release -->
-  <target name="release" depends="clean, compile, test, set-build-number, copy-history, make-jar, pdf, publish, release-src-zip, release-package, mac-package, restart-history, clean-history">
+  <target name="release" depends="generate-lexer, clean, compile, test, set-build-number, copy-history, make-jar, pdf, publish, release-src-zip, release-package, mac-package, restart-history, clean-history">
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>

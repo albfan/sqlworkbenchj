@@ -41,12 +41,14 @@ public class DbExplorerOptionsPanel
 		set.setSelectDataPanelAfterRetrieve(autoselectDataPanel.isSelected());
 		set.setRememberSortInDbExplorer(rememberSort.isSelected());
 		set.setShowFocusInDbExplorer(showFocus.isSelected());
+		set.setDefaultExplorerObjectType(this.defTableType.getText());
 	}
 
 	public void restoreSettings()
 	{
 		Settings set = Settings.getInstance();
 		autogeneratePK.setSelected(set.getAutoGeneratePKName());
+		defTableType.setText(set.getDefaultExplorerObjectType());
 	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -73,6 +75,8 @@ public class DbExplorerOptionsPanel
     showFocus = new javax.swing.JCheckBox();
     autogeneratePkLabel = new WbCheckBoxLabel();
     autogeneratePK = new javax.swing.JCheckBox();
+    defTableTypeLabel = new WbCheckBoxLabel();
+    defTableType = new javax.swing.JTextField();
     jPanel1 = new javax.swing.JPanel();
 
     setLayout(new java.awt.GridBagLayout());
@@ -252,9 +256,25 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 0);
     add(autogeneratePK, gridBagConstraints);
+
+    defTableTypeLabel.setLabelFor(autogeneratePK);
+    defTableTypeLabel.setText(ResourceMgr.getString("LblDefTableType"));
+    defTableTypeLabel.setToolTipText(ResourceMgr.getDescription("LblDefTableType"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(11, 12, 0, 0);
+    add(defTableTypeLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 8;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
+    add(defTableType, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
@@ -267,6 +287,8 @@ public class DbExplorerOptionsPanel
   private javax.swing.JLabel autogeneratePkLabel;
   private javax.swing.JCheckBox autoselectDataPanel;
   private javax.swing.JLabel dbExplorerLabel;
+  private javax.swing.JTextField defTableType;
+  private javax.swing.JLabel defTableTypeLabel;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JCheckBox rememberObject;
   private javax.swing.JLabel rememberObjectLabel;

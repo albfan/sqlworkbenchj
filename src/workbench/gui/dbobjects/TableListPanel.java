@@ -1002,15 +1002,15 @@ public class TableListPanel
 			if (loc == 0 || loc > maxWidth) loc = 200;
 			this.importedPanel.setDividerLocation(loc);
 		}
-		
+
+		String defType = Settings.getInstance().getDefaultExplorerObjectType();
 		if (Settings.getInstance().getStoreExplorerObjectType())
 		{
-			this.tableTypeToSelect = props.getProperty(prefix + "objecttype", null);
-			//LogMgr.logDebug("TableListPanel.readSettings()", "Retrieved objecttype: '" + tableTypeToSelect + "' (workspace prefix: " + prefix + ")");
+			this.tableTypeToSelect = props.getProperty(prefix + "objecttype", defType);
 		}
 		else
 		{
-			this.tableTypeToSelect = null;
+			this.tableTypeToSelect = defType;
 		}
 	}
 

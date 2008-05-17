@@ -20,6 +20,7 @@
 <xsl:template match="/">
 		<xsl:apply-templates select="/schema-report/table-def"/>
 		<xsl:apply-templates select="/schema-report/view-def"/>
+		<xsl:call-template name="process-fk"/>
 </xsl:template>
 
 <xsl:template match="table-def">
@@ -187,6 +188,41 @@
 	</xsl:if>	
 </xsl:template>
 
+<xsl:template name="process-fk">
+  <xsl:for-each select="/schema-report/table-def">
+    <xsl:variable name="table" select="table-name"/>
+    <xsl:if test="count(foreign-keys) &gt; 0">
+      <xsl:for-each select="foreign-keys/foreign-key">
+        <xsl:variable name="targetTable" select="references/table-name"/>
+        <xsl:value-of select="$newline"/>
+        <xsl:text>ALTER TABLE </xsl:text><xsl:value-of select="$table"/>
+        <xsl:value-of select="$newline"/>
+        <xsl:text> ADD CONSTRAINT </xsl:text><xsl:value-of select="constraint-name"/>
+        <xsl:value-of select="$newline"/>
+        <xsl:text> FOREIGN KEY (</xsl:text>
+        <xsl:for-each select="source-columns/column">
+          <xsl:value-of select="."/>
+          <xsl:if test="position() &lt; last()">
+            <xsl:text>,</xsl:text>
+          </xsl:if>        
+        </xsl:for-each>
+        <xsl:text>)</xsl:text>
+        <xsl:value-of select="$newline"/>
+        <xsl:text> REFERENCES </xsl:text><xsl:value-of select="$targetTable"/><xsl:text> (</xsl:text>
+        <xsl:for-each select="referenced-columns/column">
+          <xsl:value-of select="."/>
+          <xsl:if test="position() &lt; last()">
+            <xsl:text>,</xsl:text>
+          </xsl:if>        
+        </xsl:for-each>
+        <xsl:text>);</xsl:text>
+        <xsl:value-of select="$newline"/>
+      </xsl:for-each>
+      <xsl:value-of select="$newline"/>
+    </xsl:if>
+  </xsl:for-each>
+</xsl:template>
+
 <xsl:template match="view-def">
   <xsl:variable name="quote"><xsl:text>"</xsl:text></xsl:variable>
   <xsl:variable name="backtick"><xsl:text>&#96;</xsl:text></xsl:variable>
@@ -221,8 +257,6 @@
     </xsl:if>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
-  
-  <xsl:value-of select="$newline"/>
   <xsl:text>)</xsl:text>
   <xsl:value-of select="$newline"/>
   <xsl:text>AS </xsl:text>

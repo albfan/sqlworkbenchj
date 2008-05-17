@@ -66,19 +66,19 @@
 				Thus you can create different shortcuts on your desktop pointing to different sets of profiles.
 				The different shortcuts can still use the same main configuration file.
 			</para>
-			<para>If you want to control the location where &bw-productname; stores the configuration 
-			  files, you have to start the application with the parameter -configDir to specify an 
-				alternate directory:</para>
+			
+			<?dbfo-need height="2cm" ?>
 			<para>
-				<programlisting>java -jar sqlworkbench.jar -configDir=/export/configs/SQLWorkbench</programlisting>
-				or if you are using the Windows&reg; launcher:
-				<programlisting>SQLWorkbench -configDir=c:\ConfigData\SQLWorkbench</programlisting>
-
-				The placeholder <literal>${user.home}</literal> will be 
-				replaced with the current user's home directory (as returned by the Operating System), e.g.:
-<programlisting>
-java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench
-</programlisting>
+				If you want to control the location where &bw-productname; stores the configuration 
+			  files, you have to start the application with the parameter -configDir to specify an 
+				alternate directory:<programlisting>java -jar sqlworkbench.jar -configDir=/export/configs/SQLWorkbench</programlisting>
+			</para>
+			
+			<?dbfo-need height="2cm" ?>
+			<para>
+				or if you are using the Windows&reg; launcher:<programlisting>SQLWorkbench -configDir=c:\ConfigData\SQLWorkbench</programlisting>
+				The placeholder <literal>${user.home}</literal> will be replaced with the current user's home directory 
+				(as returned by the Operating System), e.g.:<programlisting>java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench</programlisting>
 				If the specified directory does not exist, it will be created.
 			</para>
 
@@ -401,8 +401,10 @@ java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench
 				If the specified directory does not exist, it will be created. 
 			</para>
 			
+			<?dbfo-need height="1.5cm" ?>
 			<programlisting>java -jar sqlworkbench.jar -configDir=${user.home}/wbconfig
 SQLWorkbench -configDir='c:\Configurations\SQLWorkbench'</programlisting>
+
 			<para>
 				Note that even on the Windows platform you can use a forward slash to separate 
 				directory names in the parameter.

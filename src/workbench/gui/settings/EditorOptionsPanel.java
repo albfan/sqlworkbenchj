@@ -226,7 +226,6 @@ public class EditorOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 10;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(3, 11, 0, 15);
@@ -238,7 +237,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
     add(altDelimLabel, gridBagConstraints);
 
     historySizeLabel.setText(ResourceMgr.getString("LblHistorySize"));
@@ -286,9 +285,8 @@ public class EditorOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 9;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 11);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 10);
     add(rightClickMovesCursor, gridBagConstraints);
 
     editorFontLabel.setText(ResourceMgr.getString("LblEditorFont"));
@@ -306,7 +304,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(3, 11, 0, 15);
+    gridBagConstraints.insets = new java.awt.Insets(3, 10, 0, 15);
     add(editorFont, gridBagConstraints);
 
     closePopup.setSelected(Settings.getInstance().getCloseAutoCompletionWithSearch());
@@ -320,7 +318,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 11);
     add(closePopup, gridBagConstraints);
 
     completionPasteCase.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Lowercase", "Uppercase", "As is" }));
@@ -403,7 +401,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 5);
+    gridBagConstraints.insets = new java.awt.Insets(6, 10, 0, 5);
     add(alternateDelim, gridBagConstraints);
 
     pasterOrderLabel.setLabelFor(completionColumnSort);
@@ -441,27 +439,27 @@ public class EditorOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 11;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(3, 11, 0, 15);
     add(noWordSep, gridBagConstraints);
 
+    jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(" " + ResourceMgr.getString("LblEditorColors") + " "));
     jPanel1.setLayout(new java.awt.GridBagLayout());
 
     errorColorLabel.setText(ResourceMgr.getString("LblSelectErrorColor"));
     errorColorLabel.setToolTipText(ResourceMgr.getDescription("LblSelectErrorColor"));
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridx = 4;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 14, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
     jPanel1.add(errorColorLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridx = 5;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 7, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
     jPanel1.add(errorColor, gridBagConstraints);
 
     selectionColorLabel.setText(ResourceMgr.getString("LblSelectionColor"));
@@ -470,13 +468,13 @@ public class EditorOptionsPanel
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 14, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
     jPanel1.add(selectionColorLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
     jPanel1.add(selectionColor, gridBagConstraints);
 
     currLineLabel.setText(ResourceMgr.getString("LblCurrLineColor"));
@@ -485,14 +483,15 @@ public class EditorOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
     jPanel1.add(currLineLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
     jPanel1.add(currLineColor, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridx = 5;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     jPanel1.add(jPanel2, gridBagConstraints);
@@ -505,7 +504,7 @@ public class EditorOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 13);
+    gridBagConstraints.insets = new java.awt.Insets(9, 9, 0, 13);
     add(jPanel1, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 

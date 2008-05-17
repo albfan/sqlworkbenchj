@@ -745,8 +745,8 @@ public class MainWindow
 
 	private void checkConnectionForPanel(final MainPanel aPanel)
 	{
-		if (aPanel.isConnected()) return;
 		if (this.isConnectInProgress()) return;
+		if (aPanel.isConnected()) return;
 
 		try
 		{
@@ -960,6 +960,9 @@ public class MainWindow
 
 	protected void tabSelected(final int index)
 	{
+		if (index < 0) return;
+		if (index >= sqlTab.getTabCount()) return;
+		
 		// Make sure this is executed on the EDT
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -1180,7 +1183,7 @@ public class MainWindow
 	public void connectFailed(String error)
 	{
 		disconnected();
-		this.updateWindowTitle();
+		tabSelected(0);
 		
 		try
 		{
@@ -1429,11 +1432,18 @@ public class MainWindow
 		{
 			public void run()
 			{
-				if (saveWorkspace) saveWorkspace(false);
-				if (background) showDisconnectInfo();
-				doDisconnect();
-				if (closeWorkspace) closeWorkspace(background);
-				if (background) closeConnectingInfo();
+				try
+				{
+					if (saveWorkspace) saveWorkspace(false);
+					if (background) showDisconnectInfo();
+					doDisconnect();
+					if (closeWorkspace) closeWorkspace(background);
+					if (background) closeConnectingInfo();
+				}
+				finally
+				{
+					clearConnectIsInProgress();
+				}
 			}
 		};
 		
@@ -1507,7 +1517,6 @@ public class MainWindow
 		{
 			sqlTab.setForegroundAt(i, null);
 		}
-		this.clearConnectIsInProgress();
 	}
 
 
@@ -1871,9 +1880,10 @@ public class MainWindow
 
 	protected void removeAllPanels()
 	{
+		boolean inProgress = connectInProgress;
+		if (!inProgress) this.setConnectIsInProgress();
 		try
 		{
-			this.setConnectIsInProgress();
 			this.tabRemovalInProgress = true;
 			while (sqlTab.getTabCount() > 1)
 			{
@@ -1893,7 +1903,7 @@ public class MainWindow
 		finally
 		{
 			tabRemovalInProgress = false;
-			clearConnectIsInProgress();
+			if (!inProgress) clearConnectIsInProgress();
 		}
 	}
 	

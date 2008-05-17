@@ -1,8 +1,5 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
-
-Build 99, 01.03.2008
---------------------
 *************************************************************************
 **                            ATTENTION                                **
 *************************************************************************
@@ -14,6 +11,107 @@ Build 99, 01.03.2008
 *************************************************************************
 **                            ATTENTION                                **
 *************************************************************************
+Enh:  (99.10) If the configuration file was changed outside of SQL Workbench
+      the application now asks if the external changes should be overwritten
+Enh:  (99.10) A new tab can now be opened by double-clicking in the "free"
+      are of the tab title display (as with Firefox)
+Enh:  (99.9) The display of the tab index can now be disabled in the 
+      general options.
+Enh:  (99.8) A new property to treat Oracle DATE columns as timestamp 
+      has been added to the options dialog. If that option is enabled, it
+      will overwrite the setting for Oracle's JDBC driver.
+Enh:  (99.8) The XML export now writes XML 1.1 to allow for escaped control 
+      characters that are below 0x20
+Enh:  (99.8) WbCopy can now optionally delete rows from the target table that 
+      are not present in the source table. To enable this, use the parameter 
+      -syncDelete=true
+Enh:  (99.7) The output of WbSchemaReport now contains a new tag 
+      <foreign-keys> that contains the definition for each foreign key to 
+      make it possible to create the necessary SQL for multi-column 
+      foreign keys.
+      The individual FK references per column are still present
+Enh:  (99.7) The execution of connect scripts is now also logged when 
+      switching to a tab and a new connection is created.
+Enh:  (99.6) WbImport can now import multiple files from a source directory 
+      into a single table. When both -sourceDir and -table are specified all 
+      files from the source directory are imported into the target table. 
+      Note that -deleteTarget does not work in this mode.
+Enh:  (99.6) The "Drop Tables" dialog in the DbExplorer can now sort the
+      tables according to their FK references in order to allow dropping 
+      them with DBMS that do not support a cascading DROP
+Enh:  (99.6) The "Drop Tables" and "Drop Columns" dialogs in the DbExplorer 
+      can now also display the generated script.
+Enh:  (99.6) WbReport now supports the parameter -reportTitle. The supplied
+      value will be written as report-title into the generated XML.
+Enh:  (99.4) A connection profile can now be set to "read only". All statements
+      that could possibly change the database are ignored.
+Enh:  (99.3) The log messages from WbCopy are more detailed now. Reporting
+      the number of updated and inserted rows.
+Enh:  (99.2) When specifying the complete connection on the commandline the
+      property -seperateConnection is now supported. It defaults to true
+Fix:  (99.11) Sometimes error messages during the connect were displayed 
+      twice.
+Fix:  (99.10) The formatter did not process CREATE TABLE ... AS SELECT 
+Fix:  (99.10) When moving tabs while "Use separate connection per tab", the
+      moved tab was not always connected properly.
+Fix:  (99.10) Descending indexes were not displayed correctly for Oracle
+Fix:  (99.10) When opening a new workspace for the current connection the old
+      workspace was not automatically saved and the connections were not 
+      managed correctly if "Separate Connection per Tab" was used.
+Fix:  (99.10) Using $wb_skip$ with the -fileColumns parameter did not work 
+      when importing multiple files into a single table
+Fix:  (99.10) The parameter -fileColumns did not working when importing
+      multiple files into a single table
+Fix:  (99.9) The parameter -keyColumns was broken for WbCopy
+Fix:  (99.8) When running WbSchemaDiff using -includeSequences=true with 
+      a DBMS that does not support sequences the command silently failed
+      without an error message.
+Fix:  (99.8) The SQL source for table and column comments was not generated
+      correctly
+Fix:  (99.7) The syntax highlighting for multi-line comments using /* .. */
+      was incorrect
+Fix:  (99.7) The data types of the target columns were not retrieved correctly
+      for WbCopy if a column mapping was defined.
+Fix:  (99.7) -createTarget=true was broken for WbImport with XML files 
+Fix:  (99.7) WbExport -type=SQLInsert -createTable=true was broken
+Fix:  (99.7) The SQL source for unique keys was not created correctly for 
+      SQL Server.
+Fix:  (99.6) When creating stored procedures in Oracle, error messages
+      were not displayed if the procedure/package name was no specified 
+      in upper-case in the CREATE statement.
+Fix:  (99.6) In Oracle, the datatype was not displayed correctly for columns 
+      with the datatype NUMBER (no further details) in the DbExplorer
+Fix:  (99.5) When hitting ENTER at the end of a line with no with no whitespace
+      the line was duplicated
+Fix:  (99.4) Scripts with line comments that contained a single quote were
+      not processed correctly if the line comment did not start at the first
+      column of the line.
+Fix:  (99.3) The SQL Formatter now works with multi-byte encoded characters
+Fix:  (99.3) The reported rows per table where incorrect when using 
+      WbCopy with multiple source tables.
+Fix:  (99.3) Using a mode with "update" for WbCopy with multiple tables
+      did not work.
+Fix:  (99.2) The selected object type was not saved and restored correctly
+      in the DbExplorer
+Fix:  (99.2) When using -createTarget=true with WbCopy, tables that used
+      reserved words as column names could not be created
+Fix:  (99.2) Workspaces were saved under certain circumstances even if
+      -nosettings was specified.
+Fix:  (99.2) When running WbExport with the -outputDir parameter and the 
+      directory did not exists and -createDir=true was not specified the 
+      command silently failed.
+Fix:  (99.2) Running in batch mode and using -displayResults=true
+      was not working when statements were executed that had no results.
+Fix:  (99.1) Running WbReport with -includeViews=false did not work.
+Fix:  (99.1) Auto completion did not detect tables that were joined  
+      with the JOIN keyword (LEFT JOIN or INNER JOIN would work)
+Fix:  (99.1) Reference table navigation was broken.
+Fix:  (99.1) CREATE TABLE statements were not formatted correctly if 
+      they contained inlined PRIMARY KEY definitions.
+Fix:  (99.1) Auto completion for views was not working in Derby
+
+Build 99, 01.03.2008
+--------------------
 Enh:  (98.6) Files generated by WbExport are now always lowercase
 Enh:  (98.6) When running in batch mode, individual update counts can now 
       be consolidated into a single message at the end (similar to the 
@@ -148,8 +246,8 @@ Fix:  (97.10) Table definitions could not always retrieved when using Oracle
       (e.g. in the DbExplorer)
 Fix:  (97.9) Indexes with complex expressions (e.g. CASE ...) where not
       displayed correctly in the generated SQL for a table
-Fix:  (97.9) The "REFERENCES" label in the DbExplorer panels "REFERENCES"
-      and "REFERENCED BY" were the wrong way round.
+Fix:  (97.9) The label in the DbExplorer panels "REFERENCES" and 
+      "REFERENCED BY" were the wrong way round.
 Fix:  (97.8) Character literals spanning multiple lines were not colored
       correctly (especially if the start was not visible)
 Fix:  (97.8) Using WbVardef without a value did not delete the variable.

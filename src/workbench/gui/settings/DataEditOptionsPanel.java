@@ -66,11 +66,8 @@ public class DataEditOptionsPanel
     jPanel3 = new javax.swing.JPanel();
     pkMapFile = new javax.swing.JTextField();
     selectMapFile = new FlatButton();
-    previewDmlLabel = new WbCheckBoxLabel();
     previewDml = new javax.swing.JCheckBox();
-    requiredFieldLabel = new javax.swing.JLabel();
     requiredFieldColor = new workbench.gui.components.WbColorPicker();
-    highlightRequiredLabel = new WbCheckBoxLabel();
     highlightRequired = new javax.swing.JCheckBox();
     dummyPanel = new javax.swing.JPanel();
 
@@ -108,67 +105,41 @@ public class DataEditOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(7, 8, 0, 15);
     add(jPanel3, gridBagConstraints);
 
-    previewDmlLabel.setLabelFor(previewDml);
-    previewDmlLabel.setText(ResourceMgr.getString("LblPreviewDml"));
-    previewDmlLabel.setToolTipText(ResourceMgr.getDescription("LblPreviewDml"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
-    add(previewDmlLabel, gridBagConstraints);
-
-    previewDml.setFont(null);
-    previewDml.setText(" ");
+    previewDml.setText(ResourceMgr.getString("LblPreviewDml"));
+    previewDml.setToolTipText(ResourceMgr.getDescription("LblPreviewDml"));
     previewDml.setBorder(null);
     previewDml.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     previewDml.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     previewDml.setIconTextGap(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 9, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 11);
     add(previewDml, gridBagConstraints);
 
-    requiredFieldLabel.setText(ResourceMgr.getString("LblReqFldColor"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(12, 12, 0, 0);
-    add(requiredFieldLabel, gridBagConstraints);
+    requiredFieldColor.setToolTipText(ResourceMgr.getString("LblReqFldColor"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 25);
     add(requiredFieldColor, gridBagConstraints);
 
-    highlightRequiredLabel.setLabelFor(highlightRequired);
-    highlightRequiredLabel.setText(ResourceMgr.getString("LblHiliteRqd"));
-    highlightRequiredLabel.setToolTipText(ResourceMgr.getDescription("LblHiliteRqd"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
-    add(highlightRequiredLabel, gridBagConstraints);
-
-    highlightRequired.setFont(null);
+    highlightRequired.setText(ResourceMgr.getString("LblHiliteRqd"));
+    highlightRequired.setToolTipText(ResourceMgr.getDescription("LblHiliteRqd"));
     highlightRequired.setBorder(null);
     highlightRequired.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     highlightRequired.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     highlightRequired.setIconTextGap(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 9, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
     add(highlightRequired, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -196,14 +167,11 @@ public class DataEditOptionsPanel
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel dummyPanel;
   private javax.swing.JCheckBox highlightRequired;
-  private javax.swing.JLabel highlightRequiredLabel;
   private javax.swing.JPanel jPanel3;
   private javax.swing.JTextField pkMapFile;
   private javax.swing.JLabel pkMapFileLabel;
   private javax.swing.JCheckBox previewDml;
-  private javax.swing.JLabel previewDmlLabel;
   private workbench.gui.components.WbColorPicker requiredFieldColor;
-  private javax.swing.JLabel requiredFieldLabel;
   private javax.swing.JButton selectMapFile;
   // End of variables declaration//GEN-END:variables
 

@@ -577,16 +577,6 @@ public class Settings
 		setProperty("workbench.gui.autoconnect", flag);
 	}
 	
-	public String getPDFReaderPath()
-	{
-		return getProperty(PROPERTY_PDF_READER_PATH, null);
-	}
-
-	public void setPDFReaderPath(String path)
-	{
-		setProperty(PROPERTY_PDF_READER_PATH, path);
-	}
-
 	// <editor-fold defaultstate="collapsed" desc="Formatting options">
 	
 	public int getFormatterMaxColumnsInSelect()
@@ -712,6 +702,16 @@ public class Settings
 	
 	// <editor-fold defaultstate="collapsed" desc="DbExplorer">
 
+	public String getDefaultExplorerObjectType()
+	{
+		return getProperty("workbench.gui.dbobjects.TableListPanel.objecttype", null);
+	}
+
+	public void setDefaultExplorerObjectType(String type)
+	{
+		setProperty("workbench.gui.dbobjects.TableListPanel.objecttype", type);
+	}
+	
 	public boolean getRetrieveDbExplorer()
 	{
 		return getBoolProperty("workbench.dbexplorer.retrieveonopen", true);
@@ -789,24 +789,6 @@ public class Settings
 	public boolean getSwitchCatalogInExplorer()
 	{
 		return getBoolProperty("workbench.dbexplorer.switchcatalog", true);
-	}
-
-	public String getProfileStorage()
-	{
-		String profiles = this.props.getProperty(PROPERTY_PROFILE_STORAGE);
-		if (profiles == null)
-		{
-			return new File(getConfigDir(), "WbProfiles.xml").getAbsolutePath();
-		}
-		String realFilename = FileDialogUtil.replaceConfigDir(profiles);
-
-		WbFile f = new WbFile(realFilename);
-		if (!f.isAbsolute())
-		{
-			// no directory in filename -> use config directory
-			f = new WbFile(getConfigDir(), realFilename);
-		}
-		return f.getFullPath();
 	}
 
 	public boolean getSelectDataPanelAfterRetrieve()
@@ -2018,6 +2000,16 @@ public class Settings
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Directories">
+	public String getPDFReaderPath()
+	{
+		return getProperty(PROPERTY_PDF_READER_PATH, null);
+	}
+
+	public void setPDFReaderPath(String path)
+	{
+		setProperty(PROPERTY_PDF_READER_PATH, path);
+	}
+	
 	public String getLastLibraryDir()
 	{
 		return getProperty("workbench.drivers.lastlibdir", "");
@@ -2087,6 +2079,25 @@ public class Settings
 	{
 		this.props.setProperty("workbench.filter.lastdir",dir);
 	}
+	
+	public String getProfileStorage()
+	{
+		String profiles = this.props.getProperty(PROPERTY_PROFILE_STORAGE);
+		if (profiles == null)
+		{
+			return new File(getConfigDir(), "WbProfiles.xml").getAbsolutePath();
+		}
+		String realFilename = FileDialogUtil.replaceConfigDir(profiles);
+
+		WbFile f = new WbFile(realFilename);
+		if (!f.isAbsolute())
+		{
+			// no directory in filename -> use config directory
+			f = new WbFile(getConfigDir(), realFilename);
+		}
+		return f.getFullPath();
+	}
+	
 	// </editor-fold>
 	
 	// <editor-fold defaultstate="collapsed" desc="Date and Time Formatting">

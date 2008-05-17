@@ -18,8 +18,19 @@
 	      <xsl:otherwise>inherit</xsl:otherwise>
 	    </xsl:choose>
 	  </xsl:attribute>
+	  <xsl:attribute name="text-decoration">
+	    <xsl:choose>
+	      <xsl:when test="self::link">underline</xsl:when>
+	      <xsl:when test="self::ulink">underline</xsl:when>
+	      <xsl:otherwise>inherit</xsl:otherwise>
+	    </xsl:choose>
+	  </xsl:attribute>
 	</xsl:attribute-set>
   
+	<xsl:attribute-set name="root.properties">
+		<xsl:attribute name="widows">6</xsl:attribute>
+		<xsl:attribute name="orphans">6</xsl:attribute>
+	</xsl:attribute-set>	
 </xsl:stylesheet>
 
 

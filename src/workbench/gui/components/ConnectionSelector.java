@@ -195,14 +195,8 @@ public class ConnectionSelector
 		WbConnection conn = null;
 		String error = null;
 		
-		this.setConnectIsInProgress();
-//		WbSwingUtilities.invoke(new Runnable()
-//		{
-//			public void run()
-//			{
-				client.connectBegin(aProfile);
-//			}
-//		});
+		setConnectIsInProgress();
+		client.connectBegin(aProfile);
 		
 		String id = this.client.getConnectionId(aProfile);
 		try
