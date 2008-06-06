@@ -46,7 +46,7 @@ import workbench.util.SqlUtil;
  * 
  * @author support@sql-workbench.net
  */
-public class TableSync
+public class TableDeleteSync
 {
 	private WbConnection toDelete;
 	private WbConnection reference;
@@ -64,7 +64,7 @@ public class TableSync
 	private SqlLiteralFormatter formatter;
 	private long deletedRows;
 	
-	public TableSync(WbConnection deleteFrom, WbConnection compareTo)
+	public TableDeleteSync(WbConnection deleteFrom, WbConnection compareTo)
 		throws SQLException
 	{
 		this.toDelete = deleteFrom;
@@ -151,10 +151,9 @@ public class TableSync
 		LogMgr.logDebug("SyncDeleter.setTable()", "Using " + deleteSql + " to delete rows from target database");
 	}
 
-	public void deleteTarget()
+	public void doSync()
 		throws SQLException, IOException
 	{
-
 		List<ColumnIdentifier> columns = this.toDelete.getMetadata().getTableColumns(this.deleteTable);
 		boolean first = true;
 		String selectColumns = ""; 

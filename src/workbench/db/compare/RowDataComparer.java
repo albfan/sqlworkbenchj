@@ -17,7 +17,7 @@ import workbench.storage.RowData;
 import workbench.storage.StatementFactory;
 
 /**
- * Compare to {@link workbench.storage.RowData} objects to check for equality.
+ * Compare two {@link workbench.storage.RowData} objects to check for equality.
  * Used to generate the approriate SQL scripts when comparing the data from
  * two tables.
  * 
