@@ -29,7 +29,7 @@
    <string>Oracle</string>
    <object id="ora_trg_source" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
-     <string>SELECT 'CREATE OR REPLACE TRIGGER '|| description, trigger_body FROM all_triggers</string>
+     <string>SELECT 'CREATE OR REPLACE TRIGGER '|| description || decode(when_clause,NULL,'','WHEN ('|| when_clause ||')'||chr(10)), trigger_body FROM all_triggers</string>
     </void>
     <void property="objectNameField">
      <string>trigger_name</string>

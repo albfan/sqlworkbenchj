@@ -320,8 +320,7 @@ public class WbManager
 		catch (Exception e)
 		{
 			// Fallback, should not happen
-			String p = url.getFile();
-			p = StringUtil.replace(p, "%20", " ");
+			String p = url.getFile().replace("%20", " ");
 			f = new File(p);
 		}
 		return f;

@@ -1025,7 +1025,7 @@ public class DwPanel
 			String r = "";
 			if (errorRow > -1)
 			{
-				r = ResourceMgr.getString("TxtErrorRow").replaceAll("%row%", NumberStringCache.getNumberString(errorRow));
+				r = ResourceMgr.getString("TxtErrorRow").replace("%row%", NumberStringCache.getNumberString(errorRow));
 			}
 			msg = StringUtil.replace(msg, "%row%", r);
 		}

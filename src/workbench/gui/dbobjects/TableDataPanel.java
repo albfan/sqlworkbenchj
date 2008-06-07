@@ -763,7 +763,7 @@ public class TableDataPanel
 				   && max == 0)
 			{
 				String msg = ResourceMgr.getString("MsgDataDisplayWarningThreshold");
-				msg = msg.replaceAll("%rows%", Long.toString(rows));
+				msg = msg.replace("%rows%", Long.toString(rows));
 				int choice = JOptionPane.showConfirmDialog(this, msg, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION);
 				if (choice == JOptionPane.NO_OPTION) return;
 			}

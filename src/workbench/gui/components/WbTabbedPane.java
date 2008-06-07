@@ -181,8 +181,10 @@ public class WbTabbedPane
 		if (newIndex != -1 && newIndex != draggedTabIndex)
 		{
 			setCursor(DragSource.DefaultMoveDrop);
-			tabMover.moveTab(draggedTabIndex, newIndex);
-			draggedTabIndex = newIndex;
+			if (tabMover.moveTab(draggedTabIndex, newIndex))
+			{
+				draggedTabIndex = newIndex;
+			}
 		}
 	}
 

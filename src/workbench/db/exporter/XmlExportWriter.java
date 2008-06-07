@@ -53,7 +53,8 @@ public class XmlExportWriter
 		{
 			try
 			{
-				XsltTransformer.transformFile(exportFile, output, xsltFile);
+				XsltTransformer transformer = new XsltTransformer();
+				transformer.transform(exportFile, output, xsltFile);
 			}
 			catch (Exception e)
 			{

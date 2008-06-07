@@ -18,11 +18,9 @@ import java.util.List;
 import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.TableIdentifier;
-import workbench.db.exporter.SqlRowDataConverter;
 import workbench.sql.ScriptParser;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
-import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.util.SqlUtil;
 

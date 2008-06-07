@@ -471,7 +471,7 @@ public class WbImport
 					{
 						result.setFailure();
 						String col = xmlParser.getMissingColumn();
-						String msg = ResourceMgr.getString("ErrImportColumnNotFound").replaceAll("%name%", col);
+						String msg = ResourceMgr.getString("ErrImportColumnNotFound").replace("%name%", col);
 						result.addMessage(msg);
 						LogMgr.logError("WbImport.execute()", msg, null);
 						return result;
@@ -573,7 +573,7 @@ public class WbImport
 		{
 			if (!imp.setMode(mode))
 			{
-				result.addMessage(ResourceMgr.getString("ErrInvalidModeIgnored").replaceAll("%mode%", mode));
+				result.addMessage(ResourceMgr.getString("ErrInvalidModeIgnored").replace("%mode%", mode));
 			}
 		}
 

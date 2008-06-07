@@ -293,6 +293,20 @@ public class ResultInfo
 			}
 		}
 	}
+
+	public void setPKColumns(List<ColumnIdentifier> cols)
+	{
+		for (ColumnIdentifier col : cols)
+		{
+			String name = col.getColumnName();
+			int colIndex = this.findColumn(name);
+			if (colIndex > -1)
+			{
+				boolean pk = col.isPkColumn();
+				this.columns[colIndex].setIsPkColumn(pk);
+			}
+		}
+	}
 	
 	public boolean hasPkColumns()
 	{

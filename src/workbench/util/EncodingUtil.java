@@ -120,15 +120,6 @@ public class EncodingUtil
 	}
 
 	/**
-	 * Returns the system's default encoding. 
-	 */
-	public static String getDefaultEncoding()
-	{
-		String enc = Settings.getInstance().getDefaultFileEncoding();
-		return enc;
-	}
-	
-	/**
 	 * Return all available encodings.
 	 */
 	public synchronized static String[] getEncodings()
@@ -190,8 +181,7 @@ public class EncodingUtil
 			{
 				// Fall back to default encoding
 				pw = new BufferedWriter(new OutputStreamWriter(stream), buffSize);
-				String msg = ResourceMgr.getString("ErrWrongEncoding");
-				msg = StringUtil.replace(msg, "%encoding%", encoding);
+				String msg = ResourceMgr.getString("ErrWrongEncoding").replace("%encoding%", encoding);
 				LogMgr.logError("EncodingUtil.createWriter()", msg, e);
 			}
 		}

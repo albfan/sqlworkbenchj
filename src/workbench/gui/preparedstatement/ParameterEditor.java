@@ -114,8 +114,8 @@ public class ParameterEditor
 			String v = this.model.getParameterValue(i);
 			if (!this.parameters.isValueValid(i, v)) 
 			{
-				String error = ResourceMgr.getString("ErrInvalidPSParameterValue").replaceAll("%value%", v);
-				error = error.replaceAll("%type%", SqlUtil.getTypeName(this.parameters.getParameterType(i)));
+				String error = ResourceMgr.getString("ErrInvalidPSParameterValue").replace("%value%", v);
+				error = error.replace("%type%", SqlUtil.getTypeName(this.parameters.getParameterType(i)));
 				WbSwingUtilities.showErrorMessage(this, error);
 				return false;
 			}

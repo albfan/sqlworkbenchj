@@ -189,7 +189,8 @@ public class WbSchemaReport
 		{
 			try
 			{
-				XsltTransformer.transformFile(output.getFullPath(), xsltOutput, xslt);
+				XsltTransformer transfomer = new XsltTransformer();
+				transfomer.transform(output.getFullPath(), xsltOutput, xslt);
 				result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", xsltOutput));
 				result.setSuccess();
 			}

@@ -57,6 +57,8 @@ public class WbExport
 	private boolean showProgress = true;
 	private int progressInterval = 1;
 
+	public static final String PARAM_CREATE_OUTPUTDIR = "createDir";
+	
 	public WbExport()
 	{
 		cmdLine = new ArgumentParser();
@@ -66,7 +68,8 @@ public class WbExport
 		CommonArgs.addCommitParameter(cmdLine);
 		CommonArgs.addVerboseXmlParameter(cmdLine);
 		CommonArgs.addQuoteEscaping(cmdLine);
-
+		CommonArgs.addSqlDateLiteralParameter(cmdLine);
+		
 		cmdLine.addArgument("type", StringUtil.stringToList("text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsx,xls,html"));
 		cmdLine.addArgument("file");
 		cmdLine.addArgument("title");
@@ -102,8 +105,7 @@ public class WbExport
 		cmdLine.addArgument("blobType", BlobMode.getTypes());
 		cmdLine.addArgument("clobAsFile", ArgumentType.BoolArgument);
 		cmdLine.addArgument("continueOnError", ArgumentType.BoolArgument);
-		cmdLine.addArgument("sqlDateLiterals", Settings.getInstance().getLiteralTypeList());
-		cmdLine.addArgument("createDir", ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_CREATE_OUTPUTDIR, ArgumentType.BoolArgument);
 	}
 
 	public String getVerb() { return VERB; }
@@ -124,10 +126,10 @@ public class WbExport
 		header += ", xls="  + Boolean.toString(getHeaderDefault("xls"));
 		header += ", xlsx="  + Boolean.toString(getHeaderDefault("xlsx"));
 		
-		msg = StringUtil.replace(msg, "%header_flag_default%", header);
-		msg = StringUtil.replace(msg, "%verbose_default%", Boolean.toString(getVerboseXmlDefault()));
-		msg = StringUtil.replace(msg, "%date_literal_default%", Settings.getInstance().getDefaultExportDateLiteralType());
-		msg = StringUtil.replace(msg, "%default_encoding%", Settings.getInstance().getDefaultDataEncoding());
+		msg = msg.replace("%header_flag_default%", header);
+		msg = msg.replace("%verbose_default%", Boolean.toString(getVerboseXmlDefault()));
+		msg = msg.replace("%date_literal_default%", Settings.getInstance().getDefaultExportDateLiteralType());
+		msg = msg.replace("%default_encoding%", Settings.getInstance().getDefaultDataEncoding());
 		return msg;
 	}
 
@@ -281,7 +283,7 @@ public class WbExport
 				else
 				{
 					exporter.setEscapeRange(null);
-					String msg = ResourceMgr.getString("ErrExportInvalidEscapeRangeIgnored").replaceAll("%value%", escape);
+					String msg = ResourceMgr.getString("ErrExportInvalidEscapeRangeIgnored").replace("%value%", escape);
 					result.addMessage(msg);
 				}
 			}
@@ -310,7 +312,7 @@ public class WbExport
 			String bmode = cmdLine.getValue("blobtype");
 			exporter.setBlobMode(bmode);
 			this.defaultExtension = ".sql";
-			String literal = cmdLine.getValue("sqlDateLiterals");
+			String literal = cmdLine.getValue(CommonArgs.ARG_DATE_LITERAL_TYPE);
 			if (literal != null)
 			{
 				exporter.setDateLiteralType(literal);
@@ -336,7 +338,7 @@ public class WbExport
 				else
 				{
 					String msg = ResourceMgr.getString("ErrSpoolXsltNotFound");
-					msg = msg.replaceAll("%xslt%", f.getAbsolutePath());
+					msg = msg.replace("%xslt%", f.getAbsolutePath());
 					result.addMessage(msg);
 				}
 			}
@@ -440,7 +442,7 @@ public class WbExport
 		CommonArgs.setProgressInterval(this, cmdLine);
 		this.showProgress = (this.progressInterval > 0);
 
-		boolean create = cmdLine.getBoolean("createdir", false);
+		boolean create = cmdLine.getBoolean(PARAM_CREATE_OUTPUTDIR, false);
 
 		if (create)
 		{
@@ -468,14 +470,12 @@ public class WbExport
 				}
 			}
 		}
-		else if (outputdir != null)
+		
+		if (outputdir != null && !outputdir.exists())
 		{
-			if (!outputdir.exists())
-			{
-				result.addMessage(ResourceMgr.getFormattedString("ErrExportOutputDirNotFound", outputdir.getFullPath()));
-				result.setFailure();
-				return result;
-			}
+			result.addMessage(ResourceMgr.getFormattedString("ErrOutputDirNotFound", outputdir.getFullPath()));
+			result.setFailure();
+			return result;
 		}
 
 		if (outputFile != null)
@@ -526,7 +526,7 @@ public class WbExport
 			this.exporter.setReportInterval(this.progressInterval);
 
 			String msg = ResourceMgr.getString("MsgSpoolInit");
-			msg = StringUtil.replace(msg, "%type%", exporter.getTypeDisplay());
+			msg = msg.replace("%type%", exporter.getTypeDisplay());
 			String out = null;
 			if (outputFile != null)
 			{
@@ -536,12 +536,11 @@ public class WbExport
 			{
 				out = outputdir.getFullPath();
 			}
-			msg = StringUtil.replace(msg, "%file%", out);
-			//msg = msg + " quote=" + exporter.getTextQuoteChar();
+			msg = msg.replace("%file%", out);
 			result.addMessage(msg);
 			if (this.maxRows > 0)
 			{
-				msg = ResourceMgr.getString("MsgExportMaxRowsWarning").replaceAll("%maxrows%", Integer.toString(maxRows));
+				msg = ResourceMgr.getString("MsgExportMaxRowsWarning").replace("%maxrows%", Integer.toString(maxRows));
 				result.addMessage(msg);
 			}
 		}
@@ -642,9 +641,9 @@ public class WbExport
 		{
 			long rows = exporter.getTotalRows();
 			String msg = ResourceMgr.getString("MsgExportTableExported");
-			msg = StringUtil.replace(msg, "%file%", exporter.getFullOutputFilename());
-			msg = StringUtil.replace(msg, "%tablename%", table.getTableExpression());
-			msg = StringUtil.replace(msg, "%rows%", Long.toString(rows));
+			msg = msg.replace("%file%", exporter.getFullOutputFilename());
+			msg = msg.replace("%tablename%", table.getTableExpression());
+			msg = msg.replace("%rows%", Long.toString(rows));
 			result.addMessage(msg);
 		}
 		else
@@ -671,7 +670,7 @@ public class WbExport
 
 		if (outdir == null || !outdir.exists())
 		{
-			String msg = ResourceMgr.getFormattedString("ErrExportOutputDirNotFound", outdir.getAbsolutePath());
+			String msg = ResourceMgr.getFormattedString("ErrOutputDirNotFound", outdir.getAbsolutePath());
 			result.addMessage(msg);
 			result.setFailure();
 			return;
@@ -680,7 +679,7 @@ public class WbExport
 		if (!outdir.isDirectory())
 		{
 			String msg = ResourceMgr.getString("ErrExportOutputDirNotDir");
-			msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
+			msg = msg.replace("%dir%", outdir.getAbsolutePath());
 			result.addMessage(msg);
 			result.setFailure();
 			return;
@@ -715,8 +714,8 @@ public class WbExport
 		{
 			tableCount = exporter.getNumberExportedTables();
 			String msg = ResourceMgr.getString("MsgExportNumTables");
-			msg = msg.replaceAll("%numtables%", Integer.toString(tableCount));
-			msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
+			msg = msg.replace("%numtables%", Integer.toString(tableCount));
+			msg = msg.replace("%dir%", outdir.getAbsolutePath());
 			result.addMessage(msg);
 			result.setSuccess();
 		}
@@ -769,7 +768,7 @@ public class WbExport
 
 				if (exporter.isSuccess())
 				{
-					msg = ResourceMgr.getString("MsgSpoolOk").replaceAll("%rows%", Long.toString(rowCount));
+					msg = ResourceMgr.getString("MsgSpoolOk").replace("%rows%", Long.toString(rowCount));
 					aResult.addMessage(""); // force new line in output
 					aResult.addMessage(msg);
 					msg = ResourceMgr.getString("MsgSpoolTarget") + " " + this.exporter.getFullOutputFilename();

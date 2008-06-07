@@ -83,5 +83,22 @@ public class RowDataComparerTest
 		verb = SqlUtil.getSqlVerb(sql);
 		assertEquals("INSERT", verb);
 		assertTrue(sql.indexOf("(42, 'Zaphod', 'Beeblebrox')") > -1);
+		
+		reference = new RowData(info);
+		reference.setValue(0, new Integer(42));
+		reference.setValue(1, "Zaphod");
+		reference.setValue(2, null);
+		reference.resetStatus();
+
+		target = new RowData(info);
+		target.setValue(0, new Integer(42));
+		target.setValue(1, "Zaphod");
+		target.setValue(2, null);
+		target.resetStatus();
+		
+		instance = new RowDataComparer(reference, target);
+		result = instance.getMigrationSql(factory);
+		assertNull(result);
+		
 	}
 }

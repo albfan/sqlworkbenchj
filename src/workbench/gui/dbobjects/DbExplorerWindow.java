@@ -26,6 +26,7 @@ import workbench.gui.components.ConnectionSelector;
 import workbench.gui.components.RunningJobIndicator;
 import workbench.interfaces.Connectable;
 import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -207,7 +208,7 @@ public class DbExplorerWindow
 		});
 	}
 	
-	public void connectBegin(ConnectionProfile profile)
+	public void connectBegin(ConnectionProfile profile, StatusBar info)
 	{
 	}
 	

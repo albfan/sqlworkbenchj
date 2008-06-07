@@ -21,7 +21,7 @@ import workbench.db.WbConnection;
 public interface Connectable
 {
 	void connectCancelled();
-	void connectBegin(ConnectionProfile profile);
+	void connectBegin(ConnectionProfile profile, StatusBar info);
 	String getConnectionId(ConnectionProfile profile);
 	void connectFailed(String error);
 	void connected(WbConnection conn);

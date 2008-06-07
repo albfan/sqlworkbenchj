@@ -112,7 +112,7 @@ public class SqlRowDataConverter
 	{
 		if (this.literalFormatter != null)
 		{
-			this.literalFormatter.setProduct(type);
+			this.literalFormatter.setDateLiteralType(type);
 		}
 	}
 	

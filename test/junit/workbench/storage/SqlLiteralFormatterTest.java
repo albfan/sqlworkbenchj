@@ -32,7 +32,7 @@ public class SqlLiteralFormatterTest
 		try
 		{
 			SqlLiteralFormatter f = new SqlLiteralFormatter();
-			f.setProduct(SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE);
+			f.setDateLiteralType(SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE);
 
 			Calendar c = Calendar.getInstance();
 			c.clear();
@@ -74,7 +74,7 @@ public class SqlLiteralFormatterTest
 		try
 		{
 			SqlLiteralFormatter f = new SqlLiteralFormatter();
-			f.setProduct(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
+			f.setDateLiteralType(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
 
 			Calendar c = Calendar.getInstance();
 			c.clear();
@@ -116,7 +116,7 @@ public class SqlLiteralFormatterTest
 		try
 		{
 			SqlLiteralFormatter f = new SqlLiteralFormatter();
-			f.setProduct("oracle");
+			f.setDateLiteralType("oracle");
 
 			Calendar c = Calendar.getInstance();
 			c.clear();

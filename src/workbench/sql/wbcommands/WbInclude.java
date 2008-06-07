@@ -88,9 +88,9 @@ public class WbInclude
 			file = evaluateFileArgument(cmdLine.getValue("file"));
 		}
 
-		if (file == null || file.length() == 0)
+		if (file == null)
 		{
-			String msg = ResourceMgr.getString("ErrIncludeWrongParameter");
+			String msg = ResourceMgr.getString("ErrIncludeWrongParameter").replace("%default_encoding%", Settings.getInstance().getDefaultEncoding());
 			result.addMessage(msg);
 			result.setFailure();
 			return result;
@@ -111,6 +111,10 @@ public class WbInclude
 		boolean defaultIgnore = currentConnection.getProfile().getIgnoreDropErrors();
 		boolean ignoreDrop = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, defaultIgnore);
 		String encoding = cmdLine.getValue("encoding");
+		if (encoding == null)
+		{
+			encoding = Settings.getInstance().getDefaultEncoding();
+		}
 
 		String delim = cmdLine.getValue("delimiter");
 		try

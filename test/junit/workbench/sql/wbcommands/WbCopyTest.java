@@ -37,6 +37,12 @@ public class WbCopyTest
 		super(testName);
 	}
 
+	public void testIsConnectionRequired()
+	{
+		WbCopy copy = new WbCopy();
+		assertFalse(copy.isConnectionRequired());
+	}
+	
 	public void testCopyWithSyncDelete() throws Exception
 	{
 		try

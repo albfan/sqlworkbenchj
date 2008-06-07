@@ -24,9 +24,11 @@ import workbench.util.SqlUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class WbDescribeTable extends SqlCommand
+public class WbDescribeTable 
+	extends SqlCommand
 {
-	private static final String VERB = "DESC";
+	public static final String VERB = "DESC";
+	public static final String VERB_LONG = "DESCRIBE";
 
 	public WbDescribeTable()
 	{
@@ -47,7 +49,7 @@ public class WbDescribeTable extends SqlCommand
 		{
 			result.setFailure();
 			String msg = ResourceMgr.getString("ErrTableOrViewNotFound");
-			msg = msg.replaceAll("%name%", table);
+			msg = msg.replace("%name%", table);
 			result.addMessage(msg);
 		}
 		else

@@ -39,7 +39,7 @@ public class LnFManager
 			String clz = set.getProperty("workbench.lnf." + i + ".class", null);
 			String name = set.getProperty("workbench.lnf." + i + ".name", clz);
 			String libs = set.getProperty("workbench.lnf." + i + ".classpath", null);
-			libs = StringUtil.replace(libs, LnFDefinition.LNF_PATH_SEPARATOR, StringUtil.getPathSeparator());
+			libs = libs.replace(LnFDefinition.LNF_PATH_SEPARATOR, StringUtil.getPathSeparator());
 			if (clz != null && libs != null)
 			{
 				LnFDefinition lnf = new LnFDefinition(name, clz, libs);

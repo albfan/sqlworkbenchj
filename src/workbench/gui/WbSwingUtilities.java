@@ -395,7 +395,10 @@ public class WbSwingUtilities
 	{
 		String[] options = new String[]
 		{
-			ResourceMgr.getString("LblYes"), ResourceMgr.getString("LblExecuteAll"), ResourceMgr.getString("LblNo"), ResourceMgr.getString("ButtonLabelCancel")
+			ResourceMgr.getPlainString("LblYes"), 
+			ResourceMgr.getPlainString("LblExecuteAll"), 
+			ResourceMgr.getPlainString("LblNo"), 
+			ResourceMgr.getPlainString("LblCancel")
 		};
 		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
 		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);

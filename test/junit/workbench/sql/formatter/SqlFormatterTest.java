@@ -35,6 +35,28 @@ public class SqlFormatterTest
 		util.prepareEnvironment();
 	}
 
+	public void testCTAS()
+	{
+		try
+		{
+			String sql = "CREATE table cust as select * from customers where rownum <= 1000";
+			String expected = 
+					"CREATE TABLE cust \n"+
+					"AS\n"+
+					"SELECT *\n" + 
+					"FROM customers\n" + 
+					"WHERE rownum <= 1000";
+			SqlFormatter f = new SqlFormatter(sql);
+			String formatted = f.getFormattedSql().toString();
+//			System.out.println("**************\n" + formatted + "\n**********\n" + expected + "\n*************");
+			assertEquals(expected, formatted);
+		}
+		catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testUnknown()
 	{
 		try

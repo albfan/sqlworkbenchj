@@ -221,13 +221,13 @@ public class RowData
 	 *
 	 *	@throws IndexOutOfBoundsException
 	 */
-	public void setValue(int aColIndex, Object aValue)
+	public void setValue(int aColIndex, Object newValue)
 		throws IndexOutOfBoundsException
 	{
 		if (!this.isNew())
 		{
 			Object oldValue = this.colData[aColIndex];
-			if (oldValue != null && oldValue.equals(aValue)) return;
+			if (objectsAreEqual(oldValue, newValue)) return;
 			if (this.originalData == null)
 			{
 				createOriginalData();
@@ -238,7 +238,7 @@ public class RowData
 				this.originalData[aColIndex] = this.colData[aColIndex];
 			}
 		}
-		this.colData[aColIndex] = aValue;
+		this.colData[aColIndex] = newValue;
 		this.setModified();
 	}
 
@@ -428,7 +428,7 @@ public class RowData
 		return true;
 	}
 
-	private boolean objectsAreEqual(Object one, Object other)
+	public static boolean objectsAreEqual(Object one, Object other)
 	{
 		if (one == null && other == null) return true;
 		if (one == null || other == null) return false;

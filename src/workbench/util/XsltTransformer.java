@@ -33,46 +33,50 @@ import javax.xml.transform.stream.StreamSource;
  */
 public class XsltTransformer
 {
-	private Transformer transformer;
+	public XsltTransformer()
+	{
+	}
 
-	public XsltTransformer(File xslfile)
+	public void transform(String inputFileName, String outputFileName, String xslFileName)
 		throws IOException, TransformerException
 	{
-		if(!xslfile.exists())
+		File inputFile = new File(inputFileName);
+		File outputFile = new File(outputFileName);
+		File xslFile = new File(xslFileName);
+		transform(inputFile, outputFile, xslFile);
+	}
+
+	public void transform(File inputFile, File outputFile, File xslfile)
+		throws IOException, TransformerException
+	{
+		if (!xslfile.exists())
 		{
 			throw new FileNotFoundException("File "+xslfile.getAbsolutePath()+" doesn't exist");
 		}
-		Source sxslt = new StreamSource(new FileInputStream(xslfile));
-		sxslt.setSystemId(xslfile.getName());
-		TransformerFactory factory = TransformerFactory.newInstance();
-		this.transformer = factory.newTransformer(sxslt);
-	}
 
-	public void transform(InputStream inXml, OutputStream out)
-		throws TransformerException
-	{
-		Source xmlSource = new StreamSource(inXml);
-		StreamResult res = new StreamResult(out);
-		transformer.transform(xmlSource, res);
-		FileUtil.closeQuitely(inXml);
-		FileUtil.closeQuitely(out);
-	}
-
-	public static void transformFile(String inputFileName, String outputFilename, String xsltFile)
-		throws TransformerException, IOException
-	{
-		File f = new File(xsltFile);
-		XsltTransformer trans = new XsltTransformer(f);
 		InputStream in = null;
 		OutputStream out = null;
+		InputStream xlsInput = null;
+		Transformer transformer = null;
 		try
 		{
-			in = new BufferedInputStream(new FileInputStream(inputFileName),32*1024);
-			out = new BufferedOutputStream(new FileOutputStream(outputFilename), 32*1024);
-			trans.transform(in, out);
+			xlsInput = new FileInputStream(xslfile);
+			
+			Source sxslt = new StreamSource(xlsInput);
+			sxslt.setSystemId(xslfile.getName());
+			TransformerFactory factory = TransformerFactory.newInstance();
+			transformer = factory.newTransformer(sxslt);
+			
+			in = new BufferedInputStream(new FileInputStream(inputFile),32*1024);
+			out = new BufferedOutputStream(new FileOutputStream(outputFile), 32*1024);
+			Source xmlSource = new StreamSource(in);
+			StreamResult result = new StreamResult(out);
+			transformer.transform(xmlSource, result);
 		}
 		finally
 		{
+			if (transformer != null) transformer.reset();
+			FileUtil.closeQuitely(xlsInput);
 			FileUtil.closeQuitely(in);
 			FileUtil.closeQuitely(out);
 		}
@@ -88,7 +92,8 @@ public class XsltTransformer
 			}
 			else
 			{
-				transformFile(args[0], args[1], args[2]);
+				XsltTransformer transformer = new XsltTransformer();
+				transformer.transform(args[0], args[1], args[2]);
 				System.out.println(args[0] + " has been successfully transformed into " + args[1]);
 			}
 		}

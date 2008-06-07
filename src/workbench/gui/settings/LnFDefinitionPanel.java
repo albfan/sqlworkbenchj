@@ -48,7 +48,7 @@ public class LnFDefinitionPanel
 	{
 		initComponents();
 		String text = ResourceMgr.getDescription("LblLnFLib");
-		text = text.replaceAll("%path_sep%", StringUtil.getPathSeparator());
+		text = text.replace("%path_sep%", StringUtil.getPathSeparator());
 		lblLibrary.setToolTipText(text);
 		libraryPath.setTextFieldPropertyName("library");
 		libraryPath.setTextfieldTooltip(text);
@@ -69,7 +69,7 @@ public class LnFDefinitionPanel
 		f = f.deriveFont((float)(f.getSize() * 1.1));
 		infoText.setFont(f);
 		String button = changeLnfButton.getText();
-		String info = ResourceMgr.getString("TxtChangeLnFInfo").replaceAll("%button%", button);
+		String info = ResourceMgr.getString("TxtChangeLnFInfo").replace("%button%", button);
 		infoText.setText(info);
 		infoText.setWrapStyleWord(true);
 		infoText.setLineWrap(true);

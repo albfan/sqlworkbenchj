@@ -31,6 +31,7 @@ import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.interfaces.Connectable;
+import workbench.interfaces.StatusBar;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -42,6 +43,7 @@ import workbench.util.WbThread;
  * @author  support@sql-workbench.net
  */
 public class ConnectionSelector
+	implements StatusBar
 {
 	protected Connectable client;
 	private boolean connectInProgress;
@@ -66,6 +68,7 @@ public class ConnectionSelector
 		return this.connectInProgress;
 	}
 
+	
 	public void selectConnection()
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -118,7 +121,7 @@ public class ConnectionSelector
 		{
 			public void run()
 			{
-				showConnectingInfo();
+				showPopupMessagePanel("");
 				doConnect(aProfile, showDialogOnError);
 			}
 		};
@@ -163,6 +166,7 @@ public class ConnectionSelector
 				{
 					connectLabel.setText(msg);
 					connectingInfo.pack();
+					WbSwingUtilities.center(connectingInfo, parent);
 				}
 				else
 				{
@@ -196,8 +200,11 @@ public class ConnectionSelector
 		String error = null;
 		
 		setConnectIsInProgress();
-		client.connectBegin(aProfile);
 		
+		client.connectBegin(aProfile, this);
+		connectingInfo.repaint();
+		
+		showConnectingInfo();
 		String id = this.client.getConnectionId(aProfile);
 		try
 		{
@@ -289,6 +296,33 @@ public class ConnectionSelector
 	private void clearConnectIsInProgress()
 	{
 		this.connectInProgress = false;
+	}
+
+	public void setStatusMessage(final String message)
+	{
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				showPopupMessagePanel(message);
+			}
+		});
+	}
+
+	public void clearStatusMessage()
+	{
+		showPopupMessagePanel("");
+	}
+
+	public void repaint()
+	{
+		if (this.connectLabel != null) connectLabel.repaint();
+	}
+
+	public String getText()
+	{
+		if (this.connectLabel == null) return "";
+		return connectLabel.getText();
 	}
 
 }

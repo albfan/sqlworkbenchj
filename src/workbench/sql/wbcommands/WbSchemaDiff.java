@@ -18,12 +18,9 @@ import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import workbench.db.ConnectionMgr;
-import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.diff.SchemaDiff;
-import workbench.gui.profiles.ProfileKey;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -41,22 +38,8 @@ public class WbSchemaDiff
 	extends SqlCommand
 {
 	public static final String VERB = "WBSCHEMADIFF";
-	public static final String PARAM_SOURCEPROFILE = "referenceProfile";
-	public static final String PARAM_SOURCEPROFILE_GROUP = "referenceGroup";
-	public static final String PARAM_TARGETPROFILE = "targetProfile";
-	public static final String PARAM_TARGETPROFILE_GROUP = "targetGroup";
 	
-	public static final String PARAM_FILENAME = "file";
-	public static final String PARAM_ENCODING = "encoding";
 	public static final String PARAM_NAMESPACE = "namespace";
-
-	public static final String PARAM_SOURCETABLES = "referenceTables";
-	public static final String PARAM_TARGETTABLES = "targetTables";
-
-	public static final String PARAM_SOURCESCHEMA = "referenceSchema";
-	public static final String PARAM_TARGETSCHEMA = "targetSchema";
-
-	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
 
 	public static final String PARAM_INCLUDE_INDEX = "includeIndex";
 	public static final String PARAM_INCLUDE_FK = "includeForeignKeys";
@@ -66,26 +49,17 @@ public class WbSchemaDiff
 	public static final String PARAM_DIFF_JDBC_TYPES = "useJdbcTypes";
 	
 	private SchemaDiff diff;
-
+	private CommonDiffParameters params; 
+	
 	public WbSchemaDiff()
 	{
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(PARAM_SOURCEPROFILE, ArgumentType.ProfileArgument);
-		cmdLine.addArgument(PARAM_SOURCEPROFILE_GROUP);
-		cmdLine.addArgument(PARAM_TARGETPROFILE, ArgumentType.ProfileArgument);
-		cmdLine.addArgument(PARAM_TARGETPROFILE_GROUP);
-		cmdLine.addArgument(PARAM_FILENAME);
-		cmdLine.addArgument(PARAM_ENCODING);
-		cmdLine.addArgument(PARAM_SOURCETABLES, ArgumentType.TableArgument);
-		cmdLine.addArgument(PARAM_TARGETTABLES, ArgumentType.TableArgument);
-		cmdLine.addArgument(PARAM_SOURCESCHEMA);
-		cmdLine.addArgument(PARAM_TARGETSCHEMA);
+		params = new CommonDiffParameters(cmdLine);
 		cmdLine.addArgument(PARAM_NAMESPACE);
 		cmdLine.addArgument(PARAM_INCLUDE_FK, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_SEQUENCES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_PK, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_INDEX, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_EXCLUDE_TABLES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_CONSTRAINTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_VIEWS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
@@ -115,86 +89,28 @@ public class WbSchemaDiff
 			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrDiffWrongParameters"));
 			return result;
 		}
-
-		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
-		if (sourceProfile == null) sourceProfile = cmdLine.getValue("sourceprofile"); // support old name
-		
-		String sourceGroup = cmdLine.getValue(PARAM_SOURCEPROFILE_GROUP);
-		ProfileKey sourceKey = null;
-		if (sourceProfile != null) sourceKey = new ProfileKey(sourceProfile, sourceGroup);
-		
-		String targetProfile = cmdLine.getValue(PARAM_TARGETPROFILE);
-		String targetGroup = cmdLine.getValue(PARAM_TARGETPROFILE_GROUP);
-		ProfileKey targetKey = null;
-		if (targetProfile != null) targetKey = new ProfileKey(targetProfile, targetGroup);
-		
-		WbConnection targetCon = null;
-		WbConnection sourceCon = null;
-
+	
 		if (this.rowMonitor != null) this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+		params.setMonitor(rowMonitor);
+		
+		WbConnection targetCon = params.getTargetConnection(currentConnection, result);
+		if (!result.isSuccess()) return result;
+		
+		WbConnection sourceCon = params.getSourceConnection(currentConnection, result);
 
-		if (targetProfile == null || (currentConnection != null && currentConnection.getProfile().isProfileForKey(targetKey)))
+		if (sourceCon == null && targetCon != null && targetCon != currentConnection)
 		{
-			targetCon = currentConnection;
-		}
-		else
-		{
-			ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(targetKey);
-			if (prof == null)
-			{
-				String msg = ResourceMgr.getString("ErrProfileNotFound");
-				msg = StringUtil.replace(msg, "%profile%", targetKey.toString());
-				result.addMessage(msg);
-				result.setFailure();
-				return result;
-			}
 			try
 			{
-				if (this.rowMonitor != null) this.rowMonitor.setCurrentObject(ResourceMgr.getString("MsgDiffConnectingTarget"),-1,-1);
-				targetCon = ConnectionMgr.getInstance().getConnection(targetKey, "Wb-Diff-Target");
+				targetCon.disconnect();
 			}
-			catch (Exception e)
+			catch (Exception th)
 			{
-				result.addMessage(ResourceMgr.getString("ErrDiffCouldNotConnectTarget"));
-				result.setFailure();
-				return result;
 			}
+			return result;
 		}
-
-		if (sourceProfile == null || (currentConnection != null && currentConnection.getProfile().isProfileForKey(sourceKey)))
-		{
-			sourceCon = currentConnection;
-		}
-		else
-		{
-			ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(sourceKey);
-			if (prof == null)
-			{
-				String msg = ResourceMgr.getString("ErrProfileNotFound");
-				msg = StringUtil.replace(msg, "%profile%", sourceKey.toString());
-				result.addMessage(msg);
-				result.setFailure();
-				return result;
-			}
-			
-			try
-			{
-				if (this.rowMonitor != null) this.rowMonitor.setCurrentObject(ResourceMgr.getString("MsgDiffConnectingSource"),-1,-1);
-				sourceCon = ConnectionMgr.getInstance().getConnection(sourceKey, "Wb-Diff-Source");
-			}
-			catch (Exception e)
-			{
-				result.addMessage(ResourceMgr.getString("ErrDiffCouldNotConnectSource"));
-				result.setFailure();
-				// disconnect the target connection only if it was created by this command
-				if (targetCon.getId().startsWith("Wb-Diff"))
-				{
-					try { targetCon.disconnect(); } catch (Exception th) {}
-				}
-				return result;
-			}
-		}
-
+		if (!result.isSuccess()) return result;
+		
 		this.diff = new SchemaDiff(sourceCon, targetCon);
 		diff.setMonitor(this.rowMonitor);
 
@@ -210,14 +126,14 @@ public class WbSchemaDiff
 		diff.setIncludeSequences(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_SEQUENCES, false));
 		//diff.setIncludeComments(cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, false));
 
-		String refTables = cmdLine.getValue(PARAM_SOURCETABLES);
-		String tarTables = cmdLine.getValue(PARAM_TARGETTABLES);
+		String refTables = cmdLine.getValue(CommonDiffParameters.PARAM_REFERENCETABLES);
+		String tarTables = cmdLine.getValue(CommonDiffParameters.PARAM_TARGETTABLES);
 
 		if (refTables == null)
 		{
-			String refSchema = cmdLine.getValue(PARAM_SOURCESCHEMA);
-			String targetSchema = cmdLine.getValue(PARAM_TARGETSCHEMA);
-			String excludeTables = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
+			String refSchema = cmdLine.getValue(CommonDiffParameters.PARAM_REFERENCESCHEMA);
+			String targetSchema = cmdLine.getValue(CommonDiffParameters.PARAM_TARGETSCHEMA);
+			String excludeTables = cmdLine.getValue(CommonDiffParameters.PARAM_EXCLUDE_TABLES);
 			if (excludeTables != null)
 			{
 				List<String> l = StringUtil.stringToList(excludeTables, ",", true, true);
@@ -275,7 +191,7 @@ public class WbSchemaDiff
 		
 		Writer out = null;
 		boolean outputToConsole = false;
-		WbFile output = evaluateFileArgument(cmdLine.getValue(PARAM_FILENAME));
+		WbFile output = evaluateFileArgument(cmdLine.getValue(CommonDiffParameters.PARAM_FILENAME));
 		
 		try
 		{
@@ -286,7 +202,7 @@ public class WbSchemaDiff
 			}
 			else
 			{
-				String encoding = cmdLine.getValue(PARAM_ENCODING);
+				String encoding = cmdLine.getValue(CommonDiffParameters.PARAM_ENCODING);
 				if (encoding == null)
 				{
 					encoding = diff.getEncoding();

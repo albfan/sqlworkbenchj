@@ -57,7 +57,7 @@ public class WbRemoveVar extends SqlCommand
 			{
 				msg = ResourceMgr.getString("MsgVarDefVariableNotRemoved");
 			}
-			msg = msg.replaceAll("%var%", var);
+			msg = msg.replace("%var%", var);
 		}
 
 		result.addMessage(msg);

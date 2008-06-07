@@ -81,13 +81,13 @@ public class GenericRowMonitor
 
 	public void setCurrentObject(String name, long number, long total)
 	{
+		this.currentMonitorObject = name;
 		if (this.monitorType == RowActionMonitor.MONITOR_PLAIN)
 		{
 			statusBar.setStatusMessage(name);
 		}
 		else
 		{
-			this.currentMonitorObject = name;
 			StringBuilder msg = new StringBuilder(40);
 			if (objectMsg != null) msg.append(objectMsg);
 			msg.append(name);

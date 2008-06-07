@@ -28,8 +28,13 @@ import workbench.log.LogMgr;
 public class ArgumentParser
 {
 	private static final String ARG_PRESENT = "$WB$__ARG_PRESENT__$WB$";
+	
+	// Maps the argument to the supplied value
 	private Map<String, String> arguments;
+	
+	// Maps a registered argument to the argument type
 	private Map<String, ArgumentType> argTypes;
+	
 	private List<String> unknownParameters = new ArrayList<String>();
 	private Map<String, Collection<String>> allowedValues;
 	private int argCount = 0;

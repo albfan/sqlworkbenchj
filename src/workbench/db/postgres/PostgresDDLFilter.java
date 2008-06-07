@@ -77,7 +77,7 @@ public class PostgresDDLFilter
 		if (bodyStart == -1 || bodyEnd == -1) return sql;
 		
 		String body = sql.substring(bodyStart, bodyEnd);
-		body = body.replaceAll("'", "''");
+		body = body.replace("'", "''");
 
 		StringBuilder newSql = new StringBuilder(sql.length() + 10);
 		newSql.append(sql.substring(0, bodyStart - 2));

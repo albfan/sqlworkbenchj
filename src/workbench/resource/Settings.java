@@ -1001,6 +1001,11 @@ public class Settings
 	{
 		setProperty("workbench.export.sql.default.dateliterals", type);
 	}
+
+	public String getDefaultDiffDateLiteralType()
+	{
+		return getProperty("workbench.diff.sql.default.dateliterals", "jdc");
+	}
 	
 	public String getDefaultExportDateLiteralType()
 	{
@@ -1862,6 +1867,12 @@ public class Settings
 		return getProperty("workbench.file.data.encoding", def);
 	}
 
+	public String getDefaultEncoding()
+	{
+		String def = System.getProperty("file.encoding");
+		return getProperty("workbench.encoding", def);
+	}
+
 	public String getDefaultFileEncoding()
 	{
 		String def = System.getProperty("file.encoding");
@@ -2210,6 +2221,11 @@ public class Settings
 	}
 
 	// </editor-fold>
+	
+	public int getSyncChunkSize()
+	{
+		return getIntProperty("workbench.sql.sync.chunksize", 25);
+	}
 	
 	public String getSqlParameterPrefix()
 	{
@@ -2594,7 +2610,7 @@ public class Settings
 		String s = getProperty("workbench.db.truncatesupported",null);
 		if (s!=null)
 		{
-			s = s.replaceAll(",postgres,",",postgresql,");
+			s = s.replace(",postgres,",",postgresql,");
 			this.setProperty("workbench.db.truncatesupported",s);
 		}
 		this.renameProperty("workbench.history.tablelist", "workbench.quickfilter.tablelist.history");

@@ -96,7 +96,8 @@ public class WbXslt
 
 		try
 		{
-			XsltTransformer.transformFile(inputFile, outputFile, xsltFile);
+			XsltTransformer transformer = new XsltTransformer();
+			transformer.transform(inputFile, outputFile, xsltFile);
 			result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", outputFile));
 			result.setSuccess();
 		}

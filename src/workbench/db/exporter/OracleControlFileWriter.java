@@ -168,12 +168,12 @@ public class OracleControlFileWriter
 
 	private String convertJavaDateFormatToOracle(String format)
 	{
-		String result = format.replaceAll("HH", "HH24");
-		result = result.replaceAll("hh", "HH12");
-		result = result.replaceAll("mm", "MI");
-		result = result.replaceAll("yy", "YY");
-		result = result.replaceAll("dd", "DD");
-		result = result.replaceAll("ss", "SS");
+		String result = format.replace("HH", "HH24");
+		result = result.replace("hh", "HH12");
+		result = result.replace("mm", "MI");
+		result = result.replace("yy", "YY");
+		result = result.replace("dd", "DD");
+		result = result.replace("ss", "SS");
 		return result;
 	}
 }

@@ -141,7 +141,7 @@ public class ExecuteSqlDialog
 				Statement stmt = null;
 				try
 				{
-					String sql = sqlEditor.getText().trim().replaceAll(";", "");
+					String sql = sqlEditor.getText().trim().replace(";", "");
 					dbConn.setBusy(true);
 					stmt = dbConn.createStatement();
 					stmt.executeUpdate(sql);

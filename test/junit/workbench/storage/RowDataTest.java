@@ -52,5 +52,11 @@ public class RowDataTest extends TestCase
 		assertEquals(value, "456");
 		assertNull(row.getOriginalValue(0));
 		assertTrue(row.isColumnModified(0));
+		
+		row.setValue(0, "123");
+		row.setValue(1, null);
+		row.resetStatus();
+		row.setValue(1, null);
+		assertFalse(row.isModified());
 	}
 }

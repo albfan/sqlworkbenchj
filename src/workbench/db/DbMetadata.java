@@ -2191,6 +2191,12 @@ public class DbMetadata
 		return defs.values();
 	}
 
+	public List<TableIdentifier> getTableList()
+		throws SQLException
+	{
+		return getTableList(null, getCurrentSchema(), new String[] { tableTypeName} );
+	}
+	
 	public List<TableIdentifier> getTableList(String schema, String[] types)
 		throws SQLException
 	{

@@ -33,7 +33,7 @@ and   t.schemaid = s.schemaid
 
   <void method="put">
    <string>DB2/NT</string>
-   <object class="workbench.db.GetMetaDataSql">
+   <object id="db2_lst_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>select trigname as trigger_name, 
         case trigtime
@@ -59,6 +59,11 @@ from syscat.triggers</string>
     </void>
    </object>
   </void>
+
+	<void method="put">  
+   <string>DB2/LINUX</string>  
+   <object idref="db2_lst_trg"/>
+	</void>
 	
   <void method="put">
    <string>Oracle</string>

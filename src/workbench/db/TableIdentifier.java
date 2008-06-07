@@ -538,5 +538,21 @@ public class TableIdentifier
 		}
 		return source;
 	}
+
+	public static TableIdentifier findTableByName(List<TableIdentifier> tables, String toFind)
+	{
+		return findTableByName(tables, new TableIdentifier(toFind));
+	}
+	
+	public static TableIdentifier findTableByName(List<TableIdentifier> tables, TableIdentifier toFind)
+	{
+		if (tables == null) return null;
+		
+		for (TableIdentifier table : tables)
+		{
+			if (table.getTableName().equalsIgnoreCase(toFind.getTableName())) return table;
+		}
+		return null;
+	}
 	
 }

@@ -1,6 +1,13 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * TableDeleteSyncTest.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2008, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
 package workbench.db.compare;
 
@@ -16,9 +23,9 @@ import workbench.util.SqlUtil;
 
 /**
  *
- * @author thomas
+ * @author support@sql-workbench.net
  */
-public class TableSyncTest
+public class TableDeleteSyncTest
 	extends TestCase
 {
 	private WbConnection source;
@@ -27,7 +34,7 @@ public class TableSyncTest
 	private int rowCount = 127;
 	private int toDelete = 53;
 	
-	public TableSyncTest(String testName)
+	public TableDeleteSyncTest(String testName)
 	{
 		super(testName);
 		util	= new TestUtil("syncDelete");
@@ -89,9 +96,9 @@ public class TableSyncTest
 		ResultSet rs = null;
 		try
 		{
-			TableSync sync = new TableSync(target, source);
+			TableDeleteSync sync = new TableDeleteSync(target, source);
 			sync.setTableName(new TableIdentifier("person"), new TableIdentifier("person_t"));
-			sync.deleteTarget();
+			sync.doSync();
 			long deleted = sync.getDeletedRows();
 			assertEquals(toDelete, deleted);
 			check = target.getSqlConnection().createStatement();
@@ -113,15 +120,13 @@ public class TableSyncTest
 	public void testCreateScript()
 		throws Exception
 	{
-		Statement check = null;
-		ResultSet rs = null;
 		try
 		{
-			TableSync sync = new TableSync(target, source);
+			TableDeleteSync sync = new TableDeleteSync(target, source);
 			StringWriter writer = new StringWriter();
 			sync.setOutputWriter(writer);
 			sync.setTableName(new TableIdentifier("person"), new TableIdentifier("person_t"));
-			sync.deleteTarget();
+			sync.doSync();
 			
 			String sql = writer.toString();
 			ScriptParser parser = new ScriptParser(sql);

@@ -294,45 +294,6 @@ public class StringUtil
 	}
 
 	/**
-	 * Replaces all occurances of needle in haystack with replacement and appends the resulting
-	 * String to the passed target.
-	 * @param target the buffer to append the result to. If target is null a new StringBuilder will be created
-	 * @param haystack the String in which to search the value
-	 * @param needle the value to search for
-	 * @param replacement the value with which needle is replaced
-	 * @return the resulting buffer
-	 */
-	public static final StringBuilder replaceToBuffer(StringBuilder target, String haystack, String needle,String replacement)
-	{
-		if (target == null)
-		{
-			target = new StringBuilder((int)(haystack.length() * 1.1));
-		}
-
-		int pos = haystack.indexOf(needle);
-		if (pos == -1)
-		{
-			target.append(haystack);
-			return target;
-		}
-
-		int lastpos = 0;
-		int len = needle.length();
-		while (pos != -1)
-		{
-			target.append(haystack.substring(lastpos, pos));
-			if (replacement != null) target.append(replacement);
-			lastpos = pos + len;
-			pos = haystack.indexOf(needle, lastpos);
-		}
-		if (lastpos < haystack.length())
-		{
-			target.append(haystack.substring(lastpos));
-		}
-		return target;
-	}
-
-	/**
 	 * Replacement for StringBuilder.lastIndexOf() which does
 	 * a lot of object creation and copying to achieve this.
 	 * This implementation should be a lot faster for StringBuilder
@@ -361,12 +322,7 @@ public class StringUtil
 		if (needle == null) return haystack;
 		if (haystack == null) return null;
 
-		int pos = haystack.indexOf(needle);
-		if (pos == -1) return haystack;
-
-		StringBuilder temp = replaceToBuffer(null,haystack,needle, replacement);
-
-		return temp.toString();
+		return haystack.replace(needle, replacement);
 	}
 
 	private static final int[] limits =

@@ -20,8 +20,11 @@ import java.util.Set;
 import java.util.TreeSet;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.resource.Settings;
+import workbench.sql.CommandMapper;
+import workbench.sql.SqlCommand;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.sql.wbcommands.CommandTester;
+import workbench.util.ArgumentParser;
 import workbench.util.CharSequenceReader;
 import workbench.util.StringUtil;
 
@@ -762,15 +765,20 @@ public class SqlFormatter
 		return null;
 	}
 	
-	private SQLToken processWbCommand(int indent)
+	private SQLToken processWbCommand(String wbVerb)
 		throws Exception
 	{
-		StringBuilder b = new StringBuilder(indent);
+		int myindent = wbVerb.length() + 1;
+		StringBuilder b = new StringBuilder(myindent);
 
-		for (int i=0; i < indent; i++) b.append(' ');
+		for (int i=0; i < myindent; i++) b.append(' ');
 		this.appendText(' ');
 
+		CommandMapper mapper = new CommandMapper();
+		
 		SQLToken t = this.lexer.getNextToken(true,false);
+		SqlCommand cmd = mapper.getCommandToUse(wbVerb);
+		
 		boolean first = true;
 		boolean isParm = false;
 		boolean inQuotes = false;
@@ -781,7 +789,24 @@ public class SqlFormatter
 			{
 				inQuotes = !inQuotes;
 			}
-			if (isParm) text = text.toLowerCase();
+			
+			if (isParm) 
+			{
+				ArgumentParser p = cmd.getArgumentParser();
+				if (p != null)
+				{
+					List<String> args = p.getRegisteredArguments();
+					for (String regArg : args)
+					{
+						if (regArg.equalsIgnoreCase(text)) 
+						{
+							text = regArg;
+							break;
+						}
+					}
+				}
+			}
+			
 			if (text.equals("-") && !inQuotes)
 			{
 				if (!first) 
@@ -1077,7 +1102,7 @@ public class SqlFormatter
 				
 				if (wbTester.isWbCommand(word))
 				{
-					t = this.processWbCommand(word.length() + 1);
+					t = this.processWbCommand(word);
 				}
 				
 			}

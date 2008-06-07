@@ -23,7 +23,7 @@ import workbench.db.TableCreator;
 import workbench.db.TableDropper;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.compare.TableSync;
+import workbench.db.compare.TableDeleteSync;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.RowDataReceiver;
@@ -378,11 +378,11 @@ public class DataCopier
 			
 			if (this.doSyncDelete)
 			{
-				TableSync sync = new TableSync(this.targetConnection, this.sourceConnection);
+				TableDeleteSync sync = new TableDeleteSync(this.targetConnection, this.sourceConnection);
 				sync.setTableName(this.sourceTable, this.targetTable);
 				sync.setRowMonitor(this.importer.getRowActionMonitor());
 				sync.setBatchSize(this.getBatchSize());
-				sync.deleteTarget();
+				sync.doSync();
 				long rows = sync.getDeletedRows();
 				String msg = rows + " " + ResourceMgr.getString("MsgCopyNumRowsDeleted");
 				this.addMessage(msg);

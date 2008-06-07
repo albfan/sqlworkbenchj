@@ -55,7 +55,7 @@ public class KeyColumnSelectorPanel
 			return;
 		}
 
-		String msg = ResourceMgr.getString("MsgSelectKeyColumns").replaceAll("%tablename%", tableName);
+		String msg = ResourceMgr.getString("MsgSelectKeyColumns").replace("%tablename%", tableName);
 		JLabel infoLabel = new JLabel(msg);
 		this.infoPanel.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();

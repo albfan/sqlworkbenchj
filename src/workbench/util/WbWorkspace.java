@@ -25,6 +25,7 @@ import java.util.zip.ZipOutputStream;
 
 import workbench.gui.sql.SqlHistory;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 /**
  *
@@ -38,7 +39,7 @@ public class WbWorkspace
 	private ZipEntry[] entries;
 
 	private boolean isReadOnly;
-	private WbProperties tabInfo = new WbProperties(1);
+	private WbProperties tabInfo = new WbProperties(null, 0);
 
 	public WbWorkspace(String archiveName, boolean createNew)
 		throws IOException
@@ -320,7 +321,7 @@ public class WbWorkspace
 		if (this.tabInfo == null) return null;
 		String key = "tab" + tabIndex + ".encoding";
 		String value = (String)this.tabInfo.get(key);
-		if (StringUtil.isEmptyString(value)) return EncodingUtil.getDefaultEncoding();
+		if (StringUtil.isEmptyString(value)) return Settings.getInstance().getDefaultEncoding();
 		return value;
 	}
 

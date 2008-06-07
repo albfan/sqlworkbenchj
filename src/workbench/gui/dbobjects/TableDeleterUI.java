@@ -447,8 +447,8 @@ public class TableDeleterUI
 					if (!ignoreAll)
 					{
 						String question = ResourceMgr.getString("ErrDeleteTableData");
-						question = question.replaceAll("%table%", table.toString());
-						question = question.replaceAll("%error%", error);
+						question = question.replace("%table%", table.toString());
+						question = question.replace("%error%", error);
 						question = question + "\n" + ResourceMgr.getString("MsgContinueQ");
 
 						int choice = WbSwingUtilities.getYesNoIgnoreAll(this.dialog, question);
@@ -499,7 +499,7 @@ public class TableDeleterUI
 				{
 					msg = ResourceMgr.getString("ErrRollbackTableData");
 				}
-				msg = msg.replaceAll("%error%", e.getMessage());
+				msg = msg.replace("%error%", e.getMessage());
 
 				WbSwingUtilities.showErrorMessage(this.dialog, msg);
 			}

@@ -31,6 +31,7 @@ import workbench.sql.wbcommands.WbCall;
 import workbench.sql.wbcommands.WbConfirm;
 import workbench.sql.wbcommands.WbConnect;
 import workbench.sql.wbcommands.WbCopy;
+import workbench.sql.wbcommands.WbDataDiff;
 import workbench.sql.wbcommands.WbDefinePk;
 import workbench.sql.wbcommands.WbDefineVar;
 import workbench.sql.wbcommands.WbDescribeTable;
@@ -80,7 +81,7 @@ public class CommandMapper
 
 		sql = new WbDescribeTable();
 		cmdDispatch.put(sql.getVerb(), sql);
-		cmdDispatch.put("DESCRIBE", sql);
+		cmdDispatch.put(WbDescribeTable.VERB_LONG, sql);
 
 		sql = new WbEnableOraOutput();
 		cmdDispatch.put(sql.getVerb(), sql);
@@ -125,6 +126,9 @@ public class CommandMapper
 		sql = new WbSchemaDiff();
 		cmdDispatch.put(sql.getVerb(), sql);
 
+		sql = new WbDataDiff();
+		cmdDispatch.put(sql.getVerb(), sql);
+		
 		sql = new SetCommand();
 		cmdDispatch.put(sql.getVerb(), sql);
 

@@ -73,7 +73,7 @@ public class SqlLiteralFormatter
 	 * Create  new formatter specifically for the DBMS identified
 	 * by the connection.
 	 * The type of date literals used, can be changed to a different
-	 * "product" using {@link #setProduct(String)}
+	 * "product" using {@link #setDateLiteralType(String)}
 	 * 
 	 * @param con the connection identifying the DBMS
 	 * 
@@ -88,14 +88,14 @@ public class SqlLiteralFormatter
 			product = con.getMetadata().getDbId();
 			isDbId = true;
 		}
-		setProduct(product);
+		setDateLiteralType(product);
 	}
 	
 	/**
 	 * Select the DBMS specific date literal according to the 
 	 * DBMS identified by the connection.
 	 * @param con the connection to identify the DBMS
-	 * @see #setProduct(String)
+	 * @see #setDateLiteralType(String)
 	 */
 	public void setProduct(WbConnection con)
 	{
@@ -103,7 +103,7 @@ public class SqlLiteralFormatter
 		{
 			String product = con.getMetadata().getDbId();
 			isDbId = true;
-			this.setProduct(product);
+			this.setDateLiteralType(product);
 			this.dbSettings = con.getDbSettings();
 		}
 	}
@@ -114,26 +114,26 @@ public class SqlLiteralFormatter
 	 * been initialised with a Connection (thus the DBMS specific formatter is already
 	 * selected).
 	 * 
-	 * @param product the product to use. This is the key to the map defining the formats
+	 * @param type the literal type to use. This is the key to the map defining the formats
 	 * 
 	 * @see workbench.db.DbMetadata#getProductName()
 	 */
-	public void setProduct(String product)
+	public void setDateLiteralType(String type)
 	{
 		// If the DBMS specific format is selected and we already have a DBID
 		// then this call is simply ignored.
-		if (DBMS_DATE_LITERAL_TYPE.equalsIgnoreCase(product))
+		if (DBMS_DATE_LITERAL_TYPE.equalsIgnoreCase(type))
 		{
 			if (this.isDbId)
 			{
 				return;
 			}
-			product = null;
+			type = null;
 		}
 		
-		dateFormatter = createFormatter(product, "date", "''yyyy-MM-dd''");
-		timestampFormatter = createFormatter(product, "timestamp", "''yyyy-MM-dd HH:mm:ss''");
-		timeFormatter = createFormatter(product, "time", "''HH:mm:ss''");
+		dateFormatter = createFormatter(type, "date", "''yyyy-MM-dd''");
+		timestampFormatter = createFormatter(type, "timestamp", "''yyyy-MM-dd HH:mm:ss''");
+		timeFormatter = createFormatter(type, "time", "''HH:mm:ss''");
 	}
 
 
@@ -226,27 +226,18 @@ public class SqlLiteralFormatter
 	
 	private String quoteString(String t)
 	{
-		StringBuilder realValue = new StringBuilder(t.length() + 10);
-		
-		// Surround the value with single quotes
-		realValue.append('\'');
-		
-		// Single quotes in a String must be "quoted"...
-		// replaceToBuffer writes the result directly into the passed buffer
-		StringUtil.replaceToBuffer(realValue, t, "'", "''");
-		
-		realValue.append('\'');
-		return realValue.toString();
+		if (t == null) return t;
+		return "'" + t.replace("'", "''") + "'";
 	}
 	
 	/**
 	 * Return the default literal for the given column data.
 	 * Date and Timestamp data will be formatted according to the 
-	 * syntax defined by the {@link #setProduct(String)} method
+	 * syntax defined by the {@link #setDateLiteralType(String)} method
 	 * or through the connection provided in the constructor.
 	 * @param data the data to be converted into a literal.
 	 * @return the literal to be used in a SQL statement
-	 * @see #setProduct(String)
+	 * @see #setDateLiteralType(String)
 	 */
 	public CharSequence getDefaultLiteral(ColumnData data)
 	{

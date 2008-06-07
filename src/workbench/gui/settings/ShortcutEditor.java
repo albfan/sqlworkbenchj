@@ -41,7 +41,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ActionRegistration;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.DataStoreTableModel;
@@ -347,7 +346,10 @@ public class ShortcutEditor
 			}
 		});
 		
-		String[] options = new String[] { ResourceMgr.getString("LblOK").replaceAll("&", ""), ResourceMgr.getString("LblCancel").replaceAll("&", "")};
+		String[] options = new String[] { 
+			ResourceMgr.getPlainString("LblOK"), 
+			ResourceMgr.getPlainString("LblCancel")
+		};
 		
 		JOptionPane overwritePane = new JOptionPane(mapper, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, options);
 		JDialog dialog = overwritePane.createDialog(this, ResourceMgr.getString("LblEnterKeyWindowTitle"));
@@ -367,7 +369,7 @@ public class ShortcutEditor
 			if (oldrow > -1)
 			{
 				String name = this.definitions.getValueAsString(oldrow, 0);
-				String msg = ResourceMgr.getString("MsgShortcutAlreadyAssigned").replaceAll("%action%", name);
+				String msg = ResourceMgr.getString("MsgShortcutAlreadyAssigned").replace("%action%", name);
 				boolean choice = WbSwingUtilities.getYesNo(this, msg);
 				if (!choice) return;
 				ShortcutDisplay old = (ShortcutDisplay)this.definitions.getValue(oldrow, 1);

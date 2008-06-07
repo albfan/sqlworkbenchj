@@ -98,7 +98,7 @@ public class WbConnect
 			if (runner.getConnectionClient() != null)
 			{
 				id = runner.getConnectionClient().getConnectionId(profile);
-				runner.getConnectionClient().connectBegin(profile);
+				runner.getConnectionClient().connectBegin(profile, null);
 			}
 			else
 			{

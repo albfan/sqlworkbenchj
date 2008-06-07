@@ -83,12 +83,12 @@ public class WbStartBatch
 				if (rows[i] != Statement.EXECUTE_FAILED)
 				{
 					String msg = ResourceMgr.getString("MsgJdbcBatchStatementFailed");
-					result.addMessage(msg.replaceAll("%num%", Integer.toString(i)));
+					result.addMessage(msg.replace("%num%", Integer.toString(i)));
 				}
 				else if (rows[i] == Statement.SUCCESS_NO_INFO)
 				{
 					String msg = ResourceMgr.getString("MsgJdbcBatchStatementNoStatementInfo");
-					result.addMessage(msg.replaceAll("%num%", Integer.toString(i)));
+					result.addMessage(msg.replace("%num%", Integer.toString(i)));
 				}
 				else
 				{

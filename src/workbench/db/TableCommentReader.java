@@ -46,7 +46,7 @@ public class TableCommentReader
 		{
 			result = StringUtil.replace(commentStatement, MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
 			result = StringUtil.replace(result, MetaDataSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
-			result = StringUtil.replace(result, MetaDataSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replaceAll("'", "''"));
+			result = StringUtil.replace(result, MetaDataSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replace("'", "''"));
 		}
 		return result;
 	}
@@ -105,7 +105,7 @@ public class TableCommentReader
 					String commentSql = StringUtil.replace(columnStatement, MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
 					commentSql = StringUtil.replace(commentSql, MetaDataSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
 					commentSql = StringUtil.replace(commentSql, MetaDataSqlManager.COMMENT_COLUMN_PLACEHOLDER, column);
-					commentSql = StringUtil.replace(commentSql, MetaDataSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replaceAll("'" ,"''"));
+					commentSql = StringUtil.replace(commentSql, MetaDataSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replace("'" ,"''"));
 					result.append(commentSql);
 					result.append("\n");
 				}

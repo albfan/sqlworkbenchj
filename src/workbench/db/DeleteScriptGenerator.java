@@ -62,7 +62,7 @@ public class DeleteScriptGenerator
 
 	public void useJdbcLiterals()
 	{
-		this.formatter.setProduct("jdbc");
+		this.formatter.setDateLiteralType("jdbc");
 	}
 	
 	public void setSource(WbTable aTable)

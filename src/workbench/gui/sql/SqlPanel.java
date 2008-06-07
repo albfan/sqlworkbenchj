@@ -1785,7 +1785,7 @@ public class SqlPanel
 						}
 						if (exporter.isSuccess())
 						{
-							String msg2 = ResourceMgr.getString("MsgSpoolOk").replaceAll("%rows%", Long.toString(rowCount));
+							String msg2 = ResourceMgr.getString("MsgSpoolOk").replace("%rows%", Long.toString(rowCount));
 							messages.append("\n");
 							messages.append(msg2);
 							messages.append("\n");
@@ -1854,15 +1854,15 @@ public class SqlPanel
 		if (errorColumn != null)
 		{
 			msg = ResourceMgr.getString("ErrColumnImportError");
-			msg = msg.replaceAll("%row%", NumberStringCache.getNumberString(errorRow));
-			msg = msg.replaceAll("%column%", errorColumn);
-			msg = msg.replaceAll("%data%", dataLine);
+			msg = msg.replace("%row%", NumberStringCache.getNumberString(errorRow));
+			msg = msg.replace("%column%", errorColumn);
+			msg = msg.replace("%data%", dataLine);
 		}
 		else
 		{
 			msg = ResourceMgr.getString("ErrRowImportError");
-			msg = msg.replaceAll("%row%", NumberStringCache.getNumberString(errorRow));
-			msg = msg.replaceAll("%data%", dataLine == null ? "(null)" : dataLine.substring(0,40) + " ...");
+			msg = msg.replace("%row%", NumberStringCache.getNumberString(errorRow));
+			msg = msg.replace("%data%", dataLine == null ? "(null)" : dataLine.substring(0,40) + " ...");
 		}
 
 		this.showBusyIcon(false);
@@ -2456,7 +2456,7 @@ public class SqlPanel
 				if (statementResult.promptingWasCancelled())
 				{
 					String cancelMsg = ResourceMgr.getString("MsgSqlCancelledDuringPrompt");
-					cancelMsg = cancelMsg.replaceAll("%nr%", NumberStringCache.getNumberString(i+1));
+					cancelMsg = cancelMsg.replace("%nr%", NumberStringCache.getNumberString(i+1));
 					this.appendToLog(cancelMsg);
 					this.showLogPanel();
 					continue;

@@ -380,7 +380,7 @@ public class DbExplorerPanel
 		catch (Exception e)
 		{
 			String error = ExceptionUtil.getDisplay(e);
-			String msg = ResourceMgr.getString("ErrExplorerConnectFailed").replaceAll("%msg%", error.trim());
+			String msg = ResourceMgr.getString("ErrExplorerConnectFailed").replace("%msg%", error.trim());
 			WbSwingUtilities.showErrorMessage(this, msg);
 			LogMgr.logError("MainWindow.showDbExplorer()", "Error getting new connection for DbExplorer tab. Using connection from current panel", e);
 		}

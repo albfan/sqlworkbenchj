@@ -172,7 +172,7 @@ public class WbDefineVar
 			{
 				VariablePool.getInstance().removeValue(var);
 				msg = ResourceMgr.getString("MsgVarDefVariableRemoved");
-				msg = msg.replaceAll("%var%", var);
+				msg = msg.replace("%var%", var);
 			}
 			result.addMessage(msg);
 		}

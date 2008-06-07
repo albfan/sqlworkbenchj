@@ -46,6 +46,7 @@ import java.sql.Types;
 import java.util.LinkedList;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ImportFileParser;
+import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.WbThread;
@@ -696,7 +697,7 @@ public class DataImporter
 		int rows = stmt.executeUpdate(deleteSql);
 		if (this.useTruncate)
 		{
-			String msg = ResourceMgr.getString("MsgImportTableTruncated").replaceAll("%table%", this.targetTable.getTableExpression(this.dbConn));
+			String msg = ResourceMgr.getString("MsgImportTableTruncated").replace("%table%", this.targetTable.getTableExpression(this.dbConn));
 			this.messages.append(msg);
 			this.messages.appendNewLine();
 		}
@@ -1032,7 +1033,7 @@ public class DataImporter
 						catch (Exception e)
 						{
 							LogMgr.logWarning("DataImporter.processRow()", "Error when adding COMMIT to batch. This does not seem to be supported by the server: " + ExceptionUtil.getDisplay(e));
-							String msg = ResourceMgr.getString("ErrCommitInBatch").replaceAll("%error%", e.getMessage()) + "\n";
+							String msg = ResourceMgr.getString("ErrCommitInBatch").replace("%error%", e.getMessage()) + "\n";
 							this.messages.append(msg);
 							this.hasWarnings = true;
 							this.canCommitInBatch = false;
@@ -1255,7 +1256,7 @@ public class DataImporter
 					String encoding = (handler != null ? handler.getEncoding() : null);
 					if (encoding == null)
 					{
-						encoding = (this.parser != null ? parser.getEncoding() : EncodingUtil.getDefaultEncoding());
+						encoding = (this.parser != null ? parser.getEncoding() : Settings.getInstance().getDefaultDataEncoding());
 					}
 					
 					File f = (File)row[i];
@@ -1586,8 +1587,8 @@ public class DataImporter
 				{
 					this.hasErrors = true;
 					String msg = ResourceMgr.getString("ErrDeleteTableData");
-					msg = msg.replaceAll("%table%",table.toString());
-					msg = msg.replaceAll("%error%", ExceptionUtil.getDisplay(e));
+					msg = msg.replace("%table%",table.toString());
+					msg = msg.replace("%error%", ExceptionUtil.getDisplay(e));
 					this.messages.append(msg);
 					this.messages.appendNewLine();
 					

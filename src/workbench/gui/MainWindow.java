@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.Action;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -109,6 +110,7 @@ import workbench.gui.actions.DisconnectTabAction;
 import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
 import workbench.gui.dbobjects.DbExplorerWindow;
+import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
 import workbench.util.FileUtil;
 import workbench.util.NumberStringCache;
@@ -201,8 +203,6 @@ public class MainWindow
 		this.sqlTab.addMouseListener(this);
 		this.addWindowListener(this);
 		MacroManager.getInstance().addChangeListener(this);
-		
-		this.jobIndicator = new RunningJobIndicator(this);
 		
 		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
 		sqlTab.enableDragDropReordering(this);
@@ -1086,7 +1086,7 @@ public class MainWindow
 		if (current != null) current.showLogMessage(aMsg);
 	}
 
-	public void connectBegin(final ConnectionProfile aProfile)
+	public void connectBegin(final ConnectionProfile aProfile, final StatusBar info)
 	{
 		if (this.currentWorkspaceFile != null && WbManager.getInstance().getSettingsShouldBeSaved())
 		{
@@ -1106,6 +1106,7 @@ public class MainWindow
 		this.currentProfile = aProfile;
 		
 		showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
+		if (info != null) info.setStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
 		loadWorkspaceForProfile(currentProfile);
 		Settings.getInstance().setLastConnection(currentProfile);
 		showStatusMessage(ResourceMgr.getString("MsgConnecting"));
@@ -1351,6 +1352,7 @@ public class MainWindow
 				catch (Throwable e)
 				{
 					LogMgr.logWarning("MainWindow.loadWorkspace()", "Error loading workspace  " + realFilename, e);
+					updateGuiForTab(sqlTab.getSelectedIndex());
 					handleWorkspaceLoadError(e, realFilename);
 				}
 				finally
@@ -1566,6 +1568,16 @@ public class MainWindow
 		return filename;
 	}
 	
+	protected synchronized RunningJobIndicator getJobIndicator()
+	{
+		if (this.jobIndicator == null)
+		{
+			this.jobIndicator = new RunningJobIndicator(this);
+		}
+			
+		return this.jobIndicator;
+	}
+	
 	protected void updateWindowTitle()
 	{
 		WbSwingUtilities.invoke(new Runnable()
@@ -1575,7 +1587,7 @@ public class MainWindow
 				WindowTitleBuilder titleBuilder = new WindowTitleBuilder();
 				String title = titleBuilder.getWindowTitle(currentProfile, currentWorkspaceFile, getCurrentEditorFile());
 				setTitle(title);
-				jobIndicator.baseTitleChanged();
+				getJobIndicator().baseTitleChanged();
 			}
 		});
 	}
@@ -2510,19 +2522,24 @@ public class MainWindow
 		this.tabRemovalInProgress = true;
 	}
 	
-	public void moveTab(int oldIndex, int newIndex)
+	public boolean moveTab(int oldIndex, int newIndex)
 	{
-		SqlPanel p = (SqlPanel) this.getSqlPanel(oldIndex);
+		MainPanel p = this.getSqlPanel(newIndex);
+		if (p instanceof DbExplorerPanel) return false;
+		
+		MainPanel panel = this.getSqlPanel(oldIndex);
+		
 		JMenuBar oldMenu = this.panelMenus.get(oldIndex);
 		this.sqlTab.remove(oldIndex);
 		this.panelMenus.remove(oldIndex);
 		this.panelMenus.add(newIndex, oldMenu);
 		
-		this.sqlTab.add(p, newIndex);
+		this.sqlTab.add((JComponent)panel, newIndex);
 		this.sqlTab.setSelectedIndex(newIndex);
 		
 		renumberTabs();
 		this.validate();
+		return true;
 	}
 	
 	/**
@@ -2645,7 +2662,7 @@ public class MainWindow
 
 	public void executionEnd(WbConnection conn, Object source)
 	{
-		jobIndicator.jobEnded();
+		getJobIndicator().jobEnded();
 	}
 
 	public void executionStart(WbConnection conn, Object source)
@@ -2654,7 +2671,7 @@ public class MainWindow
 		{
 			this.saveWorkspace();
 		}
-		jobIndicator.jobStarted();
+		getJobIndicator().jobStarted();
 	}
 
 	public void dragEnter(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)

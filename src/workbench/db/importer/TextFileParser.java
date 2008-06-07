@@ -736,7 +736,7 @@ public class TextFileParser
 				this.messages.append(ResourceMgr.getString("ErrNoMultiLine") + "\n");
 				enableMultiLineMode = false;
 			}
-			LogMgr.logInfo("TextFileParser.processOneFile()", "Using line ending: " + lineEnding.replaceAll("\\r", "\\\\r").replaceAll("\\n", "\\\\n"));
+			LogMgr.logInfo("TextFileParser.processOneFile()", "Using line ending: " + lineEnding.replace("\\r", "\\\\r").replaceAll("\\n", "\\\\n"));
 			// now that we have already used the Reader supplied by the fileHandler,
 			// we have to close and re-open the ZIP archive in order to make sure we start at the beginning
 			// as we cannot rely on mark() and reset() to be available for the ZIP archives.
@@ -972,10 +972,10 @@ public class TextFileParser
 					{
 						if (targetIndex != -1) rowData[targetIndex] = null;
 						String msg = ResourceMgr.getString("ErrTextfileImport");
-						msg = msg.replaceAll("%row%", Integer.toString(importRow));
-						msg = StringUtil.replace(msg, "%col%", (this.columns[i] == null ? "n/a" : this.columns[i].getColumnName()));
-						msg = msg.replaceAll("%value%", (value == null ? "(NULL)" : value));
-						msg = StringUtil.replace(msg, "%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
+						msg = msg.replace("%row%", Integer.toString(importRow));
+						msg = msg.replace("%col%", (this.columns[i] == null ? "n/a" : this.columns[i].getColumnName()));
+						msg = msg.replace("%value%", (value == null ? "(NULL)" : value));
+						msg = msg.replace("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
 						this.messages.append(msg);
 						this.messages.appendNewLine();
 						if (this.abortOnError)

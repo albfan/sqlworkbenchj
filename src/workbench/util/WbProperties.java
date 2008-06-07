@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import workbench.interfaces.PropertyStorage;
+import workbench.resource.Settings;
 
 /**
  * An enhanced Properties class
@@ -290,7 +291,7 @@ public class WbProperties
 		File f = new File(filename);
 		if(encoding == null) 
 		{
-			encoding = EncodingUtil.getDefaultEncoding();
+			encoding = Settings.getInstance().getDefaultEncoding();
 		}
 		try
 		{

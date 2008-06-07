@@ -96,6 +96,28 @@ public class WbIncludeTest
 		}
 	}
 	
+	public void testFileNotFound() 
+		throws Exception
+	{
+		try
+		{
+			runner.runStatement("WbInclude -file=/this/will/not/be/there/i_hope.sql", 0, -1);
+			StatementRunnerResult result = runner.getResult();
+			assertFalse("Runner was successful", result.isSuccess());
+			String msg = result.getMessageBuffer().toString();
+			assertTrue("Wrong error", msg.indexOf("not found") > -1);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+	
 	public void testNestedInclude() 
 		throws Exception
 	{

@@ -1677,7 +1677,7 @@ public class TableListPanel
 		String sql = tableDefinition.getSelectForTable() + ";";
 		if (sql == null)
 		{
-			String msg = ResourceMgr.getString("ErrNoColumnsRetrieved").replaceAll("%table%", this.selectedTable.getTableName());
+			String msg = ResourceMgr.getString("ErrNoColumnsRetrieved").replace("%table%", this.selectedTable.getTableName());
 			WbSwingUtilities.showErrorMessage(this, msg);
 		}
 		return sql;

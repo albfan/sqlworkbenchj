@@ -12,11 +12,13 @@
 package workbench.sql.wbcommands;
 
 import java.io.File;
+import java.io.FileReader;
 import java.sql.SQLException;
 import java.sql.Statement;
 import workbench.TestUtil;
 import workbench.db.WbConnection;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 
 /**
@@ -26,7 +28,6 @@ import workbench.util.SqlUtil;
 public class WbSchemaDiffTest 
 	extends junit.framework.TestCase
 {
-	
 	private WbConnection source;
 	private WbConnection target;
 	private TestUtil util;
@@ -43,26 +44,55 @@ public class WbSchemaDiffTest
 	}
 	
 	public void testBaseDiff()
+		throws Exception
 	{
-		try
+		setupDatabase();
+		WbSchemaDiff diff = new WbSchemaDiff();
+		File output = new File(util.getBaseDir(), "diffTest.xml");
+		output.delete();
+		StatementRunnerResult result = diff.execute("WbSchemaDiff -file='" + output.getAbsolutePath() + "' -includeForeignKeys=false -includePrimaryKeys=false -includeIndex=false -includeSequences=true -referenceProfile=source -targetProfile=target");
+		assertTrue(result.isSuccess());
+		assertTrue("File not created", output.exists());
+
+		FileReader in = new FileReader(output);
+		String xml = FileUtil.readCharacters(in);
+
+		String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table)");
+		assertEquals("Incorrect table count", "2", value);
+
+		value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='ADDRESS']/add-column/column-def)");
+		assertEquals("Incorrect table count", "2", value);
+
+		value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='ADDRESS']/remove-column)");
+		assertEquals("Incorrect table count", "2", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='ADDRESS']/remove-column[1]/@name");
+		assertEquals("Wrong view to create", "PONE", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='ADDRESS']/remove-column[2]/@name");
+		assertEquals("Wrong view to create", "REMARK", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/modify-column[1]/@name");
+		assertEquals("Incorrect table count", "FIRSTNAME", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/create-view[1]/view-def/@name");
+		assertEquals("Wrong view to create", "V_PERSON", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/drop-view/view-name/text()");
+		assertEquals("Incorrect sequence to delete", "SOMETHING", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/update-sequence/sequence-def/@name");
+		assertEquals("Incorrect sequence to update", "SEQ_TWO", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/create-sequence/sequence-def/@name");
+		assertEquals("Incorrect sequence to create", "SEQ_THREE", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/drop-sequence/sequence-name/text()");
+		assertEquals("Incorrect sequence to delete", "SEQ_TO_BE_DELETED", value);
+
+		if (!output.delete())
 		{
-			setupDatabase();
-			WbSchemaDiff diff = new WbSchemaDiff();
-			File output = new File(util.getBaseDir(), "diffTest.xml");
-			output.delete();
-			StatementRunnerResult result = diff.execute("WbSchemaDiff -file='" + output.getAbsolutePath() + "' -includeForeignKeys=false -includePrimaryKeys=false -includeIndex=false -referenceProfile=source -targetProfile=target");
-			assertTrue(result.isSuccess());
-			assertTrue("File not created", output.exists());
-			
-			if (!output.delete())
-			{
-				fail("could not delete output file");
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			fail("could not delete output file");
 		}
 	}
 
@@ -106,6 +136,5 @@ public class WbSchemaDiffTest
 		{
 			SqlUtil.closeStatement(stmt);
 		}
-		
 	}
 }

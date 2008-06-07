@@ -147,9 +147,15 @@ public class ResourceMgr
 		}
 	}
 	
+	/**
+	 * Returns the resource string for the given key with 
+	 * all occurances of &amp; removed. 
+	 * @param aKey
+	 * @return
+	 */
 	public static String getPlainString(String aKey)
 	{
-		String value = getString(aKey).replaceAll("\\&", "");
+		String value = getString(aKey).replace("&", "");
 		return value;
 	}
 

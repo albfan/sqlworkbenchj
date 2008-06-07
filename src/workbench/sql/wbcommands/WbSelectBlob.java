@@ -132,8 +132,8 @@ public class WbSelectBlob
 				out = new FileOutputStream(currentFile);
 				filesize = FileUtil.copy(in, out);
 				String msg = ResourceMgr.getString("MsgBlobSaved");
-				msg = StringUtil.replace(msg, "%filename%", currentFile.getFullPath());
-				msg = msg.replaceAll("%filesize%", Long.toString(filesize));
+				msg = msg.replace("%filename%", currentFile.getFullPath());
+				msg = msg.replace("%filesize%", Long.toString(filesize));
 				result.addMessage(msg);
 				result.setSuccess();
 				row ++;

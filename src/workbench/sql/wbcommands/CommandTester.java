@@ -11,6 +11,8 @@
  */
 package workbench.sql.wbcommands;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -39,15 +41,21 @@ public class CommandTester
 		commands.add(WbCall.VERB);
 		commands.add(WbConfirm.VERB);
 		commands.add(WbCopy.VERB);
+		commands.add(WbDataDiff.VERB);
 		commands.add(WbDefinePk.VERB);
 		commands.add(WbDefineVar.VERB_DEFINE_LONG);
 		commands.add(WbDefineVar.VERB_DEFINE_SHORT);
+		commands.add(WbDescribeTable.VERB);
+		commands.add(WbDescribeTable.VERB_LONG);
+		commands.add(WbDisableOraOutput.VERB);
+		commands.add(WbEnableOraOutput.VERB);
 		commands.add(WbEndBatch.VERB);
 		commands.add(WbExport.VERB);
 		commands.add(WbFeedback.VERB);
 		commands.add(WbImport.VERB);
 		commands.add(WbInclude.VERB);
 		commands.add(WbListPkDef.VERB);
+		commands.add(WbListVars.VERB);
 		commands.add(WbLoadPkMapping.VERB);
 		commands.add(WbRemoveVar.VERB);
 		commands.add(WbSavePkMapping.VERB);
@@ -66,6 +74,14 @@ public class CommandTester
 		formattedWords.put(WbEndBatch.VERB, "WbEndBatch");
 		formattedWords.put(WbStartBatch.VERB, "WbStartBatch");
 		formattedWords.put(WbSchemaDiff.VERB, "WbSchemaDiff");
+		formattedWords.put(WbDataDiff.VERB, "WbDataDiff");
+		formattedWords.put(WbDescribeTable.VERB, WbDescribeTable.VERB.toUpperCase());
+		formattedWords.put(WbDescribeTable.VERB_LONG, WbDescribeTable.VERB_LONG.toUpperCase());
+	}
+	
+	public Collection<String> getCommands()
+	{
+		return Collections.unmodifiableSet(commands);
 	}
 	
 	public boolean isWbCommand(String verb)

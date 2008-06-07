@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.compare.TableSync;
+import workbench.db.compare.TableDeleteSync;
 import workbench.db.datacopy.DataCopier;
 import workbench.db.importer.RowDataReceiver;
 import workbench.db.importer.TableDependencySorter;
@@ -175,10 +175,10 @@ public class SchemaCopy
 
 			TableIdentifier targetTable = this.targetConnection.getMetadata().findTable(new TableIdentifier(sourceTable.getTableName()));
 
-			TableSync sync = new TableSync(targetConnection, sourceConnection);
+			TableDeleteSync sync = new TableDeleteSync(targetConnection, sourceConnection);
 			sync.setTableName(sourceTable, targetTable);
 			sync.setBatchSize(copier.getBatchSize());
-			sync.deleteTarget();
+			sync.doSync();
 			long rows = sync.getDeletedRows();
 			String msg = ResourceMgr.getFormattedString("MsgCopyNumRowsDeleted", rows, targetTable.getTableName());
 			this.messages.append(msg);

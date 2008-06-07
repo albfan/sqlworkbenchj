@@ -31,7 +31,7 @@ public class DriverEditorPanel
 	{
 		initComponents();
 		String text = ResourceMgr.getDescription("LblDriverLibrary");
-		text = text.replaceAll("%path_sep%", StringUtil.getPathSeparator());
+		text = text.replace("%path_sep%", StringUtil.getPathSeparator());
 		lblLibrary.setToolTipText(text);
 		libraryPath.setFileFilter(ExtensionFileFilter.getJarFileFilter());
 		libraryPath.setLastDirProperty("workbench.drivers.lastlibdir");

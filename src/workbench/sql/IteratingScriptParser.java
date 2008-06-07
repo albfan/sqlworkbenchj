@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.interfaces.CharacterSequence;
-import workbench.util.EncodingUtil;
+import workbench.resource.Settings;
 import workbench.util.FileMappedSequence;
 import workbench.util.SqlUtil;
 import workbench.util.StringSequence;
@@ -107,26 +107,26 @@ public class IteratingScriptParser
 	/**
 	 * Define the source file for the script using the default encoding.
 	 * @see #setFile(File, String)
-	 * @see workbench.util.EncodingUtil#getDefaultEncoding()
+	 * @see workbench.resource.Settings#getDefaultEncoding()
 	 */
 	public void setFile(File f)
 		throws IOException
 	{
-		this.setFile(f, EncodingUtil.getDefaultEncoding());
+		this.setFile(f, Settings.getInstance().getDefaultFileEncoding());
 	}
 	
 	/**
 	 * Define the source file to be used and the encoding of the file.
 	 * If the encoding is null, the default encoding will be used.
 	 * @see #setFile(File, String)
-	 * @see workbench.util.EncodingUtil#getDefaultEncoding()
+	 * @see workbench.resource.Settings#getDefaultEncoding()
 	 */
 	public final void setFile(File f, String enc)
 		throws IOException
 	{
 		this.cleanup();
 		// Make sure we have an encoding (otherwise FileMappedSequence will not work!
-		if (enc == null) enc = EncodingUtil.getDefaultEncoding();
+		if (enc == null) enc = Settings.getInstance().getDefaultEncoding();
 		this.script = new FileMappedSequence(f, enc);
 		this.scriptLength = (int)f.length();
 		this.checkEscapedQuotes = false;

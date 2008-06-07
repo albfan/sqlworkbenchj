@@ -57,6 +57,7 @@ public class CommonArgs
 	public static final String ARG_POST_TABLE_STMT = "postTableStatement";
 	public static final String ARG_IGNORE_TABLE_STMT_ERRORS = "ignorePrePostErrors";
 	public static final String ARG_TRANS_CONTROL = "transactionControl";
+	public static final String ARG_DATE_LITERAL_TYPE = "sqlDateLiterals";
 	
 	private static List<String> getDelimiterArguments()
 	{
@@ -88,6 +89,11 @@ public class CommonArgs
 	public static void addImportModeParameter(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_IMPORT_MODE, StringUtil.stringToList("insert,update,\"update,insert\",\"insert,update\""));
+	}
+	
+	public static void addSqlDateLiteralParameter(ArgumentParser cmdLine)
+	{
+		cmdLine.addArgument(ARG_DATE_LITERAL_TYPE, Settings.getInstance().getLiteralTypeList());
 	}
 	
 	public static void addVerboseXmlParameter(ArgumentParser cmdLine)

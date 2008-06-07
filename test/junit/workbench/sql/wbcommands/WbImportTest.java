@@ -2017,6 +2017,118 @@ public class WbImportTest
 		}
 	}
 
+	public void testXmlImportChangeStructure()
+	{
+		String xml = "<?xml version=\"1.1\" encoding=\"UTF-8\"?> \n" +
+             "<wb-export> \n" +
+             "  <meta-data> \n" +
+             "    <created>2008-06-06 21:25:24.828 CEST</created> \n" +
+             "    <jdbc-driver>PostgreSQL Native Driver</jdbc-driver> \n" +
+             "    <jdbc-driver-version>PostgreSQL 8.3 JDBC3 with SSL (build 603)</jdbc-driver-version> \n" +
+             "    <connection>User=thomas, Database=wbtest, URL=jdbc:postgresql://localhost/wbtest</connection> \n" +
+             "    <schema></schema> \n" +
+             "    <catalog>wbtest</catalog> \n" +
+             "    <database-product-name>PostgreSQL</database-product-name> \n" +
+             "    <database-product-version>8.3.1</database-product-version> \n" +
+             "    <wb-tag-format>short</wb-tag-format> \n" +
+             "  </meta-data> \n" +
+             " \n" +
+             "  <table-def> \n" +
+             "    <table-name>info</table-name> \n" +
+             "    <column-count>5</column-count> \n" +
+             " \n" +
+             "    <column-def index=\"0\"> \n" +
+             "      <column-name>id</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>int4</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"1\"> \n" +
+             "      <column-name>firstname</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>varchar(50)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"2\"> \n" +
+             "      <column-name>lastname</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>varchar(50)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"3\"> \n" +
+             "      <column-name>birthday</column-name> \n" +
+             "      <java-class>java.sql.Date</java-class> \n" +
+             "      <java-sql-type-name>DATE</java-sql-type-name> \n" +
+             "      <java-sql-type>91</java-sql-type> \n" +
+             "      <dbms-data-type>date</dbms-data-type> \n" +
+             "      <data-format>yyyy-MM-dd</data-format> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"4\"> \n" +
+             "      <column-name>salary</column-name> \n" +
+             "      <java-class>java.math.BigDecimal</java-class> \n" +
+             "      <java-sql-type-name>NUMERIC</java-sql-type-name> \n" +
+             "      <java-sql-type>2</java-sql-type> \n" +
+             "      <dbms-data-type>numeric(12,2)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "  </table-def> \n" +
+             " \n" +
+             "<data> \n" +
+             "<rd><cd>1</cd><cd>Arthur</cd><cd>Dent</cd><cd longValue=\"-880682400000\">1942-02-04</cd><cd>100.41</cd></rd> \n" +
+             "<rd><cd>4</cd><cd>Mary</cd><cd>Moviestar</cd><cd longValue=\"946767600000\">2000-01-02</cd><cd>42.42</cd></rd> \n" +
+             "<rd><cd>2</cd><cd>Zaphod</cd><cd>Beeblebrox</cd><cd longValue=\"-299466000000\">1960-07-06</cd><cd>123.45</cd></rd> \n" +
+             "<rd><cd>3</cd><cd>Tricia</cd><cd>McMillian</cd><cd longValue=\"334620000000\">1980-08-09</cd><cd>567.89</cd></rd> \n" +
+             "</data> \n" +
+             "</wb-export>";
+
+		String sql = "CREATE TABLE info \n" +
+             "( \n" +
+             "   salary    decimal(12,2), \n" +
+             "   birthday  date, \n" +
+             "   Lastname varchar(50)  NULL, \n" +
+             "   id        int4         NOT NULL, \n" +
+             "   FIRSTNAME  varchar(50)  NULL \n" +
+             ")";		
+		try
+		{
+			File xmlFile = new File(this.basedir, "xml_import.xml");
+			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
+			out.write(xml);
+			out.close();
+			
+			Statement stmt = this.connection.createStatement();
+			stmt.executeUpdate(sql);
+			
+			String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=info";
+			StatementRunnerResult result = importCmd.execute(cmd);
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			ResultSet rs = stmt.executeQuery("select count(*) from info");
+			int rowCount = 0;
+			
+			if (rs.next())
+			{
+				rowCount = rs.getInt(1);
+			}
+			
+			assertEquals("Wrong number of rows", rowCount, 4);
+			rs.close();
+			stmt.close();
+			
+			
+			if (!xmlFile.delete())
+			{
+				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
+			}			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testXmlImportCreateTable()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
