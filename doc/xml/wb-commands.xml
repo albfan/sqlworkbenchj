@@ -2,36 +2,6 @@
 <section id="wb-commands">
   <title>Other &wb-productname; specific commands</title>
   
-  <section id="command-selectblob">
-    <title>Extracting BLOB content - WbSelectBlob</title>
-    <para>To save the contents of a <literal>BLOB</literal> or <literal>CLOB</literal> column
-      into an external file the <literal>WbSelectBlob</literal> command can be used. Most DBMS
-      support reading of <literal>CLOB</literal> (character data) columns directly, so depending
-      on your DBMS (and JDBC driver) this command might only be needed for binary data.
-    </para>
-    <para>The syntax is very similar to the regular <literal>SELECT</literal> statement, an additional
-      <literal>INTO</literal> keyword specifies the name of the external file into which the
-      data should be written:
-    </para>
-    <programlisting>WbSelectBlob blob_column
-INTO c:/temp/image.bmp
-FROM theTable
-WHERE id=42;</programlisting>
-    <para>
-      Even if you specify more then one column in the column list, &wb-productname; will only
-      use the first column. If the SELECT returns more then one row, then one 
-      outputfile will be created for each row. Additional files will be created with 
-      a counter indicating the row number from the result. In the above
-      example, image.bmp, image_1.bmp, image_3.bmp and so on, would be created.
-      If you want to export addtional columns together with the BLOB contents, please
-      use the <link linkend="command-export">WbExport</link> command.
-    </para>
-    <note><para>
-	You can fully manipulate (save, view, upload) the contents of BLOB columns in a result set.
-	Please refer to <xref linkend="blob-support"/> for details.
-    </para></note>
-  </section>
-  
   <section id="command-schema-report">
     <title>Create a report of the database objects - WbReport</title>
     
@@ -155,12 +125,14 @@ WHERE id=42;</programlisting>
   
   <section id="command-schema-diff">
     <title>Compare two database schemas - WbSchemaDiff</title>
+		
     <para>The <literal>WbSchemaDiff</literal> analyzes two schemas (or a list of tables)
       and outputs the differences between those schemas as an XML file. The XML file
       describes the changes that need to be applied to the target schema to have
       the same structure as the reference schema, e.g. modify column definitions,
       remove or add tables, remove or add indexes.
     </para>
+		
     <para>The output is intended to be transformed using XSLT (e.g. with the
       <link linkend="command-xslt">XSLT Command</link>).
       Sample XSLT transformations
@@ -170,231 +142,430 @@ WHERE id=42;</programlisting>
     
     <informaltable frame="all">
       <tgroup cols="2" align="left">
-	<colspec colname="c1" colwidth="4cm" />
-	<colspec colname="c2" />
-	<thead>
-	  <row>
-	    <entry>Parameter</entry>
-	    <entry>Description</entry>
-	  </row>
-	</thead>
+			<colspec colname="c1" colwidth="4cm" />
+			<colspec colname="c2" />
+			<thead>
+				<row>
+					<entry>Parameter</entry>
+					<entry>Description</entry>
+				</row>
+			</thead>
 	
-	<tbody valign="top">
-	  <row>
-	    <entry>-referenceProfile</entry>
-	    <entry>The name of the connection profile for the reference
-	      connection. If this is not specified, then the current connection is
-	    used.</entry>
-	  </row>
-	  <row>
-	    <entry>-referenceGroup</entry>
-	    <entry>If the name of your reference profile is not unique across 
-	      all profiles, you will need to specify the group in which the profile 
-	      is located with this parameter.
-	    </entry>
-	  </row>
-	  <row>
-	    <entry>-targetProfile</entry>
-	    <entry>
-	      <para>
-		The name of the connection profile for the target
-		connection (the one that needs to be migrated). If this is not
-		specified, then the current connection is used.
-	      </para>
-	      <para>
-		If you use the current connection for reference and target,
-		then you should prefix the table names with schema/user or
-		use the <literal>-referenceschema</literal> and
-		<literal>-targetschema</literal> parameters.
-	      </para>
-	    </entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-targetGroup</entry>
-	    <entry>If the name of your target profile is not unique across 
-	      all profiles, you will need to specify the group in which the profile 
-	      is located with this parameter.
-	    </entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-file</entry>
-	    <entry>The filename of the output file. If this
-	    is not supplied the output will be written to the message area</entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-referenceTables</entry>
-	    <entry>A (comma separated) list of tables that are the reference
-	      tables, to be checked.
-	    </entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-targetTables</entry>
-	    <entry>
-	      <para>
-		A (comma separated) list of tables in the target
-		connection to be compared to the source tables. The tables
-		are "matched" by their position in the list. The first table in the
-		<literal>-referenceTables</literal> parameter is compared to the
-		first table in the <literal>-targetTables</literal> parameter, and so
-		on. Using this parameter you can compare tables that do not have the
-		same name.
-	      </para>
-	      <para>If you omit this parameter, then all tables from the
-		target connection with the same names as those listed in
-		<literal>-referenceTables</literal> are compared.
-	      </para>
-	      <para>If you omit both parameters, then all tables that the
-		user can access are retrieved from the source connection
-		and compared to the tables with the same name in the target
-		connection.
-	      </para>
-	    </entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-referenceSchema</entry>
-	    <entry>
-	      Compare all tables from the specified schema (user)
-	    </entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-targetSchema</entry>
-	    <entry>
-	      A schema in the target connection to be compared to the tables from the reference schema.
-	    </entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-namespace</entry>
-	    <entry>The namespace to be used for the XML tags. By default no
-	      namespace is used. If you supply a value for this e.g. <literal>wb</literal> the tag <literal>&lt;schema-report&gt;
-	      </literal> would be written as <literal>&lt;wb:modify-table&gt;</literal>
-	    </entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-encoding</entry>
-	    <entry>The encoding to be used for the XML file. The default is UTF-8</entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-includePrimaryKeys</entry>
-	    <entry>Select whether primary key constraint definitions should be compared as well.
-	      The default is <literal>true</literal>.
-	      Valid values are <literal>true</literal> or <literal>false</literal>.
-	    </entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-includeForeignKeys</entry>
-	    <entry>Select whether foreign key constraint definitions should be compared as well.
-	      The default is <literal>true</literal>.
-	      Valid values are <literal>true</literal> or <literal>false</literal>.
-	    </entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-includeTableGrants</entry>
-	    <entry>Select whether table grants should be compared as well.
-	      The default is <literal>false</literal>.
-	    </entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-includeConstraints</entry>
-	    <entry>
-	      <para>
-		Select whether table and column (check) constraints
-		should be compared as well. &wb-productname; compares the constraint
-		definition (SQL) as stored in the database. When comparing schemas from
-		different DBMS systems this will not return the desired results.
-	      </para>
-	      <para>
-		The default is to not compare table constraints (<literal>false</literal>)
-		Valid values are <literal>true</literal> or <literal>false</literal>.
-	      </para>
-	    </entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-includeViews</entry>
-	    <entry>
-	      <para>
-		Select whether views should also be compared. When comparing
-		views, the source as it is stored in the DBMS is compared. This comparison
-		is case-sensitiv, which means <literal>SELECT * FROM foo;</literal> will be
-		reported as a difference to <literal>select * from foo;</literal> even
-		if they are logically the same. A comparison across different DBMS will also not
-		work properly!
-	      </para>
-	      <para>The default is <literal>true</literal>
-		Valid values are <literal>true</literal> or <literal>false</literal>.
-	      </para>
-	    </entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-includeProcedures</entry>
-	    <entry>
-	      <para>
-		Select whether stored procedures should also be compared. When comparing
-		procedures the source as it is stored in the DBMS is compared. This comparison
-		is case-sensitiv. A comparison across different DBMS will also not work!
-	      </para>
-	      <para>The default is <literal>false</literal>
-		Valid values are <literal>true</literal> or <literal>false</literal>.
-	      </para>
-	    </entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-includeIndex</entry>
-	    <entry>
-	      Select whether indexes should be compared as well.  The default
-	      is to not compare index definitions.
-	      Valid values are <literal>true</literal> or <literal>false</literal>.
-	    </entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-includeSequences</entry>
-	    <entry>
-	      Select whether sequences should be compared as well. The default is 
-	      to not compare sequences. Valid values are <literal>true</literal>, <literal>false</literal>.
-	    </entry>
-	  </row>
-	  
-	  <row>
-	    <entry>-useJdbcTypes</entry>
-	    <entry>
-	      <para>
-		Define whether to compare the DBMS specific data types, or 
-		the JDBC data type returned by the driver. When comparing 
-		tables from two different DBMS it is recommended to use
-		<literal>-useJdbcType=true</literal> as this will make the 
-		comparison a bit more DBMS-independent. When comparing e.g. 
-		Oracle vs. PostgreSQL a column defined as 
-		<literal>VARCHAR2(100)</literal> in Oracle would be reported as beeing different
-		to a <literal>VARCHAR(100)</literal> column in PostgreSQL which is not really true
-		As both drivers ropert the column as java.sql.Types.VARCHAR, 
-		they would be considered as identical when using <literal>-useJdbcType=true</literal>.
-	      </para>
-	      <para>
-		Valid values are <literal>true</literal> or <literal>false</literal>.
-	      </para>
-	    </entry>
-	  </row>
-	</tbody>
+			<tbody valign="top">
+				<row>
+					<entry>-referenceProfile</entry>
+					<entry>The name of the connection profile for the reference
+						connection. If this is not specified, then the current connection is
+					used.</entry>
+				</row>
+				<row>
+					<entry>-referenceGroup</entry>
+					<entry>If the name of your reference profile is not unique across 
+						all profiles, you will need to specify the group in which the profile 
+						is located with this parameter.
+					</entry>
+				</row>
+				<row>
+					<entry>-targetProfile</entry>
+					<entry>
+						<para>
+				The name of the connection profile for the target
+				connection (the one that needs to be migrated). If this is not
+				specified, then the current connection is used.
+						</para>
+						<para>
+				If you use the current connection for reference and target,
+				then you should prefix the table names with schema/user or
+				use the <literal>-referenceschema</literal> and
+				<literal>-targetschema</literal> parameters.
+						</para>
+					</entry>
+				</row>
+
+				<row>
+					<entry>-targetGroup</entry>
+					<entry>If the name of your target profile is not unique across 
+						all profiles, you will need to specify the group in which the profile 
+						is located with this parameter.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-file</entry>
+					<entry>The filename of the output file. If this
+					is not supplied the output will be written to the message area</entry>
+				</row>
+
+				<row>
+					<entry>-referenceTables</entry>
+					<entry>A (comma separated) list of tables that are the reference
+						tables, to be checked.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-targetTables</entry>
+					<entry>
+						<para>
+				A (comma separated) list of tables in the target
+				connection to be compared to the source tables. The tables
+				are "matched" by their position in the list. The first table in the
+				<literal>-referenceTables</literal> parameter is compared to the
+				first table in the <literal>-targetTables</literal> parameter, and so
+				on. Using this parameter you can compare tables that do not have the
+				same name.
+						</para>
+						<para>If you omit this parameter, then all tables from the
+				target connection with the same names as those listed in
+				<literal>-referenceTables</literal> are compared.
+						</para>
+						<para>If you omit both parameters, then all tables that the
+				user can access are retrieved from the source connection
+				and compared to the tables with the same name in the target
+				connection.
+						</para>
+					</entry>
+				</row>
+
+				<row>
+					<entry>-referenceSchema</entry>
+					<entry>
+						Compare all tables from the specified schema (user)
+					</entry>
+				</row>
+
+				<row>
+					<entry>-targetSchema</entry>
+					<entry>
+						A schema in the target connection to be compared to the tables from the reference schema.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-namespace</entry>
+					<entry>The namespace to be used for the XML tags. By default no
+						namespace is used. If you supply a value for this e.g. <literal>wb</literal> the tag <literal>&lt;schema-report&gt;
+						</literal> would be written as <literal>&lt;wb:modify-table&gt;</literal>
+					</entry>
+				</row>
+
+				<row>
+					<entry>-encoding</entry>
+					<entry>The encoding to be used for the XML file. The default is UTF-8</entry>
+				</row>
+
+				<row>
+					<entry>-includePrimaryKeys</entry>
+					<entry>Select whether primary key constraint definitions should be compared as well.
+						The default is <literal>true</literal>.
+						Valid values are <literal>true</literal> or <literal>false</literal>.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-includeForeignKeys</entry>
+					<entry>Select whether foreign key constraint definitions should be compared as well.
+						The default is <literal>true</literal>.
+						Valid values are <literal>true</literal> or <literal>false</literal>.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-includeTableGrants</entry>
+					<entry>Select whether table grants should be compared as well.
+						The default is <literal>false</literal>.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-includeConstraints</entry>
+					<entry>
+						<para>
+				Select whether table and column (check) constraints
+				should be compared as well. &wb-productname; compares the constraint
+				definition (SQL) as stored in the database. When comparing schemas from
+				different DBMS systems this will not return the desired results.
+						</para>
+						<para>
+				The default is to not compare table constraints (<literal>false</literal>)
+				Valid values are <literal>true</literal> or <literal>false</literal>.
+						</para>
+					</entry>
+				</row>
+
+				<row>
+					<entry>-includeViews</entry>
+					<entry>
+						<para>
+				Select whether views should also be compared. When comparing
+				views, the source as it is stored in the DBMS is compared. This comparison
+				is case-sensitiv, which means <literal>SELECT * FROM foo;</literal> will be
+				reported as a difference to <literal>select * from foo;</literal> even
+				if they are logically the same. A comparison across different DBMS will also not
+				work properly!
+						</para>
+						<para>The default is <literal>true</literal>
+				Valid values are <literal>true</literal> or <literal>false</literal>.
+						</para>
+					</entry>
+				</row>
+
+				<row>
+					<entry>-includeProcedures</entry>
+					<entry>
+						<para>
+				Select whether stored procedures should also be compared. When comparing
+				procedures the source as it is stored in the DBMS is compared. This comparison
+				is case-sensitiv. A comparison across different DBMS will also not work!
+						</para>
+						<para>The default is <literal>false</literal>
+				Valid values are <literal>true</literal> or <literal>false</literal>.
+						</para>
+					</entry>
+				</row>
+
+				<row>
+					<entry>-includeIndex</entry>
+					<entry>
+						Select whether indexes should be compared as well.  The default
+						is to not compare index definitions.
+						Valid values are <literal>true</literal> or <literal>false</literal>.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-includeSequences</entry>
+					<entry>
+						Select whether sequences should be compared as well. The default is 
+						to not compare sequences. Valid values are <literal>true</literal>, <literal>false</literal>.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-useJdbcTypes</entry>
+					<entry>
+						<para>
+				Define whether to compare the DBMS specific data types, or 
+				the JDBC data type returned by the driver. When comparing 
+				tables from two different DBMS it is recommended to use
+				<literal>-useJdbcType=true</literal> as this will make the 
+				comparison a bit more DBMS-independent. When comparing e.g. 
+				Oracle vs. PostgreSQL a column defined as 
+				<literal>VARCHAR2(100)</literal> in Oracle would be reported as beeing different
+				to a <literal>VARCHAR(100)</literal> column in PostgreSQL which is not really true
+				As both drivers ropert the column as java.sql.Types.VARCHAR, 
+				they would be considered as identical when using <literal>-useJdbcType=true</literal>.
+						</para>
+						<para>
+				Valid values are <literal>true</literal> or <literal>false</literal>.
+						</para>
+					</entry>
+				</row>
+			</tbody>
       </tgroup>
     </informaltable>
     
   </section>
   
+	<section id="command-data-diff">
+		<title>Comparing data across databases - WbDataDiff</title>
+		<para>
+			The <literal>WbDataDiff</literal> command can be used to generate SQL scripts
+			that update a target database such that the data is identical to a reference 
+			database. This is similar to the <literal>WbSchemaDiff</literal> but compares 
+			the actual data in the tables rather than the table structure.
+		</para>
+		<para>
+			For each table the command will create up to three script files, depending on 
+			the needed statements to migrate the data. One file for <literal>UPDATE</literal> statements, 
+			one file for <literal>INSERT</literal> statements and one file for <literal>DELETE</literal>
+			statements (if <literal>-includeDelete=true</literal> is specified)
+		</para>
+		
+		<note><para>
+			As this command needs to read every row from the reference and the target 
+			table, processing large tables can take quite some time, especially if <literal>DELETE</literal>
+			statements should also be generated.
+		</para></note>
+		
+		<para>
+			<literal>WbDataDiff</literal> requires that all involved tables have a primary key 
+			defined. If a table does not have a primary key, <literal>WbDataDiff</literal> will 
+			stop the processing.
+		</para>
+		
+    <informaltable frame="all">
+      <tgroup cols="2" align="left">
+			<colspec colname="c1" colwidth="4cm" />
+			<colspec colname="c2" />
+			<thead>
+				<row>
+					<entry>Parameter</entry>
+					<entry>Description</entry>
+				</row>
+			</thead>
+	
+			<tbody valign="top">
+				<row>
+					<entry>-referenceProfile</entry>
+					<entry>
+						The name of the connection profile for the reference connection. 
+						If this is not specified, then the current connection is used.
+					</entry>
+				</row>
+				<row>
+					<entry>-referenceGroup</entry>
+					<entry>
+						If the name of your reference profile is not unique across 
+						all profiles, you will need to specify the group in which the profile 
+						is located with this parameter. If the profile's name is unique
+						you can omit this parameter
+					</entry>
+				</row>
+				<row>
+					<entry>-targetProfile</entry>
+					<entry>
+						<para>
+							The name of the connection profile for the target
+							connection (the one that needs to be migrated). If this is not
+							specified, then the current connection is used.
+						</para>
+						<para>
+							If you use the current connection for reference and target,
+							then you should prefix the table names with schema/user or
+							use the <literal>-referenceschema</literal> and
+							<literal>-targetschema</literal> parameters.
+						</para>
+					</entry>
+				</row>
+
+				<row>
+					<entry>-targetGroup</entry>
+					<entry>If the name of your target profile is not unique across 
+						all profiles, you will need to specify the group in which the profile 
+						is located with this parameter.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-file</entry>
+					<entry>
+						The filename of the main script file. The command creates two 
+						scripts per table. One script named <literal>update_&lt;tablename&gt;.sql</literal>
+						that contains all needed <literal>UPDATE</literal> or <literal>INSERT</literal>
+						statements. The second script is named <literal>delete_&lt;tablename&gt;.sql</literal>
+						and will contain all <literal>DELETE</literal> statements for the target table.
+						The main script merely calls (using <link linkend="command-wbinclude">WbInclude</link>)
+						the generated scripts for each table.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-referenceTables</entry>
+					<entry>
+						A (comma separated) list of tables that are the reference
+						tables, to be checked. You can specify the table with wildcards, 
+						e.g. <literal>-referenceTables=P%</literal> to compare all tables
+						that start with the letter <literal>P</literal>.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-targetTables</entry>
+					<entry>
+						<para>
+							A (comma separated) list of tables in the target
+							connection to be compared to the source tables. The tables
+							are "matched" by their position in the list. The first table in the
+							<literal>-referenceTables</literal> parameter is compared to the
+							first table in the <literal>-targetTables</literal> parameter, and so
+							on. Using this parameter you can compare tables that do not have the
+							same name.
+						</para>
+						<para>
+							If you omit this parameter, then all tables from the
+							target connection with the same names as those listed in
+							<literal>-referenceTables</literal> are compared.
+						</para>
+						<para>
+							If you omit both parameters, then all tables that the
+							user can access are retrieved from the source connection
+							and compared to the tables with the same name in the target
+							connection.
+						</para>
+					</entry>
+				</row>
+
+				<row>
+					<entry>-referenceSchema</entry>
+					<entry>
+						Compare all tables from the specified schema (user)
+					</entry>
+				</row>
+
+				<row>
+					<entry>-targetSchema</entry>
+					<entry>
+						A schema in the target connection to be compared to the tables from the reference schema.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-checkDependencies</entry>
+					<entry>
+						Sorts the generated scripts in order to respect foreign key dependencies
+						for deleting and inserting rows. 
+						Valid values are <literal>true</literal>, <literal>false</literal>. The default
+						is <literal>true</literal>.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-includeDelete</entry>
+					<entry>
+						Generates <literal>DELETE</literal> statements for rows that are present
+						in the target table, but not in the reference table. The default is <literal>false</literal>.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-encoding</entry>
+					<entry>
+						The encoding to be used for the SQL scripts. The default depends
+						on your operating system. It will be displayed when you run 
+						<literal>WbDataDiff</literal> without any parameters.
+					</entry>
+				</row>
+
+			</tbody>
+      </tgroup>
+    </informaltable>
+		
+		<simplesect id="data-diff-examples">
+			<title>WbDataDiff Examples</title>
+			<para>
+				Compare all tables between two connections, and write the output to the 
+				file <literal>migrate_staging.sql</literal>, but do not generate 
+				<literal>DELETE</literal> statements.
+			</para>
+<programlisting>WbDataDiff -referenceProfile="Production"
+           -targetProfile="Staging"
+           -file=migrate_staging.sql
+           -includeDelete=false</programlisting>
+
+			<para>
+				Compare a list of matching tables between two databases and write the output to the 
+				file <literal>migrate_staging.sql</literal> including <literal>DELETE</literal> statements.
+				
+			</para>
+<programlisting>WbDataDiff -referenceProfile="Production"
+           -targetProfile="Staging"
+           -referenceTables=person,address,person_address
+           -file=migrate_staging.sql
+           -includeDelete=true</programlisting>
+		</simplesect>
+	</section>
+	
   <section id="command-xslt">
     <title>Run an XSLT transformation - WbXslt</title>
     
@@ -593,97 +764,134 @@ WHERE id=42;</programlisting>
     <programlisting>wbinclude -file="my_script.sql" -continueOnError=false;</programlisting>
   </section>
   
-  <section id="command-define-pk">
-    <title>Define primary key columns - WbDefinePK</title>
+	<section id="pk-handling">
+		<title>Handling tables or updateable views without primary keys</title>
+		
+		<section id="command-define-pk">
+			<title>Define primary key columns - WbDefinePK</title>
+			<para>
+				To be able to directly edit data in the result set (grid) &wb-productname; needs
+				a primary key on the underlying table. In some cases these primary keys are not present or
+				cannot be retrieved from the database (e.g. when using updateable views).
+				To still be able to automatically update a result based on those tables (without always
+				manually defining the primary key) you can manually define a primary
+				key using the <literal>WbDefinePk</literal> command.
+			</para>
+			<para>
+				Assuming you have an updateable view called <literal>v_person</literal> where
+				the primary key is the column <literal>person_id</literal>. When you simply do a
+				<literal>SELECT * FROM v_person</literal>, &wb-productname; will prompt you for the
+				primary key when you try to save changes to the data. If you run
+			</para>
+
+			<programlisting>WbDefinePk v_person=person_id</programlisting>
+			<para>
+				before retrieving the result, &wb-productname; will automatically
+				use the <literal>person_id</literal> as the primary key (just as if this
+				information had been retrieved from the database).
+			</para>
+			<para>To delete a definition simply call the command with an empty column list:</para>
+			<programlisting>WbDefinePk v_person=</programlisting>
+			<para>
+				If you want to define certain mappings permanently, this can be done using
+				a mapping file that is specified in the <link linkend="options-pkmapping">configuration file</link>.
+				The file specified has to be a text file with each line containing one
+				primary key definition in the same format as passed to this command. The global mapping will
+				automatically be saved when you exit the application if a filename has been defined.
+				If no file is defined, then all PK mappings that you define are lost when
+				exiting the application (unless you explicitely save them using
+				<link linkend="command-save-pkmap">WbSavePkMap</link>
+			</para>
+
+			<programlisting>v_person=person_id
+	v_data=id1,id2</programlisting>
+
+			<para>
+				will define a primary key for the view <literal>v_person</literal> and one for
+				the view <literal>v_data</literal>. The definitions stored in that file can
+				be overwritten using the <literal>WbDefinePk</literal> command, but those changes
+				won't be saved to the file. This file will be read for all database connections and
+				is not profile specific. If you have conflicting primary key definitions for
+				different databases, you'll need to execute the <literal>WbDefinePk</literal> command
+				each time, rather then specifying the keys in the mapping file.
+			</para>
+
+			<para>
+				When you define the key columns for a table through the GUI, you have the option
+				to remember the defined mapping. If this option is checked, then that mapping
+				will be added to the global map (just as if you had executed <literal>WbDefinePk</literal>
+				manually.
+			</para>
+			<note><para>
+		The mappings will be stored with lowercase table names internally, regardless how you specify them.
+			</para></note>
+
+		</section>
+
+		<section id="command-list-pk">
+			<title>List defined primary key columns - WbListPKDef</title>
+			<para>To view the currently defined primary keys, execute the command
+			<literal>WbListPkDef</literal>.</para>
+		</section>
+
+		<section id="command-load-pkmap">
+			<title>Load primary key mappings - WbLoadPKMap</title>
+			<para>
+				To load the additional primary key definitions from a file, you can
+				use the the <literal>WbLoadPKMap</literal> command. If a filename is defined
+				in the <link linkend="options-pkmapping">configuration file</link> then that
+				file is loaded. Alternatively if no file is configured, or if you want to
+				load a different file, you can specify the filename using the <literal>-file</literal>
+				parameter.
+			</para>
+		</section>
+
+		<section id="command-save-pkmap">
+			<title>Save primary key mappings - WbSavePKMap</title>
+			<para>
+				To save the current primary key definitions to a file, you can
+				use the the <literal>WbSavePKMap</literal> command. If a filename is defined
+				in the <link linkend="options-pkmapping">configuration file</link> then the
+				definition is stored in that file. Alternatively if no file is configured, or if you want to
+				store the current mapping into a different file, you can specify the filename
+				using the <literal>-file</literal> parameter.
+			</para>
+		</section>
+		
+	</section>
+	
+  <section id="command-selectblob">
+    <title>Extracting BLOB content - WbSelectBlob</title>
     <para>
-      To be able to directly edit data in the result set (grid) &wb-productname; needs
-      a primary key on the underlying table. In some cases these primary keys are not present or
-      cannot be retrieved from the database (e.g. when using updateable views).
-      To still be able to automatically update a result based on those tables (without always
-      manually defining the primary key) you can manually define a primary
-      key using the <literal>WbDefinePk</literal> command.
+			To save the contents of a <literal>BLOB</literal> or <literal>CLOB</literal> column
+      into an external file the <literal>WbSelectBlob</literal> command can be used. Most DBMS
+      support reading of <literal>CLOB</literal> (character data) columns directly, so depending
+      on your DBMS (and JDBC driver) this command might only be needed for binary data.
     </para>
     <para>
-      Assuming you have an updateable view called <literal>v_person</literal> where
-      the primary key is the column <literal>person_id</literal>. When you simply do a
-      <literal>SELECT * FROM v_person</literal>, &wb-productname; will prompt you for the
-      primary key when you try to save changes to the data. If you run
+			The syntax is very similar to the regular <literal>SELECT</literal> statement, an additional
+      <literal>INTO</literal> keyword specifies the name of the external file into which the
+      data should be written:
     </para>
-    
-    <programlisting>WbDefinePk v_person=person_id</programlisting>
+    <programlisting>WbSelectBlob blob_column
+INTO c:/temp/image.bmp
+FROM theTable
+WHERE id=42;</programlisting>
     <para>
-      before retrieving the result, &wb-productname; will automatically
-      use the <literal>person_id</literal> as the primary key (just as if this
-      information had been retrieved from the database).
-    </para>
-    <para>To delete a definition simply call the command with an empty column list:</para>
-    <programlisting>WbDefinePk v_person=</programlisting>
-    <para>
-      If you want to define certain mappings permanently, this can be done using
-      a mapping file that is specified in the <link linkend="options-pkmapping">configuration file</link>.
-      The file specified has to be a text file with each line containing one
-      primary key definition in the same format as passed to this command. The global mapping will
-      automatically be saved when you exit the application if a filename has been defined.
-      If no file is defined, then all PK mappings that you define are lost when
-      exiting the application (unless you explicitely save them using
-      <link linkend="command-save-pkmap">WbSavePkMap</link>
-    </para>
-    
-    <programlisting>v_person=person_id
-v_data=id1,id2</programlisting>
-    
-    <para>
-      will define a primary key for the view <literal>v_person</literal> and one for
-      the view <literal>v_data</literal>. The definitions stored in that file can
-      be overwritten using the <literal>WbDefinePk</literal> command, but those changes
-      won't be saved to the file. This file will be read for all database connections and
-      is not profile specific. If you have conflicting primary key definitions for
-      different databases, you'll need to execute the <literal>WbDefinePk</literal> command
-      each time, rather then specifying the keys in the mapping file.
-    </para>
-    
-    <para>
-      When you define the key columns for a table through the GUI, you have the option
-      to remember the defined mapping. If this option is checked, then that mapping
-      will be added to the global map (just as if you had executed <literal>WbDefinePk</literal>
-      manually.
+      Even if you specify more then one column in the column list, &wb-productname; will only
+      use the first column. If the SELECT returns more then one row, then one 
+      outputfile will be created for each row. Additional files will be created with 
+      a counter indicating the row number from the result. In the above
+      example, image.bmp, image_1.bmp, image_3.bmp and so on, would be created.
+      If you want to export addtional columns together with the BLOB contents, please
+      use the <link linkend="command-export">WbExport</link> command.
     </para>
     <note><para>
-	The mappings will be stored with lowercase table names internally, regardless how you specify them.
+	You can fully manipulate (save, view, upload) the contents of BLOB columns in a result set.
+	Please refer to <xref linkend="blob-support"/> for details.
     </para></note>
-    
   </section>
-  
-  <section id="command-list-pk">
-    <title>List defined primary key columns - WbListPKDef</title>
-    <para>To view the currently defined primary keys, execute the command
-    <literal>WbListPkDef</literal>.</para>
-  </section>
-  
-  <section id="command-load-pkmap">
-    <title>Load primary key mappings - WbLoadPKMap</title>
-    <para>
-      To load the additional primary key definitions from a file, you can
-      use the the <literal>WbLoadPKMap</literal> command. If a filename is defined
-      in the <link linkend="options-pkmapping">configuration file</link> then that
-      file is loaded. Alternatively if no file is configured, or if you want to
-      load a different file, you can specify the filename using the <literal>-file</literal>
-      parameter.
-    </para>
-  </section>
-  
-  <section id="command-save-pkmap">
-    <title>Save primary key mappings - WbSavePKMap</title>
-    <para>
-      To save the current primary key definitions to a file, you can
-      use the the <literal>WbSavePKMap</literal> command. If a filename is defined
-      in the <link linkend="options-pkmapping">configuration file</link> then the
-      definition is stored in that file. Alternatively if no file is configured, or if you want to
-      store the current mapping into a different file, you can specify the filename
-      using the <literal>-file</literal> parameter.
-    </para>
-  </section>
-  
+	
   <section id="command-enableout" xreflabel="ENABLEOUT">
     <title>Enable Oracle's DBMS_OUTPUT package - ENABLEOUT</title>
     
@@ -736,17 +944,6 @@ v_data=id1,id2</programlisting>
     </para>
   </section>
   
-  <section id="command-desc">
-    <title>Show table structure - DESCRIBE</title>
-    
-    <para>Describe shows the definition of the given table. It can be
-    abbreviated with DESC. The command expects the table name as a parameter.</para>
-    <programlisting>DESC person;</programlisting>
-    <para>If you want to show the structure of a table from a different user, you need
-    to prefix the table name with the desired user</para>
-    <programlisting>DESCRIBE otheruser.person;</programlisting>
-  </section>
-  
   <section id="command-set">
     <title>Setting connection properties - SET</title>
     <para>
@@ -787,6 +984,17 @@ v_data=id1,id2</programlisting>
       </para>
     </section>
     
+  </section>
+  
+  <section id="command-desc">
+    <title>Show table structure - DESCRIBE</title>
+    
+    <para>Describe shows the definition of the given table. It can be
+    abbreviated with DESC. The command expects the table name as a parameter.</para>
+    <programlisting>DESC person;</programlisting>
+    <para>If you want to show the structure of a table from a different user, you need
+    to prefix the table name with the desired user</para>
+    <programlisting>DESCRIBE otheruser.person;</programlisting>
   </section>
   
   <section id="command-list">
