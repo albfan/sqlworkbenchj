@@ -11,10 +11,12 @@
  */
 package workbench.db.compare;
 
+import java.util.Collection;
+import workbench.db.exporter.SqlRowDataConverter;
 import workbench.resource.Settings;
-import workbench.storage.DmlStatement;
+import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
-import workbench.storage.StatementFactory;
+import workbench.util.StrBuffer;
 
 /**
  * Compare two {@link workbench.storage.RowData} objects to check for equality.
@@ -43,6 +45,7 @@ public class RowDataComparer
 			targetWasNull = true;
 			migrationData = referenceRow.createCopy();
 			migrationData.resetStatus();
+			migrationData.setNew();
 		}
 		else
 		{
@@ -63,20 +66,45 @@ public class RowDataComparer
 		}
 	}
 	
-	public DmlStatement getMigrationSql(StatementFactory factory)
+	public void ignoreColumns(Collection<String> columnNames, ResultInfo info)
+	{
+		if (columnNames == null || columnNames.size() == 0) return;
+		for (int i=0; i < info.getColumnCount(); i++)
+		{
+			if (columnNames.contains(info.getColumnName(i)))
+			{
+				migrationData.resetStatusForColumn(i);
+			}
+		}
+	}
+
+	public RowData getRowData() 
+	{
+		return migrationData;
+	}
+	
+	public String getMigrationSql(SqlRowDataConverter converter, long rowNumber)
 	{
 		String le = Settings.getInstance().getInternalEditorLineEnding();
 
-		DmlStatement result = null;
+		String sql = null;
+		
+
 		if (targetWasNull)
 		{
-			result = factory.createInsertStatement(migrationData, true, le);
+			converter.setIgnoreColumnStatus(true);
+			converter.setType(SqlRowDataConverter.SQL_INSERT);
+			//result = factory.createInsertStatement(migrationData, true, le);
 		}
 		else
 		{
-			result = factory.createUpdateStatement(migrationData, false, le);
+			converter.setIgnoreColumnStatus(false);
+			converter.setType(SqlRowDataConverter.SQL_UPDATE);
+			//result = factory.createUpdateStatement(migrationData, false, le);
 		}
-		return result;
+		StrBuffer result = converter.convertRowData(migrationData, rowNumber);
+		if (result == null) return null;
+		return result.toString();
 	}
 	
 }

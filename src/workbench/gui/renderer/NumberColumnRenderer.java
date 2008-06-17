@@ -17,7 +17,6 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.swing.SwingConstants;
 import workbench.resource.Settings;
@@ -28,7 +27,7 @@ import workbench.resource.Settings;
 public class NumberColumnRenderer
 	extends ToolTipRenderer
 {
-	private DecimalFormat decimalFormatter;
+	private final DecimalFormat decimalFormatter;
 	private DecimalFormatSymbols symb = new DecimalFormatSymbols();
 	private int maxDigits = -1;
 	

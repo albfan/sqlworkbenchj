@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import java.util.Properties;
 import junit.framework.TestCase;
 import workbench.sql.DelimiterDefinition;
 
@@ -26,45 +27,107 @@ public class ConnectionProfileTest
 	}
 
 	public void testCreateCopy()
+		throws Exception
 	{
-		try
-		{
-			ConnectionProfile old = new ConnectionProfile();
-			old.setAlternateDelimiter(new DelimiterDefinition("/", true));
-			old.setAutocommit(false);
-			old.setConfirmUpdates(true);
-			old.setDriverName("Postgres");
-			old.setEmptyStringIsNull(true);
-			old.setUseSeparateConnectionPerTab(true);
-			old.setIgnoreDropErrors(true);
-			old.setStoreExplorerSchema(true);
-			old.setName("First");
-			old.setStorePassword(true);
-			old.setUrl("jdbc:some:database");
+		ConnectionProfile old = new ConnectionProfile();
+		old.setAlternateDelimiter(new DelimiterDefinition("/", true));
+		old.setAutocommit(false);
+		old.setConfirmUpdates(true);
+		old.setDriverName("Postgres");
+		old.setEmptyStringIsNull(true);
+		old.setUseSeparateConnectionPerTab(true);
+		old.setIgnoreDropErrors(true);
+		old.setStoreExplorerSchema(true);
+		old.setName("First");
+		old.setStorePassword(true);
+		old.setCopyExtendedPropsToSystem(true);
+		old.setIncludeNullInInsert(true);
+		old.setIdleTime(42);
+		old.setTrimCharData(true);
+		old.setIdleScript("select 12 from dual");
+		old.setPostConnectScript("drop database");
+		old.setPreDisconnectScript("shutdown abort");
+		old.setUrl("jdbc:some:database");
 
-			ConnectionProfile copy = old.createCopy();
-			assertFalse(copy.getAutocommit());
-			assertTrue(copy.getConfirmUpdates());
-			assertEquals("Postgres", copy.getDriverName());
-			assertEquals("First", copy.getName());
-			assertTrue(copy.getStorePassword());
-			assertTrue(copy.getUseSeparateConnectionPerTab());
-			assertTrue(copy.getStoreExplorerSchema());
-			assertTrue(copy.getIgnoreDropErrors());
-			assertEquals("jdbc:some:database", copy.getUrl());
-			DelimiterDefinition delim = copy.getAlternateDelimiter();
-			assertNotNull(delim);
-			assertEquals("/", delim.getDelimiter());
-			assertTrue(delim.isSingleLine());
-			
-			old.setAlternateDelimiter(null);
-			copy = old.createCopy();
-			assertNull(copy.getAlternateDelimiter());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		ConnectionProfile copy = old.createCopy();
+		assertFalse(copy.getAutocommit());
+		assertTrue(copy.getConfirmUpdates());
+		assertEquals("Postgres", copy.getDriverName());
+		assertEquals("First", copy.getName());
+		assertTrue(copy.getStorePassword());
+		assertTrue(copy.getUseSeparateConnectionPerTab());
+		assertTrue(copy.getStoreExplorerSchema());
+		assertTrue(copy.getIgnoreDropErrors());
+		assertTrue(copy.getTrimCharData());
+		assertTrue(copy.getIncludeNullInInsert());
+		assertEquals(42, copy.getIdleTime());
+		assertEquals("select 12 from dual", old.getIdleScript());
+		assertEquals("jdbc:some:database", copy.getUrl());
+		
+		assertEquals("drop database", old.getPostConnectScript());
+		assertEquals("shutdown abort", old.getPreDisconnectScript());
+		
+		DelimiterDefinition delim = copy.getAlternateDelimiter();
+		assertNotNull(delim);
+		assertEquals("/", delim.getDelimiter());
+		assertTrue(delim.isSingleLine());
+		assertTrue(copy.getCopyExtendedPropsToSystem());
+
+		old.setAlternateDelimiter(null);
+		copy = old.createCopy();
+		assertNull(copy.getAlternateDelimiter());
+	}
+	
+	public void testProps()
+		throws Exception
+	{
+		ConnectionProfile profile = new ConnectionProfile();
+		profile.setAlternateDelimiter(new DelimiterDefinition("/", true));
+		profile.setAutocommit(false);
+		profile.setConfirmUpdates(true);
+		profile.reset();
+		
+		Properties props = new Properties();
+		props.setProperty("remarksReporting", "true");
+		profile.setConnectionProperties(props);
+		assertTrue(profile.isChanged());
+		profile.setCopyExtendedPropsToSystem(true);
+		assertTrue(profile.isChanged());
+		
+		profile.setAutocommit(true);
+		profile.setConfirmUpdates(false);
+		assertTrue(profile.isChanged());
+
+		profile.setAutocommit(true);
+		profile.setConfirmUpdates(false);
+		assertTrue(profile.isChanged());
+		
+		profile.setUrl("jdbc:postgres:local");
+		assertTrue(profile.isChanged());
+		
+		profile.setUrl("jdbc:postgres:local");
+		assertTrue(profile.isChanged());
+
+		profile.setEmptyStringIsNull(false);
+		profile.reset();
+		profile.setEmptyStringIsNull(true);
+		assertTrue(profile.isChanged());
+		profile.setEmptyStringIsNull(true);
+		assertTrue(profile.isChanged());
+
+		profile.setUseSeparateConnectionPerTab(false);
+		profile.reset();
+		profile.setUseSeparateConnectionPerTab(true);
+		assertTrue(profile.isChanged());
+		profile.setUseSeparateConnectionPerTab(true);
+		assertTrue(profile.isChanged());
+		
+		profile.setStoreExplorerSchema(false);
+		profile.reset();
+		profile.setStoreExplorerSchema(true);
+		assertTrue(profile.isChanged());
+		profile.setStoreExplorerSchema(true);
+		assertTrue(profile.isChanged());
+		
 	}
 }

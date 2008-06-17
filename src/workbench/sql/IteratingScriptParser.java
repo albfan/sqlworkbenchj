@@ -128,7 +128,7 @@ public class IteratingScriptParser
 		// Make sure we have an encoding (otherwise FileMappedSequence will not work!
 		if (enc == null) enc = Settings.getInstance().getDefaultEncoding();
 		this.script = new FileMappedSequence(f, enc);
-		this.scriptLength = (int)f.length();
+		this.scriptLength = script.length();
 		this.checkEscapedQuotes = false;
 		this.storeSqlInCommands = true;
 		this.reset();
@@ -262,14 +262,13 @@ public class IteratingScriptParser
 	public ScriptCommandDefinition getNextCommand()
 	{
 		int pos;
-		String currChar;
 		boolean delimiterOnOwnLine = this.delimiter.isSingleLine();
 		String delim = this.delimiter.getDelimiter();
+		int delimLength = delim.length();
 		
 		for (pos = this.lastPos; pos < this.scriptLength; pos++)
 		{
-			currChar = this.script.subSequence(pos, pos + 1).toString().toUpperCase();
-			char firstChar = currChar.charAt(0);
+			char firstChar = this.script.charAt(pos);
 			
 			// skip CR characters
 			if (firstChar == '\r') continue;
@@ -353,12 +352,17 @@ public class IteratingScriptParser
 
  			if (!quoteOn && !commentOn)
 			{
+				String currWord = null;
 				if (this.delimiterLength > 1 && pos + this.delimiterLength < scriptLength)
 				{
-					currChar = this.script.subSequence(pos, pos + this.delimiterLength).toString().toUpperCase();
+					currWord = this.script.subSequence(pos, pos + this.delimiterLength).toString().toUpperCase();
+				}
+				else
+				{
+					currWord = String.valueOf(firstChar);
 				}
 
-				if (!delimiterOnOwnLine && (currChar.equals(delim) || (pos == scriptLength)))
+				if (!delimiterOnOwnLine && (currWord.equals(delim) || (pos == scriptLength)))
 				{
 					if (lastPos >= pos && pos < scriptLength - 1) 
 					{

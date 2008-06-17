@@ -117,6 +117,7 @@ public class XmlDataFileParser
 			LogMgr.logError("XmlDataFileParser.<init>", "Error creating XML parser", e);
 		}
 	}
+	
 	public XmlDataFileParser(File inputFile)
 	{
 		this();
@@ -258,7 +259,6 @@ public class XmlDataFileParser
 			if (this.receiver.getCreateTarget())
 			{
 				LogMgr.logDebug("XmlDataFileParser.checkTargetColumns()", "Table " + tbl.getTableName() + " not found, but receiver will create it. Skipping column check...");
-//				columnsToImport = getColumnsFromFile();
 				return;
 			}
 			else
@@ -525,6 +525,13 @@ public class XmlDataFileParser
 			}
 			finished = true;
 		}
+		catch (ParsingConverterException pce)
+		{
+			// already logged and added to the messages
+			this.receiver.tableImportError();
+			this.hasErrors = true;
+			throw pce;
+		}
 		catch (Exception e)
 		{
 		  String msg = "Error during parsing of data row: " + (this.currentRowNumber) + 
@@ -532,6 +539,7 @@ public class XmlDataFileParser
 				  ", current data: " + (this.chars == null ? "<n/a>" : "[" + this.chars.toString() + "]" ) + 
 				  ", message: " + ExceptionUtil.getDisplay(e);
 			LogMgr.logWarning("XmlDataFileParser.processOneFile()", msg);
+			this.hasErrors = true;
 			this.messages.append(msg);
 			this.messages.appendNewLine();
 			this.receiver.tableImportError();
@@ -728,7 +736,7 @@ public class XmlDataFileParser
 				}
 			}
 			attrValue = attrs.getValue(XmlRowDataConverter.ATTR_NULL);
-			this.isNull = "true".equals(attrValue);
+			isNull = "true".equals(attrValue);
 			columnDataFile = attrs.getValue(XmlRowDataConverter.ATTR_DATA_FILE);
 		}
 		else
@@ -833,7 +841,7 @@ public class XmlDataFileParser
 	 *  Numeric types contain the actual class to be used {@link #createNumericType(String, String)}
 	 */
 	private void buildColumnData()
-		throws ParsingInterruptedException
+		throws ParsingConverterException
 	{
 		if (this.columnsToImport != null && !this.columnsToImport.contains(this.columns[this.currentColIndex])) return;
 		this.currentRow[this.realColIndex] = null;
@@ -912,7 +920,7 @@ public class XmlDataFileParser
 			{
 				LogMgr.logError("XmlDataFileParser.buildColumnData()", msg, e);
 				this.hasErrors = true;
-				throw new ParsingInterruptedException();				
+				throw new ParsingConverterException();				
 			}
 			else
 			{

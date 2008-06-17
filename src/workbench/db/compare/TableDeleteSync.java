@@ -24,6 +24,7 @@ import java.util.Map;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.interfaces.ProgressReporter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -46,9 +47,18 @@ import workbench.util.StringUtil;
  * The presence of the primary keys in the source table are not checked. The column names
  * of the PK of the target table are used to retrieve the data from the source table.
  * 
+ * To improve performance (a bit), the rows are retrieved in chunks from the 
+ * target table by dynamically constructing a WHERE clause for the rows
+ * that were retrieved from the reference table. The chunk size 
+ * can be controlled using the property workbench.sql.sync.chunksize
+ * The chunk size defaults to 25. This is a conservative setting to avoid
+ * problems with long SQL statements when processing tables that have 
+ * a PK with multiple columns.
+ * 
  * @author support@sql-workbench.net
  */
 public class TableDeleteSync
+	implements ProgressReporter
 {
 	private WbConnection toDelete;
 	private WbConnection reference;
@@ -65,13 +75,16 @@ public class TableDeleteSync
 	private Writer outputWriter;
 	private SqlLiteralFormatter formatter;
 	private long deletedRows;
-	boolean firstDelete;
+	private boolean firstDelete;
+	
+	private boolean cancelExecution;
+	private int progressInterval = 10;
 	
 	public TableDeleteSync(WbConnection deleteFrom, WbConnection compareTo)
 		throws SQLException
 	{
-		this.toDelete = deleteFrom;
-		this.reference = compareTo;
+		toDelete = deleteFrom;
+		reference = compareTo;
 		formatter = new SqlLiteralFormatter(toDelete);
 		chunkSize = Settings.getInstance().getSyncChunkSize();
 	}
@@ -86,6 +99,11 @@ public class TableDeleteSync
 		this.monitor = rowMonitor;
 	}
 	
+	public void cancel()
+	{
+		this.cancelExecution = true;
+	}
+	
 	/**
 	 * Set a Writer to write the generated statements to. 
 	 * If an outputwriter is defined, the statements will <b>not</b> 
@@ -96,6 +114,11 @@ public class TableDeleteSync
 	public void setOutputWriter(Writer out)
 	{
 		this.outputWriter = out;
+	}
+
+	public void setReportInterval(int interval)
+	{
+		this.progressInterval = interval;
 	}
 	
 	public void setTableName(TableIdentifier checkTable)
@@ -176,7 +199,9 @@ public class TableDeleteSync
 		
 		LogMgr.logDebug("SyncDeleter.deleteTarget()", "Using " + retrieve + " to retrieve rows from reference database");
 	
-		this.deletedRows = 0;
+		deletedRows = 0;
+		cancelExecution = false;
+		
 		checkStatement = reference.createStatement();
 		
 		ResultSet rs = null;
@@ -194,21 +219,25 @@ public class TableDeleteSync
 				if (this.outputWriter == null)
 				{
 					this.monitor.setMonitorType(RowActionMonitor.MONITOR_DELETE);
+					this.monitor.setCurrentObject(this.deleteTable.getTableName(), -1, -1);
 				}
 				else
 				{
 					this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+					String msg = ResourceMgr.getFormattedString("MsgDeleteSyncProcess", this.deleteTable.getTableName());
+					this.monitor.setCurrentObject(msg, -1, -1);
 				}
-				this.monitor.setCurrentObject(this.deleteTable.getTableExpression(this.toDelete), -1, -1);
 			}
 			int cols = info.getColumnCount();
 			List<RowData> packetRows = new ArrayList<RowData>(chunkSize);
 			
 			while (rs.next())
 			{
+				if (cancelExecution) break;
+				
 				rowNumber ++;
 				RowData row = new RowData(cols);
-				if (this.monitor != null)
+				if (this.monitor != null && (rowNumber % progressInterval == 0))
 				{
 					monitor.setCurrentRow(rowNumber, -1);
 				}
@@ -222,7 +251,7 @@ public class TableDeleteSync
 				}
 			}
 			
-			if (packetRows.size() > 0)
+			if (packetRows.size() > 0 && !cancelExecution)
 			{
 				checkRows(packetRows, info);
 			}
@@ -237,7 +266,6 @@ public class TableDeleteSync
 			{
 				this.monitor.jobFinished();
 			}
-			
 		}
 		catch (SQLException e)
 		{
@@ -267,6 +295,7 @@ public class TableDeleteSync
 			ResultInfo ri = new ResultInfo(rs.getMetaData(), reference);
 			while (rs.next())
 			{
+				if (cancelExecution) break;
 				RowData r = new RowData(ri);
 				r.read(rs, ri);
 				checkRows.add(r);
@@ -274,6 +303,8 @@ public class TableDeleteSync
 			
 			// Same number of rows --> no row is missing 
 			if (checkRows.size() == referenceRows.size()) return;
+			if (cancelExecution) return;
+			
 			for (RowData doomed : referenceRows)
 			{
 				if (!checkRows.contains(doomed))
@@ -379,5 +410,5 @@ public class TableDeleteSync
 		out.write("------------------------------------------------------------------");
 		out.write(lineEnding);
 	}
-	
+
 }

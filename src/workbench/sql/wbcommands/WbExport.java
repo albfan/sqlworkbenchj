@@ -58,6 +58,8 @@ public class WbExport
 	private int progressInterval = 1;
 
 	public static final String PARAM_CREATE_OUTPUTDIR = "createDir";
+	public static final String PARAM_BLOB_TYPE = "blobType";
+	public static final String PARAM_XML_VERSION = "xmlVersion";
 	
 	public WbExport()
 	{
@@ -85,6 +87,7 @@ public class WbExport
 		cmdLine.addArgument("createTable", ArgumentType.BoolArgument);
 		cmdLine.addArgument("keyColumns");
 		cmdLine.addArgument("append", ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_XML_VERSION, StringUtil.stringToList("1.0", "1.1"));
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 		cmdLine.addArgument("escapeHTML", ArgumentType.BoolArgument);
@@ -102,7 +105,7 @@ public class WbExport
 		cmdLine.addArgument("blobIdCols", ArgumentType.Deprecated);
 		cmdLine.addArgument("lobIdCols");
 		cmdLine.addArgument("filenameColumn");
-		cmdLine.addArgument("blobType", BlobMode.getTypes());
+		cmdLine.addArgument(PARAM_BLOB_TYPE, BlobMode.getTypes());
 		cmdLine.addArgument("clobAsFile", ArgumentType.BoolArgument);
 		cmdLine.addArgument("continueOnError", ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_CREATE_OUTPUTDIR, ArgumentType.BoolArgument);
@@ -309,7 +312,7 @@ public class WbExport
 				List cols = StringUtil.stringToList(c, ",");
 				exporter.setKeyColumnsToUse(cols);
 			}
-			String bmode = cmdLine.getValue("blobtype");
+			String bmode = cmdLine.getValue(PARAM_BLOB_TYPE);
 			exporter.setBlobMode(bmode);
 			this.defaultExtension = ".sql";
 			String literal = cmdLine.getValue(CommonArgs.ARG_DATE_LITERAL_TYPE);
@@ -327,6 +330,12 @@ public class WbExport
 			boolean verbose = cmdLine.getBoolean(CommonArgs.ARG_VERBOSE_XML, verboseDefault);
 			exporter.setUseVerboseFormat(verbose);
 
+			String version = cmdLine.getValue(PARAM_XML_VERSION);
+			if (version != null)
+			{
+				exporter.setXMLVersion(version);
+			}
+			
 			if (xsl != null && output != null)
 			{
 				File f = new File(xsl);

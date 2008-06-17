@@ -24,6 +24,40 @@ public class RowDataTest extends TestCase
 	{
 		super(testName);
 	}
+
+	public void testBlobs()
+	{
+		RowData row = new RowData(2);
+		row.setValue(0, new Integer(1));
+		row.setValue(1, new byte[] {1,2,3});
+		row.resetStatus();
+		
+		row.setValue(1, new byte[] {1,2,3});
+		assertFalse(row.isColumnModified(1));
+		assertFalse(row.isModified());
+	}
+	
+	public void testResetStatus()
+	{
+		RowData row = new RowData(2);
+		row.setValue(0, new Integer(42));
+		row.setValue(1, "Test");
+		row.resetStatus();
+
+		row.setValue(0, new Integer(43));
+		row.setValue(1, "Test2");
+		assertTrue(row.isModified());
+		
+		row.resetStatusForColumn(1);
+		assertTrue(row.isModified());
+		assertTrue(row.isColumnModified(0));
+		assertFalse(row.isColumnModified(1));
+		
+		row.resetStatusForColumn(0);
+		assertFalse(row.isColumnModified(0));
+		assertFalse(row.isColumnModified(1));
+		assertFalse(row.isModified());
+	}
 	
 	public void testChangeValues()
 	{

@@ -66,6 +66,7 @@ public class XmlRowDataConverter
 	private StrBuffer dbInfo;
 	private boolean writeClobFiles = false;
 	private boolean addColName = false;
+	private String xmlVersion = Settings.getInstance().getDefaultXmlVersion();
 	
 	public XmlRowDataConverter()
 	{
@@ -97,6 +98,14 @@ public class XmlRowDataConverter
 		this.dbInfo = con.getDatabaseInfoAsXml(indent);
 	}
 
+	public void setXMLVersion(String version)
+	{
+		if ("1.1".equals(version) || "1.0".equals(version))
+		{
+			this.xmlVersion = version;
+		}
+	}
+	
 	public void setUseVerboseFormat(boolean flag)
 	{
 		this.verboseFormat = flag;
@@ -120,7 +129,7 @@ public class XmlRowDataConverter
 	{
 		StrBuffer xml = new StrBuffer(250);
 		String enc = this.getEncoding();
-		xml.append("<?xml version=\"1.1\""); 
+		xml.append("<?xml version=\"" + xmlVersion + "\""); 
 		if (enc != null) xml.append(" encoding=\"" + enc + "\"");
 		xml.append("?>");
 		xml.append(this.lineEnding);

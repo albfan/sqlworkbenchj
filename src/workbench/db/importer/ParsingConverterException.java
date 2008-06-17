@@ -1,5 +1,5 @@
 /*
- * XmlOptions.java
+ * ParsingInterruptedException.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -9,17 +9,20 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.gui.dialogs.export;
+package workbench.db.importer;
+
+import org.xml.sax.SAXException;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
-public interface XmlOptions
+public class ParsingConverterException
+	extends SAXException
 {
-	String getXMLVersion();
-	boolean getUseCDATA();
-	void setUseCDATA(boolean flag);
-	boolean getUseVerboseXml();
-	void setUseVerboseXml(boolean flag);
+	public ParsingConverterException()
+	{
+		super("Error when converting data");
+	}
+	
 }

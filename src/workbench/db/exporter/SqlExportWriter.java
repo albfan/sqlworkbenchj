@@ -46,24 +46,8 @@ public class SqlExportWriter
 		conv.setConcatString(exporter.getConcatString());
 		conv.setConcatFunction(exporter.getConcatFunction());
 		conv.setSqlLiteralType(exporter.getDateLiteralType());
-    
-		BlobMode type = exporter.getBlobMode();
-		if (type == BlobMode.DbmsLiteral)
-		{
-			conv.setBlobTypeDbmsLiteral();
-		}
-		else if (type == BlobMode.AnsiLiteral)
-		{
-			conv.setBlobTypeAnsiLiteral();
-		}
-		else if (type == BlobMode.SaveToFile)
-		{
-			conv.setBlobTypeFile();
-		}
-		else
-		{
-			conv.setBlobTypeNone();
-		}
+
+		conv.setBlobMode(exporter.getBlobMode());
 
 		if (exporter.getWriteClobAsFile())
 		{

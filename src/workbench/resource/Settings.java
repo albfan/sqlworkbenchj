@@ -1001,16 +1001,22 @@ public class Settings
 	{
 		setProperty("workbench.export.sql.default.dateliterals", type);
 	}
-
-	public String getDefaultDiffDateLiteralType()
-	{
-		return getProperty("workbench.diff.sql.default.dateliterals", "jdc");
-	}
 	
 	public String getDefaultExportDateLiteralType()
 	{
 		return getProperty("workbench.export.sql.default.dateliterals", "dbms");
 	}
+
+	public String getDefaultDiffDateLiteralType()
+	{
+		return getProperty("workbench.diff.sql.default.dateliterals", "jdbc");
+	}
+
+	public void setDefaultDiffDateLiteralType(String type)
+	{
+		setProperty("workbench.diff.sql.default.dateliterals", type);
+	}
+	
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Data display">
@@ -1934,6 +1940,12 @@ public class Settings
 	{
 		return getDelimiter("workbench.import.text.fielddelimiter", "\\t", readable);
 	}
+	
+	public String getDefaultXmlVersion()
+	{
+		return getProperty("workbench.xml.default.version", "1.0");
+	}
+	
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Import">
@@ -2397,7 +2409,12 @@ public class Settings
 
 	public List<String> getListProperty(String aProperty, boolean makeLowerCase)
 	{
-		String list = System.getProperty(aProperty, this.props.getProperty(aProperty, null));
+		return getListProperty(aProperty, makeLowerCase, null);
+	}
+	
+	public List<String> getListProperty(String aProperty, boolean makeLowerCase, String defaultList)
+	{
+		String list = System.getProperty(aProperty, this.props.getProperty(aProperty, defaultList));
 		if (makeLowerCase && list != null)
 		{
 			list = list.toLowerCase();

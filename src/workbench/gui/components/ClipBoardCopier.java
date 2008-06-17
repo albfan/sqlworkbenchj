@@ -23,6 +23,7 @@ import javax.swing.SwingUtilities;
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
+import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.SqlRowDataConverter;
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
@@ -256,7 +257,7 @@ public class ClipBoardCopier
 				}
 			}
 			converter.setColumnsToExport(columnsToInclude);
-			converter.setBlobTypeDbmsLiteral();
+			converter.setBlobMode(BlobMode.DbmsLiteral);
 			
 			int count = 0;
 			if (rows != null) count = rows.length;

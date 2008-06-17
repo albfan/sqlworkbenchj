@@ -24,7 +24,6 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
-import junit.framework.*;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
@@ -42,7 +41,7 @@ public class FileUtilTest
 		super(testName);
 		testUtil = getTestUtil();
 	}
-
+	
 	public void testGetLines()
 	{
 		try
@@ -298,7 +297,8 @@ public class FileUtilTest
 			assertEquals(content.length(), FileUtil.getCharacterLength(f, encoding));
 			
 			encoding = "UTF-8";
-			content = "\u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153";
+			content = "This is a test for the UTF-8 length \u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153. "+
+				"Let's see how it works";
 			out = new OutputStreamWriter(new FileOutputStream(f),encoding);
 			out.write(content);
 			out.close();

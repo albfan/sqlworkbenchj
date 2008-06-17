@@ -444,7 +444,7 @@ public abstract class RowDataConverter
 	
 	/**
 	 *	Returns the String sequence needed in before the actual data part.
-	 *  (might be an empty string)
+	 *  (might be null)
 	 */
 	public abstract StrBuffer getStart();
 	

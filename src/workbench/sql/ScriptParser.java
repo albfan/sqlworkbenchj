@@ -123,6 +123,19 @@ public class ScriptParser
 		}
 	}
 	
+	public int getScriptLength()
+	{
+		if (this.iteratingParser != null)
+		{
+			return this.iteratingParser.getScriptLength();
+		}
+		if (this.originalScript != null)
+		{
+			return this.originalScript.length();
+		}
+		return 0;
+	}
+	
 	public void readScriptFromFile(File f)
 		throws IOException
 	{
@@ -363,6 +376,12 @@ public class ScriptParser
 		else return s;
 	}
 
+	/**
+	 * Returns the number of statements in this script.
+	 * This will force a complete parsing of the script and the
+	 * script will be loaded into memory!
+	 * @return
+	 */
 	public int getSize() 
 	{
 		if (this.commands == null) this.parseCommands();

@@ -69,11 +69,6 @@ public class TextAreaRenderer
 		return textDisplay;
 	}
 
-	public Insets getInsets()
-	{
-		return WbSwingUtilities.EMPTY_INSETS;
-	}
-
 	public void prepareDisplay(Object value)
 	{
 		if (value == null)

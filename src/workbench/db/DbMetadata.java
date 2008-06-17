@@ -66,6 +66,7 @@ import workbench.db.hsqldb.HsqlConstraintReader;
 import workbench.db.firebird.FirebirdConstraintReader;
 import workbench.db.h2database.H2ConstraintReader;
 import workbench.db.h2database.H2SequenceReader;
+import workbench.db.ibm.Db2ConstraintReader;
 import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.sql.formatter.SqlFormatter;
@@ -237,6 +238,7 @@ public class DbMetadata
 		{
 			this.synonymReader = new Db2SynonymReader();
 			this.sequenceReader = new Db2SequenceReader(this.dbConnection);
+			this.constraintReader = new Db2ConstraintReader();
 		}
 		else if (productLower.indexOf("adaptive server") > -1) 
 		{

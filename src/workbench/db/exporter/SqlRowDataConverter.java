@@ -65,6 +65,7 @@ public class SqlRowDataConverter
 	private boolean includeOwner = true;
 	private boolean doFormatting = true; 
 	private SqlLiteralFormatter literalFormatter;
+	private boolean ignoreRowStatus = true;
 	
 	public SqlRowDataConverter(WbConnection con)
 	{
@@ -135,6 +136,11 @@ public class SqlRowDataConverter
 		return end;
 	}
 
+	public void setIgnoreColumnStatus(boolean flag)
+	{
+		this.ignoreRowStatus = flag;
+	}
+	
 	public void setType(int type)
 	{
 		if (type == SQL_INSERT)
@@ -151,11 +157,6 @@ public class SqlRowDataConverter
 	{
 		StrBuffer result = new StrBuffer();
 		DmlStatement dml = null;
-		String db = null;
-		if (this.originalConnection != null)
-		{
-			db = this.originalConnection.getDatabaseProductName();
-		}
 		this.statementFactory.setIncludeTableOwner(this.includeOwner);
 		
 		if (this.sqlTypeToUse == SQL_DELETE_INSERT)
@@ -167,12 +168,14 @@ public class SqlRowDataConverter
 		}
 		if (this.sqlTypeToUse == SQL_DELETE_INSERT || this.sqlType == SQL_INSERT)
 		{
-			dml = this.statementFactory.createInsertStatement(row, true, "\n", this.exportColumns);
+			dml = this.statementFactory.createInsertStatement(row, ignoreRowStatus, "\n", this.exportColumns);
 		}
 		else // implies sqlType == SQL_UPDATE
 		{
-			dml = this.statementFactory.createUpdateStatement(row, true, "\n", this.exportColumns);
+			dml = this.statementFactory.createUpdateStatement(row, ignoreRowStatus, "\n", this.exportColumns);
 		}
+		if (dml == null) return null;
+		
 		dml.setChrFunction(this.chrFunction);
 		dml.setConcatString(this.concatString);
 		dml.setConcatFunction(this.concatFunction);
@@ -381,24 +384,26 @@ public class SqlRowDataConverter
 		if (this.statementFactory != null) this.statementFactory.setIncludeTableOwner(flag);
 	}
 
-	public void setBlobTypeNone()
+	public void setBlobMode(BlobMode type)
 	{
-		this.literalFormatter.noBlobHandling();
-	}
-	
-	public void setBlobTypeDbmsLiteral()
-	{
-		if (this.literalFormatter != null) this.literalFormatter.createDbmsBlobLiterals(originalConnection);
-	}
-	
-	public void setBlobTypeAnsiLiteral()
-	{
-		if (this.literalFormatter != null) literalFormatter.createAnsiBlobLiterals();
-	}
-	
-	public void setBlobTypeFile()
-	{
-		if (this.literalFormatter != null) literalFormatter.createBlobFiles(this);
+		if (this.literalFormatter == null) return;
+		
+		if (type == BlobMode.DbmsLiteral)
+		{
+			this.literalFormatter.createDbmsBlobLiterals(originalConnection);
+		}
+		else if (type == BlobMode.AnsiLiteral)
+		{
+			literalFormatter.createAnsiBlobLiterals();
+		}
+		else if (type == BlobMode.SaveToFile)
+		{
+			literalFormatter.createBlobFiles(this);
+		}
+		else
+		{
+			this.literalFormatter.noBlobHandling();
+		}
 	}
 	
 	public void setClobAsFile(String encoding)

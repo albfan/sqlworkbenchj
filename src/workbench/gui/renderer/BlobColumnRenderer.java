@@ -42,7 +42,6 @@ public class BlobColumnRenderer
 	private BlobColumnPanel displayPanel;
 	private Object currentValue;
 	private WbTable currentTable;
-	private boolean isPrinting = false;
 	private int currentRow;
 	private int currentColumn;
 	private Color alternateColor = Settings.getInstance().getAlternateRowColor();

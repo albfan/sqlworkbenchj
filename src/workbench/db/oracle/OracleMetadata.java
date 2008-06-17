@@ -11,6 +11,8 @@
  */
 package workbench.db.oracle;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -57,9 +59,9 @@ import workbench.util.StringUtil;
  * @author support@sql-workbench.net
  */
 public class OracleMetadata
-	implements ErrorInformationReader, DataTypeResolver
+	implements ErrorInformationReader, DataTypeResolver, PropertyChangeListener
 {
-	private WbConnection connection;
+	private final WbConnection connection;
 	private PreparedStatement columnStatement;
 	private int version;
 	private boolean retrieveSnapshots = true;
@@ -74,6 +76,7 @@ public class OracleMetadata
 	 */
 	OracleMetadata(int defaultSemantics, boolean alwaysShowSemantics)
 	{
+		connection = null;
 		defaultLengthSemantics = defaultSemantics;
 		alwaysShowCharSemantics = alwaysShowSemantics;
 	}
@@ -132,8 +135,22 @@ public class OracleMetadata
 		
 		useOwnSql = (version > 8 && (checkCharSemantics || fixNVARCHAR));
 		globalMapDateToTimestamp = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixdatetype", false);
+		Settings.getInstance().addPropertyChangeListener(this, "workbench.db.oracle.fixdatetype");
 	}
 
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (evt.getPropertyName().equals("workbench.db.oracle.fixdatetype"))
+		{
+			globalMapDateToTimestamp = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixdatetype", false);
+		}
+	}
+	
+	public void done()
+	{
+		Settings.getInstance().removePropertyChangeListener(this);
+	}
+	
 	public boolean isOracle8()
 	{
 		return this.version == 8;
@@ -146,6 +163,8 @@ public class OracleMetadata
 		String value = getDriverProperty("remarksReporting", false);
 		if (value == null)
 		{
+			// Only the new oracle.jdbc.remarksReporting should also be 
+			// checked in the system properties
 			value = getDriverProperty("oracle.jdbc.remarksReporting", true);
 		}
 		return "true".equalsIgnoreCase(value == null ? "false" : value.trim());

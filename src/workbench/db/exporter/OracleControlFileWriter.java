@@ -55,21 +55,9 @@ public class OracleControlFileWriter
 				out.println("OPTIONS (skip=1)");
 			}
 
-			if (!exporter.getEncoding().startsWith("UTF"))
-			{
-				out.println("-- The specified character set is an ISO name and will most probably not work");
-				out.println("-- as Oracle uses its own names for character sets (e.g. WE8ISO8859P1 for ISO-8859-1)");
-			}
+			out.println("-- The specified might not be correct, please check the Oracle documentation");
 			out.print("LOAD DATA CHARACTERSET '");
-			if (exporter.getEncoding().equalsIgnoreCase("UTF-8"))
-			{
-				// Oracle only understand UTF8 not UTF-8
-				out.println("UTF8'");
-			}
-			else
-			{
-				out.println(exporter.getEncoding().toUpperCase() + "'");
-			}
+			out.println(convertJavaCharsetToOracle(exporter.getEncoding()) + "'");
 			File f = new File(exporter.getFullOutputFilename());
 			out.println("INFILE '" + f.getName() + "'");
 			out.println("-- to replace the data in the table use TRUNCATE instead of APPEND");
@@ -166,6 +154,24 @@ public class OracleControlFileWriter
 		}
 	}
 
+	private String convertJavaCharsetToOracle(String encoding)
+	{
+		if (encoding == null) return Settings.getInstance().getDefaultFileEncoding();
+		if (encoding.equalsIgnoreCase("UTF8")) return "UTF-8";
+		if (encoding.equalsIgnoreCase("ISO-8859-1")) return "WE8ISO8859P1";
+		if (encoding.equalsIgnoreCase("ISO-8859-15")) return "WE8ISO8859P15";
+		if (encoding.equalsIgnoreCase("ISO-8859-10")) return "NE8ISO8859P10";
+		if (encoding.equalsIgnoreCase("ISO-8859-5")) return "CL8ISO8859P5";
+		if (encoding.equalsIgnoreCase("ISO-8859-5")) return "CL8ISO8859P5";
+		if (encoding.equalsIgnoreCase("windows-1250")) return "EE8MSWIN1250";
+		if (encoding.equalsIgnoreCase("windows-1253")) return "EL8MSWIN1253";
+		if (encoding.equalsIgnoreCase("ISO-2022-JP")) return "ISO2022-JP";
+		if (encoding.equalsIgnoreCase("ISO-2022-CN")) return "ISO2022-CN";
+		if (encoding.equalsIgnoreCase("ISO-2022-KR")) return "ISO2022-KR";
+		if (encoding.equalsIgnoreCase("UTF-16BE")) return "AL16UTF16";
+		return encoding.toUpperCase();
+	}
+	
 	private String convertJavaDateFormatToOracle(String format)
 	{
 		String result = format.replace("HH", "HH24");

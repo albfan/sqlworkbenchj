@@ -16,6 +16,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionListener;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -34,6 +35,7 @@ public class BlobColumnPanel
 	private static final int BUTTON_WIDTH = 16;
 	private FlatButton openButton = new FlatButton("...");
 	private JLabel label = new JLabel();
+	private Insets insets = ToolTipRenderer.getDefaultInsets();
 	
 	public BlobColumnPanel()
 	{
@@ -43,7 +45,7 @@ public class BlobColumnPanel
 		openButton.setBasicUI();
 		openButton.setFlatLook();
 		openButton.setBorder(WbSwingUtilities.FLAT_BUTTON_BORDER);
-		openButton.setMaximumSize(d);
+//		openButton.setMaximumSize(d);
 		openButton.setPreferredSize(d);
 		openButton.setMinimumSize(d);
 		openButton.setEnabled(true);
@@ -68,6 +70,13 @@ public class BlobColumnPanel
 		this.setToolTipText(ResourceMgr.getDescription("LblShowBlobInfo", true));
 	}
 
+	@Override
+	public Insets getInsets()
+	{
+		return insets;
+	}
+
+	
 	public int getButtonWidth()
 	{
 		if (openButton != null && openButton.isVisible())

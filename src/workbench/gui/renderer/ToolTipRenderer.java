@@ -19,6 +19,7 @@ import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
 
+import java.util.List;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JTable;
@@ -27,6 +28,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbTable;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.filter.ColumnExpression;
 import workbench.util.StringUtil;
@@ -70,8 +72,9 @@ public class ToolTipRenderer
 
 	private boolean isPrinting = false;
 	
-	private Insets focusedInsets;
-
+	protected Insets focusedInsets;
+	protected Insets regularInsets;
+	
 	protected boolean isSelected;
 	protected boolean hasFocus;
 	
@@ -87,8 +90,37 @@ public class ToolTipRenderer
 	{
 		int thick = WbSwingUtilities.FOCUSED_CELL_BORDER.getThickness();
 		focusedInsets = new Insets(thick, thick, thick, thick);
+		regularInsets = getDefaultInsets();
 	}
 
+	static Insets getDefaultInsets()
+	{
+		Insets result = null;
+		List<String> i = Settings.getInstance().getListProperty("workbench.gui.renderer.insets", true, "1,1,1,1");
+		
+		if (i.size() == 4)
+		{
+			try
+			{
+				int top = Integer.valueOf(i.get(0));
+				int left = Integer.valueOf(i.get(1));
+				int bottom = Integer.valueOf(i.get(2));
+				int right = Integer.valueOf(i.get(3));
+				result = new Insets(top,left,bottom,right);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("ToolTipRenderer.getDefaultInsets()", "Error reading default insets from settings", e);
+				result = null;
+			}
+		}
+		if (result == null)
+		{
+			result = new Insets(1,1,1,1);
+		}
+		return result;
+	}
+	
 	public void setUseAlternatingColors(boolean flag)
 	{
 		this.useAlternatingColors = flag;
@@ -254,7 +286,7 @@ public class ToolTipRenderer
 		}
 		else
 		{
-			insets = WbSwingUtilities.EMPTY_INSETS;
+			insets = regularInsets;
 		}
 			
 		paintViewR.x = insets.left;

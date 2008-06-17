@@ -18,19 +18,25 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.exporter.BlobMode;
+import workbench.db.exporter.SqlRowDataConverter;
+import workbench.interfaces.ErrorReporter;
+import workbench.interfaces.ProgressReporter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.ColumnData;
-import workbench.storage.DmlStatement;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
 import workbench.storage.SqlLiteralFormatter;
-import workbench.storage.StatementFactory;
+import workbench.util.CaseInsensitiveComparator;
+import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -42,12 +48,20 @@ import workbench.util.StringUtil;
  * the reference database and it is expected that both tables have the same primary 
  * key definition.
  * 
- * The presence of the primary keys in the source table are not checked. The column names
- * of the PK of the target table are used to retrieve the data from the source table.
+ * To improve performance (a bit), the rows are retrieved in chunks from the 
+ * target table by dynamically constructing a WHERE clause for the rows
+ * that were retrieved from the reference table. The chunk size 
+ * can be controlled using the property workbench.sql.sync.chunksize
+ * The chunk size defaults to 25. This is a conservative setting to avoid
+ * problems with long SQL statements when processing tables that have 
+ * a PK with multiple columns.
+ * 
+ * @see workbench.resource.Settings#getSyncChunkSize() 
  * 
  * @author support@sql-workbench.net
  */
 public class TableDataDiff
+	implements ProgressReporter, ErrorReporter
 {
 	private WbConnection toSync;
 	private WbConnection reference;
@@ -64,8 +78,19 @@ public class TableDataDiff
 	private boolean firstInsert;
 		
 	private SqlLiteralFormatter formatter;
-	private List<ColumnIdentifier> pkColumns = null;
+	private List<ColumnIdentifier> pkColumns;
 	private String lineEnding = "\n";
+
+	private boolean cancelExecution;
+	private int progressInterval = 10;
+	
+	private Set<String> columnsToIgnore;
+	
+	private SqlRowDataConverter converter;
+	
+	private MessageBuffer warnings = new MessageBuffer();
+	private MessageBuffer errors = new MessageBuffer();
+	private long currentRowNumber;
 	
 	public TableDataDiff(WbConnection original, WbConnection compareTo)
 		throws SQLException
@@ -74,22 +99,89 @@ public class TableDataDiff
 		this.reference = original;
 		formatter = new SqlLiteralFormatter(toSync);
 		chunkSize = Settings.getInstance().getSyncChunkSize();
+		converter = new SqlRowDataConverter(compareTo);
 	}
 	
 	public void setRowMonitor(RowActionMonitor rowMonitor)
 	{
 		this.monitor = rowMonitor;
 	}
+
+	public void addWarning(String msg)
+	{
+		this.warnings.append(msg);
+		this.warnings.appendNewLine();
+	}
+
+	public void addError(String msg)
+	{
+		this.errors.append(msg);
+		this.errors.appendNewLine();
+	}
 	
+	/**
+	 * Define how blobs should be handled during export.
+	 * 
+	 * @param type the blob mode to be used. 
+	 *        null means no special treatment (toString() will be called)
+	 */
+	public void setBlobMode(String type)
+	{
+		BlobMode mode = BlobMode.getMode(type);
+		if (mode == null)
+		{
+			String msg = ResourceMgr.getString("ErrExpInvalidBlobType");
+			msg = StringUtil.replace(msg, "%paramvalue%", type);
+			this.addWarning(msg);
+		}
+		else if (converter != null)
+		{
+			converter.setBlobMode(mode);
+		}
+		
+	}
+	
+	/**
+	 * Define a list of column names which should not considered when 
+	 * checking for differences (e.g. a "MODIFIED" column)
+	 * 
+	 * @param columnNames
+	 */
+	public void setColumnsToIgnore(List<String> columnNames)
+	{
+		if (columnNames == null) 
+		{
+			this.columnsToIgnore = null;
+			return;
+		}
+		this.columnsToIgnore = new TreeSet<String>(new CaseInsensitiveComparator());
+		this.columnsToIgnore.addAll(columnNames);
+	}
+
+	public void setReportInterval(int interval)
+	{
+		this.progressInterval = interval;
+	}
+	
+	/**
+	 * Define the literal type of the date literals.
+	 * This is simply delegated to the instance of the 
+	 * {@link workbench.storage.SqlLiteralFormatter} that is used internally.
+	 * 
+	 * @see workbench.storage.SqlLiteralFormatter#setDateLiteralType(java.lang.String) 
+	 * @param type
+	 */
 	public void setSqlDateLiteralType(String type)
 	{
 		formatter.setDateLiteralType(type);
 	}
 	
 	/**
-	 * Set a Writer to write the generated UPDATE statements to. 
+	 * Set the Writers to write the generated UPDATE and INSERT statements.
 	 * 
-	 * @param out
+	 * @param updates the Writer to write UPDATEs to
+	 * @param inserts the Writer to write INSERTs to
+	 * @param lineEnd the line end character(s) to be used when writing the text files
 	 */
 	public void setOutputWriters(Writer updates, Writer inserts, String lineEnd)
 	{
@@ -100,11 +192,12 @@ public class TableDataDiff
 
 
 	/**
-	 * Define the table to be checked. 
+	 * Define the tables to be compared. 
 	 * 
 	 * @param tableToCheck the table with the "reference" data
 	 * @param tableToDelete the table from which obsolete rows should be deleted
-	 * @throws java.sql.SQLException
+	 * @throws java.sql.SQLException if the refTable does not have a primary key 
+	 * or the tableToVerify is not found
 	 */
 	public void setTableName(TableIdentifier refTable, TableIdentifier tableToVerify)
 		throws SQLException
@@ -138,6 +231,18 @@ public class TableDataDiff
 		}
 	}
 
+	public void cancel()
+	{
+		this.cancelExecution = true;
+	}
+	
+	/**
+	 * This starts the actual creation of the necessary update and inserts
+	 * statements. 
+	 * 
+	 * @throws java.sql.SQLException
+	 * @throws java.io.IOException
+	 */
 	public void doSync()
 		throws SQLException, IOException
 	{
@@ -147,8 +252,11 @@ public class TableDataDiff
 	
 		checkStatement = toSync.createStatement();
 		
+		cancelExecution = false;
+		
 		ResultSet rs = null;
 		Statement stmt = null;
+		currentRowNumber = 0;
 		try
 		{
 			// Process all rows from the reference table to be synchronized
@@ -156,23 +264,20 @@ public class TableDataDiff
 			rs = stmt.executeQuery(retrieve);
 			ResultInfo info = new ResultInfo(rs.getMetaData(), this.reference);
 			
-			long rowNumber = 0;
 			if (this.monitor != null)
 			{
 				this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-				this.monitor.setCurrentObject(this.tableToSync.getTableExpression(this.toSync), -1, -1);
+				String msg = ResourceMgr.getFormattedString("MsgDataDiffProcessUpd", this.tableToSync.getTableName());
+				this.monitor.setCurrentObject(msg, -1, -1);
 			}
 			int cols = info.getColumnCount();
 			List<RowData> packetRows = new ArrayList<RowData>(chunkSize);
 			
 			while (rs.next())
 			{
-				rowNumber ++;
+				if (cancelExecution) break;
+				
 				RowData row = new RowData(cols);
-				if (this.monitor != null)
-				{
-					monitor.setCurrentRow(rowNumber, -1);
-				}
 				row.read(rs, info);
 				packetRows.add(row);
 				
@@ -182,8 +287,8 @@ public class TableDataDiff
 					packetRows.clear();
 				}
 			}
-			
-			if (packetRows.size() > 0)
+
+			if (packetRows.size() > 0 && !cancelExecution)
 			{
 				checkRows(packetRows, info);
 			}
@@ -192,7 +297,6 @@ public class TableDataDiff
 			{
 				this.monitor.jobFinished();
 			}
-			
 		}
 		finally
 		{
@@ -214,53 +318,56 @@ public class TableDataDiff
 			ResultInfo ri = new ResultInfo(rs.getMetaData(), toSync);
 			ri.setPKColumns(this.pkColumns);
 			ri.setUpdateTable(this.tableToSync);
+
+			if (currentRowNumber == 0) converter.setResultInfo(ri);
 			
-			StatementFactory factory = new StatementFactory(ri, toSync);
 			while (rs.next())
 			{
 				RowData r = new RowData(ri);
 				r.read(rs, ri);
 				checkRows.add(r);
+				if (cancelExecution) break;
 			}
 			
 			for (RowData toInsert : referenceRows)
 			{
+				if (cancelExecution) break;
+				
 				int i = findRowByPk(checkRows, info, toInsert, ri);
-				RowDataComparer comp;
+				
+				currentRowNumber ++;
+				if (this.monitor != null && (currentRowNumber % progressInterval == 0))
+				{
+					monitor.setCurrentRow(currentRowNumber, -1);
+				}
+				
+				Writer writerToUse = null;
+				RowDataComparer comp = new RowDataComparer(toInsert, i > -1 ? checkRows.get(i) : null);
+				comp.ignoreColumns(columnsToIgnore, ri);
+				
 				if (i > -1)
 				{
-					comp = new RowDataComparer(toInsert, checkRows.get(i));
+					// Row is present, check for modifications
+					if (firstUpdate)
+					{
+						firstUpdate = false;
+						writeGenerationInfo(updateWriter);
+					}
+					writerToUse = updateWriter;
 				}
 				else
 				{
-					comp = new RowDataComparer(toInsert, null);
+					if (firstInsert)
+					{
+						firstInsert = false;
+						writeGenerationInfo(insertWriter);
+					}
+					writerToUse = insertWriter;
 				}
-				DmlStatement dml = comp.getMigrationSql(factory);
-				
-				// dml == null means no difference
-				if (dml != null)
+
+				String migrateSql = comp.getMigrationSql(converter, currentRowNumber);
+				if (migrateSql != null)
 				{
-					Writer writerToUse = null;
-					
-					String migrateSql = dml.getExecutableStatement(formatter).toString();
-					if (migrateSql.startsWith("UPDATE"))
-					{
-						if (firstUpdate)
-						{
-							firstUpdate = false;
-							writeGenerationInfo(updateWriter);
-						}
-						writerToUse = updateWriter;
-					}
-					else
-					{
-						if (firstInsert)
-						{
-							firstInsert = false;
-							writeGenerationInfo(insertWriter);
-						}
-						writerToUse = insertWriter;
-					}
 					writerToUse.write(migrateSql);
 					writerToUse.write(";" + lineEnding + lineEnding);
 				}
@@ -297,6 +404,7 @@ public class TableDataDiff
 		}
 		return -1;
 	}
+	
 	/**
 	 * Creates the Statement to retrieve the corresponding rows of the target
 	 * table based on the data retrieved from the reference table

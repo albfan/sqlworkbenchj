@@ -820,6 +820,12 @@ public class SqlFormatter
 			{
 				isParm = false;
 			}
+
+			// true, false should be written in lowercase for 
+			// WB Commands
+			if (text.equalsIgnoreCase("true")) text = "true";
+			if (text.equalsIgnoreCase("false")) text = "false";
+			
 			this.appendText(text);
 			t = this.lexer.getNextToken(true,inQuotes);
 			first = false;

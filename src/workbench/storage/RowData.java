@@ -281,6 +281,19 @@ public class RowData
 		this.resetStatus();
 	}
 
+	public void resetStatusForColumn(int column)
+	{
+		if (!this.isNew() && this.originalData != null)
+		{
+			this.originalData[column] = NO_CHANGE_MARKER;
+			for (int i=0; i < originalData.length; i++)
+			{
+				if (this.originalData[i] != NO_CHANGE_MARKER) return;
+			}
+			this.resetStatus();
+		}
+	}
+	
 	/**
 	 * Returns true if the indicated column has been modified since the 
 	 * initial retrieve (i.e. since the last time resetStatus() was called
@@ -432,8 +445,23 @@ public class RowData
 	{
 		if (one == null && other == null) return true;
 		if (one == null || other == null) return false;
+		
+		// consider blobs
+		if (one instanceof byte[] && other instanceof byte[])
+		{
+			return compareArrays((byte[])one, (byte[])other);
+		}
 		return one.equals(other);
 	}
 	
-
+	private static boolean compareArrays(byte[] one, byte[] other)
+	{
+		if (one.length != other.length) return false;
+		for (int i=0; i < one.length; i++)
+		{
+			if (one[i] != other[i]) return false;
+		}
+		return true;
+	}
+	
 }

@@ -25,12 +25,10 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.SortedMap;
 import javax.swing.JComponent;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 /**
  * Utility class to handle encoding related stuff
@@ -126,13 +124,12 @@ public class EncodingUtil
 	{
 		if (charsets == null)
 		{
-			Map sets = java.nio.charset.Charset.availableCharsets();
-			Iterator names = sets.keySet().iterator();
+			SortedMap<String,Charset> sets = java.nio.charset.Charset.availableCharsets();
 			charsets = new String[sets.size()];
 			int i=0;
-			while (names.hasNext())
+			for (String name : sets.keySet())
 			{
-				charsets[i] = (String)names.next();
+				charsets[i] = name;
 				i++;
 			}
 		}

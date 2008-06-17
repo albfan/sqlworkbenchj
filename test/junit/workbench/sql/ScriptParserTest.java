@@ -16,9 +16,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Iterator;
 import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -35,6 +38,47 @@ public class ScriptParserTest
 		super(testName);
 	}
 
+	public void testMultiByteEncoding()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("ScriptParserTest");
+		File f = new File(util.getBaseDir(), "insert.sql");
+		ScriptParser parser = null;
+		int commandsInFile = 0;
+		try
+		{
+			int statementCount = 18789;
+			Writer w = EncodingUtil.createWriter(f, "UTF-8", false);
+			int scriptSize = 0;
+			for (int i=0; i < statementCount; i++)
+			{
+				String sql = "insert into address (id, street) \nvalues \n(" + i + ", ' \u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153 Ã¶Ã¤ Ã¶Ã¤ Ã¶Ã¤ Ã¶Ã¤ ÃŸ');\n";
+				w.write(sql);
+				scriptSize += sql.length();
+			}
+			FileUtil.closeQuitely(w);
+			parser = new ScriptParser(500);
+			parser.setFile(f, "UTF-8");
+			assertEquals(scriptSize, parser.getScriptLength());
+			parser.startIterator();
+
+			commandsInFile = 0;
+			while (parser.hasNext())
+			{
+				String sql = "insert into address (id, street) \nvalues \n(" + commandsInFile + ", ' \u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153 Ã¶Ã¤ Ã¶Ã¤ Ã¶Ã¤ Ã¶Ã¤ ÃŸ')";
+				String command = parser.getNextCommand();
+				assertEquals(sql, command.trim());
+				commandsInFile++;
+			}
+			assertEquals(statementCount, commandsInFile);
+		}
+		finally
+		{
+			parser.done();
+			f.delete();
+		}
+	}
+	
 	public void testEmptyStatement()
 	{
 		try
@@ -209,7 +253,7 @@ public class ScriptParserTest
 
 			// Make sure the iterating parser is used, by setting
 			// a very low max file size
-			ScriptParser p = new ScriptParser(0);
+			ScriptParser p = new ScriptParser(10);
 
 			p.setDelimiter(new DelimiterDefinition("/", true));
 			p.setSupportOracleInclude(false);
@@ -511,7 +555,6 @@ public class ScriptParserTest
 			p.done();
 			assertEquals("Wrong number of statements using CRL", counter, count);
 			script.delete();
-
 		}
 		catch (Exception e)
 		{
@@ -520,7 +563,7 @@ public class ScriptParserTest
 		}
 	}
 
-	public void testMutliStatements()
+	public void testMultiStatements()
 	{
 		String sql = "SELECT '(select l.label from template_field_label l where l.template_field_id = f.id and l.language_code = '''|| l.code ||''') as \"'||l.code||' ('||l.name||')\",' \n" +
 									"FROM  (SELECT DISTINCT language_code FROM template_field_label) ll,  \n" +

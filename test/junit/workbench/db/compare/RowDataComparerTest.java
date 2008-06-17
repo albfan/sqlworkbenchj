@@ -13,7 +13,7 @@
 import junit.framework.TestCase;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
-import workbench.storage.DmlStatement;
+import workbench.db.exporter.SqlRowDataConverter;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.SqlLiteralFormatter;
@@ -69,17 +69,16 @@ public class RowDataComparerTest
 
 		RowDataComparer instance = new RowDataComparer(reference, target);
 
-		SqlLiteralFormatter formatter = new SqlLiteralFormatter();
+		SqlRowDataConverter converter = new SqlRowDataConverter(null);
+		converter.setResultInfo(info);
 
-		DmlStatement result = instance.getMigrationSql(factory);
-		String sql = result.getExecutableStatement(formatter).toString();
+		String sql = instance.getMigrationSql(converter, 1);
 		String verb = SqlUtil.getSqlVerb(sql);
 		assertEquals("UPDATE", verb);
 		assertTrue(sql.indexOf("SET FIRSTNAME = 'Zaphod'") > -1);
 		
 		instance = new RowDataComparer(reference, null);
-		result = instance.getMigrationSql(factory);
-		sql = result.getExecutableStatement(formatter).toString();
+		sql = instance.getMigrationSql(converter, 1);
 		verb = SqlUtil.getSqlVerb(sql);
 		assertEquals("INSERT", verb);
 		assertTrue(sql.indexOf("(42, 'Zaphod', 'Beeblebrox')") > -1);
@@ -97,8 +96,7 @@ public class RowDataComparerTest
 		target.resetStatus();
 		
 		instance = new RowDataComparer(reference, target);
-		result = instance.getMigrationSql(factory);
-		assertNull(result);
-		
+		sql = instance.getMigrationSql(converter, 1);
+		assertNull(sql);
 	}
 }

@@ -130,6 +130,7 @@ public class DataExporter
 
 	private int sqlType = SqlRowDataConverter.SQL_INSERT;
 	private boolean useCDATA = false;
+	private String xmlVersion;
 	private CharacterRange escapeRange = null;
 	private String lineEnding = "\n";
 	private String tableName;
@@ -1480,6 +1481,16 @@ public class DataExporter
 		return this.lineEnding;
 	}
 
+	public void setXMLVersion(String version)
+	{
+		xmlVersion = version;
+	}
+	
+	public String getXMLVersion()
+	{
+		return xmlVersion;
+	}
+	
 	public boolean getUseVerboseFormat()
 	{
 		return verboseFormat;

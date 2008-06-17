@@ -424,7 +424,7 @@ public class DwPanel
 		{
 			ds.setUpdateTableToBeUsed(table);
 		}
-		referenceNavigator.reset();
+		if (referenceNavigator != null) referenceNavigator.reset();
 	}
 	
 	/**

@@ -40,6 +40,8 @@ public class SqlGenerationOptionsPanel
 		literalTypes.setModel(model1);
 		ComboBoxModel model2 = new DefaultComboBoxModel(types.toArray());
 		exportLiteralTypes.setModel(model2);
+		ComboBoxModel model3 = new DefaultComboBoxModel(types.toArray());
+		diffLiteralsType.setModel(model3);
 	}
 	
 	public void restoreSettings()
@@ -50,6 +52,7 @@ public class SqlGenerationOptionsPanel
 		else this.tableNameCase.setSelectedIndex(0);		
 		this.literalTypes.setSelectedItem(Settings.getInstance().getDefaultCopyDateLiteralType());
 		this.exportLiteralTypes.setSelectedItem(Settings.getInstance().getDefaultExportDateLiteralType());
+		this.diffLiteralsType.setSelectedItem(Settings.getInstance().getDefaultDiffDateLiteralType());
 		this.includeEmptyComments.setSelected(Settings.getInstance().getIncludeEmptyComments());
 	}
 	
@@ -65,6 +68,7 @@ public class SqlGenerationOptionsPanel
 		set.setGeneratedSqlTableCase((String)tableNameCase.getSelectedItem());
 		set.setDefaultCopyDateLiteralType((String)literalTypes.getSelectedItem());
 		set.setDefaultExportDateLiteralType((String)exportLiteralTypes.getSelectedItem());
+		set.setDefaultDiffDateLiteralType((String)diffLiteralsType.getSelectedItem());
 		set.setIncludeEmptyComments(includeEmptyComments.isSelected());
 		set.setFormatInsertIgnoreIdentity(ignoreIdentity.isSelected());
 	}
@@ -103,6 +107,8 @@ public class SqlGenerationOptionsPanel
     includeEmptyCommentsLabel = new WbCheckBoxLabel();
     includeEmptyComments = new javax.swing.JCheckBox();
     jSeparator4 = new javax.swing.JSeparator();
+    diffLiteralsLabel = new javax.swing.JLabel();
+    diffLiteralsType = new javax.swing.JComboBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -343,6 +349,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 0);
     add(exportLiteralTypes, gridBagConstraints);
 
+    exportLiteralLabel.setLabelFor(exportLiteralTypes);
     exportLiteralLabel.setText(ResourceMgr.getString("LblDefExportLiteralType"));
     exportLiteralLabel.setToolTipText(ResourceMgr.getDescription("LblDefExportLiteralType"));
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -359,7 +366,7 @@ public class SqlGenerationOptionsPanel
     includeEmptyCommentsLabel.setToolTipText(ResourceMgr.getDescription("LblGenInclEmptyComments"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 14;
+    gridBagConstraints.gridy = 15;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
@@ -375,7 +382,7 @@ public class SqlGenerationOptionsPanel
     includeEmptyComments.setIconTextGap(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 14;
+    gridBagConstraints.gridy = 15;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
@@ -383,17 +390,38 @@ public class SqlGenerationOptionsPanel
     add(includeEmptyComments, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 14;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(7, 0, 2, 0);
     add(jSeparator4, gridBagConstraints);
+
+    diffLiteralsLabel.setLabelFor(diffLiteralsType);
+    diffLiteralsLabel.setText(ResourceMgr.getString("LblDefDiffLiteralType"));
+    diffLiteralsLabel.setToolTipText(ResourceMgr.getDescription("LblDefDiffLiteralType"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 13;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
+    add(diffLiteralsLabel, gridBagConstraints);
+
+    diffLiteralsType.setToolTipText(ResourceMgr.getDescription("LblDefExportLiteralType"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 13;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 0);
+    add(diffLiteralsType, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 	
 	
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JLabel colsPerLineLabel;
   private javax.swing.JLabel copyLiteralLabel;
+  private javax.swing.JLabel diffLiteralsLabel;
+  private javax.swing.JComboBox diffLiteralsType;
   private javax.swing.JLabel exportLiteralLabel;
   private javax.swing.JComboBox exportLiteralTypes;
   private javax.swing.JCheckBox formatInserts;

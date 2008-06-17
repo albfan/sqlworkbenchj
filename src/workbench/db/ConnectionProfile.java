@@ -146,7 +146,7 @@ public class ConnectionProfile
 	
 	public void setCopyExtendedPropsToSystem(boolean flag)
 	{
-		this.changed = (flag != this.copyPropsToSystem);
+		if (flag != this.copyPropsToSystem) changed = true;
 		this.copyPropsToSystem = flag;
 	}
 
@@ -157,7 +157,7 @@ public class ConnectionProfile
 
 	public void setReadOnly(boolean flag)
 	{
-		this.changed = (this.readOnly != flag);
+		if (this.readOnly != flag) changed = true;
 		this.readOnly = flag;
 	}
 	
@@ -168,7 +168,7 @@ public class ConnectionProfile
 	
 	public void setTrimCharData(boolean flag) 
 	{ 
-		changed = (flag != trimCharData);
+		if (flag != trimCharData) changed = true;
 		trimCharData = flag; 
 	}
 	
@@ -186,7 +186,7 @@ public class ConnectionProfile
 
 	public void setStoreExplorerSchema(boolean value)
 	{
-		changed = value != rememberExplorerSchema;
+		if (value != rememberExplorerSchema) changed = true;
 		rememberExplorerSchema = value;
 	}
 
@@ -501,23 +501,38 @@ public class ConnectionProfile
 		}
 	}
 
-	public String getUrl() { return this.url; }
-	public void setUrl(String aUrl)
+	public String getUrl()
 	{
-		if (aUrl != null) aUrl = aUrl.trim();
-		this.url = aUrl;
-		this.changed = true;
+		return this.url;
 	}
 
-	public String getDriverclass() { return this.driverclass; }
+	public void setUrl(String newUrl)
+	{
+		if (newUrl != null) newUrl = newUrl.trim();
+		this.url = newUrl;
+		if (!StringUtil.equalString(newUrl, url)) changed = true;
+	}
+
+	public String getDriverclass()
+	{
+		return this.driverclass;
+	}
+
 	public void setDriverclass(String aDriverclass)
 	{
-		if (aDriverclass != null) aDriverclass = aDriverclass.trim();
+		if (aDriverclass != null)
+		{
+			aDriverclass = aDriverclass.trim();
+		}
 		this.driverclass = aDriverclass;
 		this.changed = true;
 	}
 
-	public String getUsername() { return this.username; }
+	public String getUsername() 
+	{ 
+		return this.username; 
+	}
+	
 	public void setUsername(java.lang.String aUsername)
 	{
 		if (aUsername != null) aUsername = aUsername.trim();
@@ -525,7 +540,11 @@ public class ConnectionProfile
 		this.changed = true;
 	}
 
-	public boolean getAutocommit() { return this.autocommit; }
+	public boolean getAutocommit() 
+	{ 
+		return this.autocommit; 
+	}
+	
 	public void setAutocommit(boolean aFlag)
 	{
 		if (aFlag != this.autocommit)
@@ -542,7 +561,7 @@ public class ConnectionProfile
 
 	public void setName(String aName)
 	{
-		this.changed = !StringUtil.equalString(name, aName);
+		if (StringUtil.equalString(name, aName)) changed = true;
 		this.name = aName;
 	}
 
@@ -624,7 +643,7 @@ public class ConnectionProfile
 
 	public void setIgnoreDropErrors(boolean aFlag)
 	{
-		this.changed = (aFlag != this.ignoreDropErrors);
+		if (aFlag != this.ignoreDropErrors) changed = true;
 		this.ignoreDropErrors = aFlag;
 	}
 

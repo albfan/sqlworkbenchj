@@ -22,7 +22,7 @@ import workbench.log.LogMgr;
 public class DateColumnRenderer
 	extends ToolTipRenderer
 {
-	private SimpleDateFormat dateFormatter;
+	private final SimpleDateFormat dateFormatter;
 
 	public static final String DEFAULT_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	

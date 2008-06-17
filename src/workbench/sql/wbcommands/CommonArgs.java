@@ -69,6 +69,14 @@ public class CommonArgs
 		cmdLine.addArgument(ARG_TRANS_CONTROL, ArgumentType.BoolArgument);
 	}
 	
+	public static List<String> getListArgument(ArgumentParser cmdLine, String arg)
+	{
+		String value = cmdLine.getValue(arg);
+		if (StringUtil.isEmptyString(value)) return null;
+		List<String> items = StringUtil.stringToList(value, ",");
+		return items;
+	}
+	
 	public static void addTableStatements(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_PRE_TABLE_STMT);
