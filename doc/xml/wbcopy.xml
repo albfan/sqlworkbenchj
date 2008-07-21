@@ -112,7 +112,7 @@
 					</row>
 
 					<row>
-						<entry>-syncDelete</entry>
+						<entry id="copy-sync-delete">-syncDelete</entry>
 						<entry>
 							<para>
 								If this option is enabled <literal>-syncDelete=true</literal>, &wb-productname; will
@@ -131,6 +131,10 @@
 								all inserts and updates have been processed. It is recommended to use the 
 								<literal>-checkDependencies</literal> parameter to make sure the deletes are processed
 								in the correct order (which is most probably already needed to process inserts correctly).
+							</para>
+							<para>
+								To only generate the SQL statements that would synchronize two databases,
+								you can use the command <link linkend="command-data-diff">WbDataDiff</link>
 							</para>
 						</entry>
 					</row>
@@ -187,12 +191,18 @@
 								will be halted on the first error. The default value is <literal>false</literal>.
 							</para>
 							<para>
-								Note that for some DBMS <literal>continueOnError</literal> will not work. PostgreSQL
-								will not execute any further commands if the current transactions had an error. 
+								With PostgreSQL <literal>continueOnError</literal> will only work, if the use of  
+								savepoints is enabled. This can be done using by setting the property 
+								<literal>workbench.db.postgresql.import.usesavepoint=true</literal> in 
+								in the configuration file <literal>workbench.settings</literal>.
+								If this is enabled, then each INSERT (or UPDATE) statement will be 
+								"wrapped" between savepoints so that a statement error can be recovered.
 							</para>
 						</entry>
 					</row>
-
+					
+					&progress-parameter;
+					
 				</tbody>
 			</tgroup>
 		</informaltable>

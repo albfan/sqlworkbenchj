@@ -133,6 +133,7 @@ public class WbExport
 		msg = msg.replace("%verbose_default%", Boolean.toString(getVerboseXmlDefault()));
 		msg = msg.replace("%date_literal_default%", Settings.getInstance().getDefaultExportDateLiteralType());
 		msg = msg.replace("%default_encoding%", Settings.getInstance().getDefaultDataEncoding());
+		msg = msg.replace("%xmlversion%", Settings.getInstance().getDefaultXmlVersion());
 		return msg;
 	}
 

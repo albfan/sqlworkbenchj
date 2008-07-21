@@ -13,7 +13,6 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 import workbench.AppArguments;
-import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
@@ -35,7 +34,8 @@ public class WbConnect
 	extends SqlCommand
 {
 	private static int connectionId;
-	
+	public static final String VERB = "WBCONNECT";
+
 	public WbConnect()
 	{
 		cmdLine = new ArgumentParser();
@@ -53,21 +53,21 @@ public class WbConnect
 
 	public String getVerb()
 	{
-		return "WBCONNECT";
+		return VERB;
 	}
 
+	@Override
+	protected boolean isConnectionRequired()
+	{
+		return false;
+	}
+	
 	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setFailure();
-		
-		if (!WbManager.getInstance().isBatchMode())
-		{
-			result.addMessage(ResourceMgr.getString("ErrConnNoBatch"));
-			return result;
-		}
 		
 		String args = getCommandLine(aSql);
 		cmdLine.parse(args);
@@ -93,60 +93,24 @@ public class WbConnect
 		WbConnection newConn = null;
 		try
 		{
-			String id = null;
-			
-			if (runner.getConnectionClient() != null)
-			{
-				id = runner.getConnectionClient().getConnectionId(profile);
-				runner.getConnectionClient().connectBegin(profile, null);
-			}
-			else
-			{
-				connectionId ++;
-				id = "batch-connect-" + connectionId;
-			}
-			
-			newConn = ConnectionMgr.getInstance().getConnection(profile, id);
-			if (newConn != null && runner.getConnectionClient() == null)
-			{
-				// Disconnect the old connection "manually" if no connectionClient 
-				// is available, otherwise Connectable.connectBegin() takes care of that
-				WbConnection old = this.runner.getConnection();
-				if (old != null) 
-				{
-					LogMgr.logInfo("WbConnect.execute()", "Closing old connection: " + old.getDisplayString());
-					old.close();
-				}
-			}
-			LogMgr.logInfo("WbConnect.execute()", "Connected to: " + newConn.getDisplayString());
-			this.runner.setConnection(newConn);
+			connectionId ++;
+			String id = "batch-connect-" + connectionId;
 
-			if (runner.getConnectionClient() != null)
-			{
-				runner.getConnectionClient().connected(newConn);
-			}
-			
-			this.setConnection(newConn);
+			newConn = ConnectionMgr.getInstance().getConnection(profile, id);
+			LogMgr.logInfo("WbConnect.execute()", "Connected to: " + newConn.getDisplayString());
+
+			// The runner will switch back to the original connection automatically once
+			// the current script has ended. 
+			this.runner.changeConnection(newConn);
 			result.addMessage(ResourceMgr.getFormattedString("MsgBatchConnectOk", newConn.getDisplayString()));
 			result.setSuccess();
 		}
 		catch (Exception e)
 		{
 			String err = ExceptionUtil.getDisplay(e);
-			if (runner.getConnectionClient() != null)
-			{
-				runner.getConnectionClient().connectFailed(err);
-			}
 			result.addMessage(ResourceMgr.getFormattedString("MsgBatchConnectError"));
 			result.addMessage(err);
 			result.setFailure();
-		}
-		finally
-		{
-			if (runner.getConnectionClient() != null)
-			{
-				runner.getConnectionClient().connectEnded();
-			}
 		}
 			 
 		return result;

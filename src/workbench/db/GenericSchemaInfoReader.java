@@ -48,6 +48,12 @@ public class GenericSchemaInfoReader
 		Statement stmt = null;
 		ResultSet rs = null;
 		String currentSchema = null;
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("GenericSchemaInfoReader.getCurrentSchema()", "Using query=\n" + schemaQuery);
+		}
+
 		try
 		{
 			stmt = conn.createStatementForQuery();

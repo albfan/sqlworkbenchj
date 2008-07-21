@@ -285,24 +285,23 @@ WHERE p.person_id = a.person_id;</programlisting>
 				</para>
 			</note>
 			<para>The following drivers have been found to support (at least partially) this feature:
-				<simplelist>
-					<member><ulink url="http://www.postgresql.org">PostgreSQL</ulink>, driver version 8.1-build 405</member>
-					<!-- <member><ulink url="http://www.h2database.com">H2 Database Engine</ulink>, Version 1.0</member> -->
-					<member><ulink url="http://db.apache.org/derby/">Apache Derby</ulink>, Version 10.2</member>
-					<member><ulink url="http://www.firebirdsql.org/">Firebird SQL</ulink>, Jaybird 2.0 driver</member>
-					<member><ulink url="http://hsqldb.sourceforge.net">HSQLDB</ulink>, version 1.8.0</member>
-					<!-- <member><ulink url="http://jtds.sourceforge.net">jTDS driver for MS SQL Server</ulink>, driver version 1.2</member> -->
-					<!-- <member><ulink url="http://www.mysql.com">MySQL</ulink>, driver version 5.0.13</member> -->
-				</simplelist>
+				<itemizedlist>
+					<listitem><ulink url="http://www.postgresql.org">PostgreSQL</ulink>, driver version 8.1-build 405</listitem>
+					<listitem><ulink url="http://www.h2database.com">H2 Database Engine</ulink>, Version 1.0.73</listitem>
+					<listitem><ulink url="http://db.apache.org/derby/">Apache Derby</ulink>, Version 10.2</listitem>
+					<listitem><ulink url="http://www.firebirdsql.org/">Firebird SQL</ulink>, Jaybird 2.0 driver</listitem>
+					<listitem><ulink url="http://hsqldb.sourceforge.net">HSQLDB</ulink>, version 1.8.0</listitem>
+					<!-- <listitem><ulink url="http://jtds.sourceforge.net">jTDS driver for MS SQL Server</ulink>, driver version 1.2</listitem> -->
+					<!-- <listitem><ulink url="http://www.mysql.com">MySQL</ulink>, driver version 5.0.13</listitem> -->
+				</itemizedlist>
 			</para>
 			<para>
 				Drivers known to <emphasis role="bold">not</emphasis> support this feature:
-				<simplelist>
-					<member>Oracle 10g driver (ojdbc14.jar)</member>
-					<member>Microsoft SQL Server 2000 driver (mssqlserver.jar;msbase.jar;msutil.jar)</member>
-					<member>Microsoft SQL Server 2005 driver (sqljdbc.jar)</member>
-				</simplelist>
-				
+				<itemizedlist>
+					<listitem>Oracle 10g driver (ojdbc14.jar)</listitem>
+					<listitem>Microsoft SQL Server 2000 driver (mssqlserver.jar;msbase.jar;msutil.jar)</listitem>
+					<listitem>Microsoft SQL Server 2005 driver (sqljdbc.jar)</listitem>
+				</itemizedlist>
 			</para>
 		</section>
 

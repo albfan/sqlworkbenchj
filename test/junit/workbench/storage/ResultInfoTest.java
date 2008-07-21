@@ -11,7 +11,7 @@
  */
 package workbench.storage;
 
-import junit.framework.*;
+import junit.framework.TestCase;
 import workbench.db.ColumnIdentifier;
 
 /**

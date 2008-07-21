@@ -153,11 +153,8 @@ public class CommandMapper
 		sql = new WbCall();
 		cmdDispatch.put(sql.getVerb(), sql);
 		
-		if (WbManager.getInstance().isBatchMode())
-		{
-			sql = new WbConnect();
-			cmdDispatch.put(sql.getVerb(), sql);
-		}
+		sql = new WbConnect();
+		cmdDispatch.put(sql.getVerb(), sql);
 		
 		cmdDispatch.put(WbInclude.INCLUDE_LONG.getVerb(), WbInclude.INCLUDE_LONG);
 		cmdDispatch.put(WbInclude.INCLUDE_SHORT.getVerb(), WbInclude.INCLUDE_SHORT);

@@ -21,6 +21,7 @@ import java.util.List;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.diff.SchemaDiff;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -30,6 +31,7 @@ import workbench.util.ArgumentType;
 import workbench.util.StrWriter;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+import workbench.util.XsltTransformer;
 
 /**
  * @author  support@sql-workbench.net
@@ -65,6 +67,8 @@ public class WbSchemaDiff
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_DIFF_JDBC_TYPES, ArgumentType.BoolArgument);
+		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
+		cmdLine.addArgument(WbXslt.ARG_OUTPUT);		
 	}
 
 	public String getVerb() { return VERB; }
@@ -222,7 +226,7 @@ public class WbSchemaDiff
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("WbSchemaDiff.execute()", "Error writing output file", e);
 		}
 		finally
 		{
@@ -243,6 +247,25 @@ public class WbSchemaDiff
 			{
 				String msg = ResourceMgr.getString("MsgDiffFileWritten") + " " + output.getFullPath();
 				result.addMessage(msg);
+				
+				String xslt = cmdLine.getValue(WbXslt.ARG_STYLESHEET);
+				String xsltOutput = cmdLine.getValue(WbXslt.ARG_OUTPUT);
+				
+				if (!StringUtil.isEmptyString(xslt) && !StringUtil.isEmptyString(xsltOutput))
+				{
+					try
+					{
+						XsltTransformer transfomer = new XsltTransformer();
+						transfomer.transform(output.getFullPath(), xsltOutput, xslt);
+						result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", xsltOutput));
+						result.setSuccess();
+					}
+					catch (Exception e)
+					{
+						LogMgr.logError("WbSchemaReport.execute()", "Error when transforming '" + output.getFullPath() + "' to '" + xsltOutput + "' using " + xslt, e);
+						result.addMessage(e.getMessage());
+					}
+				}
 			}
 		}
 		return result;

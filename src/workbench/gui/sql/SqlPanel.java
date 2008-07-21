@@ -1337,7 +1337,6 @@ public class SqlPanel
 		if (this.stmtRunner != null)
 		{
 			this.stmtRunner.setConnection(aConnection);
-			this.stmtRunner.setConnectionClient(connectionClient);
 			this.stmtRunner.setResultLogger(this);
 		}
 

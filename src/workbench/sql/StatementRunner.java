@@ -19,7 +19,6 @@ import java.sql.Savepoint;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
-import workbench.interfaces.Connectable;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
 import workbench.log.LogMgr;
@@ -38,8 +37,11 @@ import workbench.interfaces.ExecutionController;
 public class StatementRunner
 	implements PropertyChangeListener
 {
-	private WbConnection dbConnection;
-	private Connectable connectionClient;
+	// used to restore the "real" connection if WbConnect changes the "current"
+	// connection during script execution
+	private WbConnection mainConnection;
+
+	private WbConnection currentConnection;
 	private StatementRunnerResult result;
 
 	private SqlCommand currentCommand;
@@ -113,16 +115,6 @@ public class StatementRunner
 		cmdMapper.addCommand(command);
 	}
 	
-	public Connectable getConnectionClient()
-	{
-		return this.connectionClient;
-	}
-	
-	public void setConnectionClient(Connectable client)
-	{
-		this.connectionClient = client;
-	}
-
 	/**
 	 * Controls the type of error reporting. 
 	 * If this is set to true, no additional messages will be reported, only
@@ -142,25 +134,57 @@ public class StatementRunner
 	
 	public WbConnection getConnection()
 	{
-		return this.dbConnection;
+		return this.currentConnection;
+	}
+
+	public void restoreMainConnection()
+	{
+		if (mainConnection != null)
+		{
+			this.currentConnection.close();
+			this.setConnection(this.mainConnection);
+			this.mainConnection = null;
+		}
 	}
 	
+	/**
+	 * Temporarily change the connection, but keep the old connection open.
+	 * If changeConnection() has already been called once, the current connection
+	 * is closed
+	 * @param newConn
+	 */
+	public void changeConnection(WbConnection newConn)
+	{
+		if (newConn == null) return;
+		if (newConn == currentConnection) return;
+		
+		if (mainConnection == null)
+		{
+			this.mainConnection = currentConnection;
+		}
+		else
+		{
+			this.currentConnection.close();
+		}
+		this.setConnection(newConn);
+	}
+
 	public void setConnection(WbConnection aConn)
 	{
 		this.releaseSavepoint();
 		this.cmdMapper.setConnection(aConn);
-		this.dbConnection = aConn;
+		this.currentConnection = aConn;
 		
 		if (aConn == null) return;
-		this.ignoreDropErrors = dbConnection.getProfile().getIgnoreDropErrors();
-		this.removeComments = dbConnection.getProfile().getRemoveComments();
-		this.confirmUpdates = dbConnection.getProfile().getConfirmUpdates();
+		this.ignoreDropErrors = currentConnection.getProfile().getIgnoreDropErrors();
+		this.removeComments = currentConnection.getProfile().getRemoveComments();
+		this.confirmUpdates = currentConnection.getProfile().getConfirmUpdates();
 		
-		DbMetadata meta = this.dbConnection.getMetadata();
+		DbMetadata meta = this.currentConnection.getMetadata();
 		if (meta == null) return;
 		
 		this.removeNewLines = Settings.getInstance().getBoolProperty("workbench.db." + meta.getDbId() + ".removenewlines", false);
-		setUseSavepoint(dbConnection.getDbSettings().useSavePointForDML());
+		setUseSavepoint(currentConnection.getDbSettings().useSavePointForDML());
 	}
 
 	public StatementRunnerResult getResult()
@@ -220,7 +244,7 @@ public class StatementRunner
 			return;
 		}
 
-		if (this.dbConnection == null && this.currentCommand.isConnectionRequired())
+		if (this.currentConnection == null && this.currentCommand.isConnectionRequired())
 		{
 			throw new SQLException("Cannot execute command '" + this.currentCommand.getVerb() + " without a connection!");
 		}
@@ -231,7 +255,7 @@ public class StatementRunner
 		this.currentCommand.setResultLogger(this.resultLogger);
 		this.currentCommand.setMaxRows(maxRows);
 		this.currentCommand.setQueryTimeout(queryTimeout);
-		this.currentCommand.setConnection(this.dbConnection);
+		this.currentCommand.setConnection(this.currentConnection);
 		this.currentCommand.setParameterPrompter(this.prompter);
 		this.currentCommand.setReturnOnlyErrorMessages(this.returnOnlyErrorMessages);
 
@@ -241,9 +265,9 @@ public class StatementRunner
 			realSql = VariablePool.getInstance().replaceAllParameters(aSql);
 		}
 
-		if (!currentCommand.isModificationAllowed(dbConnection, realSql))
+		if (!currentCommand.isModificationAllowed(currentConnection, realSql))
 		{
-			ConnectionProfile target = currentCommand.getModificationTarget(dbConnection, aSql);
+			ConnectionProfile target = currentCommand.getModificationTarget(currentConnection, aSql);
 			String profileName = (target == null ? "" : target.getName());
 			this.result = new StatementRunnerResult();
 			String verb = SqlUtil.getSqlVerb(aSql);
@@ -255,7 +279,7 @@ public class StatementRunner
 			return;
 		}
 		
-		if (controller != null && currentCommand.needConfirmation(dbConnection, realSql))
+		if (controller != null && currentCommand.needConfirmation(currentConnection, realSql))
 		{
 			boolean doExecute = this.controller.confirmExecution(realSql);
 			if (!doExecute)
@@ -349,7 +373,8 @@ public class StatementRunner
 		this.releaseSavepoint();
 		this.statementDone();
 		this.currentConsumer = null;
-		this.dbConnection.clearWarnings();
+		this.restoreMainConnection();
+		this.currentConnection.clearWarnings();
 	}
 
 	public void setUseSavepoint(boolean flag)
@@ -363,7 +388,7 @@ public class StatementRunner
 		if (this.savepoint != null) return;
 		try
 		{
-			this.savepoint = this.dbConnection.setSavepoint();
+			this.savepoint = this.currentConnection.setSavepoint();
 		}
 		catch (SQLException e)
 		{
@@ -380,10 +405,10 @@ public class StatementRunner
 	
 	public void releaseSavepoint()
 	{
-		if (this.savepoint == null || this.dbConnection == null) return;
+		if (this.savepoint == null || this.currentConnection == null) return;
 		try
 		{
-			this.dbConnection.releaseSavepoint(savepoint);
+			this.currentConnection.releaseSavepoint(savepoint);
 		}
 		finally
 		{
@@ -396,7 +421,7 @@ public class StatementRunner
 		if (this.savepoint == null) return;
 		try
 		{
-			this.dbConnection.rollback(savepoint);
+			this.currentConnection.rollback(savepoint);
 		}
 		finally
 		{

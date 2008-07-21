@@ -11,35 +11,37 @@
 		<para>The configuration of a specific driver requires at least two properties:</para>
 
 		<itemizedlist>
-			<listitem><para>the driver&apos;s class name</para></listitem>
-			<listitem><para>the library where to find the classes</para></listitem>
+			<listitem>the driver&apos;s class name</listitem>
+			<listitem>the library ("JAR file") where to find the driver class</listitem>
 		</itemizedlist>
 
 		<para>
 			The name of the library has to contain the full path to the driver&apos;s jar file, so that
 			&wb-productname; can find it. If a driver requires more than one library,
 			select all necessary libraries in the file open dialog, or enter all the
-			filenames separated by a semicolon. This is also true for drivers that require
-			a license file that is contained in a jar file. In this case you have to
-			include the license jar in the list of files. Basically this list defines
+			filenames separated by a semicolon (or a colon on Unix style operating systems). 
+			This is also true for drivers that require a license file that is contained in a jar file. 
+			In this case you have to include the license jar in the list of files. Basically this list defines
 			the classpath for the classloader that is used to load and instantiate the driver.
+		</para>
+		<para>
 			If the driver accesses files through its classpath definition that are not
 			contained in a jar library, you have to include that directory as part
-			of the library definition (e.g: "c:\etc\TheDriver\jdbcDriver.jar;c:\etc\TheDriver").
+			of the library definition (e.g: <literal>"c:\etc\TheDriver\jdbcDriver.jar;c:\etc\TheDriver"</literal>).
 			The file selection dialog will not let you select a directory, so you have
 			to add it manually to the library definition.
 		</para>
 
-		<para>&wb-productname; is <emphasis role="bold">not</emphasis> using
+		<note><para>&wb-productname; is <emphasis role="bold">not</emphasis> using
 			the system CLASSPATH definition (i.e. environment variable) to load the
 			driver classes. Changing the CLASSPATH environment variable to include
 			your driver's library will not work.
-		</para>
-
-		<note><para>
-			When using the JDBC-ODBC bridge you do not need to specify a library as
-			the necessary drivers are already part of the Java runtime.
 		</para></note>
+
+		<para>
+			You do not need to specify a library for the JDBC-ODBC bridge, as
+			the necessary drivers are already part of the Java runtime.
+		</para>
 
 		<para>You can assign a sample URL to each driver, which will be put into
 			the URL property of the profile, when the driver class is selected.

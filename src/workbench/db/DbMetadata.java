@@ -465,8 +465,22 @@ public class DbMetadata
 		if (this.dbId == null)
 		{
 			this.dbId = this.productName.replaceAll("[ \\(\\)\\[\\]\\/$,.'=\"]", "_").toLowerCase();
-			// Use the same dbid for DB2/LINUX, DB2/NT, ...
-			if (dbId.startsWith("db2") && productName.indexOf("/") > -1) dbId = "db2";
+			
+			if (productName.startsWith("DB2"))
+			{
+				if (productName.equals("DB2") || productName.indexOf("AS/400") > -1)
+				{
+					// DB/2 for Host-Systems
+					// apparently DB2 for z/OS identifies itself as "DB2" whereas
+					// DB2 for AS/400 identifies itself as "DB2 UDB for AS/400"
+					dbId = "db2h";
+				}
+				else
+				{
+					// Use the same dbid for DB2/LINUX, DB2/NT, DB2/NT64
+					dbId = "db2";
+				}
+			}
 			LogMgr.logInfo("DbMetadata", "Using DBID=" + this.dbId);
 		}
 		return this.dbId;
@@ -667,6 +681,7 @@ public class DbMetadata
 		{
 			TableIdentifier tbl = table.createCopy();
 			tbl.adjustCase(this.dbConnection);
+			tbl.checkIsQuoted(this);
 			DataStore ds = getTables(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName(), null);
 			if (ds.getRowCount() > 0)
 			{
@@ -949,11 +964,34 @@ public class DbMetadata
 		return this.keywordHandler.getSqlKeywords();
 	}
 
+	/**
+	 * Checks if the given name is already quoted according to the SQL rules
+	 * for the current DBMS. This takes non-standard DBMS into account.
+	 * 
+	 * @param name
+	 * @return true if the values is already quoted.
+	 */
+	public boolean isQuoted(String name)
+	{
+		if (StringUtil.isEmptyString(name)) return false;
+		if (name.startsWith(quoteCharacter)) return true;
+
+		// The MS SQL Server driver claims that a " is the quote
+		// character but still accepts the dreaded brackets as quoted characters...
+		if (this.isSqlServer)
+		{
+			if (name.startsWith("[")) return true;
+		}
+		return false;
+	}
+
+
 	public String quoteObjectname(String aName)
 	{
 		return quoteObjectname(aName, false);
 	}
-	
+
+
 	/**
 	 *	Encloses the given object name in double quotes if necessary.
 	 *	Quoting of names is necessary if the name is a reserved word in the
@@ -973,7 +1011,7 @@ public class DbMetadata
 		if (aName.length() == 0) return aName;
 		
 		// already quoted?
-		if (aName.startsWith(this.quoteCharacter)) return aName;
+		if (isQuoted(aName)) return aName;
 
 		if (this.dbSettings.neverQuoteObjects()) return StringUtil.trimQuotes(aName);
 
@@ -1875,6 +1913,7 @@ public class DbMetadata
 		if (type == null) type = tableTypeName;
 		TableIdentifier tbl = id.createCopy();
 		tbl.adjustCase(dbConnection);
+		tbl.checkIsQuoted(this);
 		return this.getTableDefinition(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName(), type);
 	}
 

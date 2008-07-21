@@ -104,9 +104,30 @@ public class ConnectionProfileTest
 		
 		profile.setUrl("jdbc:postgres:local");
 		assertTrue(profile.isChanged());
-		
+
 		profile.setUrl("jdbc:postgres:local");
 		assertTrue(profile.isChanged());
+
+
+		profile.reset();
+		// Changing to a new URL has to be reflected
+		profile.setUrl("jdbc:postgres:local;someProp=myValue");
+		assertTrue(profile.isChanged());
+
+		profile.setInputPassword("welcome");
+		profile.setStorePassword(true);
+		profile.reset();
+
+		// check if changing the password sets the changed flag
+		profile.setInputPassword("secret");
+		assertTrue(profile.isChanged());
+
+		profile.setStorePassword(false);
+		profile.reset();
+		profile.setInputPassword("welcome");
+		// password are not saved, changing the password should not mark the profile
+		// as changed
+		assertFalse(profile.isChanged());
 
 		profile.setEmptyStringIsNull(false);
 		profile.reset();

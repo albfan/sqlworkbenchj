@@ -234,8 +234,8 @@ END;</programlisting>
 
 		<para>
 			When executing this script, Oracle would return an error because &wb-productname; will
-			send everything up to the keyword <literal>INTEGER</literal> to the database. Obviously this
-			fragment is not correct.
+			send everything up to the keyword <literal>INTEGER</literal> to the database. Obviously that
+			fragment would not be correct.
 		</para>
 
 		<para>
@@ -281,7 +281,7 @@ END;
 			does not end with the alternate delimiter).
 		</para>
 		<para><note>
-			This means that you cannot mix the standard semicolon and the alternate delimiter inside
+			You cannot mix the standard semicolon and the alternate delimiter inside
 			one script.
 		</note></para>
 		
@@ -348,8 +348,8 @@ END;
 			</para>
 			
 			<programlisting>UPDATE theTable 
-        SET blob_col = {$blobfile=c:/data/image.bmp} 
-      WHERE id=24;</programlisting>
+  SET blob_col = {$blobfile=c:/data/image.bmp} 
+WHERE id=24;</programlisting>
 			
 			<para>
 				&wb-productname; will rewrite the UPDATE statement and send the contents
@@ -383,8 +383,8 @@ VALUES
 				a parameter to define the encoding of the source file.
 			</para>
 			<programlisting>UPDATE theTable 
-        SET clob_col = {$clobfile=c:/data/manual.html encoding=utf8}
-      WHERE id=42;</programlisting>
+  SET clob_col = {$clobfile=c:/data/manual.html encoding=utf8}
+WHERE id=42;</programlisting>
 			<para>
 				If you ommit the encoding parameter, &wb-productname; will leave the data conversion 
 				to the JDBC driver (technically, it will use the <literal>PreapredStatement.setAsciiStream()</literal> method
@@ -478,7 +478,7 @@ VALUES
 			<link linkend="command-export">exports</link> it is recommended to turn
 			off the progress display in the statusbar that shows the current row
 			that is imported/exported because this will slow down the process as 
-			well. In both cases you can use <literal>-showprogress</literal>
+			well. In both cases you can use <literal>-showProgress</literal>
 			to turn off the display (or set it to a high number such as 1000) in 
 			order to reduce the overhead caused by updating the screen.
 		</para>
@@ -804,7 +804,7 @@ Done.</programlisting>
 			<para>
 				If your DBMS supports something similar, please let me know. I will try 
 				to implement it - provided I have free access to the DBMS. Please send your
-				request to <ulink url="mailto:support@sql-workbench.net">support@sql-workbench.net</ulink>
+				request to <email>support@sql-workbench.net</email>.
 			</para>
 		</section>
 		
@@ -1089,8 +1089,8 @@ WHERE base_id = 1;</programlisting>
 				Whether the quick filter is available depends on the selected rows 
 				and columns. It will be enabled when:
 				<itemizedlist>
-					<listitem><para>You have selected one or more columns in a single row</para></listitem>
-					<listitem><para>You have selected one column in multiple rows</para></listitem>
+					<listitem>You have selected one or more columns in a single row</listitem>
+					<listitem>You have selected one column in multiple rows</listitem>
 				</itemizedlist>
 			</para>
 			

@@ -329,6 +329,7 @@ public class TableDataPanel
 			}
 		}
 	}
+
 	public long showRowCount()
 	{
 		if (this.dbConnection == null) return -1;
@@ -353,7 +354,9 @@ public class TableDataPanel
 			setSavepoint();
 			retrieveStart();
 			rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountCancel"));
-			
+
+			LogMgr.logDebug("TableDataPanel.showRowCount()", "Using query=\n" + sql);
+
 			rowCountRetrieveStmt = this.dbConnection.createStatementForQuery();
 			rs = rowCountRetrieveStmt.executeQuery(sql);
 			if (rs.next())
@@ -583,7 +586,9 @@ public class TableDataPanel
 			dataDisplay.setStatusMessage(ResourceMgr.getString("LblLoadingProgress"));
 			
 			setSavepoint();
-			
+
+			LogMgr.logDebug("TableDataPanel.doRetrieve()", "Using query=\n" + sql);
+
 			error = !dataDisplay.runQuery(sql, respectMaxRows);
 			
 			// By directly setting the update table, we avoid 

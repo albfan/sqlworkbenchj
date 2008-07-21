@@ -380,6 +380,10 @@ public class ConnectionProfile
 			return "";
 	}
 
+	/**
+	 * Set the password from a plain readable text
+	 * @param aPassword
+	 */
 	public void setInputPassword(String aPassword)
 	{
 		this.setPassword(aPassword);
@@ -509,8 +513,8 @@ public class ConnectionProfile
 	public void setUrl(String newUrl)
 	{
 		if (newUrl != null) newUrl = newUrl.trim();
-		this.url = newUrl;
 		if (!StringUtil.equalString(newUrl, url)) changed = true;
+		this.url = newUrl;
 	}
 
 	public String getDriverclass()
@@ -518,14 +522,14 @@ public class ConnectionProfile
 		return this.driverclass;
 	}
 
-	public void setDriverclass(String aDriverclass)
+	public void setDriverclass(String drvClass)
 	{
-		if (aDriverclass != null)
+		if (!StringUtil.equalString(drvClass, driverclass)) changed = true;
+		if (drvClass != null)
 		{
-			aDriverclass = aDriverclass.trim();
+			drvClass = drvClass.trim();
 		}
-		this.driverclass = aDriverclass;
-		this.changed = true;
+		this.driverclass = drvClass;
 	}
 
 	public String getUsername() 
@@ -533,11 +537,11 @@ public class ConnectionProfile
 		return this.username; 
 	}
 	
-	public void setUsername(java.lang.String aUsername)
+	public void setUsername(java.lang.String newName)
 	{
-		if (aUsername != null) aUsername = aUsername.trim();
-		this.username = aUsername;
-		this.changed = true;
+		if (newName != null) newName = newName.trim();
+		if (!StringUtil.equalString(newName, username)) changed = true;
+		this.username = newName;
 	}
 
 	public boolean getAutocommit() 

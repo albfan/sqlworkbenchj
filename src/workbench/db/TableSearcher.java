@@ -159,9 +159,8 @@ public class TableSearcher
 			this.query.setMaxRows(this.maxRows);
 
 			rs = this.query.executeQuery(sql);
-			result = new DataStore(rs,true);
+			result = new DataStore(rs, this.connection, true);
 			result.setGeneratingSql(sql);
-			result.setOriginalConnection(connection);
 			result.setUpdateTableToBeUsed(table);
 			
 			if (this.display != null) this.display.tableSearched(table, result);

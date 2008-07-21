@@ -12,7 +12,7 @@
 package workbench.storage;
 
 import java.sql.Types;
-import junit.framework.*;
+import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.TableIdentifier;
 import workbench.resource.Settings;
@@ -21,7 +21,8 @@ import workbench.resource.Settings;
  *
  * @author support@sql-workbench.net
  */
-public class StatementFactoryTest extends TestCase
+public class StatementFactoryTest 
+	extends TestCase
 {
 	public StatementFactoryTest(String testName)
 	{

@@ -1,0 +1,65 @@
+<row>
+	<entry>-url</entry>
+	<entry>The JDBC connection URL</entry>
+</row>
+
+<row>
+	<entry>-username</entry>
+	<entry>Specify the username for the DBMS</entry>
+</row>
+
+<row>
+	<entry>-password</entry>
+	<entry>Specify the password for the user</entry>
+</row>
+
+<row>
+	<entry>-driver</entry>
+	<entry>Specify the full class name of the JDBC driver</entry>
+</row>
+
+<row>
+	<entry>-driverJar</entry>
+	<entry>Specify the full pathname to the .jar file containing the JDBC driver</entry>
+</row>
+
+<row>
+	<entry>-autocommit</entry>
+	<entry>Set the autocommit property for this connection. You can also
+	control the autocommit mode from within your script by using the
+	<link linkend="command-set-autocommit"><literal>SET AUTOCOMMIT</literal></link> command.
+	</entry>
+</row>
+
+<row>
+	<entry>-rollbackOnDisconnect</entry>
+	<entry>If this parameter is set to true, a <literal>ROLLBACK</literal> will
+	be sent to the DBMS before the connection is closed. This setting is
+	also available in the <link linkend="profile-rollback-before-disconnect">connection profile</link>.
+	</entry>
+</row>
+
+<row>
+	<entry>-emptyStringIsNull</entry>
+	<entry>This parameter corresponds to the
+	<link linkend="profile-empty-string-is-null">Empty String is NULL</link>
+	setting of the connection profile. This will only be used in GUI mode.
+	</entry>
+</row>
+
+<row>
+	<entry>-trimCharData</entry>
+	<entry>
+		Turns on right-trimming of values retrieved from <literal>CHAR</literal>
+		columns. See the <link linkend="profile-trim-char-data">description</link> of the
+		profile properties for details.
+	</entry>
+</row>
+
+<row>
+	<entry>-removeComments</entry>
+	<entry>This parameter corresponds to the
+	<link linkend="profile-remove-comments">Remove comments</link>
+	setting of the connection profile.
+	</entry>
+</row>

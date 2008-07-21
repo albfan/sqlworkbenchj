@@ -51,13 +51,13 @@
 
 			<para>The configuration files are:
 				<itemizedlist>
-					<listitem><para>General configuration settings (<filename>workbench.settings</filename>)</para></listitem>
-					<listitem><para>Connection profiles (<filename>WbProfiles.xml</filename>)</para></listitem>
-					<listitem><para>JDBC Driver definitions (<filename>WbDrivers.xml</filename>)</para></listitem>
-					<listitem><para>Customized shortcut definitions (<filename>WbShortcuts.xml</filename>)</para></listitem>
-					<listitem><para>Macro definitions (<filename>WbMacros.xml</filename>)</para></listitem>
-					<listitem><para>Log file (<filename>workbench.log</filename>)</para></listitem>
-					<listitem><para>Workspace files (<filename>*.wksp</filename>)</para></listitem>
+					<listitem>General configuration settings (<filename>workbench.settings</filename>)</listitem>
+					<listitem>Connection profiles (<filename>WbProfiles.xml</filename>)</listitem>
+					<listitem>JDBC Driver definitions (<filename>WbDrivers.xml</filename>)</listitem>
+					<listitem>Customized shortcut definitions (<filename>WbShortcuts.xml</filename>)</listitem>
+					<listitem>Macro definitions (<filename>WbMacros.xml</filename>)</listitem>
+					<listitem>Log file (<filename>workbench.log</filename>)</listitem>
+					<listitem>Workspace files (<filename>*.wksp</filename>)</listitem>
 				</itemizedlist>
 			</para>
 
@@ -361,13 +361,15 @@
 			<title>Windows Vista</title>
 			<para>
 				With Windows Vista, Microsoft changed the way needed DLLs are searched when an executable
-				is loaded. This affects the &wb-productname; launcher as described in 
-				<ulink url="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_CRT_C_Run.2d.Time_Libraries.asp">Microsoft C runtime distribution model</ulink>
+				is loaded. This affects the &wb-productname; launcher due to the (new?) Microsoft C runtime distribution model.
 				If you want to run &wb-productname; under Windows Vista, please copy the file <literal>msvcr71.dll</literal>
-				into the directory where <literal>SQLWorkbench.exe</literal> is located. This file can be found
-				under <literal>%SystemRoot%\System32\msvcr71.dll</literal> (usually this is 
-				<literal>c:\Windows\System32\msvcr71.dll</literal>)
+				into the directory where <literal>SQLWorkbench.exe</literal> is located. 
 			</para>
+			<para>
+				This file can be found at <literal>%SystemRoot%\System32\msvcr71.dll</literal> 
+				(usually this is <literal>c:\Windows\System32\msvcr71.dll</literal>)
+			</para>
+			<para>Thanks to Jon for this tip.</para>
 		</section>
 
 	</section>
@@ -532,81 +534,9 @@ another_variable=24</programlisting>
 					</thead>
 
 					<tbody valign="top">
-						<row>
-							<entry>-url</entry>
-							<entry>The JDBC connection URL</entry>
-						</row>
 
-						<row>
-							<entry>-username</entry>
-							<entry>Specify the username for the DBMS</entry>
-						</row>
+						&common-connect-args;
 
-						<row>
-							<entry>-password</entry>
-							<entry>Specify the password for the user</entry>
-						</row>
-
-						<row>
-							<entry>-driver</entry>
-							<entry>Specify the full class name of the JDBC driver</entry>
-						</row>
-
-						<row>
-							<entry>-driverJar</entry>
-							<entry>Specify the full pathname to the .jar file containing the JDBC driver</entry>
-						</row>
-
-						<row>
-							<entry>-autocommit</entry>
-							<entry>Set the autocommit property for this connection. You can also 
-							control the autocommit mode from within your script by using the 
-							<link linkend="command-set-autocommit"><literal>SET AUTOCOMMIT</literal></link> command.
-							</entry>
-						</row>
-						
-						<row>
-							<entry>-rollbackOnDisconnect</entry>
-							<entry>If this parameter is set to true, a <literal>ROLLBACK</literal> will 
-							be sent to the DBMS before the connection is closed. This setting is 
-							also available in the <link linkend="profile-rollback-before-disconnect">connection profile</link>.
-							</entry>
-						</row>
-
-						<row>
-							<entry>-separateConnection</entry>
-							<entry>If this parameter is set to true, and &wb-productname; is run in GUI mode, 
-							each SQL tab will use it's own connection to the database server. This setting is 
-							also available in the <link linkend="profile-separate-connection">connection profile</link>.
-							The default is <literal>true</literal>.
-							</entry>
-						</row>
-
-						<row>
-							<entry>-emptyStringIsNull</entry>
-							<entry>This parameter corresponds to the 
-							<link linkend="profile-empty-string-is-null">Empty String is NULL</link>
-							setting of the connection profile. This will only be used in GUI mode.
-							</entry>
-						</row>
-
-						<row>
-							<entry>-removeComments</entry>
-							<entry>This parameter corresponds to the 
-							<link linkend="profile-remove-comments">Remove comments</link>
-							setting of the connection profile.
-							</entry>
-						</row>
-						
-						<row>
-							<entry>-workspace</entry>
-							<entry>The workspace file to be loaded. If the file specification does not 
-							include a directory, the workspace will be loaded from the 
-							<link linkend="cmdline-parameter-configdir">configuration directory</link>. If this parameter
-							is not specified, the default workspace (<literal>Default.wksp</literal>) will be loaded.
-							</entry>
-						</row>
-						
 						<row>
 							<entry>-altDelim</entry>
 							<entry>
@@ -620,11 +550,20 @@ another_variable=24</programlisting>
 						</row>
 
 						<row>
-							<entry>-trimCharData</entry>
-							<entry>
-								Turns on right-trimming of values retrieved from <literal>CHAR</literal>
-								columns. See the <link linkend="profile-trim-char-data">description</link> of the 
-								profile properties for details.
+							<entry>-separateConnection</entry>
+							<entry>If this parameter is set to true, and &wb-productname; is run in GUI mode,
+							each SQL tab will use it's own connection to the database server. This setting is
+							also available in the <link linkend="profile-separate-connection">connection profile</link>.
+							The default is <literal>true</literal>.
+							</entry>
+						</row>
+
+						<row>
+							<entry>-workspace</entry>
+							<entry>The workspace file to be loaded. If the file specification does not
+							include a directory, the workspace will be loaded from the
+							<link linkend="cmdline-parameter-configdir">configuration directory</link>. If this parameter
+							is not specified, the default workspace (<literal>Default.wksp</literal>) will be loaded.
 							</entry>
 						</row>
 

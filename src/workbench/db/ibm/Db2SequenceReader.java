@@ -79,7 +79,30 @@ public class Db2SequenceReader
 	
 	public DataStore getRawSequenceDefinition(String schema, String sequence)
 	{
-		String sql ="SELECT SEQNAME, \n" +
+		String sql = null;
+
+		if (this.connection.getMetadata().getDbId().equals("db2h"))
+		{
+			// Host system
+			sql = "SELECT NAME, \n" +
+			"       START, \n" +
+			"       MINVALUE, \n" +
+			"       MAXVALUE, \n" +
+			"       INCREMENT, \n" +
+			"       CYCLE, \n" +
+			"       ORDER, \n" +
+			"       CACHE, \n" +
+			"       DATATYPEID  \n" +
+			"FROM   SYSIBM.SYSSEQUENCES \n" +
+			"WHERE schema = ?";
+			if (!StringUtil.isEmptyString(sequence))
+			{
+				sql += "  AND name = ? ";
+			}
+		}
+		else
+		{
+			sql = "SELECT SEQNAME, \n" +
 			"       START, \n" +
 			"       MINVALUE, \n" +
 			"       MAXVALUE, \n" +
@@ -90,10 +113,11 @@ public class Db2SequenceReader
 			"       DATATYPEID  \n" +
 			"FROM   syscat.sequences \n" +
 			"WHERE seqschema = ?";
-		
-		if (!StringUtil.isEmptyString(sequence))
-		{
-			sql += "  AND seqname = ? ";
+			if (!StringUtil.isEmptyString(sequence))
+			{
+				sql += "  AND seqname = ? ";
+			}
+
 		}
 		
 		if (Settings.getInstance().getDebugMetadataSql())

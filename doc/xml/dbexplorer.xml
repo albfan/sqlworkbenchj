@@ -132,7 +132,7 @@
 				complete script will be shown as soon as all objects have been processed.
 				The objects will be processed in this order:</para>
 				<simplelist columns="1">
-					<member>SEQUENCES</member>
+					<member>SEQUENCEs</member>
 					<member>TABLEs</member>
 					<member>VIEWs</member>
 					<member>SYNONYMS</member>

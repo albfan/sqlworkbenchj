@@ -291,6 +291,37 @@ public class TableIdentifier
 		return result.toString();
 	}
 
+	/**
+	 * Check for non-standard quote characters in the table, schema or catalog name
+	 * in order to support DBMS who don't even care about the most simple standards.
+	 *
+	 * This will only re-add the correct quotes later, if getTableExpression(WbConnection) is used!
+	 * 
+	 * @param quoteCharacter
+	 */
+	public void checkIsQuoted(DbMetadata meta)
+	{
+
+		if (meta.isQuoted(this.tablename))
+		{
+			this.tableWasQuoted = true;
+			this.tablename = this.tablename.substring(1, tablename.length() - 1);
+			this.expression = null;
+		}
+		if (meta.isQuoted(schema))
+		{
+			this.schemaWasQuoted = true;
+			this.schema = this.schema.substring(1, schema.length() - 1);
+			this.expression = null;
+		}
+		if (meta.isQuoted(catalog))
+		{
+			this.catalogWasQuoted = true;
+			this.catalog= this.catalog.substring(1, catalog.length() - 1);
+			this.expression = null;
+		}
+	}
+
 	public void setTable(String aTable)
 	{
 		if (!this.isNewTable && (aTable == null || aTable.trim().length() == 0))

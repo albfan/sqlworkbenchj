@@ -35,7 +35,8 @@ public class GenericObjectDropper
 	private boolean cascadeConstraints;
 	private TableIdentifier objectTable;
 	private RowActionMonitor monitor;
-	
+	private boolean cancel = false;
+
 	public GenericObjectDropper()
 	{
 	}
@@ -163,8 +164,8 @@ public class GenericObjectDropper
 	public void dropObjects()
 		throws SQLException
 	{
-		boolean needCommit = this.connection.shouldCommitDDL();
-		
+		cancel = false;
+
 		try
 		{
 			if (this.connection == null) throw new NullPointerException("No connection!");
@@ -184,16 +185,17 @@ public class GenericObjectDropper
 					monitor.setCurrentObject(name, i + 1, count);
 				}
 				currentStatement.execute(sql);
+				if (this.cancel) break;
 			}
 
-			if (needCommit)
+			if (connection.shouldCommitDDL())
 			{
 				this.connection.commit(); 
 			}
 		}
 		catch (SQLException e)
 		{
-			if (needCommit)
+			if (connection.shouldCommitDDL())
 			{
 				try { this.connection.rollback(); } catch (Throwable th) {}
 			}
@@ -211,6 +213,7 @@ public class GenericObjectDropper
 		throws SQLException
 	{
 		if (this.currentStatement == null) return;
+		cancel = true;
 		this.currentStatement.cancel();
 		if (this.connection.shouldCommitDDL())
 		{

@@ -33,7 +33,7 @@ public class StatementFactory
 	private TableIdentifier tableToUse;
 	private boolean includeTableOwner = true;
 	private WbConnection dbConnection;
-	private boolean emptyStringIsNull = false;
+	private boolean emptyStringIsNull;
 	private boolean includeNullInInsert = true;
 
 	private static final int CASE_NO_CHANGE = 1;
@@ -314,10 +314,18 @@ public class StatementFactory
 		return createDeleteStatement(aRow, false);
 	}
 
-	public DmlStatement createDeleteStatement(RowData aRow, boolean ignoreStatus)
+	/**
+	 * Generate a DELETE statement that will delete the row from the database.
+	 *
+	 * @param row the row to be deleted
+	 * @param ignoreStatus if false, the row will only be deleted if it's not "new"
+	 * @return a DELETE statement or null, if the row was new and does not need to be deleted
+	 * @see workbench.storage.RowData#isNew()
+	 */
+	public DmlStatement createDeleteStatement(RowData row, boolean ignoreStatus)
 	{
-		if (aRow == null) return null;
-		if (!ignoreStatus && aRow.isNew()) return null;
+		if (row == null) return null;
+		if (!ignoreStatus && row.isNew()) return null;
 
 		boolean first = true;
 		DmlStatement dml;
@@ -344,7 +352,7 @@ public class StatementFactory
 			String colName = adjustColumnName(this.resultInfo.getColumnName(j));
 			sql.append(colName);
 
-			Object value = aRow.getOriginalValue(j);
+			Object value = row.getOriginalValue(j);
 			if (isNull(value)) value = null;
 			if (value == null)
 			{
@@ -362,19 +370,32 @@ public class StatementFactory
 	}
 	
 	/**
-	 * Setter for property tableToUse.
-	 * @param tableToUse New value of property tableToUse.
+	 * Defines an alternative table to be used when generating the SQL statements.
+	 * By default the table defined through the ResultInfo from the constructor is used.
+	 *
+	 * @param tableToUse The table to be used
 	 */
 	public void setTableToUse(TableIdentifier tableToUse)
 	{
 		this.tableToUse = tableToUse;
 	}
 
+	/**
+	 * Control the usage of table owner/catalog/schema in the generated statements.
+	 * If this is set to false, the owner/catalog/schema will <b>never</b> included
+	 * in the generated SQL. If this is set to true (which is the default), the
+	 * owner/catalog/schema is included in the table name if necessary.
+	 *
+	 * @param flag turn the usage of the table owner on or off
+	 * @see workbench.db.DbMetadata#needCatalogInDML(workbench.db.TableIdentifier)
+	 * @see workbench.db.DbMetadata#needSchemaInDML(workbench.db.TableIdentifier)
+	 * @see workbench.db.TableIdentifier#getTableExpression(workbench.db.WbConnection)
+	 */
 	public void setIncludeTableOwner(boolean flag) 
-	{ 
+	{
 		this.includeTableOwner = flag; 
 	}
-	
+
 	public void setEmptyStringIsNull(boolean flag)
 	{
 		this.emptyStringIsNull = flag;
@@ -407,6 +428,11 @@ public class StatementFactory
 		return value;
 	}
 
+	private TableIdentifier getUpdateTable()
+	{
+		return tableToUse != null ? tableToUse : resultInfo.getUpdateTable();
+	}
+	
 	private String adjustIdentifierCase(String value)
 	{
 		if (value == null) return null;
@@ -415,13 +441,16 @@ public class StatementFactory
 		// If the table name is not in the same case the server stores it
 		// and the case may not be changed at all, then we need to quote the table name.
 		
-		TableIdentifier updateTable = this.resultInfo.getUpdateTable();
+		TableIdentifier updateTable = getUpdateTable();
 		
 		// setNeverAdjustCase() will only be set for TableIdentifiers that have
 		// been "retrieved" from the database (e.g. in the DbExplorer)
 		// For table names that the user entered, neverAdjustCase() will be false
 		boolean neverAdjust = (updateTable == null ? false : updateTable.getNeverAdjustCase());
+		if (neverAdjust) return value;
 		
+		// If the table name should not be adjusted, we'll need to check 
+		// if it needs quotes.
 		if (neverAdjust && dbConnection != null)
 		{
 			boolean caseSensitive =  dbConnection.getMetadata().isCaseSensitive();
@@ -444,33 +473,27 @@ public class StatementFactory
 
 	private String getTableNameToUse()
 	{
-		String name = null;
-		TableIdentifier updateTable = this.resultInfo.getUpdateTable();
-		if (updateTable == null && this.tableToUse == null) throw new IllegalArgumentException("Cannot proceed without update table defined");
+		String expression = null;
 		
-		if (this.tableToUse != null)
+		TableIdentifier updateTable = getUpdateTable();
+		if (updateTable == null) throw new IllegalArgumentException("Cannot proceed without update table defined");
+		
+		if (includeTableOwner)
 		{
-			if (!includeTableOwner)
-			{
-				name = tableToUse.getTableName();
-			}
-			else
-			{
-				name = tableToUse.getTableExpression(this.dbConnection);
-			}
+			expression = updateTable.getTableExpression(this.dbConnection);
 		}
 		else
 		{
-			name = (includeTableOwner ? updateTable.getTableExpression(this.dbConnection) : updateTable.getTableName());
+			expression = updateTable.getTableName();
 		}
-		name = adjustIdentifierCase(name);
-		return name;
+		
+		expression = adjustIdentifierCase(expression);
+		return expression;
 	}
 
 	private boolean isNull(Object value)
 	{
 		if (value == null) return true;
-//		if (value instanceof NullValue) return true;
 		String s = value.toString();
 		if (emptyStringIsNull && s.length() == 0) return true;
 		return false;

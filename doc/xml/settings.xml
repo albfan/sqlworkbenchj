@@ -858,8 +858,22 @@
         </simplelist>
       </para>
     </section>
+
+    <section id="settings-sync-chunk-size">
+			<title>Controlling the chunk size for WbDataDiff</title>
+			<para>Property: <literal>workbench.sql.sync.chunksize</literal></para>
+			<para>
+				Controls the number of rows that are retrieved from the target table
+				when running <link linkend="command-data-diff"><literal>WbDataDiff</literal></link> 
+				or <link linkend="copy-sync-delete"><literal>WbCopy</literal></link> with the 
+				<literal>-syncDelete=true</literal> parameter.
+			</para>
+			<para>Default value: <literal>25</literal></para>
+    </section>
 		
   </section>
+	
+	
 	<section id="filter-settings">
 		<title>Filter settings</title>
 		

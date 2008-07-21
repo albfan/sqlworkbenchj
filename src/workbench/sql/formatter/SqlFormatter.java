@@ -142,7 +142,6 @@ public class SqlFormatter
 	private int maxSubselectLength = 60;
 	private Set<String> dbFunctions = Collections.emptySet();
 	private Set<String> dataTypes = Collections.emptySet();
-	private int selectColumnsPerLine = 1;
 	private static final String NL = "\n";
 	private boolean lowerCaseFunctions;
 
@@ -181,11 +180,6 @@ public class SqlFormatter
 	public String getLineEnding()
 	{
 		return NL;
-	}
-	
-	public void setMaxColumnsPerSelect(int cols)
-	{
-		this.selectColumnsPerLine = cols;
 	}
 	
 	public void setDbDataTypes(Set<String> types)
@@ -371,11 +365,12 @@ public class SqlFormatter
 	private boolean needsWhitespace(SQLToken last, SQLToken current, boolean ignoreStartOfline)
 	{
 		if (last == null) return false;
+		if (current.isWhiteSpace()) return false;
+		if (last.isWhiteSpace()) return false;
 		String lastV = last.getContents();
 		String currentV = current.getContents();
 		char lastChar = lastV.charAt(0);
 		char currChar = currentV.charAt(0);
-		if (last.isWhiteSpace()) return false;
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
 		boolean isCurrentOpenBracket = "(".equals(currentV);
 		boolean isLastOpenBracket = "(".equals(lastV);
@@ -483,6 +478,17 @@ public class SqlFormatter
 
 		int currentColumnCount = 0;
 		boolean isSelect = last.getContents().equals("SELECT");
+		boolean isUpdate = last.getContents().equals("UPDATE");
+
+		int columnsPerLine = -1;
+		if (isSelect)
+		{
+			columnsPerLine = Settings.getInstance().getFormatterMaxColumnsInSelect();
+		}
+		else
+		{
+			columnsPerLine = Settings.getInstance().getFormatterMaxColumnsInUpdate();
+		}
 		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = last;
 		
@@ -543,7 +549,7 @@ public class SqlFormatter
 			{
 				this.appendText(',');
 				currentColumnCount++;
-				if (!isSelect || currentColumnCount >= selectColumnsPerLine)
+				if (columnsPerLine > -1 && currentColumnCount >= columnsPerLine)
 				{
 					currentColumnCount = 0;
 					this.appendNewline();
@@ -833,23 +839,37 @@ public class SqlFormatter
 		return null;
 	}
 	
-	private SQLToken processBracketList(int indentCount)
+	private SQLToken processBracketList(int indentCount, int elementsPerLine)
 		throws Exception
 	{
 		StringBuilder b = new StringBuilder(indentCount);
 
 		for (int i=0; i < indentCount; i++) b.append(' ');
 
-		this.appendText(b);
+		this.appendNewline();
+		if (elementsPerLine == 1)
+		{
+			this.appendText('(');
+			this.appendNewline();
+			this.appendText(b);
+		}
+		else 
+		{
+			this.appendText(b);
+			b.append(' ');
+			this.appendText("(");
+		}
+
 		SQLToken t = this.lexer.getNextToken(true,false);
+
+		int elementCount = 0;
 
 		while (t != null)
 		{
 			final String text = t.getContents();
 			if (text.equals(")"))
 			{
-				this.appendNewline();
-				//this.indent(b);
+				if (elementsPerLine == 1) this.appendNewline();
 				this.appendText(")");
 				return this.lexer.getNextToken();
 			}
@@ -862,8 +882,17 @@ public class SqlFormatter
 			else if (text.equals(","))
 			{
 				this.appendText(",");
-				this.appendNewline();
-				this.indent(b);
+				elementCount ++;
+				if (elementCount >= elementsPerLine)
+				{
+					this.appendNewline();
+					this.indent(b);
+					elementCount = 0;
+				}
+				else
+				{
+					this.appendText(' ');
+				}
 			}
 			else if (!t.isWhiteSpace())
 			{
@@ -1096,11 +1125,8 @@ public class SqlFormatter
 					t = this.lexer.getNextToken(false, false);
 					if (t.isSeparator() && t.getContents().equals("("))
 					{
-						this.appendNewline();
-						this.appendText("(");
-						this.appendNewline();
-
-						t = this.processBracketList(2);
+						int colsPerLine = Settings.getInstance().getFormatterMaxColumnsInInsert();
+						t = this.processBracketList(2, colsPerLine);
 					}
 					if (t == null) return;
 					continue;
@@ -1259,10 +1285,8 @@ public class SqlFormatter
 			}
 			else if (t.isSeparator() && t.getContents().equals("("))
 			{
-				this.appendNewline();
-				this.appendText(t.getContents());
-				this.appendNewline();
-				return this.processBracketList(2);
+				int colsPerLine = Settings.getInstance().getFormatterMaxColumnsInInsert();
+				return this.processBracketList(2,colsPerLine);
 			}
 		}
 		return t;

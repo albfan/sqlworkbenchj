@@ -22,6 +22,8 @@
 	<!ENTITY wbimport SYSTEM "wbimport.xml">
 	<!ENTITY wbcopy SYSTEM "wbcopy.xml">
 	<!ENTITY wb-productname	"SQL Workbench/J">
+	<!ENTITY progress-parameter SYSTEM "progress.xml">
+	<!ENTITY common-connect-args SYSTEM "common-connect-args.xml">
 ]>
 
 <?xml-stylesheet href="html.css" type="text/css"?>

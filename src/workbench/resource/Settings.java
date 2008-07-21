@@ -578,7 +578,27 @@ public class Settings
 	}
 	
 	// <editor-fold defaultstate="collapsed" desc="Formatting options">
-	
+
+	public int getFormatterMaxColumnsInUpdate()
+	{
+		return getIntProperty("workbench.sql.formatter.update.columnsperline", 1);
+	}
+
+	public void setFormatterMaxColumnsInUpdate(int num)
+	{
+		setProperty("workbench.sql.formatter.update.columnsperline", num);
+	}
+
+	public int getFormatterMaxColumnsInInsert()
+	{
+		return getIntProperty("workbench.sql.formatter.insert.columnsperline", 1);
+	}
+
+	public void setFormatterMaxColumnsInInsert(int num)
+	{
+		setProperty("workbench.sql.formatter.insert.columnsperline", num);
+	}
+
 	public int getFormatterMaxColumnsInSelect()
 	{
 		return getIntProperty("workbench.sql.formatter.select.columnsperline", 1);

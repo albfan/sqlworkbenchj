@@ -200,11 +200,12 @@
 		
 		<para>
 			You can change the current connection inside a script using the command <literal>WbConnect</literal>.
-			You can either specify a <link linkend="commandline-connect-profile">profile name</link> or specifying 
-			the connection properties <link linkend="commandline-connect-noprofile">directly</link>.
+			You can either specify a <link linkend="commandline-connect-profile">profile name</link> or specify 
+			the connection properties <link linkend="commandline-connect-noprofile">directly</link>. The WbConnect
+			command accepts the same parameters as described in those chapters.
 		</para>
 		<para>	
-			The command accepts the same parameters as the commandline.
+			<literal>WbConnect</literal> can only be used in batch mode.
 		</para>
 	</section>
 	

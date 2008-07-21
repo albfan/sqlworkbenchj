@@ -8,8 +8,8 @@
 		of settings:
 		
 		<itemizedlist>
-			<listitem><para>JDBC related properties such as the JDBC driver class, the connection URL, the username etc.</para></listitem>
-			<listitem><para>&wb-productname; related properties such as the profile name the associated workspace, etc.</para></listitem>
+			<listitem>JDBC related properties such as the JDBC driver class, the connection URL, the username etc.</listitem>
+			<listitem>&wb-productname; related properties such as the profile name the associated workspace, etc.</listitem>
 		</itemizedlist>
 	</para>
 	
@@ -433,8 +433,8 @@
 			</para>
 
 			<para>
-				The keep alive statement can not be a script, it can only be a single SQL 
-				statement (e.g. <literal>SELECT version()</literal> or <literal>SELECT 42 FROM dual</literal>.
+				The keep alive statement can not be a script, it can only be a <emphasis role="bold">single</emphasis>
+				SQL statement (e.g. <literal>SELECT version()</literal> or <literal>SELECT 42 FROM dual</literal>).
 				You may not enter the trailing semicolon.
 			</para>
 
@@ -461,7 +461,7 @@
 				in the toolbar of the main window. You can select a color for the background of this 
 				display to e.g. indicate "sensitive" connections. To use the default background, 
 				click on the <literal>Reset</literal> (<guiicon><inlinegraphic fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>)
-				button. If not color is selected this is indicated with the text <literal>(None)</literal>
+				button. If no color is selected this is indicated with the text <literal>(None)</literal>
 				next to the selection button. If you have selected a color, a preview of the color is 
 				displayed.
 			</para>

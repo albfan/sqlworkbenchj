@@ -2,12 +2,21 @@
 	<title>Export data using WbExport</title>
 
 	<para>
+		The <literal>WbExport</literal> command can be used to export the contents
+		of the database into external files. Several types of output files are supported.
+		The <literal>WbExport</literal> command can either be used from within the 
+		GUI like any other command (such as <literal>UPDATE</literal> or <literal>INSERT</literal>), 
+		or it can be used as part of a SQL script that is run in 
+		<link linkend="using-scripting">batch mode</link>.
+	</para>
+	
+	<para>
 		The <literal>WbExport</literal> command exports either the result of the 
 		<emphasis role="bold">next</emphasis> SQL statement (which has to produce a result set) or
 		the content of the table(s) specified with the <literal>-sourceTable</literal> parameter. 
 		The data is directly written to the output file and not loaded into memory. The export file(s)
 		can be compressed ("zipped") on the fly. <link linkend="command-import">WbImport</link> can
-		import the zipped files directly without the need to unzip them.
+		import the zipped (text or XML) files directly without the need to unzip them.
 	</para>
 
 	<para>
@@ -313,6 +322,9 @@
 						</para>
 					</entry>
 				</row>
+				
+				&progress-parameter;
+				
 			</tbody>
 		</tgroup>
 	</informaltable>
@@ -450,21 +462,24 @@
 					</row>
 
 					<row>
-						<entry>-writeOracleLoader</entry>
+						<entry>-formatFile</entry>
 						<entry>
-							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>Possible values: <literal>oracle</literal>, <literal>sqlserver</literal></para>
 							<para>
-								This parameter controls the creation of Oracle SQL*Loader
-								control files. If it is set to <literal>true</literal>, then &wb-productname;
-								will generate a control file for each exported text file,
-								that can be used to import the text file using SQL*Loader
-								instead of &wb-productname;. The control file has the same
-								filename as the output file but with the ending <literal>.ctl</literal>
+								This parameter controls the creation of a control file for 
+								the bulk load utilities of Oracle and Microsoft SQL Server.
+								<literal>oracle</literal> will create a control file for Oracle's 
+								SQL*Loader utility, <literal>sqlserver</literal> will create a format
+								file for Microsoft's <literal>bcp</literal> utility.
+								The format file has the same filename as the output file but with the ending <literal>.ctl</literal>
+								for Oracle and <literal>.fmt</literal> for SQL Server.
+							</para>
+							<para>
+								You can specify both formats. In that case two control files will be created.
 							</para>
 							<para>
 								Note that the generated control file will most probably
-								need some adjustments before you can actually use it. It is mainly
-								meant as a template that needs further refinement.
+								need some adjustments before you can actually use it. 
 							</para>
 						</entry>
 					</row>
@@ -671,8 +686,8 @@
 						</entry>
 					</row>
 
-					<row id="export-sql-literal-formats">
-						<entry>-sqlDateLiterals</entry>
+					<row>
+						<entry id="export-sql-literal-formats">-sqlDateLiterals</entry>
 						<entry>
 							<para>Possible values: <literal>jdbc</literal>, <literal>ansi</literal>, <literal>dbms</literal>, <literal>default</literal></para>
 							<para>
@@ -683,27 +698,28 @@
 								and timestamps.
 							</para>
 							<para>
-								<literal>jdbc</literal> selects the creation of JDBC compliant literals. 
+								<emphasis role="bold"><literal>jdbc</literal></emphasis> selects the creation of JDBC compliant literals. 
 								These should be usable with every JDBC based tool, including your own Java code:
 								<literal>{d '2004-04-28'}</literal> or 
 								<literal>{ts '2002-04-02 12:02:00.042'}</literal>. This is the 
 								recommended format if you plan to use &wb-productname; (or any 
 								other JDBC based tool) to run the generated statements.
 							</para>
+							
 							<para>
-								The value <literal>ansi</literal> selects the creation of ANSI SQL compliant 
+								<emphasis role="bold"><literal>ansi</literal></emphasis> selects the creation of ANSI SQL compliant 
 								date literals: <literal>DATE '2004-04-28'</literal> or 
 								<literal>TIMESTAMP '2002-04-02 12:04:00'</literal>. Please consult the 
 								manual of the target DBMS, to find out whether it supports ANSI compliant
 								date literals.
 							</para>
 							<para>
-								The value <literal>default</literal> selects the creation of quoted date and timestamp
+								<emphasis role="bold"><literal>default</literal></emphasis> selects the creation of quoted date and timestamp
 								literals in ISO format (e.g. '2004-04-28'). Several DBMS support this format (e.g. Postgres, Microsoft SQL Server)
 							</para>
 
 							<para>
-								The value <literal>dbms</literal> selects the creation of specific 
+								<emphasis role="bold"><literal>dbms</literal></emphasis> selects the creation of specific 
 								literals to be used with the current DBMS (using e.g. the <literal>to_date()</literal>
 								function for Oracle). The format of these literals can be customized if necessary
 								in <literal>workbench.settings</literal> using the keys
@@ -727,19 +743,19 @@
 					<row>
 						<entry>-commitEvery</entry>
 						<entry>
-								<para>
-									A numeric value which identifies
-									the number of <literal>INSERT</literal> or <literal>UPDATE</literal> statements
-									after which a <literal>COMMIT</literal> is put into the generated SQL script.
-								</para>
-								<para>-commitevery=100</para>
-								<para>will create a <literal>COMMIT;</literal> after every 100th statement.</para>
-								<para>
-									If this is not specified one <literal>COMMIT;</literal> will be added at the 
-									end of the script. To suppress the final COMMIT, you can use
-									<literal>-commitEvery=none</literal>. Passing <literal>-commitEvery=atEnd</literal>
-									is equivalent to <literal>-commitEvery=0</literal>
-								</para>
+							<para>
+								A numeric value which identifies
+								the number of <literal>INSERT</literal> or <literal>UPDATE</literal> statements
+								after which a <literal>COMMIT</literal> is put into the generated SQL script.
+							</para>
+							<para>-commitevery=100</para>
+							<para>will create a <literal>COMMIT;</literal> after every 100th statement.</para>
+							<para>
+								If this is not specified one <literal>COMMIT;</literal> will be added at the 
+								end of the script. To suppress the final COMMIT, you can use
+								<literal>-commitEvery=none</literal>. Passing <literal>-commitEvery=atEnd</literal>
+								is equivalent to <literal>-commitEvery=0</literal>
+							</para>
 						</entry>
 					</row>
 
@@ -835,9 +851,9 @@
 		<title>Examples</title>
 
 <programlisting>WbExport -type=text
-			 -file='c:/data/data.txt'
-			 -delimiter='|'
-			 -decimal=',';
+         -file='c:/data/data.txt'
+         -delimiter='|'
+         -decimal=',';
 SELECT * FROM data_table;</programlisting>
 
 	<para>
@@ -849,50 +865,65 @@ SELECT * FROM data_table;</programlisting>
 	</para>
 
 <programlisting>WbExport -type=text
-			 -file='c:/data/data.txt'
-			 -delimiter='|'
-			 -decimal=','
-			 -sourcetable=data_table;</programlisting>
+         -file='c:/data/data.txt'
+         -delimiter='|'
+         -decimal=','
+         -sourcetable=data_table;</programlisting>
 
 	<para>
-		There is a difference in the behaviour of the command regarding the "Max. Rows" setting
-		in the GUI. When you use the <literal>WbExport</literal> command together with
-		a <literal>SELECT</literal> query, the Max. Rows setting will be respected
-		by the <literal>SELECT</literal> statement (and you will see a warning
-		that the result set was limited). When you use the <literal>WbExport</literal>
-		with the <literal>-sourcetable</literal> switch, the "Max. Rows" setting
-		will not be respected, and all rows from the table will be written into
-		the specified file.
+		To export all tables from the current connection into tab-separated files
+		and compress the files, you can use the following statement:
 	</para>
-
+<programlisting>WbExport -type=text
+         -outputDir=c:/data/export
+         -compress=true				 
+         -sourcetable=*;</programlisting>
 	<para>
-		To generate a file that contains SQL INSERT statements that can be
+		This will create one zip file for each table containing the exported data as a 
+		text file. If a table contains BLOB columns, the blob data will be written into 
+		a separate zip file.
+	</para>
+	
+	<para>
+		The files created by the above statement can be imported into another database
+		using the following command:
+	</para>
+	
+<programlisting>WbImport -type=text
+         -sourceDir=c:/data/export
+         -checkDependencies=true;</programlisting>
+	
+	<para>
+		To generate a file that contains <literal>INSERT</literal> statements that can be
 		executed on the target system, the following command can be used:
 	</para>
 
 <programlisting>WbExport -type=sqlinsert
-			 -file='c:/data/newtable.sql'
-			 -table=newtable;
+         -file='c:/data/newtable.sql'
+         -table=newtable;
 SELECT * FROM table1, table2
 WHERE table1.column1 = table2.column1;</programlisting>
 
 	<para>
 		will create a SQL scripts which inserts the data from table1
 		and table2 into a table called newtable. If the parameter -table is
-		omitted, the creation of SQL INSERT statements is only possible, if the SELECT is
-		based on a single table (or view).
+		omitted, the creation of SQL <literal>INSERT</literal> statements is only possible, 
+		if the SELECT is based on a single table (or view).
 	</para>
 
+	<simplesect>
+		<title>WbExport and the "Max. Rows" option</title>
+		<para>
+			There is a difference in the behaviour of the command regarding the "Max. Rows" setting
+			in the GUI. When you use the <literal>WbExport</literal> command together with
+			a <literal>SELECT</literal> query, the Max. Rows setting will be respected
+			by the <literal>SELECT</literal> statement (and you will see a warning
+			that the result set was limited). When you use the <literal>WbExport</literal>
+			with the <literal>-sourcetable</literal> switch, the "Max. Rows" setting
+			will not be respected, and all rows from the table will be written into
+			the specified file.
+		</para>
+	</simplesect>
 	</section>
 		
-	<section id="export-date-formats">
-		<title>Specifying date formats</title>
-		<para>
-			The date/time format that can be specified with the <literal>-dateformat</literal>
-			or <literal>-timestampformat</literal> accepts fhe following format codes. These
-			are the format codes for Java's <ulink url="http://java.sun.com/j2se/1.5.0/docs/api/java/text/SimpleDateFormat.html">SimpleDateFormat</ulink>
-			class.
-		</para>
-	</section>
-
 </section>

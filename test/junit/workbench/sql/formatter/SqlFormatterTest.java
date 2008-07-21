@@ -94,22 +94,68 @@ public class SqlFormatterTest
 		}
 			
 	}
-	
-	public void testFormatUnicode()
+
+
+	public void testFormatInsert()
+		throws Exception
 	{
 		try
 		{
-			String sql = "insert into x(ss2,ss3,ss2) values('\u32A5\u0416','dsaffds',234)";
-			String expected = "INSERT INTO x\n(\n  ss2,\n  ss3,\n  ss2\n)  \nVALUES\n(\n  '\u32A5\u0416',\n  'dsaffds',\n  234\n)";
+			Settings.getInstance().setFormatterMaxColumnsInInsert(3);
+			String sql = "insert into x ( col1,col2,col3) values (1,2,3)";
+			String expected = "INSERT INTO x\n  (col1, col2, col3) \nVALUES\n  (1, 2, 3)";
 			SqlFormatter f = new SqlFormatter(sql, 100);
 			String formatted = (String) f.getFormattedSql();
+//			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
+			assertEquals(expected, formatted);
+
+			Settings.getInstance().setFormatterMaxColumnsInInsert(3);
+			sql = "insert into x ( col1,col2,col3,col4,col5) values (1,2,3,4,5)";
+			expected = "INSERT INTO x\n  (col1, col2, col3,\n   col4, col5) \nVALUES\n  (1, 2, 3,\n   4, 5)";
+			f = new SqlFormatter(sql, 100);
+			formatted = (String) f.getFormattedSql();
+//			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
 			assertEquals(expected, formatted);
 		}
-		catch (Exception e)
+		finally
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			Settings.getInstance().setFormatterMaxColumnsInInsert(1);
 		}
+	}
+
+	public void testFormatUpdate()
+		throws Exception
+	{
+		try
+		{
+			Settings.getInstance().setFormatterMaxColumnsInUpdate(3);
+			String sql = "update mytable set col1=5,col2=6,col3=4";
+			String expected = "UPDATE mytable\n   SET col1 = 5, col2 = 6, col3 = 4";
+			SqlFormatter f = new SqlFormatter(sql, 100);
+			String formatted = (String) f.getFormattedSql();
+//			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
+			assertEquals(expected, formatted);
+			sql = "update mytable set col1=1,col2=2,col3=3,col4=4,col5=5";
+			expected = "UPDATE mytable\n   SET col1 = 1, col2 = 2, col3 = 3,\n       col4 = 4, col5 = 5";
+			f = new SqlFormatter(sql, 100);
+			formatted = (String) f.getFormattedSql();
+//			System.out.println("*********\n" + formatted + "\n--- expected\n" + expected + "\n************");
+			assertEquals(expected, formatted);
+		}
+		finally
+		{
+			Settings.getInstance().setFormatterMaxColumnsInUpdate(1);
+		}
+	}
+
+	public void testFormatUnicode()
+		throws Exception
+	{
+		String sql = "insert into x(ss2,ss3,ss2) values('\u32A5\u0416','dsaffds',234)";
+		String expected = "INSERT INTO x\n(\n  ss2,\n  ss3,\n  ss2\n) \nVALUES\n(\n  '\u32A5\u0416',\n  'dsaffds',\n  234\n)";
+		SqlFormatter f = new SqlFormatter(sql, 100);
+		String formatted = (String) f.getFormattedSql();
+		assertEquals(expected, formatted);
 	}
 	
 	public void testCreateTable()
@@ -222,7 +268,7 @@ public class SqlFormatterTest
 		try
 		{
 			String sql = "insert into tble (a,b) values ( (select max(x) from y), 'bla')";
-			String expected = "INSERT INTO tble\n" + "(\n" + "  a,\n" + "  b\n" + ")  \n" + "VALUES\n" + "(\n" + "   (SELECT MAX(x) FROM y),\n" + "  'bla'\n" + ")";
+			String expected = "INSERT INTO tble\n" + "(\n" + "  a,\n" + "  b\n" + ") \n" + "VALUES\n" + "(\n" + "   (SELECT MAX(x) FROM y),\n" + "  'bla'\n" + ")";
 			SqlFormatter f = new SqlFormatter(sql, 100);
 			CharSequence formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
@@ -326,22 +372,20 @@ public class SqlFormatterTest
 		try
 		{
 			String sql = "SELECT a,b,c from mytable";
+			Settings.getInstance().setFormatterMaxColumnsInSelect(5);
 			SqlFormatter f = new SqlFormatter(sql, 100);
-			f.setMaxColumnsPerSelect(5);
 			CharSequence formatted = f.getFormattedSql();
 			String expected = "SELECT a, b, c\nFROM mytable";
 
 			sql = "SELECT a,b,c,d,e,f,g,h,i from mytable";
 			f = new SqlFormatter(sql, 100);
-			f.setMaxColumnsPerSelect(5);
 			formatted = f.getFormattedSql();
 			expected = "SELECT a, b, c, d, e,\n       f, g, h, i\nFROM mytable";
 			assertEquals(expected, formatted);
 		}
-		catch (Exception e)
+		finally
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			Settings.getInstance().setFormatterMaxColumnsInSelect(1);
 		}
 	}
 
@@ -352,14 +396,15 @@ public class SqlFormatterTest
 		{
 			String sql = "SELECT a,b,[MyCol] from mytable";
 			SqlFormatter f = new SqlFormatter(sql, 100);
+			Settings.getInstance().setFormatterMaxColumnsInSelect(1);
 			CharSequence formatted = f.getFormattedSql();
 			String expected = "SELECT a,\n       b,\n       [MyCol]\nFROM mytable";
+//			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
 			assertEquals(expected, formatted);
 		}
-		catch (Exception e)
+		finally
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			Settings.getInstance().setFormatterMaxColumnsInSelect(1);
 		}
 	}
 

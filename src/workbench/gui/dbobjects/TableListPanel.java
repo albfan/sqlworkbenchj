@@ -1210,7 +1210,7 @@ public class TableListPanel
 				if (reader != null)
 				{
 					CharSequence seqSql = reader.getSequenceSource(this.selectedTable.getSchema(), this.selectedTable.getTableName());
-					if (!StringUtil.isEmptyString(seqSql))
+					if (StringUtil.isEmptyString(seqSql))
 					{
 						sql = ResourceMgr.getString("MsgSequenceSourceNotImplemented") + " " + meta.getProductName();
 					}

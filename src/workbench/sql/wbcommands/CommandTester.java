@@ -64,6 +64,7 @@ public class CommandTester
 		commands.add(WbSelectBlob.VERB);
 		commands.add(WbStartBatch.VERB);
 		commands.add(WbXslt.VERB);
+		commands.add(WbConnect.VERB);
 		
 		formattedWords = new HashMap<String, String>();
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);

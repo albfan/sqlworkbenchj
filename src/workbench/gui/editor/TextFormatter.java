@@ -63,8 +63,6 @@ public class TextFormatter
 			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getFormatterMaxSubselectLength());
 			f.setDBFunctions(dbFunctions);
 			f.setDbDataTypes(dbDatatypes);
-			int cols = Settings.getInstance().getFormatterMaxColumnsInSelect();
-			f.setMaxColumnsPerSelect(cols);
 			
 			try
 			{
