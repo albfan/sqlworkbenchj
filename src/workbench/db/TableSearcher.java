@@ -22,7 +22,6 @@ import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -293,26 +292,26 @@ public class TableSearcher
 	public boolean setColumnFunction(String aColFunc)
 	{
 		this.columnFunction = null;
-		boolean result = false;
+		boolean setResult = false;
 		if (aColFunc != null && aColFunc.trim().length() > 0)
 		{
 			if (aColFunc.equalsIgnoreCase("$col$"))
 			{
 				this.columnFunction = null;
-				result = true;
+				setResult = true;
 			}
 			else if (aColFunc.indexOf("$col$") > -1)
 			{
 				this.columnFunction = aColFunc;
-				result = true;
+				setResult = true;
 			}
 			else if (aColFunc.indexOf("$COL$") > -1)
 			{
 				this.columnFunction = StringUtil.replace(aColFunc, "$COL$", "$col$");
-				result = true;
+				setResult = true;
 			}
 		}
-		return result;
+		return setResult;
 	}
 
 	public void setTableNames(TableIdentifier[] tables)

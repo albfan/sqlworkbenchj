@@ -43,7 +43,6 @@ import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
 import workbench.util.StringUtil;
-import workbench.util.WbFile;
 import workbench.util.WbThread;
 
 
@@ -77,7 +76,6 @@ public class SchemaReporter
 	private String schemaNameToUse = null;
 	private String reportTitle = null;
 	private JFrame parentWindow;
-	private boolean dbDesignerFormat = false;
 
 	/**
 	 * Creates a new SchemaReporter for the supplied connection
@@ -202,11 +200,6 @@ public class SchemaReporter
 		return out.toString();
 	}
 
-	public void setDbDesigner(boolean flag)
-	{
-		this.dbDesignerFormat = flag;
-	}
-	
 	public void setShowProgress(boolean flag, JFrame parent)
 	{
 		this.showProgress = flag;
@@ -262,16 +255,6 @@ public class SchemaReporter
 		if (this.includeTables && this.tables.size() == 0) this.retrieveTables();
 		if (this.cancel) return;
 
-		if (this.dbDesignerFormat)
-		{
-			WbFile f = new WbFile(this.outputfile);
-			DbDesignerWriter writer = new DbDesignerWriter(this.dbConn, this.tables, f.getFileName());
-			writer.setMonitor(monitor);
-			writer.setProgressPanel(progressPanel);
-			writer.writeXml(out);
-			return;
-		}
-		
 		if (this.includeProcedures && this.procedures.size() == 0) this.retrieveProcedures();
 		if (this.cancel) return;
 

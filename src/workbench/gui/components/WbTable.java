@@ -1777,6 +1777,11 @@ public class WbTable
 	public void checkCopyActions()
 	{
 		boolean hasRows = getRowCount() > 0;
+
+		if (this.copyAsTextAction != null)
+		{
+			this.copyAsTextAction.setEnabled(hasRows);
+		}
 		
 		if (this.copyInsertAction != null)
 		{

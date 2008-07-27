@@ -168,7 +168,7 @@ public class MainWindowTest
 		JTableOperator cols = new JTableOperator(definePK);
 		cols.setValueAt(Boolean.TRUE, 0, 1);
 		JButtonOperator ok = new JButtonOperator(definePK, "OK");
-		ok.push();
+		ok.pushNoBlock();
 		tool.waitEmpty();
 		
 		saveChanges(sqlPanel);
@@ -221,7 +221,7 @@ public class MainWindowTest
 		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Data|Save changes to database", "|");		
 		JDialogOperator warning = new JDialogOperator("Missing key columns");
 		JButtonOperator cancel = new JButtonOperator(warning, "Cancel");
-		cancel.push();
+		cancel.pushNoBlock();
 		tool.waitEmpty();
 		assertEquals(3, result.getColumnCount());
 	}
@@ -271,6 +271,19 @@ public class MainWindowTest
 		testUtil.waitUntilConnected(sqlPanel);
 	}
 
+	private void testCopyActions(JMenuBarOperator mainMenu)
+	{
+		JMenuOperator dataMenu = new JMenuOperator(mainMenu.getMenu(3));
+
+		// Copy as text menu item
+		for (int i=8; i < 12; i++)
+		{
+			JMenuItem item = (JMenuItem)dataMenu.getMenuComponent(i);
+			JMenuItemOperator op = new JMenuItemOperator(item);
+			assertTrue(op.isEnabled());
+		}
+	}
+	
 	private void runSql()
 	{
 		NamedComponentChooser chooser = new NamedComponentChooser();
@@ -300,6 +313,8 @@ public class MainWindowTest
 		Object nr = result.getValueAt(0, 0);
 		assertEquals(nr, new Integer(42));
 
+		testCopyActions(mainMenu);
+		
 		JMenuOperator dataMenu = new JMenuOperator(mainMenu.getMenu(3));
 		JMenuItem saveItem = (JMenuItem)dataMenu.getMenuComponent(1);
 		JMenuItemOperator save = new JMenuItemOperator(saveItem);
@@ -423,6 +438,8 @@ public class MainWindowTest
 			};
 		testUtil.execute(r);
 		testUtil.waitWhileBusy(panel);
+		QueueTool tool = new QueueTool();
+		tool.waitEmpty();
 		return panel.getLogMessage();
 	}
 

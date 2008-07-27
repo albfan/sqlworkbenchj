@@ -159,6 +159,17 @@ public class ForeignKeyDefinition
 		
 		return result;
 	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 53 * hash + (this.fkName != null ? this.fkName.hashCode() : 0);
+		hash = 53 * hash + (this.foreignTable != null ? this.foreignTable.hashCode() : 0);
+		hash = 53 * hash + this.updateRuleValue;
+		hash = 53 * hash + this.deleteRuleValue;
+		hash = 53 * hash + this.deferrableRuleValue;
+		return hash;
+	}
 	
 	public boolean equals(Object o)
 	{

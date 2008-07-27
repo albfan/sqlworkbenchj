@@ -102,6 +102,14 @@ public class ColumnReference
 		tagWriter.appendTag(result, indent, TAG_DEFER_RULE, this.fkDefinition.getDeferRule(), "jdbcValue", NumberStringCache.getNumberString(this.fkDefinition.getDeferrableRuleValue()));
 		return result;
 	}
+
+	@Override
+	public int hashCode() {
+		int hash = 3;
+		hash = 83 * hash + (this.fkDefinition != null ? this.fkDefinition.hashCode() : 0);
+		hash = 83 * hash + (this.foreignColumn != null ? this.foreignColumn.hashCode() : 0);
+		return hash;
+	}
 	
 	public boolean equals(Object o)
 	{

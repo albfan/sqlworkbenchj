@@ -697,6 +697,7 @@ public class DwPanel
 			newData.setProgressMonitor(null);
 			this.clearStatusMessage();
 
+			// Make sure this is executed on the EDT
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				public void run()

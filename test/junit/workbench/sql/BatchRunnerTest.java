@@ -122,7 +122,7 @@ public class BatchRunnerTest
 		}
 		finally
 		{
-			con.close();
+			con.disconnect();
 		}
 	}
 
@@ -196,7 +196,7 @@ public class BatchRunnerTest
 		}
 		finally
 		{
-			con.close();
+			con.disconnect();
 		}
 	}
 	

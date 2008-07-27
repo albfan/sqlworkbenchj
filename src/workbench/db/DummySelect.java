@@ -10,18 +10,21 @@
  *
  */
 package workbench.db;
+
 import java.sql.SQLException;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
+
 /**
  * @author support@sql-workbench.net
  */
-public class DummySelect 
+public class DummySelect
 	implements DbObject
 {
+
 	private TableIdentifier table;
-	
+
 	public DummySelect(TableIdentifier tbl)
 	{
 		this.table = tbl;
@@ -64,14 +67,20 @@ public class DummySelect
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		DataStore tableDef = meta.getTableDefinition(table);
 
-		if (tableDef.getRowCount() == 0) return StringUtil.EMPTY_STRING;
+		if (tableDef.getRowCount() == 0)
+		{
+			return StringUtil.EMPTY_STRING;
+		}
 		int colCount = tableDef.getRowCount();
-		if (colCount == 0) return StringUtil.EMPTY_STRING;
+		if (colCount == 0)
+		{
+			return StringUtil.EMPTY_STRING;
+		}
 
 		StringBuilder sql = new StringBuilder(colCount * 80);
 
 		sql.append("SELECT ");
-		for (int i=0; i < colCount; i++)
+		for (int i = 0; i < colCount; i++)
 		{
 			String column = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
 			if (i > 0)
@@ -89,6 +98,6 @@ public class DummySelect
 		sql.append(';');
 		sql.append(nl);
 
-		return sql.toString();	}
-	
+		return sql.toString();
+	}
 }

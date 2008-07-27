@@ -35,64 +35,182 @@ public class SqlFormatterTest
 		util.prepareEnvironment();
 	}
 
-	public void testCTAS()
+//	public void testUnion()
+//		throws Exception
+//	{
+//		String sql =
+//			"SELECT e.ManagerID, e.EmployeeID, e.Title, edh.DepartmentID,  \n" +
+//             "        0 AS Level \n" +
+//             "    FROM HumanResources.Employee AS e \n" +
+//             "    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh \n" +
+//             "        ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
+//             "    WHERE ManagerID IS NULL \n" +
+//             "    UNION ALL \n" +
+//             "    SELECT e.ManagerID, e.EmployeeID, e.Title, edh.DepartmentID, \n" +
+//             "        Level + 1 \n" +
+//             "    FROM HumanResources.Employee AS e \n" +
+//             "    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh \n" +
+//             "        ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
+//             "    INNER JOIN DirectReports AS d \n" +
+//             "        ON e.ManagerID = d.EmployeeID";
+//		SqlFormatter f = new SqlFormatter(sql);
+//		String formatted = f.getFormattedSql().toString();
+//		String expected = "";
+//		System.out.println("**************\n" + formatted + "\n**********");
+//	}
+	
+	public void testCTE()
+		throws Exception
 	{
-		try
-		{
-			String sql = "CREATE table cust as select * from customers where rownum <= 1000";
-			String expected = 
-					"CREATE TABLE cust \n"+
-					"AS\n"+
-					"SELECT *\n" + 
-					"FROM customers\n" + 
-					"WHERE rownum <= 1000";
-			SqlFormatter f = new SqlFormatter(sql);
-			String formatted = f.getFormattedSql().toString();
+		String sql = "WITH RECURSIVE DirectReports (ManagerID, EmployeeID, Title, DeptID, Level) \n" +
+             "AS \n" +
+             "( \n" +
+             "-- Anchor member definition \n" +
+             "    SELECT e.ManagerID, e.EmployeeID, e.Title, edh.DepartmentID,  \n" +
+             "        0 AS Level \n" +
+             "    FROM HumanResources.Employee AS e \n" +
+             "    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh \n" +
+             "        ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
+             "    WHERE ManagerID IS NULL \n" +
+             "    UNION ALL \n" +
+             "-- Recursive member definition \n" +
+             "    SELECT e.ManagerID, e.EmployeeID, e.Title, edh.DepartmentID, \n" +
+             "        Level + 1 \n" +
+             "    FROM HumanResources.Employee AS e \n" +
+             "    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh \n" +
+             "        ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
+             "    INNER JOIN DirectReports AS d \n" +
+             "        ON e.ManagerID = d.EmployeeID \n" +
+             ") \n" +
+             "-- Statement that executes the CTE \n" +
+             "SELECT ManagerID, EmployeeID, Title, Level \n" +
+             "FROM DirectReports \n" +
+             "INNER JOIN HumanResources.Department AS dp \n" +
+             "    ON DirectReports.DeptID = dp.DepartmentID \n" +
+             "WHERE dp.GroupName = N'Research and Development' OR Level = 0";
+
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql().toString();
+		String expected = 
+						"WITH RECURSIVE DirectReports (ManagerID, EmployeeID, Title, DeptID, LEVEL) \n" +
+						"AS\n" +
+						"(\n" +
+						"  -- Anchor member definition \n" +
+						"  SELECT e.ManagerID,\n" +
+						"         e.EmployeeID,\n" +
+						"         e.Title,\n" +
+						"         edh.DepartmentID,\n" +
+						"         0 AS LEVEL\n" +
+						"  FROM HumanResources.Employee AS e \n" +
+						"       INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL\n" +
+						"  WHERE ManagerID IS NULL\n" +
+						"  UNION ALL\n" +
+						"  -- Recursive member definition \n" +
+						"  SELECT e.ManagerID,\n" +
+						"         e.EmployeeID,\n" +
+						"         e.Title,\n" +
+						"         edh.DepartmentID,\n" +
+						"         LEVEL+1\n" +
+						"  FROM HumanResources.Employee AS e \n" +
+						"       INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
+						"       INNER JOIN DirectReports AS d ON e.ManagerID = d.EmployeeID\n" +
+						")\n" +
+						"-- Statement that executes the CTE \n" +
+						"SELECT ManagerID,\n" +
+						"       EmployeeID,\n" +
+						"       Title,\n" +
+						"       LEVEL\n" +
+						"FROM DirectReports \n" +
+						"     INNER JOIN HumanResources.Department AS dp ON DirectReports.DeptID = dp.DepartmentID\n" +
+						"WHERE dp.GroupName = N 'Research and Development'\n" +
+						"OR    LEVEL = 0";
+
+//		System.out.println("+++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+		sql = "with tmp as\n" +
+			"(SELECT *\n" +
+			"FROM users\n" +
+			") select tmp.*,nvl((select 1 from td_cdma_ip where tmp.src_ip between\n"+
+			"ip_fromip and ip_endip),0) isNew\n"+
+			"from tmp ";
+
+		expected = "WITH tmpAS\n" +
+							"(\n" +
+							"  SELECT * FROM users\n" +
+							")\n" +
+							"SELECT tmp. *,\n" +
+							"       nvl((SELECT 1 FROM td_cdma_ip WHERE tmp.src_ip BETWEEN ip_fromip AND ip_endip),0) isNew\n" +
+							"FROM tmp";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql().toString();
+//		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+
+
+		// Make sure a WITH in a different statement is not mistaken for a CTE
+		sql = "CREATE VIEW vfoo \n" +
+					"AS \n" +
+					"SELECT id, name FROM foo WHERE id BETWEEN 1 AND 10000 \n" +
+					"WITH CHECK OPTION";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql().toString();
+		
+		expected = "CREATE VIEW vfoo \n" +
+							"AS\n" + 
+							"SELECT id,\n" + 
+							"       name\n" +
+							"FROM foo\n" + 
+							"WHERE id BETWEEN 1\n" + 
+							"AND   10000 WITH CHECK OPTION";
+//		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+	}
+	
+	public void testCTAS()
+		throws Exception
+	{
+		String sql = "CREATE table cust as select * from customers where rownum <= 1000";
+		String expected =
+				"CREATE TABLE cust \n"+
+				"AS\n"+
+				"SELECT *\n" +
+				"FROM customers\n" +
+				"WHERE rownum <= 1000";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql().toString();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected + "\n*************");
-			assertEquals(expected, formatted);
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+		assertEquals(expected, formatted);
 	}
 	
 	public void testUnknown()
+		throws Exception
 	{
-		try
-		{
-			String sql = 
-						"SELECT e.ename AS employee, \n" +
-            "       CASE row_number() over (PARTITION BY d.deptno ORDER BY e.empno) \n" +
-            "         WHEN 1 THEN d.dname \n" +
-            "         ELSE NULL \n" +
-            "       END AS department \n" +
-            "FROM emp e\n" +
-            "     INNER JOIN dept d ON (e.deptno = d.deptno) \n" +
-            "ORDER BY d.deptno, \n" +
-            "         e.empno";		
-			
-			String expected = 
-				"SELECT e.ename AS employee,\n" +
-				"       CASE row_number() OVER (PARTITION BY d.deptno ORDER BY e.empno)\n" +
-				"         WHEN 1 THEN d.dname\n" +
-				"         ELSE NULL\n" +
-				"       END AS department\n" +
-				"FROM emp e \n" +
-				"     INNER JOIN dept d ON (e.deptno = d.deptno)\n" +
-				"ORDER BY d.deptno,\n" +
-				"         e.empno";
+		String sql =
+					"SELECT e.ename AS employee, \n" +
+					"       CASE row_number() over (PARTITION BY d.deptno ORDER BY e.empno) \n" +
+					"         WHEN 1 THEN d.dname \n" +
+					"         ELSE NULL \n" +
+					"       END AS department \n" +
+					"FROM emp e\n" +
+					"     INNER JOIN dept d ON (e.deptno = d.deptno) \n" +
+					"ORDER BY d.deptno, \n" +
+					"         e.empno";
 
-			SqlFormatter f = new SqlFormatter(sql);
-			String formatted = f.getFormattedSql().toString();
+		String expected =
+			"SELECT e.ename AS employee,\n" +
+			"       CASE row_number() OVER (PARTITION BY d.deptno ORDER BY e.empno)\n" +
+			"         WHEN 1 THEN d.dname\n" +
+			"         ELSE NULL\n" +
+			"       END AS department\n" +
+			"FROM emp e \n" +
+			"     INNER JOIN dept d ON (e.deptno = d.deptno)\n" +
+			"ORDER BY d.deptno,\n" +
+			"         e.empno";
+
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql().toString();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
-			assertEquals(expected, formatted);
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
-			
+		assertEquals(expected, formatted);
 	}
 
 
@@ -159,195 +277,140 @@ public class SqlFormatterTest
 	}
 	
 	public void testCreateTable()
+		throws Exception
 	{
-		try
-		{
-			String sql = null;
-			SqlFormatter f = null;
-			String formatted = null;
-			List<String> lines = null;
-			
-			sql = "create table person (id1 integer not null, id2 integer not null, id3 integer not null, firstname varchar(50), lastname varchar(50), primary key (id1, id2), foreign key (id3) references othertable(id));";
-			f = new SqlFormatter(sql, 100);
-			formatted = f.getFormattedSql().toString();
-			lines = TestUtil.getLines(formatted);
-			assertEquals("  id1           INTEGER NOT NULL,", lines.get(2));
-			assertEquals("  PRIMARY KEY (id1,id2),", lines.get(7));
-			assertEquals("  FOREIGN KEY (id3) REFERENCES othertable (id)", lines.get(8));
-			
-			sql = "create table person (somecol integer primary key, firstname varchar(50), lastname varchar(50));";
-			f = new SqlFormatter(sql, 100);
-			formatted = f.getFormattedSql().toString();
-			lines = TestUtil.getLines(formatted);
-			assertEquals("  somecol     INTEGER PRIMARY KEY,", lines.get(2));
-			
-			sql = "create table person (id1 integer not null, id2 integer not null, firstname varchar(50), lastname varchar(50), primary key (id1, id2));";
-			f = new SqlFormatter(sql, 100);
-			formatted = f.getFormattedSql().toString();
-			lines = TestUtil.getLines(formatted);
-			assertEquals("  id1           INTEGER NOT NULL,", lines.get(2));
-			assertEquals("  PRIMARY KEY (id1,id2)", lines.get(6));
-			
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		String sql = null;
+		SqlFormatter f = null;
+		String formatted = null;
+		List<String> lines = null;
+
+		sql = "create table person (id1 integer not null, id2 integer not null, id3 integer not null, firstname varchar(50), lastname varchar(50), primary key (id1, id2), foreign key (id3) references othertable(id));";
+		f = new SqlFormatter(sql, 100);
+		formatted = f.getFormattedSql().toString();
+		lines = TestUtil.getLines(formatted);
+		assertEquals("  id1           INTEGER NOT NULL,", lines.get(2));
+		assertEquals("  PRIMARY KEY (id1,id2),", lines.get(7));
+		assertEquals("  FOREIGN KEY (id3) REFERENCES othertable (id)", lines.get(8));
+
+		sql = "create table person (somecol integer primary key, firstname varchar(50), lastname varchar(50));";
+		f = new SqlFormatter(sql, 100);
+		formatted = f.getFormattedSql().toString();
+		lines = TestUtil.getLines(formatted);
+		assertEquals("  somecol     INTEGER PRIMARY KEY,", lines.get(2));
+
+		sql = "create table person (id1 integer not null, id2 integer not null, firstname varchar(50), lastname varchar(50), primary key (id1, id2));";
+		f = new SqlFormatter(sql, 100);
+		formatted = f.getFormattedSql().toString();
+		lines = TestUtil.getLines(formatted);
+		assertEquals("  id1           INTEGER NOT NULL,", lines.get(2));
+		assertEquals("  PRIMARY KEY (id1,id2)", lines.get(6));
 	}
 	
 	public void testFileParam()
+		throws Exception
 	{
-		try
-		{
-			String sql = "wbexport -file=\"c:\\Documents and Settings\\test.txt\" -type=text";
-			SqlFormatter f = new SqlFormatter(sql, 100);
-			String formatted = f.getFormattedSql().toString();
-			assertTrue(formatted.indexOf("\"c:\\Documents and Settings\\test.txt\"") > 0);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		String sql = "wbexport -file=\"c:\\Documents and Settings\\test.txt\" -type=text";
+		SqlFormatter f = new SqlFormatter(sql, 100);
+		String formatted = f.getFormattedSql().toString();
+		assertTrue(formatted.indexOf("\"c:\\Documents and Settings\\test.txt\"") > 0);
 	}
 	
 	public void testWbConfirm()
+		throws Exception
 	{
-		try
-		{
-			String sql = "wbconfirm 'my message'";
-			SqlFormatter f = new SqlFormatter(sql, 100);
-			CharSequence formatted = f.getFormattedSql();
-			String expected = "WbConfirm 'my message'";
-			assertEquals("WbConfirm not formatted correctly", expected, formatted);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		String sql = "wbconfirm 'my message'";
+		SqlFormatter f = new SqlFormatter(sql, 100);
+		CharSequence formatted = f.getFormattedSql();
+		String expected = "WbConfirm 'my message'";
+		assertEquals("WbConfirm not formatted correctly", expected, formatted);
 	}
 
 	public void testAliasForSubselect()
+		throws Exception
 	{
-		try
-		{
-			String sql = "select a,b, (select a,b from t2) col4 from t1";
-			SqlFormatter f = new SqlFormatter(sql, 100);
-			CharSequence formatted = f.getFormattedSql();
-			String expected = "SELECT a,\n" + "       b,\n" + "       (SELECT a, b FROM t2) col4\n" + "FROM t1";
-			assertEquals("SELECT in VALUES not formatted", expected, formatted);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		String sql = "select a,b, (select a,b from t2) col4 from t1";
+		SqlFormatter f = new SqlFormatter(sql, 100);
+		CharSequence formatted = f.getFormattedSql();
+		String expected = "SELECT a,\n" + "       b,\n" + "       (SELECT a, b FROM t2) col4\n" + "FROM t1";
+		assertEquals("SELECT in VALUES not formatted", expected, formatted);
 	}
 
 	public void testAsInFrom()
+		throws Exception
 	{
-		try
-		{
-			String sql = "select t1.a, t2.b from bla as t1, t2";
-			SqlFormatter f = new SqlFormatter(sql, 100);
-			CharSequence formatted = f.getFormattedSql();
-			String expected = "SELECT t1.a,\n" + "       t2.b\n" + "FROM bla AS t1,\n" + "     t2";
-			assertEquals("SELECT in VALUES not formatted", expected, formatted);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		String sql = "select t1.a, t2.b from bla as t1, t2";
+		SqlFormatter f = new SqlFormatter(sql, 100);
+		CharSequence formatted = f.getFormattedSql();
+		String expected = "SELECT t1.a,\n" + "       t2.b\n" + "FROM bla AS t1,\n" + "     t2";
+		assertEquals("SELECT in VALUES not formatted", expected, formatted);
 	}
 
 	public void testInsertWithSubselect()
+		throws Exception
 	{
-		try
-		{
-			String sql = "insert into tble (a,b) values ( (select max(x) from y), 'bla')";
-			String expected = "INSERT INTO tble\n" + "(\n" + "  a,\n" + "  b\n" + ") \n" + "VALUES\n" + "(\n" + "   (SELECT MAX(x) FROM y),\n" + "  'bla'\n" + ")";
-			SqlFormatter f = new SqlFormatter(sql, 100);
-			CharSequence formatted = f.getFormattedSql();
+		String sql = "insert into tble (a,b) values ( (select max(x) from y), 'bla')";
+		String expected = "INSERT INTO tble\n" + "(\n" + "  a,\n" + "  b\n" + ") \n" + "VALUES\n" + "(\n" + "   (SELECT MAX(x) FROM y),\n" + "  'bla'\n" + ")";
+		SqlFormatter f = new SqlFormatter(sql, 100);
+		CharSequence formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
-			assertEquals("SELECT in VALUES not formatted", expected, formatted);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		assertEquals("SELECT in VALUES not formatted", expected, formatted);
 	}
 
 	public void testLowerCaseFunctions()
+		throws Exception
 	{
-		try
-		{
-			String sql = "select col1, MAX(col2) from theTable group by col1;";
-			String expected = "SELECT col1,\n       max(col2)\nFROM theTable\nGROUP BY col1;";
-			SqlFormatter f = new SqlFormatter(sql, 100);
-			f.setUseLowerCaseFunctions(true);
-			CharSequence formatted = f.getFormattedSql();
+		String sql = "select col1, MAX(col2) from theTable group by col1;";
+		String expected = "SELECT col1,\n       max(col2)\nFROM theTable\nGROUP BY col1;";
+		SqlFormatter f = new SqlFormatter(sql, 100);
+		f.setUseLowerCaseFunctions(true);
+		CharSequence formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
-			assertEquals("SELECT in VALUES not formatted", expected, formatted);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		assertEquals("SELECT in VALUES not formatted", expected, formatted);
 	}
 	
 	public void testCase()
+		throws Exception
 	{
-		try
-		{
-			String sql = "SELECT col1 as bla, case when x = 1 then 2 else 3 end AS y FROM person";
-			String expected = 
-				"SELECT col1 AS bla,\n" +
-				"       CASE\n" +
-				"         WHEN x = 1 THEN 2\n" +
-				"         ELSE 3\n" +
-				"       END AS y\n" +
-				"FROM person";
-			SqlFormatter f = new SqlFormatter(sql, 100);
-			CharSequence formatted = f.getFormattedSql();
-			assertEquals("CASE alias not formatted", expected, formatted);
+		String sql = "SELECT col1 as bla, case when x = 1 then 2 else 3 end AS y FROM person";
+		String expected = 
+			"SELECT col1 AS bla,\n" +
+			"       CASE\n" +
+			"         WHEN x = 1 THEN 2\n" +
+			"         ELSE 3\n" +
+			"       END AS y\n" +
+			"FROM person";
+		SqlFormatter f = new SqlFormatter(sql, 100);
+		CharSequence formatted = f.getFormattedSql();
+		assertEquals("CASE alias not formatted", expected, formatted);
 
-			sql = "SELECT case when x = 1 then 2 else 3 end AS y FROM person";
-			expected = 
-				"SELECT CASE\n" +
-				"         WHEN x = 1 THEN 2\n" +
-				"         ELSE 3\n" +
-				"       END AS y\n" +
-				"FROM person";
-			f = new SqlFormatter(sql, 100);
-			formatted = f.getFormattedSql();
+		sql = "SELECT case when x = 1 then 2 else 3 end AS y FROM person";
+		expected = 
+			"SELECT CASE\n" +
+			"         WHEN x = 1 THEN 2\n" +
+			"         ELSE 3\n" +
+			"       END AS y\n" +
+			"FROM person";
+		f = new SqlFormatter(sql, 100);
+		formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
-			assertEquals("CASE alias not formatted", expected, formatted);
+		assertEquals("CASE alias not formatted", expected, formatted);
 
-			sql = "SELECT a,b,c from table order by b,case when a=1 then 2 when a=2 then 1 else 3 end";
-			expected = 
-				"SELECT a,\n" + 
-				"       b,\n" + 
-				"       c\n" + 
-				"FROM TABLE\n" + 
-				"ORDER BY b,\n" + 
-				"         CASE\n" + 
-				"           WHEN a = 1 THEN 2\n" + 
-				"           WHEN a = 2 THEN 1\n" + 
-				"           ELSE 3\n" + 
-				"         END";
-			f = new SqlFormatter(sql, 100);
-			formatted = f.getFormattedSql();
+		sql = "SELECT a,b,c from table order by b,case when a=1 then 2 when a=2 then 1 else 3 end";
+		expected = 
+			"SELECT a,\n" + 
+			"       b,\n" + 
+			"       c\n" + 
+			"FROM TABLE\n" + 
+			"ORDER BY b,\n" + 
+			"         CASE\n" + 
+			"           WHEN a = 1 THEN 2\n" + 
+			"           WHEN a = 2 THEN 1\n" + 
+			"           ELSE 3\n" + 
+			"         END";
+		f = new SqlFormatter(sql, 100);
+		formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
-			assertEquals("CASE alias not formatted", expected, formatted);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		assertEquals("CASE alias not formatted", expected, formatted);
 	}
 
 	public void testWhitespace()

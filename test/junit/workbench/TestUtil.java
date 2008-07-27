@@ -27,9 +27,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
+import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -292,11 +296,24 @@ public class TestUtil
 	
 	public static String getXPathValue(String xml, String expression)
 	{
+		return getXPathValue(xml, expression, null);
+	}
+
+	public static String getXPathValue(String xml, String expression, Map<String, String> namespaceMapping)
+	{
 		try
 		{
-			XPath xpath = XPathFactory.newInstance().newXPath();
+			DocumentBuilderFactory xmlFact = DocumentBuilderFactory.newInstance();
+      xmlFact.setNamespaceAware(true);
+      DocumentBuilder builder = xmlFact.newDocumentBuilder();
 			InputSource inputSource = new InputSource(new StringReader(xml));
-			String value = (String) xpath.evaluate(expression, inputSource, XPathConstants.STRING);		
+      Document doc = builder.parse(inputSource);
+			XPath xpath = XPathFactory.newInstance().newXPath();
+			if (namespaceMapping != null)
+			{
+			  xpath.setNamespaceContext(new SimpleNamespaceContext(namespaceMapping));
+			}
+			String value = (String) xpath.evaluate(expression, doc, XPathConstants.STRING);		
 			return value;
 		}
 		catch (Exception e)

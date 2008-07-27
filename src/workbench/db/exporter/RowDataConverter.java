@@ -80,16 +80,12 @@ public abstract class RowDataConverter
 	
 	protected boolean convertDateToTimestamp = false;
 	
-	/**
-	 *	The metadata for the result set that should be exported
-	 */
 	public RowDataConverter()
 	{
 		this.defaultDateFormatter = Settings.getInstance().getDefaultDateFormatter();
 		this.defaultTimestampFormatter = Settings.getInstance().getDefaultTimestampFormatter();
 		this.defaultNumberFormatter = Settings.getInstance().getDefaultDecimalFormatter();
 	}
-
 
 	public void setWriteHeader(boolean writeHeader)
 	{

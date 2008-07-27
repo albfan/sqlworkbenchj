@@ -531,19 +531,24 @@ public class ProfileTree
 		checkActions();
 	}
 
-	public Insets getAutoscrollInsets()
-	{
-		return this.autoscrollInsets;
-	}
-	
 	public void autoscroll(Point cursorLocation)
 	{
-		Insets insets = getAutoscrollInsets();
 		Rectangle outer = getVisibleRect();
-		Rectangle inner = new Rectangle(outer.x+insets.left, outer.y+insets.top, outer.width-(insets.left+insets.right), outer.height-(insets.top+insets.bottom));
+		Rectangle inner = new Rectangle(
+						outer.x + autoscrollInsets.left,
+						outer.y + autoscrollInsets.top,
+						outer.width - (autoscrollInsets.left + autoscrollInsets.right),
+						outer.height - (autoscrollInsets.top+autoscrollInsets.bottom)
+					);
+		
 		if (!inner.contains(cursorLocation))
 		{
-			Rectangle scrollRect = new Rectangle(cursorLocation.x-insets.left, cursorLocation.y-insets.top,	insets.left+insets.right, insets.top+insets.bottom);
+			Rectangle scrollRect = new Rectangle(
+							cursorLocation.x - autoscrollInsets.left,
+							cursorLocation.y - autoscrollInsets.top,
+							autoscrollInsets.left + autoscrollInsets.right,
+							autoscrollInsets.top + autoscrollInsets.bottom
+						);
 			scrollRectToVisible(scrollRect);
 		}
 	}

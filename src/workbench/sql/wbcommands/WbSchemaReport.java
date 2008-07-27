@@ -57,7 +57,6 @@ public class WbSchemaReport
 		cmdLine.addArgument("tables", ArgumentType.TableArgument);
 		cmdLine.addArgument("schemas");
 		cmdLine.addArgument("reportTitle");
-		cmdLine.addArgument("format", StringUtil.stringToList("wb,dbdesigner"));
 		cmdLine.addArgument("useSchemaName", ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_VIEWS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
@@ -73,7 +72,6 @@ public class WbSchemaReport
 	public StatementRunnerResult execute(final String sql)
 		throws SQLException
 	{
-		boolean dbDesigner = false;
 		StatementRunnerResult result = new StatementRunnerResult();
 
 		cmdLine.parse(getCommandLine(sql));
@@ -93,27 +91,11 @@ public class WbSchemaReport
 			return result;
 		}
 
-		String format = cmdLine.getValue("format");
-		if (StringUtil.isEmptyString(format)) format = "xml";
-
-		if ("dbdesigner".equalsIgnoreCase(format))
-		{
-			dbDesigner = true;
-		}
-		else if (!"xml".equalsIgnoreCase(format) &&
-		         !"wb".equalsIgnoreCase(format) &&
-						 !"wbxml".equalsIgnoreCase(format))
-		{
-			result.addMessage(ResourceMgr.getString("ErrSchemaReportWrongParameters"));
-			result.setFailure();
-			return result;
-		}
 		String namespace = cmdLine.getValue("namespace");
 		this.reporter = new SchemaReporter(currentConnection);
 		String title = cmdLine.getValue("reportTitle");
 		this.reporter.setReportTitle(title);
 		this.reporter.setNamespace(namespace);
-		this.reporter.setDbDesigner(dbDesigner);
 		this.reporter.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
 		TableIdentifier[] tables = this.parseTables();
 		if (tables != null)

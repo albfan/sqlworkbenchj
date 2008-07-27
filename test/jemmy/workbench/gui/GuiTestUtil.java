@@ -40,6 +40,7 @@ public class GuiTestUtil
 		System.setProperty("workbench.system.doexit", "false");
 
 //		JemmyProperties.getCurrentTimeouts().loadDebugTimeouts();
+    JemmyProperties.getCurrentTimeouts().load(getClass().getClassLoader().getResourceAsStream("org/netbeans/jemmy/debug.timeouts"));
 		TestOut out = JemmyProperties.getProperties().getOutput().createErrorOutput();
 		JemmyProperties.getProperties().setOutput(out);
 	}

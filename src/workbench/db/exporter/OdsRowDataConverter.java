@@ -195,7 +195,7 @@ public class OdsRowDataConverter
 			"<style:style style:name=\"ce1\" style:family=\"table-cell\" style:parent-style-name=\"Default\"> \n" +
 			"  <style:text-properties fo:font-weight=\"bold\" style:font-weight-asian=\"bold\" style:font-weight-complex=\"bold\"/> \n" +
 			"</style:style> \n" +
-			"</office:automatic-styles>";
+			"</office:automatic-styles>\n";
 		content.write(styles);
 	}
 

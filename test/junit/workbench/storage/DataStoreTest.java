@@ -532,7 +532,7 @@ public class DataStoreTest
 		}
 		finally
 		{
-			con.close();
+			con.disconnect();
 		}
 	}
 	

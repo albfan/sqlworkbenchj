@@ -478,7 +478,6 @@ public class SqlFormatter
 
 		int currentColumnCount = 0;
 		boolean isSelect = last.getContents().equals("SELECT");
-		boolean isUpdate = last.getContents().equals("UPDATE");
 
 		int columnsPerLine = -1;
 		if (isSelect)
@@ -907,6 +906,7 @@ public class SqlFormatter
 	private SQLToken processInList(SQLToken current)
 		throws Exception
 	{
+		if (current == null) return null;
 		ArrayList<StringBuilder> list = new ArrayList<StringBuilder>(25);
 		list.add(new StringBuilder(""));
 		SQLToken t = current;
@@ -1057,6 +1057,14 @@ public class SqlFormatter
 					this.appendNewline();
 				}
 
+				if (word.equals("WITH"))
+				{
+					lastToken = t;
+					t = this.processCTE(t);
+					if (t == null) return;
+					continue;
+				}
+				
 				if (word.equals("SELECT"))
 				{
 					lastToken = t;
@@ -1173,6 +1181,82 @@ public class SqlFormatter
 //		this.appendNewline();
 	}
 
+	private SQLToken processCTE(SQLToken previousToken)
+		throws Exception
+	{
+		if (previousToken == null) return null;
+
+		SQLToken lastToken = null;
+		
+		this.appendText(' ');
+		
+		SQLToken t = skipComments();
+		
+		int bracketCount = 0;
+		boolean afterAs = false;
+		
+		while (t != null)
+		{
+			String verb = t.getContents();
+
+			if (verb.equals("("))
+			{
+				bracketCount ++;
+				if (!afterAs) this.appendText(' ');
+				this.appendText('(');
+
+				if (bracketCount == 1)
+				{
+					if (afterAs)
+					{
+						StringBuilder oldIndent = this.indent;
+						this.indent = new StringBuilder(indent == null ? "" : indent).append("  ");
+						this.appendNewline();
+						t = skipComments();
+						t = processSubSelect(t.getContents().equals("SELECT"));
+						this.indent = oldIndent;
+						this.appendNewline();
+						// once the AS part is finished (which is treated as a sub-select)
+						// the actual SELECT should come, so we can simply return control
+						// to the main formatting loop
+						return t;
+					}
+					else
+					{
+						t = skipComments();
+						t = processInList(t);
+						bracketCount --;
+						continue;
+					}
+				}
+			}
+			else if (verb.equals("AS"))
+			{
+				this.appendText(verb);
+				this.appendNewline();
+				afterAs = true;
+			}
+			else if (verb.equals(")"))
+			{
+				bracketCount --;
+				this.appendText(")");
+			}
+			else if (t.isComment())
+			{
+				this.appendComment(verb);
+			}
+			else
+			{
+				if (needsWhitespace(lastToken, t)) appendText(' ');
+				appendText(verb);
+			}
+			lastToken = t;
+			t = skipComments();
+		}
+		return null;
+	}
+	
+	
 	private SQLToken processWhere(SQLToken previousToken)
 		throws Exception
 	{
@@ -1255,6 +1339,7 @@ public class SqlFormatter
 		throws Exception
 	{
 		SQLToken next = lexer.getNextToken(true, false);
+		if (next == null) return null;
 		if (!next.isComment()) return next;
 		while (next != null) 
 		{
