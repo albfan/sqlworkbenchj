@@ -141,7 +141,7 @@ public class DdlCommand extends SqlCommand
 					}
 					else
 					{
-						result.addMessage(this.verb + " " + ResourceMgr.getString("MsgKnownStatementOK"));
+						appendSuccessMessage(result);
 					}
 				}
 

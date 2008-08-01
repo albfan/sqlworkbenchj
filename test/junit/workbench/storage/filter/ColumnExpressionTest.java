@@ -86,6 +86,13 @@ public class ColumnExpressionTest
 		assertTrue(col.evaluate(values));
 		col.setIgnoreCase(false);
 		assertFalse(col.evaluate(values));
+
+		
+		col = new ColumnExpression("firstname", new ContainsNotComparator(), "Pho");
+		col.setIgnoreCase(true);
+		assertFalse(col.evaluate(values));
+		col.setIgnoreCase(false);
+		assertTrue(col.evaluate(values));
 		
 		col = new ColumnExpression("firstname", new StringEqualsComparator(), "Zaphod");
 		col.setIgnoreCase(true);

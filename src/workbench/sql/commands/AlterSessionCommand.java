@@ -86,8 +86,7 @@ public class AlterSessionCommand
 			this.currentStatement.executeUpdate(sql);
 			if (oldSchema == null)
 			{
-				String msg = VERB + " " + ResourceMgr.getString("MsgKnownStatementOK");
-				result.addMessage(msg);
+				appendSuccessMessage(result);
 			}
 			else 
 			{

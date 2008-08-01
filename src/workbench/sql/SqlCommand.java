@@ -117,6 +117,7 @@ public class SqlCommand
 	 */
 	protected boolean appendWarnings(StatementRunnerResult result)
 	{
+		if (!this.runner.getShowWarnings()) return false;
 		CharSequence warn = SqlUtil.getWarnings(this.currentConnection, this.currentStatement);
 		boolean hasWarning = false;
 		if (warn != null && warn.length() > 0)

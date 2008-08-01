@@ -518,9 +518,7 @@ public class DbMetadata
 	public boolean isSelectIntoNewTable(String sql)
 	{
 		if (this.selectIntoPattern == null) return false;
-		if (sql == null || sql.length() == 0) return false;
-		Matcher m = this.selectIntoPattern.matcher(sql);
-		return m.find();
+		return SqlUtil.isSelectIntoNewTable(this.selectIntoPattern, sql);
 	}
 
 	public boolean isMySql() { return this.isMySql; }

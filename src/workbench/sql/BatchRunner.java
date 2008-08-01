@@ -511,22 +511,25 @@ public class BatchRunner
 
 		end = System.currentTimeMillis();
 
-		StringBuilder msg = new StringBuilder(50);
-		msg.append(scriptFile.getFullPath());
-		msg.append(": ");
-		msg.append(executedCount);
-		msg.append(' ');
-		msg.append(ResourceMgr.getString("MsgTotalStatementsExecuted"));
-		if (resultDisplay == null) msg.insert(0, '\n'); // force newline on console
-		this.printMessage(msg.toString());
-
+		if (!quiet)
+		{
+			StringBuilder msg = new StringBuilder(50);
+			msg.append(scriptFile.getFullPath());
+			msg.append(": ");
+			msg.append(executedCount);
+			msg.append(' ');
+			msg.append(ResourceMgr.getString("MsgTotalStatementsExecuted"));
+			if (resultDisplay == null) msg.insert(0, '\n'); // force newline on console
+			this.printMessage(msg.toString());
+		}
+		
 		if (consolidateMessages)
 		{
 			if (errorCount > 0)
 			{
 				printMessage((resultDisplay == null ? "\n" : "") + errorCount + " " + ResourceMgr.getString("MsgTotalStatementsFailed"));
 			}
-			this.printMessage(totalRows + " " + ResourceMgr.getString("MsgTotalRowsAffected"));
+			if (!quiet) this.printMessage(totalRows + " " + ResourceMgr.getString("MsgTotalRowsAffected"));
 		}
 		
 		parser.done();

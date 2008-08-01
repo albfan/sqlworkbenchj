@@ -38,6 +38,44 @@ public class ScriptParserTest
 		super(testName);
 	}
 
+	public void testQuotes()
+		throws Exception
+	{
+		String sql = "delete from gaga;\n" +
+			"\n" +
+			"insert into gaga (col1) values ('one, two);";
+		ScriptParser p = new ScriptParser(sql);
+		p.setDelimiter(DelimiterDefinition.STANDARD_DELIMITER);
+		p.setCheckForSingleLineCommands(false);
+		p.setScript(sql);
+		// Make sure the remainder of the script (after the initial delete) is
+		// added as (an incorrect) statement to the list of statement. Otherwise
+		// it won't be processed and won't give an error
+		int count = p.getSize();
+		assertEquals(2, count);
+		assertEquals("delete from gaga", p.getCommand(0));
+		assertEquals("insert into gaga (col1) values ('one, two)", p.getCommand(1));
+
+		sql = "wbfeedback off; \n" +
+             " \n" +
+             "create procedure dbo.CopyTable \n" +
+             "      @SrcTableName varchar(max), \n" +
+             "      @DestTableName varchar(max) \n" +
+             "      as \n" +
+             "   set nocount on \n" +
+             "   set xact_abort on \n" +
+             "   declare @cols varchar(max) \n" +
+             "   select @cols = case when @cols is null then '' else @cols + ',' end + name from sys.columns where object_id=object_id(@DestTableName) order by column_id \n" +
+             "   declare @sql varchar(max) \n" +
+             "   set @sql = 'insert into ' + @DestTableName + ' (' + @cols + ') ' + \n" +
+             "      'select ' + @cols + ' from + @SrcTableName \n" +
+             "   exec (@sql); \n" +
+             " \n" +
+             "commit;";
+		p.setScript(sql);
+		assertEquals(2, p.getSize());
+	}
+
 	public void testMultiByteEncoding()
 		throws Exception
 	{

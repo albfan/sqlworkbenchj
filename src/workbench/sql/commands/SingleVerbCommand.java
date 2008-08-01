@@ -57,7 +57,7 @@ public class SingleVerbCommand extends SqlCommand
 				this.currentStatement.execute(verb);
 			}
 
-			result.addMessage(this.verb + " " + ResourceMgr.getString("MsgKnownStatementOK"));
+			appendSuccessMessage(result);
 			result.setSuccess();
 			processMoreResults(aSql, result, false);
 		}

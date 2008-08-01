@@ -1142,6 +1142,10 @@ public class SqlPanel
 		{
 			w.setTabTitle(index, this.tabName);
 		}
+		if (this.hasFileLoaded() && this.editor.isModified())
+		{
+			editor.saveCurrentFile();
+		}
 	}
 
 	public void saveHistory(WbWorkspace w)

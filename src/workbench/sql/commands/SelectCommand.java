@@ -96,18 +96,32 @@ public class SelectCommand extends SqlCommand
 			}
 
 			ResultSet rs = null;
+			boolean hasResult = true;
+
 			if (isPrepared)
 			{
 				rs = ((PreparedStatement)this.currentStatement).executeQuery();
 			}
 			else
 			{
-				rs = this.currentStatement.executeQuery(sql);
+				if (Settings.getInstance().getUseGenericExecuteForSelect())
+				{
+					hasResult = this.currentStatement.execute(sql);
+				}
+				else
+				{
+					rs = this.currentStatement.executeQuery(sql);
+				}
 			}
 
-			if (rs != null)
+			if (this.isCancelled)
 			{
-				processResults(result, true, rs);
+				result.addMessage(ResourceMgr.getString("MsgStatementCancelled"));
+				result.setFailure();
+			}
+			else
+			{
+				processResults(result, hasResult, rs);
 
 				if (!isCancelled)
 				{
@@ -119,15 +133,7 @@ public class SelectCommand extends SqlCommand
 				}
 				result.setSuccess();
 			}
-			else if (this.isCancelled)
-			{
-				result.addMessage(ResourceMgr.getString("MsgStatementCancelled"));
-				result.setFailure();
-			}
-			else
-			{
-				throw new Exception(ResourceMgr.getString("MsgReceivedNullResultSet"));
-			}
+
 			this.runner.releaseSavepoint();
 		}
 		catch (Exception e)

@@ -14,7 +14,6 @@ package workbench.sql;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -67,6 +66,7 @@ public class CommandMapper
 	private List<String> dbSpecificCommands;
 	private boolean supportsSelectInto = false;
 	private DbMetadata metaData;
+	private boolean useExecuteForSelect = false;
 	
 	public CommandMapper()
 	{
@@ -179,6 +179,7 @@ public class CommandMapper
 		this.cmdDispatch.put("CREATE OR REPLACE", DdlCommand.CREATE);
 
 		this.dbSpecificCommands = new LinkedList<String>();
+		this.useExecuteForSelect = Settings.getInstance().getUseGenericExecuteForSelect();
 	}
 	
 	/**
@@ -291,6 +292,13 @@ public class CommandMapper
 		SqlCommand cmd = null;
 		String verb = SqlUtil.getSqlVerb(sql);
 		if (StringUtil.isEmptyString(verb)) return null;
+
+		if (this.useExecuteForSelect)
+		{
+			// If the SelectStatement should use the generic execute() method,
+			// we don't have to perform the check for the SELECT .. INTO syntax
+			return this.cmdDispatch.get(verb);
+		}
 		
 		if (this.supportsSelectInto && this.metaData != null && this.metaData.isSelectIntoNewTable(sql))
 		{

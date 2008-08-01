@@ -1778,6 +1778,11 @@ public class WbTable
 	{
 		boolean hasRows = getRowCount() > 0;
 
+		if (this.saveDataAsAction != null)
+		{
+			saveDataAsAction.setEnabled(hasRows);
+		}
+		
 		if (this.copyAsTextAction != null)
 		{
 			this.copyAsTextAction.setEnabled(hasRows);

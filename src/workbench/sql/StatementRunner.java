@@ -53,6 +53,7 @@ public class StatementRunner
 	private WbStartBatch batchCommand;
 	private ResultLogger resultLogger;
 	private boolean verboseLogging;
+	private boolean showWarnings;
 	private boolean removeComments;
 	private boolean fullErrorReporting = false;
 	private ParameterPrompter prompter;
@@ -96,6 +97,16 @@ public class StatementRunner
 		this.controller = control;
 	}
 
+	public boolean getShowWarnings()
+	{
+		return this.showWarnings;
+	}
+	
+	public void setShowWarnings(boolean flag)
+	{
+		this.showWarnings = flag;
+	}
+	
 	public void setIgnoreDropErrors(boolean flag)
 	{
 		this.ignoreDropErrors = flag;

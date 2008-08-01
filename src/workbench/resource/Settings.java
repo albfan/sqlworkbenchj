@@ -1747,6 +1747,11 @@ public class Settings
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Database">
+	public boolean getUseGenericExecuteForSelect()
+	{
+		return getBoolProperty("workbench.db.select.genericexecute", false);
+	}
+	
 	public String getPKMappingFilename()
 	{
 		String fName = System.getProperty(PK_MAPPING_FILENAME_PROPERTY, getProperty(PK_MAPPING_FILENAME_PROPERTY, null));

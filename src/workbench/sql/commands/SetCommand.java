@@ -103,8 +103,9 @@ public class SetCommand extends SqlCommand
 				// are treated correctly. E.g. when sending a SET and a SELECT 
 				// as one statement for SQL Server
 				boolean hasResult = this.currentStatement.execute(aSql);
-				result.setSuccess();
 				processMoreResults(aSql, result, hasResult);
+				result.setSuccess();
+				appendSuccessMessage(result);
 			}
 		}
 		catch (Exception e)

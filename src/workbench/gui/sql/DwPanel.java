@@ -111,7 +111,6 @@ public class DwPanel
 	
 	private boolean editingStarted;
 	private boolean batchUpdate;
-	private boolean manageUpdateAction;
 	private boolean readOnly;
 	
 	private String[] lastResultMessages;
@@ -176,11 +175,6 @@ public class DwPanel
 		{	
 			dataTable.selectKeyColumns();
 		}
-	}
-	
-	public void setManageUpdateAction(boolean aFlag)
-	{
-		this.manageUpdateAction = aFlag;
 	}
 	
 	public void setDefaultStatusMessage(String aMessage)
@@ -358,10 +352,10 @@ public class DwPanel
 		synchronized (this)
 		{
 			this.dataTable.stopEditing();
-			if (this.manageUpdateAction)
-			{
+//			if (this.manageUpdateAction)
+//			{
 				this.disableUpdateActions();
-			}
+//			}
 
 			try
 			{
@@ -393,7 +387,7 @@ public class DwPanel
 			{
 				savingData = false;
 				this.clearStatusMessage();
-				if (this.manageUpdateAction) this.checkResultSetActions();
+				this.checkResultSetActions();
 			}
 		}
 		
@@ -726,8 +720,6 @@ public class DwPanel
 	{
 		boolean hasResult = this.hasResultSet();
 		int rows = this.getTable().getSelectedRowCount();
-		
-		this.dataTable.getExportAction().setEnabled(hasResult);
 		
 		if (this.readOnly)
 		{

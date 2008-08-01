@@ -129,7 +129,7 @@ public class TableDataPanel
 			}
 		};
 
-		this.dataDisplay.setManageUpdateAction(true);
+//		this.dataDisplay.setManageUpdateAction(true);
 		this.dataDisplay.setShowLoadProcess(true);
 		this.dataDisplay.setDefaultStatusMessage("");
 

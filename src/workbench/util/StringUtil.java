@@ -648,7 +648,7 @@ public class StringUtil
 	public static boolean stringToBool(String aString)
 	{
 		if (aString == null) return false;
-		return ("true".equalsIgnoreCase(aString) || "1".equals(aString) || "y".equalsIgnoreCase(aString) || "yes".equalsIgnoreCase(aString) );
+		return ("true".equalsIgnoreCase(aString) || "1".equals(aString) || "y".equalsIgnoreCase(aString) || "yes".equalsIgnoreCase(aString) || "on".equalsIgnoreCase(aString) );
 	}
 
 	public static final String getMaxSubstring(String s, int maxLen, String add)

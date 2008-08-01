@@ -672,6 +672,19 @@ public class SqlUtil
 		return s;
 	}
 
+	public static boolean isSelectIntoNewTable(Pattern testPattern, String sql)
+	{
+		if (testPattern == null) return false;
+		if (sql == null || sql.length() == 0) return false;
+		int pos = SqlUtil.getKeywordPosition("SELECT", sql);
+		if (pos > -1)
+		{
+			sql = sql.substring(pos);
+		}
+		Matcher m = testPattern.matcher(sql);
+		return m.find();		
+	}
+
 	/**
 	 * returns true if the passed data type (from java.sql.Types)
 	 * indicates a data type which can hold numeric values with

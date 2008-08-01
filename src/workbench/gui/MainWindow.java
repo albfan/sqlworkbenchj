@@ -2245,6 +2245,10 @@ public class MainWindow
 					if (!p.canCloseTab()) return false;
 				}
 			}
+			else
+			{
+
+			}
 			w = new WbWorkspace(realFilename, true);
 			int selected = this.sqlTab.getSelectedIndex();
 			w.setSelectedTab(selected);
@@ -2252,6 +2256,7 @@ public class MainWindow
 			{
 				MainPanel p = getSqlPanel(i);
 				p.saveToWorkspace(w,i);
+				
 			}
 			if (WbManager.getInstance().outOfMemoryOcurred())
 			{
@@ -2669,7 +2674,7 @@ public class MainWindow
 	{
 		if (Settings.getInstance().getAutoSaveWorkspace())
 		{
-			this.saveWorkspace();
+			this.saveWorkspace(false);
 		}
 		getJobIndicator().jobStarted();
 	}
