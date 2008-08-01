@@ -23,12 +23,12 @@ import workbench.util.ArgumentParser;
  *
  * @author support@sql-workbench.net
  */
-public class WbEnableWarnings
+public class WbHideWarnings
 	extends SqlCommand
 {
 	public static final String VERB = "WBENABLEWARNINGS";
 	
-	public WbEnableWarnings()
+	public WbHideWarnings()
 	{
 		this.cmdLine = new ArgumentParser(false);
 		this.cmdLine.addArgument("on");
@@ -64,17 +64,17 @@ public class WbEnableWarnings
 			}
 			else
 			{
-				this.runner.setShowWarnings(parm.equalsIgnoreCase("on"));
+				this.runner.setHideWarnings(parm.equalsIgnoreCase("on"));
 			}
 		}
 		
-		if (runner.getShowWarnings())
+		if (runner.getHideWarnings())
 		{
-			result.addMessage(ResourceMgr.getString("MsgWarningsEnabled"));
+			result.addMessage(ResourceMgr.getString("MsgWarningsDisabled"));
 		}
 		else
 		{
-			result.addMessage(ResourceMgr.getString("MsgWarningsDisabled"));
+			result.addMessage(ResourceMgr.getString("MsgWarningsEnabled"));
 		}
 		return result;
 	}

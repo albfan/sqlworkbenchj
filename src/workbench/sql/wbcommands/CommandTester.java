@@ -65,7 +65,7 @@ public class CommandTester
 		commands.add(WbStartBatch.VERB);
 		commands.add(WbXslt.VERB);
 		commands.add(WbConnect.VERB);
-		commands.add(WbEnableWarnings.VERB);
+		commands.add(WbHideWarnings.VERB);
 		
 		formattedWords = new HashMap<String, String>();
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);
@@ -79,7 +79,7 @@ public class CommandTester
 		formattedWords.put(WbDataDiff.VERB, "WbDataDiff");
 		formattedWords.put(WbDescribeTable.VERB, WbDescribeTable.VERB.toUpperCase());
 		formattedWords.put(WbDescribeTable.VERB_LONG, WbDescribeTable.VERB_LONG.toUpperCase());
-		formattedWords.put(WbEnableWarnings.VERB, "WbEnableWarnings");
+		formattedWords.put(WbHideWarnings.VERB, "WbEnableWarnings");
 	}
 	
 	public Collection<String> getCommands()

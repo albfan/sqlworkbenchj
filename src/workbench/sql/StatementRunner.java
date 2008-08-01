@@ -53,7 +53,7 @@ public class StatementRunner
 	private WbStartBatch batchCommand;
 	private ResultLogger resultLogger;
 	private boolean verboseLogging;
-	private boolean showWarnings;
+	private boolean hideWarnings;
 	private boolean removeComments;
 	private boolean fullErrorReporting = false;
 	private ParameterPrompter prompter;
@@ -97,14 +97,14 @@ public class StatementRunner
 		this.controller = control;
 	}
 
-	public boolean getShowWarnings()
+	public boolean getHideWarnings()
 	{
-		return this.showWarnings;
+		return this.hideWarnings;
 	}
 	
-	public void setShowWarnings(boolean flag)
+	public void setHideWarnings(boolean flag)
 	{
-		this.showWarnings = flag;
+		this.hideWarnings = flag;
 	}
 	
 	public void setIgnoreDropErrors(boolean flag)
@@ -190,7 +190,8 @@ public class StatementRunner
 		this.ignoreDropErrors = currentConnection.getProfile().getIgnoreDropErrors();
 		this.removeComments = currentConnection.getProfile().getRemoveComments();
 		this.confirmUpdates = currentConnection.getProfile().getConfirmUpdates();
-		
+		this.hideWarnings = currentConnection.getProfile().isHideWarnings();
+
 		DbMetadata meta = this.currentConnection.getMetadata();
 		if (meta == null) return;
 		

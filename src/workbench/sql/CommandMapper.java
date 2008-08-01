@@ -293,14 +293,7 @@ public class CommandMapper
 		String verb = SqlUtil.getSqlVerb(sql);
 		if (StringUtil.isEmptyString(verb)) return null;
 
-		if (this.useExecuteForSelect)
-		{
-			// If the SelectStatement should use the generic execute() method,
-			// we don't have to perform the check for the SELECT .. INTO syntax
-			return this.cmdDispatch.get(verb);
-		}
-		
-		if (this.supportsSelectInto && this.metaData != null && this.metaData.isSelectIntoNewTable(sql))
+		if (!useExecuteForSelect && this.supportsSelectInto && "SELECT".equals(verb) && this.metaData != null && this.metaData.isSelectIntoNewTable(sql))
 		{
 			LogMgr.logDebug("CommandMapper.getCommandToUse()", "Found 'SELECT ... INTO new_table'");
 			// use the generic SqlCommand implementation for this and not the SelectCommand
