@@ -1907,6 +1907,9 @@ public class MainWindow
 			// Reset the first panel, now we have a "clean" workspace
 			MainPanel p = getSqlPanel(0);
 			p.reset();
+
+			// make sure the toolbar and menus are updated correctly
+			updateCurrentTab(0);
 		}
 		catch (Exception e)
 		{

@@ -13,8 +13,11 @@ package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
 import java.awt.Dialog;
+import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.event.MouseListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -53,7 +56,7 @@ import workbench.util.StringUtil;
  */
 public class ProfileEditorPanel
 	extends JPanel
-	implements FileActions, ValidatingComponent
+	implements FileActions, ValidatingComponent, PropertyChangeListener
 {
 	private ProfileListModel model;
 	private JToolBar toolbar;
@@ -118,12 +121,28 @@ public class ProfileEditorPanel
 
 		final ProfileKey last = Settings.getInstance().getLastConnection(lastProfileKey);
 		((ProfileTree)profileTree).selectProfile(last);
+		ConnectionMgr.getInstance().addDriverChangeListener(this);
 	}
 
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (evt.getPropertyName().equals("driver"))
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					fillDrivers();
+				}
+			});
+		}
+	}
+	
 	public void done()
 	{
 		if (this.filter != null)
 		{
+			ConnectionMgr.getInstance().removeDriverChangeListener(this);
 			this.filter.done();
 		}
 	}
@@ -145,7 +164,12 @@ public class ProfileEditorPanel
 		this.profileTree.addTreeSelectionListener(listener);
 	}
 
-	private void fillDrivers()
+	public DbDriver getCurrentDriver()
+	{
+		return this.connectionEditor.getCurrentDriver();
+	}
+
+	public void fillDrivers()
 	{
 		List<DbDriver> drivers = ConnectionMgr.getInstance().getDrivers();
 		this.connectionEditor.setDrivers(drivers);

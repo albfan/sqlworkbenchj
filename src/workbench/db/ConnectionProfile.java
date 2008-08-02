@@ -61,6 +61,8 @@ public class ConnectionProfile
 	private boolean includeNullInInsert = true;
 	private boolean removeComments = false;
 	private boolean rememberExplorerSchema = false;
+	private boolean hideWarnings = false;
+
 	private String postConnectScript;
 	private String preDisconnectScript;
 	private String idleScript;
@@ -109,6 +111,17 @@ public class ConnectionProfile
 		return this.infoColor;
 	}
 	
+	public boolean isHideWarnings()
+	{
+		return hideWarnings;
+	}
+
+	public void setHideWarnings(boolean flag)
+	{
+		this.changed = hideWarnings != flag;
+		this.hideWarnings = flag;
+	}
+
 	public void setInfoDisplayColor(Color c)
 	{
 		if (this.infoColor == null && c == null) return;
@@ -608,7 +621,7 @@ public class ConnectionProfile
 		result.setInfoDisplayColor(infoColor);
 		result.setReadOnly(readOnly);
 		result.setAlternateDelimiter(alternateDelimiter == null ? null : alternateDelimiter.createCopy());
-		
+		result.setHideWarnings(hideWarnings);
 		result.setCopyExtendedPropsToSystem(copyPropsToSystem);
 		if (connectionProperties != null)
 		{

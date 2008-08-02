@@ -39,6 +39,7 @@ import workbench.sql.wbcommands.WbEnableOraOutput;
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbExport;
 import workbench.sql.wbcommands.WbFeedback;
+import workbench.sql.wbcommands.WbHideWarnings;
 import workbench.sql.wbcommands.WbImport;
 import workbench.sql.wbcommands.WbInclude;
 import workbench.sql.wbcommands.WbListCatalogs;
@@ -100,7 +101,6 @@ public class CommandMapper
 
 		sql = new WbXslt();
 		cmdDispatch.put(sql.getVerb(), sql);
-		cmdDispatch.put("XSLT", sql);
 
 		cmdDispatch.put(WbDefineVar.DEFINE_LONG.getVerb(), WbDefineVar.DEFINE_LONG);
 		cmdDispatch.put(WbDefineVar.DEFINE_SHORT.getVerb(), WbDefineVar.DEFINE_SHORT);
@@ -171,6 +171,7 @@ public class CommandMapper
 		cmdDispatch.put(UpdatingCommand.TRUNCATE.getVerb(), UpdatingCommand.TRUNCATE);
 		
 		cmdDispatch.put(WbSelectBlob.VERB, new WbSelectBlob());
+		cmdDispatch.put(WbHideWarnings.VERB, new WbHideWarnings());
 		
 		for (DdlCommand cmd : DdlCommand.DDL_COMMANDS)
 		{

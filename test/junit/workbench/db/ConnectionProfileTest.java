@@ -48,6 +48,7 @@ public class ConnectionProfileTest
 		old.setPostConnectScript("drop database");
 		old.setPreDisconnectScript("shutdown abort");
 		old.setUrl("jdbc:some:database");
+		old.setHideWarnings(true);
 
 		ConnectionProfile copy = old.createCopy();
 		assertFalse(copy.getAutocommit());
@@ -63,6 +64,7 @@ public class ConnectionProfileTest
 		assertEquals(42, copy.getIdleTime());
 		assertEquals("select 12 from dual", old.getIdleScript());
 		assertEquals("jdbc:some:database", copy.getUrl());
+		assertTrue(copy.isHideWarnings());
 		
 		assertEquals("drop database", old.getPostConnectScript());
 		assertEquals("shutdown abort", old.getPreDisconnectScript());
@@ -108,7 +110,11 @@ public class ConnectionProfileTest
 		profile.setUrl("jdbc:postgres:local");
 		assertTrue(profile.isChanged());
 
-
+		profile.setHideWarnings(false);
+		profile.reset();
+		profile.setHideWarnings(true);
+		assertTrue(profile.isChanged());
+		
 		profile.reset();
 		// Changing to a new URL has to be reflected
 		profile.setUrl("jdbc:postgres:local;someProp=myValue");

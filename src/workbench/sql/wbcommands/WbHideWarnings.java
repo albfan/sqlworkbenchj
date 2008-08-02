@@ -18,6 +18,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.util.ArgumentParser;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -26,7 +27,7 @@ import workbench.util.ArgumentParser;
 public class WbHideWarnings
 	extends SqlCommand
 {
-	public static final String VERB = "WBENABLEWARNINGS";
+	public static final String VERB = "WBHIDEWARNINGS";
 	
 	public WbHideWarnings()
 	{
@@ -55,8 +56,8 @@ public class WbHideWarnings
 
 		if (parm != null)
 		{
-			parm = parm.toLowerCase();
-			if (!parm.equalsIgnoreCase("on") && !parm.equalsIgnoreCase("off"))
+			if (!parm.equalsIgnoreCase("on") && !parm.equalsIgnoreCase("off") &&
+				  !parm.equalsIgnoreCase("true") && !parm.equalsIgnoreCase("false"))
 			{
 				result.setFailure();
 				result.addMessage(ResourceMgr.getString("ErrShowWarnWrongParameter"));
@@ -64,7 +65,7 @@ public class WbHideWarnings
 			}
 			else
 			{
-				this.runner.setHideWarnings(parm.equalsIgnoreCase("on"));
+				this.runner.setHideWarnings(StringUtil.stringToBool(parm));
 			}
 		}
 		

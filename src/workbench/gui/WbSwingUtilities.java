@@ -313,7 +313,6 @@ public class WbSwingUtilities
 		{
 			aCaller = SwingUtilities.getWindowAncestor(aCaller);
 		}
-		Thread.dumpStack();
 		JOptionPane.showMessageDialog(aCaller, aMessage, title, JOptionPane.ERROR_MESSAGE);
 	}
 

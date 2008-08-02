@@ -58,6 +58,7 @@ public class ConnectionMgr
 	private boolean readTemplates = true;
 	private boolean templatesImported;
 	private List<PropertyChangeListener> groupsChangeListener;
+	private List<PropertyChangeListener> driverChangeListener;
 	private static ConnectionMgr instance = new ConnectionMgr();
 	
 	private ConnectionMgr()
@@ -302,6 +303,14 @@ public class ConnectionMgr
 	public void setDrivers(List<DbDriver> aDriverList)
 	{
 		this.drivers = aDriverList;
+		if (this.driverChangeListener != null)
+		{
+			PropertyChangeEvent evt = new PropertyChangeEvent(this, "drivers", null, null);
+			for (PropertyChangeListener l : this.driverChangeListener)
+			{
+				l.propertyChange(evt);
+			}
+		}
 	}
 	
 	/**
@@ -348,7 +357,19 @@ public class ConnectionMgr
 		}
 		return result;
 	}
+
+	public void addDriverChangeListener(PropertyChangeListener l)
+	{
+		if (this.driverChangeListener == null) this.driverChangeListener = new ArrayList<PropertyChangeListener>();
+		this.driverChangeListener.add(l);
+	}
 	
+	public void removeDriverChangeListener(PropertyChangeListener l)
+	{
+		if (this.driverChangeListener == null) return;
+		this.driverChangeListener.remove(l);
+	}
+
 	public void addProfileGroupChangeListener(PropertyChangeListener l)
 	{
 		if (this.groupsChangeListener == null) this.groupsChangeListener = new ArrayList<PropertyChangeListener>();

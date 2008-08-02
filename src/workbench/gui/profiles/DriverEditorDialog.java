@@ -21,6 +21,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import java.util.List;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JButton;
@@ -29,6 +30,9 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 
+import workbench.db.ConnectionMgr;
+import workbench.db.DbDriver;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
@@ -172,5 +176,26 @@ public class DriverEditorDialog extends JDialog
 		driverListPanel.saveSettings();
 		setVisible(false);
 		dispose();
+	}
+
+	/**
+	 * 
+	 * @param parentFrame
+	 * @param current
+	 * @return true if the dialog was closed with OK, false if it was cancelled
+	 */
+	public static void showDriverDialog(final Frame parentFrame, final DbDriver current)
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				DriverEditorDialog d = new DriverEditorDialog(parentFrame);
+				d.setDriverName(current != null ? current.getName() : null);
+				WbSwingUtilities.center(d, parentFrame);
+				d.setVisible(true);
+				d.dispose();
+			}
+		});
 	}
 }

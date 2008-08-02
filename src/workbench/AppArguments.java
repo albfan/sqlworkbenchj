@@ -45,6 +45,7 @@ public class AppArguments
 	public static final String ARG_IGNORE_DROP = "ignoreDropErrors";
 	public static final String ARG_READ_ONLY = "readOnly";
 	public static final String ARG_CONN_REMOVE_COMMENTS = "removeComments";
+	public static final String ARG_HIDE_WARNINGS = "hideWarnings";
 	
 	public static final String ARG_DISPLAY_RESULT = "displayResult";
 	public static final String ARG_SUCCESS_SCRIPT = "cleanupSuccess";
@@ -104,6 +105,7 @@ public class AppArguments
 		addArgument(ARG_WORKSPACE);
 		addArgument(ARG_NOSETTNGS, ArgumentType.BoolArgument);
 		addArgument(ARG_NOTEMPLATES, ArgumentType.BoolArgument);
+		addArgument(ARG_HIDE_WARNINGS, ArgumentType.BoolArgument);
 		addArgument(ARG_ALT_DELIMITER);
 		addArgument(ARG_DELIMITER);
 		addArgument(ARG_QUIET, ArgumentType.BoolArgument);

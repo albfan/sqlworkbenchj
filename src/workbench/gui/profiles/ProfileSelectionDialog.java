@@ -12,6 +12,7 @@
 package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -32,9 +33,11 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
 import workbench.db.ConnectionProfile;
+import workbench.db.DbDriver;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
+import workbench.gui.help.HelpManager;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
@@ -45,22 +48,25 @@ import workbench.util.StringUtil;
  * @author  support@sql-workbench.net
  */
 public class ProfileSelectionDialog
-	extends JDialog 
+	extends JDialog
 	implements ActionListener, WindowListener, TreeSelectionListener, MouseListener
 {
-	private JPanel buttonPanel;
+	private JPanel okCancelPanel;
 	private JButton okButton;
 	private JButton cancelButton;
+	private WbButton helpButton;
+	private WbButton manageDriversButton;
+
 	private ProfileEditorPanel profiles;
 	private ConnectionProfile selectedProfile;
 	private boolean cancelled = false;
 	private String escActionCommand;
-	
+
 	public ProfileSelectionDialog(Frame parent, boolean modal)
 	{
 		this(parent, modal, null);
 	}
-	
+
 	public ProfileSelectionDialog(Frame parent, boolean modal, String lastProfileKey)
 	{
 		super(parent, modal);
@@ -79,19 +85,38 @@ public class ProfileSelectionDialog
 	{
 		profiles = new ProfileEditorPanel(lastProfileKey);
 
-		buttonPanel = new JPanel();
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new BorderLayout(0, 0));
+
+		JPanel toolsButtonPanel = new JPanel();
+		toolsButtonPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+		manageDriversButton = new WbButton();
+    manageDriversButton.setResourceKey("LblEditDrivers");
+    manageDriversButton.addActionListener(this);
+
+		helpButton = new WbButton();
+    helpButton.setResourceKey("LblHelp");
+    helpButton.addActionListener(this);
+		toolsButtonPanel.add(manageDriversButton);
+		toolsButtonPanel.add(helpButton);
+
+		okCancelPanel = new JPanel();
+		buttonPanel.add(okCancelPanel, BorderLayout.EAST);
+		buttonPanel.add(toolsButtonPanel, BorderLayout.WEST);
+
 		okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
 		okButton.setEnabled(profiles.getSelectedProfile() != null);
-		
+
 		cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
 
 		addWindowListener(this);
-		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		okCancelPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-		buttonPanel.add(okButton);
+		okCancelPanel.add(okButton);
 		okButton.addActionListener(this);
 
-		buttonPanel.add(cancelButton);
+		okCancelPanel.add(cancelButton);
 		cancelButton.addActionListener(this);
 
 		profiles.addListMouseListener(this);
@@ -150,13 +175,13 @@ public class ProfileSelectionDialog
 	{
 		if (this.selectedProfile == null) return false;
 		if (this.selectedProfile.getStorePassword()) return true;
-		
+
 		String pwd = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgInputPwdWindowTitle"), "", true);
 		if (StringUtil.isEmptyString(pwd)) return false;
 		this.selectedProfile.setPassword(pwd);
 		return true;
 	}
-	
+
 	public void profileListClicked(MouseEvent evt)
 	{
 		if (evt.getButton() == MouseEvent.BUTTON1 && evt.getClickCount() == 2)
@@ -164,7 +189,8 @@ public class ProfileSelectionDialog
 			selectProfile();
 		}
 	}
-	
+
+
 	public void setInitialFocus()
 	{
 		profiles.setInitialFocus();
@@ -182,9 +208,20 @@ public class ProfileSelectionDialog
 			this.selectedProfile = null;
 			this.closeDialog();
 		}
+		else if (e.getSource() == this.manageDriversButton)
+		{
+			showDriverEditorDialog();
+		}
+		else if (e.getSource() == this.helpButton)
+		{
+			HelpManager.showProfileHelp();
+		}
 	}
 
-	public boolean isCancelled() { return this.cancelled;	}
+	public boolean isCancelled()
+	{
+		return this.cancelled;
+	}
 
 	public void windowActivated(WindowEvent e)
 	{
@@ -198,7 +235,7 @@ public class ProfileSelectionDialog
 			this.setInitialFocus();
 		}
 	}
-	
+
 	public void windowClosed(WindowEvent e)
 	{
 		this.profiles.done();
@@ -254,6 +291,13 @@ public class ProfileSelectionDialog
 
 	public void mouseExited(MouseEvent e)
 	{
+	}
+
+	private void showDriverEditorDialog()
+	{
+		final Frame parent = (Frame)this.getParent();
+		final DbDriver drv = this.profiles.getCurrentDriver();
+		DriverEditorDialog.showDriverDialog(parent, drv);
 	}
 
 }
