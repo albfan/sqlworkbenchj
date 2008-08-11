@@ -21,6 +21,9 @@ import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
@@ -50,6 +53,8 @@ import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.sql.EditorPanel;
+import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.DbExecutionNotifier;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.ShareableDisplay;
 import workbench.interfaces.TableSearchDisplay;
@@ -70,7 +75,7 @@ import workbench.util.WbWorkspace;
  */
 public class TableSearchPanel
 	extends JPanel
-	implements TableSearchDisplay, ListSelectionListener, KeyListener
+	implements TableSearchDisplay, ListSelectionListener, KeyListener, DbExecutionNotifier
 {
 	private TableModel tableListModel;
 	private TableSearcher searcher;
@@ -81,6 +86,7 @@ public class TableSearchPanel
 	private ColumnExpression searchPattern;
 	private EditorPanel sqlDisplay;
 	private FlatButton startButton;
+	private List<DbExecutionListener> execListener;
 
 	public TableSearchPanel(ShareableDisplay aTableListSource)
 	{
@@ -161,14 +167,12 @@ public class TableSearchPanel
 			if (result.getRowCount() == 0) return;
 
 			WbTable display = new WbTable(true, true, false);
-			display.getCopyAsInsertAction().setEnabled(true);
-			display.getCopyAsUpdateAction().setEnabled(true);
-			display.getCopyAsDeleteInsertAction().setEnabled(true);
 
 			DataStoreTableModel model = new DataStoreTableModel(result);
 			display.setModel(model, true);
 			display.applyHighlightExpression(searchPattern);
 			display.adjustOrOptimizeColumns();
+			display.checkCopyActions();
 
 			JScrollPane pane = new ParentWidthScrollPane(display);
 
@@ -256,6 +260,8 @@ public class TableSearchPanel
 
 	public void searchData()
 	{
+		if (!WbSwingUtilities.checkConnection(this, connection)) return;
+
 		if (!searcher.setColumnFunction(this.columnFunction.getText()))
 		{
 			WbSwingUtilities.showErrorMessageKey(this, "MsgErrorColFunction");
@@ -300,6 +306,7 @@ public class TableSearchPanel
 			ignoreCase = searcher.getCriteriaMightBeCaseInsensitive();
 		}
 		// Remove SQL "syntax" from the criteria
+		fireDbExecStart();
 		String expressionPattern = StringUtil.trimQuotes(text.replaceAll("[%_]", ""));
 		searchPattern = new ColumnExpression("*", new ContainsComparator(), expressionPattern);
 		searchPattern.setIgnoreCase(ignoreCase);
@@ -354,6 +361,8 @@ public class TableSearchPanel
 
 	public void searchEnded()
 	{
+		fireDbExecEnd();
+
 		// insert a dummy panel at the end which will move
 		// all tables in the pane to the upper border
 		// e.g. when there is only one table
@@ -428,6 +437,38 @@ public class TableSearchPanel
 			Container parent = this.getParent();
 			this.preferredSize.setSize( (double)parent.getWidth() - 5, d.getHeight());
 			return this.preferredSize;
+		}
+	}
+
+	public synchronized void addDbExecutionListener(DbExecutionListener l)
+	{
+		if (this.execListener == null) this.execListener = Collections.synchronizedList(new ArrayList<DbExecutionListener>());
+		this.execListener.add(l);
+	}
+
+	public synchronized void removeDbExecutionListener(DbExecutionListener l)
+	{
+		if (this.execListener == null) return;
+		this.execListener.remove(l);
+	}
+
+	protected synchronized void fireDbExecStart()
+	{
+		this.connection.executionStart(this.connection, this);
+		if (this.execListener == null) return;
+		for (DbExecutionListener l : execListener)
+		{
+			if (l != null) l.executionStart(this.connection, this);
+		}
+	}
+	
+	protected synchronized void fireDbExecEnd()
+	{
+		this.connection.executionEnd(this.connection, this);
+		if (this.execListener == null) return;
+		for (DbExecutionListener l : execListener)
+		{
+			if (l != null) l.executionEnd(this.connection, this);
 		}
 	}
 	

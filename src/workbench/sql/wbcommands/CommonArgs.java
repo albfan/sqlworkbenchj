@@ -276,8 +276,8 @@ public class CommonArgs
 		String decimal = cmdLine.getValue(ARG_DECCHAR);
 		if (decimal != null) converter.setDecimalCharacter(decimal.charAt(0));
 
-		List<String> falseValues = StringUtil.stringToList(cmdLine.getValue(ARG_FALSE_LITERALS), ",", true, true, false);
-		List<String> trueValues = StringUtil.stringToList(cmdLine.getValue(ARG_TRUE_LITERALS), ",", true, true, false);
+		List<String> falseValues = cmdLine.getListValue(ARG_FALSE_LITERALS);
+		List<String> trueValues = cmdLine.getListValue(ARG_TRUE_LITERALS);
 		if (falseValues.size() > 0 && trueValues.size() > 0)
 		{
 			converter.setBooleanLiterals(trueValues, falseValues);

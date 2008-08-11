@@ -71,7 +71,7 @@ public class BatchRunner
 	private String encoding = null;
 	private boolean showProgress = false;
 	private PrintStream console = System.out;
-	private boolean quiet = false;
+//	private boolean quiet = false;
 	private boolean consolidateMessages = false;
 
 	public BatchRunner(String aFilelist)
@@ -189,7 +189,7 @@ public class BatchRunner
 			this.setConnection(c);
 			String info = c.getDisplayString();
 			LogMgr.logInfo("BatchRunner.connect()",  ResourceMgr.getFormattedString("MsgBatchConnectOk", c.getDisplayString()));
-			if (!quiet) this.printMessage(ResourceMgr.getFormattedString("MsgBatchConnectOk", info));
+			if (verboseLogging) this.printMessage(ResourceMgr.getFormattedString("MsgBatchConnectOk", info));
 			success = true;
 			String warn = c.getWarnings();
 			if (!StringUtil.isEmptyString(warn))
@@ -284,7 +284,7 @@ public class BatchRunner
 			{
 				String msg = ResourceMgr.getString("MsgBatchProcessingFile") + " " + fo.getFullPath();
 				LogMgr.logInfo("BatchRunner.execute()", msg);
-				if (this.resultDisplay != null)
+				if (this.resultDisplay != null && verboseLogging)
 				{
 					this.resultDisplay.appendToLog(msg);
 					this.resultDisplay.appendToLog("\n");
@@ -493,7 +493,7 @@ public class BatchRunner
 
 				if (this.cancelExecution)
 				{
-					if (!quiet) this.printMessage(ResourceMgr.getString("MsgStatementCancelled"));
+					if (verboseLogging) this.printMessage(ResourceMgr.getString("MsgStatementCancelled"));
 					break;
 				}
 
@@ -511,7 +511,7 @@ public class BatchRunner
 
 		end = System.currentTimeMillis();
 
-		if (!quiet)
+		if (verboseLogging)
 		{
 			StringBuilder msg = new StringBuilder(50);
 			msg.append(scriptFile.getFullPath());
@@ -529,7 +529,7 @@ public class BatchRunner
 			{
 				printMessage((resultDisplay == null ? "\n" : "") + errorCount + " " + ResourceMgr.getString("MsgTotalStatementsFailed"));
 			}
-			if (!quiet) this.printMessage(totalRows + " " + ResourceMgr.getString("MsgTotalRowsAffected"));
+			if (verboseLogging) this.printMessage(totalRows + " " + ResourceMgr.getString("MsgTotalRowsAffected"));
 		}
 		
 		parser.done();
@@ -757,7 +757,7 @@ public class BatchRunner
 		runner.setProfile(profile);
 		runner.setVerboseLogging(feedback);
 		runner.setConsolidateLog(consolidateLog);
-		runner.quiet = cmdLine.isArgPresent(AppArguments.ARG_QUIET);
+//		runner.quiet = cmdLine.isArgPresent(AppArguments.ARG_QUIET);
 
 		// if no showTiming argument was provided but feedback was disabled
 		// disable the display of the timing information as well.

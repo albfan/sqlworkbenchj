@@ -57,26 +57,6 @@ public class TableDependencySorter
 		if (cycleErrors == null) return null;
 		return Collections.unmodifiableList(cycleErrors);
 	}
-	/**
-	 * Return a sorted list of DependencyNodes that need to be taken care of 
-	 * when deleting a row from the passed table.
-	 * 
-	 * @param table
-	 * @return all DependencyNodes relevant for deleting 
-	 */
-	public List<DependencyNode> getSortedNodesForDelete(TableIdentifier table)
-	{
-		ArrayList<TableIdentifier> tables = new ArrayList<TableIdentifier>(1);
-		tables.add(table);
-		List<LevelNode> levelMapping = createLevelMapping(tables, true);
-		
-		ArrayList<DependencyNode> result = new ArrayList<DependencyNode>(levelMapping.size());
-		for (LevelNode lvl : levelMapping)
-		{
-			result.add(lvl.node);
-		}
-		return result;
-	}
 	
 	/**
 	 * Determines the FK dependencies for each table in the passed List, 
@@ -169,9 +149,17 @@ public class TableDependencySorter
 	
 	protected void putNodes(List<LevelNode> levelMapping, List<DependencyNode> nodes)
 	{
+		TableIdentifier root = nodes.get(0).getTable();
+
 		for (DependencyNode node : nodes)
 		{
 			TableIdentifier tbl = node.getTable();
+
+			// There is no need to include self referencing tables into the level
+			// mapping, as this will create a wrong level for them and a potential
+			// parent of the self referencing table (e.g. through a different FK)
+			if (!node.isRoot() && tbl.equals(root)) continue;
+			
 			int level = node.getLevel();
 			LevelNode lvl = findLevelNode(levelMapping, tbl);
 			if (lvl == null)

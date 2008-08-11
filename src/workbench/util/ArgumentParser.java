@@ -13,6 +13,7 @@ package workbench.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -328,6 +329,14 @@ public class ArgumentParser
 		String value = this.arguments.get(key);
 		if (value == ARG_PRESENT) return null;
 		return value;
+	}
+
+	public List<String> getListValue(String key)
+	{
+		String value = this.getValue(key);
+		if (value == null) return Collections.emptyList();
+		List<String> result = StringUtil.stringToList(value, ",", true, true, false);
+		return result;
 	}
 	
 	public int getIntValue(String key, int def)

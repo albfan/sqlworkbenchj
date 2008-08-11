@@ -59,7 +59,7 @@ public class AppArguments
 
 	// Other parameters
 	public static final String ARG_SHOWPROGRESS = "showProgress";
-	public static final String ARG_QUIET = "quiet";
+//	public static final String ARG_QUIET = "quiet";
 	public static final String ARG_PROFILE_STORAGE = "profileStorage";
 	public static final String ARG_CONFIGDIR = "configDir";
 	public static final String ARG_LIBDIR = "libdir";
@@ -108,7 +108,7 @@ public class AppArguments
 		addArgument(ARG_HIDE_WARNINGS, ArgumentType.BoolArgument);
 		addArgument(ARG_ALT_DELIMITER);
 		addArgument(ARG_DELIMITER);
-		addArgument(ARG_QUIET, ArgumentType.BoolArgument);
+//		addArgument(ARG_QUIET, ArgumentType.BoolArgument);
 		addArgument(ARG_READ_ONLY, ArgumentType.BoolArgument);
 		addArgument(ARG_CONN_TRIM_CHAR, ArgumentType.BoolArgument);
 		addArgument(ARG_LANG);

@@ -148,7 +148,6 @@ public class TableDependency
 				child.addColumnDefinition(tablecolumn, parentcolumn);
 			}
 
-			//level ++;
 			if (level > 15) 
 			{
 				// this is a bit paranoid, as I am testing for cycles before recursing
@@ -166,7 +165,6 @@ public class TableDependency
 			List<DependencyNode> children = parent.getChildren();
 			for (DependencyNode child : children)
 			{
-				String s = child.getTable().getTableName();
 				if (!isCycle(child, parent))
 				{
 					this.readTree(child, exportedKeys, level + 1);

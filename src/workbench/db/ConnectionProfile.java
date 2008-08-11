@@ -714,14 +714,18 @@ public class ConnectionProfile
 		}
 	}
 
-	public java.lang.String getDriverName()
+	public String getDriverName()
 	{
 		return driverName;
 	}
 
-	public void setDriverName(java.lang.String driverName)
+	public void setDriverName(java.lang.String name)
 	{
-		this.driverName = driverName;
+		if (!StringUtil.equalStringOrEmpty(name, this.driverName))
+		{
+			this.driverName = name;
+			this.changed = true;
+		}
 	}
 
 	public boolean getConfirmUpdates()

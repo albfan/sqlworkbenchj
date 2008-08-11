@@ -353,15 +353,17 @@ public abstract class RowDataConverter
 		}
 	}
 	
-	public void writeBlobFile(Object value, File f)
+	public long writeBlobFile(Object value, File f)
 		throws IOException
 	{
-		if (value == null) return;
-		
+		if (value == null) return -1;
+		long size = 0;
+
 		try
 		{
 			OutputStream out = this.createOutputStream(f);
-			BlobHandler.saveBlobToFile(value, out);
+			size = BlobHandler.saveBlobToFile(value, out);
+			return size;
 		}
 		catch (IOException io)
 		{

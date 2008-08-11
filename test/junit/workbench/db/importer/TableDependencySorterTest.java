@@ -34,11 +34,9 @@ public class TableDependencySorterTest
 		super(testName);
 	}
 
-	@Override
-	protected void setUp()
+	protected void createTables()
 		throws Exception
 	{
-		super.setUp();
 		TestUtil util = new TestUtil("dependencyTest");
 		dbConn = util.getConnection();
 		Statement stmt = dbConn.createStatement();
@@ -120,7 +118,9 @@ public class TableDependencySorterTest
 	}
 
 	public void testPlainTables()
+		throws Exception
 	{
+		createTables();
 		ArrayList<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 		for (int i=0; i < 3; i++)
 		{
@@ -133,7 +133,9 @@ public class TableDependencySorterTest
 	}
 
 	public void testCheckDependencies()
+		throws Exception
 	{
+		createTables();
 		TableIdentifier base = new TableIdentifier("base");
 		TableIdentifier child1 = new TableIdentifier("child1");
 		TableIdentifier child2 = new TableIdentifier("child2");
@@ -177,7 +179,9 @@ public class TableDependencySorterTest
 	}
 
 	public void testCheckAddMissing()
+		throws Exception
 	{
+		createTables();
 		TableIdentifier child1 = new TableIdentifier("child1");
 		ArrayList<TableIdentifier> tbl = new ArrayList<TableIdentifier>();
 		tbl.add(child1);
@@ -198,5 +202,58 @@ public class TableDependencySorterTest
 		assertEquals("Wrong second table", true, second.equals("child1_detail") || second.equals("child1_detail2"));
 		assertEquals("Wrong third table", "child1", result.get(2).getTableName().toLowerCase());
 	}
-	
+
+	public void testCatDependency()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("dependencyTest");
+		dbConn = util.getConnection();
+		Statement stmt = dbConn.createStatement();
+		String script = "CREATE TABLE catalogue_node \n" +
+             "( \n" +
+             "   catalogue_node_id integer       NOT NULL, \n" +
+             "   parent_node_id    integer, \n" +
+             "   product_id        integer, \n" +
+             "   sort_order        integer       NOT NULL, \n" +
+             "   external_id       varchar(50), \n" +
+             "   node_name         varchar(100) \n" +
+             "); \n" +
+             "ALTER TABLE catalogue_node \n" +
+             "   ADD CONSTRAINT catalogue_node_pk PRIMARY KEY (catalogue_node_id); \n" +
+             " \n" +
+             " \n" +
+             "ALTER TABLE catalogue_node \n" +
+             "  ADD CONSTRAINT catalogue_parent_fk FOREIGN KEY (parent_node_id) \n" +
+             "  REFERENCES catalogue_node (catalogue_node_id); \n" +
+             "\n" +
+						 "CREATE TABLE catalogue \n" +
+             "( \n" +
+             "   catalogue_id           integer      NOT NULL, \n" +
+             "   catalogue_name         varchar(20)  NOT NULL, \n" +
+             "   description            varchar(50)  NOT NULL, \n" +
+             "   read_only              integer      NOT NULL, \n" +
+             "   catalogue_root_node_id integer, \n" +
+             "   external_id            varchar(50) \n" +
+             "); \n" +
+             "ALTER TABLE catalogue \n" +
+             "   ADD CONSTRAINT catalogue_pk PRIMARY KEY (catalogue_id); \n" +
+             " \n" +
+             "ALTER TABLE catalogue \n" +
+             "  ADD CONSTRAINT cat_root_fk FOREIGN KEY (catalogue_root_node_id) \n" +
+             "  REFERENCES catalogue_node (catalogue_node_id);";
+		
+		TestUtil.executeScript(dbConn, script);
+
+		ArrayList<TableIdentifier> tbl = new ArrayList<TableIdentifier>();
+		TableIdentifier cat = new TableIdentifier("catalogue");
+		TableIdentifier node = new TableIdentifier("catalogue_node");
+		tbl.add(cat);
+		tbl.add(node);
+		
+		TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
+		List<TableIdentifier> result = sorter.sortForInsert(tbl);
+		assertEquals(2, result.size());
+		assertEquals(node, result.get(0));
+		assertEquals(cat, result.get(1));
+	}
 }

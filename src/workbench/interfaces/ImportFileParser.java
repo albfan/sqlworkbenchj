@@ -11,9 +11,11 @@
  */
 package workbench.interfaces;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
+import workbench.db.importer.ImportFileLister;
 import workbench.db.importer.ImportFileHandler;
 import workbench.db.importer.modifier.ImportValueModifier;
 
@@ -26,6 +28,12 @@ public interface ImportFileParser
 	 *  Return the encoding used to read input files
 	 */
 	String getEncoding();
+
+	/**
+	 * Set the file to be processed.
+	 * @param file
+	 */
+	void setInputFile(File file);
 	
 	/**
 	 *	Return the name of the input file
@@ -64,5 +72,6 @@ public interface ImportFileParser
 
 	void setMultiFileImport(boolean flag);
 	boolean isMultiFileImport();
-	
+
+	void setSourceFiles(ImportFileLister source);
 }

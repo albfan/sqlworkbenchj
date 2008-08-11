@@ -54,11 +54,15 @@ public class XmlDataFileParser
 	extends DefaultHandler
 	implements RowDataProducer, ImportFileParser
 {
-	private String sourceDirectory;
 	private File inputFile;
+	private ImportFileLister sourceFiles;
+	
 	private String tableName;
 	private String tableNameFromFile;
-	
+
+	private boolean ignoreOwner = false;
+	private List<String> filenamesToIgnore = null;
+
 	private int currentRowNumber = 1;
 	private int colCount;
 	private int realColCount;
@@ -71,14 +75,13 @@ public class XmlDataFileParser
 	private RowDataReceiver receiver;
 	private boolean ignoreCurrentRow = false;
 	private boolean abortOnError = false;
-	private boolean checkDependencies = false;
+	
 	private boolean[] warningAdded;
 	private JobErrorHandler errorHandler;
 	private boolean verboseFormat = true;
 	private boolean formatKnown = false;
 	private String missingColumn;
 	private MessageBuffer messages;
-	private String extensionToUse;
 	
 	private int currentColIndex = 0;
 	private int realColIndex = 0;
@@ -161,11 +164,6 @@ public class XmlDataFileParser
 		return null;
 	}
 	
-	public void setCheckDependencies(boolean flag)
-	{
-		this.checkDependencies = flag;
-	}
-	
 	public boolean hasErrors() { return this.hasErrors; }
 	public boolean hasWarnings() 
 	{ 
@@ -178,6 +176,24 @@ public class XmlDataFileParser
 		return false;
 	}
 	
+	/**
+	 * Defines a "pattern" for files to ignore if a complete directory is imported.
+	 * Any file that contains the given pattern in its name will be removed from the
+	 * list of files to be processed.
+	 * 
+	 * @param pattern
+	 * @see FileNameSorter#ignoreFiles(java.lang.String) 
+	 */
+	public void setFilesToIgnore(List<String> nameStart)
+	{
+		this.filenamesToIgnore = nameStart;
+	}
+
+	public void setIgnoreSchema(boolean flag)
+	{
+		this.ignoreOwner = flag;
+	}
+		
 	public void setValueConverter(ValueConverter convert)
 	{
 		this.converter = convert;
@@ -445,28 +461,15 @@ public class XmlDataFileParser
 		return this.inputFile.getAbsolutePath();
 	}
 	
-	public void setSourceFile(File file)
+	public void setInputFile(File file)
 	{
-		this.sourceDirectory = null;
+		this.sourceFiles = null;
 		this.inputFile = file;
 	}
 	
-	public void setSourceExtension(String ext)
+	public void setSourceFiles(ImportFileLister source)
 	{
-		this.extensionToUse = ext;
-	}
-	
-	public void setSourceDirectory(String dir)
-	{
-		File f = new File(dir);
-		if (!f.isDirectory()) throw new IllegalArgumentException(dir + " is not a directory");
-		this.sourceDirectory = dir;
-		this.inputFile = null;
-	}
-	
-	public String getSourceDirectory()
-	{
-		return this.sourceDirectory;
+		this.sourceFiles = source;
 	}
 	
 	public void setAbortOnError(boolean flag)
@@ -574,33 +577,36 @@ public class XmlDataFileParser
 	private void processDirectory()
 		throws Exception
 	{
-		File dir = new File(this.sourceDirectory);
+		if (this.sourceFiles == null) throw new IllegalStateException("Cannot process source directory without FileNameSorter");
 		boolean verbose = this.verboseFormat;
-		if (this.extensionToUse == null) this.extensionToUse = ".xml";
 		
-		FileNameSorter sorter = new FileNameSorter(this.dbConn, dir, extensionToUse, new XmlTableNameResolver(encoding));
+		sourceFiles.setTableNameResolver(new XmlTableNameResolver(encoding));
+
 		List<WbFile> toProcess = null;
-		if (this.checkDependencies) 
+		try
 		{
-			try
-			{
-				toProcess = sorter.getSortedList();
-			}
-			catch (CycleErrorException e)
-			{
-				hasErrors = true;
-				LogMgr.logError("XmlDataFileParser.processDirectory()", "Error when checking dependencies", e);
-				throw e;
-			}
-			// The receiver only needs to pre-process the full table list
-			// if checkDependencies is turned on, otherwise a possible
-			// table delete can be done during the single table import
-			this.receiver.setTableList(sorter.getTableList());
+			toProcess = sourceFiles.getFiles();
 		}
-		else
+		catch (CycleErrorException e)
 		{
-			toProcess = sorter.getFiles();
+			hasErrors = true;
+			LogMgr.logError("XmlDataFileParser.processDirectory()", "Error when checking dependencies", e);
+			throw e;
 		}
+		
+		int count = toProcess.size();
+		if (count == 0)
+		{
+			String msg = ResourceMgr.getFormattedString("ErrImportNoFiles", sourceFiles.getExtension(), sourceFiles.getDirectory());
+			this.messages.append(msg);
+			this.hasErrors = true;
+			throw new SQLException("No files with extension '" + sourceFiles.getExtension() + "' in directory " + sourceFiles.getDirectory());
+		}
+		
+		// The receiver only needs to pre-process the full table list
+		// if checkDependencies is turned on, otherwise a possible
+		// table delete can be done during the single table import
+		this.receiver.setTableList(sourceFiles.getTableList());
 		
 		this.receiver.setTableCount(toProcess.size());
 		
@@ -644,7 +650,7 @@ public class XmlDataFileParser
 		
 		try
 		{
-			if (this.sourceDirectory == null)
+			if (this.sourceFiles == null)
 			{
 				processOneFile();
 			}

@@ -20,6 +20,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.importer.ConstantColumnValues;
 import workbench.db.importer.CycleErrorException;
 import workbench.db.importer.DataImporter;
+import workbench.db.importer.ImportFileLister;
 import workbench.db.importer.ParsingInterruptedException;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.TableStatements;
@@ -78,6 +79,8 @@ public class WbImport
 	public static final String ARG_BADFILE = "badFile";
 	public static final String ARG_CONSTANTS = "constantValues";
 	public static final String ARG_COL_WIDTHS = "columnWidths";
+	public static final String ARG_IGNORE_OWNER = "ignoreOwner";
+	public static final String ARG_EXCLUDE_FILES = "excludeFiles";
 
 	private DataImporter imp;
 
@@ -127,6 +130,8 @@ public class WbImport
 		cmdLine.addArgument(ARG_BADFILE);
 		cmdLine.addArgument(ARG_CONSTANTS);
 		cmdLine.addArgument(ARG_COL_WIDTHS);
+		cmdLine.addArgument(ARG_EXCLUDE_FILES);
+		cmdLine.addArgument(ARG_IGNORE_OWNER, ArgumentType.BoolArgument);
 		ModifierArguments.addArguments(cmdLine);
 	}
 
@@ -198,6 +203,7 @@ public class WbImport
 		WbFile inputFile = evaluateFileArgument(cmdLine.getValue(ARG_FILE));
 		String type = cmdLine.getValue(ARG_TYPE);
 		String dir = cmdLine.getValue(ARG_DIRECTORY);
+		String defaultExtension = null;
 
 		if (inputFile == null && dir == null)
 		{
@@ -282,7 +288,7 @@ public class WbImport
 
 		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
 		ImportFileParser parser = null;
-
+			
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
 			if (table == null && dir == null)
@@ -294,19 +300,16 @@ public class WbImport
 				return result;
 			}
 
+			defaultExtension = "txt";
+			
 			TextFileParser textParser = new TextFileParser();
 			parser = textParser;
 
 			textParser.setTableName(table);
+			
 			if (inputFile != null)
 			{
 				textParser.setInputFile(inputFile);
-			}
-			else
-			{
-				textParser.setSourceDirectory(dir);
-				String ext = cmdLine.getValue(ARG_FILE_EXT);
-				if (ext != null) textParser.setSourceExtension(ext);
 			}
 
 			boolean multi = cmdLine.getBoolean(ARG_MULTI_LINE, getMultiDefault());
@@ -365,7 +368,6 @@ public class WbImport
 			
 			if (dir == null)
 			{
-
 				String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
 				if (importcolumns != null)
 				{
@@ -440,6 +442,8 @@ public class WbImport
 		}
 		else if ("xml".equalsIgnoreCase(type))
 		{
+			defaultExtension = "xml";
+			
 			XmlDataFileParser xmlParser = new XmlDataFileParser();
 			xmlParser.setConnection(currentConnection);
 			xmlParser.setAbortOnError(!continueOnError);
@@ -451,15 +455,9 @@ public class WbImport
 			if (encoding != null) xmlParser.setEncoding(encoding);
 			if (table != null) xmlParser.setTableName(table);
 
-			if (dir != null)
+			if (dir == null)
 			{
-				String ext = cmdLine.getValue(ARG_FILE_EXT);
-				if (ext != null) xmlParser.setSourceExtension(ext);
-				xmlParser.setSourceDirectory(dir);
-			}
-			else
-			{
-				xmlParser.setSourceFile(inputFile);
+				xmlParser.setInputFile(inputFile);
 				String cols = cmdLine.getValue(ARG_IMPORTCOLUMNS);
 				if (cols != null)
 				{
@@ -482,6 +480,12 @@ public class WbImport
 			imp.setProducer(xmlParser);
 		}
 
+		ImportFileLister sorter = getFileNameSorter(cmdLine, defaultExtension);
+		if (sorter != null)
+		{
+			parser.setSourceFiles(sorter);
+		}
+		
 		ValueConverter converter = null;
 		try
 		{
@@ -489,6 +493,7 @@ public class WbImport
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("WbImport.execute()", "Error creating ValueConverter", e);
 			result.setFailure();
 			result.addMessage(e.getMessage());
 			return result;
@@ -500,7 +505,6 @@ public class WbImport
 		if (prod != null)
 		{
 			prod.setValueConverter(converter);
-			prod.setCheckDependencies(cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS));
 		}
 
 		try
@@ -664,6 +668,20 @@ public class WbImport
 		return result;
 	}
 
+	private ImportFileLister getFileNameSorter(ArgumentParser cmdLine, String defaultExt)
+	{
+		String dir = cmdLine.getValue(ARG_DIRECTORY);
+		if (dir == null) return null;
+		String ext = cmdLine.getValue(ARG_FILE_EXT);
+		if (ext == null) ext = defaultExt;
+		
+		ImportFileLister lister = new ImportFileLister(this.currentConnection, new File(dir), ext);
+		lister.setIgnoreSchema(cmdLine.getBoolean(ARG_IGNORE_OWNER, false));
+		lister.ignoreFiles(cmdLine.getListValue(ARG_EXCLUDE_FILES));
+		lister.setCheckDependencies(cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS, false));
+		return lister;
+	}
+	
 	private void addColumnFilter(String filters, TextFileParser textParser)
 	{
 		if (filters == null || filters.trim().length() == 0) return;

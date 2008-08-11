@@ -31,7 +31,7 @@ public interface DataFileWriter
 	 * Write the data contained in the value object
 	 * to the File object specified by outputFile
 	 */
-	void writeBlobFile(Object value, File outputFile)
+	long writeBlobFile(Object value, File outputFile)
 		throws IOException;
 	
 	/**

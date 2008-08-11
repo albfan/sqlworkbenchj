@@ -113,8 +113,7 @@ public class SqlKeywordHandler
 		
 		try
 		{
-			String words = Settings.getInstance().getProperty("workbench.db." + dbId + ".syntax.nokeywords", null);
-			List l = StringUtil.stringToList(words, ",", true, true, false);
+			List<String> l = Settings.getInstance().getListProperty("workbench.db." + dbId + ".syntax.nokeywords", false, null);
 			this.keywords.removeAll(l);
 		}
 		catch (Exception e)

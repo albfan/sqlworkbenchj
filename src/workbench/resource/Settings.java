@@ -345,8 +345,7 @@ public class Settings
 
 	public List<WbLocale> getLanguages()
 	{
-		String prop = getProperty("workbench.gui.languages.available", "en,de");
-		List<String> codes = StringUtil.stringToList(prop, ",", true, true, false);
+		List<String> codes = getListProperty("workbench.gui.languages.available", false, "en,de");
 		List<WbLocale> result = new ArrayList<WbLocale>(codes.size());
 		for (String c : codes)
 		{
@@ -991,15 +990,9 @@ public class Settings
 		}
 	}
 
-	public String getLiteralTypes()
-	{
-		return getProperty("workbench.sql.literals.types", "jdbc,ansi,dbms,default");
-	}
-	
 	public List<String> getLiteralTypeList()
 	{
-		String types = getLiteralTypes();
-		List<String> result = StringUtil.stringToList(types, ",", true, true, false);	
+		List<String> result = getListProperty("workbench.sql.literals.types", false, "jdbc,ansi,dbms,default");
 		if (!result.contains("dbms"))
 		{
 			result.add("dbms");

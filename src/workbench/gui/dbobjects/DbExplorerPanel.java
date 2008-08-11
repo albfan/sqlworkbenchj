@@ -124,12 +124,12 @@ public class DbExplorerPanel
 		try
 		{
 			tables = new TableListPanel(aParent);
-			setDbExecutionListener(aParent);
 			procs = new ProcedureListPanel(aParent);
 			this.searchPanel = new TableSearchPanel(tables);
 			tabPane = new WbTabbedPane(JTabbedPane.TOP);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);
 			tabPane.setToolTipTextAt(0, ResourceMgr.getDescription("TxtDbExplorerTables"));
+			setDbExecutionListener(aParent);
 			
 			String tabLocation = Settings.getInstance().getProperty("workbench.gui.dbobjects.maintabs", "top");
 			int location = JTabbedPane.TOP;
@@ -229,6 +229,10 @@ public class DbExplorerPanel
 		if (this.tables != null)
 		{
 			tables.setDbExecutionListener(l);
+		}
+		if (this.searchPanel != null)
+		{
+			this.searchPanel.addDbExecutionListener(l);
 		}
 	}
 	

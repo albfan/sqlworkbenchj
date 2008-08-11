@@ -94,7 +94,11 @@ public class TextRowDataConverter
 				value = blobFile.getName();
 				try
 				{
-					writeBlobFile(row.getValue(c), blobFile);
+					long blobSize = writeBlobFile(row.getValue(c), blobFile);
+					if (blobSize <= 0)
+					{
+						value = null;
+					}
 				}
 				catch (Exception e)
 				{

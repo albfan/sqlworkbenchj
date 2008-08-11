@@ -1498,7 +1498,7 @@ public class WbImportTest
 			//out.println("int_col\tdouble_col\tchar_col\tdate_col\ttime_col\tts_col");
 			out.println("42\t42.1234\tfortytwo\t2006-02-01\t22:30\t2006-04-01 22:34:14\t");
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -header=false -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
@@ -1766,78 +1766,72 @@ public class WbImportTest
 	}
 
 	public void testZippedTextBlobImport()
+		throws Exception
 	{
-		int rowCount = 10;
-		try
+		util.emptyBaseDirectory();
+		File importFile  = new File(this.basedir, "blob_test.txt");
+
+		File archive = new File(this.basedir, "blob_test.zip");
+		ZipOutputFactory zout = new ZipOutputFactory(archive);
+		Writer w = zout.createWriter(importFile, "UTF-8");
+
+		PrintWriter out = new PrintWriter(w);
+		out.println("nr\tbinary_data");
+		out.println("1\tblob_data_r1_c1.data");
+		out.close();
+
+		w.close();
+		zout.done();
+
+		File blobarchive = new File(this.basedir, "blob_test" + RowDataConverter.BLOB_ARCHIVE_SUFFIX + ".zip");
+		zout = new ZipOutputFactory(blobarchive);
+		OutputStream binaryOut = zout.createOutputStream(new File("blob_data_r1_c1.data"));
+
+		byte[] testData = new byte[1024];
+		for (int i = 0; i < testData.length; i++)
 		{
-			File importFile  = new File(this.basedir, "blob_test.txt");
-			
-			File archive = new File(this.basedir, "blob_test.zip");
-			ZipOutputFactory zout = new ZipOutputFactory(archive);
-			Writer w = zout.createWriter(importFile, "UTF-8");
-			
-			PrintWriter out = new PrintWriter(w);
-			out.println("nr\tbinary_data");
-			out.println("1\tblob_data_r1_c1.data");
-			out.close();
+			testData[i] = (byte)(i % 255);
+		}
+		binaryOut.write(testData);
+		binaryOut.close();
 
-			w.close();
-			zout.done();
-			
-			File blobarchive = new File(this.basedir, "blob_test" + RowDataConverter.BLOB_ARCHIVE_SUFFIX + ".zip");
-			zout = new ZipOutputFactory(blobarchive);
-			OutputStream binaryOut = zout.createOutputStream(new File("blob_data_r1_c1.data"));
-			
-			byte[] testData = new byte[1024];
-			for (int i = 0; i < testData.length; i++)
+		zout.done();
+
+		StatementRunnerResult result = importCmd.execute("wbimport -sourceDir='" + basedir + "' -decimal='.' -multiline=true -encoding='UTF-8' -type=text -header=true -extension=zip");
+		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+		Statement stmt = this.connection.createStatementForQuery();
+		ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test");
+		if (rs.next())
+		{
+			int nr = rs.getInt(1);
+			assertEquals("Wrong data imported", 1, nr);
+
+			Object blob = rs.getObject(2);
+			assertNotNull("No blob data imported", blob);
+			if (blob instanceof byte[])
 			{
-				testData[i] = (byte)(i % 255);
-			}
-			binaryOut.write(testData);
-			binaryOut.close();
-
-			zout.done();
-
-			StatementRunnerResult result = importCmd.execute("wbimport -file='" + archive.getAbsolutePath() + "' -decimal='.' -multiline=true -encoding='UTF-8' -type=text -header=true -table=blob_test");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test");
-			if (rs.next())
-			{
-				int nr = rs.getInt(1);
-				assertEquals("Wrong data imported", 1, nr);
-				
-				Object blob = rs.getObject(2);
-				assertNotNull("No blob data imported", blob);
-				if (blob instanceof byte[])
-				{
-					byte[] retrievedData = (byte[])blob;
-					assertEquals("Wrong blob size importee", 1024, retrievedData.length);
-					assertEquals("Wrong content of blob data", retrievedData[0], 0);
-					assertEquals("Wrong content of blob data", retrievedData[1], 1);
-					assertEquals("Wrong content of blob data", retrievedData[2], 2);
-					assertEquals("Wrong content of blob data", retrievedData[3], 3);
-				}
-				else
-				{
-					fail("Wrong blob data returned");
-				}
+				byte[] retrievedData = (byte[])blob;
+				assertEquals("Wrong blob size importee", 1024, retrievedData.length);
+				assertEquals("Wrong content of blob data", retrievedData[0], 0);
+				assertEquals("Wrong content of blob data", retrievedData[1], 1);
+				assertEquals("Wrong content of blob data", retrievedData[2], 2);
+				assertEquals("Wrong content of blob data", retrievedData[3], 3);
 			}
 			else
 			{
-				fail("No rows imported");
+				fail("Wrong blob data returned");
 			}
-			rs.close();
-			stmt.close();
-			if (!archive.delete())
-			{
-				fail("Could not delete input file: " + archive.getCanonicalPath());
-			}			
 		}
-		catch (Exception e)
+		else
 		{
-			fail(e.getMessage());
+			fail("No rows imported");
+		}
+		rs.close();
+		stmt.close();
+		if (!archive.delete())
+		{
+			fail("Could not delete input file: " + archive.getCanonicalPath());
 		}
 	}
 

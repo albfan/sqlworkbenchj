@@ -56,6 +56,7 @@ public class BatchRunnerTest
 	}
 
 	public void testTransactionControlError()
+		throws Exception
 	{
 		WbConnection con = null;
 		try
@@ -80,7 +81,7 @@ public class BatchRunnerTest
 			writer.println("commit;");
 			writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect');");
 			writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox');");
-			writer.println("-- import data. should fail!");
+			writer.println("-- import data should fail!");
 			writer.println("WbImport -file='" + importFile.getName() + "' -type=text -header=true -table=person -continueOnError=false -transactionControl=false");
 			writer.close();
 			
@@ -115,11 +116,6 @@ public class BatchRunnerTest
 			}
 			SqlUtil.closeAll(rs, stmt);
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 		finally
 		{
 			con.disconnect();
@@ -127,6 +123,7 @@ public class BatchRunnerTest
 	}
 
 	public void testTransactionControlSuccess()
+		throws Exception
 	{
 		WbConnection con = null;
 		try
@@ -151,8 +148,7 @@ public class BatchRunnerTest
 			writer.println("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent');");
 			writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect');");
 			writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox');");
-			writer.println("-- import data. should fail!");
-			writer.println("WbImport -file='" + importFile.getName() + "' -type=text -header=true -table=person -continueOnError=false -transactionControl=false");
+			writer.println("WbImport -file='" + importFile.getName() + "' -type=text -header=true -table=person -continueOnError=false -transactionControl=false;");
 			writer.println("insert into person (nr, firstname, lastname) values (8,'Tricia', 'McMillian');");
 			writer.close();
 			
@@ -181,18 +177,13 @@ public class BatchRunnerTest
 			if (rs.next())
 			{
 				int nr = rs.getInt(1);
-				assertEquals("Not enough rows!", 6, nr);
+				assertEquals("Not enough rows!", 7, nr);
 			}
 			else
 			{
 				fail("No data");
 			}
 			SqlUtil.closeAll(rs, stmt);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
 		}
 		finally
 		{
@@ -201,6 +192,7 @@ public class BatchRunnerTest
 	}
 	
 	public void testCreateCommandLineProfile()
+		throws Exception
 	{
 		AppArguments cmdline = new AppArguments();
 		cmdline.parse("-readOnly=true -removeComments=true -emptyStringIsNull=true -autoCommit=true -separateConnection=true -url=jdbc:postgres://localhost/test -username=test -password=topsecret -configdir=. -driver=org.postgresql.Driver -driverjar=postgresql-8.3-603.jdbc3.jar");
@@ -221,40 +213,34 @@ public class BatchRunnerTest
 	}
 	
 	public void testEmptyStatement()
+		throws Exception
 	{
-		try
-		{
-			String sql = "-- comment only";
-			util.emptyBaseDirectory();
-			
-			File scriptFile = new File(util.getBaseDir(), "testbatch.sql");
-			FileWriter writer = new FileWriter(scriptFile);
-			writer.write(sql);
-			writer.close();
+		String sql = "-- comment only";
+		util.emptyBaseDirectory();
 
-			ArgumentParser parser = new AppArguments();
-			String script = "-script='" + scriptFile.getAbsolutePath() + "'";
-			parser.parse("-url='jdbc:h2:mem:testEmptyStmt' -user=sa -driver=org.h2.Driver "  + script  + " -displayresult=true -ignoredroperrors=true -showprogress=true -showtiming=false");
-			BatchRunner runner = BatchRunner.createBatchRunner(parser);
-	
-			assertNotNull(runner);
-			
-			runner.connect();
-			WbConnection con = runner.getConnection();
-			assertNotNull(con);
-			assertNotNull(con.getProfile());
-			
-			runner.execute();
-			assertEquals(true, runner.isSuccess());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		File scriptFile = new File(util.getBaseDir(), "testbatch.sql");
+		FileWriter writer = new FileWriter(scriptFile);
+		writer.write(sql);
+		writer.close();
+
+		ArgumentParser parser = new AppArguments();
+		String script = "-script='" + scriptFile.getAbsolutePath() + "'";
+		parser.parse("-url='jdbc:h2:mem:testEmptyStmt' -user=sa -driver=org.h2.Driver "  + script  + " -displayresult=true -ignoredroperrors=true -showprogress=true -showtiming=false");
+		BatchRunner runner = BatchRunner.createBatchRunner(parser);
+
+		assertNotNull(runner);
+
+		runner.connect();
+		WbConnection con = runner.getConnection();
+		assertNotNull(con);
+		assertNotNull(con.getProfile());
+
+		runner.execute();
+		assertEquals(true, runner.isSuccess());
 	}
 	
 	public void testBatchRunner()
+		throws Exception
 	{
 		try
 		{
@@ -306,11 +292,6 @@ public class BatchRunnerTest
 				assertEquals("Not enough records inserted", 3, count);
 			}
 			SqlUtil.closeAll(rs, stmt);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
 		}
 		finally
 		{

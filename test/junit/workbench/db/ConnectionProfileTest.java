@@ -87,6 +87,7 @@ public class ConnectionProfileTest
 		profile.setAlternateDelimiter(new DelimiterDefinition("/", true));
 		profile.setAutocommit(false);
 		profile.setConfirmUpdates(true);
+		profile.setDriverName("Postgres");
 		profile.reset();
 		
 		Properties props = new Properties();
@@ -154,6 +155,10 @@ public class ConnectionProfileTest
 		profile.setStoreExplorerSchema(true);
 		assertTrue(profile.isChanged());
 		profile.setStoreExplorerSchema(true);
+		assertTrue(profile.isChanged());
+
+		profile.reset();
+		profile.setDriverName("Postgres 8.3");
 		assertTrue(profile.isChanged());
 		
 	}

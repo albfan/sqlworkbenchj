@@ -54,6 +54,8 @@ public class TextFileParser
 	implements RowDataProducer, ImportFileParser
 {
 	private File inputFile;
+	private ImportFileLister sourceFiles;
+	
 	private File baseDir;
 	private String tableName;
 	private String encoding = null;
@@ -62,7 +64,7 @@ public class TextFileParser
 	private boolean decodeUnicode = false;
 	private boolean enableMultiLineMode = true;
 	private boolean checkDependencies = false;
-
+	
 	// this indicates an import of several files from a single
 	// directory into one table
 	private boolean multiFileImport = false;
@@ -95,8 +97,7 @@ public class TextFileParser
 	private RowDataReceiver receiver;
 	private boolean abortOnError = false;
 	private WbConnection connection;
-	private String sourceDir;
-	private String extensionToUse;
+
 	private JobErrorHandler errorHandler;
 	private List<ColumnIdentifier> pendingImportColumns;
 	private ValueConverter converter = new ValueConverter();
@@ -125,7 +126,6 @@ public class TextFileParser
 	public TextFileParser(File aFile)
 	{
 		this.inputFile = aFile;
-		this.sourceDir = null;
 	}
 
 	public ImportFileHandler getFileHandler()
@@ -155,14 +155,8 @@ public class TextFileParser
 
 	public void setInputFile(File file)
 	{
-		this.sourceDir = null;
+		this.sourceFiles = null;
 		this.inputFile = file;
-	}
-
-	public void setSourceExtension(String ext)
-	{
-		if (ext != null && ext.trim().length() == 0) return;
-		this.extensionToUse = ext;
 	}
 
 	/**
@@ -182,10 +176,10 @@ public class TextFileParser
 		return this.multiFileImport;
 	}
 	
-	public void setSourceDirectory(String dir)
+	public void setSourceFiles(ImportFileLister source)
 	{
-		this.sourceDir = dir;
 		this.inputFile = null;
+		this.sourceFiles = source;
 	}
 
 	public void setTableName(String aName)
@@ -587,14 +581,14 @@ public class TextFileParser
 
 		try
 		{
-			if (this.sourceDir != null)
+			if (this.sourceFiles != null)
 				processDirectory();
 			else
 				processOneFile();
 		}
 		finally
 		{
-			if (this.sourceDir != null)
+			if (this.sourceFiles != null)
 			{
 				this.receiver.endMultiTable();
 			}
@@ -614,41 +608,34 @@ public class TextFileParser
 	private void processDirectory()
 		throws Exception
 	{
-		WbFile dir = new WbFile(this.sourceDir);
-		if (this.extensionToUse == null) this.extensionToUse = ".txt";
+		if (this.sourceFiles == null) throw new IllegalStateException("Cannot process source directory without FileNameSorter");
 
-		FileNameSorter sorter = new FileNameSorter(this.connection, dir, extensionToUse, new DefaultTablenameResolver());
+		this.sourceFiles.setTableNameResolver(new DefaultTablenameResolver());
+		
 		List<WbFile> toProcess = null;
-		if (this.checkDependencies)
+		try
 		{
-			try
-			{
-				toProcess = sorter.getSortedList();
-			}
-			catch (CycleErrorException e)
-			{
-				cancelImport = true;
-				LogMgr.logError("TextFileParser.processDirectory()", "Error when checking dependencies", e);
-				throw e;
-			}
-			
-			// The receiver only needs to pre-process the full table list
-			// if checkDependencies is turned on, otherwise a possible
-			// table delete can be done during the single table import
-			this.receiver.setTableList(sorter.getTableList());
+			toProcess = sourceFiles.getFiles();
 		}
-		else
+		catch (CycleErrorException e)
 		{
-			toProcess = sorter.getFiles();
+			cancelImport = true;
+			LogMgr.logError("TextFileParser.processDirectory()", "Error when checking dependencies", e);
+			throw e;
 		}
+
+		// The receiver only needs to pre-process the full table list
+		// if checkDependencies is turned on, otherwise a possible
+		// table delete can be done during the single table import
+		this.receiver.setTableList(sourceFiles.getTableList());
 
 		int count = toProcess.size();
 		if (count == 0)
 		{
-			String msg = ResourceMgr.getFormattedString("ErrImportNoFiles", extensionToUse, dir.getFullPath());
+			String msg = ResourceMgr.getFormattedString("ErrImportNoFiles", sourceFiles.getExtension(), sourceFiles.getDirectory());
 			this.messages.append(msg);
 			this.hasErrors = true;
-			throw new SQLException("No files with extension '" + extensionToUse + "' in directory " + dir.getFullPath());
+			throw new SQLException("No files with extension '" + sourceFiles.getExtension() + "' in directory " + sourceFiles.getDirectory());
 		}
 		
 		this.receiver.setTableCount(count);
@@ -672,10 +659,12 @@ public class TextFileParser
 				this.receiver.setCurrentTable(currentFile);
 				if (!multiFileImport)
 				{
-					this.tableName = f.getFileName();
+					// Only reset the import columns and table if multiple files
+					// are imported into multiple tables
+					// if multifileimport is true, then all files are imported into the same table!
+					TableIdentifier tbl = sourceFiles.getTableForFile(f);
+					this.tableName = tbl.getTableExpression();
 					
-					// Do not reset the import columns if multiple files
-					// are imported into a single table.
 					this.columns = null;
 					this.colCount = 0;
 					this.columnMap = null;
@@ -952,7 +941,7 @@ public class TextFileParser
 									rowData[targetIndex] = value;
 								}
 							}
-							else if (blobsAreFilenames && value != null && SqlUtil.isBlobType(colType) )
+							else if (blobsAreFilenames && !StringUtil.isEmptyString(value) && SqlUtil.isBlobType(colType) )
 							{
 								File bfile = new File(value.trim());
 								if (!bfile.isAbsolute())
