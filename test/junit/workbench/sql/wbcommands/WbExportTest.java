@@ -11,6 +11,7 @@
  */
 package workbench.sql.wbcommands;
 
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.io.File;
@@ -33,6 +34,7 @@ import workbench.util.FileUtil;
 import workbench.util.LobFileParameter;
 import workbench.util.LobFileStatement;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.ZipUtil;
 
@@ -101,34 +103,61 @@ public class WbExportTest
 		}
 	}
 	
-	public void testCreateDir()
+	public void testExportRownum()
+		throws Exception
 	{
-		try
+		Statement stmt = this.connection.createStatement();
+		stmt.executeUpdate("CREATE MEMORY TABLE rownumtest (firstname varchar(100), lastname varchar(100))");
+		PreparedStatement pstmt = connection.getSqlConnection().prepareStatement("insert into rownumtest (firstname, lastname) values (?,?)");
+		int rows = 20;
+		for (int i=0; i < rows; i ++)
 		{
-			String outputDir = util.getBaseDir() + "/nonexisting";
-			File exportDir = new WbFile(outputDir);
-			exportDir.delete();
-			StatementRunnerResult result = exportCmd.execute("wbexport -outputDir='" + exportDir.getAbsolutePath() + "' -type=text -sourceTable=*");
-			String msg = result.getMessageBuffer().toString();
-			assertTrue(msg.indexOf("not found!") > -1);
-			assertFalse("Export did not fail", result.isSuccess());
-			assertFalse("Export directory created", exportDir.exists());
-			
-			result = exportCmd.execute("wbexport -outputDir='" + exportDir.getAbsolutePath() + "' -type=text -createDir=true -sourceTable=*");
-			assertTrue("Export failed", result.isSuccess());
-			assertTrue("Export directory not created", exportDir.exists());
-			WbFile f = new WbFile(exportDir, "junit_test.txt");
-			assertTrue(f.exists());
-			f = new WbFile(exportDir, "person.txt");
-			assertTrue(f.exists());
-			f = new WbFile(exportDir, "blob_test.txt");
-			assertTrue(f.exists());
+			pstmt.setString(1, "FirstName" + i);
+			pstmt.setString(2, "LastName" + i);
+			pstmt.executeUpdate();
 		}
-		catch (Exception e)
+		connection.commit();
+		
+		WbFile exportFile = new WbFile(util.getBaseDir(), "rownum_test.txt");
+		StatementRunnerResult result = exportCmd.execute("wbexport -header=true -file='" + exportFile.getFullPath() + "' -type=text -sourceTable=rownumtest -rowNumberColumn=rownum");
+		String msg = result.getMessageBuffer().toString();
+		assertTrue(result.isSuccess());
+		assertTrue(exportFile.exists());
+		BufferedReader in = new BufferedReader(new FileReader(exportFile));
+		List<String> content = FileUtil.getLines(in);
+		assertTrue(content.size() == (rows + 1));
+		List<String> elements = StringUtil.stringToList(content.get(0), "\t", true, true, false);
+		assertTrue(elements.size() == 3);
+		assertEquals("rownum", elements.get(0));
+		for (int i=1; i < content.size(); i++)
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			List<String> values = StringUtil.stringToList(content.get(i), "\t", false, true, false);
+			assertTrue(values.size() == 3);
+			assertEquals(values.get(0), Integer.toString(i));
 		}
+	}
+	
+	public void testCreateDir()
+		throws Exception
+	{
+		String outputDir = util.getBaseDir() + "/nonexisting";
+		File exportDir = new WbFile(outputDir);
+		exportDir.delete();
+		StatementRunnerResult result = exportCmd.execute("wbexport -outputDir='" + exportDir.getAbsolutePath() + "' -type=text -sourceTable=*");
+		String msg = result.getMessageBuffer().toString();
+		assertTrue(msg.indexOf("not found!") > -1);
+		assertFalse("Export did not fail", result.isSuccess());
+		assertFalse("Export directory created", exportDir.exists());
+
+		result = exportCmd.execute("wbexport -outputDir='" + exportDir.getAbsolutePath() + "' -type=text -createDir=true -sourceTable=*");
+		assertTrue("Export failed", result.isSuccess());
+		assertTrue("Export directory not created", exportDir.exists());
+		WbFile f = new WbFile(exportDir, "junit_test.txt");
+		assertTrue(f.exists());
+		f = new WbFile(exportDir, "person.txt");
+		assertTrue(f.exists());
+		f = new WbFile(exportDir, "blob_test.txt");
+		assertTrue(f.exists());
 	}
 	
 	public void testQuoteEscaping()

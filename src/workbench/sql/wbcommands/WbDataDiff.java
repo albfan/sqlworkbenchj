@@ -63,9 +63,9 @@ public class WbDataDiff
 	{
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(PARAM_INCLUDE_DELETE, ArgumentType.BoolArgument);
-		cmdLine.addArgument(WbExport.PARAM_CREATE_OUTPUTDIR);
+		cmdLine.addArgument(WbExport.ARG_CREATE_OUTPUTDIR);
 		cmdLine.addArgument(PARAM_IGNORE_COLS);
-		cmdLine.addArgument(WbExport.PARAM_BLOB_TYPE, BlobMode.getTypes());
+		cmdLine.addArgument(WbExport.ARG_BLOB_TYPE, BlobMode.getTypes());
 		
 		CommonArgs.addCheckDepsParameter(cmdLine);
 		CommonArgs.addSqlDateLiteralParameter(cmdLine);
@@ -132,7 +132,7 @@ public class WbDataDiff
 			encoding = Settings.getInstance().getDefaultEncoding();
 		}
 		
-		boolean createDir = cmdLine.getBoolean(WbExport.PARAM_CREATE_OUTPUTDIR, false);
+		boolean createDir = cmdLine.getBoolean(WbExport.ARG_CREATE_OUTPUTDIR, false);
 		String literalType = cmdLine.getValue(CommonArgs.ARG_DATE_LITERAL_TYPE);
 		if (literalType == null) literalType = SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE;
 		

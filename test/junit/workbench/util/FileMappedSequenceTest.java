@@ -107,7 +107,7 @@ public class FileMappedSequenceTest
 		
 		for (int chunkSize =  contentLength / 3; chunkSize < contentLength * 2; chunkSize += contentLength / 4)
 		{
-			System.out.println("Using chunk size: " + chunkSize);
+//			System.out.println("Using chunk size: " + chunkSize);
 			sequence = new FileMappedSequence(f, "UTF-8", chunkSize);
 
 			len = sequence.getCurrentChunkLength();

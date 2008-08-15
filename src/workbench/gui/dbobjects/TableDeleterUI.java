@@ -16,11 +16,11 @@ import java.awt.Frame;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import workbench.db.TableDeleter;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.TableDependencySorter;
@@ -28,11 +28,12 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.EditWindow;
 import workbench.gui.components.NoSelectionModel;
 import workbench.gui.components.WbButton;
+import workbench.interfaces.JobErrorHandler;
+import workbench.interfaces.StatusBar;
 import workbench.interfaces.TableDeleteListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
-import workbench.util.SqlUtil;
 import workbench.util.WbThread;
 
 /**
@@ -41,7 +42,7 @@ import workbench.util.WbThread;
  */
 public class TableDeleterUI
 	extends javax.swing.JPanel
-	implements WindowListener
+	implements WindowListener, StatusBar, JobErrorHandler
 {
 	private JDialog dialog;
 	private List<TableIdentifier> objectNames;
@@ -50,8 +51,8 @@ public class TableDeleterUI
 	private Thread deleteThread;
 	private Thread checkThread;
 	private List<TableDeleteListener> deleteListener;
-	private Statement currentStatement;
-	
+	private TableDeleter deleter;
+
 	public TableDeleterUI()
 	{
 		initComponents();
@@ -248,6 +249,10 @@ public class TableDeleterUI
 
 	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_cancelButtonActionPerformed
 	{//GEN-HEADEREND:event_cancelButtonActionPerformed
+		if (this.deleter != null)
+		{
+			this.deleter.cancel();
+		}
 		this.cancelled = true;
 		closeWindow();
 	}//GEN-LAST:event_cancelButtonActionPerformed
@@ -259,16 +264,20 @@ public class TableDeleterUI
 
 	private void checkFKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkFKButtonActionPerformed
 
-		if (this.connection.isBusy()) return;
+		if (this.connection.isBusy())
+		{
+			return;
+		}
 
 		this.deleteButton.setEnabled(false);
 		this.showScript.setEnabled(false);
 		this.statusLabel.setText(ResourceMgr.getString("MsgFkDeps"));
-		
+
 		WbSwingUtilities.showWaitCursor(dialog);
-		
+
 		this.checkThread = new WbThread("FKCheck")
 		{
+
 			public void run()
 			{
 				List<TableIdentifier> sorted = null;
@@ -291,14 +300,13 @@ public class TableDeleterUI
 				}
 			}
 		};
-		
+
 		checkThread.start();
 	}//GEN-LAST:event_checkFKButtonActionPerformed
-	
+
 	private void showScriptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showScriptActionPerformed
 		showScript();
 	}//GEN-LAST:event_showScriptActionPerformed
-
 
 	protected void fkCheckFinished(final List<TableIdentifier> newlist)
 	{
@@ -318,11 +326,61 @@ public class TableDeleterUI
 			}
 		});
 	}
-	
+
+	public void fatalError(String msg)
+	{
+		WbSwingUtilities.showErrorMessage(this, msg);
+	}
+
+	public int getActionOnError(int errorRow, String errorColumn, String data, String errorMessage)
+	{
+		int choice = WbSwingUtilities.getYesNoIgnoreAll(this.dialog, errorMessage);
+		if (choice == WbSwingUtilities.IGNORE_ALL)
+		{
+			return JobErrorHandler.JOB_IGNORE_ALL;
+		}
+		if (choice == JOptionPane.YES_OPTION)
+		{
+			return JobErrorHandler.JOB_CONTINUE;
+		}
+		return JobErrorHandler.JOB_ABORT;
+	}
+
+	public void clearStatusMessage()
+	{
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				statusLabel.setText("");
+			}
+		});
+	}
+
+	public String getText()
+	{
+		return statusLabel.getText();
+	}
+
+	public void setStatusMessage(final String message)
+	{
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				statusLabel.setText(message);
+			}
+		});
+	}
+
 	protected void closeWindow()
 	{
 		try
 		{
+			if (this.deleter != null)
+			{
+				this.deleter.cancel();
+			}
 			if (this.deleteThread != null)
 			{
 				this.deleteThread.interrupt();
@@ -346,9 +404,8 @@ public class TableDeleterUI
 		{
 			LogMgr.logWarning("TableDeleterUI.cancel()", "Error when trying to kill check thread", e);
 		}
-		
+
 		this.dialog.setVisible(false);
-//		this.dialog.dispose();
 		this.dialog = null;
 	}
 
@@ -398,191 +455,48 @@ public class TableDeleterUI
 	protected void doDelete()
 	{
 		this.cancelled = false;
-		boolean ignoreAll = false;
 
 		boolean doCommitEach = this.commitEach.isSelected();
 		boolean useTruncate = this.useTruncateCheckBox.isSelected();
+
+		deleter = new TableDeleter(this.connection);
+		deleter.setStatusBar(this);
+
 		if (useTruncate)
 		{
 			doCommitEach = false;
 		}
 		boolean hasError = false;
-		List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
-		int count = this.objectNames.size();
-		TableIdentifier table = null;
+		List<TableIdentifier> deletedTables = null;
 
 		try
 		{
-			this.currentStatement = this.connection.createStatement();
+			deletedTables = deleter.deleteTableData(this.objectNames, doCommitEach, useTruncate);
 		}
 		catch (SQLException e)
 		{
-			WbSwingUtilities.showErrorMessage(e.getMessage());
-			LogMgr.logError("TableDeleterUI.doDelete()", "Error creating statement", e);
-			return;
-		}
-		
-		try
-		{
-			this.connection.setBusy(true);
-
-			for (int i = 0; i < count; i++)
-			{
-				if (this.cancelled)
-				{
-					break;
-				}
-				table = this.objectNames.get(i);
-				this.statusLabel.setText(ResourceMgr.getString("TxtDeletingTable") + " " + table + " ...");
-				try
-				{
-					this.deleteTable(table, useTruncate, doCommitEach);
-					tables.add(table);
-				}
-				catch (Exception ex)
-				{
-					String error = ExceptionUtil.getDisplay(ex);
-					LogMgr.logError("TableDeleterUI.doDelete()", "Error deleting table " + table, ex);
-
-					if (!ignoreAll)
-					{
-						String question = ResourceMgr.getString("ErrDeleteTableData");
-						question = question.replace("%table%", table.toString());
-						question = question.replace("%error%", error);
-						question = question + "\n" + ResourceMgr.getString("MsgContinueQ");
-
-						int choice = WbSwingUtilities.getYesNoIgnoreAll(this.dialog, question);
-						if (choice == JOptionPane.NO_OPTION)
-						{
-							// the hasError flag will cause a rollback at the end.
-							hasError = true;
-							break;
-						}
-						if (choice == WbSwingUtilities.IGNORE_ALL)
-						{
-							// if we ignore all errors we should do a commit at the
-							// end in order to ensure that the delete's which were
-							// successful are committed.
-							hasError = false;
-							ignoreAll = true;
-						}
-					}
-				}
-			}
-
-			boolean doCommit = true && !cancelled;
-			try
-			{
-				if (!doCommitEach)
-				{
-					if (hasError || cancelled)
-					{
-						doCommit = false;
-						this.connection.rollback();
-					}
-					else
-					{
-						this.connection.commit();
-					}
-				}
-			}
-			catch (SQLException e)
-			{
-				LogMgr.logError("TableDeleterUI.doDelete()", "Error on commit/rollback", e);
-				String msg = null;
-
-				if (doCommit)
-				{
-					ResourceMgr.getString("ErrCommit");
-				}
-				else
-				{
-					msg = ResourceMgr.getString("ErrRollbackTableData");
-				}
-				msg = msg.replace("%error%", e.getMessage());
-
-				WbSwingUtilities.showErrorMessage(this.dialog, msg);
-			}
-		}
-		finally
-		{
-			SqlUtil.closeStatement(currentStatement);
-			this.connection.setBusy(false);
+			// Basically any error should have been handled by the TableDeleter
+			// or through the JobErrorHandler callbacks
+			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(e));
 		}
 
-		this.fireTableDeleted(tables);
+		this.fireTableDeleted(deletedTables);
 
 		this.statusLabel.setText("");
+		this.deleter = null;
+		
 		if (!hasError)
 		{
 			this.closeWindow();
 		}
 	}
 
-	protected void deleteTable(final TableIdentifier table, final boolean useTruncate, final boolean doCommit)
-		throws SQLException
-	{
-		try
-		{
-			String deleteSql = getDeleteStatement(table, useTruncate);
-			LogMgr.logInfo("TableDeleterUI.deleteTable()", "Executing: [" + deleteSql + "] to delete target table...");
-			currentStatement.executeUpdate(deleteSql);
-			if (doCommit && !this.connection.getAutoCommit())
-			{
-				this.connection.commit();
-			}
-		}
-		catch (SQLException e)
-		{
-			if (doCommit && !this.connection.getAutoCommit())
-			{
-				this.connection.rollback();
-			}
-			LogMgr.logError("TableDeleterUI.deleteTable()", "Error when deleting table!", e);
-			throw e;
-		}
-	}
-
-	protected String getDeleteStatement(final TableIdentifier table, final boolean useTruncate)
-	{
-		String deleteSql = null;
-		String tableName = table.getTableExpression(this.connection);
-		if (useTruncate)
-		{
-			deleteSql = "TRUNCATE TABLE " + tableName;
-		}
-		else
-		{
-			deleteSql = "DELETE FROM " + tableName;
-		}
-		return deleteSql;
-	}
-
 	protected void showScript()
 	{
 		boolean doCommitEach = this.commitEach.isSelected();
 		boolean useTruncate = this.useTruncateCheckBox.isSelected();
-		if (useTruncate)
-		{
-			doCommitEach = false;
-		}
-		StringBuilder script = new StringBuilder(objectNames.size() * 30);
-		for (TableIdentifier table : objectNames)
-		{
-			String sql = this.getDeleteStatement(table, useTruncate);
-			script.append(sql);
-			script.append(";\n");
-			if (doCommitEach)
-			{
-				script.append("COMMIT;\n\n");
-			}
-		}
-
-		if (!doCommitEach)
-		{
-			script.append("\nCOMMIT;\n");
-		}
-
+		TableDeleter tblDeleter = new TableDeleter(this.connection);
+		CharSequence script = tblDeleter.generateScript(objectNames, doCommitEach, useTruncate);
 		final EditWindow w = new EditWindow(this.dialog, ResourceMgr.getString("TxtWindowTitleGeneratedScript"), script.toString(), "workbench.tabledeleter.scriptwindow", true);
 		w.setVisible(true);
 		w.dispose();
@@ -640,7 +554,7 @@ public class TableDeleterUI
 
 	protected void fireTableDeleted(List tables)
 	{
-		if (this.deleteListener == null)
+		if (this.deleteListener == null || tables == null)
 		{
 			return;
 		}
@@ -679,8 +593,6 @@ public class TableDeleterUI
 	public void windowOpened(WindowEvent e)
 	{
 	}
-	
-	
   // Variables declaration - do not modify//GEN-BEGIN:variables
   public javax.swing.JCheckBox addMissingTables;
   public javax.swing.ButtonGroup buttonGroup1;

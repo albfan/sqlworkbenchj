@@ -54,6 +54,7 @@ public class MainWindowTest
 	{
 		try
 		{
+//			JemmyProperties.getCurrentTimeouts().loadDebugTimeouts();
 			testUtil.startApplication();
 		}
 		catch (Exception e)
@@ -69,12 +70,11 @@ public class MainWindowTest
 		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Help|About", "|");
 		
 		JDialogOperator dialog = new JDialogOperator(mainWindow, "About SQL Workbench/J");
-		dialog.setVisible(false);
 		
-		QueueTool tool = new QueueTool();
-		tool.waitEmpty();
-		dialog.dispose();
-		
+		NamedComponentChooser chooser = new NamedComponentChooser();
+		chooser.setName("close");
+		JButtonOperator close = new JButtonOperator(dialog, chooser);
+		close.push();
 	}	
 	
 	private void whatsNewTest()
@@ -165,11 +165,12 @@ public class MainWindowTest
 		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Data|Define key columns", "|");		
 		JDialogOperator definePK = new JDialogOperator("Select Key Columns");
 
-		JTableOperator cols = new JTableOperator(definePK);
-		cols.setValueAt(Boolean.TRUE, 0, 1);
-		JButtonOperator ok = new JButtonOperator(definePK, "OK");
-		ok.pushNoBlock();
-		tool.waitEmpty();
+		JTableOperator table = new JTableOperator(definePK);
+		chooser.setName("ok");
+		JButtonOperator ok = new JButtonOperator(definePK, chooser);
+
+		table.clickOnCell(0, 1, 1);
+		ok.push();
 		
 		saveChanges(sqlPanel);
 		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Data|Save changes to database", "|");		
@@ -221,8 +222,7 @@ public class MainWindowTest
 		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Data|Save changes to database", "|");		
 		JDialogOperator warning = new JDialogOperator("Missing key columns");
 		JButtonOperator cancel = new JButtonOperator(warning, "Cancel");
-		cancel.pushNoBlock();
-		tool.waitEmpty();
+		cancel.push();
 		assertEquals(3, result.getColumnCount());
 	}
 	

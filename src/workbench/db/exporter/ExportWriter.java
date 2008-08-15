@@ -17,6 +17,8 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Set;
+import workbench.db.ConnectionProfile;
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 
@@ -42,7 +44,7 @@ public abstract class ExportWriter
 	protected Writer outputWriter;
 	protected WbFile outputFile;
 	private int progressInterval = 10;
-
+	
 	public ExportWriter(DataExporter exp)
 	{
 		this.exporter = exp;
@@ -93,6 +95,21 @@ public abstract class ExportWriter
 		return rows;
 	}
 
+	private boolean getTrimCharData()
+	{
+		boolean trimCharData = false;
+		WbConnection con = exporter.getConnection();
+		if (con != null)
+		{
+			ConnectionProfile profile = con.getProfile();
+			if (profile != null)
+			{
+				trimCharData = profile.getTrimCharData();
+			}
+		}
+		return trimCharData;
+	}
+	
 	public void writeExport(DataStore ds)
 		throws SQLException, IOException
 	{
@@ -114,7 +131,9 @@ public abstract class ExportWriter
 		}
 		
 		writeStart();
-		
+
+		boolean trim = getTrimCharData();
+
 		int rowCount = ds.getRowCount();
 		for (int i=0; i < rowCount; i++)
 		{
@@ -126,6 +145,7 @@ public abstract class ExportWriter
 				this.rowMonitor.setCurrentRow((int)this.rows, -1);
 			}
 			RowData row = ds.getRow(i);
+			row.setTrimCharData(trim);
 			writeRow(row, rows);
 			rows ++;
 		}
@@ -162,6 +182,7 @@ public abstract class ExportWriter
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
 		}
 		int colCount = info.getColumnCount();
+		boolean trim = getTrimCharData();
 		
 		if (!this.exporter.getAppendToFile()) writeStart();
 		while (rs.next())
@@ -174,6 +195,7 @@ public abstract class ExportWriter
 				this.rowMonitor.setCurrentRow((int)this.rows, -1);
 			}
 			RowData row = new RowData(colCount);
+			row.setTrimCharData(trim);
 			row.read(rs, info);
 			writeRow(row, rows);
 			rows ++;

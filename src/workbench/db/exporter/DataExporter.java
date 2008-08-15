@@ -125,6 +125,7 @@ public class DataExporter
 	private String transformOutputFile = null;
 	private int exportType;
 	private boolean exportHeaders;
+	private String rowIndexColumnName = null;
 	private boolean includeCreateTable = false;
 	private boolean continueOnError = true;
 
@@ -235,6 +236,17 @@ public class DataExporter
 		this.progressWindow.setVisible(true);
 	}
 
+	public String getRowIndexColumnName()
+	{
+		return rowIndexColumnName;
+	}
+
+	public void setRowIndexColumnName(String colnme)
+	{
+		this.rowIndexColumnName = colnme;
+	}
+
+	
 	/**
 	 * Define the format for date and timestamp literals
 	 * when writing SQL statements. 

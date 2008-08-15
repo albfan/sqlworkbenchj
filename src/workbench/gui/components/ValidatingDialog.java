@@ -107,12 +107,18 @@ public class ValidatingDialog
 		for (int i = 0; i < options.length; i++)
 		{
 			this.optionButtons[i] = new WbButton(options[i]);
+			String label = optionButtons[i].getText();
+			if (label.equals("OK"))
+			{
+				optionButtons[i].setName("ok");
+			}
 			this.optionButtons[i].addActionListener(this);
 		}
 		
 		if (addCancelButton)
 		{
 			this.cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
+			this.cancelButton.setName("cancel");
 			this.cancelButton.addActionListener(this);
 		}
 		

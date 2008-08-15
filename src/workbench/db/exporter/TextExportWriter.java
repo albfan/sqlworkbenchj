@@ -39,6 +39,7 @@ public class TextExportWriter
 		conv.setLineEnding(exporter.getLineEnding());
 		conv.setWriteClobToFile(exporter.getWriteClobAsFile());
 		conv.setQuoteEscaping(exporter.getQuoteEscaping());
+		conv.setRowIndexColName(exporter.getRowIndexColumnName());
 	}
 	
 }

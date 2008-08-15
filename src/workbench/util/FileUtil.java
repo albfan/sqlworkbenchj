@@ -19,10 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import workbench.log.LogMgr;
 
 /**
@@ -54,9 +52,9 @@ public class FileUtil
 	 * @param in the "file" to read
 	 * @return a Collection with all the lines in the file
 	 */
-	public static Collection<String> getLines(BufferedReader in)
+	public static List<String> getLines(BufferedReader in)
 	{
-		Set<String> result = new HashSet<String>();
+		List<String> result = new ArrayList<String>();
 
 		try
 		{

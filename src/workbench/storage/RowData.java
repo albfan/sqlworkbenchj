@@ -68,7 +68,10 @@ public class RowData
 		this.setNew();
 	}
 
-	public void setTrimCharData(boolean flag) { this.trimCharData = flag; }
+	public void setTrimCharData(boolean flag)
+	{
+		this.trimCharData = flag;
+	}
 	
 	public Object[] getData() 
 	{ 

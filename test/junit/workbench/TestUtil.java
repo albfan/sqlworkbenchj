@@ -55,12 +55,24 @@ public class TestUtil
 	
 	private String basedir;
 	private String testName;
-	
+
+	/**
+	 * Creates a new TestUtil with the given test name
+	 * @param name
+	 */
 	public TestUtil(String name)
 	{
 		this(name, true);
 	}
 	
+	/**
+	 * Creates a new TestUtil with the given test name, but makes sure no
+	 * driver templates are loaded by WbManager
+	 *
+	 * @param name
+	 * @param noTemplates
+	 * @see workbench.WbManager#prepareForTest(java.lang.String[]) 
+	 */
 	public TestUtil(String name, boolean noTemplates)
 	{
 		try
@@ -158,7 +170,11 @@ public class TestUtil
 		dropAll(con, false);
 		return con;
 	}
-	
+
+	/**
+	 * Return a connection to an H2 Database with the name of this TestUtil
+	 * @see TestUtil#TestUtil(String)
+	 */
 	public WbConnection getConnection()
 		throws SQLException, ClassNotFoundException
 	{

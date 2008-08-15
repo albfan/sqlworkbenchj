@@ -11,6 +11,8 @@
  */
 package workbench.gui;
 
+import java.awt.Component;
+import java.awt.Container;
 import org.netbeans.jemmy.ClassReference;
 import org.netbeans.jemmy.JemmyProperties;
 import org.netbeans.jemmy.QueueTool;
@@ -18,6 +20,7 @@ import org.netbeans.jemmy.TestOut;
 import workbench.TestUtil;
 import workbench.WbManager;
 import workbench.gui.sql.SqlPanel;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -39,8 +42,7 @@ public class GuiTestUtil
 		new ClassReference("workbench.WbManager").startApplication(getArgs(false));
 		System.setProperty("workbench.system.doexit", "false");
 
-//		JemmyProperties.getCurrentTimeouts().loadDebugTimeouts();
-    JemmyProperties.getCurrentTimeouts().load(getClass().getClassLoader().getResourceAsStream("org/netbeans/jemmy/debug.timeouts"));
+//    JemmyProperties.getCurrentTimeouts().load(getClass().getClassLoader().getResourceAsStream("org/netbeans/jemmy/debug.timeouts"));
 		TestOut out = JemmyProperties.getProperties().getOutput().createErrorOutput();
 		JemmyProperties.getProperties().setOutput(out);
 	}
@@ -51,7 +53,35 @@ public class GuiTestUtil
 		tool.waitEmpty();
 	}
 
+	private static void printAllComponents(Container root, StringBuffer result, String indent)
+	{
+		Component[] all = root.getComponents();
+		if (all == null) return;
 
+		for (Component c : all)
+		{
+			result.append(indent);
+			String name = c.getName();
+			if (StringUtil.isEmptyString(name))
+			{
+				name = c.getClass().getName();
+			}
+			result.append(c.getName());
+			result.append("\n");
+			if (c instanceof Container)
+			{
+				printAllComponents((Container)c, result, indent + "  ");
+			}
+		}
+	}
+
+	public static void printAllComponents(Container c)
+	{
+		StringBuffer result = new StringBuffer(500);
+		printAllComponents(c, result, "");
+		System.out.println("********* \n" + result.toString() + "\n*****************");
+	}
+	
 	public void waitWhileBusy(SqlPanel panel)
 	{
 		int count = 0;

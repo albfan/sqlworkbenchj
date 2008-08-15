@@ -37,7 +37,8 @@ public class TextRowDataConverter
 	private boolean writeBlobFiles = true;
 	private boolean writeClobFiles = false;
 	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
-	
+	private String rowIndexColumnName = null;
+
 	public TextRowDataConverter()
 	{
 		super();
@@ -52,7 +53,25 @@ public class TextRowDataConverter
 	{
 		writeBlobFiles = flag;
 	}
-	
+
+	/**
+	 * Define a column name to include the rowindex in the output
+	 * If the name is null, the rowindex column will not be written.
+	 * 
+	 * @param colname
+	 */
+	public void setRowIndexColName(String colname)
+	{
+		if (StringUtil.isEmptyString(colname))
+		{
+			this.rowIndexColumnName = null;
+		}
+		else
+		{
+			this.rowIndexColumnName = colname;
+		}
+	}
+
 	public StrBuffer getEnd(long totalRows)
 	{
 		return null;
@@ -74,7 +93,12 @@ public class TextRowDataConverter
 		StrBuffer result = new StrBuffer(count * 30);
 		boolean canQuote = this.quoteCharacter != null;
 		int currentColIndex = 0;
-
+		if (rowIndexColumnName != null)
+		{
+			result.append(Long.toString(rowIndex + 1));
+			result.append(this.delimiter);
+		}
+		
 		for (int c=0; c < count; c ++)
 		{
 			if (!this.includeColumnInExport(c)) continue;
@@ -186,7 +210,14 @@ public class TextRowDataConverter
 
 		StrBuffer result = new StrBuffer();
 		int colCount = this.metaData.getColumnCount();
+		
 		boolean first = true;
+		if (rowIndexColumnName != null)
+		{
+			result.append(rowIndexColumnName);
+			first = false;
+		}
+
 		for (int c=0; c < colCount; c ++)
 		{
 			if (!this.includeColumnInExport(c)) continue;
