@@ -1012,8 +1012,20 @@ public class WbManager
 	}
 
 	/**
-	 * For testing purposes only!
+	 * Prepare the Workbench "environment" to be used inside another
+	 * application (e.g. for Unit testing)
 	 */
+	public static void prepareForEmbedded()
+	{
+		wb = new WbManager();
+		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
+		String args = "-notemplates -nosettings";
+		System.setProperty("workbench.system.doexit", "false");
+		System.setProperty("workbench.gui.testmode", "true");
+		// Avoid saving the settings
+		wb.readParameters(new String[] { args} );
+	}
+		
 	public static void prepareForTest(String[] args)
 	{
 		wb = new WbManager();
