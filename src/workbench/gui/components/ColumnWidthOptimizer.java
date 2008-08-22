@@ -15,6 +15,7 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import javax.swing.JLabel;
+import javax.swing.JTextArea;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -24,15 +25,15 @@ import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
- * A class to adjust the columns of a WbTable to the displayed values.
+ * A class to adjust the column width of a WbTable to the displayed values.
  *
  * @author support@sql-workbench.net
  */
-public class TableColumnOptimizer
+public class ColumnWidthOptimizer
 {
 	private WbTable table;
 
-	public TableColumnOptimizer(WbTable client)
+	public ColumnWidthOptimizer(WbTable client)
 	{
 		this.table = client;
 	}
@@ -99,10 +100,9 @@ public class TableColumnOptimizer
 		}
 
 		int rowCount = this.table.getRowCount();
-
+		int maxLines = Settings.getInstance().getAutRowHeightMaxLines();
 		String s = null;
 		int stringWidth = 0;
-
 
 		for (int row = 0; row < rowCount; row++)
 		{
@@ -110,9 +110,19 @@ public class TableColumnOptimizer
 			Component c = rend.getTableCellRendererComponent(this.table, table.getValueAt(row, aColumn), false, false, row, aColumn);
 			Font f = c.getFont();
 			FontMetrics fm = c.getFontMetrics(f);
+			
+			// The value that is displayed in the table through the renderer
+			// is not necessarily identical to the String returned by table.getValueAsString()
+			// so we'll first ask the Renderer or its component for the displayed value.
 			if (c instanceof WbRenderer)
 			{
 				s = ((WbRenderer)c).getDisplayValue();
+			}
+			else if (c instanceof JTextArea)
+			{
+				JTextArea text = (JTextArea)c;
+				String t = text.getText();
+				s = StringUtil.getLongestLine(t, maxLines);
 			}
 			else if (c instanceof JLabel)
 			{

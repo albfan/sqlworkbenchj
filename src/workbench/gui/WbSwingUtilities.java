@@ -49,7 +49,10 @@ import workbench.util.StringUtil;
 
 /**
  * Some helper functions to deal with Swing stuff
- */
+ *
+ * @author support@sql-workbench.net  
+ */ 
+
 public class WbSwingUtilities
 {
 	public static final Insets EMPTY_INSETS = new Insets(0, 0, 0, 0);

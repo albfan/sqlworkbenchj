@@ -19,6 +19,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.BrowserLauncher;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -33,8 +34,8 @@ public class HelpManager
 			String pdf = Settings.getInstance().getPdfPath();
 			if (pdf == null)
 			{
-				String msg = ResourceMgr.getString("ErrManualNotFound");
-				msg = StringUtil.replace(msg, "%jarpath%", WbManager.getInstance().getJarPath());
+				String defaultPdf = Settings.getInstance().getDefaultPdf().getFullPath();
+				String msg = ResourceMgr.getFormattedString("ErrManualNotFound", defaultPdf, WbManager.getInstance().getJarPath());
 				WbSwingUtilities.showMessage(WbManager.getInstance().getCurrentWindow(), msg);
 				return;
 			}
@@ -50,8 +51,7 @@ public class HelpManager
 			File reader = new File(readerPath);
 			if (!reader.exists() || !reader.canRead() || !reader.isFile())
 			{
-				String msg = ResourceMgr.getString("ErrExeNotAvail");
-				msg = StringUtil.replace(msg, "%exepath%", readerPath);
+				String msg = ResourceMgr.getFormattedString("ErrExeNotAvail", readerPath);
 				WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
 				return;
 			}
@@ -68,6 +68,15 @@ public class HelpManager
 	public static void showHelpFile(String filename)
 	{
 		File dir = Settings.getInstance().getHtmlManualDir();
+		if (dir == null)
+		{
+			File jardir = WbManager.getInstance().getJarFile().getParentFile();
+			WbFile htmldir = new WbFile(jardir, "manual");
+			String msg = ResourceMgr.getFormattedString("ErrHelpDirNotFound", htmldir.getFullPath());
+			WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
+			return;
+		}
+		
 		File manual = null;
 		if (dir != null)
 		{

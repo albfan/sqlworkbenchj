@@ -43,7 +43,9 @@ import workbench.gui.actions.WbAction;
  *	<code>
  *	UIManager.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
  *	</code>
- */
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class WbToolTipUI extends BasicToolTipUI
 {
 	

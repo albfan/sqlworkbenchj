@@ -611,6 +611,13 @@ public class TextFileParser
 		if (this.sourceFiles == null) throw new IllegalStateException("Cannot process source directory without FileNameSorter");
 
 		this.sourceFiles.setTableNameResolver(new DefaultTablenameResolver());
+    if (!sourceFiles.containsFiles())
+    {
+			String msg = ResourceMgr.getFormattedString("ErrImpNoFiles", sourceFiles.getExtension(), sourceFiles.getDirectory());
+			this.messages.append(msg);
+			this.hasErrors = true;
+      throw new SQLException("No files with extension '" + sourceFiles.getExtension() + "' in directory " + sourceFiles.getDirectory());
+    }
 		
 		List<WbFile> toProcess = null;
 		try
@@ -629,15 +636,15 @@ public class TextFileParser
 		// table delete can be done during the single table import
 		this.receiver.setTableList(sourceFiles.getTableList());
 
-		int count = toProcess.size();
+		int count = toProcess == null ? 0 : toProcess.size();
 		if (count == 0)
 		{
-			String msg = ResourceMgr.getFormattedString("ErrImportNoFiles", sourceFiles.getExtension(), sourceFiles.getDirectory());
+			String msg = ResourceMgr.getFormattedString("ErrImpNoMatch", sourceFiles.getDirectory());
 			this.messages.append(msg);
 			this.hasErrors = true;
-			throw new SQLException("No files with extension '" + sourceFiles.getExtension() + "' in directory " + sourceFiles.getDirectory());
+      throw new SQLException("No matching tables found for files in directory " + sourceFiles.getDirectory());
 		}
-		
+    
 		this.receiver.setTableCount(count);
 		if (!multiFileImport)
 		{

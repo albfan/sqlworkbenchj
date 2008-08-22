@@ -56,7 +56,7 @@ public class XmlDataFileParser
 {
 	private File inputFile;
 	private ImportFileLister sourceFiles;
-	
+
 	private String tableName;
 	private String tableNameFromFile;
 
@@ -75,14 +75,14 @@ public class XmlDataFileParser
 	private RowDataReceiver receiver;
 	private boolean ignoreCurrentRow = false;
 	private boolean abortOnError = false;
-	
+
 	private boolean[] warningAdded;
 	private JobErrorHandler errorHandler;
 	private boolean verboseFormat = true;
 	private boolean formatKnown = false;
 	private String missingColumn;
 	private MessageBuffer messages;
-	
+
 	private int currentColIndex = 0;
 	private int realColIndex = 0;
 	private long columnLongValue = 0;
@@ -96,35 +96,42 @@ public class XmlDataFileParser
 
 	private boolean hasErrors = false;
 	private boolean hasWarnings = false;
-	
+
 	private boolean multiFileImport = false;
-	
+	private boolean trimValues = false;
+
 	private SAXParser saxParser;
 	private ImportFileHandler fileHandler = new ImportFileHandler();
 	private WbConnection dbConn;
-	
+
 	private ValueConverter converter = new ValueConverter();
 	private ImportValueModifier valueModifier;
-	
-	public XmlDataFileParser()
-	{
-		SAXParserFactory factory = SAXParserFactory.newInstance();
-		factory.setValidating(false);
-		try
-		{
-			saxParser = factory.newSAXParser();
-		}
-		catch (Exception e)
-		{
-			// should not happen!
-			LogMgr.logError("XmlDataFileParser.<init>", "Error creating XML parser", e);
-		}
-	}
-	
+
+  public XmlDataFileParser()
+  {
+    this.messages = new MessageBuffer();
+    SAXParserFactory factory = SAXParserFactory.newInstance();
+    factory.setValidating(false);
+    try
+    {
+      saxParser = factory.newSAXParser();
+    }
+    catch (Exception e)
+    {
+      // should not happen!
+      LogMgr.logError("XmlDataFileParser.<init>", "Error creating XML parser", e);
+    }
+  }
+
 	public XmlDataFileParser(File inputFile)
 	{
 		this();
 		this.inputFile = inputFile;
+	}
+
+	public void setTrimValues(boolean trimValues)
+	{
+		this.trimValues = trimValues;
 	}
 
 	/**
@@ -139,21 +146,21 @@ public class XmlDataFileParser
 		this.multiFileImport = flag;
 	}
 
-	public boolean isMultiFileImport() 
+	public boolean isMultiFileImport()
 	{
 		return this.multiFileImport;
 	}
-		
+
 	public void setValueModifier(ImportValueModifier mod)
 	{
 		this.valueModifier = mod;
 	}
-	
+
 	public ImportFileHandler getFileHandler()
 	{
 		return this.fileHandler;
 	}
-	
+
 	public String getColumns()
 	{
 		return StringUtil.listToString(this.columnsToImport, ',', false);
@@ -163,10 +170,10 @@ public class XmlDataFileParser
 	{
 		return null;
 	}
-	
+
 	public boolean hasErrors() { return this.hasErrors; }
-	public boolean hasWarnings() 
-	{ 
+	public boolean hasWarnings()
+	{
 		if (this.hasWarnings) return true;
 		if (this.warningAdded == null) return false;
 		for (boolean b : warningAdded)
@@ -175,14 +182,14 @@ public class XmlDataFileParser
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Defines a "pattern" for files to ignore if a complete directory is imported.
 	 * Any file that contains the given pattern in its name will be removed from the
 	 * list of files to be processed.
-	 * 
+	 *
 	 * @param pattern
-	 * @see FileNameSorter#ignoreFiles(java.lang.String) 
+	 * @see FileNameSorter#ignoreFiles(java.lang.String)
 	 */
 	public void setFilesToIgnore(List<String> nameStart)
 	{
@@ -193,12 +200,12 @@ public class XmlDataFileParser
 	{
 		this.ignoreOwner = flag;
 	}
-		
+
 	public void setValueConverter(ValueConverter convert)
 	{
 		this.converter = convert;
 	}
-	
+
 	public void setColumns(String columnList)
 		throws SQLException
 	{
@@ -222,7 +229,7 @@ public class XmlDataFileParser
 		}
 		checkImportColumns();
 	}
-	
+
 	/**	 Define the columns to be imported
 	 */
 	public void setColumns(List<ColumnIdentifier> cols)
@@ -256,9 +263,9 @@ public class XmlDataFileParser
 	/**
 	 * Check if all columns defined for the import (through the table definition
 	 * as part of the XML file, or passed by the user on the command line) are
-	 * actually available in the target table. 
+	 * actually available in the target table.
 	 * For this all columns of the target table are retrieved from the database,
-	 * and each column that has been defined through setColumns() is checked 
+	 * and each column that has been defined through setColumns() is checked
 	 * whether it exists there. Columns that are not found are dropped from
 	 * the list of import columns
 	 * If continueOnError == true, a warning is added to the messages. Otherwise
@@ -291,7 +298,7 @@ public class XmlDataFileParser
 		for (int colIndex=0; colIndex < this.columns.length; colIndex++)
 		{
 			int i = tableCols.indexOf(this.columns[colIndex]);
-			
+
 			if (i != -1)
 			{
 				// Use the column definition retrieved from the database
@@ -331,18 +338,18 @@ public class XmlDataFileParser
 			this.realColCount = this.columnsToImport.size();
 		}
 	}
-	
+
 	private void checkImportColumns()
 		throws SQLException
 	{
-		if (this.columnsToImport == null) 
+		if (this.columnsToImport == null)
 		{
 			this.realColCount = this.colCount;
 			return;
 		}
-		
+
 		this.missingColumn = null;
-		
+
 		try
 		{
 			if (this.columns == null) this.readXmlTableDefinition();
@@ -353,10 +360,10 @@ public class XmlDataFileParser
 			this.hasErrors = true;
 			throw new SQLException("Could not read table definition from XML file");
 		}
-		
+
 		for (ColumnIdentifier c : columnsToImport)
 		{
-			if (!this.containsColumn(c)) 
+			if (!this.containsColumn(c))
 			{
 				this.missingColumn = c.getColumnName();
 				this.hasErrors = true;
@@ -365,7 +372,7 @@ public class XmlDataFileParser
 		}
 		this.realColCount = this.columnsToImport.size();
 	}
-	
+
 	/**
 	 *	Returns the first column from the import columns
 	 *  that is not found in the import file
@@ -373,7 +380,7 @@ public class XmlDataFileParser
 	 *  @see #setColumns(List)
 	 */
 	public String getMissingColumn() { return this.missingColumn; }
-	
+
 	private boolean containsColumn(ColumnIdentifier col)
 	{
 		if (this.columns == null) return false;
@@ -383,7 +390,7 @@ public class XmlDataFileParser
 		}
 		return false;
 	}
-	
+
 	public void setTableName(String aName)
 	{
 		this.tableName = aName;
@@ -425,7 +432,7 @@ public class XmlDataFileParser
 			this.setUseVerboseFormat(true);
 		}
 	}
-	
+
 	private void detectTagFormat(XmlTableDefinitionParser tableDef)
 	{
 		String format = tableDef.getTagFormat();
@@ -441,12 +448,12 @@ public class XmlDataFileParser
 			}
 		}
 	}
-	
+
 	private void readXmlTableDefinition()
 		throws IOException, SAXException
 	{
 		fileHandler.setMainFile(this.inputFile, this.encoding);
-		
+
 		XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(this.fileHandler);
 		this.columns = tableDef.getColumns();
 		this.colCount = this.columns.length;
@@ -460,37 +467,37 @@ public class XmlDataFileParser
 		if (this.inputFile == null) return null;
 		return this.inputFile.getAbsolutePath();
 	}
-	
+
 	public void setInputFile(File file)
 	{
 		this.sourceFiles = null;
 		this.inputFile = file;
 	}
-	
+
 	public void setSourceFiles(ImportFileLister source)
 	{
 		this.sourceFiles = source;
 	}
-	
+
 	public void setAbortOnError(boolean flag)
 	{
 		this.abortOnError = flag;
 	}
-	
+
 	private void processOneFile()
 		throws Exception
 	{
 		this.keepRunning = true;
 		this.regularStop = false;
-			
-		// readTableDefinition relies on the fileHandler, so this 
+
+		// readTableDefinition relies on the fileHandler, so this
 		// has to be called after initializing the fileHandler
 		if (this.columns == null) this.readXmlTableDefinition();
 		if (!this.formatKnown)
 		{
 			detectTagFormat();
 		}
-		
+
 		if (this.columnsToImport == null)
 		{
 			this.realColCount = this.colCount;
@@ -499,16 +506,16 @@ public class XmlDataFileParser
 		{
 			this.realColCount = this.columnsToImport.size();
 		}
-		
+
 		// Re-initialize the reader in case we are reading from a ZIP archive
 		// because readTableDefinition() can change the file handler
 		this.fileHandler.setMainFile(this.inputFile, this.encoding);
-		
+
 		this.messages = new MessageBuffer();
 		this.sendTableDefinition();
 		Reader in = null;
 		boolean finished = false;
-		
+
 		try
 		{
 			in = this.fileHandler.getMainFileReader();
@@ -537,9 +544,9 @@ public class XmlDataFileParser
 		}
 		catch (Exception e)
 		{
-		  String msg = "Error during parsing of data row: " + (this.currentRowNumber) + 
-				  ", column: " + this.currentColIndex + 
-				  ", current data: " + (this.chars == null ? "<n/a>" : "[" + this.chars.toString() + "]" ) + 
+		  String msg = "Error during parsing of data row: " + (this.currentRowNumber) +
+				  ", column: " + this.currentColIndex +
+				  ", current data: " + (this.chars == null ? "<n/a>" : "[" + this.chars.toString() + "]" ) +
 				  ", message: " + ExceptionUtil.getDisplay(e);
 			LogMgr.logWarning("XmlDataFileParser.processOneFile()", msg);
 			this.hasErrors = true;
@@ -573,13 +580,21 @@ public class XmlDataFileParser
 		columnsToImport = null;
 		keepRunning = true;
 	}
-	
+
 	private void processDirectory()
 		throws Exception
 	{
 		if (this.sourceFiles == null) throw new IllegalStateException("Cannot process source directory without FileNameSorter");
 		boolean verbose = this.verboseFormat;
-		
+
+    if (!sourceFiles.containsFiles())
+    {
+			String msg = ResourceMgr.getFormattedString("ErrImpNoFiles", sourceFiles.getExtension(), sourceFiles.getDirectory());
+			this.messages.append(msg);
+			this.hasErrors = true;
+      throw new SQLException("No files with extension '" + sourceFiles.getExtension() + "' in directory " + sourceFiles.getDirectory());
+    }
+   
 		sourceFiles.setTableNameResolver(new XmlTableNameResolver(encoding));
 
 		List<WbFile> toProcess = null;
@@ -593,23 +608,23 @@ public class XmlDataFileParser
 			LogMgr.logError("XmlDataFileParser.processDirectory()", "Error when checking dependencies", e);
 			throw e;
 		}
-		
-		int count = toProcess.size();
+
+		int count = toProcess == null ? 0 : toProcess.size();
 		if (count == 0)
 		{
-			String msg = ResourceMgr.getFormattedString("ErrImportNoFiles", sourceFiles.getExtension(), sourceFiles.getDirectory());
+			String msg = ResourceMgr.getFormattedString("ErrImpNoMatch", sourceFiles.getDirectory());
 			this.messages.append(msg);
 			this.hasErrors = true;
-			throw new SQLException("No files with extension '" + sourceFiles.getExtension() + "' in directory " + sourceFiles.getDirectory());
+      throw new SQLException("No matching tables found for files in directory " + sourceFiles.getDirectory());
 		}
-		
+
 		// The receiver only needs to pre-process the full table list
 		// if checkDependencies is turned on, otherwise a possible
 		// table delete can be done during the single table import
 		this.receiver.setTableList(sourceFiles.getTableList());
-		
+
 		this.receiver.setTableCount(toProcess.size());
-		
+
 		for (WbFile sourceFile : toProcess)
 		{
 			if (!this.keepRunning) break;
@@ -618,10 +633,10 @@ public class XmlDataFileParser
 				this.inputFile = sourceFile;
 				this.reset();
 
-				// readTableDefinition() might reset the verbose 
+				// readTableDefinition() might reset the verbose
 				// flag if a new XML structure is used
-				// this ensures, that the flag specified by the 
-				// user will be used for files that do not have the 
+				// this ensures, that the flag specified by the
+				// user will be used for files that do not have the
 				// flag in the meta-data tag
 				this.verboseFormat = verbose;
 				this.processOneFile();
@@ -637,24 +652,24 @@ public class XmlDataFileParser
 			}
 		}
 	}
-	
+
 	public void start()
 		throws Exception
 	{
 		this.hasErrors = false;
 		this.hasWarnings = false;
 		this.keepRunning = true;
-		
+
 		this.receiver.setTableCount(-1); // clear multi-table flag in receiver
-		this.receiver.setCurrentTable(-1);		
-		
+		this.receiver.setCurrentTable(-1);
+
 		try
 		{
 			if (this.sourceFiles == null)
 			{
 				processOneFile();
 			}
-			else 
+			else
 			{
 				processDirectory();
 			}
@@ -670,12 +685,12 @@ public class XmlDataFileParser
 		this.keepRunning = false;
 		this.regularStop = true;
 	}
-	
+
 	public boolean isCancelled()
 	{
 		return !this.keepRunning && !regularStop;
 	}
-	
+
 	public void cancel()
 	{
 		this.keepRunning = false;
@@ -692,7 +707,7 @@ public class XmlDataFileParser
 		this.realColIndex = 0;
 	}
 
-	public String getEncoding() { return this.encoding; } 
+	public String getEncoding() { return this.encoding; }
 	public void setEncoding(String enc) { this.encoding = enc; }
 
 	public void setReceiver(RowDataReceiver aReceiver)
@@ -719,7 +734,7 @@ public class XmlDataFileParser
 	{
 		Thread.yield();
 		if (!this.keepRunning) throw new ParsingInterruptedException();
-		
+
 		if (qName.equals(this.rowTag))
 		{
 			// row definition ended, start a new row
@@ -761,7 +776,7 @@ public class XmlDataFileParser
 			{
 				this.receiver.nextRowSkipped();
 			}
-			else 
+			else
 			{
 				if (!this.ignoreCurrentRow)
 				{
@@ -805,7 +820,7 @@ public class XmlDataFileParser
 		Thread.yield();
 		if (!this.keepRunning) throw new ParsingInterruptedException();
 	}
-	
+
 	public void processingInstruction(String target,String data)
 		throws SAXException
 	{
@@ -853,7 +868,7 @@ public class XmlDataFileParser
 		this.currentRow[this.realColIndex] = null;
 
 		if (!this.receiver.shouldProcessNextRow()) return;
-		
+
 		// the isNull flag will be set by the startElement method
 		// as that is an attribute of the tag
 		if (this.isNull)
@@ -863,11 +878,16 @@ public class XmlDataFileParser
 		}
 
 		String value = this.chars.toString();
+    if (trimValues)
+    {
+      value = value.trim();
+    }
+
 		if (this.valueModifier != null)
 		{
 			value = this.valueModifier.modifyValue(this.columns[this.realColIndex], value);
 		}
-		
+
 		int type = this.columns[this.realColIndex].getDataType();
 		try
 		{
@@ -892,7 +912,7 @@ public class XmlDataFileParser
 			}
 			else if (SqlUtil.isDateType(type))
 			{
-				// For Date types we don't need the ValueConverter as already we 
+				// For Date types we don't need the ValueConverter as already we
 				// have a suitable long value that doesn't need parsing
 				java.sql.Date d = new java.sql.Date(this.columnLongValue);
 				if (type == Types.TIMESTAMP)
@@ -918,15 +938,15 @@ public class XmlDataFileParser
 			msg = StringUtil.replace(msg, "%error%", e.getMessage());
 			msg = StringUtil.replace(msg, "%value%", value);
 			msg = StringUtil.replace(msg, "%row%", Integer.toString(this.currentRowNumber));
-			
+
 			this.messages.append(msg);
 			this.messages.appendNewLine();
-			
+
 			if (this.abortOnError)
 			{
 				LogMgr.logError("XmlDataFileParser.buildColumnData()", msg, e);
 				this.hasErrors = true;
-				throw new ParsingConverterException();				
+				throw new ParsingConverterException();
 			}
 			else
 			{
@@ -935,7 +955,7 @@ public class XmlDataFileParser
 				LogMgr.logWarning("XmlDataFileParser.buildColumnData()", msg, null);
 			}
 		}
-		
+
 		this.realColIndex ++;
 	}
 
@@ -952,14 +972,14 @@ public class XmlDataFileParser
 		}
 		return tbl;
 	}
-	
+
 	private void sendTableDefinition()
 		throws SQLException
 	{
 		try
 		{
 			TableIdentifier tbl = getTargetTable();
-			
+
 			checkTargetColumns();
 			if (this.columnsToImport == null)
 			{
@@ -1001,7 +1021,7 @@ public class XmlDataFileParser
 			catch (Exception e)
 			{
 				LogMgr.logError("XmlDataFileParser.sendRowData()", "Error when sending row data to receiver", e);
-				if (this.abortOnError) 
+				if (this.abortOnError)
 				{
 					this.hasErrors = true;
 					throw e;
@@ -1011,12 +1031,12 @@ public class XmlDataFileParser
 				{
 					int choice = errorHandler.getActionOnError(this.currentRowNumber + 1, null, null, ExceptionUtil.getDisplay(e, false));
 					if (choice == JobErrorHandler.JOB_ABORT) throw e;
-					if (choice == JobErrorHandler.JOB_IGNORE_ALL) 
+					if (choice == JobErrorHandler.JOB_IGNORE_ALL)
 					{
 						this.abortOnError = false;
 					}
 				}
-				
+
 			}
 		}
 		if (!this.keepRunning) throw new ParsingInterruptedException();
@@ -1043,9 +1063,9 @@ public class XmlDataFileParser
 		}
 	}
 
-    public void setErrorHandler(JobErrorHandler handler) 
+    public void setErrorHandler(JobErrorHandler handler)
 		{
 			this.errorHandler = handler;
     }
-	
+
 }

@@ -22,7 +22,6 @@ import workbench.gui.dialogs.dataimport.XmlImportOptions;
 import workbench.interfaces.ImportFileParser;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.CommonArgs;
-import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.WbImport;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;

@@ -54,6 +54,9 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.WbThread;
 
+/**
+ * @author support@sql-workbench.net  
+ */ 
 public class PrintPreview
 	extends JDialog
 	implements ActionListener, WindowListener

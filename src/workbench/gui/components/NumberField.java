@@ -23,7 +23,12 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
-public class NumberField extends JTextField
+/**
+ * 
+ * @author support@sql-workbench.net  
+ */ 
+public class NumberField 
+	extends JTextField
 {
 	private NumberFormat integerFormatter;
 	protected boolean allowDecimals = false;

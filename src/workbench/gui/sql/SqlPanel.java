@@ -106,6 +106,7 @@ import workbench.gui.actions.MakeLowerCaseAction;
 import workbench.gui.actions.MakeNonCharInListAction;
 import workbench.gui.actions.MakeUpperCaseAction;
 import workbench.gui.actions.OptimizeAllColumnsAction;
+import workbench.gui.actions.OptimizeRowHeightAction;
 import workbench.gui.actions.PrintAction;
 import workbench.gui.actions.PrintPreviewAction;
 import workbench.gui.actions.RedoAction;
@@ -229,6 +230,7 @@ public class SqlPanel
 	protected FilterPickerAction filterPicker;
 	protected ResetFilterAction resetFilterAction;
 	protected OptimizeAllColumnsAction optimizeAllCol;
+	protected OptimizeRowHeightAction optimizeRowHeights;
 	protected AppendResultsAction appendResultsAction;
 
 	protected CheckPreparedStatementsAction checkPreparedAction;
@@ -624,6 +626,13 @@ public class SqlPanel
 		this.optimizeAllCol.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 		this.actions.add(this.optimizeAllCol);
 
+		this.optimizeRowHeights = new OptimizeRowHeightAction();
+		this.optimizeRowHeights.setCreateMenuSeparator(false);
+		this.optimizeRowHeights.setEnabled(false);
+		this.optimizeRowHeights.removeIcon();
+		this.optimizeRowHeights.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
+		this.actions.add(this.optimizeRowHeights);
+		
 		this.dataToClipboard = new CopyAsTextAction(null);
 		this.dataToClipboard.setEnabled(false);
 		this.actions.add(this.exportDataAction);
@@ -2148,6 +2157,7 @@ public class SqlPanel
 			this.createDeleteScript.setClient(null);
 			this.exportDataAction.setOriginal(null);
 			this.optimizeAllCol.setClient(null);
+			this.optimizeRowHeights.setClient(null);
 			this.dataToClipboard.setOriginal(null);
 			this.copyAsSqlInsert.setOriginal(null);
 			this.copyAsSqlUpdate.setOriginal(null);
@@ -2175,6 +2185,7 @@ public class SqlPanel
 			this.createDeleteScript.setClient(this.currentData.getTable());
 			this.exportDataAction.setOriginal(this.currentData.getTable().getExportAction());
 			this.optimizeAllCol.setClient(this.currentData.getTable());
+			this.optimizeRowHeights.setClient(this.currentData.getTable());
 			this.dataToClipboard.setOriginal(this.currentData.getTable().getDataToClipboardAction());
 			this.copyAsSqlInsert.setOriginal(this.currentData.getTable().getCopyAsInsertAction());
 			this.copyAsSqlUpdate.setOriginal(this.currentData.getTable().getCopyAsUpdateAction());
@@ -2905,6 +2916,7 @@ public class SqlPanel
 						{ dataToClipboard,
 							exportDataAction,
 							optimizeAllCol,
+							optimizeRowHeights,
 							printDataAction,
 							printPreviewAction
 						};

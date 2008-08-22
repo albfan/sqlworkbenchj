@@ -12,7 +12,7 @@
 package workbench.db.exporter;
 
 /**
- * @author Thomas Kellerer
+ * @author support@sql-workbench.net  
  */
 public class PoiHelper
 {

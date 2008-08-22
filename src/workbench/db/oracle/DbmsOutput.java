@@ -18,6 +18,11 @@ import java.sql.Types;
 
 import workbench.log.LogMgr;
 
+/**
+ * A class to control the dbms_output package in Oracle through JDBC
+ *  
+ * @author support@sql-workbench.net  
+ */
 public class DbmsOutput
 {
 	private Connection conn;

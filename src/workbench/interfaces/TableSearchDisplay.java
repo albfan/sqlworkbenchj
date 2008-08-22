@@ -15,9 +15,8 @@ import workbench.db.TableIdentifier;
 import workbench.storage.DataStore;
 
 /**
- *
- * @author  kellererth
- */
+ * @author support@sql-workbench.net  
+ */ 
 public interface TableSearchDisplay
 {
 	void setCurrentTable(String aTablename, String aStatement);

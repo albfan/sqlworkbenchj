@@ -19,6 +19,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.plaf.metal.MetalTabbedPaneUI;
 
+/**
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class BorderLessMetalTabbedPaneUI 
 	extends MetalTabbedPaneUI
 {

@@ -27,6 +27,9 @@ import java.io.InputStream;
 
 import workbench.log.LogMgr;
 
+/**
+ * @author support@sql-workbench.net  
+ */ 
 public class WbPersistence
 	implements ExceptionListener
 {

@@ -43,14 +43,17 @@ public abstract class ExportWriter
 	protected RowDataConverter converter;
 	protected Writer outputWriter;
 	protected WbFile outputFile;
+	protected boolean canAppendStart = false;
+  protected boolean trimCharData = false;
+	
 	private int progressInterval = 10;
 	
 	public ExportWriter(DataExporter exp)
 	{
 		this.exporter = exp;
 		converter = createConverter();
-		// configureConverter() might be called more than once
-		// to prevent connection dependent information to be read
+		// configureConverter() might be called more than once!
+		// To prevent connection dependent information to be read
 		// more than once, call setOriginalConnection() only 
 		// here and now
 		converter.setOriginalConnection(this.exporter.getConnection());
@@ -73,8 +76,9 @@ public abstract class ExportWriter
 		
 		String file = this.exporter.getOutputFilename();
 		if (file != null) converter.setOutputFile(new File(file));
+    trimCharData = getTrimCharData();
 	}
-	
+
 	public abstract RowDataConverter createConverter();
 
 	public void setProgressInterval(int interval)
@@ -97,17 +101,17 @@ public abstract class ExportWriter
 
 	private boolean getTrimCharData()
 	{
-		boolean trimCharData = false;
+		boolean trim = false;
 		WbConnection con = exporter.getConnection();
 		if (con != null)
 		{
 			ConnectionProfile profile = con.getProfile();
 			if (profile != null)
 			{
-				trimCharData = profile.getTrimCharData();
+				trim = profile.getTrimCharData();
 			}
 		}
-		return trimCharData;
+		return trim;
 	}
 	
 	public void writeExport(DataStore ds)
@@ -132,8 +136,6 @@ public abstract class ExportWriter
 		
 		writeStart();
 
-		boolean trim = getTrimCharData();
-
 		int rowCount = ds.getRowCount();
 		for (int i=0; i < rowCount; i++)
 		{
@@ -145,7 +147,7 @@ public abstract class ExportWriter
 				this.rowMonitor.setCurrentRow((int)this.rows, -1);
 			}
 			RowData row = ds.getRow(i);
-			row.setTrimCharData(trim);
+			row.setTrimCharData(trimCharData);
 			writeRow(row, rows);
 			rows ++;
 		}
@@ -182,9 +184,8 @@ public abstract class ExportWriter
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
 		}
 		int colCount = info.getColumnCount();
-		boolean trim = getTrimCharData();
 		
-		if (!this.exporter.getAppendToFile()) writeStart();
+		if (!this.exporter.getAppendToFile() || canAppendStart) writeStart();
 		while (rs.next())
 		{
 			if (this.cancel) break;
@@ -195,7 +196,7 @@ public abstract class ExportWriter
 				this.rowMonitor.setCurrentRow((int)this.rows, -1);
 			}
 			RowData row = new RowData(colCount);
-			row.setTrimCharData(trim);
+			row.setTrimCharData(trimCharData);
 			row.read(rs, info);
 			writeRow(row, rows);
 			rows ++;

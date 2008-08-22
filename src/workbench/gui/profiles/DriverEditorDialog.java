@@ -38,6 +38,9 @@ import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+/**
+ * @author support@sql-workbench.net  
+ */ 
 public class DriverEditorDialog extends JDialog
 	implements ActionListener
 {

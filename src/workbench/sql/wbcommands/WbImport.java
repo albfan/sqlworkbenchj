@@ -325,7 +325,6 @@ public class WbImport
 			String quote = cmdLine.getValue(ARG_QUOTE);
 			if (quote != null) textParser.setQuoteChar(quote);
 
-			textParser.setTrimValues(cmdLine.getBoolean(ARG_TRIM_VALUES, getTrimDefault()));
 			textParser.setDecodeUnicode(cmdLine.getBoolean(ARG_DECODE, false));
 
 			if (encoding != null) textParser.setEncoding(encoding);
@@ -485,6 +484,7 @@ public class WbImport
 		{
 			parser.setSourceFiles(sorter);
 		}
+		parser.setTrimValues(cmdLine.getBoolean(ARG_TRIM_VALUES, getTrimDefault()));
 		
 		ValueConverter converter = null;
 		try

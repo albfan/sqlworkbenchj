@@ -433,11 +433,6 @@ public class WbManager
 		return true;
 	}
 
-	public boolean isTestMode()
-	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.testmode", false);
-	}
-
 	public boolean isBatchMode()
 	{
 		return this.batchMode;
@@ -555,7 +550,7 @@ public class WbManager
 	}
 
 	/**
-	 *	this gets called from the thread that disconnects everything
+	 *	this gets called from exitWorkbench() when disconnecting everything
 	 */
 	protected void disconnected()
 	{
@@ -638,34 +633,6 @@ public class WbManager
 		return true;
 	}
 
-	class CloseThread
-		extends WbThread
-	{
-		final private MainWindow win;
-		public CloseThread(String name, MainWindow w)
-		{
-			super(name);
-			win = w;
-		}
-
-		public void run()
-		{
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				public void run()
-				{
-					// First parameter tells the window to disconnect in the
-					// current thread as we are already in a background thread
-					// second parameter tells the window not to close the workspace
-					// third parameter tells the window not to save the workspace
-					win.disconnect(false, false, false);
-					win.setVisible(false);
-					win.dispose();
-				}
-			});
-		}
-	}
-
 	/**
 	 * Called whenever a MainWindow is closed.
 	 * 
@@ -683,7 +650,20 @@ public class WbManager
 		{
 			if (!win.saveWorkspace()) return;
 			this.mainWindows.remove(win);
-			CloseThread t = new CloseThread("WindowDisconnect", win);
+			WbThread t = new WbThread("WindowDisconnect")
+			{
+				public void run()
+				{
+					// First parameter tells the window to disconnect in the
+					// current thread as we are already in a background thread
+					// second parameter tells the window not to close the workspace
+					// third parameter tells the window not to save the workspace
+					// this does not need to happen on the EDT
+					win.disconnect(false, false, false);
+					win.setVisible(false);
+					win.dispose();
+				}
+			};
 			t.start();
 		}
 	}
@@ -760,27 +740,23 @@ public class WbManager
 		try
 		{
 			cmdLine.parse(args);
-			boolean needInitialize = false;
 
 			String lang = cmdLine.getValue(AppArguments.ARG_LANG);
 			if (!StringUtil.isEmptyString(lang))
 			{
 				System.setProperty("workbench.gui.language", lang);
-				needInitialize = true;
 			}
 
 			String value = cmdLine.getValue(AppArguments.ARG_CONFIGDIR);
 			if (!StringUtil.isEmptyString(value))
 			{
 				System.setProperty("workbench.configdir", value);
-				needInitialize = true;
 			}
 
 			value = cmdLine.getValue(AppArguments.ARG_LIBDIR);
 			if (!StringUtil.isEmptyString(value))
 			{
 				System.setProperty("workbench.libdir", value);
-				needInitialize = true;
 			}
 
 			value = cmdLine.getValue(AppArguments.ARG_LOGFILE);
@@ -788,7 +764,6 @@ public class WbManager
 			{
 				WbFile file = new WbFile(value);
 				System.setProperty("workbench.log.filename", file.getFullPath());
-				needInitialize = true;
 			}
 
 			// Make sure the Settings object is (re)initialized properly now that
@@ -872,7 +847,7 @@ public class WbManager
 		LogMgr.logInfo("WbManager.init()", "Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
 		LogMgr.logInfo("WbManager.init()", "Operating System=" + System.getProperty("os.name")  + ", version=" + System.getProperty("os.version") + ", platform=" + System.getProperty("os.arch"));
 
-		// batchMode flag is set by initCmdLine()
+		// batchMode flag is set by readParameters()
 		if (this.batchMode)
 		{
 			runBatch();
@@ -885,15 +860,15 @@ public class WbManager
 			// parallel while the MainWindow is initializing
 			// especially on a multi-core computer this should
 			// show some improvement - I hope :) 
-			WbThread init = new WbThread("Background Init") 
-			{
-				public void run()
-				{
-					ConnectionMgr.getInstance().getDrivers();
-					ConnectionMgr.getInstance().getProfiles();
-				}
-			};
-			init.start();
+//			WbThread init = new WbThread("Background Init")
+//			{
+//				public void run()
+//				{
+//					ConnectionMgr.getInstance().getDrivers();
+//					ConnectionMgr.getInstance().getProfiles();
+//				}
+//			};
+//			init.start();
 			
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -981,12 +956,11 @@ public class WbManager
 				if (runner.isSuccess())
 				{
 					runner.execute();
+					// Not all exceptions will be re-thrown by the batch runner
+					// in order to be able to run the error script, so it is important
+					// to check isSuccess() in order to return the correct status
+					if (!runner.isSuccess()) exitCode = 2;
 				}
-
-				// Not all exceptions will be re-thrown by the batch runner
-				// in order to be able to run the error script, so it is important
-				// to check isSuccess() in order to return the correct status
-				if (!runner.isSuccess()) exitCode = 2;
 			}
 			catch (OutOfMemoryError e)
 			{
@@ -1018,11 +992,11 @@ public class WbManager
 	public static void prepareForEmbedded()
 	{
 		wb = new WbManager();
+		// Avoid saving the settings
 		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
 		String args = "-notemplates -nosettings";
 		System.setProperty("workbench.system.doexit", "false");
 		System.setProperty("workbench.gui.testmode", "true");
-		// Avoid saving the settings
 		wb.readParameters(new String[] { args} );
 	}
 		
@@ -1031,6 +1005,12 @@ public class WbManager
 		wb = new WbManager();
 		// Avoid saving the settings
 		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
+
+		// This will be used in isTestMode(). Basically the test
+		// mode is used by DbDriver to skip the test if a driver library
+		// is accessible because in test mode the drivers are not loaded
+		// through our own class loader because they are already present
+		// on the classpath.
 		System.setProperty("workbench.gui.testmode", "true");
 		wb.readParameters(args);
 	}

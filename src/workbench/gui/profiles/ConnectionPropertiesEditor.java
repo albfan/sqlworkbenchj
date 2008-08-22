@@ -26,7 +26,7 @@ import workbench.db.ConnectionProfile;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.TableColumnOptimizer;
+import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
@@ -75,7 +75,7 @@ public class ConnectionPropertiesEditor
 		this.propTable = new WbTable();
 
 		this.propTable.setModel(new DataStoreTableModel(this.propData));
-		TableColumnOptimizer optimizer = new TableColumnOptimizer(this.propTable);
+		ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(this.propTable);
 		optimizer.optimizeAllColWidth(100, -1, true);
 
 		this.setLayout(new BorderLayout());

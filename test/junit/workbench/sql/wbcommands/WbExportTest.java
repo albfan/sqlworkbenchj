@@ -82,27 +82,69 @@ public class WbExportTest
 
 	public void testIsTypeValid()
 	{
-		try
-		{
-			WbExport exp = new WbExport();
-			assertTrue(exp.isTypeValid("text"));
-			assertTrue(exp.isTypeValid("TEXT"));
-			assertTrue(exp.isTypeValid("xml"));
-			assertTrue(exp.isTypeValid("sql"));
-			assertTrue(exp.isTypeValid("HTML"));
-			assertTrue(exp.isTypeValid("sqlUpdate"));
-			assertTrue(exp.isTypeValid("sqlInsert"));
-			assertTrue(exp.isTypeValid("SQLDeleteInsert"));
-			assertTrue(exp.isTypeValid("xls"));
-			//assertTrue(exp.isTypeValid("odt"));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		WbExport exp = new WbExport();
+		assertTrue(exp.isTypeValid("text"));
+		assertTrue(exp.isTypeValid("TEXT"));
+		assertTrue(exp.isTypeValid("xml"));
+		assertTrue(exp.isTypeValid("sql"));
+		assertTrue(exp.isTypeValid("HTML"));
+		assertTrue(exp.isTypeValid("sqlUpdate"));
+		assertTrue(exp.isTypeValid("sqlInsert"));
+		assertTrue(exp.isTypeValid("SQLDeleteInsert"));
+		assertTrue(exp.isTypeValid("xls"));
+		assertTrue(exp.isTypeValid("xlsx"));
+		assertTrue(exp.isTypeValid("ods"));
+		assertFalse(exp.isTypeValid("calc"));
+		assertFalse(exp.isTypeValid("excel"));
+		assertFalse(exp.isTypeValid("odt"));
 	}
-	
+
+	public void testAppendSQL()
+		throws Exception
+	{
+		Statement stmt = this.connection.createStatement();
+		stmt.executeUpdate("DELETE FROM JUNIT_TEST");
+		stmt.executeUpdate("DELETE FROM PERSON");
+		connection.commit();
+		SqlUtil.closeStatement(stmt);
+
+		WbFile exportFile = new WbFile(util.getBaseDir(), "create_tbl.sql");
+		StatementRunnerResult result = exportCmd.execute("wbexport -createTable=true -file='" + exportFile.getFullPath() + "' -type=sqlinsert -sourceTable=junit_test");
+		String msg = result.getMessageBuffer().toString();
+		assertTrue(result.isSuccess());
+		assertTrue(exportFile.exists());
+
+		long fsize = exportFile.length();
+		
+		FileReader in = new FileReader(exportFile);
+		String script = FileUtil.readCharacters(in);
+		ScriptParser p = new ScriptParser(script);
+		assertEquals(3, p.getSize()); // 3 Statements: CREATE TABLE, ALTER TABLE, COMMIT
+
+
+		result = exportCmd.execute("wbexport -createTable=true -file='" + exportFile.getFullPath() + "' -type=sqlinsert -sourceTable=person -append=true");
+		msg = result.getMessageBuffer().toString();
+		assertTrue(result.isSuccess());
+		assertTrue(exportFile.exists());
+		long fsize2 = exportFile.length();
+		assertTrue(fsize2 > fsize);
+
+		in = new FileReader(exportFile);
+		script = FileUtil.readCharacters(in);
+		p = new ScriptParser(script);
+		assertEquals(6, p.getSize());
+
+		String create1 = p.getCommand(0);
+		assertEquals("CREATE", SqlUtil.getSqlVerb(create1));
+		assertEquals("TABLE", SqlUtil.getCreateType(create1));
+		assertEquals("JUNIT_TEST", SqlUtil.getCreateTable(create1));
+		
+		String create2 = p.getCommand(3);
+		assertEquals("CREATE", SqlUtil.getSqlVerb(create2));
+		assertEquals("TABLE", SqlUtil.getCreateType(create2));
+		assertEquals("PERSON", SqlUtil.getCreateTable(create2));
+	}
+
 	public void testExportRownum()
 		throws Exception
 	{

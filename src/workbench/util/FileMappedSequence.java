@@ -241,7 +241,7 @@ public class FileMappedSequence
 	
 	public char charAt(int index)
 	{
-		if (index >= this.charLength || index < 0) throw new StringIndexOutOfBoundsException(index + " > " + charLength);
+		if (index > this.charLength || index < 0) throw new StringIndexOutOfBoundsException(index + " > " + charLength);
 		
 		int chunkLength = chunk.length();
 		if (index >= chunkCharStart + chunkLength)

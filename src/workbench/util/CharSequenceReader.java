@@ -19,7 +19,9 @@ import java.io.Reader;
  * 
  * Copied from the JDK's StringReader as that does not 
  * support a CharSequence as the input.
- */
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class CharSequenceReader
 	extends Reader
 {

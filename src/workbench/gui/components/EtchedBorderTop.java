@@ -17,6 +17,10 @@ import java.awt.Graphics;
 import java.awt.Insets;
 import javax.swing.border.AbstractBorder;
 
+/**
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class EtchedBorderTop 
 	extends AbstractBorder
 {

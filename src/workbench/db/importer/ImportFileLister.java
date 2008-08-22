@@ -107,6 +107,11 @@ public class ImportFileLister
 		this.resolver = resolve;
 	}
 
+  public boolean containsFiles()
+  {
+    return toProcess != null && toProcess.size() > 0;
+  }
+  
 	public String getDirectory()
 	{
 		if (this.sourceDir == null) return null;

@@ -39,6 +39,21 @@ public class FileMappedSequenceTest
 		super.setUp();
 	}
 
+  public void testLastChar()
+    throws Exception
+  {
+		File f = new File(util.getBaseDir(), "maxtest.txt");
+		String content = "this is a test";
+    
+		Writer w = EncodingUtil.createWriter(f, "UTF-8", false);
+		w.write(content);
+		FileUtil.closeQuitely(w);    
+		FileMappedSequence sequence = new FileMappedSequence(f, "UTF-8", 57);
+		int charLength = sequence.length();
+    assertEquals(content.length(), charLength);
+    assertEquals(content, sequence.subSequence(0, charLength));
+  }
+  
 	public void testLength()
 		throws Exception
 	{

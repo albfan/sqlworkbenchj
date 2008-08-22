@@ -138,6 +138,19 @@ public class SqlUtilTest
 		}
 		
 	}
+	
+	public void testGetCreateTable()
+		throws Exception
+	{
+		String sql = "create\n-- drop something\ntable mytable (id integer)";
+		String table = SqlUtil.getCreateTable(sql);
+		assertEquals("Wrong table returned", "mytable", table);
+
+		sql = "create view v_view as select * from mytable";
+		table = SqlUtil.getCreateTable(sql);
+		assertNull(table);
+	}
+	
 	public void testGetInsertTable()
 	{
 		try
@@ -277,7 +290,7 @@ public class SqlUtilTest
 		
 		sql = "/* \n" + 
 					 "* $URL: some_script.sql $ \n" + 
-					 "* $Revision: 1.7 $ \n" + 
+					 "* $Revision: 1.8 $ \n" + 
 					 "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
 					 "*/ \n" + 
 					 "-- A quis Lorem consequat Aenean tellus risus convallis velit Maecenas arcu. \n" + 

@@ -20,6 +20,10 @@ import javax.swing.UIManager;
 
 import com.sun.java.swing.plaf.motif.MotifTabbedPaneUI;
 
+/**
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class BorderLessMotifTabbedPaneUI 
 	extends MotifTabbedPaneUI
 {

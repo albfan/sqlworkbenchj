@@ -24,7 +24,9 @@ import javax.swing.border.Border;
  *  Displays a Label left or right aligned with no further overhead in painting
  *  (Faster then JLabel) this is used to in DwStatusBar to speed
  *  up processes that do give a lot of feedback (e.g. import)
- */
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class WbTextLabel
 	extends JComponent
 {

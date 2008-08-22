@@ -20,6 +20,11 @@ import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+/**
+ * Saves the connection profiles
+ *  
+ * @author support@sql-workbench.net  
+ */
 public class FileSaveProfiles 
 	extends WbAction
 {

@@ -30,7 +30,9 @@ import javax.xml.transform.stream.StreamSource;
 
 /**
  *  Xslt transformer using the JDK built-in XSLT stuff
- */
+ *
+ * @author support@sql-workbench.net  
+ */ 
 public class XsltTransformer
 {
 	public XsltTransformer()

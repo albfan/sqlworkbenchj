@@ -131,7 +131,6 @@ public class KeepAliveDaemon
 	{
 		if (this.dbConnection == null) return;
 		if (this.dbConnection.isBusy()) return;
-		if (this.dbConnection.isClosed()) return;
 
 		Statement stmt = null;
 		synchronized (this.dbConnection)

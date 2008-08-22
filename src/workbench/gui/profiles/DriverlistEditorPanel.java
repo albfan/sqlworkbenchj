@@ -28,6 +28,9 @@ import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
 
+/**
+ * @author support@sql-workbench.net  
+ */ 
 public class DriverlistEditorPanel
 	extends JPanel
 	implements FileActions

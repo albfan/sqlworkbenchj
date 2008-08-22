@@ -18,7 +18,12 @@ import java.awt.Insets;
 
 import javax.swing.border.AbstractBorder;
 
-public class WbLineBorder extends AbstractBorder
+/**
+ * 
+ * @author support@sql-workbench.net  
+ */ 
+public class WbLineBorder 
+	extends AbstractBorder
 {
 	public static final int LEFT = 1;
 	public static final int RIGHT = 2;

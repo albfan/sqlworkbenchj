@@ -496,18 +496,25 @@ public class DbExplorerPanel
 			// same connection object
 			if (!this.isConnectionBusy())
 			{
-				initConnection();
-				
-				if (this.isVisible())
+				WbThread t = new WbThread("DbExplorerInit")
 				{
-					readSchemas();
-					
-					if (this.retrievePending)
+					public void run()
 					{
-						// if we are visible start the retrieve immediately
-						retrieve();
+						initConnection();
+
+						if (isVisible())
+						{
+							readSchemas();
+
+							if (retrievePending)
+							{
+								// if we are visible start the retrieve immediately
+								retrieve();
+							}
+						}
 					}
-				}
+				};
+				t.start();
 			}
 		}
 		catch (Throwable th)
@@ -682,7 +689,7 @@ public class DbExplorerPanel
 	
 	protected void retrieve()
 	{
-		if (this.dbConnection == null || this.dbConnection.isClosed()) return;
+		if (this.dbConnection == null) return;
 		
 		if (this.isBusy() || isConnectionBusy()) 
 		{

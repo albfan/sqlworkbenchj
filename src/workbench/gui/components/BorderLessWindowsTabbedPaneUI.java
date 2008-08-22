@@ -20,6 +20,10 @@ import javax.swing.UIManager;
 
 import com.sun.java.swing.plaf.windows.WindowsTabbedPaneUI;
 
+/**
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class BorderLessWindowsTabbedPaneUI 
 	extends WindowsTabbedPaneUI
 {

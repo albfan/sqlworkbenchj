@@ -29,6 +29,7 @@ public class SqlExportWriter
 	public SqlExportWriter(DataExporter exp)
 	{
 		super(exp);
+		canAppendStart = true;
 	}
 
 	public RowDataConverter createConverter()

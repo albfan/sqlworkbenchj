@@ -11,6 +11,9 @@
  */
 package workbench.interfaces;
 
+/**
+ * @author support@sql-workbench.net  
+ */ 
 public interface MacroChangeListener
 {
 	void macroListChanged();

@@ -28,6 +28,37 @@ public class StringUtilTest
 		super(testName);
 	}
 
+	public void testLongestLine()
+	{
+		String s = "this\na test for\nseveral lines";
+		String line = StringUtil.getLongestLine(s, 10);
+		assertEquals("several lines", line);
+
+		s = "this\na test for\nseveral lines\nand another long line that is even longer\na short end";
+		line = StringUtil.getLongestLine(s, 3);
+		assertEquals("several lines", line);
+		line = StringUtil.getLongestLine(s, 10);
+		assertEquals("and another long line that is even longer", line);
+
+		s = "this\na test for\nseveral lines\na long line at the end of the string";
+		line = StringUtil.getLongestLine(s, 10);
+		assertEquals("a long line at the end of the string", line);
+
+		s = "this\na test for\nseveral lines\na long line at the end of the string\n";
+		line= StringUtil.getLongestLine(s, 10);
+		assertEquals("a long line at the end of the string", line);
+
+		s = "this\r\na test for\r\nseveral lines\r\na long line at the end of the string\r\n";
+		line = StringUtil.getLongestLine(s, 10);
+		assertEquals("a long line at the end of the string", line);
+		
+		s = "no line feeds";
+		line = StringUtil.getLongestLine(s, 10);
+		assertEquals(s, line);
+
+	}
+	
+	
 	public void testLineStartsWith()
 	{
 		String s = "some stuff     -- this is a comment";

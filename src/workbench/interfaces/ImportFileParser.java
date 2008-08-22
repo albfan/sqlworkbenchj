@@ -74,4 +74,5 @@ public interface ImportFileParser
 	boolean isMultiFileImport();
 
 	void setSourceFiles(ImportFileLister source);
+  void setTrimValues(boolean trimValues);
 }

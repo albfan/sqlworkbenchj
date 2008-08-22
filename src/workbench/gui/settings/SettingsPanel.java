@@ -46,9 +46,8 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- *
- * @author  sql.workbench@freenet.de
- */
+ * @author support@sql-workbench.net  
+ */ 
 public class SettingsPanel
 	extends JPanel
 	implements ActionListener, ListSelectionListener

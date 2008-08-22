@@ -12,7 +12,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.gui.components.TableColumnOptimizer;
+import workbench.gui.components.ColumnWidthOptimizer;
 
 import workbench.gui.components.WbTable;
 import workbench.resource.Settings;
@@ -25,13 +25,13 @@ public class OptimizeColumnWidthAction
 	extends WbAction
 {
 	protected WbTable client;
-	protected TableColumnOptimizer optimizer;
+	protected ColumnWidthOptimizer optimizer;
 
 	public OptimizeColumnWidthAction(WbTable aClient)
 	{
 		super();
 		this.client = aClient;
-		this.optimizer = new TableColumnOptimizer(client);
+		this.optimizer = new ColumnWidthOptimizer(client);
 		this.setMenuTextByKey("MnuTxtOptimizeCol");
 	}
 

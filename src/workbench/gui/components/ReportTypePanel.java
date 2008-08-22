@@ -18,6 +18,10 @@ import java.awt.GridBagConstraints;
 import javax.swing.ButtonGroup;
 import java.awt.GridBagLayout;
 
+/**
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class ReportTypePanel
 	extends EncodingPanel
 {

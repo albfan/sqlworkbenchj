@@ -39,8 +39,10 @@ public class TextAreaRenderer
 				return WbSwingUtilities.EMPTY_INSETS;
 			}
 		};
+		textDisplay.setWrapStyleWord(false);
+		textDisplay.setLineWrap(false);
 	}
-	
+
 	public int getHorizontalAlignment()
 	{
 		return SwingConstants.LEFT;
@@ -85,20 +87,4 @@ public class TextAreaRenderer
 		}
 	}
 
-	/**
-	 * This is used by WbTable to calculate the optimal column
-	 * width. Assuming that most of the time only the first line
-	 * is visible, only that is returned.
-	 */ 
-	public String getDisplayValue()
-	{
-		if (displayValue == null) return null;
-		int pos = displayValue.indexOf('\n');
-		if (pos > 0)
-		{
-			return displayValue.substring(0, pos);
-		}
-		return displayValue;
-	}
-	
 }

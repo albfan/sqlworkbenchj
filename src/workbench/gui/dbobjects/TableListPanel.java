@@ -741,8 +741,7 @@ public class TableListPanel
 
 		if (this.isReallyVisible() || this.isClientVisible())
 		{
-			this.retrieve();
-			this.setFocusToTableList();
+			this.startRetrieve(true);
 		}
 		else
 		{
@@ -776,7 +775,7 @@ public class TableListPanel
 			return;
 		}
 
-		if (dbConnection == null || dbConnection.isClosed())
+		if (dbConnection == null)
 		{
 			LogMgr.logDebug("TableListPanel.retrieve()", "Connection object not accessible", new Exception());
 			WbSwingUtilities.showErrorMessageKey(this, "ErrConnectionGone");
@@ -852,9 +851,9 @@ public class TableListPanel
 	/**
 	 *	Starts the retrieval of the tables in a background thread
 	 */
-	private void startRetrieve()
+	private void startRetrieve(final boolean setFocus)
 	{
-		if (dbConnection == null || dbConnection.isClosed()) 
+		if (dbConnection == null) 
 		{
 			LogMgr.logDebug("TableListPanel.startRetrieve()", "startRetrieve() called, but no connection available", new Exception());
 			return;
@@ -865,6 +864,7 @@ public class TableListPanel
 			public void run()
 			{
 				retrieve();
+				if (setFocus) setFocusToTableList();
 			}
 		};
 		t.start();
@@ -872,14 +872,14 @@ public class TableListPanel
 
 	public void panelSelected()
 	{
-		if (this.shouldRetrieve) startRetrieve();
+		if (this.shouldRetrieve) startRetrieve(true);
 	}
 	
 	public void setVisible(boolean aFlag)
 	{
 		super.setVisible(aFlag);
 		if (aFlag && this.shouldRetrieve)
-			this.retrieve();
+			this.startRetrieve(false);
 	}
 
 	private String getWorkspacePrefix(int index)
@@ -1546,7 +1546,6 @@ public class TableListPanel
 			DataStoreTableModel model = new DataStoreTableModel(ds);
 			indexes.setModel(model, true);
 			indexes.adjustOrOptimizeColumns();
-			
 			this.shouldRetrieveIndexes = false;
 		}
 		catch (Throwable th)
@@ -1647,7 +1646,7 @@ public class TableListPanel
 	public void reload()
 	{
 		this.reset();
-		this.retrieve();
+		this.startRetrieve(false);
 	}
 
 	private void showTableData(final int panelIndex, final boolean appendText)
@@ -1696,8 +1695,7 @@ public class TableListPanel
 			try
 			{
 				this.removeTablePanels(true);
-				this.retrieve();
-				this.setFocusToTableList();
+				this.startRetrieve(true);
 			}
 			catch (Exception ex) 
 			{

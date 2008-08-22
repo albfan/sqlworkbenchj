@@ -45,7 +45,7 @@ import workbench.gui.actions.ActionRegistration;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DividerBorder;
-import workbench.gui.components.TableColumnOptimizer;
+import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
@@ -116,7 +116,7 @@ public class ShortcutEditor
 		this.keysTable.setRowSelectionAllowed(true);
 		this.keysTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		this.keysTable.setAdjustToColumnLabel(true);
-		TableColumnOptimizer optimizer = new TableColumnOptimizer(this.keysTable);
+		ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(this.keysTable);
 		optimizer.optimizeAllColWidth(80,-1,true);
 		this.keysTable.addMouseListener(this);
 		this.cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));

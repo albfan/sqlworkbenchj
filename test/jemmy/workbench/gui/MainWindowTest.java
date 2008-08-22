@@ -321,6 +321,7 @@ public class MainWindowTest
 		assertFalse(save.isEnabled());
 
 		result.setValueAt("Arthur", 0, 1);
+		QueueTool tool = new QueueTool();
 
 		// The first call to setValueAt() will make the result table display
 		// the status column
@@ -338,6 +339,7 @@ public class MainWindowTest
 		assertEquals(3, result.getColumnCount());
 
 		runSql(sqlPanel, "select nr, firstname, lastname from person where lastname = 'Dent';");
+		tool.waitEmpty();
 
 		// Obtain a new referenct to the result table as the 
 		// SQLPanel has created a new instance when running the select
@@ -360,7 +362,6 @@ public class MainWindowTest
 		assertTrue(StringUtil.isWhitespaceOrEmpty(firstname));
 
 		result.setValueAt("Arthur", 0, 1);
-		QueueTool tool = new QueueTool();
 		tool.waitEmpty();
 		msg = saveChanges(sqlPanel);
 		tool.waitEmpty();
@@ -407,7 +408,6 @@ public class MainWindowTest
 		assertFalse(action.getButton().isSelected());
 		
 		runSql(sqlPanel, "select * from person");
-		tool.waitEmpty();
 		try { Thread.sleep(500); } catch (Throwable th) {}
 		assertEquals(2, resultTab.getTabCount());
 	}
@@ -422,7 +422,10 @@ public class MainWindowTest
 				}
 			};
 		testUtil.execute(r);
+		QueueTool tool = new QueueTool();
+		tool.waitEmpty();
 		testUtil.waitWhileBusy(panel);
+		tool.waitEmpty();
 		return panel.getLogMessage();
 	}
 
@@ -437,8 +440,9 @@ public class MainWindowTest
 				}
 			};
 		testUtil.execute(r);
-		testUtil.waitWhileBusy(panel);
 		QueueTool tool = new QueueTool();
+		tool.waitEmpty();
+		testUtil.waitWhileBusy(panel);
 		tool.waitEmpty();
 		return panel.getLogMessage();
 	}

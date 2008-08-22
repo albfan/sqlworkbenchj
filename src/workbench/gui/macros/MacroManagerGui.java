@@ -48,7 +48,9 @@ import workbench.sql.MacroManager;
  * Displays all stored macros and lets the user add, edit and delete macros.
  * It uses {@link workbench.sql.MacroManager} to retrieve and store 
  * the macros.
- */
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class MacroManagerGui
 	extends JPanel
 	implements FileActions, ListSelectionListener, PropertyChangeListener

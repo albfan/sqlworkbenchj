@@ -13,7 +13,9 @@ package workbench.gui.macros;
 
 /**
  * One Macro entry in the GUI dialogs
- */
+ *  
+ * @author support@sql-workbench.net  
+ */ 
 public class MacroEntry
 {
 	private String text;

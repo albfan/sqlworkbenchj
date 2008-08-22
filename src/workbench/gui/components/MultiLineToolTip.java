@@ -13,6 +13,10 @@ package workbench.gui.components;
 
 import javax.swing.JToolTip;
 
+/**
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class MultiLineToolTip
 	extends JToolTip
 {

@@ -16,7 +16,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
-import workbench.gui.components.TableColumnOptimizer;
+import workbench.gui.components.ColumnWidthOptimizer;
 
 import workbench.gui.components.WbTable;
 import workbench.resource.Settings;
@@ -28,7 +28,7 @@ import workbench.util.WbThread;
 public class OptimizeAllColumnsAction 
 	extends WbAction
 {
-	protected TableColumnOptimizer optimizer;
+	protected ColumnWidthOptimizer optimizer;
 
 	public OptimizeAllColumnsAction(WbTable client)
 	{
@@ -61,7 +61,7 @@ public class OptimizeAllColumnsAction
 	
 	public void setClient(WbTable client)
 	{
-		this.optimizer = (client != null ? new TableColumnOptimizer(client) : null);
+		this.optimizer = (client != null ? new ColumnWidthOptimizer(client) : null);
 		this.setEnabled(client != null);
 	}
 }

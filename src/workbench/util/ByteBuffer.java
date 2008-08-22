@@ -19,6 +19,8 @@ package workbench.util;
  * be able to give direct access to the underlying array. 
  * {@link #getLength()} returns the physical length of the internal array
  * and is equivalent to getBuffer().length;
+ *
+ * @author support@sql-workbench.net  
  */
 public class ByteBuffer
 {

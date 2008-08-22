@@ -23,7 +23,11 @@ import javax.swing.plaf.basic.BasicToolTipUI;
 import workbench.util.StringUtil;
 
 
-public class MultiLineToolTipUI extends BasicToolTipUI
+/**
+ * @author support@sql-workbench.net  
+ */ 
+public class MultiLineToolTipUI 
+	extends BasicToolTipUI
 {
 	private final String[] emptyLines = new String[] { StringUtil.EMPTY_STRING };
 	private int maxWidth = 0;

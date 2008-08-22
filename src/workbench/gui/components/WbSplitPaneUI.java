@@ -17,7 +17,9 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 /**
  * WB's own SplitPaneUI in order to be able to control the Divider
- */
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class WbSplitPaneUI
 	extends BasicSplitPaneUI
 {

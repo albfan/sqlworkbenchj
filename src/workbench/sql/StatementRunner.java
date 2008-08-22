@@ -187,11 +187,15 @@ public class StatementRunner
 		this.currentConnection = aConn;
 		
 		if (aConn == null) return;
-		this.ignoreDropErrors = currentConnection.getProfile().getIgnoreDropErrors();
-		this.removeComments = currentConnection.getProfile().getRemoveComments();
-		this.confirmUpdates = currentConnection.getProfile().getConfirmUpdates();
-		this.hideWarnings = currentConnection.getProfile().isHideWarnings();
-
+    ConnectionProfile profile = currentConnection.getProfile();
+    if (profile != null)
+    {
+      this.ignoreDropErrors = profile.getIgnoreDropErrors();
+      this.removeComments = profile.getRemoveComments();
+      this.confirmUpdates = profile.getConfirmUpdates();
+      this.hideWarnings = profile.isHideWarnings();
+    }
+    
 		DbMetadata meta = this.currentConnection.getMetadata();
 		if (meta == null) return;
 		

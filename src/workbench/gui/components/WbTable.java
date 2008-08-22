@@ -86,6 +86,7 @@ import workbench.gui.actions.FilterDataAction;
 import workbench.gui.actions.ResetFilterAction;
 import workbench.gui.actions.OptimizeAllColumnsAction;
 import workbench.gui.actions.OptimizeColumnWidthAction;
+import workbench.gui.actions.OptimizeRowHeightAction;
 import workbench.gui.actions.PrintAction;
 import workbench.gui.actions.PrintPreviewAction;
 import workbench.gui.actions.ResetHighlightAction;
@@ -112,6 +113,10 @@ import workbench.storage.filter.FilterExpression;
 import workbench.util.FileDialogUtil;
 import workbench.util.SqlUtil;
 
+/**
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class WbTable
 	extends JTable
 	implements ActionListener, FocusListener, MouseListener,
@@ -1371,7 +1376,7 @@ public class WbTable
 	 */
 	public void adjustOrOptimizeColumns()
 	{
-		TableColumnOptimizer optimizer = new TableColumnOptimizer(this);
+		ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(this);
 		boolean checkHeaders = Settings.getInstance().getIncludeHeaderInOptimalWidth();
 		if (Settings.getInstance().getAutomaticOptimalWidth())
 		{
@@ -1381,6 +1386,17 @@ public class WbTable
 		{
 			optimizer.adjustColumns(this.adjustToColumnLabel);
 		}
+		
+		if (Settings.getInstance().getAutomaticOptimalRowHeight())
+		{
+			optimizeRowHeight();
+		}
+	}
+
+	public void optimizeRowHeight()
+	{
+		RowHeightOptimizer optimizer = new RowHeightOptimizer(this);
+		optimizer.optimizeAllRows();
 	}
 	
 	public void cancelEditing()
@@ -1553,6 +1569,8 @@ public class WbTable
 						headerPopup.add(setColWidth.getMenuItem());
 						headerPopup.addSeparator();
 						headerPopup.add(new ScrollToColumnAction(WbTable.this));
+						headerPopup.addSeparator();
+						headerPopup.add(new OptimizeRowHeightAction(WbTable.this));
 						headerPopup.show(getTableHeader(), e.getX(), e.getY());
 					}
 				});

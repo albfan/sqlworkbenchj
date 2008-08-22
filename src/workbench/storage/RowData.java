@@ -33,7 +33,9 @@ import workbench.util.StringUtil;
  *	NEW          - the row has not been retrieved from the database (i.e. was created on the client)
  *  MODIFIED     - the row has been retrieved but has been changed since then
  *  NOT_MODIFIED - The row has not been changed since it has been retrieved
- */
+ *
+ * @author support@sql-workbench.net  
+ */ 
 public class RowData
 {
 	public static final int NOT_MODIFIED = 0;

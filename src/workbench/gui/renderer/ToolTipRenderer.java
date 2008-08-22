@@ -120,6 +120,11 @@ public class ToolTipRenderer
 		}
 		return result;
 	}
+
+	public int getLineCount()
+	{
+		return 1;
+	}
 	
 	public void setUseAlternatingColors(boolean flag)
 	{

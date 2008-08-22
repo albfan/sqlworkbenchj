@@ -532,6 +532,18 @@ public class WbConnection
 		try
 		{
 			if (this.metaData != null) this.metaData.close();
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logWarning("WbConnection.close()", "Error when releasing metadata", th);
+		}
+		finally
+		{
+			this.metaData = null;
+		}
+
+		try
+		{
 			if (this.sqlConnection != null) this.sqlConnection.close();
 		}
 		catch (Throwable th)
@@ -540,10 +552,9 @@ public class WbConnection
 		}
 		finally
 		{
-			this.metaData = null;
 			this.sqlConnection = null;
 		}
-
+		
 		LogMgr.logDebug("WbConnection.close()", "Connection " + this.getId() + " closed.");
 
 		if (Settings.getInstance().getProperty("workbench.db.driver.log", null) != null)
@@ -556,15 +567,15 @@ public class WbConnection
 	public boolean isClosed()
 	{
 		if (this.sqlConnection == null) return true;
-
-		try
-		{
-			return this.sqlConnection.isClosed();
-		}
-		catch (Exception e)
-		{
-			return true;
-		}
+		else return false;
+//		try
+//		{
+//			return this.sqlConnection.isClosed();
+//		}
+//		catch (Exception e)
+//		{
+//			return true;
+//		}
 	}
 
 	/**

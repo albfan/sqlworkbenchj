@@ -33,6 +33,10 @@ import javax.swing.KeyStroke;
 import javax.swing.table.TableCellEditor;
 import workbench.gui.WbSwingUtilities;
 
+/**
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class WbCellEditor
 	extends AbstractCellEditor
 	implements TableCellEditor, MouseListener

@@ -166,6 +166,9 @@ public class StringUtil
 		int pos = s.length();
 		if (pos == 0) return s;
 
+		char last = s.charAt(pos - 1);
+		if (!Character.isWhitespace(last)) return s;
+
 		while (pos > 0 && Character.isWhitespace(s.charAt(pos - 1)))
 		{
 			pos --;
@@ -359,7 +362,58 @@ public class StringUtil
 		}
 		return true;
 	}
+	
+	/**
+	 * Find the longest line in the give string and return its length.
+	 * Up to maxLines lines are evaluated.
+	 * 
+	 * @param text
+	 * @param maxLines
+	 * @return the length of the longest line 
+	 */
+	public static String getLongestLine(String text, int maxLines)
+	{
+		if (isEmptyString(text)) return "";
+		Matcher m = PATTERN_CRLF.matcher(text);
 
+		int lastpos = 0;
+		int linecount = 0;
+		int maxlen = 0;
+		int linestart = 0;
+		int lineend = 0;
+		
+		while (m.find(lastpos))
+		{
+			linecount ++;
+			int pos = m.start();
+			int len = pos - lastpos;
+			if (len > maxlen)
+			{
+				linestart = lastpos;
+				lineend = pos;
+				maxlen = len;
+			}
+			lastpos = pos + 1;
+			if (linecount >= maxLines) break;
+		}
+		
+		if (m.hitEnd())
+		{
+			int len = text.length() - lastpos;
+			if (len > maxlen)
+			{
+				maxlen = len;
+				linestart = lastpos;
+				lineend = text.length();
+			}
+		}
+		if (linestart > 0 && lineend <= text.length())
+		{
+			return text.substring(linestart, lineend);
+		}
+		return text;
+	}
+	
 	public static boolean isNumber(String value)
 	{
 		try

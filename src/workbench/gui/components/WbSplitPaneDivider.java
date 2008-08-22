@@ -15,6 +15,10 @@ import javax.swing.JButton;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 
+/**
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class WbSplitPaneDivider
 	extends BasicSplitPaneDivider
 {

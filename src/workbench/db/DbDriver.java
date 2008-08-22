@@ -31,7 +31,6 @@ import workbench.util.StringUtil;
 import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.List;
-import workbench.WbManager;
 
 /**
  *	Represents a JDBC Driver definition.
@@ -156,7 +155,8 @@ public class DbDriver
 
 	public boolean canReadLibrary()
 	{
-		if (WbManager.getInstance().isTestMode()) return true;
+		if (Settings.getInstance().getBoolProperty("workbench.gui.testmode", false)) return true;
+		
 		if (libraryList != null)
 		{
 			for (String lib : libraryList)

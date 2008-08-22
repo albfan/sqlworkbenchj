@@ -20,6 +20,10 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 
+/**
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class SortHeaderRenderer
 	extends DefaultTableCellRenderer
 {

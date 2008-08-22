@@ -38,7 +38,9 @@ import workbench.storage.ResultInfo;
 
 /**
  * Methods for manipulating and analyzing SQL statements.
- */
+ *
+ * @author support@sql-workbench.net  
+ */ 
 public class SqlUtil
 {
 	private static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_][\\w\\$#@]*");
@@ -192,7 +194,29 @@ public class SqlUtil
 			return null;
 		}
 	}	
-	
+
+	/**
+	 * If the given SQL command is a CREATE TABLE command, return 
+	 * the table that is created, otherwise return null;
+	 */
+	public static String getCreateTable(CharSequence sql)
+	{
+		try
+		{
+			SQLLexer lexer = new SQLLexer(sql);
+			SQLToken t = lexer.getNextToken(false, false);
+			if (t == null || !t.getContents().equals("CREATE")) return null;
+			t = lexer.getNextToken(false, false);
+			if (t == null || !t.getContents().equals("TABLE")) return null;
+			t = lexer.getNextToken(false, false);
+			if (t == null) return null;
+			return t.getContents();
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}		
 	/**
 	 *  Returns the SQL Verb for the given SQL string.
 	 */

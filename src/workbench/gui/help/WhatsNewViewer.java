@@ -25,7 +25,9 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
-
+/**
+ * @author support@sql-workbench.net  
+ */ 
 public class WhatsNewViewer 
 	extends JDialog 
 {

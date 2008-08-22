@@ -17,6 +17,10 @@ import java.awt.Graphics;
 
 import javax.swing.Icon;
 
+/**
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class SortArrowIcon
 	implements Icon
 {

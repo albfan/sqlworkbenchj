@@ -47,7 +47,9 @@ import workbench.resource.Settings;
 /**
  * A Dialog that displays a {@link MacroManagerGui} and allows to run 
  * the selected macro.
- */
+ *
+ * @author support@sql-workbench.net  
+ */ 
 public class MacroManagerDialog
 	extends JDialog
 	implements ActionListener, ListSelectionListener, MouseListener, WindowListener

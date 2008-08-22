@@ -20,7 +20,12 @@ import java.awt.Insets;
 import javax.swing.JPanel;
 import javax.swing.border.AbstractBorder;
 
-public class DividerBorder extends AbstractBorder
+/**
+ * 
+ * @author support@sql-workbench.net  
+ */ 
+public class DividerBorder 
+	extends AbstractBorder
 {
 	public static final int LEFT = 1;
 	public static final int RIGHT = 2;

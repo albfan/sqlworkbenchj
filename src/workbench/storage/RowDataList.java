@@ -16,7 +16,10 @@ import java.util.Comparator;
 
 /**
  * A class to store a dynamic array of {@link RowData} objects
- */
+ *
+ * @author support@sql-workbench.net  
+ */ 
+
 public class RowDataList
 {
 	private static final int DEFAULT_SIZE = 150;

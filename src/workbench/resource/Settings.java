@@ -269,27 +269,34 @@ public class Settings
 	}
 	
 	// <editor-fold defaultstate="collapsed" desc="Manual">
-	public String getPdfPath()
+	public WbFile getDefaultPdf()
 	{
 		String pdfManual = getProperty("workbench.manual.pdf.file", "SQLWorkbench-Manual.pdf");
 		
-		File f = new File(pdfManual);
+		WbFile f = new WbFile(pdfManual);
 		if (f.isDirectory())
 		{
-			f = new File(f, "SQLWorkbench-Manual.pdf");
-		}
-		
-		if (f.exists() && f.canRead())
-		{
-			return f.getAbsolutePath();
+			f = new WbFile(f, "SQLWorkbench-Manual.pdf");
 		}
 		
 		String jarDir = WbManager.getInstance().getJarPath();
 		WbFile pdf = new WbFile(jarDir, pdfManual);
 		
+		return pdf;
+	}
+
+	public String getPdfPath()
+	{
+		WbFile pdf = getDefaultPdf();
+		
+		if (pdf.exists() && pdf.canRead())
+		{
+			return pdf.getFullPath();
+		}
+		
 		if (!pdf.exists())
 		{
-			pdf = new WbFile(getConfigDir(), pdfManual);
+			pdf = new WbFile(getConfigDir(), pdf.getFileName());
 		}
 		
 		if (pdf.exists() && pdf.canRead())
@@ -1212,6 +1219,16 @@ public class Settings
 		setProperty("workbench.gui.optimalwidth.includeheader", flag);
 	}
 
+	public boolean getAutomaticOptimalRowHeight()
+	{
+		return getBoolProperty("workbench.gui.optimalrowheight.automatic", false);
+	}
+
+	public void setAutomaticOptimalRowHeight(boolean flag)
+	{
+		setProperty("workbench.gui.optimalrowheight.automatic", flag);
+	}
+	
 	public boolean getAutomaticOptimalWidth()
 	{
 		return getBoolProperty("workbench.gui.optimalwidth.automatic", true);
@@ -1281,10 +1298,20 @@ public class Settings
 	{
 		this.setProperty("workbench.gui.optimalwidth.maxsize", width);
 	}
+
+	public int getAutRowHeightMaxLines()
+	{
+		return getIntProperty("workbench.gui.optimalrowheight.maxlines", 10);
+	}
+
+	public void setAutRowHeightMaxLines(int lines)
+	{
+		setProperty("workbench.gui.optimalrowheight.maxlines", lines);
+	}
 	
 	public void setLookAndFeelClass(String aClassname)
 	{
-		this.props.setProperty("workbench.gui.lookandfeelclass", aClassname);
+		setProperty("workbench.gui.lookandfeelclass", aClassname);
 	}
 
 	public String getLookAndFeelClass()

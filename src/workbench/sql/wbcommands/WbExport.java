@@ -198,6 +198,9 @@ public class WbExport
 			return result;
 		}
 
+		type = type.trim().toLowerCase();
+		if ("txt".equals(type)) type = "text";
+		
 		this.exporter = new DataExporter(this.currentConnection);
 
 		String tables = cmdLine.getValue("sourcetable");
@@ -218,10 +221,16 @@ public class WbExport
 			result.setFailure();
 			return result;
 		}
+
+		boolean appendToFile = cmdLine.getBoolean("append", false);
+		if (appendToFile && !type.equals("text") && !type.startsWith("sql"))
+		{
+			result.setFailure();
+			result.addMessage(ResourceMgr.getFormattedString("ErrNoAppend", type));
+			return result;
+		}
 		
 		String updateTable = cmdLine.getValue("table");
-		type = type.trim().toLowerCase();
-		if ("txt".equals(type)) type = "text";
 
 		String encoding = cmdLine.getValue("encoding");
 		if (encoding != null)
@@ -244,7 +253,6 @@ public class WbExport
 		if (format != null) exporter.setDecimalSymbol(format);
 		
 		exporter.setPageTitle(cmdLine.getValue("title"));
-
 		exporter.setExportHeaders(cmdLine.getBoolean("header", getHeaderDefault(type)));		
 		
 		if ("text".equals(type))
@@ -296,7 +304,6 @@ public class WbExport
 			exporter.setQuoteAlways(cmdLine.getBoolean("quotealways"));
 			exporter.setQuoteEscaping(CommonArgs.getQuoteEscaping(cmdLine));
 			exporter.setRowIndexColumnName(cmdLine.getValue(ARG_ROWNUM));
-
 			this.defaultExtension = ".txt";
 		}
 		else if (type.startsWith("sql"))
@@ -308,7 +315,6 @@ public class WbExport
 
 			CommonArgs.setCommitEvery(exporter, cmdLine);
 
-			exporter.setAppendToFile(cmdLine.getBoolean("append"));
 			if (updateTable != null) exporter.setTableName(updateTable);
 			String c = cmdLine.getValue("keycolumns");
 			if (c != null)
@@ -388,6 +394,8 @@ public class WbExport
 				return result;
 			}
 		}
+
+		exporter.setAppendToFile(appendToFile);
 		
 		String ending = cmdLine.getValue("lineending");
 		if (ending != null)

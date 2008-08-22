@@ -18,6 +18,10 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
+/**
+ * 
+ * @author support@sql-workbench.net  
+ */ 
 public class LineNumberTable 
 	extends JTable
 {

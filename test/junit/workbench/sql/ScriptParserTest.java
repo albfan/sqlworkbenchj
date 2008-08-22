@@ -17,6 +17,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Iterator;
 import junit.framework.TestCase;
 import workbench.TestUtil;
@@ -24,6 +26,7 @@ import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  *

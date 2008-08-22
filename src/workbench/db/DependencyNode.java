@@ -24,6 +24,8 @@ import workbench.util.StringUtil;
  * @see workbench.db.TableDependency
  * @see workbench.db.DeleteScriptGenerator
  * @see workbench.db.importer.TableDependencySorter
+ * 
+ * @author support@sql-workbench.net  
  */
 public class DependencyNode
 {
