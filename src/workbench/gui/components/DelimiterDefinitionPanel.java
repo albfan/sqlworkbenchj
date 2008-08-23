@@ -12,9 +12,6 @@
 package workbench.gui.components;
 
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeListener;
 import javax.swing.JPanel;
 import workbench.resource.ResourceMgr;
@@ -109,7 +106,7 @@ public class DelimiterDefinitionPanel
 		gridBagConstraints.gridy = 0;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.weightx = 0.5;
+		gridBagConstraints.weightx = 0.2;
 		add(delimitTextField, gridBagConstraints);
 
 		singleLineCheckBox.setText(ResourceMgr.getString("LblDelimSingleLine"));

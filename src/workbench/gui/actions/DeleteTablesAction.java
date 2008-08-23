@@ -48,7 +48,6 @@ public class DeleteTablesAction
 		list.addListSelectionListener(this);
 	}
 	
-	@Override
 	public void executeAction(ActionEvent e)
 	{
 		if (!WbSwingUtilities.checkConnection(source.getComponent(), source.getConnection())) return;
@@ -61,7 +60,6 @@ public class DeleteTablesAction
 		deleter.setConnection(source.getConnection());
 		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(source.getComponent());
 		deleter.showDialog(f);
-		deleter.removeDeleteListener(deleteListener);
 	}
 
 	private List<TableIdentifier> getSelectedTables()

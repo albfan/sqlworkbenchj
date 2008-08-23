@@ -43,23 +43,23 @@ public class SqlTabPopup
 	public SqlTabPopup(MainWindow aClient)
 	{
 		this.add = new AddTabAction(aClient);
-		this.add(add.getMenuItem());
+		this.add(add);
 		this.insert = new InsertTabAction(aClient);
-		this.add(insert.getMenuItem());
+		this.add(insert);
 		
 		this.remove = new RemoveTabAction(aClient);
-		this.add(remove.getMenuItem());
+		this.add(remove);
 
 		if (aClient.canRenameTab())
 		{
 			this.rename = new RenameTabAction(aClient);
-			this.add(rename.getMenuItem());
+			this.add(rename);
 		}
 
 		this.addSeparator();
 		
 		this.newDbExp = new NewDbExplorerPanelAction(aClient, "MnuTxtAddExplorerPanel");
-		this.newDbExp.setIcon(null);
+		this.newDbExp.removeIcon();
 		this.add(newDbExp);
 
 		if (aClient.canUseSeparateConnection())
@@ -77,7 +77,7 @@ public class SqlTabPopup
 			int currentIndex = aClient.getCurrentPanelIndex();
 			moveLeft = new MoveSqlTabLeft(aClient);
 			moveLeft.setEnabled(currentIndex > 0);
-			this.add(moveLeft.getMenuItem());
+			this.add(moveLeft);
 			int lastIndex = aClient.getLastSqlPanelIndex();
 			moveRight = new MoveSqlTabRight(aClient);
 			moveRight.setEnabled(currentIndex < lastIndex);
@@ -87,13 +87,13 @@ public class SqlTabPopup
 
 			EditorPanel editor = spanel.getEditor();
 			
-			this.add(editor.getFileSaveAction().getMenuItem());
-			this.add(editor.getFileOpenAction().getMenuItem());
-			this.add(editor.getReloadAction().getMenuItem());
+			this.add(editor.getFileSaveAction());
+			this.add(editor.getFileOpenAction());
+			this.add(editor.getReloadAction());
 			this.addSeparator();
 			FileDiscardAction discard = new FileDiscardAction(spanel);
 			discard.removeIcon();
-			this.add(discard.getMenuItem());
+			this.add(discard);
 			this.remove.setEnabled(aClient.canCloseTab());
 		}
 	}

@@ -61,8 +61,8 @@ public class WbAction
 	public WbAction()
 	{
 		String c = this.getClass().getName();
-		this.actionName = "wb-" + c.substring(c.lastIndexOf('.')  + 1);
-    this.putValue(ACTION_COMMAND_KEY, this.actionName);
+		actionName = "wb-" + c.substring(c.lastIndexOf('.')  + 1);
+    putValue(ACTION_COMMAND_KEY, this.actionName);
 	}
 
 	/**
@@ -75,9 +75,9 @@ public class WbAction
 	public WbAction(ActionListener l, String aName)
 	{
 		this();
-		this.delegate = l;
-		this.actionName = aName;
-    this.putValue(ACTION_COMMAND_KEY, this.actionName);
+		delegate = l;
+		actionName = aName;
+    putValue(ACTION_COMMAND_KEY, this.actionName);
 	}
 
 	public static boolean isAltPressed(ActionEvent e)
@@ -115,7 +115,7 @@ public class WbAction
 
 	public void setTooltip(String aText)
 	{
-		this.putValue(Action.SHORT_DESCRIPTION, aText);
+		putValue(Action.SHORT_DESCRIPTION, aText);
 	}
 
 	public String getTooltipText()
@@ -130,7 +130,7 @@ public class WbAction
 
 	public void clearAccelerator()
 	{
-		this.putValue(Action.ACCELERATOR_KEY, null);
+		putValue(Action.ACCELERATOR_KEY, null);
 	}
 
 	public String getActionCommand()
@@ -140,7 +140,7 @@ public class WbAction
 
 	protected void setActionName(String aName)
 	{
-		this.actionName = aName;
+		actionName = aName;
 	}
 
 	public String getMenuLabel()
@@ -159,7 +159,7 @@ public class WbAction
 	 */
 	public void initMenuDefinition(String aKey)
 	{
-		this.initMenuDefinition(aKey, null);
+		initMenuDefinition(aKey, null);
 	}
 
 	/**
@@ -173,8 +173,8 @@ public class WbAction
 	 */
 	public void initMenuDefinition(String aKey, KeyStroke defaultKey)
 	{
-		this.setMenuTextByKey(aKey);
-		this.setDefaultAccelerator(defaultKey);
+		setMenuTextByKey(aKey);
+		setDefaultAccelerator(defaultKey);
 		initializeShortcut();
 	}
 
@@ -183,7 +183,7 @@ public class WbAction
 		ShortcutManager mgr = Settings.getInstance().getShortcutManager();
 		mgr.registerAction(this);
 		KeyStroke key = mgr.getCustomizedKeyStroke(this);
-		this.setAccelerator(key);
+		setAccelerator(key);
 	}
 	/**
 	 * Initialize the menu definition for this action. The menu text and tooltip
@@ -196,9 +196,9 @@ public class WbAction
 	 */
 	public void initMenuDefinition(String aMenuText, String aTooltip, KeyStroke defaultKey)
 	{
-		this.setMenuText(aMenuText);
-		this.setTooltip(aTooltip);
-		this.setDefaultAccelerator(defaultKey);
+		setMenuText(aMenuText);
+		setTooltip(aTooltip);
+		setDefaultAccelerator(defaultKey);
 		initializeShortcut();
 	}
 
@@ -213,8 +213,8 @@ public class WbAction
 	 */
 	public void setMenuTextByKey(String aKey)
 	{
-		this.setMenuText(ResourceMgr.getString(aKey));
-		this.setTooltip(ResourceMgr.getDescription(aKey, true));
+		setMenuText(ResourceMgr.getString(aKey));
+		setTooltip(ResourceMgr.getDescription(aKey, true));
 	}
 
 	/**
@@ -246,7 +246,7 @@ public class WbAction
 
 	public void setAlternateAccelerator(KeyStroke key)
 	{
-		this.putValue(ALTERNATE_ACCELERATOR, key);
+		putValue(ALTERNATE_ACCELERATOR, key);
 	}
 
 	public KeyStroke getAlternateAccelerator()
@@ -256,17 +256,7 @@ public class WbAction
 
 	public void setAccelerator(KeyStroke key)
 	{
-		KeyStroke old = this.getAccelerator();
-		this.putValue(Action.ACCELERATOR_KEY, key);
-//		boolean isNew = false;
-//		if (old != null && key != null)
-//		{
-//			isNew = !key.equals(old);
-//		}
-//		else
-//		{
-//			isNew = (old != null || key != null);
-//		}
+		putValue(Action.ACCELERATOR_KEY, key);
 	}
 
 	public KeyStroke getAccelerator()
@@ -303,20 +293,21 @@ public class WbAction
 
 	public void addToToolbar(JToolBar aToolbar)
 	{
-		aToolbar.add(this.getToolbarButton());
+		aToolbar.add(getToolbarButton());
 	}
 
 	public void addToMenu(JMenu aMenu)
 	{
-		aMenu.add(this.getMenuItem());
+		//aMenu.add(getMenuItem());
+		aMenu.add(this);
 	}
 
 	public JMenuItem getMenuItem()
 	{
 		JMenuItem item = new WbMenuItem();
 		item.setAction(this);
-		item.setAccelerator(this.getAccelerator());
-		Integer index = (Integer)this.getValue(WbAction.MNEMONIC_INDEX);
+		item.setAccelerator(getAccelerator());
+		Integer index = (Integer)getValue(WbAction.MNEMONIC_INDEX);
 		if (index != null)
 		{
 			try
@@ -338,7 +329,7 @@ public class WbAction
 
 	public void setMenuItemName(String aKey)
 	{
-		this.putValue(WbAction.MAIN_MENU_ITEM, aKey);
+		putValue(WbAction.MAIN_MENU_ITEM, aKey);
 	}
 
 	public boolean getCreateToolbarSeparator()
@@ -362,12 +353,12 @@ public class WbAction
 
 	public void setCreateMenuSeparator(boolean flag)
 	{
-		this.putValue(WbAction.MENU_SEPARATOR, (flag ? Boolean.TRUE : Boolean.FALSE));
+		putValue(WbAction.MENU_SEPARATOR, (flag ? Boolean.TRUE : Boolean.FALSE));
 	}
 
 	public String getActionName()
 	{
-		return this.actionName;
+		return actionName;
 	}
 
 	public void addToInputMap(JComponent c)
@@ -427,12 +418,12 @@ public class WbAction
 
 	public void setDefaultAccelerator(KeyStroke key)
 	{
-		this.putValue(DEFAULT_ACCELERATOR, key);
+		putValue(DEFAULT_ACCELERATOR, key);
 	}
 
 	public KeyStroke getDefaultAccelerator()
 	{
-		return (KeyStroke)this.getValue(DEFAULT_ACCELERATOR);
+		return (KeyStroke)getValue(DEFAULT_ACCELERATOR);
 	}
 
 	public void setIcon(String key)
@@ -440,10 +431,12 @@ public class WbAction
 		// Just store the key for the resource manager
 		// the actual item will be retrieved when it's really
 		// needed in getValue()
-		this.iconKey = key;
+		// this will retrieve the icons "lazily" so not all
+		// of them are actually loaded during startup
+		iconKey = key;
 		if (key == null)
 		{
-			this.removeIcon();
+			removeIcon();
 		}
 	}
 
@@ -458,7 +451,7 @@ public class WbAction
 			if (icon == null)
 			{
 				// now retrieve the icon and store it
-				icon = ResourceMgr.getImage(this.iconKey);
+				icon = ResourceMgr.getImage(iconKey);
 				this.putValue(key, icon);
 			}
 			return icon;
@@ -468,13 +461,13 @@ public class WbAction
 
 	public void removeIcon()
 	{
-		this.putValue(Action.SMALL_ICON, null);
-		this.iconKey = null;
+		iconKey = null;
+		putValue(Action.SMALL_ICON, null);
 	}
 
 	public void actionPerformed(final ActionEvent e)
 	{
-		if (this.isEnabled())
+		if (isEnabled())
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -498,13 +491,13 @@ public class WbAction
 		if (this.isEnabled() && this.delegate != null)
 		{
 			e.setSource(this);
-			this.delegate.actionPerformed(e);
+			delegate.actionPerformed(e);
 		}
 	}
 
 	private String getAcceleratorDisplay()
 	{
-		String acceleratorDelimiter = UIManager.getString( "MenuItem.acceleratorDelimiter" );
+		String acceleratorDelimiter = UIManager.getString("MenuItem.acceleratorDelimiter");
 		if ( acceleratorDelimiter == null )
 		{
 			acceleratorDelimiter = "-";

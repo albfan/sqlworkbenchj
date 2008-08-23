@@ -27,6 +27,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -112,6 +113,30 @@ public class WbSwingUtilities
 		}
 	}
 
+	public static final void setLabel(final JLabel label, final String text, final String tooltip)
+	{
+		invoke(new Runnable()
+		{
+			public void run()
+			{
+				label.setText(text);
+				label.setToolTipText(tooltip);
+			}
+		});
+	}
+	
+//	public static final void setText(final JTextComponent comp, final String text, final String tooltip)
+//	{
+//		invoke(new Runnable()
+//		{
+//			public void run()
+//			{
+//				comp.setText(text);
+//				comp.setToolTipText(tooltip);
+//			}
+//		});
+//	}
+	
 	/**
 	 * Synchronously execute code on the EDT.
 	 * If the current thread is the EDT, this merely calls r.run()
@@ -140,12 +165,12 @@ public class WbSwingUtilities
 	}
 
 	/**
-	 *	Centers the given window either agains anotherone on the screen
-	 *	If a second window is passed the first window is centered
-	 *	against that one
+	 * Centers the given window against another one on the screen.
+	 * If aReference is not null, the first window is centered relative to the
+	 * reference. If aReference is null, the window is centered on screen.
 	 *
-	 *	@param 	aWinToCenter the window to be centered
-	 *	@param	aReference	center against this window. If null -> center on screen
+	 * @param aWinToCenter the window to be centered
+	 * @param aReference	center against this window. If null -> center on screen
 	 */
 	public static void center(Window aWinToCenter, Component aReference)
 	{
@@ -242,18 +267,16 @@ public class WbSwingUtilities
 		showCursor(null, caller, includeParents, true);
 	}
 
-	private static void showCursor(final Cursor cursor, final Component caller, final boolean includeParents, boolean immediate)
+	private static void showCursor(final Cursor cursor, final Component caller, final boolean includeParent, boolean immediate)
 	{
-		if (caller == null)
-		{
-			return;
-		}
+		if (caller == null) return;
+		
 		Runnable r = new Runnable()
 		{
 			public void run()
 			{
 				caller.setCursor(cursor);
-				if (includeParents)
+				if (includeParent)
 				{
 					final Window w = SwingUtilities.getWindowAncestor(caller);
 					if (w != null)
@@ -302,36 +325,62 @@ public class WbSwingUtilities
 		showErrorMessage(aCaller, ResourceMgr.TXT_PRODUCT_NAME, aMessage);
 	}
 
-	public static void showErrorMessage(Component aCaller, String title, String aMessage)
+	public static void showErrorMessage(Component aCaller, final String title, final String aMessage)
 	{
 		if (WbManager.getInstance().isBatchMode())
 		{
 			return;
 		}
+
+		final Component caller;
+
 		if (aCaller == null)
 		{
-			aCaller = WbManager.getInstance().getCurrentWindow();
+			caller = WbManager.getInstance().getCurrentWindow();
 		}
 		else if (!(aCaller instanceof Window))
 		{
-			aCaller = SwingUtilities.getWindowAncestor(aCaller);
+			caller = SwingUtilities.getWindowAncestor(aCaller);
 		}
-		JOptionPane.showMessageDialog(aCaller, aMessage, title, JOptionPane.ERROR_MESSAGE);
+		else
+		{
+			caller = aCaller;
+		}
+		
+		JOptionPane.showMessageDialog(caller, aMessage, title, JOptionPane.ERROR_MESSAGE);
 	}
 
-	public static void showMessage(Component aCaller, Object aMessage)
+	public static void showMessage(final Component aCaller, final Object aMessage)
 	{
-		JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
+		invoke(new Runnable()
+		{
+			public void run()
+			{
+				JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
+			}
+		});
 	}
 
-	public static void showMessage(Component aCaller, String title, Object aMessage)
+	public static void showMessage(final Component aCaller, final String title, final Object aMessage)
 	{
-		JOptionPane.showMessageDialog(aCaller, aMessage, title, JOptionPane.PLAIN_MESSAGE);
+		invoke(new Runnable()
+		{
+			public void run()
+			{
+				JOptionPane.showMessageDialog(aCaller, aMessage, title, JOptionPane.PLAIN_MESSAGE);
+			}
+		});
 	}
 
-	public static void showMessageKey(Component aCaller, String aKey)
+	public static void showMessageKey(final Component aCaller, final String aKey)
 	{
-		JOptionPane.showMessageDialog(aCaller, ResourceMgr.getString(aKey), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
+		invoke(new Runnable()
+		{
+			public void run()
+			{
+				JOptionPane.showMessageDialog(aCaller, ResourceMgr.getString(aKey), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
+			}
+		});
 	}
 
 	public static boolean getYesNo(Component aCaller, String aMessage)

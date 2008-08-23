@@ -14,11 +14,9 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import workbench.gui.components.ColumnWidthOptimizer;
 
 import workbench.gui.components.RowHeightOptimizer;
 import workbench.gui.components.WbTable;
-import workbench.resource.Settings;
 import workbench.util.WbThread;
 
 /**
@@ -33,7 +31,8 @@ public class OptimizeRowHeightAction
 	public OptimizeRowHeightAction()
 	{
 		super();
-		this.setMenuTextByKey("LblRowHeightAuto");
+		initMenuDefinition("LblRowHeightOpt");
+		this.setEnabled(false);		
 	}
 
 	public OptimizeRowHeightAction(WbTable table)
@@ -81,6 +80,7 @@ public class OptimizeRowHeightAction
 			setEnabled(false);
 		}
 	}
+	
 	public void tableChanged(TableModelEvent e)
 	{
 		checkEnabled();

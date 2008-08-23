@@ -280,8 +280,8 @@ public class WbTable
 			this.printDataAction = new PrintAction(this);
 			this.printPreviewAction = new PrintPreviewAction(this);
 			this.popup.addSeparator();
-			this.popup.add(this.printDataAction.getMenuItem());
-			this.popup.add(this.printPreviewAction.getMenuItem());
+			this.popup.add(this.printDataAction);
+			this.popup.add(this.printPreviewAction);
 		}
 
 		this.addMouseListener(this);
@@ -1328,7 +1328,7 @@ public class WbTable
 		}
 		
 		int sizeThreshold = Settings.getInstance().getIntProperty("workbench.gui.display.multilinethreshold", 500);
-		return charLength > sizeThreshold;
+		return charLength >= sizeThreshold;
 	}
 	
 	protected void initDefaultEditors()

@@ -213,6 +213,7 @@ public class ShortcutManager
 	{
 		for (WbAction action : allActions)
 		{
+			if (action == null) continue;
 			String actionClass = action.getClass().getName();
 			ShortcutDefinition def = this.getDefinition(actionClass);
 			KeyStroke key = def.getActiveKeyStroke();

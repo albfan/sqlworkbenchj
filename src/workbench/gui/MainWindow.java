@@ -382,7 +382,8 @@ public class MainWindow
 		for (int i=0; i < tabCount; i ++)
 		{
 			action = new SelectTabAction(this.sqlTab, i);
-			menu.add(action.getMenuItem());
+			//menu.add(action.getMenuItem());
+			menu.add(action);
 		}
 
 		menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_DATA));
@@ -475,17 +476,17 @@ public class MainWindow
 		menu.addSeparator();
 
 		action = new FileExitAction();
-		menu.add(action.getMenuItem());
+		menu.add(action);
 
 		menu = menus.get(workbench.resource.ResourceMgr.MNU_TXT_VIEW);
 		AddTabAction add = new AddTabAction(this);
 		menu.addSeparator();
-		menu.add(add.getMenuItem());
+		menu.add(add);
 		InsertTabAction insert = new InsertTabAction(this);
-		menu.add(insert.getMenuItem());
+		menu.add(insert);
 
 		RemoveTabAction rem = new RemoveTabAction(this);
-		menu.add(rem.getMenuItem());
+		menu.add(rem);
 		menu.addSeparator();
 		ViewLineNumbers v = new ViewLineNumbers();
 		v.addToMenu(menu);
@@ -1727,7 +1728,7 @@ public class MainWindow
 
 				if (a.getIndex() > anAction.getIndex())
 				{
-					view.insert(anAction.getMenuItem(), k);
+					view.insert(anAction, k);
 					inserted = k;
 					break;
 				}
@@ -1742,7 +1743,7 @@ public class MainWindow
 					if (!(view.getItem(count -1).getAction() instanceof SelectTabAction))
 					view.addSeparator();
 
-					view.add(anAction.getMenuItem());
+					view.add(anAction);
 				}
 				else if (lastAction != null && lastAction.getIndex() != anAction.getIndex())
 				{
@@ -1750,7 +1751,7 @@ public class MainWindow
 					// insert the new one right behind the last one.
 					// (there might be other items in the view menu!)
 
-					view.insert(anAction.getMenuItem(), lastActionIndex + 1);
+					view.insert(anAction, lastActionIndex + 1);
 				}
 			}
 			else

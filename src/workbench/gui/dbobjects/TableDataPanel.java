@@ -56,7 +56,6 @@ import workbench.util.SqlUtil;
 import workbench.util.WbThread;
 import workbench.interfaces.JobErrorHandler;
 import java.awt.Cursor;
-import java.awt.EventQueue;
 import java.beans.PropertyChangeListener;
 import java.sql.Savepoint;
 import java.util.ArrayList;
@@ -71,7 +70,6 @@ import workbench.util.WbWorkspace;
 /**
  *
  * @author  support@sql-workbench.net
- *
  */
 public class TableDataPanel
   extends JPanel
@@ -335,11 +333,18 @@ public class TableDataPanel
 		if (this.dbConnection == null) return -1;
 		if (this.isRetrieving()) return -1;
 
-		this.rowCountLabel.setText("");
-		this.rowCountLabel.setIcon(this.getLoadingIndicator());
+		//EventQueue.invokeLater(new Runnable() 
+		WbSwingUtilities.invoke(new Runnable() 
+		{
+			public void run()
+			{
+				rowCountLabel.setText("");
+				rowCountLabel.setIcon(getLoadingIndicator());
 
-		this.reloadAction.setEnabled(false);
-		this.dataDisplay.setStatusMessage(ResourceMgr.getString("MsgCalculatingRowCount"));
+				reloadAction.setEnabled(false);
+				dataDisplay.setStatusMessage(ResourceMgr.getString("MsgCalculatingRowCount"));
+			}
+		});
 		
 		String sql = this.buildSqlForTable(true);
 		if (sql == null) return -1;
@@ -366,32 +371,40 @@ public class TableDataPanel
 			this.rowCountLabel.setText(Long.toString(rowCount));
 			this.rowCountLabel.setToolTipText(null);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
+			WbSwingUtilities.showDefaultCursor(this);
 			rowCount = -1;
 			error = true;
-			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression() + ": " + ExceptionUtil.getDisplay(e), e);
+			final String msg = ExceptionUtil.getDisplay(e);
+			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression(), e);
 			if (rowCountCancel)
 			{
-				this.rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
-				this.rowCountLabel.setToolTipText(null);
+				WbSwingUtilities.setLabel(rowCountLabel, ResourceMgr.getString("LblNotAvailable"), null);
 			}
 			else
 			{
-				this.rowCountLabel.setText(ResourceMgr.getString("TxtError"));
-				this.rowCountLabel.setToolTipText(ExceptionUtil.getDisplay(e));
+				WbSwingUtilities.setLabel(rowCountLabel, ResourceMgr.getString("TxtError"), msg);
 			}
 			String title = ResourceMgr.getString("TxtErrorRowCount");
-			WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), title, ExceptionUtil.getDisplay(e));
+			WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), title, msg);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, rowCountRetrieveStmt);
 			this.rowCountCancel = false;
-			this.dataDisplay.setStatusMessage("");
-			this.clearLoadingImage();
-			this.reloadAction.setEnabled(true);
-			rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountButton"));
+			
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					dataDisplay.setStatusMessage("");
+					clearLoadingImage();
+					reloadAction.setEnabled(true);
+					rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountButton"));
+				}
+			});
+			
 			if (error)
 			{
 				rollbackIfNeeded();
@@ -583,7 +596,15 @@ public class TableDataPanel
 
 		try
 		{
-			dataDisplay.setStatusMessage(ResourceMgr.getString("LblLoadingProgress"));
+			WbSwingUtilities.showWaitCursor(this);
+			WbSwingUtilities.invoke(new Runnable() 
+			{
+				public void run()
+				{
+					dataDisplay.setStatusMessage(ResourceMgr.getString("LblLoadingProgress"));
+				}
+			});
+			
 			
 			setSavepoint();
 
@@ -594,21 +615,28 @@ public class TableDataPanel
 			// By directly setting the update table, we avoid 
 			// another round-trip to the database to check the table from the
 			// passed SQL statement.
-			dataDisplay.setUpdateTableToBeUsed(this.table);
-			dataDisplay.getSelectKeysAction().setEnabled(true);
-			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
-			dataDisplay.setPrintHeader(header);
-			dataDisplay.showlastExecutionTime();
-			
-			if (this.lastSort != null)
+			WbSwingUtilities.invoke(new Runnable() 
 			{
-				dataDisplay.setSortDefinition(lastSort);
-			}
+				public void run()
+				{
+					dataDisplay.setUpdateTableToBeUsed(table);
+					dataDisplay.getSelectKeysAction().setEnabled(true);
+					String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
+					dataDisplay.setPrintHeader(header);
+					dataDisplay.showlastExecutionTime();
+
+					if (lastSort != null)
+					{
+						dataDisplay.setSortDefinition(lastSort);
+					}
+				}
+			});
 		}
 		catch (Throwable e)
 		{
+			WbSwingUtilities.showDefaultCursor(this);
 			error = true;
-			final String msg;
+			String msg = null;
 			
 			if (e instanceof OutOfMemoryError)
 			{
@@ -622,21 +650,22 @@ public class TableDataPanel
 			}
 
 			LogMgr.logError("TableDataPanel.doRetrieve()", "Error retrieving table data", e);
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					WbSwingUtilities.showErrorMessage(TableDataPanel.this, msg);
-				}
-			});
+			WbSwingUtilities.showErrorMessage(this, msg);
 		}
 		finally
 		{
-			dataDisplay.clearStatusMessage();
-			cancelRetrieve.setEnabled(false);
-			reloadAction.setEnabled(true);
-			this.retrieveEnd();
 			WbSwingUtilities.showDefaultCursor(this);
+			
+			WbSwingUtilities.invoke(new Runnable() 
+			{
+				public void run()
+				{
+					dataDisplay.clearStatusMessage();
+					cancelRetrieve.setEnabled(false);
+					reloadAction.setEnabled(true);
+				}
+			});
+			this.retrieveEnd();
 			if (error) 
 			{
 				rollbackIfNeeded();
@@ -649,13 +678,7 @@ public class TableDataPanel
 		
 		if (!error && Settings.getInstance().getSelectDataPanelAfterRetrieve())
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					dataDisplay.getTable().requestFocus();
-				}
-			});
+			WbSwingUtilities.requestFocus(dataDisplay.getTable());
 		}
 	}
 

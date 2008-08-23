@@ -615,7 +615,7 @@ public class TableListPanel
 		});
 	}
 
-	private void resetCurrentPanel()
+	protected void resetCurrentPanel()
 	{
 		int index = this.displayTab.getSelectedIndex();
 		switch (index)
@@ -755,7 +755,8 @@ public class TableListPanel
 		this.tableInfoLabel.setText(info);
 		
 	}
-	private void setFocusToTableList()
+	
+	protected void setFocusToTableList()
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -830,16 +831,10 @@ public class TableListPanel
 		catch (Throwable e)
 		{
 			LogMgr.logError("TableListPanel.retrieve()", "Error retrieving table list", e);
-			final String msg = ExceptionUtil.getDisplay(e);
+			String msg = ExceptionUtil.getDisplay(e);
 			invalidateData();
 			setDirty(true);
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					WbSwingUtilities.showErrorMessage(TableListPanel.this, msg);
-				}
-			});
+			WbSwingUtilities.showErrorMessage(this, msg);
 		}
 		finally
 		{
@@ -851,7 +846,7 @@ public class TableListPanel
 	/**
 	 *	Starts the retrieval of the tables in a background thread
 	 */
-	private void startRetrieve(final boolean setFocus)
+	protected void startRetrieve(final boolean setFocus)
 	{
 		if (dbConnection == null) 
 		{
@@ -1261,7 +1256,6 @@ public class TableListPanel
 	private void retrieveTableDefinition()
 		throws SQLException
 	{
-
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
@@ -1296,15 +1290,22 @@ public class TableListPanel
 		this.showPopupMessagePanel(ResourceMgr.getString("MsgRetrieving"));
 	}
 
-	private void showPopupMessagePanel(String aMsg)
+	protected void showPopupMessagePanel(final String aMsg)
 	{
 		if (this.infoWindow != null)
 		{
-			this.infoLabel.setText(aMsg);
-			this.infoWindow.invalidate();
 			Thread.yield();
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					infoLabel.setText(aMsg);
+					infoWindow.invalidate();
+				}
+			});
 			return;
 		}
+		
 		JPanel p = new JPanel();
 		p.setBorder(WbSwingUtilities.getBevelBorderRaised());
 		p.setLayout(new BorderLayout());
@@ -1319,32 +1320,36 @@ public class TableListPanel
 		this.infoWindow.setUndecorated(true);
 		this.infoWindow.setSize(260,50);
 		WbSwingUtilities.center(this.infoWindow, f);
-		WbThread t = new WbThread("Info display")
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
 				infoWindow.setVisible(true);
 			}
-		};
-		t.start();
-		Thread.yield();
+		});
 	}
 
 	private void closeInfoWindow()
 	{
 		if (this.infoWindow != null)
 		{
-			this.infoLabel = null;
-			this.infoWindow.getOwner().setEnabled(true);
-			this.infoWindow.setVisible(false);
-			this.infoWindow.dispose();
-			this.infoWindow = null;
+			EventQueue.invokeLater(new Runnable() 
+			{
+				public void run()
+				{
+					infoLabel = null;
+					infoWindow.getOwner().setEnabled(true);
+					infoWindow.setVisible(false);
+					infoWindow.dispose();
+					infoWindow = null;
+				}
+			});
 		}
 	}
 
 	protected Thread panelRetrieveThread;
 
-	private void startCancelThread()
+	protected void startCancelThread()
 	{
 		Thread t = new WbThread("TableListPanel Cancel")
 		{
@@ -1471,10 +1476,10 @@ public class TableListPanel
 			{
 				try { this.dbConnection.commit(); } catch (Throwable th) {}
 			}
+			WbSwingUtilities.showDefaultCursor(this);
 			this.setBusy(false);
 			this.repaint();
 			closeInfoWindow();
-			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
 
