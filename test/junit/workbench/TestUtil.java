@@ -232,6 +232,8 @@ public class TestUtil
 		ArgumentParser parser = new AppArguments();
 		parser.parse("-url='jdbc:h2:" + db.getAbsolutePath() + "' -user=sa -driver=org.h2.Driver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
+		prof.setName(db.getName());
+		ConnectionMgr.getInstance().addProfile(prof);
 		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, id);
 		return con;
 	}

@@ -30,7 +30,7 @@ import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.*;
-import workbench.resource.Settings;
+import workbench.resource.GuiSettings;
 
 /**
  * @author  support@sql-workbench.net
@@ -44,10 +44,10 @@ public class BlobColumnRenderer
 	private WbTable currentTable;
 	private int currentRow;
 	private int currentColumn;
-	private Color alternateColor = Settings.getInstance().getAlternateRowColor();
-	private Color nullColor = Settings.getInstance().getNullColor();
+	private Color alternateColor = GuiSettings.getAlternateRowColor();
+	private Color nullColor = GuiSettings.getNullColor();
 	
-	private boolean useAlternatingColors = Settings.getInstance().getUseAlternateRowColor();
+	private boolean useAlternatingColors = GuiSettings.getUseAlternateRowColor();
 	
 	public BlobColumnRenderer()
 	{

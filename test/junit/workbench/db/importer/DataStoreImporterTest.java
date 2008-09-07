@@ -64,7 +64,7 @@ public class DataStoreImporterTest
 			TextImportOptions to = new DefaultTextImportOptions("\t", "\"");
 			ImportOptions o = new DefaultImportOptions();
 			
-			importer.setImportOptions(f,ProducerFactory.IMPORT_TEXT, o, to, null);
+			importer.setImportOptions(f,ProducerFactory.ImportType.Text, o, to, null);
 			importer.startImport();
 			assertEquals("Wrong number of rows imported", 3, ds.getRowCount());
 			

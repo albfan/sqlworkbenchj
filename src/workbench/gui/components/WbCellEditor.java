@@ -12,9 +12,7 @@
 package workbench.gui.components;
 
 import java.awt.Component;
-import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -22,7 +20,6 @@ import java.awt.event.MouseListener;
 import java.util.Collections;
 import java.util.EventObject;
 import java.util.Set;
-import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
@@ -36,7 +33,7 @@ import workbench.gui.WbSwingUtilities;
 /**
  * 
  * @author support@sql-workbench.net  
- */ 
+ */
 public class WbCellEditor
 	extends AbstractCellEditor
 	implements TableCellEditor, MouseListener
@@ -44,12 +41,12 @@ public class WbCellEditor
 	private TextAreaEditor editor;
 	private WbTable parentTable;
 	private JScrollPane scroll;
-
+	
 	public WbCellEditor(WbTable parent)
 	{
 		parentTable = parent;
 		editor = new TextAreaEditor();
-    setDefaultCopyPasteKeys(editor);
+		setDefaultCopyPasteKeys(editor);
 		setFont(parent.getFont());
 		scroll = new TextAreaScrollPane(editor);
 		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -84,6 +81,26 @@ public class WbCellEditor
 		im.put(ksnew, cmd);
 	}
 
+	@Override
+	public void cancelCellEditing()
+	{
+		super.cancelCellEditing();
+		// For some reason Swing resets the row height for all rows when
+		// stopping the editing. If automatic
+		parentTable.adjustRowHeight();
+	}
+
+	@Override
+	public boolean stopCellEditing()
+	{
+		boolean result = super.stopCellEditing();
+		// For some reason Swing resets the row height for all rows when
+		// stopping the editing. If automatic
+		parentTable.adjustRowHeight();
+		return result;
+	}
+
+
 	public void setFont(Font aFont)
 	{
 		this.editor.setFont(aFont);
@@ -104,24 +121,15 @@ public class WbCellEditor
 		boolean result = true;
 		if (anEvent instanceof MouseEvent)
 		{
-			result = ((MouseEvent)anEvent).getClickCount() >= 2;
+			result = ((MouseEvent) anEvent).getClickCount() >= 2;
 		}
-		if (result)
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					editor.requestFocus();
-				}
-			});
-		}
+		if (result) WbSwingUtilities.requestFocus(editor);
 		return result;
 	}
 
 	public Component getTableCellEditorComponent(JTable table, Object value,
-				boolean isSelected,
-				int row, int column)
+		boolean isSelected,
+		int row, int column)
 	{
 		editor.setText((value != null) ? value.toString() : "");
 		return scroll;
@@ -132,7 +140,10 @@ public class WbCellEditor
 		return true;
 	}
 
-	public boolean isManagingFocus() { return false; }
+	public boolean isManagingFocus()
+	{
+		return false;
+	}
 
 	public void mouseClicked(MouseEvent evt)
 	{
@@ -158,6 +169,7 @@ public class WbCellEditor
 	{
 	}
 
+	
 	class TextAreaEditor
 		extends JTextArea
 	{
@@ -177,63 +189,87 @@ public class WbCellEditor
 				this.getInputMap().put(WbSwingUtilities.CTRL_TAB, tabAction);
 			}
 
+			// Remove the default action for the Enter key and replace it with
+			// the "stop-editing" action which is the default for all other
+			// editors. 
 			Object enterAction = this.getInputMap().get(WbSwingUtilities.ENTER);
 
 			this.getInputMap().put(WbSwingUtilities.ENTER, "wb-stop-editing");
 
-			this.getActionMap().put("stopEditing",
-				new AbstractAction("wb-stop-editing")
-				{
-						public void actionPerformed(ActionEvent e)
-						{
-							stopCellEditing();
-						}
-				}
-			);
+//			this.getActionMap().put("stopEditing",
+//				new AbstractAction("wb-stop-editing")
+//				{
+//					public void actionPerformed(ActionEvent e)
+//					{
+//						try
+//						{
+//							ignoreSetBounds = true;
+//							System.out.println("**** ignoreSetBounds = true...");
+//							stopCellEditing();
+//						}
+//						finally
+//						{
+//							ignoreSetBounds = false;
+//						}
+//					}
+//				});
+
 			if (enterAction != null)
 			{
+				// This will map the original Action for Enter (basically: create a new line)
+				// to Alt-Enter and Ctrl-Enter
 				this.getInputMap().put(WbSwingUtilities.CTRL_ENTER, enterAction);
 				this.getInputMap().put(WbSwingUtilities.ALT_ENTER, enterAction);
 			}
 		}
-		public boolean isManagingFocus() { return false; }
+
+		@Override
+		public boolean isManagingFocus()
+		{
+			return false;
+		}
 	}
 
 	public class TextAreaScrollPane
 		extends JScrollPane
 	{
-		TextAreaEditor editor;
-
-		public TextAreaScrollPane(TextAreaEditor content)
+		TextAreaScrollPane(TextAreaEditor content)
 		{
 			super(content);
-			this.setFocusCycleRoot(false);
+			setFocusCycleRoot(false);
 			Set<? extends java.awt.AWTKeyStroke> empty = Collections.emptySet();
 			this.setFocusTraversalKeys(WHEN_FOCUSED, empty);
-			editor = content;
 		}
 
-		public boolean isManagingFocus() { return false; }
+		@Override
+		public boolean isManagingFocus()
+		{
+			return false;
+		}
 
+		@Override
 		public boolean requestFocus(boolean temp)
 		{
 			return editor.requestFocus(temp);
 		}
 
+		@Override
 		public void requestFocus()
 		{
-			this.editor.requestFocus();
+			editor.requestFocus();
 		}
 
+		@Override
 		public boolean requestFocusInWindow()
 		{
-			return this.editor.requestFocusInWindow();
+			return editor.requestFocusInWindow();
 		}
 
+		@Override
 		public boolean requestFocusInWindow(boolean temp)
 		{
-			return this.editor.requestFocusInWindow();
+			return editor.requestFocusInWindow();
 		}
-	}
 
+	}
 }

@@ -46,9 +46,66 @@
 
 	<para>
 		The parameters to specifiy the connection and the SQL script to be executed have
-		to be passed just like normally on the commandline.
+		to be passed on the commandline.
 	</para>
+
+  <!--
+	<para>
+		The following parameters are supported on the commandline:
+	</para>
+
+    <informaltable frame="all">
+      <tgroup cols="2" align="left">
+			<colspec colname="c1" colwidth="4cm" />
+			<colspec colname="c2" />
+			<thead>
+				<row>
+					<entry>Parameter</entry>
+					<entry>Description</entry>
+				</row>
+			</thead>
 	
+			<tbody valign="top">
+				<row>
+					<entry>-script</entry>
+					<entry><link linkend="scripting-scriptfile">The script(s) to be executed.</link></entry>
+				</row>
+				<row>
+					<entry>-delimiter</entry>
+					<entry><link linkend="scripting-delimiter">The delimiter to be used</link></entry>
+				</row>
+				<row>
+					<entry>-encoding</entry>
+					<entry><link linkend="scripting-encoding">The encoding to be used</link></entry>
+				</row>
+				<row>
+					<entry>-logfile</entry>
+					<entry><link linkend="scripting-logfile">The logfile to be used</link></entry>
+				</row>
+				<row>
+					<entry>-abortOnError</entry>
+					<entry><link linkend="scripting-handling-errors">What to do when an error occurs</link></entry>
+				</row>
+				<row>
+					<entry>-cleanupSuccess</entry>
+					<entry><link linkend="scripting-success">The script to be executed when no errors occurred</link></entry>
+				</row>
+				<row>
+					<entry>-cleanupError</entry>
+					<entry><link linkend="scripting-success">The script to be executed when an error occurred</link></entry>
+				</row>
+				<row>
+					<entry>-ignoreDropErrors</entry>
+					<entry><link linkend="scripting-success">If errors from DROP statements should be ignored.</link></entry>
+				</row>
+				<row>
+					<entry>-quiet</entry>
+					<entry><link linkend="scripting-success">If errors from DROP statements should be ignored.</link></entry>
+				</row>
+			</tbody>
+		</tgroup>
+	</informaltable>
+  -->
 	<section id="scripting-connecting">
 		<title>Specifying the connection</title>
 		
@@ -108,7 +165,7 @@
 		<para>
 			If you don't want to write the messages to the default logfile
 			which is defined in <filename>workbench.settings</filename>
-			an alternate logfile can be specified with <literal>-logfile=&#60;filename&#62;</literal>
+			an alternate logfile can be specified with <literal>-logfile</literal>
 		</para>
 	</section>
 	
@@ -159,7 +216,7 @@
 		<title>Specify a script to be executed on successful completion</title>
 		
 		<para>
-			The script specified with the parameter <literal>-CleanupSuccess=&#60;filename&#62;</literal>
+			The script specified with the parameter <literal>-cleanupSuccess=&#60;filename&#62;</literal>
 			is executed as the last script if either no error occurred or AbortOnError is set to false.
 		</para>
 		<para>
@@ -189,7 +246,7 @@
 		
 		<para>
 			When connecting <link linkend="commandline-connect-noprofile">without a profile</link>, 
-			you can use the switch <literal>-ignoredroperrors=[true|false]</literal> to ignore errors that are reported from <literal>DROP</literal>
+			you can use the switch <literal>-ignoreDropErrors=[true|false]</literal> to ignore errors that are reported from <literal>DROP</literal>
 			statements. This has the same effect as connecting with a profile where the 
 			<link linkend="profile-ignore-drop-error">Ignore DROP errors</link> property is enabled.
 		</para>
@@ -199,14 +256,10 @@
 		<title>Changing the connection</title>
 		
 		<para>
-			You can change the current connection inside a script using the command <literal>WbConnect</literal>.
-			You can either specify a <link linkend="commandline-connect-profile">profile name</link> or specify 
-			the connection properties <link linkend="commandline-connect-noprofile">directly</link>. The WbConnect
-			command accepts the same parameters as described in those chapters.
+			You can change the current connection inside a script using the command 
+			<link linkend="command-connect"><literal>WbConnect</literal></link>.
 		</para>
-		<para>	
-			<literal>WbConnect</literal> can only be used in batch mode.
-		</para>
+
 	</section>
 	
 	<section id="script-display">
@@ -223,7 +276,7 @@
 				If you are running <literal>SELECT</literal> statements in your script without "consuming" 
 				the data through an <link linkend="command-export"><literal>WbExport</literal></link>,
 				you can optionally display the results to the console using the parameter 
-				<literal>-displayresult=true</literal>. If this parameter is not passed or set
+				<literal>-displayResult=true</literal>. If this parameter is not passed or set
 				to false, results sets will not be visible (for a <literal>SELECT</literal> statement
 				you will simply see the message '<literal>SELECT executed successfully</literal>'.
 			</para>
@@ -248,19 +301,36 @@
 			</para>
 
 			<para>
-				To you only log a summary of the script execution (per script file), specify 
-				the parameter <literal>consolidateMessages=true</literal>. This will then display
+				To only log a summary of the script execution (per script file), specify 
+				the parameter <literal>-consolidateMessages=true</literal>. This will then display
 				the number of statements executed, the number of failed statements and the total 
 				number of rows affected (updated, deleted or inserted).
 			</para>
 			
+			<para>
+				When using <literal>-feedback=false</literal>, informational messages like the total
+				number of statements executed, or a successful connection are not logged either.
+			</para>
 		</section>
 
+		<!--
+		<section id="cmdline-parameter-quiet">
+			<title>Surpressing informational messages</title>
+			<para>
+				When running script &wb-productname; will display other informational messages, such as
+				reporting a successful connection or the total number of statements executed.
+				These messages can be surpressed with the switch <literal>-quiet</literal>.
+				This switch does not have parameter values (e.g. <literal>true, false</literal>). If the parameter
+				is present the "quiet" mode is enabled.
+			</para>
+		</section>
+		-->
+		
 		<section id="cmdline-parameter-progress">
 			<title>Controlling statement progress information</title>
 			<para>
 				Several commands (like <literal>WbExport</literal>) show progress information in the statusbar. 
-				When running in batch mode, this information is usually not shown. When you specifiy <literal>-showprogress=true</literal>
+				When running in batch mode, this information is usually not shown. When you specifiy <literal>-showProgress=true</literal>
 				these messages will also be displayed on the console.
 			</para>
 		</section>

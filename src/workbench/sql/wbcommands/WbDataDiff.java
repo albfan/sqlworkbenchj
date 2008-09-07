@@ -187,12 +187,14 @@ public class WbDataDiff
 		dataDiff = new TableDataDiff(sourceCon, targetCon);
 		dataDiff.setSqlDateLiteralType(literalType);
 		
-		deleteSync = new TableDeleteSync(targetCon, sourceCon);
-		deleteSync.setRowMonitor(rowMonitor);
 		dataDiff.setRowMonitor(rowMonitor);
+
+		if (rowMonitor != null)
+		{
+			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS_TABLE);
+		}
 		
 		CommonArgs.setProgressInterval(dataDiff, cmdLine);
-		CommonArgs.setProgressInterval(deleteSync, cmdLine);
 
 		List<String> ignoreColumns = CommonArgs.getListArgument(cmdLine, PARAM_IGNORE_COLS);
 		dataDiff.setColumnsToIgnore(ignoreColumns);
@@ -226,7 +228,12 @@ public class WbDataDiff
 					Writer deleteOut = EncodingUtil.createWriter(deleteFile, encoding, false);
 					try
 					{
+						deleteSync = new TableDeleteSync(targetCon, sourceCon);
+						CommonArgs.setProgressInterval(deleteSync, cmdLine);
+						
+						deleteSync.setRowMonitor(rowMonitor);
 						deleteSync.setOutputWriter(deleteOut);
+
 						deleteSync.setTableName(refTable, targetTable);
 						deleteSync.doSync();
 					}
@@ -243,7 +250,7 @@ public class WbDataDiff
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			result.setFailure();
 		}
-		
+
 		if (result.isSuccess() && !isCancelled)
 		{
 			String encodingParm = "-encoding='" + EncodingUtil.cleanupEncoding(encoding) + "'";
@@ -277,6 +284,11 @@ public class WbDataDiff
 				TableDependencySorter sorter = new TableDependencySorter(targetCon);
 				if (checkDependencies)
 				{
+					if (this.rowMonitor != null)
+					{
+						rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+						rowMonitor.setCurrentObject(ResourceMgr.getString("MsgDataDiffSortInsert"), -1, -1);
+					}
 					sorter.sortForInsert(mapping.targetTables);
 				}
 				
@@ -317,6 +329,11 @@ public class WbDataDiff
 				
 				if (checkDependencies)
 				{
+					if (this.rowMonitor != null)
+					{
+						rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+						rowMonitor.setCurrentObject(ResourceMgr.getString("MsgDataDiffSortDelete"), -1, -1);
+					}
 					sorter.sortForDelete(mapping.targetTables, false);
 				}
 				
@@ -352,6 +369,11 @@ public class WbDataDiff
 			{
 				FileUtil.closeQuitely(out);
 			}
+		}
+
+		if (this.rowMonitor != null)
+		{
+			this.rowMonitor.jobFinished();
 		}
 		
 		if (result.isSuccess() && !isCancelled)

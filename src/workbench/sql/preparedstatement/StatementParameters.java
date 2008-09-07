@@ -14,6 +14,7 @@ package workbench.sql.preparedstatement;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
@@ -60,6 +61,16 @@ public class StatementParameters
 		}
 	}
 
+	public StatementParameters(List<ParameterDefinition> params)
+	{
+		this.parameterCount = params.size();
+		this.parameter = new ParameterDefinition[parameterCount];
+		for (int i=0; i < params.size(); i++)
+		{
+			parameter[i] = params.get(i);
+		}
+	}
+	
 	public int getParameterType(int index)
 	{
 		return this.parameter[index].getType();

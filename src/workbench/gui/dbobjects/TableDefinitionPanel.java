@@ -229,7 +229,6 @@ public class TableDefinitionPanel
 		tableDefinition.setPrintHeader(this.currentTable.getTableName());
 		tableDefinition.setAutoCreateColumnsFromModel(true);
 		tableDefinition.setModel(model, true);
-		tableDefinition.adjustOrOptimizeColumns();
 
 		// remove the last three columns if we are not displaying a SEQUENCE
 		// these columns are "SCALE/SIZE", "PRECISION" and "POSITION"

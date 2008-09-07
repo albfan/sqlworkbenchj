@@ -622,6 +622,11 @@ public class StringUtil
 
 	public static final String[] toArray(Collection<String> strings)
 	{
+		return toArray(strings, false);
+	}
+	
+	public static final String[] toArray(Collection<String> strings, boolean toUpper)
+	{
 		if (strings == null) return null;
 		if (strings.size() == 0) return new String[0];
 
@@ -629,7 +634,7 @@ public class StringUtil
 		String[] result = new String[strings.size()];
 		for (String s : strings)
 		{
-			result[i++] = s;
+			result[i++] = (s == null ? null : (toUpper ? s.toUpperCase() : s ) );
 		}
 		return result;
 	}

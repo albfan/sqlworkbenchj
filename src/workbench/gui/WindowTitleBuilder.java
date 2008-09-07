@@ -13,8 +13,8 @@ package workbench.gui;
 
 import java.io.File;
 import workbench.db.ConnectionProfile;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
@@ -32,11 +32,11 @@ public class WindowTitleBuilder
 	{
 		final StringBuilder title = new StringBuilder(50);
 
-		boolean showProductNameAtEnd = Settings.getInstance().getShowProductNameAtEnd();
-		boolean showProfileGroup = Settings.getInstance().getShowProfileGroupInWindowTitle();
-		boolean showWorkspace = Settings.getInstance().getShowWorkspaceInWindowTitle();
-		String enclose = Settings.getInstance().getTitleGroupBracket();
-		String sep = Settings.getInstance().getTitleGroupSeparator();
+		boolean showProductNameAtEnd = GuiSettings.getShowProductNameAtEnd();
+		boolean showProfileGroup = GuiSettings.getShowProfileGroupInWindowTitle();
+		boolean showWorkspace = GuiSettings.getShowWorkspaceInWindowTitle();
+		String enclose = GuiSettings.getTitleGroupBracket();
+		String sep = GuiSettings.getTitleGroupSeparator();
 		
 		if (!showProductNameAtEnd)
 		{
@@ -78,12 +78,12 @@ public class WindowTitleBuilder
 			title.append(" ");
 		}
 
-		int showTitle = Settings.getInstance().getShowFilenameInWindowTitle();
-		if (editorFile != null && showTitle != Settings.SHOW_NO_FILENAME)
+		int showTitle = GuiSettings.getShowFilenameInWindowTitle();
+		if (editorFile != null && showTitle != GuiSettings.SHOW_NO_FILENAME)
 		{
 			
 			title.append(" - ");
-			if (showTitle == Settings.SHOW_FULL_PATH)
+			if (showTitle == GuiSettings.SHOW_FULL_PATH)
 			{
 				title.append(editorFile);
 			}

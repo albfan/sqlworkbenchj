@@ -39,6 +39,7 @@ import workbench.gui.actions.SelectionFilterAction;
 import workbench.gui.components.FlatButton;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Resettable;
+import workbench.resource.GuiSettings;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
@@ -213,6 +214,12 @@ public class TableDataPanel
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_DBEXP_REMEMBER_SORT);
 	}
 
+	public boolean isModified()
+	{
+		if (this.dataDisplay == null) return false;
+		return this.dataDisplay.isModified();
+	}
+	
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		this.rememberSort = Settings.getInstance().getRememberSortInDbExplorer();
@@ -360,7 +367,7 @@ public class TableDataPanel
 			retrieveStart();
 			rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountCancel"));
 
-			LogMgr.logDebug("TableDataPanel.showRowCount()", "Using query=\n" + sql);
+//			LogMgr.logDebug("TableDataPanel.showRowCount()", "Using query=\n" + sql);
 
 			rowCountRetrieveStmt = this.dbConnection.createStatementForQuery();
 			rs = rowCountRetrieveStmt.executeQuery(sql);
@@ -608,7 +615,7 @@ public class TableDataPanel
 			
 			setSavepoint();
 
-			LogMgr.logDebug("TableDataPanel.doRetrieve()", "Using query=\n" + sql);
+//			LogMgr.logDebug("TableDataPanel.doRetrieve()", "Using query=\n" + sql);
 
 			error = !dataDisplay.runQuery(sql, respectMaxRows);
 			
@@ -801,6 +808,11 @@ public class TableDataPanel
 
 	public void reload()
 	{
+		if (isModified() && GuiSettings.getConfirmDiscardResultSetChanges())
+		{
+			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) return;
+		}
+		
 		this.reset();
 		long rows = -1;
 		boolean ctrlPressed = this.reloadAction.ctrlPressed();

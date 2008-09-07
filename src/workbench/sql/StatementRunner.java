@@ -152,7 +152,7 @@ public class StatementRunner
 	{
 		if (mainConnection != null)
 		{
-			this.currentConnection.close();
+			this.currentConnection.disconnect();
 			this.setConnection(this.mainConnection);
 			this.mainConnection = null;
 		}
@@ -175,7 +175,7 @@ public class StatementRunner
 		}
 		else
 		{
-			this.currentConnection.close();
+			this.currentConnection.disconnect();
 		}
 		this.setConnection(newConn);
 	}

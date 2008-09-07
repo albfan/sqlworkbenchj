@@ -16,6 +16,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -30,7 +33,6 @@ import javax.swing.UIManager;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbToolbarButton;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 import workbench.resource.ShortcutManager;
 
 /**
@@ -52,11 +54,12 @@ public class WbAction
 
 	private String actionName;
 	protected JButton toolbarButton;
-	private ActionListener delegate = null;
+	private ActionListener delegate;
 	protected WbAction proxy;
 	private WbAction original;
 
 	private String iconKey;
+	private List<JMenuItem> createdItems = new LinkedList<JMenuItem>();
 
 	public WbAction()
 	{
@@ -180,7 +183,7 @@ public class WbAction
 
 	protected void initializeShortcut()
 	{
-		ShortcutManager mgr = Settings.getInstance().getShortcutManager();
+		ShortcutManager mgr = ShortcutManager.getInstance();
 		mgr.registerAction(this);
 		KeyStroke key = mgr.getCustomizedKeyStroke(this);
 		setAccelerator(key);
@@ -257,6 +260,19 @@ public class WbAction
 	public void setAccelerator(KeyStroke key)
 	{
 		putValue(Action.ACCELERATOR_KEY, key);
+		Iterator<JMenuItem> itr = this.createdItems.iterator();
+		while (itr.hasNext())
+		{
+			JMenuItem item = itr.next();
+			if (item == null)
+			{
+				itr.remove();
+			}
+			else
+			{
+				item.setAccelerator(key);
+			}
+		}
 	}
 
 	public KeyStroke getAccelerator()
@@ -298,8 +314,7 @@ public class WbAction
 
 	public void addToMenu(JMenu aMenu)
 	{
-		//aMenu.add(getMenuItem());
-		aMenu.add(this);
+		aMenu.add(getMenuItem());
 	}
 
 	public JMenuItem getMenuItem()
@@ -318,7 +333,7 @@ public class WbAction
 			{
 			}
 		}
-
+		this.createdItems.add(item);
 		return item;
 	}
 
@@ -534,8 +549,25 @@ public class WbAction
 		}
 	}
 
+	public String toString()
+	{
+		return this.getActionName() + ", " + this.getAccelerator();
+	}
+	
 	protected void setProxy(WbAction p)
 	{
 		this.proxy = p;
 	}
+
+	@Override
+	protected void finalize()
+		throws Throwable
+	{
+		createdItems.clear();
+		proxy = null;
+		delegate = null;
+		original = null;
+	}
+
+
 }

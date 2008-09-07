@@ -63,7 +63,7 @@ public class BlobInfoDialog
 
 		String encoding = Settings.getInstance().getDefaultBlobTextEncoding();
 		encodingPanel.setEncoding(encoding);
-		List<ToolDefinition> tools = Settings.getInstance().getExternalTools();
+		List<ToolDefinition> tools = Settings.getInstance().getExternalTools(true, true);
 		this.hasTools = (tools != null && tools.size() > 0);
 		this.externalViewer.setEnabled(hasTools);
 		this.externalTools.setEnabled(hasTools);

@@ -101,8 +101,10 @@ import workbench.gui.renderer.RequiredFieldHighlighter;
 import workbench.gui.renderer.RowStatusRenderer;
 import workbench.gui.sql.DwStatusBar;
 import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.ListSelectionControl;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -180,10 +182,12 @@ public class WbTable
 	private boolean selectOnRightButtonClick = false;
 	private boolean highlightRequiredFields = false;
 	private boolean useMultilineTooltip = true;
+	private boolean rowHeightWasOptimized;
 	private Color requiredColor;
 	
 	private boolean showFocusPending = false;
 	private FocusIndicator focusIndicator = null;
+	private ListSelectionControl selectionController;
 	
 	// </editor-fold>
 	
@@ -219,7 +223,7 @@ public class WbTable
 
 		super.setFont(dataFont);
 		
-		// Create a separate editor for numbers that is right alligned
+		// Create a separate editor for numbers that is right aligned
 		numberEditorTextField = new JTextField();
 		numberEditorTextField.setFont(dataFont);
 		numberEditorTextField.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -313,6 +317,26 @@ public class WbTable
 		this.getActionMap().put("wbtable-stop-editing", a);
 	}
 
+	public void setListSelectionControl(ListSelectionControl controller)
+	{
+		this.selectionController = controller;
+	}
+	
+	@Override
+	public void changeSelection(int rowIndex, int columnIndex, boolean toggle, boolean extend)
+	{
+		boolean canChange = true;
+		if (selectionController != null)
+		{
+			canChange = selectionController.canChangeSelection();
+		}
+		if (canChange)
+		{
+			super.changeSelection(rowIndex, columnIndex, toggle, extend);
+		}
+	}
+
+
 	public void showFocusBorder()
 	{
 		if (this.scrollPane == null)
@@ -368,17 +392,30 @@ public class WbTable
 		super.setFont(f);
 		adjustRowHeight();
 	}
-	
-	@SuppressWarnings("deprecation")
-	private void adjustRowHeight()
+
+	public void adjustRowHeight()
 	{
-		Graphics g = getGraphics();
+		if (rowHeightWasOptimized || GuiSettings.getAutomaticOptimalRowHeight())
+		{
+			optimizeRowHeight();
+		}
+		else
+		{
+			calculateGlobalRowHeight();
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	private void calculateGlobalRowHeight()
+	{
 		Font f = getFont();
 		if (f == null) return;
 		
-		// Depending on the stage of initialization 
+		Graphics g = getGraphics();
+
+		// Depending on the stage of initialization
 		// not all calls work the same, so we need
-		// to take care that no exceptioin gets thrown 
+		// to take care that no exceptioin gets thrown
 		// in here
 		FontMetrics fm = null;
 		if (g != null)
@@ -389,16 +426,19 @@ public class WbTable
 			}
 			catch (Throwable e)
 			{
-				 fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
+				fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
 			}
 		}
 		else
 		{
 			fm = getFontMetrics(getFont());
 		}
-		if (fm != null) setRowHeight(fm.getHeight() + 2);
+		if (fm != null)
+		{
+			setRowHeight(fm.getHeight() + 2);
+		}
 	}
-	
+
 	public void useMultilineTooltip(boolean flag)
 	{
 		this.useMultilineTooltip = flag;
@@ -533,6 +573,7 @@ public class WbTable
 	public void reset()
 	{
 		this.stopEditing();
+		this.rowHeightWasOptimized = false;
 		if (this.getModel() == EmptyTableModel.EMPTY_MODEL) return;
 		this.setModel(EmptyTableModel.EMPTY_MODEL, false);
 	}
@@ -737,7 +778,7 @@ public class WbTable
 		setRowSelectionInterval(row, row);
 		setColumnSelectionInterval(col, col);
 	}
-	
+
 	public boolean editCellAt(final int row, int column, EventObject e)
 	{
 		boolean result = super.editCellAt(row, column, e);
@@ -853,6 +894,7 @@ public class WbTable
 	public void setModel(TableModel aModel, boolean sortIt)
 	{
 		removeListeners();
+		rowHeightWasOptimized = false;
 
 		JTableHeader header = this.getTableHeader();
 		if (header != null)
@@ -881,7 +923,6 @@ public class WbTable
 		}
 
 		resetFilter();
-		adjustRowHeight();
 
 		if (aModel instanceof DataStoreTableModel)
 		{
@@ -904,6 +945,7 @@ public class WbTable
 			this.initDefaultEditors();
 		}
 		addListeners();
+		adjustRowsAndColumns();
 	}
 
 	private FilterExpression lastFilter;
@@ -920,6 +962,7 @@ public class WbTable
 		this.currentFilter = null;
 		if (this.dwModel == null) return;
 		this.dwModel.resetFilter();
+		adjustRowsAndColumns();
 	}
 
 	public FilterExpression getLastFilter() { return lastFilter; }
@@ -927,10 +970,11 @@ public class WbTable
 
 	public void applyFilter(FilterExpression filter)
 	{
-		if (this.dwModel == null) return;
-		this.lastFilter = filter;
-		this.currentFilter = filter;
-		this.dwModel.applyFilter(filter);
+		if (dwModel == null) return;
+		lastFilter = filter;
+		currentFilter = filter;
+		dwModel.applyFilter(filter);
+		adjustRowsAndColumns();
 	}
 
 	public DataStoreTableModel getDataStoreTableModel()
@@ -1036,6 +1080,7 @@ public class WbTable
 		this.initMultiLineRenderer();
 		this.initDefaultEditors();
 		this.restoreColumnSizes();
+		this.adjustRowHeight();
 
 		if (row >= 0)
 		{
@@ -1097,7 +1142,7 @@ public class WbTable
 	public void sortingFinished()
 	{
 		final Container c = (this.scrollPane == null ? this : scrollPane);
-		
+		adjustRowHeight();
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -1327,7 +1372,7 @@ public class WbTable
 			return false;
 		}
 		
-		int sizeThreshold = Settings.getInstance().getIntProperty("workbench.gui.display.multilinethreshold", 500);
+		int sizeThreshold = Settings.getInstance().getIntProperty("workbench.gui.display.multilinethreshold", 250);
 		return charLength >= sizeThreshold;
 	}
 	
@@ -1374,11 +1419,11 @@ public class WbTable
 	 * call {@link TableColumnOptimizer#optimizeAllColWidth()}
 	 * otherwise this will call {@link TableColumnOptimizer#adjustColumns(boolean)}
 	 */
-	public void adjustOrOptimizeColumns()
+	public void adjustRowsAndColumns()
 	{
 		ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(this);
-		boolean checkHeaders = Settings.getInstance().getIncludeHeaderInOptimalWidth();
-		if (Settings.getInstance().getAutomaticOptimalWidth())
+		boolean checkHeaders = GuiSettings.getIncludeHeaderInOptimalWidth();
+		if (GuiSettings.getAutomaticOptimalWidth())
 		{
 			optimizer.optimizeAllColWidth(checkHeaders);
 		}
@@ -1386,17 +1431,20 @@ public class WbTable
 		{
 			optimizer.adjustColumns(this.adjustToColumnLabel);
 		}
-		
-		if (Settings.getInstance().getAutomaticOptimalRowHeight())
-		{
-			optimizeRowHeight();
-		}
+
+		adjustRowHeight();
 	}
 
+	public boolean rowHeightWasOptimized()
+	{
+		return rowHeightWasOptimized;
+	}
+	
 	public void optimizeRowHeight()
 	{
 		RowHeightOptimizer optimizer = new RowHeightOptimizer(this);
 		optimizer.optimizeAllRows();
+		rowHeightWasOptimized = true;
 	}
 	
 	public void cancelEditing()
@@ -1409,19 +1457,38 @@ public class WbTable
 				editor.cancelCellEditing();
 			}
 		}
-		WbSwingUtilities.repaintLater(this);
 	}
 
 	public boolean stopEditing()
 	{
-		if (!this.isEditing()) return false;
-		CellEditor editor = this.getCellEditor();
-		if(editor != null)
+		boolean result = false;
+		
+		if (this.isEditing())
 		{
-			return editor.stopCellEditing();
+			CellEditor editor = this.getCellEditor();
+			if(editor != null)
+			{
+				result = editor.stopCellEditing();
+			}
 		}
-		WbSwingUtilities.repaintLater(this);
-		return false;
+		return result;
+	}
+
+	public void checkRowHeight()
+	{
+		int row = getEditingRow();
+		checkRowHeight(row);
+	}
+	
+	public void checkRowHeight(int row)
+	{
+		if (getRowCount() == 0) return;
+		int rowheight = getRowHeight(row > -1 ? row : 0);
+		int defaultheight = getRowHeight();
+		if (defaultheight != rowheight)
+		{
+			optimizeRowHeight();
+		}
 	}
 
 	public void openEditWindow()
@@ -1500,11 +1567,6 @@ public class WbTable
 		Point p = this.scrollPane.getViewport().getViewPosition();
 		int row = this.rowAtPoint(p);
 		return row;
-	}
-
-	public int getLastVisibleRow()
-	{
-		return this.getLastVisibleRow(this.getFirstVisibleRow());
 	}
 
 	public int getLastVisibleRow(int first)
@@ -2020,7 +2082,7 @@ public class WbTable
 		this.highlightRequiredFields = flag;
 		if (flag && this.requiredColor == null)
 		{
-			requiredColor = Settings.getInstance().getRequiredFieldColor();
+			requiredColor = GuiSettings.getRequiredFieldColor();
 		}
 		else if (!flag)
 		{

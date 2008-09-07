@@ -1584,7 +1584,7 @@ public class DataStore
 
 	public void sort(SortDefinition sortDef)
 	{
-		synchronized (this.data)
+		synchronized (this)
 		{
 			RowDataListSorter sorter = new RowDataListSorter(sortDef);
 			sorter.sort(this.data);
@@ -1593,7 +1593,7 @@ public class DataStore
 
 	public void sortByColumn(int col, boolean ascending)
 	{
-		synchronized (this.data)
+		synchronized (this)
 		{
 			SortDefinition sort = new SortDefinition(col, ascending);
 			RowDataListSorter sorter = new RowDataListSorter(sort);

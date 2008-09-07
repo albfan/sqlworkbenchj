@@ -25,7 +25,7 @@ public class H2ConstraintReader
            "from information_schema.columns \n" + 
            "where table_name = ? \n" + 
            "and table_schema = ? \n" +
-					 "and check_constraint is not null";
+					 "and (check_constraint is not null and check_constraint <> '')";
 	
 	public H2ConstraintReader()
 	{

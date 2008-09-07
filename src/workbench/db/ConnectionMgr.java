@@ -95,6 +95,11 @@ public class ConnectionMgr
 	{
 		return this.activeConnections.get(id);
 	}
+
+	public int getOpenCount()
+	{
+		return this.activeConnections.size();
+	}
 	
 	public WbConnection getConnection(ConnectionProfile aProfile, String anId)
 		throws ClassNotFoundException, SQLException
@@ -459,7 +464,7 @@ public class ConnectionMgr
 			}
 			else
 			{
-				conn.close();
+				conn.shutdown();
 			}
 		}
 		catch (Exception e)

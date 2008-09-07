@@ -102,7 +102,7 @@ public class TriggerDisplayPanel
 			DataStore trg = reader.getTableTriggers(table);
 			DataStoreTableModel rs = new DataStoreTableModel(trg);
 			triggers.setModel(rs, true);
-			triggers.adjustOrOptimizeColumns();
+			triggers.adjustRowsAndColumns();
 			this.triggerCatalog = table.getCatalog();
 			this.triggerSchema = table.getSchema();
 			if (triggers.getRowCount() > 0)

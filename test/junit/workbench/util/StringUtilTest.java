@@ -466,6 +466,11 @@ public class StringUtilTest
 			String[] result = StringUtil.toArray(elements);
 			assertEquals(result.length, 3);
 			assertEquals(result[1], "two");
+
+			result = StringUtil.toArray(elements, true);
+			assertEquals(result.length, 3);
+			assertEquals(result[1], "TWO");
+
 		}
 		catch (Exception e)
 		{

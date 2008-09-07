@@ -41,7 +41,7 @@ public class ImportOptionsPanel
 	private GeneralImportOptionsPanel generalOptions;
 	private TextOptionsPanel textOptions;
 	private XmlOptionsPanel xmlOptions;
-	private int currentType = -1;
+	private ProducerFactory.ImportType currentType = null;
 	
 	public ImportOptionsPanel()
 	{
@@ -92,7 +92,7 @@ public class ImportOptionsPanel
 		this.generalOptions.saveSettings();
 		this.textOptions.saveSettings();
 		this.xmlOptions.saveSettings();
-		Settings.getInstance().setProperty("workbench.import.type", Integer.toString(this.currentType));
+		Settings.getInstance().setProperty("workbench.import.type", this.currentType == null ? -1 : currentType.toInteger());
 	}
 	
 	public void restoreSettings()
@@ -101,27 +101,27 @@ public class ImportOptionsPanel
 		this.textOptions.restoreSettings();
 		this.xmlOptions.restoreSettings();
 		int type = Settings.getInstance().getIntProperty("workbench.import.type", -1);
-		this.setImportType(type);
+		this.setImportType(ProducerFactory.ImportType.valueOf(type));
 	}
 	
 	/**
 	 *	Sets the displayed options according to 
 	 *  DataExporter.EXPORT_XXXX types
 	 */
-	public void setImportType(int type)
+	public void setImportType(ProducerFactory.ImportType type)
 	{
 		switch (type)
 		{
-			case ProducerFactory.IMPORT_TEXT:
+			case Text:
 				setTypeText();
 				break;
-			case ProducerFactory.IMPORT_XML:
+			case XML:
 				setTypeXml();
 				break;
 		}
 	}
 
-	public int getImportType()
+	public ProducerFactory.ImportType getImportType()
 	{
 		return this.currentType;
 	}
@@ -129,14 +129,14 @@ public class ImportOptionsPanel
 	public void setTypeText()
 	{
 		this.card.show(this.typePanel, "text");
-		this.currentType = ProducerFactory.IMPORT_TEXT;
+		this.currentType = ProducerFactory.ImportType.Text;
 		typeSelector.setSelectedIndex(0);
 	}
 	
 	public void setTypeXml()
 	{
 		this.card.show(this.typePanel, "xml");
-		this.currentType = ProducerFactory.IMPORT_XML;
+		this.currentType = ProducerFactory.ImportType.XML;
 		typeSelector.setSelectedIndex(1);
 	}
 
@@ -170,14 +170,14 @@ public class ImportOptionsPanel
 		if (event.getSource() == this.typeSelector)
 		{
 			String item = typeSelector.getSelectedItem().toString().toLowerCase();
-			int oldType = this.currentType;
+			ProducerFactory.ImportType oldType = this.currentType;
 
 			this.card.show(this.typePanel, item);
 
 			if ("text".equals(item))
-				this.currentType = ProducerFactory.IMPORT_TEXT;
+				this.currentType = ProducerFactory.ImportType.Text;
 			else if ("xml".equals(item))
-				this.currentType = ProducerFactory.IMPORT_XML;
+				this.currentType = ProducerFactory.ImportType.XML;
 			firePropertyChange("exportType", oldType, this.currentType);
 		}
 	}

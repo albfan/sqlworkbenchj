@@ -98,7 +98,9 @@ import workbench.gui.components.WbTabbedPane;
 import workbench.gui.sql.PanelContentSender;
 import workbench.interfaces.CriteriaPanel;
 import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.ListSelectionControl;
 import workbench.interfaces.Reloadable;
+import workbench.resource.GuiSettings;
 import workbench.util.WbWorkspace;
 import workbench.util.WbProperties;
 
@@ -110,7 +112,7 @@ public class TableListPanel
 	extends JPanel
 	implements ActionListener, ChangeListener, ListSelectionListener, MouseListener,
 						 ShareableDisplay, Exporter, PropertyChangeListener,
-						 TableModelListener, DbObjectList
+						 TableModelListener, DbObjectList, ListSelectionControl
 {
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected WbConnection dbConnection;
@@ -375,6 +377,7 @@ public class TableListPanel
 				}
 			});
 		}
+		tableList.setListSelectionControl(this);
 	}
 
 	private void initIndexDropper(Reloadable indexReload)
@@ -417,6 +420,12 @@ public class TableListPanel
 		
 		DropDbObjectAction dropAction = new DropDbObjectAction("MnuTxtDropIndex", indexList, indexes.getSelectionModel(), indexReload);
 		this.indexes.addPopupAction(dropAction, true);
+	}
+
+	public boolean isModified()
+	{
+		if (this.tableData == null) return false;
+		return tableData.isModified();
 	}
 	
 	public void dispose()
@@ -786,6 +795,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
+			this.tableInfoLabel.setText(ResourceMgr.getString("MsgRetrieving"));
 			reset();
 			
 			// do not call setBusy() before reset() because
@@ -815,7 +825,7 @@ public class TableListPanel
 				{
 					tableList.setModel(model, true);
 					tableList.getExportAction().setEnabled(true);
-					tableList.adjustOrOptimizeColumns();
+					tableList.adjustRowsAndColumns();
 					updateDisplayClients();
 				}
 			});
@@ -1009,17 +1019,6 @@ public class TableListPanel
 		}
 	}
 
-	private boolean suspendTableSelection = false;
-
-	public void suspendTableSelection(boolean flag)
-	{
-		boolean wasSuspended = this.suspendTableSelection;
-		this.suspendTableSelection = flag;
-		if (wasSuspended && !this.suspendTableSelection)
-		{
-			this.updateDisplay();
-		}
-	}
 
 	/**
 	 * Invoked when the selection in the table list has changed
@@ -1027,7 +1026,8 @@ public class TableListPanel
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
-		if (e.getSource() == this.tableList.getSelectionModel() && !this.suspendTableSelection)
+
+		if (e.getSource() == this.tableList.getSelectionModel())
 		{
 			if (this.showDataMenu != null)
 			{
@@ -1037,6 +1037,27 @@ public class TableListPanel
 		}
 	}
 
+	public boolean canChangeSelection()
+	{
+		if (this.tableData == null) return true;
+		if (isModified() && GuiSettings.getConfirmDiscardResultSetChanges())
+		{
+			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) 
+			{
+				return false;
+			}
+			else
+			{
+				// for some reason the "valueIsAdjusting" flag is set to true if we wind up here
+				// and I have no idea why. 
+				// But if the change of the selection is allowed, the valueIsAdjusting flag will
+				// prevent updateDisplay() from applying the change.
+				tableList.getSelectionModel().setValueIsAdjusting(false);
+			}
+		}
+		return true;
+	}
+	
 	public void updateDisplay()
 	{
 		int count = this.tableList.getSelectedRowCount();
@@ -1550,7 +1571,7 @@ public class TableListPanel
 			DataStore ds = meta.getTableIndexInformation(getObjectTable());
 			DataStoreTableModel model = new DataStoreTableModel(ds);
 			indexes.setModel(model, true);
-			indexes.adjustOrOptimizeColumns();
+			indexes.adjustRowsAndColumns();
 			this.shouldRetrieveIndexes = false;
 		}
 		catch (Throwable th)
@@ -1573,7 +1594,7 @@ public class TableListPanel
 			DbMetadata meta = this.dbConnection.getMetadata();
 			DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(getObjectTable()));
 			exportedKeys.setModel(model, true);
-			exportedKeys.adjustOrOptimizeColumns();
+			exportedKeys.adjustRowsAndColumns();
 			this.shouldRetrieveExportedKeys = false;
 		}
 		catch (Throwable th)
@@ -1593,7 +1614,7 @@ public class TableListPanel
 			DbMetadata meta = this.dbConnection.getMetadata();
 			DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(getObjectTable(), false));
 			importedKeys.setModel(model, true);
-			importedKeys.adjustOrOptimizeColumns();
+			importedKeys.adjustRowsAndColumns();
 			this.shouldRetrieveImportedKeys = false;
 		}
 		catch (Throwable th)
@@ -1757,7 +1778,7 @@ public class TableListPanel
 				if (table instanceof WbTable)
 				{
 					WbTable t = (WbTable)table;
-					t.adjustOrOptimizeColumns();
+					t.adjustRowsAndColumns();
 				}
 				table.repaint();
 			}

@@ -27,7 +27,7 @@ public class TableDependency
 	private DependencyNode tableRoot;
 	private DbMetadata wbMetadata;
 	private ArrayList<DependencyNode> leafs;
-	private boolean directChildren = false;
+	private boolean directChildrenOnly = false;
 	private boolean readAborted = false;
 	
 	public TableDependency(WbConnection con, TableIdentifier tbl)
@@ -39,7 +39,7 @@ public class TableDependency
 
 	public void setRetrieveDirectChildrenOnly(boolean flag)
 	{
-		this.directChildren = flag;
+		this.directChildrenOnly = flag;
 	}
 
 	public DependencyNode findLeafNodeForTable(TableIdentifier table)
@@ -160,7 +160,7 @@ public class TableDependency
 				return count;
 			}
 
-			if (directChildren && level == 1) return count;
+			if (directChildrenOnly && level == 1) return count;
 			
 			List<DependencyNode> children = parent.getChildren();
 			for (DependencyNode child : children)

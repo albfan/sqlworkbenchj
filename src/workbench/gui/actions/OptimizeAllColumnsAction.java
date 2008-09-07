@@ -19,7 +19,7 @@ import javax.swing.KeyStroke;
 import workbench.gui.components.ColumnWidthOptimizer;
 
 import workbench.gui.components.WbTable;
-import workbench.resource.Settings;
+import workbench.resource.GuiSettings;
 import workbench.util.WbThread;
 
 /**
@@ -51,7 +51,7 @@ public class OptimizeAllColumnsAction
 		{ 	
 			public void run()	
 			{ 
-				optimizer.optimizeAllColWidth(shiftPressed || Settings.getInstance().getIncludeHeaderInOptimalWidth()); 
+				optimizer.optimizeAllColWidth(shiftPressed || GuiSettings.getIncludeHeaderInOptimalWidth());
 			}
 		};
 		t.start();

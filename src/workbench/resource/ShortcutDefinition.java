@@ -26,7 +26,7 @@ public class ShortcutDefinition
 	private StoreableKeyStroke defaultKey;
 	private StoreableKeyStroke alternateKey;
 	private boolean shortcutRemoved;
-	
+
 	public ShortcutDefinition()
 	{
 	}
@@ -143,7 +143,7 @@ public class ShortcutDefinition
 	
 	/**
 	 * Assign a default key for this action class.
-	 * This method is called assign so that the XMLEncoder does not consider
+	 * This method is called assign (instead of setDefaultKey) so that the XMLEncoder does not consider
 	 * reading or writing this "property" as KeyStrokes cannot be serialized 
 	 * to XML
 	 * @param aKey
@@ -210,8 +210,8 @@ public class ShortcutDefinition
 	 */
 	public void resetToDefault()
 	{
-		this.shortcutRemoved = false;
-		this.currentKey = null;
+		shortcutRemoved = false;
+		currentKey = null;
 	}
 	
 	/**
@@ -245,7 +245,7 @@ public class ShortcutDefinition
 		if (aClass == null) throw new IllegalArgumentException("ClassName cannot be null");
 		this.actionClass = aClass;
 	}
-
+	
 	public String toString()
 	{
 		StringBuilder result = new StringBuilder(50);

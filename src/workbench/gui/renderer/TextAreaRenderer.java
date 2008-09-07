@@ -43,6 +43,7 @@ public class TextAreaRenderer
 		textDisplay.setLineWrap(false);
 	}
 
+
 	public int getHorizontalAlignment()
 	{
 		return SwingConstants.LEFT;

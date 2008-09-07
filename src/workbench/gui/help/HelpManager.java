@@ -31,7 +31,7 @@ public class HelpManager
 	{
 		try
 		{
-			String pdf = Settings.getInstance().getPdfPath();
+			WbFile pdf = Settings.getInstance().getPDFManualPath();
 			if (pdf == null)
 			{
 				String defaultPdf = Settings.getInstance().getDefaultPdf().getFullPath();
@@ -48,7 +48,7 @@ public class HelpManager
 				return;
 			}
 			
-			File reader = new File(readerPath);
+			WbFile reader = new WbFile(readerPath);
 			if (!reader.exists() || !reader.canRead() || !reader.isFile())
 			{
 				String msg = ResourceMgr.getFormattedString("ErrExeNotAvail", readerPath);
@@ -56,7 +56,7 @@ public class HelpManager
 				return;
 			}
 			
-			String[] cmd = new String[] { readerPath, pdf };
+			String[] cmd = new String[] { "\"" + reader.getFullPath() + "\"", "\"" + pdf.getFullPath() + "\"" };
 			Runtime.getRuntime().exec(cmd);
 		}
 		catch (Exception ex)

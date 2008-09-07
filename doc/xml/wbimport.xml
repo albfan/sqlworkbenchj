@@ -75,6 +75,7 @@
 							</para>
 						</entry>
 					</row>
+					
 					<row>
 						<entry>-sourceDir</entry>
 						<entry>
@@ -90,6 +91,32 @@
 					</row>
 
 					<row>
+						<entry>-ignoreOwner</entry>
+						<entry>
+							<para>
+								If the file names imported with from the directory specified with
+								-sourceDir contain the owner (schema) information, this owner (schema)
+								information can be ignored using this parameter. Otherwise the files
+								might be imported into a wrong schema, or the target tables will not be found.
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-excludeFiles</entry>
+						<entry>
+							<para>
+								Using -excludeFiles, files from the source directory (when using -sourceDir)
+								can be excluded from the import. The value for this parameter is a comma
+								separated list of partial names. Each file that contains at least one of the 
+								values supplied in this parameter is ignored. <literal>-excludeFiles=back,data</literal>
+								will exclude any file that contains the value <literal>back</literal> or <literal>data</literal>
+								in it, e.g.: <literal>backup</literal>, <literal>to_back</literal>, <literal>log_data_store</literal> etc.
+							</para>
+						</entry>
+					</row>
+
+					<row>
 						<entry>-checkDependencies</entry>
 						<entry>
 							<para>
@@ -97,7 +124,11 @@
 								into tables with foreign key constraints, this switch can be used to 
 								import the files in the correct order (child tables first). When 
 								<literal>-checkDependencies=true</literal> is passed, &wb-productname; will 
-								check the foreign key dependencies for all tables.
+								check the foreign key dependencies for all tables. Note that this will
+								not check dependencies in the data. This means that e.g. the data for a self-referencing
+								table (parent/child) will not be order so that it can be imported. To import
+								self-referencing tables, the foreign key constraint should be set to "initially deferred"
+								in order to postpone evaluation of the constraint until commit time.
 							</para>
 						</entry>
 					</row>

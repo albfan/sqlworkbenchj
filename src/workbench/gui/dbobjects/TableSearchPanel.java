@@ -171,7 +171,6 @@ public class TableSearchPanel
 			DataStoreTableModel model = new DataStoreTableModel(result);
 			display.setModel(model, true);
 			display.applyHighlightExpression(searchPattern);
-			display.adjustOrOptimizeColumns();
 			display.checkCopyActions();
 
 			JScrollPane pane = new ParentWidthScrollPane(display);

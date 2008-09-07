@@ -370,6 +370,17 @@
 					</row>
 
 					<row>
+						<entry>-rowNumberColumn</entry>
+						<entry>
+							If this parameter is specified with a value, the value defines the name
+							of an additional column that will contain the rownumber. The row number will always be
+							exported as the first column. If the text file is not created with
+							a header (<literal>-header=false</literal>) a value must still be provided to enable
+							the creation of the additional column.
+						</entry>
+					</row>
+
+					<row>
 						<entry>-quoteChar</entry>
 
 						<entry>
@@ -532,19 +543,19 @@
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
-								Normally any character data written into the xml file will
-								be processed to escape XML characters (e.g. &lt; will be written as &amp;lt;).
-								If you don't want that escaping, set <literal>-usecdata=true</literal> and
+								Normally all data written into the xml file will
+								be written with escaped XML characters (e.g. &lt; will be written as &amp;lt;).
+								If you don't want that escaping, set <literal>-useCDATA=true</literal> and
 								all character data (VARCHAR, etc) will be enclosed in a CDATA section.
 							</para>
 							 <para>
-									With <literal>-cdata=true</literal> a HTML value would be written like this:
+									With <literal>-useCDATA=true</literal> a HTML value would be written like this:
 							 </para>
 							 <para>
 								<literal>&lt;![CDATA[&lt;b&gt;This is a title&lt;/b&gt;]]&gt;</literal>
 							</para>
 							<para>
-								With <literal>-cdata=false</literal> (the default) a HTML value would be written like this:</para>
+								With <literal>-useCDATA=false</literal> (the default) a HTML value would be written like this:</para>
 							<para>
 								<literal>&amp;lt;b&amp;gt;This is a title&amp;lt;/b&amp;gt;</literal>
 							</para>
@@ -576,7 +587,7 @@
 								imposed by this is quite high. Using -verboseXML=false
 								uses shorter tag names (not longer then two characters) and
 								does put more information in one line. This output is
-								a harder to read for a human but is smaller in size which
+								harder to read for a human but is smaller in size which
 								could be important for exports with large result sets.
 							</para>
 						</entry>

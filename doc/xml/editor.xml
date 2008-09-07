@@ -73,7 +73,7 @@ FROM person p, address a;</programlisting>
 		<title>Reformat SQL</title>
 		<para>When you analyze statements from e.g. a log file, they are not necessarily formatted in a way that
 			can be easily read, let alone understood. The editor of the &wb-productname; can reformat SQL statements
-			into a format that's easier to read and understand for a human beeing. This feature is often called pretty-printing.
+			into a format that's easier to read and understand for a human being. This feature is often called pretty-printing.
 			Suppose you have the following statement (pasted from a log file)
 		</para>
 				

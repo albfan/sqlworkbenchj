@@ -64,7 +64,7 @@ public class HsqlShutdownHook
 				SqlUtil.closeStatement(stmt);
 			}
 		}
-		con.close();
+		con.shutdown();
 	}
 
 	/**

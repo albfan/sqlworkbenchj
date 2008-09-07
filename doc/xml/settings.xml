@@ -54,6 +54,30 @@
   <section id="gui-settings">
     <title>GUI related settings</title>
 
+		<section id="settings-varchar-multiline-threshold">
+			<title>Controlling display of multiline values</title>
+      <para>Property: <literal>workbench.gui.display.multilinethreshold</literal></para>
+			<para>
+				&wb-productname; uses a special renderer for the contents 
+				of <literal>CLOB</literal> columns that is capable of displaying 
+				multiple lines. This multi-line renderer is usually not applied for
+				<literal>VARCHAR</literal> columns. If your database stores text 
+				in VARCHAR columns that contains line breaks, you can define a threshold
+				for the length of the column. Any column that is defined with a higher value
+				will be displayed with a multiline renderer. 
+			</para>
+			<para>
+				The default value of 250 means that a <literal>VARCHAR(250)</literal> column
+				will be displayed with the multiline renderer. A <literal>VARCHAR(210)</literal>
+				will be displayed in a single line. 
+			</para>
+			<para>
+				Using the multiline renderer has some minor drawbacks when editing the data,
+				and might be a bit slower when displaying large result sets.
+			</para>
+      <para>Default: <literal>250</literal></para>
+		</section>
+
     <section id="settings-show-acc-menu">
       <title>Showing accelerator in menu</title>
       <para>Property: <literal>workbench.gui.showmnemonics</literal></para>

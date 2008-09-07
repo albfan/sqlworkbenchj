@@ -29,6 +29,7 @@ import javax.swing.table.TableCellRenderer;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbTable;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 import workbench.storage.filter.ColumnExpression;
 import workbench.util.StringUtil;
@@ -54,11 +55,11 @@ public class ToolTipRenderer
 	protected Color unselectedForeground;
 	protected Color unselectedBackground;
 	protected Color highlightBackground;
-	protected Color filterHighlightColor = Settings.getInstance().getExpressionHighlightColor();
+	protected Color filterHighlightColor = GuiSettings.getExpressionHighlightColor();
 	
-	private Color alternateBackground = Settings.getInstance().getAlternateRowColor();
-	private boolean useAlternatingColors = Settings.getInstance().getUseAlternateRowColor();
-	private Color nullColor = Settings.getInstance().getNullColor();
+	private Color alternateBackground = GuiSettings.getAlternateRowColor();
+	private boolean useAlternatingColors = GuiSettings.getUseAlternateRowColor();
+	private Color nullColor = GuiSettings.getNullColor();
 
 	protected int maxTooltipSize = Settings.getInstance().getIntProperty("workbench.gui.renderer.maxtooltipsize", 1000);
 	protected int editingRow = -1;

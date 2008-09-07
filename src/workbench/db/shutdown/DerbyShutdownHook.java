@@ -34,7 +34,7 @@ public class DerbyShutdownHook
 	{
 		if (ConnectionMgr.getInstance().isActive(conn)) return;
 		
-		conn.close();
+		conn.shutdown();
 		
 		if (!canShutdown(conn)) return;
 		

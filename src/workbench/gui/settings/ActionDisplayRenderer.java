@@ -16,7 +16,7 @@ import java.awt.Component;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import workbench.gui.renderer.*;
-import workbench.resource.Settings;
+import workbench.resource.GuiSettings;
 
 /**
  * @author support@sql-workbench.net
@@ -31,8 +31,8 @@ public class ActionDisplayRenderer
 	public ActionDisplayRenderer()
 	{
 		super();
-		alternateBackground = Settings.getInstance().getAlternateRowColor();
-		useAlternateColors = Settings.getInstance().getUseAlternateRowColor();		
+		alternateBackground = GuiSettings.getAlternateRowColor();
+		useAlternateColors = GuiSettings.getUseAlternateRowColor();
 	}
 
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)

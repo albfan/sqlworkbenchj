@@ -85,11 +85,10 @@ public class ToolDefinitionPanel
     lblPath = new javax.swing.JLabel();
     tfPath = new StringPropertyEditor();
     selectLibButton = new FlatButton();
-    jPanel1 = new javax.swing.JPanel();
 
     setLayout(new java.awt.GridBagLayout());
 
-    lblName.setText(ResourceMgr.getString("LblLnFName"));
+    lblName.setText(ResourceMgr.getString("LblLnFName")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -110,23 +109,25 @@ public class ToolDefinitionPanel
     gridBagConstraints.insets = new java.awt.Insets(4, 3, 0, 3);
     add(tfName, gridBagConstraints);
 
-    lblPath.setText(ResourceMgr.getString("LblLnFLib"));
+    lblPath.setText(ResourceMgr.getString("LblExePath")); // NOI18N
+    lblPath.setToolTipText(ResourceMgr.getString("d_LblExePath")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 7);
     add(lblPath, gridBagConstraints);
 
     tfPath.setColumns(10);
     tfPath.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-    tfPath.setName("applicationPath"); // NOI18N
+    tfPath.setName("commandLine"); // NOI18N
     tfPath.addMouseListener(new TextComponentMouseListener());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(2, 3, 0, 3);
     add(tfPath, gridBagConstraints);
@@ -139,18 +140,9 @@ public class ToolDefinitionPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 3);
     add(selectLibButton, gridBagConstraints);
-
-    jPanel1.setDoubleBuffered(false);
-    jPanel1.setEnabled(false);
-    jPanel1.setOpaque(false);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.weighty = 1.0;
-    add(jPanel1, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -217,7 +209,6 @@ public class ToolDefinitionPanel
 	}
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  public javax.swing.JPanel jPanel1;
   public javax.swing.JLabel lblName;
   public javax.swing.JLabel lblPath;
   public javax.swing.JButton selectLibButton;

@@ -491,30 +491,39 @@ public class WbConnection
 	 *	because for certain DBMS some cleanup works needs to be done.
 	 *  And the ConnectionMgr is the only one who knows if there are more connections
 	 *  around, which might influence what needs to be cleaned up
+	 *
 	 *  (Currently this is only HSQLDB, but who knows...)
 	 */
 	public void disconnect()
 	{
 		ConnectionMgr.getInstance().disconnect(this);
-		if (this.preparedStatementPool != null)
-		{
-			this.preparedStatementPool.done();
-		}
 		fireConnectionStateChanged(PROP_CONNECTION_STATE, CONNECTION_OPEN, CONNECTION_CLOSED);
 	}
 
 	/**
 	 * This will actually close the connection to the DBMS.
-	 * 
 	 * It will also free an resources from the DbMetadata object and
 	 * shutdown the keep alive thread.
+	 *
+	 * Normally {@link #disconnect()} should be used.
+	 * 
+	 * This is only public to allow cross-package calls in the workbench.db
+	 * package (basically for the shutdown hooks)
+	 *
+	 * This will <b>not</b> notify the ConnectionMgr that this connection has been closed.
+	 * 
 	 */
-	public void close()
+	public void shutdown()
 	{
 		if (this.keepAlive != null)
 		{
 			this.keepAlive.shutdown();
 			this.keepAlive = null;
+		}
+		
+		if (this.preparedStatementPool != null)
+		{
+			this.preparedStatementPool.done();
 		}
 
 		if (this.profile != null && this.profile.getRollbackBeforeDisconnect() && this.sqlConnection != null)

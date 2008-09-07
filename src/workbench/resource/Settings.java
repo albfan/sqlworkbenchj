@@ -104,7 +104,7 @@ public class Settings
 	
 	private List<FontChangedListener> fontChangeListeners = new ArrayList<FontChangedListener>(5);
 
-	private ShortcutManager keyManager;
+//	private ShortcutManager keyManager;
 	private long fileTime;
 	
 	protected static class LazyInstanceHolder
@@ -285,13 +285,17 @@ public class Settings
 		return pdf;
 	}
 
-	public String getPdfPath()
+	/**
+	 * Returns the full path to the PDF manual
+	 * @return
+	 */
+	public WbFile getPDFManualPath()
 	{
 		WbFile pdf = getDefaultPdf();
 		
 		if (pdf.exists() && pdf.canRead())
 		{
-			return pdf.getFullPath();
+			return pdf;
 		}
 		
 		if (!pdf.exists())
@@ -301,7 +305,7 @@ public class Settings
 		
 		if (pdf.exists() && pdf.canRead())
 		{
-			return pdf.getFullPath();
+			return pdf;
 		}
 		else
 		{
@@ -385,15 +389,6 @@ public class Settings
 	}
 	// </editor-fold>
 	
-	public ShortcutManager getShortcutManager()
-	{
-		if (this.keyManager == null)
-		{
-			this.keyManager = new ShortcutManager(this.getShortcutFilename());
-		}
-		return this.keyManager;
-	}
-
 	// <editor-fold defaultstate="collapsed" desc="Settings Configuration">
 	public String getDriverConfigFilename()
 	{
@@ -419,9 +414,9 @@ public class Settings
 		return new WbFile(dir);
 	}
 	
-	private String getShortcutFilename()
+	public String getShortcutFilename()
 	{
-		return new File(getConfigDir(), "WbShortcuts.xml").getAbsolutePath();
+		return new WbFile(getConfigDir(), "WbShortcuts.xml").getFullPath();
 	}
 
 	public void setProfileStorage(String file)
@@ -454,36 +449,53 @@ public class Settings
 
 	public List<ToolDefinition> getExternalTools()
 	{
-		return getExternalTools(true);
+		return getExternalTools(true, false);
 	}
 
 	public List<ToolDefinition> getAllExternalTools()
 	{
-		return getExternalTools(false);
+		return getExternalTools(false, false);
 	}
 
-	private List<ToolDefinition> getExternalTools(boolean check)
+	public List<ToolDefinition> getExternalTools(boolean checkExists, boolean addPdfReader)
 	{
 		int numTools = getIntProperty("workbench.tools.count", 0);
 		List<ToolDefinition> result = new ArrayList<ToolDefinition>(numTools);
-		int count = 0;
+
+		boolean pdfReaderPresent = false;
+		WbFile pdfReader = null;
+		if (addPdfReader)
+		{
+			String pdfpath = getPDFReaderPath();
+			if (pdfpath != null) pdfReader = new WbFile(pdfpath);
+		}
+
 		for (int i = 0; i < numTools; i++)
 		{
 			String path = getProperty("workbench.tools." + i + ".executable", "");
 			String name = getProperty("workbench.tools." + i + ".name", path);
 
 			ToolDefinition tool = new ToolDefinition(path, name);
-			
-			if (check && tool.executableExists())
+
+			if (addPdfReader && pdfReader != null)
+			{
+				pdfReaderPresent = tool.getExecutable().equals(pdfReader);
+			}
+
+			if (checkExists && tool.executableExists())
 			{
 				result.add(tool);
-				count++;
 			}
 			else
 			{
 				result.add(tool);
-				count ++;
 			}
+		}
+
+		if (addPdfReader && !pdfReaderPresent && pdfReader != null)
+		{
+			ToolDefinition tool = new ToolDefinition(pdfReader.getFullPath(), ResourceMgr.getString("LblReaderPath"));
+			result.add(tool);
 		}
 		return result;
 	}
@@ -504,7 +516,7 @@ public class Settings
 		int count = 0;
 		for (ToolDefinition tool : tools)
 		{
-			setProperty("workbench.tools." + count + ".executable", tool.getApplicationPath());
+			setProperty("workbench.tools." + count + ".executable", tool.getCommandLine());
 			setProperty("workbench.tools." + count + ".name", tool.getName());
 			count ++;
 		}
@@ -1039,80 +1051,6 @@ public class Settings
 	
 	// </editor-fold>
 
-	// <editor-fold defaultstate="collapsed" desc="Data display">
-
-	public boolean getAllowRowHeightResizing()
-	{
-		return getBoolProperty("workbench.gui.display.rowheightresize", false);
-	}
-
-	public void setAllowRowHeightResizing(boolean flag)
-	{
-		setProperty("workbench.gui.display.rowheightresize", flag);
-	}
-	
-	public boolean getUseAlternateRowColor()
-	{
-		return getBoolProperty("workbench.gui.table.alternate.use", false);
-	}
-
-	public void setUseAlternateRowColor(boolean flag)
-	{
-		setProperty("workbench.gui.table.alternate.use", flag);
-	}
-
-	public void setNullColor(Color c)
-	{
-		setColor("workbench.gui.table.null.color", c);
-	}
-	
-	public Color getNullColor()
-	{
-		return getColor("workbench.gui.table.null.color", null);
-	}
-
-	public Color getExpressionHighlightColor()
-	{
-		return getColor("workbench.gui.table.searchhighlite.color", Color.YELLOW);
-	}
-
-	public void setExpressionHighlightColor(Color c)
-	{
-		setColor("workbench.gui.table.searchhighlite.color", c);
-	}
-	
-	public Color getAlternateRowColor()
-	{
-		Color defColor = (getUseAlternateRowColor() ? new Color(252,252,252) : null);
-		return getColor("workbench.gui.table.alternate.color", defColor);
-	}
-
-	public void setAlternateRowColor(Color c)
-	{
-		setColor("workbench.gui.table.alternate.color", c);
-	}
-
-	public void setRequiredFieldColor(Color c)
-	{
-		setColor("workbench.gui.edit.requiredfield.color", c);
-	}
-
-	public Color getRequiredFieldColor()
-	{
-		return getColor("workbench.gui.edit.requiredfield.color", new Color(255,100,100));
-	}
-
-	public void setHighlightRequiredFields(boolean flag)
-	{
-		setProperty("workbench.gui.edit.requiredfield.dohighlight", flag);
-	}
-
-	public boolean getHighlightRequiredFields()
-	{
-		return getBoolProperty("workbench.gui.edit.requiredfield.dohighlight", true);
-	}
-	// </editor-fold>
-
 	// <editor-fold defaultstate="collapsed" desc="Color Handling">
 	public Color getColor(String aColorKey)
 	{
@@ -1196,225 +1134,6 @@ public class Settings
 		this.props.setProperty("workbench.print.orientation", Integer.toString(aFormat.getOrientation()));
 	}
 
-	// </editor-fold>
-
-	// <editor-fold defaultstate="collapsed" desc="GUI Stuff">
-	public boolean getShowTabIndex()
-	{
-		return getBoolProperty(PROPERTY_SHOW_TAB_INDEX, true);
-	}
-
-	public void setShowTabIndex(boolean flag)
-	{
-		setProperty(PROPERTY_SHOW_TAB_INDEX, flag);
-	}
-	
-	public boolean getIncludeHeaderInOptimalWidth()
-	{
-		return getBoolProperty("workbench.gui.optimalwidth.includeheader", true);
-	}
-
-	public void setIncludeHeaderInOptimalWidth(boolean flag)
-	{
-		setProperty("workbench.gui.optimalwidth.includeheader", flag);
-	}
-
-	public boolean getAutomaticOptimalRowHeight()
-	{
-		return getBoolProperty("workbench.gui.optimalrowheight.automatic", false);
-	}
-
-	public void setAutomaticOptimalRowHeight(boolean flag)
-	{
-		setProperty("workbench.gui.optimalrowheight.automatic", flag);
-	}
-	
-	public boolean getAutomaticOptimalWidth()
-	{
-		return getBoolProperty("workbench.gui.optimalwidth.automatic", true);
-	}
-
-	public void setAutomaticOptimalWidth(boolean flag)
-	{
-		setProperty("workbench.gui.optimalwidth.automatic", flag);
-	}
-	
-	public boolean getUseAnimatedIcon()
-	{
-		return getBoolProperty(PROPERTY_ANIMATED_ICONS, false);
-	}
-
-	public void setUseAnimatedIcon(boolean flag)
-	{
-		this.setProperty(PROPERTY_ANIMATED_ICONS, flag);
-	}
-
-	public boolean getUseDynamicLayout()
-	{
-		return getBoolProperty("workbench.gui.dynamiclayout", true);
-	}
-
-	public void setUseDynamicLayout(boolean flag)
-	{
-		this.setProperty("workbench.gui.dynamiclayout", flag);
-	}
-
-	public boolean getShowMnemonics()
-	{
-		return getBoolProperty("workbench.gui.showmnemonics", true);
-	}
-
-	public boolean getShowSplash()
-	{
-		return getBoolProperty("workbench.gui.showsplash", false);
-	}
-
-	public int getProfileDividerLocation()
-	{
-		return getIntProperty("workbench.gui.profiles.divider", -1);
-	}
-
-	public void setProfileDividerLocation(int aValue)
-	{
-		this.props.setProperty("workbench.gui.profiles.divider", Integer.toString(aValue));
-	}
-
-	public void setMinColumnWidth(int width)
-	{
-		setProperty("workbench.gui.optimalwidth.minsize", width);
-	}
-
-	public int getMinColumnWidth()
-	{
-		return this.getIntProperty("workbench.gui.optimalwidth.minsize", 50);
-	}
-
-	public int getMaxColumnWidth()
-	{
-		return getIntProperty("workbench.gui.optimalwidth.maxsize", 850);
-	}
-
-	public void setMaxColumnWidth(int width)
-	{
-		this.setProperty("workbench.gui.optimalwidth.maxsize", width);
-	}
-
-	public int getAutRowHeightMaxLines()
-	{
-		return getIntProperty("workbench.gui.optimalrowheight.maxlines", 10);
-	}
-
-	public void setAutRowHeightMaxLines(int lines)
-	{
-		setProperty("workbench.gui.optimalrowheight.maxlines", lines);
-	}
-	
-	public void setLookAndFeelClass(String aClassname)
-	{
-		setProperty("workbench.gui.lookandfeelclass", aClassname);
-	}
-
-	public String getLookAndFeelClass()
-	{
-		return getProperty("workbench.gui.lookandfeelclass", "");
-	}
-	
-	public int getMaxMacrosInMenu()
-	{
-		return getIntProperty("workbench.gui.macro.maxmenuitems", 9);
-	}
-	
-	public static final int SHOW_NO_FILENAME = 0;
-	public static final int SHOW_FILENAME = 1;
-	public static final int SHOW_FULL_PATH = 2;
-
-	public void setShowFilenameInWindowTitle(int type)
-	{
-		switch (type)
-		{
-			case SHOW_NO_FILENAME:
-				this.setProperty("workbench.gui.display.showfilename", "none");
-				break;
-			case SHOW_FILENAME:
-				this.setProperty("workbench.gui.display.showfilename", "name");
-				break;
-			case SHOW_FULL_PATH:
-				this.setProperty("workbench.gui.display.showfilename", "path");
-				break;
-		}
-	}
-
-	public int getShowFilenameInWindowTitle()
-	{
-		String type = this.getProperty("workbench.gui.display.showfilename", "none");
-		if ("name".equalsIgnoreCase(type)) return SHOW_FILENAME;
-		if ("path".equalsIgnoreCase(type)) return SHOW_FULL_PATH;
-		return SHOW_NO_FILENAME;
-	}
-
-	public String getTitleGroupSeparator()
-	{
-		String sep = getProperty("workbench.gui.display.titlegroupsep", "/");
-		if ("XXX".equals(sep)) return "";
-		return sep;
-	}
-	
-	public void setTitleGroupSeparator(String sep)
-	{
-		if (StringUtil.isEmptyString(sep) || sep.trim().length() == 0) sep = "XXX";
-		setProperty("workbench.gui.display.titlegroupsep", sep);
-	}
-	
-	public String getTitleGroupBracket()
-	{
-		return getProperty("workbench.gui.display.titlegroupbracket", null);
-	}
-	
-	public void setTitleGroupBracket(String bracket)
-	{
-		setProperty("workbench.gui.display.titlegroupbracket", bracket);
-	}
-	
-	public void setShowWorkspaceInWindowTitle(boolean flag)
-	{
-		setProperty("workbench.gui.display.showpworkspace", flag);
-	}
-	
-	public boolean getShowWorkspaceInWindowTitle()
-	{
-		return getBoolProperty("workbench.gui.display.showpworkspace", true);
-	}
-	
-	public void setShowProfileGroupInWindowTitle(boolean flag)
-	{
-		setProperty("workbench.gui.display.showprofilegroup", flag);
-	}
-	
-	public boolean getShowProfileGroupInWindowTitle()
-	{
-		return getBoolProperty("workbench.gui.display.showprofilegroup", false);
-	}
-
-	public void setShowProductNameAtEnd(boolean flag)
-	{
-		setProperty("workbench.gui.display.name_at_end", flag);
-	}
-	
-	public boolean getShowProductNameAtEnd()
-	{
-		return getBoolProperty("workbench.gui.display.name_at_end", false);
-	}
-
-	public boolean getShowToolbar()
-	{
-		return getBoolProperty(PROPERTY_SHOW_TOOLBAR, true);
-	}
-
-	public void setShowToolbar(final boolean show)
-	{
-		setProperty(PROPERTY_SHOW_TOOLBAR, show);
-	}
-	
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Editor">
@@ -2477,7 +2196,7 @@ public class Settings
 		return this.props.getIntProperty(aProperty, defaultValue);
 	}
 
-	private void setColor(String key, Color c)
+	public void setColor(String key, Color c)
 	{
 		String value = null;
 		if (c != null)
@@ -2829,7 +2548,7 @@ public class Settings
 	public void saveSettings(boolean makeBackup)
 	{
 		if (this.props == null) return;
-		if (keyManager!= null) this.keyManager.saveSettings();
+		ShortcutManager.getInstance().saveSettings();
 		
 		if (makeBackup)
 		{

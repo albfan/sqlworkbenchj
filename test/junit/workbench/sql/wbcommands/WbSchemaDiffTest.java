@@ -16,7 +16,9 @@ import java.io.FileReader;
 import java.sql.SQLException;
 import java.sql.Statement;
 import workbench.TestUtil;
+import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+import workbench.gui.profiles.ProfileKey;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
@@ -28,8 +30,6 @@ import workbench.util.SqlUtil;
 public class WbSchemaDiffTest 
 	extends junit.framework.TestCase
 {
-	private WbConnection source;
-	private WbConnection target;
 	private TestUtil util;
 	
 	public WbSchemaDiffTest(String testName)
@@ -37,16 +37,48 @@ public class WbSchemaDiffTest
 		super(testName);
 	}
 	
-	public void tearDown()
+	public void testTreatViewAsTable()
+		throws Exception
 	{
-		try { source.disconnect(); } catch (Throwable th) {}
-		try { target.disconnect(); } catch (Throwable th) {}
+		setupDatabase();
+		Statement stmt = null;
+
+		WbConnection target = ConnectionMgr.getInstance().getConnection(new ProfileKey("target"), "manual");
+		try
+		{
+			stmt = target.createStatement();
+			stmt.executeUpdate("drop view something");
+			stmt.executeUpdate("create table v_person (person_id integer, firstname varchar(100))");
+		}
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
+			// Close the connection in order to be able to check if WbSchemaReport
+			// frees them correctly when they are opened during the compare
+			target.disconnect();
+		}
+
+		WbSchemaDiff diff = new WbSchemaDiff();
+		File output = new File(util.getBaseDir(), "view_table_test.xml");
+		output.delete();
+		StatementRunnerResult result = diff.execute("WbSchemaDiff -file='" + output.getAbsolutePath() + "' -viewAsTable=true -includeForeignKeys=false -includePrimaryKeys=false -includeIndex=false -includeSequences=false -referenceProfile=source -targetProfile=target");
+		String msg = result.getMessageBuffer().toString();
+		assertTrue(msg, result.isSuccess());
+		assertTrue("File not created", output.exists());
+
+		FileReader in = new FileReader(output);
+		String xml = FileUtil.readCharacters(in);
+		
+		String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='V_PERSON']/add-column/column-def[@name='LASTNAME'])");
+		assertEquals("Incorrect table count", "1", value);
+		assertEquals("Connections not closed", 0, ConnectionMgr.getInstance().getOpenCount());
 	}
 	
 	public void testBaseDiff()
 		throws Exception
 	{
 		setupDatabase();
+
 		WbSchemaDiff diff = new WbSchemaDiff();
 		File output = new File(util.getBaseDir(), "diffTest.xml");
 		output.delete();
@@ -94,14 +126,16 @@ public class WbSchemaDiffTest
 		{
 			fail("could not delete output file");
 		}
+		assertEquals("Connections not closed", 0, ConnectionMgr.getInstance().getOpenCount());
 	}
 
 	private void setupDatabase()
 		throws SQLException, ClassNotFoundException
 	{
 		util = new TestUtil("schemaDiffTest");
-		this.source = util.getConnection("source");
-		this.target = util.getConnection("target");
+		
+		WbConnection source = util.getConnection(new File(util.getBaseDir(), "source"), "source");
+		WbConnection target = util.getConnection(new File(util.getBaseDir(), "target"), "target");
 
 		Statement stmt = null;
 		
@@ -135,6 +169,8 @@ public class WbSchemaDiffTest
 		finally
 		{
 			SqlUtil.closeStatement(stmt);
+			source.disconnect();
+			target.disconnect();
 		}
 	}
 }

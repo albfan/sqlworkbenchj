@@ -50,16 +50,17 @@ public class ConnectionInfoPanel
 			DatabaseMetaData meta = conn.getSqlConnection().getMetaData();
 			DbMetadata wbmeta = conn.getMetadata();
 
-			content.append("<b>" + ResourceMgr.getString("LblDbProductName") + ":</b> " + meta.getDatabaseProductName() + "<br>\r\n");
-			content.append("<b>" + ResourceMgr.getString("LblDbProductInfo") + ":</b> " + meta.getDatabaseProductVersion() + "<br>\r\n");
-			content.append("<b>" + ResourceMgr.getString("LblDbProductVersion") + ":</b> " + conn.getDatabaseVersion() + "<br>\r\n");
-			content.append("<b>" + ResourceMgr.getString("LblDriverInfoName") + ":</b> " + meta.getDriverName() + "<br>\r\n");
-			content.append("<b>" + ResourceMgr.getString("LblDriverInfoClass") + ":</b> " + conn.getProfile().getDriverclass() + "<br>\r\n");
-			content.append("<b>" + ResourceMgr.getString("LblDriverInfoVersion") + ":</b> " + conn.getDriverVersion() + "<br>\r\n");
-			content.append("<b>" + ResourceMgr.getString("LblDbURL") + ":</b> " + conn.getUrl() + "<br>\r\n");
-			content.append("<b>" + ResourceMgr.getString("LblUsername") + ":</b> " + conn.getCurrentUser() + "<br>\r\n");
-			content.append("<b>" + StringUtil.capitalize(wbmeta.getSchemaTerm()) + ":</b> " + getDisplayValue(conn.getCurrentSchema()) + "<br>\r\n");
-			content.append("<b>" + StringUtil.capitalize(wbmeta.getCatalogTerm()) + ":</b> " + getDisplayValue(wbmeta.getCurrentCatalog()) + "<br>\r\n");
+			content.append("<b>" + ResourceMgr.getString("LblDbProductName") + ":</b> " + meta.getDatabaseProductName() + "<br>\n");
+			content.append("<b>" + ResourceMgr.getString("LblDbProductInfo") + ":</b> " + meta.getDatabaseProductVersion() + "<br>\n");
+			content.append("<b>" + ResourceMgr.getString("LblDbProductVersion") + ":</b> " + conn.getDatabaseVersion() + "<br>\n");
+			content.append("<b>" + ResourceMgr.getString("LblDriverInfoName") + ":</b> " + meta.getDriverName() + "<br>\n");
+			content.append("<b>" + ResourceMgr.getString("LblDriverInfoClass") + ":</b> " + conn.getProfile().getDriverclass() + "<br>\n");
+			content.append("<b>" + ResourceMgr.getString("LblDriverInfoVersion") + ":</b> " + conn.getDriverVersion() + "<br>\n");
+			content.append("<b>" + ResourceMgr.getString("LblDbURL") + ":</b> " + conn.getUrl() + "<br>\n");
+			content.append("<b>" + ResourceMgr.getString("LblUsername") + ":</b> " + conn.getCurrentUser() + "<br>\n");
+			content.append("<b>" + StringUtil.capitalize(wbmeta.getSchemaTerm()) + ":</b> " + getDisplayValue(conn.getCurrentSchema()) + "<br>\n");
+			content.append("<b>" + StringUtil.capitalize(wbmeta.getCatalogTerm()) + ":</b> " + getDisplayValue(wbmeta.getCurrentCatalog()) + "<br>\n");
+			content.append("<b>Workbench DBID:</b> " + wbmeta.getDbId() + " \n");
 			content.append("</html>");
 			infotext.setContentType("text/html");
 			infotext.setFont(Settings.getInstance().getEditorFont());

@@ -266,10 +266,11 @@ public class TableDataDiff
 			
 			if (this.monitor != null)
 			{
-				this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+				//this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 				String msg = ResourceMgr.getFormattedString("MsgDataDiffProcessUpd", this.tableToSync.getTableName());
 				this.monitor.setCurrentObject(msg, -1, -1);
 			}
+			
 			int cols = info.getColumnCount();
 			List<RowData> packetRows = new ArrayList<RowData>(chunkSize);
 			
@@ -291,11 +292,6 @@ public class TableDataDiff
 			if (packetRows.size() > 0 && !cancelExecution)
 			{
 				checkRows(packetRows, info);
-			}
-			
-			if (this.monitor != null)
-			{
-				this.monitor.jobFinished();
 			}
 		}
 		finally
@@ -344,30 +340,31 @@ public class TableDataDiff
 				Writer writerToUse = null;
 				RowDataComparer comp = new RowDataComparer(toInsert, i > -1 ? checkRows.get(i) : null);
 				comp.ignoreColumns(columnsToIgnore, ri);
-				
-				if (i > -1)
-				{
-					// Row is present, check for modifications
-					if (firstUpdate)
-					{
-						firstUpdate = false;
-						writeGenerationInfo(updateWriter);
-					}
-					writerToUse = updateWriter;
-				}
-				else
-				{
-					if (firstInsert)
-					{
-						firstInsert = false;
-						writeGenerationInfo(insertWriter);
-					}
-					writerToUse = insertWriter;
-				}
 
 				String migrateSql = comp.getMigrationSql(converter, currentRowNumber);
+				
 				if (migrateSql != null)
 				{
+					if (i > -1)
+					{
+						// Row is present, check for modifications
+						if (firstUpdate)
+						{
+							firstUpdate = false;
+							writeGenerationInfo(updateWriter);
+						}
+						writerToUse = updateWriter;
+					}
+					else
+					{
+						if (firstInsert)
+						{
+							firstInsert = false;
+							writeGenerationInfo(insertWriter);
+						}
+						writerToUse = insertWriter;
+					}
+
 					writerToUse.write(migrateSql);
 					writerToUse.write(";" + lineEnding + lineEnding);
 				}

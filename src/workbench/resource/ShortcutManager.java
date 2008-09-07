@@ -44,11 +44,19 @@ public class ShortcutManager
 	private List<WbAction> allActions = new LinkedList<WbAction>();
 	
 	private HashMap<KeyStroke, WbAction> keyDebugMap;
+
+	private boolean modified;
 	
+  private static class LazyInstanceHolder
+	{
+    static final ShortcutManager instane = new ShortcutManager(Settings.getInstance().getShortcutFilename());
+  }
+
 	@SuppressWarnings("unchecked")
-	ShortcutManager(String aFilename)
+	private ShortcutManager(String aFilename)
 	{
 		this.filename = aFilename;
+		LogMgr.logDebug("ShortcutManager", "Using file: " + filename);
 		try
 		{
 			WbPersistence reader = new WbPersistence(this.filename);
@@ -70,6 +78,11 @@ public class ShortcutManager
 		}
 	}
 
+	public synchronized static ShortcutManager getInstance()
+	{
+		return LazyInstanceHolder.instane;
+	}
+	
 	public void removeShortcut(String clazz)
 	{
 		this.assignKey(clazz, null);
@@ -193,6 +206,7 @@ public class ShortcutManager
 		ShortcutDefinition def = this.getDefinition(actionClass);
 		if (def == null) return;
 		def.resetToDefault();
+		modified = true;
 	}
 
 	public void assignKey(String actionClass, KeyStroke key)
@@ -207,6 +221,7 @@ public class ShortcutManager
 		{
 			def.assignKey(key);
 		}
+		modified = true;
 	}
 
 	public void updateActions()
@@ -216,8 +231,12 @@ public class ShortcutManager
 			if (action == null) continue;
 			String actionClass = action.getClass().getName();
 			ShortcutDefinition def = this.getDefinition(actionClass);
-			KeyStroke key = def.getActiveKeyStroke();
-			action.setAccelerator(key);
+			if (def.isCustomized())
+			{
+				KeyStroke key = def.getActiveKeyStroke();
+				action.setAccelerator(key);
+				LogMgr.logDebug("ShortcutManager.updateActions", "Updated modified action: " + action);
+			}
 		}
 	}
 
@@ -233,7 +252,14 @@ public class ShortcutManager
 	 */
 	public void saveSettings()
 	{
+		if (!modified)
+		{
+			LogMgr.logDebug("ShortcutManager.saveSettings()", "Nothing modified. Definitions will not be saved");
+		}
+		
 		// we only want to save those definitions where a different mapping is defined
+		// so we first create a copy of the current keymap, and then remove any
+		// definition that is not customized.
 		HashMap<String, ShortcutDefinition> toSave = new HashMap<String, ShortcutDefinition>(this.keyMap);
 		for (Entry<String, ShortcutDefinition> entry : keyMap.entrySet())
 		{
@@ -292,6 +318,7 @@ public class ShortcutManager
 		ShortcutDefinition def = this.keyMap.get(aClassName);
 		if (def == null) return;
 		def.assignKey(aKey);
+		modified = true;
 	}
 
 	private ShortcutDefinition getDefinition(Action anAction)
@@ -304,6 +331,5 @@ public class ShortcutManager
 		ShortcutDefinition def = this.keyMap.get(aClassname);
 		return def;
 	}
-
 
 }

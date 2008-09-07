@@ -51,8 +51,8 @@ import workbench.util.StringUtil;
 /**
  * Some helper functions to deal with Swing stuff
  *
- * @author support@sql-workbench.net  
- */ 
+ * @author support@sql-workbench.net
+ */
 
 public class WbSwingUtilities
 {
@@ -79,7 +79,7 @@ public class WbSwingUtilities
 	private static final Border createBevelBorder(int type)
 	{
 		BevelBorder b = new BevelBorder(type);
-		
+
 		Color c = Color.LIGHT_GRAY;
 		return new BevelBorder(type,
 			b.getHighlightOuterColor(),
@@ -87,7 +87,7 @@ public class WbSwingUtilities
 			b.getHighlightInnerColor(),
 			b.getShadowInnerColor());
 	}
-	
+
 	public static final void waitForEmptyQueue()
 	{
 		if (EventQueue.isDispatchThread())
@@ -124,26 +124,14 @@ public class WbSwingUtilities
 			}
 		});
 	}
-	
-//	public static final void setText(final JTextComponent comp, final String text, final String tooltip)
-//	{
-//		invoke(new Runnable()
-//		{
-//			public void run()
-//			{
-//				comp.setText(text);
-//				comp.setToolTipText(tooltip);
-//			}
-//		});
-//	}
-	
+
 	/**
 	 * Synchronously execute code on the EDT.
 	 * If the current thread is the EDT, this merely calls r.run()
 	 * otherwise EventQueue.invokeAndWait() is called with the passed runnable.
-	 * 
+	 *
 	 * Exceptions that can be thrown by EventQueue.invokeAndWait() are
-	 * caught and logged. 
+	 * caught and logged.
 	 */
 	public static final void invoke(Runnable r)
 	{
@@ -270,7 +258,7 @@ public class WbSwingUtilities
 	private static void showCursor(final Cursor cursor, final Component caller, final boolean includeParent, boolean immediate)
 	{
 		if (caller == null) return;
-		
+
 		Runnable r = new Runnable()
 		{
 			public void run()
@@ -346,7 +334,7 @@ public class WbSwingUtilities
 		{
 			caller = aCaller;
 		}
-		
+
 		JOptionPane.showMessageDialog(caller, aMessage, title, JOptionPane.ERROR_MESSAGE);
 	}
 
@@ -397,6 +385,40 @@ public class WbSwingUtilities
 	public static final int IGNORE_ALL = JOptionPane.YES_OPTION + JOptionPane.NO_OPTION + JOptionPane.CANCEL_OPTION + 1;
 	public static final int EXECUTE_ALL = JOptionPane.YES_OPTION + JOptionPane.NO_OPTION + JOptionPane.CANCEL_OPTION + 2;
 
+	public static boolean getProceedCancel(Component aCaller, String resourceKey, Object ... params)
+	{
+		String[] options = new String[]
+		{
+			ResourceMgr.getPlainString("LblProceed"), ResourceMgr.getPlainString("LblCancel")
+		};
+
+
+		String msg = ResourceMgr.getFormattedString(resourceKey, params);
+		final JOptionPane ignorePane = new JOptionPane(msg, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
+		final JDialog dialog = ignorePane.createDialog(SwingUtilities.getWindowAncestor(aCaller), ResourceMgr.TXT_PRODUCT_NAME);
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+		try
+		{
+			invoke(new Runnable()
+			{
+				public void run()
+				{
+					dialog.setResizable(false);
+					dialog.pack();
+					dialog.setVisible(true);
+				}
+			});
+		}
+		finally
+		{
+			dialog.dispose();
+		}
+		Object result = ignorePane.getValue();
+		if (result == null) return false;
+		return result.equals(options[0]);
+	}
+
 	public static int getYesNoIgnoreAll(Component aCaller, String aMessage)
 	{
 		String[] options = new String[]
@@ -409,7 +431,7 @@ public class WbSwingUtilities
 		int rvalue = -1;
 		try
 		{
-			dialog.setResizable(true);
+			dialog.setResizable(false);
 			dialog.pack();
 			dialog.setVisible(true);
 			Object result = ignorePane.getValue();
@@ -437,7 +459,6 @@ public class WbSwingUtilities
 		finally
 		{
 			dialog.dispose();
-			dialog = null;
 		}
 		return rvalue;
 	}
@@ -446,9 +467,9 @@ public class WbSwingUtilities
 	{
 		String[] options = new String[]
 		{
-			ResourceMgr.getPlainString("LblYes"), 
-			ResourceMgr.getPlainString("LblExecuteAll"), 
-			ResourceMgr.getPlainString("LblNo"), 
+			ResourceMgr.getPlainString("LblYes"),
+			ResourceMgr.getPlainString("LblExecuteAll"),
+			ResourceMgr.getPlainString("LblNo"),
 			ResourceMgr.getPlainString("LblCancel")
 		};
 		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
@@ -551,7 +572,7 @@ public class WbSwingUtilities
 			dialog.addWindowListener(w);
 		}
 
-		dialog.setResizable(true);
+		dialog.setResizable(false);
 		dialog.pack();
 		dialog.setVisible(true);
 		dialog.dispose();
@@ -567,10 +588,14 @@ public class WbSwingUtilities
 		}
 		return false;
 	}
-	public static final int DO_COMMIT = 0;
-	public static final int DO_ROLLBACK = 1;
 
-	public static int getCommitRollbackQuestion(Component aCaller, String aMessage)
+	public enum TransactionEnd
+	{
+		Commit,
+		Rollback
+	}
+	
+	public static TransactionEnd getCommitRollbackQuestion(Component aCaller, String aMessage)
 	{
 		String[] options = new String[]
 		{
@@ -589,28 +614,27 @@ public class WbSwingUtilities
 			th.printStackTrace();
 			w = 300;
 		}
+		
 		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
-		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		dialog.setSize(w + 130, dialog.getHeight());
-		dialog.setResizable(true);
-		dialog.setVisible(true);
-		dialog.dispose();
-		Object result = ignorePane.getValue();
-		if (result == null)
+		try
 		{
-			return DO_ROLLBACK;
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.setSize(w + 130, dialog.getHeight());
+			dialog.setResizable(true);
+			dialog.setVisible(true);
+			Object result = ignorePane.getValue();
+			if (result != null && result.equals(options[0]))
+			{
+				return TransactionEnd.Commit;
+			}
+			else
+			{
+				return TransactionEnd.Rollback;
+			}
 		}
-		else if (result.equals(options[0]))
+		finally
 		{
-			return DO_COMMIT;
-		}
-		else if (result.equals(options[1]))
-		{
-			return DO_ROLLBACK;
-		}
-		else
-		{
-			return DO_ROLLBACK;
+			dialog.dispose();
 		}
 	}
 
@@ -771,9 +795,8 @@ public class WbSwingUtilities
 		}
 		if (keyCode >= KeyEvent.VK_NUMPAD0 && keyCode <= KeyEvent.VK_NUMPAD9)
 		{
-			String numpad = "NumPad";
 			char c = (char) (keyCode - KeyEvent.VK_NUMPAD0 + '0');
-			return numpad + "-" + c;
+			return "NumPad-" + c;
 		}
 		return "KeyCode: 0x" + Integer.toString(keyCode, 16);
 	}

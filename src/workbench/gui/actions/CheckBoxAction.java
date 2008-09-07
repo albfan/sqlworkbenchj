@@ -16,6 +16,7 @@ import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -96,8 +97,8 @@ public class CheckBoxAction
 		}
 		this.toggleMenu.setText(text);
 		this.toggleMenu.setSelected(this.switchedOn);
-		
 	}
+
 	public void addToMenu(JMenu aMenu)
 	{
 		if (this.toggleMenu == null)
@@ -105,5 +106,14 @@ public class CheckBoxAction
 			createMenuItem();
 		}
 		aMenu.add(this.toggleMenu);
+	}
+
+	public void setAccelerator(KeyStroke key)
+	{
+		super.setAccelerator(key);
+		if (this.toggleMenu != null)
+		{
+			toggleMenu.setAccelerator(key);
+		}
 	}
 }

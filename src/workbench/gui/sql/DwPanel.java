@@ -63,6 +63,7 @@ import workbench.interfaces.DbUpdater;
 import workbench.interfaces.Interruptable;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.StatementRunner;
@@ -154,7 +155,7 @@ public class DwPanel
 		this.dataTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.dataTable.setRowSelectionAllowed(true);
 		this.dataTable.getSelectionModel().addListSelectionListener(this);
-		this.dataTable.setHighlightRequiredFields(Settings.getInstance().getHighlightRequiredFields());
+		this.dataTable.setHighlightRequiredFields(GuiSettings.getHighlightRequiredFields());
 		this.dataTable.setStatusBar(this.statusBar);
 		this.genericRowMonitor = new GenericRowMonitor(this.statusBar);
 	}
@@ -699,7 +700,6 @@ public class DwPanel
 					dataTable.reset();
 					dataTable.setAutoCreateColumnsFromModel(true);
 					dataTable.setModel(new DataStoreTableModel(newData), true);
-					dataTable.adjustOrOptimizeColumns();
 					//StringBuilder header = new StringBuilder(80);
 					//header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
 					//header.append(sql);
@@ -906,7 +906,7 @@ public class DwPanel
 		this.setLayout(new BorderLayout());
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.dataTable = new WbTable(true, true, true);
-		this.dataTable.setRowResizeAllowed(Settings.getInstance().getAllowRowHeightResizing());
+		this.dataTable.setRowResizeAllowed(GuiSettings.getAllowRowHeightResizing());
 		if (status != null)
 		{
 			this.statusBar = status;
@@ -1075,7 +1075,7 @@ public class DwPanel
 		endEdit(true);
 	}
 	
-	public void endEdit(boolean restoreData)
+	public synchronized void endEdit(boolean restoreData)
 	{
 		if (!this.editingStarted) return;
 		this.editingStarted = false;
@@ -1104,7 +1104,7 @@ public class DwPanel
 	 *  </ul>
 	 * @param restoreSelection if true the selected rows before starting the edit mode are restored
 	 */
-	public boolean startEdit(boolean restoreSelection)
+	public synchronized boolean startEdit(boolean restoreSelection)
 	{
 		if (this.readOnly) return false;
 		

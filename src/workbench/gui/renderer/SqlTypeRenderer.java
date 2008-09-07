@@ -20,7 +20,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.resource.Settings;
+import workbench.resource.GuiSettings;
 import workbench.util.SqlUtil;
 
 /**
@@ -30,8 +30,8 @@ public class SqlTypeRenderer
 	extends DefaultTableCellRenderer
 	implements WbRenderer
 {
-	private Color alternateColor = Settings.getInstance().getAlternateRowColor();
-	private boolean useAlternatingColors = Settings.getInstance().getUseAlternateRowColor();
+	private Color alternateColor = GuiSettings.getAlternateRowColor();
+	private boolean useAlternatingColors = GuiSettings.getUseAlternateRowColor();
 	private boolean isPrinting = false;
 	private Font printFont;
 	

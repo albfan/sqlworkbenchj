@@ -21,8 +21,10 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.ProcedureReader;
+import workbench.gui.preparedstatement.ParameterEditor;
 import workbench.log.LogMgr;
 import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
@@ -30,8 +32,9 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.sql.preparedstatement.ParameterDefinition;
+import workbench.sql.preparedstatement.StatementParameters;
 import workbench.storage.DataStore;
-import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -50,11 +53,15 @@ public class WbCall
 	public static final String EXEC_VERB_LONG = "EXECUTE";
 	public static final String VERB = "WBCALL";
 	private List<Integer> refCursorIndex = null;
-	
+
+	// Stores all parameters that need an input
+	private List<ParameterDefinition> inputParameters = new ArrayList<ParameterDefinition>(5);
+
 	public WbCall()
 	{
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;
@@ -70,6 +77,7 @@ public class WbCall
 	 * Converts the passed sql to an Oracle compliant JDBC call and
 	 * runs the statement.
 	 */
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException, Exception
 	{
@@ -78,9 +86,12 @@ public class WbCall
 		String cleanSql = SqlUtil.stripVerb(aSql);
 		String realSql = getSqlToPrepare(cleanSql, false);
 
+		this.inputParameters.clear();
+		
+		List<ParameterDefinition> outParameters = null;
+		
 		try
 		{
-			ArrayList<String> parameterNames = null;
 			refCursorIndex = null;
 			
 			result.addMessage(ResourceMgr.getString("MsgProcCallConverted") + " " + realSql);
@@ -98,7 +109,7 @@ public class WbCall
 					{
 						sp = currentConnection.setSavepoint();
 					}
-					parameterNames = checkParametersFromStatement(cstmt);
+					outParameters = checkParametersFromStatement(cstmt);
 					currentConnection.releaseSavepoint(sp);
 				}
 				catch (Throwable e)
@@ -116,23 +127,26 @@ public class WbCall
 			}
 			
 			// The called "procedure" could also be a function
-			if (parameterNames == null || parameterNames.size() == 0)
+			if (outParameters == null || outParameters.size() == 0)
 			{
-				// checkParametersFromDatabase will re-create the callable statement
-				// and assign it to currentStatement
-				// This is necessary to avoid having two statements open on the same
-				// connection as some jdbc drivers do not like this
 				try
 				{
 					if (currentConnection.getDbSettings().useSavePointForDDL())
 					{
 						sp = currentConnection.setSavepoint();
 					}
-					parameterNames = checkParametersFromDatabase(cleanSql);
+
+					outParameters = checkParametersFromDatabase(cleanSql);
+					
+					// checkParametersFromDatabase will re-create the callable statement
+					// and assign it to currentStatement
+					// This is necessary to avoid having two statements open on the same
+					// connection as some jdbc drivers do not like this
 					if (this.currentStatement != null)
 					{
 						cstmt = (CallableStatement)currentStatement;
 					}
+					
 					currentConnection.releaseSavepoint(sp);
 				}
 				catch (Throwable e)
@@ -143,6 +157,25 @@ public class WbCall
 				finally
 				{
 					sp = null;
+				}
+			}
+
+			if (!WbManager.getInstance().isBatchMode() && this.inputParameters.size() > 0)
+			{
+				StatementParameters input = new StatementParameters(this.inputParameters);
+				boolean ok = ParameterEditor.showParameterDialog(input);
+				if (!ok)
+				{
+					result.addMessage(ResourceMgr.getString("MsgStatementCancelled"));
+					result.setFailure();
+					return result;
+				}
+				
+				for (int i=0; i < inputParameters.size(); i++)
+				{
+					int type = inputParameters.get(i).getType();
+					Object value = inputParameters.get(i).getValue();
+					cstmt.setObject(i + 1, value, type);
 				}
 			}
 			
@@ -175,18 +208,20 @@ public class WbCall
 			}
 			
 			// Now process all single-value out parameters
-			if (parameterNames != null && parameterNames.size() >= startColumn)
+			if (outParameters != null && outParameters.size() > 0)
 			{
 				String[] cols = new String[]{"PARAMETER", "VALUE"};
 				int[] types = new int[]{Types.VARCHAR, Types.VARCHAR};
 				int[] sizes = new int[]{35, 35};
 
 				DataStore resultData = new DataStore(cols, types, sizes);
-				for (int i = startColumn; i <= parameterNames.size(); i++)
+				ParameterDefinition.sortByIndex(outParameters);
+				
+				for (ParameterDefinition def : outParameters)
 				{
-					if (refCursorIndex != null && refCursorIndex.contains(new Integer(i))) continue;
+					if (refCursorIndex != null && refCursorIndex.contains(new Integer(def.getIndex()))) continue;
 					
-					Object parmValue = cstmt.getObject(i);
+					Object parmValue = cstmt.getObject(def.getIndex());
 					if (parmValue instanceof ResultSet)
 					{
 						processResults(result, true, (ResultSet)parmValue);
@@ -194,7 +229,7 @@ public class WbCall
 					else
 					{
 						int row = resultData.addRow();
-						resultData.setValue(row, 0, parameterNames.get(i - 1));
+						resultData.setValue(row, 0, def.getParameterName());
 						resultData.setValue(row, 1, parmValue == null ? "NULL" : parmValue.toString());
 					}
 				}
@@ -216,32 +251,40 @@ public class WbCall
 		return result;
 	}
 
+	@Override
 	public void done()
 	{
 		super.done();
 		if (this.refCursorIndex != null) this.refCursorIndex.clear();
 		this.refCursorIndex = null;
+		this.inputParameters.clear();
 	}
 	
-	private ArrayList<String> checkParametersFromStatement(CallableStatement cstmt)
+	private ArrayList<ParameterDefinition> checkParametersFromStatement(CallableStatement cstmt)
 		throws SQLException
 	{
-		ArrayList<String> parameterNames = null;
+		ArrayList<ParameterDefinition> parameterNames = null;
 		
 		ParameterMetaData parmData = cstmt.getParameterMetaData();
 		if (parmData != null)
 		{
-			parameterNames = new ArrayList<String>();
+			parameterNames = new ArrayList<ParameterDefinition>();
 			int parameterCount = 0;
+			
 			for (int i = 0; i < parmData.getParameterCount(); i++)
 			{
+				int mode = parmData.getParameterMode(i + 1);
 				int type = parmData.getParameterType(i + 1);
-				if (type == ParameterMetaData.parameterModeOut || 
-						type == ParameterMetaData.parameterModeInOut)
+
+				ParameterDefinition def = new ParameterDefinition(i + 1, type);
+				inputParameters.add(def);
+
+				if (mode == ParameterMetaData.parameterModeOut || 
+						mode == ParameterMetaData.parameterModeInOut)
 				{
 					parameterCount++;
-					cstmt.registerOutParameter(parameterCount, type);
-					parameterNames.add("$" + NumberStringCache.getNumberString(i + 1));
+					cstmt.registerOutParameter(i + 1, type);
+					parameterNames.add(def);
 				}
 			}
 		}
@@ -249,7 +292,7 @@ public class WbCall
 		return parameterNames;
 	}
 
-	private ArrayList<String> checkParametersFromDatabase(String sql)
+	private ArrayList<ParameterDefinition> checkParametersFromDatabase(String sql)
 		throws SQLException
 	{
 		// Try to get the parameter information directly from the procedure definition
@@ -281,7 +324,7 @@ public class WbCall
 		}
 		
 		DbMetadata meta = this.currentConnection.getMetadata();
-		ArrayList<String> parameterNames = null;
+		ArrayList<ParameterDefinition> parameterNames = null;
 
 		DataStore params = meta.getProcedureColumns(null, meta.adjustSchemaNameCase(schema),meta.adjustObjectnameCase(procname));
 
@@ -293,16 +336,22 @@ public class WbCall
 
 		if (params.getRowCount() > 0)
 		{
-			parameterNames = new ArrayList<String>(params.getRowCount());
+			parameterNames = new ArrayList<ParameterDefinition>(params.getRowCount());
 			for (int i = 0; i < params.getRowCount(); i++)
 			{
 				int dataType = params.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, -1);
+
+				ParameterDefinition def = new ParameterDefinition(i + 1, dataType);
+				inputParameters.add(def);
+				
 				String typeName = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
 				String resultType = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
-				if (StringUtil.equalString(resultType, "OUT") || (needFuncCall && StringUtil.equalString(resultType, "RETURN")))
+
+				if (resultType != null && resultType.endsWith("OUT") || (needFuncCall && StringUtil.equalString(resultType, "RETURN")))
 				{
 					parameterCount++;
-					parameterNames.add(params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME));
+					def.setParameterName(params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME));
+					parameterNames.add(def);
 					if (isRefCursor(typeName))
 					{
 						// these parameters should not be added to the regular parameter list

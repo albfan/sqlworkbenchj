@@ -52,7 +52,7 @@ public class DbExplorerWindow
 	public DbExplorerWindow(DbExplorerPanel aPanel, String aProfileName)
 	{
 		super();
-		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		this.panel = aPanel;
 		this.addWindowListener(this);
 		this.getContentPane().add(this.panel);
@@ -170,7 +170,10 @@ public class DbExplorerWindow
 
 	public void windowClosing(WindowEvent e)
 	{
-    this.saveSettings();
+		if (panel.canCloseTab())
+		{
+			closeWindow();
+		}
 	}
 
 	public void windowDeactivated(WindowEvent e)

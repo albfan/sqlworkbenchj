@@ -13,7 +13,7 @@ package workbench.gui.settings;
 
 import javax.swing.JPanel;
 import workbench.gui.components.FlatButton;
-import workbench.gui.components.WbCheckBoxLabel;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.FileDialogUtil;
@@ -39,18 +39,19 @@ public class DataEditOptionsPanel
 	{
 		pkMapFile.setCaretPosition(0);
 		previewDml.setSelected(Settings.getInstance().getPreviewDml());
-		requiredFieldColor.setSelectedColor(Settings.getInstance().getRequiredFieldColor());
-		highlightRequired.setSelected(Settings.getInstance().getHighlightRequiredFields());
+		requiredFieldColor.setSelectedColor(GuiSettings.getRequiredFieldColor());
+		highlightRequired.setSelected(GuiSettings.getHighlightRequiredFields());
 		pkMapFile.setText(Settings.getInstance().getPKMappingFilename());
+		warnDiscard.setSelected(GuiSettings.getConfirmDiscardResultSetChanges());
 	}
 
 	public void saveSettings()
 	{
-		Settings set = Settings.getInstance();
-		set.setRequiredFieldColor(requiredFieldColor.getSelectedColor());
-		set.setHighlightRequiredFields(this.highlightRequired.isSelected());
-		set.setPreviewDml(this.previewDml.isSelected());
-		set.setPKMappingFilename(pkMapFile.getText());
+		GuiSettings.setRequiredFieldColor(requiredFieldColor.getSelectedColor());
+		GuiSettings.setHighlightRequiredFields(this.highlightRequired.isSelected());
+		GuiSettings.setConfirmDiscardResultSetChanges(warnDiscard.isSelected());
+		Settings.getInstance().setPreviewDml(this.previewDml.isSelected());
+		Settings.getInstance().setPKMappingFilename(pkMapFile.getText());
 	}
 	
 	/** This method is called from within the constructor to
@@ -62,51 +63,21 @@ public class DataEditOptionsPanel
   private void initComponents() {
     java.awt.GridBagConstraints gridBagConstraints;
 
-    pkMapFileLabel = new javax.swing.JLabel();
-    jPanel3 = new javax.swing.JPanel();
-    pkMapFile = new javax.swing.JTextField();
-    selectMapFile = new FlatButton();
     previewDml = new javax.swing.JCheckBox();
     requiredFieldColor = new workbench.gui.components.WbColorPicker();
     highlightRequired = new javax.swing.JCheckBox();
     dummyPanel = new javax.swing.JPanel();
+    warnDiscard = new javax.swing.JCheckBox();
+    jPanel1 = new javax.swing.JPanel();
+    pkMapFileLabel = new javax.swing.JLabel();
+    pkMapFile = new javax.swing.JTextField();
+    selectMapFile = new FlatButton();
+    jPanel2 = new javax.swing.JPanel();
 
     setLayout(new java.awt.GridBagLayout());
 
-    pkMapFileLabel.setText(ResourceMgr.getString("LblPKMapFile"));
-    pkMapFileLabel.setToolTipText(ResourceMgr.getDescription("LblPKMapFile"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(11, 12, 0, 0);
-    add(pkMapFileLabel, gridBagConstraints);
-
-    jPanel3.setLayout(new java.awt.BorderLayout(5, 0));
-
-    pkMapFile.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-    pkMapFile.setMaximumSize(new java.awt.Dimension(2147483647, 22));
-    pkMapFile.setMinimumSize(new java.awt.Dimension(6, 22));
-    pkMapFile.setPreferredSize(new java.awt.Dimension(72, 22));
-    jPanel3.add(pkMapFile, java.awt.BorderLayout.CENTER);
-
-    selectMapFile.setText("...");
-    selectMapFile.setMaximumSize(new java.awt.Dimension(22, 22));
-    selectMapFile.setMinimumSize(new java.awt.Dimension(22, 22));
-    selectMapFile.setPreferredSize(new java.awt.Dimension(22, 22));
-    selectMapFile.addActionListener(this);
-    jPanel3.add(selectMapFile, java.awt.BorderLayout.EAST);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 8, 0, 15);
-    add(jPanel3, gridBagConstraints);
-
-    previewDml.setText(ResourceMgr.getString("LblPreviewDml"));
-    previewDml.setToolTipText(ResourceMgr.getDescription("LblPreviewDml"));
+    previewDml.setText(ResourceMgr.getString("LblPreviewDml")); // NOI18N
+    previewDml.setToolTipText(ResourceMgr.getString("d_LblPreviewDml")); // NOI18N
     previewDml.setBorder(null);
     previewDml.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     previewDml.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -125,11 +96,11 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 25);
+    gridBagConstraints.insets = new java.awt.Insets(10, 8, 0, 25);
     add(requiredFieldColor, gridBagConstraints);
 
-    highlightRequired.setText(ResourceMgr.getString("LblHiliteRqd"));
-    highlightRequired.setToolTipText(ResourceMgr.getDescription("LblHiliteRqd"));
+    highlightRequired.setText(ResourceMgr.getString("LblHiliteRqd")); // NOI18N
+    highlightRequired.setToolTipText(ResourceMgr.getString("d_LblHiliteRqd")); // NOI18N
     highlightRequired.setBorder(null);
     highlightRequired.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     highlightRequired.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -139,14 +110,72 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(13, 12, 0, 0);
     add(highlightRequired, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     add(dummyPanel, gridBagConstraints);
+
+    warnDiscard.setText(ResourceMgr.getString("LblWarnChgResultSet")); // NOI18N
+    warnDiscard.setToolTipText(ResourceMgr.getString("d_LblWarnChgResultSet")); // NOI18N
+    warnDiscard.setBorder(null);
+    warnDiscard.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(12, 12, 0, 0);
+    add(warnDiscard, gridBagConstraints);
+
+    jPanel1.setLayout(new java.awt.GridBagLayout());
+
+    pkMapFileLabel.setText(ResourceMgr.getString("LblPKMapFile")); // NOI18N
+    pkMapFileLabel.setToolTipText(ResourceMgr.getString("d_LblPKMapFile")); // NOI18N
+    pkMapFileLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 10));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    jPanel1.add(pkMapFileLabel, gridBagConstraints);
+
+    pkMapFile.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+    pkMapFile.setMaximumSize(new java.awt.Dimension(2147483647, 22));
+    pkMapFile.setMinimumSize(new java.awt.Dimension(25, 22));
+    pkMapFile.setPreferredSize(new java.awt.Dimension(72, 22));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 0.5;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+    jPanel1.add(pkMapFile, gridBagConstraints);
+
+    selectMapFile.setText("...");
+    selectMapFile.setMaximumSize(new java.awt.Dimension(22, 22));
+    selectMapFile.setMinimumSize(new java.awt.Dimension(22, 22));
+    selectMapFile.setPreferredSize(new java.awt.Dimension(22, 22));
+    selectMapFile.addActionListener(this);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 0);
+    jPanel1.add(selectMapFile, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.weightx = 1.0;
+    jPanel1.add(jPanel2, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(15, 12, 0, 15);
+    add(jPanel1, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -167,12 +196,14 @@ public class DataEditOptionsPanel
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel dummyPanel;
   private javax.swing.JCheckBox highlightRequired;
-  private javax.swing.JPanel jPanel3;
+  private javax.swing.JPanel jPanel1;
+  private javax.swing.JPanel jPanel2;
   private javax.swing.JTextField pkMapFile;
   private javax.swing.JLabel pkMapFileLabel;
   private javax.swing.JCheckBox previewDml;
   private workbench.gui.components.WbColorPicker requiredFieldColor;
   private javax.swing.JButton selectMapFile;
+  private javax.swing.JCheckBox warnDiscard;
   // End of variables declaration//GEN-END:variables
 
 }

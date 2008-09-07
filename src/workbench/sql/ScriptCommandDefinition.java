@@ -74,5 +74,9 @@ public class ScriptCommandDefinition
 	public int getIndexInScript() { return this.indexInScript; }
 	public void setIndexInScript(int index) { this.indexInScript = index; }
 	
-	public String toString() { return this.command; }
+	public String toString() 
+	{
+		if (command == null) return "[" + textStartPosInScript + "," + textEndPosInScript + "]";
+		return this.command;
+	}
 }

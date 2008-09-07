@@ -17,8 +17,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.util.Iterator;
 import junit.framework.TestCase;
 import workbench.TestUtil;
@@ -26,7 +24,6 @@ import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-import workbench.util.WbFile;
 
 /**
  *
@@ -93,7 +90,7 @@ public class ScriptParserTest
 			int scriptSize = 0;
 			for (int i=0; i < statementCount; i++)
 			{
-				String sql = "insert into address (id, street) \nvalues \n(" + i + ", ' \u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153 Ã¶Ã¤ Ã¶Ã¤ Ã¶Ã¤ Ã¶Ã¤ ÃŸ');\n";
+				String sql = "insert into address (id, street) \nvalues \n(" + i + ", ' \u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153');\n";
 				w.write(sql);
 				scriptSize += sql.length();
 			}
@@ -106,7 +103,7 @@ public class ScriptParserTest
 			commandsInFile = 0;
 			while (parser.hasNext())
 			{
-				String sql = "insert into address (id, street) \nvalues \n(" + commandsInFile + ", ' \u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153 Ã¶Ã¤ Ã¶Ã¤ Ã¶Ã¤ Ã¶Ã¤ ÃŸ')";
+				String sql = "insert into address (id, street) \nvalues \n(" + commandsInFile + ", ' \u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153')";
 				String command = parser.getNextCommand();
 				assertEquals(sql, command.trim());
 				commandsInFile++;
@@ -358,6 +355,7 @@ public class ScriptParserTest
 			ScriptParser p = new ScriptParser(sql);
 			// Test if the automatic detection of the MS SQL delimiter works
 			p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_MS_DELIMITER);
+			p.setCheckForSingleLineCommands(false);
 			int size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);
 			//System.out.println("sql=" + p.getCommand(0));
@@ -370,12 +368,31 @@ public class ScriptParserTest
 						 " \r\n" +
 						 "select * \r\n" +
 						 "from country \r\n" +
-						 "  GO";
+						 "GO\n" +
+						 "select * \r\n" +
+						 "from country \r\n" +
+						 "GO";
+			p.setScript(sql);
+			size = p.getSize();
+			assertEquals("Wrong number of statements", 3, size);
+			assertEquals("Wrong statement returned", "SELECT id \r\nFROM person GO", p.getCommand(0));
+			assertEquals("Wrong statement returned", "select * \r\nfrom country", p.getCommand(1));
+
+			sql = "SET QUOTED_IDENTIFIER ON\nGO\nSET ANSI_NULLS ON\nGO";
 			p.setScript(sql);
 			size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);
-			assertEquals("Wrong statement returned", "SELECT id \r\nFROM person GO", p.getCommand(0));
-			assertEquals("Wrong statement returned", "select * \r\nfrom country", p.getCommand(1));
+			assertEquals("SET QUOTED_IDENTIFIER ON", p.getCommand(0));
+			assertEquals("SET ANSI_NULLS ON", p.getCommand(1));
+
+			sql = "SET QUOTED_IDENTIFIER ON\nRUN\nSET ANSI_NULLS ON\nRUN";
+			p.setScript(sql);
+			p.setAlternateDelimiter(new DelimiterDefinition("RUN", true));
+			size = p.getSize();
+			assertEquals("Wrong number of statements", 2, size);
+			assertEquals("SET QUOTED_IDENTIFIER ON", p.getCommand(0));
+			assertEquals("SET ANSI_NULLS ON", p.getCommand(1));
+
 		}
 		catch (Exception e)
 		{

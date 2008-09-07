@@ -246,7 +246,7 @@ public class DependencyNode
 		StringBuilder indent = new StringBuilder(level * 2);
 		for (int i=0; i < level; i++) indent.append("  ");
 		
-		System.out.println(indent + toString());
+		System.out.println(indent + toString() + " [@" + level + "]");
 		for (DependencyNode node : childTables)
 		{
 			node.printAll();

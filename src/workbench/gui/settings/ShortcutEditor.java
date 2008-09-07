@@ -220,7 +220,7 @@ public class ShortcutEditor
 	
 	private void createModel()
 	{
-		ShortcutManager mgr = Settings.getInstance().getShortcutManager();
+		ShortcutManager mgr = ShortcutManager.getInstance();
 		ShortcutDefinition[] keys = mgr.getDefinitions();
 		
 		String[] cols = new String[] { ResourceMgr.getString("LblKeyDefCommandCol"), 
@@ -293,7 +293,7 @@ public class ShortcutEditor
 
 	private void saveShortcuts()
 	{
-		ShortcutManager mgr = Settings.getInstance().getShortcutManager();
+		ShortcutManager mgr = ShortcutManager.getInstance();
 		int count = this.definitions.getRowCount();
 		for (int row = 0; row < count; row++)
 		{
@@ -363,7 +363,6 @@ public class ShortcutEditor
 		{
 			KeyStroke key = mapper.getKeyStroke();
 			ShortcutDisplay d = (ShortcutDisplay)this.definitions.getValue(row, 1);
-			String cls = d.getShortcut().getActionClass();
 
 			int oldrow = this.findKey(key);
 			if (oldrow > -1)

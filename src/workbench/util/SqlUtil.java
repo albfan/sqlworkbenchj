@@ -743,17 +743,6 @@ public class SqlUtil
 	}
 
 	/**
-	 * Returns true if the given JDBC type maps to the String class. This
-	 * returns fals for CLOB data.
-	 */
-	public static final boolean isStringType(int aSqlType)
-	{
-		return (aSqlType == Types.VARCHAR || 
-		        aSqlType == Types.CHAR ||
-		        aSqlType == Types.LONGVARCHAR);
-	}
-	
-	/**
 	 * Returns true if the given JDBC type indicates some kind of 
 	 * character data (including CLOBs)
 	 */
@@ -762,7 +751,12 @@ public class SqlUtil
 		return (aSqlType == Types.VARCHAR || 
 		        aSqlType == Types.CHAR ||
 		        aSqlType == Types.CLOB ||
-		        aSqlType == Types.LONGVARCHAR);
+		        aSqlType == Types.LONGVARCHAR ||
+						aSqlType == Types40.NVARCHAR ||
+						aSqlType == Types40.NCHAR ||
+						aSqlType == Types40.LONGNVARCHAR ||
+						aSqlType == Types40.NCLOB
+						);
 	}
 	
 	/**
@@ -789,13 +783,24 @@ public class SqlUtil
 
 	public static final boolean isClobType(int aSqlType)
 	{
-		return (aSqlType == Types.CLOB);
+		return (aSqlType == Types.CLOB || aSqlType == Types40.NCLOB);
 	}
 	
 	public static final boolean isClobType(int aSqlType, DbSettings dbInfo)
 	{
-		if (dbInfo == null || !dbInfo.longVarcharIsClob()) return (aSqlType == Types.CLOB);
-		return (aSqlType == Types.CLOB || aSqlType == Types.LONGVARCHAR);
+		boolean treatLongVarcharAsClob = (dbInfo == null ? false : dbInfo.longVarcharIsClob());
+		return isClobType(aSqlType, treatLongVarcharAsClob);
+	}
+	
+	public static final boolean isClobType(int aSqlType, boolean treatLongVarcharAsClob)
+	{
+		if (!treatLongVarcharAsClob) return isClobType(aSqlType);
+		
+		return (aSqlType == Types.CLOB || 
+			      aSqlType == Types40.NCLOB ||
+			      aSqlType == Types.LONGVARCHAR ||
+						aSqlType == Types40.LONGNVARCHAR
+						);
 	}
 	
 	public static final boolean isBlobType(int aSqlType)
@@ -898,20 +903,17 @@ public class SqlUtil
 			return "VARBINARY";
 		else if (aSqlType == Types.VARCHAR)
 			return "VARCHAR";
-		// The following values are JDBC 4.0 /Java6 constants
-		// but as I want to be able to compile with Java 5, I cannot
-		// reference the constant declarations from java.sql.Types 
-		else if (aSqlType == 2011) 
+		else if (aSqlType == Types40.NCLOB)
 			return "NCLOB";
-		else if (aSqlType == 2009) 
+		else if (aSqlType == Types40.SQLXML)
 			return "SQLXML";
-		else if (aSqlType == -15) 
+		else if (aSqlType == Types40.NCHAR)
 			return "NCHAR";
-		else if (aSqlType == -9) 
+		else if (aSqlType == Types40.NVARCHAR)
 			return "NVARCHAR";
-		else if (aSqlType == -16)
+		else if (aSqlType == Types40.LONGNVARCHAR)
 			return "LONGNVARCHAR";
-		else if (aSqlType == -8) 
+		else if (aSqlType == Types40.ROWID)
 			return "ROWID";
 		else
 			return "UNKNOWN";

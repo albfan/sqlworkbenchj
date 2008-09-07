@@ -33,9 +33,26 @@ import workbench.util.ValueConverter;
  */
 public class ProducerFactory
 {
-	public static final int IMPORT_TEXT = 0;
-	public static final int IMPORT_XML = 1;
-	private int importType = -1;
+	public enum ImportType {
+		Text,
+		XML;
+
+		public static ImportType valueOf(int type)
+		{
+			if (type == 0) return Text;
+			if (type == 1) return XML;
+			return null;
+		}
+
+		public int toInteger()
+		{
+			if (this == Text) return 0;
+			if (this == XML) return 1;
+			return -1;
+		}
+	};
+
+	private ImportType importType = null;
 	private TextImportOptions textOptions;
 	private XmlImportOptions xmlOptions;
 	private ImportOptions generalOptions;
@@ -96,34 +113,32 @@ public class ProducerFactory
 		importer.setMode(generalOptions.getMode());
 	}
 	
-	public void setType(int type)
+	public void setType(ImportType type)
 	{
-		if (type == IMPORT_TEXT)
+		if (type == ImportType.Text)
 			this.setImportTypeText();
-		else if (type == IMPORT_XML)
+		else if (type == ImportType.XML)
 			this.setImportTypeXml();
-		else
-			throw new IllegalArgumentException("Not a valid import type!");
 	}
 
 	public boolean isTextImport()
 	{
-		return this.importType == IMPORT_TEXT;
+		return this.importType == ImportType.Text;
 	}
 	public boolean isXmlImport()
 	{
-		return this.importType == IMPORT_XML;
+		return this.importType == ImportType.XML;
 	}
 	
 	public void setImportTypeText()
 	{
-		this.importType = IMPORT_TEXT;
+		this.importType = ImportType.Text;
 		this.producer = null;
 	}
 	
 	public void setImportTypeXml()
 	{
-		this.importType = IMPORT_XML;
+		this.importType = ImportType.XML;
 		this.producer = null;
 	}
 	
@@ -147,9 +162,9 @@ public class ProducerFactory
 	{
 		if (this.producer == null)
 		{
-			if (this.importType == IMPORT_TEXT)
+			if (this.importType == ImportType.Text)
 				createTextFileParser();
-			else if (this.importType == IMPORT_XML)
+			else if (this.importType == ImportType.XML)
 				createXmlFileParser();
 		}
 		return this.producer;

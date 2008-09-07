@@ -264,7 +264,6 @@ public class IteratingScriptParser
 		int pos;
 		boolean delimiterOnOwnLine = this.delimiter.isSingleLine();
 		String delim = this.delimiter.getDelimiter();
-		int delimLength = delim.length();
 		
 		for (pos = this.lastPos; pos < this.scriptLength; pos++)
 		{
@@ -402,7 +401,7 @@ public class IteratingScriptParser
 							{
 								startOfLine = true;
 								this.lastNewLineStart = pos + 1;
-								this.lastPos = pos + this.delimiterLength;
+								this.lastPos = lastNewLineStart;
 								this.lastCommandEnd = lastPos;
 								return c;
 							}

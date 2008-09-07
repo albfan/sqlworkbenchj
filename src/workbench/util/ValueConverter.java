@@ -176,6 +176,7 @@ public class ValueConverter
 	{
 		if (trueValues == null || falseValues == null || trueValues.size() == 0 || falseValues.size() == 0)
 		{
+			LogMgr.logWarning("ValueConverter.setBooleanLiterals()", "Ignoring call as at least one collection is empty or null");
 			this.booleanFalseValues = null;
 			this.booleanTrueValues = null;
 		}

@@ -91,7 +91,7 @@
 		  <title>Can't start a cloned connection while in manual transaction mode</title>
 		  <para>
 		    This error usually occurs in the DbExplorer if an older Microsoft JDBC Driver is used
-		    and the connection does not use autocommit mode. There are two ways to fix this problem:
+		    and the connection does not use autocommit mode. There are three ways to fix this problem:
 		    <itemizedlist>
 		      <listitem>Upgrade to a newer Microsoft driver (e.g. the one for SQL Server 2005)</listitem>
 		      <listitem>Enable autocommit in the connection profile</listitem>
@@ -126,7 +126,9 @@
 				The Microsoft JDBC Driver supports a connection property called <literal>lockTimeout</literal>.
 				It is recommended to set that to 0 (zero) (or a similar low value). If that is done, calls
 				to the driver's API will through an error if they encounter a lock rather than waiting
-				until the lock is released. The jTDS driver does not support such a property.
+				until the lock is released. The jTDS driver does not support such a property. If you are using
+				the jTDS driver, you can define a <link linkend="profile-connect-scripts">post-connect script</link> that 
+				runs <literal>SET LOCK_TIMEOUT 0</literal>.
 			</para>
 		</section>
 

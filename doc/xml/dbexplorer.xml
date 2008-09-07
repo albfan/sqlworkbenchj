@@ -82,8 +82,8 @@
 			</blockquote>
 		</simplesect>
 
-		<simplesect>
-			<title id="dbexplorer-select-data">Put SELECT into</title>
+		<simplesect id="dbexplorer-select-data">
+			<title>Put SELECT into</title>
 
 			<blockquote><para>
 				This will put a SELECT statement into the SQL editor to display
@@ -95,8 +95,8 @@
 			</para></blockquote>
 		</simplesect>
 
-		<simplesect>
-			<title id="dbexplorer-create-insert">Create empty INSERT</title>
+		<simplesect id="dbexplorer-create-insert">
+			<title>Create empty INSERT</title>
         
 			<blockquote>
 				<para>This creates an empty <literal>INSERT</literal> statement for the 
@@ -106,8 +106,8 @@
 			</blockquote>
 		</simplesect>
 
-		<simplesect>
-			<title id="dbexplorer-create-select">Create default SELECT</title>
+		<simplesect id="dbexplorer-create-select">
+			<title>Create default SELECT</title>
         
 			<blockquote>
 				<para>This creates a <literal>SELECT</literal> for the 
@@ -118,8 +118,8 @@
 			</blockquote>
 		</simplesect>
 
-		<simplesect>
-			<title id="dbexplorer-create-ddl">Create DDL Script</title>
+		<simplesect id="dbexplorer-create-ddl">
+			<title>Create DDL Script</title>
 
 			<blockquote>
 				<para>With this command a script for multiple objects can be created. Select
@@ -167,8 +167,8 @@
 			</blockquote>
 		</simplesect>
 
-		<simplesect>
-			<title id="dbexplorer-delete-data">Delete data</title>
+		<simplesect id="dbexplorer-delete-data">
+			<title>Delete data</title>
 
 			<blockquote>
 				<para>

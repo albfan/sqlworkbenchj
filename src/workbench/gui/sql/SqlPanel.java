@@ -152,6 +152,7 @@ import workbench.interfaces.ResultLogger;
 import workbench.interfaces.Exporter;
 import workbench.interfaces.TextChangeListener;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
@@ -257,7 +258,7 @@ public class SqlPanel
 	protected WbConnection dbConnection;
 	private Connectable connectionClient;
 	
-	private Object connectionLock = new Object();
+	private final Object connectionLock = new Object();
 	
 	protected boolean importRunning;
 	protected boolean updateRunning;
@@ -792,6 +793,7 @@ public class SqlPanel
 		//this.setExecuteActionStates(false);
 	}
 
+	@Override
 	public void setVisible(boolean flag)
 	{
 		super.setVisible(flag);
@@ -800,6 +802,20 @@ public class SqlPanel
 			this.autoCompletion.closePopup();
 		}
 	}
+
+	public boolean isModified()
+	{
+		if (this.currentData == null) return false;
+		if (this.resultTab.getTabCount() == 1) return false; // only messages
+
+		for (int i=0; i < resultTab.getTabCount() - 1; i++)
+		{
+			DwPanel panel = (DwPanel)resultTab.getComponentAt(i);
+			if (panel.isModified()) return true;
+		}
+		return false;
+	}
+
 	private void setupActionMap()
 	{
 		InputMap im = new ComponentInputMap(this);
@@ -1124,7 +1140,13 @@ public class SqlPanel
 	 */
 	public boolean canCloseTab()
 	{
-		return this.checkAndSaveFile();
+		boolean fileOk = this.checkAndSaveFile();
+		if (fileOk && GuiSettings.getConfirmDiscardResultSetChanges())
+		{
+			if (!isModified()) return true;
+			return WbSwingUtilities.getProceedCancel(this, "MsgDiscardTabChanges", getRealTabTitle());
+		}
+		return fileOk;
 	}
 
 	public void saveToWorkspace(WbWorkspace w, int index)
@@ -1164,6 +1186,21 @@ public class SqlPanel
 		w.addHistoryEntry("WbStatements" + this.internalId + ".txt", this.sqlHistory);
 	}
 
+	public String getRealTabTitle()
+	{
+		if (getParent() instanceof JTabbedPane)
+		{
+			JTabbedPane p = (JTabbedPane)getParent();
+			int index = p.indexOfComponent(this);
+			if (index > -1)
+			{
+				String t = p.getTitleAt(index);
+				return t;
+			}
+		}
+		return getTabTitle();
+	}
+	
 	/**
 	 * Implementation of the ResultReceiver interface
 	 */
@@ -1230,12 +1267,12 @@ public class SqlPanel
 
 		String plainTitle = getTabTitle();
 		String title = plainTitle;
-		if (Settings.getInstance().getShowTabIndex())
+		if (GuiSettings.getShowTabIndex())
 		{
 			 title += " " + Integer.toString(index+1);
 		}
 		tab.setTitleAt(index, title);
-		if (index < 9 && Settings.getInstance().getShowTabIndex())
+		if (index < 9 && GuiSettings.getShowTabIndex())
 		{
 			char c = Integer.toString(index+1).charAt(0);
 			int pos = plainTitle.length() + 1;
@@ -1418,11 +1455,11 @@ public class SqlPanel
 			if (!this.dbConnection.getAutoCommit())
 			{
 				String msg = ResourceMgr.getString("MsgCommitPartialUpdate");
-				int commit = WbSwingUtilities.getCommitRollbackQuestion(this, msg);
+				WbSwingUtilities.TransactionEnd action = WbSwingUtilities.getCommitRollbackQuestion(this, msg);
 				{
 					try
 					{
-						if (commit == WbSwingUtilities.DO_COMMIT)
+						if (action == WbSwingUtilities.TransactionEnd.Rollback)
 						{
 							this.dbConnection.commit();
 							ds.resetStatusForSentRows();
@@ -1624,9 +1661,11 @@ public class SqlPanel
 
 	private void startExecution(final String sql, final int offset, final int commandAtIndex, final boolean highlight, final boolean appendResult)
 	{
-		if (this.isBusy()) 
+		if (this.isBusy()) return;
+
+		if (isModified() && !appendResult && GuiSettings.getConfirmDiscardResultSetChanges())
 		{
-			return;
+			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) return;
 		}
 		
 		if (!this.isConnected()) 
@@ -1660,7 +1699,7 @@ public class SqlPanel
 	 * This is only public to allow a direct call during 
 	 * GUI testing (to avoid multi-threading)
 	 */
-	public void runStatement(String sql, int selectionOffset, int commandAtIndex, boolean highlightOnError, boolean appendResult)
+	protected void runStatement(String sql, int selectionOffset, int commandAtIndex, boolean highlightOnError, boolean appendResult)
 	{
 		this.showStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
 
@@ -1674,7 +1713,7 @@ public class SqlPanel
 		fireDbExecStart();
 
 		setCancelState(true);
-		makeReadOnly();
+//		makeReadOnly();
 
 		try
 		{
@@ -2069,7 +2108,6 @@ public class SqlPanel
 		}
 		updateProxiedActions();
 		checkResultSetActions();
-
 	}
 	
 	public void closeCurrentResult()
@@ -2146,63 +2184,63 @@ public class SqlPanel
 	
 	protected void _updateProxiedActions()
 	{
-		if (this.currentData == null)
+		if (currentData == null)
 		{
-			this.updateAction.setOriginal(null);
-			this.insertRow.setOriginal(null);
-			this.deleteRow.setOriginal(null);
-			this.deleteDependentRow.setOriginal(null);
-			this.duplicateRow.setOriginal(null);
-			this.selectKeys.setOriginal(null);
-			this.createDeleteScript.setClient(null);
-			this.exportDataAction.setOriginal(null);
-			this.optimizeAllCol.setClient(null);
-			this.optimizeRowHeights.setClient(null);
-			this.dataToClipboard.setOriginal(null);
-			this.copyAsSqlInsert.setOriginal(null);
-			this.copyAsSqlUpdate.setOriginal(null);
-			this.copyAsSqlDeleteInsert.setOriginal(null);
-			this.findDataAction.setOriginal(null);
-			this.findDataAgainAction.setOriginal(null);
+			updateAction.setOriginal(null);
+			insertRow.setOriginal(null);
+			deleteRow.setOriginal(null);
+			deleteDependentRow.setOriginal(null);
+			duplicateRow.setOriginal(null);
+			selectKeys.setOriginal(null);
+			createDeleteScript.setClient(null);
+			exportDataAction.setOriginal(null);
+			optimizeAllCol.setClient(null);
+			optimizeRowHeights.setClient(null);
+			dataToClipboard.setOriginal(null);
+			copyAsSqlInsert.setOriginal(null);
+			copyAsSqlUpdate.setOriginal(null);
+			copyAsSqlDeleteInsert.setOriginal(null);
+			findDataAction.setOriginal(null);
+			findDataAgainAction.setOriginal(null);
 			copySelectedMenu.removeAll();
 			copySelectedMenu.setEnabled(false);
-			this.printDataAction.setOriginal(null);
-			this.printPreviewAction.setOriginal(null);
-			this.filterAction.setOriginal(null);
-			this.filterPicker.setClient(null);
-			this.resetFilterAction.setOriginal(null);
-			this.selectionFilterAction.setClient(null);
-			this.resetHighlightAction.setOriginal(null);
+			printDataAction.setOriginal(null);
+			printPreviewAction.setOriginal(null);
+			filterAction.setOriginal(null);
+			filterPicker.setClient(null);
+			resetFilterAction.setOriginal(null);
+			selectionFilterAction.setClient(null);
+			resetHighlightAction.setOriginal(null);
 		}
 		else
 		{
-			this.updateAction.setOriginal(this.currentData.getUpdateDatabaseAction());
-			this.insertRow.setOriginal(this.currentData.getInsertRowAction());
-			this.deleteRow.setOriginal(this.currentData.getDeleteRowAction());
-			this.deleteDependentRow.setOriginal(this.currentData.getDeleteDependentRowsAction());
-			this.duplicateRow.setOriginal(this.currentData.getCopyRowAction());
-			this.selectKeys.setOriginal(this.currentData.getSelectKeysAction());
-			this.createDeleteScript.setClient(this.currentData.getTable());
-			this.exportDataAction.setOriginal(this.currentData.getTable().getExportAction());
-			this.optimizeAllCol.setClient(this.currentData.getTable());
-			this.optimizeRowHeights.setClient(this.currentData.getTable());
-			this.dataToClipboard.setOriginal(this.currentData.getTable().getDataToClipboardAction());
-			this.copyAsSqlInsert.setOriginal(this.currentData.getTable().getCopyAsInsertAction());
-			this.copyAsSqlUpdate.setOriginal(this.currentData.getTable().getCopyAsUpdateAction());
-			this.copyAsSqlDeleteInsert.setOriginal(this.currentData.getTable().getCopyAsDeleteInsertAction());
-			this.findDataAction.setOriginal(this.currentData.getTable().getReplacer().getFindAction());
-			this.findDataAgainAction.setOriginal(this.currentData.getTable().getReplacer().getFindAgainAction());
-			this.replaceDataAction.setOriginal(this.currentData.getTable().getReplacer().getReplaceAction());
+			updateAction.setOriginal(currentData.getUpdateDatabaseAction());
+			insertRow.setOriginal(currentData.getInsertRowAction());
+			deleteRow.setOriginal(currentData.getDeleteRowAction());
+			deleteDependentRow.setOriginal(currentData.getDeleteDependentRowsAction());
+			duplicateRow.setOriginal(currentData.getCopyRowAction());
+			selectKeys.setOriginal(currentData.getSelectKeysAction());
+			createDeleteScript.setClient(currentData.getTable());
+			exportDataAction.setOriginal(currentData.getTable().getExportAction());
+			optimizeAllCol.setClient(currentData.getTable());
+			optimizeRowHeights.setClient(currentData.getTable());
+			dataToClipboard.setOriginal(currentData.getTable().getDataToClipboardAction());
+			copyAsSqlInsert.setOriginal(currentData.getTable().getCopyAsInsertAction());
+			copyAsSqlUpdate.setOriginal(currentData.getTable().getCopyAsUpdateAction());
+			copyAsSqlDeleteInsert.setOriginal(currentData.getTable().getCopyAsDeleteInsertAction());
+			findDataAction.setOriginal(currentData.getTable().getReplacer().getFindAction());
+			findDataAgainAction.setOriginal(currentData.getTable().getReplacer().getFindAgainAction());
+			replaceDataAction.setOriginal(currentData.getTable().getReplacer().getReplaceAction());
 			copySelectedMenu.removeAll();
-			this.currentData.getTable().populateCopySelectedMenu(copySelectedMenu);
+			currentData.getTable().populateCopySelectedMenu(copySelectedMenu);
 			copySelectedMenu.setEnabled(true);
-			this.printDataAction.setOriginal(this.currentData.getTable().getPrintAction());
-			this.printPreviewAction.setOriginal(this.currentData.getTable().getPrintPreviewAction());
-			this.filterAction.setOriginal(this.currentData.getTable().getFilterAction());
-			this.filterPicker.setClient(this.currentData.getTable());
-			this.resetFilterAction.setOriginal(this.currentData.getTable().getResetFilterAction());
-			this.selectionFilterAction.setClient(this.currentData.getTable());
-			this.resetHighlightAction.setOriginal(this.currentData.getTable().getResetHighlightAction());
+			printDataAction.setOriginal(currentData.getTable().getPrintAction());
+			printPreviewAction.setOriginal(currentData.getTable().getPrintPreviewAction());
+			filterAction.setOriginal(currentData.getTable().getFilterAction());
+			filterPicker.setClient(currentData.getTable());
+			resetFilterAction.setOriginal(currentData.getTable().getResetFilterAction());
+			selectionFilterAction.setClient(currentData.getTable());
+			resetHighlightAction.setOriginal(currentData.getTable().getResetHighlightAction());
 		}
 	}
 
@@ -2272,7 +2310,6 @@ public class SqlPanel
 			}
 		}
 		return goOn;
-
 	}
 
 	private void displayResult(String script, int selectionOffset, int commandAtIndex, boolean highlightOnError, boolean appendResult)
@@ -2974,7 +3011,7 @@ public class SqlPanel
 	{
 		if (this.loadingIcon == null)
 		{
-			if (Settings.getInstance().getUseAnimatedIcon())
+			if (GuiSettings.getUseAnimatedIcon())
 			{
 				String name = Settings.getInstance().getProperty("workbench.gui.animatedicon.name", "loading");
 				this.loadingIcon = ResourceMgr.getPicture(name);
@@ -2992,7 +3029,7 @@ public class SqlPanel
 	{
 		if (this.cancelIcon == null)
 		{
-			if (Settings.getInstance().getUseAnimatedIcon())
+			if (GuiSettings.getUseAnimatedIcon())
 			{
 				this.cancelIcon = ResourceMgr.getPicture("cancelling");
 			}
@@ -3108,7 +3145,7 @@ public class SqlPanel
 						{
 							tab.setIconAt(index, null);
 						}
-						if (Settings.getInstance().getUseAnimatedIcon())
+						if (GuiSettings.getUseAnimatedIcon())
 						{
 							// flushing the animated icons also stops the thread that
 							// is used for the animation. If this is not done it will still

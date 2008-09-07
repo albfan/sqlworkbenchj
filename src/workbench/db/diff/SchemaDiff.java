@@ -70,6 +70,7 @@ public class SchemaDiff
 	public static final String TAG_VIEW_INFO = "include-views";
 	public static final String TAG_PROC_INFO = "include-procs";
 	public static final String TAG_SEQUENCE_INFO = "include-sequences";
+	public static final String TAG_VIEWS_AS_TABLE = "views-as-tables";
 	
 	private WbConnection sourceDb;
 	private WbConnection targetDb;
@@ -90,6 +91,7 @@ public class SchemaDiff
 	private boolean diffViews = true;
 	private boolean diffProcs = true;
 	private boolean diffSequences = true;
+	private boolean treatViewAsTable = false;
 	
 //	private boolean diffComments;
 	private RowActionMonitor monitor;
@@ -165,6 +167,8 @@ public class SchemaDiff
 	
 	public void setIncludeTableGrants(boolean flag) { this.diffGrants = flag; }
 	public boolean getIncludeTableGrants() { return this.diffGrants; }
+
+	public void setTreatViewAsTable(boolean flag) { this.treatViewAsTable = flag; }
 	
 //	public void setIncludeComments(boolean flag) { this.diffComments = flag; }
 	
@@ -368,11 +372,12 @@ public class SchemaDiff
 			this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 			this.monitor.setCurrentObject(ResourceMgr.getString("MsgDiffRetrieveDbInfo"), -1, -1);
 		}
+		
 		this.referenceSchema = (rSchema == null ? this.sourceDb.getMetadata().getSchemaToUse() : this.sourceDb.getMetadata().adjustSchemaNameCase(rSchema));
 		this.targetSchema = (tSchema == null ? this.targetDb.getMetadata().getSchemaToUse() : this.sourceDb.getMetadata().adjustSchemaNameCase(tSchema));
 		
 		String[] types;
-		if (diffViews)
+		if (diffViews || treatViewAsTable)
 		{
 			types = new String[] { this.sourceDb.getMetadata().getTableTypeName(), this.sourceDb.getMetadata().getViewTypeName() };
 		}
@@ -380,8 +385,22 @@ public class SchemaDiff
 		{
 			types = new String[] { this.sourceDb.getMetadata().getTableTypeName() };
 		}
+
 		List<TableIdentifier> refTables = sourceDb.getMetadata().getTableList(this.referenceSchema, types);
 		List<TableIdentifier> target = targetDb.getMetadata().getTableList(this.targetSchema, types);
+	
+		if (treatViewAsTable)
+		{
+			String viewType = sourceDb.getMetadata().getViewTypeName();
+			String tblType = sourceDb.getMetadata().getTableTypeName();
+			for (TableIdentifier table : refTables)
+			{
+				if (table.getType().equals(viewType))
+				{
+					table.setType(tblType);
+				}
+			}
+		}
 		
 		processTableList(refTables, target);
 		
@@ -932,7 +951,8 @@ public class SchemaDiff
 		tw.appendTag(info, indent2, TAG_CONSTRAINT_INFO, this.diffConstraints);
 		tw.appendTag(info, indent2, TAG_GRANT_INFO, this.diffGrants);
 		tw.appendTag(info, indent2, TAG_VIEW_INFO, this.diffViews);
-		
+		tw.appendTag(info, indent2, TAG_VIEWS_AS_TABLE, this.treatViewAsTable);
+
 		if (this.referenceSchema != null && this.targetSchema != null)
 		{
 			tw.appendTag(info, indent2, "reference-schema", this.referenceSchema);

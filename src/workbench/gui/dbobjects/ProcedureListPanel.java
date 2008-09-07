@@ -240,6 +240,8 @@ public class ProcedureListPanel
 		{
 			this.reset();
 			this.dbConnection.setBusy(true);
+			this.infoLabel.setText(ResourceMgr.getString("MsgRetrieving"));
+
 			this.isRetrieving = true;
 			DbMetadata meta = dbConnection.getMetadata();
 			WbSwingUtilities.showWaitCursorOnWindow(this);
@@ -253,7 +255,6 @@ public class ProcedureListPanel
 					int rows = model.getRowCount();
 					infoLabel.setText(rows + " " + ResourceMgr.getString("TxtTableListObjects"));
 					procList.setModel(model, true);
-					procList.adjustOrOptimizeColumns();
 				}
 			});
 			shouldRetrieve = false;
@@ -374,7 +375,6 @@ public class ProcedureListPanel
 				{
 					col.setCellRenderer(RendererFactory.getSqlTypeRenderer());
 				}
-				procColumns.adjustOrOptimizeColumns();
 			}
 			catch (Exception ex)
 			{

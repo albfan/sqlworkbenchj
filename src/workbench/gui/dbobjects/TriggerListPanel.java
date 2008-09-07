@@ -223,6 +223,7 @@ public class TriggerListPanel
 			this.reset();
 			this.dbConnection.setBusy(true);
 			this.isRetrieving = true;
+			this.infoLabel.setText(ResourceMgr.getString("MsgRetrieving"));
 			WbSwingUtilities.showWaitCursorOnWindow(this);
 			
 			DataStore ds = reader.getTriggers(currentCatalog, currentSchema);
@@ -235,7 +236,6 @@ public class TriggerListPanel
 					int rows = model.getRowCount();
 					infoLabel.setText(rows + " " + ResourceMgr.getString("TxtTableListObjects"));
 					triggerList.setModel(model, true);
-					triggerList.adjustOrOptimizeColumns();
 				}
 			});
 			shouldRetrieve = false;

@@ -1134,13 +1134,13 @@ WHERE id=42;</programlisting>
     <title>Change the connection for a script - WbConnect</title>
 
     <para>
-			With the <literal>WbConnect</literal> the current connection can be changed
-			inside a SQL script. 
+			With the <literal>WbConnect</literal> command, the connection for the script that is
+			currently be exected can be changed.
 		</para>
 		
 		<para>
-			When this command is run in GUI mode, the connection is <emphasis role="bold">not</emphasis>
-			changed for the complete application. Therefor at leas one other statement should be
+			When this command is run in GUI mode, the connection is <emphasis role="bold">only</emphasis>
+			changed for the remainder of the script execution. Therefor at least one other statement should be
 			executed together with the <literal>WbConnect</literal> command. Either by running
 			the complete script of the editor or selecting the <literal>WbConnect</literal> command
 			together with other statements. Once the script has finished, the connection is closed 

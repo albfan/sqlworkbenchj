@@ -113,7 +113,7 @@ public class SchemaCopy
 					// it doesn't but in SchemaCopy we want to simply ignore non-existing tables
 					if (targetTable == null)
 					{
-						this.messages.append(ResourceMgr.getFormattedString("MsgCopyTableIgnored", targetTable.getTableName()));
+						this.messages.append(ResourceMgr.getFormattedString("MsgCopyTableIgnored", table.getTableName()));
 						this.messages.appendNewLine();
 						continue;
 					}
@@ -174,7 +174,8 @@ public class SchemaCopy
 			}
 
 			TableIdentifier targetTable = this.targetConnection.getMetadata().findTable(new TableIdentifier(sourceTable.getTableName()));
-
+			if (targetTable == null) continue;
+			
 			TableDeleteSync sync = new TableDeleteSync(targetConnection, sourceConnection);
 			sync.setTableName(sourceTable, targetTable);
 			sync.setBatchSize(copier.getBatchSize());

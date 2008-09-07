@@ -112,6 +112,7 @@ import workbench.gui.actions.WhatsNewAction;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
+import workbench.resource.GuiSettings;
 import workbench.util.FileUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.WbFile;
@@ -518,7 +519,7 @@ public class MainWindow
 			needInvalidate = true;
 		}
 		
-		if (Settings.getInstance().getShowToolbar())
+		if (GuiSettings.getShowToolbar())
 		{
 			final MainPanel curPanel = this.getCurrentPanel();
 			if (curPanel != null)
@@ -538,7 +539,7 @@ public class MainWindow
 	{
 		if (Settings.PROPERTY_SHOW_TOOLBAR.equals(evt.getPropertyName()))
 		{
-			this.setShowToolbar(Settings.getInstance().getShowToolbar());
+			this.setShowToolbar(GuiSettings.getShowToolbar());
 		}
 		else if (Settings.PROPERTY_SHOW_TAB_INDEX.equals(evt.getPropertyName()))
 		{
@@ -639,7 +640,7 @@ public class MainWindow
 		Collections.sort(macros);
 		int count = macros.size();
 		RunMacroAction run = null;
-		int maxItems = Settings.getInstance().getMaxMacrosInMenu();
+		int maxItems = GuiSettings.getMaxMacrosInMenu();
 		for (int i=0; (i < count && i < maxItems); i++)
 		{
 			String name = macros.get(i);
@@ -2384,7 +2385,7 @@ public class MainWindow
 	private String getPlainTabTitle(int index)
 	{
 		String title = this.sqlTab.getTitleAt(index);
-		if (Settings.getInstance().getShowTabIndex())
+		if (GuiSettings.getShowTabIndex())
 		{
 			int pos = title.lastIndexOf(' ');
 			if (pos > -1)

@@ -145,6 +145,12 @@ public class DelimiterDefinition
 		}
 		
 	}
+
+	public boolean equals(String other)
+	{
+		return StringUtil.equalStringIgnoreCase(this.delimiter, other);
+	}
+	
 	public boolean equals(Object other)
 	{
 		if (other == null) return false;

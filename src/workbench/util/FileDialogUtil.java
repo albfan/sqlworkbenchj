@@ -33,12 +33,12 @@ import workbench.resource.ResourceMgr;
  */
 public class FileDialogUtil
 {
-	public static final int FILE_TYPE_UNKNOWN = -1;
-	public static final int FILE_TYPE_TXT = 0;
-	public static final int FILE_TYPE_SQL = 1;
-	public static final int FILE_TYPE_XML = 2;
-	public static final int FILE_TYPE_HTML = 3;
-	public static final int FILE_TYPE_SQL_UPDATE = 4;
+	private static final int FILE_TYPE_UNKNOWN = -1;
+	private static final int FILE_TYPE_TXT = 0;
+	private static final int FILE_TYPE_SQL = 1;
+	private static final int FILE_TYPE_XML = 2;
+	private static final int FILE_TYPE_HTML = 3;
+	private static final int FILE_TYPE_SQL_UPDATE = 4;
 
 	private int lastFileType = FILE_TYPE_UNKNOWN;
 	public static final String CONFIG_DIR_KEY = "%ConfigDir%";

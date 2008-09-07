@@ -40,6 +40,7 @@ public class ResultInfo
 	final private int colCount;
 	private int realColumns;
 	private TableIdentifier updateTable;
+	private boolean treatLongVarcharAsClob = false;
 	
 	public ResultInfo(ColumnIdentifier[] cols)
 	{
@@ -53,11 +54,6 @@ public class ResultInfo
 	
 	public ResultInfo(String[] colNames, int[] colTypes, int[] colSizes)
 	{
-		this(colNames, colTypes, colSizes, null);
-	}
-	
-	public ResultInfo(String[] colNames, int[] colTypes, int[] colSizes, String[] columnClasses)
-	{
 		this.colCount = colNames.length;
 		this.columns = new ColumnIdentifier[this.colCount];
 		for (int i=0; i < colCount; i++)
@@ -65,7 +61,6 @@ public class ResultInfo
 			ColumnIdentifier col = new ColumnIdentifier(colNames[i]);
 			if (colSizes != null) col.setColumnSize(colSizes[i]);
 			col.setDataType(colTypes[i]);
-			if (columnClasses != null) col.setColumnClassName(columnClasses[i]);
 			this.columns[i] = col;
 		}
 	}
@@ -93,6 +88,7 @@ public class ResultInfo
 			i++;
 		}
 		this.colCount = this.columns.length;
+		this.treatLongVarcharAsClob = conn.getDbSettings().longVarcharIsClob();
 	}
 	
 	public ResultInfo(ResultSetMetaData metaData, WbConnection sourceConnection) 
@@ -100,7 +96,12 @@ public class ResultInfo
 	{
 		this.colCount = metaData.getColumnCount();
 		this.columns = new ColumnIdentifier[this.colCount];
-		DbMetadata dbMeta = (sourceConnection == null ? null : sourceConnection.getMetadata());
+		DbMetadata dbMeta = null;
+		if (sourceConnection != null)
+		{
+			dbMeta = sourceConnection.getMetadata();
+			treatLongVarcharAsClob = sourceConnection.getDbSettings().longVarcharIsClob();
+		}
 		
 		for (int i=0; i < this.colCount; i++)
 		{
@@ -221,6 +222,11 @@ public class ResultInfo
 		}
 	}
 
+	public boolean treatLongVarcharAsClob()
+	{
+		return treatLongVarcharAsClob;
+	}
+	
 	public ColumnIdentifier getColumn(int i)
 	{
 		return this.columns[i];

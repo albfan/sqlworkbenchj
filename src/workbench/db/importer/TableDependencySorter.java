@@ -70,12 +70,17 @@ public class TableDependencySorter
 	private List<TableIdentifier> getSortedTableList(List<TableIdentifier> tables, boolean addMissing, boolean bottomUp)
 	{
 		List<LevelNode> levelMapping = createLevelMapping(tables, bottomUp);
+
+//		if (bottomUp)
+//		{
+//			dumpMapping(levelMapping);
+//		}
 		
 		ArrayList<TableIdentifier> result = new ArrayList<TableIdentifier>();
 		for (LevelNode lvl : levelMapping)
 		{
 			int index = findTable(lvl.node.getTable(), tables);
-			if (index > -1) 
+			if (index > -1)
 			{
 				result.add(tables.get(index));
 			}
@@ -87,12 +92,23 @@ public class TableDependencySorter
 		return result;
 	}
 
+	private void dumpMapping(List<LevelNode> mapping)
+	{
+		for (LevelNode lvl : mapping)
+		{
+			System.out.println(lvl.toString());
+		}
+	}
+	
 	private List<LevelNode> createLevelMapping(List<TableIdentifier> tables, boolean bottomUp)
 	{
 		List<LevelNode> levelMapping = new ArrayList<LevelNode>(tables.size());
+		List<DependencyNode> startNodes = new ArrayList<DependencyNode>(tables.size());
 		
 		for (TableIdentifier tbl : tables)
 		{
+			if (!dbConn.getMetadata().tableExists(tbl)) continue;
+			
 			TableDependency deps = new TableDependency(dbConn, tbl);
 			deps.readTreeForChildren();
 			if (deps.wasAborted())
@@ -102,10 +118,23 @@ public class TableDependencySorter
 			}
 			
 			DependencyNode root = deps.getRootNode();
+			startNodes.add(root);
 			if (root != null)
 			{
 				List<DependencyNode> allChildren = getAllNodes(root);
 				putNodes(levelMapping, allChildren);
+			}
+		}
+
+		// The "starting" tables have not been added yet.
+		// They only need to be added if they did not appear as a child
+		// in one of the sub-trees
+		for (DependencyNode node : startNodes)
+		{
+			LevelNode lvl = findLevelNode(levelMapping, node.getTable());
+			if (lvl == null)
+			{
+				levelMapping.add(new LevelNode(node, node.getLevel()));
 			}
 		}
 		
@@ -149,7 +178,8 @@ public class TableDependencySorter
 	
 	protected void putNodes(List<LevelNode> levelMapping, List<DependencyNode> nodes)
 	{
-		TableIdentifier root = nodes.get(0).getTable();
+		if (nodes == null || nodes.size() == 0) return;
+//		TableIdentifier root = nodes.get(0).getTable();
 
 		for (DependencyNode node : nodes)
 		{
@@ -158,7 +188,7 @@ public class TableDependencySorter
 			// There is no need to include self referencing tables into the level
 			// mapping, as this will create a wrong level for them and a potential
 			// parent of the self referencing table (e.g. through a different FK)
-			if (!node.isRoot() && tbl.equals(root)) continue;
+//			if (!node.isRoot() && tbl.equals(root)) continue;
 			
 			int level = node.getLevel();
 			LevelNode lvl = findLevelNode(levelMapping, tbl);
@@ -166,9 +196,11 @@ public class TableDependencySorter
 			{
 				lvl = new LevelNode(node, level);
 				levelMapping.add(lvl);
+//				System.out.println("added node: " + lvl);
 			}
 			else if (level > lvl.level)
 			{
+//				System.out.println("updating node: "+ lvl + " to level " + level);
 				lvl.level = level;
 			}
 		}
@@ -178,7 +210,7 @@ public class TableDependencySorter
 	{
 		for (LevelNode lvl : levelMapping)
 		{
-			if (lvl.node.getTable().getTableName().equalsIgnoreCase(tbl.getTableName())) return lvl;
+			if (lvl.node.getTable().compareNames(tbl)) return lvl;
 		}
 		return null;
 	}
@@ -191,23 +223,26 @@ public class TableDependencySorter
 	{
 		if (startWith == null) return Collections.emptyList();
 		
-		ArrayList<DependencyNode> result = new ArrayList<DependencyNode>();
-		result.add(startWith);
-		
 		List<DependencyNode> children = startWith.getChildren();
 		
-		if (children.size() == 0) 
-		{
-			return result;
-		}
+		if (children.size() == 0) return Collections.emptyList();
+		
+		ArrayList<DependencyNode> result = new ArrayList<DependencyNode>();
 		
 		for (DependencyNode node : children)
 		{
+			if (!(node.getTable().compareNames(startWith.getTable()))) result.add(node);
 			result.addAll(getAllNodes(node));
 		}
 		return result;
 	}
 
+	/**
+	 * DependencyNode's equals method compares the FK names as well, which is not something
+	 * we need in this context.
+	 * Additionally we want to manipulate the level of the node according to the max/min
+	 * level for that table. 
+	 */
 	static class LevelNode
 	{
 		int level;
@@ -224,7 +259,7 @@ public class TableDependencySorter
 			if (other instanceof LevelNode)
 			{
 				LevelNode n = (LevelNode) other;
-				return node.getTable().getTableName().equalsIgnoreCase(n.node.getTable().getTableName());
+				return node.getTable().compareNames(n.node.getTable());
 			}
 			return false;
 		}

@@ -29,8 +29,8 @@ import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbButton;
 import workbench.gui.lnf.LnFDefinition;
 import workbench.gui.lnf.LnFLoader;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
@@ -250,7 +250,7 @@ public class LnFDefinitionPanel
 		{
 			String className = lnf.getClassName();
 			this.currentLabel.setText(lnf.getName());
-			Settings.getInstance().setLookAndFeelClass(className);
+			GuiSettings.setLookAndFeelClass(className);
 			WbSwingUtilities.showMessage(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("MsgLnFChanged"));
 		}
 		else

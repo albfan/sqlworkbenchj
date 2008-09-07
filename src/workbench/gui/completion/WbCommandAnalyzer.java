@@ -57,6 +57,7 @@ public class WbCommandAnalyzer
 		return 0;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void checkContext()
 	{
 		CommandMapper mapper = new CommandMapper();

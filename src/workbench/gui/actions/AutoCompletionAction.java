@@ -32,6 +32,7 @@ public class AutoCompletionAction
 	private CompletionHandler handler;
 	private JEditTextArea editor;
 	private StatusBar status;
+	
 	public AutoCompletionAction(JEditTextArea editor, StatusBar status)
 	{
 		this.editor = editor;

@@ -13,7 +13,11 @@ package workbench.sql.preparedstatement;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import workbench.log.LogMgr;
+import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 import workbench.util.ValueConverter;
 
@@ -28,7 +32,8 @@ public class ParameterDefinition
 	private final ValueConverter converter = new ValueConverter();
 	private int type;
 	private int index;
-	
+	private String name;
+
 	private boolean valueValid = false;
 	private Object value = null;
 	
@@ -53,7 +58,18 @@ public class ParameterDefinition
 			return false;
 		}
 	}
-	
+
+	public void setParameterName(String parm)
+	{
+		this.name = parm;
+	}
+
+	public String getParameterName()
+	{
+		if (name == null) return NumberStringCache.getNumberString(this.index);
+		return name;
+	}
+
 	public boolean setValue(String v)
 	{
 		try
@@ -80,5 +96,16 @@ public class ParameterDefinition
 		if (!this.valueValid) throw new IllegalStateException("No valid value defined for parameter " + this.index);
 		stmt.setObject(this.index, this.value);
 	}
-		
+
+	public static void sortByIndex(List<ParameterDefinition> parameters)
+	{
+		Comparator<ParameterDefinition> comp = new Comparator<ParameterDefinition>()
+		{
+			public int compare(ParameterDefinition p1, ParameterDefinition p2)
+			{
+				return p1.index - p2.index;
+			}
+		};
+		Collections.sort(parameters, comp);
+	}
 }

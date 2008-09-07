@@ -16,9 +16,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.diff.SchemaDiff;
 import workbench.log.LogMgr;
@@ -28,6 +26,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.FileUtil;
 import workbench.util.StrWriter;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -41,14 +40,14 @@ public class WbSchemaDiff
 {
 	public static final String VERB = "WBSCHEMADIFF";
 	
-	public static final String PARAM_NAMESPACE = "namespace";
-
-	public static final String PARAM_INCLUDE_INDEX = "includeIndex";
-	public static final String PARAM_INCLUDE_FK = "includeForeignKeys";
-	public static final String PARAM_INCLUDE_PK = "includePrimaryKeys";
-	public static final String PARAM_INCLUDE_CONSTRAINTS = "includeConstraints";
-	public static final String PARAM_INCLUDE_VIEWS = "includeViews";
-	public static final String PARAM_DIFF_JDBC_TYPES = "useJdbcTypes";
+	public static final String ARG_NAMESPACE = "namespace";
+	public static final String ARG_INCLUDE_INDEX = "includeIndex";
+	public static final String ARG_INCLUDE_FK = "includeForeignKeys";
+	public static final String ARG_INCLUDE_PK = "includePrimaryKeys";
+	public static final String ARG_INCLUDE_CONSTRAINTS = "includeConstraints";
+	public static final String ARG_INCLUDE_VIEWS = "includeViews";
+	public static final String ARG_DIFF_JDBC_TYPES = "useJdbcTypes";
+	public static final String ARG_VIEWS_AS_TABLES = "viewAsTable";
 	
 	private SchemaDiff diff;
 	private CommonDiffParameters params; 
@@ -57,22 +56,32 @@ public class WbSchemaDiff
 	{
 		cmdLine = new ArgumentParser();
 		params = new CommonDiffParameters(cmdLine);
-		cmdLine.addArgument(PARAM_NAMESPACE);
-		cmdLine.addArgument(PARAM_INCLUDE_FK, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_NAMESPACE);
+		cmdLine.addArgument(ARG_INCLUDE_FK, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_SEQUENCES, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_INCLUDE_PK, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_INCLUDE_INDEX, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_INCLUDE_CONSTRAINTS, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_INCLUDE_VIEWS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_INCLUDE_PK, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_INCLUDE_INDEX, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_INCLUDE_CONSTRAINTS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_INCLUDE_VIEWS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_DIFF_JDBC_TYPES, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_DIFF_JDBC_TYPES, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_VIEWS_AS_TABLES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);		
 	}
 
-	public String getVerb() { return VERB; }
-	protected boolean isConnectionRequired() { return false; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
+	
+	@Override
+	protected boolean isConnectionRequired()
+	{
+		return false;
+	}
 
 	public StatementRunnerResult execute(final String sql)
 		throws SQLException
@@ -100,34 +109,29 @@ public class WbSchemaDiff
 		WbConnection targetCon = params.getTargetConnection(currentConnection, result);
 		if (!result.isSuccess()) return result;
 		
-		WbConnection sourceCon = params.getSourceConnection(currentConnection, result);
+		WbConnection referenceConnection = params.getSourceConnection(currentConnection, result);
 
-		if (sourceCon == null && targetCon != null && targetCon != currentConnection)
+		if (referenceConnection == null && targetCon != null && targetCon != currentConnection)
 		{
-			try
-			{
-				targetCon.disconnect();
-			}
-			catch (Exception th)
-			{
-			}
+			targetCon.disconnect();
 			return result;
 		}
 		if (!result.isSuccess()) return result;
 		
-		this.diff = new SchemaDiff(sourceCon, targetCon);
+		this.diff = new SchemaDiff(referenceConnection, targetCon);
 		diff.setMonitor(this.rowMonitor);
 
 		// this needs to be set before the tables are defined!
-		diff.setIncludeForeignKeys(cmdLine.getBoolean(PARAM_INCLUDE_FK, true));
-		diff.setIncludeIndex(cmdLine.getBoolean(PARAM_INCLUDE_INDEX, true));
-		diff.setIncludePrimaryKeys(cmdLine.getBoolean(PARAM_INCLUDE_PK, true));
-		diff.setIncludeTableConstraints(cmdLine.getBoolean(PARAM_INCLUDE_CONSTRAINTS, true));
-		diff.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
-		diff.setCompareJdbcTypes(cmdLine.getBoolean(PARAM_DIFF_JDBC_TYPES, false));
+		diff.setIncludeForeignKeys(cmdLine.getBoolean(ARG_INCLUDE_FK, true));
+		diff.setIncludeIndex(cmdLine.getBoolean(ARG_INCLUDE_INDEX, true));
+		diff.setIncludePrimaryKeys(cmdLine.getBoolean(ARG_INCLUDE_PK, true));
+		diff.setIncludeTableConstraints(cmdLine.getBoolean(ARG_INCLUDE_CONSTRAINTS, true));
+		diff.setIncludeViews(cmdLine.getBoolean(ARG_INCLUDE_VIEWS, true));
+		diff.setCompareJdbcTypes(cmdLine.getBoolean(ARG_DIFF_JDBC_TYPES, false));
 		diff.setIncludeProcedures(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_PROCS, false));
 		diff.setIncludeTableGrants(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_GRANTS, false));
 		diff.setIncludeSequences(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_SEQUENCES, false));
+		diff.setTreatViewAsTable(cmdLine.getBoolean(ARG_VIEWS_AS_TABLES, false));
 		//diff.setIncludeComments(cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, false));
 
 		String refTables = cmdLine.getValue(CommonDiffParameters.PARAM_REFERENCETABLES);
@@ -146,7 +150,7 @@ public class WbSchemaDiff
 
 			if (refSchema == null && targetSchema == null)
 			{
-				if (sourceCon == targetCon)
+				if (referenceConnection == targetCon)
 				{
 					result.addMessage(ResourceMgr.getString("ErrDiffSameConnectionNoTableSelection"));
 					result.setFailure();
@@ -154,9 +158,9 @@ public class WbSchemaDiff
 					{
 						try { targetCon.disconnect(); } catch (Exception th) {}
 					}
-					if (sourceCon.getId().startsWith("Wb-Diff"))
+					if (referenceConnection.getId().startsWith("Wb-Diff"))
 					{
-						try { sourceCon.disconnect(); } catch (Exception th) {}
+						try { referenceConnection.disconnect(); } catch (Exception th) {}
 					}
 					return result;
 				}
@@ -169,16 +173,8 @@ public class WbSchemaDiff
 		}
 		else if (tarTables == null)
 		{
-			List<String> rl = StringUtil.stringToList(refTables, ",", true, true);
-			List<TableIdentifier> tables = new ArrayList<TableIdentifier>(rl.size());
-			String ttype = this.currentConnection.getMetadata().getTableTypeName();
-			for (String tname : rl)
-			{
-				TableIdentifier tbl = new TableIdentifier(tname);
-				tbl.setType(ttype);
-				tables.add(tbl);
-			}
-			diff.setTables(tables);
+			SourceTableArgument tables = new SourceTableArgument(refTables, referenceConnection);
+			diff.setTables(tables.getTables());
 		}
 		else
 		{
@@ -230,7 +226,15 @@ public class WbSchemaDiff
 		}
 		finally
 		{
-			try { out.close(); } catch (Exception th) {}
+			FileUtil.closeQuitely(out);
+			if (referenceConnection.getId().startsWith("Wb-Diff"))
+			{
+				referenceConnection.disconnect();
+			}
+			if (targetCon.getId().startsWith("Wb-Diff"))
+			{
+				targetCon.disconnect();
+			}
 		}
 		
 		if (diff.isCancelled())
@@ -271,6 +275,7 @@ public class WbSchemaDiff
 		return result;
 	}
 
+	@Override
 	public void cancel()
 	{
 		if (this.diff != null) this.diff.cancel();

@@ -15,7 +15,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
-import workbench.gui.components.RowHeightOptimizer;
 import workbench.gui.components.WbTable;
 import workbench.util.WbThread;
 
@@ -62,8 +61,7 @@ public class OptimizeRowHeightAction
 		{
 			public void run()	
 			{
-				RowHeightOptimizer optimizer = new RowHeightOptimizer(client);
-				optimizer.optimizeAllRows();
+				client.optimizeRowHeight();
 			}
 		};
 		t.start();

@@ -55,6 +55,7 @@ import workbench.gui.components.WbToolbar;
 import workbench.interfaces.Connectable;
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -260,7 +261,7 @@ public class DbExplorerPanel
 			busy = flag;
 		}
 	}
-	
+
 	public boolean isBusy()
 	{
 		synchronized (busyLock)
@@ -743,7 +744,22 @@ public class DbExplorerPanel
 	{
 		this.tabTitle = name;
 	}
-	
+
+	public String getRealTabTitle()
+	{
+		if (getParent() instanceof JTabbedPane)
+		{
+			JTabbedPane p = (JTabbedPane)getParent();
+			int index = p.indexOfComponent(this);
+			if (index > -1)
+			{
+				String t = p.getTitleAt(index);
+				return t;
+			}
+		}
+		return getTabTitle();
+	}
+
 	public String getTabTitle()
 	{
 		return ResourceMgr.getString("LblDbExplorer");
@@ -754,12 +770,12 @@ public class DbExplorerPanel
 		String plainTitle = (this.tabTitle == null ? getTabTitle() : this.tabTitle);
 		
 		String realTitle = plainTitle;
-		if (Settings.getInstance().getShowTabIndex())
+		if (GuiSettings.getShowTabIndex())
 		{
 			realTitle += " " + Integer.toString(index+1);
 		}
 		tab.setTitleAt(index, realTitle);
-		if (index < 9 && Settings.getInstance().getShowTabIndex())
+		if (index < 9 && GuiSettings.getShowTabIndex())
 		{
 			char c = Integer.toString(index+1).charAt(0);
 			int pos = plainTitle.length() + 1;
@@ -815,8 +831,11 @@ public class DbExplorerPanel
 		}
 		this.dispose();
 		this.disconnect();
-		
-		this.mainWindow.explorerWindowClosed(this.window);
+
+		if (this.mainWindow != null)
+		{
+			this.mainWindow.explorerWindowClosed(this.window);
+		}
 		this.window = null;
 	}
 
@@ -892,9 +911,19 @@ public class DbExplorerPanel
 		if (triggers != null) triggers.saveToWorkspace(w, index);
 	}
 
+
+	public boolean isModified()
+	{
+		return tables.isModified();
+	}
+
 	public boolean canCloseTab()
 	{
-		return true;
+		if (!GuiSettings.getConfirmDiscardResultSetChanges()) return true;
+		if (!isModified()) return true;
+
+		boolean canClose = WbSwingUtilities.getProceedCancel(this, "MsgDiscardTabChanges", getRealTabTitle());
+		return canClose;
 	}
 
 	public void readFromWorkspace(WbWorkspace w, int index) 

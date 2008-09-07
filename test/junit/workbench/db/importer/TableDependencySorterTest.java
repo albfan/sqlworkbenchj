@@ -11,6 +11,9 @@
  */
 package workbench.db.importer;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +22,7 @@ import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.util.FileUtil;
 
 /**
  *
@@ -132,6 +136,36 @@ public class TableDependencySorterTest
 		assertEquals("Not enough entries", tables.size(), result.size());
 	}
 
+	public void testNonExistingTable()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("dependencyTest");
+		dbConn = util.getConnection();
+		Statement stmt = dbConn.createStatement();
+		stmt.executeUpdate("create table person (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob)");
+		stmt.executeUpdate("create table address (person_id integer not null primary key, address_details varchar(100))");
+		stmt.executeUpdate("alter table address add foreign key (person_id) references person(nr)");
+		dbConn.commit();
+
+		TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
+		List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
+		TableIdentifier person = new TableIdentifier("PERSON");
+		TableIdentifier address = new TableIdentifier("ADDRESS");
+		tables.add(person);
+		tables.add(address);
+		tables.add(new TableIdentifier("some_data"));
+		List<TableIdentifier> result = sorter.sortForInsert(tables);
+		System.out.println("********************");
+		for (TableIdentifier tbl : result)
+		{
+			System.out.println(tbl.getTableName());
+		}
+		System.out.println("********************");
+		assertEquals(2, result.size());
+		assertTrue(person.compareNames(result.get(0)));
+		assertTrue(address.compareNames(result.get(1)));
+	}
+
 	public void testCheckDependencies()
 		throws Exception
 	{
@@ -157,17 +191,19 @@ public class TableDependencySorterTest
 //		}
 //		System.out.println("--------------------");
 		assertEquals("Not enough entries", tbl.size(), result.size());
-		assertEquals("Wrong first table", result.get(0), child1_detail2);
+		assertEquals("Wrong first table", result.get(0).getTableName().toUpperCase(), child1_detail2.getTableName().toUpperCase());
 		
 		// the second entry is either child1_detail or child2_detail
 		TableIdentifier second = result.get(1);
-		assertEquals(true, second.equals(child1_detail) || second.equals(child2_detail));
+		second.setSchema(null);
+		second.setCatalog(null);
+		assertEquals(true, second.compareNames(child1_detail) || second.compareNames(child2_detail));
 
 		TableIdentifier last = result.get(result.size() - 1);
-		assertEquals("Wrong last table", true, last.equals(base));
+		assertEquals("Wrong last table", true, last.compareNames(base));
 		
 		TableIdentifier lastButOne = result.get(result.size() - 2);
-		assertEquals(true, lastButOne.equals(child1) || lastButOne.equals(child2));
+		assertEquals(true, lastButOne.compareNames(child1) || lastButOne.compareNames(child2));
 		
 		List<TableIdentifier> insertList = sorter.sortForInsert(tbl);
 //		for (TableIdentifier t : insertList)
@@ -175,7 +211,7 @@ public class TableDependencySorterTest
 //			System.out.println(t.toString());
 //		}
 		assertEquals("Not enough entries", tbl.size(), insertList.size());
-		assertEquals("Wrong first table for insert", base, insertList.get(0));
+		assertTrue("Wrong first table for insert", base.compareNames(insertList.get(0)));
 	}
 
 	public void testCheckAddMissing()
@@ -203,47 +239,44 @@ public class TableDependencySorterTest
 		assertEquals("Wrong third table", "child1", result.get(2).getTableName().toLowerCase());
 	}
 
-	public void testCatDependency()
+	public void testCatDeleteDependency()
 		throws Exception
 	{
 		TestUtil util = new TestUtil("dependencyTest");
 		dbConn = util.getConnection();
-		Statement stmt = dbConn.createStatement();
-		String script = "CREATE TABLE catalogue_node \n" +
-             "( \n" +
-             "   catalogue_node_id integer       NOT NULL, \n" +
-             "   parent_node_id    integer, \n" +
-             "   product_id        integer, \n" +
-             "   sort_order        integer       NOT NULL, \n" +
-             "   external_id       varchar(50), \n" +
-             "   node_name         varchar(100) \n" +
-             "); \n" +
-             "ALTER TABLE catalogue_node \n" +
-             "   ADD CONSTRAINT catalogue_node_pk PRIMARY KEY (catalogue_node_id); \n" +
-             " \n" +
-             " \n" +
-             "ALTER TABLE catalogue_node \n" +
-             "  ADD CONSTRAINT catalogue_parent_fk FOREIGN KEY (parent_node_id) \n" +
-             "  REFERENCES catalogue_node (catalogue_node_id); \n" +
-             "\n" +
-						 "CREATE TABLE catalogue \n" +
-             "( \n" +
-             "   catalogue_id           integer      NOT NULL, \n" +
-             "   catalogue_name         varchar(20)  NOT NULL, \n" +
-             "   description            varchar(50)  NOT NULL, \n" +
-             "   read_only              integer      NOT NULL, \n" +
-             "   catalogue_root_node_id integer, \n" +
-             "   external_id            varchar(50) \n" +
-             "); \n" +
-             "ALTER TABLE catalogue \n" +
-             "   ADD CONSTRAINT catalogue_pk PRIMARY KEY (catalogue_id); \n" +
-             " \n" +
-             "ALTER TABLE catalogue \n" +
-             "  ADD CONSTRAINT cat_root_fk FOREIGN KEY (catalogue_root_node_id) \n" +
-             "  REFERENCES catalogue_node (catalogue_node_id);";
 		
+		InputStream in = getClass().getResourceAsStream("dependency_tables.sql");
+		Reader r = new InputStreamReader(in);
+		String script = FileUtil.readCharacters(r);
 		TestUtil.executeScript(dbConn, script);
 
+//		List<TableIdentifier> tables = dbConn.getMetadata().getTableList();
+		List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
+		TableIdentifier product = new TableIdentifier("PRODUCT");
+		TableIdentifier catNode = new TableIdentifier("CATALOGUE_NODE");
+		tables.add(catNode);
+		tables.add(product);
+
+		TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
+		List<TableIdentifier> result = sorter.sortForDelete(tables, true);
+
+		assertEquals(6, result.size());
+
+		assertTrue(result.get(4).compareNames(catNode));
+		assertTrue(result.get(5).compareNames(product));
+	}
+	
+	public void testCatDependencyForInsert()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("dependencyTest");
+		dbConn = util.getConnection();
+		
+		InputStream in = getClass().getResourceAsStream("dependency_tables.sql");
+		Reader r = new InputStreamReader(in);
+		String script = FileUtil.readCharacters(r);
+		TestUtil.executeScript(dbConn, script);
+		
 		ArrayList<TableIdentifier> tbl = new ArrayList<TableIdentifier>();
 		TableIdentifier cat = new TableIdentifier("catalogue");
 		TableIdentifier node = new TableIdentifier("catalogue_node");
@@ -253,7 +286,7 @@ public class TableDependencySorterTest
 		TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
 		List<TableIdentifier> result = sorter.sortForInsert(tbl);
 		assertEquals(2, result.size());
-		assertEquals(node, result.get(0));
-		assertEquals(cat, result.get(1));
+		assertTrue(node.compareNames(result.get(0)));
+		assertTrue(cat.compareNames(result.get(1)));
 	}
 }

@@ -98,16 +98,16 @@ public class DataStoreImporter
 	public void importString(String contents, String delimiter, String quoteChar)
 	{
 		ClipboardFile file = new ClipboardFile(contents);
-		setImportOptions(file, ProducerFactory.IMPORT_TEXT, new DefaultImportOptions(), new DefaultTextImportOptions(delimiter, quoteChar), null);
+		setImportOptions(file, ProducerFactory.ImportType.Text, new DefaultImportOptions(), new DefaultTextImportOptions(delimiter, quoteChar), null);
 	}
 
 	public void importString(String content, ImportOptions options, TextImportOptions textOptions)
 	{
 		ClipboardFile file = new ClipboardFile(content);
-		setImportOptions(file, ProducerFactory.IMPORT_TEXT, options, textOptions, null);
+		setImportOptions(file, ProducerFactory.ImportType.Text, options, textOptions, null);
 	}
 	
-	public void setImportOptions(File file, int type, ImportOptions generalOptions, TextImportOptions textOptions, XmlImportOptions xmlOptions)
+	public void setImportOptions(File file, ProducerFactory.ImportType type, ImportOptions generalOptions, TextImportOptions textOptions, XmlImportOptions xmlOptions)
 	{
 		ProducerFactory factory = new ProducerFactory(file);
 		factory.setTextOptions(textOptions);

@@ -21,7 +21,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import workbench.gui.renderer.WbRenderer;
-import workbench.resource.Settings;
+import workbench.resource.GuiSettings;
 import workbench.util.StringUtil;
 
 /**
@@ -40,12 +40,12 @@ public class ColumnWidthOptimizer
 
 	public void optimizeAllColWidth()
 	{
-		this.optimizeAllColWidth(Settings.getInstance().getMinColumnWidth(), Settings.getInstance().getMaxColumnWidth(), Settings.getInstance().getIncludeHeaderInOptimalWidth());
+		this.optimizeAllColWidth(GuiSettings.getMinColumnWidth(), GuiSettings.getMaxColumnWidth(), GuiSettings.getIncludeHeaderInOptimalWidth());
 	}
 
 	public void optimizeAllColWidth(boolean respectColName)
 	{
-		this.optimizeAllColWidth(Settings.getInstance().getMinColumnWidth(), Settings.getInstance().getMaxColumnWidth(), respectColName);
+		this.optimizeAllColWidth(GuiSettings.getMinColumnWidth(), GuiSettings.getMaxColumnWidth(), respectColName);
 	}
 
 	public void optimizeAllColWidth(int minWidth, int maxWidth, boolean respectColName)
@@ -64,7 +64,7 @@ public class ColumnWidthOptimizer
 
 	public void optimizeColWidth(int aColumn, boolean respectColName)
 	{
-		this.optimizeColWidth(aColumn, Settings.getInstance().getMinColumnWidth(), Settings.getInstance().getMaxColumnWidth(), respectColName);
+		this.optimizeColWidth(aColumn, GuiSettings.getMinColumnWidth(), GuiSettings.getMaxColumnWidth(), respectColName);
 	}
 
 	public void optimizeColWidth(int aColumn, int minWidth, int maxWidth)
@@ -100,7 +100,7 @@ public class ColumnWidthOptimizer
 		}
 
 		int rowCount = this.table.getRowCount();
-		int maxLines = Settings.getInstance().getAutRowHeightMaxLines();
+		int maxLines = GuiSettings.getAutRowHeightMaxLines();
 		String s = null;
 		int stringWidth = 0;
 
@@ -179,27 +179,19 @@ public class ColumnWidthOptimizer
 	 */
 	public void adjustColumns(boolean adjustToColumnLabel)
 	{
-		if (this.table.getModel() == null)
-		{
-			return;
-		}
+		if (this.table.getModel() == null) return;
+	
 		DataStoreTableModel dwModel = this.table.getDataStoreTableModel();
-		if (dwModel == null)
-		{
-			return;
-		}
+		if (dwModel == null) return;
 
 		Font f = this.table.getFont();
 		FontMetrics fm = this.table.getFontMetrics(f);
 		int charWidth = fm.stringWidth("n");
 		TableColumnModel colMod = this.table.getColumnModel();
-		if (colMod == null)
-		{
-			return;
-		}
+		if (colMod == null) return;
 
-		int minWidth = Settings.getInstance().getMinColumnWidth();
-		int maxWidth = Settings.getInstance().getMaxColumnWidth();
+		int minWidth = GuiSettings.getMinColumnWidth();
+		int maxWidth = GuiSettings.getMaxColumnWidth();
 
 		for (int i = 0; i < colMod.getColumnCount(); i++)
 		{

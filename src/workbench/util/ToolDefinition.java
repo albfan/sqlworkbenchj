@@ -11,7 +11,6 @@
  */
 package workbench.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -29,7 +28,7 @@ public class ToolDefinition
 
 	public ToolDefinition(String exe, String name)
 	{
-		setApplicationPath(exe);
+		setCommandLine(exe);
 		setName(name);
 	}
 	
@@ -43,12 +42,28 @@ public class ToolDefinition
 		this.name = appName;
 	}
 
-	public String getApplicationPath()
+	/**
+	 * The commndline for this external tool, including possible (static)
+	 * parameters.
+	 */
+	public String getCommandLine()
 	{
 		return appPath;
 	}
 
-	public void setApplicationPath(String path)
+	/**
+	 * The command line that should be used to run the external tool. This may
+	 * include parameters to the application, therefor a File object cannot be passed
+	 * 
+	 * Parameters are separated with spaces from the actual program path.
+	 * Program paths with spaces are expected to be enclosed with double quotes
+	 *
+	 * The method is invoked through reflection from the {@link workbench.gui.settings.ToolDefinitionPanel}
+	 * by a {@link workbench.gui.components.StringPropertyEditor}
+	 *
+	 * @param path
+	 */
+	public void setCommandLine(String path)
 	{
 		this.appPath = path;
 	}
@@ -56,6 +71,16 @@ public class ToolDefinition
 	public String toString()
 	{
 		return getName();
+	}
+
+	public WbFile getExecutable()
+	{
+		if (this.appPath == null) return null;
+		// as the commandline may include parameters, we assume the first token is the actual program. 
+		List<String> appDef = tokenizePath();
+		String prgPath = appDef.get(0);
+		WbFile f = new WbFile(prgPath);
+		return f;
 	}
 	
 	public void runApplication(String arg)
@@ -73,9 +98,7 @@ public class ToolDefinition
 	
 	public boolean executableExists()
 	{
-		List<String> appDef = tokenizePath();
-		String prgPath = appDef.get(0);
-		File f = new File(prgPath);
+		WbFile f = getExecutable();
 		return f.exists();
 	}
 	
@@ -98,5 +121,13 @@ public class ToolDefinition
 			return this.name.equals((String)other);
 		}
 		return false;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int hash = 7;
+		hash = 43 * hash + (this.name != null ? this.name.hashCode() : 0);
+		return hash;
 	}
 }

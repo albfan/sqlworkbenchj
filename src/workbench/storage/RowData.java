@@ -87,6 +87,8 @@ public class RowData
 		throws SQLException
 	{
 		int colCount = this.colData.length;
+		boolean longVarcharAsClob = info.treatLongVarcharAsClob();
+		
 		Object value = null;
 		for (int i=0; i < colCount; i++)
 		{
@@ -133,7 +135,7 @@ public class RowData
 						try { in.close(); } catch (Throwable th) {}
 					}
 				}
-				else if (SqlUtil.isClobType(type))
+				else if (SqlUtil.isClobType(type, longVarcharAsClob))
 				{
 					// CLOB columns are always converted to String objects internally
 					Reader in = null;

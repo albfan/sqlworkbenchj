@@ -26,6 +26,7 @@ import workbench.gui.components.WbCheckBoxLabel;
 import workbench.gui.components.WbFilePicker;
 import workbench.gui.components.WbFontPicker;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.WbLocale;
@@ -109,10 +110,10 @@ public class GeneralOptionsPanel
 
 		// General settings
 		set.setStandardFont(standardFont.getSelectedFont());
-		set.setShowTabIndex(showTabIndex.isSelected());
+		GuiSettings.setShowTabIndex(showTabIndex.isSelected());
 		set.setUseEncryption(this.useEncryption.isSelected());
 		set.setMsgLogFont(msgLogFont.getSelectedFont());
-		set.setUseAnimatedIcon(this.enableAnimatedIcon.isSelected());
+		GuiSettings.setUseAnimatedIcon(this.enableAnimatedIcon.isSelected());
 		set.setQuoteChar(this.quoteCharField.getText().trim());
 		set.setConsolidateLogMsg(this.consolidateLog.isSelected());
 		set.setDefaultTextDelimiter(this.textDelimiterField.getText());
@@ -357,7 +358,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new Insets(6, 0, 1, 0);
     jPanel2.add(consolidateLog, gridBagConstraints);
 
-    showTabIndex.setSelected(Settings.getInstance().getShowTabIndex());
+    showTabIndex.setSelected(GuiSettings.getShowTabIndex());
     showTabIndex.setText(ResourceMgr.getString("LblShowTabIndex"));
     showTabIndex.setToolTipText(ResourceMgr.getDescription("LblShowTabIndex"));
     showTabIndex.setBorder(null);
@@ -372,7 +373,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new Insets(6, 25, 1, 0);
     jPanel2.add(showTabIndex, gridBagConstraints);
 
-    enableAnimatedIcon.setSelected(Settings.getInstance().getUseAnimatedIcon());
+    enableAnimatedIcon.setSelected(GuiSettings.getUseAnimatedIcon());
     enableAnimatedIcon.setText(ResourceMgr.getString("LblEnableAnimatedIcon"));
     enableAnimatedIcon.setToolTipText(ResourceMgr.getDescription("LblEnableAnimatedIcon"));
     enableAnimatedIcon.setBorder(null);

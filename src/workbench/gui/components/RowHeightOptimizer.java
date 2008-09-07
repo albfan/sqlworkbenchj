@@ -14,11 +14,11 @@ package workbench.gui.components;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.table.TableCellRenderer;
-import workbench.gui.renderer.WbRenderer;
-import workbench.resource.Settings;
+import javax.swing.text.BadLocationException;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.util.StringUtil;
 
 
@@ -39,21 +39,28 @@ public class RowHeightOptimizer
 	public void optimizeAllRows()
 	{
 		int count = this.table.getRowCount();
-		int maxLines = Settings.getInstance().getAutRowHeightMaxLines();
+		int maxLines = GuiSettings.getAutRowHeightMaxLines();
 		if (count == 0) return;
+		boolean ignore = GuiSettings.getIgnoreWhitespaceForAutoRowHeight();
 		for (int row = 0; row < count; row ++)
 		{
-			optimizeRowHeight(row, maxLines);
+			optimizeRowHeight(row, maxLines, ignore);
 		}
 	}
+
+	public void optimizeRowHeight(int row)
+	{
+		int maxLines = GuiSettings.getAutRowHeightMaxLines();
+		boolean ignore = GuiSettings.getIgnoreWhitespaceForAutoRowHeight();
+		optimizeRowHeight(row, maxLines, ignore);
+	}
 	
-	public void optimizeRowHeight(int row, int maxLines)
+	public void optimizeRowHeight(int row, int maxLines, boolean ignoreEmptyLines)
 	{
 		int colCount = this.table.getColumnCount();
 
 		int defaultHeight = table.getRowHeight();
 		int optHeight = defaultHeight;
-//		int addHeight = this.getAdditionalRowSpace();
 		
 		for (int col = 0; col < colCount; col++)
 		{
@@ -67,48 +74,27 @@ public class RowHeightOptimizer
 			Font f = c.getFont();
 			FontMetrics fm = c.getFontMetrics(f);
 			
-			String s;
 			int lines = 1;
 
-			// The value that is displayed in the table through the renderer
-			// is not necessarily identical to the String returned by table.getValueAsString()
-			// so we'll first ask the Renderer or its component for the displayed value.
-			if (c instanceof WbRenderer)
-			{
-				WbRenderer wb = (WbRenderer)c;
-				s = wb.getDisplayValue();
-			}
-			else if (c instanceof JTextArea)
+			// Calculating the lines for the value only makes sense
+			// when a multi-line renderer is used which is essentially a JTextArea
+			if (c instanceof JTextArea)
 			{
 				JTextArea text = (JTextArea)c;
-				lines = text.getLineCount();
-				s = text.getText();
+				if (ignoreEmptyLines)
+				{
+					lines = getLineCount(text);
+				}
+				else
+				{
+					lines = text.getLineCount();
+				}
 			}
-			else if (c instanceof JLabel)
-			{
-				// DefaultCellRenderer is a JLabel
-				s = ((JLabel)c).getText();
-			}
-			else
-			{
-				s = this.table.getValueAsString(row, col);
-			}
-
-			int stringHeight;
-			if (!StringUtil.isEmptyString(s))
-			{
-				if (lines > maxLines) lines = maxLines;
-				int fheight = (fm == null ? 16 : fm.getHeight());
-//				Rectangle2D rect = fm.getStringBounds(s, table.getGraphics());
-//				stringHeight = lines * (int)rect.getHeight() + addHeight;
-				if (lines > maxLines) lines = maxLines;
-				stringHeight = lines * fheight;// + addHeight;
-			}
-			else
-			{
-				stringHeight = table.getRowHeight();
-			}
-
+			
+			if (lines > maxLines) lines = maxLines;
+			int fheight = (fm == null ? 16 : fm.getHeight());
+			int stringHeight = lines * fheight;// + addHeight;
+			
 			optHeight = Math.max(optHeight, stringHeight);
 		}
 		
@@ -118,14 +104,38 @@ public class RowHeightOptimizer
 		}
 	}
 
-//	private int getAdditionalRowSpace()
-//	{
-//		int addWidth = this.table.getIntercellSpacing().height * 2;
-//		if (this.table.getShowHorizontalLines())
-//		{
-//			addWidth += 2;
-//		}
-//		return addWidth;
-//	}
+	private int getLineCount(JTextArea text)
+	{
+		int lines = text.getLineCount();
+		if (lines < 1) return lines;
+
+		int line = lines;
+
+		try
+		{
+			int len = 0;
+			while (line > 0 && len == 0)
+			{
+				line --;
+				int start = text.getLineStartOffset(line);
+				int end = text.getLineEndOffset(line);
+				String content = text.getText(start, end - start);
+				if (StringUtil.isWhitespaceOrEmpty(content))
+				{
+					len = 0;
+				}
+				else
+				{
+					len = 1;
+				}
+			}
+		}
+		catch (BadLocationException e)
+		{
+			LogMgr.logError("RowHeightOptimizer.getLineCount()", "Error when calculating lines", e);
+			return lines;
+		}
+		return line + 1;
+	}
 	
 }

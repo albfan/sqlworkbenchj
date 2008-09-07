@@ -29,7 +29,7 @@ import workbench.util.StringUtil;
  */
 public class DbSettings
 {
-	private String dbId;
+	private final String dbId;
 	private boolean caseSensitive;
 	private boolean useJdbcCommit;
 	private boolean ddlNeedsCommit;
@@ -45,15 +45,17 @@ public class DbSettings
 	private Map<Integer, String> indexTypeMapping;
 	public static final String IDX_TYPE_NORMAL = "NORMAL";
 	private Set<String> updatingCommands;
-	
+	private final String prefix;
+
 	public DbSettings(String id, String productName)
 	{
 		this.dbId = id;
+		prefix = "workbench.db." + id + ".";
 		Settings settings = Settings.getInstance();
 		
-		this.caseSensitive = settings.getBoolProperty("workbench.db." + getDbId() + ".casesensitive", false) || settings.getCaseSensitivServers().contains(productName);
-		this.useJdbcCommit = settings.getBoolProperty("workbench.db." + getDbId() + ".usejdbccommit", false) || settings.getServersWhichNeedJdbcCommit().contains(productName);
-		this.ddlNeedsCommit = settings.getBoolProperty("workbench.db." + getDbId() + ".ddlneedscommit", false) || settings.getServersWhereDDLNeedsCommit().contains(productName);
+		this.caseSensitive = settings.getBoolProperty(prefix + "casesensitive", false) || settings.getCaseSensitivServers().contains(productName);
+		this.useJdbcCommit = settings.getBoolProperty(prefix + "usejdbccommit", false) || settings.getServersWhichNeedJdbcCommit().contains(productName);
+		this.ddlNeedsCommit = settings.getBoolProperty(prefix + "ddlneedscommit", false) || settings.getServersWhereDDLNeedsCommit().contains(productName);
 		
 		// Migrate old list-based properties to new dbid based properties
 		// If the flags were already set with the new format, re-applying the 
@@ -61,26 +63,26 @@ public class DbSettings
 		if (caseSensitive )
 		{
 			settings.removeCaseSensitivServer(productName);
-			settings.setProperty("workbench.db." + getDbId() + ".casesensitive", true);
+			settings.setProperty(prefix + "casesensitive", true);
 		}
 		if (ddlNeedsCommit)
 		{
 			settings.removeDDLCommitServer(productName);
-			settings.setProperty("workbench.db." + getDbId() + ".ddlneedscommit", true);
+			settings.setProperty(prefix + "ddlneedscommit", true);
 		}
 		if (useJdbcCommit)
 		{
 			settings.removeJdbcCommitServer(productName);
-			settings.setProperty("workbench.db." + getDbId() + ".usejdbccommit", true);
+			settings.setProperty(prefix + "usejdbccommit", true);
 		}
 		
 		List<String> quote = StringUtil.stringToList(settings.getProperty("workbench.db.neverquote",""));
 		this.neverQuoteObjects = quote.contains(this.getDbId());
-		this.trimDefaults = settings.getBoolProperty("workbench.db." + getDbId() + ".trimdefaults", true);
-		this.allowsMultipleGetUpdateCounts = settings.getBoolProperty("workbench.db." + getDbId() + ".multipleupdatecounts", true);
-		this.reportsRealSizeAsDisplaySize = settings.getBoolProperty("workbench.db." + getDbId() + ".charsize.usedisplaysize", false);
-		this.allowExtendedCreateStatement = settings.getBoolProperty("workbench.db." + getDbId() + ".extended.createstmt", true);
-		this.supportsBatchedStatements = settings.getBoolProperty("workbench.db." + getDbId() + ".batchedstatements", false);
+		this.trimDefaults = settings.getBoolProperty(prefix + "trimdefaults", true);
+		this.allowsMultipleGetUpdateCounts = settings.getBoolProperty(prefix + "multipleupdatecounts", true);
+		this.reportsRealSizeAsDisplaySize = settings.getBoolProperty(prefix + "charsize.usedisplaysize", false);
+		this.allowExtendedCreateStatement = settings.getBoolProperty(prefix + "extended.createstmt", true);
+		this.supportsBatchedStatements = settings.getBoolProperty(prefix + "batchedstatements", false);
 	}
 	
 	String getDbId() 
@@ -98,7 +100,7 @@ public class DbSettings
 			String l = Settings.getInstance().getProperty("workbench.db.updatingcommands", null);
 			List<String> commands = StringUtil.stringToList(l, ",", true, true);
 			updatingCommands.addAll(commands);
-			l = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".updatingcommands", null);
+			l = Settings.getInstance().getProperty(prefix + "updatingcommands", null);
 			commands = StringUtil.stringToList(l, ",", true, true);
 			updatingCommands.addAll(commands);
 		}
@@ -107,7 +109,7 @@ public class DbSettings
 	
 	public boolean longVarcharIsClob()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".clob.longvarchar", true);
+		return Settings.getInstance().getBoolProperty(prefix + "clob.longvarchar", true);
 	}
 
 	public boolean supportsBatchedStatements()
@@ -147,7 +149,7 @@ public class DbSettings
 
 	public boolean useSetNull()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".import.use.setnull", false);
+		return Settings.getInstance().getBoolProperty(prefix + "import.use.setnull", false);
 	}
 	
 	public boolean useJdbcCommit()
@@ -193,22 +195,22 @@ public class DbSettings
 	
 	public String getRefCursorTypeName()
 	{
-		return Settings.getInstance().getProperty("workbench.db." + getDbId() + ".refcursor.typename", null);
+		return Settings.getInstance().getProperty(prefix + "refcursor.typename", null);
 	}
 
 	public int getRefCursorDataType()
 	{
-		return Settings.getInstance().getIntProperty("workbench.db." + getDbId() + ".refcursor.typevalue", Integer.MIN_VALUE);
+		return Settings.getInstance().getIntProperty(prefix + "refcursor.typevalue", Integer.MIN_VALUE);
 	}
 	
 	public boolean useWbProcedureCall()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".procs.use.wbcall", false);
+		return Settings.getInstance().getBoolProperty(prefix + "procs.use.wbcall", false);
 	}
 	
 	public boolean needsTableForDropIndex()
 	{
-		boolean needsTable = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".dropindex.needstable", false);
+		boolean needsTable = Settings.getInstance().getBoolProperty(prefix + "dropindex.needstable", false);
 		return needsTable;
 	}	
 
@@ -219,12 +221,12 @@ public class DbSettings
 
 	public boolean useSavePointForDML()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".sql.usesavepoint", false);
+		return Settings.getInstance().getBoolProperty(prefix + "sql.usesavepoint", false);
 	}
 	
 	public boolean useSavePointForDDL()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".ddl.usesavepoint", false);
+		return Settings.getInstance().getBoolProperty(prefix + "ddl.usesavepoint", false);
 	}
 
 	/**
@@ -233,22 +235,22 @@ public class DbSettings
 	 */
 	public String getBlobLiteralType()
 	{
-		return Settings.getInstance().getProperty("workbench.db." + getDbId() + ".blob.literal.type", "hex");
+		return Settings.getInstance().getProperty(prefix + "blob.literal.type", "hex");
 	}
 	
 	public String getBlobLiteralPrefix()
 	{
-		return Settings.getInstance().getProperty("workbench.db." + getDbId() + ".blob.literal.prefix", null);
+		return Settings.getInstance().getProperty(prefix + "blob.literal.prefix", null);
 	}
 	
 	public String getBlobLiteralSuffix()
 	{
-		return Settings.getInstance().getProperty("workbench.db." + getDbId() + ".blob.literal.suffix", null);
+		return Settings.getInstance().getProperty(prefix + "blob.literal.suffix", null);
 	}
 
 	public boolean getBlobLiteralUpperCase()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".blob.literal.upcase", false);
+		return Settings.getInstance().getBoolProperty(prefix + "blob.literal.upcase", false);
 	}
 	
 	public boolean supportSingleLineCommands()
@@ -261,18 +263,18 @@ public class DbSettings
 
 	public String getLineComment()
 	{
-		return Settings.getInstance().getProperty("workbench.db." + getDbId() + ".linecomment", null);
+		return Settings.getInstance().getProperty(prefix + "linecomment", null);
 	}
-	
+
 	public boolean supportsQueryTimeout()
 	{
-		boolean result = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".supportquerytimeout", true);
+		boolean result = Settings.getInstance().getBoolProperty(prefix + "supportquerytimeout", true);
 		return result;
 	}
 	
 	public boolean supportsGetPrimaryKeys()
 	{
-		boolean result = Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".supportgetpk", true);
+		boolean result = Settings.getInstance().getBoolProperty(prefix + "supportgetpk", true);
 		return result;
 	}
 	
@@ -301,7 +303,7 @@ public class DbSettings
 		if (type == null) return false;
 		type = type.toLowerCase();
 		if (type.toUpperCase().indexOf("VIEW") > -1) return true;
-		String viewTypes = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".additional.viewtypes", "view").toLowerCase();
+		String viewTypes = Settings.getInstance().getProperty(prefix + "additional.viewtypes", "view").toLowerCase();
 		List types = StringUtil.stringToList(viewTypes, ",", true, true, false);
 		return (types.contains(type.toLowerCase()));
 	}
@@ -309,7 +311,7 @@ public class DbSettings
 	public boolean isSynonymType(String type)
 	{
 		if (type == null) return false;
-		String synTypes = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".synonymtypes", "synonym").toLowerCase();
+		String synTypes = Settings.getInstance().getProperty(prefix + "synonymtypes", "synonym").toLowerCase();
 		List types = StringUtil.stringToList(synTypes, ",", true, true, false);
 		return (types.contains(type.toLowerCase()));
 	}
@@ -335,7 +337,7 @@ public class DbSettings
 		if (indexTypeMapping == null)
 		{
 			this.indexTypeMapping = new HashMap<Integer, String>();
-			String map = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".indextypes", null);
+			String map = Settings.getInstance().getProperty(prefix + "indextypes", null);
 			if (map != null)
 			{
 				List<String> entries = StringUtil.stringToList(map, ";", true, true);
@@ -542,6 +544,21 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".index.sorted", true);
 	}
+
+	public boolean includeSystemTablesInSelectable()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".systemtables.selectable", false);
+	}
+	
+//	public boolean preferParametersFromStatement()
+//	{
+//		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".call.parameters.fromstatement", true);
+//	}
+//
+//	public boolean callStatementsNeedInput()
+//	{
+//		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".call.parameters.prompt", true);
+//	}
 	
 	public boolean canDropType(String type)
 	{

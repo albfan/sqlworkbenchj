@@ -507,14 +507,14 @@ public class TableIdentifier
 		}
 		else
 		{
-			result = this.getTableName().equals(other.getTableName());
+			result = this.getTableName().equalsIgnoreCase(other.getTableName());
 			if (result && this.schema != null && other.schema != null)
 			{
-				result = this.schema.equals(other.schema);
+				result = this.schema.equalsIgnoreCase(other.schema);
 			}
 			if (result && this.catalog != null && other.catalog != null)
 			{
-				result = this.catalog.equals(other.catalog);
+				result = this.catalog.equalsIgnoreCase(other.catalog);
 			}
 		}
 		return result;

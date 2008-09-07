@@ -76,21 +76,32 @@ public class StoreableKeyStroke
 		return 0;
 	}
 
-	public boolean equals(Object other)
+	public boolean equals(KeyStroke other)
 	{
 		KeyStroke thisKey = getKeyStroke();
+		if (thisKey == null && other == null) return true;
+		return thisKey.equals(other);
+	}
+
+	public boolean equals(StoreableKeyStroke other)
+	{
+		KeyStroke thisKey = getKeyStroke();
+		KeyStroke otherKey = ((StoreableKeyStroke)other).getKeyStroke();
+		if (thisKey == null && otherKey == null) return true;
+		if (thisKey == null && otherKey != null) return false;
+		if (thisKey != null && otherKey == null) return false;
+		return thisKey.equals(otherKey);
+	}
+
+	public boolean equals(Object other)
+	{
 		if (other instanceof StoreableKeyStroke)
 		{
-			KeyStroke otherKey = ((StoreableKeyStroke)other).getKeyStroke();
-			if (thisKey == null && otherKey == null) return true;
-			if (thisKey == null && otherKey != null) return false;
-			if (thisKey != null && otherKey == null) return false;
-			return thisKey.equals(otherKey);
+			return equals((StoreableKeyStroke)other);
 		}
 		else if (other instanceof KeyStroke)
 		{
-			if (thisKey == null && other == null) return true; 
-			return thisKey.equals((KeyStroke)other);
+			return equals((KeyStroke)other);
 		}
 		return false;
 	}

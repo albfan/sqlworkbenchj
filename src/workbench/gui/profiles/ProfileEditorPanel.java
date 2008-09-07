@@ -46,6 +46,7 @@ import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.FileActions;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
@@ -177,7 +178,7 @@ public class ProfileEditorPanel
 
 	public void restoreSettings()
 	{
-		int pos = Settings.getInstance().getProfileDividerLocation();
+		int pos = GuiSettings.getProfileDividerLocation();
 		if (pos < 200)
 		{
 			pos = 200; // make sure the whole toolbar for the tree is visible!
@@ -190,7 +191,7 @@ public class ProfileEditorPanel
 
 	public void saveSettings()
 	{
-		Settings.getInstance().setProfileDividerLocation(this.jSplitPane.getDividerLocation());
+		GuiSettings.setProfileDividerLocation(this.jSplitPane.getDividerLocation());
 		List<String> expandedGroups = ((ProfileTree)profileTree).getExpandedGroupNames();
 		Settings.getInstance().setProperty("workbench.profiles.expandedgroups", StringUtil.listToString(expandedGroups, ',', true));
 	}

@@ -142,8 +142,13 @@ public class TableDeleteSync
 	public void setTableName(TableIdentifier tableToCheck, TableIdentifier tableToDelete)
 		throws SQLException
 	{
+		if (tableToCheck == null) throw new IllegalArgumentException("Source table may not be null!");
+		if (tableToDelete == null) throw new IllegalArgumentException("Target table (for source: " + tableToCheck.getTableName() + ") may not be null!");
+		
 		this.checkTable = this.reference.getMetadata().findSelectableObject(tableToCheck);
 		this.deleteTable = this.toDelete.getMetadata().findTable(tableToDelete);
+
+		if (deleteTable == null) throw new SQLException("Table " + tableToDelete.getTableName() + " not found in target database");
 		firstDelete = true;
 		this.columnMap.clear();
 		
@@ -218,6 +223,7 @@ public class TableDeleteSync
 			{
 				if (this.outputWriter == null)
 				{
+					// If output writer is null, we are executing the statements directly.
 					this.monitor.setMonitorType(RowActionMonitor.MONITOR_DELETE);
 					this.monitor.setCurrentObject(this.deleteTable.getTableName(), -1, -1);
 				}
@@ -261,10 +267,6 @@ public class TableDeleteSync
 			if (!toDelete.getAutoCommit())
 			{
 				toDelete.commit();
-			}
-			if (this.monitor != null)
-			{
-				this.monitor.jobFinished();
 			}
 		}
 		catch (SQLException e)

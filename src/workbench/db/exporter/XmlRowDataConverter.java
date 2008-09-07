@@ -265,23 +265,16 @@ public class XmlRowDataConverter
 			// or if the value is not a blob value (which has already been written!)
 			if (!isNull && !externalFile)
 			{
-				// String data needs to be escaped!
-				if (SqlUtil.isCharacterType(type))
+				if (this.useCData && SqlUtil.isCharacterType(type))
 				{
-					if (this.useCData)
-					{
-						xml.append(TagWriter.CDATA_START);
-						xml.append(this.getValueAsFormattedString(row, c));
-						xml.append(TagWriter.CDATA_END);
-					}
-					else
-					{
-						writeEscapedXML(xml, this.getValueAsFormattedString(row, c), true);
-					}
+					// CDATA should only be used for character data types
+					xml.append(TagWriter.CDATA_START);
+					xml.append(this.getValueAsFormattedString(row, c));
+					xml.append(TagWriter.CDATA_END);
 				}
 				else
 				{
-					xml.append(this.getValueAsFormattedString(row, c));
+					writeEscapedXML(xml, this.getValueAsFormattedString(row, c), true);
 				}
 			}
 			if (writeCloseTag) xml.append(closeColTag);

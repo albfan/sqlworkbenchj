@@ -554,7 +554,8 @@ public class WbCopyTest
 				"-syncDelete=true";
 
 			StatementRunnerResult result = copyCmd.execute(sql);
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			String msg = result.getMessageBuffer().toString();
+			assertEquals(msg, true, result.isSuccess());
 
 			ResultSet rs = tstmt.executeQuery("select nr, lastname, firstname from person");
 			while (rs.next())

@@ -335,7 +335,7 @@ public class DbMetadata
 		this.metaSqlMgr = new MetaDataSqlManager(this.getProductName());
 
 		tableTypeName = settings.getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
-		tableTypesTable = new String[] {tableTypeName};
+		tableTypesTable = new String[] { tableTypeName };
 		
 		// The tableTypesSelectable array will be used
 		// to fill the completion cache. In that case 
@@ -343,22 +343,21 @@ public class DbMetadata
 		// is done for the objectsWithData as that 
 		// drives the "Data" tab in the DbExplorer)
 		Set<String> types = getObjectsWithData();
-		List<String> realTypes = new ArrayList<String>(types.size());
-		
-		Iterator itr = types.iterator();
-		for (String s : types)
+
+		if (!getDbSettings().includeSystemTablesInSelectable())
 		{
-			if (s.toUpperCase().indexOf("SYSTEM") == -1)
+			Iterator<String> itr = types.iterator();
+			while (itr.hasNext())
 			{
-				realTypes.add(s);
+				String s = itr.next();
+				if (s.toUpperCase().indexOf("SYSTEM") > -1)
+				{
+					itr.remove();
+				}
 			}
 		}
-		tableTypesSelectable = new String[realTypes.size()];
-		int i = 0;
-		for (String s : realTypes)
-		{
-			tableTypesSelectable[i++] = s.toUpperCase();
-		}
+		
+		tableTypesSelectable = StringUtil.toArray(types, true);
 		
 		String pattern = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".selectinto.pattern", null);
 		if (pattern != null)
@@ -375,6 +374,11 @@ public class DbMetadata
 		}
 	}
 
+	public String[] getSelectableTypes()
+	{
+		return tableTypesSelectable;
+	}
+	
 	public String getTableTypeName() { return tableTypeName; }
 	public String getMViewTypeName() { return MVIEW_NAME;	}
 	

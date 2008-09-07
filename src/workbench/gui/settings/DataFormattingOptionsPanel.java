@@ -14,9 +14,9 @@ package workbench.gui.settings;
 import java.awt.Color;
 import javax.swing.JPanel;
 import workbench.gui.components.NumberField;
-import workbench.gui.components.WbCheckBoxLabel;
 import workbench.gui.components.WbColorPicker;
 import workbench.interfaces.Restoreable;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -37,39 +37,40 @@ public class DataFormattingOptionsPanel
 	
 	public void restoreSettings()
 	{
-		rowHeightResize.setSelected(Settings.getInstance().getAllowRowHeightResizing());
-		autoRowHeight.setSelected(Settings.getInstance().getAutomaticOptimalRowHeight());
-		maxRowHeight.setText(Integer.toString(Settings.getInstance().getAutRowHeightMaxLines()));
-		alternateColor.setSelectedColor(Settings.getInstance().getAlternateRowColor());
+		rowHeightResize.setSelected(GuiSettings.getAllowRowHeightResizing());
+		autoRowHeight.setSelected(GuiSettings.getAutomaticOptimalRowHeight());
+		maxRowHeight.setText(Integer.toString(GuiSettings.getAutRowHeightMaxLines()));
+		alternateColor.setSelectedColor(GuiSettings.getAlternateRowColor());
 		dataFont.setSelectedFont(Settings.getInstance().getDataFont(false));
-		autoColWidth.setSelected(Settings.getInstance().getAutomaticOptimalWidth());
-		includeHeaderWidth.setSelected(Settings.getInstance().getIncludeHeaderInOptimalWidth());
-		minColSizeField.setText(Integer.toString(Settings.getInstance().getMinColumnWidth()));
-		maxColSizeField.setText(Integer.toString(Settings.getInstance().getMaxColumnWidth()));
-		nullColor.setSelectedColor(Settings.getInstance().getNullColor());
+		autoColWidth.setSelected(GuiSettings.getAutomaticOptimalWidth());
+		includeHeaderWidth.setSelected(GuiSettings.getIncludeHeaderInOptimalWidth());
+		ignoreEmptyRows.setSelected(GuiSettings.getIgnoreWhitespaceForAutoRowHeight());
+		minColSizeField.setText(Integer.toString(GuiSettings.getMinColumnWidth()));
+		maxColSizeField.setText(Integer.toString(GuiSettings.getMaxColumnWidth()));
+		nullColor.setSelectedColor(GuiSettings.getNullColor());
 	}
 
 	public void saveSettings()
 	{
-		Settings set = Settings.getInstance();
 		Color c = alternateColor.getSelectedColor();
-		set.setUseAlternateRowColor(c != null);
-		set.setAlternateRowColor(alternateColor.getSelectedColor());
-		set.setDefaultDateFormat(this.dateFormatTextField.getText());
-		set.setDefaultTimeFormat(this.timeFormat.getText());
-		set.setDefaultTimestampFormat(this.timestampFormatTextField.getText());
-		set.setMaxFractionDigits(((NumberField)this.maxDigitsField).getValue());
-		set.setDecimalSymbol(this.decimalField.getText());
-		set.setAllowRowHeightResizing(rowHeightResize.isSelected());
-		set.setDataFont(dataFont.getSelectedFont());
-		set.setMaxColumnWidth(((NumberField)this.maxColSizeField).getValue());
-		set.setMinColumnWidth(((NumberField)this.minColSizeField).getValue());
-		set.setAutomaticOptimalWidth(autoColWidth.isSelected());
-		set.setIncludeHeaderInOptimalWidth(includeHeaderWidth.isSelected());
-		set.setNullColor(nullColor.getSelectedColor());
-		set.setProperty("workbench.db.oracle.fixdatetype", oraDateFix.isSelected());
-		set.setAutomaticOptimalRowHeight(autoRowHeight.isSelected());
-		set.setAutRowHeightMaxLines(((NumberField)this.maxRowHeight).getValue());
+		GuiSettings.setUseAlternateRowColor(c != null);
+		GuiSettings.setAlternateRowColor(alternateColor.getSelectedColor());
+		Settings.getInstance().setDefaultDateFormat(this.dateFormatTextField.getText());
+		Settings.getInstance().setDefaultTimeFormat(this.timeFormat.getText());
+		Settings.getInstance().setDefaultTimestampFormat(this.timestampFormatTextField.getText());
+		Settings.getInstance().setMaxFractionDigits(((NumberField)this.maxDigitsField).getValue());
+		Settings.getInstance().setDecimalSymbol(this.decimalField.getText());
+		GuiSettings.setAllowRowHeightResizing(rowHeightResize.isSelected());
+		Settings.getInstance().setDataFont(dataFont.getSelectedFont());
+		GuiSettings.setMaxColumnWidth(((NumberField)this.maxColSizeField).getValue());
+		GuiSettings.setMinColumnWidth(((NumberField)this.minColSizeField).getValue());
+		GuiSettings.setAutomaticOptimalWidth(autoColWidth.isSelected());
+		GuiSettings.setIncludeHeaderInOptimalWidth(includeHeaderWidth.isSelected());
+		GuiSettings.setNullColor(nullColor.getSelectedColor());
+		Settings.getInstance().setProperty("workbench.db.oracle.fixdatetype", oraDateFix.isSelected());
+		GuiSettings.setAutomaticOptimalRowHeight(autoRowHeight.isSelected());
+		GuiSettings.setAutRowHeightMaxLines(((NumberField)this.maxRowHeight).getValue());
+		GuiSettings.setIgnoreWhitespaceForAutoRowHeight(ignoreEmptyRows.isSelected());
 	}
 
 	/** This method is called from within the constructor to
@@ -105,10 +106,11 @@ public class DataFormattingOptionsPanel
     rowHeightPanel = new javax.swing.JPanel();
     jPanel5 = new javax.swing.JPanel();
     autoRowHeight = new javax.swing.JCheckBox();
-    rowHeightResize = new javax.swing.JCheckBox();
+    ignoreEmptyRows = new javax.swing.JCheckBox();
     jPanel6 = new javax.swing.JPanel();
     maxRowHeightLabel = new javax.swing.JLabel();
     maxRowHeight = new NumberField();
+    rowHeightResize = new javax.swing.JCheckBox();
     oraDateFix = new javax.swing.JCheckBox();
     jPanel2 = new javax.swing.JPanel();
     alternateColorLabel = new javax.swing.JLabel();
@@ -118,8 +120,8 @@ public class DataFormattingOptionsPanel
 
     setLayout(new java.awt.GridBagLayout());
 
-    dateFormatLabel.setText(ResourceMgr.getString("LblDateFormat"));
-    dateFormatLabel.setToolTipText(ResourceMgr.getDescription("LblDateFormat"));
+    dateFormatLabel.setText(ResourceMgr.getString("LblDateFormat")); // NOI18N
+    dateFormatLabel.setToolTipText(ResourceMgr.getString("d_LblDateFormat")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -136,7 +138,7 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 7, 0, 9);
     add(dateFormatTextField, gridBagConstraints);
 
-    decimalLabel.setText(ResourceMgr.getString("LblDecimalSymbol"));
+    decimalLabel.setText(ResourceMgr.getString("LblDecimalSymbol")); // NOI18N
     decimalLabel.setToolTipText(ResourceMgr.getDescription("LblDecimalSymbol"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -154,7 +156,7 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 7, 0, 9);
     add(decimalField, gridBagConstraints);
 
-    maxDigitsLabel.setText(ResourceMgr.getString("LblMaxDigits"));
+    maxDigitsLabel.setText(ResourceMgr.getString("LblMaxDigits")); // NOI18N
     maxDigitsLabel.setToolTipText(ResourceMgr.getDescription("LblMaxDigits"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
@@ -175,7 +177,7 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 12);
     add(maxDigitsField, gridBagConstraints);
 
-    timestampFormatLabel.setText(ResourceMgr.getString("LblTimestampFormat"));
+    timestampFormatLabel.setText(ResourceMgr.getString("LblTimestampFormat")); // NOI18N
     timestampFormatLabel.setToolTipText(ResourceMgr.getDescription("LblTimestampFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -194,7 +196,7 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(4, 7, 0, 9);
     add(timestampFormatTextField, gridBagConstraints);
 
-    timeFormatLabel.setText(ResourceMgr.getString("LblTimeFormat"));
+    timeFormatLabel.setText(ResourceMgr.getString("LblTimeFormat")); // NOI18N
     timeFormatLabel.setToolTipText(ResourceMgr.getDescription("LblTimeFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
@@ -214,8 +216,8 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 12);
     add(timeFormat, gridBagConstraints);
 
-    dataFontLabel.setText(ResourceMgr.getString("LblDataFont"));
-    dataFontLabel.setToolTipText(ResourceMgr.getDescription("LblDataFont"));
+    dataFontLabel.setText(ResourceMgr.getString("LblDataFont")); // NOI18N
+    dataFontLabel.setToolTipText(ResourceMgr.getString("d_LblDataFont")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -232,19 +234,19 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 7, 0, 10);
     add(dataFont, gridBagConstraints);
 
-    colWidthPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("TxtColWidthSettings")));
+    colWidthPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("TxtColWidthSettings"))); // NOI18N
     colWidthPanel.setLayout(new java.awt.GridBagLayout());
 
     jPanel3.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
 
-    autoColWidth.setText(ResourceMgr.getString("LblAutoColWidth"));
-    autoColWidth.setToolTipText(ResourceMgr.getDescription("LblAutoColWidth"));
+    autoColWidth.setText(ResourceMgr.getString("LblAutoColWidth")); // NOI18N
+    autoColWidth.setToolTipText(ResourceMgr.getString("d_LblAutoColWidth")); // NOI18N
     autoColWidth.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
     autoColWidth.setMargin(new java.awt.Insets(0, 0, 0, 0));
     jPanel3.add(autoColWidth);
 
-    includeHeaderWidth.setText(ResourceMgr.getString("LblIncludeHeaderColWidth"));
-    includeHeaderWidth.setToolTipText(ResourceMgr.getDescription("LblIncludeHeaderColWidth"));
+    includeHeaderWidth.setText(ResourceMgr.getString("LblIncludeHeaderColWidth")); // NOI18N
+    includeHeaderWidth.setToolTipText(ResourceMgr.getString("d_LblIncludeHeaderColWidth")); // NOI18N
     includeHeaderWidth.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
     includeHeaderWidth.setMargin(new java.awt.Insets(0, 0, 0, 0));
     jPanel3.add(includeHeaderWidth);
@@ -257,23 +259,34 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
     colWidthPanel.add(jPanel3, gridBagConstraints);
 
-    jPanel4.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
+    jPanel4.setLayout(new java.awt.GridBagLayout());
 
-    minColSizeLabel1.setText(ResourceMgr.getString("LblMinColsize"));
-    minColSizeLabel1.setToolTipText(ResourceMgr.getDescription("LblMinColsize"));
+    minColSizeLabel1.setText(ResourceMgr.getString("LblMinColsize")); // NOI18N
+    minColSizeLabel1.setToolTipText(ResourceMgr.getString("d_LblMinColsize")); // NOI18N
     minColSizeLabel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 5, 0));
-    jPanel4.add(minColSizeLabel1);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 6);
+    jPanel4.add(minColSizeLabel1, gridBagConstraints);
 
     minColSizeField.setColumns(5);
-    jPanel4.add(minColSizeField);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    jPanel4.add(minColSizeField, gridBagConstraints);
 
-    maxColSizeLabel1.setText(ResourceMgr.getString("LblMaxColsize"));
-    maxColSizeLabel1.setToolTipText(ResourceMgr.getDescription("LblMaxColsize"));
+    maxColSizeLabel1.setText(ResourceMgr.getString("LblMaxColsize")); // NOI18N
+    maxColSizeLabel1.setToolTipText(ResourceMgr.getString("d_LblMaxColsize")); // NOI18N
     maxColSizeLabel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 5));
-    jPanel4.add(maxColSizeLabel1);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
+    jPanel4.add(maxColSizeLabel1, gridBagConstraints);
 
     maxColSizeField.setColumns(5);
-    jPanel4.add(maxColSizeField);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    jPanel4.add(maxColSizeField, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -282,7 +295,7 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 0.5;
-    gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 5, 2, 0);
     colWidthPanel.add(jPanel4, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -294,41 +307,45 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(7, 7, 0, 10);
     add(colWidthPanel, gridBagConstraints);
 
-    rowHeightPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("TxtRowHeightSettings")));
+    rowHeightPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("TxtRowHeightSettings"))); // NOI18N
     rowHeightPanel.setLayout(new java.awt.GridBagLayout());
 
-    jPanel5.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
+    jPanel5.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 0));
 
-    autoRowHeight.setText(ResourceMgr.getString("LblRowHeightAuto"));
-    autoRowHeight.setToolTipText(ResourceMgr.getDescription("LblRowHeightAuto"));
+    autoRowHeight.setText(ResourceMgr.getString("LblRowHeightAuto")); // NOI18N
+    autoRowHeight.setToolTipText(ResourceMgr.getString("LblRowHeightAuto")); // NOI18N
     autoRowHeight.setBorder(null);
     jPanel5.add(autoRowHeight);
 
-    rowHeightResize.setText(ResourceMgr.getString("LblRowResize"));
-    rowHeightResize.setToolTipText(ResourceMgr.getDescription("LblRowResize"));
-    rowHeightResize.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
-    rowHeightResize.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    rowHeightResize.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-    rowHeightResize.setIconTextGap(5);
-    jPanel5.add(rowHeightResize);
+    ignoreEmptyRows.setText(ResourceMgr.getString("LblIgnoreRowHeightEmptyLine")); // NOI18N
+    ignoreEmptyRows.setToolTipText(ResourceMgr.getString("d_LblIgnoreRowHeightEmptyLine")); // NOI18N
+    ignoreEmptyRows.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
+    ignoreEmptyRows.setMargin(new java.awt.Insets(0, 10, 0, 0));
+    jPanel5.add(ignoreEmptyRows);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 0);
     rowHeightPanel.add(jPanel5, gridBagConstraints);
 
-    jPanel6.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
+    jPanel6.setLayout(new java.awt.GridBagLayout());
 
-    maxRowHeightLabel.setText(ResourceMgr.getString("LblRowHeightMax"));
-    maxRowHeightLabel.setToolTipText(ResourceMgr.getDescription("LblRowHeightMax"));
+    maxRowHeightLabel.setText(ResourceMgr.getString("LblRowHeightMax")); // NOI18N
+    maxRowHeightLabel.setToolTipText(ResourceMgr.getString("d_LblRowHeightMax")); // NOI18N
     maxRowHeightLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 5, 0));
-    jPanel6.add(maxRowHeightLabel);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 7);
+    jPanel6.add(maxRowHeightLabel, gridBagConstraints);
 
     maxRowHeight.setColumns(5);
-    jPanel6.add(maxRowHeight);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    jPanel6.add(maxRowHeight, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -336,8 +353,20 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 0);
+    gridBagConstraints.insets = new java.awt.Insets(3, 4, 7, 0);
     rowHeightPanel.add(jPanel6, gridBagConstraints);
+
+    rowHeightResize.setText(ResourceMgr.getString("LblRowResize")); // NOI18N
+    rowHeightResize.setToolTipText(ResourceMgr.getString("d_LblRowResize")); // NOI18N
+    rowHeightResize.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    rowHeightResize.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    rowHeightResize.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 4, 0);
+    rowHeightPanel.add(rowHeightResize, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -350,8 +379,8 @@ public class DataFormattingOptionsPanel
     add(rowHeightPanel, gridBagConstraints);
 
     oraDateFix.setSelected(Settings.getInstance().getBoolProperty("workbench.db.oracle.fixdatetype", false));
-    oraDateFix.setText(ResourceMgr.getString("LblOraDataTS"));
-    oraDateFix.setToolTipText(ResourceMgr.getDescription("LblOraDataTS"));
+    oraDateFix.setText(ResourceMgr.getString("LblOraDataTS")); // NOI18N
+    oraDateFix.setToolTipText(ResourceMgr.getString("d_LblOraDataTS")); // NOI18N
     oraDateFix.setBorder(null);
     oraDateFix.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     oraDateFix.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -367,8 +396,8 @@ public class DataFormattingOptionsPanel
 
     jPanel2.setLayout(new java.awt.GridBagLayout());
 
-    alternateColorLabel.setText(ResourceMgr.getString("LblAlternateRowColor"));
-    alternateColorLabel.setToolTipText(ResourceMgr.getDescription("LblAlternateRowColor"));
+    alternateColorLabel.setText(ResourceMgr.getString("LblAlternateRowColor")); // NOI18N
+    alternateColorLabel.setToolTipText(ResourceMgr.getString("d_LblAlternateRowColor")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -380,7 +409,6 @@ public class DataFormattingOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 8);
@@ -390,13 +418,12 @@ public class DataFormattingOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(7, 3, 0, 8);
     jPanel2.add(nullColor, gridBagConstraints);
 
-    nullColorLabel.setText(ResourceMgr.getString("LblNullValueColor"));
-    nullColorLabel.setToolTipText(ResourceMgr.getDescription("LblNullValueColor"));
+    nullColorLabel.setText(ResourceMgr.getString("LblNullValueColor")); // NOI18N
+    nullColorLabel.setToolTipText(ResourceMgr.getString("d_LblNullValueColor")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -429,6 +456,7 @@ public class DataFormattingOptionsPanel
   private javax.swing.JTextField dateFormatTextField;
   private javax.swing.JTextField decimalField;
   private javax.swing.JLabel decimalLabel;
+  private javax.swing.JCheckBox ignoreEmptyRows;
   private javax.swing.JCheckBox includeHeaderWidth;
   private javax.swing.JPanel jPanel2;
   private javax.swing.JPanel jPanel3;

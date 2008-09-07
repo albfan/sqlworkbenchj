@@ -123,7 +123,7 @@ public class WbDataDiffTest
 			String sync = FileUtil.readCharacters(r);
 			ScriptParser parser = new ScriptParser();
 			parser.setScript(sync);
-			assertEquals(11, parser.getSize());
+			assertEquals(10, parser.getSize());
 			
 			String[] expectedFiles = new String[]
 			{

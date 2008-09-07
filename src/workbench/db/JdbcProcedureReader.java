@@ -22,6 +22,7 @@ import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
+import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -244,6 +245,12 @@ public class JdbcProcedureReader
 
 				switch (colType)
 				{
+					case DatabaseMetaData.procedureColumnUnknown:
+						stype = "UNKNOWN";
+						break;
+					case DatabaseMetaData.procedureColumnInOut:
+						stype = "INOUT";
+						break;
 					case DatabaseMetaData.procedureColumnIn:
 						stype = "IN";
 						break;
@@ -257,7 +264,7 @@ public class JdbcProcedureReader
 						stype = "RETURN";
 						break;
 					default:
-						stype = "";
+						stype = NumberStringCache.getNumberString(colType);
 				}
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, stype);
 

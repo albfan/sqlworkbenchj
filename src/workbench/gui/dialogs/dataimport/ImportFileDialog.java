@@ -33,7 +33,7 @@ import workbench.util.StringUtil;
 public class ImportFileDialog
 	implements PropertyChangeListener
 {
-	private int importType = -1;
+	private ProducerFactory.ImportType importType = null;
 	private File selectedFile = null;
 	private boolean isCancelled = false;
 	private Settings settings = Settings.getInstance();
@@ -84,7 +84,7 @@ public class ImportFileDialog
 		return this.selectedFile;
 	}
 	
-	public int getImportType()
+	public ProducerFactory.ImportType getImportType()
 	{
 		return this.importType;
 	}
@@ -110,7 +110,7 @@ public class ImportFileDialog
 	
 	public boolean selectInput(String title)
 	{
-		this.importType = -1;
+		this.importType = null;
 		this.selectedFile = null;
 		boolean result = false;
 		
@@ -171,17 +171,17 @@ public class ImportFileDialog
 		return result;
 	}
 
-	private int getImportType(FileFilter ff)
+	private ProducerFactory.ImportType getImportType(FileFilter ff)
 	{
 		if (ff == ExtensionFileFilter.getXmlFileFilter())
 		{
-			return ProducerFactory.IMPORT_XML;
+			return ProducerFactory.ImportType.XML;
 		}
 		else if (ff == ExtensionFileFilter.getTextFileFilter())
 		{
-			return ProducerFactory.IMPORT_TEXT;
+			return ProducerFactory.ImportType.Text;
 		}
-		return -1;
+		return null;
 	}
 	
 	public void propertyChange(PropertyChangeEvent evt) 
@@ -195,8 +195,7 @@ public class ImportFileDialog
 			if (ff instanceof ExtensionFileFilter)
 			{
 				ExtensionFileFilter eff = (ExtensionFileFilter)ff;
-				int type = this.getImportType(eff);
-				this.importOptions.setImportType(type);
+				this.importOptions.setImportType(this.getImportType(eff));
 			}
 		}
 		else if (evt.getSource() == this.importOptions && this.chooser != null)
@@ -207,17 +206,17 @@ public class ImportFileDialog
 				// check for All file (*.*) filter. In that
 				// case we do not change the current filter.
 				if (!(ff instanceof ExtensionFileFilter)) return;
-				
+
 				Integer newvalue = (Integer)evt.getNewValue();
-				int type = (newvalue == null ? -1 : newvalue.intValue());
+				ProducerFactory.ImportType type = ProducerFactory.ImportType.valueOf(newvalue);
 				this.filterChange = true;
 				
 				switch (type)
 				{
-					case ProducerFactory.IMPORT_XML:
+					case XML:
 						this.chooser.setFileFilter(ExtensionFileFilter.getXmlFileFilter());
 						break;
-					case ProducerFactory.IMPORT_TEXT:
+					case Text:
 						this.chooser.setFileFilter(ExtensionFileFilter.getTextFileFilter());
 						break;
 				}

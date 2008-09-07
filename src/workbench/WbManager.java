@@ -62,6 +62,7 @@ import workbench.gui.filter.FilterDefinitionManager;
 import workbench.gui.lnf.LnFManager;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.tools.DataPumper;
+import workbench.resource.GuiSettings;
 import workbench.util.UpdateCheck;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
@@ -76,8 +77,8 @@ public class WbManager
 	implements FontChangedListener, Runnable, Thread.UncaughtExceptionHandler
 {
 	private static WbManager wb;
-	private List<MainWindow> mainWindows = Collections.synchronizedList(new ArrayList<MainWindow>(5));
-	private List<ToolWindow> toolWindows = Collections.synchronizedList(new ArrayList<ToolWindow>(5));
+	private final List<MainWindow> mainWindows = Collections.synchronizedList(new ArrayList<MainWindow>(5));
+	private final List<ToolWindow> toolWindows = Collections.synchronizedList(new ArrayList<ToolWindow>(5));
 	private boolean batchMode = false;
 	private boolean writeSettings = true;
 	private boolean overWriteGlobalSettingsFile = true;
@@ -222,7 +223,7 @@ public class WbManager
 
 	private void initializeLookAndFeel()
 	{
-		String className = Settings.getInstance().getLookAndFeelClass();
+		String className = GuiSettings.getLookAndFeelClass();
 		try
 		{
 			if (StringUtil.isEmptyString(className))
@@ -292,12 +293,12 @@ public class WbManager
 		{
 			LogMgr.logError("Settings.initializeLookAndFeel()", "Could not set look and feel", e);
 			LogMgr.logWarning("Settings.initializeLookAndFeel()", "Current look and feel class [" + className + "] will be removed");
-			Settings.getInstance().setLookAndFeelClass(null);
+			GuiSettings.setLookAndFeelClass(null);
 		}
 
 		try
 		{
-			Toolkit.getDefaultToolkit().setDynamicLayout(Settings.getInstance().getUseDynamicLayout());
+			Toolkit.getDefaultToolkit().setDynamicLayout(GuiSettings.getUseDynamicLayout());
 		}
 		catch (Exception e)
 		{
@@ -384,7 +385,7 @@ public class WbManager
 		// Polish up the standard look & feel settings
 		Color c = settings.getColor("workbench.table.gridcolor", new Color(215,215,215));
 		def.put("Table.gridColor", c);
-		def.put("Button.showMnemonics", Boolean.valueOf(settings.getShowMnemonics()));
+		def.put("Button.showMnemonics", Boolean.valueOf(GuiSettings.getShowMnemonics()));
 
 		// use our own classes for some GUI elements
 		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
@@ -883,7 +884,7 @@ public class WbManager
 	public void runGui()
 	{
 		WbSplash splash = null;
-		if (Settings.getInstance().getShowSplash())
+		if (GuiSettings.getShowSplash())
 		{
 			splash = new WbSplash();
 			splash.setVisible(true);

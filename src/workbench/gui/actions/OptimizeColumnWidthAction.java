@@ -15,7 +15,7 @@ import java.awt.event.ActionEvent;
 import workbench.gui.components.ColumnWidthOptimizer;
 
 import workbench.gui.components.WbTable;
-import workbench.resource.Settings;
+import workbench.resource.GuiSettings;
 import workbench.util.WbThread;
 
 /**
@@ -38,7 +38,7 @@ public class OptimizeColumnWidthAction
 	public void executeAction(ActionEvent e)
 	{
 		if (client == null) return;
-		final boolean respectColName = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK) || Settings.getInstance().getIncludeHeaderInOptimalWidth();
+		final boolean respectColName = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK) || GuiSettings.getIncludeHeaderInOptimalWidth();
 		final int column = client.getPopupColumnIndex();
 		Thread t = new WbThread("OptimizeCol Thread")
 		{
