@@ -1663,7 +1663,7 @@ public class SqlPanel
 	{
 		if (this.isBusy()) return;
 
-		if (isModified() && !appendResult && GuiSettings.getConfirmDiscardResultSetChanges())
+		if (GuiSettings.getConfirmDiscardResultSetChanges()  && !appendResult && isModified())
 		{
 			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) return;
 		}

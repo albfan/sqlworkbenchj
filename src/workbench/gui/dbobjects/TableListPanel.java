@@ -1040,7 +1040,7 @@ public class TableListPanel
 	public boolean canChangeSelection()
 	{
 		if (this.tableData == null) return true;
-		if (isModified() && GuiSettings.getConfirmDiscardResultSetChanges())
+		if (GuiSettings.getConfirmDiscardResultSetChanges() && isModified())
 		{
 			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) 
 			{

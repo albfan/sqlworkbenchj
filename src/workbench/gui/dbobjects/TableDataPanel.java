@@ -808,7 +808,7 @@ public class TableDataPanel
 
 	public void reload()
 	{
-		if (isModified() && GuiSettings.getConfirmDiscardResultSetChanges())
+		if (GuiSettings.getConfirmDiscardResultSetChanges() && isModified())
 		{
 			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) return;
 		}

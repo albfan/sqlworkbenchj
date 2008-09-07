@@ -572,7 +572,7 @@ public class WbTable
 	
 	public void reset()
 	{
-		this.stopEditing();
+		this.cancelEditing();
 		this.rowHeightWasOptimized = false;
 		if (this.getModel() == EmptyTableModel.EMPTY_MODEL) return;
 		this.setModel(EmptyTableModel.EMPTY_MODEL, false);

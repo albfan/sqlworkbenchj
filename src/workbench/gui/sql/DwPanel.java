@@ -467,8 +467,8 @@ public class DwPanel
 		this.readOnly = aFlag;
 		if (this.readOnly)
 		{
-			this.endEdit(true);
-			this.disableUpdateActions();
+			if (editingStarted) this.dataTable.cancelEditing();
+			disableUpdateActions();
 		}
 		else
 		{
@@ -987,7 +987,6 @@ public class DwPanel
 	 */
 	public void clearContent()
 	{
-		this.endEdit();
 		this.dataTable.reset();
 		this.hasResultSet = false;
 		this.lastMessage = null;
@@ -995,7 +994,6 @@ public class DwPanel
 		this.statusBar.clearRowcount();
 		this.statusBar.clearExecutionTime();
 		this.selectKeys.setEnabled(false);
-		checkResultSetActions();
 	}
 	
 	public int getActionOnError(int errorRow, String errorColumn, String data, String errorMessage)
@@ -1072,18 +1070,14 @@ public class DwPanel
 	 */
 	public void endEdit()
 	{
-		endEdit(true);
-	}
-	
-	public synchronized void endEdit(boolean restoreData)
-	{
 		if (!this.editingStarted) return;
-		this.editingStarted = false;
-		this.dataTable.stopEditing();
+		editingStarted = false;
+		
+		dataTable.stopEditing();
 		this.dataTable.setShowStatusColumn(false);
 		this.checkResultSetActions();
-		this.updateAction.setEnabled(false);
-		if (restoreData) this.dataTable.restoreOriginalValues();
+		updateAction.setEnabled(false);
+		dataTable.restoreOriginalValues();
 	}
 
 	public boolean startEdit()
@@ -1104,7 +1098,7 @@ public class DwPanel
 	 *  </ul>
 	 * @param restoreSelection if true the selected rows before starting the edit mode are restored
 	 */
-	public synchronized boolean startEdit(boolean restoreSelection)
+	public boolean startEdit(boolean restoreSelection)
 	{
 		if (this.readOnly) return false;
 		
