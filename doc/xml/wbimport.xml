@@ -10,10 +10,9 @@
 	</para>
 	
 	<para>
-		The <literal>WbImport</literal> command can either be used from within the 
-		GUI like any other SQL command (such as <literal>UPDATE</literal> or <literal>INSERT</literal>), 
-		or it can be used as part of a SQL script that is run in 
-		<link linkend="using-scripting">batch mode</link>.
+		The <literal>WbImport</literal> command can be used like any other SQL command
+		(such as <literal>UPDATE</literal> or <literal>INSERT</literal>), inlcuding scripts
+		that are run in <link linkend="using-scripting">batch mode</link>.
 	</para>
 
 	<para>

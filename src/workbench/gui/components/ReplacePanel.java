@@ -334,9 +334,7 @@ public class ReplacePanel
 			InputMap im = this.dialog.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 			ActionMap am = this.dialog.getRootPane().getActionMap();
 
-			escAction = new EscAction(this);
-			im.put(escAction.getAccelerator(), escAction.getActionName());
-			am.put(escAction.getActionName(), escAction);
+			escAction = new EscAction(dialog, this);
 
 			final boolean criteriaAdded = hasSelectedText;
 

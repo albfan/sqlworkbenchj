@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -86,6 +87,8 @@ import workbench.interfaces.TextFileContainer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.syntax.SqlKeywordHelper;
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 
@@ -207,39 +210,55 @@ public class EditorPanel
 	
 	public void setDatabaseConnection(WbConnection aConnection)
 	{
+		dbFunctions = new TreeSet<String>(new CaseInsensitiveComparator());
+		dbDatatypes = new TreeSet<String>(new CaseInsensitiveComparator());
+		
 		if (aConnection == null) 
 		{
 			this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter();
-			return;
 		}
-		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
-		DbFunctions func = new DbFunctions();
-		this.dbFunctions = func.getDbFunctions(aConnection.getMetadata());
-		
-		SqlDataTypesHandler handler = new SqlDataTypesHandler(aConnection.getMetadata().getDbId());
-		this.dbDatatypes = handler.getDataTypes();
-		
-		if (token != null) 
+		else
 		{
-			token.initKeywordMap(); // reset keywords, to get rid of old DBMS specific ones
-			
-			Collection<String> keywords = aConnection.getMetadata().getSqlKeywords();
-			token.setSqlKeyWords(keywords);
-			token.setSqlFunctions(this.dbFunctions);
-			
-			String key = "workbench.db." + aConnection.getMetadata().getDbId() + ".syntax.";
+			DbFunctions func = new DbFunctions();
+			dbFunctions.addAll(func.getDbFunctions(aConnection.getMetadata()));
+		}
 
-			List<String> addKeys = StringUtil.stringToList(Settings.getInstance().getProperty(key  + "functions", ""), ",", true, true);
-			token.setSqlFunctions(addKeys);			
+		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
+		
+		if (token == null) return;
+
+		token.initKeywordMap(); // reset keywords, to get rid of old DBMS specific ones
+
+		if (aConnection != null)
+		{
+			Collection<String> keywords = aConnection.getMetadata().getSqlKeywords();
+			token.addSqlKeyWords(keywords);
+		}
+
+		this.commentChar = "--";
+		String dbId = (aConnection == null ? null : aConnection.getMetadata().getDbId());
+		
+		SqlDataTypesHandler handler = new SqlDataTypesHandler(dbId);
+		dbDatatypes.addAll(handler.getDataTypes());
+
+		SqlKeywordHelper helper = new SqlKeywordHelper(dbId);
+		dbFunctions.addAll(helper.getSqlFunctions());
+		dbDatatypes.addAll(helper.getDataTypes());
+
+		token.addSqlFunctions(this.dbFunctions);
+		token.addDatatypes(dbDatatypes);
+		token.addSqlKeyWords(helper.getKeywords());
+		token.addOperators(helper.getOperators());
+		
+		if (aConnection != null)
+		{
 			this.isMySQL = aConnection.getMetadata().isMySql();
 			token.setIsMySQL(isMySQL);
-		}
-		
-		this.commentChar = "--";
-		
-		if (aConnection.getMetadata().isMySql() && Settings.getInstance().getBoolProperty("workbench.editor.mysql.usehashcomment", false))
-		{
-			this.commentChar = "#";
+			if (aConnection.getMetadata().isMySql() && Settings.getInstance().getBoolProperty("workbench.editor.mysql.usehashcomment", false))
+			{
+				this.commentChar = "#";
+			}
+
 		}
 
 		this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter(aConnection);

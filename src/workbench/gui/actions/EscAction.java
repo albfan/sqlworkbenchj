@@ -15,9 +15,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.KeyStroke;
 
 /**
@@ -29,11 +28,12 @@ public class EscAction
 {
 	private ActionListener client;
 
-	public EscAction(ActionListener aClient)
+	public EscAction(JDialog d, ActionListener aClient)
 	{
 		super();
 		this.client = aClient;
 		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0));
+		addToInputMap(d);
 	}
 
 	public void actionPerformed(ActionEvent e)
@@ -41,5 +41,14 @@ public class EscAction
 		e.setSource(this);
 		this.client.actionPerformed(e);
 	}
-	
+
+	public void addToInputMap(JDialog d)
+	{
+		addToInputMap(d.getRootPane());
+	}
+	public void addToInputMap(JComponent c)
+	{
+		super.addToInputMap(c, JComponent.WHEN_IN_FOCUSED_WINDOW);
+	}
+
 }

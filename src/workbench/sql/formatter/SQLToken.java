@@ -108,7 +108,7 @@ public class SQLToken
 	private int charBegin;
 	private int charEnd;
 	private int state;
-
+	
 	private static final Pattern WHITESPACE = Pattern.compile("[ \t\r\n]+");
 	/**
 	 * Create a new token.
@@ -145,7 +145,7 @@ public class SQLToken
 		this.charEnd = charEnd;
 		this.state = state;
 	}
-
+	
 	/**
 	 * Get an integer representing the state the tokenizer is in after
 	 * returning this token.
@@ -242,7 +242,7 @@ public class SQLToken
 	 */
 	public boolean isReservedWord()
 	{
-		return((ID >> 8) == 0x1);
+		return ((ID >> 8) == 0x1);
 	}
 
 	public boolean isIntegerLiteral()
@@ -292,7 +292,7 @@ public class SQLToken
 	 */
 	public boolean isOperator()
 	{
-		return((ID >> 8) == 0x5);
+		return ((ID >> 8) == 0x5);
 	}
 
 	/**

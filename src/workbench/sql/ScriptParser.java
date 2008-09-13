@@ -451,7 +451,6 @@ public class ScriptParser
 		p.setDelimiter(useAlternateDelimiter ? this.alternateDelimiter : this.delimiter);
 		p.setReturnStartingWhitespace(this.returnTrailingWhitesapce);
 		p.setAlternateLineComment(this.alternateLineComment);
-		p.setDelimiter(useAlternateDelimiter ? this.alternateDelimiter : this.delimiter);
 
 		if (useAlternateDelimiter)
 		{

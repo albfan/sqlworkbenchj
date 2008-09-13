@@ -30,6 +30,7 @@ package workbench.sql.formatter;
 
 import java.io.*;
 import workbench.util.CharSequenceReader;
+import workbench.sql.syntax.SqlKeywordHelper;
 
 /**
  * SQLLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:
@@ -89,6 +90,17 @@ import workbench.util.CharSequenceReader;
 		}
 	}
 
+
+  /*
+	public SQLToken getNextToken()
+		throws IOException
+  {
+    SQLToken t = _getNextToken();
+    if (t != null) t.setKeywordHelper(keywordHelper);
+    return t;
+  }
+	*/
+
 	/**
 	 * Closes the current input stream, and resets the scanner to read from a new input stream.
 	 * All internal variables are reset, the old input stream  cannot be reused
@@ -115,12 +127,12 @@ import workbench.util.CharSequenceReader;
 
 	public SQLLexer(String source)
 	{
-	this(new StringReader(source));
+	  this(new StringReader(source));
 	}
 
 	public SQLLexer(CharSequence source)
 	{
-	this(new CharSequenceReader(source));
+	  this(new CharSequenceReader(source));
 	}
 %}
 
@@ -232,7 +244,6 @@ keyword=("ABORT"|
 "CORRESPONDING"|
 "COUNT"|
 "CREATE"|
-"CREATEDB"|
 "CREATEUSER"|
 "CROSS"|
 "CUBE"|
@@ -588,6 +599,7 @@ keyword=("ABORT"|
 "TRUE"|
 "TRUSTED"|
 "TYPE"|
+"UNLISTEN"|
 "UNION"|
 "UNIQUE"|
 "UNTIL"|

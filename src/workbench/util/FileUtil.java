@@ -45,6 +45,10 @@ public class FileUtil
 		}
 	}
 	
+	public static List<String> getLines(BufferedReader in)
+	{
+		return getLines(in, false);
+	}
 	/**
 	 * Read the lines of the given Reader into a Collection.
 	 * The Reader will be closed after all lines have been read.
@@ -52,7 +56,7 @@ public class FileUtil
 	 * @param in the "file" to read
 	 * @return a Collection with all the lines in the file
 	 */
-	public static List<String> getLines(BufferedReader in)
+	public static List<String> getLines(BufferedReader in, boolean trim)
 	{
 		List<String> result = new ArrayList<String>();
 
@@ -61,7 +65,10 @@ public class FileUtil
 			String line; 
 			while ( (line = in.readLine()) != null)
 			{
-				if (!StringUtil.isEmptyString(line)) result.add(line);
+				if (!StringUtil.isEmptyString(line)) 
+				{
+					result.add(trim ? line.trim() : line);
+				}
 			}
 		}
 		catch (Exception e)

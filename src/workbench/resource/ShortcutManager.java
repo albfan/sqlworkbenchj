@@ -235,7 +235,6 @@ public class ShortcutManager
 			{
 				KeyStroke key = def.getActiveKeyStroke();
 				action.setAccelerator(key);
-				LogMgr.logDebug("ShortcutManager.updateActions", "Updated modified action: " + action);
 			}
 		}
 	}

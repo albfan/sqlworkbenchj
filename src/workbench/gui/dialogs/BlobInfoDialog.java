@@ -15,10 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.List;
-import javax.swing.ActionMap;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
@@ -55,11 +52,7 @@ public class BlobInfoDialog
 		handler = new BlobHandler();
 
 		getRootPane().setDefaultButton(closeButton);
-		InputMap im = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-		ActionMap am = this.getRootPane().getActionMap();
-		escAction = new EscAction(this);
-		im.put(escAction.getAccelerator(), escAction.getActionName());
-		am.put(escAction.getActionName(), escAction);
+		escAction = new EscAction(this, this);
 
 		String encoding = Settings.getInstance().getDefaultBlobTextEncoding();
 		encodingPanel.setEncoding(encoding);

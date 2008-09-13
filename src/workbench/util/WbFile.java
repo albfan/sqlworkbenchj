@@ -126,4 +126,9 @@ public class WbFile
 			return this.getAbsolutePath();
 		}
 	}
+
+	public String toString()
+	{
+		return getFullPath();
+	}
 }

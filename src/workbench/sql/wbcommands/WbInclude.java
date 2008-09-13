@@ -108,7 +108,7 @@ public class WbInclude
 		boolean continueOnError = cmdLine.getBoolean("continueonerror", false);
 		boolean checkEscape = cmdLine.getBoolean("checkescapedquotes", Settings.getInstance().getCheckEscapedQuotes());
 		boolean verbose = cmdLine.getBoolean("verbose", false);
-		boolean defaultIgnore = currentConnection.getProfile().getIgnoreDropErrors();
+		boolean defaultIgnore = (currentConnection == null ? false : currentConnection.getProfile().getIgnoreDropErrors());
 		boolean ignoreDrop = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, defaultIgnore);
 		String encoding = cmdLine.getValue("encoding");
 		if (encoding == null)

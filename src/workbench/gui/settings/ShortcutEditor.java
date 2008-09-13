@@ -104,13 +104,8 @@ public class ShortcutEditor
 		JScrollPane scroll = new JScrollPane(this.keysTable);
 		contentPanel.add(scroll, BorderLayout.CENTER);
 		
-		JRootPane root = window.getRootPane();
-		InputMap im = root.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-		ActionMap am = root.getActionMap();
-		EscAction esc = new EscAction(this);
+		EscAction esc = new EscAction(window, this);
 		escActionCommand = esc.getActionName();
-		im.put(esc.getAccelerator(), esc.getActionName());
-		am.put(esc.getActionName(), esc);
 		
 		this.createModel();
 		this.keysTable.setRowSelectionAllowed(true);
@@ -122,13 +117,8 @@ public class ShortcutEditor
 		this.cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
 		this.cancelButton.addActionListener(this);
 
-		im = keysTable.getInputMap(JComponent.WHEN_FOCUSED);
-		am = keysTable.getActionMap();
-		im.put(esc.getAccelerator(), esc.getActionName());
-		am.put(esc.getActionName(), esc);
-		
-		this.okButton = new WbButton(ResourceMgr.getString("LblOK"));
-		this.okButton.addActionListener(this);
+		okButton = new WbButton(ResourceMgr.getString("LblOK"));
+		okButton.addActionListener(this);
 		
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));

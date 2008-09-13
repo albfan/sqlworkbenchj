@@ -851,6 +851,18 @@ public class DbMetadata
 			}
 			if (!StringUtil.endsWith(source, ';')) source.append(';');
 			source.append(Settings.getInstance().getInternalEditorLineEnding());
+
+			ViewGrantReader grantReader = ViewGrantReader.createViewGrantReader(this.dbConnection);
+			if (grantReader != null)
+			{
+				CharSequence grants = grantReader.getViewGrantSource(dbConnection, viewId);
+				if (grants != null && grants.length() > 0)
+				{
+					source.append(Settings.getInstance().getInternalEditorLineEnding());
+					source.append(grants);
+					source.append(Settings.getInstance().getInternalEditorLineEnding());
+				}
+			}
 		}
 		catch (Exception e)
 		{
@@ -862,6 +874,7 @@ public class DbMetadata
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+
 		return source;
 	}
 
@@ -1460,6 +1473,7 @@ public class DbMetadata
 			if (rs.next())
 			{
 				result = new TableIdentifier(rs.getString(1), rs.getString(2), rs.getString(3));
+				result.setType(rs.getString(4));
 			}
 		}
 		catch (Exception e)

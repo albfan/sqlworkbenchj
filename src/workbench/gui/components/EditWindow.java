@@ -161,8 +161,9 @@ public class EditWindow
 		this.setFocusTraversalPolicy(pol);
 		this.setFocusCycleRoot(false);
 
-		EscAction escAction = new EscAction(this);
-		escAction.addToInputMap(getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW), getRootPane().getActionMap());
+		// creating the action will add it to the input map of the dialog
+		// which will enable the key
+		new EscAction(this, this);
 		
 		if (!Settings.getInstance().restoreWindowSize(this, settingsId))
 		{

@@ -127,16 +127,8 @@ public class ValidatingDialog
 
 		if (addCancelButton)
 		{
-			InputMap im = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-			ActionMap am = root.getActionMap();
-			this.esc = new EscAction(this);
-			im.put(esc.getAccelerator(), esc.getActionName());
-			am.put(esc.getActionName(), esc);
-
-			im = editor.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-			am = editor.getActionMap();
-			im.put(esc.getAccelerator(), esc.getActionName());
-			am.put(esc.getActionName(), esc);
+			esc = new EscAction(this, this);
+			//esc.addToInputMap(editor);
 		}
 		
 		JPanel content = new JPanel();

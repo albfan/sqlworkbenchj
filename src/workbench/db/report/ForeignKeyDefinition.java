@@ -11,8 +11,9 @@
  */
 package workbench.db.report;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.StrBuffer;
 import workbench.util.NumberStringCache;
 
@@ -34,7 +35,7 @@ public class ForeignKeyDefinition
 	
 	// Stores which column in the source table 
 	// references which column in the foreignTabl
-	private Map<String, String> columnMap = new HashMap<String, String>();
+	private Map<String, String> columnMap = new TreeMap<String, String>(new CaseInsensitiveComparator());
 	private ReportTable foreignTable;
 	private String updateRule;
 	private String deleteRule;
@@ -43,10 +44,16 @@ public class ForeignKeyDefinition
 	private int updateRuleValue;
 	private int deleteRuleValue;
 	private int deferrableRuleValue;
+	private boolean compareFKRules = false;
 	
 	public ForeignKeyDefinition(String name)
 	{
 		fkName = name;
+	}
+
+	public void setCompareFKRules(boolean flag)
+	{
+		compareFKRules = flag;
 	}
 	
 	public void setNamespace(String namespace)
@@ -165,9 +172,12 @@ public class ForeignKeyDefinition
 		int hash = 7;
 		hash = 53 * hash + (this.fkName != null ? this.fkName.hashCode() : 0);
 		hash = 53 * hash + (this.foreignTable != null ? this.foreignTable.hashCode() : 0);
-		hash = 53 * hash + this.updateRuleValue;
-		hash = 53 * hash + this.deleteRuleValue;
-		hash = 53 * hash + this.deferrableRuleValue;
+		if (compareFKRules)
+		{
+			hash = 53 * hash + this.updateRuleValue;
+			hash = 53 * hash + this.deleteRuleValue;
+			hash = 53 * hash + this.deferrableRuleValue;
+		}
 		return hash;
 	}
 	
@@ -177,18 +187,36 @@ public class ForeignKeyDefinition
 		if (o instanceof ForeignKeyDefinition) return equals((ForeignKeyDefinition)o);
 		return false;
 	}
-	
+
+	private boolean compareColumns(ForeignKeyDefinition other)
+	{
+		if (other == null) return false;
+		for (Map.Entry<String, String> entry : columnMap.entrySet())
+		{
+			String mappedTo = other.columnMap.get(entry.getKey().toLowerCase());
+			if (!mappedTo.equalsIgnoreCase(entry.getValue())) return false;
+		}
+		return true;
+	}
+
 	public boolean equals(ForeignKeyDefinition ref)
 	{
 		try
 		{
-			return (this.fkName.equals(ref.fkName) && 
-				      this.columnMap.equals(ref.columnMap) &&
-			        this.foreignTable.equals(ref.foreignTable) &&
+			boolean columnsAreEqual = compareColumns(ref);
+			boolean namesAreEqual = this.fkName.equalsIgnoreCase(ref.fkName);
+			boolean tablesAreEqual = this.foreignTable.equals(ref.foreignTable);
+
+			boolean baseEquals = columnsAreEqual && namesAreEqual && tablesAreEqual;
+			
+			if (baseEquals && compareFKRules)
+			{
+				baseEquals = baseEquals &&
 							(this.updateRuleValue == ref.updateRuleValue) &&
 							(this.deleteRuleValue == ref.deleteRuleValue) &&
-							(this.deferrableRuleValue == ref.deferrableRuleValue)
-			        );
+							(this.deferrableRuleValue == ref.deferrableRuleValue);
+			}
+			return baseEquals;
 		}
 		catch (Exception e)
 		{

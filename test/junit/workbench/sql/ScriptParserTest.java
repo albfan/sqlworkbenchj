@@ -401,6 +401,28 @@ public class ScriptParserTest
 		}
 	}
 
+	public void testGoWithComments()
+	{
+		String sql =
+						 "IF  EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID('something') AND OBJECTPROPERTY(id,'IsProcedure') = 1) \n" +
+             "DROP PROCEDURE something \n" +
+             "GO\n" +
+             "\n" +
+             "-- Test comment \n" +
+             "CREATE PROCEDURE something \n" +
+             "AS  \n" +
+             "BEGIN " +
+						 "   DECLARE @counter INT\n" +
+						 "   SELECT @counter = count(*) FROM person " +
+             "END \n" +
+             "GO";
+		ScriptParser p = new ScriptParser(sql);
+		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_MS_DELIMITER);
+		p.setCheckForSingleLineCommands(false);
+		int size = p.getSize();
+		assertEquals(2, size);
+	}
+
 	public void testAlternateDelimiter()
 	{
 		String sql = "SELECT id \n" +

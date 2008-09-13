@@ -2,12 +2,14 @@
 	<title>Export data using WbExport</title>
 
 	<para>
-		The <literal>WbExport</literal> command can be used to export the contents
-		of the database into external files. Several types of output files are supported.
-		The <literal>WbExport</literal> command can either be used from within the 
-		GUI like any other command (such as <literal>UPDATE</literal> or <literal>INSERT</literal>), 
-		or it can be used as part of a SQL script that is run in 
-		<link linkend="using-scripting">batch mode</link>.
+		The <literal>WbExport</literal> exports contents of the database into external files, e.g.
+		plain text ("CSV") or XML.
+	</para>
+	
+	<para>
+		The <literal>WbExport</literal> command can be used like any other SQL command
+		(such as <literal>UPDATE</literal> or <literal>INSERT</literal>), inlcuding scripts
+		that are run in <link linkend="using-scripting">batch mode</link>.
 	</para>
 	
 	<para>

@@ -14,6 +14,7 @@ package workbench.db;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import junit.framework.TestCase;
@@ -52,7 +53,7 @@ public class ReferenceTableNavigationTest
              "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
              "   base_id1    INTEGER NOT NULL, \n" + 
              "   base_id2    INTEGER NOT NULL, \n" + 
-             "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" + 
+             "   CONSTRAINT fk_child1_base FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
              ")";			
 			stmt.execute(child1Sql);
 			
@@ -61,7 +62,7 @@ public class ReferenceTableNavigationTest
              "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
              "   base_id1    INTEGER NOT NULL, \n" + 
              "   base_id2    INTEGER NOT NULL, \n" + 
-             "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" + 
+             "   CONSTRAINT fk_child2_base FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
              ")";			
 			stmt.execute(child2Sql);
 
@@ -121,10 +122,10 @@ public class ReferenceTableNavigationTest
 			TableIdentifier t1 = new TableIdentifier("child1");
 			t1.adjustCase(con);
 			
-			String select = nav.getSelectForChild(t1, rows);
+			String select = nav.getSelectForChild(t1, "fk_child1_base", rows);
 			assertNotNull("Select for Child1 not created", select);
 			
-			System.out.println("select child1 with:" + select);
+//			System.out.println("select child1 with:" + select);
 			ResultSet rs = stmt.executeQuery(select);
 			int count = 0;
 			while (rs.next())
@@ -154,10 +155,10 @@ public class ReferenceTableNavigationTest
 			TableIdentifier t2 = new TableIdentifier("child2");
 			t2.adjustCase(con);
 			
-			String select2 = nav.getSelectForChild(t2, rows);
+			String select2 = nav.getSelectForChild(t2, "fk_child2_base", rows);
 			assertNotNull("Child table 2 not found", select2);
 			
-			System.out.println("select child2 with:" + select2);
+//			System.out.println("select child2 with:" + select2);
 			rs = stmt.executeQuery(select2);
 			count = 0;
 			while (rs.next())
@@ -190,7 +191,55 @@ public class ReferenceTableNavigationTest
 			fail(e.getMessage());
 		}
 	}
-	
+
+	public void testDoubleLink()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("TwoLinks");
+
+		WbConnection con = util.getConnection();
+		String script = "CREATE TABLE base  \n" +
+					 "( \n" +
+					 "   id  INTEGER NOT NULL, \n" +
+					 "   data  VARCHAR(10), \n" +
+					 "   primary key (id) \n" +
+					 "); \n" +
+					 "\n" +
+					 "CREATE TABLE link_table \n" +
+					 "( \n" +
+					 "   link_id INTEGER NOT NULL, \n" +
+					 "   original_id INTEGER NOT NULL, \n" +
+					 "   CONSTRAINT link_id_fk FOREIGN KEY (link_id) REFERENCES base (id), \n" +
+					 "   CONSTRAINT org_id_fk FOREIGN KEY (original_id) REFERENCES base (id) \n" +
+					 "); \n" +
+					 "INSERT INTO base (id, data) VALUES (1, 'one');\n" +
+					 "INSERT INTO base (id, data) VALUES (2, 'two');\n" +
+					 "INSERT INTO link_table (link_id, original_id) vALUES (1,2);\n" +
+					 "COMMIT;\n" +
+					 "";
+		TestUtil.executeScript(con, script);
+		ReferenceTableNavigation nav = new ReferenceTableNavigation(new TableIdentifier("base"), con);
+		nav.readTreeForChildren();
+		TableDependency dep = nav.getTree();
+		List<DependencyNode> tables = dep.getLeafs();
+//		System.out.println("***************");
+//		for (DependencyNode node : tables)
+//		{
+//			System.out.println(node.toString());
+//		}
+		ColumnData col1 = new ColumnData(new Integer(1), new ColumnIdentifier("ID"));
+		List<ColumnData> row = new ArrayList<ColumnData>();
+		row.add(col1);
+		List<List<ColumnData>> all = new ArrayList<List<ColumnData>>();
+		all.add(row);
+		String sql = nav.getSelectForChild(new TableIdentifier("link_table"), "link_id_fk", all);
+		//System.out.println("******\n" + sql);
+		assertTrue(sql.indexOf("(LINK_ID = 1)") > -1);
+
+		sql = nav.getSelectForChild(new TableIdentifier("link_table"), "org_id_fk", all);
+		//System.out.println("******\n" + sql);
+		assertTrue(sql.indexOf("(ORIGINAL_ID = 1)") > -1);
+	}
 
 	public void testParentNavigation()
 	{
@@ -213,7 +262,7 @@ public class ReferenceTableNavigationTest
              "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
              "   base_id1    INTEGER NOT NULL, \n" + 
              "   base_id2    INTEGER NOT NULL, \n" + 
-             "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" + 
+             "   CONSTRAINT fk_child1_base FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
              ")";			
 			stmt.execute(child1Sql);
 			
@@ -222,7 +271,7 @@ public class ReferenceTableNavigationTest
              "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
              "   base_id1    INTEGER NOT NULL, \n" + 
              "   base_id2    INTEGER NOT NULL, \n" + 
-             "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" + 
+             "   CONSTRAINT fk_child2_base FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
              ")";			
 			stmt.execute(child2Sql);
 
@@ -230,7 +279,7 @@ public class ReferenceTableNavigationTest
              "( \n" + 
              "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
              "   child_id    INTEGER NOT NULL, \n" + 
-             "   FOREIGN KEY (child_id) REFERENCES child2 (id) \n" + 
+             "   CONSTRAINT fk_child2d_base FOREIGN KEY (child_id) REFERENCES child2 (id) \n" +
              ")";			
 			stmt.execute(child3Sql);
 			
@@ -284,9 +333,9 @@ public class ReferenceTableNavigationTest
 			assertEquals("No leafs for parent!", 1, leafs.size());
 
 			TableIdentifier tbl = new TableIdentifier("base");
-			String select1 = nav.getSelectForParent(tbl, rows);
+			String select1 = nav.getSelectForParent(tbl, "fk_child1_base", rows);
 			
-			System.out.println("select parent with = " + select1);
+//			System.out.println("select parent with = " + select1);
 			ResultSet rs = stmt.executeQuery(select1);
 			int count = 0;
 			while (rs.next())

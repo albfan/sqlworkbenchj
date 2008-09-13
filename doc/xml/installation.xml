@@ -3,8 +3,8 @@
 
 	<para><note>
 		Starting with build 99 the jar file has been renamed to <literal>sqlworkbench.jar</literal>. 
-		Please delete the old file <literal>Workbench.jar</literal>. Windows user should also 
-		delete the old <literal>JWorkbench.exe</literal> and use the most recent <literal>SQLWorkbench.exe</literal>
+		Please delete the old file <literal>Workbench.jar</literal>. Please delete
+		<literal>JWorkbench.exe</literal> as well, and only use <literal>SQLWorkbench.exe</literal>
 	</note></para>
 	
 	<para>To run &wb-productname; a <ulink url="http://java.sun.com/j2se/">Java runtime environment</ulink> 

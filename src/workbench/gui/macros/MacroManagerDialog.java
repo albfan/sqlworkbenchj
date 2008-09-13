@@ -23,11 +23,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -104,11 +101,7 @@ public class MacroManagerDialog
 		{
 			this.getRootPane().setDefaultButton(this.okButton);
 		}
-		InputMap im = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-		ActionMap am = this.getRootPane().getActionMap();
-		escAction = new EscAction(this);
-		im.put(escAction.getAccelerator(), escAction.getActionName());
-		am.put(escAction.getActionName(), escAction);
+		escAction = new EscAction(this, this);
 	}
 
 	private void initComponents()

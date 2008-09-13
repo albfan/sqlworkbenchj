@@ -40,75 +40,68 @@ public class SchemaDiffTest
 	}
 
 	public void testBaseDiff()
+		throws Exception
 	{
-		try
-		{
-			setupBaseDatabase();
-			SchemaDiff diff = new SchemaDiff(source, target);
-			diff.setIncludeForeignKeys(true);
-			diff.setIncludePrimaryKeys(true);
-			diff.setIncludeProcedures(false);
-			diff.setIncludeTableGrants(false);
-			diff.setIncludeTableConstraints(true);
-			diff.setIncludeSequences(true);
-			diff.setIncludeViews(true);
-			diff.compareAll();
-			String xml = diff.getMigrateTargetXml();
+		setupBaseDatabase();
+		SchemaDiff diff = new SchemaDiff(source, target);
+		diff.setIncludeForeignKeys(true);
+		diff.setIncludePrimaryKeys(true);
+		diff.setIncludeProcedures(false);
+		diff.setIncludeTableGrants(false);
+		diff.setIncludeTableConstraints(true);
+		diff.setIncludeSequences(true);
+		diff.setIncludeViews(true);
+		diff.compareAll();
+		String xml = diff.getMigrateTargetXml();
 //			TestUtil.writeFile(new File("c:/temp/basediff.xml"), xml);
 //			Thread.yield();
 //			System.out.println("---------------");
 //			System.out.println(xml);
 //			System.out.println("---------------");
 
-			String count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
-			assertEquals("Incorrect number of tables listed", "3", count);
+		String count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
+		assertEquals("Incorrect number of tables listed", "3", count);
 
-			count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/view-info[@compareTo='V_PERSON'])");
-			assertEquals("Incorrect number of views listed", "1", count);
+		count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/view-info[@compareTo='V_PERSON'])");
+		assertEquals("Incorrect number of views listed", "1", count);
 
-			// Check if email column
-			String col = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='ADDRESS']/add-column/column-def[@name='EMAIL']/column-name");
-			assertNotNull("Table ADDRESS not changed", col);
-			assertEquals("Table ADDRESS not changed", "EMAIL", col);
+		// Check if email column
+		String col = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='ADDRESS']/add-column/column-def[@name='EMAIL']/column-name");
+		assertNotNull("Table ADDRESS not changed", col);
+		assertEquals("Table ADDRESS not changed", "EMAIL", col);
 
-			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='ADDRESS']/add-column)");
-			assertEquals("Incorrect number of columns to add to ADDRESS", "1", count);
+		count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='ADDRESS']/add-column)");
+		assertEquals("Incorrect number of columns to add to ADDRESS", "1", count);
 
-			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='ADDRESS']/remove-column[@name='REMARK'])");
-			assertEquals("Remark column not removed", "1", count);
+		count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='ADDRESS']/remove-column[@name='REMARK'])");
+		assertEquals("Remark column not removed", "1", count);
 
-			String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='ADDRESS']/modify-column[@name='STREET']/dbms-data-type");
-			assertEquals("Street column not changed", "VARCHAR(50)", value);
+		String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='ADDRESS']/modify-column[@name='STREET']/dbms-data-type");
+		assertEquals("Street column not changed", "VARCHAR(50)", value);
 
-			value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/modify-column[@name='FIRSTNAME']/dbms-data-type");
-			assertEquals("Firstname column not changed", "VARCHAR(100)", value);
+		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/modify-column[@name='FIRSTNAME']/dbms-data-type");
+		assertEquals("Firstname column not changed", "VARCHAR(100)", value);
 
-			value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON_ADDRESS']/modify-column[@name='ADDRESS_ID']/add-reference/table-name");
-			assertEquals("FK to address not added", "ADDRESS", value);
+		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON_ADDRESS']/modify-column[@name='ADDRESS_ID']/add-reference/table-name");
+		assertEquals("FK to address not added", "ADDRESS", value);
 
-			value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON_ADDRESS']/add-index/index-def/index-expression");
-			assertEquals("Index for address_id not added", "ADDRESS_ID ASC", value);
+		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON_ADDRESS']/add-index/index-def/index-expression");
+		assertEquals("Index for address_id not added", "ADDRESS_ID ASC", value);
 
-			value = TestUtil.getXPathValue(xml, "/schema-diff/create-view/view-def[@name='V_PERSON']/view-name");
-			assertEquals("View not created ", "V_PERSON", value);
+		value = TestUtil.getXPathValue(xml, "/schema-diff/create-view/view-def[@name='V_PERSON']/view-name");
+		assertEquals("View not created ", "V_PERSON", value);
 
-			value = TestUtil.getXPathValue(xml, "/schema-diff/drop-view/view-name[1]");
-			assertEquals("View not dropped ", "SOMETHING", value);
+		value = TestUtil.getXPathValue(xml, "/schema-diff/drop-view/view-name[1]");
+		assertEquals("View not dropped ", "SOMETHING", value);
 
-			value = TestUtil.getXPathValue(xml, "/schema-diff/update-sequence[1]/sequence-def/sequence-name");
-			assertEquals("Sequence not updated", "SEQ_TWO", value);
+		value = TestUtil.getXPathValue(xml, "/schema-diff/update-sequence[1]/sequence-def/sequence-name");
+		assertEquals("Sequence not updated", "SEQ_TWO", value);
 
-			value = TestUtil.getXPathValue(xml, "/schema-diff/create-sequence[1]/sequence-def/sequence-name");
-			assertEquals("Sequence not created", "SEQ_THREE", value);
+		value = TestUtil.getXPathValue(xml, "/schema-diff/create-sequence[1]/sequence-def/sequence-name");
+		assertEquals("Sequence not created", "SEQ_THREE", value);
 
-			value = TestUtil.getXPathValue(xml, "/schema-diff/drop-sequence/sequence-name[1]");
-			assertEquals("Sequence not dropped", "SEQ_TO_BE_DELETED", value);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		value = TestUtil.getXPathValue(xml, "/schema-diff/drop-sequence/sequence-name[1]");
+		assertEquals("Sequence not dropped", "SEQ_TO_BE_DELETED", value);
 
 	}
 

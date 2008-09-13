@@ -57,11 +57,8 @@ public class DriverEditorDialog extends JDialog
 		super(parent, true);
 		initComponents();
 
-		this.getRootPane().setDefaultButton(this.okButton);
-		InputMap im = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-		ActionMap am = this.getRootPane().getActionMap();
-		escAction = new EscAction(this);
-		escAction.addToInputMap(im, am);
+		getRootPane().setDefaultButton(this.okButton);
+		escAction = new EscAction(this, this);
 
 		if (!Settings.getInstance().restoreWindowSize(this))
 		{

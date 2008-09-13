@@ -3,10 +3,15 @@
   <title>Other &wb-productname; specific commands</title>
   
 	<para>
-		&wb-productname; implements a set of SQL commands. These commands
-		can be used like any standard SQL command (such as <literal>UPDATE</literal>
-		inside &wb-productname;, i.e. inside the editor or as part of a SQL script
-		that is run through &wb-productname; in <link linkend="using-scripting">batch mode</link>.
+		In addtion to the <link linkend="command-export">WbExport</link>, 
+		<link linkend="command-import">WbImport</link> and <link linkend="command-import">WbCopy</link>
+		commands, &wb-productname; implements a set of additional SQL commands that are not part
+		of the SQL standard. These commands can be used like any other SQL command
+		(such as <literal>UPDATE</literal> inside &wb-productname;, i.e. inside the editor
+		or as part of a SQL script that is run through &wb-productname; in <link linkend="using-scripting">batch mode</link>.
+	</para>
+	
+	<para>
 		As those commands are implemented by &wb-productname; you will not be able to 
 		use them when running your SQL scripts using a different client program 
 		(e.g. <literal>psql</literal>, SQL*Plus or <literal>phpmyadmin</literal>.

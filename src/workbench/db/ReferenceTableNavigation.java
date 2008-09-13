@@ -62,9 +62,11 @@ public class ReferenceTableNavigation
 			dependencyTree.readTreeForParents();
 		}
 	}
-	public DependencyNode getNodeForTable(TableIdentifier tbl)
+
+	public DependencyNode getNodeForTable(TableIdentifier tbl, String fkName)
 	{
 		if (this.dependencyTree == null) return null;
+		if (tbl == null) return null;
 		
 		TableIdentifier table = tbl.createCopy();
 		if (table.getSchema() == null)
@@ -76,7 +78,7 @@ public class ReferenceTableNavigation
 			table.setCatalog(this.dbConn.getMetadata().getCurrentCatalog());
 		}
 		table.adjustCase(dbConn);
-		return dependencyTree.findLeafNodeForTable(table);
+		return dependencyTree.findLeafNodeForTable(table, fkName);
 	}
 
 	public TableDependency getTree()
@@ -84,24 +86,42 @@ public class ReferenceTableNavigation
 		return this.dependencyTree;
 	}
 	
-	public String getSelectForChild(TableIdentifier tbl, List<List<ColumnData>> values)
+	/**
+	 * Return a SELECT statement to retrieve the child rows referenced by the given
+	 * table column values
+	 *
+	 * @param tbl the table for which the parent rows should be retrieved
+	 * @param fkName the name of the foreign key that links tbl
+	 * @param values the values for which the SQL statement should be created
+	 * @return
+	 */
+	public String getSelectForChild(TableIdentifier tbl, String fkName, List<List<ColumnData>> values)
 	{
-		return generateSelect(tbl, true, values);
+		return generateSelect(tbl, fkName, true, values);
+	}
+
+	/**
+	 * Return a SELECT statement to retrieve the parent rows referencing by the given
+	 * table column values
+	 * 
+	 * @param tbl the table for which the parent rows should be retrieved
+	 * @param fkName the name of the foreign key that links tbl
+	 * @param values the values for which the SQL statement should be created
+	 * @return
+	 */
+	public String getSelectForParent(TableIdentifier tbl, String fkName, List<List<ColumnData>> values)
+	{
+		return generateSelect(tbl, fkName, false, values);
 	}
 	
-	public String getSelectForParent(TableIdentifier tbl, List<List<ColumnData>> values)
-	{
-		return generateSelect(tbl, false, values);
-	}
-	
-	private String generateSelect(TableIdentifier tbl, boolean forChildren, List<List<ColumnData>> values)
+	private String generateSelect(TableIdentifier tbl, String fkName, boolean forChildren, List<List<ColumnData>> values)
 	{
 		String result = null;
 		try
 		{
 			if (this.dependencyTree == null) this.readDependencyTree(forChildren);
 			
-			DependencyNode node = getNodeForTable(tbl);
+			DependencyNode node = getNodeForTable(tbl, fkName);
 			
 			StringBuilder sql = new StringBuilder(100);
 			sql.append("SELECT * \nFROM ");

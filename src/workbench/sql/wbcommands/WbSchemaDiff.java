@@ -16,7 +16,9 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.diff.SchemaDiff;
 import workbench.log.LogMgr;
@@ -173,8 +175,17 @@ public class WbSchemaDiff
 		}
 		else if (tarTables == null)
 		{
-			SourceTableArgument tables = new SourceTableArgument(refTables, referenceConnection);
-			diff.setTables(tables.getTables());
+			SourceTableArgument parms = new SourceTableArgument(refTables, referenceConnection);
+			List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
+			for (TableIdentifier tbl : parms.getTables())
+			{
+				TableIdentifier realTable = referenceConnection.getMetadata().findTable(tbl);
+				if (realTable != null)
+				{
+					tables.add(realTable);
+				}
+			}
+			diff.setTables(tables);
 		}
 		else
 		{

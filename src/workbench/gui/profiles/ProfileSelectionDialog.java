@@ -12,7 +12,6 @@
 package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -22,10 +21,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -74,10 +70,7 @@ public class ProfileSelectionDialog
 
 		JRootPane root = this.getRootPane();
 		root.setDefaultButton(okButton);
-		InputMap im = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-		ActionMap am = root.getActionMap();
-		EscAction esc = new EscAction(this);
-		esc.addToInputMap(im, am);
+		EscAction esc = new EscAction(this, this);
 		escActionCommand = esc.getActionName();
 	}
 
@@ -129,6 +122,9 @@ public class ProfileSelectionDialog
 
 		setTitle(ResourceMgr.getString("LblSelectProfile"));
 		this.restoreSize();
+		// This should be "posted", otherwise the focus will not be set
+		// correctly when running on Linux with the GTk+ look and feel
+		WbSwingUtilities.requestFocus(profiles.getInitialFocusComponent());
 	}
 
 	private void closeDialog()
@@ -191,11 +187,6 @@ public class ProfileSelectionDialog
 	}
 
 
-	public void setInitialFocus()
-	{
-		profiles.setInitialFocus();
-	}
-
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.okButton)
@@ -227,15 +218,6 @@ public class ProfileSelectionDialog
 	{
 	}
 
-	public void setVisible(boolean aFlag)
-	{
-		super.setVisible(aFlag);
-		if (aFlag)
-		{
-			this.setInitialFocus();
-		}
-	}
-
 	public void windowClosed(WindowEvent e)
 	{
 		this.profiles.done();
@@ -264,7 +246,6 @@ public class ProfileSelectionDialog
 	{
 		this.cancelled = true;
 		this.selectedProfile = null;
-		this.setInitialFocus();
 	}
 
 	public void valueChanged(TreeSelectionEvent e)

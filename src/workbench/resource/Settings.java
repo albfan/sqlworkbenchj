@@ -477,16 +477,18 @@ public class Settings
 
 			ToolDefinition tool = new ToolDefinition(path, name);
 
-			if (addPdfReader && pdfReader != null)
+			if (addPdfReader && pdfReader != null && !pdfReaderPresent)
 			{
-				pdfReaderPresent = tool.getExecutable().equals(pdfReader);
+				String tp = tool.getExecutable().getFullPath();
+				String pp = pdfReader.getFullPath();
+				pdfReaderPresent = StringUtil.equalString(tp, pp);
 			}
 
-			if (checkExists && tool.executableExists())
+			if (!checkExists)
 			{
-				result.add(tool);
+				 result.add(tool);
 			}
-			else
+			else if (tool.executableExists()) 
 			{
 				result.add(tool);
 			}

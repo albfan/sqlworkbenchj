@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -116,6 +117,11 @@ public class ConnectionEditorPanel
 
 	}
 
+	public JComponent getInitialFocusComponent()
+	{
+		return tfProfileName;
+	}
+	
 	public void setFocusToTitle()
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -254,7 +260,6 @@ public class ConnectionEditorPanel
     add(tfURL, gridBagConstraints);
 
     tfUserName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-    tfUserName.setToolTipText("");
     tfUserName.setMaximumSize(new java.awt.Dimension(2147483647, 20));
     tfUserName.setName("username"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -285,7 +290,7 @@ public class ConnectionEditorPanel
     add(cbAutocommit, gridBagConstraints);
 
     lblUsername.setLabelFor(tfUserName);
-    lblUsername.setText(ResourceMgr.getString("LblUsername"));
+    lblUsername.setText(ResourceMgr.getString("LblUsername")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -295,7 +300,7 @@ public class ConnectionEditorPanel
     add(lblUsername, gridBagConstraints);
 
     lblPwd.setLabelFor(tfPwd);
-    lblPwd.setText(ResourceMgr.getString("LblPassword"));
+    lblPwd.setText(ResourceMgr.getString("LblPassword")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -305,7 +310,7 @@ public class ConnectionEditorPanel
     add(lblPwd, gridBagConstraints);
 
     lblDriver.setLabelFor(cbDrivers);
-    lblDriver.setText(ResourceMgr.getString("LblDriver"));
+    lblDriver.setText(ResourceMgr.getString("LblDriver")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -315,7 +320,7 @@ public class ConnectionEditorPanel
     add(lblDriver, gridBagConstraints);
 
     lblUrl.setLabelFor(tfURL);
-    lblUrl.setText(ResourceMgr.getString("LblDbURL"));
+    lblUrl.setText(ResourceMgr.getString("LblDbURL")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -341,8 +346,8 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 2);
     add(tfFetchSize, gridBagConstraints);
 
-    fetchSizeLabel.setText(ResourceMgr.getString("LblFetchSize"));
-    fetchSizeLabel.setToolTipText(ResourceMgr.getDescription("LblFetchSize"));
+    fetchSizeLabel.setText(ResourceMgr.getString("LblFetchSize")); // NOI18N
+    fetchSizeLabel.setToolTipText(ResourceMgr.getString("d_LblFetchSize")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
@@ -351,7 +356,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
     add(fetchSizeLabel, gridBagConstraints);
 
-    showPassword.setText(ResourceMgr.getString("LblShowPassword"));
+    showPassword.setText(ResourceMgr.getString("LblShowPassword")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 4;
@@ -363,8 +368,8 @@ public class ConnectionEditorPanel
     wbOptionsPanel.setLayout(new java.awt.GridBagLayout());
 
     cbStorePassword.setSelected(true);
-    cbStorePassword.setText(ResourceMgr.getString("LblSavePassword"));
-    cbStorePassword.setToolTipText(ResourceMgr.getDescription("LblSavePassword"));
+    cbStorePassword.setText(ResourceMgr.getString("LblSavePassword")); // NOI18N
+    cbStorePassword.setToolTipText(ResourceMgr.getString("d_LblSavePassword")); // NOI18N
     cbStorePassword.setName("storePassword"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -374,8 +379,8 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 1, 0);
     wbOptionsPanel.add(cbStorePassword, gridBagConstraints);
 
-    rollbackBeforeDisconnect.setText(ResourceMgr.getString("LblRollbackBeforeDisconnect"));
-    rollbackBeforeDisconnect.setToolTipText(ResourceMgr.getDescription("LblRollbackBeforeDisconnect"));
+    rollbackBeforeDisconnect.setText(ResourceMgr.getString("d_LblRollbackBeforeDisconnect")); // NOI18N
+    rollbackBeforeDisconnect.setToolTipText(ResourceMgr.getString("d_LblRollbackBeforeDisconnect")); // NOI18N
     rollbackBeforeDisconnect.setMargin(new java.awt.Insets(2, 0, 2, 2));
     rollbackBeforeDisconnect.setName("rollbackBeforeDisconnect"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -387,8 +392,8 @@ public class ConnectionEditorPanel
     wbOptionsPanel.add(rollbackBeforeDisconnect, gridBagConstraints);
 
     cbIgnoreDropErrors.setSelected(true);
-    cbIgnoreDropErrors.setText(ResourceMgr.getString("LblIgnoreDropErrors"));
-    cbIgnoreDropErrors.setToolTipText(ResourceMgr.getDescription("LblIgnoreDropErrors"));
+    cbIgnoreDropErrors.setText(ResourceMgr.getString("LblIgnoreDropErrors")); // NOI18N
+    cbIgnoreDropErrors.setToolTipText(ResourceMgr.getString("d_LblIgnoreDropErrors")); // NOI18N
     cbIgnoreDropErrors.setName("ignoreDropErrors"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -398,8 +403,8 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 1, 0);
     wbOptionsPanel.add(cbIgnoreDropErrors, gridBagConstraints);
 
-    cbSeparateConnections.setText(ResourceMgr.getString("LblSeparateConnections"));
-    cbSeparateConnections.setToolTipText(ResourceMgr.getDescription("LblSeparateConnections"));
+    cbSeparateConnections.setText(ResourceMgr.getString("LblSeparateConnections")); // NOI18N
+    cbSeparateConnections.setToolTipText(ResourceMgr.getString("d_LblSeparateConnections")); // NOI18N
     cbSeparateConnections.setName("useSeparateConnectionPerTab"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -409,8 +414,8 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 1, 0);
     wbOptionsPanel.add(cbSeparateConnections, gridBagConstraints);
 
-    emptyStringIsNull.setText(ResourceMgr.getString("LblEmptyStringIsNull"));
-    emptyStringIsNull.setToolTipText(ResourceMgr.getDescription("LblEmptyStringIsNull"));
+    emptyStringIsNull.setText(ResourceMgr.getString("LblEmptyStringIsNull")); // NOI18N
+    emptyStringIsNull.setToolTipText(ResourceMgr.getString("d_LblEmptyStringIsNull")); // NOI18N
     emptyStringIsNull.setName("emptyStringIsNull"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -420,8 +425,8 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 1, 0);
     wbOptionsPanel.add(emptyStringIsNull, gridBagConstraints);
 
-    includeNull.setText(ResourceMgr.getString("LblIncludeNullInInsert"));
-    includeNull.setToolTipText(ResourceMgr.getDescription("LblIncludeNullInInsert"));
+    includeNull.setText(ResourceMgr.getString("LblIncludeNullInInsert")); // NOI18N
+    includeNull.setToolTipText(ResourceMgr.getString("d_LblIncludeNullInInsert")); // NOI18N
     includeNull.setMargin(new java.awt.Insets(2, 0, 2, 2));
     includeNull.setName("includeNullInInsert"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -432,8 +437,8 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 7, 1, 0);
     wbOptionsPanel.add(includeNull, gridBagConstraints);
 
-    removeComments.setText(ResourceMgr.getString("LblRemoveComments"));
-    removeComments.setToolTipText(ResourceMgr.getDescription("LblRemoveComments"));
+    removeComments.setText(ResourceMgr.getString("LblRememberSchema")); // NOI18N
+    removeComments.setToolTipText(ResourceMgr.getString("d_LblRememberSchema")); // NOI18N
     removeComments.setMargin(new java.awt.Insets(2, 0, 2, 2));
     removeComments.setName("removeComments"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -444,8 +449,8 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
     wbOptionsPanel.add(removeComments, gridBagConstraints);
 
-    rememberExplorerSchema.setText(ResourceMgr.getString("LblRememberSchema"));
-    rememberExplorerSchema.setToolTipText(ResourceMgr.getDescription("LblRememberSchema"));
+    rememberExplorerSchema.setText(ResourceMgr.getString("LblRememberSchema")); // NOI18N
+    rememberExplorerSchema.setToolTipText(ResourceMgr.getString("d_LblRememberSchema")); // NOI18N
     rememberExplorerSchema.setMargin(new java.awt.Insets(2, 0, 2, 2));
     rememberExplorerSchema.setName("storeExplorerSchema"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -456,25 +461,26 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 7, 1, 0);
     wbOptionsPanel.add(rememberExplorerSchema, gridBagConstraints);
 
-    trimCharData.setText(ResourceMgr.getString("LblTrimCharData"));
-    trimCharData.setToolTipText(ResourceMgr.getDescription("LblTrimCharData"));
+    trimCharData.setText(ResourceMgr.getString("LblTrimCharData")); // NOI18N
+    trimCharData.setToolTipText(ResourceMgr.getString("d_LblTrimCharData")); // NOI18N
     trimCharData.setName("trimCharData"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     wbOptionsPanel.add(trimCharData, gridBagConstraints);
 
     controlUpdates.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 0));
 
-    confirmUpdates.setText(ResourceMgr.getString("LblConfirmDbUpdates"));
-    confirmUpdates.setToolTipText(ResourceMgr.getDescription("LblConfirmDbUpdates"));
+    confirmUpdates.setText(ResourceMgr.getString("LblConfirmDbUpdates")); // NOI18N
+    confirmUpdates.setToolTipText(ResourceMgr.getString("d_LblConfirmDbUpdates")); // NOI18N
     confirmUpdates.setMargin(new java.awt.Insets(2, 0, 2, 5));
     confirmUpdates.setName("confirmUpdates"); // NOI18N
     controlUpdates.add(confirmUpdates);
 
-    readOnly.setText(ResourceMgr.getString("LblConnReadOnly"));
-    readOnly.setToolTipText(ResourceMgr.getDescription("LblConnReadOnly"));
+    readOnly.setText(ResourceMgr.getString("LblConnReadOnly")); // NOI18N
+    readOnly.setToolTipText(ResourceMgr.getString("d_LblConnReadOnly")); // NOI18N
     readOnly.setName("readOnly"); // NOI18N
     controlUpdates.add(readOnly);
 
@@ -486,8 +492,8 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 7, 1, 0);
     wbOptionsPanel.add(controlUpdates, gridBagConstraints);
 
-    hideWarnings.setText(ResourceMgr.getString("LblHideWarn"));
-    hideWarnings.setToolTipText(ResourceMgr.getDescription("LblHideWarn"));
+    hideWarnings.setText(ResourceMgr.getString("LblHideWarn")); // NOI18N
+    hideWarnings.setToolTipText(ResourceMgr.getString("d_LblHideWarn")); // NOI18N
     hideWarnings.setName("hideWarnings"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
@@ -544,8 +550,8 @@ public class ConnectionEditorPanel
     add(jPanel1, gridBagConstraints);
 
     workspaceFileLabel.setLabelFor(tfWorkspaceFile);
-    workspaceFileLabel.setText(ResourceMgr.getString("LblOpenWksp"));
-    workspaceFileLabel.setToolTipText(ResourceMgr.getDescription("LblOpenWksp"));
+    workspaceFileLabel.setText(ResourceMgr.getString("LblOpenWksp")); // NOI18N
+    workspaceFileLabel.setToolTipText(ResourceMgr.getString("d_LblOpenWksp")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 16;
@@ -571,8 +577,8 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 0);
     add(altDelimiter, gridBagConstraints);
 
-    altDelimLabel.setText(ResourceMgr.getString("LblAltDelimit"));
-    altDelimLabel.setToolTipText(ResourceMgr.getDescription("LblAltDelimit"));
+    altDelimLabel.setText(ResourceMgr.getString("LblAltDelimit")); // NOI18N
+    altDelimLabel.setToolTipText(ResourceMgr.getString("d_LblAltDelimit")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 15;
@@ -583,8 +589,8 @@ public class ConnectionEditorPanel
 
     jPanel2.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 0));
 
-    extendedProps.setText(ResourceMgr.getString("LblConnExtendedProps"));
-    extendedProps.setToolTipText(ResourceMgr.getDescription("LblConnExtendedProps"));
+    extendedProps.setText(ResourceMgr.getString("LblConnExtendedProps")); // NOI18N
+    extendedProps.setToolTipText(ResourceMgr.getString("d_LblConnExtendedProps")); // NOI18N
     extendedProps.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
     extendedProps.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
     extendedProps.setIconTextGap(1);
@@ -611,8 +617,8 @@ public class ConnectionEditorPanel
     add(jPanel2, gridBagConstraints);
 
     infoColorLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-    infoColorLabel.setText(ResourceMgr.getString("LblInfoColor"));
-    infoColorLabel.setToolTipText(ResourceMgr.getDescription("LblInfoColor"));
+    infoColorLabel.setText(ResourceMgr.getString("LblInfoColor")); // NOI18N
+    infoColorLabel.setToolTipText(ResourceMgr.getDescription("LblInfoColor")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 14;
@@ -630,8 +636,8 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(2, 4, 0, 0);
     add(infoColor, gridBagConstraints);
 
-    editConnectionScriptsButton.setText(ResourceMgr.getString("LblConnScripts"));
-    editConnectionScriptsButton.setToolTipText(ResourceMgr.getDescription("LblConnScripts"));
+    editConnectionScriptsButton.setText(ResourceMgr.getString("LblConnScripts")); // NOI18N
+    editConnectionScriptsButton.setToolTipText(ResourceMgr.getString("d_LblConnScripts")); // NOI18N
     editConnectionScriptsButton.addActionListener(formListener);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;

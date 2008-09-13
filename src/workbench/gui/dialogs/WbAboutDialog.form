@@ -154,7 +154,7 @@
         </Component>
         <Component class="javax.swing.JLabel" name="jeditLabel">
           <Properties>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt;The editor is based on jEdit&apos;s 2.2.1 &lt;u&gt;syntax highlighting package&lt;/u&gt;&lt;/html&gt;"/>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt;The editor is based on jEdit&apos;s 2.2.2 &lt;u&gt;syntax highlighting package&lt;/u&gt;&lt;/html&gt;"/>
             <Property name="toolTipText" type="java.lang.String" value="http://syntax.jedit.org/"/>
           </Properties>
           <Events>

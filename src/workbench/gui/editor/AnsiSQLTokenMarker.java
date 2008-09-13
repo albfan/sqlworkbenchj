@@ -27,12 +27,22 @@ public class AnsiSQLTokenMarker
 		initKeywordMap();
 	}
 
-	public void setSqlKeyWords(Collection<String> keywords)
+	public void addOperators(Collection<String> operators)
+	{
+		this.addKeywordList(operators, Token.KEYWORD1);
+	}
+	
+	public void addDatatypes(Collection<String> types)
+	{
+		this.addKeywordList(types, Token.KEYWORD1);
+	}
+
+	public void addSqlKeyWords(Collection<String> keywords)
 	{
 		this.addKeywordList(keywords, Token.KEYWORD1);
 	}
 
-	public void setSqlFunctions(Collection<String> functions)
+	public void addSqlFunctions(Collection<String> functions)
 	{
 		this.addKeywordList(functions, Token.KEYWORD3);
 	}
@@ -85,7 +95,7 @@ public class AnsiSQLTokenMarker
 	private void addSystemFunctions()
 	{
 		SqlKeywordHelper helper = new SqlKeywordHelper();
-		addKeywordList(helper.getSystemFunctions(), Token.KEYWORD3);
+		addKeywordList(helper.getSqlFunctions(), Token.KEYWORD3);
 	}
 
 	private void addOperators()

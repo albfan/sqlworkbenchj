@@ -2588,9 +2588,9 @@ public class SqlPanel
 						WbSwingUtilities.repaintLater(this);
 						Thread.yield();
 
-						String question = ResourceMgr.getString("MsgScriptStatementError");
-						question = StringUtil.replace(question, "%nr%", Integer.toString(i+1));
-						question = StringUtil.replace(question, "%count%", Integer.toString(count));
+						String question = ResourceMgr.getFormattedString("MsgScriptStatementError",
+							NumberStringCache.getNumberString(i+1),
+							NumberStringCache.getNumberString(count));
 						int choice = WbSwingUtilities.getYesNoIgnoreAll(this, question);
 						this.showBusyIcon(true);
 

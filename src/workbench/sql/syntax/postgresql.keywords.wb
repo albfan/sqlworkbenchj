@@ -1,0 +1,9 @@
+abort
+analyze
+vacuum
+checkpoint
+cluster
+cast
+listen
+lock
+unlisten

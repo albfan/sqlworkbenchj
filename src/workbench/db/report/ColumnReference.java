@@ -44,7 +44,11 @@ public class ColumnReference
 	{
 		return fkDefinition.getFkName();
 	}
-	
+
+	public void setCompareFKRule(boolean flag)
+	{
+		if (this.fkDefinition != null) fkDefinition.setCompareFKRules(flag);
+	}
 	public ReportTable getForeignTable()
 	{
 		return fkDefinition.getForeignTable();
@@ -59,7 +63,7 @@ public class ColumnReference
 	{
 		return fkDefinition.getUpdateRule();
 	}
-	
+
 	public void setForeignColumn(String col)
 	{
 		this.foreignColumn = col;
@@ -122,7 +126,7 @@ public class ColumnReference
 	{
 		try
 		{
-			return (this.foreignColumn.equals(ref.foreignColumn) &&
+			return (this.foreignColumn.equalsIgnoreCase(ref.foreignColumn) &&
 			        this.fkDefinition.equals(ref.fkDefinition)
 			        );
 		}

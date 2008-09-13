@@ -73,6 +73,9 @@ public class ReferenceTableNavigator
 	private TableIdentifier baseTable;
 	private ReferenceTableNavigation parentNavigation;
 	private ReferenceTableNavigation childNavigation;
+	private final Object parentLock = new Object();
+	private final Object childLock = new Object();
+	private final Object connectionLock = new Object();
 	
 	public ReferenceTableNavigator(DwPanel data, MainWindow win)
 	{
@@ -202,14 +205,14 @@ public class ReferenceTableNavigator
 	
 	private void rebuildMenu()
 	{
-		synchronized(selectParentTables)
+		synchronized (parentLock)
 		{
 			selectParentTables.removeAll();
 			selectParentTables.add(createLoadingItem());
 			parentMenuInitialized = false;
 		}
 
-		synchronized(selectChildTables)
+		synchronized (childLock)
 		{
 			selectChildTables.removeAll();
 			selectChildTables.add(createLoadingItem());
@@ -223,12 +226,12 @@ public class ReferenceTableNavigator
 		{
 			public void run()
 			{
-				synchronized (getConnection())
+				synchronized (connectionLock)
 				{
 					childNavigation = new ReferenceTableNavigation(getUpdateTable(), getConnection());
 					childNavigation.readTreeForChildren();
 				}
-				synchronized (childNavigation)
+				synchronized (childLock)
 				{
 					buildMenu(selectChildTables, childNavigation, "select-child");
 					childMenuInitialized = true;
@@ -244,12 +247,13 @@ public class ReferenceTableNavigator
 		{
 			public void run()
 			{
-				synchronized (getConnection())
+				synchronized (connectionLock)
 				{
 					parentNavigation = new ReferenceTableNavigation(getUpdateTable(), getConnection());
 					parentNavigation.readTreeForParents();
 				}
-				synchronized (parentNavigation)
+
+				synchronized (parentLock)
 				{
 					buildMenu(selectParentTables, parentNavigation, "select-parent");
 					parentMenuInitialized = true;
@@ -294,7 +298,7 @@ public class ReferenceTableNavigator
 					}
 					display.append(')');
 					EditorTabSelectMenu item = new EditorTabSelectMenu(this, display.toString(), "LblShowDataInNewTab", "MsgRelatedTabHint", container);
-					item.setTable(node.getTable());
+					item.setDependencyNode(node);
 					item.setVisible(true);
 					boolean hasColumns = hasColumns(node);
 					item.setEnabled(hasColumns);
@@ -371,7 +375,6 @@ public class ReferenceTableNavigator
 		for (int i = 0; i < rowCount; i++)
 		{
 			List<ColumnData> rowData = new LinkedList<ColumnData>();
-			//for (Map.Entry<String, String> entry : columns.entrySet())
 			for (String col : columns.values())
 			{
 				int colIndex = ds.getColumnIndex(col);
@@ -407,55 +410,52 @@ public class ReferenceTableNavigator
 		
 		WbConnection con = getConnection();
 		TableIdentifier tbl = null;
+		String fkName = null;
+		String error = null;
+
 		if (item instanceof EditorTabSelectMenu)
 		{
-			tbl = ((EditorTabSelectMenu)item).getTable();
+			DependencyNode node = ((EditorTabSelectMenu)item).getDependencyNode();
+			tbl = node.getTable();
+			fkName = node.getFkName();
 		}
 		else
 		{
-			String t = item.getText();
-			int pos = t.indexOf(" (");
-			if (pos > -1)
-			{
-				tbl = new TableIdentifier(t.substring(0, pos));
-			}
-			else
-			{
-				tbl = new TableIdentifier(t);
-			}
+			WbSwingUtilities.showErrorMessage(this.container, "Menu was incorrectly initialized!");
+			return;
 		}
 		
 		String sql = null;
-		String error = null;
+		
 		List<List<ColumnData>> rowData = null;
 		try
 		{
 			if ("select-child".equals(cmd))
 			{
-				DependencyNode node = this.childNavigation.getNodeForTable(tbl);
+				DependencyNode node = this.childNavigation.getNodeForTable(tbl, fkName);
 				if (node == null) 
 				{
 					error = "Could not find child table from menu item!";
-					LogMgr.logError("ReferenceTableNavigator.actionPerformed", error, null);
+					LogMgr.logError("ReferenceTableNavigator.actionPerformed()", error, null);
 				}
 				else
 				{
 					rowData = getColumnData(node);
-					sql = this.childNavigation.getSelectForChild(tbl, rowData);
+					sql = this.childNavigation.getSelectForChild(tbl, fkName, rowData);
 				}
 			}
 			else if ("select-parent".equals(cmd))
 			{
-				DependencyNode node = this.parentNavigation.getNodeForTable(tbl);
+				DependencyNode node = this.parentNavigation.getNodeForTable(tbl, fkName);
 				if (node == null) 
 				{
 					error = "Could not find parent table from menu item!";
-					LogMgr.logError("ReferenceTableNavigator.actionPerformed", error, null);
+					LogMgr.logError("ReferenceTableNavigator.actionPerformed()", error, null);
 				}
 				else
 				{
 					rowData = getColumnData(node);
-					sql = this.parentNavigation.getSelectForParent(tbl, rowData);
+					sql = this.parentNavigation.getSelectForParent(tbl, fkName, rowData);
 				}
 			}
 		}
@@ -464,13 +464,14 @@ public class ReferenceTableNavigator
 			LogMgr.logError("ReferenceTableNavigator.actionPerformed", "Error when creating SQL", e);
 			error = ExceptionUtil.getDisplay(e);
 		}
+
 		if (sql == null || error != null)
 		{
 			WbSwingUtilities.showErrorMessage(this.container, error);
 			return;
 		}
 
-		String comment = comment = ResourceMgr.getString("MsgLoadRelatedComment") + " " + getUpdateTable().getTableExpression(con);
+		String comment = ResourceMgr.getFormattedString("MsgLoadRelatedComment", getUpdateTable().getTableExpression(con), fkName);
 
 		boolean logText = WbAction.isCtrlPressed(evt);
 		

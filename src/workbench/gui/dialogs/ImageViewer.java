@@ -21,10 +21,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.sql.Blob;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
@@ -78,10 +75,7 @@ public class ImageViewer
 		}
 		
 		getRootPane().setDefaultButton(closeButton);
-		InputMap im = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-		ActionMap am = this.getRootPane().getActionMap();
-		escAction = new EscAction(this);
-		escAction.addToInputMap(im, am);
+		escAction = new EscAction(this, this);
 	}
 
 	public void setData(Object data)

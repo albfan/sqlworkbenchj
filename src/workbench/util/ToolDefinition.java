@@ -76,7 +76,9 @@ public class ToolDefinition
 	public WbFile getExecutable()
 	{
 		if (this.appPath == null) return null;
-		// as the commandline may include parameters, we assume the first token is the actual program. 
+		// as the commandline may include parameters, we assume the first token is the actual program.
+		// but this requires that if the path to the executable contains spaces, the exe path
+		// must be enclosed in double quotes
 		List<String> appDef = tokenizePath();
 		String prgPath = appDef.get(0);
 		WbFile f = new WbFile(prgPath);
@@ -104,7 +106,7 @@ public class ToolDefinition
 	
 	private List<String> tokenizePath()
 	{
-		WbStringTokenizer tok = new WbStringTokenizer(this.appPath, " ", true, "\"", true);
+		WbStringTokenizer tok = new WbStringTokenizer(this.appPath, " ", true, "\"", false);
 		return tok.getAllTokens();
 	}
 	

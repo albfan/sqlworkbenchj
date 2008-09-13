@@ -17,19 +17,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
-import workbench.gui.components.BlobHandler;
 import workbench.gui.components.HexPanel;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -65,12 +60,7 @@ public class HexViewer
 		}
 		
 		getRootPane().setDefaultButton(closeButton);
-		InputMap im = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-		ActionMap am = this.getRootPane().getActionMap();
-		escAction = new EscAction(this);
-		im.put(escAction.getAccelerator(), escAction.getActionName());
-		am.put(escAction.getActionName(), escAction);
-		
+		escAction = new EscAction(this, this);
 		WbSwingUtilities.center(this, WbManager.getInstance().getCurrentWindow());
 	}
 

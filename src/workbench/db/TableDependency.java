@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -44,12 +45,22 @@ public class TableDependency
 
 	public DependencyNode findLeafNodeForTable(TableIdentifier table)
 	{
+		return findLeafNodeForTable(table, null);
+	}
+	
+	public DependencyNode findLeafNodeForTable(TableIdentifier table, String fkName)
+	{
 		String findExpr = table.getRawTableName();//table.getTableExpression(connection);
 		for (DependencyNode node : leafs)
 		{
 			TableIdentifier nodeTable = node.getTable();
 			String expr = nodeTable.getRawTableName();//getTableExpression(connection);
-			if (expr.equalsIgnoreCase(findExpr)) return node;
+			if (expr.equalsIgnoreCase(findExpr))
+			{
+				if (fkName == null) return node;
+				if (StringUtil.equalStringIgnoreCase(node.getFkName(), fkName)) return node;
+			}
+			
 		}
 		return null;
 	}

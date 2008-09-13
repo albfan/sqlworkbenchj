@@ -381,6 +381,11 @@ public class WbAction
 		addToInputMap(c.getInputMap(), c.getActionMap());
 	}
 
+	public void addToInputMap(JComponent c, int which)
+	{
+		addToInputMap(c.getInputMap(which), c.getActionMap());
+	}
+
 	public void addToInputMap(InputMap im, ActionMap am)
 	{
 		if (this.getAccelerator() == null) return;

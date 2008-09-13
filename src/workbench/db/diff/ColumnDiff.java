@@ -93,21 +93,32 @@ public class ColumnDiff
 		{
 			int sourceType = sId.getDataType();
 			int targetType = tId.getDataType();
-			if (sourceType != targetType) return false;
-			
-			if (SqlUtil.isCharacterType(sourceType))
+
+			if (SqlUtil.isClobType(targetType) && SqlUtil.isClobType(sourceType))
+			{
+				return true;
+			}
+			else if (SqlUtil.isBlobType(targetType) && SqlUtil.isBlobType(sourceType))
+			{
+				return true;
+			}
+			else if (SqlUtil.isCharacterType(sourceType) && SqlUtil.isCharacterType(targetType))
 			{
 				int sourceSize = sId.getColumnSize();
 				int targetSize = tId.getColumnSize();
 				return targetSize == sourceSize;
 			}
-			else if (SqlUtil.isNumberType(sourceType))
+			else if (SqlUtil.isIntegerType(sourceType) && SqlUtil.isIntegerType(targetType))
+			{
+				return true;
+			}
+			else if (SqlUtil.isNumberType(sourceType) && SqlUtil.isNumberType(targetType))
 			{
 				int sourceDigits = sId.getDecimalDigits();
 				int targetDigits = tId.getDecimalDigits();
 				return sourceDigits == targetDigits;
 			}
-			return true;
+			return (sourceType == targetType);
 		}
 		else
 		{
@@ -139,6 +150,7 @@ public class ColumnDiff
 		
 		ColumnReference refFk = this.referenceColumn.getForeignKey();
 		ColumnReference targetFk = this.targetColumn.getForeignKey();
+		
 		boolean fkDifferent = false;
 		if (this.compareFK)
 		{
@@ -152,6 +164,10 @@ public class ColumnDiff
 			}
 			else 
 			{
+				// when comparing only JDBC types, we should ignore FK rule as they
+				// differ extremely between DBMS
+				refFk.setCompareFKRule(!this.compareJdbcTypes);
+				targetFk.setCompareFKRule(!this.compareJdbcTypes);
 				fkDifferent = !(refFk.equals(targetFk));
 			}
 		}
@@ -170,6 +186,12 @@ public class ColumnDiff
 		{
 			writer.appendOpenTag(result, this.indent, TAG_MODIFY_COLUMN, "name", tId.getColumnName());
 			result.append('\n');
+
+			if (typeDifferent)
+			{
+				referenceColumn.appendXml(result, myindent, false, "reference-column-definition", true);
+			}
+
 			if (typeDifferent)
 			{
 				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_DBMS_TYPE, sId.getDbmsType());
@@ -218,8 +240,8 @@ public class ColumnDiff
 		return compareJdbcTypes;
 	}
 
-	public void setCompareJdbcTypes(boolean compareJdbcTypes)
+	public void setCompareJdbcTypes(boolean flag)
 	{
-		this.compareJdbcTypes = compareJdbcTypes;
+		this.compareJdbcTypes = flag;
 	}
 }

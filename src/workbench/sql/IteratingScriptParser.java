@@ -49,7 +49,6 @@ public class IteratingScriptParser
 	private boolean commentOn = false;
 	private boolean blockComment = false;
 	private boolean singleLineComment = false;
-	private boolean startOfLine = true;
 	private int lastNewLineStart = 0;
 	private char lastQuote = 0;
 	private boolean checkEscapedQuotes = true;
@@ -191,7 +190,6 @@ public class IteratingScriptParser
 		commentOn = false;
 		blockComment = false;
 		singleLineComment = false;
-		startOfLine = true;
 		lastNewLineStart = 0;
 		lastQuote = 0;
 	}
@@ -314,7 +312,7 @@ public class IteratingScriptParser
 						singleLineComment = false;
 						commentOn = true;
 					}
-					else if (/*startOfLine &&*/ isLineComment(pos))
+					else if (firstChar != '\n' && isLineComment(pos))
 					{
 						singleLineComment = true;
 						blockComment = false;
@@ -330,7 +328,6 @@ public class IteratingScriptParser
 							singleLineComment = false;
 							blockComment = false;
 							commentOn = false;
-							startOfLine = true;
 							lastNewLineStart = pos;
 							continue;
 						}
@@ -368,7 +365,6 @@ public class IteratingScriptParser
 						lastPos ++;
 						continue;
 					}
-					startOfLine = true;
 					this.lastNewLineStart = pos + 1;
 					this.lastPos = pos + this.delimiterLength;
 					int start = lastCommandEnd;
@@ -399,7 +395,6 @@ public class IteratingScriptParser
 							ScriptCommandDefinition c = this.createCommand(start, end);
 							if (c != null) 
 							{
-								startOfLine = true;
 								this.lastNewLineStart = pos + 1;
 								this.lastPos = lastNewLineStart;
 								this.lastCommandEnd = lastPos;
@@ -415,7 +410,6 @@ public class IteratingScriptParser
 							int commandEnd = pos;
 
 							lastNewLineStart = pos;
-							startOfLine = true;
 
 							if (clean.length() > 0 )
 							{
@@ -448,10 +442,6 @@ public class IteratingScriptParser
 							continue;
 						}
 						lastNewLineStart = pos + 1;
-					}
-					else
-					{
-						startOfLine = false;
 					}
 				}
 			}

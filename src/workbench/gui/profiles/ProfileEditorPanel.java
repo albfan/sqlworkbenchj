@@ -21,6 +21,7 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
@@ -148,15 +149,15 @@ public class ProfileEditorPanel
 		}
 	}
 
-	public void setInitialFocus()
+	public JComponent getInitialFocusComponent()
 	{
 		if (dummyAdded)
 		{
-			connectionEditor.setFocusToTitle();
+			return connectionEditor.getInitialFocusComponent();
 		}
 		else
 		{
-			profileTree.requestFocus();
+			return profileTree;
 		}
 	}
 

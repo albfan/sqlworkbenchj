@@ -17,7 +17,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JMenuItem;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import workbench.db.TableIdentifier;
+import workbench.db.DependencyNode;
 import workbench.gui.MainWindow;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
@@ -38,7 +38,7 @@ public class EditorTabSelectMenu
 	private String regularTooltip;
 	private String newTabTooltip;
 	public static final String PANEL_CMD_PREFIX = "panel_";
-	private TableIdentifier table;
+	private DependencyNode node;
 	
 	public EditorTabSelectMenu(ActionListener l, String label, String tooltipKeyNewTab, String tooltipKeyTab, MainWindow parent)
 	{
@@ -55,14 +55,14 @@ public class EditorTabSelectMenu
 		}
 	}
 	
-	public void setTable(TableIdentifier tbl)
+	public void setDependencyNode(DependencyNode dep)
 	{
-		this.table = tbl;
+		this.node = dep;
 	}
 	
-	public TableIdentifier getTable()
+	public DependencyNode getDependencyNode()
 	{
-		return table;
+		return node;
 	}
 	
 	protected synchronized void updateMenu()

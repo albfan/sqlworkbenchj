@@ -436,7 +436,6 @@ public class SchemaDiff
 		HashSet<String> refTableNames = new HashSet<String>();
 		
 		this.objectsToCompare = new ArrayList<Object>(count);
-		DbMetadata targetMeta = this.targetDb.getMetadata();
 
 		if (this.monitor != null)
 		{
@@ -463,10 +462,13 @@ public class SchemaDiff
 			}
 			
 			TableIdentifier tid = rid.createCopy();
-			tid.setSchema(this.targetSchema);
+			tid.setSchema(targetSchema);
+			tid.setCatalog(null);
+			tid.setNeverAdjustCase(false);
+			tid.adjustCase(targetDb);
 				
 			DiffEntry entry = null;
-			if (targetMeta.objectExists(tid, rid.getType()))
+			if (targetDb.getMetadata().objectExists(tid, rid.getType()))
 			{
 				tid.setType(rid.getType());
 				entry = new DiffEntry(rid, tid);
@@ -971,7 +973,6 @@ public class SchemaDiff
 			if (o instanceof DiffEntry)
 			{
 				DiffEntry de = (DiffEntry)o;
-				String tbl = de.reference.getTableName();
 				tbls[0] = de.reference.getType();
 				tbls[1] = (de.target == null ? "" : StringUtil.trimQuotes(de.target.getTableName()));
 				tbls[2] = StringUtil.trimQuotes(de.reference.getTableName());

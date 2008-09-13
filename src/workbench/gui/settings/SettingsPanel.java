@@ -26,7 +26,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JRootPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
@@ -34,8 +33,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionListener;
 
 import workbench.gui.WbSwingUtilities;
@@ -93,6 +90,7 @@ public class SettingsPanel
 			WbSwingUtilities.showWaitCursor(this);
 			OptionPanelPage option = pages.get(index);
 			JPanel panel = option.getPanel();
+		
 			if (currentPanel != null)
 			{
 				content.remove(currentPanel);
@@ -198,10 +196,8 @@ public class SettingsPanel
 		}
 
 		this.dialog.getRootPane().setDefaultButton(this.okButton);
-
-		JRootPane root = dialog.getRootPane();
-		escAction = new EscAction(this);
-		escAction.addToInputMap(root);
+		
+		escAction = new EscAction(dialog, this);
 
 		WbSwingUtilities.center(this.dialog, aReference);
 		EventQueue.invokeLater(new Runnable()

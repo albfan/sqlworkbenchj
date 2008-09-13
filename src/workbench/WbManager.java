@@ -727,12 +727,20 @@ public class WbManager
 		}
 
 		boolean autoSelect = Settings.getInstance().getShowConnectDialogOnStartup();
-		boolean exitOnCancel = Settings.getInstance().getExitOnFirstConnectCancel();
+		final boolean exitOnCancel = Settings.getInstance().getExitOnFirstConnectCancel();
 
 		// no connection? then display the connection dialog
 		if (!connected && autoSelect)
 		{
-			main.selectConnection(exitOnCancel);
+			// Should be done later, so that the main window
+			// has enough time to initialize
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					main.selectConnection(exitOnCancel);
+				}
+			});
 		}
 	}
 
@@ -855,22 +863,6 @@ public class WbManager
 		}
 		else
 		{
-			// Start a background thread to read the XML files
-			// for profiles and drivers. I think this improves
-			// startup performance because this can be done in 
-			// parallel while the MainWindow is initializing
-			// especially on a multi-core computer this should
-			// show some improvement - I hope :) 
-//			WbThread init = new WbThread("Background Init")
-//			{
-//				public void run()
-//				{
-//					ConnectionMgr.getInstance().getDrivers();
-//					ConnectionMgr.getInstance().getProfiles();
-//				}
-//			};
-//			init.start();
-			
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()

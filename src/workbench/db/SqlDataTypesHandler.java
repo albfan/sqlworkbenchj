@@ -11,7 +11,6 @@
  */
 package workbench.db;
 
-import java.sql.Connection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -58,14 +57,16 @@ public class SqlDataTypesHandler
 					List<String> l = StringUtil.stringToList(keys.toUpperCase(), ",");
 					this.dataTypes.addAll(l);
 				}
-				
-				keys = Settings.getInstance().getProperty("workbench.db." + dbId + ".syntax.datatypes", null);
-				if (keys != null)
+
+				if (dbId != null)
 				{
-					List<String> l = StringUtil.stringToList(keys.toUpperCase(), ",");
-					this.dataTypes.addAll(l);
+					keys = Settings.getInstance().getProperty("workbench.db." + dbId + ".syntax.datatypes", null);
+					if (keys != null)
+					{
+						List<String> l = StringUtil.stringToList(keys.toUpperCase(), ",");
+						this.dataTypes.addAll(l);
+					}
 				}
-				
 			}
 			catch (Exception e)
 			{

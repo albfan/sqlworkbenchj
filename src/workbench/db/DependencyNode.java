@@ -79,14 +79,27 @@ public class DependencyNode
 
 	public String toString()
 	{
-		if (this.fkName == null)
+		StringBuilder result = new StringBuilder(20);
+		result.append(this.table.getTableName());
+		if (fkName != null)
 		{
-			return this.table.getTableName();
+			result.append(" <" + this.fkName + ">");
 		}
-		else
+		result.append(" [");
+		boolean first = true;
+		for (String col : columns.keySet())
 		{
-			return this.table.getTableName() + " (" + this.fkName + ")";
+			if (!first)
+			{
+				result.append(", ");
+				first = false;
+			}
+			result.append(col);
+			result.append(" -> ");
+			result.append(columns.get(col));
 		}
+		result.append("]");
+		return result.toString();
 	}
 
 	public String getFkName()

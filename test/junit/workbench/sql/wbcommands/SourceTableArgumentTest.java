@@ -34,6 +34,7 @@ public class SourceTableArgumentTest
   }
 
   public void testGetTables()
+		throws Exception
   {
     WbConnection con = null;
     Statement stmt = null;
@@ -65,11 +66,6 @@ public class SourceTableArgumentTest
       tables = parser.getTables();
       assertEquals("Wrong number of table", 1, tables.size());
       assertEquals("Wrong table retrieved", true, tables.get(0).getTableName().equalsIgnoreCase("arg_test"));
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();
-      fail(e.getMessage());
     }
     finally
     {

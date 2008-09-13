@@ -83,29 +83,42 @@ public class ReportColumn
 	
 	public void appendXml(StrBuffer result, StrBuffer indent, boolean includePosition)
 	{
+		appendXml(result, indent, includePosition, TAG_COLUMN_DEFINITION, false);
+	}
+	
+	public void appendXml(StrBuffer result, StrBuffer indent, boolean includePosition, String mainTagToUse, boolean shortInfo)
+	{
 		StrBuffer myindent = new StrBuffer(indent);
 
 		myindent.append("  ");
-		tagWriter.appendOpenTag(result, indent, TAG_COLUMN_DEFINITION, "name", StringUtil.trimQuotes(this.column.getColumnName()));
+		if (shortInfo)
+		{
+			tagWriter.appendOpenTag(result, indent, mainTagToUse);
+		}
+		else
+		{
+			tagWriter.appendOpenTag(result, indent, mainTagToUse, "name", StringUtil.trimQuotes(this.column.getColumnName()));
+		}
+
 		result.append('\n');
 
 		if (includePosition) tagWriter.appendTag(result, myindent, TAG_COLUMN_POSITION, this.column.getPosition());
-		tagWriter.appendTag(result, myindent, TAG_COLUMN_NAME, this.column.getColumnName());
+		if (!shortInfo) tagWriter.appendTag(result, myindent, TAG_COLUMN_NAME, this.column.getColumnName());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_DBMS_TYPE, this.column.getDbmsType());
-		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_PK, this.column.isPkColumn());
+		if (isRealColumn && !shortInfo) tagWriter.appendTag(result, myindent, TAG_COLUMN_PK, this.column.isPkColumn());
 		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_NULLABLE, this.column.isNullable());
 		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_DEFAULT, this.column.getDefaultValue(), true);
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_SIZE, this.column.getColumnSize());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_DIGITS, this.column.getDigitsDisplay());
-		tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE, this.column.getDataType());
+		if (!shortInfo) tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE, this.column.getDataType());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE_NAME, SqlUtil.getTypeName(this.column.getDataType()));
-		tagWriter.appendTag(result, myindent, TAG_COLUMN_COMMENT, this.column.getComment(), true);
+		if (!shortInfo) tagWriter.appendTag(result, myindent, TAG_COLUMN_COMMENT, this.column.getComment(), true);
 
 		if (this.fk != null)
 		{
 			result.append(fk.getXml(myindent));
 		}
-		tagWriter.appendCloseTag(result, indent, TAG_COLUMN_DEFINITION);
+		tagWriter.appendCloseTag(result, indent, mainTagToUse);
 		return;
 	}
 

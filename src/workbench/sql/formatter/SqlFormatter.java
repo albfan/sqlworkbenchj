@@ -184,12 +184,13 @@ public class SqlFormatter
 	
 	public void setDbDataTypes(Set<String> types)
 	{
-		this.dataTypes = types;
+		this.dataTypes = new TreeSet<String>(new CaseInsensitiveComparator());
+		dataTypes.addAll(types);
 	}
 	
 	public void setDBFunctions(Set<String> functionNames)
 	{
-		this.dbFunctions = new HashSet<String>();
+		this.dbFunctions = new TreeSet<String>(new CaseInsensitiveComparator());
 		if (functionNames != null)
 		{
 			this.dbFunctions.addAll(functionNames);
@@ -200,7 +201,7 @@ public class SqlFormatter
 	private void addStandardFunctions(Set<String> functions)
 	{
 		SqlKeywordHelper keyWords = new SqlKeywordHelper();		
-		functions.addAll(keyWords.getSystemFunctions());
+		functions.addAll(keyWords.getSqlFunctions());
 	}
 	
 	private void saveLeadingWhitespace()
@@ -344,7 +345,7 @@ public class SqlFormatter
 		if (dbFunctions == null)
 		{
 			SqlKeywordHelper keyWords = new SqlKeywordHelper();
-			dbFunctions = keyWords.getSystemFunctions();
+			dbFunctions = keyWords.getSqlFunctions();
 		}
 		return this.dbFunctions.contains(key.toUpperCase());
 	}

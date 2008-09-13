@@ -313,10 +313,11 @@ public class WbSwingUtilities
 		showErrorMessage(aCaller, ResourceMgr.TXT_PRODUCT_NAME, aMessage);
 	}
 
-	public static void showErrorMessage(Component aCaller, final String title, final String aMessage)
+	public static void showErrorMessage(Component aCaller, final String title, final String message)
 	{
 		if (WbManager.getInstance().isBatchMode())
 		{
+			LogMgr.logError("showErrorMessage() - " + title, message, null);
 			return;
 		}
 
@@ -335,7 +336,7 @@ public class WbSwingUtilities
 			caller = aCaller;
 		}
 
-		JOptionPane.showMessageDialog(caller, aMessage, title, JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(caller, message, title, JOptionPane.ERROR_MESSAGE);
 	}
 
 	public static void showMessage(final Component aCaller, final Object aMessage)
