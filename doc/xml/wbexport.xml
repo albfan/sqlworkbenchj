@@ -922,7 +922,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 		if the SELECT is based on a single table (or view).
 	</para>
 
-	<simplesect>
+	<simplesect id="wb-export-max-rows">
 		<title>WbExport and the "Max. Rows" option</title>
 		<para>
 			There is a difference in the behaviour of the command regarding the "Max. Rows" setting

@@ -1,5 +1,0 @@
-Enh:  (89) The launcher will no longer set the default language for 
-      the JVM to englich (-Duser.language=en) as this causes some trouble
-      with newer Oracle drivers. The -nolang parameter is thus obsolete. 
-      To activate the old behaviour, -J-Duser.language=en needs to be added
-      manually to the commandline of the launcher.

@@ -522,7 +522,7 @@
 			</para>
 			<para>
 				You will not be prompted when running statements in the editor, when the
-				option <link linkend="display-results">Append results</link> is enabled.
+				option <link linkend="display-result">Append results</link> is enabled.
 			</para>
 		</section>
 

@@ -27,7 +27,7 @@
   <property name="fop.root" value="../etc/fop"/>
 
   <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../etc/jarbundler/jarbundler-1.9.jar"/>
-	
+
   <target name="init">
     <tstamp>
       <format pattern="yyyy-MM-dd HH:mm" property="build_date"/>
@@ -50,7 +50,7 @@
     </fileset>
     <pathelement location="${fop.root}/build/fop.jar"/>
   </path>
-	
+
 	<target name="set-build-number" depends="prepare">
 		<buildnumber file="build.number"/>
 		<echo message="Build number is ${build.number}"/>
@@ -66,15 +66,15 @@
 		<replace dir="${build}/language" token="@BUILD_NUMBER@" value="${build.number}"/>
 		<replace dir="${build}/language" token="@BUILD_DATE@" value="${build_date}"/>
 	</target>
-	
+
 	<target name="set-dev-build" depends="prepare">
 		<propertyfile file="devbuild.number">
 			<entry key="dev-build.number" type="int" operation="+" value="1"/>
 		</propertyfile>
-		
+
 		<loadproperties srcFile="release.property"/>
 		<loadproperties srcFile="devbuild.number"/>
-		
+
 		<property name="build.number" value="${release.build.number}.${dev-build.number}"/>
 		<echo message="Build number is ${build.number}"/>
 		<antcall target="replace-build-number"/>
@@ -102,58 +102,66 @@
 				<include name="Workbench-Build*.zip"/>
 			</fileset>
 		</delete>
-		
+
 	</target>
 
 	<target name="prepare" depends="init">
 		<mkdir dir="${pdfwork}"/>
-		<mkdir dir="${build.test}"/>
 		<mkdir dir="${build}"/>
 		<mkdir dir="${build}/help"/>
 		<mkdir dir="${distdir}"/>
 		<copy overwrite="true"  todir="${build}">
 			<fileset defaultexcludes="true" dir="${src}">
 				<include name="**/*.*"/>
+				<exclude name="**/*.html"/>
 				<exclude name="**/*.java"/>
 				<exclude name="**/*.form"/>
 				<exclude name="**/*.class"/>
 				<exclude name="**/*.flex"/>
 			</fileset>
-		</copy>	
+		</copy>
+	</target>
 
+	<target name="prepare-test" depends="init">
+		<mkdir dir="${build.test}"/>
+		<copy overwrite="true"  todir="${build.test}">
+			<fileset defaultexcludes="true" dir="${testsrc}/junit">
+				<include name="**/*.sql"/>
+			</fileset>
+		</copy>
 	</target>
 
 	<target name="compile" depends="prepare">
-		
+
 		<!-- compile the starter class with target=1.3 so that it can be loaded by
 		     older JVMs as well and is able to display the error message -->
-		<javac debug="on" 
-					debuglevel="source,lines" 
-					destdir="${build}" 
-					optimize="off" 
-					srcdir="${src}" 
-					target="1.2" 
-					source="1.2" 
-					encoding="ISO-8859-1" 
+		<javac debug="on"
+					debuglevel="source,lines"
+					destdir="${build}"
+					optimize="off"
+					srcdir="${src}"
+					target="1.2"
+					source="1.2"
+					encoding="ISO-8859-1"
 					includes="workbench/WbStarter.java"/>
-		
+
 		<!-- the rest of the application is compiled to the needed class file version -->
-		<javac debug="on" 
-		       debuglevel="source,lines" 
-					 destdir="${build}" 
-					 optimize="off" 
-					 srcdir="${src}" 
-					 target="1.5" 
-					 source="1.5" 
+		<javac debug="on"
+		       debuglevel="source,lines"
+					 destdir="${build}"
+					 optimize="off"
+					 srcdir="${src}"
+					 target="1.5"
+					 source="1.5"
 					 encoding="ISO-8859-1">
 			<exclude name="workbench/WbStarter.java"/>
 			<classpath>
 					<fileset dir="../etc/poi" includes="poi*.jar"/>
 			</classpath>
 		</javac>
-		
+
 	</target>
-	
+
   <!-- Manual related tasks -->
 
   <!-- Create the FO file which will in turn be transformed
@@ -162,8 +170,8 @@
 		<!-- fop seems to require absolute pathnames... -->
 		<dirname property="docdir" file="${docbook.root}/images/note.gif"/>
 		<dirname property="imgdir" file="${src}/workbench/resource/images/filter16.gif"/>
-		<echo message="${docdir}"/> 
-		<echo message="${imgdir}"/> 
+		<echo message="${docdir}"/>
+		<echo message="${imgdir}"/>
     <copy overwrite="true" todir="${pdfwork}">
       <fileset dir="${doc}/xml">
         <include name="*.xml"/>
@@ -183,13 +191,18 @@
       </xmlcatalog>
       <param name="text-indent" expression="0.2cm"/>
       <param name="paper.type" expression="A4"/>
-      <param name="page.margin.bottom" expression="1.0cm"/>
-      <param name="page.margin.top" expression="1.0cm"/>
+      <param name="page.margin.bottom" expression="1.5cm"/>
+      <param name="page.margin.top" expression="1.5cm"/>
       <param name="page.margin.outer" expression="1.5cm"/> <!-- right margin -->
       <param name="page.margin.inner" expression="1.5cm"/> <!-- left margin -->
       <param name="generate.section.toc.level" expression="3"/>
-			<param name="admon.graphics.path" expression="${docdir}/"/>
+			<param name="default.image.width" expression="16"/>
+			<param name="ignore.image.scaling" expression="1"/>
 			<param name="admon.graphics" expression="1"/>
+			<param name="admon.graphics.path" expression="${docdir}/"/>
+			<param name="admon.graphics.extension" expression=".gif"/>
+			<param name="admon.graphic.width" expression="16p"/>
+
 			<param name="admon.textlabel" expression="0"/>
       <param name="toc.indent.width" expression="24"/>
       <param name="toc.max.depth" expression="3"/>
@@ -214,7 +227,7 @@
   <target name="pdf" depends="fop">
 		<property name="inputFile" location="${pdfwork}/manual.fo"/>
 		<property name="outputFile" location="${distdir}/SQLWorkbench-Manual.pdf"/>
-		
+
     <java failonerror="true" fork="true" dir="${fop.root}" classname="org.apache.fop.cli.Main" classpathref="fop.path">
 			<arg line="-fo ${inputFile} -pdf ${outputFile}"/>
     </java>
@@ -223,16 +236,16 @@
 
 	<target name="publish" depends="copy-history,build-html"/>
 	<target name="publish-dev" depends="get-dev-build, copy-history, publish, clean-history"/>
-	
+
 	<target name="build-html" depends="prepare">
 		<property name="html-stylesheet" value="html-publish.css"/>
 		<property name="html-outdir" value="${distdir}/manual"/>
 		<property name="html-resource-dir" value="./images"/>
-		
+
 		<delete dir="${html-outdir}" failonerror="false"/>
 		<mkdir dir="${html-outdir}"/>
 		<mkdir dir="${html-outdir}/images"/>
-		
+
 		<copy todir="${html-outdir}/${html-resource-dir}" flatten="true">
 			<fileset dir="${src}/workbench/resource/images">
 				<include name="colfilter16.gif"/>
@@ -247,33 +260,33 @@
 				<include name="note.gif"/>
 			</fileset>
 		</copy>
-		
+
 		<echo message="Generating HTML in ${html-outdir}"/>
-		
+
 		<copy overwrite="true" todir="${html-outdir}">
 			<fileset dir="${doc}/xml">
 				<include name="*.xml"/>
 			</fileset>
-			
+
 			<filterset begintoken="@" endtoken="@">
 				<filter token="BUILD_DATE" value="${build_date}"/>
 				<filter token="BUILD_NUMBER" value="${build.number}"/>
 				<filter token="IMAGE_DIR" value="${html-resource-dir}"/>
 			</filterset>
 		</copy>
-		
+
 		<copy overwrite="true" tofile="${html-outdir}/history.txt" file="${scriptsrc}/history.new"/>
 
 		<xslt classpathref="xalan.path"
-          basedir="${html-outdir}" 
-          includes="Manual.xml" 
-          style="${doc}/docbook/html/chunk.xsl" 
+          basedir="${html-outdir}"
+          includes="Manual.xml"
+          style="${doc}/docbook/html/chunk.xsl"
           destdir="${html-outdir}">
-			
+
       <xmlcatalog>
 				<dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN" location="${doc}/dtd/docbookx.dtd"/>
 			</xmlcatalog>
-			
+
 			<param name="use.extensions" expression="0"/>
 			<param name="textinsert.extension" expression="1"/>
 			<param name="root.filename" expression="workbench-manual"/>
@@ -294,10 +307,10 @@
 			<param name="use.id.as.filename" expression="1"/>
 			<param name="section.autolabel" expression="1"/>
 
-      <param name="generate.section.toc.level" expression="2"/>
+      <param name="generate.section.toc.level" expression="1"/>
       <param name="toc.max.depth" expression="3"/>
       <param name="toc.section.depth" expression="2"/>
-			
+
 			<param name="table.borders.with.css" expression="1"/>
 			<param name="table.cell.border.style" expression="solid"/>
 			<param name="table.cell.border.thickness" expression="1px"/>
@@ -308,27 +321,27 @@
 			<param name="navig.showtitles" expression="1"/>
 			<param name="css.decoration" expression="1"/>
 		</xslt>
-		
+
 		<delete>
 			<fileset dir="${html-outdir}">
 				<include name="*.xml"/>
 				<include name="Manual.html"/>
 			</fileset>
 		</delete>
-		
+
 		<copy overwrite="true" todir="${html-outdir}" file="${doc}/css/${html-stylesheet}"/>
-		
+
 		<replace dir="${distdir}/manual" summary="true">
-			<replacetoken><![CDATA[<a href="mailto:support@sql-workbench.net">support@sql-workbench.net</a>]]></replacetoken> 
+			<replacetoken><![CDATA[<a href="mailto:support@sql-workbench.net">support@sql-workbench.net</a>]]></replacetoken>
 			<replacevalue><![CDATA[<a href=mailto:&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;>&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;</a>]]></replacevalue>
 		</replace>
-		
+
 	</target>
 
 	<target name="make-jar" depends="prepare,compile">
 		<copy failonerror="false" overwrite="true" file="${scriptsrc}/history.new" tofile="${build}/help/history.txt" />
 		<copy failonerror="false" overwrite="true" file="${scriptsrc}/history.new" tofile="${distdir}/history.txt" />
-		
+
 		<jar compress="true" level="9" jarfile="${distdir}/${jarfile}">
 			<manifest>
 				<attribute name="Main-Class" value="workbench.WbStarter"/>
@@ -341,12 +354,12 @@
 				<exclude name="**/package.html"/>
 			</fileset>
 		</jar>
-		
+
 	</target>
-	
+
 	<!-- alias for make-src-zip -->
 	<target name="src" depends="make-src-zip"/>
-	
+
   <target name="make-src-zip">
     <delete file="${srczip}"/>
 
@@ -371,7 +384,7 @@
         <exclude name="**/*test*"/>
         <exclude name="publish-dev.cmd"/>
       </zipfileset>
-      
+
       <zipfileset dir="${testsrc}" prefix="test">
         <exclude name="**/.nb*"/>
       </zipfileset>
@@ -411,12 +424,11 @@
       <entry key="release.build.number" value="${build.number}"/>
       <entry key="release.build.date" value="${today}"/>
     </propertyfile>
-		
-    <ant dir="..\website" inheritall="false" target="release">
-    </ant>
+
+    <ant dir="..\website" inheritall="false" target="release"/>
 
 		<mkdir dir="${root}/release/build${build.number}"/>
-		
+
 		<move todir="${root}/release/build${build.number}">
 			<fileset dir="${distdir}">
 				<include name="WorkbenchSrc-Build${build.number}.zip"/>
@@ -425,21 +437,20 @@
 				<include name="history.txt"/>
 			</fileset>
 		</move>
-		
+
   </target>
 
   <target name="make-dev-jar" depends="clean, compile, test, get-dev-build, copy-history, make-jar"/>
-	
+
   <!-- build a development release -->
   <target name="dev-release" depends="clean, compile, test, set-dev-build, copy-history, make-jar, pdf, publish, release-package, release-src-zip, clean-history">
-
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
 
     <propertyfile file="release.property">
-        <entry key="dev.build.date" value="${today}"/>
-        <entry key="dev.build.number" value="${build.number}"/>
+			<entry key="dev.build.date" value="${today}"/>
+      <entry key="dev.build.number" value="${build.number}"/>
     </propertyfile>
     <ant dir="../website" inheritall="false" target="dev-release"/>
   </target>
@@ -447,7 +458,7 @@
 	<target name="website">
     <ant antfile="../website/build.xml" inheritall="false" target="release"/>
 	</target>
-	
+
   <target name="copy-history">
     <copy file="${scriptsrc}/history.txt" overwrite="true" tofile="${scriptsrc}/history.new">
       <filterset begintoken="@" endtoken="@">
@@ -462,7 +473,7 @@
       <filelist dir="${scriptsrc}" files="history.header,history.new"/>
     </concat>
   </target>
-  
+
   <target name="clean-history">
     <delete file="${scriptsrc}/history.new" failonerror="false"/>
   </target>
@@ -474,8 +485,8 @@
 
 		<jarbundler dir="${bundledir}"
 			name="SQLWorkbenchJ"
-			mainclass="workbench.WbStarter" 
-			jar="${distdir}/${jarfile}" 
+			mainclass="workbench.WbStarter"
+			jar="${distdir}/${jarfile}"
 			jvmversion="1.5+"
 			version="${build.number}"
 			shortname="SQL Workbench"
@@ -491,7 +502,7 @@
 			<javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
 			<javaproperty name="apple.awt.showGrowBox" value="true"/>
 		</jarbundler>
-		
+
     <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-Mac.tgz">
       <tarfileset dir="${distdir}">
         <include name="history.txt"/>
@@ -519,7 +530,7 @@
       </zipfileset>
     </tar>
 	</target>
-	
+
   <target name="release-package" depends="fixshellscripts">
     <zip zipfile="${distdir}/Workbench-Build${build.number}.zip">
       <zipfileset dir="${distdir}">
@@ -531,6 +542,7 @@
         <include name="DbExplorer.exe"/>
       </zipfileset>
       <zipfileset dir="${scriptsrc}">
+        <include name="sqlworkbench.cmd"/>
         <include name="sqlworkbench.sh"/>
         <include name="datapumper.sh"/>
         <include name="dbexplorer.sh"/>
@@ -554,7 +566,7 @@
   </target>
 
 	<target name="release-src-zip" depends="init,fixshellscripts">
-		
+
 		<zip zipfile="${distdir}/WorkbenchSrc-Build${build.number}.zip">
 			<zipfileset dir="${src}" prefix="src">
 				<include name="**/*.*"/>
@@ -567,11 +579,11 @@
 				<exclude name="help/*.*"/>
 				<exclude name="**/*.tws"/>
 			</zipfileset>
-			
+
 			<zipfileset dir="${testsrc}" prefix="test">
 				<include name="**/*.*"/>
 			</zipfileset>
-			
+
 			<zipfileset dir="${scriptsrc}" prefix="scripts">
 				<include name="build.xml"/>
 				<include name="history.txt"/>
@@ -579,13 +591,14 @@
 				<include name="build.number"/>
 				<include name="release.property"/>
 				<include name="history.header"/>
+				<include name="sqlworkbench.cmd"/>
 				<include name="sqlworkbench.sh"/>
 				<include name="datapumper.sh"/>
 				<include name="dbexplorer.sh"/>
 				<include name="*.xslt"/>
         <exclude name="**/*test*"/>
 			</zipfileset>
-			
+
 			<zipfileset dir="${doc}" prefix="doc">
 				<include name="css/*.*"/>
 				<include name="xml/*.*"/>
@@ -599,7 +612,7 @@
 			</zipfileset>
 		</zip>
 	</target>
-	
+
 	<target name="generate-lexer">
 		<java classname="JFlex.Main" classpath="../etc/JFlex.jar" fork="true">
 			<jvmarg value="-Xmx256m"/>
@@ -607,14 +620,14 @@
 			<arg value="../src/workbench/sql/formatter/SQLLexer.flex"/>
 		</java>
 	</target>
-	
+
   <path id="junit.path">
 		<fileset dir="${junitdir}">
       <include name="*.jar"/>
     </fileset>
   </path>
-	 
-	<target name="compile-tests" depends="compile">
+
+	<target name="compile-tests" depends="prepare-test,compile">
 		<javac debug="on" destdir="${build.test}" optimize="on" srcdir="${unittest}" target="1.5" source="1.5" encoding="ISO-8859-1">
 			<classpath>
 				<pathelement location="${build}"/>
@@ -627,24 +640,24 @@
 		<delete failonerror="false">
 			<fileset dir="${junitdir}" includes="*.txt"/>
 		</delete>
-		
+
 		<junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="false" includeantruntime="true">
 			<classpath>
 				<pathelement location="${build}"/>
 				<pathelement location="${build.test}"/>
 				<path refid="junit.path"/>
-			</classpath>			
-			
+			</classpath>
+
 			<batchtest todir="../junit">
 				<formatter type="plain"/>
 					<fileset dir="${unittest}">
 					<include name="**/*Test.java"/>
 				</fileset>
-			</batchtest>			
+			</batchtest>
 		</junit>
 	</target>
 
-	<target name="compile-gui-tests" depends="compile">
+	<target name="compile-gui-tests" depends="prepare-test,compile-tests">
 		<javac debug="on" destdir="${build.test}" optimize="off" srcdir="${unittest}:${guitest}" target="1.5" source="1.5" encoding="ISO-8859-1">
 			<classpath>
 				<pathelement location="${build}"/>
@@ -657,23 +670,22 @@
 		<delete failonerror="false">
 			<fileset dir="${junitdir}" includes="*.txt"/>
 		</delete>
-		
+
 		<junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="false" includeantruntime="true">
 			<classpath>
 				<pathelement location="${build}"/>
 				<pathelement location="${build.test}"/>
 				<path refid="junit.path"/>
-			</classpath>			
-			
+			</classpath>
+
 			<batchtest todir="../junit">
 				<formatter type="plain"/>
 					<fileset dir="${guitest}">
 					<include name="**/*Test.java"/>
 				</fileset>
-			</batchtest>			
+			</batchtest>
 		</junit>
 	</target>
-	
 
 	<target name="javadoc">
 		<javadoc destdir="${javadocdir}" notree="true" sourcepath="${src}" packagenames="workbench.*"/>
@@ -681,10 +693,10 @@
 
   <target name="fixshellscripts">
     <fixcrlf srcdir="${scriptsrc}"
-       eol="lf" 
+       eol="lf"
        eof="remove"
        includes="**/*.sh"
     />
   </target>
-	
+
 </project>

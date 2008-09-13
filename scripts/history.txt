@@ -1,16 +1,153 @@
+*************************************************************************
+**                            ATTENTION                                **
+*************************************************************************
+** Since Build 100 the jar file is named sqlworkbench.jar              **
+** Please delete the old Workbench.jar and JWorkbench.exe              **
+*************************************************************************
+**                            ATTENTION                                **
+*************************************************************************
 Build @BUILD_NUMBER@, @BUILD_DATE@
---------------------
-*************************************************************************
-**                            ATTENTION                                **
-*************************************************************************
-** The main jar file has been renamed to sqlworkbench.jar              **
-** Please delete the old Workbench.jar                                 **
-**                                                                     **
-** Windows user should also delete JWorkbench.exe and use the new      **
-** SQLWorkbench.exe                                                    **
-*************************************************************************
-**                            ATTENTION                                **
-*************************************************************************
+---------------------
+Enh:  (100.9) Made WbSchemaDiff a bit more "robust" when comparing schemas
+      from different DBMS
+Enh:  (100.9) When displaying the source for a view, grants given on that view
+      are now also displayed for Postgres, Oracle, HSQLDB, H2, MySQL, Firebird
+      DB2, Derby and SQL Server
+Enh:  (100.8) A new option (Options -> Data Editing) is available to warn
+      when a result set with changes will be discarded (e.g. when running a
+      new SELECT while changes to the current result have not been saved)
+Enh:  (100.7) The DataPumper table dropdown now displays Excel Worksheets
+Enh:  (100.6) A new option for WbSchemaDiff is available that treats views from
+      the reference schema just like tables, and compares them to corresponding
+      tables in the target schema.
+Enh:  (100.6) A new option to automatically optimize the individual row heights
+      to match possible multi-line values is available. This can be applied 
+      automatically after the retrieval of the data, or manually using 
+      View -> Optimize Row Height (or the popup menu on the column header)
+Enh:  (100.5) The parameter -trimValues for WbImport can now also be used
+      for XML imports.
+Enh:  (100.4) A new parameter -rowNumberColumn is available for text exports
+      that can be used to generate a column with the current row number.
+      If the parameter is specified with a value, the value defines the name
+      of the additional column. If the text file is not created with
+      a header a value for the rowNumberColumn must still be given to enable
+      the creation of the additional column. The row number will always be
+      exported as the first column.
+Enh:  (100.4) A new parameter -excludeFiles is available for WbImport when 
+      using the -sourceDir switch. With this parameter, files can be excluded
+      while processing the contents of the directory. The value is a comma
+      separated list of (partial) file names. Any filename that contains one
+      of the values will be ignored.
+Enh:  (100.4) A new parameter -ignoreOwner is available for WbImport. In case
+      export files have been created including the owner information (e.g. 
+      myschema.person.txt) the owner can now be ignored when importing files
+      from a sourcedirectory.
+Enh:  (100.4) -quiet has been removed, and is now included with the 
+      -feedback=true parameter.
+Enh:  (100.3) The display of warnings can now be surpressed. This can be set
+      in the connection profile, as a parameter when connecting in batch mode
+      (-hideWarnings=true) or using the new command WbHideWarnings [true|false]
+Enh:  (100.3) The usage of the generic execute() method when running select
+      statements can now be enabled (instead of using executeQuery()) using
+      the property: workbench.db.select.genericexecute=true in the file
+      workbench.settings
+Enh:  (100.3) A new parameter -quiet can be specified in batch mode, that
+      will surpress some informational messages that are not surpressed
+      when using -feedback=false (or WbFeedback off).
+Enh:  (100.2) WbConnect can now be used in GUI mode as well. It will only
+      change the connection as long as the current script is running. The
+      "global" connection will be restored, once the script has finished.
+Enh:  (100.2) The number of columns that are put on a single line when
+      reformatting statements can now also be adjusted for UPDATE and INSERT
+      statements.
+Enh:  (100.1) The margins used to render data can now be configured using 
+      the property workbench.gui.renderer.insets
+      The property value is a comma separated list of integer values to define
+      the top,left,bottom,right insets for a single data cell.
+Enh:  (100.1) CHECK constraints were not generated in the DbExplorer for DB2 
+Enh:  (100.1) A new command WbDataDiff has been added which compares the 
+      data of one (or more tables) and creates approriate scripts to 
+      update the data of the target table to be the same as the reference
+      table.
+Enh:  (100.1) The default encoding (when no encoding is given) for the WbInclude 
+      command can now be configured using the property workbench.encoding
+      The default is displayed when WbInclude is run without parameters.
+Fix:  (100.9) The table reference navigation created wrong SQL statements if
+      the same table was referenced through more than one foreign key reference.
+Fix:  (100.9) On Linux with the GTK Look and Feel the focus was not set to the
+      "Select connection" window upon startup.
+Fix:  (100.9) WbInclude would fail if no connection was available (e.g. because
+      the included script would make the connection)
+Fix:  (100.8) Re-assigning a Shortcut was only activated after restarting 
+      the application.
+Fix:  (100.8) Display of text columns should now work for Informix
+Fix:  (100.7) WbExport did not escape the content of columns correctly.
+      Previously the escaping was only done for character data, now it's done
+      for all data types (unless -useCDATA is specified).
+Fix:  (100.7) "Check table dependencies" did not always work correctly for 
+      deleting tables, when one of the selected tables was also a child
+      of one of the tables that were added during FK checking and that table
+      was a self-referencing table.
+Fix:  (100.7) WbSchemaDiff did not release the connections properly.
+Fix:  (100.7) The row height was not retained when editing values in the 
+      result set or applying a filter
+Fix:  (100.6) Calling stored procedures with output parameters was not working 
+      properly, especially when regular parameters were needed as well.
+Fix:  (100.6) Tried to make retrieval in the DbExplorer more robust agains
+      hanging connections.
+Fix:  (100.5) In some cases WbInclude would fail processing a script.
+Fix:  (100.5) When using -append=true and -createTable=true for SQL Exports 
+      the CREATE TABLE was not written (appended) to the output file (because 
+      WbExport would never write the "header" for an export that appends to
+      an existing file, which does not make sense for SQL INSERT exports.
+Fix:  (100.4) When importing a directory using -sourceDir, WbImport would 
+      treat the files containing tables lobs as regular table files e.g. 
+      searching for a table mytable_lobs.
+Fix:  (100.4) Resolving table dependencies for INSERT (WbImport) or DELETE
+      did not work if the list of tables contained a self-referencing table
+      that was referenced by another (parent) table.
+Fix:  (100.4) A change to the driver for a connection profile was not detected
+      as a change, so the user was not asked to save the profiles when stopping
+      the application
+Fix:  (100.3) The toolbar was not always correctly repainted when a workspace
+      was closed
+Fix:  (100.3) When "Autosave Workspace" was enabled and the workspace contained
+      an external file, the user was prompted if the file should be saved
+      each time a statement was executed. Now the external file is automatically
+      saved as well, when the workspace is saved.
+Fix:  (100.3) When a script ended with a statement that had a dangling
+      single quote, the last (incorrect) statement was not executed at all
+Fix:  (100.3) Common Table Expressions (WITH ... AS ...) were not formatted
+      correctly.
+Fix:  (100.3) "Copy data to clipboard" was not always enabled, even if a 
+      result set was available.
+Fix:  (100.2) When using "Search table data" in the DbExplorer, the connection
+      profile attribute "Trim CHAR data" were not used to retrieve the data.
+Fix:  (100.2) The SQL source for sequences was no longer displayed.
+Fix:  (100.2) The application did not always ask to save the connection
+      profiles even if they were modified
+Fix:  (100.2) Triggers were not displayed for DB2 when the server was running
+      on 64bit Windows
+Fix:  (100.2) When changing the the current database in the DbExplorer 
+      in MySQL, updating the data did not work, because the table
+      in the update statement was not fully qualified (to include the 
+      database name)
+Fix:  (100.1) The Option "Map Oracle DATE to Timestamp" was only applied
+      when restarting the application
+Fix:  (100.1) WbExport's XML format now defaults to XML 1.0 again. An option 
+      has been added for WbExport to select version 1.1 if that is needed
+      in order to use the newly allowed characters. XML 1.1 support
+      can be enabled using -xmlVersion=1.1 
+      The default can be set with the property workbench.xml.default.version
+Fix:  (100.1) Using WbInclude with a multi-byte characterset (e.g. UTF8) 
+      did not work properly 
+Fix:  (100.1) The WHEN condition for Oracle triggers was not displayed in the 
+      SQL source. Thanks to Marcel for the fix.
+Fix:  (100.1) WbInclude did not give a proper error message if the specified
+      file was not found.
+
+Build 100, 17.05.2008
+---------------------
 Enh:  (99.10) If the configuration file was changed outside of SQL Workbench
       the application now asks if the external changes should be overwritten
 Enh:  (99.10) A new tab can now be opened by double-clicking in the "free"

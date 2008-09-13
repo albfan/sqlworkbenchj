@@ -38,8 +38,12 @@
 		
 		<para>
 			For some settings, where the ID is part of the property's key, a "clean" version of
-			the Database Identifer, called the DBID, is used. This DBID is also reported in the log
-			file:
+			the Database Identifer, called the DBID, is used. This DBID is displayed in the connection 
+			info dialog (right click on the connection URL in the main window, then choose "Connection Info".
+		</para>
+		
+		<para>
+			The DBID is also reported in the log file:
 		</para>
 		
 		<programlisting>INFO  15.08.2004 10:24:42 Using DBID=hsql_database_engine</programlisting>
@@ -54,7 +58,7 @@
   <section id="gui-settings">
     <title>GUI related settings</title>
 
-		<section id="settings-varchar-multiline-threshold">
+		<simplesect id="settings-varchar-multiline-threshold">
 			<title>Controlling display of multiline values</title>
       <para>Property: <literal>workbench.gui.display.multilinethreshold</literal></para>
 			<para>
@@ -76,9 +80,9 @@
 				and might be a bit slower when displaying large result sets.
 			</para>
       <para>Default: <literal>250</literal></para>
-		</section>
+		</simplesect>
 
-    <section id="settings-show-acc-menu">
+    <simplesect id="settings-show-acc-menu">
       <title>Showing accelerator in menu</title>
       <para>Property: <literal>workbench.gui.showmnemonics</literal></para>
       <para>
@@ -87,9 +91,9 @@
         ALT key. With this settings, this JDK behaviour can be controlled.
       </para>
       <para>Default: <literal>true</literal></para>
-    </section>
+    </simplesect>
 				
-    <section id="settings-save-workspace">
+    <simplesect id="settings-save-workspace">
       <title>Save workspaces automatically</title>
       <para><literal>workbench.workspace.autosave</literal></para>
       <para>
@@ -97,9 +101,9 @@
         be saved automatically, when a SQL statement is executed.
 			</para>
       <para>Default: <literal>false</literal></para>
-    </section>
+    </simplesect>
         
-		<section id="settings-workspace-backup">
+		<simplesect id="settings-workspace-backup">
 			<title>Controlling workspace backups</title>
 			<para>Property: <literal>workbench.workspace.createbackup</literal></para>
 			<para>
@@ -108,9 +112,9 @@
 				file (overwriting any existing backup) and then saving the workspace.
 			</para>
 			<para>Default: <literal>false</literal></para>
-		</section>
+		</simplesect>
 		
-    <section id="macro-menu-setting">
+    <simplesect id="macro-menu-setting">
       <title>Controlling the number of macros in the main menu</title>
       <para>Property: <literal>workbench.gui.macro.maxmenuitems</literal></para>
       <para>
@@ -118,9 +122,9 @@
 				Note that only the first 9 macros will be accessible with a menu accelerator.
       </para>
       <para>Default value: <literal>15</literal></para>
-    </section>
+    </simplesect>
 	
-		<section id="setting-native-print-dialog">
+		<simplesect id="setting-native-print-dialog">
 			<title>Controlling the type of print dialog</title>
 			<para>Property: <literal>workbench.print.nativepagedialog</literal></para>
 			<para>
@@ -131,13 +135,13 @@
 				then open a cross-platform print dialog.
 			</para>
 			<para>Default value: <literal>true</literal></para>
-		</section>
+		</simplesect>
   </section>
 
 	<section id="editor-settings">
 		<title>Editor related settings</title>
 
-		<section id="auto-completion-public-syn">
+		<simplesect id="auto-completion-public-syn">
 				<title>Include Oracle public synonyms in auto-completion of tables</title>
 				<para>Property: <literal>workbench.editor.autocompletion.oracle.public_synonyms</literal></para>
 				<para>
@@ -151,22 +155,24 @@
 					details on how to filter out unwanted synonyms from this list.
 				</para>
 				<para>Default value: <literal>false</literal></para>
-		</section>
+		</simplesect>
 		
-		<section id="auto-completion-empty-line">
+		<simplesect id="auto-completion-empty-line">
 			<title>Empty line to terminate SQL statements</title>
 			<para>Property: <literal>workbench.editor.autocompletion.sql.emptylineseparator</literal></para>
 			<para>
 				When analysing statements in the editor, it is assumed that individual statements
 				separated with a semicolon. When using auto completion, &wb-productname; can be configured
-				to accept an empty line as the separator between two statements. This does 
-				not influence the behaviour when running scripts or for the "execute current" 
-				command.
+				to accept an empty line as the separator between two statements. 
 			</para>
+			<note><para>
+				This does not influence the behaviour when running scripts or for the "execute current"
+				command.
+			</para></note>
 			<para>Default value: <literal>false</literal></para>
-		</section>
+		</simplesect>
 		
-    <section id="editor-color-setting">
+    <simplesect id="editor-color-setting">
       <title>Customizing the colors used for syntax highlighting</title>
       <para>Property: <literal>workbench.editor.color.[type]</literal></para>
       <para>
@@ -185,9 +191,9 @@
           <member><literal>operator</literal> - The color used for operators (0,0,0)</member>
         </simplelist>
       </para>
-    </section>
+    </simplesect>
 
-    <section id="editor-rect-selection">
+    <simplesect id="editor-rect-selection">
       <title>Set the modifier key for rectangular selections in the edior</title>
       <para>Property: <literal>workbench.editor.rectselection.modifier</literal></para>
       <para>
@@ -197,9 +203,9 @@
 				for setting the <keycap>Ctrl</keycap> key as the modifier.
       </para> 
 			<para>Default value: <literal>alt</literal></para>
-    </section>
+    </simplesect>
 	
-		<section id="default-file-encoding">
+		<simplesect id="default-file-encoding">
 			<title>Default file encoding</title>
 			<para>Property: <literal>workbench.file.encoding</literal></para>
 			<para>
@@ -210,9 +216,9 @@
 				that Java assumes by setting this property.
 			</para>
 			<para>Default value: empty, the Java runtime default is used</para>
-		</section>
+		</simplesect>
 		
-		<section id="editor-history-text-size">
+		<simplesect id="editor-history-text-size">
 			<title>Limitting size of the text put into the history</title>
 			<para>Property: <literal>workbench.sql.history.maxtextlength</literal></para>
 			<para>
@@ -226,9 +232,9 @@
 				the text is not put into the history. 
 			</para>
 			<para>Default value: 10485760 (10MB)</para>
-		</section>
+		</simplesect>
 		
-    <section id="manual-setting-snippet-no-newline">
+    <simplesect id="manual-setting-snippet-no-newline">
 			<title>Controlling newlines in code snippets</title>
 			<para>Property: <literal>workbench.clipcreate.includenewline</literal></para>
 			<para>
@@ -238,9 +244,9 @@
 				tell &wb-productname; not put any <literal>\n</literal> characters into the Java string.
 			</para>
 			<para>Default: <literal>true</literal></para>
-    </section>
+    </simplesect>
 
-    <section id="manual-setting-snippet-concat">
+    <simplesect id="manual-setting-snippet-concat">
 			<title>Controlling the concatenation character for code snippets</title>
 			<para>Property: <literal>workbench.clipcreate.concat</literal></para>
 			<para>
@@ -250,9 +256,9 @@
 				property.
 			</para>
 			<para>Default: <literal>+</literal></para>
-    </section>
+    </simplesect>
 
-    <section id="manual-setting-snippet-prefix">
+    <simplesect id="manual-setting-snippet-prefix">
 			<title>Controlling the prefix for code snippets</title>
 			<para>Property: <literal>workbench.clipcreate.codeprefix</literal></para>
 			<para>
@@ -261,14 +267,14 @@
 				adjust this prefix.
 			</para>
 			<para>Default: <literal>String sql =</literal></para>
-    </section>
+    </simplesect>
 		
 		
 	</section>
 
 	<section id="db-explorer-settings">
 		<title>DbExplorer Settings</title>
-    <section id="selectable-objects-setting">
+    <simplesect id="selectable-objects-setting">
       <title>Controlling data display in the DbExplorer</title>
       <para>Property: <literal>workbench.db.objecttype.selectable.<link linkend="dbid">[dbid]</link>=value1,value2,...</literal></para>
       <para>
@@ -285,10 +291,10 @@
         </simplelist>
 				The values in this property are not case-sensitiv (TABLE is the same as table)
       </para>
-    </section>
+    </simplesect>
 
-		<section id="dbexplorer-focus">
-			<title>Showing the currently focused control in the DbExplorer</title>
+		<simplesect id="dbexplorer-focus">
+			<title>Showing the currently focused component in the DbExplorer</title>
 			<para>Property: <literal>workbench.gui.dbobjects.showfocus</literal></para>
 			<para>
 				To indicate the table that has currently the focus in the DbExplorer, set
@@ -299,10 +305,11 @@
 				that property are the three RGB values for the color.
 			</para>
 			<para>Default value: <literal>false</literal></para>
-		</section>
+		</simplesect>
 	</section>
 	
   <section id="settings-sorting">
+
     <title>Controlling sorting of data</title>
 		<para>
 			When you sort data in the result set (by clicking on the column header) this 
@@ -319,7 +326,7 @@
 			be used for the collator. 
 		</para>  
 	
-	<section id="sorting-use-collator">
+		<simplesect id="sorting-use-collator">
       <title>Using language aware collations for sorting</title>
       <para>Property: <literal>workbench.sort.usecollator</literal></para>
       <para>
@@ -333,9 +340,9 @@
 				that should be used when initializing these sorting rules. 
       </para>
       <para>Default value: false</para>
-    </section>
+    </simplesect>
 
-	<section id="sorting-sort-language">
+		<simplesect id="sorting-sort-language">
       <title>Sort language</title>
       <para>Property: <literal>workbench.sort.language</literal></para>
       <para>
@@ -343,9 +350,9 @@
         this property defines the sort language to be used.
       </para>
       <para>Default value: en</para>
-    </section>
+    </simplesect>
 
-	<section id="sorting-sort-country">
+		<simplesect id="sorting-sort-country">
       <title>Sort country</title>
       <para>Property: <literal>workbench.sort.country</literal></para>
       <para>
@@ -354,14 +361,14 @@
         the collation sequence.
       </para>
       <para>Default value: The country defined by your operating system</para>
-    </section>
+    </simplesect>
     
   </section>
   
   <section id="settings-db">
     <title>Database related settings</title>
 		
-    <section id="verify-url">
+    <simplesect id="verify-url">
       <title>Verifying connection URLs</title>
       <para>Property: <literal>workbench.db.verifydriverurl</literal></para>
       <para>
@@ -377,9 +384,9 @@
 				the URL, then set this property to <literal>false</literal>
       </para>
       <para>Default: <literal>true</literal></para>
-    </section>
+    </simplesect>
 
-    <section id="manual-setting-datapumper-autoconnect">
+    <simplesect id="manual-setting-datapumper-autoconnect">
       <title>Automatically connect the DataPumper</title>
       <para>Property: <literal>workbench.datapumper.autoconnect</literal></para>
       <para>
@@ -388,9 +395,9 @@
 				connect automatically set this property to <literal>false</literal>
       </para>
       <para>Default: <literal>true</literal></para>
-    </section>
+    </simplesect>
 
-    <section id="db-settings-ddl-commit">
+    <simplesect id="db-settings-ddl-commit">
       <title>Controlling COMMIT for DDL statements</title>
       <para>Property <literal>workbench.db.ddlneedscommit</literal></para>
       <para>
@@ -398,9 +405,9 @@
 				as <literal>CREATE TABLE</literal>
       </para>
       <para>Default: <literal>PostgreSQL,Firebird,Cloudscape,Apache Derby,DB2/NT,Frontbase,Microsoft SQL Server</literal></para>
-    </section>
+    </simplesect>
           
-    <section id="db-settings-commit">
+    <simplesect id="db-settings-commit">
       <title>COMMIT/ROLLBACK behaviour</title>
       <para>Property: <literal>workbench.db.usejdbccommit</literal></para>
       <para>
@@ -411,9 +418,9 @@
       </para>
 			<para>This is a comma separated list of <link linkend="dbms-identifier">Database Identifiers</link></para>
       <para>Default: <literal>Firebird,Cloudscape</literal></para>
-    </section>
+    </simplesect>
 
-    <section id="db-settings-constraint-gen">
+    <simplesect id="db-settings-constraint-gen">
       <title>Generating constraints for SQL source</title>
       <para>Property: <literal>workbench.db.inlineconstraints</literal></para>
       <para>
@@ -423,9 +430,9 @@
 				primary and foreign keys inside the <literal>CREATE TABLE</literal> statement.
       </para>
       <para>Default: <literal>FirstSQL/J</literal></para>
-    </section>
+    </simplesect>
 
-    <section id="db-settings-case-sensitiv">
+    <simplesect id="db-settings-case-sensitiv">
       <title>Case sensitivity when comparing values</title>
       <para>Property <literal>workbench.db.casesensitive</literal></para>
       <para>
@@ -435,9 +442,9 @@
 				This is a comma separated list of <link linkend="dbms-identifier">Database Identifiers</link>
       </para>
       <para>Default: <literal>Oracle</literal></para>
-    </section>
+    </simplesect>
 
-    <section id="db-settings-keywords">
+    <simplesect id="db-settings-keywords">
       <title>Definining additional SQL keywords</title>
       <para>Property: <literal>workbench.db.keywordlist.<link linkend="dbid">[dbid]</link>=</literal></para>
       <para>
@@ -445,9 +452,9 @@
 				SQL keywords. This can be used if the JDBC driver does not implement getSQLKeywords() correctly.
       </para>
       <para>No default</para>
-    </section>
+    </simplesect>
 		
-    <section id="db-settings-updatingcommands">
+    <simplesect id="db-settings-updatingcommands">
       <title>Definining SQL commands that may change the database</title>
       <para>Property: <literal>workbench.db.updatingcommands</literal> for general SQL statements
 			</para>
@@ -457,13 +464,13 @@
 				When enabling the <link linkend="profile-readonly">read only</link> or <link linkend="profile-confirm-updates">confirm update</link>
 				option in a connection profile, &wb-productname; assumes a default set of SQL commands that 
 				will change the database. With this property you can add additional keywords that 
-				should be considered as "updating commands". This is a comma separated list of keywords. The keywords
-				may not contain whitespace.
+				should be considered as "updating commands". This is a comma separated list of keywords. 
+				The keywords may not contain whitespace.
       </para>
       <para>No default</para>
-    </section>
+    </simplesect>
 
-		<section id="db-settings-switch-catalog">
+		<simplesect id="db-settings-switch-catalog">
       <title>Database switch in DbExplorer</title>
       <para>Property: <literal>workbench.dbexplorer.switchcatalog</literal></para>
       <para>
@@ -477,9 +484,9 @@
 				with the other SQL panels) set this property to <literal>false</literal>.
       </para>
       <para>Default: <literal>true</literal></para>
-    </section>
+    </simplesect>
 
-		<section id="db-settings-filter-tables">
+		<simplesect id="db-settings-filter-tables">
 			<title>Filtering tables</title>
 			<para>Property: <literal>workbench.db.[dbid].exclude.tables</literal></para>
 			<para>
@@ -493,9 +500,9 @@
 				Default value: <literal>workbench.db.oracle.exclude.tables=^BIN\\$.*</literal>
 			</para>
 			<para>Note that you need to use two backslashes in the RegeEx.</para>
-		</section>
+		</simplesect>
 		
-		<section id="db-oracle-filter-syns">
+		<simplesect id="db-oracle-filter-syns">
 			<title>Filtering synonyms</title>
 			<para>Property: <literal>workbench.db.[dbid].exclude.synonyms</literal></para>
 			<para>
@@ -508,9 +515,9 @@
 			</para>
 			<para>Default value (for Oracle): <literal>^AQ\\$.*|^MGMT\\$.*|^GV\\$.*|^EXF\\$.*|^KU\\$_.*|^WM\\$.*|^MRV_.*|^CWM_.*|^CWM2_.*|^WK\\$_.*|^CTX_.*</literal></para>
 			<para>Note that you need to use two backslashes in the RegeEx.</para>
-		</section>
+		</simplesect>
 
-		<section id="db-oracle-detect-snapshots">
+		<simplesect id="db-oracle-detect-snapshots">
 			<title>Support for Oracle materialized views (snapshots)</title>
 			<para>Property: <literal>workbench.db.oracle.detectsnapshots</literal></para>
 			<para>
@@ -523,9 +530,9 @@
 				will be turned off until you re-connect to the database.
 			</para>
 			<para>Default value: <literal>true</literal></para>
-		</section>
+		</simplesect>
 
-		<section id="db-oracle-char-semantics-fix">
+		<simplesect id="db-oracle-char-semantics-fix">
 		  <title>Fix type display for VARCHAR columns in Oracle</title>
 		  <para>Property: <literal>workbench.db.oracle.fixcharsemantics</literal></para>
 		  <para>
@@ -543,9 +550,9 @@
 			  (which is required to comply with the JDBC specs).
 		  </para>
 		  <para>Default value: <literal>true</literal></para>
-		</section>
+		</simplesect>
 
-		<section id="db-oracle-nvarchar-fix">
+		<simplesect id="db-oracle-nvarchar-fix">
 		  <title>Fix type display for NVARCHAR2 columns in Oracle</title>
 		  <para>Property: <literal>workbench.db.oracle.fixnvarchartype</literal></para>
 		  <para>
@@ -554,9 +561,9 @@
 				is also using it's own SELECT statement to retrieve the table definition.
 		  </para>
 		  <para>Default value: <literal>true</literal></para>
-		</section>
+		</simplesect>
 		
-		<section id="settings-libdir">
+		<simplesect id="settings-libdir">
 		  <title>Defining a base directory for JDBC libraries</title>
 		  <para>Property: <literal>workbench.libdir</literal></para>
 		  <para>
@@ -566,9 +573,9 @@
 				<link linkend="cmdline-parameter-libdir">on the commandline</link>.
 		  </para>
 		  <para>No default</para>
-		</section>
+		</simplesect>
 		
-		<section id="settings-date-keywords">
+		<simplesect id="settings-date-keywords">
 			<title>Defining keywords for date or timestamp input</title>
 			<para>Property: <literal>workbench.db.keyword.current_date</literal></para>
 			<para>
@@ -587,9 +594,24 @@
 				The "literals" that are accepted for TIME columns to identify 
 				the current time. Default values are <literal>current_time, now</literal>
 			</para>
-		</section>
-          
-		<section id="db-ddl-savepoint">
+		</simplesect>
+
+		<simplesect id="db-dml-savepoint">
+			<title>Use Savepoints to guard DML statement execution</title>
+			<para>Property: <literal>workbench.db.[dbid].sql.usesavepoint</literal></para>
+			<para>
+				Some DBMS (such as PostgreSQL) cannot continue inside a transaction
+				when an error occurs. A script with multiple DML statements can therefor
+				not run completely if one statement fails, even if you choose to ignore
+				the error.
+				If this property is set to true, &wb-productname; will set a savepoint
+				before executing a DML statement (<literal>SELECT, INSERT</literal>.
+				In case of an error the savepoint will be rolled back and the transaction can continue.
+			</para>
+			<para>Default value: <literal>true</literal> for PostgreSQL, <literal>false</literal> for others</para>
+		</simplesect>
+
+		<simplesect id="db-ddl-savepoint">
 			<title>Use Savepoints to guard DDL statement execution</title>
 			<para>Property: <literal>workbench.db.[dbid].ddl.usesavepoint</literal></para>
 			<para>
@@ -599,13 +621,13 @@
 				the error.
 				If this property is set to true, &wb-productname; will set a savepoint 
 				before executing a DDL statement. In case of an error the savepoint
-				will be rolledback and the transaction can continue.
+				will be rolled back and the transaction can continue.
 			</para>
 			<para>Default value: <literal>true</literal> for PostgreSQL, <literal>false</literal> for others</para>
-		</section>
+		</simplesect>
 
-		<section id="db-import-savepoint">
-			<title>Use Savepoints to update/insert mode for WbImport</title>
+		<simplesect id="db-import-savepoint">
+			<title>Use Savepoints for <literal>update/insert</literal> mode for WbImport</title>
 			<para>Property: <literal>workbench.db.[dbid].import.usesavepoint</literal></para>
 			<para>
 				Some DBMS (such as PostgreSQL) cannot continue inside a transaction
@@ -617,9 +639,9 @@
 				will be rolledback and WbImport will try to execute the second statement.
 			</para>
 			<para>Default value: <literal>true</literal> for PostgreSQL, <literal>false</literal> for others</para>
-		</section>
+		</simplesect>
 
-		<section id="db-ignore-read-errors">
+		<simplesect id="db-ignore-read-errors">
 			<title>Ignore errors during data retrieval</title>
 			<para>Property: <literal>workbench.db.ignore.readerror</literal></para>
 			<para>
@@ -634,13 +656,13 @@
 				that do not reflect the data as it is stored in the database.
 			</para>
 			<para>Default value: <literal>false</literal></para>
-		</section>
+		</simplesect>
 		
   </section>
 			
   <section id="sql-execution-settings">
     <title>SQL Execution related settings</title>
-    <section id="options-max-script-size">
+    <simplesect id="options-max-script-size">
       <title>Maximum script size for in-memory script execution</title>
       <para>Property: <literal>workbench.sql.script.inmemory.maxsize</literal></para>
       <para>
@@ -652,9 +674,9 @@
 				does not work any longer. The size is given in bytes.
       </para>
       <para>Default: <literal>1048576</literal></para>
-    </section>
+    </simplesect>
 
-    <section id="settings-ignore-commands">
+    <simplesect id="settings-ignore-commands">
       <title>Ignoring certain SQL commands</title>
       <para>Property: <literal>workbench.db.ignore.[dbid]=</literal></para>
       <para>
@@ -673,9 +695,9 @@
 				informational message in the log file (<literal>Using DBID=</literal>)
 	  </para>
       <para>Default: <literal>workbench.db.ignore.oracle=prompt,exit,whenever</literal></para>
-    </section>
+    </simplesect>
 	
-		<section id="options-enable-shortinclude">
+		<simplesect id="options-enable-shortinclude">
 			<title>Enabling short WbInclude</title>
 			<para>Property: <literal>workbench.db.supportshortinclude</literal></para>
 			<para>
@@ -687,9 +709,9 @@
 				this property.
 			</para>
 			<para>Default: <literal>oracle, rdb, hsqldb, postgresql, mysql, adaptive_server_anywhere, cloudscape, apache_derby</literal></para>
-		</section>
+		</simplesect>
 
-		<section id="options-check-single-line-commands">
+		<simplesect id="options-check-single-line-commands">
 			<title>Check for single line commands without delimiter</title>
 			<para>Property: <literal>workbench.db.checksinglelinecmd</literal></para>
 			<para>
@@ -699,7 +721,7 @@
 				database systems (starting with build 86).
 			</para>
 			<para>Default: <literal>oracle</literal></para>
-		</section>
+		</simplesect>
 
   </section>
 	
@@ -715,7 +737,7 @@
 			corresponding command without any parameters.
 		</para>
 		
-		<section id="export-text-header-default">
+		<simplesect id="export-text-header-default">
 			<title>Controlling header lines in text exports</title>
 			<para>Property: <literal>workbench.export.text.default.header</literal></para>
 			<para>
@@ -723,9 +745,9 @@
 				parameter of the <link linkend="command-export">WbExport</link> command. 
 			</para>
 			<para>Default: <literal>false</literal></para>
-		</section>
+		</simplesect>
 
-		<section id="export-xml-verbose">
+		<simplesect id="export-xml-verbose">
 			<title>Controlling XML export format</title>
 			<para>Property: <literal>workbench.export.xml.default.verbose</literal></para>
 			<para>
@@ -734,18 +756,18 @@
 				value of the <literal>-verbosexml</literal> parameter for the <link linkend="command-export">WbExport</link> command. 
 			</para>
 			<para>Default: <literal>true</literal></para>
-		</section>
+		</simplesect>
 		
-		<section id="import-continue-default">
+		<simplesect id="import-continue-default">
 			<title>Setting default for WbImport's -continueOnError parameter</title>
 			<para>Property: <literal>workbench.import.default.continue</literal></para>
 			<para>
 				This property controls the default value for the parameter <literal>-continueOnError</literal>
 				of the <link linkend="command-import">WbImport</link> command. 
 			</para>
-		</section>
+		</simplesect>
 
-		<section id="import-header-default">
+		<simplesect id="import-header-default">
 			<title>Setting default for WbImport's -header parameter</title>
 			<para>Property: <literal>workbench.import.default.header</literal></para>
 			<para>
@@ -753,9 +775,9 @@
 				of the <link linkend="command-import">WbImport</link> command. 
 			</para>
 			<para>Default: <literal>true</literal></para>
-		</section>
+		</simplesect>
 		
-		<section id="import-text-multiline">
+		<simplesect id="import-text-multiline">
 			<title>Setting default for WbImport's -multiLine parameter</title>
 			<para>Property: <literal>workbench.import.default.multilinerecord</literal></para>
 			<para>
@@ -763,9 +785,9 @@
 				of the <link linkend="command-import">WbImport</link> command. 
 			</para>
 			<para>Default: <literal>false</literal></para>
-		</section>
+		</simplesect>
 
-		<section id="import-text-trimvalues">
+		<simplesect id="import-text-trimvalues">
 			<title>Setting default for WbImport's -trimValues parameter</title>
 			<para>Property: <literal>workbench.import.default.trimvalues</literal></para>
 			<para>
@@ -773,13 +795,13 @@
 				of the <link linkend="command-import">WbImport</link> command. 
 			</para>
 			<para>Default: <literal>false</literal></para>
-		</section>
+		</simplesect>
 		
 	</section>
 	
   <section id="log-setting">
     <title>Controlling the log file</title>
-    <section id="settings-log-level">
+    <simplesect id="settings-log-level">
       <title>Log level</title>
       <para>Property: <literal>workbench.log.level</literal></para>
       <para>Set the log level for the log file. Valid values are
@@ -791,9 +813,9 @@
         </itemizedlist>
       </para>
       <para>Default: <literal>INFO</literal></para>
-    </section>
+    </simplesect>
 
-    <section id="settings-log-format">
+    <simplesect id="settings-log-format">
       <title>Log format</title>
       <para>Property: <literal>workbench.log.format</literal></para>
       <para>Define the format of the log messages. The following placeholders are supported:
@@ -811,35 +833,37 @@
 				even if it is not included in the format string.
       </para>
       <para>Default: <literal>{type} {timestamp} {message} {error}</literal></para>
-    </section>
+    </simplesect>
 
-    <section id="options-log-console">
+    <simplesect id="options-log-console">
       <title>Logging to the console</title>
       <para>Property: <literal>workbench.log.console</literal></para>
       <para>Defines whether &wb-productname; logs messages additionally to the standard error output
       </para>
       <para>Default: <literal>false</literal></para>
-    </section>
+    </simplesect>
 					
-    <section id="settings-log-metadata">
+    <simplesect id="settings-log-metadata">
 			<title>Logging SQL used for retrieving metadata</title>
 			<para>Property: <literal>workbench.dbmetadata.logsql</literal></para>
 			<para>
-				If this is set to <literal>true</literal>the SQL queries used to
+				If this is set to <literal>true</literal> the SQL queries used to
 				retrieve DBMS specific meta data (such as view/procedure/trigger source,
 				defined triggers/views) will be logged with level INFO.
+			</para>
+			<para>
 				This can be used to debug customized SQL statements
 				for DBMS's which are not (yet) preconfigured.
 			</para>
 			<para>Default: <literal>false</literal></para>
-    </section>
+    </simplesect>
 
   </section>
 
   <section id="setting-sql-generation">
     <title>Settings related to SQL statement generation</title>
 		      
-    <section id="settings-db-ignoreschema">
+    <simplesect id="settings-db-ignoreschema">
 			<title>Controlling schema usage in generated SQL statements</title>
 			<para>Property: <literal>workbench.sql.ignoreschema.<link linkend="dbid">[dbid]</link>=schema1,...</literal></para>
 			<para>
@@ -863,9 +887,9 @@
 					<member><literal>.rdb=*</literal></member>
 				</simplelist>
 			</para>
-    </section>
+    </simplesect>
 
-    <section id="manual-setting-system-names">
+    <simplesect id="manual-setting-system-names">
 			<title>System generated names for contraints</title>
 			<para>Property: <literal>workbench.db.[dbid].constraints.systemname</literal></para>
 			<para>
@@ -881,9 +905,9 @@
           <member>mysql: <literal>PRIMARY</literal></member>
         </simplelist>
       </para>
-    </section>
+    </simplesect>
 
-    <section id="settings-sync-chunk-size">
+    <simplesect id="settings-sync-chunk-size">
 			<title>Controlling the chunk size for WbDataDiff</title>
 			<para>Property: <literal>workbench.sql.sync.chunksize</literal></para>
 			<para>
@@ -893,7 +917,7 @@
 				<literal>-syncDelete=true</literal> parameter.
 			</para>
 			<para>Default value: <literal>25</literal></para>
-    </section>
+    </simplesect>
 		
   </section>
 	
@@ -901,7 +925,7 @@
 	<section id="filter-settings">
 		<title>Filter settings</title>
 		
-		<section id="filter-picklist-size">
+		<simplesect id="filter-picklist-size">
 			<title>Controlling the number of items in the pick list</title>
 			<para>Property: <literal>workbench.gui.filter.mru.maxsize</literal></para>
 			<para>
@@ -910,7 +934,7 @@
 				This setting will control the maximum size of that dropdown.
 			</para>
 			<para>Default value: <literal>15</literal></para>
-		</section>
+		</simplesect>
 		
 	</section>
 			

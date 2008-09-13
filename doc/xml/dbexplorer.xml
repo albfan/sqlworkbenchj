@@ -21,7 +21,7 @@
 		The displayed list can be filtered using the quick filter above the list. To filter
 		the list by the object name, simply enter the criteria in the filter field, and 
 		press <literal>ENTER</literal> or click the filter icon
-		<guiicon><inlinegraphic fileref="@IMAGE_DIR@/filter16.gif" format="GIF"/></guiicon>.
+		<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/filter16.gif" format="GIF"/></guiicon>.
 		The criteria field will list the last 25 values that were entered in the dropdown.
 		If you want to filter based on a different column of the list, right-click on the 
 		criteria field, and select the desired column from the <literal>Filtercolumn</literal>
@@ -73,12 +73,14 @@
 		<simplesect id="dbexplorer-spool">
 			<title>Export data</title>
 			<blockquote>
-				<para>This will execute a <link linkend="command-export"><literal>WbExport</literal></link> command for the currently selected
-				table(s). Choosing this option is equivalent to do a <literal>SELECT * FROM table;</literal>
-				and then executing <menuchoice><guimenu>SQL</guimenu><guimenuitem>Export query result</guimenuitem></menuchoice>
-				from the SQL editor in the main window.
-				See the description of the <link linkend="command-export">WbExport command</link>
-				for details.</para>
+				<para>
+					This will execute a <link linkend="command-export"><literal>WbExport</literal></link> command for the currently selected
+					table(s). Choosing this option is equivalent to do a <literal>SELECT * FROM table;</literal>
+					and then executing <menuchoice><guimenu>SQL</guimenu><guimenuitem>Export query result</guimenuitem></menuchoice>
+					from the SQL editor in the main window.
+					See the description of the <link linkend="command-export">WbExport command</link>
+					for details.
+				</para>
 			</blockquote>
 		</simplesect>
 
@@ -152,7 +154,7 @@
 			</blockquote>
 		</simplesect>
 
-		<simplesect>
+		<simplesect id="dbexplorer-drop-table">
 			<title>Drop</title>
 
 			<blockquote>

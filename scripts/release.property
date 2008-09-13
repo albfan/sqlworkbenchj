@@ -1,3 +1,5 @@
-#Sun Jan 13 16:16:16 CET 2008
-release.build.date=2008-01-13
-release.build.number=98
+#Sun Sep 07 19:12:03 CEST 2008
+release.build.date=2008-05-17
+dev.build.date=2008-09-07
+release.build.number=100
+dev.build.number=100.8
