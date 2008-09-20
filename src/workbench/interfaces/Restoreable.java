@@ -19,5 +19,4 @@ public interface Restoreable
 {
 	void restoreSettings();
 	void saveSettings();
-
 }

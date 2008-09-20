@@ -553,7 +553,7 @@ public class ConnectionProfile
 	public void setUsername(java.lang.String newName)
 	{
 		if (newName != null) newName = newName.trim();
-		if (!StringUtil.equalString(newName, username)) changed = true;
+		if (!StringUtil.equalString(newName, username) && !changed) changed = true;
 		this.username = newName;
 	}
 
@@ -564,11 +564,11 @@ public class ConnectionProfile
 	
 	public void setAutocommit(boolean aFlag)
 	{
-		if (aFlag != this.autocommit)
+		if (aFlag != this.autocommit && !changed)
 		{
-			this.autocommit = aFlag;
 			this.changed = true;
 		}
+		this.autocommit = aFlag;
 	}
 
 	public String getName()
@@ -578,7 +578,7 @@ public class ConnectionProfile
 
 	public void setName(String aName)
 	{
-		if (StringUtil.equalString(name, aName)) changed = true;
+		if (StringUtil.equalString(name, aName) && !changed) changed = true;
 		this.name = aName;
 	}
 
@@ -589,6 +589,10 @@ public class ConnectionProfile
 
 	public void setStorePassword(boolean aFlag)
 	{
+		if (aFlag != this.storePassword && !this.changed)
+		{
+			this.changed = true;
+		}
 		this.storePassword = aFlag;
 	}
 
@@ -822,11 +826,11 @@ public class ConnectionProfile
 	
 	public void setIdleTime(long time)
 	{
-		if (time != this.idleTime)
+		if (time != this.idleTime && !changed)
 		{
-			this.idleTime = time;
 			this.changed = true;
 		}
+		this.idleTime = time;
 	}
 	
 	public String getIdleScript()

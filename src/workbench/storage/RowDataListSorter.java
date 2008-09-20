@@ -26,61 +26,48 @@ public class RowDataListSorter
 {
 	private SortDefinition definition;
 	private Collator defaultCollator;
-	
+
 	public RowDataListSorter(SortDefinition sortDef)
 	{
 		this.definition = sortDef.createCopy();
+		initCollator();
 	}
-	
+
 	public RowDataListSorter(int column, boolean ascending)
 	{
 		this.definition = new SortDefinition(column, ascending);
 		initCollator();
 	}
-	
+
 	public RowDataListSorter(int[] columns, boolean[] order)
 	{
 		if (columns.length != order.length) throw new IllegalArgumentException("Size of arrays must match");
 		this.definition = new SortDefinition(columns, order);
 		initCollator();
 	}
-	
+
 	private void initCollator()
 	{
-		// Using a Collator to compare Strings is much slower then 
+		// Using a Collator to compare Strings is much slower then
 		// using String.compareTo() so by default this is disabled
-		boolean useCollator = Settings.getInstance().getUseCollator();
-		if (useCollator)
+		Locale l = Settings.getInstance().getSortLocale();
+		if (l != null)
 		{
-			Locale l = null;
-			String lang = Settings.getInstance().getSortLanguage();
-			String country = Settings.getInstance().getSortCountry();
-			try
-			{
-				if (lang != null && country != null)
-				{
-					l = new Locale(lang, country);
-				}
-				else if (lang != null && country == null)
-				{
-					l = new Locale(lang);
-				}
-			}
-			catch (Exception e)
-			{
-				l = Locale.getDefault();
-			}
 			defaultCollator = Collator.getInstance(l);
 		}
-	}	
-	
+		else
+		{
+			defaultCollator = null;
+		}
+	}
+
 	public void sort(RowDataList data)
 	{
 		data.sort(this);
 	}
-	
+
 	/**
-	 * Compares the defined sort column 
+	 * Compares the defined sort column
 	 */
 	@SuppressWarnings("unchecked")
 	private int compareColumn(int column, RowData row1, RowData row2)
@@ -101,7 +88,7 @@ public class RowDataListSorter
 			return -1;
 		}
 
-		// Special handling for String columns 
+		// Special handling for String columns
 		if (defaultCollator != null)
 		{
 			if (o1 instanceof String && o2 instanceof String)
@@ -109,7 +96,7 @@ public class RowDataListSorter
 				return defaultCollator.compare(o1, o2);
 			}
 		}
-		
+
 		int result = 0;
 		try
 		{
@@ -117,8 +104,8 @@ public class RowDataListSorter
 		}
 		catch (Throwable e)
 		{
-			// If one of the objects did not implement 
-			// the comparable interface, we'll use the 
+			// If one of the objects did not implement
+			// the comparable interface, we'll use the
 			// toString() values to compare them
 			String v1 = o1.toString();
 			String v2 = o2.toString();
@@ -130,7 +117,7 @@ public class RowDataListSorter
 	public int compare(RowData row1, RowData row2)
 	{
 		if (this.definition == null) return 0;
-		
+
 		try
 		{
 			int colIndex = 0;
@@ -152,5 +139,5 @@ public class RowDataListSorter
 		}
 		return 0;
 	}
-	
+
 }

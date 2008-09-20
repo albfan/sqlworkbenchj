@@ -22,9 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
-import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -214,6 +212,7 @@ public class ValidatingDialog
 	
 	public void windowActivated(WindowEvent e)
 	{
+		editorComponent.requestFocusInWindow();
 	}
 	
 	public void windowClosed(WindowEvent e)
@@ -243,8 +242,8 @@ public class ValidatingDialog
 		{
 			public void run()
 			{
-				editorComponent.grabFocus();
 				if (validator != null) validator.componentDisplayed();
+				editorComponent.requestFocus();
 			}
 		});
 	}

@@ -139,17 +139,19 @@ public class WbSchemaDiff
 		String refTables = cmdLine.getValue(CommonDiffParameters.PARAM_REFERENCETABLES);
 		String tarTables = cmdLine.getValue(CommonDiffParameters.PARAM_TARGETTABLES);
 
+		// Setting the tables to be excluded must be done before setting any other table selection
+		String excludeTables = cmdLine.getValue(CommonDiffParameters.PARAM_EXCLUDE_TABLES);
+		if (excludeTables != null)
+		{
+			List<String> l = StringUtil.stringToList(excludeTables, ",", true, true);
+			diff.setExcludeTables(l);
+		}
+
+
 		if (refTables == null)
 		{
 			String refSchema = cmdLine.getValue(CommonDiffParameters.PARAM_REFERENCESCHEMA);
 			String targetSchema = cmdLine.getValue(CommonDiffParameters.PARAM_TARGETSCHEMA);
-			String excludeTables = cmdLine.getValue(CommonDiffParameters.PARAM_EXCLUDE_TABLES);
-			if (excludeTables != null)
-			{
-				List<String> l = StringUtil.stringToList(excludeTables, ",", true, true);
-				diff.setExcludeTables(l);
-			}
-
 			if (refSchema == null && targetSchema == null)
 			{
 				if (referenceConnection == targetCon)

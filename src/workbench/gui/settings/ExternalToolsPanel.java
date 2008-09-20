@@ -41,7 +41,7 @@ import workbench.util.ToolDefinition;
  */
 public class ExternalToolsPanel 
 	extends JPanel
-	implements Restoreable, ListSelectionListener, FileActions, 
+	implements Restoreable, ListSelectionListener, FileActions,
 	           PropertyChangeListener
 {
 	private JList toolList;

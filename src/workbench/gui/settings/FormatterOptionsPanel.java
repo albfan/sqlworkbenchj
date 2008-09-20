@@ -22,24 +22,24 @@ import workbench.util.StringUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class FormatterOptionsPanel 
+public class FormatterOptionsPanel
 	extends JPanel
 	implements Restoreable
 {
-	
+
 	/** Creates new form FormatterOptionsPanel */
 	public FormatterOptionsPanel()
 	{
 		initComponents();
 	}
-	
+
 	public void restoreSettings()
 	{
 		funcsLower.setSelected(Settings.getInstance().getFormatterLowercaseFunctions());
 		insertColumns.setText(Integer.toString(Settings.getInstance().getFormatterMaxColumnsInInsert()));
 		updateColumns.setText(Integer.toString(Settings.getInstance().getFormatterMaxColumnsInUpdate()));
 	}
-	
+
 	public void saveSettings()
 	{
 		Settings set = Settings.getInstance();
@@ -218,8 +218,8 @@ public class FormatterOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
     add(updateColumnsLabel, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
-	
-	
+
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JCheckBox funcsLower;
   private javax.swing.JLabel funcsLowerLabel;
@@ -236,5 +236,5 @@ public class FormatterOptionsPanel
   private javax.swing.JTextField updateColumns;
   private javax.swing.JLabel updateColumnsLabel;
   // End of variables declaration//GEN-END:variables
-	
+
 }

@@ -316,6 +316,11 @@ public class SchemaDiff
 					{
 						tablesToIgnore.add(t.getTableName());
 					}
+					tlist = this.targetDb.getMetadata().getTableList(tname.trim(), (String)null);
+					for (TableIdentifier t : tlist)
+					{
+						tablesToIgnore.add(t.getTableName());
+					}
 				}
 				catch (SQLException e)
 				{

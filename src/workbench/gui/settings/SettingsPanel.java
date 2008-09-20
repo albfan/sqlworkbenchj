@@ -207,7 +207,12 @@ public class SettingsPanel
 				pageList.setSelectedIndex(0);
 				pageList.requestFocusInWindow();
 			}
-		});		
+		});
+		// readLocales() will read the available locales in a background
+		// thread, so that they are available once the user switches
+		// to the DataFormattingOptionsPanel
+		// Reading the locales can take upt 2 seconds on a slow system
+		DataFormattingOptionsPanel.readLocales();
 		this.dialog.setVisible(true);
 	}
 

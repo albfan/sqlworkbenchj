@@ -17,7 +17,7 @@ import workbench.util.StringUtil;
  * The definition of a pluggable look and feel. It stores the classname
  * of the Look & Feel together with the library from which the class
  * should be loaded
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class LnFDefinition
@@ -34,7 +34,7 @@ public class LnFDefinition
 		this(desc, null, null);
 		this.isBuiltIn = false;
 	}
-	
+
 	public LnFDefinition(String desc, String clazz)
 	{
 		this(desc, clazz, null);
@@ -48,24 +48,24 @@ public class LnFDefinition
 		this.library = libs;
 		this.isBuiltIn = (libs == null);
 	}
-	
+
 	public boolean isBuiltInLnF()
 	{
 		return this.isBuiltIn;
 	}
-	
+
 	public boolean isComplete()
 	{
 		if (this.isBuiltIn) return true;
 		return !StringUtil.isEmptyString(this.name) && !StringUtil.isEmptyString(this.className)
 		       && !StringUtil.isEmptyString(this.library);
 	}
-	
+
 	public String toString()
 	{
 		return getName();
 	}
-	
+
 	public String getName()
 	{
 		return name;
@@ -107,7 +107,7 @@ public class LnFDefinition
 		String cls = o.getClassName();
 		return this.className.compareTo(cls);
 	}
-	
+
 	@Override
 	public boolean equals(Object o)
 	{
@@ -129,6 +129,4 @@ public class LnFDefinition
 		return this.className.hashCode();
 	}
 
-	
-	
 }

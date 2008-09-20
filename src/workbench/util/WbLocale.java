@@ -46,6 +46,7 @@ public class WbLocale
 	public boolean equals(Object other)
 	{
 		if (other == null) return false;
+		if (locale == null) return false;
 		if (other instanceof WbLocale)
 		{
 			return this.locale.equals(((WbLocale)other).locale);

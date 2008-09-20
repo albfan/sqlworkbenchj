@@ -13,21 +13,22 @@ package workbench.gui.settings;
 
 import javax.swing.JPanel;
 import workbench.gui.components.FlatButton;
+import workbench.interfaces.Restoreable;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.FileDialogUtil;
 
 /**
- * A panel to edit the options for data editing, such as the font to be 
+ * A panel to edit the options for data editing, such as the font to be
  * used in the JTable, the PK Mapping file, colors used for required
  * fields and alternating row coloring.
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class DataEditOptionsPanel
 	extends JPanel
-	implements java.awt.event.ActionListener, workbench.interfaces.Restoreable
+	implements java.awt.event.ActionListener, Restoreable
 {
 
 	public DataEditOptionsPanel()
@@ -53,7 +54,7 @@ public class DataEditOptionsPanel
 		Settings.getInstance().setPreviewDml(this.previewDml.isSelected());
 		Settings.getInstance().setPKMappingFilename(pkMapFile.getText());
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is

@@ -278,6 +278,8 @@ public class Settings
 		{
 			f = new WbFile(f, "SQLWorkbench-Manual.pdf");
 		}
+
+		if (f.exists()) return f;
 		
 		String jarDir = WbManager.getInstance().getJarPath();
 		WbFile pdf = new WbFile(jarDir, pdfManual);
@@ -2107,17 +2109,52 @@ public class Settings
 		setProperty("workbench.sql.script.inmemory.maxsize", size);
 	}
 
-	public boolean getUseCollator()
+	public Locale getSortLocale()
 	{
-		return getBoolProperty("workbench.sort.usecollator", false);
+		if (!getBoolProperty("workbench.sort.usecollator", false)) return null;
+
+		Locale l = null;
+		String lang = Settings.getInstance().getSortLanguage();
+		String country = Settings.getInstance().getSortCountry();
+		try
+		{
+			if (lang != null && country != null)
+			{
+				l = new Locale(lang, country);
+			}
+			else if (lang != null && country == null)
+			{
+				l = new Locale(lang);
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("Settings.getSortLocale()", "Error creating collation", e);
+			l = Locale.getDefault();
+		}
+		return l;
 	}
 
-	public String getSortLanguage()
+	public void setSortLocale(Locale l)
+	{
+		if (l == null)
+		{
+			setProperty("workbench.sort.usecollator", false);
+		}
+		else
+		{
+			setProperty("workbench.sort.usecollator", true);
+			setProperty("workbench.sort.language", l.getLanguage());
+			setProperty("workbench.sort.country", l.getCountry());
+		}
+	}
+	
+	private String getSortLanguage()
 	{
 		return getProperty("workbench.sort.language", System.getProperty("user.language"));
 	}
 
-	public String getSortCountry()
+	private String getSortCountry()
 	{
 		return getProperty("workbench.sort.country", System.getProperty("user.country"));
 	}

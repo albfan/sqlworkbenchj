@@ -664,13 +664,6 @@ public class WbSwingUtilities
 			input.selectAll();
 		}
 		input.addMouseListener(new TextComponentMouseListener());
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				input.grabFocus();
-			}
-		});
 
 		boolean ok = ValidatingDialog.showConfirmDialog(parent, input, aTitle);
 		if (!ok)

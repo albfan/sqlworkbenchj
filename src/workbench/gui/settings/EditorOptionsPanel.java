@@ -14,8 +14,8 @@ package workbench.gui.settings;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
 import workbench.gui.components.NumberField;
-import workbench.gui.components.WbCheckBoxLabel;
 import workbench.gui.components.WbColorPicker;
+import workbench.interfaces.Restoreable;
 import workbench.resource.ColumnSortType;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -27,7 +27,7 @@ import workbench.util.StringUtil;
  */
 public class EditorOptionsPanel
 	extends JPanel
-	implements workbench.interfaces.Restoreable
+	implements Restoreable
 {
 
 	/** Creates new form EditorOptionsPanel */
@@ -43,7 +43,7 @@ public class EditorOptionsPanel
 		selectionColor.setSelectedColor(Settings.getInstance().getEditorSelectionColor());
 		editorFont.setSelectedFont(Settings.getInstance().getEditorFont());
 		currLineColor.setSelectedColor(Settings.getInstance().getEditorCurrentLineColor());
-		
+
 		String[] items = new String[] {
 			ResourceMgr.getString("LblLTDefault"),
 			ResourceMgr.getString("LblLTDos"),
@@ -59,7 +59,7 @@ public class EditorOptionsPanel
 			ResourceMgr.getString("LblAsIs")
 		};
 		this.completionPasteCase.setModel(new DefaultComboBoxModel(pasteCase));
-		
+
 		String value = Settings.getInstance().getInteralLineEndingValue();
 		internalLineEnding.setSelectedIndex(lineEndingValueToIndex(value));
 
@@ -72,13 +72,13 @@ public class EditorOptionsPanel
 		else this.completionPasteCase.setSelectedIndex(2);
 
 		alternateDelim.setDelimiter(Settings.getInstance().getAlternateDelimiter());
-		
+
 		String[] sortItems = new String[] {
 			ResourceMgr.getString("LblSortPastColName"),
 			ResourceMgr.getString("LblSortPastColPos")
 		};
 		this.completionColumnSort.setModel(new DefaultComboBoxModel(sortItems));
-		
+
 		ColumnSortType sort = Settings.getInstance().getAutoCompletionColumnSortType();
 		if (sort == ColumnSortType.position)
 		{
@@ -128,7 +128,7 @@ public class EditorOptionsPanel
 		{
 			set.setAutoCompletionPasteCase(null);
 		}
-		
+
 		set.setCloseAutoCompletionWithSearch(closePopup.isSelected());
 		set.setEditorErrorColor(errorColor.getSelectedColor());
 		set.setEditorCurrentLineColor(currLineColor.getSelectedColor());

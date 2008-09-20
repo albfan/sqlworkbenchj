@@ -12,6 +12,10 @@
 package workbench.gui.settings;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import javax.swing.JPanel;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.WbColorPicker;
@@ -19,6 +23,9 @@ import workbench.interfaces.Restoreable;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.DisplayLocale;
+import workbench.util.WbLocale;
+import workbench.util.WbThread;
 
 /**
  *
@@ -28,8 +35,9 @@ public class DataFormattingOptionsPanel
 	extends JPanel
 	implements Restoreable
 {
-
-	/** Creates new form GeneralOptionsPanel */
+	private static Locale[] locales;
+	private static final Object localeLock = new Object();
+	
 	public DataFormattingOptionsPanel()
 	{
 		initComponents();
@@ -48,6 +56,7 @@ public class DataFormattingOptionsPanel
 		minColSizeField.setText(Integer.toString(GuiSettings.getMinColumnWidth()));
 		maxColSizeField.setText(Integer.toString(GuiSettings.getMaxColumnWidth()));
 		nullColor.setSelectedColor(GuiSettings.getNullColor());
+		fillLanguageDropDown();
 	}
 
 	public void saveSettings()
@@ -71,8 +80,67 @@ public class DataFormattingOptionsPanel
 		GuiSettings.setAutomaticOptimalRowHeight(autoRowHeight.isSelected());
 		GuiSettings.setAutRowHeightMaxLines(((NumberField)this.maxRowHeight).getValue());
 		GuiSettings.setIgnoreWhitespaceForAutoRowHeight(ignoreEmptyRows.isSelected());
+		DisplayLocale dl = (DisplayLocale)localeDropDown.getSelectedItem();
+		Settings.getInstance().setSortLocale(dl.getLocale());
 	}
 
+	public static void readLocales()
+	{
+		if (locales != null) return;
+		
+		WbThread readThread = new WbThread("Read Thread")
+		{
+			@Override
+			public void run()
+			{
+				synchronized (localeLock)
+				{
+					locales = Locale.getAvailableLocales();
+				}
+			}
+		};
+		readThread.setPriority(Thread.MIN_PRIORITY);
+		readThread.start();
+	}
+	
+	private void fillLanguageDropDown()
+	{
+		Locale l = Settings.getInstance().getLanguage();
+		DisplayLocale sortLocale = new DisplayLocale(new WbLocale(Settings.getInstance().getSortLocale()));
+
+		synchronized (localeLock)
+		{
+			if (locales == null)
+			{
+				locales = Locale.getAvailableLocales();
+			}
+		}
+		
+		List<DisplayLocale> list = new ArrayList<DisplayLocale>(locales.length);
+		localeDropDown.removeAllItems();
+		localeDropDown.addItem(new DisplayLocale(null));
+		for (Locale ls : locales)
+		{
+			DisplayLocale wl = new DisplayLocale(new WbLocale(ls));
+			wl.setDisplayLocale(l);
+			list.add(wl);
+		}
+		
+		int index = 1; // 1 because we have already added a locale
+		int currentIndex = -1;
+
+		Collections.sort(list);
+		for (DisplayLocale ls : list)
+		{
+			localeDropDown.addItem(ls);
+			if (ls.equals(sortLocale)) currentIndex = index;
+			index ++;
+		}
+		if (currentIndex != -1)
+		{
+			localeDropDown.setSelectedIndex(currentIndex);
+		}
+	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -117,6 +185,8 @@ public class DataFormattingOptionsPanel
     alternateColor = new WbColorPicker(true);
     nullColor = new WbColorPicker(true);
     nullColorLabel = new javax.swing.JLabel();
+    jLabel1 = new javax.swing.JLabel();
+    localeDropDown = new javax.swing.JComboBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -300,7 +370,7 @@ public class DataFormattingOptionsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -370,7 +440,7 @@ public class DataFormattingOptionsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -434,13 +504,31 @@ public class DataFormattingOptionsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 10);
     add(jPanel2, gridBagConstraints);
+
+    jLabel1.setText(ResourceMgr.getString("LblSortLocale")); // NOI18N
+    jLabel1.setToolTipText(ResourceMgr.getString("d_LblSortLocale")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
+    add(jLabel1, gridBagConstraints);
+
+    localeDropDown.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 7, 0, 9);
+    add(localeDropDown, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -458,11 +546,13 @@ public class DataFormattingOptionsPanel
   private javax.swing.JLabel decimalLabel;
   private javax.swing.JCheckBox ignoreEmptyRows;
   private javax.swing.JCheckBox includeHeaderWidth;
+  private javax.swing.JLabel jLabel1;
   private javax.swing.JPanel jPanel2;
   private javax.swing.JPanel jPanel3;
   private javax.swing.JPanel jPanel4;
   private javax.swing.JPanel jPanel5;
   private javax.swing.JPanel jPanel6;
+  private javax.swing.JComboBox localeDropDown;
   private javax.swing.JTextField maxColSizeField;
   private javax.swing.JLabel maxColSizeLabel1;
   private javax.swing.JTextField maxDigitsField;

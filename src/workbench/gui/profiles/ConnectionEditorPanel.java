@@ -379,7 +379,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 1, 0);
     wbOptionsPanel.add(cbStorePassword, gridBagConstraints);
 
-    rollbackBeforeDisconnect.setText(ResourceMgr.getString("d_LblRollbackBeforeDisconnect")); // NOI18N
+    rollbackBeforeDisconnect.setText(ResourceMgr.getString("LblRollbackBeforeDisconnect")); // NOI18N
     rollbackBeforeDisconnect.setToolTipText(ResourceMgr.getString("d_LblRollbackBeforeDisconnect")); // NOI18N
     rollbackBeforeDisconnect.setMargin(new java.awt.Insets(2, 0, 2, 2));
     rollbackBeforeDisconnect.setName("rollbackBeforeDisconnect"); // NOI18N
@@ -437,8 +437,8 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 7, 1, 0);
     wbOptionsPanel.add(includeNull, gridBagConstraints);
 
-    removeComments.setText(ResourceMgr.getString("LblRememberSchema")); // NOI18N
-    removeComments.setToolTipText(ResourceMgr.getString("d_LblRememberSchema")); // NOI18N
+    removeComments.setText(ResourceMgr.getString("LblRemoveComments")); // NOI18N
+    removeComments.setToolTipText(ResourceMgr.getString("d_LblRemoveComments")); // NOI18N
     removeComments.setMargin(new java.awt.Insets(2, 0, 2, 2));
     removeComments.setName("removeComments"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
