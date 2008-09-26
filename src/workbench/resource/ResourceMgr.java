@@ -219,6 +219,11 @@ public class ResourceMgr
 		return retrieveImage(aKey + "16", ".gif");
 	}
 
+	public static ImageIcon getImageByName(String fname)
+	{
+		return retrieveImage(fname);
+	}
+
 	public static ImageIcon getPicture(String aName)
 	{
 		return retrieveImage(aName, ".gif");
@@ -231,15 +236,20 @@ public class ResourceMgr
 
 	private static ImageIcon retrieveImage(String filename, String extension)
 	{
+		return retrieveImage(filename + extension);
+	}
+
+	private static ImageIcon retrieveImage(String fname)
+	{
 		ImageIcon result = null;
-		URL imageIconUrl = ResourceMgr.class.getClassLoader().getResource("workbench/resource/images/" + filename + extension);
+		URL imageIconUrl = ResourceMgr.class.getClassLoader().getResource("workbench/resource/images/" + fname);
 		if (imageIconUrl != null)
 		{
 			result = new ImageIcon(imageIconUrl);
 		}
 		else
 		{
-			imageIconUrl = ResourceMgr.class.getClassLoader().getResource(filename);
+			imageIconUrl = ResourceMgr.class.getClassLoader().getResource(fname);
 			if (imageIconUrl != null)
 			{
 				result = new ImageIcon(imageIconUrl);
